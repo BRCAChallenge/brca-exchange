@@ -1,0 +1,2 @@
+#### refseq_annotation_list ####
+Contains lists of refseq annotation id's for the respective variant databases
