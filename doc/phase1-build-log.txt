@@ -1,2 +1,11 @@
-#### refseq_annotation_list ####
-Contains lists of refseq annotation id's for the respective variant databases
+notebook for work done on BRCA Challenge phase 1
+------------------------------------------------
+
+Code and documentations is in: https://github.com/BD2KGenomics/brca
+Share data and results directory is /hive/groups/cgl/brca/phase1/data/
+
+------------------------------------------------------------------------
+2015-04-29  cmarkell@ucsc.edu 
+Lists of refseq annotation id's for the all respective variant databases
+      data/refseq_annotation_list
+------------------------------------------------------------------------
