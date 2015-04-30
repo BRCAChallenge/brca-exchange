@@ -2,10 +2,23 @@ notebook for work done on BRCA Challenge phase 1
 ------------------------------------------------
 
 Code and documentations is in: https://github.com/BD2KGenomics/brca
-Share data and results directory is /hive/groups/cgl/brca/phase1/data/
+Share data and results directory is /hive/groups/cgl/brca/phase1
 
 ------------------------------------------------------------------------
 2015-04-29  cmarkell@ucsc.edu 
 Lists of refseq annotation id's for the all respective variant databases
       data/refseq_annotation_list
+------------------------------------------------------------------------
+2015-04-30 markd@soe.ucsc.edu  
+  - create aliments for needed RefSeqs for mapping mRNA mutations coordinates
+    to the genome. It appears that the BLAT alignments for the mRNAs are the same 
+    as NCBIs, so we don't both to get the NCBI alignments.
+
+  - create data/refseq_annotation.acc from data/refseq_annotation_list
+   # retrieve fastas for unique sequences
+   ~markd/compbio/code/pycbio/bin/ncbiGbFetch --idFile data/refseq_annotation.acc --fasta --simplifyIds --out data/refseq_annotation.fa
+   # align and filter, simple filtering is fine for these refseqs, due to obvious unique mappings
+   blat -q=rna -noHead -fine /hive/data/genomes/hg38/hg38.2bit  data/refseq_annotation.fa /data/tmp/refseq_annotation.raw.psl
+   pslCDnaFilter -globalNearBest=0.01 /data/tmp/refseq_annotation.raw.psl data/refseq_annotation.psl
+   # results in data/refseq_annotation.psl.  
 ------------------------------------------------------------------------
