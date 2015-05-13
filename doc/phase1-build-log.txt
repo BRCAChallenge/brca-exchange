@@ -19,6 +19,11 @@ Lists of refseq annotation id's for the all respective variant databases
    ~markd/compbio/code/pycbio/bin/ncbiGbFetch --idFile data/refseq_annotation.acc --fasta --simplifyIds --out data/refseq_annotation.fa
    # align and filter, simple filtering is fine for these refseqs, due to obvious unique mappings
    blat -q=rna -noHead -fine /hive/data/genomes/hg38/hg38.2bit  data/refseq_annotation.fa /data/tmp/refseq_annotation.raw.psl
-   pslCDnaFilter -globalNearBest=0.01 /data/tmp/refseq_annotation.raw.psl data/refseq_annotation.psl
+   pslCDnaFilter -globalNearBest=0.01 /data/tmp/refseq_annotation.hg19.raw.psl data/refseq_annotation.hg19.psl
    # results in data/refseq_annotation.psl.  
+------------------------------------------------------------------------
+2015-05-12: markd@soe.ucsc.edu
+   # remake RefSeqs to hg19/GRCh37
+      blat -q=rna -noHead -fine /hive/data/genomes/hg19/hg19.2bit  data/refseq_annotation.fa /data/tmp/refseq_annotation.hg19.raw.psl
+         pslCDnaFilter -globalNearBest=0.01 /data/tmp/refseq_annotation.hg19.raw.psl data/refseq_annotation.hg19.psl
 ------------------------------------------------------------------------
