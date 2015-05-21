@@ -6,7 +6,7 @@ def convFile(fname, chrom, printHead, rows):
     for line in open(fname):
         fs = line.rstrip("\n").split("\t")
         if line.startswith("Accession"):
-            # output the VCF header
+            # print out VCF header
             fs = [f.replace("#", "") for f in fs]
             fieldIds = [f.replace(" ", "") for f in fs]
             fieldIds = [f.replace("(", "") for f in fieldIds]
@@ -27,7 +27,7 @@ def convFile(fname, chrom, printHead, rows):
         hgvs = fs[9]
         #ex g.41277277G>A
         if not ">" in hgvs:
-            skipCount +=1
+            skipCount += 1
             continue
         hgvs = hgvs.replace("g.","")
         part1, altAll = hgvs.split(">")
@@ -35,10 +35,12 @@ def convFile(fname, chrom, printHead, rows):
         pos = part1[:-1]
         infos = []
         for fieldId, field in zip(fieldIds, fs):
+            fieldId = fieldId.replace(";", "")
+            field = field.replace(";", "")
             infos.append("%s=%s" % (fieldId, field.replace(" ", "_")))
         row = [int(chrom), int(pos), acc, refAll, altAll, ".", ".", ";".join(infos)]
         rows.append(row)
-    logging.error("skipped %d indels" % skipCount)
+    logging.error("%d skipped, cannot import indels yet" % skipCount)
 
         #acc, ex, nt, codon, baseChange, aaChange, Designation, hgvsCdna, hgvsProt, hgvsHg19, genotype, dbSnp, mutType, clinImp, category, evidence, depositor
 

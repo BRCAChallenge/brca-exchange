@@ -1,0 +1,65 @@
+#!/usr/bin/env python
+
+import logging, sys, optparse
+from collections import defaultdict
+from os.path import join, basename, dirname, isfile
+import string
+
+# === COMMAND LINE INTERFACE, OPTIONS AND HELP ===
+parser = optparse.OptionParser("usage: %prog [options] filename - merge all rows in a VCF file that describe the same variant into one single row and add a AC info field with the total number of merged rows") 
+
+parser.add_option("-d", "--debug", dest="debug", action="store_true", help="show debug messages") 
+#parser.add_option("-f", "--file", dest="file", action="store", help="run on file") 
+#parser.add_option("", "--test", dest="test", action="store_true", help="do something") 
+(options, args) = parser.parse_args()
+
+if options.debug:
+    logging.basicConfig(level=logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.INFO)
+# ==== FUNCTIONs =====
+    
+# ----------- MAIN --------------
+if args==[]:
+    parser.print_help()
+    exit(1)
+
+filename = args[0]
+fieldNames = []
+fieldDescs = []
+data = defaultdict(list)
+for line in open(filename):
+    if line.startswith("##INFO="):
+        fieldDescs.append(line.split('"')[-2])
+        fieldNames.append(line.split("=")[2].split(",")[0])
+    elif line.startswith("#"):
+        print line,
+    else:
+        fs = line.rstrip("\n").split("\t")
+        key = (fs[0], fs[1], fs[3], fs[4])
+        data[key].append(fs)
+
+print """##INFO=<ID=Desc,Number=1,Type=String,Description="%s">""" % "|".join(fieldDescs)
+for key, rows in data.iteritems():
+    chrom, pos, ref, alt = key
+    #print key, rows
+    idStr = "|".join([row[2] for row in rows])
+    infoParts = []
+    for row in rows:
+        # parse the old info field
+        infoData = {}
+        for fieldStr in row[-1].split(";"):
+            fieldName, val = string.split(fieldStr, "=", 1)
+            infoData[fieldName] = val
+
+        descFields = []
+        for fn in fieldNames:
+            descFields.append(infoData.get(fn, ""))
+
+        descFields = [d.replace("|", "_").strip('"').lstrip("-") for d in descFields]
+        infoParts.append("|".join(descFields))
+    infoParts = [i.replace(",", ".").strip('"') for i in infoParts]
+    newInfo = "AC=%d;Desc=%s" % (len(infoParts), ",".join(infoParts))
+    newRow = (chrom, pos, idStr, ref, alt, ".", ".", newInfo)
+    print "\t".join(newRow)
+
