@@ -1,0 +1,249 @@
+#!/usr/bin/env python2.7
+
+"""
+Charles Markello
+5/1/2015
+
+Description:
+	Python script 'umd2vcf' takes in a umd table flat file and converts it to
+	vcf format. Used primarily for the purposes of data extraction for integration
+	into the ga4gh reference server.
+"""
+
+
+from __future__ import print_function, division
+import argparse
+import sys
+import os
+import pyhgvs as hgvs
+import pyhgvs.utils as hgvs_utils
+from pygr.seqdb import SequenceFileDB
+
+
+def parse_args():
+	"""
+	Description:
+		function 'parse_args' parses arguments from command-line and returns an argparse
+		object containing the arguments and their values. Default values are 'False' if option
+		is not listed in the command, else the option value is set to True.
+	"""
+	parser = argparse.ArgumentParser(description='Convert UMD database table to VCF format.')
+	parser.add_argument('-i', '--inUMD', type=argparse.FileType('r'),
+		help='Input UMD file for conversion.')
+	parser.add_argument('-o', '--out', type=argparse.FileType('w'),
+		help='Ouput VCF file result.')
+	parser.add_argument('-b', '--brca', type=int,
+		help='BRCA gene which UMD variant table was derrived from. (1 for BRCA1 or 2 for BRCA2).')
+
+	options = parser.parse_args()
+	return options
+
+def main(args):
+	options = parse_args()
+	umdFile = options.inUMD
+	vcfFile = options.out
+	brcaGene = options.brca
+	genome_path = '/Users/charlesmarkello/leidenv1.0/resources/hg38.fa'
+	refseq_path = '/Users/charlesmarkello/leidenv1.0/resources/lovd_umd_refGene.txt'
+
+	with open(refseq_path) as infile:
+		transcripts = hgvs_utils.read_transcripts(infile)
+
+	genome = SequenceFileDB(genome_path)
+
+	def get_transcript(name):
+		return transcripts.get(name)
+
+	# Format header metadata
+
+	print('##fileformat=VCFv4.0', file=vcfFile)
+	print('##source=UMD', file=vcfFile)
+	print('##reference=GRCh38', file=vcfFile)
+	print('##INFO=<ID=UMDID,Number=1,Type=Integer,Description="Sample specific UMD id. (-1 means null data)">', file=vcfFile)
+	print('##INFO=<ID=cDNAVAR,Number=1,Type=String,Description="cDNA level name of variant in HGVS format.">', file=vcfFile)
+	print('##INFO=<ID=pVAR,Number=.,Type=String,Description="protein level name of variant in HGVS format.">', file=vcfFile)
+	print('##INFO=<ID=MTYPE,Number=.,Type=String,Description="Mutation type: transition mutation (Ts) in which the base change does not change the pyrimidine-purine orientation. Transversion mutation (Tv) in which the purine-pyrimidine orientation is changed to pyrimidine-purine or vice versa.">', file=vcfFile)
+	print('##INFO=<ID=VARCLASS,Number=.,Type=String,Description="Variation class: MS (missense), FS (frameshift), IFD (in frame deletion), IFI (in frame insertion, RGT (large rearrangement), NS (non-sens), ins/del (insertion-deletion), PTC (premature termination codon).">', file=vcfFile)
+	print('##INFO=<ID=wtCODON,Number=.,Type=String,Description="The wild-type codon for this variant.">', file=vcfFile)
+	print('##INFO=<ID=wtAA,Number=.,Type=String,Description="The wild-type amino acid for this variant.">', file=vcfFile)
+	print('##INFO=<ID=mtCODON,Number=.,Type=String,Description="The mutant codon for this variant.">', file=vcfFile)
+	print('##INFO=<ID=mtAA,Number=.,Type=String,Description="The mutant amino acid for this variant.">', file=vcfFile)
+	print('##INFO=<ID=mtEVENT,Number=.,Type=String,Description="Sequence variation.">', file=vcfFile)
+	print('##INFO=<ID=mTYPE,Number=.,Type=String,Description="Mutation type: transition mutation (Ts) in which the base change does not change the pyrimidine-purine orientation. Transversion mutation (Tv) in which the purine-pyrimidine orientation is changed to pyrimidine-purine or vice versa.">', file=vcfFile)
+	print('##INFO=<ID=STRUCT,Number=.,Type=String,Description="Location of the variant on the known tridimensional structure.">', file=vcfFile)
+	print('##INFO=<ID=HCD,Number=.,Type=String,Description="Highly conserved amino acid or interacting directly with a known partner.">', file=vcfFile)
+	print('##INFO=<ID=pyDOUBLE,Number=.,Type=String,Description="Pyrimidine double.">', file=vcfFile)
+	print('##INFO=<ID=CpG,Number=.,Type=String,Description="CpG sites are regions of DNA where a cytosine nucleotide occurs next to a guanine nucleotide in the linear sequence of bases along its length. CpG stands for cytosine and guanine separated by a phosphate (-C-phosphate-G-), which links the two nucleosides together in DNA. The CpG notation is used to distinguish a cytosine followed by guanine from a cytosine base paired to a guanine.">', file=vcfFile)
+	print('##INFO=<ID=mRNALVL,Number=.,Type=String,Description="Mutation impact at the mRNA level.">', file=vcfFile)
+	print('##INFO=<ID=RSTCTMAP,Number=.,Type=String,Description="Mutation on restriction map.">', file=vcfFile)
+	print('##INFO=<ID=sampID,Number=.,Type=String,Description="Anonymous number of family.">', file=vcfFile)
+	print('##INFO=<ID=PATSTATUS,Number=.,Type=String,Description="Patient status.">', file=vcfFile)
+	print('##INFO=<ID=GENDER,Number=.,Type=String,Description="Gender of the sample.">', file=vcfFile)
+	print('##INFO=<ID=TRANSMIT,Number=.,Type=String,Description="Transmission of the variant for the sample.">', file=vcfFile)
+	print('##INFO=<ID=ONSET,Number=.,Type=String,Description="Age of onset.">', file=vcfFile)
+	print('##INFO=<ID=famTYPE,Number=.,Type=String,Description="Family type.">', file=vcfFile)
+	print('##INFO=<ID=refID,Number=.,Type=Integer,Description="Reference ID. (-1 means null data)">', file=vcfFile)
+	print('##INFO=<ID=REFERENCE,Number=.,Type=String,Description="Documentation of whether the data has already been published.">', file=vcfFile)
+	print('##INFO=<ID=mutDB,Number=.,Type=String,Description="A list of databases the mutation is already described in.">', file=vcfFile)
+	print('##INFO=<ID=methANALYSIS,Number=.,Type=String,Description="Method of analysis.">', file=vcfFile)
+	print('##INFO=<ID=spliceTYPE,Number=.,Type=String,Description="Splice site type.">', file=vcfFile)
+	print('##INFO=<ID=wtSEQ,Number=.,Type=String,Description="Wild-type sequence.">', file=vcfFile)
+	print('##INFO=<ID=CV,Number=.,Type=String,Description="CV.">', file=vcfFile)
+	print('##INFO=<ID=mutTYPESEQ,Number=.,Type=String,Description="Mutant type sequence.">', file=vcfFile)
+	print('##INFO=<ID=varPERCENT,Number=.,Type=String,Description="Variation percent.">', file=vcfFile)
+	print('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO', file=vcfFile)
+
+	headerline = umdFile.readline().strip().split('\t')
+	print(headerline)
+	print(len(headerline))
+	#testline = umdFile.readline().split('\t')
+	#print('id: ', testline[0])
+	#print('variant: ', testline[1])
+	#if brcaGene == 1:
+	#	print('Method of analysis: ', testline[26])
+	#elif brcaGene == 2:
+	#	print('Method of analysis: ', testline[15])
+
+	# Extract variant and position data
+	for line in umdFile:
+		if line == "\t"*31+"\n":
+			continue
+
+		# initialize annotation variables
+		UMDID = -1
+		cDNAVAR = ''
+		pVAR = ''
+		MTYPE = ''
+		VARCLASS = ''
+		wtCODON = ''
+		wtAA = ''
+		mtCODON = ''
+		mtAA = ''
+		mtEVENT = ''
+		MTYPE = ''	# duplication ?
+		STRUCT = ''
+		HCD = ''
+		pyDOUBLE = ''
+		CpG = ''
+		mRNALVL = ''
+		RSTCTMAP = ''
+		sampID = ''
+		PATSTATUS = ''
+		GENDER = ''
+		TRANSMIT = ''
+		ONSET = ''
+		famTYPE = ''
+		refID = -1
+		REFERENCE = ''
+		mutDB = ''
+		methANALYSIS = ''
+		spliceTYPE = ''
+		wtSEQ = ''
+		CV = ''
+		mutTYPESEQ = ''
+		varPERCENT = ''
+
+		INFO_field = ''
+
+		parsedLine = line.strip().split('\t')
+		print(len(parsedLine))
+		print(parsedLine)
+		hgvsName = parsedLine[1]
+		if '(' in hgvsName:
+			hgvsName = hgvsName.split('(')[1][0:-1]
+		if brcaGene == 1:
+			hgvsName = 'NM_007294.2:'+hgvsName
+			UMDID = parsedLine[0]
+			cDNAVAR = parsedLine[1]
+			pVAR = parsedLine[2]
+			MTYPE = parsedLine[3]
+			VARCLASS = parsedLine[4]
+			wtCODON = parsedLine[5]
+			wtAA = parsedLine[6]
+			mtCODON = parsedLine[7]
+			mtAA = parsedLine[8]
+			mtEVENT = parsedLine[9]
+			mTYPE = parsedLine[10]	# duplication ?
+			STRUCT = parsedLine[11]
+			HCD = parsedLine[12]
+			pyDOUBLE = parsedLine[13]
+			CpG = parsedLine[14]
+			mRNALVL = parsedLine[15]
+			RSTCTMAP = parsedLine[16]
+			sampID = parsedLine[17]
+			PATSTATUS = parsedLine[18]
+			GENDER = parsedLine[19]
+			TRANSMIT = parsedLine[20]
+			ONSET = parsedLine[21]
+			famTYPE = parsedLine[22]
+			refID = parsedLine[23]
+			REFERENCE = parsedLine[24]
+			if len(parsedLine) > 25:
+				mutDB = parsedLine[25]
+			if len(parsedLine) > 26:
+				methANALYSIS = parsedLine[26]
+			if len(parsedLine) > 27:
+				spliceTYPE = parsedLine[27]
+				wtSEQ = parsedLine[28]
+				CV = parsedLine[29]
+				mutTYPESEQ = parsedLine[30]
+				varPERCENT = parsedLine[31]
+			INFO_field = 'UMDID={0};cDNAVAR={1};pVAR={2};MTYPE={3};VARCLASS={4};wtCODON={5};wtAA={6};mtCODON={7};mtAA={8};mtEVENT={9};mTYPE={10};STRUCT={11};HCD={12};pyDOUBLE={13};CpG={14};mRNALVL={15};RSTCTMAP={16};sampID={17};PATSTATUS={18};GENDER={19};TRANSMIT={20};ONSET={21};famTYPE={22};refID={23};REFERENCE={24};mutDB={25};methANALYSIS={26};spliceTYPE={27};wtSEQ={28};CV={29};mutTYPESEQ={30};varPERCENT={31}'.format(UMDID,cDNAVAR,pVAR,MTYPE,VARCLASS,wtCODON,wtAA,mtCODON,mtAA,mtEVENT,mTYPE,STRUCT,HCD,pyDOUBLE,CpG,mRNALVL,RSTCTMAP,sampID,PATSTATUS,GENDER,TRANSMIT,ONSET,famTYPE,refID,REFERENCE,mutDB,methANALYSIS,spliceTYPE,wtSEQ,CV,mutTYPESEQ,varPERCENT)
+
+		elif brcaGene == 2:
+			hgvsName = 'NM_000059.3:'+hgvsName
+			UMDID = parsedLine[0]
+			cDNAVAR = parsedLine[1]
+			pVAR = parsedLine[2]
+			MTYPE = parsedLine[3]
+			VARCLASS = parsedLine[4]
+			wtCODON = parsedLine[5]
+			wtAA = parsedLine[6]
+			mtCODON = parsedLine[7]
+			mtAA = parsedLine[8]
+			mtEVENT = parsedLine[9]
+			mTYPE = parsedLine[10]	# duplication ?
+			STRUCT = parsedLine[11]
+			HCD = parsedLine[12]
+			pyDOUBLE = parsedLine[13]
+			CpG = parsedLine[14]
+			methANALYSIS = parsedLine[15]
+			mRNALVL = parsedLine[16]
+			RSTCTMAP = parsedLine[17]
+			sampID = parsedLine[18]
+			PATSTATUS = parsedLine[19]
+			GENDER = parsedLine[20]
+			TRANSMIT = parsedLine[21]
+			ONSET = parsedLine[22]
+			famTYPE = parsedLine[23]
+			refID = parsedLine[24]
+			REFERENCE = parsedLine[25]
+			if len(parsedLine) > 26:
+				mutDB = parsedLine[26]
+			if len(parsedLine) > 27:
+				spliceTYPE = parsedLine[27]
+				wtSEQ = parsedLine[28]
+				CV = parsedLine[29]
+				mutTYPESEQ = parsedLine[30]
+				varPERCENT = parsedLine[31]
+			INFO_field = 'UMDID={0};cDNAVAR={1};pVAR={2};MTYPE={3};VARCLASS={4};wtCODON={5};wtAA={6};mtCODON={7};mtAA={8};mtEVENT={9};mTYPE={10};STRUCT={11};HCD={12};pyDOUBLE={13};CpG={14};methANALYSIS={15};mRNALVL={16};RSTCTMAP={17};sampID={18};PATSTATUS={19};GENDER={20};TRANSMIT={21};ONSET={22};famTYPE={23};refID={24};REFERENCE={25};mutDB={26};spliceTYPE={27};wtSEQ={28};CV={29};mutTYPESEQ={30};varPERCENT={31}'.format(UMDID,cDNAVAR,pVAR,MTYPE,VARCLASS,wtCODON,wtAA,mtCODON,mtAA,mtEVENT,mTYPE,STRUCT,HCD,pyDOUBLE,CpG,methANALYSIS,mRNALVL,RSTCTMAP,sampID,PATSTATUS,GENDER,TRANSMIT,ONSET,famTYPE,refID,REFERENCE,mutDB,spliceTYPE,wtSEQ,CV,mutTYPESEQ,varPERCENT)
+
+		print(hgvsName)
+		queryHgvsName = hgvsName
+		if 'Ins' in hgvsName:
+			queryHgvsName = hgvsName.replace('Ins', 'ins')
+		if ' ?' in hgvsName:
+			queryHgvsName = hgvsName.replace(' ?', '')
+		if '2T>\'' in hgvsName:
+			continue
+		chrom, offset, ref, alt = hgvs.parse_hgvs_name(queryHgvsName, genome, get_transcript=get_transcript)
+		chrom = chrom.replace('chr', '')
+		#print('chr: {0}, offset: {1}, ref: {2}, alt: {3}'.format(chrom,offset,ref,alt))
+		print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(chrom,offset,queryHgvsName,ref,alt,INFO_field), file=vcfFile)
+		
+
+if __name__ == "__main__":
+	sys.exit(main(sys.argv))
+
+
+
