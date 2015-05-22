@@ -34,6 +34,10 @@ def parse_args():
 		help='Ouput VCF file result.')
 	parser.add_argument('-b', '--brca', type=int,
 		help='BRCA gene which UMD variant table was derrived from. (1 for BRCA1 or 2 for BRCA2).')
+	parser.add_argument('-g', '--gpath', default='/hive/groups/cgl/brca/phase1/data/resources/hg19.fa',
+		help='Whole path to genome file. Default: (/hive/groups/cgl/brca/phase1/data/resources/hg19.fa)')
+	parser.add_argument('-r', '--rpath', default='/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.psl',
+		help='Whole path to refSeq file. Default: (/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.psl)')
 
 	options = parser.parse_args()
 	return options
@@ -43,8 +47,8 @@ def main(args):
 	umdFile = options.inUMD
 	vcfFile = options.out
 	brcaGene = options.brca
-	genome_path = '/Users/charlesmarkello/leidenv1.0/resources/hg38.fa'
-	refseq_path = '/Users/charlesmarkello/leidenv1.0/resources/lovd_umd_refGene.txt'
+	genome_path = options.gpath
+	refseq_path = options.rpath
 
 	with open(refseq_path) as infile:
 		transcripts = hgvs_utils.read_transcripts(infile)
@@ -58,7 +62,7 @@ def main(args):
 
 	print('##fileformat=VCFv4.0', file=vcfFile)
 	print('##source=UMD', file=vcfFile)
-	print('##reference=GRCh38', file=vcfFile)
+	print('##reference=GRCh37', file=vcfFile)
 	print('##INFO=<ID=UMDID,Number=1,Type=Integer,Description="Sample specific UMD id. (-1 means null data)">', file=vcfFile)
 	print('##INFO=<ID=cDNAVAR,Number=1,Type=String,Description="cDNA level name of variant in HGVS format.">', file=vcfFile)
 	print('##INFO=<ID=pVAR,Number=.,Type=String,Description="protein level name of variant in HGVS format.">', file=vcfFile)
@@ -88,7 +92,7 @@ def main(args):
 	print('##INFO=<ID=methANALYSIS,Number=.,Type=String,Description="Method of analysis.">', file=vcfFile)
 	print('##INFO=<ID=spliceTYPE,Number=.,Type=String,Description="Splice site type.">', file=vcfFile)
 	print('##INFO=<ID=wtSEQ,Number=.,Type=String,Description="Wild-type sequence.">', file=vcfFile)
-	print('##INFO=<ID=CV,Number=.,Type=String,Description="CV.">', file=vcfFile)
+	print('##INFO=<ID=CV,Number=.,Type=String,Description="Common Variant score.">', file=vcfFile)
 	print('##INFO=<ID=mutTYPESEQ,Number=.,Type=String,Description="Mutant type sequence.">', file=vcfFile)
 	print('##INFO=<ID=varPERCENT,Number=.,Type=String,Description="Variation percent.">', file=vcfFile)
 	print('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO', file=vcfFile)
