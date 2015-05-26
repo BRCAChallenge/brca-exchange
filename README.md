@@ -13,7 +13,7 @@ A demonstration of the GA4GH api system whose goals are to showcase the capabili
 
 ## Misc Instructions
 ### Restart GA4GH reference server
-  1. Log in to the AWS instance at ubuntu@ec2-54-148-207-224.us-west-2.compute.amazonaws.com using ssh
+  1. Log in to the AWS instance at `ubuntu@ec2-54-148-207-224.us-west-2.compute.amazonaws.com` using ssh
   2. type "screen -r"
   3. ctrl + c to stop the server
   4. restart the server with command 'python server_dev.py -f /srv/ga4gh/brca_config.py'
