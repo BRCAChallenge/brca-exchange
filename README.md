@@ -12,6 +12,14 @@ A demonstration of the GA4GH api system whose goals are to showcase the capabili
   doc: Directory contains miscellaneous logfiles of various runs of scripts that are in development.
 
 ## Misc Instructions
+### Restart GA4GH reference server
+  1. Log in to the AWS instance at ubuntu@ec2-54-148-207-224.us-west-2.compute.amazonaws.com using ssh
+  2. type "screen -r"
+  3. ctrl + c to stop the server
+  4. restart the server with command 'python server_dev.py -f /srv/ga4gh/brca_config.py'
+  5. ctrl + AD to detach from screen
+  6. logout of the AWS instance
+
 ### Convert refseq .psl file to .gp (genepred) format (required format for hgvs conversion)
   1. Add '/cluster/bin/x86_64/mrnaToGene' to your PATH environment variable
   2. mrnaToGene [options] psl genePredFile
