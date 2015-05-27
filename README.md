@@ -26,3 +26,13 @@ A demonstration of the GA4GH api system whose goals are to showcase the capabili
   3. Add the open reading frame coordinates in the genepred file (column 6 is start position and column 7 is the stop position)
 
   e.g. mrnaToGene -insertMergeSize=-1 -noCds refseq_annotation.hg19.psl refseq_annotation.hg19.gp
+
+### Generate umd vcf files from webscrapped data and upload to server
+  1. ./umd2vcf -i brca1.tsv -o umd_brca1.vcf -b 1 > stdout.brca1.txt
+  2. ./umd2vcf -i brca2.tsv -o umd_brca2.vcf -b 2 > stdout.brca2.txt
+  3. vcf-concat umd_brca1.vcf umd_brca2.vcf > umd_brca12.vcf
+  4. vcf-sort umd_brca12.vcf > umd_brca12.sorted.vcf
+  5. bgzip umd_brca12.sorted.vcf
+  6. bcftools index umd_brca12.sorted.vcf.gz
+  7. scp -i ~/brca_server.pem umd_brca12.sorted.vcf.gz ubuntu@ec2-54-148-207-224.us-west-2.compute.amazonaws.com:/srv/ga4gh/brca_data/variants/umd
+  8. scp -i ~/brca_server.pem umd_brca12.sorted.vcf.gz.csi ubuntu@ec2-54-148-207-224.us-west-2.compute.amazonaws.com:/srv/ga4gh/brca_data/variants/umd
