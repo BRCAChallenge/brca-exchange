@@ -2,7 +2,7 @@
 
 """
 Charles Markello
-5/1/2015
+5/22/2015
 
 Description:
 	Python script 'umd2vcf' takes in a umd table flat file and converts it to
@@ -15,6 +15,7 @@ from __future__ import print_function, division
 import argparse
 import sys
 import os
+from collections import defaultdict
 import pyhgvs as hgvs
 import pyhgvs.utils as hgvs_utils
 from pygr.seqdb import SequenceFileDB
@@ -58,11 +59,26 @@ def main(args):
 	def get_transcript(name):
 		return transcripts.get(name)
 
+	# Sort umdfile for processing
+	umdFileList = list()
+	for line in umdFile:
+		if line == "\t"*31+"\n":
+			continue
+		if line.startswith('#'):
+			continue
+		parsedLine = line.strip().split('\t')
+		lineTuple = (parsedLine[1], line)
+		umdFileList.append(lineTuple)
+
+	# sort the contents of the umd file by their HGVS cDNA designation
+	umdFileList.sort(key=lambda tup: tup[0])
+
 	# Format header metadata
 
 	print('##fileformat=VCFv4.0', file=vcfFile)
 	print('##source=UMD', file=vcfFile)
 	print('##reference=GRCh37', file=vcfFile)
+	print('##SampleDATA=For each variant the INFO field data is organized into lists of (SAMPLE,[INFO_field_value]) tuples where SAMPLE is the UMD id of the sample and INFO_field_value is the INFO field metadata tied to the sample.', file=vcfFile)
 	print('##INFO=<ID=UMDID,Number=1,Type=Integer,Description="Sample specific UMD id. (-1 means null data)">', file=vcfFile)
 	print('##INFO=<ID=cDNAVAR,Number=1,Type=String,Description="cDNA level name of variant in HGVS format.">', file=vcfFile)
 	print('##INFO=<ID=pVAR,Number=.,Type=String,Description="protein level name of variant in HGVS format.">', file=vcfFile)
@@ -95,23 +111,21 @@ def main(args):
 	print('##INFO=<ID=CV,Number=.,Type=String,Description="Common Variant score.">', file=vcfFile)
 	print('##INFO=<ID=mutTYPESEQ,Number=.,Type=String,Description="Mutant type sequence.">', file=vcfFile)
 	print('##INFO=<ID=varPERCENT,Number=.,Type=String,Description="Variation percent.">', file=vcfFile)
+	print('##INFO=<ID=BioSignificance,Number=.,Type=String,Description="Biological significance classification of the variant in this database. Class 5: Causal, Class 4: Likely causal, Class 3: Uncertain-insufficient evidence, Class 2: Likely Neutral, Class 1: Neutral">', file=vcfFile)
 	print('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO', file=vcfFile)
 
-	headerline = umdFile.readline().strip().split('\t')
-	print(headerline)
-	print(len(headerline))
-	#testline = umdFile.readline().split('\t')
-	#print('id: ', testline[0])
-	#print('variant: ', testline[1])
-	#if brcaGene == 1:
-	#	print('Method of analysis: ', testline[26])
-	#elif brcaGene == 2:
-	#	print('Method of analysis: ', testline[15])
+	# Record additional samples with the same chromosome position variant organized in the
+	#	INFO field as a list of(UMDID, [INFOfield_values]) tuples.
+	sampleList = defaultdict()
+	prevChrom = ''
+	prevOffset = ''
+	prevRef = ''
+	prevAlt = ''
+	prevQueryName = ''
 
 	# Extract variant and position data
-	for line in umdFile:
-		if line == "\t"*31+"\n":
-			continue
+	for tup in umdFileList:
+		line = tup[1]
 
 		# initialize annotation variables
 		UMDID = -1
@@ -151,7 +165,7 @@ def main(args):
 
 		parsedLine = line.strip().split('\t')
 		print(len(parsedLine))
-		print(parsedLine)
+		#print(parsedLine)
 		hgvsName = parsedLine[1]
 		if '(' in hgvsName:
 			hgvsName = hgvsName.split('(')[1][0:-1]
@@ -182,17 +196,22 @@ def main(args):
 			famTYPE = parsedLine[22]
 			refID = parsedLine[23]
 			REFERENCE = parsedLine[24]
+			BioSignificance = parsedLine[25]
 			if len(parsedLine) > 25:
 				mutDB = parsedLine[25]
+				BioSignificance = parsedLine[26]
 			if len(parsedLine) > 26:
 				methANALYSIS = parsedLine[26]
+				BioSignificance = parsedLine[27]
 			if len(parsedLine) > 27:
 				spliceTYPE = parsedLine[27]
 				wtSEQ = parsedLine[28]
 				CV = parsedLine[29]
 				mutTYPESEQ = parsedLine[30]
 				varPERCENT = parsedLine[31]
-			INFO_field = 'UMDID={0};cDNAVAR={1};pVAR={2};MTYPE={3};VARCLASS={4};wtCODON={5};wtAA={6};mtCODON={7};mtAA={8};mtEVENT={9};mTYPE={10};STRUCT={11};HCD={12};pyDOUBLE={13};CpG={14};mRNALVL={15};RSTCTMAP={16};sampID={17};PATSTATUS={18};GENDER={19};TRANSMIT={20};ONSET={21};famTYPE={22};refID={23};REFERENCE={24};mutDB={25};methANALYSIS={26};spliceTYPE={27};wtSEQ={28};CV={29};mutTYPESEQ={30};varPERCENT={31}'.format(UMDID,cDNAVAR,pVAR,MTYPE,VARCLASS,wtCODON,wtAA,mtCODON,mtAA,mtEVENT,mTYPE,STRUCT,HCD,pyDOUBLE,CpG,mRNALVL,RSTCTMAP,sampID,PATSTATUS,GENDER,TRANSMIT,ONSET,famTYPE,refID,REFERENCE,mutDB,methANALYSIS,spliceTYPE,wtSEQ,CV,mutTYPESEQ,varPERCENT)
+				BioSignificance = parsedLine[32]
+			print('BioSignificance: ', BioSignificance)
+			INFO_field = 'UMDID={0};cDNAVAR={1};pVAR={2};MTYPE={3};VARCLASS={4};wtCODON={5};wtAA={6};mtCODON={7};mtAA={8};mtEVENT={9};mTYPE={10};STRUCT={11};HCD={12};pyDOUBLE={13};CpG={14};mRNALVL={15};RSTCTMAP={16};sampID={17};PATSTATUS={18};GENDER={19};TRANSMIT={20};ONSET={21};famTYPE={22};refID={23};REFERENCE={24};mutDB={25};methANALYSIS={26};spliceTYPE={27};wtSEQ={28};CV={29};mutTYPESEQ={30};varPERCENT={31};BioSignificance={32}'.format(UMDID,cDNAVAR,pVAR,MTYPE,VARCLASS,wtCODON,wtAA,mtCODON,mtAA,mtEVENT,mTYPE,STRUCT,HCD,pyDOUBLE,CpG,mRNALVL,RSTCTMAP,sampID,PATSTATUS,GENDER,TRANSMIT,ONSET,famTYPE,refID,REFERENCE,mutDB,methANALYSIS,spliceTYPE,wtSEQ,CV,mutTYPESEQ,varPERCENT,BioSignificance)
 
 		elif brcaGene == 2:
 			hgvsName = 'NM_000059.3:'+hgvsName
@@ -222,15 +241,19 @@ def main(args):
 			famTYPE = parsedLine[23]
 			refID = parsedLine[24]
 			REFERENCE = parsedLine[25]
+			BioSignificance = parsedLine[26]
 			if len(parsedLine) > 26:
 				mutDB = parsedLine[26]
+				BioSignificance = parsedLine[27]
 			if len(parsedLine) > 27:
 				spliceTYPE = parsedLine[27]
 				wtSEQ = parsedLine[28]
 				CV = parsedLine[29]
 				mutTYPESEQ = parsedLine[30]
 				varPERCENT = parsedLine[31]
-			INFO_field = 'UMDID={0};cDNAVAR={1};pVAR={2};MTYPE={3};VARCLASS={4};wtCODON={5};wtAA={6};mtCODON={7};mtAA={8};mtEVENT={9};mTYPE={10};STRUCT={11};HCD={12};pyDOUBLE={13};CpG={14};methANALYSIS={15};mRNALVL={16};RSTCTMAP={17};sampID={18};PATSTATUS={19};GENDER={20};TRANSMIT={21};ONSET={22};famTYPE={23};refID={24};REFERENCE={25};mutDB={26};spliceTYPE={27};wtSEQ={28};CV={29};mutTYPESEQ={30};varPERCENT={31}'.format(UMDID,cDNAVAR,pVAR,MTYPE,VARCLASS,wtCODON,wtAA,mtCODON,mtAA,mtEVENT,mTYPE,STRUCT,HCD,pyDOUBLE,CpG,methANALYSIS,mRNALVL,RSTCTMAP,sampID,PATSTATUS,GENDER,TRANSMIT,ONSET,famTYPE,refID,REFERENCE,mutDB,spliceTYPE,wtSEQ,CV,mutTYPESEQ,varPERCENT)
+				BioSignificance = parsedLine[32]
+			print('BioSignificance: ', BioSignificance)
+			INFO_field = 'UMDID={0};cDNAVAR={1};pVAR={2};MTYPE={3};VARCLASS={4};wtCODON={5};wtAA={6};mtCODON={7};mtAA={8};mtEVENT={9};mTYPE={10};STRUCT={11};HCD={12};pyDOUBLE={13};CpG={14};methANALYSIS={15};mRNALVL={16};RSTCTMAP={17};sampID={18};PATSTATUS={19};GENDER={20};TRANSMIT={21};ONSET={22};famTYPE={23};refID={24};REFERENCE={25};mutDB={26};spliceTYPE={27};wtSEQ={28};CV={29};mutTYPESEQ={30};varPERCENT={31};BioSignificance={32}'.format(UMDID,cDNAVAR,pVAR,MTYPE,VARCLASS,wtCODON,wtAA,mtCODON,mtAA,mtEVENT,mTYPE,STRUCT,HCD,pyDOUBLE,CpG,methANALYSIS,mRNALVL,RSTCTMAP,sampID,PATSTATUS,GENDER,TRANSMIT,ONSET,famTYPE,refID,REFERENCE,mutDB,spliceTYPE,wtSEQ,CV,mutTYPESEQ,varPERCENT,BioSignificance)
 
 		print(hgvsName)
 		queryHgvsName = hgvsName
@@ -242,8 +265,46 @@ def main(args):
 			continue
 		chrom, offset, ref, alt = hgvs.parse_hgvs_name(queryHgvsName, genome, get_transcript=get_transcript)
 		chrom = chrom.replace('chr', '')
-		#print('chr: {0}, offset: {1}, ref: {2}, alt: {3}'.format(chrom,offset,ref,alt))
-		print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(chrom,offset,queryHgvsName,ref,alt,INFO_field), file=vcfFile)
+		if prevChrom == '':
+			# Initilization case.
+			sampleList[UMDID] = INFO_field
+			prevChrom = chrom
+			prevOffset = offset
+			prevRef = ref
+			prevAlt = alt
+			prevQueryName = queryHgvsName
+		elif chrom == prevChrom and offset == prevOffset and ref == prevRef and alt == prevAlt:
+			# If the chromosome location is the same as the previous variant record, that record
+			#	belongs to the same variant.
+			sampleList[UMDID] = INFO_field
+		else:
+			# If the chromosome location is not the same as the previous variant record, then
+			#	collect all of the records into one INFO field value list of (sample, INFO_value) tuples
+			#	and output that as the INFO field value for the variant.
+			#	Then reset the sample dictionary for processing the next variant
+			INFO_field_flattened = list()
+			INFO_field_string = ''
+			for sampleID, INFO_field_value in sampleList.items():
+				INFO_field_flattened.append('({0},[{1}])'.format(sampleID,INFO_field_value))
+
+			INFO_field_string = ''.join(INFO_field_flattened)
+			print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(prevChrom,prevOffset,prevQueryName,prevRef,prevAlt,INFO_field_string), file=vcfFile)
+			sampleList = defaultdict()
+			sampleList[UMDID] = INFO_field
+			prevChrom = chrom
+			prevOffset = offset
+			prevRef = ref
+			prevAlt = alt
+			prevQueryName = queryHgvsName
+
+	# Reached end of file, output the last variant set of samples
+	INFO_field_flattened = list()
+	INFO_field_string = ''
+	for sampleID, INFO_field_value in sampleList.items():
+		INFO_field_flattened.append('({0},[{1}])'.format(sampleID,INFO_field_value))
+
+	INFO_field_string = ''.join(INFO_field_flattened)
+	print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(prevChrom,prevOffset,prevQueryName,prevRef,prevAlt,INFO_field_string), file=vcfFile)
 		
 
 if __name__ == "__main__":
