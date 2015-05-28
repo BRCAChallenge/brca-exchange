@@ -2,7 +2,7 @@
 
 """
 Charles Markello
-5/22/2015
+5/27/2015
 
 Description:
 	Python script 'bic2vcf' takes in a bic table flat file and converts it to
@@ -15,7 +15,7 @@ from __future__ import print_function, division
 import argparse
 import sys
 import os
-import collections
+from collections import defaultdict
 import pyhgvs as hgvs
 import pyhgvs.utils as hgvs_utils
 from pygr.seqdb import SequenceFileDB
@@ -69,15 +69,56 @@ def main(args):
 		line = line.strip().split('\t')
 		annotDict[line[0]] = line[1]
 
+	# print header lines to vcf file
 	print('##fileformat=VCFv4.0', file=vcfFile)
 	print('##source=BIC', file=vcfFile)
 	print('##reference=GRCh37', file=vcfFile)
+	for annotation, description in annotDict.items():
+		print('##INFO=<ID={0},Number=.,Type=String,Description="{1}">'.format(annotation,description), file=vcfFile)
+	print('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO', file=vcfFile)
 
+	# extract INFO field column indicies for annotation terms
 	headerline = bicFile.readline().strip().split('\t')
 
-	for field in headerline:
-		print(field)
+	fieldIdxDict = defaultdict()
+	for index, field in enumerate(headerline):
+		fieldIdxDict[field] = index
 
+	# extract info from each line of the bic flat file
+	for line in bicFile:
+		INFO_field = list()
+		parsedLine = line.strip().split('\t')
+		for field in headerline:
+			field_index = fieldIdxDict[field]
+			field_value = parsedLine[field_index]
+			INFO_field.append('{0}={1}'.format(field,field_value))
+		
+		# extract hgvs cDNA term for variant and cleanup formatting
+		hgvsName = parsedLine[fieldIdxDict['HGVS cDNA']]
+		if hgvsName == '-':
+			print(parsedLine)
+			continue
+		if brcaGene == 1:
+			hgvsName = 'U14680.1:'+hgvsName
+		elif brcaGene == 2:
+			hgvsName = 'U43746.1:'+hgvsName
+		queryHgvsName = hgvsName
+		if 'Ins' in hgvsName:
+			queryHgvsName = hgvsName.replace('Ins', 'ins')
+		if ' ?' in hgvsName:
+			queryHgvsName = hgvsName.replace(' ?', '')
+		if ' ' in hgvsName:
+			queryHgvsName = hgvsName.replace(' ', '')
+		if ']+[' in hgvsName:
+			queryHgvsName = hgvsName.split('+')[0].replace('[','').replace(']','')
+		if ':c,' in hgvsName:
+			queryHgvsName = hgvsName.replace(':c,',':c.')
+		print(len(parsedLine))
+		print(queryHgvsName)
+		chrom, offset, ref, alt = hgvs.parse_hgvs_name(queryHgvsName, genome, get_transcript=get_transcript)
+		chrom = chrom.replace('chr', '')
+		INFO_field_string = ';'.join(INFO_field)
+		print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(chrom,offset,queryHgvsName,ref,alt,INFO_field_string), file=vcfFile)
 
 if __name__ == "__main__":
 	sys.exit(main(sys.argv))
