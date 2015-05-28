@@ -46,3 +46,9 @@ Thu May 14 17:53:51 PDT 2015: max
    - Issues: ga4gh reference server vcf parser needs to be able to parse this new umd
              INFO field sample-based format.
 ------------------------------------------------------------------------
+2015-27-2015: cmarkell@ucsc.edu
+   - Updated and completed first version of bic2vcf python script.
+   - TODO: Still need to validate resulting bic vcf file on reference server.
+           Also, there is once again the issue of multiple samples belonging to the same variant position that will need to be figured out.
+------------------------------------------------------------------------
+
