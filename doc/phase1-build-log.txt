@@ -51,4 +51,10 @@ Thu May 14 17:53:51 PDT 2015: max
    - TODO: Still need to validate resulting bic vcf file on reference server.
            Also, there is once again the issue of multiple samples belonging to the same variant position that will need to be figured out.
 ------------------------------------------------------------------------
-
+2015-28-2015: cmarkell@ucsc.edu
+   - Updated and completed upload of umd data to reference server.
+   - Split 'umd2vcf' script into 'umd2vcf.v1' and 'umd2vcf.v2' where 'umd2vcf.v1' preserves original flat format of data as it appears from the webscrapped data.
+           'umd2vcf.v2' normalizes the data into a vcf file where all records that share the same variant are put in the same variant vcf row.
+   - Updated and completed upload of bic data to reference server.
+      - Skipped variant 'U43746.1:c.8332_8632del301' since its hgvs format was not correct and ambiguous.
+------------------------------------------------------------------------
