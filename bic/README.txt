@@ -1,6 +1,5 @@
 # download from http://research.nhgri.nih.gov/bic/
-# username haeussle
-# password genecats
+# username/password is in /hive/groups/cgl/brca/phase1/data/bic/account.txt at UCSC
 # brca1 data
 # https://research.nhgri.nih.gov/projects/bic/Member/brca1_mutation_database.shtml
 # brca2 data 

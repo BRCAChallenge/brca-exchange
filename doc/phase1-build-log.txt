@@ -25,7 +25,7 @@ Lists of refseq annotation id's for the all respective variant databases
 2015-05-12: markd@soe.ucsc.edu
    # remake RefSeqs to hg19/GRCh37
       blat -q=rna -noHead -fine /hive/data/genomes/hg19/hg19.2bit  data/refseq_annotation.fa /data/tmp/refseq_annotation.hg19.raw.psl
-         pslCDnaFilter -globalNearBest=0.01 /data/tmp/refseq_annotation.hg19.raw.psl data/refseq_annotation.hg19.psl
+      pslCDnaFilter -globalNearBest=0.01 /data/tmp/refseq_annotation.hg19.raw.psl data/refseq_annotation.hg19.psl
 ------------------------------------------------------------------------
 Thu May 14 17:53:51 PDT 2015: max
    # import BIC SNPs (not indels)
@@ -34,5 +34,30 @@ Thu May 14 17:53:51 PDT 2015: max
 Thu May 21 05:39:46 PDT 2015: max
 # scraped UMD, see umd/README.txt
 ------------------------------------------------------------------------
-
-
+2015-05-25: markd
+  # moved data/refseq_annotation.* data/resources/
+  # Two GENBANKs are need for UMD, added these to data/refseq_annotation.acc.
+  # Just recreate the alignments for all. 
+   ~markd/compbio/code/pycbio/bin/ncbiGbFetch --idFile data/resources/refseq_annotation.acc --fasta --simplifyIds --out data/resources/refseq_annotation.fa
+   blat -q=rna -noHead -fine /hive/data/genomes/hg19/hg19.2bit  data/resources/refseq_annotation.fa /data/tmp/refseq_annotation.hg19.raw.psl
+   pslCDnaFilter -globalNearBest=0.01 /data/tmp/refseq_annotation.hg19.raw.psl data/resources/refseq_annotation.hg19.psl
+------------------------------------------------------------------------
+2015-26-2015: cmarkell@ucsc.edu
+   - Updated umd2vcf python script to concatenate the INFO fields of umd samples that
+     share a variant into the same variant on the vcf file.
+   - Updated documentation to main brca github repository.
+   - Issues: ga4gh reference server vcf parser needs to be able to parse this new umd
+             INFO field sample-based format.
+------------------------------------------------------------------------
+2015-27-2015: cmarkell@ucsc.edu
+   - Updated and completed first version of bic2vcf python script.
+   - TODO: Still need to validate resulting bic vcf file on reference server.
+           Also, there is once again the issue of multiple samples belonging to the same variant position that will need to be figured out.
+------------------------------------------------------------------------
+2015-28-2015: cmarkell@ucsc.edu
+   - Updated and completed upload of umd data to reference server.
+   - Split 'umd2vcf' script into 'umd2vcf.v1' and 'umd2vcf.v2' where 'umd2vcf.v1' preserves original flat format of data as it appears from the webscrapped data.
+           'umd2vcf.v2' normalizes the data into a vcf file where all records that share the same variant are put in the same variant vcf row.
+   - Updated and completed upload of bic data to reference server.
+      - Skipped variant 'U43746.1:c.8332_8632del301' since its hgvs format was not correct and ambiguous.
+------------------------------------------------------------------------
