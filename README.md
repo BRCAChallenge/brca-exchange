@@ -21,9 +21,12 @@ A demonstration of the GA4GH api system whose goals are to showcase the capabili
   6. logout of the AWS instance
 
 ### Convert refseq .psl file to .gp (genepred) format (required format for hgvs conversion)
+  This is the annotation file that coincides with the '-a' option of umd2vcf and bic2vcf scripts.
+  
   1. Add '/cluster/bin/x86_64/mrnaToGene' to your PATH environment variable
   2. mrnaToGene [options] psl genePredFile
-  3. Add the open reading frame coordinates in the genepred file (column 6 is start position and column 7 is the stop position)
+  3. Insert an extra column on the left-hand most side for each row in the genepred file and put any number there designating the id of the refseq annotation. The exact number doesn't matter as long as it is unique. This is needed for proper formatting so that the hgvs python package can properly interpret the genepred file.
+  4. Add the open reading frame coordinates in the genepred file (column 6 is start position and column 7 is the stop position)
 
   e.g. mrnaToGene -insertMergeSize=-1 -noCds refseq_annotation.hg19.psl refseq_annotation.hg19.gp
 
