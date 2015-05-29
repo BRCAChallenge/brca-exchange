@@ -36,3 +36,7 @@ A demonstration of the GA4GH api system whose goals are to showcase the capabili
   6. bcftools index umd_brca12.sorted.vcf.gz
   7. scp -i ~/brca_server.pem umd_brca12.sorted.vcf.gz ubuntu@ec2-54-148-207-224.us-west-2.compute.amazonaws.com:/srv/ga4gh/brca_data/variants/umd
   8. scp -i ~/brca_server.pem umd_brca12.sorted.vcf.gz.csi ubuntu@ec2-54-148-207-224.us-west-2.compute.amazonaws.com:/srv/ga4gh/brca_data/variants/umd
+
+### Generate bic vcf files from webscrapped data and upload to server
+  1. ./bic2vcf -i brca1_data.txt -o bic_brca1.vcf -b 1
+  2. ./bic2vcf -i brca2_data.txt -o bic_brca2.vcf -b 2
