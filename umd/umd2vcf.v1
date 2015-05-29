@@ -8,6 +8,8 @@ Description:
 	Python script 'umd2vcf' takes in a umd table flat file and converts it to
 	vcf format. Used primarily for the purposes of data extraction for integration
 	into the ga4gh reference server.
+
+	Version 1, the basic flat representation of sample data
 """
 
 
@@ -113,15 +115,6 @@ def main(args):
 	print('##INFO=<ID=varPERCENT,Number=.,Type=String,Description="Variation percent.">', file=vcfFile)
 	print('##INFO=<ID=BioSignificance,Number=.,Type=String,Description="Biological significance classification of the variant in this database. Class 5: Causal, Class 4: Likely causal, Class 3: Uncertain-insufficient evidence, Class 2: Likely Neutral, Class 1: Neutral">', file=vcfFile)
 	print('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO', file=vcfFile)
-
-	# Record additional samples with the same chromosome position variant organized in the
-	#	INFO field as a list of(UMDID, [INFOfield_values]) tuples.
-	sampleList = defaultdict()
-	prevChrom = ''
-	prevOffset = ''
-	prevRef = ''
-	prevAlt = ''
-	prevQueryName = ''
 
 	# Extract variant and position data
 	for tup in umdFileList:
@@ -265,47 +258,8 @@ def main(args):
 			continue
 		chrom, offset, ref, alt = hgvs.parse_hgvs_name(queryHgvsName, genome, get_transcript=get_transcript)
 		chrom = chrom.replace('chr', '')
-		if prevChrom == '':
-			# Initilization case.
-			sampleList[UMDID] = INFO_field
-			prevChrom = chrom
-			prevOffset = offset
-			prevRef = ref
-			prevAlt = alt
-			prevQueryName = queryHgvsName
-		elif chrom == prevChrom and offset == prevOffset and ref == prevRef and alt == prevAlt:
-			# If the chromosome location is the same as the previous variant record, that record
-			#	belongs to the same variant.
-			sampleList[UMDID] = INFO_field
-		else:
-			# If the chromosome location is not the same as the previous variant record, then
-			#	collect all of the records into one INFO field value list of (sample, INFO_value) tuples
-			#	and output that as the INFO field value for the variant.
-			#	Then reset the sample dictionary for processing the next variant
-			INFO_field_flattened = list()
-			INFO_field_string = ''
-			for sampleID, INFO_field_value in sampleList.items():
-				INFO_field_flattened.append('({0},[{1}])'.format(sampleID,INFO_field_value))
+		print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(chrom,offset,queryHgvsName,ref,alt,INFO_field), file=vcfFile)
 
-			INFO_field_string = ''.join(INFO_field_flattened)
-			print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(prevChrom,prevOffset,prevQueryName,prevRef,prevAlt,INFO_field_string), file=vcfFile)
-			sampleList = defaultdict()
-			sampleList[UMDID] = INFO_field
-			prevChrom = chrom
-			prevOffset = offset
-			prevRef = ref
-			prevAlt = alt
-			prevQueryName = queryHgvsName
-
-	# Reached end of file, output the last variant set of samples
-	INFO_field_flattened = list()
-	INFO_field_string = ''
-	for sampleID, INFO_field_value in sampleList.items():
-		INFO_field_flattened.append('({0},[{1}])'.format(sampleID,INFO_field_value))
-
-	INFO_field_string = ''.join(INFO_field_flattened)
-	print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(prevChrom,prevOffset,prevQueryName,prevRef,prevAlt,INFO_field_string), file=vcfFile)
-		
 
 if __name__ == "__main__":
 	sys.exit(main(sys.argv))

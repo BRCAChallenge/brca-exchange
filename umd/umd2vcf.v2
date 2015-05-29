@@ -8,6 +8,9 @@ Description:
 	Python script 'umd2vcf' takes in a umd table flat file and converts it to
 	vcf format. Used primarily for the purposes of data extraction for integration
 	into the ga4gh reference server.
+
+	Version 2, normalize data so that each vcf variant row contains all sample data
+		information pertaining to that variant.
 """
 
 

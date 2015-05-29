@@ -31,17 +31,17 @@ def parse_args():
 	parser = argparse.ArgumentParser(description='Convert UMD database table to VCF format.')
 	parser.add_argument('-i', '--inBIC', type=argparse.FileType('r'),
 		help='Input BIC file for conversion.')
-	parser.add_argument('-a', '--inAnnot', type=argparse.FileType('r'),
+	parser.add_argument('-a', '--inAnnot', default='/hive/groups/cgl/brca/phase1/data/resources/bicAnnotation',
 		help='Input BIC annotation file for conversion. Tab-delimited with 1st column representing\n\
-		field name and 2nd column representing the field description.')
+		field name and 2nd column representing the field description. Default(/hive/groups/cgl/brca/phase1/data/resources/bicAnnotation)')
 	parser.add_argument('-o', '--out', type=argparse.FileType('w'),
 		help='Ouput VCF file result.')
 	parser.add_argument('-b', '--brca', type=int,
 		help='BRCA gene which BIC variant table was derrived from. (1 for BRCA1 or 2 for BRCA2).')
 	parser.add_argument('-g', '--gpath', default='/hive/groups/cgl/brca/phase1/data/resources/hg19.fa',
 		help='Whole path to genome file. Default: (/hive/groups/cgl/brca/phase1/data/resources/hg19.fa)')
-	parser.add_argument('-r', '--rpath', default='/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.psl',
-		help='Whole path to refSeq file. Default: (/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.psl)')
+	parser.add_argument('-r', '--rpath', default='/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.gp',
+		help='Whole path to refSeq file. Default: (/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.gp)')
 
 	options = parser.parse_args()
 	return options
@@ -49,7 +49,7 @@ def parse_args():
 def main(args):
 	options = parse_args()
 	bicFile = options.inBIC
-	annotFile = options.inAnnot
+	annotFile_path = options.inAnnot
 	vcfFile = options.out
 	brcaGene = options.brca
 	genome_path = options.gpath
@@ -65,9 +65,10 @@ def main(args):
 
 	# open and store annotation fields in a dictionary
 	annotDict = defaultdict()
-	for line in annotFile:
-		line = line.strip().split('\t')
-		annotDict[line[0]] = line[1]
+	with open(annotFile_path) as inAnnotFile:
+		for line in inAnnotFile:
+			line = line.strip().split('\t')
+			annotDict[line[0]] = line[1]
 
 	# print header lines to vcf file
 	print('##fileformat=VCFv4.0', file=vcfFile)
@@ -98,10 +99,6 @@ def main(args):
 		if hgvsName == '-':
 			print(parsedLine)
 			continue
-		if brcaGene == 1:
-			hgvsName = 'U14680.1:'+hgvsName
-		elif brcaGene == 2:
-			hgvsName = 'U43746.1:'+hgvsName
 		queryHgvsName = hgvsName
 		if 'Ins' in hgvsName:
 			queryHgvsName = hgvsName.replace('Ins', 'ins')
@@ -111,13 +108,28 @@ def main(args):
 			queryHgvsName = hgvsName.replace(' ', '')
 		if ']+[' in hgvsName:
 			queryHgvsName = hgvsName.split('+')[0].replace('[','').replace(']','')
-		if ':c,' in hgvsName:
-			queryHgvsName = hgvsName.replace(':c,',':c.')
+		if 'c,' in hgvsName:
+			queryHgvsName = hgvsName.replace('c,','c.')
+		if '/' in hgvsName:
+			queryHgvsName = hgvsName.replace('/','')
+		if 'c.53238_5239insT' in hgvsName:
+			queryHgvsName = hgvsName.replace('c.53238_5239insT','c.5238_5239insT')
+		if 'c.8332_8632del301' in hgvsName:
+			print('Hgvs not formatted properly, ambiguous fix. Skipping...')
+			continue
+		if brcaGene == 1:
+			queryHgvsName = 'U14680.1:'+queryHgvsName
+		elif brcaGene == 2:
+			queryHgvsName = 'U43746.1:'+queryHgvsName
 		print(len(parsedLine))
+		print(hgvsName)
 		print(queryHgvsName)
+		INFO_field_string = ';'.join(INFO_field)
+		print(INFO_field_string)
 		chrom, offset, ref, alt = hgvs.parse_hgvs_name(queryHgvsName, genome, get_transcript=get_transcript)
 		chrom = chrom.replace('chr', '')
-		INFO_field_string = ';'.join(INFO_field)
+		#INFO_field_string = ';'.join(INFO_field)
+		#print(INFO_field_string)
 		print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(chrom,offset,queryHgvsName,ref,alt,INFO_field_string), file=vcfFile)
 
 if __name__ == "__main__":
