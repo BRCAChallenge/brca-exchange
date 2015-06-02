@@ -28,7 +28,7 @@ def parse_args():
 		object containing the arguments and their values. Default values are 'False' if option
 		is not listed in the command, else the option value is set to True.
 	"""
-	parser = argparse.ArgumentParser(description='Convert UMD database table to VCF format.')
+	parser = argparse.ArgumentParser(description='Convert BIC database table to VCF format.')
 	parser.add_argument('-i', '--inBIC', type=argparse.FileType('r'),
 		help='Input BIC file for conversion.')
 	parser.add_argument('-a', '--inAnnot', default='/hive/groups/cgl/brca/phase1/data/resources/bicAnnotation',
@@ -75,11 +75,11 @@ def main(args):
 	print('##source=BIC', file=vcfFile)
 	print('##reference=GRCh37', file=vcfFile)
 	for annotation, description in annotDict.items():
-		print('##INFO=<ID={0},Number=.,Type=String,Description="{1}">'.format(annotation,description), file=vcfFile)
+		print('##INFO=<ID={0},Number=.,Type=String,Description="{1}">'.format(annotation.replace(' ', '_'),description), file=vcfFile)
 	print('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO', file=vcfFile)
 
 	# extract INFO field column indicies for annotation terms
-	headerline = bicFile.readline().strip().split('\t')
+	headerline = bicFile.readline().strip().replace(' ', '_').split('\t')
 
 	fieldIdxDict = defaultdict()
 	for index, field in enumerate(headerline):
@@ -92,10 +92,12 @@ def main(args):
 		for field in headerline:
 			field_index = fieldIdxDict[field]
 			field_value = parsedLine[field_index]
+			if ';' in field_value:
+				field_value = field_value.replace(';','')
 			INFO_field.append('{0}={1}'.format(field,field_value))
 		
 		# extract hgvs cDNA term for variant and cleanup formatting
-		hgvsName = parsedLine[fieldIdxDict['HGVS cDNA']]
+		hgvsName = parsedLine[fieldIdxDict['HGVS_cDNA']]
 		if hgvsName == '-':
 			print(parsedLine)
 			continue

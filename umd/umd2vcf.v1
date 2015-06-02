@@ -33,6 +33,9 @@ def parse_args():
 	parser = argparse.ArgumentParser(description='Convert UMD database table to VCF format.')
 	parser.add_argument('-i', '--inUMD', type=argparse.FileType('r'),
 		help='Input UMD file for conversion.')
+	parser.add_argument('-a', '--inAnnot', default='/hive/groups/cgl/brca/phase1/data/resources/umdAnnotation',
+		help='Input UMD annotation file for conversion. Tab-delimited with 1st column representing\n\
+		field name and 2nd column representing the field description. Default(/hive/groups/cgl/brca/phase1/data/resources/umdAnnotation)')
 	parser.add_argument('-o', '--out', type=argparse.FileType('w'),
 		help='Ouput VCF file result.')
 	parser.add_argument('-b', '--brca', type=int,
@@ -48,6 +51,7 @@ def parse_args():
 def main(args):
 	options = parse_args()
 	umdFile = options.inUMD
+	annotFile_path = options.inAnnot
 	vcfFile = options.out
 	brcaGene = options.brca
 	genome_path = options.gpath
@@ -80,7 +84,6 @@ def main(args):
 	print('##fileformat=VCFv4.0', file=vcfFile)
 	print('##source=UMD', file=vcfFile)
 	print('##reference=GRCh37', file=vcfFile)
-	print('##SampleDATA=For each variant the INFO field data is organized into lists of (SAMPLE,[INFO_field_value]) tuples where SAMPLE is the UMD id of the sample and INFO_field_value is the INFO field metadata tied to the sample.', file=vcfFile)
 	print('##INFO=<ID=UMDID,Number=1,Type=Integer,Description="Sample specific UMD id. (-1 means null data)">', file=vcfFile)
 	print('##INFO=<ID=cDNAVAR,Number=1,Type=String,Description="cDNA level name of variant in HGVS format.">', file=vcfFile)
 	print('##INFO=<ID=pVAR,Number=.,Type=String,Description="protein level name of variant in HGVS format.">', file=vcfFile)
