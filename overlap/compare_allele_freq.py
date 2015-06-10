@@ -19,18 +19,18 @@ structure of variant_dic:
 
 """
 
+PATH = "/hive/groups/cgl/brca/phase1/data/allele_freq_vcfs/"
+
+
 def main():
     varF = open("909_common_variants", "r")
-    clinvarV = overlap2.get_unique_variants("allele_freq_vcfs/ClinVar.allele_freq.vcf")
-    lovdV = overlap2.get_unique_variants("allele_freq_vcfs/LOVD.allele_freq.vcf")
-    umdV = overlap2.get_unique_variants("allele_freq_vcfs/UMD.allele_freq.vcf")
+    clinvarV = overlap2.get_unique_variants(PATH + "ClinVar.allele_freq.vcf")
+    lovdV = overlap2.get_unique_variants(PATH + "LOVD.allele_freq.vcf")
+    umdV = overlap2.get_unique_variants(PATH + "UMD.allele_freq.vcf")
 
     print len(clinvarV)
     print len(lovdV)
     print len(umdV)
-    n1 = 0
-    n2 = 0
-    n3 = 0
     sets = {}
 
     sets["A"] = []
@@ -53,9 +53,6 @@ def main():
 
     for key in sets:
         print key, len(sets[key])
-
-
-
 
 
 

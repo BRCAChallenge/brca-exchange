@@ -1,5 +1,7 @@
 import glob
 
+
+
 """
     result:
 unique variants in ClinVar:6065
@@ -59,8 +61,12 @@ overlap between UMD and ExAC: 859
 overlap between UMD and BIC: 1178
 """
 
+
+PATH = "/hive/groups/cgl/brca/phase1/data/cutoff_vcf/"
+
+
 def main():
-    databases = get_databases("cutoff_vcf/")
+    databases = get_databases(PATH)
     for key in databases.keys():
         print_variant_size(databases[key], key)
         for key2 in databases.keys():

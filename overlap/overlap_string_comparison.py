@@ -1,6 +1,7 @@
 import pysam
 import glob
 
+
 """
     improved algorithm for comparing two variants:
     if different chromosome? different variant
@@ -69,6 +70,9 @@ overlap between the UMD and BIC: 1190
 
 
 """
+
+
+PATH = "/hive/groups//brca/phase1/data/cutoff_vcf/"
 chr13 = open("brca2.txt", "r")
 BRCA2 = chr13.read()
 chr17 = open("brca1.txt", "r")
@@ -78,7 +82,7 @@ BRCA1_START = 41100000
 
 
 def main():
-    databases = get_databases("vcf/")
+    databases = get_databases(PATH)
     for key in databases.keys():
         print_variant_size(databases[key], key)
         for key2 in databases.keys():
