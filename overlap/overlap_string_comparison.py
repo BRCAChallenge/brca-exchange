@@ -114,8 +114,7 @@ def get_unique_variants(filename):
     for line in varFile:
         line_num += 1
         print line_num, filename
-        this_variant = line.strip().split("\t")[:5]
-        this_variant.pop(2) # rm ID column which isn't used in this program
+        this_variant = line.strip().split("\t")[:4]
         alt = this_variant[-1]
         if "," in alt:
             alts = alt.split(",")
