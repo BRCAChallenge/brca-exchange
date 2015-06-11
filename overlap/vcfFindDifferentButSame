@@ -12,6 +12,10 @@ from os.path import join, basename, dirname, isfile
 
 # maximum distance between two variants to get compared
 MAXDIST=50
+# do we check if the refAllele sequences are really correct?
+CHECKREF=False
+#CHECKREF=True
+
 # === COMMAND LINE INTERFACE, OPTIONS AND HELP ===
 parser = optparse.OptionParser("usage: %prog [options] filenames - find variants in VCF that have a different position but lead to the same sequence. Can process many files at a time.")
 
@@ -124,49 +128,66 @@ def get_overlap(db1, db2):
                 continue
 
             if var1!=var2:
-                ref, seq1, seq2 = variant_pair_same(var1, var2)
+                seq1, seq2, fullSeq = variant_seqs(var1, var2)
+                if seq1 is None:
+                    continue
                 if seq1==seq2:
                     chr1, pos1, id1, from1, to1 = desc1
                     chr2, pos2, id2, from2, to2 = desc2
                     pretty1 = "%s:%s->%s (%s)" % (int(pos1), from1, to1, id1)
                     pretty2 = "%s:%s->%s (%s)" % (int(pos2), from2, to2, id2)
-                    print "%s-%s:" % (db1Name, db2Name), "before=%s"%ref, "after=%s" %seq1, pretty1, "/", pretty2
+                    print "%s-%s:" % (db1Name, db2Name), pretty1, "/", pretty2, fullSeq
 
     #print "overlap between the %s and %s: %d" %(name_db1, name_db2, num_overlap)
 
 
-def variant_pair_same(v1, v2):
-    " return (refSeq, edited1, edited2) "
+def variant_seqs(v1, v2):
+    " return (edited1, edited2) "
     chr1, pos1, ref1, alt1 = v1
     chr2, pos2, ref2, alt2 = v2
     pos1 = int(pos1)
     pos2 = int(pos2)
     # make sure that v1 is upstream of v2
     if pos1 > pos2:
-        (chr1, pos1, ref1, alt1 ), (chr2, pos2, ref2, alt2 ) = (chr2, pos2, ref2, alt2), (chr1, pos1, ref1, alt1)
+        #(chr1, pos1, ref1, alt1 ), (chr2, pos2, ref2, alt2 ) = (chr2, pos2, ref2, alt2), (chr1, pos1, ref1, alt1)
+        return variant_seqs(v2, v1)
 
-    # include the length of "alt" or "ref" of downstream variant in distance between two variants
-    # v1: -------AT--------------
-    # v2: ---------------CCG-----
-    # the common sequence should include the section from A to G
-    distance = max(pos2 - pos1 + max(len(ref2), len(alt2)),
-                   max(len(ref1), len(alt1)))
+    # lift coordinates and make everything 0-based
+    if chr1 == "13":
+        seq = BRCA2
+        pos1 = pos1 -1 - BRCA2_START
+        pos2 = pos2 -1 - BRCA2_START
+    elif chr1 == "17":
+        seq = BRCA1
+        pos1 = pos1 - 1 - BRCA1_START
+        pos2 = pos2 - 1 - BRCA1_START
+    else:
+        assert(False)
+
+    assert(pos1>0)
+    assert(pos2>0)
+    assert(pos1 < 200000)
+    assert(pos2 < 200000)
+    assert(len(ref1)!=0)
+    assert(len(ref2)!=0)
+    if len(ref2)>100 or len(ref1)>100:
+        return None, None, None
 
     # replace vcf ref string with alt string
-    if chr1 == "13":
-        brca_string = BRCA2
-        brca_start = BRCA2_START
-    elif chr1 == "17":
-        brca_string = BRCA1
-        brca_start = BRCA1_START
+    if CHECKREF:
+        genomeRef1 = seq[pos1:pos1+len(ref1)].upper()
+        genomeRef2 = seq[pos2:pos2+len(ref2)].upper()
+        if (genomeRef1!=ref1):
+            print "ref1 is not in genome", genomeRef1, ref1
+        if (genomeRef2!=ref2):
+            print "ref2 is not in genome", genomeRef2, ref2
+        assert(genomeRef1==ref1)
+        assert(genomeRef2==ref2)
 
-    ref = brca_string[pos1-1-brca_start:pos1-1-brca_start+distance]
-    edited_v1 = alt1 + ref[len(ref1):]
-    try:
-        edited_v2 = ref[:(pos2-pos1)] + alt2 + ref[(pos2-pos1+len(ref2))]
-    except IndexError:
-        edited_v2 = ref[:(pos2-pos1)] + alt2
-    return ref, edited_v1, edited_v2
+    edited_v1 = seq[0:pos1]+alt1+seq[pos1+len(ref1):]
+    edited_v2 = seq[0:pos2]+alt2+seq[pos2+len(ref2):]
+    fullSeq = seq[min(pos1,pos2):max(pos1+len(ref1),pos1+len(alt1),pos2+len(alt2),pos2+len(ref2))]
+    return edited_v1, edited_v2, fullSeq
 
 if __name__ == "__main__":
     main(args, options)
