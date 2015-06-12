@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import pysam
 import glob, gzip
 from itertools import combinations

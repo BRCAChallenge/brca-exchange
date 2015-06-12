@@ -1,5 +1,5 @@
-import pysam
 import glob
+import vcfFindDifferentButSame as max
 
 
 """
@@ -72,7 +72,8 @@ overlap between the UMD and BIC: 1190
 """
 
 
-PATH = "/hive/groups//brca/phase1/data/cutoff_vcf/"
+#PATH = "/hive/groups//brca/phase1/data/cutoff_vcf/"
+PATH = "/Users/Molly/PycharmProjects/brca_personal/cutoff_vcf/"
 chr13 = open("brca2.txt", "r")
 BRCA2 = chr13.read()
 chr17 = open("brca1.txt", "r")
@@ -94,7 +95,7 @@ def get_databases(path):
     db = {}
     files = glob.glob(path + "*.vcf")
     for file in files:
-        db_name = file.split(".")[0].split("/")[1]
+        db_name = file.split(".")[0].split("/")[-1].split(".")[0]
         db[db_name] = get_unique_variants(file)
     return db
 
@@ -137,8 +138,12 @@ def check_variant_exist(v, variants):
         ### if they are the same, no need to restore the sequence ot compare
         if v == variant:
             return True
-        elif variant_pair_same(v, variant):
-            return True
+        # elif variant_pair_same(v, variant):
+        #     return True
+        else:
+            max_result =  max.variant_seqs(v, variant)
+            if max_result[0] == max_result[1]:
+                return True
     return False
 
 def variant_pair_same(v1, v2):
@@ -161,20 +166,22 @@ def variant_pair_same(v1, v2):
     if distance > 300:
         return False
 
-    # replace vcf ref string with alt string
     if chr1 == "13":
         brca_string = BRCA2
         brca_start = BRCA2_START
+
     elif chr1 == "17":
         brca_string = BRCA1
         brca_start = BRCA1_START
 
-    ref = brca_string[pos1-1-brca_start:pos1-1-brca_start+distance]
-    edited_v1 = alt1 + ref[len(ref1):]
-    try:
-        edited_v2 = ref[:(pos2-pos1)] + alt2 + ref[(pos2-pos1+len(ref2))]
-    except IndexError:
-        edited_v2 = ref[:(pos2-pos1)] + alt2
+    # change the coordinates to the entire chromsome to just brca1/2 genes
+    pos1 = pos1 - 1 - brca_start
+    pos2 = pos2 - 1 - brca_start
+
+    ref = brca_string
+    edited_v1 = ref[:pos1] + alt1 + ref[(pos1 + len(alt1)):]
+    edited_v2 = ref[:pos2] + alt2 + ref[(pos2 + len(alt2)):]
+
     return edited_v1 == edited_v2
 
 if __name__ == "__main__":

@@ -20,16 +20,16 @@ import overlap_direct_comparison as overlap1
     plot:  venn3(subsets=venn, set_labels = ("A", "B", "C")
 """
 
-PATH = "/hive/groups/cgl/brca/phase1/data/cutoff_vcf/"
-
+#PATH = "/hive/groups/cgl/brca/phase1/data/cutoff_vcf/"
+PATH = "/Users/Molly/PycharmProjects/brca_personal/cutoff_vcf/"
 
 def main():
     A = "ClinVar"
     B = "LOVD"
     C = "UMD" # optional, leave empty "" if only wanting two circles
 
-    # sets = get_string_comparison_set(A, B, C, PATH)
-    sets = get_direct_comparison_set(A, B, C, PATH)
+    sets = get_string_comparison_set(A, B, C, PATH)
+    #sets = get_direct_comparison_set(A, B, C, PATH)
 
 
     if C == "": # draw two-circle venn diagram

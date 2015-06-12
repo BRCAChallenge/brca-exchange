@@ -95,8 +95,8 @@ def get_variant_list(filename):
         items = line.split("\t")
         chr = items[0]
         pos = items[1]
-        ref = items[3]
-        alts = items[4].split(",")
+        ref = items[2]
+        alts = items[3].split(",")
         for alt in alts:
             this_variant = "{0}.{1}.{2}.{3}".format(chr, pos, ref, alt)
             variants.append(this_variant)
