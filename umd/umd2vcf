@@ -8,6 +8,8 @@ Description:
 	Python script 'umd2vcf' takes in a umd table flat file and converts it to
 	vcf format. Used primarily for the purposes of data extraction for integration
 	into the ga4gh reference server.
+
+	Version 1, the basic flat representation of sample data
 """
 
 
@@ -31,6 +33,9 @@ def parse_args():
 	parser = argparse.ArgumentParser(description='Convert UMD database table to VCF format.')
 	parser.add_argument('-i', '--inUMD', type=argparse.FileType('r'),
 		help='Input UMD file for conversion.')
+	parser.add_argument('-a', '--inAnnot', default='/hive/groups/cgl/brca/phase1/data/resources/umdAnnotation',
+		help='Input UMD annotation file for conversion. Tab-delimited with 1st column representing\n\
+		field name and 2nd column representing the field description. Default(/hive/groups/cgl/brca/phase1/data/resources/umdAnnotation)')
 	parser.add_argument('-o', '--out', type=argparse.FileType('w'),
 		help='Ouput VCF file result.')
 	parser.add_argument('-b', '--brca', type=int,
@@ -46,6 +51,7 @@ def parse_args():
 def main(args):
 	options = parse_args()
 	umdFile = options.inUMD
+	annotFile_path = options.inAnnot
 	vcfFile = options.out
 	brcaGene = options.brca
 	genome_path = options.gpath
@@ -59,253 +65,63 @@ def main(args):
 	def get_transcript(name):
 		return transcripts.get(name)
 
-	# Sort umdfile for processing
-	umdFileList = list()
-	for line in umdFile:
-		if line == "\t"*31+"\n":
-			continue
-		if line.startswith('#'):
-			continue
-		parsedLine = line.strip().split('\t')
-		lineTuple = (parsedLine[1], line)
-		umdFileList.append(lineTuple)
+	# open and store annotation fields in a dictionary
+	annotDict = defaultdict()
+	with open(annotFile_path) as inAnnotFile:
+		for line in inAnnotFile:
+			line = line.strip().split('\t')
+			annotDict[line[0]] = line[1]
 
-	# sort the contents of the umd file by their HGVS cDNA designation
-	umdFileList.sort(key=lambda tup: tup[0])
-
-	# Format header metadata
-
+	# print header lines to vcf file
 	print('##fileformat=VCFv4.0', file=vcfFile)
 	print('##source=UMD', file=vcfFile)
 	print('##reference=GRCh37', file=vcfFile)
-	print('##SampleDATA=For each variant the INFO field data is organized into lists of (SAMPLE,[INFO_field_value]) tuples where SAMPLE is the UMD id of the sample and INFO_field_value is the INFO field metadata tied to the sample.', file=vcfFile)
-	print('##INFO=<ID=UMDID,Number=1,Type=Integer,Description="Sample specific UMD id. (-1 means null data)">', file=vcfFile)
-	print('##INFO=<ID=cDNAVAR,Number=1,Type=String,Description="cDNA level name of variant in HGVS format.">', file=vcfFile)
-	print('##INFO=<ID=pVAR,Number=.,Type=String,Description="protein level name of variant in HGVS format.">', file=vcfFile)
-	print('##INFO=<ID=MTYPE,Number=.,Type=String,Description="Mutation type: transition mutation (Ts) in which the base change does not change the pyrimidine-purine orientation. Transversion mutation (Tv) in which the purine-pyrimidine orientation is changed to pyrimidine-purine or vice versa.">', file=vcfFile)
-	print('##INFO=<ID=VARCLASS,Number=.,Type=String,Description="Variation class: MS (missense), FS (frameshift), IFD (in frame deletion), IFI (in frame insertion, RGT (large rearrangement), NS (non-sens), ins/del (insertion-deletion), PTC (premature termination codon).">', file=vcfFile)
-	print('##INFO=<ID=wtCODON,Number=.,Type=String,Description="The wild-type codon for this variant.">', file=vcfFile)
-	print('##INFO=<ID=wtAA,Number=.,Type=String,Description="The wild-type amino acid for this variant.">', file=vcfFile)
-	print('##INFO=<ID=mtCODON,Number=.,Type=String,Description="The mutant codon for this variant.">', file=vcfFile)
-	print('##INFO=<ID=mtAA,Number=.,Type=String,Description="The mutant amino acid for this variant.">', file=vcfFile)
-	print('##INFO=<ID=mtEVENT,Number=.,Type=String,Description="Sequence variation.">', file=vcfFile)
-	print('##INFO=<ID=mTYPE,Number=.,Type=String,Description="Mutation type: transition mutation (Ts) in which the base change does not change the pyrimidine-purine orientation. Transversion mutation (Tv) in which the purine-pyrimidine orientation is changed to pyrimidine-purine or vice versa.">', file=vcfFile)
-	print('##INFO=<ID=STRUCT,Number=.,Type=String,Description="Location of the variant on the known tridimensional structure.">', file=vcfFile)
-	print('##INFO=<ID=HCD,Number=.,Type=String,Description="Highly conserved amino acid or interacting directly with a known partner.">', file=vcfFile)
-	print('##INFO=<ID=pyDOUBLE,Number=.,Type=String,Description="Pyrimidine double.">', file=vcfFile)
-	print('##INFO=<ID=CpG,Number=.,Type=String,Description="CpG sites are regions of DNA where a cytosine nucleotide occurs next to a guanine nucleotide in the linear sequence of bases along its length. CpG stands for cytosine and guanine separated by a phosphate (-C-phosphate-G-), which links the two nucleosides together in DNA. The CpG notation is used to distinguish a cytosine followed by guanine from a cytosine base paired to a guanine.">', file=vcfFile)
-	print('##INFO=<ID=mRNALVL,Number=.,Type=String,Description="Mutation impact at the mRNA level.">', file=vcfFile)
-	print('##INFO=<ID=RSTCTMAP,Number=.,Type=String,Description="Mutation on restriction map.">', file=vcfFile)
-	print('##INFO=<ID=sampID,Number=.,Type=String,Description="Anonymous number of family.">', file=vcfFile)
-	print('##INFO=<ID=PATSTATUS,Number=.,Type=String,Description="Patient status.">', file=vcfFile)
-	print('##INFO=<ID=GENDER,Number=.,Type=String,Description="Gender of the sample.">', file=vcfFile)
-	print('##INFO=<ID=TRANSMIT,Number=.,Type=String,Description="Transmission of the variant for the sample.">', file=vcfFile)
-	print('##INFO=<ID=ONSET,Number=.,Type=String,Description="Age of onset.">', file=vcfFile)
-	print('##INFO=<ID=famTYPE,Number=.,Type=String,Description="Family type.">', file=vcfFile)
-	print('##INFO=<ID=refID,Number=.,Type=Integer,Description="Reference ID. (-1 means null data)">', file=vcfFile)
-	print('##INFO=<ID=REFERENCE,Number=.,Type=String,Description="Documentation of whether the data has already been published.">', file=vcfFile)
-	print('##INFO=<ID=mutDB,Number=.,Type=String,Description="A list of databases the mutation is already described in.">', file=vcfFile)
-	print('##INFO=<ID=methANALYSIS,Number=.,Type=String,Description="Method of analysis.">', file=vcfFile)
-	print('##INFO=<ID=spliceTYPE,Number=.,Type=String,Description="Splice site type.">', file=vcfFile)
-	print('##INFO=<ID=wtSEQ,Number=.,Type=String,Description="Wild-type sequence.">', file=vcfFile)
-	print('##INFO=<ID=CV,Number=.,Type=String,Description="Common Variant score.">', file=vcfFile)
-	print('##INFO=<ID=mutTYPESEQ,Number=.,Type=String,Description="Mutant type sequence.">', file=vcfFile)
-	print('##INFO=<ID=varPERCENT,Number=.,Type=String,Description="Variation percent.">', file=vcfFile)
-	print('##INFO=<ID=BioSignificance,Number=.,Type=String,Description="Biological significance classification of the variant in this database. Class 5: Causal, Class 4: Likely causal, Class 3: Uncertain-insufficient evidence, Class 2: Likely Neutral, Class 1: Neutral">', file=vcfFile)
+	for annotation, description in annotDict.items():
+		print('##INFO=<ID={0},Number=.,Type=String,Description="{1}">'.format(annotation.replace(' ', '_'),description), file=vcfFile)
 	print('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO', file=vcfFile)
 
-	# Record additional samples with the same chromosome position variant organized in the
-	#	INFO field as a list of(UMDID, [INFOfield_values]) tuples.
-	sampleList = defaultdict()
-	prevChrom = ''
-	prevOffset = ''
-	prevRef = ''
-	prevAlt = ''
-	prevQueryName = ''
+	# extract INFO field column indicies for annotation terms
+	headerline = umdFile.readline().strip().replace(' ', '_').split('\t')
 
-	# Extract variant and position data
-	for tup in umdFileList:
-		line = tup[1]
+	fieldIdxDict = defaultdict()
+	for index, field in enumerate(headerline):
+		fieldIdxDict[field] = index
 
-		# initialize annotation variables
-		UMDID = -1
-		cDNAVAR = ''
-		pVAR = ''
-		MTYPE = ''
-		VARCLASS = ''
-		wtCODON = ''
-		wtAA = ''
-		mtCODON = ''
-		mtAA = ''
-		mtEVENT = ''
-		MTYPE = ''	# duplication ?
-		STRUCT = ''
-		HCD = ''
-		pyDOUBLE = ''
-		CpG = ''
-		mRNALVL = ''
-		RSTCTMAP = ''
-		sampID = ''
-		PATSTATUS = ''
-		GENDER = ''
-		TRANSMIT = ''
-		ONSET = ''
-		famTYPE = ''
-		refID = -1
-		REFERENCE = ''
-		mutDB = ''
-		methANALYSIS = ''
-		spliceTYPE = ''
-		wtSEQ = ''
-		CV = ''
-		mutTYPESEQ = ''
-		varPERCENT = ''
-
-		INFO_field = ''
-
+	# extract info from each line of the bic flat file
+	for line in umdFile:
+		INFO_field = list()
 		parsedLine = line.strip().split('\t')
-		print(len(parsedLine))
-		#print(parsedLine)
-		hgvsName = parsedLine[1]
-		if '(' in hgvsName:
-			hgvsName = hgvsName.split('(')[1][0:-1]
-		if brcaGene == 1:
-			hgvsName = 'NM_007294.2:'+hgvsName
-			UMDID = parsedLine[0]
-			cDNAVAR = parsedLine[1]
-			pVAR = parsedLine[2]
-			MTYPE = parsedLine[3]
-			VARCLASS = parsedLine[4]
-			wtCODON = parsedLine[5]
-			wtAA = parsedLine[6]
-			mtCODON = parsedLine[7]
-			mtAA = parsedLine[8]
-			mtEVENT = parsedLine[9]
-			mTYPE = parsedLine[10]	# duplication ?
-			STRUCT = parsedLine[11]
-			HCD = parsedLine[12]
-			pyDOUBLE = parsedLine[13]
-			CpG = parsedLine[14]
-			mRNALVL = parsedLine[15]
-			RSTCTMAP = parsedLine[16]
-			sampID = parsedLine[17]
-			PATSTATUS = parsedLine[18]
-			GENDER = parsedLine[19]
-			TRANSMIT = parsedLine[20]
-			ONSET = parsedLine[21]
-			famTYPE = parsedLine[22]
-			refID = parsedLine[23]
-			REFERENCE = parsedLine[24]
-			BioSignificance = parsedLine[25]
-			if len(parsedLine) > 25:
-				mutDB = parsedLine[25]
-				BioSignificance = parsedLine[26]
-			if len(parsedLine) > 26:
-				methANALYSIS = parsedLine[26]
-				BioSignificance = parsedLine[27]
-			if len(parsedLine) > 27:
-				spliceTYPE = parsedLine[27]
-				wtSEQ = parsedLine[28]
-				CV = parsedLine[29]
-				mutTYPESEQ = parsedLine[30]
-				varPERCENT = parsedLine[31]
-				BioSignificance = parsedLine[32]
-			print('BioSignificance: ', BioSignificance)
-			INFO_field = 'UMDID={0};cDNAVAR={1};pVAR={2};MTYPE={3};VARCLASS={4};wtCODON={5};wtAA={6};mtCODON={7};mtAA={8};mtEVENT={9};mTYPE={10};STRUCT={11};HCD={12};pyDOUBLE={13};CpG={14};mRNALVL={15};RSTCTMAP={16};sampID={17};PATSTATUS={18};GENDER={19};TRANSMIT={20};ONSET={21};famTYPE={22};refID={23};REFERENCE={24};mutDB={25};methANALYSIS={26};spliceTYPE={27};wtSEQ={28};CV={29};mutTYPESEQ={30};varPERCENT={31};BioSignificance={32}'.format(UMDID,cDNAVAR,pVAR,MTYPE,VARCLASS,wtCODON,wtAA,mtCODON,mtAA,mtEVENT,mTYPE,STRUCT,HCD,pyDOUBLE,CpG,mRNALVL,RSTCTMAP,sampID,PATSTATUS,GENDER,TRANSMIT,ONSET,famTYPE,refID,REFERENCE,mutDB,methANALYSIS,spliceTYPE,wtSEQ,CV,mutTYPESEQ,varPERCENT,BioSignificance)
+		for field in headerline:
+			field_index = fieldIdxDict[field]
+			field_value = parsedLine[field_index]
+			if ';' in field_value:
+				field_value = field_value.replace(';','')
+			INFO_field.append('{0}={1}'.format(field,field_value))
 
-		elif brcaGene == 2:
-			hgvsName = 'NM_000059.3:'+hgvsName
-			UMDID = parsedLine[0]
-			cDNAVAR = parsedLine[1]
-			pVAR = parsedLine[2]
-			MTYPE = parsedLine[3]
-			VARCLASS = parsedLine[4]
-			wtCODON = parsedLine[5]
-			wtAA = parsedLine[6]
-			mtCODON = parsedLine[7]
-			mtAA = parsedLine[8]
-			mtEVENT = parsedLine[9]
-			mTYPE = parsedLine[10]	# duplication ?
-			STRUCT = parsedLine[11]
-			HCD = parsedLine[12]
-			pyDOUBLE = parsedLine[13]
-			CpG = parsedLine[14]
-			methANALYSIS = parsedLine[15]
-			mRNALVL = parsedLine[16]
-			RSTCTMAP = parsedLine[17]
-			sampID = parsedLine[18]
-			PATSTATUS = parsedLine[19]
-			GENDER = parsedLine[20]
-			TRANSMIT = parsedLine[21]
-			ONSET = parsedLine[22]
-			famTYPE = parsedLine[23]
-			refID = parsedLine[24]
-			REFERENCE = parsedLine[25]
-			BioSignificance = parsedLine[26]
-			if len(parsedLine) > 26:
-				mutDB = parsedLine[26]
-				BioSignificance = parsedLine[27]
-			if len(parsedLine) > 27:
-				spliceTYPE = parsedLine[27]
-				wtSEQ = parsedLine[28]
-				CV = parsedLine[29]
-				mutTYPESEQ = parsedLine[30]
-				varPERCENT = parsedLine[31]
-				BioSignificance = parsedLine[32]
-			print('BioSignificance: ', BioSignificance)
-			INFO_field = 'UMDID={0};cDNAVAR={1};pVAR={2};MTYPE={3};VARCLASS={4};wtCODON={5};wtAA={6};mtCODON={7};mtAA={8};mtEVENT={9};mTYPE={10};STRUCT={11};HCD={12};pyDOUBLE={13};CpG={14};methANALYSIS={15};mRNALVL={16};RSTCTMAP={17};sampID={18};PATSTATUS={19};GENDER={20};TRANSMIT={21};ONSET={22};famTYPE={23};refID={24};REFERENCE={25};mutDB={26};spliceTYPE={27};wtSEQ={28};CV={29};mutTYPESEQ={30};varPERCENT={31};BioSignificance={32}'.format(UMDID,cDNAVAR,pVAR,MTYPE,VARCLASS,wtCODON,wtAA,mtCODON,mtAA,mtEVENT,mTYPE,STRUCT,HCD,pyDOUBLE,CpG,methANALYSIS,mRNALVL,RSTCTMAP,sampID,PATSTATUS,GENDER,TRANSMIT,ONSET,famTYPE,refID,REFERENCE,mutDB,spliceTYPE,wtSEQ,CV,mutTYPESEQ,varPERCENT,BioSignificance)
-
-		print(hgvsName)
+		# extract hgvs cDNA term for variant and cleanup formatting
+		hgvsName = parsedLine[fieldIdxDict['Variation_name_(cDNA_level)']]
+		if hgvsName == '-':
+			print(parsedLine)
+			continue
 		queryHgvsName = hgvsName
+		# Handle edge cases
+		if 'c.IVS' in hgvsName:
+			hgvsName = hgvsName.split('(')[1].strip(')')
+			queryHgvsName = hgvsName
 		if 'Ins' in hgvsName:
 			queryHgvsName = hgvsName.replace('Ins', 'ins')
 		if ' ?' in hgvsName:
 			queryHgvsName = hgvsName.replace(' ?', '')
 		if '2T>\'' in hgvsName:
 			continue
+		if brcaGene == 1:
+			queryHgvsName = 'NM_007294.2:'+queryHgvsName
+		elif brcaGene == 2:
+			queryHgvsName = 'NM_000059.3:'+queryHgvsName
+		INFO_field_string = ';'.join(INFO_field)
 		chrom, offset, ref, alt = hgvs.parse_hgvs_name(queryHgvsName, genome, get_transcript=get_transcript)
 		chrom = chrom.replace('chr', '')
-		if prevChrom == '':
-			# Initilization case.
-			sampleList[UMDID] = INFO_field
-			prevChrom = chrom
-			prevOffset = offset
-			prevRef = ref
-			prevAlt = alt
-			prevQueryName = queryHgvsName
-		elif chrom == prevChrom and offset == prevOffset and ref == prevRef and alt == prevAlt:
-			# If the chromosome location is the same as the previous variant record, that record
-			#	belongs to the same variant.
-			sampleList[UMDID] = INFO_field
-		else:
-			# If the chromosome location is not the same as the previous variant record, then
-			#	collect all of the records into one INFO field value list of (sample, INFO_value) tuples
-			#	and output that as the INFO field value for the variant.
-			#	Then reset the sample dictionary for processing the next variant
-			INFO_field_flattened = list()
-			INFO_field_string = ''
-			for sampleID, INFO_field_value in sampleList.items():
-				INFO_field_flattened.append('({0},[{1}])'.format(sampleID,INFO_field_value))
-
-			INFO_field_string = ''.join(INFO_field_flattened)
-			print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(prevChrom,prevOffset,prevQueryName,prevRef,prevAlt,INFO_field_string), file=vcfFile)
-			sampleList = defaultdict()
-			sampleList[UMDID] = INFO_field
-			prevChrom = chrom
-			prevOffset = offset
-			prevRef = ref
-			prevAlt = alt
-			prevQueryName = queryHgvsName
-
-	# Reached end of file, output the last variant set of samples
-	INFO_field_flattened = list()
-	INFO_field_string = ''
-	for sampleID, INFO_field_value in sampleList.items():
-		INFO_field_flattened.append('({0},[{1}])'.format(sampleID,INFO_field_value))
-
-	INFO_field_string = ''.join(INFO_field_flattened)
-	print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(prevChrom,prevOffset,prevQueryName,prevRef,prevAlt,INFO_field_string), file=vcfFile)
-		
+		print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(chrom,offset,queryHgvsName,ref,alt,INFO_field_string), file=vcfFile)
 
 if __name__ == "__main__":
 	sys.exit(main(sys.argv))

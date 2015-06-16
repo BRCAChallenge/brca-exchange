@@ -1,33 +1,33 @@
-#id	Sample specific UMD id. (-1 means null data)
-Variation_name_(cDNA_level)	cDNA level name of variant in HGVS format.
-Variation_name_(protein_level)	protein level name of variant in HGVS format.
-Mutation_type	Mutation type: transition mutation (Ts) in which the base change does not change the pyrimidine-purine orientation. Transversion mutation (Tv) in which the purine-pyrimidine orientation is changed to pyrimidine-purine or vice versa.
-Variation_class	MS (missense), FS (frameshift), IFD (in frame deletion), IFI (in frame insertion, RGT (large rearrangement), NS (non-sens), ins/del (insertion-deletion), PTC (premature termination codon).
-wt_codon	The wild-type codon for this variant.
-wt_aa	The wild-type amino acid for this variant.
-mutant_codon	The mutant codon for this variant.
-mutant_aa	The mutant amino acid for this variant.
-mutational_event	Sequence variation.
-mutation_type	Mutation type: transition mutation (Ts) in which the base change does not change the pyrimidine-purine orientation. Transversion mutation (Tv) in which the purine-pyrimidine orientation is changed to pyrimidine-purine or vice versa.
+#id	Sample specific UMD id.
+Variation name (cDNA level)	cDNA level name of variant in HGVS format.
+Variation name (protein level)	protein level name of variant in HGVS format.
+Mutation type	Mutation type: transition mutation (Ts) in which the base change does not change the pyrimidine-purine orientation. Transversion mutation (Tv) in which the purine-pyrimidine orientation is changed to pyrimidine-purine or vice versa.
+Variation class	MS (missense), FS (frameshift), IFD (in frame deletion), IFI (in frame insertion, RGT (large rearrangement), NS (non-sens), ins/del (insertion-deletion), PTC (premature termination codon).
+wt codon	The wild-type codon for this variant.
+wt aa	The wild-type amino acid for this variant.
+mutant codon	The mutant codon for this variant.
+mutant aa	The mutant amino acid for this variant.
+mutational event	Sequence variation.
+mutation type	Mutation type: transition mutation (Ts) in which the base change does not change the pyrimidine-purine orientation. Transversion mutation (Tv) in which the purine-pyrimidine orientation is changed to pyrimidine-purine or vice versa.
 Structure	Location of the variant on the known tridimensional structure.
-Key_Residue_(HCD)	Highly conserved amino acid or interacting directly with a known partner.
-Pyrimidin_doublet	Pyrimidine double.
+Key Residue (HCD)	Highly conserved amino acid or interacting directly with a known partner.
+Pyrimidin doublet	Pyrimidine double.
 CpG	CpG sites are regions of DNA where a cytosine nucleotide occurs next to a guanine nucleotide in the linear sequence of bases along its length. CpG stands for cytosine and guanine separated by a phosphate (-C-phosphate-G-), which links the two nucleosides together in DNA. The CpG notation is used to distinguish a cytosine followed by guanine from a cytosine base paired to a guanine.
-At_the_mRNA_level	Mutation impact at the mRNA level.
-On_restriction_map	Mutation on restriction map.
-Sample_ID	Anonymous number of family.
-Patient_status	Patient status.
+At the mRNA level	Mutation impact at the mRNA level.
+On restriction map	Mutation on restriction map.
+Sample ID	Anonymous number of family.
+Patient status	Patient status.
 Gender	Gender of the sample.
 Transmission	Transmission of the variant for the sample.
-Age_of_onset	Age of onset.
-Family_type	Family type.
-Reference_ID	Reference ID. (-1 means null data)
+Age of onset	Age of onset.
+Family type	Family type.
+Reference ID	Reference ID. (-1 means null data)
 Reference	Documentation of whether the data has already been published.
-Mutation_already_described_in_the_following_databases	A list of databases the mutation is already described in.
-Method_of_analysis	Method of analysis.
-spliceTYPE	Splice site type.
-wtSEQ	Wild-type sequence.
+Mutation already described in the following databases	A list of databases the mutation is already described in.
+Method of analysis	Method of analysis.
+Splice site type	Splice site type.
+Wild type sequence	Wild-type sequence.
 CV	Common Variant score.
-mutTYPESEQ	Mutant type sequence.
-varPERCENT	Variation percent.
-BioSignificance	Biological significance classification of the variant in this database. Class 5: Causal, Class 4: Likely causal, Class 3: Uncertain-insufficient evidence, Class 2: Likely Neutral, Class 1: Neutral
+Mutant type sequence	Mutant type sequence.
+Variation (%)	Variation percent.
+Biological significance	Biological significance classification of the variant in this database. Class 5: Causal, Class 4: Likely causal, Class 3: Uncertain-insufficient evidence, Class 2: Likely Neutral, Class 1: Neutral
