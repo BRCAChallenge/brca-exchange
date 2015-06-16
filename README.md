@@ -30,7 +30,10 @@ A demonstration of the GA4GH api system whose goals are to showcase the capabili
 
   e.g. mrnaToGene -insertMergeSize=-1 -noCds refseq_annotation.hg19.psl refseq_annotation.hg19.gp
 
-### Generate umd vcf files from webscrapped data and upload to server
+### Data extraction and conversion to vcf:
+  Requires installation of hgvs python package as can be found here: https://github.com/counsyl/hgvs
+
+#### Generate umd vcf files from webscrapped data and upload to server
   1. `./umd2vcf -i brca1.tsv -o umd_brca1.vcf -b 1 > stdout.brca1.txt`
   2. `./umd2vcf -i brca2.tsv -o umd_brca2.vcf -b 2 > stdout.brca2.txt`
   3. `vcf-concat umd_brca1.vcf umd_brca2.vcf > umd_brca12.vcf`
@@ -40,7 +43,7 @@ A demonstration of the GA4GH api system whose goals are to showcase the capabili
   7. `scp -i ~/brca_server.pem umd_brca12.sorted.vcf.gz ubuntu@ec2-54-148-207-224.us-west-2.compute.amazonaws.com:/srv/ga4gh/brca_data/variants/umd`
   8. `scp -i ~/brca_server.pem umd_brca12.sorted.vcf.gz.csi ubuntu@ec2-54-148-207-224.us-west-2.compute.amazonaws.com:/srv/ga4gh/brca_data/variants/umd`
 
-### Generate bic vcf files from webscrapped data and upload to server
+#### Generate bic vcf files from webscrapped data and upload to server
   1. `./bic2vcf -i brca1_data.txt -o bic_brca1.vcf -b 1 > stdout.brca1.txt`
   2. `./bic2vcf -i brca2_data.txt -o bic_brca2.vcf -b 2 > stdout.brca2.txt`
   3. `vcf-concat bic_brca1.vcf bic_brca2.vcf > bic_brca12.vcf`
@@ -49,3 +52,9 @@ A demonstration of the GA4GH api system whose goals are to showcase the capabili
   6. `bcftools index bic_brca12.sorted.vcf.gz`
   7. `scp -i ~/brca_server.pem bic_brca12.sorted.vcf.gz ubuntu@ec2-54-148-207-224.us-west-2.compute.amazonaws.com:/srv/ga4gh/brca_data/variants/bic`
   8. `scp -i ~/brca_server.pem bic_brca12.sorted.vcf.gz.csi ubuntu@ec2-54-148-207-224.us-west-2.compute.amazonaws.com:/srv/ga4gh/brca_data/variants/bic`
+
+#### Webscrap data from LOVD, generate LOVD vcf files and upload to server
+  1. Install leiden package and its dependencies via command `python setup.py install` in the `leidenv1.0_package` directory.
+  2. Extract variant data to .txt flat file format: e.g. `extract_data.py -u http://hci-exlovd.hci.utah.edu/ -l BRCA1 BRCA2 -o output_directory`
+  3. TODO: Finish LOVD instructions.
+
