@@ -21,7 +21,7 @@ A demonstration of the GA4GH api system whose goals are to showcase the capabili
   6. logout of the AWS instance
 
 ### Convert refseq .psl file to .gp (genepred) format (required format for hgvs conversion)
-  This is the annotation file that coincides with the '-a' option of umd2vcf and bic2vcf scripts.
+  This is the gene feature coordinate file that coincides with the '-r' option of umd2vcf and bic2vcf scripts.
   
   1. Add '/cluster/bin/x86_64/mrnaToGene' to your PATH environment variable
   2. mrnaToGene [options] psl genePredFile
