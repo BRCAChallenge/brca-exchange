@@ -64,3 +64,9 @@ Thu May 21 05:39:46 PDT 2015: max
 2015-06-2: cmarkell@ucsc.edu
       - Updated and cleaned up vcfMerge file. It now stores only annotation names in the INFO field of a vcf file
             header. DESC vcf file header fields are used to describe these annotation names.
+------------------------------------------------------------------------
+2015-06-15: cmarkell@ucsc.edu
+      - Cleanedup umd2vcf file along with an uploaded vcf header info file 'umdAnnotation'.
+------------------------------------------------------------------------
+2015-06-16: cmarkell@ucsc.edu
+      - Uploaded LOVD data extraction and conversion scripts. Will cleanup/test LOVD extraction instructions and upload a cleaner LOVD2vcf converter script.
