@@ -56,5 +56,6 @@ A demonstration of the GA4GH api system whose goals are to showcase the capabili
 #### Webscrap data from LOVD, generate LOVD vcf files and upload to server
   1. Install leiden package and its dependencies via command `python setup.py install` in the `leidenv1.0_package` directory.
   2. Extract variant data to .txt flat file format: e.g. `extract_data.py -u http://hci-exlovd.hci.utah.edu/ -l BRCA1 BRCA2 -o output_directory`
-  3. TODO: Finish LOVD instructions.
+  3. Convert extracted flat file to vcf format `./exLOVD2vcf -i output_directory/BRCA1.txt -o exLOVD_brca1.vcf -a exLOVDAnnotation -b 1 > stdout.brca1.txt`
+  4. `./exLOVD2vcf -i output_directory/BRCA2.txt -o exLOVD_brca2.vcf -a exLOVDAnnotation -b 2 > stdout.brca2.txt`
 
