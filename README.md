@@ -59,3 +59,6 @@ A demonstration of the GA4GH api system whose goals are to showcase the capabili
   3. Convert extracted flat file to vcf format `./exLOVD2vcf -i output_directory/BRCA1.txt -o exLOVD_brca1.vcf -a exLOVDAnnotation -b 1 > stdout.brca1.txt`
   4. `./exLOVD2vcf -i output_directory/BRCA2.txt -o exLOVD_brca2.vcf -a exLOVDAnnotation -b 2 > stdout.brca2.txt`
 
+  1. `extract_data.py -u http://databases.lovd.nl/shared/ -l BRCA1 BRCA2 -o output_directory2`
+  2. 
+  
