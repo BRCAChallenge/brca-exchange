@@ -1,0 +1,21 @@
+dna_change	Description of variant at DNA level, based on a coding DNA reference sequence (following HGVS recommendations); e.g. c.123C>T, c.123_145del, c.123_126dup.
+dna_change_genomic	Description of variant at DNA level, based on the genomic DNA reference sequence (following HGVS recommendations); e.g. g.12345678C>T, g.12345678_12345890del, g.12345678_12345890dup.
+rna_change	Description of variant at RNA level (following HGVS recommendations). e.g. r.123c>u, r.? = unknown, r.(?) = RNA not analysed but probably transcribed copy of DNA variant, r.spl? = RNA not analysed but variant probably affects splicing, r.(spl?) = RNA not analysed but variant may affect splicing, r.0? = change expected to abolish transcription.
+protein_change	Description of variant at protein level (following HGVS recommendations). e.g. p.(Arg345Pro) = change predicted from DNA (RNA not analysed), p.Arg345Pro = change derived from RNA analysis, p.? = unknown effect, p.0? = probably no protein produced.
+haplotype	Haplotype on which variant was found.
+functionalanalysis_technique	Functional analysis technique(s).
+functionalanalysis_result	Result of functional analysis.
+exon	Number of exon/intron containing variant; 2 = exon 2, 12i = intron 12, 2i_7i = exons 3 to 7, 8i_9 = border intron 8/exon 9.
+effect	The variants affect on a proteins function, in the format Reported/Curator concluded; [+] indicating the variant affects function, [+?] probably affects function, [-] does not affect function, [-?] probably does not affect function, [?] effect unknown, [.] effect not classified.
+published_as	Listed only when different from DNA change; variant as reported originally (e.g. 521delT). Variants seen in animal models, tested in vitro, predicted from RNA analysis, etc. are described between brackets like c.(456C>G)
+db_id	Database ID of variant, grouping multiple observations of the same variant together, starting with the HGNC gene symbol, followed by an underscore (_) and a six digit number (e.g. DMD_012345). _000000 is used for variants where DNA was not analysed (change predicted from RNA analysis), variants seen in animal models or variants not seen in humans but functionally tested in vitro.
+vip	Variant VIP-status was requested for matchmaking - need collaboration(s) to crack the case - please contact the submitter/curator. NOTE: to get VIP status ask the curator.
+variant_remarks	Remarks regarding variant described, e.g. germline mosaicism in mother, 345 kb deletion, muscle RNA analysed, not in 200 control chromosomes tested, on founder haplotype, etc.
+reference	publication describing the variant submitted, incl. links to OMIM, PubMed or other source, e.g. den Dunnen ASHG2003 P2346.
+dbsnp_id	The dbSNP ID.
+genetic_origin	Origin of variant; unknown, germline (inherited), somatic, de novo, from parental disomy (maternal or paternal) or in vitro (cloned) when tested for functional consequences. All options:([Unknown], [Germline (inherited)], [Somatic], [De novo], [Uniparental disomy], [Uniparental disomy, maternal allele], [Uniparental disomy, paternal allele], [In vitro (cloned)], or [Not applicable])
+segregation	Indicates whether the variant segregates with the phenotype (yes), does not segregate with the phenotype (no) or segregation is unknown (?). All options: [? = unknown], [yes = segregates with phenotype], [no = does not segregate with phenotype], [- = not applicable]
+frequency	Frequency in which the variant was found; e.g 5/760 chromosomes (in 5 of 760 chromosomes tested), 1/33 patients (in 1 of 33 patients analysed in study), 0.05 controls (in 5% of control cases tested).
+re_site	Restriction enzyme recognition site created (+) or destroyed (-); e.g. BglII+, BamHI-.
+methylation	Result of methylation test; GOM (gain of methylation), LOM (loss of methylation), 30% (30% methylated). NOTE: when several tests were done mention the method as well (e.g. MS-PCR 75%).
+owner	The author or curator of this data entry.
