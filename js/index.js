@@ -3,6 +3,7 @@
 'use strict';
 
 var React = require('react');
+require('bootstrap/dist/css/bootstrap.css');
 
 var Application = React.createClass({
 	render: function () {
