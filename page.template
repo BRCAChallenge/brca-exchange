@@ -20,7 +20,7 @@
 	</head>
 	<body id="body">
 		<div class="container">
-			<div class="row" style="margin-top: 20px; margin-bottom: 20px">
+			<div class="row" style="margin-top: 30px; margin-bottom: 30px">
 				<div class="text-center" style="font-size: 20px; color: #FF3399">
 					<h1>BRCA Challenge</h1>
 				</div>
@@ -47,7 +47,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="row" style="margin-top: 80px">
+			<div class="row" style="margin-top: 100px">
 				<div class="text-center">
 					<input type="text">  <span class="glyphicon glyphicon-search"></span></input>
 				</div>
