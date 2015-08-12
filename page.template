@@ -16,20 +16,27 @@
 		</script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  		<link rel="stylesheet" type="text/css" href="custom.css">
 	</head>
 	<body id="body">
 		<div class="container">
-			<div class="row">
-				<div class="col-md-4 col-md-offset-4"><h1>BRCA Challenge</h1></div>
+			<div class="row" style="margin-top: 20px; margin-bottom: 20px">
+				<div class="text-center" style="font-size: 20px; color: #FF3399">
+					<h1>BRCA Challenge</h1>
+				</div>
 			</div>
 			<div class="row">
-				<div class="col-md-8 col-md-offset-3">
-					<div class="btn-group" role="group" aria-label="...">
-						<button type="button" class="btn btn-default">Home</button>
-						<button type="button" class="btn btn-default">About</button>
-						<button type="button" class="btn btn-default">Database</button>
-						<div class="btn-group" role="group">
-							<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">My Variants <span class="caret"></span>
+				<div class="text-center">
+					<div class="btn-group">
+						<button type="button" class="btn btn-default btn-custom active"
+						data-toggle="pill">
+							Home
+						</button>
+						<button type="button" class="btn btn-default btn-custom">About</button>
+						<button type="button" class="btn btn-default btn-custom">Database</button>
+						<div class="btn-group">
+							<button type="button" class="btn btn-default dropdown-toggle btn-custom" data-toggle="dropdown">
+								My Variants <span class="caret"></span>
 							</button>
 							<ul class="dropdown-menu">
 								<li><a id="load-vcf" href="#">Import VCF file</a></li>
@@ -40,15 +47,13 @@
 					</div>
 				</div>
 			</div>
-			<div class="row" style="margin-top: 100px">
-				<div class="col-md-4 col-md-offset-4">
-					<input type="text">    </input><span class="glyphicon glyphicon-search"></span>
+			<div class="row" style="margin-top: 80px">
+				<div class="text-center">
+					<input type="text">  <span class="glyphicon glyphicon-search"></span></input>
 				</div>
 			</div>
-			<div class="row" style="font-size:80%; color:grey">
-				<div class="col-md-4 col-md-offset-4">
-					search for known variants
-				</div>
+			<div class="row text-center" style="font-size:90%; color:grey">
+				search for known variants
 			</div>
 		</div>
 		<div id="main">
