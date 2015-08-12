@@ -32,7 +32,7 @@
 							<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">My Variants <span class="caret"></span>
 							</button>
 							<ul class="dropdown-menu">
-								<li><a href="#">Import VCF file</a></li>
+								<li><a id="load-vcf" href="#">Import VCF file</a></li>
 								<li><a href="#">Show My Variant</a></li>
 								<li><a href="#">Result Interpretation</a></li>
 							</ul>
