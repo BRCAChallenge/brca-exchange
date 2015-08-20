@@ -14,12 +14,19 @@ __webpack_public_path__ = config.baseurl; // eslint-disable-line camelcase
 // https://github.com/mishoo/UglifyJS2/commit/276b9a31cda2a2ef93e7af4e966baae91a434361
 
 var path = document.location.pathname;
-
+console.log("path", path);
 if (path.match(/^\/$/)) {
 	require.ensure(['index'], function () {
         // XXX see above
 		require(['index']).foo; // eslint-disable-line no-unused-expressions
 	});
-} else {
+}
+//else if (path.match(/^\/construction\/$/)) {
+//
+//	require.ensure(['construction'], function() {
+//		require(['construction']).foo;
+//	})
+//}
+else {
     document.write('Page not found');
 }

@@ -56,8 +56,7 @@
 				search for known variants
 			</div>
 		</div>
-		<div id="main">
-		</div>
+		<div id="main"></div>
 		{% for (var a in o.htmlWebpackPlugin.files.js) { %}
 			<script src="..{%=o.htmlWebpackPlugin.files.js[a]%}"></script>
 		{% } %}

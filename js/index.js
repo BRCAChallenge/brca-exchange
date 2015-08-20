@@ -8,11 +8,9 @@ var Rx = require('rx');
 var vcf = require('vcf.js');
 require('rx.binding');
 require('rx-dom');
+require('../custom.css');
 
-var Modal = require('react-bootstrap/lib/Modal');
-var Input = require('react-bootstrap/lib/Input');
-var Row = require('react-bootstrap/lib/Row');
-var Col = require('react-bootstrap/lib/Col');
+var {Col, Row, Input, Modal, Button, ButtonGroup} = require('react-bootstrap');
 
 var VariantTable = require('./VariantTable');
 
@@ -53,7 +51,7 @@ var VCFUpload = React.createClass({
 	}
 });
 
-var Application = React.createClass({
+var TableView = React.createClass({
 	componentDidMount: function () {
 		Rx.DOM.click(loadbtn).subscribe(() => {
 			this.setState({dialog: true});
@@ -84,6 +82,70 @@ var Application = React.createClass({
 						</Col>
 					</Row>
 					: ''}
+			</div>
+		);
+	}
+});
+
+var Title = React.createClass({
+    render: function() {
+        return (
+        	<div class="text-center">
+        		<h1>BRCA Challenge</h1>
+        	</div>
+        	)
+    }
+});
+
+var NavBar = React.createClass({
+    render: function() {
+    	var {onAbout, onHome, onDB, onMV} = this.props;
+        return (
+            <ButtonGroup>
+                <Button onClick={onHome}>Home</Button>
+                <Button onClick={onAbout}>About</Button>
+                <Button onClick={onDB}>Database</Button>
+                <Button onClick={onMV}>My Variant</Button>
+            </ButtonGroup>
+        )
+    }
+});
+
+
+var Application = React.createClass({
+	getInitialState: function () {
+		return {about: false, home: false, database: false, myVariant: false};
+	},
+
+	onHome: function () {
+		this.setState({home: true, about:false, database: false, myVariant: false});
+	},
+
+	onAbout: function () {
+		this.setState({about: true, home:false, database: false, myVariant: false});
+	},
+
+	onDB: function () {
+		this.setState({home: false, about:false, database: true, myVariant: false});
+	},
+
+	onMV: function () {
+		this.setState({home: false, about:false, database: false, myVariant: true});
+	},
+
+
+	render: function () {
+		var {about, home, database, myVariant} = this.state;
+		return (
+			<div>
+				<Title />
+				<NavBar onAbout={this.onAbout} onHome={this.onHome} 
+				onDB={this.onDB} onMV={this.onMV} />
+				{about ? <div>Hello</div> : ''}
+				{home ? <div><input>variant search</input></div> : ''}
+				{database ? <div>Hello db</div> : ''}
+				{myVariant ? <div>Hello my variant</div> : ''}				
+				<TableView />
 			</div>
 		);
 	}

@@ -1,3 +1,10 @@
 .btn-custom {
     width: 150px !important;
     }
+
+h1 {
+	font-size: 20px; 
+	color: #FF3399; 
+	margin-top: 30px; 
+	margin-bottom: 30px
+}
