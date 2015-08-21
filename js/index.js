@@ -237,10 +237,10 @@ var Application = React.createClass({
 			<div>
 				<Title />
 				<NavBar activeButton={this.activeButton} />
-				{buttonName==='about' ? <About /> : ''}
-				{buttonName==='home' ? <Home /> : ''}
-				{buttonName==='database' ? <Database data={data}/> : ''}
-				{buttonName==='myVariant' ? <MyVariant dataReady={this.loadData}/> : ''}				
+				{buttonName === 'about' ? <About /> : ''}
+				{buttonName === 'home' ? <Home /> : ''}
+				{buttonName === 'database' ? <Database data={data}/> : ''}
+				{buttonName === 'myVariant' ? <MyVariant dataReady={this.loadData}/> : ''}
 			</div>
 		);
 	}
