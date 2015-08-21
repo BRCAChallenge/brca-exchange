@@ -8,7 +8,7 @@ var Rx = require('rx');
 var vcf = require('vcf.js');
 require('rx.binding');
 require('rx-dom');
-require('../custom.css');
+require('custom.css');
 
 var databaseUrl = require('file!../data/brca.clinvar.vcf');
 
