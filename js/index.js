@@ -16,44 +16,6 @@ var {Col, Row, Input, Modal, Button, ButtonGroup} = require('react-bootstrap');
 
 var VariantTable = require('./VariantTable');
 
-// when load is selected, render file upload in pop-up
-var loadbtn = document.getElementById('load-vcf');
-
-var VCFUpload = React.createClass({
-	getInitialState: function () {
-		return {
-			file: undefined
-		};
-	},
-	fileChange: function () {
-		var {dataReady, onRequestHide} = this.props,
-			file = this.refs.file.getInputDOMNode().files[0],
-			reader = new FileReader();
-		onRequestHide();
-		// XXX This timeout allows the UI to update (close dialog) before loading
-		// a potentially large file, which will block the UI.
-		// This might also be solved by elminating the animation on Modal close,
-		// which is probably the source of the problem.
-		window.setTimeout(() => {
-			reader.onload = dataReady;
-			reader.readAsText(file);
-		}, 100);
-	},
-	render: function () {
-		var {onRequestHide} = this.props;
-		return (
-			<Modal title="Import VCF File" onRequestHide={onRequestHide} closeButton={true}>
-				<Row>
-					<Col md={4} mdOffset={2}>
-						<Input ref='file' type='file' onChange={this.fileChange}/>
-					</Col>
-				</Row>
-			</Modal>
-		);
-	}
-});
-
-
 var TableView = React.createClass({
 	render: function () {
 		var {data} = this.props;
