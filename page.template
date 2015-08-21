@@ -19,43 +19,6 @@
   		<link rel="stylesheet" type="text/css" href="custom.css">
 	</head>
 	<body id="body">
-		<div class="container">
-			<div class="row" style="margin-top: 30px; margin-bottom: 30px">
-				<div class="text-center" style="font-size: 20px; color: #FF3399">
-					<h1>BRCA Challenge</h1>
-				</div>
-			</div>
-			<div class="row">
-				<div class="text-center">
-					<div class="btn-group">
-						<button type="button" class="btn btn-default btn-custom active"
-						data-toggle="pill">
-							Home
-						</button>
-						<button type="button" class="btn btn-default btn-custom">About</button>
-						<button type="button" class="btn btn-default btn-custom">Database</button>
-						<div class="btn-group">
-							<button type="button" class="btn btn-default dropdown-toggle btn-custom" data-toggle="dropdown">
-								My Variants <span class="caret"></span>
-							</button>
-							<ul class="dropdown-menu">
-								<li><a id="load-vcf" href="#">Import VCF file</a></li>
-								<li><a href="#">Show My Variant</a></li>
-								<li><a href="#">Result Interpretation</a></li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="row" style="margin-top: 100px">
-				<div class="text-center">
-					<input type="text">  <span class="glyphicon glyphicon-search"></span></input>
-				</div>
-			</div>
-			<div class="row text-center" style="font-size:90%; color:grey">
-				search for known variants
-			</div>
-		</div>
 		<div id="main"></div>
 		{% for (var a in o.htmlWebpackPlugin.files.js) { %}
 			<script src="..{%=o.htmlWebpackPlugin.files.js[a]%}"></script>
