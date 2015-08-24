@@ -104,8 +104,9 @@ var Database = React.createClass({
 
 	render: function () {
 		var {data} = this.state;
+		var {show} = this.props;
 		return (
-			<div>
+			<div style={{display: show ? 'block' : 'none'}}>
 				<div>
 					<Row style={{marginTop: 50, marginBottom: 50}}>
 						<div className="text-center">
@@ -145,8 +146,9 @@ var MyVariant = React.createClass({
 
 	render: function() {
 		var {data} = this.state;
+		var {show} = this.props;
 		return(
-			<div>
+			<div style={{display: show ? 'block' : 'none'}}>
 				<div className="text-center">
 					<Input ref='file' type='file' onChange={this.fileChange}/>
 				</div>
@@ -201,8 +203,8 @@ var Application = React.createClass({
 				<NavBar activeButton={this.activeButton} />
 				{buttonName === 'about' ? <About /> : ''}
 				{buttonName === 'home' ? <Home /> : ''}
-				{buttonName === 'database' ? <Database data={data}/> : ''}
-				{buttonName === 'myVariant' ? <MyVariant dataReady={this.loadData}/> : ''}
+				<Database show={buttonName === 'database'} data={data}/>
+				<MyVariant show={buttonName === 'myVariant'} dataReady={this.loadData}/>
 			</div>
 		);
 	}
