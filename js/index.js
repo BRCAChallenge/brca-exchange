@@ -10,7 +10,7 @@ require('rx.binding');
 require('rx-dom');
 require('custom.css');
 
-var databaseUrl = require('file!../data/brca.clinvar.vcf');
+var databaseUrl = require('file!../../brca-database.vcf');
 
 var {Col, Row, Input, Modal, Button, ButtonGroup} = require('react-bootstrap');
 
