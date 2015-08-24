@@ -194,7 +194,7 @@ var Application = React.createClass({
 		this.setState({buttonName: "null"});
 	},
 	render: function () {
-		var {buttonName,data} = this.state;
+		var {buttonName, data} = this.state;
 		return (
 			<div>
 				<Title />
