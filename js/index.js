@@ -9,6 +9,7 @@ var vcf = require('vcf.js');
 require('rx.binding');
 require('rx-dom');
 require('custom.css');
+var _ = require('underscore');
 
 var databaseUrl = require('file!../../brca-database.vcf');
 
@@ -91,6 +92,25 @@ var About = React.createClass({
 		)
 	}
 });
+
+// sketch of function to filter rows on exact matches
+function filterData(data, str) {
+	var {records, header} = data;
+	var filteredRecords = _.filter(data, row => {
+		// row = {
+		//   chrom: "17",
+		//   pos: 1234,
+		//   hgvs: "NC_0001:1234T>C"
+		// }
+		//
+		return _.find(_.values(row), col => col.indexOf(str) !== -1);
+
+	});
+	return {
+		records: filteredRecords,
+		header: header
+	};
+}
 
 var Database = React.createClass({
 	getInitialState: function () {
