@@ -10,6 +10,7 @@ require('rx.binding');
 require('rx-dom');
 require('css/custom.css');
 var _ = require('underscore');
+var brca_logo = require('./img/brca_logo.png')
 
 var databaseUrl = require('file!../../brca-database.vcf');
 
@@ -39,8 +40,13 @@ var NavBarNew = React.createClass({
         var {activeButton} = this.props;
         return (
             <div>
-            <a href="http://brcaexchange.org/"><img src="img/brca_logo.png" alt="brca logo"/></a>
-            <Navbar brand='BRCA Exchange' toggleNavKey={0}>
+               	<a href="http://brcaexchange.org/">
+            		<img style={{height: 20, width: 20}} src={brca_logo} alt="brca logo"/>
+            	</a>
+            <Navbar>
+            	<a className="navbar-brand" href="#">
+            		BRCA Exchange
+            	</a>
                 <CollapsableNav>
                     <Nav navbar>
                         <NavItem onClick={() => activeButton('home')}>Home</NavItem>
