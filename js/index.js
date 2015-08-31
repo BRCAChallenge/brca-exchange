@@ -11,10 +11,12 @@ require('rx-dom');
 require('css/custom.css');
 var _ = require('underscore');
 var brca_logo = require('./img/brca_logo.png')
+var white_bg = require("./img/1px_white.jpg")
 
 var databaseUrl = require('file!../../brca-database.vcf');
 
-var {Col, Row, Input, Modal, Button, ButtonGroup, Navbar, CollapsableNav, Nav, NavItem} = require('react-bootstrap');
+var {Col, Row, Input, Modal, Button, ButtonGroup, Navbar, CollapsableNav, Nav, NavItem, 
+	Carousel, CarouselItem} = require('react-bootstrap');
 
 var VariantTable = require('./VariantTable');
 
@@ -40,33 +42,33 @@ var NavBarNew = React.createClass({
         var {activeButton} = this.props;
         return (
             <div>
-               	<a href="http://brcaexchange.org/">
-            		<img style={{height: 20, width: 20}} src={brca_logo} alt="brca logo"/>
-            	</a>
-            <Navbar>
-            	<a className="navbar-brand" href="#">
-            		BRCA Exchange
-            	</a>
-                <CollapsableNav>
-                    <Nav navbar>
-                        <NavItem onClick={() => activeButton('home')}>Home</NavItem>
-                        <NavItem onClick={() => activeButton('about')}>About</NavItem>
-                        <NavItem onClick={() => activeButton('database')}>Database</NavItem>
-                    </Nav>
-                    <Nav navbar right>
-                        <NavItem href='#'><input placeholder="Search Variant"></input>
-                            <Button className='btn-xs' style={{border: 0}}>
-                                <span className="glyphicon glyphicon-search"></span>
-                            </Button>
-                        </NavItem>
-                    </Nav>
-                </CollapsableNav>
-            </Navbar>
+            	{/*<img style={{height: 40, width: 40, float: "left"}} src={brca_logo}></img>
+                <Navbar brand={<a style={{fontSize: 25, color: "#FF3399"}} href="http://brcaexchange.cloudapp.net">
+                			    BRCA Exchange</a>} toggleNavKey={0}> */}
+                <Navbar brand={<a href="http://brcaexchange.cloudapp.net">
+                			   <img style={{height: 30, width: 30, float: "left", marginBottom: 10}} src={brca_logo} />
+                			   <span style={{fontSize: 25, color: "#FF3399"}}>&nbsp;BRCA Exchange</span></a>}
+                			   toggleNavKey={0}>
+
+                	<CollapsableNav eventKey={0}>
+	                    <Nav navbar>
+	                        <NavItem eventKey={1} onClick={() => activeButton('home')}>Home</NavItem>
+	                        <NavItem eventKey={2} onClick={() => activeButton('about')}>About</NavItem>
+	                        <NavItem eventKey={3} onClick={() => activeButton('database')}>Database</NavItem>
+	                    </Nav>
+                    	<Nav navbar right>
+                        	<NavItem eventKey={1} href='#'><input placeholder="Search Variant"></input>
+	                            <Button className='btn-xs' style={{border: 0}}>
+	                                <span className="glyphicon glyphicon-search"></span>
+	                            </Button>
+                        	</NavItem>
+                    	</Nav>
+                	</CollapsableNav>
+            	</Navbar>
             </div>
         )
     }
 });
-
 
 var Title = React.createClass({
     render: function() {
@@ -102,12 +104,28 @@ var NavBar = React.createClass({
 
 
 var Home = React.createClass({
+	getInitialState() {
+		return {
+			index: 0,
+			direction: null
+		};
+	},
+
+	handleSelect(selectedIndex, selectedDirection) {
+		this.setState({
+			index: selectedIndex,
+			direction: selectedDirection
+		});
+	},
+
 	render: function() {
 		return(
 			<div>
-				<Row style={{marginTop: 100}}>
-					<div className="text-center">place holder for home</div>
-				</Row>
+				<div>
+					<Row style={{marginTop: 100}}>
+						<div className="text-center">place holder for home</div>
+					</Row>
+				</div>
 			</div>
 		)
 	}
