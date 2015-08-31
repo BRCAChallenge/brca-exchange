@@ -8,12 +8,13 @@ var Rx = require('rx');
 var vcf = require('vcf.js');
 require('rx.binding');
 require('rx-dom');
-require('custom.css');
+require('css/custom.css');
 var _ = require('underscore');
+var brca_logo = require('./img/brca_logo.png')
 
 var databaseUrl = require('file!../../brca-database.vcf');
 
-var {Col, Row, Input, Modal, Button, ButtonGroup} = require('react-bootstrap');
+var {Col, Row, Input, Modal, Button, ButtonGroup, Navbar, CollapsableNav, Nav, NavItem} = require('react-bootstrap');
 
 var VariantTable = require('./VariantTable');
 
@@ -33,6 +34,39 @@ var TableView = React.createClass({
 		);
 	}
 });
+
+var NavBarNew = React.createClass({
+    render: function () {
+        var {activeButton} = this.props;
+        return (
+            <div>
+               	<a href="http://brcaexchange.org/">
+            		<img style={{height: 20, width: 20}} src={brca_logo} alt="brca logo"/>
+            	</a>
+            <Navbar>
+            	<a className="navbar-brand" href="#">
+            		BRCA Exchange
+            	</a>
+                <CollapsableNav>
+                    <Nav navbar>
+                        <NavItem onClick={() => activeButton('home')}>Home</NavItem>
+                        <NavItem onClick={() => activeButton('about')}>About</NavItem>
+                        <NavItem onClick={() => activeButton('database')}>Database</NavItem>
+                    </Nav>
+                    <Nav navbar right>
+                        <NavItem href='#'><input placeholder="Search Variant"></input>
+                            <Button className='btn-xs' style={{border: 0}}>
+                                <span className="glyphicon glyphicon-search"></span>
+                            </Button>
+                        </NavItem>
+                    </Nav>
+                </CollapsableNav>
+            </Navbar>
+            </div>
+        )
+    }
+});
+
 
 var Title = React.createClass({
     render: function() {
@@ -219,12 +253,10 @@ var Application = React.createClass({
 		var {buttonName, data} = this.state;
 		return (
 			<div>
-				<Title />
-				<NavBar activeButton={this.activeButton} />
+                <NavBarNew activeButton={this.activeButton}/>
 				{buttonName === 'about' ? <About /> : ''}
 				{buttonName === 'home' ? <Home /> : ''}
 				<Database show={buttonName === 'database'} data={data}/>
-				<MyVariant show={buttonName === 'myVariant'} dataReady={this.loadData}/>
 			</div>
 		);
 	}
