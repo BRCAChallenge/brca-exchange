@@ -1,4 +1,8 @@
-# History of the BRCA Exchange
+<!---
+Content linked to by History of the BRCA Exchange under About
+-->
+
+# History of the BRCA Exchange  
 
 Genetic sequencing labs, academic centers, and companies have begun to aggregate observed BRCA1/2 variants in databases 
 and to classify them as pathogenic or benign using clinical information and/or other variant evidence. However, for regulatory, 
