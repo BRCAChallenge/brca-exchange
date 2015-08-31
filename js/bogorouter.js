@@ -5,6 +5,7 @@
 // To add new pages, extend the condition with additional url patterns
 // and require.ensure() blocks.
 
+require('./favicons');
 var config = require('config');
 
 __webpack_public_path__ = config.baseurl; // eslint-disable-line camelcase
