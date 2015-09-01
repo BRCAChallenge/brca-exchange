@@ -29,5 +29,4 @@ to enable accurate understanding of any individual BRCA1/2 variant, for superior
 <!---
 Chart: List of Steering Committee members/affiliations (get from Rachel L)
 Picture: SC members at UNESCO in Paris (I think John Burn has this)
-
 -->
