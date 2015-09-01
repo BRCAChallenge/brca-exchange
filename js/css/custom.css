@@ -2,44 +2,9 @@
     width: 150px !important;
     }
 
-.placeholder {
-	
+li {list-style-type: none;}
+
+.logos img {
+	width: 50%;
+	height: 50%;
 }
-
-.partners_block {
-	width:1000px;
-	margin:0 auto;
-	overflow:hidden;
-}
-
-.partners_block {
-	margin:30px auto 0;
-	width:140px;
-	text-align:center;
-	display:block;
-	padding:12px 15px 10px;
-	font:16px "Intro";
-	color:#fff;
-	background:#f05157;
-	text-transform:uppercase;}
-
-.partners_block .partners{
-	width:100%;
-	float:left;
-	margin:40px 0 40px 0;
-}
-
-.partners_block .partners ul{
-	margin:0 auto;
-	width:800px;
-	display:block;}
-
-.partners_block .partners ul li{
-	float:left;
-	list-style:none;
-	margin:8px 10px;
-	width:180px;
-	text-align:center;
-	height:50px;}
-	
-.partners_block .partners ul li.el_6{margin-left:90px;}.provides_block{width:100%;background:#f9f9f9;overflow:hidden;}

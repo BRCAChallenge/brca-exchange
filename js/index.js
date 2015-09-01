@@ -10,7 +10,8 @@ require('rx.binding');
 require('rx-dom');
 require('css/custom.css');
 var _ = require('underscore');
-var brcaLogo = require('./img/brca_logo.png');
+var brca_logo = require('./img/brca_logo.png');
+var ga4gh_logo = require('./img/ga4gh-logo-less.png');
 
 var Markdown = require('react-remarkable');
 var content = {
@@ -38,7 +39,7 @@ var NavBarNew = React.createClass({
 		return (
 			<Navbar>
 				<a className="navbar-brand" href="#">
-					<img style={{height: 20, width: 20, display: 'inline-block'}} src={brcaLogo} alt="brca logo"/>
+					<img style={{height: 20, width: 20, display: 'inline-block'}} src={brca_logo} alt="brca logo"/>
 					BRCA Exchange
 				</a>
 				<CollapsableNav>
@@ -93,6 +94,14 @@ var Home = React.createClass({
 						<Markdown options={{html: true}} source={content.home} />
 					</div>
 				</Row>
+				<div className="logo-block">
+					<div className="logos">
+						<ul>
+							<li><img src={ga4gh_logo} alt="ga4gh logo" /></li>
+						</ul>
+					</div>
+				</div>
+
 			</div>
 		);
 	}
