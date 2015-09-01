@@ -10,7 +10,8 @@ require('rx.binding');
 require('rx-dom');
 require('css/custom.css');
 var _ = require('underscore');
-var brcaLogo = require('./img/brca_logo.png');
+var brca_logo = require('./img/brca_logo.png');
+var ga4gh_logo = require('./img/ga4gh-logo-less.png');
 
 var Markdown = require('react-remarkable');
 var content = {
@@ -93,6 +94,14 @@ var Home = React.createClass({
 						<Markdown options={{html: true}} source={content.home} />
 					</div>
 				</Row>
+				<div className="logo-block">
+					<div className="logos">
+						<ul>
+							<li><img src={ga4gh_logo} alt="ga4gh logo" /></li>
+						</ul>
+					</div>
+				</div>
+
 			</div>
 		);
 	}
