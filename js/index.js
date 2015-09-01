@@ -200,8 +200,8 @@ var Database = React.createClass({
 					</Row>
 					<Row style={{marginTop: 10}}>
 						<div className="text-center">
-							<input><span className="glyphicon glyphicon-search"></span></input>
-							<span className="glyphicon glyphicon-question-sign"></span>
+							<input><span className="glyphicon glyphicon-search"/></input>
+							<span className="glyphicon glyphicon-question-sign superscript"/>
 						</div>
 					</Row>
 					<Row className="text-center" style={{fontSize: 12, color: "grey"}}>
@@ -214,7 +214,7 @@ var Database = React.createClass({
 									<MenuItem>BRCA1</MenuItem>
 									<MenuItem>BRCA2</MenuItem>
 								</DropdownButton>
-								<span className="glyphicon glyphicon-question-sign"></span>
+								<span className="glyphicon glyphicon-question-sig superscript"/>
 								<DropdownButton title="Exon">
 									<MenuItem>Any</MenuItem>
 									<MenuItem>1</MenuItem>
@@ -223,7 +223,7 @@ var Database = React.createClass({
 									<MenuItem>4</MenuItem>
 									<MenuItem>5</MenuItem>
 								</DropdownButton>
-								<span className="glyphicon glyphicon-question-sign"></span>
+								<span className="glyphicon glyphicon-question-sign superscript"/>
 							</Panel>
 						</Col>
 						<Col md={1}>
