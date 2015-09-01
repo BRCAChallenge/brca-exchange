@@ -31,7 +31,7 @@ var content = {
 var databaseUrl = require('file!../../brca-database.vcf');
 
 var {Grid, Col, Row, Input, Button, Navbar, CollapsableNav, Nav,
-	NavItem, DropdownButton, MenuItem} = require('react-bootstrap');
+	NavItem, ButtonGroup, DropdownButton, MenuItem, Panel} = require('react-bootstrap');
 
 
 var VariantTable = require('./VariantTable');
@@ -189,12 +189,37 @@ var Database = React.createClass({
 					<Row style={{marginTop: 10}}>
 						<div className="text-center">
 							<input><span className="glyphicon glyphicon-search"></span></input>
+							<span className="glyphicon glyphicon-question-sign"></span>
 						</div>
 					</Row>
 					<Row className="text-center" style={{fontSize: 12, color: "grey"}}>
 						search for known variants
 					</Row>
+					<Row>
+						<Col md={4} mdOffset={4}>
+							<Panel header='Advanced filtering'>
+								<DropdownButton title="Gene">
+									<MenuItem>BRCA1</MenuItem>
+									<MenuItem>BRCA2</MenuItem>
+								</DropdownButton>
+								<span className="glyphicon glyphicon-question-sign"></span>
+								<DropdownButton title="Exon">
+									<MenuItem>Any</MenuItem>
+									<MenuItem>1</MenuItem>
+									<MenuItem>2</MenuItem>
+									<MenuItem>3</MenuItem>
+									<MenuItem>4</MenuItem>
+									<MenuItem>5</MenuItem>
+								</DropdownButton>
+								<span className="glyphicon glyphicon-question-sign"></span>
+							</Panel>
+						</Col>
+						<Col md={1}>
+							<Button>Download</Button>
+						</Col>
+					</Row>
 				</div>
+
 
 				<div style={{position: "relative", height: "100px"}}>
 					{data?
