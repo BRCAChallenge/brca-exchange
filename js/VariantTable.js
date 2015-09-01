@@ -31,7 +31,8 @@ var VariantTable = React.createClass({
 		this.setState({data: _.sortBy(data, r => r[name])});
 	},
 	render: function () {
-		var {data} = this.state,
+		var {data, ...opts} = this.props,
+			{data} = this.state,
 			columns = [
 				{name: 'GENE', title: 'Gene', width: 80},
 				{name: 'INFO$HGVS_G', title: 'HGVS g', width: 250},
@@ -49,6 +50,7 @@ var VariantTable = React.createClass({
 			];
 		return (
 			<DataGrid
+				{...opts}
 				style={{height: "30em"}}
 				columns={columns}
 				dataSource={data}
