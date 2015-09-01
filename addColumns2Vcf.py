@@ -29,14 +29,16 @@ def main():
 			new_vcf.write(line)
 
 def add_info(line):
-	current_info = line.strip().split("\t")[-1]
+	items = line.strip().split("\t")
+	current_info = items[-1]
 	current_info += ";FREQ=" + str(random.random())
 	current_info += ";BIC_P=?;BIC_N=?"
 	current_info += ";MUTTYPE=" + random.choice(["missense", "nonsense", "silent"])
 	current_info += ";IARC=" + random.choice(["group 1", "group 2a", "group 2b", "group 3", "group 4"])
 	current_info += ";DBSource=" + random.choice(["Clinvar", "LOVD", "BIC", "ExAC", "1000Genomes"])
-	current_info += "\n"
-	return current_info
+	items[-1] = current_info
+	new_line = "\t".join(items) + "\n"
+	return new_line
 
 
 def add_HGVS(line):
