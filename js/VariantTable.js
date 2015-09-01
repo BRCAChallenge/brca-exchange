@@ -14,9 +14,9 @@ function mergeInfo(row) {
 	return merge(info, _.omit(row, ['INFO']));
 }
 
-// XXX hard-coded GENE for now
+// XXX hard-coded GENE, PROB, REFS, PATH for now
 function sanitize(data) {
-	return _.map(data, (r, i) => merge({id: i, GENE: 'BRCA1'}, mergeInfo(r)));
+	return _.map(data, (r, i) => merge({id: i, GENE: 'BRCA1', PROB: 0.23, REFS: 'sciencemag.org/content', PATH: 'pathogenic'}, mergeInfo(r)));
 }
 
 var VariantTable = React.createClass({
@@ -33,15 +33,19 @@ var VariantTable = React.createClass({
 	render: function () {
 		var {data} = this.state,
 			columns = [
-				{name: 'GENE', title: 'Gene'},
-				{name: 'INFO$HGVS_G', title: 'HGVS g'},
-				{name: 'INFO$HGVS_C', title: 'HGVS c'},
-				{name: 'INFO$HGVS_P', title: 'HGVS p'},
-				{name: 'INFO$BIC_N', title: 'BIC n'},
-				{name: 'INFO$BIC_P', title: 'BIC p'},
-				{name: 'INFO$DBSource', title: 'Source'},
-				{name: 'INFO$MUTTYPE', title: 'Type'},
-				{name: 'INFO$IARC', title: 'IARC Classification'}
+				{name: 'GENE', title: 'Gene', width: 80},
+				{name: 'INFO$HGVS_G', title: 'HGVS g', width: 250},
+				{name: 'INFO$HGVS_C', title: 'HGVS c', width: 200},
+				{name: 'INFO$HGVS_P', title: 'HGVS p', width: 200},
+				{name: 'INFO$BIC_N', title: 'BIC n', width: 70},
+				{name: 'INFO$BIC_P', title: 'BIC p', width: 70},
+				{name: 'INFO$DBSource', title: 'Source', width: 80},
+				{name: 'INFO$MUTTYPE', title: 'Type', width: 100},
+				{name: 'PROB', title: 'Posterior prob', width: 120},
+				{name: 'INFO$FREQ', title: 'Allele freq', width: 100},
+				{name: 'REFS', title: 'References', width: 150},
+				{name: 'INFO$IARC', title: 'IARC Classification', width: 120},
+				{name: 'PATH', title: 'Pathogenicity', width: 120}
 			];
 		return (
 			<DataGrid
