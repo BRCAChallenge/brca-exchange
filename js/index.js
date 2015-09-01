@@ -10,7 +10,7 @@ require('rx.binding');
 require('rx-dom');
 require('css/custom.css');
 var _ = require('underscore');
-var brca_logo = require('./img/brca_logo.png')
+var brca_logo = require('./img/brca_logo.png');
 
 var Markdown = require('react-remarkable');
 var content = {
