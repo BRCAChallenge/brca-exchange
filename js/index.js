@@ -41,7 +41,7 @@ var NavBarNew = React.createClass({
 		this.setState({open: false});
 	},
 	render: function () {
-		var {activeButton} = this.props;
+		var {buttonPressed} = this.props;
 		return (
 			<Navbar>
 				<a className="navbar-brand" href="http://brcaexchange.org">
@@ -50,19 +50,19 @@ var NavBarNew = React.createClass({
 				</a>
 				<CollapsableNav>
 					<Nav navbar>
-						<NavItem onClick={() => activeButton('home')}>Home</NavItem>
+						<NavItem onClick={() => buttonPressed('home')}>Home</NavItem>
 						<DropdownButton onSelect={this.close} title='About'>
-							<MenuItem onClick={() => activeButton('about-history')}>
+							<MenuItem onClick={() => buttonPressed('about-history')}>
 								History of the BRCA Exchange
 							</MenuItem>
-							<MenuItem onClick={() => activeButton('about-what')}>
+							<MenuItem onClick={() => buttonPressed('about-what')}>
 								What are BRCA1 and BRCA2?
 							</MenuItem>
-							<MenuItem onClick={() => activeButton('about-variation')}>
+							<MenuItem onClick={() => buttonPressed('about-variation')}>
 								BRCA Variation and Cancer
 							</MenuItem>
 						</DropdownButton>
-						<NavItem onClick={() => activeButton('database')}>Variants</NavItem>
+						<NavItem onClick={() => buttonPressed('database')}>Variants</NavItem>
 					</Nav>
 					<Nav navbar right>
 						<NavItem href='#'><input placeholder="Search Variant"></input>
@@ -298,19 +298,19 @@ var startsWith = (pat, str) => str && str.indexOf(pat) === 0;
 
 var Application = React.createClass({
 	getInitialState: function () {
-		return {data: null, buttonName: 'home'};
+		return {data: null, activePage: 'home'};
 	},
-	activeButton: function (buttonName) {
-		this.setState({buttonName: buttonName});
+	buttonPressed: function (buttonName) {
+		this.setState({activePage: buttonName});
 	},
 	render: function () {
-		var {buttonName, data} = this.state;
+		var {activePage, data} = this.state;
 		return (
 			<div>
-                <NavBarNew activeButton={this.activeButton}/>
-				{startsWith('about', buttonName) ? <About contentKey={buttonName} /> : ''}
-				{buttonName === 'home' ? <Home /> : ''}
-				<Database show={buttonName === 'database'} data={data}/>
+                <NavBarNew buttonPressed={this.buttonPressed}/>
+				{startsWith('about', activePage) ? <About contentKey={activePage} /> : ''}
+				{activePage === 'home' ? <Home /> : ''}
+				<Database show={activePage === 'database'} data={data}/>
 			</div>
 		);
 	}
