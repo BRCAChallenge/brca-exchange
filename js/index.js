@@ -30,7 +30,7 @@ var content = {
 
 var databaseUrl = require('file!../../brca-database.vcf');
 
-var {Well, Grid, Col, Row, Input, Button, Navbar, CollapsableNav, Nav,
+var {Well, Grid, Col, Row, Input, Button, Navbar, CollapsableNav, Nav, Table,
 	NavItem, ButtonGroup, DropdownButton, MenuItem, Panel} = require('react-bootstrap');
 
 
@@ -189,7 +189,7 @@ var Database = React.createClass({
 
 	render: function () {
 		var {data} = this.state;
-		var {show} = this.props;
+		var {show, showVariant} = this.props;
 		return (
 			<div style={{display: show ? 'block' : 'none'}}>
 				<div>
@@ -237,7 +237,7 @@ var Database = React.createClass({
 					{data?
 						<Row>
 							<Col md={10} mdOffset={1}>
-								<VariantTable data={data}/>
+								<VariantTable data={data} onRowClick={showVariant}/>
 							</Col>
 						</Row>
 						: ''}
@@ -294,6 +294,34 @@ var MyVariant = React.createClass({ //eslint-disable-line no-unused-vars
 	}
 });
 
+var VariantDetail = React.createClass({
+	render: function() {
+		var {variant} = this.props;
+
+		variant = _.omit(variant, ['__HEADER__']);
+		var rows = _.map(variant, (v, k) => <tr key={k}><td>{k}</td><td>{v}</td></tr>);
+		return (
+			<Grid>
+				<Row style={{marginTop: 100}}>
+					<div className='text-center'>
+						<h3>Variant Detail</h3>
+						<p>Placeholder for a better variant details page</p>
+					</div>
+				</Row>
+				<Row>
+					<Col md={8} mdOffset={2}>
+						<Table striped bordered>
+							<tbody>
+								{rows}
+							</tbody>
+						</Table>
+					</Col>
+				</Row>
+			</Grid>
+		);
+	}
+});
+
 var startsWith = (pat, str) => str && str.indexOf(pat) === 0;
 
 var Application = React.createClass({
@@ -303,14 +331,18 @@ var Application = React.createClass({
 	buttonPressed: function (buttonName) {
 		this.setState({activePage: buttonName});
 	},
+	showVariant(variant) {
+		this.setState({activePage: 'variant', variant: variant});
+	},
 	render: function () {
-		var {activePage, data} = this.state;
+		var {activePage, data, variant} = this.state;
 		return (
 			<div>
                 <NavBarNew buttonPressed={this.buttonPressed}/>
 				{startsWith('about', activePage) ? <About contentKey={activePage} /> : ''}
 				{activePage === 'home' ? <Home /> : ''}
-				<Database show={activePage === 'database'} data={data}/>
+				{activePage === 'variant' ? <VariantDetail variant={variant} /> : ''}
+				<Database show={activePage === 'database'} showVariant={this.showVariant} data={data}/>
 			</div>
 		);
 	}
