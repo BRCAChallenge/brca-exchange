@@ -12,7 +12,7 @@ require('css/custom.css');
 var _ = require('underscore');
 var brca_logo = require('./img/brca_logo.png');
 var ga4gh_logo = require('./img/ga4gh-logo-less.png');
-var brca_logo_with_text = require('./img/brca-logo-with-text.png');
+var brca_logo_with_text = require('./img/BRCA-logo-with-text.png');
 var hvp_logo = require('./img/hvp_logo.png');
 var UNESCO_logo = require('./img/UNESCO-logo.jpg');
 
