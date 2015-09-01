@@ -143,7 +143,7 @@ var Home = React.createClass({
 			<div>
 				<Row style={{marginTop: 100}}>
 					<div className="text-center">
-						<Markdown source={content.home} />
+						<Markdown options={{html: true}} source={content.home} />
 					</div>
 				</Row>
 			</div>
@@ -159,7 +159,7 @@ var About = React.createClass({
 			<div>
 				<Row style={{marginTop: 100}}>
 					<div className="text-center">
-						<Markdown source={content[contentKey]} />
+						<Markdown options={{html: true}} source={content[contentKey]} />
 					</div>
 				</Row>
 			</div>
