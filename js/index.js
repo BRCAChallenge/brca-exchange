@@ -141,19 +141,11 @@ var Home = React.createClass({
 	render: function() {
 		return(
 			<div>
-<<<<<<< HEAD
-				<div>
-					<Row style={{marginTop: 100}}>
-						<div className="text-center">place holder for home</div>
-					</Row>
-				</div>
-=======
 				<Row style={{marginTop: 100}}>
 					<div className="text-center">
 						<Markdown source={content.home} />
 					</div>
 				</Row>
->>>>>>> a2321935b4a0fa7f795f31d2551cd9e4994390d7
 			</div>
 		)
 	}
