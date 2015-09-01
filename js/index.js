@@ -39,7 +39,7 @@ var NavBarNew = React.createClass({
 		return (
 			<Navbar>
 				<a className="navbar-brand" href="#">
-					<img style={{height: 20, width: 20, display: 'inline-block'}} src={brcaLogo} alt="brca logo"/>
+					<img style={{height: 20, width: 20, display: 'inline-block'}} src={brca_logo} alt="brca logo"/>
 					BRCA Exchange
 				</a>
 				<CollapsableNav>
