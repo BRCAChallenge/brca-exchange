@@ -47,7 +47,7 @@ var NavBarNew = React.createClass({
                 			    BRCA Exchange</a>} toggleNavKey={0}> */}
                 <Navbar brand={<a href="http://brcaexchange.cloudapp.net">
                 			   <img style={{height: 30, width: 30, float: "left", marginBottom: 10}} src={brca_logo} />
-                			   <span style={{fontSize: 25, color: "#FF3399"}}>&nbsp;BRCA Exchange</span></a>}
+                			   <span style={{fontSize: 25, color: "#FF3399"}}>&nbsp;BRCA Exchange&nbsp;&nbsp;&nbsp;</span></a>}
                 			   toggleNavKey={0}>
 
                 	<CollapsableNav eventKey={0}>
