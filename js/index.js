@@ -238,7 +238,7 @@ var startsWith = (pat, str) => str && str.indexOf(pat) === 0;
 
 var Application = React.createClass({
 	getInitialState: function () {
-		return {data: null, buttonName: null};
+		return {data: null, buttonName: 'home'};
 	},
 	activeButton: function (buttonName) {
 		this.setState({buttonName: buttonName});
