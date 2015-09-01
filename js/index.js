@@ -62,7 +62,7 @@ var NavBarNew = React.createClass({
 								BRCA Variation and Cancer
 							</MenuItem>
 						</DropdownButton>
-						<NavItem onClick={() => activeButton('database')}>Database</NavItem>
+						<NavItem onClick={() => activeButton('database')}>Variants</NavItem>
 					</Nav>
 					<Nav navbar right>
 						<NavItem href='#'><input placeholder="Search Variant"></input>
