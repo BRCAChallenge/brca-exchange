@@ -24,7 +24,7 @@ var content = {
 
 var databaseUrl = require('file!../../brca-database.vcf');
 
-var {Col, Row, Input, Button, Navbar, CollapsableNav, Nav,
+var {Grid, Col, Row, Input, Button, Navbar, CollapsableNav, Nav,
 	NavItem, DropdownButton, MenuItem} = require('react-bootstrap');
 
 
@@ -88,11 +88,11 @@ var Home = React.createClass({
 
 	render: function() {
 		return (
-			<div>
+			<Grid>
 				<Row style={{marginTop: 100}}>
-					<div className="text-center">
+					<Col md={8} mdOffset={2}>
 						<Markdown options={{html: true}} source={content.home} />
-					</div>
+					</Col>
 				</Row>
 				<div className="logo-block">
 					<div className="logos">
@@ -102,7 +102,7 @@ var Home = React.createClass({
 					</div>
 				</div>
 
-			</div>
+			</Grid>
 		);
 	}
 });
@@ -112,13 +112,13 @@ var About = React.createClass({
 		var {contentKey} = this.props;
 
 		return (
-			<div>
+			<Grid>
 				<Row style={{marginTop: 100}}>
-					<div className="text-center">
+					<Col md={8} mdOffset={2}>
 						<Markdown options={{html: true}} source={content[contentKey]} />
-					</div>
+					</Col>
 				</Row>
-			</div>
+			</Grid>
 		);
 	}
 });
