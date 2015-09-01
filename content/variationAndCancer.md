@@ -2,7 +2,7 @@
 Linked to by BRCA Variation and Cancer under the About menu
 -->
 
-#BRCA Variation and Cancer
+# BRCA Variation and Cancer
 
 The human BRCA genes, BRCA1 and BRCA2, help prevent cancer by producing proteins that detect and repair DNA damage.  When
 either of these genes are altered, the alteration can result in proteins that are less effective at detecting or fixing damaged
