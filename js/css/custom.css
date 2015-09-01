@@ -28,3 +28,9 @@ li {list-style-type: none;}
 	font-weight: bold;
 	font-size: 50px;
 }
+
+.superscript {
+	font-size: 80%;
+	position: relative;
+	top: -10px;
+}

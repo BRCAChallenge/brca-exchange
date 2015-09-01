@@ -30,7 +30,7 @@ var content = {
 
 var databaseUrl = require('file!../../brca-database.vcf');
 
-var {Grid, Col, Row, Input, Button, Navbar, CollapsableNav, Nav,
+var {Well, Grid, Col, Row, Input, Button, Navbar, CollapsableNav, Nav,
 	NavItem, ButtonGroup, DropdownButton, MenuItem, Panel} = require('react-bootstrap');
 
 
@@ -95,6 +95,18 @@ var Home = React.createClass({
 	render: function() {
 		return (
 			<Grid>
+				<Row style={{marginTop: 10}}>
+					<Col md={4} mdOffset={4}>
+						<Well>
+							<div className="text-center">
+								<input placeholder="Search Variant">
+									<span className="glyphicon glyphicon-search"/>
+								</input>
+								<span className="glyphicon glyphicon-question-sign superscript"/>
+							</div>
+						</Well>
+					</Col>
+				</Row>
 				<Row style={{marginTop: 100}}>
 					<Col md={8} mdOffset={2}>
 						<Markdown options={{html: true}} source={content.home} />
