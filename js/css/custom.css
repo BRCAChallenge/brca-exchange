@@ -4,10 +4,20 @@
 
 li {list-style-type: none;}
 
-.logos img {
+.logos li {
 	float: left;
-	padding: 30px;
-	overflow: auto;
+	width: 150px;
+	height: 100px;
+	padding: 10px;
+	text-align: center;
+	line-height: 200px;
+}
+
+.logos img {
+	max-height: 100%;
+	max-width: 100%;
+	width: auto;
+	vertical-align: middle;
 }
 
 .logo_block {

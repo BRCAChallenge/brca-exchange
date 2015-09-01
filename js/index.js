@@ -10,11 +10,13 @@ require('rx.binding');
 require('rx-dom');
 require('css/custom.css');
 var _ = require('underscore');
-var brca_logo = require('./img/brca_logo.png');
-var ga4gh_logo = require('./img/ga4gh-logo-less.png');
-var brca_logo_with_text = require('./img/BRCA-logo-with-text.png');
-var hvp_logo = require('./img/hvp_logo.png');
-var UNESCO_logo = require('./img/UNESCO-logo.jpg');
+var brcaLogo = require('./img/brca_logo.png');
+var ga4ghLogo = require('./img/ga4gh-logo-less.png');
+var brcaLogoWithText = require('./img/BRCA-logo-with-text.png');
+var hvpLogo = require('./img/hvp_logo.png');
+var UNESCOLogo = require('./img/UNESCO-logo.jpg');
+var ENIGMALogo = require('./img/enigma_logo.png');
+var CIMBALogo = require('./img/cimba_logo.png');
 
 
 var Markdown = require('react-remarkable');
@@ -43,7 +45,7 @@ var NavBarNew = React.createClass({
 		return (
 			<Navbar>
 				<a className="navbar-brand" href="http://brcaexchange.org">
-					<img style={{height: 28, width: 28, display: 'inline-block'}} src={brca_logo} alt="brca logo"/>
+					<img style={{height: 28, width: 28, display: 'inline-block'}} src={brcaLogo} alt="brca logo"/>
 					&nbsp;&nbsp;&nbsp;BRCA Exchange&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				</a>
 				<CollapsableNav>
@@ -98,31 +100,31 @@ var Home = React.createClass({
 						<Markdown options={{html: true}} source={content.home} />
 					</Col>
 				</Row>
-				<div className="logo-block container">
-					<div className="logos">
-						<ul>
+				<Row className='logo-block'>
+					<Col md={6} mdOffset={3}>
+						<ul className='logos'>
 							<li><a href="http://genomicsandhealth.org">
-								<img style={{"height": "40%", "width": "40%"}} src={ga4gh_logo} alt="ga4gh logo" />
+								<img src={ga4ghLogo} alt="ga4gh logo" />
 							</a></li>
 							<li><a href="http://brcaexchange.org">
-								<img style={{"height": "20%", "width": "20%"}} src={brca_logo_with_text} alt="brca exchange logo" />
+								<img src={brcaLogoWithText} alt="brca exchange logo" />
 							</a></li>
 							<li><a href="http://www.humanvariomeproject.org">
-								<img style={{"height": "25%", "width": "25%"}} src={hvp_logo} alt="human variome project logo" />
+								<img src={hvpLogo} alt="human variome project logo" />
 							</a></li>
 							<li><a href="http://unesco.org">
-								<img style={{"height": "25%", "width": "25%"}} src={UNESCO_logo} alt="UNESCO logo" />
+								<img src={UNESCOLogo} alt="UNESCO logo" />
 							</a></li>
 							<br></br>
 							<li><a href="http://enigmaconsortium.org">
-								<div className="text_logo">ENIGMA</div>
+								<img src={ENIGMALogo} alt="ENIGMA logo" />
 							</a></li>
 							<li><a href="http://apps.ccge.medschl.cam.ac.uk/consortia/cimba//">
-								<div className="text_logo">CIMBA</div>
+								<img src={CIMBALogo} alt="CIMBA logo" />
 							</a></li>
 						</ul>
-					</div>
-				</div>
+					</Col>
+				</Row>
 			</Grid>
 		);
 	}
