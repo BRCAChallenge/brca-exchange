@@ -5,6 +5,16 @@
 li {list-style-type: none;}
 
 .logos img {
-	width: 50%;
-	height: 50%;
+	float: left;
+	padding: 30px;
+	overflow: auto;
+}
+
+.logo_block {
+	margin-top: 20px
+}
+
+.text_logo {
+	font-weight: bold;
+	font-size: 50px;
 }
