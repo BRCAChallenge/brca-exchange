@@ -54,31 +54,6 @@ var NavBarNew = React.createClass({
         var {activeButton} = this.props;
         return (
             <div>
-<<<<<<< HEAD
-            	{/*<img style={{height: 40, width: 40, float: "left"}} src={brca_logo}></img>
-                <Navbar brand={<a style={{fontSize: 25, color: "#FF3399"}} href="http://brcaexchange.cloudapp.net">
-                			    BRCA Exchange</a>} toggleNavKey={0}> */}
-                <Navbar brand={<a href="http://brcaexchange.cloudapp.net">
-                			   <img style={{height: 30, width: 30, float: "left", marginBottom: 10}} src={brca_logo} />
-                			   <span style={{fontSize: 25, color: "#FF3399"}}>&nbsp;BRCA Exchange&nbsp;&nbsp;&nbsp;</span></a>}
-                			   toggleNavKey={0}>
-
-                	<CollapsableNav eventKey={0}>
-	                    <Nav navbar>
-	                        <NavItem eventKey={1} onClick={() => activeButton('home')}>Home</NavItem>
-	                        <NavItem eventKey={2} onClick={() => activeButton('about')}>About</NavItem>
-	                        <NavItem eventKey={3} onClick={() => activeButton('database')}>Database</NavItem>
-	                    </Nav>
-                    	<Nav navbar right>
-                        	<NavItem eventKey={1} href='#'><input placeholder="Search Variant"></input>
-	                            <Button className='btn-xs' style={{border: 0}}>
-	                                <span className="glyphicon glyphicon-search"></span>
-	                            </Button>
-                        	</NavItem>
-                    	</Nav>
-                	</CollapsableNav>
-            	</Navbar>
-=======
                	<a href="http://brcaexchange.org/">
             		<img style={{height: 20, width: 20}} src={brca_logo} alt="brca logo"/>
             	</a>
@@ -111,7 +86,6 @@ var NavBarNew = React.createClass({
                     </Nav>
                 </CollapsableNav>
             </Navbar>
->>>>>>> a2321935b4a0fa7f795f31d2551cd9e4994390d7
             </div>
         )
     }
