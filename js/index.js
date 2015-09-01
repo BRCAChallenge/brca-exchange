@@ -18,33 +18,16 @@ var content = {
 	'about-history': require('../content/history.md'),
 	'about-what': require('../content/brca1_2.md'),
 	'about-variation': require('../content/variationAndCancer.md')
-}
+};
 
 
 var databaseUrl = require('file!../../brca-database.vcf');
 
-var {Col, Row, Input, Modal, Button, ButtonGroup, Navbar, CollapsableNav, Nav,
+var {Col, Row, Input, Button, Navbar, CollapsableNav, Nav,
 	NavItem, DropdownButton, MenuItem} = require('react-bootstrap');
 
 
 var VariantTable = require('./VariantTable');
-
-var TableView = React.createClass({
-	render: function () {
-		var {data} = this.props;
-		return (
-			<div style={{position: "relative", height: "100px"}}>
-				{data?
-					<Row>
-						<Col md={10} mdOffset={1}>
-							<VariantTable data={data}/>
-						</Col>
-					</Row>
-					: ''}
-			</div>
-		);
-	}
-});
 
 var NavBarNew = React.createClass({
 	close: function () {
@@ -87,39 +70,7 @@ var NavBarNew = React.createClass({
                 </CollapsableNav>
             </Navbar>
             </div>
-        )
-    }
-});
-
-var Title = React.createClass({
-    render: function() {
-        return (
-			<Row style={{marginTop: 30, marginBottom: 30}}>
-				<div className="text-center" style={{fontSize: 20, color: "#FF3399"}}>
-					<h1>BRCA Challenge</h1>
-				</div>
-			</Row>
-        )
-    }
-});
-
-var NavBar = React.createClass({
-    render: function() {
-    	var {activeButton} = this.props;
-        return (
-        	<Row className="text-center">
-	            <ButtonGroup>
-	                <Button className="btn-custom" 
-	                		onClick={() => activeButton('home')}>Home</Button>
-	                <Button className="btn-custom" 
-	                		onClick={() => activeButton('about')}>About</Button>
-	                <Button className="btn-custom" 
-	                		onClick={() => activeButton('database')}>Database</Button>
-	                <Button className="btn-custom" 
-	                		onClick={() => activeButton('myVariant')}>My Variant</Button>
-	            </ButtonGroup>
-            </Row>
-        )
+        );
     }
 });
 
@@ -139,7 +90,7 @@ var Home = React.createClass({
 	},
 
 	render: function() {
-		return(
+		return (
 			<div>
 				<Row style={{marginTop: 100}}>
 					<div className="text-center">
@@ -147,7 +98,7 @@ var Home = React.createClass({
 					</div>
 				</Row>
 			</div>
-		)
+		);
 	}
 });
 
@@ -155,7 +106,7 @@ var About = React.createClass({
 	render: function() {
 		var {contentKey} = this.props;
 
-		return(
+		return (
 			<div>
 				<Row style={{marginTop: 100}}>
 					<div className="text-center">
@@ -163,14 +114,14 @@ var About = React.createClass({
 					</div>
 				</Row>
 			</div>
-		)
+		);
 	}
 });
 
 // sketch of function to filter rows on exact matches
-function filterData(data, str) {
+function filterData(data, str) { //eslint-disable-line no-unused-vars
 	var {records, header} = data;
-	var filteredRecords = _.filter(data, row => {
+	var filteredRecords = _.filter(records, row => {
 		// row = {
 		//   chrom: "17",
 		//   pos: 1234,
@@ -231,7 +182,7 @@ var Database = React.createClass({
 	}
 });
 
-var MyVariant = React.createClass({
+var MyVariant = React.createClass({ //eslint-disable-line no-unused-vars
 	getInitialState: function () {
 		return {
 			data: null
@@ -241,7 +192,7 @@ var MyVariant = React.createClass({
 	render: function() {
 		var {data} = this.state;
 		var {show} = this.props;
-		return(
+		return (
 			<div style={{display: show ? 'block' : 'none'}}>
 				<div className="text-center">
 					<Input ref='file' type='file' onChange={this.fileChange}/>
@@ -256,7 +207,7 @@ var MyVariant = React.createClass({
 						: ''}
 				</div>
 			</div>
-		)
+		);
 	},
 
 	dataReady: function(ev) {
@@ -276,7 +227,7 @@ var MyVariant = React.createClass({
 			reader.readAsText(file);
 		}, 100);
 	}
-})
+});
 
 var startsWith = (pat, str) => str && str.indexOf(pat) === 0;
 
@@ -285,7 +236,7 @@ var Application = React.createClass({
 		return {data: null, buttonName: null};
 	},
 	activeButton: function (buttonName) {
-		this.setState({buttonName: buttonName})
+		this.setState({buttonName: buttonName});
 	},
 	render: function () {
 		var {buttonName, data} = this.state;
