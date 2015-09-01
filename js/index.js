@@ -12,6 +12,10 @@ require('css/custom.css');
 var _ = require('underscore');
 var brca_logo = require('./img/brca_logo.png');
 var ga4gh_logo = require('./img/ga4gh-logo-less.png');
+var brca_logo_with_text = require('./img/brca-logo-with-text.png');
+var hvp_logo = require('./img/hvp_logo.png');
+var UNESCO_logo = require('./img/UNESCO-logo.jpg');
+
 
 var Markdown = require('react-remarkable');
 var content = {
@@ -38,9 +42,9 @@ var NavBarNew = React.createClass({
 		var {activeButton} = this.props;
 		return (
 			<Navbar>
-				<a className="navbar-brand" href="#">
-					<img style={{height: 20, width: 20, display: 'inline-block'}} src={brca_logo} alt="brca logo"/>
-					BRCA Exchange
+				<a className="navbar-brand" href="http://brcaexchange.org">
+					<img style={{height: 28, width: 28, display: 'inline-block'}} src={brca_logo} alt="brca logo"/>
+					&nbsp;&nbsp;&nbsp;BRCA Exchange&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				</a>
 				<CollapsableNav>
 					<Nav navbar>
@@ -94,14 +98,31 @@ var Home = React.createClass({
 						<Markdown options={{html: true}} source={content.home} />
 					</Col>
 				</Row>
-				<div className="logo-block">
+				<div className="logo-block container">
 					<div className="logos">
 						<ul>
-							<li><img src={ga4gh_logo} alt="ga4gh logo" /></li>
+							<li><a href="http://genomicsandhealth.org">
+								<img style={{"height": "40%", "width": "40%"}} src={ga4gh_logo} alt="ga4gh logo" />
+							</a></li>
+							<li><a href="http://brcaexchange.org">
+								<img style={{"height": "20%", "width": "20%"}} src={brca_logo_with_text} alt="brca exchange logo" />
+							</a></li>
+							<li><a href="http://www.humanvariomeproject.org">
+								<img style={{"height": "25%", "width": "25%"}} src={hvp_logo} alt="human variome project logo" />
+							</a></li>
+							<li><a href="http://unesco.org">
+								<img style={{"height": "25%", "width": "25%"}} src={UNESCO_logo} alt="UNESCO logo" />
+							</a></li>
+							<br></br>
+							<li><a href="http://enigmaconsortium.org">
+								<div className="text_logo">ENIGMA</div>
+							</a></li>
+							<li><a href="http://apps.ccge.medschl.cam.ac.uk/consortia/cimba//">
+								<div className="text_logo">CIMBA</div>
+							</a></li>
 						</ul>
 					</div>
 				</div>
-
 			</Grid>
 		);
 	}
