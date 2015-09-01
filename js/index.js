@@ -33,21 +33,18 @@ var NavBarNew = React.createClass({
 	close: function () {
 		this.setState({open: false});
 	},
-    render: function () {
-        var {activeButton} = this.props;
-        return (
-            <div>
-               	<a href="http://brcaexchange.org/">
-            		<img style={{height: 20, width: 20}} src={brca_logo} alt="brca logo"/>
-            	</a>
-            <Navbar>
-            	<a className="navbar-brand" href="#">
-            		BRCA Exchange
-            	</a>
-                <CollapsableNav>
-                    <Nav navbar>
-                        <NavItem onClick={() => activeButton('home')}>Home</NavItem>
-                        <DropdownButton onSelect={this.close} title='About'>
+	render: function () {
+		var {activeButton} = this.props;
+		return (
+			<Navbar>
+				<a className="navbar-brand" href="#">
+					<img style={{height: 20, width: 20, display: 'inline-block'}} src={brca_logo} alt="brca logo"/>
+					BRCA Exchange
+				</a>
+				<CollapsableNav>
+					<Nav navbar>
+						<NavItem onClick={() => activeButton('home')}>Home</NavItem>
+						<DropdownButton onSelect={this.close} title='About'>
 							<MenuItem onClick={() => activeButton('about-history')}>
 								History of the BRCA Exchange
 							</MenuItem>
@@ -58,18 +55,17 @@ var NavBarNew = React.createClass({
 								BRCA Variation and Cancer
 							</MenuItem>
 						</DropdownButton>
-                        <NavItem onClick={() => activeButton('database')}>Database</NavItem>
-                    </Nav>
-                    <Nav navbar right>
-                        <NavItem href='#'><input placeholder="Search Variant"></input>
-                            <Button className='btn-xs' style={{border: 0}}>
-                                <span className="glyphicon glyphicon-search"></span>
-                            </Button>
-                        </NavItem>
-                    </Nav>
-                </CollapsableNav>
-            </Navbar>
-            </div>
+						<NavItem onClick={() => activeButton('database')}>Database</NavItem>
+					</Nav>
+					<Nav navbar right>
+						<NavItem href='#'><input placeholder="Search Variant"></input>
+							<Button className='btn-xs' style={{border: 0}}>
+								<span className="glyphicon glyphicon-search"></span>
+							</Button>
+						</NavItem>
+					</Nav>
+				</CollapsableNav>
+			</Navbar>
         );
     }
 });
