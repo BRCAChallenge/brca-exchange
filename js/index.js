@@ -11,12 +11,21 @@ require('rx-dom');
 require('css/custom.css');
 var _ = require('underscore');
 var brca_logo = require('./img/brca_logo.png')
-var white_bg = require("./img/1px_white.jpg")
+
+var Markdown = require('react-remarkable');
+var content = {
+	home: require('../content/home.md'),
+	'about-history': require('../content/history.md'),
+	'about-what': require('../content/brca1_2.md'),
+	'about-variation': require('../content/variationAndCancer.md')
+}
+
 
 var databaseUrl = require('file!../../brca-database.vcf');
 
-var {Col, Row, Input, Modal, Button, ButtonGroup, Navbar, CollapsableNav, Nav, NavItem, 
-	Carousel, CarouselItem} = require('react-bootstrap');
+var {Col, Row, Input, Modal, Button, ButtonGroup, Navbar, CollapsableNav, Nav,
+	NavItem, DropdownButton, MenuItem} = require('react-bootstrap');
+
 
 var VariantTable = require('./VariantTable');
 
@@ -38,10 +47,14 @@ var TableView = React.createClass({
 });
 
 var NavBarNew = React.createClass({
+	close: function () {
+		this.setState({open: false});
+	},
     render: function () {
         var {activeButton} = this.props;
         return (
             <div>
+<<<<<<< HEAD
             	{/*<img style={{height: 40, width: 40, float: "left"}} src={brca_logo}></img>
                 <Navbar brand={<a style={{fontSize: 25, color: "#FF3399"}} href="http://brcaexchange.cloudapp.net">
                 			    BRCA Exchange</a>} toggleNavKey={0}> */}
@@ -65,6 +78,40 @@ var NavBarNew = React.createClass({
                     	</Nav>
                 	</CollapsableNav>
             	</Navbar>
+=======
+               	<a href="http://brcaexchange.org/">
+            		<img style={{height: 20, width: 20}} src={brca_logo} alt="brca logo"/>
+            	</a>
+            <Navbar>
+            	<a className="navbar-brand" href="#">
+            		BRCA Exchange
+            	</a>
+                <CollapsableNav>
+                    <Nav navbar>
+                        <NavItem onClick={() => activeButton('home')}>Home</NavItem>
+                        <DropdownButton onSelect={this.close} title='About'>
+							<MenuItem onClick={() => activeButton('about-history')}>
+								History of the BRCA Exchange
+							</MenuItem>
+							<MenuItem onClick={() => activeButton('about-what')}>
+								What are BRCA1 and BRCA2?
+							</MenuItem>
+							<MenuItem onClick={() => activeButton('about-variation')}>
+								BRCA Variation and Cancer
+							</MenuItem>
+						</DropdownButton>
+                        <NavItem onClick={() => activeButton('database')}>Database</NavItem>
+                    </Nav>
+                    <Nav navbar right>
+                        <NavItem href='#'><input placeholder="Search Variant"></input>
+                            <Button className='btn-xs' style={{border: 0}}>
+                                <span className="glyphicon glyphicon-search"></span>
+                            </Button>
+                        </NavItem>
+                    </Nav>
+                </CollapsableNav>
+            </Navbar>
+>>>>>>> a2321935b4a0fa7f795f31d2551cd9e4994390d7
             </div>
         )
     }
@@ -102,7 +149,6 @@ var NavBar = React.createClass({
     }
 });
 
-
 var Home = React.createClass({
 	getInitialState() {
 		return {
@@ -121,11 +167,19 @@ var Home = React.createClass({
 	render: function() {
 		return(
 			<div>
+<<<<<<< HEAD
 				<div>
 					<Row style={{marginTop: 100}}>
 						<div className="text-center">place holder for home</div>
 					</Row>
 				</div>
+=======
+				<Row style={{marginTop: 100}}>
+					<div className="text-center">
+						<Markdown source={content.home} />
+					</div>
+				</Row>
+>>>>>>> a2321935b4a0fa7f795f31d2551cd9e4994390d7
 			</div>
 		)
 	}
@@ -133,11 +187,13 @@ var Home = React.createClass({
 
 var About = React.createClass({
 	render: function() {
+		var {contentKey} = this.props;
+
 		return(
 			<div>
 				<Row style={{marginTop: 100}}>
 					<div className="text-center">
-						<span>place holder for about</span>
+						<Markdown source={content[contentKey]} />
 					</div>
 				</Row>
 			</div>
@@ -256,23 +312,21 @@ var MyVariant = React.createClass({
 	}
 })
 
+var startsWith = (pat, str) => str && str.indexOf(pat) === 0;
+
 var Application = React.createClass({
 	getInitialState: function () {
-		return {data: null, buttonName: 'null'};
+		return {data: null, buttonName: null};
 	},
 	activeButton: function (buttonName) {
 		this.setState({buttonName: buttonName})
-	},
-	
-	hideDialog: function () {
-		this.setState({buttonName: "null"});
 	},
 	render: function () {
 		var {buttonName, data} = this.state;
 		return (
 			<div>
                 <NavBarNew activeButton={this.activeButton}/>
-				{buttonName === 'about' ? <About /> : ''}
+				{startsWith('about', buttonName) ? <About contentKey={buttonName} /> : ''}
 				{buttonName === 'home' ? <Home /> : ''}
 				<Database show={buttonName === 'database'} data={data}/>
 			</div>

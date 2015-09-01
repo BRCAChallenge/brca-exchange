@@ -21,7 +21,8 @@ module.exports = {
 				test: /\.(jpe?g|png|gif|svg|eot|woff2?|ttf)$/i,
 				loaders: ['url?limit=10000'],
 				exclude: [path.resolve(__dirname, "js/img/favicon")]
-			}
+			},
+			{ test: /\.md$/, loader: 'raw' }
 		]
 	},
 	plugins: [
