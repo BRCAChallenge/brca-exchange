@@ -35,7 +35,7 @@ var {Well, Grid, Col, Row, Input, Button, Navbar, CollapsableNav, Nav, Table,
 
 var VariantTable = require('./VariantTable');
 var {Navigation, State, Link, Route, RouteHandler,
-	HistoryLocation, run} = require('react-router');
+	HistoryLocation, run, DefaultRoute} = require('react-router');
 
 var merge = (...objs) => _.extend({}, ...objs);
 
@@ -84,7 +84,7 @@ var NavBarNew = React.createClass({
 				</a>
 				<CollapsableNav>
 					<Nav navbar>
-						<NavLink to='/home'>Home</NavLink>
+						<NavLink to='/'>Home</NavLink>
 						<DropdownButton ref='about' title='About'>
 							<NavLink onClick={this.close} to='/about/history'>
 								History of the BRCA Exchange
@@ -375,7 +375,7 @@ var Application = React.createClass({
 
 var routes = (
 	<Route handler={Application}>
-		<Route path='home' handler={Home}/>
+		<DefaultRoute handler={Home}/>
 		<Route path='about/:page' handler={About}/>
 		<Route path='variants' />
 		<Route path='variant/:id' handler={VariantDetail}/>
