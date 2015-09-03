@@ -6,7 +6,7 @@ var path = require('path');
 
 module.exports = {
 	historyApiFallback: true,
-	entry: "./js/bogorouter",
+	entry: "./js/index",
 	output: {
 		path: "build",
 		publicPath: "/",
@@ -45,7 +45,7 @@ module.exports = {
 	},
 	resolveLoader: {
 		alias: {
-			'copy': 'file-loader?name=[path][name].[ext]&context=./js',
+			'copy': 'file-loader?name=[path][name].[ext]&context=./js'
 		}
 	}
 };

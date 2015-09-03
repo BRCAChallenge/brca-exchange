@@ -43,6 +43,7 @@
     "react-bootstrap": "^0.20.0",
     "react-datagrid": "^1.2.13",
     "react-remarkable": "^1.1.1",
+    "react-router": "^0.13.3",
     "rx": "^2.4.3",
     "rx-dom": "^4.0.4",
     "underscore": "^1.7.0",

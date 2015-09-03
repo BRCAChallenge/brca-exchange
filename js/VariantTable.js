@@ -7,32 +7,13 @@ var _ = require('underscore');
 var DataGrid = require('react-datagrid');
 require('react-datagrid/index.css');
 
-var merge = (...objs) => _.extend({}, ...objs);
-
-function mergeInfo(row) {
-	var info = _.object(_.map(_.pairs(row.INFO), ([k, v]) => ['INFO$' + k, v]));
-	return merge(info, _.omit(row, ['INFO']));
-}
-
-// XXX hard-coded GENE, PROB, REFS, PATH for now
-function sanitize(data) {
-	return _.map(data, (r, i) => merge({id: i, GENE: 'BRCA1', PROB: 0.23, REFS: 'sciencemag.org/content', PATH: 'pathogenic'}, mergeInfo(r)));
-}
-
 var VariantTable = React.createClass({
-	getInitialState: function () {
-		var {data} = this.props,
-			cleaned = sanitize(data.records);
-		// get initial sort of data, same as passed in.
-		return {data: cleaned};
-	},
 	onSortChange: function (info) {
 		var [{name}] = info, {data} = this.state;
 		this.setState({data: _.sortBy(data, r => r[name])});
 	},
 	render: function () {
 		var {data, ...opts} = this.props,
-			{data} = this.state,
 			columns = [
 				{name: 'GENE', title: 'Gene', width: 80},
 				{name: 'INFO$HGVS_G', title: 'HGVS g', width: 250},

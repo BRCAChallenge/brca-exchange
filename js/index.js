@@ -18,30 +18,64 @@ var UNESCOLogo = require('./img/UNESCO-logo.jpg');
 var ENIGMALogo = require('./img/enigma_logo.png');
 var CIMBALogo = require('./img/cimba_logo.png');
 
-
 var Markdown = require('react-remarkable');
 var content = {
 	home: require('../content/home.md'),
-	'about-history': require('../content/history.md'),
-	'about-what': require('../content/brca1_2.md'),
-	'about-variation': require('../content/variationAndCancer.md')
+	'history': require('../content/history.md'),
+	'brca1_2': require('../content/brca1_2.md'),
+	'variation': require('../content/variationAndCancer.md')
 };
 
 
 var databaseUrl = require('file!../../brca-database.vcf');
 
 var {Well, Grid, Col, Row, Input, Button, Navbar, CollapsableNav, Nav, Table,
-	NavItem, ButtonGroup, DropdownButton, MenuItem, Panel} = require('react-bootstrap');
+	NavItem, DropdownButton, MenuItem, Panel} = require('react-bootstrap');
 
 
 var VariantTable = require('./VariantTable');
+var {Navigation, State, Link, Route, RouteHandler,
+	HistoryLocation, run} = require('react-router');
+
+var merge = (...objs) => _.extend({}, ...objs);
+
+function mergeInfo(row) {
+	var info = _.object(_.map(_.pairs(row.INFO), ([k, v]) => ['INFO$' + k, v]));
+	return merge(info, _.omit(row, ['INFO']));
+}
+
+// XXX hard-coded GENE, PROB, REFS, PATH for now
+function sanitize(data) {
+	return _.map(data, (r, i) => merge({id: i, GENE: 'BRCA1', PROB: 0.23, REFS: 'sciencemag.org/content', PATH: 'pathogenic'}, mergeInfo(r)));
+}
+
+function readVcf(response) {
+	var {header, records} = vcf.parser()(response);
+	return {
+		header: header,
+		records: sanitize(records)
+	};
+}
+
+var NavLink = React.createClass({
+	render: function () {
+		var {children, ...otherProps} = this.props;
+		return (
+			<li>
+				<Link {...otherProps} role='button'>
+					{children}
+				</Link>
+			</li>
+		);
+	}
+});
 
 var NavBarNew = React.createClass({
 	close: function () {
-		this.setState({open: false});
+		this.refs.about.setState({open: false});
 	},
+	// XXX drop the &nbsp for a css margin
 	render: function () {
-		var {buttonPressed} = this.props;
 		return (
 			<Navbar>
 				<a className="navbar-brand" href="http://brcaexchange.org">
@@ -50,19 +84,19 @@ var NavBarNew = React.createClass({
 				</a>
 				<CollapsableNav>
 					<Nav navbar>
-						<NavItem onClick={() => buttonPressed('home')}>Home</NavItem>
-						<DropdownButton onSelect={this.close} title='About'>
-							<MenuItem onClick={() => buttonPressed('about-history')}>
+						<NavLink to='/home'>Home</NavLink>
+						<DropdownButton ref='about' title='About'>
+							<NavLink onClick={this.close} to='/about/history'>
 								History of the BRCA Exchange
-							</MenuItem>
-							<MenuItem onClick={() => buttonPressed('about-what')}>
+							</NavLink>
+							<NavLink onClick={this.close} to='/about/brca1_2'>
 								What are BRCA1 and BRCA2?
-							</MenuItem>
-							<MenuItem onClick={() => buttonPressed('about-variation')}>
+							</NavLink>
+							<NavLink onClick={this.close} to='/about/variation'>
 								BRCA Variation and Cancer
-							</MenuItem>
+							</NavLink>
 						</DropdownButton>
-						<NavItem onClick={() => buttonPressed('database')}>Variants</NavItem>
+						<NavLink to='/variants'>Variants</NavLink>
 					</Nav>
 					<Nav navbar right>
 						<NavItem href='#'><input placeholder="Search Variant"></input>
@@ -144,13 +178,13 @@ var Home = React.createClass({
 
 var About = React.createClass({
 	render: function() {
-		var {contentKey} = this.props;
+		var {page} = this.props.params;
 
 		return (
 			<Grid>
 				<Row style={{marginTop: 100}}>
 					<Col md={8} mdOffset={2}>
-						<Markdown options={{html: true}} source={content[contentKey]} />
+						<Markdown options={{html: true}} source={content[page]} />
 					</Col>
 				</Row>
 			</Grid>
@@ -178,18 +212,12 @@ function filterData(data, str) { //eslint-disable-line no-unused-vars
 }
 
 var Database = React.createClass({
-	getInitialState: function () {
-		return {
-			data: null
-		};
+	mixins: [Navigation],
+	showVariant: function ({id}) {
+		this.transitionTo(`/variant/${id}`);
 	},
-	componentWillMount: function (){
-		Rx.DOM.get(databaseUrl).subscribe(data => this.setState({data: vcf.parser()(data.response)}));
-	},
-
 	render: function () {
-		var {data} = this.state;
-		var {show, showVariant} = this.props;
+		var {show, data} = this.props;
 		return (
 			<div style={{display: show ? 'block' : 'none'}}>
 				<div>
@@ -237,7 +265,7 @@ var Database = React.createClass({
 					{data?
 						<Row>
 							<Col md={10} mdOffset={1}>
-								<VariantTable data={data} onRowClick={showVariant}/>
+								<VariantTable data={data.records} onRowClick={this.showVariant}/>
 							</Col>
 						</Row>
 						: ''}
@@ -296,7 +324,8 @@ var MyVariant = React.createClass({ //eslint-disable-line no-unused-vars
 
 var VariantDetail = React.createClass({
 	render: function() {
-		var {variant} = this.props;
+		var {data, params: {id}} = this.props,
+			variant = (data && data.records[id]) || {};
 
 		variant = _.omit(variant, ['__HEADER__']);
 		var rows = _.map(variant, (v, k) => <tr key={k}><td>{k}</td><td>{v}</td></tr>);
@@ -322,31 +351,39 @@ var VariantDetail = React.createClass({
 	}
 });
 
-var startsWith = (pat, str) => str && str.indexOf(pat) === 0;
-
 var Application = React.createClass({
+	mixins: [State],
 	getInitialState: function () {
-		return {data: null, activePage: 'home'};
+		return {data: null};
 	},
-	buttonPressed: function (buttonName) {
-		this.setState({activePage: buttonName});
-	},
-	showVariant(variant) {
-		this.setState({activePage: 'variant', variant: variant});
+	componentWillMount: function (){
+		Rx.DOM.get(databaseUrl).subscribe(data =>
+			this.setState({data: readVcf(data.response)}));
 	},
 	render: function () {
-		var {activePage, data, variant} = this.state;
+		var {data} = this.state;
+		var path = this.getPath().slice(1);
 		return (
 			<div>
-                <NavBarNew buttonPressed={this.buttonPressed}/>
-				{startsWith('about', activePage) ? <About contentKey={activePage} /> : ''}
-				{activePage === 'home' ? <Home /> : ''}
-				{activePage === 'variant' ? <VariantDetail variant={variant} /> : ''}
-				<Database show={activePage === 'database'} showVariant={this.showVariant} data={data}/>
+				<NavBarNew />
+				<RouteHandler data={data}/>
+				<Database show={path === 'variants'} data={data}/>
 			</div>
 		);
 	}
 });
 
+var routes = (
+	<Route handler={Application}>
+		<Route path='home' handler={Home}/>
+		<Route path='about/:page' handler={About}/>
+		<Route path='variants' />
+		<Route path='variant/:id' handler={VariantDetail}/>
+	</Route>
+);
+
 var main = document.getElementById('main');
-React.render(<Application />, main);
+
+run(routes, HistoryLocation, (Root) => {
+  React.render(<Root/>, main);
+});
