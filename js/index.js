@@ -27,7 +27,7 @@ var content = {
 };
 
 
-var databaseUrl = require('file!../../brca-database.vcf');
+var databaseUrl = require('file!../../enigma-database.tsv');
 
 var {Well, Grid, Col, Row, Input, Button, Navbar, CollapsableNav, Nav, Table,
 	NavItem, DropdownButton, MenuItem, Panel} = require('react-bootstrap');
@@ -46,16 +46,25 @@ function mergeInfo(row) {
 
 // XXX hard-coded GENE, PROB, REFS, PATH for now
 function sanitize(data) {
-	return _.map(data, (r, i) => merge({id: i, GENE: 'BRCA1', PROB: 0.23, REFS: 'sciencemag.org/content', PATH: 'pathogenic'}, mergeInfo(r)));
+	return _.map(data, (r, i) => merge({id: i}, r));
+}
+
+function cutTrailingNewLine(string) {
+    if (string[string.length-1] === "\n") {
+        return string.slice(0,string.length-1);
+    }
+    return string;
 }
 
 function readVcf(response) {
-	var {header, records} = vcf.parser()(response);
-	return {
-		header: header,
-		records: sanitize(records)
+	var [header, ...records] = cutTrailingNewLine(response).split("\n");
+	var keys = header.split("\t");
+    var rows = _.map(records, row => row.split("\t"));
+    return {
+        records: sanitize(_.map(rows, row => _.object(keys, row)))
 	};
 }
+
 
 var NavLink = React.createClass({
 	render: function () {

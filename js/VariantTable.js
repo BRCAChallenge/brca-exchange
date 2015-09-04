@@ -3,42 +3,38 @@
 
 var React = require('react');
 var _ = require('underscore');
-
+var DataTable = require('react-data-components').DataTable;
 var DataGrid = require('react-datagrid');
 require('react-datagrid/index.css');
+require('react-data-components/css/table-twbs.css');
 
 var VariantTable = React.createClass({
 	onSortChange: function (info) {
-		var [{name}] = info, {data} = this.state;
-		this.setState({data: _.sortBy(data, r => r[name])});
+		var [{prop}] = info, {data} = this.state;
+		this.setState({data: _.sortBy(data, r => r[prop])});
 	},
 	render: function () {
 		var {data, ...opts} = this.props,
 			columns = [
-				{name: 'GENE', title: 'Gene', width: 80},
-				{name: 'INFO$HGVS_G', title: 'HGVS g', width: 250},
-				{name: 'INFO$HGVS_C', title: 'HGVS c', width: 200},
-				{name: 'INFO$HGVS_P', title: 'HGVS p', width: 200},
-				{name: 'INFO$BIC_N', title: 'BIC n', width: 70},
-				{name: 'INFO$BIC_P', title: 'BIC p', width: 70},
-				{name: 'INFO$DBSource', title: 'Source', width: 80},
-				{name: 'INFO$MUTTYPE', title: 'Type', width: 100},
-				{name: 'PROB', title: 'Posterior prob', width: 120},
-				{name: 'INFO$FREQ', title: 'Allele freq', width: 100},
-				{name: 'REFS', title: 'References', width: 150},
-				{name: 'INFO$IARC', title: 'IARC Classification', width: 120},
-				{name: 'PATH', title: 'Pathogenicity', width: 120}
+				{title: 'Gene', prop: 'Gene symbol'},
+				{title: '  HGVS  ', prop: 'HGVS'},
+				{title: 'Pathogenicity', prop: 'Clinical significance'},
+				{title: 'Allele origin', prop: 'Allele origin'},
+				{title: 'CVA', prop: 'ClinVarAccession'}
 			];
 		return (
-			<DataGrid
+			<DataTable
 				{...opts}
-				style={{height: "30em"}}
 				columns={columns}
-				dataSource={data}
-				onSortChange={this.onSortChange}
-				idProperty="id"/>
+				initialData={data}
+				initialPageLength={5}
+                initialSortBy={{ title: 'Gene', prop: 'Gene', order: 'descending' }}
+                pageLengthOptions={[ 10, 50, 100 ]}
+                keys={['id']}
+            />
 		);
 	}
 });
+
 
 module.exports = VariantTable;
