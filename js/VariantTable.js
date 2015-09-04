@@ -16,12 +16,11 @@ var VariantTable = React.createClass({
 	render: function () {
 		var {data, ...opts} = this.props,
 			columns = [
-				{title: 'Gene symbol', prop: 'Gene symbol'},
-				{title: 'HGVS', prop: 'HGVS'},
-				{title: 'Alternate', prop: 'Alternate'},
-				{title: 'Clinical significance', prop: 'Clinical significance'},
+				{title: 'Gene', prop: 'Gene symbol'},
+				{title: '  HGVS  ', prop: 'HGVS'},
+				{title: 'Pathogenicity', prop: 'Clinical significance'},
 				{title: 'Allele origin', prop: 'Allele origin'},
-				{title: 'ClinVarAcession', prop: 'ClinVarAcession'}
+				{title: 'CVA', prop: 'ClinVarAccession'}
 			];
 		return (
 			<DataTable
@@ -30,7 +29,7 @@ var VariantTable = React.createClass({
 				initialData={data}
 				initialPageLength={5}
                 initialSortBy={{ title: 'Gene', prop: 'Gene', order: 'descending' }}
-                pageLengthOptions={[ 5, 20, 50 ]}
+                pageLengthOptions={[ 10, 50, 100 ]}
                 keys={['id']}
             />
 		);

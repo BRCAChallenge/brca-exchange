@@ -49,14 +49,22 @@ function sanitize(data) {
 	return _.map(data, (r, i) => merge({id: i}, r));
 }
 
+function cutTrailingNewLine(string) {
+    if (string[string.length-1] === "\n") {
+        return string.slice(0,string.length-1);
+    }
+    return string;
+}
+
 function readVcf(response) {
-	var [header, ...records] = response.split("\n");
+	var [header, ...records] = cutTrailingNewLine(response).split("\n");
 	var keys = header.split("\t");
     var rows = _.map(records, row => row.split("\t"));
     return {
         records: sanitize(_.map(rows, row => _.object(keys, row)))
 	};
 }
+
 
 var NavLink = React.createClass({
 	render: function () {
