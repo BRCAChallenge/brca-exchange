@@ -16,28 +16,20 @@ var VariantTable = React.createClass({
 	render: function () {
 		var {data, ...opts} = this.props,
 			columns = [
-				{prop: 'GENE', title: 'Gene', width: 80},
-				{prop: 'INFO$HGVS_G', title: 'HGVS g', width: 250},
-				{prop: 'INFO$HGVS_C', title: 'HGVS c', width: 200},
-				{prop: 'INFO$HGVS_P', title: 'HGVS p', width: 200},
-				{prop: 'INFO$BIC_N', title: 'BIC n', width: 70},
-				{prop: 'INFO$BIC_P', title: 'BIC p', width: 70},
-				{prop: 'INFO$DBSource', title: 'Source', width: 80},
-				{prop: 'INFO$MUTTYPE', title: 'Type', width: 100},
-				{prop: 'PROB', title: 'Posterior prob', width: 120},
-				{prop: 'INFO$FREQ', title: 'Allele freq', width: 100},
-				{prop: 'REFS', title: 'References', width: 150},
-				{prop: 'INFO$IARC', title: 'IARC Classification', width: 120},
-				{prop: 'PATH', title: 'Pathogenicity', width: 120}
+				{title: 'Gene symbol', prop: 'Gene symbol'},
+				{title: 'HGVS', prop: 'HGVS'},
+				{title: 'Alternate', prop: 'Alternate'},
+				{title: 'Clinical significance', prop: 'Clinical significance'},
+				{title: 'Allele origin', prop: 'Allele origin'},
+				{title: 'ClinVarAcession', prop: 'ClinVarAcession'}
 			];
 		return (
 			<DataTable
 				{...opts}
-				style={{height: "30em"}}
 				columns={columns}
 				initialData={data}
 				initialPageLength={5}
-                initialSortBy={{ prop: 'Gene', order: 'descending' }}
+                initialSortBy={{ title: 'Gene', prop: 'Gene', order: 'descending' }}
                 pageLengthOptions={[ 5, 20, 50 ]}
                 keys={['id']}
             />
