@@ -27,7 +27,7 @@ var VariantTable = React.createClass({
 				{...opts}
 				columns={columns}
 				initialData={data}
-				initialPageLength={5}
+				initialPageLength={10}
                 initialSortBy={{ title: 'Gene', prop: 'Gene', order: 'descending' }}
                 pageLengthOptions={[ 10, 50, 100 ]}
                 keys={['id']}

@@ -44,8 +44,8 @@ function mergeInfo(row) {
 	return merge(info, _.omit(row, ['INFO']));
 }
 
-// XXX hard-coded GENE, PROB, REFS, PATH for now
-function sanitize(data) {
+// add unique id to variant table
+function addId(data) {
 	return _.map(data, (r, i) => merge({id: i}, r));
 }
 
@@ -56,12 +56,12 @@ function cutTrailingNewLine(string) {
     return string;
 }
 
-function readVcf(response) {
+function readTsv(response) {
 	var [header, ...records] = cutTrailingNewLine(response).split("\n");
 	var keys = header.split("\t");
     var rows = _.map(records, row => row.split("\t"));
     return {
-        records: sanitize(_.map(rows, row => _.object(keys, row)))
+        records: addId(_.map(rows, row => _.object(keys, row)))
 	};
 }
 
@@ -89,7 +89,7 @@ var NavBarNew = React.createClass({
 			<Navbar>
 				<a className="navbar-brand" href="http://brcaexchange.org">
 					<img style={{height: 28, width: 28, display: 'inline-block'}} src={brcaLogo} alt="brca logo"/>
-					&nbsp;&nbsp;&nbsp;BRCA Exchange&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<span style={{fontSize: 30, color: "#FF3399"}}>&nbsp;&nbsp;&nbsp;BRCA Exchange&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
 				</a>
 				<CollapsableNav>
 					<Nav navbar>
@@ -201,24 +201,6 @@ var About = React.createClass({
 	}
 });
 
-// sketch of function to filter rows on exact matches
-function filterData(data, str) { //eslint-disable-line no-unused-vars
-	var {records, header} = data;
-	var filteredRecords = _.filter(records, row => {
-		// row = {
-		//   chrom: "17",
-		//   pos: 1234,
-		//   hgvs: "NC_0001:1234T>C"
-		// }
-		//
-		return _.find(_.values(row), col => col.indexOf(str) !== -1);
-
-	});
-	return {
-		records: filteredRecords,
-		header: header
-	};
-}
 
 var Database = React.createClass({
 	mixins: [Navigation],
@@ -367,7 +349,7 @@ var Application = React.createClass({
 	},
 	componentWillMount: function (){
 		Rx.DOM.get(databaseUrl).subscribe(data =>
-			this.setState({data: readVcf(data.response)}));
+			this.setState({data: readTsv(data.response)}));
 	},
 	render: function () {
 		var {data} = this.state;
