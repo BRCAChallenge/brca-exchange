@@ -44,8 +44,8 @@ function mergeInfo(row) {
 	return merge(info, _.omit(row, ['INFO']));
 }
 
-// XXX hard-coded GENE, PROB, REFS, PATH for now
-function sanitize(data) {
+// add unique id to variant table
+function addId(data) {
 	return _.map(data, (r, i) => merge({id: i}, r));
 }
 
@@ -61,7 +61,7 @@ function readTsv(response) {
 	var keys = header.split("\t");
     var rows = _.map(records, row => row.split("\t"));
     return {
-        records: sanitize(_.map(rows, row => _.object(keys, row)))
+        records: addId(_.map(rows, row => _.object(keys, row)))
 	};
 }
 
@@ -89,7 +89,7 @@ var NavBarNew = React.createClass({
 			<Navbar>
 				<a className="navbar-brand" href="http://brcaexchange.org">
 					<img style={{height: 28, width: 28, display: 'inline-block'}} src={brcaLogo} alt="brca logo"/>
-					&nbsp;&nbsp;&nbsp;BRCA Exchange&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<span style={{fontSize: 30, color: "#FF3399"}}>&nbsp;&nbsp;&nbsp;BRCA Exchange&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
 				</a>
 				<CollapsableNav>
 					<Nav navbar>
