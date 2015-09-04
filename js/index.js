@@ -85,17 +85,16 @@ var NavBarNew = React.createClass({
 	},
 	render: function () {
 		return (
-			<Navbar>
+			<Navbar toggleNavKey={0}>
 				<a className="navbar-brand" href="http://brcaexchange.org">
-					<img style={{marginBottom: 10, height: 28, width: 28, display: 'inline-block'}} src={brcaLogo} alt="brca logo"/>
 					<span style={{margin: 10, fontSize: 30, color: "#FF3399"}}>
                     BRCA Exchange
                     </span>
 				</a>
-				<CollapsableNav>
+				<CollapsableNav eventKey={0}>
 					<Nav navbar>
-						<NavLink to='/'>Home</NavLink>
-						<DropdownButton ref='about' title='About'>
+						<NavLink eventKey={1} to='/'>Home</NavLink>
+						<DropdownButton eventKey={2} ref='about' title='About'>
 							<NavLink onClick={this.close} to='/about/history'>
 								History of the BRCA Exchange
 							</NavLink>
@@ -106,10 +105,10 @@ var NavBarNew = React.createClass({
 								BRCA Variation and Cancer
 							</NavLink>
 						</DropdownButton>
-						<NavLink to='/variants'>Variants</NavLink>
+						<NavLink eventKey={3} to='/variants'>Variants</NavLink>
 					</Nav>
 					<Nav navbar right>
-						<NavItem href='#'><input placeholder="Search Variant"></input>
+						<NavItem eventKey={1} href='#'><input placeholder="Search Variant"></input>
 							<Button className='btn-xs' style={{border: 0}}>
 								<span className="glyphicon glyphicon-search"></span>
 							</Button>
