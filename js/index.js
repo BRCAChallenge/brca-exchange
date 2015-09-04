@@ -201,24 +201,6 @@ var About = React.createClass({
 	}
 });
 
-// sketch of function to filter rows on exact matches
-function filterData(data, str) { //eslint-disable-line no-unused-vars
-	var {records, header} = data;
-	var filteredRecords = _.filter(records, row => {
-		// row = {
-		//   chrom: "17",
-		//   pos: 1234,
-		//   hgvs: "NC_0001:1234T>C"
-		// }
-		//
-		return _.find(_.values(row), col => col.indexOf(str) !== -1);
-
-	});
-	return {
-		records: filteredRecords,
-		header: header
-	};
-}
 
 var Database = React.createClass({
 	mixins: [Navigation],
