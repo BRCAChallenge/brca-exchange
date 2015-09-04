@@ -48,7 +48,6 @@
     "rx-dom": "^4.0.4",
     "underscore": "^1.7.0",
     "vcf.js": "^0.2.6",
-    "d3": "v3.5.6",
     "react-data-components": "v0.5.0"
   }
 }

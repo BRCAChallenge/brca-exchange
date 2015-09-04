@@ -6,8 +6,6 @@ var React = require('react');
 require('bootstrap/dist/css/bootstrap.css');
 var Rx = require('rx');
 var vcf = require('vcf.js');
-var d3 = require('d3");
-var DataTable = require('react-data-components').DataTable;
 require('rx.binding');
 require('rx-dom');
 require('css/custom.css');
