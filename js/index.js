@@ -56,7 +56,7 @@ function cutTrailingNewLine(string) {
     return string;
 }
 
-function readVcf(response) {
+function readTsv(response) {
 	var [header, ...records] = cutTrailingNewLine(response).split("\n");
 	var keys = header.split("\t");
     var rows = _.map(records, row => row.split("\t"));
@@ -349,7 +349,7 @@ var Application = React.createClass({
 	},
 	componentWillMount: function (){
 		Rx.DOM.get(databaseUrl).subscribe(data =>
-			this.setState({data: readVcf(data.response)}));
+			this.setState({data: readTsv(data.response)}));
 	},
 	render: function () {
 		var {data} = this.state;
