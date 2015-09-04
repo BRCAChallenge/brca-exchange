@@ -83,13 +83,14 @@ var NavBarNew = React.createClass({
 	close: function () {
 		this.refs.about.setState({open: false});
 	},
-	// XXX drop the &nbsp for a css margin
 	render: function () {
 		return (
 			<Navbar>
 				<a className="navbar-brand" href="http://brcaexchange.org">
-					<img style={{height: 28, width: 28, display: 'inline-block'}} src={brcaLogo} alt="brca logo"/>
-					<span style={{fontSize: 30, color: "#FF3399"}}>&nbsp;&nbsp;&nbsp;BRCA Exchange&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+					<img style={{marginBottom: 10, height: 28, width: 28, display: 'inline-block'}} src={brcaLogo} alt="brca logo"/>
+					<span style={{margin: 10, fontSize: 30, color: "#FF3399"}}>
+                    BRCA Exchange
+                    </span>
 				</a>
 				<CollapsableNav>
 					<Nav navbar>
