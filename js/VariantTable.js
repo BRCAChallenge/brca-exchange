@@ -27,7 +27,7 @@ var VariantTable = React.createClass({
 			];
 		return (
 			<DataTable
-				buildRowOptions={r => ({onClick: () => onRowClick(r.id)})}
+				buildRowOptions={r => ({title: 'click for details', onClick: () => onRowClick(r.id)})}
 				buildHeader={title => buildHeader(onHeaderClick, title)}
 				columns={columns}
 				initialData={data}
