@@ -3,6 +3,7 @@
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var webpack = require('webpack');
 var path = require('path');
+var mdih = require('./loaders/markdown-id-headers');
 
 module.exports = {
 	historyApiFallback: true,
@@ -22,7 +23,7 @@ module.exports = {
 				loaders: ['url?limit=10000'],
 				exclude: [path.resolve(__dirname, "js/img/favicon")]
 			},
-			{ test: /\.md$/, loader: 'raw' }
+			{ test: /\.md/, loader: 'raw!markdown-it' }
 		]
 	},
 	plugins: [
@@ -47,5 +48,9 @@ module.exports = {
 		alias: {
 			'copy': 'file-loader?name=[path][name].[ext]&context=./js'
 		}
+	},
+	'markdown-it': {
+		html: true,
+		use: [mdih]
 	}
 };

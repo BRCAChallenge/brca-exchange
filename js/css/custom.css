@@ -34,3 +34,13 @@ li {list-style-type: none;}
 	position: relative;
 	top: -10px;
 }
+
+@keyframes example {
+	from {background-color: bisque;}
+	to {background-color: white;}
+}
+
+:target {
+    animation-name: example;
+    animation-duration: 10s;
+}

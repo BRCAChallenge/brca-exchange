@@ -18,14 +18,7 @@ var UNESCOLogo = require('./img/UNESCO-logo.jpg');
 var ENIGMALogo = require('./img/enigma_logo.png');
 var CIMBALogo = require('./img/cimba_logo.png');
 
-var Markdown = require('react-remarkable');
-var content = {
-	home: require('../content/home.md'),
-	'history': require('../content/history.md'),
-	'brca1_2': require('../content/brca1_2.md'),
-	'variation': require('../content/variationAndCancer.md')
-};
-
+var content = require('./content');
 
 var databaseUrl = require('file!../../brca-database.vcf');
 
@@ -56,6 +49,15 @@ function readVcf(response) {
 		records: sanitize(records)
 	};
 }
+
+var RawHTML = React.createClass({
+	render: function() {
+		var {html, ...otherProps} = this.props;
+		return (
+			<div {...otherProps} dangerouslySetInnerHTML={{__html: html}} />
+		);
+	}
+});
 
 var NavLink = React.createClass({
 	render: function () {
@@ -97,6 +99,7 @@ var NavBarNew = React.createClass({
 							</NavLink>
 						</DropdownButton>
 						<NavLink to='/variants'>Variants</NavLink>
+						<NavLink to='/help'>Help</NavLink>
 					</Nav>
 					<Nav navbar right>
 						<NavItem href='#'><input placeholder="Search Variant"></input>
@@ -143,7 +146,7 @@ var Home = React.createClass({
 				</Row>
 				<Row style={{marginTop: 100}}>
 					<Col md={8} mdOffset={2}>
-						<Markdown options={{html: true}} source={content.home} />
+						<RawHTML html={content.pages.home} />
 					</Col>
 				</Row>
 				<Row className='logo-block'>
@@ -184,13 +187,28 @@ var About = React.createClass({
 			<Grid>
 				<Row style={{marginTop: 100}}>
 					<Col md={8} mdOffset={2}>
-						<Markdown options={{html: true}} source={content[page]} />
+						<RawHTML html={content.pages[page]} />
 					</Col>
 				</Row>
 			</Grid>
 		);
 	}
 });
+
+var Help = React.createClass({
+	render: function() {
+		return (
+			<Grid className="help">
+				<Row style={{marginTop: 100}}>
+					<Col md={8} mdOffset={2}>
+						<RawHTML ref='content' html={content.pages.help} />
+					</Col>
+				</Row>
+			</Grid>
+		);
+	}
+});
+
 
 // sketch of function to filter rows on exact matches
 function filterData(data, str) { //eslint-disable-line no-unused-vars
@@ -377,6 +395,7 @@ var routes = (
 	<Route handler={Application}>
 		<DefaultRoute handler={Home}/>
 		<Route path='about/:page' handler={About}/>
+		<Route path='help' handler={Help}/>
 		<Route path='variants' />
 		<Route path='variant/:id' handler={VariantDetail}/>
 	</Route>
