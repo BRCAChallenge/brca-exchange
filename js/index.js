@@ -84,8 +84,8 @@ var NavBarNew = React.createClass({
 			<Navbar toggleNavKey={0}>
 				<a className="navbar-brand" href="http://brcaexchange.org">
 					<span style={{margin: 10, fontSize: 30, color: "#FF3399"}}>
-                    BRCA Exchange
-                    </span>
+						BRCA Exchange
+					</span>
 				</a>
 				<CollapsableNav eventKey={0}>
 					<Nav navbar>
@@ -113,8 +113,8 @@ var NavBarNew = React.createClass({
 					</Nav>
 				</CollapsableNav>
 			</Navbar>
-        );
-    }
+		);
+	}
 });
 
 var Home = React.createClass({
