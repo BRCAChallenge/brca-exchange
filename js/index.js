@@ -10,7 +10,7 @@ require('rx.binding');
 require('rx-dom');
 require('css/custom.css');
 var _ = require('underscore');
-var brcaLogo = require('./img/brca_logo.png');
+//var brcaLogo = require('./img/brca_logo.png');
 var ga4ghLogo = require('./img/ga4gh-logo-less.png');
 var brcaLogoWithText = require('./img/BRCA-logo-with-text.png');
 var hvpLogo = require('./img/hvp_logo.png');
@@ -20,7 +20,7 @@ var CIMBALogo = require('./img/cimba_logo.png');
 
 var content = require('./content');
 
-var databaseUrl = require('file!../../brca-database.vcf');
+var databaseUrl = require('file!../../enigma-database.tsv');
 
 var {Well, Grid, Col, Row, Input, Button, Navbar, CollapsableNav, Nav, Table,
 	NavItem, DropdownButton, MenuItem, Panel} = require('react-bootstrap');
@@ -32,21 +32,24 @@ var {Navigation, State, Link, Route, RouteHandler,
 
 var merge = (...objs) => _.extend({}, ...objs);
 
-function mergeInfo(row) {
-	var info = _.object(_.map(_.pairs(row.INFO), ([k, v]) => ['INFO$' + k, v]));
-	return merge(info, _.omit(row, ['INFO']));
+// add unique id to variant table
+function addId(data) {
+	return _.map(data, (r, i) => merge({id: i}, r));
 }
 
-// XXX hard-coded GENE, PROB, REFS, PATH for now
-function sanitize(data) {
-	return _.map(data, (r, i) => merge({id: i, GENE: 'BRCA1', PROB: 0.23, REFS: 'sciencemag.org/content', PATH: 'pathogenic'}, mergeInfo(r)));
+function cutTrailingNewLine(string) {
+    if (string[string.length-1] === "\n") {
+        return string.slice(0, string.length - 1);
+    }
+    return string;
 }
 
-function readVcf(response) {
-	var {header, records} = vcf.parser()(response);
-	return {
-		header: header,
-		records: sanitize(records)
+function readTsv(response) {
+	var [header, ...records] = cutTrailingNewLine(response).split("\n");
+	var keys = header.split("\t");
+    var rows = _.map(records, row => row.split("\t"));
+    return {
+        records: addId(_.map(rows, row => _.object(keys, row)))
 	};
 }
 
@@ -76,18 +79,18 @@ var NavBarNew = React.createClass({
 	close: function () {
 		this.refs.about.setState({open: false});
 	},
-	// XXX drop the &nbsp for a css margin
 	render: function () {
 		return (
-			<Navbar>
+			<Navbar toggleNavKey={0}>
 				<a className="navbar-brand" href="http://brcaexchange.org">
-					<img style={{height: 28, width: 28, display: 'inline-block'}} src={brcaLogo} alt="brca logo"/>
-					&nbsp;&nbsp;&nbsp;BRCA Exchange&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<span style={{margin: 10, fontSize: 30, color: "#FF3399"}}>
+                    BRCA Exchange
+                    </span>
 				</a>
-				<CollapsableNav>
+				<CollapsableNav eventKey={0}>
 					<Nav navbar>
-						<NavLink to='/'>Home</NavLink>
-						<DropdownButton ref='about' title='About'>
+						<NavLink eventKey={1} to='/'>Home</NavLink>
+						<DropdownButton eventKey={2} ref='about' title='About'>
 							<NavLink onClick={this.close} to='/about/history'>
 								History of the BRCA Exchange
 							</NavLink>
@@ -98,11 +101,11 @@ var NavBarNew = React.createClass({
 								BRCA Variation and Cancer
 							</NavLink>
 						</DropdownButton>
-						<NavLink to='/variants'>Variants</NavLink>
+						<NavLink eventKey={3} to='/variants'>Variants</NavLink>
 						<NavLink to='/help'>Help</NavLink>
 					</Nav>
 					<Nav navbar right>
-						<NavItem href='#'><input placeholder="Search Variant"></input>
+						<NavItem eventKey={1} href='#'><input placeholder="Search Variant"></input>
 							<Button className='btn-xs' style={{border: 0}}>
 								<span className="glyphicon glyphicon-search"></span>
 							</Button>
@@ -208,26 +211,6 @@ var Help = React.createClass({
 		);
 	}
 });
-
-
-// sketch of function to filter rows on exact matches
-function filterData(data, str) { //eslint-disable-line no-unused-vars
-	var {records, header} = data;
-	var filteredRecords = _.filter(records, row => {
-		// row = {
-		//   chrom: "17",
-		//   pos: 1234,
-		//   hgvs: "NC_0001:1234T>C"
-		// }
-		//
-		return _.find(_.values(row), col => col.indexOf(str) !== -1);
-
-	});
-	return {
-		records: filteredRecords,
-		header: header
-	};
-}
 
 var Database = React.createClass({
 	mixins: [Navigation],
@@ -376,7 +359,7 @@ var Application = React.createClass({
 	},
 	componentWillMount: function (){
 		Rx.DOM.get(databaseUrl).subscribe(data =>
-			this.setState({data: readVcf(data.response)}));
+			this.setState({data: readTsv(data.response)}));
 	},
 	render: function () {
 		var {data} = this.state;
