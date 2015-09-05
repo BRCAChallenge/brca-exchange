@@ -230,7 +230,7 @@ var Help = React.createClass({
 
 var Database = React.createClass({
 	mixins: [Navigation],
-	showVariant: function ({id}) {
+	showVariant: function (id) {
 		this.transitionTo(`/variant/${id}`);
 	},
 	showHelp: function (title) {

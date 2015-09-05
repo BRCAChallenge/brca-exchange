@@ -2,7 +2,6 @@
 'use strict';
 
 var React = require('react');
-var _ = require('underscore');
 var DataTable = require('react-data-components-bd2k').DataTable;
 require('react-data-components-bd2k/css/table-twbs.css');
 
@@ -17,12 +16,8 @@ function buildHeader(onClick, title) {
 }
 
 var VariantTable = React.createClass({
-	onSortChange: function (info) {
-		var [{prop}] = info, {data} = this.state;
-		this.setState({data: _.sortBy(data, r => r[prop])});
-	},
 	render: function () {
-		var {data, onHeaderClick, ...opts} = this.props,
+		var {data, onHeaderClick, onRowClick} = this.props,
 			columns = [
 				{title: 'Gene', prop: 'Gene symbol'},
 				{title: '  HGVS  ', prop: 'HGVS'},
@@ -32,7 +27,7 @@ var VariantTable = React.createClass({
 			];
 		return (
 			<DataTable
-				{...opts}
+				buildRowOptions={r => ({onClick: () => onRowClick(r.id)})}
 				buildHeader={title => buildHeader(onHeaderClick, title)}
 				columns={columns}
 				initialData={data}
