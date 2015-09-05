@@ -17,6 +17,7 @@ var hvpLogo = require('./img/hvp_logo.png');
 var UNESCOLogo = require('./img/UNESCO-logo.jpg');
 var ENIGMALogo = require('./img/enigma_logo.png');
 var CIMBALogo = require('./img/cimba_logo.png');
+var slugify = require('./slugify');
 
 var content = require('./content');
 
@@ -199,9 +200,24 @@ var About = React.createClass({
 });
 
 var Help = React.createClass({
+	mixins: [State],
+	componentDidMount: function () {
+		var fragment = slugify(window.location.hash.slice(1));
+		if (fragment !== '') {
+			setTimeout(function () {
+				var el = document.getElementById(fragment);
+				if (el) {
+					window.scrollTo(0, el.getBoundingClientRect().top);
+				}
+			}, 0);
+		}
+	},
 	render: function() {
+		var fragment = slugify(window.location.hash.slice(1));
 		return (
 			<Grid className="help">
+				{fragment === '' ? null :
+					<style>{`#${fragment} { animation-name: emphasis; animation-duration: 10s; } `}</style>}
 				<Row style={{marginTop: 100}}>
 					<Col md={8} mdOffset={2}>
 						<RawHTML ref='content' html={content.pages.help} />
@@ -216,6 +232,9 @@ var Database = React.createClass({
 	mixins: [Navigation],
 	showVariant: function ({id}) {
 		this.transitionTo(`/variant/${id}`);
+	},
+	showHelp: function (title) {
+		this.transitionTo(`/help#${slugify(title)}`);
 	},
 	render: function () {
 		var {show, data} = this.props;
@@ -266,7 +285,10 @@ var Database = React.createClass({
 					{data?
 						<Row>
 							<Col md={10} mdOffset={1}>
-								<VariantTable data={data.records} onRowClick={this.showVariant}/>
+								<VariantTable
+									data={data.records}
+									onHeaderClick={this.showHelp}
+									onRowClick={this.showVariant}/>
 							</Col>
 						</Row>
 						: ''}

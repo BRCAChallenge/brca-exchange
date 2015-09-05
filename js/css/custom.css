@@ -35,12 +35,15 @@ li {list-style-type: none;}
 	top: -10px;
 }
 
-@keyframes example {
+@keyframes emphasis {
 	from {background-color: bisque;}
 	to {background-color: white;}
 }
 
-:target {
-    animation-name: example;
-    animation-duration: 10s;
+th[role='columnheader']:hover .help {
+	visibility: visible;
+}
+
+th[role='columnheader'] .help {
+	visibility: hidden;
 }

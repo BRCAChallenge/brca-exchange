@@ -3,10 +3,18 @@
 
 var React = require('react');
 var _ = require('underscore');
-var DataTable = require('react-data-components').DataTable;
-var DataGrid = require('react-datagrid');
-require('react-datagrid/index.css');
-require('react-data-components/css/table-twbs.css');
+var DataTable = require('react-data-components-bd2k').DataTable;
+require('react-data-components-bd2k/css/table-twbs.css');
+
+function buildHeader(onClick, title) {
+	return (
+		<span>
+			{title}
+			<span onClick={() => onClick(title)}
+				className='help glyphicon glyphicon-question-sign superscript'/>
+		</span>
+	);
+}
 
 var VariantTable = React.createClass({
 	onSortChange: function (info) {
@@ -14,7 +22,7 @@ var VariantTable = React.createClass({
 		this.setState({data: _.sortBy(data, r => r[prop])});
 	},
 	render: function () {
-		var {data, ...opts} = this.props,
+		var {data, onHeaderClick, ...opts} = this.props,
 			columns = [
 				{title: 'Gene', prop: 'Gene symbol'},
 				{title: '  HGVS  ', prop: 'HGVS'},
@@ -25,6 +33,7 @@ var VariantTable = React.createClass({
 		return (
 			<DataTable
 				{...opts}
+				buildHeader={title => buildHeader(onHeaderClick, title)}
 				columns={columns}
 				initialData={data}
 				initialPageLength={10}
