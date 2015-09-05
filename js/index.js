@@ -39,7 +39,7 @@ function addId(data) {
 }
 
 function cutTrailingNewLine(string) {
-    if (string[string.length-1] === "\n") {
+    if (string[string.length - 1] === "\n") {
         return string.slice(0, string.length - 1);
     }
     return string;
@@ -282,7 +282,7 @@ var Database = React.createClass({
 
 
 				<div style={{position: "relative", height: "100px"}}>
-					{data?
+					{data ?
 						<Row>
 							<Col md={10} mdOffset={1}>
 								<VariantTable
@@ -314,7 +314,7 @@ var MyVariant = React.createClass({ //eslint-disable-line no-unused-vars
 					<Input ref='file' type='file' onChange={this.fileChange}/>
 				</div>
 				<div style={{position: "relative", height: "100px"}}>
-					{data?
+					{data ?
 						<Row>
 							<Col md={10} mdOffset={1}>
 								<VariantTable data={data}/>
