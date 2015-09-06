@@ -230,7 +230,7 @@ var Help = React.createClass({
 });
 
 var Database = React.createClass({
-	mixins: [Navigation],
+	mixins: [Navigation, State],
 	showVariant: function (id) {
 		this.transitionTo(`/variant/${id}`);
 	},
@@ -238,7 +238,8 @@ var Database = React.createClass({
 		this.transitionTo(`/help#${slugify(title)}`);
 	},
 	render: function () {
-		var {show, data} = this.props;
+		var {show, data} = this.props,
+			{search} = this.getQuery();
 		return (
 			<div style={{display: show ? 'block' : 'none'}}>
 				<div>
@@ -287,6 +288,7 @@ var Database = React.createClass({
 						<Row>
 							<Col md={10} mdOffset={1}>
 								<VariantTable
+									filterValues={{globalSearch: search || ''}}
 									data={data.records}
 									onHeaderClick={this.showHelp}
 									onRowClick={this.showVariant}/>
@@ -391,7 +393,7 @@ var Application = React.createClass({
 			<div>
 				<NavBarNew />
 				<RouteHandler data={data}/>
-				<Database show={path === 'variants'} data={data}/>
+				<Database show={path.indexOf('variants') === 0} data={data}/>
 			</div>
 		);
 	}

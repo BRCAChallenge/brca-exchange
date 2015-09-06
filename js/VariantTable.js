@@ -17,7 +17,7 @@ function buildHeader(onClick, title) {
 
 var VariantTable = React.createClass({
 	render: function () {
-		var {data, onHeaderClick, onRowClick} = this.props,
+		var {data, onHeaderClick, onRowClick, ...opts} = this.props,
 			columns = [
 				{title: 'Gene', prop: 'Gene symbol'},
 				{title: '  HGVS  ', prop: 'HGVS'},
@@ -27,6 +27,7 @@ var VariantTable = React.createClass({
 			];
 		return (
 			<DataTable
+				{...opts}
 				buildRowOptions={r => ({title: 'click for details', onClick: () => onRowClick(r.id)})}
 				buildHeader={title => buildHeader(onHeaderClick, title)}
 				columns={columns}
