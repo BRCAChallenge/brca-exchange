@@ -40,10 +40,10 @@ li {list-style-type: none;}
 	to {background-color: white;}
 }
 
-th[role='columnheader']:hover .help {
+th[role='columnheader']:hover .help, .help-target:hover .help {
 	visibility: visible;
 }
 
-th[role='columnheader'] .help {
+th[role='columnheader'] .help, .help-target .help {
 	visibility: hidden;
 }

@@ -77,6 +77,29 @@ var NavLink = React.createClass({
 	}
 });
 
+var VariantSearch = React.createClass({
+	mixins: [Navigation],
+	onClick: function () {
+		var value = React.findDOMNode(this.refs.input).value;
+		this.transitionTo(`/variants?search=${value}`);
+	},
+	onKeyDown: function (ev) {
+		if (ev.key === 'Enter') {
+			this.transitionTo(`/variants?search=${ev.target.value}`);
+		}
+	},
+	render: function () {
+		return (
+			<span>
+				<input ref='input' onKeyDown={this.onKeyDown} placeholder="Search Variant"></input>
+				<Button onClick={this.onClick} className='btn-xs' style={{border: 0}}>
+					<span className="glyphicon glyphicon-search"></span>
+				</Button>
+			</span>
+		);
+	}
+});
+
 var NavBarNew = React.createClass({
 	close: function () {
 		this.refs.about.setState({open: false});
@@ -107,10 +130,8 @@ var NavBarNew = React.createClass({
 						<NavLink to='/help'>Help</NavLink>
 					</Nav>
 					<Nav navbar right>
-						<NavItem eventKey={1} href='#'><input placeholder="Search Variant"></input>
-							<Button className='btn-xs' style={{border: 0}}>
-								<span className="glyphicon glyphicon-search"></span>
-							</Button>
+						<NavItem eventKey={1} href='#'>
+							<VariantSearch />
 						</NavItem>
 					</Nav>
 				</CollapsableNav>
@@ -120,6 +141,7 @@ var NavBarNew = React.createClass({
 });
 
 var Home = React.createClass({
+	mixins: [Navigation],
 	getInitialState() {
 		return {
 			index: 0,
@@ -133,18 +155,20 @@ var Home = React.createClass({
 			direction: selectedDirection
 		});
 	},
+	showHelp: function (title) {
+		this.transitionTo(`/help#${slugify(title)}`);
+	},
 
 	render: function() {
 		return (
 			<Grid>
 				<Row style={{marginTop: 10}}>
 					<Col md={4} mdOffset={4}>
-						<Well>
-							<div className="text-center">
-								<input placeholder="Search Variant">
-									<span className="glyphicon glyphicon-search"/>
-								</input>
-								<span className="glyphicon glyphicon-question-sign superscript"/>
+						<Well className='help-target'>
+							<div className='text-center'>
+								<VariantSearch />
+								<span onClick={() => this.showHelp('Searching')}
+									className="glyphicon glyphicon-question-sign superscript help"/>
 							</div>
 						</Well>
 					</Col>
@@ -247,15 +271,6 @@ var Database = React.createClass({
 						<div className="text-center">
 							<span>place holder for database summary</span>
 						</div>
-					</Row>
-					<Row style={{marginTop: 10}}>
-						<div className="text-center">
-							<input><span className="glyphicon glyphicon-search"/></input>
-							<span className="glyphicon glyphicon-question-sign superscript"/>
-						</div>
-					</Row>
-					<Row className="text-center" style={{fontSize: 12, color: "grey"}}>
-						search for known variants
 					</Row>
 					<Row>
 						<Col md={4} mdOffset={4}>
