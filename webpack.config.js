@@ -19,7 +19,7 @@ module.exports = {
 			{ test: /\.css$/, loader: "style!css" },
 			{ test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader?optional=es7.objectRestSpread,optional=runtime,cacheDirectory=true'},
 			{
-				test: /\.(jpe?g|png|gif|svg|eot|woff2?|ttf)$/i,
+				test: /\.(jpe?g|png|gif|svg|eot|woff2?|ttf)(\?v=[0-9]\.[0-9]\.[0-9])?$/i,
 				loaders: ['url?limit=10000'],
 				exclude: [path.resolve(__dirname, "js/img/favicon")]
 			},

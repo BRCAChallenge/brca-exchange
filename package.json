@@ -39,6 +39,7 @@
   "dependencies": {
     "babel-runtime": "^5.1.13",
     "bootstrap": "^3.3.4",
+    "font-awesome-webpack": "0.0.3",
     "markdown-it": "^4.4.0",
     "raw-loader": "^0.5.1",
     "react": "^0.13.1",

@@ -4,6 +4,7 @@
 
 var React = require('react');
 require('bootstrap/dist/css/bootstrap.css');
+require('font-awesome-webpack');
 var Rx = require('rx');
 var vcf = require('vcf.js');
 require('rx.binding');
