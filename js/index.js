@@ -12,12 +12,7 @@ require('rx-dom');
 require('css/custom.css');
 var _ = require('underscore');
 //var brcaLogo = require('./img/brca_logo.png');
-var ga4ghLogo = require('./img/ga4gh-logo-less.png');
-var brcaLogoWithText = require('./img/BRCA-logo-with-text.png');
-var hvpLogo = require('./img/hvp_logo.png');
-var UNESCOLogo = require('./img/UNESCO-logo.jpg');
-var ENIGMALogo = require('./img/enigma_logo.png');
-var CIMBALogo = require('./img/cimba_logo.png');
+var logos = require('./logos');
 var slugify = require('./slugify');
 
 var content = require('./content');
@@ -160,6 +155,11 @@ var Home = React.createClass({
 	},
 
 	render: function() {
+		var logoItems = _.map(logos, ({id, logo, url}) => (
+			<li key={id}><a href={url}>
+				<img src={logo} alt={id + ' logo'} />
+			</a></li>
+		));
 		return (
 			<Grid>
 				<Row style={{marginTop: 10}}>
@@ -181,25 +181,7 @@ var Home = React.createClass({
 				<Row className='logo-block'>
 					<Col md={6} mdOffset={3}>
 						<ul className='logos'>
-							<li><a href="http://genomicsandhealth.org">
-								<img src={ga4ghLogo} alt="ga4gh logo" />
-							</a></li>
-							<li><a href="http://brcaexchange.org">
-								<img src={brcaLogoWithText} alt="brca exchange logo" />
-							</a></li>
-							<li><a href="http://www.humanvariomeproject.org">
-								<img src={hvpLogo} alt="human variome project logo" />
-							</a></li>
-							<li><a href="http://unesco.org">
-								<img src={UNESCOLogo} alt="UNESCO logo" />
-							</a></li>
-							<br></br>
-							<li><a href="http://enigmaconsortium.org">
-								<img src={ENIGMALogo} alt="ENIGMA logo" />
-							</a></li>
-							<li><a href="http://apps.ccge.medschl.cam.ac.uk/consortia/cimba//">
-								<img src={CIMBALogo} alt="CIMBA logo" />
-							</a></li>
+							{logoItems}
 						</ul>
 					</Col>
 				</Row>
