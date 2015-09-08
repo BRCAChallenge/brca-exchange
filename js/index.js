@@ -3,6 +3,7 @@
 'use strict';
 
 var React = require('react');
+var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 require('bootstrap/dist/css/bootstrap.css');
 require('font-awesome-webpack');
 var Rx = require('rx');
@@ -236,7 +237,7 @@ var Help = React.createClass({
 });
 
 var Database = React.createClass({
-	mixins: [Navigation, State],
+	mixins: [Navigation, State, PureRenderMixin],
 	showVariant: function (id) {
 		this.transitionTo(`/variant/${id}`);
 	},

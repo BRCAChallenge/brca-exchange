@@ -2,6 +2,7 @@
 'use strict';
 
 var React = require('react');
+var PureRenderMixin = require('./PureRenderMixin');
 var DataTable = require('react-data-components-bd2k').DataTable;
 require('react-data-components-bd2k/css/table-twbs.css');
 
@@ -9,13 +10,14 @@ function buildHeader(onClick, title) {
 	return (
 		<span>
 			{title}
-			<span onClick={() => onClick(title)}
+			<span onClick={ev => {ev.stopPropagation(); onClick(title); }}
 				className='help glyphicon glyphicon-question-sign superscript'/>
 		</span>
 	);
 }
 
 var VariantTable = React.createClass({
+	mixins: [PureRenderMixin],
 	render: function () {
 		var {data, onHeaderClick, onRowClick, ...opts} = this.props,
 			columns = [
