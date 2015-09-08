@@ -26,7 +26,7 @@ individual harbors any known BRCA genetic variants, and if any of these variants
 
 [https://en.wikipedia.org/wiki/BRCA_mutation](https://en.wikipedia.org/wiki/BRCA_mutation)
 
-![Source: https://commons.wikimedia.org/wiki/File:BRCA_1.JPG](https://commons.wikimedia.org/wiki/File:BRCA_1.JPG)
+![Source: https://commons.wikimedia.org/wiki/File:BRCA_1.JPG](https://upload.wikimedia.org/wikipedia/commons/a/ae/BRCA_1.JPG)
 <!---
 (text of caption, to be displayed in a smaller font as shown)
 Source: https://commons.wikimedia.org/wiki/File:BRCA_1.JPG
