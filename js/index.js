@@ -361,12 +361,26 @@ var MyVariant = React.createClass({ //eslint-disable-line no-unused-vars
 });
 
 var VariantDetail = React.createClass({
+	mixins: [Navigation],
+	showHelp: function (title) {
+		this.transitionTo(`/help#${slugify(title)}`);
+	},
 	render: function() {
 		var {data, params: {id}} = this.props,
 			variant = (data && data.records[id]) || {};
 
 		variant = _.omit(variant, ['__HEADER__']);
-		var rows = _.map(variant, (v, k) => <tr key={k}><td>{k}</td><td>{v}</td></tr>);
+		var rows = _.map(variant, (v, k) =>
+			 <tr key={k}>
+				 <td className='help-target'>
+					{k}
+					<span onClick={() => this.showHelp(k)}
+						className='help glyphicon glyphicon-question-sign superscript'/>
+				 </td>
+				 <td>{v}</td>
+			 </tr>);
+
+
 		return (
 			<Grid>
 				<Row style={{marginTop: 100}}>
