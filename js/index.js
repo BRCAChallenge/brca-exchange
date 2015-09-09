@@ -244,6 +244,19 @@ var Database = React.createClass({
 	showHelp: function (title) {
 		this.transitionTo(`/help#${slugify(title)}`);
 	},
+	createDownload: function (ev) {
+		// XXX This is a bit horrible. In order to build the tsv lazily (on button click, instead
+		// of on every tabe update), we catch the mousedown event and modify the href on the
+		// anchor element, behind the back of react. I don't believe this will cause any
+		// problems, but it's something to be aware of if react starts doing something strange.
+		// Also needs to be tested cross-browser. We should not offer download on browsers that don't allow
+		// client-driven download.
+		var data = this.refs.table.getData(),
+			keys = _.keys(data[0]),
+			tsvRows = _.map(data, obj => _.map(keys, k => obj[k]).join('\t')).join('\n'), // use os-specific line endings?
+			tsv = keys.join('\t') + '\n' + tsvRows;
+		ev.target.href = URL.createObjectURL(new Blob([tsv], { type: 'text/tsv' }));
+	},
 	render: function () {
 		var {show, data} = this.props,
 			{search} = this.getQuery();
@@ -275,7 +288,7 @@ var Database = React.createClass({
 							</Panel>
 						</Col>
 						<Col md={1}>
-							<Button>Download</Button>
+							<Button download="variants.tsv" href="#" onMouseDown={this.createDownload}>Download</Button>
 						</Col>
 					</Row>
 				</div>
@@ -286,6 +299,7 @@ var Database = React.createClass({
 						<Row>
 							<Col md={10} mdOffset={1}>
 								<VariantTable
+									ref='table'
 									filterValues={{globalSearch: search || ''}}
 									data={data.records}
 									onHeaderClick={this.showHelp}
