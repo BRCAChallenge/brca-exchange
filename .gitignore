@@ -3,4 +3,4 @@ data/
 build/
 env*
 npm-debug.log
-*.swp
+python_modules/

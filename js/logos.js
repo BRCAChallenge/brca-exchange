@@ -17,11 +17,6 @@ module.exports = [
 		logo: require('./img/hvp_logo.png'),
 		url: 'http://www.humanvariomeproject.org'
 	},
-	{/*
-		id: 'UNESCO',
-		logo: require('./img/UNESCO-logo.jpg'),
-		url: 'http://unesco.org'
-	*/},
 	{
 		id: 'ENIGMA',
 		logo: require('./img/enigma_logo.png'),
