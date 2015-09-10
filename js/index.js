@@ -102,14 +102,14 @@ var NavBarNew = React.createClass({
 	},
 	render: function () {
 		return (
-			<Navbar toggleNavKey={0}>
+			<Navbar toggleNavKey={0} className="navbar-fixed-top">
 				<a className="navbar-brand" href="http://brcaexchange.org">
 					<span style={{margin: 10, fontSize: 30, color: "#FF3399"}}>
 						BRCA Exchange
 					</span>
 				</a>
 				<CollapsableNav eventKey={0}>
-					<Nav navbar>
+					<Nav navbar right>
 						<NavLink eventKey={1} to='/'>Home</NavLink>
 						<DropdownButton eventKey={2} ref='about' title='About'>
 							<NavLink onClick={this.close} to='/about/history'>
@@ -124,11 +124,6 @@ var NavBarNew = React.createClass({
 						</DropdownButton>
 						<NavLink eventKey={3} to='/variants'>Variants</NavLink>
 						<NavLink to='/help'>Help</NavLink>
-					</Nav>
-					<Nav navbar right>
-						<NavItem eventKey={1} href='#'>
-							<VariantSearch />
-						</NavItem>
 					</Nav>
 				</CollapsableNav>
 			</Navbar>
