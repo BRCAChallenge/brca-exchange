@@ -2,6 +2,26 @@
     height: 80px;
 }
 
+.nav > li > a {
+    padding-left: 30px;
+    padding-right: 30px;
+    font-size: 16px;
+}
+
+.navbar-brand > span {
+    font-size: 30px;
+    font-stretch: condensed;
+}
+
+.navbar-brand > span > .BRCA {
+    color: #C03657;
+}
+
+.navbar-brand > span > .exchange {
+    color: #E8A2A0;
+}
+
+
 li {list-style-type: none;}
 
 .logos li {

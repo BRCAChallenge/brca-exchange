@@ -105,8 +105,9 @@ var NavBarNew = React.createClass({
 			<div className="navbar-container">
             <Navbar toggleNavKey={0} className="navbar-fixed-top">
 				<a className="navbar-brand" href="http://brcaexchange.org">
-					<span style={{margin: 10, fontSize: 30, color: "#FF3399"}}>
-						BRCA Exchange
+					<span>
+						<b className="BRCA">BRCA</b>
+                        <span className="exchange"> Exchange</span> 
 					</span>
 				</a>
 				<CollapsableNav eventKey={0}>
