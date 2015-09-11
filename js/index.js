@@ -161,7 +161,7 @@ var Home = React.createClass({
 		));
 		return (
 			<Grid>
-				<Row style={{marginTop: 10}}>
+				<Row>
 					<Col md={4} mdOffset={4}>
 						<Well className='help-target'>
 							<div className='text-center'>
@@ -172,7 +172,7 @@ var Home = React.createClass({
 						</Well>
 					</Col>
 				</Row>
-				<Row style={{marginTop: 100}}>
+				<Row>
 					<Col md={8} mdOffset={2}>
 						<RawHTML html={content.pages.home} />
 					</Col>
@@ -195,7 +195,7 @@ var About = React.createClass({
 
 		return (
 			<Grid>
-				<Row style={{marginTop: 100}}>
+				<Row>
 					<Col md={8} mdOffset={2}>
 						<RawHTML html={content.pages[page]} />
 					</Col>
@@ -224,7 +224,7 @@ var Help = React.createClass({
 			<Grid className="help">
 				{fragment === '' ? null :
 					<style>{`#${fragment} { animation-name: emphasis; animation-duration: 10s; } `}</style>}
-				<Row style={{marginTop: 100}}>
+				<Row>
 					<Col md={8} mdOffset={2}>
 						<RawHTML ref='content' html={content.pages.help} />
 					</Col>
@@ -381,7 +381,7 @@ var VariantDetail = React.createClass({
 
 		return (
 			<Grid>
-				<Row style={{marginTop: 100}}>
+				<Row>
 					<div className='text-center'>
 						<h3>Variant Detail</h3>
 						<p>Placeholder for a better variant details page</p>
