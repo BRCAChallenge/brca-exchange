@@ -26,6 +26,19 @@
     padding-top: 10px
 }
 
+.search-box {
+    padding: 50px;
+}
+
+.search-box > input {
+    width: 200px;
+}
+
+.search-box > Button {
+    border: 0px;
+}
+
+
 
 li {list-style-type: none;}
 
