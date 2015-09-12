@@ -87,12 +87,14 @@ var VariantSearch = React.createClass({
 	},
 	render: function () {
 		return (
-			<span>
+			<div className="search-box">
 				<input ref='input' onKeyDown={this.onKeyDown} placeholder="Search Variant"></input>
 				<Button onClick={this.onClick} className='btn-xs' style={{border: 0}}>
 					<span className="glyphicon glyphicon-search"></span>
+					<span onClick={() => this.showHelp('Searching')}
+						className="glyphicon glyphicon-question-sign superscript help"/>
 				</Button>
-			</span>
+			</div>
 		);
 	}
 });
@@ -164,13 +166,9 @@ var Home = React.createClass({
 			<Grid>
 				<Row>
 					<Col md={4} mdOffset={4}>
-						<Well className='help-target'>
-							<div className='text-center'>
-								<VariantSearch />
-								<span onClick={() => this.showHelp('Searching')}
-									className="glyphicon glyphicon-question-sign superscript help"/>
-							</div>
-						</Well>
+				    	<div className='text-center'>
+							<VariantSearch />
+						</div>
 					</Col>
 				</Row>
 				<Row>
