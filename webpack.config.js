@@ -23,7 +23,7 @@ module.exports = {
 				loaders: ['url?limit=10000'],
 				exclude: [path.resolve(__dirname, "js/img/favicon")]
 			},
-			{ test: /\.md/, loader: 'raw!markdown-it' }
+			{ test: /\.md/, loader: 'html!markdown-it' }
 		]
 	},
 	plugins: [
