@@ -2,6 +2,7 @@
 /*global require: false */
 'use strict';
 
+require('./favicons');
 var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 require('bootstrap/dist/css/bootstrap.css');
