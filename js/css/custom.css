@@ -27,16 +27,26 @@
 }
 
 .search-box {
-    padding: 50px;
+    padding: 70px;
 }
 
 .search-box > input {
-    width: 200px;
+    width: 300px;
+    height: 40px;
+    border: 1px solid #E8A2A0;
+}
+
+input:focus{
+    border: 1px solid #C03657;
+    outline: none;
 }
 
 .search-box > Button {
     border: 0px;
 }
+
+
+
 
 
 
