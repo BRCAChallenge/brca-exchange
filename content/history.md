@@ -21,7 +21,57 @@ In collaboration with the Human Variome Project, on June 12-13, 2015, a meeting 
 
 At this meeting, the vision of a web portal to share expert-reviewed BRCA variant classifications was proposed. Since this time, working groups with members located around the world have worked to identify 1) sources of classified variants to be aggregated and 2) unclassified variants with evidence, which can then be interpreted, classified, and aggregated. The classified variants are then displayed at a public portal, the BRCA Exchange, for use by clinicians, patients, and labs to enable accurate understanding of any individual BRCA1/2 variant, for superior clinical care and decision-making.
 
+The BRCA Exchange is the work of a great many people from many different institutions and countries.  The individuals listed below are part of the leadership of this effort.
+
+* John Burn, Newcastle University, Newcastle upon Tyne, UK
+
+* Stephen Chanock, National Cancer Institute, Rockville, USA
+
+* Antonis Antoniou, University of Cambridge, Cambridge, UK
+
+* Larry Brody, National Human Genome Research Institute, Bethesda, USA
+
+* Robert Cook-Deegan, Duke University, Durham, USA
+
+* Fergus Couch, Mayo Clinic, Rochester, USA
+
+* Johan den Dunnen, Leiden University Medical Center, Leiden, Netherlands
+
+* Susan Domchek, University of Pennsylvania, Philadelphia, USA
+
+* Douglas Easton, University of Cambridge, Cambridge, UK
+
+* William Foulkes, McGill University, Montreal, Canada
+
+* Judy Garber, Dana-Farber Cancer Institute, Boston, USA
+
+* David Goldgar, Huntsman Cancer Institute, Salt Lake City, USA
+
+* Kazuto Kato, Osaka University, Osaka, Japan
+
+* Delyth Jane Morgan, Baroness Morgan of Drefelin , Breast Cancer Now, Cancer Research UK
+ 
+* Robert Nussbaum, University of California San Francisco, San Francisco, USA
+
+* Kenneth Offit, Memorial Sloan Kettering Cancer Center, New York, USA
+
+* Sharon Plon, Baylor College of Medicine, Houston, USA
+
+* Gunnar Raetsch, Memorial Sloan Kettering Cancer Center, New York City, USA
+
+* Nazneen Rahman, Institute of Cancer Research, London, UK
+
+* Heidi Rehm, Harvard Medical School, Boston, USA
+
+* Mark Robson, Memorial Sloan Kettering Cancer Center, New York City, USA
+
+* Wendy Rubinstein, National Institute of Health, Bethesda, USA
+
+* Amanda Spurdle, QIMR Berghofer Medical Research Institute, Herston, Queensland, Australia
+
+* Dominique Stoppa-Lyonnet, Curie Institute, Paris, France
+
+* Sean Tavtigian, Hunstman Cancer Institute, Salt Lake City, USA
 <!---
-Chart: List of Steering Committee members/affiliations (get from Rachel L)
 Picture: SC members at UNESCO in Paris (I think John Burn has this)
 -->
