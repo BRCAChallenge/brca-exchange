@@ -95,3 +95,7 @@ th[role='columnheader']:hover .help, .help-target:hover .help {
 th[role='columnheader'] .help, .help-target .help {
 	visibility: hidden;
 }
+
+.markdown img {
+	width: 100%
+}

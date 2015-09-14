@@ -56,7 +56,7 @@ var RawHTML = React.createClass({
 	render: function() {
 		var {html, ...otherProps} = this.props;
 		return (
-			<div {...otherProps} dangerouslySetInnerHTML={{__html: html}} />
+			<div className='markdown' {...otherProps} dangerouslySetInnerHTML={{__html: html}} />
 		);
 	}
 });
