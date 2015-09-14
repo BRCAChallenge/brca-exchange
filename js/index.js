@@ -257,11 +257,6 @@ var Database = React.createClass({
 		return (
 			<div style={{display: show ? 'block' : 'none'}}>
 				<div>
-					<Row style={{marginTop: 50, marginBottom: 50}}>
-						<div className="text-center">
-							<span>place holder for database summary</span>
-						</div>
-					</Row>
 					<Row>
 						<Col md={4} mdOffset={4}>
 							<Panel header='Advanced filtering'>
