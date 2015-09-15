@@ -16,25 +16,20 @@ function buildHeader(onClick, title) {
 	);
 }
 
-// Example column renderer, with function keyword:
-//
-//function renderMyColumn(val) {
-//	return (
-//		<a href={"http://clinvar" + val}>{val}</a>
-//	);
-//}
-//
-// or as fat-arrow function:
-//
-//var renderMyColumn = val => <a href={"http://clinvar" + val}>{val}</a>;
+function renderClinVarLink(val) {
+	return (
+		<a href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + val}>{val}</a>
+	);
+}
 
 var columns = [
 	{title: 'Gene', prop: 'Gene symbol'},
 	{title: 'HGVS cDNA', prop: 'HGVS_cDNA'},
-	{title: 'HGVS protein', prop: 'HGVS_protein'/*, render: renderMyColumn*/}, // add render method like this
+	{title: 'HGVS protein', prop: 'HGVS_protein'},
 	{title: 'Genomic Coordinate', prop: 'Genomic Coordinate'},
 	{title: 'Pathogenicity', prop: 'Clinical significance'},
-	{title: 'Classification method', prop: 'Classification method'}
+	{title: 'Classification method', prop: 'Classification method'},
+	{title: 'ClinVar Link', prop: 'ClinVarAccession', render: renderClinVarLink}
 ];
 
 var VariantTable = React.createClass({
