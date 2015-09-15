@@ -373,9 +373,8 @@ var VariantDetail = React.createClass({
 		return (
 			<Grid>
 				<Row>
-					<div className='text-center'>
+					<div className='text-center Variant-detail-title'>
 						<h3>Variant Detail</h3>
-						<p>Placeholder for a better variant details page</p>
 					</div>
 				</Row>
 				<Row>
