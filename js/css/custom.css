@@ -99,3 +99,7 @@ th[role='columnheader'] .help, .help-target .help {
 .markdown img {
 	width: 100%
 }
+
+.Variant-detail-title {
+    margin: 20px;
+}
