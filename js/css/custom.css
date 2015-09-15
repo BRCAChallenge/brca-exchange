@@ -34,6 +34,11 @@
     width: 300px;
     height: 40px;
     border: 1px solid #E8A2A0;
+    text-align: left;
+    text-indent: 4%;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
 }
 
 input:focus{
@@ -45,10 +50,9 @@ input:focus{
     border: 0px;
 }
 
-
-
-
-
+.search-box Button:hover {
+    background-color: transparent;    
+}
 
 li {list-style-type: none;}
 
