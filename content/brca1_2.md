@@ -28,6 +28,5 @@ individual harbors any known BRCA genetic variants, and if any of these variants
 
 ![Source: https://upload.wikimedia.org/wikipedia/commons/a/ae/BRCA_1.JPG](BRCA_scaled.JPG)
 <!---
-(text of caption, to be displayed in a smaller font as shown)
-Source: https://commons.wikimedia.org/wiki/File:BRCA_1.JPG
+Alternatively, show the DNA cycle path, described at http://www.bshs.org.uk/travel-guide/dna-cycle-path-cambridge-england
 -->
