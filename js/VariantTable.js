@@ -18,10 +18,11 @@ function buildHeader(onClick, title) {
 
 var columns = [
 	{title: 'Gene', prop: 'Gene symbol'},
-	{title: '  HGVS  ', prop: 'HGVS'},
+	{title: 'HGVS cDNA', prop: 'HGVS_cDNA'},
+	{title: 'HGVS protein', prop: 'HGVS_protein'},
+	{title: 'Genomic Coordinate', prop: 'Genomic Coordinate'},
 	{title: 'Pathogenicity', prop: 'Clinical significance'},
-	{title: 'Allele origin', prop: 'Allele origin'},
-	{title: 'CVA', prop: 'ClinVarAccession'}
+	{title: 'Classification method', prop: 'Classification method'}
 ];
 
 var VariantTable = React.createClass({
