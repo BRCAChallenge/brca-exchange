@@ -9,7 +9,9 @@
 .nav > li > a {
     padding-left: 30px;
     padding-right: 30px;
-    font-size: 16px;
+    font-size: 14px;
+    text-transform: uppercase;
+    font-weight: bold;
 }
 
 .navbar-brand > span {
