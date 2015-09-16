@@ -88,7 +88,7 @@ var VariantSearch = React.createClass({
 	render: function () {
 		return (
 			<div className="search-box">
-				<input ref='input' onKeyDown={this.onKeyDown} placeholder="Search Variant"></input>
+				<input ref='input' onKeyDown={this.onKeyDown} placeholder="Search Variant such as c.1105G>A"></input>
 				<Button onClick={this.onClick} className='btn-xs'>
 					<span>&nbsp;&nbsp;</span>
                     <span className="glyphicon glyphicon-search"></span>
