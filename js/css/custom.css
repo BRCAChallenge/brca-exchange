@@ -61,30 +61,57 @@ input:focus{
 
 li {list-style-type: none;}
 
-.logos li {
+.logo-block li {
 	float: left;
-	width: 150px;
+    width: 300px;
 	height: 120px;
-	padding: 10px;
-	text-align: center;
-	line-height: 90px;
+    padding: 10px;
+    line-height: 90px;
+    text-align: center;
 }
 
-.logos img {
+.logo-block img {
 	max-height: 100%;
 	max-width: 100%;
 	width: auto;
 	vertical-align: middle;
 }
 
-.logo_block {
-	margin-top: 20px
+.logo-block {
+	margin: 40px;
+    padding-left: 50px;
+    padding-right: 30px;
+    width: auto;
+    text-align: center;
 }
 
-.text_logo {
-	font-weight: bold;
-	font-size: 50px;
+#BRCA-Exchange {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 5px;
 }
+
+#GA4GH {
+    padding-top: 7px;
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+#human-variome-project {
+    padding: 5px;
+}
+
+#ClinGen {
+    padding: 5px;
+}
+
+#ENIGMA {
+}
+
+#CIMBA {
+    padding: 10px;
+}
+
 
 .superscript {
 	font-size: 80%;

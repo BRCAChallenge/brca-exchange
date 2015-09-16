@@ -158,7 +158,7 @@ var Home = React.createClass({
 	render: function() {
 		var logoItems = _.map(logos, ({id, logo, url}) => (
 			<li key={id}><a href={url}>
-				<img src={logo} alt={id + ' logo'} />
+				<img id={id} src={logo} alt={id + ' logo'} />
 			</a></li>
 		));
 		return (
@@ -173,12 +173,14 @@ var Home = React.createClass({
 					    <RawHTML html={content.pages.home} />
 				    </div>
                 </Row>
-				<Row className='logo-block'>
-					<Col md={6} mdOffset={3}>
-						<ul className='logos'>
-							{logoItems}
-						</ul>
-					</Col>
+				<Row>
+			        <div>
+                        <ul>
+                            <div className="container logo-block">
+						        {logoItems}
+					        </div>
+                        </ul>
+                    </div>
 				</Row>
 			</Grid>
 		);
