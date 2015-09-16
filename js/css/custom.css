@@ -31,7 +31,7 @@
 }
 
 .search-box > input {
-    width: 300px;
+    width: 400px;
     height: 40px;
     border: 1px solid #E8A2A0;
     text-align: left;
@@ -54,12 +54,17 @@ input:focus{
     background-color: transparent;    
 }
 
+.jumbotron {
+    background-color: rgba(169,169,169, 0.13);
+    margin: 20px;
+}
+
 li {list-style-type: none;}
 
 .logos li {
 	float: left;
 	width: 150px;
-	height: 100px;
+	height: 120px;
 	padding: 10px;
 	text-align: center;
 	line-height: 90px;

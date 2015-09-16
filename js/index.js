@@ -169,10 +169,10 @@ var Home = React.createClass({
 					</div>
 				</Row>
 				<Row>
-					<Col md={8} mdOffset={2}>
-						<RawHTML html={content.pages.home} />
-					</Col>
-				</Row>
+                    <div className="jumbotron">
+					    <RawHTML html={content.pages.home} />
+				    </div>
+                </Row>
 				<Row className='logo-block'>
 					<Col md={6} mdOffset={3}>
 						<ul className='logos'>
