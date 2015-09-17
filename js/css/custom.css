@@ -1,3 +1,7 @@
+/**************************************************************/
+/**********         NavBar                *********************/
+/**************************************************************/
+
 .navbar-container {
     height: 80px;
 }
@@ -5,7 +9,9 @@
 .nav > li > a {
     padding-left: 30px;
     padding-right: 30px;
-    font-size: 16px;
+    font-size: 14px;
+    text-transform: uppercase;
+    font-weight: bold;
 }
 
 .navbar-brand > span {
@@ -26,16 +32,21 @@
     padding-top: 10px
 }
 
+/**************************************************************/
+/**********     Variant Search box       *********************/
+/**************************************************************/
+
 .home .search-box {
     padding: 70px;
 }
 
 /* XXX fixed width is not responsive */
 .search-box > input {
-    width: 300px;
+    width: 400px;
     height: 40px;
     border: 1px solid #E8A2A0;
     text-align: left;
+    font-size: 18px;
     text-indent: 4%;
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
@@ -55,36 +66,84 @@ input:focus {
     background-color: transparent;    
 }
 
+/**************************************************************/
+/**********     Variant pagination        *********************/
+/**************************************************************/
 .pagination {
 	margin: 0;
 }
 
-li {list-style-type: none;}
+/**************************************************************/
+/**********     Homepage text             *********************/
+/**************************************************************/
 
-.logos li {
-	float: left;
-	width: 150px;
-	height: 100px;
-	padding: 10px;
-	text-align: center;
-	line-height: 90px;
+.jumbotron {
+    background-color: rgba(169,169,169, 0.13);
+    margin: 20px;
 }
 
-.logos img {
+/**************************************************************/
+/**********     Homepage logo             *********************/
+/**************************************************************/
+
+li {list-style-type: none;}
+
+.logo-block li {
+	float: left;
+    width: 300px;
+	height: 120px;
+    padding: 10px;
+    line-height: 90px;
+    text-align: center;
+}
+
+.logo-block img {
 	max-height: 100%;
 	max-width: 100%;
 	width: auto;
 	vertical-align: middle;
 }
 
-.logo_block {
-	margin-top: 20px
+.logo-block {
+	margin: 40px;
+    padding-left: 50px;
+    padding-right: 30px;
+    width: auto;
+    text-align: center;
 }
 
-.text_logo {
-	font-weight: bold;
-	font-size: 50px;
+#BRCA-Exchange {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 5px;
 }
+
+#GA4GH {
+    padding-top: 7px;
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+#human-variome-project {
+    padding: 5px;
+}
+
+#ClinGen {
+    padding: 5px;
+}
+
+#ENIGMA {
+}
+
+#CIMBA {
+    padding: 10px;
+}
+
+
+/**************************************************************/
+/**********     Other                     *********************/
+/**************************************************************/
+
 
 .superscript {
 	font-size: 80%;

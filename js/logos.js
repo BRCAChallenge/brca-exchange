@@ -3,17 +3,17 @@
 
 module.exports = [
 	{
-		id: 'ga4gh',
-		logo: require('./img/ga4gh-logo-less.png'),
+		id: 'GA4GH',
+		logo: require('./img/ga4gh-logo-more.png'),
 		url: 'http://genomicsandhealth.org'
 	},
 	{
-		id: 'brca exchange',
-		logo: require('./img/BRCA-logo-with-text.png'),
+		id: 'BRCA-Exchange',
+		logo: require('./img/BRCA-Exchange-fat.jpg'),
 		url: 'http://brcaexchange.org'
 	},
 	{
-		id: 'human variome project',
+		id: 'human-variome-project',
 		logo: require('./img/hvp_logo.png'),
 		url: 'http://www.humanvariomeproject.org'
 	},
@@ -21,6 +21,11 @@ module.exports = [
 		id: 'ENIGMA',
 		logo: require('./img/enigma_logo.png'),
 		url: 'http://enigmaconsortium.org'
+	},
+	{
+		id: 'ClinGen',
+		logo: require('./img/clingen_logo.jpg'),
+		url: 'http://www.humanvariomeproject.org'
 	},
 	{
 		id: 'CIMBA',

@@ -8,7 +8,7 @@ The build is based on npm and webpack.
    * On OSX, install brew http://brew.sh/
    * `brew install git`
    * `brew install node`
- * `git clone https://github.com/acthp/brca-website.git`
+ * `git clone https://github.com/BD2KGenomics/brca-website.git`
  * `cd brca-website`
  * `npm install`
  * `npm start`
