@@ -90,7 +90,7 @@ var DataTable = React.createClass({
 					</Col>
 				</Row>
 				<Table
-					className="table table-bordered"
+					className="table table-hover table-bordered"
 					dataArray={page.data}
 					columns={columns}
 					keys={this.props.keys}
