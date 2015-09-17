@@ -26,10 +26,11 @@
     padding-top: 10px
 }
 
-.search-box {
+.home .search-box {
     padding: 70px;
 }
 
+/* XXX fixed width is not responsive */
 .search-box > input {
     width: 300px;
     height: 40px;
@@ -41,17 +42,21 @@
     border-radius: 5px;
 }
 
-input:focus{
+input:focus {
     border: 1px solid #C03657;
     outline: none;
 }
 
 .search-box > Button {
-    border: 0px;
+    border: 0;
 }
 
 .search-box Button:hover {
     background-color: transparent;    
+}
+
+.pagination {
+	margin: 0;
 }
 
 li {list-style-type: none;}
