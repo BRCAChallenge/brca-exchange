@@ -12,6 +12,8 @@ var filterDisplay = v => v == null ? 'Any' : v;
 var filterAny = v => v === 'Any' ? null : v;
 var addAny = opts => ['Any', ...opts];
 
+var pluralize = (n, s) => n === 1 ? s : s + 's';
+
 var DataTable = React.createClass({
 	mixins: [DataMixin],
 	createDownload: function (ev) {
@@ -74,7 +76,7 @@ var DataTable = React.createClass({
 							<div className='form-group'>
 								<label className='control-label'
 										style={{marginRight: '1em'}}>
-									{this.state.data.length} matching variants
+									{this.state.data.length} matching {pluralize(this.state.data.length, 'variant')}
 								</label>
 								<Button download="variants.tsv" href="#" onMouseDown={this.createDownload}>Download</Button>
 							</div>
