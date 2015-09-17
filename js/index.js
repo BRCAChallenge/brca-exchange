@@ -225,7 +225,7 @@ var Database = React.createClass({
 							<Col md={10} mdOffset={1}>
 								<VariantTable
 									ref='table'
-									filterValues={{globalSearch: search || ''}}
+									filterValues={{visibleSearch: search || ''}}
 									data={data.records}
 									onHeaderClick={this.showHelp}
 									onRowClick={this.showVariant}/>

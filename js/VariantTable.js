@@ -85,7 +85,6 @@ var VariantTable = React.createClass({
 				filter={applyFilters}
 				filters={filters(columns)}
 				filterColumns={filterColumns}
-				filterValues={{visibleSearch: ''}}
 				columns={columns}
 				initialData={data}
 				initialPageLength={10}
