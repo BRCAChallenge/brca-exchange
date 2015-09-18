@@ -111,6 +111,17 @@ var NavBarNew = React.createClass({
 	}
 });
 
+var Footer = React.createClass({
+    render: function() {
+        return (
+            <div className="container footer-container">
+               <footer className="footer">
+               </footer> 
+            </div>
+        )            
+    }
+});
+
 var Home = React.createClass({
 	mixins: [Navigation],
 	getInitialState() {
