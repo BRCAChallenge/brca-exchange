@@ -58,7 +58,7 @@ input:focus {
     outline: none;
 }
 
-.search-box > Button {
+.search-box Button {
     border: 0;
 }
 
