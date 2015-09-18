@@ -121,9 +121,9 @@ var NavBarNew = React.createClass({
 var Footer = React.createClass({
     render: function() {
         return (
-            <div className="container footer-container">
-               <footer className="footer">
-               </footer> 
+            <div className="footer">
+                <Row><a href="#">disclaimer</a></Row>
+                <Row><a href="#">contact us</a></Row> 
             </div>
         )            
     }
@@ -360,7 +360,8 @@ var Application = React.createClass({
 				<NavBarNew path={path} />
 				<RouteHandler data={data}/>
 				<Database show={path.indexOf('variants') === 0} data={data}/>
-			</div>
+	            <Footer />
+            </div>
 		);
 	}
 });
