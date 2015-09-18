@@ -79,7 +79,14 @@ var NavBarNew = React.createClass({
 	close: function () {
 		this.refs.about.setState({open: false});
 	},
+    activePath: function(path, tab) {
+        var navPath = (path === "") ? "home": path.split("/")[0]
+        return ((navPath === tab) ? "active-ly": "")
+    },
 	render: function () {
+        var {path} = this.props;
+        console.log(path);
+        console.log(this.activePath(path,"about"));
 		return (
 			<div className="navbar-container">
             <Navbar className="navbar-fixed-top">
@@ -91,7 +98,7 @@ var NavBarNew = React.createClass({
 				</a>
 					<Nav navbar right>
 						<NavLink to='/'>Home</NavLink>
-						<DropdownButton ref='about' title='About'>
+						<DropdownButton className={this.activePath(path, "about")} ref='about' title='About'>
 							<NavLink onClick={this.close} to='/about/history'>
 								History of the BRCA Exchange
 							</NavLink>
@@ -350,7 +357,7 @@ var Application = React.createClass({
 		var path = this.getPath().slice(1);
 		return (
 			<div>
-				<NavBarNew />
+				<NavBarNew path={path} />
 				<RouteHandler data={data}/>
 				<Database show={path.indexOf('variants') === 0} data={data}/>
 			</div>
