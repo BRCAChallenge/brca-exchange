@@ -45,7 +45,7 @@ var columns = [
 // matches, with this one which does an intersection.
 var applyFilters = (filters, filterValues, data) => {
 	return _.filter(data, row => _.every(filterValues, utils.filterPass(filters, row)));
-}
+};
 
 // react-data-components filters are an object with keys for each filter, and
 // values being a object with props 'filter', and optional 'prop' if the filter
