@@ -1,6 +1,5 @@
 // d3Lollipop.js
 
-require('d3');
 require('muts-needle-plot/src/js/d3-svg-legend');
 var mutneedles = require("muts-needle-plot");
 
@@ -50,6 +49,7 @@ d3Lollipop.drawStuffWithD3 = function(ref, data) {
 
     return function() {
         instance.tip.destroy();
+        instance.selectionTip.destroy();
     };
 }
 

@@ -421,20 +421,18 @@ var Application = React.createClass({
 });
 
 var Lollipop = React.createClass({
-    render: function () { 
+    render: function () {
         return <div id='hurray' ref='d3svg'/>;
     },
     componentDidMount: function() {
-        var d3svgRef= React.findDOMNode(this.refs.d3svg);
-        console.log(d3svgRef);
-        d3Lollipop.drawStuffWithD3(d3svgRef);
-        //this.cleanup = d3Lollipop.drawStuffWithD3(d3svgRef);
+        var d3svgRef = React.findDOMNode(this.refs.d3svg);
+        this.cleanup = d3Lollipop.drawStuffWithD3(d3svgRef);
     },
-    //componentWillUnmount: function() {
-    //    this.cleanup(); 
-    //},
+    componentWillUnmount: function() {
+        this.cleanup();
+    },
     shouldComponentUpdate: () => false
-})
+});
 
 var routes = (
 	<Route handler={Application}>
