@@ -218,22 +218,20 @@ var Database = React.createClass({
 		var {show, data} = this.props,
 			{search} = this.getQuery();
 		return (
-			<div style={{display: show ? 'block' : 'none'}}>
-				<div style={{position: "relative", height: "100px"}}>
-					{data ?
-						<Row>
-							<Col md={10} mdOffset={1}>
-								<VariantTable
-									ref='table'
-									filterValues={{visibleSearch: search || ''}}
-									data={data.records}
-									onHeaderClick={this.showHelp}
-									onRowClick={this.showVariant}/>
-							</Col>
-						</Row>
-						: ''}
-				</div>
-			</div>
+			<Grid style={{display: show ? 'block' : 'none'}}>
+				{data ?
+					<Row>
+						<Col md={10} mdOffset={1}>
+							<VariantTable
+								ref='table'
+								filterValues={{visibleSearch: search || ''}}
+								data={data.records}
+								onHeaderClick={this.showHelp}
+								onRowClick={this.showVariant}/>
+						</Col>
+					</Row>
+					: ''}
+			</Grid>
 		);
 	}
 });
