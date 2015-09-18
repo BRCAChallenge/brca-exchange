@@ -31,6 +31,8 @@ var {Navigation, State, Link, Route, RouteHandler,
 
 var merge = (...objs) => _.extend({}, ...objs);
 
+var d3Lollipop = require('./d3Lollipop');
+
 // add unique id to variant table
 function addId(data) {
 	return _.map(data, (r, i) => merge({id: i}, r));
@@ -125,6 +127,9 @@ var NavBarNew = React.createClass({
 							</NavLink>
 							<NavLink onClick={this.close} to='/about/variation'>
 								BRCA Variation and Cancer
+							</NavLink>
+							<NavLink onClick={this.close} to='/about/lollipop'>
+								DNA Variant BRCA Lollipop Plots
 							</NavLink>
 						</DropdownButton>
 						<NavLink to='/variants'>Variants</NavLink>
@@ -415,9 +420,25 @@ var Application = React.createClass({
 	}
 });
 
+var Lollipop = React.createClass({
+    render: function () { 
+        return <div id='hurray' ref='d3svg'/>;
+    },
+    componentDidMount: function() {
+        var d3svgRef= React.findDOMNode(this.refs.d3svg);
+        console.log(d3svgRef);
+        this.cleanup = d3Lollipop.drawStuffWithD3(d3svgRef);
+    },
+    componentWillUnmount: function() {
+        this.cleanup(); 
+    },
+    shouldComponentUpdate: () => false
+})
+
 var routes = (
 	<Route handler={Application}>
 		<DefaultRoute handler={Home}/>
+		<Route path='about/lollipop' handler={Lollipop}/>
 		<Route path='about/:page' handler={About}/>
 		<Route path='help' handler={Help}/>
 		<Route path='variants' />

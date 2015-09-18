@@ -15,7 +15,10 @@ module.exports = {
 	},
 	module: {
 		loaders: [
-			{ test: /rx-dom/, loader: "imports?define=>false" },
+            { test: /\/d3.js$/, loader: "expose?d3" },
+            { test: /\/d3-tip\/index.js$/, loader: "imports?define=>false" },
+            { test: require.resolve("underscore"), loader: "expose?_" },			
+            { test: /rx-dom/, loader: "imports?define=>false" },
 			{ test: /\.css$/, loader: "style!css" },
 			{ test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader?optional=es7.objectRestSpread,optional=runtime,cacheDirectory=true'},
 			{
