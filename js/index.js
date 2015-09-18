@@ -427,11 +427,12 @@ var Lollipop = React.createClass({
     componentDidMount: function() {
         var d3svgRef= React.findDOMNode(this.refs.d3svg);
         console.log(d3svgRef);
-        this.cleanup = d3Lollipop.drawStuffWithD3(d3svgRef);
+        d3Lollipop.drawStuffWithD3(d3svgRef);
+        //this.cleanup = d3Lollipop.drawStuffWithD3(d3svgRef);
     },
-    componentWillUnmount: function() {
-        this.cleanup(); 
-    },
+    //componentWillUnmount: function() {
+    //    this.cleanup(); 
+    //},
     shouldComponentUpdate: () => false
 })
 
