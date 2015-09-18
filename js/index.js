@@ -21,11 +21,12 @@ var content = require('./content');
 
 var databaseUrl = require('file!../../enigma-database.tsv');
 
-var {Well, Grid, Col, Row, Input, Button, Navbar, CollapsableNav, Nav, Table,
-	NavItem, DropdownButton, MenuItem, Panel} = require('react-bootstrap');
+var {Grid, Col, Row, Input, Navbar, Nav, Table,
+	DropdownButton} = require('react-bootstrap');
 
 
 var VariantTable = require('./VariantTable');
+var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Link, Route, RouteHandler,
 	HistoryLocation, run, DefaultRoute} = require('react-router');
 
@@ -76,32 +77,6 @@ var NavLink = React.createClass({
 	}
 });
 
-var VariantSearch = React.createClass({
-	mixins: [Navigation],
-	onClick: function () {
-		var value = React.findDOMNode(this.refs.input).value;
-		this.transitionTo(`/variants?search=${value}`);
-	},
-	onKeyDown: function (ev) {
-		if (ev.key === 'Enter') {
-			this.transitionTo(`/variants?search=${ev.target.value}`);
-		}
-	},
-	render: function () {
-		return (
-			<div className="search-box">
-				<input ref='input' onKeyDown={this.onKeyDown} placeholder="Search Variant"></input>
-				<Button onClick={this.onClick} className='btn-xs'>
-					<span>&nbsp;&nbsp;</span>
-                    <span className="glyphicon glyphicon-search"></span>
-                    <span onClick={() => this.showHelp('Searching')}
-						className="glyphicon glyphicon-question-sign superscript help"/>
-				</Button>
-			</div>
-		);
-	}
-});
-
 var NavBarNew = React.createClass({
 	close: function () {
 		this.refs.about.setState({open: false});
@@ -113,7 +88,7 @@ var NavBarNew = React.createClass({
 				<a className="navbar-brand" href="http://brcaexchange.org">
 					<span>
 						<b className="BRCA">BRCA</b>
-                        <span className="exchange"> Exchange</span> 
+                        <span className="exchange"> Exchange</span>
 					</span>
 				</a>
 					<Nav navbar right>
@@ -156,10 +131,9 @@ var Home = React.createClass({
 			direction: selectedDirection
 		});
 	},
-	showHelp: function (title) {
-		this.transitionTo(`/help#${slugify(title)}`);
+	onSearch(value) {
+		this.transitionTo(`/variants?search=${value}`);
 	},
-
 	render: function() {
 		var logoItems = _.map(logos, ({id, logo, url}) => (
 			<li key={id}><a href={url}>
@@ -167,10 +141,10 @@ var Home = React.createClass({
 			</a></li>
 		));
 		return (
-			<Grid>
+			<Grid className='home'>
 				<Row>
 				   	<div className='text-center'>
-						<VariantSearch />
+						<VariantSearch onSearch={this.onSearch}/>
 					</div>
 				</Row>
 				<Row>
@@ -245,58 +219,18 @@ var Database = React.createClass({
 	showHelp: function (title) {
 		this.transitionTo(`/help#${slugify(title)}`);
 	},
-	createDownload: function (ev) {
-		// XXX This is a bit horrible. In order to build the tsv lazily (on button click, instead
-		// of on every tabe update), we catch the mousedown event and modify the href on the
-		// anchor element, behind the back of react. I don't believe this will cause any
-		// problems, but it's something to be aware of if react starts doing something strange.
-		// Also needs to be tested cross-browser. We should not offer download on browsers that don't allow
-		// client-driven download.
-		var data = this.refs.table.getData(),
-			keys = _.keys(data[0]),
-			tsvRows = _.map(data, obj => _.map(keys, k => obj[k]).join('\t')).join('\n'), // use os-specific line endings?
-			tsv = keys.join('\t') + '\n' + tsvRows;
-		ev.target.href = URL.createObjectURL(new Blob([tsv], { type: 'text/tsv' }));
-	},
 	render: function () {
 		var {show, data} = this.props,
 			{search} = this.getQuery();
 		return (
 			<div style={{display: show ? 'block' : 'none'}}>
-				<div>
-					<Row>
-						<Col md={4} mdOffset={4}>
-							<Panel header='Advanced filtering'>
-								<DropdownButton title="Gene">
-									<MenuItem>BRCA1</MenuItem>
-									<MenuItem>BRCA2</MenuItem>
-								</DropdownButton>
-								<span className="glyphicon glyphicon-question-sig superscript"/>
-								<DropdownButton title="Exon">
-									<MenuItem>Any</MenuItem>
-									<MenuItem>1</MenuItem>
-									<MenuItem>2</MenuItem>
-									<MenuItem>3</MenuItem>
-									<MenuItem>4</MenuItem>
-									<MenuItem>5</MenuItem>
-								</DropdownButton>
-								<span className="glyphicon glyphicon-question-sign superscript"/>
-							</Panel>
-						</Col>
-						<Col md={1}>
-							<Button download="variants.tsv" href="#" onMouseDown={this.createDownload}>Download</Button>
-						</Col>
-					</Row>
-				</div>
-
-
 				<div style={{position: "relative", height: "100px"}}>
 					{data ?
 						<Row>
 							<Col md={10} mdOffset={1}>
 								<VariantTable
 									ref='table'
-									filterValues={{globalSearch: search || ''}}
+									filterValues={{visibleSearch: search || ''}}
 									data={data.records}
 									onHeaderClick={this.showHelp}
 									onRowClick={this.showVariant}/>
