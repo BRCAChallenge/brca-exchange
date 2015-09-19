@@ -2,6 +2,11 @@
 /*global require: false */
 'use strict';
 
+// shims for older browsers
+require('babel/polyfill');
+require('es5-shim');
+require('es5-shim/es5-sham');
+
 require('./favicons');
 var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
@@ -348,7 +353,7 @@ var Application = React.createClass({
 	},
 	componentWillMount: function (){
 		Rx.DOM.get(databaseUrl).subscribe(data =>
-			this.setState({data: readTsv(data.response)}));
+			this.setState({data: readTsv(data.responseText)}));
 	},
 	render: function () {
 		var {data} = this.state;
