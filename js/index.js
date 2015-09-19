@@ -9,7 +9,6 @@ require('bootstrap/dist/css/bootstrap.css');
 require('font-awesome-webpack');
 var Rx = require('rx');
 var vcf = require('vcf.js');
-require('rx.binding');
 require('rx-dom');
 require('css/custom.css');
 var _ = require('underscore');
