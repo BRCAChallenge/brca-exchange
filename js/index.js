@@ -80,8 +80,8 @@ var NavBarNew = React.createClass({
 		this.refs.about.setState({open: false});
 	},
     activePath: function(path, tab) {
-        var navPath = (path === "") ? "home": path.split("/")[0]
-        return ((navPath === tab) ? "active-ly": "")
+        var navPath = (path === "") ? "home": path.split("/")[0];
+        return ((navPath === tab) ? "active-ly": "");
     },
 	render: function () {
         var {path} = this.props;
@@ -123,9 +123,9 @@ var Footer = React.createClass({
         return (
             <div className="footer">
                 <Row><a href="#">disclaimer</a></Row>
-                <Row><a href="#">contact us</a></Row> 
+                <Row><a href="#">contact us</a></Row>
             </div>
-        )            
+        );
     }
 });
 
