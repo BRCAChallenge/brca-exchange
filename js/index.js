@@ -85,19 +85,18 @@ var NavBarNew = React.createClass({
     },
 	render: function () {
         var {path} = this.props;
-        console.log(path);
-        console.log(this.activePath(path,"about"));
+		var brand = (
+			<a className="navbar-brand" href="http://brcaexchange.org">
+				<span>
+					<b className="BRCA">BRCA</b>
+					<span className="exchange"> Exchange</span>
+				</span>
+			</a>);
 		return (
 			<div className="navbar-container">
-            <Navbar className="navbar-fixed-top">
-				<a className="navbar-brand" href="http://brcaexchange.org">
-					<span>
-						<b className="BRCA">BRCA</b>
-                        <span className="exchange"> Exchange</span>
-					</span>
-				</a>
-					<Nav navbar right>
-						<NavLink to='/'>Home</NavLink>
+            <Navbar fixedTop brand={brand} toggleNavKey={0}>
+				<Nav eventKey={0} navbar right>
+					<NavLink to='/'>Home</NavLink>
 						<DropdownButton className={this.activePath(path, "about")} ref='about' title='About'>
 							<NavLink onClick={this.close} to='/about/history'>
 								History of the BRCA Exchange
@@ -110,8 +109,8 @@ var NavBarNew = React.createClass({
 							</NavLink>
 						</DropdownButton>
 						<NavLink to='/variants'>Variants</NavLink>
-						<NavLink to='/help'>Help</NavLink>
-					</Nav>
+					<NavLink to='/help'>Help</NavLink>
+				</Nav>
 			</Navbar>
             </div>
 		);
