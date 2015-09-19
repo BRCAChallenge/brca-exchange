@@ -31,12 +31,8 @@ var VariantSearch = React.createClass({
 		var {value} = this.props;
 		return (
 			<div className='search-box help-target'>
-				<input ref='input' value={value} onChange={this.onChange} onKeyDown={this.onKeyDown} placeholder="Search Variant such as c.1105G>A"></input>
 				<span className='text-nowrap'>
-					<Button onClick={this.onClick} className='btn-xs'>
-						<span>&nbsp;&nbsp;</span>
-						<span className="glyphicon glyphicon-search"></span>
-					</Button>
+					<input ref='input' value={value} onChange={this.onChange} onKeyDown={this.onKeyDown} placeholder="Search Variant such as c.1105G>A"></input>
 					<span onClick={() => this.showHelp('Searching')}
 						className="glyphicon glyphicon-question-sign superscript help"/>
 				</span>
