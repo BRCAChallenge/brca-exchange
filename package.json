@@ -41,6 +41,7 @@
   "dependencies": {
     "babel-runtime": "^5.1.13",
     "bootstrap": "^3.3.4",
+    "es5-shim": "^4.1.13",
     "font-awesome-webpack": "0.0.3",
     "markdown-it": "^4.4.0",
     "raw-loader": "^0.5.1",
