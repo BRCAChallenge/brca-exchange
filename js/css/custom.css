@@ -1,3 +1,29 @@
+/* Note that bootstrap 3 media sizes are as follows:
+  @media(max-width:767px){}  // xs
+  @media(min-width:768px){}  // sm
+  @media(min-width:992px){}  // md
+  @media(min-width:1200px){} // lg
+*/
+
+/*
+ * Helper classes that pull-right for displays equal to or
+ * larger than the indicated size.
+ */
+@media (min-width: 768px) {
+	.pull-right-sm {
+		float: right;
+	}
+}
+@media (min-width: 992px) {
+	.pull-right-sm, .pull-right-md {
+		float: right;
+	}
+}
+@media (min-width: 1200px) {
+	.pull-right-sm, .pull-right-md, .pull-right-lg {
+		float: right;
+	}
+}
 /**************************************************************/
 /**********         NavBar                *********************/
 /**************************************************************/

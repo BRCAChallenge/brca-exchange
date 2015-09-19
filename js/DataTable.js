@@ -47,20 +47,20 @@ var DataTable = React.createClass({
 		return (
 			<div className={this.props.className}>
 				<Row style={{marginBottom: '2px'}}>
-					<Col md={12}>
+					<Col sm={12}>
 						<Button bsSize='xsmall' onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}</Button>
 						{filtersOpen && <div className='form-inline'>{filterFormEls}</div>}
 					</Col>
 				</Row>
 				<Row style={{marginBottom: '2px'}}>
-					<Col md={5}>
+					<Col sm={5}>
 						<VariantSearch
 							value={this.state.filterValues.visibleSearch}
 							onChange={this.onFilter.bind(this, 'visibleSearch')}
 						/>
 					</Col>
-					<Col md={3} mdOffset={4}>
-						<div className='form-inline pull-right'>
+					<Col sm={3} smOffset={4}>
+						<div className='form-inline pull-right-sm'>
 							<SelectField
 								label="Page size:"
 								value={this.state.pageLength}
@@ -71,7 +71,7 @@ var DataTable = React.createClass({
 					</Col>
 				</Row>
 				<Row style={{marginBottom: '2px'}}>
-					<Col md={6}>
+					<Col sm={6}>
 						<div className='form-inline'>
 							<div className='form-group'>
 								<label className='control-label'
@@ -82,25 +82,27 @@ var DataTable = React.createClass({
 							</div>
 						</div>
 					</Col>
-					<Col md={6}>
+					<Col sm={6}>
 						<Pagination
-							className="pagination pull-right"
+							className="pagination pull-right-sm"
 							currentPage={page.currentPage}
 							totalPages={page.totalPages}
-							onChangePage={this.onChangePage}
-						/>
+							onChangePage={this.onChangePage} />
 					</Col>
 				</Row>
-				<Table
-					className="table table-hover table-bordered"
-					dataArray={page.data}
-					columns={columns}
-					keys={this.props.keys}
-					buildRowOptions={this.props.buildRowOptions}
-					buildHeader={this.props.buildHeader}
-					sortBy={this.state.sortBy}
-					onSort={this.onSort}
-				/>
+				<Row>
+					<Col sm={12}>
+						<Table
+							className="table table-hover table-bordered"
+							dataArray={page.data}
+							columns={columns}
+							keys={this.props.keys}
+							buildRowOptions={this.props.buildRowOptions}
+							buildHeader={this.props.buildHeader}
+							sortBy={this.state.sortBy}
+							onSort={this.onSort} />
+					</Col>
+				</Row>
 			</div>
 		);
 	}
