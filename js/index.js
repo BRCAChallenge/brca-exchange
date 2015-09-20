@@ -34,6 +34,7 @@ var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Link, Route, RouteHandler,
 	HistoryLocation, run, DefaultRoute} = require('react-router');
 
+var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 var merge = (...objs) => _.extend({}, ...objs);
 
 // add unique id to variant table
@@ -206,7 +207,7 @@ var Help = React.createClass({
 			setTimeout(function () {
 				var el = document.getElementById(fragment);
 				if (el) {
-					window.scrollTo(0, el.getBoundingClientRect().top);
+					window.scrollTo(0, el.getBoundingClientRect().top - navbarHeight);
 				}
 			}, 0);
 		}
