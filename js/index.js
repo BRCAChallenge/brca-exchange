@@ -241,16 +241,12 @@ var Database = React.createClass({
 		return (
 			<Grid style={{display: show ? 'block' : 'none'}}>
 				{data ?
-					<Row>
-						<Col md={10} mdOffset={1}>
-							<VariantTable
-								ref='table'
-								filterValues={{visibleSearch: search || ''}}
-								data={data.records}
-								onHeaderClick={this.showHelp}
-								onRowClick={this.showVariant}/>
-						</Col>
-					</Row>
+					<VariantTable
+						ref='table'
+						filterValues={{visibleSearch: search || ''}}
+						data={data.records}
+						onHeaderClick={this.showHelp}
+						onRowClick={this.showVariant}/>
 					: ''}
 			</Grid>
 		);
