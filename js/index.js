@@ -114,10 +114,10 @@ var NavBarNew = React.createClass({
 var Footer = React.createClass({
     render: function() {
         return (
-            <div className="footer">
+            <Grid className="footer">
                 <Row><a href="#">disclaimer</a></Row>
                 <Row><a href="#">contact us</a></Row>
-            </div>
+            </Grid>
         );
     }
 });
