@@ -1,4 +1,4 @@
-/*global module: false, require: false, console: false */
+/*global module: false, require: false */
 'use strict';
 
 var React = require('react');
@@ -105,7 +105,7 @@ var VariantTable = React.createClass({
 			<DataTable
 				ref='table'
 				{...opts}
-				buildRowOptions={r => ({title: 'click for details', onClick: () => onRowClick(r.id)})}
+				buildRowOptions={r => ({title: 'click for details', onClick: () => onRowClick(r)})}
 				buildHeader={title => buildHeader(onHeaderClick, title)}
 				sort={(sb, d) => sortColumns(columns, sb, d)}
 				filter={applyFilters}
@@ -116,7 +116,6 @@ var VariantTable = React.createClass({
 				initialPageLength={10}
                 initialSortBy={{prop: 'Gene symbol', order: 'descending'}}
                 pageLengthOptions={[ 10, 50, 100 ]}
-                keys={['id']}
             />
 		);
 	}

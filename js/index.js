@@ -23,7 +23,8 @@ var slugify = require('./slugify');
 
 var content = require('./content');
 
-var databaseUrl = require('file!../../enigma-database.tsv');
+var databaseUrl = require('../../enigma-database.tsv');
+var databaseKey = require('../databaseKey');
 
 var {Grid, Col, Row, Input, Navbar, Nav, Table,
 	DropdownButton} = require('react-bootstrap');
@@ -35,26 +36,14 @@ var {Navigation, State, Link, Route, RouteHandler,
 	HistoryLocation, run, DefaultRoute} = require('react-router');
 
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
-var merge = (...objs) => _.extend({}, ...objs);
 
-// add unique id to variant table
-function addId(data) {
-	return _.map(data, (r, i) => merge({id: i}, r));
-}
-
-function cutTrailingNewLine(string) {
-    if (string[string.length - 1] === "\n") {
-        return string.slice(0, string.length - 1);
-    }
-    return string;
-}
+var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
+var variantPathSplit = id => _.object(databaseKey, _.map(id.split(/@@/), decodeURIComponent));
 
 function readTsv(response) {
-	var [header, ...records] = cutTrailingNewLine(response).split("\n");
-	var keys = header.split("\t");
-    var rows = _.map(records, row => row.split("\t"));
-    return {
-        records: addId(_.map(rows, row => _.object(keys, row)))
+	var {header, rows} = JSON.parse(response);
+	return {
+		records: _.map(rows, row => _.object(header, row))
 	};
 }
 
@@ -230,8 +219,8 @@ var Help = React.createClass({
 
 var Database = React.createClass({
 	mixins: [Navigation, State, PureRenderMixin],
-	showVariant: function (id) {
-		this.transitionTo(`/variant/${id}`);
+	showVariant: function (row) {
+		this.transitionTo(`/variant/${variantPathJoin(row)}`);
 	},
 	showHelp: function (title) {
 		this.transitionTo(`/help#${slugify(title)}`);
@@ -246,6 +235,7 @@ var Database = React.createClass({
 						ref='table'
 						filterValues={{visibleSearch: search || ''}}
 						data={data.records}
+						keys={databaseKey}
 						onHeaderClick={this.showHelp}
 						onRowClick={this.showVariant}/>
 					: ''}
@@ -308,7 +298,7 @@ var VariantDetail = React.createClass({
 	},
 	render: function() {
 		var {data, params: {id}} = this.props,
-			variant = (data && data.records[id]) || {};
+			variant = (data && _.findWhere(data.records, variantPathSplit(id))) || {};
 
 		variant = _.omit(variant, ['__HEADER__']);
 		var rows = _.map(variant, (v, k) =>
