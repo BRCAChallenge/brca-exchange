@@ -53,11 +53,8 @@
     color: #E8A2A0;
 }
 
-/* Using height instead of min-height because we need the exact
- * height of the navbar to be able to position content correctly.
- */
 .navbar {
-    height: 70px; /* XXX This value MUST match the setting in index.js */
+    min-height: 70px; /* XXX This value MUST match the setting in index.js */
     padding-top: 10px
 }
 
