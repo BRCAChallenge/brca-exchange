@@ -91,7 +91,7 @@ var DataTable = React.createClass({
 					</Col>
 				</Row>
 				<Row>
-					<Col sm={12}>
+					<Col className="table-responsive" sm={12}>
 						<Table
 							className="table table-hover table-bordered"
 							dataArray={page.data}
