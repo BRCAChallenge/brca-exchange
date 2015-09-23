@@ -10,10 +10,11 @@ DNA.  This can leave the individual at greater risk of diseases, especially brea
 variation in the BRCA genes increases disease risk.  Some variation is benign, with no disease impact.  To better understand
 the impact of BRCA variation, scientists study specific genetic variants to assess the individual impact of each variant.
 
-Genetic variants are classified into three categories.  *Pathogenic variants* lead to increased risk of disease.  *Benign variants*
+Genetic variants are classified into different categories.  *Pathogenic variants* lead to increased risk of disease.  *Benign variants*
 are not associated with increased risk of disease.  *Variants of uncertain significance (VUS)* are those for which the evidence
 of disease risk is not clear yet, sometimes because there is not yet enough evidence to classify them as either pathogenic or
-benign.  
+benign.  In addition, variants with good evidence to support an association with disease risk are termed *likely pathogenic*, while those with good evidence to support no association with disease risk are termed *likely benign* (or *likely not pathogenic*). 
+
 
 If a woman has a pathogenic BRCA variant, she has substantially greater risk of developing cancer in her lifetime.  
 Approximately 12% of all women will develop breast cancer by the age of 70.  However, a woman with a pathogenic BRCA1
