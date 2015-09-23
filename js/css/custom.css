@@ -79,13 +79,16 @@ li.active span {
     padding: 70px;
 }
 
-/* XXX fixed width is not responsive */
+/* change input width to a percentage of its container 
+ * font-size is a percentage of its viewpoint width (2.2%)
+ *
+ * */
 .search-box input {
-    width: 400px;
+    width: 60%;
     height: 40px;
     border: 1px solid #E8A2A0;
     text-align: left;
-    font-size: 18px;
+    font-size: 2.2vw;
     text-indent: 4%;
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
