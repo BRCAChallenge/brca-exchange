@@ -63,7 +63,7 @@
 }
 
 
-li.active span {
+.navbar-nav li.active span {
    color: #C03657;
 }
 
