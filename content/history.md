@@ -72,6 +72,8 @@ The BRCA Exchange is the work of a great many people from many different institu
 * Dominique Stoppa-Lyonnet, Curie Institute, Paris, France
 
 * Sean Tavtigian, Hunstman Cancer Institute, Salt Lake City, USA
+
+![The BRCA genes loom large in public awareness.  This photo shows a bicycle path in Shelford, England that depicts the sequence of the BRCA2 gene.  The lanes of the path are separated by colored stripes.  Each stripe represents one base of BRCA2, with the stripes color-coded according to the nucleotide. See also [http://www.bshs.org.uk/travel-guide/dna-cycle-path-cambridge-england](http://www.bshs.org.uk/travel-guide/dna-cycle-path-cambridge-england)](DNA_cyclepath_to_Shelford_-_geograph.org.uk_-_538440.jpg)
 <!---
 Picture: SC members at UNESCO in Paris (I think John Burn has this)
 -->
