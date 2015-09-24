@@ -36,8 +36,11 @@ Required for sequence variants if chromosome and some conbination of start and s
 "Required for sequence variants if start and stop are not provided. 
 Provide the c. or g. portion of the nucleotide HGVS expression(s) for the variants being reported related to condition.  (http://www.hgvs.org/mutnomen/examplesDNA.html, http://www.hgvs.org/mutnomen/standards.html). Can also be used for a haplotype or compound heterozygotes, e.g.  c.[76A>C;105G>A]  or  c.[76A>C];[105G>A] . 
 
-#### Alternate designations
+#### BIC Nomenclature
 Optional.  A set of alternative,  common, or legacy names for the variant, or an alternate HGVS expression, e.g. for protein. Separate multiple names with a vertical bar (|).
+
+#### Abbrev AA change
+Optional. For variants that are assigned official allele names, e.g. CYP3A4*18 for one of the cytochrome P450 gene CYP3A4; or HLA-DRA*0102 for the MHC gene HLA-DRA.
 
 #### Condition ID type
 "Required if ""Preferred condition name"" is not supplied. 
