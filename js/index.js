@@ -17,6 +17,7 @@ var vcf = require('vcf.js');
 require('rx-dom');
 require('css/custom.css');
 var _ = require('underscore');
+
 var brcaLogo = require('./img/BRCA-Exchange-tall-tranparent.png');
 var logos = require('./logos');
 var slugify = require('./slugify');
@@ -27,7 +28,7 @@ var databaseUrl = require('../../enigma-database.tsv');
 var databaseKey = require('../databaseKey');
 
 var {Grid, Col, Row, Input, Navbar, Nav, Table,
-	DropdownButton} = require('react-bootstrap');
+	DropdownButton, Button, Modal} = require('react-bootstrap');
 
 
 var VariantTable = require('./VariantTable');
@@ -124,18 +125,48 @@ var Footer = React.createClass({
                     </ul>
                 </div>
                 <div className="col-sm-2 logo-footer">
-                    <img href="#" src={brcaLogo} alt="brca exchange logo" />                             </div>
+                    <img href="#" src={brcaLogo} alt="brca exchange logo" />
+                </div>
                 <div className="col-sm-5 right-footer">
                     <ul>
-                        <li><a href="#">Disclaimer</a></li>
-                        <li><a href="#">Contact us</a></li>
-                        <li><a href="#">Source code</a></li>
+                        <li><DisclaimerModal /></li>
+                        <li><a href="#">contact us</a></li>
+                        <li>
+                            <a href="https://github.com/BD2KGenomics/brca-website">
+                                source code
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
         );
     }
 });
+
+var DisclaimerModal = React.createClass({
+    getInitialState() {
+        return { showModal: false };
+    },
+    close() {
+        this.setState({ showModal: false });
+    },
+    open() {
+    this.setState({ showModal: true });
+    },
+
+    render() {
+        return (
+            <div style={{display: "inline"}}>
+                <a onClick={this.open}>disclaimer</a>
+                {/* <Modal show={this.showModal}>
+                    <p>text in modal </p>
+                </Modal>
+                */}
+            </div>
+        );
+    } 
+});
+
 
 var Home = React.createClass({
 	mixins: [Navigation],
@@ -365,7 +396,7 @@ var Application = React.createClass({
 				<NavBarNew path={path} />
 				<RouteHandler data={data}/>
 				<Database show={path.indexOf('variants') === 0} data={data}/>
-	            <Footer />
+                <Footer />
             </div>
 		);
 	}
