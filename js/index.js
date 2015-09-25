@@ -387,7 +387,7 @@ var Application = React.createClass({
 	componentWillMount: function (){
 		Rx.DOM.get(databaseUrl).subscribe(data =>
 			this.setState({data: readTsv(data.responseText)}));
-	},
+    },
 	render: function () {
 		var {data} = this.state;
 		var path = this.getPath().slice(1);

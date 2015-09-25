@@ -25,9 +25,9 @@ function renderClinVarLink(val) {
 }
 
 var filterColumns = [
-	{name: 'Gene', prop: 'Gene symbol', values: ['BRCA1', 'BRCA2']},
+	{name: 'Gene', prop: 'Gene_symbol', values: ['BRCA1', 'BRCA2']},
 //	{name: 'Exon', values: ['Any', 1, 2, 3, 4, 5]}, // XXX needs refgene to get exon count
-	{name: 'Pathogenicity', prop: 'Clinical significance', values: ['Pathogenic', 'Benign']}
+	{name: 'Pathogenicity', prop: 'Clinical_significance', values: ['Pathogenic', 'Benign']}
 ];
 
 
@@ -73,7 +73,7 @@ var strPropCmpFn = prop => (a, b) => {
 	return -1;
 };
 
-var posCmpFn = strPropCmpFn('Genomic Coordinate');
+var posCmpFn = strPropCmpFn('Genomic_Coordinate');
 
 function sortColumns(columns, {prop, order}, data) {
 	var sortFn = _.findWhere(columns, {prop: prop}).sortFn || strPropCmpFn(prop),
@@ -85,12 +85,13 @@ function sortColumns(columns, {prop, order}, data) {
 }
 
 var columns = [
-	{title: 'Gene', prop: 'Gene symbol'},
+	{title: 'Gene', prop: 'Gene_symbol'},
 	{title: 'HGVS cDNA', prop: 'HGVS_cDNA', sortFn: posCmpFn},
 	{title: 'HGVS protein', prop: 'HGVS_protein', sortFn: posCmpFn},
-	{title: 'Genomic Coordinate', prop: 'Genomic Coordinate'},
-	{title: 'Pathogenicity', prop: 'Clinical significance'},
-	{title: 'Classification method', prop: 'Classification method'},
+    {title: 'BIC', prop: "BIC_Nomenclature"},    
+    {title: 'Abbrev AA Change', prop: "Abbrev_AA_change"},    
+	{title: 'Genomic Coordinate', prop: 'Genomic_Coordinate'},
+	{title: 'Pathogenicity', prop: 'Clinical_significance'},
 	{title: 'ClinVar Link', prop: 'ClinVarAccession', render: renderClinVarLink}
 ];
 
@@ -114,7 +115,7 @@ var VariantTable = React.createClass({
 				columns={columns}
 				initialData={data}
 				initialPageLength={10}
-                initialSortBy={{prop: 'Gene symbol', order: 'descending'}}
+                initialSortBy={{prop: 'Gene_symbol', order: 'descending'}}
                 pageLengthOptions={[ 20, 50, 100 ]}
             />
 		);
