@@ -10,13 +10,6 @@ var content = {
 	help: require('../content/help.md')
 };
 
-var lollipopDomains = {
-	brca1: JSON.stringify(require('../content/brca1LollipopDomain.json')),
-	brca2: JSON.stringify(require('../content/brca2LollipopDomain.json'))
-};
-
-
 module.exports = {
-	pages: content,
-	lollipop: lollipopDomains
+	pages: content
 };

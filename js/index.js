@@ -362,17 +362,27 @@ var Application = React.createClass({
 
 var Lollipop = React.createClass({
     render: function () {
-        return <div id='hurray' ref='d3svg'/>;
+        return (
+            <div>
+                <div id='brca1Lollipop' ref='d3svgBrca1'/>
+                <div id='brca2Lollipop' ref='d3svgBrca2'/>
+            </div>
+        );
     },
     componentDidMount: function() {
-        var {data} = this.props;
-        var d3svgRef = React.findDOMNode(this.refs.d3svg);
-        var domain = content.lollipop.brca1;
+        var d3svgBrca1Ref = React.findDOMNode(this.refs.d3svgBrca1);
+        var d3svgBrca2Ref = React.findDOMNode(this.refs.d3svgBrca2);
+        var mutsBRCA1 = JSON.parse(require('raw!../content/brca1LollipopMuts.json'));
+        var domainBRCA1 = JSON.parse(require('raw!../content/brca1LollipopDomain.json'));
+        var mutsBRCA2 = JSON.parse(require('raw!../content/brca2LollipopMuts.json'));
+        var domainBRCA2 = JSON.parse(require('raw!../content/brca2LollipopDomain.json'));
         console.log(content);
-        this.cleanup = d3Lollipop.drawStuffWithD3(d3svgRef, data, domain); // TODO: created promise that needs to be resolved. Used promise method since I knew it's json-loading functionality worked.
+        this.cleanupBRCA1 = d3Lollipop.drawStuffWithD3(d3svgBrca1Ref, mutsBRCA1, domainBRCA1);
+        //this.cleanupBRCA2 = d3Lollipop.drawStuffWithD3(d3svgBrca2Ref, mutsBRCA2, domainBRCA2);
     },
     componentWillUnmount: function() {
-        this.cleanup();
+        this.cleanupBRCA1();
+        //this.cleanupBRCA2();
     },
     shouldComponentUpdate: () => false
 });
