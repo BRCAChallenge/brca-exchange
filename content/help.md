@@ -1,6 +1,8 @@
 # Searching
 
-Variants are identified using [HGVS nomenclature](http://www.hgvs.org/mutnomen/), a standard created by the Human Genome Variation Society.  Most genetic test results are reported in HGVS nomenclature. This nomenclature describes a variant by indicating (1) a reference sequence, (s) what kind of sequence it is (genomic, cDNA or protein), (3) the position of the variant in this reference sequence, and (4) the nucloetide or protein differences between the variant and the reference sequence.  For example, _NM_007294.3:c.5053A>G_ indicates a variant relative to reference sequence _NM_007294.3_, which is a cDNA sequence (as indicated by the _c_), and that the variant is in position 5053 and involves changing an _A_ to a _G_.  You can search for a variant by starting to enter its HGVS string.  As you type, the list of variants displayed will update automatically to show the variants that match your search string.
+Variants are identified using [HGVS nomenclature](http://www.hgvs.org/mutnomen/), a standard created by the Human Genome Variation Society.  Most genetic test results are reported in HGVS nomenclature. This nomenclature describes a variant by indicating (1) a reference sequence, (2) what kind of sequence it is (genomic, cDNA or protein), (3) the position of the variant in relation this reference sequence, and (4) the nucloetide or protein differences between the variant and the reference sequence.  For example, _NM_007294.3:c.5053A>G_ indicates a variant relative to reference sequence _NM_007294.3_, which is a cDNA sequence (as indicated by _c_), that the variant is in position 5053, and that it involves changing an _A_ to a _G_.
+
+You can search for a variant by starting to enter its HGVS string.  As you type, the list of variants displayed will update automatically to show the variants that match your search string.
 
 # Table Columns
 
