@@ -34,6 +34,12 @@ var merge = (...objs) => _.extend({}, ...objs);
 
 var d3Lollipop = require('./d3Lollipop');
 
+if (typeof console === "undefined") {
+    window.console = {
+        log: function () {}
+    };
+}
+
 // add unique id to variant table
 function addId(data) {
 	return _.map(data, (r, i) => merge({id: i}, r));
@@ -359,8 +365,11 @@ var Lollipop = React.createClass({
         return <div id='hurray' ref='d3svg'/>;
     },
     componentDidMount: function() {
+        var {data} = this.props;
         var d3svgRef = React.findDOMNode(this.refs.d3svg);
-        this.cleanup = d3Lollipop.drawStuffWithD3(d3svgRef);
+        var domain = content.lollipop.brca1;
+        console.log(content);
+        this.cleanup = d3Lollipop.drawStuffWithD3(d3svgRef, data, domain); // TODO: created promise that needs to be resolved. Used promise method since I knew it's json-loading functionality worked.
     },
     componentWillUnmount: function() {
         this.cleanup();
