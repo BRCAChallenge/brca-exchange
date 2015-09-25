@@ -4,8 +4,7 @@ Content linked to by History of the BRCA Exchange under About
 
 # History of the BRCA Exchange  
 
-Genetic sequencing labs, academic centers, and companies have begun to aggregate observed BRCA1/2 variants in databases 
-and to classify them as pathogenic or benign using clinical information and/or other variant evidence. However, there has not been full exchange of all BRCA1/2 data among laboratories, thus stymieing the progress that can be made to classify variants if all variant data, evidence, and classifications were aggregated.
+Genetic sequencing labs, academic centers, and companies all work independently to classify BRCA1/2 variants as pathogenic or benign using clinical data and other evidence. Unfortunately, each of these individual laboratories are limited in their efforts because they do not have access to data that has been aggregated across all these groups.  While some groups have begun adding their data into shared databases, there has not been full exchange of all BRCA1/2 data among laboratories.  
 
 In March 2014, Professor Sir John Burn of Newcastle University, UK proposed a data sharing experiment now called the BRCA Challenge at the first plenary meeting of the [Global Alliance for Genomics and Health](http://genomicsandhealth.org/) (GA4GH), to address these issues. Over the subsequent months, John Burn and co-chair Stephen Chanock of the National Cancer Institute, USA, formed a Steering Committee including leaders from the breast cancer field and from genomic data sharing efforts. The Steering Committee defined initial goals for the Challenge including:
 
