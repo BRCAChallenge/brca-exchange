@@ -115,7 +115,7 @@ var VariantTable = React.createClass({
 				columns={columns}
 				initialData={data}
 				initialPageLength={10}
-                initialSortBy={{prop: 'Gene_symbol', order: 'descending'}}
+                initialSortBy={{prop: 'Abbrev_AA_change', order: 'descending'}}
                 pageLengthOptions={[ 20, 50, 100 ]}
             />
 		);
