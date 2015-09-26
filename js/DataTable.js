@@ -38,7 +38,7 @@ var DataTable = React.createClass({
 	},
 	render: function () {
 		var {filtersOpen, filterValues} = this.state,
-			{columns, filterColumns} = this.props,
+			{columns, filterColumns, suggestions} = this.props,
 			page = this.buildPage(),
 			filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
 				<SelectField onChange={v => this.onFilter(prop, filterAny(v))}
@@ -55,6 +55,8 @@ var DataTable = React.createClass({
 				<Row style={{marginBottom: '2px'}}>
 					<Col sm={5}>
 						<VariantSearch
+							id='variants-search'
+							suggestions={suggestions}
 							value={this.state.filterValues.visibleSearch}
 							onChange={this.onFilter.bind(this, 'visibleSearch')}
 						/>

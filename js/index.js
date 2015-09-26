@@ -74,8 +74,8 @@ var NavBarNew = React.createClass({
 		this.refs.about.setState({open: false});
 	},
     activePath: function(path, tab) {
-        var navPath = (path === "") ? "home": path.split("/")[0];
-        return ((navPath === tab) ? "active": "");
+        var navPath = (path === "") ? "home" : path.split("/")[0];
+        return ((navPath === tab) ? "active" : "");
     },
 	render: function () {
         var {path} = this.props;
@@ -138,9 +138,10 @@ var Home = React.createClass({
 		});
 	},
 	onSearch(value) {
-		this.transitionTo(`/variants?search=${value}`);
+		this.transitionTo('/variants', null, {search: value});
 	},
 	render: function() {
+		var {suggestions} = this.props;
 		var logoItems = _.map(logos, ({id, logo, url}) => (
 			<li key={id}><a href={url}>
 				<img id={id} src={logo} alt={id + ' logo'} />
@@ -150,7 +151,10 @@ var Home = React.createClass({
 			<Grid className='home'>
 				<Row>
 				   	<div className='text-center'>
-						<VariantSearch onSearch={this.onSearch}/>
+						<VariantSearch
+							id='home-search'
+							suggestions={suggestions}
+							onSearch={this.onSearch}/>
 					</div>
 				</Row>
 				<Row>
@@ -226,7 +230,7 @@ var Database = React.createClass({
 		this.transitionTo(`/help#${slugify(title)}`);
 	},
 	render: function () {
-		var {show, data} = this.props,
+		var {show, data, suggestions} = this.props,
 			{search} = this.getQuery();
 		return (
 			<Grid style={{display: show ? 'block' : 'none'}}>
@@ -235,6 +239,7 @@ var Database = React.createClass({
 						ref='table'
 						filterValues={{visibleSearch: search || ''}}
 						data={data.records}
+						suggestions={suggestions}
 						keys={databaseKey}
 						onHeaderClick={this.showHelp}
 						onRowClick={this.showVariant}/>
@@ -333,23 +338,45 @@ var VariantDetail = React.createClass({
 	}
 });
 
+var dontSuggest = [
+	'Assertion method citation',
+	'Citations or URLs for  clinical significance without database identifiers'
+];
+
+var flatmap = (coll, fn) => _.flatten(_.map(coll, fn), true);
+var minSuggestion = 3;
+var rowWords = row => flatmap(_.values(_.omit(row, dontSuggest)), v => v.split(/\s+/));
+
+// Pull out interesting strings from the data, for use in
+// auto-completion.
+function getSuggestions(data) {
+	return _.uniq(flatmap(data, row =>
+				_.filter(rowWords(row), w => w.length >= minSuggestion)).sort(),
+			true);
+}
+
 var Application = React.createClass({
 	mixins: [State],
 	getInitialState: function () {
 		return {data: null};
 	},
 	componentWillMount: function (){
-		Rx.DOM.get(databaseUrl).subscribe(data =>
-			this.setState({data: readTsv(data.responseText)}));
+		Rx.DOM.get(databaseUrl).subscribe(xhr => {
+			var data = readTsv(xhr.responseText);
+			this.setState({data: data, suggestions: getSuggestions(data.records)});
+		});
 	},
 	render: function () {
-		var {data} = this.state;
+		var {data, suggestions} = this.state;
 		var path = this.getPath().slice(1);
 		return (
 			<div>
 				<NavBarNew path={path} />
-				<RouteHandler data={data}/>
-				<Database show={path.indexOf('variants') === 0} data={data}/>
+				<RouteHandler data={data} suggestions={suggestions}/>
+				<Database
+					show={path.indexOf('variants') === 0}
+					suggestions={suggestions}
+					data={data}/>
 	            <Footer />
             </div>
 		);

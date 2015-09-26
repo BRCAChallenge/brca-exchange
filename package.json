@@ -48,6 +48,7 @@
     "markdown-it": "^4.4.0",
     "raw-loader": "^0.5.1",
     "react": "^0.13.1",
+    "react-autosuggest": "git+https://github.com/moroshko/react-autosuggest.git#785ee38a752a929cceacec0e9207175592446a1a",
     "react-bootstrap": "^0.20.0",
     "react-data-components-bd2k": "^0.5.3",
     "react-datagrid": "^1.2.13",
