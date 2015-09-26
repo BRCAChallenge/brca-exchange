@@ -4,8 +4,7 @@ Content linked to by History of the BRCA Exchange under About
 
 # History of the BRCA Exchange  
 
-Genetic sequencing labs, academic centers, and companies have begun to aggregate observed BRCA1/2 variants in databases 
-and to classify them as pathogenic or benign using clinical information and/or other variant evidence. However, there has not been full exchange of all BRCA1/2 data among laboratories, thus stymieing the progress that can be made to classify variants if all variant data, evidence, and classifications were aggregated.
+Genetic sequencing labs, academic centers, and companies all work independently to classify BRCA1/2 variants as pathogenic or benign using clinical data and other evidence. Unfortunately, each of these individual laboratories are limited in their efforts because they do not have access to data that has been aggregated across all these groups.  While some groups have begun adding their data into shared databases, there has not been full exchange of all BRCA1/2 data among laboratories.  
 
 In March 2014, Professor Sir John Burn of Newcastle University, UK proposed a data sharing experiment now called the BRCA Challenge at the first plenary meeting of the [Global Alliance for Genomics and Health](http://genomicsandhealth.org/) (GA4GH), to address these issues. Over the subsequent months, John Burn and co-chair Stephen Chanock of the National Cancer Institute, USA, formed a Steering Committee including leaders from the breast cancer field and from genomic data sharing efforts. The Steering Committee defined initial goals for the Challenge including:
 
@@ -72,6 +71,10 @@ The BRCA Exchange is the work of a great many people from many different institu
 * Dominique Stoppa-Lyonnet, Curie Institute, Paris, France
 
 * Sean Tavtigian, Hunstman Cancer Institute, Salt Lake City, USA
+
+![](DNA_cyclepath_to_Shelford_-_geograph.org.uk_-_538440.jpg)
+
+The BRCA genes loom large in public awareness.  This photo shows a bicycle path in Shelford, England that depicts the sequence of the BRCA2 gene.  The lanes of the path are separated by colored stripes.  Each stripe represents one base of BRCA2, with the stripes color-coded according to the nucleotide. See also [http://www.bshs.org.uk/travel-guide/dna-cycle-path-cambridge-england](http://www.bshs.org.uk/travel-guide/dna-cycle-path-cambridge-england)
 <!---
 Picture: SC members at UNESCO in Paris (I think John Burn has this)
 -->

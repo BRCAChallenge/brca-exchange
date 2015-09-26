@@ -17,7 +17,8 @@ var vcf = require('vcf.js');
 require('rx-dom');
 require('css/custom.css');
 var _ = require('underscore');
-//var brcaLogo = require('./img/brca_logo.png');
+
+var brcaLogo = require('./img/BRCA-Exchange-tall-tranparent.png');
 var logos = require('./logos');
 var slugify = require('./slugify');
 
@@ -27,7 +28,7 @@ var databaseUrl = require('../../enigma-database.tsv');
 var databaseKey = require('../databaseKey');
 
 var {Grid, Col, Row, Input, Navbar, Nav, Table,
-	DropdownButton} = require('react-bootstrap');
+	DropdownButton, Button, Modal} = require('react-bootstrap');
 
 
 var VariantTable = require('./VariantTable');
@@ -114,13 +115,58 @@ var NavBarNew = React.createClass({
 var Footer = React.createClass({
     render: function() {
         return (
-            <Grid className="footer">
-                <Row><a href="#">disclaimer</a></Row>
-                <Row><a href="#">contact us</a></Row>
-            </Grid>
+            <div className="container footer">
+                <div className="col-sm-5 left-footer">
+                    <ul>
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Variants</a></li>
+                        <li><a href="#">Help</a></li>
+                    </ul>
+                </div>
+                <div className="col-sm-2 logo-footer">
+                    <img href="#" src={brcaLogo} alt="brca exchange logo" />
+                </div>
+                <div className="col-sm-5 right-footer">
+                    <ul>
+                        <li><DisclaimerModal /></li>
+                        <li><a href="#">contact us</a></li>
+                        <li>
+                            <a href="https://github.com/BD2KGenomics/brca-website">
+                                source code
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         );
     }
 });
+
+var DisclaimerModal = React.createClass({
+    getInitialState() {
+        return { showModal: false };
+    },
+    close() {
+        this.setState({ showModal: false });
+    },
+    open() {
+    this.setState({ showModal: true });
+    },
+
+    render() {
+        return (
+            <div style={{display: "inline"}}>
+                <a onClick={this.open}>disclaimer</a>
+                {/* <Modal show={this.showModal}>
+                    <p>text in modal </p>
+                </Modal>
+                */}
+            </div>
+        );
+    } 
+});
+
 
 var Home = React.createClass({
 	mixins: [Navigation],
