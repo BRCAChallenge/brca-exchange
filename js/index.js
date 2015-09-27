@@ -342,6 +342,8 @@ var MyVariant = React.createClass({ //eslint-disable-line no-unused-vars
 	}
 });
 
+var _toSpace = s => s.replace(/_/g, ' ');
+
 var VariantDetail = React.createClass({
 	mixins: [Navigation],
 	showHelp: function (title) {
@@ -355,8 +357,8 @@ var VariantDetail = React.createClass({
 		var rows = _.map(variant, (v, k) =>
 			 <tr key={k}>
 				 <td className='help-target'>
-					{k}
-					<span onClick={() => this.showHelp(k)}
+					{_toSpace(k)}
+					<span onClick={() => this.showHelp(_toSpace(k))}
 						className='help glyphicon glyphicon-question-sign superscript'/>
 				 </td>
 				 <td>{v}</td>
