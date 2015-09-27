@@ -76,7 +76,8 @@
 /**************************************************************/
 
 .home .search-box {
-    padding: 70px;
+    padding-top: 70px;
+    padding-bottom: 70px;
 }
 
 /* change input width to a percentage of its container 
@@ -84,7 +85,7 @@
  *
  * */
 .search-box input {
-    width: 60%;
+    width: 100%;
     height: 40px;
     border: 1px solid #E8A2A0;
     text-align: left;

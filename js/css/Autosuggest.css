@@ -1,6 +1,8 @@
 /* Try to match bootstrap .dropdown */
 .react-autosuggest {
 	position: relative;
+	display: inline-block;
+	width: 100%;
 }
 
 /* Remove radius from input when dropdown is open, so

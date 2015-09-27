@@ -196,12 +196,12 @@ var Home = React.createClass({
 		return (
 			<Grid className='home'>
 				<Row>
-				   	<div className='text-center'>
+					<Col smOffset={3} sm={6}>
 						<VariantSearch
 							id='home-search'
 							suggestions={suggestions}
 							onSearch={this.onSearch}/>
-					</div>
+					</Col>
 				</Row>
 				<Row>
                     <div className="jumbotron">

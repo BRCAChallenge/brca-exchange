@@ -74,29 +74,27 @@ var VariantSearch = React.createClass({
 
 		return (
 			<div className='search-box help-target'>
-				<form onSubmit={this.onSubmit}>
+				<form onSubmit={this.onSubmit} style={{display: 'inline'}}>
 					<input type='submit' style={{display: 'none'}} />
-				<AutoSuggest
-					id={id}
-					className='dropdown open'
-					cache={false}
-					value={value}
-					inputAttributes={{
-						className: 'variant-search-input',
-						placeholder: "Search Variant such as c.1105G>A",
-						onChange: this.onChange
-					}}
-					theme={{
-						root: 'dropdown open',
-						suggestions: 'dropdown-menu'
-					}}
-					showWhen={input => input.trim().length > 1}
-					suggestions={this.suggest}
-					onSuggestionSelected={v => onSearch(v)}
-					suggestionRenderer={renderSuggestion}
-					ref='input' />
-				<span onClick={() => this.showHelp('Searching')}
-					className="glyphicon glyphicon-question-sign superscript help"/>
+					<div className='text-nowrap'>
+						<AutoSuggest
+							id={id}
+							className='dropdown open'
+							cache={false}
+							value={value}
+							inputAttributes={{
+								className: 'variant-search-input',
+								placeholder: "Search Variant such as c.1105G>A",
+								onChange: this.onChange
+							}}
+							showWhen={input => input.trim().length > 1}
+							suggestions={this.suggest}
+							onSuggestionSelected={v => onSearch(v)}
+							suggestionRenderer={renderSuggestion}
+							ref='input' />
+						<span onClick={() => this.showHelp('Searching')}
+							className="glyphicon glyphicon-question-sign superscript help"/>
+					</div>
 				</form>
 			</div>
 		);
