@@ -88,8 +88,8 @@ var columns = [
 	{title: 'Gene', prop: 'Gene_symbol'},
 	{title: 'HGVS cDNA', prop: 'HGVS_cDNA', sortFn: posCmpFn},
 	{title: 'HGVS protein', prop: 'HGVS_protein', sortFn: posCmpFn},
-    {title: 'BIC', prop: "BIC_Nomenclature"},    
-    {title: 'Abbrev AA Change', prop: "Abbrev_AA_change"},    
+    {title: 'BIC', prop: "BIC_Nomenclature"},
+    {title: 'Abbrev AA Change', prop: "Abbrev_AA_change"},
 	{title: 'Genomic Coordinate', prop: 'Genomic_Coordinate'},
 	{title: 'Pathogenicity', prop: 'Clinical_significance'},
 	{title: 'ClinVar Link', prop: 'ClinVarAccession', render: renderClinVarLink}

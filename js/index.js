@@ -28,7 +28,7 @@ var databaseUrl = require('../../enigma-database.tsv');
 var databaseKey = require('../databaseKey');
 
 var {Grid, Col, Row, Input, Navbar, Nav, Table,
-	DropdownButton, Button, Modal} = require('react-bootstrap');
+	DropdownButton} = require('react-bootstrap');
 
 
 var VariantTable = require('./VariantTable');
@@ -164,7 +164,7 @@ var DisclaimerModal = React.createClass({
                 */}
             </div>
         );
-    } 
+    }
 });
 
 
