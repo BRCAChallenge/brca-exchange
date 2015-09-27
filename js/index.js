@@ -385,8 +385,8 @@ var VariantDetail = React.createClass({
 });
 
 var dontSuggest = [
-	'Assertion method citation',
-	'Citations or URLs for  clinical significance without database identifiers'
+	'Assertion_method_citation',
+	'URL'
 ];
 
 var flatmap = (coll, fn) => _.flatten(_.map(coll, fn), true);
