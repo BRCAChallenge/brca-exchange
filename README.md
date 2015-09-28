@@ -9,6 +9,10 @@ The build is based on npm and webpack.
    * `brew install git`
    * `brew install node`
  * `git clone https://github.com/BD2KGenomics/brca-website.git`
+ * Ensure that the brca database is available to the build
+   * Browse to http://brcaexchange.cloudapp.net/variants
+   * Click "Download"
+   * `mv ~/Downloads/variants.tsv .`
  * `cd brca-website`
  * `npm install`
  * `npm start`
