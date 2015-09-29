@@ -23,12 +23,22 @@ var logos = require('./logos');
 var slugify = require('./slugify');
 
 var content = require('./content');
+var brca12JSON = {
+    brca1: {
+        brcaMutsFile: require('raw!../content/brca1LollipopMuts.json'),
+        brcaDomainFile: require('raw!../content/brca1LollipopDomain.json')
+    },
+    brca2: {
+        brcaMutsFile: require('raw!../content/brca2LollipopMuts.json'),
+        brcaDomainFile: require('raw!../content/brca2LollipopDomain.json')
+    }
+};
 
 var databaseUrl = require('../../enigma-database.tsv');
 var databaseKey = require('../databaseKey');
 
 var {Grid, Col, Row, Input, Navbar, Nav, Table,
-	DropdownButton} = require('react-bootstrap');
+	DropdownButton, MenuItem} = require('react-bootstrap');
 
 
 var VariantTable = require('./VariantTable');
@@ -38,8 +48,17 @@ var {Navigation, State, Link, Route, RouteHandler,
 
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 
+var d3Lollipop = require('./d3Lollipop');
+
+
 var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
 var variantPathSplit = id => _.object(databaseKey, _.map(id.split(/@@/), decodeURIComponent));
+
+if (typeof console === "undefined") {
+    window.console = {
+        log: function () {}
+    };
+}
 
 function readTsv(response) {
 	var {header, rows} = JSON.parse(response);
@@ -101,6 +120,9 @@ var NavBarNew = React.createClass({
 						</NavLink>
 						<NavLink onClick={this.close} to='/about/variation'>
 							BRCA Variation and Cancer
+						</NavLink>
+						<NavLink onClick={this.close} to='/about/lollipop'>
+							DNA Variant BRCA Lollipop Plots
 						</NavLink>
 					</DropdownButton>
 					<NavLink to='/variants'>Variants</NavLink>
@@ -445,9 +467,52 @@ var Application = React.createClass({
 	}
 });
 
+var D3Lollipop = React.createClass({
+    render: function () {
+        return (
+            <div id='brcaLollipop' ref='d3svgBrca'/>
+        );
+    },
+    componentDidMount: function() {
+        console.log(this.props);
+        var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
+        var mutsBRCA = JSON.parse(brca12JSON[this.props.brcakey].brcaMutsFile);
+        var domainBRCA = JSON.parse(brca12JSON[this.props.brcakey].brcaDomainFile);
+        console.log(content);
+        this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, mutsBRCA, domainBRCA, this.props.brcakey);
+    },
+    componentWillUnmount: function() {
+        this.cleanupBRCA();
+    },
+    shouldComponentUpdate: () => false
+});
+
+var Lollipop = React.createClass({
+    render: function () {
+        console.log('key', this.state.brcakey);
+        return (
+            <div>
+                <DropdownButton onSelect={this.onSelect} title="Dropdown" id="bg-vertical-dropdown-1">
+                    <MenuItem eventKey="brca1">BRCA1 Lollipop</MenuItem>
+                    <MenuItem eventKey="brca2">BRCA2 Lollipop</MenuItem>
+                </DropdownButton>
+                <D3Lollipop key={this.state.brcakey} brcakey={this.state.brcakey} id='brcaLollipop' ref='d3svgBrca'/>
+            </div>
+        );
+    },
+    getInitialState: function() {
+        return {brcakey: "brca1"};
+    },
+    onSelect: function(key) {
+	    this.setState({brcakey: key});
+        console.log(this.props);
+    }
+});
+
 var routes = (
 	<Route handler={Application}>
 		<DefaultRoute handler={Home}/>
+		<Route path='about/lollipop' handler={Lollipop}/>
 		<Route path='about/:page' handler={About}/>
 		<Route path='help' handler={Help}/>
 		<Route path='variants' />

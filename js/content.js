@@ -11,7 +11,6 @@ var content = {
     disclaimer: require('../content/disclaimer.md')
 };
 
-
 module.exports = {
 	pages: content
 };

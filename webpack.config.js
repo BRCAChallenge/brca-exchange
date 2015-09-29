@@ -18,9 +18,14 @@ module.exports = {
 	},
 	module: {
 		loaders: [
-			{ test: /\/d3.js$/, loader: "expose?d3" },
-			{ test: /\/d3-tip\/index.js$/, loader: "imports?define=>false" },
-			{ test: require.resolve("underscore"), loader: "expose?_" },
+			// The next three are required for muts-needle-plot.
+			{ test: /d3-svg-legend/, loader: "imports?d3=d3" },
+			{ test: /muts-needle-plot/, loader: "imports?_=underscore" },
+			// The d3-tip AMD loader does not populate d3.tip, which is expected
+			// by muts-needle-plot. So, we disable it here. The CommonJS loader
+			// will populate d3.tip.
+			{ test: /d3-tip/, loader: "imports?define=>false" },
+
 			{ test: /rx-dom/, loader: "imports?define=>false" },
 			{ test: /\.css$/, loader: "style!css" },
 			{ test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader?optional=es7.objectRestSpread,optional=runtime,cacheDirectory=true'},
@@ -49,7 +54,10 @@ module.exports = {
 			rx$: 'rx/dist/rx',
 			'rx.binding$': 'rx/dist/rx.binding',
 			'rx.async$': 'rx/dist/rx.async',
-			'rx.coincidence$': 'rx/dist/rx.coincidence'
+			'rx.coincidence$': 'rx/dist/rx.coincidence',
+			// The npm version of d3-tip is broken. We over-ride the transitive
+			// dependency here, with the version we've installed.
+			'd3-tip$': require.resolve('d3-tip')
 		},
 		extensions: ['', '.js', '.json', '.coffee'],
 		root: __dirname + "/js"
