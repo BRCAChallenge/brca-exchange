@@ -20,6 +20,7 @@
     "babel-eslint": "^3.0.1",
     "babel-loader": "^5.0.0",
     "css-loader": "^0.9.1",
+    "d3-dsv": "^0.1.5",
     "eslint": "^0.20.0",
     "eslint-plugin-react": "^2.2.0",
     "exports-loader": "^0.6.2",
@@ -29,6 +30,7 @@
     "html-webpack-plugin": "^1.1.0",
     "imports-loader": "^0.6.3",
     "jsverify": "^0.6.0-alpha.3",
+    "loader-utils": "^0.2.11",
     "markdown-it-loader": "^0.1.0",
     "mocha": "^2.2.1",
     "mocha-loader": "^0.7.1",
@@ -42,14 +44,19 @@
   "dependencies": {
     "babel-runtime": "^5.1.13",
     "bootstrap": "^3.3.4",
+<<<<<<< HEAD
     "d3": "^3.5.6",
     "d3-tip": "git+https://github.com/Caged/d3-tip.git#v0.6.7",
+=======
+    "es5-shim": "^4.1.13",
+>>>>>>> 1246bd5163ef83399ca201e6b76256427400f9b7
     "font-awesome-webpack": "0.0.3",
     "markdown-it": "^4.4.0",
     "raw-loader": "^0.5.1",
     "react": "^0.13.1",
+    "react-autosuggest": "git+https://github.com/moroshko/react-autosuggest.git#785ee38a752a929cceacec0e9207175592446a1a",
     "react-bootstrap": "^0.20.0",
-    "react-data-components-bd2k": "^0.5.2",
+    "react-data-components-bd2k": "^0.5.3",
     "react-datagrid": "^1.2.13",
     "react-remarkable": "^1.1.1",
     "react-router": "^0.13.3",

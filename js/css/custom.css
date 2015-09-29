@@ -1,3 +1,29 @@
+/* Note that bootstrap 3 media sizes are as follows:
+  @media(max-width:767px){}  // xs
+  @media(min-width:768px){}  // sm
+  @media(min-width:992px){}  // md
+  @media(min-width:1200px){} // lg
+*/
+
+/*
+ * Helper classes that pull-right for displays equal to or
+ * larger than the indicated size.
+ */
+@media (min-width: 768px) {
+	.pull-right-sm {
+		float: right;
+	}
+}
+@media (min-width: 992px) {
+	.pull-right-sm, .pull-right-md {
+		float: right;
+	}
+}
+@media (min-width: 1200px) {
+	.pull-right-sm, .pull-right-md, .pull-right-lg {
+		float: right;
+	}
+}
 /**************************************************************/
 /**********         NavBar                *********************/
 /**************************************************************/
@@ -28,8 +54,21 @@
 }
 
 .navbar {
-    min-height: 70px;
+    min-height: 70px; /* XXX This value MUST match the setting in index.js */
     padding-top: 10px
+}
+
+.navbar-default .navbar-nav > li > a.active {
+   color: #C03657;
+}
+
+
+.navbar-nav li.active span {
+   color: #C03657;
+}
+
+.navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:hover, .navbar-default .navbar-nav > .active > a:focus {
+    background-color: transparent;
 }
 
 /**************************************************************/
@@ -37,16 +76,20 @@
 /**************************************************************/
 
 .home .search-box {
-    padding: 70px;
+    padding-top: 70px;
+    padding-bottom: 70px;
 }
 
-/* XXX fixed width is not responsive */
-.search-box > input {
-    width: 400px;
+/* change input width to a percentage of its container 
+ * font-size is a percentage of its viewpoint width (2.2%)
+ *
+ * */
+.search-box input {
+    width: 100%;
     height: 40px;
     border: 1px solid #E8A2A0;
     text-align: left;
-    font-size: 18px;
+    font-size: 1.22em;
     text-indent: 4%;
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
@@ -58,7 +101,7 @@ input:focus {
     outline: none;
 }
 
-.search-box > Button {
+.search-box Button {
     border: 0;
 }
 
@@ -113,32 +156,58 @@ li {list-style-type: none;}
 }
 
 #BRCA-Exchange {
-    padding-top: 10px;
-    padding-bottom: 10px;
-    padding-left: 5px;
+    padding: 10px 0px;
 }
 
 #GA4GH {
-    padding-top: 7px;
-    padding-left: 7px;
-    padding-right: 7px;
+    padding: 0px 10px;
 }
 
 #human-variome-project {
-    padding: 5px;
+    padding: 5px 0px;
 }
 
 #ClinGen {
-    padding: 5px;
+    padding: 5px 0px;
 }
 
 #ENIGMA {
+    padding: 0px;
 }
 
 #CIMBA {
-    padding: 10px;
+    padding: 0px 10px 0px;
 }
 
+/**************************************************************/
+/**********     Footer                    *********************/
+/**************************************************************/
+div#main {
+    padding-bottom: 120px;
+    border-bottom: 1px solid rgb(220,220,220);
+}
+
+.footer {
+    position: absolute;
+    margin-top: 120px;
+    height: 90px;
+    width: 100%;
+    text-align: center;
+    font-size: 16px;
+    color: #4078c0;
+}
+
+.footer img {
+    width: 55px;
+    padding-top: 10px;
+}
+
+.footer li {
+    display: inline;
+    padding: 20px;
+}
+
+<<<<<<< HEAD
 /**************************************************************/
 /**********     d3 lollipop plots         *********************/
 /**************************************************************/
@@ -211,10 +280,19 @@ li {list-style-type: none;}
     left: 0;
 }
 
+=======
+.footer ul {
+    padding-top: 35px;
+    padding-bottom: 30px;
+}
+>>>>>>> 1246bd5163ef83399ca201e6b76256427400f9b7
 
 /**************************************************************/
 /**********     Other                     *********************/
 /**************************************************************/
+html {
+    font-size: 10px;
+}
 
 circle.needle-head {
     fill-opacity: 0.6;

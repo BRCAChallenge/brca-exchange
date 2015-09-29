@@ -21,20 +21,27 @@ def main():
         print line_num
         if line_num == 1:
             items = line.strip().split("\t")
-            items[2] = "HGVS_cDNA"
             items.append("HGVS_protein")
             items.append("Genomic Coordinate") 
-            items[13] = "Classification method"
         else:
             items = line.strip().split("\t")
             transcript_id = items[1]
             HGVS = items[2]
             hgvs_c = transcript_id + ":" + HGVS
             converted_hgvs = convert_hgvs(hgvs_c)
+            items[7] = convert_OMIM_id(items[7])
             items += converted_hgvs
-            items[13] = parse_comment(items[13])
-        new_line = "\t".join(items) + "\n"
+            new_line = "\t".join(items) + "\n"
         processed_file.write(new_line)
+
+def convert_OMIM_id(OMIM_id):
+    if OMIM_id == "604370":
+        return "BREAST-OVARIAN CANCER, FAMILIAL, SUSCEPTIBILITY TO, 1; BROVCA1 (" + OMIM_id + ")" 
+    elif OMIM_id == "612555":
+        return "BREAST-OVARIAN CANCER, FAMILIAL, SUSCEPTIBILITY TO, 2; BROVCA2 (" + OMIM_id + ")" 
+    else:
+        return "OMIM id not found (" + OMIM_id + ")"
+
 
 def parse_comment(s):
     text = ""

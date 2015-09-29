@@ -5,6 +5,9 @@ var webpack = require('webpack');
 var path = require('path');
 var mdih = require('./loaders/markdown-id-headers');
 
+var databaseKey = require('./databaseKey');
+var keyParam = databaseKey.map(function (k) { return "key[]=" + k; }).join("&");
+
 module.exports = {
 	historyApiFallback: true,
 	entry: "./js/index",
@@ -31,7 +34,11 @@ module.exports = {
 				loaders: ['url?limit=10000'],
 				exclude: [path.resolve(__dirname, "js/img/favicon")]
 			},
-			{ test: /\.md/, loader: 'html!markdown-it' }
+			{ test: /\.md/, loader: 'html!markdown-it' },
+			// This is a custom loader for the database tsv file that emits a compact
+			// json file (no repeated property names), and does a simple sanity check,
+			// ensuring that the primary key is, in fact, unique.
+			{ test: /enigma-database.tsv$/, loader: "url?limit=10000&name=[hash].json!dsv?" + keyParam}
 		]
 	},
 	plugins: [

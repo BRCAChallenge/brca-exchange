@@ -2,6 +2,11 @@
 /*global require: false */
 'use strict';
 
+// shims for older browsers
+require('babel/polyfill');
+require('es5-shim');
+require('es5-shim/es5-sham');
+
 require('./favicons');
 var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
@@ -9,11 +14,11 @@ require('bootstrap/dist/css/bootstrap.css');
 require('font-awesome-webpack');
 var Rx = require('rx');
 var vcf = require('vcf.js');
-require('rx.binding');
 require('rx-dom');
 require('css/custom.css');
 var _ = require('underscore');
-//var brcaLogo = require('./img/brca_logo.png');
+
+var brcaLogo = require('./img/BRCA-Exchange-tall-tranparent.png');
 var logos = require('./logos');
 var slugify = require('./slugify');
 
@@ -29,7 +34,8 @@ var brca12JSON = {
     }
 };
 
-var databaseUrl = require('file!../../enigma-database.tsv');
+var databaseUrl = require('../../enigma-database.tsv');
+var databaseKey = require('../databaseKey');
 
 var {Grid, Col, Row, Input, Navbar, Nav, Table,
 	DropdownButton, MenuItem} = require('react-bootstrap');
@@ -40,8 +46,9 @@ var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Link, Route, RouteHandler,
 	HistoryLocation, run, DefaultRoute} = require('react-router');
 
-var merge = (...objs) => _.extend({}, ...objs);
+var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 
+<<<<<<< HEAD
 var d3Lollipop = require('./d3Lollipop');
 
 if (typeof console === "undefined") {
@@ -61,13 +68,15 @@ function cutTrailingNewLine(string) {
     }
     return string;
 }
+=======
+var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
+var variantPathSplit = id => _.object(databaseKey, _.map(id.split(/@@/), decodeURIComponent));
+>>>>>>> 1246bd5163ef83399ca201e6b76256427400f9b7
 
 function readTsv(response) {
-	var [header, ...records] = cutTrailingNewLine(response).split("\n");
-	var keys = header.split("\t");
-    var rows = _.map(records, row => row.split("\t"));
-    return {
-        records: addId(_.map(rows, row => _.object(keys, row)))
+	var {header, rows} = JSON.parse(response);
+	return {
+		records: _.map(rows, row => _.object(header, row))
 	};
 }
 
@@ -97,9 +106,22 @@ var NavBarNew = React.createClass({
 	close: function () {
 		this.refs.about.setState({open: false});
 	},
+    activePath: function(path, tab) {
+        var navPath = (path === "") ? "home" : path.split("/")[0];
+        return ((navPath === tab) ? "active" : "");
+    },
 	render: function () {
+        var {path} = this.props;
+		var brand = (
+			<a className="navbar-brand" href="http://brcaexchange.org">
+				<span>
+					<b className="BRCA">BRCA</b>
+					<span className="exchange"> Exchange</span>
+				</span>
+			</a>);
 		return (
 			<div className="navbar-container">
+<<<<<<< HEAD
             <Navbar className="navbar-fixed-top">
 				<a className="navbar-brand" href="http://brcaexchange.org">
 					<span>
@@ -126,11 +148,86 @@ var NavBarNew = React.createClass({
 						<NavLink to='/variants'>Variants</NavLink>
 						<NavLink to='/help'>Help</NavLink>
 					</Nav>
+=======
+            <Navbar fixedTop brand={brand} toggleNavKey={0}>
+				<Nav eventKey={0} navbar right>
+					<NavLink to='/'>Home</NavLink>
+					<DropdownButton className={this.activePath(path, "about")} ref='about' title='About'>
+						<NavLink onClick={this.close} to='/about/history'>
+							History of the BRCA Exchange
+						</NavLink>
+						<NavLink onClick={this.close} to='/about/brca1_2'>
+							What are BRCA1 and BRCA2?
+						</NavLink>
+						<NavLink onClick={this.close} to='/about/variation'>
+							BRCA Variation and Cancer
+						</NavLink>
+					</DropdownButton>
+					<NavLink to='/variants'>Variants</NavLink>
+					<NavLink to='/help'>Help</NavLink>
+				</Nav>
+>>>>>>> 1246bd5163ef83399ca201e6b76256427400f9b7
 			</Navbar>
             </div>
 		);
 	}
 });
+
+var Footer = React.createClass({
+    render: function() {
+        return (
+            <div className="container footer">
+                <div className="col-sm-5 left-footer">
+                    <ul>
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Variants</a></li>
+                        <li><a href="#">Help</a></li>
+                    </ul>
+                </div>
+                <div className="col-sm-2 logo-footer">
+                    <img href="#" src={brcaLogo} alt="brca exchange logo" />
+                </div>
+                <div className="col-sm-5 right-footer">
+                    <ul>
+                        <li><DisclaimerModal /></li>
+                        <li><a href="#">contact us</a></li>
+                        <li>
+                            <a href="https://github.com/BD2KGenomics/brca-website">
+                                source code
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        );
+    }
+});
+
+var DisclaimerModal = React.createClass({
+    getInitialState() {
+        return { showModal: false };
+    },
+    close() {
+        this.setState({ showModal: false });
+    },
+    open() {
+    this.setState({ showModal: true });
+    },
+
+    render() {
+        return (
+            <div style={{display: "inline"}}>
+                <a onClick={this.open}>disclaimer</a>
+                {/* <Modal show={this.showModal}>
+                    <p>text in modal </p>
+                </Modal>
+                */}
+            </div>
+        );
+    }
+});
+
 
 var Home = React.createClass({
 	mixins: [Navigation],
@@ -148,9 +245,10 @@ var Home = React.createClass({
 		});
 	},
 	onSearch(value) {
-		this.transitionTo(`/variants?search=${value}`);
+		this.transitionTo('/variants', null, {search: value});
 	},
 	render: function() {
+		var {suggestions} = this.props;
 		var logoItems = _.map(logos, ({id, logo, url}) => (
 			<li key={id}><a href={url}>
 				<img id={id} src={logo} alt={id + ' logo'} />
@@ -159,9 +257,12 @@ var Home = React.createClass({
 		return (
 			<Grid className='home'>
 				<Row>
-				   	<div className='text-center'>
-						<VariantSearch onSearch={this.onSearch}/>
-					</div>
+					<Col smOffset={3} sm={6}>
+						<VariantSearch
+							id='home-search'
+							suggestions={suggestions}
+							onSearch={this.onSearch}/>
+					</Col>
 				</Row>
 				<Row>
                     <div className="jumbotron">
@@ -206,7 +307,7 @@ var Help = React.createClass({
 			setTimeout(function () {
 				var el = document.getElementById(fragment);
 				if (el) {
-					window.scrollTo(0, el.getBoundingClientRect().top);
+					window.scrollTo(0, el.getBoundingClientRect().top - navbarHeight);
 				}
 			}, 0);
 		}
@@ -229,32 +330,28 @@ var Help = React.createClass({
 
 var Database = React.createClass({
 	mixins: [Navigation, State, PureRenderMixin],
-	showVariant: function (id) {
-		this.transitionTo(`/variant/${id}`);
+	showVariant: function (row) {
+		this.transitionTo(`/variant/${variantPathJoin(row)}`);
 	},
 	showHelp: function (title) {
 		this.transitionTo(`/help#${slugify(title)}`);
 	},
 	render: function () {
-		var {show, data} = this.props,
+		var {show, data, suggestions} = this.props,
 			{search} = this.getQuery();
 		return (
-			<div style={{display: show ? 'block' : 'none'}}>
-				<div style={{position: "relative", height: "100px"}}>
-					{data ?
-						<Row>
-							<Col md={10} mdOffset={1}>
-								<VariantTable
-									ref='table'
-									filterValues={{visibleSearch: search || ''}}
-									data={data.records}
-									onHeaderClick={this.showHelp}
-									onRowClick={this.showVariant}/>
-							</Col>
-						</Row>
-						: ''}
-				</div>
-			</div>
+			<Grid style={{display: show ? 'block' : 'none'}}>
+				{data ?
+					<VariantTable
+						ref='table'
+						filterValues={{visibleSearch: search || ''}}
+						data={data.records}
+						suggestions={suggestions}
+						keys={databaseKey}
+						onHeaderClick={this.showHelp}
+						onRowClick={this.showVariant}/>
+					: ''}
+			</Grid>
 		);
 	}
 });
@@ -306,6 +403,8 @@ var MyVariant = React.createClass({ //eslint-disable-line no-unused-vars
 	}
 });
 
+var _toSpace = s => s.replace(/_/g, ' ');
+
 var VariantDetail = React.createClass({
 	mixins: [Navigation],
 	showHelp: function (title) {
@@ -313,14 +412,14 @@ var VariantDetail = React.createClass({
 	},
 	render: function() {
 		var {data, params: {id}} = this.props,
-			variant = (data && data.records[id]) || {};
+			variant = (data && _.findWhere(data.records, variantPathSplit(id))) || {};
 
 		variant = _.omit(variant, ['__HEADER__']);
 		var rows = _.map(variant, (v, k) =>
 			 <tr key={k}>
 				 <td className='help-target'>
-					{k}
-					<span onClick={() => this.showHelp(k)}
+					{_toSpace(k)}
+					<span onClick={() => this.showHelp(_toSpace(k))}
 						className='help glyphicon glyphicon-question-sign superscript'/>
 				 </td>
 				 <td>{v}</td>
@@ -348,24 +447,47 @@ var VariantDetail = React.createClass({
 	}
 });
 
+var dontSuggest = [
+	'Assertion_method_citation',
+	'URL'
+];
+
+var flatmap = (coll, fn) => _.flatten(_.map(coll, fn), true);
+var minSuggestion = 3;
+var rowWords = row => flatmap(_.values(_.omit(row, dontSuggest)), v => v.split(/\s+/));
+
+// Pull out interesting strings from the data, for use in
+// auto-completion.
+function getSuggestions(data) {
+	return _.uniq(flatmap(data, row =>
+				_.filter(rowWords(row), w => w.length >= minSuggestion)).sort(),
+			true);
+}
+
 var Application = React.createClass({
 	mixins: [State],
 	getInitialState: function () {
 		return {data: null};
 	},
 	componentWillMount: function (){
-		Rx.DOM.get(databaseUrl).subscribe(data =>
-			this.setState({data: readTsv(data.response)}));
+		Rx.DOM.get(databaseUrl).subscribe(xhr => {
+			var data = readTsv(xhr.responseText);
+			this.setState({data: data, suggestions: getSuggestions(data.records)});
+		});
 	},
 	render: function () {
-		var {data} = this.state;
+		var {data, suggestions} = this.state;
 		var path = this.getPath().slice(1);
 		return (
 			<div>
-				<NavBarNew />
-				<RouteHandler data={data}/>
-				<Database show={path.indexOf('variants') === 0} data={data}/>
-			</div>
+				<NavBarNew path={path} />
+				<RouteHandler data={data} suggestions={suggestions}/>
+				<Database
+					show={path.indexOf('variants') === 0}
+					suggestions={suggestions}
+					data={data}/>
+	            <Footer />
+            </div>
 		);
 	}
 });
