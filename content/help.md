@@ -8,21 +8,39 @@ Variants are identified using [HGVS nomenclature](http://www.hgvs.org/mutnomen/)
 
 The Gene column displays the name of the gene on which the variant was found.  This will be either BRCA1 or BRCA2.
 
-#### HGVS
+#### HGVS Nucleotide
 
-[HGVS](http://www.hgvs.org/mutnomen/) is a nomenclature proposed by the Human Genome Variation Society.  It describes a variant by specifying a reference sequence, the sequence type (genomic, cDNA or protein), the position of the variant within the reference sequence, and the changes that the variant introduces compared to the reference sequence.  For example, the string _NM_000059.3:c.8165C>G_ describes a variant relative to the reference sequence __NM_000059.3_, indicates that this sequence is a cDNA sequence (by the _c_), locates the variant at position 8165 in the reference sequence, and indicates that this variant involves changing a _C_ to a _G_.  On this site, we always use the same reference sequences: _NM_007294.3_ for BRCA1 and _NM_000059.3_ for BRCA2. For conciseness, we omit the name of the reference sequence from the HGVS string displayed.  So for the example of _NM_000059.3:c.8165C>G_, we would label the variant as _c.8165C>G_.
+The nucleotide-level change that would be introduced by this variant.  HGVS notation indicates the position of the variant within the portion of the reference nucleotide sequence after the protein start position, and the change that would be introduced by this variant.  For example, _c.15A>G_ indicates a change of _A_ to _G_ in nucleotide position 15.
+
+### HGVS Protein
+
+The protein-level change (if any) that would be introduced by this variant.  HGVS notation indicates the position of the variant within the reference protein sequence, and the change taht would be introduced by this variant.  For example, _p.(Tyr15His)_ indicates a change of _Tyr_ (Tyrosine) to _His_ (Histidine) at amino acid 15.  The notation _p.?_ indicates a variant is not within the protein-coding portions of the gene.
+
+### BIC Nucleotide
+
+Nucleotide change expressed according to nomenclature used by BIC ([http://research.nhgri.nih.gov/bic/](http://research.nhgri.nih.gov/bic/)), namely using nucleotide numbering from the first nucleotide of the full gene sequence, in contrast to HGVS notation which begins numbering relative to the start of the protein-coding portion of the sequence. 
+
+### BIC Protein
+
+Protein amino acid change expressed according to nomenclature used by BIC ([http://research.nhgri.nih.gov/bic/](http://research.nhgri.nih.gov/bic/)).  When this column is blank, it indicates that the variant is not in a protein-coding position within the gene. 
+
+### Genomic Coordinate
+
+Position of the variant in the reference genome, relative to the positive DNA strand.
+
 
 #### Pathogenicity
 
-The Pathogenicity column indicates whether expert curators have determined if the variant is _pathogenic_ or _benign_.  _Pathogenic_ variants are potentially harmful, and have been shown to increase an individual's risk of disease.  _Benign_ variants are those that show no evidence of leading to disease risk, even after detailed examination.
+The Pathogenicity column indicates whether expert curators have determined if the variant is _pathogenic_ or _benign_.  _Pathogenic_ variants are potentially harmful, and have been shown to increase an individual's risk of disease.  _Benign_ variants are those that show no evidence of leading to disease risk, even after detailed examination.  Variants can also be classified as _likely pathogenic_ or _likely benign_ when the evidence is less certain, or _uncertain_ if there is not enough information yet to assess the variant reliably.
+
+#### Source
+
+The variants shown on this site are stored in larger genomic variant databases.  One of the major variant datases is [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/).  This column gives the variant's ID in the ClinVar database, and contains hyperlinks showing the variant in ClinVar.
 
 #### Allele origin
 
 Variants are classified as either _germline_ or _somatic_, depending on how they are acquired.  _Germline_ variants are genetic changes that we inherit from our parents.  _Somatic_ variants are DNA changes that we acquire over our lifetime, often through exposure to pollutants, toxins, radiation and other carcinogens.   
 
-#### CVA
-
-The variants shown on this site are stored in larger genomic variant databases.  One of the major variant datases is [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/).  This column gives the variant's ID in the ClinVar database, and contains hyperlinks showing the variant in ClinVar.
  
 # Variant Detail Page Glossary
 
