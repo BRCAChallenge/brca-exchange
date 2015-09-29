@@ -87,7 +87,7 @@ var VariantSearch = React.createClass({
 								placeholder: "Search Variant such as c.1105G>A",
 								onChange: this.onChange
 							}}
-							showWhen={input => input.trim().length > 1}
+							showWhen={input => input.trim().length > 0}
 							suggestions={this.suggest}
 							onSuggestionSelected={v => onSearch(v)}
 							suggestionRenderer={renderSuggestion}
