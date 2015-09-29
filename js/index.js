@@ -344,6 +344,24 @@ var MyVariant = React.createClass({ //eslint-disable-line no-unused-vars
 
 var _toSpace = s => s.replace(/_/g, ' ');
 
+var Key = React.createClass({
+	render() {
+		var {onClick, tableKey} = this.props,
+			words = tableKey.replace(/_/g, ' ').split(' ');
+		return (
+			 <td className='help-target'>
+				{words.slice(0, words.length - 1).join(' ')}
+				{' '}
+				<span className="text-nowrap">
+					{words[words.length - 1]}
+					<span onClick={onClick}
+						className='help glyphicon glyphicon-question-sign superscript'/>
+				</span>
+			 </td>
+		);
+	}
+});
+
 var VariantDetail = React.createClass({
 	mixins: [Navigation],
 	showHelp: function (title) {
@@ -356,12 +374,8 @@ var VariantDetail = React.createClass({
 		variant = _.omit(variant, ['__HEADER__']);
 		var rows = _.map(variant, (v, k) =>
 			 <tr key={k}>
-				 <td className='help-target'>
-					{_toSpace(k)}
-					<span onClick={() => this.showHelp(_toSpace(k))}
-						className='help glyphicon glyphicon-question-sign superscript'/>
-				 </td>
-				 <td>{v}</td>
+				<Key tableKey={k} onClick={() => this.showHelp(_toSpace(k))} />
+				<td>{v}</td>
 			 </tr>);
 
 
