@@ -12,7 +12,7 @@ if (typeof console === "undefined") {
     };
 }
 
-d3Lollipop.drawStuffWithD3 = function(ref, muts, domain) {
+d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id) {
     console.log(ref);
     console.log(ref.id);
     console.log('muts: ', muts);
@@ -20,13 +20,13 @@ d3Lollipop.drawStuffWithD3 = function(ref, muts, domain) {
     var xAxisLabel = '';
     var minPos = 0;
     var maxPos = 1;
-    if (ref.id === 'brca1Lollipop') {
+    if (id === 'brca1') {
         xAxisLabel = 'BRCA1 Genomic Pos (chr 17)';
         minPos = 41190000;
         maxPos = 41280000;
-    } else {
+    } else if (id === 'brca2') {
         xAxisLabel = 'BRCA2 Genomic Pos (chr 13)';
-        minPos = 32870000;
+        minPos = 32880000;
         maxPos = 32980000;
     }
     var legends = {x: xAxisLabel, y: "Variant Count"};

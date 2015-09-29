@@ -18,11 +18,21 @@ var logos = require('./logos');
 var slugify = require('./slugify');
 
 var content = require('./content');
+var brca12JSON = {
+    brca1 : {
+        brcaMutsFile : require('raw!../content/brca1LollipopMuts.json'),
+        brcaDomainFile : require('raw!../content/brca1LollipopDomain.json')
+    },
+    brca2 : {
+        brcaMutsFile : require('raw!../content/brca2LollipopMuts.json'),
+        brcaDomainFile : require('raw!../content/brca2LollipopDomain.json')
+    }
+};
 
 var databaseUrl = require('file!../../enigma-database.tsv');
 
 var {Grid, Col, Row, Input, Navbar, Nav, Table,
-	DropdownButton} = require('react-bootstrap');
+	DropdownButton, MenuItem} = require('react-bootstrap');
 
 
 var VariantTable = require('./VariantTable');
@@ -360,31 +370,46 @@ var Application = React.createClass({
 	}
 });
 
-var Lollipop = React.createClass({
+var D3Lollipop = React.createClass({
     render: function () {
         return (
-            <div>
-                <div id='brca1Lollipop' ref='d3svgBrca1'/>
-                <div id='brca2Lollipop' ref='d3svgBrca2'/>
-            </div>
+            <div id='brcaLollipop' ref='d3svgBrca'/>
         );
     },
     componentDidMount: function() {
-        var d3svgBrca1Ref = React.findDOMNode(this.refs.d3svgBrca1);
-        var d3svgBrca2Ref = React.findDOMNode(this.refs.d3svgBrca2);
-        var mutsBRCA1 = JSON.parse(require('raw!../content/brca1LollipopMuts.json'));
-        var domainBRCA1 = JSON.parse(require('raw!../content/brca1LollipopDomain.json'));
-        var mutsBRCA2 = JSON.parse(require('raw!../content/brca2LollipopMuts.json'));
-        var domainBRCA2 = JSON.parse(require('raw!../content/brca2LollipopDomain.json'));
+        console.log(this.props);
+        var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
+        var mutsBRCA = JSON.parse(brca12JSON[this.props.brcakey].brcaMutsFile);
+        var domainBRCA = JSON.parse(brca12JSON[this.props.brcakey].brcaDomainFile);
         console.log(content);
-        this.cleanupBRCA1 = d3Lollipop.drawStuffWithD3(d3svgBrca1Ref, mutsBRCA1, domainBRCA1);
-        //this.cleanupBRCA2 = d3Lollipop.drawStuffWithD3(d3svgBrca2Ref, mutsBRCA2, domainBRCA2);
+        this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, mutsBRCA, domainBRCA, this.props.brcakey);
     },
     componentWillUnmount: function() {
-        this.cleanupBRCA1();
-        //this.cleanupBRCA2();
+        this.cleanupBRCA();
     },
     shouldComponentUpdate: () => false
+});
+
+var Lollipop = React.createClass({
+    render: function () {
+        console.log('key', this.state.brcakey);
+        return (
+            <div>
+                <DropdownButton onSelect={this.onSelect} title="Dropdown" id="bg-vertical-dropdown-1">
+                    <MenuItem eventKey="brca1">BRCA1 Lollipop</MenuItem>
+                    <MenuItem eventKey="brca2">BRCA2 Lollipop</MenuItem>
+                </DropdownButton>
+                <D3Lollipop key={this.state.brcakey} brcakey={this.state.brcakey} id='brcaLollipop' ref='d3svgBrca'/>
+            </div>
+        );
+    },
+    getInitialState: function() {
+        return {brcakey:"brca1"};
+    },
+    onSelect: function(key) {
+	    this.setState({brcakey:key});
+        console.log(this.props);
+    }
 });
 
 var routes = (
