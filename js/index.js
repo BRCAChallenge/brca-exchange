@@ -24,13 +24,13 @@ var slugify = require('./slugify');
 
 var content = require('./content');
 var brca12JSON = {
-    brca1 : {
-        brcaMutsFile : require('raw!../content/brca1LollipopMuts.json'),
-        brcaDomainFile : require('raw!../content/brca1LollipopDomain.json')
+    brca1: {
+        brcaMutsFile: require('raw!../content/brca1LollipopMuts.json'),
+        brcaDomainFile: require('raw!../content/brca1LollipopDomain.json')
     },
-    brca2 : {
-        brcaMutsFile : require('raw!../content/brca2LollipopMuts.json'),
-        brcaDomainFile : require('raw!../content/brca2LollipopDomain.json')
+    brca2: {
+        brcaMutsFile: require('raw!../content/brca2LollipopMuts.json'),
+        brcaDomainFile: require('raw!../content/brca2LollipopDomain.json')
     }
 };
 
@@ -48,30 +48,17 @@ var {Navigation, State, Link, Route, RouteHandler,
 
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 
-<<<<<<< HEAD
 var d3Lollipop = require('./d3Lollipop');
+
+
+var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
+var variantPathSplit = id => _.object(databaseKey, _.map(id.split(/@@/), decodeURIComponent));
 
 if (typeof console === "undefined") {
     window.console = {
         log: function () {}
     };
 }
-
-// add unique id to variant table
-function addId(data) {
-	return _.map(data, (r, i) => merge({id: i}, r));
-}
-
-function cutTrailingNewLine(string) {
-    if (string[string.length - 1] === "\n") {
-        return string.slice(0, string.length - 1);
-    }
-    return string;
-}
-=======
-var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
-var variantPathSplit = id => _.object(databaseKey, _.map(id.split(/@@/), decodeURIComponent));
->>>>>>> 1246bd5163ef83399ca201e6b76256427400f9b7
 
 function readTsv(response) {
 	var {header, rows} = JSON.parse(response);
@@ -121,34 +108,6 @@ var NavBarNew = React.createClass({
 			</a>);
 		return (
 			<div className="navbar-container">
-<<<<<<< HEAD
-            <Navbar className="navbar-fixed-top">
-				<a className="navbar-brand" href="http://brcaexchange.org">
-					<span>
-						<b className="BRCA">BRCA</b>
-                        <span className="exchange"> Exchange</span>
-					</span>
-				</a>
-					<Nav navbar right>
-						<NavLink to='/'>Home</NavLink>
-						<DropdownButton ref='about' title='About'>
-							<NavLink onClick={this.close} to='/about/history'>
-								History of the BRCA Exchange
-							</NavLink>
-							<NavLink onClick={this.close} to='/about/brca1_2'>
-								What are BRCA1 and BRCA2?
-							</NavLink>
-							<NavLink onClick={this.close} to='/about/variation'>
-								BRCA Variation and Cancer
-							</NavLink>
-							<NavLink onClick={this.close} to='/about/lollipop'>
-								DNA Variant BRCA Lollipop Plots
-							</NavLink>
-						</DropdownButton>
-						<NavLink to='/variants'>Variants</NavLink>
-						<NavLink to='/help'>Help</NavLink>
-					</Nav>
-=======
             <Navbar fixedTop brand={brand} toggleNavKey={0}>
 				<Nav eventKey={0} navbar right>
 					<NavLink to='/'>Home</NavLink>
@@ -162,11 +121,13 @@ var NavBarNew = React.createClass({
 						<NavLink onClick={this.close} to='/about/variation'>
 							BRCA Variation and Cancer
 						</NavLink>
+						<NavLink onClick={this.close} to='/about/lollipop'>
+							DNA Variant BRCA Lollipop Plots
+						</NavLink>
 					</DropdownButton>
 					<NavLink to='/variants'>Variants</NavLink>
 					<NavLink to='/help'>Help</NavLink>
 				</Nav>
->>>>>>> 1246bd5163ef83399ca201e6b76256427400f9b7
 			</Navbar>
             </div>
 		);
@@ -526,10 +487,10 @@ var Lollipop = React.createClass({
         );
     },
     getInitialState: function() {
-        return {brcakey:"brca1"};
+        return {brcakey: "brca1"};
     },
     onSelect: function(key) {
-	    this.setState({brcakey:key});
+	    this.setState({brcakey: key});
         console.log(this.props);
     }
 });
