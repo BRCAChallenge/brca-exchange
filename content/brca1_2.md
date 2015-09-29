@@ -8,7 +8,7 @@ BRCA1 and BRCA2, referred to collectively as BRCA genes, are genes that encode t
  
 In 1994 and 1995, scientists discovered that some sequence variants in the BRCA genes can lead to increased risk of breast cancer.  Since then, certain variants in the BRCA genes have also been linked to increased risk of ovarian cancer, and other diseases.  However, not every BRCA variant increases an individual’s disease risk.  Some variants are inconsequential, and people with such variants show no increased risk of disease.
 
-The BRCA genes vary between different individuals.  Scientists have been studying genetic variation, which is the aggregation of specific differences between individuals, and assessing how individual variants affect each person’s risk of disease.  Variants can be classified as benign (not leading to increased risk of disease), pathogenic (leading to increased risk of disease), or of uncertain significance (requiring further study).  Genetic testing is performed to determine whether an individual harbors any known BRCA genetic variants, and if any of these variants increase his or her risk of disease.
+The BRCA genes vary between different individuals.  Scientists have been studying genetic variation, which is the aggregation of specific differences between individuals, and assessing how individual variants affect each person’s risk of disease.  Some variants increase risk of cancer markedly (called *pathogenic*), others do not increase disease risk (termed *benign*), and yet others require further study to determine their clinical significance. Genetic testing is performed to determine whether an individual harbors any known BRCA genetic variants, and if any of these variants increase his or her risk of disease.
 
 ## See also:
 
