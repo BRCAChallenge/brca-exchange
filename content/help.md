@@ -8,7 +8,7 @@ Variants are identified using [HGVS nomenclature](http://www.hgvs.org/mutnomen/)
 
 The Gene column displays the name of the gene on which the variant was found.  This will be either BRCA1 or BRCA2.
 
-#### HGVS Nucleotide
+#### HGVS cDNA
 
 The nucleotide-level change that would be introduced by this variant.  HGVS notation indicates the position of the variant within the portion of the reference nucleotide sequence after the protein start position, and the change that would be introduced by this variant.  For example, _c.15A>G_ indicates a change of _A_ to _G_ in nucleotide position 15.
 
