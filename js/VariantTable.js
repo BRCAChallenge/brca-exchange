@@ -26,6 +26,10 @@ function renderClinVarLink(val) {
 	);
 }
 
+function renderCell(val) {
+	return <span>{val}</span>;
+}
+
 var filterColumns = [
 	{name: 'Gene', prop: 'Gene_symbol', values: ['BRCA1', 'BRCA2']},
 //	{name: 'Exon', values: ['Any', 1, 2, 3, 4, 5]}, // XXX needs refgene to get exon count
@@ -87,13 +91,13 @@ function sortColumns(columns, {prop, order}, data) {
 }
 
 var columns = [
-	{title: 'Gene', prop: 'Gene_symbol'},
-	{title: 'HGVS cDNA', prop: 'HGVS_cDNA', sortFn: posCmpFn},
-	{title: 'HGVS protein', prop: 'HGVS_protein', sortFn: posCmpFn},
-    {title: 'BIC', prop: "BIC_Nomenclature"},
-    {title: 'Abbrev AA Change', prop: "Abbrev_AA_change"},
-	{title: 'Genomic Coordinate', prop: 'Genomic_Coordinate'},
-	{title: 'Pathogenicity', prop: 'Clinical_significance'},
+	{title: 'Gene', prop: 'Gene_symbol', render: renderCell},
+	{title: 'HGVS cDNA', prop: 'HGVS_cDNA', sortFn: posCmpFn, render: renderCell},
+	{title: 'HGVS protein', prop: 'HGVS_protein', sortFn: posCmpFn, render: renderCell},
+	{title: 'BIC', prop: "BIC_Nomenclature", render: renderCell},
+	{title: 'Abbrev AA Change', prop: "Abbrev_AA_change", render: renderCell},
+	{title: 'Genomic Coordinate', prop: 'Genomic_Coordinate', render: renderCell},
+	{title: 'Pathogenicity', prop: 'Clinical_significance', render: renderCell},
 	{title: 'ClinVar Link', prop: 'ClinVarAccession', render: renderClinVarLink}
 ];
 
@@ -123,6 +127,7 @@ var VariantTable = React.createClass({
 		return (
 			<DataTable
 				ref='table'
+				className='row-clickable'
 				{...opts}
 				buildRowOptions={r => ({title: 'click for details', onClick: () => hasSelection() ? null : onRowClick(r)})}
 				buildHeader={title => buildHeader(onHeaderClick, title)}
