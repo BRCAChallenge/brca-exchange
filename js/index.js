@@ -478,7 +478,7 @@ var Lollipop = React.createClass({
         console.log('key', this.state.brcakey);
         return (
             <div>
-                <DropdownButton onSelect={this.onSelect} title="Dropdown" id="bg-vertical-dropdown-1">
+                <DropdownButton onSelect={this.onSelect} title={this.state.brcakey.toUpperCase()} id="bg-vertical-dropdown-1">
                     <MenuItem eventKey="brca1">BRCA1 Lollipop</MenuItem>
                     <MenuItem eventKey="brca2">BRCA2 Lollipop</MenuItem>
                 </DropdownButton>
