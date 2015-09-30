@@ -38,7 +38,7 @@ var databaseUrl = require('../../enigma-database.tsv');
 var databaseKey = require('../databaseKey');
 
 var {Grid, Col, Row, Input, Navbar, Nav, Table,
-	DropdownButton, MenuItem} = require('react-bootstrap');
+	DropdownButton, MenuItem, Modal, Button} = require('react-bootstrap');
 
 
 var VariantTable = require('./VariantTable');
@@ -140,10 +140,10 @@ var Footer = React.createClass({
             <div className="container footer">
                 <div className="col-sm-5 left-footer">
                     <ul>
-                        <li><a href="#">Home</a></li>
-                        <li><a href="#">About</a></li>
-                        <li><a href="#">Variants</a></li>
-                        <li><a href="#">Help</a></li>
+                        <li><a href="/home">Home</a></li>
+                        <li><a href="/about/history">About</a></li>
+                        <li><a href="/variants">Variants</a></li>
+                        <li><a href="/help">Help</a></li>
                     </ul>
                 </div>
                 <div className="col-sm-2 logo-footer">
@@ -173,17 +173,22 @@ var DisclaimerModal = React.createClass({
         this.setState({ showModal: false });
     },
     open() {
-    this.setState({ showModal: true });
+        this.setState({ showModal: true });
     },
-
+    onRequestHide() {
+        this.setState({ showModal: false });
+    },
     render() {
         return (
             <div style={{display: "inline"}}>
                 <a onClick={this.open}>disclaimer</a>
-                {/* <Modal show={this.showModal}>
-                    <p>text in modal </p>
-                </Modal>
-                */}
+                {this.state.showModal ? 
+                    <Modal onHide={this.close}>
+                        <RawHTML html={content.pages.disclaimer} />
+                        <div className = "close-button">
+                            <Button onClick={this.close}>close</Button>
+                        </div>
+                    </Modal> : null }                
             </div>
         );
     }
