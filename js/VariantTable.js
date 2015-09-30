@@ -20,7 +20,9 @@ function buildHeader(onClick, title) {
 
 function renderClinVarLink(val) {
 	return (
-		<a href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + val}>{val}</a>
+		<a title="View on ClinVar"
+			onClick={ev => ev.stopPropagation()}
+			href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + val}>{val}</a>
 	);
 }
 
