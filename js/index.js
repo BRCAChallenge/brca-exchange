@@ -182,13 +182,13 @@ var DisclaimerModal = React.createClass({
         return (
             <div style={{display: "inline"}}>
                 <a onClick={this.open}>disclaimer</a>
-                {this.state.showModal ? 
+                {this.state.showModal ?
                     <Modal onHide={this.close}>
                         <RawHTML html={content.pages.disclaimer} />
                         <div className = "close-button">
                             <Button onClick={this.close}>close</Button>
                         </div>
-                    </Modal> : null }                
+                    </Modal> : null }
             </div>
         );
     }
@@ -502,7 +502,7 @@ var Lollipop = React.createClass({
                         <MenuItem eventKey="BRCA2">BRCA2</MenuItem>
                     </DropdownButton>
                     <D3Lollipop key={this.state.brcakey} brcakey={this.state.brcakey} id='brcaLollipop' ref='d3svgBrca'/>
-                </div>    
+                </div>
             </Grid>
         );
     }
