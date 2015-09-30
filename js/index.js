@@ -152,7 +152,7 @@ var Footer = React.createClass({
                 <div className="col-sm-5 right-footer">
                     <ul>
                         <li><DisclaimerModal /></li>
-                        <li><a href="#">contact us</a></li>
+                        <li><a href="mailto:brca-exchange-contact@genomicsandhealth.org?subject=BRCA Exchange website">contact us</a></li>
                         <li>
                             <a href="https://github.com/BD2KGenomics/brca-website">
                                 source code
