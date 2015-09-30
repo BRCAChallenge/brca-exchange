@@ -15,11 +15,11 @@ def arg_parse():
     return args
 
 
-
 def main():
     args = arg_parse()
-    vcf_reader = vcf.Reader(open(args.input, "r"))
+    vcf_reader = vcf.Reader(open(args.input, "r"), strict_whitespace=True)
     vcf_writer = vcf.Writer(open(args.output, 'w'), vcf_reader)
+    write_err = 0
 
     for record in vcf_reader:
         n = len(record.ALT)
@@ -33,10 +33,11 @@ def main():
                     value = record.INFO[key]
                     if type(value) == list and len(value) == n:
                         new_record.INFO[key] = [value[i]]
-                vcf_writer.write_record(new_record)
-
-
-
+                try:
+                    vcf_writer.write_record(new_record)
+                except:
+                    write_err += 1
+    print "number of vcf_write.write_record() error is: ", write_err
 
 if __name__=="__main__":
     main()
