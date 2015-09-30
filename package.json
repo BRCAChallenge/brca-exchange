@@ -44,6 +44,7 @@
   "dependencies": {
     "babel-runtime": "^5.1.13",
     "bootstrap": "^3.3.4",
+    "classnames": "^2.1.5",
     "d3": "^3.5.6",
     "d3-tip": "git+https://github.com/Caged/d3-tip.git#v0.6.7",
     "es5-shim": "^4.1.13",

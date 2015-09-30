@@ -7,6 +7,7 @@ var {Button, Row, Col} = require('react-bootstrap');
 var VariantSearch = require('./VariantSearch');
 var SelectField = require('./SelectField');
 var _ = require('underscore');
+var cx = require('classnames');
 
 var filterDisplay = v => v == null ? 'Any' : v;
 var filterAny = v => v === 'Any' ? null : v;
@@ -38,7 +39,7 @@ var DataTable = React.createClass({
 	},
 	render: function () {
 		var {filtersOpen, filterValues} = this.state,
-			{columns, filterColumns, suggestions} = this.props,
+			{columns, filterColumns, suggestions, className} = this.props,
 			page = this.buildPage(),
 			filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
 				<SelectField onChange={v => this.onFilter(prop, filterAny(v))}
@@ -95,7 +96,7 @@ var DataTable = React.createClass({
 				<Row>
 					<Col className="table-responsive" sm={12}>
 						<Table
-							className="table table-hover table-bordered table-condensed"
+							className={cx(className, "table table-hover table-bordered table-condensed")}
 							dataArray={page.data}
 							columns={columns}
 							keys={this.props.keys}
