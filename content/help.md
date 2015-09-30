@@ -106,3 +106,6 @@ Indicates whether the submission to ClinVar is novel (and accessions were reserv
 
 #### Genomic Coordinate
 Coordinate of the variant on the genome.
+
+# Lollipop Plots
+

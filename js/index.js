@@ -24,11 +24,11 @@ var slugify = require('./slugify');
 
 var content = require('./content');
 var brca12JSON = {
-    brca1: {
+    BRCA1: {
         brcaMutsFile: require('raw!../content/brca1LollipopMuts.json'),
         brcaDomainFile: require('raw!../content/brca1LollipopDomain.json')
     },
-    brca2: {
+    BRCA2: {
         brcaMutsFile: require('raw!../content/brca2LollipopMuts.json'),
         brcaDomainFile: require('raw!../content/brca2LollipopDomain.json')
     }
@@ -465,11 +465,9 @@ var D3Lollipop = React.createClass({
         );
     },
     componentDidMount: function() {
-        console.log(this.props);
         var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
         var mutsBRCA = JSON.parse(brca12JSON[this.props.brcakey].brcaMutsFile);
         var domainBRCA = JSON.parse(brca12JSON[this.props.brcakey].brcaDomainFile);
-        console.log(content);
         this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, mutsBRCA, domainBRCA, this.props.brcakey);
     },
     componentWillUnmount: function() {
@@ -479,24 +477,34 @@ var D3Lollipop = React.createClass({
 });
 
 var Lollipop = React.createClass({
-    render: function () {
-        console.log('key', this.state.brcakey);
-        return (
-            <div>
-                <DropdownButton onSelect={this.onSelect} title={this.state.brcakey.toUpperCase()} id="bg-vertical-dropdown-1">
-                    <MenuItem eventKey="brca1">BRCA1 Lollipop</MenuItem>
-                    <MenuItem eventKey="brca2">BRCA2 Lollipop</MenuItem>
-                </DropdownButton>
-                <D3Lollipop key={this.state.brcakey} brcakey={this.state.brcakey} id='brcaLollipop' ref='d3svgBrca'/>
-            </div>
-        );
+    showHelp: function (title) {
+        this.transitionTo(`/help#${slugify(title)}`);
     },
     getInitialState: function() {
-        return {brcakey: "brca1"};
+        return {brcakey: "BRCA1"};
     },
     onSelect: function(key) {
 	    this.setState({brcakey: key});
-        console.log(this.props);
+    },
+    render: function () {
+        return (
+            <Grid>
+                <Row>
+                    <Col md={8} mdOffset={4}>
+                        <h1 id="brca-dna-variant-lollipop">{this.state.brcakey} Lollipop Chart</h1>
+                    </Col>
+                </Row>
+                <div>
+                    <span onClick={() => this.showHelp('lollipop-plots')}
+                        className='help glyphicon glyphicon-question-sign superscript'/>
+                    <DropdownButton onSelect={this.onSelect} title="Select Gene" id="bg-vertical-dropdown-1">
+                        <MenuItem eventKey="BRCA1">BRCA1</MenuItem>
+                        <MenuItem eventKey="BRCA2">BRCA2</MenuItem>
+                    </DropdownButton>
+                    <D3Lollipop key={this.state.brcakey} brcakey={this.state.brcakey} id='brcaLollipop' ref='d3svgBrca'/>
+                </div>    
+            </Grid>
+        );
     }
 });
 
