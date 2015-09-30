@@ -12,19 +12,19 @@ The Gene column displays the name of the gene on which the variant was found.  T
 
 The nucleotide-level change that would be introduced by this variant.  HGVS notation indicates the position of the variant within the portion of the reference nucleotide sequence after the protein start position, and the change that would be introduced by this variant.  For example, _c.15A>G_ indicates a change of _A_ to _G_ in nucleotide position 15.
 
-### HGVS Protein
+#### HGVS Protein
 
 The protein-level change (if any) that would be introduced by this variant.  HGVS notation indicates the position of the variant within the reference protein sequence, and the change taht would be introduced by this variant.  For example, _p.(Tyr15His)_ indicates a change of _Tyr_ (Tyrosine) to _His_ (Histidine) at amino acid 15.  The notation _p.?_ indicates a variant is not within the protein-coding portions of the gene.
 
-### BIC Nucleotide
+#### BIC Nucleotide
 
 Nucleotide change expressed according to nomenclature used by BIC ([http://research.nhgri.nih.gov/bic/](http://research.nhgri.nih.gov/bic/)), namely using nucleotide numbering from the first nucleotide of the full gene sequence, in contrast to HGVS notation which begins numbering relative to the start of the protein-coding portion of the sequence. 
 
-### BIC Protein
+#### BIC Protein
 
 Protein amino acid change expressed according to nomenclature used by BIC ([http://research.nhgri.nih.gov/bic/](http://research.nhgri.nih.gov/bic/)).  When this column is blank, it indicates that the variant is not in a protein-coding position within the gene. 
 
-### Genomic Coordinate
+#### Genomic Coordinate
 
 Position of the variant in the reference genome, relative to the positive DNA strand.
 
@@ -48,7 +48,7 @@ Variants are classified as either _germline_ or _somatic_, depending on how they
 Gene name, as named by [HGNC](http://www.genenames.org/).
 
 #### Reference sequence
-The reference sequence for the HGVS expression provided in the next column, e.g. NM_000492.3, NG_016465.3, or NC_000007.13. 
+The reference sequence corresponding to the HGVS coordinates indicated in the HGVS_cDNA column, e.g. NM_000492.3, NG_016465.3, or NC_000007.13. 
 
 #### HGVS_cDNA
 [HGVS coordinates](#HGVS) on the cDNA.
@@ -57,19 +57,19 @@ The reference sequence for the HGVS expression provided in the next column, e.g.
 Other labels or names for this variant.
 
 #### Condition ID type
-The database for the ID in the Condition ID value column. Values can be: OMIM, MeSH, MedGen, UMLS, Orphanet, HPO.
+The Condition ID type, together with the Condition ID value, indicate the condition associated with this variant according to a standard ontology. Condition ID types can be: OMIM, MeSH, MedGen, UMLS, Orphanet, HPO.
 
 #### Condition ID value
-The identifier from the database referenced in the Condition ID type column.
+The Condition ID value, together with the Condition ID type, indicate the condition associated with this variant according to a standard ontology.  The condition ID type specifies an ontology, while the condition ID value indicates the term within that ontology that identifes this condition.
 
 #### Condition category
-Possible values are Disease, DrugResponse, BloodGroup, Finding.
+Human-readable condition, describing the biological impact of the variation.
 
 #### Clinical significance
 Possible values are Pathogenic, Likely pathogenic, Uncertain significance, Likely benign, Benign, association, drug response, confers sensitivity, protective, risk factor, other, not provided.
 
 #### Date last evaluated
-Date the clinical significance of the variant was last evaluated by the submitter.
+The date on which the clinical significance of the variant was last evaluated by the submitter.
 
 #### Assertion method
 Describes the method and criteria that were used to make the assertion of clinical significance. 
