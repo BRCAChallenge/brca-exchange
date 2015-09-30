@@ -1,4 +1,4 @@
-/*global module: false, require: false */
+/*global module: false, require: false, window: false */
 'use strict';
 
 var React = require('react');
@@ -95,6 +95,22 @@ var columns = [
 	{title: 'ClinVar Link', prop: 'ClinVarAccession', render: renderClinVarLink}
 ];
 
+// Work-around to allow the user to select text in the table. The browser does not distinguish between
+// click and drag: if mouseup and mousedown occur on the same element, a click event is fired even if
+// the events occur at very different locations. That makes it hard to select text. This workaround
+// defeats the click event if text has been selected.
+//
+// XXX getSelection().isCollapsed is not available on all platforms. On those platforms we
+// will always return false (no selection), so the row click will fire. This makes it hard
+// for the user to select text in the table. A better solution would be to add a polyfill for
+// getSelection and isCollapsed. There are a few available, though they are much larger than
+// what we require:
+// https://github.com/Modernizr/Modernizr/wiki/HTML5-Cross-Browser-Polyfills#dom-range-and-selection
+// We might want to write a minimal isCollapsed that will use whichever DOM method is available. We could
+// also add feature detection, and modify the UI if the feature is not available. E.g. we could style the
+// text areas to look clickable instead of selectable..
+var hasSelection = () => !(window.getSelection && window.getSelection().isCollapsed);
+
 var VariantTable = React.createClass({
 	mixins: [PureRenderMixin],
 	getData: function () {
@@ -106,7 +122,7 @@ var VariantTable = React.createClass({
 			<DataTable
 				ref='table'
 				{...opts}
-				buildRowOptions={r => ({title: 'click for details', onClick: () => onRowClick(r)})}
+				buildRowOptions={r => ({title: 'click for details', onClick: () => hasSelection() ? null : onRowClick(r)})}
 				buildHeader={title => buildHeader(onHeaderClick, title)}
 				sort={(sb, d) => sortColumns(columns, sb, d)}
 				filter={applyFilters}
