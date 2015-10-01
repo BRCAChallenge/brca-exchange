@@ -381,7 +381,7 @@ var Key = React.createClass({
 				{' '}
 				<span className="text-nowrap">
 					{words[words.length - 1]}
-					<span onClick={onClick}
+					<span role='button' onClick={onClick}
 						className='help glyphicon glyphicon-question-sign superscript'/>
 				</span>
 			 </td>
