@@ -2,7 +2,7 @@
 'use strict';
 
 require('muts-needle-plot/src/js/d3-svg-legend');
-var mutneedles = require("muts-needle-plot");
+var Mutneedles = require("muts-needle-plot");
 
 var d3Lollipop = {};
 
@@ -26,7 +26,7 @@ d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id) {
       "Pathogenic": "red"
     };
     var config = {minCoord: minPos, maxCoord: maxPos, mutationData: muts, regionData: domain, targetElement: ref.id, legends: legends, colorMap: colorMap };
-    var instance =  new mutneedles(config);
+    var instance =  new Mutneedles(config);
     return function() {
         instance.tip.destroy();
         instance.selectionTip.destroy();
