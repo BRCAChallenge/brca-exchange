@@ -19,7 +19,7 @@ var DataTable = React.createClass({
 	mixins: [DataMixin],
 	createDownload: function (ev) {
 		// XXX This is a bit horrible. In order to build the tsv lazily (on
-		// button click, instead of on every tabe update), we catch the
+		// button click, instead of on every table update), we catch the
 		// mousedown event and modify the href on the anchor element, behind
 		// the back of react. I don't believe this will cause any problems, but
 		// it's something to be aware of if react starts doing something
