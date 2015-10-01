@@ -477,6 +477,7 @@ var D3Lollipop = React.createClass({
 });
 
 var Lollipop = React.createClass({
+    mixins: [Navigation],
     showHelp: function (title) {
         this.transitionTo(`/help#${slugify(title)}`);
     },
@@ -495,12 +496,12 @@ var Lollipop = React.createClass({
                     </Col>
                 </Row>
                 <div>
-                    <span onClick={() => this.showHelp('lollipop-plots')}
-                        className='help glyphicon glyphicon-question-sign superscript'/>
                     <DropdownButton onSelect={this.onSelect} title="Select Gene" id="bg-vertical-dropdown-1">
                         <MenuItem eventKey="BRCA1">BRCA1</MenuItem>
                         <MenuItem eventKey="BRCA2">BRCA2</MenuItem>
                     </DropdownButton>
+                    <span onClick={() => this.showHelp('Lollipop Plots')}
+                        className='help glyphicon glyphicon-question-sign superscript'/>
                     <D3Lollipop key={this.state.brcakey} brcakey={this.state.brcakey} id='brcaLollipop' ref='d3svgBrca'/>
                 </div>
             </Grid>
