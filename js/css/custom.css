@@ -193,8 +193,7 @@ div#main {
     height: 90px;
     width: 100%;
     text-align: center;
-    font-size: 16px;
-    color: #4078c0;
+    font-size: 15px;
 }
 
 .footer img {
@@ -211,6 +210,19 @@ div#main {
     padding-top: 35px;
     padding-bottom: 30px;
 }
+
+/**************************************************************/
+/**********     disclaimer                *********************/
+/**************************************************************/
+.modal-content .markdown {
+    text-align: left;
+    padding: 40px;
+}
+
+.modal-content .close-button {
+    padding-bottom: 40px;
+}
+
 
 /**************************************************************/
 /**********     d3 lollipop plots         *********************/
@@ -282,6 +294,19 @@ div#main {
     margin: -1px 0 0 0;
     top: 100%;
     left: 0;
+}
+
+/**************************************************************/
+/**********     Table                     *********************/
+/**************************************************************/
+
+
+.table.row-clickable tbody > tr {
+	cursor: pointer;
+}
+
+.table.row-clickable tbody > tr > td > * {
+	cursor: text;
 }
 
 /**************************************************************/

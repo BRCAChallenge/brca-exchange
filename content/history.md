@@ -72,6 +72,8 @@ The BRCA Exchange is the work of a great many people from many different institu
 
 * Sean Tavtigian, Hunstman Cancer Institute, Salt Lake City, USA
 
+The technical development of the BRCA Exchange web site was led by Molly Zhang, Brian Craft, Charlie Markello, Benedict Paten and Melissa Cline at UC Santa Cruz, Santa Cruz, CA, USA, with major contributions by Gunnar Raetsch st Memorial Sloan Kettering Cancer Center, New York City, USA and Rachel Liao at the Broad Institute and Harvard University in Cambridge, MA USA.
+
 ![](DNA_cyclepath_to_Shelford_-_geograph.org.uk_-_538440.jpg)
 
 The BRCA genes loom large in public awareness.  This photo shows a bicycle path in Shelford, England that depicts the sequence of the BRCA2 gene.  The lanes of the path are separated by colored stripes.  Each stripe represents one base of BRCA2, with the stripes color-coded according to the nucleotide. See also [http://www.bshs.org.uk/travel-guide/dna-cycle-path-cambridge-england](http://www.bshs.org.uk/travel-guide/dna-cycle-path-cambridge-england)

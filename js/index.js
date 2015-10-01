@@ -24,11 +24,11 @@ var slugify = require('./slugify');
 
 var content = require('./content');
 var brca12JSON = {
-    brca1: {
+    BRCA1: {
         brcaMutsFile: require('raw!../content/brca1LollipopMuts.json'),
         brcaDomainFile: require('raw!../content/brca1LollipopDomain.json')
     },
-    brca2: {
+    BRCA2: {
         brcaMutsFile: require('raw!../content/brca2LollipopMuts.json'),
         brcaDomainFile: require('raw!../content/brca2LollipopDomain.json')
     }
@@ -38,7 +38,7 @@ var databaseUrl = require('../../enigma-database.tsv');
 var databaseKey = require('../databaseKey');
 
 var {Grid, Col, Row, Input, Navbar, Nav, Table,
-	DropdownButton, MenuItem} = require('react-bootstrap');
+	DropdownButton, MenuItem, Modal, Button} = require('react-bootstrap');
 
 
 var VariantTable = require('./VariantTable');
@@ -140,10 +140,10 @@ var Footer = React.createClass({
             <div className="container footer">
                 <div className="col-sm-5 left-footer">
                     <ul>
-                        <li><a href="#">Home</a></li>
-                        <li><a href="#">About</a></li>
-                        <li><a href="#">Variants</a></li>
-                        <li><a href="#">Help</a></li>
+                        <li><a href="/home">Home</a></li>
+                        <li><a href="/about/history">About</a></li>
+                        <li><a href="/variants">Variants</a></li>
+                        <li><a href="/help">Help</a></li>
                     </ul>
                 </div>
                 <div className="col-sm-2 logo-footer">
@@ -152,7 +152,7 @@ var Footer = React.createClass({
                 <div className="col-sm-5 right-footer">
                     <ul>
                         <li><DisclaimerModal /></li>
-                        <li><a href="#">contact us</a></li>
+                        <li><a href="mailto:brca-exchange-contact@genomicsandhealth.org?subject=BRCA Exchange website">contact us</a></li>
                         <li>
                             <a href="https://github.com/BD2KGenomics/brca-website">
                                 source code
@@ -173,17 +173,22 @@ var DisclaimerModal = React.createClass({
         this.setState({ showModal: false });
     },
     open() {
-    this.setState({ showModal: true });
+        this.setState({ showModal: true });
     },
-
+    onRequestHide() {
+        this.setState({ showModal: false });
+    },
     render() {
         return (
             <div style={{display: "inline"}}>
                 <a onClick={this.open}>disclaimer</a>
-                {/* <Modal show={this.showModal}>
-                    <p>text in modal </p>
-                </Modal>
-                */}
+                {this.state.showModal ?
+                    <Modal onHide={this.close}>
+                        <RawHTML html={content.pages.disclaimer} />
+                        <div className = "close-button">
+                            <Button onClick={this.close}>close</Button>
+                        </div>
+                    </Modal> : null }
             </div>
         );
     }
@@ -474,11 +479,9 @@ var D3Lollipop = React.createClass({
         );
     },
     componentDidMount: function() {
-        console.log(this.props);
         var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
         var mutsBRCA = JSON.parse(brca12JSON[this.props.brcakey].brcaMutsFile);
         var domainBRCA = JSON.parse(brca12JSON[this.props.brcakey].brcaDomainFile);
-        console.log(content);
         this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, mutsBRCA, domainBRCA, this.props.brcakey);
     },
     componentWillUnmount: function() {
@@ -488,24 +491,34 @@ var D3Lollipop = React.createClass({
 });
 
 var Lollipop = React.createClass({
-    render: function () {
-        console.log('key', this.state.brcakey);
-        return (
-            <div>
-                <DropdownButton onSelect={this.onSelect} title="Dropdown" id="bg-vertical-dropdown-1">
-                    <MenuItem eventKey="brca1">BRCA1 Lollipop</MenuItem>
-                    <MenuItem eventKey="brca2">BRCA2 Lollipop</MenuItem>
-                </DropdownButton>
-                <D3Lollipop key={this.state.brcakey} brcakey={this.state.brcakey} id='brcaLollipop' ref='d3svgBrca'/>
-            </div>
-        );
+    showHelp: function (title) {
+        this.transitionTo(`/help#${slugify(title)}`);
     },
     getInitialState: function() {
-        return {brcakey: "brca1"};
+        return {brcakey: "BRCA1"};
     },
     onSelect: function(key) {
 	    this.setState({brcakey: key});
-        console.log(this.props);
+    },
+    render: function () {
+        return (
+            <Grid>
+                <Row>
+                    <Col md={8} mdOffset={4}>
+                        <h1 id="brca-dna-variant-lollipop">{this.state.brcakey} Lollipop Chart</h1>
+                    </Col>
+                </Row>
+                <div>
+                    <span onClick={() => this.showHelp('lollipop-plots')}
+                        className='help glyphicon glyphicon-question-sign superscript'/>
+                    <DropdownButton onSelect={this.onSelect} title="Select Gene" id="bg-vertical-dropdown-1">
+                        <MenuItem eventKey="BRCA1">BRCA1</MenuItem>
+                        <MenuItem eventKey="BRCA2">BRCA2</MenuItem>
+                    </DropdownButton>
+                    <D3Lollipop key={this.state.brcakey} brcakey={this.state.brcakey} id='brcaLollipop' ref='d3svgBrca'/>
+                </div>
+            </Grid>
+        );
     }
 });
 
