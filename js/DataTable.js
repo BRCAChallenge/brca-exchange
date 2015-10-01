@@ -54,26 +54,6 @@ var DataTable = React.createClass({
 					</Col>
 				</Row>
 				<Row style={{marginBottom: '2px'}}>
-					<Col sm={5}>
-						<VariantSearch
-							id='variants-search'
-							suggestions={suggestions}
-							value={this.state.filterValues.visibleSearch}
-							onChange={this.onFilter.bind(this, 'visibleSearch')}
-						/>
-					</Col>
-					<Col sm={3} smOffset={4}>
-						<div className='form-inline pull-right-sm'>
-							<SelectField
-								label="Page size:"
-								value={this.state.pageLength}
-								options={this.props.pageLengthOptions}
-								onChange={this.onPageLengthChange}
-							/>
-						</div>
-					</Col>
-				</Row>
-				<Row style={{marginBottom: '2px'}}>
 					<Col sm={6}>
 						<div className='form-inline'>
 							<div className='form-group'>
@@ -85,7 +65,27 @@ var DataTable = React.createClass({
 							</div>
 						</div>
 					</Col>
-					<Col sm={6}>
+					<Col sm={3} smOffset={3}>
+						<div className='form-inline pull-right-sm'>
+							<SelectField
+								label="Page size:"
+								value={this.state.pageLength}
+								options={this.props.pageLengthOptions}
+								onChange={this.onPageLengthChange}
+							/>
+						</div>
+					</Col>
+				</Row>
+				<Row style={{marginBottom: '2px'}}>
+					<Col sm={5}>
+						<VariantSearch
+							id='variants-search'
+							suggestions={suggestions}
+							value={this.state.filterValues.visibleSearch}
+							onChange={this.onFilter.bind(this, 'visibleSearch')}
+						/>
+					</Col>
+					<Col sm={6} smOffset={1}>
 						<Pagination
 							className="pagination pull-right-sm"
 							currentPage={page.currentPage}
