@@ -11,8 +11,8 @@ require('./css/Autosuggest.css');
 
 var maxSuggestions = 10;
 function getSuggestions(data, input) {
-	var matchStr = input.toLowerCase();
-	return _.first(_.filter(data, s => s.toLowerCase().indexOf(matchStr) === 0),
+	var matchStr = input.toLowerCase(); // data should already be lower case
+	return _.first(_.filter(data, s => s.indexOf(matchStr) === 0),
 			maxSuggestions);
 }
 

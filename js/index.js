@@ -433,8 +433,9 @@ var dontSuggest = [
 ];
 
 var flatmap = (coll, fn) => _.flatten(_.map(coll, fn), true);
-var minSuggestion = 3;
-var rowWords = row => flatmap(_.values(_.omit(row, dontSuggest)), v => v.split(/\s+/));
+var minSuggestion = 3; // minimum length of string to use in autocomplete
+var rowWords = row => flatmap(_.values(_.omit(row, dontSuggest)),
+		v => v.toLowerCase().split(/\s+/));
 
 // Pull out interesting strings from the data, for use in
 // auto-completion.
