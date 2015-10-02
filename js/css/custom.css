@@ -53,6 +53,21 @@
     color: #E8A2A0;
 }
 
+.navbar-brand img {
+    width: 180px;
+    height: 37px;
+    background-color: rgba(54,171,242,0.8);
+    border-radius:8px; 
+    margin-left: 40px;
+    margin-bottom: 10px;
+    padding-top: 10px;
+    padding-bottom: 6px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+
+
 .navbar {
     min-height: 70px; /* XXX This value MUST match the setting in index.js */
     padding-top: 10px

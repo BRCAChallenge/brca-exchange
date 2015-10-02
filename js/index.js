@@ -19,6 +19,7 @@ require('css/custom.css');
 var _ = require('underscore');
 
 var brcaLogo = require('./img/BRCA-Exchange-tall-tranparent.png');
+var betaBanner = require('./img/Beta_Banner.png');
 var logos = require('./logos');
 var slugify = require('./slugify');
 
@@ -104,6 +105,7 @@ var NavBarNew = React.createClass({
 				<span>
 					<b className="BRCA">BRCA</b>
 					<span className="exchange"> Exchange</span>
+                    <img src={betaBanner} alt="beta banner" />
 				</span>
 			</a>);
 		return (
