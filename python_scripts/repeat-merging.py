@@ -9,7 +9,7 @@ import copy
 def main():
     args = arg_parse()
     vcf_reader = vcf.Reader(open(args.input, "r"), strict_whitespace=True)
-    vcf_writer = vcf.Writer(open(args.output, 'w'), vcf_reader)
+    #vcf_writer = vcf.Writer(open(args.output, 'w'), vcf_reader)
     variant_dict = {}
     num_repeats = 0
     for record in vcf_reader:
@@ -19,17 +19,13 @@ def main():
             variant_dict[genome_coor] = copy.deepcopy(record)
         else:
             num_repeats += 1
-#           print "before -----------"
-#           print variant_dict[genome_coor]
-#           print variant_dict[genome_coor].INFO
-#           print record
-#           print record.INFO
             for key in record.INFO:        
                 if key not in variant_dict[genome_coor].INFO.keys():
                     variant_dict[genome_coor].INFO[key] = copy.deepcopy(record.INFO[key])
                 else:
                     new_value = copy.deepcopy(record.INFO[key])
                     old_value = copy.deepcopy(variant_dict[genome_coor].INFO[key])
+
                     if type(new_value) != list:
                         new_value = [new_value]
                     if type(old_value) != list:
@@ -39,15 +35,43 @@ def main():
                     else:
                         merged_value = list(set(new_value + old_value))
                         variant_dict[genome_coor].INFO[key] = copy.deepcopy(merged_value)
-#           print "after -----------"
-#           print variant_dict[genome_coor]
-#           print variant_dict[genome_coor].INFO
-#           print record
-#           print record.INFO
     print "number of repeat records: ", num_repeats
-    for value in variant_dict.values():
-        vcf_writer.write_record(value)
+#    for value in variant_dict.values():
+#        vcf_writer.write_record(value)
 
+
+    write_to_vcf(args.input, args.output, variant_dict)
+
+def write_to_vcf(path_in, path_out, v_dict):
+    f_in = open(path_in, "r")
+    f_out = open(path_out, "w")
+    for line in f_in:
+        if "#" in line:
+            f_out.write(line)
+        else:
+            break
+    
+    for record in v_dict.values():
+        if record.QUAL == None:
+            QUAL = "."
+        if record.FILTER == None:
+            FILTER = "."
+
+        items = [record.CHROM, str(record.POS), str(record.ID), record.REF, 
+                str(record.ALT[0]), QUAL, FILTER]
+        infos = []
+        for key in record.INFO:
+            this_info = record.INFO[key] 
+            if type(this_info) == list:
+                if None in this_info:
+                    this_info = ['None' if x is None else x for x in this_info]
+                infos.append(key + "=" + str(",".join(this_info)))
+            else:
+                infos.append(key + "=" + str(this_info))
+
+        items.append(";".join(infos))
+        new_line = "\t".join(items) + "\n"
+        f_out.write(new_line)
 
 
 def arg_parse():
