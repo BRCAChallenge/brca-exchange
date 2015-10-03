@@ -56,12 +56,12 @@ def write_to_vcf(path_in, path_out, v_dict):
 
     for record in v_dict.values():
         if record.QUAL == None:
-            QUAL = "."
+            record.QUAL = "."
         if record.FILTER == None:
-            FILTER = "."
+            record.FILTER = "."
 
         items = [record.CHROM, str(record.POS), str(record.ID), record.REF, 
-                str(record.ALT[0]), QUAL, FILTER]
+                str(record.ALT[0]), record.QUAL, record.FILTER]
         infos = []
         for key in record.INFO:
             this_info = record.INFO[key] 
