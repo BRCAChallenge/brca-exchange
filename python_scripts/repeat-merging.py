@@ -5,11 +5,12 @@ this script takes a vcf file and collapes repeatative variant rows
 import vcf
 import argparse
 import copy
+import sys
 
 def main():
+    print "warinng: this script doesn't write out headers"
     args = arg_parse()
     vcf_reader = vcf.Reader(open(args.input, "r"), strict_whitespace=True)
-    #vcf_writer = vcf.Writer(open(args.output, 'w'), vcf_reader)
     variant_dict = {}
     num_repeats = 0
     for record in vcf_reader:
@@ -43,14 +44,16 @@ def main():
     write_to_vcf(args.input, args.output, variant_dict)
 
 def write_to_vcf(path_in, path_out, v_dict):
+
     f_in = open(path_in, "r")
     f_out = open(path_out, "w")
-    for line in f_in:
-        if "#" in line:
-            f_out.write(line)
-        else:
-            break
-    
+### header print function doesn't work because of various # sign in record
+#    for line in f_in:
+#        if ("##INFO" in line) or ("#CHROM" in line):
+#            f_out.write(line)
+#        else:
+#            break
+
     for record in v_dict.values():
         if record.QUAL == None:
             QUAL = "."
@@ -65,13 +68,12 @@ def write_to_vcf(path_in, path_out, v_dict):
             if type(this_info) == list:
                 if None in this_info:
                     this_info = ['None' if x is None else x for x in this_info]
-                infos.append(key + "=" + str(",".join(this_info)))
+                infos.append(key + "=" + ",".join(this_info))
             else:
                 infos.append(key + "=" + str(this_info))
-
         items.append(";".join(infos))
-        new_line = "\t".join(items) + "\n"
-        f_out.write(new_line)
+        new_line = "\t".join(items)
+        f_out.write(new_line + "\n")
 
 
 def arg_parse():

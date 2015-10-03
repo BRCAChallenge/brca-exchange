@@ -104,7 +104,7 @@ def add_new_source(columns, variants, source, source_file, source_dict):
     variants_num = 0
     for record in vcf_reader:
         variants_num += 1
-        genome_coor = (record.CHROM + ":" + str(record.POS) + ":" + 
+        genome_coor = ("chr" + str(record.CHROM) + ":" + str(record.POS) + ":" + 
                        record.REF + ">" + str(record.ALT[0]))
         if genome_coor in variants.keys():
             overlap += 1
