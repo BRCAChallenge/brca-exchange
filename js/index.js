@@ -96,7 +96,7 @@ var NavBarNew = React.createClass({
 		this.refs.about.setState({open: false});
 	},
 	shouldComponentUpdate: function (nextProps) {
-		// don't re-render if nothing has changed but the query
+		// Only rerender if path has change, ignoring query.
 		return this.props.path.split(/\?/)[0] !== nextProps.path.split(/\?/)[0];
 	},
     activePath: function(path, tab) {
@@ -145,6 +145,7 @@ var NavBarNew = React.createClass({
 });
 
 var Footer = React.createClass({
+	mixins: [PureRenderMixin],
     render: function() {
         return (
             <div className="container footer">
