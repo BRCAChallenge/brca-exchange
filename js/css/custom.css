@@ -361,3 +361,7 @@ th[role='columnheader'] .help, .help-target .help {
 .Variant-detail-title {
     margin: 20px;
 }
+
+.glyphicon.help {
+    margin: 3px;
+}
