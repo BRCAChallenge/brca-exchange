@@ -107,13 +107,12 @@ function sortColumns(columns, {prop, order}, data) {
 
 var columns = [
 	{title: 'Gene', prop: 'Gene_symbol', render: renderCell},
-	{title: 'HGVS cDNA', prop: 'HGVS_cDNA', sortFn: posCmpFn, render: renderCell},
-	{title: 'HGVS protein', prop: 'HGVS_protein', sortFn: posCmpFn, render: renderCell},
-	{title: 'BIC', prop: "BIC_Nomenclature", render: renderCell},
-	{title: 'Abbrev AA Change', prop: "Abbrev_AA_change", render: renderCell},
 	{title: 'Genomic Coordinate', prop: 'Genomic_Coordinate', render: renderCell},
-	{title: 'Pathogenicity', prop: 'Clinical_significance', render: renderCell},
-	{title: 'ClinVar Link', prop: 'ClinVarAccession', render: renderClinVarLink}
+    {title: 'HGVS cDNA', prop: 'HGVS_cDNA', sortFn: posCmpFn, render: renderCell},
+	{title: 'HGVS protein', prop: 'HGVS_protein', sortFn: posCmpFn, render: renderCell},
+	{title: 'HGVS protein (Abbrev.)', prop: "Abbrev_AA_change", render: renderCell},
+    {title: 'BIC nucleotide', prop: "BIC_Nomenclature", render: renderCell},
+	{title: 'Pathogenicity', prop: 'Clinical_significance', render: renderCell}
 ];
 
 // Work-around to allow the user to select text in the table. The browser does not distinguish between

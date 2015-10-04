@@ -72,7 +72,9 @@ The BRCA Exchange is the work of a great many people from many different institu
 
 * Sean Tavtigian, Hunstman Cancer Institute, Salt Lake City, USA
 
-The technical development of the BRCA Exchange web site was led by Molly Zhang, Brian Craft, Charlie Markello, Benedict Paten and Melissa Cline at UC Santa Cruz, Santa Cruz, CA, USA, with major contributions by Gunnar Raetsch st Memorial Sloan Kettering Cancer Center, New York City, USA and Rachel Liao at the Broad Institute and Harvard University in Cambridge, MA USA.
+* David Haussler, UC Santa Cruz Genomics Institute, Santa Cruz, USA
+
+The technical development of the BRCA Exchange was led by Molly Zhang, Brian Craft, Charlie Markello, Benedict Paten and Melissa Cline at UC Santa Cruz, Santa Cruz, CA, USA, with major contributions by Gunnar Raetsch st Memorial Sloan Kettering Cancer Center, New York City, USA and Rachel Liao at the Broad Institute and Harvard University in Cambridge, MA USA.
 
 ![](DNA_cyclepath_to_Shelford_-_geograph.org.uk_-_538440.jpg)
 

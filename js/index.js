@@ -20,6 +20,7 @@ var _ = require('underscore');
 var hgvs = require('./hgvs');
 
 var brcaLogo = require('./img/BRCA-Exchange-tall-tranparent.png');
+var betaBanner = require('./img/Beta_Banner.png');
 var logos = require('./logos');
 var slugify = require('./slugify');
 
@@ -105,6 +106,7 @@ var NavBarNew = React.createClass({
 				<span>
 					<b className="BRCA">BRCA</b>
 					<span className="exchange"> Exchange</span>
+                    <img src={betaBanner} alt="beta banner" />
 				</span>
 			</a>);
 		return (
@@ -125,6 +127,9 @@ var NavBarNew = React.createClass({
 						<NavLink onClick={this.close} to='/about/lollipop'>
 							DNA Variant BRCA Lollipop Plots
 						</NavLink>
+                        <NavLink onClick={this.close} to='/about/thisSite'>
+                            This Site
+                        </NavLink>
 					</DropdownButton>
 					<NavLink to='/variants'>Variants</NavLink>
 					<NavLink to='/help'>Help</NavLink>

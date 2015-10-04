@@ -84,7 +84,7 @@ var VariantSearch = React.createClass({
 							value={value}
 							inputAttributes={{
 								className: 'variant-search-input',
-								placeholder: "Search Variant such as c.1105G>A",
+								placeholder: "search for \"c.1105G>A\" or \"brca1\"",
 								onChange: this.onChange
 							}}
 							showWhen={input => input.trim().length > 0}

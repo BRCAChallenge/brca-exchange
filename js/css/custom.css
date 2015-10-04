@@ -53,6 +53,21 @@
     color: #E8A2A0;
 }
 
+.navbar-brand img {
+    width: 180px;
+    height: 37px;
+    background-color: rgba(54,171,242,0.8);
+    border-radius:8px; 
+    margin-left: 40px;
+    margin-bottom: 10px;
+    padding-top: 10px;
+    padding-bottom: 6px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+
+
 .navbar {
     min-height: 70px; /* XXX This value MUST match the setting in index.js */
     padding-top: 10px
@@ -76,8 +91,8 @@
 /**************************************************************/
 
 .home .search-box {
-    padding-top: 70px;
-    padding-bottom: 70px;
+    padding-top: 60px;
+    padding-bottom: 60px;
 }
 
 /* change input width to a percentage of its container 
@@ -345,4 +360,8 @@ th[role='columnheader'] .help, .help-target .help {
 
 .Variant-detail-title {
     margin: 20px;
+}
+
+.glyphicon.help {
+    margin: 3px;
 }

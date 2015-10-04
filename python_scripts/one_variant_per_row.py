@@ -19,7 +19,6 @@ def main():
     args = arg_parse()
     vcf_reader = vcf.Reader(open(args.input, "r"), strict_whitespace=True)
     vcf_writer = vcf.Writer(open(args.output, 'w'), vcf_reader)
-    write_err = 0
 
     for record in vcf_reader:
         n = len(record.ALT)
@@ -28,16 +27,17 @@ def main():
         else:
             for i in range(n):
                 new_record = deepcopy(record) 
-                new_record.ALT = [record.ALT[i]]
+                new_record.ALT = [deepcopy(record.ALT[i])]
                 for key in record.INFO.keys():
-                    value = record.INFO[key]
+                    value = deepcopy(record.INFO[key])
                     if type(value) == list and len(value) == n:
                         new_record.INFO[key] = [value[i]]
-                try:
-                    vcf_writer.write_record(new_record)
-                except:
-                    write_err += 1
-    print "number of vcf_write.write_record() error is: ", write_err
+                vcf_writer.write_record(new_record)
+
+def my_vcf_writer(record):
+    
+
+
 
 if __name__=="__main__":
     main()
