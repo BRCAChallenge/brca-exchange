@@ -41,19 +41,10 @@ def main():
 #        vcf_writer.write_record(value)
 
 
-    write_to_vcf(args.input, args.output, variant_dict)
+    write_to_vcf(args.output, variant_dict)
 
-def write_to_vcf(path_in, path_out, v_dict):
-
-    f_in = open(path_in, "r")
+def write_to_vcf(path_out, v_dict):
     f_out = open(path_out, "w")
-### header print function doesn't work because of various # sign in record
-#    for line in f_in:
-#        if ("##INFO" in line) or ("#CHROM" in line):
-#            f_out.write(line)
-#        else:
-#            break
-
     for record in v_dict.values():
         if record.QUAL == None:
             record.QUAL = "."
