@@ -9,6 +9,7 @@ var SelectField = require('./SelectField');
 var _ = require('underscore');
 var cx = require('classnames');
 var hgvs = require('./hgvs');
+var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 
 var filterDisplay = v => v == null ? 'Any' : v;
 var filterAny = v => v === 'Any' ? null : v;
@@ -19,7 +20,7 @@ var pluralize = (n, s) => n === 1 ? s : s + 's';
 var merge = (...args) => _.extend({}, ...args);
 
 var DataTable = React.createClass({
-	mixins: [DataMixin],
+	mixins: [DataMixin, PureRenderMixin],
 	// This differs from the default DataMixin onFilter handler in that multiple filters
 	// can be set at once. This is important in order to avoid redundant sorting when
 	// setting multiple filters. Also, the onFilter code changes the filter state in-place,

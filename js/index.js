@@ -95,6 +95,10 @@ var NavBarNew = React.createClass({
 	close: function () {
 		this.refs.about.setState({open: false});
 	},
+	shouldComponentUpdate: function (nextProps) {
+		// don't re-render if nothing has changed but the query
+		return this.props.path.split(/\?/)[0] !== nextProps.path.split(/\?/)[0];
+	},
     activePath: function(path, tab) {
         var navPath = (path === "") ? "home" : path.split("/")[0];
         return ((navPath === tab) ? "active" : "");

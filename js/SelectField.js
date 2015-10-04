@@ -2,10 +2,12 @@
 'use strict';
 
 var React = require('react');
+var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 var {Input} = require('react-bootstrap');
 var _ = require('underscore');
 
 var SelectField = React.createClass({
+	mixins: [PureRenderMixin],
 	onChange: function (e) {
 		return this.props.onChange(e.target.value);
 	},
