@@ -126,6 +126,9 @@ var NavBarNew = React.createClass({
 						<NavLink onClick={this.close} to='/about/lollipop'>
 							DNA Variant BRCA Lollipop Plots
 						</NavLink>
+                        <NavLink onClick={this.close} to='/about/thisSite'>
+                            This Site
+                        </NavLink>
 					</DropdownButton>
 					<NavLink to='/variants'>Variants</NavLink>
 					<NavLink to='/help'>Help</NavLink>

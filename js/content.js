@@ -8,7 +8,8 @@ var content = {
 	brca1_2: require('../content/brca1_2.md'), //eslint-disable-line camelcase
 	variation: require('../content/variationAndCancer.md'),
 	help: require('../content/help.md'),
-    disclaimer: require('../content/disclaimer.md')
+    disclaimer: require('../content/disclaimer.md'),
+    thisSite: require('../content/thisSite.md')
 };
 
 module.exports = {
