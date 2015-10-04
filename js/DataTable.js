@@ -8,6 +8,7 @@ var VariantSearch = require('./VariantSearch');
 var SelectField = require('./SelectField');
 var _ = require('underscore');
 var cx = require('classnames');
+var hgvs = require('./hgvs');
 
 var filterDisplay = v => v == null ? 'Any' : v;
 var filterAny = v => v === 'Any' ? null : v;
@@ -15,8 +16,33 @@ var addAny = opts => ['Any', ...opts];
 
 var pluralize = (n, s) => n === 1 ? s : s + 's';
 
+var merge = (...args) => _.extend({}, ...args);
+
 var DataTable = React.createClass({
 	mixins: [DataMixin],
+	// This differs from the default DataMixin onFilter handler in that multiple filters
+	// can be set at once. This is important in order to avoid redundant sorting when
+	// setting multiple filters. Also, the onFilter code changes the filter state in-place,
+	// which violates the react API contract wherein state is treated as immutable.
+	setFilters: function (obj) {
+		var {filterValues, sortBy} = this.state,
+			{initialData, filter, filters, sort} = this.props,
+			newFilterValues = merge(filterValues, obj),
+			data = sort(sortBy, filter(filters, newFilterValues, initialData));
+
+		this.setState({
+		  data: data,
+		  filterValues: newFilterValues,
+		  currentPage: 0
+		});
+	},
+	componentWillReceiveProps: function(newProps) {
+		var {search} = newProps;
+		if (search !== this.props.search) {
+			this.setState({search: search});
+			this.setFilters(hgvs.filters(search));
+		}
+	},
 	createDownload: function (ev) {
 		// XXX This is a bit horrible. In order to build the tsv lazily (on
 		// button click, instead of on every table update), we catch the
@@ -32,17 +58,17 @@ var DataTable = React.createClass({
 		ev.target.href = URL.createObjectURL(new Blob([tsv], { type: 'text/tsv' }));
 	},
 	getInitialState: function () {
-		return {filtersOpen: false};
+		return {filtersOpen: false, search: this.props.search};
 	},
 	toggleFilters: function () {
 		this.setState({filtersOpen: !this.state.filtersOpen});
 	},
 	render: function () {
-		var {filtersOpen, filterValues} = this.state,
+		var {filtersOpen, filterValues, search} = this.state,
 			{columns, filterColumns, suggestions, className} = this.props,
 			page = this.buildPage(),
 			filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
-				<SelectField onChange={v => this.onFilter(prop, filterAny(v))}
+				<SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
 					key={prop} label={`${name} is: `} value={filterDisplay(filterValues[prop])} options={addAny(values)}/>);
 
 		return (
@@ -81,8 +107,13 @@ var DataTable = React.createClass({
 						<VariantSearch
 							id='variants-search'
 							suggestions={suggestions}
-							value={this.state.filterValues.visibleSearch}
-							onChange={this.onFilter.bind(this, 'visibleSearch')}
+							value={search}
+							/* XXX should debounce this so we don't sort so often */
+							onChange={v => {
+								this.setState({search: v});
+								this.setFilters(hgvs.filters(v));
+								this.props.onChange(v);
+							}}
 						/>
 					</Col>
 					<Col sm={6} smOffset={1}>

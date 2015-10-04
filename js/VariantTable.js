@@ -1,3 +1,12 @@
+// A table for variants.
+//
+// The intent here was to split the generic table code
+// in DataTable from the variant domain knowledge, which
+// would be here. That division has broken down due to
+// peculiarities of react-data-components DataMixin, and
+// time pressure. Knowledge about variants is in both files.
+// This needs to be revisited.
+
 /*global module: false, require: false, window: false */
 'use strict';
 
@@ -63,6 +72,12 @@ function filters(columns) {
 		visibleSearch: {
 			filter: (filterValue, value, key) => visible[key] &&
 				value.toLowerCase().indexOf(filterValue.toLowerCase()) !== -1
+		},
+		// Dedicated filter for when we recognize a reference in a free text search.
+		hgvsGene: {
+			prop: 'Gene_symbol',
+			filter: (filterValue, value) =>
+				_.isNull(filterValue) || value === filterValue
 		}
 	}, colFilters);
 }

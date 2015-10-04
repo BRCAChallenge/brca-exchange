@@ -17,6 +17,7 @@ var vcf = require('vcf.js');
 require('rx-dom');
 require('css/custom.css');
 var _ = require('underscore');
+var hgvs = require('./hgvs');
 
 var brcaLogo = require('./img/BRCA-Exchange-tall-tranparent.png');
 var logos = require('./logos');
@@ -302,15 +303,22 @@ var Database = React.createClass({
 	showHelp: function (title) {
 		this.transitionTo(`/help#${slugify(title)}`);
 	},
+	onChange: function (text) {
+		if (this.props.show) {
+			this.replaceWith('/variants', {}, {search: text});
+		}
+	},
 	render: function () {
 		var {show, data, suggestions} = this.props,
-			{search} = this.getQuery();
+			{search = ''} = this.getQuery();
 		return (
 			<Grid style={{display: show ? 'block' : 'none'}}>
 				{data ?
 					<VariantTable
 						ref='table'
-						filterValues={{visibleSearch: search || ''}}
+						onChange={this.onChange}
+						search={search}
+						filterValues={hgvs.filters(search)}
 						data={data.records}
 						suggestions={suggestions}
 						keys={databaseKey}
