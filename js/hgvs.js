@@ -20,8 +20,8 @@
 var _ = require('underscore');
 
 var hgvsPatterns = [
-	{pat: /^(NM_007294\.3(\(BRCA1\))?|BRCA1):/i, gene: 'BRCA1'},
-	{pat: /^(NM_000059\.3(\(BRCA2\))?|BRCA2):/i, gene: 'BRCA2'}
+	{pat: /^(NM_007294\.3(\(BRCA1\))?|BRCA1)(:|$)/i, gene: 'BRCA1'},
+	{pat: /^(NM_000059\.3(\(BRCA2\))?|BRCA2)(:|$)/i, gene: 'BRCA2'}
 ];
 
 function filters(text) {
