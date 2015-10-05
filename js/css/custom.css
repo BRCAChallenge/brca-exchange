@@ -331,10 +331,6 @@ html {
     font-size: 10px;
 }
 
-circle.needle-head {
-    fill-opacity: 0.6;
-}
-
 .superscript {
 	font-size: 80%;
 	position: relative;
