@@ -60,6 +60,7 @@
     "react-router": "^0.13.3",
     "rx": "^2.4.3",
     "rx-dom": "^4.0.4",
+    "svg-to-react": "^0.1.0",
     "underscore": "^1.7.0",
     "vcf.js": "^0.2.6"
   }
