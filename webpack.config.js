@@ -7,6 +7,16 @@ var mdih = require('./loaders/markdown-id-headers');
 
 var databaseKey = require('./databaseKey');
 var keyParam = databaseKey.map(function (k) { return "key[]=" + k; }).join("&");
+var fs = require('fs');
+
+var analytics = '';
+try {
+    analytics = fs.readFileSync(path.join(__dirname, '../analytics.html'));
+} catch (ex) {
+	if (ex.code !== 'ENOENT') {
+		throw ex;
+	}
+}
 
 module.exports = {
 	historyApiFallback: true,
@@ -45,7 +55,8 @@ module.exports = {
 		new HtmlWebpackPlugin({
 			title: "Template Project",
 			filename: "index.html",
-			template: "page.template"
+			template: "page.template",
+			analytics: analytics
 		}),
 		new webpack.OldWatchingPlugin()
 	],
