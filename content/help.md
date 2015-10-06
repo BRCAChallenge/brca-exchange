@@ -31,11 +31,11 @@ Position of the variant in the reference genome, relative to the positive DNA st
 
 #### Pathogenicity
 
-The Pathogenicity column indicates whether expert curators have determined if the variant is _pathogenic_ or _benign_.  _Pathogenic_ variants are potentially harmful, and have been shown to increase an individual's risk of disease.  _Benign_ variants are those that show no evidence of leading to disease risk, even after detailed examination.  Variants can also be classified as _likely pathogenic_ or _likely benign_ when the evidence is less certain, or _uncertain_ if there is not enough information yet to assess the variant reliably.
+The Pathogenicity column indicates whether expert curators have determined if the variant is _pathogenic_ or _benign_.  _Pathogenic_ variants are potentially harmful, and have been shown to increase an individual's risk of disease.  _Benign_ variants are those that show no evidence of increasing disease risk, after detailed examination.  Variants can also be classified as _likely pathogenic_ or _likely benign_ when the evidence is less certain, or _uncertain_ if there is not enough information yet to assess the variant's pathogenicity.
 
 #### Source
 
-The variants shown on this site are stored in larger genomic variant databases.  One of the major variant datases is [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/).  This column gives the variant's ID in the ClinVar database, and contains hyperlinks showing the variant in ClinVar.
+The variants shown on this site are stored in larger genomic variant databases.  One major variant datase is [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/).  This column gives the variant's ID in the ClinVar database, and contains hyperlinks showing the variant in ClinVar.
 
 #### Allele origin
 
@@ -109,4 +109,4 @@ Coordinate of the variant on the genome.
 
 # Lollipop Plots
 
-Lollipop plots for displaying BRCA1 and BRCA2 variants are shown where only benign (labeled in blue) and pathogenic (labeled in red) ENIGMA-processed data are currently displayed. Each circle-capped line 'lollipop' indicates the pathogenic state of the variant at that chromosomal position for the corresponding gene in the ENIGMA database. Quanity of specific pathogenic-state variants along with chromosomal position for a particular lollipop are represented by the diameter of the circles on top of each lollipop. The bottom bar that runs along the x-axis of the diagram displays the positioning of the different exons for that particular gene. Click the drop-down button located on the upper-left hand corner of the page to select which BRCA gene lollipop chart to view.
+Lollipop plots are a tool to visualize the chromosomal position and pathogenicity classification for each variant in a gene.  Here, each circle-capped 'lollipop' indicates whether a BRCA1 and BRCA2 variant is benign (labeled in blue) or pathogenic (labeled in red).  The diameter of the circle on top of each lollipop indicates the number of unique variants that have been observed at an individual locus.  The bottom bar that runs along the x-axis of the diagram displays the position of each exon in the selected gene.  To alternate between the BRCA1 and BRCA2 lollipop charts, click the *Select Gene* button located in the upper-left hand corner of the page.
