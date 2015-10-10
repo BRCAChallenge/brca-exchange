@@ -37,15 +37,14 @@ The Pathogenicity column indicates whether expert curators have determined if th
 
 The variants shown on this site are stored in larger genomic variant databases.  One major variant datase is [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/).  This column gives the variant's ID in the ClinVar database, and contains hyperlinks showing the variant in ClinVar.
 
-#### Allele origin
-
-Variants are classified as either _germline_ or _somatic_, depending on how they are acquired.  _Germline_ variants are genetic changes that we inherit from our parents.  _Somatic_ variants are DNA changes that we acquire over our lifetime, often through exposure to pollutants, toxins, radiation and other carcinogens.   
-
  
 # Variant Detail Page Glossary
 
 #### Gene symbol
 Gene name, as named by [HGNC](http://www.genenames.org/).
+
+#### Genomic Coordinate
+Coordinate of the variant on the genome.
 
 #### Reference sequence
 The reference sequence corresponding to the HGVS coordinates indicated in the HGVS_cDNA column, e.g. NM_000492.3, NG_016465.3, or NC_000007.13. 
@@ -53,8 +52,14 @@ The reference sequence corresponding to the HGVS coordinates indicated in the HG
 #### HGVS_cDNA
 [HGVS coordinates](#HGVS) on the cDNA.
 
-#### Alternate Designations
-Other labels or names for this variant.
+#### BIC Nomenclature
+BIC name for this variant.
+
+#### Abbrev AA Change
+The amino acid change introduced by the variant, using abbreviated (one-letter) amino acid names.
+
+#### URL
+A link with further information on this variant.
 
 #### Condition ID type
 The Condition ID type, together with the Condition ID value, indicate the condition associated with this variant according to a standard ontology. Condition ID types can be: OMIM, MeSH, MedGen, UMLS, Orphanet, HPO.
@@ -83,7 +88,7 @@ Citations documenting the clinical significance. Can be from PubMed, PubMedCentr
 #### Citations or URLs for clinical significance without database identifiers
 Citations that require a URL, or that do not have an identifier in one of the resources indicated in the Clinical significance citations column.
 
-#### Classification method
+#### Comment on clinical significance
 Describes the rationale for the clinical significance.
 
 #### Collection method
@@ -104,8 +109,6 @@ Indicates whether the submission to ClinVar is novel (and accessions were reserv
 #### HGVS_protein
 [HGVS coordinates](#HGVS) on the protein.
 
-#### Genomic Coordinate
-Coordinate of the variant on the genome.
 
 # Lollipop Plots
 
