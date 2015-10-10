@@ -1,6 +1,6 @@
 # Searching
 
-Variants are identified using [HGVS nomenclature](http://www.hgvs.org/mutnomen/), a standard created by the Human Genome Variation Society.  Most genetic test results are reported in HGVS nomenclature. This nomenclature describes a variant by indicating (1) a reference sequence, (2) what kind of sequence it is (genomic, cDNA or protein), (3) the position of the variant in relation this reference sequence, and (4) the nucloetide or protein differences between the variant and the reference sequence.  For example, _NM_007294.3:c.5053A>G_ indicates a variant relative to reference sequence _NM_007294.3_, which is a cDNA sequence (as indicated by _c_), that the variant is in position 5053, and that it involves changing an _A_ to a _G_.
+Variants are identified using [HGVS nomenclature](http://www.hgvs.org/mutnomen/), a standard created by the Human Genome Variation Society.  Most genetic test results are reported in HGVS nomenclature. This nomenclature describes a variant by indicating (1) a reference sequence, (2) what kind of sequence it is (genomic, cDNA or protein), (3) the position of the variant in relation this reference sequence, and (4) the nucloetide or protein differences between the variant and the reference sequence.  For example, _NM_007294.3:c.5053A>G_ indicates a variant relative to reference sequence _NM_007294.3_, which is a cDNA sequence (as indicated by _c_), that the variant is in position 5053, and that it involves changing an _A_ to a _G_.  
 
 # Table Columns
 
@@ -10,7 +10,7 @@ The Gene column displays the name of the gene on which the variant was found.  T
 
 #### HGVS cDNA
 
-The nucleotide-level change that would be introduced by this variant.  HGVS notation indicates the position of the variant within the portion of the reference nucleotide sequence after the protein start position, and the change that would be introduced by this variant.  For example, _c.15A>G_ indicates a change of _A_ to _G_ in nucleotide position 15.
+Nucleotide change expressed according to nomenclature used by [BIC](http://research.nhgri.nih.gov/bic/), namely using nucleotide numbering from nucleotide 1 of the full gene sequence (Genbank: U14680/ BRCA1; U43746/ BRCA2) not the ATG initiator codon, and without renaming of the BRCA1 185del AG and the BRCA1 5382insC mutations, following the universal use of the incorrect base numbers in the literature.  For example, _c.15A>G_ indicates a change of _A_ to _G_ in nucleotide position 15.
 
 #### HGVS Protein
 
