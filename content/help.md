@@ -31,7 +31,7 @@ Position of the variant in the reference genome, relative to the positive DNA st
 
 #### Pathogenicity
 
-The Pathogenicity column indicates whether expert curators have determined if the variant is _pathogenic_ or _benign_.  _Pathogenic_ variants are potentially harmful, and have been shown to increase an individual's risk of disease.  _Benign_ variants are those that show no evidence of increasing disease risk, after detailed examination.  Variants can also be classified as _likely pathogenic_ or _likely benign_ when the evidence is less certain, or _uncertain_ if there is not enough information yet to assess the variant's pathogenicity.
+The Pathogenicity column indicates whether expert curators have determined if the variant is _pathogenic_ or _benign_.  _Pathogenic_ variants are potentially harmful, and have been shown to increase an individual's risk of disease.  _Benign_ variants are those that show no evidence of increasing disease risk, after detailed examination.  Variants classified as _likely pathogenic_ or _likely benign_ show strong evidence of being pathogenic or benign respectively, but need to be studied further before they receive a definitive classification.  Variants can also be classified as _uncertain_ if there is not enough information yet to assess the variant's pathogenicity.
 
 #### Source
 
