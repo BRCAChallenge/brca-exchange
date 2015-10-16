@@ -17,13 +17,41 @@ import pyhgvs
 import pyhgvs.utils as pyhgvs_utils
 
 
-
 GENOME = SequenceFileDB('../data/hg19.fa')
 
 
 def main():
     args = repeat_merging.arg_parse()
-    add_HGVS_c(args.input, args.output)
+    add_HGVS_g(args.input, args.output)
+
+def add_HGVS_g(in_path, out_path):
+    """
+    counsyl pyhgvs module is used
+    seems like invitae hgvs module doesn't have capacities to convert between
+    hgvs genomic and vcf genomic format
+    """
+    f_in = open(in_path, "r")
+    f_out = open(out_path, "w")
+    line_num = 0
+    for line in f_in:
+        line_num += 1
+        print line_num
+        if line_num == 1:
+            items = line.strip().split("\t")
+            items.insert(3, "HGVS_genomic")
+            new_line = "\t".join(items) + "\n"
+        else:
+            items = line.strip().split("\t")
+            genome_coor = items[2].split(":")
+            chrom = genome_coor[0]
+            offset = int(genome_coor[1])
+            ref = genome_coor[2].split(">")[0]
+            alt = genome_coor[2].split(">")[1]
+            hgvs_name = pyhgvs.variant_to_hgvs_name(chrom, offset, ref, alt, GENOME, None)
+            hgvs_g = "NC_0000" + chrom[-2:] + ".10:g." + hgvs_name.format_genome()
+            items.insert(3, hgvs_g)
+            new_line = "\t".join(items) + "\n"
+        f_out.write(new_line)
 
 
 def add_gene_symbol_and_transcript(in_path, out_path):
@@ -32,6 +60,7 @@ def add_gene_symbol_and_transcript(in_path, out_path):
     line_num = 0
     for line in f_in:
         line_num += 1
+        print line_num
         if line_num == 1:
             f_out.write(line)
         else:
@@ -81,17 +110,8 @@ def add_info(line):
     new_line = "\t".join(items) + "\n"
     return new_line
 
-def get_HGVS_g(genome_coor):
-    chrom = genome_coor[0]
-    offset = int(genome_coor[1])
-    ref = genome_coor[2].split(">")[0]
-    alt = genome_coor[2].split(">")[1]
-    hgvs_name = pyhgvs.variant_to_hgvs_name(chrom, offset, ref, alt, GENOME, None)
-    hgvs_g = "NC_0000" + chrom[-2:] + ".10:g." + hgvs_name.format_genome()
-    return hgvs_g
 
-
-def add_HGVS_c(in_path, out_path):
+def add_HGVS_c_counsyl(in_path, out_path):
     f_in = open(in_path, "r")
     f_out = open(out_path, "w")
 
@@ -142,7 +162,6 @@ def compare_counsyl_and_invitae(enigma, hgvs_c_counsyl, genome_coors, transcript
 
 
 def add_HGVS_p(in_path, out_path):
-
     ########## in vitae hgvs setups
     hp = hgvs.parser.Parser()
     hdp = hgvs.dataproviders.uta.connect()
@@ -159,7 +178,7 @@ def add_HGVS_p(in_path, out_path):
     else:
         raise Exception("number of transcripts_invitae is not 1")
 
-def HGVS_c_invitae(genome_coors, transcript_id):
+def add_HGVS_c_invitae(genome_coors, transcript_id):
     ########## in vitae hgvs setups
     hp = hgvs.parser.Parser()
     hdp = hgvs.dataproviders.uta.connect()
