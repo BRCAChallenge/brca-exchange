@@ -21,7 +21,9 @@ GENOME = SequenceFileDB('../data/hg19.fa')
 
 def main():
     args = repeat_merging.arg_parse()
-    add_HGVS_p_invitae(args.input, args.output)
+    add_HGVS_g(args.input, "../data/temp1")
+    add_HGVS_c_counsyl("../data/temp1", "../data/temp2")
+    add_HGVS_p_invitae("../data/temp2", args.output)
 
 def add_HGVS_g(in_path, out_path):
     """
@@ -110,7 +112,7 @@ def add_info(line):
     return new_line
 
 
-def add_HGVS_c_counsyl(in_path, out_path, goal):
+def add_HGVS_c_counsyl(in_path, out_path):
     # counsyl pyhgvs setups
     with open('../data/BRCA12.refGene.txt') as infile:
         transcripts_counsyl = pyhgvs_utils.read_transcripts(infile)
