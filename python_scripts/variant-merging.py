@@ -59,45 +59,39 @@ EXAC_FILE = "../data/allVcf/no_repeats/exac.brca.ovpr.no_repeats.vcf"
 
 def main():
     (columns, variants) = save_enigma_to_dict(ENIGMA_FILE)
-    print "number of variants in enigma", len(variants)
-    (columns, variants) = add_new_source(columns, variants, "1000_Genomes", 
-                                         GENOME1K_FILE, GENOME1K) 
-    print "number of variants in enigma + 1000 genomes", len(variants)
-    
-    (columns, variants) = add_new_source(columns, variants, "ClinVar", 
-            CLINVAR_FILE, CLINVAR) 
-    print "number of variants in enigma + 1000 genomes + Clinvar", len(variants)
 
-    (columns, variants) = add_new_source(columns, variants, "LOVD", 
-            LOVD_FILE, LOVD) 
-    print "number of variants in enigma + 1000 genomes + Clinvar + LOVD", len(variants)
+    (columns, variants) = add_new_source(columns, variants, "1000_Genomes",
+                                          GENOME1K_FILE, GENOME1K)
 
-    (columns, variants) = add_new_source(columns, variants, "ExAC", 
-            EXAC_FILE, EXAC) 
-    print "number of variants in enigma + 1000 genomes + Clinvar + LOVD + ExAC", len(variants)
+    (columns, variants) = add_new_source(columns, variants, "ClinVar",
+            CLINVAR_FILE, CLINVAR)
 
-    (columns, variants) = add_new_source(columns, variants, "exLOVD", 
-            EX_LOVD_FILE, EX_LOVD) 
-    print "number of variants in enigma + 1000 genomes + Clinvar + LOVD + ExAC + exLOVD", len(variants)
+    (columns, variants) = add_new_source(columns, variants, "LOVD",
+            LOVD_FILE, LOVD)
 
-    (columns, variants) = add_new_source(columns, variants, "BIC", 
-            BIC_FILE, BIC) 
-    print "number of variants in enigma + 1000 genomes + Clinvar + LOVD + ExAC + exLOVD + BIC", len(variants)
-   
-    write_new_tsv("../data/merge/merged.tsv", columns, variants)       
+    (columns, variants) = add_new_source(columns, variants, "ExAC",
+            EXAC_FILE, EXAC)
+
+    (columns, variants) = add_new_source(columns, variants, "exLOVD",
+            EX_LOVD_FILE, EX_LOVD)
+
+    (columns, variants) = add_new_source(columns, variants, "BIC",
+            BIC_FILE, BIC)
+
+    write_new_tsv("../data/merge/merged_new.tsv", columns, variants)
 
 def write_new_tsv(filename, columns, variants):
     merged_file = open(filename, "w")
     merged_file.write("\t".join(columns)+"\n")
     for variant in variants.values():
+        if len(variant) != len(columns):
+            raise Exception("mismatching number of columns in head and row")
         merged_file.write("\t".join(variant)+"\n")
 
 def add_new_source(columns, variants, source, source_file, source_dict):
-    num_columns = len(source_dict)
+    old_column_num = len(columns)
     for column_title in source_dict.keys():
         columns.append(column_title)
-    for key in variants.keys():
-        variants[key] += ["-"] * num_columns
 
     vcf_reader = vcf.Reader(open(source_file, 'r'), strict_whitespace=True)
     overlap = 0
@@ -108,17 +102,31 @@ def add_new_source(columns, variants, source, source_file, source_dict):
                        record.REF + ">" + str(record.ALT[0]))
         if genome_coor in variants.keys():
             overlap += 1
-            variants[genome_coor][0] += ",{0}".format(source) 
+            variants[genome_coor][0] += ",{0}".format(source)
+
         else: 
-            variants[genome_coor] = ['-'] * len(columns)
+            variants[genome_coor] = ['-'] * old_column_num
             variants[genome_coor][0] = source 
             variants[genome_coor][2] = genome_coor
-        
+
         for value in source_dict.values():
             variants[genome_coor].append(str(record.INFO[value]))
 
+    # for those enigma record that doesn't have a hit with new genome coordinate
+    # add extra cells of "-" to the end of old record
+    for value in variants.values():
+        if len(value) != len(columns):
+            value += ["-"] * len(source_dict)
+
     print "number of variants in " + source + " is ", variants_num
-    print "overlap: ", overlap
+    print "overlap with previous dataset: ", overlap
+    print "number of variants with the addition of " + source + "is: ", len(variants), "\n"
+
+
+    for key, value in variants.iteritems():
+        if len(value) != len(columns):
+            raise Exception("mismatching number of columns in head and row")
+
     return (columns, variants) 
 
 
@@ -136,6 +144,7 @@ def save_enigma_to_dict(path):
             items = line.strip().split("\t")
             items.insert(0,"ENIGMA")
             variants[items[2]] = items
+    print "number of variants in enigma: ", len(variants), "\n"
     return (columns, variants)
 
 if __name__=="__main__":

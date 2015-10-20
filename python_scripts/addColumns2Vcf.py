@@ -21,8 +21,7 @@ GENOME = SequenceFileDB('../data/hg19.fa')
 
 def main():
     args = repeat_merging.arg_parse()
-    compare_counsyl_and_invitae("../data/merge/counsyl_hgvs_c",
-                                "../data/merge/invitae_hgvs_c")
+    add_HGVS_p_invitae(args.input, args.output)
 
 def add_HGVS_g(in_path, out_path):
     """
@@ -111,7 +110,7 @@ def add_info(line):
     return new_line
 
 
-def add_HGVS_c_counsyl(in_path, out_path):
+def add_HGVS_c_counsyl(in_path, out_path, goal):
     # counsyl pyhgvs setups
     with open('../data/BRCA12.refGene.txt') as infile:
         transcripts_counsyl = pyhgvs_utils.read_transcripts(infile)
@@ -124,6 +123,7 @@ def add_HGVS_c_counsyl(in_path, out_path):
     unmatching_cases = 0
     for line in f_in:
         line_num += 1
+        print line_num
         if line_num == 1:
             f_out.write(line)
             continue
@@ -137,18 +137,14 @@ def add_HGVS_c_counsyl(in_path, out_path):
         transcript = get_transcript(transcript_id)
         hgvs_name_with_transcript = pyhgvs.variant_to_hgvs_name(
             chrom, offset, ref, alt, GENOME, transcript)
-        hgvs_c = hgvs_name_with_transcript.format(use_prefix=False, use_gene=False)
-
+        hgvs_c = hgvs_name_with_transcript.format(use_prefix=False,
+                                                  use_gene=False)
         if items[5] == "-":
             items[5] = hgvs_c
         elif items[5] == hgvs_c:
             pass
         else:
-            # when the enigma HGVS_cDNA is in mismatched with HGVS_cDNA converted from genome coordinate
             unmatching_cases += 1
-            # print unmatching_cases
-            # print items[0]
-            # compare_counsyl_and_invitae(items[4], hgvs_c, genome_coors, transcript_id)
         new_line = "\t".join(items) + "\n"
         f_out.write(new_line)
     print "unmatching cases: ", unmatching_cases
@@ -200,7 +196,7 @@ def compare_counsyl_and_invitae(counsyl_file, invitae_file):
     f_i = open(invitae_file, "r")
     clist = []
     ilist = []
-    unmatching_num = 0git
+    unmatching_num = 0
     unmatching_implemented_num = 0
     for line in f_c:
         clist.append(line.strip())
@@ -217,23 +213,43 @@ def compare_counsyl_and_invitae(counsyl_file, invitae_file):
     print "unmatching cases between counsyl and invitae: ", unmatching_num
     print "unmatching implemented cases between counsyl and invitae: ", unmatching_implemented_num
 
-
-def add_HGVS_p(in_path, out_path):
-    ########## in vitae hgvs setups
+def add_HGVS_p_invitae(in_path, out_path):
+    # in vitae hgvs setups
     hp = hgvs.parser.Parser()
     hdp = hgvs.dataproviders.uta.connect()
     evm = hgvs.variantmapper.EasyVariantMapper(hdp,
         primary_assembly = 'GRCh37', alt_aln_method = 'splign')
-    ### temp
-    hgvs_g = get_HGVS_g(genome_coors)
-    hgvs_g = hp.parse_hgvs_variant(hgvs_g)
-    transcripts_invitae = evm.relevant_transcripts(hgvs_g)
-    if len(transcripts_invitae) == 1:
-        for transcript in transcripts_invitae:
-            hgvs_c_invitae = evm.g_to_c(hgvs_g, transcript)
-            hgvs_p_invitae = evm.c_to_p(hgvs_c_invitae)
-    else:
-        raise Exception("number of transcripts_invitae is not 1")
+
+    f_in = open(in_path, "r")
+    f_out = open(out_path, "w")
+    line_num = 0
+    unmatching_cases = 0
+    notimplemented_cases = 0
+    for line in f_in:
+        line_num += 1
+        print line_num
+        if line_num == 1:
+            f_out.write(line)
+            continue
+        items = line.strip().split("\t")
+        HGVS_cDNA_string = items[4] + ":" + items[5]
+        try:
+            hgvs_c = hp.parse_hgvs_variant(HGVS_cDNA_string)
+            hgvs_p = str(evm.c_to_p(hgvs_c)).split(":")[1]
+        except:
+            notimplemented_cases += 1
+            hgvs_p = "-"
+
+        if items[6] == "-":
+            items[6] = hgvs_p
+        elif items[6] == hgvs_p:
+            pass
+        else:
+            unmatching_cases += 1
+        new_line = "\t".join(items) + "\n"
+        f_out.write(new_line)
+    print "unmatching cases: ", unmatching_cases
+    print "notimplemented cases: ", notimplemented_cases
 
 
 
