@@ -6,6 +6,7 @@ var {Table, Pagination, DataMixin} = require('react-data-components-bd2k');
 var {Button, Row, Col} = require('react-bootstrap');
 var VariantSearch = require('./VariantSearch');
 var SelectField = require('./SelectField');
+var ColumnCheckbox = require('./ColumnCheckbox');
 var _ = require('underscore');
 var cx = require('classnames');
 var hgvs = require('./hgvs');
@@ -59,18 +60,36 @@ var DataTable = React.createClass({
 		ev.target.href = URL.createObjectURL(new Blob([tsv], { type: 'text/tsv' }));
 	},
 	getInitialState: function () {
-		return {filtersOpen: false, search: this.props.search};
+		return {filtersOpen: false, search: this.props.search, renderColumns: this.props.renderColumns};
 	},
 	toggleFilters: function () {
 		this.setState({filtersOpen: !this.state.filtersOpen});
 	},
+    toggleColumns: function (title) {
+        this.props.columnSelection[title].selectVal = !this.props.columnSelection[title].selectVal;
+        var newColumns = this.selectColumns();
+        this.setState({renderColumns: newColumns});
+    },
+    selectColumns () {
+        var columnObject = this.props.origionalColumns;
+        var newColObject = [];
+        for (var i=0; i < columnObject.length; i++) {
+            var title = columnObject[i].prop
+            if (this.props.columnSelection[title].selectVal == true) {
+                newColObject.push(columnObject[i])
+            }
+        };
+        return newColObject;
+    },
 	render: function () {
 		var {filtersOpen, filterValues, search} = this.state,
-			{columns, filterColumns, suggestions, className} = this.props,
+			{origionalColumns, renderColumns, columnSelection, filterColumns, suggestions, className} = this.props,
 			page = this.buildPage(),
 			filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
 				<SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
-					key={prop} label={`${name} is: `} value={filterDisplay(filterValues[prop])} options={addAny(values)}/>);
+					key={prop} label={`${name} is: `} value={filterDisplay(filterValues[prop])} options={addAny(values)}/>),
+			filterFormCols = _.map(origionalColumns, ({title, prop}) =>
+				<ColumnCheckbox onChange={v => this.toggleColumns(prop)} key={prop} label={title}/>);
 
 		return (
 			<div className={this.props.className}>
@@ -78,6 +97,7 @@ var DataTable = React.createClass({
 					<Col sm={12}>
 						<Button bsSize='xsmall' onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}</Button>
 						{filtersOpen && <div className='form-inline'>{filterFormEls}</div>}
+						{filtersOpen && <div className='form-inline'>{filterFormCols}</div>}
 					</Col>
 				</Row>
 				<Row style={{marginBottom: '2px'}}>
@@ -130,7 +150,7 @@ var DataTable = React.createClass({
 						<Table
 							className={cx(className, "table table-hover table-bordered table-condensed")}
 							dataArray={page.data}
-							columns={columns}
+							columns={this.state.renderColumns}
 							keys={this.props.keys}
 							buildRowOptions={this.props.buildRowOptions}
 							buildHeader={this.props.buildHeader}
