@@ -72,17 +72,17 @@ var DataTable = React.createClass({
     selectColumns () {
         var columnObject = this.props.origionalColumns;
         var newColObject = [];
-        for (var i=0; i < columnObject.length; i++) {
-            var title = columnObject[i].prop
+        for (var i = 0; i < columnObject.length; i++) {
+            var title = columnObject[i].prop;
             if (this.props.columnSelection[title].selectVal == true) {
-                newColObject.push(columnObject[i])
+                newColObject.push(columnObject[i]);
             }
-        };
+        }
         return newColObject;
     },
 	render: function () {
 		var {filtersOpen, filterValues, search} = this.state,
-			{origionalColumns, renderColumns, columnSelection, filterColumns, suggestions, className} = this.props,
+			{origionalColumns, columnSelection, filterColumns, suggestions, className} = this.props,
 			page = this.buildPage(),
 			filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
 				<SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
@@ -96,12 +96,12 @@ var DataTable = React.createClass({
 					<Col sm={12}>
 						<Button bsSize='xsmall' onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}</Button>
 						{filtersOpen && <div className='form-inline'>{filterFormEls}</div>}
-						<div className='form-group'>
-                            <label className='control-label' style={{marginRight: '1em'}}>
-                                Column Selection
-                                {filtersOpen && <div className='form-inline'>{filterFormCols}</div>}
-                            </label>
-                        </div>
+                        {filtersOpen && <div className='form-inline'>
+                                            <label className='control-label' style={{marginRight: '1em'}}>
+                                                Column Selection
+                                                {filterFormCols}
+                                            </label>
+                                        </div>}
 					</Col>
 				</Row>
 				<Row style={{marginBottom: '2px'}}>

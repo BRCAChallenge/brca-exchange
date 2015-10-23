@@ -160,7 +160,6 @@ var VariantTable = React.createClass({
 				filters={filters(columns)}
 				filterColumns={filterColumns}
 				origionalColumns={columns}
-                renderColumns={columns}
                 columnSelection={columnSelection}
 				initialData={data}
 				initialPageLength={20}

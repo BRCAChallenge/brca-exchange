@@ -4,7 +4,6 @@
 var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 var {Input} = require('react-bootstrap');
-var _ = require('underscore');
 
 var ColumnCheckbox = React.createClass({
 	mixins: [PureRenderMixin],
@@ -12,7 +11,7 @@ var ColumnCheckbox = React.createClass({
 		return this.props.onChange(e.target.value);
 	},
 	render: function () {
-		var {options, label, title, initialCheck} = this.props;
+		var {label, title, initialCheck} = this.props;
 		return (
             <div>
 			<Input type="checkbox" label={title} checked={initialCheck[label].selectVal} onChange={this.onChange} />
@@ -21,4 +20,4 @@ var ColumnCheckbox = React.createClass({
 	}
 });
 
-module.exports =ColumnCheckbox;
+module.exports = ColumnCheckbox;
