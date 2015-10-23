@@ -60,15 +60,14 @@ var DataTable = React.createClass({
 		ev.target.href = URL.createObjectURL(new Blob([tsv], { type: 'text/tsv' }));
 	},
 	getInitialState: function () {
-		return {filtersOpen: false, search: this.props.search, renderColumns: this.props.renderColumns};
+		return {filtersOpen: false, search: this.props.search, renderColumns: this.selectColumns()};
 	},
 	toggleFilters: function () {
 		this.setState({filtersOpen: !this.state.filtersOpen});
 	},
     toggleColumns: function (title) {
         this.props.columnSelection[title].selectVal = !this.props.columnSelection[title].selectVal;
-        var newColumns = this.selectColumns();
-        this.setState({renderColumns: newColumns});
+        this.setState({renderColumns: this.selectColumns()});
     },
     selectColumns () {
         var columnObject = this.props.origionalColumns;
@@ -89,7 +88,7 @@ var DataTable = React.createClass({
 				<SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
 					key={prop} label={`${name} is: `} value={filterDisplay(filterValues[prop])} options={addAny(values)}/>),
 			filterFormCols = _.map(origionalColumns, ({title, prop}) =>
-				<ColumnCheckbox onChange={v => this.toggleColumns(prop)} key={prop} label={title}/>);
+				<ColumnCheckbox onChange={v => this.toggleColumns(prop)} key={prop} label={prop} title={title} initialCheck={columnSelection}/>);
 
 		return (
 			<div className={this.props.className}>
@@ -97,7 +96,12 @@ var DataTable = React.createClass({
 					<Col sm={12}>
 						<Button bsSize='xsmall' onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}</Button>
 						{filtersOpen && <div className='form-inline'>{filterFormEls}</div>}
-						{filtersOpen && <div className='form-inline'>{filterFormCols}</div>}
+						<div className='form-group'>
+                            <label className='control-label' style={{marginRight: '1em'}}>
+                                Column Selection
+                                {filtersOpen && <div className='form-inline'>{filterFormCols}</div>}
+                            </label>
+                        </div>
 					</Col>
 				</Row>
 				<Row style={{marginBottom: '2px'}}>

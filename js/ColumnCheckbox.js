@@ -12,12 +12,10 @@ var ColumnCheckbox = React.createClass({
 		return this.props.onChange(e.target.value);
 	},
 	render: function () {
-		var {options, label, prop} = this.props,
-			opels = _.map(options, v => <option key={v} value={v}>{v}</option>);
+		var {options, label, title, initialCheck} = this.props;
 		return (
             <div>
-			<Input type="checkbox" label={label} onChange={this.onChange}>
-			</Input>
+			<Input type="checkbox" label={title} checked={initialCheck[label].selectVal} onChange={this.onChange} />
             </div>
 		);
 	}
