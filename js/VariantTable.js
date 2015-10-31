@@ -112,7 +112,15 @@ var columns = [
 	{title: 'HGVS protein', prop: 'HGVS_protein', sortFn: posCmpFn, render: renderCell},
 	{title: 'HGVS protein (Abbrev.)', prop: "Abbrev_AA_change", render: renderCell},
     {title: 'BIC nucleotide', prop: "BIC_Nomenclature", render: renderCell},
-	{title: 'Pathogenicity', prop: 'Clinical_significance', render: renderCell}
+	{title: 'Pathogenicity', prop: 'Clinical_significance', render: renderCell},
+    {title: 'Allele frequency (1000 Genomes)', prop: 'Allele_frequency(1000_Genomes)', render: renderCell},
+    {title: 'SAS Allele frequency (1000 Genomes)', prop: 'SAS_Allele_frequency(1000_Genomes)', render: renderCell},
+    {title: 'EAS Allele frequency (1000 Genomes)', prop: 'EAS_Allele_frequency(1000_Genomes)', render: renderCell},
+    {title: 'AMR Allele frequency (1000 Genomes)', prop: 'AMR_Allele_frequency(1000_Genomes)', render: renderCell},
+    {title: 'EUR Allele frequency (1000 Genomes)', prop: 'EUR_Allele_frequency(1000_Genomes)', render: renderCell},
+    {title: 'AFR Allele frequency (1000 Genomes)', prop: 'AFR_Allele_frequency(1000_Genomes)', render: renderCell},
+    {title: 'Allele origin (ClinVar)', prop: 'Allele_origin(ClinVar)', render: renderCell},
+    {title: 'Variant clinical significance (ClinVar)', prop: 'Variant_clinical_significance(ClinVar)', render: renderCell}
 ];
 
 var columnSelection = {
@@ -122,7 +130,15 @@ var columnSelection = {
     HGVS_protein: {selectVal: true},
     Abbrev_AA_change: {selectVal: true},
     BIC_Nomenclature: {selectVal: true},
-    Clinical_significance: {selectVal: true}
+    Clinical_significance: {selectVal: true},
+    Allele_frequency(1000_Genomes): {selectVal: false},
+    SAS_Allele_frequency(1000_Genomes): {selectVal: false},
+    EAS_Allele_frequency(1000_Genomes): {selectVal: false},
+    AMR_Allele_frequency(1000_Genomes): {selectVal: false},
+    EUR_Allele_frequency(1000_Genomes): {selectVal: false},
+    AFR_Allele_frequency(1000_Genomes): {selectVal: false},
+    Allele_origin(ClinVar): {selectVal: false},
+    Variant_clinical_significance(ClinVar): {selectVal: false}
 };
 
 // Work-around to allow the user to select text in the table. The browser does not distinguish between
