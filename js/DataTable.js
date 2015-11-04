@@ -74,7 +74,7 @@ var DataTable = React.createClass({
         var newColObject = [];
         for (var i = 0; i < columnObject.length; i++) {
             var title = columnObject[i].prop;
-            if (this.props.columnSelection[title].selectVal == true) {
+            if (this.props.columnSelection[title].selectVal === true) {
                 newColObject.push(columnObject[i]);
             }
         }
