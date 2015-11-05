@@ -3,7 +3,7 @@
 
 var React = require('react');
 var {Table, Pagination, DataMixin} = require('react-data-components-bd2k');
-var {Button, Row, Col} = require('react-bootstrap');
+var {Button, Row, Col, Panel} = require('react-bootstrap');
 var VariantSearch = require('./VariantSearch');
 var SelectField = require('./SelectField');
 var ColumnCheckbox = require('./ColumnCheckbox');
@@ -80,16 +80,22 @@ var DataTable = React.createClass({
         }
         return newColObject;
     },
+    filterFormCols: function (subColList, columnSelection){
+        return _.map(subColList, ({title, prop}) =>
+            <ColumnCheckbox onChange={v => this.toggleColumns(prop)} key={prop} label={prop} title={title} initialCheck={columnSelection}/>);
+    },
 	render: function () {
 		var {filtersOpen, filterValues, search} = this.state,
-			{origionalColumns, columnSelection, filterColumns, suggestions, className} = this.props,
+			{subColumns, columnSelection, filterColumns, suggestions, className} = this.props,
 			page = this.buildPage(),
 			filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
 				<SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
 					key={prop} label={`${name} is: `} value={filterDisplay(filterValues[prop])} options={addAny(values)}/>),
-			filterFormCols = _.map(origionalColumns, ({title, prop}) =>
-				<ColumnCheckbox onChange={v => this.toggleColumns(prop)} key={prop} label={prop} title={title} initialCheck={columnSelection}/>);
-
+			filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
+                <Panel header={subColTitle}>
+                    {this.filterFormCols(subColList, columnSelection)}
+                </Panel>
+            );
 		return (
 			<div className={this.props.className}>
 				<Row style={{marginBottom: '2px'}}>
@@ -98,8 +104,9 @@ var DataTable = React.createClass({
 						{filtersOpen && <div className='form-inline'>{filterFormEls}</div>}
                         {filtersOpen && <div className='form-inline'>
                                             <label className='control-label' style={{marginRight: '1em'}}>
-                                                Column Selection
-                                                {filterFormCols}
+                                                <Panel header="Column Selection">
+                                                    {filterFormSubCols}
+                                                </Panel>
                                             </label>
                                         </div>}
 					</Col>

@@ -106,13 +106,13 @@ function sortColumns(columns, {prop, order}, data) {
 }
 
 var columns = [
-	{title: 'Gene', prop: 'Gene_symbol', render: renderCell},
-	{title: 'Genomic Coordinate', prop: 'Genomic_Coordinate', render: renderCell},
+    {title: 'Gene', prop: 'Gene_symbol', render: renderCell},
+    {title: 'Genomic Coordinate', prop: 'Genomic_Coordinate', render: renderCell},
     {title: 'HGVS cDNA', prop: 'HGVS_cDNA', sortFn: posCmpFn, render: renderCell},
-	{title: 'HGVS protein', prop: 'HGVS_protein', sortFn: posCmpFn, render: renderCell},
-	{title: 'HGVS protein (Abbrev.)', prop: "Abbrev_AA_change", render: renderCell},
+    {title: 'HGVS protein', prop: 'HGVS_protein', sortFn: posCmpFn, render: renderCell},
+    {title: 'HGVS protein (Abbrev.)', prop: "Abbrev_AA_change", render: renderCell},
     {title: 'BIC nucleotide', prop: "BIC_Nomenclature", render: renderCell},
-	{title: 'Pathogenicity', prop: 'Clinical_significance', render: renderCell},
+    {title: 'Pathogenicity', prop: 'Clinical_significance', render: renderCell},
     {title: 'Allele frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes', render: renderCell},
     {title: 'SAS Allele frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes', render: renderCell},
     {title: 'EAS Allele frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes', render: renderCell},
@@ -121,6 +121,36 @@ var columns = [
     {title: 'AFR Allele frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes', render: renderCell},
     {title: 'Allele origin (ClinVar)', prop: 'Allele_origin_ClinVar', render: renderCell},
     {title: 'Variant clinical significance (ClinVar)', prop: 'Variant_clinical_significance_ClinVar', render: renderCell}
+];
+
+var subColumns = [
+    {subColTitle: "ENIGMA",
+     subColList: [
+	    {title: 'Gene', prop: 'Gene_symbol', render: renderCell},
+	    {title: 'Genomic Coordinate', prop: 'Genomic_Coordinate', render: renderCell},
+        {title: 'HGVS cDNA', prop: 'HGVS_cDNA', sortFn: posCmpFn, render: renderCell},
+	    {title: 'HGVS protein', prop: 'HGVS_protein', sortFn: posCmpFn, render: renderCell},
+	    {title: 'HGVS protein (Abbrev.)', prop: "Abbrev_AA_change", render: renderCell},
+        {title: 'BIC nucleotide', prop: "BIC_Nomenclature", render: renderCell},
+        {title: 'Pathogenicity', prop: 'Clinical_significance', render: renderCell}
+     ]
+    },
+    {subColTitle: "1000 Genomes",
+     subColList: [
+        {title: 'Allele frequency', prop: 'Allele_frequency_1000_Genomes', render: renderCell},
+        {title: 'SAS Allele frequency', prop: 'SAS_Allele_frequency_1000_Genomes', render: renderCell},
+        {title: 'EAS Allele frequency', prop: 'EAS_Allele_frequency_1000_Genomes', render: renderCell},
+        {title: 'AMR Allele frequency', prop: 'AMR_Allele_frequency_1000_Genomes', render: renderCell},
+        {title: 'EUR Allele frequency', prop: 'EUR_Allele_frequency_1000_Genomes', render: renderCell},
+        {title: 'AFR Allele frequency', prop: 'AFR_Allele_frequency_1000_Genomes', render: renderCell}
+     ]
+    },
+    {subColTitle: 'ClinVar',
+     subColList: [
+        {title: 'Allele origin', prop: 'Allele_origin_ClinVar', render: renderCell},
+        {title: 'Variant clinical significance', prop: 'Variant_clinical_significance_ClinVar', render: renderCell}
+     ]
+    }
 ];
 
 var columnSelection = {
@@ -176,6 +206,7 @@ var VariantTable = React.createClass({
 				filters={filters(columns)}
 				filterColumns={filterColumns}
 				origionalColumns={columns}
+                subColumns={subColumns}
                 columnSelection={columnSelection}
 				initialData={data}
 				initialPageLength={20}
