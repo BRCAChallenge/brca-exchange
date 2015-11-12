@@ -30,8 +30,17 @@ Position of the variant in the reference genome, relative to the positive DNA st
 
 
 #### Pathogenicity
+The Pathogenicity column indicates whether expert curators have determined if the variant is pathogenic or benign. 
 
-The Pathogenicity column indicates whether expert curators have determined if the variant is _pathogenic_ or _benign_.  _Pathogenic_ variants are potentially harmful, and have been shown to increase an individual's risk of disease.  _Benign_ variants are those that show no evidence of increasing disease risk, after detailed examination.  Variants classified as _likely pathogenic_ or _likely benign_ show strong evidence of being pathogenic or benign respectively, but need to be studied further before they receive a definitive classification.  Variants can also be classified as _uncertain_ if there is not enough information yet to assess the variant's pathogenicity.
+#####What do these classifications mean?
+- *Pathogenic variants* confer an increased risk of disease. 
+- *Likely pathogenic variants* have good evidence to support an association with disease risk.
+- *Likely benign variants* have good evidence to support no association with disease risk.
+- *Benign variants* are not associated with any markedly increased risk of disease.
+- *Variants of uncertain significance (VUS)* are those for which the evidence of disease risk is not clear yet, sometimes because there is not yet enough evidence to classify them as either pathogenic or benign.
+
+#####My variant is classified pathogenic. What do I do now?
+This website is not intended to provide a clinical diagnosis. Please contact your primary care provider to determine what steps may be necessary.
 
 #### Source
 
