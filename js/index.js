@@ -111,11 +111,8 @@ var NavBarNew = React.createClass({
 						<NavLink onClick={this.close} to='/about/history'>
 							History of the BRCA Exchange
 						</NavLink>
-						<NavLink onClick={this.close} to='/about/brca1_2'>
-							What are BRCA1 and BRCA2?
-						</NavLink>
 						<NavLink onClick={this.close} to='/about/variation'>
-							BRCA Variation and Cancer
+							BRCA1, BRCA2, and Cancer
 						</NavLink>
 						<NavLink onClick={this.close} to='/about/lollipop'>
 							DNA Variant BRCA Lollipop Plots
