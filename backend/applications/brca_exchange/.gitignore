@@ -1,0 +1,5 @@
+*.pyc
+cron/
+databases/
+modules/
+progress.log
