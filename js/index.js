@@ -13,7 +13,6 @@ var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PR
 require('bootstrap/dist/css/bootstrap.css');
 require('font-awesome-webpack');
 var Rx = require('rx');
-var vcf = require('vcf.js');
 require('rx-dom');
 require('css/custom.css');
 var _ = require('underscore');
@@ -29,7 +28,7 @@ var content = require('./content');
 var databaseUrl = require('../../enigma-database.tsv');
 var databaseKey = require('../databaseKey');
 
-var {Grid, Col, Row, Input, Navbar, Nav, Table,
+var {Grid, Col, Row, Navbar, Nav, Table,
 	DropdownButton, MenuItem, Modal, Button} = require('react-bootstrap');
 
 
@@ -172,9 +171,6 @@ var DisclaimerModal = React.createClass({
     open() {
         this.setState({ showModal: true });
     },
-    onRequestHide() {
-        this.setState({ showModal: false });
-    },
     render() {
         return (
             <div style={{display: "inline"}}>
@@ -201,12 +197,6 @@ var Home = React.createClass({
 		};
 	},
 
-	handleSelect(selectedIndex, selectedDirection) {
-		this.setState({
-			index: selectedIndex,
-			direction: selectedDirection
-		});
-	},
 	onSearch(value) {
 		this.transitionTo('/variants', null, {search: value});
 	},
@@ -323,53 +313,6 @@ var Database = React.createClass({
 					: ''}
 			</Grid>
 		);
-	}
-});
-
-var MyVariant = React.createClass({ //eslint-disable-line no-unused-vars
-	getInitialState: function () {
-		return {
-			data: null
-		};
-	},
-
-	render: function() {
-		var {data} = this.state;
-		var {show} = this.props;
-		return (
-			<div style={{display: show ? 'block' : 'none'}}>
-				<div className="text-center">
-					<Input ref='file' type='file' onChange={this.fileChange}/>
-				</div>
-				<div style={{position: "relative", height: "100px"}}>
-					{data ?
-						<Row>
-							<Col md={10} mdOffset={1}>
-								<VariantTable data={data}/>
-							</Col>
-						</Row>
-						: ''}
-				</div>
-			</div>
-		);
-	},
-
-	dataReady: function(ev) {
-		this.setState({data: vcf.parser()(ev.currentTarget.result)});
-	},
-
-
-	fileChange: function () {
-		var file = this.refs.file.getInputDOMNode().files[0],
-		reader = new FileReader();
-		// XXX This timeout allows the UI to update (close dialog) before loading
-		// a potentially large file, which will block the UI.
-		// This might also be solved by elminating the animation on Modal close,
-		// which is probably the source of the problem.
-		window.setTimeout(() => {
-			reader.onload = this.dataReady;
-			reader.readAsText(file);
-		}, 100);
 	}
 });
 
