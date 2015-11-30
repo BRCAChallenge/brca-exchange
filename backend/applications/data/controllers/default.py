@@ -8,7 +8,7 @@ def index():
     query = (db.brca_variant.Variant_Source.upper().contains([request.vars.source.upper()]))
     direction = request.vars.direction
     order_by = getattr(db.brca_variant, request.vars.order_by)
-    order_by_dir = order_by if direction == 'descending' else ~order_by
+    order_by_dir = ~order_by if direction == 'descending' else order_by
     page_size = int(request.vars.page_size)
     page_num = int(request.vars.page_num)
     limit_by = (page_size * page_num, page_size * (page_num + 1))
