@@ -2,7 +2,9 @@
 'use strict';
 
 var React = require('react');
-var {Table, Pagination, DataMixin} = require('react-data-components-bd2k');
+var Rx = require('rx');
+require('rx/dist/rx.time');
+var {Table, Pagination} = require('react-data-components-bd2k');
 var {Button, Row, Col} = require('react-bootstrap');
 var VariantSearch = require('./VariantSearch');
 var SelectField = require('./SelectField');
@@ -20,32 +22,58 @@ var pluralize = (n, s) => n === 1 ? s : s + 's';
 
 var merge = (...args) => _.extend({}, ...args);
 
-var DataTable = React.createClass({
-	mixins: [DataMixin, PureRenderMixin],
-	// This differs from the default DataMixin onFilter handler in that multiple filters
-	// can be set at once. This is important in order to avoid redundant sorting when
-	// setting multiple filters. Also, the onFilter code changes the filter state in-place,
-	// which violates the react API contract wherein state is treated as immutable.
-	setFilters: function (obj) {
-		var {filterValues, sortBy} = this.state,
-			{initialData, filter, filters, sort} = this.props,
-			newFilterValues = merge(filterValues, obj),
-			data = sort(sortBy, filter(filters, newFilterValues, initialData));
 
-		this.setState({
-		  data: data,
-		  filterValues: newFilterValues,
-		  currentPage: 0
-		});
+function setPages({data, count}, pageLength) {
+	return {
+		data,
+		count,
+		totalPages: Math.ceil(count / pageLength)
+	};
+}
+
+// Wrap Table with a version having PureRenderMixin
+var FastTable = React.createClass({
+	mixins: [PureRenderMixin],
+	render: function () {
+		return <Table {...this.props}/>;
+	}
+});
+
+var DataTable = React.createClass({
+	mixins: [PureRenderMixin],
+	componentWillMount: function () {
+		var q = this.fetchq = new Rx.Subject();
+		this.subs = q.map(this.props.fetch).debounce(100).switchLatest().subscribe(
+			resp => this.setState(setPages(resp, this.state.pageLength)), // set data, count, totalPages
+			() => this.setState({error: 'Problem connecting to server'}));
 	},
-	componentWillReceiveProps: function(newProps) {
+	componentWillUnmount: function () {
+		this.subs.dispose();
+	},
+	componentDidMount: function () {
+		this.fetch();
+	},
+	componentWillReceiveProps: function(newProps) { // XXX review this.
 		var {search} = newProps;
 		if (search !== this.props.search) {
 			this.setState({search: search});
-			this.setFilters(hgvs.filters(search));
+			this.fetch({search: search});
 		}
 	},
-	createDownload: function (ev) {
+	setFilters: function (obj) {
+		var {filterValues} = this.state,
+			newFilterValues = merge(filterValues, obj);
+
+		this.fetch({
+		  filterValues: newFilterValues,
+		  page: 0
+		});
+		this.setState({
+		  filterValues: newFilterValues,
+		  page: 0
+		});
+	},
+	createDownload: function () {
 		// XXX This is a bit horrible. In order to build the tsv lazily (on
 		// button click, instead of on every table update), we catch the
 		// mousedown event and modify the href on the anchor element, behind
@@ -53,14 +81,37 @@ var DataTable = React.createClass({
 		// it's something to be aware of if react starts doing something
 		// strange.  Also needs to be tested cross-browser. We should not offer
 		// download on browsers that don't allow client-driven download.
-		var data = this.state.data,
-			keys = _.keys(data[0]),
-			tsvRows = _.map(data, obj => _.map(keys, k => obj[k]).join('\t')).join('\n'), // use os-specific line endings?
-			tsv = keys.join('\t') + '\n' + tsvRows;
-		ev.target.href = URL.createObjectURL(new Blob([tsv], { type: 'text/tsv' }));
+		console.log('fixme');
+		return;
+//		var data = this.props.data,
+//			keys = _.keys(data[0]),
+//			tsvRows = _.map(data, obj => _.map(keys, k => obj[k]).join('\t')).join('\n'), // use os-specific line endings?
+//			tsv = keys.join('\t') + '\n' + tsvRows;
+//		ev.target.href = URL.createObjectURL(new Blob([tsv], { type: 'text/tsv' }));
 	},
 	getInitialState: function () {
-		return {filtersOpen: false, search: this.props.search, renderColumns: this.selectColumns()};
+		return merge({
+			data: [],
+			filtersOpen: false,
+			filterValues: {},
+			search: '',
+			renderColumns: this.selectColumns(),
+			pageLength: 20,
+			page: 0,
+			totalPages: 20 // XXX this is imaginary. Do we need it?
+		}, this.props.initialState);
+	},
+	fetch: function (opts) {
+		// XXX set source
+		var {pageLength, search, page, sortBy,
+			filterValues, renderColumns} = merge(this.state, opts);
+		this.fetchq.onNext(merge({
+			pageLength,
+			page,
+			sortBy,
+			search,
+			searchColumn: _.pluck(renderColumns, 'prop'),
+			filterValues}, hgvs.filters(search, filterValues)));
 	},
 	toggleFilters: function () {
 		this.setState({filtersOpen: !this.state.filtersOpen});
@@ -68,29 +119,45 @@ var DataTable = React.createClass({
     toggleColumns: function (title) {
         this.props.columnSelection[title].selectVal = !this.props.columnSelection[title].selectVal;
         this.setState({renderColumns: this.selectColumns()});
+        this.fetch({renderColumns: this.selectColumns()});
     },
     selectColumns () {
         var columnObject = this.props.origionalColumns;
         var newColObject = [];
         for (var i = 0; i < columnObject.length; i++) {
             var title = columnObject[i].prop;
-            if (this.props.columnSelection[title].selectVal == true) {
+            if (this.props.columnSelection[title].selectVal === true) {
                 newColObject.push(columnObject[i]);
             }
         }
         return newColObject;
     },
+	onChangePage: function (pageNumber) {
+		this.setState({page: pageNumber});
+		this.fetch({page: pageNumber});
+	},
+	onSort: function(sortBy) {
+		this.setState({sortBy});
+		this.fetch({sortBy});
+	},
+	onPageLengthChange: function(txt) {
+		var length = parseInt(txt),
+			{page, pageLength} = this.state,
+			newPage = Math.floor((page * pageLength) / length);
+
+		this.setState({page: newPage, pageLength: length});
+		this.fetch({page: newPage, pageLength: length});
+	},
 	render: function () {
-		var {filtersOpen, filterValues, search} = this.state,
+		var {filterValues, filtersOpen, search, data, page, totalPages, count, error} = this.state,
 			{origionalColumns, columnSelection, filterColumns, suggestions, className} = this.props,
-			page = this.buildPage(),
 			filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
 				<SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
 					key={prop} label={`${name} is: `} value={filterDisplay(filterValues[prop])} options={addAny(values)}/>),
 			filterFormCols = _.map(origionalColumns, ({title, prop}) =>
-				<ColumnCheckbox onChange={v => this.toggleColumns(prop)} key={prop} label={prop} title={title} initialCheck={columnSelection}/>);
+				<ColumnCheckbox onChange={() => this.toggleColumns(prop)} key={prop} label={prop} title={title} initialCheck={columnSelection}/>);
 
-		return (
+		return (error ? <p>{error}</p> :
 			<div className={this.props.className}>
 				<Row style={{marginBottom: '2px'}}>
 					<Col sm={12}>
@@ -110,7 +177,7 @@ var DataTable = React.createClass({
 							<div className='form-group'>
 								<label className='control-label'
 										style={{marginRight: '1em'}}>
-									{this.state.data.length} matching {pluralize(this.state.data.length, 'variant')}
+									{count} matching {pluralize(count, 'variant')}
 								</label>
 								<Button download="variants.tsv" href="#" onMouseDown={this.createDownload}>Download</Button>
 							</div>
@@ -136,7 +203,7 @@ var DataTable = React.createClass({
 							/* XXX should debounce this so we don't sort so often */
 							onChange={v => {
 								this.setState({search: v});
-								this.setFilters(hgvs.filters(v));
+								this.fetch({search: v});
 								this.props.onChange(v);
 							}}
 						/>
@@ -144,16 +211,16 @@ var DataTable = React.createClass({
 					<Col sm={6} smOffset={1}>
 						<Pagination
 							className="pagination pull-right-sm"
-							currentPage={page.currentPage}
-							totalPages={page.totalPages}
+							currentPage={page}
+							totalPages={totalPages}
 							onChangePage={this.onChangePage} />
 					</Col>
 				</Row>
 				<Row>
 					<Col className="table-responsive" sm={12}>
-						<Table
+						<FastTable
 							className={cx(className, "table table-hover table-bordered table-condensed")}
-							dataArray={page.data}
+							dataArray={data}
 							columns={this.state.renderColumns}
 							keys={this.props.keys}
 							buildRowOptions={this.props.buildRowOptions}

@@ -12,11 +12,9 @@ var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 require('bootstrap/dist/css/bootstrap.css');
 require('font-awesome-webpack');
-var Rx = require('rx');
-require('rx-dom');
 require('css/custom.css');
 var _ = require('underscore');
-var hgvs = require('./hgvs');
+var backend = require('./backend');
 
 var brcaLogo = require('./img/BRCA-Exchange-tall-tranparent.png');
 var betaBanner = require('./img/Beta_Banner.png');
@@ -25,7 +23,6 @@ var slugify = require('./slugify');
 
 var content = require('./content');
 
-var databaseUrl = require('../../enigma-database.tsv');
 var databaseKey = require('../databaseKey');
 
 var {Grid, Col, Row, Navbar, Nav, Table,
@@ -48,13 +45,6 @@ if (typeof console === "undefined") {
     window.console = {
         log: function () {}
     };
-}
-
-function readTsv(response) {
-	var {header, rows} = JSON.parse(response);
-	return {
-		records: _.map(rows, row => _.object(header, row))
-	};
 }
 
 var RawHTML = React.createClass({
@@ -281,6 +271,29 @@ var Help = React.createClass({
 	}
 });
 
+// wrap scalars in array.
+function toArray(v) {
+	return _.isArray(v) ? v : [v];
+}
+
+function toNumber(v) {
+	return _.isString(v) ? parseInt(v) : v;
+}
+
+var merge = (...args) => _.extend({}, ...args);
+
+function databaseParams(paramsIn) {
+	var {filter, filterValue, ...arrParams} = _.mapObject(
+			_.pick(paramsIn, 'hide', 'show', 'filter', 'filterValue'), toArray),
+		numParams = _.mapObject(_.pick(paramsIn, 'page', 'pageLength'),
+				toNumber),
+		{orderBy, order, ...otherParams} = _.pick(paramsIn, 'search', 'orderBy', 'order'),
+		sortBy = {prop: orderBy, order},
+		filterValues = _.object(filter, filterValue);
+
+	return merge(arrParams, numParams, {sortBy}, otherParams, {filterValues});
+}
+
 var Database = React.createClass({
 	mixins: [Navigation, State, PureRenderMixin],
 	showVariant: function (row) {
@@ -295,22 +308,21 @@ var Database = React.createClass({
 		}
 	},
 	render: function () {
-		var {show, data, suggestions} = this.props,
-			{search = ''} = this.getQuery();
+		var {show} = this.props,
+			params = databaseParams(this.getQuery());
+		// XXX is 'keys' used?
 		return (
 			<Grid style={{display: show ? 'block' : 'none'}}>
-				{data ?
-					<VariantTable
-						ref='table'
-						onChange={this.onChange}
-						search={search}
-						filterValues={hgvs.filters(search)}
-						data={data.records}
-						suggestions={suggestions}
-						keys={databaseKey}
-						onHeaderClick={this.showHelp}
-						onRowClick={this.showVariant}/>
-					: ''}
+				<VariantTable
+					ref='table'
+					initialState={params}
+					{...params}
+					fetch={backend.data}
+					onChange={this.onChange}
+					suggestions={[]}
+					keys={databaseKey}
+					onHeaderClick={this.showHelp}
+					onRowClick={this.showVariant}/>
 			</Grid>
 		);
 	}
@@ -374,46 +386,35 @@ var VariantDetail = React.createClass({
 	}
 });
 
-var dontSuggest = [
-	'Assertion_method_citation',
-	'URL'
-];
+// XXX implement in server
+//var dontSuggest = [
+//	'Assertion_method_citation',
+//	'URL'
+//];
 
-var flatmap = (coll, fn) => _.flatten(_.map(coll, fn), true);
-var minSuggestion = 3; // minimum length of string to use in autocomplete
-var rowWords = row => flatmap(_.values(_.omit(row, dontSuggest)),
-		v => v.toLowerCase().split(/\s+/));
+//var flatmap = (coll, fn) => _.flatten(_.map(coll, fn), true);
+//var minSuggestion = 3; // minimum length of string to use in autocomplete
+//var rowWords = row => flatmap(_.values(_.omit(row, dontSuggest)),
+//		v => v.toLowerCase().split(/\s+/));
 
 // Pull out interesting strings from the data, for use in
 // auto-completion.
-function getSuggestions(data) {
-	return _.uniq(flatmap(data, row =>
-				_.filter(rowWords(row), w => w.length >= minSuggestion)).sort(),
-			true);
-}
+//function getSuggestions(data) {
+//	return _.uniq(flatmap(data, row =>
+//				_.filter(rowWords(row), w => w.length >= minSuggestion)).sort(),
+//			true);
+//}
 
 var Application = React.createClass({
 	mixins: [State],
-	getInitialState: function () {
-		return {data: null};
-	},
-	componentWillMount: function (){
-		Rx.DOM.get(databaseUrl).subscribe(xhr => {
-			var data = readTsv(xhr.responseText);
-			this.setState({data: data, suggestions: getSuggestions(data.records)});
-		});
-	},
 	render: function () {
-		var {data, suggestions} = this.state;
 		var path = this.getPath().slice(1);
 		return (
 			<div>
 				<NavBarNew path={path} />
-				<RouteHandler data={data} suggestions={suggestions}/>
+				<RouteHandler />
 				<Database
-					show={path.indexOf('variants') === 0}
-					suggestions={suggestions}
-					data={data}/>
+					show={path.indexOf('variants') === 0} />
 	            <Footer />
             </div>
 		);
