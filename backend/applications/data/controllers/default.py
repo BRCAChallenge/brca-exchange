@@ -1,23 +1,35 @@
+def tolist(x):
+    return x if isinstance(x, list) else [x]
+
 def index():
     response.view = 'default/data.json'
+    response.headers['Access-Control-Allow-Origin'] = '*'
 
-    q_source = (db.brca_variant.Variant_Source.upper().contains([request.vars.source.upper()]))
+    query = (db.brca_variant.Variant_Source.upper().contains([request.vars.source.upper()]))
+    direction = request.vars.direction
     order_by = getattr(db.brca_variant, request.vars.order_by)
+    order_by_dir = order_by if direction == 'descending' else ~order_by
     page_size = int(request.vars.page_size)
     page_num = int(request.vars.page_num)
-    limit_by = (0 + page_size * (page_num -1), page_size * page_num + 1)
-    search_term = request.vars.search_term.upper()
-    search_columns = request.vars.search_column.split(",")
-    # this part saves all search queries in various provided columns in a search query string
-    # which then get converted to a python expression through eval()
-    search_query_dict = {}
-    for i in range(len(search_columns)):
-        query = (getattr(db.brca_variant, search_columns[i]).upper().contains([search_term]))
-        search_query_dict["search_q{0}".format(i)]=query
-    search_query_string = ""
-    for key in search_query_dict.keys():
-        search_query_string = search_query_string + "search_query_dict[\"{0}\"]".format(str(key)) + "|"
-    search_query_string = eval(search_query_string[0:-1])
+    limit_by = (page_size * page_num, page_size * (page_num + 1))
 
-    brca_data = db(search_query_string & q_source).select(orderby=order_by, limitby=limit_by)
-    return dict(brca_data=brca_data)
+    if request.vars.search_term:
+        search_term = request.vars.search_term.upper()
+        search_columns = tolist(request.vars.search_column)
+        term = lambda c: getattr(db.brca_variant, c).upper().contains([search_term])
+
+        subquery = term(search_columns[0])
+        for c in search_columns[1:]:
+            subquery |= term(c)
+
+        query &= subquery
+
+    if request.vars.filter:
+        filters = zip(tolist(request.vars.filter), tolist(request.vars.filterValue))
+        for (p, v) in filters:
+            query &= getattr(db.brca_variant, p) == v
+
+    brca_data = db(query).select(orderby=order_by_dir, limitby=limit_by)
+    count = db(query).count()
+
+    return dict(data=brca_data, count=count)
