@@ -90,16 +90,19 @@ var DataTable = React.createClass({
 //		ev.target.href = URL.createObjectURL(new Blob([tsv], { type: 'text/tsv' }));
 	},
 	getInitialState: function () {
+		var {columnSelect, ...otherProps} = this.props.initialState,
+			cs = merge(_.object(_.map(this.props.columns, c => [c.prop, true])),
+					columnSelect);
 		return merge({
 			data: [],
 			filtersOpen: false,
 			filterValues: {},
 			search: '',
-			columnSelection: _.object(_.map(this.props.columns, c => [c.prop, true])),
+			columnSelection: cs,
 			pageLength: 20,
 			page: 0,
 			totalPages: 20 // XXX this is imaginary. Do we need it?
-		}, this.props.initialState);
+		}, otherProps);
 	},
 	fetch: function (opts) {
 		// XXX set source

@@ -283,15 +283,16 @@ function toNumber(v) {
 var merge = (...args) => _.extend({}, ...args);
 
 function databaseParams(paramsIn) {
-	var {filter, filterValue, ...arrParams} = _.mapObject(
-			_.pick(paramsIn, 'hide', 'show', 'filter', 'filterValue'), toArray),
+	var {filter, filterValue, hide} = _.mapObject(
+			_.pick(paramsIn, 'hide', 'filter', 'filterValue'), toArray),
 		numParams = _.mapObject(_.pick(paramsIn, 'page', 'pageLength'),
 				toNumber),
-		{orderBy, order, ...otherParams} = _.pick(paramsIn, 'search', 'orderBy', 'order'),
+		{orderBy, order, search} = _.pick(paramsIn, 'search', 'orderBy', 'order'),
 		sortBy = {prop: orderBy, order},
+		columnSelect = _.object(hide, _.map(hide, _.constant(false))),
 		filterValues = _.object(filter, filterValue);
 
-	return merge(arrParams, numParams, {sortBy}, otherParams, {filterValues});
+	return merge(numParams, {search, sortBy, columnSelect, filterValues, hide});
 }
 
 var Database = React.createClass({
