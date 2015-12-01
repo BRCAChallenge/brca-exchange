@@ -95,7 +95,7 @@ var DataTable = React.createClass({
 			filtersOpen: false,
 			filterValues: {},
 			search: '',
-			renderColumns: this.selectColumns(),
+			columnSelection: _.object(_.map(this.props.columns, c => [c.prop, true])),
 			pageLength: 20,
 			page: 0,
 			totalPages: 20 // XXX this is imaginary. Do we need it?
@@ -104,33 +104,25 @@ var DataTable = React.createClass({
 	fetch: function (opts) {
 		// XXX set source
 		var {pageLength, search, page, sortBy,
-			filterValues, renderColumns} = merge(this.state, opts);
+			filterValues, columnSelection} = merge(this.state, opts);
 		this.fetchq.onNext(merge({
 			pageLength,
 			page,
 			sortBy,
 			search,
-			searchColumn: _.pluck(renderColumns, 'prop'),
+			searchColumn: _.keys(_.pick(columnSelection, v => v)),
 			filterValues}, hgvs.filters(search, filterValues)));
 	},
 	toggleFilters: function () {
 		this.setState({filtersOpen: !this.state.filtersOpen});
 	},
-    toggleColumns: function (title) {
-        this.props.columnSelection[title].selectVal = !this.props.columnSelection[title].selectVal;
-        this.setState({renderColumns: this.selectColumns()});
-        this.fetch({renderColumns: this.selectColumns()});
-    },
-    selectColumns () {
-        var columnObject = this.props.origionalColumns;
-        var newColObject = [];
-        for (var i = 0; i < columnObject.length; i++) {
-            var title = columnObject[i].prop;
-            if (this.props.columnSelection[title].selectVal === true) {
-                newColObject.push(columnObject[i]);
-            }
-        }
-        return newColObject;
+    toggleColumns: function (prop) {
+		var {columnSelection} = this.state,
+			val = columnSelection[prop],
+			cs = {...columnSelection, [prop]: !val};
+
+        this.setState({columnSelection: cs});
+        this.fetch({columnSelection: cs});
     },
 	onChangePage: function (pageNumber) {
 		this.setState({page: pageNumber});
@@ -149,12 +141,14 @@ var DataTable = React.createClass({
 		this.fetch({page: newPage, pageLength: length});
 	},
 	render: function () {
-		var {filterValues, filtersOpen, search, data, page, totalPages, count, error} = this.state,
-			{origionalColumns, columnSelection, filterColumns, suggestions, className} = this.props,
+		var {filterValues, filtersOpen, search, data, columnSelection,
+				page, totalPages, count, error} = this.state,
+			{columns, filterColumns, suggestions, className} = this.props,
+			renderColumns = _.filter(columns, c => columnSelection[c.prop]),
 			filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
 				<SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
 					key={prop} label={`${name} is: `} value={filterDisplay(filterValues[prop])} options={addAny(values)}/>),
-			filterFormCols = _.map(origionalColumns, ({title, prop}) =>
+			filterFormCols = _.map(columns, ({title, prop}) =>
 				<ColumnCheckbox onChange={() => this.toggleColumns(prop)} key={prop} label={prop} title={title} initialCheck={columnSelection}/>);
 
 		return (error ? <p>{error}</p> :
@@ -221,7 +215,7 @@ var DataTable = React.createClass({
 						<FastTable
 							className={cx(className, "table table-hover table-bordered table-condensed")}
 							dataArray={data}
-							columns={this.state.renderColumns}
+							columns={renderColumns}
 							keys={this.props.keys}
 							buildRowOptions={this.props.buildRowOptions}
 							buildHeader={this.props.buildHeader}

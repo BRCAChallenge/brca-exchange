@@ -79,16 +79,6 @@ var columns = [
 	{title: 'Pathogenicity', prop: 'Clinical_significance', render: renderCell}
 ];
 
-var columnSelection = {
-    'Gene_symbol': {selectVal: true},
-    'Genomic_Coordinate': {selectVal: true},
-    'HGVS_cDNA': {selectVal: true},
-    'HGVS_protein': {selectVal: true},
-    'Abbrev_AA_change': {selectVal: true},
-    'BIC_Nomenclature': {selectVal: true},
-    'Clinical_significance': {selectVal: true}
-};
-
 // Work-around to allow the user to select text in the table. The browser does not distinguish between
 // click and drag: if mouseup and mousedown occur on the same element, a click event is fired even if
 // the events occur at very different locations. That makes it hard to select text. This workaround
@@ -120,8 +110,7 @@ var VariantTable = React.createClass({
 				buildRowOptions={r => ({title: 'click for details', onClick: () => hasSelection() ? null : onRowClick(r)})}
 				buildHeader={title => buildHeader(onHeaderClick, title)}
 				filterColumns={filterColumns}
-				origionalColumns={columns}
-                columnSelection={columnSelection}
+				columns={columns}
                 pageLengthOptions={[ 20, 50, 100 ]}
             />
 		);
