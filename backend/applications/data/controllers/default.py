@@ -1,11 +1,9 @@
+import cStringIO
+
 def tolist(x):
     return x if isinstance(x, list) else [x]
 
 def index():
-    if request.vars.format == 'tsv':
-        response.view = 'default/data.tsv'
-    else:
-        response.view = 'default/data.json'
     response.headers['Access-Control-Allow-Origin'] = '*'
 
     query = (db.brca_variant.Variant_Source.upper().contains([request.vars.source.upper()]))
@@ -36,6 +34,14 @@ def index():
             query &= getattr(db.brca_variant, p) == v
 
     brca_data = db(query).select(orderby=order_by_dir, limitby=limit_by)
-    count = db(query).count()
 
+    if request.vars.format == 'tsv':
+        s = cStringIO.StringIO()
+        # This call is very slow. It is not streaming: it eagerly fills the cStringIO.
+        brca_data.export_to_csv_file(s, represent=False, delimiter='\t')
+        s.seek(0)
+        return response.stream(s, attachment=True, filename='variants.tsv')
+
+    response.view = 'default/data.json'
+    count = db(query).count()
     return dict(data=brca_data, count=count)
