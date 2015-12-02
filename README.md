@@ -18,6 +18,15 @@ The build is based on npm and webpack.
  * `npm start`
  * browse to [http://localhost:8080/webpack-dev-server/](http://localhost:8080/webpack-dev-server/)
 
+## Build with local server
+
+ * Copy \*.table and \*.sqlite files into brca-website/backend/applications/data/databases
+ * Edit url in js/backend.js to point to localhost:8000
+ * Download and extract web2py
+ * `python web2py.py -f ~/brca-website/backend`
+
+For now, database files can be found on beta, in /var/www/backend/beta/web2py/applications/data/databases.
+
 ### Lint
 
 Use `npm run lint` to run the lint rules. We lint with eslint and babel-eslint.
