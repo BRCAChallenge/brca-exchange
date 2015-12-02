@@ -1,0 +1,20 @@
+{{
+import cStringIO
+import csv
+stream=cStringIO.StringIO()
+
+if len(response._vars['data']) > 0:
+fieldnames=response._vars['data'][0].keys()
+fieldnames.sort()
+writer = csv.DictWriter(stream, fieldnames=fieldnames, dialect='excel-tab')
+writer.writeheader()
+for r in response._vars['data']:
+writer.writerow(r)
+pass
+response.write(stream.getvalue(), escape=False)
+else:
+response.write('[]', escape=False)
+pass
+
+response.headers['Content-Type']='application/vnd.ms-excel'
+}}
