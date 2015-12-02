@@ -5,3 +5,4 @@ npm-debug.log
 python_modules/
 *.swp
 .idea/
+data/
