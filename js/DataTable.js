@@ -42,9 +42,9 @@ var FastTable = React.createClass({
 // Merge new state (e.g. initialState) with existing state,
 // deep-merging columnSelect.
 function mergeState(state, newState) {
-	var {columnSelect, ...otherProps} = newState,
-		cs = {...state.columnSelect, ...columnSelect};
-	return {...state, columnSelect: cs, ...otherProps};
+	var {columnSelection, ...otherProps} = newState,
+		cs = {...state.columnSelection, ...columnSelection};
+	return {...state, columnSelection: cs, ...otherProps};
 }
 
 var DataTable = React.createClass({

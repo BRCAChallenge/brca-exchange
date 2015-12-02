@@ -289,10 +289,10 @@ function databaseParams(paramsIn) {
 				toNumber),
 		{orderBy, order, search = ''} = _.pick(paramsIn, 'search', 'orderBy', 'order'),
 		sortBy = {prop: orderBy, order},
-		columnSelect = _.object(hide, _.map(hide, _.constant(false))),
+		columnSelection = _.object(hide, _.map(hide, _.constant(false))),
 		filterValues = _.object(filter, filterValue);
 
-	return {search, sortBy, columnSelect, filterValues, hide, ...numParams};
+	return {search, sortBy, columnSelection, filterValues, hide, ...numParams};
 }
 
 var transpose = a => _.zip.apply(_, a);
