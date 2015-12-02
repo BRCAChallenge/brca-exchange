@@ -88,20 +88,15 @@ var DataTable = React.createClass({
 		});
 	},
 	createDownload: function () {
-		// XXX This is a bit horrible. In order to build the tsv lazily (on
-		// button click, instead of on every table update), we catch the
-		// mousedown event and modify the href on the anchor element, behind
-		// the back of react. I don't believe this will cause any problems, but
-		// it's something to be aware of if react starts doing something
-		// strange.  Also needs to be tested cross-browser. We should not offer
-		// download on browsers that don't allow client-driven download.
-		console.log('fixme');
-		return;
-//		var data = this.props.data,
-//			keys = _.keys(data[0]),
-//			tsvRows = _.map(data, obj => _.map(keys, k => obj[k]).join('\t')).join('\n'), // use os-specific line endings?
-//			tsv = keys.join('\t') + '\n' + tsvRows;
-//		ev.target.href = URL.createObjectURL(new Blob([tsv], { type: 'text/tsv' }));
+		var {search, sortBy, filterValues, columnSelection} = this.state;
+		return this.props.url(merge({
+			format: 'tsv',
+			pageLength: null,
+			page: null,
+			sortBy,
+			search,
+			searchColumn: _.keys(_.pick(columnSelection, v => v)),
+			filterValues}, hgvs.filters(search, filterValues)));
 	},
 	fetch: function (state) {
 		// XXX set source
@@ -179,7 +174,7 @@ var DataTable = React.createClass({
 										style={{marginRight: '1em'}}>
 									{count} matching {pluralize(count, 'variant')}
 								</label>
-								<Button download="variants.tsv" href="#" onMouseDown={this.createDownload}>Download</Button>
+								<Button download="variants.tsv" href={this.createDownload()}>Download</Button>
 							</div>
 						</div>
 					</Col>

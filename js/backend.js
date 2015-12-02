@@ -4,22 +4,17 @@
 var Rx = require('rx');
 require('rx-dom');
 var _ = require('underscore');
+var qs = require('qs');
 
 var databaseUrl = "http://localhost:8000";
 
-function filters(filterValues) {
-	return _.map(_.pick(filterValues, v => v != null),
-				(v, k) => `filter=${k}&filterValue=${v}`).join('&');
-}
-
-function searchColumns(columns) {
-	return _.map(columns, c => `search_column=${c}`).join('&');
-}
+var transpose = a => _.zip.apply(_, a);
 
 // XXX these defaults might produce odd user experience, since they
 // are not reflected in the UI.
-function data(opts) {
+function url(opts) {
 	var {
+		format = 'json',
 		filterValues = {},
 		source = '',
 		sortBy: {prop = 'Gene_symbol', order = 'ascending'} = {},
@@ -27,12 +22,28 @@ function data(opts) {
 		page = 0,
 		search = '',
 		searchColumn = ['Variant_Source', 'Gene_symbol']} = opts,
-		// XXX use a proper url escape API!!
-		query = `${databaseUrl}/data?${filters(filterValues)}&source=${source}&order_by=${prop}&direction=${order}&page_size=${pageLength}&page_num=${page}&search_term=${search}&${searchColumns(searchColumn)}`;
 
-	return Rx.DOM.get(query).map(xhr => JSON.parse(xhr.responseText));
+		[filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v)));
+
+	return `${databaseUrl}/data?${qs.stringify(_.pick({
+		format,
+		filter,
+		filterValue,
+		source,
+		'order_by': prop,
+		direction: order,
+		'page_size': pageLength,
+		'page_num': page,
+		'search_term': search,
+		'search_column': searchColumn
+	}, v => v != null), {arrayFormat: 'repeat'})}`;
+}
+
+function data(opts) {
+	return Rx.DOM.get(url(opts)).map(xhr => JSON.parse(xhr.responseText));
 }
 
 module.exports = {
-	data
+	data,
+	url
 };

@@ -359,6 +359,7 @@ var Database = React.createClass({
 					initialState={params}
 					{...params}
 					fetch={backend.data}
+					url={backend.url}
 					onChange={s => this.urlq.onNext(s)}
 					suggestions={[]}
 					keys={databaseKey}

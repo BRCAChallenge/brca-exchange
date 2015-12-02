@@ -2,16 +2,22 @@ def tolist(x):
     return x if isinstance(x, list) else [x]
 
 def index():
-    response.view = 'default/data.json'
+    if request.vars.format == 'tsv':
+        response.view = 'default/data.tsv'
+    else:
+        response.view = 'default/data.json'
     response.headers['Access-Control-Allow-Origin'] = '*'
 
     query = (db.brca_variant.Variant_Source.upper().contains([request.vars.source.upper()]))
     direction = request.vars.direction
     order_by = getattr(db.brca_variant, request.vars.order_by)
     order_by_dir = ~order_by if direction == 'descending' else order_by
-    page_size = int(request.vars.page_size)
-    page_num = int(request.vars.page_num)
-    limit_by = (page_size * page_num, page_size * (page_num + 1))
+    if request.vars.page_size:
+        page_size = int(request.vars.page_size)
+        page_num = int(request.vars.page_num)
+        limit_by = (page_size * page_num, page_size * (page_num + 1))
+    else:
+        limit_by = None
 
     if request.vars.search_term:
         search_term = request.vars.search_term.upper()
