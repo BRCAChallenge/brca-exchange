@@ -6,7 +6,10 @@ require('rx-dom');
 var _ = require('underscore');
 var qs = require('qs');
 
-var databaseUrl = "http://localhost:8000";
+// XXX Need a config mechanism for this. For now, uncomment the localhost
+// setting when working locally.
+var databaseUrl = "http://brcaexchange.cloudapp.net/backend";
+//databaseUrl = "http://localhost:8000";
 
 var transpose = a => _.zip.apply(_, a);
 
