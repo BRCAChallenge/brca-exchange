@@ -16,6 +16,7 @@ require('css/custom.css');
 var _ = require('underscore');
 var backend = require('./backend');
 var Rx = require('rx');
+require('rx-dom');
 
 var brcaLogo = require('./img/BRCA-Exchange-tall-tranparent.png');
 var betaBanner = require('./img/Beta_Banner.png');
@@ -393,9 +394,16 @@ var VariantDetail = React.createClass({
 	showHelp: function (title) {
 		this.transitionTo(`/help#${slugify(title)}`);
 	},
+	componentWillMount: function () {
+		backend.data({
+			filterValues: variantPathSplit(this.props.params.id),
+			pageLength: 1
+		}).take(1).subscribe(
+			resp => this.setState({data: resp.data[0], error: null}),
+			this.setState({error: 'Problem connecting to server'}));
+	},
 	render: function() {
-		var {data, params: {id}} = this.props,
-			variant = (data && _.findWhere(data.records, variantPathSplit(id))) || {};
+		var {data: variant = {}, error} = this.state;
 
 		variant = _.omit(variant, ['__HEADER__']);
 		var rows = _.map(variant, (v, k) =>
@@ -405,7 +413,7 @@ var VariantDetail = React.createClass({
 			 </tr>);
 
 
-		return (
+		return (error ? <p>{error}</p> :
 			<Grid>
 				<Row>
 					<div className='text-center Variant-detail-title'>

@@ -22,9 +22,9 @@ function data(opts) {
 	var {
 		filterValues = {},
 		source = '',
-	    sortBy: {prop = 'Gene_symbol', order = 'ascending'},
+		sortBy: {prop = 'Gene_symbol', order = 'ascending'} = {},
 		pageLength = 100,
-		page = 1,
+		page = 0,
 		search = '',
 		searchColumn = ['Variant_Source', 'Gene_symbol']} = opts,
 		// XXX use a proper url escape API!!
