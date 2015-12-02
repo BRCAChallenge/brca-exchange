@@ -16,6 +16,8 @@ function searchColumns(columns) {
 	return _.map(columns, c => `search_column=${c}`).join('&');
 }
 
+// XXX these defaults might produce odd user experience, since they
+// are not reflected in the UI.
 function data(opts) {
 	var {
 		filterValues = {},

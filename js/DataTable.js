@@ -39,6 +39,14 @@ var FastTable = React.createClass({
 	}
 });
 
+// Merge new state (e.g. initialState) with existing state,
+// deep-merging columnSelect.
+function mergeState(state, newState) {
+	var {columnSelect, ...otherProps} = newState,
+		cs = {...state.columnSelect, ...columnSelect};
+	return {...state, columnSelect: cs, ...otherProps};
+}
+
 var DataTable = React.createClass({
 	mixins: [PureRenderMixin],
 	componentWillMount: function () {
@@ -51,24 +59,30 @@ var DataTable = React.createClass({
 		this.subs.dispose();
 	},
 	componentDidMount: function () {
-		this.fetch();
+		this.fetch(this.state);
 	},
-	componentWillReceiveProps: function(newProps) { // XXX review this.
-		var {search} = newProps;
-		if (search !== this.props.search) {
-			this.setState({search: search});
-			this.fetch({search: search});
-		}
+	getInitialState: function () {
+		return mergeState({
+			data: [],
+			filtersOpen: false,
+			filterValues: {},
+			search: '',
+			columnSelection: _.object(_.map(this.props.columns, c => [c.prop, true])),
+			pageLength: 20,
+			page: 0,
+			totalPages: 20 // XXX this is imaginary. Do we need it?
+		}, this.props.initialState);
+	},
+	componentWillReceiveProps: function(newProps) {
+		var newState = mergeState(this.state, newProps.initialState);
+		this.setState(newState);
+		this.fetch(newState);
 	},
 	setFilters: function (obj) {
 		var {filterValues} = this.state,
 			newFilterValues = merge(filterValues, obj);
 
-		this.fetch({
-		  filterValues: newFilterValues,
-		  page: 0
-		});
-		this.setState({
+		this.setStateFetch({
 		  filterValues: newFilterValues,
 		  page: 0
 		});
@@ -89,25 +103,10 @@ var DataTable = React.createClass({
 //			tsv = keys.join('\t') + '\n' + tsvRows;
 //		ev.target.href = URL.createObjectURL(new Blob([tsv], { type: 'text/tsv' }));
 	},
-	getInitialState: function () {
-		var {columnSelect, ...otherProps} = this.props.initialState,
-			cs = merge(_.object(_.map(this.props.columns, c => [c.prop, true])),
-					columnSelect);
-		return merge({
-			data: [],
-			filtersOpen: false,
-			filterValues: {},
-			search: '',
-			columnSelection: cs,
-			pageLength: 20,
-			page: 0,
-			totalPages: 20 // XXX this is imaginary. Do we need it?
-		}, otherProps);
-	},
-	fetch: function (opts) {
+	fetch: function (state) {
 		// XXX set source
 		var {pageLength, search, page, sortBy,
-			filterValues, columnSelection} = merge(this.state, opts);
+			filterValues, columnSelection} = state;
 		this.fetchq.onNext(merge({
 			pageLength,
 			page,
@@ -115,6 +114,14 @@ var DataTable = React.createClass({
 			search,
 			searchColumn: _.keys(_.pick(columnSelection, v => v)),
 			filterValues}, hgvs.filters(search, filterValues)));
+	},
+	// helper function that sets state, fetches new data,
+	// and updates url.
+	setStateFetch: function (opts) {
+		var newState = {...this.state, ...opts};
+		this.setState(newState);
+		this.fetch(newState);
+		this.props.onChange(newState);
 	},
 	toggleFilters: function () {
 		this.setState({filtersOpen: !this.state.filtersOpen});
@@ -124,24 +131,20 @@ var DataTable = React.createClass({
 			val = columnSelection[prop],
 			cs = {...columnSelection, [prop]: !val};
 
-        this.setState({columnSelection: cs});
-        this.fetch({columnSelection: cs});
+        this.setStateFetch({columnSelection: cs});
     },
 	onChangePage: function (pageNumber) {
-		this.setState({page: pageNumber});
-		this.fetch({page: pageNumber});
+		this.setStateFetch({page: pageNumber});
 	},
 	onSort: function(sortBy) {
-		this.setState({sortBy});
-		this.fetch({sortBy});
+		this.setStateFetch({sortBy});
 	},
 	onPageLengthChange: function(txt) {
 		var length = parseInt(txt),
 			{page, pageLength} = this.state,
 			newPage = Math.floor((page * pageLength) / length);
 
-		this.setState({page: newPage, pageLength: length});
-		this.fetch({page: newPage, pageLength: length});
+		this.setStateFetch({page: newPage, pageLength: length});
 	},
 	render: function () {
 		var {filterValues, filtersOpen, search, data, columnSelection,
@@ -197,11 +200,8 @@ var DataTable = React.createClass({
 							id='variants-search'
 							suggestions={suggestions}
 							value={search}
-							/* XXX should debounce this so we don't sort so often */
 							onChange={v => {
-								this.setState({search: v});
-								this.fetch({search: v});
-								this.props.onChange(v);
+								this.setStateFetch({search: v});
 							}}
 						/>
 					</Col>

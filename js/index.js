@@ -15,6 +15,7 @@ require('font-awesome-webpack');
 require('css/custom.css');
 var _ = require('underscore');
 var backend = require('./backend');
+var Rx = require('rx');
 
 var brcaLogo = require('./img/BRCA-Exchange-tall-tranparent.png');
 var betaBanner = require('./img/Beta_Banner.png');
@@ -280,32 +281,70 @@ function toNumber(v) {
 	return _.isString(v) ? parseInt(v) : v;
 }
 
-var merge = (...args) => _.extend({}, ...args);
-
 function databaseParams(paramsIn) {
 	var {filter, filterValue, hide} = _.mapObject(
 			_.pick(paramsIn, 'hide', 'filter', 'filterValue'), toArray),
 		numParams = _.mapObject(_.pick(paramsIn, 'page', 'pageLength'),
 				toNumber),
-		{orderBy, order, search} = _.pick(paramsIn, 'search', 'orderBy', 'order'),
+		{orderBy, order, search = ''} = _.pick(paramsIn, 'search', 'orderBy', 'order'),
 		sortBy = {prop: orderBy, order},
 		columnSelect = _.object(hide, _.map(hide, _.constant(false))),
 		filterValues = _.object(filter, filterValue);
 
-	return merge(numParams, {search, sortBy, columnSelect, filterValues, hide});
+	return {search, sortBy, columnSelect, filterValues, hide, ...numParams};
+}
+
+var transpose = a => _.zip.apply(_, a);
+
+function urlFromDatabase(state) {
+	// Need to diff from defaults. The defaults are in DataTable.
+	// We could keep the defaults here, or in a different module.
+	var {columnSelection, filterValues,
+			search, page, pageLength, sortBy: {prop, order}} = state,
+		hide = _.keys(_.pick(columnSelection, v => !v)),
+		[filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v)));
+	return _.pick({
+		search: search === '' ? null : search,
+		filter,
+		filterValue,
+		page: page === 0 ? null : page,
+		pageLength: pageLength === 20 ? null : pageLength,
+		orderBy: prop,
+		order,
+		hide: hide.length === 0 ? null : hide
+	}, v => v != null);
+
 }
 
 var Database = React.createClass({
-	mixins: [Navigation, State, PureRenderMixin],
+	// Note this is not a pure component because of the calls to
+	// getQuery().
+	mixins: [Navigation, State],
 	showVariant: function (row) {
 		this.transitionTo(`/variant/${variantPathJoin(row)}`);
 	},
 	showHelp: function (title) {
 		this.transitionTo(`/help#${slugify(title)}`);
 	},
-	onChange: function (text) {
+	componentDidMount: function () {
+		var q = this.urlq = new Rx.Subject();
+		this.subs = q.debounce(500).subscribe(this.onChange);
+	},
+	componentWillUnmount: function () {
+		this.subs.dispose();
+	},
+	// XXX An oddity of the state flow here: we update the url when table settings
+	// change, so the page can be bookmarked, and forward/back buttons work. We
+	// do it on a timeout so we don't generate history entries for every keystroke,
+	// which would be bad for the user. Changing the url causes a re-render, passing
+	// in new props, which causes DataTable to overwrite its state with the
+	// same state that caused us to update the url. It's a bit circular.
+	// It would be less confusing if DataTable did not hold these params in state,
+	// but just read them from props, and all updates to the props occurred via
+	// transitionTo(). Consider for a later refactor.
+	onChange: function (state) {
 		if (this.props.show) {
-			this.replaceWith('/variants', {}, {search: text});
+			this.transitionTo('/variants', {}, urlFromDatabase(state));
 		}
 	},
 	render: function () {
@@ -319,7 +358,7 @@ var Database = React.createClass({
 					initialState={params}
 					{...params}
 					fetch={backend.data}
-					onChange={this.onChange}
+					onChange={s => this.urlq.onNext(s)}
 					suggestions={[]}
 					keys={databaseKey}
 					onHeaderClick={this.showHelp}

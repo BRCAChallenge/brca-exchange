@@ -37,7 +37,10 @@ var VariantSearch = React.createClass({
 	},
 	onChange: function (value) {
 		var {onChange} = this.props;
-		if (onChange) {
+		// XXX We're getting an onChange event when props are updated, which
+		// leads to a loop of sorts. Check if value has actually changed before
+		// calling.
+		if (value !== this.state.value && onChange) {
 			onChange(value);
 		}
 		this.setState({value: value});
@@ -45,8 +48,8 @@ var VariantSearch = React.createClass({
 	suggest: function (input, callback) {
 		var {suggestions} = this.props;
 		// Invoke asynchronously. This makes more sense if doing an ajax call.
-		this.cb = setTimeout(() =>
-				callback(null, getSuggestions(suggestions, input, callback), 0));
+//		this.cb = setTimeout(() =>
+//				callback(null, getSuggestions(suggestions, input, callback), 0));
 	},
 	componentWillUnmount: function () {
 		clearTimeout(this.cb);
