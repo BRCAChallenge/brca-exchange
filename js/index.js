@@ -12,12 +12,11 @@ var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 require('bootstrap/dist/css/bootstrap.css');
 require('font-awesome-webpack');
-var Rx = require('rx');
-var vcf = require('vcf.js');
-require('rx-dom');
 require('css/custom.css');
 var _ = require('underscore');
-var hgvs = require('./hgvs');
+var backend = require('./backend');
+var Rx = require('rx');
+require('rx-dom');
 
 var brcaLogo = require('./img/BRCA-Exchange-tall-tranparent.png');
 var betaBanner = require('./img/Beta_Banner.png');
@@ -26,10 +25,9 @@ var slugify = require('./slugify');
 
 var content = require('./content');
 
-var databaseUrl = require('../../enigma-database.tsv');
 var databaseKey = require('../databaseKey');
 
-var {Grid, Col, Row, Input, Navbar, Nav, Table,
+var {Grid, Col, Row, Navbar, Nav, Table,
 	DropdownButton, MenuItem, Modal, Button} = require('react-bootstrap');
 
 
@@ -49,13 +47,6 @@ if (typeof console === "undefined") {
     window.console = {
         log: function () {}
     };
-}
-
-function readTsv(response) {
-	var {header, rows} = JSON.parse(response);
-	return {
-		records: _.map(rows, row => _.object(header, row))
-	};
 }
 
 var RawHTML = React.createClass({
@@ -111,11 +102,8 @@ var NavBarNew = React.createClass({
 						<NavLink onClick={this.close} to='/about/history'>
 							History of the BRCA Exchange
 						</NavLink>
-						<NavLink onClick={this.close} to='/about/brca1_2'>
-							What are BRCA1 and BRCA2?
-						</NavLink>
 						<NavLink onClick={this.close} to='/about/variation'>
-							BRCA Variation and Cancer
+							BRCA1, BRCA2, and Cancer
 						</NavLink>
 						<NavLink onClick={this.close} to='/about/lollipop'>
 							DNA Variant BRCA Lollipop Plots
@@ -175,9 +163,6 @@ var DisclaimerModal = React.createClass({
     open() {
         this.setState({ showModal: true });
     },
-    onRequestHide() {
-        this.setState({ showModal: false });
-    },
     render() {
         return (
             <div style={{display: "inline"}}>
@@ -204,12 +189,6 @@ var Home = React.createClass({
 		};
 	},
 
-	handleSelect(selectedIndex, selectedDirection) {
-		this.setState({
-			index: selectedIndex,
-			direction: selectedDirection
-		});
-	},
 	onSearch(value) {
 		this.transitionTo('/variants', null, {search: value});
 	},
@@ -294,85 +273,100 @@ var Help = React.createClass({
 	}
 });
 
+// wrap scalars in array.
+function toArray(v) {
+	return _.isArray(v) ? v : [v];
+}
+
+function toNumber(v) {
+	return _.isString(v) ? parseInt(v) : v;
+}
+
+function databaseParams(paramsIn) {
+	var {filter, filterValue, hide} = _.mapObject(
+			_.pick(paramsIn, 'hide', 'filter', 'filterValue'), toArray),
+		numParams = _.mapObject(_.pick(paramsIn, 'page', 'pageLength'),
+				toNumber),
+		{orderBy, order, search = ''} = _.pick(paramsIn, 'search', 'orderBy', 'order'),
+		sortBy = {prop: orderBy, order},
+		columnSelection = _.object(hide, _.map(hide, _.constant(false))),
+		filterValues = _.object(filter, filterValue);
+
+	return {search, sortBy, columnSelection, filterValues, hide, ...numParams};
+}
+
+var transpose = a => _.zip.apply(_, a);
+
+function urlFromDatabase(state) {
+	// Need to diff from defaults. The defaults are in DataTable.
+	// We could keep the defaults here, or in a different module.
+	var {columnSelection, filterValues,
+			search, page, pageLength, sortBy: {prop, order}} = state,
+		hide = _.keys(_.pick(columnSelection, v => !v)),
+		[filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v)));
+	return _.pick({
+		search: search === '' ? null : search,
+		filter,
+		filterValue,
+		page: page === 0 ? null : page,
+		pageLength: pageLength === 20 ? null : pageLength,
+		orderBy: prop,
+		order,
+		hide: hide.length === 0 ? null : hide
+	}, v => v != null);
+
+}
+
 var Database = React.createClass({
-	mixins: [Navigation, State, PureRenderMixin],
+	// Note this is not a pure component because of the calls to
+	// getQuery().
+	mixins: [Navigation, State],
 	showVariant: function (row) {
 		this.transitionTo(`/variant/${variantPathJoin(row)}`);
 	},
 	showHelp: function (title) {
 		this.transitionTo(`/help#${slugify(title)}`);
 	},
-	onChange: function (text) {
+	componentDidMount: function () {
+		var q = this.urlq = new Rx.Subject();
+		this.subs = q.debounce(500).subscribe(this.onChange);
+	},
+	componentWillUnmount: function () {
+		this.subs.dispose();
+	},
+	// XXX An oddity of the state flow here: we update the url when table settings
+	// change, so the page can be bookmarked, and forward/back buttons work. We
+	// do it on a timeout so we don't generate history entries for every keystroke,
+	// which would be bad for the user. Changing the url causes a re-render, passing
+	// in new props, which causes DataTable to overwrite its state with the
+	// same state that caused us to update the url. It's a bit circular.
+	// It would be less confusing if DataTable did not hold these params in state,
+	// but just read them from props, and all updates to the props occurred via
+	// transitionTo(). Consider for a later refactor.
+	onChange: function (state) {
 		if (this.props.show) {
-			this.replaceWith('/variants', {}, {search: text});
+			this.transitionTo('/variants', {}, urlFromDatabase(state));
 		}
 	},
 	render: function () {
-		var {show, data, suggestions} = this.props,
-			{search = ''} = this.getQuery();
+		var {show} = this.props,
+			params = databaseParams(this.getQuery());
+		// XXX is 'keys' used?
 		return (
 			<Grid style={{display: show ? 'block' : 'none'}}>
-				{data ?
-					<VariantTable
-						ref='table'
-						onChange={this.onChange}
-						search={search}
-						filterValues={hgvs.filters(search)}
-						data={data.records}
-						suggestions={suggestions}
-						keys={databaseKey}
-						onHeaderClick={this.showHelp}
-						onRowClick={this.showVariant}/>
-					: ''}
+				<VariantTable
+					ref='table'
+					initialState={params}
+					{...params}
+					fetch={backend.data}
+					url={backend.url}
+					onChange={s => this.urlq.onNext(s)}
+					suggestions={[]}
+					keys={databaseKey}
+					onHeaderClick={this.showHelp}
+					onRowClick={this.showVariant}/>
 			</Grid>
 		);
-	}
-});
-
-var MyVariant = React.createClass({ //eslint-disable-line no-unused-vars
-	getInitialState: function () {
-		return {
-			data: null
-		};
-	},
-
-	render: function() {
-		var {data} = this.state;
-		var {show} = this.props;
-		return (
-			<div style={{display: show ? 'block' : 'none'}}>
-				<div className="text-center">
-					<Input ref='file' type='file' onChange={this.fileChange}/>
-				</div>
-				<div style={{position: "relative", height: "100px"}}>
-					{data ?
-						<Row>
-							<Col md={10} mdOffset={1}>
-								<VariantTable data={data}/>
-							</Col>
-						</Row>
-						: ''}
-				</div>
-			</div>
-		);
-	},
-
-	dataReady: function(ev) {
-		this.setState({data: vcf.parser()(ev.currentTarget.result)});
-	},
-
-
-	fileChange: function () {
-		var file = this.refs.file.getInputDOMNode().files[0],
-		reader = new FileReader();
-		// XXX This timeout allows the UI to update (close dialog) before loading
-		// a potentially large file, which will block the UI.
-		// This might also be solved by elminating the animation on Modal close,
-		// which is probably the source of the problem.
-		window.setTimeout(() => {
-			reader.onload = this.dataReady;
-			reader.readAsText(file);
-		}, 100);
 	}
 });
 
@@ -401,9 +395,16 @@ var VariantDetail = React.createClass({
 	showHelp: function (title) {
 		this.transitionTo(`/help#${slugify(title)}`);
 	},
+	componentWillMount: function () {
+		backend.data({
+			filterValues: variantPathSplit(this.props.params.id),
+			pageLength: 1
+		}).take(1).subscribe(
+			resp => this.setState({data: resp.data[0], error: null}),
+			this.setState({error: 'Problem connecting to server'}));
+	},
 	render: function() {
-		var {data, params: {id}} = this.props,
-			variant = (data && _.findWhere(data.records, variantPathSplit(id))) || {};
+		var {data: variant = {}, error} = this.state;
 
 		variant = _.omit(variant, ['__HEADER__']);
 		var rows = _.map(variant, (v, k) =>
@@ -413,7 +414,7 @@ var VariantDetail = React.createClass({
 			 </tr>);
 
 
-		return (
+		return (error ? <p>{error}</p> :
 			<Grid>
 				<Row>
 					<div className='text-center Variant-detail-title'>
@@ -434,46 +435,35 @@ var VariantDetail = React.createClass({
 	}
 });
 
-var dontSuggest = [
-	'Assertion_method_citation',
-	'URL'
-];
+// XXX implement in server
+//var dontSuggest = [
+//	'Assertion_method_citation',
+//	'URL'
+//];
 
-var flatmap = (coll, fn) => _.flatten(_.map(coll, fn), true);
-var minSuggestion = 3; // minimum length of string to use in autocomplete
-var rowWords = row => flatmap(_.values(_.omit(row, dontSuggest)),
-		v => v.toLowerCase().split(/\s+/));
+//var flatmap = (coll, fn) => _.flatten(_.map(coll, fn), true);
+//var minSuggestion = 3; // minimum length of string to use in autocomplete
+//var rowWords = row => flatmap(_.values(_.omit(row, dontSuggest)),
+//		v => v.toLowerCase().split(/\s+/));
 
 // Pull out interesting strings from the data, for use in
 // auto-completion.
-function getSuggestions(data) {
-	return _.uniq(flatmap(data, row =>
-				_.filter(rowWords(row), w => w.length >= minSuggestion)).sort(),
-			true);
-}
+//function getSuggestions(data) {
+//	return _.uniq(flatmap(data, row =>
+//				_.filter(rowWords(row), w => w.length >= minSuggestion)).sort(),
+//			true);
+//}
 
 var Application = React.createClass({
 	mixins: [State],
-	getInitialState: function () {
-		return {data: null};
-	},
-	componentWillMount: function (){
-		Rx.DOM.get(databaseUrl).subscribe(xhr => {
-			var data = readTsv(xhr.responseText);
-			this.setState({data: data, suggestions: getSuggestions(data.records)});
-		});
-	},
 	render: function () {
-		var {data, suggestions} = this.state;
 		var path = this.getPath().slice(1);
 		return (
 			<div>
 				<NavBarNew path={path} />
-				<RouteHandler data={data} suggestions={suggestions}/>
+				<RouteHandler />
 				<Database
-					show={path.indexOf('variants') === 0}
-					suggestions={suggestions}
-					data={data}/>
+					show={path.indexOf('variants') === 0} />
 	            <Footer />
             </div>
 		);

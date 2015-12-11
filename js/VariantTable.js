@@ -14,8 +14,6 @@ var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin');
 var DataTable = require('./DataTable');
 require('react-data-components-bd2k/css/table-twbs.css');
-var _ = require('underscore');
-var {utils} = require('react-data-components-bd2k');
 
 function buildHeader(onClick, title) {
 	return (
@@ -27,13 +25,13 @@ function buildHeader(onClick, title) {
 	);
 }
 
-function renderClinVarLink(val) {
-	return (
-		<a title="View on ClinVar"
-			onClick={ev => ev.stopPropagation()}
-			href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + val}>{val}</a>
-	);
-}
+//function renderClinVarLink(val) {
+//	return (
+//		<a title="View on ClinVar"
+//			onClick={ev => ev.stopPropagation()}
+//			href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + val}>{val}</a>
+//	);
+//}
 
 function renderCell(val) {
 	return <span>{val}</span>;
@@ -45,72 +43,38 @@ var filterColumns = [
 	{name: 'Pathogenicity', prop: 'Clinical_significance', values: ['Pathogenic', 'Benign']}
 ];
 
-
-
-// This callback is used to apply all active filters. We override the
-// one in react-data-components.utils, which performs a union of all
-// matches, with this one which does an intersection.
-var applyFilters = (filters, filterValues, data) => {
-	return _.filter(data, row => _.every(filterValues, utils.filterPass(filters, row)));
-};
-
-// react-data-components filters are an object with keys for each filter, and
-// values being a object with props 'filter', and optional 'prop' if the filter
-// applies to just one property. Here we have filters 'visibleSearch', which does
-// a 'string contains' filter on the visible columns, plus filters for each column
-// that has a filter UI control.
-// {visibleSearch: {filter: ...}, 'Gene symbol': {prop: 'Gene symbol', filter: ...}}
-function filters(columns) {
-	var visible = _.object(_.map(columns, c => [c.prop, true]));
-	var colFilters = _.object(_.map(filterColumns, c =>
-		[c.prop, {
-			filter: (fv, val) => _.isNull(fv) || fv === val,
-			prop: c.prop
-		}]
-	));
-	return _.extend({
-		visibleSearch: {
-			filter: (filterValue, value, key) => visible[key] &&
-				value.toLowerCase().indexOf(filterValue.toLowerCase()) !== -1
-		},
-		// Dedicated filter for when we recognize a reference in a free text search.
-		hgvsGene: {
-			prop: 'Gene_symbol',
-			filter: (filterValue, value) =>
-				_.isNull(filterValue) || value === filterValue
-		}
-	}, colFilters);
-}
-
-var strPropCmpFn = prop => (a, b) => {
-	var ap = a[prop],
-		bp = b[prop];
-	if (ap == null && bp == null || ap === bp) {
-		return 0;
-	}
-	if (bp == null || bp < ap) {
-		return 1;
-	}
-	return -1;
-};
-
-var posCmpFn = strPropCmpFn('Genomic_Coordinate');
-
-function sortColumns(columns, {prop, order}, data) {
-	var sortFn = _.findWhere(columns, {prop: prop}).sortFn || strPropCmpFn(prop),
-		sorted = data.slice(0).sort(sortFn);
-	if (order === 'descending') {
-		sorted.reverse();
-	}
-	return sorted;
-}
+// XXX duplicate this functionality on the server, perhaps
+// by having the client pass in order_by of Genomic_Coordinate
+// for hgvs columns.
+//var strPropCmpFn = prop => (a, b) => {
+//	var ap = a[prop],
+//		bp = b[prop];
+//	if (ap == null && bp == null || ap === bp) {
+//		return 0;
+//	}
+//	if (bp == null || bp < ap) {
+//		return 1;
+//	}
+//	return -1;
+//};
+//
+//var posCmpFn = strPropCmpFn('Genomic_Coordinate');
+//
+//function sortColumns(columns, {prop, order}, data) {
+//	var sortFn = _.findWhere(columns, {prop: prop}).sortFn || strPropCmpFn(prop),
+//		sorted = data.slice(0).sort(sortFn);
+//	if (order === 'descending') {
+//		sorted.reverse();
+//	}
+//	return sorted;
+//}
 
 var columns = [
-    {title: 'Gene', prop: 'Gene_symbol', render: renderCell},
-    {title: 'Genomic Coordinate', prop: 'Genomic_Coordinate', render: renderCell},
-    {title: 'HGVS cDNA', prop: 'HGVS_cDNA', sortFn: posCmpFn, render: renderCell},
-    {title: 'HGVS protein', prop: 'HGVS_protein', sortFn: posCmpFn, render: renderCell},
-    {title: 'HGVS protein (Abbrev.)', prop: "Abbrev_AA_change", render: renderCell},
+	{title: 'Gene', prop: 'Gene_symbol', render: renderCell},
+	{title: 'Genomic Coordinate', prop: 'Genomic_Coordinate', render: renderCell},
+    {title: 'HGVS cDNA', prop: 'HGVS_cDNA', /*sortFn: posCmpFn, */render: renderCell},
+	{title: 'HGVS protein', prop: 'HGVS_protein', /*sortFn: posCmpFn, */render: renderCell},
+	{title: 'HGVS protein (Abbrev.)', prop: "Abbrev_AA_change", render: renderCell},
     {title: 'BIC nucleotide', prop: "BIC_Nomenclature", render: renderCell},
     {title: 'Pathogenicity', prop: 'Clinical_significance', render: renderCell},
     {title: 'Allele frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes', render: renderCell},
@@ -259,7 +223,7 @@ var VariantTable = React.createClass({
 		return this.refs.table.state.data;
 	},
 	render: function () {
-		var {data, onHeaderClick, onRowClick, ...opts} = this.props;
+		var {onHeaderClick, onRowClick, ...opts} = this.props;
 		return (
 			<DataTable
 				ref='table'
@@ -267,9 +231,6 @@ var VariantTable = React.createClass({
 				{...opts}
 				buildRowOptions={r => ({title: 'click for details', onClick: () => hasSelection() ? null : onRowClick(r)})}
 				buildHeader={title => buildHeader(onHeaderClick, title)}
-				sort={(sb, d) => sortColumns(columns, sb, d)}
-				filter={applyFilters}
-				filters={filters(columns)}
 				filterColumns={filterColumns}
 				origionalColumns={columns}
                 subColumns={subColumns}

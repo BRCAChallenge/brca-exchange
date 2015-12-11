@@ -9,14 +9,19 @@ The build is based on npm and webpack.
    * `brew install git`
    * `brew install node`
  * `git clone https://github.com/BD2KGenomics/brca-website.git`
- * Ensure that the brca database is available to the build
-   * Browse to http://brcaexchange.cloudapp.net/variants
-   * Click "Download"
-   * `mv ~/Downloads/variants.tsv .`
  * `cd brca-website`
  * `npm install`
  * `npm start`
  * browse to [http://localhost:8080/webpack-dev-server/](http://localhost:8080/webpack-dev-server/)
+
+## Build with local server
+
+ * Copy \*.table and \*.sqlite files into brca-website/backend/applications/data/databases
+ * Edit url in js/backend.js to point to localhost:8000
+ * Download and extract web2py
+ * `python web2py.py -f ~/brca-website/backend`
+
+For now, database files can be found on beta, in /var/www/backend/beta/web2py/applications/data/databases.
 
 ### Lint
 
