@@ -62,8 +62,7 @@ var DataTable = React.createClass({
 		this.fetch(this.state);
 	},
 	getInitialState: function () {
-        var defaultColumns = ['Gene_symbol', 'Genomic_Coordinate', 'HGVS_cDNA', 'HGVS_protein', 'Abbrev_AA_change', 'BIC_Nomenclature', 'Clinical_significance'];
-        //_.map(this.props.columns, c=> (_.contains(defaultColumns, c.prop) ? console.log(c.prop) : console.log('False')));
+		var defaultColumns = ['Gene_symbol', 'Genomic_Coordinate', 'HGVS_cDNA', 'HGVS_protein', 'Abbrev_AA_change', 'BIC_Nomenclature', 'Clinical_significance'];
 		return mergeState({
 			data: [],
 			filtersOpen: false,
