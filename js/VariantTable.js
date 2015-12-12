@@ -110,8 +110,8 @@ var subColumns = [
      subColList: [
 	    {title: 'Gene', prop: 'Gene_symbol', render: renderCell},
 	    {title: 'Genomic Coordinate', prop: 'Genomic_Coordinate', render: renderCell},
-        {title: 'HGVS cDNA', prop: 'HGVS_cDNA', sortFn: posCmpFn, render: renderCell},
-	    {title: 'HGVS protein', prop: 'HGVS_protein', sortFn: posCmpFn, render: renderCell},
+        {title: 'HGVS cDNA', prop: 'HGVS_cDNA', /*sortFn: posCmpFn, */render: renderCell},
+	    {title: 'HGVS protein', prop: 'HGVS_protein', /*sortFn: posCmpFn, */render: renderCell},
 	    {title: 'HGVS protein (Abbrev.)', prop: "Abbrev_AA_change", render: renderCell},
         {title: 'BIC nucleotide', prop: "BIC_Nomenclature", render: renderCell},
         {title: 'Pathogenicity', prop: 'Clinical_significance', render: renderCell}
@@ -223,7 +223,7 @@ var VariantTable = React.createClass({
 		return this.refs.table.state.data;
 	},
 	render: function () {
-		var {onHeaderClick, onRowClick, ...opts} = this.props;
+		var {data, onHeaderClick, onRowClick, ...opts} = this.props;
 		return (
 			<DataTable
 				ref='table'
@@ -232,7 +232,7 @@ var VariantTable = React.createClass({
 				buildRowOptions={r => ({title: 'click for details', onClick: () => hasSelection() ? null : onRowClick(r)})}
 				buildHeader={title => buildHeader(onHeaderClick, title)}
 				filterColumns={filterColumns}
-				origionalColumns={columns}
+				columns={columns}
                 subColumns={subColumns}
                 columnSelection={columnSelection}
 				initialData={data}

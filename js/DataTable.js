@@ -62,12 +62,14 @@ var DataTable = React.createClass({
 		this.fetch(this.state);
 	},
 	getInitialState: function () {
+        var defaultColumns = ['Gene_symbol', 'Genomic_Coordinate', 'HGVS_cDNA', 'HGVS_protein', 'Abbrev_AA_change', 'BIC_Nomenclature', 'Clinical_significance'];
+        //_.map(this.props.columns, c=> (_.contains(defaultColumns, c.prop) ? console.log(c.prop) : console.log('False')));
 		return mergeState({
 			data: [],
 			filtersOpen: false,
 			filterValues: {},
 			search: '',
-			columnSelection: _.object(_.map(this.props.columns, c => [c.prop, true])),
+			columnSelection: _.object(_.map(this.props.columns, c => _.contains(defaultColumns, c.prop) ? [c.prop, true] : [c.prop, false])),
 			pageLength: 20,
 			page: 0,
 			totalPages: 20 // XXX this is imaginary. Do we need it?
@@ -148,15 +150,17 @@ var DataTable = React.createClass({
 	render: function () {
 		var {filterValues, filtersOpen, search, data, columnSelection,
 				page, totalPages, count, error} = this.state,
-			{columns, filterColumns, suggestions, className} = this.props,
+			{columns, filterColumns, suggestions, className, subColumns} = this.props,
 			renderColumns = _.filter(columns, c => columnSelection[c.prop]),
 			filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
 				<SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
 					key={prop} label={`${name} is: `} value={filterDisplay(filterValues[prop])} options={addAny(values)}/>),
 			filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
-                <Panel header={subColTitle}>
-                    {this.filterFormCols(subColList, columnSelection)}
-                </Panel>
+                <Col sm={6} md={2}>
+                    <Panel header={subColTitle}>
+                        {this.filterFormCols(subColList, columnSelection)}
+                    </Panel>
+                </Col>
             );
 		return (error ? <p>{error}</p> :
 			<div className={this.props.className}>
