@@ -5,7 +5,7 @@ var React = require('react');
 var Rx = require('rx');
 require('rx/dist/rx.time');
 var {Table, Pagination, DataMixin} = require('react-data-components-bd2k');
-var {Button, Row, Col, Panel} = require('react-bootstrap');
+var {Button, Row, Col, Panel, DropdownButton, MenuItem, Grid} = require('react-bootstrap');
 var VariantSearch = require('./VariantSearch');
 var SelectField = require('./SelectField');
 var ColumnCheckbox = require('./ColumnCheckbox');
@@ -22,6 +22,18 @@ var pluralize = (n, s) => n === 1 ? s : s + 's';
 
 var merge = (...args) => _.extend({}, ...args);
 
+var slugify = require('./slugify');
+var d3Lollipop = require('./d3Lollipop');
+var brca12JSON = {
+    BRCA1: {
+        brcaMutsFile: require('raw!../content/brca1LollipopMuts.json'),
+        brcaDomainFile: require('raw!../content/brca1LollipopDomain.json')
+    },
+    BRCA2: {
+        brcaMutsFile: require('raw!../content/brca2LollipopMuts.json'),
+        brcaDomainFile: require('raw!../content/brca2LollipopDomain.json')
+    }
+};
 
 function setPages({data, count}, pageLength) {
 	return {
@@ -47,11 +59,110 @@ function mergeState(state, newState) {
 	return {...state, columnSelection: cs, ...otherProps};
 }
 
+var D3Lollipop = React.createClass({
+    render: function () {
+        return (
+            <div id='brcaLollipop' ref='d3svgBrca'/>
+        );
+    },
+    filterData : function (obj) {
+        if (obj.Gene_symbol === this.props.brcakey && 'Genomic_Coordinate' in obj && 'Clinical_significance' in obj && (obj.Clinical_significance === 'Benign' || obj.Clinical_significance === 'Pathogenic')) {
+            return true;
+        } else {
+            return false;
+        }
+    },
+    filterAttributes : function (obj) {
+        var oldObj = _(obj).pick('Genomic_Coordinate', 'Clinical_significance');
+        
+        var chrCoordinate = parseInt(oldObj.Genomic_Coordinate.split(':')[1]);
+        var refAllele = oldObj.Genomic_Coordinate.split(':')[2].split('>')[0];
+        var altAllele = oldObj.Genomic_Coordinate.split(':')[2].split('>')[1];
+        if (altAllele.length > refAllele.length) {
+            chrCoordinate = String(chrCoordinate) + '-' + String(chrCoordinate+altAllele.length-1);
+        } else {
+            chrCoordinate = String(chrCoordinate);
+        }
+        var newObj = {category: oldObj.Clinical_significance, coord: chrCoordinate, value: 1};
+        return newObj;
+    },
+    componentDidMount: function() {
+        var {data, brcakey, ...opts} = this.props;
+        var filteredData = data.filter(this.filterData);
+        var subSetData = filteredData.map(this.filterAttributes);
+        var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
+        var mutsBRCA = JSON.parse(brca12JSON[brcakey].brcaMutsFile);
+        var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
+        this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey);
+    },
+    componentWillRecieveProps: function(newProps) {
+        this.setState({data: newProps.data});
+        var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
+        while (d3svgBrcaRef.hasChildNodes() ) { 
+            d3svgBrcaRef.removeChild(d3svgBrcaRef.lastChild);
+        }
+    },
+    componentWillUpdate: function() {
+        var {data, brcakey, ...opts} = this.props;
+        var filteredData = data.filter(this.filterData);
+        var subSetData = filteredData.map(this.filterAttributes);
+        var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
+        while (d3svgBrcaRef.hasChildNodes() ) {
+            d3svgBrcaRef.removeChild(d3svgBrcaRef.lastChild);
+        }
+        var mutsBRCA = JSON.parse(brca12JSON[brcakey].brcaMutsFile);
+        var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
+        this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey);
+    },
+    componentWillUnmount: function() {
+        this.cleanupBRCA();
+    },
+    shouldComponentUpdate: () => true
+});
+
+var Lollipop = React.createClass({
+    getInitialState: function() {
+        return {brcakey: "BRCA1", data: this.props.data};
+    },
+    onSelect: function(key) {
+        this.setState({brcakey: key});
+    },
+    componentWillReceiveProps: function(newProps) {
+        this.setState({data: newProps.data});
+    },
+    shouldComponentUpdate: () => true,
+    render: function () {
+        var {data, onHeaderClick, ...opts} = this.props;
+        return (
+            <Grid>
+                <Row>
+                    <Col md={8} mdOffset={4}>
+                        <h1 id="brca-dna-variant-lollipop">{this.state.brcakey} Lollipop Chart</h1>
+                    </Col>
+                </Row>
+                <div>
+                    <DropdownButton onSelect={this.onSelect} title="Select Gene" id="bg-vertical-dropdown-1">
+                        <MenuItem eventKey="BRCA1">BRCA1</MenuItem>
+                        <MenuItem eventKey="BRCA2">BRCA2</MenuItem>
+                    </DropdownButton>
+                    <span onClick={() => onHeaderClick('Lollipop Plots')}
+                        className='help glyphicon glyphicon-question-sign superscript'/>
+                    <D3Lollipop data={this.props.data} key={this.state.brcakey} brcakey={this.state.brcakey} id='brcaLollipop' ref='d3svgBrca'/>
+                </div>
+            </Grid>
+        );
+    }
+});
+
 var DataTable = React.createClass({
 	mixins: [PureRenderMixin],
 	componentWillMount: function () {
 		var q = this.fetchq = new Rx.Subject();
 		this.subs = q.map(this.props.fetch).debounce(100).switchLatest().subscribe(
+			resp => this.setState(setPages(resp, this.state.pageLength)), // set data, count, totalPages
+			() => this.setState({error: 'Problem connecting to server'}));
+		var qLollipop = this.fetchqLollipop = new Rx.Subject();
+		this.subs = qLollipop.map(this.props.fetch).debounce(100).switchLatest().subscribe(
 			resp => this.setState(setPages(resp, this.state.pageLength)), // set data, count, totalPages
 			() => this.setState({error: 'Problem connecting to server'}));
 	},
@@ -63,7 +174,6 @@ var DataTable = React.createClass({
 	},
 	getInitialState: function () {
         var defaultColumns = ['Gene_symbol', 'Genomic_Coordinate', 'HGVS_cDNA', 'HGVS_protein', 'Abbrev_AA_change', 'BIC_Nomenclature', 'Clinical_significance'];
-        //_.map(this.props.columns, c=> (_.contains(defaultColumns, c.prop) ? console.log(c.prop) : console.log('False')));
 		return mergeState({
 			data: [],
 			filtersOpen: false,
@@ -112,6 +222,15 @@ var DataTable = React.createClass({
 			searchColumn: _.keys(_.pick(columnSelection, v => v)),
 			filterValues}, hgvs.filters(search, filterValues)));
 	},
+    fetchLollipopData: function(state) {
+        var {search, sortBy, filterValues, columnSelection} = state;
+        this.fetchq.onNext(merge({
+            pageLength: null,
+            page: null,
+            sortBy,
+            search,
+            filterValues}, hgvs.filters(search, filterValues)));
+    },
 	// helper function that sets state, fetches new data,
 	// and updates url.
 	setStateFetch: function (opts) {
@@ -162,10 +281,17 @@ var DataTable = React.createClass({
                     </Panel>
                 </Col>
             );
-		return (error ? <p>{error}</p> :
+        var tempState = this.state;
+        console.log(tempState);
+        console.log(this);
+        console.log(this.fetch(tempState));
+        console.log(this.fetchLollipopData(tempState));
+		
+        return (error ? <p>{error}</p> :
 			<div className={this.props.className}>
 				<Row style={{marginBottom: '2px'}}>
 					<Col sm={12}>
+                        {this.state.data.length > 0 && <Lollipop data={this.state.data} onHeaderClick={this.props.onHeaderClick}/> }
 						<Button bsSize='xsmall' onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}</Button>
 						{filtersOpen && <div className='form-inline'>{filterFormEls}</div>}
                         {filtersOpen && <div className='form-inline'>
