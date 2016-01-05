@@ -5,7 +5,7 @@ var React = require('react');
 var Rx = require('rx');
 require('rx/dist/rx.time');
 var {Table, Pagination, DataMixin} = require('react-data-components-bd2k');
-var {Button, Row, Col, Panel} = require('react-bootstrap');
+var {Button, Row, Col, Panel, Grid} = require('react-bootstrap');
 var VariantSearch = require('./VariantSearch');
 var SelectField = require('./SelectField');
 var ColumnCheckbox = require('./ColumnCheckbox');
@@ -22,6 +22,8 @@ var pluralize = (n, s) => n === 1 ? s : s + 's';
 
 var merge = (...args) => _.extend({}, ...args);
 
+var slugify = require('./slugify');
+var Lollipop = require('./d3Lollipop');
 
 function setPages({data, count}, pageLength) {
 	return {
@@ -52,6 +54,10 @@ var DataTable = React.createClass({
 	componentWillMount: function () {
 		var q = this.fetchq = new Rx.Subject();
 		this.subs = q.map(this.props.fetch).debounce(100).switchLatest().subscribe(
+			resp => this.setState(setPages(resp, this.state.pageLength)), // set data, count, totalPages
+			() => this.setState({error: 'Problem connecting to server'}));
+		var qLollipop = this.fetchqLollipop = new Rx.Subject();
+		this.subs = qLollipop.map(this.props.fetch).debounce(100).switchLatest().subscribe(
 			resp => this.setState(setPages(resp, this.state.pageLength)), // set data, count, totalPages
 			() => this.setState({error: 'Problem connecting to server'}));
 	},
@@ -111,6 +117,15 @@ var DataTable = React.createClass({
 			searchColumn: _.keys(_.pick(columnSelection, v => v)),
 			filterValues}, hgvs.filters(search, filterValues)));
 	},
+    fetchLollipopData: function(state) {
+        var {search, sortBy, filterValues, columnSelection} = state;
+        this.fetchq.onNext(merge({
+            pageLength: null,
+            page: null,
+            sortBy,
+            search,
+            filterValues}, hgvs.filters(search, filterValues)));
+    },
 	// helper function that sets state, fetches new data,
 	// and updates url.
 	setStateFetch: function (opts) {
@@ -161,10 +176,11 @@ var DataTable = React.createClass({
                     </Panel>
                 </Col>
             );
-		return (error ? <p>{error}</p> :
+        return (error ? <p>{error}</p> :
 			<div className={this.props.className}>
 				<Row style={{marginBottom: '2px'}}>
 					<Col sm={12}>
+                        {this.state.data.length > 0 && <Lollipop data={this.state.data} onHeaderClick={this.props.onHeaderClick}/> }
 						<Button bsSize='xsmall' onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}</Button>
 						{filtersOpen && <div className='form-inline'>{filterFormEls}</div>}
                         {filtersOpen && <div className='form-inline'>
