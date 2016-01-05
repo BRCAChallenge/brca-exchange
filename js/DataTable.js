@@ -4,8 +4,8 @@
 var React = require('react');
 var Rx = require('rx');
 require('rx/dist/rx.time');
-var {Table, Pagination, DataMixin} = require('react-data-components-bd2k');
-var {Button, Row, Col, Panel, Grid} = require('react-bootstrap');
+var {Table, Pagination} = require('react-data-components-bd2k');
+var {Button, Row, Col, Panel} = require('react-bootstrap');
 var VariantSearch = require('./VariantSearch');
 var SelectField = require('./SelectField');
 var ColumnCheckbox = require('./ColumnCheckbox');
@@ -22,7 +22,6 @@ var pluralize = (n, s) => n === 1 ? s : s + 's';
 
 var merge = (...args) => _.extend({}, ...args);
 
-var slugify = require('./slugify');
 var Lollipop = require('./d3Lollipop');
 
 function setPages({data, count}, pageLength) {
@@ -118,7 +117,7 @@ var DataTable = React.createClass({
 			filterValues}, hgvs.filters(search, filterValues)));
 	},
     fetchLollipopData: function(state) {
-        var {search, sortBy, filterValues, columnSelection} = state;
+        var {search, sortBy, filterValues} = state;
         this.fetchq.onNext(merge({
             pageLength: null,
             page: null,

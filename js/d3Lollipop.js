@@ -50,21 +50,21 @@ var D3Lollipop = React.createClass({
             <div id='brcaLollipop' ref='d3svgBrca'/>
         );
     },
-    filterData : function (obj) {
+    filterData: function (obj) {
         if (obj.Gene_symbol === this.props.brcakey && 'Genomic_Coordinate' in obj && 'Clinical_significance' in obj && (obj.Clinical_significance === 'Benign' || obj.Clinical_significance === 'Pathogenic')) {
             return true;
         } else {
             return false;
         }
     },
-    filterAttributes : function (obj) {
+    filterAttributes: function (obj) {
         var oldObj = _(obj).pick('Genomic_Coordinate', 'Clinical_significance');
 
         var chrCoordinate = parseInt(oldObj.Genomic_Coordinate.split(':')[1]);
         var refAllele = oldObj.Genomic_Coordinate.split(':')[2].split('>')[0];
         var altAllele = oldObj.Genomic_Coordinate.split(':')[2].split('>')[1];
         if (altAllele.length > refAllele.length) {
-            chrCoordinate = String(chrCoordinate) + '-' + String(chrCoordinate+altAllele.length-1);
+            chrCoordinate = String(chrCoordinate) + '-' + String(chrCoordinate + altAllele.length - 1);
         } else {
             chrCoordinate = String(chrCoordinate);
         }
