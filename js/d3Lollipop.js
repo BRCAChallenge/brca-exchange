@@ -30,7 +30,7 @@ d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id) {
         minPos = 32880000;
         maxPos = 32980000;
     }
-    var legends = {x: xAxisLabel, y: "Variant Count"};
+    var legends = {x: xAxisLabel, y: ""};
     var colorMap = {
       // mutation categories
       "Benign": "lightblue",
