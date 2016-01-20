@@ -1,6 +1,10 @@
 import glob
 
-PATH = "/hive/groups/cgl/brca/phase1/data/cutoff_vcf/"
+
+# remember the last "/", the PATH won't work without the trailing "/"`
+#PATH = "/hive/groups/cgl/brca/phase1/data/cutoff_vcf/"
+PATH = "/Users/Molly/Desktop/BRCA Research/Data/vcf_cutoff/"
+
 
 def main():
     databases = get_databases(PATH)
@@ -15,7 +19,7 @@ def get_databases(path):
     db = {}
     files = glob.glob(path + "*.vcf")
     for file in files:
-        db_name = file.split(".")[0].split("/")[1]
+        db_name = file.split("/")[-1].split(".")[0]
         db[db_name] = get_variant_list(file)
     return db
 
