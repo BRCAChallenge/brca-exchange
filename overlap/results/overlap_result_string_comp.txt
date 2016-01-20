@@ -1,0 +1,59 @@
+Result from June 2015:
+overlap from string comparison:
+
+unique variants in ClinVar:6062
+overlap between the ClinVar and ex_LOVD: 274
+overlap between the ClinVar and LOVD: 1766
+overlap between the ClinVar and 1000_Genomes: 386
+overlap between the ClinVar and ExAC: 1399
+overlap between the ClinVar and BIC: 3512
+overlap between the ClinVar and UMD: 1562
+
+unique variants in ex_LOVD:288
+overlap between the ex_LOVD and ClinVar: 274
+overlap between the ex_LOVD and LOVD: 265
+overlap between the ex_LOVD and 1000_Genomes: 84
+overlap between the ex_LOVD and ExAC: 198
+overlap between the ex_LOVD and BIC: 259
+overlap between the ex_LOVD and UMD: 210
+
+unique variants in LOVD:3072
+overlap between the LOVD and ClinVar: 1766
+overlap between the LOVD and ex_LOVD: 265
+overlap between the LOVD and 1000_Genomes: 354
+overlap between the LOVD and ExAC: 1009
+overlap between the LOVD and BIC: 1483
+overlap between the LOVD and UMD: 1176
+
+unique variants in 1000_Genomes:4351
+overlap between the 1000_Genomes and ClinVar: 386
+overlap between the 1000_Genomes and ex_LOVD: 84
+overlap between the 1000_Genomes and LOVD: 354
+overlap between the 1000_Genomes and ExAC: 559
+overlap between the 1000_Genomes and BIC: 318
+overlap between the 1000_Genomes and UMD: 364
+
+unique variants in ExAC:3738
+overlap between the ExAC and ClinVar: 1389
+overlap between the ExAC and ex_LOVD: 197
+overlap between the ExAC and LOVD: 1002
+overlap between the ExAC and 1000_Genomes: 558
+overlap between the ExAC and BIC: 1011
+overlap between the ExAC and UMD: 945
+
+unique variants in BIC:3630
+overlap between the BIC and ClinVar: 3512
+overlap between the BIC and ex_LOVD: 259
+overlap between the BIC and LOVD: 1483
+overlap between the BIC and 1000_Genomes: 318
+overlap between the BIC and ExAC: 1017
+overlap between the BIC and UMD: 1187
+
+unique variants in UMD:3733
+overlap between the UMD and ClinVar: 1561
+overlap between the UMD and ex_LOVD: 211
+overlap between the UMD and LOVD: 1179
+overlap between the UMD and 1000_Genomes: 364
+overlap between the UMD and ExAC: 950
+overlap between the UMD and BIC: 1190
+
