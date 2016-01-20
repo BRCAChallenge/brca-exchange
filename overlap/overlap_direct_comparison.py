@@ -2,8 +2,7 @@ import glob
 
 
 # remember the last "/", the PATH won't work without the trailing "/"`
-#PATH = "/hive/groups/cgl/brca/phase1/data/cutoff_vcf/"
-PATH = "/Users/Molly/Desktop/BRCA Research/Data/vcf_cutoff/"
+PATH = "/hive/groups/cgl/brca/phase1/data/cutoff_vcf/"
 
 
 def main():
