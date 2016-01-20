@@ -34,7 +34,6 @@ def main():
                         new_record.INFO[key] = [value[i]]
                 vcf_writer.write_record(new_record)
 
-def my_vcf_writer(record):
     
 
 
