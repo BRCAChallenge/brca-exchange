@@ -61,10 +61,12 @@ var DataTable = React.createClass({
 			() => this.setState({error: 'Problem connecting to server'}));
 	},
 	componentWillUnmount: function () {
-		this.subs.dispose();
+	    window.removeEventListener('resize', this.handleResize);
+    	this.subs.dispose();
 	},
 	componentDidMount: function () {
-		this.fetch(this.state);
+		window.addEventListener('resize', this.handleResize);
+        this.fetch(this.state);
 	},
 	getInitialState: function () {
 		var defaultColumns = ['Gene_symbol', 'Genomic_Coordinate', 'HGVS_cDNA', 'HGVS_protein', 'Abbrev_AA_change', 'BIC_Nomenclature', 'Clinical_significance'];
@@ -77,7 +79,8 @@ var DataTable = React.createClass({
 			columnSelection: _.object(_.map(this.props.columns, c => _.contains(defaultColumns, c.prop) ? [c.prop, true] : [c.prop, false])),
 			pageLength: 20,
 			page: 0,
-			totalPages: 20 // XXX this is imaginary. Do we need it?
+			totalPages: 20, // XXX this is imaginary. Do we need it?
+            windowWidth: window.innerWidth
 		}, this.props.initialState);
 	},
 	componentWillReceiveProps: function(newProps) {
@@ -85,6 +88,9 @@ var DataTable = React.createClass({
 		this.setState(newState);
 		this.fetch(newState);
 	},
+    handleResize: function(e) {
+        this.setState({windowWidth: window.innerWidth});
+    },
 	setFilters: function (obj) {
 		var {filterValues} = this.state,
 			newFilterValues = merge(filterValues, obj);
@@ -181,12 +187,12 @@ var DataTable = React.createClass({
             );
         return (error ? <p>{error}</p> :
 			<div className={this.props.className}>
-				<Row style={{marginBottom: '2px'}}>
+                <Row style={{marginBottom: '2px'}}>
 					<Col sm={12}>
                         <div>
-						    <Button bsSize='xsmall' onClick={this.toggleLollipop}>{(lollipopOpen ? 'Hide' : 'Show' ) + ' Lollipop Chart'}</Button>
+                            {this.state.windowWidth > 991 && <Button bsSize='xsmall' onClick={this.toggleLollipop}>{(lollipopOpen ? 'Hide' : 'Show' ) + ' Lollipop Chart'}</Button>}
                         </div>
-                        {lollipopOpen && this.state.data.length > 0 && <Lollipop data={this.state.data} onHeaderClick={this.props.onHeaderClick}/> }
+                        {this.state.windowWidth > 991 && lollipopOpen && this.state.data.length > 0 && <Lollipop data={this.state.data} onHeaderClick={this.props.onHeaderClick}/> }
 						<Button bsSize='xsmall' onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}</Button>
 						{filtersOpen && <div className='form-inline'>{filterFormEls}</div>}
                         {filtersOpen && <div className='form-inline'>

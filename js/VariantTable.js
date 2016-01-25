@@ -224,7 +224,8 @@ var VariantTable = React.createClass({
 	},
 	render: function () {
 		var {data, onHeaderClick, onRowClick, ...opts} = this.props;
-		return (
+		console.log(this);
+        return (
 			<DataTable
 				ref='table'
 				className='row-clickable'
