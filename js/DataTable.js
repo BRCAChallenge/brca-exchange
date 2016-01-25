@@ -70,8 +70,9 @@ var DataTable = React.createClass({
 		var defaultColumns = ['Gene_symbol', 'Genomic_Coordinate', 'HGVS_cDNA', 'HGVS_protein', 'Abbrev_AA_change', 'BIC_Nomenclature', 'Clinical_significance'];
 		return mergeState({
 			data: [],
+            lollipopOpen: false,
 			filtersOpen: false,
-			filterValues: {},
+            filterValues: {},
 			search: '',
 			columnSelection: _.object(_.map(this.props.columns, c => _.contains(defaultColumns, c.prop) ? [c.prop, true] : [c.prop, false])),
 			pageLength: 20,
@@ -133,6 +134,9 @@ var DataTable = React.createClass({
 		this.fetch(newState);
 		this.props.onChange(newState);
 	},
+    toggleLollipop: function () {
+        this.setState({lollipopOpen: !this.state.lollipopOpen});
+    },
 	toggleFilters: function () {
 		this.setState({filtersOpen: !this.state.filtersOpen});
 	},
@@ -161,7 +165,7 @@ var DataTable = React.createClass({
             <ColumnCheckbox onChange={v => this.toggleColumns(prop)} key={prop} label={prop} title={title} initialCheck={columnSelection}/>);
     },
 	render: function () {
-		var {filterValues, filtersOpen, search, data, columnSelection,
+		var {filterValues, filtersOpen, lollipopOpen, search, data, columnSelection,
 				page, totalPages, count, error} = this.state,
 			{columns, filterColumns, suggestions, className, subColumns} = this.props,
 			renderColumns = _.filter(columns, c => columnSelection[c.prop]),
@@ -179,7 +183,10 @@ var DataTable = React.createClass({
 			<div className={this.props.className}>
 				<Row style={{marginBottom: '2px'}}>
 					<Col sm={12}>
-                        {this.state.data.length > 0 && <Lollipop data={this.state.data} onHeaderClick={this.props.onHeaderClick}/> }
+                        <div>
+						    <Button bsSize='xsmall' onClick={this.toggleLollipop}>{(lollipopOpen ? 'Hide' : 'Show' ) + ' Lollipop Chart'}</Button>
+                        </div>
+                        {lollipopOpen && this.state.data.length > 0 && <Lollipop data={this.state.data} onHeaderClick={this.props.onHeaderClick}/> }
 						<Button bsSize='xsmall' onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}</Button>
 						{filtersOpen && <div className='form-inline'>{filterFormEls}</div>}
                         {filtersOpen && <div className='form-inline'>

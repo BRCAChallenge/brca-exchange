@@ -1,0 +1,35 @@
+/**************************************************************/
+/**********     d3 lollipop plots         *********************/
+/**************************************************************/
+
+/* brush selection
+.selected {
+    fill: lightblue;
+    stroke-width: 4;
+}
+*/
+
+/* figure legend */
+.breakLabels.nomuts {
+    font-weight: normal;
+    opacity: 0.3;
+}
+
+.noshow {
+    //opacity: 0.1;
+}
+
+.regionGroup:hover > text {
+    fill: black;
+    font-weight: bold;
+    opacity: 1;
+}
+
+.regionGroup:hover > rect {
+    stroke-width: 4;
+}
+
+.repeatedName.noshow {
+    fill: black;
+    opacity: 0;
+}
