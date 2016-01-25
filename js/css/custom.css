@@ -243,11 +243,12 @@ div#main {
 /**********     d3 lollipop plots         *********************/
 /**************************************************************/
 
-/* brush selection */
+/* brush selection
 .selected {
     fill: lightblue;
     stroke-width: 4;
 }
+*/
 
 /* figure legend */
 .breakLabels.nomuts {
@@ -256,7 +257,7 @@ div#main {
 }
 
 .noshow {
-    opacity: 0.1;
+    //opacity: 0.1;
 }
 
 .regionGroup:hover > text {
