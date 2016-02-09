@@ -8,4 +8,4 @@ python_modules/
 data/
 backend/httpserver.log
 backend/parameters_8000.py
-
+*.pyc
