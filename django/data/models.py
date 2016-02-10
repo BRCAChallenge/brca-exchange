@@ -3,11 +3,37 @@ from __future__ import unicode_literals
 from django.db import models
 
 
+class VariantManager(models.Manager):
+    use_in_migrations = True
+
+    def create_variant(self, row):
+        return self.create(gene_symbol=row[0],
+                           genomic_coordinate=row[1],
+                           reference_sequence=row[2],
+                           hgvs_cdna=row[3],
+                           bic_nomenclature=row[4],
+                           abbrev_aa_change=row[5],
+                           url=row[6],
+                           condition_id_type=row[7],
+                           condition_id_value=row[8],
+                           condition_category=row[9],
+                           clinical_significance=row[10],
+                           date_last_evaluated=row[11],
+                           assertion_method=row[12],
+                           assertion_method_citation=row[13],
+                           clinical_significance_citations=row[14],
+                           comment_on_clinical_significance=row[15],
+                           collection_method=row[16],
+                           allele_origin=row[17],
+                           clinvaraccession=row[18],
+                           hgvs_protein=row[19])
+
+
 class Variant(models.Model):
     gene_symbol = models.CharField(max_length=512)
     genomic_coordinate = models.CharField(max_length=512)
+    reference_sequence = models.CharField(max_length=512)
     hgvs_cdna = models.CharField(max_length=512)
-    hgvs_protein = models.CharField(max_length=512)
     bic_nomenclature = models.CharField(max_length=512)
     abbrev_aa_change = models.CharField(max_length=512)
     url = models.CharField(max_length=512)
@@ -23,50 +49,6 @@ class Variant(models.Model):
     collection_method = models.CharField(max_length=512)
     allele_origin = models.CharField(max_length=512)
     clinvaraccession = models.CharField(max_length=512)
-    hgvs_cdna_bic = models.CharField(max_length=512)
-    allele_frequency_exac = models.CharField(max_length=512)
-    exon_number_bic = models.CharField(max_length=512)
-    vep_hgvsp_exac = models.CharField(max_length=512)
-    amr_allele_frequency_1000genomes = models.CharField(max_length=512)
-    eas_allele_frequency_1000_genomes = models.CharField(max_length=512)
-    variant_in_1000_genomes = models.CharField(max_length=512)
-    variant_in_enigma = models.CharField(max_length=512)
-    variant_in_clinvar = models.CharField(max_length=512)
-    literature_source_exlovd = models.CharField(max_length=512)
-    mutation_type_bic = models.CharField(max_length=512)
-    vep_consequence_exac = models.CharField(max_length=512)
-    hgvs_protein_exlovd = models.CharField(max_length=512)
-    hgvs_genomic_bic = models.CharField(max_length=512)
-    literature_citation_bic = models.CharField(max_length=512)
-    bic_exlovd = models.CharField(max_length=512)
-    afr_allele_frequency_1000genomes = models.CharField(max_length=512)
-    ethnicity_bic = models.CharField(max_length=512)
-    variant_in_bic = models.CharField(max_length=512)
-    hgvs_genomic_lovd = models.CharField(max_length=512)
-    hgvs_genomic = models.CharField(max_length=512)
-    vep_hgvsc_exac = models.CharField(max_length=512)
-    variant_in_exac = models.CharField(max_length=512)
-    hgvs_cdna_lovd = models.CharField(max_length=512)
-    origin_of_variant_lovd = models.CharField(max_length=512)
-    patient_nationality_bic = models.CharField(max_length=512)
-    hgvs_cdna_exlovd = models.CharField(max_length=512)
-    germline_or_somatic_bic = models.CharField(max_length=512)
-    variant_affecting_protein_lovd = models.CharField(max_length=512)
-    variant_haplotype_lovd = models.CharField(max_length=512)
-    vep_gene_exac = models.CharField(max_length=512)
-    iarc_class_exlovd = models.CharField(max_length=512)
-    eur_allele_frequency_1000genomes = models.CharField(max_length=512)
-    transcript_id = models.CharField(max_length=512)
-    sas_allele_frequency_1000_genomes = models.CharField(max_length=512)
-    number_of_family_member_carrying_mutation_bic = models.CharField(max_length=512)
-    exon_number_exlovd = models.CharField(max_length=512)
-    hgvs_protein_bic = models.CharField(max_length=512)
-    allele_frequency_1000_genomes = models.CharField(max_length=512)
-    variant_frequency_lovd = models.CharField(max_length=512)
-    clinical_importance_bic = models.CharField(max_length=512)
-    bic_designation_bic = models.CharField(max_length=512)
-    variant_in_lovd = models.CharField(max_length=512)
-    clinical_classification_bic = models.CharField(max_length=512)
-    variant_clinical_significance_clinvar = models.CharField(max_length=512)
-    allele_origin_clinvar = models.CharField(max_length=512)
-    hgvs_protein_lovd = models.CharField(max_length=512)
+    hgvs_protein = models.CharField(max_length=512)
+
+    objects = VariantManager()
