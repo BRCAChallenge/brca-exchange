@@ -7,18 +7,16 @@ from .models import Variant
 
 
 def index(request):
-    # data = json.load(open('/home/pete/work/BRCA/brca-website/brca.json','r'))
-    querySet = Variant.objects.all()
-    json_data = serializers.serialize('json', querySet)
 
-    data = json.loads(json_data)
+    # Convert django's model representation to the format
+    # expected by the frontend
 
-    header = data[0]['fields'].keys()
-    rows = [row['fields'].values() for row in data]
+    header = map(lambda field: field.name, Variant._meta.get_fields())
+    rows = list(Variant.objects.values_list())
 
-    response_data = {'header': header, 'rows': rows}
+    data = {'header': header, 'rows': rows}
 
-    response = JsonResponse(response_data)
+    response = JsonResponse(data)
 
     response['Access-Control-Allow-Origin'] = '*'
 
