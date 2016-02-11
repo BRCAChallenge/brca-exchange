@@ -1,54 +1,80 @@
-from __future__ import unicode_literals
-
 from django.db import models
 
 
 class VariantManager(models.Manager):
-    use_in_migrations = True
-
     def create_variant(self, row):
-        return self.create(gene_symbol=row[0],
-                           genomic_coordinate=row[1],
-                           reference_sequence=row[2],
-                           hgvs_cdna=row[3],
-                           bic_nomenclature=row[4],
-                           abbrev_aa_change=row[5],
-                           url=row[6],
-                           condition_id_type=row[7],
-                           condition_id_value=row[8],
-                           condition_category=row[9],
-                           clinical_significance=row[10],
-                           date_last_evaluated=row[11],
-                           assertion_method=row[12],
-                           assertion_method_citation=row[13],
-                           clinical_significance_citations=row[14],
-                           comment_on_clinical_significance=row[15],
-                           collection_method=row[16],
-                           allele_origin=row[17],
-                           clinvaraccession=row[18],
-                           hgvs_protein=row[19])
+        return self.create(**row)
 
 
 class Variant(models.Model):
-    gene_symbol = models.CharField(max_length=512)
-    genomic_coordinate = models.CharField(max_length=512)
-    reference_sequence = models.CharField(max_length=512)
-    hgvs_cdna = models.CharField(max_length=512)
-    bic_nomenclature = models.CharField(max_length=512)
-    abbrev_aa_change = models.CharField(max_length=512)
-    url = models.CharField(max_length=512)
-    condition_id_type = models.CharField(max_length=512)
-    condition_id_value = models.CharField(max_length=512)
-    condition_category = models.CharField(max_length=512)
-    clinical_significance = models.CharField(max_length=512)
-    date_last_evaluated = models.CharField(max_length=512)
-    assertion_method = models.CharField(max_length=512)
-    assertion_method_citation = models.CharField(max_length=512)
-    clinical_significance_citations = models.CharField(max_length=512)
-    comment_on_clinical_significance = models.CharField(max_length=512)
-    collection_method = models.CharField(max_length=512)
-    allele_origin = models.CharField(max_length=512)
-    clinvaraccession = models.CharField(max_length=512)
-    hgvs_protein = models.CharField(max_length=512)
+    variant_in_enigma = models.BooleanField()
+    variant_in_clinvar = models.BooleanField()
+    variant_in_1000_genomes = models.BooleanField()
+    variant_in_exac = models.BooleanField()
+    variant_in_lovd = models.BooleanField()
+    variant_in_bic = models.BooleanField()
+    gene_symbol = models.TextField()
+    genomic_coordinate = models.TextField()
+    hgvs_genomic = models.TextField()
+    transcript_id = models.TextField()
+    hgvs_cdna = models.TextField()
+    hgvs_protein = models.TextField()
+    bic_nomenclature = models.TextField()
+    abbrev_aa_change = models.TextField()
+    url = models.TextField()
+    condition_id_type = models.TextField()
+    condition_id_value = models.TextField()
+    condition_category = models.TextField()
+    clinical_significance = models.TextField()
+    date_last_evaluated = models.TextField()
+    assertion_method = models.TextField()
+    assertion_method_citation = models.TextField()
+    clinical_significance_citations = models.TextField()
+    comment_on_clinical_significance = models.TextField()
+    collection_method = models.TextField()
+    allele_origin = models.TextField()
+    clinvaraccession = models.TextField()
+    sas_allele_frequency_1000_genomes = models.TextField()
+    eas_allele_frequency_1000_genomes = models.TextField()
+    allele_frequency_1000_genomes = models.TextField()
+    amr_allele_frequency_1000genomes = models.TextField()
+    eur_allele_frequency_1000genomes = models.TextField()
+    afr_allele_frequency_1000genomes = models.TextField()
+    allele_origin_clinvar = models.TextField()
+    variant_clinical_significance_clinvar = models.TextField()
+    hgvs_genomic_lovd = models.TextField()
+    origin_of_variant_lovd = models.TextField()
+    hgvs_protein_lovd = models.TextField()
+    variant_frequency_lovd = models.TextField()
+    hgvs_cdna_lovd = models.TextField()
+    variant_affecting_protein_lovd = models.TextField()
+    variant_haplotype_lovd = models.TextField()
+    vep_gene_exac = models.TextField()
+    allele_frequency_exac = models.TextField()
+    vep_hgvsc_exac = models.TextField()
+    vep_consequence_exac = models.TextField()
+    vep_hgvsp_exac = models.TextField()
+    exon_number_exlovd = models.TextField()
+    iarc_class_exlovd = models.TextField()
+    bic_exlovd = models.TextField()
+    hgvs_cdna_exlovd = models.TextField()
+    literature_source_exlovd = models.TextField()
+    hgvs_protein_exlovd = models.TextField()
+    number_of_family_member_carrying_mutation_bic = models.TextField()
+    hgvs_genomic_bic = models.TextField()
+    germline_or_somatic_bic = models.TextField()
+    mutation_type_bic = models.TextField()
+    bic_designation_bic = models.TextField()
+    literature_citation_bic = models.TextField()
+    exon_number_bic = models.TextField()
+    clinical_importance_bic = models.TextField()
+    clinical_classification_bic = models.TextField()
+    hgvs_protein_bic = models.TextField()
+    hgvs_cdna_bic = models.TextField()
+    ethnicity_bic = models.TextField()
+    patient_nationality_bic = models.TextField()
 
     objects = VariantManager()
+
+    class Meta:
+        db_table = 'variant'

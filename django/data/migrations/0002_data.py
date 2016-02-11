@@ -8,15 +8,16 @@ import os.path
 from django.conf import settings
 from django.db import migrations
 
-from ..models import Variant
+from data.models import Variant
 
 
-def load_from_tsv(apps, schema_editor):
-    file = os.path.join(settings.BASE_DIR, 'data', 'resources', 'variants.tsv')
-    print(file)
-    with open(file) as tsv:
-        for row in csv.reader(tsv, dialect="excel-tab"):
-            Variant.objects.create_variant(row)
+def load_from_csv(apps, schema_editor):
+    file_path = os.path.join(settings.BASE_DIR, 'data', 'resources', 'merged_v5.csv')
+    with open(file_path) as csv_file:
+        reader = csv.reader(csv_file)
+        header = map(str.lower, reader.next())
+        for row in reader:
+            Variant.objects.create_variant(dict(zip(header, row)))
 
 
 class Migration(migrations.Migration):
@@ -25,5 +26,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(load_from_tsv),
+        migrations.RunPython(load_from_csv),
     ]
