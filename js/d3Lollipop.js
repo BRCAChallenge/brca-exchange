@@ -6,6 +6,7 @@ var _ = require('underscore');
 var {Row, Col, DropdownButton, MenuItem, Grid} = require('react-bootstrap');
 require('muts-needle-plot/src/js/d3-svg-legend');
 var Mutneedles = require("muts-needle-plot");
+var PureRenderMixin = require('./PureRenderMixin');
 
 var brca12JSON = {
     BRCA1: {
@@ -45,6 +46,7 @@ d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id) {
 };
 
 var D3Lollipop = React.createClass({
+    mixins: [PureRenderMixin],
     render: function () {
         return (
             <div id='brcaLollipop' ref='d3svgBrca'/>
@@ -79,15 +81,12 @@ var D3Lollipop = React.createClass({
         var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
         this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey);
     },
-    componentWillRecieveProps: function(newProps) {
-        this.setState({data: newProps.data});
+    componentWillReceiveProps: function(newProps) {
+        var {data, brcakey, ...opts} = newProps;
         var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
         while (d3svgBrcaRef.hasChildNodes() ) {
             d3svgBrcaRef.removeChild(d3svgBrcaRef.lastChild);
         }
-    },
-    componentWillUpdate: function() {
-        var {data, brcakey, ...opts} = this.props;
         var filteredData = data.filter(this.filterData);
         var subSetData = filteredData.map(this.filterAttributes);
         var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
@@ -99,21 +98,17 @@ var D3Lollipop = React.createClass({
     },
     componentWillUnmount: function() {
         this.cleanupBRCA();
-    },
-    shouldComponentUpdate: () => true
+    }
 });
 
 var Lollipop = React.createClass({
+    mixins: [PureRenderMixin],
     getInitialState: function() {
-        return {brcakey: "BRCA1", data: this.props.data};
+        return {brcakey: "BRCA1"};
     },
     onSelect: function(key) {
         this.setState({brcakey: key});
     },
-    componentWillReceiveProps: function(newProps) {
-        this.setState({data: newProps.data});
-    },
-    shouldComponentUpdate: () => true,
     render: function () {
         var {data, onHeaderClick, ...opts} = this.props;
         return (
