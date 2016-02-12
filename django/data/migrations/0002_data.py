@@ -15,7 +15,7 @@ def load_from_csv(apps, schema_editor):
     file_path = os.path.join(settings.BASE_DIR, 'data', 'resources', 'merged_v5.csv')
     with open(file_path) as csv_file:
         reader = csv.reader(csv_file)
-        header = map(str.lower, reader.next())
+        header = reader.next()
         for row in reader:
             Variant.objects.create_variant(dict(zip(header, row)))
 
