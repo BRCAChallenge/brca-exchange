@@ -43,9 +43,11 @@ var FastTable = React.createClass({
 // Merge new state (e.g. initialState) with existing state,
 // deep-merging columnSelect.
 function mergeState(state, newState) {
-	var {columnSelection, ...otherProps} = newState,
-		cs = {...state.columnSelection, ...columnSelection};
-	return {...state, columnSelection: cs, ...otherProps};
+	console.log(state);
+	var {columnSelection, sourceSelection, ...otherProps} = newState,
+		cs = {...state.columnSelection, ...columnSelection},
+		ss = {...state.sourceSelection, ...sourceSelection};
+	return {...state, columnSelection: cs, sourceSelection: ss, ...otherProps};
 }
 
 var DataTable = React.createClass({
@@ -77,6 +79,7 @@ var DataTable = React.createClass({
             filterValues: {},
 			search: '',
 			columnSelection: _.object(_.map(this.props.columns, c => _.contains(defaultColumns, c.prop) ? [c.prop, true] : [c.prop, false])),
+			sourceSelection: {'Variant_in_ENIGMA' : true},
 			pageLength: 20,
 			page: 0,
 			totalPages: 20, // XXX this is imaginary. Do we need it?
@@ -101,7 +104,7 @@ var DataTable = React.createClass({
 		});
 	},
 	createDownload: function () {
-		var {search, sortBy, filterValues, columnSelection} = this.state;
+		var {search, sortBy, filterValues, columnSelection, sourceSelection} = this.state;
 		return this.props.url(merge({
 			format: 'tsv',
 			pageLength: null,
@@ -114,13 +117,14 @@ var DataTable = React.createClass({
 	fetch: function (state) {
 		// XXX set source
 		var {pageLength, search, page, sortBy,
-			filterValues, columnSelection} = state;
+			filterValues, columnSelection, sourceSelection} = state;
 		this.fetchq.onNext(merge({
 			pageLength,
 			page,
 			sortBy,
 			search,
 			searchColumn: _.keys(_.pick(columnSelection, v => v)),
+			sourceSelection: _.keys(_.pick(sourceSelection, v => v)),
 			filterValues}, hgvs.filters(search, filterValues)));
 	},
     fetchLollipopData: function(state) {
@@ -153,6 +157,14 @@ var DataTable = React.createClass({
 
         this.setStateFetch({columnSelection: cs});
     },
+	toggleSource: function (prop) {
+		var {sourceSelection} = this.state,
+			val = sourceSelection[prop],
+			ss = {...sourceSelection, [prop]: !val};
+
+        this.setStateFetch({sourceSelection: ss});
+    },
+
 	onChangePage: function (pageNumber) {
 		this.setStateFetch({page: pageNumber});
 	},
@@ -197,6 +209,16 @@ var DataTable = React.createClass({
 						{filtersOpen && <div className='form-inline'>{filterFormEls}</div>}
                         {filtersOpen && <div className='form-inline'>
                                             <label className='control-label' style={{marginRight: '1em'}}>
+												<Panel header="Source Selection">
+													<Col>
+														<div>
+															<ColumnCheckbox
+																onChange={v => this.toggleSource('Variant_in_ENIGMA')}
+																key='Variant_in_ENIGMA' label='Variant_in_ENIGMA'
+																title='Variant_in_ENIGMA' initialCheck={false}/>
+														</div>
+													</Col>
+												</Panel>
                                                 <Panel header="Column Selection">
                                                     {filterFormSubCols}
                                                 </Panel>
