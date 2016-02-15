@@ -201,6 +201,14 @@ var columnSelection = {
     HGVS_protein_exLOVD: {selectVal: false}
 };
 
+var sources = {
+    Variant_in_ENIGMA: true,
+    Variant_in_ClinVar: true,
+    Variant_in_1000_Genomes: true,
+    Variant_in_ExAC: true,
+    Variant_in_LOVD: true,
+    Variant_in_BIC: true
+}
 // Work-around to allow the user to select text in the table. The browser does not distinguish between
 // click and drag: if mouseup and mousedown occur on the same element, a click event is fired even if
 // the events occur at very different locations. That makes it hard to select text. This workaround
@@ -235,6 +243,7 @@ var VariantTable = React.createClass({
 				columns={columns}
                 subColumns={subColumns}
                 columnSelection={columnSelection}
+                source={sources}
 				initialData={data}
 				initialPageLength={20}
                 initialSortBy={{prop: 'Abbrev_AA_change', order: 'descending'}}

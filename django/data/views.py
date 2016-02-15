@@ -16,6 +16,7 @@ def index(request):
     page_num =   int(request.GET.get('page_num'))
     search_term =    request.GET.get('search_term')
     search_columns = request.GET.getlist('search_column')
+    source =         request.GET.getlist('source')
     filters =        request.GET.getlist('filter')
     filterValues =   request.GET.getlist('filterValue')
 
@@ -30,6 +31,12 @@ def index(request):
     # the row must match in at least one column
     if search_term:
         query_list = (Q(**{column+'__icontains':search_term}) for column in search_columns)
+        query = query.filter(reduce(__or__,query_list))
+
+    # if there are multiple sources given then OR them:
+    # the row must match in at least one column
+    if source:
+        query_list = (Q(**{column:True}) for column in source)
         query = query.filter(reduce(__or__,query_list))
 
     # count the number of rows now before paginating

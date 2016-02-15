@@ -43,7 +43,6 @@ var FastTable = React.createClass({
 // Merge new state (e.g. initialState) with existing state,
 // deep-merging columnSelect.
 function mergeState(state, newState) {
-	console.log(state);
 	var {columnSelection, sourceSelection, ...otherProps} = newState,
 		cs = {...state.columnSelection, ...columnSelection},
 		ss = {...state.sourceSelection, ...sourceSelection};
@@ -79,7 +78,7 @@ var DataTable = React.createClass({
             filterValues: {},
 			search: '',
 			columnSelection: _.object(_.map(this.props.columns, c => _.contains(defaultColumns, c.prop) ? [c.prop, true] : [c.prop, false])),
-			sourceSelection: {'Variant_in_ENIGMA' : true},
+			sourceSelection: this.props.source,
 			pageLength: 20,
 			page: 0,
 			totalPages: 20, // XXX this is imaginary. Do we need it?
@@ -112,6 +111,7 @@ var DataTable = React.createClass({
 			sortBy,
 			search,
 			searchColumn: _.keys(_.pick(columnSelection, v => v)),
+			source: _.keys(_.pick(sourceSelection, v => v)),
 			filterValues}, hgvs.filters(search, filterValues)));
 	},
 	fetch: function (state) {
@@ -124,7 +124,7 @@ var DataTable = React.createClass({
 			sortBy,
 			search,
 			searchColumn: _.keys(_.pick(columnSelection, v => v)),
-			sourceSelection: _.keys(_.pick(sourceSelection, v => v)),
+			source: _.keys(_.pick(sourceSelection, v => v)),
 			filterValues}, hgvs.filters(search, filterValues)));
 	},
     fetchLollipopData: function(state) {
@@ -161,9 +161,8 @@ var DataTable = React.createClass({
 		var {sourceSelection} = this.state,
 			val = sourceSelection[prop],
 			ss = {...sourceSelection, [prop]: !val};
-
-        this.setStateFetch({sourceSelection: ss});
-    },
+		this.setStateFetch({sourceSelection: ss});
+	},
 
 	onChangePage: function (pageNumber) {
 		this.setStateFetch({page: pageNumber});
@@ -180,23 +179,35 @@ var DataTable = React.createClass({
 	},
     filterFormCols: function (subColList, columnSelection){
         return _.map(subColList, ({title, prop}) =>
-            <ColumnCheckbox onChange={v => this.toggleColumns(prop)} key={prop} label={prop} title={title} initialCheck={columnSelection}/>);
+            <ColumnCheckbox onChange={v => this.toggleColumns(prop)} key={prop} label={prop} title={title}initialCheck={columnSelection}/>);
     },
 	render: function () {
-		var {filterValues, filtersOpen, lollipopOpen, search, data, columnSelection,
-				page, totalPages, count, error} = this.state,
-			{columns, filterColumns, suggestions, className, subColumns} = this.props,
-			renderColumns = _.filter(columns, c => columnSelection[c.prop]),
-			filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
-				<SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
-					key={prop} label={`${name} is: `} value={filterDisplay(filterValues[prop])} options={addAny(values)}/>),
-			filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
-                <Col sm={6} md={2}>
-                    <Panel header={subColTitle}>
-                        {this.filterFormCols(subColList, columnSelection)}
-                    </Panel>
-                </Col>
-            );
+		var {filterValues, filtersOpen, lollipopOpen, search, data, columnSelection, sourceSelection,
+			page, totalPages, count, error} = this.state;
+		var {columns, filterColumns, suggestions, className, subColumns, source} = this.props;
+		var renderColumns = _.filter(columns, c => columnSelection[c.prop]);
+		var filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
+			<SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
+						 key={prop} label={`${name} is: `} value={filterDisplay(filterValues[prop])}
+						 options={addAny(values)}/>);
+		var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
+			<Col sm={6} md={2}>
+				<Panel header={subColTitle}>
+					{this.filterFormCols(subColList, columnSelection)}
+				</Panel>
+			</Col>
+		);
+        var sourceCheckboxes = _.map(source, (value, name) =>
+            <Col sm={6} md={2}>
+                <div>
+                    <ColumnCheckbox
+                        onChange={v => this.toggleSource(name)}
+                        key={name} label={name}
+                        title={name.substring(11).replace(/_/g," ")} // eg "Variant_in_1000_Genomes" => "1000 Genomes"
+                        initialCheck={sourceSelection}/>
+                </div>
+            </Col>
+        );
         return (error ? <p>{error}</p> :
 			<div className={this.props.className}>
                 <Row style={{marginBottom: '2px'}}>
@@ -208,22 +219,15 @@ var DataTable = React.createClass({
 						<Button bsSize='xsmall' onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}</Button>
 						{filtersOpen && <div className='form-inline'>{filterFormEls}</div>}
                         {filtersOpen && <div className='form-inline'>
-                                            <label className='control-label' style={{marginRight: '1em'}}>
-												<Panel header="Source Selection">
-													<Col>
-														<div>
-															<ColumnCheckbox
-																onChange={v => this.toggleSource('Variant_in_ENIGMA')}
-																key='Variant_in_ENIGMA' label='Variant_in_ENIGMA'
-																title='Variant_in_ENIGMA' initialCheck={false}/>
-														</div>
-													</Col>
-												</Panel>
-                                                <Panel header="Column Selection">
-                                                    {filterFormSubCols}
-                                                </Panel>
-                                            </label>
-                                        </div>}
+							<label className='control-label' style={{marginRight: '1em'}}>
+                                <Panel header="Source Selection">
+                                    {sourceCheckboxes}
+                                </Panel>
+                                <Panel header="Column Selection">
+                                    {filterFormSubCols}
+                                </Panel>
+							</label>
+                        </div>}
 					</Col>
 				</Row>
 				<Row style={{marginBottom: '2px'}}>
