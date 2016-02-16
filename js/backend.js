@@ -23,7 +23,6 @@ function url(opts) {
 		pageLength = 100,
 		page = 0,
 		search = '',
-		searchColumn = ['Variant_Source', 'Gene_symbol'],
 		source
 		} = opts,
 
@@ -38,7 +37,6 @@ function url(opts) {
 		'page_size': pageLength,
 		'page_num': page,
 		'search_term': search,
-		'search_column': searchColumn,
 		'source': source
 	}, v => v != null), {arrayFormat: 'repeat'})}`;
 }
