@@ -26,7 +26,7 @@ def load_from_csv(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('data', '0001_initial'),
+        ('data', '0002_search_index'),
     ]
 
     operations = [
