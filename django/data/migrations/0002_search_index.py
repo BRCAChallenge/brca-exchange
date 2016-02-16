@@ -17,12 +17,6 @@ class Migration(migrations.Migration):
             fts_document TEXT;
         BEGIN
             SELECT concat_ws(' ',
-                v."Variant_in_ENIGMA",
-                v."Variant_in_ClinVar",
-                v."Variant_in_1000_Genomes",
-                v."Variant_in_ExAC",
-                v."Variant_in_LOVD",
-                v."Variant_in_BIC",
                 v."Gene_symbol",
                 v."Genomic_Coordinate",
                 v."HGVS_genomic",
