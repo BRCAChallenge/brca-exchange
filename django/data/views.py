@@ -70,6 +70,6 @@ def index(request):
     elif format == 'json':
         # call list() now to evaluate the query
         response = JsonResponse({'count': count, 'data': list(query.values())})
-        response['Access-Control-Allow-Origin'] = '*'
-
+        
+    response['Access-Control-Allow-Origin'] = '*'
     return response
