@@ -23,8 +23,7 @@ def index(request):
     if filters:
         query = query.filter(**dict(zip(filters, filterValues)))
 
-    # if there are multiple search columns given then OR them:
-    # the row must match in at least one column
+    # search using the tsvector column which represents our document made of all the columns
     if search_term:
         query = query.extra(
             where=["variant.fts_document @@ plainto_tsquery('simple', %s)"],
