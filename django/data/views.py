@@ -5,7 +5,7 @@ import csv
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 
-from .models import Variant
+from .models import Variant, Word
 
 
 def index(request):
@@ -26,8 +26,7 @@ def index(request):
     if filters:
         query = query.filter(**dict(zip(filters, filterValues)))
 
-    # if there are multiple search columns given then OR them:
-    # the row must match in at least one column
+    # search using the tsvector column which represents our document made of all the columns
     if search_term:
         query = query.extra(
             where=["variant.fts_document @@ plainto_tsquery('simple', %s)"],
@@ -72,4 +71,18 @@ def index(request):
         response = JsonResponse({'count': count, 'data': list(query.values())})
         
     response['Access-Control-Allow-Origin'] = '*'
+    return response
+
+
+def autocomplete(request):
+    term = request.GET.get('term')
+    limit = request.GET.get('limit', 10)
+
+    query = Word.objects.raw("""
+        SELECT word FROM words
+        WHERE word like '%%s%'
+        ORDER BY similarity(word, '%S') DESC, word
+    """, [term])
+
+    response = JsonResponse(list(query)[:limit])
     return response
