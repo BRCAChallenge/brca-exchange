@@ -88,4 +88,6 @@ def autocomplete(request):
         ["%%%s%%" % term, term])
 
     rows = cursor.fetchall()
-    return JsonResponse({'suggestions': rows[:limit]})
+    response = JsonResponse({'suggestions': rows[:limit]})
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
