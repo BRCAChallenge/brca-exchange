@@ -59,11 +59,11 @@ def index(request):
 
 def autocomplete(request):
     term = request.GET.get('term')
-    limit = request.GET.get('limit') or 10
+    limit = request.GET.get('limit', 10)
 
     query = Word.objects.raw("""
         SELECT word FROM words
-        WHERE word like '%%S%'
+        WHERE word like '%%s%'
         ORDER BY similarity(word, '%S') DESC, word
     """, [term])
 
