@@ -1,4 +1,5 @@
 import csv
+import re
 from cStringIO import StringIO
 from operator import __or__
 
@@ -7,6 +8,14 @@ from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 
 from .models import Variant
+
+
+def sanitise_term(term):
+    # Escape all non alphanumeric characters
+    term = re.escape(term)
+    # Enable prefix search
+    term += ":*"
+    return term
 
 
 def index(request):
@@ -30,8 +39,8 @@ def index(request):
     # search using the tsvector column which represents our document made of all the columns
     if search_term:
         query = query.extra(
-            where=["variant.fts_document @@ plainto_tsquery('simple', %s)"],
-            params=[search_term]
+            where=["variant.fts_document @@ to_tsquery('simple', %s)"],
+            params=[sanitise_term(search_term)]
         )
 
     # if there are multiple sources given then OR them:
@@ -85,7 +94,7 @@ def autocomplete(request):
         """SELECT word FROM words
         WHERE word LIKE %s
         ORDER BY similarity(word, %s) DESC, word""",
-        ["%%%s%%" % term, term])
+        ["%s%%" % term, term])
 
     rows = cursor.fetchall()
 
