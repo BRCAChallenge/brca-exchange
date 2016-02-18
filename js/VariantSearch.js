@@ -7,16 +7,31 @@ var slugify = require('./slugify');
 var {Navigation} = require('react-router');
 var AutoSuggest = require('react-autosuggest');
 var _ = require('underscore');
+var $ = require('jquery');
+
 require('./css/Autosuggest.css');
 
-var maxSuggestions = 10;
-function getSuggestions(data, input) {
-	var matchStr = input.toLowerCase(); // data should already be lower case
-	return _.first(_.filter(data, s => s.indexOf(matchStr) === 0),
-			maxSuggestions);
+
+function getSuggestions(value, callback) {
+    var matchStr = value.toLowerCase(); // data should already be lower case
+    var databaseUrl = "http://localhost:8000/";
+
+	var suggestionsEndpoint = `${databaseUrl}data/suggestions/?term=${matchStr}`;
+	$.ajax({
+		url: suggestionsEndpoint,
+		dataType: 'json',
+		success: function (data) {
+			var suggestions = _.flatten(_.values(data.suggestions));
+			setTimeout(() => callback(null, suggestions), 300);
+		}.bind(this),
+		error: function (xhr, status, err) {
+			callback(new Error("Couldn't get suggestions"));
+		}.bind(this)
+	});
 }
 
 function renderSuggestion(suggestion, input) {
+    input.indexOf(suggestion)
 	return (
 		<span>
 			<strong>{suggestion.slice(0, input.length)}</strong>
@@ -44,12 +59,6 @@ var VariantSearch = React.createClass({
 			onChange(value);
 		}
 		this.setState({value: value});
-	},
-	suggest: function (input, callback) {
-		var {suggestions} = this.props;
-		// Invoke asynchronously. This makes more sense if doing an ajax call.
-//		this.cb = setTimeout(() =>
-//				callback(null, getSuggestions(suggestions, input, callback), 0));
 	},
 	componentWillUnmount: function () {
 		clearTimeout(this.cb);
@@ -91,7 +100,7 @@ var VariantSearch = React.createClass({
 								onChange: this.onChange
 							}}
 							showWhen={input => input.trim().length > 0}
-							suggestions={this.suggest}
+							suggestions={getSuggestions}
 							onSuggestionSelected={v => onSearch(v)}
 							suggestionRenderer={renderSuggestion}
 							ref='input' />
