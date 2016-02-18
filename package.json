@@ -40,7 +40,8 @@
     "style-loader": "^0.8.3",
     "url-loader": "^0.5.5",
     "webpack": "^1.5.3",
-    "webpack-dev-server": "^1.7.0"
+    "webpack-dev-server": "^1.7.0",
+    "jquery": "^2.2.0"
   },
   "dependencies": {
     "babel-runtime": "^5.1.13",
@@ -62,6 +63,7 @@
     "rx-dom": "^4.0.4",
     "svg-to-react": "^0.1.0",
     "underscore": "^1.7.0",
-    "vcf.js": "^0.2.6"
+    "vcf.js": "^0.2.6",
+    "jquery": "^2.2.0"
   }
 }
