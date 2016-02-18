@@ -25,3 +25,13 @@ CrossMap.py vcf /gbdb/hg19/liftOver/hg19ToHg38.over.chain.gz bicSnp.vcf /hive/da
 # index
 bgzip bicSnp.hg38.vcf
 tabix -p vcf bicSnp.hg38.vcf.gz 
+
+# Generate bic vcf files from webscrapped data and upload to server
+  1. `./bic2vcf -i brca1_data.txt -o bic_brca1.vcf -b 1 > stdout.brca1.txt`
+  2. `./bic2vcf -i brca2_data.txt -o bic_brca2.vcf -b 2 > stdout.brca2.txt`
+  3. `vcf-concat bic_brca1.vcf bic_brca2.vcf > bic_brca12.vcf`
+  4. `vcf-sort bic_brca12.vcf > bic_brca12.sorted.vcf`
+  5. `bgzip bic_brca12.sorted.vcf`
+  6. `bcftools index bic_brca12.sorted.vcf.gz`
+  7. `scp -i ~/brca_server.pem bic_brca12.sorted.vcf.gz ubuntu@ec2-54-148-207-224.us-west-2.compute.amazonaws.com:/srv/ga4gh/brca_data/variants/bic`
+  8. `scp -i ~/brca_server.pem bic_brca12.sorted.vcf.gz.csi ubuntu@ec2-54-148-207-224.us-west-2.compute.amazonaws.com:/srv/ga4gh/brca_data/variants/bic`
