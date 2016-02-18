@@ -28,7 +28,7 @@ function url(opts) {
 
 		[filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v)));
 
-	return `${databaseUrl}/data?${qs.stringify(_.pick({
+	return `${databaseUrl}/data/?${qs.stringify(_.pick({
 		format,
 		filter,
 		filterValue,

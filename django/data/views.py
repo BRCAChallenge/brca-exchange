@@ -1,18 +1,19 @@
-from operator import __or__
-from cStringIO import StringIO
 import csv
+from cStringIO import StringIO
+from operator import __or__
 
+from django.db import connection
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 
-from .models import Variant, Word
+from .models import Variant
 
 
 def index(request):
     order_by = request.GET.get('order_by')
     direction = request.GET.get('direction')
-    page_size = int(request.GET.get('page_size','0'))
-    page_num = int(request.GET.get('page_num','0'))
+    page_size = int(request.GET.get('page_size', '0'))
+    page_num = int(request.GET.get('page_num', '0'))
     search_term = request.GET.get('search_term')
     format = request.GET.get('format')
     source = request.GET.getlist('source')
@@ -54,7 +55,7 @@ def index(request):
 
     if format == 'tsv':
         header = [field.name for field in Variant._meta.fields]
-        rows =  query.values_list()
+        rows = query.values_list()
 
         tsv_string = StringIO()
         writer = csv.writer(tsv_string, dialect='excel', delimiter='\t')
@@ -69,20 +70,22 @@ def index(request):
     elif format == 'json':
         # call list() now to evaluate the query
         response = JsonResponse({'count': count, 'data': list(query.values())})
-        
+
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
 
 def autocomplete(request):
     term = request.GET.get('term')
-    limit = request.GET.get('limit', 10)
+    limit = int(request.GET.get('limit', 10))
 
-    query = Word.objects.raw("""
-        SELECT word FROM words
-        WHERE word like '%%s%'
-        ORDER BY similarity(word, '%S') DESC, word
-    """, [term])
+    cursor = connection.cursor()
 
-    response = JsonResponse(list(query)[:limit])
-    return response
+    cursor.execute(
+        """SELECT word FROM words
+        WHERE word LIKE %s
+        ORDER BY similarity(word, %s) DESC, word""",
+        ["%%%s%%" % term, term])
+
+    rows = cursor.fetchall()
+    return JsonResponse({'suggestions': rows[:limit]})
