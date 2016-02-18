@@ -32,21 +32,28 @@ A demonstration of the GA4GH api system whose goals are to showcase the capabili
 
 ### Data extraction and conversion to vcf:
   Requires installation of hgvs python package as can be found here: https://github.com/counsyl/hgvs
+  
+#### Generate ClinVar VCF files (`ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/`)
+See `https://github.com/BD2KGenomics/brca/blob/master/clinvar/README.txt`
 
 #### Generate umd vcf files from webscrapped data and upload to server
-See https://raw.githubusercontent.com/BD2KGenomics/brca/master/umd/README.txt
+See `https://raw.githubusercontent.com/BD2KGenomics/brca/master/umd/README.txt`
 
 #### Generate bic vcf files from webscrapped data and upload to server
-See https://raw.githubusercontent.com/BD2KGenomics/brca/master/bic/README.txt
+See `https://raw.githubusercontent.com/BD2KGenomics/brca/master/bic/README.txt`
  
 #### Webscrap data from LOVD, generate LOVD vcf files and upload to server
   1. Install leiden package and its dependencies via command `python setup.py install` in the `leidenv1.0_package` directory.
 
 ##### Webscrap exLOVD (`http://hci-exlovd.hci.utah.edu/`) 
-See https://raw.githubusercontent.com/BD2KGenomics/brca/master/lovd/README.md
+See `https://raw.githubusercontent.com/BD2KGenomics/brca/master/lovd/README.md`
 
- 
 ##### Webscrap sharedLOVD (`http://databases.lovd.nl/shared/`)
-See https://raw.githubusercontent.com/BD2KGenomics/brca/master/lovd/README.md
+See `https://raw.githubusercontent.com/BD2KGenomics/brca/master/lovd/README.md`
+
+#### ExAC
+
+#### ESP (`http://evs.gs.washington.edu/EVS/`)
+See `https://github.com/BD2KGenomics/brca/edit/master/esp/README.txt`
 
 
