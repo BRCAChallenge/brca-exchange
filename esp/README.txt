@@ -1,3 +1,5 @@
+Source: http://evs.gs.washington.edu/EVS/
+
 Commands for exporting EA_MAF and AA_MAF from ESP for the BRCA regions:
 
 Uses BRCA1 gene bounds of chr17:41191488:41322420 and BRCA2 gene bounds of chr13:32889080-32973809
