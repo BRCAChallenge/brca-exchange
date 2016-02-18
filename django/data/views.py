@@ -3,7 +3,7 @@ from operator import __or__
 from django.db.models import Q
 from django.http import JsonResponse
 
-from .models import Variant
+from .models import Variant, Word
 
 
 def index(request):
@@ -54,4 +54,18 @@ def index(request):
 
     response['Access-Control-Allow-Origin'] = '*'
 
+    return response
+
+
+def autocomplete(request):
+    term = request.GET.get('term')
+    limit = request.GET.get('limit') or 10
+
+    query = Word.objects.raw("""
+        SELECT word FROM words
+        WHERE word like '%%S%'
+        ORDER BY similarity(word, '%S') DESC, word
+    """, [term])
+
+    response = JsonResponse(list(query)[:limit])
     return response

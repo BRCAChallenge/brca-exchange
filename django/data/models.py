@@ -78,3 +78,10 @@ class Variant(models.Model):
 
     class Meta:
         db_table = 'variant'
+
+
+class Word(models.Model):
+    word = models.TextField()
+
+    class Meta:
+        db_table = 'words'
