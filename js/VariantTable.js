@@ -16,65 +16,65 @@ var DataTable = require('./DataTable');
 require('react-data-components-bd2k/css/table-twbs.css');
 
 function buildHeader(onClick, title) {
-	return (
-		<span>
-			{title}
-			<span onClick={ev => {ev.stopPropagation(); onClick(title); }}
-				className='help glyphicon glyphicon-question-sign superscript'/>
-		</span>
-	);
+    return (
+        <span>
+            {title}
+            <span onClick={ev => {ev.stopPropagation(); onClick(title); }}
+                className='help glyphicon glyphicon-question-sign superscript'/>
+        </span>
+    );
 }
 
 //function renderClinVarLink(val) {
-//	return (
-//		<a title="View on ClinVar"
-//			onClick={ev => ev.stopPropagation()}
-//			href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + val}>{val}</a>
-//	);
+//    return (
+//        <a title="View on ClinVar"
+//            onClick={ev => ev.stopPropagation()}
+//            href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + val}>{val}</a>
+//    );
 //}
 
 function renderCell(val) {
-	return <span>{val}</span>;
+    return <span>{val}</span>;
 }
 
 var filterColumns = [
-	{name: 'Gene', prop: 'Gene_symbol', values: ['BRCA1', 'BRCA2']},
-//	{name: 'Exon', values: ['Any', 1, 2, 3, 4, 5]}, // XXX needs refgene to get exon count
-	{name: 'Pathogenicity', prop: 'Clinical_significance', values: ['Pathogenic', 'Benign']}
+    {name: 'Gene', prop: 'Gene_symbol', values: ['BRCA1', 'BRCA2']},
+//    {name: 'Exon', values: ['Any', 1, 2, 3, 4, 5]}, // XXX needs refgene to get exon count
+    {name: 'Pathogenicity', prop: 'Clinical_significance', values: ['Pathogenic', 'Benign']}
 ];
 
 // XXX duplicate this functionality on the server, perhaps
 // by having the client pass in order_by of Genomic_Coordinate
 // for hgvs columns.
 //var strPropCmpFn = prop => (a, b) => {
-//	var ap = a[prop],
-//		bp = b[prop];
-//	if (ap == null && bp == null || ap === bp) {
-//		return 0;
-//	}
-//	if (bp == null || bp < ap) {
-//		return 1;
-//	}
-//	return -1;
+//    var ap = a[prop],
+//        bp = b[prop];
+//    if (ap == null && bp == null || ap === bp) {
+//        return 0;
+//    }
+//    if (bp == null || bp < ap) {
+//        return 1;
+//    }
+//    return -1;
 //};
 //
 //var posCmpFn = strPropCmpFn('Genomic_Coordinate');
 //
 //function sortColumns(columns, {prop, order}, data) {
-//	var sortFn = _.findWhere(columns, {prop: prop}).sortFn || strPropCmpFn(prop),
-//		sorted = data.slice(0).sort(sortFn);
-//	if (order === 'descending') {
-//		sorted.reverse();
-//	}
-//	return sorted;
+//    var sortFn = _.findWhere(columns, {prop: prop}).sortFn || strPropCmpFn(prop),
+//        sorted = data.slice(0).sort(sortFn);
+//    if (order === 'descending') {
+//        sorted.reverse();
+//    }
+//    return sorted;
 //}
 
 var columns = [
-	{title: 'Gene', prop: 'Gene_symbol', render: renderCell},
-	{title: 'Genomic Coordinate', prop: 'Genomic_Coordinate', render: renderCell},
+    {title: 'Gene', prop: 'Gene_symbol', render: renderCell},
+    {title: 'Genomic Coordinate', prop: 'Genomic_Coordinate', render: renderCell},
     {title: 'HGVS cDNA', prop: 'HGVS_cDNA', /*sortFn: posCmpFn, */render: renderCell},
-	{title: 'HGVS protein', prop: 'HGVS_protein', /*sortFn: posCmpFn, */render: renderCell},
-	{title: 'HGVS protein (Abbrev.)', prop: "Abbrev_AA_change", render: renderCell},
+    {title: 'HGVS protein', prop: 'HGVS_protein', /*sortFn: posCmpFn, */render: renderCell},
+    {title: 'HGVS protein (Abbrev.)', prop: "Abbrev_AA_change", render: renderCell},
     {title: 'BIC nucleotide', prop: "BIC_Nomenclature", render: renderCell},
     {title: 'Pathogenicity', prop: 'Clinical_significance', render: renderCell},
     {title: 'Allele frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes', render: renderCell},
@@ -108,11 +108,11 @@ var columns = [
 var subColumns = [
     {subColTitle: "ENIGMA",
      subColList: [
-	    {title: 'Gene', prop: 'Gene_symbol', render: renderCell},
-	    {title: 'Genomic Coordinate', prop: 'Genomic_Coordinate', render: renderCell},
+        {title: 'Gene', prop: 'Gene_symbol', render: renderCell},
+        {title: 'Genomic Coordinate', prop: 'Genomic_Coordinate', render: renderCell},
         {title: 'HGVS cDNA', prop: 'HGVS_cDNA', /*sortFn: posCmpFn, */render: renderCell},
-	    {title: 'HGVS protein', prop: 'HGVS_protein', /*sortFn: posCmpFn, */render: renderCell},
-	    {title: 'HGVS protein (Abbrev.)', prop: "Abbrev_AA_change", render: renderCell},
+        {title: 'HGVS protein', prop: 'HGVS_protein', /*sortFn: posCmpFn, */render: renderCell},
+        {title: 'HGVS protein (Abbrev.)', prop: "Abbrev_AA_change", render: renderCell},
         {title: 'BIC nucleotide', prop: "BIC_Nomenclature", render: renderCell},
         {title: 'Pathogenicity', prop: 'Clinical_significance', render: renderCell}
      ]
@@ -226,31 +226,31 @@ var sources = {
 var hasSelection = () => !(window.getSelection && window.getSelection().isCollapsed);
 
 var VariantTable = React.createClass({
-	mixins: [PureRenderMixin],
-	getData: function () {
-		return this.refs.table.state.data;
-	},
-	render: function () {
-		var {data, onHeaderClick, onRowClick, ...opts} = this.props;
+    mixins: [PureRenderMixin],
+    getData: function () {
+        return this.refs.table.state.data;
+    },
+    render: function () {
+        var {data, onHeaderClick, onRowClick, ...opts} = this.props;
         return (
-			<DataTable
-				ref='table'
-				className='row-clickable'
-				{...opts}
-				buildRowOptions={r => ({title: 'click for details', onClick: () => hasSelection() ? null : onRowClick(r)})}
-				buildHeader={title => buildHeader(onHeaderClick, title)}
-				filterColumns={filterColumns}
-				columns={columns}
+            <DataTable
+                ref='table'
+                className='row-clickable'
+                {...opts}
+                buildRowOptions={r => ({title: 'click for details', onClick: () => hasSelection() ? null : onRowClick(r)})}
+                buildHeader={title => buildHeader(onHeaderClick, title)}
+                filterColumns={filterColumns}
+                columns={columns}
                 subColumns={subColumns}
                 columnSelection={columnSelection}
                 source={sources}
-				initialData={data}
-				initialPageLength={20}
+                initialData={data}
+                initialPageLength={20}
                 initialSortBy={{prop: 'Abbrev_AA_change', order: 'descending'}}
                 pageLengthOptions={[ 20, 50, 100 ]}
             />
-		);
-	}
+        );
+    }
 });
 
 
