@@ -260,7 +260,8 @@ var DataTable = React.createClass({
 							suggestions={suggestions}
 							value={search}
 							onChange={v => {
-								this.setStateFetch({search: v});
+                                // reset the page number to zero on new searches
+								this.setStateFetch({search: v, page: 0});
 							}}
 						/>
 					</Col>
