@@ -105,7 +105,7 @@ var DataTable = React.createClass({
     createDownload: function () {
         var {search, sortBy, filterValues, columnSelection, sourceSelection} = this.state;
         return this.props.url(merge({
-            format: 'tsv',
+            format: 'csv',
             pageLength: null,
             page: null,
             sortBy,
@@ -238,7 +238,7 @@ var DataTable = React.createClass({
                                         style={{marginRight: '1em'}}>
                                     {count} matching {pluralize(count, 'variant')}
                                 </label>
-                                <Button download="variants.tsv" href={this.createDownload()}>Download</Button>
+                                <Button download="variants.csv" href={this.createDownload()}>Download</Button>
                             </div>
                         </div>
                     </Col>
