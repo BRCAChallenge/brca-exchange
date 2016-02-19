@@ -3,7 +3,7 @@
 clinVarParse: parse the ClinVar XML file and output the data of interest
 """
 import argparse
-import dipper.utils.ClinVar as clinvar 
+import clinvar
 import codecs
 import re
 import sys
@@ -12,13 +12,13 @@ import xml.etree.ElementTree as ET
 def printHeader():
     print("\t".join(("HGVS", "Submitter", "ClinicalSignificance",
                      "DateCreated", "DateLastUpdated", "SCV", "VariantID", 
-                     "Chrom", "Pos", "Ref", "Alt", "Symbol")))
+                     "Genomic_Coordinate", "Symbol")))
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("clinVarXmlFilename")
-    parser.add_argument('-a', "--assembly", default="GRCh37")
+    parser.add_argument('-a', "--assembly", default="GRCh38")
     args = parser.parse_args()
 
     printHeader()
@@ -42,12 +42,16 @@ def main():
                             start = None
                             referenceAllele = None
                             alternateAllele = None
+                            genomicCoordinate = "chrNA:NA:NA>NA"
                             if args.assembly in variant.coordinates:
                                 genomicData = variant.coordinates[args.assembly]
                                 chrom = genomicData.chrom
                                 start = genomicData.start
                                 referenceAllele = genomicData.referenceAllele
                                 alternateAllele = genomicData.alternateAllele
+                                genomicCoordinate = "chr%s:%s:%s>%s" % (chrom,
+                                                        start, referenceAllele,
+                                                        alternateAllele)
                             print("\t".join((str(hgvs), 
                                              str(oa.submitter), 
                                              str(oa.clinicalSignificance),
@@ -55,9 +59,7 @@ def main():
                                              str(oa.dateLastUpdated),
                                              str(oa.accession),
                                              str(variant.id),
-                                             str(chrom), str(start),
-                                             str(referenceAllele),
-                                             str(alternateAllele),
+                                             genomicCoordinate,
                                              str(variant.geneSymbol)
                                          )))
                         

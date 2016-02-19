@@ -3,7 +3,7 @@
 clinVarParse: parse the ClinVar XML file and output the data of interest
 """
 import argparse
-import dipper.utils.ClinVar as clinvar 
+import clinvar 
 import importlib
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
@@ -11,8 +11,8 @@ import sys
 
 # Below is a magic formula that keeps the code from choking on characters
 # beyond the standard ASCII set.
-#importlib.reload(sys)
-#sys.setdefaultencoding('utf8')
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 def prettify(elem):
     """Return a pretty-printed XML string for the Element.

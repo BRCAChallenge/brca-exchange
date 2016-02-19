@@ -17,4 +17,4 @@
 #
 # 4. Convert the tab data into VCF format, using convert_tsv_to_vcf from utils
 # ../utils/convert_tsv_to_vcf.py -i $CLINVAR_BRCA_GRCH38_TAB -s "#GRCH38" -o $CLINVAR_BRCA_VCF
- 
+#python ../data_merging/convert_tsv_to_vcf.py -i test2.txt -o test.vcf -s "ClinVar" 
