@@ -6,13 +6,13 @@ var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PR
 var {Input} = require('react-bootstrap');
 
 var ColumnCheckbox = React.createClass({
-	mixins: [PureRenderMixin],
-	onChange: function (e) {
-		return this.props.onChange(e.target.value);
-	},
-	render: function () {
-		var {label, title, initialCheck} = this.props;
-		var subColumnLabel = '';
+    mixins: [PureRenderMixin],
+    onChange: function (e) {
+        return this.props.onChange(e.target.value);
+    },
+    render: function () {
+        var {label, title, initialCheck} = this.props;
+        var subColumnLabel = '';
         if (title === 'Gene') {
             subColumnLabel = 'ENIGMA Columns:';
         } else if (title === 'Allele frequency (1000 Genomes)') {
@@ -23,10 +23,10 @@ var ColumnCheckbox = React.createClass({
         return (
             <div>
             <div><h5>{subColumnLabel}</h5></div>
-			<Input type="checkbox" label={title} checked={initialCheck[label].selectVal} onChange={this.onChange} />
+            <Input type="checkbox" label={title} checked={initialCheck[label].selectVal} onChange={this.onChange} />
             </div>
-		);
-	}
+        );
+    }
 });
 
 module.exports = ColumnCheckbox;
