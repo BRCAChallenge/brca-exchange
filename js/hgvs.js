@@ -19,28 +19,32 @@
 
 var _ = require('underscore');
 
+var gene = 'Gene_symbol';
+var pathogenicity = 'Clinical_significance';
+
 var hgvsPatterns = [
-	{pat: /^(NM_007294\.3(\(BRCA1\))?|BRCA1)(:|$)/i, gene: 'BRCA1'},
-	{pat: /^(NM_000059\.3(\(BRCA2\))?|BRCA2)(:|$)/i, gene: 'BRCA2'}
+    {regex: /^(NM_007294\.3(\(BRCA1\))?|BRCA1)(:|$)/i, value: 'BRCA1', column: gene},
+    {regex: /^(NM_000059\.3(\(BRCA2\))?|BRCA2)(:|$)/i, value: 'BRCA2', column: gene},
+    {regex: /^[Pp]athogenic(:|$)/i, value: 'Pathogenic', column: pathogenicity},
+    {regex: /^[Bb]enign(:|$)/i, value: 'Benign', column: pathogenicity},
+    {regex: /^([Vv]ariants of unknown significance|VUS)(:|$)/i, value: 'VUS', column: pathogenicity}
 ];
 
-var gene = 'Gene_symbol';
-
 function filters(search, filterValues) {
-	var hgvs = _.find(hgvsPatterns, p => search.match(p.pat));
-	return hgvs && (filterValues[gene] == null || filterValues[gene] === hgvs.gene) ?
-		{
-			search: search.replace(hgvs.pat, ''),
-			filterValues: {
-				...filterValues,
-				[gene]: hgvs.gene
-			}
-		} : {
-			search,
-			filterValues
-		};
+    var hgvs = _.find(hgvsPatterns, pattern => search.match(pattern.regex));
+    return hgvs && (filterValues[hgvs.column] == null || filterValues[hgvs.column] === hgvs.value) ?
+        {
+            search: search.replace(hgvs.regex, ''),
+            filterValues: {
+                ...filterValues,
+                [hgvs.column]: hgvs.value
+            }
+        } : {
+            search,
+            filterValues
+        };
 }
 
 module.exports = {
-	filters: filters
+    filters: filters
 };
