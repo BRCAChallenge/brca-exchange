@@ -20,27 +20,27 @@
 var _ = require('underscore');
 
 var hgvsPatterns = [
-	{pat: /^(NM_007294\.3(\(BRCA1\))?|BRCA1)(:|$)/i, gene: 'BRCA1'},
-	{pat: /^(NM_000059\.3(\(BRCA2\))?|BRCA2)(:|$)/i, gene: 'BRCA2'}
+    {pat: /^(NM_007294\.3(\(BRCA1\))?|BRCA1)(:|$)/i, gene: 'BRCA1'},
+    {pat: /^(NM_000059\.3(\(BRCA2\))?|BRCA2)(:|$)/i, gene: 'BRCA2'}
 ];
 
 var gene = 'Gene_symbol';
 
 function filters(search, filterValues) {
-	var hgvs = _.find(hgvsPatterns, p => search.match(p.pat));
-	return hgvs && (filterValues[gene] == null || filterValues[gene] === hgvs.gene) ?
-		{
-			search: search.replace(hgvs.pat, ''),
-			filterValues: {
-				...filterValues,
-				[gene]: hgvs.gene
-			}
-		} : {
-			search,
-			filterValues
-		};
+    var hgvs = _.find(hgvsPatterns, p => search.match(p.pat));
+    return hgvs && (filterValues[gene] == null || filterValues[gene] === hgvs.gene) ?
+        {
+            search: search.replace(hgvs.pat, ''),
+            filterValues: {
+                ...filterValues,
+                [gene]: hgvs.gene
+            }
+        } : {
+            search,
+            filterValues
+        };
 }
 
 module.exports = {
-	filters: filters
+    filters: filters
 };
