@@ -3,13 +3,25 @@ This script expands the numerous subfields of VEP consequence in exac vcf file.
 each of the CSQ subfileds become a new INFO tag starting with CSQ, and the whole VCF file is rearranged
 """
 
+import argparse
+
+
 VEP = "Allele|Gene|Feature|Feature_type|Consequence|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|ALLELE_NUM|DISTANCE|STRAND|SYMBOL|SYMBOL_SOURCE|HGNC_ID|BIOTYPE|CANONICAL|CCDS|ENSP|SWISSPROT|TREMBL|UNIPARC|SIFT|PolyPhen|EXON|INTRON|DOMAINS|HGVSc|HGVSp|GMAF|AFR_MAF|AMR_MAF|ASN_MAF|EUR_MAF|AA_MAF|EA_MAF|CLIN_SIG|SOMATIC|PUBMED|MOTIF_NAME|MOTIF_POS|HIGH_INF_POS|MOTIF_SCORE_CHANGE|LoF_info|LoF_flags|LoF_filter|LoF"
 
 VEP_fields = VEP.split("|")
 
+def arg_parse():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--input")
+    parser.add_argument("-o", "--output")
+    args = parser.parse_args()
+    return args
+
 def main():
-    f_in = open("../data/allVcf/exac_BRCA12.sorted.vcf","r")
-    f_out = open("../data/allVcf/exac.VEP_expanded.vcf","w")
+    args = arg_parse()
+    f_in = open(args.input, "r")
+    f_out = open(args.output, "w")
+    #f_out = open("../data/allVcf/exac.VEP_expanded.vcf","w")
     line_num = 0
     for line in f_in:
         line_num += 1

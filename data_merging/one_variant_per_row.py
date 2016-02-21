@@ -32,11 +32,12 @@ def main():
                     value = deepcopy(record.INFO[key])
                     if type(value) == list and len(value) == n:
                         new_record.INFO[key] = [value[i]]
+                print new_record
+                for sample in record.samples:
+                    print sample
+
+                print "--------"
                 vcf_writer.write_record(new_record)
-
-    
-
-
 
 if __name__=="__main__":
     main()
