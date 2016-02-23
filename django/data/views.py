@@ -1,6 +1,4 @@
-import csv
 import re
-from cStringIO import StringIO
 from operator import __or__
 
 from django.db import connection
@@ -27,20 +25,44 @@ def index(request):
     format = request.GET.get('format')
     source = request.GET.getlist('source')
     filters = request.GET.getlist('filter')
-    filterValues = request.GET.getlist('filterValue')
+    filter_values = request.GET.getlist('filterValue')
 
+    query, count = build_query(direction, filter_values, filters, order_by, search_term, source, page_size, page_num)
+    # The query for producing the CSV needs to have string literals inside single quotes
+    query_csv, _ = build_query(direction, filter_values, filters, order_by, search_term, source, page_size, page_num,
+                               quotes="\'")
+
+    if format == 'csv':
+        cursor = connection.cursor()
+        output_file = '/tmp/variants.csv'
+        cursor.execute("COPY ({}) TO '{}' WITH DELIMITER ',' CSV HEADER".format(query_csv.query, output_file))
+
+        with open(output_file, 'r') as f:
+            response = HttpResponse(f.read(), content_type='text/csv')
+            response['Content-Disposition'] = 'attachment;filename="variants.csv"'
+            return response
+
+    elif format == 'json':
+        # call list() now to evaluate the query
+        response = JsonResponse({'count': count, 'data': list(query.values())})
+        response['Access-Control-Allow-Origin'] = '*'
+    return response
+
+
+def build_query(direction, filterValues, filters, order_by, search_term, source, page_size, page_num,
+                quotes=""):
     query = Variant.objects
 
     # if there are multiple filters given then AND them:
     # the row must match all the filters
     if filters:
-        query = query.filter(**dict(zip(filters, filterValues)))
+        query = query.filter(**dict(zip(filters, ["{0}{1}{0}".format(quotes, v) for v in filterValues])))
 
     # search using the tsvector column which represents our document made of all the columns
     if search_term:
         query = query.extra(
             where=["variant.fts_document @@ to_tsquery('simple', %s)"],
-            params=[sanitise_term(search_term)]
+            params=["{0}{1}{0}".format(quotes, sanitise_term(search_term))]
         )
 
     # if there are multiple sources given then OR them:
@@ -48,7 +70,6 @@ def index(request):
     if source:
         query_list = (Q(**{column: True}) for column in source)
         query = query.filter(reduce(__or__, query_list))
-
     if order_by:
         if direction == 'descending':
             order_by = '-' + order_by
@@ -61,27 +82,7 @@ def index(request):
         start = page_size * page_num
         end = start + page_size
         query = query[start:end]
-
-    if format == 'tsv':
-        header = [field.name for field in Variant._meta.fields]
-        rows = query.values_list()
-
-        tsv_string = StringIO()
-        writer = csv.writer(tsv_string, dialect='excel', delimiter='\t')
-        writer.writerow(header)
-        writer.writerows(rows)
-        tsv = tsv_string.getvalue()
-
-        response = HttpResponse(tsv)
-        response['Content-Type'] = 'application/vnd.ms-excel'
-        response['Content-Disposition'] = 'attachment;filename="variants.tsv"'
-
-    elif format == 'json':
-        # call list() now to evaluate the query
-        response = JsonResponse({'count': count, 'data': list(query.values())})
-
-    response['Access-Control-Allow-Origin'] = '*'
-    return response
+    return query, count
 
 
 def autocomplete(request):
