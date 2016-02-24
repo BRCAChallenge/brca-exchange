@@ -29,7 +29,6 @@ function trimSearchTerm(search) {
 // XXX these defaults might produce odd user experience, since they
 // are not reflected in the UI.
 function url(opts) {
-    console.log(opts)
     var {
         format = 'json',
         filterValues = {},

@@ -32,7 +32,6 @@ function getSuggestions(value, callback) {
 
 function renderSuggestion(suggestion, input) {
     var maxLengthToDisplay = 50;
-    input.indexOf(suggestion);
     return (
         <span>
             <strong>{suggestion.slice(0, input.length)}</strong>
