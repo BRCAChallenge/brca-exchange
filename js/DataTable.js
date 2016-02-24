@@ -115,7 +115,6 @@ var DataTable = React.createClass({
             filterValues}, hgvs.filters(search, filterValues)));
     },
     fetch: function (state) {
-        // XXX set source
         var {pageLength, search, page, sortBy,
             filterValues, columnSelection, sourceSelection} = state;
         this.fetchq.onNext(merge({

@@ -283,16 +283,17 @@ function toNumber(v) {
 }
 
 function databaseParams(paramsIn) {
-    var {filter, filterValue, hide} = _.mapObject(
-            _.pick(paramsIn, 'hide', 'filter', 'filterValue'), toArray),
+    var {filter, filterValue, hide, source} = _.mapObject(
+            _.pick(paramsIn, 'hide', 'filter', 'filterValue', 'source'), toArray),
         numParams = _.mapObject(_.pick(paramsIn, 'page', 'pageLength'),
                 toNumber),
         {orderBy, order, search = ''} = _.pick(paramsIn, 'search', 'orderBy', 'order'),
         sortBy = {prop: orderBy, order},
         columnSelection = _.object(hide, _.map(hide, _.constant(false))),
+        source = _.object(source, _.map(source, _.constant(true))),
         filterValues = _.object(filter, filterValue);
 
-    return {search, sortBy, columnSelection, filterValues, hide, ...numParams};
+    return {search, sortBy, columnSelection, filterValues, hide, source, ...numParams};
 }
 
 var transpose = a => _.zip.apply(_, a);
@@ -300,9 +301,10 @@ var transpose = a => _.zip.apply(_, a);
 function urlFromDatabase(state) {
     // Need to diff from defaults. The defaults are in DataTable.
     // We could keep the defaults here, or in a different module.
-    var {columnSelection, filterValues,
+    var {columnSelection, filterValues, sourceSelection,
             search, page, pageLength, sortBy: {prop, order}} = state,
         hide = _.keys(_.pick(columnSelection, v => !v)),
+        sources = _.keys(_.pick(sourceSelection, v => v)),
         [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v)));
     return _.pick({
         search: search === '' ? null : search,
@@ -312,6 +314,7 @@ function urlFromDatabase(state) {
         pageLength: pageLength === 20 ? null : pageLength,
         orderBy: prop,
         order,
+        source: sources,
         hide: hide.length === 0 ? null : hide
     }, v => v != null);
 
