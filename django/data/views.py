@@ -56,7 +56,8 @@ def build_query(direction, filterValues, filters, order_by, search_term, source,
     # if there are multiple filters given then AND them:
     # the row must match all the filters
     if filters:
-        query = query.filter(**dict(zip(filters, ["{0}{1}{0}".format(quotes, v) for v in filterValues])))
+        query = query.filter(**dict(zip(["{0}__startswith".format(f) for f in filters],
+                                        ["{0}{1}{0}".format(quotes, v) for v in filterValues])))
 
     # search using the tsvector column which represents our document made of all the columns
     if search_term:
