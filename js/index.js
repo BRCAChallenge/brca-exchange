@@ -283,17 +283,15 @@ function toNumber(v) {
 }
 
 function databaseParams(paramsIn) {
-    var {filter, filterValue, hide, source} = _.mapObject(
-            _.pick(paramsIn, 'hide', 'filter', 'filterValue', 'source'), toArray),
-        numParams = _.mapObject(_.pick(paramsIn, 'page', 'pageLength'),
-                toNumber),
-        {orderBy, order, search = ''} = _.pick(paramsIn, 'search', 'orderBy', 'order'),
-        sortBy = {prop: orderBy, order},
-        columnSelection = _.object(hide, _.map(hide, _.constant(false))),
-        source = _.object(source, _.map(source, _.constant(true))),
-        filterValues = _.object(filter, filterValue);
-
-    return {search, sortBy, columnSelection, filterValues, hide, source, ...numParams};
+    var {filter, filterValue, hide, hideSources} = _.mapObject(
+        _.pick(paramsIn, 'hide', 'filter', 'filterValue', 'hideSources'), toArray);
+    var numParams = _.mapObject(_.pick(paramsIn, 'page', 'pageLength'), toNumber);
+    var {orderBy, order, search = ''    } = _.pick(paramsIn, 'search', 'orderBy', 'order');
+    var sortBy = {prop: orderBy, order};
+    var columnSelection = _.object(hide, _.map(hide, _.constant(false)));
+    var hiddenSources = _.object(hideSources, _.map(hide, _.constant(false)));
+    var filterValues = _.object(filter, filterValue);
+    return {search, sortBy, columnSelection, hiddenSources, filterValues, hide, ...numParams};
 }
 
 var transpose = a => _.zip.apply(_, a);
@@ -304,7 +302,7 @@ function urlFromDatabase(state) {
     var {columnSelection, filterValues, sourceSelection,
             search, page, pageLength, sortBy: {prop, order}} = state,
         hide = _.keys(_.pick(columnSelection, v => !v)),
-        sources = _.keys(_.pick(sourceSelection, v => v)),
+        hideSources = _.keys(_.pick(sourceSelection, v => !v)),
         [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v)));
     return _.pick({
         search: search === '' ? null : search,
@@ -314,7 +312,7 @@ function urlFromDatabase(state) {
         pageLength: pageLength === 20 ? null : pageLength,
         orderBy: prop,
         order,
-        source: sources,
+        hideSources: hideSources,
         hide: hide.length === 0 ? null : hide
     }, v => v != null);
 

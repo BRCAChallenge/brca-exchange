@@ -13,6 +13,7 @@
 var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin');
 var DataTable = require('./DataTable');
+var _ = require('underscore');
 require('react-data-components-bd2k/css/table-twbs.css');
 
 function buildHeader(onClick, title) {
@@ -201,7 +202,7 @@ var columnSelection = {
     HGVS_protein_exLOVD: {selectVal: false}
 };
 
-var sources = {
+var allSources = {
     Variant_in_ENIGMA: true,
     Variant_in_ClinVar: true,
     Variant_in_1000_Genomes: true,
@@ -231,7 +232,7 @@ var VariantTable = React.createClass({
         return this.refs.table.state.data;
     },
     render: function () {
-        var {data, onHeaderClick, onRowClick, ...opts} = this.props;
+        var {data, onHeaderClick, onRowClick, hiddenSources,...opts} = this.props;
         return (
             <DataTable
                 ref='table'
@@ -243,7 +244,7 @@ var VariantTable = React.createClass({
                 columns={columns}
                 subColumns={subColumns}
                 columnSelection={columnSelection}
-                source={sources}
+                sourceSelection={_.mapObject(allSources, (v,k)=> {return _.has(hiddenSources, k)? !v : v})}
                 initialData={data}
                 initialPageLength={20}
                 initialSortBy={{prop: 'Abbrev_AA_change', order: 'descending'}}
