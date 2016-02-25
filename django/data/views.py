@@ -96,8 +96,8 @@ def autocomplete(request):
         """SELECT word FROM words
         WHERE word LIKE %s
         AND char_length(word) >= 3
-        ORDER BY similarity(word, %s) DESC, word""",
-        ["%s%%" % term, term])
+        ORDER BY word""",
+        ["%s%%" % term])
 
     rows = cursor.fetchall()
 
