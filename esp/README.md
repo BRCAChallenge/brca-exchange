@@ -15,5 +15,6 @@ espExtract.py $CGLBRCA/phase1/data/esp/ESP6500SI-V2-SSA137.GRCh38-liftover.chr13
 Commands to get all the VCF fields for the BRCA1 GRCh38 gene bounds of BRCA1
 of chr17:43044295-43125483 and BRCA2 of chr13:32315473-32400266
 
-espExtract.py ESP6500SI-V2-SSA137.GRCh38-liftover.chr17.snps_indels.vcf --start 43044295 --end 43125483 --full 1 > esp.brca.vcf
-espExtract.py ESP6500SI-V2-SSA137.GRCh38-liftover.chr13.snps_indels.vcf --start 32315473 --end 32400266 --full 1 >> esp.brca.vcf
+espExtract.py ESP6500SI-V2-SSA137.GRCh38-liftover.chr17.snps_indels.vcf --start 43044295 --end 43125483 --full 1 -o esp.brca1.vcf
+espExtract.py ESP6500SI-V2-SSA137.GRCh38-liftover.chr13.snps_indels.vcf --start 32315473 --end 32400266 --full 1 -o esp.brca2.vcf
+(cat esp.brca1.vcf ; cat esp.brca2.vcf |grep -v "##" ) > esp.brca.vcf

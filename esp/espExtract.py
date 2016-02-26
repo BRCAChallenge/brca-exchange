@@ -20,27 +20,36 @@ def main():
     parser.add_argument("-s", "--start")
     parser.add_argument("-e", "--end")
     parser.add_argument("-a", "--ancestry")
-    parser.add_argument("-f", "--full", default=False)
+    parser.add_argument("-f", "--full")
+    parser.add_argument("-o", "--output")
     args = parser.parse_args()
 
     start = int(args.start)
     end = int(args.end)
     reader = vcf.Reader(open(args.inputVcf, 'r'))
     if args.full:
-        writer = vcf.Writer(open("out.vcf", "w"), reader)
+        writer = vcf.Writer(open(args.output, "w"), reader)
     for record in reader:
-        if int(record.POS) >= start and int(record.POS) <= end:
-            if args.full:
-                writer.write_record(record)
-            else:
-                if args.ancestry == "EA":
-                    maf = record.INFO["MAF"][0]
-                elif args.ancestry == "AA":
-                    maf = record.INFO["MAF"][1]
-                for alt in record.ALT:
-                    print "%s_%s_%s_%s %s" % (record.CHROM, record.POS, 
-                                              record.REF,
-                                              alt, maf)
+        if record.INFO.has_key("GRCh38_POSITION"):
+            tokens = record.INFO["GRCh38_POSITION"][0].split(":")
+            if len(tokens) > 1:
+                chrom = tokens[0]
+                pos = tokens[1]
+                if int(pos) >= start and int(pos) <= end:
+                    if args.full:
+                        record.CHROM = chrom
+                        record.POS = pos
+                        writer.write_record(record)
+                    else:
+                        if args.ancestry == "EA":
+                            maf = record.INFO["MAF"][0]
+                        elif args.ancestry == "AA":
+                            maf = record.INFO["MAF"][1]
+                        for alt in record.ALT:
+                            print "%s_%s_%s_%s %s" % (record.CHROM, 
+                                                      record.POS, 
+                                                      record.REF,
+                                                      alt, maf)
 
 
 if __name__ == "__main__":
