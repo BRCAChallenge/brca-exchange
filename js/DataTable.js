@@ -78,7 +78,7 @@ var DataTable = React.createClass({
             filterValues: {},
             search: '',
             columnSelection: _.object(_.map(this.props.columns, c => _.contains(defaultColumns, c.prop) ? [c.prop, true] : [c.prop, false])),
-            sourceSelection: this.props.source,
+            sourceSelection: this.props.sourceSelection,
             pageLength: 20,
             page: 0,
             totalPages: 20, // XXX this is imaginary. Do we need it?
@@ -115,7 +115,6 @@ var DataTable = React.createClass({
             filterValues}, hgvs.filters(search, filterValues)));
     },
     fetch: function (state) {
-        // XXX set source
         var {pageLength, search, page, sortBy,
             filterValues, columnSelection, sourceSelection} = state;
         this.fetchq.onNext(merge({
@@ -184,7 +183,7 @@ var DataTable = React.createClass({
     render: function () {
         var {filterValues, filtersOpen, lollipopOpen, search, data, columnSelection, sourceSelection,
             page, totalPages, count, error} = this.state;
-        var {columns, filterColumns, suggestions, className, subColumns, source} = this.props;
+        var {columns, filterColumns, suggestions, className, subColumns} = this.props;
         var renderColumns = _.filter(columns, c => columnSelection[c.prop]);
         var filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
             <SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
@@ -197,7 +196,7 @@ var DataTable = React.createClass({
                 </Panel>
             </Col>
         );
-        var sourceCheckboxes = _.map(source, (value, name) =>
+        var sourceCheckboxes = _.map(sourceSelection, (value, name) =>
             <Col sm={6} md={2}>
                 <div>
                     <ColumnCheckbox
