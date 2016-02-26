@@ -19,16 +19,16 @@ var DisclaimerModal = React.createClass({
     render() {
         var modalTrigger = React.cloneElement(this.props.children,{onClick:this.open});
         return (
-            <div style={{display: "inline", cursor: "pointer"}}>
+            <span>
                 {modalTrigger}
                 {this.state.showModal ?
-                    <Modal onHide={this.close}>
+                    <Modal onRequestHide={this.close}>
                         <RawHTML html={content.pages.disclaimer} />
-                        <div className = "close-button">
+                        <div>
                             <Button onClick={this.close}>close</Button>
                         </div>
                     </Modal> : null }
-            </div>
+            </span>
         );
     }
 });
