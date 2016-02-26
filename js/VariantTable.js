@@ -244,7 +244,7 @@ var VariantTable = React.createClass({
                 columns={columns}
                 subColumns={subColumns}
                 columnSelection={columnSelection}
-                sourceSelection={_.mapObject(allSources, (v,k)=> {return _.has(hiddenSources, k)? !v : v})}
+                sourceSelection={_.mapObject(allSources, (v,k)=> {return _.has(hiddenSources, k)? false : true})}
                 initialData={data}
                 initialPageLength={20}
                 initialSortBy={{prop: 'Abbrev_AA_change', order: 'descending'}}
