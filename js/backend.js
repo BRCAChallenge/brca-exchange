@@ -18,9 +18,9 @@ var transpose = a => _.zip.apply(_, a);
 function trimSearchTerm(search) {
     if (search.length > 50) {
         search = search.slice(0, 50);
-        var lastSemicolonPosition = search.lastIndexOf(":");
-        if (lastSemicolonPosition !== -1) {
-            search = search.slice(0, lastSemicolonPosition);
+        var lastColonPosition = search.lastIndexOf(":");
+        if (lastColonPosition !== -1) {
+            search = search.slice(0, lastColonPosition);
         }
     }
     return search;
