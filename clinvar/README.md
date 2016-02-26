@@ -8,13 +8,13 @@
 # a magic formula that keeps the code from choking on extended ascii 
 # characters.  Produces a smaller XML.
 #
-# clinVarBrca.py $CLINVARXML | awk '{ if (NF > 0) { print }}' > $CLINVAR_BRCA
+clinVarBrca.py $CLINVARXML | awk '{ if (NF > 0) { print }}' > $CLINVAR_BRCA
 
 #
 # 3. Extract data from the XML file into tab-delimited format
-# clinVarParse.py $CLINVAR_BRCA --assembly GRCh38 > $CLINVAR_BRCA_GRCH38_TAB
+clinVarParse.py $CLINVAR_BRCA --assembly GRCh38 |grep -v None |grep -v NA > $CLINVAR_BRCA_GRCH38_TAB
 
 #
 # 4. Convert the tab data into VCF format, using convert_tsv_to_vcf from utils
-# ../utils/convert_tsv_to_vcf.py -i $CLINVAR_BRCA_GRCH38_TAB -s "#GRCH38" -o $CLINVAR_BRCA_VCF
-#python ../data_merging/convert_tsv_to_vcf.py -i test2.txt -o test.vcf -s "ClinVar" 
+# ../utils/convert_tsv_to_vcf.py -i $CLINVAR_BRCA_GRCH38_TAB -s "#ClinVar" -o $CLINVAR_BRCA_VCF
+convert_tsv_to_vcf.py -i ClinVarBrca.txt -o ClinVarBrca.vcf -s "ClinVar" 
