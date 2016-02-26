@@ -11,7 +11,7 @@ GENOME1K = {"Allele_frequency(1000_Genomes)":"AF",
             "AFR_Allele_frequency(1000_Genomes)":"AFR_AF",
             "AMR_Allele_frequency(1000_Genomes)":"AMR_AF",
             "SAS_Allele_frequency(1000_Genomes)":"SAS_AF"}
-CLINVAR = {"Allele_origin(ClinVar)":"CLNORIGIN", 
+CLINVAR = {"Allele_origin(ClinVar)":"CLNORIGIN",
            "Variant_clinical_significance(ClinVar)":"CLNSIG"}
 LOVD = {"Origin_of_variant(LOVD)": "genetic_origin",
         "Variant_frequency(LOVD)": "frequency",
@@ -19,21 +19,18 @@ LOVD = {"Origin_of_variant(LOVD)": "genetic_origin",
         "Variant_affecting_protein(LOVD)": "effect",
         "HGVS_cDNA(LOVD)": "dna_change",
         "HGVS_genomic(LOVD)": "dna_change_genomic",
-        "HGVS_protein(LOVD)": "protein_change"
-        }
+        "HGVS_protein(LOVD)": "protein_change"}
 EXAC = {"Allele_frequency(ExAC)": "AF",
         "VEP_Gene(ExAC)": "CSQ_Gene",
         "VEP_Consequence(ExAC)":"CSQ_Consequence",
         "VEP_HGVSc(ExAC)":"CSQ_HGVSc",
-        "VEP_HGVSp(ExAC)":"CSQ_HGVSp"
-        }
+        "VEP_HGVSp(ExAC)":"CSQ_HGVSp"}
 EX_LOVD = {"Exon_number(exLOVD)":"exon",
-        "HGVS_cDNA(exLOVD)":"dna_change",
-        "BIC(exLOVD)":"dna_change_bic",
-        "HGVS_protein(exLOVD)":"protein_change",
-        "IARC_class(exLOVD)":"iarc_class",
-        "Literature_source(exLOVD)":"observational_reference"
-        }
+           "HGVS_cDNA(exLOVD)":"dna_change",
+           "BIC(exLOVD)":"dna_change_bic",
+           "HGVS_protein(exLOVD)":"protein_change",
+           "IARC_class(exLOVD)":"iarc_class",
+           "Literature_source(exLOVD)":"observational_reference"}
 BIC = {"Clinical_classification(BIC)":"Category",
        "Number_of_family_member_carrying_mutation(BIC)":"Number_Reported",
        "Exon_number(BIC)":"Exon",
@@ -46,8 +43,7 @@ BIC = {"Clinical_classification(BIC)":"Category",
        "HGVS_cDNA(BIC)":"HGVS_cDNA",
        "Literature_citation(BIC)":"Reference",
        "HGVS_genomic(BIC)":"HGVS_Genomic_(hg19)",
-       "HGVS_protein(BIC)":"HGVS_Protein"
-       }
+       "HGVS_protein(BIC)":"HGVS_Protein"}
 
 ENIGMA_FILE = "../data/enigma_variants_9-29-2015.tsv"
 GENOME1K_FILE = "../data/allVcf/no_repeats/1000_genomes.brca.no_sample.ovpr.no_repeats.vcf"
@@ -57,26 +53,37 @@ EX_LOVD_FILE = "../data/allVcf/no_repeats/ex_lovd.brca.ovpr.no_repeats.vcf"
 BIC_FILE = "../data/allVcf/no_repeats/bic.brca.no_repeats.vcf"
 EXAC_FILE = "../data/allVcf/no_repeats/exac.brca.ovpr.no_repeats.vcf"
 
+SOURCE_DICT = {"1000_Genomes": [GENOME1K_FILE, GENOME1K],
+               "ClinVar": [CLINVAR_FILE, CLINVAR],
+               "LOVD": [LOVD_FILE, LOVD],
+               "ExAC": [EXAC_FILE, EXAC],
+               "BIC": [BIC_FILE, BIC]}
+
+
 def main():
     (columns, variants) = save_enigma_to_dict(ENIGMA_FILE)
 
-    (columns, variants) = add_new_source(columns, variants, "1000_Genomes",
-                                          GENOME1K_FILE, GENOME1K)
+    for source, value in SOURCE_DICT.iteritems():
+        (columns, variants) = add_new_source(columns, variants, source,
+                                             value[0], value[1])
 
-    (columns, variants) = add_new_source(columns, variants, "ClinVar",
-            CLINVAR_FILE, CLINVAR)
-
-    (columns, variants) = add_new_source(columns, variants, "LOVD",
-            LOVD_FILE, LOVD)
-
-    (columns, variants) = add_new_source(columns, variants, "ExAC",
-            EXAC_FILE, EXAC)
-
-    (columns, variants) = add_new_source(columns, variants, "exLOVD",
-            EX_LOVD_FILE, EX_LOVD)
-
-    (columns, variants) = add_new_source(columns, variants, "BIC",
-            BIC_FILE, BIC)
+#    (columns, variants) = add_new_source(columns, variants, "1000_Genomes",
+#                                          GENOME1K_FILE, GENOME1K)
+#
+#    (columns, variants) = add_new_source(columns, variants, "ClinVar",
+#            CLINVAR_FILE, CLINVAR)
+#
+#    (columns, variants) = add_new_source(columns, variants, "LOVD",
+#            LOVD_FILE, LOVD)
+#
+#    (columns, variants) = add_new_source(columns, variants, "ExAC",
+#            EXAC_FILE, EXAC)
+#
+#    (columns, variants) = add_new_source(columns, variants, "exLOVD",
+#            EX_LOVD_FILE, EX_LOVD)
+#
+#    (columns, variants) = add_new_source(columns, variants, "BIC",
+#            BIC_FILE, BIC)
 
     write_new_tsv("../data/merge/merged_new.tsv", columns, variants)
 
@@ -98,7 +105,7 @@ def add_new_source(columns, variants, source, source_file, source_dict):
     variants_num = 0
     for record in vcf_reader:
         variants_num += 1
-        genome_coor = ("chr" + str(record.CHROM) + ":" + str(record.POS) + ":" + 
+        genome_coor = ("chr" + str(record.CHROM) + ":" + str(record.POS) + ":" +
                        record.REF + ">" + str(record.ALT[0]))
         if genome_coor in variants.keys():
             overlap += 1
@@ -106,7 +113,7 @@ def add_new_source(columns, variants, source, source_file, source_dict):
 
         else: 
             variants[genome_coor] = ['-'] * old_column_num
-            variants[genome_coor][0] = source 
+            variants[genome_coor][0] = source
             variants[genome_coor][2] = genome_coor
 
         for value in source_dict.values():
@@ -123,11 +130,11 @@ def add_new_source(columns, variants, source, source_file, source_dict):
     print "number of variants with the addition of " + source + "is: ", len(variants), "\n"
 
 
-    for key, value in variants.iteritems():
+    for value in variants.values():
         if len(value) != len(columns):
             raise Exception("mismatching number of columns in head and row")
 
-    return (columns, variants) 
+    return (columns, variants)
 
 
 def save_enigma_to_dict(path):
@@ -139,14 +146,14 @@ def save_enigma_to_dict(path):
         line_num += 1
         if line_num == 1:
             columns = line.strip().split("\t")
-            columns.insert(0,"Source")
+            columns.insert(0, "Source")
         else:
             items = line.strip().split("\t")
-            items.insert(0,"ENIGMA")
+            items.insert(0, "ENIGMA")
             variants[items[2]] = items
     print "number of variants in enigma: ", len(variants), "\n"
     return (columns, variants)
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
 

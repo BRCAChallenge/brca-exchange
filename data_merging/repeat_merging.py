@@ -1,5 +1,6 @@
 """
-this script takes a vcf file and collapes repeatative variant rows
+this script takes a vcf file, collapses representative variant rows and write out
+to a new vcf file (without header)
 """
 
 import vcf
@@ -7,8 +8,16 @@ import argparse
 import copy
 import sys
 
+
+def arg_parse():
+    parser = argparse.ArgumentParser() 
+    parser.add_argument("-i", "--input") 
+    parser.add_argument("-o", "--output") 
+    args = parser.parse_args() 
+    return args 
+
 def main():
-    print "warinng: this script doesn't write out headers"
+    print "warning: this script doesn't write out headers"
     args = arg_parse()
     vcf_reader = vcf.Reader(open(args.input, "r"), strict_whitespace=True)
     variant_dict = {}
@@ -66,13 +75,6 @@ def write_to_vcf(path_out, v_dict):
         new_line = "\t".join(items)
         f_out.write(new_line + "\n")
 
-
-def arg_parse():
-    parser = argparse.ArgumentParser() 
-    parser.add_argument("-i", "--input") 
-    parser.add_argument("-o", "--output") 
-    args = parser.parse_args() 
-    return args 
 
 
 
