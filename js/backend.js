@@ -13,6 +13,19 @@ var databaseUrl = "http://brcaexchange.cloudapp.net/backend";
 
 var transpose = a => _.zip.apply(_, a);
 
+// URIs have a 2083 character size limit and some search terms exceed that.
+// Limit the length and cut at a semicolon if possible to ensure the search works
+function trimSearchTerm(search) {
+    if (search.length > 50) {
+        search = search.slice(0, 50);
+        var lastColonPosition = search.lastIndexOf(":");
+        if (lastColonPosition !== -1) {
+            search = search.slice(0, lastColonPosition);
+        }
+    }
+    return search;
+}
+
 // XXX these defaults might produce odd user experience, since they
 // are not reflected in the UI.
 function url(opts) {
@@ -27,6 +40,7 @@ function url(opts) {
         } = opts,
 
         [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v)));
+    search = trimSearchTerm(search);
 
     return `${databaseUrl}/data/?${qs.stringify(_.pick({
         format,
@@ -47,5 +61,6 @@ function data(opts) {
 
 module.exports = {
     data,
-    url
+    url,
+    trimSearchTerm
 };

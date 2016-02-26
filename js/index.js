@@ -305,7 +305,7 @@ function urlFromDatabase(state) {
         hide = _.keys(_.pick(columnSelection, v => !v)),
         [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v)));
     return _.pick({
-        search: search === '' ? null : search,
+        search: search === '' ? null : backend.trimSearchTerm(search),
         filter,
         filterValue,
         page: page === 0 ? null : page,
@@ -322,6 +322,7 @@ var Database = React.createClass({
     // getQuery().
     mixins: [Navigation, State],
     showVariant: function (row) {
+        row.Genomic_Coordinate = backend.trimSearchTerm(row.Genomic_Coordinate);
         this.transitionTo(`/variant/${variantPathJoin(row)}`);
     },
     showHelp: function (title) {

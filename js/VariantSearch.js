@@ -31,13 +31,14 @@ function getSuggestions(value, callback) {
 }
 
 function renderSuggestion(suggestion, input) {
-    input.indexOf(suggestion)
+    var maxLengthToDisplay = 50;
     return (
         <span>
             <strong>{suggestion.slice(0, input.length)}</strong>
-            {suggestion.slice(input.length)}
+            {suggestion.slice(input.length, maxLengthToDisplay)}
+            {(suggestion.length > maxLengthToDisplay) ? "..." : ""}
         </span>
-   );
+    );
 }
 
 var VariantSearch = React.createClass({
