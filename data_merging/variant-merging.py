@@ -5,59 +5,41 @@ the exisitng enigma variants:
 import vcf
 
 #key value pair dictionaries of all extra fields in various databases to add
-GENOME1K = {"Allele_frequency(1000_Genomes)":"AF",
-            "EAS_Allele_frequency(1000_Genomes)":"EAS_AF",
-            "EUR_Allele_frequency(1000_Genomes)":"EUR_AF",
-            "AFR_Allele_frequency(1000_Genomes)":"AFR_AF",
-            "AMR_Allele_frequency(1000_Genomes)":"AMR_AF",
-            "SAS_Allele_frequency(1000_Genomes)":"SAS_AF"}
-CLINVAR = {"Allele_origin(ClinVar)":"CLNORIGIN",
-           "Variant_clinical_significance(ClinVar)":"CLNSIG"}
-LOVD = {"Origin_of_variant(LOVD)": "genetic_origin",
-        "Variant_frequency(LOVD)": "frequency",
-        "Variant_haplotype(LOVD)": "haplotype",
-        "Variant_affecting_protein(LOVD)": "effect",
-        "HGVS_cDNA(LOVD)": "dna_change",
-        "HGVS_genomic(LOVD)": "dna_change_genomic",
-        "HGVS_protein(LOVD)": "protein_change"}
-EXAC = {"Allele_frequency(ExAC)": "AF",
-        "VEP_Gene(ExAC)": "CSQ_Gene",
-        "VEP_Consequence(ExAC)":"CSQ_Consequence",
-        "VEP_HGVSc(ExAC)":"CSQ_HGVSc",
-        "VEP_HGVSp(ExAC)":"CSQ_HGVSp"}
-EX_LOVD = {"Exon_number(exLOVD)":"exon",
-           "HGVS_cDNA(exLOVD)":"dna_change",
-           "BIC(exLOVD)":"dna_change_bic",
-           "HGVS_protein(exLOVD)":"protein_change",
-           "IARC_class(exLOVD)":"iarc_class",
-           "Literature_source(exLOVD)":"observational_reference"}
-BIC = {"Clinical_classification(BIC)":"Category",
-       "Number_of_family_member_carrying_mutation(BIC)":"Number_Reported",
-       "Exon_number(BIC)":"Exon",
-       "Patient_nationality(BIC)":"Nationality",
-       "Germline_or_Somatic(BIC)":"G_or_S",
-       "Mutation_type(BIC)":"Mutation_Type",
-       "BIC_Designation(BIC)":"Designation",
-       "Clinical_importance(BIC)":"Clinically_Importance",
-       "Ethnicity(BIC)":"Ethnicity",
-       "HGVS_cDNA(BIC)":"HGVS_cDNA",
-       "Literature_citation(BIC)":"Reference",
-       "HGVS_genomic(BIC)":"HGVS_Genomic_(hg19)",
-       "HGVS_protein(BIC)":"HGVS_Protein"}
+GENOME1K_FIELDS = {"Allele_frequency(1000_Genomes)":"AF",
+                   "EAS_Allele_frequency(1000_Genomes)":"EAS_AF",
+                   "EUR_Allele_frequency(1000_Genomes)":"EUR_AF",
+                   "AFR_Allele_frequency(1000_Genomes)":"AFR_AF",
+                   "AMR_Allele_frequency(1000_Genomes)":"AMR_AF",
+                   "SAS_Allele_frequency(1000_Genomes)":"SAS_AF"}
+CLINVAR_FIELDS = {"Allele_origin(ClinVar)":"CLNORIGIN",
+                  "Variant_clinical_significance(ClinVar)":"CLNSIG"}
+LOVD_FIELDS = {"Origin_of_variant(LOVD)": "genetic_origin",
+               "Variant_frequency(LOVD)": "frequency",
+               "Variant_haplotype(LOVD)": "haplotype",
+               "Variant_affecting_protein(LOVD)": "effect",
+               "HGVS_cDNA(LOVD)": "dna_change",
+               "HGVS_genomic(LOVD)": "dna_change_genomic",
+               "HGVS_protein(LOVD)": "protein_change"}
+EXAC_FIELDS = {"Allele_frequency(ExAC)": "AF"}
+EX_LOVD_FIELDS = {"Exon_number(exLOVD)":"exon",
+                  "HGVS_cDNA(exLOVD)":"dna_change",
+                  "BIC(exLOVD)":"dna_change_bic",
+                  "HGVS_protein(exLOVD)":"protein_change",
+                  "IARC_class(exLOVD)":"iarc_class",
+                  "Literature_source(exLOVD)":"observational_reference"}
 
 ENIGMA_FILE = "../data/enigma_variants_9-29-2015.tsv"
 GENOME1K_FILE = "../data/allVcf/no_repeats/1000_genomes.brca.no_sample.ovpr.no_repeats.vcf"
 CLINVAR_FILE = "../data/allVcf/no_repeats/clinvar.brca.ovpr.no_repeats.vcf"
 LOVD_FILE = "../data/allVcf/no_repeats/lovd.brca.ovpr.no_repeats.vcf"
 EX_LOVD_FILE = "../data/allVcf/no_repeats/ex_lovd.brca.ovpr.no_repeats.vcf"
-BIC_FILE = "../data/allVcf/no_repeats/bic.brca.no_repeats.vcf"
 EXAC_FILE = "../data/allVcf/no_repeats/exac.brca.ovpr.no_repeats.vcf"
 
-SOURCE_DICT = {"1000_Genomes": [GENOME1K_FILE, GENOME1K],
-               "ClinVar": [CLINVAR_FILE, CLINVAR],
-               "LOVD": [LOVD_FILE, LOVD],
-               "ExAC": [EXAC_FILE, EXAC],
-               "BIC": [BIC_FILE, BIC]}
+SOURCE_DICT = {"1000_Genomes": [GENOME1K_FILE, GENOME1K_FIELDS],
+               "ClinVar": [CLINVAR_FILE, CLINVAR_FIELDS],
+               "LOVD": [LOVD_FILE, LOVD_FIELDS],
+               "exLOVD" :[EX_LOVD_FILE, EX_LOVD_FIELDS],
+               "ExAC": [EXAC_FILE, EXAC_FIELDS]}
 
 
 def main():
