@@ -48,19 +48,30 @@ EXAC_FILE = PIPELINE_INPUT + "exac_BRCA12.sorted.hg38.vcf"
 
 SOURCE_DICT = {"1000_Genomes": [GENOME1K_FILE, GENOME1K_FIELDS],
                #"ClinVar": [CLINVAR_FILE, CLINVAR_FIELDS],
-               "LOVD": [LOVD_FILE, LOVD_FIELDS],
-               "exLOVD" :[EX_LOVD_FILE, EX_LOVD_FIELDS],
-               "ExAC": [EXAC_FILE, EXAC_FIELDS]}
-
+               #"LOVD": [LOVD_FILE, LOVD_FIELDS],
+               #"exLOVD" :[EX_LOVD_FILE, EX_LOVD_FIELDS],
+               #"ExAC": [EXAC_FILE, EXAC_FIELDS],
+               }
 
 def main():
-    # Proprocessing variants:
+    # Preprocessing variants:
+    print "preprocessing 1000 Genome file"
     tmp_dir = tempfile.mkdtemp()
     try:
-        f = open(tmp_dir + "/filename", "w")
-        (subprocess.call(["bash", "preprocess.sh", GENOME1K_FILE], stdout=f))
+        f_1000G = open(tmp_dir + "/1000G.vcf", "w")
+        (subprocess.call(["bash", "preprocess.sh", GENOME1K_FILE], stdout=f_1000G))
+        GENOME1K_FILE = tmp_dir + "/1000G.vcf", "r")
+    
+
+
     finally:
         shutil.rmtree(tmp_dir)
+
+
+
+
+
+
 
 #    (columns, variants) = save_enigma_to_dict(ENIGMA_FILE)
 
