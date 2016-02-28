@@ -3,6 +3,10 @@ this scripts takes the enigma variant list and merge vcf files in a folder into
 the exisitng enigma variants:
 """
 import vcf
+import subprocess
+import tempfile
+import shutil
+from StringIO import StringIO
 
 #key value pair dictionaries of all extra fields in various databases to add
 GENOME1K_FIELDS = {"Allele_frequency(1000_Genomes)":"AF",
@@ -33,7 +37,7 @@ GENOME1K_FILE = PIPELINE_INPUT + "1000G_brca.sorted.hg38.vcf"
 #CLINVAR_FILE = PIPELINE_INPUT + "ClinVarBrca.vcf"
 LOVD_FILE = PIPELINE_INPUT + "sharedLOVD_brca12.sorted.hg38.vcf"
 EX_LOVD_FILE = PIPELINE_INPUT + "exLOVD_brca12.sorted.hg38.vcf"
-ExAC_FILE = PIPELINE_INPUT + "exac_BRCA12.sorted.hg38.vcf"
+EXAC_FILE = PIPELINE_INPUT + "exac_BRCA12.sorted.hg38.vcf"
 
 
 #GENOME1K_FILE = "../data/allVcf/no_repeats/1000_genomes.brca.no_sample.ovpr.no_repeats.vcf"
@@ -51,15 +55,20 @@ SOURCE_DICT = {"1000_Genomes": [GENOME1K_FILE, GENOME1K_FIELDS],
 
 def main():
     # Proprocessing variants:
-    truncate_1000
+    tmp_dir = tempfile.mkdtemp()
+    try:
+        f = open(tmp_dir + "/filename", "w")
+        (subprocess.call(["bash", "preprocess.sh", GENOME1K_FILE], stdout=f))
+    finally:
+        shutil.rmtree(tmp_dir)
 
-    (columns, variants) = save_enigma_to_dict(ENIGMA_FILE)
+#    (columns, variants) = save_enigma_to_dict(ENIGMA_FILE)
 
-    for source, value in SOURCE_DICT.iteritems():
-        (columns, variants) = add_new_source(columns, variants, source,
-                                             value[0], value[1])
+#    for source, value in SOURCE_DICT.iteritems():
+#        (columns, variants) = add_new_source(columns, variants, source,
+#                                             value[0], value[1])
 
-    write_new_tsv("../data/merge/merged_new.tsv", columns, variants)
+#    write_new_tsv("../data/merge/merged_new.tsv", columns, variants)
 
 def write_new_tsv(filename, columns, variants):
     merged_file = open(filename, "w")
