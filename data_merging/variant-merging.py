@@ -26,22 +26,33 @@ EX_LOVD_FIELDS = {"Exon_number(exLOVD)":"exon",
                   "HGVS_protein(exLOVD)":"protein_change",
                   "IARC_class(exLOVD)":"iarc_class",
                   "Literature_source(exLOVD)":"observational_reference"}
+PIPELINE_INPUT = "/hive/groups/cgl/brca/release1.0/pipeline_input/"
 
-ENIGMA_FILE = "../data/enigma_variants_9-29-2015.tsv"
-GENOME1K_FILE = "../data/allVcf/no_repeats/1000_genomes.brca.no_sample.ovpr.no_repeats.vcf"
-CLINVAR_FILE = "../data/allVcf/no_repeats/clinvar.brca.ovpr.no_repeats.vcf"
-LOVD_FILE = "../data/allVcf/no_repeats/lovd.brca.ovpr.no_repeats.vcf"
-EX_LOVD_FILE = "../data/allVcf/no_repeats/ex_lovd.brca.ovpr.no_repeats.vcf"
-EXAC_FILE = "../data/allVcf/no_repeats/exac.brca.ovpr.no_repeats.vcf"
+ENIGMA_FILE = PIPELINE_INPUT + "enigma_variants_GRCh38_2-27-2016.tsv"
+GENOME1K_FILE = PIPELINE_INPUT + "1000G_brca.sorted.hg38.vcf"
+#CLINVAR_FILE = PIPELINE_INPUT + "ClinVarBrca.vcf"
+LOVD_FILE = PIPELINE_INPUT + "sharedLOVD_brca12.sorted.hg38.vcf"
+EX_LOVD_FILE = PIPELINE_INPUT + "exLOVD_brca12.sorted.hg38.vcf"
+ExAC_FILE = PIPELINE_INPUT + "exac_BRCA12.sorted.hg38.vcf"
+
+
+#GENOME1K_FILE = "../data/allVcf/no_repeats/1000_genomes.brca.no_sample.ovpr.no_repeats.vcf"
+#CLINVAR_FILE = "../data/allVcf/no_repeats/clinvar.brca.ovpr.no_repeats.vcf"
+#LOVD_FILE = "../data/allVcf/no_repeats/lovd.brca.ovpr.no_repeats.vcf"
+#EX_LOVD_FILE = "../data/allVcf/no_repeats/ex_lovd.brca.ovpr.no_repeats.vcf"
+#EXAC_FILE = "../data/allVcf/no_repeats/exac.brca.ovpr.no_repeats.vcf"
 
 SOURCE_DICT = {"1000_Genomes": [GENOME1K_FILE, GENOME1K_FIELDS],
-               "ClinVar": [CLINVAR_FILE, CLINVAR_FIELDS],
+               #"ClinVar": [CLINVAR_FILE, CLINVAR_FIELDS],
                "LOVD": [LOVD_FILE, LOVD_FIELDS],
                "exLOVD" :[EX_LOVD_FILE, EX_LOVD_FIELDS],
                "ExAC": [EXAC_FILE, EXAC_FIELDS]}
 
 
 def main():
+    # Proprocessing variants:
+    truncate_1000
+
     (columns, variants) = save_enigma_to_dict(ENIGMA_FILE)
 
     for source, value in SOURCE_DICT.iteritems():
