@@ -48,26 +48,33 @@ EXAC_FILE = PIPELINE_INPUT + "exac_BRCA12.sorted.hg38.vcf"
 #EX_LOVD_FILE = "../data/allVcf/no_repeats/ex_lovd.brca.ovpr.no_repeats.vcf"
 #EXAC_FILE = "../data/allVcf/no_repeats/exac.brca.ovpr.no_repeats.vcf"
 
-SOURCE_DICT = {"1000_Genomes": [GENOME1K_FILE, GENOME1K_FIELDS],
-               #"ClinVar": [CLINVAR_FILE, CLINVAR_FIELDS],
-               #"LOVD": [LOVD_FILE, LOVD_FIELDS],
-               #"exLOVD" :[EX_LOVD_FILE, EX_LOVD_FIELDS],
-               #"ExAC": [EXAC_FILE, EXAC_FIELDS],
-               }
 
 def main():
     # Preprocessing variants:
-    print "preprocessing 1000 Genome file"
+    print "preprocessing..."
     tmp_dir = tempfile.mkdtemp()
     try:
         f_1000G = open(tmp_dir + "/1000G.vcf", "w")
+        print "remove sample columns from 1000 Genome file"
         (subprocess.call(["bash", "preprocess.sh", GENOME1K_FILE], stdout=f_1000G))
-        GENOME1K_FILE = tmp_dir + "/1000G.vcf", "r")
     
-
+        source_dict = {"1000_Genomes": tmp_dir + "/1000G.vcf",
+                       #"ClinVar": CLINVAR_FILE,
+                       "LOVD": LOVD_FILE,
+                       "exLOVD": EX_LOVD_FILE,
+                       "ExAC": EXAC_FILE,
+                       #"ESP": ESP_FILE,
+                       }
+        
+        for source_name, file_name in source_dict.iteritems():
+            print "convert to one variant per line in ", source_name
+            f_in = open(file_name, "r")
+            f_out = open(tmp_dir + "/" + source_name + ".vcf", "w")
+            one_variant_transform(f_in, f_out)
 
     finally:
-        shutil.rmtree(tmp_dir)
+        print tmp_dir
+#        shutil.rmtree(tmp_dir)
 
 
 
@@ -83,11 +90,11 @@ def main():
 
 #    write_new_tsv("../data/merge/merged_new.tsv", columns, variants)
 
-def one_variant_tranform(f_in, f_out):
+def one_variant_transform(f_in, f_out):
     """takes a vcf file, read each row, if the ALT field contains more than 
        one item, create multiple variant row based on that row, writes new vcf"""
     vcf_reader = vcf.Reader(f_in, strict_whitespace=True)
-    vcf_writer = vcf.Writer(f_out, 'w'), vcf_reader)
+    vcf_writer = vcf.Writer(f_out, vcf_reader)
     for record in vcf_reader:
         n = len(record.ALT)
         if n == 1:
