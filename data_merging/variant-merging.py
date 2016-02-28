@@ -49,24 +49,6 @@ def main():
         (columns, variants) = add_new_source(columns, variants, source,
                                              value[0], value[1])
 
-#    (columns, variants) = add_new_source(columns, variants, "1000_Genomes",
-#                                          GENOME1K_FILE, GENOME1K)
-#
-#    (columns, variants) = add_new_source(columns, variants, "ClinVar",
-#            CLINVAR_FILE, CLINVAR)
-#
-#    (columns, variants) = add_new_source(columns, variants, "LOVD",
-#            LOVD_FILE, LOVD)
-#
-#    (columns, variants) = add_new_source(columns, variants, "ExAC",
-#            EXAC_FILE, EXAC)
-#
-#    (columns, variants) = add_new_source(columns, variants, "exLOVD",
-#            EX_LOVD_FILE, EX_LOVD)
-#
-#    (columns, variants) = add_new_source(columns, variants, "BIC",
-#            BIC_FILE, BIC)
-
     write_new_tsv("../data/merge/merged_new.tsv", columns, variants)
 
 def write_new_tsv(filename, columns, variants):
