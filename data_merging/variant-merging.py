@@ -7,6 +7,8 @@ import subprocess
 import tempfile
 import shutil
 from StringIO import StringIO
+from copy import deepcopy
+
 
 #key value pair dictionaries of all extra fields in various databases to add
 GENOME1K_FIELDS = {"Allele_frequency(1000_Genomes)":"AF",
@@ -80,6 +82,25 @@ def main():
 #                                             value[0], value[1])
 
 #    write_new_tsv("../data/merge/merged_new.tsv", columns, variants)
+
+def one_variant_tranform(f_in, f_out):
+    """takes a vcf file, read each row, if the ALT field contains more than 
+       one item, create multiple variant row based on that row, writes new vcf"""
+    vcf_reader = vcf.Reader(f_in, strict_whitespace=True)
+    vcf_writer = vcf.Writer(f_out, 'w'), vcf_reader)
+    for record in vcf_reader:
+        n = len(record.ALT)
+        if n == 1:
+            vcf_writer.write_record(record)
+        else:
+            for i in range(n):
+                new_record = deepcopy(record)
+                new_record.ALT = [deepcopy(record.ALT[i])]
+                for key in record.INFO.keys():
+                    value = deepcopy(record.INFO[key])
+                    if type(value) == list and len(value) == n:
+                        new_record.INFO[key] = [value[i]]
+                vcf_writer.write_record(new_record)
 
 def write_new_tsv(filename, columns, variants):
     merged_file = open(filename, "w")
