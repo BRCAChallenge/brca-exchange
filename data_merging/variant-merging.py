@@ -23,7 +23,6 @@ LOVD_FIELDS = {"Origin_of_variant(LOVD)": "genetic_origin",
 EXAC_FIELDS = {"Allele_frequency(ExAC)": "AF"}
 EX_LOVD_FIELDS = {"Exon_number(exLOVD)":"exon",
                   "HGVS_cDNA(exLOVD)":"dna_change",
-                  "BIC(exLOVD)":"dna_change_bic",
                   "HGVS_protein(exLOVD)":"protein_change",
                   "IARC_class(exLOVD)":"iarc_class",
                   "Literature_source(exLOVD)":"observational_reference"}
