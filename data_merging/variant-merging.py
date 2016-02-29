@@ -11,31 +11,48 @@ from copy import deepcopy
 
 
 #key value pair dictionaries of all extra fields in various databases to add
-GENOME1K_FIELDS = {"Allele_frequency(1000_Genomes)":"AF",
-                   "EAS_Allele_frequency(1000_Genomes)":"EAS_AF",
-                   "EUR_Allele_frequency(1000_Genomes)":"EUR_AF",
-                   "AFR_Allele_frequency(1000_Genomes)":"AFR_AF",
-                   "AMR_Allele_frequency(1000_Genomes)":"AMR_AF",
-                   "SAS_Allele_frequency(1000_Genomes)":"SAS_AF"}
-CLINVAR_FIELDS = {"HGVS(ClinVar)":"HGVS",
-                  "Submitter(ClinVar)":"Submitter",
-                  "Clinical_Significance(ClinVar)":"ClinicalSignificance",
-                  "Date_Last_Updated(ClinVar)":"DateLastUpdated",
-                  "SCV(ClinVar)":"SCV",
-                  "Origin(ClinVar)":"Origin",
-                  "Method(ClinVar)":"Method"}
-LOVD_FIELDS = {"Origin_of_variant(LOVD)": "genetic_origin",
-               "Variant_frequency(LOVD)": "frequency",
-               "Variant_haplotype(LOVD)": "haplotype",
-               "Functional_analysis_result(LOVD)": "functionalanalysis_result",
-               "Functional_analysis_technique(LOVD)": "functionalanalysis_technique",
+GENOME1K_FIELDS = {"Allele_frequency":"AF",
+                   "EAS_Allele_frequency":"EAS_AF",
+                   "EUR_Allele_frequency":"EUR_AF",
+                   "AFR_Allele_frequency":"AFR_AF",
+                   "AMR_Allele_frequency":"AMR_AF",
+                   "SAS_Allele_frequency":"SAS_AF"}
+CLINVAR_FIELDS = {"HGVS":"HGVS",
+                  "Submitter":"Submitter",
+                  "Clinical_Significance":"ClinicalSignificance",
+                  "Date_Last_Updated":"DateLastUpdated",
+                  "SCV":"SCV",
+                  "Allele_Origin":"Origin",
+                  "Method":"Method"}
+LOVD_FIELDS = {"Origin_of_variant": "genetic_origin",
+               "Variant_frequency": "frequency",
+               "Variant_haplotype": "haplotype",
+               "Functional_analysis_result": "functionalanalysis_result",
+               "Functional_analysis_technique": "functionalanalysis_technique",
                }
-EXAC_FIELDS = {"Allele_frequency(ExAC)": "AF"}
-EX_LOVD_FIELDS = {"Combined_prior_p(exLOVD)": "combined_prior_p",
-                  "IARC_class(exLOVD)":"iarc_class",
-                  "Literature_source(exLOVD)":"observational_reference"}
-ESP_FIELDS = {"HGVS_cDNA(ESP)": "HGVS_CDNA_VAR",
-              "Minor_allele_frequency(ESP)":"MAF"}
+EXAC_FIELDS = {"Allele_frequency": "AF"}
+EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
+                  "Segregation_LR": "segregation_lr",
+                  "Sum_family_LR": "sum_family_lr",
+                  "Co_occurrence_LR": "co_occurrence_lr",
+                  "Missense_analysis_prior_probability", "missense_analysis_prior_p",
+                  "Posterior_probability": "posterior_p",
+                  "IARC_class":"iarc_class",
+                  "BIC_identifier": "prior_p_refere",
+                  "Literature_source":"observational_reference"}
+BIC = {"Clinical_classification": "Category",
+       "Number_of_family_member_carrying_mutation": "Number_Reported",
+       "Patient_nationality": "Nationality",
+       "Germline_or_Somatic": "G_or_S",
+       "Mutation_type": "Mutation_Type",
+       "BIC_Designation": "Designation",
+       "Clinical_importance": "Clinically_Importance",
+       "Ethnicity": "Ethnicity",
+       "Literature_citation": "Reference",
+       }
+ESP_FIELDS = {"polyPhen2_result": "PH",
+              "Minor_allele_frequency":"MAF"}
+
 FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
                "ClinVar": CLINVAR_FIELDS,
                "LOVD": LOVD_FIELDS,
@@ -78,7 +95,7 @@ def preprocessing(tmp_dir):
                    "LOVD": LOVD_FILE,
                    "exLOVD": EX_LOVD_FILE,
                    "ExAC": EXAC_FILE,
-                   #"ESP": ESP_FILE,
+                   #"ESP": ESP_FILE, wait for melissa to fix error
                    }    
     print "\nPIPELINE INPUT:"
     for source_name, file_name in source_dict.iteritems():
@@ -183,7 +200,7 @@ def add_new_source(columns, variants, source, source_file, source_dict):
     print "adding {0} into merged file.....".format(source)
     old_column_num = len(columns)
     for column_title in source_dict.keys():
-        columns.append(column_title)
+        columns.append(column_title+"()".format(source))
 
     vcf_reader = vcf.Reader(open(source_file, 'r'), strict_whitespace=True)
     overlap = 0
