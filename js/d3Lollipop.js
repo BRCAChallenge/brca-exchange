@@ -5,6 +5,7 @@ var React = require('react');
 var _ = require('underscore');
 var {Row, Col, DropdownButton, MenuItem, Grid} = require('react-bootstrap');
 require('muts-needle-plot/src/js/d3-svg-legend');
+require('./css/d3Lollipop.css');
 var Mutneedles = require("muts-needle-plot");
 var PureRenderMixin = require('./PureRenderMixin');
 
@@ -52,13 +53,6 @@ var D3Lollipop = React.createClass({
             <div id='brcaLollipop' ref='d3svgBrca'/>
         );
     },
-    filterData: function (obj) {
-        if (obj.Gene_symbol === this.props.brcakey && 'Genomic_Coordinate' in obj && 'Clinical_significance' in obj && (obj.Clinical_significance === 'Benign' || obj.Clinical_significance === 'Pathogenic')) {
-            return true;
-        } else {
-            return false;
-        }
-    },
     filterAttributes: function (obj) {
         var oldObj = _(obj).pick('Genomic_Coordinate', 'Clinical_significance');
 
@@ -70,25 +64,28 @@ var D3Lollipop = React.createClass({
         } else {
             chrCoordinate = String(chrCoordinate);
         }
+        console.log(oldObj);
+        if (oldObj.Clinical_significance == '-'){
+            oldObj.Clinical_significance = "Unknown";
+        }
         var newObj = {category: oldObj.Clinical_significance, coord: chrCoordinate, value: 1};
         return newObj;
     },
     componentDidMount: function() {
         var {data, brcakey, ...opts} = this.props;
-        var filteredData = data.filter(this.filterData);
-        var subSetData = filteredData.map(this.filterAttributes);
+        var subSetData = data.map(this.filterAttributes);
         var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
         var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
         this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey);
     },
     componentWillReceiveProps: function(newProps) {
+        this.cleanupBRCA();
         var {data, brcakey, ...opts} = newProps;
         var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
         while (d3svgBrcaRef.hasChildNodes() ) {
             d3svgBrcaRef.removeChild(d3svgBrcaRef.lastChild);
         }
-        var filteredData = data.filter(this.filterData);
-        var subSetData = filteredData.map(this.filterAttributes);
+        var subSetData = data.map(this.filterAttributes);
         var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
         while (d3svgBrcaRef.hasChildNodes() ) {
             d3svgBrcaRef.removeChild(d3svgBrcaRef.lastChild);
