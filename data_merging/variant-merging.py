@@ -32,8 +32,15 @@ EX_LOVD_FIELDS = {"Exon_number(exLOVD)":"exon",
                   "HGVS_protein(exLOVD)":"protein_change",
                   "IARC_class(exLOVD)":"iarc_class",
                   "Literature_source(exLOVD)":"observational_reference"}
-PIPELINE_INPUT = "/hive/groups/cgl/brca/release1.0/pipeline_input/"
+FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
+               #"ClinVar": CLINVAR_FIELDS,
+               "LOVD": LOVD_FIELDS,
+               "exLOVD": EX_LOVD_FIELDS,
+               "ExAC": EXAC_FIELDS,
+               #"ESP": ESP_FILE,
+              }
 
+PIPELINE_INPUT = "/hive/groups/cgl/brca/release1.0/pipeline_input/"
 ENIGMA_FILE = PIPELINE_INPUT + "enigma_variants_GRCh38_2-27-2016.tsv"
 GENOME1K_FILE = PIPELINE_INPUT + "1000G_brca.sorted.hg38.vcf"
 #CLINVAR_FILE = PIPELINE_INPUT + "ClinVarBrca.vcf"
@@ -42,44 +49,28 @@ EX_LOVD_FILE = PIPELINE_INPUT + "exLOVD_brca12.sorted.hg38.vcf"
 EXAC_FILE = PIPELINE_INPUT + "exac_BRCA12.sorted.hg38.vcf"
 
 
-#GENOME1K_FILE = "../data/allVcf/no_repeats/1000_genomes.brca.no_sample.ovpr.no_repeats.vcf"
-#CLINVAR_FILE = "../data/allVcf/no_repeats/clinvar.brca.ovpr.no_repeats.vcf"
-#LOVD_FILE = "../data/allVcf/no_repeats/lovd.brca.ovpr.no_repeats.vcf"
-#EX_LOVD_FILE = "../data/allVcf/no_repeats/ex_lovd.brca.ovpr.no_repeats.vcf"
-#EXAC_FILE = "../data/allVcf/no_repeats/exac.brca.ovpr.no_repeats.vcf"
 
 
 def main():
     tmp_dir = tempfile.mkdtemp()
     try:
-        preprocessing(tmp_dir)
-        #(columns, variants) = save_enigma_to_dict(ENIGMA_FILE)
-
+        source_dict = preprocessing(tmp_dir)
+        print "------------merging------------------------------------"
+        (columns, variants) = save_enigma_to_dict(ENIGMA_FILE)
+        for source_name, file in source_dict.iteritems():
+            (columns, variants) = add_new_source(columns, variants, source_name, 
+                                                 file, FIELD_DICT[source_name])
+        write_new_tsv(PIPELINE_INPUT + "merged.tsv", columns, variants)
     finally:
-        print tmp_dir
-#        shutil.rmtree(tmp_dir)
-
-
-
-
-
-
-
-
-#    for source, value in SOURCE_DICT.iteritems():
-#        (columns, variants) = add_new_source(columns, variants, source,
-#                                             value[0], value[1])
-
-#    write_new_tsv("../data/merge/merged_new.tsv", columns, variants)
+        shutil.rmtree(tmp_dir)
 
 
 def preprocessing(tmp_dir):
     # Preprocessing variants:
-    print "preprocessing..."
-    print "--------------------------------------------------"
+    print "------------preprocessing--------------------------------"
     tmp_1000g = tmp_dir + "/1000G.vcf"
     f_1000G = open(tmp_1000g, "w")
-    print "remove sample columns from 1000 Genome file"
+    print "remove sample columns and two erroneous rows from 1000 Genome file"
     (subprocess.call(["bash", "preprocess.sh", GENOME1K_FILE], stdout=f_1000G))
     source_dict = {"1000_Genomes": tmp_1000g,
                    #"ClinVar": CLINVAR_FILE,
@@ -97,7 +88,8 @@ def preprocessing(tmp_dir):
         f_in = open(tmp_dir + "/" + source_name + ".vcf", "r")
         f_out = open(tmp_dir + "/" + source_name + "ready.vcf", "w")
         repeat_merging(f_in, f_out)
-
+        source_dict[source_name] = f_out.name
+    return source_dict
 
 def repeat_merging(f_in, f_out):
     """takes a vcf file, collapses repetitive variant rows and write out
@@ -128,7 +120,7 @@ def repeat_merging(f_in, f_out):
                     else:
                         merged_value = list(set(new_value + old_value))
                         variant_dict[genome_coor].INFO[key] = deepcopy(merged_value)
-    print "number of repeat records: ", num_repeats
+    print "number of repeat records: ", num_repeats, "\n"
     write_to_vcf(f_out, variant_dict)
 
 def write_to_vcf(f_out, v_dict):
@@ -180,6 +172,7 @@ def write_new_tsv(filename, columns, variants):
         merged_file.write("\t".join(variant)+"\n")
 
 def add_new_source(columns, variants, source, source_file, source_dict):
+    print "adding {0} into merged file.....".format(source)
     old_column_num = len(columns)
     for column_title in source_dict.keys():
         columns.append(column_title)
@@ -194,7 +187,6 @@ def add_new_source(columns, variants, source, source_file, source_dict):
         if genome_coor in variants.keys():
             overlap += 1
             variants[genome_coor][0] += ",{0}".format(source)
-
         else: 
             variants[genome_coor] = ['-'] * old_column_num
             variants[genome_coor][0] = source
@@ -211,15 +203,12 @@ def add_new_source(columns, variants, source, source_file, source_dict):
 
     print "number of variants in " + source + " is ", variants_num
     print "overlap with previous dataset: ", overlap
-    print "number of variants with the addition of " + source + "is: ", len(variants), "\n"
-
+    print "number of total variants with the addition of " + source + " is: ", len(variants), "\n"
 
     for value in variants.values():
         if len(value) != len(columns):
             raise Exception("mismatching number of columns in head and row")
-
     return (columns, variants)
-
 
 def save_enigma_to_dict(path):
     enigma_file = open(path, "r")
