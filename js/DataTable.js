@@ -8,6 +8,7 @@ var {Table, Pagination} = require('react-data-components-bd2k');
 var {Button, Row, Col, Panel} = require('react-bootstrap');
 var VariantSearch = require('./VariantSearch');
 var SelectField = require('./SelectField');
+var DisclaimerModal = require('./DisclaimerModal');
 var ColumnCheckbox = require('./ColumnCheckbox');
 var _ = require('underscore');
 var cx = require('classnames');
@@ -263,6 +264,9 @@ var DataTable = React.createClass({
                                 this.setStateFetch({search: v, page: 0});
                             }}
                         />
+                    </Col>
+                    <Col>
+                        <DisclaimerModal><Button>Research information on this variant</Button></DisclaimerModal>
                     </Col>
                     <Col sm={6} smOffset={1}>
                         <Pagination
