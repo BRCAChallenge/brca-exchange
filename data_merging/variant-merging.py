@@ -101,6 +101,7 @@ def preprocessing(tmp_dir):
                    "BIC": BIC_FILE,
                    }    
     print "\nPIPELINE INPUT:"
+    print "ENIGMA: {0}".format(ENIGMA_FILE)
     for source_name, file_name in source_dict.iteritems():
         print source_name, ":", file_name
     print "------------preprocessing--------------------------------"
