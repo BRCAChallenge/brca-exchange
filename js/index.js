@@ -30,8 +30,7 @@ var databaseKey = require('../databaseKey');
 var {Grid, Col, Row, Navbar, Nav, Table,
     DropdownButton, MenuItem, Modal, Button} = require('react-bootstrap');
 
-
-var VariantTable = require('./VariantTable');
+var {VariantTable, ResearchVariantTable} = require('./VariantTable');
 var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Link, Route, RouteHandler,
     HistoryLocation, run, DefaultRoute} = require('react-router');
@@ -352,19 +351,33 @@ var Database = React.createClass({
         var {show} = this.props,
             params = databaseParams(this.getQuery());
         // XXX is 'keys' used?
+        var table;
+        if (localStorage.getItem("research-mode") === true) {
+            table = <ResearchVariantTable
+                ref='table'
+                initialState={params}
+                {...params}
+                fetch={backend.data}
+                url={backend.url}
+                onChange={s => this.urlq.onNext(s)}
+                keys={databaseKey}
+                onHeaderClick={this.showHelp}
+                onRowClick={this.showVariant}/>
+        } else {
+            table = <VariantTable
+                ref='table'
+                initialState={params}
+                {...params}
+                fetch={backend.data}
+                url={backend.url}
+                onChange={s => this.urlq.onNext(s)}
+                keys={databaseKey}
+                onHeaderClick={this.showHelp}
+                onRowClick={this.showVariant}/>
+        }
         return (
             <Grid style={{display: show ? 'block' : 'none'}}>
-                <VariantTable
-                    ref='table'
-                    initialState={params}
-                    {...params}
-                    fetch={backend.data}
-                    url={backend.url}
-                    onChange={s => this.urlq.onNext(s)}
-                    suggestions={[]}
-                    keys={databaseKey}
-                    onHeaderClick={this.showHelp}
-                    onRowClick={this.showVariant}/>
+                {table}
             </Grid>
         );
     }
