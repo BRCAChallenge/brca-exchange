@@ -10,6 +10,8 @@ require('es5-shim/es5-sham');
 require('./favicons');
 var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
+var DisclaimerModal = require('./DisclaimerModal');
+var RawHTML = require('./RawHTML');
 require('bootstrap/dist/css/bootstrap.css');
 require('font-awesome-webpack');
 require('css/custom.css');
@@ -47,15 +49,6 @@ if (typeof console === "undefined") {
         log: function () {}
     };
 }
-
-var RawHTML = React.createClass({
-    render: function() {
-        var {html, ...otherProps} = this.props;
-        return (
-            <div className='markdown' {...otherProps} dangerouslySetInnerHTML={{__html: html}} />
-        );
-    }
-});
 
 var NavLink = React.createClass({
     render: function () {
@@ -138,8 +131,16 @@ var Footer = React.createClass({
                 </div>
                 <div className="col-sm-5 right-footer">
                     <ul>
-                        <li><DisclaimerModal /></li>
-                        <li><a href="mailto:brca-exchange-contact@genomicsandhealth.org?subject=BRCA Exchange website">contact us</a></li>
+                        <li>
+                            <DisclaimerModal>
+                                <a style={{cursor:"pointer"}}>disclaimer</a>
+                            </DisclaimerModal>
+                        </li>
+                        <li>
+                            <a href="mailto:brca-exchange-contact@genomicsandhealth.org?subject=BRCA Exchange website">
+                                contact us
+                            </a>
+                        </li>
                         <li>
                             <a href="https://github.com/BD2KGenomics/brca-website">
                                 source code
@@ -151,33 +152,6 @@ var Footer = React.createClass({
         );
     }
 });
-
-var DisclaimerModal = React.createClass({
-    getInitialState() {
-        return { showModal: false };
-    },
-    close() {
-        this.setState({ showModal: false });
-    },
-    open() {
-        this.setState({ showModal: true });
-    },
-    render() {
-        return (
-            <div style={{display: "inline"}}>
-                <a onClick={this.open}>disclaimer</a>
-                {this.state.showModal ?
-                    <Modal onHide={this.close}>
-                        <RawHTML html={content.pages.disclaimer} />
-                        <div className = "close-button">
-                            <Button onClick={this.close}>close</Button>
-                        </div>
-                    </Modal> : null }
-            </div>
-        );
-    }
-});
-
 
 var Home = React.createClass({
     mixins: [Navigation],
@@ -436,6 +410,11 @@ var VariantDetail = React.createClass({
                                 {rows}
                             </tbody>
                         </Table>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col md={8} mdOffset={2}>
+                        <DisclaimerModal><Button>Research information on this variant</Button></DisclaimerModal>
                     </Col>
                 </Row>
             </Grid>
