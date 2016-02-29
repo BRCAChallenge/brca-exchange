@@ -70,43 +70,15 @@ var filterColumns = [
 //    return sorted;
 //}
 
+
 var columns = [
     {title: 'Gene', prop: 'Gene_symbol'},
     {title: 'Identifier', prop: 'HGVS_cDNA'},
     {title: 'Alternate Identifier', prop: 'Genomic_Coordinate'},
     {title: 'Alt ID', prop: "Abbrev_AA_change"},
     {title: 'Pathogenicity', prop: 'Clinical_significance'},
-    {title: 'Alternate Identifier (HGVS protein)', prop: 'HGVS_protein',},
+    {title: 'Alternate Identifier (HGVS protein)', prop: 'HGVS_protein'},
     {title: 'Alternate Identifier (BIC nomenclature)', prop: "BIC_Nomenclature"},
-    {title: 'Allele frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes'},
-    {title: 'SAS Allele frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes'},
-    {title: 'EAS Allele frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes'},
-    {title: 'AMR Allele frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes'},
-    {title: 'EUR Allele frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes'},
-    {title: 'AFR Allele frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes'},
-    {title: 'Allele origin (ClinVar)', prop: 'Allele_origin_ClinVar'},
-    {title: 'Variant clinical significance (ClinVar)', prop: 'Variant_clinical_significance_ClinVar'},
-    {title: 'HGVS genomic (LOVD)', prop: 'HGVS_genomic_LOVD'},
-    {title: 'Origin of variant (LOVD)', prop: 'Origin_of_variant_LOVD'},
-    {title: 'HGVS protein (LOVD)', prop: 'HGVS_protein_LOVD'},
-    {title: 'Variant frequency (LOVD)', prop: 'Variant_frequency_LOVD'},
-    {title: 'HGVS cDNA (LOVD)', prop: 'HGVS_cDNA_LOVD'},
-    {title: 'Variant affecting protein (LOVD)', prop: 'Variant_affecting_protein_LOVD'},
-    {title: 'Variant haplotype (LOVD)', prop: 'Variant_haplotype_LOVD'},
-    {title: 'VEP Gene (ExAC)', prop: 'VEP_Gene_ExAC'},
-    {title: 'Allele frequency (ExAC)', prop: 'Allele_frequency_ExAC'},
-    {title: 'VEP HGVSc (ExAC)', prop: 'VEP_HGVSc_ExAC'},
-    {title: 'VEP Consequence (ExAC)', prop: 'VEP_Consequence_ExAC'},
-    {title: 'VEP HGVSp (ExAC)', prop: 'VEP_HGVSp_ExAC'},
-    {title: 'Exon number (exLOVD)', prop: 'Exon_number_exLOVD'},
-    {title: 'IARC class (exLOVD)', prop: 'IARC_class_exLOVD'},
-    {title: 'BIC (exLOVD)', prop: 'BIC_exLOVD'},
-    {title: 'HGVS cDNA (exLOVD)', prop: 'HGVS_cDNA_exLOVD'},
-    {title: 'Literature source (exLOVD)', prop: 'Literature_source_exLOVD'},
-    {title: 'HGVS protein (exLOVD)', prop: 'HGVS_protein_exLOVD'},
-    {title: 'Date last evaluated', prop: 'Date_last_evaluated'},
-    {title: 'Assertion method', prop: 'Assertion method'},
-    {title: 'Assertion method citation', prop: 'Assertion_method_citation'},
 ];
 
 var research_mode_columns = [
@@ -146,6 +118,8 @@ var research_mode_columns = [
     {title: 'Date last evaluated', prop: 'Date_last_evaluated'},
     {title: 'Assertion method', prop: 'Assertion method'},
     {title: 'Assertion method citation', prop: 'Assertion_method_citation'},
+    {title: 'URL', prop: 'URL'}
+
 ];
 
 var subColumns = [
@@ -314,4 +288,6 @@ var VariantTableSupplier = function (Component) {
 module.exports = ({
     VariantTable: VariantTableSupplier(Table),
     ResearchVariantTable: ResearchVariantTableSupplier(Table),
+    research_mode_columns: research_mode_columns,
+    columns: columns
 });

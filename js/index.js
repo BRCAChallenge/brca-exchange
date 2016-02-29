@@ -32,7 +32,7 @@ var databaseKey = require('../databaseKey');
 var {Grid, Col, Row, Navbar, Nav, Table,
     DropdownButton, MenuItem, Modal, Button} = require('react-bootstrap');
 
-var {VariantTable, ResearchVariantTable} = require('./VariantTable');
+var {VariantTable, ResearchVariantTable, research_mode_columns, columns} = require('./VariantTable');
 var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Link, Route, RouteHandler,
     HistoryLocation, run, DefaultRoute} = require('react-router');
@@ -352,18 +352,13 @@ var Database = React.createClass({
     }
 });
 
-var _toSpace = s => s.replace(/_/g, ' ');
-
 var Key = React.createClass({
     render() {
-        var {onClick, tableKey} = this.props,
-            words = tableKey.replace(/_/g, ' ').split(' ');
+        var {onClick, tableKey} = this.props;
         return (
              <td className='help-target'>
-                {words.slice(0, words.length - 1).join(' ')}
-                {' '}
+                {tableKey}
                 <span className="text-nowrap">
-                    {words[words.length - 1]}
                     <span role='button' onClick={onClick}
                         className='help glyphicon glyphicon-question-sign superscript'/>
                 </span>
@@ -381,19 +376,26 @@ var VariantDetail = React.createClass({
         backend.data({
             filterValues: variantPathSplit(this.props.params.id),
             pageLength: 1
-        }).take(1).subscribe(
-            resp => this.setState({data: resp.data[0], error: null}),
+        }).subscribe(
+            resp => {
+                return this.setState({data: resp.data[0], error: null})
+            },
             this.setState({error: 'Problem connecting to server'}));
     },
-    render: function() {
+    render: function () {
         var {data: variant = {}, error} = this.state;
-
-        variant = _.omit(variant, ['__HEADER__']);
-        var rows = _.map(variant, (v, k) =>
-             <tr key={k}>
-                <Key tableKey={k} onClick={() => this.showHelp(_toSpace(k))} />
-                <td>{v}</td>
-             </tr>);
+        var cols;
+        if (localStorage.getItem("research-mode") === true) {
+            cols = research_mode_columns;
+        } else {
+            cols = columns;
+        }
+        var rows = _.map(cols, ({prop, title}) => {
+            return <tr key={prop}>
+                <Key tableKey={title} columns={cols} onClick={() => this.showHelp(title)}/>
+                <td>{variant[prop]}</td>
+            </tr>
+        });
 
 
         return (error ? <p>{error}</p> :
