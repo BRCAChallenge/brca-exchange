@@ -134,7 +134,7 @@ var Footer = React.createClass({
                     <ul>
                         <li>
                             <DisclaimerModal>
-                                <a>disclaimer</a>
+                                <a style={{cursor:"pointer"}}>disclaimer</a>
                             </DisclaimerModal>
                         </li>
                         <li>
