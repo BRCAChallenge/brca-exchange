@@ -17,8 +17,13 @@ GENOME1K_FIELDS = {"Allele_frequency(1000_Genomes)":"AF",
                    "AFR_Allele_frequency(1000_Genomes)":"AFR_AF",
                    "AMR_Allele_frequency(1000_Genomes)":"AMR_AF",
                    "SAS_Allele_frequency(1000_Genomes)":"SAS_AF"}
-CLINVAR_FIELDS = {"Allele_origin(ClinVar)":"CLNORIGIN",
-                  "Variant_clinical_significance(ClinVar)":"CLNSIG"}
+CLINVAR_FIELDS = {"HGVS(ClinVar)":"HGVS",
+                  "Submitter(ClinVar)":"Submitter",
+                  "Clinical_Significance(ClinVar)":"ClinicalSignificance",
+                  "Date_Last_Updated(ClinVar)":"DateLastUpdated",
+                  "SCV(ClinVar)":"SCV",
+                  "Origin(ClinVar)":"Origin",
+                  "Method(ClinVar)":"Method"}
 LOVD_FIELDS = {"Origin_of_variant(LOVD)": "genetic_origin",
                "Variant_frequency(LOVD)": "frequency",
                "Variant_haplotype(LOVD)": "haplotype",
@@ -32,7 +37,8 @@ EX_LOVD_FIELDS = {"Exon_number(exLOVD)":"exon",
                   "HGVS_protein(exLOVD)":"protein_change",
                   "IARC_class(exLOVD)":"iarc_class",
                   "Literature_source(exLOVD)":"observational_reference"}
-ESP_FIELDS = {}
+ESP_FIELDS = {"HGVS_cDNA(ESP)": "HGVS_CDNA_VAR",
+              "Minor_allele_frequency(ESP)":"MAF"}
 FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
                "ClinVar": CLINVAR_FIELDS,
                "LOVD": LOVD_FIELDS,
@@ -50,7 +56,7 @@ CLINVAR_FILE = PIPELINE_INPUT + "ClinVarBrca.vcf"
 LOVD_FILE = PIPELINE_INPUT + "sharedLOVD_brca12.sorted.hg38.vcf"
 EX_LOVD_FILE = PIPELINE_INPUT + "exLOVD_brca12.sorted.hg38.vcf"
 EXAC_FILE = PIPELINE_INPUT + "exac_BRCA12.sorted.hg38.vcf"
-ESP_FILE = PIPELINE_INPUT + ""
+ESP_FILE = PIPELINE_INPUT + "esp.brca.vcf"
 
 def main():
     tmp_dir = tempfile.mkdtemp()
@@ -71,7 +77,7 @@ def main():
 def preprocessing(tmp_dir):
     # Preprocessing variants:
     source_dict = {"1000_Genomes": GENOME1K_FILE + "for_pipeline",
-                   #"ClinVar": CLINVAR_FILE,
+                   "ClinVar": CLINVAR_FILE,
                    "LOVD": LOVD_FILE,
                    "exLOVD": EX_LOVD_FILE,
                    "ExAC": EXAC_FILE,
