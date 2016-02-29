@@ -16,6 +16,10 @@ var DisclaimerModal = React.createClass({
     open() {
         this.setState({ showModal: true });
     },
+    agree() {
+        localStorage.setItem('research-mode',true);
+        this.close();
+    },
     render() {
         var modalTrigger = React.cloneElement(this.props.children,{onClick:this.open});
         return (
@@ -24,9 +28,8 @@ var DisclaimerModal = React.createClass({
                 {this.state.showModal ?
                     <Modal onRequestHide={this.close}>
                         <RawHTML html={content.pages.disclaimer} />
-                        <div>
-                            <Button onClick={this.close}>close</Button>
-                        </div>
+                            <Button onClick={this.agree}>OK</Button>
+                            <Button onClick={this.close}>Cancel</Button>
                     </Modal> : null }
             </span>
         );
