@@ -27,14 +27,11 @@ CLINVAR_FIELDS = {"HGVS(ClinVar)":"HGVS",
 LOVD_FIELDS = {"Origin_of_variant(LOVD)": "genetic_origin",
                "Variant_frequency(LOVD)": "frequency",
                "Variant_haplotype(LOVD)": "haplotype",
-               "Variant_affecting_protein(LOVD)": "effect",
-               "HGVS_cDNA(LOVD)": "dna_change",
-               "HGVS_genomic(LOVD)": "dna_change_genomic",
-               "HGVS_protein(LOVD)": "protein_change"}
+               "Functional_analysis_result(LOVD)": "functionalanalysis_result",
+               "Functional_analysis_technique(LOVD)": "functionalanalysis_technique",
+               }
 EXAC_FIELDS = {"Allele_frequency(ExAC)": "AF"}
-EX_LOVD_FIELDS = {"Exon_number(exLOVD)":"exon",
-                  "HGVS_cDNA(exLOVD)":"dna_change",
-                  "HGVS_protein(exLOVD)":"protein_change",
+EX_LOVD_FIELDS = {"Combined_prior_p(exLOVD)": "combined_prior_p",
                   "IARC_class(exLOVD)":"iarc_class",
                   "Literature_source(exLOVD)":"observational_reference"}
 ESP_FIELDS = {"HGVS_cDNA(ESP)": "HGVS_CDNA_VAR",
