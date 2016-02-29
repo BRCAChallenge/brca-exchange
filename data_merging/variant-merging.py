@@ -32,24 +32,25 @@ EX_LOVD_FIELDS = {"Exon_number(exLOVD)":"exon",
                   "HGVS_protein(exLOVD)":"protein_change",
                   "IARC_class(exLOVD)":"iarc_class",
                   "Literature_source(exLOVD)":"observational_reference"}
+ESP_FIELDS = {}
 FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
-               #"ClinVar": CLINVAR_FIELDS,
+               "ClinVar": CLINVAR_FIELDS,
                "LOVD": LOVD_FIELDS,
                "exLOVD": EX_LOVD_FIELDS,
                "ExAC": EXAC_FIELDS,
-               #"ESP": ESP_FILE,
+               "ESP": ESP_FIELDS,
               }
 
 PIPELINE_INPUT = "/hive/groups/cgl/brca/release1.0/pipeline_input/"
+PIPELINE_OUTPUT = "/hive/groups/cgl/brca/release1.0/merged.csv"
+
 ENIGMA_FILE = PIPELINE_INPUT + "enigma_variants_GRCh38_2-27-2016.tsv"
 GENOME1K_FILE = PIPELINE_INPUT + "1000G_brca.sorted.hg38.vcf"
-#CLINVAR_FILE = PIPELINE_INPUT + "ClinVarBrca.vcf"
+CLINVAR_FILE = PIPELINE_INPUT + "ClinVarBrca.vcf"
 LOVD_FILE = PIPELINE_INPUT + "sharedLOVD_brca12.sorted.hg38.vcf"
 EX_LOVD_FILE = PIPELINE_INPUT + "exLOVD_brca12.sorted.hg38.vcf"
 EXAC_FILE = PIPELINE_INPUT + "exac_BRCA12.sorted.hg38.vcf"
-
-
-
+ESP_FILE = PIPELINE_INPUT + ""
 
 def main():
     tmp_dir = tempfile.mkdtemp()
@@ -60,25 +61,29 @@ def main():
         for source_name, file in source_dict.iteritems():
             (columns, variants) = add_new_source(columns, variants, source_name, 
                                                  file, FIELD_DICT[source_name])
-        write_new_tsv(PIPELINE_INPUT + "merged.tsv", columns, variants)
+        write_new_csv(PIPELINE_OUTPUT, columns, variants)
+        print "PIPELINE OUTPUT: "
+        print PIPELINE_OUTPUT
     finally:
         shutil.rmtree(tmp_dir)
 
 
 def preprocessing(tmp_dir):
     # Preprocessing variants:
-    print "------------preprocessing--------------------------------"
-    tmp_1000g = tmp_dir + "/1000G.vcf"
-    f_1000G = open(tmp_1000g, "w")
-    print "remove sample columns and two erroneous rows from 1000 Genome file"
-    (subprocess.call(["bash", "preprocess.sh", GENOME1K_FILE], stdout=f_1000G))
-    source_dict = {"1000_Genomes": tmp_1000g,
+    source_dict = {"1000_Genomes": GENOME1K_FILE + "for_pipeline",
                    #"ClinVar": CLINVAR_FILE,
                    "LOVD": LOVD_FILE,
                    "exLOVD": EX_LOVD_FILE,
                    "ExAC": EXAC_FILE,
                    #"ESP": ESP_FILE,
                    }    
+    print "\nPIPELINE INPUT:"
+    for source_name, file_name in source_dict.iteritems():
+        print source_name, ":", file_name
+    print "------------preprocessing--------------------------------"
+    print "remove sample columns and two erroneous rows from 1000 Genome file"
+    f_1000G = open(GENOME1K_FILE + "for_pipeline", "w")
+    (subprocess.call(["bash", "1000g_preprocess.sh", GENOME1K_FILE], stdout=f_1000G))
     for source_name, file_name in source_dict.iteritems():
         print "convert to one variant per line in ", source_name
         f_in = open(file_name, "r")
@@ -163,13 +168,13 @@ def one_variant_transform(f_in, f_out):
                         new_record.INFO[key] = [value[i]]
                 vcf_writer.write_record(new_record)
 
-def write_new_tsv(filename, columns, variants):
+def write_new_csv(filename, columns, variants):
     merged_file = open(filename, "w")
-    merged_file.write("\t".join(columns)+"\n")
+    merged_file.write(",".join(columns)+"\n")
     for variant in variants.values():
         if len(variant) != len(columns):
             raise Exception("mismatching number of columns in head and row")
-        merged_file.write("\t".join(variant)+"\n")
+        merged_file.write(",".join(variant)+"\n")
 
 def add_new_source(columns, variants, source, source_file, source_dict):
     print "adding {0} into merged file.....".format(source)
@@ -186,7 +191,7 @@ def add_new_source(columns, variants, source, source_file, source_dict):
                        record.REF + ">" + str(record.ALT[0]))
         if genome_coor in variants.keys():
             overlap += 1
-            variants[genome_coor][0] += ",{0}".format(source)
+            variants[genome_coor][0] += "|{0}".format(source)
         else: 
             variants[genome_coor] = ['-'] * old_column_num
             variants[genome_coor][0] = source
@@ -210,6 +215,7 @@ def add_new_source(columns, variants, source, source_file, source_dict):
             raise Exception("mismatching number of columns in head and row")
     return (columns, variants)
 
+
 def save_enigma_to_dict(path):
     enigma_file = open(path, "r")
     variants = dict()
@@ -217,6 +223,7 @@ def save_enigma_to_dict(path):
     line_num = 0
     for line in enigma_file:
         line_num += 1
+        line = line.replace(",", "|")
         if line_num == 1:
             columns = line.strip().split("\t")
             columns.insert(0, "Source")
