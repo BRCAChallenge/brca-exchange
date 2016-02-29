@@ -13,6 +13,7 @@
 var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin');
 var DataTable = require('./DataTable');
+var _ = require('underscore');
 require('react-data-components-bd2k/css/table-twbs.css');
 
 function buildHeader(onClick, title) {
@@ -216,7 +217,7 @@ var subColumns = [
 var defaultColumns = ['Gene_symbol', 'Genomic_Coordinate', 'HGVS_cDNA', 'HGVS_protein', 'Abbrev_AA_change', 'BIC_Nomenclature', 'Clinical_significance', 'Date_last_evaluated', 'Assertion_method', 'Assertion_method_citation'];
 var defaultResearchColumns = ['Gene_symbol', 'Genomic_Coordinate', 'HGVS_cDNA', 'HGVS_protein', 'Abbrev_AA_change', 'BIC_Nomenclature', 'Clinical_significance'];
 
-var sources = {
+var allSources = {
     Variant_in_ENIGMA: true,
     Variant_in_ClinVar: true,
     Variant_in_1000_Genomes: true,
@@ -246,7 +247,7 @@ var Table = React.createClass({
         return this.refs.table.state.data;
     },
     render: function () {
-        var {data, onHeaderClick, onRowClick, ...opts} = this.props;
+        var {data, onHeaderClick, onRowClick, hiddenSources,...opts} = this.props;
         return (
             <DataTable
                 ref='table'
@@ -256,7 +257,7 @@ var Table = React.createClass({
                 buildHeader={title => buildHeader(onHeaderClick, title)}
                 filterColumns={filterColumns}
                 subColumns={subColumns}
-                source={sources}
+                sourceSelection={_.mapObject(allSources, (v,k)=> {return _.has(hiddenSources, k)? false : true})}
                 initialData={data}
                 initialPageLength={20}
                 initialSortBy={{prop: 'Abbrev_AA_change', order: 'descending'}}

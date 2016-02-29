@@ -14,9 +14,9 @@ require('./css/Autosuggest.css');
 
 function getSuggestions(value, callback) {
     var matchStr = value.toLowerCase(); // data should already be lower case
-    var databaseUrl = "http://localhost:8000/";
+    var databaseUrl = "http://localhost:8000";
 
-    var suggestionsEndpoint = `${databaseUrl}data/suggestions/?term=${matchStr}`;
+    var suggestionsEndpoint = `${databaseUrl}/data/suggestions/?term=${matchStr}`;
     $.ajax({
         url: suggestionsEndpoint,
         dataType: 'json',
@@ -31,13 +31,14 @@ function getSuggestions(value, callback) {
 }
 
 function renderSuggestion(suggestion, input) {
-    input.indexOf(suggestion)
+    var maxLengthToDisplay = 50;
     return (
         <span>
             <strong>{suggestion.slice(0, input.length)}</strong>
-            {suggestion.slice(input.length)}
+            {suggestion.slice(input.length, maxLengthToDisplay)}
+            {(suggestion.length > maxLengthToDisplay) ? "..." : ""}
         </span>
-   );
+    );
 }
 
 var VariantSearch = React.createClass({

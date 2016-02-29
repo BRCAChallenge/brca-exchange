@@ -272,26 +272,18 @@ var Help = React.createClass({
     }
 });
 
-// wrap scalars in array.
-function toArray(v) {
-    return _.isArray(v) ? v : [v];
-}
-
 function toNumber(v) {
     return _.isString(v) ? parseInt(v) : v;
 }
 
 function databaseParams(paramsIn) {
-    var {filter, filterValue, hide} = _.mapObject(
-            _.pick(paramsIn, 'hide', 'filter', 'filterValue'), toArray),
-        numParams = _.mapObject(_.pick(paramsIn, 'page', 'pageLength'),
-                toNumber),
-        {orderBy, order, search = ''} = _.pick(paramsIn, 'search', 'orderBy', 'order'),
-        sortBy = {prop: orderBy, order},
-        columnSelection = _.object(hide, _.map(hide, _.constant(false))),
-        filterValues = _.object(filter, filterValue);
-
-    return {search, sortBy, columnSelection, filterValues, hide, ...numParams};
+    var {filter, filterValue, hide, hideSources, orderBy, order, search = ''} = paramsIn;
+    var numParams = _.mapObject(_.pick(paramsIn, 'page', 'pageLength'), toNumber);
+    var sortBy = {prop: orderBy, order};
+    var columnSelection = _.object(hide, _.map(hide, _.constant(false)));
+    var hiddenSources = _.object(hideSources, _.map(hideSources, _.constant(false)));
+    var filterValues = _.object(filter, filterValue);
+    return {search, sortBy, columnSelection, hiddenSources, filterValues, hide, ...numParams};
 }
 
 var transpose = a => _.zip.apply(_, a);
@@ -299,18 +291,20 @@ var transpose = a => _.zip.apply(_, a);
 function urlFromDatabase(state) {
     // Need to diff from defaults. The defaults are in DataTable.
     // We could keep the defaults here, or in a different module.
-    var {columnSelection, filterValues,
-            search, page, pageLength, sortBy: {prop, order}} = state,
-        hide = _.keys(_.pick(columnSelection, v => !v)),
-        [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v)));
+    var {columnSelection, filterValues, sourceSelection,
+            search, page, pageLength, sortBy: {prop, order}} = state;
+    var hide = _.keys(_.pick(columnSelection, v => v == false));
+    var hideSources = _.keys(_.pick(sourceSelection, v => v == false));
+    var [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v == true)));
     return _.pick({
-        search: search === '' ? null : search,
+        search: search === '' ? null : backend.trimSearchTerm(search),
         filter,
         filterValue,
         page: page === 0 ? null : page,
         pageLength: pageLength === 20 ? null : pageLength,
         orderBy: prop,
         order,
+        hideSources: hideSources,
         hide: hide.length === 0 ? null : hide
     }, v => v != null);
 
@@ -321,6 +315,7 @@ var Database = React.createClass({
     // getQuery().
     mixins: [Navigation, State],
     showVariant: function (row) {
+        row.Genomic_Coordinate = backend.trimSearchTerm(row.Genomic_Coordinate);
         this.transitionTo(`/variant/${variantPathJoin(row)}`);
     },
     showHelp: function (title) {
