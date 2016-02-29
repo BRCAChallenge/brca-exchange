@@ -230,15 +230,21 @@ var Help = React.createClass({
             }, 0);
         }
     },
-    render: function() {
+    render: function () {
         var fragment = slugify(window.location.hash.slice(1));
+        var helpContent;
+        if (localStorage.getItem("research-mode") === 'true') {
+            helpContent = content.pages.help_research;
+        } else {
+            helpContent = content.pages.help;
+        }
         return (
             <Grid className="help">
                 {fragment === '' ? null :
                     <style>{`#${fragment} { animation-name: emphasis; animation-duration: 10s; } `}</style>}
                 <Row>
                     <Col md={8} mdOffset={2}>
-                        <RawHTML ref='content' html={content.pages.help} />
+                        <RawHTML ref='content' html={helpContent}/>
                     </Col>
                 </Row>
             </Grid>
