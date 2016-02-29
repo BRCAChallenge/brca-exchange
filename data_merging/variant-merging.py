@@ -50,27 +50,10 @@ EXAC_FILE = PIPELINE_INPUT + "exac_BRCA12.sorted.hg38.vcf"
 
 
 def main():
-    # Preprocessing variants:
-    print "preprocessing..."
     tmp_dir = tempfile.mkdtemp()
     try:
-        f_1000G = open(tmp_dir + "/1000G.vcf", "w")
-        print "remove sample columns from 1000 Genome file"
-        (subprocess.call(["bash", "preprocess.sh", GENOME1K_FILE], stdout=f_1000G))
-    
-        source_dict = {"1000_Genomes": tmp_dir + "/1000G.vcf",
-                       #"ClinVar": CLINVAR_FILE,
-                       "LOVD": LOVD_FILE,
-                       "exLOVD": EX_LOVD_FILE,
-                       "ExAC": EXAC_FILE,
-                       #"ESP": ESP_FILE,
-                       }
-        
-        for source_name, file_name in source_dict.iteritems():
-            print "convert to one variant per line in ", source_name
-            f_in = open(file_name, "r")
-            f_out = open(tmp_dir + "/" + source_name + ".vcf", "w")
-            one_variant_transform(f_in, f_out)
+        preprocessing(tmp_dir)
+        #(columns, variants) = save_enigma_to_dict(ENIGMA_FILE)
 
     finally:
         print tmp_dir
@@ -82,13 +65,92 @@ def main():
 
 
 
-#    (columns, variants) = save_enigma_to_dict(ENIGMA_FILE)
 
 #    for source, value in SOURCE_DICT.iteritems():
 #        (columns, variants) = add_new_source(columns, variants, source,
 #                                             value[0], value[1])
 
 #    write_new_tsv("../data/merge/merged_new.tsv", columns, variants)
+
+
+def preprocessing(tmp_dir):
+    # Preprocessing variants:
+    print "preprocessing..."
+    print "--------------------------------------------------"
+    tmp_1000g = tmp_dir + "/1000G.vcf"
+    f_1000G = open(tmp_1000g, "w")
+    print "remove sample columns from 1000 Genome file"
+    (subprocess.call(["bash", "preprocess.sh", GENOME1K_FILE], stdout=f_1000G))
+    source_dict = {"1000_Genomes": tmp_1000g,
+                   #"ClinVar": CLINVAR_FILE,
+                   "LOVD": LOVD_FILE,
+                   "exLOVD": EX_LOVD_FILE,
+                   "ExAC": EXAC_FILE,
+                   #"ESP": ESP_FILE,
+                   }    
+    for source_name, file_name in source_dict.iteritems():
+        print "convert to one variant per line in ", source_name
+        f_in = open(file_name, "r")
+        f_out = open(tmp_dir + "/" + source_name + ".vcf", "w")
+        one_variant_transform(f_in, f_out)
+        print "merge repetitive variants within ", source_name
+        f_in = open(tmp_dir + "/" + source_name + ".vcf", "r")
+        f_out = open(tmp_dir + "/" + source_name + "ready.vcf", "w")
+        repeat_merging(f_in, f_out)
+
+
+def repeat_merging(f_in, f_out):
+    """takes a vcf file, collapses repetitive variant rows and write out
+        to a new vcf file (without header)"""
+    vcf_reader = vcf.Reader(f_in, strict_whitespace=True)
+    variant_dict = {}
+    num_repeats = 0
+    for record in vcf_reader:
+        genome_coor = "chr{0}:{1}:{2}>{3}".format(
+            record.CHROM, str(record.POS), record.REF, record.ALT[0])
+        if genome_coor not in variant_dict.keys():
+            variant_dict[genome_coor] = deepcopy(record)
+        else:
+            num_repeats += 1
+            for key in record.INFO:        
+                if key not in variant_dict[genome_coor].INFO.keys():
+                    variant_dict[genome_coor].INFO[key] = deepcopy(record.INFO[key])
+                else:
+                    new_value = deepcopy(record.INFO[key])
+                    old_value = deepcopy(variant_dict[genome_coor].INFO[key])
+
+                    if type(new_value) != list:
+                        new_value = [new_value]
+                    if type(old_value) != list:
+                        old_value = [old_value]
+                    if new_value  == old_value:
+                        continue
+                    else:
+                        merged_value = list(set(new_value + old_value))
+                        variant_dict[genome_coor].INFO[key] = deepcopy(merged_value)
+    print "number of repeat records: ", num_repeats
+    write_to_vcf(f_out, variant_dict)
+
+def write_to_vcf(f_out, v_dict):
+    for record in v_dict.values():
+        if record.QUAL == None:
+            record.QUAL = "."
+        if record.FILTER == None:
+            record.FILTER = "."
+
+        items = [record.CHROM, str(record.POS), str(record.ID), record.REF, 
+                str(record.ALT[0]), record.QUAL, record.FILTER]
+        infos = []
+        for key in record.INFO:
+            this_info = record.INFO[key] 
+            if type(this_info) == list:
+                this_info = [str(x) for x in this_info]
+                infos.append(key + "=" + "|".join(this_info))
+            else:
+                infos.append(key + "=" + str(this_info))
+        items.append(";".join(infos))
+        new_line = "\t".join([str(i) for i in items])
+        f_out.write(new_line + "\n")
 
 def one_variant_transform(f_in, f_out):
     """takes a vcf file, read each row, if the ALT field contains more than 
