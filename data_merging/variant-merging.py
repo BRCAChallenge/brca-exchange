@@ -8,7 +8,7 @@ import tempfile
 import shutil
 from StringIO import StringIO
 from copy import deepcopy
-
+from pprint import pprint
 
 #key value pair dictionaries of all extra fields in various databases to add
 GENOME1K_FIELDS = {"Allele_frequency":"AF",
@@ -35,21 +35,21 @@ EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "Segregation_LR": "segregation_lr",
                   "Sum_family_LR": "sum_family_lr",
                   "Co_occurrence_LR": "co_occurrence_lr",
-                  "Missense_analysis_prior_probability", "missense_analysis_prior_p",
+                  "Missense_analysis_prior_probability": "missense_analysis_prior_p",
                   "Posterior_probability": "posterior_p",
                   "IARC_class":"iarc_class",
-                  "BIC_identifier": "prior_p_refere",
+                  "BIC_identifier": "bic_dna_change",
                   "Literature_source":"observational_reference"}
-BIC = {"Clinical_classification": "Category",
-       "Number_of_family_member_carrying_mutation": "Number_Reported",
-       "Patient_nationality": "Nationality",
-       "Germline_or_Somatic": "G_or_S",
-       "Mutation_type": "Mutation_Type",
-       "BIC_Designation": "Designation",
-       "Clinical_importance": "Clinically_Importance",
-       "Ethnicity": "Ethnicity",
-       "Literature_citation": "Reference",
-       }
+BIC_FIELDS = {"Clinical_classification": "Category",
+              "Number_of_family_member_carrying_mutation": "Number_Reported",
+              "Patient_nationality": "Nationality",
+              "Germline_or_Somatic": "G_or_S",
+              "Mutation_type": "Mutation_Type",
+              "BIC_Designation": "Designation",
+              "Clinical_importance": "Clinically_Importance",
+              "Ethnicity": "Ethnicity",
+              "Literature_citation": "Reference",
+              }
 ESP_FIELDS = {"polyPhen2_result": "PH",
               "Minor_allele_frequency":"MAF"}
 
@@ -59,25 +59,27 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
                "exLOVD": EX_LOVD_FIELDS,
                "ExAC": EXAC_FIELDS,
                "ESP": ESP_FIELDS,
-              }
+               "BIC": BIC_FIELDS,
+                }
 
 PIPELINE_INPUT = "/hive/groups/cgl/brca/release1.0/pipeline_input/"
 PIPELINE_OUTPUT = "/hive/groups/cgl/brca/release1.0/merged.csv"
 
-ENIGMA_FILE = PIPELINE_INPUT + "enigma_variants_GRCh38_2-27-2016.tsv"
-GENOME1K_FILE = PIPELINE_INPUT + "1000G_brca.sorted.hg38.vcf"
-CLINVAR_FILE = PIPELINE_INPUT + "ClinVarBrca.vcf"
-LOVD_FILE = PIPELINE_INPUT + "sharedLOVD_brca12.sorted.hg38.vcf"
-EX_LOVD_FILE = PIPELINE_INPUT + "exLOVD_brca12.sorted.hg38.vcf"
-EXAC_FILE = PIPELINE_INPUT + "exac_BRCA12.sorted.hg38.vcf"
-ESP_FILE = PIPELINE_INPUT + "esp.brca.vcf"
+ENIGMA_FILE = "enigma_variants_GRCh38_2-27-2016.tsv"
+GENOME1K_FILE = "1000G_brca.sorted.hg38.vcf"
+CLINVAR_FILE = "ClinVarBrca.vcf"
+LOVD_FILE = "sharedLOVD_brca12.sorted.hg38.vcf"
+EX_LOVD_FILE = "exLOVD_brca12.sorted.hg38.vcf"
+BIC_FILE = "bic_brca12.sorted.hg38.vcf"
+EXAC_FILE = "exac_BRCA12.sorted.hg38.vcf"
+ESP_FILE = "esp.brca.vcf"
 
 def main():
     tmp_dir = tempfile.mkdtemp()
     try:
         source_dict = preprocessing(tmp_dir)
         print "------------merging------------------------------------"
-        (columns, variants) = save_enigma_to_dict(ENIGMA_FILE)
+        (columns, variants) = save_enigma_to_dict(PIPELINE_INPUT + ENIGMA_FILE)
         for source_name, file in source_dict.iteritems():
             (columns, variants) = add_new_source(columns, variants, source_name, 
                                                  file, FIELD_DICT[source_name])
@@ -95,18 +97,20 @@ def preprocessing(tmp_dir):
                    "LOVD": LOVD_FILE,
                    "exLOVD": EX_LOVD_FILE,
                    "ExAC": EXAC_FILE,
-                   #"ESP": ESP_FILE, wait for melissa to fix error
+                   "ESP": ESP_FILE,
+                   "BIC": BIC_FILE,
                    }    
     print "\nPIPELINE INPUT:"
     for source_name, file_name in source_dict.iteritems():
         print source_name, ":", file_name
     print "------------preprocessing--------------------------------"
     print "remove sample columns and two erroneous rows from 1000 Genome file"
-    f_1000G = open(GENOME1K_FILE + "for_pipeline", "w")
-    (subprocess.call(["bash", "1000g_preprocess.sh", GENOME1K_FILE], stdout=f_1000G))
+    f_1000G = open(PIPELINE_INPUT + GENOME1K_FILE + "for_pipeline", "w")
+    subprocess.call(
+       ["bash", "1000g_preprocess.sh", PIPELINE_INPUT + GENOME1K_FILE], stdout=f_1000G)
     for source_name, file_name in source_dict.iteritems():
         print "convert to one variant per line in ", source_name
-        f_in = open(file_name, "r")
+        f_in = open(PIPELINE_INPUT + file_name, "r")
         f_out = open(tmp_dir + "/" + source_name + ".vcf", "w")
         one_variant_transform(f_in, f_out)
         print "merge repetitive variants within ", source_name
@@ -218,7 +222,13 @@ def add_new_source(columns, variants, source, source_file, source_dict):
             variants[genome_coor][2] = genome_coor
 
         for value in source_dict.values():
-            variants[genome_coor].append(str(record.INFO[value]))
+            try:
+                variants[genome_coor].append(str(record.INFO[value]))
+            except KeyError:
+                if value == "Category":
+                    variants[genome_coor].append(str(record.INFO["\"" + value]))
+                else:
+                    raise Exception("uncaught BIC weirdness")
 
     # for those enigma record that doesn't have a hit with new genome coordinate
     # add extra cells of "-" to the end of old record
