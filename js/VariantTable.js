@@ -72,12 +72,12 @@ var filterColumns = [
 
 var columns = [
     {title: 'Gene', prop: 'Gene_symbol'},
-    {title: 'Alternate Identifier (Genomic Coordinate)', prop: 'Genomic_Coordinate'},
-    {title: 'Identifier (HGVS cDNA)', prop: 'HGVS_cDNA'},
-    {title: 'Alternate Identifier (HGVS protein)', prop: 'HGVS_protein',},
-    {title: 'Alternate Identifier (HGVS protein (abbr))', prop: "Abbrev_AA_change"},
-    {title: 'Alternate Identifier (BIC nomenclature)', prop: "BIC_Nomenclature"},
+    {title: 'Identifier', prop: 'HGVS_cDNA'},
+    {title: 'Alternate Identifier', prop: 'Genomic_Coordinate'},
+    {title: 'Alt ID', prop: "Abbrev_AA_change"},
     {title: 'Pathogenicity', prop: 'Clinical_significance'},
+    {title: 'Alternate Identifier (HGVS protein)', prop: 'HGVS_protein',},
+    {title: 'Alternate Identifier (BIC nomenclature)', prop: "BIC_Nomenclature"},
     {title: 'Allele frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes'},
     {title: 'SAS Allele frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes'},
     {title: 'EAS Allele frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes'},
@@ -214,8 +214,8 @@ var subColumns = [
     }
 ];
 
-var defaultColumns = ['Gene_symbol', 'Genomic_Coordinate', 'HGVS_cDNA', 'HGVS_protein', 'Abbrev_AA_change', 'BIC_Nomenclature', 'Clinical_significance', 'Date_last_evaluated', 'Assertion_method', 'Assertion_method_citation'];
-var defaultResearchColumns = ['Gene_symbol', 'Genomic_Coordinate', 'HGVS_cDNA', 'HGVS_protein', 'Abbrev_AA_change', 'BIC_Nomenclature', 'Clinical_significance'];
+var defaultColumns = ['Gene_symbol', 'HGVS_cDNA', 'Genomic_Coordinate', 'Abbrev_AA_change', 'Clinical_significance'];
+var defaultResearchColumns = ['Gene_symbol', 'HGVS_cDNA', 'Genomic_Coordinate', 'HGVS_protein', 'Abbrev_AA_change', 'BIC_Nomenclature', 'Clinical_significance'];
 
 var allSources = {
     Variant_in_ENIGMA: true,
@@ -243,9 +243,6 @@ var hasSelection = () => !(window.getSelection && window.getSelection().isCollap
 
 var Table = React.createClass({
     mixins: [PureRenderMixin],
-    getData: function () {
-        return this.refs.table.state.data;
-    },
     render: function () {
         var {data, onHeaderClick, onRowClick, hiddenSources,...opts} = this.props;
         return (
@@ -314,10 +311,7 @@ var VariantTableSupplier = function (Component) {
 };
 
 
-var VariantTable = VariantTableSupplier(Table);
-var ResearchVariantTable = ResearchVariantTableSupplier(Table);
-
 module.exports = ({
-    VariantTable: VariantTable,
-    ResearchVariantTable: ResearchVariantTable,
+    VariantTable: VariantTableSupplier(Table),
+    ResearchVariantTable: ResearchVariantTableSupplier(Table),
 });
