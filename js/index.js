@@ -321,7 +321,7 @@ var Database = React.createClass({
             params = databaseParams(this.getQuery());
         // XXX is 'keys' used?
         var table;
-        if (localStorage.getItem("research-mode") === true) {
+        if (localStorage.getItem("research-mode") === 'true') {
             table = <ResearchVariantTable
                 ref='table'
                 initialState={params}
@@ -385,7 +385,7 @@ var VariantDetail = React.createClass({
     render: function () {
         var {data: variant = {}, error} = this.state;
         var cols;
-        if (localStorage.getItem("research-mode") === true) {
+        if (localStorage.getItem("research-mode") === 'true') {
             cols = research_mode_columns;
         } else {
             cols = columns;
