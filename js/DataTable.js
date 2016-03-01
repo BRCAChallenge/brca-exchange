@@ -71,25 +71,23 @@ var DataTable = React.createClass({
         this.fetch(this.state);
     },
     getInitialState: function () {
-        var defaultColumns = ['Gene_symbol', 'Genomic_Coordinate', 'HGVS_cDNA', 'HGVS_protein', 'Abbrev_AA_change', 'BIC_Nomenclature', 'Clinical_significance'];
         return mergeState({
             data: [],
             lollipopOpen: false,
             filtersOpen: false,
             filterValues: {},
             search: '',
-            columnSelection: _.object(_.map(this.props.columns, c => _.contains(defaultColumns, c.prop) ? [c.prop, true] : [c.prop, false])),
+            columnSelection: _.object(_.map(this.props.columns, c => _.contains(this.props.defaultColumns, c.prop) ? [c.prop, true] : [c.prop, false])),
             sourceSelection: this.props.sourceSelection,
             pageLength: 20,
             page: 0,
-            totalPages: 20, // XXX this is imaginary. Do we need it?
             windowWidth: window.innerWidth
         }, this.props.initialState);
     },
     componentWillReceiveProps: function(newProps) {
         var newState = mergeState(this.state, newProps.initialState);
-        this.setState(newState);
-        this.fetch(newState);
+        newState.sourceSelection = newProps.sourceSelection;
+        this.setStateFetch(newState);
     },
     handleResize: function(e) {
         this.setState({windowWidth: window.innerWidth});
@@ -157,13 +155,6 @@ var DataTable = React.createClass({
 
         this.setStateFetch({columnSelection: cs});
     },
-    toggleSource: function (prop) {
-        var {sourceSelection} = this.state,
-            val = sourceSelection[prop],
-            ss = {...sourceSelection, [prop]: !val};
-        this.setStateFetch({sourceSelection: ss});
-    },
-
     onChangePage: function (pageNumber) {
         this.setStateFetch({page: pageNumber});
     },
@@ -182,9 +173,9 @@ var DataTable = React.createClass({
             <ColumnCheckbox onChange={v => this.toggleColumns(prop)} key={prop} label={prop} title={title}initialCheck={columnSelection}/>);
     },
     render: function () {
-        var {filterValues, filtersOpen, lollipopOpen, search, data, columnSelection, sourceSelection,
+        var {filterValues, filtersOpen, lollipopOpen, search, data, columnSelection,
             page, totalPages, count, error} = this.state;
-        var {columns, filterColumns, suggestions, className, subColumns} = this.props;
+        var {columns, filterColumns, className, subColumns, advancedFilters} = this.props;
         var renderColumns = _.filter(columns, c => columnSelection[c.prop]);
         var filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
             <SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
@@ -197,17 +188,7 @@ var DataTable = React.createClass({
                 </Panel>
             </Col>
         );
-        var sourceCheckboxes = _.map(sourceSelection, (value, name) =>
-            <Col sm={6} md={2}>
-                <div>
-                    <ColumnCheckbox
-                        onChange={v => this.toggleSource(name)}
-                        key={name} label={name}
-                        title={name.substring(11).replace(/_/g," ")} // eg "Variant_in_1000_Genomes" => "1000 Genomes"
-                        initialCheck={sourceSelection}/>
-                </div>
-            </Col>
-        );
+
         return (error ? <p>{error}</p> :
             <div className={this.props.className}>
                 <Row style={{marginBottom: '2px'}}>
@@ -219,14 +200,7 @@ var DataTable = React.createClass({
                         <Button bsSize='xsmall' onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}</Button>
                         {filtersOpen && <div className='form-inline'>{filterFormEls}</div>}
                         {filtersOpen && <div className='form-inline'>
-                            <label className='control-label' style={{marginRight: '1em'}}>
-                                <Panel header="Source Selection">
-                                    {sourceCheckboxes}
-                                </Panel>
-                                <Panel header="Column Selection">
-                                    {filterFormSubCols}
-                                </Panel>
-                            </label>
+                            {advancedFilters}
                         </div>}
                     </Col>
                 </Row>
@@ -257,7 +231,6 @@ var DataTable = React.createClass({
                     <Col sm={5}>
                         <VariantSearch
                             id='variants-search'
-                            suggestions={suggestions}
                             value={search}
                             onChange={v => {
                                 // reset the page number to zero on new searches
