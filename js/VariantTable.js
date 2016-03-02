@@ -245,13 +245,16 @@ var ResearchVariantTableSupplier = function (Component) {
         mixins: [PureRenderMixin],
 
         getInitialState: function () {
+            var defaultColumnSelection = _.object(
+                _.map(this.getColumns(),
+                    c => _.contains(this.getDefaultColumns(), c.prop) ? [c.prop, true] : [c.prop, false]));
+            var columnSelectionQueryParams = this.props.initialState.columnSelection;
+
             return {
                 sourceSelection: _.mapObject(allSources, (v, k)=> {
                     return _.has(this.props.hiddenSources, k) ? false : true
                 }),
-                columnSelection: _.object(
-                    _.map(this.getColumns(),
-                        c => _.contains(this.getDefaultColumns(), c.prop) ? [c.prop, true] : [c.prop, false])),
+                columnSelection: {...defaultColumnSelection, ...columnSelectionQueryParams},
             };
         },
         toggleColumns: function (prop) {
@@ -312,7 +315,6 @@ var ResearchVariantTableSupplier = function (Component) {
                 <Component
                     {...this.props}
                     columns={this.getColumns()}
-                    defaultColumns={this.getDefaultColumns()}
                     advancedFilters={this.getAdvancedFilters()}
                     sourceSelection={sourceSelection}
                     columnSelection={columnSelection}
@@ -341,7 +343,6 @@ var VariantTableSupplier = function (Component) {
                 <Component
                     {...this.props}
                     columns={this.getColumns()}
-                    defaultColumns={this.getDefaultColumns()}
                     columnSelection={columnSelection}
                 />
             );
