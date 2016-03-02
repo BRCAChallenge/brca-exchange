@@ -5,7 +5,7 @@ var React = require('react');
 var Rx = require('rx');
 require('rx/dist/rx.time');
 var {Table, Pagination} = require('react-data-components-bd2k');
-var {Button, Row, Col, Panel} = require('react-bootstrap');
+var {Button, Row, Col} = require('react-bootstrap');
 var VariantSearch = require('./VariantSearch');
 var SelectField = require('./SelectField');
 var DisclaimerModal = require('./DisclaimerModal');
@@ -77,7 +77,7 @@ var DataTable = React.createClass({
             filtersOpen: false,
             filterValues: {},
             search: '',
-            columnSelection: _.object(_.map(this.props.columns, c => _.contains(this.props.defaultColumns, c.prop) ? [c.prop, true] : [c.prop, false])),
+            columnSelection: this.props.columnSelection,
             sourceSelection: this.props.sourceSelection,
             pageLength: 20,
             page: 0,
@@ -87,6 +87,7 @@ var DataTable = React.createClass({
     componentWillReceiveProps: function(newProps) {
         var newState = mergeState(this.state, newProps.initialState);
         newState.sourceSelection = newProps.sourceSelection;
+        newState.columnSelection = newProps.columnSelection;
         this.setStateFetch(newState);
     },
     handleResize: function(e) {
@@ -148,13 +149,6 @@ var DataTable = React.createClass({
     toggleFilters: function () {
         this.setState({filtersOpen: !this.state.filtersOpen});
     },
-    toggleColumns: function (prop) {
-        var {columnSelection} = this.state,
-            val = columnSelection[prop],
-            cs = {...columnSelection, [prop]: !val};
-
-        this.setStateFetch({columnSelection: cs});
-    },
     onChangePage: function (pageNumber) {
         this.setStateFetch({page: pageNumber});
     },
@@ -168,26 +162,15 @@ var DataTable = React.createClass({
 
         this.setStateFetch({page: newPage, pageLength: length});
     },
-    filterFormCols: function (subColList, columnSelection){
-        return _.map(subColList, ({title, prop}) =>
-            <ColumnCheckbox onChange={v => this.toggleColumns(prop)} key={prop} label={prop} title={title}initialCheck={columnSelection}/>);
-    },
     render: function () {
         var {filterValues, filtersOpen, lollipopOpen, search, data, columnSelection,
             page, totalPages, count, error} = this.state;
-        var {columns, filterColumns, className, subColumns, advancedFilters} = this.props;
+        var {columns, filterColumns, className, advancedFilters} = this.props;
         var renderColumns = _.filter(columns, c => columnSelection[c.prop]);
         var filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
             <SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
                          key={prop} label={`${name} is: `} value={filterDisplay(filterValues[prop])}
                          options={addAny(values)}/>);
-        var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
-            <Col sm={6} md={2}>
-                <Panel header={subColTitle}>
-                    {this.filterFormCols(subColList, columnSelection)}
-                </Panel>
-            </Col>
-        );
 
         return (error ? <p>{error}</p> :
             <div className={this.props.className}>
