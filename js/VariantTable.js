@@ -14,6 +14,10 @@ var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin');
 var DataTable = require('./DataTable');
 var _ = require('underscore');
+var {Col, Panel} = require('react-bootstrap');
+var ColumnCheckbox = require('./ColumnCheckbox');
+
+
 require('react-data-components-bd2k/css/table-twbs.css');
 
 function buildHeader(onClick, title) {
@@ -227,8 +231,6 @@ var Table = React.createClass({
                 buildRowOptions={r => ({title: 'click for details', onClick: () => hasSelection() ? null : onRowClick(r)})}
                 buildHeader={title => buildHeader(onHeaderClick, title)}
                 filterColumns={filterColumns}
-                subColumns={subColumns}
-                sourceSelection={_.mapObject(allSources, (v,k)=> {return _.has(hiddenSources, k)? false : true})}
                 initialData={data}
                 initialPageLength={20}
                 initialSortBy={{prop: 'Abbrev_AA_change', order: 'descending'}}
@@ -242,6 +244,64 @@ var ResearchVariantTableSupplier = function (Component) {
     var ResearchVariantTableComponent = React.createClass({
         mixins: [PureRenderMixin],
 
+        getInitialState: function () {
+            var defaultColumnSelection = _.object(
+                _.map(this.getColumns(),
+                    c => _.contains(this.getDefaultColumns(), c.prop) ? [c.prop, true] : [c.prop, false]));
+            var columnSelectionQueryParams = this.props.initialState.columnSelection;
+
+            return {
+                sourceSelection: _.mapObject(allSources, (v, k)=> {
+                    return _.has(this.props.hiddenSources, k) ? false : true
+                }),
+                columnSelection: {...defaultColumnSelection, ...columnSelectionQueryParams},
+            };
+        },
+        toggleColumns: function (prop) {
+            var {columnSelection} = this.state,
+                val = columnSelection[prop],
+                cs = {...columnSelection, [prop]: !val};
+            this.setState({columnSelection: cs});
+        },
+        toggleSource: function (prop) {
+            var {sourceSelection} = this.state,
+                val = sourceSelection[prop],
+                ss = {...sourceSelection, [prop]: !val};
+            this.setState({sourceSelection: ss});
+        },
+        filterFormCols: function (subColList, columnSelection){
+            return _.map(subColList, ({title, prop}) =>
+                <ColumnCheckbox onChange={v => this.toggleColumns(prop)} key={prop} label={prop} title={title}initialCheck={columnSelection}/>);
+        },
+        getAdvancedFilters() {
+            var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
+                <Col sm={6} md={2}>
+                    <div>
+                        <ColumnCheckbox
+                            onChange={v => this.toggleSource(name)}
+                            key={name} label={name}
+                            title={name.substring(11).replace(/_/g," ")} // eg "Variant_in_1000_Genomes" => "1000 Genomes"
+                            initialCheck={this.state.sourceSelection}/>
+                    </div>
+                </Col>
+            );
+            var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
+                <Col sm={6} md={2}>
+                    <Panel header={subColTitle}>
+                        {this.filterFormCols(subColList, this.state.columnSelection)}
+                    </Panel>
+                </Col>
+            );
+            return (<label className='control-label' style={{marginRight: '1em'}}>
+                <Panel header="Source Selection">
+                    {sourceCheckboxes}
+                </Panel>
+                <Panel header="Column Selection">
+                    {filterFormSubCols}
+                </Panel>
+            </label>);
+        },
+
         getColumns: function () {
             return research_mode_columns;
         },
@@ -249,11 +309,15 @@ var ResearchVariantTableSupplier = function (Component) {
             return defaultResearchColumns;
         },
         render: function () {
+            var sourceSelection = this.state.sourceSelection;
+            var columnSelection = this.state.columnSelection;
             return (
                 <Component
                     {...this.props}
                     columns={this.getColumns()}
-                    defaultColumns={this.getDefaultColumns()}
+                    advancedFilters={this.getAdvancedFilters()}
+                    sourceSelection={sourceSelection}
+                    columnSelection={columnSelection}
                 />
             );
         }
@@ -272,11 +336,14 @@ var VariantTableSupplier = function (Component) {
             return defaultColumns;
         },
         render: function () {
+            var columnSelection = _.object(
+                _.map(this.getColumns(),
+                    c => _.contains(this.getDefaultColumns(), c.prop) ? [c.prop, true] : [c.prop, false]));
             return (
                 <Component
                     {...this.props}
                     columns={this.getColumns()}
-                    defaultColumns={this.getDefaultColumns()}
+                    columnSelection={columnSelection}
                 />
             );
         }
