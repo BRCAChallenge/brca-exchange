@@ -16,7 +16,6 @@ var DataTable = require('./DataTable');
 var _ = require('underscore');
 var {Col, Panel} = require('react-bootstrap');
 var ColumnCheckbox = require('./ColumnCheckbox');
-var hgvs = require('./hgvs');
 
 
 require('react-data-components-bd2k/css/table-twbs.css');
