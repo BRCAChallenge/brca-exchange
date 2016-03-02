@@ -16,23 +16,48 @@ var DisclaimerModal = React.createClass({
     open() {
         this.setState({ showModal: true });
     },
+    disable_research_mode() {
+        localStorage.setItem('research-mode',false);
+    },
     agree() {
         localStorage.setItem('research-mode',true);
         this.close();
     },
-    render() {
-        var modalTrigger = React.cloneElement(this.props.children,{onClick:this.open});
+    research_mode() {
+        if(localStorage.getItem('research-mode') == 'true') {
+            return <Button onClick={this.disable_research_mode}>Return to the default view</Button>
+        } else {
+            return (
+                <span>
+                    <Button onClick={this.open}>Research information on this variant</Button>
+                    {this.state.showModal ?
+                        <Modal onRequestHide={this.close}>
+                            <RawHTML html={content.pages.disclaimer} />
+                            <Button onClick={this.agree}>OK</Button>
+                            <Button onClick={this.close}>Cancel</Button>
+                        </Modal> : null }
+                </span>
+            );
+        }
+    },
+    general_mode() {
         return (
             <span>
-                {modalTrigger}
+                <a style={{cursor:"pointer"}} onClick={this.open}>disclaimer</a>
                 {this.state.showModal ?
                     <Modal onRequestHide={this.close}>
                         <RawHTML html={content.pages.disclaimer} />
-                            <Button onClick={this.agree}>OK</Button>
-                            <Button onClick={this.close}>Cancel</Button>
+                        <Button onClick={this.agree}>OK</Button>
                     </Modal> : null }
             </span>
         );
+    },
+    render() {
+        if(this.props.research_mode){
+            return this.research_mode()
+        } else {
+            return this.general_mode()
+        }
     }
 });
 
