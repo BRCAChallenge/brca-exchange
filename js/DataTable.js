@@ -264,7 +264,7 @@ var DataTable = React.createClass({
                         />
                     </Col>
                     <Col>
-                        <DisclaimerModal><Button>Research information on this variant</Button></DisclaimerModal>
+                        <DisclaimerModal research_mode/>
                     </Col>
                     <Col sm={6} smOffset={1}>
                         <Pagination

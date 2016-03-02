@@ -132,9 +132,7 @@ var Footer = React.createClass({
                 <div className="col-sm-5 right-footer">
                     <ul>
                         <li>
-                            <DisclaimerModal>
-                                <a style={{cursor:"pointer"}}>disclaimer</a>
-                            </DisclaimerModal>
+                            <DisclaimerModal/>
                         </li>
                         <li>
                             <a href="mailto:brca-exchange-contact@genomicsandhealth.org?subject=BRCA Exchange website">
@@ -423,7 +421,7 @@ var VariantDetail = React.createClass({
                 </Row>
                 <Row>
                     <Col md={8} mdOffset={2}>
-                        <DisclaimerModal><Button>Research information on this variant</Button></DisclaimerModal>
+                        <DisclaimerModal research_mode/>
                     </Col>
                 </Row>
             </Grid>
