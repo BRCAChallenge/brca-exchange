@@ -53,12 +53,13 @@ def build_query(direction, filterValues, filters, order_by, search_term, source,
                 quotes=""):
     query = Variant.objects
 
-    # if there are multiple filters given then AND them:
-    # the row must match all the filters
+    # if there are multiple filters the row must match all the filters
     if filters:
-        query = query.filter(**dict(zip(["{0}__startswith".format(f) for f in filters],
-                                        ["{0}{1}{0}".format(quotes, v) for v in filterValues])))
-
+        for column, value in zip(filters, filterValues):
+            query = query.extra(
+                where=["\"{0}\" LIKE %s".format(column)],
+                params=["{0}{1}{0}".format(quotes, value)]
+            )
     # search using the tsvector column which represents our document made of all the columns
     if search_term:
         query = query.extra(
