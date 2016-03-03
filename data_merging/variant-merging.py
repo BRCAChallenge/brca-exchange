@@ -205,7 +205,7 @@ def add_new_source(columns, variants, source, source_file, source_dict):
     print "adding {0} into merged file.....".format(source)
     old_column_num = len(columns)
     for column_title in source_dict.keys():
-        columns.append(column_title+"()".format(source))
+        columns.append(column_title+"({0})".format(source))
 
     vcf_reader = vcf.Reader(open(source_file, 'r'), strict_whitespace=True)
     overlap = 0
