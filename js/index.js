@@ -333,6 +333,7 @@ var Database = React.createClass({
                 fetch={backend.data}
                 url={backend.url}
                 onChange={s => this.urlq.onNext(s)}
+                database={this}
                 keys={databaseKey}
                 onHeaderClick={this.showHelp}
                 onRowClick={this.showVariant}/>
@@ -344,6 +345,7 @@ var Database = React.createClass({
                 fetch={backend.data}
                 url={backend.url}
                 onChange={s => this.urlq.onNext(s)}
+                database={this}
                 keys={databaseKey}
                 onHeaderClick={this.showHelp}
                 onRowClick={this.showVariant}/>
