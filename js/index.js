@@ -423,7 +423,7 @@ var VariantDetail = React.createClass({
                 </Row>
                 <Row>
                     <Col md={8} mdOffset={2}>
-                        <DisclaimerModal research_mode/>
+                        <DisclaimerModal research_mode onToggleMode={this}/>
                     </Col>
                 </Row>
             </Grid>
