@@ -165,7 +165,7 @@ var DataTable = React.createClass({
     render: function () {
         var {filterValues, filtersOpen, lollipopOpen, search, data, columnSelection,
             page, totalPages, count, error} = this.state;
-        var {columns, filterColumns, className, advancedFilters} = this.props;
+        var {columns, filterColumns, className, advancedFilters, onToggleMode} = this.props;
         var renderColumns = _.filter(columns, c => columnSelection[c.prop]);
         var filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
             <SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
@@ -222,7 +222,7 @@ var DataTable = React.createClass({
                         />
                     </Col>
                     <Col>
-                        <DisclaimerModal research_mode/>
+                        <DisclaimerModal research_mode onToggleMode={onToggleMode}/>
                     </Col>
                     <Col sm={6} smOffset={1}>
                         <Pagination

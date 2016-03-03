@@ -17,9 +17,11 @@ var DisclaimerModal = React.createClass({
         this.setState({ showModal: true });
     },
     disable_research_mode() {
+        this.props.onToggleMode.forceUpdate();
         localStorage.setItem('research-mode',false);
     },
     agree() {
+        this.props.onToggleMode.forceUpdate();
         localStorage.setItem('research-mode',true);
         this.close();
     },
