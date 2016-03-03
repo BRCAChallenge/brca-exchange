@@ -58,7 +58,7 @@ def build_query(direction, filterValues, filters, order_by, search_term, source,
         for column, value in zip(filters, filterValues):
             query = query.extra(
                 where=["\"{0}\" LIKE %s".format(column)],
-                params=["{0}{1}{0}".format(quotes, value)]
+                params=["{0}{1}%{0}".format(quotes, value)]
             )
     # search using the tsvector column which represents our document made of all the columns
     if search_term:
