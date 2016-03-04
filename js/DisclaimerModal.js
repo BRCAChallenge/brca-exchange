@@ -49,7 +49,7 @@ var DisclaimerModal = React.createClass({
                 {this.state.showModal ?
                     <Modal onRequestHide={this.close}>
                         <RawHTML html={content.pages.disclaimer} />
-                        <Button onClick={this.agree}>OK</Button>
+                        <Button onClick={this.close}>OK</Button>
                     </Modal> : null }
             </span>
         );
