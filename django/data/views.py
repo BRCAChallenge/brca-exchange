@@ -1,5 +1,7 @@
 import re
 from operator import __or__
+import tempfile
+import os
 
 from django.db import connection
 from django.db.models import Q
@@ -34,10 +36,10 @@ def index(request):
 
     if format == 'csv':
         cursor = connection.cursor()
-        output_file = '/tmp/variants.csv'
-        cursor.execute("COPY ({}) TO '{}' WITH DELIMITER ',' CSV HEADER".format(query_csv.query, output_file))
+        with tempfile.NamedTemporaryFile() as f:
+            os.chmod(f.name, 0606)
+            cursor.execute("COPY ({}) TO '{}' WITH DELIMITER ',' CSV HEADER".format(query_csv.query, f.name))
 
-        with open(output_file, 'r') as f:
             response = HttpResponse(f.read(), content_type='text/csv')
             response['Content-Disposition'] = 'attachment;filename="variants.csv"'
             return response
@@ -46,7 +48,7 @@ def index(request):
         # call list() now to evaluate the query
         response = JsonResponse({'count': count, 'data': list(query.values())})
         response['Access-Control-Allow-Origin'] = '*'
-    return response
+        return response
 
 
 def build_query(direction, filterValues, filters, order_by, search_term, source, page_size, page_num,
