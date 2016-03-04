@@ -41,7 +41,6 @@ var FastTable = React.createClass({
         var trimmedData = _.map(dataArray, r =>
             _.mapObject(r, v => v.length > 30 ? v.slice(0, 30) + "..." : v)
         );
-        console.log(trimmedData)
         return <Table {...props} dataArray={trimmedData}/>;
     }
 });
