@@ -37,7 +37,12 @@ function setPages({data, count}, pageLength) {
 var FastTable = React.createClass({
     mixins: [PureRenderMixin],
     render: function () {
-        return <Table {...this.props}/>;
+        var {dataArray, ...props} = this.props;
+        var trimmedData = _.map(dataArray, r =>
+            _.mapObject(r, v => v.length > 30 ? v.slice(0, 30) + "..." : v)
+        );
+        console.log(trimmedData)
+        return <Table {...props} dataArray={trimmedData}/>;
     }
 });
 
