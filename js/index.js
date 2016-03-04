@@ -400,7 +400,7 @@ var VariantDetail = React.createClass({
             var column_title = dp_title || title;
             return <tr key={prop}>
                 <Key tableKey={column_title} columns={cols} onClick={() => this.showHelp(title)}/>
-                <td>{variant[prop]}</td>
+                <td><span className="row-wrap">{variant[prop]}</span></td>
             </tr>
         });
 
