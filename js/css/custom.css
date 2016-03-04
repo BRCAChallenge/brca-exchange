@@ -264,6 +264,11 @@ html {
     font-size: 10px;
 }
 
+
+#main-grid {
+    margin-top: 40px;
+}
+
 .superscript {
 	font-size: 80%;
 	position: relative;

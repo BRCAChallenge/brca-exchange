@@ -171,7 +171,7 @@ var Home = React.createClass({
             </a></li>
         ));
         return (
-            <Grid className='home'>
+            <Grid id="main-grid" className='home'>
                 <Row>
                     <Col smOffset={3} sm={6}>
                         <VariantSearch
@@ -204,7 +204,7 @@ var About = React.createClass({
         var {page} = this.props.params;
 
         return (
-            <Grid>
+            <Grid id="main-grid" className="main-grid">
                 <Row>
                     <Col md={8} mdOffset={2}>
                         <RawHTML html={content.pages[page]} />
@@ -237,7 +237,7 @@ var Help = React.createClass({
             helpContent = content.pages.help;
         }
         return (
-            <Grid className="help">
+            <Grid id="main-grid" className="help">
                 {fragment === '' ? null :
                     <style>{`#${fragment} { animation-name: emphasis; animation-duration: 10s; } `}</style>}
                 <Row>
@@ -487,7 +487,7 @@ var Lollipop = React.createClass({
     },
     render: function () {
         return (
-            <Grid>
+            <Grid id="main-grid">
                 <Row>
                     <Col md={8} mdOffset={4}>
                         <h1 id="brca-dna-variant-lollipop">{this.state.brcakey} Lollipop Chart</h1>
