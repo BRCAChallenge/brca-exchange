@@ -2,6 +2,8 @@
 from pprint import pprint
 import vcf
 import pandas as pd
+import json
+
 
 MERGED_FILE = "/cluster/home/mollyzhang/release1.0/merged.csv"
 OUTPUT = "/cluster/home/mollyzhang/release1.0/merged_withVEP.csv"
@@ -49,13 +51,11 @@ def process_VEP_info(info):
         result_dict = dict(zip(VEP_FIELDS, values))
         row_list.append(result_dict)
     df = pd.DataFrame(row_list)
+    collapsed = []
     for field in df.columns:
-        print field
-        print df[field]
-        print df[field].value_counts()
-        print type(df[field].value_counts())    
-        print "--------------------------------"
-    return df 
+        for key, value in df[field].value_counts().iteritems():
+            collapsed.append(key, "{0}/{1}".format(value, len(infos)))
+    return collapsed 
 
 
 if __name__ == "__main__":
