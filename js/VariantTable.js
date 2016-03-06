@@ -231,7 +231,9 @@ var VariantTable = React.createClass({
 				{...opts}
 				buildRowOptions={r => ({title: 'click for details', onClick: () => hasSelection() ? null : onRowClick(r)})}
 				buildHeader={title => buildHeader(onHeaderClick, title)}
-				filterColumns={filterColumns}
+				onRowClick={onRowClick}
+                onHeaderClick={onHeaderClick}
+                filterColumns={filterColumns}
 				columns={columns}
                 subColumns={subColumns}
                 columnSelection={columnSelection}
