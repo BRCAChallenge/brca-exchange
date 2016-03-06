@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 this script converts a tsv file into a vcf file
 """
@@ -14,9 +15,9 @@ def main():
     for line in tsv:
         line_num += 1
         if line_num == 1:
-            info_keys = line.strip().split("\t")
+            info_keys = line.strip().split(args.delimiter)
         else:
-            info_values = line.strip().split("\t")
+            info_values = line.strip().split(args.delimiter)
             infos.append(dict(zip(info_keys, info_values)))  
     
     sorted_infos = sort_by_pos(infos)
@@ -66,6 +67,7 @@ def arg_parse():
     parser.add_argument("-i", "--input")
     parser.add_argument("-o", "--output")
     parser.add_argument("-s", "--source")
+    parser.add_argument("-d", "--delimiter", default="\t")
     return parser.parse_args()
 
 
