@@ -23,24 +23,31 @@ VEP_FIELDS = ['Allele', 'Consequence', 'IMPACT', 'SYMBOL', 'Gene',
 
 def main():
     vep_result_dict = save_VEP_to_dict()
-    temp_dump = open("temp_dump", "w")
-    temp_dump.write(pickle.dumps(vep_result_dict))
-    temp_dump.close()
+    #temp_dump = open("temp_dump", "w")
+    #temp_dump.write(pickle.dumps(vep_result_dict))
+    #temp_dump.close()
+    #vep_result_dict = pickle.loads(open("temp_dump", "r").read())
+    write_to_file(vep_result_dict)
+
+def write_to_file(vep_result_dict):
     f_in = open(MERGED_FILE, "r")
     f_out = open(OUTPUT, "w")
     line_num = 0
     for line in f_in:
         line_num += 1
+        if line_num %100 == 0:
+            print line_num
         items = line.strip().split(",")
         if line_num == 1:
-            vep_fields = ["VEP" + i for i in VEP_FIELDS]
+            vep_fields = ["VEP_" + i for i in VEP_FIELDS]
             items += vep_fields
         else:
             genome_coor = items[2]
             if genome_coor in vep_result_dict.keys():
                 additional_items = []
                 for column in VEP_FIELDS:
-                    additional_items.append(vep_result_dict[genome_coor][column])
+                    this_cell = vep_result_dict[genome_coor][column].replace(", ","|")
+                    additional_items.append(this_cell)
             items += additional_items
         new_line = ",".join(items) + "\n"
         f_out.write(new_line)
