@@ -58,10 +58,13 @@ def build_query(direction, filterValues, filters, order_by, search_term, source,
     # if there are multiple filters the row must match all the filters
     if filters:
         for column, value in zip(filters, filterValues):
-            query = query.extra(
-                where=["\"{0}\" = %s".format(column)],
-                params=["{0}{1}{0}".format(quotes, value)]
-            )
+            if column == 'id':
+                query = query.filter(**{column:value})
+            else:
+                query = query.extra(
+                    where=["\"{0}\" LIKE %s".format(column)],
+                    params=["{0}{1}%{0}".format(quotes, value)]
+                )
 
     # search using the tsvector column which represents our document made of all the columns
     if search_term:
