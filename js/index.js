@@ -136,12 +136,12 @@ var Footer = React.createClass({
                         </li>
                         <li>
                             <a href="mailto:brca-exchange-contact@genomicsandhealth.org?subject=BRCA Exchange website">
-                                contact us
+                                Contact us
                             </a>
                         </li>
                         <li>
                             <a href="https://github.com/BD2KGenomics/brca-website">
-                                source code
+                                Source code
                             </a>
                         </li>
                     </ul>
