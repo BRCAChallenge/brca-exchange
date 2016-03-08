@@ -79,7 +79,7 @@ var columns = [
     {title: 'Gene', prop: 'Gene_symbol'},
     {title: 'Identifier', prop: 'HGVS_cDNA', dp_title: 'Identifier (HGVS cDNA)'},
     {title: 'Alternate Identifier', prop: 'Genomic_Coordinate', dp_title: 'Alternate Identifier (Genomic Coordinate)'},
-    {title: 'Alt ID', prop: "Abbrev_AA_change", dp_title: 'Alternate Identifier (HGVS protein (abbr))'},
+    {title: 'Alt ID', prop: "Abbrev_AA_change", dp_title: 'Alternate Identifier (HGVS protein (abbr)'},
     {title: 'Pathogenicity', prop: 'Clinical_significance'},
     {title: 'Alternate Identifier (HGVS protein)', prop: 'HGVS_protein'},
     {title: 'Alternate Identifier (BIC nomenclature)', prop: "BIC_Nomenclature"}
