@@ -322,7 +322,12 @@ var Database = React.createClass({
 	// getQuery().
 	mixins: [Navigation, State],
 	showVariant: function (row) {
-		this.transitionTo(`/variant/${variantPathJoin(row)}`);
+        var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
+        if (d3TipDiv.length != 0 && d3TipDiv[0].style.opacity != '0') {
+            d3TipDiv[0].style.opacity='0';
+            d3TipDiv[0].style.pointerEvents='none';
+        }
+        this.transitionTo(`/variant/${variantPathJoin(row)}`);
 	},
 	showHelp: function (title) {
 		this.transitionTo(`/help#${slugify(title)}`);

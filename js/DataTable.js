@@ -173,7 +173,7 @@ var DataTable = React.createClass({
 	render: function () {
 		var {filterValues, filtersOpen, lollipopOpen, search, data, columnSelection,
 				page, totalPages, count, error} = this.state,
-			{columns, filterColumns, suggestions, className, subColumns} = this.props,
+			{columns, filterColumns, suggestions, className, subColumns, hasSelection, onRowClick} = this.props,
 			renderColumns = _.filter(columns, c => columnSelection[c.prop]),
 			filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
 				<SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
@@ -185,6 +185,7 @@ var DataTable = React.createClass({
                     </Panel>
                 </Col>
             );
+
         return (error ? <p>{error}</p> :
 			<div className={this.props.className}>
                 <Row style={{marginBottom: '2px'}}>
@@ -254,6 +255,7 @@ var DataTable = React.createClass({
 							columns={renderColumns}
 							keys={this.props.keys}
 							buildRowOptions={this.props.buildRowOptions}
+                            onRowClick={this.props.onRowClick}
 							buildHeader={this.props.buildHeader}
 							sortBy={this.state.sortBy}
 							onSort={this.onSort} />

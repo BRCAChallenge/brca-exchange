@@ -233,6 +233,7 @@ var VariantTable = React.createClass({
 				buildHeader={title => buildHeader(onHeaderClick, title)}
 				onRowClick={onRowClick}
                 onHeaderClick={onHeaderClick}
+                hasSelection={hasSelection}
                 filterColumns={filterColumns}
 				columns={columns}
                 subColumns={subColumns}

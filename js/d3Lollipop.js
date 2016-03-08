@@ -109,7 +109,6 @@ var Lollipop = React.createClass({
     },
     render: function () {
         var {data, onHeaderClick, onRowClick, ...opts} = this.props;
-        console.log(this.props);
         return (
             <Grid>
                 <div>
