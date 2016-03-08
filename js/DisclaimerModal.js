@@ -27,18 +27,22 @@ var DisclaimerModal = React.createClass({
     },
     research_mode() {
         if(localStorage.getItem('research-mode') == 'true') {
-            return <Button onClick={this.disable_research_mode}>Return to the default view</Button>
+            return (
+                <div className="form-group">
+                <Button className="btn-sm" onClick={this.disable_research_mode}>Return to the default view</Button>
+                </div>
+            );
         } else {
             return (
-                <span>
-                    <Button onClick={this.open}>Research information on this variant</Button>
+                <div className="form-group">
+                    <Button className="btn-sm" onClick={this.open}>Research information on this variant</Button>
                     {this.state.showModal ?
                         <Modal onRequestHide={this.close}>
                             <RawHTML html={content.pages.disclaimer} />
                             <Button onClick={this.agree}>OK</Button>
                             <Button onClick={this.close}>Cancel</Button>
                         </Modal> : null }
-                </span>
+                </div>
             );
         }
     },

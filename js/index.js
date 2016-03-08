@@ -79,11 +79,11 @@ var NavBarNew = React.createClass({
         var {path} = this.props;
         var brand = (
             <a className="navbar-brand" href="http://brcaexchange.org">
-                <span>
-                    <b className="BRCA">BRCA</b>
+                <h1>
+                    <span className="BRCA">BRCA</span>
                     <span className="exchange"> Exchange</span>
-                    <img src={betaBanner} alt="beta banner" />
-                </span>
+                </h1>
+                <span id="beta-label" className="label label-info">Beta</span>
             </a>);
         return (
             <div className="navbar-container">

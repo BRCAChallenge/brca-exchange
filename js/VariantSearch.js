@@ -88,7 +88,7 @@ var VariantSearch = React.createClass({
         return (
             <div className='search-box'>
                 <form onSubmit={this.onSubmit} style={{display: 'inline'}}>
-                    <input type='submit' style={{display: 'none'}} />
+                    <input type='submit' className='input-sm'style={{display: 'none'}} />
                     <div className='text-nowrap help-target'>
                         <AutoSuggest
                             id={id}

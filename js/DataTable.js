@@ -178,28 +178,33 @@ var DataTable = React.createClass({
 
         return (error ? <p>{error}</p> :
             <div className={this.props.className}>
-                <Row style={{marginBottom: '2px'}}>
-                    <Col sm={12}>
-                        <div>
-                            {this.state.windowWidth > 991 && <Button bsSize='xsmall' onClick={this.toggleLollipop}>{(lollipopOpen ? 'Hide' : 'Show' ) + ' Lollipop Chart'}</Button>}
-                        </div>
+                <Row id="show-hide" className="btm-buffer">
+                    <Col sm={2}>
+                        {this.state.windowWidth > 991 && <Button className="btn-sm" onClick={this.toggleLollipop}>{(lollipopOpen ? 'Hide' : 'Show' ) + ' Lollipop Chart'}</Button>}
                         {this.state.windowWidth > 991 && lollipopOpen && this.state.data.length > 0 && <Lollipop data={this.state.data} onHeaderClick={this.props.onHeaderClick}/> }
-                        <Button bsSize='xsmall' onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}</Button>
+                    </Col>
+                    <Col sm={10}>
+
+                        <Button className="btn-sm" onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}</Button>
+                    </Col>
+                </Row>
+
+                <Row id="filters" className="btm-buffer">
+                    <Col sm={12}>
                         {filtersOpen && <div className='form-inline'>{filterFormEls}</div>}
                         {filtersOpen && <div className='form-inline'>
                             {advancedFilters}
                         </div>}
                     </Col>
                 </Row>
-                <Row style={{marginBottom: '2px'}}>
+                <Row id="download" className="btm-buffer">
                     <Col sm={6}>
                         <div className='form-inline'>
                             <div className='form-group'>
-                                <label className='control-label'
-                                        style={{marginRight: '1em'}}>
+                                <label className='control-label'>
                                     {count} matching {pluralize(count, 'variant')}
                                 </label>
-                                <Button download="variants.csv" href={this.createDownload()}>Download</Button>
+                                <Button className="btn-sm" download="variants.csv" href={this.createDownload()}>Download</Button>
                             </div>
                         </div>
                     </Col>
@@ -214,7 +219,7 @@ var DataTable = React.createClass({
                         </div>
                     </Col>
                 </Row>
-                <Row style={{marginBottom: '2px'}}>
+                <Row id='variant-search-row' className="btm-buffer">
                     <Col sm={5}>
                         <VariantSearch
                             id='variants-search'

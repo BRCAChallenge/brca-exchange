@@ -292,8 +292,8 @@ var ResearchVariantTableSupplier = function (Component) {
                     </Panel>
                 </Col>
             );
-            return (<label className='control-label' style={{marginRight: '1em'}}>
-                <Panel header="Source Selection">
+            return (<label className='control-label'>
+                <Panel className="top-buffer" header="Source Selection">
                     {sourceCheckboxes}
                 </Panel>
                 <Panel header="Column Selection">
