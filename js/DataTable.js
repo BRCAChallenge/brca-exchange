@@ -230,10 +230,10 @@ var DataTable = React.createClass({
                             }}
                         />
                     </Col>
-                    <Col>
+                    <Col sm={3}>
                         <DisclaimerModal research_mode onToggleMode={onToggleMode} text='Go to Research pages'/>
                     </Col>
-                    <Col sm={6} smOffset={1}>
+                    <Col sm={4}>
                         <Pagination
                             className="pagination pull-right-sm"
                             currentPage={page}
