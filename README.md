@@ -2,7 +2,7 @@
 To contribute:
 Fork the repository, make the changes, and submit pull request. 
 
-## Build
+## Build the frontend
 The build is based on npm and webpack.
  * Ensure that git and node are installed
    * On OSX, install brew http://brew.sh/
@@ -14,14 +14,19 @@ The build is based on npm and webpack.
  * `npm start`
  * browse to [http://localhost:8080/webpack-dev-server/](http://localhost:8080/webpack-dev-server/)
 
-## Build with local server
+## Build the server
+The server runs on Django with postgres so install and set up those
+ * `pip install django`
+ * `sudo apt-get install postgresql postgresql-contrib`
+ * `sudo -u postgres createdb storage.pg`
 
- * Copy \*.table and \*.sqlite files into brca-website/backend/applications/data/databases
+Then run the initial migration to populate postgres
+ * `cd django`
+ * `django manage.py migrate`
+ * `django manage.py runserver`
+
+To point the frontend at the local server
  * Edit url in js/backend.js to point to localhost:8000
- * Download and extract web2py
- * `python web2py.py -f ~/brca-website/backend`
-
-For now, database files can be found on beta, in /var/www/backend/beta/web2py/applications/data/databases.
 
 ### Lint
 
