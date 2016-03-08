@@ -35,7 +35,7 @@ var DisclaimerModal = React.createClass({
         } else {
             return (
                 <div className="form-group">
-                    <Button className="btn-sm" onClick={this.open}>Research information on this variant</Button>
+                    <Button className="btn-sm" onClick={this.open}>{this.props.text}</Button>
                     {this.state.showModal ?
                         <Modal onRequestHide={this.close}>
                             <RawHTML html={content.pages.disclaimer} />
@@ -49,7 +49,7 @@ var DisclaimerModal = React.createClass({
     general_mode() {
         return (
             <span>
-                <a style={{cursor:"pointer"}} onClick={this.open}>Disclaimer</a>
+                <a style={{cursor:"pointer"}} onClick={this.open}>{this.props.text}</a>
                 {this.state.showModal ?
                     <Modal onRequestHide={this.close}>
                         <RawHTML html={content.pages.disclaimer} />
