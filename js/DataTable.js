@@ -231,7 +231,7 @@ var DataTable = React.createClass({
                         />
                     </Col>
                     <Col sm={3}>
-                        <DisclaimerModal research_mode onToggleMode={onToggleMode} text='Go to Research pages'/>
+                        <DisclaimerModal research_mode onToggleMode={onToggleMode} text='Go to research pages'/>
                     </Col>
                     <Col sm={4}>
                         <Pagination
