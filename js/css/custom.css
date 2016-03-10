@@ -141,8 +141,6 @@ input:focus {
 /**********     Homepage logo             *********************/
 /**************************************************************/
 
-li {list-style-type: none;}
-
 .logo-block li {
     float: left;
     width: 300px;
@@ -150,6 +148,7 @@ li {list-style-type: none;}
     padding: 10px;
     line-height: 90px;
     text-align: center;
+    list-style-type: none;
     }
 
 .logo-block img {
