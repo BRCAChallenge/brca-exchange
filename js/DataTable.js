@@ -169,7 +169,7 @@ var DataTable = React.createClass({
     render: function () {
         var {filterValues, filtersOpen, lollipopOpen, search, data, columnSelection,
             page, totalPages, count, error} = this.state;
-        var {columns, filterColumns, className, advancedFilters, onToggleMode} = this.props;
+        var {columns, filterColumns, className, advancedFilters, downloadButton, lollipopButton, onToggleMode} = this.props;
         var renderColumns = _.filter(columns, c => columnSelection[c.prop]);
         var filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
             <SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
@@ -180,12 +180,12 @@ var DataTable = React.createClass({
             <div className={this.props.className}>
                 <Row id="show-hide" className="btm-buffer">
                     <Col sm={2}>
-                        {this.state.windowWidth > 991 && <Button className="btn-sm" onClick={this.toggleLollipop}>{(lollipopOpen ? 'Hide' : 'Show' ) + ' Lollipop Chart'}</Button>}
-                        {this.state.windowWidth > 991 && lollipopOpen && this.state.data.length > 0 && <Lollipop data={this.state.data} onHeaderClick={this.props.onHeaderClick}/> }
+                        <Button className="btn-sm"
+                                onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}
+                        </Button>
                     </Col>
-                    <Col sm={10}>
-
-                        <Button className="btn-sm" onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}</Button>
+                    <Col sm={2}>
+                        {lollipopButton(this.toggleLollipop, lollipopOpen)}
                     </Col>
                 </Row>
 
@@ -197,6 +197,16 @@ var DataTable = React.createClass({
                         </div>}
                     </Col>
                 </Row>
+                <Row id="lollipop-chart">
+                    <Col sm={12}>
+                        {lollipopOpen && this.state.windowWidth > 991 && this.state.data.length > 0 &&
+                        <Lollipop data={this.state.data} onHeaderClick={this.props.onHeaderClick}/> }
+
+                        {lollipopOpen && this.state.windowWidth <= 991 &&
+                        <div><span className="label label-danger">Please use a larger screen size to view this interactive chart.</span></div>}
+                    </Col>
+                </Row>
+
                 <Row id="download" className="btm-buffer">
                     <Col sm={6}>
                         <div className='form-inline'>
@@ -204,7 +214,7 @@ var DataTable = React.createClass({
                                 <label className='control-label'>
                                     {count} matching {pluralize(count, 'variant')}
                                 </label>
-                                <Button className="btn-sm" download="variants.csv" href={this.createDownload()}>Download</Button>
+                                {downloadButton(this.createDownload)}
                             </div>
                         </div>
                     </Col>

@@ -14,7 +14,7 @@ var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin');
 var DataTable = require('./DataTable');
 var _ = require('underscore');
-var {Col, Panel} = require('react-bootstrap');
+var {Col, Panel, Button} = require('react-bootstrap');
 var ColumnCheckbox = require('./ColumnCheckbox');
 
 
@@ -301,6 +301,12 @@ var ResearchVariantTableSupplier = function (Component) {
                 </Panel>
             </label>);
         },
+        getDownloadButton: function (callback) {
+            return <Button className="btn-sm" download="variants.csv" href={callback}>Download</Button>;
+        },
+        getLollipopButton: function (callback, isOpen) {
+            return <Button className="btn-sm" onClick={callback}>{(isOpen ? 'Hide' : 'Show' ) + ' Lollipop Chart'}</Button>
+        },
 
         getColumns: function () {
             return research_mode_columns;
@@ -318,6 +324,8 @@ var ResearchVariantTableSupplier = function (Component) {
                     advancedFilters={this.getAdvancedFilters()}
                     sourceSelection={sourceSelection}
                     columnSelection={columnSelection}
+                    downloadButton = {this.getDownloadButton}
+                    lollipopButton = {this.getLollipopButton}
                 />
             );
         }
@@ -328,7 +336,6 @@ var ResearchVariantTableSupplier = function (Component) {
 var VariantTableSupplier = function (Component) {
     var ResearchVariantTableComponent = React.createClass({
         mixins: [PureRenderMixin],
-
         getColumns: function () {
             return columns;
         },
@@ -344,6 +351,8 @@ var VariantTableSupplier = function (Component) {
                     {...this.props}
                     columns={this.getColumns()}
                     columnSelection={columnSelection}
+                    downloadButton = {()=> null}
+                    lollipopButton = {()=> null}
                 />
             );
         }
