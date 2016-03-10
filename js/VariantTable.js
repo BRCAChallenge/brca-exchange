@@ -14,7 +14,7 @@ var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin');
 var DataTable = require('./DataTable');
 var _ = require('underscore');
-var {Col, Panel} = require('react-bootstrap');
+var {Col, Panel, Button} = require('react-bootstrap');
 var ColumnCheckbox = require('./ColumnCheckbox');
 
 
@@ -77,9 +77,9 @@ var filterColumns = [
 //Some columns appear under a different name on the table header and the detail page
 var columns = [
     {title: 'Gene', prop: 'Gene_symbol'},
-    {title: 'Identifier', prop: 'HGVS_cDNA', dp_title: 'Identifier (HGVS cDNA)'},
-    {title: 'Alternate Identifier', prop: 'Genomic_Coordinate', dp_title: 'Alternate Identifier (Genomic Coordinate)'},
-    {title: 'Alt ID', prop: "Abbrev_AA_change", dp_title: 'Alternate Identifier (HGVS protein (abbr)'},
+    {title: 'Identifier', prop: 'HGVS_cDNA'},
+    {title: 'Alternate Identifier', prop: 'Genomic_Coordinate'},
+    {title: 'Alt ID', prop: "Abbrev_AA_change"},
     {title: 'Pathogenicity', prop: 'Clinical_significance'},
     {title: 'Alternate Identifier (HGVS protein)', prop: 'HGVS_protein'},
     {title: 'Alternate Identifier (BIC nomenclature)', prop: "BIC_Nomenclature"}
@@ -301,6 +301,12 @@ var ResearchVariantTableSupplier = function (Component) {
                 </Panel>
             </label>);
         },
+        getDownloadButton: function (callback) {
+            return <Button className="btn-sm" download="variants.csv" href={callback}>Download</Button>;
+        },
+        getLollipopButton: function (callback, isOpen) {
+            return <Button className="btn-sm" onClick={callback}>{(isOpen ? 'Hide' : 'Show' ) + ' Lollipop Chart'}</Button>
+        },
 
         getColumns: function () {
             return research_mode_columns;
@@ -318,6 +324,8 @@ var ResearchVariantTableSupplier = function (Component) {
                     advancedFilters={this.getAdvancedFilters()}
                     sourceSelection={sourceSelection}
                     columnSelection={columnSelection}
+                    downloadButton = {this.getDownloadButton}
+                    lollipopButton = {this.getLollipopButton}
                 />
             );
         }
@@ -328,7 +336,6 @@ var ResearchVariantTableSupplier = function (Component) {
 var VariantTableSupplier = function (Component) {
     var ResearchVariantTableComponent = React.createClass({
         mixins: [PureRenderMixin],
-
         getColumns: function () {
             return columns;
         },
@@ -344,6 +351,8 @@ var VariantTableSupplier = function (Component) {
                     {...this.props}
                     columns={this.getColumns()}
                     columnSelection={columnSelection}
+                    downloadButton = {()=> null}
+                    lollipopButton = {()=> null}
                 />
             );
         }
