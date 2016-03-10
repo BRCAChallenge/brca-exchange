@@ -1,4 +1,5 @@
 # Pycharm thing
 *.idea
 data/
+*.ipynb_checkpoints
 
