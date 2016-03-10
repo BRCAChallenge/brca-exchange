@@ -396,10 +396,9 @@ var VariantDetail = React.createClass({
         } else {
             cols = columns;
         }
-        var rows = _.map(cols, ({prop, title, dp_title}) => {
-            var column_title = dp_title || title;
+        var rows = _.map(cols, ({prop, title}) => {
             return <tr key={prop}>
-                <Key tableKey={column_title} columns={cols} onClick={() => this.showHelp(title)}/>
+                <Key tableKey={title} columns={cols} onClick={() => this.showHelp(title)}/>
                 <td><span className="row-wrap">{variant[prop]}</span></td>
             </tr>
         });
