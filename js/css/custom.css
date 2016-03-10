@@ -144,11 +144,13 @@ input:focus {
 li {list-style-type: none;}
 
 .logo-block li {
-	height: 120px;
+    float: left;
+    width: 300px;
+    height: 120px;
     padding: 10px;
     line-height: 90px;
     text-align: center;
-}
+    }
 
 .logo-block img {
 	max-height: 100%;
@@ -157,8 +159,10 @@ li {list-style-type: none;}
 	vertical-align: middle;
 }
 
-.logo-block {
-	margin: 40px;
+.logo-block {    
+    margin: 40px;
+    padding-left: 50px;
+    padding-right: 30px;
     width: auto;
     text-align: center;
 }
