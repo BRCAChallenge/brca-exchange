@@ -179,12 +179,11 @@ var DataTable = React.createClass({
         return (error ? <p>{error}</p> :
             <div className={this.props.className}>
                 <Row id="show-hide" className="btm-buffer">
-                    <Col sm={2}>
-                        <Button className="btn-sm"
+                    <Col sm={12}>
+                        <Button className="btn-sm rgt-buffer"
                                 onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}
                         </Button>
-                    </Col>
-                    <Col sm={2}>
+
                         {lollipopButton(this.toggleLollipop, lollipopOpen)}
                     </Col>
                 </Row>
