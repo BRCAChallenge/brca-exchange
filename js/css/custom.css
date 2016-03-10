@@ -280,6 +280,10 @@ html {
     margin-top: 1em;
 }
 
+.rgt-buffer {
+    margin-right: 1em;
+}
+
 #main-grid {
     margin-top: 40px;
 }
