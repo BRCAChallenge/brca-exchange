@@ -202,7 +202,7 @@ var DataTable = React.createClass({
                         <Lollipop data={this.state.data} onHeaderClick={this.props.onHeaderClick}/> }
 
                         {lollipopOpen && this.state.windowWidth <= 991 &&
-                        <div><span className="label label-danger">Please use a larger screen size to view this interactive chart.</span></div>}
+                        <div><span className="label label-danger">Please use a larger screen size to view this interactive chart</span></div>}
                     </Col>
                 </Row>
 
