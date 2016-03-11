@@ -86,7 +86,7 @@ var VariantSearch = React.createClass({
             {value} = this.state;
 
         return (
-            <div className='search-box'>
+            <div className='search-box alert alert-danger'>
                 <form onSubmit={this.onSubmit} style={{display: 'inline'}}>
                     <input type='submit' className='input-sm'style={{display: 'none'}} />
                     <div className='text-nowrap help-target'>
