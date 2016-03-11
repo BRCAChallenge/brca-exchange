@@ -11,6 +11,8 @@ import shutil
 from StringIO import StringIO
 from copy import deepcopy
 from pprint import pprint
+import string_comp
+
 
 #key value pair dictionaries of all extra fields in various databases to add
 GENOME1K_FIELDS = {"Allele_frequency":"AF",
@@ -29,8 +31,7 @@ LOVD_FIELDS = {"Origin_of_variant": "genetic_origin",
                "Variant_frequency": "frequency",
                "Variant_haplotype": "haplotype",
                "Functional_analysis_result": "functionalanalysis_result",
-               "Functional_analysis_technique": "functionalanalysis_technique",
-               }
+               "Functional_analysis_technique": "functionalanalysis_technique"}
 EXAC_FIELDS = {"Allele_frequency": "AF"}
 EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "Segregation_LR": "segregation_lr",
@@ -49,8 +50,7 @@ BIC_FIELDS = {"Clinical_classification": "Category",
               "BIC_Designation": "Designation",
               "Clinical_importance": "Clinically_Importance",
               "Ethnicity": "Ethnicity",
-              "Literature_citation": "Reference",
-              }
+              "Literature_citation": "Reference"}
 ESP_FIELDS = {"polyPhen2_result": "PH",
               "Minor_allele_frequency":"MAF"}
 
@@ -60,8 +60,7 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
                "exLOVD": EX_LOVD_FIELDS,
                "ExAC": EXAC_FIELDS,
                "ESP": ESP_FIELDS,
-               "BIC": BIC_FIELDS,
-                }
+               "BIC": BIC_FIELDS}
 
 PIPELINE_INPUT = "/hive/groups/cgl/brca/release1.0/pipeline_input_old/"
 
@@ -97,13 +96,36 @@ def main():
         shutil.rmtree(tmp_dir)
 
 def string_comparison_merge(variants):
+    print len(variants.keys())
+    print len(set(variant.keys()))
     for index, variant in enumerate(variants):
         print variant
         if index == 10:
             break
+    return None
 
 
-
+def find_equivalent_variant(set_of_genome_coor):
+    uniq_variants = {}
+    for v in set_of_genome_coor:
+        variant_exist = False
+        for existing_v in uniq_variants:
+            if v == existing_v:
+                continue
+            else:
+                v1 = v.split("_")
+                v2 = existing_v.split("_")
+                if string_comp.variant_equal(v1, v2):
+                    variant_exist = True
+                    uniq_variants[existing_v].add(v)
+                    print "these two variants are equivlaent", v1, v2
+        if not variant_exist:
+            uniq_variants[v] = set([v])
+    f = open(EV, "w")
+    for key, value in uniq_variants.iteritems():
+        if len(value) > 1:
+            f.write(",".join(list(value)) + "\n")
+    f.close()
 
 
 def preprocessing(tmp_dir):
