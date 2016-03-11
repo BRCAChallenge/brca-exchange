@@ -19,8 +19,7 @@ GENOME1K_FIELDS = {"Allele_frequency":"AF",
                    "AFR_Allele_frequency":"AFR_AF",
                    "AMR_Allele_frequency":"AMR_AF",
                    "SAS_Allele_frequency":"SAS_AF"}
-CLINVAR_FIELDS = {"HGVS":"HGVS",
-                  "Submitter":"Submitter",
+CLINVAR_FIELDS = {"Submitter":"Submitter",
                   "Clinical_Significance":"ClinicalSignificance",
                   "Date_Last_Updated":"DateLastUpdated",
                   "SCV":"SCV",
@@ -31,8 +30,6 @@ LOVD_FIELDS = {"Origin_of_variant": "genetic_origin",
                "Variant_haplotype": "haplotype",
                "Functional_analysis_result": "functionalanalysis_result",
                "Functional_analysis_technique": "functionalanalysis_technique",
-               "HGVS_cDNA": "dna_change",
-               "HGVS_protein": "protein_change"
                }
 EXAC_FIELDS = {"Allele_frequency": "AF"}
 EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
@@ -42,21 +39,17 @@ EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "Missense_analysis_prior_probability": "missense_analysis_prior_p",
                   "Posterior_probability": "posterior_p",
                   "IARC_class":"iarc_class",
-                  "BIC_Nomenclature": "bic_dna_change",
-                  "Literature_source":"observational_reference",
-                  "HGVS_cDNA": "dna_change",
-                  "HGVS_protein": "protein_change",
-              }
+                  "BIC_identifier": "bic_dna_change",
+                  "Literature_source":"observational_reference"}
 BIC_FIELDS = {"Clinical_classification": "Category",
               "Number_of_family_member_carrying_mutation": "Number_Reported",
               "Patient_nationality": "Nationality",
               "Germline_or_Somatic": "G_or_S",
               "Mutation_type": "Mutation_Type",
-              "BIC_Nomenclature": "Designation",
+              "BIC_Designation": "Designation",
               "Clinical_importance": "Clinically_Importance",
               "Ethnicity": "Ethnicity",
               "Literature_citation": "Reference",
-              "BIC_Nomenclature": "Designation",
               }
 ESP_FIELDS = {"polyPhen2_result": "PH",
               "Minor_allele_frequency":"MAF"}
@@ -70,7 +63,7 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
                "BIC": BIC_FIELDS,
                 }
 
-PIPELINE_INPUT = "/hive/groups/cgl/brca/release1.0/pipeline_input/"
+PIPELINE_INPUT = "/hive/groups/cgl/brca/release1.0/pipeline_input_old/"
 
 ENIGMA_FILE = "enigma_variants_GRCh38_2-27-2016.tsv"
 GENOME1K_FILE = "1000G_brca.sorted.hg38.vcf"
@@ -89,11 +82,14 @@ def main():
     tmp_dir = tempfile.mkdtemp()
     try:
         source_dict = preprocessing(tmp_dir)
-        print "------------merging------------------------------------"
+        print "------------merging different dataset------------------------------"
         (columns, variants) = save_enigma_to_dict(PIPELINE_INPUT + ENIGMA_FILE)
         for source_name, file in source_dict.iteritems():
             (columns, variants) = add_new_source(columns, variants, source_name, 
                                                  file, FIELD_DICT[source_name])
+        print "------------string comparison merge-------------------------------"
+        print columns
+
         write_new_csv(args.output, columns, variants)
         print "PIPELINE OUTPUT: "
         print args.output
@@ -103,13 +99,13 @@ def main():
 
 def preprocessing(tmp_dir):
     # Preprocessing variants:
-    source_dict = {"1000_Genomes": GENOME1K_FILE + "for_pipeline",
-                   "ClinVar": CLINVAR_FILE,
-                   "LOVD": LOVD_FILE,
+    source_dict = {#"1000_Genomes": GENOME1K_FILE + "for_pipeline",
+                   #"ClinVar": CLINVAR_FILE,
+                   #"LOVD": LOVD_FILE,
                    "exLOVD": EX_LOVD_FILE,
-                   "ExAC": EXAC_FILE,
-                   "ESP": ESP_FILE,
-                   "BIC": BIC_FILE,
+                   #"ExAC": EXAC_FILE,
+                   #"ESP": ESP_FILE,
+                   #"BIC": BIC_FILE,
                    }    
     print "\nPIPELINE INPUT:"
     print "ENIGMA: {0}".format(ENIGMA_FILE)
@@ -270,6 +266,7 @@ def save_enigma_to_dict(path):
             columns = line.strip().split("\t")
             columns = [c + "(ENIGMA)" for c in columns if c != "Genomic_Coordinate"]
             columns.insert(0, "Source")
+            columns.insert(2, "Genomic_Coordinate")
         else:
             items = line.strip().split("\t")
             items.insert(0, "ENIGMA")
