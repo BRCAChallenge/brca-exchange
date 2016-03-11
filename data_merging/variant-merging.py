@@ -88,13 +88,22 @@ def main():
             (columns, variants) = add_new_source(columns, variants, source_name, 
                                                  file, FIELD_DICT[source_name])
         print "------------string comparison merge-------------------------------"
-        print columns
+        variants = string_comparison_merge(variants) 
 
         write_new_csv(args.output, columns, variants)
         print "PIPELINE OUTPUT: "
         print args.output
     finally:
         shutil.rmtree(tmp_dir)
+
+def string_comparison_merge(variants):
+    for index, variant in enumerate(variants):
+        print variant
+        if index == 10:
+            break
+
+
+
 
 
 def preprocessing(tmp_dir):
