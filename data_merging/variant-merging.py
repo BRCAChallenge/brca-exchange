@@ -1,7 +1,9 @@
+#!/usr/bin/env python
 """
 this scripts takes the enigma variant list and merge vcf files in a folder into
 the exisitng enigma variants:
 """
+import argparse
 import vcf
 import subprocess
 import tempfile
@@ -29,6 +31,8 @@ LOVD_FIELDS = {"Origin_of_variant": "genetic_origin",
                "Variant_haplotype": "haplotype",
                "Functional_analysis_result": "functionalanalysis_result",
                "Functional_analysis_technique": "functionalanalysis_technique",
+               "HGVS_cDNA": "dna_change",
+               "HGVS_protein": "protein_change"
                }
 EXAC_FIELDS = {"Allele_frequency": "AF"}
 EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
@@ -38,17 +42,21 @@ EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "Missense_analysis_prior_probability": "missense_analysis_prior_p",
                   "Posterior_probability": "posterior_p",
                   "IARC_class":"iarc_class",
-                  "BIC_identifier": "bic_dna_change",
-                  "Literature_source":"observational_reference"}
+                  "BIC_Nomenclature": "bic_dna_change",
+                  "Literature_source":"observational_reference",
+                  "HGVS_cDNA": "dna_change",
+                  "HGVS_protein": "protein_change",
+              }
 BIC_FIELDS = {"Clinical_classification": "Category",
               "Number_of_family_member_carrying_mutation": "Number_Reported",
               "Patient_nationality": "Nationality",
               "Germline_or_Somatic": "G_or_S",
               "Mutation_type": "Mutation_Type",
-              "BIC_Designation": "Designation",
+              "BIC_Nomenclature": "Designation",
               "Clinical_importance": "Clinically_Importance",
               "Ethnicity": "Ethnicity",
               "Literature_citation": "Reference",
+              "BIC_Nomenclature": "Designation",
               }
 ESP_FIELDS = {"polyPhen2_result": "PH",
               "Minor_allele_frequency":"MAF"}
@@ -63,7 +71,6 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
                 }
 
 PIPELINE_INPUT = "/hive/groups/cgl/brca/release1.0/pipeline_input/"
-PIPELINE_OUTPUT = "/hive/groups/cgl/brca/release1.0/merged.csv"
 
 ENIGMA_FILE = "enigma_variants_GRCh38_2-27-2016.tsv"
 GENOME1K_FILE = "1000G_brca.sorted.hg38.vcf"
@@ -75,6 +82,10 @@ EXAC_FILE = "exac_BRCA12.sorted.hg38.vcf"
 ESP_FILE = "esp.brca.vcf"
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-o", "--output", 
+                        default="/hive/groups/cgl/brca/release1.0/merged.csv")
+    args = parser.parse_args()
     tmp_dir = tempfile.mkdtemp()
     try:
         source_dict = preprocessing(tmp_dir)
@@ -83,9 +94,9 @@ def main():
         for source_name, file in source_dict.iteritems():
             (columns, variants) = add_new_source(columns, variants, source_name, 
                                                  file, FIELD_DICT[source_name])
-        write_new_csv(PIPELINE_OUTPUT, columns, variants)
+        write_new_csv(args.output, columns, variants)
         print "PIPELINE OUTPUT: "
-        print PIPELINE_OUTPUT
+        print args.output
     finally:
         shutil.rmtree(tmp_dir)
 

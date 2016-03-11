@@ -1,10 +1,10 @@
+#!/usr/bin/env python
 """add VEP result to merged data"""
+import argparse
 import pandas as pd
 import json
 import pickle
 
-MERGED_FILE = "/cluster/home/mollyzhang/release1.0/merged.csv"
-OUTPUT = "/cluster/home/mollyzhang/release1.0/merged_withVEP_cleaned.csv"
 VEP_OUTPUT = "/cluster/home/mollyzhang/release1.0/data/VEP/vep_output_3_3_2016.vcf"
 VEP_FIELDS = ['Allele', 'Consequence', 'IMPACT', 'SYMBOL', 'Gene',
               'Feature_type', 'Feature', 'BIOTYPE', 'EXON', 'INTRON',
@@ -18,26 +18,44 @@ VEP_FIELDS = ['Allele', 'Consequence', 'IMPACT', 'SYMBOL', 'Gene',
               'ExAC_OTH_MAF', 'ExAC_SAS_MAF', 'CLIN_SIG', 'SOMATIC', 'PHENO',
               'PUBMED', 'MOTIF_NAME', 'MOTIF_POS', 'HIGH_INF_POS',
               'MOTIF_SCORE_CHANGE']
-UNWANTED = ["Allele", "SYMBOL", "Gene", "Feature_type", "Feature", "HGVSc",
-            "HGVSp", "cDNA_position", "CDS_position", "Protein_position",
-            "SYMBOL_SOURCE", "HGNC_ID", "GMAF", "AFR_MAF", "AMR_MAF", "EAS_MAF",
-            "EUR_MAF", "SAS_MAF", "AA_MAF", "EA_MAF", "ExAC_MAF", 'ExAC_Adj_MAF',
-            'ExAC_AFR_MAF', 'ExAC_AMR_MAF', 'ExAC_EAS_MAF', 'ExAC_FIN_MAF',
-            'ExAC_NFE_MAF', 'ExAC_OTH_MAF', 'ExAC_SAS_MAF', "CLIN_SIG"]
+#UNWANTED = ["Allele", "SYMBOL", "Gene", "Feature_type", "Feature", "HGVSc",
+#            "HGVSp", "cDNA_position", "CDS_position", "Protein_position",
+#            "SYMBOL_SOURCE", "HGNC_ID", "GMAF", "AFR_MAF", "AMR_MAF", "EAS_MAF##,
+#            "EUR_MAF", "SAS_MAF", "AA_MAF", "EA_MAF", "ExAC_MAF", 'ExAC_Adj_MA##',
+#            'ExAC_AFR_MAF', 'ExAC_AMR_MAF', 'ExAC_EAS_MAF', 'ExAC_FIN_MAF',
+#            'ExAC_NFE_MAF', 'ExAC_OTH_MAF', 'ExAC_SAS_MAF', "CLIN_SIG"]
+UNWANTED = ['Allele', 'Consequence', 'IMPACT', 'SYMBOL', 'Gene',
+            'Feature_type', 'Feature', 'BIOTYPE', 'EXON', 'INTRON',
+            'HGVSc', 'HGVSp', 'cDNA_position', 'CDS_position',
+            'Protein_position', 'Amino_acids', 'Codons',
+            'Existing_variation', 'DISTANCE', 'STRAND', 'SYMBOL_SOURCE',
+            'HGNC_ID', 'TSL', 'APPRIS', 'REFSEQ_MATCH',
+            'GMAF', 'AFR_MAF', 'AMR_MAF', 'EAS_MAF', 'EUR_MAF', 'SAS_MAF',
+            'AA_MAF', 'EA_MAF', 'ExAC_MAF', 'ExAC_Adj_MAF', 'ExAC_AFR_MAF',
+            'ExAC_AMR_MAF', 'ExAC_EAS_MAF', 'ExAC_FIN_MAF', 'ExAC_NFE_MAF',
+            'ExAC_OTH_MAF', 'ExAC_SAS_MAF', 'CLIN_SIG', 'SOMATIC', 'PHENO',
+            'PUBMED', 'MOTIF_NAME', 'MOTIF_POS', 'HIGH_INF_POS',
+            'MOTIF_SCORE_CHANGE']
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--input",
+                        default="/hive/groups/cgl/brca/release1.0/merged.csv")
+    parser.add_argument("-o", "--output",
+                        default="/hive/groups/cgl/brca/release1.0/merged_withVEP_cleaned.csv")
+    args = parser.parse_args()
     vep_result_dict = save_VEP_to_dict()
     temp_dump = open("temp_dump", "w")
     temp_dump.write(pickle.dumps(vep_result_dict))
     temp_dump.close()
     #vep_result_dict = pickle.loads(open("temp_dump", "r").read())
-    write_to_file(vep_result_dict)
+    write_to_file(vep_result_dict, args.input, args.output)
 
-def write_to_file(vep_result_dict):
-    print "write to file {0}".format(OUTPUT)
-    f_in = open(MERGED_FILE, "r")
-    f_out = open(OUTPUT, "w")
+def write_to_file(vep_result_dict, inputFile, outputFile):
+    print "write to file {0}".format(outputFile)
+    f_in = open(inputFile, "r")
+    f_out = open(outputFile, "w")
     line_num = 0
     for field in UNWANTED:
         VEP_FIELDS.remove(field)
