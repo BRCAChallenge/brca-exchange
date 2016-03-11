@@ -268,7 +268,7 @@ def save_enigma_to_dict(path):
         line = line.replace(",", "|")
         if line_num == 1:
             columns = line.strip().split("\t")
-            columns = [c + "(ENIGMA)" for c in columns]
+            columns = [c + "(ENIGMA)" for c in columns if c != "Genomic_Coordinate"]
             columns.insert(0, "Source")
         else:
             items = line.strip().split("\t")
