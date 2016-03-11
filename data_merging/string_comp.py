@@ -1,4 +1,4 @@
-PATH = "../reference_files/"
+PATH = "../resources/"
 chr13 = open(PATH + "brca2.txt", "r")
 BRCA2 = chr13.read()
 chr17 = open(PATH + "brca1.txt", "r")
