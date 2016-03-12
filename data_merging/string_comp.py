@@ -1,10 +1,10 @@
 BRCA1 = {"hg38": {"start": 43000000,
                   "sequence": open("../resources/brca1_hg38.txt", "r").read()},
-         "hg19": {"start": 32800000,
+         "hg19": {"start": 41100000,
                   "sequence": open("../resources/brca1_hg19.txt", "r").read()}}
 BRCA2 = {"hg38": {"start": 32300000,
                   "sequence": open("../resources/brca2_hg38.txt", "r").read()},
-         "hg19": {"start": 41100000,
+         "hg19": {"start": 32800000,
                   "sequence": open("../resources/brca2_hg19.txt", "r").read()}}
 
 def ref_correct(v, version="hg38"):
@@ -20,12 +20,17 @@ def ref_correct(v, version="hg38"):
         assert(False)
 
     genomeRef = seq[pos:pos+len(ref)].upper()
+    if len(ref) != 0 and len(genomeRef)==0:
+        print v
+        raise Exception("ref not inside BRCA1 or BRCA2")
     if (genomeRef != ref):
+        print genomeRef
+        print ref
         return False
     else:
         return True
 
-
+    
 def variant_equal(v1, v2):
     " return (edited1, edited2) "
     if v1 == v2:
