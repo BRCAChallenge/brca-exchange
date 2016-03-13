@@ -89,9 +89,8 @@ def main():
     args = parser.parse_args()
     tmp_dir = tempfile.mkdtemp()
     try:
-        source_dict = preprocessing(tmp_dir)
+        source_dict, columns, variants = preprocessing(tmp_dir)
         print "------------merging different dataset------------------------------"
-        (columns, variants) = save_enigma_to_dict(PIPELINE_INPUT + ENIGMA_FILE)
         for source_name, file in source_dict.iteritems():
             (columns, variants) = add_new_source(columns, variants, source_name, 
                                                  file, FIELD_DICT[source_name])
@@ -136,13 +135,13 @@ def find_equivalent_variant(set_of_genome_coor):
 
 def preprocessing(tmp_dir):
     # Preprocessing variants:
-    source_dict = {"1000_Genomes": GENOME1K_FILE + "for_pipeline",
-                   "ClinVar": CLINVAR_FILE,
-                   "LOVD": LOVD_FILE,
+    source_dict = {#"1000_Genomes": GENOME1K_FILE + "for_pipeline",
+                   #"ClinVar": CLINVAR_FILE,
+                   #"LOVD": LOVD_FILE,
                    "exLOVD": EX_LOVD_FILE,
-                   "ExAC": EXAC_FILE,
-                   "ESP": ESP_FILE,
-                   "BIC": BIC_FILE,
+                   #"ExAC": EXAC_FILE,
+                   #"ESP": ESP_FILE,
+                   #"BIC": BIC_FILE,
                    }    
     print "\nPIPELINE INPUT:"
     print "ENIGMA: {0}".format(ENIGMA_FILE)
@@ -155,6 +154,7 @@ def preprocessing(tmp_dir):
        ["bash", "1000g_preprocess.sh", PIPELINE_INPUT + GENOME1K_FILE], stdout=f_1000G)
     
     print "-------check if genomic coordinates are correct----------"
+    (columns, variants) = save_enigma_to_dict(PIPELINE_INPUT + ENIGMA_FILE)
     for source_name, file_name in source_dict.iteritems():
         f = open(PIPELINE_INPUT + file_name, "r")
         f_wrong = open(WRONG_GENOME + source_name + "_wrong_genome_coor.vcf", "w")
@@ -187,7 +187,7 @@ def preprocessing(tmp_dir):
         f_out = open(tmp_dir + "/" + source_name + "ready.vcf", "w")
         repeat_merging(f_in, f_out)
         source_dict[source_name] = f_out.name
-    return source_dict
+    return source_dict, columns, variants
 
 def repeat_merging(f_in, f_out):
     """takes a vcf file, collapses repetitive variant rows and write out
@@ -320,6 +320,8 @@ def save_enigma_to_dict(path):
     variants = dict()
     columns = ""
     line_num = 0
+    f_wrong = open(WRONG_GENOME + "ENIGMA_wrong_genome.txt", "w")
+    n_wrong, n_total = 0, 0
     for line in enigma_file:
         line_num += 1
         line = line.replace(",", "|")
@@ -328,11 +330,19 @@ def save_enigma_to_dict(path):
             columns = [c + "(ENIGMA)" for c in columns if c != "Genomic_Coordinate"]
             columns.insert(0, "Source")
             columns.insert(2, "Genomic_Coordinate")
+            f_wrong.write(line)
         else:
             items = line.strip().split("\t")
             items.insert(0, "ENIGMA")
-            variants[items[2]] = items
-    print "number of variants in enigma: ", len(variants), "\n"
+            v = items[2].replace("-", "").replace("chr", "").replace(">", ":")
+            if string_comp.ref_correct(v.split(":")):
+                variants[items[2]] = items
+            else:
+                n_wrong += 1
+                f_wrong.write(line)
+            n_total += 1
+    f_wrong.close()
+    print "in ENIGMA, wrong: {0}, total: {1}".format(n_wrong, n_total)
     return (columns, variants)
 
 if __name__ == "__main__":
