@@ -98,6 +98,7 @@ def main():
         print "------------string comparison merge-------------------------------"
         variants = string_comparison_merge(variants) 
 
+        raise Exception("friendly break")
         write_new_csv(args.output, columns, variants)
         print "PIPELINE OUTPUT: "
         print args.output
@@ -135,13 +136,13 @@ def find_equivalent_variant(set_of_genome_coor):
 
 def preprocessing(tmp_dir):
     # Preprocessing variants:
-    source_dict = {#"1000_Genomes": GENOME1K_FILE + "for_pipeline",
-                   #"ClinVar": CLINVAR_FILE,
-                   #"LOVD": LOVD_FILE,
+    source_dict = {"1000_Genomes": GENOME1K_FILE + "for_pipeline",
+                   "ClinVar": CLINVAR_FILE,
+                   "LOVD": LOVD_FILE,
                    "exLOVD": EX_LOVD_FILE,
-                   #"ExAC": EXAC_FILE,
-                   #"ESP": ESP_FILE,
-                   #"BIC": BIC_FILE,
+                   "ExAC": EXAC_FILE,
+                   "ESP": ESP_FILE,
+                   "BIC": BIC_FILE,
                    }    
     print "\nPIPELINE INPUT:"
     print "ENIGMA: {0}".format(ENIGMA_FILE)
@@ -156,11 +157,11 @@ def preprocessing(tmp_dir):
     print "-------check if genomic coordinates are correct----------"
     for source_name, file_name in source_dict.iteritems():
         f = open(PIPELINE_INPUT + file_name, "r")
+        f_wrong = open(WRONG_GENOME + source_name + "_wrong_genome_coor.vcf", "w")
+        f_right = open(tmp_dir + "/right" + source_name, "w")
         vcf_reader = vcf.Reader(f, strict_whitespace=True)
-        vcf_wrong_writer = vcf.Writer(open(WRONG_GENOME + source_name + 
-                                      "_wrong_genome_coor.vcf", "w"), vcf_reader)
-        vcf_right_writer = vcf.Writer(open(tmp_dir + "/right" + source_name, "w"),
-                                      vcf_reader)
+        vcf_wrong_writer = vcf.Writer(f_wrong, vcf_reader)
+        vcf_right_writer = vcf.Writer(f_right, vcf_reader)
         n_wrong, n_total = 0, 0
         for record in vcf_reader:
             v = [record.CHROM, record.POS, record.REF, record.ALT]
@@ -170,6 +171,8 @@ def preprocessing(tmp_dir):
             else:
                 vcf_right_writer.write_record(record)
             n_total += 1
+        f_right.close()
+        f_wrong.close()
         print "in {0}, wrong: {1}, total: {2}".format(source_name, n_wrong, n_total) 
     print "variants with wrong genomic coordates are saved to:", WRONG_GENOME
     print "---------------------------------------------------------"
