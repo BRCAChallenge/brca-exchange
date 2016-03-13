@@ -29,7 +29,7 @@ def ref_correct(v, version="hg38"):
         return True
 
     
-def variant_equal(v1, v2):
+def variant_equal(v1, v2, version="hg38"):
     " return (edited1, edited2) "
     if v1 == v2:
         return True
@@ -53,13 +53,13 @@ def variant_equal(v1, v2):
 
     # lift coordinates and make everything 0-based
     if chr1 == "13":
-        seq = BRCA2
-        pos1 = pos1 - BRCA2_START
-        pos2 = pos2 - BRCA2_START
+        seq = BRCA2[version]["sequence"]
+        pos1 = pos1 - 1 - BRCA2[version]["start"]
+        pos2 = pos2 - 1 - BRCA2[version]["start"]
     elif chr1 == "17":
-        seq = BRCA1
-        pos1 = pos1 - 1 - BRCA1_START
-        pos2 = pos2 - 1 - BRCA1_START
+        seq = BRCA1[version]["sequence"]
+        pos1 = pos1 - 1 - BRCA1[version]["start"]
+        pos2 = pos2 - 1 - BRCA1[version]["start"]
     else:
         assert(False)
 
