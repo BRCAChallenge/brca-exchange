@@ -14,6 +14,14 @@ from pprint import pprint
 import string_comp
 
 
+
+#GENOMIC VERSION:
+VERSION = "hg38" # equivalent to GRCh38
+
+
+
+# files needed for string comparison
+
 #key value pair dictionaries of all extra fields in various databases to add
 GENOME1K_FIELDS = {"Allele_frequency":"AF",
                    "EAS_Allele_frequency":"EAS_AF",
@@ -65,7 +73,7 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
 PIPELINE_INPUT = "/hive/groups/cgl/brca/release1.0/pipeline_input_old/"
 
 ENIGMA_FILE = "enigma_variants_GRCh38_2-27-2016.tsv"
-GENOME1K_FILE = "1000G_brca.sorted.hg38.vcf"
+GENOME1K_FILE = "10k_genome.brca.sorted.hg38.vcf"
 CLINVAR_FILE = "ClinVarBrca.vcf"
 LOVD_FILE = "sharedLOVD_brca12.sorted.hg38.vcf"
 EX_LOVD_FILE = "exLOVD_brca12.sorted.hg38.vcf"
@@ -96,8 +104,22 @@ def main():
         shutil.rmtree(tmp_dir)
 
 def string_comparison_merge(variants):
-    print len(variants.keys())
-    print len(set(variant.keys()))
+    # make sure the input genomic coordinate strings are already unique strings
+    assert (len(variants.keys()) == len(set(variants.keys())))
+    genome_coors = [i.replace("-", "").replace("chr", "").replace(">", ":")
+                    for i in variants.keys()]
+    n = 0
+    for genome_coor in genome_coors:
+        if not string_comp.ref_correct(genome_coor.split(":")):
+            n += 1
+            print genome_coor
+    print n
+    print len(genome_coors)
+
+        
+
+    print find_equivalent_variant(set(genome_coors))
+
     for index, variant in enumerate(variants):
         print variant
         if index == 10:
@@ -113,30 +135,25 @@ def find_equivalent_variant(set_of_genome_coor):
             if v == existing_v:
                 continue
             else:
-                v1 = v.split("_")
-                v2 = existing_v.split("_")
+                v1 = v.split(":")
+                v2 = existing_v.split(":")
                 if string_comp.variant_equal(v1, v2):
                     variant_exist = True
                     uniq_variants[existing_v].add(v)
                     print "these two variants are equivlaent", v1, v2
         if not variant_exist:
             uniq_variants[v] = set([v])
-    f = open(EV, "w")
-    for key, value in uniq_variants.iteritems():
-        if len(value) > 1:
-            f.write(",".join(list(value)) + "\n")
-    f.close()
-
+    return uniq_variants
 
 def preprocessing(tmp_dir):
     # Preprocessing variants:
-    source_dict = {#"1000_Genomes": GENOME1K_FILE + "for_pipeline",
-                   #"ClinVar": CLINVAR_FILE,
-                   #"LOVD": LOVD_FILE,
+    source_dict = {"1000_Genomes": GENOME1K_FILE + "for_pipeline",
+                   "ClinVar": CLINVAR_FILE,
+                   "LOVD": LOVD_FILE,
                    "exLOVD": EX_LOVD_FILE,
-                   #"ExAC": EXAC_FILE,
-                   #"ESP": ESP_FILE,
-                   #"BIC": BIC_FILE,
+                   "ExAC": EXAC_FILE,
+                   "ESP": ESP_FILE,
+                   "BIC": BIC_FILE,
                    }    
     print "\nPIPELINE INPUT:"
     print "ENIGMA: {0}".format(ENIGMA_FILE)
@@ -147,6 +164,22 @@ def preprocessing(tmp_dir):
     f_1000G = open(PIPELINE_INPUT + GENOME1K_FILE + "for_pipeline", "w")
     subprocess.call(
        ["bash", "1000g_preprocess.sh", PIPELINE_INPUT + GENOME1K_FILE], stdout=f_1000G)
+    
+    print "-------check if genomic coordinates are correct----------"
+    for source_name, file_name in source_dict.iteritems():
+        f = open(PIPELINE_INPUT + file_name, "r")
+        vcf_reader = vcf.Reader(f, strict_whitespace=True)
+        n_wrong = 0
+        n_total = 0
+        for record in vcf_reader:
+            v = [record.CHROM, record.POS, record.REF, record.ALT]
+            if not string_comp.ref_correct(v):
+                n_wrong += 1
+            n_total += 1
+        print "in {0}, wrong: {1}, total: {2}".format(source_name, n_wrong, n_total) 
+
+            
+
     for source_name, file_name in source_dict.iteritems():
         print "convert to one variant per line in ", source_name
         f_in = open(PIPELINE_INPUT + file_name, "r")

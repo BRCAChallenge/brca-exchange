@@ -24,8 +24,6 @@ def ref_correct(v, version="hg38"):
         print v
         raise Exception("ref not inside BRCA1 or BRCA2")
     if (genomeRef != ref):
-        print genomeRef
-        print ref
         return False
     else:
         return True
