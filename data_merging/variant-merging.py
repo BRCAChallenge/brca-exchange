@@ -82,11 +82,18 @@ BIC_FILE = "bic_brca12.sorted.hg38.vcf"
 EXAC_FILE = "exac_BRCA12.sorted.hg38.vcf"
 ESP_FILE = "esp.brca.vcf"
 
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-o", "--output", 
+                    default="/hive/groups/cgl/brca/release1.0/merged.csv")
+parser.add_argument("-e", "--equivalent_variants", 
+                    default="/hive/groups/cgl/brca/release1.0/equivalent_variants.txt")
+ARGS = parser.parse_args()
+
+
+
+
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-o", "--output", 
-                        default="/hive/groups/cgl/brca/release1.0/merged.csv")
-    args = parser.parse_args()
     tmp_dir = tempfile.mkdtemp()
     try:
         source_dict, columns, variants = preprocessing(tmp_dir)
@@ -98,9 +105,9 @@ def main():
         variants = string_comparison_merge(variants) 
 
         raise Exception("friendly break")
-        write_new_csv(args.output, columns, variants)
+        write_new_csv(ARGS.output, columns, variants)
         print "PIPELINE OUTPUT: "
-        print args.output
+        print ARGS.output
     finally:
        # shutil.rmtree(tmp_dir)
         print tmp_dir
@@ -111,13 +118,14 @@ def string_comparison_merge(variants):
     genome_coors = [i.replace("-", "").replace("chr", "").replace(">", ":")
                     for i in variants.keys()]
 
-    print find_equivalent_variant(set(genome_coors))
+    print find_equivalent_variant(genome_coors)
 
     return None
 
-def find_equivalent_variant(set_of_genome_coor):
+def find_equivalent_variant(genome_coors):
     uniq_variants = {}
-    for v in set_of_genome_coor:
+    for i, v in enumerate(genome_coors):
+        print i
         variant_exist = False
         for existing_v in uniq_variants:
             if v == existing_v:
@@ -131,7 +139,15 @@ def find_equivalent_variant(set_of_genome_coor):
                     print "these two variants are equivlaent", v1, v2
         if not variant_exist:
             uniq_variants[v] = set([v])
-    return uniq_variants
+    equivalent_variants = [] 
+    for value in uniq_variants.values():
+        if len(value) > 1:
+            equivalent_variants.append(value)
+    f = open(ARGS.equivalent_variants, "w")
+    for e in equivalent_variants:
+        f.write("|".join(list(e)) + "\n")
+    f.close()
+    return equivalent_variants
 
 def preprocessing(tmp_dir):
     # Preprocessing variants:
