@@ -12,7 +12,7 @@ from StringIO import StringIO
 from copy import deepcopy
 from pprint import pprint
 import string_comp
-
+import pickle
 
 
 #GENOMIC VERSION:
@@ -103,24 +103,43 @@ def main():
                                                  file, FIELD_DICT[source_name])
         print "------------string comparison merge-------------------------------"
         variants = string_comparison_merge(variants) 
-
-        raise Exception("friendly break")
         write_new_csv(ARGS.output, columns, variants)
         print "PIPELINE OUTPUT: "
         print ARGS.output
+        print ARGS.equivalent_variants
     finally:
-       # shutil.rmtree(tmp_dir)
-        print tmp_dir
+        shutil.rmtree(tmp_dir)
 
 def string_comparison_merge(variants):
     # make sure the input genomic coordinate strings are already unique strings
     assert (len(variants.keys()) == len(set(variants.keys())))
-    genome_coors = [i.replace("-", "").replace("chr", "").replace(">", ":")
-                    for i in variants.keys()]
-
-    print find_equivalent_variant(genome_coors)
-
-    return None
+    #equivalence = find_equivalent_variant(variants.keys())
+    #with open("dumps", "w") as f:
+    #    f.write(pickle.dumps(equivalence))
+    #f.close()
+    equivalence = pickle.loads(open("dumps", "r").read())
+    for equivalent_v in equivalence:
+        print equivalent_v
+        merged_row = []
+        for each_v in equivalent_v:
+            print variants[each_v]
+            if len(merged_row) == 0:
+                merged_row = variants[each_v]
+                variants.pop(each_v)
+            else:
+                for index, row1 in enumerate(merged_row):
+                    row2 = variants[each_v][index]
+                    if row1 == "-" and row2 != "-":
+                        merged_row[index] = row2
+                    elif row1 != "-" and row2 == "-":
+                        merged_row[index] = row1
+                    else:
+                        if row1 != row2 and (row2 not in row1.split("|")):
+                            merged_row[index] = row1 + "|" + row2
+                variants.pop(each_v)
+        variants["|".join(list(equivalent_v))] = merged_row
+        print merged_row
+    return variants
 
 def find_equivalent_variant(genome_coors):
     uniq_variants = {}
@@ -131,12 +150,12 @@ def find_equivalent_variant(genome_coors):
             if v == existing_v:
                 continue
             else:
-                v1 = v.split(":")
-                v2 = existing_v.split(":")
-                if string_comp.variant_equal(v1, v2):
+                v1 = v.replace("-", "").replace("chr", "").replace(">", ":")
+                v2 = existing_v.replace("-", "").replace("chr", "").replace(">", ":")
+                if string_comp.variant_equal(v1.split(":"), v2.split(":")):
                     variant_exist = True
                     uniq_variants[existing_v].add(v)
-                    print "these two variants are equivlaent", v1, v2
+                    print "these two variants are equivalent", v1, v2
         if not variant_exist:
             uniq_variants[v] = set([v])
     equivalent_variants = [] 
