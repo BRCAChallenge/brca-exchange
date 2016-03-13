@@ -17,7 +17,7 @@ import string_comp
 
 #GENOMIC VERSION:
 VERSION = "hg38" # equivalent to GRCh38
-
+WRONG_GENOME = "/hive/groups/cgl/brca/release1.0/vcf_wrong_genome_coordinate/"
 
 
 # files needed for string comparison
@@ -40,7 +40,7 @@ LOVD_FIELDS = {"Origin_of_variant": "genetic_origin",
                "Variant_haplotype": "haplotype",
                "Functional_analysis_result": "functionalanalysis_result",
                "Functional_analysis_technique": "functionalanalysis_technique"}
-EXAC_FIELDS = {"Allele_frequency": "AF"}
+
 EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "Segregation_LR": "segregation_lr",
                   "Sum_family_LR": "sum_family_lr",
@@ -61,6 +61,7 @@ BIC_FIELDS = {"Clinical_classification": "Category",
               "Literature_citation": "Reference"}
 ESP_FIELDS = {"polyPhen2_result": "PH",
               "Minor_allele_frequency":"MAF"}
+EXAC_FIELDS = {"Allele_frequency": "AF"}
 
 FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
                "ClinVar": CLINVAR_FIELDS,
@@ -101,31 +102,18 @@ def main():
         print "PIPELINE OUTPUT: "
         print args.output
     finally:
-        shutil.rmtree(tmp_dir)
+       # shutil.rmtree(tmp_dir)
+        print tmp_dir
 
 def string_comparison_merge(variants):
     # make sure the input genomic coordinate strings are already unique strings
     assert (len(variants.keys()) == len(set(variants.keys())))
     genome_coors = [i.replace("-", "").replace("chr", "").replace(">", ":")
                     for i in variants.keys()]
-    n = 0
-    for genome_coor in genome_coors:
-        if not string_comp.ref_correct(genome_coor.split(":")):
-            n += 1
-            print genome_coor
-    print n
-    print len(genome_coors)
-
-        
 
     print find_equivalent_variant(set(genome_coors))
 
-    for index, variant in enumerate(variants):
-        print variant
-        if index == 10:
-            break
     return None
-
 
 def find_equivalent_variant(set_of_genome_coor):
     uniq_variants = {}
@@ -147,13 +135,13 @@ def find_equivalent_variant(set_of_genome_coor):
 
 def preprocessing(tmp_dir):
     # Preprocessing variants:
-    source_dict = {"1000_Genomes": GENOME1K_FILE + "for_pipeline",
-                   "ClinVar": CLINVAR_FILE,
-                   "LOVD": LOVD_FILE,
+    source_dict = {#"1000_Genomes": GENOME1K_FILE + "for_pipeline",
+                   #"ClinVar": CLINVAR_FILE,
+                   #"LOVD": LOVD_FILE,
                    "exLOVD": EX_LOVD_FILE,
-                   "ExAC": EXAC_FILE,
-                   "ESP": ESP_FILE,
-                   "BIC": BIC_FILE,
+                   #"ExAC": EXAC_FILE,
+                   #"ESP": ESP_FILE,
+                   #"BIC": BIC_FILE,
                    }    
     print "\nPIPELINE INPUT:"
     print "ENIGMA: {0}".format(ENIGMA_FILE)
@@ -169,20 +157,26 @@ def preprocessing(tmp_dir):
     for source_name, file_name in source_dict.iteritems():
         f = open(PIPELINE_INPUT + file_name, "r")
         vcf_reader = vcf.Reader(f, strict_whitespace=True)
-        n_wrong = 0
-        n_total = 0
+        vcf_wrong_writer = vcf.Writer(open(WRONG_GENOME + source_name + 
+                                      "_wrong_genome_coor.vcf", "w"), vcf_reader)
+        vcf_right_writer = vcf.Writer(open(tmp_dir + "/right" + source_name, "w"),
+                                      vcf_reader)
+        n_wrong, n_total = 0, 0
         for record in vcf_reader:
             v = [record.CHROM, record.POS, record.REF, record.ALT]
             if not string_comp.ref_correct(v):
+                vcf_wrong_writer.write_record(record)
                 n_wrong += 1
+            else:
+                vcf_right_writer.write_record(record)
             n_total += 1
         print "in {0}, wrong: {1}, total: {2}".format(source_name, n_wrong, n_total) 
-
-            
-
+    print "variants with wrong genomic coordates are saved to:", WRONG_GENOME
+    print "---------------------------------------------------------"
+    
     for source_name, file_name in source_dict.iteritems():
         print "convert to one variant per line in ", source_name
-        f_in = open(PIPELINE_INPUT + file_name, "r")
+        f_in = open(tmp_dir + "/right" + source_name, "r")
         f_out = open(tmp_dir + "/" + source_name + ".vcf", "w")
         one_variant_transform(f_in, f_out)
         print "merge repetitive variants within ", source_name
