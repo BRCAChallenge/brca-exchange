@@ -70,3 +70,8 @@ Thu May 21 05:39:46 PDT 2015: max
 ------------------------------------------------------------------------
 2015-06-16: cmarkell@ucsc.edu
       - Uploaded LOVD data extraction and conversion scripts. Will cleanup/test LOVD extraction instructions and upload a cleaner LOVD2vcf converter script.
+      
+------------------------------------------------------------------------
+2016-03-14: cmarkell@ucsc.edu
+Updated lists of refseq annotation id's for the all respective variant databases to include all BRCA1 and BRCA2 transcript isoforms.
+      data/refseq_annotation_list
