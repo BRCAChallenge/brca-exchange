@@ -63,24 +63,6 @@ def variant_equal(v1, v2, version="hg38"):
     else:
         assert(False)
 
-    # check if the ref base is really in the genome
-    genomeRef1 = seq[pos1:pos1+len(ref1)].upper()
-    genomeRef2 = seq[pos2:pos2+len(ref2)].upper()
-
-    if len(ref1) != 0 and len(genomeRef1)==0:
-        print v1
-        raise Exception("ref1 not inside BRCA1 or BRCA2")
-    if len(ref2) != 0 and len(genomeRef2)==0:
-        print v2
-        raise Exception("ref2 not inside BRCA1 or BRCA2")
-    if (genomeRef1!=ref1):
-        print "ref1 is not in genome", genomeRef1, ref1
-    if (genomeRef2!=ref2):
-        print "ref2 is not in genome", genomeRef2, ref2
-    assert(genomeRef1==ref1)
-    assert(genomeRef2==ref2)
-
-
     # replace vcf ref string with alt string
     edited_v1 = seq[0:pos1]+alt1+seq[pos1+len(ref1):]
     edited_v2 = seq[0:pos2]+alt2+seq[pos2+len(ref2):]
