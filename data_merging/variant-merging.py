@@ -37,7 +37,8 @@ GENOME1K_FIELDS = {"Allele_frequency":"AF",
                    "AFR_Allele_frequency":"AFR_AF",
                    "AMR_Allele_frequency":"AMR_AF",
                    "SAS_Allele_frequency":"SAS_AF"}
-CLINVAR_FIELDS = {"Submitter":"Submitter",
+CLINVAR_FIELDS = {"HGVS": "HGVS",
+                  "Submitter":"Submitter",
                   "Clinical_Significance":"ClinicalSignificance",
                   "Date_Last_Updated":"DateLastUpdated",
                   "SCV":"SCV",
@@ -47,8 +48,9 @@ LOVD_FIELDS = {"Origin_of_variant": "genetic_origin",
                "Variant_frequency": "frequency",
                "Variant_haplotype": "haplotype",
                "Functional_analysis_result": "functionalanalysis_result",
-               "Functional_analysis_technique": "functionalanalysis_technique"}
-
+               "Functional_analysis_technique": "functionalanalysis_technique",
+               "HGVS_cDNA": "dna_change",
+               "HGVS_protein": "protein_change"}
 EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "Segregation_LR": "segregation_lr",
                   "Sum_family_LR": "sum_family_lr",
@@ -56,8 +58,10 @@ EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "Missense_analysis_prior_probability": "missense_analysis_prior_p",
                   "Posterior_probability": "posterior_p",
                   "IARC_class":"iarc_class",
-                  "BIC_identifier": "bic_dna_change",
-                  "Literature_source":"observational_reference"}
+                  "BIC_Nomenclature": "bic_dna_change",
+                  "Literature_source":"observational_reference",
+                  "HGVS_cDNA": "dna_change",
+                  "HGVS_protein": "protein_change"}
 BIC_FIELDS = {"Clinical_classification": "Category",
               "Number_of_family_member_carrying_mutation": "Number_Reported",
               "Patient_nationality": "Nationality",
@@ -94,8 +98,8 @@ ESP_FILE = "esp.brca.vcf"
 parser = argparse.ArgumentParser()
 parser.add_argument("-o", "--output", 
                     default="/hive/groups/cgl/brca/release1.0/merged.csv")
-parser.add_argument("-e", "--equivalent_variants", 
-                    default="/hive/groups/cgl/brca/release1.0/equivalent_variants.txt")
+parser.add_argument("-e", "--ev", 
+                    default="/hive/groups/cgl/brca/release1.0/equivalent_variants.pickledumps")
 ARGS = parser.parse_args()
 
 
@@ -114,7 +118,7 @@ def main():
         write_new_csv(ARGS.output, columns, variants)
         print "PIPELINE OUTPUT: "
         print ARGS.output
-        print ARGS.equivalent_variants
+        print ARGS.ev
         print WRONG_GENOME
     finally:
         shutil.rmtree(tmp_dir)
@@ -123,7 +127,7 @@ def string_comparison_merge(variants):
     # make sure the input genomic coordinate strings are already unique strings
     assert (len(variants.keys()) == len(set(variants.keys())))
     equivalence = find_equivalent_variant(variants.keys())
-    with open("dumps", "w") as f:
+    with open(ARGS.ev, "w") as f:
         f.write(pickle.dumps(equivalence))
     f.close()
     #equivalence = pickle.loads(open("dumps", "r").read())
@@ -150,8 +154,6 @@ def string_comparison_merge(variants):
 def find_equivalent_variant(genome_coors):
     uniq_variants = {}
     for i, v in enumerate(genome_coors):
-        if i%10 == 0:
-            print i
         variant_exist = False
         for existing_v in uniq_variants:
             if v == existing_v:
@@ -169,10 +171,6 @@ def find_equivalent_variant(genome_coors):
     for value in uniq_variants.values():
         if len(value) > 1:
             equivalent_variants.append(value)
-    f = open(ARGS.equivalent_variants, "w")
-    for e in equivalent_variants:
-        f.write("|".join(list(e)) + "\n")
-    f.close()
     return equivalent_variants
 
 def preprocessing(tmp_dir):
