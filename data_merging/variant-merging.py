@@ -11,10 +11,18 @@ import shutil
 from StringIO import StringIO
 from copy import deepcopy
 from pprint import pprint
-import string_comp
 import pickle
 
 
+BRCA1 = {"hg38": {"start": 43000000,
+                  "sequence": open("../resources/brca1_hg38.txt", "r").read()},
+         "hg19": {"start": 41100000,
+                  "sequence": open("../resources/brca1_hg19.txt", "r").read()}}
+BRCA2 = {"hg38": {"start": 32300000,
+                  "sequence": open("../resources/brca2_hg38.txt", "r").read()},
+         "hg19": {"start": 32800000,
+                  "sequence": open("../resources/brca2_hg19.txt", "r").read()}}
+  
 #GENOMIC VERSION:
 VERSION = "hg38" # equivalent to GRCh38
 WRONG_GENOME = "/hive/groups/cgl/brca/release1.0/vcf_wrong_genome_coordinate/"
@@ -107,22 +115,21 @@ def main():
         print "PIPELINE OUTPUT: "
         print ARGS.output
         print ARGS.equivalent_variants
+        print WRONG_GENOME
     finally:
         shutil.rmtree(tmp_dir)
 
 def string_comparison_merge(variants):
     # make sure the input genomic coordinate strings are already unique strings
     assert (len(variants.keys()) == len(set(variants.keys())))
-    #equivalence = find_equivalent_variant(variants.keys())
-    #with open("dumps", "w") as f:
-    #    f.write(pickle.dumps(equivalence))
-    #f.close()
-    equivalence = pickle.loads(open("dumps", "r").read())
+    equivalence = find_equivalent_variant(variants.keys())
+    with open("dumps", "w") as f:
+        f.write(pickle.dumps(equivalence))
+    f.close()
+    #equivalence = pickle.loads(open("dumps", "r").read())
     for equivalent_v in equivalence:
-        print equivalent_v
         merged_row = []
         for each_v in equivalent_v:
-            print variants[each_v]
             if len(merged_row) == 0:
                 merged_row = variants[each_v]
                 variants.pop(each_v)
@@ -138,13 +145,13 @@ def string_comparison_merge(variants):
                             merged_row[index] = row1 + "|" + row2
                 variants.pop(each_v)
         variants["|".join(list(equivalent_v))] = merged_row
-        print merged_row
     return variants
 
 def find_equivalent_variant(genome_coors):
     uniq_variants = {}
     for i, v in enumerate(genome_coors):
-        print i
+        if i%10 == 0:
+            print i
         variant_exist = False
         for existing_v in uniq_variants:
             if v == existing_v:
@@ -152,7 +159,7 @@ def find_equivalent_variant(genome_coors):
             else:
                 v1 = v.replace("-", "").replace("chr", "").replace(">", ":")
                 v2 = existing_v.replace("-", "").replace("chr", "").replace(">", ":")
-                if string_comp.variant_equal(v1.split(":"), v2.split(":")):
+                if variant_equal(v1.split(":"), v2.split(":")):
                     variant_exist = True
                     uniq_variants[existing_v].add(v)
                     print "these two variants are equivalent", v1, v2
@@ -170,13 +177,13 @@ def find_equivalent_variant(genome_coors):
 
 def preprocessing(tmp_dir):
     # Preprocessing variants:
-    source_dict = {#"1000_Genomes": GENOME1K_FILE + "for_pipeline",
-                   #"ClinVar": CLINVAR_FILE,
-                   #"LOVD": LOVD_FILE,
+    source_dict = {"1000_Genomes": GENOME1K_FILE + "for_pipeline",
+                   "ClinVar": CLINVAR_FILE,
+                   "LOVD": LOVD_FILE,
                    "exLOVD": EX_LOVD_FILE,
-                   #"ExAC": EXAC_FILE,
-                   #"ESP": ESP_FILE,
-                   #"BIC": BIC_FILE,
+                   "ExAC": EXAC_FILE,
+                   "ESP": ESP_FILE,
+                   "BIC": BIC_FILE,
                    }    
     print "\nPIPELINE INPUT:"
     print "ENIGMA: {0}".format(ENIGMA_FILE)
@@ -200,7 +207,7 @@ def preprocessing(tmp_dir):
         n_wrong, n_total = 0, 0
         for record in vcf_reader:
             v = [record.CHROM, record.POS, record.REF, record.ALT]
-            if not string_comp.ref_correct(v):
+            if not ref_correct(v):
                 vcf_wrong_writer.write_record(record)
                 n_wrong += 1
             else:
@@ -329,10 +336,10 @@ def add_new_source(columns, variants, source, source_file, source_dict):
             try:
                 variants[genome_coor].append(str(record.INFO[value]))
             except KeyError:
-                if value == "Category":
-                    variants[genome_coor].append(str(record.INFO["\"" + value]))
+                if source == "BIC":
+                    variants[genome_coor].append("-")
                 else:
-                    raise Exception("uncaught BIC weirdness")
+                    raise Exception("uncaught weirdness")
 
     # for those enigma record that doesn't have a hit with new genome coordinate
     # add extra cells of "-" to the end of old record
@@ -370,7 +377,7 @@ def save_enigma_to_dict(path):
             items = line.strip().split("\t")
             items.insert(0, "ENIGMA")
             v = items[2].replace("-", "").replace("chr", "").replace(">", ":")
-            if string_comp.ref_correct(v.split(":")):
+            if ref_correct(v.split(":")):
                 variants[items[2]] = items
             else:
                 n_wrong += 1
@@ -379,6 +386,69 @@ def save_enigma_to_dict(path):
     f_wrong.close()
     print "in ENIGMA, wrong: {0}, total: {1}".format(n_wrong, n_total)
     return (columns, variants)
+
+
+def variant_equal(v1, v2, version="hg38"):
+    " return (edited1, edited2) "
+    if v1 == v2:
+        return True
+
+    chr1, pos1, ref1, alt1 = v1
+    chr2, pos2, ref2, alt2 = v2
+    pos1 = int(pos1)
+    pos2 = int(pos2)
+
+    if chr1 != chr2:
+        return False
+    if (len(ref1) - len(alt1)) != (len(ref2) - len(alt2)):
+        return False
+
+    # if len(ref2)>100 or len(ref1)>100:
+    #     return False
+
+    # make sure that v1 is upstream of v2
+    if pos1 > pos2:
+        return variant_equal(v2, v1)
+
+    # lift coordinates and make everything 0-based
+    if chr1 == "13":
+        seq = BRCA2[version]["sequence"]
+        pos1 = pos1 - 1 - BRCA2[version]["start"]
+        pos2 = pos2 - 1 - BRCA2[version]["start"]
+    elif chr1 == "17":
+        seq = BRCA1[version]["sequence"]
+        pos1 = pos1 - 1 - BRCA1[version]["start"]
+        pos2 = pos2 - 1 - BRCA1[version]["start"]
+    else:
+        assert(False)
+
+    # replace vcf ref string with alt string
+    edited_v1 = seq[0:pos1]+alt1+seq[pos1+len(ref1):]
+    edited_v2 = seq[0:pos2]+alt2+seq[pos2+len(ref2):]
+
+    return edited_v1 == edited_v2
+
+def ref_correct(v, version="hg38"): 
+    chr, pos, ref, alt = v 
+    pos = int(pos) 
+    if chr == "13": 
+        seq = BRCA2[version]["sequence"] 
+        pos = pos - 1 - BRCA2[version]["start"]
+    elif chr == "17":
+        seq = BRCA1[version]["sequence"]
+        pos = pos - 1 - BRCA1[version]["start"]
+    else:
+        assert(False)
+
+    genomeRef = seq[pos:pos+len(ref)].upper()
+    if len(ref) != 0 and len(genomeRef)==0:
+        print v
+        raise Exception("ref not inside BRCA1 or BRCA2")
+    if (genomeRef != ref):
+        return False
+    else:
+        return True
+
 
 if __name__ == "__main__":
     main()
