@@ -292,10 +292,15 @@ var Database = React.createClass({
     // Note this is not a pure component because of the calls to
     // getQuery().
     mixins: [Navigation, State],
-    showVariant: function (row) {
+	showVariant: function (row) {
         row.Genomic_Coordinate = backend.trimSearchTerm(row.Genomic_Coordinate);
+        var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
+        if (d3TipDiv.length != 0 && d3TipDiv[0].style.opacity != '0') {
+            d3TipDiv[0].style.opacity='0';
+            d3TipDiv[0].style.pointerEvents='none';
+        }
         this.transitionTo(`/variant/${variantPathJoin(row)}`);
-    },
+	},
     showHelp: function (title) {
         this.transitionTo(`/help#${slugify(title)}`);
     },

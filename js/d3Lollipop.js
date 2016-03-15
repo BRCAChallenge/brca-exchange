@@ -19,7 +19,7 @@ var brca12JSON = {
 };
 var d3Lollipop = {};
 
-d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id) {
+d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id, varlink, data) {
     var xAxisLabel = '';
     var minPos = 0;
     var maxPos = 1;
@@ -38,7 +38,7 @@ d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id) {
       "Benign": "lightblue",
       "Pathogenic": "red"
     };
-    var config = {minCoord: minPos, maxCoord: maxPos, mutationData: muts, regionData: domain, targetElement: ref.id, legends: legends, colorMap: colorMap };
+    var config = {variantDetailLink: varlink, minCoord: minPos, maxCoord: maxPos, mutationData: muts, regionData: domain, targetElement: ref.id, legends: legends, colorMap: colorMap };
     var instance =  new Mutneedles(config);
     return function() {
         instance.tip.destroy();
@@ -56,9 +56,11 @@ var D3Lollipop = React.createClass({
     filterAttributes: function (obj) {
         var oldObj = _(obj).pick('Genomic_Coordinate', 'Clinical_significance_ENIGMA');
 
+        var chromosome = oldObj.Genomic_Coordinate.split(':')[1];
         var chrCoordinate = parseInt(oldObj.Genomic_Coordinate.split(':')[1]);
-        var refAllele = oldObj.Genomic_Coordinate.split(':')[2].split('>')[0];
-        var altAllele = oldObj.Genomic_Coordinate.split(':')[2].split('>')[1];
+        var alleleChange = oldObj.Genomic_Coordinate.split(':')[2];
+        var refAllele = alleleChange.split('>')[0];
+        var altAllele = alleleChange.split('>')[1];
         if (altAllele.length > refAllele.length) {
             chrCoordinate = String(chrCoordinate) + '-' + String(chrCoordinate + altAllele.length - 1);
         } else {
@@ -68,19 +70,19 @@ var D3Lollipop = React.createClass({
         if (oldObj.Clinical_significance_ENIGMA == '-'){
             oldObj.Clinical_significance_ENIGMA = "Unknown";
         }
-        var newObj = {category: oldObj.Clinical_significance_ENIGMA, coord: chrCoordinate, value: 1};
+        var newObj = {category: oldObj.Clinical_significance_ENIGMA, coord: chrCoordinate, value: 1, oldData: obj};
         return newObj;
     },
     componentDidMount: function() {
-        var {data, brcakey, ...opts} = this.props;
+        var {data, brcakey, onRowClick, ...opts} = this.props;
         var subSetData = data.map(this.filterAttributes);
         var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
         var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
-        this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey);
+        this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
     },
     componentWillReceiveProps: function(newProps) {
         this.cleanupBRCA();
-        var {data, brcakey, ...opts} = newProps;
+        var {data, brcakey, onRowClick, ...opts} = newProps;
         var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
         while (d3svgBrcaRef.hasChildNodes() ) {
             d3svgBrcaRef.removeChild(d3svgBrcaRef.lastChild);
@@ -91,7 +93,7 @@ var D3Lollipop = React.createClass({
             d3svgBrcaRef.removeChild(d3svgBrcaRef.lastChild);
         }
         var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
-        this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey);
+        this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
     },
     componentWillUnmount: function() {
         this.cleanupBRCA();
@@ -107,22 +109,19 @@ var Lollipop = React.createClass({
         this.setState({brcakey: key});
     },
     render: function () {
-        var {data, onHeaderClick, ...opts} = this.props;
+        var {data, onHeaderClick, onRowClick, ...opts} = this.props;
         return (
             <Grid>
-                <Row>
-                    <Col md={8} mdOffset={4}>
-                        <h1 id="brca-dna-variant-lollipop">{this.state.brcakey} Lollipop Chart</h1>
-                    </Col>
-                </Row>
                 <div>
-                    <DropdownButton onSelect={this.onSelect} title="Select Gene" id="bg-vertical-dropdown-1">
-                        <MenuItem eventKey="BRCA1">BRCA1</MenuItem>
-                        <MenuItem eventKey="BRCA2">BRCA2</MenuItem>
-                    </DropdownButton>
-                    <span onClick={() => onHeaderClick('Lollipop Plots')}
-                        className='help glyphicon glyphicon-question-sign superscript'/>
-                    <D3Lollipop data={this.props.data} key={this.state.brcakey} brcakey={this.state.brcakey} id='brcaLollipop' ref='d3svgBrca'/>
+                    <Row style={{marginBottom: '2px', marginTop: '2px'}}>
+                        <DropdownButton onSelect={this.onSelect} title="Select Gene" id="bg-vertical-dropdown-1">
+                            <MenuItem eventKey="BRCA1">BRCA1</MenuItem>
+                            <MenuItem eventKey="BRCA2">BRCA2</MenuItem>
+                        </DropdownButton>
+                        <span onClick={() => this.props.onHeaderClick('Lollipop Plots')}
+                            className='help glyphicon glyphicon-question-sign superscript'/>
+                        <D3Lollipop data={this.props.data} key={this.state.brcakey} brcakey={this.state.brcakey} onRowClick={this.props.onRowClick} id='brcaLollipop' ref='d3svgBrca'/>
+                    </Row>
                 </div>
             </Grid>
         );
