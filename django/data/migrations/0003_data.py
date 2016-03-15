@@ -17,10 +17,11 @@ def load_from_csv(apps, schema_editor):
     with open(file_path) as csv_file:
         reader = csv.reader(csv_file)
         header = reader.next()
+        source_column = header.index("Source")
         for row in reader:
-            # The first 6 columns of the database are booleans
-            for i in range(6):
-                row[i] = ast.literal_eval(row[i])
+            # Fill the boolean columns using Source
+            for source in row[source_column].split('|'):
+                row['variant_in_'+source] = True
             Variant.objects.create_variant(dict(zip(header, row)))
 
 
