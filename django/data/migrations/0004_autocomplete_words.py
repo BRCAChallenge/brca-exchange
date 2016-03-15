@@ -12,23 +12,14 @@ class Migration(migrations.Migration):
         migrations.RunSQL("""
         CREATE TABLE words AS SELECT DISTINCT left(word, 300) as word FROM (
 
-        SELECT regexp_split_to_table(lower("HGVS_genomic_BIC"), '[\s+|''"]') as word from variant UNION
-        SELECT regexp_split_to_table(lower("BIC_exLOVD"), '[\s+|''"]') as word from variant UNION
-        SELECT regexp_split_to_table(lower("HGVS_cDNA_BIC"), '[\s+|''"]') as word from variant UNION
-        SELECT regexp_split_to_table(lower("HGVS_genomic_LOVD"), '[\s+|''"]') as word from variant UNION
-        SELECT regexp_split_to_table(lower("HGVS_genomic"), '[\s+|''"]') as word from variant UNION
-        SELECT regexp_split_to_table(lower("HGVS_protein"), '[\s+|''"]') as word from variant UNION
         SELECT regexp_split_to_table(lower("Genomic_Coordinate"), '[\s+|''"]') as word from variant UNION
-        SELECT regexp_split_to_table(lower("BIC_Designation_BIC"), '[\s+|''"]') as word from variant UNION
-        SELECT regexp_split_to_table(lower("HGVS_protein_BIC"), '[\s+|''"]') as word from variant UNION
-        SELECT regexp_split_to_table(lower("BIC_Nomenclature"), '[\s+|''"]') as word from variant UNION
-        SELECT regexp_split_to_table(lower("Gene_symbol"), '[\s+|''"]') as word from variant UNION
+        SELECT regexp_split_to_table(lower("Condition_category_ENIGMA"), '[\s+|''"]') as word from variant UNION
+        SELECT regexp_split_to_table(lower("Clinical_significance_ENIGMA"), '[\s+|''"]') as word from variant UNION
+        SELECT regexp_split_to_table(lower("Gene_Symbol"), '[\s+|''"]') as word from variant UNION
+        SELECT regexp_split_to_table(lower("Reference_Sequence"), '[\s+|''"]') as word from variant UNION
         SELECT regexp_split_to_table(lower("HGVS_cDNA"), '[\s+|''"]') as word from variant UNION
-        SELECT regexp_split_to_table(lower("HGVS_cDNA_LOVD"), '[\s+|''"]') as word from variant UNION
-        SELECT regexp_split_to_table(lower("HGVS_protein_exLOVD"), '[\s+|''"]') as word from variant UNION
-        SELECT regexp_split_to_table(lower("HGVS_protein_LOVD"), '[\s+|''"]') as word from variant UNION
-        SELECT regexp_split_to_table(lower("HGVS_cDNA_exLOVD"), '[\s+|''"]') as word from variant UNION
-        SELECT regexp_split_to_table(lower("Clinical_significance"), '[\s+|''"]') as word from variant
+        SELECT regexp_split_to_table(lower("BIC_Identifier"), '[\s+|''"]') as word from variant UNION
+        SELECT regexp_split_to_table(lower("HGVS_Protein"), '[\s+|''"]') as word from variant
 
         )
         AS combined_words;
