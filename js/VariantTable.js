@@ -320,7 +320,7 @@ var Table = React.createClass({
                 filterColumns={filterColumns}
                 initialData={data}
                 initialPageLength={20}
-                initialSortBy={{prop: 'Abbrev_AA_change', order: 'descending'}}
+                initialSortBy={{prop: 'Gene_Symbol', order: 'descending'}}
                 pageLengthOptions={[ 20, 50, 100 ]}
             />
         );
@@ -362,7 +362,7 @@ var ResearchVariantTableSupplier = function (Component) {
         },
         getAdvancedFilters() {
             var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
-                <Col sm={6} md={2}>
+                <Col sm={6} md={3}>
                     <div>
                         <ColumnCheckbox
                             onChange={v => this.toggleSource(name)}
