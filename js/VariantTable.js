@@ -271,7 +271,7 @@ var Table = React.createClass({
                 filterColumns={filterColumns}
                 initialData={data}
                 initialPageLength={20}
-                initialSortBy={{prop: 'Abbrev_AA_change', order: 'descending'}}
+                initialSortBy={{prop: 'Gene_Symbol', order: 'descending'}}
                 pageLengthOptions={[ 20, 50, 100 ]}
             />
         );
