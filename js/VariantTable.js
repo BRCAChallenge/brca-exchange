@@ -373,7 +373,7 @@ var ResearchVariantTableSupplier = function (Component) {
                 </Col>
             );
             var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
-                <Col sm={6} md={2}>
+                <Col sm={6} md={4}>
                     <Panel header={subColTitle}>
                         {this.filterFormCols(subColList, this.state.columnSelection)}
                     </Panel>
