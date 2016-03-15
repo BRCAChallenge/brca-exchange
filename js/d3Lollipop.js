@@ -54,7 +54,7 @@ var D3Lollipop = React.createClass({
         );
     },
     filterAttributes: function (obj) {
-        var oldObj = _(obj).pick('Genomic_Coordinate', 'Clinical_significance');
+        var oldObj = _(obj).pick('Genomic_Coordinate', 'Clinical_significance_ENIGMA');
 
         var chrCoordinate = parseInt(oldObj.Genomic_Coordinate.split(':')[1]);
         var refAllele = oldObj.Genomic_Coordinate.split(':')[2].split('>')[0];
@@ -65,10 +65,10 @@ var D3Lollipop = React.createClass({
             chrCoordinate = String(chrCoordinate);
         }
         console.log(oldObj);
-        if (oldObj.Clinical_significance == '-'){
-            oldObj.Clinical_significance = "Unknown";
+        if (oldObj.Clinical_significance_ENIGMA == '-'){
+            oldObj.Clinical_significance_ENIGMA = "Unknown";
         }
-        var newObj = {category: oldObj.Clinical_significance, coord: chrCoordinate, value: 1};
+        var newObj = {category: oldObj.Clinical_significance_ENIGMA, coord: chrCoordinate, value: 1};
         return newObj;
     },
     componentDidMount: function() {
