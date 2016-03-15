@@ -8,8 +8,8 @@ var qs = require('qs');
 
 // XXX Need a config mechanism for this. For now, uncomment the localhost
 // setting when working locally.
-var databaseUrl = "http://brcaexchange.cloudapp.net/backend";
-//var databaseUrl = "http://localhost:8000";
+// var databaseUrl = "http://brcaexchange.cloudapp.net/backend";
+var databaseUrl = "http://localhost:8000";
 
 var transpose = a => _.zip.apply(_, a);
 
@@ -32,7 +32,7 @@ function url(opts) {
     var {
         format = 'json',
         filterValues = {},
-        sortBy: {prop = 'Gene_symbol', order = 'ascending'} = {},
+        sortBy: {prop = 'Gene_Symbol', order = 'ascending'} = {},
         pageLength = 100,
         page = 0,
         search = '',
