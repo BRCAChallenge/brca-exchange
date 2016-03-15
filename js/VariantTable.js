@@ -74,7 +74,6 @@ var filterColumns = [
 //    return sorted;
 //}
 
-//Some columns appear under a different name on the table header and the detail page
 var columns = [
     {title: 'Gene', prop: 'Gene_Symbol'},
     {title: 'Identifier', prop: 'HGVS_cDNA'},
@@ -85,31 +84,79 @@ var columns = [
 ];
 
 var research_mode_columns = [
-    {title: 'Gene Symbol', prop: 'Gene_Symbol'},
-    {title: 'Genomic Coordinate', prop: 'Genomic_Coordinate'},
-    {title: 'HGVS cDNA', prop: 'HGVS_cDNA'},
-    {title: 'HGVS Protein', prop: 'HGVS_Protein'},
-    {title: 'BIC nucleotide', prop: "BIC_Identifier"},
-    {title: 'Clinical significance (ENIGMA)', prop: 'Clinical_significance_ENIGMA'},
-    {title: 'Allele frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes'},
-    {title: 'SAS Allele frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes'},
-    {title: 'EAS Allele frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes'},
-    {title: 'AMR Allele frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes'},
-    {title: 'EUR Allele frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes'},
-    {title: 'AFR Allele frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes'},
-    {title: 'Allele Origin (ClinVar)', prop: 'Allele_origin_ClinVar'},
-    {title: 'Clinical Significance (ClinVar)', prop: 'Clinical_significance_ClinVar'},
-    {title: 'Origin of variant (LOVD)', prop: 'Origin_of_variant_LOVD'},
-    {title: 'Variant frequency (LOVD)', prop: 'Variant_frequency_LOVD'},
-    {title: 'Variant haplotype (LOVD)', prop: 'Variant_haplotype_LOVD'},
-    {title: 'Allele frequency (ExAC)', prop: 'Allele_frequency_ExAC'},
-    {title: 'IARC class (exLOVD)', prop: 'IARC_class_exLOVD'},
-    {title: 'Literature source (exLOVD)', prop: 'Literature_source_exLOVD'},
-    {title: 'Date last evaluated (ENIGMA)', prop: 'Date_last_evaluated_ENIGMA'},
-    {title: 'Assertion method (ENIGMA)', prop: 'Assertion method_ENIGMA'},
-    {title: 'Assertion method citation (ENIGMA)', prop: 'Assertion_method_citation_ENIGMA'},
-    {title: 'URL (ENIGMA)', prop: 'URL_ENIGMA'}
 
+    {title: 'Gene Symbol', prop: 'Gene_Symbol'},
+    {title: 'Genomic (GRCh38)', prop: 'Genomic_Coordinate'},
+    {title: 'Genomic (GRCh36)', prop: 'Genomic_Coordinate_hg36'},
+    {title: 'Genomic (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
+
+    {title: 'Mutation category (BIC)', prop: 'Mutation_type_BIC'},
+    {title: 'PolyPhen score', prop: 'PolyPhen_VEP'},
+    {title: 'SIFT score', prop: 'SIFT_VEP'},
+
+    {title: 'African Allele Frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes'},
+    {title: 'Allele Frequency', prop: 'Allele_Frequency'},
+    {title: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes'},
+    {title: 'Allele Frequency (ExAC)', prop: 'Allele_frequency_ExAC'},
+    {title: 'AMR Allele Frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes'},
+    {title: 'EAS Allele Frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes'},
+    {title: 'EUR Allele Frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes'},
+    {title: 'Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP'},
+    {title: 'South Asian Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes'},
+    {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'},
+
+    {title: 'BIC Variant Identifier', prop: 'BIC_Identifier'},
+    {title: 'HGVS Protein', prop: 'HGVS_Protein'},
+    {title: 'SCV Accession (ClinVar)', prop: 'SCV_ClinVar'},
+    {title: 'Source(s)', prop: 'Source'},
+    {title: 'Source URL(s)', prop: 'Source_URL'},
+    {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA'},
+    {title: 'Other HGVS Nucleotide(s)', prop: 'Other_HGVS_cDNA'},
+    {title: 'Protein Amino Acid Change', prop: 'Protein_Change'},
+    {title: 'Reference cDNA Sequence', prop: 'Reference_Sequence'},
+
+    {title: 'Allele Origin (ClinVar)', prop: 'Allele_Origin_ClinVar'},
+    {title: 'Allele Origin (ENIGMA)', prop: 'Allele_origin_ENIGMA'},
+    {title: 'Ethnicity (BIC)', prop: 'Ethnicity_BIC'},
+    {title: 'Allele Origin (BIC)', prop: 'Germline_or_Somatic_BIC'},
+    {title: 'Allele Origin (LOVD)', prop: 'Origin_of_variant_LOVD'},
+    {title: 'Patient Nationality (BIC)', prop: 'Patient_nationality_BIC'},
+    {title: 'Variant Haplotype (BIC)', prop: 'Variant_haplotype_LOVD'},
+
+    {title: 'Family members carrying this variant (BIC)', prop: 'Number_of_family_member_carrying_mutation_BIC'},
+
+    {title: 'Co-occurrence likelihood (exLOVD)', prop: 'Co_occurrence_LR_exLOVD'},
+    {title: 'Prior probability of pathogenicity (exLOVD)', prop: 'Combined_prior_probablility_exLOVD'},
+    {title: 'Missense analysis probability of pathogenicity (exLOVD)', prop: 'Missense_analysis_prior_probability_exLOVD'},
+    {title: 'Probability of pathogenicity (exLOVD)', prop: 'Posterior_probability_exLOVD'},
+    {title: 'Segregation Likelihood Ratio (exLOVD)', prop: 'Segregation_LR_exLOVD'},
+    {title: 'Summary Family History Likelihood Ratio (exLOVD)', prop: 'Sum_family_LR_exLOVD'},
+
+    {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_citation_ENIGMA'},
+    {title: 'Clinical Significance Citation (ENIGMA)', prop: 'Clinical_significance_citations_ENIGMA'},
+    {title: 'Literature Reference (BIC)', prop: 'Literature_citation_BIC'},
+    {title: 'Literature Reference (exLOVD)', prop: 'Literature_source_exLOVD'},
+
+    {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_ENIGMA'},
+    {title: 'Clinical Significance (BIC)', prop: 'Clinical_classification_BIC'},
+    {title: 'Clinical Importance (BIC)', prop: 'Clinical_importance_BIC'},
+    {title: 'Clinical Significance (ClinVar)', prop: 'Clinical_Significance_ClinVar'},
+    {title: 'Clinical Significance (ENIGMA)', prop: 'Clinical_significance_ENIGMA'},
+    {title: 'Collection Method (ENIGMA)', prop: 'Collection_method_ENIGMA'},
+    {title: 'Comment on Clinical Significance (ENIGMA)', prop: 'Comment_on_clinical_significance_ENIGMA'},
+    {title: 'Date last evaluated (ENIGMA)', prop: 'Date_last_evaluated_ENIGMA'},
+    {title: 'Date last updated (ClinVar)', prop: 'Date_Last_Updated_ClinVar'},
+    {title: 'Has Discordant Evidence', prop: 'Discordant'},
+    {title: 'Functional Analysis Result (LOVD)', prop: 'Functional_analysis_result_LOVD'},
+    {title: 'Functional Analysis Method (LOVD)', prop: 'Functional_analysis_technique_LOVD'},
+    {title: 'Analysis Method (ClinVar)', prop: 'Method_ClinVar'},
+
+    {title: 'ClinVar Accession', prop: 'ClinVarAccession_ENIGMA'},
+    {title: 'Condition Category (ENIGMA)', prop: 'Condition_category_ENIGMA'},
+    {title: 'Condition ID Type (ENIGMA)', prop: 'Condition_ID_type_ENIGMA'},
+    {title: 'Condition ID Value (ENIGMA)', prop: 'Condition_ID_value_ENIGMA'},
+    {title: 'Submitter (ClinVar)', prop: 'Submitter_ClinVar'},
+    {title: 'URL (ENIGMA)', prop: 'URL_ENIGMA'}
 ];
 
 var subColumns = [
