@@ -268,6 +268,8 @@ var Table = React.createClass({
                 {...opts}
                 buildRowOptions={r => ({title: 'click for details', onClick: () => hasSelection() ? null : onRowClick(r)})}
                 buildHeader={title => buildHeader(onHeaderClick, title)}
+                onRowClick={onRowClick}
+                onHeaderClick={onHeaderClick}
                 filterColumns={filterColumns}
                 initialData={data}
                 initialPageLength={20}

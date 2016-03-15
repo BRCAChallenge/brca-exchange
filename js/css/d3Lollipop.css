@@ -50,6 +50,7 @@
 .d3-tip-selection {
     font-size: 12px;
     text-align: center;
+    stroke: black;
 }
 
 /* Creates a small triangle extender for the tooltip */
