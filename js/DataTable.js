@@ -199,7 +199,7 @@ var DataTable = React.createClass({
                 <Row id="lollipop-chart">
                     <Col sm={12}>
                         {lollipopOpen && this.state.windowWidth > 991 && this.state.data.length > 0 &&
-                        <Lollipop data={this.state.data} onHeaderClick={this.props.onHeaderClick}/> }
+                        <Lollipop data={this.state.data} onHeaderClick={this.props.onHeaderClick} onRowClick={this.props.onRowClick}/> }
 
                         {lollipopOpen && this.state.windowWidth <= 991 &&
                         <div><span className="label label-danger">Please use a larger screen size to view this interactive chart</span></div>}
@@ -258,6 +258,7 @@ var DataTable = React.createClass({
                             columns={renderColumns}
                             keys={this.props.keys}
                             buildRowOptions={this.props.buildRowOptions}
+                            onRowClick={this.props.onRowClick}
                             buildHeader={this.props.buildHeader}
                             sortBy={this.state.sortBy}
                             onSort={this.onSort} />
