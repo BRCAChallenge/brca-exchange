@@ -23,6 +23,8 @@ class Migration(migrations.Migration):
                 ('Variant_in_ExAC', models.BooleanField()),
                 ('Variant_in_LOVD', models.BooleanField()),
                 ('Variant_in_BIC', models.BooleanField()),
+                ('Variant_in_ESP', models.BooleanField()),
+                ('Variant_in_exLOVD', models.BooleanField()),
                 ('Source', models.TextField()),
                 ('Genomic_Coordinate', models.TextField()),
                 ('URL_ENIGMA', models.TextField()),
@@ -93,3 +95,4 @@ class Migration(migrations.Migration):
             },
         ),
     ]
+

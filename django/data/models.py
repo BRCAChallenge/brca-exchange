@@ -8,12 +8,14 @@ class VariantManager(models.Manager):
 
 class Variant(models.Model):
 
-    Variant_in_ENIGMA = models.BooleanField()
-    Variant_in_ClinVar = models.BooleanField()
-    Variant_in_1000_Genomes = models.BooleanField()
-    Variant_in_ExAC = models.BooleanField()
-    Variant_in_LOVD = models.BooleanField()
-    Variant_in_BIC = models.BooleanField()
+    Variant_in_ENIGMA = models.BooleanField(default=False)
+    Variant_in_ClinVar = models.BooleanField(default=False)
+    Variant_in_1000_Genomes = models.BooleanField(default=False)
+    Variant_in_ExAC = models.BooleanField(default=False)
+    Variant_in_LOVD = models.BooleanField(default=False)
+    Variant_in_BIC = models.BooleanField(default=False)
+    Variant_in_ESP = models.BooleanField(default=False)
+    Variant_in_exLOVD = models.BooleanField(default=False)
 
     Source = models.TextField()
     Genomic_Coordinate = models.TextField()
