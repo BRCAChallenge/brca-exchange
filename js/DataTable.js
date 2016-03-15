@@ -188,7 +188,7 @@ var DataTable = React.createClass({
                     </Col>
                 </Row>
 
-                <Row id="filters" className="btm-buffer">
+                <Row id="filters" className="">
                     <Col sm={12}>
                         {filtersOpen && <div className='form-inline'>{filterFormEls}</div>}
                         {filtersOpen && <div className='form-inline'>
@@ -196,17 +196,17 @@ var DataTable = React.createClass({
                         </div>}
                     </Col>
                 </Row>
-                <Row id="lollipop-chart">
+                <Row id="lollipop-chart" className="">
                     <Col sm={12}>
                         {lollipopOpen && this.state.windowWidth > 991 && this.state.data.length > 0 &&
                         <Lollipop data={this.state.data} onHeaderClick={this.props.onHeaderClick} onRowClick={this.props.onRowClick}/> }
 
                         {lollipopOpen && this.state.windowWidth <= 991 &&
-                        <div><span className="label label-danger">Please use a larger screen size to view this interactive chart</span></div>}
+                        <div className="alert alert-danger">Please use a larger screen size to view this interactive chart.</div>}
+
                     </Col>
                 </Row>
-
-                <Row id="download" className="btm-buffer">
+                <Row id="download" className="btm-buffer ">
                     <Col sm={6}>
                         <div className='form-inline'>
                             <div className='form-group'>
