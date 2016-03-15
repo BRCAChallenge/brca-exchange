@@ -69,10 +69,17 @@ def write_to_file(vep_result_dict, inputFile, outputFile):
             items += vep_fields
         else:
             genome_coor = items[2]
-            if genome_coor in vep_result_dict.keys():
-                additional_items = []
+            additional_items = []
+            coordinate_this_variant = ""
+            for coordinate in genome_coor.split("|"):
+                if coordinate in vep_result_dict.keys():
+                    coordinate_this_variant = coordinate
+            if coordinate_this_variant == "":
                 for column in VEP_FIELDS:
-                    this_cell = vep_result_dict[genome_coor][column].replace(", ","|")
+                    additional_items.append("-")
+            else:
+                for column in VEP_FIELDS:
+                    this_cell = vep_result_dict[coordinate_this_variant][column].replace(", ","|")
                     additional_items.append(this_cell)
             items += additional_items
         new_line = ",".join(items) + "\n"
