@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         SELECT regexp_split_to_table(lower("Genomic_Coordinate"), '[\s+|''"]') as word from variant UNION
         SELECT regexp_split_to_table(lower("Condition_category_ENIGMA"), '[\s+|''"]') as word from variant UNION
         SELECT regexp_split_to_table(lower("Clinical_significance_ENIGMA"), '[\s+|''"]') as word from variant UNION
-        SELECT regexp_split_to_table(lower("Gene_symbol"), '[\s+|''"]') as word from variant UNION
+        SELECT regexp_split_to_table(lower("Gene_Symbol"), '[\s+|''"]') as word from variant UNION
         SELECT regexp_split_to_table(lower("Reference_Sequence"), '[\s+|''"]') as word from variant UNION
         SELECT regexp_split_to_table(lower("HGVS_cDNA"), '[\s+|''"]') as word from variant UNION
         SELECT regexp_split_to_table(lower("BIC_Identifier"), '[\s+|''"]') as word from variant UNION
