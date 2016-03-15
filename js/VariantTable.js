@@ -313,7 +313,7 @@ var ResearchVariantTableSupplier = function (Component) {
         },
         getAdvancedFilters() {
             var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
-                <Col sm={6} md={2}>
+                <Col sm={6} md={3}>
                     <div>
                         <ColumnCheckbox
                             onChange={v => this.toggleSource(name)}
