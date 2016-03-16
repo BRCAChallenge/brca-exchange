@@ -84,7 +84,7 @@ def build_query(direction, filterValues, filters, order_by, search_term, source,
             order_by = 'Genomic_Coordinate_hg38'
         if direction == 'descending':
             order_by = '-' + order_by
-        query = query.order_by(order_by)
+        query = query.order_by(order_by, 'Pathogenicity_default')
 
     # count the number of rows now before paginating
     count = query.count()
