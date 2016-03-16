@@ -80,8 +80,8 @@ def build_query(direction, filterValues, filters, order_by, search_term, source,
         query = query.filter(reduce(__or__, query_list))
     if order_by:
         # special case for HGVS columns
-        if order_by in ('HGVS_cDNA','HGVS_Protein'):
-            order_by = 'Genomic_Coordinate'
+        if order_by in ('HGVS_cDNA', 'HGVS_Protein'):
+            order_by = 'Genomic_Coordinate_hg38'
         if direction == 'descending':
             order_by = '-' + order_by
         query = query.order_by(order_by)

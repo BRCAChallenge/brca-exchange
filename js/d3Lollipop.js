@@ -54,11 +54,11 @@ var D3Lollipop = React.createClass({
         );
     },
     filterAttributes: function (obj) {
-        var oldObj = _(obj).pick('Genomic_Coordinate', 'Clinical_significance_ENIGMA');
+        var oldObj = _(obj).pick('Genomic_Coordinate_hg38', 'Pathogenicity_default');
 
-        var chromosome = oldObj.Genomic_Coordinate.split(':')[1];
-        var chrCoordinate = parseInt(oldObj.Genomic_Coordinate.split(':')[1]);
-        var alleleChange = oldObj.Genomic_Coordinate.split(':')[2];
+        var chromosome = oldObj.Genomic_Coordinate_hg38.split(':')[1];
+        var chrCoordinate = parseInt(oldObj.Genomic_Coordinate_hg38.split(':')[1]);
+        var alleleChange = oldObj.Genomic_Coordinate_hg38.split(':')[2];
         var refAllele = alleleChange.split('>')[0];
         var altAllele = alleleChange.split('>')[1];
         if (altAllele.length > refAllele.length) {
@@ -66,11 +66,11 @@ var D3Lollipop = React.createClass({
         } else {
             chrCoordinate = String(chrCoordinate);
         }
-        console.log(oldObj);
-        if (oldObj.Clinical_significance_ENIGMA == '-'){
-            oldObj.Clinical_significance_ENIGMA = "Unknown";
-        }
-        var newObj = {category: oldObj.Clinical_significance_ENIGMA, coord: chrCoordinate, value: 1, oldData: obj};
+//        console.log(oldObj);
+//        if (oldObj.Pathogenicity_default == '-'){
+//            oldObj.Pathogenicity_default = "Unknown";
+//        }
+        var newObj = {category: oldObj.Pathogenicity_default, coord: chrCoordinate, value: 1, oldData: obj};
         return newObj;
     },
     componentDidMount: function() {

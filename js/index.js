@@ -293,7 +293,7 @@ var Database = React.createClass({
     // getQuery().
     mixins: [Navigation, State],
 	showVariant: function (row) {
-        row.Genomic_Coordinate = backend.trimSearchTerm(row.Genomic_Coordinate);
+        row.Genomic_Coordinate_hg38 = backend.trimSearchTerm(row.Genomic_Coordinate_hg38);
         var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
         if (d3TipDiv.length != 0 && d3TipDiv[0].style.opacity != '0') {
             d3TipDiv[0].style.opacity='0';
