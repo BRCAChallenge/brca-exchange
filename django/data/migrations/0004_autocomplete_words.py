@@ -11,8 +11,9 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL("""
         CREATE TABLE words AS SELECT DISTINCT left(word, 300) as word FROM (
-
-        SELECT regexp_split_to_table(lower("Genomic_Coordinate"), '[\s+|''"]') as word from variant UNION
+        SELECT regexp_split_to_table(lower("Genomic_Coordinate_hg38"), '[\s+|''"]') as word from variant UNION
+        SELECT regexp_split_to_table(lower("Genomic_Coordinate_hg37"), '[\s+|''"]') as word from variant UNION
+        SELECT regexp_split_to_table(lower("Genomic_Coordinate_hg36"), '[\s+|''"]') as word from variant UNION
         SELECT regexp_split_to_table(lower("Condition_category_ENIGMA"), '[\s+|''"]') as word from variant UNION
         SELECT regexp_split_to_table(lower("Clinical_significance_ENIGMA"), '[\s+|''"]') as word from variant UNION
         SELECT regexp_split_to_table(lower("Gene_Symbol"), '[\s+|''"]') as word from variant UNION

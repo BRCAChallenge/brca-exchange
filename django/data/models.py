@@ -7,7 +7,6 @@ class VariantManager(models.Manager):
 
 
 class Variant(models.Model):
-
     Variant_in_ENIGMA = models.BooleanField(default=False)
     Variant_in_ClinVar = models.BooleanField(default=False)
     Variant_in_1000_Genomes = models.BooleanField(default=False)
@@ -18,7 +17,6 @@ class Variant(models.Model):
     Variant_in_exLOVD = models.BooleanField(default=False)
 
     Source = models.TextField()
-    Genomic_Coordinate = models.TextField()
     URL_ENIGMA = models.TextField()
     Condition_ID_type_ENIGMA = models.TextField()
     Condition_ID_value_ENIGMA = models.TextField()
@@ -76,11 +74,14 @@ class Variant(models.Model):
     HGVS_Protein = models.TextField()
     Protein_Change = models.TextField()
     Allele_Frequency = models.TextField()
+    Genomic_Coordinate_hg38 = models.TextField()
     Genomic_Coordinate_hg37 = models.TextField()
     Genomic_Coordinate_hg36 = models.TextField()
     Source_URL = models.TextField()
     Discordant = models.TextField()
     Other_HGVS_cDNA = models.TextField()
+    Pathogenicity_default = models.TextField()
+    Pathogenicity_research = models.TextField()
 
     objects = VariantManager()
 
