@@ -80,7 +80,7 @@ var columns = [
     {title: 'Nucleotide', prop: 'HGVS_cDNA'},
     {title: 'Protein', prop: 'HGVS_Protein'},
     {title: 'Pathogenicity', prop: 'Pathogenicity_default'},
-    {title: 'Alternate Identifier (BIC Identifier)', prop: "BIC_Identifier"}
+    {title: 'Source URL(s)', prop: 'Source_URL'},
 ];
 
 var research_mode_columns = [
