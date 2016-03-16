@@ -420,18 +420,18 @@ var ResearchVariantTableSupplier = function (Component) {
         },
         getAdvancedFilters() {
             var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
-                <Col sm={6} md={3}>
+                <Col sm={6} md={3} key={name}>
                     <div>
                         <ColumnCheckbox
                             onChange={v => this.toggleSource(name)}
-                            key={name} label={name}
+                            label={name}
                             title={name.substring(11).replace(/_/g," ")} // eg "Variant_in_1000_Genomes" => "1000 Genomes"
                             initialCheck={this.state.sourceSelection}/>
                     </div>
                 </Col>
             );
             var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
-                <Col sm={6} md={4}>
+                <Col sm={6} md={4} key={subColTitle}>
                     <Panel header={subColTitle}>
                         {this.filterFormCols(subColList, this.state.columnSelection)}
                     </Panel>
@@ -447,7 +447,7 @@ var ResearchVariantTableSupplier = function (Component) {
             </label>);
         },
         getDownloadButton: function (callback) {
-            return <Button className="btn-sm" download="variants.csv" href={callback()}>Download</Button>;
+            return <Button className="btn-sm" download="variants.csv" onClick={callback()}>Download</Button>;
         },
         getLollipopButton: function (callback, isOpen) {
             return <Button className="btn-sm"
