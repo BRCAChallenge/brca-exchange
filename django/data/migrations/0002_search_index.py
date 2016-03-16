@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             fts_document TEXT;
         BEGIN
             SELECT concat_ws(' ',
-                v."Genomic_Coordinate",
+                v."Source",
                 v."URL_ENIGMA",
                 v."Condition_ID_type_ENIGMA",
                 v."Condition_ID_value_ENIGMA",
@@ -75,11 +75,14 @@ class Migration(migrations.Migration):
                 v."HGVS_Protein",
                 v."Protein_Change",
                 v."Allele_Frequency",
+                v."Genomic_Coordinate_hg38",
                 v."Genomic_Coordinate_hg37",
                 v."Genomic_Coordinate_hg36",
                 v."Source_URL",
                 v."Discordant",
-                v."Other_HGVS_cDNA")
+                v."Other_HGVS_cDNA",
+                v."Pathogenicity_default",
+                v."Pathogenicity_research")
     INTO fts_document;
             RETURN to_tsvector('pg_catalog.simple', fts_document);
     END;

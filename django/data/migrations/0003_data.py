@@ -12,20 +12,17 @@ from data.models import Variant
 
 
 def load_from_csv(apps, schema_editor):
-    file_path = os.path.join(settings.BASE_DIR, 'data', 'resources', 'merged_v5.csv')
-    with open(file_path) as csv_file:
-        reader = csv.reader(csv_file)
+    file_path = os.path.join(settings.BASE_DIR, 'data', 'resources', 'aggregated.tsv')
+    with open(file_path) as tsv_file:
+        reader = csv.reader(tsv_file, dialect="excel-tab")
         header = reader.next()
-
-        source_column = header.index("Source")
 
         for row in reader:
 
             # split Source column into booleans
-            row_dict = dict(zip(header,row))
-            for source in row_dict['Source'].split('|'):
-                row_dict['Variant_in_'+source] = True
-
+            row_dict = dict(zip(header, row))
+            for source in row_dict['Source'].split(','):
+                row_dict['Variant_in_' + source] = True
             Variant.objects.create_variant(row_dict)
 
 

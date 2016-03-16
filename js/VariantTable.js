@@ -76,41 +76,31 @@ var filterColumns = [
 
 var columns = [
     {title: 'Gene', prop: 'Gene_Symbol'},
-    {title: 'Identifier', prop: 'HGVS_cDNA'},
-    {title: 'Alternate Identifier', prop: 'Genomic_Coordinate'},
-    {title: 'Pathogenicity', prop: 'Clinical_significance_ENIGMA'},
-    {title: 'Alternate Identifier (HGVS Protein)', prop: 'HGVS_Protein'},
+    {title: 'Genomic (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
+    {title: 'Nucleotide', prop: 'HGVS_cDNA'},
+    {title: 'Protein', prop: 'HGVS_Protein'},
+    {title: 'Pathogenicity', prop: 'Pathogenicity_default'},
     {title: 'Alternate Identifier (BIC Identifier)', prop: "BIC_Identifier"}
 ];
 
 var research_mode_columns = [
 
     {title: 'Gene Symbol', prop: 'Gene_Symbol'},
-    {title: 'Genomic (GRCh38)', prop: 'Genomic_Coordinate'},
-    {title: 'Genomic (GRCh36)', prop: 'Genomic_Coordinate_hg36'},
-    {title: 'Genomic (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
+    {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36'},
+    {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
+    {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
 
     {title: 'Mutation category (BIC)', prop: 'Mutation_type_BIC'},
     {title: 'PolyPhen score', prop: 'PolyPhen_VEP'},
     {title: 'SIFT score', prop: 'SIFT_VEP'},
 
-    {title: 'African Allele Frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes'},
-    {title: 'Allele Frequency', prop: 'Allele_Frequency'},
-    {title: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes'},
-    {title: 'Allele Frequency (ExAC)', prop: 'Allele_frequency_ExAC'},
-    {title: 'AMR Allele Frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes'},
-    {title: 'EAS Allele Frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes'},
-    {title: 'EUR Allele Frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes'},
-    {title: 'Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP'},
-    {title: 'South Asian Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes'},
-    {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'},
 
     {title: 'BIC Variant Identifier', prop: 'BIC_Identifier'},
-    {title: 'HGVS Protein', prop: 'HGVS_Protein'},
+    {title: 'Nucleotide', prop: 'HGVS_cDNA'},
+    {title: 'Protein', prop: 'HGVS_Protein'},
     {title: 'SCV Accession (ClinVar)', prop: 'SCV_ClinVar'},
     {title: 'Source(s)', prop: 'Source'},
     {title: 'Source URL(s)', prop: 'Source_URL'},
-    {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA'},
     {title: 'Other HGVS Nucleotide(s)', prop: 'Other_HGVS_cDNA'},
     {title: 'Protein Amino Acid Change', prop: 'Protein_Change'},
     {title: 'Reference cDNA Sequence', prop: 'Reference_Sequence'},
@@ -136,6 +126,7 @@ var research_mode_columns = [
     {title: 'Clinical Significance Citation (ENIGMA)', prop: 'Clinical_significance_citations_ENIGMA'},
     {title: 'Literature Reference (BIC)', prop: 'Literature_citation_BIC'},
     {title: 'Literature Reference (exLOVD)', prop: 'Literature_source_exLOVD'},
+    {title: 'Pathogenicity', prop: 'Pathogenicity_research'},
 
     {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_ENIGMA'},
     {title: 'Clinical Significance (BIC)', prop: 'Clinical_classification_BIC'},
@@ -156,7 +147,19 @@ var research_mode_columns = [
     {title: 'Condition ID Type (ENIGMA)', prop: 'Condition_ID_type_ENIGMA'},
     {title: 'Condition ID Value (ENIGMA)', prop: 'Condition_ID_value_ENIGMA'},
     {title: 'Submitter (ClinVar)', prop: 'Submitter_ClinVar'},
-    {title: 'URL (ENIGMA)', prop: 'URL_ENIGMA'}
+    {title: 'URL (ENIGMA)', prop: 'URL_ENIGMA'},
+
+    {title: 'African Allele Frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes'},
+    {title: 'Allele Frequency', prop: 'Allele_Frequency'},
+    {title: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes'},
+    {title: 'Allele Frequency (ExAC)', prop: 'Allele_frequency_ExAC'},
+    {title: 'AMR Allele Frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes'},
+    {title: 'EAS Allele Frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes'},
+    {title: 'EUR Allele Frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes'},
+    {title: 'Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP'},
+    {title: 'South Asian Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes'},
+    {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'}
+
 ];
 
 var subColumns = [
@@ -187,7 +190,7 @@ var subColumns = [
         subColTitle: "General",
         subColList: [
             {title: 'BIC Variant Identifier', prop: 'BIC_Identifier', render: renderCell},
-            {title: 'HGVS Protein', prop: 'HGVS_Protein', render: renderCell},
+            {title: 'Protein', prop: 'HGVS_Protein', render: renderCell},
             {title: 'SCV Accession (ClinVar)', prop: 'SCV_ClinVar', render: renderCell},
             {title: 'Source(s)', prop: 'Source', render: renderCell},
             {title: 'Source URL(s)', prop: 'Source_URL', render: renderCell},
@@ -201,9 +204,9 @@ var subColumns = [
         subColTitle: "Genomic",
         subColList: [
             {title: 'Gene Symbol', prop: 'Gene_Symbol', render: renderCell},
-            {title: 'Genomic (GRCh38)', prop: 'Genomic_Coordinate', render: renderCell},
-            {title: 'Genomic (GRCh36)', prop: 'Genomic_Coordinate_hg36', render: renderCell},
-            {title: 'Genomic (GRCh37)', prop: 'Genomic_Coordinate_hg37', render: renderCell}
+            {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38', render: renderCell},
+            {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36', render: renderCell},
+            {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37', render: renderCell}
         ]
     },
     {
@@ -275,8 +278,8 @@ var subColumns = [
     }
 ];
 
-var defaultColumns = ['Gene_Symbol', 'HGVS_cDNA', 'Genomic_Coordinate', 'Clinical_significance_ENIGMA'];
-var defaultResearchColumns = ['Gene_Symbol', 'HGVS_cDNA', 'Genomic_Coordinate', 'HGVS_Protein', 'BIC_Identifier', 'Clinical_significance_ENIGMA'];
+var defaultColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_default'];
+var defaultResearchColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_research', 'Discordant', 'Allele_Frequency'];
 
 var allSources = {
     Variant_in_ENIGMA: true,
