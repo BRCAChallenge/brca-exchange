@@ -272,6 +272,7 @@ var subColumns = [
     {
         subColTitle: "Significance",
         subColList: [
+            {title: 'Pathogenicity', prop: 'Pathogenicity_research', render: renderCell},
             {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_ENIGMA', render: renderCell},
             {title: 'Clinical Significance (BIC)', prop: 'Clinical_classification_BIC', render: renderCell},
             {title: 'Clinical Importance (BIC)', prop: 'Clinical_importance_BIC', render: renderCell},
