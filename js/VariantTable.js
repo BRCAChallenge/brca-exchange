@@ -94,23 +94,13 @@ var research_mode_columns = [
     {title: 'PolyPhen score', prop: 'PolyPhen_VEP'},
     {title: 'SIFT score', prop: 'SIFT_VEP'},
 
-    {title: 'African Allele Frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes'},
-    {title: 'Allele Frequency', prop: 'Allele_Frequency'},
-    {title: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes'},
-    {title: 'Allele Frequency (ExAC)', prop: 'Allele_frequency_ExAC'},
-    {title: 'AMR Allele Frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes'},
-    {title: 'EAS Allele Frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes'},
-    {title: 'EUR Allele Frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes'},
-    {title: 'Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP'},
-    {title: 'South Asian Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes'},
-    {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'},
 
     {title: 'BIC Variant Identifier', prop: 'BIC_Identifier'},
-    {title: 'HGVS Protein', prop: 'HGVS_Protein'},
+    {title: 'Nucleotide', prop: 'HGVS_cDNA'},
+    {title: 'Protein', prop: 'HGVS_Protein'},
     {title: 'SCV Accession (ClinVar)', prop: 'SCV_ClinVar'},
     {title: 'Source(s)', prop: 'Source'},
     {title: 'Source URL(s)', prop: 'Source_URL'},
-    {title: 'Nucleotide', prop: 'HGVS_cDNA'},
     {title: 'Other HGVS Nucleotide(s)', prop: 'Other_HGVS_cDNA'},
     {title: 'Protein Amino Acid Change', prop: 'Protein_Change'},
     {title: 'Reference cDNA Sequence', prop: 'Reference_Sequence'},
@@ -136,6 +126,7 @@ var research_mode_columns = [
     {title: 'Clinical Significance Citation (ENIGMA)', prop: 'Clinical_significance_citations_ENIGMA'},
     {title: 'Literature Reference (BIC)', prop: 'Literature_citation_BIC'},
     {title: 'Literature Reference (exLOVD)', prop: 'Literature_source_exLOVD'},
+    {title: 'Pathogenicity', prop: 'Pathogenicity_research'},
 
     {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_ENIGMA'},
     {title: 'Clinical Significance (BIC)', prop: 'Clinical_classification_BIC'},
@@ -158,8 +149,17 @@ var research_mode_columns = [
     {title: 'Submitter (ClinVar)', prop: 'Submitter_ClinVar'},
     {title: 'URL (ENIGMA)', prop: 'URL_ENIGMA'},
 
-    {title: 'Pathogenicity', prop: 'Pathogenicity_default'},
-    {title: 'Pathogenicity', prop: 'Pathogenicity_research'}
+    {title: 'African Allele Frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes'},
+    {title: 'Allele Frequency', prop: 'Allele_Frequency'},
+    {title: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes'},
+    {title: 'Allele Frequency (ExAC)', prop: 'Allele_frequency_ExAC'},
+    {title: 'AMR Allele Frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes'},
+    {title: 'EAS Allele Frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes'},
+    {title: 'EUR Allele Frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes'},
+    {title: 'Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP'},
+    {title: 'South Asian Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes'},
+    {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'}
+
 ];
 
 var subColumns = [
@@ -190,7 +190,7 @@ var subColumns = [
         subColTitle: "General",
         subColList: [
             {title: 'BIC Variant Identifier', prop: 'BIC_Identifier', render: renderCell},
-            {title: 'HGVS Protein', prop: 'HGVS_Protein', render: renderCell},
+            {title: 'Protein', prop: 'HGVS_Protein', render: renderCell},
             {title: 'SCV Accession (ClinVar)', prop: 'SCV_ClinVar', render: renderCell},
             {title: 'Source(s)', prop: 'Source', render: renderCell},
             {title: 'Source URL(s)', prop: 'Source_URL', render: renderCell},
