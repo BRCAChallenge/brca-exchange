@@ -126,11 +126,11 @@ def main():
 def string_comparison_merge(variants):
     # make sure the input genomic coordinate strings are already unique strings
     assert (len(variants.keys()) == len(set(variants.keys())))
-    equivalence = find_equivalent_variant(variants.keys())
-    with open(ARGS.ev, "w") as f:
-        f.write(pickle.dumps(equivalence))
-    f.close()
-    #equivalence = pickle.loads(open("dumps", "r").read())
+    #equivalence = find_equivalent_variant(variants.keys())
+    #with open(ARGS.ev, "w") as f:
+    #    f.write(pickle.dumps(equivalence))
+    #f.close()
+    equivalence = pickle.loads(open(ARGS.ev, "r").read())
     for equivalent_v in equivalence:
         merged_row = []
         for each_v in equivalent_v:
@@ -164,7 +164,6 @@ def find_equivalent_variant(genome_coors):
                 if variant_equal(v1.split(":"), v2.split(":")):
                     variant_exist = True
                     uniq_variants[existing_v].add(v)
-                    print "these two variants are equivalent", v1, v2
         if not variant_exist:
             uniq_variants[v] = set([v])
     equivalent_variants = [] 
