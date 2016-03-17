@@ -447,7 +447,7 @@ var ResearchVariantTableSupplier = function (Component) {
             </label>);
         },
         getDownloadButton: function (callback) {
-            return <Button className="btn-sm" download="variants.csv" onClick={callback()}>Download</Button>;
+            return <Button className="btn-sm" download="variants.csv" href={callback()}>Download</Button>;
         },
         getLollipopButton: function (callback, isOpen) {
             return <Button className="btn-sm"
