@@ -25,12 +25,12 @@ d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id, varlink, data) {
     var maxPos = 1;
     if (id === 'BRCA1') {
         xAxisLabel = 'BRCA1 Genomic Pos (chr 17)';
-        minPos = 41190000;
-        maxPos = 41280000;
+        minPos = 43039471;
+        maxPos = 43127867;
     } else if (id === 'BRCA2') {
         xAxisLabel = 'BRCA2 Genomic Pos (chr 13)';
-        minPos = 32880000;
-        maxPos = 32980000;
+        minPos = 32314943;
+        maxPos = 32400000;
     }
     var legends = {x: xAxisLabel, y: ""};
     var colorMap = {
@@ -66,10 +66,10 @@ var D3Lollipop = React.createClass({
         } else {
             chrCoordinate = String(chrCoordinate);
         }
-//        console.log(oldObj);
-//        if (oldObj.Pathogenicity_default == '-'){
-//            oldObj.Pathogenicity_default = "Unknown";
-//        }
+
+        if (oldObj.Pathogenicity_default == 'Not Yet Classified'){
+            oldObj.Pathogenicity_default = "Unknown";
+        }
         var newObj = {category: oldObj.Pathogenicity_default, coord: chrCoordinate, value: 1, oldData: obj};
         return newObj;
     },
