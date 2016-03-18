@@ -8,45 +8,34 @@ To search just start typing a variant in the search box and it will auto complet
 
 The Gene column displays the name of the gene on which the variant was found.  This will be either BRCA1 or BRCA2.
 
-#### HGVS cDNA
 
-Nucleotide change expressed according to nomenclature used by [BIC](http://research.nhgri.nih.gov/bic/), namely using nucleotide numbering from nucleotide 1 of the full gene sequence (Genbank: U14680/ BRCA1; U43746/ BRCA2) not the ATG initiator codon, and without renaming of the BRCA1 185del AG and the BRCA1 5382insC mutations, following the universal use of the incorrect base numbers in the literature.  For example, _c.15A>G_ indicates a change of _A_ to _G_ in nucleotide position 15.
+#### Genomic (GRCh38)
+Coordinate of the variant on the GRCh38 reference genome
 
-#### HGVS Protein
+#### Nucleotide
+HGVS string that represents the variant at cDNA nucleotide level
 
+#### Protein
 The protein-level change (if any) that would be introduced by this variant.  HGVS notation indicates the position of the variant within the reference protein sequence, and the change that would be introduced by this variant.  For example, _p.(Tyr15His)_ indicates a change of _Tyr_ (Tyrosine) to _His_ (Histidine) at amino acid 15.  The notation _p.?_ indicates a variant is not within the protein-coding portions of the gene.
 
-#### BIC Nucleotide
-
-Nucleotide change expressed according to nomenclature used by BIC ([http://research.nhgri.nih.gov/bic/](http://research.nhgri.nih.gov/bic/)), namely using nucleotide numbering from the first nucleotide of the full gene sequence, in contrast to HGVS notation which begins numbering relative to the start of the protein-coding portion of the sequence. 
-
-#### BIC Protein
-
-Protein amino acid change expressed according to nomenclature used by BIC ([http://research.nhgri.nih.gov/bic/](http://research.nhgri.nih.gov/bic/)).  When this column is blank, it indicates that the variant is not in a protein-coding position within the gene. 
-
-#### Genomic Coordinate
-
-Position of the variant in the reference genome, relative to the positive DNA strand.
-
-
 #### Pathogenicity
-The Pathogenicity column indicates whether expert curators have determined if the variant is pathogenic or benign. 
+The Pathogenicity column indicates whether expert curators have determined if the variant is pathogenic or benign.
 
-##### What do these classifications mean?
-- *Pathogenic variants* confer an increased risk of disease. 
+##### _What do these classifications mean?_
+- *Pathogenic variants* confer an increased risk of disease.
 - *Likely pathogenic variants* have good evidence to support an association with disease risk.
 - *Likely benign variants* have good evidence to support no association with disease risk.
 - *Benign variants* are not associated with any markedly increased risk of disease.
 - *Variants of uncertain significance (VUS)* are those for which the evidence of disease risk is not clear yet, sometimes because there is not yet enough evidence to classify them as either pathogenic or benign.
 
-##### My variant is classified pathogenic. What do I do now?
+##### _My variant is classified pathogenic. What do I do now?_
 This website is not intended to provide a clinical diagnosis. Please contact your primary care provider to determine what steps may be necessary.
 
-#### Source
 
-The variants shown on this site are stored in larger genomic variant databases.  One major variant datase is [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/).  This column gives the variant's ID in the ClinVar database, and contains hyperlinks showing the variant in ClinVar.
+#### Source URL(s)
+URL(s) pointing back to the original source data
 
- 
+
 # Variant Detail Page Glossary
 
 #### Gene symbol
