@@ -46,12 +46,13 @@ var FastTable = React.createClass({
 });
 
 // Merge new state (e.g. initialState) with existing state,
-// deep-merging columnSelect.
+// deep-merging fields that are objects.
 function mergeState(state, newState) {
-    var {columnSelection, sourceSelection, ...otherProps} = newState,
+    var {columnSelection, sourceSelection, filterValues, ...otherProps} = newState,
         cs = {...state.columnSelection, ...columnSelection},
-        ss = {...state.sourceSelection, ...sourceSelection};
-    return {...state, columnSelection: cs, sourceSelection: ss, ...otherProps};
+        ss = {...state.sourceSelection, ...sourceSelection},
+        fv = {...state.filterValues, ...filterValues};
+    return {...state, columnSelection: cs, sourceSelection: ss, filterValues: fv, ...otherProps};
 }
 
 var DataTable = React.createClass({
@@ -142,7 +143,7 @@ var DataTable = React.createClass({
     // helper function that sets state, fetches new data,
     // and updates url.
     setStateFetch: function (opts) {
-        var newState = {...this.state, ...opts};
+        var newState = mergeState(this.state, opts);
         this.setState(newState);
         this.fetch(newState);
         this.props.onChange(newState);
