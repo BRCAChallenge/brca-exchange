@@ -25,7 +25,6 @@ BRCA2 = {"hg38": {"start": 32300000,
   
 #GENOMIC VERSION:
 VERSION = "hg38" # equivalent to GRCh38
-WRONG_GENOME = "/hive/groups/cgl/brca/release1.0/vcf_wrong_genome_coordinate/"
 
 
 # files needed for string comparison
@@ -83,8 +82,6 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
                "ESP": ESP_FIELDS,
                "BIC": BIC_FIELDS}
 
-PIPELINE_INPUT = "/hive/groups/cgl/brca/release1.0/pipeline_input_old/"
-
 ENIGMA_FILE = "enigma_variants_GRCh38_2-27-2016.tsv"
 GENOME1K_FILE = "10k_genome.brca.sorted.hg38.vcf"
 CLINVAR_FILE = "ClinVarBrca.vcf"
@@ -96,10 +93,16 @@ ESP_FILE = "esp.brca.vcf"
 
 
 parser = argparse.ArgumentParser()
+parser.add_argument("-i", "--input", help="Input VCF directory",
+                    default="/hive/groups/cgl/brca/release1.0/pipeline_input/")
 parser.add_argument("-o", "--output", 
                     default="/hive/groups/cgl/brca/release1.0/merged.csv")
 parser.add_argument("-e", "--ev", 
                     default="/hive/groups/cgl/brca/release1.0/equivalent_variants.pickledumps")
+parser.add_argument("-w", "--wrong_genome", 
+                    help="Directory for data with  wrong genomic coordinates",
+                    default="/hive/groups/cgl/brca/release1.0/vcf_wrong_genome_coordinate/")
+
 ARGS = parser.parse_args()
 
 
@@ -116,10 +119,10 @@ def main():
         print "------------string comparison merge-------------------------------"
         variants = string_comparison_merge(variants) 
         write_new_csv(ARGS.output, columns, variants)
-        print "PIPELINE OUTPUT: "
+        print ARGS.input
         print ARGS.output
         print ARGS.ev
-        print WRONG_GENOME
+        print ARGS.wrong_genome
     finally:
         shutil.rmtree(tmp_dir)
 
@@ -182,21 +185,21 @@ def preprocessing(tmp_dir):
                    "ESP": ESP_FILE,
                    "BIC": BIC_FILE,
                    }    
-    print "\nPIPELINE INPUT:"
+    print "\n" + ARGS.input + ":"
     print "ENIGMA: {0}".format(ENIGMA_FILE)
     for source_name, file_name in source_dict.iteritems():
         print source_name, ":", file_name
     print "------------preprocessing--------------------------------"
     print "remove sample columns and two erroneous rows from 1000 Genome file"
-    f_1000G = open(PIPELINE_INPUT + GENOME1K_FILE + "for_pipeline", "w")
+    f_1000G = open(ARGS.input + GENOME1K_FILE + "for_pipeline", "w")
     subprocess.call(
-       ["bash", "1000g_preprocess.sh", PIPELINE_INPUT + GENOME1K_FILE], stdout=f_1000G)
+       ["bash", "1000g_preprocess.sh", ARGS.input + GENOME1K_FILE], stdout=f_1000G)
     
     print "-------check if genomic coordinates are correct----------"
-    (columns, variants) = save_enigma_to_dict(PIPELINE_INPUT + ENIGMA_FILE)
+    (columns, variants) = save_enigma_to_dict(ARGS.input + ENIGMA_FILE)
     for source_name, file_name in source_dict.iteritems():
-        f = open(PIPELINE_INPUT + file_name, "r")
-        f_wrong = open(WRONG_GENOME + source_name + "_wrong_genome_coor.vcf", "w")
+        f = open(ARGS.input + file_name, "r")
+        f_wrong = open(args.wg + source_name + "_wrong_genome_coor.vcf", "w")
         f_right = open(tmp_dir + "/right" + source_name, "w")
         vcf_reader = vcf.Reader(f, strict_whitespace=True)
         vcf_wrong_writer = vcf.Writer(f_wrong, vcf_reader)
@@ -213,7 +216,7 @@ def preprocessing(tmp_dir):
         f_right.close()
         f_wrong.close()
         print "in {0}, wrong: {1}, total: {2}".format(source_name, n_wrong, n_total) 
-    print "variants with wrong genomic coordates are saved to:", WRONG_GENOME
+    print "variants with wrong genomic coordates are saved to:", ARGS.wrong_genome
     print "---------------------------------------------------------"
     
     for source_name, file_name in source_dict.iteritems():
@@ -359,7 +362,7 @@ def save_enigma_to_dict(path):
     variants = dict()
     columns = ""
     line_num = 0
-    f_wrong = open(WRONG_GENOME + "ENIGMA_wrong_genome.txt", "w")
+    f_wrong = open(ARGS.wrong_genome + "ENIGMA_wrong_genome.txt", "w")
     n_wrong, n_total = 0, 0
     for line in enigma_file:
         line_num += 1
