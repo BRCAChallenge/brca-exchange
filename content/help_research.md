@@ -80,13 +80,13 @@ Sequence on which the variant was observed
 #### Gene Symbol
 Gene that the variant maps to (BRCA1 or BRCA2).
 
-#### Genomic (GRCh38)
+#### Genome (GRCh38)
 Coordinate of the variant on the GRCh38 reference genome
 
-#### Genomic (GRCh36)
+#### Genome (GRCh36)
 Coordinate of the variant on the GRCh36 reference genome
 
-#### Genomic (GRCh37)
+#### Genome (GRCh37)
 Coordinate of the variant on the GRCh37 reference genome
 
 #### Allele Origin (ClinVar)
