@@ -4,29 +4,40 @@ Fork the repository, make the changes, and submit pull request.
 
 ## Build the frontend
 The build is based on npm and webpack.
- * Ensure that git and node are installed
+* **Ensure that git and node are installed**
    * On OSX, install brew http://brew.sh/
-   * `brew install git`
-   * `brew install node`
- * `git clone https://github.com/BD2KGenomics/brca-website.git`
- * `cd brca-website`
- * `npm install`
- * `npm start`
- * browse to [http://localhost:8080/webpack-dev-server/](http://localhost:8080/webpack-dev-server/)
+       * `brew install git`
+       * `brew install node`
+   * On Linux:
+        * `sudo apt-get install git-all`    
+        * `curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -`
+        * `sudo apt-get install -y nodejs`
+* **Checkout the repo**
+   * `git clone https://github.com/BD2KGenomics/brca-website.git`
+* **Start the frontend**
+   * `cd brca-website`
+   * `npm install`
+   * `npm start`
 
 ## Build the server
 The server runs on Django with postgres so install and set up those
- * `pip install django`
- * `sudo apt-get install postgresql postgresql-contrib`
- * `sudo -u postgres createdb storage.pg`
-
-Then run the initial migration to populate postgres
- * `cd django`
- * `django manage.py migrate`
- * `django manage.py runserver`
-
-To point the frontend at the local server
- * Edit url in js/backend.js to point to localhost:8000
+* **Install postgres** 
+   * For Mac:
+       * The easiest way is to install postgress.app from http://postgresapp.com/
+   * Linux: 
+       * `sudo apt-get install postgresql postgresql-contrib`
+* **Create the database** 
+   * `sudo -u postgres createdb  storage.pg`
+* **Install the python dependencies**
+   * `pip install -qU -r requirements.txt`
+* **Run the initial migration to populate the database**
+   * `cd django`
+   * `django manage.py migrate`
+* **Start the server**
+   * `django manage.py runserver`
+* If you're developing locally point the frontend at the local server
+   * Edit databaseUrl in `js/backend.js` to point to `localhost:8000`
+* **Browse to [http://localhost:8080/](http://localhost:8080/)**
 
 ### Lint
 
