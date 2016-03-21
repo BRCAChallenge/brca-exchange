@@ -42,6 +42,7 @@ CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "Date_Last_Updated":"DateLastUpdated",
                   "SCV":"SCV",
                   "Allele_Origin":"Origin",
+                  "Protein":"Protein",
                   "Method":"Method"}
 LOVD_FIELDS = {"Origin_of_variant": "genetic_origin",
                "Variant_frequency": "frequency",
@@ -199,7 +200,7 @@ def preprocessing(tmp_dir):
     (columns, variants) = save_enigma_to_dict(ARGS.input + ENIGMA_FILE)
     for source_name, file_name in source_dict.iteritems():
         f = open(ARGS.input + file_name, "r")
-        f_wrong = open(args.wg + source_name + "_wrong_genome_coor.vcf", "w")
+        f_wrong = open(ARGS.wrong_genome + source_name + "_wrong_genome_coor.vcf", "w")
         f_right = open(tmp_dir + "/right" + source_name, "w")
         vcf_reader = vcf.Reader(f, strict_whitespace=True)
         vcf_wrong_writer = vcf.Writer(f_wrong, vcf_reader)

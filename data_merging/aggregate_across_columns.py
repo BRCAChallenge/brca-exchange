@@ -8,7 +8,7 @@ EMPTY = "-"
 FIELDS_TO_REMOVE=["Gene_symbol(ENIGMA)", "Genomic_Coordinate",
                   "Reference_sequence(ENIGMA)", "HGVS_cDNA(ENIGMA)",
                   "BIC_Nomenclature(ENIGMA)", "Abbrev_AA_change(ENIGMA)",
-                  "HGVS_protein(ENIGMA)", 
+                  "HGVS_protein(ENIGMA)", "Protein(ClinVar)",
                   "HGVS(ClinVar)", "HGVS_cDNA(LOVD)", "HGVS_cDNA(exLOVD)",
                   "HGVS_protein(LOVD)", "HGVS_protein(exLOVD)",
                   "polyPhen2_result(ESP)", 
@@ -16,9 +16,10 @@ FIELDS_TO_REMOVE=["Gene_symbol(ENIGMA)", "Genomic_Coordinate",
 FIELDS_TO_ADD=["Gene_Symbol", "Reference_Sequence",
                "HGVS_cDNA", "BIC_Identifier", "HGVS_Protein", 
                "Protein_Change", "Allele_Frequency", 
+               "Max_Allele_Frequency",
                "Genomic_Coordinate_hg38",
                "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg36", 
-               "Source_URL", "Discordant", "Other_HGVS_cDNA",
+               "Source_URL", "Discordant", "Synonyms",
                "Pathogenicity_default", "Pathogenicity_research"]
 
 def main():
@@ -69,6 +70,7 @@ def updateRow(row, toRemove):
     newRow = update_basic_fields(newRow)
     newRow = hgvsUpdate(newRow)
     newRow["Allele_Frequency"] = selectAlleleFrequency(newRow)
+    newRow["Max_Allele_Frequency"] = selectMaxAlleleFrequency(newRow)
     newRow["Discordant"] = checkDiscordantStatus(newRow)
     newRow["Genomic_Coordinate_hg37"] = EMPTY
     newRow["Genomic_Coordinate_hg36"] = EMPTY
@@ -91,6 +93,8 @@ def update_basic_fields(row):
     row["BIC_Identifier"] = row["BIC_Nomenclature(ENIGMA)"]
     row["HGVS_Protein"] = row["HGVS_protein(ENIGMA)"]
     if row["HGVS_Protein"] == EMPTY:
+        row["HGVS_Protein"] = row["Protein(ClinVar)"]
+    if row["HGVS_Protein"] == EMPTY:
         row["HGVS_Protein"] = row["HGVS_protein(LOVD)"]
     if row["HGVS_Protein"] == EMPTY:
         row["HGVS_Protein"] = row["HGVS_protein(exLOVD)"]
@@ -100,6 +104,8 @@ def update_basic_fields(row):
     row["Pathogenicity_default"] = row["Clinical_significance(ENIGMA)"]
     if row["Pathogenicity_default"] == EMPTY:
         row["Pathogenicity_default"] = "Not Yet Classified"
+    if row["Pathogenicity_default"] == "Benign":
+        row["Pathogenicity_default"] = "Benign / Little Clinical Significance"
     patho_research = ""
     delimiter = ""
     if row["Clinical_significance(ENIGMA)"] != EMPTY:
@@ -166,27 +172,80 @@ def selectAlleleFrequency(row):
     else:
         return EMPTY
 
+def selectMaxAlleleFrequency(newRow):
+    maxFreq = 0
+    maxFreqString = EMPTY
+    if newRow["Minor_allele_frequency(ESP)"] != EMPTY:
+        #print newRow["Minor_allele_frequency(ESP)"]
+        tokens = newRow["Minor_allele_frequency(ESP)"].split(",")
+        if len(tokens) >= 1:
+            ea = float(tokens[0]) / 100
+            if ea > maxFreq:
+                maxFreq = ea
+                maxFreqString = "%f (EA from ESP)" % ea
+        if len(tokens) > 2:
+            aa = float(tokens[1]) / 100
+            if aa >= maxFreq:
+                maxFreq = aa
+                maxFreqString = "%f (AA from ESP)" % aa
+    if newRow["EUR_Allele_frequency(1000_Genomes)"] != EMPTY:
+        eur_af = float(newRow["EUR_Allele_frequency(1000_Genomes)"])
+        if eur_af > maxFreq:
+            maxFreq = eur_af
+            maxFreqString = "%f (EUR from 1000 Genomes)" % eur_af
+    if newRow["AFR_Allele_frequency(1000_Genomes)"] != EMPTY:
+        afr_af = float(newRow["AFR_Allele_frequency(1000_Genomes)"])
+        if afr_af > maxFreq:
+            maxFreq = afr_af
+            maxFreqString = "%f (AFR from 1000 Genomes)" % afr_af
+    if newRow["AMR_Allele_frequency(1000_Genomes)"] != EMPTY:
+        amr_af = float(newRow["AMR_Allele_frequency(1000_Genomes)"])
+        if amr_af > maxFreq:
+            maxFreq = amr_af
+            maxFreqString = "%f (AMR from 1000 Genomes)" % amr_af
+    if newRow["EAS_Allele_frequency(1000_Genomes)"] != EMPTY:
+        eas_af = float(newRow["EAS_Allele_frequency(1000_Genomes)"])
+        if eas_af > maxFreq:
+            maxFreq = eas_af
+            maxFreqString = "%f (EAS from 1000 Genomes)" % eas_af
+    if newRow["SAS_Allele_frequency(1000_Genomes)"] != EMPTY:
+        sas_af = float(newRow["SAS_Allele_frequency(1000_Genomes)"])
+        if sas_af > maxFreq:
+            maxFreq = sas_af
+            maxFreqString = "%f (SAS from 1000 Genomes)" % sas_af
+    return(maxFreqString)
+
 
 def checkDiscordantStatus(row):
     hasPathogenicClassification = False
-    if re.search("pathogenic", row["Clinical_Significance(ClinVar)"].lower()):
-        hasPathogenicClassification = True
-    if re.search("pathogenic", row["Clinical_significance(ENIGMA)"].lower()):
-        hasPathogenicClassification = True
-    if re.search("pathologic", row["Clinical_Significance(ClinVar)"].lower()):
-        hasPathogenicClassification = True
-    if re.search("class 5", row["Clinical_classification(BIC)"].lower()):
-        hasPathogenicClassification = True
     hasBenignClassification = False
-    if re.search("benign", row["Clinical_Significance(ClinVar)"].lower()):
-        hasBenignClassification = True
-    if re.search("no_known_pathogenicity", 
-                 row["Clinical_Significance(ClinVar)"].lower()):
-        hasBenignClassification = True
-    if re.search("benign", row["Clinical_significance(ENIGMA)"].lower()):
-        hasBenignClassification = True
-    if re.search("class 1", row["Clinical_classification(BIC)"].lower()):
-        hasBenignClassification = True
+    for column in (row["Clinical_Significance(ClinVar)"], row["Clinical_significance(ENIGMA)"]):
+        for item in column.split(","):
+            if re.search("^pathogenic$", item.lower()):
+                hasPathogenicClassification = True
+            if re.search("^pathologic$", item.lower()):
+                hasPathogenicClassification = True
+            if re.search("^likely_pathogenic$", item.lower()):
+                hasPathogenicClassification = True
+            if re.search("^probable_pathogenic$", item.lower()):
+                hasPathogenicClassification = True
+            if re.search("^benign$", item.lower()):
+                hasBenignClassification = True
+            if re.search("^probably_not_pathogenic$", item.lower()):
+                hasBenignClassification = True
+            if re.search("^likely_benign$", item.lower()):
+                hasBenignClassification = True
+            if re.search("^no_known_pathogenicity$", item.lower()):
+                hasBenignClassification = True
+            if re.search("^variant_of_unknown_significance$", item.lower()):
+                hasBenignClassification = True
+            if re.search("^uncertain_significance$", item.lower()):
+                hasBenignClassification = True
+    for item in row["Clinical_classification(BIC)"].split(","):
+        if re.search("class 5", item.lower()):
+            hasPathogenicClassification = True
+        if re.search("class 1", item.lower()):
+            hasBenignClassification = True
     if hasPathogenicClassification and hasBenignClassification:
         return "True"
     else:
