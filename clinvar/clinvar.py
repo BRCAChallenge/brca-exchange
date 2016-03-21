@@ -57,9 +57,9 @@ class variant:
         if debug:
             print("Parsing variant", self.id)
         self.name = name
+        
         self.attribute = dict()
-        attrs = element.find("AttributeSet")
-        if attrs != None:
+        for attrs in element.findall("AttributeSet"):
             for attrib in attrs.findall("Attribute"):
                 self.attribute[attrib.get("Type")] = attrib.text
         self.coordinates = dict()
@@ -123,7 +123,8 @@ class referenceAssertion:
             else:
                 variantName = name.find("ElementValue").text
             self.variant = variant(measureSet.find("Measure"), variantName, 
-                                   measureSet.get("ID"), debug=debug)
+                                   measureSet.get("ID"), 
+                                   debug=debug)
                 
 
 class clinVarAssertion:

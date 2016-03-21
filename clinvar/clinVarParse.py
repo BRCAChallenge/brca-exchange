@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 def printHeader():
     print("\t".join(("HGVS", "Submitter", "ClinicalSignificance",
                      "DateLastUpdated", "SCV", "Origin", "Method",
-                     "Genomic_Coordinate", "Symbol")))
+                     "Genomic_Coordinate", "Symbol", "Protein")))
 
 
 def main():
@@ -37,12 +37,15 @@ def main():
                         variant = ra.variant
                         hgvs = re.sub("\(" + "(BRCA[1|2])" + "\)", 
                                       "", variant.name.split()[0])
+                        proteinChange = None
+                        if variant.attribute.has_key("HGVS, protein, RefSeq"):
+                            proteinChange = variant.attribute["HGVS, protein, RefSeq"]
                         if not re.search("^NP", hgvs):
                             chrom = None
                             start = None
                             referenceAllele = None
                             alternateAllele = None
-                            genomicCoordinate = "chrNA:NA:NA>NA"
+                            genomicCoordinate = "chrNone:None:None>None"
                             if args.assembly in variant.coordinates:
                                 genomicData = variant.coordinates[args.assembly]
                                 chrom = genomicData.chrom
@@ -60,7 +63,8 @@ def main():
                                              str(oa.origin),
                                              str(oa.method),
                                              genomicCoordinate,
-                                             str(variant.geneSymbol)
+                                             str(variant.geneSymbol),
+                                             str(proteinChange)
                                          )))
                         
 
