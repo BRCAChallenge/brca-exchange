@@ -45,7 +45,7 @@ function renderCell(val) {
 var filterColumns = [
     {name: 'Gene', prop: 'Gene_Symbol', values: ['BRCA1', 'BRCA2']},
 //    {name: 'Exon', values: ['Any', 1, 2, 3, 4, 5]}, // XXX needs refgene to get exon count
-    {name: 'Pathogenicity', prop: 'Pathogenicity_default', values: ['Pathogenic', 'Benign']}
+    {name: 'Pathogenicity', prop: 'Pathogenicity_default', values: ['Pathogenic', 'Benign / Little Clinical Significance', 'Not Yet Classified']}
 ];
 
 // XXX duplicate this functionality on the server, perhaps
@@ -101,7 +101,7 @@ var research_mode_columns = [
     {title: 'SCV Accession (ClinVar)', prop: 'SCV_ClinVar'},
     {title: 'Source(s)', prop: 'Source'},
     {title: 'Source URL(s)', prop: 'Source_URL'},
-    {title: 'Other HGVS Nucleotide(s)', prop: 'Other_HGVS_cDNA'},
+    {title: 'Synonyms', prop: 'Synonyms'},
     {title: 'Protein Amino Acid Change', prop: 'Protein_Change'},
     {title: 'Reference cDNA Sequence', prop: 'Reference_Sequence'},
 
@@ -159,6 +159,7 @@ var research_mode_columns = [
     {title: 'AMR Allele Frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes'},
     {title: 'EAS Allele Frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes'},
     {title: 'EUR Allele Frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes'},
+    {title: 'Maximum Allele Frequency', prop: 'Max_Allele_Frequency'},
     {title: 'Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP'},
     {title: 'South Asian Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes'},
     {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'}
@@ -172,10 +173,8 @@ var subColumns = [
             {title: 'BIC Variant Identifier', prop: 'BIC_Identifier', render: renderCell},
             {title: 'Protein', prop: 'HGVS_Protein', render: renderCell},
             {title: 'SCV Accession (ClinVar)', prop: 'SCV_ClinVar', render: renderCell},
-            {title: 'Source(s)', prop: 'Source', render: renderCell},
-            {title: 'Source URL(s)', prop: 'Source_URL', render: renderCell},
             {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: renderCell},
-            {title: 'Other HGVS Nucleotide(s)', prop: 'Other_HGVS_cDNA', render: renderCell},
+            {title: 'Synonyms', prop: 'Synonyms', render: renderCell},
             {title: 'Protein Amino Acid Change', prop: 'Protein_Change', render: renderCell},
             {title: 'Reference cDNA Sequence', prop: 'Reference_Sequence', render: renderCell}
         ]
@@ -219,6 +218,7 @@ var subColumns = [
                 prop: 'EUR_Allele_frequency_1000_Genomes',
                 render: renderCell
             },
+            {title: 'Maximum Allele Frequency', prop: 'Max_Allele_Frequency',render: renderCell},
             {title: 'Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP', render: renderCell},
             {
                 title: 'South Asian Allele Frequency (1000 Genomes)',
@@ -247,7 +247,7 @@ var subColumns = [
         ]
     },
     {
-        subColTitle: "Prob",
+        subColTitle: "Probability",
         subColList: [
             {title: 'Co-occurrence likelihood (exLOVD)', prop: 'Co_occurrence_LR_exLOVD', render: renderCell},
             {
@@ -307,7 +307,7 @@ var subColumns = [
         ]
     },
     {
-        subColTitle: "Pub",
+        subColTitle: "Publications",
         subColList: [
             {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_citation_ENIGMA', render: renderCell},
             {
@@ -327,7 +327,9 @@ var subColumns = [
             {title: 'Condition ID Type (ENIGMA)', prop: 'Condition_ID_type_ENIGMA', render: renderCell},
             {title: 'Condition ID Value (ENIGMA)', prop: 'Condition_ID_value_ENIGMA', render: renderCell},
             {title: 'Submitter (ClinVar)', prop: 'Submitter_ClinVar', render: renderCell},
-            {title: 'URL (ENIGMA)', prop: 'URL_ENIGMA', render: renderCell}
+            {title: 'URL (ENIGMA)', prop: 'URL_ENIGMA', render: renderCell},
+            {title: 'Source(s)', prop: 'Source', render: renderCell},
+            {title: 'Source URL(s)', prop: 'Source_URL', render: renderCell}
         ]
     },
 ];

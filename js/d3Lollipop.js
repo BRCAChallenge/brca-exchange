@@ -70,6 +70,9 @@ var D3Lollipop = React.createClass({
         if (oldObj.Pathogenicity_default == 'Not Yet Classified'){
             oldObj.Pathogenicity_default = "Unknown";
         }
+        if (oldObj.Pathogenicity_default == 'Benign / Little Clinical Significance'){
+            oldObj.Pathogenicity_default = "Benign";
+        }
         var newObj = {category: oldObj.Pathogenicity_default, coord: chrCoordinate, value: 1, oldData: obj};
         return newObj;
     },
