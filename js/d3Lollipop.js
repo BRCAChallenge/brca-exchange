@@ -25,12 +25,12 @@ d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id, varlink, data) {
     var maxPos = 1;
     if (id === 'BRCA1') {
         xAxisLabel = 'BRCA1 Genomic Pos (chr 17)';
-        minPos = 43039471;
-        maxPos = 43127867;
+        minPos = 43030000;
+        maxPos = 43130000;
     } else if (id === 'BRCA2') {
         xAxisLabel = 'BRCA2 Genomic Pos (chr 13)';
-        minPos = 32314943;
-        maxPos = 32400000;
+        minPos = 32300000;
+        maxPos = 32410000;
     }
     var legends = {x: xAxisLabel, y: ""};
     var colorMap = {
