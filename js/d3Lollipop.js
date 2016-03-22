@@ -55,10 +55,10 @@ var D3Lollipop = React.createClass({
     },
     filterAttributes: function (obj) {
         var oldObj = _(obj).pick('Genomic_Coordinate_hg38', 'Pathogenicity_default');
-
         var chromosome = oldObj.Genomic_Coordinate_hg38.split(':')[1];
-        var chrCoordinate = parseInt(oldObj.Genomic_Coordinate_hg38.split(':')[1]);
-        var alleleChange = oldObj.Genomic_Coordinate_hg38.split(':')[2];
+        var parts = oldObj.Genomic_Coordinate_hg38.split(':');
+        var chrCoordinate = parseInt(oldObj.Genomic_Coordinate_hg38.split(':')[parts.length - 2]);
+        var alleleChange = _.last(parts);
         var refAllele = alleleChange.split('>')[0];
         var altAllele = alleleChange.split('>')[1];
         if (altAllele.length > refAllele.length) {
@@ -66,7 +66,6 @@ var D3Lollipop = React.createClass({
         } else {
             chrCoordinate = String(chrCoordinate);
         }
-
         if (oldObj.Pathogenicity_default == 'Not Yet Classified'){
             oldObj.Pathogenicity_default = "Unknown";
         }
