@@ -8,15 +8,14 @@ var {Navigation} = require('react-router');
 var AutoSuggest = require('react-autosuggest');
 var _ = require('underscore');
 var $ = require('jquery');
+var backend = require('./backend');
 
 require('./css/Autosuggest.css');
 
 
 function getSuggestions(value, callback) {
-    var matchStr = encodeURIComponent(value.toLowerCase()); // data should already be lower case
-    var databaseUrl = "http://localhost:8000";
-
-    var suggestionsEndpoint = `${databaseUrl}/data/suggestions/?term=${matchStr}`;
+    var matchStr = encodeURIComponent(value.toLowerCase());
+    var suggestionsEndpoint = `${backend.databaseUrl}/data/suggestions/?term=${matchStr}`;
     $.ajax({
         url: suggestionsEndpoint,
         dataType: 'json',

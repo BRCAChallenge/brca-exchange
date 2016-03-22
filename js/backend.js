@@ -62,5 +62,6 @@ function data(opts) {
 module.exports = {
     data,
     url,
-    trimSearchTerm
+    trimSearchTerm,
+    databaseUrl
 };
