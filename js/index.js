@@ -78,7 +78,7 @@ var NavBarNew = React.createClass({
     render: function () {
         var {path} = this.props;
         var brand = (
-            <a className="navbar-brand" href="http://brcaexchange.org">
+            <a className="navbar-brand" href="/">
                 <h1>
                     <span className="BRCA">BRCA</span>
                     <span className="exchange"> Exchange</span>
