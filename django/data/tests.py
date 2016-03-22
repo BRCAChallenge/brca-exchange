@@ -1,6 +1,7 @@
 import json
 import os
 import unittest
+from urllib import quote
 
 from django.http import JsonResponse, HttpResponse
 from django.test import TestCase
@@ -56,12 +57,25 @@ class VariantTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content, {"count": 1, "data": [test_data.existing_variant()]})
 
-    def test_autocomplete(self):
+    def test_autocomplete_nuclotide(self):
         """Getting autocomplete suggestions for words starting with c.2123 should return 2 results"""
-        search_term = 'c.2123'
+        search_term = quote('c.2123')
         expected_autocomplete_results = [["c.2123c>a"], ["c.2123c>t"]]
 
         request = self.factory.get('/data/suggestions/?term=%s' % search_term)
+        response = autocomplete(request)
+
+        self.assertIsInstance(response, JsonResponse)
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {"suggestions": expected_autocomplete_results})
+
+    def test_autocomplete_bic(self):
+        """Getting autocomplete suggestions for words starting with IVS7+10 should return 2 results"""
+        search_term = quote('ivs7+10')
+        expected_autocomplete_results = [["ivs7+1028t>a"], ["ivs7+1037t>c"]]
+
+        query = '/data/suggestions/?term=%s' % search_term
+        request = self.factory.get(query)
         response = autocomplete(request)
 
         self.assertIsInstance(response, JsonResponse)

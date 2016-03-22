@@ -13,7 +13,7 @@ require('./css/Autosuggest.css');
 
 
 function getSuggestions(value, callback) {
-    var matchStr = value.toLowerCase(); // data should already be lower case
+    var matchStr = encodeURIComponent(value.toLowerCase()); // data should already be lower case
     var databaseUrl = "http://localhost:8000";
 
     var suggestionsEndpoint = `${databaseUrl}/data/suggestions/?term=${matchStr}`;
