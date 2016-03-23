@@ -80,7 +80,6 @@ class Migration(migrations.Migration):
                 v."Genomic_Coordinate_hg38",
                 v."Source_URL",
                 v."Discordant",
-                v."Synonyms",
                 v."Pathogenicity_default",
                 v."Pathogenicity_research")
     INTO fts_standard;
@@ -94,7 +93,8 @@ class Migration(migrations.Migration):
         BEGIN
             SELECT concat_ws(' ',
                 v."Genomic_Coordinate_hg37",
-                v."Genomic_Coordinate_hg36")
+                v."Genomic_Coordinate_hg36",
+                v."Synonyms")
             INTO
                 fts_synonyms;
             RETURN to_tsvector('pg_catalog.simple', fts_synonyms);
