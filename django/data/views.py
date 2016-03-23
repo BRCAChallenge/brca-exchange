@@ -25,14 +25,18 @@ def index(request):
     page_num = int(request.GET.get('page_num', '0'))
     search_term = request.GET.get('search_term')
     format = request.GET.get('format')
-    source = request.GET.getlist('source')
+    sources = request.GET.getlist('source')
     filters = request.GET.getlist('filter')
     filter_values = request.GET.getlist('filterValue')
 
-    query, count = build_query(direction, filter_values, filters, order_by, search_term, source, page_size, page_num)
-    # The query for producing the CSV needs to have string literals inside single quotes
-    query_csv, _ = build_query(direction, filter_values, filters, order_by, search_term, source, page_size, page_num,
-                               quotes="\'")
+    query = Variant.objects
+
+    apply_sources(query, sources)
+    apply_filters(query, filter_values, filters)
+    apply_search(query, search_term)
+    apply_order(query, order_by, direction)
+
+    count = query.count()
 
     if format == 'csv':
         cursor = connection.cursor()
@@ -45,56 +49,55 @@ def index(request):
             return response
 
     elif format == 'json':
+        select_page(query, page_size, page_num)
         # call list() now to evaluate the query
         response = JsonResponse({'count': count, 'data': list(query.values())})
         response['Access-Control-Allow-Origin'] = '*'
         return response
 
+def apply_sources(query, sources):
+    # if there are multiple sources given then OR them:
+    # the row must match in at least one column
+    if sources:
+        query_list = (Q(**{column: True}) for column in sources)
+        query.filter(reduce(__or__, query_list))
 
-def build_query(direction, filterValues, filters, order_by, search_term, source, page_size, page_num,
-                quotes=""):
-    query = Variant.objects
-
+def apply_filters(query, filterValues, filters):
     # if there are multiple filters the row must match all the filters
     if filters:
         for column, value in zip(filters, filterValues):
             if column == 'id':
-                query = query.filter(**{column:value})
+                query.filter(**{column:value})
             else:
-                query = query.extra(
+                query.extra(
                     where=["\"{0}\" LIKE %s".format(column)],
                     params=["{0}{1}%{0}".format(quotes, value)]
                 )
 
+def apply_search(query, search_term, search_column='fts_document', quotes=''):
     # search using the tsvector column which represents our document made of all the columns
     if search_term:
-        query = query.extra(
-            where=["variant.fts_document @@ to_tsquery('simple', %s)"],
-            params=["{0}{1}{0}".format(quotes, sanitise_term(search_term))]
+        where_clause = "variant.fts_document @@ to_tsquery('simple', %s)".format(search_column)
+        parameter = quotes + sanitise_term(search_term) + quotes
+        query.extra(
+            where=[where_clause],
+            params=[parameter]
         )
 
-    # if there are multiple sources given then OR them:
-    # the row must match in at least one column
-    if source:
-        query_list = (Q(**{column: True}) for column in source)
-        query = query.filter(reduce(__or__, query_list))
+def apply_order(query, order_by, direction):
     if order_by:
         # special case for HGVS columns
         if order_by in ('HGVS_cDNA', 'HGVS_Protein'):
             order_by = 'Genomic_Coordinate_hg38'
         if direction == 'descending':
             order_by = '-' + order_by
-        query = query.order_by(order_by, 'Pathogenicity_default')
+        query.order_by(order_by, 'Pathogenicity_default')
 
-    # count the number of rows now before paginating
-    count = query.count()
-
+def select_page(query, page_size, page_num):
     if page_size:
         start = page_size * page_num
         end = start + page_size
         query = query[start:end]
-    return query, count
-
 
 def autocomplete(request):
     term = request.GET.get('term')
