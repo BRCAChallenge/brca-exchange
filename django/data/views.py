@@ -9,15 +9,6 @@ from django.http import JsonResponse, HttpResponse
 
 from .models import Variant
 
-
-def sanitise_term(term):
-    # Escape all non alphanumeric characters
-    term = re.escape(term)
-    # Enable prefix search
-    term += ":*"
-    return term
-
-
 def index(request):
     order_by = request.GET.get('order_by')
     direction = request.GET.get('direction')
@@ -31,14 +22,20 @@ def index(request):
 
     query = Variant.objects
 
-    apply_sources(query, sources)
-    apply_filters(query, filter_values, filters)
-    apply_search(query, search_term)
-    apply_order(query, order_by, direction)
+    if sources:
+        query = apply_sources(query, sources)
 
-    count = query.count()
+    if filters:
+        query = apply_filters(query, filter_values, filters)
+
+    if order_by:
+        query = apply_order(query, order_by, direction)
 
     if format == 'csv':
+
+        if search_term:
+            query = apply_search(query, search_term, quotes='\'')
+
         cursor = connection.cursor()
         with tempfile.NamedTemporaryFile() as f:
             os.chmod(f.name, 0606)
@@ -49,55 +46,62 @@ def index(request):
             return response
 
     elif format == 'json':
-        select_page(query, page_size, page_num)
+
+        if search_term:
+            synonyms = apply_search(query, search_term, search_column='fts_synonyms').count()
+            query = apply_search(query, search_term)
+        else:
+            synonyms = 0
+
+        count = query.count()
+
+        if page_size:
+            query = select_page(query, page_size, page_num)
+
         # call list() now to evaluate the query
-        response = JsonResponse({'count': count, 'data': list(query.values())})
+        response = JsonResponse({'count': count, 'synonyms': synonyms, 'data': list(query.values())})
         response['Access-Control-Allow-Origin'] = '*'
         return response
 
 def apply_sources(query, sources):
     # if there are multiple sources given then OR them:
     # the row must match in at least one column
-    if sources:
-        query_list = (Q(**{column: True}) for column in sources)
-        query.filter(reduce(__or__, query_list))
+    query_list = (Q(**{column: True}) for column in sources)
+    return query.filter(reduce(__or__, query_list))
 
 def apply_filters(query, filterValues, filters):
     # if there are multiple filters the row must match all the filters
-    if filters:
-        for column, value in zip(filters, filterValues):
-            if column == 'id':
-                query.filter(**{column:value})
-            else:
-                query.extra(
-                    where=["\"{0}\" LIKE %s".format(column)],
-                    params=["{0}{1}%{0}".format(quotes, value)]
-                )
+    for column, value in zip(filters, filterValues):
+        if column == 'id':
+            query = query.filter(**{column:value})
+        else:
+            query = query.extra(
+                where=["\"{0}\" LIKE %s".format(column)],
+                params=["{0}{1}%{0}".format(quotes, value)]
+            )
+    return query
 
 def apply_search(query, search_term, search_column='fts_document', quotes=''):
     # search using the tsvector column which represents our document made of all the columns
-    if search_term:
-        where_clause = "variant.fts_document @@ to_tsquery('simple', %s)".format(search_column)
-        parameter = quotes + sanitise_term(search_term) + quotes
-        query.extra(
-            where=[where_clause],
-            params=[parameter]
-        )
+    where_clause = "variant.{} @@ to_tsquery('simple', %s)".format(search_column)
+    parameter = quotes + sanitise_term(search_term) + quotes
+    return query.extra(
+        where=[where_clause],
+        params=[parameter]
+    )
 
 def apply_order(query, order_by, direction):
-    if order_by:
-        # special case for HGVS columns
-        if order_by in ('HGVS_cDNA', 'HGVS_Protein'):
-            order_by = 'Genomic_Coordinate_hg38'
-        if direction == 'descending':
-            order_by = '-' + order_by
-        query.order_by(order_by, 'Pathogenicity_default')
+    # special case for HGVS columns
+    if order_by in ('HGVS_cDNA', 'HGVS_Protein'):
+        order_by = 'Genomic_Coordinate_hg38'
+    if direction == 'descending':
+        order_by = '-' + order_by
+    return query.order_by(order_by, 'Pathogenicity_default')
 
 def select_page(query, page_size, page_num):
-    if page_size:
-        start = page_size * page_num
-        end = start + page_size
-        query = query[start:end]
+    start = page_size * page_num
+    end = start + page_size
+    return query[start:end]
 
 def autocomplete(request):
     term = request.GET.get('term')
@@ -117,3 +121,10 @@ def autocomplete(request):
     response = JsonResponse({'suggestions': rows[:limit]})
     response['Access-Control-Allow-Origin'] = '*'
     return response
+
+def sanitise_term(term):
+    # Escape all non alphanumeric characters
+    term = re.escape(term)
+    # Enable prefix search
+    term += ":*"
+    return term
