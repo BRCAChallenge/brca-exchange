@@ -120,11 +120,12 @@ var DataTable = React.createClass({
     },
     lollipopOpts: function () {
         var {search, filterValues,sourceSelection} = this.state;
-        return {
+        return merge({
             search,
-            source: _.keys(_.pick(sourceSelection, v => v)),
+            include: _.keys(_.pick(sourceSelection, v => v == 1)),
+            exclude: _.keys(_.pick(sourceSelection, v => v == -1)),
             filterValues
-        };
+        }, hgvs.filters(search, filterValues));
     },
     fetch: function (state) {
         var {pageLength, search, page, sortBy,
