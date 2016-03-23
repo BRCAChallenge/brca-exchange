@@ -61,7 +61,7 @@ function data(opts) {
 }
 
 function lollipopData(opts) {
-    opts.pageLength = -1;
+    opts.pageLength = 0;
     opts.format = 'json';
     opts.column = ['id', 'Genomic_Coordinate_hg38', 'Pathogenicity_default'];
     return Rx.DOM.get(url(opts)).map(xhr => JSON.parse(xhr.responseText));
