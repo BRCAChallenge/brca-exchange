@@ -22,24 +22,29 @@ def index(request):
 
     query = Variant.objects
 
+    if format == 'csv':
+        quotes = '\''
+    else:
+        quotes = ''
+
     if sources:
         query = apply_sources(query, sources)
 
     if filters:
-        query = apply_filters(query, filter_values, filters)
+        query = apply_filters(query, filter_values, filters, quotes=quotes)
+
+    if search_term:
+        query = apply_search(query, search_term, quotes=quotes)
 
     if order_by:
         query = apply_order(query, order_by, direction)
 
     if format == 'csv':
 
-        if search_term:
-            query = apply_search(query, search_term, quotes='\'')
-
         cursor = connection.cursor()
         with tempfile.NamedTemporaryFile() as f:
             os.chmod(f.name, 0606)
-            cursor.execute("COPY ({}) TO '{}' WITH DELIMITER ',' CSV HEADER".format(query_csv.query, f.name))
+            cursor.execute("COPY ({}) TO '{}' WITH DELIMITER ',' CSV HEADER".format(query.query, f.name))
 
             response = HttpResponse(f.read(), content_type='text/csv')
             response['Content-Disposition'] = 'attachment;filename="variants.csv"'
@@ -47,16 +52,14 @@ def index(request):
 
     elif format == 'json':
 
+        count = query.count()
+
         if search_term:
-            synonyms = apply_search(query, search_term, search_column='fts_synonyms').count()
-            query = apply_search(query, search_term)
+            synonyms = count - apply_search(query, search_term, search_column='fts_standard').count()
         else:
             synonyms = 0
 
-        count = query.count()
-
-        if page_size:
-            query = select_page(query, page_size, page_num)
+        query = select_page(query, page_size, page_num)
 
         # call list() now to evaluate the query
         response = JsonResponse({'count': count, 'synonyms': synonyms, 'data': list(query.values())})
@@ -69,7 +72,7 @@ def apply_sources(query, sources):
     query_list = (Q(**{column: True}) for column in sources)
     return query.filter(reduce(__or__, query_list))
 
-def apply_filters(query, filterValues, filters):
+def apply_filters(query, filterValues, filters, quotes=''):
     # if there are multiple filters the row must match all the filters
     for column, value in zip(filters, filterValues):
         if column == 'id':
