@@ -3,11 +3,13 @@
 
 var React = require('react');
 var _ = require('underscore');
-var {Row, Col, DropdownButton, MenuItem, Grid} = require('react-bootstrap');
 require('muts-needle-plot/src/js/d3-svg-legend');
 require('./css/d3Lollipop.css');
 var Mutneedles = require("muts-needle-plot");
 var PureRenderMixin = require('./PureRenderMixin');
+
+var {Grid, Row, Nav, NavItem} = require('react-bootstrap');
+
 
 var brca12JSON = {
     BRCA1: {
@@ -55,7 +57,6 @@ var D3Lollipop = React.createClass({
     },
     filterAttributes: function (obj) {
         var oldObj = _(obj).pick('Genomic_Coordinate_hg38', 'Pathogenicity_default');
-        var chromosome = oldObj.Genomic_Coordinate_hg38.split(':')[1];
         var parts = oldObj.Genomic_Coordinate_hg38.split(':');
         var chrCoordinate = parseInt(oldObj.Genomic_Coordinate_hg38.split(':')[parts.length - 2]);
         var alleleChange = _.last(parts);
@@ -75,13 +76,15 @@ var D3Lollipop = React.createClass({
         var newObj = {category: oldObj.Pathogenicity_default, coord: chrCoordinate, value: 1, oldData: obj};
         return newObj;
     },
-    componentDidMount: function() {
+
+     componentDidMount: function() {
         var {data, brcakey, onRowClick, ...opts} = this.props;
         var subSetData = data.map(this.filterAttributes);
         var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
         var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
         this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
     },
+
     componentWillReceiveProps: function(newProps) {
         this.cleanupBRCA();
         var {data, brcakey, onRowClick, ...opts} = newProps;
@@ -99,30 +102,52 @@ var D3Lollipop = React.createClass({
     },
     componentWillUnmount: function() {
         this.cleanupBRCA();
+        window.removeEventListener('resize', this.handleResize);
+    },
+    handleResize: function (e) {
+        this.setState({windowWidth: window.innerWidth});
     }
+
 });
 
 var Lollipop = React.createClass({
     mixins: [PureRenderMixin],
-    getInitialState: function() {
-        return {brcakey: "BRCA1"};
+    getInitialState: function () {
+        return {
+            brcakey: "BRCA1",
+            data: []
+        };
     },
-    onSelect: function(key) {
+    componentWillReceiveProps: function (newProps) {
+        this.fetchData(newProps.opts);
+    },
+    componentWillMount: function () {
+        this.fetchData(this.props.opts);
+    },
+    fetchData: function (opts) {
+        this.props.fetch(opts).subscribe(
+            function (d) {
+                console.log('setting the state');
+                console.log(d);
+                this.setState({data: d.data});
+                console.log('state set');
+                console.log(this.state);
+            }.bind(this));
+    },
+    onSelect: function (key) {
         this.setState({brcakey: key});
     },
     render: function () {
-        var {data, onHeaderClick, onRowClick, ...opts} = this.props;
         return (
             <Grid>
                 <div>
                     <Row style={{marginBottom: '2px', marginTop: '2px'}}>
-                        <DropdownButton onSelect={this.onSelect} title="Select Gene" id="bg-vertical-dropdown-1">
-                            <MenuItem eventKey="BRCA1">BRCA1</MenuItem>
-                            <MenuItem eventKey="BRCA2">BRCA2</MenuItem>
-                        </DropdownButton>
-                        <span onClick={() => this.props.onHeaderClick('Lollipop Plots')}
-                            className='help glyphicon glyphicon-question-sign superscript'/>
-                        <D3Lollipop data={this.props.data} key={this.state.brcakey} brcakey={this.state.brcakey} onRowClick={this.props.onRowClick} id='brcaLollipop' ref='d3svgBrca'/>
+                        <Nav bsStyle="tabs" eventKey={0} activeKey={this.state.brcakey} onSelect={this.onSelect} title="Select Gene" id="bg-vertical-dropdown-1">
+                            <NavItem eventKey="BRCA1">BRCA1</NavItem>
+                            <NavItem eventKey="BRCA2">BRCA2</NavItem>
+                        </Nav>
+                        <span onClick={() => this.props.onHeaderClick('Lollipop Plots')}/>
+                        <D3Lollipop data={this.state.data} opts={this.props.opts} key={this.state.brcakey} brcakey={this.state.brcakey} onRowClick={this.props.onRowClick} id='brcaLollipop' ref='d3svgBrca'/>
                     </Row>
                 </div>
             </Grid>

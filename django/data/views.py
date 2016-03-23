@@ -21,6 +21,7 @@ def index(request):
     exclude = request.GET.getlist('exclude')
     filters = request.GET.getlist('filter')
     filter_values = request.GET.getlist('filterValue')
+    column = request.GET.getlist('column')
 
     query = Variant.objects
 
@@ -65,7 +66,7 @@ def index(request):
         query = select_page(query, page_size, page_num)
 
         # call list() now to evaluate the query
-        response = JsonResponse({'count': count, 'synonyms': synonyms, 'data': list(query.values())})
+        response = JsonResponse({'count': count, 'synonyms': synonyms, 'data': list(query.values(*column))})
         response['Access-Control-Allow-Origin'] = '*'
         return response
 
@@ -112,9 +113,11 @@ def apply_order(query, order_by, direction):
 
 
 def select_page(query, page_size, page_num):
-    start = page_size * page_num
-    end = start + page_size
-    return query[start:end]
+    if page_size:
+        start = page_size * page_num
+        end = start + page_size
+        return query[start:end]
+    return query
 
 
 def autocomplete(request):

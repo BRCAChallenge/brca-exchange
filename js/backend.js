@@ -35,6 +35,7 @@ function url(opts) {
         pageLength = 100,
         page = 0,
         search = '',
+        column,
         include,
         exclude
         } = opts,
@@ -51,6 +52,7 @@ function url(opts) {
         'page_size': pageLength,
         'page_num': page,
         'search_term': search,
+        'column': column,
         'include': include,
         'exclude': exclude
     }, v => v != null), {arrayFormat: 'repeat'})}`;
@@ -60,8 +62,16 @@ function data(opts) {
     return Rx.DOM.get(url(opts)).map(xhr => JSON.parse(xhr.responseText));
 }
 
+function lollipopData(opts) {
+    opts.pageLength = 0;
+    opts.format = 'json';
+    opts.column = ['id', 'Genomic_Coordinate_hg38', 'Pathogenicity_default'];
+    return Rx.DOM.get(url(opts)).map(xhr => JSON.parse(xhr.responseText));
+}
+
 module.exports = {
     data,
+    lollipopData,
     url,
     trimSearchTerm,
     databaseUrl

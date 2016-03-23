@@ -39,8 +39,6 @@ var {Navigation, State, Link, Route, RouteHandler,
 
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 
-var D3LollipopSVG = require('./D3LollipopSVG');
-
 var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
 var variantPathSplit = id => _.object(databaseKey, _.map(id.split(/@@/), decodeURIComponent));
 
@@ -91,14 +89,11 @@ var NavBarNew = React.createClass({
                 <Nav eventKey={0} navbar right>
                     <NavLink to='/'>Home</NavLink>
                     <DropdownButton className={this.activePath(path, "about")} ref='about' title='About'>
-                        <NavLink onClick={this.close} to='/about/history'>
-                            History of the BRCA Exchange
-                        </NavLink>
                         <NavLink onClick={this.close} to='/about/variation'>
                             BRCA1, BRCA2, and Cancer
                         </NavLink>
-                        <NavLink onClick={this.close} to='/about/lollipop'>
-                            DNA Variant BRCA Lollipop Plots
+                        <NavLink onClick={this.close} to='/about/history'>
+                            History of the BRCA Exchange
                         </NavLink>
                         <NavLink onClick={this.close} to='/about/thisSite'>
                             This Site
@@ -339,6 +334,7 @@ var Database = React.createClass({
                 initialState={params}
                 {...params}
                 fetch={backend.data}
+                fetchLollipop={backend.lollipopData}
                 url={backend.url}
                 onChange={s => this.urlq.onNext(s)}
                 onToggleMode={this}
@@ -351,6 +347,7 @@ var Database = React.createClass({
                 initialState={params}
                 {...params}
                 fetch={backend.data}
+                fetchLollipop={backend.lollipopData}
                 url={backend.url}
                 onChange={s => this.urlq.onNext(s)}
                 onToggleMode={this}
@@ -473,51 +470,9 @@ var Application = React.createClass({
     }
 });
 
-var D3StaticLollipop = React.createClass({
-    render: function () {
-        return (
-            <D3LollipopSVG brcakey={this.props.brcakey}/>
-        );
-    }
-});
-
-var Lollipop = React.createClass({
-    mixins: [Navigation],
-    showHelp: function (title) {
-        this.transitionTo(`/help#${slugify(title)}`);
-    },
-    getInitialState: function() {
-        return {brcakey: "BRCA1"};
-    },
-    onSelect: function(key) {
-        this.setState({brcakey: key});
-    },
-    render: function () {
-        return (
-            <Grid id="main-grid">
-                <Row>
-                    <Col md={8} mdOffset={4}>
-                        <h1 id="brca-dna-variant-lollipop">{this.state.brcakey} Lollipop Chart</h1>
-                    </Col>
-                </Row>
-                <div>
-                    <DropdownButton onSelect={this.onSelect} title="Select Gene" id="bg-vertical-dropdown-1">
-                        <MenuItem eventKey="BRCA1">BRCA1</MenuItem>
-                        <MenuItem eventKey="BRCA2">BRCA2</MenuItem>
-                    </DropdownButton>
-                    <span onClick={() => this.showHelp('Lollipop Plots')}
-                        className='help glyphicon glyphicon-question-sign superscript'/>
-                    <D3StaticLollipop key={this.state.brcakey} brcakey={this.state.brcakey} id='brcaLollipop' ref='d3svgBrca'/>
-                </div>
-            </Grid>
-        );
-    }
-});
-
 var routes = (
     <Route handler={Application}>
         <DefaultRoute handler={Home}/>
-        <Route path='about/lollipop' handler={Lollipop}/>
         <Route path='about/:page' handler={About}/>
         <Route path='help' handler={Help}/>
         <Route path='variants' />
