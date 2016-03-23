@@ -35,7 +35,6 @@ function url(opts) {
         pageLength = 100,
         page = 0,
         search = '',
-        source,
         column,
         include,
         exclude
@@ -53,7 +52,6 @@ function url(opts) {
         'page_size': pageLength,
         'page_num': page,
         'search_term': search,
-        'source': source,
         'column': column,
         'include': include,
         'exclude': exclude
