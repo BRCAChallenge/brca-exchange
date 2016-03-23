@@ -63,10 +63,6 @@ var DataTable = React.createClass({
         this.subs = q.map(this.props.fetch).debounce(100).switchLatest().subscribe(
             resp => this.setState(setPages(resp, this.state.pageLength)), // set data, count, totalPages
             () => this.setState({error: 'Problem connecting to server'}));
-        var qLollipop = this.fetchqLollipop = new Rx.Subject();
-        this.subs = qLollipop.map(this.props.fetch).debounce(100).switchLatest().subscribe(
-            resp => this.setState(setPages(resp, this.state.pageLength)), // set data, count, totalPages
-            () => this.setState({error: 'Problem connecting to server'}));
     },
     componentWillUnmount: function () {
         window.removeEventListener('resize', this.handleResize);
@@ -120,6 +116,16 @@ var DataTable = React.createClass({
             source: _.keys(_.pick(sourceSelection, v => v)),
             filterValues}, hgvs.filters(search, filterValues)));
     },
+    lollipopOpts: function () {
+        var {search, filterValues,sourceSelection} = this.state;
+        return {
+            format: 'json',
+            pageLength: -1,
+            search,
+            source: _.keys(_.pick(sourceSelection, v => v)),
+            filterValues
+        };
+    },
     fetch: function (state) {
         var {pageLength, search, page, sortBy,
             filterValues, columnSelection, sourceSelection} = state;
@@ -130,15 +136,6 @@ var DataTable = React.createClass({
             search,
             searchColumn: _.keys(_.pick(columnSelection, v => v)),
             source: _.keys(_.pick(sourceSelection, v => v)),
-            filterValues}, hgvs.filters(search, filterValues)));
-    },
-    fetchLollipopData: function(state) {
-        var {search, sortBy, filterValues} = state;
-        this.fetchq.onNext(merge({
-            pageLength: null,
-            page: null,
-            sortBy,
-            search,
             filterValues}, hgvs.filters(search, filterValues)));
     },
     // helper function that sets state, fetches new data,
@@ -201,7 +198,7 @@ var DataTable = React.createClass({
                 <Row id="lollipop-chart" className="">
                     <Col sm={12}>
                         {lollipopOpen && this.state.windowWidth > 991 && this.state.data.length > 0 &&
-                        <Lollipop data={this.state.data} onHeaderClick={this.props.onHeaderClick} onRowClick={this.props.onRowClick}/> }
+                        <Lollipop fetch={this.props.fetchLollipop} opts={this.lollipopOpts()} onHeaderClick={this.props.onHeaderClick} onRowClick={this.props.onRowClick}/> }
 
                         {lollipopOpen && this.state.windowWidth <= 991 &&
                         <div className="alert alert-danger">Please use a larger screen size to view this interactive chart.</div>}

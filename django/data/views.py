@@ -109,6 +109,9 @@ def apply_order(query, order_by, direction):
 
 
 def select_page(query, page_size, page_num):
+    # Special case for the lollipop diagram
+    if page_size == -1:
+        return query
     start = page_size * page_num
     end = start + page_size
     return query[start:end]

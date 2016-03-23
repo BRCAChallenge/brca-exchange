@@ -58,8 +58,14 @@ function data(opts) {
     return Rx.DOM.get(url(opts)).map(xhr => JSON.parse(xhr.responseText));
 }
 
+function lollipopData(opts) {
+    opts.pageLength = -1;
+    return Rx.DOM.get(url(opts)).map(xhr => JSON.parse(xhr.responseText));
+}
+
 module.exports = {
     data,
+    lollipopData,
     url,
     trimSearchTerm,
     databaseUrl
