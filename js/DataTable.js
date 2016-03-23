@@ -87,6 +87,7 @@ var DataTable = React.createClass({
             sourceSelection: this.props.sourceSelection,
             pageLength: 20,
             page: 0,
+            totalPages: 0,
             windowWidth: window.innerWidth
         }, this.props.initialState);
     },
