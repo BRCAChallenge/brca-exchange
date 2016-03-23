@@ -17,7 +17,8 @@ def index(request):
     page_num = int(request.GET.get('page_num', '0'))
     search_term = request.GET.get('search_term')
     format = request.GET.get('format')
-    sources = request.GET.getlist('source')
+    include = request.GET.getlist('include')
+    exclude = request.GET.getlist('exclude')
     filters = request.GET.getlist('filter')
     filter_values = request.GET.getlist('filterValue')
 
@@ -28,8 +29,8 @@ def index(request):
     else:
         quotes = ''
 
-    if sources:
-        query = apply_sources(query, sources)
+    if include or exclude:
+        query = apply_sources(query, include, exclude)
 
     if filters:
         query = apply_filters(query, filter_values, filters, quotes=quotes)
@@ -69,11 +70,13 @@ def index(request):
         return response
 
 
-def apply_sources(query, sources):
+def apply_sources(query, include, exclude):
     # if there are multiple sources given then OR them:
     # the row must match in at least one column
-    query_list = (Q(**{column: True}) for column in sources)
-    return query.filter(reduce(__or__, query_list))
+    include_list = (Q(**{column: True}) for column in include)
+    exclude_dict = {exclusion: False for exclusion in exclude}
+    
+    return query.filter(reduce(__or__, query_list)).filter(**exclude_dict)
 
 
 def apply_filters(query, filterValues, filters, quotes=''):
