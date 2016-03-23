@@ -118,7 +118,8 @@ var DataTable = React.createClass({
             sortBy,
             search,
             searchColumn: _.keys(_.pick(columnSelection, v => v)),
-            source: _.keys(_.pick(sourceSelection, v => v)),
+            include: _.keys(_.pick(sourceSelection, v => v == 1)),
+            exclude: _.keys(_.pick(sourceSelection, v => v == -1)),
             filterValues}, hgvs.filters(search, filterValues)));
     },
     fetch: function (state) {
@@ -130,7 +131,8 @@ var DataTable = React.createClass({
             sortBy,
             search,
             searchColumn: _.keys(_.pick(columnSelection, v => v)),
-            source: _.keys(_.pick(sourceSelection, v => v)),
+            include: _.keys(_.pick(sourceSelection, v => v == 1)),
+            exclude: _.keys(_.pick(sourceSelection, v => v == -1)),
             filterValues}, hgvs.filters(search, filterValues)));
     },
     fetchLollipopData: function(state) {
