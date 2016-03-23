@@ -11,11 +11,11 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL("""
     ALTER TABLE variant ADD COLUMN fts_document TSVECTOR;
-    ALTER TABLE variant ADD COLUMN fts_synonyms TSVECTOR;
+    ALTER TABLE variant ADD COLUMN fts_standard TSVECTOR;
 
-    CREATE FUNCTION variant_fts_document(v variant) RETURNS tsvector AS $$
+    CREATE FUNCTION variant_fts_standard(v variant) RETURNS tsvector AS $$
         DECLARE
-            fts_document TEXT;
+            fts_standard TEXT;
         BEGIN
             SELECT concat_ws(' ',
                 v."Source",
@@ -78,15 +78,13 @@ class Migration(migrations.Migration):
                 v."Allele_Frequency",
                 v."Max_Allele_Frequency",
                 v."Genomic_Coordinate_hg38",
-                v."Genomic_Coordinate_hg37",
-                v."Genomic_Coordinate_hg36",
                 v."Source_URL",
                 v."Discordant",
                 v."Synonyms",
                 v."Pathogenicity_default",
                 v."Pathogenicity_research")
-    INTO fts_document;
-            RETURN to_tsvector('pg_catalog.simple', fts_document);
+    INTO fts_standard;
+            RETURN to_tsvector('pg_catalog.simple', fts_standard);
     END;
     $$ LANGUAGE plpgsql;
 
@@ -103,10 +101,16 @@ class Migration(migrations.Migration):
         END;
         $$ LANGUAGE plpgsql;
 
+    CREATE FUNCTION variant_fts_document(v variant) RETURNS tsvector AS $$
+        BEGIN
+            RETURN variant_fts_standard(v) || variant_fts_synonyms(v);
+        END;
+        $$ LANGUAGE plpgsql;
+
     CREATE FUNCTION variant_fts_trigger() RETURNS TRIGGER AS $$
     BEGIN
+    NEW.fts_standard=variant_fts_standard(NEW);
     NEW.fts_document=variant_fts_document(NEW);
-    NEW.fts_synonyms=variant_fts_synonyms(NEW);
     RETURN NEW;
     END;
     $$ LANGUAGE plpgsql;
@@ -114,8 +118,8 @@ class Migration(migrations.Migration):
     CREATE TRIGGER variant_fts_update_trigger BEFORE UPDATE ON variant FOR EACH ROW EXECUTE PROCEDURE variant_fts_trigger();
     CREATE TRIGGER variant_fts_insert_trigger BEFORE INSERT ON variant FOR EACH ROW EXECUTE PROCEDURE variant_fts_trigger();
 
-    CREATE INDEX variant_fts_index ON variant USING gin(fts_document);
-    CREATE INDEX variant_synonyms_index ON variant USING gin(fts_synonyms);
+    CREATE INDEX variant_fts_document_index ON variant USING gin(fts_document);
+    CREATE INDEX variant_fts_standard_index ON variant USING gin(fts_standard);
 
     """)
 
