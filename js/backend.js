@@ -35,7 +35,8 @@ function url(opts) {
         pageLength = 100,
         page = 0,
         search = '',
-        source
+        include,
+        exclude
         } = opts,
 
         [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v)));
@@ -50,7 +51,8 @@ function url(opts) {
         'page_size': pageLength,
         'page_num': page,
         'search_term': search,
-        'source': source
+        'include': include,
+        'exclude': exclude
     }, v => v != null), {arrayFormat: 'repeat'})}`;
 }
 
