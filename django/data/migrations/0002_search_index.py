@@ -11,10 +11,11 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL("""
     ALTER TABLE variant ADD COLUMN fts_document TSVECTOR;
+    ALTER TABLE variant ADD COLUMN fts_standard TSVECTOR;
 
-    CREATE FUNCTION variant_fts_document(v variant) RETURNS tsvector AS $$
+    CREATE FUNCTION variant_fts_standard(v variant) RETURNS tsvector AS $$
         DECLARE
-            fts_document TEXT;
+            fts_standard TEXT;
         BEGIN
             SELECT concat_ws(' ',
                 v."Source",
@@ -77,29 +78,48 @@ class Migration(migrations.Migration):
                 v."Allele_Frequency",
                 v."Max_Allele_Frequency",
                 v."Genomic_Coordinate_hg38",
-                v."Genomic_Coordinate_hg37",
-                v."Genomic_Coordinate_hg36",
                 v."Source_URL",
                 v."Discordant",
-                v."Synonyms",
                 v."Pathogenicity_default",
                 v."Pathogenicity_research")
-    INTO fts_document;
-            RETURN to_tsvector('pg_catalog.simple', fts_document);
+    INTO fts_standard;
+            RETURN to_tsvector('pg_catalog.simple', fts_standard);
     END;
     $$ LANGUAGE plpgsql;
 
-    CREATE FUNCTION variant_fts_document_trigger() RETURNS TRIGGER AS $$
+    CREATE FUNCTION variant_fts_synonyms(v variant) RETURNS tsvector AS $$
+        DECLARE
+            fts_synonyms TEXT;
+        BEGIN
+            SELECT concat_ws(' ',
+                v."Genomic_Coordinate_hg37",
+                v."Genomic_Coordinate_hg36",
+                v."Synonyms")
+            INTO
+                fts_synonyms;
+            RETURN to_tsvector('pg_catalog.simple', fts_synonyms);
+        END;
+        $$ LANGUAGE plpgsql;
+
+    CREATE FUNCTION variant_fts_document(v variant) RETURNS tsvector AS $$
+        BEGIN
+            RETURN variant_fts_standard(v) || variant_fts_synonyms(v);
+        END;
+        $$ LANGUAGE plpgsql;
+
+    CREATE FUNCTION variant_fts_trigger() RETURNS TRIGGER AS $$
     BEGIN
+    NEW.fts_standard=variant_fts_standard(NEW);
     NEW.fts_document=variant_fts_document(NEW);
     RETURN NEW;
     END;
     $$ LANGUAGE plpgsql;
 
-    CREATE TRIGGER variant_fts_update_trigger BEFORE UPDATE ON variant FOR EACH ROW EXECUTE PROCEDURE variant_fts_document_trigger();
-    CREATE TRIGGER variant_fts_insert_trigger BEFORE INSERT ON variant FOR EACH ROW EXECUTE PROCEDURE variant_fts_document_trigger();
+    CREATE TRIGGER variant_fts_update_trigger BEFORE UPDATE ON variant FOR EACH ROW EXECUTE PROCEDURE variant_fts_trigger();
+    CREATE TRIGGER variant_fts_insert_trigger BEFORE INSERT ON variant FOR EACH ROW EXECUTE PROCEDURE variant_fts_trigger();
 
-    CREATE INDEX variant_fts_index ON variant USING gin(fts_document);
+    CREATE INDEX variant_fts_document_index ON variant USING gin(fts_document);
+    CREATE INDEX variant_fts_standard_index ON variant USING gin(fts_standard);
 
     """)
 

@@ -1,21 +1,13 @@
-import re
-from operator import __or__
-import tempfile
 import os
+import re
+import tempfile
+from operator import __or__
 
 from django.db import connection
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 
 from .models import Variant
-
-
-def sanitise_term(term):
-    # Escape all non alphanumeric characters
-    term = re.escape(term)
-    # Enable prefix search
-    term += ":*"
-    return term
 
 
 def index(request):
@@ -25,75 +17,101 @@ def index(request):
     page_num = int(request.GET.get('page_num', '0'))
     search_term = request.GET.get('search_term')
     format = request.GET.get('format')
-    source = request.GET.getlist('source')
+    sources = request.GET.getlist('source')
     filters = request.GET.getlist('filter')
     filter_values = request.GET.getlist('filterValue')
 
-    query, count = build_query(direction, filter_values, filters, order_by, search_term, source, page_size, page_num)
-    # The query for producing the CSV needs to have string literals inside single quotes
-    query_csv, _ = build_query(direction, filter_values, filters, order_by, search_term, source, page_size, page_num,
-                               quotes="\'")
+    query = Variant.objects
 
     if format == 'csv':
+        quotes = '\''
+    else:
+        quotes = ''
+
+    if sources:
+        query = apply_sources(query, sources)
+
+    if filters:
+        query = apply_filters(query, filter_values, filters, quotes=quotes)
+
+    if search_term:
+        query = apply_search(query, search_term, quotes=quotes)
+
+    if order_by:
+        query = apply_order(query, order_by, direction)
+
+    if format == 'csv':
+
         cursor = connection.cursor()
         with tempfile.NamedTemporaryFile() as f:
             os.chmod(f.name, 0606)
-            cursor.execute("COPY ({}) TO '{}' WITH DELIMITER ',' CSV HEADER".format(query_csv.query, f.name))
+            cursor.execute("COPY ({}) TO '{}' WITH DELIMITER ',' CSV HEADER".format(query.query, f.name))
 
             response = HttpResponse(f.read(), content_type='text/csv')
             response['Content-Disposition'] = 'attachment;filename="variants.csv"'
             return response
 
     elif format == 'json':
+
+        count = query.count()
+
+        if search_term:
+            # Number of synonym matches = total matches minus matches on "normal" columns
+            synonyms = count - apply_search(query, search_term, search_column='fts_standard').count()
+        else:
+            synonyms = 0
+
+        query = select_page(query, page_size, page_num)
+
         # call list() now to evaluate the query
-        response = JsonResponse({'count': count, 'data': list(query.values())})
+        response = JsonResponse({'count': count, 'synonyms': synonyms, 'data': list(query.values())})
         response['Access-Control-Allow-Origin'] = '*'
         return response
 
 
-def build_query(direction, filterValues, filters, order_by, search_term, source, page_size, page_num,
-                quotes=""):
-    query = Variant.objects
-
-    # if there are multiple filters the row must match all the filters
-    if filters:
-        for column, value in zip(filters, filterValues):
-            if column == 'id':
-                query = query.filter(**{column:value})
-            else:
-                query = query.extra(
-                    where=["\"{0}\" LIKE %s".format(column)],
-                    params=["{0}{1}%{0}".format(quotes, value)]
-                )
-
-    # search using the tsvector column which represents our document made of all the columns
-    if search_term:
-        query = query.extra(
-            where=["variant.fts_document @@ to_tsquery('simple', %s)"],
-            params=["{0}{1}{0}".format(quotes, sanitise_term(search_term))]
-        )
-
+def apply_sources(query, sources):
     # if there are multiple sources given then OR them:
     # the row must match in at least one column
-    if source:
-        query_list = (Q(**{column: True}) for column in source)
-        query = query.filter(reduce(__or__, query_list))
-    if order_by:
-        # special case for HGVS columns
-        if order_by in ('HGVS_cDNA', 'HGVS_Protein'):
-            order_by = 'Genomic_Coordinate_hg38'
-        if direction == 'descending':
-            order_by = '-' + order_by
-        query = query.order_by(order_by, 'Pathogenicity_default')
+    query_list = (Q(**{column: True}) for column in sources)
+    return query.filter(reduce(__or__, query_list))
 
-    # count the number of rows now before paginating
-    count = query.count()
 
-    if page_size:
-        start = page_size * page_num
-        end = start + page_size
-        query = query[start:end]
-    return query, count
+def apply_filters(query, filterValues, filters, quotes=''):
+    # if there are multiple filters the row must match all the filters
+    for column, value in zip(filters, filterValues):
+        if column == 'id':
+            query = query.filter(**{column: value})
+        else:
+            query = query.extra(
+                where=["\"{0}\" LIKE %s".format(column)],
+                params=["{0}{1}%{0}".format(quotes, value)]
+            )
+    return query
+
+
+def apply_search(query, search_term, search_column='fts_document', quotes=''):
+    # search using the tsvector column which represents our document made of all the columns
+    where_clause = "variant.{} @@ to_tsquery('simple', %s)".format(search_column)
+    parameter = quotes + sanitise_term(search_term) + quotes
+    return query.extra(
+        where=[where_clause],
+        params=[parameter]
+    )
+
+
+def apply_order(query, order_by, direction):
+    # special case for HGVS columns
+    if order_by in ('HGVS_cDNA', 'HGVS_Protein'):
+        order_by = 'Genomic_Coordinate_hg38'
+    if direction == 'descending':
+        order_by = '-' + order_by
+    return query.order_by(order_by, 'Pathogenicity_default')
+
+
+def select_page(query, page_size, page_num):
+    start = page_size * page_num
+    end = start + page_size
+    return query[start:end]
 
 
 def autocomplete(request):
@@ -114,3 +132,11 @@ def autocomplete(request):
     response = JsonResponse({'suggestions': rows[:limit]})
     response['Access-Control-Allow-Origin'] = '*'
     return response
+
+
+def sanitise_term(term):
+    # Escape all non alphanumeric characters
+    term = re.escape(term)
+    # Enable prefix search
+    term += ":*"
+    return term
