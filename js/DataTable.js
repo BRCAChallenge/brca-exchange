@@ -83,6 +83,7 @@ var DataTable = React.createClass({
             sourceSelection: this.props.sourceSelection,
             pageLength: 20,
             page: 0,
+            totalPages: 0,
             windowWidth: window.innerWidth
         }, this.props.initialState);
     },
@@ -113,7 +114,8 @@ var DataTable = React.createClass({
             sortBy,
             search,
             searchColumn: _.keys(_.pick(columnSelection, v => v)),
-            source: _.keys(_.pick(sourceSelection, v => v)),
+            include: _.keys(_.pick(sourceSelection, v => v == 1)),
+            exclude: _.keys(_.pick(sourceSelection, v => v == -1)),
             filterValues}, hgvs.filters(search, filterValues)));
     },
     lollipopOpts: function () {
@@ -133,7 +135,8 @@ var DataTable = React.createClass({
             sortBy,
             search,
             searchColumn: _.keys(_.pick(columnSelection, v => v)),
-            source: _.keys(_.pick(sourceSelection, v => v)),
+            include: _.keys(_.pick(sourceSelection, v => v == 1)),
+            exclude: _.keys(_.pick(sourceSelection, v => v == -1)),
             filterValues}, hgvs.filters(search, filterValues)));
     },
     // helper function that sets state, fetches new data,

@@ -37,6 +37,8 @@ function url(opts) {
         search = '',
         source,
         column,
+        include,
+        exclude
         } = opts,
 
         [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v)));
@@ -52,7 +54,9 @@ function url(opts) {
         'page_num': page,
         'search_term': search,
         'source': source,
-        'column': column
+        'column': column,
+        'include': include,
+        'exclude': exclude
     }, v => v != null), {arrayFormat: 'repeat'})}`;
 }
 
