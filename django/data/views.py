@@ -76,7 +76,7 @@ def apply_sources(query, include, exclude):
     include_list = (Q(**{column: True}) for column in include)
     exclude_dict = {exclusion: False for exclusion in exclude}
     
-    return query.filter(reduce(__or__, query_list)).filter(**exclude_dict)
+    return query.filter(reduce(__or__, include_list)).filter(**exclude_dict)
 
 
 def apply_filters(query, filterValues, filters, quotes=''):
