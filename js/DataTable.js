@@ -25,10 +25,11 @@ var merge = (...args) => _.extend({}, ...args);
 
 var Lollipop = require('./d3Lollipop');
 
-function setPages({data, count}, pageLength) {
+function setPages({data, count, synonyms}, pageLength) {
     return {
         data,
         count,
+        synonyms,
         totalPages: Math.ceil(count / pageLength)
     };
 }
@@ -169,7 +170,7 @@ var DataTable = React.createClass({
     },
     render: function () {
         var {filterValues, filtersOpen, lollipopOpen, search, data, columnSelection,
-            page, totalPages, count, error} = this.state;
+            page, totalPages, count, synonyms, error} = this.state;
         var {columns, filterColumns, className, advancedFilters, downloadButton, lollipopButton, onToggleMode} = this.props;
         var renderColumns = _.filter(columns, c => columnSelection[c.prop]);
         var filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
@@ -212,7 +213,7 @@ var DataTable = React.createClass({
                         <div className='form-inline'>
                             <div className='form-group'>
                                 <label className='control-label'>
-                                    {count} matching {pluralize(count, 'variant')}
+                                    {count} matching {pluralize(count, 'variant')} {synonyms ? 'of which '+synonyms+' matched on synonyms' : ''}
                                 </label>
                                 {downloadButton(this.createDownload)}
                             </div>
