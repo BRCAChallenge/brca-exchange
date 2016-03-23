@@ -20,6 +20,7 @@ def index(request):
     sources = request.GET.getlist('source')
     filters = request.GET.getlist('filter')
     filter_values = request.GET.getlist('filterValue')
+    column = request.GET.getlist('column')
 
     query = Variant.objects
 
@@ -64,7 +65,7 @@ def index(request):
         query = select_page(query, page_size, page_num)
 
         # call list() now to evaluate the query
-        response = JsonResponse({'count': count, 'synonyms': synonyms, 'data': list(query.values())})
+        response = JsonResponse({'count': count, 'synonyms': synonyms, 'data': list(query.values(*column))})
         response['Access-Control-Allow-Origin'] = '*'
         return response
 

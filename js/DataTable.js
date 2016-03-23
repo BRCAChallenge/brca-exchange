@@ -119,8 +119,6 @@ var DataTable = React.createClass({
     lollipopOpts: function () {
         var {search, filterValues,sourceSelection} = this.state;
         return {
-            format: 'json',
-            pageLength: -1,
             search,
             source: _.keys(_.pick(sourceSelection, v => v)),
             filterValues
