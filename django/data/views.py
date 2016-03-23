@@ -55,6 +55,7 @@ def index(request):
         count = query.count()
 
         if search_term:
+            # Number of synonym matches = total matches minus matches on "normal" columns
             synonyms = count - apply_search(query, search_term, search_column='fts_standard').count()
         else:
             synonyms = 0
