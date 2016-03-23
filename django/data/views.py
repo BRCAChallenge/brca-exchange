@@ -1,13 +1,14 @@
-import re
-from operator import __or__
-import tempfile
 import os
+import re
+import tempfile
+from operator import __or__
 
 from django.db import connection
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 
 from .models import Variant
+
 
 def index(request):
     order_by = request.GET.get('order_by')
@@ -67,23 +68,26 @@ def index(request):
         response['Access-Control-Allow-Origin'] = '*'
         return response
 
+
 def apply_sources(query, sources):
     # if there are multiple sources given then OR them:
     # the row must match in at least one column
     query_list = (Q(**{column: True}) for column in sources)
     return query.filter(reduce(__or__, query_list))
 
+
 def apply_filters(query, filterValues, filters, quotes=''):
     # if there are multiple filters the row must match all the filters
     for column, value in zip(filters, filterValues):
         if column == 'id':
-            query = query.filter(**{column:value})
+            query = query.filter(**{column: value})
         else:
             query = query.extra(
                 where=["\"{0}\" LIKE %s".format(column)],
                 params=["{0}{1}%{0}".format(quotes, value)]
             )
     return query
+
 
 def apply_search(query, search_term, search_column='fts_document', quotes=''):
     # search using the tsvector column which represents our document made of all the columns
@@ -94,6 +98,7 @@ def apply_search(query, search_term, search_column='fts_document', quotes=''):
         params=[parameter]
     )
 
+
 def apply_order(query, order_by, direction):
     # special case for HGVS columns
     if order_by in ('HGVS_cDNA', 'HGVS_Protein'):
@@ -102,10 +107,12 @@ def apply_order(query, order_by, direction):
         order_by = '-' + order_by
     return query.order_by(order_by, 'Pathogenicity_default')
 
+
 def select_page(query, page_size, page_num):
     start = page_size * page_num
     end = start + page_size
     return query[start:end]
+
 
 def autocomplete(request):
     term = request.GET.get('term')
@@ -125,6 +132,7 @@ def autocomplete(request):
     response = JsonResponse({'suggestions': rows[:limit]})
     response['Access-Control-Allow-Origin'] = '*'
     return response
+
 
 def sanitise_term(term):
     # Escape all non alphanumeric characters
