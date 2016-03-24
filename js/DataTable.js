@@ -39,10 +39,7 @@ var FastTable = React.createClass({
     mixins: [PureRenderMixin],
     render: function () {
         var {dataArray, ...props} = this.props;
-        var trimmedData = _.map(dataArray, r =>
-            _.mapObject(r, v => v.length > 30 ? v.slice(0, 30) + "..." : v)
-        );
-        return <Table {...props} dataArray={trimmedData}/>;
+        return <Table {...props} dataArray={dataArray}/>;
     }
 });
 
