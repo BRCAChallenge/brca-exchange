@@ -419,7 +419,7 @@ var ResearchVariantTableSupplier = function (Component) {
         getAdvancedFilters() {
             var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
                 <Col sm={6} md={3} key={name}>
-                    <div>
+                    <div className="sources-fields btm-buffer">
                         <Input type="select"
                             onChange={v => this.setSource(name,v)}
                             label={name.substring(11).replace(/_/g," ")} // eg "Variant_in_1000_Genomes" => "1000 Genomes"

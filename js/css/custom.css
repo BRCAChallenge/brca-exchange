@@ -322,3 +322,6 @@ th[role='columnheader'] .help, .help-target .help {
 .glyphicon.help {
     margin: 3px;
 }
+.sources-fields label {
+    width: 8em;
+}
