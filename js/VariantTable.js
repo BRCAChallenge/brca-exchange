@@ -492,11 +492,13 @@ var VariantTableSupplier = function (Component) {
             var columnSelection = _.object(
                 _.map(this.getColumns(),
                     c => _.contains(this.getDefaultColumns(), c.prop) ? [c.prop, true] : [c.prop, false]));
+            var sourceSelection = allSources
             return (
                 <Component
                     {...this.props}
                     columns={this.getColumns()}
                     columnSelection={columnSelection}
+                    sourceSelection={sourceSelection}
                     downloadButton={()=> null}
                     lollipopButton={()=> null}/>
             );
