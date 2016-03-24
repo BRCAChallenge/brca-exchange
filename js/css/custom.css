@@ -238,7 +238,10 @@ div#main {
 /**************************************************************/
 /**********     Table                     *********************/
 /**************************************************************/
-
+.table.row-clickable {
+    word-wrap: break-word;
+    table-layout: fixed;
+}
 
 .table.row-clickable tbody > tr {
 	cursor: pointer;
