@@ -102,12 +102,7 @@ var D3Lollipop = React.createClass({
     },
     componentWillUnmount: function() {
         this.cleanupBRCA();
-        window.removeEventListener('resize', this.handleResize);
-    },
-    handleResize: function (e) {
-        this.setState({windowWidth: window.innerWidth});
     }
-
 });
 
 var Lollipop = React.createClass({
@@ -127,11 +122,7 @@ var Lollipop = React.createClass({
     fetchData: function (opts) {
         this.props.fetch(opts).subscribe(
             function (d) {
-                console.log('setting the state');
-                console.log(d);
                 this.setState({data: d.data});
-                console.log('state set');
-                console.log(this.state);
             }.bind(this));
     },
     onSelect: function (key) {
