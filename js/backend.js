@@ -15,8 +15,9 @@ var transpose = a => _.zip.apply(_, a);
 // URIs have a 2083 character size limit and some search terms exceed that.
 // Limit the length and cut at a semicolon if possible to ensure the search works
 function trimSearchTerm(search) {
-    if (search.length > 50) {
-        search = search.slice(0, 50);
+    var maxLength = 200;
+    if (search.length > maxLength) {
+        search = search.slice(0, maxLength);
         var lastColonPosition = search.lastIndexOf(":");
         if (lastColonPosition !== -1) {
             search = search.slice(0, lastColonPosition);
