@@ -72,9 +72,9 @@ def updateRow(row, toRemove):
     newRow["Allele_Frequency"] = selectAlleleFrequency(newRow)
     newRow["Max_Allele_Frequency"] = selectMaxAlleleFrequency(newRow)
     newRow["Discordant"] = checkDiscordantStatus(newRow)
+    newRow["Source_URL"] = setSourceUrls(newRow)
     newRow["Genomic_Coordinate_hg37"] = EMPTY
     newRow["Genomic_Coordinate_hg36"] = EMPTY
-    newRow["Source_URL"] = EMPTY
     for item in toRemove:
         del newRow[item]
     return(newRow)
@@ -247,10 +247,22 @@ def checkDiscordantStatus(row):
         if re.search("class 1", item.lower()):
             hasBenignClassification = True
     if hasPathogenicClassification and hasBenignClassification:
-        return "True"
+        return "Discordant"
     else:
-        return "False"
+        return "Concordant"
 
+def setSourceUrls(row):
+    url = ""
+    delimiter = ""
+    if row["SCV(ClinVar)"] != EMPTY:
+        for thisSCV in row["SCV(ClinVar)"].split(','):
+            variantUrl = "http://www.ncbi.nlm.nih.gov/clinvar/?term="+ thisSCV
+            url = "%s%s%s" % (url, delimiter, variantUrl)
+            delimiter=","
+    if url != "":
+        return url
+    else:
+        return EMPTY
 
 if __name__ == "__main__":
     main()
