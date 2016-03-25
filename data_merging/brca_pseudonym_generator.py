@@ -91,7 +91,7 @@ def main(args):
         parsedLine = line.rstrip().split('\t')
         
         if parsedLine[refSeqIndex] == '-': continue
-       
+
         # Format genomic variant position strings to contain relevant refseq strings 
         oldHgvsGenomic36 = parsedLine[refSeqIndex] + ':' + parsedLine[hgvsG36Index]
         oldHgvsGenomic37 = parsedLine[refSeqIndex] + ':' + parsedLine[hgvsG37Index]
@@ -106,7 +106,7 @@ def main(args):
         # Edge case for correcting variant string formats for indels to be accepted by the counsyl parser
         if ref38 == '-': ref38 = ''
         if alt38 == '-': alt38 = ''
-        
+
         transcript38 = get_transcript38(parsedLine[refSeqIndex])
         transcript37 = get_transcript37(parsedLine[refSeqIndex])
         transcript36 = get_transcript36(parsedLine[refSeqIndex])

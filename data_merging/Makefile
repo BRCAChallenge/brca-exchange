@@ -13,7 +13,7 @@ endef
 
 all:	$(releaseDir)/aggregated.tsv
 
-$(releaseDir)/aggregated.tsv:	$(releaseDir)/merged.withVEP.csv
+$(releaseDir)/aggregated.tsv:	$(releaseDir)/merged.withVEP.csv aggregate_across_columns.py brca_pseudonym_generator.py
 	aggregate_across_columns.py -i $< -o $(releaseDir)/tmp.tsv
 	brca_pseudonym_generator.py -i $(releaseDir)/tmp.tsv \
 	  -j $(pseudonymDir)/hg18.fa \
@@ -23,10 +23,10 @@ $(releaseDir)/aggregated.tsv:	$(releaseDir)/merged.withVEP.csv
 	  -t $(pseudonymDir)/refseq_annotation.hg38.gp \
 	  -o $@
 
-$(releaseDir)/merged.withVEP.csv:	$(releaseDir)/merged.csv
+$(releaseDir)/merged.withVEP.csv:	$(releaseDir)/merged.csv add_VEP_result.py
 	add_VEP_result.py -i $< -o $@
 
-$(releaseDir)/merged.csv:	$(inputVcfs)
-	variant-merging.py -o $@
+$(releaseDir)/merged.csv:	$(inputVcfs) variant-merging.py
+	variant-merging.py -o $@ > merge.out
 
 

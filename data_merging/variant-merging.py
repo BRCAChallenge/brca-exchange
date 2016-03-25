@@ -49,6 +49,7 @@ LOVD_FIELDS = {"Origin_of_variant": "genetic_origin",
                "Variant_haplotype": "haplotype",
                "Functional_analysis_result": "functionalanalysis_result",
                "Functional_analysis_technique": "functionalanalysis_technique",
+               #"ID", "dna_change_genomic",
                "HGVS_cDNA": "dna_change",
                "HGVS_protein": "protein_change"}
 EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
@@ -316,7 +317,7 @@ def add_new_source(columns, variants, source, source_file, source_dict):
     print "adding {0} into merged file.....".format(source)
     old_column_num = len(columns)
     for column_title in source_dict.keys():
-        columns.append(column_title+"({0})".format(source))
+        columns.append(column_title+"_{0}".format(source))
 
     vcf_reader = vcf.Reader(open(source_file, 'r'), strict_whitespace=True)
     overlap = 0
@@ -370,7 +371,7 @@ def save_enigma_to_dict(path):
         line = line.replace(",", "|")
         if line_num == 1:
             columns = line.strip().split("\t")
-            columns = [c + "(ENIGMA)" for c in columns if c != "Genomic_Coordinate"]
+            columns = [c + "_ENIGMA" for c in columns if c != "Genomic_Coordinate"]
             columns.insert(0, "Source")
             columns.insert(2, "Genomic_Coordinate")
             f_wrong.write(line)

@@ -65,7 +65,7 @@ def write_to_file(vep_result_dict, inputFile, outputFile):
             print line_num
         items = line.strip().split(",")
         if line_num == 1:
-            vep_fields = [i+"(VEP)" for i in VEP_FIELDS]
+            vep_fields = [i+"_VEP" for i in VEP_FIELDS]
             items += vep_fields
         else:
             genome_coor = items[2]
