@@ -25,10 +25,11 @@ var merge = (...args) => _.extend({}, ...args);
 
 var Lollipop = require('./d3Lollipop');
 
-function setPages({data, count}, pageLength) {
+function setPages({data, count, synonyms}, pageLength) {
     return {
         data,
         count,
+        synonyms,
         totalPages: Math.ceil(count / pageLength)
     };
 }
@@ -38,10 +39,7 @@ var FastTable = React.createClass({
     mixins: [PureRenderMixin],
     render: function () {
         var {dataArray, ...props} = this.props;
-        var trimmedData = _.map(dataArray, r =>
-            _.mapObject(r, v => v.length > 30 ? v.slice(0, 30) + "..." : v)
-        );
-        return <Table {...props} dataArray={trimmedData}/>;
+        return <Table {...props} dataArray={dataArray}/>;
     }
 });
 
@@ -60,10 +58,6 @@ var DataTable = React.createClass({
     componentWillMount: function () {
         var q = this.fetchq = new Rx.Subject();
         this.subs = q.map(this.props.fetch).debounce(100).switchLatest().subscribe(
-            resp => this.setState(setPages(resp, this.state.pageLength)), // set data, count, totalPages
-            () => this.setState({error: 'Problem connecting to server'}));
-        var qLollipop = this.fetchqLollipop = new Rx.Subject();
-        this.subs = qLollipop.map(this.props.fetch).debounce(100).switchLatest().subscribe(
             resp => this.setState(setPages(resp, this.state.pageLength)), // set data, count, totalPages
             () => this.setState({error: 'Problem connecting to server'}));
     },
@@ -86,6 +80,7 @@ var DataTable = React.createClass({
             sourceSelection: this.props.sourceSelection,
             pageLength: 20,
             page: 0,
+            totalPages: 0,
             windowWidth: window.innerWidth
         }, this.props.initialState);
     },
@@ -116,8 +111,18 @@ var DataTable = React.createClass({
             sortBy,
             search,
             searchColumn: _.keys(_.pick(columnSelection, v => v)),
-            source: _.keys(_.pick(sourceSelection, v => v)),
+            include: _.keys(_.pick(sourceSelection, v => v == 1)),
+            exclude: _.keys(_.pick(sourceSelection, v => v == -1)),
             filterValues}, hgvs.filters(search, filterValues)));
+    },
+    lollipopOpts: function () {
+        var {search, filterValues,sourceSelection} = this.state;
+        return merge({
+            search,
+            include: _.keys(_.pick(sourceSelection, v => v == 1)),
+            exclude: _.keys(_.pick(sourceSelection, v => v == -1)),
+            filterValues
+        }, hgvs.filters(search, filterValues));
     },
     fetch: function (state) {
         var {pageLength, search, page, sortBy,
@@ -128,16 +133,8 @@ var DataTable = React.createClass({
             sortBy,
             search,
             searchColumn: _.keys(_.pick(columnSelection, v => v)),
-            source: _.keys(_.pick(sourceSelection, v => v)),
-            filterValues}, hgvs.filters(search, filterValues)));
-    },
-    fetchLollipopData: function(state) {
-        var {search, sortBy, filterValues} = state;
-        this.fetchq.onNext(merge({
-            pageLength: null,
-            page: null,
-            sortBy,
-            search,
+            include: _.keys(_.pick(sourceSelection, v => v == 1)),
+            exclude: _.keys(_.pick(sourceSelection, v => v == -1)),
             filterValues}, hgvs.filters(search, filterValues)));
     },
     // helper function that sets state, fetches new data,
@@ -169,7 +166,7 @@ var DataTable = React.createClass({
     },
     render: function () {
         var {filterValues, filtersOpen, lollipopOpen, search, data, columnSelection,
-            page, totalPages, count, error} = this.state;
+            page, totalPages, count, synonyms, error} = this.state;
         var {columns, filterColumns, className, advancedFilters, downloadButton, lollipopButton, onToggleMode} = this.props;
         var renderColumns = _.filter(columns, c => columnSelection[c.prop]);
         var filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
@@ -200,7 +197,7 @@ var DataTable = React.createClass({
                 <Row id="lollipop-chart" className="">
                     <Col sm={12}>
                         {lollipopOpen && this.state.windowWidth > 991 && this.state.data.length > 0 &&
-                        <Lollipop data={this.state.data} onHeaderClick={this.props.onHeaderClick} onRowClick={this.props.onRowClick}/> }
+                        <Lollipop fetch={this.props.fetchLollipop} opts={this.lollipopOpts()} onHeaderClick={this.props.onHeaderClick} onRowClick={this.props.onRowClick}/> }
 
                         {lollipopOpen && this.state.windowWidth <= 991 &&
                         <div className="alert alert-danger">Please use a larger screen size to view this interactive chart.</div>}
@@ -212,7 +209,7 @@ var DataTable = React.createClass({
                         <div className='form-inline'>
                             <div className='form-group'>
                                 <label className='control-label'>
-                                    {count} matching {pluralize(count, 'variant')}
+                                    {count} matching {pluralize(count, 'variant')} {synonyms ? 'of which '+synonyms+' matched on synonyms' : ''}
                                 </label>
                                 {downloadButton(this.createDownload)}
                             </div>

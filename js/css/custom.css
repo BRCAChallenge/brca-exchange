@@ -238,7 +238,10 @@ div#main {
 /**************************************************************/
 /**********     Table                     *********************/
 /**************************************************************/
-
+.table.row-clickable {
+    word-wrap: break-word;
+    table-layout: fixed;
+}
 
 .table.row-clickable tbody > tr {
 	cursor: pointer;
@@ -321,4 +324,7 @@ th[role='columnheader'] .help, .help-target .help {
 
 .glyphicon.help {
     margin: 3px;
+}
+.sources-fields label {
+    width: 7.5em;
 }

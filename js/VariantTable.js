@@ -14,7 +14,7 @@ var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin');
 var DataTable = require('./DataTable');
 var _ = require('underscore');
-var {Col, Panel, Button} = require('react-bootstrap');
+var {Col, Panel, Button, Input} = require('react-bootstrap');
 var ColumnCheckbox = require('./ColumnCheckbox');
 
 
@@ -338,14 +338,14 @@ var defaultColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HG
 var defaultResearchColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_research', 'Discordant', 'Allele_Frequency'];
 
 var allSources = {
-    Variant_in_ENIGMA: true,
-    Variant_in_ClinVar: true,
-    Variant_in_1000_Genomes: true,
-    Variant_in_ExAC: true,
-    Variant_in_LOVD: true,
-    Variant_in_BIC: true,
-    Variant_in_ESP: true,
-    Variant_in_exLOVD: true
+    Variant_in_ENIGMA: 1,
+    Variant_in_ClinVar: 1,
+    Variant_in_1000_Genomes: 1,
+    Variant_in_ExAC: 1,
+    Variant_in_LOVD: 1,
+    Variant_in_BIC: 1,
+    Variant_in_ESP: 1,
+    Variant_in_exLOVD: 1
 };
 // Work-around to allow the user to select text in the table. The browser does not distinguish between
 // click and drag: if mouseup and mousedown occur on the same element, a click event is fired even if
@@ -380,8 +380,7 @@ var Table = React.createClass({
                 initialData={data}
                 initialPageLength={20}
                 initialSortBy={{prop: 'Gene_Symbol', order: 'descending'}}
-                pageLengthOptions={[ 20, 50, 100 ]}
-            />
+                pageLengthOptions={[ 20, 50, 100 ]}/>
         );
     }
 });
@@ -397,10 +396,8 @@ var ResearchVariantTableSupplier = function (Component) {
             var columnSelectionQueryParams = this.props.initialState.columnSelection;
 
             return {
-                sourceSelection: _.mapObject(allSources, (v, k)=> {
-                    return _.has(this.props.hiddenSources, k) ? false : true
-                }),
-                columnSelection: {...defaultColumnSelection, ...columnSelectionQueryParams},
+                sourceSelection: {...allSources, ...this.props.sourceSelection},
+                columnSelection: {...defaultColumnSelection, ...columnSelectionQueryParams}
             };
         },
         toggleColumns: function (prop) {
@@ -409,10 +406,9 @@ var ResearchVariantTableSupplier = function (Component) {
                 cs = {...columnSelection, [prop]: !val};
             this.setState({columnSelection: cs});
         },
-        toggleSource: function (prop) {
-            var {sourceSelection} = this.state,
-                val = sourceSelection[prop],
-                ss = {...sourceSelection, [prop]: !val};
+        setSource: function (prop, event) {
+            var {sourceSelection} = this.state
+            var ss = {...sourceSelection, [prop]: event.target.value};
             this.setState({sourceSelection: ss});
         },
         filterFormCols: function (subColList, columnSelection) {
@@ -423,12 +419,15 @@ var ResearchVariantTableSupplier = function (Component) {
         getAdvancedFilters() {
             var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
                 <Col sm={6} md={3} key={name}>
-                    <div>
-                        <ColumnCheckbox
-                            onChange={v => this.toggleSource(name)}
-                            label={name}
-                            title={name.substring(11).replace(/_/g," ")} // eg "Variant_in_1000_Genomes" => "1000 Genomes"
-                            initialCheck={this.state.sourceSelection}/>
+                    <div className="sources-fields btm-buffer">
+                        <Input type="select"
+                            onChange={v => this.setSource(name,v)}
+                            label={name.substring(11).replace(/_/g," ")} // eg "Variant_in_1000_Genomes" => "1000 Genomes"
+                            value={value}>
+                            <option value={ 1}>{"Include"}</option>
+                            <option value={ 0}>{"Don't care"}</option>
+                            <option value={-1}>{"Exclude"}</option>
+                        </Input>
                     </div>
                 </Col>
             );
@@ -473,8 +472,7 @@ var ResearchVariantTableSupplier = function (Component) {
                     sourceSelection={sourceSelection}
                     columnSelection={columnSelection}
                     downloadButton={this.getDownloadButton}
-                    lollipopButton={this.getLollipopButton}
-                />
+                    lollipopButton={this.getLollipopButton}/>
             );
         }
     });
@@ -494,14 +492,15 @@ var VariantTableSupplier = function (Component) {
             var columnSelection = _.object(
                 _.map(this.getColumns(),
                     c => _.contains(this.getDefaultColumns(), c.prop) ? [c.prop, true] : [c.prop, false]));
+            var sourceSelection = allSources
             return (
                 <Component
                     {...this.props}
                     columns={this.getColumns()}
                     columnSelection={columnSelection}
+                    sourceSelection={sourceSelection}
                     downloadButton={()=> null}
-                    lollipopButton={()=> null}
-                />
+                    lollipopButton={()=> null}/>
             );
         }
     });
