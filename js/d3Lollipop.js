@@ -26,19 +26,19 @@ d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id, varlink, data) {
     var minPos = 0;
     var maxPos = 1;
     if (id === 'BRCA1') {
-        xAxisLabel = 'BRCA1 Genomic Pos (chr 17)';
+        xAxisLabel = 'Coordinate Selection (GRCh38 chr 17)';
         minPos = 43030000;
         maxPos = 43130000;
     } else if (id === 'BRCA2') {
-        xAxisLabel = 'BRCA2 Genomic Pos (chr 13)';
+        xAxisLabel = 'Coordinate Selection (GRCh38 chr 13)';
         minPos = 32300000;
         maxPos = 32410000;
     }
     var legends = {x: xAxisLabel, y: ""};
     var colorMap = {
       // mutation categories
-      "Benign": "lightblue",
-      "Pathogenic": "red"
+      "Pathogenic": "red",
+      "Benign": "lightblue"
     };
     var config = {variantDetailLink: varlink, minCoord: minPos, maxCoord: maxPos, mutationData: muts, regionData: domain, targetElement: ref.id, legends: legends, colorMap: colorMap };
     var instance =  new Mutneedles(config);
@@ -68,7 +68,7 @@ var D3Lollipop = React.createClass({
             chrCoordinate = String(chrCoordinate);
         }
         if (oldObj.Pathogenicity_default == 'Not Yet Classified'){
-            oldObj.Pathogenicity_default = "Unknown";
+            oldObj.Pathogenicity_default = "Uncertain";
         }
         if (oldObj.Pathogenicity_default == 'Benign / Little Clinical Significance'){
             oldObj.Pathogenicity_default = "Benign";
