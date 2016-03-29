@@ -176,6 +176,7 @@ var DataTable = React.createClass({
 
         return (error ? <p>{error}</p> :
             <div className={this.props.className}>
+            <div id="filters" className="container">
                 <Row id="show-hide" className="btm-buffer">
                     <Col sm={12}>
                         <Button className="btn-sm rgt-buffer"
@@ -248,6 +249,8 @@ var DataTable = React.createClass({
                             onChangePage={this.onChangePage} />
                     </Col>
                 </Row>
+            </div>
+            <div id="wide-table" className="container-fluid">
                 <Row>
                     <Col className="table-responsive" sm={12}>
                         <FastTable
@@ -262,6 +265,7 @@ var DataTable = React.createClass({
                             onSort={this.onSort} />
                     </Col>
                 </Row>
+                </div>
             </div>
         );
     }
