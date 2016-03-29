@@ -356,7 +356,7 @@ var Database = React.createClass({
                 onRowClick={this.showVariant}/>
         }
         return (
-            <Grid style={{display: show ? 'block' : 'none'}}>
+            <Grid fluid={true} id="table-grid" style={{display: show ? 'block' : 'none'}}>
                 {table}
             </Grid>
         );
