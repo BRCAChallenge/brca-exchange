@@ -20,15 +20,21 @@ def login(request):
             # is not logged in.
             auth.login(request, user)
 
-            return JsonResponse({'success': True})
+            response = JsonResponse({'success': True})
+            response["Access-Control-Allow-Origin"] = "*"
+            return response
 
     else:
-        return JsonResponse({'success': False})
+        response = JsonResponse({'success': False})
+        response["Access-Control-Allow-Origin"] = "*"
+        return response
 
 
 def user_logout(request):
     logout(request)
-    return JsonResponse({'success': True})
+    response = JsonResponse({'success': True})
+    response["Access-Control-Allow-Origin"] = "*"
+    return response
 
 
 def register(request):
@@ -41,14 +47,18 @@ def register(request):
     city = request.POST.get('city', '')
     state = request.POST.get('state', '')
     country = request.POST.get('country', '')
-    phone_number = request.POST.get('phone_number', '')
-    hide_number = request.POST.get('hide_number', True)
-    hide_email = request.POST.get('hide_email', True)
+    phone_number = request.POST.get('phoneNumber', '')
+    hide_number = request.POST.get('hideNumber', True)
+    hide_email = request.POST.get('hideEmail', True)
+
+    response = {'success': True}
 
     try:
         MyUser.objects.create_user(email, password, title, affiliation, institution, city, state, country, phone_number,
                                    hide_number, hide_email)
     except IntegrityError:
-        return JsonResponse({'success': False})
+        response = {'success': False}
 
-    return JsonResponse({'success': True})
+    response = JsonResponse(response)
+    response["Access-Control-Allow-Origin"] = "*"
+    return response

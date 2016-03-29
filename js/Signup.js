@@ -23,27 +23,30 @@ var AFFILIATION = [
 var Signup = React.createClass({
     getInitialState: function () {
         return {
-            submitted: null
+            submitted: null,
+            success: null
         }
     },
     render: function () {
-        var submitted;
-        if (this.state.submitted !== null) {
-            submitted = <div className="alert alert-success">
-                <p>ContactForm data:</p>
-                <pre><code>{JSON.stringify(this.state.submitted, null, '  ')}</code></pre>
+        var message;
+        if (this.state.success === true) {
+            message = <div className="alert alert-success">
+                <p>Account created successfully</p>
+            </div>
+        } else if (this.state.success === false) {
+            message = <div className="alert alert-danger">
+                <p>An error occurred creating this account</p>
             </div>
         }
         return <div>
             <div className="panel panel-default">
+                {message}
                 <div className="panel-heading clearfix">
                     <h3 className="panel-title pull-left">Signup</h3>
+
                 </div>
                 <div className="panel-body">
                     <SignupForm ref="contactForm"
-                                email={this.state.email}
-                                question={this.state.question}
-                                company={this.props.company}
                     />
                 </div>
                 <div className="panel-footer">
@@ -51,7 +54,6 @@ var Signup = React.createClass({
                     </button>
                 </div>
             </div>
-            {submitted}
         </div>
     },
 
@@ -63,61 +65,45 @@ var Signup = React.createClass({
 
     handleSubmit: function () {
         if (this.refs.contactForm.isValid()) {
-            this.setState({submitted: this.refs.contactForm.getFormData()})
-            var token = Cookies.get('csrftoken');
-            console.log(token);
-            var url = 'http://localhost:8000/account/signup/';
-            console.log(url);
+            var formData = this.refs.contactForm.getFormData();
 
-            //$.ajax({
-            //    url: url,
-            //    crossDomain: true,
-            //    success: function (data) {
-            //        console.log('success');
-            //        console.log(data);
-            //    }.bind(this),
-            //    error: function (xhr, status, err) {
-            //        console.error("Couldn't sign up");
-            //    }.bind(this)
-            //});
+            this.setState({submitted: formData})
 
-            Rx.DOM.post(
-                     'http://localhost:8000/account/signup/',
-                    {country: 'Greece', first_name: 'Irene', email: 'eirhnh+test25@gmail.com', csrftoken: token})
-            .subscribe(
-                function (data) {
-                    console.log('logging data');
-                    console.log(data);
-                    console.log(data.response);
-                },
-                function (err) {
-                    console.log('logging error');
-                    console.log(err);
-                }
-            );
+            var url = backend.databaseUrl + '/accounts/register/';
+
+            $.ajax({
+                url: url,
+                data: formData,
+                dataType: 'json',
+                crossDomain: true,
+                method: 'POST',
+                success: function (data) {
+                    this.setState({success: data.success})
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    this.setState({success: false})
+
+                }.bind(this)
+            });
         }
     }
 });
 
 var SignupForm = React.createClass({
-    getDefaultProps: function () {
-        return {
-            email: true
-            , question: false
-        }
-    },
     getInitialState: function () {
         return {errors: {}}
     },
     isValid: function () {
-        //var fields = ['email', 'email_confirm', 'firstName', 'lastName', 'city', 'state', 'country',
-        //    'phoneNumber', 'hideNumber', 'hideEmail'];
-        var fields = [];
+        var compulsory_fields = ['email', 'email_confirm', 'password', 'password_confirm', 'firstName',
+            'lastName', 'city', 'state', 'country', 'phoneNumber'];
         var errors = {};
         if (this.refs.email.getDOMNode().value != this.refs.email_confirm.getDOMNode().value) {
             errors["email_confirm"] = "The emails don't match"
         }
-        fields.forEach(function (field) {
+        if (this.refs.password.getDOMNode().value != this.refs.password_confirm.getDOMNode().value) {
+            errors["password_confirm"] = "The passwords don't match"
+        }
+        compulsory_fields.forEach(function (field) {
             var value = trim(this.refs[field].getDOMNode().value)
             if (!value) {
                 errors[field] = 'This field is required'
@@ -140,6 +126,8 @@ var SignupForm = React.createClass({
         var data = {
             email: this.refs.email.getDOMNode().value
             , email_confirm: this.refs.email_confirm.getDOMNode().value
+            , password: this.refs.password.getDOMNode().value
+            , password_confirm: this.refs.password_confirm.getDOMNode().value
             , firstName: this.refs.firstName.getDOMNode().value
             , lastName: this.refs.lastName.getDOMNode().value
             , title: title
@@ -156,20 +144,22 @@ var SignupForm = React.createClass({
     },
     render: function () {
         return <div className="form-horizontal">
-            {this.renderTextInput('email', 'Email')}
-            {this.renderTextInput('email_confirm', 'Confirm Email')}
-            {this.renderTextInput('firstName', 'First Name')}
-            {this.renderTextInput('lastName', 'Last Name')}
+            {this.renderTextInput('email', 'Email *')}
+            {this.renderTextInput('email_confirm', 'Confirm Email *')}
+            {this.renderPassword('password', 'Password *')}
+            {this.renderPassword('password_confirm', 'Confirm Password *')}
+            {this.renderTextInput('firstName', 'First Name *')}
+            {this.renderTextInput('lastName', 'Last Name *')}
             {this.renderRadioInlines('title', '', {
                 values: [{name: 'M.D.', ref: 'md'}, {name: 'Ph.D', ref: 'phd'}, {name: 'Other', ref: 'other'}]
                 , defaultCheckedValue: 'M.D.'
             })}
             {this.renderSelect('affiliation', 'Affiliation', AFFILIATION)}
             {this.renderTextInput('institution', 'Institution, Hospital or Company')}
-            {this.renderTextInput('city', 'City')}
-            {this.renderTextInput('state', 'State or Province')}
-            {this.renderTextInput('country', 'Country')}
-            {this.renderTextInput('phoneNumber', 'Phone number')}
+            {this.renderTextInput('city', 'City *')}
+            {this.renderTextInput('state', 'State or Province *')}
+            {this.renderTextInput('country', 'Country *')}
+            {this.renderTextInput('phoneNumber', 'Phone number *')}
             {this.renderCheckBox('hideNumber', "Don't display my phone number on this website")}
             {this.renderCheckBox('hideEmail', "Don't display my email on this website")}
 
@@ -179,6 +169,11 @@ var SignupForm = React.createClass({
     renderTextInput: function (id, label) {
         return this.renderField(id, label,
             <input type="text" className="form-control" id={id} ref={id}/>
+        )
+    },
+    renderPassword: function (id, label) {
+        return this.renderField(id, label,
+            <input type="password" className="form-control" id={id} ref={id}/>
         )
     },
     renderTextarea: function (id, label) {
