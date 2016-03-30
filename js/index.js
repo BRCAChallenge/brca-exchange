@@ -22,20 +22,20 @@ var Rx = require('rx');
 require('rx-dom');
 
 var brcaLogo = require('./img/BRCA-Exchange-tall-tranparent.png');
-var betaBanner = require('./img/Beta_Banner.png');
 var logos = require('./logos');
 var slugify = require('./slugify');
 
 var content = require('./content');
+var Community = require('./Community');
 
 var databaseKey = require('../databaseKey');
 
-var {Grid, Col, Row, Navbar, Nav, Table,
-    DropdownButton, MenuItem, Modal, Button} = require('react-bootstrap');
+var {Grid, Col, Row, Table} = require('react-bootstrap');
 
 var {VariantTable, ResearchVariantTable, research_mode_columns, columns} = require('./VariantTable');
+var {Signup} = require('./Signup');
 var VariantSearch = require('./VariantSearch');
-var {Navigation, State, Link, Route, RouteHandler,
+var {Navigation, State, Route, RouteHandler,
     HistoryLocation, run, DefaultRoute} = require('react-router');
 
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
@@ -434,6 +434,8 @@ var routes = (
         <DefaultRoute handler={Home}/>
         <Route path='about/:page' handler={About}/>
         <Route path='help' handler={Help}/>
+        <Route path='community' handler={Community}/>
+        <Route path='signup' handler={Signup}/>
         <Route path='variants' />
         <Route path='variant/:id' handler={VariantDetail}/>
     </Route>

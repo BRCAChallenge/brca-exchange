@@ -7,7 +7,7 @@ var RawHTML = require('./RawHTML');
 var {Modal, Button} = require('react-bootstrap');
 
 var content = require('./content');
-
+var Community = require('./Community');
 var databaseKey = require('../databaseKey');
 
 var {Navbar, Nav, DropdownButton} = require('react-bootstrap');
@@ -71,6 +71,7 @@ var NavBarNew = React.createClass({
                 <Navbar fixedTop brand={brand} toggleNavKey={0}>
                     <Nav eventKey={0} navbar right>
                         <NavLink to='/'>Home</NavLink>
+                        <NavLink to='/community'>Community</NavLink>
                         <DropdownButton className={this.activePath(path, "about")} ref='about' title='About'>
                             <NavLink onClick={this.close} to='/about/variation'>
                                 BRCA1, BRCA2, and Cancer
