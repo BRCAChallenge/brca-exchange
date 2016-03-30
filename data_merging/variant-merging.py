@@ -49,7 +49,7 @@ LOVD_FIELDS = {"Origin_of_variant": "genetic_origin",
                "Variant_haplotype": "haplotype",
                "Functional_analysis_result": "functionalanalysis_result",
                "Functional_analysis_technique": "functionalanalysis_technique",
-               #"ID", "dna_change_genomic",
+               "dna_change_genomic": "dna_change_genomic",
                "HGVS_cDNA": "dna_change",
                "HGVS_protein": "protein_change"}
 EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
