@@ -18,25 +18,25 @@ require('font-awesome-webpack');
 require('css/custom.css');
 var _ = require('underscore');
 var backend = require('./backend');
+var {NavBarNew} = require('./NavBarNew');
 var Rx = require('rx');
 require('rx-dom');
 
 var brcaLogo = require('./img/BRCA-Exchange-tall-tranparent.png');
-var betaBanner = require('./img/Beta_Banner.png');
 var logos = require('./logos');
 var slugify = require('./slugify');
 
 var content = require('./content');
+var Community = require('./Community');
 
 var databaseKey = require('../databaseKey');
 
-var {Grid, Col, Row, Navbar, Nav, Table,
-    DropdownButton, MenuItem, Modal, Button} = require('react-bootstrap');
+var {Grid, Col, Row, Table} = require('react-bootstrap');
 
 var {VariantTable, ResearchVariantTable, research_mode_columns, columns} = require('./VariantTable');
 var {Signup} = require('./Signup');
 var VariantSearch = require('./VariantSearch');
-var {Navigation, State, Link, Route, RouteHandler,
+var {Navigation, State, Route, RouteHandler,
     HistoryLocation, run, DefaultRoute} = require('react-router');
 
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
@@ -49,144 +49,6 @@ if (typeof console === "undefined") {
         log: function () {}
     };
 }
-
-var NavLink = React.createClass({
-    render: function () {
-        var {children, ...otherProps} = this.props;
-        return (
-            <li>
-                <Link {...otherProps} role='button'>
-                    {children}
-                </Link>
-            </li>
-        );
-    }
-});
-
-var NavBarNew = React.createClass({
-    close: function () {
-        this.refs.about.setState({open: false});
-    },
-    shouldComponentUpdate: function (nextProps) {
-        // Only rerender if path has change, ignoring query.
-        return this.props.path.split(/\?/)[0] !== nextProps.path.split(/\?/)[0];
-    },
-    activePath: function(path, tab) {
-        var navPath = (path === "") ? "home" : path.split("/")[0];
-        return ((navPath === tab) ? "active" : "");
-    },
-    render: function () {
-        var {path} = this.props;
-        var brand = (
-            <a className="navbar-brand" href="/">
-                <h1>
-                    <span className="BRCA">BRCA</span>
-                    <span className="exchange"> Exchange</span>
-                </h1>
-                <span id="beta-label" className="label label-info">Beta</span>
-            </a>);
-        return (
-            <div className="navbar-container">
-            <Navbar fixedTop brand={brand} toggleNavKey={0}>
-                <Nav eventKey={0} navbar right>
-                    <NavLink to='/'>Home</NavLink>
-                    <NavLink to='/community'>Community</NavLink>
-                    <DropdownButton className={this.activePath(path, "about")} ref='about' title='About'>
-                        <NavLink onClick={this.close} to='/about/variation'>
-                            BRCA1, BRCA2, and Cancer
-                        </NavLink>
-                        <NavLink onClick={this.close} to='/about/history'>
-                            History of the BRCA Exchange
-                        </NavLink>
-                        <NavLink onClick={this.close} to='/about/thisSite'>
-                            This Site
-                        </NavLink>
-                    </DropdownButton>
-                    <NavLink to='/variants'>Variants</NavLink>
-                    <NavLink to='/help'>Help</NavLink>
-                </Nav>
-            </Navbar>
-            </div>
-        );
-    }
-});
-
-
-var Community = React.createClass({
-    mixins: [PureRenderMixin, Navigation],
-    componentWillMount: function () {
-        backend.users(this.state).subscribe(
-            resp => this.setState({...resp}), // set data, count, totalPages
-            () => this.setState({error: 'Problem connecting to server'}));
-    },
-    getInitialState: function () {
-        return {
-            data: [],
-            pageLength: 10,
-            page: 0,
-            totalPages: 0,
-            windowWidth: window.innerWidth
-        };
-    },
-    fetch: function (state) {
-        var {pageLength, page} = state;
-        this.fetchq.onNext({pageLength,page});
-    },
-    setStateFetch: function (opts) {
-        var newState = {...this.state, ...opts};
-        this.setState(newState);
-        this.fetch(newState);
-    },
-    onChangePage: function (pageNumber) {
-        this.setStateFetch({page: pageNumber});
-    },
-    render: function () {
-        var {data, page, totalPages, error} = this.state;
-
-        var rows = _.map(data, row => {
-            return <tr >
-                <td>Placeholder Image</td>
-                <td>
-                    <span className="row-wrap">{row['email']} {row['title']}</span>
-                    <span className="row-wrap">{row['affiliation']} at {row['institution']}</span>
-                </td>
-            </tr>
-        });
-
-        return (error ? <p>{error}</p> :
-            <Grid>
-                <Row>
-                    <div className='text-center Variant-detail-title'>
-                        <h3>BRCA Community</h3>
-                    </div>
-                </Row>
-                <Row>
-                    <Col sm={4}>
-                        <Pagination
-                            className="pagination pull-right-sm"
-                            currentPage={page}
-                            totalPages={totalPages}
-                            onChangePage={this.onChangePage} />
-                    </Col>
-                </Row>
-                <Row>
-                    <Col md={8} mdOffset={2}>
-                        <Table striped bordered>
-                            <tbody>
-                                {rows}
-                            </tbody>
-                        </Table>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col md={8} mdOffset={2}>
-                        <Button href="/signup">Join our mailing list and this community space</Button>
-                    </Col>
-                </Row>
-            </Grid>
-        );
-    }
-});
 
 var Footer = React.createClass({
     mixins: [PureRenderMixin],
@@ -408,7 +270,7 @@ var Database = React.createClass({
             params = databaseParams(this.getQuery());
         // XXX is 'keys' used?
         var table;
-        if (localStorage.getItem("research-mode") === 'true') {
+        if (this.props.mode === 'research_mode') {
             table = <ResearchVariantTable
                 ref='table'
                 initialState={params}
@@ -507,7 +369,7 @@ var VariantDetail = React.createClass({
                 </Row>
                 <Row>
                     <Col md={8} mdOffset={2}>
-                        <DisclaimerModal research_mode onToggleMode={this} text="Research information on this variant"/>
+                        <DisclaimerModal buttonModal onToggleMode={this} text="Research information on this variant"/>
                     </Col>
                 </Row>
             </Grid>
@@ -536,13 +398,31 @@ var VariantDetail = React.createClass({
 
 var Application = React.createClass({
     mixins: [State],
+    onChildToggleMode: function() {
+        this.toggleMode();
+    },
+    getInitialState: function () {
+        return {
+            mode: (localStorage.getItem("research-mode") === 'true') ? 'research_mode' : 'default',
+        }
+    },
+    toggleMode: function () {
+        if (this.state.mode === 'research_mode') {
+            localStorage.setItem('research-mode', false);
+            this.setState({mode: 'default'});
+        } else {
+            localStorage.setItem('research-mode', true);
+            this.setState({mode: 'research_mode'});
+        }
+    },
     render: function () {
         var path = this.getPath().slice(1);
         return (
             <div>
-                <NavBarNew path={path} />
+                <NavBarNew path={path} mode={this.state.mode} toggleMode={this.onChildToggleMode}/>
                 <RouteHandler />
                 <Database
+                    mode={this.state.mode}
                     show={path.indexOf('variants') === 0} />
                 <Footer />
             </div>

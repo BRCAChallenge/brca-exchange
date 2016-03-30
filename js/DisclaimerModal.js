@@ -25,7 +25,7 @@ var DisclaimerModal = React.createClass({
         localStorage.setItem('research-mode',true);
         this.close();
     },
-    research_mode() {
+    buttonModal() {
         if(localStorage.getItem('research-mode') == 'true') {
             return (
                 <div className="form-group">
@@ -46,7 +46,7 @@ var DisclaimerModal = React.createClass({
             );
         }
     },
-    general_mode() {
+    linkModal() {
         return (
             <span>
                 <a style={{cursor:"pointer"}} onClick={this.open}>{this.props.text}</a>
@@ -59,10 +59,10 @@ var DisclaimerModal = React.createClass({
         );
     },
     render() {
-        if(this.props.research_mode){
-            return this.research_mode()
+        if(this.props.buttonModal){
+            return this.buttonModal()
         } else {
-            return this.general_mode()
+            return this.linkModal()
         }
     }
 });
