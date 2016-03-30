@@ -11,7 +11,6 @@ require('./favicons');
 var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 var DisclaimerModal = require('./DisclaimerModal');
-var {Pagination} = require('react-data-components-bd2k');
 var RawHTML = require('./RawHTML');
 require('bootstrap/dist/css/bootstrap.css');
 require('font-awesome-webpack');
