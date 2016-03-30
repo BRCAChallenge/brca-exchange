@@ -11,7 +11,7 @@ import xml.etree.ElementTree as ET
 
 def printHeader():
     print("\t".join(("HGVS", "Submitter", "ClinicalSignificance",
-                     "DateLastUpdated", "SCV", "Origin", "Method",
+                     "DateLastUpdated", "SCV", "ID", "Origin", "Method",
                      "Genomic_Coordinate", "Symbol", "Protein")))
 
 
@@ -60,6 +60,7 @@ def main():
                                              str(oa.clinicalSignificance),
                                              str(oa.dateLastUpdated),
                                              str(oa.accession),
+                                             str(oa.id),
                                              str(oa.origin),
                                              str(oa.method),
                                              genomicCoordinate,
