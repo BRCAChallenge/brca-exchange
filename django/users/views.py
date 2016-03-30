@@ -41,6 +41,8 @@ def register(request):
     email = request.POST.get('email', '')
     password = request.POST.get('password', '')
 
+    first_name = request.POST.get('firstName', '')
+    last_name = request.POST.get('lastName', '')
     title = request.POST.get('title', '')
     affiliation = request.POST.get('affiliation', '')
     institution = request.POST.get('institution', '')
@@ -48,14 +50,15 @@ def register(request):
     state = request.POST.get('state', '')
     country = request.POST.get('country', '')
     phone_number = request.POST.get('phoneNumber', '')
+    include_me = request.POST.get('includeMe', True)
     hide_number = request.POST.get('hideNumber', True)
     hide_email = request.POST.get('hideEmail', True)
 
     response = {'success': True}
 
     try:
-        MyUser.objects.create_user(email, password, title, affiliation, institution, city, state, country, phone_number,
-                                   hide_number, hide_email)
+        MyUser.objects.create_user(email, password, first_name, last_name, title, affiliation, institution, city, state,
+                                   country, phone_number, include_me, hide_number, hide_email)
     except IntegrityError:
         response = {'success': False}
 

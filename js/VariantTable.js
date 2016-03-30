@@ -174,7 +174,6 @@ var subColumns = [
             {title: 'Protein', prop: 'HGVS_Protein', render: renderCell},
             {title: 'SCV Accession (ClinVar)', prop: 'SCV_ClinVar', render: renderCell},
             {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: renderCell},
-            {title: 'Synonyms', prop: 'Synonyms', render: renderCell},
             {title: 'Protein Amino Acid Change', prop: 'Protein_Change', render: renderCell},
             {title: 'Reference cDNA Sequence', prop: 'Reference_Sequence', render: renderCell}
         ]
@@ -335,8 +334,7 @@ var subColumns = [
 ];
 
 var defaultColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_default'];
-var defaultResearchColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein',
-                              'Pathogenicity_research', 'Discordant', 'Allele_Frequency'];
+var defaultResearchColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_research', 'Allele_Frequency'];
 
 var allSources = {
     Variant_in_ENIGMA: 1,
