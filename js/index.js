@@ -33,6 +33,7 @@ var {Grid, Col, Row, Navbar, Nav, Table,
     DropdownButton, MenuItem, Modal, Button} = require('react-bootstrap');
 
 var {VariantTable, ResearchVariantTable, research_mode_columns, columns} = require('./VariantTable');
+var {Signup} = require('./Signup');
 var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Link, Route, RouteHandler,
     HistoryLocation, run, DefaultRoute} = require('react-router');
@@ -88,6 +89,7 @@ var NavBarNew = React.createClass({
             <Navbar fixedTop brand={brand} toggleNavKey={0}>
                 <Nav eventKey={0} navbar right>
                     <NavLink to='/'>Home</NavLink>
+                    <NavLink to='/community'>Community</NavLink>
                     <DropdownButton className={this.activePath(path, "about")} ref='about' title='About'>
                         <NavLink onClick={this.close} to='/about/variation'>
                             BRCA1, BRCA2, and Cancer
@@ -105,6 +107,14 @@ var NavBarNew = React.createClass({
             </Navbar>
             </div>
         );
+    }
+});
+
+
+var Community = React.createClass({
+    mixins: [PureRenderMixin],
+    render: function () {
+        return (<Button href="/signup">Join our mailing list and this community space</Button>);
     }
 });
 
@@ -475,6 +485,8 @@ var routes = (
         <DefaultRoute handler={Home}/>
         <Route path='about/:page' handler={About}/>
         <Route path='help' handler={Help}/>
+        <Route path='community' handler={Community}/>
+        <Route path='signup' handler={Signup}/>
         <Route path='variants' />
         <Route path='variant/:id' handler={VariantDetail}/>
     </Route>
