@@ -4,7 +4,7 @@ var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 var {Grid, Col, Row, Button, Table} = require('react-bootstrap');
 var backend = require('backend');
-var {Navigation} = require('react-router');
+var {Navigation, Link} = require('react-router');
 var {Pagination} = require('react-data-components-bd2k');
 var _ = require('underscore');
 
@@ -43,7 +43,7 @@ var Community = React.createClass({
             return <tr >
                 <td>Placeholder Image</td>
                 <td>
-                    <span className="row-wrap">{row['email']} {row['title']}</span>
+                    <span className="row-wrap">{row['firstName']} {row['lastName']} {row['title']}</span>
                     <span className="row-wrap">{row['affiliation']} at {row['institution']}</span>
                 </td>
             </tr>
@@ -76,7 +76,7 @@ var Community = React.createClass({
                 </Row>
                 <Row>
                     <Col md={8} mdOffset={2}>
-                        <Button href="/signup">Join our mailing list and this community space</Button>
+                        <Link to="/signup"><Button>Join our mailing list and this community space</Button></Link>
                     </Col>
                 </Row>
             </Grid>
