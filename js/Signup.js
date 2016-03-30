@@ -6,6 +6,8 @@ var Rx = require('rx');
 require('rx-dom');
 var _ = require('underscore');
 var $ = require('jquery');
+var {Grid, Row, Col, Button} = require('react-bootstrap');
+var {Link, Navigation} = require('react-router');
 
 var Cookies = require('js-cookie');
 
@@ -21,6 +23,7 @@ var AFFILIATION = [
 
 
 var Signup = React.createClass({
+    mixins: [Navigation],
     getInitialState: function () {
         return {
             submitted: null,
@@ -29,32 +32,29 @@ var Signup = React.createClass({
     },
     render: function () {
         var message;
-        if (this.state.success === true) {
-            message = <div className="alert alert-success">
-                <p>Account created successfully</p>
-            </div>
-        } else if (this.state.success === false) {
+        if (this.state.error != null) {
             message = <div className="alert alert-danger">
-                <p>An error occurred creating this account</p>
+                <p>{this.state.error}</p>
             </div>
         }
-        return <div>
-            <div className="panel panel-default">
-                {message}
-                <div className="panel-heading clearfix">
-                    <h3 className="panel-title pull-left">Signup</h3>
-
-                </div>
-                <div className="panel-body">
-                    <SignupForm ref="contactForm"
-                    />
-                </div>
-                <div className="panel-footer">
-                    <button type="button" className="btn btn-primary btn-block" onClick={this.handleSubmit}>Submit
-                    </button>
-                </div>
-            </div>
-        </div>
+        return (
+            <Grid>
+                <Row id="message">
+                    {message}
+                </Row>
+                <Row id="form">
+                    <Col md={8} mdOffset={2}>
+                        <SignupForm ref="contactForm"/>
+                    </Col>
+                </Row>
+                <Row id="submit">
+                    <Col md={6} mdOffset={3}>
+                        <Button type="button" className="btn btn-primary btn-block" onClick={this.handleSubmit}>
+                            Submit
+                        </Button>
+                    </Col>
+                </Row>
+            </Grid>)
     },
 
     handleChange: function (field, e) {
@@ -78,13 +78,15 @@ var Signup = React.createClass({
                 crossDomain: true,
                 method: 'POST',
                 success: function (data) {
-                    this.setState({success: data.success})
+                    this.transitionTo('/community')
                 }.bind(this),
                 error: function (xhr, status, err) {
-                    this.setState({success: false})
+                    this.setState({error: "An error occurred creating this account"})
 
                 }.bind(this)
             });
+        } else {
+            this.setState({error: "Some information was missing"});
         }
     }
 });
