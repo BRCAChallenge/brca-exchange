@@ -228,7 +228,7 @@ var DataTable = React.createClass({
                     </Col>
                 </Row>
                 <Row id='variant-search-row' className="btm-buffer">
-                    <Col sm={5}>
+                    <Col sm={6}>
                         <VariantSearch
                             id='variants-search'
                             value={search}
@@ -238,10 +238,7 @@ var DataTable = React.createClass({
                             }}
                         />
                     </Col>
-                    <Col sm={3}>
-                        <DisclaimerModal research_mode onToggleMode={onToggleMode} text='Go to research pages'/>
-                    </Col>
-                    <Col sm={4}>
+                    <Col sm={4} smOffset={2}>
                         <Pagination
                             className="pagination pull-right-sm"
                             currentPage={page}
