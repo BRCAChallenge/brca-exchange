@@ -157,7 +157,7 @@ var Community = React.createClass({
             <Grid>
                 <Row>
                     <div className='text-center Variant-detail-title'>
-                        <h3>Variant Detail</h3>
+                        <h3>BRCA Community</h3>
                     </div>
                 </Row>
                 <Row>
