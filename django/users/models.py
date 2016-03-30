@@ -5,8 +5,8 @@ from django.db import models
 
 
 class MyUserManager(BaseUserManager):
-    def create_user(self, email, password, title, affiliation, institution, city, state, country, phone_number,
-                    hide_number, hide_email):
+    def create_user(self, email, password, firstName, lastName, title, affiliation, institution, city, state, country, phone_number,
+                    include_me, hide_number, hide_email):
         """
         Creates and saves a User with the given email, date of
         birth and password.
@@ -16,6 +16,9 @@ class MyUserManager(BaseUserManager):
 
         user = self.model(
             email=self.normalize_email(email),
+            password=password,
+            firstName=firstName,
+            lastName=lastName,
             title=title,
             affiliation=affiliation,
             institution=institution,
@@ -23,6 +26,7 @@ class MyUserManager(BaseUserManager):
             state=state,
             country=country,
             phone_number=phone_number,
+            include_me=include_me,
             hide_number=hide_number,
             hide_email=hide_email
         )
@@ -31,10 +35,12 @@ class MyUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password, title, affiliation, institution, city, state, country, phone_number,
-                         hide_number, hide_email):
+    def create_superuser(self,  email, password, firstName, lastName,title, affiliation, institution, city, state, country, phone_number,
+                        include_me, hide_number, hide_email):
         user = self.create_user(email,
                                 password=password,
+                                firstName=firstName,
+                                lastName=lastName,
                                 title=title,
                                 affiliation=affiliation,
                                 institution=institution,
@@ -42,6 +48,8 @@ class MyUserManager(BaseUserManager):
                                 state=state,
                                 country=country,
                                 phone_number=phone_number,
+                                include_me=include_me,
+
                                 hide_number=hide_number,
                                 hide_email=hide_email
                                 )
@@ -57,6 +65,8 @@ class MyUser(AbstractBaseUser):
         unique=True,
     )
 
+    firstName = models.TextField(blank=True)
+    lastName = models.TextField(blank=True)
     title = models.TextField(blank=True)
     affiliation = models.TextField(blank=True)
     institution = models.TextField(blank=True)
@@ -68,6 +78,7 @@ class MyUser(AbstractBaseUser):
     hide_number = models.BooleanField(default=False)
     hide_email = models.BooleanField(default=False)
 
+    include_me = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
 

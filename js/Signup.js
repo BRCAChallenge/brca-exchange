@@ -94,8 +94,7 @@ var SignupForm = React.createClass({
         return {errors: {}}
     },
     isValid: function () {
-        var compulsory_fields = ['email', 'email_confirm', 'password', 'password_confirm', 'firstName',
-            'lastName', 'city', 'state', 'country', 'phoneNumber'];
+        var compulsory_fields = ['email', 'email_confirm', 'password', 'password_confirm'];
         var errors = {};
         if (this.refs.email.getDOMNode().value != this.refs.email_confirm.getDOMNode().value) {
             errors["email_confirm"] = "The emails don't match"
@@ -137,6 +136,7 @@ var SignupForm = React.createClass({
             , state: this.refs.state.getDOMNode().value
             , country: this.refs.country.getDOMNode().value
             , phoneNumber: this.refs.phoneNumber.getDOMNode().value
+            , includeMe: this.refs.includeMe.getDOMNode().checked
             , hideNumber: this.refs.hideNumber.getDOMNode().checked
             , hideEmail: this.refs.hideEmail.getDOMNode().checked
         };
@@ -148,18 +148,19 @@ var SignupForm = React.createClass({
             {this.renderTextInput('email_confirm', 'Confirm Email *')}
             {this.renderPassword('password', 'Password *')}
             {this.renderPassword('password_confirm', 'Confirm Password *')}
-            {this.renderTextInput('firstName', 'First Name *')}
-            {this.renderTextInput('lastName', 'Last Name *')}
+            {this.renderTextInput('firstName', 'First Name')}
+            {this.renderTextInput('lastName', 'Last Name')}
             {this.renderRadioInlines('title', '', {
                 values: [{name: 'M.D.', ref: 'md'}, {name: 'Ph.D', ref: 'phd'}, {name: 'Other', ref: 'other'}]
                 , defaultCheckedValue: 'M.D.'
             })}
             {this.renderSelect('affiliation', 'Affiliation', AFFILIATION)}
             {this.renderTextInput('institution', 'Institution, Hospital or Company')}
-            {this.renderTextInput('city', 'City *')}
-            {this.renderTextInput('state', 'State or Province *')}
-            {this.renderTextInput('country', 'Country *')}
-            {this.renderTextInput('phoneNumber', 'Phone number *')}
+            {this.renderTextInput('city', 'City')}
+            {this.renderTextInput('state', 'State or Province')}
+            {this.renderTextInput('country', 'Country')}
+            {this.renderTextInput('phoneNumber', 'Phone number')}
+            {this.renderCheckBox('includeMe', "Include me in the community page")}
             {this.renderCheckBox('hideNumber', "Don't display my phone number on this website")}
             {this.renderCheckBox('hideEmail', "Don't display my email on this website")}
 
