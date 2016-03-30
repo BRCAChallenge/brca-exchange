@@ -63,6 +63,15 @@ function data(opts) {
     return Rx.DOM.get(url(opts)).map(xhr => JSON.parse(xhr.responseText));
 }
 
+function users(opts) {
+    var {page, pageLength} = opts;
+    var users_url = `${databaseUrl}/accounts/users/?${qs.stringify(_.pick({
+        'page_num': page,
+        'page_size': pageLength
+    }, v => v != null))}`;
+    return Rx.DOM.get(users_url).map(xhr => JSON.parse(xhr.responseText));
+}
+
 function lollipopData(opts) {
     opts.pageLength = 0;
     opts.format = 'json';
@@ -72,6 +81,7 @@ function lollipopData(opts) {
 
 module.exports = {
     data,
+    users,
     lollipopData,
     url,
     trimSearchTerm,
