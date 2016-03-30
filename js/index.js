@@ -17,6 +17,7 @@ require('font-awesome-webpack');
 require('css/custom.css');
 var _ = require('underscore');
 var backend = require('./backend');
+var {NavBarNew} = require('./NavBarNew');
 var Rx = require('rx');
 require('rx-dom');
 
@@ -47,66 +48,6 @@ if (typeof console === "undefined") {
         log: function () {}
     };
 }
-
-var NavLink = React.createClass({
-    render: function () {
-        var {children, ...otherProps} = this.props;
-        return (
-            <li>
-                <Link {...otherProps} role='button'>
-                    {children}
-                </Link>
-            </li>
-        );
-    }
-});
-
-var NavBarNew = React.createClass({
-    close: function () {
-        this.refs.about.setState({open: false});
-    },
-    shouldComponentUpdate: function (nextProps) {
-        // Only rerender if path has change, ignoring query.
-        return this.props.path.split(/\?/)[0] !== nextProps.path.split(/\?/)[0];
-    },
-    activePath: function(path, tab) {
-        var navPath = (path === "") ? "home" : path.split("/")[0];
-        return ((navPath === tab) ? "active" : "");
-    },
-    render: function () {
-        var {path} = this.props;
-        var brand = (
-            <a className="navbar-brand" href="/">
-                <h1>
-                    <span className="BRCA">BRCA</span>
-                    <span className="exchange"> Exchange</span>
-                </h1>
-                <span id="beta-label" className="label label-info">Beta</span>
-            </a>);
-        return (
-            <div className="navbar-container">
-            <Navbar fixedTop brand={brand} toggleNavKey={0}>
-                <Nav eventKey={0} navbar right>
-                    <NavLink to='/'>Home</NavLink>
-                    <DropdownButton className={this.activePath(path, "about")} ref='about' title='About'>
-                        <NavLink onClick={this.close} to='/about/variation'>
-                            BRCA1, BRCA2, and Cancer
-                        </NavLink>
-                        <NavLink onClick={this.close} to='/about/history'>
-                            History of the BRCA Exchange
-                        </NavLink>
-                        <NavLink onClick={this.close} to='/about/thisSite'>
-                            This Site
-                        </NavLink>
-                    </DropdownButton>
-                    <NavLink to='/variants'>Variants</NavLink>
-                    <NavLink to='/help'>Help</NavLink>
-                </Nav>
-            </Navbar>
-            </div>
-        );
-    }
-});
 
 var Footer = React.createClass({
     mixins: [PureRenderMixin],
@@ -328,7 +269,7 @@ var Database = React.createClass({
             params = databaseParams(this.getQuery());
         // XXX is 'keys' used?
         var table;
-        if (localStorage.getItem("research-mode") === 'true') {
+        if (this.props.mode === 'research_mode') {
             table = <ResearchVariantTable
                 ref='table'
                 initialState={params}
@@ -427,7 +368,7 @@ var VariantDetail = React.createClass({
                 </Row>
                 <Row>
                     <Col md={8} mdOffset={2}>
-                        <DisclaimerModal research_mode onToggleMode={this} text="Research information on this variant"/>
+                        <DisclaimerModal buttonModal onToggleMode={this} text="Research information on this variant"/>
                     </Col>
                 </Row>
             </Grid>
@@ -456,13 +397,31 @@ var VariantDetail = React.createClass({
 
 var Application = React.createClass({
     mixins: [State],
+    onChildToggleMode: function() {
+        this.toggleMode();
+    },
+    getInitialState: function () {
+        return {
+            mode: (localStorage.getItem("research-mode") === 'true') ? 'research_mode' : 'default',
+        }
+    },
+    toggleMode: function () {
+        if (this.state.mode === 'research_mode') {
+            localStorage.setItem('research-mode', false);
+            this.setState({mode: 'default'});
+        } else {
+            localStorage.setItem('research-mode', true);
+            this.setState({mode: 'research_mode'});
+        }
+    },
     render: function () {
         var path = this.getPath().slice(1);
         return (
             <div>
-                <NavBarNew path={path} />
+                <NavBarNew path={path} mode={this.state.mode} toggleMode={this.onChildToggleMode}/>
                 <RouteHandler />
                 <Database
+                    mode={this.state.mode}
                     show={path.indexOf('variants') === 0} />
                 <Footer />
             </div>
