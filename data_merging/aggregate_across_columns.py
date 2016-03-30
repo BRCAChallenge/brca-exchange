@@ -10,7 +10,8 @@ FIELDS_TO_REMOVE=["Gene_symbol_ENIGMA", "Genomic_Coordinate",
                   "BIC_Nomenclature_ENIGMA", "Abbrev_AA_change_ENIGMA",
                   "HGVS_protein_ENIGMA", "Protein_ClinVar",
                   "HGVS_ClinVar", "HGVS_cDNA_LOVD", "HGVS_cDNA_exLOVD",
-                  "HGVS_protein_LOVD", "HGVS_protein_exLOVD",
+                  "HGVS_protein_LOVD", "dna_change_genomic_LOVD",
+                  "HGVS_protein_exLOVD",
                   "polyPhen2_result_ESP", 
                   "BIC_Designation_BIC", "BIC_Nomenclature_exLOVD"]
 FIELDS_TO_ADD=["Gene_Symbol", "Reference_Sequence",
@@ -77,6 +78,7 @@ def updateRow(row, toRemove):
     newRow["Max_Allele_Frequency"] = selectMaxAlleleFrequency(newRow)
     newRow["Discordant"] = checkDiscordantStatus(newRow)
     newRow["Source_URL"] = setSourceUrls(newRow)
+    newRow["Synonyms"] = setSynonym(row)
     newRow["Genomic_Coordinate_hg37"] = EMPTY
     newRow["Genomic_Coordinate_hg36"] = EMPTY
     for item in toRemove:
@@ -229,7 +231,7 @@ def checkDiscordantStatus(row):
                 hasPathogenicClassification = True
             if re.search("^pathologic$", item.lower()):
                 hasPathogenicClassification = True
-~<            if re.search("^likely_pathogenic$", item.lower()):
+            if re.search("^likely_pathogenic$", item.lower()):
                 hasPathogenicClassification = True
             if re.search("^probable_pathogenic$", item.lower()):
                 hasPathogenicClassification = True
@@ -258,15 +260,37 @@ def checkDiscordantStatus(row):
 def setSourceUrls(row):
     url = ""
     delimiter = ""
+    if row["URL_ENIGMA"] != EMPTY:
+        for thisURL in row["URL_ENIGMA"].split(','):
+            url = "%s%s%s" % (url, delimiter, thisURL)
+            delimiter = ", "
     if row["SCV_ClinVar"] != EMPTY:
         for thisSCV in row["SCV_ClinVar"].split(','):
             variantUrl = "http://www.ncbi.nlm.nih.gov/clinvar/?term="+ thisSCV
             url = "%s%s%s" % (url, delimiter, variantUrl)
-            delimiter=","
+            delimiter=", "
     if url != "":
         return url
     else:
         return EMPTY
+
+def setSynonym(row):
+    delimiter = ""
+    synonym = ""
+    if row["BIC_Nomenclature_ENIGMA"] != EMPTY:
+        for thisBic in row["BIC_Nomenclature_ENIGMA"].split(','):
+            synonym = "%s%s%s" % (synonym, delimiter, thisBic)
+            delimiter = ","
+    if row["BIC_Nomenclature_exLOVD"] != EMPTY:
+        for thisBic in row["BIC_Nomenclature_exLOVD"].split(','):
+            synonym = "%s%s%s" % (synonym, delimiter, thisBic)
+            delimiter = ","
+    if row["BIC_Designation_BIC"] != EMPTY:
+        for thisBic in row["BIC_Designation_BIC"].split(','):
+            synonym = "%s%s%s" % (synonym, delimiter, thisBic)
+            delimiter = ","
+    return synonym
+
 
 if __name__ == "__main__":
     main()
