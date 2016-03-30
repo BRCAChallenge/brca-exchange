@@ -11,6 +11,7 @@ require('./favicons');
 var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 var DisclaimerModal = require('./DisclaimerModal');
+var {Pagination} = require('react-data-components-bd2k');
 var RawHTML = require('./RawHTML');
 require('bootstrap/dist/css/bootstrap.css');
 require('font-awesome-webpack');
@@ -112,9 +113,78 @@ var NavBarNew = React.createClass({
 
 
 var Community = React.createClass({
-    mixins: [PureRenderMixin],
+    mixins: [PureRenderMixin, Navigation],
+    componentWillMount: function () {
+        backend.users(this.state).subscribe(
+            resp => this.setState({...resp}), // set data, count, totalPages
+            () => this.setState({error: 'Problem connecting to server'}));
+    },
+    getInitialState: function () {
+        return {
+            data: [],
+            pageLength: 10,
+            page: 0,
+            totalPages: 0,
+            windowWidth: window.innerWidth
+        };
+    },
+    fetch: function (state) {
+        var {pageLength, page} = state;
+        this.fetchq.onNext({pageLength,page});
+    },
+    setStateFetch: function (opts) {
+        var newState = {...this.state, ...opts};
+        this.setState(newState);
+        this.fetch(newState);
+    },
+    onChangePage: function (pageNumber) {
+        this.setStateFetch({page: pageNumber});
+    },
     render: function () {
-        return (<Button href="/signup">Join our mailing list and this community space</Button>);
+        var {data, page, totalPages, error} = this.state;
+
+        var rows = _.map(data, row => {
+            return <tr >
+                <td>Placeholder Image</td>
+                <td>
+                    <span className="row-wrap">{row['email']} {row['title']}</span>
+                    <span className="row-wrap">{row['affiliation']} at {row['institution']}</span>
+                </td>
+            </tr>
+        });
+
+        return (error ? <p>{error}</p> :
+            <Grid>
+                <Row>
+                    <div className='text-center Variant-detail-title'>
+                        <h3>Variant Detail</h3>
+                    </div>
+                </Row>
+                <Row>
+                    <Col sm={4}>
+                        <Pagination
+                            className="pagination pull-right-sm"
+                            currentPage={page}
+                            totalPages={totalPages}
+                            onChangePage={this.onChangePage} />
+                    </Col>
+                </Row>
+                <Row>
+                    <Col md={8} mdOffset={2}>
+                        <Table striped bordered>
+                            <tbody>
+                                {rows}
+                            </tbody>
+                        </Table>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col md={8} mdOffset={2}>
+                        <Button href="/signup">Join our mailing list and this community space</Button>
+                    </Col>
+                </Row>
+            </Grid>
+        );
     }
 });
 

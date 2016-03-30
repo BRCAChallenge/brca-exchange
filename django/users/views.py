@@ -62,3 +62,17 @@ def register(request):
     response = JsonResponse(response)
     response["Access-Control-Allow-Origin"] = "*"
     return response
+
+def users(request):
+    page_num = int(request.GET.get('page_num','0'))
+    page_size = int(request.GET.get('page_size','0'))
+
+    start = page_num * page_size
+    end = start + page_size
+
+    page = MyUser.objects.all()[start:end]
+
+    response = JsonResponse({'data':list(page.values())})
+    response["Access-Control-Allow-Origin"] = "*"
+    
+    return response

@@ -335,7 +335,8 @@ var subColumns = [
 ];
 
 var defaultColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_default'];
-var defaultResearchColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_research', 'Discordant', 'Allele_Frequency'];
+var defaultResearchColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein',
+                              'Pathogenicity_research', 'Discordant', 'Allele_Frequency'];
 
 var allSources = {
     Variant_in_ENIGMA: 1,
