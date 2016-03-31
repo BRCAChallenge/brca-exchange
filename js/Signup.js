@@ -100,6 +100,9 @@ var SignupForm = React.createClass({
     getInitialState: function () {
         return {errors: {}, file: '', imagePreviewUrl: ''}
     },
+    componentDidMount: function() {
+        grecaptcha.render(this.refs.signupCAPTCHA.getDOMNode(), {sitekey: '6LdwNBwTAAAAACFRvttQc08debhGzAzNY0xWQhxw'});
+    },
     isValid: function () {
         var compulsory_fields = ['email', 'email_confirm', 'password', 'password_confirm'];
         var errors = {};
@@ -185,7 +188,7 @@ var SignupForm = React.createClass({
             {this.renderCheckBox('includeMe', "Include me in the community page")}
             {this.renderCheckBox('hideNumber', "Don't display my phone number on this website")}
             {this.renderCheckBox('hideEmail', "Don't display my email on this website")}
-
+            {this.renderCAPTCHA('captcha','')}
 
         </div>
     },
@@ -246,6 +249,9 @@ var SignupForm = React.createClass({
             {label}
         </label>);
         return this.renderField(id, "", checkbox);
+    },
+    renderCAPTCHA: function(id, label) {
+        return this.renderField(id, label, <div ref="signupCAPTCHA"></div>);
     },
     renderField: function (id, label, field) {
         return <div className={$c('form-group', {'has-error': id in this.state.errors})}>
