@@ -6,7 +6,7 @@ from django.db import models
 
 class MyUserManager(BaseUserManager):
     def create_user(self, email, password, firstName, lastName, title, affiliation, institution, city, state, country, phone_number,
-                    include_me, hide_number, hide_email):
+                    comment, include_me, hide_number, hide_email):
         """
         Creates and saves a User with the given email, date of
         birth and password.
@@ -26,6 +26,7 @@ class MyUserManager(BaseUserManager):
             state=state,
             country=country,
             phone_number=phone_number,
+            comment=comment,
             include_me=include_me,
             hide_number=hide_number,
             hide_email=hide_email
@@ -36,7 +37,7 @@ class MyUserManager(BaseUserManager):
         return user
 
     def create_superuser(self,  email, password, firstName, lastName,title, affiliation, institution, city, state, country, phone_number,
-                        include_me, hide_number, hide_email):
+                        comment, include_me, hide_number, hide_email):
         user = self.create_user(email,
                                 password=password,
                                 firstName=firstName,
@@ -48,8 +49,8 @@ class MyUserManager(BaseUserManager):
                                 state=state,
                                 country=country,
                                 phone_number=phone_number,
+                                comment=comment,
                                 include_me=include_me,
-
                                 hide_number=hide_number,
                                 hide_email=hide_email
                                 )
@@ -74,6 +75,8 @@ class MyUser(AbstractBaseUser):
     state = models.TextField(blank=True)
     country = models.TextField(blank=True)
     phone_number = models.TextField(max_length=30, blank=True)
+
+    comment = models.TextField(blank=True)
     # profile_image = ImageField(upload_to=get_image_path, blank=True, null=True)
     hide_number = models.BooleanField(default=False)
     hide_email = models.BooleanField(default=False)

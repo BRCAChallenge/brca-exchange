@@ -19,7 +19,8 @@ var AFFILIATION = [
     'I am a member of a research lab',
     'I lead an advocacy group',
     'I work at an advocacy group',
-    'I am a genetic councelor'];
+    'I am a genetic councelor',
+    'Other'];
 
 
 var Signup = React.createClass({
@@ -145,6 +146,7 @@ var SignupForm = React.createClass({
             , state: this.refs.state.getDOMNode().value
             , country: this.refs.country.getDOMNode().value
             , phoneNumber: this.refs.phoneNumber.getDOMNode().value
+            , comment: this.refs.comment.getDOMNode().value
             , includeMe: this.refs.includeMe.getDOMNode().checked
             , hideNumber: this.refs.hideNumber.getDOMNode().checked
             , hideEmail: this.refs.hideEmail.getDOMNode().checked
@@ -170,6 +172,7 @@ var SignupForm = React.createClass({
             {this.renderTextInput('state', 'State or Province')}
             {this.renderTextInput('country', 'Country')}
             {this.renderTextInput('phoneNumber', 'Phone number')}
+            {this.renderTextarea('comment', 'Comment')}
             {this.renderCheckBox('includeMe', "Include me in the community page")}
             {this.renderCheckBox('hideNumber', "Don't display my phone number on this website")}
             {this.renderCheckBox('hideEmail', "Don't display my email on this website")}
