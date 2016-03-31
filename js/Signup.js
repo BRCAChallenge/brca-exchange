@@ -64,27 +64,32 @@ var Signup = React.createClass({
     },
 
     handleSubmit: function () {
+        var showSuccess = () => {this.transitionTo('/community', {registrationSuccess:true})};
+        var showFailure = () => {this.setState({success: false})};
+
         if (this.refs.contactForm.isValid()) {
             var formData = this.refs.contactForm.getFormData();
-
-            this.setState({submitted: formData})
-
+            this.setState({submitted: formData});
             var url = backend.databaseUrl + '/accounts/register/';
 
-            $.ajax({
-                url: url,
-                data: formData,
-                dataType: 'json',
-                crossDomain: true,
-                method: 'POST',
-                success: function (data) {
-                    this.transitionTo('/community')
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    this.setState({error: "An error occurred creating this account"})
-
-                }.bind(this)
+            var fd = new FormData();
+            $.each(formData, function (k, v) {
+                fd.append(k, v);
             });
+
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function () {
+                console.log(this);
+                var responseData = JSON.parse(this.response);
+
+                if (this.status == 200 && responseData.success === true) {
+                    showSuccess();
+                } else {
+                    showFailure()
+                }
+            };
+            xhr.open('post', url);
+            xhr.send(fd);
         } else {
             this.setState({error: "Some information was missing"});
         }
@@ -93,7 +98,7 @@ var Signup = React.createClass({
 
 var SignupForm = React.createClass({
     getInitialState: function () {
-        return {errors: {}}
+        return {errors: {}, file: '', imagePreviewUrl: ''}
     },
     isValid: function () {
         var compulsory_fields = ['email', 'email_confirm', 'password', 'password_confirm'];
@@ -125,7 +130,8 @@ var SignupForm = React.createClass({
             this.refs.titleother.getDOMNode().checked && this.refs.titlecustom.getDOMNode().value;
 
         var data = {
-            email: this.refs.email.getDOMNode().value
+            image: this.state.file
+            , email: this.refs.email.getDOMNode().value
             , email_confirm: this.refs.email_confirm.getDOMNode().value
             , password: this.refs.password.getDOMNode().value
             , password_confirm: this.refs.password_confirm.getDOMNode().value
@@ -144,8 +150,22 @@ var SignupForm = React.createClass({
         };
         return data
     },
+    handleImageChange(e) {
+        e.preventDefault();
+
+        let reader = new FileReader();
+        let file = e.target.files[0];
+        reader.onloadend = () => {
+            this.setState({
+                file: file,
+                imagePreviewUrl: reader.result
+            });
+        };
+        reader.readAsDataURL(file)
+    },
     render: function () {
         return <div className="form-horizontal">
+            {this.renderImageUpload('image', 'Profile picture')}
             {this.renderTextInput('email', 'Email *')}
             {this.renderTextInput('email_confirm', 'Confirm Email *')}
             {this.renderPassword('password', 'Password *')}
@@ -168,6 +188,18 @@ var SignupForm = React.createClass({
 
 
         </div>
+    },
+    renderImageUpload: function (id, label) {
+        var {imagePreviewUrl} = this.state;
+        var imagePreview = null;
+        if (imagePreviewUrl) {
+            imagePreview = (<img src={imagePreviewUrl} className="img-thumbnail"  style={{'maxHeight':'160px', 'maxWidth':'160px'}} />);
+        }
+        return this.renderField(id, label,
+            <div>
+                <input onChange={this.handleImageChange} type="file" accept="image/*"/>
+                {imagePreview}
+            </div>)
     },
     renderTextInput: function (id, label) {
         return this.renderField(id, label,
