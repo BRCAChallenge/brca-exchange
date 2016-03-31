@@ -126,9 +126,10 @@ USE_L10N = True
 
 USE_TZ = True
 
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, "uploads")
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
-
 
 # Absolute path to the directory static files should be collected to.
 # Don"t put anything in this directory yourself; store your static files

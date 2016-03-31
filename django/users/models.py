@@ -2,6 +2,7 @@ from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser
 )
 from django.db import models
+from django.db.models import ImageField
 
 
 class MyUserManager(BaseUserManager):
@@ -64,7 +65,6 @@ class MyUser(AbstractBaseUser):
         max_length=255,
         unique=True,
     )
-
     firstName = models.TextField(blank=True)
     lastName = models.TextField(blank=True)
     title = models.TextField(blank=True)
@@ -74,7 +74,6 @@ class MyUser(AbstractBaseUser):
     state = models.TextField(blank=True)
     country = models.TextField(blank=True)
     phone_number = models.TextField(max_length=30, blank=True)
-    # profile_image = ImageField(upload_to=get_image_path, blank=True, null=True)
     hide_number = models.BooleanField(default=False)
     hide_email = models.BooleanField(default=False)
 

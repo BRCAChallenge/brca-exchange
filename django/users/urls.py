@@ -1,4 +1,7 @@
-from django.conf.urls import url
+from django.conf import settings
+from django.conf.urls import url, patterns
+
+url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
 
 from . import views
 
@@ -7,4 +10,10 @@ urlpatterns = [
     url(r'^login/$', views.login, name="login"),
     url(r'^logout/$', views.user_logout, name="logout"),
     url(r'^users/$', views.users, name="users"),
+
 ]
+
+urlpatterns += patterns('',
+                        url(r'^site_media/media/(?P<path>.*)$', 'django.views.static.serve',
+                            {'document_root': settings.MEDIA_ROOT, 'show_indexes': True})
+                        )
