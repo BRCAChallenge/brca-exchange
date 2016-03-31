@@ -1,0 +1,1 @@
+This is the BRCA Exchange Clinical Space, and contains only expert-reviewed variant classifications. The variants shown here represent the initial set of variants classified by the ENIGMA consortium, ~1000 (primarily missense) variants in BRCA1 and BRCA2. The Clinical space will become more fully populated pending additional expert review.
