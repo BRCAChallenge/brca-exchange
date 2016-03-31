@@ -65,12 +65,17 @@ def register(request):
     hide_email = request.POST.get('hideEmail', True)
     captcha = request.POST.get('captcha')
 
+    response = {'success': True}
+
     # Check the CAPTCHA
-    post_data = {'secret': captcha_secret,
-                 'response': captcha}
-    response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=post_data)
-    content = json.loads(response.content)
-    response = {'success': content['success']}
+    try:
+        post_data = {'secret': captcha_secret,
+                     'response': captcha}
+        response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=post_data)
+        content = json.loads(response.content)
+        response = {'success': content['success']}
+    except HTTPError:
+        response = {'success': False}
 
     try:
         created_user = MyUser.objects.create_user(email, password, first_name, last_name, title, affiliation,
