@@ -60,6 +60,7 @@ def register(request):
     state = request.POST.get('state', '')
     country = request.POST.get('country', '')
     phone_number = request.POST.get('phoneNumber', '')
+    comment = request.POST.get('comment', '')
     include_me = request.POST.get('includeMe', True)
     hide_number = request.POST.get('hideNumber', True)
     hide_email = request.POST.get('hideEmail', True)
@@ -79,7 +80,7 @@ def register(request):
 
     try:
         created_user = MyUser.objects.create_user(email, password, first_name, last_name, title, affiliation,
-                                                  institution, city, state, country, phone_number, include_me,
+                                                  institution, city, state, comment, country, phone_number, include_me,
                                                   hide_number, hide_email)
         if image is not None:
             save_picture(created_user.id, image)
