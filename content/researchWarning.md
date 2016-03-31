@@ -1,0 +1,3 @@
+You are leaving the BRCA Exchange Clinical Space and entering the Research Space.  The BRCA Exchange Research Space contains a much larger set of variant data than the Clinical Space, and includes variants that have not yet been subject to expert review by the ENIGMA consortium. Pathogenicity assignments are from the original submitters.
+
+Are you sure you want to leave the Clinical Space (Default View) and enter the Research Space?

@@ -95,10 +95,9 @@ var NavBarNew = React.createClass({
                             </NavLink>}
                             {this.props.mode === 'default' && this.state.showModal &&
                             <Modal onRequestHide={() => this.setState({ showModal: false })}>
-                                <RawHTML html={content.pages.disclaimer}/>
-                                <Button onClick={() => {this.toggleMode() ;}}>
-                                    OK</Button>
-                                <Button onClick={() => this.setState({ showModal: false })}>Cancel</Button>
+                                <RawHTML html={content.pages.researchWarning}/>
+                                <Button onClick={() => {this.toggleMode() ;}}>Yes</Button>
+                                <Button onClick={() => this.setState({ showModal: false })}>No</Button>
                             </Modal>}
                         </DropdownButton>
                     </Nav>
