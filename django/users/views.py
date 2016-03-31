@@ -1,3 +1,5 @@
+import requests, json
+
 import os
 
 from django.conf import settings
@@ -7,6 +9,7 @@ from django.db import IntegrityError
 from django.http import JsonResponse
 
 from .models import MyUser
+from .config import captcha_secret
 
 
 def login(request):
@@ -60,8 +63,14 @@ def register(request):
     include_me = request.POST.get('includeMe', True)
     hide_number = request.POST.get('hideNumber', True)
     hide_email = request.POST.get('hideEmail', True)
+    captcha = request.POST.get('captcha')
 
-    response = {'success': True}
+    # Check the CAPTCHA
+    post_data = {'secret': captcha_secret,
+                 'response': captcha}
+    response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=post_data)
+    content = json.loads(response.content)
+    response = {'success': content['success']}
 
     try:
         created_user = MyUser.objects.create_user(email, password, first_name, last_name, title, affiliation,
