@@ -73,7 +73,7 @@ var Signup = React.createClass({
 
     handleSubmit: function () {
         var showSuccess = () => {this.transitionTo('/community', {registrationSuccess:true})};
-        var showFailure = () => {this.setState({error: "An error occured"})};
+        var showFailure = () => {this.setState({success: false})};
 
         if (this.refs.contactForm.isValid()) {
             var formData = this.refs.contactForm.getFormData();
@@ -211,7 +211,7 @@ var SignupForm = React.createClass({
         var {imagePreviewUrl} = this.state;
         var imagePreview = null;
         if (imagePreviewUrl) {
-            imagePreview = (<img src={imagePreviewUrl} className="img-thumbnail" style={{'maxHeight':'160px', 'maxWidth':'160px'}} />);
+            imagePreview = (<img src={imagePreviewUrl} className="img-thumbnail"  style={{'maxHeight':'160px', 'maxWidth':'160px'}} />);
         }
         return this.renderField(id, label,
             <div>
