@@ -112,6 +112,9 @@ var SignupForm = React.createClass({
         if (this.refs.password.getDOMNode().value != this.refs.password_confirm.getDOMNode().value) {
             errors["password_confirm"] = "The passwords don't match"
         }
+        if (grecaptcha.getResponse() == "") {
+            errors["captcha"] = "No CAPTCHA entered"
+        }
         compulsory_fields.forEach(function (field) {
             var value = trim(this.refs[field].getDOMNode().value)
             if (!value) {
@@ -125,6 +128,7 @@ var SignupForm = React.createClass({
             isValid = false;
             break;
         }
+        
         return isValid
     },
     getFormData: function () {
@@ -150,6 +154,7 @@ var SignupForm = React.createClass({
             , includeMe: this.refs.includeMe.getDOMNode().checked
             , hideNumber: this.refs.hideNumber.getDOMNode().checked
             , hideEmail: this.refs.hideEmail.getDOMNode().checked
+            , captcha: grecaptcha.getResponse()
         };
         return data
     },
@@ -188,7 +193,7 @@ var SignupForm = React.createClass({
             {this.renderCheckBox('includeMe', "Include me in the community page")}
             {this.renderCheckBox('hideNumber', "Don't display my phone number on this website")}
             {this.renderCheckBox('hideEmail', "Don't display my email on this website")}
-            {this.renderCAPTCHA('captcha','')}
+            {this.renderCAPTCHA('captcha','CAPTCHA *')}
 
         </div>
     },
