@@ -14,6 +14,8 @@ var _ = require('underscore');
 var cx = require('classnames');
 var hgvs = require('./hgvs');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
+var RawHTML = require('RawHTML');
+var content = require('content');
 
 var filterDisplay = v => v == null ? 'Any' : v;
 var filterAny = v => v === 'Any' ? null : v;
@@ -176,9 +178,14 @@ var DataTable = React.createClass({
 
         return (error ? <p>{error}</p> :
             <div className={this.props.className}>
-            <div id="filters" className="container">
+            <div id="filters" className="container-fluid">
+                <Row>
+                    <Col sm={10} smOffset={1}  className="alert alert-warning">
+                        <RawHTML ref='content' html={content.pages.variantPage}/>
+                    </Col>
+                </Row>
                 <Row id="show-hide" className="btm-buffer">
-                    <Col sm={12}>
+                    <Col sm={10} smOffset={1}>
                         <Button className="btn-sm rgt-buffer"
                                 onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}
                         </Button>
@@ -186,17 +193,16 @@ var DataTable = React.createClass({
                         {lollipopButton(this.toggleLollipop, lollipopOpen)}
                     </Col>
                 </Row>
-
-                <Row id="filters" className="">
-                    <Col sm={12}>
+                <Row id="filters">
+                    <Col sm={10} smOffset={1}>
                         {filtersOpen && <div className='form-inline'>{filterFormEls}</div>}
                         {filtersOpen && <div className='form-inline'>
                             {advancedFilters}
                         </div>}
                     </Col>
                 </Row>
-                <Row id="lollipop-chart" className="">
-                    <Col sm={12}>
+                <Row id="lollipop-chart">
+                    <Col sm={10} smOffset={1}>
                         {lollipopOpen && this.state.windowWidth > 991 && this.state.data.length > 0 &&
                         <Lollipop fetch={this.props.fetchLollipop} opts={this.lollipopOpts()} onHeaderClick={this.props.onHeaderClick} onRowClick={this.props.onRowClick}/> }
 
@@ -205,8 +211,8 @@ var DataTable = React.createClass({
 
                     </Col>
                 </Row>
-                <Row id="download" className="btm-buffer ">
-                    <Col sm={6}>
+                <Row id="download" className="btm-buffer">
+                    <Col sm={6} smOffset={1}>
                         <div className='form-inline'>
                             <div className='form-group'>
                                 <label className='control-label'>
@@ -216,7 +222,7 @@ var DataTable = React.createClass({
                             </div>
                         </div>
                     </Col>
-                    <Col sm={3} smOffset={3}>
+                    <Col sm={4}>
                         <div className='form-inline pull-right-sm'>
                             <SelectField
                                 label="Page size:"
@@ -228,7 +234,7 @@ var DataTable = React.createClass({
                     </Col>
                 </Row>
                 <Row id='variant-search-row' className="btm-buffer">
-                    <Col sm={6}>
+                    <Col sm={4} smOffset={1}>
                         <VariantSearch
                             id='variants-search'
                             value={search}
@@ -238,7 +244,7 @@ var DataTable = React.createClass({
                             }}
                         />
                     </Col>
-                    <Col sm={4} smOffset={2}>
+                    <Col sm={6}>
                         <Pagination
                             className="pagination pull-right-sm"
                             currentPage={page}
@@ -246,10 +252,8 @@ var DataTable = React.createClass({
                             onChangePage={this.onChangePage} />
                     </Col>
                 </Row>
-            </div>
-            <div id="wide-table" className="container-fluid">
                 <Row>
-                    <Col className="table-responsive" sm={12}>
+                    <Col className="table-responsive" sm={10} smOffset={1}>
                         <FastTable
                             className={cx(className, "table table-hover table-bordered table-condensed")}
                             dataArray={data}

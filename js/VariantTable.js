@@ -447,10 +447,10 @@ var ResearchVariantTableSupplier = function (Component) {
             </label>);
         },
         getDownloadButton: function (callback) {
-            return <Button className="btn-sm" download="variants.csv" href={callback()}>Download</Button>;
+            return <Button className="btn-sm rgt-buffer" download="variants.csv" href={callback()}>Download</Button>;
         },
         getLollipopButton: function (callback, isOpen) {
-            return <Button className="btn-sm"
+            return <Button className="btn-sm rgt-buffer"
                            onClick={callback}>{(isOpen ? 'Hide' : 'Show' ) + ' Lollipop Chart'}</Button>
         },
 
