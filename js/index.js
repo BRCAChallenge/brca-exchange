@@ -278,7 +278,7 @@ var Database = React.createClass({
         var {show} = this.props,
             params = databaseParams(this.getQuery());
         // XXX is 'keys' used?
-        var table;
+        var table, message;
         if (this.props.mode === 'research_mode') {
             table = <ResearchVariantTable
                 ref='table'
@@ -292,6 +292,7 @@ var Database = React.createClass({
                 keys={databaseKey}
                 onHeaderClick={this.showHelp}
                 onRowClick={this.showVariant}/>
+            message = this.renderMessage(content.pages.variantsResearch)
         } else {
             table = <VariantTable
                 ref='table'
@@ -305,12 +306,21 @@ var Database = React.createClass({
                 keys={databaseKey}
                 onHeaderClick={this.showHelp}
                 onRowClick={this.showVariant}/>
+            message = this.renderMessage(content.pages.variantsDefault)
         }
         return (
             <Grid fluid={true} id="table-grid" style={{display: show ? 'block' : 'none'}}>
+                {message}
                 {table}
             </Grid>
         );
+    },
+    renderMessage: function(message) {
+        return  <Row>
+                    <Col sm={10} smOffset={1}  className="alert alert-warning">
+                        <RawHTML ref='content' html={message}/>
+                    </Col>
+                </Row>
     }
 });
 
