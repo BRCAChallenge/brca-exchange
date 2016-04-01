@@ -14,7 +14,7 @@ var Cookies = require('js-cookie');
 
 var AFFILIATION = [
     'I lead a testing lab',
-    'I am a member of a teting lab',
+    'I am a member of a testing lab',
     'I lead a research lab',
     'I am a member of a research lab',
     'I lead an advocacy group',
