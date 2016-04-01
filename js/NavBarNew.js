@@ -46,6 +46,11 @@ var NavBarNew = React.createClass({
     },
     shouldComponentUpdate: function (nextProps, nextState) {
         // Only rerender if path has change or the research mode changes, ignoring query.
+        var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
+        if (d3TipDiv.length != 0 && d3TipDiv[0].style.opacity != '0') {
+            d3TipDiv[0].style.opacity='0';
+            d3TipDiv[0].style.pointerEvents='none';
+        }
         return this.props.mode !== nextProps.mode ||
             this.state.showModal !== nextState.showModal ||
             this.props.path.split(/\?/)[0] !== nextProps.path.split(/\?/)[0];
