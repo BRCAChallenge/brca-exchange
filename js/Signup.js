@@ -39,7 +39,7 @@ var Signup = React.createClass({
             </div>
         }
         return (
-            <Grid>
+            <Grid id="main-grid">
                 <Row id="message">
                     {message}
                 </Row>
