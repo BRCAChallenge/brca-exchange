@@ -41,7 +41,7 @@ var Signup = React.createClass({
             </div>
         }
         return (
-            <Grid>
+            <Grid id="main-grid">
                 <Row>
                     <Col sm={10} smOffset={1}  className="alert alert-warning">
                         <RawHTML ref='content' html={content.pages.signupMessage}/>
