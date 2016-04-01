@@ -406,6 +406,8 @@ var ResearchVariantTableSupplier = function (Component) {
             this.setState({columnSelection: cs});
         },
         setSource: function (prop, event) {
+            // this function uses 1, 0 and -1 to accommodate excluding sources as well as not-including them
+            // currently only uses 1 and 0 because exclusion is not being used
             var {sourceSelection} = this.state
             var value = event.target.checked ? 1 : 0;
             var ss = {...sourceSelection, [prop]: value};
