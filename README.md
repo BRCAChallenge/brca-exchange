@@ -28,13 +28,16 @@ The server runs on Django with postgres so install and set up those
        * `sudo apt-get install postgresql postgresql-contrib`
 * **Create the database** 
    * `sudo -u postgres createdb  storage.pg`
+* **Set the postgres role's password** 
+   * `sudo -u postgres psql postgres`
+   *  at the prompt type `\password postgres` to set the password to `postgres`
 * **Install the python dependencies**
    * `pip install -qU -r requirements.txt`
 * **Run the initial migration to populate the database**
    * `cd django`
-   * `django manage.py migrate`
+   * `python manage.py migrate`
 * **Start the server**
-   * `django manage.py runserver`
+   * `python manage.py runserver`
 * If you're developing locally point the frontend at the local server
    * Edit databaseUrl in `js/backend.js` to point to `localhost:8000`
 * **Browse to [http://localhost:8080/](http://localhost:8080/)**
