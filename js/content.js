@@ -10,8 +10,10 @@ var content = {
     help_research: require('../content/help_research.md'),
     disclaimer: require('../content/disclaimer.md'),
     thisSite: require('../content/thisSite.md'),
-    variantPage: require('../content/variantPage.md'),
-    researchWarning: require('../content/researchWarning.md')
+    variantsDefault: require('../content/variantsDefault.md'),
+    variantsResearch: require('../content/variantsResearch.md'),
+    researchWarning: require('../content/researchWarning.md'),
+    signupMessage: require('../content/signupMessage.md')
 };
 
 module.exports = {

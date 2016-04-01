@@ -2,6 +2,8 @@
 
 var React = require('react');
 var backend = require('./backend');
+var content = require('./content');
+var RawHTML = require('./RawHTML');
 var Rx = require('rx');
 require('rx-dom');
 var _ = require('underscore');
@@ -14,12 +16,12 @@ var Cookies = require('js-cookie');
 
 var AFFILIATION = [
     'I lead a testing lab',
-    'I am a member of a teting lab',
+    'I am a member of a testing lab',
     'I lead a research lab',
     'I am a member of a research lab',
     'I lead an advocacy group',
     'I work at an advocacy group',
-    'I am a genetic councelor',
+    'I am a genetic counselor',
     'Other'];
 
 
@@ -40,6 +42,11 @@ var Signup = React.createClass({
         }
         return (
             <Grid id="main-grid">
+                <Row>
+                    <Col sm={10} smOffset={1}  className="alert alert-warning">
+                        <RawHTML ref='content' html={content.pages.signupMessage}/>
+                    </Col>
+                </Row>
                 <Row id="message">
                     {message}
                 </Row>

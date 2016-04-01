@@ -406,8 +406,11 @@ var ResearchVariantTableSupplier = function (Component) {
             this.setState({columnSelection: cs});
         },
         setSource: function (prop, event) {
+            // this function uses 1, 0 and -1 to accommodate excluding sources as well as not-including them
+            // currently only uses 1 and 0 because exclusion is not being used
             var {sourceSelection} = this.state
-            var ss = {...sourceSelection, [prop]: event.target.value};
+            var value = event.target.checked ? 1 : 0;
+            var ss = {...sourceSelection, [prop]: value};
             this.setState({sourceSelection: ss});
         },
         filterFormCols: function (subColList, columnSelection) {
@@ -418,16 +421,11 @@ var ResearchVariantTableSupplier = function (Component) {
         getAdvancedFilters() {
             var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
                 <Col sm={6} md={3} key={name}>
-                    <div className="sources-fields btm-buffer">
-                        <Input type="select"
-                            onChange={v => this.setSource(name,v)}
-                            label={name.substring(11).replace(/_/g," ")} // eg "Variant_in_1000_Genomes" => "1000 Genomes"
-                            value={value}>
-                            <option value={ 1}>{"Include"}</option>
-                            <option value={ 0}>{"Don't care"}</option>
-                            <option value={-1}>{"Exclude"}</option>
-                        </Input>
-                    </div>
+                    <Input type="checkbox"
+                        onChange={v => this.setSource(name,v)}
+                        label={name.substring(11).replace(/_/g," ")} // eg "Variant_in_1000_Genomes" => "1000 Genomes"
+                        checked={value>0}>
+                    </Input>
                 </Col>
             );
             var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
