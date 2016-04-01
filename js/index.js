@@ -309,7 +309,7 @@ var Database = React.createClass({
             message = this.renderMessage(content.pages.variantsDefault)
         }
         return (
-            <Grid fluid={true} id="table-grid" style={{display: show ? 'block' : 'none'}}>
+            <Grid fluid={true} id="main-grid" style={{display: show ? 'block' : 'none'}}>
                 {message}
                 {table}
             </Grid>
