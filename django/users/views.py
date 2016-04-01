@@ -11,7 +11,6 @@ from django.http import JsonResponse
 from brca import settings
 
 from .models import MyUser
-from .config import captcha_secret
 
 
 def login(request):
