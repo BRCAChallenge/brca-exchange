@@ -179,11 +179,6 @@ var DataTable = React.createClass({
         return (error ? <p>{error}</p> :
             <div className={this.props.className}>
             <div id="filters" className="container-fluid">
-                <Row>
-                    <Col sm={10} smOffset={1}  className="alert alert-warning">
-                        <RawHTML ref='content' html={content.pages.variantPage}/>
-                    </Col>
-                </Row>
                 <Row id="show-hide" className="btm-buffer">
                     <Col sm={10} smOffset={1}>
                         <Button className="btn-sm rgt-buffer"
