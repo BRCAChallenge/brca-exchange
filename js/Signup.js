@@ -2,6 +2,8 @@
 
 var React = require('react');
 var backend = require('./backend');
+var content = require('./content');
+var RawHTML = require('./RawHTML');
 var Rx = require('rx');
 require('rx-dom');
 var _ = require('underscore');
@@ -40,6 +42,11 @@ var Signup = React.createClass({
         }
         return (
             <Grid>
+                <Row>
+                    <Col sm={10} smOffset={1}  className="alert alert-warning">
+                        <RawHTML ref='content' html={content.pages.signupMessage}/>
+                    </Col>
+                </Row>
                 <Row id="message">
                     {message}
                 </Row>

@@ -12,7 +12,8 @@ var content = {
     thisSite: require('../content/thisSite.md'),
     variantsDefault: require('../content/variantsDefault.md'),
     variantsResearch: require('../content/variantsResearch.md'),
-    researchWarning: require('../content/researchWarning.md')
+    researchWarning: require('../content/researchWarning.md'),
+    signupMessage: require('../content/signupMessage.md')
 };
 
 module.exports = {
