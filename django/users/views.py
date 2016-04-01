@@ -5,6 +5,8 @@ from django.contrib.auth import logout
 from django.db import IntegrityError
 from django.http import JsonResponse
 
+from brca import settings
+
 from .models import MyUser
 from .config import captcha_secret
 
@@ -63,7 +65,7 @@ def register(request):
 
     # Check the CAPTCHA
     try:
-        post_data = {'secret': captcha_secret,
+        post_data = {'secret': settings.CAPTCHA_SECRET,
                      'response': captcha}
         response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=post_data)
         content = json.loads(response.content)
