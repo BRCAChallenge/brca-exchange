@@ -12,7 +12,7 @@ import sys
 
 from django.core.wsgi import get_wsgi_application
 
-appdir = '/var/www/backend/beta/django'
+appdir = os.path.dirname(__file__)
 sys.path.append(appdir)
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "brca.settings")
