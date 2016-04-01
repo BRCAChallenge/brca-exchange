@@ -4,4 +4,5 @@ This site provides information on catalogued BRCA1 and BRCA2 genetic variants.  
 
 The BRCA Exchange website was developed by the [BRCA Challenge](https://genomicsandhealth.org/work-products-demonstration-projects/brca-challenge-0) of the [Global Alliance for Genomics and Health](https://genomicsandhealth.org/).  The web site and underlying database were developed by the Computational Genomics Lab at the [UC Santa Cruz Genomics Institute](https://genomics.soe.ucsc.edu/)
 
-![](ucsc_logo.png)
+
+<img src="ucsc_logo.png" style="width:400px;">
