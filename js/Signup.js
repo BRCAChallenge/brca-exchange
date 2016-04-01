@@ -19,7 +19,7 @@ var AFFILIATION = [
     'I am a member of a research lab',
     'I lead an advocacy group',
     'I work at an advocacy group',
-    'I am a genetic councelor',
+    'I am a genetic counselor',
     'Other'];
 
 
