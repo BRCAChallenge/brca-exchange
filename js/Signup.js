@@ -87,7 +87,6 @@ var Signup = React.createClass({
 
             var xhr = new XMLHttpRequest();
             xhr.onload = function () {
-                console.log(this);
                 var responseData = JSON.parse(this.response);
 
                 if (this.status == 200 && responseData.success === true) {
@@ -106,10 +105,7 @@ var Signup = React.createClass({
 
 var SignupForm = React.createClass({
     getInitialState: function () {
-        return {errors: {}, file: '', imagePreviewUrl: ''}
-    },
-    componentDidMount: function() {
-        grecaptcha.render(this.refs.signupCAPTCHA.getDOMNode(), {sitekey: '6LdwNBwTAAAAACFRvttQc08debhGzAzNY0xWQhxw'});
+        return {errors: {}, file: '', imagePreviewUrl: null}
     },
     componentDidMount: function() {
         grecaptcha.render(this.refs.signupCAPTCHA.getDOMNode(), {sitekey: '6LdwNBwTAAAAACFRvttQc08debhGzAzNY0xWQhxw'});
@@ -176,10 +172,19 @@ var SignupForm = React.createClass({
         let reader = new FileReader();
         let file = e.target.files[0];
         reader.onloadend = () => {
-            this.setState({
-                file: file,
-                imagePreviewUrl: reader.result
-            });
+            if (file.size <= 4 * 1024 * 1024) {
+                this.setState({
+                    file: file,
+                    imagePreviewUrl: reader.result,
+                    imageTooBig: false
+                });
+            } else {
+                this.setState({
+                    file: null,
+                    imagePreviewUrl: null,
+                    imageTooBig: true
+                });
+            }
         };
         reader.readAsDataURL(file)
     },
@@ -211,15 +216,20 @@ var SignupForm = React.createClass({
         </div>
     },
     renderImageUpload: function (id, label) {
-        var {imagePreviewUrl} = this.state;
+        var {imagePreviewUrl, imageTooBig} = this.state;
         var imagePreview = null;
+        var error = null;
         if (imagePreviewUrl) {
             imagePreview = (<img src={imagePreviewUrl} className="img-thumbnail" style={{'maxHeight':'160px', 'maxWidth':'160px'}} />);
+        }
+        if (imageTooBig) {
+            error = <p className="bg-danger">Please choose an image less than 4MB</p>
         }
         return this.renderField(id, label,
             <div>
                 <input onChange={this.handleImageChange} type="file" accept="image/*"/>
                 {imagePreview}
+                {error}
             </div>)
     },
     renderTextInput: function (id, label) {
