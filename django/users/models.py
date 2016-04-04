@@ -75,9 +75,9 @@ class MyUser(AbstractBaseUser):
     state = models.TextField(blank=True)
     country = models.TextField(blank=True)
     phone_number = models.TextField(max_length=30, blank=True)
+    hide_number = models.BooleanField(default=False)
 
     comment = models.TextField(blank=True)
-    hide_number = models.BooleanField(default=False)
     hide_email = models.BooleanField(default=False)
 
     include_me = models.BooleanField(default=True)

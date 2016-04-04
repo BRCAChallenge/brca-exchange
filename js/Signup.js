@@ -111,6 +111,9 @@ var SignupForm = React.createClass({
     componentDidMount: function() {
         grecaptcha.render(this.refs.signupCAPTCHA.getDOMNode(), {sitekey: '6LdwNBwTAAAAACFRvttQc08debhGzAzNY0xWQhxw'});
     },
+    componentDidMount: function() {
+        grecaptcha.render(this.refs.signupCAPTCHA.getDOMNode(), {sitekey: '6LdwNBwTAAAAACFRvttQc08debhGzAzNY0xWQhxw'});
+    },
     isValid: function () {
         var compulsory_fields = ['email', 'email_confirm', 'password', 'password_confirm'];
         var errors = {};
@@ -236,7 +239,7 @@ var SignupForm = React.createClass({
     },
     renderSelect: function (id, label, values) {
         var options = values.map(function (value) {
-            return <option value={value}>{value}</option>
+            return <option key={id+value} value={value}>{value}</option>
         });
         return this.renderField(id, label,
             <select className="form-control" id={id} ref={id}>

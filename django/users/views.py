@@ -6,6 +6,8 @@ import requests, json
 import os
 
 from django.conf import settings
+import requests, json
+
 from django.contrib import auth
 from django.contrib.auth import logout
 from django.db import IntegrityError
