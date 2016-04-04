@@ -204,7 +204,7 @@ var SignupForm = React.createClass({
     },
     renderSelect: function (id, label, values) {
         var options = values.map(function (value) {
-            return <option value={value}>{value}</option>
+            return <option key={id+value} value={value}>{value}</option>
         });
         return this.renderField(id, label,
             <select className="form-control" id={id} ref={id}>
