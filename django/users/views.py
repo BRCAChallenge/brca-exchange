@@ -55,9 +55,9 @@ def register(request):
     country = request.POST.get('country', '')
     phone_number = request.POST.get('phoneNumber', '')
     comment = request.POST.get('comment', '')
-    include_me = request.POST.get('includeMe', True)
-    hide_number = request.POST.get('hideNumber', True)
-    hide_email = request.POST.get('hideEmail', True)
+    include_me = (request.POST.get('includeMe', "true") == "true")
+    hide_number = (request.POST.get('hideNumber', "true") == "true")
+    hide_email = (request.POST.get('hideEmail', "true") == "true")
     captcha = request.POST.get('captcha')
 
     response = {'success': True}
@@ -86,12 +86,19 @@ def users(request):
     page_num = int(request.GET.get('page_num','0'))
     page_size = int(request.GET.get('page_size','0'))
 
+    query = MyUser.objects.filter(include_me=True)
+
     start = page_num * page_size
     end = start + page_size
+    data = list(query[start:end].values())
 
-    page = MyUser.objects.all()[start:end]
+    for user in data:
+        if user['hide_email']:
+            user['email'] = ""
+        if user['hide_number']:
+            user['phone_number'] = ""
 
-    response = JsonResponse({'data':list(page.values())})
+    response = JsonResponse({'data':data})
     response["Access-Control-Allow-Origin"] = "*"
     
     return response
