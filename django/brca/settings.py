@@ -115,8 +115,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 MEDIA_ROOT = os.path.join(PROJECT_ROOT, "uploads")
-
-MEDIA_ROOT = os.path.join(PROJECT_ROOT, "uploads")
+MEDIA_URL = "/site_media/media/"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
@@ -137,8 +136,6 @@ STATICFILES_DIRS = [
 ]
 
 SITE_ID = 1
-
-MEDIA_URL = "/site_media/media/"
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_PORT = 25

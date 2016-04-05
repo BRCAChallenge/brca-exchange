@@ -8,4 +8,3 @@ python_modules/
 backend/httpserver.log
 backend/parameters_8000.py
 *.pyc
-django/uploads/

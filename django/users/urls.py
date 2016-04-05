@@ -1,9 +1,9 @@
 from django.conf import settings
 from django.conf.urls import url, patterns
 
-url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
-
 from . import views
+
+url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
 
 urlpatterns = [
     url(r'^register/$', views.register, name="register"),
