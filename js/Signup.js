@@ -72,27 +72,31 @@ var Signup = React.createClass({
     },
 
     handleSubmit: function () {
+        var showSuccess = () => {this.transitionTo('/community', {registrationSuccess:true})};
+        var showFailure = () => {this.setState({error: "An error occured"})};
+
         if (this.refs.contactForm.isValid()) {
             var formData = this.refs.contactForm.getFormData();
-
-            this.setState({submitted: formData})
-
+            this.setState({submitted: formData});
             var url = backend.databaseUrl + '/accounts/register/';
 
-            $.ajax({
-                url: url,
-                data: formData,
-                dataType: 'json',
-                crossDomain: true,
-                method: 'POST',
-                success: function (data) {
-                    this.transitionTo('/community')
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    this.setState({error: "An error occurred creating this account"})
-
-                }.bind(this)
+            var fd = new FormData();
+            $.each(formData, function (k, v) {
+                fd.append(k, v);
             });
+
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function () {
+                var responseData = JSON.parse(this.response);
+
+                if (this.status == 200 && responseData.success === true) {
+                    showSuccess();
+                } else {
+                    showFailure()
+                }
+            };
+            xhr.open('post', url);
+            xhr.send(fd);
         } else {
             this.setState({error: "Some information was missing"});
         }
@@ -101,7 +105,7 @@ var Signup = React.createClass({
 
 var SignupForm = React.createClass({
     getInitialState: function () {
-        return {errors: {}}
+        return {errors: {}, file: '', imagePreviewUrl: null}
     },
     componentDidMount: function() {
         grecaptcha.render(this.refs.signupCAPTCHA.getDOMNode(), {sitekey: '6LdwNBwTAAAAACFRvttQc08debhGzAzNY0xWQhxw'});
@@ -140,7 +144,8 @@ var SignupForm = React.createClass({
             this.refs.titleother.getDOMNode().checked && this.refs.titlecustom.getDOMNode().value;
 
         var data = {
-            email: this.refs.email.getDOMNode().value
+            image: this.state.file
+            , email: this.refs.email.getDOMNode().value
             , email_confirm: this.refs.email_confirm.getDOMNode().value
             , password: this.refs.password.getDOMNode().value
             , password_confirm: this.refs.password_confirm.getDOMNode().value
@@ -161,8 +166,31 @@ var SignupForm = React.createClass({
         };
         return data
     },
+    handleImageChange(e) {
+        e.preventDefault();
+
+        let reader = new FileReader();
+        let file = e.target.files[0];
+        reader.onloadend = () => {
+            if (file.size <= 4 * 1024 * 1024) {
+                this.setState({
+                    file: file,
+                    imagePreviewUrl: reader.result,
+                    imageTooBig: false
+                });
+            } else {
+                this.setState({
+                    file: null,
+                    imagePreviewUrl: null,
+                    imageTooBig: true
+                });
+            }
+        };
+        reader.readAsDataURL(file)
+    },
     render: function () {
         return <div className="form-horizontal">
+            {this.renderImageUpload('image', 'Profile picture')}
             {this.renderTextInput('email', 'Email *')}
             {this.renderTextInput('email_confirm', 'Confirm Email *')}
             {this.renderPassword('password', 'Password *')}
@@ -186,6 +214,23 @@ var SignupForm = React.createClass({
             {this.renderCAPTCHA('captcha','CAPTCHA *')}
 
         </div>
+    },
+    renderImageUpload: function (id, label) {
+        var {imagePreviewUrl, imageTooBig} = this.state;
+        var imagePreview = null;
+        var error = null;
+        if (imagePreviewUrl) {
+            imagePreview = (<img src={imagePreviewUrl} className="img-thumbnail" style={{'maxHeight':'160px', 'maxWidth':'160px'}} />);
+        }
+        if (imageTooBig) {
+            error = <p className="bg-danger">Please choose an image less than 4MB</p>
+        }
+        return this.renderField(id, label,
+            <div>
+                <input onChange={this.handleImageChange} type="file" accept="image/*"/>
+                {imagePreview}
+                {error}
+            </div>)
     },
     renderTextInput: function (id, label) {
         return this.renderField(id, label,
