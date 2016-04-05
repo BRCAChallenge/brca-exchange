@@ -58,8 +58,8 @@ var Community = React.createClass({
                     {avatar}
                 </td>
                 <td>
-                    <span id="name" className="row-wrap">{row['firstName']} {row['lastName']}, {row['title']}</span>
-                    <span id="affiliation" className="row-wrap">{row['affiliation']}</span>
+                    <span id="name" className="row-wrap"><h3>{row['firstName']} {row['lastName']}, {row['title']}</h3></span>
+                    <span id="affiliation" className="row-wrap"><h4>{row['affiliation']}</h4></span>
                     <span id="institution" className="row-wrap">{row['institution']}</span>
                     <span id="location" className="row-wrap">{location_string}</span>
                     <span id="contact" className="row-wrap">{row['email']} {row['phone_number']}</span>
