@@ -81,9 +81,22 @@ def register(request):
 
     # Create the user
     try:
-        created_user = MyUser.objects.create_user(email, password, first_name, last_name, title, affiliation,
-                                                  institution, city, state, comment, country, phone_number, include_me,
-                                                  hide_number, hide_email, has_image)
+        created_user = MyUser.objects.create_user(email=email,
+                                                  password=password,
+                                                  firstName=first_name,
+                                                  lastName=last_name,
+                                                  title=title,
+                                                  affiliation=affiliation,
+                                                  institution=institution,
+                                                  city=city,
+                                                  state=state,
+                                                  comment=comment,
+                                                  country=country,
+                                                  phone_number=phone_number,
+                                                  include_me=include_me,
+                                                  hide_number=hide_number,
+                                                  hide_email=hide_email,
+                                                  has_image=has_image)
         # Save the image under the user's id
         if image is not None:
             save_picture(created_user.id, image)
