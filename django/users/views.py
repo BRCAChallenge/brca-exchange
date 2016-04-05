@@ -1,12 +1,14 @@
-import requests, json
+import json
+import os
+from urllib2 import HTTPError
 
+import requests
 from django.contrib import auth
 from django.contrib.auth import logout
 from django.db import IntegrityError
 from django.http import JsonResponse
 
 from brca import settings
-
 from .models import MyUser
 
 
@@ -42,6 +44,10 @@ def user_logout(request):
 
 
 def register(request):
+    image = None
+    if request.FILES:
+        image = request.FILES["image"]
+
     email = request.POST.get('email', '')
     password = request.POST.get('password', '')
 
@@ -72,9 +78,15 @@ def register(request):
     except HTTPError:
         response = {'success': False}
 
+    # Create the user
     try:
-        MyUser.objects.create_user(email, password, first_name, last_name, title, affiliation, institution, city, state,
-                                   comment, country, phone_number, include_me, hide_number, hide_email)
+        created_user = MyUser.objects.create_user(email, password, first_name, last_name, title, affiliation,
+                                                  institution, city, state, comment, country, phone_number, include_me,
+                                                  hide_number, hide_email)
+        # Save the image under the user's id
+        if image is not None:
+            save_picture(created_user.id, image)
+
     except IntegrityError:
         response = {'success': False}
 
@@ -82,9 +94,18 @@ def register(request):
     response["Access-Control-Allow-Origin"] = "*"
     return response
 
+
+def save_picture(filename, image):
+    path = os.path.join(settings.MEDIA_ROOT, str(filename))
+    fd = open(path, 'wb')
+    for chunk in image.chunks():
+        fd.write(chunk)
+    fd.close()
+
+
 def users(request):
-    page_num = int(request.GET.get('page_num','0'))
-    page_size = int(request.GET.get('page_size','0'))
+    page_num = int(request.GET.get('page_num', '0'))
+    page_size = int(request.GET.get('page_size', '0'))
 
     query = MyUser.objects.filter(include_me=True)
 
@@ -100,5 +121,5 @@ def users(request):
 
     response = JsonResponse({'data':data})
     response["Access-Control-Allow-Origin"] = "*"
-    
+
     return response

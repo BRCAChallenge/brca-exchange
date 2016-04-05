@@ -41,7 +41,10 @@ var Community = React.createClass({
 
         var rows = _.map(data, row => {
             return <tr >
-                <td>Placeholder Image</td>
+                <td>
+                    <object className="avatar" data={backend.databaseUrl + '/site_media/media/' + row['id']}
+                            type="image/jpg"></object>
+                </td>
                 <td>
                     <span className="row-wrap">{row['firstName']} {row['lastName']} {row['title']}</span>
                     <span className="row-wrap">{row['affiliation']} at {row['institution']}</span>

@@ -5,11 +5,10 @@ from django.db import models
 
 
 class MyUserManager(BaseUserManager):
-    def create_user(self, email, password, firstName, lastName, title, affiliation, institution, city, state, country, phone_number,
-                    comment, include_me, hide_number, hide_email):
+    def create_user(self, email, password, firstName, lastName, title, affiliation, institution, city, state, country,
+                    phone_number, comment, include_me, hide_number, hide_email):
         """
-        Creates and saves a User with the given email, date of
-        birth and password.
+        Creates and saves a User with the given fields
         """
         if not email:
             raise ValueError('Users must have an email address')
@@ -36,8 +35,8 @@ class MyUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self,  email, password, firstName, lastName,title, affiliation, institution, city, state, country, phone_number,
-                        comment, include_me, hide_number, hide_email):
+    def create_superuser(self, email, password, firstName, lastName, title, affiliation, institution, city, state,
+                         country, phone_number, comment, include_me, hide_number, hide_email):
         user = self.create_user(email,
                                 password=password,
                                 firstName=firstName,
@@ -65,7 +64,6 @@ class MyUser(AbstractBaseUser):
         max_length=255,
         unique=True,
     )
-
     firstName = models.TextField(blank=True)
     lastName = models.TextField(blank=True)
     title = models.TextField(blank=True)
@@ -75,10 +73,9 @@ class MyUser(AbstractBaseUser):
     state = models.TextField(blank=True)
     country = models.TextField(blank=True)
     phone_number = models.TextField(max_length=30, blank=True)
+    hide_number = models.BooleanField(default=False)
 
     comment = models.TextField(blank=True)
-    # profile_image = ImageField(upload_to=get_image_path, blank=True, null=True)
-    hide_number = models.BooleanField(default=False)
     hide_email = models.BooleanField(default=False)
 
     include_me = models.BooleanField(default=True)
