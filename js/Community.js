@@ -7,6 +7,7 @@ var backend = require('backend');
 var {Navigation, Link} = require('react-router');
 var {Pagination} = require('react-data-components-bd2k');
 var _ = require('underscore');
+var placeholder = require('./img/placeholder.png');
 
 var Community = React.createClass({
     mixins: [PureRenderMixin, Navigation],
@@ -40,10 +41,18 @@ var Community = React.createClass({
         var {data, page, totalPages, error} = this.state;
 
         var rows = _.map(data, row => {
+            
+            var avatar;
+            if (data.has_image) {
+                var avatar_link = backend.databaseUrl + '/site_media/media/' + row['id']
+                avatar = <object className="avatar" data={avatar_link} type="image/jpg"/>
+            } else {
+                avatar = <img src={placeholder}/>
+            }
+
             return <tr >
                 <td>
-                    <object className="avatar" data={backend.databaseUrl + '/site_media/media/' + row['id']}
-                            type="image/jpg"></object>
+                    {avatar}
                 </td>
                 <td>
                     <span className="row-wrap">{row['firstName']} {row['lastName']} {row['title']}</span>

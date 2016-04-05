@@ -47,6 +47,7 @@ def register(request):
     image = None
     if request.FILES:
         image = request.FILES["image"]
+    has_image = (image is not None)
 
     email = request.POST.get('email', '')
     password = request.POST.get('password', '')
@@ -82,7 +83,7 @@ def register(request):
     try:
         created_user = MyUser.objects.create_user(email, password, first_name, last_name, title, affiliation,
                                                   institution, city, state, comment, country, phone_number, include_me,
-                                                  hide_number, hide_email)
+                                                  hide_number, hide_email, has_image)
         # Save the image under the user's id
         if image is not None:
             save_picture(created_user.id, image)
