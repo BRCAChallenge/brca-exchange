@@ -18,8 +18,6 @@ var Signin = React.createClass({
         }
     },
     render: function () {
-        console.log(this.getQuery());
-
         var message;
         if (this.state.error != null) {
             message = <div className="alert alert-danger">
