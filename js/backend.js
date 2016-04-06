@@ -4,11 +4,8 @@
 var Rx = require('rx');
 require('rx-dom');
 var _ = require('underscore');
+var config = require('./config')
 var qs = require('qs');
-
-// XXX Need a config mechanism for this.
-//var databaseUrl = "http://brcaexchange.cloudapp.net/backend";
-var databaseUrl = "http://localhost:8000";
 
 var transpose = a => _.zip.apply(_, a);
 
@@ -44,7 +41,7 @@ function url(opts) {
         [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v)));
     search = trimSearchTerm(search);
 
-    return `${databaseUrl}/data/?${qs.stringify(_.pick({
+    return `${config.backend_url}/data/?${qs.stringify(_.pick({
         format,
         filter,
         filterValue,
@@ -65,7 +62,7 @@ function data(opts) {
 
 function users(opts) {
     var {page, pageLength} = opts;
-    var users_url = `${databaseUrl}/accounts/users/?${qs.stringify(_.pick({
+    var users_url = `${config.backend_url}/accounts/users/?${qs.stringify(_.pick({
         'page_num': page,
         'page_size': pageLength
     }, v => v != null))}`;
@@ -84,6 +81,5 @@ module.exports = {
     users,
     lollipopData,
     url,
-    trimSearchTerm,
-    databaseUrl
+    trimSearchTerm
 };

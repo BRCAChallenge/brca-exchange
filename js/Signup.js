@@ -1,9 +1,9 @@
 'use strict';
 
 var React = require('react');
-var backend = require('./backend');
 var content = require('./content');
 var RawHTML = require('./RawHTML');
+var config  = require('./config')
 var Rx = require('rx');
 require('rx-dom');
 var _ = require('underscore');
@@ -78,7 +78,7 @@ var Signup = React.createClass({
         if (this.refs.contactForm.isValid()) {
             var formData = this.refs.contactForm.getFormData();
             this.setState({submitted: formData});
-            var url = backend.databaseUrl + '/accounts/register/';
+            var url = config.backend_url + '/accounts/register/';
 
             var fd = new FormData();
             $.each(formData, function (k, v) {
@@ -108,7 +108,7 @@ var SignupForm = React.createClass({
         return {errors: {}, file: '', imagePreviewUrl: null}
     },
     componentDidMount: function() {
-        grecaptcha.render(this.refs.signupCAPTCHA.getDOMNode(), {sitekey: '6LdwNBwTAAAAACFRvttQc08debhGzAzNY0xWQhxw'});
+        grecaptcha.render(this.refs.signupCAPTCHA.getDOMNode(), {sitekey: config.captcha_key});
     },
     isValid: function () {
         var compulsory_fields = ['email', 'email_confirm', 'password', 'password_confirm'];
