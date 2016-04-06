@@ -4,6 +4,7 @@ var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 var {Grid, Col, Row, Button, Table} = require('react-bootstrap');
 var backend = require('backend');
+var config  = require('./config')
 var {Navigation, Link} = require('react-router');
 var {Pagination} = require('react-data-components-bd2k');
 var _ = require('underscore');
@@ -44,7 +45,7 @@ var Community = React.createClass({
 
             var avatar;
             if (row.has_image) {
-                var avatar_link = backend.databaseUrl + '/site_media/media/' + row['id']
+                var avatar_link = config.backend_url + '/site_media/media/' + row['id']
                 avatar = <object className="avatar" data={avatar_link} type="image/jpg"/>
             } else {
                 avatar = <img src={placeholder}/>
