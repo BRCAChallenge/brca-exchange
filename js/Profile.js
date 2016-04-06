@@ -1,25 +1,25 @@
 'use strict';
 
 var React = require('react');
+var backend = require('./backend');
 var content = require('./content');
 var RawHTML = require('./RawHTML');
 var $ = require('jquery');
-var config  = require('./config')
 var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {Navigation} = require('react-router');
+var auth = require('./auth');
+var {Signup, AFFILIATION, trim, $c} = require('./Signup');
 
-var AFFILIATION = [
-    'I lead a testing lab',
-    'I am a member of a testing lab',
-    'I lead a research lab',
-    'I am a member of a research lab',
-    'I lead an advocacy group',
-    'I work at an advocacy group',
-    'I am a genetic counselor',
-    'Other'];
-
-
-var Signup = React.createClass({
+var Profile = React.createClass({
+    statics: {
+        willTransitionTo: function (transition, params, query) {
+            if (!auth.loggedIn()) {
+                transition.redirect('/signin', {}, {
+                    target: transition.path
+                });
+            }
+        }
+    },
     mixins: [Navigation],
     getInitialState: function () {
         return {
@@ -37,22 +37,22 @@ var Signup = React.createClass({
         return (
             <Grid id="main-grid">
                 <Row>
-                    <Col sm={10} smOffset={1}  className="alert alert-warning">
-                        <RawHTML ref='content' html={content.pages.signupMessage}/>
-                    </Col>
+                    <div className='text-center Variant-detail-title'>
+                        <h3>Update your profile</h3>
+                    </div>
                 </Row>
                 <Row id="message">
                     {message}
                 </Row>
                 <Row id="form">
                     <Col md={8} mdOffset={2}>
-                        <SignupForm ref="contactForm"/>
+                        <EditProfileForm ref="contactForm"/>
                     </Col>
                 </Row>
                 <Row id="submit">
                     <Col md={6} mdOffset={3}>
                         <Button type="button" className="btn btn-primary btn-block" onClick={this.handleSubmit}>
-                            Submit
+                            Update
                         </Button>
                     </Col>
                 </Row>
@@ -66,55 +66,20 @@ var Signup = React.createClass({
     },
 
     handleSubmit: function () {
-        var showSuccess = () => {this.transitionTo('/community', {registrationSuccess:true})};
-        var showFailure = () => {this.setState({error: "An error occured"})};
-
-        if (this.refs.contactForm.isValid()) {
-            var formData = this.refs.contactForm.getFormData();
-            this.setState({submitted: formData});
-            var url = config.backend_url + '/accounts/register/';
-
-            var fd = new FormData();
-            $.each(formData, function (k, v) {
-                fd.append(k, v);
-            });
-
-            var xhr = new XMLHttpRequest();
-            xhr.onload = function () {
-                var responseData = JSON.parse(this.response);
-
-                if (this.status == 200 && responseData.success === true) {
-                    showSuccess();
-                } else {
-                    showFailure()
-                }
-            };
-            xhr.open('post', url);
-            xhr.send(fd);
-        } else {
-            this.setState({error: "Some information was missing"});
-        }
+        //TODO
     }
 });
 
-var SignupForm = React.createClass({
+var EditProfileForm = React.createClass({
     getInitialState: function () {
-        return {errors: {}, file: '', imagePreviewUrl: null}
+        return {errors: {}}
     },
-    componentDidMount: function() {
-        grecaptcha.render(this.refs.signupCAPTCHA.getDOMNode(), {sitekey: config.captcha_key});
-    },
+
     isValid: function () {
         var compulsory_fields = ['email', 'email_confirm', 'password', 'password_confirm'];
         var errors = {};
-        if (this.refs.email.getDOMNode().value != this.refs.email_confirm.getDOMNode().value) {
-            errors["email_confirm"] = "The emails don't match"
-        }
         if (this.refs.password.getDOMNode().value != this.refs.password_confirm.getDOMNode().value) {
             errors["password_confirm"] = "The passwords don't match"
-        }
-        if (grecaptcha.getResponse() == "") {
-            errors["captcha"] = "No CAPTCHA entered"
         }
         compulsory_fields.forEach(function (field) {
             var value = trim(this.refs[field].getDOMNode().value)
@@ -129,7 +94,7 @@ var SignupForm = React.createClass({
             isValid = false;
             break;
         }
-        
+
         return isValid
     },
     getFormData: function () {
@@ -138,10 +103,7 @@ var SignupForm = React.createClass({
             this.refs.titleother.getDOMNode().checked && this.refs.titlecustom.getDOMNode().value;
 
         var data = {
-            image: this.state.file
-            , email: this.refs.email.getDOMNode().value
-            , email_confirm: this.refs.email_confirm.getDOMNode().value
-            , password: this.refs.password.getDOMNode().value
+            password: this.refs.password.getDOMNode().value
             , password_confirm: this.refs.password_confirm.getDOMNode().value
             , firstName: this.refs.firstName.getDOMNode().value
             , lastName: this.refs.lastName.getDOMNode().value
@@ -156,7 +118,6 @@ var SignupForm = React.createClass({
             , includeMe: this.refs.includeMe.getDOMNode().checked
             , hideNumber: this.refs.hideNumber.getDOMNode().checked
             , hideEmail: this.refs.hideEmail.getDOMNode().checked
-            , captcha: grecaptcha.getResponse()
         };
         return data
     },
@@ -185,10 +146,8 @@ var SignupForm = React.createClass({
     render: function () {
         return <div className="form-horizontal">
             {this.renderImageUpload('image', 'Profile picture')}
-            {this.renderTextInput('email', 'Email *')}
-            {this.renderTextInput('email_confirm', 'Confirm Email *')}
-            {this.renderPassword('password', 'Password *')}
-            {this.renderPassword('password_confirm', 'Confirm Password *')}
+            {this.renderPassword('password', 'Password')}
+            {this.renderPassword('password_confirm', 'Confirm Password')}
             {this.renderTextInput('firstName', 'First Name')}
             {this.renderTextInput('lastName', 'Last Name')}
             {this.renderRadioInlines('title', '', {
@@ -203,10 +162,8 @@ var SignupForm = React.createClass({
             {this.renderTextInput('phoneNumber', 'Phone number')}
             {this.renderTextarea('comment', 'Comment')}
             {this.renderCheckBox('includeMe', "Include me in the community page")}
-            {this.renderCheckBox('hideNumber', "Hide my phone number on this website")}
-            {this.renderCheckBox('hideEmail', "Hide my email address on this website")}
-            {this.renderCAPTCHA('captcha','CAPTCHA *')}
-
+            {this.renderCheckBox('hideNumber', "Don't display my phone number on this website")}
+            {this.renderCheckBox('hideEmail', "Don't display my email on this website")}
         </div>
     },
     renderImageUpload: function (id, label) {
@@ -214,7 +171,8 @@ var SignupForm = React.createClass({
         var imagePreview = null;
         var error = null;
         if (imagePreviewUrl) {
-            imagePreview = (<img src={imagePreviewUrl} className="img-thumbnail" style={{'maxHeight':'160px', 'maxWidth':'160px'}} />);
+            imagePreview = (<img src={imagePreviewUrl} className="img-thumbnail"
+                                 style={{'maxHeight':'160px', 'maxWidth':'160px'}}/>);
         }
         if (imageTooBig) {
             error = <p className="bg-danger">Please choose an image less than 4MB</p>
@@ -272,9 +230,6 @@ var SignupForm = React.createClass({
         </label>);
         return this.renderField(id, "", checkbox);
     },
-    renderCAPTCHA: function(id, label) {
-        return this.renderField(id, label, <div ref="signupCAPTCHA"></div>);
-    },
     renderField: function (id, label, field) {
         return <div className={$c('form-group', {'has-error': id in this.state.errors})}>
             <label htmlFor={id} className="col-sm-4 control-label">{label}</label>
@@ -285,32 +240,6 @@ var SignupForm = React.createClass({
     }
 });
 
-var trim = function () {
-    var TRIM_RE = /^\s+|\s+$/g
-    return function trim(string) {
-        return string.replace(TRIM_RE, '')
-    }
-}();
-
-function $c(staticClassName, conditionalClassNames) {
-    var classNames = []
-    if (typeof conditionalClassNames == 'undefined') {
-        conditionalClassNames = staticClassName
-    }
-    else {
-        classNames.push(staticClassName)
-    }
-    for (var className in conditionalClassNames) {
-        if (!!conditionalClassNames[className]) {
-            classNames.push(className)
-        }
-    }
-    return classNames.join(' ')
-}
-
 module.exports = ({
-    Signup: Signup,
-    AFFILIATION: AFFILIATION,
-    trim:  trim,
-    $c : $c
+    Profile: Profile
 });
