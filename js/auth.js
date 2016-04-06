@@ -1,4 +1,4 @@
-var backend = require('./backend');
+var config = require('./config');
 var $ = require('jquery');
 
 module.exports = {
@@ -26,7 +26,7 @@ module.exports = {
     },
 
     getToken: function (username, password, cb) {
-        var url = backend.databaseUrl + '/accounts/token-auth/';
+        var url = config.backend_url + '/accounts/token-auth/';
         $.ajax({
             url: url,
             data: {
