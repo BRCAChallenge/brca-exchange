@@ -49,7 +49,11 @@ var Signin = React.createClass({
             var formData = this.refs.contactForm.getFormData();
             auth.login(formData.email, formData.password, (loggedIn) => {
                 if (loggedIn) {
-                    this.transitionTo(this.getQuery()["target"])
+                    var target = this.getQuery()["target"];
+                    if (target ==null) {
+                        target = '/profile';
+                    }
+                    this.transitionTo(target)
                 }
             });
         } else {
