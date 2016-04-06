@@ -66,30 +66,7 @@ var Profile = React.createClass({
     },
 
     handleSubmit: function () {
-        if (this.refs.contactForm.isValid()) {
-            var formData = this.refs.contactForm.getFormData();
-
-            this.setState({submitted: formData})
-
-            var url = backend.databaseUrl + '/accounts/register/';
-
-            $.ajax({
-                url: url,
-                data: formData,
-                dataType: 'json',
-                crossDomain: true,
-                method: 'POST',
-                success: function (data) {
-                    this.transitionTo('/community')
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    this.setState({error: "An error occurred creating this account"})
-
-                }.bind(this)
-            });
-        } else {
-            this.setState({error: "Some information was missing"});
-        }
+        //TODO
     }
 });
 
@@ -104,7 +81,6 @@ var EditProfileForm = React.createClass({
         if (this.refs.password.getDOMNode().value != this.refs.password_confirm.getDOMNode().value) {
             errors["password_confirm"] = "The passwords don't match"
         }
-
         compulsory_fields.forEach(function (field) {
             var value = trim(this.refs[field].getDOMNode().value)
             if (!value) {
@@ -118,7 +94,7 @@ var EditProfileForm = React.createClass({
             isValid = false;
             break;
         }
-        
+
         return isValid
     },
     getFormData: function () {
@@ -145,8 +121,31 @@ var EditProfileForm = React.createClass({
         };
         return data
     },
+    handleImageChange(e) {
+        e.preventDefault();
+
+        let reader = new FileReader();
+        let file = e.target.files[0];
+        reader.onloadend = () => {
+            if (file.size <= 4 * 1024 * 1024) {
+                this.setState({
+                    file: file,
+                    imagePreviewUrl: reader.result,
+                    imageTooBig: false
+                });
+            } else {
+                this.setState({
+                    file: null,
+                    imagePreviewUrl: null,
+                    imageTooBig: true
+                });
+            }
+        };
+        reader.readAsDataURL(file)
+    },
     render: function () {
         return <div className="form-horizontal">
+            {this.renderImageUpload('image', 'Profile picture')}
             {this.renderPassword('password', 'Password')}
             {this.renderPassword('password_confirm', 'Confirm Password')}
             {this.renderTextInput('firstName', 'First Name')}
@@ -166,6 +165,24 @@ var EditProfileForm = React.createClass({
             {this.renderCheckBox('hideNumber', "Don't display my phone number on this website")}
             {this.renderCheckBox('hideEmail', "Don't display my email on this website")}
         </div>
+    },
+    renderImageUpload: function (id, label) {
+        var {imagePreviewUrl, imageTooBig} = this.state;
+        var imagePreview = null;
+        var error = null;
+        if (imagePreviewUrl) {
+            imagePreview = (<img src={imagePreviewUrl} className="img-thumbnail"
+                                 style={{'maxHeight':'160px', 'maxWidth':'160px'}}/>);
+        }
+        if (imageTooBig) {
+            error = <p className="bg-danger">Please choose an image less than 4MB</p>
+        }
+        return this.renderField(id, label,
+            <div>
+                <input onChange={this.handleImageChange} type="file" accept="image/*"/>
+                {imagePreview}
+                {error}
+            </div>)
     },
     renderTextInput: function (id, label) {
         return this.renderField(id, label,
