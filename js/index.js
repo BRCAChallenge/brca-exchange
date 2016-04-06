@@ -365,9 +365,17 @@ var VariantDetail = React.createClass({
             cols = columns;
         }
         var rows = _.map(cols, ({prop, title}) => {
+            var row_item;
+            if ((prop == "URL_ENIGMA" || prop == "Assertion_method_citation_ENIGMA") && variant[prop] != null) {
+                row_item = <a href={variant[prop]}>{variant[prop]}</a>
+            } else if (prop == "Source_URL" && variant[prop] != null) {
+                row_item = _.map(variant[prop].split(','), url => <a href={url}>{url}</a>)
+            } else {
+                row_item = variant[prop]
+            }
             return <tr key={prop}>
                 <Key tableKey={title} columns={cols} onClick={() => this.showHelp(title)}/>
-                <td><span className="row-wrap">{variant[prop]}</span></td>
+                <td><span className="row-wrap">{row_item}</span></td>
             </tr>
         });
 

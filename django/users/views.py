@@ -21,6 +21,7 @@ def register(request):
     image = None
     if request.FILES:
         image = request.FILES["image"]
+    has_image = (image is not None)
 
     email = request.POST.get('email', '')
     password = request.POST.get('password', '')
@@ -35,9 +36,9 @@ def register(request):
     country = request.POST.get('country', '')
     phone_number = request.POST.get('phoneNumber', '')
     comment = request.POST.get('comment', '')
-    include_me = request.POST.get('includeMe', True)
-    hide_number = request.POST.get('hideNumber', True)
-    hide_email = request.POST.get('hideEmail', True)
+    include_me = (request.POST.get('includeMe', "true") == "true")
+    hide_number = (request.POST.get('hideNumber', "true") == "true")
+    hide_email = (request.POST.get('hideEmail', "true") == "true")
     captcha = request.POST.get('captcha')
 
     response = {'success': True}
@@ -54,9 +55,22 @@ def register(request):
 
     # Create the user
     try:
-        created_user = MyUser.objects.create_user(email, password, first_name, last_name, title, affiliation,
-                                                  institution, city, state, comment, country, phone_number, include_me,
-                                                  hide_number, hide_email)
+        created_user = MyUser.objects.create_user(email=email,
+                                                  password=password,
+                                                  firstName=first_name,
+                                                  lastName=last_name,
+                                                  title=title,
+                                                  affiliation=affiliation,
+                                                  institution=institution,
+                                                  city=city,
+                                                  state=state,
+                                                  comment=comment,
+                                                  country=country,
+                                                  phone_number=phone_number,
+                                                  include_me=include_me,
+                                                  hide_number=hide_number,
+                                                  hide_email=hide_email,
+                                                  has_image=has_image)
         # Save the image under the user's id
         if image is not None:
             save_picture(created_user.id, image)
@@ -81,12 +95,19 @@ def users(request):
     page_num = int(request.GET.get('page_num', '0'))
     page_size = int(request.GET.get('page_size', '0'))
 
+    query = MyUser.objects.filter(include_me=True)
+
     start = page_num * page_size
     end = start + page_size
+    data = list(query[start:end].values())
 
-    page = MyUser.objects.all()[start:end]
+    for user in data:
+        if user['hide_email']:
+            user['email'] = ""
+        if user['hide_number']:
+            user['phone_number'] = ""
 
-    response = JsonResponse({'data': list(page.values())})
+    response = JsonResponse({'data':data})
     response["Access-Control-Allow-Origin"] = "*"
 
     return response

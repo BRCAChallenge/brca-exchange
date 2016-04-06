@@ -6,7 +6,7 @@ from django.db import models
 
 class MyUserManager(BaseUserManager):
     def create_user(self, email, password, firstName, lastName, title, affiliation, institution, city, state, country,
-                    phone_number, comment, include_me, hide_number, hide_email):
+                    phone_number, comment, include_me, hide_number, hide_email, has_image, is_admin=False):
         """
         Creates and saves a User with the given fields
         """
@@ -28,33 +28,17 @@ class MyUserManager(BaseUserManager):
             comment=comment,
             include_me=include_me,
             hide_number=hide_number,
-            hide_email=hide_email
+            hide_email=hide_email,
+            has_image=has_image,
+            is_admin=is_admin
         )
 
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password, firstName, lastName, title, affiliation, institution, city, state,
-                         country, phone_number, comment, include_me, hide_number, hide_email):
-        user = self.create_user(email,
-                                password=password,
-                                firstName=firstName,
-                                lastName=lastName,
-                                title=title,
-                                affiliation=affiliation,
-                                institution=institution,
-                                city=city,
-                                state=state,
-                                country=country,
-                                phone_number=phone_number,
-                                comment=comment,
-                                include_me=include_me,
-                                hide_number=hide_number,
-                                hide_email=hide_email
-                                )
-        user.is_admin = True
-        user.save(using=self._db)
+    def create_superuser(self, **kwargs):
+        user = self.create_user(is_admin=True, **kwargs)
         return user
 
 
@@ -81,6 +65,7 @@ class MyUser(AbstractBaseUser):
     include_me = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+    has_image = models.BooleanField(default=False)
 
     objects = MyUserManager()
 

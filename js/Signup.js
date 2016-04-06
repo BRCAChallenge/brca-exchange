@@ -203,8 +203,8 @@ var SignupForm = React.createClass({
             {this.renderTextInput('phoneNumber', 'Phone number')}
             {this.renderTextarea('comment', 'Comment')}
             {this.renderCheckBox('includeMe', "Include me in the community page")}
-            {this.renderCheckBox('hideNumber', "Don't display my phone number on this website")}
-            {this.renderCheckBox('hideEmail', "Don't display my email on this website")}
+            {this.renderCheckBox('hideNumber', "Hide my phone number on this website")}
+            {this.renderCheckBox('hideEmail', "Hide my email address on this website")}
             {this.renderCAPTCHA('captcha','CAPTCHA *')}
 
         </div>

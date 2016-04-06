@@ -7,6 +7,7 @@ var backend = require('backend');
 var {Navigation, Link} = require('react-router');
 var {Pagination} = require('react-data-components-bd2k');
 var _ = require('underscore');
+var placeholder = require('./img/placeholder.png');
 
 var Community = React.createClass({
     mixins: [PureRenderMixin, Navigation],
@@ -40,14 +41,28 @@ var Community = React.createClass({
         var {data, page, totalPages, error} = this.state;
 
         var rows = _.map(data, row => {
+
+            var avatar;
+            if (row.has_image) {
+                var avatar_link = backend.databaseUrl + '/site_media/media/' + row['id']
+                avatar = <object className="avatar" data={avatar_link} type="image/jpg"/>
+            } else {
+                avatar = <img src={placeholder}/>
+            }
+
+            var {city, state, country} = row;
+            var location_string = _.values(_.pick({city,state,country}, v => v)).join(', ')
+
             return <tr >
                 <td>
-                    <object className="avatar" data={backend.databaseUrl + '/site_media/media/' + row['id']}
-                            type="image/jpg"></object>
+                    {avatar}
                 </td>
                 <td>
-                    <span className="row-wrap">{row['firstName']} {row['lastName']} {row['title']}</span>
-                    <span className="row-wrap">{row['affiliation']} at {row['institution']}</span>
+                    <span id="name" className="row-wrap"><h3>{row['firstName']} {row['lastName']}, {row['title']}</h3></span>
+                    <span id="affiliation" className="row-wrap"><h4>{row['affiliation']}</h4></span>
+                    <span id="institution" className="row-wrap">{row['institution']}</span>
+                    <span id="location" className="row-wrap">{location_string}</span>
+                    <span id="contact" className="row-wrap">{row['email']} {row['phone_number']}</span>
                 </td>
             </tr>
         });
