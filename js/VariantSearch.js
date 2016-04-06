@@ -8,14 +8,14 @@ var {Navigation} = require('react-router');
 var AutoSuggest = require('react-autosuggest');
 var _ = require('underscore');
 var $ = require('jquery');
-var backend = require('./backend');
+var config = require('./config')
 
 require('./css/Autosuggest.css');
 
 
 function getSuggestions(value, callback) {
     var matchStr = encodeURIComponent(value.toLowerCase());
-    var suggestionsEndpoint = `${backend.databaseUrl}/data/suggestions/?term=${matchStr}`;
+    var suggestionsEndpoint = `${config.backend_url}/data/suggestions/?term=${matchStr}`;
     $.ajax({
         url: suggestionsEndpoint,
         dataType: 'json',
