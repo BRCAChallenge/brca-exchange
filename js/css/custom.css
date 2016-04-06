@@ -325,3 +325,11 @@ th[role='columnheader'] .help, .help-target .help {
 .sources-fields label {
     width: 7.5em;
 }
+
+.avatar {
+    width: 120px;
+    height: auto;
+    background-size: cover;
+    background: url('http://i67.tinypic.com/2hd189c.jpg') center ;
+
+}
