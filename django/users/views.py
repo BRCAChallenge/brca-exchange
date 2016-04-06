@@ -1,42 +1,16 @@
-import requests, json
+import json
 
-from django.contrib import auth
-from django.contrib.auth import logout
+import requests
 from django.db import IntegrityError
 from django.http import JsonResponse
+from rest_framework.authtoken import views as rest_views
 
 from brca import settings
-
 from .models import MyUser
 
 
-def login(request):
-    # here you get the post request username and password
-    username = request.POST.get('username', '')
-    password = request.POST.get('password', '')
-
-    # authentication of the user, to check if it's active or None
-    user = auth.authenticate(username=username, password=password)
-
-    if user is not None:
-        if user.is_active:
-            # this is where the user login actually happens, before this the user
-            # is not logged in.
-            auth.login(request, user)
-
-            response = JsonResponse({'success': True})
-            response["Access-Control-Allow-Origin"] = "*"
-            return response
-
-    else:
-        response = JsonResponse({'success': False})
-        response["Access-Control-Allow-Origin"] = "*"
-        return response
-
-
-def user_logout(request):
-    logout(request)
-    response = JsonResponse({'success': True})
+def token_auth(request):
+    response = rest_views.obtain_auth_token(request)
     response["Access-Control-Allow-Origin"] = "*"
     return response
 
@@ -82,6 +56,7 @@ def register(request):
     response["Access-Control-Allow-Origin"] = "*"
     return response
 
+
 def users(request):
     page_num = int(request.GET.get('page_num','0'))
     page_size = int(request.GET.get('page_size','0'))
@@ -93,5 +68,5 @@ def users(request):
 
     response = JsonResponse({'data':list(page.values())})
     response["Access-Control-Allow-Origin"] = "*"
-    
+
     return response

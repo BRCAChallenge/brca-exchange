@@ -9,11 +9,10 @@ var {Modal, Button} = require('react-bootstrap');
 var content = require('./content');
 var Community = require('./Community');
 var databaseKey = require('../databaseKey');
-
 var {Navbar, Nav, DropdownButton} = require('react-bootstrap');
-
 var VariantSearch = require('./VariantSearch');
-var { Link} = require('react-router');
+var {Link} = require('react-router');
+var auth = require('./auth');
 
 var NavLink = React.createClass({
     render: function () {
@@ -32,9 +31,14 @@ var NavBarNew = React.createClass({
     close: function () {
         this.refs.about.setState({open: false});
     },
+    logout: function () {
+        auth.logout();
+        this.refs.about.setState({open: false});
+    },
     getInitialState: function () {
         return {
-            showModal: false
+            showModal: false,
+            loggedin: auth.loggedIn()
         }
     },
     getModeName: function (name) {
@@ -52,6 +56,7 @@ var NavBarNew = React.createClass({
             d3TipDiv[0].style.pointerEvents='none';
         }
         return this.props.mode !== nextProps.mode ||
+            this.state.loggedin !== nextState.loggedin ||
             this.state.showModal !== nextState.showModal ||
             this.props.path.split(/\?/)[0] !== nextProps.path.split(/\?/)[0];
     },
@@ -100,11 +105,16 @@ var NavBarNew = React.createClass({
                             {this.props.mode === 'default' && this.state.showModal &&
                             <Modal onRequestHide={() => this.setState({ showModal: false })}>
                                 <RawHTML html={content.pages.researchWarning}/>
-                                <Button onClick={() => {this.toggleMode() ;}}>Yes</Button>
+                                <Button onClick={() => {this.toggleMode()}}>Yes</Button>
                                 <Button onClick={() => this.setState({ showModal: false })}>No</Button>
                             </Modal>}
                         </DropdownButton>
-                        <NavLink to='/community'>Community</NavLink>
+                        <DropdownButton className={this.activePath(path, "community")} ref='community' title='Community'>
+                            <NavLink onClick={this.close} to='/community'>Community space</NavLink>
+                            <NavLink onClick={this.close} to='/profile'>Your profile</NavLink>
+                            {!auth.loggedIn() && <NavLink onClick={this.close} to='/signin'>Sign in</NavLink> }
+                            {auth.loggedIn() && <NavLink onClick={this.logout} to='/'>Sign out</NavLink> }
+                        </DropdownButton>
                     </Nav>
                 </Navbar>
             </div>
