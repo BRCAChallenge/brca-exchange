@@ -5,15 +5,30 @@ from urllib2 import HTTPError
 import requests
 from django.db import IntegrityError
 from django.http import JsonResponse
-from rest_framework.authtoken import views as rest_views
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from rest_framework_jwt.views import obtain_jwt_token
 
 from brca import settings
 from .models import MyUser
 
 
+class RetrieveUser(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def get(self, request):
+        data = {
+            'token': str(request.auth)
+        }
+        response = Response(data)
+        return response
+
+
 def token_auth(request):
-    response = rest_views.obtain_auth_token(request)
-    response["Access-Control-Allow-Origin"] = "*"
+    response = obtain_jwt_token(request)
     return response
 
 
@@ -79,7 +94,6 @@ def register(request):
         response = {'success': False}
 
     response = JsonResponse(response)
-    response["Access-Control-Allow-Origin"] = "*"
     return response
 
 
@@ -107,7 +121,5 @@ def users(request):
         if user['hide_number']:
             user['phone_number'] = ""
 
-    response = JsonResponse({'data':data})
-    response["Access-Control-Allow-Origin"] = "*"
-
+    response = JsonResponse({'data': data})
     return response

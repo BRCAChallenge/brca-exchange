@@ -5,6 +5,7 @@ var backend = require('./backend');
 var content = require('./content');
 var RawHTML = require('./RawHTML');
 var $ = require('jquery');
+var config  = require('./config')
 var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {Navigation} = require('react-router');
 var auth = require('./auth');
@@ -21,9 +22,25 @@ var Profile = React.createClass({
         }
     },
     mixins: [Navigation],
+    retrieveProfile: function () {
+        var url = config.backend_url + '/accounts/get/';
+        var token = auth.token();
+        var tokenValue = 'JWT ' + token;
+
+        $.ajax({
+            type: 'GET',
+            headers: {'Authorization': tokenValue},
+            url: url,
+            success: function (data) {
+                return data;
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+            }
+        });
+    },
     getInitialState: function () {
         return {
-            submitted: null,
+            submitted: this.retrieveProfile(),
             success: null
         }
     },
@@ -66,7 +83,35 @@ var Profile = React.createClass({
     },
 
     handleSubmit: function () {
-        //TODO
+        var showSuccess = () => {this.transitionTo('/community', {registrationSuccess:true})};
+        var showFailure = () => {this.setState({error: "An error occured"})};
+
+        if (this.refs.contactForm.isValid()) {
+            var formData = this.refs.contactForm.getFormData();
+            this.setState({submitted: formData});
+
+            var url = config.backend_url + '/accounts/update/';
+
+            var fd = new FormData();
+            $.each(formData, function (k, v) {
+                fd.append(k, v);
+            });
+
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function () {
+                var responseData = JSON.parse(this.response);
+
+                if (this.status == 200 && responseData.success === true) {
+                    showSuccess();
+                } else {
+                    showFailure()
+                }
+            };
+            xhr.open('post', url);
+            xhr.send(fd);
+        } else {
+            this.setState({error: "Some information was missing"});
+        }
     }
 });
 

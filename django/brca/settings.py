@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     # project
     'brca',
 
+    'corsheaders',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -45,10 +46,8 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware'
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 
@@ -57,6 +56,14 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     )
 }
+
+CORS_ORIGIN_WHITELIST = (
+    'localhost:8080',
+    'brcaexchange.cloudapp.net',
+    'brcaexchange.org',
+    'brca-website.cloudapp.net'
+)
+
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 

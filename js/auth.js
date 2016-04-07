@@ -25,12 +25,16 @@ module.exports = {
         return !!localStorage.token
     },
 
+    token: function() {
+        return localStorage.token
+    },
+
     getToken: function (username, password, cb) {
         var url = config.backend_url + '/accounts/token-auth/';
         $.ajax({
             url: url,
             data: {
-                username: username,
+                email: username,
                 password: password
             },
             dataType: 'json',
