@@ -22,27 +22,9 @@ var Profile = React.createClass({
         }
     },
     mixins: [Navigation],
-    retrieveProfile: function () {
-        var url = config.backend_url + '/accounts/get/';
-        var token = auth.token();
-        var tokenValue = 'JWT ' + token;
-
-        $.ajax({
-            type: 'GET',
-            headers: {'Authorization': tokenValue},
-            url: url,
-            success: function (data) {
-                console.log(data);
-                return data;
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-            }
-        });
-    },
     getInitialState: function () {
         return {
-            submitted: this.retrieveProfile(),
-            success: null
+            success: null,
         }
     },
     render: function () {
@@ -84,32 +66,34 @@ var Profile = React.createClass({
     },
 
     handleSubmit: function () {
+        console.log('HANDLE SUBMIT CALLED')
         var showSuccess = () => {this.transitionTo('/community', {registrationSuccess:true})};
         var showFailure = () => {this.setState({error: "An error occured"})};
+        var formData = this.refs.contactForm.getFormData();
 
+        console.log('submitted data is')
+        console.log(formData)
         if (this.refs.contactForm.isValid()) {
-            var formData = this.refs.contactForm.getFormData();
-            this.setState({submitted: formData});
-
-            var url = config.backend_url + '/accounts/update/';
-
-            var fd = new FormData();
-            $.each(formData, function (k, v) {
-                fd.append(k, v);
-            });
-
-            var xhr = new XMLHttpRequest();
-            xhr.onload = function () {
-                var responseData = JSON.parse(this.response);
-
-                if (this.status == 200 && responseData.success === true) {
-                    showSuccess();
-                } else {
-                    showFailure()
-                }
-            };
-            xhr.open('post', url);
-            xhr.send(fd);
+            //this.setState({submitted: formData});
+            //var url = config.backend_url + '/accounts/update/';
+            //
+            //var fd = new FormData();
+            //$.each(formData, function (k, v) {
+            //    fd.append(k, v);
+            //});
+            //
+            //var xhr = new XMLHttpRequest();
+            //xhr.onload = function () {
+            //    var responseData = JSON.parse(this.response);
+            //
+            //    if (this.status == 200 && responseData.success === true) {
+            //        showSuccess();
+            //    } else {
+            //        showFailure()
+            //    }
+            //};
+            //xhr.open('post', url);
+            //xhr.send(fd);
         } else {
             this.setState({error: "Some information was missing"});
         }
@@ -117,24 +101,34 @@ var Profile = React.createClass({
 });
 
 var EditProfileForm = React.createClass({
-    getInitialState: function () {
-        return {errors: {}}
+    componentDidMount: function() {
+        this.retrieveProfile();
     },
-
+    retrieveProfile: function () {
+        var url = config.backend_url + '/accounts/get/';
+        var token = auth.token();
+        var tokenValue = 'JWT ' + token;
+        var saveProfileData = (data) => this.setState({data : data.user});
+        $.ajax({
+            type: 'GET',
+            headers: {'Authorization': tokenValue},
+            url: url,
+            success: function (data) {
+                saveProfileData(data);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+            }
+        });
+    },
+    getInitialState: function () {
+        return {errors: {}, data:{}}
+    },
     isValid: function () {
-        var compulsory_fields = ['email', 'email_confirm', 'password', 'password_confirm'];
         var errors = {};
         if (this.refs.password.getDOMNode().value != this.refs.password_confirm.getDOMNode().value) {
             errors["password_confirm"] = "The passwords don't match"
         }
-        compulsory_fields.forEach(function (field) {
-            var value = trim(this.refs[field].getDOMNode().value)
-            if (!value) {
-                errors[field] = 'This field is required'
-            }
-        }.bind(this));
         this.setState({errors: errors});
-
         var isValid = true;
         for (var error in errors) {
             isValid = false;
@@ -159,11 +153,11 @@ var EditProfileForm = React.createClass({
             , city: this.refs.city.getDOMNode().value
             , state: this.refs.state.getDOMNode().value
             , country: this.refs.country.getDOMNode().value
-            , phoneNumber: this.refs.phoneNumber.getDOMNode().value
+            , phone_number: this.refs.phone_number.getDOMNode().value
             , comment: this.refs.comment.getDOMNode().value
-            , includeMe: this.refs.includeMe.getDOMNode().checked
-            , hideNumber: this.refs.hideNumber.getDOMNode().checked
-            , hideEmail: this.refs.hideEmail.getDOMNode().checked
+            , include_me: this.refs.include_me.getDOMNode().checked
+            , hide_number: this.refs.hide_number.getDOMNode().checked
+            , hide_email: this.refs.hide_email.getDOMNode().checked
         };
         return data
     },
@@ -190,26 +184,31 @@ var EditProfileForm = React.createClass({
         reader.readAsDataURL(file)
     },
     render: function () {
+        console.log('render of form - STATE is')
+        console.log(this.state.data)
+        console.log('cats title is')
+        console.log(this.state.data.title)
+
         return <div className="form-horizontal">
             {this.renderImageUpload('image', 'Profile picture')}
             {this.renderPassword('password', 'Password')}
             {this.renderPassword('password_confirm', 'Confirm Password')}
-            {this.renderTextInput('firstName', 'First Name')}
-            {this.renderTextInput('lastName', 'Last Name')}
+            {this.renderTextInput('firstName', 'First Name', this.state.data.firstName)}
+            {this.renderTextInput('lastName', 'Last Name', this.state.data.lastName)}
             {this.renderRadioInlines('title', '', {
                 values: [{name: 'M.D.', ref: 'md'}, {name: 'Ph.D', ref: 'phd'}, {name: 'Other', ref: 'other'}]
-                , defaultCheckedValue: 'M.D.'
+                , defaultCheckedValue: this.state.data.title
             })}
-            {this.renderSelect('affiliation', 'Affiliation', AFFILIATION)}
+            {this.renderSelect('affiliation', 'Affiliation', AFFILIATION, this.state.data.affiliation)}
             {this.renderTextInput('institution', 'Institution, Hospital or Company')}
-            {this.renderTextInput('city', 'City')}
-            {this.renderTextInput('state', 'State or Province')}
-            {this.renderTextInput('country', 'Country')}
-            {this.renderTextInput('phoneNumber', 'Phone number')}
-            {this.renderTextarea('comment', 'Comment')}
-            {this.renderCheckBox('includeMe', "Include me in the community page")}
-            {this.renderCheckBox('hideNumber', "Don't display my phone number on this website")}
-            {this.renderCheckBox('hideEmail', "Don't display my email on this website")}
+            {this.renderTextInput('city', 'City', this.state.data.city)}
+            {this.renderTextInput('state', 'State or Province', this.state.data.state)}
+            {this.renderTextInput('country', 'Country', this.state.data.country)}
+            {this.renderTextInput('phone_number', 'Phone number', this.state.data.phone_number)}
+            {this.renderTextarea('comment', 'Comment', this.state.data.comment)}
+            {this.renderCheckBox('include_me', "Include me in the community page", this.state.data.include_me)}
+            {this.renderCheckBox('hide_number', "Don't display my phone number on this website", this.state.data.hide_number)}
+            {this.renderCheckBox('hide_email', "Don't display my email on this website",this.state.data.hide_email)}
         </div>
     },
     renderImageUpload: function (id, label) {
@@ -230,9 +229,10 @@ var EditProfileForm = React.createClass({
                 {error}
             </div>)
     },
-    renderTextInput: function (id, label) {
+    renderTextInput: function (id, label, defaultValue) {
+        var handleChange = () => {var oldData = this.state.data; oldData[id]=this.refs[id].value; this.setState({data: oldData})};
         return this.renderField(id, label,
-            <input type="text" className="form-control" id={id} ref={id}/>
+            <input type="text" className="form-control" id={id} ref={id} value={defaultValue} onChange={handleChange}/>
         )
     },
     renderPassword: function (id, label) {
@@ -240,14 +240,16 @@ var EditProfileForm = React.createClass({
             <input type="password" className="form-control" id={id} ref={id}/>
         )
     },
-    renderTextarea: function (id, label) {
+    renderTextarea: function (id, label,defaultValue) {
+        var handleChange = () => {var oldData = this.state.data; oldData[id]=this.refs[id].value; this.setState({data: oldData})};
         return this.renderField(id, label,
-            <textarea className="form-control" id={id} ref={id}/>
+            <textarea className="form-control" id={id} ref={id} value={defaultValue} onChange={handleChange}/>
         )
     },
-    renderSelect: function (id, label, values) {
+    renderSelect: function (id, label, values, defaultValue) {
         var options = values.map(function (value) {
-            return <option key={id+value} value={value}>{value}</option>
+            var selected=defaultValue===value;
+            return <option key={id+value} value={value} selected={selected}>{value}</option>
         });
         return this.renderField(id, label,
             <select className="form-control" id={id} ref={id}>
@@ -256,22 +258,31 @@ var EditProfileForm = React.createClass({
         )
     },
     renderRadioInlines: function (id, label, kwargs) {
+        var handleTextChange = () => {var oldData = this.state.data; oldData[id]=this.refs.titlecustom.value; this.setState({data: oldData})};
+        var otherValue = kwargs.defaultCheckedValue;
         var options = kwargs.values.map(function (value) {
-            var defaultChecked = (value.name == kwargs.defaultCheckedValue)
+            var handleRadioChange = () => {var oldData = this.state.data; oldData[id]=this.refs[id+value.ref].checked; this.setState({data: oldData})};
+            var defaultChecked = false;
+            if (value.name == kwargs.defaultCheckedValue) {
+                defaultChecked = true;
+                otherValue = '';
+            }
+            if (value.name == 'Other' && otherValue !=='') {defaultChecked=true}
             return <label className="radio-inline">
-                <input type="radio" ref={id+value.ref} name={id} value={value.name} defaultChecked={defaultChecked}/>
+                <input type="radio" ref={id+value.ref} name={id} value={value.name} checked={defaultChecked} onChange={handleRadioChange}/>
                 {value.name}
             </label>;
         });
         var other = (<label className="radio-inline">
-            <input type="text" ref="titlecustom" name="titlecustom"/>
+            <input type="text" ref="titlecustom" name="titlecustom" value={otherValue} onChange={handleTextChange}/>
         </label>);
         var optionsWithOther = {options, other};
         return this.renderField(id, label, optionsWithOther)
     },
-    renderCheckBox: function (id, label) {
+    renderCheckBox: function (id, label, defaultValue) {
+        var handleChange = () => {var oldData = this.state.data; oldData[id]=this.refs[id].checked; this.setState({data: oldData})};
         var checkbox = (<label className="radio-inline">
-            <input type='checkbox' ref={id}/>
+            <input type='checkbox' ref={id} checked={defaultValue} onChange={handleChange} />
             {label}
         </label>);
         return this.renderField(id, "", checkbox);
