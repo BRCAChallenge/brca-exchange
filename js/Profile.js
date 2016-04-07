@@ -32,6 +32,7 @@ var Profile = React.createClass({
             headers: {'Authorization': tokenValue},
             url: url,
             success: function (data) {
+                console.log(data);
                 return data;
             },
             error: function (xhr, ajaxOptions, thrownError) {

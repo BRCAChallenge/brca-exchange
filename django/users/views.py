@@ -20,10 +20,24 @@ class RetrieveUser(APIView):
     authentication_classes = (JSONWebTokenAuthentication,)
 
     def get(self, request):
-        data = {
-            'token': str(request.auth)
-        }
-        response = Response(data)
+        user = request.user
+        query = MyUser.objects.filter(email=user)
+        data = list(query.values())[0]
+        data["password"] = ""
+        response = JsonResponse({'user': data})
+        return response
+
+
+class UpdateUser(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def update(self, request):
+        user = request.user
+        user = MyUser.objects.filter(email=user)
+        # user.update(...)
+
+        response = JsonResponse({'success': True})
         return response
 
 
@@ -33,16 +47,44 @@ def token_auth(request):
 
 
 def register(request):
+    fields = user_fields(request)
+    image = None
+    if request.FILES:
+        image = request.FILES["image"]
+    # Check the CAPTCHA
+    try:
+        captcha = request.POST.get('captcha')
+        post_data = {'secret': settings.CAPTCHA_SECRET,
+                     'response': captcha}
+        response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=post_data)
+        content = json.loads(response.content)
+        response = {'success': content['success']}
+    except HTTPError:
+        response = {'success': False}
+
+    # Create the user
+    try:
+        created_user = MyUser.objects.create_user(**fields)
+        # Save the image under the user's id
+        if image is not None:
+            save_picture(created_user.id, image)
+
+    except IntegrityError:
+        response = {'success': False}
+
+    response = JsonResponse(response)
+    return response
+
+
+def user_fields(request):
     image = None
     if request.FILES:
         image = request.FILES["image"]
     has_image = (image is not None)
-
     email = request.POST.get('email', '')
     password = request.POST.get('password', '')
-
-    first_name = request.POST.get('firstName', '')
-    last_name = request.POST.get('lastName', '')
+    firstName = request.POST.get('firstName', '')
+    lastName = request.POST.get('lastName', '')
     title = request.POST.get('title', '')
     affiliation = request.POST.get('affiliation', '')
     institution = request.POST.get('institution', '')
@@ -54,47 +96,11 @@ def register(request):
     include_me = (request.POST.get('includeMe', "true") == "true")
     hide_number = (request.POST.get('hideNumber', "true") == "true")
     hide_email = (request.POST.get('hideEmail', "true") == "true")
-    captcha = request.POST.get('captcha')
 
-    response = {'success': True}
-
-    # Check the CAPTCHA
-    try:
-        post_data = {'secret': settings.CAPTCHA_SECRET,
-                     'response': captcha}
-        response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=post_data)
-        content = json.loads(response.content)
-        response = {'success': content['success']}
-    except HTTPError:
-        response = {'success': False}
-
-    # Create the user
-    try:
-        created_user = MyUser.objects.create_user(email=email,
-                                                  password=password,
-                                                  firstName=first_name,
-                                                  lastName=last_name,
-                                                  title=title,
-                                                  affiliation=affiliation,
-                                                  institution=institution,
-                                                  city=city,
-                                                  state=state,
-                                                  comment=comment,
-                                                  country=country,
-                                                  phone_number=phone_number,
-                                                  include_me=include_me,
-                                                  hide_number=hide_number,
-                                                  hide_email=hide_email,
-                                                  has_image=has_image)
-        # Save the image under the user's id
-        if image is not None:
-            save_picture(created_user.id, image)
-
-    except IntegrityError:
-        response = {'success': False}
-
-    response = JsonResponse(response)
-    return response
+    return {'affiliation': affiliation, 'city': city, 'comment': comment, 'country': country,
+            'email': email, 'firstName': firstName, 'has_image': has_image, 'hide_email': hide_email,
+            'hide_number': hide_number, 'include_me': include_me, 'institution': institution,
+            'lastName': lastName, 'password': password, 'phone_number': phone_number, 'state': state, 'title': title}
 
 
 def save_picture(filename, image):
