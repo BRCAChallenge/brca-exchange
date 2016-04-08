@@ -151,11 +151,12 @@ var SignupForm = React.createClass({
             , city: this.refs.city.getDOMNode().value
             , state: this.refs.state.getDOMNode().value
             , country: this.refs.country.getDOMNode().value
-            , phoneNumber: this.refs.phoneNumber.getDOMNode().value
+            , phone_number: this.refs.phone_number.getDOMNode().value
             , comment: this.refs.comment.getDOMNode().value
-            , includeMe: this.refs.includeMe.getDOMNode().checked
-            , hideNumber: this.refs.hideNumber.getDOMNode().checked
-            , hideEmail: this.refs.hideEmail.getDOMNode().checked
+            , include_me: this.refs.include_me.getDOMNode().checked
+            , email_me: this.refs.email_me.getDOMNode().checked
+            , hide_number: this.refs.hide_number.getDOMNode().checked
+            , hide_email: this.refs.hide_email.getDOMNode().checked
             , captcha: grecaptcha.getResponse()
         };
         return data
@@ -200,11 +201,12 @@ var SignupForm = React.createClass({
             {this.renderTextInput('city', 'City')}
             {this.renderTextInput('state', 'State or Province')}
             {this.renderTextInput('country', 'Country')}
-            {this.renderTextInput('phoneNumber', 'Phone number')}
+            {this.renderTextInput('phone_number', 'Phone number')}
             {this.renderTextarea('comment', 'Comment')}
-            {this.renderCheckBox('includeMe', "Include me in the community page")}
-            {this.renderCheckBox('hideNumber', "Hide my phone number on this website")}
-            {this.renderCheckBox('hideEmail', "Hide my email address on this website")}
+            {this.renderCheckBox('include_me', "Include me in the community page", true)}
+            {this.renderCheckBox('email_me', "Include me in the mailing list", true)}
+            {this.renderCheckBox('hide_number', "Hide my phone number on this website")}
+            {this.renderCheckBox('hide_email', "Hide my email address on this website")}
             {this.renderCAPTCHA('captcha','CAPTCHA *')}
 
         </div>
@@ -259,15 +261,17 @@ var SignupForm = React.createClass({
                 {value.name}
             </label>;
         });
-        var other = (<label className="radio-inline">
-            <input type="text" ref="titlecustom" name="titlecustom"/>
-        </label>);
+        options = <span className="col-sm-9">{options}</span>;
+        var other =
+            <span className="col-sm-3">
+            <input className="form-control" type="text" ref="titlecustom" name="titlecustom"/>
+            </span>;
         var optionsWithOther = {options, other};
         return this.renderField(id, label, optionsWithOther)
     },
-    renderCheckBox: function (id, label) {
+    renderCheckBox: function (id, label, defaultChecked=false) {
         var checkbox = (<label className="radio-inline">
-            <input type='checkbox' ref={id}/>
+            <input type='checkbox' ref={id} defaultChecked={defaultChecked}/>
             {label}
         </label>);
         return this.renderField(id, "", checkbox);

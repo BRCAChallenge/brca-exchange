@@ -101,12 +101,13 @@ def user_fields(request):
     phone_number = request.POST.get('phone_number', '')
     comment = request.POST.get('comment', '')
     include_me = (request.POST.get('include_me', "true") == "true")
+    email_me = (request.POST.get('email_me', "true") == "true")
     hide_number = (request.POST.get('hide_number', "true") == "true")
     hide_email = (request.POST.get('hide_email', "true") == "true")
 
     return {'affiliation': affiliation, 'city': city, 'comment': comment, 'country': country,
             'email': email, 'firstName': firstName, 'has_image': has_image, 'hide_email': hide_email,
-            'hide_number': hide_number, 'include_me': include_me, 'institution': institution,
+            'hide_number': hide_number, 'include_me': include_me, 'email_me': email_me, 'institution': institution,
             'lastName': lastName, 'password': password, 'phone_number': phone_number, 'state': state, 'title': title}
 
 

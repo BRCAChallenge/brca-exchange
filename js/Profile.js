@@ -163,6 +163,7 @@ var EditProfileForm = React.createClass({
             , phone_number: this.refs.phone_number.getDOMNode().value
             , comment: this.refs.comment.getDOMNode().value
             , include_me: this.refs.include_me.getDOMNode().checked
+            , email_me: this.refs.email_me.getDOMNode().checked
             , hide_number: this.refs.hide_number.getDOMNode().checked
             , hide_email: this.refs.hide_email.getDOMNode().checked
         };
@@ -210,6 +211,7 @@ var EditProfileForm = React.createClass({
             {this.renderTextInput('phone_number', 'Phone number', this.state.data.phone_number)}
             {this.renderTextarea('comment', 'Comment', this.state.data.comment)}
             {this.renderCheckBox('include_me', "Include me in the community page", this.state.data.include_me)}
+            {this.renderCheckBox('email_me', "Include me in the mailing list", this.state.data.email_me)}
             {this.renderCheckBox('hide_number', "Don't display my phone number on this website", this.state.data.hide_number)}
             {this.renderCheckBox('hide_email', "Don't display my email on this website",this.state.data.hide_email)}
         </div>
@@ -287,7 +289,7 @@ var EditProfileForm = React.createClass({
                 {value.name}
             </label>;
         });
-        options = <span className="col-sm-9">{options}</span>
+        options = <span className="col-sm-9">{options}</span>;
         var other =
             <span className="col-sm-3">
             <input className="form-control" type="text" ref="titlecustom" name="titlecustom" value={otherValue} onChange={handleTextChange}/>
