@@ -13,9 +13,7 @@ var placeholder = require('./img/placeholder.png');
 var Community = React.createClass({
     mixins: [PureRenderMixin, Navigation],
     componentWillMount: function () {
-        this.fetchq = backend.users(this.state).subscribe(
-            resp => this.setState(this.setPages(resp)), // set data, count, totalPages
-            () => this.setState({error: 'Problem connecting to server'}));
+        this.fetch(this.state);
     },
     getInitialState: function () {
         return {
@@ -34,8 +32,9 @@ var Community = React.createClass({
         };
     },
     fetch: function (state) {
-        var {pageLength, page} = state;
-        this.fetchq.onNext({pageLength,page});
+        backend.users(state).subscribe(
+            resp => this.setState(this.setPages(resp)), // set data, count, totalPages
+            () => this.setState({error: 'Problem connecting to server'}));
     },
     setStateFetch: function (opts) {
         var newState = {...this.state, ...opts};
