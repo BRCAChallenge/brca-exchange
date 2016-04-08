@@ -122,7 +122,7 @@ def users(request):
     page_num = int(request.GET.get('page_num', '0'))
     page_size = int(request.GET.get('page_size', '0'))
 
-    query = MyUser.objects.filter(include_me=True)
+    query = MyUser.objects.filter(include_me=True).filter(is_approved=True)
 
     count = query.count()
 
