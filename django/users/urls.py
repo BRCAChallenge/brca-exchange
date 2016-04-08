@@ -12,4 +12,5 @@ urlpatterns = [
     url(r'^token-auth/$', obtain_jwt_token, name="token_auth"),
     url(r'^get/$', views.retrieve, name="retrieve"),
     url(r'^update/$', views.update, name="update"),
+    url(r'^confirm/(?P<activation_key>\w+)/$', views.confirm, name="confirm"),
 ]

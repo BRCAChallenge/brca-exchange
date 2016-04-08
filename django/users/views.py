@@ -1,10 +1,16 @@
+import datetime
+import hashlib
 import json
 import os
+import random
 from urllib2 import HTTPError
 
 import requests
+from django.core.mail import send_mail
 from django.db import IntegrityError
+from django.http import HttpResponse
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import never_cache
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
@@ -77,10 +83,34 @@ def register(request):
         if image is not None:
             save_picture(created_user.id, image)
 
+        created_user.is_active = False
+        created_user.save()
+
+        # Send email with activation key
+        salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
+        activation_key = hashlib.sha1(salt + created_user.email).hexdigest()
+        key_expires = datetime.datetime.today() + datetime.timedelta(2)
+
+        created_user.activation_key = activation_key
+        created_user.key_expires = key_expires
+        created_user.save()
+
+        email_subject = 'Account confirmation'
+        email_body = "Hey %s, thanks for signing up. To activate your account, click this link within 48 hours http://127.0.0.1:8000/accounts/confirm/%s" % (
+            created_user.firstName, activation_key)
+        send_mail(email_subject, email_body, 'noreply@brcaexchange.org', [created_user.email], fail_silently=False)
+
     except IntegrityError:
         response = {'success': False}
 
     return JsonResponse(response)
+
+
+def confirm(request, activation_key):
+    user = get_object_or_404(MyUser, activation_key=activation_key)
+    user.is_active = True
+    user.save()
+    return HttpResponse("Thanks for confirming your email")
 
 
 def user_fields(request):
