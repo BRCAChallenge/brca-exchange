@@ -97,6 +97,8 @@ def users(request):
 
     query = MyUser.objects.filter(include_me=True)
 
+    count = query.count()
+
     start = page_num * page_size
     end = start + page_size
     data = list(query[start:end].values())
@@ -107,7 +109,7 @@ def users(request):
         if user['hide_number']:
             user['phone_number'] = ""
 
-    response = JsonResponse({'data':data})
+    response = JsonResponse({'data':data, 'count':count})
     response["Access-Control-Allow-Origin"] = "*"
 
     return response
