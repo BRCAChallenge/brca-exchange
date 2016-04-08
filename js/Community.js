@@ -13,22 +13,28 @@ var placeholder = require('./img/placeholder.png');
 var Community = React.createClass({
     mixins: [PureRenderMixin, Navigation],
     componentWillMount: function () {
-        backend.users(this.state).subscribe(
-            resp => this.setState({...resp}), // set data, count, totalPages
-            () => this.setState({error: 'Problem connecting to server'}));
+        this.fetch(this.state);
     },
     getInitialState: function () {
         return {
             data: [],
             pageLength: 10,
             page: 0,
-            totalPages: 0,
+            totalPages: 1,
             windowWidth: window.innerWidth
         };
     },
+    setPages: function({data, count}) {
+        return {
+            data,
+            count,
+            totalPages: Math.ceil(count / this.state.pageLength)
+        };
+    },
     fetch: function (state) {
-        var {pageLength, page} = state;
-        this.fetchq.onNext({pageLength,page});
+        backend.users(state).subscribe(
+            resp => this.setState(this.setPages(resp)), // set data, count, totalPages
+            () => this.setState({error: 'Problem connecting to server'}));
     },
     setStateFetch: function (opts) {
         var newState = {...this.state, ...opts};
@@ -40,7 +46,6 @@ var Community = React.createClass({
     },
     render: function () {
         var {data, page, totalPages, error} = this.state;
-
         var rows = _.map(data, row => {
 
             var avatar;
@@ -75,8 +80,8 @@ var Community = React.createClass({
                         <h3>BRCA Community</h3>
                     </div>
                 </Row>
-                <Row>
-                    <Col sm={4}>
+                <Row className="btm-buffer">
+                    <Col sm={10}>
                         <Pagination
                             className="pagination pull-right-sm"
                             currentPage={page}
