@@ -3,10 +3,12 @@ var $ = require('jquery');
 
 module.exports = {
     login: function (username, pass, cb) {
-        if (localStorage.token) {
-            if (cb) cb(true);
-            return
-        }
+        this.logout();
+        // Todo: handle the expiration of the tokens
+        //if (localStorage.token) {
+        //    if (cb) cb(true);
+        //    return
+        //}
         this.getToken(username, pass, (res) => {
             if (res.authenticated) {
                 localStorage.token = res.token;

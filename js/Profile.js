@@ -149,6 +149,7 @@ var EditProfileForm = React.createClass({
 
         var data = {
             image: this.state.file
+            , deleteImage : this.state.imageDelete
             , password: this.refs.password.getDOMNode().value
             , password_confirm: this.refs.password_confirm.getDOMNode().value
             , firstName: this.refs.firstName.getDOMNode().value
@@ -177,7 +178,8 @@ var EditProfileForm = React.createClass({
                 this.setState({
                     file: file,
                     imagePreviewUrl: reader.result,
-                    imageTooBig: false
+                    imageTooBig: false,
+                    imageDelete: null
                 });
             } else {
                 this.setState({
@@ -213,12 +215,23 @@ var EditProfileForm = React.createClass({
         </div>
     },
     renderImageUpload: function (id, label) {
+        var handleImageDelete = ()=>
+            this.setState({
+                imageDelete: true,
+                imagePreviewUrl: '',
+                file: null
+            });
         var {imagePreviewUrl, imageTooBig} = this.state;
         var imagePreview = null;
         var error = null;
         if (imagePreviewUrl) {
-            imagePreview = (<img src={imagePreviewUrl} className="img-thumbnail"
-                                 style={{'maxHeight':'160px', 'maxWidth':'160px'}}/>);
+            imagePreview = (
+                <div>
+                    <div><img src={imagePreviewUrl} className="img-thumbnail"
+                              style={{'maxHeight':'160px', 'maxWidth':'160px'}}/></div>
+                    <div ><Button bsStyle="link" onClick={handleImageDelete}>Remove picture</Button></div>
+                </div>
+            );
         }
         if (imageTooBig) {
             error = <p className="bg-danger">Please choose an image less than 4MB</p>
