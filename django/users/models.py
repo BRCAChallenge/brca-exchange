@@ -1,7 +1,9 @@
+import django
 from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser
 )
 from django.db import models
+from django.utils import timezone
 
 
 class MyUserManager(BaseUserManager):
@@ -72,6 +74,9 @@ class MyUser(AbstractBaseUser):
     is_admin = models.BooleanField(default=False)
     is_approved = models.BooleanField(default=False)
     has_image = models.BooleanField(default=False)
+
+    activation_key = models.CharField(max_length=40, blank=True)
+    key_expires = models.DateTimeField(default=django.utils.timezone.now)
 
     objects = MyUserManager()
 
