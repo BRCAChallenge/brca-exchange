@@ -5,45 +5,50 @@ from urllib2 import HTTPError
 import requests
 from django.db import IntegrityError
 from django.http import JsonResponse
+from django.views.decorators.cache import never_cache
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from rest_framework_jwt.views import obtain_jwt_token
 
 from brca import settings
 from .models import MyUser
 
 
-class RetrieveUser(APIView):
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (JSONWebTokenAuthentication,)
-
-    def get(self, request):
-        user = request.user
-        query = MyUser.objects.filter(email=user)
-        data = list(query.values())[0]
-        data["password"] = ""
-        response = JsonResponse({'user': data})
-        return response
-
-
-class UpdateUser(APIView):
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (JSONWebTokenAuthentication,)
-
-    def update(self, request):
-        user = request.user
-        user = MyUser.objects.filter(email=user)
-        # user.update(...)
-
-        response = JsonResponse({'success': True})
-        return response
-
-
-def token_auth(request):
-    response = obtain_jwt_token(request)
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+@authentication_classes((JSONWebTokenAuthentication,))
+def retrieve(request):
+    user = request.user
+    query = MyUser.objects.filter(email=user)
+    data = list(query.values())[0]
+    data["password"] = ''
+    response = JsonResponse({'user': data})
     return response
+
+
+@never_cache
+@api_view(['POST'])
+@permission_classes((IsAuthenticated,))
+@authentication_classes((JSONWebTokenAuthentication,))
+def update(request):
+    print(request)
+    user = MyUser.objects.filter(email=request.user)
+
+    fields = user_fields(request)
+    del fields['email']
+    if fields['password'] == '':
+        del fields['password']
+
+    try:
+        user.update(**fields)
+        if request.FILES:
+            image = request.FILES["image"]
+            if image is not None:
+                save_picture(user[0].id, image)
+    except Exception, e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': True})
 
 
 def register(request):
@@ -72,8 +77,7 @@ def register(request):
     except IntegrityError:
         response = {'success': False}
 
-    response = JsonResponse(response)
-    return response
+    return JsonResponse(response)
 
 
 def user_fields(request):
@@ -91,11 +95,11 @@ def user_fields(request):
     city = request.POST.get('city', '')
     state = request.POST.get('state', '')
     country = request.POST.get('country', '')
-    phone_number = request.POST.get('phoneNumber', '')
+    phone_number = request.POST.get('phone_number', '')
     comment = request.POST.get('comment', '')
-    include_me = (request.POST.get('includeMe', "true") == "true")
-    hide_number = (request.POST.get('hideNumber', "true") == "true")
-    hide_email = (request.POST.get('hideEmail', "true") == "true")
+    include_me = (request.POST.get('include_me', "true") == "true")
+    hide_number = (request.POST.get('hide_number', "true") == "true")
+    hide_email = (request.POST.get('hide_email', "true") == "true")
 
     return {'affiliation': affiliation, 'city': city, 'comment': comment, 'country': country,
             'email': email, 'firstName': firstName, 'has_image': has_image, 'hide_email': hide_email,

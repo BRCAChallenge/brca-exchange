@@ -66,34 +66,31 @@ var Profile = React.createClass({
     },
 
     handleSubmit: function () {
-        console.log('HANDLE SUBMIT CALLED')
         var showSuccess = () => {this.transitionTo('/community', {registrationSuccess:true})};
         var showFailure = () => {this.setState({error: "An error occured"})};
-        var formData = this.refs.contactForm.getFormData();
 
-        console.log('submitted data is')
-        console.log(formData)
         if (this.refs.contactForm.isValid()) {
-            //this.setState({submitted: formData});
-            //var url = config.backend_url + '/accounts/update/';
-            //
-            //var fd = new FormData();
-            //$.each(formData, function (k, v) {
-            //    fd.append(k, v);
-            //});
-            //
-            //var xhr = new XMLHttpRequest();
-            //xhr.onload = function () {
-            //    var responseData = JSON.parse(this.response);
-            //
-            //    if (this.status == 200 && responseData.success === true) {
-            //        showSuccess();
-            //    } else {
-            //        showFailure()
-            //    }
-            //};
-            //xhr.open('post', url);
-            //xhr.send(fd);
+            var formData = this.refs.contactForm.getFormData();
+            this.setState({submitted: formData});
+            var url = config.backend_url + '/accounts/update/';
+
+            var fd = new FormData();
+            $.each(formData, function (k, v) {
+                fd.append(k, v);
+            });
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function () {
+                var responseData = JSON.parse(this.response);
+
+                if (this.status == 200 && responseData.success === true) {
+                    showSuccess();
+                } else {
+                    showFailure()
+                }
+            };
+            xhr.open('post', url);
+            xhr.setRequestHeader('Authorization', 'JWT ' + auth.token())
+            xhr.send(fd);
         } else {
             this.setState({error: "Some information was missing"});
         }
@@ -101,6 +98,7 @@ var Profile = React.createClass({
 });
 
 var EditProfileForm = React.createClass({
+    mixins: [Navigation],
     componentDidMount: function() {
         this.retrieveProfile();
     },
@@ -108,7 +106,13 @@ var EditProfileForm = React.createClass({
         var url = config.backend_url + '/accounts/get/';
         var token = auth.token();
         var tokenValue = 'JWT ' + token;
-        var saveProfileData = (data) => this.setState({data : data.user});
+        var saveProfileData = (data) => {
+            var imagePreviewUrl = '';
+            if (data.user.has_image) {
+                imagePreviewUrl = config.backend_url + '/site_media/media/' + data.user['id']
+            }
+            this.setState({data : data.user, imagePreviewUrl: imagePreviewUrl});
+        };
         $.ajax({
             type: 'GET',
             headers: {'Authorization': tokenValue},
@@ -117,7 +121,8 @@ var EditProfileForm = React.createClass({
                 saveProfileData(data);
             },
             error: function (xhr, ajaxOptions, thrownError) {
-            }
+                this.transitionTo('/signin', {}, {target: '/profile'});
+            }.bind(this)
         });
     },
     getInitialState: function () {
@@ -143,7 +148,8 @@ var EditProfileForm = React.createClass({
             this.refs.titleother.getDOMNode().checked && this.refs.titlecustom.getDOMNode().value;
 
         var data = {
-            password: this.refs.password.getDOMNode().value
+            image: this.state.file
+            , password: this.refs.password.getDOMNode().value
             , password_confirm: this.refs.password_confirm.getDOMNode().value
             , firstName: this.refs.firstName.getDOMNode().value
             , lastName: this.refs.lastName.getDOMNode().value
@@ -184,12 +190,7 @@ var EditProfileForm = React.createClass({
         reader.readAsDataURL(file)
     },
     render: function () {
-        console.log('render of form - STATE is')
-        console.log(this.state.data)
-        console.log('cats title is')
-        console.log(this.state.data.title)
-
-        return <div className="form-horizontal">
+    return <div className="form-horizontal">
             {this.renderImageUpload('image', 'Profile picture')}
             {this.renderPassword('password', 'Password')}
             {this.renderPassword('password_confirm', 'Confirm Password')}
@@ -273,9 +274,11 @@ var EditProfileForm = React.createClass({
                 {value.name}
             </label>;
         });
-        var other = (<label className="radio-inline">
-            <input type="text" ref="titlecustom" name="titlecustom" value={otherValue} onChange={handleTextChange}/>
-        </label>);
+        options = <span className="col-sm-9">{options}</span>
+        var other =
+            <span className="col-sm-3">
+            <input className="form-control" type="text" ref="titlecustom" name="titlecustom" value={otherValue} onChange={handleTextChange}/>
+            </span>;
         var optionsWithOther = {options, other};
         return this.renderField(id, label, optionsWithOther)
     },

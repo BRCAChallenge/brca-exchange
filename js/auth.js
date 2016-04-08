@@ -45,6 +45,11 @@ module.exports = {
                     authenticated: true,
                     token: res.token
                 })
+            },
+            error: function () {
+                cb({
+                    authenticated: false
+                })
             }
         });
     }
