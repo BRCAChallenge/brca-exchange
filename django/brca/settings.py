@@ -18,7 +18,12 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir
 PACKAGE_ROOT = os.path.abspath(os.path.dirname(__file__))
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = (
+    'localhost:8080',
+    'brcaexchange.cloudapp.net',
+    'brcaexchange.org',
+    'brca-website.cloudapp.net'
+)
 
 # Application definition
 
