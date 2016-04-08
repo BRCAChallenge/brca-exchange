@@ -1,4 +1,7 @@
 requests
 django
+django-cors-headers
 djangorestframework
+djangorestframework-jwt
+django-jwt-auth
 psycopg2

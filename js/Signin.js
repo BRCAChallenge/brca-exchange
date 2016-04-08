@@ -50,10 +50,12 @@ var Signin = React.createClass({
             auth.login(formData.email, formData.password, (loggedIn) => {
                 if (loggedIn) {
                     var target = this.getQuery()["target"];
-                    if (target ==null) {
+                    if (target == null) {
                         target = '/profile';
                     }
                     this.transitionTo(target)
+                } else {
+                    this.setState({error: "Please try again"});
                 }
             });
         } else {

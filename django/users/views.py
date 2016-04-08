@@ -5,46 +5,63 @@ from urllib2 import HTTPError
 import requests
 from django.db import IntegrityError
 from django.http import JsonResponse
-from rest_framework.authtoken import views as rest_views
+from django.views.decorators.cache import never_cache
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from brca import settings
 from .models import MyUser
 
 
-def token_auth(request):
-    response = rest_views.obtain_auth_token(request)
-    response["Access-Control-Allow-Origin"] = "*"
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+@authentication_classes((JSONWebTokenAuthentication,))
+def retrieve(request):
+    user = request.user
+    query = MyUser.objects.filter(email=user)
+    data = list(query.values())[0]
+    data["password"] = ''
+    response = JsonResponse({'user': data})
     return response
 
 
+@never_cache
+@api_view(['POST'])
+@permission_classes((IsAuthenticated,))
+@authentication_classes((JSONWebTokenAuthentication,))
+def update(request):
+    print(request)
+    user = MyUser.objects.filter(email=request.user)
+
+    fields = user_fields(request)
+    delete_image = request.POST.get('deleteImage', "false") == "true"
+    fields['has_image'] = (user[0].has_image or fields['has_image']) and not delete_image
+
+    del fields['email']
+    if fields['password'] == '':
+        del fields['password']
+
+    try:
+        user.update(**fields)
+        if request.FILES:
+            image = request.FILES["image"]
+            if image is not None:
+                save_picture(user[0].id, image)
+    except Exception, e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': True})
+
+
 def register(request):
+    fields = user_fields(request)
     image = None
     if request.FILES:
         image = request.FILES["image"]
-    has_image = (image is not None)
-
-    email = request.POST.get('email', '')
-    password = request.POST.get('password', '')
-
-    first_name = request.POST.get('firstName', '')
-    last_name = request.POST.get('lastName', '')
-    title = request.POST.get('title', '')
-    affiliation = request.POST.get('affiliation', '')
-    institution = request.POST.get('institution', '')
-    city = request.POST.get('city', '')
-    state = request.POST.get('state', '')
-    country = request.POST.get('country', '')
-    phone_number = request.POST.get('phoneNumber', '')
-    comment = request.POST.get('comment', '')
-    include_me = (request.POST.get('includeMe', "true") == "true")
-    hide_number = (request.POST.get('hideNumber', "true") == "true")
-    hide_email = (request.POST.get('hideEmail', "true") == "true")
-    captcha = request.POST.get('captcha')
-
-    response = {'success': True}
-
     # Check the CAPTCHA
     try:
+        captcha = request.POST.get('captcha')
         post_data = {'secret': settings.CAPTCHA_SECRET,
                      'response': captcha}
         response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=post_data)
@@ -55,22 +72,7 @@ def register(request):
 
     # Create the user
     try:
-        created_user = MyUser.objects.create_user(email=email,
-                                                  password=password,
-                                                  firstName=first_name,
-                                                  lastName=last_name,
-                                                  title=title,
-                                                  affiliation=affiliation,
-                                                  institution=institution,
-                                                  city=city,
-                                                  state=state,
-                                                  comment=comment,
-                                                  country=country,
-                                                  phone_number=phone_number,
-                                                  include_me=include_me,
-                                                  hide_number=hide_number,
-                                                  hide_email=hide_email,
-                                                  has_image=has_image)
+        created_user = MyUser.objects.create_user(**fields)
         # Save the image under the user's id
         if image is not None:
             save_picture(created_user.id, image)
@@ -78,9 +80,34 @@ def register(request):
     except IntegrityError:
         response = {'success': False}
 
-    response = JsonResponse(response)
-    response["Access-Control-Allow-Origin"] = "*"
-    return response
+    return JsonResponse(response)
+
+
+def user_fields(request):
+    image = None
+    if request.FILES:
+        image = request.FILES["image"]
+    has_image = (image is not None)
+    email = request.POST.get('email', '')
+    password = request.POST.get('password', '')
+    firstName = request.POST.get('firstName', '')
+    lastName = request.POST.get('lastName', '')
+    title = request.POST.get('title', '')
+    affiliation = request.POST.get('affiliation', '')
+    institution = request.POST.get('institution', '')
+    city = request.POST.get('city', '')
+    state = request.POST.get('state', '')
+    country = request.POST.get('country', '')
+    phone_number = request.POST.get('phone_number', '')
+    comment = request.POST.get('comment', '')
+    include_me = (request.POST.get('include_me', "true") == "true")
+    hide_number = (request.POST.get('hide_number', "true") == "true")
+    hide_email = (request.POST.get('hide_email', "true") == "true")
+
+    return {'affiliation': affiliation, 'city': city, 'comment': comment, 'country': country,
+            'email': email, 'firstName': firstName, 'has_image': has_image, 'hide_email': hide_email,
+            'hide_number': hide_number, 'include_me': include_me, 'institution': institution,
+            'lastName': lastName, 'password': password, 'phone_number': phone_number, 'state': state, 'title': title}
 
 
 def save_picture(filename, image):
@@ -109,7 +136,5 @@ def users(request):
         if user['hide_number']:
             user['phone_number'] = ""
 
-    response = JsonResponse({'data':data, 'count':count})
-    response["Access-Control-Allow-Origin"] = "*"
-
+    response = JsonResponse({'data': data, 'count': count})
     return response
