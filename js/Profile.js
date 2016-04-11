@@ -274,10 +274,10 @@ var EditProfileForm = React.createClass({
         )
     },
     renderRadioInlines: function (id, label, kwargs) {
-        var handleTextChange = () => {var oldData = this.state.data; oldData[id]=this.refs.titlecustom.value; this.setState({data: oldData})};
+        var handleTextChange = () => {var oldData = this.state.data; oldData[id]=this.refs.titlecustom.getDOMNode().value; this.setState({data: oldData})};
         var otherValue = kwargs.defaultCheckedValue;
         var options = kwargs.values.map(function (value) {
-            var handleRadioChange = () => {var oldData = this.state.data; oldData[id]=this.refs[id+value.ref].checked; this.setState({data: oldData})};
+            var handleRadioChange = () => {var oldData = this.state.data; oldData[id] = value.name; this.setState({data: oldData})};
             var defaultChecked = false;
             if (value.name == kwargs.defaultCheckedValue) {
                 defaultChecked = true;
@@ -288,7 +288,7 @@ var EditProfileForm = React.createClass({
                 <input type="radio" ref={id+value.ref} name={id} value={value.name} checked={defaultChecked} onChange={handleRadioChange}/>
                 {value.name}
             </label>;
-        });
+        }.bind(this));
         options = <span className="col-sm-9">{options}</span>;
         var other =
             <span className="col-sm-3">
