@@ -7,4 +7,6 @@ python_modules/
 .idea/
 backend/httpserver.log
 backend/parameters_8000.py
+django/brca/static/
 *.pyc
+
