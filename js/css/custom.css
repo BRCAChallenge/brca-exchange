@@ -332,5 +332,5 @@ th[role='columnheader'] .help, .help-target .help {
 }
 
 .btn .caret {
-    border-top-style: solid;
+    border-top-style: dashed;
 }
