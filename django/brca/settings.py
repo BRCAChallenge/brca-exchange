@@ -141,11 +141,6 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, "static")
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = "/static/"
 
-# Additional locations of static files
-STATICFILES_DIRS = [
-    os.path.join(PROJECT_ROOT, "static"),
-]
-
 SITE_ID = 1
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
