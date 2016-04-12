@@ -13,194 +13,339 @@
 var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin');
 var DataTable = require('./DataTable');
+var _ = require('underscore');
+var {Col, Panel, Button, Input} = require('react-bootstrap');
+var ColumnCheckbox = require('./ColumnCheckbox');
+
+
 require('react-data-components-bd2k/css/table-twbs.css');
 
 function buildHeader(onClick, title) {
-	return (
-		<span>
-			{title}
-			<span onClick={ev => {ev.stopPropagation(); onClick(title); }}
-				className='help glyphicon glyphicon-question-sign superscript'/>
-		</span>
-	);
+    return (
+        <span>
+            {title}
+            <span onClick={ev => {ev.stopPropagation(); onClick(title); }}
+                  className='help glyphicon glyphicon-question-sign superscript'/>
+        </span>
+    );
 }
 
 //function renderClinVarLink(val) {
-//	return (
-//		<a title="View on ClinVar"
-//			onClick={ev => ev.stopPropagation()}
-//			href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + val}>{val}</a>
-//	);
+//    return (
+//        <a title="View on ClinVar"
+//            onClick={ev => ev.stopPropagation()}
+//            href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + val}>{val}</a>
+//    );
 //}
 
 function renderCell(val) {
-	return <span>{val}</span>;
+    return <span>{val}</span>;
 }
 
 var filterColumns = [
-	{name: 'Gene', prop: 'Gene_symbol', values: ['BRCA1', 'BRCA2']},
-//	{name: 'Exon', values: ['Any', 1, 2, 3, 4, 5]}, // XXX needs refgene to get exon count
-	{name: 'Pathogenicity', prop: 'Clinical_significance', values: ['Pathogenic', 'Benign']}
+    {name: 'Gene', prop: 'Gene_Symbol', values: ['BRCA1', 'BRCA2']},
+//    {name: 'Exon', values: ['Any', 1, 2, 3, 4, 5]}, // XXX needs refgene to get exon count
+    {name: 'Pathogenicity', prop: 'Pathogenicity_default', values: ['Pathogenic', 'Benign / Little Clinical Significance', 'Not Yet Classified']}
 ];
 
 // XXX duplicate this functionality on the server, perhaps
 // by having the client pass in order_by of Genomic_Coordinate
 // for hgvs columns.
 //var strPropCmpFn = prop => (a, b) => {
-//	var ap = a[prop],
-//		bp = b[prop];
-//	if (ap == null && bp == null || ap === bp) {
-//		return 0;
-//	}
-//	if (bp == null || bp < ap) {
-//		return 1;
-//	}
-//	return -1;
+//    var ap = a[prop],
+//        bp = b[prop];
+//    if (ap == null && bp == null || ap === bp) {
+//        return 0;
+//    }
+//    if (bp == null || bp < ap) {
+//        return 1;
+//    }
+//    return -1;
 //};
 //
 //var posCmpFn = strPropCmpFn('Genomic_Coordinate');
 //
 //function sortColumns(columns, {prop, order}, data) {
-//	var sortFn = _.findWhere(columns, {prop: prop}).sortFn || strPropCmpFn(prop),
-//		sorted = data.slice(0).sort(sortFn);
-//	if (order === 'descending') {
-//		sorted.reverse();
-//	}
-//	return sorted;
+//    var sortFn = _.findWhere(columns, {prop: prop}).sortFn || strPropCmpFn(prop),
+//        sorted = data.slice(0).sort(sortFn);
+//    if (order === 'descending') {
+//        sorted.reverse();
+//    }
+//    return sorted;
 //}
 
 var columns = [
-	{title: 'Gene', prop: 'Gene_symbol', render: renderCell},
-	{title: 'Genomic Coordinate', prop: 'Genomic_Coordinate', render: renderCell},
-    {title: 'HGVS cDNA', prop: 'HGVS_cDNA', /*sortFn: posCmpFn, */render: renderCell},
-	{title: 'HGVS protein', prop: 'HGVS_protein', /*sortFn: posCmpFn, */render: renderCell},
-	{title: 'HGVS protein (Abbrev.)', prop: "Abbrev_AA_change", render: renderCell},
-    {title: 'BIC nucleotide', prop: "BIC_Nomenclature", render: renderCell},
-    {title: 'Pathogenicity', prop: 'Clinical_significance', render: renderCell},
-    {title: 'Allele frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes', render: renderCell},
-    {title: 'SAS Allele frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes', render: renderCell},
-    {title: 'EAS Allele frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes', render: renderCell},
-    {title: 'AMR Allele frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes', render: renderCell},
-    {title: 'EUR Allele frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes', render: renderCell},
-    {title: 'AFR Allele frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes', render: renderCell},
-    {title: 'Allele origin (ClinVar)', prop: 'Allele_origin_ClinVar', render: renderCell},
-    {title: 'Variant clinical significance (ClinVar)', prop: 'Variant_clinical_significance_ClinVar', render: renderCell},
-    {title: 'HGVS genomic (LOVD)', prop: 'HGVS_genomic_LOVD', render: renderCell},
-    {title: 'Origin of variant (LOVD)', prop: 'Origin_of_variant_LOVD', render: renderCell},
-    {title: 'HGVS protein (LOVD)', prop: 'HGVS_protein_LOVD', render: renderCell},
-    {title: 'Variant frequency (LOVD)', prop: 'Variant_frequency_LOVD', render: renderCell},
-    {title: 'HGVS cDNA (LOVD)', prop: 'HGVS_cDNA_LOVD', render: renderCell},
-    {title: 'Variant affecting protein (LOVD)', prop: 'Variant_affecting_protein_LOVD', render: renderCell},
-    {title: 'Variant haplotype (LOVD)', prop: 'Variant_haplotype_LOVD', render: renderCell},
-    {title: 'VEP Gene (ExAC)', prop: 'VEP_Gene_ExAC', render: renderCell},
-    {title: 'Allele frequency (ExAC)', prop: 'Allele_frequency_ExAC', render: renderCell},
-    {title: 'VEP HGVSc (ExAC)', prop: 'VEP_HGVSc_ExAC', render: renderCell},
-    {title: 'VEP Consequence (ExAC)', prop: 'VEP_Consequence_ExAC', render: renderCell},
-    {title: 'VEP HGVSp (ExAC)', prop: 'VEP_HGVSp_ExAC', render: renderCell},
-    {title: 'Exon number (exLOVD)', prop: 'Exon_number_exLOVD', render: renderCell},
-    {title: 'IARC class (exLOVD)', prop: 'IARC_class_exLOVD', render: renderCell},
-    {title: 'BIC (exLOVD)', prop: 'BIC_exLOVD', render: renderCell},
-    {title: 'HGVS cDNA (exLOVD)', prop: 'HGVS_cDNA_exLOVD', render: renderCell},
-    {title: 'Literature source (exLOVD)', prop: 'Literature_source_exLOVD', render: renderCell},
-    {title: 'HGVS protein (exLOVD)', prop: 'HGVS_protein_exLOVD', render: renderCell}
+    {title: 'Gene', prop: 'Gene_Symbol'},
+    {title: 'Genomic (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
+    {title: 'Nucleotide', prop: 'HGVS_cDNA'},
+    {title: 'Protein', prop: 'HGVS_Protein'},
+    {title: 'Pathogenicity', prop: 'Pathogenicity_default'},
+    {title: 'Source URL(s)', prop: 'Source_URL'},
+];
+
+var research_mode_columns = [
+
+    {title: 'Gene Symbol', prop: 'Gene_Symbol'},
+    {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36'},
+    {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
+    {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
+
+    {title: 'Mutation category (BIC)', prop: 'Mutation_type_BIC'},
+    {title: 'PolyPhen score', prop: 'PolyPhen_VEP'},
+    {title: 'SIFT score', prop: 'SIFT_VEP'},
+
+
+    {title: 'BIC Variant Identifier', prop: 'BIC_Identifier'},
+    {title: 'Nucleotide', prop: 'HGVS_cDNA'},
+    {title: 'Protein', prop: 'HGVS_Protein'},
+    {title: 'Analysis Method (ClinVar)', prop: 'SCV_ClinVar'},
+    {title: 'Source(s)', prop: 'Source'},
+    {title: 'Source URL(s)', prop: 'Source_URL'},
+    {title: 'Synonyms', prop: 'Synonyms'},
+    {title: 'Protein Amino Acid Change', prop: 'Protein_Change'},
+    {title: 'Reference cDNA Sequence', prop: 'Reference_Sequence'},
+
+    {title: 'SCV Accession (ClinVar)', prop: 'Allele_Origin_ClinVar'},
+    {title: 'Allele Origin (ENIGMA)', prop: 'Allele_origin_ENIGMA'},
+    {title: 'Ethnicity (BIC)', prop: 'Ethnicity_BIC'},
+    {title: 'Allele Origin (BIC)', prop: 'Germline_or_Somatic_BIC'},
+    {title: 'Allele Origin (LOVD)', prop: 'Origin_of_variant_LOVD'},
+    {title: 'Patient Nationality (BIC)', prop: 'Patient_nationality_BIC'},
+    {title: 'Variant Haplotype (LOVD)', prop: 'Variant_haplotype_LOVD'},
+
+    {title: 'Family members carrying this variant (BIC)', prop: 'Number_of_family_member_carrying_mutation_BIC'},
+
+    {title: 'Co-occurrence likelihood (exLOVD)', prop: 'Co_occurrence_LR_exLOVD'},
+    {title: 'Prior probability of pathogenicity (exLOVD)', prop: 'Combined_prior_probablility_exLOVD'},
+    {
+        title: 'Missense analysis probability of pathogenicity (exLOVD)',
+        prop: 'Missense_analysis_prior_probability_exLOVD'
+    },
+    {title: 'Probability of pathogenicity (exLOVD)', prop: 'Posterior_probability_exLOVD'},
+    {title: 'Segregation Likelihood Ratio (exLOVD)', prop: 'Segregation_LR_exLOVD'},
+    {title: 'Summary Family History Likelihood Ratio (exLOVD)', prop: 'Sum_family_LR_exLOVD'},
+
+    {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_citation_ENIGMA'},
+    {title: 'Clinical Significance Citation (ENIGMA)', prop: 'Clinical_significance_citations_ENIGMA'},
+    {title: 'Literature Reference (BIC)', prop: 'Literature_citation_BIC'},
+    {title: 'Literature Reference (exLOVD)', prop: 'Literature_source_exLOVD'},
+    {title: 'Pathogenicity', prop: 'Pathogenicity_research'},
+
+    {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_ENIGMA'},
+    {title: 'Clinical Significance (BIC)', prop: 'Clinical_classification_BIC'},
+    {title: 'Clinical Importance (BIC)', prop: 'Clinical_importance_BIC'},
+    {title: 'Clinical Significance (ClinVar)', prop: 'Clinical_Significance_ClinVar'},
+    {title: 'Clinical Significance (ENIGMA)', prop: 'Clinical_significance_ENIGMA'},
+    {title: 'Collection Method (ENIGMA)', prop: 'Collection_method_ENIGMA'},
+    {title: 'Comment on Clinical Significance (ENIGMA)', prop: 'Comment_on_clinical_significance_ENIGMA'},
+    {title: 'Date last evaluated (ENIGMA)', prop: 'Date_last_evaluated_ENIGMA'},
+    {title: 'Date last updated (ClinVar)', prop: 'Date_Last_Updated_ClinVar'},
+    {title: 'Has Discordant Evidence', prop: 'Discordant'},
+    {title: 'Functional Analysis Result (LOVD)', prop: 'Functional_analysis_result_LOVD'},
+    {title: 'Functional Analysis Method (LOVD)', prop: 'Functional_analysis_technique_LOVD'},
+    {title: 'Allele Origin (ClinVar)', prop: 'Method_ClinVar'},
+
+    {title: 'ClinVar Accession', prop: 'ClinVarAccession_ENIGMA'},
+    {title: 'Condition Category (ENIGMA)', prop: 'Condition_category_ENIGMA'},
+    {title: 'Condition ID Type (ENIGMA)', prop: 'Condition_ID_type_ENIGMA'},
+    {title: 'Condition ID Value (ENIGMA)', prop: 'Condition_ID_value_ENIGMA'},
+    {title: 'Submitter (ClinVar)', prop: 'Submitter_ClinVar'},
+    {title: 'URL (ENIGMA)', prop: 'URL_ENIGMA'},
+
+    {title: 'African Allele Frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes'},
+    {title: 'Allele Frequency', prop: 'Allele_Frequency'},
+    {title: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes'},
+    {title: 'Allele Frequency (ExAC)', prop: 'Allele_frequency_ExAC'},
+    {title: 'AMR Allele Frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes'},
+    {title: 'EAS Allele Frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes'},
+    {title: 'EUR Allele Frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes'},
+    {title: 'Maximum Allele Frequency', prop: 'Max_Allele_Frequency'},
+    {title: 'Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP'},
+    {title: 'South Asian Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes'},
+    {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'}
+
 ];
 
 var subColumns = [
-    {subColTitle: "ENIGMA",
-     subColList: [
-	    {title: 'Gene', prop: 'Gene_symbol', render: renderCell},
-	    {title: 'Genomic Coordinate', prop: 'Genomic_Coordinate', render: renderCell},
-        {title: 'HGVS cDNA', prop: 'HGVS_cDNA', /*sortFn: posCmpFn, */render: renderCell},
-	    {title: 'HGVS protein', prop: 'HGVS_protein', /*sortFn: posCmpFn, */render: renderCell},
-	    {title: 'HGVS protein (Abbrev.)', prop: "Abbrev_AA_change", render: renderCell},
-        {title: 'BIC nucleotide', prop: "BIC_Nomenclature", render: renderCell},
-        {title: 'Pathogenicity', prop: 'Clinical_significance', render: renderCell}
-     ]
+    {
+        subColTitle: "Variant Nomenclature",
+        subColList: [
+            {title: 'BIC Variant Identifier', prop: 'BIC_Identifier', render: renderCell},
+            {title: 'Protein', prop: 'HGVS_Protein', render: renderCell},
+            {title: 'Analysis Method (ClinVar)', prop: 'SCV_ClinVar', render: renderCell},
+            {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: renderCell},
+            {title: 'Protein Amino Acid Change', prop: 'Protein_Change', render: renderCell},
+            {title: 'Reference cDNA Sequence', prop: 'Reference_Sequence', render: renderCell}
+        ]
     },
-    {subColTitle: "1000 Genomes",
-     subColList: [
-        {title: 'Allele frequency', prop: 'Allele_frequency_1000_Genomes', render: renderCell},
-        {title: 'SAS Allele frequency', prop: 'SAS_Allele_frequency_1000_Genomes', render: renderCell},
-        {title: 'EAS Allele frequency', prop: 'EAS_Allele_frequency_1000_Genomes', render: renderCell},
-        {title: 'AMR Allele frequency', prop: 'AMR_Allele_frequency_1000_Genomes', render: renderCell},
-        {title: 'EUR Allele frequency', prop: 'EUR_Allele_frequency_1000_Genomes', render: renderCell},
-        {title: 'AFR Allele frequency', prop: 'AFR_Allele_frequency_1000_Genomes', render: renderCell}
-     ]
+    {
+        subColTitle: "Origin",
+        subColList: [
+            {title: 'SCV Accession (ClinVar)', prop: 'Allele_Origin_ClinVar', render: renderCell},
+            {title: 'Allele Origin (ENIGMA)', prop: 'Allele_origin_ENIGMA', render: renderCell},
+            {title: 'Ethnicity (BIC)', prop: 'Ethnicity_BIC', render: renderCell},
+            {title: 'Allele Origin (BIC)', prop: 'Germline_or_Somatic_BIC', render: renderCell},
+            {title: 'Allele Origin (LOVD)', prop: 'Origin_of_variant_LOVD', render: renderCell},
+            {title: 'Patient Nationality (BIC)', prop: 'Patient_nationality_BIC', render: renderCell},
+            {title: 'Variant Haplotype (LOVD)', prop: 'Variant_haplotype_LOVD', render: renderCell}
+        ]
     },
-    {subColTitle: 'ClinVar',
-     subColList: [
-        {title: 'Allele origin', prop: 'Allele_origin_ClinVar', render: renderCell},
-        {title: 'Variant clinical significance', prop: 'Variant_clinical_significance_ClinVar', render: renderCell}
-     ]
+
+    {
+        subColTitle: "Frequency",
+        subColList: [
+            {
+                title: 'African Allele Frequency (1000 Genomes)',
+                prop: 'AFR_Allele_frequency_1000_Genomes',
+                render: renderCell
+            },
+            {title: 'Allele Frequency', prop: 'Allele_Frequency', render: renderCell},
+            {title: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes', render: renderCell},
+            {title: 'Allele Frequency (ExAC)', prop: 'Allele_frequency_ExAC', render: renderCell},
+            {
+                title: 'AMR Allele Frequency (1000 Genomes)',
+                prop: 'AMR_Allele_frequency_1000_Genomes',
+                render: renderCell
+            },
+            {
+                title: 'EAS Allele Frequency (1000 Genomes)',
+                prop: 'EAS_Allele_frequency_1000_Genomes',
+                render: renderCell
+            },
+            {
+                title: 'EUR Allele Frequency (1000 Genomes)',
+                prop: 'EUR_Allele_frequency_1000_Genomes',
+                render: renderCell
+            },
+            {title: 'Maximum Allele Frequency', prop: 'Max_Allele_Frequency',render: renderCell},
+            {title: 'Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP', render: renderCell},
+            {
+                title: 'South Asian Allele Frequency (1000 Genomes)',
+                prop: 'SAS_Allele_frequency_1000_Genomes',
+                render: renderCell
+            },
+            {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD', render: renderCell}
+        ]
     },
-    {subColTitle: 'LOVD',
-     subColList: [
-        {title: 'HGVS genomic', prop: 'HGVS_genomic_LOVD', render: renderCell},
-        {title: 'Origin of variant', prop: 'Origin_of_variant_LOVD', render: renderCell},
-        {title: 'HGVS protein', prop: 'HGVS_protein_LOVD', render: renderCell},
-        {title: 'Variant frequency', prop: 'Variant_frequency_LOVD', render: renderCell},
-        {title: 'HGVS cDNA', prop: 'HGVS_cDNA_LOVD', render: renderCell},
-        {title: 'Variant affecting protein', prop: 'Variant_affecting_protein_LOVD', render: renderCell},
-        {title: 'Variant haplotype', prop: 'Variant_haplotype_LOVD', render: renderCell}
-     ]
+
+    {
+        subColTitle: "Genomic",
+        subColList: [
+            {title: 'Gene Symbol', prop: 'Gene_Symbol', render: renderCell},
+            {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38', render: renderCell},
+            {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36', render: renderCell},
+            {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37', render: renderCell}
+        ]
     },
-    {subColTitle: 'ExAC',
-     subColList: [
-        {title: 'VEP Gene', prop: 'VEP_Gene_ExAC', render: renderCell},
-        {title: 'Allele frequency', prop: 'Allele_frequency_ExAC', render: renderCell},
-        {title: 'VEP HGVSc', prop: 'VEP_HGVSc_ExAC', render: renderCell},
-        {title: 'VEP Consequence', prop: 'VEP_Consequence_ExAC', render: renderCell},
-        {title: 'VEP HGVSp', prop: 'VEP_HGVSp_ExAC', render: renderCell}
-     ]
+    {
+        subColTitle: "Bioinformatic Annotation",
+        subColList: [
+            {title: 'Mutation category (BIC)', prop: 'Mutation_type_BIC', render: renderCell},
+            {title: 'PolyPhen score', prop: 'PolyPhen_VEP', render: renderCell},
+            {title: 'SIFT score', prop: 'SIFT_VEP', render: renderCell}
+        ]
     },
-    {subColTitle: 'exLOVD',
-     subColList: [
-        {title: 'Exon number', prop: 'Exon_number_exLOVD', render: renderCell},
-        {title: 'IARC class', prop: 'IARC_class_exLOVD', render: renderCell},
-        {title: 'BIC', prop: 'BIC_exLOVD', render: renderCell},
-        {title: 'HGVS cDNA', prop: 'HGVS_cDNA_exLOVD', render: renderCell},
-        {title: 'Literature source', prop: 'Literature_source_exLOVD', render: renderCell},
-        {title: 'HGVS protein', prop: 'HGVS_protein_exLOVD', render: renderCell}
-     ]
-    }
+    {
+        subColTitle: "Probability",
+        subColList: [
+            {title: 'Co-occurrence likelihood (exLOVD)', prop: 'Co_occurrence_LR_exLOVD', render: renderCell},
+            {
+                title: 'Prior probability of pathogenicity (exLOVD)',
+                prop: 'Combined_prior_probablility_exLOVD',
+                render: renderCell
+            },
+            {
+                title: 'Missense analysis probability of pathogenicity (exLOVD)',
+                prop: 'Missense_analysis_prior_probability_exLOVD',
+                render: renderCell
+            },
+            {title: 'Probability of pathogenicity (exLOVD)', prop: 'Posterior_probability_exLOVD', render: renderCell},
+            {title: 'Segregation Likelihood Ratio (exLOVD)', prop: 'Segregation_LR_exLOVD', render: renderCell},
+            {
+                title: 'Summary Family History Likelihood Ratio (exLOVD)',
+                prop: 'Sum_family_LR_exLOVD',
+                render: renderCell
+            }
+        ]
+    },
+    {
+        subColTitle: "Significance",
+        subColList: [
+            {title: 'Pathogenicity', prop: 'Pathogenicity_research', render: renderCell},
+            {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_ENIGMA', render: renderCell},
+            {title: 'Clinical Significance (BIC)', prop: 'Clinical_classification_BIC', render: renderCell},
+            {title: 'Clinical Importance (BIC)', prop: 'Clinical_importance_BIC', render: renderCell},
+            {title: 'Clinical Significance (ClinVar)', prop: 'Clinical_Significance_ClinVar', render: renderCell},
+            {title: 'Clinical Significance (ENIGMA)', prop: 'Clinical_significance_ENIGMA', render: renderCell},
+            {title: 'Collection Method (ENIGMA)', prop: 'Collection_method_ENIGMA', render: renderCell},
+            {
+                title: 'Comment on Clinical Significance (ENIGMA)',
+                prop: 'Comment_on_clinical_significance_ENIGMA',
+                render: renderCell
+            },
+            {title: 'Date last evaluated (ENIGMA)', prop: 'Date_last_evaluated_ENIGMA', render: renderCell},
+            {title: 'Date last updated (ClinVar)', prop: 'Date_Last_Updated_ClinVar', render: renderCell},
+            {title: 'Has Discordant Evidence', prop: 'Discordant', render: renderCell},
+            {title: 'Functional Analysis Result (LOVD)', prop: 'Functional_analysis_result_LOVD', render: renderCell},
+            {
+                title: 'Functional Analysis Method (LOVD)',
+                prop: 'Functional_analysis_technique_LOVD',
+                render: renderCell
+            },
+            {title: 'Allele Origin (ClinVar)', prop: 'Method_ClinVar', render: renderCell}
+        ]
+    },
+    {
+        subColTitle: "Pedigree",
+        subColList: [
+            {
+                title: 'Family members carrying this variant (BIC)',
+                prop: 'Number_of_family_member_carrying_mutation_BIC',
+                render: renderCell
+            }
+        ]
+    },
+    {
+        subColTitle: "Publications",
+        subColList: [
+            {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_citation_ENIGMA', render: renderCell},
+            {
+                title: 'Clinical Significance Citation (ENIGMA)',
+                prop: 'Clinical_significance_citations_ENIGMA',
+                render: renderCell
+            },
+            {title: 'Literature Reference (BIC)', prop: 'Literature_citation_BIC', render: renderCell},
+            {title: 'Literature Reference (exLOVD)', prop: 'Literature_source_exLOVD', render: renderCell}
+        ]
+    },
+    {
+        subColTitle: "Source",
+        subColList: [
+            {title: 'ClinVar Accession', prop: 'ClinVarAccession_ENIGMA', render: renderCell},
+            {title: 'Condition Category (ENIGMA)', prop: 'Condition_category_ENIGMA', render: renderCell},
+            {title: 'Condition ID Type (ENIGMA)', prop: 'Condition_ID_type_ENIGMA', render: renderCell},
+            {title: 'Condition ID Value (ENIGMA)', prop: 'Condition_ID_value_ENIGMA', render: renderCell},
+            {title: 'Submitter (ClinVar)', prop: 'Submitter_ClinVar', render: renderCell},
+            {title: 'URL (ENIGMA)', prop: 'URL_ENIGMA', render: renderCell},
+            {title: 'Source(s)', prop: 'Source', render: renderCell},
+            {title: 'Source URL(s)', prop: 'Source_URL', render: renderCell}
+        ]
+    },
 ];
 
-var columnSelection = {
-    Gene_symbol: {selectVal: true},
-    Genomic_Coordinate: {selectVal: true},
-    HGVS_cDNA: {selectVal: true},
-    HGVS_protein: {selectVal: true},
-    Abbrev_AA_change: {selectVal: true},
-    BIC_Nomenclature: {selectVal: true},
-    Clinical_significance: {selectVal: true},
-    Allele_frequency_1000_Genomes: {selectVal: false},
-    SAS_Allele_frequency_1000_Genomes: {selectVal: false},
-    EAS_Allele_frequency_1000_Genomes: {selectVal: false},
-    AMR_Allele_frequency_1000_Genomes: {selectVal: false},
-    EUR_Allele_frequency_1000_Genomes: {selectVal: false},
-    AFR_Allele_frequency_1000_Genomes: {selectVal: false},
-    Allele_origin_ClinVar: {selectVal: false},
-    Variant_clinical_significance_ClinVar: {selectVal: false},
-    HGVS_genomic_LOVD: {selectVal: false},
-    Origin_of_variant_LOVD: {selectVal: false},
-    HGVS_protein_LOVD: {selectVal: false},
-    Variant_frequency_LOVD: {selectVal: false},
-    HGVS_cDNA_LOVD: {selectVal: false},
-    Variant_affecting_protein_LOVD: {selectVal: false},
-    Variant_haplotype_LOVD: {selectVal: false},
-    VEP_Gene_ExAC: {selectVal: false},
-    Allele_frequency_ExAC: {selectVal: false},
-    VEP_HGVSc_ExAC: {selectVal: false},
-    VEP_Consequence_ExAC: {selectVal: false},
-    VEP_HGVSp_ExAC: {selectVal: false},
-    Exon_number_exLOVD: {selectVal: false},
-    IARC_class_exLOVD: {selectVal: false},
-    BIC_exLOVD: {selectVal: false},
-    HGVS_cDNA_exLOVD: {selectVal: false},
-    Literature_source_exLOVD: {selectVal: false},
-    HGVS_protein_exLOVD: {selectVal: false}
-};
+var defaultColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_default'];
+var defaultResearchColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_research', 'Allele_Frequency'];
 
+var allSources = {
+    Variant_in_ENIGMA: 1,
+    Variant_in_ClinVar: 1,
+    Variant_in_1000_Genomes: 1,
+    Variant_in_ExAC: 1,
+    Variant_in_LOVD: 1,
+    Variant_in_BIC: 1,
+    Variant_in_ESP: 1,
+    Variant_in_exLOVD: 1
+};
 // Work-around to allow the user to select text in the table. The browser does not distinguish between
 // click and drag: if mouseup and mousedown occur on the same element, a click event is fired even if
 // the events occur at very different locations. That makes it hard to select text. This workaround
@@ -217,35 +362,152 @@ var columnSelection = {
 // text areas to look clickable instead of selectable..
 var hasSelection = () => !(window.getSelection && window.getSelection().isCollapsed);
 
-var VariantTable = React.createClass({
-	mixins: [PureRenderMixin],
-	getData: function () {
-		return this.refs.table.state.data;
-	},
-	render: function () {
-		var {data, onHeaderClick, onRowClick, ...opts} = this.props;
+var Table = React.createClass({
+    mixins: [PureRenderMixin],
+    render: function () {
+        var {data, onHeaderClick, onRowClick, hiddenSources,...opts} = this.props;
         return (
-			<DataTable
-				ref='table'
-				className='row-clickable'
-				{...opts}
-				buildRowOptions={r => ({title: 'click for details', onClick: () => hasSelection() ? null : onRowClick(r)})}
-				buildHeader={title => buildHeader(onHeaderClick, title)}
-				onRowClick={onRowClick}
+            <DataTable
+                ref='table'
+                className='row-clickable'
+                {...opts}
+                buildRowOptions={r => ({title: 'click for details', onClick: () => hasSelection() ? null : onRowClick(r)})}
+                buildHeader={title => buildHeader(onHeaderClick, title)}
+                onRowClick={onRowClick}
                 onHeaderClick={onHeaderClick}
-                hasSelection={hasSelection}
                 filterColumns={filterColumns}
-				columns={columns}
-                subColumns={subColumns}
-                columnSelection={columnSelection}
-				initialData={data}
-				initialPageLength={20}
-                initialSortBy={{prop: 'Abbrev_AA_change', order: 'descending'}}
-                pageLengthOptions={[ 20, 50, 100 ]}
-            />
-		);
-	}
+                initialData={data}
+                initialPageLength={20}
+                initialSortBy={{prop: 'Gene_Symbol', order: 'descending'}}
+                pageLengthOptions={[ 20, 50, 100 ]}/>
+        );
+    }
 });
 
+var ResearchVariantTableSupplier = function (Component) {
+    var ResearchVariantTableComponent = React.createClass({
+        mixins: [PureRenderMixin],
 
-module.exports = VariantTable;
+        getInitialState: function () {
+            var defaultColumnSelection = _.object(
+                _.map(this.getColumns(),
+                    c => _.contains(this.getDefaultColumns(), c.prop) ? [c.prop, true] : [c.prop, false]));
+            var columnSelectionQueryParams = this.props.initialState.columnSelection;
+
+            return {
+                sourceSelection: {...allSources, ...this.props.sourceSelection},
+                columnSelection: {...defaultColumnSelection, ...columnSelectionQueryParams}
+            };
+        },
+        toggleColumns: function (prop) {
+            var {columnSelection} = this.state,
+                val = columnSelection[prop],
+                cs = {...columnSelection, [prop]: !val};
+            this.setState({columnSelection: cs});
+        },
+        setSource: function (prop, event) {
+            // this function uses 1, 0 and -1 to accommodate excluding sources as well as not-including them
+            // currently only uses 1 and 0 because exclusion is not being used
+            var {sourceSelection} = this.state
+            var value = event.target.checked ? 1 : 0;
+            var ss = {...sourceSelection, [prop]: value};
+            this.setState({sourceSelection: ss});
+        },
+        filterFormCols: function (subColList, columnSelection) {
+            return _.map(subColList, ({title, prop}) =>
+                <ColumnCheckbox onChange={v => this.toggleColumns(prop)} key={prop} label={prop} title={title}
+                                initialCheck={columnSelection}/>);
+        },
+        getAdvancedFilters() {
+            var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
+                <Col sm={6} md={3} key={name}>
+                    <Input type="checkbox"
+                        onChange={v => this.setSource(name,v)}
+                        label={name.substring(11).replace(/_/g," ")} // eg "Variant_in_1000_Genomes" => "1000 Genomes"
+                        checked={value>0}>
+                    </Input>
+                </Col>
+            );
+            var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
+                <Col sm={6} md={4} key={subColTitle}>
+                    <Panel header={subColTitle}>
+                        {this.filterFormCols(subColList, this.state.columnSelection)}
+                    </Panel>
+                </Col>
+            );
+            return (<label className='control-label'>
+                <Panel className="top-buffer" header="Source Selection">
+                    {sourceCheckboxes}
+                </Panel>
+                <Panel header="Column Selection">
+                    {filterFormSubCols}
+                </Panel>
+            </label>);
+        },
+        getDownloadButton: function (callback) {
+            return <Button className="btn-sm rgt-buffer" download="variants.csv" href={callback()}>Download</Button>;
+        },
+        getLollipopButton: function (callback, isOpen) {
+            return <Button className="btn-sm rgt-buffer"
+                           onClick={callback}>{(isOpen ? 'Hide' : 'Show' ) + ' Lollipop Chart'}</Button>
+        },
+
+        getColumns: function () {
+            return research_mode_columns;
+        },
+        getDefaultColumns: function () {
+            return defaultResearchColumns;
+        },
+        render: function () {
+            var sourceSelection = this.state.sourceSelection;
+            var columnSelection = this.state.columnSelection;
+            return (
+                <Component
+                    {...this.props}
+                    columns={this.getColumns()}
+                    advancedFilters={this.getAdvancedFilters()}
+                    sourceSelection={sourceSelection}
+                    columnSelection={columnSelection}
+                    downloadButton={this.getDownloadButton}
+                    lollipopButton={this.getLollipopButton}/>
+            );
+        }
+    });
+    return ResearchVariantTableComponent;
+};
+
+var VariantTableSupplier = function (Component) {
+    var ResearchVariantTableComponent = React.createClass({
+        mixins: [PureRenderMixin],
+        getColumns: function () {
+            return columns;
+        },
+        getDefaultColumns: function () {
+            return defaultColumns;
+        },
+        render: function () {
+            var columnSelection = _.object(
+                _.map(this.getColumns(),
+                    c => _.contains(this.getDefaultColumns(), c.prop) ? [c.prop, true] : [c.prop, false]));
+            var sourceSelection = allSources
+            return (
+                <Component
+                    {...this.props}
+                    columns={this.getColumns()}
+                    columnSelection={columnSelection}
+                    sourceSelection={sourceSelection}
+                    downloadButton={()=> null}
+                    lollipopButton={()=> null}/>
+            );
+        }
+    });
+    return ResearchVariantTableComponent;
+};
+
+
+module.exports = ({
+    VariantTable: VariantTableSupplier(Table),
+    ResearchVariantTable: ResearchVariantTableSupplier(Table),
+    research_mode_columns: research_mode_columns,
+    columns: columns
+});

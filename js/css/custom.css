@@ -33,37 +33,35 @@
 }
 
 .nav > li > a {
-    padding-left: 30px;
-    padding-right: 30px;
-    font-size: 14px;
+    padding-left: 1em;
+    padding-right: 1em;
     text-transform: uppercase;
     font-weight: bold;
 }
 
-.navbar-brand > span {
-    font-size: 30px;
+.navbar-brand {
+    margin: 0 1em 0 1em;
+    padding: 0;
+    float: left;
+}
+.navbar-brand h1 {
     font-stretch: condensed;
+    margin: 0;
+    padding: 0;
+    float: left;
 }
 
-.navbar-brand > span > .BRCA {
+.navbar-brand  span.BRCA {
     color: #C03657;
 }
 
-.navbar-brand > span > .exchange {
+.navbar-brand span.exchange {
     color: #E8A2A0;
 }
 
-.navbar-brand img {
-    width: 180px;
-    height: 37px;
-    background-color: rgba(54,171,242,0.8);
-    border-radius:8px; 
-    margin-left: 40px;
-    margin-bottom: 10px;
-    padding-top: 10px;
-    padding-bottom: 6px;
-    padding-left: 10px;
-    padding-right: 10px;
+#research-label {
+    margin: 0 1em 0 1em;
+    font-size: 75%;
 }
 
 
@@ -101,14 +99,14 @@
  * */
 .search-box input {
     width: 100%;
-    height: 40px;
     border: 1px solid #E8A2A0;
     text-align: left;
     font-size: 1.22em;
-    text-indent: 4%;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
+    height: 2.5em;
+    text-indent: 1em;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
 }
 
 input:focus {
@@ -144,16 +142,15 @@ input:focus {
 /**********     Homepage logo             *********************/
 /**************************************************************/
 
-li {list-style-type: none;}
-
 .logo-block li {
-	float: left;
+    float: left;
     width: 300px;
-	height: 120px;
+    height: 120px;
     padding: 10px;
     line-height: 90px;
     text-align: center;
-}
+    list-style-type: none;
+    }
 
 .logo-block img {
 	max-height: 100%;
@@ -162,8 +159,8 @@ li {list-style-type: none;}
 	vertical-align: middle;
 }
 
-.logo-block {
-	margin: 40px;
+.logo-block {    
+    margin: 40px;
     padding-left: 50px;
     padding-right: 30px;
     width: auto;
@@ -217,25 +214,25 @@ div#main {
 }
 
 .footer li {
-    display: inline;
-    padding: 20px;
+    display: inline-block;
+    padding: 10px;
 }
 
 .footer ul {
-    padding-top: 35px;
-    padding-bottom: 30px;
+    padding: 30px 0 30px 0;
 }
 
 /**************************************************************/
 /**********     disclaimer                *********************/
 /**************************************************************/
 .modal-content .markdown {
-    text-align: left;
     padding: 40px;
+    text-align: left;
 }
 
-.modal-content .close-button {
-    padding-bottom: 40px;
+.modal-content button {
+    margin: 0px 0px 40px 40px;
+    text-align: left;
 }
 
 /**************************************************************/
@@ -251,11 +248,48 @@ div#main {
 	cursor: text;
 }
 
+.row-wrap {
+    width: 600px;
+    word-wrap: break-word;
+    float: left;
+}
 /**************************************************************/
 /**********     Other                     *********************/
 /**************************************************************/
 html {
     font-size: 10px;
+}
+
+.form-group label {
+    margin-right: 1em;
+}
+
+#filters .panel-body {
+    padding: 0.4em;
+}
+
+#filters .form-inline .form-group {
+    margin-right: 1em;
+}
+
+.checkbox input[type="checkbox"] {
+    margin-right: 0.4em;
+}
+
+.btm-buffer {
+    margin-bottom: 1em;
+}
+
+.top-buffer {
+    margin-top: 1em;
+}
+
+.rgt-buffer {
+    margin-right: 1em;
+}
+
+#main-grid {
+    margin-top: 40px;
 }
 
 .superscript {
@@ -287,4 +321,16 @@ th[role='columnheader'] .help, .help-target .help {
 
 .glyphicon.help {
     margin: 3px;
+}
+.sources-fields label {
+    width: 7.5em;
+}
+
+.avatar {
+    width: 120px;
+    height: auto;
+}
+
+.btn .caret {
+    border-top-style: dashed;
 }

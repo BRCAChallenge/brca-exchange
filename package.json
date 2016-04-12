@@ -7,7 +7,7 @@
     "test": "webpack-dev-server --config webpack.test.js --port 8081",
     "lint": "eslint --no-color js/*.js test/*.js",
     "clean": "rimraf build/*",
-    "start": "webpack-dev-server --devtool eval --progress --colors --history-api-fallback",
+    "start": "webpack-dev-server --devtool eval --progress --colors --history-api-fallback --host 0.0.0.0",
     "build": "webpack",
     "build:prod": "npm run build -- --config webpack.prod.js --devtool source-map",
     "prebuild": "npm run clean"
@@ -40,7 +40,8 @@
     "style-loader": "^0.8.3",
     "url-loader": "^0.5.5",
     "webpack": "^1.5.3",
-    "webpack-dev-server": "^1.7.0"
+    "webpack-dev-server": "^1.7.0",
+    "jquery": "^2.2.0"
   },
   "dependencies": {
     "babel-runtime": "^5.1.13",
@@ -49,7 +50,10 @@
     "d3": "^3.5.6",
     "d3-tip": "git+https://github.com/Caged/d3-tip.git#v0.6.7",
     "es5-shim": "^4.1.13",
+    "font-awesome": "^4.5.0",
     "font-awesome-webpack": "0.0.3",
+    "jquery": "^2.2.0",
+    "less": "^1.5.0",
     "markdown-it": "^4.4.0",
     "qs": "2.4.1",
     "react": "^0.13.1",

@@ -3,11 +3,13 @@
 
 var React = require('react');
 var _ = require('underscore');
-var {Row, Col, DropdownButton, MenuItem, Grid} = require('react-bootstrap');
 require('muts-needle-plot/src/js/d3-svg-legend');
 require('./css/d3Lollipop.css');
 var Mutneedles = require("muts-needle-plot");
 var PureRenderMixin = require('./PureRenderMixin');
+
+var {Grid, Row, Nav, NavItem} = require('react-bootstrap');
+
 
 var brca12JSON = {
     BRCA1: {
@@ -24,19 +26,19 @@ d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id, varlink, data) {
     var minPos = 0;
     var maxPos = 1;
     if (id === 'BRCA1') {
-        xAxisLabel = 'BRCA1 Genomic Pos (chr 17)';
+        xAxisLabel = 'Coordinate Selection (GRCh38 chr 17)';
         minPos = 43030000;
         maxPos = 43130000;
     } else if (id === 'BRCA2') {
-        xAxisLabel = 'BRCA2 Genomic Pos (chr 13)';
+        xAxisLabel = 'Coordinate Selection (GRCh38 chr 13)';
         minPos = 32300000;
         maxPos = 32410000;
     }
     var legends = {x: xAxisLabel, y: ""};
     var colorMap = {
       // mutation categories
-      "Benign": "lightblue",
-      "Pathogenic": "red"
+      "Pathogenic": "red",
+      "Benign": "lightblue"
     };
     var config = {variantDetailLink: varlink, minCoord: minPos, maxCoord: maxPos, mutationData: muts, regionData: domain, targetElement: ref.id, legends: legends, colorMap: colorMap };
     var instance =  new Mutneedles(config);
@@ -54,11 +56,10 @@ var D3Lollipop = React.createClass({
         );
     },
     filterAttributes: function (obj) {
-        var oldObj = _(obj).pick('Genomic_Coordinate', 'Clinical_significance');
-
-        var chromosome = oldObj.Genomic_Coordinate.split(':')[1];
-        var chrCoordinate = parseInt(oldObj.Genomic_Coordinate.split(':')[1]);
-        var alleleChange = oldObj.Genomic_Coordinate.split(':')[2];
+        var oldObj = _(obj).pick('Genomic_Coordinate_hg38', 'Pathogenicity_default');
+        var parts = oldObj.Genomic_Coordinate_hg38.split(':');
+        var chrCoordinate = parseInt(oldObj.Genomic_Coordinate_hg38.split(':')[parts.length - 2]);
+        var alleleChange = _.last(parts);
         var refAllele = alleleChange.split('>')[0];
         var altAllele = alleleChange.split('>')[1];
         if (altAllele.length > refAllele.length) {
@@ -66,19 +67,24 @@ var D3Lollipop = React.createClass({
         } else {
             chrCoordinate = String(chrCoordinate);
         }
-        if (oldObj.Clinical_significance == '-'){
-            oldObj.Clinical_significance = "Unknown";
+        if (oldObj.Pathogenicity_default == 'Not Yet Classified'){
+            oldObj.Pathogenicity_default = "Uncertain";
         }
-        var newObj = {category: oldObj.Clinical_significance, coord: chrCoordinate, value: 1, oldData: obj};
+        if (oldObj.Pathogenicity_default == 'Benign / Little Clinical Significance'){
+            oldObj.Pathogenicity_default = "Benign";
+        }
+        var newObj = {category: oldObj.Pathogenicity_default, coord: chrCoordinate, value: 1, oldData: obj};
         return newObj;
     },
-    componentDidMount: function() {
+
+     componentDidMount: function() {
         var {data, brcakey, onRowClick, ...opts} = this.props;
         var subSetData = data.map(this.filterAttributes);
         var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
         var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
         this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
     },
+
     componentWillReceiveProps: function(newProps) {
         this.cleanupBRCA();
         var {data, brcakey, onRowClick, ...opts} = newProps;
@@ -100,26 +106,47 @@ var D3Lollipop = React.createClass({
 });
 
 var Lollipop = React.createClass({
-    mixins: [PureRenderMixin],
-    getInitialState: function() {
-        return {brcakey: "BRCA1"};
+    getInitialState: function () {
+        return {
+            brcakey: "BRCA1",
+            data: []
+        };
     },
-    onSelect: function(key) {
+    shouldComponentUpdate: function (nextProps, nextState) {
+       return (
+            //Update if it's the first time rendering
+            this.state.data.length === 0 ||
+            !_.isEqual(this.props.opts, nextProps.opts) ||
+            !_.isEqual(this.state, nextState)
+        );
+    },
+    componentWillReceiveProps: function (newProps) {
+        this.fetchData(newProps.opts);
+    },
+    componentWillMount: function () {
+        this.fetchData = _.debounce(this.fetchData, 600, true);
+        this.fetchData(this.props.opts);
+    },
+    fetchData: function (opts) {
+        this.props.fetch(opts).subscribe(
+            function (d) {
+                this.setState({data: d.data});
+            }.bind(this));
+    },
+    onSelect: function (key) {
         this.setState({brcakey: key});
     },
     render: function () {
-        var {data, onHeaderClick, onRowClick, ...opts} = this.props;
         return (
             <Grid>
                 <div>
                     <Row style={{marginBottom: '2px', marginTop: '2px'}}>
-                        <DropdownButton onSelect={this.onSelect} title="Select Gene" id="bg-vertical-dropdown-1">
-                            <MenuItem eventKey="BRCA1">BRCA1</MenuItem>
-                            <MenuItem eventKey="BRCA2">BRCA2</MenuItem>
-                        </DropdownButton>
-                        <span onClick={() => this.props.onHeaderClick('Lollipop Plots')}
-                            className='help glyphicon glyphicon-question-sign superscript'/>
-                        <D3Lollipop data={this.props.data} key={this.state.brcakey} brcakey={this.state.brcakey} onRowClick={this.props.onRowClick} id='brcaLollipop' ref='d3svgBrca'/>
+                        <Nav bsStyle="tabs" eventKey={0} activeKey={this.state.brcakey} onSelect={this.onSelect} title="Select Gene" id="bg-vertical-dropdown-1">
+                            <NavItem eventKey="BRCA1">BRCA1</NavItem>
+                            <NavItem eventKey="BRCA2">BRCA2</NavItem>
+                        </Nav>
+                        <span onClick={() => this.props.onHeaderClick('Lollipop Plots')}/>
+                        <D3Lollipop data={this.state.data} opts={this.props.opts} key={this.state.brcakey} brcakey={this.state.brcakey} onRowClick={this.props.onRowClick} id='brcaLollipop' ref='d3svgBrca'/>
                     </Row>
                 </div>
             </Grid>

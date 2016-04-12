@@ -2,26 +2,45 @@
 To contribute:
 Fork the repository, make the changes, and submit pull request. 
 
-## Build
+## Build the frontend
 The build is based on npm and webpack.
- * Ensure that git and node are installed
+* **Ensure that git and node are installed**
    * On OSX, install brew http://brew.sh/
-   * `brew install git`
-   * `brew install node`
- * `git clone https://github.com/BD2KGenomics/brca-website.git`
- * `cd brca-website`
- * `npm install`
- * `npm start`
- * browse to [http://localhost:8080/webpack-dev-server/](http://localhost:8080/webpack-dev-server/)
+       * `brew install git`
+       * `brew install node`
+   * On Linux:
+        * `sudo apt-get install git-all`    
+        * `curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -`
+        * `sudo apt-get install -y nodejs`
+* **Checkout the repo**
+   * `git clone https://github.com/BD2KGenomics/brca-website.git`
+* **Start the frontend**
+   * `cd brca-website`
+   * `npm install`
+   * `npm start`
 
-## Build with local server
-
- * Copy \*.table and \*.sqlite files into brca-website/backend/applications/data/databases
- * Edit url in js/backend.js to point to localhost:8000
- * Download and extract web2py
- * `python web2py.py -f ~/brca-website/backend`
-
-For now, database files can be found on beta, in /var/www/backend/beta/web2py/applications/data/databases.
+## Build the server
+The server runs on Django with postgres so install and set up those
+* **Install postgres** 
+   * For Mac:
+       * The easiest way is to install postgress.app from http://postgresapp.com/
+   * Linux: 
+       * `sudo apt-get install postgresql postgresql-contrib`
+* **Create the database** 
+   * `sudo -u postgres createdb  storage.pg`
+* **Set the postgres role's password** 
+   * `sudo -u postgres psql postgres`
+   *  at the prompt type `\password postgres` to set the password to `postgres`
+* **Install the python dependencies**
+   * `pip install -qU -r requirements.txt`
+* **Run the initial migration to populate the database**
+   * `cd django`
+   * `python manage.py migrate`
+* **Start the server**
+   * `python manage.py runserver`
+* If you're developing locally point the frontend at the local server
+   * Edit databaseUrl in `js/backend.js` to point to `localhost:8000`
+* **Browse to [http://localhost:8080/](http://localhost:8080/)**
 
 ### Lint
 

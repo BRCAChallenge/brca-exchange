@@ -1,0 +1,16 @@
+language: python
+python:
+  - "2.7"
+# command to install dependencies
+services:
+  - postgresql
+before_script:
+  - psql -c 'create database "storage.pg";' -U postgres
+install:
+  - pip install -qU -r requirements.txt
+#environment variables
+env:
+- EMAIL_HOST=test MAIL_USERNAME=test MAIL_PASSWORD=test
+# command to run tests
+script:
+  - cd django && ./manage.py test
