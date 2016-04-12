@@ -56,7 +56,22 @@ function mergeState(state, newState) {
 }
 
 var DataTable = React.createClass({
-    mixins: [PureRenderMixin],
+    shouldComponentUpdate: function (nextProps, nextState) {
+        return (
+            this.state.data.length === 0 ||
+            this.state.filtersOpen !== nextState.filtersOpen ||
+            this.state.lollipopOpen !== nextState.lollipopOpen ||
+            this.state.page !== nextState.page ||
+            this.state.pageLength != nextState.pageLength ||
+            this.props.search !== nextProps.search ||
+            !_.isEqual(this.state.sortBy, nextState.sortBy) ||
+            !_.isEqual(this.props.sourceSelection, nextProps.sourceSelection) ||
+            !_.isEqual(this.props.columnSelection, nextProps.columnSelection) ||
+            !_.isEqual(_.sortBy(this.props.hide), _.sortBy(nextProps.hide)) ||
+            !_.isEqual(this.state.filterValues, nextState.filterValues) ||
+            !_.isEqual(this.state.filterColumns, nextState.filterColumns)
+        );
+    },
     componentWillMount: function () {
         var q = this.fetchq = new Rx.Subject();
         this.subs = q.map(this.props.fetch).debounce(100).switchLatest().subscribe(
