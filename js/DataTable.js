@@ -69,7 +69,8 @@ var DataTable = React.createClass({
             !_.isEqual(this.props.columnSelection, nextProps.columnSelection) ||
             !_.isEqual(_.sortBy(this.props.hide), _.sortBy(nextProps.hide)) ||
             !_.isEqual(this.state.filterValues, nextState.filterValues) ||
-            !_.isEqual(this.state.filterColumns, nextState.filterColumns)
+            !_.isEqual(this.state.filterColumns, nextState.filterColumns) ||
+            !_.isEqual(_.map(this.state.data, r => r.id), _.map(nextState.data, r=> r.id))
         );
     },
     componentWillMount: function () {
