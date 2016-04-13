@@ -163,6 +163,7 @@ var EditProfileForm = React.createClass({
             , phone_number: this.refs.phone_number.getDOMNode().value
             , comment: this.refs.comment.getDOMNode().value
             , include_me: this.refs.include_me.getDOMNode().checked
+            , email_me: this.refs.email_me.getDOMNode().checked
             , hide_number: this.refs.hide_number.getDOMNode().checked
             , hide_email: this.refs.hide_email.getDOMNode().checked
         };
@@ -210,6 +211,7 @@ var EditProfileForm = React.createClass({
             {this.renderTextInput('phone_number', 'Phone number', this.state.data.phone_number)}
             {this.renderTextarea('comment', 'Comment', this.state.data.comment)}
             {this.renderCheckBox('include_me', "Include me in the community page", this.state.data.include_me)}
+            {this.renderCheckBox('email_me', "Include me in the mailing list", this.state.data.email_me)}
             {this.renderCheckBox('hide_number', "Don't display my phone number on this website", this.state.data.hide_number)}
             {this.renderCheckBox('hide_email', "Don't display my email on this website",this.state.data.hide_email)}
         </div>
@@ -272,10 +274,10 @@ var EditProfileForm = React.createClass({
         )
     },
     renderRadioInlines: function (id, label, kwargs) {
-        var handleTextChange = () => {var oldData = this.state.data; oldData[id]=this.refs.titlecustom.value; this.setState({data: oldData})};
+        var handleTextChange = () => {var oldData = this.state.data; oldData[id]=this.refs.titlecustom.getDOMNode().value; this.setState({data: oldData})};
         var otherValue = kwargs.defaultCheckedValue;
         var options = kwargs.values.map(function (value) {
-            var handleRadioChange = () => {var oldData = this.state.data; oldData[id]=this.refs[id+value.ref].checked; this.setState({data: oldData})};
+            var handleRadioChange = () => {var oldData = this.state.data; oldData[id] = value.name; this.setState({data: oldData})};
             var defaultChecked = false;
             if (value.name == kwargs.defaultCheckedValue) {
                 defaultChecked = true;
@@ -286,8 +288,8 @@ var EditProfileForm = React.createClass({
                 <input type="radio" ref={id+value.ref} name={id} value={value.name} checked={defaultChecked} onChange={handleRadioChange}/>
                 {value.name}
             </label>;
-        });
-        options = <span className="col-sm-9">{options}</span>
+        }.bind(this));
+        options = <span className="col-sm-9">{options}</span>;
         var other =
             <span className="col-sm-3">
             <input className="form-control" type="text" ref="titlecustom" name="titlecustom" value={otherValue} onChange={handleTextChange}/>

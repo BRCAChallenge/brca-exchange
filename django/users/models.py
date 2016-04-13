@@ -7,8 +7,10 @@ from django.utils import timezone
 
 
 class MyUserManager(BaseUserManager):
-    def create_user(self, email, password, firstName, lastName, title, affiliation, institution, city, state, country,
-                    phone_number, comment, include_me, hide_number, hide_email, has_image, is_admin=False):
+    def create_user(self, email, password, firstName="", lastName="", title="", affiliation="", institution="",
+                    city="", state="", country="",phone_number="", comment="", 
+                    include_me=False, email_me=False, hide_number=False, hide_email=False, has_image=False,
+                    is_admin=False, is_approved=False):
         """
         Creates and saves a User with the given fields
         """
@@ -29,10 +31,12 @@ class MyUserManager(BaseUserManager):
             phone_number=phone_number,
             comment=comment,
             include_me=include_me,
+            email_me=email_me,
             hide_number=hide_number,
             hide_email=hide_email,
             has_image=has_image,
-            is_admin=is_admin
+            is_admin=is_admin,
+            is_approved=is_approved
         )
 
         user.set_password(password)
@@ -65,8 +69,10 @@ class MyUser(AbstractBaseUser):
     hide_email = models.BooleanField(default=False)
 
     include_me = models.BooleanField(default=True)
+    email_me = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=False)
     has_image = models.BooleanField(default=False)
 
     activation_key = models.CharField(max_length=40, blank=True)

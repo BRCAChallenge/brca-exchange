@@ -6,10 +6,12 @@ from operator import __or__
 from django.db import connection
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
+from django.views.decorators.gzip import gzip_page
 
 from .models import Variant
 
 
+@gzip_page
 def index(request):
     order_by = request.GET.get('order_by')
     direction = request.GET.get('direction')

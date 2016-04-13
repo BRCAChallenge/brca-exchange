@@ -330,3 +330,7 @@ th[role='columnheader'] .help, .help-target .help {
     width: 120px;
     height: auto;
 }
+
+.btn .caret {
+    border-top-style: dashed;
+}

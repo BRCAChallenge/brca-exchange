@@ -4,7 +4,6 @@ from rest_framework_jwt.views import obtain_jwt_token
 
 from . import views
 
-url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
 
 urlpatterns = [
     url(r'^register/$', views.register, name="register"),
