@@ -1,3 +1,5 @@
+from django.core.mail import EmailMessage, EmailMultiAlternatives
+from django.template import Context
 import datetime
 import hashlib
 import json
@@ -11,12 +13,13 @@ from django.db import IntegrityError
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.template.loader import get_template
 from django.views.decorators.cache import never_cache
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
-from brca import settings
+from brca import settings, site_settings
 from .models import MyUser
 
 
@@ -65,6 +68,7 @@ def register(request):
     image = None
     if request.FILES:
         image = request.FILES["image"]
+
     # Check the CAPTCHA
     try:
         captcha = request.POST.get('captcha')
@@ -74,7 +78,7 @@ def register(request):
         content = json.loads(response.content)
         response = {'success': content['success']}
     except HTTPError:
-        response = {'success': False}
+        return JsonResponse({'success': False, 'error': 'Wrong CAPTCHA'})
 
     # Create the user
     try:
@@ -86,7 +90,7 @@ def register(request):
         created_user.is_active = False
         created_user.save()
 
-        # Send email with activation key
+        # Create and save activation key
         salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
         activation_key = hashlib.sha1(salt + created_user.email).hexdigest()
         key_expires = datetime.datetime.today() + datetime.timedelta(2)
@@ -95,15 +99,24 @@ def register(request):
         created_user.key_expires = key_expires
         created_user.save()
 
-        email_subject = 'Account confirmation'
-        email_body = "Hey %s, thanks for signing up. To activate your account, click this link within 48 hours http://127.0.0.1:8000/accounts/confirm/%s" % (
-            created_user.firstName, activation_key)
-        send_mail(email_subject, email_body, 'noreply@brcaexchange.org', [created_user.email], fail_silently=False)
+        # Send activation email
+        url = "{0}accounts/confirm/{1}".format(site_settings.URL, activation_key)
+        plaintext_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'registration_email.txt'))
+        html_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'registration_email.html'))
+
+        d = Context({'firstname': created_user.firstName, 'url':url})
+
+        subject, from_email, to = 'BRCAExchange account confirmation', 'noreply@brcaexchange.org', created_user.email
+        text_content = plaintext_email.render(d)
+        html_content = html_email.render(d)
+        msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()
 
     except IntegrityError:
-        response = {'success': False}
+        return JsonResponse({'success': False, 'error': 'This email already exists'})
 
-    return JsonResponse(response)
+    return JsonResponse({'success': True})
 
 
 def confirm(request, activation_key):
