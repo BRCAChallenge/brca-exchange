@@ -1,6 +1,3 @@
-from django.core.mail import EmailMessage, EmailMultiAlternatives
-from django.template import Context
-import datetime
 import hashlib
 import json
 import os
@@ -8,11 +5,10 @@ import random
 from urllib2 import HTTPError
 
 import requests
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.db import IntegrityError
-from django.http import HttpResponse
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.template import Context
 from django.template.loader import get_template
 from django.views.decorators.cache import never_cache
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
@@ -93,18 +89,16 @@ def register(request):
         # Create and save activation key
         salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
         activation_key = hashlib.sha1(salt + created_user.email).hexdigest()
-        key_expires = datetime.datetime.today() + datetime.timedelta(2)
 
         created_user.activation_key = activation_key
-        created_user.key_expires = key_expires
         created_user.save()
 
         # Send activation email
-        url = "{0}accounts/confirm/{1}".format(site_settings.URL, activation_key)
+        url = "{0}confirm/{1}".format(site_settings.URL_FRONTEND, activation_key)
         plaintext_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'registration_email.txt'))
         html_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'registration_email.html'))
 
-        d = Context({'firstname': created_user.firstName, 'url':url})
+        d = Context({'firstname': created_user.firstName, 'url': url})
 
         subject, from_email, to = 'BRCAExchange account confirmation', 'noreply@brcaexchange.org', created_user.email
         text_content = plaintext_email.render(d)
@@ -114,16 +108,23 @@ def register(request):
         msg.send()
 
     except IntegrityError:
-        return JsonResponse({'success': False, 'error': 'This email already exists'})
+        return JsonResponse({'success': False, 'error': 'This email address already exists'})
 
     return JsonResponse({'success': True})
 
 
 def confirm(request, activation_key):
-    user = get_object_or_404(MyUser, activation_key=activation_key)
+    user = MyUser.objects.filter(activation_key=activation_key)
+    if not user:
+        response = JsonResponse({'success': False, 'error': 'Invalid activation key'})
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+    user = user[0]
     user.is_active = True
     user.save()
-    return HttpResponse("Thanks for confirming your email")
+    response = JsonResponse({'success': True})
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
 
 
 def user_fields(request):
