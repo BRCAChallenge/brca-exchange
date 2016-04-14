@@ -100,7 +100,7 @@ var VariantSearch = React.createClass({
                                 onChange: this.onChange
                             }}
                             showWhen={input => input.trim().length > 0}
-                            suggestions={_.debounce(getSuggestions, 300, true)}
+                            suggestions={_.debounce(getSuggestions, 200)}
                             onSuggestionSelected={v => onSearch(v)}
                             suggestionRenderer={renderSuggestion}
                             ref='input' />
