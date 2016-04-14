@@ -6,4 +6,4 @@ CAPTCHA_SECRET = '6LdwNBwTAAAAABi4FQqI_W8qzPiuDypc4re1DjuI'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-URL = 'http://127.0.0.1:8000/'
+URL_FRONTEND = 'http://127.0.0.1:8080/'
