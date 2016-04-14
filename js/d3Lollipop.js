@@ -106,19 +106,12 @@ var D3Lollipop = React.createClass({
 });
 
 var Lollipop = React.createClass({
+    mixins: [PureRenderMixin],
     getInitialState: function () {
         return {
             brcakey: "BRCA1",
             data: []
         };
-    },
-    shouldComponentUpdate: function (nextProps, nextState) {
-       return (
-            //Update if it's the first time rendering
-            this.state.data.length === 0 ||
-            !_.isEqual(this.props.opts, nextProps.opts) ||
-            !_.isEqual(this.state, nextState)
-        );
     },
     componentWillReceiveProps: function (newProps) {
         this.fetchData(newProps.opts);
