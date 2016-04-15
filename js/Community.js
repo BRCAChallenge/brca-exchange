@@ -9,6 +9,7 @@ var {Navigation, Link} = require('react-router');
 var {Pagination} = require('react-data-components-bd2k');
 var _ = require('underscore');
 var placeholder = require('./img/placeholder.png');
+var auth = require('./auth');
 
 var Community = React.createClass({
     mixins: [PureRenderMixin, Navigation],
@@ -44,6 +45,10 @@ var Community = React.createClass({
     onChangePage: function (pageNumber) {
         this.setStateFetch({page: pageNumber});
     },
+    logout: function() {
+        auth.logout();
+        this.forceUpdate();
+    },
     render: function () {
         var {data, page, totalPages, error} = this.state;
         var rows = _.map(data, row => {
@@ -76,9 +81,15 @@ var Community = React.createClass({
         return (error ? <p>{error}</p> :
             <Grid id="main-grid">
                 <Row>
-                    <div className='text-center Variant-detail-title'>
+                    <Col smOffset="5">
                         <h3>BRCA Community</h3>
-                    </div>
+                    </Col>
+                    {!auth.loggedIn() && <Col sm={1} smOffset="2"><Link to="/signup"><Button bsStyle="link">Sign up </Button></Link></Col>}
+                    {!auth.loggedIn() && <Col sm={1}><Link to="/signin"><Button bsStyle="link"> Sign in </Button></Link></Col>}
+
+                    {auth.loggedIn() && <Col sm={1} smOffset="2"><Link to="/profile"><Button bsStyle="link">Edit profile</Button></Link></Col>}
+                    {auth.loggedIn() && <Col sm={1}><Button onClick={this.logout} bsStyle="link">Sign out</Button></Col>}
+
                 </Row>
                 <Row className="btm-buffer">
                     <Col sm={10}>
@@ -99,9 +110,6 @@ var Community = React.createClass({
                     </Col>
                 </Row>
                 <Row>
-                    <Col md={8} mdOffset={2}>
-                        <Link to="/signup"><Button>Join our mailing list and this community space</Button></Link>
-                    </Col>
                 </Row>
             </Grid>
         );
