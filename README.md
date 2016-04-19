@@ -46,6 +46,13 @@ The server runs on Django with postgres so install and set up those
 
 Use `npm run lint` to run the lint rules. We lint with eslint and babel-eslint.
 
+## How to change the data file
+This process will delete all the previous data from the `variants` table and replace it with data from a new tsv file.
+
+ * Replace the contents of `data/resources/aggregated.tsv` with the new data file
+ * `cd django`
+ * `python manage.py migrate --fake data 0002_search_index && python manage.py migrate`
+
 ### References
  * http://blog.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/
  * http://webpack.github.io/
