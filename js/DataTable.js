@@ -58,7 +58,6 @@ function mergeState(state, newState) {
 var DataTable = React.createClass({
     shouldComponentUpdate: function (nextProps, nextState) {
         return (
-            this.state.data.length === 0 ||
             this.state.filtersOpen !== nextState.filtersOpen ||
             this.state.lollipopOpen !== nextState.lollipopOpen ||
             this.state.page !== nextState.page ||
