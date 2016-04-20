@@ -32,5 +32,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunSQL("DELETE FROM variant;"),
         migrations.RunPython(load_from_csv),
     ]
