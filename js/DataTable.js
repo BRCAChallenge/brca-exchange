@@ -213,7 +213,7 @@ var DataTable = React.createClass({
                 </Row>
                 <Row id="lollipop-chart">
                     <Col sm={10} smOffset={1}>
-                        {lollipopOpen && this.state.windowWidth > 991 && this.state.data.length > 0 &&
+                        {lollipopOpen && this.state.windowWidth > 991 &&
                         <Lollipop fetch={this.props.fetchLollipop} opts={this.lollipopOpts()} onHeaderClick={this.props.onHeaderClick} onRowClick={this.props.onRowClick}/> }
 
                         {lollipopOpen && this.state.windowWidth <= 991 &&
