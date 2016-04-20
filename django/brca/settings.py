@@ -153,3 +153,5 @@ EMAIL_HOST_PASSWORD = ''
 DEFAULT_FROM_EMAIL = 'noreply@brcaexchange.org'
 
 AUTH_USER_MODEL = 'users.MyUser'
+
+PASSWORD_RESET_LINK_DURATION = 1
