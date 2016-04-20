@@ -12,7 +12,6 @@ var databaseKey = require('../databaseKey');
 var {Navbar, Nav, DropdownButton} = require('react-bootstrap');
 var VariantSearch = require('./VariantSearch');
 var {Link} = require('react-router');
-var auth = require('./auth');
 
 var NavLink = React.createClass({
     render: function () {
@@ -31,14 +30,9 @@ var NavBarNew = React.createClass({
     close: function () {
         this.refs.about.setState({open: false});
     },
-    logout: function () {
-        auth.logout();
-        this.refs.about.setState({open: false});
-    },
     getInitialState: function () {
         return {
             showModal: false,
-            loggedin: auth.loggedIn()
         }
     },
     getModeName: function (name) {
@@ -109,12 +103,7 @@ var NavBarNew = React.createClass({
                                 <Button onClick={() => this.setState({ showModal: false })}>No</Button>
                             </Modal>}
                         </DropdownButton>
-                        <DropdownButton className={this.activePath(path, "community")} ref='community' title='Community'>
-                            <NavLink onClick={this.close} to='/community'>Community space</NavLink>
-                            <NavLink onClick={this.close} to='/profile'>Your profile</NavLink>
-                            {!auth.loggedIn() && <NavLink onClick={this.close} to='/signin'>Sign in</NavLink> }
-                            {auth.loggedIn() && <NavLink onClick={this.logout} to='/'>Sign out</NavLink> }
-                        </DropdownButton>
+                        <NavLink to='/community'>Community</NavLink>
                     </Nav>
                 </Navbar>
             </div>
