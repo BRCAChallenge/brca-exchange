@@ -36,6 +36,7 @@ var {VariantTable, ResearchVariantTable, research_mode_columns, columns} = requi
 var {Signup} = require('./Signup');
 var {Signin, ResetPassword} = require('./Signin');
 var {ConfirmEmail} = require('./ConfirmEmail');
+var {ChangePassword} = require('./ChangePassword');
 var {Profile} = require('./Profile');
 var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Route, RouteHandler,
@@ -471,6 +472,7 @@ var routes = (
         <Route path='reset_password' handler={ResetPassword}/>
         <Route path='profile' handler={Profile}/>
         <Route path='confirm/:activationCode' handler={ConfirmEmail}/>
+        <Route path='reset/:resetToken' handler={ChangePassword}/>
         <Route path='variants' />
         <Route path='variant/:id' handler={VariantDetail}/>
     </Route>

@@ -66,7 +66,7 @@ var Signup = React.createClass({
     },
 
     handleSubmit: function () {
-        var showSuccess = () => {this.transitionTo('/community', {registrationSuccess:true})};
+        var showSuccess = () => {this.transitionTo('/community', null, {registrationSuccess:true})};
         var showFailure = (msg => {this.setState({error: msg})});
 
         if (this.refs.contactForm.isValid()) {

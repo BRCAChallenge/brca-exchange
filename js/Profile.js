@@ -66,7 +66,7 @@ var Profile = React.createClass({
     },
 
     handleSubmit: function () {
-        var showSuccess = () => {this.transitionTo('/community', {registrationSuccess:true})};
+        var showSuccess = () => {this.transitionTo('/community', null, {updateSuccess:true})};
         var showFailure = () => {this.setState({error: "An error occured"})};
 
         if (this.refs.contactForm.isValid()) {
