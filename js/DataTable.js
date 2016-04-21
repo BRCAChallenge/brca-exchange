@@ -61,6 +61,7 @@ var DataTable = React.createClass({
             this.state.filtersOpen !== nextState.filtersOpen ||
             this.state.lollipopOpen !== nextState.lollipopOpen ||
             this.state.page !== nextState.page ||
+            this.state.count !== nextState.count ||
             this.state.pageLength != nextState.pageLength ||
             this.props.search !== nextProps.search ||
             !_.isEqual(this.state.sortBy, nextState.sortBy) ||
