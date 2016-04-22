@@ -19,7 +19,7 @@ var ChangePassword = React.createClass({
     componentDidMount: function () {
         var showFailure = (msg => {this.setState({error: msg})});
         var resetToken = this.context.router.getCurrentParams().resetToken;
-        var url = config.backend_url + '/accounts/update_password/' + resetToken + '/';
+        var url = config.backend_url + '/accounts/check_password_token/' + resetToken + '/';
         $.post({
             url: url,
             success: function (data) {
