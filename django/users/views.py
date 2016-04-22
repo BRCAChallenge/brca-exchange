@@ -1,3 +1,4 @@
+import datetime
 import hashlib
 import json
 import os
@@ -10,6 +11,7 @@ from django.db import IntegrityError
 from django.http import JsonResponse
 from django.template import Context
 from django.template.loader import get_template
+from django.utils import timezone
 from django.views.decorators.cache import never_cache
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
@@ -121,6 +123,64 @@ def confirm(request, activation_key):
         return response
     user = user[0]
     user.is_active = True
+    user.save()
+    response = JsonResponse({'success': True})
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
+
+
+def password_reset(request):
+    email = request.POST.get('email', '')
+    user = MyUser.objects.filter(email=email)
+    if not user:
+        response = JsonResponse({'success': False, 'error': 'Email not found'})
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+    user = user[0]
+
+    # Create and save password reset token
+    salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
+    password_reset_token = hashlib.sha1(salt + user.email).hexdigest()
+
+    user.password_reset_token = password_reset_token
+    email_duration_days = settings.PASSWORD_RESET_LINK_DURATION
+    password_token_expires = timezone.now() + datetime.timedelta(email_duration_days)
+    user.password_token_expires = password_token_expires
+    user.save()
+
+    # Send password reset email
+    url = "{0}reset/{1}".format(site_settings.URL_FRONTEND, password_reset_token)
+    plaintext_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'password_reset_email.txt'))
+    html_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'password_reset_email.html'))
+    d = Context({'firstname': user.firstName, 'url': url, 'hours': email_duration_days * 24})
+
+    subject, from_email, to = 'BRCAExchange password reset', 'noreply@brcaexchange.org', user.email
+    text_content = plaintext_email.render(d)
+    html_content = html_email.render(d)
+    msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
+
+    response = JsonResponse({'success': True})
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
+
+
+def update_password(request, password_reset_token):
+    user = MyUser.objects.filter(password_reset_token=password_reset_token)
+    if not user:
+        response = JsonResponse({'success': False, 'invalid_token': True})
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+    user = user[0]
+
+    if user.password_token_expires < timezone.now():
+        response = JsonResponse({'success': False, 'invalid_token': True})
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+
+    password = request.POST.get('password', '')
+    user.set_password(password)
     user.save()
     response = JsonResponse({'success': True})
     response['Access-Control-Allow-Origin'] = '*'

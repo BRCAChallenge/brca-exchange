@@ -3,5 +3,6 @@ django
 django-cors-headers
 djangorestframework
 djangorestframework-jwt
+django-utils
 django-jwt-auth
 psycopg2

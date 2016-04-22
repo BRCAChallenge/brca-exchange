@@ -77,6 +77,9 @@ class MyUser(AbstractBaseUser):
 
     activation_key = models.CharField(max_length=40, blank=True)
 
+    password_reset_token = models.CharField(max_length=40, blank=True)
+    password_token_expires = models.DateTimeField(default=django.utils.timezone.now)
+
     objects = MyUserManager()
 
     USERNAME_FIELD = 'email'

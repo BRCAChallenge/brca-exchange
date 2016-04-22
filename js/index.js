@@ -34,8 +34,9 @@ var {Grid, Col, Row, Table} = require('react-bootstrap');
 
 var {VariantTable, ResearchVariantTable, research_mode_columns, columns} = require('./VariantTable');
 var {Signup} = require('./Signup');
-var {Signin} = require('./Signin');
+var {Signin, ResetPassword} = require('./Signin');
 var {ConfirmEmail} = require('./ConfirmEmail');
+var {ChangePassword} = require('./ChangePassword');
 var {Profile} = require('./Profile');
 var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Route, RouteHandler,
@@ -468,8 +469,10 @@ var routes = (
         <Route path='community' handler={Community}/>
         <Route path='signup' handler={Signup}/>
         <Route path='signin' handler={Signin}/>
+        <Route path='reset_password' handler={ResetPassword}/>
         <Route path='profile' handler={Profile}/>
         <Route path='confirm/:activationCode' handler={ConfirmEmail}/>
+        <Route path='reset/:resetToken' handler={ChangePassword}/>
         <Route path='variants' />
         <Route path='variant/:id' handler={VariantDetail}/>
     </Route>
