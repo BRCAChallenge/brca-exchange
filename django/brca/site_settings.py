@@ -7,3 +7,7 @@ CAPTCHA_SECRET = '6LdwNBwTAAAAABi4FQqI_W8qzPiuDypc4re1DjuI'
 DEBUG = True
 
 URL_FRONTEND = 'http://localhost:8080/'
+
+EMAIL_HOST = ''
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
