@@ -66,8 +66,8 @@ var Signup = React.createClass({
     },
 
     handleSubmit: function () {
-        var showSuccess = () => {this.transitionTo('/community', {registrationSuccess:true})};
-        var showFailure = () => {this.setState({error: "An error occured"})};
+        var showSuccess = () => {this.transitionTo('/community', null, {registrationSuccess:true})};
+        var showFailure = (msg => {this.setState({error: msg})});
 
         if (this.refs.contactForm.isValid()) {
             var formData = this.refs.contactForm.getFormData();
@@ -86,7 +86,11 @@ var Signup = React.createClass({
                 if (this.status == 200 && responseData.success === true) {
                     showSuccess();
                 } else {
-                    showFailure()
+                    var message = responseData.error;
+                    if (message === null) {
+                        message = "Could not complete registration";
+                    }
+                    showFailure(message)
                 }
             };
             xhr.open('post', url);

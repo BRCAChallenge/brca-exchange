@@ -50,6 +50,13 @@ var Community = React.createClass({
         this.forceUpdate();
     },
     render: function () {
+        var queryParams = this.context.router.getCurrentQuery();
+        var message;
+        if (queryParams.registrationSuccess) {
+            message =  <div className="alert alert-success">
+                <p>Thanks for signing up. We have sent you an email with a confirmation link to complete your registration.</p>
+            </div>
+        }
         var {data, page, totalPages, error} = this.state;
         var rows = _.map(data, row => {
 
@@ -80,6 +87,7 @@ var Community = React.createClass({
 
         return (error ? <p>{error}</p> :
             <Grid id="main-grid">
+                <Row id="message"> {message} </Row>
                 <Row>
                     <Col smOffset="5">
                         <h3>BRCA Community</h3>

@@ -5,3 +5,5 @@ CAPTCHA_SECRET = '6LdwNBwTAAAAABi4FQqI_W8qzPiuDypc4re1DjuI'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
+URL_FRONTEND = 'http://localhost:8080/'
