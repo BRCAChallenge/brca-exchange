@@ -98,14 +98,14 @@ var research_mode_columns = [
     {title: 'BIC Variant Identifier', prop: 'BIC_Identifier'},
     {title: 'Nucleotide', prop: 'HGVS_cDNA'},
     {title: 'Protein', prop: 'HGVS_Protein'},
-    {title: 'Analysis Method (ClinVar)', prop: 'SCV_ClinVar'},
+    {title: 'SCV Accession (ClinVar)', prop: 'SCV_ClinVar'},
     {title: 'Source(s)', prop: 'Source'},
     {title: 'Source URL(s)', prop: 'Source_URL'},
     {title: 'Synonyms', prop: 'Synonyms'},
     {title: 'Protein Amino Acid Change', prop: 'Protein_Change'},
     {title: 'Reference cDNA Sequence', prop: 'Reference_Sequence'},
 
-    {title: 'SCV Accession (ClinVar)', prop: 'Allele_Origin_ClinVar'},
+    {title: 'Allele Origin (ClinVar)', prop: 'Allele_Origin_ClinVar'},
     {title: 'Allele Origin (ENIGMA)', prop: 'Allele_origin_ENIGMA'},
     {title: 'Ethnicity (BIC)', prop: 'Ethnicity_BIC'},
     {title: 'Allele Origin (BIC)', prop: 'Germline_or_Somatic_BIC'},
@@ -143,7 +143,7 @@ var research_mode_columns = [
     {title: 'Has Discordant Evidence', prop: 'Discordant'},
     {title: 'Functional Analysis Result (LOVD)', prop: 'Functional_analysis_result_LOVD'},
     {title: 'Functional Analysis Method (LOVD)', prop: 'Functional_analysis_technique_LOVD'},
-    {title: 'Allele Origin (ClinVar)', prop: 'Method_ClinVar'},
+    {title: 'Analysis Method (ClinVar)', prop: 'Method_ClinVar'},
 
     {title: 'ClinVar Accession', prop: 'ClinVarAccession_ENIGMA'},
     {title: 'Condition Category (ENIGMA)', prop: 'Condition_category_ENIGMA'},
@@ -172,7 +172,7 @@ var subColumns = [
         subColList: [
             {title: 'BIC Variant Identifier', prop: 'BIC_Identifier', render: renderCell},
             {title: 'Protein', prop: 'HGVS_Protein', render: renderCell},
-            {title: 'Analysis Method (ClinVar)', prop: 'SCV_ClinVar', render: renderCell},
+            {title: 'SCV Accession (ClinVar)', prop: 'SCV_ClinVar', render: renderCell},
             {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: renderCell},
             {title: 'Protein Amino Acid Change', prop: 'Protein_Change', render: renderCell},
             {title: 'Reference cDNA Sequence', prop: 'Reference_Sequence', render: renderCell}
@@ -181,7 +181,7 @@ var subColumns = [
     {
         subColTitle: "Origin",
         subColList: [
-            {title: 'SCV Accession (ClinVar)', prop: 'Allele_Origin_ClinVar', render: renderCell},
+            {title: 'Allele Origin (ClinVar)', prop: 'Allele_Origin_ClinVar', render: renderCell},
             {title: 'Allele Origin (ENIGMA)', prop: 'Allele_origin_ENIGMA', render: renderCell},
             {title: 'Ethnicity (BIC)', prop: 'Ethnicity_BIC', render: renderCell},
             {title: 'Allele Origin (BIC)', prop: 'Germline_or_Somatic_BIC', render: renderCell},
@@ -292,7 +292,7 @@ var subColumns = [
                 prop: 'Functional_analysis_technique_LOVD',
                 render: renderCell
             },
-            {title: 'Allele Origin (ClinVar)', prop: 'Method_ClinVar', render: renderCell}
+            {title: 'Analysis Method (ClinVar)', prop: 'Method_ClinVar', render: renderCell}
         ]
     },
     {
