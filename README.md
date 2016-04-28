@@ -46,12 +46,22 @@ The server runs on Django with postgres so install and set up those
 
 Use `npm run lint` to run the lint rules. We lint with eslint and babel-eslint.
 
+
 ## How to change the data file
 This process will delete all the previous data from the `variants` table and replace it with data from a new tsv file.
 
  * Replace the contents of `data/resources/aggregated.tsv` with the new data file
+ * (Optional step if the schema has changed) Change the following files to correspond to schema changes (renamed / added / removed columns)
+    *  `django/data/models.py` - this is the python model that corresponds to all the table columns
+    *  `django/data/migrations/0001_initial.py` - specifies all the table columns, it matches the model above and the tsv headers
+    *  `django/data/migrations/0002_search_index.py` - specifies which columns are used in full text search
+    *  (if applicable) `django/data/migrations/0004_autocomplete_words.py` - specifies which columns are used in autocomplete suggestions
+    *  `js/VariantTable.js`:
+        * `columns` specifies which columns appear in the default mode and their names
+        * `research_mode_columns` specifies which columns appear in research mode and their names
+        * `subColumns` specifies which columns appear in the column selection filter and how they're grouped.
  * `cd django`
- * `python manage.py migrate --fake data 0002_search_index && python manage.py migrate`
+ * `python manage.py migrate --fake data zero && python manage.py migrate`
 
 ### References
  * http://blog.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/
