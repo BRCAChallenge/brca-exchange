@@ -13,10 +13,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunSQL("""DROP TABLE IF EXISTS variant CASCADE;
+        DROP FUNCTION IF EXISTS variant_fts_trigger();
+        """),
         migrations.CreateModel(
             name='Variant',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                # These are some extra derived columns that help with filtering
                 ('Variant_in_ENIGMA', models.BooleanField(default=False)),
                 ('Variant_in_ClinVar', models.BooleanField(default=False)),
                 ('Variant_in_1000_Genomes', models.BooleanField(default=False)),
@@ -25,6 +29,7 @@ class Migration(migrations.Migration):
                 ('Variant_in_BIC', models.BooleanField(default=False)),
                 ('Variant_in_ESP', models.BooleanField(default=False)),
                 ('Variant_in_exLOVD', models.BooleanField(default=False)),
+
                 ('Source', models.TextField()),
                 ('URL_ENIGMA', models.TextField()),
                 ('Condition_ID_type_ENIGMA', models.TextField()),
