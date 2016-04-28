@@ -7,6 +7,7 @@ class VariantManager(models.Manager):
 
 
 class Variant(models.Model):
+    # These are some extra derived columns that help with filtering
     Variant_in_ENIGMA = models.BooleanField(default=False)
     Variant_in_ClinVar = models.BooleanField(default=False)
     Variant_in_1000_Genomes = models.BooleanField(default=False)
