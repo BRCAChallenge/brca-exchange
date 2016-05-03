@@ -7,11 +7,11 @@ vcfDir = $(releaseDir)/pipeline_input
 $(vcfDir)/ClinVarBrca.vcf:	$(clinVarDir)/ClinVarBrca.vcf
 	cp $< $@
 
-$(clinVarDir)/ClinVarBrca.vcf:	$(clinVarDir)/ClinVarBrca.txt
+$(clinVarDir)/ClinVarBrca.vcf:	$(clinVarDir)/ClinVarBrca.txt ../data_merging/convert_tsv_to_vcf.py
 	../data_merging/convert_tsv_to_vcf.py -i $< -o $@ -s "ClinVar"
 
-$(clinVarDir)/ClinVarBrca.txt:	$(clinVarDir)/ClinVarBrca.xml
-	clinVarParse.py	$< --assembly GRCh38 |grep -v None:None > $@
+$(clinVarDir)/ClinVarBrca.txt:	$(clinVarDir)/ClinVarBrca.xml clinVarParse.py
+	clinVarParse.py	$< --assembly GRCh38 > $@
 
-$(clinVarDir)/ClinVarBrca.xml:	$(clinVarDir)/ClinVarFullRelease.xml
+$(clinVarDir)/ClinVarBrca.xml:	$(clinVarDir)/ClinVarFullRelease.xml clinVarBrca.py
 	clinVarBrca.py $< |awk '{ if (NF > 0) { print }}' | > $@

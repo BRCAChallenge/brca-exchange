@@ -12,7 +12,7 @@ clinVarBrca.py $CLINVARXML | awk '{ if (NF > 0) { print }}' > $CLINVAR_BRCA
 
 #
 # 3. Extract data from the XML file into tab-delimited format
-clinVarParse.py $CLINVAR_BRCA --assembly GRCh38 |grep -v None |grep -v NA > $CLINVAR_BRCA_GRCH38_TAB
+clinVarParse.py $CLINVAR_BRCA --assembly GRCh38 > $CLINVAR_BRCA_GRCH38_TAB
 
 #
 # 4. Convert the tab data into VCF format, using convert_tsv_to_vcf from utils
