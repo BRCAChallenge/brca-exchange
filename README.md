@@ -1,8 +1,6 @@
-# brca
-A demonstration of the GA4GH api system whose goals are to showcase the capabilities of the system in distributing and categorizing large quantities of BRCA variant data in a manner that is consistant with the needs of the genomics and biomedical community. So far there is support and implementation of a reference server for BRCA1 and BRCA2 variants contained within 1000-genomes, ClinVAR, LOVD, ex-lovd, ExAC, UMD, and BIC databases.
+# brca-pipeine
 
-##Authors
-[Benedict Paten](https://github.com/benedictpaten/), [Charles Markello](https://github.com/cmarkello), [Molly Zhang](https://github.com/MollyZhang), [Max Haeussler](https://github.com/maximilianh), [Melissa Cline](https://github.com/melissacline), [Mark Diekhans](https://github.com/diekhans)
+Contains source code used to wrangle the BRCA variation data that is presented in the brca-exchange site.
 
 ## Repository directory
   bic: Contains relevant scripts pertaining to converting data originating from the [Breast Cancer Information Core](https://research.nhgri.nih.gov/projects/bic/index.shtml) database to GA4GH reference server friendly vcf format.
