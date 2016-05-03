@@ -8,13 +8,14 @@ import hgvs
 import hgvs.parser as hgvs_parser
 import hgvs.dataproviders.uta as hgvs_dataproviders_uta
 import hgvs.variantmapper as hgvs_variantmapper
+import hgvs.exceptions
 import pyhgvs
 import pyhgvs.utils as pyhgvs_utils
 from pygr.seqdb import SequenceFileDB
 
 '''
     Example run:
-        ./brca_pseudonym_generator_protein.py -j hg18.fa -k hg19.fa -l hg38.fa -r refseq_annotation.hg18.gp -s refseq_annotation.hg19.gp -t refseq_annotation.hg38.gp -i aggregated.tsv -o test.out -p > stdoutErrorLog.txt
+        ./brca_pseudonym_generator.py -j hg18.fa -k hg19.fa -l hg38.fa -r refseq_annotation.hg18.gp -s refseq_annotation.hg19.gp -t refseq_annotation.hg38.gp -i aggregated.tsv -o test.out -p > stdoutErrorLog.txt
     
     WARNING:
         Currently only works for insertion and deletion strings less than or equal to 100 bases long. Can be modified to be larger.
@@ -158,11 +159,13 @@ def main(args):
             #print('oldHgvsCDNA: ', oldHgvsCDNA)
             #print('cdna: ', cdna_coord)
 
-            # NM_000059.3:c.7397C>T exception
-            if oldHgvsGenomic38 == 'NM_000059.3:chr13:32338918:A>A': cdna_coord = oldHgvsCDNA        
-
-            var_c1 = hgvsparser.parse_hgvs_variant(cdna_coord)
-            protein_coord = variantmapper.c_to_p(var_c1) 
+            try:
+                var_c1 = hgvsparser.parse_hgvs_variant(cdna_coord)
+                protein_coord = variantmapper.c_to_p(var_c1)
+            except hgvs.exceptions.HGVSParseError as e:
+                print('hgvs.exceptions.HGVSParseError: ', e)
+                print('GRCh38 Genomic change: ', '{0}:{1}:{2}>{3}'.format(chrom38,offset38,ref38,alt38))
+                print('')
             #print('oldProtein: ', parsedLine[hgvsPIndex]) 
             #print('protein:', protein_coord)
             #print('')
