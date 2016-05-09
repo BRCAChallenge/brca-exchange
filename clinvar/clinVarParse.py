@@ -51,7 +51,7 @@ def main():
                 genomicCoordinate = "chr%s:%s:%s>%s" % (chrom,
                                                         start, referenceAllele,
                                                         alternateAllele)
-                print("\t".join((str(hgvs),  str(oa.submitter), 
+                print("\t".join((str(hgvs),  oa.submitter.encode('utf-8'), 
                                  str(oa.clinicalSignificance),
                                  str(oa.dateLastUpdated),
                                  str(oa.accession),
