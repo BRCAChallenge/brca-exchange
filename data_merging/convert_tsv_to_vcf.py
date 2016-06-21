@@ -21,7 +21,7 @@ def main():
             infos.append(dict(zip(info_keys, info_values)))  
     
     sorted_infos = sort_by_pos(infos)
-    write_header(args.output, info_keys, args.source)
+    write_header(args.output, info_keys, args.source, args.version)
     write_body(args.output, sorted_infos)
     merge_header_body(args.output)
 
@@ -50,11 +50,11 @@ def merge_header_body(output_name):
     for each_file in file_list:
         os.remove(each_file)
 
-def write_header(output_path, info_keys, source):
+def write_header(output_path, info_keys, source, version):
     f_out = open(output_path + ".header", "w")
     f_out.write("##fileformat=VCFv4.0\n")
     f_out.write("##source={0}\n".format(source))
-    f_out.write("##reference=GRCh37\n")
+    f_out.write("##reference=GRCh{0}\n".format(version))
     for info_key in info_keys:
         f_out.write(
                 "##INFO=<ID={0},Number=.,Type=String,Description=\"\">\n".format(info_key))
@@ -68,6 +68,8 @@ def arg_parse():
     parser.add_argument("-o", "--output")
     parser.add_argument("-s", "--source")
     parser.add_argument("-d", "--delimiter", default="\t")
+    parser.add_argument("-g", "--version", choices=['37', '38'], 
+        help="genome assembly version can be either GRCh37 or GRCh38")
     return parser.parse_args()
 
 
