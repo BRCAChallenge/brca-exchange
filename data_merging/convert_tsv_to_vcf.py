@@ -68,7 +68,7 @@ def arg_parse():
     parser.add_argument("-o", "--output")
     parser.add_argument("-s", "--source")
     parser.add_argument("-d", "--delimiter", default="\t")
-    parser.add_argument("-g", "--version", choices=['37', '38'], 
+    parser.add_argument("-g", "--version", choices=['37', '38'], default="38",
         help="genome assembly version can be either GRCh37 or GRCh38")
     return parser.parse_args()
 
