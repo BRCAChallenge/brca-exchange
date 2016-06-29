@@ -88,21 +88,6 @@ var NavBarNew = React.createClass({
                         </DropdownButton>
                         <NavLink to='/variants'>Variants</NavLink>
                         <NavLink to='/help'>Help</NavLink>
-                        <DropdownButton className={this.activePath(path, "mode")} ref='mode' title={mode_name}>
-                            {this.props.mode === 'research_mode' && <NavLink onClick={this.toggleMode} to='/variants'>
-                                Switch to {this.getModeName(other_mode)}
-                            </NavLink> }
-                            {this.props.mode === 'default' &&
-                            <NavLink onClick={() =>this.setState({showModal: true})} to='/variants'>
-                                Switch to {this.getModeName(other_mode)}
-                            </NavLink>}
-                            {this.props.mode === 'default' && this.state.showModal &&
-                            <Modal onRequestHide={() => this.setState({ showModal: false })}>
-                                <RawHTML html={content.pages.researchWarning}/>
-                                <Button onClick={() => {this.toggleMode()}}>Yes</Button>
-                                <Button onClick={() => this.setState({ showModal: false })}>No</Button>
-                            </Modal>}
-                        </DropdownButton>
                         <NavLink to='/community'>Community</NavLink>
                     </Nav>
                 </Navbar>
