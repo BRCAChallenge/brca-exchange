@@ -120,7 +120,8 @@ def main():
         write_new_csv(ARGS.output + date + "-merged.csv" + columns, variants)
         print "Done" 
     finally:
-        shutil.rmtree(tmp_dir)
+        print tmp_dir 
+        #shutil.rmtree(tmp_dir)
 
 def string_comparison_merge(variants):
     # make sure the input genomic coordinate strings are already unique strings
@@ -261,8 +262,11 @@ def repeat_merging(f_in, f_out):
                         merged_value = list(set(new_value + old_value))
                         variant_dict[genome_coor].INFO[key] = deepcopy(merged_value)
     print "number of repeat records: ", num_repeats, "\n"
-    header = get_header(open(f_in.name, 'r'))
-    write_to_vcf(header, f_out, variant_dict)
+    vcf_writer = vcf.Writer(f_out, vcf_reader)
+    for record in variant_dict.values():
+        vcf_writer.write_record(record)
+    f_in.close()
+    f_out.close()
 
 def get_header(f):
     header = ""
@@ -270,33 +274,6 @@ def get_header(f):
         if "#" in line:
             header += line
     return header
-
-
-
-def write_to_vcf(header, f_out, v_dict):
-    f_out.write(header)
-    for record in v_dict.values():
-        if record.QUAL == None:
-            record.QUAL = "."
-        if record.FILTER == None:
-            record.FILTER = "."
-        if record.ID == None:
-            record.ID = "."
-
-        items = [record.CHROM, str(record.POS), str(record.iD), record.REF, 
-                str(record.ALT[0]), record.QUAL, record.FILTER]
-        infos = []
-        for key in record.INFO:
-            this_info = record.INFO[key] 
-            if type(this_info) == list:
-                this_info = [str(x) for x in this_info]
-                infos.append(key + "=" + "|".join(this_info))
-            else:
-                infos.append(key + "=" + str(this_info))
-        items.append(";".join(infos))
-        new_line = "\t".join([str(i) for i in items])
-        f_out.write(new_line + "\n")
-    f_out.close()
     
 def one_variant_transform(f_in, f_out):
     """takes a vcf file, read each row, if the ALT field contains more than 
