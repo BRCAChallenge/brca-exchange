@@ -414,6 +414,12 @@ def variant_equal(v1, v2, version="hg38"):
     else:
         assert(False)
 
+    # correct error with when ref is empty string
+    if len(ref1) == 0:
+        pos1 += 1
+    if len(ref2) == 0:
+        pos2 += 1
+
     # replace vcf ref string with alt string
     edited_v1 = seq[0:pos1]+alt1+seq[pos1+len(ref1):]
     edited_v2 = seq[0:pos2]+alt2+seq[pos2+len(ref2):]
