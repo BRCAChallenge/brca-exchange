@@ -117,7 +117,7 @@ def main():
         print "------------string comparison merge-------------------------------"
         variants = string_comparison_merge(variants) 
         date = datetime.datetime.today().strftime('%d%b%Y')
-        write_new_csv(ARGS.output + date + "-merged.csv" + , columns, variants)
+        write_new_csv(ARGS.output + date + "-merged.csv" + columns, variants)
         print "Done" 
     finally:
         shutil.rmtree(tmp_dir)
@@ -125,10 +125,10 @@ def main():
 def string_comparison_merge(variants):
     # make sure the input genomic coordinate strings are already unique strings
     assert (len(variants.keys()) == len(set(variants.keys())))
-    #equivalence = find_equivalent_variant(variants.keys())
-    #with open(ARGS.output + "equivalent_variants.pkl", "w") as f:
-    #    f.write(pickle.dumps(equivalence))
-    #f.close()
+    equivalence = find_equivalent_variant(variants.keys())
+    with open(ARGS.output + "equivalent_variants.pkl", "w") as f:
+        f.write(pickle.dumps(equivalence))
+    f.close()
     equivalence = pickle.loads(open(ARGS.output + "equivalent_variants.pkl", "r").read())
     for equivalent_v in equivalence:
         merged_row = []
