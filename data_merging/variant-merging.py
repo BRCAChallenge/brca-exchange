@@ -222,7 +222,8 @@ def preprocessing(tmp_dir):
         vcf_right_writer = vcf.Writer(f_right, vcf_reader)
         n_wrong, n_total = 0, 0
         for record in vcf_reader:
-            v = [record.CHROM, record.POS, record.REF, record.ALT]
+            ref = record.REF.replace("-", "")
+            v = [record.CHROM, record.POS, ref, "dummy"]
             if not ref_correct(v):
                 vcf_wrong_writer.write_record(record)
                 n_wrong += 1
