@@ -196,11 +196,25 @@ def preprocessing(tmp_dir):
     f_1000G = open(ARGS.input + GENOME1K_FILE + "for_pipeline", "w")
     subprocess.call(
        ["bash", "1000g_preprocess.sh", ARGS.input + GENOME1K_FILE], stdout=f_1000G)
+   
+    # merge multiple variant per vcf into multiple lines 
+    for source_name, file_name in source_dict.iteritems():
+        print "convert to one variant per line in ", source_name
+        f_in = open(ARGS.input + file_name, "r")
+        f_out = open(tmp_dir + "/" + source_name + ".vcf", "w")
+        one_variant_transform(f_in, f_out)
+        f_in.close()
+        f_out.close()
+        print "merge repetitive variants within ", source_name
+        f_in = open(tmp_dir + "/" + source_name + ".vcf", "r")
+        f_out = open(tmp_dir + "/" + source_name + "ready.vcf", "w")
+        repeat_merging(f_in, f_out)
+        source_dict[source_name] = f_out.name 
     
     print "-------check if genomic coordinates are correct----------"
     (columns, variants) = save_enigma_to_dict(ARGS.input + ENIGMA_FILE)
     for source_name, file_name in source_dict.iteritems():
-        f = open(ARGS.input + file_name, "r")
+        f = open(file_name, "r")
         f_wrong = open(ARGS.wrong_genome + source_name + "_wrong_genome_coor.vcf", "w")
         f_right = open(tmp_dir + "/right" + source_name, "w")
         vcf_reader = vcf.Reader(f, strict_whitespace=True)
@@ -221,16 +235,6 @@ def preprocessing(tmp_dir):
     print "variants with wrong genomic coordates are saved to:", ARGS.wrong_genome
     print "---------------------------------------------------------"
     
-    for source_name, file_name in source_dict.iteritems():
-        print "convert to one variant per line in ", source_name
-        f_in = open(tmp_dir + "/right" + source_name, "r")
-        f_out = open(tmp_dir + "/" + source_name + ".vcf", "w")
-        one_variant_transform(f_in, f_out)
-        print "merge repetitive variants within ", source_name
-        f_in = open(tmp_dir + "/" + source_name + ".vcf", "r")
-        f_out = open(tmp_dir + "/" + source_name + "ready.vcf", "w")
-        repeat_merging(f_in, f_out)
-        source_dict[source_name] = f_out.name
     return source_dict, columns, variants
 
 def repeat_merging(f_in, f_out):
@@ -285,7 +289,8 @@ def write_to_vcf(f_out, v_dict):
         items.append(";".join(infos))
         new_line = "\t".join([str(i) for i in items])
         f_out.write(new_line + "\n")
-
+    f_out.close()
+    
 def one_variant_transform(f_in, f_out):
     """takes a vcf file, read each row, if the ALT field contains more than 
        one item, create multiple variant row based on that row, writes new vcf"""
