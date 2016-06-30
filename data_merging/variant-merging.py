@@ -267,16 +267,29 @@ def repeat_merging(f_in, f_out):
                         merged_value = list(set(new_value + old_value))
                         variant_dict[genome_coor].INFO[key] = deepcopy(merged_value)
     print "number of repeat records: ", num_repeats, "\n"
-    write_to_vcf(f_out, variant_dict)
+    header = get_header(open(f_in.name, 'r'))
+    write_to_vcf(header, f_out, variant_dict)
 
-def write_to_vcf(f_out, v_dict):
+def get_header(f):
+    header = ""
+    for line in f:
+        if "#" in line:
+            header += line
+    return header
+
+
+
+def write_to_vcf(header, f_out, v_dict):
+    f_out.write(header)
     for record in v_dict.values():
         if record.QUAL == None:
             record.QUAL = "."
         if record.FILTER == None:
             record.FILTER = "."
+        if record.ID == None:
+            record.ID = "."
 
-        items = [record.CHROM, str(record.POS), str(record.ID), record.REF, 
+        items = [record.CHROM, str(record.POS), str(record.iD), record.REF, 
                 str(record.ALT[0]), record.QUAL, record.FILTER]
         infos = []
         for key in record.INFO:
