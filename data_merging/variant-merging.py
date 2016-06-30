@@ -12,6 +12,7 @@ from StringIO import StringIO
 from copy import deepcopy
 from pprint import pprint
 import pickle
+import datetime
 
 
 BRCA1 = {"hg38": {"start": 43000000,
@@ -98,12 +99,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--input", help="Input VCF directory",
                     default="/hive/groups/cgl/brca/release1.0/pipeline_input/")
 parser.add_argument("-o", "--output", 
-                    default="/hive/groups/cgl/brca/release1.0/merged.csv")
-parser.add_argument("-e", "--ev", 
-                    default="/hive/groups/cgl/brca/release1.0/equivalent_variants.pickledumps")
-parser.add_argument("-w", "--wrong_genome", 
-                    help="Directory for data with  wrong genomic coordinates",
-                    default="/hive/groups/cgl/brca/release1.0/vcf_wrong_genome_coordinate/")
+                    default="/hive/groups/cgl/brca/release1.0/pipeline_output/")
 
 ARGS = parser.parse_args()
 
@@ -120,11 +116,9 @@ def main():
                                                  file, FIELD_DICT[source_name])
         print "------------string comparison merge-------------------------------"
         variants = string_comparison_merge(variants) 
-        write_new_csv(ARGS.output, columns, variants)
-        print ARGS.input
-        print ARGS.output
-        print ARGS.ev
-        print ARGS.wrong_genome
+        date = datetime.datetime.today().strftime('%d%b%Y')
+        write_new_csv(ARGS.output + date + "-merged.csv" + , columns, variants)
+        print "Done" 
     finally:
         shutil.rmtree(tmp_dir)
 
@@ -132,10 +126,10 @@ def string_comparison_merge(variants):
     # make sure the input genomic coordinate strings are already unique strings
     assert (len(variants.keys()) == len(set(variants.keys())))
     #equivalence = find_equivalent_variant(variants.keys())
-    #with open(ARGS.ev, "w") as f:
+    #with open(ARGS.output + "equivalent_variants.pkl", "w") as f:
     #    f.write(pickle.dumps(equivalence))
     #f.close()
-    equivalence = pickle.loads(open(ARGS.ev, "r").read())
+    equivalence = pickle.loads(open(ARGS.output + "equivalent_variants.pkl", "r").read())
     for equivalent_v in equivalence:
         merged_row = []
         for each_v in equivalent_v:
@@ -215,7 +209,7 @@ def preprocessing(tmp_dir):
     (columns, variants) = save_enigma_to_dict(ARGS.input + ENIGMA_FILE)
     for source_name, file_name in source_dict.iteritems():
         f = open(file_name, "r")
-        f_wrong = open(ARGS.wrong_genome + source_name + "_wrong_genome_coor.vcf", "w")
+        f_wrong = open(ARGS.output + source_name + "_wrong_genome_coor.vcf", "w")
         f_right = open(tmp_dir + "/right" + source_name, "w")
         vcf_reader = vcf.Reader(f, strict_whitespace=True)
         vcf_wrong_writer = vcf.Writer(f_wrong, vcf_reader)
@@ -233,7 +227,6 @@ def preprocessing(tmp_dir):
         f_right.close()
         f_wrong.close()
         print "in {0}, wrong: {1}, total: {2}".format(source_name, n_wrong, n_total) 
-    print "variants with wrong genomic coordates are saved to:", ARGS.wrong_genome
     print "---------------------------------------------------------"
     
     return source_dict, columns, variants
@@ -383,7 +376,7 @@ def save_enigma_to_dict(path):
     variants = dict()
     columns = ""
     line_num = 0
-    f_wrong = open(ARGS.wrong_genome + "ENIGMA_wrong_genome.txt", "w")
+    f_wrong = open(ARGS.output + "ENIGMA_wrong_genome.txt", "w")
     n_wrong, n_total = 0, 0
     for line in enigma_file:
         line_num += 1
