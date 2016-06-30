@@ -472,7 +472,7 @@ var Application = React.createClass({
         var path = this.getPath().slice(1);
         return (
             <div>
-                <NavBarNew path={path} mode={this.state.mode} toggleMode={this.onChildToggleMode}/>
+                <NavBarNew path={path} mode={this.state.mode} />
                 <RouteHandler />
                 <Database
                     mode={this.state.mode}

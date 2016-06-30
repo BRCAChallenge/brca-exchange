@@ -35,13 +35,6 @@ var NavBarNew = React.createClass({
             showModal: false,
         }
     },
-    getModeName: function (name) {
-        return {'research_mode': 'Research Pages', 'default': 'Default Mode'}[name]
-    },
-    toggleMode: function () {
-        this.props.toggleMode();
-        this.setState({ showModal: false });
-    },
     shouldComponentUpdate: function (nextProps, nextState) {
         // Only rerender if path has change or the research mode changes, ignoring query.
         var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
@@ -51,7 +44,6 @@ var NavBarNew = React.createClass({
         }
         return this.props.mode !== nextProps.mode ||
             this.state.loggedin !== nextState.loggedin ||
-            this.state.showModal !== nextState.showModal ||
             this.props.path.split(/\?/)[0] !== nextProps.path.split(/\?/)[0];
     },
     activePath: function (path, tab) {
@@ -68,8 +60,6 @@ var NavBarNew = React.createClass({
                 </h1>
                 {this.props.mode === 'research_mode' && <span id="research-label" className="label label-info">Research</span>}
             </a>);
-        var mode_name = this.getModeName(this.props.mode);
-        var other_mode = (this.props.mode === 'research_mode') ? 'default' : 'research_mode';
         return (
             <div className="navbar-container">
                 <Navbar fixedTop brand={brand} toggleNavKey={0}>
