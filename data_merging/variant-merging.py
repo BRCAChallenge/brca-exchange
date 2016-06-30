@@ -117,7 +117,7 @@ def main():
         print "------------string comparison merge-------------------------------"
         variants = string_comparison_merge(variants) 
         date = datetime.datetime.today().strftime('%d%b%Y')
-        write_new_csv(ARGS.output + date + "-merged.csv" + columns, variants)
+        write_new_csv(ARGS.output + "merged_" + date + ".csv", columns, variants)
         print "Done" 
     finally:
         print tmp_dir 
@@ -126,10 +126,10 @@ def main():
 def string_comparison_merge(variants):
     # make sure the input genomic coordinate strings are already unique strings
     assert (len(variants.keys()) == len(set(variants.keys())))
-    equivalence = find_equivalent_variant(variants.keys())
-    with open(ARGS.output + "equivalent_variants.pkl", "w") as f:
-        f.write(pickle.dumps(equivalence))
-    f.close()
+    #equivalence = find_equivalent_variant(variants.keys())
+    #with open(ARGS.output + "equivalent_variants.pkl", "w") as f:
+    #    f.write(pickle.dumps(equivalence))
+    #f.close()
     equivalence = pickle.loads(open(ARGS.output + "equivalent_variants.pkl", "r").read())
     for equivalent_v in equivalence:
         merged_row = []
@@ -210,7 +210,8 @@ def preprocessing(tmp_dir):
     (columns, variants) = save_enigma_to_dict(ARGS.input + ENIGMA_FILE)
     for source_name, file_name in source_dict.iteritems():
         f = open(file_name, "r")
-        f_wrong = open(ARGS.output + source_name + "_wrong_genome_coor.vcf", "w")
+        f_wrong = open(ARGS.output + "wrong_genome_coors/" + 
+                       source_name + "_wrong_genome_coor.vcf", "w")
         f_right = open(tmp_dir + "/right" + source_name, "w")
         vcf_reader = vcf.Reader(f, strict_whitespace=True)
         vcf_wrong_writer = vcf.Writer(f_wrong, vcf_reader)
