@@ -100,7 +100,9 @@ parser.add_argument("-i", "--input", help="Input VCF directory",
                     default="/hive/groups/cgl/brca/release1.0/pipeline_input/")
 parser.add_argument("-o", "--output", 
                     default="/hive/groups/cgl/brca/release1.0/pipeline_output/")
-
+parser.add_argument("-p", "--de_novo",
+                    help="string comparison all over, instead of loading from pickle dump",
+                    action="store_true")
 ARGS = parser.parse_args()
 
 
@@ -118,7 +120,7 @@ def main():
         variants = string_comparison_merge(variants) 
         date = datetime.datetime.today().strftime('%d%b%Y')
         write_new_csv(ARGS.output + "merged_" + date + ".csv", columns, variants)
-        print "final number of variants: %d", %len(variants)
+        print "final number of variants: %d" %len(variants)
         print "Done" 
     finally:
         shutil.rmtree(tmp_dir)
@@ -126,16 +128,18 @@ def main():
 def string_comparison_merge(variants):
     # make sure the input genomic coordinate strings are already unique strings
     assert (len(variants.keys()) == len(set(variants.keys())))
-    #equivalence = find_equivalent_variant(variants.keys())
-    #with open(ARGS.output + "equivalent_variants.pkl", "w") as f:
-    #    f.write(pickle.dumps(equivalence))
-    #f.close()
-    equivalence = pickle.loads(open(ARGS.output + "equivalent_variants.pkl", "r").read())
+    if ARGS.de_novo:
+        equivalence = find_equivalent_variant(variants.keys())
+        with open(ARGS.output + "equivalent_variants.pkl", "w") as f:
+            f.write(pickle.dumps(equivalence))
+        f.close()
+    else:
+        equivalence = pickle.loads(open(ARGS.output + "equivalent_variants.pkl", "r").read())
     n_before_merge = 0
     for each in equivalence:
         n_before_merge += len(each)
     n_after_merge = len(equivalence)
-    print "%d equivalent variants are merged into %d unique variants", %(
+    print "%d equivalent variants are merged into %d unique variants" %(
           n_before_merge, n_after_merge)
     for equivalent_v in equivalence:
         merged_row = []
