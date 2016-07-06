@@ -5,3 +5,4 @@ data/
 *.pyc
 *.nfs*
 *dumps
+*.py.swp
