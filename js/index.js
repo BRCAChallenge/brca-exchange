@@ -30,7 +30,7 @@ var Community = require('./Community');
 
 var databaseKey = require('../databaseKey');
 
-var {Grid, Col, Row, Table} = require('react-bootstrap');
+var {Grid, Col, Row, Table, Button, Modal} = require('react-bootstrap');
 
 var {VariantTable, ResearchVariantTable, research_mode_columns, columns} = require('./VariantTable');
 var {Signup} = require('./Signup');
@@ -235,15 +235,20 @@ var Database = React.createClass({
     // Note this is not a pure component because of the calls to
     // getQuery().
     mixins: [Navigation, State],
-	showVariant: function (row) {
-        row.Genomic_Coordinate_hg38 = backend.trimSearchTerm(row.Genomic_Coordinate_hg38);
-        var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
-        if (d3TipDiv.length != 0 && d3TipDiv[0].style.opacity != '0') {
-            d3TipDiv[0].style.opacity='0';
-            d3TipDiv[0].style.pointerEvents='none';
+    getInitialState: function () {
+        return {
+            showModal: false,
         }
-        this.transitionTo(`/variant/${variantPathJoin(row)}`);
-	},
+    },
+    showVariant: function (row) {
+          row.Genomic_Coordinate_hg38 = backend.trimSearchTerm(row.Genomic_Coordinate_hg38);
+          var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
+          if (d3TipDiv.length != 0 && d3TipDiv[0].style.opacity != '0') {
+              d3TipDiv[0].style.opacity='0';
+              d3TipDiv[0].style.pointerEvents='none';
+          }
+          this.transitionTo(`/variant/${variantPathJoin(row)}`);
+    },
     showHelp: function (title) {
         var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
         if (d3TipDiv.length != 0 && d3TipDiv[0].style.opacity != '0') {
@@ -277,6 +282,10 @@ var Database = React.createClass({
             }
             this.transitionTo('/variants', {}, urlFromDatabase(state));
         }
+    },
+    toggleMode: function () {
+        this.props.toggleMode();
+        this.setState({ showModal: false });
     },
     render: function () {
         var {show} = this.props,
@@ -323,6 +332,19 @@ var Database = React.createClass({
         return  <Row>
                     <Col sm={10} smOffset={1}  className="alert alert-warning">
                         <RawHTML ref='content' html={message}/>
+                        {this.props.mode === 'research_mode' && <Button className="btn-small" onClick={this.toggleMode}>
+                            Show Expert Reviewed Data
+                        </Button>}
+                        {this.props.mode === 'default' &&
+                        <Button className="btn-small" onClick={() =>this.setState({showModal: true})}>
+                            Show All Data
+                        </Button>}
+                        {this.props.mode === 'default' && this.state.showModal &&
+                        <Modal onRequestHide={() => this.setState({ showModal: false })}>
+                            <RawHTML html={content.pages.researchWarning}/>
+                            <Button onClick={() => {this.toggleMode()}}>Yes</Button>
+                            <Button onClick={() => this.setState({ showModal: false })}>No</Button>
+                        </Modal>}
                     </Col>
                 </Row>
     }
@@ -450,10 +472,11 @@ var Application = React.createClass({
         var path = this.getPath().slice(1);
         return (
             <div>
-                <NavBarNew path={path} mode={this.state.mode} toggleMode={this.onChildToggleMode}/>
+                <NavBarNew path={path} mode={this.state.mode} />
                 <RouteHandler />
                 <Database
                     mode={this.state.mode}
+                    toggleMode={this.onChildToggleMode}
                     show={path.indexOf('variants') === 0} />
                 <Footer />
             </div>

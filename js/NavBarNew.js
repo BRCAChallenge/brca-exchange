@@ -35,13 +35,6 @@ var NavBarNew = React.createClass({
             showModal: false,
         }
     },
-    getModeName: function (name) {
-        return {'research_mode': 'Research Pages', 'default': 'Default Mode'}[name]
-    },
-    toggleMode: function () {
-        this.props.toggleMode();
-        this.setState({ showModal: false });
-    },
     shouldComponentUpdate: function (nextProps, nextState) {
         // Only rerender if path has change or the research mode changes, ignoring query.
         var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
@@ -51,7 +44,6 @@ var NavBarNew = React.createClass({
         }
         return this.props.mode !== nextProps.mode ||
             this.state.loggedin !== nextState.loggedin ||
-            this.state.showModal !== nextState.showModal ||
             this.props.path.split(/\?/)[0] !== nextProps.path.split(/\?/)[0];
     },
     activePath: function (path, tab) {
@@ -68,8 +60,6 @@ var NavBarNew = React.createClass({
                 </h1>
                 {this.props.mode === 'research_mode' && <span id="research-label" className="label label-info">Research</span>}
             </a>);
-        var mode_name = this.getModeName(this.props.mode);
-        var other_mode = (this.props.mode === 'research_mode') ? 'default' : 'research_mode';
         return (
             <div className="navbar-container">
                 <Navbar fixedTop brand={brand} toggleNavKey={0}>
@@ -88,21 +78,6 @@ var NavBarNew = React.createClass({
                         </DropdownButton>
                         <NavLink to='/variants'>Variants</NavLink>
                         <NavLink to='/help'>Help</NavLink>
-                        <DropdownButton className={this.activePath(path, "mode")} ref='mode' title={mode_name}>
-                            {this.props.mode === 'research_mode' && <NavLink onClick={this.toggleMode} to='/variants'>
-                                Switch to {this.getModeName(other_mode)}
-                            </NavLink> }
-                            {this.props.mode === 'default' &&
-                            <NavLink onClick={() =>this.setState({showModal: true})} to='/variants'>
-                                Switch to {this.getModeName(other_mode)}
-                            </NavLink>}
-                            {this.props.mode === 'default' && this.state.showModal &&
-                            <Modal onRequestHide={() => this.setState({ showModal: false })}>
-                                <RawHTML html={content.pages.researchWarning}/>
-                                <Button onClick={() => {this.toggleMode()}}>Yes</Button>
-                                <Button onClick={() => this.setState({ showModal: false })}>No</Button>
-                            </Modal>}
-                        </DropdownButton>
                         <NavLink to='/community'>Community</NavLink>
                     </Nav>
                 </Navbar>
