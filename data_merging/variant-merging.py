@@ -12,6 +12,7 @@ from StringIO import StringIO
 from copy import deepcopy
 from pprint import pprint
 import pickle
+import datetime
 
 
 BRCA1 = {"hg38": {"start": 43000000,
@@ -98,13 +99,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--input", help="Input VCF directory",
                     default="/hive/groups/cgl/brca/release1.0/pipeline_input/")
 parser.add_argument("-o", "--output", 
-                    default="/hive/groups/cgl/brca/release1.0/merged.csv")
-parser.add_argument("-e", "--ev", 
-                    default="/hive/groups/cgl/brca/release1.0/equivalent_variants.pickledumps")
-parser.add_argument("-w", "--wrong_genome", 
-                    help="Directory for data with  wrong genomic coordinates",
-                    default="/hive/groups/cgl/brca/release1.0/vcf_wrong_genome_coordinate/")
-
+                    default="/hive/groups/cgl/brca/release1.0/pipeline_output/")
+parser.add_argument("-p", "--de_novo",
+                    help="string comparison all over, instead of loading from pickle dump",
+                    action="store_true")
 ARGS = parser.parse_args()
 
 
@@ -120,22 +118,29 @@ def main():
                                                  file, FIELD_DICT[source_name])
         print "------------string comparison merge-------------------------------"
         variants = string_comparison_merge(variants) 
-        write_new_csv(ARGS.output, columns, variants)
-        print ARGS.input
-        print ARGS.output
-        print ARGS.ev
-        print ARGS.wrong_genome
+        date = datetime.datetime.today().strftime('%d%b%Y')
+        write_new_csv(ARGS.output + "merged_" + date + ".csv", columns, variants)
+        print "final number of variants: %d" %len(variants)
+        print "Done" 
     finally:
         shutil.rmtree(tmp_dir)
 
 def string_comparison_merge(variants):
     # make sure the input genomic coordinate strings are already unique strings
     assert (len(variants.keys()) == len(set(variants.keys())))
-    #equivalence = find_equivalent_variant(variants.keys())
-    #with open(ARGS.ev, "w") as f:
-    #    f.write(pickle.dumps(equivalence))
-    #f.close()
-    equivalence = pickle.loads(open(ARGS.ev, "r").read())
+    if ARGS.de_novo:
+        equivalence = find_equivalent_variant(variants.keys())
+        with open(ARGS.output + "equivalent_variants.pkl", "w") as f:
+            f.write(pickle.dumps(equivalence))
+        f.close()
+    else:
+        equivalence = pickle.loads(open(ARGS.output + "equivalent_variants.pkl", "r").read())
+    n_before_merge = 0
+    for each in equivalence:
+        n_before_merge += len(each)
+    n_after_merge = len(equivalence)
+    print "%d equivalent variants are merged into %d unique variants" %(
+          n_before_merge, n_after_merge)
     for equivalent_v in equivalence:
         merged_row = []
         for each_v in equivalent_v:
@@ -196,19 +201,35 @@ def preprocessing(tmp_dir):
     f_1000G = open(ARGS.input + GENOME1K_FILE + "for_pipeline", "w")
     subprocess.call(
        ["bash", "1000g_preprocess.sh", ARGS.input + GENOME1K_FILE], stdout=f_1000G)
+   
+    # merge multiple variant per vcf into multiple lines 
+    for source_name, file_name in source_dict.iteritems():
+        print "convert to one variant per line in ", source_name
+        f_in = open(ARGS.input + file_name, "r")
+        f_out = open(tmp_dir + "/" + source_name + ".vcf", "w")
+        one_variant_transform(f_in, f_out)
+        f_in.close()
+        f_out.close()
+        print "merge repetitive variants within ", source_name
+        f_in = open(tmp_dir + "/" + source_name + ".vcf", "r")
+        f_out = open(tmp_dir + "/" + source_name + "ready.vcf", "w")
+        repeat_merging(f_in, f_out)
+        source_dict[source_name] = f_out.name 
     
     print "-------check if genomic coordinates are correct----------"
     (columns, variants) = save_enigma_to_dict(ARGS.input + ENIGMA_FILE)
     for source_name, file_name in source_dict.iteritems():
-        f = open(ARGS.input + file_name, "r")
-        f_wrong = open(ARGS.wrong_genome + source_name + "_wrong_genome_coor.vcf", "w")
+        f = open(file_name, "r")
+        f_wrong = open(ARGS.output + "wrong_genome_coors/" + 
+                       source_name + "_wrong_genome_coor.vcf", "w")
         f_right = open(tmp_dir + "/right" + source_name, "w")
         vcf_reader = vcf.Reader(f, strict_whitespace=True)
         vcf_wrong_writer = vcf.Writer(f_wrong, vcf_reader)
         vcf_right_writer = vcf.Writer(f_right, vcf_reader)
         n_wrong, n_total = 0, 0
         for record in vcf_reader:
-            v = [record.CHROM, record.POS, record.REF, record.ALT]
+            ref = record.REF.replace("-", "")
+            v = [record.CHROM, record.POS, ref, "dummy"]
             if not ref_correct(v):
                 vcf_wrong_writer.write_record(record)
                 n_wrong += 1
@@ -218,19 +239,8 @@ def preprocessing(tmp_dir):
         f_right.close()
         f_wrong.close()
         print "in {0}, wrong: {1}, total: {2}".format(source_name, n_wrong, n_total) 
-    print "variants with wrong genomic coordates are saved to:", ARGS.wrong_genome
     print "---------------------------------------------------------"
     
-    for source_name, file_name in source_dict.iteritems():
-        print "convert to one variant per line in ", source_name
-        f_in = open(tmp_dir + "/right" + source_name, "r")
-        f_out = open(tmp_dir + "/" + source_name + ".vcf", "w")
-        one_variant_transform(f_in, f_out)
-        print "merge repetitive variants within ", source_name
-        f_in = open(tmp_dir + "/" + source_name + ".vcf", "r")
-        f_out = open(tmp_dir + "/" + source_name + "ready.vcf", "w")
-        repeat_merging(f_in, f_out)
-        source_dict[source_name] = f_out.name
     return source_dict, columns, variants
 
 def repeat_merging(f_in, f_out):
@@ -263,29 +273,19 @@ def repeat_merging(f_in, f_out):
                         merged_value = list(set(new_value + old_value))
                         variant_dict[genome_coor].INFO[key] = deepcopy(merged_value)
     print "number of repeat records: ", num_repeats, "\n"
-    write_to_vcf(f_out, variant_dict)
+    vcf_writer = vcf.Writer(f_out, vcf_reader)
+    for record in variant_dict.values():
+        vcf_writer.write_record(record)
+    f_in.close()
+    f_out.close()
 
-def write_to_vcf(f_out, v_dict):
-    for record in v_dict.values():
-        if record.QUAL == None:
-            record.QUAL = "."
-        if record.FILTER == None:
-            record.FILTER = "."
-
-        items = [record.CHROM, str(record.POS), str(record.ID), record.REF, 
-                str(record.ALT[0]), record.QUAL, record.FILTER]
-        infos = []
-        for key in record.INFO:
-            this_info = record.INFO[key] 
-            if type(this_info) == list:
-                this_info = [str(x) for x in this_info]
-                infos.append(key + "=" + "|".join(this_info))
-            else:
-                infos.append(key + "=" + str(this_info))
-        items.append(";".join(infos))
-        new_line = "\t".join([str(i) for i in items])
-        f_out.write(new_line + "\n")
-
+def get_header(f):
+    header = ""
+    for line in f:
+        if "#" in line:
+            header += line
+    return header
+    
 def one_variant_transform(f_in, f_out):
     """takes a vcf file, read each row, if the ALT field contains more than 
        one item, create multiple variant row based on that row, writes new vcf"""
@@ -364,7 +364,7 @@ def save_enigma_to_dict(path):
     variants = dict()
     columns = ""
     line_num = 0
-    f_wrong = open(ARGS.wrong_genome + "ENIGMA_wrong_genome.txt", "w")
+    f_wrong = open(ARGS.output + "ENIGMA_wrong_genome.txt", "w")
     n_wrong, n_total = 0, 0
     for line in enigma_file:
         line_num += 1
@@ -423,6 +423,12 @@ def variant_equal(v1, v2, version="hg38"):
         pos2 = pos2 - 1 - BRCA1[version]["start"]
     else:
         assert(False)
+
+    # correct error with when ref is empty string
+    if len(ref1) == 0:
+        pos1 += 1
+    if len(ref2) == 0:
+        pos2 += 1
 
     # replace vcf ref string with alt string
     edited_v1 = seq[0:pos1]+alt1+seq[pos1+len(ref1):]
