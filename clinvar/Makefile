@@ -1,8 +1,8 @@
-releaseDir = /hive/groups/cgl/brca/release1.0
+releaseDir = $(BRCA_PIPELINE_DATA)
 clinVarDir = $(releaseDir)/data/ClinVar
 vcfDir = $(releaseDir)/pipeline_input
 
-#export PATH := .:../data_merging:$PATH
+export PATH := .:../data_merging:$(PATH)
 
 $(vcfDir)/ClinVarBrca.vcf:	$(clinVarDir)/ClinVarBrca.vcf
 	cp $< $@
