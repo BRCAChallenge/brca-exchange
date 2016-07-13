@@ -109,24 +109,24 @@ ARGS = parser.parse_args()
 
 
 def main():
-    tmp_dir = tempfile.mkdtemp()
-    try:
-        source_dict, columns, variants = preprocessing(tmp_dir)
-        print "------------merging different dataset------------------------------"
-        for source_name, file in source_dict.iteritems():
-            (columns, variants) = add_new_source(columns, variants, source_name, 
-                                                 file, FIELD_DICT[source_name])
-        print "------------string comparison merge-------------------------------"
-        variants = string_comparison_merge(variants) 
-        date = datetime.datetime.today().strftime('%d%b%Y')
-        write_new_csv(ARGS.output + "merged_" + date + ".csv", columns, variants)
-        print "final number of variants: %d" %len(variants)
-        print "Done" 
-    finally:
-        shutil.rmtree(tmp_dir)
+#    tmp_dir = tempfile.mkdtemp()
+#    try:
+#        source_dict, columns, variants = preprocessing(tmp_dir)
+#        print "------------merging different dataset------------------------------"
+#        for source_name, file in source_dict.iteritems():
+#            (columns, variants) = add_new_source(columns, variants, source_name, 
+#                                                 file, FIELD_DICT[source_name])
+#        print "------------string comparison merge-------------------------------"
+#        variants = string_comparison_merge(variants) 
+#        date = datetime.datetime.today().strftime('%d%b%Y')
+#        write_new_csv(ARGS.output + "merged_" + date + ".csv", columns, variants)
+#        print "final number of variants: %d" %len(variants)
+#        print "Done" 
+#    finally:
+#        shutil.rmtree(tmp_dir)
+    variant_standardize()
 
-
-def variant_standardize(variants): 
+def variant_standardize(): 
     """standardize variants such that:
     1. "-" in ref or alt is removed, and a leading base is added
     2. other cases
@@ -135,9 +135,36 @@ def variant_standardize(variants):
         variants = pickle.loads(fv.read())
     fv.close()
     for ev, items in variants.iteritems():
-        print ev
-        print items[2]
+        variant_names = items[2].split("|")
+        new_names = [add_leading_base(v) if "-" in v else v for v in variant_names]
+        new_names = "|".join(list(set(new_names)))
 
+def add_leading_base(v, version="hg38"):
+    print v
+    chr, pos, refalt = v.replace("-", "").split(":")
+    pos = int(pos)
+    ref, alt = refalt.split(">")
+    if chr == "chr13":
+        seq = BRCA2[version]["sequence"]
+        brca_pos = pos - 1 - BRCA2[version]["start"]
+    elif chr == "chr17":
+        seq = BRCA1[version]["sequence"]
+        brca_pos = pos - 1 - BRCA1[version]["start"]
+    else:
+        raise Exception("wrong chromosome number")
+
+    # correct error with when ref is empty string
+    if len(ref) == 0:
+        brca_pos += 1
+    else:
+        assert(seq[brca_pos:brca_pos + len(ref)] == ref)
+    leading_base = seq[brca_pos-1]
+    new_v = "{0}:{1}:{2}>{3}".format(chr, str(pos-1), 
+                                     leading_base + ref, leading_base + alt)
+    print new_v
+    print ""
+    return new_v
+    
 
 def string_comparison_merge(variants):
     # make sure the input genomic coordinate strings are already unique strings
