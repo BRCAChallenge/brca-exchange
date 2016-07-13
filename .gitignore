@@ -6,3 +6,4 @@ data/
 *.nfs*
 *dumps
 *.py.swp
+*/temp_variants.pkl
