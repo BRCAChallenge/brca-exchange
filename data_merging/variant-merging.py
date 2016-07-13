@@ -118,14 +118,26 @@ def main():
                                                  file, FIELD_DICT[source_name])
         print "------------string comparison merge-------------------------------"
         variants = string_comparison_merge(variants) 
-        for variant in variants:
-            print variant
         date = datetime.datetime.today().strftime('%d%b%Y')
         write_new_csv(ARGS.output + "merged_" + date + ".csv", columns, variants)
         print "final number of variants: %d" %len(variants)
         print "Done" 
     finally:
         shutil.rmtree(tmp_dir)
+
+def variant_standardize(variants): 
+    """standardize variants such that:
+    1. "-" in ref or alt is removed, and a leading base is added
+    2. other cases
+    """
+    with open("temp_variants.pkl", "r") as fv:
+        variants = pickle.loads(fv.read())
+    fv.close()
+    for ev, items in variants.iteritems():
+        print ev
+        print items[2]
+
+
 
 def string_comparison_merge(variants):
     # make sure the input genomic coordinate strings are already unique strings
