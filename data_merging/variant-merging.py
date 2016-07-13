@@ -16,13 +16,13 @@ import datetime
 
 
 BRCA1 = {"hg38": {"start": 43000000,
-                  "sequence": open("../resources/brca1_hg38.txt", "r").read()},
+                  "sequence": open("../resources/genome_sequences/brca1_hg38.txt", "r").read()},
          "hg19": {"start": 41100000,
-                  "sequence": open("../resources/brca1_hg19.txt", "r").read()}}
+                  "sequence": open("../resources/genome_sequences/brca1_hg19.txt", "r").read()}}
 BRCA2 = {"hg38": {"start": 32300000,
-                  "sequence": open("../resources/brca2_hg38.txt", "r").read()},
+                  "sequence": open("../resources/genome_sequences/brca2_hg38.txt", "r").read()},
          "hg19": {"start": 32800000,
-                  "sequence": open("../resources/brca2_hg19.txt", "r").read()}}
+                  "sequence": open("../resources/genome_sequences/brca2_hg19.txt", "r").read()}}
   
 #GENOMIC VERSION:
 VERSION = "hg38" # equivalent to GRCh38
@@ -118,6 +118,8 @@ def main():
                                                  file, FIELD_DICT[source_name])
         print "------------string comparison merge-------------------------------"
         variants = string_comparison_merge(variants) 
+        for variant in variants:
+            print variant
         date = datetime.datetime.today().strftime('%d%b%Y')
         write_new_csv(ARGS.output + "merged_" + date + ".csv", columns, variants)
         print "final number of variants: %d" %len(variants)
@@ -239,7 +241,6 @@ def preprocessing(tmp_dir):
         f_right.close()
         f_wrong.close()
         print "in {0}, wrong: {1}, total: {2}".format(source_name, n_wrong, n_total) 
-    print "---------------------------------------------------------"
     
     return source_dict, columns, variants
 
