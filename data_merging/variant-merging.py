@@ -125,6 +125,7 @@ def main():
     finally:
         shutil.rmtree(tmp_dir)
 
+
 def variant_standardize(variants): 
     """standardize variants such that:
     1. "-" in ref or alt is removed, and a leading base is added
@@ -136,7 +137,6 @@ def variant_standardize(variants):
     for ev, items in variants.iteritems():
         print ev
         print items[2]
-
 
 
 def string_comparison_merge(variants):
@@ -345,6 +345,13 @@ def add_new_source(columns, variants, source, source_file, source_dict):
         else: 
             variants[genome_coor] = ['-'] * old_column_num
             variants[genome_coor][0] = source
+            chrm = genome_coor.split(":")[0]
+            if chrm == "chr13":
+                variants[genome_coor][1] = "BRCA2"
+            elif chrm == "chr17":
+                variants[genome_coor][1] = "BRCA1"
+            else:
+                raise Exception("Wrong chromosome")
             variants[genome_coor][2] = genome_coor
 
         for value in source_dict.values():
