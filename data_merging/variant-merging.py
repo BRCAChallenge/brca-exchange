@@ -106,8 +106,6 @@ parser.add_argument("-p", "--de_novo",
 ARGS = parser.parse_args()
 
 
-
-
 def main():
     tmp_dir = tempfile.mkdtemp()
     try:
@@ -125,6 +123,7 @@ def main():
         print "Done" 
     finally:
         shutil.rmtree(tmp_dir)
+
 
 def variant_standardize(variants="pickle"): 
     """standardize variants such that:
@@ -384,10 +383,16 @@ def one_variant_transform(f_in, f_out):
 def write_new_csv(filename, columns, variants):
     merged_file = open(filename, "w")
     merged_file.write(",".join(columns)+"\n")
-    for variant in variants.values():
+    for key, varaint in variants.iteritems():
         if len(variant) != len(columns):
             raise Exception("mismatching number of columns in head and row")
-        merged_file.write(",".join(variant)+"\n")
+        if "chr13" in key:
+            merged_file.write(",".join(variant)+"\n")
+    for key, varaint in variants.iteritems():
+        if "chr17" in key:
+            merged_file.write(",".join(variant)+"\n")
+    merged_file.close()
+
 
 def add_new_source(columns, variants, source, source_file, source_dict):
     print "adding {0} into merged file.....".format(source)
