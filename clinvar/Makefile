@@ -13,5 +13,5 @@ $(clinVarDir)/ClinVarBrca.vcf:	$(clinVarDir)/ClinVarBrca.txt ../data_merging/con
 $(clinVarDir)/ClinVarBrca.txt:	$(clinVarDir)/ClinVarBrca.xml clinVarParse.py
 	clinVarParse.py	$< --assembly GRCh38 > $@
 
-$(clinVarDir)/ClinVarBrca.xml:	$(clinVarDir)/ClinVarFullRelease_00-latest.xml clinVarBrca.py
+$(clinVarDir)/ClinVarBrca.xml:	$(clinVarDir)/ClinVarFullRelease_00-latest.xml.gz clinVarBrca.py
 	clinVarBrca.py $< |awk '{ if (NF > 0) { print }}'  > $@
