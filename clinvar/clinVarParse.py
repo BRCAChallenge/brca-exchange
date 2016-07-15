@@ -51,17 +51,20 @@ def main():
                 genomicCoordinate = "chr%s:%s:%s>%s" % (chrom,
                                                         start, referenceAllele,
                                                         alternateAllele)
-                print("\t".join((str(hgvs),  oa.submitter.encode('utf-8'), 
-                                 str(oa.clinicalSignificance),
-                                 str(oa.dateLastUpdated),
-                                 str(oa.accession),
-                                 str(oa.id),
-                                 str(oa.origin),
-                                 str(oa.method),
-                                 genomicCoordinate,
-                                 str(variant.geneSymbol),
-                                 str(proteinChange)
-                             )))
+                # 
+                # Omit the variants that don't have any genomic start coordinate indicated.
+                if start != None and start != "NA":
+                    print("\t".join((str(hgvs),  oa.submitter.encode('utf-8'), 
+                                     str(oa.clinicalSignificance),
+                                     str(oa.dateLastUpdated),
+                                     str(oa.accession),
+                                     str(oa.id),
+                                     str(oa.origin),
+                                     str(oa.method),
+                                     genomicCoordinate,
+                                     str(variant.geneSymbol),
+                                     str(proteinChange)
+                                 )))
                         
 
 if __name__ == "__main__":

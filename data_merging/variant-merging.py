@@ -16,13 +16,13 @@ import datetime
 
 
 BRCA1 = {"hg38": {"start": 43000000,
-                  "sequence": open("../resources/brca1_hg38.txt", "r").read()},
+                  "sequence": open("../resources/genome_sequences/brca1_hg38.txt", "r").read()},
          "hg19": {"start": 41100000,
-                  "sequence": open("../resources/brca1_hg19.txt", "r").read()}}
+                  "sequence": open("../resources/genome_sequences/brca1_hg19.txt", "r").read()}}
 BRCA2 = {"hg38": {"start": 32300000,
-                  "sequence": open("../resources/brca2_hg38.txt", "r").read()},
+                  "sequence": open("../resources/genome_sequences/brca2_hg38.txt", "r").read()},
          "hg19": {"start": 32800000,
-                  "sequence": open("../resources/brca2_hg19.txt", "r").read()}}
+                  "sequence": open("../resources/genome_sequences/brca2_hg19.txt", "r").read()}}
   
 #GENOMIC VERSION:
 VERSION = "hg38" # equivalent to GRCh38
@@ -112,18 +112,94 @@ def main():
     tmp_dir = tempfile.mkdtemp()
     try:
         source_dict, columns, variants = preprocessing(tmp_dir)
-        print "------------merging different dataset------------------------------"
+        print "\n------------merging different dataset------------------------------"
         for source_name, file in source_dict.iteritems():
             (columns, variants) = add_new_source(columns, variants, source_name, 
                                                  file, FIELD_DICT[source_name])
         print "------------string comparison merge-------------------------------"
         variants = string_comparison_merge(variants) 
+        variants = variant_standardize(variants=variants)
         date = datetime.datetime.today().strftime('%d%b%Y')
         write_new_csv(ARGS.output + "merged_" + date + ".csv", columns, variants)
         print "final number of variants: %d" %len(variants)
         print "Done" 
     finally:
         shutil.rmtree(tmp_dir)
+
+def variant_standardize(variants="pickle"): 
+    """standardize variants such that:
+    1. "-" in ref or alt is removed, and a leading base is added, e.g. ->T is changed to N > NT
+    2. remove trailing same bases: e.g. AGGGG > TGGGG is changed to A>T
+    3. remove leading same baes: e.g. position 100, AAT > AAG is changed to position 102 T>G
+    """
+    if variants=="pickle":
+        with open("temp_variants.pkl", "r") as fv:
+            variants = pickle.loads(fv.read())
+        fv.close()
+    for ev, items in variants.iteritems():
+        variant_names = items[2].split("|")
+        new_names = [add_leading_base(v) if "-" in v else v for v in variant_names]
+        new_names = [trim_bases(v) if "None" not in v else v for v in new_names]
+        new_names = "|".join(list(set(new_names)))
+        items[2] = new_names
+        variants[ev] = items
+    return variants
+
+def trim_bases(v):
+    ref, alt = v.split(":")[2].split(">")
+    if len(ref) == 1 or len(alt) == 1:
+        return v
+    else:
+        ref, alt = trim_trailing(ref, alt)
+        v = ":".join(v.split(":")[0:2] + ["{0}>{1}".format(ref, alt)])
+        v = trim_leading(v)
+        return v
+
+def trim_trailing(ref, alt):
+    if len(ref) == 1 or len(alt) == 1 or ref[-1] != alt[-1]:
+        return ref, alt    
+    else:
+        ref = ref[:-1]
+        alt = alt[:-1]
+        return trim_trailing(ref, alt)
+
+def trim_leading(v):
+    chr, pos, refalt = v.replace("-", "").split(":")
+    pos = int(pos)
+    ref, alt = refalt.split(">")
+    if len(ref) == 1 or len(alt) == 1 or ref[0] != alt[0]:
+        return v
+    else:
+        ref = ref[1:]
+        alt = alt[1:]
+        pos += 1
+        new_v = "{0}:{1}:{2}>{3}".format(chr, str(pos), ref, alt)
+        return trim_leading(new_v)
+
+
+def add_leading_base(v, version="hg38"):
+    chr, pos, refalt = v.replace("-", "").split(":")
+    pos = int(pos)
+    ref, alt = refalt.split(">")
+    if chr == "chr13":
+        seq = BRCA2[version]["sequence"]
+        brca_pos = pos - 1 - BRCA2[version]["start"]
+    elif chr == "chr17":
+        seq = BRCA1[version]["sequence"]
+        brca_pos = pos - 1 - BRCA1[version]["start"]
+    else:
+        raise Exception("wrong chromosome number")
+
+    # correct error with when ref is empty string
+    if len(ref) == 0:
+        brca_pos += 1
+    else:
+        assert(seq[brca_pos:brca_pos + len(ref)] == ref)
+    leading_base = seq[brca_pos-1]
+    new_v = "{0}:{1}:{2}>{3}".format(chr, str(pos-1), 
+                                     leading_base + ref, leading_base + alt)
+    return new_v
+    
 
 def string_comparison_merge(variants):
     # make sure the input genomic coordinate strings are already unique strings
@@ -193,10 +269,11 @@ def preprocessing(tmp_dir):
                    "BIC": BIC_FILE,
                    }    
     print "\n" + ARGS.input + ":"
+    print "---------------------------------------------------------"
     print "ENIGMA: {0}".format(ENIGMA_FILE)
     for source_name, file_name in source_dict.iteritems():
         print source_name, ":", file_name
-    print "------------preprocessing--------------------------------"
+    print "\n------------preprocessing--------------------------------"
     print "remove sample columns and two erroneous rows from 1000 Genome file"
     f_1000G = open(ARGS.input + GENOME1K_FILE + "for_pipeline", "w")
     subprocess.call(
@@ -239,7 +316,6 @@ def preprocessing(tmp_dir):
         f_right.close()
         f_wrong.close()
         print "in {0}, wrong: {1}, total: {2}".format(source_name, n_wrong, n_total) 
-    print "---------------------------------------------------------"
     
     return source_dict, columns, variants
 
@@ -332,6 +408,13 @@ def add_new_source(columns, variants, source, source_file, source_dict):
         else: 
             variants[genome_coor] = ['-'] * old_column_num
             variants[genome_coor][0] = source
+            chrm = genome_coor.split(":")[0]
+            if chrm == "chr13":
+                variants[genome_coor][1] = "BRCA2"
+            elif chrm == "chr17":
+                variants[genome_coor][1] = "BRCA1"
+            else:
+                raise Exception("Wrong chromosome")
             variants[genome_coor][2] = genome_coor
 
         for value in source_dict.values():
