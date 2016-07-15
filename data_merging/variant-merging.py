@@ -383,12 +383,12 @@ def one_variant_transform(f_in, f_out):
 def write_new_csv(filename, columns, variants):
     merged_file = open(filename, "w")
     merged_file.write(",".join(columns)+"\n")
-    for key, varaint in variants.iteritems():
+    for key, variant in variants.iteritems():
         if len(variant) != len(columns):
             raise Exception("mismatching number of columns in head and row")
         if "chr13" in key:
             merged_file.write(",".join(variant)+"\n")
-    for key, varaint in variants.iteritems():
+    for key, variant in variants.iteritems():
         if "chr17" in key:
             merged_file.write(",".join(variant)+"\n")
     merged_file.close()
