@@ -394,6 +394,12 @@ var VariantDetail = React.createClass({
                 row_item = <a href={variant[prop]}>{variant[prop]}</a>
             } else if (prop == "Source_URL" && variant[prop] != null) {
                 row_item = _.map(variant[prop].split(','), url => <a href={url}>{url}</a>)
+            } else if (prop == "HGVS_cDNA" && variant[prop] != null) {
+                row_item = variant[prop].split(":")[1];
+            } else if (prop == "HGVS_Protein" && variant[prop] != null) {
+                row_item = variant[prop].split(":")[1];
+            } else if (prop == "HGVS_Protein_ID" && variant["HGVS_Protein"] != null) {
+                row_item = variant["HGVS_Protein"].split(":")[0];
             } else {
                 row_item = variant[prop]
             }

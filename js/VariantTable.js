@@ -76,18 +76,35 @@ var filterColumns = [
 
 var columns = [
     {title: 'Gene', prop: 'Gene_Symbol'},
-    {title: 'Genomic (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
-    {title: 'Nucleotide', prop: 'HGVS_cDNA'},
-    {title: 'Protein', prop: 'HGVS_Protein'},
-    {title: 'Pathogenicity', prop: 'Pathogenicity_default'},
-    {title: 'Source URL(s)', prop: 'Source_URL'},
+    {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA'},
+    {title: 'Transcript Identifier', prop:'Reference_Sequence'},
+    // Not implemented yet
+    // {title: 'HGVS RNA'},
+    {title: 'HGVS Protein', prop: 'HGVS_Protein'},
+    // Protein Identfifier is pulled from HGVS_Protein, this is handled in VariantDetail (index.js)
+    {title: 'Protein Identifier', prop: 'HGVS_Protein_ID'},
+    // Not implemented yet
+    // {title: 'Abbreviated AA Change'},
+    {title: 'BIC Designation', prop: 'BIC_Identifier'},
+    {title: 'Genomic Nomenclature (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
+    {title: 'Genomic Nomenclature (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
+    {title: 'Clinical Significance', prop: 'Pathogenicity_default'},
+    {title: 'IARC Class', prop: 'Clinical_significance_ENIGMA'},
+    {title: 'Comment on Clinical Significance', prop: 'Comment_on_clinical_significance_ENIGMA'},
+    {title: 'Clinical Significance Citations', prop: 'Clinical_significance_citations_ENIGMA'},
+    {title: 'Supporting Evidence URL(s)', prop: 'Source_URL'},
+    {title: 'Date Last Evaluated', prop: 'Date_last_evaluated_ENIGMA'},
+    {title: 'Assertion Method', prop: 'Assertion_method_ENIGMA'},
+    {title: 'Assertion Method Citation', prop: 'Assertion_method_citation_ENIGMA'},
+    {title: 'Allele Origin', prop: 'Allele_origin_ENIGMA'},
+    {title: 'ClinVar Accession', prop: 'ClinVarAccession_ENIGMA'}
 ];
 
 var research_mode_columns = [
 
     {title: 'Gene Symbol', prop: 'Gene_Symbol'},
     {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36'},
-    {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
+    {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinaty1e_hg37'},
     {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
 
     {title: 'Mutation category (BIC)', prop: 'Mutation_type_BIC'},
@@ -333,7 +350,9 @@ var subColumns = [
     },
 ];
 
-var defaultColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_default'];
+//var defaultColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_default'];
+
+var defaultColumns = ['Gene_Symbol', 'HGVS_cDNA', 'HGVS_Protein', 'BIC_Identifier', 'Pathogenicity_default'];
 var defaultResearchColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_research', 'Allele_Frequency'];
 
 var allSources = {
