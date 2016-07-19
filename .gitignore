@@ -1,6 +1,6 @@
 # Pycharm thing
 *.idea
-data/
+*data/
 *.ipynb_checkpoints
 *.pyc
 *.nfs*
