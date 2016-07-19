@@ -405,6 +405,11 @@ var VariantDetail = React.createClass({
                     var url_count = 0;
                     console.log(url_count);
                     row_item = _.map(variant[prop].split(','), url => (url.length != 0) && (<span><a key={"Source_URL"+(url_count++)} href={url}>link to multifactorial analysis ({url_count})</a><br /></span>));
+                } else if (prop == "Comment_on_clinical_significance_ENIGMA" || prop == "Clinical_significance_citations_ENIGMA") {
+                    var pubmed = "http://ncbi.nlm.nih.gov/pubmed/";
+                    row_item = _.map(variant[prop].split(/PMID:? ?([0-9]+)/), piece =>
+                        (/^[0-9]+$/.test(piece)) ? <a href={pubmed + piece}>PMID: {piece}</a> : piece );
+//(PMID: 18951446)
                 } else if (prop == "HGVS_cDNA") {
                     row_item = variant[prop].split(":")[1];
                 } else if (prop == "HGVS_Protein") {
