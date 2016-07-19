@@ -1,6 +1,6 @@
 releaseDir = $(BRCA_PIPELINE_DATA)
 clinVarDir = $(releaseDir)/data/ClinVar
-vcfDir = $(releaseDir)/pipeline_input
+vcfDir = $(releaseDir)/data/pipeline_input
 
 export PATH := .:../data_merging:$(PATH)
 
