@@ -390,18 +390,32 @@ var VariantDetail = React.createClass({
         }
         var rows = _.map(cols, ({prop, title}) => {
             var row_item;
-            if ((prop == "URL_ENIGMA" || prop == "Assertion_method_citation_ENIGMA") && variant[prop] != null) {
-                row_item = <a href={variant[prop]}>{variant[prop]}</a>
-            } else if (prop == "Source_URL" && variant[prop] != null) {
-                row_item = _.map(variant[prop].split(','), url => <a href={url}>{url}</a>)
-            } else if (prop == "HGVS_cDNA" && variant[prop] != null) {
-                row_item = variant[prop].split(":")[1];
-            } else if (prop == "HGVS_Protein" && variant[prop] != null) {
-                row_item = variant[prop].split(":")[1];
-            } else if (prop == "HGVS_Protein_ID" && variant["HGVS_Protein"] != null) {
-                row_item = variant["HGVS_Protein"].split(":")[0];
-            } else {
-                row_item = variant[prop]
+            var months = ["January", "February", "March", "April", "May", "June", "July",
+                          "August", "September", "October", "November", "December"];
+            var date_format = function(str) {
+                var d = str.split('/');
+                return "" + d[1] + " " + months[d[0] - 1] + " " + d[2];
+            }
+            if (variant[prop] != null) {
+                if (prop == "URL_ENIGMA") {
+                    row_item = <a href={variant[prop]}>{variant[prop]}</a>
+                } else if (prop == "Assertion_method_citation_ENIGMA") {
+                    row_item = <a href={variant[prop]}>Enigma Rules version Mar 26, 2015</a>
+                } else if (prop == "Source_URL") {
+                    var url_count = 0;
+                    console.log(url_count);
+                    row_item = _.map(variant[prop].split(','), url => (url.length != 0) && (<span><a key={"Source_URL"+(url_count++)} href={url}>link to multifactorial analysis ({url_count})</a><br /></span>));
+                } else if (prop == "HGVS_cDNA") {
+                    row_item = variant[prop].split(":")[1];
+                } else if (prop == "HGVS_Protein") {
+                    row_item = variant[prop].split(":")[1];
+                } else if (prop == "HGVS_Protein_ID" && variant["HGVS_Protein"] != null) {
+                    row_item = variant["HGVS_Protein"].split(":")[0];
+                } else if (prop == "Date_last_evaluated_ENIGMA") {
+                    row_item = date_format(variant[prop]);
+                } else {
+                    row_item = variant[prop]
+                }
             }
             return <tr key={prop}>
                 <Key tableKey={title} columns={cols} onClick={() => this.showHelp(title)}/>
