@@ -1,1 +1,1 @@
-This is the BRCA Exchange Research Space. It contains information drawn from multiple databases and intelligently merged together, one row per allele. It is intended to provide researchers as comprehensive as possible set of BRCA variations and annotations.
+This is the BRCA Exchange Research Space. It contains information drawn from multiple databases which have been intelligently merged together, one row per variant. It is intended to provide researchers with a set of BRCA variations and annotations which is as comprehensive as possible.
