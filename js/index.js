@@ -403,7 +403,6 @@ var VariantDetail = React.createClass({
                     row_item = <a href={variant[prop]}>Enigma Rules version Mar 26, 2015</a>
                 } else if (prop == "Source_URL") {
                     var url_count = 0;
-                    console.log(url_count);
                     row_item = _.map(variant[prop].split(','), url => (url.length != 0) && (<span><a key={"Source_URL"+(url_count++)} href={url}>link to multifactorial analysis ({url_count})</a><br /></span>));
                 } else if (prop == "Comment_on_clinical_significance_ENIGMA" || prop == "Clinical_significance_citations_ENIGMA") {
                     var pubmed = "http://ncbi.nlm.nih.gov/pubmed/";
@@ -414,13 +413,13 @@ var VariantDetail = React.createClass({
                     row_item = variant[prop].split(":")[1];
                 } else if (prop == "HGVS_Protein") {
                     row_item = variant[prop].split(":")[1];
-                } else if (prop == "HGVS_Protein_ID" && variant["HGVS_Protein"] != null) {
-                    row_item = variant["HGVS_Protein"].split(":")[0];
                 } else if (prop == "Date_last_evaluated_ENIGMA") {
                     row_item = date_format(variant[prop]);
                 } else {
                     row_item = variant[prop]
                 }
+            } else if (prop == "HGVS_Protein_ID" && variant["HGVS_Protein"] != null) {
+                row_item = variant["HGVS_Protein"].split(":")[0];
             }
             return <tr key={prop}>
                 <Key tableKey={title} columns={cols} onClick={() => this.showHelp(title)}/>

@@ -78,13 +78,11 @@ var columns = [
     {title: 'Gene', prop: 'Gene_Symbol'},
     {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA'},
     {title: 'Transcript Identifier', prop:'Reference_Sequence'},
-    // Not implemented yet
-    // {title: 'HGVS RNA'},
+    {title: 'HGVS RNA', prop: 'HGVS_RNA'},
     {title: 'HGVS Protein', prop: 'HGVS_Protein'},
     // Protein Identfifier is pulled from HGVS_Protein, this is handled in VariantDetail (index.js)
     {title: 'Protein Identifier', prop: 'HGVS_Protein_ID'},
-    // Not implemented yet
-    // {title: 'Abbreviated AA Change'},
+    {title: 'Protein Abbrev', prop: 'Protein_Change'},
     {title: 'BIC Designation', prop: 'BIC_Identifier'},
     {title: 'Genomic Nomenclature (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
     {title: 'Genomic Nomenclature (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
@@ -352,7 +350,7 @@ var subColumns = [
 
 //var defaultColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_default'];
 
-var defaultColumns = ['Gene_Symbol', 'HGVS_cDNA', 'HGVS_Protein', 'BIC_Identifier', 'Pathogenicity_default'];
+var defaultColumns = ['Gene_Symbol', 'HGVS_cDNA', 'HGVS_Protein', 'Protein_Change', 'BIC_Identifier', 'Pathogenicity_default'];
 var defaultResearchColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_research', 'Allele_Frequency'];
 
 var allSources = {
