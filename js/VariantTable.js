@@ -76,10 +76,10 @@ var filterColumns = [
 
 var columns = [
     {title: 'Gene', prop: 'Gene_Symbol'},
-    {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA'},
+    {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: nucleotide => nucleotide.split(':')[1]},
     {title: 'Transcript Identifier', prop:'Reference_Sequence'},
     {title: 'HGVS RNA', prop: 'HGVS_RNA'},
-    {title: 'HGVS Protein', prop: 'HGVS_Protein'},
+    {title: 'HGVS Protein', prop: 'HGVS_Protein', render: protein => protein.split(':')[1]},
     // Protein Identfifier is pulled from HGVS_Protein, this is handled in VariantDetail (index.js)
     {title: 'Protein Identifier', prop: 'HGVS_Protein_ID'},
     {title: 'Protein Abbrev', prop: 'Protein_Change'},

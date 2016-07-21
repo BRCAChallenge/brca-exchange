@@ -396,6 +396,9 @@ var VariantDetail = React.createClass({
                 var d = str.split('/');
                 return "" + d[1] + " " + months[d[0] - 1] + " 20" + d[2];
             }
+            if (prop == "Protein_Change") {
+                title = "Abbreviated AA Change";
+            }
             if (variant[prop] != null) {
                 if (prop == "URL_ENIGMA") {
                     row_item = <a target="_blank" href={variant[prop]}>{variant[prop]}</a>
