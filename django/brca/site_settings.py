@@ -11,3 +11,17 @@ URL_FRONTEND = 'http://localhost:8080/'
 EMAIL_HOST = ''
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
+
+# Database
+# https://docs.djangoproject.com/en/1.9/ref/settings/#databases
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': 'localhost',
+        'NAME': 'storage.pg',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres'
+    }
+}
+

@@ -95,19 +95,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'brca.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/1.9/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'HOST': 'localhost',
-        'NAME': 'storage.pg',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres'
-    }
-}
-
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
 
