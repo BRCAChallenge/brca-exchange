@@ -394,21 +394,25 @@ var VariantDetail = React.createClass({
                           "August", "September", "October", "November", "December"];
             var date_format = function(str) {
                 var d = str.split('/');
-                return "" + d[1] + " " + months[d[0] - 1] + " " + d[2];
+                return "" + d[1] + " " + months[d[0] - 1] + " 20" + d[2];
             }
             if (variant[prop] != null) {
                 if (prop == "URL_ENIGMA") {
-                    row_item = <a href={variant[prop]}>{variant[prop]}</a>
+                    row_item = <a target="_blank" href={variant[prop]}>{variant[prop]}</a>
                 } else if (prop == "Assertion_method_citation_ENIGMA") {
-                    row_item = <a href={variant[prop]}>Enigma Rules version Mar 26, 2015</a>
-                } else if (prop == "Source_URL") {
+                    row_item = <a target="_blank" href={variant[prop]}>Enigma Rules version Mar 26, 2015</a>
+// this will be used in All Data display
+/*                } else if (prop == "Source_URL") {
                     var url_count = 0;
-                    row_item = _.map(variant[prop].split(','), url => (url.length != 0) && (<span><a key={"Source_URL"+(url_count++)} href={url}>link to multifactorial analysis ({url_count})</a><br /></span>));
+                    row_item = _.map(variant[prop].split(','), url => (url.length != 0) && (<span><a key={"Source_URL"+(url_count++)} target="_blank" href={url}>link to multifactorial analysis ({url_count})</a><br /></span>));
+  */            
+                } else if (prop == "Source_URL") {
+                    if (variant[prop].startsWith("http://hci-exlovd.hci.utah.edu"))
+                        row_item = <a target="_blank" href={variant[prop].split(',')[0]}>link to multifactorial analysis</a>;
                 } else if (prop == "Comment_on_clinical_significance_ENIGMA" || prop == "Clinical_significance_citations_ENIGMA") {
                     var pubmed = "http://ncbi.nlm.nih.gov/pubmed/";
                     row_item = _.map(variant[prop].split(/PMID:? ?([0-9]+)/), piece =>
-                        (/^[0-9]+$/.test(piece)) ? <a href={pubmed + piece}>PMID: {piece}</a> : piece );
-//(PMID: 18951446)
+                        (/^[0-9]+$/.test(piece)) ? <a target="_blank" href={pubmed + piece}>PMID: {piece}</a> : piece );
                 } else if (prop == "HGVS_cDNA") {
                     row_item = variant[prop].split(":")[1];
                 } else if (prop == "HGVS_Protein") {

@@ -90,7 +90,7 @@ var columns = [
     {title: 'IARC Class', prop: 'Clinical_significance_ENIGMA'},
     {title: 'Comment on Clinical Significance', prop: 'Comment_on_clinical_significance_ENIGMA'},
     {title: 'Clinical Significance Citations', prop: 'Clinical_significance_citations_ENIGMA'},
-    {title: 'Supporting Evidence URL(s)', prop: 'Source_URL'},
+    {title: 'Supporting Evidence URL(s)', prop: 'ENIGMA_URL'},
     {title: 'Date Last Evaluated', prop: 'Date_last_evaluated_ENIGMA'},
     {title: 'Assertion Method', prop: 'Assertion_method_ENIGMA'},
     {title: 'Assertion Method Citation', prop: 'Assertion_method_citation_ENIGMA'},
