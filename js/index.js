@@ -401,7 +401,7 @@ var VariantDetail = React.createClass({
             }
             if (variant[prop] != null) {
                 if (prop == "URL_ENIGMA") {
-                    row_item = <a target="_blank" href={variant[prop]}>link to multifactorial analysis</a>
+                    row_item = variant[prop].length && <a target="_blank" href={variant[prop]}>link to multifactorial analysis</a>
                 } else if (prop == "Assertion_method_citation_ENIGMA") {
                     row_item = <a target="_blank" href={variant[prop]}>Enigma Rules version Mar 26, 2015</a>
 // this will be used in All Data display
