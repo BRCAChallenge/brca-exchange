@@ -239,6 +239,23 @@ div#main {
 /**********     Table                     *********************/
 /**************************************************************/
 
+.table th>span:first-child {
+    position: relative;
+}
+
+.table th {
+    position: relative;
+}
+
+.sort-icon:after {
+    position: absolute;
+    right: 1px;
+    bottom: 1px;
+}
+
+.table th .glyphicon.help {
+    position: absolute;
+}
 
 .table.row-clickable tbody > tr {
 	cursor: pointer;
