@@ -4,15 +4,16 @@ this scripts takes the enigma variant list and merge vcf files in a folder into
 the exisitng enigma variants:
 """
 import argparse
-import vcf
+import datetime
+import os
+import pickle
+import shutil
 import subprocess
 import tempfile
-import shutil
+import vcf
 from StringIO import StringIO
 from copy import deepcopy
 from pprint import pprint
-import pickle
-import datetime
 
 
 BRCA1 = {"hg38": {"start": 43000000,
@@ -296,6 +297,9 @@ def preprocessing(tmp_dir):
     (columns, variants) = save_enigma_to_dict(ARGS.input + ENIGMA_FILE)
     for source_name, file_name in source_dict.iteritems():
         f = open(file_name, "r")
+        d_wrong = ARGS.output + "wrong_genome_coors/"
+        if not os.path.exists(d_wrong):
+            os.makedirs(d_wrong)
         f_wrong = open(ARGS.output + "wrong_genome_coors/" + 
                        source_name + "_wrong_genome_coor.vcf", "w")
         f_right = open(tmp_dir + "/right" + source_name, "w")

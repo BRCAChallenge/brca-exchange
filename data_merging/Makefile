@@ -1,5 +1,5 @@
-releaseDir = /hive/groups/cgl/brca/release1.0
-pseudonymDir = /hive/groups/cgl/brca/pseudonym_generation
+releaseDir = $(BRCA_PIPELINE_DATA)
+pseudonymDir = $(releaseDir)/pseudonym_generation
 inputVcfDir = $(releaseDir)/pipeline_input
 inputVcfs = $(inputVcfDir)/10k_genome.brca.sorted.hg38.vcf \
 	$(inputVcfDir)/ClinVarBrca.vcf \
@@ -26,6 +26,6 @@ $(releaseDir)/merged.withVEP.csv:	$(releaseDir)/merged.csv add_VEP_result.py
 	add_VEP_result.py -i $< -o $@
 
 $(releaseDir)/merged.csv:	$(inputVcfs) variant-merging.py
-	variant-merging.py -o $@ > merge.out
+	variant-merging.py -i $(inputVcfDir)/ -o $(releaseDir)/pipeline_output/ -p
 
 
