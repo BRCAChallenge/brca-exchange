@@ -17,11 +17,11 @@ var DisclaimerModal = React.createClass({
         this.setState({ showModal: true });
     },
     disable_research_mode() {
-        this.props.onToggleMode.forceUpdate();
+        this.props.onToggleMode();
         localStorage.setItem('research-mode',false);
     },
     agree() {
-        this.props.onToggleMode.forceUpdate();
+        this.props.onToggleMode();
         localStorage.setItem('research-mode',true);
         this.close();
     },
@@ -29,7 +29,7 @@ var DisclaimerModal = React.createClass({
         if(localStorage.getItem('research-mode') == 'true') {
             return (
                 <div className="form-group">
-                <Button className="btn-sm" onClick={this.disable_research_mode}>Return to the default view</Button>
+                <Button className="btn-sm" onClick={this.disable_research_mode}>Show Expert Reviewed Data on this Variant</Button>
                 </div>
             );
         } else {

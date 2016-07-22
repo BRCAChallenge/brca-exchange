@@ -333,7 +333,7 @@ var Database = React.createClass({
                     <Col sm={10} smOffset={1}  className="alert alert-warning">
                         <RawHTML ref='content' html={message}/>
                         {this.props.mode === 'research_mode' && <Button className="btn-small" onClick={this.toggleMode}>
-                            Show Expert Reviewed Data
+                            Show Expert Reviewed Data Only
                         </Button>}
                         {this.props.mode === 'default' &&
                         <Button className="btn-small" onClick={() =>this.setState({showModal: true})}>
@@ -379,6 +379,10 @@ var VariantDetail = React.createClass({
                 return this.setState({data: resp.data[0], error: null})
             },
             this.setState({error: 'Problem connecting to server'}));
+    },
+    onChildToggleMode: function() {
+        this.forceUpdate();
+        this.props.toggleMode();
     },
     render: function () {
         var {data: variant = {}, error} = this.state;
@@ -454,7 +458,7 @@ var VariantDetail = React.createClass({
                 </Row>
                 <Row>
                     <Col md={8} mdOffset={2}>
-                        <DisclaimerModal buttonModal onToggleMode={this} text="Research information on this variant"/>
+                        <DisclaimerModal buttonModal onToggleMode={this.onChildToggleMode} text="Show All Data on this Variant"/>
                     </Col>
                 </Row>
             </Grid>
@@ -505,7 +509,7 @@ var Application = React.createClass({
         return (
             <div>
                 <NavBarNew path={path} mode={this.state.mode} />
-                <RouteHandler />
+                <RouteHandler toggleMode={this.onChildToggleMode} />
                 <Database
                     mode={this.state.mode}
                     toggleMode={this.onChildToggleMode}

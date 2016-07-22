@@ -58,7 +58,8 @@ var NavBarNew = React.createClass({
                     <span className="BRCA">BRCA</span>
                     <span className="exchange"> Exchange</span>
                 </h1>
-                {this.props.mode === 'research_mode' && <span id="research-label" className="label label-info">Research</span>}
+                {this.props.mode === 'research_mode' && <span id="research-label" className="label label-info">All Data</span>}
+                {this.props.mode === 'default' && <span id="research-label" className="label label-info">Expert Reviewed</span>}
             </a>);
         return (
             <div className="navbar-container">
