@@ -102,7 +102,7 @@ var research_mode_columns = [
 
     {title: 'Gene Symbol', prop: 'Gene_Symbol'},
     {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36'},
-    {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinaty1e_hg37'},
+    {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
     {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
 
     {title: 'Mutation category (BIC)', prop: 'Mutation_type_BIC'},
@@ -494,7 +494,7 @@ var ResearchVariantTableSupplier = function (Component) {
 };
 
 var VariantTableSupplier = function (Component) {
-    var ResearchVariantTableComponent = React.createClass({
+    var VariantTableComponent = React.createClass({
         mixins: [PureRenderMixin],
         getColumns: function () {
             return columns;
@@ -518,7 +518,7 @@ var VariantTableSupplier = function (Component) {
             );
         }
     });
-    return ResearchVariantTableComponent;
+    return VariantTableComponent;
 };
 
 
