@@ -70,11 +70,6 @@ CORS_ORIGIN_WHITELIST = (
     'brca-website.cloudapp.net'
 )
 
-
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-
-DEFAULT_FROM_EMAIL = "no-reply@brcaexchange.org"
-
 ROOT_URLCONF = 'brca.urls'
 
 TEMPLATES = [
@@ -132,8 +127,8 @@ STATIC_URL = "/static/"
 SITE_ID = 1
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_PORT = 25
-EMAIL_USE_TLS = True
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
 DEFAULT_FROM_EMAIL = 'noreply@brcaexchange.org'
 
 AUTH_USER_MODEL = 'users.MyUser'

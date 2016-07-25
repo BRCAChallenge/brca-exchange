@@ -307,6 +307,7 @@ var Database = React.createClass({
                 onRowClick={this.showVariant}/>
             message = this.renderMessage(content.pages.variantsResearch)
         } else {
+            params.columnSelection = {};
             table = <VariantTable
                 ref='table'
                 initialState={params}
