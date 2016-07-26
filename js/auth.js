@@ -14,7 +14,7 @@ module.exports = {
                 localStorage.token = res.token;
                 if (cb) cb(true)
             } else {
-                if (cb) cb(false)
+                if (cb) cb(false, res.error)
             }
         })
     },
@@ -48,9 +48,10 @@ module.exports = {
                     token: res.token
                 })
             },
-            error: function () {
+            error: function (res) {
                 cb({
-                    authenticated: false
+                    authenticated: false,
+                    error: res.responseJSON
                 })
             }
         });
