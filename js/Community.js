@@ -99,6 +99,11 @@ var Community = React.createClass({
                     {auth.loggedIn() && <Col sm={1}><Button onClick={this.logout} bsStyle="link">Sign out</Button></Col>}
 
                 </Row>
+                <Row>
+                    <Col md={6} mdOffset={3} style={{height: "486px"}}>
+                        <CommunityMap />
+                    </Col>
+                </Row>
                 <Row className="btm-buffer">
                     <Col sm={10}>
                         <Pagination
@@ -121,6 +126,43 @@ var Community = React.createClass({
                 </Row>
             </Grid>
         );
+    }
+});
+
+var CommunityMap = React.createClass({
+    loadMap: function() {
+        var map;
+        window.initMap = function () {
+            this.geo = new google.maps.Geocoder();
+            map = window.map = new google.maps.Map(document.getElementById('communityMap'), {
+                center: {lat: -0, lng: 0},
+                zoom: 1
+            });
+            backend.userLocations().subscribe(({data}) => {
+                _.map(data, ({firstName, lastName, title, institution, city, state, country})  => {
+                    this.geo.geocode({address: city + "," + state + "," + country}, (results, status) => {
+                        var l = results[0].geometry.location;
+                        var userInfo = <div>{firstName} {lastName} {title}<br/>{institution}</div>;
+                        var marker = new google.maps.Marker({position: { lat: l.lat(), lng: l.lng() }, map: map, title: "TEST LOCATION"});
+                        var info = new google.maps.InfoWindow({content: React.renderToStaticMarkup(userInfo) });
+                        marker.addListener('click', () => info.open(map, marker));
+                    });
+                });
+            });
+        };
+    },
+    componentDidMount: function() {
+        this.loadMap();
+        var maps_script = document.createElement("script");
+        maps_script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyD9Qqc1TdmiQ4neQy5PQoxzq-lU3PCIjqY&callback=initMap";
+        maps_script.async = true;
+        document.body.appendChild(maps_script);
+    },
+
+
+    render: function() {
+        return <div id="communityMap" style={{height: "100%"}}></div>
+
     }
 });
 

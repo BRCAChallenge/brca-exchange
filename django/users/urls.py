@@ -6,6 +6,7 @@ from . import views
 urlpatterns = [
     url(r'^register/$', views.register, name="register"),
     url(r'^users/$', views.users, name="users"),
+    url(r'^user_locations/$', views.user_locations, name="user_locations"),
     url(r'^token-auth/$', obtain_jwt_token, name="token_auth"),
     url(r'^get/$', views.retrieve, name="retrieve"),
     url(r'^update/$', views.update, name="update"),

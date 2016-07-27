@@ -69,6 +69,11 @@ function users(opts) {
     return Rx.DOM.get(users_url).map(xhr => JSON.parse(xhr.responseText));
 }
 
+function userLocations() {
+    var url = `${config.backend_url}/accounts/user_locations/`;
+    return Rx.DOM.get(url).map(xhr => JSON.parse(xhr.responseText));
+}
+
 function lollipopData(opts) {
     opts.pageLength = 0;
     opts.format = 'json';
@@ -79,6 +84,7 @@ function lollipopData(opts) {
 module.exports = {
     data,
     users,
+    userLocations,
     lollipopData,
     url,
     trimSearchTerm

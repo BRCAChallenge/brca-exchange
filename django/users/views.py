@@ -265,12 +265,14 @@ def users(request):
     page_size = int(request.GET.get('page_size', '0'))
 
     query = MyUser.objects.filter(include_me=True).filter(is_approved=True)
+    whitelist = ['id','email','firstName','lastName','title','affiliation','institution','city','state','country','phone_number','hide_number','hide_email','include_me','is_active','is_admin','comment','has_image','is_approved','email_me']
 
     count = query.count()
 
     start = page_num * page_size
     end = start + page_size
-    data = list(query[start:end].values())
+    data = list(query[start:end].values(*whitelist))
+
 
     for user in data:
         if user['hide_email']:
@@ -280,3 +282,14 @@ def users(request):
 
     response = JsonResponse({'data': data, 'count': count})
     return response
+
+def user_locations(request):
+    query = MyUser.objects.filter(include_me=True).filter(is_approved=True)
+    fields = ['firstName', 'lastName', 'title', 'institution', 'city', 'state', 'country']
+    response = JsonResponse({'data': list(query.values(*fields))})
+    return response
+
+
+
+
+
