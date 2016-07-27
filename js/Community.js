@@ -141,11 +141,13 @@ var CommunityMap = React.createClass({
             backend.userLocations().subscribe(({data}) => {
                 _.map(data, ({firstName, lastName, title, institution, city, state, country})  => {
                     this.geo.geocode({address: city + "," + state + "," + country}, (results, status) => {
-                        var l = results[0].geometry.location;
-                        var userInfo = <div>{firstName} {lastName} {title}<br/>{institution}</div>;
-                        var marker = new google.maps.Marker({position: { lat: l.lat(), lng: l.lng() }, map: map, title: "TEST LOCATION"});
-                        var info = new google.maps.InfoWindow({content: React.renderToStaticMarkup(userInfo) });
-                        marker.addListener('click', () => info.open(map, marker));
+                        if (status == "OK") {
+                            var l = results[0].geometry.location;
+                            var userInfo = <div>{firstName} {lastName} {title}<br/>{institution}</div>;
+                            var marker = new google.maps.Marker({position: { lat: l.lat(), lng: l.lng() }, map: map, title: "TEST LOCATION"});
+                            var info = new google.maps.InfoWindow({content: React.renderToStaticMarkup(userInfo) });
+                            marker.addListener('click', () => info.open(map, marker));
+                        }
                     });
                 });
             });
