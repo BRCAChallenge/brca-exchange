@@ -270,6 +270,16 @@ div#main {
     word-wrap: break-word;
     float: left;
 }
+
+table.community td > span {
+    width: 100%;
+    word-wrap: break-word;
+    float: left;
+}
+
+table.community h3 {
+    margin-top: 0;
+}
 /**************************************************************/
 /**********     Other                     *********************/
 /**************************************************************/
@@ -346,6 +356,34 @@ th[role='columnheader'] .help, .help-target .help {
 .avatar {
     width: 120px;
     height: auto;
+}
+
+#communityMap {
+    width: 500px;
+    height: 250px;
+    margin: 20px auto 20px auto;
+}
+
+@media (min-width: 1200px) {
+    #communityMap {
+        width: 1000px;
+        height: 500px;
+        margin: 20px auto 20px auto;
+    }
+}
+
+.map-info-window div { 
+    float: right;
+}
+
+#communityMap .avatar {
+    height: 90px;
+    width: 90px;
+    float: left;
+    margin-right: 15px;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    padding: 4px;
 }
 
 .caret {

@@ -285,7 +285,7 @@ def users(request):
 
 def user_locations(request):
     query = MyUser.objects.filter(include_me=True).filter(is_approved=True)
-    fields = ['firstName', 'lastName', 'title', 'institution', 'city', 'state', 'country']
+    fields = ['id', 'firstName', 'lastName', 'title', 'institution', 'city', 'state', 'country', 'has_image']
     response = JsonResponse({'data': list(query.values(*fields))})
     return response
 

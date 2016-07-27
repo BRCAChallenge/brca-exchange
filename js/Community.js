@@ -72,15 +72,15 @@ var Community = React.createClass({
             var location_string = _.values(_.pick({city,state,country}, v => v)).join(', ')
 
             return <tr >
-                <td>
+                <td width="120px">
                     {avatar}
                 </td>
                 <td>
-                    <span id="name" className="row-wrap"><h3>{row['firstName']} {row['lastName']}, {row['title']}</h3></span>
-                    <span id="affiliation" className="row-wrap"><h4>{row['affiliation']}</h4></span>
-                    <span id="institution" className="row-wrap">{row['institution']}</span>
-                    <span id="location" className="row-wrap">{location_string}</span>
-                    <span id="contact" className="row-wrap">{row['email']} {row['phone_number']}</span>
+                    <span id="name"><h3>{row['firstName']} {row['lastName']}, {row['title']}</h3></span>
+                    <span id="affiliation"><h4>{row['affiliation']}</h4></span>
+                    <span id="institution">{row['institution']}</span>
+                    <span id="location">{location_string}</span>
+                    <span id="contact">{row['email']} {row['phone_number']}</span>
                 </td>
             </tr>
         });
@@ -89,7 +89,7 @@ var Community = React.createClass({
             <Grid id="main-grid">
                 <Row id="message"> {message} </Row>
                 <Row>
-                    <Col smOffset="5">
+                    <Col smOffset={5}>
                         <h3>BRCA Community</h3>
                     </Col>
                     {!auth.loggedIn() && <Col sm={1} smOffset="2"><Link to="/signup"><Button bsStyle="link">Sign up </Button></Link></Col>}
@@ -100,7 +100,7 @@ var Community = React.createClass({
 
                 </Row>
                 <Row>
-                    <Col md={6} mdOffset={3} style={{height: "486px"}}>
+                    <Col>
                         <CommunityMap />
                     </Col>
                 </Row>
@@ -115,7 +115,7 @@ var Community = React.createClass({
                 </Row>
                 <Row>
                     <Col md={8} mdOffset={2}>
-                        <Table striped bordered>
+                        <Table className="community" striped bordered>
                             <tbody>
                                 {rows}
                             </tbody>
@@ -130,40 +130,77 @@ var Community = React.createClass({
 });
 
 var CommunityMap = React.createClass({
-    loadMap: function() {
-        var map;
-        window.initMap = function () {
+    getInitialState: () => ({ widthGroup: (window.innerWidth < 1200) ? "md" : "lg" }),
+
+    handleResize: function () {
+        console.log('resize');
+        var widthGroup =  (window.innerWidth < 1200) ? "md" : "lg";
+        if (widthGroup != this.state.widthGroup) {
+            setTimeout((function() {
+                    this.map.setZoom(widthGroup == "md" ? 1 : 2);
+                    this.map.setCenter({lat: 17, lng:-2.5});
+                }).bind(this), 500);
+        }
+        this.setState({ widthGroup: widthGroup });
+    },
+    shouldComponentUpdate(nextProps, {widthGroup}) {
+        return this.state.widthGroup == widthGroup;
+    },
+    componentDidMount: function() {
+        var initMap = function () {
             this.geo = new google.maps.Geocoder();
-            map = window.map = new google.maps.Map(document.getElementById('communityMap'), {
-                center: {lat: -0, lng: 0},
-                zoom: 1
+            var infowindow;
+            var map = this.map = new google.maps.Map(document.getElementById('communityMap'), {
+                center: {lat: 17, lng: -2.5},
+                zoom: this.state.widthGroup == "md" ? 1 : 2,
+                mapTypeControl: false,
+                streetViewControl: false,
+                styles: [{
+                    "featureType": "administrative",
+                    "elementType": "geometry.fill",
+                    "stylers": [{ "visibility": "off" }]
+                }]
             });
+
             backend.userLocations().subscribe(({data}) => {
-                _.map(data, ({firstName, lastName, title, institution, city, state, country})  => {
+                _.map(data, ({id, firstName, lastName, title, institution, city, state, country, has_image})  => {
                     this.geo.geocode({address: city + "," + state + "," + country}, (results, status) => {
                         if (status == "OK") {
                             var l = results[0].geometry.location;
-                            var userInfo = <div>{firstName} {lastName} {title}<br/>{institution}</div>;
+                            var avatar
+                            if (has_image) {
+                                var avatar_link = config.backend_url + '/site_media/media/' + id
+                                avatar = <object className="avatar" data={avatar_link} type="image/jpg"/>
+                            } else {
+                                avatar = <img className="avatar" src={placeholder}/>
+                            }
+                            var userInfo = <div className="map-info-window">
+                                {avatar}
+                                <div>
+                                    <span>{firstName} {lastName}{title.length ? "," : ""} {title}</span><br />
+                                    <span>{institution}</span>
+                                </div>
+                            </div>;
                             var marker = new google.maps.Marker({position: { lat: l.lat(), lng: l.lng() }, map: map, title: "TEST LOCATION"});
                             var info = new google.maps.InfoWindow({content: React.renderToStaticMarkup(userInfo) });
-                            marker.addListener('click', () => info.open(map, marker));
+                            marker.addListener('click', () => {
+                                infowindow && infowindow.close();
+                                infowindow = info;
+                                info.open(map, marker)
+                            });
                         }
                     });
                 });
             });
         };
-    },
-    componentDidMount: function() {
-        this.loadMap();
-        var maps_script = document.createElement("script");
-        maps_script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyD9Qqc1TdmiQ4neQy5PQoxzq-lU3PCIjqY&callback=initMap";
-        maps_script.async = true;
-        document.body.appendChild(maps_script);
+        google.load('maps', '3', {callback: initMap.bind(this), other_params: "key=" + config.maps_key});
+        window.addEventListener('resize', this.handleResize);
     },
 
+    componentWillUnmount: function() { window.removeEventListener('resize', this.handleResize) },
 
     render: function() {
-        return <div id="communityMap" style={{height: "100%"}}></div>
+        return <div id="communityMap"></div>
 
     }
 });
