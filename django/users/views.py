@@ -114,6 +114,30 @@ def register(request):
 
     return JsonResponse({'success': True})
 
+def resend_activation(request):
+    email = request.POST.get('email', '')
+    user = MyUser.objects.filter(email = email)
+    if not user:
+        response = JsonResponse({'success': False, 'error': 'Email not found'})
+        response['Access-Control-Allow-Origin'] = '*'
+        return response;
+    user = user[0]
+
+    # resend activation email
+    url = "{0}confirm/{1}".format(site_settings.URL_FRONTEND, user.activation_key)
+    plaintext_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'registration_email.txt'))
+    html_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'registration_email.html'))
+
+    d = Context({'firstname': user.firstName, 'url': url})
+
+    subject, from_email, to = 'BRCAExchange account confirmation', 'noreply@brcaexchange.org', user.email
+    text_content = plaintext_email.render(d)
+    html_content = html_email.render(d)
+    msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
+
+    return JsonResponse({'success': True})
 
 def confirm(request, activation_key):
     user = MyUser.objects.filter(activation_key=activation_key)

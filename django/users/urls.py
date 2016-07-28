@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^update/$', views.update, name="update"),
     url(r'^password_reset/$', views.password_reset, name="password_reset"),
     url(r'^confirm/(?P<activation_key>\w+)/$', views.confirm, name="confirm"),
+    url(r'^resend-activation/$', views.resend_activation, name="resend_activation"),
     url(r'^update_password/(?P<password_reset_token>\w+)/$', views.update_password, name="update_password"),
     url(r'^check_password_token/(?P<password_reset_token>\w+)/$', views.check_password_token, name="check_password_token"),
 ]

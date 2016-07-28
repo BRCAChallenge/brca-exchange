@@ -133,7 +133,8 @@ var Signin = React.createClass({
     getInitialState: function () {
         return {
             submitted: null,
-            success: null
+            success: null,
+            successMessage: null
         }
     },
     render: function () {
@@ -141,6 +142,10 @@ var Signin = React.createClass({
         if (this.state.error != null) {
             message = <div className="alert alert-danger">
                 <p>{this.state.error}</p>
+            </div>
+        } else if (this.state.success && this.state.successMessage != null) {
+            message = <div className="alert alert-success">
+                <p>{this.state.successMessage}</p>
             </div>
         }
         return (
@@ -171,7 +176,7 @@ var Signin = React.createClass({
     handleSubmit: function () {
         if (this.refs.contactForm.isValid()) {
             var formData = this.refs.contactForm.getFormData();
-            auth.login(formData.email, formData.password, (loggedIn) => {
+            auth.login(formData.email, formData.password, (loggedIn, error) => {
                 if (loggedIn) {
                     var target = this.getQuery()["target"];
                     if (target == null) {
@@ -179,7 +184,34 @@ var Signin = React.createClass({
                     }
                     this.transitionTo(target)
                 } else {
-                    this.setState({error: "Please try again"});
+                    if (error.non_field_errors == 'User account is disabled.') {
+                        var showSuccess = (() => {this.setState({success: true, successMessage: "Activation email sent."})});
+                        var showFailure = (msg => {this.setState({error: msg})});
+                        var resend_activation = function() {
+                            $.post({
+                                url: config.backend_url + "/accounts/resend-activation/",
+                                data: {email: formData.email},
+                                success: function (data) {
+                                    showFailure(data.error);
+                                    if (data.success) {
+                                        showSuccess()
+                                    }
+                                },
+                                error: function (xhr, ajaxOptions, thrownError) {
+                                    showFailure('Could not complete this action');
+                                }.bind(this)
+                            });
+                        };
+                        var activation_message =
+                            <span>
+                                This account has not yet been activated. Please check your email for an activation link, or <a href="#" onClick={resend_activation}>resend activation</a>.
+                            </span>
+                        this.setState({error: activation_message});
+                    } else if (error.non_field_errors == 'Unable to login with provided credentials.') {
+                        this.setState({error: "Incorrect email/password"});
+                    } else {
+                        this.setState({error: error.non_field_errors});
+                    }
                 }
             });
         } else {

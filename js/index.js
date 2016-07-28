@@ -338,7 +338,7 @@ var Database = React.createClass({
                         </Button>}
                         {this.props.mode === 'default' &&
                         <Button className="btn-small" onClick={() =>this.setState({showModal: true})}>
-                            Show All Data
+                            Show All Public Data
                         </Button>}
                         {this.props.mode === 'default' && this.state.showModal &&
                         <Modal onRequestHide={() => this.setState({ showModal: false })}>
@@ -459,7 +459,7 @@ var VariantDetail = React.createClass({
                 </Row>
                 <Row>
                     <Col md={8} mdOffset={2}>
-                        <DisclaimerModal buttonModal onToggleMode={this.onChildToggleMode} text="Show All Data on this Variant"/>
+                        <DisclaimerModal buttonModal onToggleMode={this.onChildToggleMode} text="Show All Public Data on this Variant"/>
                     </Col>
                 </Row>
             </Grid>
