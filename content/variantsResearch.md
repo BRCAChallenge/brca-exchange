@@ -1,1 +1,1 @@
-This is all BRCA Exchange variant data. It contains information drawn from multiple databases which have been intelligently merged together, one row per variant. It is intended to provide researchers with a set of BRCA variations and annotations which is as comprehensive as possible.
+This is all BRCA Exchange public variant data. It contains information drawn from multiple databases which have been intelligently merged together, one row per variant. It is intended to provide researchers with a set of BRCA variations and annotations which is as comprehensive as possible.
