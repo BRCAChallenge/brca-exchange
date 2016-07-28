@@ -58,7 +58,8 @@ var D3Lollipop = React.createClass({
     filterAttributes: function (obj) {
         var oldObj = _(obj).pick('Genomic_Coordinate_hg38', 'Pathogenicity_default');
         var parts = oldObj.Genomic_Coordinate_hg38.split(':');
-        var chrCoordinate = parseInt(oldObj.Genomic_Coordinate_hg38.split(':')[parts.length - 2]);
+        // new format for genomic coordinates, now includes "g.", trim first two characters
+        var chrCoordinate = parseInt(parts[1].substr(2));
         var alleleChange = _.last(parts);
         var refAllele = alleleChange.split('>')[0];
         var altAllele = alleleChange.split('>')[1];
