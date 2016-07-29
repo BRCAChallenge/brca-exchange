@@ -92,11 +92,6 @@ var Community = React.createClass({
                     <Col smOffset={5}>
                         <h3>BRCA Community</h3>
                     </Col>
-                    {!auth.loggedIn() && <Col sm={1} smOffset="2"><Link to="/signup"><Button bsStyle="link">Sign up </Button></Link></Col>}
-                    {!auth.loggedIn() && <Col sm={1}><Link to="/signin"><Button bsStyle="link"> Sign in </Button></Link></Col>}
-
-                    {auth.loggedIn() && <Col sm={1} smOffset="2"><Link to="/profile"><Button bsStyle="link">Edit profile</Button></Link></Col>}
-                    {auth.loggedIn() && <Col sm={1}><Button onClick={this.logout} bsStyle="link">Sign out</Button></Col>}
 
                 </Row>
                 <Row>
@@ -105,7 +100,19 @@ var Community = React.createClass({
                     </Col>
                 </Row>
                 <Row className="btm-buffer">
-                    <Col sm={10}>
+                    {!auth.loggedIn() &&
+                        <Col sm={3} smOffset={1} mdOffset={2}>
+                            <Link to="/signup"><Button bsStyle="link">Sign up </Button></Link>
+                            <Link to="/signin"><Button bsStyle="link"> Sign in </Button></Link>
+                        </Col>}
+
+                    {auth.loggedIn() &&
+                        <Col sm={3} smOffset={1} mdOffset={2}>
+                            <Link to="/profile"><Button bsStyle="link">Edit profile</Button></Link>
+                            <Button onClick={this.logout} bsStyle="link">Sign out</Button>
+                        </Col>}
+
+                    <Col sm={6} smOffset={1} md={5} mdOffset={0}>
                         <Pagination
                             className="pagination pull-right-sm"
                             currentPage={page}
@@ -114,7 +121,7 @@ var Community = React.createClass({
                     </Col>
                 </Row>
                 <Row>
-                    <Col md={8} mdOffset={2}>
+                    <Col md={8} mdOffset={2} sm={10} smOffset={1}>
                         <Table className="community" striped bordered>
                             <tbody>
                                 {rows}
