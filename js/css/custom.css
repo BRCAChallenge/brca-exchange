@@ -328,6 +328,12 @@ th[role='columnheader'] .help, .help-target .help {
 	visibility: hidden;
 }
 
+@media (max-width: 1024px) { /* Ensures help icon is always visible on most touchscreen devices */
+    th[role='columnheader'] .help, .help-target .help {
+        visibility: visible;
+    }
+}
+
 .markdown img {
 	width: 100%
 }
@@ -338,6 +344,8 @@ th[role='columnheader'] .help, .help-target .help {
 
 .glyphicon.help {
     margin: 3px;
+    cursor: pointer;
+    z-index: 10;
 }
 .sources-fields label {
     width: 7.5em;
