@@ -18,6 +18,8 @@ try {
 	}
 }
 
+var port = process.env.BRCAPORT || 8080;
+
 module.exports = {
 	historyApiFallback: true,
 	entry: "./js/index",
@@ -25,6 +27,9 @@ module.exports = {
 		path: "build",
 		publicPath: "/",
 		filename: "[name].js"
+	},
+	devServer: {
+		port: port
 	},
 	module: {
 		loaders: [
