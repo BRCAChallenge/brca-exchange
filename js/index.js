@@ -106,7 +106,7 @@ var Home = React.createClass({
     render: function() {
         var {suggestions} = this.props;
         var logoItems = _.map(logos, ({id, logo, url}) => (
-            <li key={id}><a href={url}>
+            <li key={id} className="img-responsive"><a href={url}>
                 <img id={id} src={logo} alt={id + ' logo'} />
             </a></li>
         ));
