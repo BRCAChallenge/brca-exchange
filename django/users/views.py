@@ -8,6 +8,7 @@ from urllib2 import HTTPError
 import requests
 from django.core.mail import EmailMultiAlternatives
 from django.db import IntegrityError
+from django.db.models import Q
 from django.http import JsonResponse
 from django.template import Context
 from django.template.loader import get_template
@@ -263,8 +264,14 @@ def save_picture(filename, image):
 def users(request):
     page_num = int(request.GET.get('page_num', '0'))
     page_size = int(request.GET.get('page_size', '0'))
+    search = request.GET.get('search', '')
 
     query = MyUser.objects.filter(include_me=True).filter(is_approved=True)
+    search_query = Q()
+    for term in search.split():
+        search_query &= Q(firstName__icontains=term) | Q(lastName__icontains=term) | Q(institution__icontains=term) | Q(city__icontains=term) | Q(state__icontains=term) | Q(country__icontains=term)
+    query = query.filter(search_query)
+
     whitelist = ['id','email','firstName','lastName','title','affiliation','institution','city','state','country','phone_number','hide_number','hide_email','include_me','is_active','is_admin','comment','has_image','is_approved','email_me']
 
     count = query.count()
@@ -288,8 +295,4 @@ def user_locations(request):
     fields = ['id', 'firstName', 'lastName', 'title', 'institution', 'city', 'state', 'country', 'has_image']
     response = JsonResponse({'data': list(query.values(*fields))})
     return response
-
-
-
-
 

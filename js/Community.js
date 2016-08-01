@@ -10,6 +10,7 @@ var {Pagination} = require('react-data-components-bd2k');
 var _ = require('underscore');
 var placeholder = require('./img/placeholder.png');
 var auth = require('./auth');
+var Rx = require('rx');
 
 var Community = React.createClass({
     mixins: [PureRenderMixin, Navigation],
@@ -45,9 +46,19 @@ var Community = React.createClass({
     onChangePage: function (pageNumber) {
         this.setStateFetch({page: pageNumber});
     },
+    onChangeSearch: function (search) {
+        this.setStateFetch({search: search, page: 0});
+    },
     logout: function() {
         auth.logout();
         this.forceUpdate();
+    },
+    componentDidMount() {
+        var searchq = this.searchq = new Rx.Subject();
+        this.subs = searchq.debounce(500).subscribe(this.onChangeSearch);
+    },
+    componentWillUnmount() {
+        this.subs.dispose();
     },
     render: function () {
         var queryParams = this.context.router.getCurrentQuery();
@@ -97,6 +108,11 @@ var Community = React.createClass({
                 <Row>
                     <Col>
                         <CommunityMap />
+                    </Col>
+                </Row>
+                <Row>
+                    <Col sm={10} smOffset={1} md={8} mdOffset={2}>
+                        <CommunitySearch onChange={s => this.searchq.onNext(s)}/>
                     </Col>
                 </Row>
                 <Row className="btm-buffer">
@@ -209,6 +225,25 @@ var CommunityMap = React.createClass({
     render: function() {
         return <div id="communityMap"></div>
 
+    }
+});
+
+var CommunitySearch = React.createClass({
+    onChange: function(e) {
+        this.props.onChange(e.target.value);
+    },
+    render: function() {
+        return <div className='search-box'>
+            <form onSubmit={this.onSubmit} style={{display: 'inline'}}>
+                <input type='submit' className='input-sm'style={{display: 'none'}} />
+                <div className='text-nowrap help-target'>
+                    <div>
+                        <input className='community-search-input' placeholder='search for community members' type='text'
+                            onChange={this.onChange} />
+                    </div>
+                </div>
+            </form>
+        </div>
     }
 });
 

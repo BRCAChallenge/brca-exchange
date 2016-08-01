@@ -61,10 +61,11 @@ function data(opts) {
 }
 
 function users(opts) {
-    var {page, pageLength} = opts;
+    var {page, pageLength, search} = opts;
     var users_url = `${config.backend_url}/accounts/users/?${qs.stringify(_.pick({
         'page_num': page,
-        'page_size': pageLength
+        'page_size': pageLength,
+        'search': search
     }, v => v != null))}`;
     return Rx.DOM.get(users_url).map(xhr => JSON.parse(xhr.responseText));
 }
