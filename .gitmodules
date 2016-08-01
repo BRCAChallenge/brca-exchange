@@ -1,0 +1,3 @@
+[submodule "brca-pipeline"]
+	path = brca-pipeline
+	url = https://github.com/BD2KGenomics/brca-pipeline.git
