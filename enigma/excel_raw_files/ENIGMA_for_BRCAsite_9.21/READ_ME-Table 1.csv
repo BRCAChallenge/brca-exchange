@@ -1,0 +1,15 @@
+Spreadsheet for submitting data  to ClinVar. ,,,,
+"If you have any questions about this form, please contact us at clinvar@ncbi.nlm.nih.gov",,,,
+"When you are ready to submit, please email this spreadsheet to clinvar@ncbi.nlm.nih.gov",,,,
+,,,,
+"Please note this workbook consists of five sheets, including this one. The SubmissionInfo and Variant sheets are required. ",,,,
+,Description,Comment,,
+Sheet name,,,,
+READ_ME,This sheet. Overview of the template and general instructions.,,,
+SubmissionInfo,"To register information about the submitter, and information that pertains to all data in the submission.",REQUIRED,,
+Variant,"To register summary-level information about assertions, including the variant,  condition, and clinical significance. Aggregate-level evidence for the assertions may also be provided on this worksheet.",REQUIRED. All assertions are reported on this worksheet (columns A-AU). Information about individuals with the variant as evidence for the assertions may be provided on this worksheet as counts (columns BA-CQ) *OR* on the CaseData worksheet as individual data. Please do not provide evidence both ways to avoid double-counting.,,
+CaseData,"To register individual-level data from clinical testing or research laboratories as evidence for the assertions reported on the Variant worksheet.
+",OPTIONAL. This worksheet is used in combination with the Variant worksheet.,,
+FunctionalEvidence,"To register functional experiments as evidence for the assertions reported on the Variant worksheet. This tab is for research labs, e.g. for animal models, in vitro experiments, etc. 
+",OPTIONAL. This worksheet is used in combination with the Variant worksheet.,,
+,,,,

@@ -1,0 +1,23 @@
+"This worksheet is OPTIONAL. It is used in combination with the Variant worksheet, to provide functional evidence in support of assertions on the Variant tab.",,,,,,,,,,,,,,,,,,,,
+,Details of study and samples,,,,,,,,,,,,,"Please describe the methods used in your functional assay. If you want to report multiple methods or platforms for any line of evidence, please copy any of columns O-U  to the end as often as needed.",,,,,,
+##Linking ID,Collection method,Allele origin,Affected status,Structural variant method/analysis type,Species,Cell line,Strain/breed,Tissue,Sex,Result,Evidence citations,Citations or URLs that cannot be represented in evidence citations column,Comment on evidence,Platform type,Platform name,Method,Method purpose,Method citations,Software name and version,Software purpose
+Required. This value is used to connect a row on the Variant tab to one or more rows in the FunctionalEvidence tab. See instructions on the Variant tab.,"Required: Method used to collect the data that supports the assertion of clinical significance. Allowed values: case-control, literature only, in vitro, in vivo, reference population, research.","Required. The genetic origin of  the variant. Allowed values: biparental, de novo, germline, maternal, paternal, somatic, uniparental, unknown. Note that biparental and uniparental are intended for the context of uniparental disomy.","Required: Indicate whether or not the individual(s) had the phenotype. Allowed values: yes, no, unknown.","Required only for structural variants. Allowed values: SNP array, Oligo array, Read depth, Paired-end mapping, One end anchored assembly, Sequence alignment, Optical mapping, Curated. ","Optional. If not provided, the default is human.",Required only for reporting functional evidence performed in cell lines. Name of the cell line. Separate multiple cell lines by semicolons.,Optional. Name of strain or breed that was analyzed in this observation.,Optional. Tissue sampled to assay the variation. Free text.,"Optional. Sex of individuals studied for experimental support. Allowed values: female, male, mixed gender group. To submit gender-specific values, use one line for each.",Optional.  Free text describing the result.,"Optional. Citations documenting the evidence. Any of PubMed, PubMedCentral, DOI, NCBI Bookshelf combined with the id in that database (e.g. PMID:123456, PMCID:PMC3385229, NBK:56955).  Separate multiple citations by a semicolon.
+
+","Optional. Citations that require a URL, or that do not have an identifier in the one of the resources indicated in the Evidence citations column. Separate multiple citations/URLs by a vertical bar (|).",Optional. Free text comment on the evidence provided.,"Optional.  Type of platform used for data capture, e.g. next-gen sequencing, microarray.","Optional.  Name of platform used for data capture, e.g. HiSeq, MiSeq.","Optional.  Free text describing the experimental method used to generate support.
+
+","Optional.  The primary intent of the method used to generate the data provided in the submission. Allowed values: discovery, validation, assert pathogenicity.","Optional.  Citation(s) documenting this method. PubMed ID, in the format PMID:123456.  Multiples separated by a semicolon.",Optional.  Description of key software with explicit representation of name and version.,"Optional.  Purpose of the software. e.g. alignment, variant calling."
+Please start your submission in the next row.,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
