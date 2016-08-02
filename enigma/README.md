@@ -1,14 +1,14 @@
-####this folder documents the process of cleaning and processing the excel file containing the variants classified by ENIGMA
+##this folder documents the process of cleaning and processing the excel file containing the variants classified by ENIGMA
 
-ENIGMA excel files located at raw_files:
+####ENIGMA excel files located at raw_files:
 
 raw_files/ENIGMA_for_BRCAsite_9.21.2015.xlsx
 
 raw_files/ENIGMA_SubmissionClinVar_2016-05-31_ncbi.xlsx
 
-1. open excel file with google spreadsheet, go to the "Variant" tab
+####1. open excel file with google spreadsheet, go to the "Variant" tab
 
-2. delete the following rows:
+####2. delete the following rows:
 
     row1: ("This worksheet is REQUIRED for submission. All assertions......")
     
@@ -18,9 +18,9 @@ raw_files/ENIGMA_SubmissionClinVar_2016-05-31_ncbi.xlsx
     
     row5: (Please start your submission in ....)
 
-3. delete the columns with the following title:
+####3. delete the columns with the following title:
     
-    ##Local ID
+    \#\#Local ID
     
     Linking ID
     
@@ -39,6 +39,6 @@ raw_files/ENIGMA_SubmissionClinVar_2016-05-31_ncbi.xlsx
     click '+' above this column to add more clinical significance data
     
     Affected status
-4.  file -> download as -> Tab-separated values (tsv, .current sheet)
+####4.  file -> download as -> Tab-separated values (tsv, .current sheet)
     
     downloaded file renamed and saved as raw_files/ENIGMA_variants_batch1_9_21_2015.tsv
