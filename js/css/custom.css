@@ -270,6 +270,25 @@ div#main {
     word-wrap: break-word;
     float: left;
 }
+
+/* id helper to access the variant data table for better responsive layouts */
+#data-table-container {
+    overflow-x: visible;
+}
+
+@media only screen and (min-width: 768px) {
+    #data-table-container table {
+        table-layout: fixed;
+        min-width: 612px;
+    }
+
+    #data-table-container table td,
+    #data-table-container table th {
+        word-wrap: break-word;
+        white-space: normal;
+    }
+}
+
 /**************************************************************/
 /**********     Other                     *********************/
 /**************************************************************/
