@@ -100,8 +100,8 @@ var Community = React.createClass({
             <Grid id="main-grid">
                 <Row id="message"> {message} </Row>
                 <Row>
-                    <Col smOffset={5}>
-                        <h3>BRCA Community</h3>
+                    <Col className="text-center">
+                        <h2>We Support the BRCA Exchange</h2>
                     </Col>
 
                 </Row>
@@ -111,8 +111,18 @@ var Community = React.createClass({
                     </Col>
                 </Row>
                 <Row>
+                    <Col style={{padding: "0 0 14px 0"}} sm={10} smOffset={1} md={8} mdOffset={2}>
+                        <Col sm={6} lg={5}>
+                            <h4>Search for a community member:</h4>
+                        </Col>
+                        <Col sm={6} lg={7}>
+                            <CommunitySearch onChange={s => this.searchq.onNext(s)}/>
+                        </Col>
+                    </Col>
+                </Row>
+                <Row>
                     <Col sm={10} smOffset={1} md={8} mdOffset={2}>
-                        <CommunitySearch onChange={s => this.searchq.onNext(s)}/>
+                        <span>The BRCA Exchange supports the exchange of information about BRCA1 and BRCA2 variants. Show your support by joining our mailing list and/or listing your name below as one of our supporters.</span>
                     </Col>
                 </Row>
                 <Row className="btm-buffer">
@@ -156,7 +166,6 @@ var CommunityMap = React.createClass({
     getInitialState: () => ({ widthGroup: (window.innerWidth < 1200) ? "md" : "lg" }),
 
     handleResize: function () {
-        console.log('resize');
         var widthGroup =  (window.innerWidth < 1200) ? "md" : "lg";
         if (widthGroup != this.state.widthGroup) {
             setTimeout((function() {
@@ -238,7 +247,7 @@ var CommunitySearch = React.createClass({
                 <input type='submit' className='input-sm'style={{display: 'none'}} />
                 <div className='text-nowrap help-target'>
                     <div>
-                        <input className='community-search-input' placeholder='search for community members' type='text'
+                        <input className='community-search-input' placeholder='name, organization, city, etc.' type='text'
                             onChange={this.onChange} />
                     </div>
                 </div>
