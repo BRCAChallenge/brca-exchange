@@ -125,20 +125,22 @@ var Community = React.createClass({
                         <span>The BRCA Exchange supports the exchange of information about BRCA1 and BRCA2 variants. Show your support by joining our mailing list and/or listing your name below as one of our supporters.</span>
                     </Col>
                 </Row>
-                <Row className="btm-buffer">
+                <Row>
                     {!auth.loggedIn() &&
-                        <Col sm={3} smOffset={1} mdOffset={2}>
-                            <Link to="/signup"><Button bsStyle="link">Sign up </Button></Link>
-                            <Link to="/signin"><Button bsStyle="link"> Sign in </Button></Link>
+                        <Col sm={10} smOffset={1} md={8} mdOffset={2}>
+                            <Link to="/mailinglist"><Button>Join the mailing list only</Button></Link>&nbsp;
+                            <Link to="/signup"><Button>Join the mailing list and add me to the supporters</Button></Link>&nbsp;
+                            <Link to="/signin"><Button>Login to your profile</Button></Link>
                         </Col>}
 
                     {auth.loggedIn() &&
-                        <Col sm={3} smOffset={1} mdOffset={2}>
-                            <Link to="/profile"><Button bsStyle="link">Edit profile</Button></Link>
-                            <Button onClick={this.logout} bsStyle="link">Sign out</Button>
+                        <Col sm={10} smOffset={1} md={8} mdOffset={2}>
+                            <Link to="/profile"><Button>Edit profile</Button></Link>
+                            <Button onClick={this.logout}>Sign out</Button>
                         </Col>}
-
-                    <Col sm={6} smOffset={1} md={5} mdOffset={0}>
+                </Row>
+                <Row className="btm-buffer">
+                    <Col sm={10} smOffset={1} md={8} mdOffset={2}>
                         <Pagination
                             className="pagination pull-right-sm"
                             currentPage={page}

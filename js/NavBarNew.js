@@ -66,7 +66,8 @@ var NavBarNew = React.createClass({
                 <Navbar fixedTop brand={brand} toggleNavKey={0}>
                     <Nav eventKey={0} navbar right>
                         <NavLink to='/'>Home</NavLink>
-                        <DropdownButton className={this.activePath(path, "about")} ref='about' title='About'>
+                        <NavLink to='/variants'>Variants</NavLink>
+                        <DropdownButton className={this.activePath(path, "about")} ref='about' title='More'>
                             <NavLink onClick={this.close} to='/about/variation'>
                                 BRCA1, BRCA2, and Cancer
                             </NavLink>
@@ -77,9 +78,8 @@ var NavBarNew = React.createClass({
                                 This Site
                             </NavLink>
                         </DropdownButton>
-                        <NavLink to='/variants'>Variants</NavLink>
-                        <NavLink to='/help'>Help</NavLink>
                         <NavLink to='/community'>Community</NavLink>
+                        <NavLink to='/help'>Help</NavLink>
                     </Nav>
                 </Navbar>
             </div>
