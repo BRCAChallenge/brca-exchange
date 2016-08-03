@@ -1,0 +1,130 @@
+#!/usr/bin/env python2.7
+
+"""
+Charles Markello
+5/22/2015
+
+Description:
+	Python script 'umd2vcf' takes in a umd table flat file and converts it to
+	vcf format. Used primarily for the purposes of data extraction for integration
+	into the ga4gh reference server.
+
+	Version 1, the basic flat representation of sample data
+"""
+
+
+from __future__ import print_function, division
+import argparse
+import sys
+import os
+from collections import defaultdict
+import pyhgvs as hgvs
+import pyhgvs.utils as hgvs_utils
+from pygr.seqdb import SequenceFileDB
+
+
+def parse_args():
+	"""
+	Description:
+		function 'parse_args' parses arguments from command-line and returns an argparse
+		object containing the arguments and their values. Default values are 'False' if option
+		is not listed in the command, else the option value is set to True.
+	"""
+	parser = argparse.ArgumentParser(description='Convert UMD database table to VCF format.')
+	parser.add_argument('-i', '--inUMD', type=argparse.FileType('r'),
+		help='Input UMD file for conversion.')
+	parser.add_argument('-a', '--inAnnot', default='/hive/groups/cgl/brca/phase1/data/resources/umdAnnotation',
+		help='Input UMD annotation file for conversion. Tab-delimited with 1st column representing\n\
+		field name and 2nd column representing the field description. Default(/hive/groups/cgl/brca/phase1/data/resources/umdAnnotation)')
+	parser.add_argument('-o', '--out', type=argparse.FileType('w'),
+		help='Ouput VCF file result.')
+	parser.add_argument('-b', '--brca', type=int,
+		help='BRCA gene which UMD variant table was derrived from. (1 for BRCA1 or 2 for BRCA2).')
+	parser.add_argument('-g', '--gpath', default='/hive/groups/cgl/brca/phase1/data/resources/hg19.fa',
+		help='Whole path to genome file. Default: (/hive/groups/cgl/brca/phase1/data/resources/hg19.fa)')
+	parser.add_argument('-r', '--rpath', default='/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.gp',
+		help='Whole path to refSeq file. Default: (/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.gp)')
+
+	options = parser.parse_args()
+	return options
+
+def main(args):
+	options = parse_args()
+	umdFile = options.inUMD
+	annotFile_path = options.inAnnot
+	vcfFile = options.out
+	brcaGene = options.brca
+	genome_path = options.gpath
+	refseq_path = options.rpath
+
+	with open(refseq_path) as infile:
+		transcripts = hgvs_utils.read_transcripts(infile)
+
+	genome = SequenceFileDB(genome_path)
+
+	def get_transcript(name):
+		return transcripts.get(name)
+
+	# open and store annotation fields in a dictionary
+	annotDict = defaultdict()
+	with open(annotFile_path) as inAnnotFile:
+		for line in inAnnotFile:
+			line = line.strip().split('\t')
+			annotDict[line[0]] = line[1]
+
+	# print header lines to vcf file
+	print('##fileformat=VCFv4.0', file=vcfFile)
+	print('##source=UMD', file=vcfFile)
+	print('##reference=GRCh37', file=vcfFile)
+	for annotation, description in annotDict.items():
+		print('##INFO=<ID={0},Number=.,Type=String,Description="{1}">'.format(annotation.replace(' ', '_'),description), file=vcfFile)
+	print('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO', file=vcfFile)
+
+	# extract INFO field column indicies for annotation terms
+	headerline = umdFile.readline().strip().replace(' ', '_').split('\t')
+
+	fieldIdxDict = defaultdict()
+	for index, field in enumerate(headerline):
+		fieldIdxDict[field] = index
+
+	# extract info from each line of the bic flat file
+	for line in umdFile:
+		INFO_field = list()
+		parsedLine = line.strip().split('\t')
+		for field in headerline:
+			field_index = fieldIdxDict[field]
+			field_value = parsedLine[field_index]
+			if ';' in field_value:
+				field_value = field_value.replace(';','')
+			INFO_field.append('{0}={1}'.format(field,field_value))
+
+		# extract hgvs cDNA term for variant and cleanup formatting
+		hgvsName = parsedLine[fieldIdxDict['Variation_name_(cDNA_level)']]
+		if hgvsName == '-':
+			print(parsedLine)
+			continue
+		queryHgvsName = hgvsName
+		# Handle edge cases
+		if 'c.IVS' in hgvsName:
+			hgvsName = hgvsName.split('(')[1].strip(')')
+			queryHgvsName = hgvsName
+		if 'Ins' in hgvsName:
+			queryHgvsName = hgvsName.replace('Ins', 'ins')
+		if ' ?' in hgvsName:
+			queryHgvsName = hgvsName.replace(' ?', '')
+		if '2T>\'' in hgvsName:
+			continue
+		if brcaGene == 1:
+			queryHgvsName = 'NM_007294.2:'+queryHgvsName
+		elif brcaGene == 2:
+			queryHgvsName = 'NM_000059.3:'+queryHgvsName
+		INFO_field_string = ';'.join(INFO_field)
+		chrom, offset, ref, alt = hgvs.parse_hgvs_name(queryHgvsName, genome, get_transcript=get_transcript)
+		chrom = chrom.replace('chr', '')
+		print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(chrom,offset,queryHgvsName,ref,alt,INFO_field_string), file=vcfFile)
+
+if __name__ == "__main__":
+	sys.exit(main(sys.argv))
+
+
+

@@ -1,0 +1,9 @@
+# Pycharm thing
+*.idea
+*data/
+*.ipynb_checkpoints
+*.pyc
+*.nfs*
+*dumps
+*.py.swp
+*/temp_variants.pkl

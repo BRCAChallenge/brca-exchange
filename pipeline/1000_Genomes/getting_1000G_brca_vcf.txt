@@ -1,0 +1,25 @@
+download chr13, chr17 vcf file from 10k genome ftp site:
+ftp:  ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/
+
+chr13 (BRCA2)
+
+file: release/20130502/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
+size of file before decompression: ~400Mb, size after decompression: 27Gb
+number of rows: 2858168 (252 rows of headers)
+number of columns: 2513 (2503 columns of samples/callsets)
+BRCA2 position: chr13:32889617-32973809 84193 bp
+line number of the file corresponding to BRCA2: 438362-440648 (position 32889656-32973779)
+ways to get those lines: head -n 440648 chr13.vcf | tail -2286 > chr13.brca2.vcf
+
+
+chr17 (BRCA1)
+file: release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
+size of file before decompression: ~400Mb, size after decompression: 22Gb
+number of rows: 2329540 (252 rows of headers)
+number of columns: 2513 (2503 columns of samples/callsets)
+BRCA2 position: chr17:41196312-41277500 81189 bp
+line number of the file corresponding to BRCA2: 1144380-1146432 (position 41196363-41277492)
+ways to get those lines: head -1146432 chr17.vcf | tail -2052 > chr17.brca1.vcf
+check to find out that header of chr13 and chr17 is SAME
+
+cacatenate header, chr13.brca2.vcf, chr17.brca1.vcf into one file: 10k_genome.brca.vcf
