@@ -19,7 +19,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from brca import settings, site_settings
-from .models import MyUser
+from .models import MyUser, MailingListEmail
 
 
 @api_view(['GET'])
@@ -296,3 +296,35 @@ def user_locations(request):
     response = JsonResponse({'data': list(query.values(*fields))})
     return response
 
+def mailinglist(request):
+    email = request.POST.get('email')
+
+    # Check the CAPTCHA
+    try:
+        captcha = request.POST.get('captcha')
+        post_data = {'secret': settings.CAPTCHA_SECRET,
+                     'response': captcha}
+        response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=post_data)
+        content = json.loads(response.content)
+        response = {'success': content['success']}
+    except HTTPError:
+        return JsonResponse({'success': False, 'error': 'Wrong CAPTCHA'})
+
+    try:
+        entry = MailingListEmail.objects.create(email = request.POST.get('email'))
+        entry.save()
+    except IntegrityError:
+        return JsonResponse({'success': False, 'error': 'This email address already exists'})
+
+    # Send confirmation email
+    plaintext_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'mailinglist_email.txt'))
+    html_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'mailinglist_email.html'))
+
+    subject, from_email, to = 'BRCA Exchange Mailing List', 'noreply@brcaexchange.org', email
+    text_content = plaintext_email.render()
+    html_content = html_email.render()
+    msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
+
+    return JsonResponse({'success': True}) 

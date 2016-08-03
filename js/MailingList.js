@@ -63,7 +63,7 @@ var MailingList = React.createClass({
         if (this.refs.contactForm.isValid()) {
             var formData = this.refs.contactForm.getFormData();
             this.setState({submitted: formData});
-            var url = config.backend_url + '/accounts/register/';
+            var url = config.backend_url + '/accounts/mailinglist/';
 
             var fd = new FormData();
             $.each(formData, function (k, v) {
@@ -79,7 +79,7 @@ var MailingList = React.createClass({
                 } else {
                     var message = responseData.error;
                     if (message === null) {
-                        message = "Could not complete registration";
+                        message = "Could not complete mailing list signup";
                     }
                     showFailure(message)
                 }
@@ -97,10 +97,10 @@ var MailingListForm = React.createClass({
         return {errors: {}, file: '', imagePreviewUrl: null}
     },
     componentDidMount: function() {
-        grecaptcha.render(this.refs.signupCAPTCHA.getDOMNode(), {sitekey: config.captcha_key});
+        grecaptcha.render(this.refs.mailinglistCAPTCHA.getDOMNode(), {sitekey: config.captcha_key});
     },
     isValid: function () {
-        var compulsory_fields = ['email', 'email_confirm', 'password', 'password_confirm'];
+        var compulsory_fields = ['email', 'email_confirm'];
         var errors = {};
         if (this.refs.email.getDOMNode().value != this.refs.email_confirm.getDOMNode().value) {
             errors["email_confirm"] = "The emails don't match"
@@ -145,7 +145,7 @@ var MailingListForm = React.createClass({
         )
     },
     renderCAPTCHA: function(id, label) {
-        return this.renderField(id, label, <div ref="signupCAPTCHA"></div>);
+        return this.renderField(id, label, <div ref="mailinglistCAPTCHA"></div>);
     },
     renderField: function (id, label, field) {
         return <div className={$c('form-group', {'has-error': id in this.state.errors})}>
