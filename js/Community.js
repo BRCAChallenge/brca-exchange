@@ -121,7 +121,7 @@ var Community = React.createClass({
                     </Col>
                 </Row>
                 <Row>
-                    <Col sm={10} smOffset={1} md={8} mdOffset={2}>
+                    <Col sm={10} smOffset={1} md={8} mdOffset={2} style={{paddingBottom: "14px"}}>
                         <span>The BRCA Exchange supports the exchange of information about BRCA1 and BRCA2 variants. Show your support by joining our mailing list and/or listing your name below as one of our supporters.</span>
                     </Col>
                 </Row>

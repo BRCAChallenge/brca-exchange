@@ -389,3 +389,21 @@ th[role='columnheader'] .help, .help-target .help {
 .caret {
     border-top: 4px dashed;
 }
+
+.slide-fade-in {
+    overflow: hidden;
+    animation-duration: 1s;
+    animation-name: slide-fade-in;
+    border-radius: 10px;
+}
+@keyframes slide-fade-in {
+    from {
+        max-height: 0px;
+        opacity: 0;
+    }
+    to {
+        max-height: 100px;
+        opacity: 1;
+    }
+}
+

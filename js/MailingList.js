@@ -28,7 +28,6 @@ var MailingList = React.createClass({
                 <Row>
                     <Col sm={10} smOffset={1} md={8} mdOffset={2} className="text-center">
                         <h2>Thank you for signing up for our mailing list.</h2>
-                        <h2>You will receive an email asking you to confirm your email address shortly.</h2>
                     </Col>
                 </Row>
                 <Row>

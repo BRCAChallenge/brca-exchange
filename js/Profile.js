@@ -111,7 +111,8 @@ var EditProfileForm = React.createClass({
             if (data.user.has_image) {
                 imagePreviewUrl = config.backend_url + '/site_media/media/' + data.user['id']
             }
-            this.setState({data : data.user, imagePreviewUrl: imagePreviewUrl});
+            var otherAffiliation = ! AFFILIATION.has(data.user.affiliation);
+            this.setState({data : data.user, imagePreviewUrl: imagePreviewUrl, otherAffiliation: otherAffiliation});
         };
         $.ajax({
             type: 'GET',
@@ -155,7 +156,7 @@ var EditProfileForm = React.createClass({
             , firstName: this.refs.firstName.getDOMNode().value
             , lastName: this.refs.lastName.getDOMNode().value
             , title: title
-            , affiliation: this.refs.affiliation.getDOMNode().value
+            , affiliation: (this.state.otherAffiliation ? this.refs.other_affiliation : this.refs.affiliation).getDOMNode().value
             , institution: this.refs.institution.getDOMNode().value
             , city: this.refs.city.getDOMNode().value
             , state: this.refs.state.getDOMNode().value
@@ -193,7 +194,11 @@ var EditProfileForm = React.createClass({
         reader.readAsDataURL(file)
     },
     render: function () {
-    return <div className="form-horizontal">
+        var onChange = function() {
+            var value = this.refs.affiliation.getDOMNode().value;
+            this.setState({otherAffiliation: ! AFFILIATION.has(value)});
+        }
+        return <div className="form-horizontal" onChange={onChange.bind(this)}>
             {this.renderImageUpload('image', 'Profile picture')}
             {this.renderPassword('password', 'Password')}
             {this.renderPassword('password_confirm', 'Confirm Password')}
@@ -204,6 +209,8 @@ var EditProfileForm = React.createClass({
                 , defaultCheckedValue: this.state.data.title
             })}
             {this.renderSelect('affiliation', 'Affiliation', AFFILIATION, this.state.data.affiliation)}
+            {this.state.otherAffiliation &&
+                <div className="slide-fade-in">{this.renderOtherTextInput('other_affiliation', 'affiliation', <span style={{color: "#D00000"}}>Please Specify:</span>, this.state.data.affiliation)}</div>}
             {this.renderTextInput('institution', 'Institution, Hospital or Company')}
             {this.renderTextInput('city', 'City', this.state.data.city)}
             {this.renderTextInput('state', 'State or Province', this.state.data.state)}
@@ -245,6 +252,12 @@ var EditProfileForm = React.createClass({
                 {error}
             </div>)
     },
+    renderOtherTextInput: function (id, ref, label, defaultValue) {
+        var handleChange = () => {var oldData = this.state.data; oldData[ref]=this.refs[id].value; this.setState({data: oldData})};
+        return this.renderField(id, label,
+            <input type="text" className="form-control" id={id} ref={id} value={defaultValue} onChange={handleChange}/>
+        )
+    },
     renderTextInput: function (id, label, defaultValue) {
         var handleChange = () => {var oldData = this.state.data; oldData[id]=this.refs[id].value; this.setState({data: oldData})};
         return this.renderField(id, label,
@@ -263,9 +276,12 @@ var EditProfileForm = React.createClass({
         )
     },
     renderSelect: function (id, label, values, defaultValue) {
+        var other = !AFFILIATION.has(defaultValue);
         var options = values.map(function (value) {
-            var selected=defaultValue===value;
-            return <option key={id+value} value={value} selected={selected}>{value}</option>
+            var selected=(other && value === "Other") || defaultValue===(value instanceof Array ? value[1] : value);
+            return value instanceof Array
+                ? <option key={id+value[1]} value={value[1]} selected={selected}>{value[0]}</option>
+                : <option key={id+value} value={value} selected={selected}>{value}</option>
         });
         return this.renderField(id, label,
             <select className="form-control" id={id} ref={id}>
