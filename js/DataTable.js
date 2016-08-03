@@ -216,10 +216,6 @@ var DataTable = React.createClass({
                     <Col sm={10} smOffset={1}>
                         {lollipopOpen && this.state.windowWidth > 991 &&
                         <Lollipop fetch={this.props.fetchLollipop} opts={this.lollipopOpts()} onHeaderClick={this.props.onHeaderClick} onRowClick={this.props.onRowClick}/> }
-
-                        {lollipopOpen && this.state.windowWidth <= 991 &&
-                        <div className="alert alert-danger">Please use a larger screen size to view this interactive chart.</div>}
-
                     </Col>
                 </Row>
                 <Row id="download" className="btm-buffer">

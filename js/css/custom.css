@@ -308,6 +308,13 @@ html {
     margin-right: 1em;
 }
 
+/* Hide lollipop chart toggle if screen is too small to display chart */
+@media only screen and (max-width: 991px) {
+    #lollipop-chart-toggle {
+        display: none;
+    }
+}
+
 .checkbox input[type="checkbox"] {
     margin-right: 0.4em;
 }
