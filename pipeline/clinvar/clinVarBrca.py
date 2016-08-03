@@ -10,7 +10,6 @@ record into a buffer.  When it comes to the end of a ClinVarSet
 record, it checks whether the record contains a BRCA variant, and if
 so, it prints it.  If it's not reading a ClinVarSet record, then it
 echoes each line to stdout.
-
 """
 import argparse
 import clinvar 

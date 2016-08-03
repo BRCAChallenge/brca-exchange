@@ -14,6 +14,43 @@ def printHeader():
                      "DateLastUpdated", "SCV", "ID", "Origin", "Method",
                      "Genomic_Coordinate", "Symbol", "Protein")))
 
+def processSubmission(submissionSet, assembly):
+    ra = submissionSet.referenceAssertion
+    for oa in submissionSet.otherAssertions.values():
+        submitter = oa.submitter
+        variant = ra.variant
+        hgvs = re.sub("\(" + "(BRCA[1|2])" + "\)", 
+                      "", variant.name.split()[0])
+        proteinChange = None
+        if variant.attribute.has_key("HGVS, protein, RefSeq"):
+            proteinChange = variant.attribute["HGVS, protein, RefSeq"]
+        chrom = None
+        start = None
+        referenceAllele = None
+        alternateAllele = None
+        if assembly in variant.coordinates:
+            genomicData = variant.coordinates[assembly]
+            chrom = genomicData.chrom
+            start = genomicData.start
+            referenceAllele = genomicData.referenceAllele
+            alternateAllele = genomicData.alternateAllele
+        genomicCoordinate = "chr%s:%s:%s>%s" % (chrom, start, referenceAllele,
+                                                alternateAllele)
+        # 
+        # Omit the variants that don't have any genomic start coordinate indicated.
+        if start != None and start != "None" and start != "NA":
+            print("\t".join((str(hgvs),  oa.submitter.encode('utf-8'), 
+                             str(oa.clinicalSignificance),
+                             str(oa.dateLastUpdated),
+                             str(oa.accession),
+                             str(oa.id),
+                             str(oa.origin),
+                             str(oa.method),
+                             genomicCoordinate,
+                             str(variant.geneSymbol),
+                             str(proteinChange)
+                         )))
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -23,49 +60,25 @@ def main():
 
     printHeader()
 
-
-    tree = ET.parse(args.clinVarXmlFilename)
-    root = tree.getroot()
-    for cvs in root.findall("ClinVarSet"):
-        if clinvar.isCurrent(cvs):
-            submissionSet = clinvar.clinVarSet(cvs)
-            ra = submissionSet.referenceAssertion
-            for oa in submissionSet.otherAssertions.values():
-                submitter = oa.submitter
-                variant = ra.variant
-                hgvs = re.sub("\(" + "(BRCA[1|2])" + "\)", 
-                              "", variant.name.split()[0])
-                proteinChange = None
-                if variant.attribute.has_key("HGVS, protein, RefSeq"):
-                    proteinChange = variant.attribute["HGVS, protein, RefSeq"]
-                chrom = None
-                start = None
-                referenceAllele = None
-                alternateAllele = None
-                if args.assembly in variant.coordinates:
-                    genomicData = variant.coordinates[args.assembly]
-                    chrom = genomicData.chrom
-                    start = genomicData.start
-                    referenceAllele = genomicData.referenceAllele
-                    alternateAllele = genomicData.alternateAllele
-                genomicCoordinate = "chr%s:%s:%s>%s" % (chrom,
-                                                        start, referenceAllele,
-                                                        alternateAllele)
-                # 
-                # Omit the variants that don't have any genomic start coordinate indicated.
-                if start != None and start != "NA":
-                    print("\t".join((str(hgvs),  oa.submitter.encode('utf-8'), 
-                                     str(oa.clinicalSignificance),
-                                     str(oa.dateLastUpdated),
-                                     str(oa.accession),
-                                     str(oa.id),
-                                     str(oa.origin),
-                                     str(oa.method),
-                                     genomicCoordinate,
-                                     str(variant.geneSymbol),
-                                     str(proteinChange)
-                                 )))
-                        
+    inputBuffer = ""
+    with open(args.clinVarXmlFilename) as inputFile:
+        inClinVarSet = False
+        for line in inputFile:
+            #print "inClinVarSet", inClinVarSet, " input:", line.rstrip()
+            if "<ClinVarSet" in line:
+                inHeader = False
+                inputBuffer = line
+                inClinVarSet = True
+            elif "</ClinVarSet>" in line:
+                inputBuffer += line
+                inClinVarSet = False
+                cvs = ET.fromstring(inputBuffer)
+                if clinvar.isCurrent(cvs):
+                    submissionSet = clinvar.clinVarSet(cvs)
+                    processSubmission(submissionSet, args.assembly)
+                inputBuffer = None
+            elif inClinVarSet:
+                inputBuffer += line
 
 if __name__ == "__main__":
     # execute only if run as a script
