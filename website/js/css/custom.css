@@ -1,0 +1,387 @@
+/* Note that bootstrap 3 media sizes are as follows:
+  @media(max-width:767px){}  // xs
+  @media(min-width:768px){}  // sm
+  @media(min-width:992px){}  // md
+  @media(min-width:1200px){} // lg
+*/
+
+/*
+ * Helper classes that pull-right for displays equal to or
+ * larger than the indicated size.
+ */
+@media (min-width: 768px) {
+	.pull-right-sm {
+		float: right;
+	}
+}
+@media (min-width: 992px) {
+	.pull-right-sm, .pull-right-md {
+		float: right;
+	}
+}
+@media (min-width: 1200px) {
+	.pull-right-sm, .pull-right-md, .pull-right-lg {
+		float: right;
+	}
+}
+/**************************************************************/
+/**********         NavBar                *********************/
+/**************************************************************/
+
+.navbar-container {
+    height: 80px;
+}
+
+.nav > li > a {
+    padding-left: 1em;
+    padding-right: 1em;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.navbar-brand {
+    margin: 0 1em 0 1em;
+    padding: 0;
+    float: left;
+}
+.navbar-brand h1 {
+    font-stretch: condensed;
+    margin: 0;
+    padding: 0;
+    float: left;
+}
+
+.navbar-brand  span.BRCA {
+    color: #C03657;
+}
+
+.navbar-brand span.exchange {
+    color: #E8A2A0;
+}
+
+#research-label {
+    margin: 0 1em 0 1em;
+    font-size: 75%;
+}
+
+
+
+.navbar {
+    min-height: 70px; /* XXX This value MUST match the setting in index.js */
+    padding-top: 10px
+}
+
+.navbar-default .navbar-nav > li > a.active {
+   color: #C03657;
+}
+
+
+.navbar-nav li.active span {
+   color: #C03657;
+}
+
+.navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:hover, .navbar-default .navbar-nav > .active > a:focus {
+    background-color: transparent;
+}
+
+/**************************************************************/
+/**********     Variant Search box       *********************/
+/**************************************************************/
+
+.home .search-box {
+    padding-top: 60px;
+    padding-bottom: 60px;
+}
+
+/* change input width to a percentage of its container 
+ * font-size is a percentage of its viewpoint width (2.2%)
+ *
+ * */
+.search-box input {
+    width: 100%;
+    border: 1px solid #E8A2A0;
+    text-align: left;
+    font-size: 1.22em;
+    height: 2.5em;
+    text-indent: 1em;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+input:focus {
+    border: 1px solid #C03657;
+    outline: none;
+}
+
+.search-box Button {
+    border: 0;
+}
+
+.search-box Button:hover {
+    background-color: transparent;    
+}
+
+/**************************************************************/
+/**********     Variant pagination        *********************/
+/**************************************************************/
+.pagination {
+	margin: 0;
+}
+
+/**************************************************************/
+/**********     Homepage text             *********************/
+/**************************************************************/
+
+.jumbotron {
+    background-color: rgba(169,169,169, 0.13);
+    margin: 20px;
+}
+
+/**************************************************************/
+/**********     Homepage logo             *********************/
+/**************************************************************/
+
+.logo-block {
+    margin: 80px 0 0 0;
+    width: auto;
+    text-align: center;
+}
+
+@media only screen and (min-width : 768px) {
+    .logo-block {
+        margin: 80px 100px;
+    }
+}
+
+.logo-item {
+    height: 120px;
+    padding: 10px;
+    text-align: center;
+}
+
+.logo-item img {
+    max-height: 100%;
+    max-width: 300px;
+    width: auto;
+    vertical-align: middle;
+}
+
+#BRCA-Exchange {
+    padding: 10px 0px;
+}
+
+#GA4GH {
+    padding: 0px 10px;
+}
+
+#human-variome-project {
+    padding: 5px 0px;
+}
+
+#ClinGen {
+    padding: 5px 0px;
+}
+
+#ENIGMA {
+    padding: 0px;
+}
+
+#CIMBA {
+    padding: 0px 10px 0px;
+}
+
+/**************************************************************/
+/**********     Footer                    *********************/
+/**************************************************************/
+div#main {
+    padding-bottom: 120px;
+    border-bottom: 1px solid rgb(220,220,220);
+}
+
+.footer {
+    position: absolute;
+    margin-top: 120px;
+    height: 90px;
+    width: 100%;
+    text-align: center;
+    font-size: 15px;
+}
+
+.footer img {
+    width: 55px;
+    padding-top: 10px;
+}
+
+.footer li {
+    display: inline-block;
+    padding: 10px;
+}
+
+.footer ul {
+    padding: 30px 0 30px 0;
+}
+
+/**************************************************************/
+/**********     disclaimer                *********************/
+/**************************************************************/
+.modal-content .markdown {
+    padding: 40px;
+    text-align: left;
+}
+
+.modal-content button {
+    margin: 0px 0px 40px 40px;
+    text-align: left;
+}
+
+/**************************************************************/
+/**********     Table                     *********************/
+/**************************************************************/
+
+.table th>span:first-child {
+    position: relative;
+}
+
+.table th {
+    position: relative;
+}
+
+.sort-icon:after {
+    position: absolute;
+    right: 1px;
+    bottom: 1px;
+}
+
+.table th .glyphicon.help {
+    position: absolute;
+}
+
+.table.row-clickable tbody > tr {
+	cursor: pointer;
+}
+
+.table.row-clickable tbody > tr > td > * {
+	cursor: text;
+}
+
+.row-wrap {
+    width: 600px;
+    word-wrap: break-word;
+    float: left;
+}
+
+/* id helper to access the variant data table for better responsive layouts */
+#data-table-container {
+    overflow-x: visible;
+}
+
+@media only screen and (min-width: 768px) {
+    #data-table-container table {
+        table-layout: fixed;
+        min-width: 612px;
+    }
+
+    #data-table-container table td,
+    #data-table-container table th {
+        word-wrap: break-word;
+        white-space: normal;
+    }
+}
+
+/**************************************************************/
+/**********     Other                     *********************/
+/**************************************************************/
+html {
+    font-size: 10px;
+}
+
+.form-group label {
+    margin-right: 1em;
+}
+
+#filters .panel-body {
+    padding: 0.4em;
+}
+
+#filters .form-inline .form-group {
+    margin-right: 1em;
+}
+
+/* Hide lollipop chart toggle if screen is too small to display chart */
+@media only screen and (max-width: 991px) {
+    #lollipop-chart-toggle {
+        display: none;
+    }
+}
+
+.checkbox input[type="checkbox"] {
+    margin-right: 0.4em;
+}
+
+.btm-buffer {
+    margin-bottom: 1em;
+}
+
+.top-buffer {
+    margin-top: 1em;
+}
+
+.rgt-buffer {
+    margin-right: 1em;
+}
+
+#main-grid {
+    margin-top: 40px;
+}
+
+.superscript {
+	font-size: 80%;
+	position: relative;
+	top: -10px;
+}
+
+@keyframes emphasis {
+	from {background-color: bisque;}
+	to {background-color: white;}
+}
+
+th[role='columnheader']:hover .help, .help-target:hover .help {
+	visibility: visible;
+}
+
+th[role='columnheader'] .help, .help-target .help {
+	visibility: hidden;
+}
+
+@media (max-width: 1024px) { /* Ensures help icon is always visible on most touchscreen devices */
+    th[role='columnheader'] .help, .help-target .help {
+        visibility: visible;
+    }
+}
+
+.markdown img {
+	width: 100%
+}
+
+.Variant-detail-title {
+    margin: 20px;
+}
+
+.glyphicon.help {
+    margin: 3px;
+    cursor: pointer;
+    z-index: 10;
+}
+.sources-fields label {
+    width: 7.5em;
+}
+
+.avatar {
+    width: 120px;
+    height: auto;
+}
+
+.caret {
+    border-top: 4px dashed;
+}
