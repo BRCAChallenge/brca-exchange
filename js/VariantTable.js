@@ -465,7 +465,7 @@ var ResearchVariantTableSupplier = function (Component) {
             return <Button className="btn-sm rgt-buffer" download="variants.csv" href={callback()}>Download</Button>;
         },
         getLollipopButton: function (callback, isOpen) {
-            return <Button className="btn-sm rgt-buffer"
+            return <Button id="lollipop-chart-toggle" className="btn-sm rgt-buffer"
                            onClick={callback}>{(isOpen ? 'Hide' : 'Show' ) + ' Lollipop Chart'}</Button>
         },
 
