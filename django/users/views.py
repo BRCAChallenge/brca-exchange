@@ -288,12 +288,14 @@ def users(request):
             user['phone_number'] = ""
 
     response = JsonResponse({'data': data, 'count': count})
+    response['Access-Control-Allow-Origin'] = '*'
     return response
 
 def user_locations(request):
     query = MyUser.objects.filter(include_me=True).filter(is_approved=True)
     fields = ['id', 'firstName', 'lastName', 'title', 'institution', 'city', 'state', 'country', 'has_image']
     response = JsonResponse({'data': list(query.values(*fields))})
+    response['Access-Control-Allow-Origin'] = '*'
     return response
 
 def mailinglist(request):
@@ -307,24 +309,21 @@ def mailinglist(request):
         response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=post_data)
         content = json.loads(response.content)
         response = {'success': content['success']}
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
     except HTTPError:
-        return JsonResponse({'success': False, 'error': 'Wrong CAPTCHA'})
+        response = JsonResponse({'success': False, 'error': 'Wrong CAPTCHA'})
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
 
     try:
         entry = MailingListEmail.objects.create(email = request.POST.get('email'))
         entry.save()
     except IntegrityError:
-        return JsonResponse({'success': False, 'error': 'This email address already exists'})
+        response = JsonResponse({'success': False, 'error': 'This email address already exists'})
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
 
-    # Send confirmation email
-    plaintext_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'mailinglist_email.txt'))
-    html_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'mailinglist_email.html'))
-
-    subject, from_email, to = 'BRCA Exchange Mailing List', 'noreply@brcaexchange.org', email
-    text_content = plaintext_email.render()
-    html_content = html_email.render()
-    msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
-    msg.attach_alternative(html_content, "text/html")
-    msg.send()
-
-    return JsonResponse({'success': True}) 
+    response = JsonResponse({'success': True}) 
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
