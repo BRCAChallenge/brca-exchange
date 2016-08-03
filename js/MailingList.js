@@ -23,8 +23,27 @@ var MailingList = React.createClass({
                 <p>{this.state.error}</p>
             </div>
         }
-        return (
-            <Grid id="main-grid">
+        if (this.state.success) {
+            return <Grid id="main-grid">
+                <Row>
+                    <Col sm={10} smOffset={1} md={8} mdOffset={2} className="text-center">
+                        <h2>Thank you for signing up for our mailing list.</h2>
+                        <h2>You will receive an email asking you to confirm your email address shortly.</h2>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col sm={10} smOffset={1} md={8} mdOffset={2} className="text-center">
+                        <h4>Would you also like to be listed as part of the BRCA community? This is a great way to show your support as well as make it easier for collaborators and colleagues to find you.</h4>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col sm={10} smOffset={1} md={8} mdOffset={2} className="text-center">
+                        <Link to="/signup"><Button>Join our Community Space!</Button></Link>
+                    </Col>
+                </Row>
+            </Grid>
+        } else {
+            return <Grid id="main-grid">
                 <Row id="message">
                     {message}
                 </Row>
@@ -47,7 +66,8 @@ var MailingList = React.createClass({
                         </Button>
                     </Col>
                 </Row>
-            </Grid>)
+            </Grid>
+        }
     },
 
     handleChange: function (field, e) {
@@ -57,7 +77,7 @@ var MailingList = React.createClass({
     },
 
     handleSubmit: function () {
-        var showSuccess = () => {this.transitionTo('/community', null, {registrationSuccess:true})};
+        var showSuccess = () => this.setState({success: true});
         var showFailure = (msg => {this.setState({error: msg})});
 
         if (this.refs.contactForm.isValid()) {

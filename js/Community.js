@@ -139,7 +139,7 @@ var Community = React.createClass({
                             <Button onClick={this.logout}>Sign out</Button>
                         </Col>}
                 </Row>
-                <Row className="btm-buffer">
+                <Row style={{paddingTop: "14px"}} className="btm-buffer">
                     <Col sm={10} smOffset={1} md={8} mdOffset={2}>
                         <Pagination
                             className="pagination pull-right-sm"

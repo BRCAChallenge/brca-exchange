@@ -306,11 +306,9 @@ def mailinglist(request):
         captcha = request.POST.get('captcha')
         post_data = {'secret': settings.CAPTCHA_SECRET,
                      'response': captcha}
-        response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=post_data)
-        content = json.loads(response.content)
-        response = {'success': content['success']}
-        response['Access-Control-Allow-Origin'] = '*'
-        return response
+        resp = requests.post('https://www.google.com/recaptcha/api/siteverify', data=post_data)
+        content = json.loads(resp.content)
+        response = JsonResponse({'success': content['success']})
     except HTTPError:
         response = JsonResponse({'success': False, 'error': 'Wrong CAPTCHA'})
         response['Access-Control-Allow-Origin'] = '*'
