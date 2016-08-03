@@ -1,6 +1,0 @@
-[submodule "brca-pipeline"]
-	path = brca-pipeline
-	url = git@github.com:BD2KGenomics/brca-pipeline.git
-[submodule "brca-website"]
-	path = brca-website
-	url = git@github.com:BD2KGenomics/brca-website.git
