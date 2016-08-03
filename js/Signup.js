@@ -103,10 +103,15 @@ var Signup = React.createClass({
 
 var SignupForm = React.createClass({
     getInitialState: function () {
-        return {errors: {}, file: '', imagePreviewUrl: null}
+        return {errors: {}, file: '', imagePreviewUrl: null, captcha: ""}
     },
     componentDidMount: function() {
-        grecaptcha.render(this.refs.signupCAPTCHA.getDOMNode(), {sitekey: config.captcha_key});
+        var me = this;
+        onRecaptchaLoad(function() {
+            grecaptcha.render(me.refs.signupCAPTCHA.getDOMNode(), {sitekey: config.captcha_key, callback: function(resp) {
+                me.setState({captcha: resp});
+            }});
+        });
     },
     isValid: function () {
         var compulsory_fields = ['email', 'email_confirm', 'password', 'password_confirm'];
@@ -117,7 +122,7 @@ var SignupForm = React.createClass({
         if (this.refs.password.getDOMNode().value != this.refs.password_confirm.getDOMNode().value) {
             errors["password_confirm"] = "The passwords don't match"
         }
-        if (grecaptcha.getResponse() == "") {
+        if (this.state.captcha == "") {
             errors["captcha"] = "No CAPTCHA entered"
         }
         compulsory_fields.forEach(function (field) {
@@ -161,7 +166,7 @@ var SignupForm = React.createClass({
             , email_me: this.refs.email_me.getDOMNode().checked
             , hide_number: this.refs.hide_number.getDOMNode().checked
             , hide_email: this.refs.hide_email.getDOMNode().checked
-            , captcha: grecaptcha.getResponse()
+            , captcha: this.state.captcha
         };
         return data
     },

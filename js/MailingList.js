@@ -114,10 +114,15 @@ var MailingList = React.createClass({
 
 var MailingListForm = React.createClass({
     getInitialState: function () {
-        return {errors: {}, file: '', imagePreviewUrl: null}
+        return {errors: {}, file: '', imagePreviewUrl: null, captcha: ""}
     },
     componentDidMount: function() {
-        grecaptcha.render(this.refs.mailinglistCAPTCHA.getDOMNode(), {sitekey: config.captcha_key});
+        var me = this;
+        onRecaptchaLoad(function() {
+            grecaptcha.render(me.refs.mailinglistCAPTCHA.getDOMNode(), {sitekey: config.captcha_key, callback: function(resp) {
+                me.setState({captcha: resp});
+            }});
+        });
     },
     isValid: function () {
         var compulsory_fields = ['email', 'email_confirm'];
@@ -125,7 +130,7 @@ var MailingListForm = React.createClass({
         if (this.refs.email.getDOMNode().value != this.refs.email_confirm.getDOMNode().value) {
             errors["email_confirm"] = "The emails don't match"
         }
-        if (grecaptcha.getResponse() == "") {
+        if (this.state.captcha == "") {
             errors["captcha"] = "No CAPTCHA entered"
         }
         compulsory_fields.forEach(function (field) {
@@ -148,7 +153,7 @@ var MailingListForm = React.createClass({
         var data = {
             email: this.refs.email.getDOMNode().value
             , email_confirm: this.refs.email_confirm.getDOMNode().value
-            , captcha: grecaptcha.getResponse()
+            , captcha: this.state.captcha
         };
         return data
     },
