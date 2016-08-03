@@ -88,7 +88,7 @@ TEMPLATES = [
      },
 ]
 
-WSGI_APPLICATION = 'brca.wsgi.application'
+WSGI_APPLICATION = 'wsgi.application'
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
