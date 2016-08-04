@@ -243,6 +243,10 @@ var CommunitySearch = React.createClass({
     onChange: function(e) {
         this.props.onChange(e.target.value);
     },
+    onSubmit: function (ev) {
+        ev.preventDefault();
+        this.props.onSearch(this.state.value);
+    },
     render: function() {
         return <div className='search-box'>
             <form onSubmit={this.onSubmit} style={{display: 'inline'}}>
