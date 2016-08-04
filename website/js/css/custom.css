@@ -289,6 +289,16 @@ div#main {
     }
 }
 
+table.community td > span {
+    width: 100%;
+    word-wrap: break-word;
+    float: left;
+}
+
+table.community h3 {
+    margin-top: 0;
+}
+
 /**************************************************************/
 /**********     Other                     *********************/
 /**************************************************************/
@@ -382,6 +392,52 @@ th[role='columnheader'] .help, .help-target .help {
     height: auto;
 }
 
+#communityMap {
+    width: 500px;
+    height: 250px;
+    margin: 20px auto 20px auto;
+}
+
+@media (min-width: 1200px) {
+    #communityMap {
+        width: 1000px;
+        height: 500px;
+        margin: 20px auto 20px auto;
+    }
+}
+
+.map-info-window div { 
+    float: right;
+}
+
+#communityMap .avatar {
+    height: 90px;
+    width: 90px;
+    float: left;
+    margin-right: 15px;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    padding: 4px;
+}
+
 .caret {
     border-top: 4px dashed;
 }
+
+.slide-fade-in {
+    overflow: hidden;
+    animation-duration: 1s;
+    animation-name: slide-fade-in;
+    border-radius: 10px;
+}
+@keyframes slide-fade-in {
+    from {
+        max-height: 0px;
+        opacity: 0;
+    }
+    to {
+        max-height: 100px;
+        opacity: 1;
+    }
+}
+

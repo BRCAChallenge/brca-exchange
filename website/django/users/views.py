@@ -8,6 +8,7 @@ from urllib2 import HTTPError
 import requests
 from django.core.mail import EmailMultiAlternatives
 from django.db import IntegrityError
+from django.db.models import Q
 from django.http import JsonResponse
 from django.template import Context
 from django.template.loader import get_template
@@ -18,7 +19,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from brca import settings, site_settings
-from .models import MyUser
+from .models import MyUser, MailingListEmail
 
 
 @api_view(['GET'])
@@ -263,14 +264,22 @@ def save_picture(filename, image):
 def users(request):
     page_num = int(request.GET.get('page_num', '0'))
     page_size = int(request.GET.get('page_size', '0'))
+    search = request.GET.get('search', '')
 
     query = MyUser.objects.filter(include_me=True).filter(is_approved=True)
+    search_query = Q()
+    for term in search.split():
+        search_query &= Q(firstName__icontains=term) | Q(lastName__icontains=term) | Q(institution__icontains=term) | Q(city__icontains=term) | Q(state__icontains=term) | Q(country__icontains=term)
+    query = query.filter(search_query)
+
+    whitelist = ['id','email','firstName','lastName','title','affiliation','institution','city','state','country','phone_number','hide_number','hide_email','include_me','is_active','is_admin','comment','has_image','is_approved','email_me']
 
     count = query.count()
 
     start = page_num * page_size
     end = start + page_size
-    data = list(query[start:end].values())
+    data = list(query[start:end].values(*whitelist))
+
 
     for user in data:
         if user['hide_email']:
@@ -279,4 +288,40 @@ def users(request):
             user['phone_number'] = ""
 
     response = JsonResponse({'data': data, 'count': count})
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
+
+def user_locations(request):
+    query = MyUser.objects.filter(include_me=True).filter(is_approved=True)
+    fields = ['id', 'firstName', 'lastName', 'title', 'institution', 'city', 'state', 'country', 'has_image']
+    response = JsonResponse({'data': list(query.values(*fields))})
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
+
+def mailinglist(request):
+    email = request.POST.get('email')
+
+    # Check the CAPTCHA
+    try:
+        captcha = request.POST.get('captcha')
+        post_data = {'secret': settings.CAPTCHA_SECRET,
+                     'response': captcha}
+        resp = requests.post('https://www.google.com/recaptcha/api/siteverify', data=post_data)
+        content = json.loads(resp.content)
+        response = JsonResponse({'success': content['success']})
+    except HTTPError:
+        response = JsonResponse({'success': False, 'error': 'Wrong CAPTCHA'})
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+
+    try:
+        entry = MailingListEmail.objects.create(email = request.POST.get('email'))
+        entry.save()
+    except IntegrityError:
+        response = JsonResponse({'success': False, 'error': 'This email address already exists'})
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+
+    response = JsonResponse({'success': True}) 
+    response['Access-Control-Allow-Origin'] = '*'
     return response

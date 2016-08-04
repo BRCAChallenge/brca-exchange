@@ -27,6 +27,7 @@ var slugify = require('./slugify');
 
 var content = require('./content');
 var Community = require('./Community');
+var {MailingList} = require('./MailingList');
 
 var databaseKey = require('../databaseKey');
 
@@ -52,6 +53,15 @@ if (typeof console === "undefined") {
         log: function () {}
     };
 }
+
+(function() {
+    var listeners = [], loaded = false;
+    window.onRecaptchaLoad = callback => (loaded ? callback() : listeners.push(callback));
+    window.recaptchaCallback = function() {
+        loaded = true;
+        while (listeners.length) listeners.pop()();
+    };
+})();
 
 var Footer = React.createClass({
     mixins: [PureRenderMixin],
@@ -525,6 +535,7 @@ var routes = (
         <Route path='community' handler={Community}/>
         <Route path='signup' handler={Signup}/>
         <Route path='signin' handler={Signin}/>
+        <Route path='mailinglist' handler={MailingList}/>
         <Route path='reset_password' handler={ResetPassword}/>
         <Route path='profile' handler={Profile}/>
         <Route path='confirm/:activationCode' handler={ConfirmEmail}/>

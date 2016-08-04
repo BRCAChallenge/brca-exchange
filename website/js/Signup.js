@@ -9,15 +9,21 @@ var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {Navigation} = require('react-router');
 
 var AFFILIATION = [
-    'I lead a testing lab',
-    'I am a member of a testing lab',
-    'I lead a research lab',
-    'I am a member of a research lab',
-    'I lead an advocacy group',
-    'I work at an advocacy group',
-    'I am a genetic counselor',
-    'Other'];
+    ["I am a Clinical Lab Director",        "Clinical Lab Director"],
+    ["I am a member of a diagnostic lab",   "Diagnostic Lab Staff"],
+    ["I lead a principal investigator",     "Principal Investigator"],
+    ["I am a researcher",                   "Researcher"],
+    ["I lead an advocacy group",            "Advocacy Group Leader"],
+    ["I am a member of an advocacy group",  "Advocacy Group Member"],
+    ["I am a genetic counselor",            "Genetic Counselor"],
+    ["I am a clinical geneticist",          "Clinical Geneticist"],
+    "I am a clinician",
+    "Other"
+];
 
+AFFILIATION.has = function(affil) {
+    return this.slice(0, -2).some(val => affil === (val instanceof Array ? val[1] : val));
+}
 
 var Signup = React.createClass({
     mixins: [Navigation],
@@ -103,10 +109,15 @@ var Signup = React.createClass({
 
 var SignupForm = React.createClass({
     getInitialState: function () {
-        return {errors: {}, file: '', imagePreviewUrl: null}
+        return {errors: {}, file: '', imagePreviewUrl: null, captcha: "", otherAffiliation: false}
     },
     componentDidMount: function() {
-        grecaptcha.render(this.refs.signupCAPTCHA.getDOMNode(), {sitekey: config.captcha_key});
+        var me = this;
+        onRecaptchaLoad(function() {
+            grecaptcha.render(me.refs.signupCAPTCHA.getDOMNode(), {sitekey: config.captcha_key, callback: function(resp) {
+                me.setState({captcha: resp});
+            }});
+        });
     },
     isValid: function () {
         var compulsory_fields = ['email', 'email_confirm', 'password', 'password_confirm'];
@@ -117,7 +128,7 @@ var SignupForm = React.createClass({
         if (this.refs.password.getDOMNode().value != this.refs.password_confirm.getDOMNode().value) {
             errors["password_confirm"] = "The passwords don't match"
         }
-        if (grecaptcha.getResponse() == "") {
+        if (this.state.captcha == "") {
             errors["captcha"] = "No CAPTCHA entered"
         }
         compulsory_fields.forEach(function (field) {
@@ -150,7 +161,7 @@ var SignupForm = React.createClass({
             , firstName: this.refs.firstName.getDOMNode().value
             , lastName: this.refs.lastName.getDOMNode().value
             , title: title
-            , affiliation: this.refs.affiliation.getDOMNode().value
+            , affiliation: (this.state.otherAffiliation ? this.refs.other_affiliation : this.refs.affiliation).getDOMNode().value
             , institution: this.refs.institution.getDOMNode().value
             , city: this.refs.city.getDOMNode().value
             , state: this.refs.state.getDOMNode().value
@@ -161,7 +172,7 @@ var SignupForm = React.createClass({
             , email_me: this.refs.email_me.getDOMNode().checked
             , hide_number: this.refs.hide_number.getDOMNode().checked
             , hide_email: this.refs.hide_email.getDOMNode().checked
-            , captcha: grecaptcha.getResponse()
+            , captcha: this.state.captcha
         };
         return data
     },
@@ -188,7 +199,11 @@ var SignupForm = React.createClass({
         reader.readAsDataURL(file)
     },
     render: function () {
-        return <div className="form-horizontal">
+        var onChange = function() {
+            var value = this.refs.affiliation.getDOMNode().value;
+            this.setState({otherAffiliation: value == "Other" || value == "I am a clinician"});
+        }
+        return <div className="form-horizontal" onChange={onChange.bind(this)}>
             {this.renderImageUpload('image', 'Profile picture')}
             {this.renderTextInput('email', 'Email *')}
             {this.renderTextInput('email_confirm', 'Confirm Email *')}
@@ -201,6 +216,8 @@ var SignupForm = React.createClass({
                 , defaultCheckedValue: 'M.D.'
             })}
             {this.renderSelect('affiliation', 'Affiliation', AFFILIATION)}
+            {this.state.otherAffiliation &&
+                <div className="slide-fade-in">{this.renderTextInput('other_affiliation', <span style={{color: "#D00000"}}>Please Specify:</span>)}</div>}
             {this.renderTextInput('institution', 'Institution, Hospital or Company')}
             {this.renderTextInput('city', 'City')}
             {this.renderTextInput('state', 'State or Province')}
@@ -247,9 +264,12 @@ var SignupForm = React.createClass({
             <textarea className="form-control" id={id} ref={id}/>
         )
     },
+    // to specificy different label/value, pass a tuple like ["Label", "Value]
     renderSelect: function (id, label, values) {
         var options = values.map(function (value) {
-            return <option key={id+value} value={value}>{value}</option>
+            return value instanceof Array
+                ? <option key={id+value[1]} value={value[1]}>{value[0]}</option>
+                : <option key={id+value} value={value}>{value}</option>
         });
         return this.renderField(id, label,
             <select className="form-control" id={id} ref={id}>
