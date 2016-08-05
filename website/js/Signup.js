@@ -11,7 +11,7 @@ var {Navigation} = require('react-router');
 var AFFILIATION = [
     ["I am a Clinical Lab Director",        "Clinical Lab Director"],
     ["I am a member of a diagnostic lab",   "Diagnostic Lab Staff"],
-    ["I lead a principal investigator",     "Principal Investigator"],
+    ["I am a principal investigator",     "Principal Investigator"],
     ["I am a researcher",                   "Researcher"],
     ["I lead an advocacy group",            "Advocacy Group Leader"],
     ["I am a member of an advocacy group",  "Advocacy Group Member"],

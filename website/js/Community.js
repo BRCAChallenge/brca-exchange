@@ -82,7 +82,7 @@ var Community = React.createClass({
             var {city, state, country} = row;
             var location_string = _.values(_.pick({city,state,country}, v => v)).join(', ')
 
-            return <tr >
+            return <tr>
                 <td width="120px">
                     {avatar}
                 </td>
@@ -167,16 +167,18 @@ var Community = React.createClass({
 var CommunityMap = React.createClass({
     getInitialState: () => ({ widthGroup: (window.innerWidth < 1200) ? "md" : "lg" }),
 
-    handleResize: function () {
+    /* handleResize: function () {
         var widthGroup =  (window.innerWidth < 1200) ? "md" : "lg";
         if (widthGroup != this.state.widthGroup) {
             setTimeout((function() {
-                    this.map.setZoom(widthGroup == "md" ? 1 : 2);
+                    //this.map.setZoom(widthGroup == "md" ? 1 : 2);
+                    this.map.setZoom(2);
                     this.map.setCenter({lat: 17, lng:-2.5});
                 }).bind(this), 500);
         }
         this.setState({ widthGroup: widthGroup });
     },
+    */
     shouldComponentUpdate(nextProps, {widthGroup}) {
         return this.state.widthGroup == widthGroup;
     },
@@ -186,7 +188,7 @@ var CommunityMap = React.createClass({
             var infowindow;
             var map = this.map = new google.maps.Map(document.getElementById('communityMap'), {
                 center: {lat: 17, lng: -2.5},
-                zoom: this.state.widthGroup == "md" ? 1 : 2,
+                zoom: 1,
                 mapTypeControl: false,
                 streetViewControl: false,
                 styles: [{
@@ -226,16 +228,17 @@ var CommunityMap = React.createClass({
                     });
                 });
             });
+
         };
+
         google.load('maps', '3', {callback: initMap.bind(this), other_params: "key=" + config.maps_key});
-        window.addEventListener('resize', this.handleResize);
+        //window.addEventListener('resize', this.handleResize);
     },
 
     componentWillUnmount: function() { window.removeEventListener('resize', this.handleResize) },
 
     render: function() {
         return <div id="communityMap"></div>
-
     }
 });
 

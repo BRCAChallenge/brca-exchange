@@ -398,14 +398,6 @@ th[role='columnheader'] .help, .help-target .help {
     margin: 20px auto 20px auto;
 }
 
-@media (min-width: 1200px) {
-    #communityMap {
-        width: 1000px;
-        height: 500px;
-        margin: 20px auto 20px auto;
-    }
-}
-
 .map-info-window div { 
     float: right;
 }
