@@ -100,10 +100,9 @@ var Community = React.createClass({
             <Grid id="main-grid">
                 <Row id="message"> {message} </Row>
                 <Row>
-                    <Col className="text-center">
-                        <h2>We Support the BRCA Exchange</h2>
+                    <Col sm={10} smOffset={1} md={8} mdOffset={2}>
+                        <span>The BRCA Exchange supports the exchange of information about BRCA1 and BRCA2 variants. Show your support by joining our mailing list and/or listing your name below as one of our supporters.</span>
                     </Col>
-
                 </Row>
                 <Row>
                     <Col>
@@ -111,23 +110,8 @@ var Community = React.createClass({
                     </Col>
                 </Row>
                 <Row>
-                    <Col style={{padding: "0 0 14px 0"}} sm={10} smOffset={1} md={8} mdOffset={2}>
-                        <Col sm={6} lg={5}>
-                            <h4>Search for a community member:</h4>
-                        </Col>
-                        <Col sm={6} lg={7}>
-                            <CommunitySearch onChange={s => this.searchq.onNext(s)}/>
-                        </Col>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col sm={10} smOffset={1} md={8} mdOffset={2} style={{paddingBottom: "14px"}}>
-                        <span>The BRCA Exchange supports the exchange of information about BRCA1 and BRCA2 variants. Show your support by joining our mailing list and/or listing your name below as one of our supporters.</span>
-                    </Col>
-                </Row>
-                <Row>
                     {!auth.loggedIn() &&
-                        <Col sm={10} smOffset={1} md={8} mdOffset={2}>
+                        <Col className="text-center" sm={12} smOffset={0} md={10} mdOffset={1}>
                             <Link to="/mailinglist"><Button>Join the mailing list only</Button></Link>&nbsp;
                             <Link to="/signup"><Button>Join the mailing list and add me to the supporters</Button></Link>&nbsp;
                             <Link to="/signin"><Button>Login to your profile</Button></Link>
@@ -139,13 +123,20 @@ var Community = React.createClass({
                             <Button onClick={this.logout}>Sign out</Button>
                         </Col>}
                 </Row>
-                <Row style={{paddingTop: "14px"}} className="btm-buffer">
-                    <Col sm={10} smOffset={1} md={8} mdOffset={2}>
-                        <Pagination
-                            className="pagination pull-right-sm"
-                            currentPage={page}
-                            totalPages={totalPages}
-                            onChangePage={this.onChangePage} />
+                <Row>
+                    <Col className="text-center">
+                        <h2>We Support the BRCA Exchange</h2>
+                    </Col>
+
+                </Row>
+                <Row>
+                    <Col className="btm-buffer" sm={10} smOffset={1} md={8} mdOffset={2}>
+                        <Col sm={6} lg={5} style={{paddingRight: "0"}}>
+                            <h4>Search for a community member:</h4>
+                        </Col>
+                        <Col sm={6} lg={7}>
+                            <CommunitySearch onChange={s => this.searchq.onNext(s)}/>
+                        </Col>
                     </Col>
                 </Row>
                 <Row>
@@ -158,6 +149,13 @@ var Community = React.createClass({
                     </Col>
                 </Row>
                 <Row>
+                    <Col sm={10} smOffset={1} md={8} mdOffset={2}>
+                        <Pagination
+                            className="pagination pull-right-sm"
+                            currentPage={page}
+                            totalPages={totalPages}
+                            onChangePage={this.onChangePage} />
+                    </Col>
                 </Row>
             </Grid>
         );
