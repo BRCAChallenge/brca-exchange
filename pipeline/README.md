@@ -54,4 +54,8 @@ See `https://raw.githubusercontent.com/BD2KGenomics/brca/master/lovd/README.md`
 #### ESP (`http://evs.gs.washington.edu/EVS/`)
 See `https://github.com/BD2KGenomics/brca/edit/master/esp/README.txt`
 
+## Luigi
+
+Luigi is intended to automate many of the tasks in the pipeline directory. To get started, `pip install luigi`.
+
 

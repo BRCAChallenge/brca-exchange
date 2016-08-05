@@ -6,14 +6,18 @@ export PATH := .:../data_merging:$(PATH)
 
 $(vcfDir)/ClinVarBrca.vcf:      $(clinVarDir)/ClinVarBrca.vcf
 	cp $< $@
+	@echo "Copied vcf file to pipeline_input/"
 
 $(clinVarDir)/ClinVarBrca.vcf:  $(clinVarDir)/ClinVarBrca.txt ../data_merging/convert_tsv_to_vcf.py
 	../data_merging/convert_tsv_to_vcf.py -i $< -o $@ -s "ClinVar"
+	@echo "Converted ClinVarBrca.txt to ClinVarBrca.vcf"
 
 $(clinVarDir)/ClinVarBrca.txt:  $(clinVarDir)/ClinVarBrca.xml clinVarParse.py
 	clinVarParse.py $< --assembly GRCh38 > $@
+	@echo "Parsed xml to ClinVarBrca.txt"
 
 $(clinVarDir)/ClinVarBrca.xml:  $(clinVarDir)/ClinVarFullRelease_00-latest.xml.gz clinVarBrca.py
 	clinVarBrca.py $<   > $@
+	@echo "Parsed and cleaned latest to ClinVarBrca.xml"
 
 
