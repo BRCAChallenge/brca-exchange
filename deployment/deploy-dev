@@ -5,8 +5,16 @@ HOST=brcaexchange-deployment1721.cloudapp.net
 USER=brca
 
 # directory of this file
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DEPLOYMENT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+WEBSITE=${DEPLOYMENT}/../website
 
-cd ${DIR}/../website
+# Drop in site settings.
+# XXX add secure config
+cp ${DEPLOYMENT}/site_settings/site_settings.beta.py ${WEBSITE}/django/brca/site_settings.py
+
+cd ${WEBSITE}
 npm run build:prod
-rsync -na --delete build/ ${USER}@${HOST}:/var/www/html/production
+
+# deploy
+rsync -a --delete build/ ${USER}@${HOST}:/var/www/html/production
+rsync -a --delete django/ ${USER}@${HOST}:/var/www/backend/production/django
