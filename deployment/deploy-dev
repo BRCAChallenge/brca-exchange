@@ -1,0 +1,10 @@
+#!/bin/bash
+
+echo PATH $PATH
+HOST=brcaexchange-deployment1721.cloudapp.net
+USER=brca
+
+
+cd website
+npm run build:prod
+rsync -na --delete build/ ${USER}@${HOST}:/var/www/html/production
