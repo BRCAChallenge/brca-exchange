@@ -4,4 +4,4 @@ deployment:
     dev:
         branch: ci
         commands:
-            - ./deployment/deploy-dev
+            - ../deployment/deploy-dev

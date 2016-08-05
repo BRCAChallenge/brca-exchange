@@ -4,7 +4,9 @@ echo PATH $PATH
 HOST=brcaexchange-deployment1721.cloudapp.net
 USER=brca
 
+# directory of this file
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-cd website
+cd ${DIR}/../website
 npm run build:prod
 rsync -na --delete build/ ${USER}@${HOST}:/var/www/html/production
