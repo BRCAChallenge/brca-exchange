@@ -16,5 +16,5 @@ cd ${WEBSITE}
 npm run build:prod
 
 # deploy
-rsync -a --delete build/ ${USER}@${HOST}:/var/www/html/production
-rsync -a --delete django/ ${USER}@${HOST}:/var/www/backend/production/django
+rsync -a --delete --rsync-path='sudo rsync' build/ ${USER}@${HOST}:/var/www/html/production
+rsync -a --delete --rsync-path='sudo rsync' django/ ${USER}@${HOST}:/var/www/backend/production/django
