@@ -19,6 +19,7 @@ Contains source code used to wrangle the BRCA variation data that is presented i
  * install bx-python from https://pypi.python.org/packages/55/db/fa76af59a03c88ad80494fc0df2948740bbd58cd3b3ed5c31319624687cc/bx-python-0.7.3.tar.gz#md5=d8c50c01c9e421bae0bbdbfa00fef6e4 (note: pip install bx-python left an outstanding dependency to lzo1x.h, which proved to be hard to resolve)
  * pip install CrossMap
  * install vcftools from https://vcftools.github.io/index.html
+ * pip install pyvcf
 
 
 
