@@ -110,18 +110,11 @@ var Community = React.createClass({
                     </Col>
                 </Row>
                 <Row>
-                    {!auth.loggedIn() &&
-                        <Col className="text-center" sm={12} smOffset={0} md={10} mdOffset={1}>
-                            <Link to="/mailinglist"><Button>Join the mailing list only</Button></Link>&nbsp;
-                            <Link to="/signup"><Button>Join the mailing list and add me to the supporters</Button></Link>&nbsp;
-                            <Link to="/signin"><Button>Login to your profile</Button></Link>
-                        </Col>}
-
-                    {auth.loggedIn() &&
-                        <Col sm={10} smOffset={1} md={8} mdOffset={2}>
-                            <Link to="/profile"><Button>Edit profile</Button></Link>
-                            <Button onClick={this.logout}>Sign out</Button>
-                        </Col>}
+                    <Col className="text-center" sm={12} smOffset={0} md={10} mdOffset={1}>
+                        <Link to="/mailinglist"><Button>Join the mailing list only</Button></Link>&nbsp;
+                        <Link to="/signup"><Button>Join the mailing list and add me to the supporters</Button></Link>&nbsp;
+                        <Link to="/signin"><Button>Login to your profile</Button></Link>
+                    </Col>
                 </Row>
                 <Row>
                     <Col className="text-center">
