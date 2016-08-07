@@ -303,7 +303,7 @@ var EditProfileForm = React.createClass({
                 defaultChecked = true;
                 otherValue = '';
             }
-            if (value.name == 'Other' && otherValue !=='') {defaultChecked=true}
+            if (value.name == 'Other') {defaultChecked=true}
             return <label className="radio-inline">
                 <input type="radio" ref={id+value.ref} name={id} value={value.name} checked={defaultChecked} onChange={handleRadioChange}/>
                 {value.name}
