@@ -291,7 +291,7 @@ def users(request):
 
 def user_locations(request):
     query = MyUser.objects.filter(is_approved=True)
-    fields = ['id', 'firstName', 'lastName', 'title', 'institution', 'city', 'state', 'country', 'has_image']
+    fields = ['id', 'firstName', 'lastName', 'title', 'role', 'role_other', 'institution', 'city', 'state', 'country', 'has_image']
     response = JsonResponse({'data': list(query.values(*fields))})
     response['Access-Control-Allow-Origin'] = '*'
     return response

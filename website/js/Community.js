@@ -5,6 +5,7 @@ var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PR
 var {Grid, Col, Row, Button, Table} = require('react-bootstrap');
 var backend = require('backend');
 var config  = require('./config')
+var {Role} = require('./Signup');
 var {Navigation, Link} = require('react-router');
 var {Pagination} = require('react-data-components-bd2k');
 var _ = require('underscore');
@@ -88,7 +89,7 @@ var Community = React.createClass({
                 </td>
                 <td>
                     <span id="name"><h3>{row['firstName']} {row['lastName']}{row['title'].length ? ", " + row['title'] : ""}</h3></span>
-                    <span id="affiliation"><h4>{row['affiliation']}</h4></span>
+                    <span id="role"><h4>{Role.other(row['role']) ? row['role_other'] : Role.get(row['role'])[2]}</h4></span>
                     <span id="institution">{row['institution']}</span>
                     <span id="location">{location_string}</span>
                     <span id="contact">{row['email']} {row['phone_number']}</span>
@@ -177,6 +178,7 @@ var CommunityMap = React.createClass({
         var initMap = function () {
             this.geo = new google.maps.Geocoder();
             var infowindow;
+            var markers = this.markers = [];
             var map = this.map = new google.maps.Map(document.getElementById('communityMap'), {
                 center: {lat: 17, lng: -2.5},
                 zoom: 1,
@@ -191,7 +193,7 @@ var CommunityMap = React.createClass({
             });
 
             backend.userLocations().subscribe(({data}) => {
-                _.map(data, ({id, firstName, lastName, title, institution, city, state, country, has_image})  => {
+                _.map(data, ({id, firstName, lastName, title, role, role_other, institution, city, state, country, has_image})  => {
                     this.geo.geocode({address: city + "," + state + "," + country}, (results, status) => {
                         if (status == "OK") {
                             var l = results[0].geometry.location;
@@ -206,10 +208,12 @@ var CommunityMap = React.createClass({
                                 {avatar}
                                 <div>
                                     <span>{firstName} {lastName}{title.length ? "," : ""} {title}</span><br />
+                                    <span id="role">{Role.other(role) ? role_other : Role.get(role)[2]}</span><br />
                                     <span>{institution}</span>
                                 </div>
                             </div>;
                             var marker = new google.maps.Marker({position: { lat: l.lat(), lng: l.lng() }, map: map, title: "TEST LOCATION"});
+                            markers.push(marker);
                             var info = new google.maps.InfoWindow({content: React.renderToStaticMarkup(userInfo) });
                             marker.addListener('click', () => {
                                 infowindow && infowindow.close();
