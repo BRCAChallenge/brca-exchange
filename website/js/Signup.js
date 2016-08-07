@@ -213,15 +213,15 @@ var SignupForm = React.createClass({
             {this.renderTextInput('email_confirm', 'Confirm Email *')}
             {this.renderPassword('password', 'Password *')}
             {this.renderPassword('password_confirm', 'Confirm Password *')}
-            {this.renderTextInput('firstName', 'First Name')}
-            {this.renderTextInput('lastName', 'Last Name')}
+            {this.renderTextInput('firstName', 'First Name *')}
+            {this.renderTextInput('lastName', 'Last Name *')}
             {this.renderRadioInlines('title', '', {
                 values: [{name: 'M.D.', ref: 'md'}, {name: 'Ph.D', ref: 'phd'}, {name: 'Other', ref: 'other'}]
                 , defaultCheckedValue: 'M.D.'
             })}
             {this.renderRoles()}
             {this.state.otherRole &&
-                <div className="slide-fade-in">{this.renderTextInput('role_other', <span style={{color: "#D00000"}}>Please Specify:</span>)}</div>}
+                <div className="slide-fade-in">{this.renderTextInput('role_other', <span style={{color: "#D00000"}}>Please Specify: *</span>)}</div>}
             {this.renderTextInput('institution', 'Institution, Hospital or Company')}
             {this.renderTextInput('city', 'City')}
             {this.renderTextInput('state', 'State or Province')}
