@@ -9,7 +9,7 @@ var config  = require('./config')
 var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {Navigation} = require('react-router');
 var auth = require('./auth');
-var {Signup, AFFILIATION, trim, $c} = require('./Signup');
+var {Signup, Role, trim, $c} = require('./Signup');
 
 var Profile = React.createClass({
     statics: {
@@ -111,8 +111,8 @@ var EditProfileForm = React.createClass({
             if (data.user.has_image) {
                 imagePreviewUrl = config.backend_url + '/site_media/media/' + data.user['id']
             }
-            var otherAffiliation = ! AFFILIATION.has(data.user.affiliation);
-            this.setState({data : data.user, imagePreviewUrl: imagePreviewUrl, otherAffiliation: otherAffiliation});
+            var otherRole = Role.other(data.user.role);
+            this.setState({data : data.user, imagePreviewUrl: imagePreviewUrl, otherRole: otherRole});
         };
         $.ajax({
             type: 'GET',
@@ -133,6 +133,11 @@ var EditProfileForm = React.createClass({
         var errors = {};
         if (this.refs.password.getDOMNode().value != this.refs.password_confirm.getDOMNode().value) {
             errors["password_confirm"] = "The passwords don't match"
+        }
+
+        if (this.state.otherRole) {
+            if (!trim(this.refs.role_other.getDOMNode().value))
+                errors['role_other'] = 'This field is required'
         }
         this.setState({errors: errors});
         var isValid = true;
@@ -156,15 +161,13 @@ var EditProfileForm = React.createClass({
             , firstName: this.refs.firstName.getDOMNode().value
             , lastName: this.refs.lastName.getDOMNode().value
             , title: title
-            , affiliation: (this.state.otherAffiliation ? this.refs.other_affiliation : this.refs.affiliation).getDOMNode().value
+            , role: this.refs.role.getDOMNode().value
+            , role_other: this.state.roleOther ? this.refs.role_other.getDOMNode().value : Role.get(this.refs.role.getDOMNode().value)[2]
             , institution: this.refs.institution.getDOMNode().value
             , city: this.refs.city.getDOMNode().value
             , state: this.refs.state.getDOMNode().value
             , country: this.refs.country.getDOMNode().value
             , phone_number: this.refs.phone_number.getDOMNode().value
-            , comment: this.refs.comment.getDOMNode().value
-            , include_me: this.refs.include_me.getDOMNode().checked
-            , email_me: this.refs.email_me.getDOMNode().checked
             , hide_number: this.refs.hide_number.getDOMNode().checked
             , hide_email: this.refs.hide_email.getDOMNode().checked
         };
@@ -195,8 +198,8 @@ var EditProfileForm = React.createClass({
     },
     render: function () {
         var onChange = function() {
-            var value = this.refs.affiliation.getDOMNode().value;
-            this.setState({otherAffiliation: ! AFFILIATION.has(value)});
+            var value = this.refs.role.getDOMNode().value;
+            this.setState({otherRole: Role.other(value)});
         }
         return <div className="form-horizontal" onChange={onChange.bind(this)}>
             {this.renderImageUpload('image', 'Profile picture')}
@@ -208,17 +211,14 @@ var EditProfileForm = React.createClass({
                 values: [{name: 'M.D.', ref: 'md'}, {name: 'Ph.D', ref: 'phd'}, {name: 'Other', ref: 'other'}]
                 , defaultCheckedValue: this.state.data.title
             })}
-            {this.renderSelect('affiliation', 'Affiliation', AFFILIATION, this.state.data.affiliation)}
-            {this.state.otherAffiliation &&
-                <div className="slide-fade-in">{this.renderOtherTextInput('other_affiliation', 'affiliation', <span style={{color: "#D00000"}}>Please Specify:</span>, this.state.data.affiliation)}</div>}
+            {this.renderRoles(this.state.data.role)}
+            {this.state.otherRole &&
+                <div className="slide-fade-in">{this.renderTextInput('role_other', <span style={{color: "#D00000"}}>Please Specify:</span>)}</div>}
             {this.renderTextInput('institution', 'Institution, Hospital or Company')}
             {this.renderTextInput('city', 'City', this.state.data.city)}
             {this.renderTextInput('state', 'State or Province', this.state.data.state)}
             {this.renderTextInput('country', 'Country', this.state.data.country)}
             {this.renderTextInput('phone_number', 'Phone number', this.state.data.phone_number)}
-            {this.renderTextarea('comment', 'Comment', this.state.data.comment)}
-            {this.renderCheckBox('include_me', "Include me in the community page", this.state.data.include_me)}
-            {this.renderCheckBox('email_me', "Include me in the mailing list", this.state.data.email_me)}
             {this.renderCheckBox('hide_number', "Don't display my phone number on this website", this.state.data.hide_number)}
             {this.renderCheckBox('hide_email', "Don't display my email on this website",this.state.data.hide_email)}
         </div>
@@ -252,12 +252,6 @@ var EditProfileForm = React.createClass({
                 {error}
             </div>)
     },
-    renderOtherTextInput: function (id, ref, label, defaultValue) {
-        var handleChange = () => {var oldData = this.state.data; oldData[ref]=this.refs[id].value; this.setState({data: oldData})};
-        return this.renderField(id, label,
-            <input type="text" className="form-control" id={id} ref={id} value={defaultValue} onChange={handleChange}/>
-        )
-    },
     renderTextInput: function (id, label, defaultValue) {
         var handleChange = () => {var oldData = this.state.data; oldData[id]=this.refs[id].value; this.setState({data: oldData})};
         return this.renderField(id, label,
@@ -274,6 +268,16 @@ var EditProfileForm = React.createClass({
         return this.renderField(id, label,
             <textarea className="form-control" id={id} ref={id} value={defaultValue} onChange={handleChange}/>
         )
+    },
+    renderRoles: function (defaultValue) {
+        var id = 'role';
+        var handleChange = () => {var oldData = this.state.data; oldData[id]=this.refs[id].value; this.setState({data: oldData})};
+        var options = Role.options.map(value => <option key={id+value[0]} value={value[0]}>{value[1]}</option>);
+        return this.renderField(id, 'Role',
+            <select className="form-control" id={id} ref={id} value={defaultValue} onChange={handleChange}>
+                {options}
+            </select>
+        );
     },
     renderSelect: function (id, label, values, defaultValue) {
         var other = !AFFILIATION.has(defaultValue);

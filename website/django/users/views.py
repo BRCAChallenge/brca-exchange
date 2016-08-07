@@ -235,21 +235,19 @@ def user_fields(request):
     firstName = request.POST.get('firstName', '')
     lastName = request.POST.get('lastName', '')
     title = request.POST.get('title', '')
-    affiliation = request.POST.get('affiliation', '')
+    role = request.POST.get('role', MyUser.ROLE_OTHER)
+    role_other = request.POST.get('role_other', '')
     institution = request.POST.get('institution', '')
     city = request.POST.get('city', '')
     state = request.POST.get('state', '')
     country = request.POST.get('country', '')
     phone_number = request.POST.get('phone_number', '')
-    comment = request.POST.get('comment', '')
-    include_me = (request.POST.get('include_me', "true") == "true")
-    email_me = (request.POST.get('email_me', "true") == "true")
     hide_number = (request.POST.get('hide_number', "true") == "true")
     hide_email = (request.POST.get('hide_email', "true") == "true")
 
-    return {'affiliation': affiliation, 'city': city, 'comment': comment, 'country': country,
+    return {'role': role, 'role_other': role_other, 'city': city, 'country': country,
             'email': email, 'firstName': firstName, 'has_image': has_image, 'hide_email': hide_email,
-            'hide_number': hide_number, 'include_me': include_me, 'email_me': email_me, 'institution': institution,
+            'hide_number': hide_number, 'institution': institution,
             'lastName': lastName, 'password': password, 'phone_number': phone_number, 'state': state, 'title': title}
 
 
@@ -266,13 +264,13 @@ def users(request):
     page_size = int(request.GET.get('page_size', '0'))
     search = request.GET.get('search', '')
 
-    query = MyUser.objects.filter(include_me=True).filter(is_approved=True)
+    query = MyUser.objects.filter(is_approved=True)
     search_query = Q()
     for term in search.split():
         search_query &= Q(firstName__icontains=term) | Q(lastName__icontains=term) | Q(institution__icontains=term) | Q(city__icontains=term) | Q(state__icontains=term) | Q(country__icontains=term)
     query = query.filter(search_query)
 
-    whitelist = ['id','email','firstName','lastName','title','affiliation','institution','city','state','country','phone_number','hide_number','hide_email','include_me','is_active','is_admin','comment','has_image','is_approved','email_me']
+    whitelist = ['id','email','firstName','lastName','title','role','role_other','institution','city','state','country','phone_number','hide_number','hide_email','is_active','is_admin','has_image','is_approved']
 
     count = query.count()
 
@@ -292,7 +290,7 @@ def users(request):
     return response
 
 def user_locations(request):
-    query = MyUser.objects.filter(include_me=True).filter(is_approved=True)
+    query = MyUser.objects.filter(is_approved=True)
     fields = ['id', 'firstName', 'lastName', 'title', 'institution', 'city', 'state', 'country', 'has_image']
     response = JsonResponse({'data': list(query.values(*fields))})
     response['Access-Control-Allow-Origin'] = '*'

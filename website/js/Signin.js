@@ -155,7 +155,7 @@ var Signin = React.createClass({
                 </Row>
                 <Row id="form">
                     <Col md={8} mdOffset={2}>
-                        <SigninForm ref="contactForm"/>
+                        <SigninForm onSubmit={e => { this.handleSubmit(); e.preventDefault() }} ref="contactForm"/>
                     </Col>
                 </Row>
                 <Row id="submit">
@@ -251,10 +251,11 @@ var SigninForm = React.createClass({
         return data
     },
     render: function () {
-        return <div className="form-horizontal">
+        return <form className="form-horizontal" onSubmit={this.props.onSubmit}>
             {this.renderTextInput('email', 'Email')}
             {this.renderPassword('password', 'Password')}
-        </div>
+            <input type="submit" className="hidden" />
+        </form>
     },
     renderTextInput: function (id, label) {
         return this.renderField(id, label,

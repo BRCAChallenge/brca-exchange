@@ -8,22 +8,25 @@ var config  = require('./config')
 var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {Navigation} = require('react-router');
 
-var AFFILIATION = [
-    ["I am a Clinical Lab Director",        "Clinical Lab Director"],
-    ["I am a member of a diagnostic lab",   "Diagnostic Lab Staff"],
-    ["I am a principal investigator",     "Principal Investigator"],
-    ["I am a researcher",                   "Researcher"],
-    ["I lead an advocacy group",            "Advocacy Group Leader"],
-    ["I am a member of an advocacy group",  "Advocacy Group Member"],
-    ["I am a genetic counselor",            "Genetic Counselor"],
-    ["I am a clinical geneticist",          "Clinical Geneticist"],
-    "I am a clinician",
-    "Other"
-];
-
-AFFILIATION.has = function(affil) {
-    return this.slice(0, -2).some(val => affil === (val instanceof Array ? val[1] : val));
-}
+var Role = {
+    options: [
+        // [ id, dropdown text, community page text ]
+        [1, "I am a patient",                      "Patient"],
+        [2, "I am a proband",                      "Proband"],
+        [3, "I am a clinical lab director",        "Clinical Lab Director"],
+        [4, "I am a member of a diagnostic lab",   "Diagnostic Lab Staff"],
+        [5, "I am a principal investigator",       "Principal Investigator"],
+        [6, "I am a researcher",                   "Researcher"],
+        [7, "I lead an advocacy group",            "Advocacy Group Leader"],
+        [8, "I am a member of an advocacy group",  "Advocacy Group Member"],
+        [9, "I am a genetic counselor",            "Genetic Counselor"],
+        [10, "I am a clinical geneticist",          "Clinical Geneticist"],
+        [11, "I am a clinician"],
+        [0, "Other"]
+    ],
+    other: id => id == 0 || id == 11,
+    get: function(id) { return this.options.find(role => role[0] == id) }
+};
 
 var Signup = React.createClass({
     mixins: [Navigation],
@@ -109,7 +112,7 @@ var Signup = React.createClass({
 
 var SignupForm = React.createClass({
     getInitialState: function () {
-        return {errors: {}, file: '', imagePreviewUrl: null, captcha: "", otherAffiliation: false}
+        return {errors: {}, file: '', imagePreviewUrl: null, captcha: "", otherRole: false}
     },
     componentDidMount: function() {
         var me = this;
@@ -120,7 +123,10 @@ var SignupForm = React.createClass({
         });
     },
     isValid: function () {
-        var compulsory_fields = ['email', 'email_confirm', 'password', 'password_confirm'];
+        var compulsory_fields = ['email', 'email_confirm', 'password', 'password_confirm', 'firstName', 'lastName'];
+        if (this.state.otherRole)
+            compulsory_fields.push('role_other');
+
         var errors = {};
         if (this.refs.email.getDOMNode().value != this.refs.email_confirm.getDOMNode().value) {
             errors["email_confirm"] = "The emails don't match"
@@ -161,15 +167,13 @@ var SignupForm = React.createClass({
             , firstName: this.refs.firstName.getDOMNode().value
             , lastName: this.refs.lastName.getDOMNode().value
             , title: title
-            , affiliation: (this.state.otherAffiliation ? this.refs.other_affiliation : this.refs.affiliation).getDOMNode().value
+            , role: this.refs.role.getDOMNode().value
+            , role_other: this.state.roleOther ? this.refs.role_other.getDOMNode().value : Role.get(this.refs.role.getDOMNode().value)[2]
             , institution: this.refs.institution.getDOMNode().value
             , city: this.refs.city.getDOMNode().value
             , state: this.refs.state.getDOMNode().value
             , country: this.refs.country.getDOMNode().value
             , phone_number: this.refs.phone_number.getDOMNode().value
-            , comment: this.refs.comment.getDOMNode().value
-            , include_me: this.refs.include_me.getDOMNode().checked
-            , email_me: this.refs.email_me.getDOMNode().checked
             , hide_number: this.refs.hide_number.getDOMNode().checked
             , hide_email: this.refs.hide_email.getDOMNode().checked
             , captcha: this.state.captcha
@@ -200,8 +204,8 @@ var SignupForm = React.createClass({
     },
     render: function () {
         var onChange = function() {
-            var value = this.refs.affiliation.getDOMNode().value;
-            this.setState({otherAffiliation: value == "Other" || value == "I am a clinician"});
+            var value = this.refs.role.getDOMNode().value;
+            this.setState({otherRole: Role.other(value)}); 
         }
         return <div className="form-horizontal" onChange={onChange.bind(this)}>
             {this.renderImageUpload('image', 'Profile picture')}
@@ -215,17 +219,14 @@ var SignupForm = React.createClass({
                 values: [{name: 'M.D.', ref: 'md'}, {name: 'Ph.D', ref: 'phd'}, {name: 'Other', ref: 'other'}]
                 , defaultCheckedValue: 'M.D.'
             })}
-            {this.renderSelect('affiliation', 'Affiliation', AFFILIATION)}
-            {this.state.otherAffiliation &&
-                <div className="slide-fade-in">{this.renderTextInput('other_affiliation', <span style={{color: "#D00000"}}>Please Specify:</span>)}</div>}
+            {this.renderRoles()}
+            {this.state.otherRole &&
+                <div className="slide-fade-in">{this.renderTextInput('role_other', <span style={{color: "#D00000"}}>Please Specify:</span>)}</div>}
             {this.renderTextInput('institution', 'Institution, Hospital or Company')}
             {this.renderTextInput('city', 'City')}
             {this.renderTextInput('state', 'State or Province')}
             {this.renderTextInput('country', 'Country')}
             {this.renderTextInput('phone_number', 'Phone number')}
-            {this.renderTextarea('comment', 'Comment')}
-            {this.renderCheckBox('include_me', "Include me in the community page", true)}
-            {this.renderCheckBox('email_me', "Include me in the mailing list", true)}
             {this.renderCheckBox('hide_number', "Hide my phone number on this website")}
             {this.renderCheckBox('hide_email', "Hide my email address on this website")}
             {this.renderCAPTCHA('captcha','CAPTCHA *')}
@@ -264,18 +265,14 @@ var SignupForm = React.createClass({
             <textarea className="form-control" id={id} ref={id}/>
         )
     },
-    // to specificy different label/value, pass a tuple like ["Label", "Value]
-    renderSelect: function (id, label, values) {
-        var options = values.map(function (value) {
-            return value instanceof Array
-                ? <option key={id+value[1]} value={value[1]}>{value[0]}</option>
-                : <option key={id+value} value={value}>{value}</option>
-        });
-        return this.renderField(id, label,
+    renderRoles: function () {
+        var id = 'role';
+        var options = Role.options.map(value => <option key={id+value[0]} value={value[0]}>{value[1]}</option>);
+        return this.renderField(id, 'Role',
             <select className="form-control" id={id} ref={id}>
                 {options}
             </select>
-        )
+        );
     },
     renderRadioInlines: function (id, label, kwargs) {
         var options = kwargs.values.map(function (value) {
@@ -291,7 +288,7 @@ var SignupForm = React.createClass({
             <input className="form-control" type="text" ref="titlecustom" name="titlecustom"/>
             </span>;
         var optionsWithOther = {options, other};
-        return this.renderField(id, label, optionsWithOther)
+        return this.renderField(id, label, optionsWithOther);
     },
     renderCheckBox: function (id, label, defaultChecked=false) {
         var checkbox = (<label className="radio-inline">
@@ -338,7 +335,7 @@ function $c(staticClassName, conditionalClassNames) {
 
 module.exports = ({
     Signup: Signup,
-    AFFILIATION: AFFILIATION,
+    Role: Role,
     trim:  trim,
     $c : $c
 });
