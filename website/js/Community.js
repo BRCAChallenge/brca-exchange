@@ -180,6 +180,7 @@ var CommunityMap = React.createClass({
             var map = this.map = new google.maps.Map(document.getElementById('communityMap'), {
                 center: {lat: 17, lng: -2.5},
                 zoom: 1,
+                scrollwheel: false,
                 mapTypeControl: false,
                 streetViewControl: false,
                 styles: [{
