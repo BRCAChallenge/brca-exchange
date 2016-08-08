@@ -70,8 +70,8 @@ function users(opts) {
     return Rx.DOM.get(users_url).map(xhr => JSON.parse(xhr.responseText));
 }
 
-function userLocations() {
-    var url = `${config.backend_url}/accounts/user_locations/`;
+function userLocations(search) {
+    var url = `${config.backend_url}/accounts/user_locations/?${qs.stringify({search: search})}`;
     return Rx.DOM.get(url).map(xhr => JSON.parse(xhr.responseText));
 }
 

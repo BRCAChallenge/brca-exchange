@@ -21,6 +21,7 @@ var Community = React.createClass({
     getInitialState: function () {
         return {
             data: [],
+            search: "",
             pageLength: 10,
             page: 0,
             totalPages: 1,
@@ -107,7 +108,7 @@ var Community = React.createClass({
                 </Row>
                 <Row>
                     <Col>
-                        <CommunityMap />
+                        <CommunityMap search={this.state.search}/>
                     </Col>
                 </Row>
                 <Row>
@@ -157,8 +158,6 @@ var Community = React.createClass({
 });
 
 var CommunityMap = React.createClass({
-    getInitialState: () => ({ widthGroup: (window.innerWidth < 1200) ? "md" : "lg" }),
-
     /* handleResize: function () {
         var widthGroup =  (window.innerWidth < 1200) ? "md" : "lg";
         if (widthGroup != this.state.widthGroup) {
@@ -171,8 +170,8 @@ var CommunityMap = React.createClass({
         this.setState({ widthGroup: widthGroup });
     },
     */
-    shouldComponentUpdate(nextProps, {widthGroup}) {
-        return this.state.widthGroup == widthGroup;
+    shouldComponentUpdate({search}) {
+        return this.props.search != search;
     },
     componentDidMount: function() {
         var initMap = function () {
@@ -191,46 +190,53 @@ var CommunityMap = React.createClass({
                     "stylers": [{ "visibility": "off" }]
                 }]
             });
+            this.updateMap = (function() {
+                markers.map(m => m.setMap(null));
+                markers.length = 0;
 
-            backend.userLocations().subscribe(({data}) => {
-                _.map(data, ({id, firstName, lastName, title, role, role_other, institution, city, state, country, has_image})  => {
-                    this.geo.geocode({address: city + "," + state + "," + country}, (results, status) => {
-                        if (status == "OK") {
-                            var l = results[0].geometry.location;
-                            var avatar
-                            if (has_image) {
-                                var avatar_link = config.backend_url + '/site_media/media/' + id
-                                avatar = <object className="avatar" data={avatar_link} type="image/jpg"/>
-                            } else {
-                                avatar = <img className="avatar" src={placeholder}/>
+                backend.userLocations(this.props.search).subscribe(({data}) => {
+                    _.map(data, ({id, firstName, lastName, title, role, role_other, institution, city, state, country, has_image})  => {
+                        this.geo.geocode({address: city + "," + state + "," + country}, (results, status) => {
+                            if (status == "OK") {
+                                var l = results[0].geometry.location;
+                                var avatar
+                                if (has_image) {
+                                    var avatar_link = config.backend_url + '/site_media/media/' + id
+                                    avatar = <object className="avatar" data={avatar_link} type="image/jpg"/>
+                                } else {
+                                    avatar = <img className="avatar" src={placeholder}/>
+                                }
+                                var userInfo = <div className="map-info-window">
+                                    {avatar}
+                                    <div>
+                                        <span>{firstName} {lastName}{title.length ? "," : ""} {title}</span><br />
+                                        <span id="role">{Role.other(role) ? role_other : Role.get(role)[2]}</span><br />
+                                        <span>{institution}</span>
+                                    </div>
+                                </div>;
+                                var marker = new google.maps.Marker({position: { lat: l.lat(), lng: l.lng() }, map: map, title: "TEST LOCATION"});
+                                markers.push(marker);
+                                var info = new google.maps.InfoWindow({content: React.renderToStaticMarkup(userInfo) });
+                                marker.addListener('click', () => {
+                                    infowindow && infowindow.close();
+                                    infowindow = info;
+                                    info.open(map, marker)
+                                });
                             }
-                            var userInfo = <div className="map-info-window">
-                                {avatar}
-                                <div>
-                                    <span>{firstName} {lastName}{title.length ? "," : ""} {title}</span><br />
-                                    <span id="role">{Role.other(role) ? role_other : Role.get(role)[2]}</span><br />
-                                    <span>{institution}</span>
-                                </div>
-                            </div>;
-                            var marker = new google.maps.Marker({position: { lat: l.lat(), lng: l.lng() }, map: map, title: "TEST LOCATION"});
-                            markers.push(marker);
-                            var info = new google.maps.InfoWindow({content: React.renderToStaticMarkup(userInfo) });
-                            marker.addListener('click', () => {
-                                infowindow && infowindow.close();
-                                infowindow = info;
-                                info.open(map, marker)
-                            });
-                        }
+                        });
                     });
                 });
-            });
-
+            }).bind(this);
+            this.updateMap();
         };
 
         google.load('maps', '3', {callback: initMap.bind(this), other_params: "key=" + config.maps_key});
         //window.addEventListener('resize', this.handleResize);
     },
 
+    componentDidUpdate: function() {
+        this.updateMap();
+    },
     componentWillUnmount: function() { window.removeEventListener('resize', this.handleResize) },
 
     render: function() {

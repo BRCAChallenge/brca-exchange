@@ -267,7 +267,10 @@ def users(request):
     query = MyUser.objects.filter(is_approved=True)
     search_query = Q()
     for term in search.split():
-        search_query &= Q(firstName__icontains=term) | Q(lastName__icontains=term) | Q(institution__icontains=term) | Q(city__icontains=term) | Q(state__icontains=term) | Q(country__icontains=term)
+        search_query &= ( Q(firstName__icontains=term) | Q(lastName__icontains=term)
+                        | Q(institution__icontains=term) | Q(role_other__icontains=term)
+                        | Q(city__icontains=term) | Q(state__icontains=term) | Q(country__icontains=term)
+                        )
     query = query.filter(search_query)
 
     whitelist = ['id','email','firstName','lastName','title','role','role_other','institution','city','state','country','phone_number','hide_number','hide_email','is_active','is_admin','has_image','is_approved']
@@ -290,7 +293,17 @@ def users(request):
     return response
 
 def user_locations(request):
+    search = request.GET.get('search', '')
+
     query = MyUser.objects.filter(is_approved=True)
+    search_query = Q()
+    for term in search.split():
+        search_query &= ( Q(firstName__icontains=term) | Q(lastName__icontains=term)
+                        | Q(institution__icontains=term) | Q(role_other__icontains=term)
+                        | Q(city__icontains=term) | Q(state__icontains=term) | Q(country__icontains=term)
+                        )
+    query = query.filter(search_query)
+
     fields = ['id', 'firstName', 'lastName', 'title', 'role', 'role_other', 'institution', 'city', 'state', 'country', 'has_image']
     response = JsonResponse({'data': list(query.values(*fields))})
     response['Access-Control-Allow-Origin'] = '*'
