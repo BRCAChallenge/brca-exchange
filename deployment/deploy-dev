@@ -22,5 +22,5 @@ ssh -l${USER} ${HOST} <<-ENDSSH
     cp ~/site_settings/site_settings.beta.py /var/www/backend/beta/django/brca/site_settings.py
     . /var/www/backend/beta/virtualenv/bin/activate
     pip install ${requirements}
-    touch /var/www/backend/beta/django/wsgi.py
+    sudo apache2ctl restart
 ENDSSH
