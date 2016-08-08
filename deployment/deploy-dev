@@ -8,13 +8,12 @@ USER=brca
 DEPLOYMENT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 WEBSITE=${DEPLOYMENT}/../website
 
-# Drop in site settings.
-# XXX add secure config
-cp ${DEPLOYMENT}/site_settings/site_settings.beta.py ${WEBSITE}/django/brca/site_settings.py
-
 cd ${WEBSITE}
 npm run build:prod
 
 # deploy
-rsync -a --delete --rsync-path='sudo rsync' build/ ${USER}@${HOST}:/var/www/html/production
-rsync -a --delete --rsync-path='sudo rsync' django/ ${USER}@${HOST}:/var/www/backend/production/django
+rsync -a --delete --rsync-path='sudo rsync' build/ ${USER}@${HOST}:/var/www/html/beta
+rsync -a --delete --rsync-path='sudo rsync' django/ ${USER}@${HOST}:/var/www/backend/beta/django
+
+ssh -l${USER} ${HOST} 'cp ~/site_settings/config.beta.js /var/www/html/beta/config.js'
+ssh -l${USER} ${HOST} 'cp ~/site_settings/site_settings.beta.py /var/www/backend/beta/django/brca/site_settings.py'
