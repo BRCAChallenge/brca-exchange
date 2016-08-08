@@ -65,3 +65,6 @@ to enable SSI on html files in the static asset directory.
 CI is implemented with circle-ci (CCI). CCI will build any commits on 'master' branch,
 and deploy them on the beta vhost of brcaexchange-dev. The deploy script, deploy-dev,
 will rsync the build, and copy site settings into place.
+
+To allow CCI to push code to azure, an authorized ssh key is added to the ssh config
+on the azure hosts. The ssh key can be managed in the CCI account settings.
