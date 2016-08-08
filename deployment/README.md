@@ -18,6 +18,7 @@ may add the following line to your /etc/hosts file if you need access to the
 # apache directories
 ## beta vhost
 
+| file | description |
 | --- | --- |
 | /var/www/html/beta | static assets |
 | /var/www/backend/beta/virtualenv | the python virtualenv |
@@ -25,6 +26,7 @@ may add the following line to your /etc/hosts file if you need access to the
 
 ## production vhost
 
+| file | description |
 | --- | --- |
 | /var/www/html/production | static assets |
 | /var/www/backend/production/virtualenv | the python virtualenv |
@@ -32,6 +34,7 @@ may add the following line to your /etc/hosts file if you need access to the
 
 # apache configuration
 
+| file | description |
 | --- | --- |
 | sites-available/000-default | configuration for the production site |
 | sites-available/001-beta | configuration for the beta site |
