@@ -20,7 +20,7 @@ Contains source code used to wrangle the BRCA variation data that is presented i
  * pip install CrossMap
  * install vcftools from https://vcftools.github.io/index.html
  * pip install pyvcf
-
+ * install tabix (see http://genometoolbox.blogspot.com/2013/11/installing-tabix-on-unix.html)
 
 
 ## Misc Instructions
