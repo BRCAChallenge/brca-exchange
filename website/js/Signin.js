@@ -159,15 +159,20 @@ var Signin = React.createClass({
                     </Col>
                 </Row>
                 <Row id="submit">
-                    <Col md={6} mdOffset={3}>
-                        <Button type="button" className="btn btn-primary btn-block" onClick={this.handleSubmit}>
-                            Sign in
-                        </Button>
+                    <Col md={8} mdOffset={2}>
+                            <div className="form-group" style={{marginLeft: "-15px", marginRight: "-15px"}}> 
+                                <label className="col-sm-4 control-label"></label>
+                                <Col sm={6}>
+                                    <Button type="button" className="btn btn-primary btn-block" onClick={this.handleSubmit}>
+                                        Sign in
+                                    </Button>
+                                </Col>
+                            </div>
                     </Col>
                 </Row>
                 <Row id="submit">
-                    <Col md={6} mdOffset={3}>
-                        <Link to='/reset_password'><Button bsStyle="link">Forgot your password?</Button></Link>
+                    <Col sm={10} md={6} mdOffset={3}>
+                        <Link className="pull-right" to='/reset_password'><Button bsStyle="link">Forgot your password?</Button></Link>
                     </Col>
                 </Row>
             </Grid>)
