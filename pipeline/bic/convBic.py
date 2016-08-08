@@ -1,4 +1,7 @@
+#!/usr/bin/env python
+
 # convert from NHGRI BIC dump format to VCF
+import argparse
 import logging
 
 def convFile(fname, chrom, printHead, rows):
@@ -45,9 +48,13 @@ def convFile(fname, chrom, printHead, rows):
         #acc, ex, nt, codon, baseChange, aaChange, Designation, hgvsCdna, hgvsProt, hgvsHg19, genotype, dbSnp, mutType, clinImp, category, evidence, depositor
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--brca1", dest="brca1", help="Pathname of the BIC brca1_data file from NHGRI")
+    parser.add_argument("--brca2", dest="brca2", help="Pathname of the BIC brca2_data file from NHGRI")
+    args = parser.parse_args()
     rows = []
-    convFile("/hive/groups/cgl/brca/phase1/bic/brca1_data.txt", "17", True, rows)
-    convFile("/hive/groups/cgl/brca/phase1/bic/brca2_data.txt", "13", False, rows)
+    convFile(args.brca1, "17", True, rows)
+    convFile(args.brca2, "13", False, rows)
     rows.sort()
     for row in rows:
         row = [str(x) for x in row]
