@@ -214,7 +214,15 @@ var CommunityMap = React.createClass({
                                         <span>{institution}</span>
                                     </div>
                                 </div>;
-                                var marker = new google.maps.Marker({position: { lat: l.lat(), lng: l.lng() }, map: map, title: "TEST LOCATION"});
+                                var marker = new google.maps.Marker({
+                                    position: { lat: l.lat(), lng: l.lng() },
+                                    map: map,
+                                    title: `${firstName} ${lastName}${title.length ? "," : ""} ${title}`,
+                                    icon: {
+                                        url: require(`./img/map/${role}.png`),
+                                        scaledSize: new google.maps.Size(20,32)
+                                    }
+                                });
                                 markers.push(marker);
                                 var info = new google.maps.InfoWindow({content: React.renderToStaticMarkup(userInfo) });
                                 marker.addListener('click', () => {
