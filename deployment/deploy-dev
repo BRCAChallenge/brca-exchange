@@ -15,6 +15,11 @@ npm run build:prod
 rsync -a --delete --rsync-path='sudo rsync' build/ ${USER}@${HOST}:/var/www/html/beta
 rsync -a --delete --rsync-path='sudo rsync' django/ ${USER}@${HOST}:/var/www/backend/beta/django
 
-ssh -l${USER} ${HOST} 'cp ~/site_settings/config.beta.js /var/www/html/beta/config.js'
-ssh -l${USER} ${HOST} 'cp ~/site_settings/site_settings.beta.py /var/www/backend/beta/django/brca/site_settings.py'
-ssh -l${USER} ${HOST} 'touch /var/www/backend/beta/django/wsgi.py'
+requirements=$(cat requirements.txt)
+ssh -l${USER} ${HOST} <<-ENDSSH
+    cp ~/site_settings/config.beta.js /var/www/html/beta/config.js
+    cp ~/site_settings/site_settings.beta.py /var/www/backend/beta/django/brca/site_settings.py
+    . /var/www/backend/beta/virtualenv/bin/activate
+    pip install ${requirements}
+    touch /var/www/backend/beta/django/wsgi.py
+ENDSSH
