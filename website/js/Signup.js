@@ -128,6 +128,8 @@ var SignupForm = React.createClass({
             compulsory_fields.push('role_other');
 
         var errors = {};
+        if (this.refs.role.getDOMNode().value == "NONE")
+            errors["role"] = "Please select a roll";
         if (this.refs.email.getDOMNode().value != this.refs.email_confirm.getDOMNode().value) {
             errors["email_confirm"] = "The emails don't match"
         }
@@ -268,8 +270,9 @@ var SignupForm = React.createClass({
     renderRoles: function () {
         var id = 'role';
         var options = Role.options.map(value => <option key={id+value[0]} value={value[0]}>{value[1]}</option>);
-        return this.renderField(id, 'Role',
+        return this.renderField(id, 'Role *',
             <select className="form-control" id={id} ref={id}>
+                <option key={id+"NONE"} value="NONE">Choose one:</option>
                 {options}
             </select>
         );
