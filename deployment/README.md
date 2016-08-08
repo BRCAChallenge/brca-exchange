@@ -13,7 +13,7 @@ No public domain has been published for brcaexchange-dev.cloudapp.net, but you
 may add the following line to your /etc/hosts file if you need access to the
 'production' virutal host:
 
-40.78.99.255 brcaexchange-dev.cloudapp.net
+40.78.99.255 brcaexchange-dev.org
 
 # apache directories
 ## beta vhost
