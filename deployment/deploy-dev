@@ -1,4 +1,6 @@
 #!/bin/bash
+set -o nounset
+set -o errexit
 
 echo PATH $PATH
 HOST=brcaexchange-dev.cloudapp.net
@@ -18,6 +20,8 @@ rsync -a --delete --rsync-path='sudo rsync' django/ ${USER}@${HOST}:/var/www/bac
 requirements=$(cat requirements.txt)
 requirements=$(echo ${requirements}) # drop carriage returns
 ssh -l${USER} ${HOST} <<-ENDSSH
+    set -o nounset
+    set -o errexit
     cp ~/site_settings/config.beta.js /var/www/html/beta/config.js
     cp ~/site_settings/site_settings.beta.py /var/www/backend/beta/django/brca/site_settings.py
     . /var/www/backend/beta/virtualenv/bin/activate
