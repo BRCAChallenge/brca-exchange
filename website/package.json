@@ -4,7 +4,8 @@
   "description": "client project template",
   "main": "index.js",
   "scripts": {
-    "test": "webpack-dev-server --config webpack.test.js --port 8081",
+    "pretest": "webpack --config webpack.test.js --target node test/all.js",
+    "test": "mocha --timeout 0 build/testBundle",
     "lint": "eslint --no-color js/*.js test/*.js",
     "clean": "rimraf build/*",
     "start": "webpack-dev-server --devtool eval --progress --colors --history-api-fallback --host 0.0.0.0",
