@@ -2,6 +2,6 @@ general:
     build_dir: website
 deployment:
     dev:
-        branch: ci
+        branch: master
         commands:
             - ../deployment/deploy-dev
