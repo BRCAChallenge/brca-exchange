@@ -190,11 +190,30 @@ var CommunityMap = React.createClass({
                     "stylers": [{ "visibility": "off" }]
                 }]
             });
-            this.updateMap = (function() {
-                markers.map(m => m.setMap(null));
-                markers.length = 0;
 
+            var legendControl = document.createElement('div');
+            var roleMarkers = Role.options.map(role =>
+                <div className="map-legend-col">
+                    <img src={require(`./img/map/${role[0]}key.png`)} /> {role.length == 3 ? role[2] : role[1]}
+                </div>
+            );
+            roleMarkers = _.values(_.groupBy(roleMarkers, (item, index) => index % 4)).map(group => <div className="map-legend-row">{group}</div>);
+            legendControl.innerHTML = React.renderToStaticMarkup(
+                <div>
+                    <img src={require("./img/map/1.png")} className="map-legend-icon" />
+                    <div className="map-legend-full">
+                        {roleMarkers}
+                    </div>
+                </div>
+            );
+            legendControl.className = "map-legend";
+            legendControl.index = 1;
+            map.controls[google.maps.ControlPosition.TOP_RIGHT].push(legendControl);
+
+            this.updateMap = (function() {
                 backend.userLocations(this.props.search).subscribe(({data}) => {
+                    markers.map(m => m.setMap(null));
+                    markers.length = 0;
                     _.map(data, ({id, firstName, lastName, title, role, role_other, institution, city, state, country, has_image})  => {
                         this.geo.geocode({address: city + "," + state + "," + country}, (results, status) => {
                             if (status == "OK") {
