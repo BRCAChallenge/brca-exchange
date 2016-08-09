@@ -51,6 +51,10 @@ var Community = React.createClass({
     onChangeSearch: function (search) {
         this.setStateFetch({search: search, page: 0});
     },
+    onFilterRole: function (role) {
+        if (Role.get(role).length == 3)
+            this.refs['community-search'].appendSearch(Role.get(role)[2]);
+    },
     logout: function() {
         auth.logout();
         this.forceUpdate();
@@ -108,7 +112,7 @@ var Community = React.createClass({
                 </Row>
                 <Row>
                     <Col>
-                        <CommunityMap search={this.state.search}/>
+                        <CommunityMap onFilterRole={this.onFilterRole} search={this.state.search}/>
                     </Col>
                 </Row>
                 <Row>
@@ -130,7 +134,7 @@ var Community = React.createClass({
                             <h4>Search for a community member:</h4>
                         </Col>
                         <Col sm={6} lg={7}>
-                            <CommunitySearch onChange={s => this.searchq.onNext(s)}/>
+                            <CommunitySearch ref="community-search" onChange={s => this.searchq.onNext(s)}/>
                         </Col>
                     </Col>
                 </Row>
@@ -193,7 +197,7 @@ var CommunityMap = React.createClass({
 
             var legendControl = document.createElement('div');
             var roleMarkers = Role.options.map(role =>
-                <div className="map-legend-col">
+                <div className="map-legend-col" data-role={role[0]}> 
                     <img src={require(`./img/map/${role[0]}key.png`)} /> {role.length == 3 ? role[2] : role[1]}
                 </div>
             );
@@ -205,6 +209,11 @@ var CommunityMap = React.createClass({
                         {roleMarkers}
                     </div>
                 </div>
+            );
+
+            var self = this;
+            Array.prototype.slice.call(legendControl.querySelectorAll(".map-legend-col")).map(
+                el => el.addEventListener('click', () => self.props.onFilterRole(el.attributes['data-role'].value))
             );
             legendControl.className = "map-legend";
             legendControl.index = 1;
@@ -272,12 +281,18 @@ var CommunityMap = React.createClass({
 });
 
 var CommunitySearch = React.createClass({
+    getInitialState: () => ({ search: "" }),
     onChange: function(e) {
+        this.setState({search: e.target.value});
         this.props.onChange(e.target.value);
     },
     onSubmit: function (ev) {
         ev.preventDefault();
     },
+    appendSearch: function(term) {
+        this.setState({search: `${this.state.search.trim()} ${term}`.trim()});
+        this.props.onChange(this.state.search);
+    },    
     render: function() {
         return <div className='search-box'>
             <form onSubmit={this.onSubmit} style={{display: 'inline'}}>
@@ -285,7 +300,7 @@ var CommunitySearch = React.createClass({
                 <div className='text-nowrap help-target'>
                     <div>
                         <input className='community-search-input' placeholder='name, organization, city, etc.' type='text'
-                            onChange={this.onChange} />
+                            onChange={this.onChange} value={this.state.search} />
                     </div>
                 </div>
             </form>
