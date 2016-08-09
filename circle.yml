@@ -1,0 +1,7 @@
+general:
+    build_dir: website
+deployment:
+    dev:
+        branch: master
+        commands:
+            - ../deployment/deploy-dev
