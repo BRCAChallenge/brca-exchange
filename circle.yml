@@ -5,3 +5,7 @@ deployment:
         branch: master
         commands:
             - ../deployment/deploy-dev
+    beta:
+        tag: /v[0-9]+(\.[0-9]+)*/
+        commands:
+            - HOST=brcaexchange-deployment1721.cloudapp.net ../deployment/deploy-dev
