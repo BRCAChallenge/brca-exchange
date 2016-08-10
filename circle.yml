@@ -8,4 +8,4 @@ deployment:
     beta:
         tag: /v[0-9]+(\.[0-9]+)*/
         commands:
-            - HOST=brcaexchange-deployment1721.cloudapp.net ../deployment/deploy-dev
+            - HOST=brcaexchange.cloudapp.net ../deployment/deploy-dev

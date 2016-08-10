@@ -1,20 +1,31 @@
 #!/bin/sh
+set -x
+set -o nounset
+set -o errexit
 
-SRC=beta
-DST=production
-HTML=/var/www/html
-BACKEND=/var/www/backend
+HOST=${HOST:-brcaexchange.cloudapp.net}
+USER=brca
 
-rsync -a --delete ${HTML}/${SRC}/ ${HTML}/${DST}
-rsync -a --delete ${BACKEND}/${SRC}/django/ ${BACKEND}/${DST}/django
+ssh -l${USER} ${HOST} <<-'ENDSSH'
+    set -x
+    #set -o nounset # 'activate' accesses unbound vars
+    set -o errexit
+    SRC=beta
+    DST=production
+    HTML=/var/www/html
+    BACKEND=/var/www/backend
 
-cp ~/site_settings/config.${DST}.js /var/www/html/${DST}/config.js
-cp ~/site_settings/site_settings.${DST}.py /var/www/backend/${DST}/django/brca/site_settings.py
+    rsync -a --delete ${HTML}/${SRC}/ ${HTML}/${DST}
+    rsync -a --delete ${BACKEND}/${SRC}/django/ ${BACKEND}/${DST}/django
 
-. /var/www/backend/${SRC}/virtualenv/bin/activate
-requirements=$(pip freeze)
-deactivate
-requirements=$(echo ${requirements}) # drop carriage returns
-. /var/www/backend/${DST}/virtualenv/bin/activate
-pip install ${requirements}
-sudo apache2ctl restart
+    cp ~/site_settings/config.${DST}.js /var/www/html/${DST}/config.js
+    cp ~/site_settings/site_settings.${DST}.py /var/www/backend/${DST}/django/brca/site_settings.py
+
+    . /var/www/backend/${SRC}/virtualenv/bin/activate
+    requirements=$(pip freeze)
+    deactivate
+    requirements=$(echo ${requirements}) # drop carriage returns
+    . /var/www/backend/${DST}/virtualenv/bin/activate
+    pip install ${requirements}
+    sudo apache2ctl restart
+ENDSSH
