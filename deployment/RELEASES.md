@@ -19,6 +19,8 @@ the ```release``` script is run to create a patch release. The new release
 will be tagged, tested, and deployed to brcaexchange.cloudapp.net. The fix
 is also cherry-picked or ported to ```master```.
 
+![Image of branching](brca-branching.png)
+
 
 # How do I...
 
