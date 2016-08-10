@@ -8,14 +8,10 @@ var {Table, Pagination} = require('react-data-components-bd2k');
 var {Button, Row, Col} = require('react-bootstrap');
 var VariantSearch = require('./VariantSearch');
 var SelectField = require('./SelectField');
-var DisclaimerModal = require('./DisclaimerModal');
-var ColumnCheckbox = require('./ColumnCheckbox');
 var _ = require('underscore');
 var cx = require('classnames');
 var hgvs = require('./hgvs');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
-var RawHTML = require('RawHTML');
-var content = require('content');
 
 var filterDisplay = v => v == null ? 'Any' : v;
 var filterAny = v => v === 'Any' ? null : v;
@@ -62,7 +58,7 @@ var DataTable = React.createClass({
             this.state.lollipopOpen !== nextState.lollipopOpen ||
             this.state.page !== nextState.page ||
             this.state.count !== nextState.count ||
-            this.state.pageLength != nextState.pageLength ||
+            this.state.pageLength !== nextState.pageLength ||
             this.props.search !== nextProps.search ||
             !_.isEqual(this.state.sortBy, nextState.sortBy) ||
             !_.isEqual(this.props.sourceSelection, nextProps.sourceSelection) ||
@@ -108,7 +104,7 @@ var DataTable = React.createClass({
         newState.columnSelection = newProps.columnSelection;
         this.setStateFetch(newState);
     },
-    handleResize: function(e) {
+    handleResize: function() {
         this.setState({windowWidth: window.innerWidth});
     },
     setFilters: function (obj) {
@@ -129,16 +125,16 @@ var DataTable = React.createClass({
             sortBy,
             search,
             searchColumn: _.keys(_.pick(columnSelection, v => v)),
-            include: _.keys(_.pick(sourceSelection, v => v == 1)),
-            exclude: _.keys(_.pick(sourceSelection, v => v == -1)),
+            include: _.keys(_.pick(sourceSelection, v => v === 1)),
+            exclude: _.keys(_.pick(sourceSelection, v => v === -1)),
             filterValues}, hgvs.filters(search, filterValues)));
     },
     lollipopOpts: function () {
-        var {search, filterValues,sourceSelection} = this.state;
+        var {search, filterValues, sourceSelection} = this.state;
         return merge({
             search,
-            include: _.keys(_.pick(sourceSelection, v => v == 1)),
-            exclude: _.keys(_.pick(sourceSelection, v => v == -1)),
+            include: _.keys(_.pick(sourceSelection, v => v === 1)),
+            exclude: _.keys(_.pick(sourceSelection, v => v === -1)),
             filterValues
         }, hgvs.filters(search, filterValues));
     },
@@ -151,8 +147,8 @@ var DataTable = React.createClass({
             sortBy,
             search,
             searchColumn: _.keys(_.pick(columnSelection, v => v)),
-            include: _.keys(_.pick(sourceSelection, v => v == 1)),
-            exclude: _.keys(_.pick(sourceSelection, v => v == -1)),
+            include: _.keys(_.pick(sourceSelection, v => v === 1)),
+            exclude: _.keys(_.pick(sourceSelection, v => v === -1)),
             filterValues}, hgvs.filters(search, filterValues)));
     },
     // helper function that sets state, fetches new data,
@@ -185,7 +181,7 @@ var DataTable = React.createClass({
     render: function () {
         var {filterValues, filtersOpen, lollipopOpen, search, data, columnSelection,
             page, totalPages, count, synonyms, error} = this.state;
-        var {columns, filterColumns, className, advancedFilters, downloadButton, lollipopButton, onToggleMode} = this.props;
+        var {columns, filterColumns, className, advancedFilters, downloadButton, lollipopButton} = this.props;
         var renderColumns = _.filter(columns, c => columnSelection[c.prop]);
         var filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
             <SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
@@ -223,7 +219,7 @@ var DataTable = React.createClass({
                         <div className='form-inline'>
                             <div className='form-group'>
                                 <label className='control-label'>
-                                    {count} matching {pluralize(count, 'variant')} {synonyms ? 'of which '+synonyms+' matched on synonyms' : ''}
+                                    {count} matching {pluralize(count, 'variant')} {synonyms ? 'of which ' + synonyms + ' matched on synonyms' : ''}
                                 </label>
                                 {downloadButton(this.createDownload)}
                             </div>

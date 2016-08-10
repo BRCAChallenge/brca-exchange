@@ -77,7 +77,7 @@ var filterColumns = [
 var columns = [
     {title: 'Gene', prop: 'Gene_Symbol'},
     {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: nucleotide => nucleotide.split(':')[1]},
-    {title: 'Transcript Identifier', prop:'Reference_Sequence'},
+    {title: 'Transcript Identifier', prop: 'Reference_Sequence'},
     {title: 'HGVS RNA', prop: 'HGVS_RNA'},
     {title: 'HGVS Protein', prop: 'HGVS_Protein', render: protein => protein.split(':')[1]},
     // Protein Identfifier is pulled from HGVS_Protein, this is handled in VariantDetail (index.js)
@@ -98,7 +98,7 @@ var columns = [
     {title: 'ClinVar Accession', prop: 'ClinVarAccession_ENIGMA'}
 ];
 
-var research_mode_columns = [
+var researchModeColumns = [
 
     {title: 'Gene Symbol', prop: 'Gene_Symbol'},
     {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36'},
@@ -232,7 +232,7 @@ var subColumns = [
                 prop: 'EUR_Allele_frequency_1000_Genomes',
                 render: renderCell
             },
-            {title: 'Maximum Allele Frequency', prop: 'Max_Allele_Frequency',render: renderCell},
+            {title: 'Maximum Allele Frequency', prop: 'Max_Allele_Frequency', render: renderCell},
             {title: 'Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP', render: renderCell},
             {
                 title: 'South Asian Allele Frequency (1000 Genomes)',
@@ -354,15 +354,17 @@ var defaultColumns = ['Gene_Symbol', 'HGVS_cDNA', 'HGVS_Protein', 'Protein_Chang
 var defaultResearchColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_research', 'Allele_Frequency'];
 
 var allSources = {
-    Variant_in_ENIGMA: 1,
-    Variant_in_ClinVar: 1,
-    Variant_in_1000_Genomes: 1,
-    Variant_in_ExAC: 1,
-    Variant_in_LOVD: 1,
-    Variant_in_BIC: 1,
-    Variant_in_ESP: 1,
-    Variant_in_exLOVD: 1
+    "Variant_in_ENIGMA": 1,
+    "Variant_in_ClinVar": 1,
+    "Variant_in_1000_Genomes": 1,
+    "Variant_in_ExAC": 1,
+    "Variant_in_LOVD": 1,
+    "Variant_in_BIC": 1,
+    "Variant_in_ESP": 1,
+    "Variant_in_exLOVD": 1
 };
+/*eslint-enable camelcase */
+
 // Work-around to allow the user to select text in the table. The browser does not distinguish between
 // click and drag: if mouseup and mousedown occur on the same element, a click event is fired even if
 // the events occur at very different locations. That makes it hard to select text. This workaround
@@ -382,7 +384,7 @@ var hasSelection = () => !(window.getSelection && window.getSelection().isCollap
 var Table = React.createClass({
     mixins: [PureRenderMixin],
     render: function () {
-        var {data, onHeaderClick, onRowClick, hiddenSources,...opts} = this.props;
+        var {data, onHeaderClick, onRowClick, hiddenSources, ...opts} = this.props;
         return (
             <DataTable
                 ref='table'
@@ -425,24 +427,23 @@ var ResearchVariantTableSupplier = function (Component) {
         setSource: function (prop, event) {
             // this function uses 1, 0 and -1 to accommodate excluding sources as well as not-including them
             // currently only uses 1 and 0 because exclusion is not being used
-            var {sourceSelection} = this.state
+            var {sourceSelection} = this.state;
             var value = event.target.checked ? 1 : 0;
             var ss = {...sourceSelection, [prop]: value};
             this.setState({sourceSelection: ss});
         },
         filterFormCols: function (subColList, columnSelection) {
             return _.map(subColList, ({title, prop}) =>
-                <ColumnCheckbox onChange={v => this.toggleColumns(prop)} key={prop} label={prop} title={title}
+                <ColumnCheckbox onChange={() => this.toggleColumns(prop)} key={prop} label={prop} title={title}
                                 initialCheck={columnSelection}/>);
         },
         getAdvancedFilters() {
             var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
                 <Col sm={6} md={3} key={name}>
                     <Input type="checkbox"
-                        onChange={v => this.setSource(name,v)}
-                        label={name.substring(11).replace(/_/g," ")} // eg "Variant_in_1000_Genomes" => "1000 Genomes"
-                        checked={value>0}>
-                    </Input>
+                        onChange={v => this.setSource(name, v)}
+                        label={name.substring(11).replace(/_/g, " ")} // eg "Variant_in_1000_Genomes" => "1000 Genomes"
+                        checked={value > 0}/>
                 </Col>
             );
             var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
@@ -465,12 +466,12 @@ var ResearchVariantTableSupplier = function (Component) {
             return <Button className="btn-sm rgt-buffer" download="variants.csv" href={callback()}>Download</Button>;
         },
         getLollipopButton: function (callback, isOpen) {
-            return <Button id="lollipop-chart-toggle" className="btn-sm rgt-buffer"
-                           onClick={callback}>{(isOpen ? 'Hide' : 'Show' ) + ' Lollipop Chart'}</Button>
+            return (<Button id="lollipop-chart-toggle" className="btn-sm rgt-buffer"
+                           onClick={callback}>{(isOpen ? 'Hide' : 'Show' ) + ' Lollipop Chart'}</Button>);
         },
 
         getColumns: function () {
-            return research_mode_columns;
+            return researchModeColumns;
         },
         getDefaultColumns: function () {
             return defaultResearchColumns;
@@ -506,7 +507,7 @@ var VariantTableSupplier = function (Component) {
             var columnSelection = _.object(
                 _.map(this.getColumns(),
                     c => _.contains(this.getDefaultColumns(), c.prop) ? [c.prop, true] : [c.prop, false]));
-            var sourceSelection = allSources
+            var sourceSelection = allSources;
             return (
                 <Component
                     {...this.props}
@@ -522,9 +523,9 @@ var VariantTableSupplier = function (Component) {
 };
 
 
-module.exports = ({
-    VariantTable: VariantTableSupplier(Table),
-    ResearchVariantTable: ResearchVariantTableSupplier(Table),
-    research_mode_columns: research_mode_columns,
-    columns: columns
-});
+module.exports = {
+	VariantTable: VariantTableSupplier(Table),
+	ResearchVariantTable: ResearchVariantTableSupplier(Table),
+	researchModeColumns: researchModeColumns,
+	columns: columns
+};

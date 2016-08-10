@@ -8,7 +8,7 @@ var {Navigation} = require('react-router');
 var AutoSuggest = require('react-autosuggest');
 var _ = require('underscore');
 var $ = require('jquery');
-var config = require('./config')
+var config = require('./config');
 
 require('./css/Autosuggest.css');
 
@@ -22,10 +22,10 @@ function getSuggestions(value, callback) {
         success: function (data) {
             var suggestions = _.flatten(_.values(data.suggestions));
             setTimeout(() => callback(null, suggestions), 300);
-        }.bind(this),
-        error: function (xhr, status, err) {
+        },
+        error: function () {
             callback(new Error("Couldn't get suggestions"));
-        }.bind(this)
+        }
     });
 }
 

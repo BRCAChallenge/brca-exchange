@@ -32,7 +32,7 @@ var databaseKey = require('../databaseKey');
 
 var {Grid, Col, Row, Table, Button, Modal} = require('react-bootstrap');
 
-var {VariantTable, ResearchVariantTable, research_mode_columns, columns} = require('./VariantTable');
+var {VariantTable, ResearchVariantTable, researchModeColumns, columns} = require('./VariantTable');
 var {Signup} = require('./Signup');
 var {Signin, ResetPassword} = require('./Signin');
 var {ConfirmEmail} = require('./ConfirmEmail');
@@ -168,7 +168,7 @@ var Help = React.createClass({
         var fragment = slugify(window.location.hash.slice(1));
         var helpContent;
         if (localStorage.getItem("research-mode") === 'true') {
-            helpContent = content.pages.help_research;
+            helpContent = content.pages.helpResearch;
         } else {
             helpContent = content.pages.help;
         }
@@ -208,10 +208,10 @@ function urlFromDatabase(state) {
     // We could keep the defaults here, or in a different module.
     var {columnSelection, filterValues, sourceSelection,
             search, page, pageLength, sortBy: {prop, order}} = state;
-    var hide = _.keys(_.pick(columnSelection, v => v == false));
-    var hideSources = _.keys(_.pick(sourceSelection, v => v == 0));
-    var excludeSources = _.keys(_.pick(sourceSelection, v => v == -1));
-    var [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v == true)));
+    var hide = _.keys(_.pick(columnSelection, v => v === false));
+    var hideSources = _.keys(_.pick(sourceSelection, v => v === 0));
+    var excludeSources = _.keys(_.pick(sourceSelection, v => v === -1));
+    var [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v === true)));
     return _.pick({
         search: search === '' ? null : backend.trimSearchTerm(search),
         filter,
@@ -234,22 +234,23 @@ var Database = React.createClass({
     getInitialState: function () {
         return {
             showModal: false,
-        }
+        };
     },
     showVariant: function (row) {
-          row.Genomic_Coordinate_hg38 = backend.trimSearchTerm(row.Genomic_Coordinate_hg38);
+		  // XXX THIS IS VERY WRONG! A 'show' method should NOT modify data underneath the app!
+          row["Genomic_Coordinate_hg38"] = backend.trimSearchTerm(row["Genomic_Coordinate_hg38"]); //eslint-disable-line dot-notation
           var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
-          if (d3TipDiv.length != 0 && d3TipDiv[0].style.opacity != '0') {
-              d3TipDiv[0].style.opacity='0';
-              d3TipDiv[0].style.pointerEvents='none';
+          if (d3TipDiv.length !== 0 && d3TipDiv[0].style.opacity !== '0') {
+              d3TipDiv[0].style.opacity = '0';
+              d3TipDiv[0].style.pointerEvents = 'none';
           }
           this.transitionTo(`/variant/${variantPathJoin(row)}`);
     },
     showHelp: function (title) {
         var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
-        if (d3TipDiv.length != 0 && d3TipDiv[0].style.opacity != '0') {
-            d3TipDiv[0].style.opacity='0';
-            d3TipDiv[0].style.pointerEvents='none';
+        if (d3TipDiv.length !== 0 && d3TipDiv[0].style.opacity !== '0') {
+            d3TipDiv[0].style.opacity = '0';
+            d3TipDiv[0].style.pointerEvents = 'none';
         }
         this.transitionTo(`/help#${slugify(title)}`);
     },
@@ -272,9 +273,9 @@ var Database = React.createClass({
     onChange: function (state) {
         if (this.props.show) {
             var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
-            if (d3TipDiv.length != 0 && d3TipDiv[0].style.opacity != '0') {
-                d3TipDiv[0].style.opacity='0';
-                d3TipDiv[0].style.pointerEvents='none';
+            if (d3TipDiv.length !== 0 && d3TipDiv[0].style.opacity !== '0') {
+                d3TipDiv[0].style.opacity = '0';
+                d3TipDiv[0].style.pointerEvents = 'none';
             }
             this.transitionTo('/variants', {}, urlFromDatabase(state));
         }
@@ -289,34 +290,36 @@ var Database = React.createClass({
         // XXX is 'keys' used?
         var table, message;
         if (this.props.mode === 'research_mode') {
-            table = <ResearchVariantTable
-                ref='table'
-                initialState={params}
-                {...params}
-                fetch={backend.data}
-                fetchLollipop={backend.lollipopData}
-                url={backend.url}
-                onChange={s => this.urlq.onNext(s)}
-                onToggleMode={this}
-                keys={databaseKey}
-                onHeaderClick={this.showHelp}
-                onRowClick={this.showVariant}/>
-            message = this.renderMessage(content.pages.variantsResearch)
+            table = (
+				<ResearchVariantTable
+					ref='table'
+					initialState={params}
+					{...params}
+					fetch={backend.data}
+					fetchLollipop={backend.lollipopData}
+					url={backend.url}
+					onChange={s => this.urlq.onNext(s)}
+					onToggleMode={this}
+					keys={databaseKey}
+					onHeaderClick={this.showHelp}
+					onRowClick={this.showVariant}/>);
+            message = this.renderMessage(content.pages.variantsResearch);
         } else {
             params.columnSelection = {};
-            table = <VariantTable
-                ref='table'
-                initialState={params}
-                {...params}
-                fetch={backend.data}
-                fetchLollipop={backend.lollipopData}
-                url={backend.url}
-                onChange={s => this.urlq.onNext(s)}
-                onToggleMode={this}
-                keys={databaseKey}
-                onHeaderClick={this.showHelp}
-                onRowClick={this.showVariant}/>
-            message = this.renderMessage(content.pages.variantsDefault)
+            table = (
+				<VariantTable
+					ref='table'
+					initialState={params}
+					{...params}
+					fetch={backend.data}
+					fetchLollipop={backend.lollipopData}
+					url={backend.url}
+					onChange={s => this.urlq.onNext(s)}
+					onToggleMode={this}
+					keys={databaseKey}
+					onHeaderClick={this.showHelp}
+					onRowClick={this.showVariant}/>);
+            message = this.renderMessage(content.pages.variantsDefault);
         }
         return (
             <Grid fluid={true} id="main-grid" style={{display: show ? 'block' : 'none'}}>
@@ -326,24 +329,25 @@ var Database = React.createClass({
         );
     },
     renderMessage: function(message) {
-        return  <Row>
-                    <Col sm={10} smOffset={1}  className="alert alert-warning">
-                        <RawHTML ref='content' html={message}/>
-                        {this.props.mode === 'research_mode' && <Button className="btn-small" onClick={this.toggleMode}>
-                            Show Expert Reviewed Data Only
-                        </Button>}
-                        {this.props.mode === 'default' &&
-                        <Button className="btn-small" onClick={() =>this.setState({showModal: true})}>
-                            Show All Public Data
-                        </Button>}
-                        {this.props.mode === 'default' && this.state.showModal &&
-                        <Modal onRequestHide={() => this.setState({ showModal: false })}>
-                            <RawHTML html={content.pages.researchWarning}/>
-                            <Button onClick={() => {this.toggleMode()}}>Yes</Button>
-                            <Button onClick={() => this.setState({ showModal: false })}>No</Button>
-                        </Modal>}
-                    </Col>
-                </Row>
+        return  (
+			<Row>
+				<Col sm={10} smOffset={1}  className="alert alert-warning">
+					<RawHTML ref='content' html={message}/>
+					{this.props.mode === 'research_mode' && <Button className="btn-small" onClick={this.toggleMode}>
+						Show Expert Reviewed Data Only
+					</Button>}
+					{this.props.mode === 'default' &&
+					<Button className="btn-small" onClick={() =>this.setState({showModal: true})}>
+						Show All Public Data
+					</Button>}
+					{this.props.mode === 'default' && this.state.showModal &&
+					<Modal onRequestHide={() => this.setState({ showModal: false })}>
+						<RawHTML html={content.pages.researchWarning}/>
+						<Button onClick={() => {this.toggleMode();}}>Yes</Button>
+						<Button onClick={() => this.setState({ showModal: false })}>No</Button>
+					</Modal>}
+				</Col>
+			</Row>);
     }
 });
 
@@ -373,7 +377,7 @@ var VariantDetail = React.createClass({
             pageLength: 1
         }).subscribe(
             resp => {
-                return this.setState({data: resp.data[0], error: null})
+                return this.setState({data: resp.data[0], error: null});
             },
             this.setState({error: 'Problem connecting to server'}));
     },
@@ -385,55 +389,58 @@ var VariantDetail = React.createClass({
         var {data: variant = {}, error} = this.state;
         var cols;
         if (localStorage.getItem("research-mode") === 'true') {
-            cols = research_mode_columns;
+            cols = researchModeColumns;
         } else {
             cols = columns;
         }
         var rows = _.map(cols, ({prop, title}) => {
-            var row_item;
+            var rowItem;
             var months = ["January", "February", "March", "April", "May", "June", "July",
                           "August", "September", "October", "November", "December"];
-            var date_format = function(str) {
+            var dateFormat = function(str) {
                 var d = str.split('/');
                 return "" + d[1] + " " + months[d[0] - 1] + " 20" + d[2];
-            }
-            if (prop == "Protein_Change") {
+            };
+            if (prop === "Protein_Change") {
                 title = "Abbreviated AA Change";
             }
             if (variant[prop] != null) {
-                if (prop == "URL_ENIGMA") {
-                    if (variant[prop].length)
-                        row_item = <a target="_blank" href={variant[prop]}>link to multifactorial analysis</a>
-                } else if (prop == "Assertion_method_citation_ENIGMA") {
-                    row_item = <a target="_blank" href={variant[prop]}>Enigma Rules version Mar 26, 2015</a>
+                if (prop === "URL_ENIGMA") {
+                    if (variant[prop].length) {
+                        rowItem = <a target="_blank" href={variant[prop]}>link to multifactorial analysis</a>;
+					}
+                } else if (prop === "Assertion_method_citation_ENIGMA") {
+                    rowItem = <a target="_blank" href={variant[prop]}>Enigma Rules version Mar 26, 2015</a>;
 // this will be used in All Data display
 /*                } else if (prop == "Source_URL") {
                     var url_count = 0;
-                    row_item = _.map(variant[prop].split(','), url => (url.length != 0) && (<span><a key={"Source_URL"+(url_count++)} target="_blank" href={url}>link to multifactorial analysis ({url_count})</a><br /></span>));
-  */            
-                } else if (prop == "Source_URL") {
-                    if (variant[prop].startsWith("http://hci-exlovd.hci.utah.edu"))
-                        row_item = <a target="_blank" href={variant[prop].split(',')[0]}>link to multifactorial analysis</a>;
-                } else if (prop == "Comment_on_clinical_significance_ENIGMA" || prop == "Clinical_significance_citations_ENIGMA") {
+                    rowItem = _.map(variant[prop].split(','), url => (url.length != 0) && (<span><a key={"Source_URL"+(url_count++)} target="_blank" href={url}>link to multifactorial analysis ({url_count})</a><br /></span>));
+  */
+                } else if (prop === "Source_URL") {
+                    if (variant[prop].startsWith("http://hci-exlovd.hci.utah.edu")) {
+                        rowItem = <a target="_blank" href={variant[prop].split(',')[0]}>link to multifactorial analysis</a>;
+					}
+                } else if (prop === "Comment_on_clinical_significance_ENIGMA" || prop === "Clinical_significance_citations_ENIGMA") {
                     var pubmed = "http://ncbi.nlm.nih.gov/pubmed/";
-                    row_item = _.map(variant[prop].split(/PMID:? ?([0-9]+)/), piece =>
+                    rowItem = _.map(variant[prop].split(/PMID:? ?([0-9]+)/), piece =>
                         (/^[0-9]+$/.test(piece)) ? <a target="_blank" href={pubmed + piece}>PMID: {piece}</a> : piece );
-                } else if (prop == "HGVS_cDNA") {
-                    row_item = variant[prop].split(":")[1];
-                } else if (prop == "HGVS_Protein") {
-                    row_item = variant[prop].split(":")[1];
-                } else if (prop == "Date_last_evaluated_ENIGMA") {
-                    row_item = date_format(variant[prop]);
+                } else if (prop === "HGVS_cDNA") {
+                    rowItem = variant[prop].split(":")[1];
+                } else if (prop === "HGVS_Protein") {
+                    rowItem = variant[prop].split(":")[1];
+                } else if (prop === "Date_last_evaluated_ENIGMA") {
+                    rowItem = dateFormat(variant[prop]);
                 } else {
-                    row_item = variant[prop]
+                    rowItem = variant[prop];
                 }
-            } else if (prop == "HGVS_Protein_ID" && variant["HGVS_Protein"] != null) {
-                row_item = variant["HGVS_Protein"].split(":")[0];
+            } else if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] != null) { //eslint-disable-line dot-notation
+                rowItem = variant["HGVS_Protein"].split(":")[0]; //eslint-disable-line dot-notation
             }
-            return <tr key={prop}>
-                <Key tableKey={title} columns={cols} onClick={() => this.showHelp(title)}/>
-                <td><span className="row-wrap">{row_item}</span></td>
-            </tr>
+            return (
+				<tr key={prop}>
+					<Key tableKey={title} columns={cols} onClick={() => this.showHelp(title)}/>
+					<td><span className="row-wrap">{rowItem}</span></td>
+				</tr>);
         });
 
 
@@ -490,7 +497,7 @@ var Application = React.createClass({
     getInitialState: function () {
         return {
             mode: (localStorage.getItem("research-mode") === 'true') ? 'research_mode' : 'default',
-        }
+        };
     },
     toggleMode: function () {
         if (this.state.mode === 'research_mode') {
