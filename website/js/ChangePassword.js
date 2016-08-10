@@ -14,36 +14,38 @@ var ChangePassword = React.createClass({
     getInitialState: function () {
         return {
             success: null
-        }
+        };
     },
+	receiveToken: function(data) {
+		if (data.invalid_token) {
+			this.setState({'invalid_token': true});
+		}
+	},
     componentDidMount: function () {
-        var showFailure = (msg => {this.setState({error: msg})});
         var resetToken = this.context.router.getCurrentParams().resetToken;
         var url = config.backend_url + '/accounts/check_password_token/' + resetToken + '/';
         $.post({
             url: url,
-            success: function (data) {
-                if (data.invalid_token) {
-                    this.setState({'invalid_token': true})
-                }
-            }.bind(this)
+            success: this.receiveToken
         });
-        },
+	},
     render: function () {
         // If the token is invalid, show an error and don't show the form.
         if (this.state.invalid_token) {
-            return <Grid id="main-grid"> <Row id="message">
-                <div className="alert alert-danger">
-                    <p>Invalid link</p>
-                </div>
-            </Row> </Grid>
+            return (
+				<Grid id="main-grid"> <Row id="message">
+					<div className="alert alert-danger">
+						<p>Invalid link</p>
+					</div>
+				</Row> </Grid>);
         }
 
         var message;
        if (this.state.success) {
-            message = <div className="alert alert-success">
-                <p>Your password has been updated. You can now sign in using it.</p>
-            </div>
+            message = (
+				<div className="alert alert-success">
+					<p>Your password has been updated. You can now sign in using it.</p>
+				</div>);
         }
         return (
             <Grid id="main-grid"> <Row id="message">
@@ -69,8 +71,8 @@ var ChangePassword = React.createClass({
             </Grid>);
     },
     handleSubmit: function () {
-        var showSuccess = (() => {this.setState({success: true})});
-        var showFailure = (msg => {this.setState({error: msg})});
+        var showSuccess = () => {this.setState({success: true});};
+        var showFailure = msg => {this.setState({error: msg});};
         var resetToken = this.context.router.getCurrentParams().resetToken;
 
         var url = config.backend_url + '/accounts/update_password/' + resetToken + '/';
@@ -82,12 +84,12 @@ var ChangePassword = React.createClass({
                 success: function (data) {
                     showFailure(data.error);
                     if (data.success) {
-                        showSuccess()
+                        showSuccess();
                     }
                 },
-                error: function (xhr, ajaxOptions, thrownError) {
+                error: function () {
                     showFailure('Could not complete this action');
-                }.bind(this)
+                }
             });
         }
     }
@@ -96,54 +98,50 @@ var ChangePassword = React.createClass({
 
 var ChangePasswordForm = React.createClass({
     getInitialState: function () {
-        return {errors: {}}
+        return {errors: {}};
     },
     isValid: function () {
-        var compulsory_fields = ['password', 'password_confirm'];
+        var compulsoryFields = ['password', 'passwordConfirm'];
         var errors = {};
-        if (this.refs.password.getDOMNode().value != this.refs.password_confirm.getDOMNode().value) {
-            errors["password_confirm"] = "The passwords don't match"
+        if (this.refs.password.getDOMNode().value !== this.refs.passwordConfirm.getDOMNode().value) {
+            errors.passwordConfirm = "The passwords don't match";
         }
-        compulsory_fields.forEach(function (field) {
-            var value = trim(this.refs[field].getDOMNode().value)
+        compulsoryFields.forEach(function (field) {
+            var value = trim(this.refs[field].getDOMNode().value);
             if (!value) {
-                errors[field] = 'This field is required'
+                errors[field] = 'This field is required';
             }
         }.bind(this));
         this.setState({errors: errors});
-        var isValid = true;
-        for (var error in errors) {
-            isValid = false;
-            break;
-        }
-
-        return isValid
+		return Object.keys(errors).length === 0;
     },
     getFormData: function () {
         var data = {
-            password: this.refs.password.getDOMNode().value
-            , password_confirm: this.refs.password_confirm.getDOMNode().value
+            password: this.refs.password.getDOMNode().value,
+			passwordConfirm: this.refs.passwordConfirm.getDOMNode().value
         };
-        return data
+        return data;
     },
     render: function () {
-        return <div className="form-horizontal">
-            {this.renderPassword('password', 'Password')}
-            {this.renderPassword('password_confirm', 'Confirm Password')}
-        </div>
+        return (
+			<div className="form-horizontal">
+				{this.renderPassword('password', 'Password')}
+				{this.renderPassword('passwordConfirm', 'Confirm Password')}
+			</div>);
     },
     renderPassword: function (id, label) {
         return this.renderField(id, label,
             <input type="password" className="form-control" id={id} ref={id}/>
-        )
+        );
     },
     renderField: function (id, label, field) {
-        return <div className={$c('form-group', {'has-error': id in this.state.errors})}>
-            <label htmlFor={id} className="col-sm-4 control-label">{label}</label>
-            <div className="col-sm-6">
-                {field}
-            </div>
-        </div>
+        return (
+			<div className={$c('form-group', {'has-error': id in this.state.errors})}>
+				<label htmlFor={id} className="col-sm-4 control-label">{label}</label>
+				<div className="col-sm-6">
+					{field}
+				</div>
+			</div>);
     }
 });
 

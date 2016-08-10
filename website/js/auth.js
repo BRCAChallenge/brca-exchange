@@ -1,3 +1,4 @@
+'use strict';
 var config = require('./config');
 var $ = require('jquery');
 
@@ -12,11 +13,11 @@ module.exports = {
         this.getToken(username, pass, (res) => {
             if (res.authenticated) {
                 localStorage.token = res.token;
-                if (cb) cb(true)
+                if (cb) { cb(true); }
             } else {
-                if (cb) cb(false, res.error)
+                if (cb) { cb(false, res.error); }
             }
-        })
+        });
     },
 
     logout: function () {
@@ -24,11 +25,11 @@ module.exports = {
     },
 
     loggedIn: function () {
-        return !!localStorage.token
+        return !!localStorage.token;
     },
 
     token: function() {
-        return localStorage.token
+        return localStorage.token;
     },
 
     getToken: function (username, password, cb) {
@@ -46,13 +47,13 @@ module.exports = {
                 cb({
                     authenticated: true,
                     token: res.token
-                })
+                });
             },
             error: function (res) {
                 cb({
                     authenticated: false,
                     error: res.responseJSON
-                })
+                });
             }
         });
     }

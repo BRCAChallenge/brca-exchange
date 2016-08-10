@@ -4,7 +4,7 @@
 var Rx = require('rx');
 require('rx-dom');
 var _ = require('underscore');
-var config = require('./config')
+var config = require('./config');
 var qs = require('qs');
 
 var transpose = a => _.zip.apply(_, a);
@@ -62,11 +62,11 @@ function data(opts) {
 
 function users(opts) {
     var {page, pageLength} = opts;
-    var users_url = `${config.backend_url}/accounts/users/?${qs.stringify(_.pick({
+    var usersUrl = `${config.backend_url}/accounts/users/?${qs.stringify(_.pick({
         'page_num': page,
         'page_size': pageLength
     }, v => v != null))}`;
-    return Rx.DOM.get(users_url).map(xhr => JSON.parse(xhr.responseText));
+    return Rx.DOM.get(usersUrl).map(xhr => JSON.parse(xhr.responseText));
 }
 
 function lollipopData(opts) {

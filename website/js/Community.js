@@ -4,7 +4,7 @@ var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 var {Grid, Col, Row, Button, Table} = require('react-bootstrap');
 var backend = require('backend');
-var config  = require('./config')
+var config  = require('./config');
 var {Navigation, Link} = require('react-router');
 var {Pagination} = require('react-data-components-bd2k');
 var _ = require('underscore');
@@ -53,36 +53,40 @@ var Community = React.createClass({
         var queryParams = this.context.router.getCurrentQuery();
         var message;
         if (queryParams.registrationSuccess) {
-            message =  <div className="alert alert-success">
-                <p>Thanks for signing up. We have sent you an email with a confirmation link to complete your registration.</p>
-            </div>
+            message =  (
+				<div className="alert alert-success">
+					<p>Thanks for signing up. We have sent you an email with a confirmation link to complete your registration.</p>
+				</div>);
         }
         var {data, page, totalPages, error} = this.state;
         var rows = _.map(data, row => {
 
             var avatar;
             if (row.has_image) {
-                var avatar_link = config.backend_url + '/site_media/media/' + row['id']
-                avatar = <object className="avatar" data={avatar_link} type="image/jpg"/>
+                var avatarLink = config.backend_url + '/site_media/media/' + row.id;
+                avatar = <object className="avatar" data={avatarLink} type="image/jpg"/>;
             } else {
-                avatar = <img src={placeholder}/>
+                avatar = <img src={placeholder}/>;
             }
 
             var {city, state, country} = row;
-            var location_string = _.values(_.pick({city,state,country}, v => v)).join(', ')
+            var locationString = _.values(_.pick({city, state, country}, v => v)).join(', ');
 
-            return <tr >
-                <td>
-                    {avatar}
-                </td>
-                <td>
-                    <span id="name" className="row-wrap"><h3>{row['firstName']} {row['lastName']}, {row['title']}</h3></span>
-                    <span id="affiliation" className="row-wrap"><h4>{row['affiliation']}</h4></span>
-                    <span id="institution" className="row-wrap">{row['institution']}</span>
-                    <span id="location" className="row-wrap">{location_string}</span>
-                    <span id="contact" className="row-wrap">{row['email']} {row['phone_number']}</span>
-                </td>
-            </tr>
+			/*eslint-disable dot-notation*/
+            return (
+				<tr>
+					<td>
+						{avatar}
+					</td>
+					<td>
+						<span id="name" className="row-wrap"><h3>{row['firstName']} {row['lastName']}, {row['title']}</h3></span>
+						<span id="affiliation" className="row-wrap"><h4>{row['affiliation']}</h4></span>
+						<span id="institution" className="row-wrap">{row['institution']}</span>
+						<span id="location" className="row-wrap">{locationString}</span>
+						<span id="contact" className="row-wrap">{row['email']} {row['phone_number']}</span>
+					</td>
+				</tr>);
+			/*eslint-enable dot-notation*/
         });
 
         return (error ? <p>{error}</p> :
@@ -117,8 +121,7 @@ var Community = React.createClass({
                         </Table>
                     </Col>
                 </Row>
-                <Row>
-                </Row>
+                <Row/>
             </Grid>
         );
     }
