@@ -1,7 +1,7 @@
 {
-  "name": "client-template",
-  "version": "2.0.0-SNAPSHOT",
-  "description": "client project template",
+  "name": "brca exchange",
+  "version": "2.0.0-alpha.0",
+  "description": "brca variant browser",
   "main": "index.js",
   "scripts": {
     "pretest": "webpack --config webpack.test.js --target node test/all.js",
