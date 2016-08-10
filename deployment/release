@@ -2,12 +2,14 @@
 
 ECHO=echo
 DEBUG=false
-VERSION="$(node -e "console.log(require('./package.json').version)")"
 SEMVER=./node_modules/.bin/semver
 PREID=alpha
 
 DIR=$(dirname "${BASH_SOURCE[0]}")
-cd ${DIR}
+cd ${DIR}/../website
+
+VERSION="$(node -e "console.log(require('./package.json').version)")"
+
 FAILED=false
 
 run() {
