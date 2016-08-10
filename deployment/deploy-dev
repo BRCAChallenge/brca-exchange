@@ -2,7 +2,6 @@
 set -o nounset
 set -o errexit
 
-echo PATH $PATH
 HOST=${HOST:-brcaexchange-dev.cloudapp.net}
 USER=brca
 
