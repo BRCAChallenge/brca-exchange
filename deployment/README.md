@@ -1,3 +1,7 @@
+# Release process
+
+See [this page](RELEASES.md).
+
 # azure instances
 
 Two VMs are provisioned: brcaexchange.cloudapp.net for production, and
