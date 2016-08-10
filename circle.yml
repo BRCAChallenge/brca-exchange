@@ -1,0 +1,11 @@
+general:
+    build_dir: website
+deployment:
+    dev:
+        branch: master
+        commands:
+            - ../deployment/deploy-dev
+    beta:
+        tag: /v[0-9]+(\.[0-9]+)*/
+        commands:
+            - HOST=brcaexchange.cloudapp.net ../deployment/deploy-dev

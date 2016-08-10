@@ -16,15 +16,6 @@ from copy import deepcopy
 from pprint import pprint
 
 
-BRCA1 = {"hg38": {"start": 43000000,
-                  "sequence": open("../resources/genome_sequences/brca1_hg38.txt", "r").read()},
-         "hg19": {"start": 41100000,
-                  "sequence": open("../resources/genome_sequences/brca1_hg19.txt", "r").read()}}
-BRCA2 = {"hg38": {"start": 32300000,
-                  "sequence": open("../resources/genome_sequences/brca2_hg38.txt", "r").read()},
-         "hg19": {"start": 32800000,
-                  "sequence": open("../resources/genome_sequences/brca2_hg19.txt", "r").read()}}
-  
 #GENOMIC VERSION:
 VERSION = "hg38" # equivalent to GRCh38
 
@@ -86,14 +77,14 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
                "ESP": ESP_FIELDS,
                "BIC": BIC_FIELDS}
 
-ENIGMA_FILE = "enigma_variants_GRCh38_2-27-2016.tsv"
+ENIGMA_FILE = "ENIGMA_last_updated_05-21-2016.tsv"
 GENOME1K_FILE = "10k_genome.brca.sorted.hg38.vcf"
 CLINVAR_FILE = "ClinVarBrca.vcf"
 LOVD_FILE = "sharedLOVD_brca12.sorted.hg38.vcf"
 EX_LOVD_FILE = "exLOVD_brca12.sorted.hg38.vcf"
 BIC_FILE = "bic_brca12.sorted.hg38.vcf"
-EXAC_FILE = "exac_BRCA12.sorted.hg38.vcf"
-ESP_FILE = "esp.brca.vcf"
+EXAC_FILE = "exac.BRCA12.sorted.hg38.vcf"
+ESP_FILE = "esp.brca12.sorted.hg38.vcf"
 
 
 parser = argparse.ArgumentParser()
@@ -104,9 +95,19 @@ parser.add_argument("-o", "--output",
 parser.add_argument("-p", "--de_novo",
                     help="string comparison all over, instead of loading from pickle dump",
                     action="store_true")
+parser.add_argument('-r', "--reference", help="reference data directory")
 ARGS = parser.parse_args()
 
 
+BRCA1 = {"hg38": {"start": 43000000,
+                  "sequence": open(ARGS.reference + "/brca1_hg38.txt", "r").read()},
+         "hg19": {"start": 41100000,
+                  "sequence": open(ARGS.reference + "/brca1_hg19.txt", "r").read()}}
+BRCA2 = {"hg38": {"start": 32300000,
+                  "sequence": open(ARGS.reference + "/brca2_hg38.txt", "r").read()},
+         "hg19": {"start": 32800000,
+                  "sequence": open(ARGS.reference + "/brca2_hg19.txt", "r").read()}}
+  
 def main():
     tmp_dir = tempfile.mkdtemp()
     try:
@@ -137,17 +138,27 @@ def variant_standardize(variants="pickle"):
             variants = pickle.loads(fv.read())
         fv.close()
     for ev, items in variants.iteritems():
+        print
+        print "working on variant", ev, items
         variant_names = items[2].split("|")
-        new_names = [add_leading_base(v) if "-" in v else v for v in variant_names]
+        new_names = [add_leading_base(v) if ("-" in v) or refOrAltMissing(v)  else v for v in variant_names]
         new_names = [trim_bases(v) if "None" not in v else v for v in new_names]
         new_names = "|".join(list(set(new_names)))
         items[2] = new_names
         variants[ev] = items
     return variants
 
-def trim_bases(v):
+def refOrAltMissing(v):
     ref, alt = v.split(":")[2].split(">")
-    if len(ref) == 1 or len(alt) == 1:
+    if len(ref) < 1 or len(alt) < 1:
+        return True
+    else:
+        return False
+
+def trim_bases(v):
+    print "trimming variant", v
+    ref, alt = v.split(":")[2].split(">")
+    if len(ref) <= 1 or len(alt) <= 1:
         return v
     else:
         ref, alt = trim_trailing(ref, alt)
@@ -156,7 +167,9 @@ def trim_bases(v):
         return v
 
 def trim_trailing(ref, alt):
-    if len(ref) == 1 or len(alt) == 1 or ref[-1] != alt[-1]:
+    if len(ref) <= 1 or len(alt) <= 1: 
+        return ref, alt    
+    elif ref[-1] != alt[-1]:
         return ref, alt    
     else:
         ref = ref[:-1]
@@ -460,6 +473,7 @@ def save_enigma_to_dict(path):
     n_wrong, n_total = 0, 0
     for line in enigma_file:
         line_num += 1
+        print "ENIGMA line", line
         line = line.replace(",", "|")
         if line_num == 1:
             columns = line.strip().split("\t")
@@ -530,6 +544,8 @@ def variant_equal(v1, v2, version="hg38"):
 
 def ref_correct(v, version="hg38"): 
     chr, pos, ref, alt = v 
+    if  pos == "None":
+        return False
     pos = int(pos) 
     if chr == "13": 
         seq = BRCA2[version]["sequence"] 

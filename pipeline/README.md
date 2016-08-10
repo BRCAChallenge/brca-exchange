@@ -7,6 +7,7 @@ Contains source code used to wrangle the BRCA variation data that is presented i
  * download http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/hg19.fa.gz to $BRCA_RESOURCES and uncompress
  * download http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz to $BRCA_RESOURCES and uncompress
  * download http://hgdownload.cse.ucsc.edu/gbdb/hg19/liftOver/hg19ToHg38.over.chain.gz to $BRCA_RESOURCES.  There is no need to uncompress it.
+ * Download brca1_hg38.txt, brca2_hg38.txt, brca1_hg19.txt and brca2_hg19.txt from http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/ to $BRCA_RESOURCES
  * install postgresql
  * install the leiden cleanup package at http://leiden-open-variation-database-lovd-cleanup.readthedocs.io/en/latest/index.html
  * pip install git+https://github.com/counsyl/hgvs.git

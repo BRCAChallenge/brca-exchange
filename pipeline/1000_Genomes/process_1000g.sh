@@ -1,23 +1,20 @@
-FOLDER="/cluster/home/mollyzhang/common_brca_folder/release1.0/data/1000_genomes"
+#G1K="/cluster/home/mollyzhang/common_brca_folder/release1.0/data/1000_genomes"
+
 
 echo downloading 1000 genome variant data from ftp....takes about 5 minutes....
-echo -e "\ndata location: $FOLDER"
-ftp -n < ftp_data_download.txt
-
-echo unzipping those data ...takes about 10 mintues...
-gzip -d $FOLDER/ftp_download/chr13_1000g_GRCh37_vcf.gz
-gzip -d $FOLDER/ftp_download/chr17_1000g_GRCh37_vcf.gz
-
-echo remove sample columns ... another 5 minutes ...
-cut -f1-9 $FOLDER/ftp_download/chr13_1000g_GRCh37_vcf > $FOLDER/ftp_download/chr13_1000g_GRCh37_no_sample.vcf
-cut -f1-9 $FOLDER/ftp_download/chr17_1000g_GRCh37_vcf > $FOLDER/ftp_download/chr17_1000g_GRCh37_no_sample.vcf
+echo -e "\ndata location: $G1K"
+pushd $G1K
+wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
+wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
+wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi
+wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi
+popd
 
 echo extract BRCA gene region from chr13 and chr17
-head -440648 $FOLDER/ftp_download/chr13_1000g_GRCh37_no_sample.vcf | tail -2286 > $FOLDER/ftp_download/chr13_brca2_1000g_GRCh37.vcf
-head -1146432 $FOLDER/ftp_download/chr17_1000g_GRCh37_no_sample.vcf | tail -2052 > $FOLDER/ftp_download/chr17_brca1_1000g_GRCh37.vcf
-
-echo cacatenate header, brca1 and brca2 files to generate final output
-grep "^#" $FOLDER/ftp_download/chr17_1000g_GRCh37_no_sample.vcf > $FOLDER/ftp_download/header
-cat $FOLDER/ftp_download/header $FOLDER/ftp_download/chr13_brca2_1000g_GRCh37.vcf $FOLDER/ftp_download/chr17_brca1_1000g_GRCh37.vcf > $FOLDER/1000g_brca12_GRCh37.vcf 
+tabix -h $G1K/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz 13:32889080-32973809 > $G1K/chr13_brca2_1000g_GRCh37.vcf
+tabix -h $G1K/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz 17:41191488-41322420 > $G1K/chr17_brca1_1000g_GRCh37.vcf
+vcf-concat $G1K/chr13_brca2_1000g_GRCh37.vcf $G1K/chr17_brca1_1000g_GRCh37.vcf  > $G1K/brca12_1000g_GRCh37.vcf
+CrossMap.py vcf $BRCA_RESOURCES/hg19ToHg38.over.chain.gz  $G1K/brca12_1000g_GRCh37.vcf $BRCA_RESOURCES/hg38.fa  $G1K/1000G_brca.hg38.vcf
+vcf-sort $G1K/1000G_brca.hg38.vcf > $G1K/1000G_brca.sorted.hg38.vcf
 
 echo Done!
