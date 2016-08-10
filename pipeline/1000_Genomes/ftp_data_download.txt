@@ -1,6 +1,0 @@
-open ftp-trace.ncbi.nih.gov 
-user anonymous ubuntu@ucsc.edu
-get /1000genomes/ftp/release/20130502/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz /hive/groups/cgl/brca/release1.0/data/1000_genomes/ftp_download/chr13_1000g_GRCh37_vcf.gz
-get /1000genomes/ftp/release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz /hive/groups/cgl/brca/release1.0/data/1000_genomes/ftp_download/chr17_1000g_GRCh37_vcf.gz
-close
-
