@@ -1,6 +1,9 @@
 general:
     build_dir: website
 deployment:
+    test:
+        post:
+            - npm run lint
     dev:
         branch: master
         commands:
