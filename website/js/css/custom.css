@@ -423,6 +423,16 @@ th[role='columnheader'] .help, .help-target .help {
     padding: 0 1px 0 1px;
 }
 
+#communityMap .map-legend-col img {
+    padding: 1px;
+    border-radius: 8px;
+    border: 1px solid white;
+}
+
+#communityMap .map-legend-col.selected img {
+    border: 1px solid black;
+}
+
 #communityMap .map-legend-icon {
     height: 20px;
 }

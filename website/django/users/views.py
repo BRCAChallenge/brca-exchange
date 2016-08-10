@@ -263,8 +263,12 @@ def users(request):
     page_num = int(request.GET.get('page_num', '0'))
     page_size = int(request.GET.get('page_size', '0'))
     search = request.GET.get('search', '')
+    roles = request.GET.getlist('roles[]')
 
     query = MyUser.objects.filter(is_approved=True)
+    if roles:
+        query = query.filter(role__in=roles)
+
     search_query = Q()
     for term in search.split():
         search_query &= ( Q(firstName__icontains=term) | Q(lastName__icontains=term)
@@ -294,8 +298,11 @@ def users(request):
 
 def user_locations(request):
     search = request.GET.get('search', '')
-
+    roles = request.GET.getlist('roles[]')
     query = MyUser.objects.filter(is_approved=True)
+    if roles:
+        query = query.filter(role__in=roles)
+
     search_query = Q()
     for term in search.split():
         search_query &= ( Q(firstName__icontains=term) | Q(lastName__icontains=term)

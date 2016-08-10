@@ -162,24 +162,22 @@ var Community = React.createClass({
 });
 
 var CommunityMap = React.createClass({
-    /* handleResize: function () {
-        var widthGroup =  (window.innerWidth < 1200) ? "md" : "lg";
-        if (widthGroup != this.state.widthGroup) {
-            setTimeout((function() {
-                    //this.map.setZoom(widthGroup == "md" ? 1 : 2);
-                    this.map.setZoom(2);
-                    this.map.setCenter({lat: 17, lng:-2.5});
-                }).bind(this), 500);
-        }
-        this.setState({ widthGroup: widthGroup });
-    },
-    */
+    getInitialState: () => ({ roles: [] }),
     shouldComponentUpdate({search}) {
-        return this.props.search != search;
+        return this.props.search != search
+    },
+    onFilterRole: function(role) {
+        var roles = this.state.roles.slice();
+        roles[role] = !roles[role];
+        this.setState({ roles: roles });
+        this.filterSub.onNext(role);
     },
     componentDidMount: function() {
+
         var initMap = function () {
+            var self = this;
             this.geo = new google.maps.Geocoder();
+            var geoCache = [];
             var infowindow;
             var markers = this.markers = [];
             var map = this.map = new google.maps.Map(document.getElementById('communityMap'), {
@@ -211,63 +209,83 @@ var CommunityMap = React.createClass({
                 </div>
             );
 
-            var self = this;
-            Array.prototype.slice.call(legendControl.querySelectorAll(".map-legend-col")).map(
-                el => el.addEventListener('click', () => self.props.onFilterRole(el.attributes['data-role'].value))
-            );
+            Array.prototype.slice.call(legendControl.querySelectorAll(".map-legend-col")).map(function(el) { 
+                el.addEventListener('click', function(ev) {
+                    self.onFilterRole(this.attributes['data-role'].value)
+                    this.classList.toggle('selected');
+                })
+            });
             legendControl.className = "map-legend";
             legendControl.index = 1;
             map.controls[google.maps.ControlPosition.TOP_RIGHT].push(legendControl);
 
             this.updateMap = (function() {
-                backend.userLocations(this.props.search).subscribe(({data}) => {
-                    markers.map(m => m.setMap(null));
-                    markers.length = 0;
+                var roleFilter = [...this.state.roles.keys()].filter(index => this.state.roles[index]);
+                backend.userLocations(this.props.search, roleFilter).subscribe(({data}) => {
+                    var newMarkers = [];
+                    markers.map(m => {
+                        var idx = data.findIndex(({id}) => m.userID === id);
+                        if (idx != -1) {
+                            newMarkers.push(m);
+                            data.splice(idx, 1);
+                        } else {
+                            m.setMap(null);
+                        }
+                    });
+                    markers = self.markers = newMarkers;
                     _.map(data, ({id, firstName, lastName, title, role, role_other, institution, city, state, country, has_image})  => {
-                        this.geo.geocode({address: city + "," + state + "," + country}, (results, status) => {
-                            if (status == "OK") {
-                                var l = results[0].geometry.location;
-                                var avatar
-                                if (has_image) {
-                                    var avatar_link = config.backend_url + '/site_media/media/' + id
-                                    avatar = <object className="avatar" data={avatar_link} type="image/jpg"/>
-                                } else {
-                                    avatar = <img className="avatar" src={placeholder}/>
+                        var addMarker = function (loc) {
+                            var avatar;
+                            if (has_image) {
+                                var avatar_link = config.backend_url + '/site_media/media/' + id
+                                avatar = <object className="avatar" data={avatar_link} type="image/jpg"/>
+                            } else {
+                                avatar = <img className="avatar" src={placeholder}/>
+                            }
+                            var userInfo = <div className="map-info-window">
+                                {avatar}
+                                <div>
+                                    <span>{firstName} {lastName}{title.length ? "," : ""} {title}</span><br />
+                                    <span id="role">{Role.other(role) ? role_other : Role.get(role)[2]}</span><br />
+                                    <span>{institution}</span>
+                                </div>
+                            </div>;
+                            var marker = new google.maps.Marker({
+                                position: { lat: loc.lat(), lng: loc.lng() },
+                                map: map,
+                                title: `${firstName} ${lastName}${title.length ? "," : ""} ${title}`,
+                                icon: {
+                                    url: require(`./img/map/${role}.png`),
+                                    scaledSize: new google.maps.Size(20,32)
                                 }
-                                var userInfo = <div className="map-info-window">
-                                    {avatar}
-                                    <div>
-                                        <span>{firstName} {lastName}{title.length ? "," : ""} {title}</span><br />
-                                        <span id="role">{Role.other(role) ? role_other : Role.get(role)[2]}</span><br />
-                                        <span>{institution}</span>
-                                    </div>
-                                </div>;
-                                var marker = new google.maps.Marker({
-                                    position: { lat: l.lat(), lng: l.lng() },
-                                    map: map,
-                                    title: `${firstName} ${lastName}${title.length ? "," : ""} ${title}`,
-                                    icon: {
-                                        url: require(`./img/map/${role}.png`),
-                                        scaledSize: new google.maps.Size(20,32)
-                                    }
-                                });
-                                markers.push(marker);
-                                var info = new google.maps.InfoWindow({content: React.renderToStaticMarkup(userInfo) });
-                                marker.addListener('click', () => {
-                                    infowindow && infowindow.close();
+                            });
+                            marker.userID = id;
+                            markers.push(marker);
+                            var info = new google.maps.InfoWindow({content: React.renderToStaticMarkup(userInfo) });
+                            marker.addListener('click', () => {
+                                infowindow && infowindow.close();
                                     infowindow = info;
                                     info.open(map, marker)
-                                });
+                            });
+                        };
+                        if (id in geoCache) addMarker(geoCache[id]);
+                        else this.geo.geocode({address: city + "," + state + "," + country}, (results, status) => {
+                            var loc;
+                            if (status == "OK") {
+                                loc = geoCache[id] = results[0].geometry.location;
+                                addMarker(loc);
                             }
                         });
                     });
                 });
             }).bind(this);
             this.updateMap();
+            var filterSub = this.filterSub = new Rx.Subject();
+            this.subs = filterSub.debounce(500).subscribe(this.updateMap);
         };
 
+
         google.load('maps', '3', {callback: initMap.bind(this), other_params: "key=" + config.maps_key});
-        //window.addEventListener('resize', this.handleResize);
     },
 
     componentDidUpdate: function() {
