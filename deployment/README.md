@@ -88,6 +88,10 @@ CI is implemented with circle-ci (CCI). CCI will build any commits on 'master' b
 and deploy them on the beta vhost of brcaexchange-dev. The deploy script, deploy-dev,
 will rsync the build, and copy site settings into place.
 
+Any commits that are tagged with a version number, e.g. v1.2.3, will be built and
+deployed to brcaexchange.cloudapp.net (beta). The ```release``` script will
+generate and increment tags of this form automatically.
+
 To allow CCI to push code to azure, an authorized ssh key is added to the ssh config
 on the azure hosts. The ssh key can be managed in the CCI account settings.
 
