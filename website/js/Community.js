@@ -193,6 +193,8 @@ var CommunityMap = React.createClass({
                 }]
             });
 
+            map.addListener('click', () => { infowindow && infowindow.close(); infowindow = undefined; });
+
             var legendControl = document.createElement('div');
             var roleMarkers = Role.options.map(role =>
                 <div className="map-legend-col" data-role={role[0]}> 
@@ -203,8 +205,10 @@ var CommunityMap = React.createClass({
             legendControl.innerHTML = React.renderToStaticMarkup(
                 <div>
                     <img src={require("./img/map/1.png")} className="map-legend-icon" />
-                    <div className="map-legend-full">
-                        {roleMarkers}
+                    <div className="map-legend-slide">
+                        <div className="map-legend-full">
+                            {roleMarkers}
+                        </div>
                     </div>
                 </div>
             );
@@ -264,8 +268,8 @@ var CommunityMap = React.createClass({
                             var info = new google.maps.InfoWindow({content: React.renderToStaticMarkup(userInfo) });
                             marker.addListener('click', () => {
                                 infowindow && infowindow.close();
-                                    infowindow = info;
-                                    info.open(map, marker)
+                                infowindow = info;
+                                info.open(map, marker)
                             });
                         };
                         if (id in geoCache) addMarker(geoCache[id]);
@@ -278,6 +282,8 @@ var CommunityMap = React.createClass({
                         });
                     });
                 });
+                infowindow && infowindow.close();
+                infowindow = undefined;
             }).bind(this);
             this.updateMap();
             var filterSub = this.filterSub = new Rx.Subject();

@@ -21,7 +21,7 @@ var Role = {
         [8, "I am a member of an advocacy group",  "Advocacy Group Member"],
         [9, "I am a genetic counselor",            "Genetic Counselor"],
         [10, "I am a clinical geneticist",         "Clinical Geneticist"],
-        [11, "I am a clinician",                    "Clinician"],
+        [11, "I am a clinician",                   "Clinician"],
         [0, "Other"]
     ],
     other: id => id == 0 || id == 11,
