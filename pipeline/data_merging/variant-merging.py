@@ -82,8 +82,8 @@ GENOME1K_FILE = "10k_genome.brca.sorted.hg38.vcf"
 CLINVAR_FILE = "ClinVarBrca.vcf"
 LOVD_FILE = "sharedLOVD_brca12.sorted.hg38.vcf"
 EX_LOVD_FILE = "exLOVD_brca12.sorted.hg38.vcf"
-BIC_FILE = "bic_brca12.sorted.hg38.vcf"
-EXAC_FILE = "exac.BRCA12.sorted.hg38.vcf"
+BIC_FILE = "bicSnp.sorted.hg38.vcf"
+EXAC_FILE = "exac.brca12.sorted.hg38.vcf"
 ESP_FILE = "esp.brca12.sorted.hg38.vcf"
 
 
@@ -120,7 +120,7 @@ def main():
         variants = string_comparison_merge(variants) 
         variants = variant_standardize(variants=variants)
         date = datetime.datetime.today().strftime('%d%b%Y')
-        write_new_csv(ARGS.output + "merged_" + date + ".csv", columns, variants)
+        write_new_tsv(ARGS.output + "merged_" + date + ".tsv", columns, variants)
         print "final number of variants: %d" %len(variants)
         print "Done" 
     finally:
@@ -397,17 +397,17 @@ def one_variant_transform(f_in, f_out):
                         new_record.INFO[key] = [value[i]]
                 vcf_writer.write_record(new_record)
 
-def write_new_csv(filename, columns, variants):
+def write_new_tsv(filename, columns, variants):
     merged_file = open(filename, "w")
-    merged_file.write(",".join(columns)+"\n")
+    merged_file.write("\t".join(columns)+"\n")
     for key, variant in variants.iteritems():
         if len(variant) != len(columns):
             raise Exception("mismatching number of columns in head and row")
         if "chr13" in key:
-            merged_file.write(",".join(variant)+"\n")
+            merged_file.write("\t".join(variant)+"\n")
     for key, variant in variants.iteritems():
         if "chr17" in key:
-            merged_file.write(",".join(variant)+"\n")
+            merged_file.write("\t".join(variant)+"\n")
     merged_file.close()
 
 

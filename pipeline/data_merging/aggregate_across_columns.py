@@ -15,7 +15,8 @@ FIELDS_TO_REMOVE=["Gene_symbol_ENIGMA", "Genomic_Coordinate",
                   "polyPhen2_result_ESP", 
                   "BIC_Designation_BIC", "BIC_Nomenclature_exLOVD"]
 FIELDS_TO_ADD=["Gene_Symbol", "Reference_Sequence",
-               "HGVS_cDNA", "BIC_Identifier", "HGVS_Protein", 
+               "HGVS_cDNA", "Hg38_Start", "HG38_End", "HGVS_RNA", "BIC_Identifier", 
+               "HGVS_Protein", 
                "Protein_Change", "Allele_Frequency", 
                "Max_Allele_Frequency",
                "Genomic_Coordinate_hg38",
@@ -31,13 +32,16 @@ def main():
                         default="/hive/groups/cgl/brca/release1.0/aggregated.csv")
     args = parser.parse_args()
 
-    csvIn = csv.DictReader(open(args.input, "r"))
+    csvIn = csv.DictReader(open(args.input, "r"), delimiter='\t')
     outputColumns = setOutputColumns(csvIn.fieldnames, FIELDS_TO_REMOVE,
                                      FIELDS_TO_ADD)
     csvOut = csv.DictWriter(open(args.output, "w"), delimiter='\t',
                             fieldnames=outputColumns)
     csvOut.writerow(dict((fn,fn) for fn in outputColumns))
+    rowCount = 0
     for row in csvIn:
+        rowCount += 1
+        print "working on row", rowCount
         csvOut.writerow(updateRow(row, FIELDS_TO_REMOVE))
 
         
@@ -58,8 +62,10 @@ def cleanColumns(row):
     with commas.  Replace underscores with spaces, and parentheses with
     underscores
     """
-    for column in row.keys():
+    print "top of function: keys", sorted(row.keys())
+    for column in sorted(row.keys()):
         value = row[column]
+        print "cleaning", column, "contents", row[column]
         value = re.sub("^\[", "", value)
         value = re.sub("\]$", "", value)
         value = re.sub("^'", "", value)
@@ -71,6 +77,12 @@ def cleanColumns(row):
     return row
 
 def updateRow(row, toRemove):
+    if row.has_key(None):
+        print "1 Row has key none"
+        for item in row.keys():
+            print item, row[item]
+    else:
+        print "1 Row has no key none"
     newRow = cleanColumns(row)
     newRow = update_basic_fields(newRow)
     newRow = hgvsUpdate(newRow)
@@ -83,10 +95,21 @@ def updateRow(row, toRemove):
     newRow["Genomic_Coordinate_hg36"] = EMPTY
     for item in toRemove:
         del newRow[item]
+    if row.has_key(None):
+        print "2 Row has key none"
+    else:
+        print "2 Row has no key none"
     return(newRow)
 
 def update_basic_fields(row):
     row["Genomic_Coordinate_hg38"] = row["Genomic_Coordinate"]
+    hgvsTokens = row["Genomic_Coordinate"].split(":")
+    Hg38_Start = hgvsTokens[1]
+    hgvsRef = hgvsTokens[2].split(">")[0]
+    if hgvsRef == "None":
+        Hg38_End = Hg38_start
+    else:
+        Hg38_End = str(int(Hg38_Start) + len(hgvsRef) - 1)
     row["Gene_Symbol"] = row["Gene_symbol_ENIGMA"]
     if row["Gene_Symbol"] == EMPTY:
         if re.search("^chr17", row["Genomic_Coordinate_hg38"] ):
@@ -97,6 +120,7 @@ def update_basic_fields(row):
     row["Genomic_Coordinate_hg38"] = row["Genomic_Coordinate"]
     row["HGVS_cDNA"] = row["HGVS_cDNA_ENIGMA"]
     row["BIC_Identifier"] = row["BIC_Nomenclature_ENIGMA"]
+    row["HGVS_RNA"] = EMPTY
     row["HGVS_Protein"] = row["HGVS_protein_ENIGMA"]
     if row["HGVS_Protein"] == EMPTY:
         row["HGVS_Protein"] = row["Protein_ClinVar"]

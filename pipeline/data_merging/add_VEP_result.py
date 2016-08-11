@@ -5,7 +5,6 @@ import pandas as pd
 import json
 import pickle
 
-VEP_OUTPUT = "/cluster/home/mollyzhang/release1.0/data/VEP/vep_output_3_3_2016.vcf"
 VEP_FIELDS = ['Allele', 'Consequence', 'IMPACT', 'SYMBOL', 'Gene',
               'Feature_type', 'Feature', 'BIOTYPE', 'EXON', 'INTRON',
               'HGVSc', 'HGVSp', 'cDNA_position', 'CDS_position',
@@ -44,8 +43,10 @@ def main():
                         default="/hive/groups/cgl/brca/release1.0/merged.csv")
     parser.add_argument("-o", "--output",
                         default="/hive/groups/cgl/brca/release1.0/merged_withVEP_cleaned.csv")
+    parser.add_argument("-v", "--vep",  help="VEP output, run in advance for all variants",
+                        default="/cluster/home/mollyzhang/release1.0/data/VEP/vep_output_3_3_2016.vcf")
     args = parser.parse_args()
-    vep_result_dict = save_VEP_to_dict()
+    vep_result_dict = save_VEP_to_dict(args.vep)
     temp_dump = open("temp_dump", "w")
     temp_dump.write(pickle.dumps(vep_result_dict))
     temp_dump.close()
@@ -87,9 +88,9 @@ def write_to_file(vep_result_dict, inputFile, outputFile):
 
 
 
-def save_VEP_to_dict():
+def save_VEP_to_dict(vepFile):
     print("processing VEP output")
-    f = open(VEP_OUTPUT, "r")
+    f = open(vepFile, "r")
     vep_dict = {}
     line_no = 0
     for line in f:
