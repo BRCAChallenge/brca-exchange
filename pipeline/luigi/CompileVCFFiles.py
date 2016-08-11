@@ -11,34 +11,41 @@ import sys
 sys.path.insert(0, '../esp')
 import espExtract
 
-# Environment variables
-# TODO: Formalize for other systems
-# NOTE: These must be changed to represent the directory structure of the machine running this script
-os.environ['BRCA_RESOURCES'] = '/Users/zackfischmann/UCSC/brca/brca-resources'
-os.environ['PIPELINE_INPUT'] = '/Users/zackfischmann/UCSC/brca/pipeline-data/data/pipeline_input'
-os.environ['BIC'] = '/Users/zackfischmann/UCSC/brca/pipeline-data/data/BIC'
-os.environ['CLINVAR'] = '/Users/zackfischmann/UCSC/brca/pipeline-data/data/ClinVar'
-os.environ['ESP'] = '/Users/zackfischmann/UCSC/brca/pipeline-data/data/ESP'
-os.environ['LUIGI'] = '/Users/zackfischmann/UCSC/brca-exchange/pipeline/luigi'
-os.environ['BIC_METHODS'] = '/Users/zackfischmann/UCSC/brca-exchange/pipeline/bic'
-os.environ['ESP_METHODS'] = '/Users/zackfischmann/UCSC/brca-exchange/pipeline/esp'
+def create_path_if_nonexistent(path):
+  if not os.path.exists(path):
+    os.makedirs(path)
+  return path
 
-# Globals
-brca_resources_dir = os.environ['BRCA_RESOURCES']
-pipeline_input_dir = os.environ['PIPELINE_INPUT']
-bic_file_dir =  os.environ['BIC']
-clinvar_file_dir = os.environ['CLINVAR']
-esp_file_dir = os.environ['ESP']
-luigi_dir = os.environ['LUIGI']
-bic_method_dir = os.environ['BIC_METHODS']
-esp_method_dir = os.environ['ESP_METHODS']
+# Create directories, environment variables, and globals for scripts to run.
+brca_resources_dir = os.environ['BRCA_RESOURCES'] = create_path_if_nonexistent(os.path.abspath('../brca/brca-resources'))
+pipeline_input_dir = os.environ['PIPELINE_INPUT'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/pipeline_input'))
+brca_pipeline_data_dir = os.environ['BRCA_PIPELINE_DATA'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data'))
+
+bic_file_dir = os.environ['BIC'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/BIC'))
+clinvar_file_dir = os.environ['CLINVAR'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/ClinVar'))
+esp_file_dir = os.environ['ESP'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/ESP'))
+lovd_file_dir = os.environ['LOVD'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/LOVD'))
+ex_lovd_file_dir = os.environ['EXLOVD'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/exLOVD'))
+exac_file_dir = os.environ['EXAC'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/exac'))
+g1k_file_dir = os.environ['G1K'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/G1K'))
+
+luigi_dir = os.environ['LUIGI'] = os.getcwd()
+
+bic_method_dir = os.environ['BIC_METHODS'] = os.path.abspath('../bic')
+esp_method_dir = os.environ['ESP_METHODS'] = os.path.abspath('../esp')
+lovd_method_dir = os.environ['LOVD_METHODS'] = os.path.abspath('../lovd')
+g1k_method_dir = os.environ['G1K_METHODS'] = os.path.abspath('../1000_Genomes')
+
 
 class ConvertLatestClinvarToVCF(luigi.Task):
 
     def run(self):
-      # Change to correct directory for storing files
-      # TODO: maybe we can use temp files or keep in current dir and cleanup after?
       os.chdir(clinvar_file_dir)
+      
+      # Create required xml file for make to run properly
+      clinvar_xml_file = clinvar_file_dir + "/ClinVarBrca.xml"
+      if not os.path.exists(clinvar_xml_file):
+        open(clinvar_xml_file, 'w').close() 
 
       # Download latest gzipped ClinVarFullRelease
       url = "ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/ClinVarFullRelease_00-latest.xml.gz"
@@ -68,9 +75,14 @@ class ConvertLatestClinvarToVCF(luigi.Task):
       # Switch back to this file's directory
       os.chdir(luigi_dir)
 
+      
+      # Makefile requires a particular environment variable for output
+      my_env = os.environ.copy()
+      my_env["BRCA_PIPELINE_DATA"] = brca_pipeline_data_dir
+      
       # Convert gzipped file to vcf using makefile in pipeline/clinvar/
-      print "Converting %s to VCF format... this takes a while." % (file_name)
-      sp = subprocess.Popen(["make"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd="../clinvar")
+      print "Converting %s to VCF format. This takes a while..." % (file_name)
+      sp = subprocess.Popen(["make"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd="../clinvar", env=my_env)
       out, err = sp.communicate()
       if out:
           print "standard output of subprocess:"
@@ -78,7 +90,6 @@ class ConvertLatestClinvarToVCF(luigi.Task):
       if err:
           print "standard error of subprocess:"
           print err
-
 
 class DownloadAndExtractFilesFromESPTar(luigi.Task):
 
@@ -194,7 +205,6 @@ class DownloadAndExtractFilesFromESPTar(luigi.Task):
       copyfile(sorted_concatenated_brca_output_file, final_destination)
       print "File copied to %s" % (final_destination)
 
-
 class DownloadAndExtractFilesFromBIC(luigi.Task):
 
     # TODO: Figure out how to store u/p for safe retrieval
@@ -296,3 +306,209 @@ class DownloadAndExtractFilesFromBIC(luigi.Task):
       final_destination = pipeline_input_dir + "/bicSnp.sorted.hg38.vcf"
       copyfile(sorted_hg38_vcf_file, final_destination)
       print "File copied to %s" % (final_destination)
+
+class ExtractAndConvertFilesFromEXLOVD(luigi.Task):
+    
+    def run(self):
+      os.chdir(lovd_method_dir)
+      
+      # extract_data.py -u http://hci-exlovd.hci.utah.edu/ -l BRCA1 BRCA2 -o $EXLOVD
+      ex_lovd_data_host_url = "http://hci-exlovd.hci.utah.edu/"
+      args = ["extract_data.py", "-u", ex_lovd_data_host_url, "-l", "BRCA1", "BRCA2", "-o", ex_lovd_file_dir]
+      print "Running extract_data.py with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      out, err = sp.communicate()
+      if out:
+          print "standard output of subprocess:"
+          print out
+      if err:
+          print "standard error of subprocess:"
+          print err
+      print "Extracted data from %s." % (lovd_data_host_url)
+
+      # Convert extracted flat file to vcf format ./lovd2vcf -i $EXLOVD/BRCA1.txt -o $EXLOVD/exLOVD_brca1.hg19.vcf -a exLOVDAnnotation -b 1 -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -g $BRCA_RESOURCES/hg19.fa
+      args = ["./lovd2vcf", "-i", ex_lovd_file_dir + "/BRCA1.txt", "-o", ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", "-a", "exLOVDAnnotation", "-b", "1", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g", brca_resources_dir + "/hg19.fa"]
+      print "Running lovd2vcf with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      out, err = sp.communicate()
+      if out:
+          print "standard output of subprocess:"
+          print out
+      if err:
+          print "standard error of subprocess:"
+          print err
+      print "Converted extracted BRCA1 flat file to vcf format."
+
+      # ./lovd2vcf -i output_directory/BRCA2.txt -o exLOVD_brca2.vcf -a $EXLOVD/exLOVDAnnotation -b 2 -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -g $BRCA_RESOURCES/hg19.fa
+      args = ["./lovd2vcf", "-i", ex_lovd_file_dir + "/BRCA2.txt", "-o", "exLOVD_brca2.vcf", "-a", ex_lovd_file_dir + "exLOVDAnnotation", "-b", "2", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g", brca_resources_dir + "/hg19.fa"]
+      print "Running lovd2vcf with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      out, err = sp.communicate()
+      if out:
+          print "standard output of subprocess:"
+          print out
+      if err:
+          print "standard error of subprocess:"
+          print err
+      print "Converted extracted BRCA2 flat file to vcf format."
+
+      # vcf-concat $EXLOVD/exLOVD_brca1.hg19.vcf $EXLOVD/exLOVD_brca2.hg19.vcf > $EXLOVD/exLOVD_brca12.hg19.vcf
+      ex_lovd_brca12_hg19_vcf_file = ex_lovd_file_dir + "/exLOVD_brca12.hg19.vcf"
+      writable_ex_lovd_brca12_hg19_vcf_file = open(ex_lovd_brca12_hg19_vcf_file, 'w')
+      args = ["vcf-concat", ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf"]
+      print "Running lovd2vcf with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=writable_ex_lovd_brca12_hg19_vcf_file, stderr=subprocess.PIPE)
+      out, err = sp.communicate()
+      if out:
+          print "standard output of subprocess:"
+          print out
+      if err:
+          print "standard error of subprocess:"
+          print err
+      print "Concatenated BRCA1 and BRCA2 vcf files into %s." % (ex_lovd_brca12_hg19_vcf_file)
+      
+      # `CrossMap.py vcf $BRCA_RESOURCES/hg19ToHg38.over.chain.gz $EXLOVD/exLOVD_brca12.hg19.vcf $BRCA_RESOURCES/hg38.fa $EXLOVD/exLOVD_brca12.hg38.vcf
+      args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz", ex_lovd_brca12_hg19_vcf_file, brca_resources_dir + "/hg38.fa", ex_lovd_file_dir + "/exLOVD_brca12.hg38.vcf"]
+      print "Running CrossMap.py with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      out, err = sp.communicate()
+      if out:
+          print "standard output of subprocess:"
+          print out
+      if err:
+          print "standard error of subprocess:"
+          print err
+      print "Crossmap complete."
+      
+      # vcf-sort $EXLOVD/exLOVD_brca12.hg38.vcf > $EXLOVD/exLOVD_brca12.sorted.hg38.vcf
+      sorted_ex_lovd_brca12_hg38_vcf_file = ex_lovd_file_dir + "/exLOVD_brca12.sorted.hg38.vcf"
+      writable_sorted_ex_lovd_brca12_hg38_vcf_file = open(sorted_ex_lovd_brca12_hg38_vcf_file, 'w')
+      args = ["vcf-sort", ex_lovd_file_dir + "/exLOVD_brca12.hg38.vcf"]
+      print "Running lovd2vcf with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=writable_sorted_ex_lovd_brca12_hg38_vcf_file, stderr=subprocess.PIPE)
+      out, err = sp.communicate()
+      if out:
+          print "standard output of subprocess:"
+          print out
+      if err:
+          print "standard error of subprocess:"
+          print err
+      print "Sorted BRCA1/2 hg38 vcf file into %s." % (sorted_ex_lovd_brca12_hg38_vcf_file)
+      
+      # `cp $EXLOVD/exLOVD_brca12.sorted.hg38.vcf $PIPELINE_INPUT
+      print "Copying sorted hg38 VCF to the final pipeline_input destination"
+      final_destination = pipeline_input_dir + "/exLOVD_brca12.sorted.hg38.vcf"
+      copyfile(sorted_ex_lovd_brca12_hg38_vcf_file, final_destination)
+      print "File copied to %s" % (final_destination)
+
+class ExtractAndConvertFilesFromLOVD(luigi.Task):
+    
+    def run(self):
+      os.chdir(lovd_method_dir)
+      
+      # extract_data.py -u http://databases.lovd.nl/shared/ -l BRCA1 BRCA2 -o $LOVD
+      lovd_data_host_url = "http://databases.lovd.nl/shared/"
+      args = ["extract_data.py", "-u", lovd_data_host_url, "-l", "BRCA1", "BRCA2", "-o", lovd_file_dir]
+      print "Running extract_data.py with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      out, err = sp.communicate()
+      if out:
+          print "standard output of subprocess:"
+          print out
+      if err:
+          print "standard error of subprocess:"
+          print err
+      print "Extracted data from %s." % (lovd_data_host_url)
+
+      # ./lovd2vcf -i $LOVD/BRCA1.txt -o $LOVD/sharedLOVD_brca1.hg19.vcf -a sharedLOVDAnnotation -b 1 -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -g $BRCA_RESOURCES/hg19.fa
+      args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA1.txt", "-o", lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf", "-a", "sharedLOVDAnnotation", "-b", "1", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g", brca_resources_dir + "/hg19.fa"]
+      print "Running lovd2vcf with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      out, err = sp.communicate()
+      if out:
+          print "standard output of subprocess:"
+          print out
+      if err:
+          print "standard error of subprocess:"
+          print err
+      print "Converted extracted BRCA1 flat file to vcf format."
+
+      # ./lovd2vcf -i $LOVD/BRCA2.txt -o $LOVD/sharedLOVD_brca2.hg19.vcf -a sharedLOVDAnnotation -b 2 -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -g $BRCA_RESOURCES/hg19.fa 
+      # Comment: BRCA2.txt might or might not be created. It seems like there's an error condition that kills BRCA2. It's not worth fixing the error condition at this point.
+      args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA2.txt", "-o", "sharedLOVD_brca2.hg19.vcf", "-a", "sharedLOVDAnnotation", "-b", "2", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g", brca_resources_dir + "/hg19.fa"]
+      print "Running lovd2vcf with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      out, err = sp.communicate()
+      if out:
+          print "standard output of subprocess:"
+          print out
+      if err:
+          print "standard error of subprocess:"
+          print err
+      print "Converted extracted BRCA2 flat file to vcf format."
+
+      # vcf-concat $LOVD/sharedLOVD_brca1.hg19.vcf $LOVD/sharedLOVD_brca2.hg19.vcf > $LOVD/sharedLOVD_brca12.hg19.vcf
+      shared_lovd_brca12_hg19_vcf_file = lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf"
+      writable_shared_lovd_brca12_hg19_vcf_file = open(ex_lovd_brca12_hg19_vcf_file, 'w')
+      args = ["vcf-concat", lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf", lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf"]
+      print "Running lovd2vcf with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=writable_shared_lovd_brca12_hg19_vcf_file, stderr=subprocess.PIPE)
+      out, err = sp.communicate()
+      if out:
+          print "standard output of subprocess:"
+          print out
+      if err:
+          print "standard error of subprocess:"
+          print err
+      print "Concatenated BRCA1 and BRCA2 vcf files into %s." % (shared_lovd_brca12_hg19_vcf_file)
+      
+      # `CrossMap.py vcf $BRCA_RESOURCES/hg19ToHg38.over.chain.gz $LOVD/sharedLOVD_brca12.hg19.vcf $BRCA_RESOURCES/hg38.fa $LOVD/sharedLOVD_brca12.hg38.vcf
+      args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz", shared_lovd_brca12_hg19_vcf_file, brca_resources_dir + "/hg38.fa", lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
+      print "Running CrossMap.py with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      out, err = sp.communicate()
+      if out:
+          print "standard output of subprocess:"
+          print out
+      if err:
+          print "standard error of subprocess:"
+          print err
+      print "Crossmap complete."
+      
+      # vcf-sort $LOVD/sharedLOVD_brca12.38.vcf > $LOVD/sharedLOVD_brca12.sorted.38.vcf
+      sorted_shared_lovd_brca12_hg38_vcf_file = lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf"
+      writable_sorted_shared_lovd_brca12_hg38_vcf_file = open(sorted_shared_lovd_brca12_hg38_vcf_file, 'w')
+      args = ["vcf-sort", lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
+      print "Running lovd2vcf with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=writable_sorted_shared_lovd_brca12_hg38_vcf_file, stderr=subprocess.PIPE)
+      out, err = sp.communicate()
+      if out:
+          print "standard output of subprocess:"
+          print out
+      if err:
+          print "standard error of subprocess:"
+          print err
+      print "Sorted BRCA1/2 hg38 vcf file into %s." % (writable_sorted_shared_lovd_brca12_hg38_vcf_file)
+      
+      # `cp $LOVD/sharedLOVD_brca12.sorted.38.vcf $PIPELINE_INPUT
+      print "Copying sorted hg38 VCF to the final pipeline_input destination"
+      final_destination = pipeline_input_dir + "/sharedLOVD_brca12.sorted.hg38.vcf"
+      copyfile(sorted_shared_lovd_brca12_hg38_vcf_file, final_destination)
+      print "File copied to %s" % (final_destination)
+
+class DownloadAndExtractFilesFromG1K(luigi.Task):
+
+    def run(self):
+      os.chdir(g1k_method_dir)
+      args = ["bash", "process_1000g.sh"]
+      print "Running process_1000g.sh with the following args: %s" % (args)
+      print "It may take several minutes to download files... you will see begin to see output once the downloads are complete."
+      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      out, err = sp.communicate()
+      if out:
+          print "standard output of subprocess:"
+          print out
+      if err:
+          print "standard error of subprocess:"
+          print err
+      print "Completed 1000 Genomes download and extraction."
