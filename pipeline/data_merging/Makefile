@@ -13,7 +13,7 @@ outputFiles = $(releaseDir)/pipeline-output
 
 all:	$(outputFiles)/aggregated.tsv
 
-$(outputFiles)/aggregated.tsv:	$(outputFiles)/merged.withVEP.csv aggregate_across_columns.py brca_pseudonym_generator.py
+$(outputFiles)/aggregated.tsv:	$(outputFiles)/merged.withVEP.tsv aggregate_across_columns.py brca_pseudonym_generator.py
 	aggregate_across_columns.py -i $< -o $(outputFiles)/tmp.tsv
 	brca_pseudonym_generator.py -i $(outputFiles)/tmp.tsv \
 	  -j $(resources)/hg18.fa \
@@ -23,10 +23,10 @@ $(outputFiles)/aggregated.tsv:	$(outputFiles)/merged.withVEP.csv aggregate_acros
 	  -t $(resources)/refseq_annotation.hg38.gp \
 	  -o $@
 
-$(outputFiles)/merged.withVEP.csv:	$(outputFiles)/merged.tsv add_VEP_result.py
+$(outputFiles)/merged.withVEP.tsv:	$(outputFiles)/merged.tsv add_VEP_result.py
 	add_VEP_result.py -i $< -v $(inputVcfDir)/vep_output_3_3_2016.vcf -o $@
 
 $(outputFiles)/merged.tsv:	$(inputVcfs) variant-merging.py
-	variant-merging.py -i $(inputVcfDir)/ -o $(releaseDir)/pipeline_output/ -p
+	variant-merging.py -i $(inputVcfDir)/ -o $(releaseDir)/pipeline_output/ -p -r $(resources)
 
 
