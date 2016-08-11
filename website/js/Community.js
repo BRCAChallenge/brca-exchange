@@ -4,7 +4,7 @@ var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 var {Grid, Col, Row, Button, Table} = require('react-bootstrap');
 var backend = require('backend');
-var config  = require('./config')
+var config  = require('./config');
 var {Role} = require('./Signup');
 var {Navigation, Link} = require('react-router');
 var {Pagination} = require('react-data-components-bd2k');
@@ -24,8 +24,7 @@ var Community = React.createClass({
             search: "",
             pageLength: 10,
             page: 0,
-            totalPages: 1,
-            windowWidth: window.innerWidth
+            totalPages: 1
         };
     },
     setPages: function({data, count}) {
@@ -52,8 +51,9 @@ var Community = React.createClass({
         this.setStateFetch({search: search, page: 0});
     },
     onFilterRole: function (role) {
-        if (Role.get(role).length == 3)
+        if (Role.get(role).length === 3) {
             this.refs['community-search'].appendSearch(Role.get(role)[2]);
+        }
     },
     logout: function() {
         auth.logout();
@@ -70,36 +70,36 @@ var Community = React.createClass({
         var queryParams = this.context.router.getCurrentQuery();
         var message;
         if (queryParams.registrationSuccess) {
-            message =  <div className="alert alert-success">
+            message = (<div className="alert alert-success">
                 <p>Thanks for signing up. We have sent you an email with a confirmation link to complete your registration.</p>
-            </div>
+            </div>);
         }
         var {data, page, totalPages, error} = this.state;
         var rows = _.map(data, row => {
 
             var avatar;
             if (row.has_image) {
-                var avatar_link = config.backend_url + '/site_media/media/' + row['id']
-                avatar = <object className="avatar" data={avatar_link} type="image/jpg"/>
+                let avatarLink = config.backend_url + '/site_media/media/' + row.id;
+                avatar = <object className="avatar" data={avatarLink} type="image/jpg"/>;
             } else {
-                avatar = <img src={placeholder}/>
+                avatar = <img src={placeholder}/>;
             }
 
             var {city, state, country} = row;
-            var location_string = _.values(_.pick({city,state,country}, v => v)).join(', ')
+            var locationString = _.values(_.pick({city, state, country}, v => v)).join(', ');
 
-            return <tr>
+            return (<tr>
                 <td width="120px">
                     {avatar}
                 </td>
                 <td>
-                    <span id="name"><h3>{row['firstName']} {row['lastName']}{row['title'].length ? ", " + row['title'] : ""}</h3></span>
-                    <span id="role"><h4>{Role.other(row['role']) ? row['role_other'] : Role.get(row['role'])[2]}</h4></span>
-                    <span id="institution">{row['institution']}</span>
-                    <span id="location">{location_string}</span>
-                    <span id="contact">{row['email']} {row['phone_number']}</span>
+                    <span id="name"><h3>{row.firstName} {row.lastName}{row.title.length ? ", " + row.title : ""}</h3></span>
+                    <span id="role"><h4>{Role.other(row.role) ? row.role_other : Role.get(row.role)[2]}</h4></span>
+                    <span id="institution">{row.institution}</span>
+                    <span id="location">{locationString}</span>
+                    <span id="contact">{row.email} {row.phone_number}</span>
                 </td>
-            </tr>
+            </tr>);
         });
 
         return (error ? <p>{error}</p> :
@@ -164,7 +164,7 @@ var Community = React.createClass({
 var CommunityMap = React.createClass({
     getInitialState: () => ({ roles: [] }),
     shouldComponentUpdate({search}) {
-        return this.props.search != search
+        return this.props.search !== search;
     },
     onFilterRole: function(role) {
         var roles = this.state.roles.slice();
@@ -193,12 +193,17 @@ var CommunityMap = React.createClass({
                 }]
             });
 
-            map.addListener('click', () => { infowindow && infowindow.close(); infowindow = undefined; });
+            map.addListener('click', function() {
+                if (infowindow) {
+                    infowindow.close();
+                }
+                infowindow = undefined;
+            });
 
             var legendControl = document.createElement('div');
             var roleMarkers = Role.options.map(role =>
-                <div className="map-legend-col" data-role={role[0]}> 
-                    <img src={require(`./img/map/${role[0]}key.png`)} /> {role.length == 3 ? role[2] : role[1]}
+                <div className="map-legend-col" data-role={role[0]}>
+                    <img src={require(`./img/map/${role[0]}key.png`)} /> {role.length === 3 ? role[2] : role[1]}
                 </div>
             );
             roleMarkers = _.values(_.groupBy(roleMarkers, (item, index) => index % 4)).map(group => <div className="map-legend-row">{group}</div>);
@@ -213,23 +218,23 @@ var CommunityMap = React.createClass({
                 </div>
             );
 
-            Array.prototype.slice.call(legendControl.querySelectorAll(".map-legend-col")).map(function(el) { 
-                el.addEventListener('click', function(ev) {
-                    self.onFilterRole(this.attributes['data-role'].value)
+            Array.prototype.slice.call(legendControl.querySelectorAll(".map-legend-col")).map(function(el) {
+                el.addEventListener('click', function() {
+                    self.onFilterRole(this.attributes['data-role'].value);
                     this.classList.toggle('selected');
-                })
+                });
             });
             legendControl.className = "map-legend";
             legendControl.index = 1;
             map.controls[google.maps.ControlPosition.TOP_RIGHT].push(legendControl);
 
-            this.updateMap = (function() {
+            this.updateMap = function() {
                 var roleFilter = [...this.state.roles.keys()].filter(index => this.state.roles[index]);
                 backend.userLocations(this.props.search, roleFilter).subscribe(({data}) => {
                     var newMarkers = [];
                     markers.map(m => {
                         var idx = data.findIndex(({id}) => m.userID === id);
-                        if (idx != -1) {
+                        if (idx !== -1) {
                             newMarkers.push(m);
                             data.splice(idx, 1);
                         } else {
@@ -241,50 +246,58 @@ var CommunityMap = React.createClass({
                         var addMarker = function (loc) {
                             var avatar;
                             if (has_image) {
-                                var avatar_link = config.backend_url + '/site_media/media/' + id
-                                avatar = <object className="avatar" data={avatar_link} type="image/jpg"/>
+                                var avatar_link = config.backend_url + '/site_media/media/' + id;
+                                avatar = <object className="avatar" data={avatar_link} type="image/jpg"/>;
                             } else {
-                                avatar = <img className="avatar" src={placeholder}/>
+                                avatar = <img className="avatar" src={placeholder}/>;
                             }
-                            var userInfo = <div className="map-info-window">
+                            var userInfo = (<div className="map-info-window">
                                 {avatar}
                                 <div>
                                     <span>{firstName} {lastName}{title.length ? "," : ""} {title}</span><br />
                                     <span id="role">{Role.other(role) ? role_other : Role.get(role)[2]}</span><br />
                                     <span>{institution}</span>
                                 </div>
-                            </div>;
+                            </div>);
                             var marker = new google.maps.Marker({
                                 position: { lat: loc.lat(), lng: loc.lng() },
                                 map: map,
                                 title: `${firstName} ${lastName}${title.length ? "," : ""} ${title}`,
                                 icon: {
                                     url: require(`./img/map/${role}.png`),
-                                    scaledSize: new google.maps.Size(20,32)
+                                    scaledSize: new google.maps.Size(20, 32)
                                 }
                             });
                             marker.userID = id;
                             markers.push(marker);
                             var info = new google.maps.InfoWindow({content: React.renderToStaticMarkup(userInfo) });
                             marker.addListener('click', () => {
-                                infowindow && infowindow.close();
+                                if (infowindow) {
+                                    infowindow.close();
+                                }
                                 infowindow = info;
-                                info.open(map, marker)
+                                info.open(map, marker);
                             });
                         };
-                        if (id in geoCache) addMarker(geoCache[id]);
-                        else this.geo.geocode({address: city + "," + state + "," + country}, (results, status) => {
-                            var loc;
-                            if (status == "OK") {
-                                loc = geoCache[id] = results[0].geometry.location;
-                                addMarker(loc);
-                            }
-                        });
+                        if (id in geoCache) {
+                            addMarker(geoCache[id]);
+                        }
+                        else {
+                            this.geo.geocode({address: city + "," + state + "," + country}, (results, status) => {
+                                var loc;
+                                if (status === "OK") {
+                                    loc = geoCache[id] = results[0].geometry.location;
+                                    addMarker(loc);
+                                }
+                            });
+                        }
                     });
                 });
-                infowindow && infowindow.close();
+                if (infowindow) {
+                    infowindow.close();
+                }
                 infowindow = undefined;
-            }).bind(this);
+            };
             this.updateMap();
             var filterSub = this.filterSub = new Rx.Subject();
             this.subs = filterSub.debounce(500).subscribe(this.updateMap);
@@ -297,10 +310,10 @@ var CommunityMap = React.createClass({
     componentDidUpdate: function() {
         this.updateMap();
     },
-    componentWillUnmount: function() { window.removeEventListener('resize', this.handleResize) },
+    componentWillUnmount: function() { window.removeEventListener('resize', this.handleResize); },
 
     render: function() {
-        return <div id="communityMap"></div>
+        return <div id="communityMap"></div>;
     }
 });
 
@@ -316,9 +329,9 @@ var CommunitySearch = React.createClass({
     appendSearch: function(term) {
         this.setState({search: `${this.state.search.trim()} ${term}`.trim()});
         this.props.onChange(this.state.search);
-    },    
+    },
     render: function() {
-        return <div className='search-box'>
+        return (<div className='search-box'>
             <form onSubmit={this.onSubmit} style={{display: 'inline'}}>
                 <input type='submit' className='input-sm'style={{display: 'none'}} />
                 <div className='text-nowrap help-target'>
@@ -328,7 +341,7 @@ var CommunitySearch = React.createClass({
                     </div>
                 </div>
             </form>
-        </div>
+        </div>);
     }
 });
 
