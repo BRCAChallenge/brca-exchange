@@ -6,7 +6,7 @@ var config  = require('./config');
 var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {Navigation} = require('react-router');
 var auth = require('./auth');
-var {Signup, Role, trim, $c} = require('./Signup');
+var {Role, $c} = require('./Signup');
 
 var Profile = React.createClass({
     statics: {
@@ -134,8 +134,9 @@ var EditProfileForm = React.createClass({
         }
 
         if (this.state.otherRole) {
-            if (!trim(this.refs.role_other.getDOMNode().value))
-                errors['role_other'] = 'This field is required'
+            if (!this.refs.role_other.getDOMNode().value.trim()) {
+                errors['role_other'] = 'This field is required'; //eslint-disable-line dot-notation
+            }
         }
         this.setState({errors: errors});
 		return Object.keys(errors).length === 0;
@@ -192,7 +193,7 @@ var EditProfileForm = React.createClass({
         var onChange = function() {
             var value = this.refs.role.getDOMNode().value;
             this.setState({otherRole: Role.other(value)});
-        }
+        };
         return (
         <div className="form-horizontal" onChange={onChange.bind(this)}>
             {this.renderImageUpload('image', 'Profile picture')}
@@ -264,8 +265,12 @@ var EditProfileForm = React.createClass({
     },
     renderRoles: function (defaultValue) {
         var id = 'role';
-        var handleChange = () => {var oldData = this.state.data; oldData[id]=this.refs[id].value; this.setState({data: oldData})};
-        var options = Role.options.map(value => <option key={id+value[0]} value={value[0]}>{value[1]}</option>);
+        var handleChange = () => {
+            var oldData = this.state.data;
+            oldData[id] = this.refs[id].value;
+            this.setState({data: oldData});
+        };
+        var options = Role.options.map(value => <option key={id + value[0]} value={value[0]}>{value[1]}</option>);
         return this.renderField(id, 'Role',
             <select className="form-control" id={id} ref={id} value={defaultValue} onChange={handleChange}>
                 {options}
@@ -273,12 +278,12 @@ var EditProfileForm = React.createClass({
         );
     },
     renderSelect: function (id, label, values, defaultValue) {
-        var other = !AFFILIATION.has(defaultValue);
+        var other = !Role.has(defaultValue);
         var options = values.map(function (value) {
             var selected = (other && value === "Other") || defaultValue === (value instanceof Array ? value[1] : value);
             return value instanceof Array
-                ? <option key={id+value[1]} value={value[1]} selected={selected}>{value[0]}</option>
-                : <option key={id+value} value={value} selected={selected}>{value}</option>
+                ? <option key={id + value[1]} value={value[1]} selected={selected}>{value[0]}</option>
+                : <option key={id + value} value={value} selected={selected}>{value}</option>;
         });
         return this.renderField(id, label,
             <select className="form-control" id={id} ref={id}>

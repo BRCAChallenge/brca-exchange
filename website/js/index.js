@@ -59,7 +59,9 @@ if (typeof console === "undefined") {
     window.onRecaptchaLoad = callback => (loaded ? callback() : listeners.push(callback));
     window.recaptchaCallback = function() {
         loaded = true;
-        while (listeners.length) listeners.pop()();
+        while (listeners.length) {
+            listeners.pop()();
+        }
     };
 })();
 

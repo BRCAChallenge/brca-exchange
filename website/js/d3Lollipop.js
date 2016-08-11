@@ -91,7 +91,7 @@ var D3Lollipop = React.createClass({
 
     componentWillReceiveProps: function(newProps) {
         // only rebuild plot if number of variants has changed
-        if (newProps.data.length != this.props.data.length) {
+        if (newProps.data.length !== this.props.data.length) {
             this.cleanupBRCA();
             var {data, brcakey, onRowClick, ...opts} = newProps;
             var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);

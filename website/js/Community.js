@@ -231,7 +231,7 @@ var CommunityMap = React.createClass({
             legendControl.index = 1;
             map.controls[google.maps.ControlPosition.TOP_RIGHT].push(legendControl);
 
-            this.updateMap = function() {
+            this.updateMap = (function() { //eslint-disable-line no-extra-parens
                 var roleFilter = [...this.state.roles.keys()].filter(index => this.state.roles[index]);
                 backend.userLocations(this.props.search, roleFilter).subscribe(({data}) => {
                     var newMarkers = [];
@@ -245,6 +245,7 @@ var CommunityMap = React.createClass({
                         }
                     });
                     markers = self.markers = newMarkers;
+/*eslint-disable camelcase*/
                     _.map(data, ({id, firstName, lastName, title, role, role_other, institution, city, state, country, has_image})  => {
                         var addMarker = function (loc) {
                             var avatar;
@@ -259,6 +260,7 @@ var CommunityMap = React.createClass({
                                 <div>
                                     <span>{firstName} {lastName}{title.length ? "," : ""} {title}</span><br />
                                     <span id="role">{Role.other(role) ? role_other : Role.get(role)[2]}</span><br />
+/*eslint-enable camelcase*/
                                     <span>{institution}</span>
                                 </div>
                             </div>);
@@ -300,7 +302,7 @@ var CommunityMap = React.createClass({
                     infowindow.close();
                 }
                 infowindow = undefined;
-            };
+            }).bind(this);
             this.updateMap();
             var filterSub = this.filterSub = new Rx.Subject();
             this.subs = filterSub.debounce(500).subscribe(this.updateMap);

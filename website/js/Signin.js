@@ -153,12 +153,12 @@ var Signin = React.createClass({
                 </Row>
                 <Row id="form">
                     <Col md={8} mdOffset={2}>
-                        <SigninForm onSubmit={e => { this.handleSubmit(); e.preventDefault() }} ref="contactForm"/>
+                        <SigninForm onSubmit={e => { this.handleSubmit(); e.preventDefault(); }} ref="contactForm"/>
                     </Col>
                 </Row>
                 <Row id="submit">
                     <Col md={8} mdOffset={2}>
-                            <div className="form-group" style={{marginLeft: "-15px", marginRight: "-15px"}}> 
+                            <div className="form-group" style={{marginLeft: "-15px", marginRight: "-15px"}}>
                                 <label className="col-sm-4 control-label"></label>
                                 <Col sm={6}>
                                     <Button type="button" className="btn btn-primary btn-block" onClick={this.handleSubmit}>

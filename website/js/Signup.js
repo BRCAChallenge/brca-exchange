@@ -25,8 +25,8 @@ var Role = {
         [11, "I am a clinician",                   "Clinician"],
         [0, "Other"]
     ],
-    other: id => id == 0 || id == 11,
-    get: function(id) { return this.options.find(role => role[0] == id) }
+    other: id => id === 0 || id === 11,
+    get: function(id) { return this.options.find(role => role[0] === id); }
 };
 
 var Signup = React.createClass({
@@ -128,45 +128,39 @@ function $c(staticClassName, conditionalClassNames) {
     return classNames.join(' ');
 }
 
-var trim = function () {
-    var TRIM_RE = /^\s+|\s+$/g;
-    return function trim(string) {
-        return string.replace(TRIM_RE, '');
-    };
-}();
-
 var SignupForm = React.createClass({
     getInitialState: function () {
         return {errors: {}, file: '', imagePreviewUrl: null, captcha: "", otherRole: false};
     },
     componentDidMount: function() {
         var me = this;
-        onRecaptchaLoad(function() {
+        window.onRecaptchaLoad(function() {
             grecaptcha.render(me.refs.signupCAPTCHA.getDOMNode(), {sitekey: config.captcha_key, callback: function(resp) {
                 me.setState({captcha: resp});
             }});
         });
     },
     isValid: function () {
-        var compulsory_fields = ['email', 'email_confirm', 'password', 'password_confirm', 'firstName', 'lastName'];
+        var compulsoryFields = ['email', 'email_confirm', 'password', 'password_confirm', 'firstName', 'lastName'];
         if (this.state.otherRole) {
-            compulsory_fields.push('role_other');
+            compulsoryFields.push('role_other');
         }
 
         var errors = {};
-        if (this.refs.role.getDOMNode().value === "NONE")
+        if (this.refs.role.getDOMNode().value === "NONE") {
             errors["role"] = "Please select a roll"; //eslint-disable-line dot-notation
+        }
         if (this.refs.email.getDOMNode().value !== this.refs.email_confirm.getDOMNode().value) {
             errors["email_confirm"] = "The emails don't match"; //eslint-disable-line dot-notation
         }
         if (this.refs.password.getDOMNode().value !== this.refs.password_confirm.getDOMNode().value) {
             errors["password_confirm"] = "The passwords don't match"; //eslint-disable-line dot-notation
         }
-        if (this.state.captcha == "") {
+        if (this.state.captcha === "") {
             errors["captcha"] = "No CAPTCHA entered"; //eslint-disable-line dot-notation
         }
         compulsoryFields.forEach(function (field) {
-            var value = trim(this.refs[field].getDOMNode().value);
+            var value = this.refs[field].getDOMNode().value.trim();
             if (!value) {
                 errors[field] = 'This field is required';
             }
@@ -227,8 +221,8 @@ var SignupForm = React.createClass({
     render: function () {
         var onChange = function() {
             var value = this.refs.role.getDOMNode().value;
-            this.setState({otherRole: Role.other(value)}); 
-        }
+            this.setState({otherRole: Role.other(value)});
+        };
         return (
             <div className="form-horizontal" onChange={onChange.bind(this)}>
                 {this.renderImageUpload('image', 'Profile picture')}
@@ -250,9 +244,9 @@ var SignupForm = React.createClass({
                 {this.renderTextInput('state', 'State or Province')}
                 {this.renderTextInput('country', 'Country')}
                 {this.renderTextInput('phone_number', 'Phone number')}
-                {this.renderCheckBox('hide_number', "Hide my phone number on this website")}
-                {this.renderCheckBox('hide_email', "Hide my email address on this website")}
-                {this.renderCAPTCHA('captcha','CAPTCHA *')}
+                {this.renderCheckBox('hide_number', 'Hide my phone number on this website')}
+                {this.renderCheckBox('hide_email', 'Hide my email address on this website')}
+                {this.renderCAPTCHA('captcha', 'CAPTCHA *')}
 			</div>);
     },
     renderImageUpload: function (id, label) {
@@ -292,7 +286,7 @@ var SignupForm = React.createClass({
         var options = Role.options.map(value => <option key={id + value[0]} value={value[0]}>{value[1]}</option>);
         return this.renderField(id, 'Role *',
             <select className="form-control" id={id} ref={id}>
-                <option key={id+"NONE"} value="NONE">Choose one:</option>
+                <option key={id + "NONE"} value="NONE">Choose one:</option>
                 {options}
             </select>
         );
@@ -338,6 +332,5 @@ var SignupForm = React.createClass({
 module.exports = ({
     Signup: Signup,
     Role: Role,
-    trim:  trim,
-    $c : $c
+    $c: $c
 });
