@@ -23,10 +23,10 @@ $(outputFiles)/aggregated.tsv:	$(outputFiles)/merged.withVEP.csv aggregate_acros
 	  -t $(resources)/refseq_annotation.hg38.gp \
 	  -o $@
 
-$(outputFiles)/merged.withVEP.csv:	$(outputFiles)/merged.csv add_VEP_result.py
+$(outputFiles)/merged.withVEP.csv:	$(outputFiles)/merged.tsv add_VEP_result.py
 	add_VEP_result.py -i $< -v $(inputVcfDir)/vep_output_3_3_2016.vcf -o $@
 
-$(outputFiles)/merged.csv:	$(inputVcfs) variant-merging.py
+$(outputFiles)/merged.tsv:	$(inputVcfs) variant-merging.py
 	variant-merging.py -i $(inputVcfDir)/ -o $(releaseDir)/pipeline_output/ -p
 
 
