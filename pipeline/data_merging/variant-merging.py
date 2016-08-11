@@ -120,7 +120,7 @@ def main():
         variants = string_comparison_merge(variants) 
         variants = variant_standardize(variants=variants)
         date = datetime.datetime.today().strftime('%d%b%Y')
-        write_new_csv(ARGS.output + "merged_" + date + ".csv", columns, variants)
+        write_new_tsv(ARGS.output + "merged_" + date + ".tsv", columns, variants)
         print "final number of variants: %d" %len(variants)
         print "Done" 
     finally:
@@ -399,15 +399,15 @@ def one_variant_transform(f_in, f_out):
 
 def write_new_csv(filename, columns, variants):
     merged_file = open(filename, "w")
-    merged_file.write(",".join(columns)+"\n")
+    merged_file.write("\t".join(columns)+"\n")
     for key, variant in variants.iteritems():
         if len(variant) != len(columns):
             raise Exception("mismatching number of columns in head and row")
         if "chr13" in key:
-            merged_file.write(",".join(variant)+"\n")
+            merged_file.write("\t".join(variant)+"\n")
     for key, variant in variants.iteritems():
         if "chr17" in key:
-            merged_file.write(",".join(variant)+"\n")
+            merged_file.write("\t".join(variant)+"\n")
     merged_file.close()
 
 
