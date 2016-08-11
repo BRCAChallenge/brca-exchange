@@ -75,7 +75,6 @@ class ConvertLatestClinvarToVCF(luigi.Task):
       # Switch back to this file's directory
       os.chdir(luigi_dir)
 
-      
       # Makefile requires a particular environment variable for output
       my_env = os.environ.copy()
       my_env["BRCA_PIPELINE_DATA"] = brca_pipeline_data_dir
@@ -102,6 +101,7 @@ class DownloadAndExtractFilesFromESPTar(luigi.Task):
     def run(self):
       os.chdir(esp_file_dir)
 
+      # Download ESP data
       url = "http://evs.gs.washington.edu/evs_bulk_data/ESP6500SI-V2-SSA137.GRCh38-liftover.snps_indels.vcf.tar.gz"
       file_name = url.split('/')[-1]
 
@@ -133,7 +133,6 @@ class DownloadAndExtractFilesFromESPTar(luigi.Task):
       tar.close()
       print "Finished extracting files from %s" % (file_name)
 
-      # Switch back to this file's directory
       os.chdir(esp_method_dir)
 
       # Extract data for BRCA1 region
@@ -324,7 +323,7 @@ class ExtractAndConvertFilesFromEXLOVD(luigi.Task):
       if err:
           print "standard error of subprocess:"
           print err
-      print "Extracted data from %s." % (lovd_data_host_url)
+      print "Extracted data from %s." % (ex_lovd_data_host_url)
 
       # Convert extracted flat file to vcf format ./lovd2vcf -i $EXLOVD/BRCA1.txt -o $EXLOVD/exLOVD_brca1.hg19.vcf -a exLOVDAnnotation -b 1 -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -g $BRCA_RESOURCES/hg19.fa
       args = ["./lovd2vcf", "-i", ex_lovd_file_dir + "/BRCA1.txt", "-o", ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", "-a", "exLOVDAnnotation", "-b", "1", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g", brca_resources_dir + "/hg19.fa"]
@@ -449,7 +448,7 @@ class ExtractAndConvertFilesFromLOVD(luigi.Task):
 
       # vcf-concat $LOVD/sharedLOVD_brca1.hg19.vcf $LOVD/sharedLOVD_brca2.hg19.vcf > $LOVD/sharedLOVD_brca12.hg19.vcf
       shared_lovd_brca12_hg19_vcf_file = lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf"
-      writable_shared_lovd_brca12_hg19_vcf_file = open(ex_lovd_brca12_hg19_vcf_file, 'w')
+      writable_shared_lovd_brca12_hg19_vcf_file = open(shared_lovd_brca12_hg19_vcf_file, 'w')
       args = ["vcf-concat", lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf", lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf"]
       print "Running lovd2vcf with the following args: %s" % (args)
       sp = subprocess.Popen(args, stdout=writable_shared_lovd_brca12_hg19_vcf_file, stderr=subprocess.PIPE)
@@ -502,7 +501,7 @@ class DownloadAndExtractFilesFromG1K(luigi.Task):
       os.chdir(g1k_method_dir)
       args = ["bash", "process_1000g.sh"]
       print "Running process_1000g.sh with the following args: %s" % (args)
-      print "It may take several minutes to download files... you will see begin to see output once the downloads are complete."
+      print "It may take several minutes to download files... you will begin to see output once the downloads are complete."
       sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       out, err = sp.communicate()
       if out:
@@ -512,3 +511,132 @@ class DownloadAndExtractFilesFromG1K(luigi.Task):
           print "standard error of subprocess:"
           print err
       print "Completed 1000 Genomes download and extraction."
+
+class DownloadAndExtractFilesFromEXAC(luigi.Task):
+
+    def run(self):
+      os.chdir(exac_file_dir)
+
+      # Download vcf.gz file
+      exac_vcf_gz_url = "ftp://ftp.broadinstitute.org/pub/ExAC_release/current/subsets/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz"
+      exac_vcf_gz_file_name = exac_vcf_gz_url.split('/')[-1]
+      u = urllib2.urlopen(exac_vcf_gz_url)
+      f = open(exac_vcf_gz_file_name, 'wb')
+      meta = u.info()
+      file_size = int(meta.getheaders("Content-Length")[0])
+      print "Downloading: %s Bytes: %s" % (exac_vcf_gz_file_name, file_size)
+
+      file_size_dl = 0
+      block_sz = 8192
+      while True:
+          buffer = u.read(block_sz)
+          if not buffer:
+              break
+
+          file_size_dl += len(buffer)
+          f.write(buffer)
+          status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
+          status = status + chr(8)*(len(status)+1)
+          print status,
+
+      f.close()
+      print "Finished downloading %s" % (exac_vcf_gz_file_name)
+
+      # Download vcf.gz.tbi file
+      exac_vcf_gz_tbi_url = "ftp://ftp.broadinstitute.org/pub/ExAC_release/current/subsets/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz.tbi"
+      exac_vcf_gz_tbi_file_name = exac_vcf_gz_tbi_url.split('/')[-1]
+      u = urllib2.urlopen(exac_vcf_gz_tbi_url)
+      f = open(exac_vcf_gz_tbi_file_name, 'wb')
+      meta = u.info()
+      file_size = int(meta.getheaders("Content-Length")[0])
+      print "Downloading: %s Bytes: %s" % (exac_vcf_gz_tbi_file_name, file_size)
+
+      file_size_dl = 0
+      block_sz = 8192
+      while True:
+          buffer = u.read(block_sz)
+          if not buffer:
+              break
+
+          file_size_dl += len(buffer)
+          f.write(buffer)
+          status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
+          status = status + chr(8)*(len(status)+1)
+          print status,
+
+      f.close()
+      print "Finished downloading %s" % (exac_vcf_gz_tbi_file_name)
+
+      # tabix -h $EXAC/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz 17:41191488-41322420 > $EXAC/exac.brca1.hg19.vcf
+      args = ["tabix", "-h", exac_file_dir + "/" + exac_vcf_gz_file_name, "17:41191488-41322420"]
+      exac_brca1_hg19_vcf_file = exac_file_dir + "/exac.brca1.hg19.vcf"
+      writable_exac_brca1_hg19_vcf_file = open(exac_brca1_hg19_vcf_file, 'w')
+      print "Running tabix with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=writable_exac_brca1_hg19_vcf_file, stderr=subprocess.PIPE)
+      out, err = sp.communicate()
+      if out:
+          print "standard output of subprocess:"
+          print out
+      if err:
+          print "standard error of subprocess:"
+          print err
+      print "Completed writing %s." % (exac_brca1_hg19_vcf_file)
+
+      # tabix -h $EXAC/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz 13:32889080-32973809 > $EXAC/exac.brca2.hg19.vcf
+      args = ["tabix", "-h", exac_file_dir + "/" + exac_vcf_gz_file_name, "13:32889080-32973809"]
+      exac_brca2_hg19_vcf_file = exac_file_dir + "/exac.brca2.hg19.vcf"
+      writable_exac_brca2_hg19_vcf_file = open(exac_brca2_hg19_vcf_file, 'w')
+      print "Running tabix with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=writable_exac_brca2_hg19_vcf_file, stderr=subprocess.PIPE)
+      out, err = sp.communicate()
+      if out:
+          print "standard output of subprocess:"
+          print out
+      if err:
+          print "standard error of subprocess:"
+          print err
+      print "Completed writing %s." % (exac_brca2_hg19_vcf_file)
+
+      # vcf-concat $EXAC/exac.brca1.hg19.vcf $EXAC/exac.brca2.hg19.vcf > $EXAC/exac.brca12.hg19.vcf
+      args = ["vcf-concat", exac_file_dir + "/exac.brca1.hg19.vcf", exac_file_dir + "/exac.brca2.hg19.vcf"]
+      exac_brca12_hg19_vcf_file = exac_file_dir + "/exac.brca12.hg19.vcf"
+      writable_exac_brca12_hg19_vcf_file = open(exac_brca12_hg19_vcf_file, 'w')
+      print "Running tabix with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=writable_exac_brca12_hg19_vcf_file, stderr=subprocess.PIPE)
+      out, err = sp.communicate()
+      if out:
+          print "standard output of subprocess:"
+          print out
+      if err:
+          print "standard error of subprocess:"
+          print err
+      print "Completed concatenation of exac brca1/2 data into %s." % (exac_brca12_hg19_vcf_file)
+
+      # CrossMap.py vcf $BRCA_RESOURCES/hg19ToHg38.over.chain.gz $EXAC/exac.brca12.hg19.vcf $BRCA_RESOURCES/hg38.fa $EXAC/exac.brca12.hg38.vcf
+      args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz", exac_file_dir + "/exac.brca12.hg19.vcf", brca_resources_dir + "/hg38.fa", exac_file_dir + "/exac.brca12.hg38.vcf"]
+      print "Running CrossMap.py with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      out, err = sp.communicate()
+      if out:
+          print "standard output of subprocess:"
+          print out
+      if err:
+          print "standard error of subprocess:"
+          print err
+      print "Completed crossmapping hg19 and hg38."
+
+      # vcf-sort $EXAC/exac.brca12.hg38.vcf > $EXAC/exac.brca12.sorted.hg38.vcf
+      args = ["vcf-sort", exac_file_dir + "/exac.brca12.hg38.vcf"]
+      exac_brca12_sorted_hg19_vcf_file = exac_file_dir + "/exac.brca12.sorted.hg38.vcf"
+      writable_exac_brca12_sorted_hg19_vcf_file = open(exac_brca12_sorted_hg19_vcf_file, 'w')
+      print "Running tabix with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=writable_exac_brca12_sorted_hg19_vcf_file, stderr=subprocess.PIPE)
+      out, err = sp.communicate()
+      if out:
+          print "standard output of subprocess:"
+          print out
+      if err:
+          print "standard error of subprocess:"
+          print err
+      print "Completed sorting of exac data into %s." % (exac_brca12_sorted_hg19_vcf_file)
+
