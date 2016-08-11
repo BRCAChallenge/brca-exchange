@@ -82,8 +82,8 @@ GENOME1K_FILE = "10k_genome.brca.sorted.hg38.vcf"
 CLINVAR_FILE = "ClinVarBrca.vcf"
 LOVD_FILE = "sharedLOVD_brca12.sorted.hg38.vcf"
 EX_LOVD_FILE = "exLOVD_brca12.sorted.hg38.vcf"
-BIC_FILE = "bic_brca12.sorted.hg38.vcf"
-EXAC_FILE = "exac.BRCA12.sorted.hg38.vcf"
+BIC_FILE = "bicSnp.sorted.hg38.vcf"
+EXAC_FILE = "exac.brca12.sorted.hg38.vcf"
 ESP_FILE = "esp.brca12.sorted.hg38.vcf"
 
 
