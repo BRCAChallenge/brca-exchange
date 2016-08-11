@@ -70,16 +70,17 @@ var Community = React.createClass({
         var queryParams = this.context.router.getCurrentQuery();
         var message;
         if (queryParams.registrationSuccess) {
-            message = (<div className="alert alert-success">
-                <p>Thanks for signing up. We have sent you an email with a confirmation link to complete your registration.</p>
-            </div>);
+            message =  (
+				<div className="alert alert-success">
+					<p>Thanks for signing up. We have sent you an email with a confirmation link to complete your registration.</p>
+				</div>);
         }
         var {data, page, totalPages, error} = this.state;
         var rows = _.map(data, row => {
 
             var avatar;
             if (row.has_image) {
-                let avatarLink = config.backend_url + '/site_media/media/' + row.id;
+                var avatarLink = config.backend_url + '/site_media/media/' + row.id;
                 avatar = <object className="avatar" data={avatarLink} type="image/jpg"/>;
             } else {
                 avatar = <img src={placeholder}/>;
@@ -88,18 +89,20 @@ var Community = React.createClass({
             var {city, state, country} = row;
             var locationString = _.values(_.pick({city, state, country}, v => v)).join(', ');
 
+			/*eslint-disable dot-notation*/
             return (<tr>
                 <td width="120px">
                     {avatar}
                 </td>
                 <td>
                     <span id="name"><h3>{row.firstName} {row.lastName}{row.title.length ? ", " + row.title : ""}</h3></span>
-                    <span id="role"><h4>{Role.other(row.role) ? row.role_other : Role.get(row.role)[2]}</h4></span>
+                    <span id="role"><h4>{Role.other(row.role) ? row["role_other"] : Role.get(row.role)[2]}</h4></span>
                     <span id="institution">{row.institution}</span>
                     <span id="location">{locationString}</span>
-                    <span id="contact">{row.email} {row.phone_number}</span>
+                    <span id="contact">{row.email} {row["phone_number"]}</span>
                 </td>
             </tr>);
+			/*eslint-enable dot-notation*/
         });
 
         return (error ? <p>{error}</p> :

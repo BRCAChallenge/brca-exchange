@@ -8,12 +8,13 @@
 		<script type="text/javascript">
 			// If a template engine sets 'settings' to 'enable', then
 			// take settings from template variables. Otherwise use defaults.
-			var config = ('{{ settings }}' === 'enable') ? {
-				baseurl: '{{ baseurl }}'
-			} : {
+			window.config = {
+				captcha_key: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
+				backend_url: 'http://brcaexchange.org/backend',
 				baseurl: '/'
-			};
+			}
 		</script>
+		<!--#include file="config.js" -->
 		<script src='https://www.google.com/recaptcha/api.js?onload=recaptchaCallback&render=explicit' async defer></script>
         <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 	    <!-- Favicon and touch icons -->

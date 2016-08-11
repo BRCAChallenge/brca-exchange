@@ -16,20 +16,20 @@ var DisclaimerModal = React.createClass({
     open() {
         this.setState({ showModal: true });
     },
-    disable_research_mode() {
+    disableResearchMode() {
         this.props.onToggleMode();
-        localStorage.setItem('research-mode',false);
+        localStorage.setItem('research-mode', false);
     },
     agree() {
         this.props.onToggleMode();
-        localStorage.setItem('research-mode',true);
+        localStorage.setItem('research-mode', true);
         this.close();
     },
     buttonModal() {
-        if(localStorage.getItem('research-mode') == 'true') {
+        if(localStorage.getItem('research-mode') === 'true') {
             return (
                 <div className="form-group">
-                <Button className="btn-sm" onClick={this.disable_research_mode}>Show Expert Reviewed Data on this Variant</Button>
+                <Button className="btn-sm" onClick={this.disableResearchMode}>Show Expert Reviewed Data on this Variant</Button>
                 </div>
             );
         } else {
@@ -49,7 +49,7 @@ var DisclaimerModal = React.createClass({
     linkModal() {
         return (
             <span>
-                <a style={{cursor:"pointer"}} onClick={this.open}>{this.props.text}</a>
+                <a style={{cursor: "pointer"}} onClick={this.open}>{this.props.text}</a>
                 {this.state.showModal ?
                     <Modal onRequestHide={this.close}>
                         <RawHTML html={content.pages.disclaimer} />
@@ -59,10 +59,10 @@ var DisclaimerModal = React.createClass({
         );
     },
     render() {
-        if(this.props.buttonModal){
-            return this.buttonModal()
+        if(this.props.buttonModal) {
+            return this.buttonModal();
         } else {
-            return this.linkModal()
+            return this.linkModal();
         }
     }
 });
