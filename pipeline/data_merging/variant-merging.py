@@ -397,7 +397,7 @@ def one_variant_transform(f_in, f_out):
                         new_record.INFO[key] = [value[i]]
                 vcf_writer.write_record(new_record)
 
-def write_new_csv(filename, columns, variants):
+def write_new_tsv(filename, columns, variants):
     merged_file = open(filename, "w")
     merged_file.write("\t".join(columns)+"\n")
     for key, variant in variants.iteritems():
