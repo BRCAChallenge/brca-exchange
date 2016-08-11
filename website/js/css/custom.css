@@ -461,7 +461,7 @@ th[role='columnheader'] .help, .help-target .help {
     max-height: 500px;
     padding: 8px;
     visibility: visible;
-    transition: max-width 1s, padding-left 1s, padding-right 1s;
+    transition: max-width 0.5s, padding-left 0.5s, padding-right 0.5s;
 }
 
 #communityMap .avatar {
