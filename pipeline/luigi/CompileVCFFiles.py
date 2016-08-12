@@ -186,8 +186,6 @@ class DownloadAndExtractFilesFromESPTar(luigi.Task):
       print "Concatenation complete."
 
       # Sort concatenated BRCA1/2 data
-      # sorted_concatenated_brca_output_file = esp_file_dir + "/esp.brca12.sorted.hg38.vcf"
-      # writable_sorted_concatenated_brca_output_file = open(sorted_concatenated_brca_output_file, 'w')
       print "Sorting concatenated data into pipeline_input directory."
       with self.output().open("w") as vcf_file:
         args = ["vcf-sort", concatenated_brca_output_file]
@@ -201,14 +199,7 @@ class DownloadAndExtractFilesFromESPTar(luigi.Task):
             print "standard error of subprocess:"
             print err
 
-      # writable_sorted_concatenated_brca_output_file.close()
       print "Sorting of concatenated files complete."
-
-      # Copy sorted data to correct path
-      # print "Copying sorted and concatenated VCF to the final pipeline_input destination"
-      # final_destination = pipeline_input_dir + "/esp.brca12.sorted.hg38.vcf"
-      # copyfile(sorted_concatenated_brca_output_file, final_destination)
-      # print "File copied to %s" % (final_destination)
 
 class DownloadAndExtractFilesFromBIC(luigi.Task):
 
@@ -310,6 +301,9 @@ class DownloadAndExtractFilesFromBIC(luigi.Task):
       print "Sorting of hg38 vcf file complete."
 
 class ExtractAndConvertFilesFromEXLOVD(luigi.Task):
+
+    def output(self):
+      return luigi.LocalTarget(pipeline_input_dir + "/exLOVD_brca12.sorted.hg38.vcf")
     
     def run(self):
       os.chdir(lovd_method_dir)
@@ -383,28 +377,25 @@ class ExtractAndConvertFilesFromEXLOVD(luigi.Task):
       print "Crossmap complete."
       
       # vcf-sort $EXLOVD/exLOVD_brca12.hg38.vcf > $EXLOVD/exLOVD_brca12.sorted.hg38.vcf
-      sorted_ex_lovd_brca12_hg38_vcf_file = ex_lovd_file_dir + "/exLOVD_brca12.sorted.hg38.vcf"
-      writable_sorted_ex_lovd_brca12_hg38_vcf_file = open(sorted_ex_lovd_brca12_hg38_vcf_file, 'w')
-      args = ["vcf-sort", ex_lovd_file_dir + "/exLOVD_brca12.hg38.vcf"]
-      print "Running lovd2vcf with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=writable_sorted_ex_lovd_brca12_hg38_vcf_file, stderr=subprocess.PIPE)
-      out, err = sp.communicate()
-      if out:
-          print "standard output of subprocess:"
-          print out
-      if err:
-          print "standard error of subprocess:"
-          print err
-      print "Sorted BRCA1/2 hg38 vcf file into %s." % (sorted_ex_lovd_brca12_hg38_vcf_file)
+      print "Sorting concatenated file into pipeline_input directory."
+      with self.output().open("w") as vcf_file:
+        args = ["vcf-sort", ex_lovd_file_dir + "/exLOVD_brca12.hg38.vcf"]
+        print "Running lovd2vcf with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=vcf_file, stderr=subprocess.PIPE)
+        out, err = sp.communicate()
+        if out:
+            print "standard output of subprocess:"
+            print out
+        if err:
+            print "standard error of subprocess:"
+            print err
+        print "Sorted BRCA1/2 hg38 vcf file into %s" % (vcf_file)
       
-      # `cp $EXLOVD/exLOVD_brca12.sorted.hg38.vcf $PIPELINE_INPUT
-      print "Copying sorted hg38 VCF to the final pipeline_input destination"
-      final_destination = pipeline_input_dir + "/exLOVD_brca12.sorted.hg38.vcf"
-      copyfile(sorted_ex_lovd_brca12_hg38_vcf_file, final_destination)
-      print "File copied to %s" % (final_destination)
-
 class ExtractAndConvertFilesFromLOVD(luigi.Task):
     
+    def output(self):
+      return luigi.LocalTarget(pipeline_input_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
+
     def run(self):
       os.chdir(lovd_method_dir)
       
@@ -478,25 +469,19 @@ class ExtractAndConvertFilesFromLOVD(luigi.Task):
       print "Crossmap complete."
       
       # vcf-sort $LOVD/sharedLOVD_brca12.38.vcf > $LOVD/sharedLOVD_brca12.sorted.38.vcf
-      sorted_shared_lovd_brca12_hg38_vcf_file = lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf"
-      writable_sorted_shared_lovd_brca12_hg38_vcf_file = open(sorted_shared_lovd_brca12_hg38_vcf_file, 'w')
-      args = ["vcf-sort", lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
-      print "Running lovd2vcf with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=writable_sorted_shared_lovd_brca12_hg38_vcf_file, stderr=subprocess.PIPE)
-      out, err = sp.communicate()
-      if out:
-          print "standard output of subprocess:"
-          print out
-      if err:
-          print "standard error of subprocess:"
-          print err
-      print "Sorted BRCA1/2 hg38 vcf file into %s." % (writable_sorted_shared_lovd_brca12_hg38_vcf_file)
+      with self.output().open("w") as vcf_file:
+        args = ["vcf-sort", lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
+        print "Running lovd2vcf with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=vcf_file, stderr=subprocess.PIPE)
+        out, err = sp.communicate()
+        if out:
+            print "standard output of subprocess:"
+            print out
+        if err:
+            print "standard error of subprocess:"
+            print err
+        print "Sorted BRCA1/2 hg38 vcf file into %s." % (vcf_file)
       
-      # `cp $LOVD/sharedLOVD_brca12.sorted.38.vcf $PIPELINE_INPUT
-      print "Copying sorted hg38 VCF to the final pipeline_input destination"
-      final_destination = pipeline_input_dir + "/sharedLOVD_brca12.sorted.hg38.vcf"
-      copyfile(sorted_shared_lovd_brca12_hg38_vcf_file, final_destination)
-      print "File copied to %s" % (final_destination)
 
 class DownloadAndExtractFilesFromG1K(luigi.Task):
 
