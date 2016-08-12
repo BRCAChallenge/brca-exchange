@@ -8,6 +8,19 @@ PREID=alpha
 DIR=$(dirname "${BASH_SOURCE[0]}")
 cd ${DIR}/../website
 
+# Horrible work-around for 'npm version'
+# https://github.com/npm/npm/issues/9111
+npmversion() {
+    if [ ! -e  .git ]; then
+	mkdir .git
+	npm version "$@"
+	rmdir .git
+    else
+	npm version "$@"
+    fi
+}
+
+
 VERSION="$(node -e "console.log(require('./package.json').version)")"
 
 FAILED=false
@@ -29,19 +42,18 @@ run() {
 new() {
 	BRANCH=$(${SEMVER} -i minor ${VERSION})
 	run "Creating release branch ${BRANCH}" git checkout -b ${BRANCH}
-	run "Tagging release" npm version minor
+	run "Tagging release" npmversion minor
 	run "Incrementing master version" git checkout master
-	run "" npm verison $(${SEMVER} --preid ${PREID} -i preminor ${VERSION})
+	run "" npmversion $(${SEMVER} --preid ${PREID} -i preminor ${VERSION})
 	run "Pushing to origin" git push origin --tags master ${BRANCH}
 #	run "Publishing" git checkout ${BRANCH}
 #	run "" npm publish
-	run "" git checkout master
 }
 
 patch() {
 	local release="$2"
 	run "Checking out release branch ${release}" git checkout ${release}
-	run "Tagging release" npm version patch
+	run "Tagging release" npmversion patch
 	run "Pushing to origin" git push origin --tags ${release}
 #	run "Publishing" npm publish
 	run "" git checkout master
@@ -49,7 +61,7 @@ patch() {
 
 major() {
 	run "Incrementing master version" git checkout master
-	run "" npm version $(${SEMVER} --preid ${PREID} -i premajor ${VERSION})
+	run "" npmversion $(${SEMVER} --preid ${PREID} -i premajor ${VERSION})
 	run "Pushing to origin" git push origin --tags ${master}
 }
 
