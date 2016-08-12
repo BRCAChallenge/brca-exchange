@@ -142,18 +142,15 @@ var MailingListForm = React.createClass({
         });
     },
     isValid: function () {
-        var compulsoryFields = ['email', 'email_confirm'];
+        var compulsoryFields = ['email', 'emailConfirm'];
         var errors = {};
-        if (this.refs.email.getDOMNode().value !== this.refs.email_confirm.getDOMNode().value) {
-            errors["email_confirm"] = "The emails don't match"; //eslint-disable-line dot-notation
-        }
-        if (this.state.captcha === "") {
-            errors["captcha"] = "No CAPTCHA entered"; //eslint-disable-line dot-notation
+        if (this.refs.email.getDOMNode().value !== this.refs.emailConfirm.getDOMNode().value) {
+            errors.emailConfirm = "The emails don't match";
         }
         compulsoryFields.forEach(function (field) {
             var value = this.refs[field].getDOMNode().value.trim();
             if (!value) {
-                errors[field] = 'This field is required'; //eslint-disable-line dot-notation
+                errors[field] = 'This field is required';
             }
         }.bind(this));
         this.setState({errors: errors});
@@ -171,8 +168,8 @@ var MailingListForm = React.createClass({
     getFormData: function () {
         var data = {
             "email": this.refs.email.getDOMNode().value,
-            "email_confirm": this.refs.email_confirm.getDOMNode().value,
-            "captcha": this.state.captcha
+            "firstName": this.refs.firstName.getDOMNode().value,
+            "lastName": this.refs.lastName.getDOMNode().value,
         };
         return data;
     },
@@ -180,8 +177,10 @@ var MailingListForm = React.createClass({
         return (
             <div className="form-horizontal">
                 {this.renderTextInput('email', 'Email *')}
-                {this.renderTextInput('email_confirm', 'Confirm Email *')}
-                {this.renderCAPTCHA('captcha', 'CAPTCHA *')}
+                {this.renderTextInput('emailConfirm', 'Confirm Email *')}
+                {this.renderTextInput('firstName', 'First Name')}
+                {this.renderTextInput('lastName', 'Last Name')}
+                {this.renderCAPTCHA('CAPTCHA', 'CAPTCHA *')}
             </div>);
     },
     renderTextInput: function (id, label) {

@@ -318,6 +318,8 @@ def user_locations(request):
 
 def mailinglist(request):
     email = request.POST.get('email')
+    first_name = request.POST.get('firstName')
+    last_name = request.POST.get('lastName')
 
     # Check the CAPTCHA
     try:
@@ -332,11 +334,13 @@ def mailinglist(request):
         response['Access-Control-Allow-Origin'] = '*'
         return response
 
-    try:
-        entry = MailingListEmail.objects.create(email = request.POST.get('email'))
-        entry.save()
-    except IntegrityError:
-        response = JsonResponse({'success': False, 'error': 'This email address already exists'})
+    mailchimp_data = {'email_address': email,
+                      'merge_fields': {'FNAME': first_name, 'LNAME': last_name},
+                      'status': 'pending'}
+    mailchimp_response = requests.post(settings.MAILCHIMP_URL + 'lists/' + settings.MAILCHIMP_LIST + '/members', auth=('user', settings.MAILCHIMP_KEY), json=mailchimp_data)
+
+    if mailchimp_response.status_code != requests.codes.ok:
+        response = JsonResponse({'success': False, 'error': mailchimp_response.json()['title']})
         response['Access-Control-Allow-Origin'] = '*'
         return response
 
