@@ -92,11 +92,14 @@ class ConvertLatestClinvarToVCF(luigi.Task):
           print err
 
 class DownloadAndExtractFilesFromESPTar(luigi.Task):
+    date = luigi.DateParameter(default=datetime.date.today())
 
     # NOTE: This task requires some setup to run properly.
     # 1. vcf module must be installed (`pip install PyVCF`)
     # 2. VCFtools must be installed: https://vcftools.github.io/index.html 
     # VCFtools installation is tricky and will require some extra work
+    def output(self):
+      return luigi.LocalTarget(pipeline_input_dir + "/esp.brca12.sorted.hg38.vcf")
 
     # TODO: break up into smaller pieces and require each as steps
     def run(self):
@@ -183,27 +186,29 @@ class DownloadAndExtractFilesFromESPTar(luigi.Task):
       print "Concatenation complete."
 
       # Sort concatenated BRCA1/2 data
-      sorted_concatenated_brca_output_file = esp_file_dir + "/esp.brca12.sorted.hg38.vcf"
-      writable_sorted_concatenated_brca_output_file = open(sorted_concatenated_brca_output_file, 'w')
-      args = ["vcf-sort", concatenated_brca_output_file]
-      print "Calling vcf-sort with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=writable_sorted_concatenated_brca_output_file, stderr=subprocess.PIPE)
-      out, err = sp.communicate()
-      if out:
-          print "standard output of subprocess:"
-          print out
-      if err:
-          print "standard error of subprocess:"
-          print err
+      # sorted_concatenated_brca_output_file = esp_file_dir + "/esp.brca12.sorted.hg38.vcf"
+      # writable_sorted_concatenated_brca_output_file = open(sorted_concatenated_brca_output_file, 'w')
+      print "Sorting concatenated data into pipeline_input directory."
+      with self.output().open("w") as vcf_file:
+        args = ["vcf-sort", concatenated_brca_output_file]
+        print "Calling vcf-sort with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=vcf_file, stderr=subprocess.PIPE)
+        out, err = sp.communicate()
+        if out:
+            print "standard output of subprocess:"
+            print out
+        if err:
+            print "standard error of subprocess:"
+            print err
 
-      writable_sorted_concatenated_brca_output_file.close()
+      # writable_sorted_concatenated_brca_output_file.close()
       print "Sorting of concatenated files complete."
 
       # Copy sorted data to correct path
-      print "Copying sorted and concatenated VCF to the final pipeline_input destination"
-      final_destination = pipeline_input_dir + "/esp.brca12.sorted.hg38.vcf"
-      copyfile(sorted_concatenated_brca_output_file, final_destination)
-      print "File copied to %s" % (final_destination)
+      # print "Copying sorted and concatenated VCF to the final pipeline_input destination"
+      # final_destination = pipeline_input_dir + "/esp.brca12.sorted.hg38.vcf"
+      # copyfile(sorted_concatenated_brca_output_file, final_destination)
+      # print "File copied to %s" % (final_destination)
 
 class DownloadAndExtractFilesFromBIC(luigi.Task):
 
@@ -644,8 +649,8 @@ class RunAll(luigi.WrapperTask):
     p = luigi.Parameter()
     def requires(self):
         # yield ConvertLatestClinvarToVCF(self.date)
-        # yield DownloadAndExtractFilesFromESPTar(self.date)
-        yield DownloadAndExtractFilesFromBIC(self.date, self.u, self.p)
+        yield DownloadAndExtractFilesFromESPTar(self.date)
+        # yield DownloadAndExtractFilesFromBIC(self.date, self.u, self.p)
         # yield DownloadAndExtractFilesFromG1K(self.date)
         # yield DownloadAndExtractFilesFromEXAC(self.date)
         # yield ExtractAndConvertFilesFromEXLOVD(self.date)
