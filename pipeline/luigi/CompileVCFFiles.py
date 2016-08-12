@@ -2,6 +2,7 @@ import subprocess
 import os
 import urllib2
 import tarfile
+import datetime
 import luigi
 
 from shutil import copyfile
@@ -208,8 +209,12 @@ class DownloadAndExtractFilesFromBIC(luigi.Task):
 
     # TODO: Figure out how to store u/p for safe retrieval
     # NOTE: U/P can be found in /hive/groups/cgl/brca/phase1/data/bic/account.txt at UCSC
-    username = ''
-    password = ''
+    date = luigi.DateParameter(default=datetime.date.today())
+    u = luigi.Parameter()
+    p = luigi.Parameter()
+
+    def output(self):
+        return luigi.LocalTarget(pipeline_input_dir + "/bicSnp.sorted.hg38.vcf")
 
     def run(self):
       os.chdir(bic_file_dir)
@@ -223,7 +228,7 @@ class DownloadAndExtractFilesFromBIC(luigi.Task):
       # Download brca1 data
       p = urllib2.HTTPPasswordMgrWithDefaultRealm()
 
-      p.add_password(None, brca1_data_url, self.username, self.password)
+      p.add_password(None, brca1_data_url, self.u, self.p)
 
       handler = urllib2.HTTPBasicAuthHandler(p)
       opener = urllib2.build_opener(handler)
@@ -238,7 +243,7 @@ class DownloadAndExtractFilesFromBIC(luigi.Task):
       # Download brca2 data
       p = urllib2.HTTPPasswordMgrWithDefaultRealm()
 
-      p.add_password(None, brca2_data_url, self.username, self.password)
+      p.add_password(None, brca2_data_url, self.u, self.p)
 
       handler = urllib2.HTTPBasicAuthHandler(p)
       opener = urllib2.build_opener(handler)
@@ -286,25 +291,18 @@ class DownloadAndExtractFilesFromBIC(luigi.Task):
       print "Crossmap.py execution complete, created bicSnp.hg38.vcf."
 
       # Sort hg38 vcf file, requires VCFtools.
-      sorted_hg38_vcf_file = bic_file_dir + "/bicSnp.sorted.hg38.vcf"
-      writable_sorted_hg38_vcf_file = open(sorted_hg38_vcf_file, 'w')
-      args = ["vcf-sort", bic_hg38_vcf_file]
-      print "Running vcf-sort with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=writable_sorted_hg38_vcf_file, stderr=subprocess.PIPE)
-      out, err = sp.communicate()
-      if out:
-          print "standard output of subprocess:"
-          print out
-      if err:
-          print "standard error of subprocess:"
-          print err
+      with self.output().open("w") as vcf_file:
+        args = ["vcf-sort", bic_hg38_vcf_file]
+        print "Running vcf-sort with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=vcf_file, stderr=subprocess.PIPE)
+        out, err = sp.communicate()
+        if out:
+            print "standard output of subprocess:"
+            print out
+        if err:
+            print "standard error of subprocess:"
+            print err
       print "Sorting of hg38 vcf file complete."
-
-      # Copy sorted file to pipeline_input directory
-      print "Copying sorted hg38 VCF to the final pipeline_input destination"
-      final_destination = pipeline_input_dir + "/bicSnp.sorted.hg38.vcf"
-      copyfile(sorted_hg38_vcf_file, final_destination)
-      print "File copied to %s" % (final_destination)
 
 class ExtractAndConvertFilesFromEXLOVD(luigi.Task):
     
@@ -640,3 +638,18 @@ class DownloadAndExtractFilesFromEXAC(luigi.Task):
           print err
       print "Completed sorting of exac data into %s." % (exac_brca12_sorted_hg19_vcf_file)
 
+class RunAll(luigi.WrapperTask):
+    date = luigi.DateParameter(default=datetime.date.today())
+    u = luigi.Parameter()
+    p = luigi.Parameter()
+    def requires(self):
+        # yield ConvertLatestClinvarToVCF(self.date)
+        # yield DownloadAndExtractFilesFromESPTar(self.date)
+        yield DownloadAndExtractFilesFromBIC(self.date, self.u, self.p)
+        # yield DownloadAndExtractFilesFromG1K(self.date)
+        # yield DownloadAndExtractFilesFromEXAC(self.date)
+        # yield ExtractAndConvertFilesFromEXLOVD(self.date)
+        # yield ExtractAndConvertFilesFromLOVD(self.date)
+
+    def output(self):
+        return luigi.LocalTarget('RunAll.txt')
