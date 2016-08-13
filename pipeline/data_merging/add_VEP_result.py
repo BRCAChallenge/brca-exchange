@@ -40,9 +40,9 @@ UNWANTED = ['Allele', 'Consequence', 'IMPACT', 'SYMBOL', 'Gene',
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input",
-                        default="/hive/groups/cgl/brca/release1.0/merged.csv")
+                        default="/hive/groups/cgl/brca/release1.0/merged.tsv")
     parser.add_argument("-o", "--output",
-                        default="/hive/groups/cgl/brca/release1.0/merged_withVEP_cleaned.csv")
+                        default="/hive/groups/cgl/brca/release1.0/merged_withVEP_cleaned.tsv")
     parser.add_argument("-v", "--vep",  help="VEP output, run in advance for all variants",
                         default="/cluster/home/mollyzhang/release1.0/data/VEP/vep_output_3_3_2016.vcf")
     args = parser.parse_args()
@@ -64,7 +64,7 @@ def write_to_file(vep_result_dict, inputFile, outputFile):
         line_num += 1
         if line_num %1000 == 0:
             print line_num
-        items = line.strip().split(",")
+        items = line.strip().split("\t")
         if line_num == 1:
             vep_fields = [i+"_VEP" for i in VEP_FIELDS]
             items += vep_fields
@@ -72,7 +72,7 @@ def write_to_file(vep_result_dict, inputFile, outputFile):
             genome_coor = items[2]
             additional_items = []
             coordinate_this_variant = ""
-            for coordinate in genome_coor.split("|"):
+            for coordinate in genome_coor.split(","):
                 if coordinate in vep_result_dict.keys():
                     coordinate_this_variant = coordinate
             if coordinate_this_variant == "":
@@ -80,10 +80,10 @@ def write_to_file(vep_result_dict, inputFile, outputFile):
                     additional_items.append("-")
             else:
                 for column in VEP_FIELDS:
-                    this_cell = vep_result_dict[coordinate_this_variant][column].replace(", ","|")
+                    this_cell = vep_result_dict[coordinate_this_variant][column]
                     additional_items.append(this_cell)
             items += additional_items
-        new_line = ",".join(items) + "\n"
+        new_line = "\t".join(items) + "\n"
         f_out.write(new_line)
 
 
