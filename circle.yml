@@ -1,8 +1,9 @@
 general:
     build_dir: website
 test:
-    post:
-        - npm run lint
+    override:
+        - npm run lint -- -f junit -o $CIRCLE_TEST_REPORTS/lint-results.xml
+        - npm run test -- -R xunit --reporter-options output=$CIRCLE_TEST_REPORTS/test-results.xml
 deployment:
     dev:
         branch: master
