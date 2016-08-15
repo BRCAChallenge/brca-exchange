@@ -3,21 +3,11 @@ import os
 import urllib2
 import tarfile
 import datetime
+from retrying import retry
+import socket
 import luigi
 
 from shutil import copyfile
-
-# Import methods from pipeline files
-import sys
-sys.path.insert(0, '../esp')
-import espExtract
-
-sys.path.insert(0, '../data_merging')
-import convert_tsv_to_vcf
-
-sys.path.insert(0, '../clinvar')
-import clinVarBrca
-import clinVarParse
 
 #######################
 # Convenience methods #
@@ -37,11 +27,15 @@ def print_subprocess_output_and_error(sp):
       print "standard error of subprocess:"
       print err
 
+@retry(stop_max_attempt_number=3, wait_fixed=3000)
+def urlopen_with_retry(url):
+    return urllib2.urlopen(url)
+
 def download_file_and_display_progress(url, file_name=None):
   if file_name is None:
     file_name = url.split('/')[-1]
 
-  u = urllib2.urlopen(url)
+  u = urlopen_with_retry(url)
   f = open(file_name, 'wb')
   meta = u.info()
   file_size = int(meta.getheaders("Content-Length")[0])
@@ -72,7 +66,7 @@ def download_file_with_basic_auth(url, file_name, username, password):
   opener = urllib2.build_opener(handler)
   urllib2.install_opener(opener)
 
-  data = urllib2.urlopen(brca2_data_url).read()
+  data = urlopen_with_retry(url).read()
   f = open(file_name, "wb")
   f.write(data)
   f.close()
@@ -82,6 +76,8 @@ def download_file_with_basic_auth(url, file_name, username, password):
 ###############################
 # Globals / Env / Directories #
 ###############################
+
+luigi_dir = os.environ['LUIGI'] = os.getcwd()
 
 brca_resources_dir = os.environ['BRCA_RESOURCES'] = create_path_if_nonexistent(os.path.abspath('../brca/brca-resources'))
 pipeline_input_dir = os.environ['PIPELINE_INPUT'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/pipeline_input'))
@@ -94,8 +90,6 @@ lovd_file_dir = os.environ['LOVD'] = create_path_if_nonexistent(os.path.abspath(
 ex_lovd_file_dir = os.environ['EXLOVD'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/exLOVD'))
 exac_file_dir = os.environ['EXAC'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/exac'))
 g1k_file_dir = os.environ['G1K'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/G1K'))
-
-luigi_dir = os.environ['LUIGI'] = os.getcwd()
 
 bic_method_dir = os.environ['BIC_METHODS'] = os.path.abspath('../bic')
 clinvar_method_dir = os.environ['CLINVAR_METHODS'] = os.path.abspath('../clinvar')
@@ -127,7 +121,7 @@ class ConvertLatestClinvarToVCF(luigi.Task):
       clinvar_xml_file = clinvar_file_dir + "/ClinVarBrca.xml"
       writable_clinvar_xml_file = open(clinvar_xml_file, "w")
       args = ["python", "clinVarBrca.py", clinvar_file_dir + "/ClinVarFullRelease_00-latest.xml.gz"]
-      print "Running clinVarBrca.py with the following args: %s" % (args)
+      print "Running clinVarBrca.py with the following args: %s. This takes a while..." % (args)
       sp = subprocess.Popen(args, stdout=writable_clinvar_xml_file, stderr=subprocess.PIPE)
       print_subprocess_output_and_error(sp)
       print "Completed writing %s." % (writable_clinvar_xml_file)
@@ -149,7 +143,7 @@ class ConvertLatestClinvarToVCF(luigi.Task):
       print_subprocess_output_and_error(sp)
       print "Completed writing %s." % (pipeline_input_dir + "/ClinVarBrca.vcf")
 
-      # NOTE: If we prefer to use the Clinvar Makefile instead of python, it can be run with the commented out code below.
+      ### NOTE: If we prefer to use the Clinvar Makefile instead of python, it can be run with the commented out code below. ###
 
       # # Create required xml file for make to run properly
       # clinvar_xml_file = clinvar_file_dir + "/ClinVarBrca.xml"
@@ -171,16 +165,14 @@ class DownloadAndExtractFilesFromESPTar(luigi.Task):
     def output(self):
       return luigi.LocalTarget(pipeline_input_dir + "/esp.brca12.sorted.hg38.vcf")
 
-    # NOTE: This task requires some setup to run properly.
-    # 1. vcf module must be installed (`pip install PyVCF`)
-    # 2. VCFtools must be installed: https://vcftools.github.io/index.html 
-    # VCFtools installation is tricky and will require some extra work
+    # NOTE: vcf module (`pip install PyVCF`) and VCFtools must be installed: https://vcftools.github.io/index.html 
     def run(self):
       os.chdir(esp_file_dir)
 
       # Download ESP data
       esp_data_url = "http://evs.gs.washington.edu/evs_bulk_data/ESP6500SI-V2-SSA137.GRCh38-liftover.snps_indels.vcf.tar.gz"
-      download_file_and_display_progress(esp_data_url)
+      file_name = esp_data_url.split('/')[-1]
+      download_file_and_display_progress(esp_data_url, file_name)
 
       # Extract contents of tarfile
       tar = tarfile.open(file_name, "r:gz")
@@ -414,11 +406,11 @@ class DownloadAndExtractFilesFromG1K(luigi.Task):
 
       # wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi
       chr13_vcf_gz_tbi_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi"
-      download_file_and_display_progress(chr17_vcf_gz_tbi_url)
+      download_file_and_display_progress(chr13_vcf_gz_tbi_url)
 
       # wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi
-      url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi"
-      download_file_and_display_progress(chr13_vcf_gz_tbi_url)
+      chr17_vcf_gz_tbi_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi"
+      download_file_and_display_progress(chr17_vcf_gz_tbi_url)
 
       print "Extracting BRCA gene region from chr13 and chr17"
       # tabix -h $G1K/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz 13:32889080-32973809 > $G1K/chr13_brca2_1000g_GRCh37.vcf
@@ -534,5 +526,5 @@ class RunAll(luigi.WrapperTask):
         yield DownloadAndExtractFilesFromBIC(self.date, self.u, self.p)
         yield DownloadAndExtractFilesFromG1K(self.date)
         yield DownloadAndExtractFilesFromEXAC(self.date)
-        yield ExtractAndConvertFilesFromEXLOVD(self.date)
-        yield ExtractAndConvertFilesFromLOVD(self.date)
+        # yield ExtractAndConvertFilesFromEXLOVD(self.date)
+        # yield ExtractAndConvertFilesFromLOVD(self.date)
