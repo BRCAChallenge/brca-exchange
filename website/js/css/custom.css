@@ -464,7 +464,7 @@ th[role='columnheader'] .help, .help-target .help {
 }
 
 #communityMap .map-legend:hover .map-legend-slide {
-    max-width: 464px;
+    max-width: 500px;
     max-height: 500px;
     padding: 8px;
     visibility: visible;
