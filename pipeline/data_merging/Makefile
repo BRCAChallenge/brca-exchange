@@ -1,6 +1,6 @@
 releaseDir = $(BRCA_PIPELINE_DATA)
 resources = $(releaseDir)/pipeline-resources/
-inputVcfDir = $(releaseDir)/pipeline-input
+inputVcfDir = $(releaseDir)/pipeline-input/
 inputVcfs = $(inputVcfDir)/10k_genome.brca.sorted.hg38.vcf \
 	$(inputVcfDir)/ClinVarBrca.vcf \
 	$(inputVcfDir)/sharedLOVD_brca12.sorted.hg38.vcf \
@@ -8,7 +8,7 @@ inputVcfs = $(inputVcfDir)/10k_genome.brca.sorted.hg38.vcf \
 	$(inputVcfDir)/bicSnp.sorted.hg38.vcf \
 	$(inputVcfDir)/exac.brca12.sorted.hg38.vcf \
 	$(inputVcfDir)/esp.brca12.sorted.hg38.vcf
-outputFiles = $(releaseDir)/pipeline-output
+outputFiles = $(releaseDir)/pipeline-output/
 
 
 all:	$(outputFiles)/aggregated.tsv
