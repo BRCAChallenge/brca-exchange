@@ -58,21 +58,10 @@ def setOutputColumns(fields, toRemove, toAdd):
 
 def cleanColumns(row):
     """For each column, remove any pickling that might be delimiting the
-    column, to generate proper text.  Replace delimiters of vertical bars (|)
-    with commas.  Replace underscores with spaces, and parentheses with
-    underscores
+    column, to generate proper text.  
     """
-    print "top of function: keys", sorted(row.keys())
     for column in sorted(row.keys()):
         value = row[column]
-        print "cleaning", column, "contents", row[column]
-        value = re.sub("^\[", "", value)
-        value = re.sub("\]$", "", value)
-        value = re.sub("^'", "", value)
-        value = re.sub("'$", "", value)
-        value = re.sub("'\]\|\['", ",", value)
-        value = re.sub("\]\|\[", ",", value)
-        value = re.sub("\|", ",", value)
         row[column] = value
     return row
 
@@ -95,10 +84,6 @@ def updateRow(row, toRemove):
     newRow["Genomic_Coordinate_hg36"] = EMPTY
     for item in toRemove:
         del newRow[item]
-    if row.has_key(None):
-        print "2 Row has key none"
-    else:
-        print "2 Row has no key none"
     return(newRow)
 
 def update_basic_fields(row):
@@ -156,7 +141,7 @@ def update_basic_fields(row):
     return row
 
 def unpackHgvs(hgvsString):
-    firstHgvsString = hgvsString.split("|")[0]
+    firstHgvsString = hgvsString.split(",")[0]
     if re.search(":", firstHgvsString):
         transcript = firstHgvsString.split(":")[0]
         suffix = re.sub(transcript+":", "", hgvsString)

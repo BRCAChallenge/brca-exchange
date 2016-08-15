@@ -125,8 +125,7 @@ def main():
         print "final number of variants: %d" %len(variants)
         print "Done" 
     finally:
-        print "Done"
-        #shutil.rmtree(tmp_dir)
+        shutil.rmtree(tmp_dir)
 
 
 def variant_standardize(variants="pickle"): 
