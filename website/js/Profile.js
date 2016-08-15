@@ -209,7 +209,7 @@ var EditProfileForm = React.createClass({
             {this.renderRoles(this.state.data.role)}
             {this.state.otherRole &&
                 <div className="slide-fade-in">{this.renderTextInput('role_other', <span style={{color: "#D00000"}}>Please Specify:</span>)}</div>}
-            {this.renderTextInput('institution', 'Institution, Hospital or Company')}
+            {this.renderTextInput('institution', 'Institution, Hospital or Company', this.state.data.institution)}
             {this.renderTextInput('city', 'City', this.state.data.city)}
             {this.renderTextInput('state', 'State or Province', this.state.data.state)}
             {this.renderSelect('country', 'Country', countries.map(v => [v, v]), this.state.data.country)}

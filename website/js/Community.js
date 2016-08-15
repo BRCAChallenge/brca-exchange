@@ -250,7 +250,7 @@ var CommunityMap = React.createClass({
                         var addMarker = function (loc) {
                             var avatar;
                             if (has_image) {
-                                var avatar_link = config.backend_url + '/site_media/media/' + id;
+                                let avatar_link = config.backend_url + '/site_media/media/' + id;
                                 avatar = <object className="avatar" data={avatar_link} type="image/jpg"/>;
                             } else {
                                 avatar = <img className="avatar" src={placeholder}/>;
@@ -260,10 +260,10 @@ var CommunityMap = React.createClass({
                                 <div>
                                     <span>{firstName} {lastName}{title.length ? "," : ""} {title}</span><br />
                                     <span id="role">{Role.other(role) ? role_other : Role.get(role)[2]}</span><br />
-/*eslint-enable camelcase*/
                                     <span>{institution}</span>
                                 </div>
                             </div>);
+/*eslint-enable camelcase*/
                             var marker = new google.maps.Marker({
                                 position: { lat: loc.lat(), lng: loc.lng() },
                                 map: map,
