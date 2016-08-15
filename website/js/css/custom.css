@@ -310,6 +310,13 @@ html {
     margin-right: 1em;
 }
 
+.required label::after {
+    content: '*';
+    position: absolute;
+    padding-left: 4px;
+    color: #CC0000;
+}
+
 #filters .panel-body {
     padding: 0.4em;
 }

@@ -60,6 +60,7 @@ class MyUser(AbstractBaseUser):
     ROLE_GENETIC_COUNSELOR      = 9
     ROLE_CLINICAL_GENETICIST    = 10
     ROLE_CLINICIAN              = 11
+    ROLE_DATA_PROVIDER          = 12
 
     email = models.EmailField(
         verbose_name='email address',

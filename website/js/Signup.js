@@ -11,6 +11,7 @@ var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {Navigation} = require('react-router');
 
 var Role = {
+    ROLE_DATA_PROVIDER: 12,
     options: [
         // [ id, dropdown text, community page text ]
         [1, "I am a patient",                      "Patient"],
@@ -24,9 +25,10 @@ var Role = {
         [9, "I am a genetic counselor",            "Genetic Counselor"],
         [10, "I am a clinical geneticist",         "Clinical Geneticist"],
         [11, "I am a clinician",                   "Clinician"],
+        [12, "I represent a Data Provider",        "Data Provider"],
         [0, "Other"]
     ],
-    other: id => id === 0 || id === 11,
+    other: id => parseInt(id) === 0 || parseInt(id) === 11,
     get: function(id) { return this.options.find(role => role[0] === parseInt(id)); }
 };
 
@@ -133,20 +135,15 @@ var SignupForm = React.createClass({
     getInitialState: function () {
         return {errors: {}, file: '', imagePreviewUrl: null, captcha: "", otherRole: false};
     },
-    componentDidMount: function() {
+    componentDidMount: function () {
         var me = this;
-        window.onRecaptchaLoad(function() {
+        window.onRecaptchaLoad(function () {
             grecaptcha.render(me.refs.signupCAPTCHA.getDOMNode(), {sitekey: config.captcha_key, callback: function(resp) {
                 me.setState({captcha: resp});
             }});
         });
     },
     isValid: function () {
-        var compulsoryFields = ['email', 'email_confirm', 'password', 'password_confirm', 'firstName', 'lastName'];
-        if (this.state.otherRole) {
-            compulsoryFields.push('role_other');
-        }
-
         var errors = {};
         if (this.refs.role.getDOMNode().value === "NONE") {
             errors["role"] = "Please select a roll"; //eslint-disable-line dot-notation
@@ -160,7 +157,7 @@ var SignupForm = React.createClass({
         if (this.state.captcha === "") {
             errors["captcha"] = "No CAPTCHA entered"; //eslint-disable-line dot-notation
         }
-        compulsoryFields.forEach(function (field) {
+        this.getCompulsoryFields().forEach(function (field) {
             var value = this.refs[field].getDOMNode().value.trim();
             if (!value) {
                 errors[field] = 'This field is required';
@@ -169,6 +166,16 @@ var SignupForm = React.createClass({
         this.setState({errors: errors});
 
 		return Object.keys(errors).length === 0;
+    },
+    getCompulsoryFields: function () {
+        var fields = ['email', 'email_confirm', 'password', 'password_confirm', 'role'];
+        if (!this.refs || !this.refs.role || parseInt(this.refs.role.getDOMNode().value) !== Role.ROLE_DATA_PROVIDER) {
+            fields.push('firstName', 'lastName');
+        }
+        if (this.state.otherRole) {
+            fields.push('role_other');
+        }
+        return fields;
     },
     getFormData: function () {
         var title = this.refs.titlemd.getDOMNode().checked && this.refs.titlemd.getDOMNode().value ||
@@ -227,19 +234,19 @@ var SignupForm = React.createClass({
         return (
             <div className="form-horizontal" onChange={onChange.bind(this)}>
                 {this.renderImageUpload('image', 'Profile picture')}
-                {this.renderTextInput('email', 'Email *')}
-                {this.renderTextInput('email_confirm', 'Confirm Email *')}
-                {this.renderPassword('password', 'Password *')}
-                {this.renderPassword('password_confirm', 'Confirm Password *')}
-                {this.renderTextInput('firstName', 'First Name *')}
-                {this.renderTextInput('lastName', 'Last Name *')}
+                {this.renderTextInput('email', 'Email')}
+                {this.renderTextInput('email_confirm', 'Confirm Email')}
+                {this.renderPassword('password', 'Password')}
+                {this.renderPassword('password_confirm', 'Confirm Password')}
+                {this.renderTextInput('firstName', 'First Name')}
+                {this.renderTextInput('lastName', 'Last Name')}
                 {this.renderRadioInlines('title', '', {
                     values: [{name: 'M.D.', ref: 'md'}, {name: 'Ph.D', ref: 'phd'}, {name: 'Other', ref: 'other'}]
                     , defaultCheckedValue: 'M.D.'
                 })}
                 {this.renderRoles()}
                 {this.state.otherRole &&
-                    <div className="slide-fade-in">{this.renderTextInput('role_other', <span style={{color: "#D00000"}}>Please Specify: *</span>)}</div>}
+                    <div className="slide-fade-in">{this.renderTextInput('role_other', <span style={{color: "#D00000"}}>Please Specify:</span>)}</div>}
                 {this.renderTextInput('institution', 'Institution, Hospital or Company')}
                 {this.renderTextInput('city', 'City')}
                 {this.renderTextInput('state', 'State or Province')}
@@ -294,7 +301,7 @@ var SignupForm = React.createClass({
     renderRoles: function () {
         var id = 'role';
         var options = Role.options.map(value => <option key={id + value[0]} value={value[0]}>{value[1]}</option>);
-        return this.renderField(id, 'Role *',
+        return this.renderField(id, 'Role',
             <select className="form-control" id={id} ref={id}>
                 <option key={id + "NONE"} value="NONE">Choose one:</option>
                 {options}
@@ -330,7 +337,7 @@ var SignupForm = React.createClass({
     },
     renderField: function (id, label, field) {
         return (
-			<div className={$c('form-group', {'has-error': id in this.state.errors})}>
+			<div className={$c('form-group', {'has-error': id in this.state.errors, 'required': this.getCompulsoryFields().includes(id)})}>
 				<label htmlFor={id} className="col-sm-4 control-label">{label}</label>
 				<div className="col-sm-6">
 					{field}
