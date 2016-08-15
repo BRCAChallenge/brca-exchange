@@ -54,17 +54,6 @@ if (typeof console === "undefined") {
     };
 }
 
-(function() {
-    var listeners = [], loaded = false;
-    window.onRecaptchaLoad = callback => (loaded ? callback() : listeners.push(callback));
-    window.recaptchaCallback = function() {
-        loaded = true;
-        while (listeners.length) {
-            listeners.pop()();
-        }
-    };
-})();
-
 var Footer = React.createClass({
     mixins: [PureRenderMixin],
     render: function() {
