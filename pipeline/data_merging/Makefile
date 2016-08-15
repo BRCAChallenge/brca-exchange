@@ -1,6 +1,6 @@
 releaseDir = $(BRCA_PIPELINE_DATA)
-resources = $(releaseDir)/pipeline-resources
-inputVcfDir = $(releaseDir)/pipeline-input
+resources = $(releaseDir)/pipeline-resources/
+inputVcfDir = $(releaseDir)/pipeline-input/
 inputVcfs = $(inputVcfDir)/10k_genome.brca.sorted.hg38.vcf \
 	$(inputVcfDir)/ClinVarBrca.vcf \
 	$(inputVcfDir)/sharedLOVD_brca12.sorted.hg38.vcf \
@@ -8,7 +8,7 @@ inputVcfs = $(inputVcfDir)/10k_genome.brca.sorted.hg38.vcf \
 	$(inputVcfDir)/bicSnp.sorted.hg38.vcf \
 	$(inputVcfDir)/exac.brca12.sorted.hg38.vcf \
 	$(inputVcfDir)/esp.brca12.sorted.hg38.vcf
-outputFiles = $(releaseDir)/pipeline-output
+outputFiles = $(releaseDir)/pipeline-output/
 
 
 all:	$(outputFiles)/aggregated.tsv
@@ -27,6 +27,6 @@ $(outputFiles)/merged.withVEP.tsv:	$(outputFiles)/merged.tsv add_VEP_result.py
 	add_VEP_result.py -i $< -v $(inputVcfDir)/vep_output_3_3_2016.vcf -o $@
 
 $(outputFiles)/merged.tsv:	$(inputVcfs) variant-merging.py
-	variant-merging.py -i $(inputVcfDir)/ -o $(releaseDir)/pipeline_output/ -p -r $(resources)
+	variant-merging.py -i $(inputVcfDir)/ -o $(outputFiles) -p -r $(resources)
 
 
