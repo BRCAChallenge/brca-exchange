@@ -4,6 +4,7 @@
 var React = require('react');
 var content = require('./content');
 var RawHTML = require('./RawHTML');
+var countries = require('raw!../content/countries.txt').split("\n");
 var $ = require('jquery');
 var config  = require('./config');
 var {Grid, Row, Col, Button} = require('react-bootstrap');
@@ -26,7 +27,7 @@ var Role = {
         [0, "Other"]
     ],
     other: id => id === 0 || id === 11,
-    get: function(id) { return this.options.find(role => role[0] === id); }
+    get: function(id) { return this.options.find(role => role[0] === parseInt(id)); }
 };
 
 var Signup = React.createClass({
@@ -242,7 +243,7 @@ var SignupForm = React.createClass({
                 {this.renderTextInput('institution', 'Institution, Hospital or Company')}
                 {this.renderTextInput('city', 'City')}
                 {this.renderTextInput('state', 'State or Province')}
-                {this.renderTextInput('country', 'Country')}
+                {this.renderSelect('country', 'Country', countries.map(v => [v, v]))}
                 {this.renderTextInput('phone_number', 'Phone number')}
                 {this.renderCheckBox('hide_number', 'Hide my phone number on this website')}
                 {this.renderCheckBox('hide_email', 'Hide my email address on this website')}
@@ -279,6 +280,15 @@ var SignupForm = React.createClass({
     renderTextarea: function (id, label) {
         return this.renderField(id, label,
             <textarea className="form-control" id={id} ref={id}/>
+        );
+    },
+    renderSelect: function(id, label, opts) {
+        var options = opts.map(value => <option key={id + value[0]} value={value[0]}>{value[1]}</option>);
+        return this.renderField(id, label,
+            <select className="form-control" id={id} ref={id}>
+                <option key={id + "NONE"} value=""></option>
+                {options}
+            </select>
         );
     },
     renderRoles: function () {

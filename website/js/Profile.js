@@ -7,6 +7,7 @@ var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {Navigation} = require('react-router');
 var auth = require('./auth');
 var {Role, $c} = require('./Signup');
+var countries = require('raw!../content/countries.txt').split('\n');
 
 var Profile = React.createClass({
     statics: {
@@ -211,7 +212,7 @@ var EditProfileForm = React.createClass({
             {this.renderTextInput('institution', 'Institution, Hospital or Company')}
             {this.renderTextInput('city', 'City', this.state.data.city)}
             {this.renderTextInput('state', 'State or Province', this.state.data.state)}
-            {this.renderTextInput('country', 'Country', this.state.data.country)}
+            {this.renderSelect('country', 'Country', countries.map(v => [v, v]), this.state.data.country)}
             {this.renderTextInput('phone_number', 'Phone number', this.state.data.phone_number)}
             {this.renderCheckBox('hide_number', "Don't display my phone number on this website", this.state.data.hide_number)}
             {this.renderCheckBox('hide_email', "Don't display my email on this website", this.state.data.hide_email)}
@@ -277,16 +278,12 @@ var EditProfileForm = React.createClass({
             </select>
         );
     },
-    renderSelect: function (id, label, values, defaultValue) {
-        var other = !Role.has(defaultValue);
-        var options = values.map(function (value) {
-            var selected = (other && value === "Other") || defaultValue === (value instanceof Array ? value[1] : value);
-            return value instanceof Array
-                ? <option key={id + value[1]} value={value[1]} selected={selected}>{value[0]}</option>
-                : <option key={id + value} value={value} selected={selected}>{value}</option>;
-        });
+    renderSelect: function(id, label, opts, defaultValue) {
+        var handleChange = () => {var oldData = this.state.data; oldData[id] = this.refs[id].checked; this.setState({data: oldData});};
+        var options = opts.map(value => <option key={id + value[0]} value={value[0]}>{value[1]}</option>);
         return this.renderField(id, label,
-            <select className="form-control" id={id} ref={id}>
+            <select className="form-control" id={id} ref={id} value={defaultValue} onChange={handleChange}>
+                <option key={id + "NONE"} value=""></option>
                 {options}
             </select>
         );

@@ -4,7 +4,7 @@ var React = require('react');
 var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {State, Navigation, Link} = require('react-router');
 var auth = require('./auth');
-var {trim, $c} = require('./Signup');
+var {$c} = require('./Signup');
 var config  = require('./config');
 var $ = require('jquery');
 
@@ -88,7 +88,7 @@ var ResetPasswordForm = React.createClass({
         var compulsoryFields = ['email'];
         var errors = {};
         compulsoryFields.forEach(function (field) {
-            var value = trim(this.refs[field].getDOMNode().value);
+            var value = this.refs[field].getDOMNode().value.trim();
             if (!value) {
                 errors[field] = 'This field is required';
             }
@@ -232,7 +232,7 @@ var SigninForm = React.createClass({
         var compulsoryFields = ['email', 'password'];
         var errors = {};
         compulsoryFields.forEach(function (field) {
-            var value = trim(this.refs[field].getDOMNode().value);
+            var value = this.refs[field].getDOMNode().value.trim();
             if (!value) {
                 errors[field] = 'This field is required';
             }
