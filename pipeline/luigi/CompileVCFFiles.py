@@ -90,13 +90,16 @@ lovd_file_dir = os.environ['LOVD'] = create_path_if_nonexistent(os.path.abspath(
 ex_lovd_file_dir = os.environ['EXLOVD'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/exLOVD'))
 exac_file_dir = os.environ['EXAC'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/exac'))
 g1k_file_dir = os.environ['G1K'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/G1K'))
+enigma_file_dir = os.environ['ENIGMA'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/enigma'))
 
 bic_method_dir = os.environ['BIC_METHODS'] = os.path.abspath('../bic')
 clinvar_method_dir = os.environ['CLINVAR_METHODS'] = os.path.abspath('../clinvar')
 esp_method_dir = os.environ['ESP_METHODS'] = os.path.abspath('../esp')
 lovd_method_dir = os.environ['LOVD_METHODS'] = os.path.abspath('../lovd')
 g1k_method_dir = os.environ['G1K_METHODS'] = os.path.abspath('../1000_Genomes')
+enigma_method_dir = os.environ['ENIGMA_METHODS'] = os.path.abspath('../enigma')
 data_merging_method_dir = os.environ['DATA_MERGING_METHODS'] = os.path.abspath('../data_merging')
+
 
 
 ######################
@@ -515,6 +518,22 @@ class DownloadAndExtractFilesFromEXAC(luigi.Task):
         print_subprocess_output_and_error(sp)
         print "Completed sorting of exac data into %s." % (vcf_file)
 
+class ExtractOutputFromEnigma(luigi.Task):
+    date = luigi.DateParameter(default=datetime.date.today())
+    date_for_output_file_name = datetime.date.today().isoformat()
+    output_file_path = pipeline_input_dir + "/ENIGMA_last_updated_%s.tsv" % (date_for_output_file_name)
+
+    def output(self):
+      return luigi.LocalTarget(self.output_file_path)
+
+    def run(self):
+      os.chdir(enigma_method_dir)
+      args = ["python", "enigma-processing.py", "-o", self.output_file_path, "-g", brca_resources_dir + "/hg38.fa"]
+      print "Running enigma-processing.py with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      print_subprocess_output_and_error(sp)
+      print "Completed enigma processing into %s." % (self.output_file_path)
+
 class RunAll(luigi.WrapperTask):
     date = luigi.DateParameter(default=datetime.date.today())
     u = luigi.Parameter()
@@ -526,5 +545,6 @@ class RunAll(luigi.WrapperTask):
         # yield DownloadAndExtractFilesFromBIC(self.date, self.u, self.p)
         # yield DownloadAndExtractFilesFromG1K(self.date)
         # yield DownloadAndExtractFilesFromEXAC(self.date)
-        yield ExtractAndConvertFilesFromEXLOVD(self.date)
-        yield ExtractAndConvertFilesFromLOVD(self.date)
+        # yield ExtractAndConvertFilesFromEXLOVD(self.date)
+        # yield ExtractAndConvertFilesFromLOVD(self.date)
+        yield ExtractOutputFromEnigma(self.date)

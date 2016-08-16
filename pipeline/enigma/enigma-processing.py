@@ -1,38 +1,102 @@
 """
-this scripts takes the enigma variant list and do following things:
-    1.  append HGVS_cDNA and Genomic Coordinate column
-    2. change "comment on classification" column to parsed succinct words
+this scripts takes the enigma raw tsv file and process it to produce the format suitable for 
+brcaexchange variant merging pipeline
 """
 
+import glob
+import numpy as np
+import sys
+import re
+import argparse
+from pprint import pprint as pp
+import pyhgvs
+import pyhgvs.utils as pyhgvs_utils
+from pygr.seqdb import SequenceFileDB
 import hgvs.dataproviders.uta
 import hgvs.parser
 import hgvs.variantmapper
-import pyhgvs
-import pyhgvs.utils as pyhgvs_utils
-import re
-import sys
-from pygr.seqdb import SequenceFileDB
+import datetime
+
+
+
+COLUMNS_TO_SAVE = np.array(["Gene_symbol", #Genomic_Coordinate
+                            "Reference_sequence",
+                            "HGVS", # change to HGVS_cDNA
+                            "BIC_Nomenclature",
+                            "Abbrev_AA_change",
+                            "URL",
+                            "Condition_ID_type",
+                            "Condition_ID_value",
+                            "Condition_category",
+                            "Clinical_significance",
+                            "Date_last_evaluated",
+                            "Assertion_method",
+                            "Assertion_method_citation",
+                            "Clinical_significance_citations",
+                            "Comment_on_clinical_significance",
+                            "Collection_method",
+                            "Allele_origin",
+                            "ClinVarAccession"]) #"HGVS_protein"
+
+OUTPUT_COLUMNS = [i + "_cDNA" if i == "HGVS" else i for i in COLUMNS_TO_SAVE] + ["HGVS_protein"]
+OUTPUT_COLUMNS.insert(1, "Genomic_Coordinate")
+
+HDP = hgvs.dataproviders.uta.connect()
+EVM = hgvs.variantmapper.EasyVariantMapper(HDP,
+    primary_assembly='GRCh37', alt_aln_method='splign')
+HP = hgvs.parser.Parser()
+
 
 def main():
-    processed_file = open("data/enigma_database_v3.tsv", "w")
-    line_num = 0
-    for line in sys.stdin:
-        line_num += 1
-        print line_num
-        if line_num == 1:
-            items = line.strip().split("\t")
-            items.append("HGVS_protein")
-            items.append("Genomic Coordinate") 
-        else:
-            items = line.strip().split("\t")
-            transcript_id = items[1]
-            HGVS = items[2]
-            hgvs_c = transcript_id + ":" + HGVS
-            converted_hgvs = convert_hgvs(hgvs_c)
-            items[7] = convert_OMIM_id(items[7])
-            items += converted_hgvs
-            new_line = "\t".join(items) + "\n"
-        processed_file.write(new_line)
+    raw_files = sorted(glob.glob("raw_files/*batch*tsv"))
+
+    today = datetime.date.today().isoformat()
+    default_output_file_name = "output/ENIGMA_last_updated_%s.tsv" % (today)
+    default_writable_output = open(default_output_file_name, "w")
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-o', '--writable_output', type=argparse.FileType('w'),
+        help='Opened writable output file for conversion.', default=default_writable_output)
+    parser.add_argument('-g', '--genome_path',
+        help='Link to hg38.fa.')
+    args = parser.parse_args()
+    
+    f_out = args.writable_output
+    GENOME = SequenceFileDB(args.genome_path)
+    
+    f_out.write("\t".join(OUTPUT_COLUMNS) + "\n")
+    for filename in raw_files:
+        f_in = open(filename, "r")
+        # print filename
+        for index, line in enumerate(f_in):
+            # print index
+            if index in [0, 1, 3, 4]:
+                continue
+            items = np.array(line.rstrip().split("\t"))
+            if index == 2:
+                columns = np.array([i.replace(" ", "_") for i in items])
+                index_to_save = [np.where(columns==i)[0][0] for i in COLUMNS_TO_SAVE]
+                column_idx = dict(zip(COLUMNS_TO_SAVE, index_to_save))
+                continue
+            if len(items) != len(columns):
+                continue
+            OMIM_id_index = column_idx["Condition_ID_value"]
+            items[OMIM_id_index] = convert_OMIM_id(items[OMIM_id_index])
+            HGVS_cDNA = (items[column_idx["Reference_sequence"]] +
+                         ":" + items[column_idx["HGVS"]])
+            try:
+                genome_coor, HGVS_p = convert_HGVS(HGVS_cDNA, GENOME)
+            except:
+                # TODO: better handling of misnamed HGVS string
+                genome_coor, HGVS_p = create_None_filler() 
+            final_items = list(items[index_to_save])
+            final_items.insert(1, genome_coor)
+            final_items.append(HGVS_p)
+            new_line = "\t".join(list(final_items)) + "\n"
+            f_out.write(new_line)
+        f_in.close()
+    f_out.close()
+
 
 def convert_OMIM_id(OMIM_id):
     if OMIM_id == "604370":
@@ -40,54 +104,36 @@ def convert_OMIM_id(OMIM_id):
     elif OMIM_id == "612555":
         return "BREAST-OVARIAN CANCER, FAMILIAL, SUSCEPTIBILITY TO, 2; BROVCA2 (" + OMIM_id + ")" 
     else:
-        return "OMIM id not found (" + OMIM_id + ")"
+        raise Exception("OMIM id not found (" + OMIM_id + ")")
 
 
-def parse_comment(s):
-    text = ""
-    if "IARC" in s:
-        text = re.search("posterior probability = (([0-9.]+)|1)", s)
-        text = text.group(0).strip(".")
-    if "IARC" in s and "frequency" in s:
-        text += " and frequency >1%"
-    elif "frequency" in s and "IARC" not in s:
-        text = "frequency > 1%"
-    return text
-
-
-def convert_hgvs(hgvs_c):
-    hp = hgvs.parser.Parser()
-    hgvs_c = hp.parse_hgvs_variant(hgvs_c)
-    hdp = hgvs.dataproviders.uta.connect()
-    evm = hgvs.variantmapper.EasyVariantMapper(hdp,
-        primary_assembly='GRCh37', alt_aln_method='splign')
-    #hgvs_g = evm.c_to_g(hgvs_c)
-    hgvs_p = evm.c_to_p(hgvs_c)
-    hgvs_p_no_transcript = str(hgvs_p).split(":")[1]
-    genome_coordinate = get_genome_coor(str(hgvs_c))
-    return [hgvs_p_no_transcript, genome_coordinate]
-
-def get_genome_coor(hgvs_c):
-    genome = SequenceFileDB('data/hg19.fa')
-    refGene = "/Users/Molly/Desktop/web-dev/hgvs_counsyl/hgvs/pyhgvs/data/genes.refGene"
-    with open(refGene) as infile:
-        transcripts = pyhgvs_utils.read_transcripts(infile)
-
-    def get_transcript(name):
-        return transcripts.get(name)
-    
+def convert_HGVS(hgvs_c, GENOME):
     chrom, offset, ref, alt = pyhgvs.parse_hgvs_name(
         hgvs_c, genome, get_transcript=get_transcript)
-    return chrom + ":" + str(offset) + ":" + ref + ">" + alt
+    genome_coor = chrom + ":" + str(offset) + ":" + ref + ">" + alt
+    HGVS_p = HGVS_cDNA_to_protein(hgvs_c)
+    return genome_coor, HGVS_p
 
 
+def create_None_filler():
+    genome_coor = "None:None:None>None"
+    HGVS_p = "None"
+    return genome_coor, HGVS_p
 
-def parse_hgvs_g(hgvs_g):
-    text = re.search("NC_0000(1[37])\.10:g\.([0-9]+)([AGTC]>[AGTC])", hgvs_g)
-    chrom = text.group(1)
-    position = text.group(2)
-    change = text.group(3)
-    return "chr" + chrom + ":" + position + ":" + change
+
+def HGVS_cDNA_to_protein(hgvs_c):
+    hgvs_c = HP.parse_hgvs_variant(hgvs_c)
+    hgvs_p = str(EVM.c_to_p(hgvs_c)).split(":")[1]
+    return hgvs_p
+
+
+def get_transcript(name):
+    # TODO: Use environment variable
+    REFGENE = "../resources/refseq/hg38.BRCA.refGene.txt"
+    with open(REFGENE) as infile:
+        TRANSCRIPTS = pyhgvs_utils.read_transcripts(infile)
+    return TRANSCRIPTS.get(name)
+
 
 if __name__ == "__main__":
     main()
