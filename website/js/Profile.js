@@ -167,7 +167,7 @@ var EditProfileForm = React.createClass({
             "lastName": this.refs.lastName.getDOMNode().value,
             "title": title,
             "role": this.refs.role.getDOMNode().value,
-            "role_other": this.state.roleOther ? this.refs.role_other.getDOMNode().value : Role.get(this.refs.role.getDOMNode().value)[2],
+            "role_other": this.state.otherRole ? this.refs.role_other.getDOMNode().value : Role.get(this.refs.role.getDOMNode().value)[2],
             "institution": this.refs.institution.getDOMNode().value,
             "city": this.refs.city.getDOMNode().value,
             "state": this.refs.state.getDOMNode().value,
@@ -219,7 +219,7 @@ var EditProfileForm = React.createClass({
             })}
             {this.renderRoles(this.state.data.role)}
             {this.state.otherRole &&
-                <div className="slide-fade-in">{this.renderTextInput('role_other', <span style={{color: "#D00000"}}>Please Specify:</span>)}</div>}
+                <div className="slide-fade-in">{this.renderTextInput('role_other', <span style={{color: "#D00000"}}>Please Specify:</span>, this.state.data.role_other)}</div>}
             {this.renderTextInput('institution', 'Institution, Hospital or Company', this.state.data.institution)}
             {this.renderTextInput('city', 'City', this.state.data.city)}
             {this.renderTextInput('state', 'State or Province', this.state.data.state)}
@@ -260,7 +260,7 @@ var EditProfileForm = React.createClass({
             </div>);
     },
     renderTextInput: function (id, label, defaultValue) {
-        var handleChange = () => {var oldData = this.state.data; oldData[id] = this.refs[id].value; this.setState({data: oldData});};
+        var handleChange = () => {var oldData = this.state.data; oldData[id] = this.refs[id].getDOMNode().value; this.setState({data: oldData});};
         return this.renderField(id, label,
             <input type="text" className="form-control" id={id} ref={id} value={defaultValue} onChange={handleChange}/>
         );

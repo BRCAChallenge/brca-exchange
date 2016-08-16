@@ -192,7 +192,7 @@ var SignupForm = React.createClass({
             "lastName": this.refs.lastName.getDOMNode().value,
             "title": title,
             "role": this.refs.role.getDOMNode().value,
-            "role_other": this.state.roleOther ? this.refs.role_other.getDOMNode().value : Role.get(this.refs.role.getDOMNode().value)[2],
+            "role_other": this.state.otherRole ? this.refs.role_other.getDOMNode().value : Role.get(this.refs.role.getDOMNode().value)[2],
             "institution": this.refs.institution.getDOMNode().value,
             "city": this.refs.city.getDOMNode().value,
             "state": this.refs.state.getDOMNode().value,
