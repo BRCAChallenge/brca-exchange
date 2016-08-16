@@ -299,7 +299,7 @@ class ExtractAndConvertFilesFromEXLOVD(luigi.Task):
       print "Converted extracted BRCA1 flat file to vcf format."
 
       # ./lovd2vcf -i output_directory/BRCA2.txt -o exLOVD_brca2.vcf -a $EXLOVD/exLOVDAnnotation -b 2 -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -g $BRCA_RESOURCES/hg19.fa
-      args = ["./lovd2vcf", "-i", ex_lovd_file_dir + "/BRCA2.txt", "-o", "exLOVD_brca2.vcf", "-a", ex_lovd_file_dir + "exLOVDAnnotation", "-b", "2", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g", brca_resources_dir + "/hg19.fa"]
+      args = ["./lovd2vcf", "-i", ex_lovd_file_dir + "/BRCA2.txt", "-o", ex_lovd_file_dir + "/exLOVD_brca2.vcf", "-a", "exLOVDAnnotation", "-b", "2", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g", brca_resources_dir + "/hg19.fa"]
       print "Running lovd2vcf with the following args: %s" % (args)
       sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       print_subprocess_output_and_error(sp)
@@ -308,7 +308,7 @@ class ExtractAndConvertFilesFromEXLOVD(luigi.Task):
       # vcf-concat $EXLOVD/exLOVD_brca1.hg19.vcf $EXLOVD/exLOVD_brca2.hg19.vcf > $EXLOVD/exLOVD_brca12.hg19.vcf
       ex_lovd_brca12_hg19_vcf_file = ex_lovd_file_dir + "/exLOVD_brca12.hg19.vcf"
       writable_ex_lovd_brca12_hg19_vcf_file = open(ex_lovd_brca12_hg19_vcf_file, 'w')
-      args = ["vcf-concat", ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf"]
+      args = ["vcf-concat", ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", ex_lovd_file_dir + "/exLOVD_brca12.hg19.vcf"]
       print "Running lovd2vcf with the following args: %s" % (args)
       sp = subprocess.Popen(args, stdout=writable_ex_lovd_brca12_hg19_vcf_file, stderr=subprocess.PIPE)
       print_subprocess_output_and_error(sp)
@@ -521,10 +521,10 @@ class RunAll(luigi.WrapperTask):
     p = luigi.Parameter()
 
     def requires(self):
-        yield ConvertLatestClinvarToVCF(self.date)
-        yield DownloadAndExtractFilesFromESPTar(self.date)
-        yield DownloadAndExtractFilesFromBIC(self.date, self.u, self.p)
-        yield DownloadAndExtractFilesFromG1K(self.date)
-        yield DownloadAndExtractFilesFromEXAC(self.date)
-        # yield ExtractAndConvertFilesFromEXLOVD(self.date)
-        # yield ExtractAndConvertFilesFromLOVD(self.date)
+        # yield ConvertLatestClinvarToVCF(self.date)
+        # yield DownloadAndExtractFilesFromESPTar(self.date)
+        # yield DownloadAndExtractFilesFromBIC(self.date, self.u, self.p)
+        # yield DownloadAndExtractFilesFromG1K(self.date)
+        # yield DownloadAndExtractFilesFromEXAC(self.date)
+        yield ExtractAndConvertFilesFromEXLOVD(self.date)
+        yield ExtractAndConvertFilesFromLOVD(self.date)

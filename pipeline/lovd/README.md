@@ -2,8 +2,8 @@
 ##### Webscrap exLOVD (`http://hci-exlovd.hci.utah.edu/`)
   1. create an output directory.  Point to it with the environment variable $EXLOVD
   2. Extract variant data to .txt flat file format: e.g. `extract_data.py -u http://hci-exlovd.hci.utah.edu/ -l BRCA1 BRCA2 -o $EXLOVD`
-  3. Convert extracted flat file to vcf format `./lovd2vcf -i $EXLOVD/BRCA1.txt -o $EXLOVD/exLOVD_brca1.hg19.vcf -a exLOVDAnnotation -b 1  -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -g $BRCA_RESOURCES/hg19.fa`
-  3. `./lovd2vcf -i output_directory/BRCA2.txt -o exLOVD_brca2.vcf -a $EXLOVD/exLOVDAnnotation -b 2 -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -g $BRCA_RESOURCES/hg19.fa`                     
+  3. Convert extracted flat file to vcf format `./lovd2vcf -i $EXLOVD/BRCA1.txt -o $EXLOVD/exLOVD_brca1.hg19.vcf -a exLOVDAnnotation -b 1 -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -g $BRCA_RESOURCES/hg19.fa`
+  3. `./lovd2vcf -i output_directory/BRCA2.txt -o $EXLOVD/exLOVD_brca2.vcf -a $EXLOVD/exLOVDAnnotation -b 2 -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -g $BRCA_RESOURCES/hg19.fa`
   4. `vcf-concat $EXLOVD/exLOVD_brca1.hg19.vcf $EXLOVD/exLOVD_brca2.hg19.vcf > $EXLOVD/exLOVD_brca12.hg19.vcf`
   5. `CrossMap.py vcf $BRCA_RESOURCES/hg19ToHg38.over.chain.gz $EXLOVD/exLOVD_brca12.hg19.vcf $BRCA_RESOURCES/hg38.fa $EXLOVD/exLOVD_brca12.hg38.vcf
   6. `vcf-sort $EXLOVD/exLOVD_brca12.hg38.vcf > $EXLOVD/exLOVD_brca12.sorted.hg38.vcf`
