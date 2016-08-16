@@ -540,11 +540,11 @@ class RunAll(luigi.WrapperTask):
     p = luigi.Parameter()
 
     def requires(self):
-        # yield ConvertLatestClinvarToVCF(self.date)
-        # yield DownloadAndExtractFilesFromESPTar(self.date)
-        # yield DownloadAndExtractFilesFromBIC(self.date, self.u, self.p)
-        # yield DownloadAndExtractFilesFromG1K(self.date)
-        # yield DownloadAndExtractFilesFromEXAC(self.date)
-        # yield ExtractAndConvertFilesFromEXLOVD(self.date)
-        # yield ExtractAndConvertFilesFromLOVD(self.date)
+        yield ConvertLatestClinvarToVCF(self.date)
+        yield DownloadAndExtractFilesFromESPTar(self.date)
+        yield DownloadAndExtractFilesFromBIC(self.date, self.u, self.p)
+        yield DownloadAndExtractFilesFromG1K(self.date)
+        yield DownloadAndExtractFilesFromEXAC(self.date)
+        yield ExtractAndConvertFilesFromEXLOVD(self.date)
+        yield ExtractAndConvertFilesFromLOVD(self.date)
         yield ExtractOutputFromEnigma(self.date)
