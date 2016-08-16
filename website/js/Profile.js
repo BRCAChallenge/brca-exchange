@@ -336,7 +336,7 @@ var EditProfileForm = React.createClass({
         return this.renderField(id, "", checkbox);
     },
     renderMailingList: function (id, label, defaultValue) {
-        var handleChange = () => {this.setState({mailingList: !!this.refs[id].checked});};
+        var handleChange = () => {this.setState({mailingList: !!this.refs[id].getDOMNode().checked});};
         var checkbox = (<label className="radio-inline">
             <input type='checkbox' ref={id} checked={defaultValue} onChange={handleChange} />
             &nbsp;{label}

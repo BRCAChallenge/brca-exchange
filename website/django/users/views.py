@@ -51,7 +51,6 @@ def retrieve(request):
 @permission_classes((IsAuthenticated,))
 @authentication_classes((JSONWebTokenAuthentication,))
 def update(request):
-    print(request)
     user = MyUser.objects.filter(email=request.user)
 
     fields = user_fields(request)
@@ -61,6 +60,16 @@ def update(request):
     del fields['email']
     if fields['password'] == '':
         del fields['password']
+
+    # mailing list toggle
+    if 'subscribe' in request.POST:
+        subscribe = request.POST.get('subscribe')
+        subscriber_hash = md5.new(user[0].email).hexdigest()
+        mailchimp_data = {'email_address': user[0].email,
+                          'merge_fields': {'FNAME': fields['firstName'], 'LNAME': fields['lastName']},
+                          'status': 'subscribed' if subscribe == 'true' else 'unsubscribed'}
+        mailchimp_url = settings.MAILCHIMP_URL + 'lists/' + settings.MAILCHIMP_LIST + '/members/' + subscriber_hash
+        mailchimp_response = requests.put(mailchimp_url, auth=('user', settings.MAILCHIMP_KEY), json=mailchimp_data)
 
     try:
         user.update(**fields)
@@ -72,7 +81,6 @@ def update(request):
         return JsonResponse({'success': False, 'error': str(e)})
 
     return JsonResponse({'success': True})
-
 
 def register(request):
     fields = user_fields(request)
