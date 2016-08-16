@@ -69,11 +69,21 @@ var Community = React.createClass({
     render: function () {
         var queryParams = this.context.router.getCurrentQuery();
         var message;
-        if (queryParams.registrationSuccess) {
-            message =  (
+        if (queryParams.registrationSuccess === "true") {
+            message = (
 				<div className="alert alert-success">
 					<p>Thanks for signing up. We have sent you an email with a confirmation link to complete your registration.</p>
 				</div>);
+        } else if (queryParams.updateSuccess === "true") {
+            message = (
+                <div className="alert alert-success">
+                    {queryParams.subscribe === "true" &&
+                        <p>Your profile has been edited successfully, and you have been added to the mailing list.</p>}
+                    {queryParams.subscribe === "false" &&
+                        <p>Your profile has been edited successfully, and you have been removed from the mailing list.</p>}
+                    {queryParams.subscribe === undefined &&
+                        <p>Your profile has been edited successfully.</p>}
+                </div>);
         }
         var {data, page, totalPages, error} = this.state;
         var rows = _.map(data, row => {
@@ -309,7 +319,7 @@ var CommunityMap = React.createClass({
         };
 
 
-        google.load('maps', '3', {callback: initMap.bind(this), other_params: "key=" + config.maps_key});
+        google.load('maps', '3', {callback: initMap.bind(this), "other_params": "key=" + config.maps_key});
     },
 
     componentDidUpdate: function() {

@@ -65,8 +65,8 @@ var Profile = React.createClass({
     },
 
     handleSubmit: function () {
-        var showSuccess = () => {this.transitionTo('/community', null, {updateSuccess: true});};
-        var showFailure = () => {this.setState({error: "An error occured"});};
+        var showSuccess = () => this.transitionTo('/community', null, {updateSuccess: true, subscribe: this.refs.contactForm.getSubscribeAction()});
+        var showFailure = () => this.setState({error: "An error occured"});
 
         if (this.refs.contactForm.isValid()) {
             var formData = this.refs.contactForm.getFormData();
@@ -77,6 +77,9 @@ var Profile = React.createClass({
             $.each(formData, function (k, v) {
                 fd.append(k, v);
             });
+            if(this.refs.contactForm.getSubscribeAction() !== undefined) {
+                fd.append("subscribe", this.refs.contactForm.getSubscribeAction());
+            }
             var xhr = new XMLHttpRequest();
             xhr.onload = function () {
                 var responseData = JSON.parse(this.response);
@@ -98,8 +101,16 @@ var Profile = React.createClass({
 
 var EditProfileForm = React.createClass({
     mixins: [Navigation],
-    componentDidMount: function() {
+    componentDidMount: function () {
         this.retrieveProfile();
+    },
+    getSubscribeAction: function () {
+        // returns undefined to do nothing, true to subscribe, false to unsubscribe
+        return (
+            this.state.mailingList !== this.state.oldMailingList
+                ? this.state.mailingList
+                : undefined
+        );
     },
     retrieveProfile: function () {
         var url = config.backend_url + '/accounts/get/';
@@ -111,7 +122,7 @@ var EditProfileForm = React.createClass({
                 imagePreviewUrl = config.backend_url + '/site_media/media/' + data.user.id;
             }
             var otherRole = Role.other(data.user.role);
-            this.setState({data: data.user, imagePreviewUrl: imagePreviewUrl, otherRole: otherRole});
+            this.setState({data: data.user, mailingList: data.mailinglist, oldMailingList: data.mailinglist, imagePreviewUrl: imagePreviewUrl, otherRole: otherRole});
         };
         $.ajax({
             type: 'GET',
@@ -216,6 +227,7 @@ var EditProfileForm = React.createClass({
             {this.renderTextInput('phone_number', 'Phone number', this.state.data.phone_number)}
             {this.renderCheckBox('hide_number', "Don't display my phone number on this website", this.state.data.hide_number)}
             {this.renderCheckBox('hide_email', "Don't display my email on this website", this.state.data.hide_email)}
+            {this.renderMailingList('mailinglist', "Subscribed to mailing list?", this.state.mailingList)}
         </div>);
     },
     renderImageUpload: function (id, label) {
@@ -319,7 +331,15 @@ var EditProfileForm = React.createClass({
         var handleChange = () => {var oldData = this.state.data; oldData[id] = this.refs[id].checked; this.setState({data: oldData});};
         var checkbox = (<label className="radio-inline">
             <input type='checkbox' ref={id} checked={defaultValue} onChange={handleChange} />
-            {label}
+            &nbsp;{label}
+        </label>);
+        return this.renderField(id, "", checkbox);
+    },
+    renderMailingList: function (id, label, defaultValue) {
+        var handleChange = () => {this.setState({mailingList: !!this.refs[id].checked});};
+        var checkbox = (<label className="radio-inline">
+            <input type='checkbox' ref={id} checked={defaultValue} onChange={handleChange} />
+            &nbsp;{label}
         </label>);
         return this.renderField(id, "", checkbox);
     },

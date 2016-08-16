@@ -3,9 +3,9 @@ import hashlib
 import json
 import os
 import random
-from urllib2 import HTTPError
-
+import md5
 import requests
+from urllib2 import HTTPError
 from django.core.mail import EmailMultiAlternatives
 from django.db import IntegrityError
 from django.db.models import Q
@@ -30,7 +30,19 @@ def retrieve(request):
     query = MyUser.objects.filter(email=user)
     data = list(query.values())[0]
     data["password"] = ''
-    response = JsonResponse({'user': data})
+
+    # get mailing list status
+    subscriber_hash = md5.new(data["email"]).hexdigest()
+    mailchimp_url = settings.MAILCHIMP_URL + 'lists/' + settings.MAILCHIMP_LIST + '/members/' + subscriber_hash
+    mailchimp_response = requests.get(mailchimp_url, auth=('user', settings.MAILCHIMP_KEY))
+
+    is_subscribed = False
+    if mailchimp_response.status_code == requests.codes.ok:
+        status = mailchimp_response.json()['status']
+        if status == "subscribed" or status == "pending":
+            is_subscribed = True
+
+    response = JsonResponse({'user': data, 'mailinglist': is_subscribed})
     return response
 
 
