@@ -44,6 +44,7 @@
     padding: 0;
     float: left;
 }
+
 .navbar-brand h1 {
     font-stretch: condensed;
     margin: 0;
@@ -59,12 +60,36 @@
     color: #E8A2A0;
 }
 
+/* Ensures BRCA exchange logo and menu items are on a single line across different devices */
+@media only screen and (max-width: 992px) and (min-width: 768px) {
+    .navbar-header {
+        width: 250px;
+    }
+}
+
+/* Ensures BRCA exchange logo and menu dropdown toggle are on a single line across different devices */
+@media only screen and (max-width: 767px) {
+    .navbar-brand {
+        max-width: 70%;
+    }
+}
+
+/* Shrink BRCA exchange logo on smaller devices so logo and menu items are on a single line across different devices */
+@media only screen and (max-width: 992px) {
+    .navbar-brand h1 {
+        font-size: 28px;
+    }
+
+    .navbar-brand #research-label {
+        font-size: 64%;
+        float: left;
+    }
+}
+
 #research-label {
     margin: 0 1em 0 1em;
     font-size: 75%;
 }
-
-
 
 .navbar {
     min-height: 70px; /* XXX This value MUST match the setting in index.js */
