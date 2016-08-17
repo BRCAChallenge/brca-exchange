@@ -17,12 +17,14 @@ Contains source code used to wrangle the BRCA variation data that is presented i
  * pip install bioutils
  * pip install biopython
  * install lzo
- * install bx-python from https://pypi.python.org/packages/55/db/fa76af59a03c88ad80494fc0df2948740bbd58cd3b3ed5c31319624687cc/bx-python-0.7.3.tar.gz#md5=d8c50c01c9e421bae0bbdbfa00fef6e4 (note: pip install bx-python left an outstanding dependency to lzo1x.h, which proved to be hard to resolve)
+ * install bx-python from https://pypi.python.org/packages/55/db/fa76af59a03c88ad80494fc0df2948740bbd58cd3b3ed5c31319624687cc/bx-python-0.7.3.tar.gz#md5=d8c50c01c9e421bae0bbdbfa00fef6e4 (note: pip install bx-python left an outstanding dependency to lzo1x.h, which proved to be hard to resolve) NOTE: This may lead to a missing bigwig.py file, working out how to resolve this issue currently, contact zfischma@ucsc.edu if you run into this problem.
  * pip install CrossMap
  * install vcftools from https://vcftools.github.io/index.html
  * pip install pyvcf
  * install tabix (see http://genometoolbox.blogspot.com/2013/11/installing-tabix-on-unix.html)
-
+ * pip install luigi
+ * pip install retrying
+ * cd into enigma and `pip install -r requirements.txt`
 
 ## Misc Instructions
 ### Convert refseq .psl file to .gp (genepred) format (required format for hgvs conversion)

@@ -8,6 +8,7 @@ import numpy as np
 import sys
 import re
 import argparse
+import os
 from pprint import pprint as pp
 import pyhgvs
 import pyhgvs.utils as pyhgvs_utils
@@ -50,7 +51,11 @@ HP = hgvs.parser.Parser()
 def main():
     raw_files = sorted(glob.glob("raw_files/*batch*tsv"))
 
+    # Luigi moves all output files to pipeline/brca/pipeline-data/pipeline_input.
+    # This code is here in case the output directory is needed instead of using the luigi output. If not, no default writable output is needed and it can be removed.
     today = datetime.date.today().isoformat()
+    if not os.path.exists("output"):
+        os.makedirs("output")
     default_output_file_name = "output/ENIGMA_last_updated_%s.tsv" % (today)
     default_writable_output = open(default_output_file_name, "w")
 
