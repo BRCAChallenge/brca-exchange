@@ -106,7 +106,6 @@ data_merging_method_dir = os.environ['DATA_MERGING_METHODS'] = os.path.abspath('
 ####### Tasks ########
 ######################
 
-
 class ConvertLatestClinvarToVCF(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
 
