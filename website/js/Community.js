@@ -91,7 +91,7 @@ var Community = React.createClass({
             var avatar;
             if (row.has_image) {
                 var avatarLink = config.backend_url + '/site_media/media/' + row.id;
-                avatar = <object className="avatar" data={avatarLink} type="image/jpg"/>;
+                avatar = <img className="avatar" src={avatarLink} type="image/image"/>;
             } else {
                 avatar = <img src={placeholder}/>;
             }

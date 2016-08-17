@@ -396,7 +396,8 @@ th[role='columnheader'] .help, .help-target .help {
 
 .avatar {
     width: 120px;
-    height: auto;
+    max-height: 120px;
+    object-fit: cover;
 }
 
 #communityMap {
