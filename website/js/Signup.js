@@ -4,21 +4,33 @@
 var React = require('react');
 var content = require('./content');
 var RawHTML = require('./RawHTML');
+var countries = require('raw!../content/countries.txt').split("\n");
 var $ = require('jquery');
 var config  = require('./config');
 var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {Navigation} = require('react-router');
 
-var AFFILIATION = [
-    'I lead a testing lab',
-    'I am a member of a testing lab',
-    'I lead a research lab',
-    'I am a member of a research lab',
-    'I lead an advocacy group',
-    'I work at an advocacy group',
-    'I am a genetic counselor',
-    'Other'];
-
+var Role = {
+    ROLE_DATA_PROVIDER: 12,
+    options: [
+        // [ id, dropdown text, community page text ]
+        [1, "I am a patient",                      "Patient"],
+        [2, "I am a proband",                      "Proband"],
+        [3, "I am a clinical lab director",        "Clinical Lab Director"],
+        [4, "I am a member of a diagnostic lab",   "Diagnostic Lab Staff"],
+        [5, "I am a principal investigator",       "Principal Investigator"],
+        [6, "I am a researcher",                   "Researcher"],
+        [7, "I lead an advocacy group",            "Advocacy Group Leader"],
+        [8, "I am a member of an advocacy group",  "Advocacy Group Member"],
+        [9, "I am a genetic counselor",            "Genetic Counselor"],
+        [10, "I am a clinical geneticist",         "Clinical Geneticist"],
+        [11, "I am a clinician",                   "Clinician"],
+        [12, "I represent a Data Provider",        "Data Provider"],
+        [0, "Other"]
+    ],
+    other: id => parseInt(id) === 0 || parseInt(id) === 11,
+    get: function(id) { return this.options.find(role => role[0] === parseInt(id)); }
+};
 
 var Signup = React.createClass({
     mixins: [Navigation],
@@ -119,34 +131,34 @@ function $c(staticClassName, conditionalClassNames) {
     return classNames.join(' ');
 }
 
-var trim = function () {
-    var TRIM_RE = /^\s+|\s+$/g;
-    return function trim(string) {
-        return string.replace(TRIM_RE, '');
-    };
-}();
-
 var SignupForm = React.createClass({
     getInitialState: function () {
-        return {errors: {}, file: '', imagePreviewUrl: null};
+        return {errors: {}, file: '', imagePreviewUrl: null, captcha: "", otherRole: false};
     },
-    componentDidMount: function() {
-        grecaptcha.render(this.refs.signupCAPTCHA.getDOMNode(), {sitekey: config.captcha_key});
+    componentDidMount: function () {
+        var me = this;
+        window.onRecaptchaLoad(function () {
+            grecaptcha.render(me.refs.signupCAPTCHA.getDOMNode(), {sitekey: config.captcha_key, callback: function(resp) {
+                me.setState({captcha: resp});
+            }});
+        });
     },
     isValid: function () {
-        var compulsoryFields = ['email', 'email_confirm', 'password', 'password_confirm'];
         var errors = {};
+        if (this.refs.role.getDOMNode().value === "NONE") {
+            errors["role"] = "Please select a roll"; //eslint-disable-line dot-notation
+        }
         if (this.refs.email.getDOMNode().value !== this.refs.email_confirm.getDOMNode().value) {
             errors["email_confirm"] = "The emails don't match"; //eslint-disable-line dot-notation
         }
         if (this.refs.password.getDOMNode().value !== this.refs.password_confirm.getDOMNode().value) {
             errors["password_confirm"] = "The passwords don't match"; //eslint-disable-line dot-notation
         }
-        if (grecaptcha.getResponse() === "") {
+        if (this.state.captcha === "") {
             errors["captcha"] = "No CAPTCHA entered"; //eslint-disable-line dot-notation
         }
-        compulsoryFields.forEach(function (field) {
-            var value = trim(this.refs[field].getDOMNode().value);
+        this.getCompulsoryFields().forEach(function (field) {
+            var value = this.refs[field].getDOMNode().value.trim();
             if (!value) {
                 errors[field] = 'This field is required';
             }
@@ -154,6 +166,16 @@ var SignupForm = React.createClass({
         this.setState({errors: errors});
 
 		return Object.keys(errors).length === 0;
+    },
+    getCompulsoryFields: function () {
+        var fields = ['email', 'email_confirm', 'password', 'password_confirm', 'role'];
+        if (!this.refs || !this.refs.role || parseInt(this.refs.role.getDOMNode().value) !== Role.ROLE_DATA_PROVIDER) {
+            fields.push('firstName', 'lastName');
+        }
+        if (this.state.otherRole) {
+            fields.push('role_other');
+        }
+        return fields;
     },
     getFormData: function () {
         var title = this.refs.titlemd.getDOMNode().checked && this.refs.titlemd.getDOMNode().value ||
@@ -169,18 +191,16 @@ var SignupForm = React.createClass({
             "firstName": this.refs.firstName.getDOMNode().value,
             "lastName": this.refs.lastName.getDOMNode().value,
             "title": title,
-            "affiliation": this.refs.affiliation.getDOMNode().value,
+            "role": this.refs.role.getDOMNode().value,
+            "role_other": this.state.otherRole ? this.refs.role_other.getDOMNode().value : Role.get(this.refs.role.getDOMNode().value)[2],
             "institution": this.refs.institution.getDOMNode().value,
             "city": this.refs.city.getDOMNode().value,
             "state": this.refs.state.getDOMNode().value,
             "country": this.refs.country.getDOMNode().value,
             "phone_number": this.refs.phone_number.getDOMNode().value,
-            "comment": this.refs.comment.getDOMNode().value,
-            "include_me": this.refs.include_me.getDOMNode().checked,
-            "email_me": this.refs.email_me.getDOMNode().checked,
             "hide_number": this.refs.hide_number.getDOMNode().checked,
             "hide_email": this.refs.hide_email.getDOMNode().checked,
-            "captcha": grecaptcha.getResponse()
+            "captcha": this.state.captcha
         };
         return data;
     },
@@ -207,32 +227,34 @@ var SignupForm = React.createClass({
         reader.readAsDataURL(file);
     },
     render: function () {
+        var onChange = function() {
+            var value = this.refs.role.getDOMNode().value;
+            this.setState({otherRole: Role.other(value)});
+        };
         return (
-			<div className="form-horizontal">
-				{this.renderImageUpload('image', 'Profile picture')}
-				{this.renderTextInput('email', 'Email *')}
-				{this.renderTextInput('email_confirm', 'Confirm Email *')}
-				{this.renderPassword('password', 'Password *')}
-				{this.renderPassword('password_confirm', 'Confirm Password *')}
-				{this.renderTextInput('firstName', 'First Name')}
-				{this.renderTextInput('lastName', 'Last Name')}
-				{this.renderRadioInlines('title', '', {
-					values: [{name: 'M.D.', ref: 'md'}, {name: 'Ph.D', ref: 'phd'}, {name: 'Other', ref: 'other'}]
-					, defaultCheckedValue: 'M.D.'
-				})}
-				{this.renderSelect('affiliation', 'Affiliation', AFFILIATION)}
-				{this.renderTextInput('institution', 'Institution, Hospital or Company')}
-				{this.renderTextInput('city', 'City')}
-				{this.renderTextInput('state', 'State or Province')}
-				{this.renderTextInput('country', 'Country')}
-				{this.renderTextInput('phone_number', 'Phone number')}
-				{this.renderTextarea('comment', 'Comment')}
-				{this.renderCheckBox('include_me', "Include me in the community page", true)}
-				{this.renderCheckBox('email_me', "Include me in the mailing list", true)}
-				{this.renderCheckBox('hide_number', "Hide my phone number on this website")}
-				{this.renderCheckBox('hide_email', "Hide my email address on this website")}
-				{this.renderCAPTCHA('captcha', 'CAPTCHA *')}
-
+            <div className="form-horizontal" onChange={onChange.bind(this)}>
+                {this.renderImageUpload('image', 'Profile picture')}
+                {this.renderTextInput('email', 'Email')}
+                {this.renderTextInput('email_confirm', 'Confirm Email')}
+                {this.renderPassword('password', 'Password')}
+                {this.renderPassword('password_confirm', 'Confirm Password')}
+                {this.renderTextInput('firstName', 'First Name')}
+                {this.renderTextInput('lastName', 'Last Name')}
+                {this.renderRadioInlines('title', '', {
+                    values: [{name: 'M.D.', ref: 'md'}, {name: 'Ph.D', ref: 'phd'}, {name: 'Other', ref: 'other'}]
+                    , defaultCheckedValue: 'M.D.'
+                })}
+                {this.renderRoles()}
+                {this.state.otherRole &&
+                    <div className="slide-fade-in">{this.renderTextInput('role_other', <span style={{color: "#D00000"}}>Please Specify:</span>)}</div>}
+                {this.renderTextInput('institution', 'Institution, Hospital or Company')}
+                {this.renderTextInput('city', 'City')}
+                {this.renderTextInput('state', 'State or Province')}
+                {this.renderSelect('country', 'Country', countries.map(v => [v, v]))}
+                {this.renderTextInput('phone_number', 'Phone number')}
+                {this.renderCheckBox('hide_number', 'Hide my phone number on this website')}
+                {this.renderCheckBox('hide_email', 'Hide my email address on this website')}
+                {this.renderCAPTCHA('captcha', 'CAPTCHA *')}
 			</div>);
     },
     renderImageUpload: function (id, label) {
@@ -267,12 +289,21 @@ var SignupForm = React.createClass({
             <textarea className="form-control" id={id} ref={id}/>
         );
     },
-    renderSelect: function (id, label, values) {
-        var options = values.map(function (value) {
-            return <option key={id + value} value={value}>{value}</option>;
-        });
+    renderSelect: function(id, label, opts) {
+        var options = opts.map(value => <option key={id + value[0]} value={value[0]}>{value[1]}</option>);
         return this.renderField(id, label,
             <select className="form-control" id={id} ref={id}>
+                <option key={id + "NONE"} value=""></option>
+                {options}
+            </select>
+        );
+    },
+    renderRoles: function () {
+        var id = 'role';
+        var options = Role.options.map(value => <option key={id + value[0]} value={value[0]}>{value[1]}</option>);
+        return this.renderField(id, 'Role',
+            <select className="form-control" id={id} ref={id}>
+                <option key={id + "NONE"} value="NONE">Choose one:</option>
                 {options}
             </select>
         );
@@ -306,7 +337,7 @@ var SignupForm = React.createClass({
     },
     renderField: function (id, label, field) {
         return (
-			<div className={$c('form-group', {'has-error': id in this.state.errors})}>
+			<div className={$c('form-group', {'has-error': id in this.state.errors, 'required': this.getCompulsoryFields().includes(id)})}>
 				<label htmlFor={id} className="col-sm-4 control-label">{label}</label>
 				<div className="col-sm-6">
 					{field}
@@ -317,7 +348,6 @@ var SignupForm = React.createClass({
 
 module.exports = ({
     Signup: Signup,
-    AFFILIATION: AFFILIATION,
-    trim: trim,
+    Role: Role,
     $c: $c
 });

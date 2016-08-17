@@ -61,12 +61,18 @@ function data(opts) {
 }
 
 function users(opts) {
-    var {page, pageLength} = opts;
+    var {page, pageLength, search} = opts;
     var usersUrl = `${config.backend_url}/accounts/users/?${qs.stringify(_.pick({
         'page_num': page,
-        'page_size': pageLength
+        'page_size': pageLength,
+        'search': search
     }, v => v != null))}`;
     return Rx.DOM.get(usersUrl).map(xhr => JSON.parse(xhr.responseText));
+}
+
+function userLocations(search, roles) {
+    var url = `${config.backend_url}/accounts/user_locations/?${qs.stringify({search: search, 'roles[]': roles}, {indices: false})}`;
+    return Rx.DOM.get(url).map(xhr => JSON.parse(xhr.responseText));
 }
 
 function lollipopData(opts) {
@@ -79,6 +85,7 @@ function lollipopData(opts) {
 module.exports = {
     data,
     users,
+    userLocations,
     lollipopData,
     url,
     trimSearchTerm

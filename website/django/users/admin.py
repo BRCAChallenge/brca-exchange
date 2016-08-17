@@ -13,7 +13,7 @@ image.allow_tags = True
 
 class MyUserAdmin(admin.ModelAdmin):
 
-    list_display = ('email', 'is_admin', 'firstName', 'lastName', 'comment', 'is_approved', image)
+    list_display = ('email', 'is_admin', 'firstName', 'lastName', 'is_approved', image)
     exclude = ('password',)
     ordering = ('is_approved',)
     search_fields = ('firstName', 'lastName', 'email')

@@ -3,11 +3,12 @@ import hashlib
 import json
 import os
 import random
-from urllib2 import HTTPError
-
+import md5
 import requests
+from urllib2 import HTTPError
 from django.core.mail import EmailMultiAlternatives
 from django.db import IntegrityError
+from django.db.models import Q
 from django.http import JsonResponse
 from django.template import Context
 from django.template.loader import get_template
@@ -18,7 +19,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from brca import settings, site_settings
-from .models import MyUser
+from .models import MyUser, MailingListEmail
 
 
 @api_view(['GET'])
@@ -29,7 +30,19 @@ def retrieve(request):
     query = MyUser.objects.filter(email=user)
     data = list(query.values())[0]
     data["password"] = ''
-    response = JsonResponse({'user': data})
+
+    # get mailing list status
+    subscriber_hash = md5.new(data["email"]).hexdigest()
+    mailchimp_url = settings.MAILCHIMP_URL + 'lists/' + settings.MAILCHIMP_LIST + '/members/' + subscriber_hash
+    mailchimp_response = requests.get(mailchimp_url, auth=('user', settings.MAILCHIMP_KEY))
+
+    is_subscribed = False
+    if mailchimp_response.status_code == requests.codes.ok:
+        status = mailchimp_response.json()['status']
+        if status == "subscribed" or status == "pending":
+            is_subscribed = True
+
+    response = JsonResponse({'user': data, 'mailinglist': is_subscribed})
     return response
 
 
@@ -38,7 +51,6 @@ def retrieve(request):
 @permission_classes((IsAuthenticated,))
 @authentication_classes((JSONWebTokenAuthentication,))
 def update(request):
-    print(request)
     user = MyUser.objects.filter(email=request.user)
 
     fields = user_fields(request)
@@ -48,6 +60,16 @@ def update(request):
     del fields['email']
     if fields['password'] == '':
         del fields['password']
+
+    # mailing list toggle
+    if 'subscribe' in request.POST:
+        subscribe = request.POST.get('subscribe')
+        subscriber_hash = md5.new(user[0].email).hexdigest()
+        mailchimp_data = {'email_address': user[0].email,
+                          'merge_fields': {'FNAME': fields['firstName'], 'LNAME': fields['lastName']},
+                          'status': 'subscribed' if subscribe == 'true' else 'unsubscribed'}
+        mailchimp_url = settings.MAILCHIMP_URL + 'lists/' + settings.MAILCHIMP_LIST + '/members/' + subscriber_hash
+        mailchimp_response = requests.put(mailchimp_url, auth=('user', settings.MAILCHIMP_KEY), json=mailchimp_data)
 
     try:
         user.update(**fields)
@@ -59,7 +81,6 @@ def update(request):
         return JsonResponse({'success': False, 'error': str(e)})
 
     return JsonResponse({'success': True})
-
 
 def register(request):
     fields = user_fields(request)
@@ -234,21 +255,19 @@ def user_fields(request):
     firstName = request.POST.get('firstName', '')
     lastName = request.POST.get('lastName', '')
     title = request.POST.get('title', '')
-    affiliation = request.POST.get('affiliation', '')
+    role = request.POST.get('role', MyUser.ROLE_OTHER)
+    role_other = request.POST.get('role_other', '')
     institution = request.POST.get('institution', '')
     city = request.POST.get('city', '')
     state = request.POST.get('state', '')
     country = request.POST.get('country', '')
     phone_number = request.POST.get('phone_number', '')
-    comment = request.POST.get('comment', '')
-    include_me = (request.POST.get('include_me', "true") == "true")
-    email_me = (request.POST.get('email_me', "true") == "true")
     hide_number = (request.POST.get('hide_number', "true") == "true")
     hide_email = (request.POST.get('hide_email', "true") == "true")
 
-    return {'affiliation': affiliation, 'city': city, 'comment': comment, 'country': country,
+    return {'role': role, 'role_other': role_other, 'city': city, 'country': country,
             'email': email, 'firstName': firstName, 'has_image': has_image, 'hide_email': hide_email,
-            'hide_number': hide_number, 'include_me': include_me, 'email_me': email_me, 'institution': institution,
+            'hide_number': hide_number, 'institution': institution,
             'lastName': lastName, 'password': password, 'phone_number': phone_number, 'state': state, 'title': title}
 
 
@@ -263,14 +282,29 @@ def save_picture(filename, image):
 def users(request):
     page_num = int(request.GET.get('page_num', '0'))
     page_size = int(request.GET.get('page_size', '0'))
+    search = request.GET.get('search', '')
+    roles = request.GET.getlist('roles[]')
 
-    query = MyUser.objects.filter(include_me=True).filter(is_approved=True)
+    query = MyUser.objects.filter(is_approved=True)
+    if roles:
+        query = query.filter(role__in=roles)
+
+    search_query = Q()
+    for term in search.split():
+        search_query &= ( Q(firstName__icontains=term) | Q(lastName__icontains=term)
+                        | Q(institution__icontains=term) | Q(role_other__icontains=term)
+                        | Q(city__icontains=term) | Q(state__icontains=term) | Q(country__icontains=term)
+                        )
+    query = query.filter(search_query)
+
+    whitelist = ['id','email','firstName','lastName','title','role','role_other','institution','city','state','country','phone_number','hide_number','hide_email','is_active','is_admin','has_image','is_approved']
 
     count = query.count()
 
     start = page_num * page_size
     end = start + page_size
-    data = list(query[start:end].values())
+    data = list(query[start:end].values(*whitelist))
+
 
     for user in data:
         if user['hide_email']:
@@ -279,4 +313,57 @@ def users(request):
             user['phone_number'] = ""
 
     response = JsonResponse({'data': data, 'count': count})
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
+
+def user_locations(request):
+    search = request.GET.get('search', '')
+    roles = request.GET.getlist('roles[]')
+    query = MyUser.objects.filter(is_approved=True)
+    if roles:
+        query = query.filter(role__in=roles)
+
+    search_query = Q()
+    for term in search.split():
+        search_query &= ( Q(firstName__icontains=term) | Q(lastName__icontains=term)
+                        | Q(institution__icontains=term) | Q(role_other__icontains=term)
+                        | Q(city__icontains=term) | Q(state__icontains=term) | Q(country__icontains=term)
+                        )
+    query = query.filter(search_query)
+
+    fields = ['id', 'firstName', 'lastName', 'title', 'role', 'role_other', 'institution', 'city', 'state', 'country', 'has_image']
+    response = JsonResponse({'data': list(query.values(*fields))})
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
+
+def mailinglist(request):
+    email = request.POST.get('email')
+    first_name = request.POST.get('firstName')
+    last_name = request.POST.get('lastName')
+
+    # Check the CAPTCHA
+    try:
+        captcha = request.POST.get('captcha')
+        post_data = {'secret': settings.CAPTCHA_SECRET,
+                     'response': captcha}
+        resp = requests.post('https://www.google.com/recaptcha/api/siteverify', data=post_data)
+        content = json.loads(resp.content)
+        response = JsonResponse({'success': content['success']})
+    except HTTPError:
+        response = JsonResponse({'success': False, 'error': 'Wrong CAPTCHA'})
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+
+    mailchimp_data = {'email_address': email,
+                      'merge_fields': {'FNAME': first_name, 'LNAME': last_name},
+                      'status': 'pending'}
+    mailchimp_response = requests.post(settings.MAILCHIMP_URL + 'lists/' + settings.MAILCHIMP_LIST + '/members', auth=('user', settings.MAILCHIMP_KEY), json=mailchimp_data)
+
+    if mailchimp_response.status_code != requests.codes.ok:
+        response = JsonResponse({'success': False, 'error': mailchimp_response.json()['title']})
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+
+    response = JsonResponse({'success': True}) 
+    response['Access-Control-Allow-Origin'] = '*'
     return response

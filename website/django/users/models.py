@@ -5,11 +5,12 @@ from django.contrib.auth.models import (
 from django.db import models
 from django.utils import timezone
 
+ROLE_OTHER = 0
 
 class MyUserManager(BaseUserManager):
-    def create_user(self, email, password, firstName="", lastName="", title="", affiliation="", institution="",
-                    city="", state="", country="",phone_number="", comment="", 
-                    include_me=False, email_me=False, hide_number=False, hide_email=False, has_image=False,
+    def create_user(self, email, password, firstName="", lastName="", title="", role=ROLE_OTHER, role_other="", institution="",
+                    city="", state="", country="",phone_number="", 
+                    hide_number=False, hide_email=False, has_image=False,
                     is_admin=False, is_approved=False):
         """
         Creates and saves a User with the given fields
@@ -23,15 +24,13 @@ class MyUserManager(BaseUserManager):
             firstName=firstName,
             lastName=lastName,
             title=title,
-            affiliation=affiliation,
+            role=role,
+            role_other=role_other,
             institution=institution,
             city=city,
             state=state,
             country=country,
             phone_number=phone_number,
-            comment=comment,
-            include_me=include_me,
-            email_me=email_me,
             hide_number=hide_number,
             hide_email=hide_email,
             has_image=has_image,
@@ -49,6 +48,20 @@ class MyUserManager(BaseUserManager):
 
 
 class MyUser(AbstractBaseUser):
+    ROLE_OTHER                  = ROLE_OTHER
+    ROLE_PATIENT                = 1
+    ROLE_PROBAND                = 2
+    ROLE_CLINICAL_LAB_DIRECTOR  = 3
+    ROLE_DIAGNOSTIC_LAB_STAFF   = 4
+    ROLE_PRINCIPAL_INVESTIGATOR = 5
+    ROLE_RESEARCHER             = 6
+    ROLE_ADVOCACY_LEADER        = 7
+    ROLE_ADVOCACY_MEMBER        = 8
+    ROLE_GENETIC_COUNSELOR      = 9
+    ROLE_CLINICAL_GENETICIST    = 10
+    ROLE_CLINICIAN              = 11
+    ROLE_DATA_PROVIDER          = 12
+
     email = models.EmailField(
         verbose_name='email address',
         max_length=255,
@@ -57,19 +70,15 @@ class MyUser(AbstractBaseUser):
     firstName = models.TextField(blank=True)
     lastName = models.TextField(blank=True)
     title = models.TextField(blank=True)
-    affiliation = models.TextField(blank=True)
+    role = models.IntegerField(default=ROLE_OTHER)
+    role_other = models.TextField(blank=True)
     institution = models.TextField(blank=True)
     city = models.TextField(blank=True)
     state = models.TextField(blank=True)
     country = models.TextField(blank=True)
     phone_number = models.TextField(max_length=30, blank=True)
     hide_number = models.BooleanField(default=False)
-
-    comment = models.TextField(blank=True)
     hide_email = models.BooleanField(default=False)
-
-    include_me = models.BooleanField(default=True)
-    email_me = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     is_approved = models.BooleanField(default=False)
@@ -110,3 +119,11 @@ class MyUser(AbstractBaseUser):
         "Is the user a member of staff?"
         # Simplest possible answer: All admins are staff
         return self.is_admin
+
+class MailingListEmail(models.Model):
+    email = models.EmailField(
+        verbose_name='email address',
+        max_length=255,
+        unique=True,
+    )
+

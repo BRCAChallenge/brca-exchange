@@ -4,6 +4,10 @@
 		"node": true,
 		"es6": true
 	},
+    "globals": {
+        "google": false,
+        "grecaptcha": false
+    },
 	"plugins": [
 		"react"
 	],

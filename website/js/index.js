@@ -27,6 +27,7 @@ var slugify = require('./slugify');
 
 var content = require('./content');
 var Community = require('./Community');
+var {MailingList} = require('./MailingList');
 
 var databaseKey = require('../databaseKey');
 
@@ -532,6 +533,7 @@ var routes = (
         <Route path='community' handler={Community}/>
         <Route path='signup' handler={Signup}/>
         <Route path='signin' handler={Signin}/>
+        <Route path='mailinglist' handler={MailingList}/>
         <Route path='reset_password' handler={ResetPassword}/>
         <Route path='profile' handler={Profile}/>
         <Route path='confirm/:activationCode' handler={ConfirmEmail}/>
