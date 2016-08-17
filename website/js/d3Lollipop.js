@@ -49,7 +49,8 @@ d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id, varlink) {
 };
 
 var D3Lollipop = React.createClass({
-    mixins: [PureRenderMixin],
+    //mixins: [PureRenderMixin],
+    shouldComponentUpdate: () => false,
     render: function () {
         return (
             <div id='brcaLollipop' ref='d3svgBrca'/>
@@ -89,19 +90,22 @@ var D3Lollipop = React.createClass({
     },
 
     componentWillReceiveProps: function(newProps) {
-        this.cleanupBRCA();
-        var {data, brcakey, onRowClick, ...opts} = newProps;
-        var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
-        while (d3svgBrcaRef.hasChildNodes() ) {
-            d3svgBrcaRef.removeChild(d3svgBrcaRef.lastChild);
+        // only rebuild plot if number of variants has changed
+        if (newProps.data.length !== this.props.data.length) {
+            this.cleanupBRCA();
+            var {data, brcakey, onRowClick, ...opts} = newProps;
+            var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
+            while (d3svgBrcaRef.lastChild) {
+                d3svgBrcaRef.removeChild(d3svgBrcaRef.lastChild);
+            }
+            var subSetData = data.map(this.filterAttributes);
+            d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
+            while (d3svgBrcaRef.lastChild ) {
+                d3svgBrcaRef.removeChild(d3svgBrcaRef.lastChild);
+            }
+            var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
+            this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
         }
-        var subSetData = data.map(this.filterAttributes);
-        d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
-        while (d3svgBrcaRef.hasChildNodes() ) {
-            d3svgBrcaRef.removeChild(d3svgBrcaRef.lastChild);
-        }
-        var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
-        this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
     },
     componentWillUnmount: function() {
         this.cleanupBRCA();

@@ -4,7 +4,7 @@ var React = require('react');
 var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {State, Navigation, Link} = require('react-router');
 var auth = require('./auth');
-var {trim, $c} = require('./Signup');
+var {$c} = require('./Signup');
 var config  = require('./config');
 var $ = require('jquery');
 
@@ -88,7 +88,7 @@ var ResetPasswordForm = React.createClass({
         var compulsoryFields = ['email'];
         var errors = {};
         compulsoryFields.forEach(function (field) {
-            var value = trim(this.refs[field].getDOMNode().value);
+            var value = this.refs[field].getDOMNode().value.trim();
             if (!value) {
                 errors[field] = 'This field is required';
             }
@@ -153,19 +153,24 @@ var Signin = React.createClass({
                 </Row>
                 <Row id="form">
                     <Col md={8} mdOffset={2}>
-                        <SigninForm ref="contactForm"/>
+                        <SigninForm onSubmit={e => { this.handleSubmit(); e.preventDefault(); }} ref="contactForm"/>
                     </Col>
                 </Row>
                 <Row id="submit">
-                    <Col md={6} mdOffset={3}>
-                        <Button type="button" className="btn btn-primary btn-block" onClick={this.handleSubmit}>
-                            Sign in
-                        </Button>
+                    <Col md={8} mdOffset={2}>
+                            <div className="form-group" style={{marginLeft: "-15px", marginRight: "-15px"}}>
+                                <label className="col-sm-4 control-label"></label>
+                                <Col sm={6}>
+                                    <Button type="button" className="btn btn-primary btn-block" onClick={this.handleSubmit}>
+                                        Sign in
+                                    </Button>
+                                </Col>
+                            </div>
                     </Col>
                 </Row>
                 <Row id="submit">
-                    <Col md={6} mdOffset={3}>
-                        <Link to='/reset_password'><Button bsStyle="link">Forgot your password?</Button></Link>
+                    <Col sm={10} md={6} mdOffset={3}>
+                        <Link className="pull-right" to='/reset_password'><Button bsStyle="link">Forgot your password?</Button></Link>
                     </Col>
                 </Row>
             </Grid>);
@@ -227,7 +232,7 @@ var SigninForm = React.createClass({
         var compulsoryFields = ['email', 'password'];
         var errors = {};
         compulsoryFields.forEach(function (field) {
-            var value = trim(this.refs[field].getDOMNode().value);
+            var value = this.refs[field].getDOMNode().value.trim();
             if (!value) {
                 errors[field] = 'This field is required';
             }
@@ -244,10 +249,11 @@ var SigninForm = React.createClass({
     },
     render: function () {
         return (
-			<div className="form-horizontal">
-				{this.renderTextInput('email', 'Email')}
-				{this.renderPassword('password', 'Password')}
-			</div>);
+            <form className="form-horizontal" onSubmit={this.props.onSubmit}>
+                {this.renderTextInput('email', 'Email')}
+                {this.renderPassword('password', 'Password')}
+                <input type="submit" className="hidden" />
+            </form>);
     },
     renderTextInput: function (id, label) {
         return this.renderField(id, label,

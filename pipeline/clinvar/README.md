@@ -1,14 +1,19 @@
 # Parse data out of the ClinVar XML file into VCF format.
-### 1. Download the latest ClinVar XML file from ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/
-### 2. Extract the BRCA variants from the larger ClinVar XML file.  LONG RUN TIME While doing so, filter out the blank lines that are probably introduced by a magic formula that keeps the code from choking on extended ascii  characters.  Produces a smaller XML.
 
+In order for the makefile to work, you will need a directory with the following structure:
 
-`clinVarBrca.py $CLINVARXML | awk '{ if (NF > 0) { print }}' > $CLINVAR_BRCA`
+- brca
+  - pipeline-data
+    - data
+      - ClinVar
+      - pipeline_input
 
+You will also need to create an empty file called `ClinVarBrca.xml` inside the ClinVar directory `brca/pipeline-data/data/ClinVar` if you don't already have this file.
 
-### 3. Extract data from the XML file into tab-delimited format
-`clinVarParse.py $CLINVAR_BRCA --assembly GRCh38 > $CLINVAR_BRCA_GRCH38_TAB`
+1. Make sure you have a an environment variable for the `brca/pipeline-data` directory named `BRCA_PIPELINE_DATA`. It's advisable to create this variable in your `.bashrc` file to make it readily available for future use.
 
+2. Download the latest ClinVar XML file in gzip format from ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/ (it should be titled `ClinVarFullRelease_00-latest.xml.gz`) and move it into `brca/pipeline-data/data/ClinVar`.
 
-### 4. Convert the tab data into VCF format, using convert_tsv_to_vcf from utils
-`../utils/convert_tsv_to_vcf.py -i $CLINVAR_BRCA_GRCH38_TAB -s "#ClinVar" -o $CLINVAR_BRCA_VCF convert_tsv_to_vcf.py -i ClinVarBrca.txt -o ClinVarBrca.vcf -s "ClinVar"`
+3. cd into `brca-exchange/pipeline/clinvar` and run `make`.
+
+4. Find something to do while the process is running. Be patient, it takes a minute!

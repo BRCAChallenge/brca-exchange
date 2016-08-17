@@ -65,7 +65,7 @@ class UserTestCase(TestCase):
         self.assertEqual(json.loads(response.content)['success'], True)
 
     def create_test_user(self):
-        test_user_fields = {'affiliation': 'affiliation', 'city': 'city', 'comment': 'comment', 'country': 'country',
+        test_user_fields = {'role': 'role', 'role_other': 'role_other', 'city': 'city', 'comment': 'comment', 'country': 'country',
                             'email': 'email@example.com', 'firstName': 'firstName', 'has_image': False,
                             'hide_email': False, 'hide_number': True, 'include_me': True, 'email_me': True,
                             'institution': 'institution', 'lastName': 'lastName', 'password': 'password',

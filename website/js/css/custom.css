@@ -44,6 +44,7 @@
     padding: 0;
     float: left;
 }
+
 .navbar-brand h1 {
     font-stretch: condensed;
     margin: 0;
@@ -59,12 +60,36 @@
     color: #E8A2A0;
 }
 
+/* Ensures BRCA exchange logo and menu items are on a single line across different devices */
+@media only screen and (max-width: 992px) and (min-width: 768px) {
+    .navbar-header {
+        width: 250px;
+    }
+}
+
+/* Ensures BRCA exchange logo and menu dropdown toggle are on a single line across different devices */
+@media only screen and (max-width: 767px) {
+    .navbar-brand {
+        max-width: 70%;
+    }
+}
+
+/* Shrink BRCA exchange logo on smaller devices so logo and menu items are on a single line across different devices */
+@media only screen and (max-width: 992px) {
+    .navbar-brand h1 {
+        font-size: 28px;
+    }
+
+    .navbar-brand #research-label {
+        font-size: 64%;
+        float: left;
+    }
+}
+
 #research-label {
     margin: 0 1em 0 1em;
     font-size: 75%;
 }
-
-
 
 .navbar {
     min-height: 70px; /* XXX This value MUST match the setting in index.js */
@@ -289,6 +314,16 @@ div#main {
     }
 }
 
+table.community td > span {
+    width: 100%;
+    word-wrap: break-word;
+    float: left;
+}
+
+table.community h3 {
+    margin-top: 0;
+}
+
 /**************************************************************/
 /**********     Other                     *********************/
 /**************************************************************/
@@ -298,6 +333,13 @@ html {
 
 .form-group label {
     margin-right: 1em;
+}
+
+.required label::after {
+    content: '*';
+    position: absolute;
+    padding-left: 4px;
+    color: #CC0000;
 }
 
 #filters .panel-body {
@@ -379,9 +421,111 @@ th[role='columnheader'] .help, .help-target .help {
 
 .avatar {
     width: 120px;
-    height: auto;
+    max-height: 120px;
+    object-fit: cover;
+}
+
+#communityMap {
+    width: 500px;
+    height: 250px;
+    margin: 20px auto 20px auto;
+}
+
+#communityMap .map-info-window div { 
+    float: right;
+}
+
+#communityMap .map-legend {
+    position: relative;
+    background-color: white;
+    margin-top: 10px;
+    margin-right: 10px;
+    padding: 8px;
+    border-radius: 2px;
+    box-shadow: rgba(0, 0, 0, 0.298039) 0px 1px 4px -1px;
+}
+
+#communityMap .map-legend .map-legend-row {
+    padding: 4px 0 18px 0;
+    margin-left: 15px;
+}
+
+#communityMap .map-legend .map-legend-col {
+    float: left;
+    width: 33.3333333%;
+    padding: 0 1px 0 1px;
+}
+
+#communityMap .map-legend-col img {
+    padding: 1px;
+    border-radius: 8px;
+    border: 1px solid white;
+}
+
+#communityMap .map-legend-col.selected img {
+    border: 1px solid black;
+}
+
+#communityMap .map-legend-icon {
+    height: 20px;
+}
+
+#communityMap .map-legend .map-legend-full {
+    width: 464px;
+}
+
+#communityMap .map-legend .map-legend-slide {
+    background-color: white;
+    padding: 0;
+    border-radius: 2px;
+    box-shadow: rgba(0, 0, 0, 0.298039) 0px 1px 4px -1px;
+    position: absolute;
+    z-index: 10;
+    top: 0px;
+    right: 0px;
+    max-width: 0;
+    max-height: 0;
+    overflow: hidden;
+    visibility: hidden;
+}
+
+#communityMap .map-legend:hover .map-legend-slide {
+    max-width: 500px;
+    max-height: 500px;
+    padding: 8px;
+    visibility: visible;
+    transition: max-width 0.5s, padding-left 0.5s, padding-right 0.5s;
+}
+
+#communityMap .avatar {
+    height: 90px;
+    width: 90px;
+    float: left;
+    margin-right: 15px;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    padding: 4px;
 }
 
 .caret {
     border-top: 4px dashed;
 }
+
+.slide-fade-in {
+    overflow: hidden;
+    animation-duration: 1s;
+    animation-name: slide-fade-in;
+    border-radius: 10px;
+}
+
+@keyframes slide-fade-in {
+    from {
+        max-height: 0px;
+        opacity: 0;
+    }
+    to {
+        max-height: 100px;
+        opacity: 1;
+    }
+}
+
