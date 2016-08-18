@@ -12,14 +12,15 @@ var ConfirmEmail = React.createClass({
     getInitialState: function () {
         return {
             success: null
-        }
+        };
     },
+	activate: function(result) {
+		this.setState({success: result.success});
+	},
     componentDidMount: function () {
         var activationCode = this.context.router.getCurrentParams().activationCode;
         var url = config.backend_url + '/accounts/confirm/' + activationCode + '/';
-        $.get(url, function (result) {
-            this.setState({success: result.success});
-        }.bind(this));
+        $.get(url, this.activate);
     },
     render: function () {
         return (

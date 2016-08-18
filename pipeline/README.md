@@ -1,23 +1,30 @@
 # brca-pipeine
 
 Contains source code used to wrangle the BRCA variation data that is presented in the brca-exchange site.
+##### Overall Dependencies
+ * create a directory for genomic resources.  Point to it with the environment variable $BCRA_RESOURCES
+ * download http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/refseq_annotation.hg19.gp to $BRCA_RESOURCES
+ * download http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/hg19.fa.gz to $BRCA_RESOURCES and uncompress
+ * download http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz to $BRCA_RESOURCES and uncompress
+ * download http://hgdownload.cse.ucsc.edu/gbdb/hg19/liftOver/hg19ToHg38.over.chain.gz to $BRCA_RESOURCES.  There is no need to uncompress it.
+ * Download brca1_hg38.txt, brca2_hg38.txt, brca1_hg19.txt and brca2_hg19.txt from http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/ to $BRCA_RESOURCES
+ * install postgresql
+ * install the leiden cleanup package at http://leiden-open-variation-database-lovd-cleanup.readthedocs.io/en/latest/index.html
+ * pip install git+https://github.com/counsyl/hgvs.git
+ * pip install psycopg2
+ * pip install parsley
+ * pip install configparser
+ * pip install bioutils
+ * pip install biopython
+ * install lzo
+ * install bx-python from https://pypi.python.org/packages/55/db/fa76af59a03c88ad80494fc0df2948740bbd58cd3b3ed5c31319624687cc/bx-python-0.7.3.tar.gz#md5=d8c50c01c9e421bae0bbdbfa00fef6e4 (note: pip install bx-python left an outstanding dependency to lzo1x.h, which proved to be hard to resolve)
+ * pip install CrossMap
+ * install vcftools from https://vcftools.github.io/index.html
+ * pip install pyvcf
+ * install tabix (see http://genometoolbox.blogspot.com/2013/11/installing-tabix-on-unix.html)
 
-## Repository directory
-  bic: Contains relevant scripts pertaining to converting data originating from the [Breast Cancer Information Core](https://research.nhgri.nih.gov/projects/bic/index.shtml) database to GA4GH reference server friendly vcf format.
-  
-  umd: Contains relevant scripts and web-scrapped data pertaining to converting data originating from the [Universal Mutation Database](http://www.umd.be/BRCA1/) to GA4GH reference server friendly vcf format.
-  
-  doc: Directory contains miscellaneous logfiles of various runs of scripts that are in development.
 
 ## Misc Instructions
-### Restart GA4GH reference server
-  1. Log in to the AWS instance at `ubuntu@ec2-54-148-207-224.us-west-2.compute.amazonaws.com` using ssh
-  2. type "screen -r"
-  3. ctrl + c to stop the server
-  4. restart the server with command 'python server_dev.py -f /srv/ga4gh/brca_config.py'
-  5. ctrl + AD to detach from screen
-  6. logout of the AWS instance
-
 ### Convert refseq .psl file to .gp (genepred) format (required format for hgvs conversion)
   This is the gene feature coordinate file that coincides with the '-r' option of umd2vcf and bic2vcf scripts.
   
@@ -28,9 +35,6 @@ Contains source code used to wrangle the BRCA variation data that is presented i
 
   e.g. mrnaToGene -insertMergeSize=-1 -noCds refseq_annotation.hg19.psl refseq_annotation.hg19.gp
 
-### Data extraction and conversion to vcf:
-  Requires installation of hgvs python package as can be found here: https://github.com/counsyl/hgvs
-  
 #### Generate ClinVar VCF files (`ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/`)
 See `https://github.com/BD2KGenomics/brca/blob/master/clinvar/README.txt`
 
@@ -53,5 +57,4 @@ See `https://raw.githubusercontent.com/BD2KGenomics/brca/master/lovd/README.md`
 
 #### ESP (`http://evs.gs.washington.edu/EVS/`)
 See `https://github.com/BD2KGenomics/brca/edit/master/esp/README.txt`
-
 

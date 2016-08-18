@@ -21,7 +21,7 @@ var brca12JSON = {
 };
 var d3Lollipop = {};
 
-d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id, varlink, data) {
+d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id, varlink) {
     var xAxisLabel = '';
     var minPos = 0;
     var maxPos = 1;
@@ -69,12 +69,14 @@ var D3Lollipop = React.createClass({
         } else {
             chrCoordinate = String(chrCoordinate);
         }
-        if (oldObj.Pathogenicity_default == 'Not Yet Classified'){
-            oldObj.Pathogenicity_default = "Uncertain";
+		/*eslint-disable dot-notation */
+        if (oldObj["Pathogenicity_default"] === 'Not Yet Classified') {
+            oldObj["Pathogenicity_default"] = "Uncertain";
         }
-        if (oldObj.Pathogenicity_default == 'Benign / Little Clinical Significance'){
-            oldObj.Pathogenicity_default = "Benign";
+        if (oldObj["Pathogenicity_default"] === 'Benign / Little Clinical Significance') {
+            oldObj["Pathogenicity_default"] = "Benign";
         }
+		/*eslint-enable dot-notation */
         var newObj = {category: oldObj.Pathogenicity_default, coord: chrCoordinate, value: 1, oldData: obj};
         return newObj;
     },
@@ -89,7 +91,7 @@ var D3Lollipop = React.createClass({
 
     componentWillReceiveProps: function(newProps) {
         // only rebuild plot if number of variants has changed
-        if (newProps.data.length != this.props.data.length) {
+        if (newProps.data.length !== this.props.data.length) {
             this.cleanupBRCA();
             var {data, brcakey, onRowClick, ...opts} = newProps;
             var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
@@ -97,7 +99,7 @@ var D3Lollipop = React.createClass({
                 d3svgBrcaRef.removeChild(d3svgBrcaRef.lastChild);
             }
             var subSetData = data.map(this.filterAttributes);
-            var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
+            d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
             while (d3svgBrcaRef.lastChild ) {
                 d3svgBrcaRef.removeChild(d3svgBrcaRef.lastChild);
             }

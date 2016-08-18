@@ -1,16 +1,8 @@
 'use strict';
 
 var React = require('react');
-var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
-var DisclaimerModal = require('./DisclaimerModal');
-var RawHTML = require('./RawHTML');
-var {Modal, Button} = require('react-bootstrap');
 
-var content = require('./content');
-var Community = require('./Community');
-var databaseKey = require('../databaseKey');
 var {Navbar, Nav, DropdownButton} = require('react-bootstrap');
-var VariantSearch = require('./VariantSearch');
 var {Link} = require('react-router');
 
 var NavLink = React.createClass({
@@ -33,14 +25,14 @@ var NavBarNew = React.createClass({
     getInitialState: function () {
         return {
             showModal: false,
-        }
+        };
     },
     shouldComponentUpdate: function (nextProps, nextState) {
         // Only rerender if path has change or the research mode changes, ignoring query.
         var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
-        if (d3TipDiv.length != 0 && d3TipDiv[0].style.opacity != '0') {
-            d3TipDiv[0].style.opacity='0';
-            d3TipDiv[0].style.pointerEvents='none';
+        if (d3TipDiv.length !== 0 && d3TipDiv[0].style.opacity !== '0') {
+            d3TipDiv[0].style.opacity = '0';
+            d3TipDiv[0].style.pointerEvents = 'none';
         }
         return this.props.mode !== nextProps.mode ||
             this.state.loggedin !== nextState.loggedin ||

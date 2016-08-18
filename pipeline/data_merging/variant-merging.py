@@ -7,6 +7,7 @@ import argparse
 import datetime
 import os
 import pickle
+import re
 import shutil
 import subprocess
 import tempfile
@@ -16,15 +17,6 @@ from copy import deepcopy
 from pprint import pprint
 
 
-BRCA1 = {"hg38": {"start": 43000000,
-                  "sequence": open("../resources/genome_sequences/brca1_hg38.txt", "r").read()},
-         "hg19": {"start": 41100000,
-                  "sequence": open("../resources/genome_sequences/brca1_hg19.txt", "r").read()}}
-BRCA2 = {"hg38": {"start": 32300000,
-                  "sequence": open("../resources/genome_sequences/brca2_hg38.txt", "r").read()},
-         "hg19": {"start": 32800000,
-                  "sequence": open("../resources/genome_sequences/brca2_hg19.txt", "r").read()}}
-  
 #GENOMIC VERSION:
 VERSION = "hg38" # equivalent to GRCh38
 
@@ -86,27 +78,38 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
                "ESP": ESP_FIELDS,
                "BIC": BIC_FIELDS}
 
-ENIGMA_FILE = "enigma_variants_GRCh38_2-27-2016.tsv"
+ENIGMA_FILE = "ENIGMA_last_updated_05-21-2016.tsv"
 GENOME1K_FILE = "10k_genome.brca.sorted.hg38.vcf"
 CLINVAR_FILE = "ClinVarBrca.vcf"
 LOVD_FILE = "sharedLOVD_brca12.sorted.hg38.vcf"
 EX_LOVD_FILE = "exLOVD_brca12.sorted.hg38.vcf"
-BIC_FILE = "bic_brca12.sorted.hg38.vcf"
-EXAC_FILE = "exac_BRCA12.sorted.hg38.vcf"
-ESP_FILE = "esp.brca.vcf"
+BIC_FILE = "bicSnp.sorted.hg38.vcf"
+EXAC_FILE = "exac.brca12.sorted.hg38.vcf"
+ESP_FILE = "esp.brca12.sorted.hg38.vcf"
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--input", help="Input VCF directory",
-                    default="/hive/groups/cgl/brca/release1.0/pipeline_input/")
+                    default="/home/brca/pipeline-data/pipeline-input/")
 parser.add_argument("-o", "--output", 
-                    default="/hive/groups/cgl/brca/release1.0/pipeline_output/")
-parser.add_argument("-p", "--de_novo",
+                    default="/home/brca/pipeline-data/pipeline-output/")
+parser.add_argument("-p", "--de_novo", default=False,
                     help="string comparison all over, instead of loading from pickle dump",
                     action="store_true")
+parser.add_argument('-r', "--reference", help="reference data directory",
+                    default="/home/brca/pipeline-data/pipeline-resources/")
 ARGS = parser.parse_args()
 
 
+BRCA1 = {"hg38": {"start": 43000000,
+                  "sequence": open(ARGS.reference + "brca1_hg38.txt", "r").read()},
+         "hg19": {"start": 41100000,
+                  "sequence": open(ARGS.reference + "brca1_hg19.txt", "r").read()}}
+BRCA2 = {"hg38": {"start": 32300000,
+                  "sequence": open(ARGS.reference + "brca2_hg38.txt", "r").read()},
+         "hg19": {"start": 32800000,
+                  "sequence": open(ARGS.reference + "brca2_hg19.txt", "r").read()}}
+  
 def main():
     tmp_dir = tempfile.mkdtemp()
     try:
@@ -118,8 +121,7 @@ def main():
         print "------------string comparison merge-------------------------------"
         variants = string_comparison_merge(variants) 
         variants = variant_standardize(variants=variants)
-        date = datetime.datetime.today().strftime('%d%b%Y')
-        write_new_csv(ARGS.output + "merged_" + date + ".csv", columns, variants)
+        write_new_tsv(ARGS.output + "merged.tsv", columns, variants)
         print "final number of variants: %d" %len(variants)
         print "Done" 
     finally:
@@ -127,7 +129,7 @@ def main():
 
 
 def variant_standardize(variants="pickle"): 
-    """standardize variants such that:
+    """standardize variants such 
     1. "-" in ref or alt is removed, and a leading base is added, e.g. ->T is changed to N > NT
     2. remove trailing same bases: e.g. AGGGG > TGGGG is changed to A>T
     3. remove leading same baes: e.g. position 100, AAT > AAG is changed to position 102 T>G
@@ -137,17 +139,38 @@ def variant_standardize(variants="pickle"):
             variants = pickle.loads(fv.read())
         fv.close()
     for ev, items in variants.iteritems():
-        variant_names = items[2].split("|")
-        new_names = [add_leading_base(v) if "-" in v else v for v in variant_names]
-        new_names = [trim_bases(v) if "None" not in v else v for v in new_names]
-        new_names = "|".join(list(set(new_names)))
+        if type(items[2]) == list:
+            variant_names = items[2]
+        else:
+            variant_names = [items[2]]
+        new_names = []
+        for vv in variant_names:
+            if ("-" in vv) or refOrAltMissing(vv):
+                vv2 = add_leading_base(vv)
+            else:
+                vv2 = vv
+            if not re.search("None", vv2):
+                new_names.append(trim_bases(vv2))
+            else:
+                new_names.append(vv2)
+        #                        
+        #new_names = [add_leading_base(v) if ("-" in v) or refOrAltMissing(v)  else v for v in variant_names]
+        #new_names = [trim_bases(v) if "None" not in v else v for v in new_names]
+        #new_names = ",".join(list(set(new_names)))
         items[2] = new_names
         variants[ev] = items
     return variants
 
+def refOrAltMissing(v):
+    ref, alt = v.split(":")[2].split(">")
+    if len(ref) < 1 or len(alt) < 1:
+        return True
+    else:
+        return False
+
 def trim_bases(v):
     ref, alt = v.split(":")[2].split(">")
-    if len(ref) == 1 or len(alt) == 1:
+    if len(ref) <= 1 or len(alt) <= 1:
         return v
     else:
         ref, alt = trim_trailing(ref, alt)
@@ -156,7 +179,9 @@ def trim_bases(v):
         return v
 
 def trim_trailing(ref, alt):
-    if len(ref) == 1 or len(alt) == 1 or ref[-1] != alt[-1]:
+    if len(ref) <= 1 or len(alt) <= 1: 
+        return ref, alt    
+    elif ref[-1] != alt[-1]:
         return ref, alt    
     else:
         ref = ref[:-1]
@@ -189,7 +214,6 @@ def add_leading_base(v, version="hg38"):
         brca_pos = pos - 1 - BRCA1[version]["start"]
     else:
         raise Exception("wrong chromosome number")
-
     # correct error with when ref is empty string
     if len(ref) == 0:
         brca_pos += 1
@@ -218,23 +242,46 @@ def string_comparison_merge(variants):
     print "%d equivalent variants are merged into %d unique variants" %(
           n_before_merge, n_after_merge)
     for equivalent_v in equivalence:
+        # 
+        # equivalent_v contains a set of variants found to be equivalent.
+        # The next step is to merge data for these variants, which will
+        # end up in the array merged_row.
         merged_row = []
         for each_v in equivalent_v:
             if len(merged_row) == 0:
+                #
+                # If this is the first variant in the equivalence set, initialize
+                # the merged data to the data for this variant.
                 merged_row = variants[each_v]
-                variants.pop(each_v)
             else:
-                for index, row1 in enumerate(merged_row):
-                    row2 = variants[each_v][index]
-                    if row1 == "-" and row2 != "-":
-                        merged_row[index] = row2
-                    elif row1 != "-" and row2 == "-":
-                        merged_row[index] = row1
+                for index, values_merged_so_far in enumerate(merged_row):
+                    values_to_be_merged = variants[each_v][index]
+                    # If either the new value or the old value is non-blank, use it.
+                    if values_merged_so_far == "-" and values_to_be_merged != "-":
+                        merged_row[index] = values_to_be_merged
+                    elif values_merged_so_far != "-" and values_to_be_merged == "-":
+                        merged_row[index] = values_merged_so_far
                     else:
-                        if row1 != row2 and (row2 not in row1.split("|")):
-                            merged_row[index] = row1 + "|" + row2
-                variants.pop(each_v)
-        variants["|".join(list(equivalent_v))] = merged_row
+                        # If both the new value and old value are non-blank and different,
+                        # generate a list that contains both new and old values.
+                        # If the old value is already a list, append the new value.
+                        # If the old value is not a list, create a list containing the old
+                        # value and append the new value.
+                        if values_merged_so_far != values_to_be_merged:
+                            if type(values_merged_so_far) != list:
+                                values_merged_so_far = [values_merged_so_far]
+                            if values_to_be_merged not in values_merged_so_far:
+                                if type(values_to_be_merged) == list:
+                                    values_merged_so_far.extend(values_to_be_merged)
+                                else:
+                                    values_merged_so_far.append(values_to_be_merged)
+                            merged_row[index] = values_merged_so_far
+            #
+            # Remove each variant in the equivalence set from the hash of 
+            # variants.  Later on, we'll add an entry for the entire equivalence 
+            # set.
+            variants.pop(each_v)
+        variants[",".join(list(equivalent_v))] = merged_row
     return variants
 
 def find_equivalent_variant(genome_coors):
@@ -384,17 +431,17 @@ def one_variant_transform(f_in, f_out):
                         new_record.INFO[key] = [value[i]]
                 vcf_writer.write_record(new_record)
 
-def write_new_csv(filename, columns, variants):
+def write_new_tsv(filename, columns, variants):
     merged_file = open(filename, "w")
-    merged_file.write(",".join(columns)+"\n")
-    for key, variant in variants.iteritems():
+    merged_file.write("\t".join(columns)+"\n")
+    for key, variant in sorted(variants.iteritems()):
         if len(variant) != len(columns):
             raise Exception("mismatching number of columns in head and row")
-        if "chr13" in key:
-            merged_file.write(",".join(variant)+"\n")
-    for key, variant in variants.iteritems():
-        if "chr17" in key:
-            merged_file.write(",".join(variant)+"\n")
+        for ii in range(len(variant)):
+            if type(variant[ii]) == list:
+                comma_delimited_string = ",".join(str(xx) for xx in variant[ii])
+                variant[ii] = comma_delimited_string
+        merged_file.write("\t".join(variant)+"\n")
     merged_file.close()
 
 
@@ -403,7 +450,6 @@ def add_new_source(columns, variants, source, source_file, source_dict):
     old_column_num = len(columns)
     for column_title in source_dict.keys():
         columns.append(column_title+"_{0}".format(source))
-
     vcf_reader = vcf.Reader(open(source_file, 'r'), strict_whitespace=True)
     overlap = 0
     variants_num = 0
@@ -413,7 +459,10 @@ def add_new_source(columns, variants, source, source_file, source_dict):
                        record.REF + ">" + str(record.ALT[0]))
         if genome_coor in variants.keys():
             overlap += 1
-            variants[genome_coor][0] += "|{0}".format(source)
+            if type(variants[genome_coor][0]) != list:
+                variants[genome_coor][0] = [variants[genome_coor][0]]
+            variants[genome_coor][0].append(source)
+            #variants[genome_coor][0] += ".{0}".format(source)
         else: 
             variants[genome_coor] = ['-'] * old_column_num
             variants[genome_coor][0] = source
@@ -425,22 +474,19 @@ def add_new_source(columns, variants, source, source_file, source_dict):
             else:
                 raise Exception("Wrong chromosome")
             variants[genome_coor][2] = genome_coor
-
         for value in source_dict.values():
             try:
-                variants[genome_coor].append(str(record.INFO[value]))
+                variants[genome_coor].append(record.INFO[value])
             except KeyError:
                 if source == "BIC":
                     variants[genome_coor].append("-")
                 else:
                     raise Exception("uncaught weirdness")
-
     # for those enigma record that doesn't have a hit with new genome coordinate
     # add extra cells of "-" to the end of old record
     for value in variants.values():
         if len(value) != len(columns):
             value += ["-"] * len(source_dict)
-
     print "number of variants in " + source + " is ", variants_num
     print "overlap with previous dataset: ", overlap
     print "number of total variants with the addition of " + source + " is: ", len(variants), "\n"
@@ -460,7 +506,6 @@ def save_enigma_to_dict(path):
     n_wrong, n_total = 0, 0
     for line in enigma_file:
         line_num += 1
-        line = line.replace(",", "|")
         if line_num == 1:
             columns = line.strip().split("\t")
             columns = [c + "_ENIGMA" for c in columns if c != "Genomic_Coordinate"]
@@ -486,24 +531,21 @@ def variant_equal(v1, v2, version="hg38"):
     " return (edited1, edited2) "
     if v1 == v2:
         return True
-
     chr1, pos1, ref1, alt1 = v1
     chr2, pos2, ref2, alt2 = v2
     pos1 = int(pos1)
     pos2 = int(pos2)
-
     if chr1 != chr2:
         return False
     if (len(ref1) - len(alt1)) != (len(ref2) - len(alt2)):
         return False
-
+    #    
     # if len(ref2)>100 or len(ref1)>100:
     #     return False
-
     # make sure that v1 is upstream of v2
     if pos1 > pos2:
         return variant_equal(v2, v1)
-
+    #
     # lift coordinates and make everything 0-based
     if chr1 == "13":
         seq = BRCA2[version]["sequence"]
@@ -515,21 +557,23 @@ def variant_equal(v1, v2, version="hg38"):
         pos2 = pos2 - 1 - BRCA1[version]["start"]
     else:
         assert(False)
-
+    #
     # correct error with when ref is empty string
     if len(ref1) == 0:
         pos1 += 1
     if len(ref2) == 0:
         pos2 += 1
-
+    #
     # replace vcf ref string with alt string
     edited_v1 = seq[0:pos1]+alt1+seq[pos1+len(ref1):]
     edited_v2 = seq[0:pos2]+alt2+seq[pos2+len(ref2):]
-
+    #
     return edited_v1 == edited_v2
 
 def ref_correct(v, version="hg38"): 
     chr, pos, ref, alt = v 
+    if  pos == "None":
+        return False
     pos = int(pos) 
     if chr == "13": 
         seq = BRCA2[version]["sequence"] 
@@ -539,7 +583,6 @@ def ref_correct(v, version="hg38"):
         pos = pos - 1 - BRCA1[version]["start"]
     else:
         assert(False)
-
     genomeRef = seq[pos:pos+len(ref)].upper()
     if len(ref) != 0 and len(genomeRef)==0:
         print v
@@ -551,5 +594,6 @@ def ref_correct(v, version="hg38"):
 
 
 if __name__ == "__main__":
+    print "hello world"
     main()
 

@@ -1,0 +1,29 @@
+#!/bin/bash
+set -o nounset
+set -o errexit
+
+HOST=${HOST:-brcaexchange-dev.cloudapp.net}
+USER=brca
+
+# directory of this file
+DEPLOYMENT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+WEBSITE=${DEPLOYMENT}/../website
+
+cd ${WEBSITE}
+npm run build:prod
+
+# deploy
+rsync -a --delete --rsync-path='sudo rsync' build/ ${USER}@${HOST}:/var/www/html/beta
+rsync -a --delete --rsync-path='sudo rsync' django/ ${USER}@${HOST}:/var/www/backend/beta/django
+
+requirements=$(cat requirements.txt)
+requirements=$(echo ${requirements}) # drop carriage returns
+ssh -l${USER} ${HOST} <<-ENDSSH
+    #set -o nounset # 'activate' accesses unbound vars
+    set -o errexit
+    cp ~/site_settings/config.beta.js /var/www/html/beta/config.js
+    cp ~/site_settings/site_settings.beta.py /var/www/backend/beta/django/brca/site_settings.py
+    . /var/www/backend/beta/virtualenv/bin/activate
+    pip install ${requirements}
+    sudo apache2ctl restart
+ENDSSH

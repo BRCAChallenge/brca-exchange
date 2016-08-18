@@ -1,0 +1,15 @@
+general:
+    build_dir: website
+test:
+    override:
+        - npm run lint -- -f junit -o $CIRCLE_TEST_REPORTS/lint-results.xml
+        - npm run test -- -R xunit --reporter-options output=$CIRCLE_TEST_REPORTS/test-results.xml
+deployment:
+    dev:
+        branch: master
+        commands:
+            - ../deployment/deploy-dev
+    beta:
+        tag: /v[0-9]+(\.[0-9]+)*/
+        commands:
+            - HOST=brcaexchange.cloudapp.net ../deployment/deploy-dev
