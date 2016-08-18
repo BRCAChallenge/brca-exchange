@@ -1,6 +1,7 @@
 import os
 import re
 import tempfile
+import json
 from operator import __or__
 
 from django.db import connection
@@ -9,7 +10,15 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.gzip import gzip_page
 
 from .models import Variant
+#########################################################
+from django.views.decorators.http import require_http_methods
+from ga4gh import variant_service_pb2 as v_s
+from ga4gh import variants_pb2 as vrs
+from ga4gh import metadata_service_pb2 as m_s
+from ga4gh import metadata_pb2 as meta
+import google.protobuf.json_format as json_format
 
+#########################################################
 
 @gzip_page
 def index(request):
@@ -78,7 +87,7 @@ def apply_sources(query, include, exclude):
     # the row must match in at least one column
     include_list = (Q(**{column: True}) for column in include)
     exclude_dict = {exclusion: False for exclusion in exclude}
-    
+
     return query.filter(reduce(__or__, include_list)).filter(**exclude_dict)
 
 
@@ -148,3 +157,252 @@ def sanitise_term(term):
     # Enable prefix search
     term += ":*"
     return term
+
+########################### START WORK ####################################
+###########################################################################
+###########################################################################
+
+############## .../variants/search method ############################
+@require_http_methods(["POST"])
+def variant_search(request):
+    conditional = validate_request(request)
+    if conditional :
+        return conditional
+    else:
+        req_dict = json.loads(request.body)
+        variant_set_id = req_dict.get('variantSetId')
+        reference_name = req_dict.get('referenceName')
+        start = req_dict.get('start')
+        end = req_dict.get('end')
+        page_size = req_dict.get('pageSize', 3)
+        page_token = req_dict.get('pageToken', "0")
+    
+    x, referenceCord = variant_set_id.split("-")
+    if referenceCord not in SetIds:
+        return JsonResponse({"Error message": "Request not processed invalid set id"})
+
+    response0 = v_s.SearchVariantsResponse()
+    filt = str(reference_name)+":"
+    DbResp = Variant.objects
+    DbResp = select_gen_coor(referenceCord, DbResp, filt)
+    ret_data = ga4gh_brca_page(DbResp, int(page_size), int(page_token))
+    ga_vars = [brca_to_ga4gh(i,referenceCord) for i in ret_data.values()]
+    if len(ga_vars) > page_size:
+        ga_vars.pop()
+        page_token = str(1 + int(page_token))
+    else:
+        response0.next_page_token = ""
+    response0.variants.extend(ga_vars)
+    response0.next_page_token = page_token
+    resp = json_format._MessageToJsonObject(response0, True)
+    return JsonResponse(resp)
+############### .../variants/search methond END ##############################
+
+############### Auxiliary function for quering database on a given Gen-Coordinate ###############
+def select_gen_coor(referenceCordinate, DbResp, filt, Start = None, End = None):
+    if referenceCordinate == SetIds[0]:
+        FilteredResponse = DbResp.filter(Genomic_Coordinate_hg36__startswith=filt)
+        if Start != None and End != None:
+            FilteredResponse = FilteredResponse.filter(Hg36_End__lt=End, Hg36_Start__gt=val1)
+        else:
+            return FilteredResponse
+    elif referenceCordinate == SetIds[1]:
+        FilteredResponse = DbResp.filter(Genomic_Coordinate_hg37__startswith=filt)
+        if Start != None and End != None:
+            FilteredResponse = FilteredResponse.filter(Hg37_End__lt=End, Hg37_Start__gt=val1)
+        else:
+            return FilteredResponse
+    elif referenceCordinate == SetIds[2]:
+        FilteredResponse = DbResp.filter(Genomic_Coordinate_hg38__startswith=filt)
+        if Start != None and End != None:
+            FilteredResponse = FilteredResponse.filter(Hg38_End__lt=End, Hg38_Start__gt=val1)
+        else:
+            return FilteredResponse
+############################## Gen-Coordinate function END ##############################
+
+############### Paging Auxiliary function ###############
+def ga4gh_brca_page(query, page_size, page_token):
+    start = page_size * page_token
+    end = start + page_size+1
+    return query[start:end]
+################## Paging function END ##################
+
+############### Auxiliary function to obtain offset for database query ########
+def get_offset(start, end, VarLEn = None):
+    if VarLEn:
+        start = start - 1
+        end = start + len(VarLEn)
+    else:
+        start = start + 1
+        end = end + 1
+    return start, end
+###################### Offset function END ##############################
+
+
+### Function that translates elements in BRCA-database to GA4GH format #######
+def brca_to_ga4gh(brca_variant, genRefer):
+    var_resp = vrs.Variant()
+    for j in brca_variant:
+        if brca_variant[j] == "-" or (brca_variant[j] == ""):
+            continue
+        if j == "Genomic_Coordinate_"+genRefer:
+            var_resp.reference_name, start, bases = brca_variant[j].split(':')
+            var_resp.reference_bases, alternbases = bases.split(">")
+            for i in range(len(alternbases)):
+                var_resp.alternate_bases.append(alternbases[i])
+            var_resp.start = int(start)
+            var_resp.end = var_resp.start+len(alternbases)
+            continue
+        if j == "id":
+            var_resp.id = genRefer+"-"+str(brca_variant['id'])
+            var_resp.variant_set_id = name+"-"+genRefer
+            var_resp.names.append("This are names")
+            var_resp.created = 0
+            var_resp.updated = 0
+            continue
+        else:
+            var_resp.info[str(j)].append(brca_variant[j])
+    return var_resp
+################## Translator function END ##############################
+
+#### Auxiliary function which validates requests ######
+def validate_request(request):
+    if not request.body:
+        return JsonResponse(ErrorMessages['emptyBody'])
+    else:
+        request_dict = json.loads(request.body)
+        if not request_dict.get("variantSetId"):
+            return JsonResponse(ErrorMessages['VariantSetId'])
+        elif not request_dict.get('referenceName'):
+            return JsonResponse(ErrorMessages['referenceName'])
+        elif not request_dict.get('start')  :
+            return JsonResponse(ErrorMessages['start'])
+        elif not request_dict.get('end') :
+            return JsonResponse(ErrorMessages['end'])
+        elif not request_dict.get("datasetId"):
+            return JsonResponse(ErrorMessages['datasetId'])
+        else:
+            return None
+########## Auxiliary function END ############
+
+######### .../variants/<variant id> method ########
+@require_http_methods(["GET"])
+def get_var_by_id(request, variant_id):
+    if not variant_id:
+        return JsonResponse(ErrorMessages['variantId'])
+    else:
+        gen_coor_and_id = variant_id
+        gen_coor, v_id = gen_coor_and_id.split("-")
+        if gen_coor in SetIds:
+            DbResp = Variant.objects.values()
+            resp1 = DbResp.get(id=int(v_id))
+            Var_resp = brca_to_ga4gh(resp1, gen_coor)
+            resp = json_format._MessageToJsonObject(Var_resp, True)
+            return JsonResponse(resp)
+        else:
+            return JsonResponse(ErrorMessages["datasetId"])
+######### .../variants/<variant id> method END ########
+
+######### .../variantsets/search method ########
+@require_http_methods(["POST"])
+def get_variantSet(request):
+    condit = validate_request(request)
+    if condit:
+        return condit
+    else:
+        req_dict = json.loads(request.body)
+        dataset_id = req_dict.get('datasetId')
+        page_size = req_dict.get('pageSize', 3)
+        page_token = req_dict.get('pageToken', '0')
+        if dataset_id != "brca-exchange":
+            return JsonResponse({"message": "404 dataset id not registered"})
+    response1 = v_s.SearchVariantSetsResponse()
+    response1.next_page_token = page_token
+    for i in range(len(SetIds)):       
+        response = vrs.VariantSet()
+        response.id = datasetId+"-"+SetIds[i]
+        response.name = SetName+"-"+SetIds[i]
+        response.dataset_id =  name
+        response.reference_set_id = referenceSetId+"-"+SetIds[i]
+        brca_meta(response.metadata, dataset_id)
+        response1.variant_sets.extend([response])
+    resp = json_format._MessageToJsonObject(response1, True)
+    return JsonResponse(resp)
+######### .../variantsets/search method END ########
+
+### Auxiliary function, generates metadata fields ######
+def brca_meta(Metadata, dataset_id):
+    var_resp = vrs.VariantSetMetadata()
+    for j in Variant._meta.get_all_field_names():
+        var_resp.key = str(j)
+        var_resp.value = "-"
+        var_resp.id = datasetId+"-"+str(j)
+        var_resp.type = Variant._meta.get_field(str(j)).get_internal_type()
+        var_resp.number = "-"
+        var_resp.description = "refer to ->"+str(j)+ " in https://github.com/BD2KGenomics/brca-website/blob/master/content/help_research.md"
+        Metadata.extend([var_resp])
+    return Metadata
+### Metadata generator END ###############
+
+#### .../variantsets/<set id> method ########
+@require_http_methods(["GET"])
+def get_varset_by_id(request, variantSetId):
+    if not variantSetId :
+        return JsonResponse(ErrorMessages["variantSetId"])
+    dataset, Id = variantSetId.split("-")
+    if Id in SetIds and dataset == "brca":
+        response = vrs.VariantSet()
+        response.id = dataset + "-" + Id
+        response.name = SetName + "-" + Id
+        response.dataset_id = name
+        response.reference_set_id = referenceSetId + "-" + Id
+        brca_meta(response.metadata, Id)
+        resp = json_format._MessageToJsonObject(response, False)
+        return JsonResponse(resp)
+    else:
+        return JsonResponse({"Invalid Set Id": variantSetId})
+#### .../variantsets/<set id> method END ########
+
+#### .../datasets/search method request handler ######
+@require_http_methods(["POST"])
+def search_datasets(request):
+    req_dict = json.loads(request.body)
+    page_size = req_dict.get("pageSize", 1)
+    page_token = req_dict.get("nextPageToken", "0")
+    sr_dta_set_resp = m_s.SearchDatasetsResponse()
+    dta_resp = meta.Dataset()
+    dta_resp.name = SetName
+    dta_resp.id = name
+    dta_resp.description = "Variants observed in brca-exchange project -----"
+    sr_dta_set_resp.datasets.extend([dta_resp])
+    sr_dta_set_resp.next_page_token = page_token
+    return JsonResponse(json_format._MessageToJsonObject(sr_dta_set_resp, True))
+#### .../datasets/search method END #########
+
+ #### Error URL catcher methods ######
+@require_http_methods(["GET", "POST"])
+def varsetId_empty_catcher(request):
+    return JsonResponse(ErrorMessages["emptyBody"])
+
+@require_http_methods(["GET", "POST"])
+def empty_varId_catcher(request):
+    return JsonResponse(ErrorMessages["emptyBody"])
+################# END #####################
+
+############################## GLOABAL VARIABLES ################################
+ErrorMessages = {'emptyBody' :{'error code': 400, 'message' : 'invalid request empty request'},
+                'VariantSetId' : {'error code': 400, 'message': 'invalid request no variant_set_id'},
+                 'referenceName': {'error code': 400, 'message': 'invalid reques no reference_name'},
+                 'start': {'error code' : 400, 'message': 'invalid request no start'},
+                 'end' : {'error code' :400, 'message': 'invalid request no end'},
+                 'datasetId': {'error code' : 400, 'message': 'invalid request no dataset_id'},
+                 'variantId': {'error code' : 400, 'message': 'invalid request no variant_id'},
+                 'variantSetId': {'error code': 400, 'message': 'invalid request no variant_set_id'}}
+SetName = "brca-exchange-variants"
+datasetId = "brca"
+referenceSetId = "Genomic-Coordinate"
+name = "brca-exchange"
+SetIds = ["hg36", "hg37", "hg38"]
+#################################################################################
+
+# Need to implement function that filters elements by increasing and decreasing integer values
