@@ -178,14 +178,16 @@ def variant_search(request):
         page_token = req_dict.get('pageToken', "0")
     
     x, referenceCord = variant_set_id.split("-")
-    if referenceCord not in SetIds:
-        return JsonResponse({"Error message": "Request not processed invalid set id"})
+    if referenceCord not in SetIds :
+        return JsonResponse({"Error messeage" : "Not a supported variantSetId"})
 
     response0 = v_s.SearchVariantsResponse()
     filt = str(reference_name)+":"
     DbResp = Variant.objects
     DbResp = select_gen_coor(referenceCord, DbResp, filt)
+    
     ret_data = ga4gh_brca_page(DbResp, int(page_size), int(page_token))
+    
     ga_vars = [brca_to_ga4gh(i,referenceCord) for i in ret_data.values()]
     if len(ga_vars) > page_size:
         ga_vars.pop()
@@ -256,10 +258,14 @@ def brca_to_ga4gh(brca_variant, genRefer):
         if j == "id":
             var_resp.id = genRefer+"-"+str(brca_variant['id'])
             var_resp.variant_set_id = name+"-"+genRefer
-            var_resp.names.append("This are names")
+            
             var_resp.created = 0
             var_resp.updated = 0
             continue
+        if j == "Synonyms":
+            Names = [i for i in str(brca_variant[j]).split(",")]
+            for i in Names:
+                var_resp.names.append(i)
         else:
             var_resp.info[str(j)].append(brca_variant[j])
     return var_resp
@@ -279,7 +285,15 @@ def validate_request(request):
             return JsonResponse(ErrorMessages['start'])
         elif not request_dict.get('end') :
             return JsonResponse(ErrorMessages['end'])
-        elif not request_dict.get("datasetId"):
+        else:
+            return None
+
+def validate_varsetreq(request):
+    if not request.body:
+        return JsonResponse(ErrorMessages['emptyBody'])
+    else:
+        request_dict = json.loads(request.body)
+        if not request_dict.get("datasetId"):
             return JsonResponse(ErrorMessages['datasetId'])
         else:
             return None
@@ -306,7 +320,7 @@ def get_var_by_id(request, variant_id):
 ######### .../variantsets/search method ########
 @require_http_methods(["POST"])
 def get_variantSet(request):
-    condit = validate_request(request)
+    condit = validate_varsetreq(request)
     if condit:
         return condit
     else:
@@ -315,7 +329,8 @@ def get_variantSet(request):
         page_size = req_dict.get('pageSize', 3)
         page_token = req_dict.get('pageToken', '0')
         if dataset_id != "brca-exchange":
-            return JsonResponse({"message": "404 dataset id not registered"})
+            return JsonResponse(ErrorMessages["datasetId"])
+    
     response1 = v_s.SearchVariantSetsResponse()
     response1.next_page_token = page_token
     for i in range(len(SetIds)):       
