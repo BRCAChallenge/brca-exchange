@@ -8,7 +8,10 @@
 # Put them in a working directory pointed to with the environment variable BIC.
 
 # convert data to vcf, CURRENTLY ONLY EXPORTS THE SNPS !!
-python convBic.py  --brca1 $BIC/brca1_data.txt --brca2 $BIC/brca2_data.txt > $BIC/bicSnp.hg19.vcf
-CrossMap.py vcf $BRCA_RESOURCES/hg19ToHg38.over.chain.gz $BIC/bicSnp.hg19.vcf $BRCA_RESOURCES/hg38.fa $BIC/bicSnp.hg38.vcf
-vcf-sort $BIC/bicSnp.hg38.vcf > $BIC/bicSnp.sorted.hg38.vcf
-cp $BIC/bicSnp.sorted.hg38.vcf $PIPELINE_INPUT
+pushd $BRCA_RESOURCES; wget cline@hgwdev.soe.ucsc.edu:public_html/BRCA/resources/bicAnnotation; popd
+./bic2vcf -i $BIC/brca1_data.txt -o $BIC/bic_brca1.hg19.vcf -b 1 -g $BRCA_RESOURCES/hg19.fa -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -a $BRCA_RESOURCES/bicAnnotation
+./bic2vcf -i $BIC/brca1_data.txt -o $BIC/bic_brca1.hg19.vcf -b 1 -g $BRCA_RESOURCES/hg19.fa -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -a $BRCA_RESOURCES/bicAnnotation
+vcf-concat $BIC/bic_brca1.hg19.vcf $BIC/bic_brca2.hg19.vcf > $BIC/bic_brca12.hg19.vcf
+CrossMap.py vcf $BRCA_RESOURCES/hg19ToHg38.over.chain.gz $BIC/bic_brca12.hg19.vcf $BRCA_RESOURCES/hg38.fa $BIC/bic_brca12.hg38.vcf
+vcf-sort $BIC/bic_brca12.hg38.vcf > $BIC/bic_brca12.sorted.hg38.vcf
+cp $BIC/bic_brca12.sorted.hg38.vcf $PIPELINE_INPUT
