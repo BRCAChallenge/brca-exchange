@@ -7,7 +7,7 @@ from retrying import retry
 import socket
 import luigi
 
-from shutil import copyfile
+from shutil import copy
 
 #######################
 # Convenience methods #
@@ -141,11 +141,13 @@ class ConvertLatestClinvarToVCF(luigi.Task):
 
       # Convert txt to vcf
       os.chdir(data_merging_method_dir)
-      args = ["python", "convert_tsv_to_vcf.py", "-i", clinvar_file_dir + "/ClinVarBrca.txt", "-o", pipeline_input_dir + "/ClinVarBrca.vcf", "-s", "ClinVar"]
+      args = ["python", "convert_tsv_to_vcf.py", "-i", clinvar_file_dir + "/ClinVarBrca.txt", "-o", clinvar_file_dir + "/ClinVarBrca.vcf", "-s", "ClinVar"]
       print "Running convert_tsv_to_vcf.py with the following args: %s" % (args)
       sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       print_subprocess_output_and_error(sp)
-      print "Completed writing %s." % (pipeline_input_dir + "/ClinVarBrca.vcf")
+      print "Completed writing %s." % (clinvar_file_dir + "/ClinVarBrca.vcf")
+
+      copy(clinvar_file_dir + "/ClinVarBrca.vcf", pipeline_input_dir)
 
       ### NOTE: If we prefer to use the Clinvar Makefile instead of python, it can be run with the commented out code below. ###
 
@@ -228,13 +230,19 @@ class DownloadAndExtractFilesFromESPTar(luigi.Task):
 
       # Sort concatenated BRCA1/2 data
       print "Sorting concatenated data into pipeline_input directory."
-      with self.output().open("w") as vcf_file:
-        args = ["vcf-sort", concatenated_brca_output_file]
-        print "Calling vcf-sort with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=vcf_file, stderr=subprocess.PIPE)
-        print_subprocess_output_and_error(sp)
+      sorted_concatenated_brca_output_file = esp_file_dir + "/esp.brca12.sorted.hg38.vcf"
+      writable_sorted_concatenated_brca_output_file = open(sorted_concatenated_brca_output_file, 'w')
+      # with self.output().open("w") as vcf_file:
+      args = ["vcf-sort", concatenated_brca_output_file]
+      print "Calling vcf-sort with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=writable_sorted_concatenated_brca_output_file, stderr=subprocess.PIPE)
+      print_subprocess_output_and_error(sp)
 
       print "Sorting of concatenated files complete."
+
+      copy(esp_file_dir + "/esp.brca12.sorted.hg38.vcf", pipeline_input_dir)
+
+      print "Copied final ESP output to output directory."
 
 class DownloadAndExtractFilesFromBIC(luigi.Task):
 
@@ -296,12 +304,17 @@ class DownloadAndExtractFilesFromBIC(luigi.Task):
       print "Crossmap.py execution complete, created bicSnp.hg38.vcf."
 
       # Sort hg38 vcf file, requires VCFtools.
-      with self.output().open("w") as vcf_file:
-        args = ["vcf-sort", bic_hg38_vcf_file]
-        print "Running vcf-sort with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=vcf_file, stderr=subprocess.PIPE)
-        print_subprocess_output_and_error(sp)
+      sorted_bic_output_file = bic_file_dir + "/bicSnp.sorted.hg38.vcf"
+      writable_sorted_bic_output_file = open(sorted_bic_output_file, 'w')
+      args = ["vcf-sort", bic_hg38_vcf_file]
+      print "Running vcf-sort with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=writable_sorted_bic_output_file, stderr=subprocess.PIPE)
+      print_subprocess_output_and_error(sp)
       print "Sorting of hg38 vcf file complete."
+
+      copy(sorted_bic_output_file, pipeline_input_dir)
+
+      print "Copied final BIC output to output directory"
 
 class ExtractAndConvertFilesFromEXLOVD(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
@@ -364,13 +377,18 @@ class ExtractAndConvertFilesFromEXLOVD(luigi.Task):
       print "Crossmap complete."
       
       # vcf-sort $EXLOVD/exLOVD_brca12.hg38.vcf > $EXLOVD/exLOVD_brca12.sorted.hg38.vcf
-      print "Sorting concatenated file into pipeline_input directory."
-      with self.output().open("w") as vcf_file:
-        args = ["vcf-sort", ex_lovd_file_dir + "/exLOVD_brca12.hg38.vcf"]
-        print "Running lovd2vcf with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=vcf_file, stderr=subprocess.PIPE)
-        print_subprocess_output_and_error(sp)
-        print "Sorted BRCA1/2 hg38 vcf file into %s" % (vcf_file)
+      print "Sorting concatenated file into exLOVD file directory."
+      sorted_ex_lovd_output_file = ex_lovd_file_dir + "/exLOVD_brca12.sorted.hg38.vcf"
+      writable_sorted_ex_lovd_output_file = open(sorted_ex_lovd_output_file, 'w')
+      args = ["vcf-sort", ex_lovd_file_dir + "/exLOVD_brca12.hg38.vcf"]
+      print "Running lovd2vcf with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=writable_sorted_ex_lovd_output_file, stderr=subprocess.PIPE)
+      print_subprocess_output_and_error(sp)
+      print "Sorted BRCA1/2 hg38 vcf file into %s" % (writable_sorted_ex_lovd_output_file)
+
+      copy(writable_sorted_ex_lovd_output_file, pipeline_input_dir)
+
+      print "Copied exLOVD output file to output directory."
 
 class ExtractAndConvertFilesFromLOVD(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
@@ -434,12 +452,17 @@ class ExtractAndConvertFilesFromLOVD(luigi.Task):
       print "Crossmap complete."
       
       # vcf-sort $LOVD/sharedLOVD_brca12.38.vcf > $LOVD/sharedLOVD_brca12.sorted.38.vcf
-      with self.output().open("w") as vcf_file:
-        args = ["vcf-sort", lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
-        print "Running lovd2vcf with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=vcf_file, stderr=subprocess.PIPE)
-        print_subprocess_output_and_error(sp)
-        print "Sorted BRCA1/2 hg38 vcf file into %s." % (vcf_file)
+      sorted_lovd_output_file = lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf"
+      writable_sorted_lovd_output_file = open(sorted_lovd_output_file, 'w')
+      args = ["vcf-sort", lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
+      print "Running lovd2vcf with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=writable_sorted_lovd_output_file, stderr=subprocess.PIPE)
+      print_subprocess_output_and_error(sp)
+      print "Sorted BRCA1/2 hg38 vcf file into %s." % (writable_sorted_lovd_output_file)
+
+      copy(writable_sorted_lovd_output_file, pipeline_input_dir)
+
+      print "Copied LOVD output file into output directory."
 
 class DownloadAndExtractFilesFromG1K(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
@@ -514,13 +537,18 @@ class DownloadAndExtractFilesFromG1K(luigi.Task):
       print_subprocess_output_and_error(sp)
 
       # vcf-sort $G1K/1000G_brca.hg38.vcf > $G1K/1000G_brca.sorted.hg38.vcf
-      with self.output().open("w") as sorted_1000G_brca_hg38_vcf_file:
-        args = ["vcf-sort", g1k_file_dir + "/1000G_brca.hg38.vcf"]
-        print "Running vcf-sort with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=sorted_1000G_brca_hg38_vcf_file, stderr=subprocess.PIPE)
-        print_subprocess_output_and_error(sp)
+      sorted_g1k_output_file = g1k_file_dir + "/1000G_brca.sorted.hg38.vcf"
+      writable_sorted_g1k_output_file = open(sorted_g1k_output_file, 'w')
+      args = ["vcf-sort", g1k_file_dir + "/1000G_brca.hg38.vcf"]
+      print "Running vcf-sort with the following args: %s" % (args)
+      sp = subprocess.Popen(args, stdout=writable_sorted_g1k_output_file, stderr=subprocess.PIPE)
+      print_subprocess_output_and_error(sp)
 
-        print "Done! Sorted concatenated data into %s" % (sorted_1000G_brca_hg38_vcf_file)
+      print "Sorted concatenated data into %s" % (writable_sorted_g1k_output_file)
+
+      copy(sorted_g1k_output_file, pipeline_input_dir)
+
+      print "Copied final G1K output to output directory"
 
 class DownloadAndExtractFilesFromEXAC(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
@@ -614,17 +642,21 @@ class ExtractOutputFromEnigma(luigi.Task):
       return luigi.LocalTarget(output_file_path)
 
     def run(self):
+      enigma_file_dir = os.environ['ENIGMA'] = self.file_parent_dir + '/enigma'
       pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
       brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
 
       date_for_output_file_name = datetime.date.today().isoformat()
-      output_file_path = pipeline_input_dir + "/ENIGMA_last_updated_%s.tsv" % (date_for_output_file_name)
+      enigma_dir_output_file = enigma_file_dir + "/ENIGMA_last_updated_%s.tsv" % (date_for_output_file_name)
       os.chdir(enigma_method_dir)
-      args = ["python", "enigma-processing.py", "-o", output_file_path, "-g", brca_resources_dir + "/hg38.fa"]
+      args = ["python", "enigma-processing.py", "-o", enigma_dir_output_file, "-g", brca_resources_dir + "/hg38.fa"]
       print "Running enigma-processing.py with the following args: %s" % (args)
       sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       print_subprocess_output_and_error(sp)
-      print "Completed enigma processing into %s." % (output_file_path)
+      print "Completed enigma processing at %s." % (enigma_dir_output_file)
+
+      copy(enigma_dir_output_file, pipeline_input_dir)
+      print "Copied Enigma output file to output file directory."
 
 class RunAll(luigi.WrapperTask):
     date = luigi.DateParameter(default=datetime.date.today())
