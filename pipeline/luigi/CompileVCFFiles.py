@@ -73,24 +73,15 @@ def download_file_with_basic_auth(url, file_name, username, password):
   print "Finished downloading %s" % (file_name)
 
 
-###############################
-# Globals / Env / Directories #
-###############################
+#######################################
+# Default Globals / Env / Directories #
+#######################################
+
+DEFAULT_BRCA_RESOURCES_DIR = os.environ['BRCA_RESOURCES'] = (os.path.abspath('../brca/brca-resources'))
+DEFAULT_OUTPUT_DIR = os.environ['PIPELINE_INPUT'] = (os.path.abspath('../brca/pipeline-data/data/pipeline_input'))
+DEFAULT_FILE_PARENT_DIR = os.environ['CLINVAR'] = (os.path.abspath('../brca/pipeline-data/data'))
 
 luigi_dir = os.environ['LUIGI'] = os.getcwd()
-
-brca_resources_dir = os.environ['BRCA_RESOURCES'] = create_path_if_nonexistent(os.path.abspath('../brca/brca-resources'))
-pipeline_input_dir = os.environ['PIPELINE_INPUT'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/pipeline_input'))
-brca_pipeline_data_dir = os.environ['BRCA_PIPELINE_DATA'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data'))
-
-bic_file_dir = os.environ['BIC'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/BIC'))
-clinvar_file_dir = os.environ['CLINVAR'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/ClinVar'))
-esp_file_dir = os.environ['ESP'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/ESP'))
-lovd_file_dir = os.environ['LOVD'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/LOVD'))
-ex_lovd_file_dir = os.environ['EXLOVD'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/exLOVD'))
-exac_file_dir = os.environ['EXAC'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/exac'))
-g1k_file_dir = os.environ['G1K'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/G1K'))
-enigma_file_dir = os.environ['ENIGMA'] = create_path_if_nonexistent(os.path.abspath('../brca/pipeline-data/data/enigma'))
 
 bic_method_dir = os.environ['BIC_METHODS'] = os.path.abspath('../bic')
 clinvar_method_dir = os.environ['CLINVAR_METHODS'] = os.path.abspath('../clinvar')
@@ -101,18 +92,29 @@ enigma_method_dir = os.environ['ENIGMA_METHODS'] = os.path.abspath('../enigma')
 data_merging_method_dir = os.environ['DATA_MERGING_METHODS'] = os.path.abspath('../data_merging')
 
 
-
 ######################
 ####### Tasks ########
 ######################
 
 class ConvertLatestClinvarToVCF(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
+    
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                        description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                        description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                        description='directory to store all individual task related files')
 
     def output(self):
-      return luigi.LocalTarget(pipeline_input_dir + "/ClinVarBrca.vcf")
+      return luigi.LocalTarget(self.output_dir + "/ClinVarBrca.vcf")
 
     def run(self):
+      clinvar_file_dir = os.environ['CLINVAR'] = self.file_parent_dir + '/ClinVar'
+      pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+
       os.chdir(clinvar_file_dir)
 
       # Download latest gzipped ClinVarFullRelease
@@ -164,11 +166,23 @@ class ConvertLatestClinvarToVCF(luigi.Task):
 class DownloadAndExtractFilesFromESPTar(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
 
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                        description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                        description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                        description='directory to store all individual task related files')
+
     def output(self):
-      return luigi.LocalTarget(pipeline_input_dir + "/esp.brca12.sorted.hg38.vcf")
+      return luigi.LocalTarget(self.output_dir + "/esp.brca12.sorted.hg38.vcf")
 
     # NOTE: vcf module (`pip install PyVCF`) and VCFtools must be installed: https://vcftools.github.io/index.html 
     def run(self):
+      esp_file_dir = os.environ['ESP'] = self.file_parent_dir + '/ESP'
+      pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+
       os.chdir(esp_file_dir)
 
       # Download ESP data
@@ -229,10 +243,23 @@ class DownloadAndExtractFilesFromBIC(luigi.Task):
     u = luigi.Parameter()
     p = luigi.Parameter()
 
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                        description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                        description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                        description='directory to store all individual task related files')
+
     def output(self):
-        return luigi.LocalTarget(pipeline_input_dir + "/bicSnp.sorted.hg38.vcf")
+        return luigi.LocalTarget(self.output_dir + "/bicSnp.sorted.hg38.vcf")
 
     def run(self):
+      bic_file_dir = os.environ['BIC'] = self.file_parent_dir + '/BIC'
+      pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+      brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+
       os.chdir(bic_file_dir)
 
       # Download brca1 data
@@ -279,10 +306,23 @@ class DownloadAndExtractFilesFromBIC(luigi.Task):
 class ExtractAndConvertFilesFromEXLOVD(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
 
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                        description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                        description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                        description='directory to store all individual task related files')
+
     def output(self):
-      return luigi.LocalTarget(pipeline_input_dir + "/exLOVD_brca12.sorted.hg38.vcf")
+      return luigi.LocalTarget(self.output_dir + "/exLOVD_brca12.sorted.hg38.vcf")
     
     def run(self):
+      ex_lovd_file_dir = os.environ['EXLOVD'] = self.file_parent_dir + '/exLOVD'
+      pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+      brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+
       os.chdir(lovd_method_dir)
       
       # extract_data.py -u http://hci-exlovd.hci.utah.edu/ -l BRCA1 BRCA2 -o $EXLOVD
@@ -334,11 +374,24 @@ class ExtractAndConvertFilesFromEXLOVD(luigi.Task):
 
 class ExtractAndConvertFilesFromLOVD(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
+
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                        description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                        description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                        description='directory to store all individual task related files')
     
     def output(self):
-      return luigi.LocalTarget(pipeline_input_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
+      return luigi.LocalTarget(self.output_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
 
     def run(self):
+      lovd_file_dir = os.environ['LOVD'] = self.file_parent_dir + '/LOVD'
+      pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+      brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+
       os.chdir(lovd_method_dir)
       
       # extract_data.py -u http://databases.lovd.nl/shared/ -l BRCA1 BRCA2 -o $LOVD
@@ -391,10 +444,23 @@ class ExtractAndConvertFilesFromLOVD(luigi.Task):
 class DownloadAndExtractFilesFromG1K(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
 
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                        description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                        description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                        description='directory to store all individual task related files')
+
     def output(self):
-      return luigi.LocalTarget(pipeline_input_dir + "/1000G_brca.sorted.hg38.vcf")
+      return luigi.LocalTarget(self.output_dir + "/1000G_brca.sorted.hg38.vcf")
 
     def run(self):
+      g1k_file_dir = os.environ['G1K'] = self.file_parent_dir + '/G1K'
+      pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+      brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+
       os.chdir(g1k_file_dir)
       print "Downloading 1000 genome variant data from ftp....takes a while...."
 
@@ -459,10 +525,23 @@ class DownloadAndExtractFilesFromG1K(luigi.Task):
 class DownloadAndExtractFilesFromEXAC(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
 
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                        description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                        description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                        description='directory to store all individual task related files')
+
     def output(self):
-      return luigi.LocalTarget(pipeline_input_dir + "/exac.brca12.hg38.vcf")
+      return luigi.LocalTarget(self.output_dir + "/exac.brca12.hg38.vcf")
 
     def run(self):
+      g1k_file_dir = os.environ['EXAC'] = self.file_parent_dir + '/exac'
+      pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+      brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+
       os.chdir(exac_file_dir)
 
       # Download vcf.gz file
@@ -519,31 +598,54 @@ class DownloadAndExtractFilesFromEXAC(luigi.Task):
 
 class ExtractOutputFromEnigma(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
-    date_for_output_file_name = datetime.date.today().isoformat()
-    output_file_path = pipeline_input_dir + "/ENIGMA_last_updated_%s.tsv" % (date_for_output_file_name)
+
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                        description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                        description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                        description='directory to store all individual task related files')
 
     def output(self):
-      return luigi.LocalTarget(self.output_file_path)
+      date_for_output_file_name = datetime.date.today().isoformat()
+      output_file_path = self.output_dir + "/ENIGMA_last_updated_%s.tsv" % (date_for_output_file_name)
+      return luigi.LocalTarget(output_file_path)
 
     def run(self):
+      pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+      brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+
+      date_for_output_file_name = datetime.date.today().isoformat()
+      output_file_path = pipeline_input_dir + "/ENIGMA_last_updated_%s.tsv" % (date_for_output_file_name)
       os.chdir(enigma_method_dir)
-      args = ["python", "enigma-processing.py", "-o", self.output_file_path, "-g", brca_resources_dir + "/hg38.fa"]
+      args = ["python", "enigma-processing.py", "-o", output_file_path, "-g", brca_resources_dir + "/hg38.fa"]
       print "Running enigma-processing.py with the following args: %s" % (args)
       sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       print_subprocess_output_and_error(sp)
-      print "Completed enigma processing into %s." % (self.output_file_path)
+      print "Completed enigma processing into %s." % (output_file_path)
 
 class RunAll(luigi.WrapperTask):
     date = luigi.DateParameter(default=datetime.date.today())
     u = luigi.Parameter()
     p = luigi.Parameter()
+    
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                        description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                        description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                        description='directory to store all individual task related files')
 
     def requires(self):
-        yield ConvertLatestClinvarToVCF(self.date)
-        yield DownloadAndExtractFilesFromESPTar(self.date)
-        yield DownloadAndExtractFilesFromBIC(self.date, self.u, self.p)
-        yield DownloadAndExtractFilesFromG1K(self.date)
-        yield DownloadAndExtractFilesFromEXAC(self.date)
-        yield ExtractAndConvertFilesFromEXLOVD(self.date)
-        yield ExtractAndConvertFilesFromLOVD(self.date)
-        yield ExtractOutputFromEnigma(self.date)
+        yield ConvertLatestClinvarToVCF(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield DownloadAndExtractFilesFromESPTar(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield DownloadAndExtractFilesFromBIC(self.date, self.u, self.p, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield DownloadAndExtractFilesFromG1K(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield DownloadAndExtractFilesFromEXAC(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield ExtractAndConvertFilesFromEXLOVD(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield ExtractAndConvertFilesFromLOVD(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield ExtractOutputFromEnigma(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)

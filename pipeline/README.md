@@ -9,7 +9,7 @@ Contains source code used to wrangle the BRCA variation data that is presented i
  * download http://hgdownload.cse.ucsc.edu/gbdb/hg19/liftOver/hg19ToHg38.over.chain.gz to $BRCA_RESOURCES.  There is no need to uncompress it.
  * Download brca1_hg38.txt, brca2_hg38.txt, brca1_hg19.txt and brca2_hg19.txt from http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/ to $BRCA_RESOURCES
  * install postgresql
- * install the leiden cleanup package at http://leiden-open-variation-database-lovd-cleanup.readthedocs.io/en/latest/index.html
+ * install the leiden cleanup package at http://leiden-open-variation-database-lovd-cleanup.readthedocs.io/en/latest/index.html (NOTE: this can be problematic, please submit an issue if you encounter errors with the leiden package)
  * pip install git+https://github.com/counsyl/hgvs.git
  * pip install psycopg2
  * pip install parsley
@@ -17,7 +17,7 @@ Contains source code used to wrangle the BRCA variation data that is presented i
  * pip install bioutils
  * pip install biopython
  * install lzo
- * install bx-python from https://pypi.python.org/packages/55/db/fa76af59a03c88ad80494fc0df2948740bbd58cd3b3ed5c31319624687cc/bx-python-0.7.3.tar.gz#md5=d8c50c01c9e421bae0bbdbfa00fef6e4 (note: pip install bx-python left an outstanding dependency to lzo1x.h, which proved to be hard to resolve) NOTE: This may lead to a missing bigwig.py file, working out how to resolve this issue currently, contact zfischma@ucsc.edu if you run into this problem.
+ * install bx-python from https://pypi.python.org/packages/55/db/fa76af59a03c88ad80494fc0df2948740bbd58cd3b3ed5c31319624687cc/bx-python-0.7.3.tar.gz#md5=d8c50c01c9e421bae0bbdbfa00fef6e4 (note: pip install bx-python left an outstanding dependency to lzo1x.h, which proved to be hard to resolve) NOTE: This may lead to errors in the bx.bbi directory, please submit an issue if you encounter this problem. Sometimes `pip install bx-python` is also necessary.
  * pip install CrossMap
  * install vcftools from https://vcftools.github.io/index.html
  * pip install pyvcf
