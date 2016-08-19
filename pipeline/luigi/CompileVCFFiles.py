@@ -538,7 +538,7 @@ class DownloadAndExtractFilesFromEXAC(luigi.Task):
       return luigi.LocalTarget(self.output_dir + "/exac.brca12.hg38.vcf")
 
     def run(self):
-      g1k_file_dir = os.environ['EXAC'] = self.file_parent_dir + '/exac'
+      exac_file_dir = os.environ['EXAC'] = self.file_parent_dir + '/exac'
       pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
       brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
 
