@@ -79,7 +79,7 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
                "BIC": BIC_FIELDS}
 
 ENIGMA_FILE = "ENIGMA_last_updated_05-21-2016.tsv"
-GENOME1K_FILE = "10k_genome.brca.sorted.hg38.vcf"
+GENOME1K_FILE = "1000G_brca.sorted.hg38.vcf"
 CLINVAR_FILE = "ClinVarBrca.vcf"
 LOVD_FILE = "sharedLOVD_brca12.sorted.hg38.vcf"
 EX_LOVD_FILE = "exLOVD_brca12.sorted.hg38.vcf"

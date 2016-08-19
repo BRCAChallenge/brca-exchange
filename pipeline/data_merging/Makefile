@@ -1,6 +1,6 @@
 releaseDir = $(BRCA_PIPELINE_DATA)
 resources = $(releaseDir)/pipeline-resources/
-inputVcfDir = $(releaseDir)/pipeline-input/
+inputVcfDir = $(releaseDir)/pipeline-input
 inputVcfs = $(inputVcfDir)/1000G_brca.sorted.hg38.vcf \
 	$(inputVcfDir)/ClinVarBrca.vcf \
 	$(inputVcfDir)/sharedLOVD_brca12.sorted.hg38.vcf \
