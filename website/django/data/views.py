@@ -176,7 +176,7 @@ def variant_search(request):
         end = req_dict.get('end')
         page_size = req_dict.get('pageSize', 3)
         page_token = req_dict.get('pageToken', "0")
-    
+
     x, referenceCord = variant_set_id.split("-")
     if referenceCord not in SetIds :
         return JsonResponse({"Error messeage" : "Not a supported variantSetId"})
@@ -185,9 +185,9 @@ def variant_search(request):
     filt = str(reference_name)+":"
     DbResp = Variant.objects
     DbResp = select_gen_coor(referenceCord, DbResp, filt)
-    
+
     ret_data = ga4gh_brca_page(DbResp, int(page_size), int(page_token))
-    
+
     ga_vars = [brca_to_ga4gh(i,referenceCord) for i in ret_data.values()]
     if len(ga_vars) > page_size:
         ga_vars.pop()
@@ -258,7 +258,7 @@ def brca_to_ga4gh(brca_variant, genRefer):
         if j == "id":
             var_resp.id = genRefer+"-"+str(brca_variant['id'])
             var_resp.variant_set_id = name+"-"+genRefer
-            
+
             var_resp.created = 0
             var_resp.updated = 0
             continue
@@ -330,10 +330,10 @@ def get_variantSet(request):
         page_token = req_dict.get('pageToken', '0')
         if dataset_id != "brca-exchange":
             return JsonResponse(ErrorMessages["datasetId"])
-    
+
     response1 = v_s.SearchVariantSetsResponse()
     response1.next_page_token = page_token
-    for i in range(len(SetIds)):       
+    for i in range(len(SetIds)):
         response = vrs.VariantSet()
         response.id = datasetId+"-"+SetIds[i]
         response.name = SetName+"-"+SetIds[i]
@@ -388,7 +388,8 @@ def search_datasets(request):
     dta_resp = meta.Dataset()
     dta_resp.name = SetName
     dta_resp.id = name
-    dta_resp.description = "Variants observed in brca-exchange project -----"
+    dta_resp.info[SetName].append("This set contains variants as stored and mantained by the brca-exchange project")
+    dta_resp.description = "Variants observed in brca-exchange project"
     sr_dta_set_resp.datasets.extend([dta_resp])
     sr_dta_set_resp.next_page_token = page_token
     return JsonResponse(json_format._MessageToJsonObject(sr_dta_set_resp, True))
