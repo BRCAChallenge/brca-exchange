@@ -14,63 +14,63 @@ from shutil import copy
 #######################
 
 def create_path_if_nonexistent(path):
-  if not os.path.exists(path):
-    os.makedirs(path)
-  return path
+    if not os.path.exists(path):
+        os.makedirs(path)
+    return path
 
 def print_subprocess_output_and_error(sp):
-  out, err = sp.communicate()
-  if out:
-      print "standard output of subprocess:"
-      print out
-  if err:
-      print "standard error of subprocess:"
-      print err
+    out, err = sp.communicate()
+    if out:
+        print "standard output of subprocess:"
+        print out
+    if err:
+        print "standard error of subprocess:"
+        print err
 
 @retry(stop_max_attempt_number=3, wait_fixed=3000)
 def urlopen_with_retry(url):
     return urllib2.urlopen(url)
 
 def download_file_and_display_progress(url, file_name=None):
-  if file_name is None:
-    file_name = url.split('/')[-1]
+    if file_name is None:
+        file_name = url.split('/')[-1]
 
-  u = urlopen_with_retry(url)
-  f = open(file_name, 'wb')
-  meta = u.info()
-  file_size = int(meta.getheaders("Content-Length")[0])
-  print "Downloading: %s Bytes: %s" % (file_name, file_size)
+    u = urlopen_with_retry(url)
+    f = open(file_name, 'wb')
+    meta = u.info()
+    file_size = int(meta.getheaders("Content-Length")[0])
+    print "Downloading: %s Bytes: %s" % (file_name, file_size)
 
-  file_size_dl = 0
-  block_sz = 8192
-  while True:
-      buffer = u.read(block_sz)
-      if not buffer:
-          break
+    file_size_dl = 0
+    block_sz = 8192
+    while True:
+        buffer = u.read(block_sz)
+        if not buffer:
+            break
 
-      file_size_dl += len(buffer)
-      f.write(buffer)
-      status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
-      status = status + chr(8)*(len(status)+1)
-      print status,
+        file_size_dl += len(buffer)
+        f.write(buffer)
+        status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
+        status = status + chr(8)*(len(status)+1)
+        print status,
 
-  f.close()
-  print "Finished downloading %s" % (file_name)
+    f.close()
+    print "Finished downloading %s" % (file_name)
 
 def download_file_with_basic_auth(url, file_name, username, password):
-  p = urllib2.HTTPPasswordMgrWithDefaultRealm()
+    p = urllib2.HTTPPasswordMgrWithDefaultRealm()
 
-  p.add_password(None, url, username, password)
+    p.add_password(None, url, username, password)
 
-  handler = urllib2.HTTPBasicAuthHandler(p)
-  opener = urllib2.build_opener(handler)
-  urllib2.install_opener(opener)
+    handler = urllib2.HTTPBasicAuthHandler(p)
+    opener = urllib2.build_opener(handler)
+    urllib2.install_opener(opener)
 
-  data = urlopen_with_retry(url).read()
-  f = open(file_name, "wb")
-  f.write(data)
-  f.close()
-  print "Finished downloading %s" % (file_name)
+    data = urlopen_with_retry(url).read()
+    f = open(file_name, "wb")
+    f.write(data)
+    f.close()
+    print "Finished downloading %s" % (file_name)
 
 
 #######################################
@@ -96,74 +96,216 @@ data_merging_method_dir = os.environ['DATA_MERGING_METHODS'] = os.path.abspath('
 ####### Tasks ########
 ######################
 
-class ConvertLatestClinvarToVCF(luigi.Task):
-    date = luigi.DateParameter(default=datetime.date.today())
+# class ConvertLatestClinvarToVCF(luigi.Task):
+#     date = luigi.DateParameter(default=datetime.date.today())
     
+#     resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+#                                     description='directory to store brca-resources data')
+
+#     output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+#                                  description='directory to store output files')
+
+#     file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+#                                       description='directory to store all individual task related files')
+
+#     def output(self):
+#       return luigi.LocalTarget(self.output_dir + "/ClinVarBrca.vcf")
+
+#     def run(self):
+        # clinvar_file_dir = os.environ['CLINVAR'] = self.file_parent_dir + '/ClinVar'
+        # pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+
+        # os.chdir(clinvar_file_dir)
+
+        # # Download latest gzipped ClinVarFullRelease
+        # download_file_and_display_progress("ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/ClinVarFullRelease_00-latest.xml.gz")
+
+        # Convert downloaded data to xml
+        # os.chdir(clinvar_method_dir)
+        # clinvar_xml_file = clinvar_file_dir + "/ClinVarBrca.xml"
+        # writable_clinvar_xml_file = open(clinvar_xml_file, "w")
+        # args = ["python", "clinVarBrca.py", clinvar_file_dir + "/ClinVarFullRelease_00-latest.xml.gz"]
+        # print "Running clinVarBrca.py with the following args: %s. This takes a while..." % (args)
+        # sp = subprocess.Popen(args, stdout=writable_clinvar_xml_file, stderr=subprocess.PIPE)
+        # print_subprocess_output_and_error(sp)
+        # print "Completed writing %s." % (writable_clinvar_xml_file)
+
+        # # Convert xml to txt
+        # clinvar_txt_file = clinvar_file_dir + "/ClinVarBrca.txt"
+        # writable_clinvar_txt_file = open(clinvar_txt_file, "w")
+        # args = ["python", "clinVarParse.py", clinvar_file_dir + "/ClinVarBrca.xml", "--assembly", "GRCh38"]
+        # print "Running clinVarParse.py with the following args: %s" % (args)
+        # sp = subprocess.Popen(args, stdout=writable_clinvar_txt_file, stderr=subprocess.PIPE)
+        # print_subprocess_output_and_error(sp)
+        # print "Completed writing %s." % (writable_clinvar_txt_file)
+
+        # # Convert txt to vcf
+        # os.chdir(data_merging_method_dir)
+        # args = ["python", "convert_tsv_to_vcf.py", "-i", clinvar_file_dir + "/ClinVarBrca.txt", "-o", clinvar_file_dir + "/ClinVarBrca.vcf", "-s", "ClinVar"]
+        # print "Running convert_tsv_to_vcf.py with the following args: %s" % (args)
+        # sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # print_subprocess_output_and_error(sp)
+        # print "Completed writing %s." % (clinvar_file_dir + "/ClinVarBrca.vcf")
+
+        # copy(clinvar_file_dir + "/ClinVarBrca.vcf", pipeline_input_dir)
+
+###############################################
+################### CLINVAR ###################
+###############################################
+
+class DownloadLatestClinvarData(luigi.Task):
+    date = luigi.DateParameter(default=datetime.date.today())
+      
     resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
-                        description='directory to store brca-resources data')
+                                    description='directory to store brca-resources data')
 
     output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                        description='directory to store output files')
+                                 description='directory to store output files')
 
     file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
-                        description='directory to store all individual task related files')
+                                      description='directory to store all individual task related files')
 
     def output(self):
-      return luigi.LocalTarget(self.output_dir + "/ClinVarBrca.vcf")
+        return luigi.LocalTarget(self.file_parent_dir + "/ClinVar/ClinVarFullRelease_00-latest.xml.gz")
 
     def run(self):
-      clinvar_file_dir = os.environ['CLINVAR'] = self.file_parent_dir + '/ClinVar'
-      pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+        clinvar_file_dir = self.file_parent_dir + "/ClinVar"
+        os.chdir(clinvar_file_dir)
 
-      os.chdir(clinvar_file_dir)
+        clinvar_data_url = "ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/ClinVarFullRelease_00-latest.xml.gz"
+        download_file_and_display_progress(clinvar_data_url)
 
-      # Download latest gzipped ClinVarFullRelease
-      download_file_and_display_progress("ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/ClinVarFullRelease_00-latest.xml.gz")
+class ConvertLatestClinvarDataToXML(luigi.Task):
+    date = luigi.DateParameter(default=datetime.date.today())
       
-      # Convert downloaded data to xml
-      os.chdir(clinvar_method_dir)
-      clinvar_xml_file = clinvar_file_dir + "/ClinVarBrca.xml"
-      writable_clinvar_xml_file = open(clinvar_xml_file, "w")
-      args = ["python", "clinVarBrca.py", clinvar_file_dir + "/ClinVarFullRelease_00-latest.xml.gz"]
-      print "Running clinVarBrca.py with the following args: %s. This takes a while..." % (args)
-      sp = subprocess.Popen(args, stdout=writable_clinvar_xml_file, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
-      print "Completed writing %s." % (writable_clinvar_xml_file)
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                                    description='directory to store brca-resources data')
 
-      # Convert xml to txt
-      clinvar_txt_file = clinvar_file_dir + "/ClinVarBrca.txt"
-      writable_clinvar_txt_file = open(clinvar_txt_file, "w")
-      args = ["python", "clinVarParse.py", clinvar_file_dir + "/ClinVarBrca.xml", "--assembly", "GRCh38"]
-      print "Running clinVarParse.py with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=writable_clinvar_txt_file, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
-      print "Completed writing %s." % (writable_clinvar_txt_file)
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                                 description='directory to store output files')
 
-      # Convert txt to vcf
-      os.chdir(data_merging_method_dir)
-      args = ["python", "convert_tsv_to_vcf.py", "-i", clinvar_file_dir + "/ClinVarBrca.txt", "-o", clinvar_file_dir + "/ClinVarBrca.vcf", "-s", "ClinVar"]
-      print "Running convert_tsv_to_vcf.py with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
-      print "Completed writing %s." % (clinvar_file_dir + "/ClinVarBrca.vcf")
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                                      description='directory to store all individual task related files')
 
-      copy(clinvar_file_dir + "/ClinVarBrca.vcf", pipeline_input_dir)
+    def requires(self):
+        return DownloadLatestClinvarData(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
 
-      ### NOTE: If we prefer to use the Clinvar Makefile instead of python, it can be run with the commented out code below. ###
+    def output(self):
+        return luigi.LocalTarget(self.file_parent_dir + "/ClinVar/ClinVarBrca.xml")
 
-      # # Create required xml file for make to run properly
-      # clinvar_xml_file = clinvar_file_dir + "/ClinVarBrca.xml"
-      # if not os.path.exists(clinvar_xml_file):
-      #   open(clinvar_xml_file, 'w').close() 
+    def run(self):
+        clinvar_file_dir = self.file_parent_dir + "/ClinVar"
+        os.chdir(clinvar_method_dir)
 
-      # # Makefile requires a particular environment variable for output
-      # my_env = os.environ.copy()
-      # my_env["BRCA_PIPELINE_DATA"] = brca_pipeline_data_dir
+        clinvar_xml_file = clinvar_file_dir + "/ClinVarBrca.xml"
+        writable_clinvar_xml_file = open(clinvar_xml_file, "w")
+        args = ["python", "clinVarBrca.py", clinvar_file_dir + "/ClinVarFullRelease_00-latest.xml.gz"]
+        print "Running clinVarBrca.py with the following args: %s. This takes a while..." % (args)
+        sp = subprocess.Popen(args, stdout=writable_clinvar_xml_file, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        print os.stat(clinvar_xml_file)
+
+        if os.stat(clinvar_xml_file).st_size == 0:
+            os.rename(clinvar_xml_file, clinvar_file_dir + "/Failed_ClinVarBrca.xml")
+            print "Failed to write Clinvar data to XML"
+        else:
+            print "Completed writing %s." % (clinvar_xml_file)
+
+class ConvertClinvarXMLToTXT(luigi.Task):
+    date = luigi.DateParameter(default=datetime.date.today())
       
-      # # Convert gzipped file to vcf using makefile in pipeline/clinvar/
-      # print "Converting %s to VCF format. This takes a while..." % (file_name)
-      # sp = subprocess.Popen(["make"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd="../clinvar", env=my_env)
-      # print_subprocess_output_and_error(sp)
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                                    description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                                 description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                                      description='directory to store all individual task related files')
+
+    def requires(self):
+        return ConvertLatestClinvarDataToXML(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+
+    def output(self):
+        return luigi.LocalTarget(self.file_parent_dir + "/ClinVar/ClinVarBrca.txt")
+
+    def run(self):
+        clinvar_file_dir = self.file_parent_dir + "/ClinVar"
+        os.chdir(clinvar_method_dir)
+
+        clinvar_txt_file = clinvar_file_dir + "/ClinVarBrca.txt"
+        writable_clinvar_txt_file = open(clinvar_txt_file, "w")
+        args = ["python", "clinVarParse.py", clinvar_file_dir + "/ClinVarBrca.xml", "--assembly", "GRCh38"]
+        print "Running clinVarParse.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=writable_clinvar_txt_file, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        if os.stat(clinvar_txt_file).st_size == 0:
+            os.rename(clinvar_txt_file, clinvar_file_dir + "/Failed_ClinVarBrca.txt")
+            print "Failed to convert Clinvar XML to TXT"
+        else:
+            print "Completed writing %s." % (clinvar_txt_file)
+
+class ConvertClinvarTXTToVCF(luigi.Task):
+    date = luigi.DateParameter(default=datetime.date.today())
+      
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                                    description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                                 description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                                      description='directory to store all individual task related files')
+
+    def requires(self):
+        return ConvertClinvarXMLToTXT(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+
+    def output(self):
+        return luigi.LocalTarget(self.file_parent_dir + "/ClinVar/ClinVarBrca.vcf")
+
+    def run(self):
+        clinvar_file_dir = self.file_parent_dir + "/ClinVar"
+
+        # Convert txt to vcf
+        os.chdir(data_merging_method_dir)
+        args = ["python", "convert_tsv_to_vcf.py", "-i", clinvar_file_dir + "/ClinVarBrca.txt", "-o", clinvar_file_dir + "/ClinVarBrca.vcf", "-s", "ClinVar"]
+        print "Running convert_tsv_to_vcf.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        if os.stat(clinvar_vcf_file).st_size == 0:
+            os.rename(clinvar_vcf_file, clinvar_file_dir + "/Failed_ClinVarBrca.vcf")
+            print "Failed to convert Clinvar TXT to VCF"
+        else:
+            print "Completed writing %s." % (clinvar_vcf_file)
+
+class CopyClinvarVCFToOutputDir(luigi.Task):
+    date = luigi.DateParameter(default=datetime.date.today())
+      
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                                    description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                                 description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                                      description='directory to store all individual task related files')
+
+    def requires(self):
+        return ConvertClinvarXMLToTXT(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+
+    def output(self):
+        return luigi.LocalTarget(self.output_dir + "/ClinVarBrca.vcf")
+
+    def run(self):
+        clinvar_file_dir = self.file_parent_dir + "/ClinVar"
+        copy(self.input(), self.output_dir)
+
+###############################################
+##################### ESP #####################
+###############################################
 
 class DownloadAndExtractFilesFromESPTar(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
@@ -673,11 +815,11 @@ class RunAll(luigi.WrapperTask):
                         description='directory to store all individual task related files')
 
     def requires(self):
-        yield ConvertLatestClinvarToVCF(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield DownloadAndExtractFilesFromESPTar(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield DownloadAndExtractFilesFromBIC(self.date, self.u, self.p, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield DownloadAndExtractFilesFromG1K(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield DownloadAndExtractFilesFromEXAC(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield ExtractAndConvertFilesFromEXLOVD(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield ExtractAndConvertFilesFromLOVD(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield ExtractOutputFromEnigma(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield CopyClinvarVCFToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        # yield DownloadAndExtractFilesFromESPTar(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        # yield DownloadAndExtractFilesFromBIC(self.date, self.u, self.p, self.resources_dir, self.output_dir, self.file_parent_dir)
+        # yield DownloadAndExtractFilesFromG1K(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        # yield DownloadAndExtractFilesFromEXAC(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        # yield ExtractAndConvertFilesFromEXLOVD(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        # yield ExtractAndConvertFilesFromLOVD(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        # yield ExtractOutputFromEnigma(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
