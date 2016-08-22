@@ -238,8 +238,6 @@ var Database = React.createClass({
         };
     },
     showVariant: function (row) {
-		  // XXX THIS IS VERY WRONG! A 'show' method should NOT modify data underneath the app!
-          row["Genomic_Coordinate_hg38"] = backend.trimSearchTerm(row["Genomic_Coordinate_hg38"]); //eslint-disable-line dot-notation
           var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
           if (d3TipDiv.length !== 0 && d3TipDiv[0].style.opacity !== '0') {
               d3TipDiv[0].style.opacity = '0';
