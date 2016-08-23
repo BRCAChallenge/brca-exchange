@@ -330,6 +330,8 @@ def get_variantSet(request):
         page_token = req_dict.get('pageToken', '0')
         if dataset_id != "brca-exchange":
             return JsonResponse(ErrorMessages["datasetId"])
+    if page_token is None:
+         page_token = "0"
 
     response1 = v_s.SearchVariantSetsResponse()
     response1.next_page_token = page_token
@@ -372,7 +374,7 @@ def get_varset_by_id(request, variantSetId):
         response.dataset_id = name
         response.reference_set_id = referenceSetId + "-" + Id
         brca_meta(response.metadata, Id)
-        resp = json_format._MessageToJsonObject(response, False)
+        resp = json_format._MessageToJsonObject(response, True)
         return JsonResponse(resp)
     else:
         return JsonResponse({"Invalid Set Id": variantSetId})

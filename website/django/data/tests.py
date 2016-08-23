@@ -97,17 +97,18 @@ class VariantTestCase(TestCase):
 ############################# NEW TESTS START #####################################
     def test_ga4gh_variants_status_code(self):
         request0 =  self.factory.post(
-            "/data/ga4gh/variants/search", json.dumps({"end": 51425158029, "referenceName": "chr17", "variantSetId": "brca1", "start": 51425158, "pageSize": 5 }), content_type="application/json")
+            "/data/ga4gh/variants/search", json.dumps({"referenceName": "chr17", "variantSetId": "brca-hg37", "start": 51425158, "end": 51425158029, "pageSize": 5 }), content_type="application/json")
         response = variant_search(request0)
         self.assertEqual(response.status_code, 200)
-
-
 
     def test_ga4gh_translator(self):
         var_resp = vrs.Variant()
         resp = Variant.objects.values()[0]
+        genRefer = "hg37"
         for j in resp:
-            if j == "Genomic_Coordinate_hg37":
+            if resp[j] == "-" or (resp[j] == ""):
+                continue
+            if j == "Genomic_Coordinate_"+genRefer:
                 var_resp.reference_name, start, bases = resp[j].split(':')
                 var_resp.reference_bases, alternbases = bases.split(">")
                 for i in range(len(alternbases)):
@@ -116,17 +117,21 @@ class VariantTestCase(TestCase):
                 var_resp.end = var_resp.start + len(alternbases)
                 continue
             if j == "id":
-                var_resp.id = str(resp['id'])
-                var_resp.variant_set_id = "brca-exchange-hg37"
-                var_resp.names.append("This are names")
+                var_resp.id = genRefer+"-"+str(resp['id'])
+                var_resp.variant_set_id = "brca-exchange"+"-"+genRefer
+
                 var_resp.created = 0
                 var_resp.updated = 0
                 continue
+            if j == "Synonyms":
+                Names = [i for i in str(resp[j]).split(",")]
+                for i in Names:
+                    var_resp.names.append(i)
             else:
                 var_resp.info[str(j)].append(resp[j])
 
         expectedResp = json.dumps(json_format._MessageToJsonObject(var_resp, False))
-        jresponse = json.dumps(json_format._MessageToJsonObject(brca_to_ga4gh(resp), False))
+        jresponse = json.dumps(json_format._MessageToJsonObject(brca_to_ga4gh(resp, genRefer), False))
         self.assertJSONEqual(jresponse , expectedResp)
 
     def test_validated_request(self):
@@ -168,14 +173,14 @@ class VariantTestCase(TestCase):
     def test_pagging_token(self):
         request0 = self.factory.post(
             "/data/ga4gh/variants/search", json.dumps(
-                {"end": 51425158029, "referenceName": "chr17", "variantSetId": "brca1", "start": 51425158,
+                {"end": 51425158029, "referenceName": "chr13", "variantSetId": "brca-hg37", "start": 51425158,
                  "pageSize": 5}), content_type="application/json")
         response = variant_search(request0)
         self.assertEqual(json.loads(response.content)["nextPageToken"], "1" )
 
         request0 = self.factory.post(
             "/data/ga4gh/variants/search", json.dumps(
-                {"end": 51425158029, "referenceName": "chr17", "variantSetId": "brca1", "start": 51425158,
+                {"end": 51425158029, "referenceName": "chr17", "variantSetId": "brca-hg37", "start": 51425158,
                  "pageSize": 5, "pageToken": "3"}), content_type="application/json", )
         response = variant_search(request0)
         self.assertEqual(json.loads(response.content)["nextPageToken"], "4")
@@ -196,20 +201,20 @@ class VariantTestCase(TestCase):
 
     def test_brca_to_ga4gh_variantSets_metafieldNums(self):
         request0 = self.factory.post(
-            "/data/ga4gh/variants/search", json.dumps({"datasetId": "hg37"}), content_type="application/json")
+            "/data/ga4gh/variantsets/search", json.dumps({"datasetId": "brca-exchange"}), content_type="application/json")
         response = get_variantSet(request0)
-        self.assertEqual(len(json.loads(response.content)["variantSets"][0]["metadata"]), 76)
+        self.assertEqual(len(json.loads(response.content)["variantSets"][0]["metadata"]), 82)
 
     def test_variantSets_fields(self):
         request0 = self.factory.post(
-            "/data/ga4gh/variants/search", json.dumps({"datasetId": "hg37"}), content_type="application/json")
+            "/data/ga4gh/variants/search", json.dumps({"datasetId": "brca-exchange"}), content_type="application/json")
         response = get_variantSet(request0)
-        Comp = json.loads(response.content)["variantSets"][0]
+        Comp = json.loads(response.content)["variantSets"][1]
 
         """Comparative fields returned by request's responce"""
         self.assertEqual(Comp["referenceSetId"], "Genomic-Coordinate-hg37")
         self.assertEqual(Comp["datasetId"], "brca-exchange")
-        self.assertEqual(Comp["name"], "brca-exchange-hg37")
+        self.assertEqual(Comp["name"], "brca-exchange-variants-hg37")
 
         """Next Page Token Field"""
         self.assertEquals(json.loads(response.content)["nextPageToken"], '0')
