@@ -12,17 +12,32 @@ from data.models import Variant
 
 
 def load_from_csv(apps, schema_editor):
-    file_path = os.path.join(settings.BASE_DIR, 'data', 'resources', 'written.tsv')
+    file_path = os.path.join(settings.BASE_DIR, 'data', 'resources', 'aggregated.tsv')
     with open(file_path) as tsv_file:
         reader = csv.reader(tsv_file, dialect="excel-tab")
         header = reader.next()
 
         for row in reader:
-
             # split Source column into booleans
             row_dict = dict(zip(header, row))
             for source in row_dict['Source'].split(','):
                 row_dict['Variant_in_' + source] = True
+            x = y = z = w = u = None
+            x , w , y = row_dict['Genomic_Coordinate_hg36'].split(':')
+            z , u = y.split('>')
+            row_dict['Hg36_Start'] = long(w)
+            row_dict['Hg36_End'] = long(row_dict['Hg36_Start'])+ len(u)
+            x = y = z = w = u = None
+            x ,w , y = row_dict['Genomic_Coordinate_hg37'].split(':')
+            z , u = y.split('>')
+            row_dict['Hg37_Start'] = long(w)
+            row_dict['Hg37_End'] = long(row_dict['Hg37_Start'])+ len(u)
+            x = y = z = w = u = None
+            x , w , y = row_dict['Genomic_Coordinate_hg38'].split(':')
+            z , u = y.split('>')
+            row_dict['Hg38_Start'] = long(w)
+            row_dict['Hg38_End'] = long(row_dict['Hg38_Start'])+ len(u)
+            row_dict['Reference_Name'] = x
             Variant.objects.create_variant(row_dict)
 
 

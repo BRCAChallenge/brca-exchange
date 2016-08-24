@@ -94,6 +94,7 @@ class Migration(migrations.Migration):
                 ('Hg37_Start', models.BigIntegerField(default=1)),
                 ('Hg38_End', models.BigIntegerField(default=1)),
                 ('Hg38_Start', models.BigIntegerField(default=1)),
+                ('Reference_Name', models.TextField()),
                 ('Max_Allele_Frequency', models.TextField()),
                 ('Genomic_Coordinate_hg38', models.TextField()),
                 ('Genomic_Coordinate_hg37', models.TextField()),
