@@ -537,241 +537,653 @@ class CopyBICOutputToOutputDir(luigi.Task):
         check_file_for_contents(self.output_dir + "/bic_brca12.sorted.hg38.vcf")
 
 
-class ExtractAndConvertFilesFromEXLOVD(luigi.Task):
+###############################################
+#                  exLOVD                     #
+###############################################
+
+
+class ExtractDataFromLatestEXLOVD(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
 
     resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
-                        description='directory to store brca-resources data')
+                                    description='directory to store brca-resources data')
 
     output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                        description='directory to store output files')
+                                 description='directory to store output files')
 
     file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
-                        description='directory to store all individual task related files')
+                                      description='directory to store all individual task related files')
 
     def output(self):
-      return luigi.LocalTarget(self.output_dir + "/exLOVD_brca12.sorted.hg38.vcf")
-    
+        ex_lovd_file_dir = self.file_parent_dir + '/exLOVD'
+
+        return {'brca1': luigi.LocalTarget(ex_lovd_file_dir + "/BRCA1.txt"),
+                'brca2': luigi.LocalTarget(ex_lovd_file_dir + "/BRCA2.txt")}
+
     def run(self):
-      ex_lovd_file_dir = os.environ['EXLOVD'] = self.file_parent_dir + '/exLOVD'
-      pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
-      brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+        ex_lovd_file_dir = os.environ['EXLOVD'] = self.file_parent_dir + '/exLOVD'
+        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+        brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
 
-      os.chdir(lovd_method_dir)
+        os.chdir(lovd_method_dir)
+
+        # extract_data.py -u http://hci-exlovd.hci.utah.edu/ -l BRCA1 BRCA2 -o $EXLOVD
+        ex_lovd_data_host_url = "http://hci-exlovd.hci.utah.edu/"
+        args = ["extract_data.py", "-u", ex_lovd_data_host_url, "-l", "BRCA1", "BRCA2", "-o", ex_lovd_file_dir]
+        print "Running extract_data.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+        print "Extracted data from %s." % (ex_lovd_data_host_url)
+
+
+@requires(ExtractDataFromLatestEXLOVD)
+class ConvertEXLOVDBRCA1ExtractToVCF(luigi.Task):
+
+    def output(self):
+        ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
+        return luigi.LocalTarget(ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf")
+
+    def run(self):
+        ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
+        args = ["./lovd2vcf", "-i", ex_lovd_file_dir + "/BRCA1.txt", "-o",
+                ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", "-a", "exLOVDAnnotation",
+                "-b", "1", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
+                brca_resources_dir + "/hg19.fa"]
+        print "Running lovd2vcf with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf")
+
+
+@requires(ConvertEXLOVDBRCA1ExtractToVCF)
+class ConvertEXLOVDBRCA2ExtractToVCF(luigi.Task):
+
+    def output(self):
+        ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
+        return luigi.LocalTarget(ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf")
+
+    def run(self):
+        ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
+        args = ["./lovd2vcf", "-i", ex_lovd_file_dir + "/BRCA2.txt", "-o",
+                ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf", "-a", "exLOVDAnnotation",
+                "-b", "2", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
+                brca_resources_dir + "/hg19.fa"]
+        print "Running lovd2vcf with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf")
+
+
+@requires(ConvertEXLOVDBRCA2ExtractToVCF)
+class ConcatenateEXLOVDVCFFiles(luigi.Task):
+
+    def output(self):
+        ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
+        return luigi.LocalTarget(ex_lovd_file_dir + "/exLOVD_brca12.hg19.vcf")
+
+    def run(self):
+        ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
+
+        ex_lovd_brca12_hg19_vcf_file = ex_lovd_file_dir + "/exLOVD_brca12.hg19.vcf"
+        writable_ex_lovd_brca12_hg19_vcf_file = open(ex_lovd_brca12_hg19_vcf_file, 'w')
+        args = ["vcf-concat", ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", ex_lovd_file_dir + "/exLOVD_brca12.hg19.vcf"]
+        print "Running lovd2vcf with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=writable_ex_lovd_brca12_hg19_vcf_file, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(ex_lovd_file_dir + "/exLOVD_brca12.hg19.vcf")
+
+
+@requires(ConcatenateEXLOVDVCFFiles)
+class CrossmapConcatenatedEXLOVDData(luigi.Task):
+
+    def output(self):
+        ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
+        return luigi.LocalTarget(ex_lovd_file_dir + "/exLOVD_brca12.hg38.vcf")
+
+    def run(self):
+        ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
+
+        args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz",
+                ex_lovd_file_dir + "/exLOVD_brca12.hg19.vcf", brca_resources_dir + "/hg38.fa",
+                ex_lovd_file_dir + "/exLOVD_brca12.hg38.vcf"]
+        print "Running CrossMap.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(ex_lovd_file_dir + "/exLOVD_brca12.hg38.vcf")
+
+
+@requires(CrossmapConcatenatedEXLOVDData)
+class SortEXLOVDOutput(luigi.Task):
+
+    def output(self):
+        ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
+        return luigi.LocalTarget(ex_lovd_file_dir + "/exLOVD_brca12.sorted.hg38.vcf")
+
+    def run(self):
+        ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
+
+        sorted_ex_lovd_output_file = ex_lovd_file_dir + "/exLOVD_brca12.sorted.hg38.vcf"
+        writable_sorted_ex_lovd_output_file = open(sorted_ex_lovd_output_file, 'w')
+        args = ["vcf-sort", ex_lovd_file_dir + "/exLOVD_brca12.hg38.vcf"]
+        print "Running vcf-sort with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=writable_sorted_ex_lovd_output_file, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+        print "Sorted BRCA1/2 hg38 vcf file into %s" % (writable_sorted_ex_lovd_output_file)
+
+        check_file_for_contents(ex_lovd_file_dir + "/exLOVD_brca12.sorted.hg38.vcf")
+
+
+@requires(SortEXLOVDOutput)
+class CopyEXLOVDOutputToOutputDir(luigi.Task):
+
+    def output(self):
+        return luigi.LocalTarget(self.output_dir + "/exLOVD_brca12.sorted.hg38.vcf")
+
+    def run(self):
+        ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
+
+        copy(ex_lovd_file_dir + "/exLOVD_brca12.sorted.hg38.vcf", self.output_dir)
+
+        check_file_for_contents(self.output_dir + "/exLOVD_brca12.sorted.hg38.vcf")
+
+
+###############################################
+#                sharedLOVD                   #
+###############################################
+
+
+class ExtractDataFromLatestSharedLOVD(luigi.Task):
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                                    description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                                 description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                                      description='directory to store all individual task related files')
+
+    def output(self):
+        lovd_file_dir = self.file_parent_dir + '/LOVD'
+
+        return {'brca1': luigi.LocalTarget(lovd_file_dir + "/BRCA1.txt"),
+                'brca2': luigi.LocalTarget(lovd_file_dir + "/BRCA2.txt")}
+
+    def run(self):
+        lovd_file_dir = os.environ['LOVD'] = self.file_parent_dir + '/LOVD'
+        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+        brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+
+        os.chdir(lovd_method_dir)
+
+        lovd_data_host_url = "http://databases.lovd.nl/shared/"
+        args = ["extract_data.py", "-u", lovd_data_host_url, "-l", "BRCA1", "BRCA2", "-o", lovd_file_dir]
+        print "Running extract_data.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+        print "Extracted data from %s." % (lovd_data_host_url)
+
+
+@requires(ExtractDataFromLatestSharedLOVD)
+class ConvertSharedLOVDBRCA1ExtractToVCF(luigi.Task):
+
+    def output(self):
+        lovd_file_dir = self.file_parent_dir + "/LOVD"
+        return luigi.LocalTarget(lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf")
+
+    def run(self):
+        lovd_file_dir = self.file_parent_dir + "/LOVD"
+        args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA1.txt",
+                "-o", lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf", "-a",
+                "exLOVDAnnotation", "-b", "1", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp",
+                "-g", brca_resources_dir + "/hg19.fa"]
+        print "Running lovd2vcf with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf")
+
+
+@requires(ConvertSharedLOVDBRCA1ExtractToVCF)
+class ConvertSharedLOVDBRCA2ExtractToVCF(luigi.Task):
+
+    def output(self):
+        lovd_file_dir = self.file_parent_dir + "/LOVD"
+        return luigi.LocalTarget(lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf")
+
+    def run(self):
+        lovd_file_dir = self.file_parent_dir + "/LOVD"
+        args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA2.txt", "-o",
+                lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf", "-a", "exLOVDAnnotation",
+                "-b", "2", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
+                brca_resources_dir + "/hg19.fa"]
+        print "Running lovd2vcf with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf")
+
+
+@requires(ConvertSharedLOVDBRCA2ExtractToVCF)
+class ConcatenateSharedLOVDVCFFiles(luigi.Task):
+
+    def output(self):
+        lovd_file_dir = self.file_parent_dir + "/LOVD"
+        return luigi.LocalTarget(lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf")
+
+    def run(self):
+        lovd_file_dir = self.file_parent_dir + "/LOVD"
+
+        lovd_brca12_hg19_vcf_file = lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf"
+        writable_lovd_brca12_hg19_vcf_file = open(lovd_brca12_hg19_vcf_file, 'w')
+        args = ["vcf-concat", lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf",
+                lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf"]
+        print "Running lovd2vcf with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=writable_lovd_brca12_hg19_vcf_file, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf")
+
+
+@requires(ConcatenateSharedLOVDVCFFiles)
+class CrossmapConcatenatedSharedLOVDData(luigi.Task):
+
+    def output(self):
+        lovd_file_dir = self.file_parent_dir + "/LOVD"
+        return luigi.LocalTarget(lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf")
+
+    def run(self):
+        lovd_file_dir = self.file_parent_dir + "/LOVD"
+
+        args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz",
+                lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf", brca_resources_dir + "/hg38.fa",
+                lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
+        print "Running CrossMap.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf")
+
+
+@requires(CrossmapConcatenatedSharedLOVDData)
+class SortSharedLOVDOutput(luigi.Task):
+
+    def output(self):
+        lovd_file_dir = self.file_parent_dir + "/LOVD"
+        return luigi.LocalTarget(lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
+
+    def run(self):
+        lovd_file_dir = self.file_parent_dir + "/LOVD"
+
+        sorted_lovd_output_file = lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf"
+        writable_sorted_lovd_output_file = open(sorted_lovd_output_file, 'w')
+        args = ["vcf-sort", lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
+        print "Running vcf-sort with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=writable_sorted_lovd_output_file, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+        print "Sorted BRCA1/2 hg38 vcf file into %s" % (writable_sorted_lovd_output_file)
+
+        check_file_for_contents(lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
+
+
+@requires(SortSharedLOVDOutput)
+class CopySharedLOVDOutputToOutputDir(luigi.Task):
+
+    def output(self):
+        return luigi.LocalTarget(self.output_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
+
+    def run(self):
+        lovd_file_dir = self.file_parent_dir + "/LOVD"
+
+        copy(lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf", self.output_dir)
+
+        check_file_for_contents(self.output_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
+
+
+# class ExtractAndConvertFilesFromEXLOVD(luigi.Task):
+    # date = luigi.DateParameter(default=datetime.date.today())
+
+    # resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+    #                     description='directory to store brca-resources data')
+
+    # output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+    #                     description='directory to store output files')
+
+    # file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+    #                     description='directory to store all individual task related files')
+
+    # def output(self):
+    #   return luigi.LocalTarget(self.output_dir + "/exLOVD_brca12.sorted.hg38.vcf")
+
+    # def run(self):
+    #   ex_lovd_file_dir = os.environ['EXLOVD'] = self.file_parent_dir + '/exLOVD'
+    #   pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+    #   brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+
+    #   os.chdir(lovd_method_dir)
+
+    #   # extract_data.py -u http://hci-exlovd.hci.utah.edu/ -l BRCA1 BRCA2 -o $EXLOVD
+    #   ex_lovd_data_host_url = "http://hci-exlovd.hci.utah.edu/"
+    #   args = ["extract_data.py", "-u", ex_lovd_data_host_url, "-l", "BRCA1", "BRCA2", "-o", ex_lovd_file_dir]
+    #   print "Running extract_data.py with the following args: %s" % (args)
+    #   sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    #   print_subprocess_output_and_error(sp)
+    #   print "Extracted data from %s." % (ex_lovd_data_host_url)
+
+      # # Convert extracted flat file to vcf format ./lovd2vcf -i $EXLOVD/BRCA1.txt -o $EXLOVD/exLOVD_brca1.hg19.vcf -a exLOVDAnnotation -b 1 -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -g $BRCA_RESOURCES/hg19.fa
+      # args = ["./lovd2vcf", "-i", ex_lovd_file_dir + "/BRCA1.txt", "-o", ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", "-a", "exLOVDAnnotation", "-b", "1", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g", brca_resources_dir + "/hg19.fa"]
+      # print "Running lovd2vcf with the following args: %s" % (args)
+      # sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      # print_subprocess_output_and_error(sp)
+      # print "Converted extracted BRCA1 flat file to vcf format."
+
+      # # ./lovd2vcf -i output_directory/BRCA2.txt -o exLOVD_brca2.vcf -a $EXLOVD/exLOVDAnnotation -b 2 -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -g $BRCA_RESOURCES/hg19.fa
+      # args = ["./lovd2vcf", "-i", ex_lovd_file_dir + "/BRCA2.txt", "-o", ex_lovd_file_dir + "/exLOVD_brca2.vcf", "-a", "exLOVDAnnotation", "-b", "2", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g", brca_resources_dir + "/hg19.fa"]
+      # print "Running lovd2vcf with the following args: %s" % (args)
+      # sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      # print_subprocess_output_and_error(sp)
+      # print "Converted extracted BRCA2 flat file to vcf format."
+
+      # # vcf-concat $EXLOVD/exLOVD_brca1.hg19.vcf $EXLOVD/exLOVD_brca2.hg19.vcf > $EXLOVD/exLOVD_brca12.hg19.vcf
+      # ex_lovd_brca12_hg19_vcf_file = ex_lovd_file_dir + "/exLOVD_brca12.hg19.vcf"
+      # writable_ex_lovd_brca12_hg19_vcf_file = open(ex_lovd_brca12_hg19_vcf_file, 'w')
+      # args = ["vcf-concat", ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", ex_lovd_file_dir + "/exLOVD_brca12.hg19.vcf"]
+      # print "Running lovd2vcf with the following args: %s" % (args)
+      # sp = subprocess.Popen(args, stdout=writable_ex_lovd_brca12_hg19_vcf_file, stderr=subprocess.PIPE)
+      # print_subprocess_output_and_error(sp)
+      # print "Concatenated BRCA1 and BRCA2 vcf files into %s." % (ex_lovd_brca12_hg19_vcf_file)
       
-      # extract_data.py -u http://hci-exlovd.hci.utah.edu/ -l BRCA1 BRCA2 -o $EXLOVD
-      ex_lovd_data_host_url = "http://hci-exlovd.hci.utah.edu/"
-      args = ["extract_data.py", "-u", ex_lovd_data_host_url, "-l", "BRCA1", "BRCA2", "-o", ex_lovd_file_dir]
-      print "Running extract_data.py with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
-      print "Extracted data from %s." % (ex_lovd_data_host_url)
-
-      # Convert extracted flat file to vcf format ./lovd2vcf -i $EXLOVD/BRCA1.txt -o $EXLOVD/exLOVD_brca1.hg19.vcf -a exLOVDAnnotation -b 1 -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -g $BRCA_RESOURCES/hg19.fa
-      args = ["./lovd2vcf", "-i", ex_lovd_file_dir + "/BRCA1.txt", "-o", ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", "-a", "exLOVDAnnotation", "-b", "1", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g", brca_resources_dir + "/hg19.fa"]
-      print "Running lovd2vcf with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
-      print "Converted extracted BRCA1 flat file to vcf format."
-
-      # ./lovd2vcf -i output_directory/BRCA2.txt -o exLOVD_brca2.vcf -a $EXLOVD/exLOVDAnnotation -b 2 -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -g $BRCA_RESOURCES/hg19.fa
-      args = ["./lovd2vcf", "-i", ex_lovd_file_dir + "/BRCA2.txt", "-o", ex_lovd_file_dir + "/exLOVD_brca2.vcf", "-a", "exLOVDAnnotation", "-b", "2", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g", brca_resources_dir + "/hg19.fa"]
-      print "Running lovd2vcf with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
-      print "Converted extracted BRCA2 flat file to vcf format."
-
-      # vcf-concat $EXLOVD/exLOVD_brca1.hg19.vcf $EXLOVD/exLOVD_brca2.hg19.vcf > $EXLOVD/exLOVD_brca12.hg19.vcf
-      ex_lovd_brca12_hg19_vcf_file = ex_lovd_file_dir + "/exLOVD_brca12.hg19.vcf"
-      writable_ex_lovd_brca12_hg19_vcf_file = open(ex_lovd_brca12_hg19_vcf_file, 'w')
-      args = ["vcf-concat", ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", ex_lovd_file_dir + "/exLOVD_brca12.hg19.vcf"]
-      print "Running lovd2vcf with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=writable_ex_lovd_brca12_hg19_vcf_file, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
-      print "Concatenated BRCA1 and BRCA2 vcf files into %s." % (ex_lovd_brca12_hg19_vcf_file)
-      
-      # `CrossMap.py vcf $BRCA_RESOURCES/hg19ToHg38.over.chain.gz $EXLOVD/exLOVD_brca12.hg19.vcf $BRCA_RESOURCES/hg38.fa $EXLOVD/exLOVD_brca12.hg38.vcf
-      args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz", ex_lovd_brca12_hg19_vcf_file, brca_resources_dir + "/hg38.fa", ex_lovd_file_dir + "/exLOVD_brca12.hg38.vcf"]
-      print "Running CrossMap.py with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
-      print "Crossmap complete."
+      # # `CrossMap.py vcf $BRCA_RESOURCES/hg19ToHg38.over.chain.gz $EXLOVD/exLOVD_brca12.hg19.vcf $BRCA_RESOURCES/hg38.fa $EXLOVD/exLOVD_brca12.hg38.vcf
+      # args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz", ex_lovd_brca12_hg19_vcf_file, brca_resources_dir + "/hg38.fa", ex_lovd_file_dir + "/exLOVD_brca12.hg38.vcf"]
+      # print "Running CrossMap.py with the following args: %s" % (args)
+      # sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      # print_subprocess_output_and_error(sp)
+      # print "Crossmap complete."
       
       # vcf-sort $EXLOVD/exLOVD_brca12.hg38.vcf > $EXLOVD/exLOVD_brca12.sorted.hg38.vcf
-      print "Sorting concatenated file into exLOVD file directory."
-      sorted_ex_lovd_output_file = ex_lovd_file_dir + "/exLOVD_brca12.sorted.hg38.vcf"
-      writable_sorted_ex_lovd_output_file = open(sorted_ex_lovd_output_file, 'w')
-      args = ["vcf-sort", ex_lovd_file_dir + "/exLOVD_brca12.hg38.vcf"]
-      print "Running lovd2vcf with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=writable_sorted_ex_lovd_output_file, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
-      print "Sorted BRCA1/2 hg38 vcf file into %s" % (writable_sorted_ex_lovd_output_file)
+      # print "Sorting concatenated file into exLOVD file directory."
+      # sorted_ex_lovd_output_file = ex_lovd_file_dir + "/exLOVD_brca12.sorted.hg38.vcf"
+      # writable_sorted_ex_lovd_output_file = open(sorted_ex_lovd_output_file, 'w')
+      # args = ["vcf-sort", ex_lovd_file_dir + "/exLOVD_brca12.hg38.vcf"]
+      # print "Running lovd2vcf with the following args: %s" % (args)
+      # sp = subprocess.Popen(args, stdout=writable_sorted_ex_lovd_output_file, stderr=subprocess.PIPE)
+      # print_subprocess_output_and_error(sp)
+      # print "Sorted BRCA1/2 hg38 vcf file into %s" % (writable_sorted_ex_lovd_output_file)
 
-      copy(writable_sorted_ex_lovd_output_file, pipeline_input_dir)
+      # copy(writable_sorted_ex_lovd_output_file, pipeline_input_dir)
 
-      print "Copied exLOVD output file to output directory."
+      # print "Copied exLOVD output file to output directory."
 
 
-class ExtractAndConvertFilesFromLOVD(luigi.Task):
+# class ExtractAndConvertFilesFromLOVD(luigi.Task):
+    #     date = luigi.DateParameter(default=datetime.date.today())
+
+    #     resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+    #                         description='directory to store brca-resources data')
+
+    #     output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+    #                         description='directory to store output files')
+
+    #     file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+    #                         description='directory to store all individual task related files')
+        
+    #     def output(self):
+    #       return luigi.LocalTarget(self.output_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
+
+    #     def run(self):
+    #       lovd_file_dir = os.environ['LOVD'] = self.file_parent_dir + '/LOVD'
+    #       pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+    #       brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+
+    #       os.chdir(lovd_method_dir)
+          
+    #       # extract_data.py -u http://databases.lovd.nl/shared/ -l BRCA1 BRCA2 -o $LOVD
+    #       lovd_data_host_url = "http://databases.lovd.nl/shared/"
+    #       args = ["extract_data.py", "-u", lovd_data_host_url, "-l", "BRCA1", "BRCA2", "-o", lovd_file_dir]
+    #       print "Running extract_data.py with the following args: %s" % (args)
+    #       sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    #       print_subprocess_output_and_error(sp)
+    #       print "Extracted data from %s." % (lovd_data_host_url)
+
+    #       # ./lovd2vcf -i $LOVD/BRCA1.txt -o $LOVD/sharedLOVD_brca1.hg19.vcf -a sharedLOVDAnnotation -b 1 -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -g $BRCA_RESOURCES/hg19.fa
+    #       args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA1.txt", "-o", lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf", "-a", "sharedLOVDAnnotation", "-b", "1", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g", brca_resources_dir + "/hg19.fa"]
+    #       print "Running lovd2vcf with the following args: %s" % (args)
+    #       sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    #       print_subprocess_output_and_error(sp)
+    #       print "Converted extracted BRCA1 flat file to vcf format."
+
+    #       # ./lovd2vcf -i $LOVD/BRCA2.txt -o $LOVD/sharedLOVD_brca2.hg19.vcf -a sharedLOVDAnnotation -b 2 -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -g $BRCA_RESOURCES/hg19.fa 
+    #       # Comment: BRCA2.txt might or might not be created. It seems like there's an error condition that kills BRCA2. It's not worth fixing the error condition at this point.
+    #       args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA2.txt", "-o", "sharedLOVD_brca2.hg19.vcf", "-a", "sharedLOVDAnnotation", "-b", "2", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g", brca_resources_dir + "/hg19.fa"]
+    #       print "Running lovd2vcf with the following args: %s" % (args)
+    #       sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    #       print_subprocess_output_and_error(sp)
+    #       print "Converted extracted BRCA2 flat file to vcf format."
+
+    #       # vcf-concat $LOVD/sharedLOVD_brca1.hg19.vcf $LOVD/sharedLOVD_brca2.hg19.vcf > $LOVD/sharedLOVD_brca12.hg19.vcf
+    #       shared_lovd_brca12_hg19_vcf_file = lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf"
+    #       writable_shared_lovd_brca12_hg19_vcf_file = open(shared_lovd_brca12_hg19_vcf_file, 'w')
+    #       args = ["vcf-concat", lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf", lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf"]
+    #       print "Running lovd2vcf with the following args: %s" % (args)
+    #       sp = subprocess.Popen(args, stdout=writable_shared_lovd_brca12_hg19_vcf_file, stderr=subprocess.PIPE)
+    #       print_subprocess_output_and_error(sp)
+    #       print "Concatenated BRCA1 and BRCA2 vcf files into %s." % (shared_lovd_brca12_hg19_vcf_file)
+          
+    #       # `CrossMap.py vcf $BRCA_RESOURCES/hg19ToHg38.over.chain.gz $LOVD/sharedLOVD_brca12.hg19.vcf $BRCA_RESOURCES/hg38.fa $LOVD/sharedLOVD_brca12.hg38.vcf
+    #       args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz", shared_lovd_brca12_hg19_vcf_file, brca_resources_dir + "/hg38.fa", lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
+    #       print "Running CrossMap.py with the following args: %s" % (args)
+    #       sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    #       print_subprocess_output_and_error(sp)
+    #       print "Crossmap complete."
+          
+    #       # vcf-sort $LOVD/sharedLOVD_brca12.38.vcf > $LOVD/sharedLOVD_brca12.sorted.38.vcf
+    #       sorted_lovd_output_file = lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf"
+    #       writable_sorted_lovd_output_file = open(sorted_lovd_output_file, 'w')
+    #       args = ["vcf-sort", lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
+    #       print "Running lovd2vcf with the following args: %s" % (args)
+    #       sp = subprocess.Popen(args, stdout=writable_sorted_lovd_output_file, stderr=subprocess.PIPE)
+    #       print_subprocess_output_and_error(sp)
+    #       print "Sorted BRCA1/2 hg38 vcf file into %s." % (writable_sorted_lovd_output_file)
+
+    #       copy(writable_sorted_lovd_output_file, pipeline_input_dir)
+
+    #       print "Copied LOVD output file into output directory."
+
+class DownloadG1KCHR13GZ(luigi.Task):
+
     date = luigi.DateParameter(default=datetime.date.today())
 
     resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
-                        description='directory to store brca-resources data')
+                                    description='directory to store brca-resources data')
 
     output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                        description='directory to store output files')
+                                 description='directory to store output files')
 
     file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
-                        description='directory to store all individual task related files')
-    
-    def output(self):
-      return luigi.LocalTarget(self.output_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
-
-    def run(self):
-      lovd_file_dir = os.environ['LOVD'] = self.file_parent_dir + '/LOVD'
-      pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
-      brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
-
-      os.chdir(lovd_method_dir)
-      
-      # extract_data.py -u http://databases.lovd.nl/shared/ -l BRCA1 BRCA2 -o $LOVD
-      lovd_data_host_url = "http://databases.lovd.nl/shared/"
-      args = ["extract_data.py", "-u", lovd_data_host_url, "-l", "BRCA1", "BRCA2", "-o", lovd_file_dir]
-      print "Running extract_data.py with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
-      print "Extracted data from %s." % (lovd_data_host_url)
-
-      # ./lovd2vcf -i $LOVD/BRCA1.txt -o $LOVD/sharedLOVD_brca1.hg19.vcf -a sharedLOVDAnnotation -b 1 -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -g $BRCA_RESOURCES/hg19.fa
-      args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA1.txt", "-o", lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf", "-a", "sharedLOVDAnnotation", "-b", "1", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g", brca_resources_dir + "/hg19.fa"]
-      print "Running lovd2vcf with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
-      print "Converted extracted BRCA1 flat file to vcf format."
-
-      # ./lovd2vcf -i $LOVD/BRCA2.txt -o $LOVD/sharedLOVD_brca2.hg19.vcf -a sharedLOVDAnnotation -b 2 -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -g $BRCA_RESOURCES/hg19.fa 
-      # Comment: BRCA2.txt might or might not be created. It seems like there's an error condition that kills BRCA2. It's not worth fixing the error condition at this point.
-      args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA2.txt", "-o", "sharedLOVD_brca2.hg19.vcf", "-a", "sharedLOVDAnnotation", "-b", "2", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g", brca_resources_dir + "/hg19.fa"]
-      print "Running lovd2vcf with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
-      print "Converted extracted BRCA2 flat file to vcf format."
-
-      # vcf-concat $LOVD/sharedLOVD_brca1.hg19.vcf $LOVD/sharedLOVD_brca2.hg19.vcf > $LOVD/sharedLOVD_brca12.hg19.vcf
-      shared_lovd_brca12_hg19_vcf_file = lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf"
-      writable_shared_lovd_brca12_hg19_vcf_file = open(shared_lovd_brca12_hg19_vcf_file, 'w')
-      args = ["vcf-concat", lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf", lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf"]
-      print "Running lovd2vcf with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=writable_shared_lovd_brca12_hg19_vcf_file, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
-      print "Concatenated BRCA1 and BRCA2 vcf files into %s." % (shared_lovd_brca12_hg19_vcf_file)
-      
-      # `CrossMap.py vcf $BRCA_RESOURCES/hg19ToHg38.over.chain.gz $LOVD/sharedLOVD_brca12.hg19.vcf $BRCA_RESOURCES/hg38.fa $LOVD/sharedLOVD_brca12.hg38.vcf
-      args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz", shared_lovd_brca12_hg19_vcf_file, brca_resources_dir + "/hg38.fa", lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
-      print "Running CrossMap.py with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
-      print "Crossmap complete."
-      
-      # vcf-sort $LOVD/sharedLOVD_brca12.38.vcf > $LOVD/sharedLOVD_brca12.sorted.38.vcf
-      sorted_lovd_output_file = lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf"
-      writable_sorted_lovd_output_file = open(sorted_lovd_output_file, 'w')
-      args = ["vcf-sort", lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
-      print "Running lovd2vcf with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=writable_sorted_lovd_output_file, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
-      print "Sorted BRCA1/2 hg38 vcf file into %s." % (writable_sorted_lovd_output_file)
-
-      copy(writable_sorted_lovd_output_file, pipeline_input_dir)
-
-      print "Copied LOVD output file into output directory."
-
-
-class DownloadAndExtractFilesFromG1K(luigi.Task):
-    date = luigi.DateParameter(default=datetime.date.today())
-
-    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
-                        description='directory to store brca-resources data')
-
-    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                        description='directory to store output files')
-
-    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
-                        description='directory to store all individual task related files')
+                                      description='directory to store all individual task related files')
 
     def output(self):
-      return luigi.LocalTarget(self.output_dir + "/1000G_brca.sorted.hg38.vcf")
+        g1k_file_dir = self.file_parent_dir + '/G1K'
+        return luigi.LocalTarget(g1k_file_dir + "/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz")
 
     def run(self):
-      g1k_file_dir = os.environ['G1K'] = self.file_parent_dir + '/G1K'
-      pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
-      brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+        g1k_file_dir = os.environ['G1K'] = self.file_parent_dir + '/G1K'
+        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+        brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
 
-      os.chdir(g1k_file_dir)
-      print "Downloading 1000 genome variant data from ftp....takes a while...."
+        os.chdir(g1k_file_dir)
 
-      # wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
-      chr13_vcf_gz_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz"
-      download_file_and_display_progress(chr13_vcf_gz_url)
+        chr13_vcf_gz_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz"
+        download_file_and_display_progress(chr13_vcf_gz_url)
 
-      # wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
-      chr17_vcf_gz_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz"
-      download_file_and_display_progress(chr17_vcf_gz_url)
 
-      # wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi
-      chr13_vcf_gz_tbi_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi"
-      download_file_and_display_progress(chr13_vcf_gz_tbi_url)
+@requires(DownloadG1KCHR13GZ)
+class DownloadG1KCHR17GZ(luigi.Task):
 
-      # wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi
-      chr17_vcf_gz_tbi_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi"
-      download_file_and_display_progress(chr17_vcf_gz_tbi_url)
+    def output(self):
+        g1k_file_dir = self.file_parent_dir + '/G1K'
+        return luigi.LocalTarget(g1k_file_dir + "/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz")
 
-      print "Extracting BRCA gene region from chr13 and chr17"
-      # tabix -h $G1K/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz 13:32889080-32973809 > $G1K/chr13_brca2_1000g_GRCh37.vcf
-      file_name = g1k_file_dir + "/chr13_brca2_1000g_GRCh37.vcf"
-      chr13_brca2_1000g_GRCh37_vcf_file = open(file_name, "w")
-      print file_name
-      print chr13_brca2_1000g_GRCh37_vcf_file
-      args = ["tabix", "-h", g1k_file_dir + "/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz", "13:32889080-32973809"]
-      print "Running tabix with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=chr13_brca2_1000g_GRCh37_vcf_file, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
+    def run(self):
+        g1k_file_dir = self.file_parent_dir + '/G1K'
+        os.chdir(g1k_file_dir)
 
-      # tabix -h $G1K/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz 17:41191488-41322420 > $G1K/chr17_brca1_1000g_GRCh37.vcf
-      file_name = g1k_file_dir + "/chr17_brca1_1000g_GRCh37.vcf"
-      chr17_brca1_1000g_GRCh37_vcf_file = open(file_name, "w")
-      args = ["tabix", "-h", g1k_file_dir + "/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz", "17:41191488-41322420"]
-      print "Running tabix with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=chr17_brca1_1000g_GRCh37_vcf_file, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
+        chr17_vcf_gz_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz"
+        download_file_and_display_progress(chr17_vcf_gz_url)
 
-      # vcf-concat $G1K/chr13_brca2_1000g_GRCh37.vcf $G1K/chr17_brca1_1000g_GRCh37.vcf  > $G1K/brca12_1000g_GRCh37.vcf
-      file_name = g1k_file_dir + "/brca12_1000g_GRCh37.vcf"
-      brca12_1000g_GRCh37_vcf_file = open(file_name, "w")
-      args = ["vcf-concat", g1k_file_dir + "/chr13_brca2_1000g_GRCh37.vcf", g1k_file_dir + "/chr17_brca1_1000g_GRCh37.vcf"]
-      print "Running vcf-concat with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=brca12_1000g_GRCh37_vcf_file, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
 
-      # CrossMap.py vcf $BRCA_RESOURCES/hg19ToHg38.over.chain.gz  $G1K/brca12_1000g_GRCh37.vcf $BRCA_RESOURCES/hg38.fa  $G1K/1000G_brca.hg38.vcf
-      args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz", g1k_file_dir + "/brca12_1000g_GRCh37.vcf", brca_resources_dir + "/hg38.fa", g1k_file_dir + "/1000G_brca.hg38.vcf"]
-      print "Running CrossMap.py with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
+@requires(DownloadG1KCHR17GZ)
+class DownloadG1KCHR13GZTBI(luigi.Task):
 
-      # vcf-sort $G1K/1000G_brca.hg38.vcf > $G1K/1000G_brca.sorted.hg38.vcf
-      sorted_g1k_output_file = g1k_file_dir + "/1000G_brca.sorted.hg38.vcf"
-      writable_sorted_g1k_output_file = open(sorted_g1k_output_file, 'w')
-      args = ["vcf-sort", g1k_file_dir + "/1000G_brca.hg38.vcf"]
-      print "Running vcf-sort with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=writable_sorted_g1k_output_file, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
+    def output(self):
+        g1k_file_dir = self.file_parent_dir + '/G1K'
+        return luigi.LocalTarget(g1k_file_dir + "/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi")
 
-      print "Sorted concatenated data into %s" % (writable_sorted_g1k_output_file)
+    def run(self):
+        g1k_file_dir = self.file_parent_dir + '/G1K'
+        os.chdir(g1k_file_dir)
 
-      copy(sorted_g1k_output_file, pipeline_input_dir)
+        chr13_vcf_gz_tbi_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi"
+        download_file_and_display_progress(chr13_vcf_gz_tbi_url)
 
-      print "Copied final G1K output to output directory"
+
+@requires(DownloadG1KCHR13GZTBI)
+class DownloadG1KCHR17GZTBI(luigi.Task):
+
+    def output(self):
+        g1k_file_dir = self.file_parent_dir + '/G1K'
+        return luigi.LocalTarget(g1k_file_dir + "/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi")
+
+    def run(self):
+        g1k_file_dir = self.file_parent_dir + '/G1K'
+        os.chdir(g1k_file_dir)
+
+        chr17_vcf_gz_tbi_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi"
+        download_file_and_display_progress(chr17_vcf_gz_tbi_url)
+
+
+@requires(DownloadG1KCHR17GZTBI)
+class ExtractCHR13BRCAData(luigi.Task):
+
+    def output(self):
+        g1k_file_dir = self.file_parent_dir + '/G1K'
+        return luigi.LocalTarget(g1k_file_dir + "/chr13_brca2_1000g_GRCh37.vcf")
+
+    def run(self):
+        g1k_file_dir = self.file_parent_dir + '/G1K'
+
+        chr13_brca2_vcf_file = g1k_file_dir + "/chr13_brca2_1000g_GRCh37.vcf"
+        writable_chr13_brca2_vcf_file = open(chr13_brca2_vcf_file, "w")
+        args = ["tabix", "-h",
+                g1k_file_dir + "/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz",
+                "13:32889080-32973809"]
+        print "Running tabix with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=writable_chr13_brca2_vcf_file, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(chr13_brca2_vcf_file)
+
+
+@requires(ExtractCHR13BRCAData)
+class ExtractCHR17BRCAData(luigi.Task):
+
+    def output(self):
+        g1k_file_dir = self.file_parent_dir + '/G1K'
+        return luigi.LocalTarget(g1k_file_dir + "/chr17_brca1_1000g_GRCh37.vcf")
+
+    def run(self):
+        g1k_file_dir = self.file_parent_dir + '/G1K'
+
+        chr17_brca1_vcf_file = g1k_file_dir + "/chr17_brca1_1000g_GRCh37.vcf"
+        writable_chr17_brca1_vcf_file = open(chr17_brca1_vcf_file, "w")
+        args = ["tabix", "-h",
+                g1k_file_dir + "/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz",
+                "17:41191488-41322420"]
+        print "Running tabix with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=writable_chr17_brca1_vcf_file, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(chr17_brca1_vcf_file)
+
+
+@requires(ExtractCHR17BRCAData)
+class ConcatenateG1KData(luigi.Task):
+
+    def output(self):
+        g1k_file_dir = self.file_parent_dir + '/G1K'
+        return luigi.LocalTarget(g1k_file_dir + "/brca12_1000g_GRCh37.vcf")
+
+    def run(self):
+        g1k_file_dir = self.file_parent_dir + '/G1K'
+        concatenated_g1k_vcf = g1k_file_dir + "/brca12_1000g_GRCh37.vcf"
+        writable_concatenated_g1k_vcf = open(concatenated_g1k_vcf, "w")
+        args = ["vcf-concat", g1k_file_dir + "/chr13_brca2_1000g_GRCh37.vcf",
+                g1k_file_dir + "/chr17_brca1_1000g_GRCh37.vcf"]
+        print "Running vcf-concat with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=writable_concatenated_g1k_vcf, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(concatenated_g1k_vcf)
+
+
+@requires(ConcatenateG1KData)
+class CrossmapConcatenatedG1KData(luigi.Task):
+
+    def output(self):
+        g1k_file_dir = self.file_parent_dir + '/G1K'
+        return luigi.LocalTarget(g1k_file_dir + "/1000G_brca.hg38.vcf")
+
+    def run(self):
+        g1k_file_dir = self.file_parent_dir + '/G1K'
+        brca_resources_dir = self.resources_dir
+
+        args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz",
+                g1k_file_dir + "/brca12_1000g_GRCh37.vcf", brca_resources_dir + "/hg38.fa",
+                g1k_file_dir + "/1000G_brca.hg38.vcf"]
+        print "Running CrossMap.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(g1k_file_dir + "/1000G_brca.hg38.vcf")
+
+
+@requires(CrossmapConcatenatedG1KData)
+class SortG1KData(luigi.Task):
+
+    def output(self):
+        g1k_file_dir = self.file_parent_dir + '/G1K'
+        return luigi.LocalTarget(g1k_file_dir + "/1000G_brca.sorted.hg38.vcf")
+
+    def run(self):
+        g1k_file_dir = self.file_parent_dir + '/G1K'
+
+        sorted_g1k_output_file = g1k_file_dir + "/1000G_brca.sorted.hg38.vcf"
+        writable_sorted_g1k_output_file = open(sorted_g1k_output_file, 'w')
+        args = ["vcf-sort", g1k_file_dir + "/1000G_brca.hg38.vcf"]
+        print "Running vcf-sort with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=writable_sorted_g1k_output_file, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(g1k_file_dir + "/1000G_brca.sorted.hg38.vcf")
+
+
+@requires(SortG1KData)
+class CopyG1KOutputToOutputDir(luigi.Task):
+
+    def output(self):
+        return luigi.LocalTarget(self.output_dir + "/1000G_brca.sorted.hg38.vcf")
+
+    def run(self):
+        g1k_file_dir = self.file_parent_dir + '/G1K'
+
+        copy(g1k_file_dir + "/1000G_brca.sorted.hg38.vcf", self.output_dir)
+
+        check_file_for_contents(self.output_dir + "/1000G_brca.sorted.hg38.vcf")
 
 
 class DownloadAndExtractFilesFromEXAC(luigi.Task):
@@ -902,7 +1314,7 @@ class RunAll(luigi.WrapperTask):
         # yield CopyClinvarVCFToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyESPOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyBICOutputToOutputDir(self.date, self.u, self.p, self.resources_dir, self.output_dir, self.file_parent_dir)
-        # yield DownloadAndExtractFilesFromG1K(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield CopyG1KOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         # yield DownloadAndExtractFilesFromEXAC(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         # yield ExtractAndConvertFilesFromEXLOVD(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         # yield ExtractAndConvertFilesFromLOVD(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
