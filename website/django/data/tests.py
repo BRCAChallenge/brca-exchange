@@ -97,7 +97,7 @@ class VariantTestCase(TestCase):
 ############################# NEW TESTS START #####################################
     def test_ga4gh_variants_status_code(self):
         request0 =  self.factory.post(
-            "/data/ga4gh/variants/search", json.dumps({"referenceName": "chr17", "variantSetId": "brca-hg37", "start": 51425158, "end": 51425158029, "pageSize": 5 }), content_type="application/json")
+            "/data/ga4gh/variants/search", json.dumps({"referenceName": "chr17", "variantSetId": "brca-hg37", "start": 51425158, "end": 515158029, "pageSize": 5 }), content_type="application/json")
         response = variant_search(request0)
         self.assertEqual(response.status_code, 200)
 
@@ -109,20 +109,39 @@ class VariantTestCase(TestCase):
             if resp[j] == "-" or (resp[j] == ""):
                 continue
             if j == "Genomic_Coordinate_"+genRefer:
-                var_resp.reference_name, start, bases = resp[j].split(':')
+                refNme, strt, bases = resp[j].split(':')
                 var_resp.reference_bases, alternbases = bases.split(">")
                 for i in range(len(alternbases)):
                     var_resp.alternate_bases.append(alternbases[i])
-                var_resp.start = int(start)
-                var_resp.end = var_resp.start + len(alternbases)
                 continue
             if j == "id":
                 var_resp.id = genRefer+"-"+str(resp['id'])
                 var_resp.variant_set_id = "brca-exchange"+"-"+genRefer
-
                 var_resp.created = 0
                 var_resp.updated = 0
                 continue
+            if j == "Reference_Name":
+                var_resp.reference_name = resp[j]
+                continue
+
+            if j == "Hg36_Start" and (genRefer == "hg36"):
+                var_resp.start = resp[j]
+                var_resp.end = resp["Hg36_End"]
+                continue
+            if j == "Hg36_End" and (genRefer == "hg36"): continue
+
+            if j == "Hg37_Start" and (genRefer == "hg37"):
+                var_resp.start = resp[j]
+                var_resp.end = resp["Hg37_End"]
+                continue
+            if j == "Hg37_End" and (genRefer == "hg37"): continue
+
+            if j == "Hg38_Start" and (genRefer == "hg38"):
+                var_resp.start = resp[j]
+                var_resp.end = resp["Hg38_End"]
+                continue
+            if j == "Hg38_End" and (genRefer == "hg38"): continue
+
             if j == "Synonyms":
                 Names = [i for i in str(resp[j]).split(",")]
                 for i in Names:
@@ -173,14 +192,14 @@ class VariantTestCase(TestCase):
     def test_pagging_token(self):
         request0 = self.factory.post(
             "/data/ga4gh/variants/search", json.dumps(
-                {"end": 51425158029, "referenceName": "chr13", "variantSetId": "brca-hg37", "start": 51425158,
+                {"end": 45158029, "referenceName": "chr13", "variantSetId": "brca-hg37", "start": 20425158,
                  "pageSize": 5}), content_type="application/json")
         response = variant_search(request0)
         self.assertEqual(json.loads(response.content)["nextPageToken"], "1" )
 
         request0 = self.factory.post(
             "/data/ga4gh/variants/search", json.dumps(
-                {"end": 51425158029, "referenceName": "chr17", "variantSetId": "brca-hg37", "start": 51425158,
+                {"end": 51425158029, "referenceName": "chr17", "variantSetId": "brca-hg37", "start": 41245664,
                  "pageSize": 5, "pageToken": "3"}), content_type="application/json", )
         response = variant_search(request0)
         self.assertEqual(json.loads(response.content)["nextPageToken"], "4")
@@ -195,7 +214,7 @@ class VariantTestCase(TestCase):
 
     def test_brca_to_ga4gh_variantSets_status_code(self):
         request0 = self.factory.post(
-            "/data/ga4gh/variants/search", json.dumps({"datasetId": "hg37"}), content_type="application/json")
+            "/data/ga4gh/variants/search", json.dumps({"datasetId": "brca-exchange"}), content_type="application/json")
         response = get_variantSet(request0)
         self.assertEqual(response.status_code, 200)
 
@@ -203,7 +222,7 @@ class VariantTestCase(TestCase):
         request0 = self.factory.post(
             "/data/ga4gh/variantsets/search", json.dumps({"datasetId": "brca-exchange"}), content_type="application/json")
         response = get_variantSet(request0)
-        self.assertEqual(len(json.loads(response.content)["variantSets"][0]["metadata"]), 82)
+        self.assertEqual(len(json.loads(response.content)["variantSets"][0]["metadata"]), 83)
 
     def test_variantSets_fields(self):
         request0 = self.factory.post(
@@ -243,6 +262,15 @@ class VariantTestCase(TestCase):
         self.assertIsNotNone(jresponse["datasets"], True)
         self.assertIsNotNone(jresponse["datasets"][0], True)
 
+    def test_search_variants_requested_range_present(self):
+        request = self.factory.post("/data/ga4gh/variants/search", json.dumps({"end": 41247374, "referenceName": "chr17", "variantSetId": "brca-hg37", "start": 41246794}), content_type = "application/json")
+        response = variant_search(request)
+
+        jresp = json.loads(response.content)
+        self.assertTrue(jresp["variants"][0]["start"] >= 41246794)
+        self.assertTrue(jresp["variants"][2]["end"] >= 41247374)
+        self.assertTrue(jresp["variants"][0]["referenceName"] == "chr17")
+        self.assertTrue(jresp["variants"][2]["referenceName"] == "chr17")
 
 if __name__ == '__main__':
     unittest.main()

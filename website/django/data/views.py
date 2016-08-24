@@ -180,11 +180,13 @@ def variant_search(request):
     x, referenceCord = variant_set_id.split("-")
     if referenceCord not in SetIds :
         return JsonResponse({"Error messeage" : "Not a supported variantSetId"})
+    if reference_name not in refNames:
+        return JsonResponse({"Error messeage" : "Not a supported referenceName"})
 
     response0 = v_s.SearchVariantsResponse()
     filt = str(reference_name)+":"
     DbResp = Variant.objects
-    DbResp = select_gen_coor(referenceCord, DbResp, filt)
+    DbResp = select_gen_coor(referenceCord, DbResp, reference_name, start, end)
 
     ret_data = ga4gh_brca_page(DbResp, int(page_size), int(page_token))
 
@@ -201,23 +203,26 @@ def variant_search(request):
 ############### .../variants/search methond END ##############################
 
 ############### Auxiliary function for quering database on a given Gen-Coordinate ###############
-def select_gen_coor(referenceCordinate, DbResp, filt, Start = None, End = None):
+def select_gen_coor(referenceCordinate, DbResp, Chrm, Start = None, End = None):
     if referenceCordinate == SetIds[0]:
-        FilteredResponse = DbResp.filter(Genomic_Coordinate_hg36__startswith=filt)
+        FilteredResponse = DbResp.filter(Hg36_Start__gt=Start, Reference_Name=Chrm)
         if Start != None and End != None:
-            FilteredResponse = FilteredResponse.filter(Hg36_End__lt=End, Hg36_Start__gt=val1)
+            FilteredResponse = FilteredResponse.filter(Hg36_Start__gt=Start, Hg36_End__lt=End)
+            return FilteredResponse
         else:
             return FilteredResponse
     elif referenceCordinate == SetIds[1]:
-        FilteredResponse = DbResp.filter(Genomic_Coordinate_hg37__startswith=filt)
+        FilteredResponse = DbResp.filter(Reference_Name=Chrm)
         if Start != None and End != None:
-            FilteredResponse = FilteredResponse.filter(Hg37_End__lt=End, Hg37_Start__gt=val1)
+            FilteredResponse = FilteredResponse.filter(Hg37_End__lt=End, Hg37_Start__gt=Start)
+            return FilteredResponse
         else:
             return FilteredResponse
     elif referenceCordinate == SetIds[2]:
-        FilteredResponse = DbResp.filter(Genomic_Coordinate_hg38__startswith=filt)
+        FilteredResponse = DbResp.filter(Reference_Name=Chrm)
         if Start != None and End != None:
             FilteredResponse = FilteredResponse.filter(Hg38_End__lt=End, Hg38_Start__gt=val1)
+            return FilteredResponse
         else:
             return FilteredResponse
 ############################## Gen-Coordinate function END ##############################
@@ -248,20 +253,38 @@ def brca_to_ga4gh(brca_variant, genRefer):
         if brca_variant[j] == "-" or (brca_variant[j] == ""):
             continue
         if j == "Genomic_Coordinate_"+genRefer:
-            var_resp.reference_name, start, bases = brca_variant[j].split(':')
+            refNme, strt, bases = brca_variant[j].split(':')
             var_resp.reference_bases, alternbases = bases.split(">")
             for i in range(len(alternbases)):
                 var_resp.alternate_bases.append(alternbases[i])
-            var_resp.start = int(start)
-            var_resp.end = var_resp.start+len(alternbases)
             continue
         if j == "id":
             var_resp.id = genRefer+"-"+str(brca_variant['id'])
             var_resp.variant_set_id = name+"-"+genRefer
-
             var_resp.created = 0
             var_resp.updated = 0
             continue
+        if j == "Reference_Name":
+            var_resp.reference_name = brca_variant[j]
+            continue
+        if j == "Hg36_Start" and (genRefer == "hg36"):
+            var_resp.start = brca_variant[j]
+            var_resp.end = brca_variant["Hg36_End"]
+            continue
+        if j == "Hg36_End" and (genRefer == "hg36"): continue
+
+        if j == "Hg37_Start" and (genRefer == "hg37"):
+            var_resp.start = brca_variant[j]
+            var_resp.end = brca_variant["Hg37_End"]
+            continue
+        if j == "Hg37_End" and (genRefer == "hg37"): continue
+
+        if j == "Hg38_Start" and (genRefer == "hg38"):
+            var_resp.start = brca_variant[j]
+            var_resp.end = brca_variant["Hg38_End"]
+            continue
+        if j == "Hg38_End" and (genRefer == "hg38"): continue
+
         if j == "Synonyms":
             Names = [i for i in str(brca_variant[j]).split(",")]
             for i in Names:
@@ -421,6 +444,7 @@ datasetId = "brca"
 referenceSetId = "Genomic-Coordinate"
 name = "brca-exchange"
 SetIds = ["hg36", "hg37", "hg38"]
+refNames = ["chr13", "chr17"]
 #################################################################################
 
 # Need to implement function that filters elements by increasing and decreasing integer values
