@@ -15,7 +15,8 @@ FIELDS_TO_REMOVE=["Gene_symbol_ENIGMA", "Genomic_Coordinate",
                   "polyPhen2_result_ESP", 
                   "BIC_Designation_BIC", "BIC_Nomenclature_exLOVD"]
 FIELDS_TO_ADD=["Gene_Symbol", "Reference_Sequence",
-               "HGVS_cDNA", "Hg38_Start", "HG38_End", "HGVS_RNA", "BIC_Identifier", 
+               "HGVS_cDNA", "Hg38_Start", "Hg38_End",
+               "HGVS_RNA", "BIC_Identifier", 
                "HGVS_Protein", 
                "Protein_Change", "Allele_Frequency", 
                "Max_Allele_Frequency",
@@ -23,6 +24,11 @@ FIELDS_TO_ADD=["Gene_Symbol", "Reference_Sequence",
                "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg36", 
                "Source_URL", "Discordant", "Synonyms",
                "Pathogenicity_default", "Pathogenicity_research"]
+FIELDS_TO_RENAME={ "Genomic_Coordinate" : "Genomic_Coordinate_Hg38",
+                   "Gene_Symbol_ENIGMA" : "Gene_Symbol",
+                   "BIC_Nomenclature_ENIGMA" : "BIC_Identifier",
+                   "Abbrev_AA_ENIGMA" : "Protein_Change"
+                   }
 
 def main():
     parser = argparse.ArgumentParser()
@@ -45,8 +51,11 @@ def main():
         csvOut.writerow(updateRow(row, FIELDS_TO_REMOVE))
 
         
-def setOutputColumns(fields, toRemove, toAdd):
+def setOutputColumns(fields, toRemove, toAdd, toRename):
     newFields = []
+    for oldName, newName in toRename:
+        newFields.remove(oldName)
+        newFields.append(newName)
     for item in fields:
         newFields.append(item)
     for item in toRemove:
@@ -56,23 +65,10 @@ def setOutputColumns(fields, toRemove, toAdd):
         newFields.append(item)
     return(newFields)
 
-def cleanColumns(row):
-    """For each column, remove any pickling that might be delimiting the
-    column, to generate proper text.  
-    """
-    for column in sorted(row.keys()):
-        value = row[column]
-        row[column] = value
-    return row
-
 def updateRow(row, toRemove):
-    if row.has_key(None):
-        print "1 Row has key none"
-        for item in row.keys():
-            print item, row[item]
-    else:
-        print "1 Row has no key none"
-    newRow = cleanColumns(row)
+    #if row.has_key(None):
+    #    for item in row.keys():
+    #        print item, row[item]
     newRow = update_basic_fields(newRow)
     newRow = hgvsUpdate(newRow)
     newRow["Allele_Frequency"] = selectAlleleFrequency(newRow)
@@ -88,13 +84,8 @@ def updateRow(row, toRemove):
 
 def update_basic_fields(row):
     row["Genomic_Coordinate_hg38"] = row["Genomic_Coordinate"]
-    hgvsTokens = row["Genomic_Coordinate"].split(":")
-    Hg38_Start = hgvsTokens[1]
-    hgvsRef = hgvsTokens[2].split(">")[0]
-    if hgvsRef == "None":
-        Hg38_End = Hg38_start
-    else:
-        Hg38_End = str(int(Hg38_Start) + len(hgvsRef) - 1)
+    row["Hg38_Start"] = row['Pos']
+    row["Hg38_End"] = int(row["Hg38_Start"]) + len(row["Ref"]) - 1
     row["Gene_Symbol"] = row["Gene_symbol_ENIGMA"]
     if row["Gene_Symbol"] == EMPTY:
         if re.search("^chr17", row["Genomic_Coordinate_hg38"] ):
@@ -102,7 +93,6 @@ def update_basic_fields(row):
         else:
             row["Gene_Symbol"] = "BRCA2"
     row["Reference_Sequence"] = row["Reference_sequence_ENIGMA"]
-    row["Genomic_Coordinate_hg38"] = row["Genomic_Coordinate"]
     row["HGVS_cDNA"] = row["HGVS_cDNA_ENIGMA"]
     row["BIC_Identifier"] = row["BIC_Nomenclature_ENIGMA"]
     row["HGVS_RNA"] = EMPTY
@@ -134,10 +124,6 @@ def update_basic_fields(row):
         patho_research = "%s%s%s (BIC)" % (patho_research, delimiter,
                                            row["Clinical_classification_BIC"])
     row["Pathogenicity_research"] = patho_research
-    if len(row["SIFT_VEP"]) == 0:
-        row["SIFT_VEP"] = EMPTY
-    if len(row["PolyPhen_VEP"]) == 0:
-        row["PolyPhen_VEP"] = EMPTY
     return row
 
 def unpackHgvs(hgvsString):

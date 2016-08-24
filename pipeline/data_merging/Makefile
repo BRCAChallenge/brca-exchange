@@ -23,8 +23,8 @@ $(outputFiles)/aggregated.tsv:	$(outputFiles)/merged.withVEP.tsv aggregate_acros
 	  -t $(resources)/refseq_annotation.hg38.gp \
 	  -o $@
 
-$(outputFiles)/merged.withVEP.tsv:	$(outputFiles)/merged.tsv add_VEP_result.py
-	add_VEP_result.py -i $< -v $(inputVcfDir)/vep_output_3_3_2016.vcf -o $@
+$(outputFiles)/merged.withVEP.tsv:	$(outputFiles)/merged.tsv add_annotation.py
+	add_annotation.py -i $< -o $@
 
 $(outputFiles)/merged.tsv:	$(inputVcfs) variant-merging.py
 	variant-merging.py -i $(inputVcfDir)/ -o $(outputFiles) -p -r $(resources)
