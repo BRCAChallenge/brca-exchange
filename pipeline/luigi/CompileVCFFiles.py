@@ -7,6 +7,7 @@ import datetime
 import socket
 from shutil import copy
 import luigi
+from luigi.util import inherits, requires
 
 from retrying import retry
 
@@ -140,20 +141,8 @@ class DownloadLatestClinvarData(luigi.Task):
         download_file_and_display_progress(clinvar_data_url)
 
 
+@requires(DownloadLatestClinvarData)
 class ConvertLatestClinvarDataToXML(luigi.Task):
-    date = luigi.DateParameter(default=datetime.date.today())
-
-    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
-                                    description='directory to store brca-resources data')
-
-    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                                 description='directory to store output files')
-
-    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
-                                      description='directory to store all individual task related files')
-
-    def requires(self):
-        return DownloadLatestClinvarData(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
 
     def output(self):
         return luigi.LocalTarget(self.file_parent_dir + "/ClinVar/ClinVarBrca.xml")
@@ -172,20 +161,8 @@ class ConvertLatestClinvarDataToXML(luigi.Task):
         check_file_for_contents(clinvar_xml_file)
 
 
+@requires(ConvertLatestClinvarDataToXML)
 class ConvertClinvarXMLToTXT(luigi.Task):
-    date = luigi.DateParameter(default=datetime.date.today())
-
-    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
-                                    description='directory to store brca-resources data')
-
-    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                                 description='directory to store output files')
-
-    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
-                                      description='directory to store all individual task related files')
-
-    def requires(self):
-        return ConvertLatestClinvarDataToXML(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
 
     def output(self):
         return luigi.LocalTarget(self.file_parent_dir + "/ClinVar/ClinVarBrca.txt")
@@ -204,20 +181,8 @@ class ConvertClinvarXMLToTXT(luigi.Task):
         check_file_for_contents(clinvar_txt_file)
 
 
+@requires(ConvertClinvarXMLToTXT)
 class ConvertClinvarTXTToVCF(luigi.Task):
-    date = luigi.DateParameter(default=datetime.date.today())
-
-    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
-                                    description='directory to store brca-resources data')
-
-    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                                 description='directory to store output files')
-
-    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
-                                      description='directory to store all individual task related files')
-
-    def requires(self):
-        return ConvertClinvarXMLToTXT(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
 
     def output(self):
         return luigi.LocalTarget(self.file_parent_dir + "/ClinVar/ClinVarBrca.vcf")
@@ -226,7 +191,6 @@ class ConvertClinvarTXTToVCF(luigi.Task):
         clinvar_file_dir = self.file_parent_dir + "/ClinVar"
         clinvar_vcf_file = clinvar_file_dir + "/ClinVarBrca.vcf"
 
-        # Convert txt to vcf
         os.chdir(data_merging_method_dir)
         args = ["python", "convert_tsv_to_vcf.py", "-i", clinvar_file_dir + "/ClinVarBrca.txt", "-o",
                 clinvar_file_dir + "/ClinVarBrca.vcf", "-s", "ClinVar"]
@@ -237,20 +201,8 @@ class ConvertClinvarTXTToVCF(luigi.Task):
         check_file_for_contents(clinvar_vcf_file)
 
 
+@requires(ConvertClinvarTXTToVCF)
 class CopyClinvarVCFToOutputDir(luigi.Task):
-    date = luigi.DateParameter(default=datetime.date.today())
-
-    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
-                                    description='directory to store brca-resources data')
-
-    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                                 description='directory to store output files')
-
-    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
-                                      description='directory to store all individual task related files')
-
-    def requires(self):
-        return ConvertClinvarTXTToVCF(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
 
     def output(self):
         return luigi.LocalTarget(self.output_dir + "/ClinVarBrca.vcf")
@@ -289,20 +241,8 @@ class DownloadLatestESPData(luigi.Task):
         download_file_and_display_progress(esp_data_url, file_name)
 
 
+@requires(DownloadLatestESPData)
 class DecompressESPTarfile(luigi.Task):
-    date = luigi.DateParameter(default=datetime.date.today())
-
-    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
-                                    description='directory to store brca-resources data')
-
-    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                                 description='directory to store output files')
-
-    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
-                                      description='directory to store all individual task related files')
-
-    def requires(self):
-        return DownloadLatestESPData(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
 
     def output(self):
         esp_file_dir = self.file_parent_dir + '/ESP'
@@ -322,20 +262,8 @@ class DecompressESPTarfile(luigi.Task):
         print "Finished extracting files from %s" % (file_name)
 
 
+@requires(DecompressESPTarfile)
 class ExtractESPDataForBRCA1Region(luigi.Task):
-    date = luigi.DateParameter(default=datetime.date.today())
-
-    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
-                                    description='directory to store brca-resources data')
-
-    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                                 description='directory to store output files')
-
-    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
-                                      description='directory to store all individual task related files')
-
-    def requires(self):
-        return DecompressESPTarfile(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
 
     def output(self):
         esp_file_dir = self.file_parent_dir + "/ESP"
@@ -355,20 +283,8 @@ class ExtractESPDataForBRCA1Region(luigi.Task):
         check_file_for_contents(brca1_region_output)
 
 
+@requires(ExtractESPDataForBRCA1Region)
 class ExtractESPDataForBRCA2Region(luigi.Task):
-    date = luigi.DateParameter(default=datetime.date.today())
-
-    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
-                                    description='directory to store brca-resources data')
-
-    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                                 description='directory to store output files')
-
-    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
-                                      description='directory to store all individual task related files')
-
-    def requires(self):
-        return ExtractESPDataForBRCA1Region(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
 
     def output(self):
         esp_file_dir = self.file_parent_dir + "/ESP"
@@ -386,20 +302,8 @@ class ExtractESPDataForBRCA2Region(luigi.Task):
         print_subprocess_output_and_error(sp)
 
 
+@requires(ExtractESPDataForBRCA2Region)
 class ConcatenateESPBRCA12Data(luigi.Task):
-    date = luigi.DateParameter(default=datetime.date.today())
-
-    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
-                                    description='directory to store brca-resources data')
-
-    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                                 description='directory to store output files')
-
-    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
-                                      description='directory to store all individual task related files')
-
-    def requires(self):
-        return ExtractESPDataForBRCA2Region(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
 
     def output(self):
         esp_file_dir = self.file_parent_dir + "/ESP"
@@ -422,20 +326,8 @@ class ConcatenateESPBRCA12Data(luigi.Task):
         print "Concatenation complete."
 
 
+@requires(ConcatenateESPBRCA12Data)
 class SortConcatenatedESPBRCA12Data(luigi.Task):
-    date = luigi.DateParameter(default=datetime.date.today())
-
-    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
-                                    description='directory to store brca-resources data')
-
-    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                                 description='directory to store output files')
-
-    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
-                                      description='directory to store all individual task related files')
-
-    def requires(self):
-        return ConcatenateESPBRCA12Data(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
 
     def output(self):
         esp_file_dir = self.file_parent_dir + "/ESP"
@@ -456,20 +348,8 @@ class SortConcatenatedESPBRCA12Data(luigi.Task):
         print "Sorting of concatenated files complete."
 
 
+@requires(SortConcatenatedESPBRCA12Data)
 class CopyESPOutputToOutputDir(luigi.Task):
-    date = luigi.DateParameter(default=datetime.date.today())
-
-    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
-                                    description='directory to store brca-resources data')
-
-    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                                 description='directory to store output files')
-
-    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
-                                      description='directory to store all individual task related files')
-
-    def requires(self):
-        return SortConcatenatedESPBRCA12Data(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
 
     def output(self):
         return luigi.LocalTarget(self.output_dir + "/esp.brca12.sorted.hg38.vcf")
@@ -479,6 +359,11 @@ class CopyESPOutputToOutputDir(luigi.Task):
         copy(esp_file_dir + "/esp.brca12.sorted.hg38.vcf", self.output_dir)
         check_file_for_contents(self.output_dir + "/esp.brca12.sorted.hg38.vcf")
         print "Copied final ESP output to output directory."
+
+
+###############################################
+#                     BIC                     #
+###############################################
 
 
 class DownloadAndExtractFilesFromBIC(luigi.Task):
@@ -553,6 +438,105 @@ class DownloadAndExtractFilesFromBIC(luigi.Task):
 
       print "Copied final BIC output to output directory"
 
+
+class DownloadBRCA1BICData(luigi.Task):
+    # NOTE: U/P can be found in /hive/groups/cgl/brca/phase1/data/bic/account.txt at UCSC
+    date = luigi.DateParameter(default=datetime.date.today())
+    u = luigi.Parameter()
+    p = luigi.Parameter()
+
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                                    description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                                 description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                                      description='directory to store all individual task related files')
+
+    def output(self):
+        bic_file_dir = self.file_parent_dir + '/BIC'
+        return luigi.LocalTarget(bic_file_dir + "/brca1_data.txt")
+
+    def run(self):
+        bic_file_dir = os.environ['BIC'] = self.file_parent_dir + '/BIC'
+        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+        brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+
+        os.chdir(bic_file_dir)
+
+        brca1_data_url = "https://research.nhgri.nih.gov/projects/bic/Member/cgi-bin/bic_query_result.cgi/brca1_data.txt?table=brca1_exons&download=1&submit=Download"
+        brca1_file_name = "brca1_data.txt"
+        download_file_with_basic_auth(brca1_data_url, brca1_file_name, self.u, self.p)
+
+
+@requires(DownloadBRCA1BICData)
+class DownloadBRCA2BICData(luigi.Task):
+
+    def output(self):
+        bic_file_dir = self.file_parent_dir + '/BIC'
+        return luigi.LocalTarget(bic_file_dir + "/brca2_data.txt")
+
+    def run(self):
+        bic_file_dir = self.file_parent_dir + '/BIC'
+        os.chdir(bic_file_dir)
+
+        brca2_data_url = "https://research.nhgri.nih.gov/projects/bic/Member/cgi-bin/bic_query_result.cgi/brca2_data.txt?table=brca2_exons&download=1&submit=Download"
+        brca2_file_name = "brca2_data.txt"
+        download_file_with_basic_auth(brca2_data_url, brca2_file_name, self.u, self.p)
+
+
+@requires(DownloadBRCA2BICData)
+class ConvertBRCA1BICDataToVCF(luigi.Task):
+
+    def output(self):
+        bic_file_dir = self.file_parent_dir + '/BIC'
+        return luigi.LocalTarget(bic_file_dir + "/bic_brca1.hg19.vcf")
+
+    def run(self):
+        bic_file_dir = self.file_parent_dir + '/BIC'
+        os.chdir(bic_method_dir)
+
+        bic_brca1_vcf_file = bic_file_dir + "/bic_brca1.hg19.vcf"
+        writable_bic_brca1_vcf_file = open(bic_brca1_vcf_file, 'w')
+        args = ["./bic2vcf", "-i", bic_file_dir + "/brca1_data.txt", "-o", bic_brca1_vcf_file, "-b", "1", "-g",
+                self.resources_dir + "/hg19.fa", "-r", self.resources_dir + "/refseq_annotation.hg19.gp", "-a",
+                bic_method_dir + "/bicAnnotation"]
+        print "Converting BRCA1 BIC data to vcf with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=writable_bic_brca1_vcf_file, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(bic_brca1_vcf_file)
+
+
+@requires(ConvertBRCA1BICDataToVCF)
+class ConvertBRCA2BICDataToVCF(luigi.Task):
+
+    def output(self):
+        bic_file_dir = self.file_parent_dir + '/BIC'
+        return luigi.LocalTarget(bic_file_dir + "/bic_brca2.hg19.vcf")
+
+    def run(self):
+        bic_file_dir = self.file_parent_dir + '/BIC'
+        os.chdir(bic_method_dir)
+
+        bic_brca2_vcf_file = bic_file_dir + "/bic_brca2.hg19.vcf"
+        writable_bic_brca1_vcf_file = open(bic_brca2_vcf_file, 'w')
+        args = ["./bic2vcf", "-i", bic_file_dir + "/brca2_data.txt", "-o", bic_brca2_vcf_file, "-b", "2", "-g",
+                self.resources_dir + "/hg19.fa", "-r", self.resources_dir + "/refseq_annotation.hg19.gp", "-a",
+                bic_method_dir + "/bicAnnotation"]
+        print "Converting BRCA1 BIC data to vcf with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=writable_bic_brca1_vcf_file, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(bic_brca2_vcf_file)
+
+# ./bic2vcf -i $BIC/brca1_data.txt -o $BIC/bic_brca1.hg19.vcf -b 1 -g $BRCA_RESOURCES/hg19.fa -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -a $BRCA_RESOURCES/bicAnnotation
+# ./bic2vcf -i $BIC/brca2_data.txt -o $BIC/bic_brca2.hg19.vcf -b 2 -g $BRCA_RESOURCES/hg19.fa -r $BRCA_RESOURCES/refseq_annotation.hg19.gp -a $BRCA_RESOURCES/bicAnnotation
+# vcf-concat $BIC/bic_brca1.hg19.vcf $BIC/bic_brca2.hg19.vcf > $BIC/bic_brca12.hg19.vcf
+# CrossMap.py vcf $BRCA_RESOURCES/hg19ToHg38.over.chain.gz $BIC/bic_brca12.hg19.vcf $BRCA_RESOURCES/hg38.fa $BIC/bic_brca12.hg38.vcf
+# vcf-sort $BIC/bic_brca12.hg38.vcf > $BIC/bic_brca12.sorted.hg38.vcf
+# cp $BIC/bic_brca12.sorted.hg38.vcf $PIPELINE_INPUT
 
 class ExtractAndConvertFilesFromEXLOVD(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
@@ -918,7 +902,7 @@ class RunAll(luigi.WrapperTask):
     def requires(self):
         # yield CopyClinvarVCFToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyESPOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        # yield DownloadAndExtractFilesFromBIC(self.date, self.u, self.p, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield ConvertBRCA2BICDataToVCF(self.date, self.u, self.p, self.resources_dir, self.output_dir, self.file_parent_dir)
         # yield DownloadAndExtractFilesFromG1K(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         # yield DownloadAndExtractFilesFromEXAC(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         # yield ExtractAndConvertFilesFromEXLOVD(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
