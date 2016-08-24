@@ -12,7 +12,7 @@ from data.models import Variant
 
 
 def load_from_csv(apps, schema_editor):
-    file_path = os.path.join(settings.BASE_DIR, 'data', 'resources', 'aggregated.tsv')
+    file_path = os.path.join(settings.BASE_DIR, 'data', 'resources', 'written.tsv')
     with open(file_path) as tsv_file:
         reader = csv.reader(tsv_file, dialect="excel-tab")
         header = reader.next()
