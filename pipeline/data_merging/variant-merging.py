@@ -504,7 +504,7 @@ def add_new_source(columns, variants, source, source_file, source_dict):
     variants_num = 0
     for record in vcf_reader:
         variants_num += 1
-        genome_coor = ("chr" + str(record.CHROM) + ":" + str(record.POS) + ":" +
+        genome_coor = ("chr" + str(record.CHROM) + ":g." + str(record.POS) + ":" +
                        record.REF + ">" + str(record.ALT[0]))
         if genome_coor in variants.keys():
             overlap += 1
@@ -581,7 +581,7 @@ def save_enigma_to_dict(path):
                 if items[ii] == None:
                     items[ii] = DEFAULT_CONTENTS 
             if ref_correct(chrom, pos, ref, alt):
-                hgvs = "chr%s:%s:%s>%s" % (str(chrom), str(pos), ref, alt)
+                hgvs = "chr%s:g.%s:%s>%s" % (str(chrom), str(pos), ref, alt)
                 variants[hgvs] = items
             else:
                 n_wrong += 1
