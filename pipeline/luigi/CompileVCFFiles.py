@@ -732,7 +732,12 @@ class ExtractDataFromLatestSharedLOVD(luigi.Task):
         print "Running extract_data.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
+
         print "Extracted data from %s." % (lovd_data_host_url)
+
+        if not os.path.exists(lovd_file_dir + "/BRCA2.txt"):
+            copy(brca_resources_dir + "/BRCA2.txt", lovd_file_dir)
+            print "*** WARNING: Could not fetch new BRCA2.txt, using readily available version from BRCA_RESOURCES ***"
 
 
 @requires(ExtractDataFromLatestSharedLOVD)
