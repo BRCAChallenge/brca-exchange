@@ -72,7 +72,7 @@ def updateRow(row, toRename, toRemove):
     (newRow["Reference_Sequence"], newRow["HGVS_cDNA"]) = hgvsCdnaUpdate(newRow)
     newRow["HGVS_Protein"] = hgvsProteinUpdate(row)
     newRow["BIC_Nomenclature"] = BICUpdate(row)
-    (newRow["Pathogenicity_expert_reviewed"],
+    (newRow["Pathogenicity_expert"],
      newRow["Pathogenicity_all"]) = pathogenicityUpdate(newRow)
     newRow["Allele_Frequency"] = selectAlleleFrequency(newRow)
     newRow["Max_Allele_Frequency"] = selectMaxAlleleFrequency(newRow)
@@ -176,6 +176,8 @@ def pathogenicityUpdate(row):
     if row["Clinical_classification_BIC"] != EMPTY:
         pathoAll = "%s%s%s (BIC)" % (pathoAll, delimiter,
                                            row["Clinical_classification_BIC"])
+    if pathoAll == "":
+        pathAll = EMPTY
     return(pathoExpert, pathoAll)
 
 def selectAlleleFrequency(row):
