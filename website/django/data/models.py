@@ -1,10 +1,21 @@
 from django.db import models
 
+class DataRelease(models.Model):
+    timestamp = models.DateTimeField(auto_now_add=True)
+    comment = models.TextField()
+    variants_added = models.IntegerField(default=0)
+    variants_modified = models.IntegerField(default=0)
+    variants_deleted = models.IntegerField(default=0)
+    # Schema Changes
+    columns_added = models.TextField(null=True)
+    columns_deleted = models.TextField(null=True)
+
+    class Meta:
+        db_table = "data_release"
 
 class VariantManager(models.Manager):
     def create_variant(self, row):
         return self.create(**row)
-
 
 class Variant(models.Model):
     # These are some extra derived columns that help with filtering
@@ -91,7 +102,13 @@ class Variant(models.Model):
     Pathogenicity_default = models.TextField()
     Pathogenicity_research = models.TextField()
 
+    # Data Versioning
+    Data_Release = models.ForeignKey(DataRelease)
+    Variant_Deletion = models.BooleanField(default=False)
+
     objects = VariantManager()
 
     class Meta:
         db_table = 'variant'
+
+
