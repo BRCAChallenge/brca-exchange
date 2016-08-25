@@ -567,7 +567,6 @@ class ExtractDataFromLatestEXLOVD(luigi.Task):
 
         os.chdir(lovd_method_dir)
 
-        # extract_data.py -u http://hci-exlovd.hci.utah.edu/ -l BRCA1 BRCA2 -o $EXLOVD
         ex_lovd_data_host_url = "http://hci-exlovd.hci.utah.edu/"
         args = ["extract_data.py", "-u", ex_lovd_data_host_url, "-l", "BRCA1", "BRCA2", "-o", ex_lovd_file_dir]
         print "Running extract_data.py with the following args: %s" % (args)
@@ -585,6 +584,10 @@ class ConvertEXLOVDBRCA1ExtractToVCF(luigi.Task):
 
     def run(self):
         ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
+        brca_resources_dir = self.resources_dir
+
+        os.chdir(lovd_method_dir)
+
         args = ["./lovd2vcf", "-i", ex_lovd_file_dir + "/BRCA1.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", "-a", "exLOVDAnnotation",
                 "-b", "1", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
@@ -605,6 +608,8 @@ class ConvertEXLOVDBRCA2ExtractToVCF(luigi.Task):
 
     def run(self):
         ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
+        brca_resources_dir = self.resources_dir
+
         args = ["./lovd2vcf", "-i", ex_lovd_file_dir + "/BRCA2.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf", "-a", "exLOVDAnnotation",
                 "-b", "2", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
@@ -645,6 +650,7 @@ class CrossmapConcatenatedEXLOVDData(luigi.Task):
 
     def run(self):
         ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
+        brca_resources_dir = self.resources_dir
 
         args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz",
                 ex_lovd_file_dir + "/exLOVD_brca12.hg19.vcf", brca_resources_dir + "/hg38.fa",
@@ -738,6 +744,8 @@ class ConvertSharedLOVDBRCA1ExtractToVCF(luigi.Task):
 
     def run(self):
         lovd_file_dir = self.file_parent_dir + "/LOVD"
+        brca_resources_dir = self.resources_dir
+
         args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA1.txt",
                 "-o", lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf", "-a",
                 "exLOVDAnnotation", "-b", "1", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp",
@@ -758,6 +766,8 @@ class ConvertSharedLOVDBRCA2ExtractToVCF(luigi.Task):
 
     def run(self):
         lovd_file_dir = self.file_parent_dir + "/LOVD"
+        brca_resources_dir = self.resources_dir
+
         args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA2.txt", "-o",
                 lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf", "-a", "exLOVDAnnotation",
                 "-b", "2", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
@@ -799,6 +809,7 @@ class CrossmapConcatenatedSharedLOVDData(luigi.Task):
 
     def run(self):
         lovd_file_dir = self.file_parent_dir + "/LOVD"
+        brca_resources_dir = self.resources_dir
 
         args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz",
                 lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf", brca_resources_dir + "/hg38.fa",
@@ -1488,7 +1499,7 @@ class RunAll(luigi.WrapperTask):
         yield CopyESPOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyBICOutputToOutputDir(self.date, self.u, self.p, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyG1KOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        # yield DownloadAndExtractFilesFromEXAC(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        # yield ExtractAndConvertFilesFromEXLOVD(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        # yield ExtractAndConvertFilesFromLOVD(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield CopyEXACOuputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield CopyEXLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield CopySharedLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield ExtractOutputFromEnigma(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
