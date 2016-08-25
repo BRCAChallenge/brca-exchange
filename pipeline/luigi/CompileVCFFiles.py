@@ -1265,7 +1265,7 @@ class ExtractBRCA1DataFromExac(luigi.Task):
     def run(self):
         exac_file_dir = self.file_parent_dir + '/exac'
 
-        args = ["tabix", "-h", exac_file_dir + "/" + exac_vcf_gz_file_name, "17:41191488-41322420"]
+        args = ["tabix", "-h", exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz.tbi", "17:41191488-41322420"]
         exac_brca1_hg19_vcf_file = exac_file_dir + "/exac.brca1.hg19.vcf"
         writable_exac_brca1_hg19_vcf_file = open(exac_brca1_hg19_vcf_file, 'w')
         print "Running tabix with the following args: %s" % (args)
@@ -1284,7 +1284,7 @@ class ExtractBRCA2DataFromExac(luigi.Task):
     def run(self):
         exac_file_dir = self.file_parent_dir + '/exac'
 
-        args = ["tabix", "-h", exac_file_dir + "/" + exac_vcf_gz_file_name, "13:32889080-32973809"]
+        args = ["tabix", "-h", exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz.tbi", "13:32889080-32973809"]
         exac_brca2_hg19_vcf_file = exac_file_dir + "/exac.brca2.hg19.vcf"
         writable_exac_brca2_hg19_vcf_file = open(exac_brca2_hg19_vcf_file, 'w')
         print "Running tabix with the following args: %s" % (args)
