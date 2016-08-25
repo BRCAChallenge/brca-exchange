@@ -994,6 +994,12 @@ class CopySharedLOVDOutputToOutputDir(luigi.Task):
 
     #       print "Copied LOVD output file into output directory."
 
+
+###############################################
+#                    G1K                      #
+###############################################
+
+
 class DownloadG1KCHR13GZ(luigi.Task):
 
     date = luigi.DateParameter(default=datetime.date.today())
@@ -1186,114 +1192,281 @@ class CopyG1KOutputToOutputDir(luigi.Task):
         check_file_for_contents(self.output_dir + "/1000G_brca.sorted.hg38.vcf")
 
 
-class DownloadAndExtractFilesFromEXAC(luigi.Task):
+###############################################
+#                    EXAC                     #
+###############################################
+
+
+class DownloadEXACVCFGZFile(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
 
     resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
-                        description='directory to store brca-resources data')
+                                    description='directory to store brca-resources data')
 
     output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                        description='directory to store output files')
+                                 description='directory to store output files')
 
     file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
-                        description='directory to store all individual task related files')
+                                      description='directory to store all individual task related files')
 
     def output(self):
-      return luigi.LocalTarget(self.output_dir + "/exac.brca12.hg38.vcf")
+        exac_file_dir = self.file_parent_dir + '/exac'
+        return luigi.LocalTarget(exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz")
 
     def run(self):
-      exac_file_dir = os.environ['EXAC'] = self.file_parent_dir + '/exac'
-      pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
-      brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+        exac_file_dir = os.environ['EXAC'] = self.file_parent_dir + '/exac'
+        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+        brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
 
-      os.chdir(exac_file_dir)
+        os.chdir(exac_file_dir)
 
-      # Download vcf.gz file
-      exac_vcf_gz_url = "ftp://ftp.broadinstitute.org/pub/ExAC_release/current/subsets/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz"
-      exac_vcf_gz_file_name = exac_vcf_gz_url.split('/')[-1]
-      download_file_and_display_progress(exac_vcf_gz_url, exac_vcf_gz_file_name)
+        exac_vcf_gz_url = "ftp://ftp.broadinstitute.org/pub/ExAC_release/current/subsets/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz"
+        exac_vcf_gz_file_name = exac_vcf_gz_url.split('/')[-1]
+        download_file_and_display_progress(exac_vcf_gz_url, exac_vcf_gz_file_name)
 
-      # Download vcf.gz.tbi file
-      exac_vcf_gz_tbi_url = "ftp://ftp.broadinstitute.org/pub/ExAC_release/current/subsets/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz.tbi"
-      exac_vcf_gz_tbi_file_name = exac_vcf_gz_tbi_url.split('/')[-1]
-      download_file_and_display_progress(exac_vcf_gz_tbi_url, exac_vcf_gz_tbi_file_name)      
 
-      # tabix -h $EXAC/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz 17:41191488-41322420 > $EXAC/exac.brca1.hg19.vcf
-      args = ["tabix", "-h", exac_file_dir + "/" + exac_vcf_gz_file_name, "17:41191488-41322420"]
-      exac_brca1_hg19_vcf_file = exac_file_dir + "/exac.brca1.hg19.vcf"
-      writable_exac_brca1_hg19_vcf_file = open(exac_brca1_hg19_vcf_file, 'w')
-      print "Running tabix with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=writable_exac_brca1_hg19_vcf_file, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
-      print "Completed writing %s." % (exac_brca1_hg19_vcf_file)
+@requires(DownloadEXACVCFGZFile)
+class DownloadEXACVCFGZTBIFile(luigi.Task):
+    def output(self):
+        exac_file_dir = self.file_parent_dir + '/exac'
+        return luigi.LocalTarget(exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz.tbi")
 
-      # tabix -h $EXAC/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz 13:32889080-32973809 > $EXAC/exac.brca2.hg19.vcf
-      args = ["tabix", "-h", exac_file_dir + "/" + exac_vcf_gz_file_name, "13:32889080-32973809"]
-      exac_brca2_hg19_vcf_file = exac_file_dir + "/exac.brca2.hg19.vcf"
-      writable_exac_brca2_hg19_vcf_file = open(exac_brca2_hg19_vcf_file, 'w')
-      print "Running tabix with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=writable_exac_brca2_hg19_vcf_file, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
-      print "Completed writing %s." % (exac_brca2_hg19_vcf_file)
+    def run(self):
+        exac_file_dir = os.environ['EXAC'] = self.file_parent_dir + '/exac'
+        os.chdir(exac_file_dir)
 
-      # vcf-concat $EXAC/exac.brca1.hg19.vcf $EXAC/exac.brca2.hg19.vcf > $EXAC/exac.brca12.hg19.vcf
-      args = ["vcf-concat", exac_file_dir + "/exac.brca1.hg19.vcf", exac_file_dir + "/exac.brca2.hg19.vcf"]
-      exac_brca12_hg19_vcf_file = exac_file_dir + "/exac.brca12.hg19.vcf"
-      writable_exac_brca12_hg19_vcf_file = open(exac_brca12_hg19_vcf_file, 'w')
-      print "Running tabix with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=writable_exac_brca12_hg19_vcf_file, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
-      print "Completed concatenation of exac brca1/2 data into %s." % (exac_brca12_hg19_vcf_file)
+        exac_vcf_gz_tbi_url = "ftp://ftp.broadinstitute.org/pub/ExAC_release/current/subsets/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz.tbi"
+        exac_vcf_gz_tbi_file_name = exac_vcf_gz_tbi_url.split('/')[-1]
+        download_file_and_display_progress(exac_vcf_gz_tbi_url, exac_vcf_gz_tbi_file_name)
 
-      # CrossMap.py vcf $BRCA_RESOURCES/hg19ToHg38.over.chain.gz $EXAC/exac.brca12.hg19.vcf $BRCA_RESOURCES/hg38.fa $EXAC/exac.brca12.hg38.vcf
-      args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz", exac_file_dir + "/exac.brca12.hg19.vcf", brca_resources_dir + "/hg38.fa", exac_file_dir + "/exac.brca12.hg38.vcf"]
-      print "Running CrossMap.py with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
-      print "Completed crossmapping hg19 and hg38."
+
+@requires(DownloadEXACVCFGZTBIFile)
+class ExtractBRCA1DataFromExac(luigi.Task):
+    def output(self):
+        exac_file_dir = self.file_parent_dir + '/exac'
+        return luigi.LocalTarget(exac_file_dir + "/exac.brca1.hg19.vcf")
+
+    def run(self):
+        exac_file_dir = self.file_parent_dir + '/exac'
+
+        args = ["tabix", "-h", exac_file_dir + "/" + exac_vcf_gz_file_name, "17:41191488-41322420"]
+        exac_brca1_hg19_vcf_file = exac_file_dir + "/exac.brca1.hg19.vcf"
+        writable_exac_brca1_hg19_vcf_file = open(exac_brca1_hg19_vcf_file, 'w')
+        print "Running tabix with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=writable_exac_brca1_hg19_vcf_file, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(exac_brca1_hg19_vcf_file)
+
+
+@requires(ExtractBRCA1DataFromExac)
+class ExtractBRCA2DataFromExac(luigi.Task):
+    def output(self):
+        exac_file_dir = self.file_parent_dir + '/exac'
+        return luigi.LocalTarget(exac_file_dir + "/exac.brca2.hg19.vcf")
+
+    def run(self):
+        exac_file_dir = self.file_parent_dir + '/exac'
+
+        args = ["tabix", "-h", exac_file_dir + "/" + exac_vcf_gz_file_name, "13:32889080-32973809"]
+        exac_brca2_hg19_vcf_file = exac_file_dir + "/exac.brca2.hg19.vcf"
+        writable_exac_brca2_hg19_vcf_file = open(exac_brca2_hg19_vcf_file, 'w')
+        print "Running tabix with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=writable_exac_brca2_hg19_vcf_file, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(exac_brca2_hg19_vcf_file)
+
+
+@requires(ExtractBRCA2DataFromExac)
+class ConcatenateEXACData(luigi.Task):
+    def output(self):
+        exac_file_dir = self.file_parent_dir + '/exac'
+        return luigi.LocalTarget(exac_file_dir + "/exac.brca12.hg19.vcf")
+
+    def run(self):
+        exac_file_dir = self.file_parent_dir + '/exac'
+
+        exac_brca12_hg19_vcf_file = exac_file_dir + "/exac.brca12.hg19.vcf"
+        writable_exac_brca12_hg19_vcf_file = open(exac_brca12_hg19_vcf_file, 'w')
+        args = ["vcf-concat", exac_file_dir + "/exac.brca1.hg19.vcf", exac_file_dir + "/exac.brca2.hg19.vcf"]
+        print "Running tabix with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=writable_exac_brca12_hg19_vcf_file, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(exac_brca12_hg19_vcf_file)
+
+
+@requires(ConcatenateEXACData)
+class CrossmapEXACData(luigi.Task):
+    def output(self):
+        exac_file_dir = self.file_parent_dir + '/exac'
+        return luigi.LocalTarget(exac_file_dir + "/exac.brca12.hg38.vcf")
+
+    def run(self):
+        exac_file_dir = self.file_parent_dir + '/exac'
+
+        args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz",
+                exac_file_dir + "/exac.brca12.hg19.vcf", brca_resources_dir + "/hg38.fa",
+                exac_file_dir + "/exac.brca12.hg38.vcf"]
+        print "Running CrossMap.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(exac_file_dir + "/exac.brca12.hg38.vcf")
+
+
+@requires(CrossmapEXACData)
+class SortEXACData(luigi.Task):
+    def output(self):
+        exac_file_dir = self.file_parent_dir + '/exac'
+        return luigi.LocalTarget(exac_file_dir + "/exac.brca12.sorted.hg38.vcf")
+
+    def run(self):
+        exac_file_dir = self.file_parent_dir + '/exac'
+
+        with self.output().open("w") as vcf_file:
+            args = ["vcf-sort", exac_file_dir + "/exac.brca12.hg38.vcf"]
+            print "Running tabix with the following args: %s" % (args)
+            sp = subprocess.Popen(args, stdout=vcf_file, stderr=subprocess.PIPE)
+            print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(exac_file_dir + "/exac.brca12.sorted.hg38.vcf")
+
+
+@requires(SortEXACData)
+class CopyEXACOuputToOutputDir(luigi.Task):
+    def output(self):
+        return luigi.LocalTarget(self.output_dir + "/exac.brca12.sorted.hg38.vcf")
+
+    def run(self):
+        exac_file_dir = self.file_parent_dir + '/exac'
+
+        copy(exac_file_dir + "/exac.brca12.sorted.hg38.vcf", self.output_dir)
+
+        check_file_for_contents(self.output_dir + "/exac.brca12.sorted.hg38.vcf")
+
+
+# class DownloadAndExtractFilesFromEXAC(luigi.Task):
+    # date = luigi.DateParameter(default=datetime.date.today())
+
+    # resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+    #                     description='directory to store brca-resources data')
+
+    # output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+    #                     description='directory to store output files')
+
+    # file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+    #                     description='directory to store all individual task related files')
+
+    # def output(self):
+    #   return luigi.LocalTarget(self.output_dir + "/exac.brca12.hg38.vcf")
+
+    # def run(self):
+      # exac_file_dir = os.environ['EXAC'] = self.file_parent_dir + '/exac'
+      # pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+      # brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+
+      # os.chdir(exac_file_dir)
+
+      # # Download vcf.gz file
+      # exac_vcf_gz_url = "ftp://ftp.broadinstitute.org/pub/ExAC_release/current/subsets/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz"
+      # exac_vcf_gz_file_name = exac_vcf_gz_url.split('/')[-1]
+      # download_file_and_display_progress(exac_vcf_gz_url, exac_vcf_gz_file_name)
+
+      # # Download vcf.gz.tbi file
+      # exac_vcf_gz_tbi_url = "ftp://ftp.broadinstitute.org/pub/ExAC_release/current/subsets/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz.tbi"
+      # exac_vcf_gz_tbi_file_name = exac_vcf_gz_tbi_url.split('/')[-1]
+      # download_file_and_display_progress(exac_vcf_gz_tbi_url, exac_vcf_gz_tbi_file_name)
+
+      # # tabix -h $EXAC/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz 17:41191488-41322420 > $EXAC/exac.brca1.hg19.vcf
+      # args = ["tabix", "-h", exac_file_dir + "/" + exac_vcf_gz_file_name, "17:41191488-41322420"]
+      # exac_brca1_hg19_vcf_file = exac_file_dir + "/exac.brca1.hg19.vcf"
+      # writable_exac_brca1_hg19_vcf_file = open(exac_brca1_hg19_vcf_file, 'w')
+      # print "Running tabix with the following args: %s" % (args)
+      # sp = subprocess.Popen(args, stdout=writable_exac_brca1_hg19_vcf_file, stderr=subprocess.PIPE)
+      # print_subprocess_output_and_error(sp)
+      # print "Completed writing %s." % (exac_brca1_hg19_vcf_file)
+
+      # # tabix -h $EXAC/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz 13:32889080-32973809 > $EXAC/exac.brca2.hg19.vcf
+      # args = ["tabix", "-h", exac_file_dir + "/" + exac_vcf_gz_file_name, "13:32889080-32973809"]
+      # exac_brca2_hg19_vcf_file = exac_file_dir + "/exac.brca2.hg19.vcf"
+      # writable_exac_brca2_hg19_vcf_file = open(exac_brca2_hg19_vcf_file, 'w')
+      # print "Running tabix with the following args: %s" % (args)
+      # sp = subprocess.Popen(args, stdout=writable_exac_brca2_hg19_vcf_file, stderr=subprocess.PIPE)
+      # print_subprocess_output_and_error(sp)
+      # print "Completed writing %s." % (exac_brca2_hg19_vcf_file)
+
+      # # vcf-concat $EXAC/exac.brca1.hg19.vcf $EXAC/exac.brca2.hg19.vcf > $EXAC/exac.brca12.hg19.vcf
+      # args = ["vcf-concat", exac_file_dir + "/exac.brca1.hg19.vcf", exac_file_dir + "/exac.brca2.hg19.vcf"]
+      # exac_brca12_hg19_vcf_file = exac_file_dir + "/exac.brca12.hg19.vcf"
+      # writable_exac_brca12_hg19_vcf_file = open(exac_brca12_hg19_vcf_file, 'w')
+      # print "Running tabix with the following args: %s" % (args)
+      # sp = subprocess.Popen(args, stdout=writable_exac_brca12_hg19_vcf_file, stderr=subprocess.PIPE)
+      # print_subprocess_output_and_error(sp)
+      # print "Completed concatenation of exac brca1/2 data into %s." % (exac_brca12_hg19_vcf_file)
+
+      # # CrossMap.py vcf $BRCA_RESOURCES/hg19ToHg38.over.chain.gz $EXAC/exac.brca12.hg19.vcf $BRCA_RESOURCES/hg38.fa $EXAC/exac.brca12.hg38.vcf
+      # args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz", exac_file_dir + "/exac.brca12.hg19.vcf", brca_resources_dir + "/hg38.fa", exac_file_dir + "/exac.brca12.hg38.vcf"]
+      # print "Running CrossMap.py with the following args: %s" % (args)
+      # sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      # print_subprocess_output_and_error(sp)
+      # print "Completed crossmapping hg19 and hg38."
 
       # vcf-sort $EXAC/exac.brca12.hg38.vcf > $EXAC/exac.brca12.sorted.hg38.vcf
-      with self.output().open("w") as vcf_file:
-        args = ["vcf-sort", exac_file_dir + "/exac.brca12.hg38.vcf"]
-        print "Running tabix with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=vcf_file, stderr=subprocess.PIPE)
-        print_subprocess_output_and_error(sp)
-        print "Completed sorting of exac data into %s." % (vcf_file)
+      # with self.output().open("w") as vcf_file:
+      #   args = ["vcf-sort", exac_file_dir + "/exac.brca12.hg38.vcf"]
+      #   print "Running tabix with the following args: %s" % (args)
+      #   sp = subprocess.Popen(args, stdout=vcf_file, stderr=subprocess.PIPE)
+      #   print_subprocess_output_and_error(sp)
+      #   print "Completed sorting of exac data into %s." % (vcf_file)
+
+
+###############################################
+#                  ENIGMA                     #
+###############################################
 
 
 class ExtractOutputFromEnigma(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
 
     resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
-                        description='directory to store brca-resources data')
+                                    description='directory to store brca-resources data')
 
     output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                        description='directory to store output files')
+                                 description='directory to store output files')
 
     file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
-                        description='directory to store all individual task related files')
+                                      description='directory to store all individual task related files')
 
     def output(self):
-      date_for_output_file_name = datetime.date.today().isoformat()
-      output_file_path = self.output_dir + "/ENIGMA_last_updated_%s.tsv" % (date_for_output_file_name)
-      return luigi.LocalTarget(output_file_path)
+        date_for_output_file_name = datetime.date.today().isoformat()
+        output_file_path = self.output_dir + "/ENIGMA_last_updated_%s.tsv" % (date_for_output_file_name)
+        return luigi.LocalTarget(output_file_path)
 
     def run(self):
-      enigma_file_dir = os.environ['ENIGMA'] = self.file_parent_dir + '/enigma'
-      pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
-      brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+        enigma_file_dir = os.environ['ENIGMA'] = self.file_parent_dir + '/enigma'
+        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+        brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
 
-      date_for_output_file_name = datetime.date.today().isoformat()
-      enigma_dir_output_file = enigma_file_dir + "/ENIGMA_last_updated_%s.tsv" % (date_for_output_file_name)
-      os.chdir(enigma_method_dir)
-      args = ["python", "enigma-processing.py", "-o", enigma_dir_output_file, "-g", brca_resources_dir + "/hg38.fa"]
-      print "Running enigma-processing.py with the following args: %s" % (args)
-      sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      print_subprocess_output_and_error(sp)
-      print "Completed enigma processing at %s." % (enigma_dir_output_file)
+        date_for_output_file_name = datetime.date.today().isoformat()
+        enigma_dir_output_file = enigma_file_dir + "/ENIGMA_last_updated_%s.tsv" % (date_for_output_file_name)
 
-      copy(enigma_dir_output_file, pipeline_input_dir)
-      print "Copied Enigma output file to output file directory."
+        os.chdir(enigma_method_dir)
+
+        args = ["python", "enigma-processing.py", "-o", enigma_dir_output_file, "-g", brca_resources_dir + "/hg38.fa"]
+        print "Running enigma-processing.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(enigma_dir_output_file)
+
+        copy(enigma_dir_output_file, pipeline_input_dir)
+
+
+###############################################
+#              MASTER RUN TASK                #
+###############################################
 
 
 class RunAll(luigi.WrapperTask):
@@ -1311,11 +1484,11 @@ class RunAll(luigi.WrapperTask):
                                       description='directory to store all individual task related files')
 
     def requires(self):
-        # yield CopyClinvarVCFToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield CopyClinvarVCFToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyESPOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyBICOutputToOutputDir(self.date, self.u, self.p, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyG1KOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         # yield DownloadAndExtractFilesFromEXAC(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         # yield ExtractAndConvertFilesFromEXLOVD(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         # yield ExtractAndConvertFilesFromLOVD(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        # yield ExtractOutputFromEnigma(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield ExtractOutputFromEnigma(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)

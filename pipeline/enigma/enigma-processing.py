@@ -52,23 +52,24 @@ def main():
     raw_files = sorted(glob.glob("raw_files/*batch*tsv"))
 
     # Luigi moves all output files to pipeline/brca/pipeline-data/pipeline_input.
-    # This code is here in case the output directory is needed instead of using the luigi output. If not, no default writable output is needed and it can be removed.
+    # This code is here in case the output directory is needed instead of using the luigi output.
     today = datetime.date.today().isoformat()
     if not os.path.exists("output"):
         os.makedirs("output")
-    default_output_file_name = "output/ENIGMA_last_updated_%s.tsv" % (today)
-    default_writable_output = open(default_output_file_name, "w")
+    default_output_file = "output/ENIGMA_last_updated_%s.tsv" % (today)
+    # writable_default_output_file = open(default_output_file, "w")
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', '--writable_output', type=argparse.FileType('w'),
-        help='Opened writable output file for conversion.', default=default_writable_output)
+                        help='Opened writable output file for conversion.',
+                        default=default_output_file)
     parser.add_argument('-g', '--genome_path',
-        help='Link to hg38.fa.')
+                        help='Link to hg38.fa.')
     args = parser.parse_args()
-    
+
     f_out = args.writable_output
     GENOME = SequenceFileDB(args.genome_path)
-    
+
     f_out.write("\t".join(OUTPUT_COLUMNS) + "\n")
     for filename in raw_files:
         f_in = open(filename, "r")
@@ -105,9 +106,9 @@ def main():
 
 def convert_OMIM_id(OMIM_id):
     if OMIM_id == "604370":
-        return "BREAST-OVARIAN CANCER, FAMILIAL, SUSCEPTIBILITY TO, 1; BROVCA1 (" + OMIM_id + ")" 
+        return "BREAST-OVARIAN CANCER, FAMILIAL, SUSCEPTIBILITY TO, 1; BROVCA1 (" + OMIM_id + ")"
     elif OMIM_id == "612555":
-        return "BREAST-OVARIAN CANCER, FAMILIAL, SUSCEPTIBILITY TO, 2; BROVCA2 (" + OMIM_id + ")" 
+        return "BREAST-OVARIAN CANCER, FAMILIAL, SUSCEPTIBILITY TO, 2; BROVCA2 (" + OMIM_id + ")"
     else:
         raise Exception("OMIM id not found (" + OMIM_id + ")")
 
