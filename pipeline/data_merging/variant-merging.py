@@ -488,6 +488,8 @@ def write_new_tsv(filename, columns, variants):
             if type(variant[ii]) == list:
                 comma_delimited_string = ",".join(str(xx) for xx in variant[ii])
                 variant[ii] = comma_delimited_string
+            elif type(variant[ii]) == int:
+                variant[ii] = str(variant[ii])
         merged_file.write("\t".join(variant)+"\n")
     merged_file.close()
 
