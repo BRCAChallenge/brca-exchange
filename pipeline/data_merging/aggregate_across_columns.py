@@ -19,7 +19,7 @@ FIELDS_TO_ADD=["Hg38_Start", "Hg38_End", "Hg37_Start", "Hg37_End",
                "Max_Allele_Frequency",
                "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg36", 
                "Source_URL", "Discordant", "Synonyms",
-               "Pathogenicity_expert_reviewed", "Pathogenicity_all"]
+               "Pathogenicity_expert", "Pathogenicity_all"]
 FIELDS_TO_RENAME={"Gene_symbol_ENIGMA" : "Gene_Symbol",
                   "Genomic_Coordinate" : "Genomic_Coordinate_hg38",
                   "Reference_sequence_ENIGMA" : "Reference_Sequence", 

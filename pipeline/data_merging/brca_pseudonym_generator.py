@@ -121,11 +121,12 @@ def main(args):
         oldHgvsGenomic37 = parsedLine[refSeqIndex] + ':' + parsedLine[hgvsG37Index]
         oldHgvsGenomic38 = parsedLine[refSeqIndex] + ':' + parsedLine[hgvsG38Index].split(',')[0]
         oldHgvsCDNA = parsedLine[refSeqIndex] + ':' + parsedLine[hgvsCDNAIndex]
-        
+
         chrom38 = parsedLine[labelLine.index("Chr")]
         offset38 = parsedLine[labelLine.index("Pos")]
         ref38 = parsedLine[labelLine.index("Ref")]
         alt38 = parsedLine[labelLine.index("Alt")]
+        print("working on variant", chrom38, offset38, ref38, alt38)
         
         # Edge cases to correct variant string formats for indels in order to be accepted by the counsyl parser
         if ref38 == '-': ref38 = ''

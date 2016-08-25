@@ -22,7 +22,7 @@ $(outputFiles)/built.tsv:	$(outputFiles)/aggregated.tsv brca_pseudonym_generator
 	  -t $(resources)/refseq_annotation.hg38.gp \
 	  -o $@
 
-$(outputFiles)/aggregated.tsv:	$(outputFiles)/annotated.tsv aggregate_across_columns.py brca_pseudonym_generator.py
+$(outputFiles)/aggregated.tsv:	$(outputFiles)/annotated.tsv aggregate_across_columns.py 
 	aggregate_across_columns.py -i $< -o $@
 
 $(outputFiles)/annotated.tsv:	$(outputFiles)/merged.tsv add_annotation.py
