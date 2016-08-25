@@ -207,10 +207,12 @@ class VariantTestCase(TestCase):
 
     def test_get_variant_response(self):
         request = self.factory.get("/data/ga4gh/variants/hg37-1")
-        response = get_var_by_id(request, "hg37-1")
+        response = get_var_by_id(request, "hg37-19")
         jsonresp = json.loads(response.content)
         self.assertIsNotNone(jsonresp["referenceName"], True)
         self.assertIsNotNone(jsonresp["start"], True)
+        self.assertTrue(jsonresp["start"] == 41275598)
+        self.assertTrue(jsonresp["end"] == 41275599)
 
     def test_brca_to_ga4gh_variantSets_status_code(self):
         request0 = self.factory.post(
