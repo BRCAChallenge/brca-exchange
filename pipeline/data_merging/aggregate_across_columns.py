@@ -19,7 +19,7 @@ FIELDS_TO_ADD=["Hg38_Start", "Hg38_End", "Hg37_Start", "Hg37_End",
                "Max_Allele_Frequency",
                "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg36", 
                "Source_URL", "Discordant", "Synonyms",
-               "Pathogenicity_expert_reviewed", "Pathogenicity_all"]
+               "Pathogenicity_expert", "Pathogenicity_all"]
 FIELDS_TO_RENAME={"Gene_symbol_ENIGMA" : "Gene_Symbol",
                   "Genomic_Coordinate" : "Genomic_Coordinate_hg38",
                   "Reference_sequence_ENIGMA" : "Reference_Sequence", 
@@ -72,7 +72,7 @@ def updateRow(row, toRename, toRemove):
     (newRow["Reference_Sequence"], newRow["HGVS_cDNA"]) = hgvsCdnaUpdate(newRow)
     newRow["HGVS_Protein"] = hgvsProteinUpdate(row)
     newRow["BIC_Nomenclature"] = BICUpdate(row)
-    (newRow["Pathogenicity_expert_reviewed"],
+    (newRow["Pathogenicity_expert"],
      newRow["Pathogenicity_all"]) = pathogenicityUpdate(newRow)
     newRow["Allele_Frequency"] = selectAlleleFrequency(newRow)
     newRow["Max_Allele_Frequency"] = selectMaxAlleleFrequency(newRow)
@@ -176,6 +176,8 @@ def pathogenicityUpdate(row):
     if row["Clinical_classification_BIC"] != EMPTY:
         pathoAll = "%s%s%s (BIC)" % (pathoAll, delimiter,
                                            row["Clinical_classification_BIC"])
+    if pathoAll == "":
+        pathAll = EMPTY
     return(pathoExpert, pathoAll)
 
 def selectAlleleFrequency(row):

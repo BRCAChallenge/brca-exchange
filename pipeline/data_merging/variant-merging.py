@@ -156,6 +156,10 @@ def variant_standardize(variants="pickle"):
         pos = items[COLUMN_VCF_POS]
         ref = items[COLUMN_VCF_REF]
         alt = items[COLUMN_VCF_ALT]
+        if ref == "None":
+            ref = ""
+        if alt == "None":
+            alt = ""
         if re.search("^-", ref) or re.search("^-", alt):
             (chr, pos, ref, alt) = add_leading_base(chr, pos, ref, alt)
         if len(ref) < 1 or len(alt) < 1:
