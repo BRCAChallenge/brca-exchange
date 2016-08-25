@@ -80,35 +80,58 @@ var Signup = React.createClass({
     },
 
     handleSubmit: function () {
+        var self = this;
         var showSuccess = () => {this.transitionTo('/community', null, {registrationSuccess: true});};
         var showFailure = msg => {this.setState({error: msg});};
 
-        if (this.refs.contactForm.isValid()) {
-            var formData = this.refs.contactForm.getFormData();
-            this.setState({submitted: formData});
-            var url = config.backend_url + '/accounts/register/';
+        var withGoogleMaps = function () {
+            var geo = new google.maps.Geocoder();
+            var formData = self.refs.contactForm.getFormData();
+            var address = "" + formData.institution + "," + formData.city + "," + formData.state + "," + formData.country;
 
-            var fd = new FormData();
-            $.each(formData, function (k, v) {
-                fd.append(k, v);
-            });
-
-            var xhr = new XMLHttpRequest();
-            xhr.onload = function () {
-                var responseData = JSON.parse(this.response);
-
-                if (this.status === 200 && responseData.success === true) {
-                    showSuccess();
-                } else {
-                    var message = responseData.error;
-                    if (message === null) {
-                        message = "Could not complete registration";
-                    }
-                    showFailure(message);
+            geo.geocode({address: address}, (results, status) => {
+                var loc;
+                if (status === google.maps.GeocoderStatus.OK) {
+                    loc = results[0].geometry.location;
+                    formData.latitude = loc.lat().toString();
+                    formData.longitude = loc.lng().toString();
+                } else if (status === google.maps.GeocoderStatus.ZERO_RESULTS) {
+                    showFailure("Please check your location information.");
+                    return;
+                } else if (status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
+                    showFailure("Error checking your location information, please submit again.");
+                    return;
                 }
-            };
-            xhr.open('post', url);
-            xhr.send(fd);
+
+                self.setState({submitted: formData});
+                var url = config.backend_url + '/accounts/register/';
+
+                var fd = new FormData();
+                $.each(formData, function (k, v) {
+                    fd.append(k, v);
+                });
+
+                var xhr = new XMLHttpRequest();
+                xhr.onload = function () {
+                    var responseData = JSON.parse(this.response);
+
+                    if (this.status === 200 && responseData.success === true) {
+                        showSuccess();
+                    } else {
+                        var message = responseData.error;
+                        if (message === null) {
+                            message = "Could not complete registration";
+                        }
+                        showFailure(message);
+                    }
+                };
+                xhr.open('post', url);
+                xhr.send(fd);
+            });
+        };
+
+        if (this.refs.contactForm.isValid()) {
+            google.load('maps', '3', {callback: withGoogleMaps, "other_params": "key=" + config.maps_key});
         } else {
             this.setState({error: "Some information was missing"});
         }

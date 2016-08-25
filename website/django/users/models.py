@@ -9,7 +9,7 @@ ROLE_OTHER = 0
 
 class MyUserManager(BaseUserManager):
     def create_user(self, email, password, firstName="", lastName="", title="", role=ROLE_OTHER, role_other="", institution="",
-                    city="", state="", country="",phone_number="", 
+                    city="", state="", country="", latitude="", longitude="", phone_number="", 
                     hide_number=False, hide_email=False, has_image=False,
                     is_admin=False, is_approved=False):
         """
@@ -30,6 +30,8 @@ class MyUserManager(BaseUserManager):
             city=city,
             state=state,
             country=country,
+            latitude=latitude,
+            longitude=longitude,
             phone_number=phone_number,
             hide_number=hide_number,
             hide_email=hide_email,
@@ -76,6 +78,8 @@ class MyUser(AbstractBaseUser):
     city = models.TextField(blank=True)
     state = models.TextField(blank=True)
     country = models.TextField(blank=True)
+    latitude = models.TextField(blank=True)
+    longitude = models.TextField(blank=True)
     phone_number = models.TextField(max_length=30, blank=True)
     hide_number = models.BooleanField(default=False)
     hide_email = models.BooleanField(default=False)
