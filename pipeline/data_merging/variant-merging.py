@@ -29,6 +29,9 @@ COLUMN_VCF_POS = 4
 COLUMN_VCF_REF = 5
 COLUMN_VCF_ALT = 6
 
+# This is the string to be stored when a field is empty
+DEFAULT_CONTENTS = "-"
+
 # files needed for string comparison
 
 #key value pair dictionaries of all extra fields in various databases to add
@@ -292,9 +295,9 @@ def string_comparison_merge(variants):
                 for index, values_merged_so_far in enumerate(merged_row):
                     values_to_be_merged = variants[each_v][index]
                     # If either the new value or the old value is non-blank, use it.
-                    if values_merged_so_far == "-" and values_to_be_merged != "-":
+                    if values_merged_so_far == DEFAULT_CONTENTS and values_to_be_merged != DEFAULT_CONTENTS:
                         merged_row[index] = values_to_be_merged
-                    elif values_merged_so_far != "-" and values_to_be_merged == "-":
+                    elif values_merged_so_far != DEFAULT_CONTENTS and values_to_be_merged == DEFAULT_CONTENTS:
                         merged_row[index] = values_merged_so_far
                         # Skip over the VCF columns.  We're going to assume that one
                         # equivalence of them is enough, which will simplify life for
@@ -526,14 +529,14 @@ def add_new_source(columns, variants, source, source_file, source_dict):
                 variants[genome_coor].append(record.INFO[value])
             except KeyError:
                 if source == "BIC":
-                    variants[genome_coor].append("-")
+                    variants[genome_coor].append(DEFAULT_CONTENTS)
                 else:
                     raise Exception("uncaught weirdness")
     # for those enigma record that doesn't have a hit with new genome coordinate
     # add extra cells of "-" to the end of old record
     for value in variants.values():
         if len(value) != len(columns):
-            value += ["-"] * len(source_dict)
+            value += [DEFAULT_CONTENTS] * len(source_dict)
     print "number of variants in " + source + " is ", variants_num
     print "overlap with previous dataset: ", overlap
     print "number of total variants with the addition of " + source + " is: ", len(variants), "\n"
@@ -572,6 +575,9 @@ def save_enigma_to_dict(path):
             items.insert(COLUMN_VCF_POS, pos)
             items.insert(COLUMN_VCF_REF, ref)
             items.insert(COLUMN_VCF_ALT, alt)
+            for ii in range(len(items)):
+                if items[ii] == None:
+                    items[ii] = DEFAULT_CONTENTS 
             if ref_correct(chrom, pos, ref, alt):
                 hgvs = "chr%s:%s:%s>%s" % (str(chrom), str(pos), ref, alt)
                 variants[hgvs] = items
@@ -650,6 +656,6 @@ def ref_correct(chr, pos, ref, alt, version="hg38"):
 
 
 if __name__ == "__main__":
-    print "hello world"
-    #main()
+    #print "hello world"
+    main()
 
