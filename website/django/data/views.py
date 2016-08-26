@@ -413,11 +413,11 @@ def search_datasets(request):
     dta_resp = meta.Dataset()
     dta_resp.name = SetName
     dta_resp.id = name
-    dta_resp.info[SetName].append("This set contains variants as stored and mantained by the brca-exchange project")
+    #dta_resp.info[SetName].append("This set contains variants as stored and mantained by the brca-exchange project")
     dta_resp.description = "Variants observed in brca-exchange project"
     sr_dta_set_resp.datasets.extend([dta_resp])
     sr_dta_set_resp.next_page_token = page_token
-    return JsonResponse(json_format._MessageToJsonObject(sr_dta_set_resp, True))
+    return JsonResponse(json_format._MessageToJsonObject(sr_dta_set_resp, False))
 #### .../datasets/search method END #########
 
  #### Error URL catcher methods ######
