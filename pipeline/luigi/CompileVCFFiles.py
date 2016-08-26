@@ -210,7 +210,7 @@ class CopyClinvarVCFToOutputDir(luigi.Task):
     def run(self):
         clinvar_file_dir = self.file_parent_dir + "/ClinVar"
         copy(self.file_parent_dir + "/ClinVar/ClinVarBrca.vcf", self.output_dir)
-        check_file_for_contents(self.output_dir + "/ClinVar/ClinVarBrca.vcf")
+        check_file_for_contents(self.output_dir + "/ClinVarBrca.vcf")
 
 
 ###############################################
