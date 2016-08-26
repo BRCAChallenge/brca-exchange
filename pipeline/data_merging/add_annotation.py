@@ -26,8 +26,6 @@ def main():
                         default="/hive/groups/cgl/brca/release1.0/merged.tsv")
     parser.add_argument("-o", "--output",
                         default="/hive/groups/cgl/brca/release1.0/merged_withVEP_cleaned.tsv")
-    parser.add_argument("-v", "--vep",  help="VEP output, run in advance for all variants",
-                        default="/cluster/home/mollyzhang/release1.0/data/VEP/vep_output_3_3_2016.vcf")
     args = parser.parse_args()
     csvIn = csv.DictReader(open(args.input, "r"), delimiter='\t')
     outputColumns = setOutputColumns(csvIn.fieldnames, VEP_TRANSCRIPT_CONSEQUENCES)
