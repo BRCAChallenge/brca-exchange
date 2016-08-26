@@ -64,7 +64,6 @@ def addVepResults(row, vepTranscriptConsequenceFields):
         ext = "/vep/human/hgvs/"
         hgvs = "%s:g.%s:%s>%s?" % (row["Chr"], row["Pos"], 
                                    row["Ref"], row["Alt"])
-        print "workign on", hgvs
         req = requests.get(server+ext+hgvs, 
                            headers={ "Content-Type" : "application/json"})
         if not req.ok:
