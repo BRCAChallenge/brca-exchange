@@ -134,7 +134,8 @@ class DownloadLatestClinvarData(luigi.Task):
         return luigi.LocalTarget(self.file_parent_dir + "/ClinVar/ClinVarFullRelease_00-latest.xml.gz")
 
     def run(self):
-        clinvar_file_dir = self.file_parent_dir + "/ClinVar"
+        clinvar_file_dir = create_path_if_nonexistent(self.file_parent_dir + "/ClinVar")
+        create_path_if_nonexistent(self.output_dir)
         os.chdir(clinvar_file_dir)
 
         clinvar_data_url = "ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/ClinVarFullRelease_00-latest.xml.gz"
@@ -234,7 +235,8 @@ class DownloadLatestESPData(luigi.Task):
         return luigi.LocalTarget(self.file_parent_dir + "/ESP/ESP6500SI-V2-SSA137.GRCh38-liftover.snps_indels.vcf.tar.gz")
 
     def run(self):
-        esp_file_dir = os.environ['ESP'] = self.file_parent_dir + '/ESP'
+        esp_file_dir = os.environ['ESP'] = create_path_if_nonexistent(self.file_parent_dir + '/ESP')
+        create_path_if_nonexistent(self.output_dir)
         os.chdir(esp_file_dir)
 
         esp_data_url = "http://evs.gs.washington.edu/evs_bulk_data/ESP6500SI-V2-SSA137.GRCh38-liftover.snps_indels.vcf.tar.gz"
@@ -386,8 +388,8 @@ class DownloadBRCA1BICData(luigi.Task):
         return luigi.LocalTarget(bic_file_dir + "/brca1_data.txt")
 
     def run(self):
-        bic_file_dir = os.environ['BIC'] = self.file_parent_dir + '/BIC'
-        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+        bic_file_dir = os.environ['BIC'] = create_path_if_nonexistent(self.file_parent_dir + '/BIC')
+        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = create_path_if_nonexistent(self.output_dir)
         brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
 
         os.chdir(bic_file_dir)
@@ -561,8 +563,8 @@ class ExtractDataFromLatestEXLOVD(luigi.Task):
                 'brca2': luigi.LocalTarget(ex_lovd_file_dir + "/BRCA2.txt")}
 
     def run(self):
-        ex_lovd_file_dir = os.environ['EXLOVD'] = self.file_parent_dir + '/exLOVD'
-        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+        ex_lovd_file_dir = os.environ['EXLOVD'] = create_path_if_nonexistent(self.file_parent_dir + '/exLOVD')
+        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = create_path_if_nonexistent(self.output_dir)
         brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
 
         os.chdir(lovd_method_dir)
@@ -721,8 +723,8 @@ class ExtractDataFromLatestSharedLOVD(luigi.Task):
                 'brca2': luigi.LocalTarget(lovd_file_dir + "/BRCA2.txt")}
 
     def run(self):
-        lovd_file_dir = os.environ['LOVD'] = self.file_parent_dir + '/LOVD'
-        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+        lovd_file_dir = os.environ['LOVD'] = create_path_if_nonexistent(self.file_parent_dir + '/LOVD')
+        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = create_path_if_nonexistent(self.output_dir)
         brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
 
         os.chdir(lovd_method_dir)
@@ -884,8 +886,8 @@ class DownloadG1KCHR13GZ(luigi.Task):
         return luigi.LocalTarget(g1k_file_dir + "/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz")
 
     def run(self):
-        g1k_file_dir = os.environ['G1K'] = self.file_parent_dir + '/G1K'
-        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+        g1k_file_dir = os.environ['G1K'] = create_path_if_nonexistent(self.file_parent_dir + '/G1K')
+        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = create_path_if_nonexistent(self.output_dir)
         brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
 
         os.chdir(g1k_file_dir)
@@ -1080,8 +1082,8 @@ class DownloadEXACVCFGZFile(luigi.Task):
         return luigi.LocalTarget(exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz")
 
     def run(self):
-        exac_file_dir = os.environ['EXAC'] = self.file_parent_dir + '/exac'
-        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+        exac_file_dir = os.environ['EXAC'] = create_path_if_nonexistent(self.file_parent_dir + '/exac')
+        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = create_path_if_nonexistent(self.output_dir)
         brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
 
         os.chdir(exac_file_dir)
@@ -1239,8 +1241,8 @@ class ExtractOutputFromEnigma(luigi.Task):
         return luigi.LocalTarget(output_file_path)
 
     def run(self):
-        enigma_file_dir = os.environ['ENIGMA'] = self.file_parent_dir + '/enigma'
-        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = self.output_dir
+        enigma_file_dir = os.environ['ENIGMA'] = create_path_if_nonexistent(self.file_parent_dir + '/enigma')
+        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = create_path_if_nonexistent(self.output_dir)
         brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
 
         date_for_output_file_name = datetime.date.today().isoformat()
