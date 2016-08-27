@@ -188,14 +188,11 @@ def variant_standardize(variants="pickle"):
         items[COLUMN_VCF_ALT] = alt
         newHgvs = "chr%s:%s:%s>%s" % (str(chr), str(pos), ref, str(alt))
         if newHgvs != ev:
-            print "replacing hgvs", ev, "with", newHgvs
             variants_to_remove.append(ev)
             variants_to_add[newHgvs] = items
     for old_variant in variants_to_remove:
-        print "removing", old_variant
         variants.pop(old_variant)
     for key, values in variants_to_add.iteritems():
-        print "Adding replacement", key
         variants[key] = values
     return variants
 
@@ -548,7 +545,6 @@ def add_new_source(columns, variants, source, source_file, source_dict):
     print "number of total variants with the addition of " + source + " is: ", len(variants), "\n"
     for index,value in variants.iteritems():
         if len(value) != len(columns):
-            print index
             raise Exception("mismatching number of columns in head and row")
     return (columns, variants)
 

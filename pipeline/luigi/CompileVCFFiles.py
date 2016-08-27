@@ -7,6 +7,7 @@ import datetime
 import socket
 from shutil import copy
 import luigi
+import synapseclient
 from luigi.util import inherits, requires
 
 from retrying import retry
@@ -1223,8 +1224,11 @@ class CopyEXACOuputToOutputDir(luigi.Task):
 ###############################################
 
 
-class ExtractOutputFromEnigma(luigi.Task):
+class DownloadLatestEnigmaData(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
+
+    synapse_username = luigi.Parameter(description='used to access preprocessed enigma files')
+    synapse_password = luigi.Parameter(description='used to access preprocessed enigma files')
 
     resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
                                     description='directory to store brca-resources data')
@@ -1235,15 +1239,62 @@ class ExtractOutputFromEnigma(luigi.Task):
     file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
                                       description='directory to store all individual task related files')
 
+    preprocessed_enigma_dir_id = 'syn7188267'
+
+    def output(self):
+        """
+        Connects to synapse.org to gather latest Enigma preprocessed filenames. Requires a Synapse.org
+        account and access to the Enigma file directory with id syn7188267 owned by user MelissaCline.
+        """
+
+        syn = synapseclient.Synapse()
+
+        syn.login(self.synapse_username, self.synapse_password)
+
+        query = "select name from entity where entity.parentId=='%s'" % (self.preprocessed_enigma_dir_id)
+        enigma_files = syn.query(query)
+
+        enigma_preprocessed_data_dir = create_path_if_nonexistent('../enigma/raw_files')
+        output_files = {}
+        count = 1
+        for enigma_file in enigma_files['results']:
+            file_name = enigma_file['entity.name']
+            key = "Enigma" + str(count)
+            output_files[key] = luigi.LocalTarget(enigma_preprocessed_data_dir + "/" + file_name)
+            count += 1
+        return output_files
+
+    def run(self):
+        """
+        Connects to synapse.org to download latest Enigma preprocessed files. Requires a Synapse.org
+        account and access to the Enigma file directory with id syn7188267 owned by user MelissaCline.
+        """
+
+        enigma_preprocessed_data_dir = create_path_if_nonexistent('../enigma/raw_files')
+        enigma_file_dir = os.environ['ENIGMA'] = create_path_if_nonexistent(self.file_parent_dir + '/enigma')
+
+        syn = synapseclient.Synapse()
+        syn.login(self.synapse_username, self.synapse_password)
+
+        query = "select id from entity where entity.parentId=='%s'" % (self.preprocessed_enigma_dir_id)
+        enigma_files = syn.query(query)
+
+        for enigma_file in enigma_files['results']:
+            syn.get(enigma_file['entity.id'], downloadLocation=enigma_preprocessed_data_dir)
+
+
+@requires(DownloadLatestEnigmaData)
+class ExtractOutputFromEnigma(luigi.Task):
+
     def output(self):
         date_for_output_file_name = datetime.date.today().isoformat()
+        create_path_if_nonexistent(self.output_dir)
         output_file_path = self.output_dir + "/ENIGMA_last_updated_%s.tsv" % (date_for_output_file_name)
         return luigi.LocalTarget(output_file_path)
 
     def run(self):
-        enigma_file_dir = os.environ['ENIGMA'] = create_path_if_nonexistent(self.file_parent_dir + '/enigma')
-        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = create_path_if_nonexistent(self.output_dir)
-        brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+        enigma_file_dir = self.file_parent_dir + '/enigma'
+        brca_resources_dir = self.resources_dir
 
         date_for_output_file_name = datetime.date.today().isoformat()
         enigma_dir_output_file = enigma_file_dir + "/ENIGMA_last_updated_%s.tsv" % (date_for_output_file_name)
@@ -1257,7 +1308,7 @@ class ExtractOutputFromEnigma(luigi.Task):
 
         check_file_for_contents(enigma_dir_output_file)
 
-        copy(enigma_dir_output_file, pipeline_input_dir)
+        copy(enigma_dir_output_file, self.output_dir)
 
 
 ###############################################
@@ -1269,6 +1320,9 @@ class RunAll(luigi.WrapperTask):
     date = luigi.DateParameter(default=datetime.date.today())
     u = luigi.Parameter()
     p = luigi.Parameter()
+
+    synapse_username = luigi.Parameter(description='used to access preprocessed enigma files')
+    synapse_password = luigi.Parameter(description='used to access preprocessed enigma files')
 
     resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
                                     description='directory to store brca-resources data')
@@ -1282,9 +1336,11 @@ class RunAll(luigi.WrapperTask):
     def requires(self):
         yield CopyClinvarVCFToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyESPOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield CopyBICOutputToOutputDir(self.date, self.u, self.p, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield CopyBICOutputToOutputDir(self.date, self.u, self.p, self.resources_dir, self.output_dir,
+                                       self.file_parent_dir)
         yield CopyG1KOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyEXACOuputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyEXLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopySharedLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield ExtractOutputFromEnigma(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield ExtractOutputFromEnigma(self.date, self.synapse_username, self.synapse_password, self.resources_dir,
+                                      self.output_dir, self.file_parent_dir)

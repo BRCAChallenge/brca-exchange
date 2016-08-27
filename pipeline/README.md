@@ -17,17 +17,22 @@ Contains source code used to wrangle the BRCA variation data that is presented i
  * pip install git+https://github.com/counsyl/hgvs.git
  * pip install psycopg2
  * pip install parsley
- * pip install configparser
+ * pip install configparser (Enigma requires version 3.5.0, will fail with latest version)
  * pip install bioutils
  * pip install biopython
  * install lzo
  * install bx-python from https://pypi.python.org/packages/55/db/fa76af59a03c88ad80494fc0df2948740bbd58cd3b3ed5c31319624687cc/bx-python-0.7.3.tar.gz#md5=d8c50c01c9e421bae0bbdbfa00fef6e4 (note: pip install bx-python left an outstanding dependency to lzo1x.h, which proved to be hard to resolve) NOTE: This may lead to errors in the bx.bbi directory, please submit an issue if you encounter this problem. Sometimes `pip install bx-python` is also necessary.
- * pip install CrossMap
+ * pip install pysam
+ * install lzo (sudo apt-get install liblzo2-dev)
+ * pip install git+https://github.com/bxlab/bx-python
+ * install Cython
+ * pip install CrossMap (8/25/16: install from
  * install vcftools from https://vcftools.github.io/index.html
  * pip install pyvcf
  * install tabix (see http://genometoolbox.blogspot.com/2013/11/installing-tabix-on-unix.html)
  * pip install luigi
  * pip install retrying
+ * pip install synapseclient[pandas,pysftp]
  * cd into enigma and `pip install -r requirements.txt`
 
 ## Misc Instructions
