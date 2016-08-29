@@ -6,7 +6,7 @@ from operator import __or__
 
 from django.db import connection
 from django.db.models import Q
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.gzip import gzip_page
 
 from .models import Variant
@@ -177,11 +177,17 @@ def variant_search(request):
         page_size = req_dict.get('pageSize', 3)
         page_token = req_dict.get('pageToken', "0")
 
+    if not page_size:
+        page_size = 3
+    if page_size == 0:
+        page_size = 3
+    if not page_token:
+        page_token = "0"
     x, referenceCord = variant_set_id.split("-")
     if referenceCord not in SetIds :
-        return JsonResponse({"Error messeage" : "Not a supported variantSetId"})
+        return HttpResponseBadRequest(json.dumps(ErrorMessages["VariantSetId"]), content_type="application/json")
     if reference_name not in refNames:
-        return JsonResponse({"Error messeage" : "Not a supported referenceName"})
+        return HttpResponseBadRequest(json.dumps(ErrorMessages["referenceName"]), content_type="application/json")
 
     response0 = v_s.SearchVariantsResponse()
     filt = str(reference_name)+":"
@@ -194,11 +200,10 @@ def variant_search(request):
     if len(ga_vars) > page_size:
         ga_vars.pop()
         page_token = str(1 + int(page_token))
-    else:
-        response0.next_page_token = ""
+        response0.next_page_token = page_token
+
     response0.variants.extend(ga_vars)
-    response0.next_page_token = page_token
-    resp = json_format._MessageToJsonObject(response0, True)
+    resp = json_format._MessageToJsonObject(response0, False)
     return JsonResponse(resp)
 ############### .../variants/search methond END ##############################
 
@@ -297,27 +302,27 @@ def brca_to_ga4gh(brca_variant, genRefer):
 #### Auxiliary function which validates requests ######
 def validate_request(request):
     if not request.body:
-        return JsonResponse(ErrorMessages['emptyBody'])
+        return HttpResponseBadRequest(json.dumps(ErrorMessages['emptyBody']), content_type="application/json")
     else:
         request_dict = json.loads(request.body)
         if not request_dict.get("variantSetId"):
-            return JsonResponse(ErrorMessages['VariantSetId'])
+            return HttpResponseBadRequest(json.dumps(ErrorMessages['VariantSetId']), content_type="application/json")
         elif not request_dict.get('referenceName'):
-            return JsonResponse(ErrorMessages['referenceName'])
+            return HttpResponseBadRequest(json.dumps(ErrorMessages['referenceName']), content_type="application/json")
         elif not request_dict.get('start')  :
-            return JsonResponse(ErrorMessages['start'])
+            return HttpResponseBadRequest(json.dumps(ErrorMessages['start']), content_type="application/json")
         elif not request_dict.get('end') :
-            return JsonResponse(ErrorMessages['end'])
+            return HttpResponseBadRequest(json.dumps(ErrorMessages['end']), content_type="application/json")
         else:
             return None
 
 def validate_varsetreq(request):
     if not request.body:
-        return JsonResponse(ErrorMessages['emptyBody'])
+        return HttpResponseBadRequest(json.dumps(ErrorMessages['emptyBody']), content_type="application/json")
     else:
         request_dict = json.loads(request.body)
         if not request_dict.get("datasetId"):
-            return JsonResponse(ErrorMessages['datasetId'])
+            return HttpResponseBadRequest(json.dumps(ErrorMessages['datasetId']), content_type="application/json")
         else:
             return None
 ########## Auxiliary function END ############
@@ -326,7 +331,7 @@ def validate_varsetreq(request):
 @require_http_methods(["GET"])
 def get_var_by_id(request, variant_id):
     if not variant_id:
-        return JsonResponse(ErrorMessages['variantId'])
+        return HttpResponseBadRequest(json.dumps(ErrorMessages['variantId']), content_type="application/json")
     else:
         gen_coor_and_id = variant_id
         gen_coor, v_id = gen_coor_and_id.split("-")
@@ -337,7 +342,7 @@ def get_var_by_id(request, variant_id):
             resp = json_format._MessageToJsonObject(Var_resp, True)
             return JsonResponse(resp)
         else:
-            return JsonResponse(ErrorMessages["datasetId"])
+            return HttpResponseBadRequest(json.dumps(ErrorMessages["datasetId"]), content_type="application/json")
 ######### .../variants/<variant id> method END ########
 
 ######### .../variantsets/search method ########
@@ -352,7 +357,7 @@ def get_variantSet(request):
         page_size = req_dict.get('pageSize', 3)
         page_token = req_dict.get('pageToken', '0')
         if dataset_id != "brca-exchange":
-            return JsonResponse(ErrorMessages["datasetId"])
+            return HttpResponseBadRequest(json.dumps(ErrorMessages["datasetId"]), content_type="application/json")
     if page_token is None:
          page_token = "0"
 
@@ -388,7 +393,7 @@ def brca_meta(Metadata, dataset_id):
 @require_http_methods(["GET"])
 def get_varset_by_id(request, variantSetId):
     if not variantSetId :
-        return JsonResponse(ErrorMessages["variantSetId"])
+        return HttpResponseBadRequest(json.dumps(ErrorMessages["variantSetId"]), content_type="application/json")
     dataset, Id = variantSetId.split("-")
     if Id in SetIds and dataset == "brca":
         response = vrs.VariantSet()
@@ -423,11 +428,11 @@ def search_datasets(request):
  #### Error URL catcher methods ######
 @require_http_methods(["GET", "POST"])
 def varsetId_empty_catcher(request):
-    return JsonResponse(ErrorMessages["emptyBody"])
+    return HttpResponseBadRequest(json.dumps(ErrorMessages["emptyBody"]), content_type="application/json")
 
 @require_http_methods(["GET", "POST"])
 def empty_varId_catcher(request):
-    return JsonResponse(ErrorMessages["emptyBody"])
+    return HttpResponseBadRequest(json.dumps(ErrorMessages["emptyBody"]), content_type="application/json")
 ################# END #####################
 
 ############################## GLOABAL VARIABLES ################################
@@ -444,7 +449,7 @@ datasetId = "brca"
 referenceSetId = "Genomic-Coordinate"
 name = "brca-exchange"
 SetIds = ["hg36", "hg37", "hg38"]
-refNames = ["chr13", "chr17"]
+refNames = ["chr13", "chr17", "13", "17"]
 #################################################################################
 
 # Need to implement function that filters elements by increasing and decreasing integer values
