@@ -158,25 +158,25 @@ class VariantTestCase(TestCase):
         req = self.factory.post("/data/ga4gh/variants/search", json.dumps(json_format._MessageToJsonObject(request, False)),
                                 content_type="application/json")
         response = variant_search(req)
-        self.assertJSONEqual(response.content, ErrorMessages['VariantSetId'])
+        self.assertEquals(response.status_code, 400, "Should pass because is an empty: {}, which returns an error message: {}".format(response.status_code, 404))
 
         request.variant_set_id = "Something not null"
         req = self.factory.post("/data/ga4gh/variants/search", json.dumps(json_format._MessageToJsonObject(request, False)),
                                 content_type="application/json")
         response = variant_search(req)
-        self.assertJSONEqual(response.content, ErrorMessages['referenceName'])
+        self.assertEquals(response.status_code, 400, "Should pass because is an empty: {}, which returns an error message: {}".format(response.status_code, 404))
 
         request.reference_name = "chr17"
         req= self.factory.post("/data/ga4gh/variants/search", json.dumps(json_format._MessageToJsonObject(request, False)),
                                 content_type="application/json")
         response = variant_search(req)
-        self.assertJSONEqual(response.content, ErrorMessages['start'])
+        self.assertEquals(response.status_code, 400, "Should pass because is an empty: {}, which returns an error message: {}".format(response.status_code, 404))
 
         request.start = 14589
         req = self.factory.post("/data/ga4gh/variants/search", json.dumps(json_format._MessageToJsonObject(request, False)),
                                 content_type="application/json")
         response = variant_search(req)
-        self.assertJSONEqual(response.content, ErrorMessages['end'])
+        self.assertEquals(response.status_code, 400, "Should pass because is an empty: {}, which returns an error message: {}".format(response.status_code, 404))
 
     def test_offset_calculator(self):
         start = 12500
@@ -206,7 +206,7 @@ class VariantTestCase(TestCase):
         self.assertEquals(len(json.loads(response.content)["variants"]), 5)
 
     def test_get_variant_response(self):
-        request = self.factory.get("/data/ga4gh/variants/hg37-1")
+        request = self.factory.get("/data/ga4gh/variants/hg37-19")
         response = get_var_by_id(request, "hg37-19")
         jsonresp = json.loads(response.content)
         self.assertIsNotNone(jsonresp["referenceName"], True)
