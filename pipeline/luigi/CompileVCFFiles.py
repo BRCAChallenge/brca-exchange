@@ -99,19 +99,19 @@ def check_file_for_contents(file_path):
 #######################################
 
 
-DEFAULT_BRCA_RESOURCES_DIR = os.environ['BRCA_RESOURCES'] = (os.path.abspath('../brca/brca-resources'))
-DEFAULT_OUTPUT_DIR = os.environ['PIPELINE_INPUT'] = (os.path.abspath('../brca/pipeline-data/data/pipeline_input'))
-DEFAULT_FILE_PARENT_DIR = os.environ['CLINVAR'] = (os.path.abspath('../brca/pipeline-data/data'))
+DEFAULT_BRCA_RESOURCES_DIR = (os.path.abspath('../brca/brca-resources'))
+DEFAULT_OUTPUT_DIR = (os.path.abspath('../brca/pipeline-data/data/pipeline_input'))
+DEFAULT_FILE_PARENT_DIR = (os.path.abspath('../brca/pipeline-data/data'))
 
-luigi_dir = os.environ['LUIGI'] = os.getcwd()
+luigi_dir = os.getcwd()
 
-bic_method_dir = os.environ['BIC_METHODS'] = os.path.abspath('../bic')
-clinvar_method_dir = os.environ['CLINVAR_METHODS'] = os.path.abspath('../clinvar')
-esp_method_dir = os.environ['ESP_METHODS'] = os.path.abspath('../esp')
-lovd_method_dir = os.environ['LOVD_METHODS'] = os.path.abspath('../lovd')
-g1k_method_dir = os.environ['G1K_METHODS'] = os.path.abspath('../1000_Genomes')
-enigma_method_dir = os.environ['ENIGMA_METHODS'] = os.path.abspath('../enigma')
-data_merging_method_dir = os.environ['DATA_MERGING_METHODS'] = os.path.abspath('../data_merging')
+bic_method_dir = os.path.abspath('../bic')
+clinvar_method_dir = os.path.abspath('../clinvar')
+esp_method_dir = os.path.abspath('../esp')
+lovd_method_dir = os.path.abspath('../lovd')
+g1k_method_dir = os.path.abspath('../1000_Genomes')
+enigma_method_dir = os.path.abspath('../enigma')
+data_merging_method_dir = os.path.abspath('../data_merging')
 
 
 ###############################################
@@ -136,7 +136,6 @@ class DownloadLatestClinvarData(luigi.Task):
 
     def run(self):
         clinvar_file_dir = create_path_if_nonexistent(self.file_parent_dir + "/ClinVar")
-        create_path_if_nonexistent(self.output_dir)
         os.chdir(clinvar_file_dir)
 
         clinvar_data_url = "ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/ClinVarFullRelease_00-latest.xml.gz"
@@ -211,6 +210,8 @@ class CopyClinvarVCFToOutputDir(luigi.Task):
 
     def run(self):
         clinvar_file_dir = self.file_parent_dir + "/ClinVar"
+        create_path_if_nonexistent(self.output_dir)
+
         copy(self.file_parent_dir + "/ClinVar/ClinVarBrca.vcf", self.output_dir)
         check_file_for_contents(self.output_dir + "/ClinVarBrca.vcf")
 
@@ -236,8 +237,7 @@ class DownloadLatestESPData(luigi.Task):
         return luigi.LocalTarget(self.file_parent_dir + "/ESP/ESP6500SI-V2-SSA137.GRCh38-liftover.snps_indels.vcf.tar.gz")
 
     def run(self):
-        esp_file_dir = os.environ['ESP'] = create_path_if_nonexistent(self.file_parent_dir + '/ESP')
-        create_path_if_nonexistent(self.output_dir)
+        esp_file_dir = create_path_if_nonexistent(self.file_parent_dir + '/ESP')
         os.chdir(esp_file_dir)
 
         esp_data_url = "http://evs.gs.washington.edu/evs_bulk_data/ESP6500SI-V2-SSA137.GRCh38-liftover.snps_indels.vcf.tar.gz"
@@ -360,6 +360,8 @@ class CopyESPOutputToOutputDir(luigi.Task):
 
     def run(self):
         esp_file_dir = self.file_parent_dir + "/ESP"
+        create_path_if_nonexistent(self.output_dir)
+
         copy(esp_file_dir + "/esp.brca12.sorted.hg38.vcf", self.output_dir)
         check_file_for_contents(self.output_dir + "/esp.brca12.sorted.hg38.vcf")
 
@@ -389,9 +391,7 @@ class DownloadBRCA1BICData(luigi.Task):
         return luigi.LocalTarget(bic_file_dir + "/brca1_data.txt")
 
     def run(self):
-        bic_file_dir = os.environ['BIC'] = create_path_if_nonexistent(self.file_parent_dir + '/BIC')
-        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = create_path_if_nonexistent(self.output_dir)
-        brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+        bic_file_dir = create_path_if_nonexistent(self.file_parent_dir + '/BIC')
 
         os.chdir(bic_file_dir)
 
@@ -536,6 +536,8 @@ class CopyBICOutputToOutputDir(luigi.Task):
 
     def run(self):
         bic_file_dir = self.file_parent_dir + '/BIC'
+        create_path_if_nonexistent(self.output_dir)
+
         copy(bic_file_dir + "/bic_brca12.sorted.hg38.vcf", self.output_dir)
         check_file_for_contents(self.output_dir + "/bic_brca12.sorted.hg38.vcf")
 
@@ -564,9 +566,7 @@ class ExtractDataFromLatestEXLOVD(luigi.Task):
                 'brca2': luigi.LocalTarget(ex_lovd_file_dir + "/BRCA2.txt")}
 
     def run(self):
-        ex_lovd_file_dir = os.environ['EXLOVD'] = create_path_if_nonexistent(self.file_parent_dir + '/exLOVD')
-        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = create_path_if_nonexistent(self.output_dir)
-        brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+        ex_lovd_file_dir = create_path_if_nonexistent(self.file_parent_dir + '/exLOVD')
 
         os.chdir(lovd_method_dir)
 
@@ -694,6 +694,7 @@ class CopyEXLOVDOutputToOutputDir(luigi.Task):
 
     def run(self):
         ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
+        create_path_if_nonexistent(self.output_dir)
 
         copy(ex_lovd_file_dir + "/exLOVD_brca12.sorted.hg38.vcf", self.output_dir)
 
@@ -724,9 +725,8 @@ class ExtractDataFromLatestSharedLOVD(luigi.Task):
                 'brca2': luigi.LocalTarget(lovd_file_dir + "/BRCA2.txt")}
 
     def run(self):
-        lovd_file_dir = os.environ['LOVD'] = create_path_if_nonexistent(self.file_parent_dir + '/LOVD')
-        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = create_path_if_nonexistent(self.output_dir)
-        brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+        lovd_file_dir = create_path_if_nonexistent(self.file_parent_dir + '/LOVD')
+        brca_resources_dir = self.resources_dir
 
         os.chdir(lovd_method_dir)
 
@@ -858,6 +858,7 @@ class CopySharedLOVDOutputToOutputDir(luigi.Task):
 
     def run(self):
         lovd_file_dir = self.file_parent_dir + "/LOVD"
+        create_path_if_nonexistent(self.output_dir)
 
         copy(lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf", self.output_dir)
 
@@ -887,9 +888,7 @@ class DownloadG1KCHR13GZ(luigi.Task):
         return luigi.LocalTarget(g1k_file_dir + "/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz")
 
     def run(self):
-        g1k_file_dir = os.environ['G1K'] = create_path_if_nonexistent(self.file_parent_dir + '/G1K')
-        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = create_path_if_nonexistent(self.output_dir)
-        brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+        g1k_file_dir = create_path_if_nonexistent(self.file_parent_dir + '/G1K')
 
         os.chdir(g1k_file_dir)
 
@@ -1055,6 +1054,7 @@ class CopyG1KOutputToOutputDir(luigi.Task):
 
     def run(self):
         g1k_file_dir = self.file_parent_dir + '/G1K'
+        create_path_if_nonexistent(self.output_dir)
 
         copy(g1k_file_dir + "/1000G_brca.sorted.hg38.vcf", self.output_dir)
 
@@ -1083,9 +1083,7 @@ class DownloadEXACVCFGZFile(luigi.Task):
         return luigi.LocalTarget(exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz")
 
     def run(self):
-        exac_file_dir = os.environ['EXAC'] = create_path_if_nonexistent(self.file_parent_dir + '/exac')
-        pipeline_input_dir = os.environ['PIPELINE_INPUT'] = create_path_if_nonexistent(self.output_dir)
-        brca_resources_dir = os.environ['BRCA_RESOURCES'] = self.resources_dir
+        exac_file_dir = create_path_if_nonexistent(self.file_parent_dir + '/exac')
 
         os.chdir(exac_file_dir)
 
@@ -1101,7 +1099,7 @@ class DownloadEXACVCFGZTBIFile(luigi.Task):
         return luigi.LocalTarget(exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz.tbi")
 
     def run(self):
-        exac_file_dir = os.environ['EXAC'] = self.file_parent_dir + '/exac'
+        exac_file_dir = self.file_parent_dir + '/exac'
         os.chdir(exac_file_dir)
 
         exac_vcf_gz_tbi_url = "ftp://ftp.broadinstitute.org/pub/ExAC_release/current/subsets/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz.tbi"
@@ -1213,6 +1211,7 @@ class CopyEXACOuputToOutputDir(luigi.Task):
 
     def run(self):
         exac_file_dir = self.file_parent_dir + '/exac'
+        create_path_if_nonexistent(self.output_dir)
 
         copy(exac_file_dir + "/exac.brca12.sorted.hg38.vcf", self.output_dir)
 
@@ -1271,7 +1270,7 @@ class DownloadLatestEnigmaData(luigi.Task):
         """
 
         enigma_preprocessed_data_dir = create_path_if_nonexistent('../enigma/raw_files')
-        enigma_file_dir = os.environ['ENIGMA'] = create_path_if_nonexistent(self.file_parent_dir + '/enigma')
+        enigma_file_dir = create_path_if_nonexistent(self.file_parent_dir + '/enigma')
 
         syn = synapseclient.Synapse()
         syn.login(self.synapse_username, self.synapse_password)
@@ -1293,8 +1292,9 @@ class ExtractOutputFromEnigma(luigi.Task):
         return luigi.LocalTarget(output_file_path)
 
     def run(self):
-        enigma_file_dir = self.file_parent_dir + '/enigma'
+        enigma_file_dir = create_path_if_nonexistent(self.file_parent_dir + '/enigma')
         brca_resources_dir = self.resources_dir
+        create_path_if_nonexistent(self.output_dir)
 
         date_for_output_file_name = datetime.date.today().isoformat()
         enigma_dir_output_file = enigma_file_dir + "/ENIGMA_last_updated_%s.tsv" % (date_for_output_file_name)
