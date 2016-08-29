@@ -226,7 +226,7 @@ def select_gen_coor(referenceCordinate, DbResp, Chrm, Start = None, End = None):
     elif referenceCordinate == SetIds[2]:
         FilteredResponse = DbResp.filter(Reference_Name=Chrm)
         if Start != None and End != None:
-            FilteredResponse = FilteredResponse.filter(Hg38_End__lt=End, Hg38_Start__gt=val1)
+            FilteredResponse = FilteredResponse.filter(Hg38_End__lt=End, Hg38_Start__gt=Start)
             return FilteredResponse
         else:
             return FilteredResponse
