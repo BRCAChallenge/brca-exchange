@@ -58,8 +58,11 @@ def update(request):
     fields['has_image'] = (user[0].has_image or fields['has_image']) and not delete_image
 
     del fields['email']
-    if fields['password'] == '':
-        del fields['password']
+    if fields['password'] != '':
+        u = user[0]
+        u.set_password(fields['password'])
+        u.save()
+    del fields['password']
 
     # mailing list toggle
     if 'subscribe' in request.POST:
