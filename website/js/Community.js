@@ -254,7 +254,7 @@ var CommunityMap = React.createClass({
                     });
                     markers = self.markers = newMarkers;
 /*eslint-disable camelcase*/
-                    _.map(data, ({id, firstName, lastName, title, role, role_other, institution, city, state, country, latitude, longitude, has_image})  => {
+                    _.map(data, ({id, firstName, lastName, title, role, role_other, institution, latitude, longitude, has_image})  => {
                         var avatar;
                         if (has_image) {
                             let avatar_link = config.backend_url + '/site_media/media/' + id;
