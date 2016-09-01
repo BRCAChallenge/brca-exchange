@@ -145,7 +145,13 @@ def main(args):
         chrom36, offset36, ref36, alt36 = pyhgvs.parse_hgvs_name(cdna_coord, genome36, get_transcript=get_transcript36)
         
         # Generate transcript hgvs cdna synonym string
-        synonymString = []
+        if parsedLine[synonymIndex] == "-":
+            synonymString = []
+        elif parsedLine[synonymIndex] == "":
+            synonymString = []
+        else:
+            synonymString = parsedLine[synonymIndex].split(",")
+
         if parsedLine[geneSymbolIndex] == 'BRCA1':
             for transcriptName in refSeqBRCA1Transcripts:
                 transcript38 = get_transcript38(transcriptName)
