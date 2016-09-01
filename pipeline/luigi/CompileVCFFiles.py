@@ -241,8 +241,7 @@ class DownloadLatestESPData(luigi.Task):
         os.chdir(esp_file_dir)
 
         esp_data_url = "http://evs.gs.washington.edu/evs_bulk_data/ESP6500SI-V2-SSA137.GRCh38-liftover.snps_indels.vcf.tar.gz"
-        file_name = esp_data_url.split('/')[-1]
-        download_file_and_display_progress(esp_data_url, file_name)
+        download_file_and_display_progress(esp_data_url)
 
 
 @requires(DownloadLatestESPData)
@@ -276,6 +275,7 @@ class ExtractESPDataForBRCA1Region(luigi.Task):
     def run(self):
         esp_file_dir = self.file_parent_dir + "/ESP"
         os.chdir(esp_method_dir)
+
         brca1_region_file = esp_file_dir + "/ESP6500SI-V2-SSA137.GRCh38-liftover.chr17.snps_indels.vcf"
         brca1_region_output = esp_file_dir + "/esp.brca1.vcf"
         args = ["python", "espExtract.py", brca1_region_file, "--start",
@@ -299,8 +299,9 @@ class ExtractESPDataForBRCA2Region(luigi.Task):
         os.chdir(esp_method_dir)
         brca2_region_file = esp_file_dir + '/ESP6500SI-V2-SSA137.GRCh38-liftover.chr13.snps_indels.vcf'
         brca2_region_output = esp_file_dir + "/esp.brca2.vcf"
-        args = ["python", "espExtract.py", brca2_region_file, "--start", "43044295",
-                "--end", "43125483", "--full", "1", "-o", brca2_region_output]
+
+        args = ["python", "espExtract.py", brca2_region_file, "--start", "32315473",
+                "--end", "32400266", "--full", "1", "-o", brca2_region_output]
         print "Calling espExtract.py for BRCA 2 region with the following arguments: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
@@ -1205,7 +1206,7 @@ class SortEXACData(luigi.Task):
 
 
 @requires(SortEXACData)
-class CopyEXACOuputToOutputDir(luigi.Task):
+class CopyEXACOutputToOutputDir(luigi.Task):
     def output(self):
         return luigi.LocalTarget(self.output_dir + "/exac.brca12.sorted.hg38.vcf")
 
@@ -1286,9 +1287,8 @@ class DownloadLatestEnigmaData(luigi.Task):
 class ExtractOutputFromEnigma(luigi.Task):
 
     def output(self):
-        date_for_output_file_name = datetime.date.today().isoformat()
         create_path_if_nonexistent(self.output_dir)
-        output_file_path = self.output_dir + "/ENIGMA_last_updated_%s.tsv" % (date_for_output_file_name)
+        output_file_path = self.output_dir + "/ENIGMA_last_updated.tsv"
         return luigi.LocalTarget(output_file_path)
 
     def run(self):
@@ -1296,8 +1296,7 @@ class ExtractOutputFromEnigma(luigi.Task):
         brca_resources_dir = self.resources_dir
         create_path_if_nonexistent(self.output_dir)
 
-        date_for_output_file_name = datetime.date.today().isoformat()
-        enigma_dir_output_file = enigma_file_dir + "/ENIGMA_last_updated_%s.tsv" % (date_for_output_file_name)
+        enigma_dir_output_file = enigma_file_dir + "/ENIGMA_last_updated.tsv"
 
         os.chdir(enigma_method_dir)
 
@@ -1309,6 +1308,109 @@ class ExtractOutputFromEnigma(luigi.Task):
         check_file_for_contents(enigma_dir_output_file)
 
         copy(enigma_dir_output_file, self.output_dir)
+
+
+###############################################
+#              VARIANT MERGING                #
+###############################################
+
+
+class MergeVCFsIntoTSVFile(luigi.Task):
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                                    description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                                 description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                                      description='directory to store all individual task related files')
+
+    def output(self):
+        release_dir = create_path_if_nonexistent(self.output_dir + "/release/")
+        return luigi.LocalTarget(release_dir + "merged.tsv")
+
+    def run(self):
+        release_dir = create_path_if_nonexistent(self.output_dir + "/release/")
+        brca_resources_dir = self.resources_dir
+
+        os.chdir(data_merging_method_dir)
+
+        args = ["python", "variant-merging.py", "-i", self.output_dir + "/", "-o",
+                release_dir, "-p", "-r", brca_resources_dir + "/"]
+        print "Running variant-merging.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(release_dir + "merged.tsv")
+
+
+@requires(MergeVCFsIntoTSVFile)
+class AnnotateMergedOutput(luigi.Task):
+
+    def output(self):
+        release_dir = self.output_dir + "/release/"
+        return luigi.LocalTarget(release_dir + "annotated.tsv")
+
+    def run(self):
+        release_dir = self.output_dir + "/release/"
+        os.chdir(data_merging_method_dir)
+
+        args = ["python", "add_annotation.py", "-i", release_dir + "merged.tsv",
+                "-o", release_dir + "annotated.tsv"]
+        print "Running add_annotation.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(release_dir + "annotated.tsv")
+
+
+@requires(AnnotateMergedOutput)
+class AggregateMergedOutput(luigi.Task):
+
+    def output(self):
+        release_dir = self.output_dir + "/release/"
+        return luigi.LocalTarget(release_dir + "aggregated.tsv")
+
+    def run(self):
+        release_dir = self.output_dir + "/release/"
+        os.chdir(data_merging_method_dir)
+
+        args = ["python", "aggregate_across_columns.py", "-i", release_dir + "annotated.tsv",
+                "-o", release_dir + "aggregated.tsv"]
+        print "Running aggregate_across_columns.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(release_dir + "aggregated.tsv")
+
+
+@requires(AggregateMergedOutput)
+class BuildAggregatedOutput(luigi.Task):
+
+    def output(self):
+        release_dir = self.output_dir + "/release/"
+        return luigi.LocalTarget(release_dir + "built.tsv")
+
+    def run(self):
+        release_dir = self.output_dir + "/release/"
+        brca_resources_dir = self.resources_dir
+        os.chdir(data_merging_method_dir)
+
+        args = ["python", "brca_pseudonym_generator.py", "-i", release_dir + "/aggregated.tsv", "-p",
+                "-j", brca_resources_dir + "/hg18.fa",
+                "-k", brca_resources_dir + "/hg19.fa",
+                "-l", brca_resources_dir + "/hg38.fa",
+                "-r", brca_resources_dir + "/refseq_annotation.hg18.gp",
+                "-s", brca_resources_dir + "/refseq_annotation.hg19.gp",
+                "-t", brca_resources_dir + "/refseq_annotation.hg38.gp",
+                "-o", release_dir + "built.tsv"]
+        print "Running brca_pseudonym_generator.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(release_dir + "built.tsv")
 
 
 ###############################################
@@ -1334,13 +1436,14 @@ class RunAll(luigi.WrapperTask):
                                       description='directory to store all individual task related files')
 
     def requires(self):
+        # yield BuildAggregatedOutput(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyClinvarVCFToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyESPOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyBICOutputToOutputDir(self.date, self.u, self.p, self.resources_dir, self.output_dir,
                                        self.file_parent_dir)
         yield CopyG1KOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield CopyEXACOuputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield CopyEXACOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyEXLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopySharedLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield ExtractOutputFromEnigma(self.date, self.synapse_username, self.synapse_password, self.resources_dir,
-                                      self.output_dir, self.file_parent_dir)
+        # yield ExtractOutputFromEnigma(self.date, self.synapse_username, self.synapse_password, self.resources_dir,
+        #                               self.output_dir, self.file_parent_dir)

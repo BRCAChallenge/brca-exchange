@@ -56,7 +56,7 @@ def main():
     today = datetime.date.today().isoformat()
     if not os.path.exists("output"):
         os.makedirs("output")
-    default_output_file = "output/ENIGMA_last_updated_%s.tsv" % (today)
+    default_output_file = "output/ENIGMA_last_updated.tsv"
     # writable_default_output_file = open(default_output_file, "w")
 
     parser = argparse.ArgumentParser()
