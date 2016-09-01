@@ -114,7 +114,7 @@ var Profile = React.createClass({
                         formData.latitude = loc.lat().toString();
                         formData.longitude = loc.lng().toString();
                     } else if (status === google.maps.GeocoderStatus.ZERO_RESULTS) {
-                        showFailure("Please check your location information.");
+                        showFailure("Please check your location information, or leave it blank.");
                         return;
                     } else if (status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
                         showFailure("Error checking your location information, please submit again.");
