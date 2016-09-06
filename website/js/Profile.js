@@ -341,13 +341,13 @@ var EditProfileForm = React.createClass({
 		// XXX Not sure why eslint flags this bind, because 'this' is used in the handlers within the
 		// body of the function.
         var options = kwargs.values.map(function (value) { //eslint-disable-line no-extra-bind
-            var handleRadioChange = () => {var oldData = this.state.data; oldData[id] = value.name; this.setState({data: oldData});};
+            var handleRadioChange = () => {var oldData = this.state.data; oldData[id] = value.name; this.setState({data: oldData}); };
             var defaultChecked = false;
             if (value.name === kwargs.defaultCheckedValue) {
                 defaultChecked = true;
                 otherValue = '';
             }
-            if (value.name === 'Other') {defaultChecked = true;}
+            if (value.name === 'Other' && !kwargs.values.some(opt => opt.name === kwargs.defaultCheckedValue)) {defaultChecked = true;}
             return (
 				<label className="radio-inline">
 					<input type="radio" ref={id + value.ref} name={id} value={value.name} checked={defaultChecked} onChange={handleRadioChange}/>
