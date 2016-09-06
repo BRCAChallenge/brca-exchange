@@ -32,6 +32,7 @@ var Profile = React.createClass({
 				<div className="alert alert-danger">
 					<p>{this.state.error}</p>
 				</div>);
+            window.scrollTo(0,0);
         }
         return (
             <Grid id="main-grid">
