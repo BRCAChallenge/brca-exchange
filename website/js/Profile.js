@@ -170,9 +170,9 @@ var EditProfileForm = React.createClass({
     },
     isValid: function () {
         var errors = {};
-        if (this.refs.password.getDOMNode().value !== this.refs.password_confirm.getDOMNode().value) {
+        /* if (this.refs.password.getDOMNode().value !== this.refs.password_confirm.getDOMNode().value) {
             errors["password_confirm"] = "The passwords don't match"; //eslint-disable-line dot-notation
-        }
+        } */
 
         if (this.state.otherRole) {
             if (!this.refs.role_other.getDOMNode().value.trim()) {
@@ -190,8 +190,9 @@ var EditProfileForm = React.createClass({
         var data = {
             "image": this.state.file,
             "deleteImage": this.state.imageDelete,
-            "password": this.refs.password.getDOMNode().value,
-            "password_confirm": this.refs.password_confirm.getDOMNode().value,
+            /* "password": this.refs.password.getDOMNode().value,
+               "password_confirm": this.refs.password_confirm.getDOMNode().value,
+            */
             "firstName": this.refs.firstName.getDOMNode().value,
             "lastName": this.refs.lastName.getDOMNode().value,
             "title": title,
@@ -238,8 +239,11 @@ var EditProfileForm = React.createClass({
         return (
         <div className="form-horizontal" onChange={onChange.bind(this)}>
             {this.renderImageUpload('image', 'Profile picture')}
-            {this.renderPassword('password', 'Password')}
-            {this.renderPassword('password_confirm', 'Confirm Password')}
+            {
+                /* {this.renderPassword('password', 'Password')}
+                   {this.renderPassword('password_confirm', 'Confirm Password')}
+                */
+            }
             {this.renderTextInput('firstName', 'First Name', this.state.data.firstName)}
             {this.renderTextInput('lastName', 'Last Name', this.state.data.lastName)}
             {this.renderRadioInlines('title', '', {
@@ -294,11 +298,13 @@ var EditProfileForm = React.createClass({
             <input type="text" className="form-control" id={id} ref={id} value={defaultValue} onChange={handleChange}/>
         );
     },
+/*
     renderPassword: function (id, label) {
         return this.renderField(id, label,
             <input type="password" className="form-control" id={id} ref={id}/>
         );
     },
+*/
     renderTextarea: function (id, label, defaultValue) {
         var handleChange = () => {var oldData = this.state.data; oldData[id] = this.refs[id].value; this.setState({data: oldData});};
         return this.renderField(id, label,
