@@ -49,16 +49,19 @@ class transformer(object):
         lists in which the same elements have been assembled in
         a differnt order
         """
-        listsAreConsisten = False
-        oldTokens = oldValues.split(",")
-        newTokens = newValues.split(",")
-        numberSharedTokens = 0
-        for token in oldTokens:
-            if token in newTokens:
-                numberSharedTokens += 1
-        if numberSharedTokens == len(newValues) and \
-                numberSharedTokens == len(oldValues):
-            listsAreConsistent = True
+        listsAreConsistent = False
+        if oldValues is None or newValues is None:
+            return False
+        elif re.search(",", oldValues) and re.search(",", newValues):
+            oldTokens = oldValues.split(",")
+            newTokens = newValues.split(",")
+            numberSharedTokens = 0
+            for token in oldTokens:
+                if token in newTokens:
+                    numberSharedTokens += 1
+            if numberSharedTokens == len(newTokens) and \
+                    numberSharedTokens == len(oldTokens):
+                listsAreConsistent = True
         return listsAreConsistent
 
     def compareField(self, oldRow, newRow, field):
@@ -94,22 +97,39 @@ class transformer(object):
         for field in newRow.keys():
             result = self.compareField(oldRow, newRow, field)
             if re.search("major change", result):
-                print field, result
+                print field, "variant", newRow["Genomic_Coordinate_hg38"], result
             
         
 
 
 class v1ToV2(transformer):
+    # Here are columns that were renamed between the April 2016 release and the September 2016
+    # release. In this dictionary, the key is the old name, and the value is the new name.
     _renamedColumns = {"SIFT_VEP" : "Sift_Prediction",
                        "PolyPhen_VEP" : "Polyphen_Prediction", 
                        "BIC_Identifier" : "BIC_Nomenclature", 
                        "Pathogenicity_default" : "Pathogenicity_expert",
                        "Pathogenicity_research" : "Pathogenicity_all" }
 
-
+    #
+    # This dictionary documents and implements some expected formatting changes between the
+    # April 2016 release and the September 2016 release.  For each named field, there is a 
+    # lambda function that if applied to the old value, would generate the equivalent new value.
+    #
     _makeExpectedChanges = {
-        "Synonyms" : (lambda xx: re.sub("^,", "", xx))
-        "HGVS_Protein" : (lambda xx: re.sub("$", ")", re.sub("p.", "p.(", xx)))
+        "Synonyms" : (lambda xx: re.sub("^,", "", xx)),
+        "HGVS_Protein" : (lambda xx: re.sub(".p.", ":p.", 
+                                            re.sub("$", ")", 
+                                                   re.sub("p.", "p.(", 
+                                                          re.sub("NM_000059", "NP_000050.2",
+                                                                 xx))))),
+        "Reference_Sequence" : (lambda xx: re.sub("NM_000059", "NM_000059.3", 
+                                                  re.sub("NM_007294", "NM_007294.3", xx))),
+        "Allele_Frequency" : (lambda xx: re.sub("\(ExAC", "(ExAC)", xx)),
+        "Polyphen_Prediction" : (lambda xx: re.sub("\(*$", "", xx)),
+        "Sift_Prediction" : (lambda xx: re.sub("\(*$", "", xx)),
+        "Clinical_significance_citations_ENIGMA" : (lambda xx: re.sub("", "-", xx)),
+        "Date_last_evaluated_ENIGMA", : (lambda xx: re.sub("/15$", "/2015", xx)),
         }
 
 
