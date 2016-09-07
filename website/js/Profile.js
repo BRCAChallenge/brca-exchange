@@ -2,6 +2,7 @@
 
 var React = require('react');
 var $ = require('jquery');
+var _ = require('underscore');
 var config  = require('./config');
 var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {Navigation} = require('react-router');
@@ -28,11 +29,14 @@ var Profile = React.createClass({
     render: function () {
         var message;
         if (this.state.error != null) {
+            let fieldErrors = _.map(this.state.fieldErrors, err => (<li>{err}</li>));
+            fieldErrors = _.values(_.groupBy(fieldErrors, (item, index) => Math.floor(index / 2) )).map(group => <Col md={3}><ul>{group}</ul></Col>);
             message = (
-				<div className="alert alert-danger">
-					<p>{this.state.error}</p>
-				</div>);
-            window.scrollTo(0,0);
+                <div className="alert alert-danger">
+                    <Row><Col md={6}>{this.state.error}</Col></Row>
+                    <Row><Col md={1} />{fieldErrors}</Row>
+                </div>);
+            window.scrollTo(0, 0);
         }
         return (
             <Grid id="main-grid">
@@ -121,10 +125,11 @@ var Profile = React.createClass({
             });
         };
 
-        if (this.refs.contactForm.isValid()) {
+        var formErrors = this.refs.contactForm.getFormErrors();
+        if (formErrors === false) {
             google.load('maps', '3', {callback: withGoogleMaps, "other_params": "key=" + config.maps_key});
         } else {
-            this.setState({error: "Some information was missing"});
+            this.setState({error: <strong>Some information was missing:</strong>, fieldErrors: formErrors });
         }
     }
 });
@@ -169,7 +174,7 @@ var EditProfileForm = React.createClass({
     getInitialState: function () {
         return {errors: {}, data: {}};
     },
-    isValid: function () {
+    getFormErrors: function () {
         var errors = {};
         /* if (this.refs.password.getDOMNode().value !== this.refs.password_confirm.getDOMNode().value) {
             errors["password_confirm"] = "The passwords don't match"; //eslint-disable-line dot-notation
@@ -177,11 +182,15 @@ var EditProfileForm = React.createClass({
 
         if (this.state.otherRole) {
             if (!this.refs.role_other.getDOMNode().value.trim()) {
-                errors['role_other'] = 'This field is required'; //eslint-disable-line dot-notation
+                errors['role_other'] = <span>Please specify <strong>other role</strong>.</span>; //eslint-disable-line dot-notation
             }
         }
         this.setState({errors: errors});
-		return Object.keys(errors).length === 0;
+        if (Object.keys(errors).length === 0) {
+            return false;
+        } else {
+            return errors;
+        }
     },
     getFormData: function () {
         var title = this.refs.titlemd.getDOMNode().checked && this.refs.titlemd.getDOMNode().value ||
