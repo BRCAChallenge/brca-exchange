@@ -1436,7 +1436,7 @@ class RunAll(luigi.WrapperTask):
                                       description='directory to store all individual task related files')
 
     def requires(self):
-        # yield BuildAggregatedOutput(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield BuildAggregatedOutput(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyClinvarVCFToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyESPOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyBICOutputToOutputDir(self.date, self.u, self.p, self.resources_dir, self.output_dir,
@@ -1445,5 +1445,5 @@ class RunAll(luigi.WrapperTask):
         yield CopyEXACOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyEXLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopySharedLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        # yield ExtractOutputFromEnigma(self.date, self.synapse_username, self.synapse_password, self.resources_dir,
-        #                               self.output_dir, self.file_parent_dir)
+        yield ExtractOutputFromEnigma(self.date, self.synapse_username, self.synapse_password, self.resources_dir,
+                                      self.output_dir, self.file_parent_dir)

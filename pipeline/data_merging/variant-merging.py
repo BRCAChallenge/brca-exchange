@@ -337,6 +337,10 @@ def find_equivalent_variant(variants):
             if v == existing_v:
                 continue
             else:
+                # NOTE: This is a temp fix to prevent problematic 1000_Genomes merging
+                # TODO: come up with long term solution
+                if str(variants[v][COLUMN_SOURCE]) == "1000_Genomes" and str(variants[existing_v][COLUMN_SOURCE]) == "1000_Genomes":
+                    continue
                 v1 = [variants[v][COLUMN_VCF_CHR], variants[v][COLUMN_VCF_POS], variants[v][COLUMN_VCF_REF], variants[v][COLUMN_VCF_ALT]]
                 v2 = [variants[existing_v][COLUMN_VCF_CHR], variants[existing_v][COLUMN_VCF_POS], variants[existing_v][COLUMN_VCF_REF], variants[existing_v][COLUMN_VCF_ALT]]
                 if variant_equal(v1, v2):
@@ -347,7 +351,7 @@ def find_equivalent_variant(variants):
                     uniq_variants[existing_v].add(v)
         if not variant_exist:
             uniq_variants[v] = set([v])
-    equivalent_variants = [] 
+    equivalent_variants = []
     for value in uniq_variants.values():
         if len(value) > 1:
             equivalent_variants.append(value)
@@ -362,7 +366,7 @@ def preprocessing(tmp_dir):
                    "ExAC": EXAC_FILE,
                    "ESP": ESP_FILE,
                    "BIC": BIC_FILE,
-                   }    
+                   }
     print "\n" + ARGS.input + ":"
     print "---------------------------------------------------------"
     print "ENIGMA: {0}".format(ENIGMA_FILE)
@@ -636,7 +640,7 @@ def variant_equal(v1, v2, version="hg38"):
     return edited_v1 == edited_v2
 
 def ref_correct(chr, pos, ref, alt, version="hg38"): 
-    if  pos == "None":
+    if pos == "None":
         return False
     pos = int(pos) 
     if chr == "13": 
@@ -658,6 +662,4 @@ def ref_correct(chr, pos, ref, alt, version="hg38"):
 
 
 if __name__ == "__main__":
-    #print "hello world"
     main()
-
