@@ -1311,7 +1311,7 @@ class ExtractOutputFromEnigma(luigi.Task):
 
 
 ###############################################
-#              VARIANT MERGING                #
+#            VARIANT COMPILATION              #
 ###############################################
 
 

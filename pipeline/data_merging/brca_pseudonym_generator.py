@@ -11,6 +11,7 @@ import hgvs.variantmapper as hgvs_variantmapper
 import hgvs.exceptions
 import pyhgvs
 import pyhgvs.utils as pyhgvs_utils
+from ometa.runtime import ParseError
 from pygr.seqdb import SequenceFileDB
 
 '''
@@ -126,7 +127,7 @@ def main(args):
         offset38 = parsedLine[labelLine.index("Pos")]
         ref38 = parsedLine[labelLine.index("Ref")]
         alt38 = parsedLine[labelLine.index("Alt")]
-        print("working on variant", chrom38, offset38, ref38, alt38)
+        # print("working on variant", chrom38, offset38, ref38, alt38)
         
         # Edge cases to correct variant string formats for indels in order to be accepted by the counsyl parser
         if ref38 == '-': ref38 = ''
@@ -164,9 +165,9 @@ def main(args):
                 synonymString.append(cdna_synonym)
         
         if calcProtein == True:
-            #print('oldHgvsGenomic38:', oldHgvsGenomic38)
-            #print('oldHgvsCDNA: ', oldHgvsCDNA)
-            #print('cdna: ', cdna_coord)
+            # print('oldHgvsGenomic38:', oldHgvsGenomic38)
+            # print('oldHgvsCDNA: ', oldHgvsCDNA)
+            # print('cdna: ', cdna_coord)
 
             try:
                 var_c1 = hgvsparser.parse_hgvs_variant(cdna_coord)
@@ -175,6 +176,14 @@ def main(args):
                 print('hgvs.exceptions.HGVSParseError: ', e)
                 print('GRCh38 Genomic change: ', '{0}:{1}:{2}>{3}'.format(chrom38,offset38,ref38,alt38))
                 print('')
+            # Catch parse errors thrown by ometa.runtime.ParseError.
+            except ParseError as ex:
+                template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                message = template.format(type(ex).__name__, ex.args)
+                print(message)
+                print('ometa.runtime.ParseError', ex)
+                print('GRCh38 Genomic change: ', '{0}:{1}:{2}>{3}'.format(chrom38,offset38,ref38,alt38))
+
             #print('oldProtein: ', parsedLine[hgvsPIndex]) 
             #print('protein:', protein_coord)
             #print('')
