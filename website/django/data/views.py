@@ -452,22 +452,20 @@ def search_datasets(request):
     dataset.name = SETNAME
     dataset.id = DATASET_ID
     dataset.description = 'Variants observed in brca-exchange project'
+    # TODO uncomment when ga4gh client implements info field otherwise hardcoded values are placed
     #dataset.info[SETNAME].append("This set contains variants as stored and mantained by the brca-exchange project")
     list_of_sets = []
     list_of_sets.append(dataset)
     sets = ga4gh_brca_page(list_of_sets, int(page_size), int(page_token))
-
+    response.next_page_token
     if len(sets) > page_size:
         page_token = str(1 + int(page_token))
         response.next_page_token = page_token
     ##############
-    """
-    Block gets fixed when ga4gh client implements
-    info field otherwise hardcoded values are placed
-    """
+    # TODO Block gets fixed when ga4gh client implements
+    # info field otherwise hardcoded values are placed
     if sets:
-        for elements in sets:
-            response.datasets.extend([elements])
+        response.datasets.extend(sets)
     else:
         response.next_page_token = ' '
         response.datasets.extend([metadata.Dataset()])
