@@ -28,7 +28,7 @@ var Role = {
         [12, "I represent a Data Provider",             "Data Provider"],
         [0, "Other"]
     ],
-    other: id => parseInt(id) === 0 || parseInt(id) === 11,
+    other: id => parseInt(id) === 0,
     get: function(id) { return this.options.find(role => role[0] === parseInt(id)); }
 };
 
