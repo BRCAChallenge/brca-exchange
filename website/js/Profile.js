@@ -85,13 +85,15 @@ var Profile = React.createClass({
                     loc = results[0].geometry.location;
                     formData.latitude = loc.lat().toString();
                     formData.longitude = loc.lng().toString();
-                } else if (status === google.maps.GeocoderStatus.ZERO_RESULTS) {
+                }
+                // Handle geocoding errors
+                /* else if (status === google.maps.GeocoderStatus.ZERO_RESULTS) {
                     showFailure("Please check your location information.");
                     return;
                 } else if (status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
                     showFailure("Error checking your location information, please submit again.");
                     return;
-                }
+                } */
 
                 self.setState({submitted: formData});
                 var url = config.backend_url + '/accounts/update/';
