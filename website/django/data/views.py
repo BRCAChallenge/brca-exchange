@@ -166,14 +166,17 @@ def search_variants(request):
     if conditional :
         return conditional
     else:
-        # TODO use ga4gh protocol from json
-        req_dict = json.loads(request.body)
-        variant_set_id = req_dict.get('variantSetId')
-        reference_name = req_dict.get('referenceName')
-        start = req_dict.get('start')
-        end = req_dict.get('end')
-        page_size = req_dict.get('pageSize', 0)
-        page_token = req_dict.get('pageToken', '0')
+        try:
+            protocol_variable = json_format.Parse(request.body, variant_service.SearchVariantsRequest())
+        except Exception as e:
+            return HttpResponseBadRequest(json.dumps({"message": e.message.replace("\"", "'")}),
+                                          content_type='application/json')
+        variant_set_id = protocol_variable.variant_set_id
+        reference_name = protocol_variable.reference_name
+        start = protocol_variable.start
+        end = protocol_variable.end
+        page_size = protocol_variable.page_size
+        page_token = protocol_variable.page_token
     if not page_size or page_size == 0:
         page_size = DEFAULT_PAGE_SIZE
     if not page_token:
@@ -181,10 +184,13 @@ def search_variants(request):
 
     response = variant_service.SearchVariantsResponse()
     variants = Variant.objects
-    reference_genome = variant_set_id.split('-')[1]
+    dataset_id, reference_genome = variant_set_id.split('-')
+    if dataset_id != DATASET_ID:
+        return HttpResponseBadRequest(
+                json.dumps(ErrorMessages['variantSetId']),
+                content_type='application/json')
     variants = range_filter(reference_genome, variants, reference_name, start, end)
     variants = ga4gh_brca_page(variants, int(page_size), int(page_token))
-
 
     ga_variants = [brca_to_ga4gh(i, reference_genome) for i in variants.values()]
     if len(ga_variants) > page_size:
@@ -193,13 +199,11 @@ def search_variants(request):
         response.next_page_token = page_token
 
     response.variants.extend(ga_variants)
-    resp = json_format._MessageToJsonObject(response, False)
+    resp = json_format._MessageToJsonObject(response, True)
     return JsonResponse(resp)
 
-
-def range_filter(reference_genome, variants, reference_name, start=None, end=None):
+def range_filter(reference_genome, variants, reference_name, start, end):
     """Filters variants by range depending on the reference_genome"""
-    # TODO make sure start and end are set before this
     if 'chr' not in reference_name:
         reference_name = 'chr' + reference_name
     variants = variants.filter(Reference_Name=reference_name)
@@ -212,6 +216,7 @@ def range_filter(reference_genome, variants, reference_name, start=None, end=Non
     elif reference_genome == 'hg38':
         variants = variants.order_by('Hg38_Start')
         variants = variants.filter(Hg38_Start__lt=end, Hg38_End__gt=start)
+
     return variants
 
 def ga4gh_brca_page(query, page_size, page_token):
@@ -220,24 +225,13 @@ def ga4gh_brca_page(query, page_size, page_token):
     end = start + page_size + 1
     return query[start:end]
 
-def get_offset(start, end, variant_length=None):
-    """Auxiliary function to obtain offset for database query"""
-    # FIXME currently unused
-    if variant_length:
-        start -= 1
-        end = start + len(variant_length)
-    else:
-        start += 1
-        end += 1
-    return start, end
-
 def brca_to_ga4gh(brca_variant, reference_genome):
     """Function that translates elements in BRCA-database to GA4GH format."""
     variant = variants.Variant()
     bases = brca_variant['Genomic_Coordinate_' + reference_genome].split(':')[2]
     variant.reference_bases, alternbases = bases.split('>')
-    for i in range(len(alternbases)):
-        variant.alternate_bases.append(alternbases[i])
+    for i in alternbases.split(","):
+        variant.alternate_bases.append(i)
     variant.created = 0
     variant.updated = 0
     variant.reference_name = brca_variant['Reference_Name']
@@ -260,11 +254,13 @@ def brca_to_ga4gh(brca_variant, reference_genome):
             variant.info[str(key)].append(brca_variant[key])
     return variant
 
-
 def validate_search_variants_request(request):
     """Auxiliary function which validates search variants requests"""
     if not request.body:
-        return HttpResponseBadRequest(json.dumps(ErrorMessages['emptyBody']), content_type='application/json')
+        return HttpResponseBadRequest(
+            json.dumps(ErrorMessages['emptyBody']),
+            content_type='application/json'
+        )
     else:
         request_dict = json.loads(request.body)
         if not request_dict.get('variantSetId'):
@@ -282,6 +278,10 @@ def validate_search_variants_request(request):
         elif not request_dict.get('end') :
             return HttpResponseBadRequest(
                 json.dumps(ErrorMessages['end']),
+                content_type='application/json')
+        elif int(request_dict.get('start')) >= int(request_dict.get('end')):
+            return HttpResponseBadRequest(
+                json.dumps(ErrorMessages['invalidPositions']),
                 content_type='application/json')
         else:
                 # Make sure the variant set ID is well formed
@@ -320,7 +320,6 @@ def validate_search_variant_sets_request(request):
         else:
             return None
 
-
 @require_http_methods(['GET'])
 def get_variant(request, variant_id):
     """Handles requests to the /variants/<variant id> endpoint"""
@@ -332,15 +331,19 @@ def get_variant(request, variant_id):
         set_id, v_id = variant_id.split('-')
         if set_id in SET_IDS:
             variants = Variant.objects.values()
-            # TODO fail safely to 404 if none found
-            variant = variants.get(id=int(v_id))
+            try:
+                variant = variants.get(id=int(v_id))
+            except Exception:
+                return HttpResponseBadRequest(
+                    json.dumps(ErrorMessages['notFoundId']),
+                    content_type='application/json',
+                    status=404)
             ga_variant = brca_to_ga4gh(variant, set_id)
             response = json_format._MessageToJsonObject(ga_variant, True)
             return JsonResponse(response)
         else:
-            # TODO change to not found message
-            return HttpResponse(
-                json.dumps(ErrorMessages['datasetId']),
+            return HttpResponseBadRequest(
+                json.dumps(ErrorMessages['notFoundId']),
                 content_type='application/json',
                 status=404)
 
@@ -351,106 +354,173 @@ def search_variant_sets(request):
     if invalid_request:
         return invalid_request
     else:
-        req_dict = json.loads(request.body)
-        dataset_id = req_dict.get('datasetId')
-        # TODO page size is unused, add paging
-        page_size = req_dict.get('pageSize', DEFAULT_PAGE_SIZE)
-        page_token = req_dict.get('pageToken', '0')
+        try:
+            req_dict = json_format.Parse(request.body, variant_service.SearchVariantSetsRequest())
+        except Exception as e :
+            return HttpResponseBadRequest(json.dumps({"message": e.message.replace("\"", "'")}),
+                                          content_type='application/json')
+        dataset_id = req_dict.dataset_id
+        page_size = req_dict.page_size
+        page_token = req_dict.page_token
         if dataset_id != DATASET_ID:
-            # TODO instead of bad request return empty list
-            return HttpResponseBadRequest(
-                json.dumps(ErrorMessages['datasetId']),
-                content_type='application/json')
-    if page_token is None:
-         page_token = '0'
+            """Bad Request returns empty response"""
+            return JsonResponse(
+                json_format._MessageToJsonObject(
+                    variant_service.SearchCallSetsResponse(), True
+                )
+            )
+    if not page_size or page_size == 0:
+        page_size = DEFAULT_PAGE_SIZE
+    if not page_token:
+        page_token = '0'
 
     response = variant_service.SearchVariantSetsResponse()
-    response.next_page_token = page_token
-    # TODO generalize by associating a function with each variant set ID
-    for set_id in SET_IDS:
-        variant_set = variants.VariantSet()
-        variant_set.id = '{}-{}'.format(DATASET_ID, set_id)
-        variant_set.name = '{}-{}'.format(SETNAME, set_id)
-        # TODO change to use ID
-        variant_set.dataset_id = DATASET_ID
-        variant_set.reference_set_id = '{}-{}'.format(REFERENCE_SET_BASE, set_id)
-        brca_meta(variant_set.metadata, dataset_id)
-        response.variant_sets.extend([variant_set])
+    variant_sets_list = [obtain_variant_set_for_set(i) for i in SET_IDS]
+    variant_sets_list = ga4gh_brca_page(variant_sets_list, int(page_size), int(page_token))
+    if len(variant_sets_list) > page_size:
+        variant_sets_list.pop()
+        page_token = str(1 + int(page_token))
+        response.next_page_token = page_token
+    for sets in variant_sets_list:
+        response.variant_sets.extend([sets])
     return JsonResponse(json_format._MessageToJsonObject(response, True))
+
+def obtain_variant_set_for_set(Set):
+    variant_set = variants.VariantSet()
+    variant_set.id = '{}-{}'.format(DATASET_ID, Set)
+    variant_set.name = '{}-{}'.format(SETNAME, Set)
+    variant_set.dataset_id = DATASET_ID
+    variant_set.reference_set_id = '{}-{}'.format(REFERENCE_SET_BASE, Set)
+    brca_meta(variant_set.metadata, DATASET_ID)
+    return variant_set
 
 def brca_meta(Metadata, dataset_id):
     """Auxiliary function, generates metadata fields"""
     metadata_element = variants.VariantSetMetadata()
-    for key in Variant._meta.get_all_field_names():
-        # TODO switch to .get_fields()
-        # http://stackoverflow.com/questions/3647805/get-models-fields-in-django
-        metadata_element.key = str(key)
+    for key in Variant._meta.get_fields():
+        metadata_element.key = str(key.name)
         metadata_element.value = '-'
-        metadata_element.id = '{}-{}'.format(DATASET_ID , str(key))
-        metadata_element.type = Variant._meta.get_field(str(key)).get_internal_type()
+        metadata_element.id = '{}-{}'.format(dataset_id , str(key.name))
+        metadata_element.type = key.get_internal_type()
         metadata_element.number = '-'
         metadata_element.description = "refer to ->{} in https://github.com/BD2KGenomics" \
-                                       "/brca-website/blob/master/content/help_research.md".format(str(key))
+                                       "/brca-website/blob/master/content/help_research.md".format(str(key.name))
         Metadata.extend([metadata_element])
     return Metadata
 
 
 @require_http_methods(['GET'])
-def get_variant_set(request, variantSetId):
+def get_variant_set(request, variant_set_id):
     """/variantsets/<set id> method"""
-    if not variantSetId:
+    if not variant_set_id:
         return HttpResponseBadRequest(
             json.dumps(ErrorMessages['variantSetId']),
             content_type='application/json')
-    dataset, id_ = variantSetId.split('-')
+
+    dataset, id_ = variant_set_id.split('-')
+
     if id_ in SET_IDS and dataset == 'brca':
         variant_set = variants.VariantSet()
         variant_set.id = '{}-{}'.format(dataset, id_)
-        variant_set.name = '{}-{}'.format(SETNAME, id)
+        variant_set.name = '{}-{}'.format(SETNAME, id_)
         variant_set.dataset_id = DATASET_ID
         variant_set.reference_set_id = '{}-{}'.format(REFERENCE_SET_BASE, id_)
         brca_meta(variant_set.metadata, id_)
         resp = json_format._MessageToJsonObject(variant_set, True)
         return JsonResponse(resp)
     else:
-        return JsonResponse({'Invalid Set Id': variantSetId}, status=404)
+        return JsonResponse({'Invalid Set Id': variant_set_id}, status=404)
 
 
 @require_http_methods(['POST'])
 def search_datasets(request):
     """/datasets/search method request handler"""
-    # TODO paging datasets
-    # TODO no validation in request body, bug if no request content
-    request_dict = json.loads(request.body)
-    page_size = request_dict.get('pageSize', DEFAULT_PAGE_SIZE)
-    page_token = request_dict.get('nextPageToken', '0')
+    if not request.body:
+        page_size = DEFAULT_PAGE_SIZE
+        page_token = '0'
+    else:
+        try :
+            request_dict = json_format.Parse(request.body, metadata_service.SearchDatasetsRequest())
+        except Exception as e:
+            return HttpResponseBadRequest(json.dumps({"message": e.message.replace("\"", "'")}), content_type='application/json')
+        page_size = request_dict.page_size
+        page_token = request_dict.page_token
+
+    if not page_size or page_size == 0:
+        page_size = DEFAULT_PAGE_SIZE
+    if not page_token:
+        page_token = '0'
+
     response = metadata_service.SearchDatasetsResponse()
     dataset = metadata.Dataset()
     dataset.name = SETNAME
     dataset.id = DATASET_ID
-    #dta_resp.info[SETNAME].append("This set contains variants as stored and mantained by the brca-exchange project")
     dataset.description = 'Variants observed in brca-exchange project'
-    response.datasets.extend([dataset])
-    response.next_page_token = page_token
+    #dataset.info[SETNAME].append("This set contains variants as stored and mantained by the brca-exchange project")
+    list_of_sets = []
+    list_of_sets.append(dataset)
+    sets = ga4gh_brca_page(list_of_sets, int(page_size), int(page_token))
+
+    if len(sets) > page_size:
+        page_token = str(1 + int(page_token))
+        response.next_page_token = page_token
+    ##############
+    # Block gets fixed when ga4gh client implements
+    # info field otherwise hardcoded values are placed
+    if sets:
+        for elements in sets:
+            response.datasets.extend([elements])
+    else:
+        response.next_page_token = ' '
+        response.datasets.extend([metadata.Dataset()])
+    ##############
     return JsonResponse(json_format._MessageToJsonObject(response, False))
 
+@require_http_methods(['GET'])
+def get_dataset(request, dataset_id):
+    """/datasets/<dataset id> get dataset via id method"""
+    if not dataset_id:
+        return HttpResponseBadRequest(
+            json.dumps(ErrorMessages['datasetId']),
+            content_type='application/json'
+        )
+    response = metadata_service.GetDatasetRequest()
+    dataset = metadata.Dataset()
+    response.dataset_id = dataset_id
+    dataset.id = DATASET_ID
+    dataset.name = SETNAME
+    dataset.description = 'Variants observed in brca-exchange project'
+    # Needs field for info, still not available from ga4gh client
+    return JsonResponse(json_format._MessageToJsonObject(dataset, False))
+
 @require_http_methods(['GET', 'POST'])
-def varsetId_empty_catcher(request):
+def empty_variantset_id_catcher(request):
     """Error URL catcher methods"""
-    return HttpResponseBadRequest(json.dumps(ErrorMessages['emptyBody']), content_type='application/json')
+    return HttpResponseBadRequest(json.dumps(ErrorMessages['methodNotAllowed']),
+                                  content_type='application/json',
+                                  status=405)
 
 @require_http_methods(['GET', 'POST'])
-def empty_varId_catcher(request):
-    return HttpResponseBadRequest(json.dumps(ErrorMessages['emptyBody']), content_type='application/json')
+def empty_variant_id_catcher(request):
+    return HttpResponseBadRequest(json.dumps(ErrorMessages['methodNotAllowed']),
+                                  content_type='application/json',
+                                  status=405)
+@require_http_methods(['GET', 'POST'])
+def empty_dataset_catcher(request):
+    return HttpResponseBadRequest(json.dumps(ErrorMessages['methodNotAllowed']),
+                                  content_type='application/json',
+                                  status=405)
 
-# TODO add errors for the not found cases and use them
 ErrorMessages = {'emptyBody' :{'status_code': 400, 'message' : 'Invalid request: empty request'},
                  'variantSetId' : {'status_code': 400, 'message': 'Invalid request: please provide a variantSetId'},
                  'referenceName': {'status_code': 400, 'message': 'Invalid request: please provide a referenceName'},
                  'start': {'status_code' : 400, 'message': 'Invalid request: please provide a start position'},
                  'end' : {'status_code' :400, 'message': 'Invalid request: please provide an end position'},
                  'datasetId': {'status_code' : 400, 'message': 'Invalid request: please provide a datasetId'},
-                 'variantId': {'status_code' : 400, 'message': 'Invalid request: please provide a variantId'}}
+                 'variantId': {'status_code' : 400, 'message': 'Invalid request: please provide a variantId'},
+                 'invalidPositions': {'status_code': 400, 'message': 'Invalid request: assure starting position is less than end'},
+                 'notFoundId': {'status_code' : 404, 'message': 'Not found: the provided id is not supported'},
+                 'methodNotAllowed': {'status_code': 405, 'message': 'Method is not supported: empty body request'}}
 
 # The display name for the variant set.
 SETNAME = 'brca-exchange-variants'
