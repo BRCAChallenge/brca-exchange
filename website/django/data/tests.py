@@ -2,18 +2,14 @@ import json
 import os
 import unittest
 from urllib import quote
-
-
 from django.http import JsonResponse, HttpResponse
 from django.test import TestCase
 from django.test.client import RequestFactory
-
 from brca import settings
 from data import test_data
 from data.models import Variant
 from data.views import index, autocomplete
 import data.views as views
-
 
 # GA4GH related modules
 import google.protobuf.json_format as json_format
@@ -184,7 +180,7 @@ class VariantTestCase(TestCase):
             content_type="application/json")
         response = views.search_variant_sets(search_request)
         self.assertEqual(response.status_code, 200)
-        """Bad request 'data_set_id' returns a valid, empty response"""
+        # Bad request 'data_set_id' returns a valid, empty response
         json_response = json.loads(response.content)
         """Note that the following test are assertEquals do to the response,
         not being empty, therefore we check for empty values."""
@@ -222,19 +218,19 @@ class VariantTestCase(TestCase):
 
     def test_get_variant_set_by_id(self):
         """Ensures that expected variant sets are present."""
-        """Test for variant set brca-hg36"""
+        # Test for variant set brca-hg36
         request_hg36 = self.factory.get("/data/ga4gh/variantsets/brca-hg36")
         response_hg36 = views.get_variant_set(request_hg36, "brca-hg36")
         json_response36 = json.loads(response_hg36.content)
         self.assertIsNotNone(json_response36["referenceSetId"])
         self.assertIsNotNone(json_response36["id"])
-        """Test for variant set brca-hg37"""
+        # Test for variant set brca-hg37
         request_hg37 = self.factory.get("/data/ga4gh/variantsets/brca-hg37")
         response_hg37 = views.get_variant_set(request_hg37, "brca-hg37")
         json_response37 = json.loads(response_hg37.content)
         self.assertIsNotNone(json_response37["referenceSetId"])
         self.assertIsNotNone(json_response37["id"])
-        """Test for variant set brca-hg38"""
+        # Test for variant set brca-hg38
         request_hg38 = self.factory.get("/data/ga4gh/variantsets/brca-hg38")
         response_hg38 = views.get_variant_set(request_hg38, "brca-hg38")
         json_response38 = json.loads(response_hg38.content)
@@ -439,7 +435,7 @@ class VariantTestCase(TestCase):
     def test_ordered_range_for_search_variant(self):
         START = 41246925
         END = 41247084
-        """Assure Start is less than End """
+        # Assure Start is less than End
         self.assertGreater(END, START)
         request = self.factory.post("/data/ga4gh/variants/search",
                                     json.dumps({"referenceName": "chr17",
@@ -506,14 +502,14 @@ class VariantTestCase(TestCase):
         invalid_id = "Jijf30453hwbur-PWFvWIvwPRGrjnib"
         request = self.factory.get("/data/ga4gh/variants/"+invalid_id)
         response = views.get_variant(request, invalid_id)
-        """Useful error message for an id which is not supported"""
+        # Useful error message for an id which is not supported
         self.assertEqual(response.status_code, 404)
         self.assertJSONEqual(response.content, views.ErrorMessages['notFoundId'])
 
         invalid_id_2 = "hg37-999999999999"
         request = self.factory.get("/data/ga4gh/variants/" + invalid_id_2)
         response = views.get_variant(request, invalid_id_2)
-        """Useful error for elements non existent in data base"""
+        # Useful error for elements non existent in data base"""
         self.assertEqual(response.status_code, 404)
         self.assertJSONEqual(response.content, views.ErrorMessages['notFoundId'])
 
@@ -530,7 +526,7 @@ class VariantTestCase(TestCase):
         response = views.get_variant(request, variant_id)
         json_response = json.loads(response.content)
         base_1_start = int(json_response['info']["Genomic_Coordinate_hg37"][0].split(':')[1]) -1
-        """Note that `Genomic Coordinate hg37` is 1 base offset from its determined 'start' position"""
+        # Note that `Genomic Coordinate hg37` is 1 base offset from its determined 'start' position"""
         self.assertEqual(int(json_response['start']), base_1_start,
                          "`base_1_start`, obtained from 'Genomic Coordinate hg37' minus 1 should be equal to the `start` Variant parameter")
 
@@ -539,7 +535,7 @@ class VariantTestCase(TestCase):
         response_2 = views.get_variant(request_2, variant_id_2)
         json_response_2 = json.loads(response_2.content)
         base_0_start = int(json_response_2['start']) + 1
-        """Note that `start` is 0 base offset from its determined 'Genomic Coordinate' field"""
+        # Note that `start` is 0 base offset from its determined 'Genomic Coordinate' field"""
         genomic_coordinate_start = int(json_response_2['info']['Genomic_Coordinate_hg36'][0].split(':')[1])
         self.assertEqual(genomic_coordinate_start, base_0_start)
 
@@ -558,11 +554,11 @@ class VariantTestCase(TestCase):
         response = views.brca_to_ga4gh(variant, genomic_coordinate)
 
         json_response = json_format._MessageToJsonObject(response, True)
-        self.assertEqual(json_response['start'], 32923950)
+        self.assertEqual(int(json_response['start']), 32923950)
         self.assertEqual(json_response['referenceBases'], "CA")
         self.assertEqual(json_response['alternateBases'][0], "C")
         self.assertEqual(json_response['referenceName'], "chr13")
-        self.assertEqual(json_response['id'], "hg37-2")
+        self.assertEqual(json_response['id'], "hg37-1")
 
 if __name__ == '__main__':
     unittest.main()

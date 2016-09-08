@@ -391,7 +391,7 @@ def obtain_variant_set_for_set(Set):
     brca_meta(variant_set.metadata, DATASET_ID)
     return variant_set
 
-def brca_meta(Metadata, dataset_id):
+def brca_meta(metadata, dataset_id):
     """Auxiliary function, generates metadata fields"""
     metadata_element = variants.VariantSetMetadata()
     for key in Variant._meta.get_fields():
@@ -402,8 +402,8 @@ def brca_meta(Metadata, dataset_id):
         metadata_element.number = '-'
         metadata_element.description = "refer to ->{} in https://github.com/BD2KGenomics" \
                                        "/brca-website/blob/master/content/help_research.md".format(str(key.name))
-        Metadata.extend([metadata_element])
-    return Metadata
+        metadata.extend([metadata_element])
+    return metadata
 
 
 @require_http_methods(['GET'])
@@ -461,8 +461,10 @@ def search_datasets(request):
         page_token = str(1 + int(page_token))
         response.next_page_token = page_token
     ##############
-    # Block gets fixed when ga4gh client implements
-    # info field otherwise hardcoded values are placed
+    """
+    Block gets fixed when ga4gh client implements
+    info field otherwise hardcoded values are placed
+    """
     if sets:
         for elements in sets:
             response.datasets.extend([elements])
