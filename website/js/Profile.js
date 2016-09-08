@@ -79,22 +79,7 @@ var Profile = React.createClass({
             var formData = self.refs.contactForm.getFormData();
             var address = "" + formData.institution + "," + formData.city + "," + formData.state + "," + formData.country;
 
-            geo.geocode({address: address}, (results, status) => {
-                var loc;
-                if (status === google.maps.GeocoderStatus.OK) {
-                    loc = results[0].geometry.location;
-                    formData.latitude = loc.lat().toString();
-                    formData.longitude = loc.lng().toString();
-                }
-                // Handle geocoding errors
-                /* else if (status === google.maps.GeocoderStatus.ZERO_RESULTS) {
-                    showFailure("Please check your location information.");
-                    return;
-                } else if (status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
-                    showFailure("Error checking your location information, please submit again.");
-                    return;
-                } */
-
+            var submit = function() {
                 self.setState({submitted: formData});
                 var url = config.backend_url + '/accounts/update/';
 
@@ -124,7 +109,28 @@ var Profile = React.createClass({
                 xhr.open('post', url);
                 xhr.setRequestHeader('Authorization', 'JWT ' + auth.token());
                 xhr.send(fd);
-            });
+            };
+
+            if (address.length > 3) {
+                geo.geocode({address: address}, (results, status) => {
+                    var loc;
+                    if (status === google.maps.GeocoderStatus.OK) {
+                        loc = results[0].geometry.location;
+                        formData.latitude = loc.lat().toString();
+                        formData.longitude = loc.lng().toString();
+                    }
+                    /* else if (status === google.maps.GeocoderStatus.ZERO_RESULTS) {
+                        showFailure("Please check your location information, or leave it blank.");
+                        return;
+                    } else if (status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
+                        showFailure("Error checking your location information, please submit again.");
+                        return;
+                    } */
+                    submit();
+                });
+            } else {
+                submit();
+            }
         };
 
         var formErrors = this.refs.contactForm.getFormErrors();
