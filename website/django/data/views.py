@@ -461,8 +461,10 @@ def search_datasets(request):
         page_token = str(1 + int(page_token))
         response.next_page_token = page_token
     ##############
-    # Block gets fixed when ga4gh client implements
-    # info field otherwise hardcoded values are placed
+    """
+    Block gets fixed when ga4gh client implements
+    info field otherwise hardcoded values are placed
+    """
     if sets:
         for elements in sets:
             response.datasets.extend([elements])
