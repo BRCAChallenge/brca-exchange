@@ -259,8 +259,7 @@ def validate_search_variants_request(request):
     if not request.body:
         return HttpResponseBadRequest(
             json.dumps(ErrorMessages['emptyBody']),
-            content_type='application/json'
-        )
+            content_type='application/json')
     else:
         request_dict = json.loads(request.body)
         if not request_dict.get('variantSetId'):
@@ -366,9 +365,7 @@ def search_variant_sets(request):
             """Bad Request returns empty response"""
             return JsonResponse(
                 json_format._MessageToJsonObject(
-                    variant_service.SearchCallSetsResponse(), True
-                )
-            )
+                    variant_service.SearchCallSetsResponse(), True))
     if not page_size or page_size == 0:
         page_size = DEFAULT_PAGE_SIZE
     if not page_token:
@@ -416,7 +413,6 @@ def get_variant_set(request, variant_set_id):
         return HttpResponseBadRequest(
             json.dumps(ErrorMessages['variantSetId']),
             content_type='application/json')
-
     dataset, id_ = variant_set_id.split('-')
 
     if id_ in SET_IDS and dataset == 'brca':
@@ -482,8 +478,7 @@ def get_dataset(request, dataset_id):
     if not dataset_id:
         return HttpResponseBadRequest(
             json.dumps(ErrorMessages['datasetId']),
-            content_type='application/json'
-        )
+            content_type='application/json')
     response = metadata_service.GetDatasetRequest()
     dataset = metadata.Dataset()
     response.dataset_id = dataset_id

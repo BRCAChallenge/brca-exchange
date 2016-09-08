@@ -101,13 +101,11 @@ class VariantTestCase(TestCase):
         request = self.factory.post(
             "/data/ga4gh/datasets/search",
             json.dumps({"pageSize": 1}),
-            content_type="application/json"
-        )
+            content_type="application/json")
         response = views.search_datasets(request)
         self.assertEqual(response.status_code, 200)
         request_2 = self.factory.get(
-            "/data/ga4gh/datasets/brca"
-        )
+            "/data/ga4gh/datasets/brca")
         response_2 = views.get_dataset(request_2, "brca")
         self.assertEqual(response_2.status_code, 200)
 
@@ -115,8 +113,7 @@ class VariantTestCase(TestCase):
         """Ensures the responses from datasets search are well formed."""
         request = self.factory.post(
             "/data/ga4gh/datasets/search",
-            content_type="application/json"
-        )
+            content_type="application/json")
         response = views.search_datasets(request)
         json_response = json.loads(response.content)
         self.assertIsNotNone(json_response["datasets"])
@@ -128,8 +125,7 @@ class VariantTestCase(TestCase):
         request = self.factory.post(
             "/data/ga4gh/datasets/search",
             json.dumps({"pageSize": 1, "nextPageToken": "2"}),
-            content_type="application/json"
-        )
+            content_type="application/json")
         response = views.search_datasets(request)
         json_response = json.loads(response.content)
         # Note that it was asserted to an empty string, because it is not a none value.
@@ -137,8 +133,7 @@ class VariantTestCase(TestCase):
 
     def test_get_datasets(self):
         request_2 = self.factory.get(
-            "/data/ga4gh/datasets/brca"
-        )
+            "/data/ga4gh/datasets/brca")
         response_2 = views.get_dataset(request_2, "brca")
         json_response = json.loads(response_2.content)
         self.assertIsNotNone(json_response)
@@ -160,30 +155,24 @@ class VariantTestCase(TestCase):
         search_request = self.factory.post(
             "/data/ga4gh/variantsets/search",
             json.dumps({"datasetId": "brca"}),
-            content_type="application/json"
-        )
+            content_type="application/json")
         response = views.search_variant_sets(search_request)
         self.assertEqual(response.status_code, 200)
         get_request_hg36 = self.factory.get(
-            "/data/ga4gh/variantsets/brca-hg36"
-        )
+            "/data/ga4gh/variantsets/brca-hg36")
         response_hg36 = views.get_variant_set(get_request_hg36, "brca-hg36")
         self.assertEqual(response_hg36.status_code, 200)
 
         get_request_hg37 = self.factory.get(
-            "/data/ga4gh/variantsets/brca-hg37"
-        )
+            "/data/ga4gh/variantsets/brca-hg37")
         response_hg37 = views.get_variant_set(
-            get_request_hg37, "brca-hg37"
-        )
+            get_request_hg37, "brca-hg37")
         self.assertEqual(response_hg37.status_code, 200)
 
         get_request_hg38 = self.factory.get(
-            "/data/ga4gh/variantsets/brca-hg38"
-        )
+            "/data/ga4gh/variantsets/brca-hg38")
         response_hg38 = views.get_variant_set(
-            get_request_hg38, "brca-hg38"
-        )
+            get_request_hg38, "brca-hg38")
         self.assertEqual(response_hg38.status_code, 200)
 
     def test_search_variant_sets(self):
@@ -192,8 +181,7 @@ class VariantTestCase(TestCase):
         search_request = self.factory.post(
             "/data/ga4gh/variantsets/search",
             json.dumps({"datasetId": bad_set_id_parameter}),
-            content_type="application/json"
-        )
+            content_type="application/json")
         response = views.search_variant_sets(search_request)
         self.assertEqual(response.status_code, 200)
         """Bad request 'data_set_id' returns a valid, empty response"""
@@ -259,8 +247,7 @@ class VariantTestCase(TestCase):
             json.dumps({"datasetId": "brca",
                         "pageSize": 1,
                         "pageToken": "0"}),
-            content_type="application/json"
-        )
+            content_type="application/json")
         response = views.search_variant_sets(search_request)
         json_response = json.loads(response.content)
         response_variants = json_response["variantSets"][0]
@@ -274,8 +261,7 @@ class VariantTestCase(TestCase):
             json.dumps({"datasetId": "brca",
                         "pageSize": 1,
                         "pageToken": "1"}),
-            content_type="application/json"
-        )
+            content_type="application/json")
         response = views.search_variant_sets(search_request)
         json_response = json.loads(response.content)
         response_variants = json_response["variantSets"][0]
@@ -289,8 +275,7 @@ class VariantTestCase(TestCase):
             json.dumps({"datasetId": "brca",
                         "pageSize": 1,
                         "pageToken": "2"}),
-            content_type="application/json"
-        )
+            content_type="application/json")
         response = views.search_variant_sets(search_request)
         json_response = json.loads(response.content)
         response_variants = json_response["variantSets"][0]
@@ -415,8 +400,7 @@ class VariantTestCase(TestCase):
                         "referenceName": "chr17",
                         "start": 10000, "end": 41196822,
                         "pageSize": 10, "pageToken": "5"}),
-            content_type="application/json"
-        )
+            content_type="application/json")
         response = views.search_variants(request)
         json_response = json.loads(response.content)
         # Note that it is an empty response, therefore assertions are done to empty values
