@@ -2,6 +2,7 @@
 
 var React = require('react');
 var $ = require('jquery');
+var _ = require('underscore');
 var config  = require('./config');
 var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {Navigation} = require('react-router');
@@ -28,10 +29,14 @@ var Profile = React.createClass({
     render: function () {
         var message;
         if (this.state.error != null) {
+            let fieldErrors = _.map(this.state.fieldErrors, err => (<li>{err}</li>));
+            fieldErrors = _.values(_.groupBy(fieldErrors, (item, index) => Math.floor(index / 2) )).map(group => <Col md={3}><ul>{group}</ul></Col>);
             message = (
-				<div className="alert alert-danger">
-					<p>{this.state.error}</p>
-				</div>);
+                <div className="alert alert-danger">
+                    <Row><Col md={6}>{this.state.error}</Col></Row>
+                    <Row><Col md={1} />{fieldErrors}</Row>
+                </div>);
+            window.scrollTo(0, 0);
         }
         return (
             <Grid id="main-grid">
@@ -113,13 +118,14 @@ var Profile = React.createClass({
                         loc = results[0].geometry.location;
                         formData.latitude = loc.lat().toString();
                         formData.longitude = loc.lng().toString();
-                    } else if (status === google.maps.GeocoderStatus.ZERO_RESULTS) {
-                        showFailure("Please check your location information.");
+                    }
+                    /* else if (status === google.maps.GeocoderStatus.ZERO_RESULTS) {
+                        showFailure("Please check your location information, or leave it blank.");
                         return;
                     } else if (status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
                         showFailure("Error checking your location information, please submit again.");
                         return;
-                    }
+                    } */
                     submit();
                 });
             } else {
@@ -127,10 +133,11 @@ var Profile = React.createClass({
             }
         };
 
-        if (this.refs.contactForm.isValid()) {
+        var formErrors = this.refs.contactForm.getFormErrors();
+        if (formErrors === false) {
             google.load('maps', '3', {callback: withGoogleMaps, "other_params": "key=" + config.maps_key});
         } else {
-            this.setState({error: "Some information was missing"});
+            this.setState({error: <strong>Some information was missing:</strong>, fieldErrors: formErrors });
         }
     }
 });
@@ -175,19 +182,23 @@ var EditProfileForm = React.createClass({
     getInitialState: function () {
         return {errors: {}, data: {}};
     },
-    isValid: function () {
+    getFormErrors: function () {
         var errors = {};
-        if (this.refs.password.getDOMNode().value !== this.refs.password_confirm.getDOMNode().value) {
+        /* if (this.refs.password.getDOMNode().value !== this.refs.password_confirm.getDOMNode().value) {
             errors["password_confirm"] = "The passwords don't match"; //eslint-disable-line dot-notation
-        }
+        } */
 
         if (this.state.otherRole) {
             if (!this.refs.role_other.getDOMNode().value.trim()) {
-                errors['role_other'] = 'This field is required'; //eslint-disable-line dot-notation
+                errors['role_other'] = <span>Please specify <strong>other role</strong>.</span>; //eslint-disable-line dot-notation
             }
         }
         this.setState({errors: errors});
-		return Object.keys(errors).length === 0;
+        if (Object.keys(errors).length === 0) {
+            return false;
+        } else {
+            return errors;
+        }
     },
     getFormData: function () {
         var title = this.refs.titlemd.getDOMNode().checked && this.refs.titlemd.getDOMNode().value ||
@@ -197,8 +208,9 @@ var EditProfileForm = React.createClass({
         var data = {
             "image": this.state.file,
             "deleteImage": this.state.imageDelete,
-            "password": this.refs.password.getDOMNode().value,
-            "password_confirm": this.refs.password_confirm.getDOMNode().value,
+            /* "password": this.refs.password.getDOMNode().value,
+               "password_confirm": this.refs.password_confirm.getDOMNode().value,
+            */
             "firstName": this.refs.firstName.getDOMNode().value,
             "lastName": this.refs.lastName.getDOMNode().value,
             "title": title,
@@ -245,8 +257,11 @@ var EditProfileForm = React.createClass({
         return (
         <div className="form-horizontal" onChange={onChange.bind(this)}>
             {this.renderImageUpload('image', 'Profile picture')}
-            {this.renderPassword('password', 'Password')}
-            {this.renderPassword('password_confirm', 'Confirm Password')}
+            {
+                /* {this.renderPassword('password', 'Password')}
+                   {this.renderPassword('password_confirm', 'Confirm Password')}
+                */
+            }
             {this.renderTextInput('firstName', 'First Name', this.state.data.firstName)}
             {this.renderTextInput('lastName', 'Last Name', this.state.data.lastName)}
             {this.renderRadioInlines('title', '', {
@@ -301,11 +316,13 @@ var EditProfileForm = React.createClass({
             <input type="text" className="form-control" id={id} ref={id} value={defaultValue} onChange={handleChange}/>
         );
     },
+/*
     renderPassword: function (id, label) {
         return this.renderField(id, label,
             <input type="password" className="form-control" id={id} ref={id}/>
         );
     },
+*/
     renderTextarea: function (id, label, defaultValue) {
         var handleChange = () => {var oldData = this.state.data; oldData[id] = this.refs[id].value; this.setState({data: oldData});};
         return this.renderField(id, label,
@@ -342,13 +359,13 @@ var EditProfileForm = React.createClass({
 		// XXX Not sure why eslint flags this bind, because 'this' is used in the handlers within the
 		// body of the function.
         var options = kwargs.values.map(function (value) { //eslint-disable-line no-extra-bind
-            var handleRadioChange = () => {var oldData = this.state.data; oldData[id] = value.name; this.setState({data: oldData});};
+            var handleRadioChange = () => {var oldData = this.state.data; oldData[id] = value.name; this.setState({data: oldData}); };
             var defaultChecked = false;
             if (value.name === kwargs.defaultCheckedValue) {
                 defaultChecked = true;
                 otherValue = '';
             }
-            if (value.name === 'Other') {defaultChecked = true;}
+            if (value.name === 'Other' && !kwargs.values.some(opt => opt.name === kwargs.defaultCheckedValue)) {defaultChecked = true;}
             return (
 				<label className="radio-inline">
 					<input type="radio" ref={id + value.ref} name={id} value={value.name} checked={defaultChecked} onChange={handleRadioChange}/>
