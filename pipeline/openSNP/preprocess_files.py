@@ -1,11 +1,24 @@
 import glob
+import os
+
 
 RAW_DATA = "data/datadump_opensnp_9_8_2016/"
 
 
 def main():
-    file_stats()
+    file_dict = file_stats()
+    organize_files(file_dict)
 
+def organize_files(file_dict):
+    path = "data/organized_opensnp_filedump/"
+    try: os.mkdir(path)
+    except OSError: pass
+    for folder in file_dict.keys():
+        if "readme" not in folder:
+            try: os.mkdir(path + folder)
+            except OSError: pass
+        else:
+            pass
 
 
 def file_stats():
@@ -15,7 +28,8 @@ def file_stats():
                  "ancestry": [],
                  "ftdna" :[],
                  "IYG": [],
-                 "decodeme": []}
+                 "decodeme": [],
+                 "phenotype_readme": []}
     subfix = {}
     for index, filename in enumerate(glob.glob(RAW_DATA + "*")):
 
@@ -31,21 +45,19 @@ def file_stats():
         for key in file_dict.keys():
             if key in filename:
                 found = True
-                file_dict[key].append(filename)
-
+                file_dict[key].append(filename) 
         if not found:
-            print filename
+            file_dict["phenotype_readme"].append(filename)
 
 
     print subfix
     sum = 0
     for key, value in file_dict.iteritems():
-        print key
-        print len(value)
+        print key, ":", len(value)
         sum += len(value)
-    print sum
+    print "sum:", sum
 
-
+    return file_dict
 
 
 if __name__ == "__main__":
