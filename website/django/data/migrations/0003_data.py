@@ -30,17 +30,17 @@ def load_from_csv(apps, schema_editor):
             x , w , y = row_dict['Genomic_Coordinate_hg36'].split(':')
             z , u = y.split('>')
             row_dict['Hg36_Start'] = long(w) - 1
-            row_dict['Hg36_End'] = long(row_dict['Hg36_Start']) + len(u)
+            row_dict['Hg36_End'] = long(row_dict['Hg36_Start']) + len(z)
             x = y = z = w = u = None
             x ,w , y = row_dict['Genomic_Coordinate_hg37'].split(':')
             z , u = y.split('>')
             row_dict['Hg37_Start'] = long(w) - 1
-            row_dict['Hg37_End'] = row_dict['Hg37_Start'] + len(u)
+            row_dict['Hg37_End'] = row_dict['Hg37_Start'] + len(z)
             x = y = z = w = u = None
             x , w , y = row_dict['Genomic_Coordinate_hg38'].split(':')
             z , u = y.split('>')
             row_dict['Hg38_Start'] = long(w) - 1
-            row_dict['Hg38_End'] = row_dict['Hg38_Start'] + len(u)
+            row_dict['Hg38_End'] = row_dict['Hg38_Start'] + len(z)
             row_dict['Reference_Name'] = x
             Variant.objects.create_variant(row_dict)
 
