@@ -14,6 +14,7 @@ image.allow_tags = True
 class ProxyUser(MyUser):
     class Meta:
         proxy = True
+        verbose_name = "user"
         verbose_name_plural = "All Users"
 
 class MyUserAdmin(admin.ModelAdmin):
@@ -34,6 +35,7 @@ class MyUserAdmin(admin.ModelAdmin):
 class InactiveUser(MyUser):
     class Meta:
         proxy = True
+        verbose_name = "inactive user"
         verbose_name_plural = "Users Awaiting Email Confirmation"
 
 class InactiveUserAdmin(MyUserAdmin):
@@ -43,11 +45,12 @@ class InactiveUserAdmin(MyUserAdmin):
 class UnapprovedUser(MyUser):
     class Meta:
         proxy = True
+        verbose_name = "unapproved user"
         verbose_name_plural = "Users Awaiting Approval"
 
 class UnapprovedUserAdmin(MyUserAdmin):
     def get_queryset(self, request):
-        return self.model.objects.filter(is_approved=False)
+        return self.model.objects.filter(is_approved=False, is_active=True)
 
 admin.site.register(ProxyUser, MyUserAdmin)
 admin.site.register(InactiveUser, InactiveUserAdmin)
