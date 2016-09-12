@@ -125,6 +125,9 @@ class MyUser(AbstractBaseUser):
         # Simplest possible answer: All admins are staff
         return self.is_admin
 
+    class Meta:
+        ordering = ['lastName', 'firstName']
+
 class MailingListEmail(models.Model):
     email = models.EmailField(
         verbose_name='email address',
