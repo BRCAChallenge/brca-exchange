@@ -35,20 +35,20 @@ DEFAULT_CONTENTS = "-"
 # files needed for string comparison
 
 #key value pair dictionaries of all extra fields in various databases to add
-GENOME1K_FIELDS = {"Allele_frequency":"AF",
-                   "EAS_Allele_frequency":"EAS_AF",
-                   "EUR_Allele_frequency":"EUR_AF",
-                   "AFR_Allele_frequency":"AFR_AF",
-                   "AMR_Allele_frequency":"AMR_AF",
-                   "SAS_Allele_frequency":"SAS_AF"}
+GENOME1K_FIELDS = {"Allele_frequency": "AF",
+                   "EAS_Allele_frequency": "EAS_AF",
+                   "EUR_Allele_frequency": "EUR_AF",
+                   "AFR_Allele_frequency": "AFR_AF",
+                   "AMR_Allele_frequency": "AMR_AF",
+                   "SAS_Allele_frequency": "SAS_AF"}
 CLINVAR_FIELDS = {"HGVS": "HGVS",
-                  "Submitter":"Submitter",
-                  "Clinical_Significance":"ClinicalSignificance",
-                  "Date_Last_Updated":"DateLastUpdated",
-                  "SCV":"SCV",
-                  "Allele_Origin":"Origin",
-                  "Protein":"Protein",
-                  "Method":"Method"}
+                  "Submitter": "Submitter",
+                  "Clinical_Significance": "ClinicalSignificance",
+                  "Date_Last_Updated": "DateLastUpdated",
+                  "SCV": "SCV",
+                  "Allele_Origin": "Origin",
+                  "Protein": "Protein",
+                  "Method": "Method"}
 LOVD_FIELDS = {"Origin_of_variant": "genetic_origin",
                "Variant_frequency": "frequency",
                "Variant_haplotype": "haplotype",
@@ -63,9 +63,9 @@ EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "Co_occurrence_LR": "co_occurrence_lr",
                   "Missense_analysis_prior_probability": "missense_analysis_prior_p",
                   "Posterior_probability": "posterior_p",
-                  "IARC_class":"iarc_class",
+                  "IARC_class": "iarc_class",
                   "BIC_Nomenclature": "bic_dna_change",
-                  "Literature_source":"observational_reference",
+                  "Literature_source": "observational_reference",
                   "HGVS_cDNA": "dna_change",
                   "HGVS_protein": "protein_change"}
 BIC_FIELDS = {"Clinical_classification": "Category",
@@ -78,16 +78,16 @@ BIC_FIELDS = {"Clinical_classification": "Category",
               "Ethnicity": "Ethnicity",
               "Literature_citation": "Reference"}
 ESP_FIELDS = {"polyPhen2_result": "PH",
-              "Minor_allele_frequency":"MAF"}
+              "Minor_allele_frequency": "MAF"}
 EXAC_FIELDS = {"Allele_frequency": "AF"}
 
 FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
-               "ClinVar": CLINVAR_FIELDS,
-               "LOVD": LOVD_FIELDS,
-               "exLOVD": EX_LOVD_FIELDS,
-               "ExAC": EXAC_FIELDS,
-               "ESP": ESP_FIELDS,
-               "BIC": BIC_FIELDS}
+              "ClinVar": CLINVAR_FIELDS,
+              "LOVD": LOVD_FIELDS,
+              "exLOVD": EX_LOVD_FIELDS,
+              "ExAC": EXAC_FIELDS,
+              "ESP": ESP_FIELDS,
+              "BIC": BIC_FIELDS}
 
 ENIGMA_FILE = "ENIGMA_last_updated.tsv"
 GENOME1K_FILE = "1000G_brca.sorted.hg38.vcf"
@@ -102,7 +102,7 @@ ESP_FILE = "esp.brca12.sorted.hg38.vcf"
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--input", help="Input VCF directory",
                     default="/home/brca/pipeline-data/pipeline-input/")
-parser.add_argument("-o", "--output", 
+parser.add_argument("-o", "--output",
                     default="/home/brca/pipeline-data/pipeline-output/")
 parser.add_argument("-p", "--de_novo", default=False,
                     help="string comparison all over, instead of loading from pickle dump",
@@ -120,27 +120,28 @@ BRCA2 = {"hg38": {"start": 32300000,
                   "sequence": open(ARGS.reference + "brca2_hg38.txt", "r").read()},
          "hg19": {"start": 32800000,
                   "sequence": open(ARGS.reference + "brca2_hg19.txt", "r").read()}}
-  
+
+
 def main():
     tmp_dir = tempfile.mkdtemp()
     try:
         source_dict, columns, variants = preprocessing(tmp_dir)
         print "\n------------merging different dataset------------------------------"
         for source_name, file in source_dict.iteritems():
-            (columns, variants) = add_new_source(columns, variants, source_name, 
+            (columns, variants) = add_new_source(columns, variants, source_name,
                                                  file, FIELD_DICT[source_name])
         print "------------string comparison merge-------------------------------"
         variants = variant_standardize(variants=variants)
-        variants = string_comparison_merge(variants) 
+        variants = string_comparison_merge(variants)
         write_new_tsv(ARGS.output + "merged.tsv", columns, variants)
-        print "final number of variants: %d" %len(variants)
-        print "Done" 
+        print "final number of variants: %d" % len(variants)
+        print "Done"
     finally:
         shutil.rmtree(tmp_dir)
 
 
-def variant_standardize(variants="pickle"): 
-    """standardize variants such 
+def variant_standardize(variants="pickle"):
+    """standardize variants such
     1. "-" in ref or alt is removed, and a leading base is added, e.g. ->T is changed to N > NT
     2. remove trailing same bases: e.g. AGGGG > TGGGG is changed to A>T
     3. remove leading same baes: e.g. position 100, AAT > AAG is changed to position 102 T>G

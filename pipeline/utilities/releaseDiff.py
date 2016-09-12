@@ -87,7 +87,7 @@ class transformer(object):
                     return "major change: %s %s" % (oldValue, newValue)
             else:
                 return "major change: %s %s" % (oldValue, newValue)
-        
+
 
     def compareRow(self, oldRow, newRow):
         """
@@ -98,8 +98,8 @@ class transformer(object):
             result = self.compareField(oldRow, newRow, field)
             if re.search("major change", result):
                 print field, "variant", newRow["Genomic_Coordinate_hg38"], result
-            
-        
+
+
 
 
 class v1ToV2(transformer):
@@ -129,7 +129,7 @@ class v1ToV2(transformer):
         "Polyphen_Prediction" : (lambda xx: re.sub("\(*$", "", xx)),
         "Sift_Prediction" : (lambda xx: re.sub("\(*$", "", xx)),
         "Clinical_significance_citations_ENIGMA" : (lambda xx: re.sub("", "-", xx)),
-        "Date_last_evaluated_ENIGMA", : (lambda xx: re.sub("/15$", "/2015", xx)),
+        "Date_last_evaluated_ENIGMA" : (lambda xx: re.sub("/15$", "/2015", xx)),
         }
 
 
@@ -170,7 +170,7 @@ def main():
             added.writerow(newData[newVariant])
         else:
             v1v2.compareRow(oldData[newVariant], newData[newVariant])
-    
+
 
 if __name__ == "__main__":
     #print "hello world"
