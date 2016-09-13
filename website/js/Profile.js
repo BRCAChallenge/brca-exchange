@@ -89,7 +89,7 @@ var Profile = React.createClass({
                 });
 
                 if(self.refs.contactForm.getSubscribeAction() !== undefined) {
-                    fd.append("subscribe", this.refs.contactForm.getSubscribeAction());
+                    fd.append("subscribe", self.refs.contactForm.getSubscribeAction());
                 }
 
                 var xhr = new XMLHttpRequest();
@@ -184,21 +184,35 @@ var EditProfileForm = React.createClass({
     },
     getFormErrors: function () {
         var errors = {};
-        /* if (this.refs.password.getDOMNode().value !== this.refs.password_confirm.getDOMNode().value) {
-            errors["password_confirm"] = "The passwords don't match"; //eslint-disable-line dot-notation
-        } */
-
-        if (this.state.otherRole) {
-            if (!this.refs.role_other.getDOMNode().value.trim()) {
-                errors['role_other'] = <span>Please specify <strong>other role</strong>.</span>; //eslint-disable-line dot-notation
-            }
+        if (this.refs.role.getDOMNode().value === "NONE") {
+            errors["role"] = <span>Please select a <strong>Roll</strong></span>; //eslint-disable-line dot-notation
         }
+        if (this.state.captcha === "") {
+            errors["captcha"] = <span>No <strong>CAPTCHA</strong> entered</span>; //eslint-disable-line dot-notation
+        }
+        this.getCompulsoryFields().forEach(function (field) {
+            var value = this.refs[field].getDOMNode().value.trim();
+            if (!value) {
+                errors[field] = <span><strong>{ field.replace(/([A-Z])/g, ' $1').replace(/^./, function(str) { return str.toUpperCase(); }) }</strong> is required</span>;
+            }
+        }.bind(this));
         this.setState({errors: errors});
-        if (Object.keys(errors).length === 0) {
+
+		if (Object.keys(errors).length === 0) {
             return false;
         } else {
             return errors;
         }
+    },
+    getCompulsoryFields: function () {
+        var fields = [];
+        if (!this.refs || !this.refs.role || parseInt(this.refs.role.getDOMNode().value) !== Role.ROLE_DATA_PROVIDER) {
+            fields.push('firstName', 'lastName');
+        }
+        if (this.state.otherRole) {
+            fields.push('role_other');
+        }
+        return fields;
     },
     getFormData: function () {
         var title = this.refs.titlemd.getDOMNode().checked && this.refs.titlemd.getDOMNode().value ||
@@ -208,9 +222,6 @@ var EditProfileForm = React.createClass({
         var data = {
             "image": this.state.file,
             "deleteImage": this.state.imageDelete,
-            /* "password": this.refs.password.getDOMNode().value,
-               "password_confirm": this.refs.password_confirm.getDOMNode().value,
-            */
             "firstName": this.refs.firstName.getDOMNode().value,
             "lastName": this.refs.lastName.getDOMNode().value,
             "title": title,
