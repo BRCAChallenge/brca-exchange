@@ -19,7 +19,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Check for users awaiting approval
-        users_awaiting_approval = MyUser.objects.filter(is_approved = False)
+        users_awaiting_approval = MyUser.objects.filter(is_active = True, is_approved = False)
         user_count = users_awaiting_approval.count()
 
         if user_count == 0:
