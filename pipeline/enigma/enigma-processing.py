@@ -94,7 +94,7 @@ def main():
                 genome_coor, HGVS_p = convert_HGVS(HGVS_cDNA, GENOME)
             except:
                 # TODO: better handling of misnamed HGVS string
-                genome_coor, HGVS_p = create_None_filler() 
+                genome_coor, HGVS_p = create_None_filler()
             final_items = list(items[index_to_save])
             final_items.insert(1, genome_coor)
             final_items.append(HGVS_p)
