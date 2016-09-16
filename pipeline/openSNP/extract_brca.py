@@ -11,6 +11,8 @@ NCBI34/hg16
 import glob
 import pyliftover
 import pdb
+import os
+
 
 SOURCE = ["23andme", "ancestry", "ftdna"]
 
@@ -33,6 +35,7 @@ BRCA_BOUNDARY = {"38": {"chr17": [43045629, 43125483],
                  "34": {"chr17": [41570860, 41650551],
                         "chr13": [30687617, 30771805]}}
 
+
 def genomic_coordinate_update(version, chrm, position):
     if version == "35":
         lift_tool1 = LIFT_MAP[version][0]
@@ -53,23 +56,29 @@ def extract_23andme_brca():
         1. check assembly version, if not 38, convert to 38
         2. discard all positions outside of BRCA region"""
     folder = "data/organized_opensnp_filedump/23andme/"
-    for filename in glob.glob(folder + "*"):
-        print filename
+    outpath = "data/brca_openSNP/"
+    try: 
+        os.mkdir(outpath)
+    except OSError:
+        pass
+
+    for index, filename in enumerate(glob.glob(folder + "*")):
+        filename_short = filename.split("/")[-1]
+        print index, filename_short
         f_in = open(filename, "r")
         lines = f_in.readlines()
         if not lines[0].startswith("#"):
-            print "binary file"
+            print "skipping binary file"
             continue
         
         # write out header of new file
         header = [line for line in lines if line.startswith("#")]
-        source = header[0]
         column_names = header[-1]
         header = "".join(header)
         build_index = header.index("human assembly build")
         version = header[build_index: build_index + 23][-2:]
-        f_out = open("temp", "w")
-        f_out.write(source)
+        f_out = open(outpath + filename_short, "w")
+        f_out.write("# 23andme\n")
         f_out.write("# human assembly build 38\n")
         f_out.write(column_names)
         
@@ -92,7 +101,11 @@ def extract_23andme_brca():
                     continue
             else:
                 continue
-        break
+        f_in.close()
+        f_out.close()
+        if index == 10:
+            break
+
 
 if __name__ == "__main__":
     main()
