@@ -1,11 +1,8 @@
-"""
-extract SNPs from BRCA regions (convert genome assembly versions to GRCh38)
-notice two different naming system for genome assembly corresponds as following:
-GRCh38/hg38
-GRCh37/hg19
-NCBI36/hg18
-NCBI35/hg17
-NCBI34/hg16
+"""extract BRCA region from 23andme and ancestryDNA files by:
+   1. check assembly version, if not 38, convert positions to 38
+   2. discard all positions outside of BRCA region
+    Note: about 2000 files from 23andme, 200 files from ancestryDNA, 200 files from ftdna
+    ftdna files are not processed because its human reference build version is not specified
 """
 
 import glob
@@ -48,20 +45,69 @@ def genomic_coordinate_update(version, chrm, position):
 
 
 def main():
-    extract_23andme_brca()
-
-
-def extract_23andme_brca():
-    """"extract BRCA region from 23andme files by:
-        1. check assembly version, if not 38, convert to 38
-        2. discard all positions outside of BRCA region"""
-    folder = "data/organized_opensnp_filedump/23andme/"
     outpath = "data/brca_openSNP/"
     try: 
         os.mkdir(outpath)
     except OSError:
         pass
+    extract_23andme_brca(outpath)
+    extract_ancestry_brca(outpath)
 
+
+def extract_ancestry_brca(outpath):
+    folder = "data/organized_opensnp_filedump/ancestry/"
+    for index, filename in enumerate(glob.glob(folder + "*")):
+        filename_short = filename.split("/")[-1]
+        print index, filename_short
+        f_in = open(filename, "r")
+        lines = f_in.readlines()
+        if not lines[0].startswith("#"):
+            print "skipping binary file"
+            continue
+        
+        # write out header of new file
+        header = [line for line in lines if line.startswith("#")]
+        column_names = header[-1]
+        header = "".join(header)
+        build_index = header.index("human reference build")
+        version = header[build_index: build_index + 24][-2:]
+        f_out = open(outpath + filename_short, "w")
+        f_out.write("# ancestry\n")
+        f_out.write("# human reference build 38\n")
+        
+        # write out body of new file with only BRCA region converted to GRCh38
+        body = [line for line in lines if not line.startswith("#")]
+        for line_index, line in enumerate(body):
+            items = line.strip().split("\t")
+            if line_index == 0:
+                items.pop(-1)
+                items[-1] = "Alleles"
+                f_out.write("#" + "\t".join(items) + "\n")
+                continue
+            chrm = "chr" + items[1]
+            position = int(items[2])
+            if chrm == "chr17" or chrm == "chr13":
+                [brca_start, brca_end] = BRCA_BOUNDARY[version][chrm]
+                if position >= brca_start and position <= brca_end:
+                    if version == "38":
+                        f_out.write(line)
+                    else:
+                        new_pos = int(genomic_coordinate_update(version, chrm, position))
+                        items[2] = str(new_pos)
+                        items[-2] = items[-2] + items[-1]
+                        items.pop(-1)
+                        f_out.write("\t".join(items) + "\n")     
+                else:
+                    continue
+            else:
+                continue
+        f_in.close()
+        f_out.close()
+
+
+def extract_23andme_brca(outpath):
+    
+    folder = "data/organized_opensnp_filedump/23andme/"
     for index, filename in enumerate(glob.glob(folder + "*")):
         filename_short = filename.split("/")[-1]
         print index, filename_short
@@ -103,8 +149,6 @@ def extract_23andme_brca():
                 continue
         f_in.close()
         f_out.close()
-        if index == 10:
-            break
 
 
 if __name__ == "__main__":
