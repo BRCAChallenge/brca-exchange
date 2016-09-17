@@ -9,6 +9,6 @@
 #### 2. re-organize data based on the content, (23andme, ancestry, ftdna, fitbit, picture, phenotype, readme)
     python preprocess_files.py
     
-#### 3. extract BRCA region from 23andme and ancestry data while converting to build GRCh38
+#### 3. extract BRCA region from 23andme and ancestry data while converting to build GRCh38, target folder data/brca_openSNP/
     python extract_brca.py
 
