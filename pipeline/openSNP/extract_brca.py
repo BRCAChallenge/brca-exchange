@@ -64,12 +64,14 @@ def extract_ancestry_brca(outpath):
         if not lines[0].startswith("#"):
             print "skipping binary file"
             continue
-        
         # write out header of new file
         header = [line for line in lines if line.startswith("#")]
         column_names = header[-1]
         header = "".join(header)
-        build_index = header.index("human reference build")
+        try: 
+            build_index = header.index("human reference build")
+        except ValueError:
+            continue # pass this file if no build version is found
         version = header[build_index: build_index + 24][-2:]
         f_out = open(outpath + filename_short, "w")
         f_out.write("# ancestry\n")
@@ -79,6 +81,8 @@ def extract_ancestry_brca(outpath):
         body = [line for line in lines if not line.startswith("#")]
         for line_index, line in enumerate(body):
             items = line.strip().split("\t")
+            if "A" in items[2] or "G" in items[2] or "T" in items[2] or "C" in items[2] or " " in items[2]:
+                continue
             if line_index == 0:
                 items.pop(-1)
                 items[-1] = "Alleles"
@@ -106,7 +110,6 @@ def extract_ancestry_brca(outpath):
 
 
 def extract_23andme_brca(outpath):
-    
     folder = "data/organized_opensnp_filedump/23andme/"
     for index, filename in enumerate(glob.glob(folder + "*")):
         filename_short = filename.split("/")[-1]
@@ -121,7 +124,11 @@ def extract_23andme_brca(outpath):
         header = [line for line in lines if line.startswith("#")]
         column_names = header[-1]
         header = "".join(header)
-        build_index = header.index("human assembly build")
+        try: 
+            build_index = header.index("human assembly build")
+        except:
+            print "no human assembly build version found"
+            continue
         version = header[build_index: build_index + 23][-2:]
         f_out = open(outpath + filename_short, "w")
         f_out.write("# 23andme\n")
@@ -129,9 +136,11 @@ def extract_23andme_brca(outpath):
         f_out.write(column_names)
         
         # write out body of new file with only BRCA region converted to GRCh38
-        body = [line for line in lines if not line.startswith("#")]
+        body = [line for line in lines if not line.startswith(("#", "\"#"))]
         for line in body:
-            items = line.strip().split("\t")
+            items = line.strip("\n").split("\t")
+            if items[1] == "." or items[2] == ".":
+                continue
             chrm = "chr" + items[1]
             position = int(items[2])
             if chrm == "chr17" or chrm == "chr13":
