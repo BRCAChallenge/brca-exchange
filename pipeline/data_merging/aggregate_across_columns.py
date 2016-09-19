@@ -114,6 +114,10 @@ def unpackHgvs(hgvsString):
     elif re.search(".c.", firstHgvsString):
         transcript = firstHgvsString.split(".c.")[0]
         suffix = re.sub(transcript+".", "", hgvsString)
+    elif re.search(".g.", firstHgvsString):
+        transcript = firstHgvsString.split(".g.")[0]
+        suffix = re.sub(transcript+".", "", hgvsString)
+    #TODO: Needs an else case, transcript assignment errors occurs here.
     return(transcript, suffix)
 
 

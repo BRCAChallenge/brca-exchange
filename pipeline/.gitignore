@@ -8,5 +8,10 @@
 *.py.swp
 */temp_variants.pkl
 
-# Files and directories for pipeline data conversion 
+# Files and directories for pipeline data conversion
 *brca/
+
+# Log files
+*.log
+/utilities/ns.txt
+/utilities/dupes.txt

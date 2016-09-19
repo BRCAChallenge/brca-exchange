@@ -11,19 +11,21 @@ def main():
                         help="File with data to check")
     parser.add_argument("--output", default="dupes.txt",
                         help="File with duplicates")
+    parser.add_argument("--column", default="'Genomic_Coordinate_hg38'",
+                        help="Column to search for duplicates")
 
     args = parser.parse_args()
     inputData = csv.DictReader(open(args.input, "r"), delimiter="\t")
     duplicates = open(args.output, "w")
 
-    # Finds all duplicate variants in a given tsv file containing rows with the column Genomic_Coordinate_hg38
-    hgvs_strings = []
+    # Finds all duplicate variants in a given tsv file containing rows with the given column
+    instances = []
     for row in inputData:
-        hgvs_strings.append(row["Genomic_Coordinate_hg38"])
-    c = collections.Counter(hgvs_strings)
-    for hgvs_string, count in c.iteritems():
+        instances.append(row[args.column])
+    c = collections.Counter(instances)
+    for instance, count in c.iteritems():
         if count > 1:
-            duplicates.write(hgvs_string + ": " + str(count) + "\n")
+            duplicates.write(instance + ": " + str(count) + "\n")
 
 if __name__ == "__main__":
     main()
