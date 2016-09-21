@@ -6,7 +6,6 @@ var content = require('./content');
 var RawHTML = require('./RawHTML');
 var countries = require('raw!../content/countries.txt').split("\n");
 var $ = require('jquery');
-var _ = require('underscore');
 var config  = require('./config');
 var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {Navigation} = require('react-router');
@@ -15,20 +14,21 @@ var Role = {
     ROLE_DATA_PROVIDER: 12,
     options: [
         // [ id, dropdown text, community page text ]
-        [1, "I am a concerned member of the public",    "Concerned Person"],
-        [3, "I am a clinical lab director",             "Clinical Lab Director"],
-        [4, "I am a member of a diagnostic lab",        "Diagnostic Lab Staff"],
-        [5, "I am a principal investigator",            "Principal Investigator"],
-        [6, "I am a researcher",                        "Researcher"],
-        [7, "I lead an advocacy group",                 "Advocacy Group Leader"],
-        [8, "I am a member of an advocacy group",       "Advocacy Group Member"],
-        [9, "I am a genetic counselor",                 "Genetic Counselor"],
-        [10, "I am a clinical geneticist",              "Clinical Geneticist"],
-        [11, "I am a clinician",                        "Clinician"],
-        [12, "I represent a Data Provider",             "Data Provider"],
+        [1, "I am a patient",                      "Patient"],
+        [2, "I am a proband",                      "Proband"],
+        [3, "I am a clinical lab director",        "Clinical Lab Director"],
+        [4, "I am a member of a diagnostic lab",   "Diagnostic Lab Staff"],
+        [5, "I am a principal investigator",       "Principal Investigator"],
+        [6, "I am a researcher",                   "Researcher"],
+        [7, "I lead an advocacy group",            "Advocacy Group Leader"],
+        [8, "I am a member of an advocacy group",  "Advocacy Group Member"],
+        [9, "I am a genetic counselor",            "Genetic Counselor"],
+        [10, "I am a clinical geneticist",         "Clinical Geneticist"],
+        [11, "I am a clinician",                   "Clinician"],
+        [12, "I represent a Data Provider",        "Data Provider"],
         [0, "Other"]
     ],
-    other: id => parseInt(id) === 0,
+    other: id => parseInt(id) === 0 || parseInt(id) === 11,
     get: function(id) { return this.options.find(role => role[0] === parseInt(id)); }
 };
 
@@ -43,14 +43,10 @@ var Signup = React.createClass({
     render: function () {
         var message;
         if (this.state.error != null) {
-            let fieldErrors = _.map(this.state.fieldErrors, err => (<li>{err}</li>));
-            fieldErrors = _.values(_.groupBy(fieldErrors, (item, index) => Math.floor(index / 2) )).map(group => <Col md={3}><ul>{group}</ul></Col>);
             message = (
 				<div className="alert alert-danger">
-					<Row><Col md={6}>{this.state.error}</Col></Row>
-                    <Row><Col md={1} />{fieldErrors}</Row>
+					<p>{this.state.error}</p>
 				</div>);
-            window.scrollTo(0, 0);
         }
         return (
             <Grid id="main-grid">
@@ -84,69 +80,37 @@ var Signup = React.createClass({
     },
 
     handleSubmit: function () {
-        var self = this;
         var showSuccess = () => {this.transitionTo('/community', null, {registrationSuccess: true});};
         var showFailure = msg => {this.setState({error: msg});};
 
-        var withGoogleMaps = function () {
-            var geo = new google.maps.Geocoder();
-            var formData = self.refs.contactForm.getFormData();
-            var address = "" + formData.institution + "," + formData.city + "," + formData.state + "," + formData.country;
+        if (this.refs.contactForm.isValid()) {
+            var formData = this.refs.contactForm.getFormData();
+            this.setState({submitted: formData});
+            var url = config.backend_url + '/accounts/register/';
 
-            var submit = function () {
-                self.setState({submitted: formData});
-                var url = config.backend_url + '/accounts/register/';
+            var fd = new FormData();
+            $.each(formData, function (k, v) {
+                fd.append(k, v);
+            });
 
-                var fd = new FormData();
-                $.each(formData, function (k, v) {
-                    fd.append(k, v);
-                });
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function () {
+                var responseData = JSON.parse(this.response);
 
-                var xhr = new XMLHttpRequest();
-                xhr.onload = function () {
-                    var responseData = JSON.parse(this.response);
-
-                    if (this.status === 200 && responseData.success === true) {
-                        showSuccess();
-                    } else {
-                        var message = responseData.error;
-                        if (message === null) {
-                            message = "Could not complete registration";
-                        }
-                        showFailure(message);
+                if (this.status === 200 && responseData.success === true) {
+                    showSuccess();
+                } else {
+                    var message = responseData.error;
+                    if (message === null) {
+                        message = "Could not complete registration";
                     }
-                };
-                xhr.open('post', url);
-                xhr.send(fd);
+                    showFailure(message);
+                }
             };
-
-            if (address.length > 3) {
-                geo.geocode({address: address}, (results, status) => {
-                    var loc;
-                    if (status === google.maps.GeocoderStatus.OK) {
-                        loc = results[0].geometry.location;
-                        formData.latitude = loc.lat().toString();
-                        formData.longitude = loc.lng().toString();
-                    }
-                    /* else if (status === google.maps.GeocoderStatus.ZERO_RESULTS) {
-                        showFailure("Please check your location information, or leave it blank.");
-                        return;
-                    } else if (status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
-                        showFailure("Error checking your location information, please submit again.");
-                        return;
-                    } */
-                    submit();
-                });
-            } else {
-                submit();
-            }
-        };
-
-        var formErrors = this.refs.contactForm.getFormErrors();
-        if (formErrors === false) {
-            google.load('maps', '3', {callback: withGoogleMaps, "other_params": "key=" + config.maps_key});
+            xhr.open('post', url);
+            xhr.send(fd);
         } else {
-            this.setState({error: <strong>Some information was missing:</strong>, fieldErrors: formErrors });
+            this.setState({error: "Some information was missing"});
         }
     }
 });
@@ -179,36 +143,32 @@ var SignupForm = React.createClass({
             }});
         });
     },
-    getFormErrors: function () {
+    isValid: function () {
         var errors = {};
         if (this.refs.role.getDOMNode().value === "NONE") {
-            errors["role"] = <span>Please select a <strong>Roll</strong></span>; //eslint-disable-line dot-notation
+            errors["role"] = "Please select a roll"; //eslint-disable-line dot-notation
         }
         if (this.refs.email.getDOMNode().value !== this.refs.email_confirm.getDOMNode().value) {
-            errors["email_confirm"] = <span>The <strong>emails</strong> don't match</span>; //eslint-disable-line dot-notation
+            errors["email_confirm"] = "The emails don't match"; //eslint-disable-line dot-notation
         }
         if (this.refs.password.getDOMNode().value !== this.refs.password_confirm.getDOMNode().value) {
-            errors["password_confirm"] = <span>The <strong>passwords</strong> don't match</span>; //eslint-disable-line dot-notation
+            errors["password_confirm"] = "The passwords don't match"; //eslint-disable-line dot-notation
         }
         if (this.state.captcha === "") {
-            errors["captcha"] = <span>No <strong>CAPTCHA</strong> entered</span>; //eslint-disable-line dot-notation
+            errors["captcha"] = "No CAPTCHA entered"; //eslint-disable-line dot-notation
         }
         this.getCompulsoryFields().forEach(function (field) {
             var value = this.refs[field].getDOMNode().value.trim();
             if (!value) {
-                errors[field] = <span><strong>{ field.replace(/([A-Z])/g, ' $1').replace(/^./, function(str) { return str.toUpperCase(); }) }</strong> is required</span>;
+                errors[field] = 'This field is required';
             }
         }.bind(this));
         this.setState({errors: errors});
 
-		if (Object.keys(errors).length === 0) {
-            return false;
-        } else {
-            return errors;
-        }
+		return Object.keys(errors).length === 0;
     },
     getCompulsoryFields: function () {
-        var fields = ['email', 'password', 'role'];
+        var fields = ['email', 'email_confirm', 'password', 'password_confirm', 'role'];
         if (!this.refs || !this.refs.role || parseInt(this.refs.role.getDOMNode().value) !== Role.ROLE_DATA_PROVIDER) {
             fields.push('firstName', 'lastName');
         }

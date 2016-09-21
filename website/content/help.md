@@ -18,7 +18,7 @@ Coordinate of the variant on the GRCh38 reference genome
 HGVS string that represents the variant at cDNA nucleotide level
 
 #### Protein
-The protein-level change (if any) that would be introduced by this variant.  HGVS notation indicates the position of the variant within the reference protein sequence, and the change that would be introduced by this variant.  For example, _p.(Tyr15His)_ indicates a change of _Tyr_ (Tyrosine) to _His_ (Histidine) at amino acid 15.  The notation _p.?_ indicates a variant for which one cannot predict the protein-level consequences.
+The protein-level change (if any) that would be introduced by this variant.  HGVS notation indicates the position of the variant within the reference protein sequence, and the change that would be introduced by this variant.  For example, _p.(Tyr15His)_ indicates a change of _Tyr_ (Tyrosine) to _His_ (Histidine) at amino acid 15.  The notation _p.?_ indicates a variant is not within the protein-coding portions of the gene.
 
 #### Pathogenicity
 The Pathogenicity column indicates whether expert curators have determined if the variant is pathogenic or benign.

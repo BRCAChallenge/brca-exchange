@@ -58,11 +58,8 @@ def update(request):
     fields['has_image'] = (user[0].has_image or fields['has_image']) and not delete_image
 
     del fields['email']
-    if fields['password'] != '':
-        u = user[0]
-        u.set_password(fields['password'])
-        u.save()
-    del fields['password']
+    if fields['password'] == '':
+        del fields['password']
 
     # mailing list toggle
     if 'subscribe' in request.POST:
@@ -264,13 +261,11 @@ def user_fields(request):
     city = request.POST.get('city', '')
     state = request.POST.get('state', '')
     country = request.POST.get('country', '')
-    latitude = request.POST.get('latitude', '')
-    longitude = request.POST.get('longitude', '')
     phone_number = request.POST.get('phone_number', '')
     hide_number = (request.POST.get('hide_number', "true") == "true")
     hide_email = (request.POST.get('hide_email', "true") == "true")
 
-    return {'role': role, 'role_other': role_other, 'city': city, 'country': country, 'latitude': latitude, 'longitude': longitude,
+    return {'role': role, 'role_other': role_other, 'city': city, 'country': country,
             'email': email, 'firstName': firstName, 'has_image': has_image, 'hide_email': hide_email,
             'hide_number': hide_number, 'institution': institution,
             'lastName': lastName, 'password': password, 'phone_number': phone_number, 'state': state, 'title': title}
@@ -336,7 +331,7 @@ def user_locations(request):
                         )
     query = query.filter(search_query)
 
-    fields = ['id', 'firstName', 'lastName', 'title', 'role', 'role_other', 'institution', 'city', 'state', 'country', 'latitude', 'longitude', 'has_image']
+    fields = ['id', 'firstName', 'lastName', 'title', 'role', 'role_other', 'institution', 'city', 'state', 'country', 'has_image']
     response = JsonResponse({'data': list(query.values(*fields))})
     response['Access-Control-Allow-Origin'] = '*'
     return response

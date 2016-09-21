@@ -7,7 +7,6 @@ var auth = require('./auth');
 var {$c} = require('./Signup');
 var config  = require('./config');
 var $ = require('jquery');
-var _ = require('underscore');
 
 var ResetPassword = React.createClass({
     mixins: [State, Navigation],
@@ -188,7 +187,7 @@ var Signin = React.createClass({
                     }
                     this.transitionTo(target);
                 } else {
-                    if (_.contains(error.non_field_errors, 'User account is disabled.')) {
+                    if (error.non_field_errors === 'User account is disabled.') {
                         var showSuccess = () => {this.setState({success: true, successMessage: "Activation email sent."});};
                         var showFailure = msg => {this.setState({error: msg});};
                         var resendActivation = function() {

@@ -11,15 +11,9 @@ def image(obj):
         return ''
 image.allow_tags = True
 
-class ProxyUser(MyUser):
-    class Meta:
-        proxy = True
-        verbose_name = "user"
-        verbose_name_plural = "All Users"
-
 class MyUserAdmin(admin.ModelAdmin):
 
-    list_display = ('email', 'is_admin', 'firstName', 'lastName', 'is_approved', 'is_active', image)
+    list_display = ('email', 'is_admin', 'firstName', 'lastName', 'is_approved', image)
     exclude = ('password',)
     ordering = ('is_approved',)
     search_fields = ('firstName', 'lastName', 'email')
@@ -32,27 +26,4 @@ class MyUserAdmin(admin.ModelAdmin):
     def approve(self, request, queryset):
         queryset.update(is_approved=True)
 
-class InactiveUser(MyUser):
-    class Meta:
-        proxy = True
-        verbose_name = "inactive user"
-        verbose_name_plural = "Users Awaiting Email Confirmation"
-
-class InactiveUserAdmin(MyUserAdmin):
-    def get_queryset(self, request):
-        return self.model.objects.filter(is_active=False)
-
-class UnapprovedUser(MyUser):
-    class Meta:
-        proxy = True
-        verbose_name = "unapproved user"
-        verbose_name_plural = "Users Awaiting Approval"
-
-class UnapprovedUserAdmin(MyUserAdmin):
-    def get_queryset(self, request):
-        return self.model.objects.filter(is_approved=False, is_active=True)
-
-admin.site.register(ProxyUser, MyUserAdmin)
-admin.site.register(InactiveUser, InactiveUserAdmin)
-admin.site.register(UnapprovedUser, UnapprovedUserAdmin)
-
+admin.site.register(MyUser, MyUserAdmin)

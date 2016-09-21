@@ -2,7 +2,6 @@
 
 var React = require('react');
 var $ = require('jquery');
-var _ = require('underscore');
 var config  = require('./config');
 var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {Navigation} = require('react-router');
@@ -29,14 +28,10 @@ var Profile = React.createClass({
     render: function () {
         var message;
         if (this.state.error != null) {
-            let fieldErrors = _.map(this.state.fieldErrors, err => (<li>{err}</li>));
-            fieldErrors = _.values(_.groupBy(fieldErrors, (item, index) => Math.floor(index / 2) )).map(group => <Col md={3}><ul>{group}</ul></Col>);
             message = (
-                <div className="alert alert-danger">
-                    <Row><Col md={6}>{this.state.error}</Col></Row>
-                    <Row><Col md={1} />{fieldErrors}</Row>
-                </div>);
-            window.scrollTo(0, 0);
+				<div className="alert alert-danger">
+					<p>{this.state.error}</p>
+				</div>);
         }
         return (
             <Grid id="main-grid">
@@ -70,74 +65,36 @@ var Profile = React.createClass({
     },
 
     handleSubmit: function () {
-        var self = this;
         var showSuccess = () => this.transitionTo('/community', null, {updateSuccess: true, subscribe: this.refs.contactForm.getSubscribeAction()});
-        var showFailure = msg => {this.setState({error: msg || "An error occurred."});};
+        var showFailure = () => this.setState({error: "An error occured"});
 
-        var withGoogleMaps = function () {
-            var geo = new google.maps.Geocoder();
-            var formData = self.refs.contactForm.getFormData();
-            var address = "" + formData.institution + "," + formData.city + "," + formData.state + "," + formData.country;
+        if (this.refs.contactForm.isValid()) {
+            var formData = this.refs.contactForm.getFormData();
+            this.setState({submitted: formData});
+            var url = config.backend_url + '/accounts/update/';
 
-            var submit = function() {
-                self.setState({submitted: formData});
-                var url = config.backend_url + '/accounts/update/';
-
-                var fd = new FormData();
-                $.each(formData, function (k, v) {
-                    fd.append(k, v);
-                });
-
-                if(self.refs.contactForm.getSubscribeAction() !== undefined) {
-                    fd.append("subscribe", self.refs.contactForm.getSubscribeAction());
-                }
-
-                var xhr = new XMLHttpRequest();
-                xhr.onload = function () {
-                    var responseData = JSON.parse(this.response);
-
-                    if (this.status === 200 && responseData.success === true) {
-                        showSuccess();
-                    } else {
-                        var message = responseData.error;
-                        if (message === null) {
-                            message = "Could not complete registration";
-                        }
-                        showFailure(message);
-                    }
-                };
-                xhr.open('post', url);
-                xhr.setRequestHeader('Authorization', 'JWT ' + auth.token());
-                xhr.send(fd);
-            };
-
-            if (address.length > 3) {
-                geo.geocode({address: address}, (results, status) => {
-                    var loc;
-                    if (status === google.maps.GeocoderStatus.OK) {
-                        loc = results[0].geometry.location;
-                        formData.latitude = loc.lat().toString();
-                        formData.longitude = loc.lng().toString();
-                    }
-                    /* else if (status === google.maps.GeocoderStatus.ZERO_RESULTS) {
-                        showFailure("Please check your location information, or leave it blank.");
-                        return;
-                    } else if (status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
-                        showFailure("Error checking your location information, please submit again.");
-                        return;
-                    } */
-                    submit();
-                });
-            } else {
-                submit();
+            var fd = new FormData();
+            $.each(formData, function (k, v) {
+                fd.append(k, v);
+            });
+            if(this.refs.contactForm.getSubscribeAction() !== undefined) {
+                fd.append("subscribe", this.refs.contactForm.getSubscribeAction());
             }
-        };
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function () {
+                var responseData = JSON.parse(this.response);
 
-        var formErrors = this.refs.contactForm.getFormErrors();
-        if (formErrors === false) {
-            google.load('maps', '3', {callback: withGoogleMaps, "other_params": "key=" + config.maps_key});
+                if (this.status === 200 && responseData.success === true) {
+                    showSuccess();
+                } else {
+                    showFailure();
+                }
+            };
+            xhr.open('post', url);
+            xhr.setRequestHeader('Authorization', 'JWT ' + auth.token());
+            xhr.send(fd);
         } else {
-            this.setState({error: <strong>Some information was missing:</strong>, fieldErrors: formErrors });
+            this.setState({error: "Some information was missing"});
         }
     }
 });
@@ -182,37 +139,19 @@ var EditProfileForm = React.createClass({
     getInitialState: function () {
         return {errors: {}, data: {}};
     },
-    getFormErrors: function () {
+    isValid: function () {
         var errors = {};
-        if (this.refs.role.getDOMNode().value === "NONE") {
-            errors["role"] = <span>Please select a <strong>Roll</strong></span>; //eslint-disable-line dot-notation
+        if (this.refs.password.getDOMNode().value !== this.refs.password_confirm.getDOMNode().value) {
+            errors["password_confirm"] = "The passwords don't match"; //eslint-disable-line dot-notation
         }
-        if (this.state.captcha === "") {
-            errors["captcha"] = <span>No <strong>CAPTCHA</strong> entered</span>; //eslint-disable-line dot-notation
-        }
-        this.getCompulsoryFields().forEach(function (field) {
-            var value = this.refs[field].getDOMNode().value.trim();
-            if (!value) {
-                errors[field] = <span><strong>{ field.replace(/([A-Z])/g, ' $1').replace(/^./, function(str) { return str.toUpperCase(); }) }</strong> is required</span>;
-            }
-        }.bind(this));
-        this.setState({errors: errors});
 
-		if (Object.keys(errors).length === 0) {
-            return false;
-        } else {
-            return errors;
-        }
-    },
-    getCompulsoryFields: function () {
-        var fields = [];
-        if (!this.refs || !this.refs.role || parseInt(this.refs.role.getDOMNode().value) !== Role.ROLE_DATA_PROVIDER) {
-            fields.push('firstName', 'lastName');
-        }
         if (this.state.otherRole) {
-            fields.push('role_other');
+            if (!this.refs.role_other.getDOMNode().value.trim()) {
+                errors['role_other'] = 'This field is required'; //eslint-disable-line dot-notation
+            }
         }
-        return fields;
+        this.setState({errors: errors});
+		return Object.keys(errors).length === 0;
     },
     getFormData: function () {
         var title = this.refs.titlemd.getDOMNode().checked && this.refs.titlemd.getDOMNode().value ||
@@ -222,6 +161,8 @@ var EditProfileForm = React.createClass({
         var data = {
             "image": this.state.file,
             "deleteImage": this.state.imageDelete,
+            "password": this.refs.password.getDOMNode().value,
+            "password_confirm": this.refs.password_confirm.getDOMNode().value,
             "firstName": this.refs.firstName.getDOMNode().value,
             "lastName": this.refs.lastName.getDOMNode().value,
             "title": title,
@@ -268,11 +209,8 @@ var EditProfileForm = React.createClass({
         return (
         <div className="form-horizontal" onChange={onChange.bind(this)}>
             {this.renderImageUpload('image', 'Profile picture')}
-            {
-                /* {this.renderPassword('password', 'Password')}
-                   {this.renderPassword('password_confirm', 'Confirm Password')}
-                */
-            }
+            {this.renderPassword('password', 'Password')}
+            {this.renderPassword('password_confirm', 'Confirm Password')}
             {this.renderTextInput('firstName', 'First Name', this.state.data.firstName)}
             {this.renderTextInput('lastName', 'Last Name', this.state.data.lastName)}
             {this.renderRadioInlines('title', '', {
@@ -327,13 +265,11 @@ var EditProfileForm = React.createClass({
             <input type="text" className="form-control" id={id} ref={id} value={defaultValue} onChange={handleChange}/>
         );
     },
-/*
     renderPassword: function (id, label) {
         return this.renderField(id, label,
             <input type="password" className="form-control" id={id} ref={id}/>
         );
     },
-*/
     renderTextarea: function (id, label, defaultValue) {
         var handleChange = () => {var oldData = this.state.data; oldData[id] = this.refs[id].value; this.setState({data: oldData});};
         return this.renderField(id, label,
@@ -370,13 +306,13 @@ var EditProfileForm = React.createClass({
 		// XXX Not sure why eslint flags this bind, because 'this' is used in the handlers within the
 		// body of the function.
         var options = kwargs.values.map(function (value) { //eslint-disable-line no-extra-bind
-            var handleRadioChange = () => {var oldData = this.state.data; oldData[id] = value.name; this.setState({data: oldData}); };
+            var handleRadioChange = () => {var oldData = this.state.data; oldData[id] = value.name; this.setState({data: oldData});};
             var defaultChecked = false;
             if (value.name === kwargs.defaultCheckedValue) {
                 defaultChecked = true;
                 otherValue = '';
             }
-            if (value.name === 'Other' && !kwargs.values.some(opt => opt.name === kwargs.defaultCheckedValue)) {defaultChecked = true;}
+            if (value.name === 'Other') {defaultChecked = true;}
             return (
 				<label className="radio-inline">
 					<input type="radio" ref={id + value.ref} name={id} value={value.name} checked={defaultChecked} onChange={handleRadioChange}/>

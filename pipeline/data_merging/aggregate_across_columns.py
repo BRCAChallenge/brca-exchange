@@ -1,33 +1,28 @@
 #!/usr/bin/env python
 
 import argparse
-import copy
 import csv
 import re
 
 EMPTY = "-"
-FIELDS_TO_REMOVE=["Protein_ClinVar",
+FIELDS_TO_REMOVE=["Gene_symbol_ENIGMA", "Genomic_Coordinate",
+                  "Reference_sequence_ENIGMA", "HGVS_cDNA_ENIGMA",
+                  "BIC_Nomenclature_ENIGMA", "Abbrev_AA_change_ENIGMA",
+                  "HGVS_protein_ENIGMA", "Protein_ClinVar",
                   "HGVS_ClinVar", "HGVS_cDNA_LOVD", "HGVS_cDNA_exLOVD",
                   "HGVS_protein_LOVD", "dna_change_genomic_LOVD",
                   "HGVS_protein_exLOVD",
                   "polyPhen2_result_ESP", 
                   "BIC_Designation_BIC", "BIC_Nomenclature_exLOVD"]
-FIELDS_TO_ADD=["Hg38_Start", "Hg38_End", "Hg37_Start", "Hg37_End",
-               "Hg36_Start", "Hg36_End", 
-               "HGVS_RNA", 
-               "Allele_Frequency", 
+FIELDS_TO_ADD=["Gene_Symbol", "Reference_Sequence",
+               "HGVS_cDNA", "Hg38_Start", "HG38_End", "HGVS_RNA", "BIC_Identifier", 
+               "HGVS_Protein", 
+               "Protein_Change", "Allele_Frequency", 
                "Max_Allele_Frequency",
+               "Genomic_Coordinate_hg38",
                "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg36", 
                "Source_URL", "Discordant", "Synonyms",
-               "Pathogenicity_expert", "Pathogenicity_all"]
-FIELDS_TO_RENAME={"Gene_symbol_ENIGMA" : "Gene_Symbol",
-                  "Genomic_Coordinate" : "Genomic_Coordinate_hg38",
-                  "Reference_sequence_ENIGMA" : "Reference_Sequence", 
-                  "Abbrev_AA_change_ENIGMA" : "Protein_Change", 
-                  "HGVS_cDNA_ENIGMA" : "HGVS_cDNA",
-                  "HGVS_protein_ENIGMA" : "HGVS_Protein",
-                  "BIC_Nomenclature_ENIGMA" : "BIC_Nomenclature",
-                  }
+               "Pathogenicity_default", "Pathogenicity_research"]
 
 def main():
     parser = argparse.ArgumentParser()
@@ -39,7 +34,7 @@ def main():
 
     csvIn = csv.DictReader(open(args.input, "r"), delimiter='\t')
     outputColumns = setOutputColumns(csvIn.fieldnames, FIELDS_TO_REMOVE,
-                                     FIELDS_TO_ADD, FIELDS_TO_RENAME)
+                                     FIELDS_TO_ADD)
     csvOut = csv.DictWriter(open(args.output, "w"), delimiter='\t',
                             fieldnames=outputColumns)
     csvOut.writerow(dict((fn,fn) for fn in outputColumns))
@@ -47,33 +42,39 @@ def main():
     for row in csvIn:
         rowCount += 1
         print "working on row", rowCount
-        csvOut.writerow(updateRow(row, FIELDS_TO_RENAME, FIELDS_TO_REMOVE))
+        csvOut.writerow(updateRow(row, FIELDS_TO_REMOVE))
 
         
-def setOutputColumns(fields, toRemove, toAdd, toRename):
+def setOutputColumns(fields, toRemove, toAdd):
     newFields = []
     for item in fields:
         newFields.append(item)
-    for oldName, newName in toRename.iteritems():
-        newFields.remove(oldName)
-        newFields.append(newName)
     for item in toRemove:
+        print "removing", item
         newFields.remove(item)
     for item in toAdd:
         newFields.append(item)
     return(newFields)
 
-def updateRow(row, toRename, toRemove):
-    #for key, value in row.iteritems():
-        #assert value != None
-        #assert len(value) > 0
-    newRow = copy.deepcopy(row)
-    newRow = update_basic_fields(row, toRename)
-    (newRow["Reference_Sequence"], newRow["HGVS_cDNA"]) = hgvsCdnaUpdate(newRow)
-    newRow["HGVS_Protein"] = hgvsProteinUpdate(row)
-    newRow["BIC_Nomenclature"] = BICUpdate(row)
-    (newRow["Pathogenicity_expert"],
-     newRow["Pathogenicity_all"]) = pathogenicityUpdate(newRow)
+def cleanColumns(row):
+    """For each column, remove any pickling that might be delimiting the
+    column, to generate proper text.  
+    """
+    for column in sorted(row.keys()):
+        value = row[column]
+        row[column] = value
+    return row
+
+def updateRow(row, toRemove):
+    if row.has_key(None):
+        print "1 Row has key none"
+        for item in row.keys():
+            print item, row[item]
+    else:
+        print "1 Row has no key none"
+    newRow = cleanColumns(row)
+    newRow = update_basic_fields(newRow)
+    newRow = hgvsUpdate(newRow)
     newRow["Allele_Frequency"] = selectAlleleFrequency(newRow)
     newRow["Max_Allele_Frequency"] = selectMaxAlleleFrequency(newRow)
     newRow["Discordant"] = checkDiscordantStatus(newRow)
@@ -81,29 +82,62 @@ def updateRow(row, toRename, toRemove):
     newRow["Synonyms"] = setSynonym(row)
     newRow["Genomic_Coordinate_hg37"] = EMPTY
     newRow["Genomic_Coordinate_hg36"] = EMPTY
-    newRow["Hg37_Start"] = EMPTY
-    newRow["Hg37_End"] = EMPTY
-    newRow["Hg36_Start"] = EMPTY
-    newRow["Hg36_End"] = EMPTY
     for item in toRemove:
         del newRow[item]
-    for item in newRow:
-        assert item != None
-        assert len(item) > 0
     return(newRow)
 
-def update_basic_fields(row, columnsToReplace):
-    for key, value in columnsToReplace.iteritems():
-        row[value] = row[key]
-        del row[key]
-    row["Hg38_Start"] = row['Pos']
-    row["Hg38_End"] = int(row["Hg38_Start"]) + len(row["Ref"]) - 1
+def update_basic_fields(row):
+    row["Genomic_Coordinate_hg38"] = row["Genomic_Coordinate"]
+    hgvsTokens = row["Genomic_Coordinate"].split(":")
+    Hg38_Start = hgvsTokens[1]
+    hgvsRef = hgvsTokens[2].split(">")[0]
+    if hgvsRef == "None":
+        Hg38_End = Hg38_start
+    else:
+        Hg38_End = str(int(Hg38_Start) + len(hgvsRef) - 1)
+    row["Gene_Symbol"] = row["Gene_symbol_ENIGMA"]
     if row["Gene_Symbol"] == EMPTY:
         if re.search("^chr17", row["Genomic_Coordinate_hg38"] ):
             row["Gene_Symbol"] = "BRCA1"
         else:
             row["Gene_Symbol"] = "BRCA2"
+    row["Reference_Sequence"] = row["Reference_sequence_ENIGMA"]
+    row["Genomic_Coordinate_hg38"] = row["Genomic_Coordinate"]
+    row["HGVS_cDNA"] = row["HGVS_cDNA_ENIGMA"]
+    row["BIC_Identifier"] = row["BIC_Nomenclature_ENIGMA"]
     row["HGVS_RNA"] = EMPTY
+    row["HGVS_Protein"] = row["HGVS_protein_ENIGMA"]
+    if row["HGVS_Protein"] == EMPTY:
+        row["HGVS_Protein"] = row["Protein_ClinVar"]
+    if row["HGVS_Protein"] == EMPTY:
+        row["HGVS_Protein"] = row["HGVS_protein_LOVD"]
+    if row["HGVS_Protein"] == EMPTY:
+        row["HGVS_Protein"] = row["HGVS_protein_exLOVD"]
+    row["HGVS_Protein"] = re.sub(row["Reference_Sequence"] + ":", "",
+                                 row["HGVS_Protein"])
+    row["Protein_Change"] = row["Abbrev_AA_change_ENIGMA"]
+    row["Pathogenicity_default"] = row["Clinical_significance_ENIGMA"]
+    if row["Pathogenicity_default"] == EMPTY:
+        row["Pathogenicity_default"] = "Not Yet Classified"
+    if row["Pathogenicity_default"] == "Benign":
+        row["Pathogenicity_default"] = "Benign / Little Clinical Significance"
+    patho_research = ""
+    delimiter = ""
+    if row["Clinical_significance_ENIGMA"] != EMPTY:
+        patho_research = row["Clinical_significance_ENIGMA"] + "(ENIGMA)"
+        delimiter = "; "
+    if row["Clinical_Significance_ClinVar"] != EMPTY:
+        patho_research = "%s%s%s (ClinVar)" % (patho_research, delimiter,
+                                               row["Clinical_Significance_ClinVar"])
+        delimiter = "; "
+    if row["Clinical_classification_BIC"] != EMPTY:
+        patho_research = "%s%s%s (BIC)" % (patho_research, delimiter,
+                                           row["Clinical_classification_BIC"])
+    row["Pathogenicity_research"] = patho_research
+    if len(row["SIFT_VEP"]) == 0:
+        row["SIFT_VEP"] = EMPTY
+    if len(row["PolyPhen_VEP"]) == 0:
+        row["PolyPhen_VEP"] = EMPTY
     return row
 
 def unpackHgvs(hgvsString):
@@ -117,72 +151,35 @@ def unpackHgvs(hgvsString):
     return(transcript, suffix)
 
 
-def hgvsCdnaUpdate(row):
-     refSequence = row["Reference_Sequence"]
-     hgvs = row["HGVS_cDNA"]
-     if hgvs == EMPTY:
-         if  row["HGVS_ClinVar"] != EMPTY:
-             (refSequence, hgvs) = unpackHgvs(row["HGVS_ClinVar"])
-         elif  row["HGVS_cDNA_LOVD"] != EMPTY:
-             (refSequence, hgvs)  = unpackHgvs(row["HGVS_cDNA_LOVD"])
-         elif  row["HGVS_cDNA_exLOVD"] != EMPTY:
-             (refSequence, hgvs)  = unpackHgvs(row["HGVS_cDNA_exLOVD"])
-     return(refSequence, hgvs)
-
-def hgvsProteinUpdate(row):
-    protein = row["HGVS_Protein"]
-    if protein == EMPTY:
-        if row["Protein_ClinVar"] == EMPTY:
-            protein = row["Protein_ClinVar"]
-        elif  row["HGVS_protein_LOVD"] != EMPTY:
-            protein = row["HGVS_protein_LOVD"]
+def hgvsUpdate(row):
+    if row["HGVS_cDNA"] == EMPTY:
+        if  row["HGVS_ClinVar"] != EMPTY:
+            (row["Reference_Sequence"], 
+             row["HGVS_cDNA"]) = unpackHgvs(row["HGVS_ClinVar"])
+        elif  row["HGVS_cDNA_LOVD"] != EMPTY:
+            (row["Reference_Sequence"], 
+             row["HGVS_cDNA"]) = unpackHgvs(row["HGVS_cDNA_LOVD"])
+        elif  row["HGVS_cDNA_exLOVD"] != EMPTY:
+            (row["Reference_Sequence"], 
+             row["HGVS_cDNA"]) = unpackHgvs(row["HGVS_cDNA_exLOVD"])
+    if row["HGVS_Protein"] == EMPTY:
+        if  row["HGVS_protein_LOVD"] != EMPTY:
+            row["HGVS_Protein"] = row["HGVS_protein_LOVD"]
         elif  row["HGVS_protein_exLOVD"] != EMPTY:
-           protein = row["HGVS_protein_exLOVD"]
-    # 8/24/16: this is an error condition that should not occur.  There should be
-    # an assertion checking the input that no value is empty.  We know in practice
-    # that there are cases where this assertion fails, currently.  I'm fixing the
-    # input code.  When that fix is in, this "if" can go away: protein will
-    # always be a string with length of at least 1.
-    if protein != None:
-        protein = re.sub(row["Reference_Sequence"] + ":", "",
-                         protein)
-    return protein
+            row["HGVS_Protein"] = row["HGVS_protein_exLOVD"]
+    return row
 
 def BICUpdate(row):
-    bic = row["BIC_Nomenclature"]
-    if bic == EMPTY:
-        if row["BIC_Designation_BIC"] != EMPTY:
-            bic = row["BIC_Designation_BIC"]
+    if row["BIC_Identifier"] == EMPTY:
+        if row["BIC_Nomenclature_BIC"] != EMPTY:
+            return row["BIC_Designation_BIC"]
         elif row["BIC_Nomenclature_exLOVD"] != EMPTY:
-            bic = row["BIC_Nomenclature_exLOVD"]
-    return bic
+            return row["BIC_Nomenclature_exLOVD"]
             
-
-def pathogenicityUpdate(row):
-    pathoExpert = row["Clinical_significance_ENIGMA"]
-    if pathoExpert == EMPTY:
-        pathoExpert = "Not Yet Classified"
-    if pathoExpert == "Benign":
-        pathoExpert = "Benign / Little Clinical Significance"
-    pathoAll = ""
-    delimiter = ""
-    if row["Clinical_significance_ENIGMA"] != EMPTY:
-        pathoAll = row["Clinical_significance_ENIGMA"] + "(ENIGMA)"
-        delimiter = "; "
-    if row["Clinical_Significance_ClinVar"] != EMPTY:
-        pathoAll = "%s%s%s (ClinVar)" % (pathoAll, delimiter,
-                                               row["Clinical_Significance_ClinVar"])
-        delimiter = "; "
-    if row["Clinical_classification_BIC"] != EMPTY:
-        pathoAll = "%s%s%s (BIC)" % (pathoAll, delimiter,
-                                           row["Clinical_classification_BIC"])
-    if pathoAll == "":
-        pathAll = EMPTY
-    return(pathoExpert, pathoAll)
 
 def selectAlleleFrequency(row):
     if row["Allele_frequency_ExAC"] != EMPTY:
-        return "%s (ExAC)" % row["Allele_frequency_ExAC"]
+        return "%s (ExAC" % row["Allele_frequency_ExAC"]
     elif row["Minor_allele_frequency_ESP"] != EMPTY:
         return "%s (ESP)" % row["Minor_allele_frequency_ESP"].split(',')[-1]
     elif row["Allele_frequency_1000_Genomes"] != EMPTY:
@@ -195,8 +192,6 @@ def selectMaxAlleleFrequency(newRow):
     maxFreqString = EMPTY
     if newRow["Minor_allele_frequency_ESP"] != EMPTY:
         #print newRow["Minor_allele_frequency_ESP"]
-        if newRow["Minor_allele_frequency_ESP"] == None:
-            print newRow
         tokens = newRow["Minor_allele_frequency_ESP"].split(",")
         if len(tokens) >= 1:
             ea = float(tokens[0]) / 100
@@ -291,8 +286,8 @@ def setSourceUrls(row):
 def setSynonym(row):
     delimiter = ""
     synonym = ""
-    if row["BIC_Nomenclature"] != EMPTY:
-        for thisBic in row["BIC_Nomenclature"].split(','):
+    if row["BIC_Nomenclature_ENIGMA"] != EMPTY:
+        for thisBic in row["BIC_Nomenclature_ENIGMA"].split(','):
             synonym = "%s%s%s" % (synonym, delimiter, thisBic)
             delimiter = ","
     if row["BIC_Nomenclature_exLOVD"] != EMPTY:

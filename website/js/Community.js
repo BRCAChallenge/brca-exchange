@@ -189,6 +189,8 @@ var CommunityMap = React.createClass({
 
         var initMap = function () {
             var self = this;
+            this.geo = new google.maps.Geocoder();
+            var geoCache = [];
             var infowindow;
             var markers = this.markers = [];
             var map = this.map = new google.maps.Map(document.getElementById('communityMap'), {
@@ -254,42 +256,56 @@ var CommunityMap = React.createClass({
                     });
                     markers = self.markers = newMarkers;
 /*eslint-disable camelcase*/
-                    _.map(data, ({id, firstName, lastName, title, role, role_other, institution, latitude, longitude, has_image})  => {
-                        var avatar;
-                        if (has_image) {
-                            let avatar_link = config.backend_url + '/site_media/media/' + id;
-                            avatar = <object className="avatar" data={avatar_link} type="image/jpg"/>;
-                        } else {
-                            avatar = <img className="avatar" src={placeholder}/>;
-                        }
-                        var userInfo = (<div className="map-info-window">
-                            {avatar}
-                            <div>
-                                <span>{firstName} {lastName}{title.length ? "," : ""} {title}</span><br />
-                                <span id="role">{Role.other(role) ? role_other : Role.get(role)[2]}</span><br />
-                                <span>{institution}</span>
-                            </div>
-                        </div>);
+                    _.map(data, ({id, firstName, lastName, title, role, role_other, institution, city, state, country, has_image})  => {
+                        var addMarker = function (loc) {
+                            var avatar;
+                            if (has_image) {
+                                let avatar_link = config.backend_url + '/site_media/media/' + id;
+                                avatar = <object className="avatar" data={avatar_link} type="image/jpg"/>;
+                            } else {
+                                avatar = <img className="avatar" src={placeholder}/>;
+                            }
+                            var userInfo = (<div className="map-info-window">
+                                {avatar}
+                                <div>
+                                    <span>{firstName} {lastName}{title.length ? "," : ""} {title}</span><br />
+                                    <span id="role">{Role.other(role) ? role_other : Role.get(role)[2]}</span><br />
+                                    <span>{institution}</span>
+                                </div>
+                            </div>);
 /*eslint-enable camelcase*/
-                        var marker = new google.maps.Marker({
-                            position: { lat: parseFloat(latitude), lng: parseFloat(longitude) },
-                            map: map,
-                            title: `${firstName} ${lastName}${title.length ? "," : ""} ${title}`,
-                            icon: {
-                                url: require(`./img/map/${role}.png`),
-                                scaledSize: new google.maps.Size(20, 32)
-                            }
-                        });
-                        marker.userID = id;
-                        markers.push(marker);
-                        var info = new google.maps.InfoWindow({content: React.renderToStaticMarkup(userInfo) });
-                        marker.addListener('click', () => {
-                            if (infowindow) {
-                                infowindow.close();
-                            }
-                            infowindow = info;
-                            info.open(map, marker);
-                        });
+                            var marker = new google.maps.Marker({
+                                position: { lat: loc.lat(), lng: loc.lng() },
+                                map: map,
+                                title: `${firstName} ${lastName}${title.length ? "," : ""} ${title}`,
+                                icon: {
+                                    url: require(`./img/map/${role}.png`),
+                                    scaledSize: new google.maps.Size(20, 32)
+                                }
+                            });
+                            marker.userID = id;
+                            markers.push(marker);
+                            var info = new google.maps.InfoWindow({content: React.renderToStaticMarkup(userInfo) });
+                            marker.addListener('click', () => {
+                                if (infowindow) {
+                                    infowindow.close();
+                                }
+                                infowindow = info;
+                                info.open(map, marker);
+                            });
+                        };
+                        if (id in geoCache) {
+                            addMarker(geoCache[id]);
+                        }
+                        else {
+                            this.geo.geocode({address: city + "," + state + "," + country}, (results, status) => {
+                                var loc;
+                                if (status === "OK") {
+                                    loc = geoCache[id] = results[0].geometry.location;
+                                    addMarker(loc);
+                                }
+                            });
+                        }
                     });
                 });
                 if (infowindow) {

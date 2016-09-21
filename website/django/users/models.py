@@ -9,9 +9,9 @@ ROLE_OTHER = 0
 
 class MyUserManager(BaseUserManager):
     def create_user(self, email, password, firstName="", lastName="", title="", role=ROLE_OTHER, role_other="", institution="",
-                    city="", state="", country="", latitude="", longitude="", phone_number="", 
+                    city="", state="", country="",phone_number="", 
                     hide_number=False, hide_email=False, has_image=False,
-                    is_admin=False, is_approved=False, admin_notifications=False):
+                    is_admin=False, is_approved=False):
         """
         Creates and saves a User with the given fields
         """
@@ -30,15 +30,12 @@ class MyUserManager(BaseUserManager):
             city=city,
             state=state,
             country=country,
-            latitude=latitude,
-            longitude=longitude,
             phone_number=phone_number,
             hide_number=hide_number,
             hide_email=hide_email,
             has_image=has_image,
             is_admin=is_admin,
-            is_approved=is_approved,
-            admin_notifications=admin_notifications,
+            is_approved=is_approved
         )
 
         user.set_password(password)
@@ -52,7 +49,8 @@ class MyUserManager(BaseUserManager):
 
 class MyUser(AbstractBaseUser):
     ROLE_OTHER                  = ROLE_OTHER
-    ROLE_COMMUNITY_MEMBER       = 1
+    ROLE_PATIENT                = 1
+    ROLE_PROBAND                = 2
     ROLE_CLINICAL_LAB_DIRECTOR  = 3
     ROLE_DIAGNOSTIC_LAB_STAFF   = 4
     ROLE_PRINCIPAL_INVESTIGATOR = 5
@@ -78,15 +76,12 @@ class MyUser(AbstractBaseUser):
     city = models.TextField(blank=True)
     state = models.TextField(blank=True)
     country = models.TextField(blank=True)
-    latitude = models.TextField(blank=True)
-    longitude = models.TextField(blank=True)
     phone_number = models.TextField(max_length=30, blank=True)
     hide_number = models.BooleanField(default=False)
     hide_email = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     is_approved = models.BooleanField(default=False)
-    admin_notifications = models.BooleanField(default=False)
     has_image = models.BooleanField(default=False)
 
     activation_key = models.CharField(max_length=40, blank=True)
@@ -124,9 +119,6 @@ class MyUser(AbstractBaseUser):
         "Is the user a member of staff?"
         # Simplest possible answer: All admins are staff
         return self.is_admin
-
-    class Meta:
-        ordering = ['lastName', 'firstName']
 
 class MailingListEmail(models.Model):
     email = models.EmailField(
