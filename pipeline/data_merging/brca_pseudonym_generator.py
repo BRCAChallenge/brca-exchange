@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 
 from __future__ import print_function, division
 import argparse
@@ -111,19 +111,22 @@ def main(args):
     for line in brcaFile:
         parsedLine = line.rstrip().split('\t')
         
-        if parsedLine[geneSymbolIndex] == 'BRCA1': parsedLine[refSeqIndex] = 'NM_007294.3'
-        elif parsedLine[geneSymbolIndex] == 'BRCA2': parsedLine[refSeqIndex] = 'NM_000059.3'
+        if parsedLine[geneSymbolIndex] == 'BRCA1': 
+            parsedLine[refSeqIndex] = 'NM_007294.3'
+        elif parsedLine[geneSymbolIndex] == 'BRCA2': 
+            parsedLine[refSeqIndex] = 'NM_000059.3'
         
         # Format genomic variant position strings to contain relevant refseq strings 
         oldHgvsGenomic36 = parsedLine[refSeqIndex] + ':' + parsedLine[hgvsG36Index]
         oldHgvsGenomic37 = parsedLine[refSeqIndex] + ':' + parsedLine[hgvsG37Index]
         oldHgvsGenomic38 = parsedLine[refSeqIndex] + ':' + parsedLine[hgvsG38Index].split(',')[0]
         oldHgvsCDNA = parsedLine[refSeqIndex] + ':' + parsedLine[hgvsCDNAIndex]
-        
-        chrom38 = oldHgvsGenomic38.split(':')[1]
-        offset38 = oldHgvsGenomic38.split(':')[2]
-        ref38 = oldHgvsGenomic38.split(':')[3].split('>')[0]
-        alt38 = oldHgvsGenomic38.split(':')[3].split('>')[1]
+
+        chrom38 = parsedLine[labelLine.index("Chr")]
+        offset38 = parsedLine[labelLine.index("Pos")]
+        ref38 = parsedLine[labelLine.index("Ref")]
+        alt38 = parsedLine[labelLine.index("Alt")]
+        print("working on variant", chrom38, offset38, ref38, alt38)
         
         # Edge cases to correct variant string formats for indels in order to be accepted by the counsyl parser
         if ref38 == '-': ref38 = ''
@@ -135,14 +138,20 @@ def main(args):
         transcript36 = get_transcript36(parsedLine[refSeqIndex])
         
         # Normalize hgvs cdna string to fit what the counsyl hgvs parser determines to be the correct format
-        cdna_coord = str(pyhgvs.format_hgvs_name(chrom38, int(offset38), ref38, alt38, genome38, transcript38, use_gene=False, max_allele_length=100))
+        cdna_coord = str(pyhgvs.format_hgvs_name("chr" + chrom38, int(offset38), ref38, alt38, genome38, transcript38, use_gene=False, max_allele_length=100))
 
         chrom38, offset38, ref38, alt38 = pyhgvs.parse_hgvs_name(cdna_coord, genome38, get_transcript=get_transcript38)
         chrom37, offset37, ref37, alt37 = pyhgvs.parse_hgvs_name(cdna_coord, genome37, get_transcript=get_transcript37)
         chrom36, offset36, ref36, alt36 = pyhgvs.parse_hgvs_name(cdna_coord, genome36, get_transcript=get_transcript36)
         
         # Generate transcript hgvs cdna synonym string
-        synonymString = []
+        if parsedLine[synonymIndex] == "-":
+            synonymString = []
+        elif parsedLine[synonymIndex] == "":
+            synonymString = []
+        else:
+            synonymString = parsedLine[synonymIndex].split(",")
+
         if parsedLine[geneSymbolIndex] == 'BRCA1':
             for transcriptName in refSeqBRCA1Transcripts:
                 transcript38 = get_transcript38(transcriptName)
@@ -174,6 +183,12 @@ def main(args):
         parsedLine[hgvsG36Index] = '{0}:{1}:{2}>{3}'.format(chrom36,offset36,ref36,alt36)
         parsedLine[hgvsG37Index] = '{0}:{1}:{2}>{3}'.format(chrom37,offset37,ref37,alt37)
         parsedLine[hgvsG38Index] = '{0}:{1}:{2}>{3}'.format(chrom38,offset38,ref38,alt38)
+        parsedLine[labelLine.index("Hg37_Start")] = str(offset37)
+        parsedLine[labelLine.index("Hg37_End")] = str(int(offset37) + len(ref38) - 1)
+        parsedLine[labelLine.index("Hg36_Start")] = str(offset36)
+        parsedLine[labelLine.index("Hg36_End")] = str(int(offset36) + len(ref38) - 1)
+
+
         parsedLine[hgvsCDNAIndex] = '{0}'.format(cdna_coord)
         if calcProtein == True: parsedLine[hgvsPIndex] = '{0}'.format(str(protein_coord))
         parsedLine[synonymIndex] = ','.join(synonymString)
