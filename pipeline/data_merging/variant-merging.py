@@ -12,7 +12,6 @@ import shutil
 import subprocess
 import tempfile
 import vcf
-import pdb
 import logging
 from StringIO import StringIO
 from copy import deepcopy
@@ -364,10 +363,6 @@ def find_equivalent_variant(variants):
                 logging.debug('v == existing_v \n "v: " %s \n "existing_v: " %s', str(v), str(existing_v))
                 continue
             else:
-                # NOTE: This is a temp fix to prevent problematic 1000_Genomes merging
-                # TODO: come up with long term solution (allow multiple allele frequencies?)
-                if str(variants[v][COLUMN_SOURCE]) == "1000_Genomes" and str(variants[existing_v][COLUMN_SOURCE]) == "1000_Genomes":
-                    continue
                 v1 = [variants[v][COLUMN_VCF_CHR], variants[v][COLUMN_VCF_POS], variants[v][COLUMN_VCF_REF], variants[v][COLUMN_VCF_ALT], variants[existing_v][COLUMN_SOURCE]]
                 v2 = [variants[existing_v][COLUMN_VCF_CHR], variants[existing_v][COLUMN_VCF_POS], variants[existing_v][COLUMN_VCF_REF], variants[existing_v][COLUMN_VCF_ALT], variants[existing_v][COLUMN_SOURCE]]
                 if variant_equal(v1, v2):
