@@ -101,32 +101,41 @@ EXAC_FILE = "exac.brca12.sorted.hg38.vcf"
 ESP_FILE = "esp.brca12.sorted.hg38.vcf"
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-i", "--input", help="Input VCF directory",
-                    default="/home/brca/pipeline-data/pipeline-input/")
-parser.add_argument("-o", "--output",
-                    default="/home/brca/pipeline-data/pipeline-output/")
-parser.add_argument("-p", "--de_novo", default=False,
-                    help="string comparison all over, instead of loading from pickle dump",
-                    action="store_true")
-parser.add_argument('-r', "--reference", help="reference data directory",
-                    default="/home/brca/pipeline-data/pipeline-resources/")
-parser.add_argument("-v", "--verbose", action="count", default=False, help="determines logging")
+def options(parser):
+    parser.add_argument("-i", "--input", help="Input VCF directory",
+                        default="/home/brca/pipeline-data/pipeline-input/")
+    parser.add_argument("-o", "--output",
+                        default="/home/brca/pipeline-data/pipeline-output/")
+    parser.add_argument("-p", "--de_novo", default=False,
+                        help="string comparison all over, instead of loading from pickle dump",
+                        action="store_true")
+    parser.add_argument('-r', "--reference", help="reference data directory",
+                        default="/home/brca/pipeline-data/pipeline-resources/")
+    parser.add_argument("-v", "--verbose", action="count", default=False, help="determines logging")
 
-ARGS = parser.parse_args()
+ARGS = None
+BRCA1 = None
+BRCA2 = None
 
+def init(args):
+    global BRCA1, BRCA2, ARGS
 
-BRCA1 = {"hg38": {"start": 43000000,
-                  "sequence": open(ARGS.reference + "brca1_hg38.txt", "r").read()},
-         "hg19": {"start": 41100000,
-                  "sequence": open(ARGS.reference + "brca1_hg19.txt", "r").read()}}
-BRCA2 = {"hg38": {"start": 32300000,
-                  "sequence": open(ARGS.reference + "brca2_hg38.txt", "r").read()},
-         "hg19": {"start": 32800000,
-                  "sequence": open(ARGS.reference + "brca2_hg19.txt", "r").read()}}
-
+    ARGS = args
+    BRCA1 = {"hg38": {"start": 43000000,
+                      "sequence": open(ARGS.reference + "brca1_hg38.txt", "r").read()},
+             "hg19": {"start": 41100000,
+                      "sequence": open(ARGS.reference + "brca1_hg19.txt", "r").read()}}
+    BRCA2 = {"hg38": {"start": 32300000,
+                      "sequence": open(ARGS.reference + "brca2_hg38.txt", "r").read()},
+             "hg19": {"start": 32800000,
+                      "sequence": open(ARGS.reference + "brca2_hg19.txt", "r").read()}}
 
 def main():
+    parser = argparse.ArgumentParser()
+    options(parser)
+
+    init(parser.parse_args())
+
     if ARGS.verbose:
         logging_level = logging.DEBUG
     else:
@@ -643,7 +652,7 @@ def variant_equal(v1, v2, version="hg38"):
 
     # make sure that v1 is upstream of v2
     if pos1 > pos2:
-        return variant_equal(v2, v1)
+        return variant_equal(v2, v1) # XXX drops 'version' parameter
 
     # lift coordinates and make everything 0-based
     if chr1 == "13":
