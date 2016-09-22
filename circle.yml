@@ -1,5 +1,8 @@
 general:
     build_dir: website
+machine:
+    python:
+        version: 2.7.11
 test:
     override:
         - npm run lint -- -f junit -o $CIRCLE_TEST_REPORTS/lint-results.xml
