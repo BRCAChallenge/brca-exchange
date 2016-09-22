@@ -1,6 +1,7 @@
 from hypothesis import given, settings
 from hypothesis.strategies import integers, tuples, text, sampled_from, lists
 from variant_merging import variant_equal, init
+import os
 
 #
 # generators
@@ -17,8 +18,12 @@ variant = tuples(chrom, pos, subseq, subseq, text())
 # initialize module
 #
 
+pwd=os.path.dirname(os.path.realpath(__file__))
+
+# XXX instead of adding '/' we should fix variant_merging to use
+# os.join.
 class Args:
-    reference = '../data/'
+    reference = os.path.join(pwd, '..', 'data') + '/'
 
 init(Args())
 
