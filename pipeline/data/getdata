@@ -1,0 +1,24 @@
+#!/bin/bash
+
+URL=http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources
+HASH=sha1sum
+
+declare -A files
+
+files[brca1_hg19.txt]=0103381d9f931367e85cc7d4c0504973a6ef08e2
+files[brca1_hg38.txt]=1adac34fa794b8057926b836384c52fe53934b6a
+files[brca2_hg19.txt]=a0f76d6a61d5275be4695e9628b0bf8d49dc1a37
+files[brca2_hg38.txt]=e3d40430167100bb3252a5f0e3655f56e244e413
+
+for file in "${!files[@]}"; do
+	hash=$(${HASH} $file | cut -f1 -d' ')
+	if [ "$hash" != "${files[$file]}" ]; then
+		echo "Downloading ${file}"
+		curl ${URL}/${file} > $file
+	fi
+	hash=$(${HASH} $file | cut -f1 -d' ')
+	if [ "$hash" != "${files[$file]}" ]; then
+		echo "Couldn't fetch file ${file}"
+		exit -1
+	fi
+done
