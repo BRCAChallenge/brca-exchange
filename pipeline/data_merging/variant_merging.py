@@ -652,7 +652,7 @@ def variant_equal(v1, v2, version="hg38"):
 
     # make sure that v1 is upstream of v2
     if pos1 > pos2:
-        return variant_equal(v2, v1) # XXX drops 'version' parameter
+        return variant_equal(v2, v1, version)
 
     # lift coordinates and make everything 0-based
     if chr1 == "13":
