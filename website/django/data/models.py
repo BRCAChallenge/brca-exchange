@@ -1,6 +1,7 @@
 from django.db import models
 
 class DataRelease(models.Model):
+    id = models.IntegerField(primary_key=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     comment = models.TextField()
     variants_added = models.IntegerField(default=0)

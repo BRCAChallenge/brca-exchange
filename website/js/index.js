@@ -42,6 +42,7 @@ var {Profile} = require('./Profile');
 var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Route, RouteHandler,
     HistoryLocation, run, DefaultRoute} = require('react-router');
+var {Releases, Release} = require('./Releases.js');
 
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 
@@ -538,6 +539,8 @@ var routes = (
         <Route path='reset/:resetToken' handler={ChangePassword}/>
         <Route path='variants' />
         <Route path='variant/:id' handler={VariantDetail}/>
+        <Route path='releases' handler={Releases}/>
+        <Route path='release/:id' handler={Release}/>
     </Route>
 );
 

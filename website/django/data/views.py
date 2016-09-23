@@ -9,8 +9,13 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.gzip import gzip_page
 
 from .models import Variant
+from .models import DataRelease
 
-
+def releases(request):
+    response = JsonResponse(list(DataRelease.objects.values().all()), safe=False)
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
+    
 @gzip_page
 def index(request):
     order_by = request.GET.get('order_by')
@@ -25,7 +30,8 @@ def index(request):
     filter_values = request.GET.getlist('filterValue')
     column = request.GET.getlist('column')
 
-    query = Variant.objects
+    latest = Variant.objects.distinct('Genomic_Coordinate_hg38').order_by('Genomic_Coordinate_hg38', '-Data_Release_id')
+    query = Variant.objects.filter(id__in = latest)
 
     if format == 'csv':
         quotes = '\''

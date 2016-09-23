@@ -60,6 +60,10 @@ function data(opts) {
     return Rx.DOM.get(url(opts)).map(xhr => JSON.parse(xhr.responseText));
 }
 
+function releases() {
+    return Rx.DOM.get(`${config.backend_url}/data/releases`).map(xhr => JSON.parse(xhr.responseText));
+}
+
 function users(opts) {
     var {page, pageLength, search} = opts;
     var usersUrl = `${config.backend_url}/accounts/users/?${qs.stringify(_.pick({
@@ -84,6 +88,7 @@ function lollipopData(opts) {
 
 module.exports = {
     data,
+    releases,
     users,
     userLocations,
     lollipopData,
