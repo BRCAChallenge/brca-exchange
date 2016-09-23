@@ -664,7 +664,13 @@ def variant_equal(v1, v2, version="hg38"):
         pos1 = pos1 - 1 - BRCA1[version]["start"]
         pos2 = pos2 - 1 - BRCA1[version]["start"]
     else:
-        assert(False)
+        assert False, "Bad chrom in variant"
+
+    assert pos1 >= 0, "v1 positions is below the reference"
+    assert pos2 >= 0, "v2 position is below the reference"
+    reflen = len(BRCA1[version]["sequence"])
+    assert pos1 + len(ref1) < reflen, "v1 position is above the reference"
+    assert pos2 + len(ref2) < reflen, "v2 position is above the reference"
 
     # correct error with when ref is empty string
     if len(ref1) == 0:
