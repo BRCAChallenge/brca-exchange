@@ -635,7 +635,7 @@ def save_enigma_to_dict(path):
 
 
 def variant_equal(v1, v2, version="hg38"):
-    " return (edited1, edited2) "
+    "return edited1 == edited2"
     if v1 == v2:
         logging.debug("v1 == v2 %s %s", str(v1), str(v2))
         return True
