@@ -122,13 +122,13 @@ def init(args):
 
     ARGS = args
     BRCA1 = {"hg38": {"start": 43000000,
-                      "sequence": open(ARGS.reference + "brca1_hg38.txt", "r").read()},
+                      "sequence": open(ARGS.reference + "brca1_hg38.txt", "r").read().upper()},
              "hg19": {"start": 41100000,
-                      "sequence": open(ARGS.reference + "brca1_hg19.txt", "r").read()}}
+                      "sequence": open(ARGS.reference + "brca1_hg19.txt", "r").read().upper()}}
     BRCA2 = {"hg38": {"start": 32300000,
-                      "sequence": open(ARGS.reference + "brca2_hg38.txt", "r").read()},
+                      "sequence": open(ARGS.reference + "brca2_hg38.txt", "r").read().upper()},
              "hg19": {"start": 32800000,
-                      "sequence": open(ARGS.reference + "brca2_hg19.txt", "r").read()}}
+                      "sequence": open(ARGS.reference + "brca2_hg19.txt", "r").read().upper()}}
 
 def main():
     parser = argparse.ArgumentParser()
