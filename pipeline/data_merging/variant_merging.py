@@ -669,14 +669,8 @@ def variant_equal(v1, v2, version="hg38"):
     assert pos1 >= 0, "v1 positions is below the reference"
     assert pos2 >= 0, "v2 position is below the reference"
     reflen = len(BRCA1[version]["sequence"])
-    assert pos1 + len(ref1) < reflen, "v1 position is above the reference"
-    assert pos2 + len(ref2) < reflen, "v2 position is above the reference"
-
-    # correct error with when ref is empty string
-    if len(ref1) == 0:
-        pos1 += 1
-    if len(ref2) == 0:
-        pos2 += 1
+    assert pos1 + len(ref1) <= reflen, "v1 position is above the reference"
+    assert pos2 + len(ref2) <= reflen, "v2 position is above the reference"
 
     # replace vcf ref string with alt string
     edited_v1 = seq[0:pos1]+alt1+seq[pos1+len(ref1):]
