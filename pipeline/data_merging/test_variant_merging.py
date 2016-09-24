@@ -5,6 +5,12 @@ import itertools
 import os
 import pytest
 
+runtimes = 500000
+settings.register_profile('ci', settings(max_examples=runtimes, max_iterations=runtimes, timeout=-1))
+
+# Uncomment this for longer test runs.
+#settings.load_profile('ci')
+
 #
 # initialize module
 #
@@ -43,18 +49,30 @@ reference_length = lengths[0]
 #
 reference_id = sampled_from(BRCA1.keys())
 chrom = sampled_from(('13', '17'))
-pos = integers(min_value=0, max_value=reference_length) # pos relative to the reference start.
+pos = integers(min_value=0, max_value=reference_length - 1) # pos relative to the reference start.
 base = sampled_from(('A', 'C', 'T', 'G'))
 subseq = lists(base).map(lambda x: ''.join(x))
 
+# Note this doesn't catch all degenerate variants. A -> A would pass, for example.
+def not_noop(v):
+    "False if ref and alt are empty"
+    (_, _, ref, alt, _) = v
+    return ref != '' or alt != ''
+
 # A variant with all random fields.
 # (chrom, position, ref, alt, src)
-variant = tuples(chrom, pos, subseq, subseq, text())
+variant = tuples(chrom, pos, subseq, subseq, text()).filter(not_noop)
+
+# Note this doesn't catch all degenerate variants. A -> A would pass, for example.
+def not_on_ref_noop(v):
+    "False if ref and alt are empty"
+    (_, _, reflen, alt, _) = v
+    return reflen != 0 or alt != ''
 
 # A variant where 'ref' is a length. We will later copy in the reference base
 # pairs from a reference sequence.
 # (chrom, position, ref, alt, src)
-variant_on_ref = tuples(chrom, pos, integers(min_value=0), subseq, text())
+variant_on_ref = tuples(chrom, pos, integers(min_value=0), subseq, text()).filter(not_on_ref_noop)
 
 chrom_ref = {
     '13': BRCA2,
@@ -73,11 +91,6 @@ def add_start(v, ref_id):
 #
 # tests
 #
-
-import sys
-def spy(msg, x):
-    print >> sys.stderr, msg, x
-    return x
 
 def test_variant_equal_throws_below_reference():
     ref_id = chrom_ref['13'].keys()[0]
@@ -102,6 +115,8 @@ def test_variant_equal_throws_above_reference():
 @given(variant, reference_id)
 def test_variant_equal_identity(v, ref_id):
     "A variant should be equal to itself"
+    (_, pos, ref, _, _) = v
+    assume(pos + len(ref) <= reference_length)
     v = add_start(v, ref_id)
     assert variant_equal(v, v, ref_id)
 
@@ -109,6 +124,11 @@ def test_variant_equal_identity(v, ref_id):
 @given(variant, variant, reference_id)
 def test_variant_equal_commutative(v1, v2, ref_id):
     "Comparing x, y should be the same as comparing y, x"
+    (_, pos1, ref1, _, _) = v1
+    (_, pos2, ref2, _, _) = v2
+    assume(pos1 + len(ref1) <= reference_length)
+    assume(pos2 + len(ref2) <= reference_length)
+
     v1 = add_start(v1, ref_id)
     v2 = add_start(v2, ref_id)
     assert variant_equal(v1, v2, ref_id) == variant_equal(v2, v1, ref_id)
@@ -167,28 +187,122 @@ def equiv_variants_delete(reference, variant):
     equiv_pos = equiv_deletes(reference, pos, l)
     return [(chrom, epos, reference[epos : epos + l], alt, src) for epos in equiv_pos]
 
+#
+# We generate variants in zero-based coords, so an insert
+# CT => CGGT is 1, '', 'GG'
+
+def right_equiv_inserts(ref, pos, alt):
+    while pos < len(ref) and strieq(ref[pos], alt[0]):
+        alt = alt[1:] + alt[0]
+        pos += 1
+        yield (pos, alt)
+
+def left_equiv_inserts(ref, pos, alt):
+    while pos > 0 and strieq(ref[pos - 1], alt[-1]):
+        alt = alt[-1] + alt[:-1]
+        pos -= 1
+        yield (pos, alt)
+
+def equiv_inserts(ref, pos, alt):
+    return itertools.chain(left_equiv_inserts(ref, pos, alt), right_equiv_inserts(ref, pos, alt))
+
+def equiv_variants_insert(reference, variant):
+    (chrom, pos, ref, alt, src) = normalize_variant(variant)
+    assert(ref == '') # must be a simple insert
+    equiv_pos = equiv_inserts(reference, pos, alt)
+    return [(chrom, epos, ref, ealt, src) for (epos, ealt) in equiv_pos]
+
+#
+#
+
+def is_deletion(v):
+    (_, _, ref, alt, _) = v
+    return len(ref) > 0 and len(alt) == 0
+
+def is_insertion(v):
+    (_, _, ref, alt, _) = v
+    return len(ref) == 0 and len(alt) > 0
+
+def is_in_bounds(v):
+    (chrom, pos, ref, alt, _) = v
+    return pos + len(ref) < reference_length
+
+# Find all equivalent variant, neglecting changes
+# in surrounding context.
+def all_norm_equiv(refsequence, v):
+    vnorm = normalize_variant(v)
+
+    equivs = []
+    if is_deletion(vnorm):
+        equivs = equiv_variants_delete(refsequence, vnorm)
+    elif is_insertion(vnorm):
+        equivs = equiv_variants_insert(refsequence, vnorm)
+
+    return equivs
+
+# Take a variant with position and ref length, and copy
+# in the ref bases from a reference sequence.
+def inject_ref(refsequence, v_on_r):
+    (chrom, pos, reflen, alt, src) = v_on_r
+    return (chrom, pos, refsequence[pos : pos + reflen], alt, src)
+
 
 # To test that equivalent variants test equal, generate a random variant, then
 # compute variants equivalent to it, and assert that they all test equal to the
 # first variant. Currently on works for deletes.
 
-#runtimes = 5000
+
 #@settings(max_examples=runtimes, max_iterations=runtimes, timeout=-1, database_file=None)
+#@settings(max_examples=runtimes, max_iterations=runtimes, timeout=-1)
 @given(variant_on_ref, reference_id)
 def test_variant_equal_equiv(v, ref_id):
     (chrom, pos, reflen, alt, src) = v
     refsequence = chrom_ref[chrom][ref_id]["sequence"]
     assume(pos + reflen <= len(refsequence))
-    v1 = (chrom, pos, refsequence[pos : pos + reflen], alt, src)
-    if alt == '' and reflen != 0:
-        equivs = equiv_variants_delete(refsequence, v1)
-        for veq in equivs:
-            assert variant_equal(add_start(v1, ref_id), add_start(veq, ref_id), ref_id)
+    v = inject_ref(refsequence, v)
+
+    equivs = all_norm_equiv(refsequence, v)
+
+    for veq in equivs:
+        if is_in_bounds(veq):
+            assert variant_equal(add_start(v, ref_id), add_start(veq, ref_id), ref_id)
+
+def equiv_set(refsequence, v):
+    full_set = all_norm_equiv(refsequence, v) + [normalize_variant(v)]
+    wo_src = [(chrom, pos, ref, alt) for (chrom, pos, ref, alt, _) in full_set]
+    return set(wo_src)
+
+#@settings(max_examples=runtimes, max_iterations=runtimes, timeout=-1, database_file=None)
+#@settings(max_examples=runtimes, max_iterations=runtimes, timeout=-1)
+@given(variant_on_ref, variant_on_ref, reference_id)
+def test_variant_equal_not_equiv(v1, v2, ref_id):
+    (chrom1, pos1, reflen1, alt1, src1) = v1
+    (chrom2, pos2, reflen2, alt2, src2) = v2
+    assume(pos1 + reflen1 <= reference_length)
+    assume(pos2 + reflen2 <= reference_length)
+    assume(not alt1 == '' and reflen1 == 0)
+    assume(not alt2 == '' and reflen2 == 0)
+
+    refsequence1 = chrom_ref[chrom1][ref_id]["sequence"]
+    refsequence2 = chrom_ref[chrom2][ref_id]["sequence"]
+    v1 = inject_ref(refsequence1, v1)
+    v2 = inject_ref(refsequence2, v2)
+
+    eq1 = equiv_set(refsequence1, v1)
+    eq2 = equiv_set(refsequence2, v2)
+
+    if len(eq1.intersection(eq2)) == 0: # should test not-equal
+        assert not variant_equal(add_start(v1, ref_id), add_start(v2, ref_id), ref_id)
     else:
-        pass
+        assert variant_equal(add_start(v1, ref_id), add_start(v2, ref_id), ref_id)
+
+# Do we need to explicitly test variations in surrounding reference length?
+# The tests above only test random variants against normalized (minimum reference)
+# variants.
 
 if __name__ == "__main__":
     # To reproduce failure conditions, paste them in here and run as
     # python ./test_variant_merging.py
     #print variant_equal(v1 = ('17', 41100001, 'gcttccca', '', ''), v2 = ('17', 41100002, 'cttcccag', '', ''), version = 'hg38')
+    print variant_equal(('13', 32800003, '', 'A', ''), ('13', 32800005, '', 'A', ''), 'hg19')
     pass
