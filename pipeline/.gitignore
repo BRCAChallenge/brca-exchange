@@ -13,5 +13,5 @@
 
 # Log files
 *.log
-/utilities/ns.txt
-/utilities/dupes.txt
+/utilities/*.txt
+/utilities/*.tsv

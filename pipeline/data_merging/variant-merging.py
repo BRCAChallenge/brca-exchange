@@ -90,7 +90,10 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "ESP": ESP_FIELDS,
               "BIC": BIC_FIELDS}
 
+# Enigma filename is different depending on which version of output data is used.
+# ENIGMA_FILE = "enigma_variants_GRCh38_2-27-2016.tsv"
 ENIGMA_FILE = "ENIGMA_last_updated.tsv"
+
 GENOME1K_FILE = "1000G_brca.sorted.hg38.vcf"
 CLINVAR_FILE = "ClinVarBrca.vcf"
 LOVD_FILE = "sharedLOVD_brca12.sorted.hg38.vcf"
@@ -186,7 +189,11 @@ def variant_standardize(variants="pickle"):
             (chr, pos, ref, alt) = add_leading_base(chr, pos, ref, alt)
         (chr, pos, ref, alt) = trim_bases(chr, pos, ref, alt)
 
-        assert(ref_correct(chr, pos, ref, alt))
+        # If the reference is wrong, remove the variant
+        if not ref_correct(chr, pos, ref, alt):
+            logging.warning("Ref incorrect, removing variant %s", str(items))
+            variants_to_remove.append(ev)
+            continue
 
         #if type(items[2]) == list:
         #    variant_names = items[2]
