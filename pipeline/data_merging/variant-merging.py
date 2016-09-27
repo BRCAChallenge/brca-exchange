@@ -91,8 +91,8 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "BIC": BIC_FIELDS}
 
 # Enigma filename is different depending on which version of output data is used.
-# ENIGMA_FILE = "enigma_variants_GRCh38_2-27-2016.tsv"
-ENIGMA_FILE = "ENIGMA_last_updated.tsv"
+ENIGMA_FILE = "enigma_variants_GRCh38_2-27-2016.tsv"
+# ENIGMA_FILE = "ENIGMA_last_updated.tsv"
 
 GENOME1K_FILE = "1000G_brca.sorted.hg38.vcf"
 CLINVAR_FILE = "ClinVarBrca.vcf"
@@ -191,7 +191,8 @@ def variant_standardize(variants="pickle"):
 
         # If the reference is wrong, remove the variant
         if not ref_correct(chr, pos, ref, alt):
-            logging.warning("Ref incorrect, removing variant %s", str(items))
+            logging.warning("Ref incorrect using chr, pos, ref, alt: %s, %s, %s, %s", chr, pos, ref, alt)
+            logging.warning("Original variant representation of incorrect ref variant before add_leading_base: %s", str(items))
             variants_to_remove.append(ev)
             continue
 
@@ -475,7 +476,7 @@ def repeat_merging(f_in, f_out):
                         new_value = [new_value]
                     if type(old_value) != list:
                         old_value = [old_value]
-                    if new_value  == old_value:
+                    if new_value == old_value:
                         continue
                     else:
                         merged_value = list(set(new_value + old_value))
