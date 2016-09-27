@@ -302,7 +302,6 @@ def string_comparison_merge(variants):
         logging.warning('Using equivalent_variants.pkl')
         print "********* WARNING: Using equivalent_variants.pkl to determine equivalents instead of testing individually *******"
         equivalence = pickle.loads(open(ARGS.output + "equivalent_variants.pkl", "r").read())
-    logging.info('Result of find_equivalent_variants: \n %s', str(equivalence))
     n_before_merge = 0
     for each in equivalence:
         n_before_merge += len(each)
