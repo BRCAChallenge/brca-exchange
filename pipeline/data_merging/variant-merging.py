@@ -196,6 +196,12 @@ def variant_standardize(variants="pickle"):
             variants_to_remove.append(ev)
             continue
 
+        if variant_is_false(ref, alt):
+            logging.warning("Bad data chr, pos, ref, alt: %s, %s, %s, %s", chr, pos, ref, alt)
+            logging.warning("Original variant representation of bad data: %s", str(items))
+            variants_to_remove.append(ev)
+            continue
+
         #if type(items[2]) == list:
         #    variant_names = items[2]
         #else:
@@ -239,11 +245,9 @@ def trim_bases(chr, pos, ref, alt):
     if len(ref) <= 1 or len(alt) <= 1:
         return (chr, pos, ref, alt)
     else:
-        logging.debug('trim_bases called with chr, pos, ref, alt: %s, %s, %s, %s: ', chr, pos, ref, alt)
         (ref, alt) = trim_trailing(ref, alt)
         #v = ":".join(v.split(":")[0:2] + ["{0}>{1}".format(ref, alt)])
         (chr, pos, ref, alt) = trim_leading(chr, pos, ref, alt)
-        logging.debug('trim_bases output chr, pos, ref, alt: %s, %s, %s, %s: ', chr, pos, ref, alt)
         return (chr, pos, ref, alt)
 
 def trim_trailing(ref, alt):
@@ -257,9 +261,7 @@ def trim_trailing(ref, alt):
         return trim_trailing(ref, alt)
 
 def trim_leading(chr, pos, ref, alt):
-    #chr, pos, refalt = v.replace("-", "").split(":")
     pos = int(pos)
-    #ref, alt = refalt.split(">")
     if len(ref) == 1 or len(alt) == 1 or ref[0] != alt[0]:
         return (chr, pos, ref, alt)
     else:
@@ -269,7 +271,6 @@ def trim_leading(chr, pos, ref, alt):
 
 
 def add_leading_base(chr, pos, ref, alt, version="hg38"):
-    logging.debug('Calling add_leading_base with chr, pos, ref, alt: %s, %s, %s, %s', chr, pos, ref, alt)
     pos = int(pos)
     if ref == "-":
         ref = ""
@@ -285,8 +286,12 @@ def add_leading_base(chr, pos, ref, alt, version="hg38"):
         raise Exception("wrong chromosome number")
 
     leading_base = seq[brca_pos-1]
-    logging.debug('Base added with new coordinates chr, pos, ref, alt: %s, %s, %s, %s', chr, str(pos-1), leading_base + ref, leading_base + alt)
     return (chr, str(pos-1), leading_base + ref, leading_base + alt)
+
+
+def variant_is_false(ref, alt):
+    # If ref and alt are the same, the variant is considered bad data
+    return ref == alt
 
 
 def string_comparison_merge(variants):
