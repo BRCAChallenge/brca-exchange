@@ -370,8 +370,8 @@ def find_equivalent_variant(variants):
                 logging.debug('v == existing_v \n "v: " %s \n "existing_v: " %s', str(v), str(existing_v))
                 continue
             else:
-                v1 = [variants[v][COLUMN_VCF_CHR], variants[v][COLUMN_VCF_POS], variants[v][COLUMN_VCF_REF], variants[v][COLUMN_VCF_ALT], variants[existing_v][COLUMN_SOURCE]]
-                v2 = [variants[existing_v][COLUMN_VCF_CHR], variants[existing_v][COLUMN_VCF_POS], variants[existing_v][COLUMN_VCF_REF], variants[existing_v][COLUMN_VCF_ALT], variants[existing_v][COLUMN_SOURCE]]
+                v1 = [variants[v][COLUMN_VCF_CHR], variants[v][COLUMN_VCF_POS], variants[v][COLUMN_VCF_REF], variants[v][COLUMN_VCF_ALT]]
+                v2 = [variants[existing_v][COLUMN_VCF_CHR], variants[existing_v][COLUMN_VCF_POS], variants[existing_v][COLUMN_VCF_REF], variants[existing_v][COLUMN_VCF_ALT]]
                 if variant_equal(v1, v2):
                 # v1 = v.replace("-", "").replace("chr", "").replace(">", ":").replace(">", ":")
                 # v2 = existing_v.replace("-", "").replace("chr", "").replace(">", ":").replace(">", ":")
@@ -632,8 +632,8 @@ def variant_equal(v1, v2, version="hg38"):
     if v1 == v2:
         logging.debug("v1 == v2 %s %s", str(v1), str(v2))
         return True
-    chr1, pos1, ref1, alt1, src1 = v1
-    chr2, pos2, ref2, alt2, src2 = v2
+    chr1, pos1, ref1, alt1 = v1
+    chr2, pos2, ref2, alt2 = v2
     pos1 = int(pos1)
     pos2 = int(pos2)
     if chr1 != chr2:

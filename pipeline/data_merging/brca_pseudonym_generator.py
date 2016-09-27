@@ -11,7 +11,6 @@ import hgvs.variantmapper as hgvs_variantmapper
 import hgvs.exceptions
 import pyhgvs
 import pyhgvs.utils as pyhgvs_utils
-import pdb
 import logging
 import csv
 from ometa.runtime import ParseError
@@ -211,12 +210,6 @@ def main(args):
         line[output_header_row.index("pyhgvs_Genomic_Coordinate_36")] = '{0}:{1}:{2}>{3}'.format(chrom36,offset36,ref36,alt36)
         line[output_header_row.index("pyhgvs_Genomic_Coordinate_37")] = '{0}:{1}:{2}>{3}'.format(chrom37,offset37,ref37,alt37)
         line[output_header_row.index("pyhgvs_Genomic_Coordinate_38")] = '{0}:{1}:{2}>{3}'.format(chrom38,offset38,ref38,alt38)
-
-        # The following two coordinates are duplicates after conversion through pyhgvs
-        if line[hgvsG38Index] == "chr17:43122882:T>TA" or line[hgvsG38Index] == "chr17:43081632:T>TC":
-            logging.warning("Known to be duplicate genomic coordinate.")
-            logging.warning("Old hg38: %s \n New hg38: %s", oldHgvsGenomic38, line[hgvsG38Index])
-
         line[output_header_row.index("pyhgvs_Hg37_Start")] = str(offset37)
         line[output_header_row.index("pyhgvs_Hg37_End")] = str(int(offset37) + len(ref38) - 1)
         line[output_header_row.index("pyhgvs_Hg36_Start")] = str(offset36)
