@@ -227,21 +227,23 @@ def variant_standardize(variants="pickle"):
         variants[key] = values
     return variants
 
-def refOrAltMissing(v):
-    ref, alt = v.split(":")[2].split(">")
-    if len(ref) < 1 or len(alt) < 1:
-        return True
-    else:
-        return False
+# def refOrAltMissing(v):
+#     ref, alt = v.split(":")[2].split(">")
+#     if len(ref) < 1 or len(alt) < 1:
+#         return True
+#     else:
+#         return False
 
 def trim_bases(chr, pos, ref, alt):
     #ref, alt = v.split(":")[2].split(">")
     if len(ref) <= 1 or len(alt) <= 1:
         return (chr, pos, ref, alt)
     else:
+        logging.debug('trim_bases called with chr, pos, ref, alt: %s, %s, %s, %s: ', chr, pos, ref, alt)
         (ref, alt) = trim_trailing(ref, alt)
         #v = ":".join(v.split(":")[0:2] + ["{0}>{1}".format(ref, alt)])
         (chr, pos, ref, alt) = trim_leading(chr, pos, ref, alt)
+        logging.debug('trim_bases output chr, pos, ref, alt: %s, %s, %s, %s: ', chr, pos, ref, alt)
         return (chr, pos, ref, alt)
 
 def trim_trailing(ref, alt):
@@ -263,12 +265,11 @@ def trim_leading(chr, pos, ref, alt):
     else:
         ref = ref[1:]
         alt = alt[1:]
-        pos += 1
-        #new_v = "{0}:{1}:{2}>{3}".format(chr, str(pos), ref, alt)
         return trim_leading(chr, str(pos+1), ref, alt)
 
 
 def add_leading_base(chr, pos, ref, alt, version="hg38"):
+    logging.debug('Calling add_leading_base with chr, pos, ref, alt: %s, %s, %s, %s', chr, pos, ref, alt)
     pos = int(pos)
     if ref == "-":
         ref = ""
@@ -284,7 +285,7 @@ def add_leading_base(chr, pos, ref, alt, version="hg38"):
         raise Exception("wrong chromosome number")
 
     leading_base = seq[brca_pos-1]
-
+    logging.debug('Base added with new coordinates chr, pos, ref, alt: %s, %s, %s, %s', chr, str(pos-1), leading_base + ref, leading_base + alt)
     return (chr, str(pos-1), leading_base + ref, leading_base + alt)
 
 
