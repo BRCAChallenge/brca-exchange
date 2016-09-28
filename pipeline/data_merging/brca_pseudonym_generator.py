@@ -227,7 +227,6 @@ def main(args):
     refSeq18.close()
     refSeq19.close()
     refSeq38.close()
-    output_file.close()
     input_file.close()
 
 if __name__ == "__main__":

@@ -1338,7 +1338,7 @@ class MergeVCFsIntoTSVFile(luigi.Task):
         os.chdir(data_merging_method_dir)
 
         args = ["python", "variant-merging.py", "-i", self.output_dir + "/", "-o",
-                release_dir, "-p", "-r", brca_resources_dir + "/"]
+                release_dir, "-p", "-r", brca_resources_dir + "/", "-v"]
         print "Running variant-merging.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
