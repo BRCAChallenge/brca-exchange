@@ -91,7 +91,8 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "BIC": BIC_FIELDS}
 
 # Enigma filename is different depending on which version of output data is used.
-ENIGMA_FILE = "enigma_variants_GRCh38_2-27-2016.tsv"
+ENIGMA_FILE = "ENIGMA_combined.tsv"
+# ENIGMA_FILE = "enigma_variants_GRCh38_2-27-2016.tsv"
 # ENIGMA_FILE = "ENIGMA_last_updated.tsv"
 
 GENOME1K_FILE = "1000G_brca.sorted.hg38.vcf"
