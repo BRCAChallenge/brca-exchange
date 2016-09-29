@@ -11,7 +11,7 @@ class MyUserManager(BaseUserManager):
     def create_user(self, email, password, firstName="", lastName="", title="", role=ROLE_OTHER, role_other="", institution="",
                     city="", state="", country="", latitude="", longitude="", phone_number="", 
                     hide_number=False, hide_email=False, has_image=False,
-                    is_admin=False, is_approved=False):
+                    is_admin=False, is_approved=False, admin_notifications=False):
         """
         Creates and saves a User with the given fields
         """
@@ -37,7 +37,8 @@ class MyUserManager(BaseUserManager):
             hide_email=hide_email,
             has_image=has_image,
             is_admin=is_admin,
-            is_approved=is_approved
+            is_approved=is_approved,
+            admin_notifications=admin_notifications,
         )
 
         user.set_password(password)
@@ -51,8 +52,7 @@ class MyUserManager(BaseUserManager):
 
 class MyUser(AbstractBaseUser):
     ROLE_OTHER                  = ROLE_OTHER
-    ROLE_PATIENT                = 1
-    ROLE_PROBAND                = 2
+    ROLE_COMMUNITY_MEMBER       = 1
     ROLE_CLINICAL_LAB_DIRECTOR  = 3
     ROLE_DIAGNOSTIC_LAB_STAFF   = 4
     ROLE_PRINCIPAL_INVESTIGATOR = 5
@@ -86,6 +86,7 @@ class MyUser(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     is_approved = models.BooleanField(default=False)
+    admin_notifications = models.BooleanField(default=False)
     has_image = models.BooleanField(default=False)
 
     activation_key = models.CharField(max_length=40, blank=True)
@@ -123,6 +124,9 @@ class MyUser(AbstractBaseUser):
         "Is the user a member of staff?"
         # Simplest possible answer: All admins are staff
         return self.is_admin
+
+    class Meta:
+        ordering = ['lastName', 'firstName']
 
 class MailingListEmail(models.Model):
     email = models.EmailField(
