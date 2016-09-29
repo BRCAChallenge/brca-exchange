@@ -463,7 +463,6 @@ var ResearchVariantTableSupplier = function (Component) {
             </label>);
         },
         getDownloadButton: function (callback) {
-            console.log(callback)
             return <Button className="btn-sm rgt-buffer" download="variants.tsv" href={callback()}>Download</Button>;
         },
         getLollipopButton: function (callback, isOpen) {
