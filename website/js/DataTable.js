@@ -140,8 +140,9 @@ var DataTable = React.createClass({
     },
     fetch: function (state) {
         var {pageLength, search, page, sortBy,
-            filterValues, columnSelection, sourceSelection} = state;
+            filterValues, columnSelection, sourceSelection, release} = state;
         this.fetchq.onNext(merge({
+            release,
             pageLength,
             page,
             sortBy,

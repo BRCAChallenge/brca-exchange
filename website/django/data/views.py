@@ -5,6 +5,7 @@ from operator import __or__
 
 from django.db import connection
 from django.db.models import Q
+from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.gzip import gzip_page
 
@@ -15,6 +16,24 @@ def releases(request):
     response = JsonResponse(list(DataRelease.objects.values().all()), safe=False)
     response['Access-Control-Allow-Origin'] = '*'
     return response
+
+def variant(request):
+    variant_id = int(request.GET.get('variant_id'))
+
+    variant = Variant.objects.get(id = variant_id)
+    key = variant.Genomic_Coordinate_hg38
+
+    query = Variant.objects.filter(Genomic_Coordinate_hg38 = key).order_by('-Data_Release_id').select_related('Data_Release')
+
+    variant_versions = map(variant_to_dict, query)
+    response = JsonResponse({"data": variant_versions})
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
+
+def variant_to_dict(variant_object):
+    variant_dict = model_to_dict(variant_object)
+    variant_dict["Data_Release"] = model_to_dict(variant_object.Data_Release)
+    return variant_dict
     
 @gzip_page
 def index(request):
@@ -29,9 +48,13 @@ def index(request):
     filters = request.GET.getlist('filter')
     filter_values = request.GET.getlist('filterValue')
     column = request.GET.getlist('column')
+    release = request.GET.get('release')
 
-    latest = Variant.objects.distinct('Genomic_Coordinate_hg38').order_by('Genomic_Coordinate_hg38', '-Data_Release_id')
-    query = Variant.objects.filter(id__in = latest)
+    if release:
+        query = Variant.objects.filter(Data_Release_id = int(release))
+    else:
+        latest = Variant.objects.distinct('Genomic_Coordinate_hg38').order_by('Genomic_Coordinate_hg38', '-Data_Release_id')
+        query = Variant.objects.filter(id__in = latest)
 
     if format == 'csv':
         quotes = '\''

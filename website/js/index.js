@@ -194,7 +194,7 @@ function toNumber(v) {
 
 function databaseParams(paramsIn) {
     var {filter, filterValue, hide, hideSources, excludeSources, orderBy, order, search = ''} = paramsIn;
-    var numParams = _.mapObject(_.pick(paramsIn, 'page', 'pageLength'), toNumber);
+    var numParams = _.mapObject(_.pick(paramsIn, 'page', 'pageLength', 'release'), toNumber);
     var sortBy = {prop: orderBy, order};
     var columnSelection = _.object(hide, _.map(hide, _.constant(false)));
     var sourceSelection = {..._.object(hideSources, _.map(hideSources, _.constant(0))),
@@ -208,13 +208,14 @@ var transpose = a => _.zip.apply(_, a);
 function urlFromDatabase(state) {
     // Need to diff from defaults. The defaults are in DataTable.
     // We could keep the defaults here, or in a different module.
-    var {columnSelection, filterValues, sourceSelection,
+    var {release, columnSelection, filterValues, sourceSelection,
             search, page, pageLength, sortBy: {prop, order}} = state;
     var hide = _.keys(_.pick(columnSelection, v => v === false));
     var hideSources = _.keys(_.pick(sourceSelection, v => v === 0));
     var excludeSources = _.keys(_.pick(sourceSelection, v => v === -1));
     var [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v === true)));
     return _.pick({
+        release: release,
         search: search === '' ? null : backend.trimSearchTerm(search),
         filter,
         filterValue,
@@ -443,7 +444,6 @@ var VariantDetail = React.createClass({
 				</tr>);
         });
 
-
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
@@ -456,6 +456,21 @@ var VariantDetail = React.createClass({
                         <Table striped bordered>
                             <tbody>
                                 {rows}
+                            </tbody>
+                        </Table>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col md={8} mdOffset={2}>
+                        <h3>{variant["HGVS_cDNA"]}</h3>
+                        <h4>Previous Versions of this Variant:</h4>
+                        <Table bordered>
+                            <thead>
+                                <th>Date</th>
+                                <th>Clinical Significance</th>
+                                <th>Changes</th>
+                            </thead>
+                            <tbody>
                             </tbody>
                         </Table>
                     </Col>
