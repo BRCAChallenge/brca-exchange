@@ -62,6 +62,10 @@ function data(opts) {
     return Rx.DOM.get(url(opts)).map(xhr => JSON.parse(xhr.responseText));
 }
 
+function variant(variant) {
+    return Rx.DOM.get(`${config.backend_url}/data/variant/?variant_id=${variant}`).map(xhr => JSON.parse(xhr.responseText));
+}
+
 function releases() {
     return Rx.DOM.get(`${config.backend_url}/data/releases`).map(xhr => JSON.parse(xhr.responseText));
 }
@@ -90,6 +94,7 @@ function lollipopData(opts) {
 
 module.exports = {
     data,
+    variant,
     releases,
     users,
     userLocations,

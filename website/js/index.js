@@ -47,7 +47,7 @@ var {Releases, Release} = require('./Releases.js');
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 
 var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
-var variantPathSplit = id => _.object(databaseKey, _.map(id.split(/@@/), decodeURIComponent));
+//var variantPathSplit = id => _.object(databaseKey, _.map(id.split(/@@/), decodeURIComponent));
 
 if (typeof console === "undefined") {
     window.console = {
@@ -372,22 +372,25 @@ var VariantDetail = React.createClass({
     showHelp: function (title) {
         this.transitionTo(`/help#${slugify(title)}`);
     },
+    getInitialState: () => ({}),
     componentWillMount: function () {
-        backend.data({
-            filterValues: variantPathSplit(this.props.params.id),
-            pageLength: 1
-        }).subscribe(
+        backend.variant(this.props.params.id).subscribe(
             resp => {
-                return this.setState({data: resp.data[0], error: null});
+                return this.setState({data: resp.data, error: null});
             },
-            this.setState({error: 'Problem connecting to server'}));
+            () => { this.setState({error: 'Problem connecting to server'}); });
     },
     onChildToggleMode: function() {
         this.forceUpdate();
         this.props.toggleMode();
     },
     render: function () {
-        var {data: variant = {}, error} = this.state;
+        var {data, error} = this.state;
+        if (!data) {
+            return <div></div>;
+        }
+
+        var variant = data[0];
         var cols;
         if (localStorage.getItem("research-mode") === 'true') {
             cols = researchModeColumns;
@@ -444,6 +447,31 @@ var VariantDetail = React.createClass({
 				</tr>);
         });
 
+        var versionRows = [];
+        for (var i = 0; i < data.length; i++) {
+            var version = data[i],
+                changes = [],
+                release = version["Data_Release"]; //eslint-disable-line dot-notation
+
+            // if this is not the oldest version of the variant, diff them
+            if (i < data.length - 1) {
+                var previous = data[i + 1];
+                for (var key in version) {
+                    if (!_.contains(["Data_Release", "id"], key) && version[key] !== previous[key]) { //eslint-disable-line dot-notation
+                        changes.push(<span><strong>{key.replace(/_/g, " ")}:</strong> {previous[key]} <span className="glyphicon glyphicon-arrow-right"></span> {version[key]}</span>, <br />);
+                    }
+                }
+            }
+            /* eslint-disable dot-notation */
+            versionRows.push(
+                <tr>
+                    <td>{release["timestamp"]}</td>
+                    <td>{version["Pathogenicity_default"]}</td>
+                    <td>{changes}</td>
+                </tr>
+            );
+            /* eslint-enable dot-notation */
+        }
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
@@ -462,7 +490,9 @@ var VariantDetail = React.createClass({
                 </Row>
                 <Row>
                     <Col md={8} mdOffset={2}>
+                        { /* eslint-disable dot-notation */ }
                         <h3>{variant["HGVS_cDNA"]}</h3>
+                        { /* eslint-enable dot-notation */ }
                         <h4>Previous Versions of this Variant:</h4>
                         <Table bordered>
                             <thead>
@@ -471,6 +501,7 @@ var VariantDetail = React.createClass({
                                 <th>Changes</th>
                             </thead>
                             <tbody>
+                                {versionRows}
                             </tbody>
                         </Table>
                     </Col>
