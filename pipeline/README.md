@@ -1,7 +1,8 @@
 # brca-pipeine
 
-Contains source code used to wrangle the BRCA variation data that is presented in the brca-exchange site.
+Contains source code used to wrangle the BRCA variation data that is presented in the brca-exchange site.  
 ##### Overall Dependencies
+ * create a Synapse account, contact Melissa for access to the ENIGMA data under Synapse, and do a 'pip install synapseclient'
  * create a directory for genomic resources.  Point to it with the environment variable $BCRA_RESOURCES
  * download http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/refseq_annotation.hg38.gp to $BRCA_RESOURCES
  * download http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/refseq_annotation.hg19.gp to $BRCA_RESOURCES
