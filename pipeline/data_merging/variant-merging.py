@@ -50,8 +50,7 @@ CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "Allele_Origin": "Origin",
                   "Protein": "Protein",
                   "Method": "Method"}
-LOVD_FIELDS = {"Origin_of_variant": "genetic_origin",
-               "Variant_frequency": "frequency",
+LOVD_FIELDS = {"Variant_frequency": "frequency",
                "Variant_haplotype": "haplotype",
                "Functional_analysis_result": "functionalanalysis_result",
                "Functional_analysis_technique": "functionalanalysis_technique",
@@ -556,7 +555,6 @@ def add_new_source(columns, variants, source, source_file, source_dict):
         else:
             variants[genome_coor] = ['-'] * old_column_num
             variants[genome_coor][COLUMN_SOURCE] = source
-            chrm = genome_coor.split(":")[0]
             if record.CHROM == "13":
                 variants[genome_coor][COLUMN_GENE] = "BRCA2"
             elif record.CHROM == "17":
@@ -574,8 +572,9 @@ def add_new_source(columns, variants, source, source_file, source_dict):
             except KeyError:
                 if source == "BIC":
                     variants[genome_coor].append(DEFAULT_CONTENTS)
+                    logging.debug("Could not find value %s for source %s in variant %s, inserting default content %s instead.", value, source, DEFAULT_CONTENTS)
                 else:
-                    raise Exception("uncaught weirdness")
+                    raise Exception("There was a problem appending a value for %s to variant %s" % (value, variats[genome_coor]))
     # for those enigma record that doesn't have a hit with new genome coordinate
     # add extra cells of "-" to the end of old record
     for value in variants.values():
@@ -584,7 +583,7 @@ def add_new_source(columns, variants, source, source_file, source_dict):
     print "number of variants in " + source + " is ", variants_num
     print "overlap with previous dataset: ", overlap
     print "number of total variants with the addition of " + source + " is: ", len(variants), "\n"
-    for index,value in variants.iteritems():
+    for index, value in variants.iteritems():
         if len(value) != len(columns):
             raise Exception("mismatching number of columns in head and row")
     return (columns, variants)
