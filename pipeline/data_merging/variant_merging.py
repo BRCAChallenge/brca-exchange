@@ -12,7 +12,6 @@ import shutil
 import subprocess
 import tempfile
 import vcf
-import pdb
 import logging
 from StringIO import StringIO
 from copy import deepcopy
@@ -91,7 +90,11 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "ESP": ESP_FIELDS,
               "BIC": BIC_FIELDS}
 
-ENIGMA_FILE = "ENIGMA_last_updated.tsv"
+# Enigma filename is different depending on which version of output data is used.
+ENIGMA_FILE = "ENIGMA_combined.tsv"
+# ENIGMA_FILE = "enigma_variants_GRCh38_2-27-2016.tsv"
+# ENIGMA_FILE = "ENIGMA_last_updated.tsv"
+
 GENOME1K_FILE = "1000G_brca.sorted.hg38.vcf"
 CLINVAR_FILE = "ClinVarBrca.vcf"
 LOVD_FILE = "sharedLOVD_brca12.sorted.hg38.vcf"
@@ -196,7 +199,18 @@ def variant_standardize(variants="pickle"):
             (chr, pos, ref, alt) = add_leading_base(chr, pos, ref, alt)
         (chr, pos, ref, alt) = trim_bases(chr, pos, ref, alt)
 
-        assert(ref_correct(chr, pos, ref, alt))
+        # If the reference is wrong, remove the variant
+        if not ref_correct(chr, pos, ref, alt):
+            logging.warning("Ref incorrect using chr, pos, ref, alt: %s, %s, %s, %s", chr, pos, ref, alt)
+            logging.warning("Original variant representation of incorrect ref variant before add_leading_base: %s", str(items))
+            variants_to_remove.append(ev)
+            continue
+
+        if variant_is_false(ref, alt):
+            logging.warning("Bad data chr, pos, ref, alt: %s, %s, %s, %s", chr, pos, ref, alt)
+            logging.warning("Original variant representation of bad data: %s", str(items))
+            variants_to_remove.append(ev)
+            continue
 
         #if type(items[2]) == list:
         #    variant_names = items[2]
@@ -229,12 +243,12 @@ def variant_standardize(variants="pickle"):
         variants[key] = values
     return variants
 
-def refOrAltMissing(v):
-    ref, alt = v.split(":")[2].split(">")
-    if len(ref) < 1 or len(alt) < 1:
-        return True
-    else:
-        return False
+# def refOrAltMissing(v):
+#     ref, alt = v.split(":")[2].split(">")
+#     if len(ref) < 1 or len(alt) < 1:
+#         return True
+#     else:
+#         return False
 
 def trim_bases(chr, pos, ref, alt):
     #ref, alt = v.split(":")[2].split(">")
@@ -257,16 +271,12 @@ def trim_trailing(ref, alt):
         return trim_trailing(ref, alt)
 
 def trim_leading(chr, pos, ref, alt):
-    #chr, pos, refalt = v.replace("-", "").split(":")
     pos = int(pos)
-    #ref, alt = refalt.split(">")
     if len(ref) == 1 or len(alt) == 1 or ref[0] != alt[0]:
         return (chr, pos, ref, alt)
     else:
         ref = ref[1:]
         alt = alt[1:]
-        pos += 1
-        #new_v = "{0}:{1}:{2}>{3}".format(chr, str(pos), ref, alt)
         return trim_leading(chr, str(pos+1), ref, alt)
 
 
@@ -286,8 +296,12 @@ def add_leading_base(chr, pos, ref, alt, version="hg38"):
         raise Exception("wrong chromosome number")
 
     leading_base = seq[brca_pos-1]
-
     return (chr, str(pos-1), leading_base + ref, leading_base + alt)
+
+
+def variant_is_false(ref, alt):
+    # If ref and alt are the same, the variant is considered bad data
+    return ref == alt
 
 
 def string_comparison_merge(variants):
@@ -305,7 +319,6 @@ def string_comparison_merge(variants):
         logging.warning('Using equivalent_variants.pkl')
         print "********* WARNING: Using equivalent_variants.pkl to determine equivalents instead of testing individually *******"
         equivalence = pickle.loads(open(ARGS.output + "equivalent_variants.pkl", "r").read())
-    logging.info('Result of find_equivalent_variants: \n %s', str(equivalence))
     n_before_merge = 0
     for each in equivalence:
         n_before_merge += len(each)
@@ -373,12 +386,8 @@ def find_equivalent_variant(variants):
                 logging.debug('v == existing_v \n "v: " %s \n "existing_v: " %s', str(v), str(existing_v))
                 continue
             else:
-                # NOTE: This is a temp fix to prevent problematic 1000_Genomes merging
-                # TODO: come up with long term solution (allow multiple allele frequencies?)
-                if str(variants[v][COLUMN_SOURCE]) == "1000_Genomes" and str(variants[existing_v][COLUMN_SOURCE]) == "1000_Genomes":
-                    continue
-                v1 = [variants[v][COLUMN_VCF_CHR], variants[v][COLUMN_VCF_POS], variants[v][COLUMN_VCF_REF], variants[v][COLUMN_VCF_ALT], variants[existing_v][COLUMN_SOURCE]]
-                v2 = [variants[existing_v][COLUMN_VCF_CHR], variants[existing_v][COLUMN_VCF_POS], variants[existing_v][COLUMN_VCF_REF], variants[existing_v][COLUMN_VCF_ALT], variants[existing_v][COLUMN_SOURCE]]
+                v1 = [variants[v][COLUMN_VCF_CHR], variants[v][COLUMN_VCF_POS], variants[v][COLUMN_VCF_REF], variants[v][COLUMN_VCF_ALT]]
+                v2 = [variants[existing_v][COLUMN_VCF_CHR], variants[existing_v][COLUMN_VCF_POS], variants[existing_v][COLUMN_VCF_REF], variants[existing_v][COLUMN_VCF_ALT]]
                 if variant_equal(v1, v2):
                 # v1 = v.replace("-", "").replace("chr", "").replace(">", ":").replace(">", ":")
                 # v2 = existing_v.replace("-", "").replace("chr", "").replace(">", ":").replace(">", ":")
@@ -483,7 +492,7 @@ def repeat_merging(f_in, f_out):
                         new_value = [new_value]
                     if type(old_value) != list:
                         old_value = [old_value]
-                    if new_value  == old_value:
+                    if new_value == old_value:
                         continue
                     else:
                         merged_value = list(set(new_value + old_value))
@@ -639,8 +648,8 @@ def variant_equal(v1, v2, version="hg38"):
     if v1 == v2:
         logging.debug("v1 == v2 %s %s", str(v1), str(v2))
         return True
-    chr1, pos1, ref1, alt1, src1 = v1
-    chr2, pos2, ref2, alt2, src2 = v2
+    chr1, pos1, ref1, alt1 = v1
+    chr2, pos2, ref2, alt2 = v2
     pos1 = int(pos1)
     pos2 = int(pos2)
     if chr1 != chr2:
