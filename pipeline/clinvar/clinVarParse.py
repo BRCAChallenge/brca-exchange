@@ -19,37 +19,38 @@ def processSubmission(submissionSet, assembly):
     for oa in submissionSet.otherAssertions.values():
         submitter = oa.submitter
         variant = ra.variant
-        hgvs = re.sub("\(" + "(BRCA[1|2])" + "\)", 
-                      "", variant.name.split()[0])
-        proteinChange = None
-        if variant.attribute.has_key("HGVS, protein, RefSeq"):
-            proteinChange = variant.attribute["HGVS, protein, RefSeq"]
-        chrom = None
-        start = None
-        referenceAllele = None
-        alternateAllele = None
-        if assembly in variant.coordinates:
-            genomicData = variant.coordinates[assembly]
-            chrom = genomicData.chrom
-            start = genomicData.start
-            referenceAllele = genomicData.referenceAllele
-            alternateAllele = genomicData.alternateAllele
-        genomicCoordinate = "chr%s:%s:%s>%s" % (chrom, start, referenceAllele,
-                                                alternateAllele)
-        # 
-        # Omit the variants that don't have any genomic start coordinate indicated.
-        if start != None and start != "None" and start != "NA":
-            print("\t".join((str(hgvs),  oa.submitter.encode('utf-8'), 
-                             str(oa.clinicalSignificance),
-                             str(oa.dateLastUpdated),
-                             str(oa.accession),
-                             str(oa.id),
-                             str(oa.origin),
-                             str(oa.method),
-                             genomicCoordinate,
-                             str(variant.geneSymbol),
-                             str(proteinChange)
-                         )))
+        if ra.origin == "germline":
+            hgvs = re.sub("\(" + "(BRCA[1|2])" + "\)", 
+                          "", variant.name.split()[0])
+            proteinChange = None
+            if variant.attribute.has_key("HGVS, protein, RefSeq"):
+                proteinChange = variant.attribute["HGVS, protein, RefSeq"]
+            chrom = None
+            start = None
+            referenceAllele = None
+            alternateAllele = None
+            if assembly in variant.coordinates:
+                genomicData = variant.coordinates[assembly]
+                chrom = genomicData.chrom
+                start = genomicData.start
+                referenceAllele = genomicData.referenceAllele
+                alternateAllele = genomicData.alternateAllele
+                genomicCoordinate = "chr%s:%s:%s>%s" % (chrom, start, referenceAllele,
+                                                        alternateAllele)
+                # 
+                # Omit the variants that don't have any genomic start coordinate indicated.
+                if start != None and start != "None" and start != "NA":
+                    print("\t".join((str(hgvs),  oa.submitter.encode('utf-8'), 
+                                     str(oa.clinicalSignificance),
+                                     str(oa.dateLastUpdated),
+                                     str(oa.accession),
+                                     str(oa.id),
+                                     str(oa.origin),
+                                     str(oa.method),
+                                     genomicCoordinate,
+                                     str(variant.geneSymbol),
+                                     str(proteinChange)
+                                     )))
 
 
 def main():
