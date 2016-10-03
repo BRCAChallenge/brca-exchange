@@ -14,14 +14,14 @@ class transformer(object):
     _makeExpectedChanges = {}
 
     def __init__(self, oldColumns, newColumns):
-        (self._oldColumnsRemoved, self._newColumnsAdded, 
-         self._newColumnNameToOld) = self._mapColumnNames(oldColumns, 
+        (self._oldColumnsRemoved, self._newColumnsAdded,
+         self._newColumnNameToOld) = self._mapColumnNames(oldColumns,
                                                           newColumns)
 
 
     def _mapColumnNames(self, oldColumns, newColumns):
         """
-        Given a set of the old column names and a set of the new column 
+        Given a set of the old column names and a set of the new column
         names, plus a hash mapping old to new names, return three things:
         - a list of new columns not represented in the old
         - a list of old columns not represented in the new
@@ -110,38 +110,38 @@ class transformer(object):
 class v1ToV2(transformer):
     # Here are columns that were renamed between the April 2016 release and the September 2016
     # release. In this dictionary, the key is the old name, and the value is the new name.
-    _renamedColumns = {"SIFT_VEP" : "Sift_Prediction",
-                       "PolyPhen_VEP" : "Polyphen_Prediction", 
-                       "BIC_Identifier" : "BIC_Nomenclature", 
-                       "Pathogenicity_default" : "Pathogenicity_expert",
-                       "Pathogenicity_research" : "Pathogenicity_all" }
+    _renamedColumns = {"SIFT_VEP": "Sift_Prediction",
+                       "PolyPhen_VEP": "Polyphen_Prediction",
+                       "BIC_Identifier": "BIC_Nomenclature",
+                       "Pathogenicity_default": "Pathogenicity_expert",
+                       "Pathogenicity_research": "Pathogenicity_all"}
 
     #
     # This dictionary documents and implements some expected formatting changes between the
-    # April 2016 release and the September 2016 release.  For each named field, there is a 
+    # April 2016 release and the September 2016 release.  For each named field, there is a
     # lambda function that if applied to the old value, would generate the equivalent new value.
     #
     _makeExpectedChanges = {
-        "Synonyms" : (lambda xx: re.sub("^,", "", xx)),
-        "HGVS_Protein" : (lambda xx: re.sub(".p.", ":p.", 
-                                            re.sub("$", ")", 
-                                                   re.sub("p.", "p.(", 
-                                                          re.sub("NM_000059", "NP_000050.2",
-                                                                 xx))))),
-        "Reference_Sequence" : (lambda xx: re.sub("NM_000059", "NM_000059.3", 
-                                                  re.sub("NM_007294", "NM_007294.3", xx))),
-        "Allele_Frequency" : (lambda xx: re.sub("\(ExAC", "(ExAC)", xx)),
-        "Polyphen_Prediction" : (lambda xx: re.sub("\(*$", "", xx)),
-        "Sift_Prediction" : (lambda xx: re.sub("\(*$", "", xx)),
-        "Clinical_significance_citations_ENIGMA" : (lambda xx: re.sub("", "-", xx)),
-        "Date_last_evaluated_ENIGMA" : (lambda xx: re.sub("/15$", "/2015", xx)),
+        "Synonyms": (lambda xx: re.sub("^,", "", xx)),
+        "HGVS_Protein": (lambda xx: re.sub(".p.", ":p.",
+                                           re.sub("$", ")",
+                                                  re.sub("p.", "p.(",
+                                                         re.sub("NM_000059", "NP_000050.2",
+                                                                xx))))),
+        "Reference_Sequence": (lambda xx: re.sub("NM_000059", "NM_000059.3",
+                                                 re.sub("NM_007294", "NM_007294.3", xx))),
+        "Allele_Frequency": (lambda xx: re.sub("\(ExAC", "(ExAC)", xx)),
+        "Polyphen_Prediction": (lambda xx: re.sub("\(*$", "", xx)),
+        "Sift_Prediction": (lambda xx: re.sub("\(*$", "", xx)),
+        "Clinical_significance_citations_ENIGMA": (lambda xx: re.sub("", "-", xx)),
+        "Date_last_evaluated_ENIGMA": (lambda xx: re.sub("/15$", "/2015", xx)),
         }
 
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--v2", default="built.tsv", 
+    parser.add_argument("--v2", default="built.tsv",
                         help="File with version 2 of the data")
     parser.add_argument("--v1", default="aggregated.tsv",
                         help="File with Version 1 of the data")
@@ -149,6 +149,8 @@ def main():
                         help="Variants from the old file that were removed in the new file")
     parser.add_argument("--added", default="added.tsv",
                         help="Variants that were added in the new file")
+    parser.add_argument("--added_data", default="added_data.tsv",
+                        help="Variants with data added in version 2")
 
     args = parser.parse_args()
     v1In = csv.DictReader(open(args.v1, "r"), delimiter="\t")
@@ -157,13 +159,15 @@ def main():
                              fieldnames=v1In.fieldnames)
     added = csv.DictWriter(open(args.added, "w"), delimiter="\t",
                            fieldnames=v2In.fieldnames)
+    added_data = csv.DictWriter(open(args.added_data, "w"), delimiter="\t",
+                                fieldnames=v2In.fieldnames)
     v1v2 = v1ToV2(v1In.fieldnames, v2In.fieldnames)
     #
     # Save the old variants in a dictionary for which the hg38 genomic
     # HGVS string is the key, and for which the value is the full row.
     oldData = {}
     for oldRow in v1In:
-        oldData[oldRow["Genomic_Coordinate_hg38"]] = oldRow
+        oldData[oldRow["pyhgvs_Genomic_Coordinate_38"]] = oldRow
     newData = {}
     for newRow in v2In:
         newData[newRow["pyhgvs_Genomic_Coordinate_38"]] = newRow
@@ -178,7 +182,4 @@ def main():
 
 
 if __name__ == "__main__":
-    #print "hello world"
     main()
-
-
