@@ -19,7 +19,7 @@ def processSubmission(submissionSet, assembly):
     for oa in submissionSet.otherAssertions.values():
         submitter = oa.submitter
         variant = ra.variant
-        if ra.origin == "germline":
+        if oa.origin == "germline":
             hgvs = re.sub("\(" + "(BRCA[1|2])" + "\)", 
                           "", variant.name.split()[0])
             proteinChange = None
