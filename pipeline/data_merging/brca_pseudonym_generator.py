@@ -207,8 +207,8 @@ def main(args):
         for i in range(len(new_columns_to_append)):
             line.append('-')
 
-        line[output_header_row.index("pyhgvs_Genomic_Coordinate_36")] = '{0}:{1}:{2}>{3}'.format(chrom36,offset36,ref36,alt36)
-        line[output_header_row.index("pyhgvs_Genomic_Coordinate_37")] = '{0}:{1}:{2}>{3}'.format(chrom37,offset37,ref37,alt37)
+        line[output_header_row.index("pyhgvs_Genomic_Coordinate_36")] = '{0}:g.{1}:{2}>{3}'.format(chrom36,offset36,ref36,alt36)
+        line[output_header_row.index("pyhgvs_Genomic_Coordinate_37")] = '{0}:g.{1}:{2}>{3}'.format(chrom37,offset37,ref37,alt37)
         line[output_header_row.index("pyhgvs_Genomic_Coordinate_38")] = '{0}:g.{1}:{2}>{3}'.format(chrom38,offset38,ref38,alt38)
         line[output_header_row.index("pyhgvs_Hg37_Start")] = str(offset37)
         line[output_header_row.index("pyhgvs_Hg37_End")] = str(int(offset37) + len(ref38) - 1)
