@@ -3,7 +3,12 @@
 import argparse
 import csv
 import re
+import pdb
 
+added_data = None
+diff = None
+total_variants_with_changes = 0
+total_variants_with_additions = 0
 
 class transformer(object):
     """
@@ -64,29 +69,48 @@ class transformer(object):
                 listsAreConsistent = True
         return listsAreConsistent
 
+    def _normalize(self, value):
+        """Make all values similar for improved comparison"""
+
+        # Replace all blank values with dashes for easier comparison
+        if value == "" or value is None:
+            return "-"
+        # Some values start with ", " which throws off the comparison -- overwrite it.
+        elif value[:2] == ", ":
+            return value[2:]
+        # Some values end with "," which throws off the comparison -- overwrite it.
+        elif value[len(value)-1] == ",":
+            return value[:len(value)-1]
+        else:
+            return value
+
     def compareField(self, oldRow, newRow, field):
         """
         Compare the old and new versions of a specific field.  Report if
         the field is added, has cosmetic changes, has major changes, or
         is unchanged.
         """
+        global added_data
         if field in self._newColumnsAdded:
             return "added"
         else:
-            newValue = newRow[field]
-            oldValue = oldRow[self._newColumnNameToOld[field]]
+            newValue = self._normalize(newRow[field])
+            oldValue = self._normalize(oldRow[self._newColumnNameToOld[field]])
             if oldValue == newValue:
                 return "unchanged"
+            elif oldValue == "-" or oldValue in newValue:
+                variant = newRow["pyhgvs_Genomic_Coordinate_38"]
+                return "added data: %s | %s" % (oldValue, newValue)
             elif self._consistentDelimitedLists(oldValue, newValue):
                 return "unchanged"
             elif self._makeExpectedChanges.has_key(field):
-                updatedOldValue = self._makeExpectedChanges[field](oldValue)
+                updatedOldValue = self._normalize(self._makeExpectedChanges[field](oldValue))
                 if updatedOldValue == newValue:
-                    return "minor change: %s %s" % (oldValue, newValue)
+                    return "minor change: %s | %s" % (oldValue, newValue)
                 else:
-                    return "major change: %s %s" % (oldValue, newValue)
+                    return "major change: %s | %s" % (oldValue, newValue)
             else:
-                return "major change: %s %s" % (oldValue, newValue)
+                return "major change: %s | %s" % (oldValue, newValue)
 
 
     def compareRow(self, oldRow, newRow):
@@ -94,15 +118,54 @@ class transformer(object):
         Compare the contents of an old row to a new row.  Indicate any minor
         (cosmetic) changes, major changes, or new values
         """
-        columns_to_ignore = ["Genomic_Coordinate_hg36", "Genomic_Coordinate_hg37",
-                             "Genomic_Coordinate_hg38", "Hg37_Start", "Hg37_End",
-                             "Hg36_Start", "Hg36_End", "HGVS_cDNA", "HGVS_Protein"]
+
+        global added_data
+        global diff
+        global total_variants_with_additions
+        global total_variants_with_changes
+
+        # Uncomment if using old data schema (e.g. pre pyhgvs_Genomic_Coordinate_38)
+        columns_to_ignore = [
+                            # "Genomic_Coordinate_hg36",
+                            # "Genomic_Coordinate_hg37",
+                            # "Genomic_Coordinate_hg38",
+                            # "Hg37_Start",
+                            # "Hg37_End",
+                            # "Hg36_Start",
+                            # "Hg36_End",
+                            # "HGVS_cDNA",
+                            # "HGVS_Protein"
+                            ]
+
+        # Header to group all logs the same variant
+        variant_intro = "\n\n %s \n Old Source: %s \n New Source: %s \n\n" % (newRow["pyhgvs_Genomic_Coordinate_38"],
+                                                                              oldRow["Source"], newRow["Source"])
+
+        changeset = ""
+        added_data_str = ""
 
         for field in newRow.keys():
             if field not in columns_to_ignore:
                 result = self.compareField(oldRow, newRow, field)
                 if re.search("major change", result):
-                    print field, "variant", newRow["Genomic_Coordinate_hg38"], result
+                    result = re.sub("major change: ", "", result)
+                    changeset += "%s: %s \n" % (field, result)
+                if re.search("added data", result):
+                    result = re.sub("added data: ", "", result)
+                    added_data_str += "%s: %s \n" % (field, result)
+
+        # If there are any changes, log them in the diff
+        if len(changeset) > 0:
+            diff.write(variant_intro)
+            diff.write(changeset)
+            total_variants_with_changes += 1
+
+        # If there are any additions, log them in added_data
+        if len(added_data_str) > 0:
+            added_data.write(variant_intro)
+            added_data.write(added_data_str)
+            total_variants_with_additions += 1
+
 
 
 
@@ -135,6 +198,7 @@ class v1ToV2(transformer):
         "Sift_Prediction": (lambda xx: re.sub("\(*$", "", xx)),
         "Clinical_significance_citations_ENIGMA": (lambda xx: re.sub("", "-", xx)),
         "Date_last_evaluated_ENIGMA": (lambda xx: re.sub("/15$", "/2015", xx)),
+        "Submitter_ClinVar": (lambda xx: re.sub("Invitae_", "Invitae", xx))
         }
 
 
@@ -151,6 +215,8 @@ def main():
                         help="Variants that were added in the new file")
     parser.add_argument("--added_data", default="added_data.tsv",
                         help="Variants with data added in version 2")
+    parser.add_argument("--diff", default="diff.txt",
+                        help="Variant diff output file")
 
     args = parser.parse_args()
     v1In = csv.DictReader(open(args.v1, "r"), delimiter="\t")
@@ -159,8 +225,10 @@ def main():
                              fieldnames=v1In.fieldnames)
     added = csv.DictWriter(open(args.added, "w"), delimiter="\t",
                            fieldnames=v2In.fieldnames)
-    added_data = csv.DictWriter(open(args.added_data, "w"), delimiter="\t",
-                                fieldnames=v2In.fieldnames)
+    global added_data
+    added_data = open(args.added_data, "w")
+    global diff
+    diff = open(args.diff, "w")
     v1v2 = v1ToV2(v1In.fieldnames, v2In.fieldnames)
     #
     # Save the old variants in a dictionary for which the hg38 genomic
@@ -180,6 +248,8 @@ def main():
         else:
             v1v2.compareRow(oldData[newVariant], newData[newVariant])
 
+    print "Number of variants with additions: " + str(total_variants_with_additions)
+    print "Number of variants with changes: " + str(total_variants_with_changes)
 
 if __name__ == "__main__":
     main()
