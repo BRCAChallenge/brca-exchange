@@ -3,7 +3,6 @@
 import argparse
 import csv
 import re
-import pdb
 
 added_data = None
 diff = None
