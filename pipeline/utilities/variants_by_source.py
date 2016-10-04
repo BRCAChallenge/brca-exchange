@@ -9,8 +9,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", default="built.tsv",
                         help="File with data to check")
-    # parser.add_argument("--output", default="source_breakdown.txt",
-    #                     help="File with duplicates")
 
     num_variants_by_source = {
                               "ClinVar": 0,
@@ -25,7 +23,6 @@ def main():
 
     args = parser.parse_args()
     inputData = csv.DictReader(open(args.input, "r"), delimiter="\t")
-    # source_breakdown = open(args.output, "w")
 
     for variant in inputData:
         for source in num_variants_by_source.keys():
