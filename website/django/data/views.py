@@ -60,7 +60,6 @@ def index(request):
         cursor = connection.cursor()
         with tempfile.NamedTemporaryFile() as f:
             os.chmod(f.name, 0606)
-            print str(query)
             cursor.execute("COPY ({}) TO '{}' WITH DELIMITER '\t' CSV HEADER".format(query.query, f.name))
 
             response = HttpResponse(f.read(), content_type='text/csv')
