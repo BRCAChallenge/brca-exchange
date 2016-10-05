@@ -13,6 +13,7 @@ import subprocess
 import tempfile
 import vcf
 import logging
+import pdb
 from StringIO import StringIO
 from copy import deepcopy
 from pprint import pprint
@@ -202,43 +203,80 @@ def variant_standardize(variants="pickle"):
             variants_to_remove.append(ev)
             continue
 
-        #if type(items[2]) == list:
-        #    variant_names = items[2]
-        #else:
-        #    variant_names = [items[2]]
-        #new_names = []
-        #for vv in variant_names:
-        #    if ("-" in vv) or refOrAltMissing(vv):
-        #        vv2 = add_leading_base(vv)
-        #    else:
-        #        vv2 = vv
-        #    if not re.search("None", vv2):
-        #        new_names.append(trim_bases(vv2))
-        #    else:
-        #        new_names.append(vv2)
-        #
-        #new_names = [add_leading_base(v) if ("-" in v) or refOrAltMissing(v)  else v for v in variant_names]
-        #new_names = [trim_bases(v) if "None" not in v else v for v in new_names]
-        #new_names = ",".join(list(set(new_names)))
         items[COLUMN_VCF_POS] = pos
         items[COLUMN_VCF_REF] = ref
         items[COLUMN_VCF_ALT] = alt
-        newHgvs = "chr%s:%s:%s>%s" % (str(chr), str(pos), ref, str(alt))
+        newHgvs = "chr%s:g.%s:%s>%s" % (str(chr), str(pos), ref, str(alt))
+
         if newHgvs != ev:
+            logging.debug("Changed genomic coordinate representation, replacing %s with %s", ev, newHgvs)
             variants_to_remove.append(ev)
             variants_to_add[newHgvs] = items
-    for old_variant in variants_to_remove:
-        variants.pop(old_variant)
-    for key, values in variants_to_add.iteritems():
-        variants[key] = values
-    return variants
 
-# def refOrAltMissing(v):
-#     ref, alt = v.split(":")[2].split(">")
-#     if len(ref) < 1 or len(alt) < 1:
-#         return True
-#     else:
-#         return False
+    # remove old variant representations and bad variants
+    for old_variant in variants_to_remove:
+        popped = variants.pop(old_variant)
+
+    # TODO: create generic merge function to handle this case and merging in string_comparison_merge.
+    # add new variant representations and merge equivalent variants
+    for genomic_coordinate, values in variants_to_add.iteritems():
+        # if the variant already exists, merge
+        if genomic_coordinate in variants:
+            existing_variant = variants[genomic_coordinate]
+            equivalent_variant = values
+            logging.info("Merging equivalent variants \n %s and \n %s", existing_variant, equivalent_variant)
+            assert(len(existing_variant) == len(equivalent_variant))
+
+            # merge properties from equivalent variant into existing variant
+            for i, existing_variant_property in enumerate(existing_variant):
+
+                # skip if dealing with chr, pos, ref, or alt since one representation is enough
+                if i == COLUMN_VCF_CHR or i == COLUMN_VCF_POS or i == COLUMN_VCF_REF or i == COLUMN_VCF_ALT:
+                    continue
+
+                # get same property from equivalent variant
+                equivalent_variant_property = equivalent_variant[i]
+
+                # standardize empty data representation
+                if equivalent_variant_property is None or equivalent_variant_property == '':
+                    equivalent_variant_property = DEFAULT_CONTENTS
+                if existing_variant_property is None or existing_variant_property == '':
+                    existing_variant_property = DEFAULT_CONTENTS
+                    # overwrite none values with default none representation
+                    existing_variant[i] = existing_variant_property
+
+                # move on if they're equal
+                if equivalent_variant_property == existing_variant_property:
+                    continue
+
+                # if the old value is blank, replace it with the new value
+                if existing_variant_property == "-":
+                    existing_variant[i] = equivalent_variant_property
+                else:
+                    # combine properties into a list
+                    if type(existing_variant_property) != list:
+                        merged_properties = [existing_variant_property]
+                    else:
+                        merged_properties = existing_variant_property
+
+                    assert type(merged_properties) == list
+
+                    if type(equivalent_variant_property) == list:
+                        for prop in equivalent_variant_property:
+                            if prop not in merged_properties:
+                                merged_properties += prop
+                    elif equivalent_variant_property not in merged_properties:
+                        merged_properties += equivalent_variant_property
+
+                # replace existing data with updates
+                existing_variant[i] = merged_properties
+
+            logging.debug('Merged output: \n %s', existing_variant)
+
+        else:
+            variants[genomic_coordinate] = values
+
+    return variants
 
 def trim_bases(chr, pos, ref, alt):
     #ref, alt = v.split(":")[2].split(">")
@@ -365,6 +403,7 @@ def string_comparison_merge(variants):
         variants[",".join(list(equivalent_v))] = merged_row
     return variants
 
+
 def find_equivalent_variant(variants):
     genome_coors = variants.keys()
     uniq_variants = {}
@@ -379,9 +418,6 @@ def find_equivalent_variant(variants):
                 v1 = [variants[v][COLUMN_VCF_CHR], variants[v][COLUMN_VCF_POS], variants[v][COLUMN_VCF_REF], variants[v][COLUMN_VCF_ALT]]
                 v2 = [variants[existing_v][COLUMN_VCF_CHR], variants[existing_v][COLUMN_VCF_POS], variants[existing_v][COLUMN_VCF_REF], variants[existing_v][COLUMN_VCF_ALT]]
                 if variant_equal(v1, v2):
-                # v1 = v.replace("-", "").replace("chr", "").replace(">", ":").replace(">", ":")
-                # v2 = existing_v.replace("-", "").replace("chr", "").replace(">", ":").replace(">", ":")
-                # if variant_equal(v1.split(":"), v2.split(":")):
                     logging.info("Equal variants: \n %s \n %s", str(v1), str(v2))
                     variant_exist = True
                     uniq_variants[existing_v].add(v)
@@ -396,7 +432,8 @@ def find_equivalent_variant(variants):
 
 def preprocessing(tmp_dir):
     # Preprocessing variants:
-    source_dict = {"1000_Genomes": GENOME1K_FILE + "for_pipeline",
+    source_dict = {
+                   "1000_Genomes": GENOME1K_FILE + "for_pipeline",
                    "ClinVar": CLINVAR_FILE,
                    "LOVD": LOVD_FILE,
                    "exLOVD": EX_LOVD_FILE,
