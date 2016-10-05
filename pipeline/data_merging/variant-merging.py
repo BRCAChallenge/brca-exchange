@@ -13,7 +13,6 @@ import subprocess
 import tempfile
 import vcf
 import logging
-import pdb
 from StringIO import StringIO
 from copy import deepcopy
 from pprint import pprint
