@@ -245,8 +245,8 @@ def variant_standardize(variants="pickle"):
                     # overwrite none values with default none representation
                     existing_variant[i] = existing_variant_property
 
-                # move on if they're equal
-                if equivalent_variant_property == existing_variant_property:
+                # move on if they're equal or if equivalent variant property is blank
+                if equivalent_variant_property == existing_variant_property or equivalent_variant_property == "-":
                     continue
 
                 # if the old value is blank, replace it with the new value
@@ -264,12 +264,13 @@ def variant_standardize(variants="pickle"):
                     if type(equivalent_variant_property) == list:
                         for prop in equivalent_variant_property:
                             if prop not in merged_properties:
-                                merged_properties += prop
+                                merged_properties.append(prop)
                     elif equivalent_variant_property not in merged_properties:
-                        merged_properties += equivalent_variant_property
+                        merged_properties.append(equivalent_variant_property)
 
-                # replace existing data with updates
-                existing_variant[i] = merged_properties
+                    # replace existing data with updates
+                    existing_variant[i] = merged_properties
+                    logging.debug("Merged properties: %s", merged_properties)
 
             logging.debug('Merged output: \n %s', existing_variant)
 
