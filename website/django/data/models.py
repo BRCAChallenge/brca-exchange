@@ -14,6 +14,9 @@ class DataRelease(models.Model):
     class Meta:
         db_table = "data_release"
 
+class ChangeType(models.Model):
+    name = models.TextField()
+
 class VariantManager(models.Manager):
     def create_variant(self, row):
         return self.create(**row)
@@ -105,7 +108,7 @@ class Variant(models.Model):
 
     # Data Versioning
     Data_Release = models.ForeignKey(DataRelease)
-    Variant_Deletion = models.BooleanField(default=False)
+    Change_Type = models.ForeignKey(ChangeType)
 
     objects = VariantManager()
 

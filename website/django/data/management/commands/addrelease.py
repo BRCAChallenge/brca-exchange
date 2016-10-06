@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from data.models import Variant, DataRelease
+from data.models import Variant, DataRelease, ChangeType
 from argparse import FileType
 import json
 import csv
@@ -24,17 +24,32 @@ class Command(BaseCommand):
         DataRelease.objects.create(id=release_number, timestamp=notes['timestamp'], comment=notes['comment'])
 
         reader = csv.reader(variants_tsv, dialect="excel-tab")
-
         header = reader.next()
 
-        variant_count = 0
+        change_types = {ct['name']:ct['id'] for ct in ChangeType.objects.values()}
+
         for row in reader:
             # split Source column into booleans
             row_dict = dict(zip(header, row))
             for source in row_dict['Source'].split(','):
                 row_dict['Variant_in_' + source] = True
             row_dict['Data_Release_id'] = release_number
-            Variant.objects.create_variant(row_dict)
-            variant_count += 1;
+            previous_version = Variant.objects.filter(Genomic_Coordinate_hg38 = row_dict['Genomic_Coordinate_hg38']).order_by('Data_Release_id').values()
+            if previous_version:
+                previous_version = previous_version[0]
+                if row_dict['Pathogenicity_Default'] != previous_version['Pathogenicity_Default']:
+                    row_dict['Change_Type_id'] = change_types['major']
+                else:
+                    for field in header:
+                        if field not in row_dict:
+                            print "Field [", field, "] not present in new data"
+                        else:
+                            new = row_dict[field]
+                            old = previous_version[field]
+                            if new != old:
+                                print "Changed: [", field, "]", old, "->", new
+                                row_dict['Change_Type_id'] = change_types['minor']
+            else:
+                row_dict['Change_Type_id'] = change_types['added']
 
-        print variant_count, "variants added."
+            Variant.objects.create_variant(row_dict)
