@@ -3,11 +3,24 @@
 import argparse
 import csv
 import re
+import pdb
 
 added_data = None
 diff = None
 total_variants_with_changes = 0
 total_variants_with_additions = 0
+
+# Change types as used in the DB to signify changes to variants between versions
+CHANGE_TYPES = {
+                "REMOVED": "deleted",
+                "ADDED": "new",
+                "CLASSIFICATION": "changed_classification",
+                "ADDED_INFO": "added_information",
+                "CHANGED_INFO": "changed_information"
+                }
+
+# Field used to denote pathogenic classification of a variant from all sources
+CLASSIFICATION_FIELD = "Pathogenicity_all"
 
 class transformer(object):
     """
@@ -142,6 +155,7 @@ class transformer(object):
 
         changeset = ""
         added_data_str = ""
+        changed_classification = False
 
         for field in newRow.keys():
             if field not in columns_to_ignore:
@@ -152,6 +166,9 @@ class transformer(object):
                 if re.search("added data", result):
                     result = re.sub("added data: ", "", result)
                     added_data_str += "%s: %s \n" % (field, result)
+                if field == CLASSIFICATION_FIELD and oldRow[field] != newRow[field]:
+                    changed_classification = True
+
 
         # If there are any changes, log them in the diff
         if len(changeset) > 0:
@@ -165,7 +182,12 @@ class transformer(object):
             added_data.write(added_data_str)
             total_variants_with_additions += 1
 
-
+        if changed_classification:
+            return CHANGE_TYPES['CLASSIFICATION']
+        elif len(changeset) > 0:
+            return CHANGE_TYPES['CHANGED_INFO']
+        elif len(added_data_str):
+            return CHANGE_TYPES['ADDED_INFO']
 
 
 
@@ -201,6 +223,30 @@ class v1ToV2(transformer):
         }
 
 
+def appendVariantChangeTypesToOutput(variantChangeTypes, v2, output):
+    with open(v2, 'r') as f_in:
+        with open(output, 'w') as f_out:
+            writer = csv.writer(f_out, delimiter='\t')
+            reader = csv.reader(f_in, delimiter='\t')
+
+            # save list for final output
+            result = []
+
+            # add change_type to the header
+            headerRow = next(reader)
+            headerRow.append('change_type')
+            result.append(headerRow)
+
+            # store pyhgvs_genomic_coordinate_38 index for referencing variants in variantChangeTypes list
+            genomicCoordinateIndex = headerRow.index("pyhgvs_Genomic_Coordinate_38")
+
+            # add change types for individual variants
+            for row in reader:
+                row.append(variantChangeTypes[row[genomicCoordinateIndex]])
+                result.append(row)
+
+            writer.writerows(result)
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -216,6 +262,8 @@ def main():
                         help="Variants with data added in version 2")
     parser.add_argument("--diff", default="diff.txt",
                         help="Variant diff output file")
+    parser.add_argument("--output", default="built_with_change.tsv",
+                        help="Output file with change_type column appended")
 
     args = parser.parse_args()
     v1In = csv.DictReader(open(args.v1, "r"), delimiter="\t")
@@ -228,10 +276,14 @@ def main():
     added_data = open(args.added_data, "w")
     global diff
     diff = open(args.diff, "w")
+
+    # Keep track of change types for all variants to append to final output file
+    variantChangeTypes = {}
+
     v1v2 = v1ToV2(v1In.fieldnames, v2In.fieldnames)
     #
-    # Save the old variants in a dictionary for which the hg38 genomic
-    # HGVS string is the key, and for which the value is the full row.
+    # Save the old variants in a dictionary for which the pyhgvs_genomic_coordinate_38
+    # string is the key, and for which the value is the full row.
     oldData = {}
     for oldRow in v1In:
         oldData[oldRow["pyhgvs_Genomic_Coordinate_38"]] = oldRow
@@ -240,15 +292,20 @@ def main():
         newData[newRow["pyhgvs_Genomic_Coordinate_38"]] = newRow
     for oldVariant in oldData.keys():
         if not newData.has_key(oldVariant):
+            variantChangeTypes[oldVariant] = CHANGE_TYPES['REMOVED']
             removed.writerow(oldData[oldVariant])
     for newVariant in newData.keys():
         if not oldData.has_key(newVariant):
+            variantChangeTypes[oldVariant] = CHANGE_TYPES['ADDED']
             added.writerow(newData[newVariant])
         else:
-            v1v2.compareRow(oldData[newVariant], newData[newVariant])
+            change_type = v1v2.compareRow(oldData[newVariant], newData[newVariant])
+            variantChangeTypes[newVariant] = change_type
 
     print "Number of variants with additions: " + str(total_variants_with_additions)
     print "Number of variants with changes: " + str(total_variants_with_changes)
+
+    appendVariantChangeTypesToOutput(variantChangeTypes, args.v2, args.output)
 
 if __name__ == "__main__":
     main()
