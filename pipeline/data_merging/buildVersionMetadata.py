@@ -8,10 +8,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--date", default=datetime.datetime.now(),
                         help="Version generation date")
-    parser.add_argument("--notes", default="release_notes.txt",
+    parser.add_argument("--notes", required=True,
                         help="File with release notes text")
-    parser.add_argument("--output", default="version.json",
-                        help="Output json file")
+    parser.add_argument("--output", default="version.json", help="Output json file")
 
     args = parser.parse_args()
 
