@@ -87,19 +87,24 @@ class transformer(object):
                     return "major change: %s %s" % (oldValue, newValue)
             else:
                 return "major change: %s %s" % (oldValue, newValue)
-        
+
 
     def compareRow(self, oldRow, newRow):
         """
         Compare the contents of an old row to a new row.  Indicate any minor
         (cosmetic) changes, major changes, or new values
         """
+        columns_to_ignore = ["Genomic_Coordinate_hg36", "Genomic_Coordinate_hg37",
+                             "Genomic_Coordinate_hg38", "Hg37_Start", "Hg37_End",
+                             "Hg36_Start", "Hg36_End", "HGVS_cDNA", "HGVS_Protein"]
+
         for field in newRow.keys():
-            result = self.compareField(oldRow, newRow, field)
-            if re.search("major change", result):
-                print field, "variant", newRow["Genomic_Coordinate_hg38"], result
-            
-        
+            if field not in columns_to_ignore:
+                result = self.compareField(oldRow, newRow, field)
+                if re.search("major change", result):
+                    print field, "variant", newRow["Genomic_Coordinate_hg38"], result
+
+
 
 
 class v1ToV2(transformer):
@@ -129,7 +134,7 @@ class v1ToV2(transformer):
         "Polyphen_Prediction" : (lambda xx: re.sub("\(*$", "", xx)),
         "Sift_Prediction" : (lambda xx: re.sub("\(*$", "", xx)),
         "Clinical_significance_citations_ENIGMA" : (lambda xx: re.sub("", "-", xx)),
-        "Date_last_evaluated_ENIGMA", : (lambda xx: re.sub("/15$", "/2015", xx)),
+        "Date_last_evaluated_ENIGMA" : (lambda xx: re.sub("/15$", "/2015", xx)),
         }
 
 
@@ -161,7 +166,7 @@ def main():
         oldData[oldRow["Genomic_Coordinate_hg38"]] = oldRow
     newData = {}
     for newRow in v2In:
-        newData[newRow["Genomic_Coordinate_hg38"]] = newRow
+        newData[newRow["pyhgvs_Genomic_Coordinate_38"]] = newRow
     for oldVariant in oldData.keys():
         if not newData.has_key(oldVariant):
             removed.writerow(oldData[oldVariant])
@@ -170,7 +175,7 @@ def main():
             added.writerow(newData[newVariant])
         else:
             v1v2.compareRow(oldData[newVariant], newData[newVariant])
-    
+
 
 if __name__ == "__main__":
     #print "hello world"

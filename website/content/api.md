@@ -14,3 +14,5 @@ Using the <a href="http://github.com/ga4gh/schemas">GA4GH schemas</a>, students 
 This allows the well curated and expert reviewed variation data in the BRCA exchange to be made available to application developers in most common languages.
 
 The BRCA exchange exposes the interfaces necessary for accessing variant data, which are a subset of the interfaces the GA4GH defines. For a detailed description of the interface view the generated <a href="/backend/static/swagger/index.html"><b>documentation</b></a>.
+
+An example of accessing variants through GA4GH client in a more systematica way can be obtained through the <a href="https://github.com/achave11/brca-exchange/blob/master/website/django/python_notebook/brca-exchange.ipynb"><b>python notebook</b></a>.
