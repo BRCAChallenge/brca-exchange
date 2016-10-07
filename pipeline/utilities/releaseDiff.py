@@ -262,7 +262,7 @@ def main():
                         help="Variants with data added in version 2")
     parser.add_argument("--diff", default="diff.txt",
                         help="Variant diff output file")
-    parser.add_argument("--output", default="built_with_change.tsv",
+    parser.add_argument("--output", default="built_with_change_types.tsv",
                         help="Output file with change_type column appended")
 
     args = parser.parse_args()
