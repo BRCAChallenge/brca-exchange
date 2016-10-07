@@ -172,8 +172,12 @@ class transformer(object):
             added_data.write(added_data_str)
             total_variants_with_additions += 1
 
-        logging.debug('Determining change type: \n Changed Classification: %s \n Changeset: %s \n Added Data: %s', changed_classification, changeset, added_data_str)
+        logging.debug('Determining change type: \n Changed Classification: %s \n Changeset: %s \n Added Data: %s',
+                      changed_classification, changeset, added_data_str)
 
+        # Change types are determined with the following precedence (Classification changes, Changed information,
+        # Added information). Note that new variants never make it to this function call and have already been
+        # classified. Removed variants are not encountered because they do not exist in v2.
         if changed_classification:
             return CHANGE_TYPES['CLASSIFICATION']
         elif len(changeset) > 0:
@@ -217,27 +221,28 @@ class v1ToV2(transformer):
 
 
 def appendVariantChangeTypesToOutput(variantChangeTypes, v2, output):
+    # This function copies v2 into the output file with an appended change_type column and
+    # appropriate change_type values for each variant.
     with open(v2, 'r') as f_in:
         with open(output, 'w') as f_out:
             writer = csv.writer(f_out, delimiter='\t')
             reader = csv.reader(f_in, delimiter='\t')
 
-            # save list for final output
+            # save rows of data for final output
             result = []
 
             # add change_type to the header
             headerRow = next(reader)
             headerRow.append('change_type')
             result.append(headerRow)
-            logging.debug('New header row for output: \n %s', headerRow)
 
             # store pyhgvs_genomic_coordinate_38 index for referencing variants in variantChangeTypes list
             genomicCoordinateIndex = headerRow.index("pyhgvs_Genomic_Coordinate_38")
 
             # add change types for individual variants
             for row in reader:
-                logging.debug('variant: %s \n variant change_type: %s', row[genomicCoordinateIndex], variantChangeTypes[row[genomicCoordinateIndex]])
                 row.append(variantChangeTypes[row[genomicCoordinateIndex]])
+                logging.debug('variant with change type: %s', row)
                 result.append(row)
 
             writer.writerows(result)
@@ -290,11 +295,9 @@ def main():
         newData[newRow["pyhgvs_Genomic_Coordinate_38"]] = newRow
     for oldVariant in oldData.keys():
         if not newData.has_key(oldVariant):
-            logging.debug('Removed: %s', oldVariant)
             removed.writerow(oldData[oldVariant])
     for newVariant in newData.keys():
         if not oldData.has_key(newVariant):
-            logging.debug('Added: %s', newVariant)
             variantChangeTypes[newVariant] = CHANGE_TYPES['ADDED']
             added.writerow(newData[newVariant])
         else:
