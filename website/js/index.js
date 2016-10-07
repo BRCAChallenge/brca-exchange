@@ -65,6 +65,7 @@ var Footer = React.createClass({
                         <li><a href="/about/history">About</a></li>
                         <li><a href="/variants">Variants</a></li>
                         <li><a href="/help">Help</a></li>
+                        <li><a href="/about/api">API</a></li>
                     </ul>
                 </div>
                 <div className="col-sm-2 logo-footer">

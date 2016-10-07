@@ -113,6 +113,10 @@ MEDIA_URL = "/site_media/media/"
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = os.path.join(PROJECT_ROOT, "static")
 
+STATICFILES_DIRS = ( 
+    os.path.join(PROJECT_ROOT, 'data/static'),
+)
+
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = "/static/"
