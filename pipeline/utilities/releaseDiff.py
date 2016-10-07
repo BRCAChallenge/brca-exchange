@@ -3,7 +3,7 @@
 import argparse
 import csv
 import re
-import pdb
+import logging
 
 added_data = None
 diff = None
@@ -137,17 +137,7 @@ class transformer(object):
         global total_variants_with_changes
 
         # Uncomment if using old data schema (e.g. pre pyhgvs_Genomic_Coordinate_38)
-        columns_to_ignore = [
-                            # "Genomic_Coordinate_hg36",
-                            # "Genomic_Coordinate_hg37",
-                            # "Genomic_Coordinate_hg38",
-                            # "Hg37_Start",
-                            # "Hg37_End",
-                            # "Hg36_Start",
-                            # "Hg36_End",
-                            # "HGVS_cDNA",
-                            # "HGVS_Protein"
-                            ]
+        columns_to_ignore = ["change_type"]
 
         # Header to group all logs the same variant
         variant_intro = "\n\n %s \n Old Source: %s \n New Source: %s \n\n" % (newRow["pyhgvs_Genomic_Coordinate_38"],
@@ -182,13 +172,16 @@ class transformer(object):
             added_data.write(added_data_str)
             total_variants_with_additions += 1
 
+        logging.debug('Determining change type: \n Changed Classification: %s \n Changeset: %s \n Added Data: %s', changed_classification, changeset, added_data_str)
+
         if changed_classification:
             return CHANGE_TYPES['CLASSIFICATION']
         elif len(changeset) > 0:
             return CHANGE_TYPES['CHANGED_INFO']
-        elif len(added_data_str):
+        elif len(added_data_str) > 0:
             return CHANGE_TYPES['ADDED_INFO']
-
+        else:
+            return None
 
 
 class v1ToV2(transformer):
@@ -236,12 +229,14 @@ def appendVariantChangeTypesToOutput(variantChangeTypes, v2, output):
             headerRow = next(reader)
             headerRow.append('change_type')
             result.append(headerRow)
+            logging.debug('New header row for output: \n %s', headerRow)
 
             # store pyhgvs_genomic_coordinate_38 index for referencing variants in variantChangeTypes list
             genomicCoordinateIndex = headerRow.index("pyhgvs_Genomic_Coordinate_38")
 
             # add change types for individual variants
             for row in reader:
+                logging.debug('variant: %s \n variant change_type: %s', row[genomicCoordinateIndex], variantChangeTypes[row[genomicCoordinateIndex]])
                 row.append(variantChangeTypes[row[genomicCoordinateIndex]])
                 result.append(row)
 
@@ -266,6 +261,9 @@ def main():
                         help="Output file with change_type column appended")
 
     args = parser.parse_args()
+
+    logging.basicConfig(filename='releaseDiff.log', filemode="w", level=logging.DEBUG)
+
     v1In = csv.DictReader(open(args.v1, "r"), delimiter="\t")
     v2In = csv.DictReader(open(args.v2, "r"), delimiter="\t")
     removed = csv.DictWriter(open(args.removed, "w"), delimiter="\t",
@@ -292,20 +290,26 @@ def main():
         newData[newRow["pyhgvs_Genomic_Coordinate_38"]] = newRow
     for oldVariant in oldData.keys():
         if not newData.has_key(oldVariant):
-            variantChangeTypes[oldVariant] = CHANGE_TYPES['REMOVED']
+            logging.debug('Removed: %s', oldVariant)
             removed.writerow(oldData[oldVariant])
     for newVariant in newData.keys():
         if not oldData.has_key(newVariant):
-            variantChangeTypes[oldVariant] = CHANGE_TYPES['ADDED']
+            logging.debug('Added: %s', newVariant)
+            variantChangeTypes[newVariant] = CHANGE_TYPES['ADDED']
             added.writerow(newData[newVariant])
         else:
+            logging.debug('Finding change type...')
             change_type = v1v2.compareRow(oldData[newVariant], newData[newVariant])
+            logging.debug("newV: %s change_type: %s", newVariant, change_type)
+            assert(newVariant not in variantChangeTypes)
             variantChangeTypes[newVariant] = change_type
+
+    # Adds change_type column and values for each variant in v2 to the output
+    appendVariantChangeTypesToOutput(variantChangeTypes, args.v2, args.output)
 
     print "Number of variants with additions: " + str(total_variants_with_additions)
     print "Number of variants with changes: " + str(total_variants_with_changes)
 
-    appendVariantChangeTypesToOutput(variantChangeTypes, args.v2, args.output)
 
 if __name__ == "__main__":
     main()
