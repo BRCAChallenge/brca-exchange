@@ -1,12 +1,19 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "GA4GH BRCA Exchange",
-    "version": "0.1",
-    "description": "meow"
+      "description": "The Genomics API developed by the Global Alliance enables DNA data providers and consumers to better share information and work together on a global scale, advancing genome research and clinical application.",
+      "version": "0.1",
+      "title": "BRCA Exchange GA4GH API",
+      "contact": {
+          "email": "ga4gh-server-support@soe.ucsc.edu"
+      },
+      "license": {
+          "name": "Apache 2.0",
+          "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+      }
   },
-  "host": "brcaexchange.org",
-  "basePath": "backend/data/ga4gh"
+  "host": "brcaexchange.org/",
+  "basePath": "backend/data/ga4gh",
   "schemes": [
     "http",
     "https"
