@@ -184,19 +184,31 @@ class v1ToV2(transformer):
     # lambda function that if applied to the old value, would generate the equivalent new value.
     #
     _makeExpectedChanges = {
+        # ignore leading commas in the old data
         "Synonyms": (lambda xx: re.sub("^,", "", xx)),
+        # overlook the following:
+        # - version numbers being provided in the new but not old accession
+        # - the addition of parentheses as delimiters
+        # - colons as delimiters before the 'p'
         "HGVS_Protein": (lambda xx: re.sub(".p.", ":p.",
                                            re.sub("$", ")",
                                                   re.sub("p.", "p.(",
                                                          re.sub("NM_000059", "NP_000050.2",
                                                                 xx))))),
+        # The reference sequence is accessioned in the new but not old data
         "Reference_Sequence": (lambda xx: re.sub("NM_000059", "NM_000059.3",
                                                  re.sub("NM_007294", "NM_007294.3", xx))),
+        # In an annoying thing, the old ExAC allele frequency was missing a ')'
         "Allele_Frequency": (lambda xx: re.sub("\(ExAC", "(ExAC)", xx)),
+        # for polyphen and sift predictions, the old data combined the 
+        # numerical and categorical scores
         "Polyphen_Prediction": (lambda xx: re.sub("\(*$", "", xx)),
         "Sift_Prediction": (lambda xx: re.sub("\(*$", "", xx)),
+        # In the new data, empty fields are indicated by a single hyphen
         "Clinical_significance_citations_ENIGMA": (lambda xx: re.sub("", "-", xx)),
+        # The old dates had two-digit years.  Now, the years have four digits.
         "Date_last_evaluated_ENIGMA": (lambda xx: re.sub("/15$", "/2015", xx)),
+        # Nagging trailing underscore...
         "Submitter_ClinVar": (lambda xx: re.sub("Invitae_", "Invitae", xx))
         }
 
@@ -222,8 +234,10 @@ def main():
     v2In = csv.DictReader(open(args.v2, "r"), delimiter="\t")
     removed = csv.DictWriter(open(args.removed, "w"), delimiter="\t",
                              fieldnames=v1In.fieldnames)
+    removed.writeheader()
     added = csv.DictWriter(open(args.added, "w"), delimiter="\t",
                            fieldnames=v2In.fieldnames)
+    added.writeheader()
     global added_data
     added_data = open(args.added_data, "w")
     global diff
