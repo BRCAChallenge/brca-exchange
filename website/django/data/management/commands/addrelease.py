@@ -14,14 +14,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         variants_tsv = options['variants']
         notes = json.load(options['notes'])
-        release_number = notes['release_number']
 
-        #print "Variant Count:", sum(1 for line in variants_tsv)
-        print "Release:", notes['release_number']
-        print "Timestamp:", notes['timestamp']
-        print "Comment:", notes['comment']
-
-        DataRelease.objects.create(id=release_number, timestamp=notes['timestamp'], comment=notes['comment'])
+        release_id = DataRelease.objects.create(**notes).id
 
         reader = csv.reader(variants_tsv, dialect="excel-tab")
         header = reader.next()
@@ -33,23 +27,17 @@ class Command(BaseCommand):
             row_dict = dict(zip(header, row))
             for source in row_dict['Source'].split(','):
                 row_dict['Variant_in_' + source] = True
-            row_dict['Data_Release_id'] = release_number
-            previous_version = Variant.objects.filter(Genomic_Coordinate_hg38 = row_dict['Genomic_Coordinate_hg38']).order_by('Data_Release_id').values()
-            if previous_version:
-                previous_version = previous_version[0]
-                if row_dict['Pathogenicity_Default'] != previous_version['Pathogenicity_Default']:
-                    row_dict['Change_Type_id'] = change_types['major']
-                else:
-                    for field in header:
-                        if field not in row_dict:
-                            print "Field [", field, "] not present in new data"
-                        else:
-                            new = row_dict[field]
-                            old = previous_version[field]
-                            if new != old:
-                                print "Changed: [", field, "]", old, "->", new
-                                row_dict['Change_Type_id'] = change_types['minor']
-            else:
-                row_dict['Change_Type_id'] = change_types['added']
+            row_dict['Data_Release_id'] = release_id
+            row_dict['Change_Type_id'] = change_types[row_dict.pop('change_type')]
+            # use cleaned up genomic coordinates
+            row_dict['Genomic_Coordinate_hg38'] = row_dict.pop('pyhgvs_Genomic_Coordinate_38')
+            row_dict['Genomic_Coordinate_hg37'] = row_dict.pop('pyhgvs_Genomic_Coordinate_37')
+            row_dict['Genomic_Coordinate_hg36'] = row_dict.pop('pyhgvs_Genomic_Coordinate_36')
+            row_dict['Hg37_Start'] = row_dict.pop('pyhgvs_Hg37_Start')
+            row_dict['Hg37_End'] = row_dict.pop('pyhgvs_Hg37_End')
+            row_dict['Hg36_Start'] = row_dict.pop('pyhgvs_Hg36_Start')
+            row_dict['Hg36_End'] = row_dict.pop('pyhgvs_Hg36_End')
+            row_dict['HGVS_cDNA'] = row_dict.pop('pyhgvs_cDNA')
+            row_dict['HGVS_Protein'] = row_dict.pop('pyhgvs_Protein')
 
             Variant.objects.create_variant(row_dict)

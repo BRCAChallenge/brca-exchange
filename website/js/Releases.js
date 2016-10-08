@@ -1,4 +1,3 @@
-/*global grecaptcha: false */
 'use strict';
 
 var React = require('react');
@@ -16,11 +15,11 @@ var Releases = React.createClass({
     render: function () {
         var rows = _.map(this.state.releases, release => (
             <tr>
-                <td>{release.id}</td>
-                <td>{release.timestamp}</td>
-                <td>{release.comment}</td>
+                <td><a href={release.data_link}>Link</a></td>
+                <td>{release.date_released}</td>
+                <td>{release.data_sources}</td>
                 <td>{release.variants_added}</td>
-                <td>meh</td>
+                <td>{release.variants_classified}</td>
                 <td>{release.variants_modified}</td>
                 <td>{release.variants_deleted}</td>
             </tr>
@@ -34,7 +33,7 @@ var Releases = React.createClass({
                     <Col sm={8} smOffset={2}>
                         <table className="table table-bordered table-condensed">
                             <thead>
-                                <th>Raw Data</th>
+                                <th>Data</th>
                                 <th>Date</th>
                                 <th>Data Sources</th>
                                 <th>New Variants</th>

@@ -465,8 +465,8 @@ var VariantDetail = React.createClass({
             /* eslint-disable dot-notation */
             versionRows.push(
                 <tr>
-                    <td>{release["timestamp"]}</td>
-                    <td>{version["Pathogenicity_default"]}</td>
+                    <td>{release["date_released"]}</td>
+                    <td>{version["Pathogenicity_expert"]}</td>
                     <td>{changes}</td>
                 </tr>
             );

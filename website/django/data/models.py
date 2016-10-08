@@ -1,15 +1,11 @@
 from django.db import models
 
 class DataRelease(models.Model):
-    id = models.IntegerField(primary_key=True)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    comment = models.TextField()
-    variants_added = models.IntegerField(default=0)
-    variants_modified = models.IntegerField(default=0)
-    variants_deleted = models.IntegerField(default=0)
-    # Schema Changes
-    columns_added = models.TextField(null=True)
-    columns_deleted = models.TextField(null=True)
+    data_schema = models.TextField()
+    data_link = models.TextField()
+    date_released = models.DateTimeField()
+    release_notes = models.TextField()
+    md5sum = models.TextField()
 
     class Meta:
         db_table = "data_release"
@@ -53,7 +49,6 @@ class Variant(models.Model):
     Allele_Origin_ClinVar = models.TextField()
     Method_ClinVar = models.TextField()
     Functional_analysis_result_LOVD = models.TextField()
-    Origin_of_variant_LOVD = models.TextField()
     Functional_analysis_technique_LOVD = models.TextField()
     Variant_frequency_LOVD = models.TextField()
     Variant_haplotype_LOVD = models.TextField()
@@ -81,13 +76,12 @@ class Variant(models.Model):
     Posterior_probability_exLOVD = models.TextField()
     Missense_analysis_prior_probability_exLOVD = models.TextField()
     Segregation_LR_exLOVD = models.TextField()
-    SIFT_VEP = models.TextField()
-    PolyPhen_VEP = models.TextField()
     Gene_Symbol = models.TextField()
     Reference_Sequence = models.TextField()
     HGVS_cDNA = models.TextField()
-    BIC_Identifier = models.TextField()
+    BIC_Nomenclature = models.TextField()
     HGVS_Protein = models.TextField()
+    HGVS_RNA = models.TextField()
     Protein_Change = models.TextField()
     Allele_Frequency = models.TextField()
     Max_Allele_Frequency = models.TextField()
@@ -103,8 +97,17 @@ class Variant(models.Model):
     Source_URL = models.TextField()
     Discordant = models.TextField()
     Synonyms = models.TextField()
-    Pathogenicity_default = models.TextField()
-    Pathogenicity_research = models.TextField()
+    Pathogenicity_expert = models.TextField()
+    Pathogenicity_all = models.TextField()
+    Chr = models.TextField()
+    Pos = models.TextField()
+    Ref = models.TextField()
+    Alt = models.TextField()
+    Polyphen_Prediction = models.TextField()
+    Polyphen_Score = models.TextField()
+    Sift_Score = models.TextField()
+    Sift_Prediction = models.TextField()
+    
 
     # Data Versioning
     Data_Release = models.ForeignKey(DataRelease)

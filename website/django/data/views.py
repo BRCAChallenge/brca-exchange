@@ -9,11 +9,18 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.gzip import gzip_page
 
-from .models import Variant
-from .models import DataRelease
+from .models import Variant, DataRelease, ChangeType
 
 def releases(request):
-    response = JsonResponse(list(DataRelease.objects.values().all()), safe=False)
+    releases = DataRelease.objects.values().all()
+    change_types = {x['name']:x['id'] for x in ChangeType.objects.values().all()}
+    for release in releases:
+        variants = Variant.objects.filter(Data_Release_id = release['id'])
+        release['variants_added'] = variants.filter(Change_Type_id = change_types['new']).count()
+        release['variants_classified'] = variants.filter(Change_Type_id = change_types['new_classification']).count()
+        release['variants_modified'] = variants.filter(Change_Type_id = change_types['modified']).count()
+        release['variants_deleted'] = variants.filter(Change_Type_id = change_types['deleted']).count()
+    response = JsonResponse(list(releases), safe=False)
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
@@ -33,7 +40,7 @@ def variant(request):
 def variant_to_dict(variant_object):
     variant_dict = model_to_dict(variant_object)
     variant_dict["Data_Release"] = model_to_dict(variant_object.Data_Release)
-    variant_dict["Data_Release"]["timestamp"] = variant_object.Data_Release.timestamp
+    variant_dict["Data_Release"]["date_released"] = variant_object.Data_Release.date_released
     return variant_dict
     
 @gzip_page
@@ -141,7 +148,7 @@ def apply_order(query, order_by, direction):
         order_by = 'Genomic_Coordinate_hg38'
     if direction == 'descending':
         order_by = '-' + order_by
-    return query.order_by(order_by, 'Pathogenicity_default')
+    return query.order_by(order_by, 'Pathogenicity_expert')
 
 
 def select_page(query, page_size, page_num):
