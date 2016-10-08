@@ -17,8 +17,10 @@ def releases(request):
     for release in releases:
         variants = Variant.objects.filter(Data_Release_id = release['id'])
         release['variants_added'] = variants.filter(Change_Type_id = change_types['new']).count()
-        release['variants_classified'] = variants.filter(Change_Type_id = change_types['new_classification']).count()
-        release['variants_modified'] = variants.filter(Change_Type_id = change_types['modified']).count()
+        release['variants_classified'] = variants.filter(
+            Q(Change_Type_id = change_types['changed_classification']) | Q(Change_Type_id = change_types['added_classification'])).count()
+        release['variants_modified'] = variants.filter(
+            Q(Change_Type_id = change_types['added_information']) | Q(Change_Type_id = change_types['changed_information'])).count()
         release['variants_deleted'] = variants.filter(Change_Type_id = change_types['deleted']).count()
     response = JsonResponse(list(releases), safe=False)
     response['Access-Control-Allow-Origin'] = '*'
