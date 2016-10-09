@@ -1,6 +1,7 @@
 'use strict';
 
 var React = require('react');
+var {Link} = require('react-router');
 var {Grid, Row, Col} = require('react-bootstrap');
 var _ = require('underscore');
 var backend = require('./backend');
@@ -18,10 +19,10 @@ var Releases = React.createClass({
                 <td><a href={release.data_link}>Link</a></td>
                 <td>{release.date_released}</td>
                 <td>{release.data_sources}</td>
-                <td>{release.variants_added}</td>
-                <td>{release.variants_classified}</td>
-                <td>{release.variants_modified}</td>
-                <td>{release.variants_deleted}</td>
+                <td><Link to={`/variants?release=${release.id}&changeTypes[]=new`}>{release.variants_added}</Link></td>
+                <td><Link to={`/variants?release=${release.id}&changeTypes[]=added_classification&changeTypes[]=changed_classification`}>{release.variants_classified}</Link></td>
+                <td><Link to={`/variants?release=${release.id}&changeTypes[]=added_information&changeTypes[]=changed_information`}>{release.variants_modified}</Link></td>
+                <td><Link to={`/variants?release=${release.id}&changeTypes[]=deleted`}>{release.variants_deleted}</Link></td>
             </tr>
         ));
         return (

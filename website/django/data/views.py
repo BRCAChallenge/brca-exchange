@@ -59,9 +59,14 @@ def index(request):
     filter_values = request.GET.getlist('filterValue')
     column = request.GET.getlist('column')
     release = request.GET.get('release')
+    change_types = request.GET.getlist('change_types')
+    change_types_map = {x['name']:x['id'] for x in ChangeType.objects.values().all()}
 
     if release:
         query = Variant.objects.filter(Data_Release_id = int(release))
+        if(change_types):
+            change_types = map(lambda c: change_types_map[c], filter(lambda c: c in change_types_map, change_types))
+            query = query.filter(Change_Type_id__in = change_types)
     else:
         latest = Variant.objects.distinct('Genomic_Coordinate_hg38').order_by('Genomic_Coordinate_hg38', '-Data_Release_id')
         query = Variant.objects.filter(id__in = latest)

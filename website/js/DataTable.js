@@ -117,9 +117,11 @@ var DataTable = React.createClass({
         });
     },
     createDownload: function () {
-        var {search, sortBy, filterValues, columnSelection, sourceSelection} = this.state;
+        var {release, changeTypes, search, sortBy, filterValues, columnSelection, sourceSelection} = this.state;
         return this.props.url(merge({
             format: 'csv',
+            release,
+            changeTypes,
             pageLength: null,
             page: null,
             sortBy,
@@ -140,9 +142,10 @@ var DataTable = React.createClass({
     },
     fetch: function (state) {
         var {pageLength, search, page, sortBy,
-            filterValues, columnSelection, sourceSelection, release} = state;
+            filterValues, columnSelection, sourceSelection, release, changeTypes} = state;
         this.fetchq.onNext(merge({
             release,
+            changeTypes,
             pageLength,
             page,
             sortBy,
