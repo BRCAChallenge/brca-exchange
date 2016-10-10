@@ -3,11 +3,24 @@
 import argparse
 import csv
 import re
+import logging
 
 added_data = None
 diff = None
 total_variants_with_changes = 0
 total_variants_with_additions = 0
+
+# Change types as used in the DB to signify changes to variants between versions
+CHANGE_TYPES = {
+                "REMOVED": "deleted",
+                "ADDED": "new",
+                "CLASSIFICATION": "changed_classification",
+                "ADDED_INFO": "added_information",
+                "CHANGED_INFO": "changed_information"
+                }
+
+# Field used to denote pathogenic classification of a variant from all sources
+CLASSIFICATION_FIELD = "Pathogenicity_all"
 
 class transformer(object):
     """
@@ -124,17 +137,7 @@ class transformer(object):
         global total_variants_with_changes
 
         # Uncomment if using old data schema (e.g. pre pyhgvs_Genomic_Coordinate_38)
-        columns_to_ignore = [
-                            # "Genomic_Coordinate_hg36",
-                            # "Genomic_Coordinate_hg37",
-                            # "Genomic_Coordinate_hg38",
-                            # "Hg37_Start",
-                            # "Hg37_End",
-                            # "Hg36_Start",
-                            # "Hg36_End",
-                            # "HGVS_cDNA",
-                            # "HGVS_Protein"
-                            ]
+        columns_to_ignore = ["change_type"]
 
         # Header to group all logs the same variant
         variant_intro = "\n\n %s \n Old Source: %s \n New Source: %s \n\n" % (newRow["pyhgvs_Genomic_Coordinate_38"],
@@ -142,6 +145,7 @@ class transformer(object):
 
         changeset = ""
         added_data_str = ""
+        changed_classification = False
 
         for field in newRow.keys():
             if field not in columns_to_ignore:
@@ -152,6 +156,9 @@ class transformer(object):
                 if re.search("added data", result):
                     result = re.sub("added data: ", "", result)
                     added_data_str += "%s: %s \n" % (field, result)
+                if field == CLASSIFICATION_FIELD and oldRow[field] != newRow[field]:
+                    changed_classification = True
+
 
         # If there are any changes, log them in the diff
         if len(changeset) > 0:
@@ -165,8 +172,20 @@ class transformer(object):
             added_data.write(added_data_str)
             total_variants_with_additions += 1
 
+        logging.debug('Determining change type: \n Changed Classification: %s \n Changeset: %s \n Added Data: %s',
+                      changed_classification, changeset, added_data_str)
 
-
+        # Change types are determined with the following precedence (Classification changes, Changed information,
+        # Added information). Note that new variants never make it to this function call and have already been
+        # classified. Removed variants are not encountered because they do not exist in v2.
+        if changed_classification:
+            return CHANGE_TYPES['CLASSIFICATION']
+        elif len(changeset) > 0:
+            return CHANGE_TYPES['CHANGED_INFO']
+        elif len(added_data_str) > 0:
+            return CHANGE_TYPES['ADDED_INFO']
+        else:
+            return None
 
 
 class v1ToV2(transformer):
@@ -184,22 +203,61 @@ class v1ToV2(transformer):
     # lambda function that if applied to the old value, would generate the equivalent new value.
     #
     _makeExpectedChanges = {
+        # ignore leading commas in the old data
         "Synonyms": (lambda xx: re.sub("^,", "", xx)),
+        # overlook the following:
+        # - version numbers being provided in the new but not old accession
+        # - the addition of parentheses as delimiters
+        # - colons as delimiters before the 'p'
         "HGVS_Protein": (lambda xx: re.sub(".p.", ":p.",
                                            re.sub("$", ")",
                                                   re.sub("p.", "p.(",
                                                          re.sub("NM_000059", "NP_000050.2",
                                                                 xx))))),
+        # The reference sequence is accessioned in the new but not old data
         "Reference_Sequence": (lambda xx: re.sub("NM_000059", "NM_000059.3",
                                                  re.sub("NM_007294", "NM_007294.3", xx))),
+        # In an annoying thing, the old ExAC allele frequency was missing a ')'
         "Allele_Frequency": (lambda xx: re.sub("\(ExAC", "(ExAC)", xx)),
+        # for polyphen and sift predictions, the old data combined the 
+        # numerical and categorical scores
         "Polyphen_Prediction": (lambda xx: re.sub("\(*$", "", xx)),
         "Sift_Prediction": (lambda xx: re.sub("\(*$", "", xx)),
+        # In the new data, empty fields are indicated by a single hyphen
         "Clinical_significance_citations_ENIGMA": (lambda xx: re.sub("", "-", xx)),
+        # The old dates had two-digit years.  Now, the years have four digits.
         "Date_last_evaluated_ENIGMA": (lambda xx: re.sub("/15$", "/2015", xx)),
+        # Nagging trailing underscore...
         "Submitter_ClinVar": (lambda xx: re.sub("Invitae_", "Invitae", xx))
         }
 
+
+def appendVariantChangeTypesToOutput(variantChangeTypes, v2, output):
+    # This function copies v2 into the output file with an appended change_type column and
+    # appropriate change_type values for each variant.
+    with open(v2, 'r') as f_in:
+        with open(output, 'w') as f_out:
+            writer = csv.writer(f_out, delimiter='\t')
+            reader = csv.reader(f_in, delimiter='\t')
+
+            # save rows of data for final output
+            result = []
+
+            # add change_type to the header
+            headerRow = next(reader)
+            headerRow.append('change_type')
+            result.append(headerRow)
+
+            # store pyhgvs_genomic_coordinate_38 index for referencing variants in variantChangeTypes list
+            genomicCoordinateIndex = headerRow.index("pyhgvs_Genomic_Coordinate_38")
+
+            # add change types for individual variants
+            for row in reader:
+                row.append(variantChangeTypes[row[genomicCoordinateIndex]])
+                logging.debug('variant with change type: %s', row)
+                result.append(row)
+
+            writer.writerows(result)
 
 
 def main():
@@ -216,22 +274,33 @@ def main():
                         help="Variants with data added in version 2")
     parser.add_argument("--diff", default="diff.txt",
                         help="Variant diff output file")
+    parser.add_argument("--output", default="built_with_change_types.tsv",
+                        help="Output file with change_type column appended")
 
     args = parser.parse_args()
+
+    logging.basicConfig(filename='releaseDiff.log', filemode="w", level=logging.DEBUG)
+
     v1In = csv.DictReader(open(args.v1, "r"), delimiter="\t")
     v2In = csv.DictReader(open(args.v2, "r"), delimiter="\t")
     removed = csv.DictWriter(open(args.removed, "w"), delimiter="\t",
                              fieldnames=v1In.fieldnames)
+    removed.writeheader()
     added = csv.DictWriter(open(args.added, "w"), delimiter="\t",
                            fieldnames=v2In.fieldnames)
+    added.writeheader()
     global added_data
     added_data = open(args.added_data, "w")
     global diff
     diff = open(args.diff, "w")
+
+    # Keep track of change types for all variants to append to final output file
+    variantChangeTypes = {}
+
     v1v2 = v1ToV2(v1In.fieldnames, v2In.fieldnames)
     #
-    # Save the old variants in a dictionary for which the hg38 genomic
-    # HGVS string is the key, and for which the value is the full row.
+    # Save the old variants in a dictionary for which the pyhgvs_genomic_coordinate_38
+    # string is the key, and for which the value is the full row.
     oldData = {}
     for oldRow in v1In:
         oldData[oldRow["pyhgvs_Genomic_Coordinate_38"]] = oldRow
@@ -243,12 +312,21 @@ def main():
             removed.writerow(oldData[oldVariant])
     for newVariant in newData.keys():
         if not oldData.has_key(newVariant):
+            variantChangeTypes[newVariant] = CHANGE_TYPES['ADDED']
             added.writerow(newData[newVariant])
         else:
-            v1v2.compareRow(oldData[newVariant], newData[newVariant])
+            logging.debug('Finding change type...')
+            change_type = v1v2.compareRow(oldData[newVariant], newData[newVariant])
+            logging.debug("newV: %s change_type: %s", newVariant, change_type)
+            assert(newVariant not in variantChangeTypes)
+            variantChangeTypes[newVariant] = change_type
+
+    # Adds change_type column and values for each variant in v2 to the output
+    appendVariantChangeTypesToOutput(variantChangeTypes, args.v2, args.output)
 
     print "Number of variants with additions: " + str(total_variants_with_additions)
     print "Number of variants with changes: " + str(total_variants_with_changes)
+
 
 if __name__ == "__main__":
     main()
