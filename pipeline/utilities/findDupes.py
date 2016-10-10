@@ -11,7 +11,7 @@ def main():
                         help="File with data to check")
     parser.add_argument("--output", default="dupes.txt",
                         help="File with duplicates")
-    parser.add_argument("--column", default="'Genomic_Coordinate_hg38'",
+    parser.add_argument("--column", default="pyhgvs_Genomic_Coordinate_38",
                         help="Column to search for duplicates")
 
     args = parser.parse_args()
