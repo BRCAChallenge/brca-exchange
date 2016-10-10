@@ -195,7 +195,7 @@ var DataTable = React.createClass({
         var changeString;
         if (changeTypes) {
             if (changeTypes.includes('new')) {
-                changeString = "new";
+                changeString = "added";
             } else if (changeTypes.includes('added_information')) {
                 changeString = "with new or changed information";
             } else if (changeTypes.includes('added_classification')) {

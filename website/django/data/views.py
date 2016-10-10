@@ -12,7 +12,11 @@ from django.views.decorators.gzip import gzip_page
 from .models import Variant, DataRelease, ChangeType
 
 def releases(request):
-    releases = DataRelease.objects.values().all()
+    release_id = request.GET.get('release_id')
+    if release_id:
+        releases = DataRelease.objects.filter(id = release_id).values().all()
+    else:
+        releases = DataRelease.objects.values().all()
     change_types = {x['name']:x['id'] for x in ChangeType.objects.values().all()}
     for release in releases:
         variants = Variant.objects.filter(Data_Release_id = release['id'])

@@ -72,6 +72,10 @@ function releases() {
     return Rx.DOM.get(`${config.backend_url}/data/releases`).map(xhr => JSON.parse(xhr.responseText));
 }
 
+function release(id) {
+    return Rx.DOM.get(`${config.backend_url}/data/releases?release_id=${id}`).map(xhr => JSON.parse(xhr.responseText));
+}
+
 function users(opts) {
     var {page, pageLength, search} = opts;
     var usersUrl = `${config.backend_url}/accounts/users/?${qs.stringify(_.pick({
@@ -98,6 +102,7 @@ module.exports = {
     data,
     variant,
     releases,
+    release,
     users,
     userLocations,
     lollipopData,
