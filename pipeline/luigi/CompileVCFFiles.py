@@ -112,6 +112,7 @@ lovd_method_dir = os.path.abspath('../lovd')
 g1k_method_dir = os.path.abspath('../1000_Genomes')
 enigma_method_dir = os.path.abspath('../enigma')
 data_merging_method_dir = os.path.abspath('../data_merging')
+utilities_method_dir = os.path.abspath('../utilities')
 
 
 ###############################################
@@ -1280,8 +1281,8 @@ class MergeVCFsIntoTSVFile(luigi.Task):
     file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
                                       description='directory to store all individual task related files')
 
-    previous_release = luigi.Parameter(description='previous release for diffing versions and producing \
-                                       change types for variants')
+    previous_release = luigi.Parameter(default=None, description='previous release for diffing versions \
+                                       and producing change types for variants')
 
     def output(self):
         release_dir = create_path_if_nonexistent(self.output_dir + "/release/")
@@ -1383,7 +1384,7 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
     def run(self):
         release_dir = self.output_dir + "/release/"
         brca_resources_dir = self.resources_dir
-        os.chdir(data_merging_method_dir)
+        os.chdir(utilities_method_dir)
 
         args = ["python", "releaseDiff.py", "--v2", release_dir + "built.tsv", "--v1", self.previous_release,
                 "--removed", release_dir + "removed.tsv", "--added", release_dir + "added.tsv", "--added_data",
@@ -1419,8 +1420,8 @@ class RunAll(luigi.WrapperTask):
     file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
                                       description='directory to store all individual task related files')
 
-    previous_release = luigi.Parameter(description='previous release for diffing versions and producing \
-                                       change types for variants')
+    previous_release = luigi.Parameter(default=None, description='previous release for diffing versions \
+                                       and producing change types for variants')
 
     def requires(self):
         # If a previous release is provided, run the releaseDiff.py script to generate change_types
