@@ -1284,6 +1284,8 @@ class MergeVCFsIntoTSVFile(luigi.Task):
     previous_release = luigi.Parameter(default=None, description='previous release for diffing versions \
                                        and producing change types for variants')
 
+    release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
+
     def output(self):
         release_dir = create_path_if_nonexistent(self.output_dir + "/release/")
         return luigi.LocalTarget(release_dir + "merged.tsv")
@@ -1383,7 +1385,6 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
 
     def run(self):
         release_dir = self.output_dir + "/release/"
-        brca_resources_dir = self.resources_dir
         os.chdir(utilities_method_dir)
 
         args = ["python", "releaseDiff.py", "--v2", release_dir + "built.tsv", "--v1", self.previous_release,
@@ -1395,6 +1396,26 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
         print_subprocess_output_and_error(sp)
 
         check_file_for_contents(release_dir + "built_with_change_types.tsv")
+
+
+@requires(RunDiffAndAppendChangeTypesToOutput)
+class GenerateReleaseNotes(luigi.Task):
+
+    def output(self):
+        release_dir = self.output_dir + "/release/"
+        return luigi.LocalTarget(release_dir + "version.json")
+
+    def run(self):
+        release_dir = self.output_dir + "/release/"
+        os.chdir(data_merging_method_dir)
+
+        args = ["python", "buildVersionMetadata.py", "--date", str(self.date), "--notes", self.release_notes, "--output",
+                release_dir + "version.json"]
+        print "Running buildVersionMetadata.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(release_dir + "version.json")
 
 
 ###############################################
@@ -1423,10 +1444,15 @@ class RunAll(luigi.WrapperTask):
     previous_release = luigi.Parameter(default=None, description='previous release for diffing versions \
                                        and producing change types for variants')
 
+    release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
+
     def requires(self):
         # If a previous release is provided, run the releaseDiff.py script to generate change_types
         # between releases of variants.
-        if self.previous_release:
+        if self.release_notes and self.previous_release:
+            yield GenerateReleaseNotes(self.date, self.resources_dir, self.output_dir,
+                                       self.file_parent_dir, self.previous_release, self.release_notes)
+        elif self.previous_release:
             yield RunDiffAndAppendChangeTypesToOutput(self.date, self.resources_dir, self.output_dir,
                                                       self.file_parent_dir, self.previous_release)
         else:
