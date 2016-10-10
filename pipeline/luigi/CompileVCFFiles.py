@@ -1280,6 +1280,9 @@ class MergeVCFsIntoTSVFile(luigi.Task):
     file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
                                       description='directory to store all individual task related files')
 
+    previous_release = luigi.Parameter(description='previous release for diffing versions and producing \
+                                       change types for variants')
+
     def output(self):
         release_dir = create_path_if_nonexistent(self.output_dir + "/release/")
         return luigi.LocalTarget(release_dir + "merged.tsv")
@@ -1366,6 +1369,33 @@ class BuildAggregatedOutput(luigi.Task):
         check_file_for_contents(release_dir + "built.tsv")
 
 
+@requires(BuildAggregatedOutput)
+class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
+
+    def output(self):
+        release_dir = self.output_dir + "/release/"
+        return {'built_with_change_types': luigi.LocalTarget(release_dir + "built_with_change_types.tsv"),
+                'removed': luigi.LocalTarget(release_dir + "removed.tsv"),
+                'added': luigi.LocalTarget(release_dir + "added.tsv"),
+                'added_data': luigi.LocalTarget(release_dir + "added_data.tsv"),
+                'diff': luigi.LocalTarget(release_dir + "diff.txt")}
+
+    def run(self):
+        release_dir = self.output_dir + "/release/"
+        brca_resources_dir = self.resources_dir
+        os.chdir(data_merging_method_dir)
+
+        args = ["python", "releaseDiff.py", "--v2", release_dir + "built.tsv", "--v1", self.previous_release,
+                "--removed", release_dir + "removed.tsv", "--added", release_dir + "added.tsv", "--added_data",
+                release_dir + "added_data.tsv", "--diff", release_dir + "diff.txt", "--output",
+                release_dir + "built_with_change_types.tsv"]
+        print "Running releaseDiff.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(release_dir + "built_with_change_types.tsv")
+
+
 ###############################################
 #              MASTER RUN TASK                #
 ###############################################
@@ -1389,8 +1419,18 @@ class RunAll(luigi.WrapperTask):
     file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
                                       description='directory to store all individual task related files')
 
+    previous_release = luigi.Parameter(description='previous release for diffing versions and producing \
+                                       change types for variants')
+
     def requires(self):
-        yield BuildAggregatedOutput(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        # If a previous release is provided, run the releaseDiff.py script to generate change_types
+        # between releases of variants.
+        if self.previous_release:
+            yield RunDiffAndAppendChangeTypesToOutput(self.date, self.resources_dir, self.output_dir,
+                                                      self.file_parent_dir, self.previous_release)
+        else:
+            yield BuildAggregatedOutput(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+
         yield CopyClinvarVCFToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyESPOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyBICOutputToOutputDir(self.date, self.u, self.p, self.resources_dir, self.output_dir,
@@ -1400,5 +1440,5 @@ class RunAll(luigi.WrapperTask):
         yield CopyEXLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopySharedLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield DownloadLatestEnigmaData(self.date, self.synapse_username, self.synapse_password,
-                                      self.synapse_enigma_file_id, self.resources_dir,
-                                      self.output_dir, self.file_parent_dir)
+                                       self.synapse_enigma_file_id, self.resources_dir,
+                                       self.output_dir, self.file_parent_dir)
