@@ -448,31 +448,6 @@ var VariantDetail = React.createClass({
 				</tr>);
         });
 
-        var versionRows = [];
-        for (var i = 0; i < data.length; i++) {
-            var version = data[i],
-                changes = [],
-                release = version["Data_Release"]; //eslint-disable-line dot-notation
-
-            // if this is not the oldest version of the variant, diff them
-            if (i < data.length - 1) {
-                var previous = data[i + 1];
-                for (var key in version) {
-                    if (!_.contains(["Data_Release", "id"], key) && version[key] !== previous[key]) { //eslint-disable-line dot-notation
-                        changes.push(<span><strong>{key.replace(/_/g, " ")}:</strong> {previous[key]} <span className="glyphicon glyphicon-arrow-right"></span> {version[key]}</span>, <br />);
-                    }
-                }
-            }
-            /* eslint-disable dot-notation */
-            versionRows.push(
-                <tr>
-                    <td>{release["date_released"]}</td>
-                    <td>{version["Pathogenicity_expert"]}</td>
-                    <td>{changes}</td>
-                </tr>
-            );
-            /* eslint-enable dot-notation */
-        }
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
@@ -485,24 +460,6 @@ var VariantDetail = React.createClass({
                         <Table striped bordered>
                             <tbody>
                                 {rows}
-                            </tbody>
-                        </Table>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col md={8} mdOffset={2}>
-                        { /* eslint-disable dot-notation */ }
-                        <h3>{variant["HGVS_cDNA"]}</h3>
-                        { /* eslint-enable dot-notation */ }
-                        <h4>Previous Versions of this Variant:</h4>
-                        <Table bordered>
-                            <thead>
-                                <th>Date</th>
-                                <th>Clinical Significance</th>
-                                <th>Changes</th>
-                            </thead>
-                            <tbody>
-                                {versionRows}
                             </tbody>
                         </Table>
                     </Col>
