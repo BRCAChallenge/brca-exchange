@@ -75,7 +75,7 @@ def index(request):
         latest = Variant.objects.distinct('Genomic_Coordinate_hg38').order_by('Genomic_Coordinate_hg38', '-Data_Release_id')
         query = Variant.objects.filter(id__in = latest).exclude(Change_Type_id = change_types_map['deleted'])
 
-    if format == 'csv':
+    if format == 'csv' or format == 'tsv':
         quotes = '\''
     else:
         quotes = ''
@@ -100,6 +100,17 @@ def index(request):
 
             response = HttpResponse(f.read(), content_type='text/csv')
             response['Content-Disposition'] = 'attachment;filename="variants.csv"'
+            return response
+
+    elif format == 'tsv':
+
+        cursor = connection.cursor()
+        with tempfile.NamedTemporaryFile() as f:
+            os.chmod(f.name, 0606)
+            cursor.execute("COPY ({}) TO '{}' WITH DELIMITER '\t' CSV HEADER".format(query.query, f.name))
+
+            response = HttpResponse(f.read(), content_type='text/csv')
+            response['Content-Disposition'] = 'attachment;filename="variants.tsv"'
             return response
 
     elif format == 'json':

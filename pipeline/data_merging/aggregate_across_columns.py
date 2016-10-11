@@ -148,6 +148,10 @@ def unpackHgvs(hgvsString):
     elif re.search(".c.", firstHgvsString):
         transcript = firstHgvsString.split(".c.")[0]
         suffix = re.sub(transcript+".", "", hgvsString)
+    elif re.search(".g.", firstHgvsString):
+        transcript = firstHgvsString.split(".g.")[0]
+        suffix = re.sub(transcript+".", "", hgvsString)
+    #TODO: Could use an else case, transcript assignment errors could occurs here.
     return(transcript, suffix)
 
 
@@ -204,27 +208,32 @@ def selectMaxAlleleFrequency(newRow):
                 maxFreq = aa
                 maxFreqString = "%f (AA from ESP)" % aa
     if newRow["EUR_Allele_frequency_1000_Genomes"] != EMPTY:
-        eur_af = float(newRow["EUR_Allele_frequency_1000_Genomes"])
+        freqs = [float(i) for i in newRow["EUR_Allele_frequency_1000_Genomes"].split(',')]
+        eur_af = max(freqs)
         if eur_af > maxFreq:
             maxFreq = eur_af
             maxFreqString = "%f (EUR from 1000 Genomes)" % eur_af
     if newRow["AFR_Allele_frequency_1000_Genomes"] != EMPTY:
-        afr_af = float(newRow["AFR_Allele_frequency_1000_Genomes"])
+        freqs = [float(i) for i in newRow["AFR_Allele_frequency_1000_Genomes"].split(',')]
+        afr_af = max(freqs)
         if afr_af > maxFreq:
             maxFreq = afr_af
             maxFreqString = "%f (AFR from 1000 Genomes)" % afr_af
     if newRow["AMR_Allele_frequency_1000_Genomes"] != EMPTY:
-        amr_af = float(newRow["AMR_Allele_frequency_1000_Genomes"])
+        freqs = [float(i) for i in newRow["AMR_Allele_frequency_1000_Genomes"].split(',')]
+        amr_af = max(freqs)
         if amr_af > maxFreq:
             maxFreq = amr_af
             maxFreqString = "%f (AMR from 1000 Genomes)" % amr_af
     if newRow["EAS_Allele_frequency_1000_Genomes"] != EMPTY:
-        eas_af = float(newRow["EAS_Allele_frequency_1000_Genomes"])
+        freqs = [float(i) for i in newRow["EAS_Allele_frequency_1000_Genomes"].split(',')]
+        eas_af = max(freqs)
         if eas_af > maxFreq:
             maxFreq = eas_af
             maxFreqString = "%f (EAS from 1000 Genomes)" % eas_af
     if newRow["SAS_Allele_frequency_1000_Genomes"] != EMPTY:
-        sas_af = float(newRow["SAS_Allele_frequency_1000_Genomes"])
+        freqs = [float(i) for i in newRow["SAS_Allele_frequency_1000_Genomes"].split(',')]
+        sas_af = max(freqs)
         if sas_af > maxFreq:
             maxFreq = sas_af
             maxFreqString = "%f (SAS from 1000 Genomes)" % sas_af

@@ -7,3 +7,14 @@
 *dumps
 *.py.swp
 */temp_variants.pkl
+
+# Files and directories for pipeline data conversion
+*brca/
+
+# Log files
+*.log
+
+# Output files
+/utilities/*.txt
+/utilities/*.tsv
+/data_merging/version.json

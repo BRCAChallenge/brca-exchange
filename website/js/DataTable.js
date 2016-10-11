@@ -119,7 +119,7 @@ var DataTable = React.createClass({
     createDownload: function () {
         var {release, changeTypes, search, sortBy, filterValues, columnSelection, sourceSelection} = this.state;
         return this.props.url(merge({
-            format: 'csv',
+            format: 'tsv',
             release,
             changeTypes,
             pageLength: null,
