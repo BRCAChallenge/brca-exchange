@@ -18,11 +18,30 @@ def load_from_csv(apps, schema_editor):
         header = reader.next()
 
         for row in reader:
-
             # split Source column into booleans
             row_dict = dict(zip(header, row))
             for source in row_dict['Source'].split(','):
                 row_dict['Variant_in_' + source] = True
+
+            # Here genomic coordinates are split into columns to support
+            # GA4GH queries. The coordinates are 1-based and GA4GH is 0
+            # based inclusive so we subtract 1.
+            x = y = z = w = u = None
+            x , w , y = row_dict['Genomic_Coordinate_hg36'].split(':')
+            z , u = y.split('>')
+            row_dict['Hg36_Start'] = long(w) - 1
+            row_dict['Hg36_End'] = long(row_dict['Hg36_Start']) + len(z)
+            x = y = z = w = u = None
+            x ,w , y = row_dict['Genomic_Coordinate_hg37'].split(':')
+            z , u = y.split('>')
+            row_dict['Hg37_Start'] = long(w) - 1
+            row_dict['Hg37_End'] = row_dict['Hg37_Start'] + len(z)
+            x = y = z = w = u = None
+            x , w , y = row_dict['Genomic_Coordinate_hg38'].split(':')
+            z , u = y.split('>')
+            row_dict['Hg38_Start'] = long(w) - 1
+            row_dict['Hg38_End'] = row_dict['Hg38_Start'] + len(z)
+            row_dict['Reference_Name'] = x
             Variant.objects.create_variant(row_dict)
 
 
