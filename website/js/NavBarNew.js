@@ -75,7 +75,7 @@ var NavBarNew = React.createClass({
                             </NavLink>
                         </DropdownButton>
                     </Nav>
-                    {config.environment === "local" && <div className='beta-header'>This is a beta version of the website. Please note that all information contained herein is still under review. Please report any issues to ... for review.</div>}
+                    {config.environment === "beta" && <div className='beta-header'>This is a beta version of the website. Please note that all information contained herein is still under review. Please report any issues to brcaexchange@gmail.com.</div>}
                 </Navbar>
             </div>
         );
