@@ -73,7 +73,7 @@ def index(request):
             query = query.filter(Change_Type_id__in = change_types)
     else:
         latest = Variant.objects.distinct('Genomic_Coordinate_hg38').order_by('Genomic_Coordinate_hg38', '-Data_Release_id')
-        query = Variant.objects.filter(id__in = latest)
+        query = Variant.objects.filter(id__in = latest).exclude(Change_Type_id = change_types_map['deleted'])
 
     if format == 'csv':
         quotes = '\''

@@ -10,10 +10,13 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('variants', type=FileType('r'), help='Variants to be added, in TSV format')
         parser.add_argument('notes', type=FileType('r'), help='Release notes and metadata, in JSON format')
+        parser.add_argument('deletions', nargs='?', default=None, type=FileType('r'), help='Deleted variants, in TSV format, same schema sans change_type')
 
     def handle(self, *args, **options):
         variants_tsv = options['variants']
         notes = json.load(options['notes'])
+        deletions_tsv = options['deletions']
+        
 
         release_id = DataRelease.objects.create(**notes).id
 
@@ -42,3 +45,12 @@ class Command(BaseCommand):
                 row_dict['HGVS_Protein'] = row_dict.pop('pyhgvs_Protein')
 
                 Variant.objects.create_variant(row_dict)
+
+        if (deletions_tsv):
+            reader = csv.reader(deletions_tsv, dialect="excel-tab")
+            header = reader.next()
+            for row in reader:
+                row_dict = dict(zip(header, row))
+                Variant.objects.create_variant({'Genomic_Coordinate_hg38': row_dict.pop('pyhgvs_Genomic_Coordinate_38'),
+                                                'Change_Type_id': change_types['deleted'],
+                                                'Data_Release_id': release_id})
