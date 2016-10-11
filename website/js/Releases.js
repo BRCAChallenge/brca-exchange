@@ -5,6 +5,7 @@ var {Link} = require('react-router');
 var {Table, Grid, Row, Col} = require('react-bootstrap');
 var _ = require('underscore');
 var backend = require('./backend');
+var {dateFormat} = require('./util');
 
 var Releases = React.createClass({
     getInitialState: () => ({ releases: {} }),
@@ -17,8 +18,8 @@ var Releases = React.createClass({
         /* eslint-disable dot-notation */
         var rows = _.map(this.state.releases, release => (
             <tr>
-                <td><Link to={`/release/${release.id}`}>{release.id}</Link></td>
-                <td>{release['date_released']}</td>
+                <td><Link to={`/release/${release.id}`}>Version {release.id}</Link></td>
+                <td>{dateFormat(release['date_released'])}</td>
                 <td>{release['data_sources']}</td>
                 <td><Link to={`/variants?release=${release.id}&changeTypes[]=new`}>{release['variants_added']}</Link></td>
                 <td><Link to={`/variants?release=${release.id}&changeTypes[]=added_classification&changeTypes[]=changed_classification`}>{release['variants_classified']}</Link></td>
@@ -36,7 +37,7 @@ var Releases = React.createClass({
                     <Col sm={8} smOffset={2}>
                         <table className="table table-bordered table-condensed">
                             <thead>
-                                <th>Notes/Data</th>
+                                <th>Notes</th>
                                 <th>Date</th>
                                 <th>Data Sources</th>
                                 <th>New Variants</th>
@@ -90,7 +91,7 @@ var Release = React.createClass({
                             </tr>
                             <tr>
                                 <td className="active"><b>Date</b></td>
-                                <td>{release['date_released']}</td>
+                                <td>{dateFormat(release['date_released'])}</td>
                             </tr>
                             <tr>
                                 <td className="active"><b>Link to Data Schema</b></td>
