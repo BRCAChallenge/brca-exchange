@@ -5,12 +5,6 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 import django.db.models.deletion
 
-def create_initial_data_release(apps, schema_editor):
-    DataRelease = apps.get_model('data', 'DataRelease')
-    Variant = apps.get_model('data', 'Variant')
-    initial_release = DataRelease(comment="initial variant set", variants_added = Variant.objects.count())
-    initial_release.save()
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -22,17 +16,14 @@ class Migration(migrations.Migration):
             name='DataRelease',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('comment', models.TextField()),
-                ('variants_added', models.IntegerField(default=0)),
-                ('variants_modified', models.IntegerField(default=0)),
-                ('variants_deleted', models.IntegerField(default=0)),
-                ('columns_added', models.TextField(null=True)),
-                ('columns_deleted', models.TextField(null=True)),
+                ('data_schema', models.TextField()),
+                ('data_link', models.TextField()),
+                ('date_released', models.DateTimeField(auto_now_add=True)),
+                ('release_notes', models.TextField()),
+                ('md5sum', models.TextField()),
             ],
             options={
                 'db_table': 'data_release',
             },
         ),
-        migrations.RunPython(create_initial_data_release)
     ]
