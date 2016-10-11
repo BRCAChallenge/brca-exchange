@@ -92,7 +92,6 @@ class Variant(models.Model):
     Hg37_End = models.BigIntegerField(default=1)
     Hg36_Start = models.BigIntegerField(default=1)
     Hg36_End = models.BigIntegerField(default=1)
-    Reference_Name = models.TextField()
     Genomic_Coordinate_hg37 = models.TextField()
     Genomic_Coordinate_hg36 = models.TextField()
     Source_URL = models.TextField()

@@ -261,9 +261,9 @@ def search_variants(request):
 
 def range_filter(reference_genome, variants, reference_name, start, end):
     """Filters variants by range depending on the reference_genome"""
-    if 'chr' not in reference_name:
-        reference_name = 'chr' + reference_name
-    variants = variants.filter(Reference_Name=reference_name)
+    if 'chr' in reference_name:
+        reference_name = reference_name.replace('chr', '')
+    variants = variants.filter(Chr=reference_name)
     if reference_genome == 'hg36':
         variants = variants.order_by('Hg36_Start')
         variants = variants.filter(Hg36_Start__lt=end, Hg36_End__gt=start)
@@ -291,7 +291,7 @@ def brca_to_ga4gh(brca_variant, reference_genome):
         variant.alternate_bases.append(i)
     variant.created = 0
     variant.updated = 0
-    variant.reference_name = brca_variant['Reference_Name']
+    variant.reference_name = brca_variant['Chr']
     if reference_genome == 'hg36':
         variant.start = brca_variant['Hg36_Start']
         variant.end = brca_variant['Hg36_End']
