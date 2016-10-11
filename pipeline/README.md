@@ -11,23 +11,29 @@ Contains source code used to wrangle the BRCA variation data that is presented i
  * download http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz to $BRCA_RESOURCES and uncompress
  * download http://hgdownload.cse.ucsc.edu/gbdb/hg19/liftOver/hg19ToHg38.over.chain.gz to $BRCA_RESOURCES.  There is no need to uncompress it.
  * Download brca1_hg38.txt, brca2_hg38.txt, brca1_hg19.txt and brca2_hg19.txt from http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/ to $BRCA_RESOURCES
+ * download the latest available version of BRCA2.txt from the lovd subdirectory and move it into $BRCA_RESOURCES (can be found on the production VM)
  * install postgresql
- * install the leiden cleanup package at http://leiden-open-variation-database-lovd-cleanup.readthedocs.io/en/latest/index.html
+ * install the leiden cleanup package at http://leiden-open-variation-database-lovd-cleanup.readthedocs.io/en/latest/index.html (NOTE: this can be problematic, please submit an issue if you encounter errors with the leiden package)
  * pip install git+https://github.com/counsyl/hgvs.git
  * pip install psycopg2
  * pip install parsley
- * pip install configparser
+ * pip install configparser (Enigma requires version 3.5.0, will fail with latest version)
  * pip install bioutils
  * pip install biopython
+ * install lzo
+ * install bx-python from https://pypi.python.org/packages/55/db/fa76af59a03c88ad80494fc0df2948740bbd58cd3b3ed5c31319624687cc/bx-python-0.7.3.tar.gz#md5=d8c50c01c9e421bae0bbdbfa00fef6e4 (note: pip install bx-python left an outstanding dependency to lzo1x.h, which proved to be hard to resolve) NOTE: This may lead to errors in the bx.bbi directory, please submit an issue if you encounter this problem. Sometimes `pip install bx-python` is also necessary.
  * pip install pysam
  * install lzo (sudo apt-get install liblzo2-dev)
  * pip install git+https://github.com/bxlab/bx-python
  * install Cython
- * pip install CrossMap (8/25/16: install from 
+ * pip install CrossMap (8/25/16: install from
  * install vcftools from https://vcftools.github.io/index.html
  * pip install pyvcf
  * install tabix (see http://genometoolbox.blogspot.com/2013/11/installing-tabix-on-unix.html)
-
+ * pip install luigi
+ * pip install retrying
+ * pip install synapseclient[pandas,pysftp]
+ * cd into enigma and `pip install -r requirements.txt`
 
 ## Misc Instructions
 ### Convert refseq .psl file to .gp (genepred) format (required format for hgvs conversion)
@@ -63,3 +69,6 @@ See `https://raw.githubusercontent.com/BD2KGenomics/brca/master/lovd/README.md`
 #### ESP (`http://evs.gs.washington.edu/EVS/`)
 See `https://github.com/BD2KGenomics/brca/edit/master/esp/README.txt`
 
+## Luigi
+
+Luigi is intended to automate many of the tasks in the pipeline directory. To get started, `pip install luigi`.

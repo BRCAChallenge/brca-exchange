@@ -36,8 +36,7 @@ def parse_args():
 	parser.add_argument('-i', '--inEXLOVD', type=argparse.FileType('r'),
 		help='Input exLOVD file for conversion.')
 	parser.add_argument('-a', '--inAnnot', default='/hive/groups/cgl/brca/phase1/data/resources/exLOVDAnnotation',
-		help='Input exLOVD annotation file for conversion. Tab-delimited with 1st column representing\n\
-		field name and 2nd column representing the field description. Default(/hive/groups/cgl/brca/phase1/data/resources/exLOVDAnnotation)')
+		help='Input exLOVD annotation file for conversion. Tab-delimited with 1st column representing field name and 2nd column representing the field description. Default(/hive/groups/cgl/brca/phase1/data/resources/exLOVDAnnotation)')
 	parser.add_argument('-o', '--out', type=argparse.FileType('w'),
 		help='Ouput VCF file result.')
 	parser.add_argument('-b', '--brca', type=int,
