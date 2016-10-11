@@ -1,6 +1,8 @@
 'use strict';
 
 var React = require('react');
+var config = require('./config');
+
 
 var {Navbar, Nav, DropdownButton} = require('react-bootstrap');
 var {Link} = require('react-router');
@@ -73,6 +75,7 @@ var NavBarNew = React.createClass({
                             </NavLink>
                         </DropdownButton>
                     </Nav>
+                    {config.environment === "local" && <div className='beta-header'>This is a beta version of the website. Please note that all information contained herein is still under review. Please report any issues to ... for review.</div>}
                 </Navbar>
             </div>
         );
