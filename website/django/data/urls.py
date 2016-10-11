@@ -7,7 +7,7 @@ urlpatterns = [
     url(r'^$', views.index, name="index"),
     url(r'^releases', views.releases, name="releases"),
     url(r'^variant/$', views.variant, name="variant"),
-    url(r'^suggestions/$', views.autocomplete)
+    url(r'^suggestions/$', views.autocomplete),
     url(r'^v0.6.0a7/ga4gh/variants/search$', views.search_variants, name='search_variants'),
     url(r'^v0.6.0a7/ga4gh/variants/(?P<variant_id>.+)$', views.get_variant, name = 'get_variant'),
     url(r'^v0.6.0a7/ga4gh/variantsets/search', views.search_variant_sets, name='search_variant_sets'),
