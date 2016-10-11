@@ -14,7 +14,7 @@ def create_initial_data_release(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('data', '0005_auto_20160801_1811'),
+        ('data', '0004_autocomplete_words.py'),
     ]
 
     operations = [

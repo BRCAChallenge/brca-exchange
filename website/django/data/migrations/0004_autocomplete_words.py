@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('data', '0003_data'),
+        ('data', '0002_search_index'),
     ]
 
     operations = [
