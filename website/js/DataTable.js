@@ -200,6 +200,8 @@ var DataTable = React.createClass({
                 changeString = "with new or changed information";
             } else if (changeTypes.includes('added_classification')) {
                 changeString = "with new or changed classification";
+            } else if (changeTypes.includes('deleted')) {
+                changeString = "deleted";
             }
         }
         return (error ? <p>{error}</p> :

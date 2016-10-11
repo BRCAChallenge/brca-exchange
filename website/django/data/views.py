@@ -79,7 +79,6 @@ def index(request):
         quotes = '\''
     else:
         quotes = ''
-
     if include or exclude:
         query = apply_sources(query, include, exclude)
 
