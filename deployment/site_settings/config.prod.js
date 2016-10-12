@@ -2,5 +2,6 @@
 
 module.exports = {
     captcha_key: '', /* enter captch key here */
-    backend_url: 'http://brcaexchange.org/backend'
+    backend_url: 'http://brcaexchange.org/backend',
+    environment: 'production'
 };
