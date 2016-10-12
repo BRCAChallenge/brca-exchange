@@ -2,7 +2,6 @@
 import datetime
 import json
 import argparse
-import os
 
 
 def main():
