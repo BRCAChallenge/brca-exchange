@@ -1287,62 +1287,62 @@ class MergeVCFsIntoTSVFile(luigi.Task):
     release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
 
     def output(self):
-        release_dir = create_path_if_nonexistent(self.output_dir + "/release/")
-        return luigi.LocalTarget(release_dir + "merged.tsv")
+        artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts/")
+        return luigi.LocalTarget(artifacts_dir + "merged.tsv")
 
     def run(self):
-        release_dir = create_path_if_nonexistent(self.output_dir + "/release/")
+        artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts/")
         brca_resources_dir = self.resources_dir
 
         os.chdir(data_merging_method_dir)
 
         args = ["python", "variant-merging.py", "-i", self.output_dir + "/", "-o",
-                release_dir, "-p", "-r", brca_resources_dir + "/", "-v"]
+                artifacts_dir, "-p", "-r", brca_resources_dir + "/", "-v"]
         print "Running variant-merging.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        check_file_for_contents(release_dir + "merged.tsv")
+        check_file_for_contents(artifacts_dir + "merged.tsv")
 
 
 @requires(MergeVCFsIntoTSVFile)
 class AnnotateMergedOutput(luigi.Task):
 
     def output(self):
-        release_dir = self.output_dir + "/release/"
-        return luigi.LocalTarget(release_dir + "annotated.tsv")
+        artifacts_dir = self.output_dir + "/release/artifacts/"
+        return luigi.LocalTarget(artifacts_dir + "annotated.tsv")
 
     def run(self):
-        release_dir = self.output_dir + "/release/"
+        artifacts_dir = self.output_dir + "/release/artifacts/"
         os.chdir(data_merging_method_dir)
 
-        args = ["python", "add_annotation.py", "-i", release_dir + "merged.tsv",
-                "-o", release_dir + "annotated.tsv"]
+        args = ["python", "add_annotation.py", "-i", artifacts_dir + "merged.tsv",
+                "-o", artifacts_dir + "annotated.tsv"]
         print "Running add_annotation.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        check_file_for_contents(release_dir + "annotated.tsv")
+        check_file_for_contents(artifacts_dir + "annotated.tsv")
 
 
 @requires(AnnotateMergedOutput)
 class AggregateMergedOutput(luigi.Task):
 
     def output(self):
-        release_dir = self.output_dir + "/release/"
-        return luigi.LocalTarget(release_dir + "aggregated.tsv")
+        artifacts_dir = self.output_dir + "/release/artifacts/"
+        return luigi.LocalTarget(artifacts_dir + "aggregated.tsv")
 
     def run(self):
-        release_dir = self.output_dir + "/release/"
+        artifacts_dir = self.output_dir + "/release/artifacts/"
         os.chdir(data_merging_method_dir)
 
-        args = ["python", "aggregate_across_columns.py", "-i", release_dir + "annotated.tsv",
-                "-o", release_dir + "aggregated.tsv"]
+        args = ["python", "aggregate_across_columns.py", "-i", artifacts_dir + "annotated.tsv",
+                "-o", artifacts_dir + "aggregated.tsv"]
         print "Running aggregate_across_columns.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        check_file_for_contents(release_dir + "aggregated.tsv")
+        check_file_for_contents(artifacts_dir + "aggregated.tsv")
 
 
 @requires(AggregateMergedOutput)
@@ -1354,10 +1354,11 @@ class BuildAggregatedOutput(luigi.Task):
 
     def run(self):
         release_dir = self.output_dir + "/release/"
+        artifacts_dir = release_dir + "artifacts/"
         brca_resources_dir = self.resources_dir
         os.chdir(data_merging_method_dir)
 
-        args = ["python", "brca_pseudonym_generator.py", "-i", release_dir + "/aggregated.tsv", "-p",
+        args = ["python", "brca_pseudonym_generator.py", "-i", artifacts_dir + "/aggregated.tsv", "-p",
                 "-j", brca_resources_dir + "/hg18.fa",
                 "-k", brca_resources_dir + "/hg19.fa",
                 "-l", brca_resources_dir + "/hg38.fa",
@@ -1365,7 +1366,7 @@ class BuildAggregatedOutput(luigi.Task):
                 "-s", brca_resources_dir + "/refseq_annotation.hg19.gp",
                 "-t", brca_resources_dir + "/refseq_annotation.hg38.gp",
                 "-o", release_dir + "built.tsv",
-                "-output_dir", self.output_dir]
+                "--artifacts_dir", artifacts_dir]
         print "Running brca_pseudonym_generator.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
