@@ -2,6 +2,7 @@
 import datetime
 import json
 import argparse
+import os
 
 
 def main():
@@ -11,6 +12,7 @@ def main():
     parser.add_argument("--notes", required=True,
                         help="File with release notes text")
     parser.add_argument("--output", default="version.json", help="Output json file")
+    parser.add_argument("--source_file_dir", help="Directory with preprocessed source files used to generate output.")
 
     args = parser.parse_args()
 
@@ -22,6 +24,10 @@ def main():
         release_notes = release_notes_file.read()
 
     version_data['notes'] = release_notes
+
+    # TODO: come up with a way to generate this and creation dates programatically.
+    source_files = ["Bic", "ClinVar", "ESP", "ExAC", "Enigma", "LOVD", "exLOVD", "1000 Genomes"]
+    version_data['sources'] = source_files
 
     json_data = json.dumps(version_data, default=handler)
 

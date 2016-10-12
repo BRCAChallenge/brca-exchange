@@ -1377,19 +1377,21 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
 
     def output(self):
         release_dir = self.output_dir + "/release/"
+        diff_dir = create_path_if_nonexistent(release_dir + "diff/")
         return {'built_with_change_types': luigi.LocalTarget(release_dir + "built_with_change_types.tsv"),
-                'removed': luigi.LocalTarget(release_dir + "removed.tsv"),
-                'added': luigi.LocalTarget(release_dir + "added.tsv"),
-                'added_data': luigi.LocalTarget(release_dir + "added_data.tsv"),
-                'diff': luigi.LocalTarget(release_dir + "diff.txt")}
+                'removed': luigi.LocalTarget(diff_dir + "removed.tsv"),
+                'added': luigi.LocalTarget(diff_dir + "added.tsv"),
+                'added_data': luigi.LocalTarget(diff_dir + "added_data.tsv"),
+                'diff': luigi.LocalTarget(diff_dir + "diff.txt")}
 
     def run(self):
         release_dir = self.output_dir + "/release/"
+        diff_dir = create_path_if_nonexistent(release_dir + "diff/")
         os.chdir(utilities_method_dir)
 
         args = ["python", "releaseDiff.py", "--v2", release_dir + "built.tsv", "--v1", self.previous_release,
-                "--removed", release_dir + "removed.tsv", "--added", release_dir + "added.tsv", "--added_data",
-                release_dir + "added_data.tsv", "--diff", release_dir + "diff.txt", "--output",
+                "--removed", diff_dir + "removed.tsv", "--added", diff_dir + "added.tsv", "--added_data",
+                diff_dir + "added_data.tsv", "--diff", diff_dir + "diff.txt", "--output",
                 release_dir + "built_with_change_types.tsv"]
         print "Running releaseDiff.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -1402,20 +1404,20 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
 class GenerateReleaseNotes(luigi.Task):
 
     def output(self):
-        release_dir = self.output_dir + "/release/"
-        return luigi.LocalTarget(release_dir + "version.json")
+        metadata_dir = create_path_if_nonexistent(self.output_dir + "/release/metadata/")
+        return luigi.LocalTarget(metadata_dir + "version.json")
 
     def run(self):
-        release_dir = self.output_dir + "/release/"
+        metadata_dir = self.output_dir + "/release/metadata/"
         os.chdir(data_merging_method_dir)
 
-        args = ["python", "buildVersionMetadata.py", "--date", str(self.date), "--notes", self.release_notes, "--output",
-                release_dir + "version.json"]
+        args = ["python", "buildVersionMetadata.py", "--date", str(self.date), "--notes", self.release_notes,
+                "--output", metadata_dir + "version.json", "--source_file_dir", self.output_dir]
         print "Running buildVersionMetadata.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        check_file_for_contents(release_dir + "version.json")
+        check_file_for_contents(metadata_dir + "version.json")
 
 
 ###############################################
