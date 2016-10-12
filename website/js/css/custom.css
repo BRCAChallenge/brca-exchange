@@ -32,6 +32,10 @@
     height: 80px;
 }
 
+.navbar-container.beta {
+    height: 125px;
+}
+
 .nav > li > a {
     padding-left: 1em;
     padding-right: 1em;
@@ -65,12 +69,20 @@
     .navbar-header {
         width: 250px;
     }
+
+    .navbar-container.beta {
+        height: 125px;
+    }
 }
 
 /* Ensures BRCA exchange logo and menu dropdown toggle are on a single line across different devices */
 @media only screen and (max-width: 767px) {
     .navbar-brand {
         max-width: 70%;
+    }
+
+    .navbar-container.beta {
+        height: 150px;
     }
 }
 
@@ -80,10 +92,30 @@
         font-size: 28px;
     }
 
+    .navbar-container.beta {
+        height: 200px;
+    }
+
     .navbar-brand #research-label {
         font-size: 64%;
         float: left;
     }
+}
+
+/* Shrink BRCA exchange logo on smaller devices so logo and menu items are on a single line across different devices */
+@media only screen and (max-width: 450px) {
+    .navbar-container.beta {
+        height: 300px;
+    }
+}
+
+.beta-header {
+    font-size: 18px;
+    width: 100%;
+    background: red;
+    left: 0;
+    position: fixed;
+    padding: 0 10px 0 10px;
 }
 
 #research-label {
