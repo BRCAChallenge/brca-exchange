@@ -2,6 +2,7 @@
 
 var React = require('react');
 var config = require('./config');
+var classNames = require('classnames');
 
 
 var {Navbar, Nav, DropdownButton} = require('react-bootstrap');
@@ -27,6 +28,7 @@ var NavBarNew = React.createClass({
     getInitialState: function () {
         return {
             showModal: false,
+            isBeta: config.environment === "beta"
         };
     },
     shouldComponentUpdate: function (nextProps, nextState) {
@@ -56,7 +58,7 @@ var NavBarNew = React.createClass({
                 {this.props.mode === 'default' && <span id="research-label" className="label label-info">Expert Reviewed</span>}
             </a>);
         return (
-            <div className="navbar-container">
+            <div className={classNames("navbar-container", {"beta": this.state.isBeta})}>
                 <Navbar fixedTop brand={brand} toggleNavKey={0}>
                     <Nav eventKey={0} navbar right>
                         <NavLink to='/'>Home</NavLink>
@@ -75,7 +77,7 @@ var NavBarNew = React.createClass({
                             </NavLink>
                         </DropdownButton>
                     </Nav>
-                    {config.environment === "beta" && <div className='beta-header'>This is a beta version of the website. Please note that all information contained herein is still under review. Please report any issues to brcaexchange@gmail.com.</div>}
+                    {this.state.isBeta && <div className='beta-header'>This is a beta version of the BRCA Exchange. Please note that some variant information and website features displayed here are under review - for the most up-to-date finalized information, please refer to <a href="http://brcaexchange.org">www.brcaexchange.org</a>. If you encounter any issues while using the beta website, please report them to <a href="mailto:brcaexchange@gmail.com">brcaexchange@gmail.com</a>.</div>}
                 </Navbar>
             </div>
         );
