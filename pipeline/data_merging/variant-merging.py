@@ -117,6 +117,11 @@ parser.add_argument("-v", "--verbose", action="count", default=False, help="dete
 
 ARGS = parser.parse_args()
 
+# directory to store non-temp files created for use in the merge process
+artifact_dir = ARGS.output + "/artifacts/"
+if not os.path.exists(artifact_dir):
+    os.makedirs(artifact_dir)
+
 
 BRCA1 = {"hg38": {"start": 43000000,
                   "sequence": open(ARGS.reference + "brca1_hg38.txt", "r").read()},
@@ -129,12 +134,14 @@ BRCA2 = {"hg38": {"start": 32300000,
 
 
 def main():
+    global artifact_dir
     if ARGS.verbose:
         logging_level = logging.DEBUG
     else:
         logging_level = logging.CRITICAL
 
-    logging.basicConfig(filename='variant-merging.log', filemode="w", level=logging_level)
+    log_file_path = artifact_dir + "variant-merging.log"
+    logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level)
     tmp_dir = tempfile.mkdtemp()
     try:
         # merge repeats within data sources before merging between data sources
@@ -334,19 +341,20 @@ def variant_is_false(ref, alt):
 
 def string_comparison_merge(variants):
     # makes sure the input genomic coordinate strings are unique (no dupes)
+    global artifact_dir
     assert (len(variants.keys()) == len(set(variants.keys())))
 
     # optimization for comparison -- saves previously identified equivalent genomic strings in a file for faster reference
     if ARGS.de_novo:
         logging.info('Calculating all equivalent variants without pickle dump.')
         equivalence = find_equivalent_variant(variants)
-        with open(ARGS.output + "equivalent_variants.pkl", "w") as f:
+        with open(artifact_dir + "equivalent_variants.pkl", "w") as f:
             f.write(pickle.dumps(equivalence))
         f.close()
     else:
         logging.warning('Using equivalent_variants.pkl')
         print "********* WARNING: Using equivalent_variants.pkl to determine equivalents instead of testing individually *******"
-        equivalence = pickle.loads(open(ARGS.output + "equivalent_variants.pkl", "r").read())
+        equivalence = pickle.loads(open(artifact_dir + "equivalent_variants.pkl", "r").read())
     n_before_merge = 0
     for each in equivalence:
         n_before_merge += len(each)
@@ -431,6 +439,7 @@ def find_equivalent_variant(variants):
     return equivalent_variants
 
 def preprocessing(tmp_dir):
+    global artifact_dir
     # Preprocessing variants:
     source_dict = {
                    "1000_Genomes": GENOME1K_FILE + "for_pipeline",
@@ -470,10 +479,10 @@ def preprocessing(tmp_dir):
     (columns, variants) = save_enigma_to_dict(ARGS.input + ENIGMA_FILE)
     for source_name, file_name in source_dict.iteritems():
         f = open(file_name, "r")
-        d_wrong = ARGS.output + "wrong_genome_coors/"
+        d_wrong = artifact_dir + "wrong_genome_coors/"
         if not os.path.exists(d_wrong):
             os.makedirs(d_wrong)
-        f_wrong = open(ARGS.output + "wrong_genome_coors/" +
+        f_wrong = open(artifact_dir + "wrong_genome_coors/" +
                        source_name + "_wrong_genome_coor.vcf", "w")
         f_right = open(tmp_dir + "/right" + source_name, "w")
         vcf_reader = vcf.Reader(f, strict_whitespace=True)
@@ -628,11 +637,12 @@ def add_new_source(columns, variants, source, source_file, source_dict):
 
 
 def save_enigma_to_dict(path):
+    global artifact_dir
     enigma_file = open(path, "r")
     variants = dict()
     columns = ""
     line_num = 0
-    f_wrong = open(ARGS.output + "ENIGMA_wrong_genome.txt", "w")
+    f_wrong = open(artifact_dir + "ENIGMA_wrong_genome.txt", "w")
     n_wrong, n_total = 0, 0
     for line in enigma_file:
         line_num += 1
