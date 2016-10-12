@@ -1358,7 +1358,8 @@ class BuildAggregatedOutput(luigi.Task):
                 "-r", brca_resources_dir + "/refseq_annotation.hg18.gp",
                 "-s", brca_resources_dir + "/refseq_annotation.hg19.gp",
                 "-t", brca_resources_dir + "/refseq_annotation.hg38.gp",
-                "-o", release_dir + "built.tsv"]
+                "-o", release_dir + "built.tsv",
+                "-output_dir", self.output_dir]
         print "Running brca_pseudonym_generator.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
