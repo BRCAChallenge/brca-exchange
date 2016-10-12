@@ -1421,6 +1421,32 @@ class GenerateReleaseNotes(luigi.Task):
 
 
 ###############################################
+#              GENERATE MD5SUMS               #
+###############################################
+
+
+class GenerateMD5Sums(luigi.Task):
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                                 description='directory to store output files')
+
+    def output(self):
+        return luigi.LocalTarget(self.output_dir + "/md5sums.txt")
+
+    def run(self):
+        output_dir = self.output_dir
+        md5sumsFile = output_dir + "/md5sums.txt"
+
+        os.chdir(utilities_method_dir)
+
+        args = ["python", "generateMD5Sums.py", "-i", output_dir, "-o", md5sumsFile]
+        print "Generating md5sums with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(md5sumsFile)
+
+
+###############################################
 #              MASTER RUN TASK                #
 ###############################################
 
@@ -1449,8 +1475,11 @@ class RunAll(luigi.WrapperTask):
     release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
 
     def requires(self):
-        # If a previous release is provided, run the releaseDiff.py script to generate change_types
-        # between releases of variants.
+        yield GenerateMD5Sums(self.output_dir)
+        '''
+        If release notes and a previous release are provided, generate a version.json file and
+        run the releaseDiff.py script to generate change_types between releases of variants.
+        '''
         if self.release_notes and self.previous_release:
             yield GenerateReleaseNotes(self.date, self.resources_dir, self.output_dir,
                                        self.file_parent_dir, self.previous_release, self.release_notes)
