@@ -56,7 +56,7 @@ def variant(request):
 def variant_to_dict(variant_object):
     variant_dict = model_to_dict(variant_object)
     variant_dict["Data_Release"] = model_to_dict(variant_object.Data_Release)
-    variant_dict["Data_Release"]["date_released"] = variant_object.Data_Release.date_released
+    variant_dict["Data_Release"]["date"] = variant_object.Data_Release.date
     return variant_dict
     
 @gzip_page
