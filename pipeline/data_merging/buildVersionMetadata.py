@@ -30,7 +30,7 @@ def main():
     json_data = json.dumps(version_data, default=handler)
 
     with open(args.output, 'w') as json_output:
-        json_output.write(json_data, json_output)
+        json_output.write(json_data)
 
 
 def handler(obj):
