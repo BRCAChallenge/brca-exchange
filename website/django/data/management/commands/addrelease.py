@@ -17,7 +17,7 @@ class Command(BaseCommand):
         notes = json.load(options['notes'])
         deletions_tsv = options['deletions']
         
-
+        notes['sources'] = ', '.join(notes['sources'])
         release_id = DataRelease.objects.create(**notes).id
 
         reader = csv.reader(variants_tsv, dialect="excel-tab")
