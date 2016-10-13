@@ -6,6 +6,7 @@ var {Table, Grid, Row, Col} = require('react-bootstrap');
 var _ = require('underscore');
 var backend = require('./backend');
 var {dateFormat} = require('./util');
+var config = require('config');
 
 var Releases = React.createClass({
     getInitialState: () => ({ releases: {} }),
@@ -94,7 +95,7 @@ var Release = React.createClass({
                         <Table bordered>
                             <tr>
                                 <td className="active"><b>Link to Data</b></td>
-                                <td><a href={release['archive']}>Link</a></td>
+                                <td><a href={`${config.backend_url}/site_media/media/releases/${release['archive']}`}>Link</a></td>
                             </tr>
                             <tr>
                                 <td className="active"><b>Date</b></td>
