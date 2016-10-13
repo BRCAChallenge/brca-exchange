@@ -11,7 +11,6 @@ def main():
     parser.add_argument("--notes", required=True,
                         help="File with release notes text")
     parser.add_argument("--output", default="version.json", help="Output json file")
-    parser.add_argument("--source_file_dir", help="Directory with preprocessed source files used to generate output.")
 
     args = parser.parse_args()
 
@@ -31,7 +30,7 @@ def main():
     json_data = json.dumps(version_data, default=handler)
 
     with open(args.output, 'w') as json_output:
-        json.dump(json_data, json_output)
+        json_output.write(json_data, json_output)
 
 
 def handler(obj):
