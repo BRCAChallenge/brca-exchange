@@ -1414,7 +1414,7 @@ class GenerateReleaseNotes(luigi.Task):
         os.chdir(data_merging_method_dir)
 
         args = ["python", "buildVersionMetadata.py", "--date", str(self.date), "--notes", self.release_notes,
-                "--output", metadata_dir + "version.json", "--source_file_dir", self.output_dir]
+                "--output", metadata_dir + "version.json"]
         print "Running buildVersionMetadata.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
