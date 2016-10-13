@@ -1422,8 +1422,6 @@ class GenerateReleaseNotes(luigi.Task):
 
 @requires(GenerateReleaseNotes)
 class GenerateMD5Sums(luigi.Task):
-    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                                 description='directory to store output files')
 
     def output(self):
         return luigi.LocalTarget(self.output_dir + "/md5sums.txt")
