@@ -11,7 +11,7 @@ var Releases = React.createClass({
     getInitialState: () => ({ releases: {} }),
     componentWillMount: function() {
         backend.releases().subscribe(
-            resp => this.setState({releases: resp}),
+            resp => this.setState(resp),
             () => this.setState({error: 'Problem connecting to server'}));
     },
     render: function () {
@@ -19,8 +19,8 @@ var Releases = React.createClass({
         var rows = _.map(this.state.releases, release => (
             <tr>
                 <td><Link to={`/release/${release.id}`}>Version {release.id}</Link></td>
-                <td>{dateFormat(release['date_released'])}</td>
-                <td>{release['data_sources']}</td>
+                <td>{dateFormat(release['date'])}</td>
+                <td>{release['sources']}</td>
                 <td><Link to={`/variants?release=${release.id}&changeTypes[]=new`}>{release['variants_added']}</Link></td>
                 <td><Link to={`/variants?release=${release.id}&changeTypes[]=added_classification&changeTypes[]=changed_classification`}>{release['variants_classified']}</Link></td>
                 <td><Link to={`/variants?release=${release.id}&changeTypes[]=added_information&changeTypes[]=changed_information`}>{release['variants_modified']}</Link></td>
@@ -56,22 +56,33 @@ var Releases = React.createClass({
 });
 
 var Release = React.createClass({
-    getInitialState: () => ({release: {}}),
+    getInitialState: () => ({ releases: [{}], latest: -1 }),
     componentWillMount: function() {
         backend.release(this.props.params.id).subscribe(
-            resp => this.setState({release: resp[0]}),
+            resp => this.setState(resp),
+            () => this.setState({error: 'Problem connecting to server'}));
+    },
+    componentWillReceiveProps: function(nextProps) {
+        backend.release(nextProps.params.id).subscribe(
+            resp => this.setState(resp),
             () => this.setState({error: 'Problem connecting to server'}));
     },
     render: function () {
-        var release = this.state.release;
-        var s = n => n === 1 ? '' : 's';
+        var release = this.state.releases[0],
+            latest = this.state.latest,
+            s = n => n === 1 ? '' : 's';
         /* eslint-disable dot-notation */
         return (
             <Grid fluid={true}>
                 <Row>
                     <Col sm={8} smOffset={2} className='text-center'>
-                        <h1>{release['is_current'] && 'Current'} Release Notes</h1>
-                        <span>{release['release_notes']}</span>
+                        <h1>{release.id === latest && 'Current'} Release Notes</h1>
+                        {release.id !== latest && <span>Note that this is not the most current release. Click <Link to={`/release/${latest}`}>here</Link> to see the most current release</span>}
+                    </Col>
+                </Row>
+                <Row>
+                    <Col sm={8} smOffset={2} className='text-center'>
+                        <span>{release['notes']}</span>
                         <h3><Link to={`/variants?release=${release.id}&changeTypes[]=new`}>{release['variants_added']} new variant{s(release['variants_added'])}</Link></h3>
                         <h3><Link to={`/variants?release=${release.id}&changeTypes[]=added_classification&changeTypes[]=changed_classification`}>{release['variants_classified']} new classification{s(release['variants_classified'])}</Link></h3>
                         <h3><Link to={`/variants?release=${release.id}&changeTypes[]=added_information&changeTypes[]=changed_information`}>{release['variants_modified']} changed/updated variant{s(release['variants_modified'])}</Link></h3>
@@ -83,11 +94,11 @@ var Release = React.createClass({
                         <Table bordered>
                             <tr>
                                 <td className="active"><b>Link to Data</b></td>
-                                <td><a href={release['data_link']}>Link</a></td>
+                                <td><a href={release['archive']}>Link</a></td>
                             </tr>
                             <tr>
                                 <td className="active"><b>Date</b></td>
-                                <td>{dateFormat(release['date_released'])}</td>
+                                <td>{dateFormat(release['date'])}</td>
                             </tr>
                         </Table>
                 {release['data_sources']}

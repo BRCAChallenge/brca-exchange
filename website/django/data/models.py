@@ -1,10 +1,11 @@
 from django.db import models
 
 class DataRelease(models.Model):
-    data_schema = models.TextField()
-    data_link = models.TextField()
-    date_released = models.DateTimeField()
-    release_notes = models.TextField()
+    schema = models.TextField()
+    archive = models.TextField()
+    date = models.DateTimeField()
+    notes = models.TextField()
+    sources = models.TextField()
     md5sum = models.TextField()
 
     class Meta:

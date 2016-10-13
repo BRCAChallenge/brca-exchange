@@ -26,6 +26,7 @@ def releases(request):
         releases = DataRelease.objects.filter(id = release_id).values().all()
     else:
         releases = DataRelease.objects.values().all()
+    latest = DataRelease.objects.order_by('-id')[0].id
     change_types = {x['name']:x['id'] for x in ChangeType.objects.values().all()}
     for release in releases:
         variants = Variant.objects.filter(Data_Release_id = release['id'])
@@ -35,7 +36,7 @@ def releases(request):
         release['variants_modified'] = variants.filter(
             Q(Change_Type_id = change_types['added_information']) | Q(Change_Type_id = change_types['changed_information'])).count()
         release['variants_deleted'] = variants.filter(Change_Type_id = change_types['deleted']).count()
-    response = JsonResponse(list(releases), safe=False)
+    response = JsonResponse({"releases": list(releases), "latest": latest})
     response['Access-Control-Allow-Origin'] = '*'
     return response
 

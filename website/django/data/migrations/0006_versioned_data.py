@@ -16,10 +16,11 @@ class Migration(migrations.Migration):
             name='DataRelease',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('data_schema', models.TextField()),
-                ('data_link', models.TextField()),
-                ('date_released', models.DateTimeField(auto_now_add=True)),
-                ('release_notes', models.TextField()),
+                ('date', models.DateTimeField(auto_now_add=True)),
+                ('notes', models.TextField()),
+                ('sources', models.TextField()),
+                ('schema', models.TextField()),
+                ('archive', models.TextField()),
                 ('md5sum', models.TextField()),
             ],
             options={
