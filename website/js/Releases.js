@@ -86,16 +86,8 @@ var Release = React.createClass({
                                 <td><a href={release['data_link']}>Link</a></td>
                             </tr>
                             <tr>
-                                <td className="active"><b>md5sum of data</b></td>
-                                <td>{release['md5sum']}</td>
-                            </tr>
-                            <tr>
                                 <td className="active"><b>Date</b></td>
                                 <td>{dateFormat(release['date_released'])}</td>
-                            </tr>
-                            <tr>
-                                <td className="active"><b>Link to Data Schema</b></td>
-                                <td><a href='#'>Link</a></td>
                             </tr>
                         </Table>
                 {release['data_sources']}

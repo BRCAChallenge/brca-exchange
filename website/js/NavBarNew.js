@@ -72,6 +72,9 @@ var NavBarNew = React.createClass({
                             <NavLink onClick={this.close} to='/releases'>
                                 Previous Data Releases
                             </NavLink>
+                            <NavLink onClick={this.close} to='/about/api'>
+                                Webservices for API Data Access
+                            </NavLink>
                         </DropdownButton>
                         <NavLink to='/community'>Community</NavLink>
                         <NavLink to='/help'>Help</NavLink>
