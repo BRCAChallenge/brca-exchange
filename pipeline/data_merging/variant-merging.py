@@ -21,6 +21,17 @@ from pprint import pprint
 #GENOMIC VERSION:
 VERSION = "hg38" # equivalent to GRCh38
 
+# Specific columns in the output matrix
+COLUMN_SOURCE = 0
+COLUMN_GENE = 1
+COLUMN_GENOMIC_HGVS = 2
+COLUMN_VCF_CHR = 3
+COLUMN_VCF_POS = 4
+COLUMN_VCF_REF = 5
+COLUMN_VCF_ALT = 6
+
+# This is the string to be stored when a field is empty
+DEFAULT_CONTENTS = "-"
 
 # files needed for string comparison
 
@@ -87,7 +98,7 @@ GENOME1K_FILE = "1000G_brca.sorted.hg38.vcf"
 CLINVAR_FILE = "ClinVarBrca.vcf"
 LOVD_FILE = "sharedLOVD_brca12.sorted.hg38.vcf"
 EX_LOVD_FILE = "exLOVD_brca12.sorted.hg38.vcf"
-BIC_FILE = "bicSnp.sorted.hg38.vcf"
+BIC_FILE = "bic_brca12.sorted.hg38.vcf"
 EXAC_FILE = "exac.brca12.sorted.hg38.vcf"
 ESP_FILE = "esp.brca12.sorted.hg38.vcf"
 
@@ -134,6 +145,7 @@ def main():
         for source_name, file in source_dict.iteritems():
             (columns, variants) = add_new_source(columns, variants, source_name,
                                                  file, FIELD_DICT[source_name])
+
         # standardizes genomic coordinates for variants
         print "\n------------standardizing genomic coordinates-------------"
         variants = variant_standardize(variants=variants)
@@ -160,6 +172,8 @@ def variant_standardize(variants="pickle"):
         with open("temp_variants.pkl", "r") as fv:
             variants = pickle.loads(fv.read())
         fv.close()
+    variants_to_remove = list()
+    variants_to_add = {}
     for ev, items in variants.iteritems():
         chr = items[COLUMN_VCF_CHR]
         pos = items[COLUMN_VCF_POS]
@@ -264,15 +278,15 @@ def variant_standardize(variants="pickle"):
 
     return variants
 
-def trim_bases(v):
-    ref, alt = v.split(":")[2].split(">")
+def trim_bases(chr, pos, ref, alt):
+    #ref, alt = v.split(":")[2].split(">")
     if len(ref) <= 1 or len(alt) <= 1:
-        return v
+        return (chr, pos, ref, alt)
     else:
-        ref, alt = trim_trailing(ref, alt)
-        v = ":".join(v.split(":")[0:2] + ["{0}>{1}".format(ref, alt)])
-        v = trim_leading(v)
-        return v
+        (ref, alt) = trim_trailing(ref, alt)
+        #v = ":".join(v.split(":")[0:2] + ["{0}>{1}".format(ref, alt)])
+        (chr, pos, ref, alt) = trim_leading(chr, pos, ref, alt)
+        return (chr, pos, ref, alt)
 
 def trim_trailing(ref, alt):
     if len(ref) <= 1 or len(alt) <= 1:
@@ -287,7 +301,7 @@ def trim_trailing(ref, alt):
 def trim_leading(chr, pos, ref, alt):
     pos = int(pos)
     if len(ref) == 1 or len(alt) == 1 or ref[0] != alt[0]:
-        return v
+        return (chr, pos, ref, alt)
     else:
         ref = ref[1:]
         alt = alt[1:]
@@ -303,7 +317,7 @@ def add_leading_base(chr, pos, ref, alt, version="hg38"):
     if chr == "13":
         seq = BRCA2[version]["sequence"]
         brca_pos = pos - 1 - BRCA2[version]["start"]
-    elif chr == "chr17":
+    elif chr == "17":
         seq = BRCA1[version]["sequence"]
         brca_pos = pos - 1 - BRCA1[version]["start"]
     else:
@@ -357,10 +371,15 @@ def string_comparison_merge(variants):
                 for index, values_merged_so_far in enumerate(merged_row):
                     values_to_be_merged = variants[each_v][index]
                     # If either the new value or the old value is non-blank, use it.
-                    if values_merged_so_far == "-" and values_to_be_merged != "-":
+                    if values_merged_so_far == DEFAULT_CONTENTS and values_to_be_merged != DEFAULT_CONTENTS:
                         merged_row[index] = values_to_be_merged
-                    elif values_merged_so_far != "-" and values_to_be_merged == "-":
+                    elif values_merged_so_far != DEFAULT_CONTENTS and values_to_be_merged == DEFAULT_CONTENTS:
                         merged_row[index] = values_merged_so_far
+                        # Skip over the VCF columns.  We're going to assume that one
+                        # equivalence of them is enough, which will simplify life for
+                        # downstream methods.
+                    elif index == COLUMN_VCF_CHR or index == COLUMN_VCF_POS or index == COLUMN_VCF_REF or index == COLUMN_VCF_ALT:
+                        continue
                     else:
                         # If both the new value and old value are non-blank and different,
                         # generate a list that contains both new and old values.
@@ -464,7 +483,7 @@ def preprocessing(tmp_dir):
         for record in vcf_reader:
             ref = record.REF.replace("-", "")
             v = [record.CHROM, record.POS, ref, "dummy"]
-            if not ref_correct(v):
+            if not ref_correct(record.CHROM, record.POS, record.REF, record.ALT):
                 vcf_wrong_writer.write_record(record)
                 n_wrong += 1
             else:
@@ -548,6 +567,8 @@ def write_new_tsv(filename, columns, variants):
             if type(variant[ii]) == list:
                 comma_delimited_string = ",".join(str(xx) for xx in variant[ii])
                 variant[ii] = comma_delimited_string
+            elif type(variant[ii]) == int:
+                variant[ii] = str(variant[ii])
         merged_file.write("\t".join(variant)+"\n")
     merged_file.close()
 
@@ -562,7 +583,7 @@ def add_new_source(columns, variants, source, source_file, source_dict):
     variants_num = 0
     for record in vcf_reader:
         variants_num += 1
-        genome_coor = ("chr" + str(record.CHROM) + ":" + str(record.POS) + ":" +
+        genome_coor = ("chr" + str(record.CHROM) + ":g." + str(record.POS) + ":" +
                        record.REF + ">" + str(record.ALT[0]))
         if genome_coor in variants.keys():
             overlap += 1
@@ -578,7 +599,11 @@ def add_new_source(columns, variants, source, source_file, source_dict):
                 variants[genome_coor][COLUMN_GENE] = "BRCA1"
             else:
                 raise Exception("Wrong chromosome")
-            variants[genome_coor][2] = genome_coor
+            variants[genome_coor][COLUMN_GENOMIC_HGVS] = genome_coor
+            variants[genome_coor][COLUMN_VCF_CHR] = record.CHROM
+            variants[genome_coor][COLUMN_VCF_POS] = record.POS
+            variants[genome_coor][COLUMN_VCF_REF] = record.REF
+            variants[genome_coor][COLUMN_VCF_ALT] = str(record.ALT[0])
         for value in source_dict.values():
             try:
                 variants[genome_coor].append(record.INFO[value])
@@ -592,7 +617,7 @@ def add_new_source(columns, variants, source, source_file, source_dict):
     # add extra cells of "-" to the end of old record
     for value in variants.values():
         if len(value) != len(columns):
-            value += ["-"] * len(source_dict)
+            value += [DEFAULT_CONTENTS] * len(source_dict)
     print "number of variants in " + source + " is ", variants_num
     print "overlap with previous dataset: ", overlap
     print "number of total variants with the addition of " + source + " is: ", len(variants), "\n"
@@ -614,15 +639,28 @@ def save_enigma_to_dict(path):
         if line_num == 1:
             columns = line.strip().split("\t")
             columns = [c + "_ENIGMA" for c in columns if c != "Genomic_Coordinate"]
-            columns.insert(0, "Source")
-            columns.insert(2, "Genomic_Coordinate")
+            columns.insert(COLUMN_SOURCE, "Source")
+            columns.insert(COLUMN_GENOMIC_HGVS, "Genomic_Coordinate")
+            columns.insert(COLUMN_VCF_CHR, "Chr")
+            columns.insert(COLUMN_VCF_POS, "Pos")
+            columns.insert(COLUMN_VCF_REF, "Ref")
+            columns.insert(COLUMN_VCF_ALT, "Alt")
             f_wrong.write(line)
         else:
             items = line.strip().split("\t")
-            items.insert(0, "ENIGMA")
-            v = items[2].replace("-", "").replace("chr", "").replace(">", ":")
-            if ref_correct(v.split(":")):
-                variants[items[2]] = items
+            items.insert(COLUMN_SOURCE, "ENIGMA")
+            v = items[COLUMN_GENOMIC_HGVS].replace("-", "").replace("chr", "").replace(">", ":")
+            (chrom, pos, ref, alt) = v.split(":")
+            items.insert(COLUMN_VCF_CHR, chrom)
+            items.insert(COLUMN_VCF_POS, pos)
+            items.insert(COLUMN_VCF_REF, ref)
+            items.insert(COLUMN_VCF_ALT, alt)
+            for ii in range(len(items)):
+                if items[ii] == None:
+                    items[ii] = DEFAULT_CONTENTS 
+            if ref_correct(chrom, pos, ref, alt):
+                hgvs = "chr%s:g.%s:%s>%s" % (str(chrom), str(pos), ref, alt)
+                variants[hgvs] = items
             else:
                 n_wrong += 1
                 f_wrong.write(line)
@@ -695,7 +733,7 @@ def ref_correct(chr, pos, ref, alt, version="hg38"):
         assert(False)
     genomeRef = seq[pos:pos+len(ref)].upper()
     if len(ref) != 0 and len(genomeRef)==0:
-        print v
+        print "%s:%s:%s>%s" % (chr, pos, ref, alt)
         raise Exception("ref not inside BRCA1 or BRCA2")
     if (genomeRef != ref):
         return False

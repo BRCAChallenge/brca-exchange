@@ -4,8 +4,11 @@ Contains source code used to wrangle the BRCA variation data that is presented i
 ##### Overall Dependencies
  * create a Synapse account, contact Melissa for access to the ENIGMA data under Synapse, and do a 'pip install synapseclient'
  * create a directory for genomic resources.  Point to it with the environment variable $BCRA_RESOURCES
+ * download http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/refseq_annotation.hg38.gp to $BRCA_RESOURCES
  * download http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/refseq_annotation.hg19.gp to $BRCA_RESOURCES
+ * download http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/refseq_annotation.hg18.gp to $BRCA_RESOURCES
  * download http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/hg19.fa.gz to $BRCA_RESOURCES and uncompress
+ * download http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/hg18.fa.gz to $BRCA_RESOURCES and uncompress
  * download http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz to $BRCA_RESOURCES and uncompress
  * download http://hgdownload.cse.ucsc.edu/gbdb/hg19/liftOver/hg19ToHg38.over.chain.gz to $BRCA_RESOURCES.  There is no need to uncompress it.
  * Download brca1_hg38.txt, brca2_hg38.txt, brca1_hg19.txt and brca2_hg19.txt from http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/ to $BRCA_RESOURCES
@@ -19,6 +22,12 @@ Contains source code used to wrangle the BRCA variation data that is presented i
  * pip install bioutils
  * pip install biopython
  * install lzo
+ * install bx-python from https://pypi.python.org/packages/55/db/fa76af59a03c88ad80494fc0df2948740bbd58cd3b3ed5c31319624687cc/bx-python-0.7.3.tar.gz#md5=d8c50c01c9e421bae0bbdbfa00fef6e4 (note: pip install bx-python left an outstanding dependency to lzo1x.h, which proved to be hard to resolve) NOTE: This may lead to errors in the bx.bbi directory, please submit an issue if you encounter this problem. Sometimes `pip install bx-python` is also necessary.
+ * pip install pysam
+ * install lzo (sudo apt-get install liblzo2-dev)
+ * pip install git+https://github.com/bxlab/bx-python
+ * install Cython
+ * pip install CrossMap (8/25/16: install from
  * install vcftools from https://vcftools.github.io/index.html
  * pip install pyvcf
  * install tabix (see http://genometoolbox.blogspot.com/2013/11/installing-tabix-on-unix.html)

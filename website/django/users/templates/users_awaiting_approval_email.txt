@@ -1,0 +1,5 @@
+{% load admin_urls %}
+There are {{ user_count }} users awaiting approval for the BRCA Exchange community pages.
+
+You can approve them by logging in to the admin site at {{ url }}
+

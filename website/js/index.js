@@ -118,7 +118,7 @@ var Home = React.createClass({
         return (
             <Grid id="main-grid" className='home'>
                 <Row>
-                    <Col smOffset={3} sm={6}>
+                    <Col smOffset={2} sm={8}>
                         <VariantSearch
                             id='home-search'
                             suggestions={suggestions}

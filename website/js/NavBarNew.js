@@ -59,6 +59,8 @@ var NavBarNew = React.createClass({
                     <Nav eventKey={0} navbar right>
                         <NavLink to='/'>Home</NavLink>
                         <NavLink to='/variants'>Variants</NavLink>
+                        <NavLink to='/community'>Community</NavLink>
+                        <NavLink to='/help'>Help</NavLink>
                         <DropdownButton className={this.activePath(path, "about")} ref='about' title='More'>
                             <NavLink onClick={this.close} to='/about/variation'>
                                 BRCA1, BRCA2, and Cancer
@@ -76,8 +78,6 @@ var NavBarNew = React.createClass({
                                 Webservices for API Data Access
                             </NavLink>
                         </DropdownButton>
-                        <NavLink to='/community'>Community</NavLink>
-                        <NavLink to='/help'>Help</NavLink>
                     </Nav>
                 </Navbar>
             </div>
