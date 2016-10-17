@@ -47,7 +47,6 @@ var {Releases, Release} = require('./Releases.js');
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 
 var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
-//var variantPathSplit = id => _.object(databaseKey, _.map(id.split(/@@/), decodeURIComponent));
 
 if (typeof console === "undefined") {
     window.console = {

@@ -221,7 +221,7 @@ def sanitise_term(term):
 def search_variants(request):
     """Handles requests to the /variants/search method"""
     conditional = validate_search_variants_request(request)
-    if conditional :
+    if conditional:
         return conditional
     else:
         try:
@@ -332,7 +332,7 @@ def validate_search_variants_request(request):
             return HttpResponseBadRequest(
                 json.dumps(ErrorMessages['start']),
                 content_type='application/json')
-        elif not request_dict.get('end') :
+        elif not request_dict.get('end'):
             return HttpResponseBadRequest(
                 json.dumps(ErrorMessages['end']),
                 content_type='application/json')
