@@ -758,7 +758,7 @@ class ConvertSharedLOVDBRCA1ExtractToVCF(luigi.Task):
 
         args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA1.txt",
                 "-o", lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf", "-a",
-                "exLOVDAnnotation", "-b", "1", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp",
+                "sharedLOVDAnnotation", "-b", "1", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp",
                 "-g", brca_resources_dir + "/hg19.fa"]
         print "Running lovd2vcf with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -779,7 +779,7 @@ class ConvertSharedLOVDBRCA2ExtractToVCF(luigi.Task):
         brca_resources_dir = self.resources_dir
 
         args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA2.txt", "-o",
-                lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf", "-a", "exLOVDAnnotation",
+                lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf", "-a", "sharedLOVDAnnotation",
                 "-b", "2", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
                 brca_resources_dir + "/hg19.fa"]
         print "Running lovd2vcf with the following args: %s" % (args)
