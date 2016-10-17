@@ -23,10 +23,14 @@ def main():
 
     version_data['notes'] = release_notes
 
+    # TODO: come up with a way to generate this and creation dates programatically.
+    source_files = ["Bic", "ClinVar", "ESP", "ExAC", "Enigma", "LOVD", "exLOVD", "1000 Genomes"]
+    version_data['sources'] = source_files
+
     json_data = json.dumps(version_data, default=handler)
 
     with open(args.output, 'w') as json_output:
-        json.dump(json_data, json_output)
+        json_output.write(json_data)
 
 
 def handler(obj):
