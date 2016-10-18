@@ -803,7 +803,7 @@ class ConcatenateSharedLOVDVCFFiles(luigi.Task):
         writable_lovd_brca12_hg19_vcf_file = open(lovd_brca12_hg19_vcf_file, 'w')
         args = ["vcf-concat", lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf",
                 lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf"]
-        print "Running lovd2vcf with the following args: %s" % (args)
+        print "Running vcf-concat with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=writable_lovd_brca12_hg19_vcf_file, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
