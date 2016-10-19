@@ -27,7 +27,7 @@ Contains source code used to wrangle the BRCA variation data that is presented i
  * install lzo (sudo apt-get install liblzo2-dev)
  * pip install git+https://github.com/bxlab/bx-python
  * install Cython
- * pip install CrossMap (8/25/16: install from
+ * pip install "crossmap>=0.2.4"
  * install vcftools from https://vcftools.github.io/index.html
  * pip install pyvcf
  * install tabix (see http://genometoolbox.blogspot.com/2013/11/installing-tabix-on-unix.html)
