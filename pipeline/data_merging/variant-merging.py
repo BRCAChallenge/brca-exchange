@@ -117,7 +117,6 @@ parser.add_argument("-v", "--verbose", action="count", default=False, help="dete
 
 ARGS = parser.parse_args()
 
-
 BRCA1 = {"hg38": {"start": 43000000,
                   "sequence": open(ARGS.reference + "brca1_hg38.txt", "r").read()},
          "hg19": {"start": 41100000,
@@ -134,32 +133,29 @@ def main():
     else:
         logging_level = logging.CRITICAL
 
-    logging.basicConfig(filename='variant-merging.log', filemode="w", level=logging_level)
-    tmp_dir = tempfile.mkdtemp()
-    try:
-        # merge repeats within data sources before merging between data sources
-        source_dict, columns, variants = preprocessing(tmp_dir)
+    logging.basicConfig(filename="variant-merging.log", filemode="w", level=logging_level)
 
-        # merges repeats from different data sources, adds necessary columns and data
-        print "\n------------merging different datasets------------------------------"
-        for source_name, file in source_dict.iteritems():
-            (columns, variants) = add_new_source(columns, variants, source_name,
-                                                 file, FIELD_DICT[source_name])
+    # merge repeats within data sources before merging between data sources
+    source_dict, columns, variants = preprocessing()
 
-        # standardizes genomic coordinates for variants
-        print "\n------------standardizing genomic coordinates-------------"
-        variants = variant_standardize(variants=variants)
+    # merges repeats from different data sources, adds necessary columns and data
+    print "\n------------merging different datasets------------------------------"
+    for source_name, file in source_dict.iteritems():
+        (columns, variants) = add_new_source(columns, variants, source_name,
+                                             file, FIELD_DICT[source_name])
 
-        # compare dna sequence results of variants and merge if equivalent
-        print "------------dna sequence comparison merge-------------------------------"
-        variants = string_comparison_merge(variants)
+    # standardizes genomic coordinates for variants
+    print "\n------------standardizing genomic coordinates-------------"
+    variants = variant_standardize(variants=variants)
 
-        # write final output to file
-        write_new_tsv(ARGS.output + "merged.tsv", columns, variants)
-        print "final number of variants: %d" % len(variants)
-        print "Done"
-    finally:
-        shutil.rmtree(tmp_dir)
+    # compare dna sequence results of variants and merge if equivalent
+    print "------------dna sequence comparison merge-------------------------------"
+    variants = string_comparison_merge(variants)
+
+    # write final output to file
+    write_new_tsv(ARGS.output + "merged.tsv", columns, variants)
+    print "final number of variants: %d" % len(variants)
+    print "Done"
 
 
 def variant_standardize(variants="pickle"):
@@ -430,7 +426,7 @@ def find_equivalent_variant(variants):
     print equivalent_variants
     return equivalent_variants
 
-def preprocessing(tmp_dir):
+def preprocessing():
     # Preprocessing variants:
     source_dict = {
                    "1000_Genomes": GENOME1K_FILE + "for_pipeline",
@@ -456,13 +452,13 @@ def preprocessing(tmp_dir):
     for source_name, file_name in source_dict.iteritems():
         print "convert to one variant per line in ", source_name
         f_in = open(ARGS.input + file_name, "r")
-        f_out = open(tmp_dir + "/" + source_name + ".vcf", "w")
+        f_out = open(ARGS.output + source_name + ".vcf", "w")
         one_variant_transform(f_in, f_out)
         f_in.close()
         f_out.close()
         print "merge repetitive variants within ", source_name
-        f_in = open(tmp_dir + "/" + source_name + ".vcf", "r")
-        f_out = open(tmp_dir + "/" + source_name + "ready.vcf", "w")
+        f_in = open(ARGS.output + source_name + ".vcf", "r")
+        f_out = open(ARGS.output + source_name + "ready.vcf", "w")
         repeat_merging(f_in, f_out)
         source_dict[source_name] = f_out.name
 
@@ -475,7 +471,7 @@ def preprocessing(tmp_dir):
             os.makedirs(d_wrong)
         f_wrong = open(ARGS.output + "wrong_genome_coors/" +
                        source_name + "_wrong_genome_coor.vcf", "w")
-        f_right = open(tmp_dir + "/right" + source_name, "w")
+        f_right = open(ARGS.output + "right" + source_name, "w")
         vcf_reader = vcf.Reader(f, strict_whitespace=True)
         vcf_wrong_writer = vcf.Writer(f_wrong, vcf_reader)
         vcf_right_writer = vcf.Writer(f_right, vcf_reader)
@@ -657,7 +653,7 @@ def save_enigma_to_dict(path):
             items.insert(COLUMN_VCF_ALT, alt)
             for ii in range(len(items)):
                 if items[ii] == None:
-                    items[ii] = DEFAULT_CONTENTS 
+                    items[ii] = DEFAULT_CONTENTS
             if ref_correct(chrom, pos, ref, alt):
                 hgvs = "chr%s:g.%s:%s>%s" % (str(chrom), str(pos), ref, alt)
                 variants[hgvs] = items

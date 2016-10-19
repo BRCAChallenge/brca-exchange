@@ -50,6 +50,7 @@ def parse_args():
                         help='Set flag for hgvs protein fill-in. May not result in complete fill-in.')
     parser.add_argument('-o', '--outBRCA', type=argparse.FileType('w'),
                         help='Output filled in ENIGMA BRCA datatable file.')
+    parser.add_argument('--artifacts_dir', help='Artifacts directory with pipeline artifact files.')
 
     parser.set_defaults(calcProtein=False)
     options = parser.parse_args()
@@ -68,8 +69,12 @@ def main(args):
     refSeq38 = options.inRefSeq38
     outputFile = options.outBRCA
     calcProtein = options.calcProtein
+    artifacts_dir = options.artifacts_dir
 
-    logging.basicConfig(filename='brca_pseudonym_generator.log', filemode="w", level=logging.DEBUG)
+    if not os.path.exists(artifacts_dir):
+        os.makedirs(artifacts_dir)
+    log_file_path = artifacts_dir + "brca_pseudonym_generator.log"
+    logging.basicConfig(filename=log_file_path, filemode="w", level=logging.DEBUG)
 
     hdp = hgvs_dataproviders_uta.connect()
     variantmapper = hgvs_variantmapper.EasyVariantMapper(hdp)
