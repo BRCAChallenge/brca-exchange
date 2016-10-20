@@ -165,7 +165,7 @@ def BICUpdate(row):
 def pathogenicityUpdate(row):
     pathoExpert = row["Clinical_significance_ENIGMA"]
     if pathoExpert == EMPTY:
-        pathoExpert = "Not Yet Classified"
+        pathoExpert = "Not Yet Reviewed"
     if pathoExpert == "Benign":
         pathoExpert = "Benign / Little Clinical Significance"
     pathoAll = ""
