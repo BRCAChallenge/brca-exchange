@@ -113,6 +113,7 @@ parser.add_argument("-p", "--de_novo", default=False,
                     action="store_true")
 parser.add_argument('-r', "--reference", help="reference data directory",
                     default="/home/brca/pipeline-data/pipeline-resources/")
+parser.add_argument('-a', "--artifacts_dir", help='Artifacts directory with pipeline artifact files.')
 parser.add_argument("-v", "--verbose", action="count", default=False, help="determines logging")
 
 ARGS = parser.parse_args()
@@ -133,7 +134,8 @@ def main():
     else:
         logging_level = logging.CRITICAL
 
-    logging.basicConfig(filename="variant-merging.log", filemode="w", level=logging_level)
+    log_file_path = ARGS.artifacts_dir + "variant-merging.log"
+    logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level)
 
     # merge repeats within data sources before merging between data sources
     source_dict, columns, variants = preprocessing()

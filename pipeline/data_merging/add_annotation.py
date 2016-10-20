@@ -7,16 +7,17 @@ import pandas as pd
 import re
 import requests
 import sys
+import logging
 
 # Here are the canonical BRCA transcripts in ENSEMBL nomenclature
 BRCA1_CANONICAL = "ENST00000357654"
 BRCA2_CANONICAL = "ENST00000380152"
 
 VEP_TRANSCRIPT_CONSEQUENCES = {
-    "Sift_Score" : "sift_score",
-    "Sift_Prediction" : "sift_prediction",
-    "Polyphen_Score" : "polyphen_score", 
-    "Polyphen_Prediction" : "polyphen_prediction"
+    "Sift_Score": "sift_score",
+    "Sift_Prediction": "sift_prediction",
+    "Polyphen_Score": "polyphen_score",
+    "Polyphen_Prediction": "polyphen_prediction"
 }
 
 
@@ -26,17 +27,30 @@ def main():
                         default="/hive/groups/cgl/brca/release1.0/merged.tsv")
     parser.add_argument("-o", "--output",
                         default="/hive/groups/cgl/brca/release1.0/merged_withVEP_cleaned.tsv")
+    parser.add_argument('-a', "--artifacts_dir", help='Artifacts directory with pipeline artifact files.')
+    parser.add_argument("-v", "--verbose", action="count", default=False, help="determines logging")
     args = parser.parse_args()
+
+    if args.verbose:
+        logging_level = logging.DEBUG
+    else:
+        logging_level = logging.CRITICAL
+
+    log_file_path = args.artifacts_dir + "add-annotation.log"
+    logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level)
+
     csvIn = csv.DictReader(open(args.input, "r"), delimiter='\t')
     outputColumns = setOutputColumns(csvIn.fieldnames, VEP_TRANSCRIPT_CONSEQUENCES)
     csvOut = csv.DictWriter(open(args.output, "w"), delimiter='\t',
                             fieldnames=outputColumns)
-    csvOut.writerow(dict((fn,fn) for fn in outputColumns))
+    csvOut.writerow(dict((fn, fn) for fn in outputColumns))
     rowCount = 0
     for row in csvIn:
         rowCount += 1
         row = addVepResults(row, VEP_TRANSCRIPT_CONSEQUENCES)
+        logging.info("Completed addVepResults.")
         csvOut.writerow(row)
+        logging.info("Completed writerow.")
 
 def setOutputColumns(fields, toAdd):
     newFields = []
@@ -60,10 +74,10 @@ def addVepResults(row, vepTranscriptConsequenceFields):
             and row["Ref"] != row["Alt"]:
         server = "http://rest.ensembl.org"
         ext = "/vep/human/hgvs/"
-        hgvs = "%s:g.%s:%s>%s?" % (row["Chr"], row["Pos"], 
+        hgvs = "%s:g.%s:%s>%s?" % (row["Chr"], row["Pos"],
                                    row["Ref"], row["Alt"])
-        req = requests.get(server+ext+hgvs, 
-                           headers={ "Content-Type" : "application/json"})
+        req = requests.get(server+ext+hgvs,
+                           headers={"Content-Type": "application/json"})
         if not req.ok:
             req.raise_for_status()
             sys.exit()
@@ -71,17 +85,20 @@ def addVepResults(row, vepTranscriptConsequenceFields):
         assert(len(jsonOutput) == 1)
         assert(jsonOutput[0].has_key("transcript_consequences"))
         correctEntry = None
+        logging.info("Completed request and passed assertions.")
         for entryThisGene in jsonOutput[0]["transcript_consequences"]:
             if entryThisGene.has_key("transcript_id"):
                 if re.search(BRCA1_CANONICAL, entryThisGene["transcript_id"]):
                     correctEntry = entryThisGene
-                elif re.search(BRCA2_CANONICAL, 
+                elif re.search(BRCA2_CANONICAL,
                                entryThisGene["transcript_id"]):
                     correctEntry = entryThisGene
-        for label, field in vepTranscriptConsequenceFields.iteritems():
-            if correctEntry != None:
+        logging.info("Correct Entry: %s", correctEntry)
+        if correctEntry is not None:
+            for label, field in vepTranscriptConsequenceFields.iteritems():
                 if correctEntry.has_key(field):
                     row[label] = correctEntry[field]
+                    logging.debug("Adding VEP results to variant %s with label %s \n correctEntry[field] == %s", row['Genomic_Coordinate'], label, correctEntry[field])
     return(row)
 
 if __name__ == "__main__":

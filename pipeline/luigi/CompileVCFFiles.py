@@ -1297,7 +1297,7 @@ class MergeVCFsIntoTSVFile(luigi.Task):
         os.chdir(data_merging_method_dir)
 
         args = ["python", "variant-merging.py", "-i", self.output_dir + "/", "-o",
-                artifacts_dir, "-p", "-r", brca_resources_dir + "/", "-v"]
+                artifacts_dir, "-p", "-r", brca_resources_dir + "/", "-a", artifacts_dir, "-v"]
         print "Running variant-merging.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
@@ -1317,7 +1317,7 @@ class AnnotateMergedOutput(luigi.Task):
         os.chdir(data_merging_method_dir)
 
         args = ["python", "add_annotation.py", "-i", artifacts_dir + "merged.tsv",
-                "-o", artifacts_dir + "annotated.tsv"]
+                "-o", artifacts_dir + "annotated.tsv", "-a", artifacts_dir, "-v"]
         print "Running add_annotation.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
