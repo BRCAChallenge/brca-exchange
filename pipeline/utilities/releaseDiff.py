@@ -229,6 +229,8 @@ class v1ToV2(transformer):
         "Date_last_evaluated_ENIGMA": (lambda xx: re.sub("/15$", "/2015", xx)),
         # Nagging trailing underscore...
         "Submitter_ClinVar": (lambda xx: re.sub("Invitae_", "Invitae", xx))
+        # Updated wording for non-expert-reviewed...
+        "Pathogenicity_expert": (lambda xx: re.sub("Not Yet Classified", "Not Yet Reviewed", xx))
         }
 
 
