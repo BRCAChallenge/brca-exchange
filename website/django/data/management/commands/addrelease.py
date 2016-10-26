@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
+from django.db import connection
 from data.models import Variant, DataRelease, ChangeType
 from argparse import FileType
 import json
@@ -57,6 +58,7 @@ class Command(BaseCommand):
                     row_dict['Variant_in_' + source] = True
                 row_dict['Data_Release_id'] = release_id
                 row_dict['Change_Type_id'] = change_types['deleted']
+                row_dict.pop('change_type', None)
                 # use cleaned up genomic coordinates
                 row_dict['Genomic_Coordinate_hg38'] = row_dict.pop('pyhgvs_Genomic_Coordinate_38')
                 row_dict['Genomic_Coordinate_hg37'] = row_dict.pop('pyhgvs_Genomic_Coordinate_37')
@@ -69,3 +71,7 @@ class Command(BaseCommand):
                 row_dict['HGVS_Protein'] = row_dict.pop('pyhgvs_Protein')
 
                 Variant.objects.create_variant(row_dict)
+
+        # update materialized view of current variants
+        with connection.cursor() as cursor:
+            cursor.execute("REFRESH MATERIALIZED VIEW currentvariant")

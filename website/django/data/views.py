@@ -10,7 +10,7 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.gzip import gzip_page
 
-from .models import Variant, DataRelease, ChangeType
+from .models import Variant, CurrentVariant, DataRelease, ChangeType
 from django.views.decorators.http import require_http_methods
 
 # GA4GH related imports
@@ -82,8 +82,9 @@ def index(request):
             change_types = map(lambda c: change_types_map[c], filter(lambda c: c in change_types_map, change_types))
             query = query.filter(Change_Type_id__in = change_types)
     else:
-        latest = Variant.objects.distinct('Genomic_Coordinate_hg38').order_by('Genomic_Coordinate_hg38', '-Data_Release_id')
-        query = Variant.objects.filter(id__in = latest).exclude(Change_Type_id = change_types_map['deleted'])
+        #latest = Variant.objects.distinct('Genomic_Coordinate_hg38').order_by('Genomic_Coordinate_hg38', '-Data_Release_id')
+        #query = Variant.objects.filter(id__in = latest).exclude(Change_Type_id = change_types_map['deleted'])
+        query = CurrentVariant.objects.exclude(Change_Type_id = change_types_map['deleted'])
 
     if format == 'csv' or format == 'tsv':
         quotes = '\''

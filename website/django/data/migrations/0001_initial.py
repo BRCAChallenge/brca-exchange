@@ -108,4 +108,9 @@ class Migration(migrations.Migration):
                 'db_table': 'variant',
             },
         ),
+        migrations.RunSQL("""CREATE MATERIALIZED VIEW currentvariant AS ( 
+            SELECT * FROM "variant" WHERE (
+                "id" IN ( SELECT DISTINCT ON ("Genomic_Coordinate_hg38") "id" FROM "variant" ORDER BY "Genomic_Coordinate_hg38" ASC, "Data_Release_id" DESC )
+            )
+        );"""),
     ]
