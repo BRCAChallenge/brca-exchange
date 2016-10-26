@@ -18,7 +18,7 @@ from ga4gh import variant_service_pb2 as variant_service
 class VariantTestCase(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
-        datafile = os.path.join(settings.BASE_DIR, 'data', 'resources', 'aggregated.tsv')
+        datafile = os.path.join(settings.BASE_DIR, 'data', 'resources', 'releases', 'output_10_6_2016', 'built_with_change_types.tsv')
         self.db_size = sum(1 for _ in open(datafile)) - 1
 
     def test_variant_model(self):
