@@ -10,7 +10,7 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.gzip import gzip_page
 
-from .models import Variant, DataRelease, ChangeType
+from .models import Variant, CurrentVariant, DataRelease, ChangeType
 from django.views.decorators.http import require_http_methods
 
 # GA4GH related imports
@@ -19,6 +19,7 @@ from ga4gh import variants_pb2 as variants
 from ga4gh import metadata_service_pb2 as metadata_service
 from ga4gh import metadata_pb2 as metadata
 import google.protobuf.json_format as json_format
+import pdb
 
 def releases(request):
     release_id = request.GET.get('release_id')
@@ -75,16 +76,15 @@ def index(request):
     release = request.GET.get('release')
     change_types = request.GET.getlist('change_types')
     change_types_map = {x['name']:x['id'] for x in ChangeType.objects.values().all()}
-
     if release:
         query = Variant.objects.filter(Data_Release_id = int(release))
         if(change_types):
             change_types = map(lambda c: change_types_map[c], filter(lambda c: c in change_types_map, change_types))
             query = query.filter(Change_Type_id__in = change_types)
     else:
-        latest = Variant.objects.distinct('Genomic_Coordinate_hg38').order_by('Genomic_Coordinate_hg38', '-Data_Release_id')
-        query = Variant.objects.filter(id__in = latest).exclude(Change_Type_id = change_types_map['deleted'])
-
+        #latest = Variant.objects.distinct('Genomic_Coordinate_hg38').order_by('Genomic_Coordinate_hg38', '-Data_Release_id')
+        #query = Variant.objects.filter(id__in = latest).exclude(Change_Type_id = change_types_map['deleted'])
+        query = CurrentVariant.objects.exclude(Change_Type_id = change_types_map['deleted'])
     if format == 'csv' or format == 'tsv':
         quotes = '\''
     else:
@@ -122,11 +122,8 @@ def index(request):
             response = HttpResponse(f.read(), content_type='text/csv')
             response['Content-Disposition'] = 'attachment;filename="variants.tsv"'
             return response
-
     elif format == 'json':
-
         count = query.count()
-
         if search_term:
             # Number of synonym matches = total matches minus matches on "normal" columns
             synonyms = count - apply_search(query, search_term, search_column='fts_standard').count()
@@ -134,7 +131,6 @@ def index(request):
             synonyms = 0
 
         query = select_page(query, page_size, page_num)
-
         # call list() now to evaluate the query
         response = JsonResponse({'count': count, 'synonyms': synonyms, 'data': list(query.values(*column))})
         response['Access-Control-Allow-Origin'] = '*'
@@ -165,7 +161,7 @@ def apply_filters(query, filterValues, filters, quotes=''):
 
 def apply_search(query, search_term, search_column='fts_document', quotes=''):
     # search using the tsvector column which represents our document made of all the columns
-    where_clause = "variant.{} @@ to_tsquery('simple', %s)".format(search_column)
+    where_clause = "currentvariant.{} @@ to_tsquery('simple', %s)".format(search_column)
     parameter = quotes + sanitise_term(search_term) + quotes
     return query.extra(
         where=[where_clause],
