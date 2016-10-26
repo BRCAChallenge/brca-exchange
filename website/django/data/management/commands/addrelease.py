@@ -18,15 +18,6 @@ class Command(BaseCommand):
                             help='Deleted variants, in TSV format, same schema sans change_type')
 
     def update_autocomplete_words(self):
-        # dbname = settings.DATABASES['default']['NAME']
-        # user = settings.DATABASES['default']['USER']
-
-        # # Connect to an existing database
-        # conn = psycopg2.connect("dbname=" + dbname + " user=" + user)
-
-        # # Open a cursor to perform database operations
-        # cur = conn.cursor()
-
         # Drop words table and recreate with latest data
         with connection.cursor() as cursor:
             cursor.execute("""
@@ -47,13 +38,6 @@ class Command(BaseCommand):
 
                 CREATE INDEX words_idx ON words(word text_pattern_ops);
             """)
-
-        # # Make the changes to the database persistent
-        # conn.commit()
-
-        # # Close communication with the database
-        # cur.close()
-        # conn.close()
 
     def handle(self, *args, **options):
         variants_tsv = options['variants']

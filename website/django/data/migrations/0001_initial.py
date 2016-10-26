@@ -210,9 +210,4 @@ class Migration(migrations.Migration):
             field=models.TextField(default='-'),
             preserve_default=False
         ),
-        # migrations.RunSQL("""CREATE MATERIALIZED VIEW currentvariant AS ( 
-        #     SELECT * FROM "variant" WHERE (
-        #         "id" IN ( SELECT DISTINCT ON ("Genomic_Coordinate_hg38") "id" FROM "variant" ORDER BY "Genomic_Coordinate_hg38" ASC, "Data_Release_id" DESC )
-        #     )
-        # );"""),
     ]
