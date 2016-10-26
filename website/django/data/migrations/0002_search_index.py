@@ -39,7 +39,6 @@ class Migration(migrations.Migration):
                 v."Allele_Origin_ClinVar",
                 v."Method_ClinVar",
                 v."Functional_analysis_result_LOVD",
-                v."Origin_of_variant_LOVD",
                 v."Functional_analysis_technique_LOVD",
                 v."Variant_frequency_LOVD",
                 v."Variant_haplotype_LOVD",
@@ -67,21 +66,24 @@ class Migration(migrations.Migration):
                 v."Posterior_probability_exLOVD",
                 v."Missense_analysis_prior_probability_exLOVD",
                 v."Segregation_LR_exLOVD",
-                v."SIFT_VEP",
-                v."PolyPhen_VEP",
                 v."Gene_Symbol",
+                v."Polyphen_Prediction",
+                v."Polyphen_Score",
+                v."Sift_Prediction",
+                v."Sift_Score",
                 v."Reference_Sequence",
                 v."HGVS_cDNA",
-                v."BIC_Identifier",
+                v."BIC_Nomenclature",
                 v."HGVS_Protein",
+                v."HGVS_RNA",
                 v."Protein_Change",
                 v."Allele_Frequency",
                 v."Max_Allele_Frequency",
                 v."Genomic_Coordinate_hg38",
                 v."Source_URL",
                 v."Discordant",
-                v."Pathogenicity_default",
-                v."Pathogenicity_research")
+                v."Pathogenicity_expert",
+                v."Pathogenicity_all")
     INTO fts_standard;
             RETURN to_tsvector('pg_catalog.simple', fts_standard);
     END;

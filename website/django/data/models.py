@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class DataRelease(models.Model):
     schema = models.TextField()
     archive = models.TextField()
@@ -11,12 +12,15 @@ class DataRelease(models.Model):
     class Meta:
         db_table = "data_release"
 
+
 class ChangeType(models.Model):
     name = models.TextField()
+
 
 class VariantManager(models.Manager):
     def create_variant(self, row):
         return self.create(**row)
+
 
 class Variant(models.Model):
     # These are some extra derived columns that help with filtering
@@ -108,7 +112,6 @@ class Variant(models.Model):
     Polyphen_Score = models.TextField()
     Sift_Score = models.TextField()
     Sift_Prediction = models.TextField()
-    
 
     # Data Versioning
     Data_Release = models.ForeignKey(DataRelease)
@@ -118,5 +121,3 @@ class Variant(models.Model):
 
     class Meta:
         db_table = 'variant'
-
-
