@@ -24,42 +24,45 @@ import google.protobuf.json_format as json_format
 def releases(request):
     release_id = request.GET.get('release_id')
     if release_id:
-        releases = DataRelease.objects.filter(id = release_id).values().all()
+        releases = DataRelease.objects.filter(id=release_id).values().all()
     else:
         releases = DataRelease.objects.values().all()
     latest = DataRelease.objects.order_by('-id')[0].id
-    change_types = {x['name']:x['id'] for x in ChangeType.objects.values().all()}
+    change_types = {x['name']: x['id'] for x in ChangeType.objects.values().all()}
     for release in releases:
-        variants = Variant.objects.filter(Data_Release_id = release['id'])
-        release['variants_added'] = variants.filter(Change_Type_id = change_types['new']).count()
+        variants = Variant.objects.filter(Data_Release_id=release['id'])
+        release['variants_added'] = variants.filter(Change_Type_id=change_types['new']).count()
         release['variants_classified'] = variants.filter(
-            Q(Change_Type_id = change_types['changed_classification']) | Q(Change_Type_id = change_types['added_classification'])).count()
+            Q(Change_Type_id=change_types['changed_classification']) | Q(Change_Type_id=change_types['added_classification'])).count()
         release['variants_modified'] = variants.filter(
-            Q(Change_Type_id = change_types['added_information']) | Q(Change_Type_id = change_types['changed_information'])).count()
-        release['variants_deleted'] = variants.filter(Change_Type_id = change_types['deleted']).count()
+            Q(Change_Type_id=change_types['added_information']) | Q(Change_Type_id=change_types['changed_information'])).count()
+        release['variants_deleted'] = variants.filter(Change_Type_id=change_types['deleted']).count()
     response = JsonResponse({"releases": list(releases), "latest": latest})
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
+
 def variant(request):
     variant_id = int(request.GET.get('variant_id'))
 
-    variant = Variant.objects.get(id = variant_id)
+    variant = Variant.objects.get(id=variant_id)
     key = variant.Genomic_Coordinate_hg38
 
-    query = Variant.objects.filter(Genomic_Coordinate_hg38 = key).order_by('-Data_Release_id').select_related('Data_Release')
+    query = Variant.objects.filter(Genomic_Coordinate_hg38=key).order_by('-Data_Release_id').select_related('Data_Release')
 
     variant_versions = map(variant_to_dict, query)
     response = JsonResponse({"data": variant_versions})
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
+
 def variant_to_dict(variant_object):
     variant_dict = model_to_dict(variant_object)
     variant_dict["Data_Release"] = model_to_dict(variant_object.Data_Release)
     variant_dict["Data_Release"]["date"] = variant_object.Data_Release.date
     return variant_dict
-    
+
+
 @gzip_page
 def index(request):
     order_by = request.GET.get('order_by')
@@ -77,14 +80,14 @@ def index(request):
     change_types = request.GET.getlist('change_types')
     change_types_map = {x['name']:x['id'] for x in ChangeType.objects.values().all()}
     if release:
-        query = Variant.objects.filter(Data_Release_id = int(release))
+        query = Variant.objects.filter(Data_Release_id=int(release))
         if(change_types):
             change_types = map(lambda c: change_types_map[c], filter(lambda c: c in change_types_map, change_types))
-            query = query.filter(Change_Type_id__in = change_types)
+            query = query.filter(Change_Type_id__in=change_types)
     else:
         #latest = Variant.objects.distinct('Genomic_Coordinate_hg38').order_by('Genomic_Coordinate_hg38', '-Data_Release_id')
         #query = Variant.objects.filter(id__in = latest).exclude(Change_Type_id = change_types_map['deleted'])
-        query = CurrentVariant.objects.exclude(Change_Type_id = change_types_map['deleted'])
+        query = CurrentVariant.objects.exclude(Change_Type_id=change_types_map['deleted'])
     if format == 'csv' or format == 'tsv':
         quotes = '\''
     else:
@@ -96,7 +99,7 @@ def index(request):
         query = apply_filters(query, filter_values, filters, quotes=quotes)
 
     if search_term:
-        query = apply_search(query, search_term, quotes=quotes)
+        query = apply_search(query, search_term, quotes=quotes, release=release)
 
     if order_by:
         query = apply_order(query, order_by, direction)
@@ -126,7 +129,7 @@ def index(request):
         count = query.count()
         if search_term:
             # Number of synonym matches = total matches minus matches on "normal" columns
-            synonyms = count - apply_search(query, search_term, search_column='fts_standard').count()
+            synonyms = count - apply_search(query, search_term, search_column='fts_standard', release=release).count()
         else:
             synonyms = 0
 
@@ -159,9 +162,12 @@ def apply_filters(query, filterValues, filters, quotes=''):
     return query
 
 
-def apply_search(query, search_term, search_column='fts_document', quotes=''):
+def apply_search(query, search_term, search_column='fts_document', quotes='', release=None):
     # search using the tsvector column which represents our document made of all the columns
-    where_clause = "currentvariant.{} @@ to_tsquery('simple', %s)".format(search_column)
+    if release:
+        where_clause = "variant.{} @@ to_tsquery('simple', %s)".format(search_column)
+    else:
+        where_clause = "currentvariant.{} @@ to_tsquery('simple', %s)".format(search_column)
     parameter = quotes + sanitise_term(search_term) + quotes
     return query.extra(
         where=[where_clause],
