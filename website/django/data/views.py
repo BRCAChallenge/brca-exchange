@@ -213,6 +213,12 @@ def sanitise_term(term):
     term += ":*"
     return term
 
+def latest_variants():
+    """Helper function provides variants from the latest release"""
+    latest = DataRelease.objects.order_by('-id')[0].id
+    variants = Variant.objects.filter(Data_Release_id = latest)
+    return variants
+
 @require_http_methods(["POST"])
 def search_variants(request):
     """Handles requests to the /variants/search method"""
@@ -237,7 +243,7 @@ def search_variants(request):
         page_token = '0'
 
     response = variant_service.SearchVariantsResponse()
-    variants = Variant.objects
+    variants = latest_variants()
     dataset_id, reference_genome = variant_set_id.split('-')
     if dataset_id != DATASET_ID:
         return HttpResponseBadRequest(

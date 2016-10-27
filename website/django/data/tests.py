@@ -421,7 +421,9 @@ class VariantTestCase(TestCase):
             self.assertTrue(long(variant["start"]) < end,
                             "Should be in range"
                             " v.start {} r.end {}".format(variant['start'], end))
-            self.assertTrue(variant["referenceName"] == "chr17")
+            self.assertTrue(
+                variant["referenceName"] == "chr17" or variant["referenceName"] == "17",
+                    "Searched for chr17 and got {}".format(variant["referenceName"]))
         request = self.factory.post("/data/ga4gh/variants/search",
                                     json.dumps({"end": end,
                                                 "referenceName": "17",
@@ -525,26 +527,27 @@ class VariantTestCase(TestCase):
         request = self.factory.get("/data/ga4gh/variants/"+variant_id)
         response = views.get_variant(request, variant_id)
         json_response = json.loads(response.content)
-        base_1_start = int(json_response['info']["Genomic_Coordinate_hg37"][0].split(':')[1]) -1
+        hgvs_start = int(
+            json_response['info']["Genomic_Coordinate_hg37"][0].split(':')[1].replace('g.',''))
         # Note that `Genomic Coordinate hg37` is 1 base offset from its determined 'start' position"""
-        self.assertEqual(int(json_response['start']), base_1_start,
-                         "`base_1_start`, obtained from 'Genomic Coordinate hg37' minus 1 should be equal to the `start` Variant parameter")
+        self.assertEqual(int(json_response['start']), hgvs_start,
+                         "`base_1_start`, obtained from 'Genomic Coordinate hg37' minus 1 should be equal to the `start` Variant parameter {} {}".format(
+                             int(json_response['start']), hgvs_start - 1))
 
-        variant_id_2 = "hg36-945"
-        request_2 = self.factory.get("/data/ga4gh/variants/" + variant_id_2)
-        response_2 = views.get_variant(request_2, variant_id_2)
-        json_response_2 = json.loads(response_2.content)
-        base_0_start = int(json_response_2['start']) + 1
+        variant_id = "hg38-945"
+        request = self.factory.get("/data/ga4gh/variants/" + variant_id)
+        response = views.get_variant(request, variant_id)
+        json_response = json.loads(response.content)
         # Note that `start` is 0 base offset from its determined 'Genomic Coordinate' field"""
-        genomic_coordinate_start = int(json_response_2['info']['Genomic_Coordinate_hg36'][0].split(':')[1])
-        self.assertEqual(genomic_coordinate_start, base_0_start)
+        hgvs_start = int(json_response['info']['Genomic_Coordinate_hg38'][0].split(':')[1].replace('g.',''))
+        self.assertEqual(int(json_response['start']), hgvs_start - 1)
 
     def test_brca_to_ga4gh(self):
         """
         Gets rows from database and converts them into tests that
         ensure the function brca_to_ga4gh makes well formed GA4GH messages.
         """
-        variant = {'Genomic_Coordinate_hg37': 'chr13:32923951:CA>C', 'Reference_Name': 'chr13',
+        variant = {'Genomic_Coordinate_hg37': 'chr13:32923951:CA>C', 'Chr': '13',
                               'id': 1, 'Hg37_End': 32923951, 'Genomic_Coordinate_hg36': 'chr13:31821951:CA>C',
                               'Hg36_Start': 31821950, 'Hg37_Start': 32923950, 'Genomic_Coordinate_hg38': 'chr13:32349814:CA>C',
                               'Hg38_End': 32349814,'Hg36_End': 31821951, 'Hg38_Start': 32349813, 'Synonyms': 'U43746.1:c.7234+2936delA'}
@@ -557,7 +560,7 @@ class VariantTestCase(TestCase):
         self.assertEqual(int(json_response['start']), 32923950)
         self.assertEqual(json_response['referenceBases'], "CA")
         self.assertEqual(json_response['alternateBases'][0], "C")
-        self.assertEqual(json_response['referenceName'], "chr13")
+        self.assertEqual(json_response['referenceName'], "13")
         self.assertEqual(json_response['id'], "hg37-1")
 
 if __name__ == '__main__':
