@@ -473,6 +473,18 @@ class VariantTestCase(TestCase):
         the provided search range"""
         self.assertEqual(json_response['nextPageToken'], unicode(''))
         self.assertEqual(json_response['variants'], list([]))
+        request = self.factory.post("/data/ga4gh/variants/search",
+                                           json.dumps({"referenceName": "5",
+                                                       "variantSetId": "brca-hg36",
+                                                       "start": 10, "end": 10000000000}),
+                                           content_type="application/json")
+        response = views.search_variants(request)
+        json_response = json.loads(response.content)
+        """Note that it is an empty response, no variants exist within
+        the provided search range"""
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json_response['nextPageToken'], unicode(''))
+        self.assertEqual(json_response['variants'], list([]))
 
     def test_get_variant_by_id(self):
         """Ensures the results found via search variants and get variant by ID are equal."""

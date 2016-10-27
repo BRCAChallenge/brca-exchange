@@ -346,6 +346,7 @@ def validate_search_variants_request(request):
                 # Make sure the variant set ID is well formed
             ids = request_dict.get('variantSetId').split('-')
             reference_name = request_dict.get('referenceName')
+            # A malformed ID
             if len(ids) < 2:
                 return HttpResponse(
                     json.dumps(ErrorMessages['variantSetId']),
@@ -355,11 +356,6 @@ def validate_search_variants_request(request):
             if reference_genome not in SET_IDS:
                 return HttpResponse(
                     json.dumps(ErrorMessages['variantSetId']),
-                    content_type='application/json',
-                    status=404)
-            if reference_name not in REFERENCE_NAMES:
-                return HttpResponse(
-                    json.dumps(ErrorMessages['referenceName']),
                     content_type='application/json',
                     status=404)
             return None
@@ -568,7 +564,7 @@ def empty_dataset_catcher(request):
 
 ErrorMessages = {'emptyBody' :{'status_code': 400, 'message' : 'Invalid request: empty request'},
                  'variantSetId' : {'status_code': 400, 'message': 'Invalid request: please provide a variantSetId'},
-                 'referenceName': {'status_code': 400, 'message': 'Invalid request: please provide a referenceName'},
+                 'referenceName': {'status_code': 400, 'message': 'Invalid request: please provide a referenceName, 13 or 17'},
                  'start': {'status_code' : 400, 'message': 'Invalid request: please provide a start position'},
                  'end' : {'status_code' :400, 'message': 'Invalid request: please provide an end position'},
                  'datasetId': {'status_code' : 400, 'message': 'Invalid request: please provide a datasetId'},
