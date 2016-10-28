@@ -16,6 +16,10 @@ require('./css/Autosuggest.css');
 function getSuggestions(value, callback) {
     var matchStr = encodeURIComponent(value.toLowerCase());
     var suggestionsEndpoint = `${config.backend_url}/data/suggestions/?term=${matchStr}`;
+    // If a release is specified, include it in the request
+    if (this.props.release) {
+        suggestionsEndpoint += `&release=${this.props.release}`;
+    }
     $.ajax({
         url: suggestionsEndpoint,
         dataType: 'json',
@@ -58,7 +62,7 @@ var VariantSearch = React.createClass({
         if (value !== this.state.value && onChange) {
             onChange(value);
         }
-        this.setState({value: value});
+        this.setState({value: value, release: this.props.release});
     },
     componentWillUnmount: function () {
         clearTimeout(this.cb);
@@ -74,7 +78,8 @@ var VariantSearch = React.createClass({
     },
     getInitialState: function () {
         return {
-            value: this.props.value
+            value: this.props.value,
+            release: this.props.release
         };
     },
     componentWillReceiveProps: function (newProps) {
@@ -82,8 +87,7 @@ var VariantSearch = React.createClass({
     },
     render: function () {
         var {id, onSearch} = this.props,
-            {value} = this.state;
-
+            {release, value} = this.state;
         return (
             <div className='search-box'>
                 <form onSubmit={this.onSubmit} style={{display: 'inline'}}>
@@ -94,6 +98,7 @@ var VariantSearch = React.createClass({
                             className='dropdown open'
                             cache={false}
                             value={value}
+                            release={release}
                             inputAttributes={{
                                 className: 'variant-search-input',
                                 placeholder: "search for \"c.1105G>A\", \"brca1\" or \"IVS7+1037T>C\"",

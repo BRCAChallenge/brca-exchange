@@ -193,17 +193,27 @@ def select_page(query, page_size, page_num):
 
 
 def autocomplete(request):
-    term = request.GET.get('term')
-    limit = int(request.GET.get('limit', 10))
-
     cursor = connection.cursor()
+    term = request.GET.get('term')
+
+    '''If a release is specified in the query, only return autocomplete
+    suggestions for specified release, otherwise default to suggestions
+    for the latest release'''
+    if 'release' in request.GET:
+        release = request.GET.get('release')
+    else:
+        cursor.execute("""SELECT MAX(id) FROM data_release""")
+        release = cursor.fetchone()[0]
+
+    limit = int(request.GET.get('limit', 10))
 
     cursor.execute(
         """SELECT word FROM words
         WHERE word LIKE %s
         AND char_length(word) >= 3
+        AND release_id = %s
         ORDER BY word""",
-        ["%s%%" % term])
+        ["%s%%" % term, release])
 
     rows = cursor.fetchall()
 
