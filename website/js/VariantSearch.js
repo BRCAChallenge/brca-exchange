@@ -15,7 +15,11 @@ require('./css/Autosuggest.css');
 
 function getSuggestions(value, callback) {
     var matchStr = encodeURIComponent(value.toLowerCase());
-    var suggestionsEndpoint = `${config.backend_url}/data/suggestions/?term=${matchStr}&release=${this.props.release}`;
+    var suggestionsEndpoint = `${config.backend_url}/data/suggestions/?term=${matchStr}`;
+    // If a release is specified, include it in the request
+    if (this.props.release) {
+        suggestionsEndpoint += `&release=${this.props.release}`;
+    }
     $.ajax({
         url: suggestionsEndpoint,
         dataType: 'json',
