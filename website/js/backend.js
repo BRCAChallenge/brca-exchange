@@ -35,7 +35,9 @@ function url(opts) {
         search = '',
         column,
         include,
-        exclude
+        exclude,
+        release,
+        changeTypes
         } = opts,
 
         [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v)));
@@ -52,12 +54,26 @@ function url(opts) {
         'search_term': search,
         'column': column,
         'include': include,
-        'exclude': exclude
+        'exclude': exclude,
+        'release': release,
+        'change_types': changeTypes
     }, v => v != null), {arrayFormat: 'repeat'})}`;
 }
 
 function data(opts) {
     return Rx.DOM.get(url(opts)).map(xhr => JSON.parse(xhr.responseText));
+}
+
+function variant(variant) {
+    return Rx.DOM.get(`${config.backend_url}/data/variant/?variant_id=${variant}`).map(xhr => JSON.parse(xhr.responseText));
+}
+
+function releases() {
+    return Rx.DOM.get(`${config.backend_url}/data/releases`).map(xhr => JSON.parse(xhr.responseText));
+}
+
+function release(id) {
+    return Rx.DOM.get(`${config.backend_url}/data/releases?release_id=${id}`).map(xhr => JSON.parse(xhr.responseText));
 }
 
 function users(opts) {
@@ -78,12 +94,15 @@ function userLocations(search, roles) {
 function lollipopData(opts) {
     opts.pageLength = 0;
     opts.format = 'json';
-    opts.column = ['id', 'Genomic_Coordinate_hg38', 'Pathogenicity_default'];
+    opts.column = ['id', 'Genomic_Coordinate_hg38', 'Pathogenicity_expert'];
     return Rx.DOM.get(url(opts)).map(xhr => JSON.parse(xhr.responseText));
 }
 
 module.exports = {
     data,
+    variant,
+    releases,
+    release,
     users,
     userLocations,
     lollipopData,

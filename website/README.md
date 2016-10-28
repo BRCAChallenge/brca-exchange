@@ -63,6 +63,13 @@ This process will delete all the previous data from the `variants` table and rep
  * `cd django`
  * `python manage.py migrate --fake data zero && python manage.py migrate`
 
+## How to add additional releases
+This process will add an additional release to the database and rebuild the words table to update autocomplete.
+
+ * Create a new directory at `brca-exchange/website/django/data/resources/releases/output_{MM_DD_YYYY}` that contains `built_with_change_types.tsv`, `removed.tsv`, and `version.json` from the latest pipeline output.
+ * Add `"archive": {NAME_OF_RELEASE_TARFILE}` to `version.json`.
+ * Run `./manage.py addrelease ./data/resources/releases/output_{MM_DD_YYYY}/built_with_change_types.tsv ./data/resources/releases/output_{MM_DD_YYYY}/version.json ./data/resources/releases/output_{MM_DD_YYYY}/removed.tsv` to add new data to the database, rebuild the words table, and generate a new release.
+
 ### References
  * http://blog.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/
  * http://webpack.github.io/

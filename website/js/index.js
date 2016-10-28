@@ -42,11 +42,11 @@ var {Profile} = require('./Profile');
 var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Route, RouteHandler,
     HistoryLocation, run, DefaultRoute} = require('react-router');
+var {Releases, Release} = require('./Releases.js');
 
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 
 var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
-var variantPathSplit = id => _.object(databaseKey, _.map(id.split(/@@/), decodeURIComponent));
 
 if (typeof console === "undefined") {
     window.console = {
@@ -65,6 +65,7 @@ var Footer = React.createClass({
                         <li><a href="/about/history">About</a></li>
                         <li><a href="/variants">Variants</a></li>
                         <li><a href="/help">Help</a></li>
+                        <li><a href="/about/api">API</a></li>
                     </ul>
                 </div>
                 <div className="col-sm-2 logo-footer">
@@ -192,14 +193,14 @@ function toNumber(v) {
 }
 
 function databaseParams(paramsIn) {
-    var {filter, filterValue, hide, hideSources, excludeSources, orderBy, order, search = ''} = paramsIn;
-    var numParams = _.mapObject(_.pick(paramsIn, 'page', 'pageLength'), toNumber);
+    var {filter, filterValue, hide, hideSources, excludeSources, orderBy, order, search = '', changeTypes} = paramsIn;
+    var numParams = _.mapObject(_.pick(paramsIn, 'page', 'pageLength', 'release'), toNumber);
     var sortBy = {prop: orderBy, order};
     var columnSelection = _.object(hide, _.map(hide, _.constant(false)));
     var sourceSelection = {..._.object(hideSources, _.map(hideSources, _.constant(0))),
                            ..._.object(excludeSources, _.map(excludeSources, _.constant(-1)))};
     var filterValues = _.object(filter, filterValue);
-    return {search, sortBy, columnSelection, sourceSelection, filterValues, hide, ...numParams};
+    return {changeTypes, search, sortBy, columnSelection, sourceSelection, filterValues, hide, ...numParams};
 }
 
 var transpose = a => _.zip.apply(_, a);
@@ -207,13 +208,15 @@ var transpose = a => _.zip.apply(_, a);
 function urlFromDatabase(state) {
     // Need to diff from defaults. The defaults are in DataTable.
     // We could keep the defaults here, or in a different module.
-    var {columnSelection, filterValues, sourceSelection,
+    var {release, changeTypes, columnSelection, filterValues, sourceSelection,
             search, page, pageLength, sortBy: {prop, order}} = state;
     var hide = _.keys(_.pick(columnSelection, v => v === false));
     var hideSources = _.keys(_.pick(sourceSelection, v => v === 0));
     var excludeSources = _.keys(_.pick(sourceSelection, v => v === -1));
     var [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v === true)));
     return _.pick({
+        release,
+        changeTypes,
         search: search === '' ? null : backend.trimSearchTerm(search),
         filter,
         filterValue,
@@ -370,22 +373,25 @@ var VariantDetail = React.createClass({
     showHelp: function (title) {
         this.transitionTo(`/help#${slugify(title)}`);
     },
+    getInitialState: () => ({}),
     componentWillMount: function () {
-        backend.data({
-            filterValues: variantPathSplit(this.props.params.id),
-            pageLength: 1
-        }).subscribe(
+        backend.variant(this.props.params.id).subscribe(
             resp => {
-                return this.setState({data: resp.data[0], error: null});
+                return this.setState({data: resp.data, error: null});
             },
-            this.setState({error: 'Problem connecting to server'}));
+            () => { this.setState({error: 'Problem connecting to server'}); });
     },
     onChildToggleMode: function() {
         this.forceUpdate();
         this.props.toggleMode();
     },
     render: function () {
-        var {data: variant = {}, error} = this.state;
+        var {data, error} = this.state;
+        if (!data) {
+            return <div></div>;
+        }
+
+        var variant = data[0];
         var cols;
         if (localStorage.getItem("research-mode") === 'true') {
             cols = researchModeColumns;
@@ -441,7 +447,6 @@ var VariantDetail = React.createClass({
 					<td><span className="row-wrap">{rowItem}</span></td>
 				</tr>);
         });
-
 
         return (error ? <p>{error}</p> :
             <Grid>
@@ -538,6 +543,8 @@ var routes = (
         <Route path='reset/:resetToken' handler={ChangePassword}/>
         <Route path='variants' />
         <Route path='variant/:id' handler={VariantDetail}/>
+        <Route path='releases' handler={Releases}/>
+        <Route path='release/:id' handler={Release}/>
     </Route>
 );
 

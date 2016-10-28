@@ -1,6 +1,6 @@
 {
   "name": "brcaexchange",
-  "version": "2.3.0",
+  "version": "2.3.5",
   "description": "brca variant browser",
   "main": "index.js",
   "scripts": {
