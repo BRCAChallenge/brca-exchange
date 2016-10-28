@@ -194,6 +194,7 @@ def select_page(query, page_size, page_num):
 
 def autocomplete(request):
     term = request.GET.get('term')
+    release = request.GET.get('release')
     limit = int(request.GET.get('limit', 10))
 
     cursor = connection.cursor()
@@ -202,8 +203,9 @@ def autocomplete(request):
         """SELECT word FROM words
         WHERE word LIKE %s
         AND char_length(word) >= 3
+        AND release_id = %s
         ORDER BY word""",
-        ["%s%%" % term])
+        ["%s%%" % term, release])
 
     rows = cursor.fetchall()
 

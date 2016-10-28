@@ -260,6 +260,7 @@ var DataTable = React.createClass({
                         <VariantSearch
                             id='variants-search'
                             value={search}
+                            release={release}
                             onChange={v => {
                                 // reset the page number to zero on new searches
                                 this.setStateFetch({search: v, page: 0});
