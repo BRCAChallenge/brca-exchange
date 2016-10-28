@@ -202,7 +202,7 @@ def autocomplete(request):
     if 'release' in request.GET:
         release = request.GET.get('release')
     else:
-        cursor.execute("""SELECT MAX(release_id) FROM words""")
+        cursor.execute("""SELECT MAX(id) FROM data_release""")
         release = cursor.fetchone()[0]
 
     limit = int(request.GET.get('limit', 10))
