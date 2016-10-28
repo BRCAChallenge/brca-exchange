@@ -19,7 +19,6 @@ from ga4gh import variants_pb2 as variants
 from ga4gh import metadata_service_pb2 as metadata_service
 from ga4gh import metadata_pb2 as metadata
 import google.protobuf.json_format as json_format
-import pdb
 
 
 def releases(request):
@@ -197,8 +196,9 @@ def autocomplete(request):
     cursor = connection.cursor()
     term = request.GET.get('term')
 
-    # If a release is included, only return autocomplete suggestions for that release
-    # otherwise default to suggestions for only the latest release
+    '''If a release is specified in the query, only return autocomplete
+    suggestions for specified release, otherwise default to suggestions
+    for the latest release'''
     if 'release' in request.GET:
         release = request.GET.get('release')
     else:
