@@ -73,7 +73,7 @@ def main(args):
 
     if not os.path.exists(artifacts_dir):
         os.makedirs(artifacts_dir)
-    log_file_path = artifacts_dir + "brca_pseudonym_generator.log"
+    log_file_path = artifacts_dir + "brca-pseudonym-generator.log"
     logging.basicConfig(filename=log_file_path, filemode="w", level=logging.DEBUG)
 
     hdp = hgvs_dataproviders_uta.connect()

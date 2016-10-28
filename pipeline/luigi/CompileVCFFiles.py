@@ -758,7 +758,7 @@ class ConvertSharedLOVDBRCA1ExtractToVCF(luigi.Task):
 
         args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA1.txt",
                 "-o", lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf", "-a",
-                "exLOVDAnnotation", "-b", "1", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp",
+                "sharedLOVDAnnotation", "-b", "1", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp",
                 "-g", brca_resources_dir + "/hg19.fa"]
         print "Running lovd2vcf with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -779,7 +779,7 @@ class ConvertSharedLOVDBRCA2ExtractToVCF(luigi.Task):
         brca_resources_dir = self.resources_dir
 
         args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA2.txt", "-o",
-                lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf", "-a", "exLOVDAnnotation",
+                lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf", "-a", "sharedLOVDAnnotation",
                 "-b", "2", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
                 brca_resources_dir + "/hg19.fa"]
         print "Running lovd2vcf with the following args: %s" % (args)
@@ -803,7 +803,7 @@ class ConcatenateSharedLOVDVCFFiles(luigi.Task):
         writable_lovd_brca12_hg19_vcf_file = open(lovd_brca12_hg19_vcf_file, 'w')
         args = ["vcf-concat", lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf",
                 lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf"]
-        print "Running lovd2vcf with the following args: %s" % (args)
+        print "Running vcf-concat with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=writable_lovd_brca12_hg19_vcf_file, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
@@ -1297,7 +1297,7 @@ class MergeVCFsIntoTSVFile(luigi.Task):
         os.chdir(data_merging_method_dir)
 
         args = ["python", "variant-merging.py", "-i", self.output_dir + "/", "-o",
-                artifacts_dir, "-p", "-r", brca_resources_dir + "/", "-v"]
+                artifacts_dir, "-p", "-r", brca_resources_dir + "/", "-a", artifacts_dir, "-v"]
         print "Running variant-merging.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
@@ -1317,7 +1317,7 @@ class AnnotateMergedOutput(luigi.Task):
         os.chdir(data_merging_method_dir)
 
         args = ["python", "add_annotation.py", "-i", artifacts_dir + "merged.tsv",
-                "-o", artifacts_dir + "annotated.tsv"]
+                "-o", artifacts_dir + "annotated.tsv", "-a", artifacts_dir, "-v"]
         print "Running add_annotation.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
