@@ -72,18 +72,21 @@ var Release = React.createClass({
         var release = this.state.releases[0],
             latest = this.state.latest,
             s = n => n === 1 ? '' : 's';
+        if (release.hasOwnProperty('notes')) {
+            var releaseNotes = release.notes.replace(/\n\s*\n/g, '\n\n');
+        }
         /* eslint-disable dot-notation */
         return (
             <Grid fluid={true}>
                 <Row>
-                    <Col sm={8} smOffset={2} className='text-center'>
+                    <Col sm={8} smOffset={2} md={6} mdOffset={3} className='text-left'>
                         <h1>{release.id === latest && 'Current'} Release Notes</h1>
-                        {release.id !== latest && <span>Note that this is not the most current release. Click <Link to={`/release/${latest}`}>here</Link> to see the most current release</span>}
+                        {release.id !== latest && <p>* Note that this is not the most current release. Click <Link to={`/release/${latest}`}>here</Link> to see the most current release.</p>}
                     </Col>
                 </Row>
                 <Row>
-                    <Col sm={8} smOffset={2} className='text-center'>
-                        <span>{release['notes']}</span>
+                    <Col sm={8} smOffset={2} md={6} mdOffset={3} className='text-center'>
+                        <p className='release-notes text-left'>{releaseNotes}</p>
                         <h3><Link to={`/variants?release=${release.id}&changeTypes[]=new`}>{release['variants_added']} new variant{s(release['variants_added'])}</Link></h3>
                         <h3><Link to={`/variants?release=${release.id}&changeTypes[]=added_classification&changeTypes[]=changed_classification`}>{release['variants_classified']} new classification{s(release['variants_classified'])}</Link></h3>
                         <h3><Link to={`/variants?release=${release.id}&changeTypes[]=added_information&changeTypes[]=changed_information`}>{release['variants_modified']} changed/updated variant{s(release['variants_modified'])}</Link></h3>
