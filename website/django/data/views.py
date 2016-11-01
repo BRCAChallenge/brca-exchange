@@ -85,8 +85,6 @@ def index(request):
             change_types = map(lambda c: change_types_map[c], filter(lambda c: c in change_types_map, change_types))
             query = query.filter(Change_Type_id__in=change_types)
     else:
-        #latest = Variant.objects.distinct('Genomic_Coordinate_hg38').order_by('Genomic_Coordinate_hg38', '-Data_Release_id')
-        #query = Variant.objects.filter(id__in = latest).exclude(Change_Type_id = change_types_map['deleted'])
         query = CurrentVariant.objects.exclude(Change_Type_id=change_types_map['deleted'])
     if format == 'csv' or format == 'tsv':
         quotes = '\''
