@@ -4,7 +4,6 @@ import argparse
 import csv
 import re
 import logging
-import os
 
 added_data = None
 diff = None
