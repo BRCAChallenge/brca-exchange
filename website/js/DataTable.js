@@ -117,7 +117,7 @@ var DataTable = React.createClass({
         });
     },
     clearFilters: function () {
-        // Reset release, changetype, search, etc.
+        // Reset release and changetype filters
         this.setStateFetch({
             release: undefined,
             changeTypes: undefined,
