@@ -1445,19 +1445,19 @@ class GenerateMD5Sums(luigi.Task):
 @requires(GenerateMD5Sums)
 class GenerateReleaseArchive(luigi.Task):
 
+    def getArchiveName(self):
+        # Format archive filename as release-mm-dd-yy.tar.gz
+        return "release-" + self.date.strftime("%x").replace('/', '-') + ".tar.gz"
+
+    def getArchiveParentDirectory(self):
+        return os.path.dirname(self.output_dir) + "/"
+
     def output(self):
-        # Format archive filename as output_mm_dd_yy.tar.gz and store in same directory as
-        # the output directory itself.
-        output_parent_dir = os.path.dirname(self.output_dir) + "/"
-        release_archive_name = "output_" + self.date.strftime("%x").replace('/', '_') + ".tar.gz"
-        return luigi.LocalTarget(output_parent_dir + release_archive_name)
+        return luigi.LocalTarget(self.getArchiveParentDirectory() + self.getArchiveName())
 
     def run(self):
-        output_parent_dir = os.path.dirname(self.output_dir) + "/"
-        release_archive_name = "output_" + self.date.strftime("%x").replace('/', '_') + ".tar.gz"
-
-        os.chdir(output_parent_dir)
-        with tarfile.open(output_parent_dir + release_archive_name, "w:gz") as tar:
+        os.chdir(self.getArchiveParentDirectory())
+        with tarfile.open(self.getArchiveParentDirectory() + self.getArchiveName(), "w:gz") as tar:
             tar.add(self.output_dir, arcname=os.path.basename(self.output_dir))
 
 
