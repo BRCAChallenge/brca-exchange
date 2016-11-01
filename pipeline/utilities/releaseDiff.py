@@ -4,6 +4,7 @@ import argparse
 import csv
 import re
 import logging
+import os
 
 added_data = None
 diff = None
@@ -22,6 +23,7 @@ CHANGE_TYPES = {
 # Field used to denote pathogenic classification of a variant from all sources
 CLASSIFICATION_FIELD = "Pathogenicity_all"
 
+
 class transformer(object):
     """
     Make the expected changes to update data from one version to another
@@ -34,7 +36,6 @@ class transformer(object):
         (self._oldColumnsRemoved, self._newColumnsAdded,
          self._newColumnNameToOld) = self._mapColumnNames(oldColumns,
                                                           newColumns)
-
 
     def _mapColumnNames(self, oldColumns, newColumns):
         """
@@ -124,7 +125,6 @@ class transformer(object):
             else:
                 return "major change: %s | %s" % (oldValue, newValue)
 
-
     def compareRow(self, oldRow, newRow):
         """
         Compare the contents of an old row to a new row.  Indicate any minor
@@ -158,7 +158,6 @@ class transformer(object):
                     added_data_str += "%s: %s \n" % (field, result)
                 if field == CLASSIFICATION_FIELD and oldRow[field] != newRow[field]:
                     changed_classification = True
-
 
         # If there are any changes, log them in the diff
         if len(changeset) > 0:
@@ -260,12 +259,31 @@ def appendVariantChangeTypesToOutput(variantChangeTypes, v2, output):
             writer.writerows(result)
 
 
+def generateReadme(args):
+
+    output_file_descriptions = {
+        "v1": args.v1,
+        "v2": args.v2,
+        "v1_release_date": args.v1_release_date,
+        "removed.tsv": "This file lists variants that are present in " + args.v1 + " and that are not present in " + args.v2 + " as determined by their pyhgvs_Genomic_Coordinate_38 values.",
+        "added.tsv": "This file lists variants that are present in " + args.v2 + " and that are not present in " + args.v1 + " as determined by their pyhgvs_Genomic_Coordinate_38 values.",
+        "added_data.tsv": "This file lists variants and relevant additional data in " + args.v2 + " that was not present for the same variant in " + args.v1 + " . Variants are defined by their pyhgvs_Genomic_Coordinate_38 values.",
+        "diff.txt": "This file lists variants and changes in " + args.v2 + " that were different for the same variant in " + args.v1 + " . Variants are defined by their pyhgvs_Genomic_Coordinate_38 values."
+    }
+
+    with open(args.diff_dir + "README.txt", "w") as readme:
+        readme.write("This file contains basic information about the diff directory.\n\n\n")
+        for k, v in output_file_descriptions.iteritems():
+            readme.write(k + ": " + v + '\n\n')
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--v2", default="built.tsv",
                         help="File with version 2 of the data")
     parser.add_argument("--v1", default="aggregated.tsv",
                         help="File with Version 1 of the data")
+    parser.add_argument("--v1_release_date", help='Date that v1 was produced')
     parser.add_argument("--removed", default="removed.tsv",
                         help="Variants from the old file that were removed in the new file")
     parser.add_argument("--added", default="added.tsv",
@@ -276,10 +294,12 @@ def main():
                         help="Variant diff output file")
     parser.add_argument("--output", default="built_with_change_types.tsv",
                         help="Output file with change_type column appended")
+    parser.add_argument("--artifacts_dir", help='Artifacts directory with pipeline artifact files.')
+    parser.add_argument("--diff_dir", help='Diff directory with outputs from this file.')
 
     args = parser.parse_args()
 
-    logging.basicConfig(filename='releaseDiff.log', filemode="w", level=logging.DEBUG)
+    logging.basicConfig(filename=args.artifacts_dir + 'releaseDiff.log', filemode="w", level=logging.DEBUG)
 
     v1In = csv.DictReader(open(args.v1, "r"), delimiter="\t")
     v2In = csv.DictReader(open(args.v2, "r"), delimiter="\t")
@@ -323,6 +343,8 @@ def main():
 
     # Adds change_type column and values for each variant in v2 to the output
     appendVariantChangeTypesToOutput(variantChangeTypes, args.v2, args.output)
+
+    generateReadme(args)
 
     print "Number of variants with additions: " + str(total_variants_with_additions)
     print "Number of variants with changes: " + str(total_variants_with_changes)

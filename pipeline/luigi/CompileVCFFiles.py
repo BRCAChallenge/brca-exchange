@@ -1284,6 +1284,8 @@ class MergeVCFsIntoTSVFile(luigi.Task):
     previous_release = luigi.Parameter(default=None, description='previous release for diffing versions \
                                        and producing change types for variants')
 
+    previous_release_date = luigi.Parameter(default=None, description='date that previous_release was produced')
+
     release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
 
     def output(self):
@@ -1379,22 +1381,26 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
 
     def output(self):
         release_dir = self.output_dir + "/release/"
+        artifacts_dir = release_dir + "artifacts/"
         diff_dir = create_path_if_nonexistent(release_dir + "diff/")
         return {'built_with_change_types': luigi.LocalTarget(release_dir + "built_with_change_types.tsv"),
                 'removed': luigi.LocalTarget(diff_dir + "removed.tsv"),
                 'added': luigi.LocalTarget(diff_dir + "added.tsv"),
                 'added_data': luigi.LocalTarget(diff_dir + "added_data.tsv"),
-                'diff': luigi.LocalTarget(diff_dir + "diff.txt")}
+                'diff': luigi.LocalTarget(diff_dir + "diff.txt"),
+                'README': luigi.LocalTarget(diff_dir + "README.txt")}
 
     def run(self):
         release_dir = self.output_dir + "/release/"
+        artifacts_dir = release_dir + "artifacts/"
         diff_dir = create_path_if_nonexistent(release_dir + "diff/")
         os.chdir(utilities_method_dir)
 
         args = ["python", "releaseDiff.py", "--v2", release_dir + "built.tsv", "--v1", self.previous_release,
                 "--removed", diff_dir + "removed.tsv", "--added", diff_dir + "added.tsv", "--added_data",
                 diff_dir + "added_data.tsv", "--diff", diff_dir + "diff.txt", "--output",
-                release_dir + "built_with_change_types.tsv"]
+                release_dir + "built_with_change_types.tsv", "--artifacts_dir", artifacts_dir, "--diff_dir", diff_dir,
+                "--v1_release_date", self.previous_release_date]
         print "Running releaseDiff.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
@@ -1468,6 +1474,8 @@ class RunAll(luigi.WrapperTask):
     previous_release = luigi.Parameter(default=None, description='previous release for diffing versions \
                                        and producing change types for variants')
 
+    previous_release_date = luigi.Parameter(default=None, description='date that previous_release was produced')
+
     release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
 
     def requires(self):
@@ -1477,10 +1485,12 @@ class RunAll(luigi.WrapperTask):
         '''
         if self.release_notes and self.previous_release:
             yield GenerateMD5Sums(self.date, self.resources_dir, self.output_dir,
-                                  self.file_parent_dir, self.previous_release, self.release_notes)
+                                  self.file_parent_dir, self.previous_release, self.previous_release_date,
+                                  self.release_notes)
         elif self.previous_release:
             yield RunDiffAndAppendChangeTypesToOutput(self.date, self.resources_dir, self.output_dir,
-                                                      self.file_parent_dir, self.previous_release)
+                                                      self.file_parent_dir, self.previous_release,
+                                                      self.previous_release_date)
         else:
             yield BuildAggregatedOutput(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
 
