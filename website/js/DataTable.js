@@ -116,6 +116,13 @@ var DataTable = React.createClass({
           page: 0
         });
     },
+    clearFilters: function () {
+        // Reset release and changetype filters
+        this.setStateFetch({
+            release: undefined,
+            changeTypes: undefined,
+        });
+    },
     createDownload: function () {
         var {release, changeTypes, search, sortBy, filterValues, columnSelection, sourceSelection} = this.state;
         return this.props.url(merge({
@@ -212,7 +219,6 @@ var DataTable = React.createClass({
                         <Button className="btn-sm rgt-buffer"
                                 onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}
                         </Button>
-
                         {lollipopButton(this.toggleLollipop, lollipopOpen)}
                     </Col>
                 </Row>
@@ -237,9 +243,13 @@ var DataTable = React.createClass({
                                 <label className='control-label'>
                                     {count} matching {pluralize(count, 'variant')} {}
                                     {changeString ? changeString : ''} {}
-                                    {release !== undefined ? 'in release ' + release : ''} {}
+                                    {release ? 'in release ' + release : ''} {}
                                     {synonyms ? 'of which ' + synonyms + ' matched on synonyms' : ''}
                                 </label>
+                                {release || changeString ?
+                                    <Button className="btn-sm rgt-buffer"
+                                        onClick={this.clearFilters}>Clear Release Filter
+                                    </Button> : ''} {}
                                 {downloadButton(this.createDownload)}
                             </div>
                         </div>
