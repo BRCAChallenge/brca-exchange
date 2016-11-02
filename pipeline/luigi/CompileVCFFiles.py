@@ -1381,7 +1381,6 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
 
     def output(self):
         release_dir = self.output_dir + "/release/"
-        artifacts_dir = release_dir + "artifacts/"
         diff_dir = create_path_if_nonexistent(release_dir + "diff/")
         return {'built_with_change_types': luigi.LocalTarget(release_dir + "built_with_change_types.tsv"),
                 'removed': luigi.LocalTarget(diff_dir + "removed.tsv"),

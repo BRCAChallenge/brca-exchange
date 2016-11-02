@@ -298,7 +298,12 @@ def main():
 
     args = parser.parse_args()
 
-    logging.basicConfig(filename=args.artifacts_dir + 'releaseDiff.log', filemode="w", level=logging.DEBUG)
+    if args.artifacts_dir:
+        logFile = args.artifacts_dir + 'releaseDiff.log'
+    else:
+        logFile = 'releaseDiff.log'
+
+    logging.basicConfig(filename=logFile, filemode="w", level=logging.DEBUG)
 
     v1In = csv.DictReader(open(args.v1, "r"), delimiter="\t")
     v2In = csv.DictReader(open(args.v2, "r"), delimiter="\t")
