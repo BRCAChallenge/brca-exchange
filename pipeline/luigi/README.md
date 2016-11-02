@@ -26,6 +26,7 @@ The Luigi script takes several arguments to run:
 * `--resources-dir`: the directory containing BRCA Resources obtained by following instructions in the pipeline readme
 * `--file-parent-dir`: the directory to store output from individual sources in the luigi script
 * `--previous-release` (optional): the previous data release used to compare with the newest release to determine variant changes between releases. If this argument is not provided, changes to variants between release versions will not be determined or appended to the output file.
+* `--previous-release-date` (optional): the date the previous release was created -- necessary for understanding the significance of the diff between current and previous versions.
 * `--release-notes` (optional, requires `--previous-release` as well): A .txt file used to generate release notes for a version metadata file (version.json) to be included in the output directory.
 
 To run: `python -m luigi --module CompileVCFFiles RunAll --u {username} --p {password} --synapse-username {username from synapse.org} --synapse-password {password from synapse.org} --synapse-enigma-file-id {id for combined enigma output file from synapse} --output-dir $OUTPUT_DIR --resources-dir $BRCA_RESOURCES --file-parent-dir $PARENT_DIR --previous-release $PREVIOUS_RELEASE --release-notes $RELEASE_NOTES --local-scheduler`
