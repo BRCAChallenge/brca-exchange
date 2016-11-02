@@ -1447,6 +1447,25 @@ class GenerateMD5Sums(luigi.Task):
         check_file_for_contents(md5sumsFile)
 
 
+@requires(GenerateMD5Sums)
+class GenerateReleaseArchive(luigi.Task):
+
+    def getArchiveName(self):
+        # Format archive filename as release-mm-dd-yy.tar.gz
+        return "release-" + self.date.strftime("%x").replace('/', '-') + ".tar.gz"
+
+    def getArchiveParentDirectory(self):
+        return os.path.dirname(self.output_dir) + "/"
+
+    def output(self):
+        return luigi.LocalTarget(self.getArchiveParentDirectory() + self.getArchiveName())
+
+    def run(self):
+        os.chdir(self.getArchiveParentDirectory())
+        with tarfile.open(self.getArchiveParentDirectory() + self.getArchiveName(), "w:gz") as tar:
+            tar.add(self.output_dir, arcname=os.path.basename(self.output_dir))
+
+
 ###############################################
 #              MASTER RUN TASK                #
 ###############################################
@@ -1483,9 +1502,9 @@ class RunAll(luigi.WrapperTask):
         run the releaseDiff.py script to generate change_types between releases of variants.
         '''
         if self.release_notes and self.previous_release:
-            yield GenerateMD5Sums(self.date, self.resources_dir, self.output_dir,
-                                  self.file_parent_dir, self.previous_release, self.previous_release_date,
-                                  self.release_notes)
+            yield GenerateReleaseArchive(self.date, self.resources_dir, self.output_dir,
+                                         self.file_parent_dir, self.previous_release, self.previous_release_date,
+                                         self.release_notes)
         elif self.previous_release:
             yield RunDiffAndAppendChangeTypesToOutput(self.date, self.resources_dir, self.output_dir,
                                                       self.file_parent_dir, self.previous_release,

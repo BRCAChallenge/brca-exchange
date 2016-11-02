@@ -6,16 +6,21 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--date", default=datetime.datetime.now(),
+    parser.add_argument("--date", default=datetime.date.today(),
                         help="Version generation date")
     parser.add_argument("--notes", required=True,
                         help="File with release notes text")
     parser.add_argument("--output", default="version.json", help="Output json file")
 
     args = parser.parse_args()
+    date = args.date
 
     version_data = {}
-    version_data['date'] = args.date
+    version_data['date'] = date
+
+    # Make sure this matches the format of the release archive created from the pipeline in GenerateReleaseArchive.
+    date = datetime.datetime.strptime(date, "%Y-%m-%d")
+    version_data['archive'] = "release-" + date.strftime("%x").replace('/', '-') + ".tar.gz"
 
     release_notes = None
     with open(args.notes) as release_notes_file:
