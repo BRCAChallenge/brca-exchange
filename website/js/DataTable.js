@@ -248,7 +248,7 @@ var DataTable = React.createClass({
                                 </label>
                                 {release || changeString ?
                                     <Button className="btn-sm rgt-buffer"
-                                        onClick={this.clearFilters}>Clear Release Filter
+                                        onClick={this.clearFilters}>Clear Filters
                                     </Button> : ''} {}
                                 {downloadButton(this.createDownload)}
                             </div>
