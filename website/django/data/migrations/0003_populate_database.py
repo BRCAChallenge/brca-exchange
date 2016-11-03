@@ -17,9 +17,9 @@ def load_from_tsv(apps, schema_editor):
     # all subsequent releases currently require manual use
     # of addrelease.py
     data_path = os.path.join(settings.BASE_DIR, 'data', 'resources', 'releases',
-                             'output_10_6_2016', 'built_with_change_types.tsv')
+                             'release-10-06-16', 'built_with_change_types.tsv')
     notes_path = os.path.join(settings.BASE_DIR, 'data', 'resources', 'releases',
-                              'output_10_6_2016', 'version.json')
+                              'release-10-06-16', 'version.json')
 
     with open(notes_path) as version_data:
         notes = json.load(version_data)
