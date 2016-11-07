@@ -27,5 +27,6 @@ ssh -l${USER} ${HOST} <<-'ENDSSH'
     requirements=$(echo ${requirements}) # drop carriage returns
     . /var/www/backend/${DST}/virtualenv/bin/activate
     pip install ${requirements}
+    python /var/www/backend/production/django/manage.py migrate --noinput --verbosity 2
     sudo apache2ctl restart
 ENDSSH
