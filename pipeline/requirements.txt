@@ -37,3 +37,4 @@ singledispatch==3.4.0.3
 six==1.10.0
 tornado==4.4.1
 wheel==0.29.0
+nose2==0.6.5
