@@ -415,7 +415,7 @@ var VariantDetail = React.createClass({
                         rowItem = <a target="_blank" href={variant[prop]}>link to multifactorial analysis</a>;
 					}
                 } else if (prop === "Assertion_method_citation_ENIGMA") {
-                    rowItem = <a target="_blank" href={variant[prop]}>Enigma Rules version Mar 26, 2015</a>;
+                    rowItem = <a target="_blank" href="https://enigmaconsortium.org/library/general-documents/">Enigma Rules version Mar 26, 2015</a>;
 // this will be used in All Data display
 /*                } else if (prop == "Source_URL") {
                     var url_count = 0;
