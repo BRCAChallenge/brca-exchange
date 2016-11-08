@@ -30,6 +30,11 @@ urlpatterns += patterns('',
                         )
 
 urlpatterns += patterns('',
+                        url(r'^downloads/(?P<path>.*)$', 'django.views.static.serve',
+                            {'document_root': settings.DOWNLOADS_ROOT, 'show_indexes': True})
+                        )
+
+urlpatterns += patterns('',
                         url(r'^static/(?P<path>.*)$', 'django.views.static.serve',
                             {'document_root': settings.STATIC_ROOT, 'show_indexes': True})
                         )
