@@ -43,6 +43,8 @@ var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Route, RouteHandler,
     HistoryLocation, run, DefaultRoute} = require('react-router');
 var {Releases, Release} = require('./Releases.js');
+var {dateFormat} = require('./util.js');
+window.dateFormat = dateFormat;
 
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 
@@ -476,25 +478,40 @@ var VariantDetail = React.createClass({
                             let added = _.map(_.difference(pathogenicityCurrent, pathogenicityPrevious), elem => `+${elem.replace(/_/g," ")}`);
                             let deleted = _.map(_.difference(pathogenicityPrevious, pathogenicityCurrent), elem => `-${elem.replace(/_/g," ")}`);
                             if (added.length || deleted.length) {
-                                changes.push(<span><strong>{key.replace(/_/g, " ")}:</strong> <br />{ added.join(', ') }{ !!(added.length && deleted.length) && ', '}{ deleted.join(', ')}</span>, <br />);
+                                changes.push(
+                                    <span>
+                                        <strong>{ key.replace(/_/g, " ") }: </strong> <br />
+                                        { added.join(', ') }{ !!(added.length && deleted.length) && ', '}{ deleted.join(', ') }
+                                    </span>, <br />
+                                );
                             }
                         }
                         else if (_.contains(listKeys, key)) {
                             let added = _.map(_.difference(version[key].split(','), previous[key].split(',')), elem => `+${elem.replace(/_/g," ")}`);
                             let deleted = _.map(_.difference(previous[key].split(','), version[key].split(',')), elem => `-${elem.replace(/_/g," ")}`);
                             if (added.length || deleted.length) {
-                                changes.push(<span><strong>{key.replace(/_/g, " ")}:</strong> <br />{ added.join(', ') }{ !!(added.length && deleted.length) && ', '}{ deleted.join(', ')}</span>, <br />);
+                                changes.push(
+                                    <span>
+                                        <strong>{ key.replace(/_/g, " ") }: </strong> <br />
+                                        { added.join(', ') }{ !!(added.length && deleted.length) && ', '}{ deleted.join(', ') }
+                                    </span>, <br />
+                                );
                             }
                         } else {
-                            changes.push(<span><strong>{key.replace(/_/g, " ")}:</strong> {previous[key].toString()} <span className="glyphicon glyphicon-arrow-right"></span> {version[key].toString()}</span>, <br />);
+                            changes.push(
+                                <span>
+                                    <strong>{ key.replace(/_/g, " ") }: </strong>
+                                    {previous[key].toString()} <span className="glyphicon glyphicon-arrow-right"></span> {version[key].toString()}
+                                </span>, <br />
+                            );
                         }
                     }
                 }
             }
             /* eslint-disable dot-notation */
             versionRows.push(
-                <tr>
-                    <td>{release["date"]}</td>
+                <tr className={version["Change_Type"] === 'added_classification' || version["Change_Type"] === 'changed_classification' ? 'danger' : ''}>
+                    <td>{dateFormat(release["date"])}</td>
                     <td>{version["Pathogenicity_expert"]}</td>
                     <td>{changes}</td>
                 </tr>
@@ -524,11 +541,13 @@ var VariantDetail = React.createClass({
                         <h3>{variant["HGVS_cDNA"]}</h3>
                         { /* eslint-enable dot-notation */ }
                         <h4>Previous Versions of this Variant:</h4>
-                        <Table bordered>
+                        <Table className='variant-history' bordered>
                             <thead>
-                                <th>Date</th>
-                                <th>Clinical Significance</th>
-                                <th>Changes</th>
+                                <tr className='active'>
+                                    <th>Date</th>
+                                    <th>Clinical Significance</th>
+                                    <th>Changes</th>
+                                </tr>
                             </thead>
                             <tbody>
                                 {versionRows}
