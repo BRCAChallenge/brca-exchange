@@ -1,0 +1,45 @@
+#!/bin/bash
+set -o nounset
+set -o errexit
+
+# This script expects a release directory of the name release-{mm-dd-yy} containing
+# built_with_change_types.tsv, removed.tsv, and version.json as its first argument,
+# and release-{mm-dd-yy}.tar.gz as its second argument.
+
+# E.G. running `./deployment/deploy-data PATH/TO/release-10-06-16/ PATH/TO/release-10-06-16.tar.gz`
+# would add the 10-06-16 release to the database, and put files in the correct
+# locations for access, storage and download.
+
+HOST=${HOST:-brcaexchange-dev.cloudapp.net}
+USER=brca
+
+# directory of this file
+DEPLOYMENT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+WEBSITE=${DEPLOYMENT}/../website
+
+RELEASEDIRECTORY=$1
+RELEASEARCHIVE=$2
+
+cd ${WEBSITE}
+
+echo ${RELEASEDIRECTORY}
+echo ${RELEASEARCHIVE}
+
+# # deploy
+# # Copies release dir to releases/ for addrelease.py
+# rsync -a --rsync-path='sudo rsync' $RELEASEDIRECTORY ${USER}@${HOST}:/var/www/backend/beta/django/data/resources/releases/
+
+# # Copies tar.gz of output to downloads/
+# rsync -a --rsync-path='sudo rsync' $RELEASEARCHIVE ${USER}@${HOST}:/var/www/backend/beta/django/downloads/releases/
+
+# # requirements=$(cat requirements.txt)
+# # requirements=$(echo ${requirements}) # drop carriage returns
+# ssh -l${USER} ${HOST} <<-ENDSSH
+#     #set -o nounset # 'activate' accesses unbound vars
+#     set -o errexit
+#     . /var/www/backend/beta/virtualenv/bin/activate
+#     python /var/www/backend/beta/django/manage.py addrelease 
+#     # pip install ${requirements}
+#     # python /var/www/backend/beta/django/manage.py migrate --noinput --verbosity 2
+#     # sudo apache2ctl restart
+# ENDSSH
