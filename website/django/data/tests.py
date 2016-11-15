@@ -13,7 +13,7 @@ import data.views as views
 
 # GA4GH related modules
 import google.protobuf.json_format as json_format
-from ga4gh import variant_service_pb2 as variant_service
+from ga4gh.schemas.ga4gh import variant_service_pb2 as variant_service
 
 class VariantTestCase(TestCase):
     def setUp(self):

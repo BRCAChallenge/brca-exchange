@@ -14,10 +14,10 @@ from .models import Variant, CurrentVariant, DataRelease, ChangeType
 from django.views.decorators.http import require_http_methods
 
 # GA4GH related imports
-from ga4gh import variant_service_pb2 as variant_service
-from ga4gh import variants_pb2 as variants
-from ga4gh import metadata_service_pb2 as metadata_service
-from ga4gh import metadata_pb2 as metadata
+from ga4gh.schemas.ga4gh import variant_service_pb2 as variant_service
+from ga4gh.schemas.ga4gh import variants_pb2 as variants
+from ga4gh.schemas.ga4gh import metadata_service_pb2 as metadata_service
+from ga4gh.schemas.ga4gh import metadata_pb2 as metadata
 import google.protobuf.json_format as json_format
 
 
