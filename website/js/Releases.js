@@ -98,7 +98,7 @@ var Release = React.createClass({
                         <Table bordered>
                             <tr>
                                 <td className="active"><b>Link to Data</b></td>
-                                <td><a href={`${config.backend_url}/downloads/releases/${release['archive']}`}>Link</a></td>
+                                <td><a href={release.archive ? `${config.backend_url}/downloads/releases/${release.archive.split('.')[0]}/${release.archive}` : ''}>Link</a></td>
                             </tr>
                             <tr>
                                 <td className="active"><b>Date</b></td>

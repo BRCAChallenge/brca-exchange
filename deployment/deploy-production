@@ -16,7 +16,7 @@ ssh -l${USER} ${HOST} <<-'ENDSSH'
     BACKEND=/var/www/backend
 
     rsync -a --delete ${HTML}/${SRC}/ ${HTML}/${DST}
-    rsync -a --delete --exclude="/uploads/*" ${BACKEND}/${SRC}/django/ ${BACKEND}/${DST}/django
+    rsync -a --delete --exclude="/uploads/*" --exclude="/downloads/*" ${BACKEND}/${SRC}/django/ ${BACKEND}/${DST}/django
 
     cp ~/site_settings/config.${DST}.js /var/www/html/${DST}/config.js
     cp ~/site_settings/site_settings.${DST}.py /var/www/backend/${DST}/django/brca/site_settings.py
