@@ -20,6 +20,7 @@ from ga4gh.schemas.ga4gh import metadata_service_pb2 as metadata_service
 from ga4gh.schemas.ga4gh import metadata_pb2 as metadata
 import google.protobuf.json_format as json_format
 
+import pdb
 
 def releases(request):
     release_id = request.GET.get('release_id')
@@ -79,6 +80,7 @@ def index(request):
     release = request.GET.get('release')
     change_types = request.GET.getlist('change_types')
     change_types_map = {x['name']:x['id'] for x in ChangeType.objects.values().all()}
+    synonyms_count = 0
     if release:
         query = Variant.objects.filter(Data_Release_id=int(release))
         if(change_types):
@@ -97,7 +99,7 @@ def index(request):
         query = apply_filters(query, filter_values, filters, quotes=quotes)
 
     if search_term:
-        query = apply_search(query, search_term, quotes=quotes, release=release)
+        query, synonyms_count = apply_search(query, search_term, quotes=quotes, release=release)
 
     if order_by:
         query = apply_order(query, order_by, direction)
@@ -125,15 +127,10 @@ def index(request):
             return response
     elif format == 'json':
         count = query.count()
-        if search_term:
-            # Number of synonym matches = total matches minus matches on "normal" columns
-            synonyms = count - apply_search(query, search_term, search_column='fts_standard', release=release).count()
-        else:
-            synonyms = 0
-
+        # synonyms_count = synonyms_count or 0
         query = select_page(query, page_size, page_num)
         # call list() now to evaluate the query
-        response = JsonResponse({'count': count, 'synonyms': synonyms, 'data': list(query.values(*column))})
+        response = JsonResponse({'count': count, 'synonyms': synonyms_count, 'data': list(query.values(*column))})
         response['Access-Control-Allow-Origin'] = '*'
         return response
 
@@ -160,17 +157,53 @@ def apply_filters(query, filterValues, filters, quotes=''):
     return query
 
 
-def apply_search(query, search_term, search_column='fts_document', quotes='', release=None):
+def apply_search(query, search_term, quotes='', release=None):
     # search using the tsvector column which represents our document made of all the columns
-    if release:
-        where_clause = "variant.{} @@ to_tsquery('simple', %s)".format(search_column)
-    else:
-        where_clause = "currentvariant.{} @@ to_tsquery('simple', %s)".format(search_column)
-    parameter = quotes + sanitise_term(search_term) + quotes
-    return query.extra(
-        where=[where_clause],
-        params=[parameter]
+
+    # if release:
+    #     # where_clause = "variant.{} @@ to_tsquery('simple', %s)".format(search_column)
+    #     return query.filter(
+    #         Q(Pathogenicity_expert__icontains=search_term) |
+    #         Q(Genomic_Coordinate_hg37__icontains=search_term) |
+    #         Q(Genomic_Coordinate_hg36__icontains=search_term) |
+    #         Q(Genomic_Coordinate_hg38__icontains=search_term) |
+    #         Q(Gene_Symbol__icontains=search_term) |
+    #         Q(HGVS_cDNA__icontains=search_term) |
+    #         Q(BIC_Nomenclature__icontains=search_term) |
+    #         Q(HGVS_Protein__icontains=search_term)
+    #     )
+    # else:
+        # where_clause = "currentvariant.{} @@ to_tsquery('simple', %s)".format(search_column)
+    results = query.filter(
+        Q(Pathogenicity_expert__icontains=search_term) |
+        Q(Genomic_Coordinate_hg38__icontains=search_term) |
+        Q(Gene_Symbol__icontains=search_term) |
+        Q(HGVS_cDNA__icontains=search_term) |
+        Q(BIC_Nomenclature__icontains=search_term) |
+        Q(HGVS_Protein__icontains=search_term) |
+        Q(Protein_Change__icontains=search_term)
     )
+
+    print results.count()
+
+    synonyms = query.filter(
+        Q(Genomic_Coordinate_hg37__icontains=search_term) |
+        Q(Genomic_Coordinate_hg36__icontains=search_term) |
+        Q(Synonyms__icontains=search_term)
+    )
+
+    print synonyms.count()
+
+    print(results | synonyms, synonyms.count())
+
+    return results | synonyms, synonyms.count()
+        # return query.filter()
+    # parameter = quotes + sanitise_term(search_term) + quotes
+    # return query.extra(
+        # where=[where_clause],
+        # params=[parameter]
+    # )
+            # Q(Synonyms__icontains=search_term) |
 
 
 def apply_order(query, order_by, direction):
