@@ -116,7 +116,7 @@ DOWNLOADS_URL = "/downloads/"
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = os.path.join(PROJECT_ROOT, "static")
 
-STATICFILES_DIRS = ( 
+STATICFILES_DIRS = (
     os.path.join(PROJECT_ROOT, 'data/static'),
 )
 
@@ -134,3 +134,27 @@ DEFAULT_FROM_EMAIL = 'noreply@brcaexchange.org'
 AUTH_USER_MODEL = 'users.MyUser'
 
 PASSWORD_RESET_LINK_DURATION = 1
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s | %(asctime)s | %(module)s | %(process)d | %(thread)d | %(message)s',
+            'datefmt': "%m/%d/%Y %H:%M:%S"
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        }
+    }
+}
