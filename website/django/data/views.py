@@ -6,6 +6,8 @@ from operator import __or__
 
 from django.db import connection
 from django.db.models import Q
+from django.db.models import Value
+from django.db.models.functions import Concat
 from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.gzip import gzip_page
@@ -20,7 +22,6 @@ from ga4gh.schemas.ga4gh import metadata_service_pb2 as metadata_service
 from ga4gh.schemas.ga4gh import metadata_pb2 as metadata
 import google.protobuf.json_format as json_format
 
-import pdb
 
 def releases(request):
     release_id = request.GET.get('release_id')
@@ -158,22 +159,25 @@ def apply_filters(query, filterValues, filters, quotes=''):
 
 
 def apply_search(query, search_term, quotes='', release=None):
-    # search using the tsvector column which represents our document made of all the columns
+    search_term = search_term.lower()
 
-    # if release:
-    #     # where_clause = "variant.{} @@ to_tsquery('simple', %s)".format(search_column)
-    #     return query.filter(
-    #         Q(Pathogenicity_expert__icontains=search_term) |
-    #         Q(Genomic_Coordinate_hg37__icontains=search_term) |
-    #         Q(Genomic_Coordinate_hg36__icontains=search_term) |
-    #         Q(Genomic_Coordinate_hg38__icontains=search_term) |
-    #         Q(Gene_Symbol__icontains=search_term) |
-    #         Q(HGVS_cDNA__icontains=search_term) |
-    #         Q(BIC_Nomenclature__icontains=search_term) |
-    #         Q(HGVS_Protein__icontains=search_term)
-    #     )
-    # else:
-        # where_clause = "currentvariant.{} @@ to_tsquery('simple', %s)".format(search_column)
+    # special cases (users may search with the following prefixes)
+    p = re.compile("^np_[0-9]{6}.[0-9]:")
+    m = p.match(search_term)
+    if m:
+        prefix = search_term[:11]
+        search_term = search_term[12:]
+        query = query.filter(HGVS_Protein__icontains=prefix)
+    elif search_term.startswith('brca1:') or search_term.startswith('brca2:'):
+        prefix = search_term[:5]
+        search_term = search_term[6:]
+        query = query.filter(Gene_Symbol__icontains=prefix)
+    elif search_term.startswith('nm_000059.3:') or search_term.startswith('nm_007294.3:'):
+        prefix = search_term[:11]
+        search_term = search_term[12:]
+        query = query.filter(Reference_Sequence__icontains=prefix)
+
+    # filter search against the following fields
     results = query.filter(
         Q(Pathogenicity_expert__icontains=search_term) |
         Q(Genomic_Coordinate_hg38__icontains=search_term) |
@@ -184,26 +188,14 @@ def apply_search(query, search_term, quotes='', release=None):
         Q(Protein_Change__icontains=search_term)
     )
 
-    print results.count()
-
+    # filter against synonym fields
     synonyms = query.filter(
         Q(Genomic_Coordinate_hg37__icontains=search_term) |
         Q(Genomic_Coordinate_hg36__icontains=search_term) |
         Q(Synonyms__icontains=search_term)
     )
 
-    print synonyms.count()
-
-    print(results | synonyms, synonyms.count())
-
     return results | synonyms, synonyms.count()
-        # return query.filter()
-    # parameter = quotes + sanitise_term(search_term) + quotes
-    # return query.extra(
-        # where=[where_clause],
-        # params=[parameter]
-    # )
-            # Q(Synonyms__icontains=search_term) |
 
 
 def apply_order(query, order_by, direction):
