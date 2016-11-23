@@ -95,8 +95,8 @@ The Genomic columns describe genomic traits of the variant, such as the location
 
 #### Gene Symbol
 The Gene Symbol column displays the name of the gene on which the variant was found,
-as named by [HGNC](http://www.genenames.org/).  This will be either BRCA1 or
-BRCA2.
+as named by [HGNC](http://www.genenames.org/).  This will be either _BRCA1_ or
+_BRCA2_.
 
 #### Genome (GRCh38)
 Coordinate of the variant on the GRCh38 reference genome
@@ -286,7 +286,7 @@ To download the variant data click on the 'Download' button located above the se
 
 # Lollipop Plots
 
-Lollipop plots are a tool to visualize the chromosomal position and pathogenicity classification for each variant in a gene.  Here, each circle-capped 'lollipop' indicates whether a BRCA1 and BRCA2 variant is pathogenic (labeled in red), benign (labeled in light-blue), or the variants clinical significance is uncertain (labeled in dark-blue). The y-axis represents the pathogenicity classification of a variant. The x-axis represents the genomic coordinates of those variants in GRCh38 human reference space. The bottom box that runs along the x-axis of the diagram displays the position of each exon in the selected gene.
+Lollipop plots are a tool to visualize the chromosomal position and pathogenicity classification for each variant in a gene.  Here, each circle-capped 'lollipop' indicates whether a _BRCA1_ and _BRCA2_ variant is pathogenic (labeled in red), benign (labeled in light-blue), or the variants clinical significance is uncertain (labeled in dark-blue). The y-axis represents the pathogenicity classification of a variant. The x-axis represents the genomic coordinates of those variants in GRCh38 human reference space. The bottom box that runs along the x-axis of the diagram displays the position of each exon in the selected gene.
 
 To open the lollipop chart click on the 'Show Lollipop Chart' button located at the top of the Variants page. To alternate between the BRCA1 and BRCA2 lollipop charts, click on the tab that contains the relevant gene name located in the upper-left hand corner next to the lollipop chart. To select a specific area of the gene to zoom in on a region, simply click and drag on the lower box to create a shaded box which displays which region you have selected. You can also select for specific exon ranges by clicking on the relevant colored exon box on the lower box-chart. Mouse scrolling on the main chart itself will also zoom in and out of a region. To de-select or zoom all the way back out, you can either click on an unshaded space in the lower box or click the 'Hide Lollipop Chart' button at the top twice to refresh and reset the chart. On the legend located within the chart you can see the relative percentages of pathogenicity classifications of variants that match the search and filter criteria for a particular gene. To hide/dim a class of variants set of lollipops, click on the colored box on the legend. You can reset this by clicking on the colored box again.
 
