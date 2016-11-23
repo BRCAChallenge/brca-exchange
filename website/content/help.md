@@ -7,8 +7,8 @@ To search just start typing a variant in the search box and it will auto complet
 #### Gene
 
 The Gene column displays the name of the gene on which the variant was found,
-as named by [HGNC](http://www.genenames.org/).  This will be either BRCA1 or 
-BRCA2.
+as named by [HGNC](http://www.genenames.org/).  This will be either _BRCA1_ or 
+_BRCA2_.
 
 
 #### Genomic (GRCh38)
