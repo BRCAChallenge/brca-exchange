@@ -161,41 +161,84 @@ def apply_filters(query, filterValues, filters, quotes=''):
 def apply_search(query, search_term, quotes='', release=None):
     search_term = search_term.lower()
 
-    # special cases (users may search with the following prefixes)
+    # special cases (users may search with HGVS_Protein, Gene_Symbol, or Reference_Sequence prefixes)
+    # each case is filtered first by the prefix, then by the possible suffixes for each prefix
     p = re.compile("^np_[0-9]{6}.[0-9]:")
     m = p.match(search_term)
     if m:
         prefix = search_term[:11]
         search_term = search_term[12:]
-        query = query.filter(HGVS_Protein__icontains=prefix)
+        results = query.filter(HGVS_Protein__icontains=prefix).filter(
+                               Q(Protein_Change__icontains=search_term) |
+                               Q(Synonyms__icontains=search_term)
+                               )
+        non_synonyms = results.filter(Protein_Change__icontains=search_term)
     elif search_term.startswith('brca1:') or search_term.startswith('brca2:'):
         prefix = search_term[:5]
         search_term = search_term[6:]
-        query = query.filter(Gene_Symbol__icontains=prefix)
+        results = query.filter(Gene_Symbol__icontains=prefix).filter(
+            Q(Genomic_Coordinate_hg38__icontains=search_term) |
+            Q(Genomic_Coordinate_hg37__icontains=search_term) |
+            Q(Genomic_Coordinate_hg36__icontains=search_term) |
+            Q(HGVS_cDNA__icontains=search_term) |
+            Q(BIC_Nomenclature__icontains=search_term) |
+            Q(HGVS_Protein__icontains=search_term) |
+            Q(Protein_Change__icontains=search_term) |
+            Q(Synonyms__icontains=search_term)
+        )
+        non_synonyms = results.filter(
+            Q(Genomic_Coordinate_hg38__icontains=search_term) |
+            Q(HGVS_cDNA__icontains=search_term) |
+            Q(BIC_Nomenclature__icontains=search_term) |
+            Q(HGVS_Protein__icontains=search_term) |
+            Q(Protein_Change__icontains=search_term)
+        )
     elif search_term.startswith('nm_000059.3:') or search_term.startswith('nm_007294.3:'):
         prefix = search_term[:11]
         search_term = search_term[12:]
-        query = query.filter(Reference_Sequence__icontains=prefix)
+        results = query.filter(Reference_Sequence__icontains=prefix).filter(
+            Q(Genomic_Coordinate_hg38__icontains=search_term) |
+            Q(Genomic_Coordinate_hg37__icontains=search_term) |
+            Q(Genomic_Coordinate_hg36__icontains=search_term) |
+            Q(HGVS_cDNA__icontains=search_term) |
+            Q(BIC_Nomenclature__icontains=search_term) |
+            Q(Synonyms__icontains=search_term)
+        )
+        non_synonyms = results.filter(
+            Q(Genomic_Coordinate_hg38__icontains=search_term) |
+            Q(HGVS_cDNA__icontains=search_term) |
+            Q(BIC_Nomenclature__icontains=search_term)
+        )
+    else:
+        # Generic case (no prefixes)
+        # filter non-special-case searches against the following fields
+        results = query.filter(
+            Q(Pathogenicity_expert__icontains=search_term) |
+            Q(Genomic_Coordinate_hg38__icontains=search_term) |
+            Q(Genomic_Coordinate_hg37__icontains=search_term) |
+            Q(Genomic_Coordinate_hg36__icontains=search_term) |
+            Q(Synonyms__icontains=search_term) |
+            Q(Gene_Symbol__icontains=search_term) |
+            Q(HGVS_cDNA__icontains=search_term) |
+            Q(BIC_Nomenclature__icontains=search_term) |
+            Q(HGVS_Protein__icontains=search_term) |
+            Q(Protein_Change__icontains=search_term)
+        )
 
-    # filter search against the following fields
-    results = query.filter(
-        Q(Pathogenicity_expert__icontains=search_term) |
-        Q(Genomic_Coordinate_hg38__icontains=search_term) |
-        Q(Gene_Symbol__icontains=search_term) |
-        Q(HGVS_cDNA__icontains=search_term) |
-        Q(BIC_Nomenclature__icontains=search_term) |
-        Q(HGVS_Protein__icontains=search_term) |
-        Q(Protein_Change__icontains=search_term)
-    )
+        # filter against synonym fields
+        non_synonyms = query.filter(
+            Q(Pathogenicity_expert__icontains=search_term) |
+            Q(Genomic_Coordinate_hg38__icontains=search_term) |
+            Q(Gene_Symbol__icontains=search_term) |
+            Q(HGVS_cDNA__icontains=search_term) |
+            Q(BIC_Nomenclature__icontains=search_term) |
+            Q(HGVS_Protein__icontains=search_term) |
+            Q(Protein_Change__icontains=search_term)
+        )
 
-    # filter against synonym fields
-    synonyms = query.filter(
-        Q(Genomic_Coordinate_hg37__icontains=search_term) |
-        Q(Genomic_Coordinate_hg36__icontains=search_term) |
-        Q(Synonyms__icontains=search_term)
-    )
+    synonyms_count = results.count() - non_synonyms.count()
 
-    return results | synonyms, synonyms.count()
+    return results, synonyms_count
 
 
 def apply_order(query, order_by, direction):
