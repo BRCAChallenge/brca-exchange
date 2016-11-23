@@ -159,20 +159,46 @@ def apply_filters(query, filterValues, filters, quotes=''):
 
 
 def apply_search(query, search_term, quotes='', release=None):
+    '''
+    Below are examples of all special case searches that don't match our data schema
+    but are handled in this method. Each example contains a user submitted search
+    followed by the colon delimited fields that they represent (note that some fields
+    contain colons in and of themselves).
+
+        User submitted search --> Field:Field
+
+        BRCA1:chr17:g.43094692:G>C --> Gene_Symbol:Genomic_Coordinate_hg38
+        BRCA1:chr17:g.41246709:G>C --> Gene_Symbol:Genomic_Coordinate_hg37
+        BRCA1:chr17:g.38500235:G>C --> Gene_Symbol:Genomic_Coordinate_hg36
+        BRCA1:958C>G --> Gene_Symbol:BIC_Nomenclature
+        BRCA1:c.839C>G --> Gene_Symbol:HGVS_cDNA
+        NM_007294.3:chr17:g.43094692:G>C --> Reference_Sequence:Genomic_Coordinate_hg38
+        NM_007294.3:chr17:g.41246709:G>C --> Reference_Sequence:Genomic_Coordinate_hg37
+        NM_007294.3:chr17:g.38500235:G>C --> Reference_Sequence:Genomic_Coordinate_hg36
+        NM_007294.3:958C>G --> Reference_Sequence:BIC_Nomenclature
+        NM_007294.3:c.839C>G --> Reference_Sequence:HGVS_cDNA
+        BRCA1:p.(Ala280Gly) --> Gene_Symbol:HGVS_Protein.split(':')[1] (HGVS_Protein is actually stored as NP_009225.1:p.(Ala280Gly), so this has to be split on the ":")
+        BRCA1:A280G --> Gene_Symbol:Protein_Change
+        NP_009225.1:p.(Ala280Gly) --> HGVS_Protein
+        NP_009225.1:A280G --> HGVS_Protein.split(':')[0]:Protein_Change
+    '''
+
     search_term = search_term.lower()
 
-    # special cases (users may search with HGVS_Protein, Gene_Symbol, or Reference_Sequence prefixes)
-    # each case is filtered first by the prefix, then by the possible suffixes for each prefix
+    # Handle HGVS_Protein searches
     p = re.compile("^np_[0-9]{6}.[0-9]:")
     m = p.match(search_term)
     if m:
         prefix = search_term[:11]
-        search_term = search_term[12:]
-        results = query.filter(HGVS_Protein__icontains=prefix).filter(
-                               Q(Protein_Change__icontains=search_term) |
-                               Q(Synonyms__icontains=search_term)
-                               )
-        non_synonyms = results.filter(Protein_Change__icontains=search_term)
+        suffix = search_term[12:]
+        prefix_filtered_results = query.filter(HGVS_Protein__icontains=prefix)
+        results = prefix_filtered_results.filter(
+            Q(Protein_Change__icontains=suffix) |
+            Q(Synonyms__icontains=suffix)
+        ) | query.filter(Q(HGVS_Protein__icontains=search_term) | Q(Synonyms__icontains=search_term))
+        non_synonyms = results.filter(Protein_Change__icontains=suffix) | query.filter(HGVS_Protein__icontains=search_term)
+
+    # Handle gene symbol prefixed searches
     elif search_term.startswith('brca1:') or search_term.startswith('brca2:'):
         prefix = search_term[:5]
         search_term = search_term[6:]
@@ -193,6 +219,8 @@ def apply_search(query, search_term, quotes='', release=None):
             Q(HGVS_Protein__icontains=search_term) |
             Q(Protein_Change__icontains=search_term)
         )
+
+    # Handle Reference_Sequence prefixed searches
     elif search_term.startswith('nm_000059.3:') or search_term.startswith('nm_007294.3:'):
         prefix = search_term[:11]
         search_term = search_term[12:]
@@ -209,8 +237,9 @@ def apply_search(query, search_term, quotes='', release=None):
             Q(HGVS_cDNA__icontains=search_term) |
             Q(BIC_Nomenclature__icontains=search_term)
         )
+
+    # Generic searches (no prefixes)
     else:
-        # Generic case (no prefixes)
         # filter non-special-case searches against the following fields
         results = query.filter(
             Q(Pathogenicity_expert__icontains=search_term) |
