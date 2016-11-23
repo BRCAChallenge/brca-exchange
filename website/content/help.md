@@ -27,7 +27,7 @@ The Pathogenicity column indicates whether expert curators have determined if th
 - *Pathogenic variants* confer an increased risk of disease.
 - *Likely pathogenic variants* have good evidence to support an association with disease risk.
 - *Likely benign variants* have good evidence to support no association with disease risk.
-- *Benign variants* are not associated with any markedly increased risk of disease.
+- *Benign / Little Clinical Significance variants* are not associated with any markedly increased risk of disease.
 - *Variants of uncertain significance (VUS)* are those for which the evidence of disease risk is not clear yet, sometimes because there is not yet enough evidence to classify them as either pathogenic or benign.
 
 ##### _My variant is classified pathogenic. What do I do now?_
