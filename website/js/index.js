@@ -505,8 +505,8 @@ var VariantDetail = React.createClass({
                         if (key === "Pathogenicity_all") {
                             let pathogenicityCurrent = _.map(version[key].split(';'), elem => elem.split(',').sort().join(','));
                             let pathogenicityPrevious = _.map(version[key].split(';'), elem => elem.split(',').sort().join(','));
-                            let added = _.map(_.difference(pathogenicityCurrent, pathogenicityPrevious), elem => `+${elem.replace(/_/g," ")}`);
-                            let deleted = _.map(_.difference(pathogenicityPrevious, pathogenicityCurrent), elem => `-${elem.replace(/_/g," ")}`);
+                            let added = _.map(_.difference(pathogenicityCurrent, pathogenicityPrevious), elem => `+${elem.replace(/_/g, " ")}`);
+                            let deleted = _.map(_.difference(pathogenicityPrevious, pathogenicityCurrent), elem => `-${elem.replace(/_/g, " ")}`);
                             if (added.length || deleted.length) {
                                 changes.push(
                                     <span>
@@ -517,8 +517,8 @@ var VariantDetail = React.createClass({
                             }
                         }
                         else if (_.contains(listKeys, key)) {
-                            let added = _.map(_.difference(version[key].split(','), previous[key].split(',')), elem => `+${elem.replace(/_/g," ")}`);
-                            let deleted = _.map(_.difference(previous[key].split(','), version[key].split(',')), elem => `-${elem.replace(/_/g," ")}`);
+                            let added = _.map(_.difference(version[key].split(','), previous[key].split(',')), elem => `+${elem.replace(/_/g, " ")}`);
+                            let deleted = _.map(_.difference(previous[key].split(','), version[key].split(',')), elem => `-${elem.replace(/_/g, " ")}`);
                             if (added.length || deleted.length) {
                                 changes.push(
                                     <span>
