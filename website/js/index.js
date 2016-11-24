@@ -370,6 +370,35 @@ var Key = React.createClass({
     }
 });
 
+// get display name for a given key from VariantTable.js column specification,
+// if we are in expert reviewed mode, search expert reviewed names then fall back to
+// all data, otherwise go straight to all data. Finally, if key is not found, replace
+// _ with space in the key and return that.
+function getDisplayName(key) {
+    var researchMode = (localStorage.getItem("research-mode") === 'true');
+    var displayName;
+    if (!researchMode) {
+        displayName = columns.find(e => e.prop === key);
+        displayName = displayName && displayName.title;
+    }
+    // we are not in expert reviewed more, or key wasn't found in expert reviewed columns
+    if (displayName === undefined) {
+        displayName = researchModeColumns.find(e => e.prop === key);
+        displayName = displayName && displayName.title;
+    }
+    // key was not found at all
+    if (displayName === undefined) {
+        displayName = key.replace(/_/g, " ");
+    }
+    return displayName;
+}
+
+// test for the various forms of blank fields
+function isEmptyField(value) {
+    var v = value.trim();
+    return v === '' || v === '-';
+}
+
 var VariantDetail = React.createClass({
     mixins: [Navigation],
     showHelp: function (title) {
@@ -472,6 +501,7 @@ var VariantDetail = React.createClass({
                 let previous = data[i + 1];
                 for (var key in version) {
                     if (!_.contains(["Data_Release", "Change_Type", "id"], key) && version[key] !== previous[key]) { //eslint-disable-line dot-notation
+                        // handle nested list in Pathogenicity_all
                         if (key === "Pathogenicity_all") {
                             let pathogenicityCurrent = _.map(version[key].split(';'), elem => elem.split(',').sort().join(','));
                             let pathogenicityPrevious = _.map(version[key].split(';'), elem => elem.split(',').sort().join(','));
@@ -480,7 +510,7 @@ var VariantDetail = React.createClass({
                             if (added.length || deleted.length) {
                                 changes.push(
                                     <span>
-                                        <strong>{ key.replace(/_/g, " ") }: </strong> <br />
+                                        <strong>{ getDisplayName(key) }: </strong> <br />
                                         { added.join(', ') }{ !!(added.length && deleted.length) && ', '}{ deleted.join(', ') }
                                     </span>, <br />
                                 );
@@ -492,16 +522,18 @@ var VariantDetail = React.createClass({
                             if (added.length || deleted.length) {
                                 changes.push(
                                     <span>
-                                        <strong>{ key.replace(/_/g, " ") }: </strong> <br />
+                                        <strong>{ getDisplayName(key) }: </strong> <br />
                                         { added.join(', ') }{ !!(added.length && deleted.length) && ', '}{ deleted.join(', ') }
                                     </span>, <br />
                                 );
                             }
                         } else {
+                            let previousDisplay = isEmptyField(previous[key].toString()) ? <span className='empty'></span> : previous[key].toString();
+                            let versionDisplay = isEmptyField(version[key].toString()) ? <span className='empty'></span> : version[key].toString();
                             changes.push(
                                 <span>
-                                    <strong>{ key.replace(/_/g, " ") }: </strong>
-                                    {previous[key].toString()} <span className="glyphicon glyphicon-arrow-right"></span> {version[key].toString()}
+                                    <strong>{ getDisplayName(key) }: </strong>
+                                    {previousDisplay} <span className="glyphicon glyphicon-arrow-right"></span> {versionDisplay}
                                 </span>, <br />
                             );
                         }
