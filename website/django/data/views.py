@@ -79,13 +79,17 @@ def index(request):
     release = request.GET.get('release')
     change_types = request.GET.getlist('change_types')
     change_types_map = {x['name']:x['id'] for x in ChangeType.objects.values().all()}
+    show_deleted = (request.GET.get('show_deleted', False) != False)
+    deleted_count = 0
+
     if release:
         query = Variant.objects.filter(Data_Release_id=int(release))
         if(change_types):
             change_types = map(lambda c: change_types_map[c], filter(lambda c: c in change_types_map, change_types))
             query = query.filter(Change_Type_id__in=change_types)
     else:
-        query = CurrentVariant.objects.exclude(Change_Type_id=change_types_map['deleted'])
+        query = CurrentVariant.objects
+
     if format == 'csv' or format == 'tsv':
         quotes = '\''
     else:
@@ -98,6 +102,10 @@ def index(request):
 
     if search_term:
         query = apply_search(query, search_term, quotes=quotes, release=release)
+
+    if not show_deleted:
+        deleted_count = query.filter(Change_Type_id=change_types_map['deleted']).count()
+        query = query.exclude(Change_Type_id=change_types_map['deleted'])
 
     if order_by:
         query = apply_order(query, order_by, direction)
@@ -133,7 +141,7 @@ def index(request):
 
         query = select_page(query, page_size, page_num)
         # call list() now to evaluate the query
-        response = JsonResponse({'count': count, 'synonyms': synonyms, 'data': list(query.values(*column))})
+        response = JsonResponse({'count': count, 'deleted_count': deleted_count, 'synonyms': synonyms, 'data': list(query.values(*column))})
         response['Access-Control-Allow-Origin'] = '*'
         return response
 

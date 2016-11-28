@@ -23,10 +23,11 @@ var merge = (...args) => _.extend({}, ...args);
 
 var Lollipop = require('./d3Lollipop');
 
-function setPages({data, count, synonyms}, pageLength) {
+function setPages({data, count, deleted_count, synonyms}, pageLength) {
     return {
         data,
         count,
+        deleted_count,
         synonyms,
         totalPages: Math.ceil(count / pageLength)
     };
@@ -149,10 +150,11 @@ var DataTable = React.createClass({
     },
     fetch: function (state) {
         var {pageLength, search, page, sortBy,
-            filterValues, columnSelection, sourceSelection, release, changeTypes} = state;
+            filterValues, columnSelection, sourceSelection, release, changeTypes, showDeleted} = state;
         this.fetchq.onNext(merge({
             release,
             changeTypes,
+            showDeleted,
             pageLength,
             page,
             sortBy,
@@ -175,6 +177,9 @@ var DataTable = React.createClass({
     },
     toggleFilters: function () {
         this.setState({filtersOpen: !this.state.filtersOpen});
+    },
+    showDeleted: function () {
+        this.setStateFetch({showDeleted: true});
     },
     onChangePage: function (pageNumber) {
         this.setStateFetch({page: pageNumber});
@@ -210,6 +215,15 @@ var DataTable = React.createClass({
             } else if (changeTypes.includes('deleted')) {
                 changeString = "deleted";
             }
+        }
+        var deletedCount = this.state['deleted_count'];
+        var deletedVariantsNote = '';
+        if (deletedCount) {
+            let pl = deletedCount !== 1;
+            deletedVariantsNote = <span>
+                There {pl ? 'are' : 'is'} {deletedCount} deleted variant{pl ? 's' : ''} that match{pl ? 'es' : ''} your search.
+                Click <a href="#" onClick={this.showDeleted}>here</a> to view these deleted variants.
+            </span>;
         }
         return (error ? <p>{error}</p> :
             <div className={this.props.className}>
@@ -297,6 +311,11 @@ var DataTable = React.createClass({
                             buildHeader={this.props.buildHeader}
                             sortBy={this.state.sortBy}
                             onSort={this.onSort} />
+                    </Col>
+                </Row>
+                <Row>
+                    <Col className="text-right" sm={10} smOffset={1}>
+                        {deletedVariantsNote}
                     </Col>
                 </Row>
                 </div>
