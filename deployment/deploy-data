@@ -24,9 +24,16 @@ WEBSITE=${DEPLOYMENT}/../website
 
 # Expects environment (beta or production) as first argument.
 ENVIRONMENT=$1
+if [ "${ENVIRONMENT}" != "beta" ] && [ "${ENVIRONMENT}" != "production" ] ;then
+    echo "ERROR: Please only enter 'beta' or 'production' as environment."
+    exit 1
+fi
 
-# Expects path to release directory as second argument (exclude trailing /).
+# Expects path to release directory as second argument. Removes trailing / if present.
 RELEASEDIRECTORYPATH=$2
+if [ "${RELEASEDIRECTORYPATH: -1}" == "/" ] ;then
+    RELEASEDIRECTORYPATH=${RELEASEDIRECTORYPATH%?}
+fi
 
 RELEASEDIRECTORY=$(basename $RELEASEDIRECTORYPATH)
 REMOTERELEASES=/var/www/backend/${ENVIRONMENT}/django/downloads/releases
