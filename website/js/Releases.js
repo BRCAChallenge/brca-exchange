@@ -17,7 +17,8 @@ var Releases = React.createClass({
     },
     render: function () {
         /* eslint-disable dot-notation */
-        var rows = _.map(this.state.releases, release => (
+        let releases = Array.isArray(this.state.releases) ? this.state.releases.reverse() : {};
+        var rows = _.map(releases, release => (
             <tr>
                 <td><Link to={`/release/${release.id}`}>Version {release.id}</Link></td>
                 <td>{dateFormat(release['date'])}</td>
