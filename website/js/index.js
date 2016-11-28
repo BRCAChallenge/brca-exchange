@@ -453,7 +453,9 @@ var VariantDetail = React.createClass({
                 <Row>
                     <div className='text-center Variant-detail-title'>
                         <h3>Variant Detail</h3>
+                        { /* eslint-disable dot-notation */ }
                         {variant['Change_Type'] === 2 && <span className='deleted'>Note this variant has been removed from the BRCA Exchange</span>}
+                        { /* eslint-enable dot-notation */ }
                     </div>
                 </Row>
                 <Row>

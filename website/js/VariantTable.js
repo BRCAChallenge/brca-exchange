@@ -388,7 +388,7 @@ var Table = React.createClass({
                 ref='table'
                 className='row-clickable'
                 {...opts}
-                buildRowOptions={r => ({className: r['Change_Type_id'] === 2 ? 'warning' : '', title: 'click for details', onClick: () => hasSelection() ? null : onRowClick(r)})}
+                buildRowOptions={r => ({className: r['Change_Type_id'] === 2 ? 'warning' : '', title: 'click for details', onClick: () => hasSelection() ? null : onRowClick(r)})} //eslint-disable-line dot-notation
                 buildHeader={title => buildHeader(onHeaderClick, title)}
                 onRowClick={onRowClick}
                 onHeaderClick={onHeaderClick}
