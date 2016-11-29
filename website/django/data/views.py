@@ -6,6 +6,8 @@ from operator import __or__
 
 from django.db import connection
 from django.db.models import Q
+from django.db.models import Value
+from django.db.models.functions import Concat
 from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.gzip import gzip_page
@@ -80,6 +82,7 @@ def index(request):
     release = request.GET.get('release')
     change_types = request.GET.getlist('change_types')
     change_types_map = {x['name']:x['id'] for x in ChangeType.objects.values().all()}
+    synonyms_count = 0
     if release:
         query = Variant.objects.filter(Data_Release_id=int(release))
         if(change_types):
@@ -98,7 +101,7 @@ def index(request):
         query = apply_filters(query, filter_values, filters, quotes=quotes)
 
     if search_term:
-        query = apply_search(query, search_term, quotes=quotes, release=release)
+        query, synonyms_count = apply_search(query, search_term, quotes=quotes, release=release)
 
     if order_by:
         query = apply_order(query, order_by, direction)
@@ -126,15 +129,10 @@ def index(request):
             return response
     elif format == 'json':
         count = query.count()
-        if search_term:
-            # Number of synonym matches = total matches minus matches on "normal" columns
-            synonyms = count - apply_search(query, search_term, search_column='fts_standard', release=release).count()
-        else:
-            synonyms = 0
-
+        # synonyms_count = synonyms_count or 0
         query = select_page(query, page_size, page_num)
         # call list() now to evaluate the query
-        response = JsonResponse({'count': count, 'synonyms': synonyms, 'data': list(query.values(*column))})
+        response = JsonResponse({'count': count, 'synonyms': synonyms_count, 'data': list(query.values(*column))})
         response['Access-Control-Allow-Origin'] = '*'
         return response
 
@@ -161,17 +159,116 @@ def apply_filters(query, filterValues, filters, quotes=''):
     return query
 
 
-def apply_search(query, search_term, search_column='fts_document', quotes='', release=None):
-    # search using the tsvector column which represents our document made of all the columns
-    if release:
-        where_clause = "variant.{} @@ to_tsquery('simple', %s)".format(search_column)
+def apply_search(query, search_term, quotes='', release=None):
+    '''
+    Below are examples of all special case searches that don't match our data schema
+    but are handled in this method. Each example contains a user submitted search
+    followed by the colon delimited fields that they represent (note that some fields
+    contain colons in and of themselves).
+
+        User submitted search --> Field:Field
+
+        BRCA1:chr17:g.43094692:G>C --> Gene_Symbol:Genomic_Coordinate_hg38
+        BRCA1:chr17:g.41246709:G>C --> Gene_Symbol:Genomic_Coordinate_hg37
+        BRCA1:chr17:g.38500235:G>C --> Gene_Symbol:Genomic_Coordinate_hg36
+        BRCA1:958C>G --> Gene_Symbol:BIC_Nomenclature
+        BRCA1:c.839C>G --> Gene_Symbol:HGVS_cDNA
+        NM_007294.3:chr17:g.43094692:G>C --> Reference_Sequence:Genomic_Coordinate_hg38
+        NM_007294.3:chr17:g.41246709:G>C --> Reference_Sequence:Genomic_Coordinate_hg37
+        NM_007294.3:chr17:g.38500235:G>C --> Reference_Sequence:Genomic_Coordinate_hg36
+        NM_007294.3:958C>G --> Reference_Sequence:BIC_Nomenclature
+        NM_007294.3:c.839C>G --> Reference_Sequence:HGVS_cDNA
+        BRCA1:p.(Ala280Gly) --> Gene_Symbol:HGVS_Protein.split(':')[1] (HGVS_Protein is actually stored as NP_009225.1:p.(Ala280Gly), so this has to be split on the ":")
+        BRCA1:A280G --> Gene_Symbol:Protein_Change
+        NP_009225.1:p.(Ala280Gly) --> HGVS_Protein
+        NP_009225.1:A280G --> HGVS_Protein.split(':')[0]:Protein_Change
+    '''
+
+    search_term = search_term.lower()
+
+    # Handle HGVS_Protein searches
+    p = re.compile("^np_[0-9]{6}.[0-9]:")
+    m = p.match(search_term)
+    if m:
+        prefix = search_term[:11]
+        suffix = search_term[12:]
+        prefix_filtered_results = query.filter(HGVS_Protein__icontains=prefix)
+        results = prefix_filtered_results.filter(
+            Q(Protein_Change__icontains=suffix) |
+            Q(Synonyms__icontains=suffix)
+        ) | query.filter(Q(HGVS_Protein__icontains=search_term) | Q(Synonyms__icontains=search_term))
+        non_synonyms = results.filter(Protein_Change__icontains=suffix) | query.filter(HGVS_Protein__icontains=search_term)
+
+    # Handle gene symbol prefixed searches
+    elif search_term.startswith('brca1:') or search_term.startswith('brca2:'):
+        prefix = search_term[:5]
+        search_term = search_term[6:]
+        results = query.filter(Gene_Symbol__icontains=prefix).filter(
+            Q(Genomic_Coordinate_hg38__icontains=search_term) |
+            Q(Genomic_Coordinate_hg37__icontains=search_term) |
+            Q(Genomic_Coordinate_hg36__icontains=search_term) |
+            Q(HGVS_cDNA__icontains=search_term) |
+            Q(BIC_Nomenclature__icontains=search_term) |
+            Q(HGVS_Protein__icontains=search_term) |
+            Q(Protein_Change__icontains=search_term) |
+            Q(Synonyms__icontains=search_term)
+        )
+        non_synonyms = results.filter(
+            Q(Genomic_Coordinate_hg38__icontains=search_term) |
+            Q(HGVS_cDNA__icontains=search_term) |
+            Q(BIC_Nomenclature__icontains=search_term) |
+            Q(HGVS_Protein__icontains=search_term) |
+            Q(Protein_Change__icontains=search_term)
+        )
+
+    # Handle Reference_Sequence prefixed searches
+    elif search_term.startswith('nm_000059.3:') or search_term.startswith('nm_007294.3:'):
+        prefix = search_term[:11]
+        search_term = search_term[12:]
+        results = query.filter(Reference_Sequence__icontains=prefix).filter(
+            Q(Genomic_Coordinate_hg38__icontains=search_term) |
+            Q(Genomic_Coordinate_hg37__icontains=search_term) |
+            Q(Genomic_Coordinate_hg36__icontains=search_term) |
+            Q(HGVS_cDNA__icontains=search_term) |
+            Q(BIC_Nomenclature__icontains=search_term) |
+            Q(Synonyms__icontains=search_term)
+        )
+        non_synonyms = results.filter(
+            Q(Genomic_Coordinate_hg38__icontains=search_term) |
+            Q(HGVS_cDNA__icontains=search_term) |
+            Q(BIC_Nomenclature__icontains=search_term)
+        )
+
+    # Generic searches (no prefixes)
     else:
-        where_clause = "currentvariant.{} @@ to_tsquery('simple', %s)".format(search_column)
-    parameter = quotes + sanitise_term(search_term) + quotes
-    return query.extra(
-        where=[where_clause],
-        params=[parameter]
-    )
+        # filter non-special-case searches against the following fields
+        results = query.filter(
+            Q(Pathogenicity_expert__icontains=search_term) |
+            Q(Genomic_Coordinate_hg38__icontains=search_term) |
+            Q(Genomic_Coordinate_hg37__icontains=search_term) |
+            Q(Genomic_Coordinate_hg36__icontains=search_term) |
+            Q(Synonyms__icontains=search_term) |
+            Q(Gene_Symbol__icontains=search_term) |
+            Q(HGVS_cDNA__icontains=search_term) |
+            Q(BIC_Nomenclature__icontains=search_term) |
+            Q(HGVS_Protein__icontains=search_term) |
+            Q(Protein_Change__icontains=search_term)
+        )
+
+        # filter against synonym fields
+        non_synonyms = query.filter(
+            Q(Pathogenicity_expert__icontains=search_term) |
+            Q(Genomic_Coordinate_hg38__icontains=search_term) |
+            Q(Gene_Symbol__icontains=search_term) |
+            Q(HGVS_cDNA__icontains=search_term) |
+            Q(BIC_Nomenclature__icontains=search_term) |
+            Q(HGVS_Protein__icontains=search_term) |
+            Q(Protein_Change__icontains=search_term)
+        )
+
+    synonyms_count = results.count() - non_synonyms.count()
+
+    return results, synonyms_count
 
 
 def apply_order(query, order_by, direction):
