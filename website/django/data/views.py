@@ -129,7 +129,6 @@ def index(request):
             return response
     elif format == 'json':
         count = query.count()
-        # synonyms_count = synonyms_count or 0
         query = select_page(query, page_size, page_num)
         # call list() now to evaluate the query
         response = JsonResponse({'count': count, 'synonyms': synonyms_count, 'data': list(query.values(*column))})
@@ -161,6 +160,10 @@ def apply_filters(query, filterValues, filters, quotes=''):
 
 def apply_search(query, search_term, quotes='', release=None):
     '''
+    NOTE: there is some additional handling of search terms on the front-end in
+    website/js/hgvs.js. hgvs.js methods are called before sending the query to the
+    backend.
+
     Below are examples of all special case searches that don't match our data schema
     but are handled in this method. Each example contains a user submitted search
     followed by the colon delimited fields that they represent (note that some fields
@@ -183,19 +186,24 @@ def apply_search(query, search_term, quotes='', release=None):
         NP_009225.1:p.(Ala280Gly) --> HGVS_Protein
         NP_009225.1:A280G --> HGVS_Protein.split(':')[0]:Protein_Change
     '''
-
     search_term = search_term.lower()
 
+    p_hgvs_protein = re.compile("^np_[0-9]{6}.[0-9]:")
+    m_hgvs_protein = p_hgvs_protein.match(search_term)
+
+    p_reference_sequence = re.compile("^nm_[0-9]{6}.[0-9]:")
+    m_reference_sequence = p_reference_sequence.match(search_term)
+
     # Handle HGVS_Protein searches
-    p = re.compile("^np_[0-9]{6}.[0-9]:")
-    m = p.match(search_term)
-    if m:
+    if m_hgvs_protein:
         prefix = search_term[:11]
         suffix = search_term[12:]
+        comma_prefixed_suffix = ',' + suffix
         prefix_filtered_results = query.filter(HGVS_Protein__icontains=prefix)
         results = prefix_filtered_results.filter(
-            Q(Protein_Change__icontains=suffix) |
-            Q(Synonyms__icontains=suffix)
+            Q(Protein_Change__istartswith=suffix) |
+            Q(Synonyms__icontains=comma_prefixed_suffix) |
+            Q(Synonyms__istartswith=suffix)
         ) | query.filter(Q(HGVS_Protein__icontains=search_term) | Q(Synonyms__icontains=search_term))
         non_synonyms = results.filter(Protein_Change__icontains=suffix) | query.filter(HGVS_Protein__icontains=search_term)
 
@@ -203,15 +211,17 @@ def apply_search(query, search_term, quotes='', release=None):
     elif search_term.startswith('brca1:') or search_term.startswith('brca2:'):
         prefix = search_term[:5]
         search_term = search_term[6:]
+        comma_prefixed_search_term = ',' + search_term
         results = query.filter(Gene_Symbol__icontains=prefix).filter(
-            Q(Genomic_Coordinate_hg38__icontains=search_term) |
-            Q(Genomic_Coordinate_hg37__icontains=search_term) |
-            Q(Genomic_Coordinate_hg36__icontains=search_term) |
+            Q(Genomic_Coordinate_hg38__istartswith=search_term) |
+            Q(Genomic_Coordinate_hg37__istartswith=search_term) |
+            Q(Genomic_Coordinate_hg36__istartswith=search_term) |
             Q(HGVS_cDNA__icontains=search_term) |
-            Q(BIC_Nomenclature__icontains=search_term) |
-            Q(HGVS_Protein__icontains=search_term) |
-            Q(Protein_Change__icontains=search_term) |
-            Q(Synonyms__icontains=search_term)
+            Q(BIC_Nomenclature__istartswith=search_term) |
+            Q(HGVS_Protein__istartswith=search_term) |
+            Q(Protein_Change__istartswith=search_term) |
+            Q(Synonyms__icontains=comma_prefixed_search_term) |
+            Q(Synonyms__istartswith=search_term)
         )
         non_synonyms = results.filter(
             Q(Genomic_Coordinate_hg38__icontains=search_term) |
@@ -222,16 +232,18 @@ def apply_search(query, search_term, quotes='', release=None):
         )
 
     # Handle Reference_Sequence prefixed searches
-    elif search_term.startswith('nm_000059.3:') or search_term.startswith('nm_007294.3:'):
+    elif m_reference_sequence:
         prefix = search_term[:11]
         search_term = search_term[12:]
+        comma_prefixed_search_term = ',' + search_term
         results = query.filter(Reference_Sequence__icontains=prefix).filter(
-            Q(Genomic_Coordinate_hg38__icontains=search_term) |
-            Q(Genomic_Coordinate_hg37__icontains=search_term) |
-            Q(Genomic_Coordinate_hg36__icontains=search_term) |
-            Q(HGVS_cDNA__icontains=search_term) |
-            Q(BIC_Nomenclature__icontains=search_term) |
-            Q(Synonyms__icontains=search_term)
+            Q(Genomic_Coordinate_hg38__istartswith=search_term) |
+            Q(Genomic_Coordinate_hg37__istartswith=search_term) |
+            Q(Genomic_Coordinate_hg36__istartswith=search_term) |
+            Q(HGVS_cDNA__istartswith=search_term) |
+            Q(BIC_Nomenclature__istartswith=search_term) |
+            Q(Synonyms__icontains=comma_prefixed_search_term) |
+            Q(Synonyms__istartswith=search_term)
         )
         non_synonyms = results.filter(
             Q(Genomic_Coordinate_hg38__icontains=search_term) |
