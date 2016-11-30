@@ -200,8 +200,7 @@ def apply_search(query, search_term, quotes='', release=None):
         suffix = search_term[12:]
         # values in synonyms column are separated by commas
         comma_prefixed_suffix = ',' + suffix
-        prefix_filtered_results = query.filter(HGVS_Protein__iexact=prefix)
-        results = prefix_filtered_results.filter(
+        results = query.filter(HGVS_Protein__istartswith=prefix).filter(
             Q(Protein_Change__istartswith=suffix) |
             Q(Synonyms__icontains=comma_prefixed_suffix) |
             Q(Synonyms__istartswith=suffix)
@@ -211,48 +210,48 @@ def apply_search(query, search_term, quotes='', release=None):
     # Handle gene symbol prefixed searches
     elif search_term.startswith('brca1:') or search_term.startswith('brca2:'):
         prefix = search_term[:5]
-        search_term = search_term[6:]
-        comma_prefixed_search_term = ',' + search_term
+        suffix = search_term[6:]
+        comma_prefixed_suffix = ',' + suffix
         # need to check synonym column for colon prefixes in the case of HGVS_cDNA and HGVS_Protein fields
-        colon_prefixed_search_term = ':' + search_term
+        colon_prefixed_suffix = ':' + suffix
         results = query.filter(Gene_Symbol__iexact=prefix).filter(
-            Q(HGVS_cDNA__icontains=search_term) |
-            Q(HGVS_Protein__icontains=search_term) |
-            Q(Genomic_Coordinate_hg38__istartswith=search_term) |
-            Q(Genomic_Coordinate_hg37__istartswith=search_term) |
-            Q(Genomic_Coordinate_hg36__istartswith=search_term) |
-            Q(BIC_Nomenclature__istartswith=search_term) |
-            Q(Protein_Change__istartswith=search_term) |
-            Q(Synonyms__icontains=comma_prefixed_search_term) |
-            Q(Synonyms__icontains=colon_prefixed_search_term) |
-            Q(Synonyms__istartswith=search_term)
-        )
+            Q(HGVS_cDNA__icontains=suffix) |
+            Q(HGVS_Protein__icontains=suffix) |
+            Q(Genomic_Coordinate_hg38__istartswith=suffix) |
+            Q(Genomic_Coordinate_hg37__istartswith=suffix) |
+            Q(Genomic_Coordinate_hg36__istartswith=suffix) |
+            Q(BIC_Nomenclature__istartswith=suffix) |
+            Q(Protein_Change__istartswith=suffix) |
+            Q(Synonyms__icontains=comma_prefixed_suffix) |
+            Q(Synonyms__icontains=colon_prefixed_suffix) |
+            Q(Synonyms__istartswith=suffix)
+        ) | query.filter(Synonyms__icontains=search_term)
         non_synonyms = results.filter(
-            Q(HGVS_cDNA__icontains=search_term) |
-            Q(HGVS_Protein__icontains=search_term) |
-            Q(Genomic_Coordinate_hg38__istartswith=search_term) |
-            Q(BIC_Nomenclature__istartswith=search_term) |
-            Q(Protein_Change__istartswith=search_term)
+            Q(HGVS_cDNA__icontains=suffix) |
+            Q(HGVS_Protein__icontains=suffix) |
+            Q(Genomic_Coordinate_hg38__istartswith=suffix) |
+            Q(BIC_Nomenclature__istartswith=suffix) |
+            Q(Protein_Change__istartswith=suffix)
         )
 
     # Handle Reference_Sequence prefixed searches
     elif m_reference_sequence:
         prefix = search_term[:11]
-        search_term = search_term[12:]
-        comma_prefixed_search_term = ',' + search_term
+        suffix = search_term[12:]
+        comma_prefixed_suffix = ',' + suffix
         results = query.filter(Reference_Sequence__iexact=prefix).filter(
-            Q(HGVS_cDNA__icontains=search_term) |
-            Q(Genomic_Coordinate_hg38__istartswith=search_term) |
-            Q(Genomic_Coordinate_hg37__istartswith=search_term) |
-            Q(Genomic_Coordinate_hg36__istartswith=search_term) |
-            Q(BIC_Nomenclature__istartswith=search_term) |
-            Q(Synonyms__icontains=comma_prefixed_search_term) |
-            Q(Synonyms__istartswith=search_term)
-        )
+            Q(HGVS_cDNA__icontains=suffix) |
+            Q(Genomic_Coordinate_hg38__istartswith=suffix) |
+            Q(Genomic_Coordinate_hg37__istartswith=suffix) |
+            Q(Genomic_Coordinate_hg36__istartswith=suffix) |
+            Q(BIC_Nomenclature__istartswith=suffix) |
+            Q(Synonyms__icontains=comma_prefixed_suffix) |
+            Q(Synonyms__istartswith=suffix)
+        ) | query.filter(Synonyms__icontains=search_term)
         non_synonyms = results.filter(
-            Q(HGVS_cDNA__icontains=search_term) |
-            Q(Genomic_Coordinate_hg38__istartswith=search_term) |
-            Q(BIC_Nomenclature__istartswith=search_term)
+            Q(HGVS_cDNA__icontains=suffix) |
+            Q(Genomic_Coordinate_hg38__istartswith=suffix) |
+            Q(BIC_Nomenclature__istartswith=suffix)
         )
 
     # Generic searches (no prefixes)
