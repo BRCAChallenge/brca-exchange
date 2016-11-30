@@ -17,7 +17,8 @@ var Releases = React.createClass({
     },
     render: function () {
         /* eslint-disable dot-notation */
-        var rows = _.map(this.state.releases, release => (
+        let releases = Array.isArray(this.state.releases) ? this.state.releases.reverse() : {};
+        var rows = _.map(releases, release => (
             <tr>
                 <td><Link to={`/release/${release.id}`}>Version {release.id}</Link></td>
                 <td>{dateFormat(release['date'])}</td>
@@ -98,7 +99,7 @@ var Release = React.createClass({
                         <Table bordered>
                             <tr>
                                 <td className="active"><b>Link to Data</b></td>
-                                <td><a href={`${config.backend_url}/downloads/releases/${release['archive']}`}>Link</a></td>
+                                <td><a href={release.archive ? `${config.backend_url}/downloads/releases/${release.archive.split('.')[0]}/${release.archive}` : ''}>Link</a></td>
                             </tr>
                             <tr>
                                 <td className="active"><b>Date</b></td>
