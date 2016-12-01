@@ -41,7 +41,7 @@ var {ChangePassword} = require('./ChangePassword');
 var {Profile} = require('./Profile');
 var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Route, RouteHandler,
-    HistoryLocation, run, DefaultRoute} = require('react-router');
+    HistoryLocation, run, DefaultRoute, Link} = require('react-router');
 var {Releases, Release} = require('./Releases.js');
 
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
@@ -98,15 +98,25 @@ var Home = React.createClass({
     getInitialState() {
         return {
             index: 0,
-            direction: null
+            direction: null,
+            releases: {}
         };
     },
-
+    componentWillMount: function() {
+        backend.releases().subscribe(
+            resp => this.setState(resp),
+            () => this.setState({error: 'Problem connecting to server'}));
+    },
     onSearch(value) {
         this.transitionTo('/variants', null, {search: value});
     },
     render: function() {
         var {suggestions} = this.props;
+        var latestRelease = _.max(this.state.releases, function(release){ return release.id; });
+        if (latestRelease !== -Infinity) {
+            var latestReleaseDate = new Date(latestRelease.date)
+            latestReleaseDate = latestReleaseDate.toLocaleDateString("en-US")
+        }
         var logoItems = _.map(logos, ({id, logo, url}) => (
             <Col key={id} lg={4} md={6} xs={12} className="logo-item">
                 <a href={url}>
@@ -116,6 +126,11 @@ var Home = React.createClass({
         ));
         return (
             <Grid id="main-grid" className='home'>
+                 <Row>
+                     <div className="newsfeed">
+                         <p>New data was released on {latestRelease ? latestReleaseDate : ''}! Learn more about the updates <Link to={`/release/${latestRelease.id}`}>here</Link>.</p>
+                     </div>
+                 </Row>
                 <Row>
                     <Col smOffset={2} sm={8}>
                         <VariantSearch
