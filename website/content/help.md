@@ -7,8 +7,8 @@ To search just start typing a variant in the search box and it will auto complet
 #### Gene
 
 The Gene column displays the name of the gene on which the variant was found,
-as named by [HGNC](http://www.genenames.org/).  This will be either BRCA1 or 
-BRCA2.
+as named by [HGNC](http://www.genenames.org/).  This will be either _BRCA1_ or 
+_BRCA2_.
 
 
 #### Genomic (GRCh38)
@@ -27,7 +27,7 @@ The Pathogenicity column indicates whether expert curators have determined if th
 - *Pathogenic variants* confer an increased risk of disease.
 - *Likely pathogenic variants* have good evidence to support an association with disease risk.
 - *Likely benign variants* have good evidence to support no association with disease risk.
-- *Benign variants* are not associated with any markedly increased risk of disease.
+- *Benign / Little Clinical Significance variants* are not associated with any markedly increased risk of disease.
 - *Variants of uncertain significance (VUS)* are those for which the evidence of disease risk is not clear yet, sometimes because there is not yet enough evidence to classify them as either pathogenic or benign.
 
 ##### _My variant is classified pathogenic. What do I do now?_
