@@ -41,7 +41,7 @@ var {ChangePassword} = require('./ChangePassword');
 var {Profile} = require('./Profile');
 var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Route, RouteHandler,
-    HistoryLocation, run, DefaultRoute} = require('react-router');
+    HistoryLocation, run, DefaultRoute, Link} = require('react-router');
 var {Releases, Release} = require('./Releases.js');
 var {dateFormat} = require('./util.js');
 window.dateFormat = dateFormat;
@@ -494,19 +494,23 @@ var VariantDetail = React.createClass({
         for (var i = 0; i < data.length; i++) {
             let version = data[i],
                 changes = [],
-                release = version["Data_Release"]; //eslint-disable-line dot-notation
+                release = version["Data_Release"], //eslint-disable-line dot-notation
+                hightlightRow = false;
 
             // if this is not the oldest version of the variant, diff them
             if (i < data.length - 1) {
                 let previous = data[i + 1];
+                if (version["Pathogenicity_expert"] !== previous["Pathogenicity_expert"]) {
+                    hightlightRow = true;
+                }
                 for (var key in version) {
                     if (!_.contains(["Data_Release", "Change_Type", "id"], key) && version[key] !== previous[key]) { //eslint-disable-line dot-notation
                         // handle nested list in Pathogenicity_all
                         if (key === "Pathogenicity_all") {
                             let pathogenicityCurrent = _.map(version[key].split(';'), elem => elem.split(',').sort().join(','));
-                            let pathogenicityPrevious = _.map(version[key].split(';'), elem => elem.split(',').sort().join(','));
-                            let added = _.map(_.difference(pathogenicityCurrent, pathogenicityPrevious), elem => `+${elem.replace(/_/g, " ")}`);
-                            let deleted = _.map(_.difference(pathogenicityPrevious, pathogenicityCurrent), elem => `-${elem.replace(/_/g, " ")}`);
+                            let pathogenicityPrevious = _.map(previous[key].split(';'), elem => elem.split(',').sort().join(','));
+                            let added = _.map(_.difference(pathogenicityCurrent, pathogenicityPrevious), elem => `+${elem.trim().replace(/_/g, " ")}`);
+                            let deleted = _.map(_.difference(pathogenicityPrevious, pathogenicityCurrent), elem => `-${elem.trim().replace(/_/g, " ")}`);
                             if (added.length || deleted.length) {
                                 changes.push(
                                     <span>
@@ -517,8 +521,10 @@ var VariantDetail = React.createClass({
                             }
                         }
                         else if (_.contains(listKeys, key)) {
-                            let added = _.map(_.difference(version[key].split(','), previous[key].split(',')), elem => `+${elem.replace(/_/g, " ")}`);
-                            let deleted = _.map(_.difference(previous[key].split(','), version[key].split(',')), elem => `-${elem.replace(/_/g, " ")}`);
+                            let trimmedVersion = _.map(version[key].split(','), elem => elem.replace(/_/g, " ").trim());
+                            let trimmedPrevious = _.map(previous[key].split(','), elem => elem.replace(/_/g, " ").trim());
+                            let added = _.map(_.difference(trimmedVersion, trimmedPrevious), elem => `+${elem}`);
+                            let deleted = _.map(_.difference(trimmedPrevious, trimmedVersion), elem => `-${elem}`);
                             if (added.length || deleted.length) {
                                 changes.push(
                                     <span>
@@ -542,8 +548,8 @@ var VariantDetail = React.createClass({
             }
             /* eslint-disable dot-notation */
             versionRows.push(
-                <tr className={version["Change_Type"] === 'added_classification' || version["Change_Type"] === 'changed_classification' ? 'danger' : ''}>
-                    <td>{dateFormat(release["date"])}</td>
+                <tr className={hightlightRow ? 'danger' : ''}>
+                    <td><Link to={`/release/${release.id}`}>{dateFormat(release["date"])}</Link></td>
                     <td>{version["Pathogenicity_expert"]}</td>
                     <td>{changes}</td>
                 </tr>
