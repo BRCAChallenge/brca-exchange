@@ -7,6 +7,8 @@ var _ = require('underscore');
 var backend = require('./backend');
 var {dateFormat} = require('./util');
 var config = require('config');
+var anchorme = require("anchorme");
+
 
 var Releases = React.createClass({
     getInitialState: () => ({ releases: {} }),
@@ -69,13 +71,23 @@ var Release = React.createClass({
             resp => this.setState(resp),
             () => this.setState({error: 'Problem connecting to server'}));
     },
+    generateReleaseNotes: function() {
+        var release = this.state.releases[0];
+        var releaseNotes = '';
+        if (release.hasOwnProperty('notes')) {
+            // format linebreaks
+            releaseNotes = release.notes.replace(/\n\s*\n/g, '\n\n');
+            // format hyperlinks
+            releaseNotes = anchorme(releaseNotes);
+            // remove mailto from text portion of emails without removing link
+            releaseNotes = releaseNotes.replace(/>mailto:/, '>');
+        }
+        return {__html: releaseNotes};
+    },
     render: function () {
         var release = this.state.releases[0],
             latest = this.state.latest,
             s = n => n === 1 ? '' : 's';
-        if (release.hasOwnProperty('notes')) {
-            var releaseNotes = release.notes.replace(/\n\s*\n/g, '\n\n');
-        }
         /* eslint-disable dot-notation */
         return (
             <Grid fluid={true}>
@@ -87,7 +99,7 @@ var Release = React.createClass({
                 </Row>
                 <Row>
                     <Col sm={8} smOffset={2} md={6} mdOffset={3} className='text-center'>
-                        <p className='release-notes text-left'>{releaseNotes}</p>
+                        <p className='release-notes text-left' dangerouslySetInnerHTML={this.generateReleaseNotes()}></p>
                         <h3><Link to={`/variants?release=${release.id}&changeTypes[]=new`}>{release['variants_added']} new variant{s(release['variants_added'])}</Link></h3>
                         <h3><Link to={`/variants?release=${release.id}&changeTypes[]=added_classification&changeTypes[]=changed_classification`}>{release['variants_classified']} new classification{s(release['variants_classified'])}</Link></h3>
                         <h3><Link to={`/variants?release=${release.id}&changeTypes[]=added_information&changeTypes[]=changed_information`}>{release['variants_modified']} changed/updated variant{s(release['variants_modified'])}</Link></h3>
