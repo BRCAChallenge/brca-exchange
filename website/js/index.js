@@ -500,7 +500,7 @@ var VariantDetail = React.createClass({
             // if this is not the oldest version of the variant, diff them
             if (i < data.length - 1) {
                 let previous = data[i + 1];
-                if (version["Pathogenicity_expert"] !== previous["Pathogenicity_expert"]) {
+                if (version["Pathogenicity_expert"] !== previous["Pathogenicity_expert"]) { //eslint-disable-line dot-notation
                     hightlightRow = true;
                 }
                 for (var key in version) {
