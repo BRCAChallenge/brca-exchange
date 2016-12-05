@@ -103,7 +103,7 @@ def index(request):
     if search_term:
         query = apply_search(query, search_term, quotes=quotes, release=release)
 
-    if not show_deleted:
+    if not show_deleted and not release:
         deleted_count = query.filter(Change_Type_id=change_types_map['deleted']).count()
         query = query.exclude(Change_Type_id=change_types_map['deleted'])
 

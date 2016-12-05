@@ -41,7 +41,7 @@ var {ChangePassword} = require('./ChangePassword');
 var {Profile} = require('./Profile');
 var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Route, RouteHandler,
-    HistoryLocation, run, DefaultRoute} = require('react-router');
+    HistoryLocation, run, DefaultRoute, Link} = require('react-router');
 var {Releases, Release} = require('./Releases.js');
 
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
@@ -391,8 +391,9 @@ var VariantDetail = React.createClass({
             return <div></div>;
         }
 
-        var variant = data[0];
-        var cols;
+        var variant = data[0],
+            release = variant["Data_Release"], // eslint-disable-line dot-notation
+            cols;
         if (localStorage.getItem("research-mode") === 'true') {
             cols = researchModeColumns;
         } else {
@@ -454,7 +455,12 @@ var VariantDetail = React.createClass({
                     <div className='text-center Variant-detail-title'>
                         <h3>Variant Detail</h3>
                         { /* eslint-disable dot-notation */ }
-                        {variant['Change_Type'] === 2 && <span className='deleted'>Note this variant has been removed from the BRCA Exchange</span>}
+                        {variant['Change_Type'] === 2 &&
+                            (<span className='deleted'>
+                                Note this variant has been removed from the BRCA Exchange.
+                                For reasons why, see the <Link to={`/release/${release.id}`}>release notes</Link>.
+                            </span>)
+                        }
                         { /* eslint-enable dot-notation */ }
                     </div>
                 </Row>
