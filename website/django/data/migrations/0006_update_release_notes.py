@@ -16,14 +16,14 @@ class Migration(migrations.Migration):
         # Reformat link to git commit for v1 data
         migrations.RunSQL(
             """
-                UPDATE data_release SET notes = replace(notes, 'https://github.com/BD2KGenomics/brca-exchange/tree/master/pipeline/luigi commit ID f8e675e2459df4c22694184ee0daf0af9a0bfe64', 'https://github.com/BD2KGenomics/brca-exchange/tree/f8e675e2459df4c22694184ee0daf0af9a0bfe64/pipeline/luigi);'
+                UPDATE data_release SET notes = replace(notes, 'https://github.com/BD2KGenomics/brca-exchange/tree/master/pipeline/luigi commit ID f8e675e2459df4c22694184ee0daf0af9a0bfe64', 'https://github.com/BD2KGenomics/brca-exchange/tree/f8e675e2459df4c22694184ee0daf0af9a0bfe64/pipeline/luigi');
             """
         ),
 
         # Reformat link to git commit for v2 data
         migrations.RunSQL(
             """
-                UPDATE data_release SET notes = replace(notes, 'https://github.com/BD2KGenomics/brca-exchange/tree/master/pipeline/luigi, commit ID 59929a3b13e0ed412c64edd1631dc9d826ee0dd0', 'https://github.com/BD2KGenomics/brca-exchange/tree/59929a3b13e0ed412c64edd1631dc9d826ee0dd0/pipeline/luigi);'
+                UPDATE data_release SET notes = replace(notes, 'https://github.com/BD2KGenomics/brca-exchange/tree/master/pipeline/luigi, commit ID 59929a3b13e0ed412c64edd1631dc9d826ee0dd0', 'https://github.com/BD2KGenomics/brca-exchange/tree/59929a3b13e0ed412c64edd1631dc9d826ee0dd0/pipeline/luigi');
             """
         ),
 
