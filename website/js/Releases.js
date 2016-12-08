@@ -19,7 +19,13 @@ var Releases = React.createClass({
     },
     render: function () {
         /* eslint-disable dot-notation */
-        let releases = Array.isArray(this.state.releases) ? this.state.releases.reverse() : {};
+        // Ensure releases are in descending order
+        var releases = this.state.releases;
+        if (Array.isArray(releases)) {
+            releases = releases.sort(function(a, b) {
+                return a.id - b.id;
+            }).reverse();
+        }
         var rows = _.map(releases, release => (
             <tr>
                 <td><Link to={`/release/${release.id}`}>Version {release.id}</Link></td>
