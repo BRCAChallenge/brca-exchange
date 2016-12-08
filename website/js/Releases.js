@@ -19,7 +19,13 @@ var Releases = React.createClass({
     },
     render: function () {
         /* eslint-disable dot-notation */
-        let releases = Array.isArray(this.state.releases) ? this.state.releases.reverse() : {};
+        // Ensure releases are in descending order
+        var releases = this.state.releases;
+        if (Array.isArray(releases)) {
+            releases = releases.sort(function(a, b) {
+                return a.id - b.id;
+            }).reverse();
+        }
         var rows = _.map(releases, release => (
             <tr>
                 <td><Link to={`/release/${release.id}`}>Version {release.id}</Link></td>
@@ -100,6 +106,7 @@ var Release = React.createClass({
                 <Row>
                     <Col sm={8} smOffset={2} md={6} mdOffset={3} className='text-center'>
                         <p className='release-notes text-left' dangerouslySetInnerHTML={this.generateReleaseNotes()}></p>
+                        <p className='release-notes text-left'><a href="https://github.com/BD2KGenomics/brca-exchange/wiki/Known-Issues">Known issues with this release</a></p>
                         <h3><Link to={`/variants?release=${release.id}&changeTypes[]=new`}>{release['variants_added']} new variant{s(release['variants_added'])}</Link></h3>
                         <h3><Link to={`/variants?release=${release.id}&changeTypes[]=added_classification&changeTypes[]=changed_classification`}>{release['variants_classified']} new classification{s(release['variants_classified'])}</Link></h3>
                         <h3><Link to={`/variants?release=${release.id}&changeTypes[]=added_information&changeTypes[]=changed_information`}>{release['variants_modified']} changed/updated variant{s(release['variants_modified'])}</Link></h3>
