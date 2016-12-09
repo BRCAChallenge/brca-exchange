@@ -94,8 +94,8 @@ def add_start(v, ref_id):
 
 def test_variant_equal_throws_below_reference():
     ref_id = chrom_ref['13'].keys()[0]
-    v1 = ('13', chrom_ref['13'][ref_id]['start'], 'A', 'C', 'foo')
-    v2 = ('13', chrom_ref['13'][ref_id]['start'] + 10, 'A', 'C', 'foo')
+    v1 = ('13', chrom_ref['13'][ref_id]['start'], 'A', 'C')
+    v2 = ('13', chrom_ref['13'][ref_id]['start'] + 10, 'A', 'C')
     with pytest.raises(AssertionError):
         variant_equal(v1, v2, ref_id)
     with pytest.raises(AssertionError):
@@ -104,8 +104,8 @@ def test_variant_equal_throws_below_reference():
 def test_variant_equal_throws_above_reference():
     ref_id = chrom_ref['13'].keys()[0]
     start = chrom_ref['13'][ref_id]['start']
-    v1 = ('13', start + reference_length + 2, 'A', 'C', 'foo')
-    v2 = ('13', start + 10, 'A', 'C', 'foo')
+    v1 = ('13', start + reference_length + 2, 'A', 'C')
+    v2 = ('13', start + 10, 'A', 'C')
     with pytest.raises(AssertionError):
         variant_equal(v1, v2, ref_id)
     with pytest.raises(AssertionError):
