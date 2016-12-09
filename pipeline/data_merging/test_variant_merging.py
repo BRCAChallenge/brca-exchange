@@ -268,10 +268,7 @@ def test_variant_equal_equiv(v, ref_id):
             assert variant_equal(add_start(v, ref_id), add_start(veq, ref_id), ref_id)
 
 def equiv_set(refsequence, v):
-    full_set = all_norm_equiv(refsequence, v) + [normalize_variant(v)]
-    # TODO: cleanup wo_src since src is now removed.
-    wo_src = [(chrom, pos, ref, alt) for (chrom, pos, ref, alt) in full_set]
-    return set(wo_src)
+    return set(all_norm_equiv(refsequence, v) + [normalize_variant(v)])
 
 #@settings(max_examples=runtimes, max_iterations=runtimes, timeout=-1, database_file=None)
 #@settings(max_examples=runtimes, max_iterations=runtimes, timeout=-1)
