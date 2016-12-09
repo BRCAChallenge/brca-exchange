@@ -154,6 +154,7 @@ def hgvsProteinUpdate(row):
 
 def BICUpdate(row):
     bic = row["BIC_Nomenclature"]
+    bic = re.sub("\|", ",", bic)
     if bic == EMPTY:
         if row["BIC_Designation_BIC"] != EMPTY:
             bic = row["BIC_Designation_BIC"]
@@ -165,7 +166,7 @@ def BICUpdate(row):
 def pathogenicityUpdate(row):
     pathoExpert = row["Clinical_significance_ENIGMA"]
     if pathoExpert == EMPTY:
-        pathoExpert = "Not Yet Classified"
+        pathoExpert = "Not Yet Reviewed"
     if pathoExpert == "Benign":
         pathoExpert = "Benign / Little Clinical Significance"
     pathoAll = ""
@@ -312,7 +313,7 @@ def setSynonym(row):
         for thisBic in row["BIC_Designation_BIC"].split(','):
             synonym = "%s%s%s" % (synonym, delimiter, thisBic)
             delimiter = ","
-    return synonym
+    return (synonym)
 
 
 if __name__ == "__main__":

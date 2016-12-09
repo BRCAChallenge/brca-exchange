@@ -112,6 +112,7 @@ lovd_method_dir = os.path.abspath('../lovd')
 g1k_method_dir = os.path.abspath('../1000_Genomes')
 enigma_method_dir = os.path.abspath('../enigma')
 data_merging_method_dir = os.path.abspath('../data_merging')
+utilities_method_dir = os.path.abspath('../utilities')
 
 
 ###############################################
@@ -757,7 +758,7 @@ class ConvertSharedLOVDBRCA1ExtractToVCF(luigi.Task):
 
         args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA1.txt",
                 "-o", lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf", "-a",
-                "exLOVDAnnotation", "-b", "1", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp",
+                "sharedLOVDAnnotation", "-b", "1", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp",
                 "-g", brca_resources_dir + "/hg19.fa"]
         print "Running lovd2vcf with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -778,7 +779,7 @@ class ConvertSharedLOVDBRCA2ExtractToVCF(luigi.Task):
         brca_resources_dir = self.resources_dir
 
         args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA2.txt", "-o",
-                lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf", "-a", "exLOVDAnnotation",
+                lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf", "-a", "sharedLOVDAnnotation",
                 "-b", "2", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
                 brca_resources_dir + "/hg19.fa"]
         print "Running lovd2vcf with the following args: %s" % (args)
@@ -802,7 +803,7 @@ class ConcatenateSharedLOVDVCFFiles(luigi.Task):
         writable_lovd_brca12_hg19_vcf_file = open(lovd_brca12_hg19_vcf_file, 'w')
         args = ["vcf-concat", lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf",
                 lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf"]
-        print "Running lovd2vcf with the following args: %s" % (args)
+        print "Running vcf-concat with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=writable_lovd_brca12_hg19_vcf_file, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
@@ -1280,63 +1281,70 @@ class MergeVCFsIntoTSVFile(luigi.Task):
     file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
                                       description='directory to store all individual task related files')
 
+    previous_release = luigi.Parameter(default=None, description='previous release for diffing versions \
+                                       and producing change types for variants')
+
+    previous_release_date = luigi.Parameter(default=None, description='date that previous_release was produced')
+
+    release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
+
     def output(self):
-        release_dir = create_path_if_nonexistent(self.output_dir + "/release/")
-        return luigi.LocalTarget(release_dir + "merged.tsv")
+        artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts/")
+        return luigi.LocalTarget(artifacts_dir + "merged.tsv")
 
     def run(self):
-        release_dir = create_path_if_nonexistent(self.output_dir + "/release/")
+        artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts/")
         brca_resources_dir = self.resources_dir
 
         os.chdir(data_merging_method_dir)
 
         args = ["python", "variant-merging.py", "-i", self.output_dir + "/", "-o",
-                release_dir, "-p", "-r", brca_resources_dir + "/", "-v"]
+                artifacts_dir, "-p", "-r", brca_resources_dir + "/", "-a", artifacts_dir, "-v"]
         print "Running variant-merging.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        check_file_for_contents(release_dir + "merged.tsv")
+        check_file_for_contents(artifacts_dir + "merged.tsv")
 
 
 @requires(MergeVCFsIntoTSVFile)
 class AnnotateMergedOutput(luigi.Task):
 
     def output(self):
-        release_dir = self.output_dir + "/release/"
-        return luigi.LocalTarget(release_dir + "annotated.tsv")
+        artifacts_dir = self.output_dir + "/release/artifacts/"
+        return luigi.LocalTarget(artifacts_dir + "annotated.tsv")
 
     def run(self):
-        release_dir = self.output_dir + "/release/"
+        artifacts_dir = self.output_dir + "/release/artifacts/"
         os.chdir(data_merging_method_dir)
 
-        args = ["python", "add_annotation.py", "-i", release_dir + "merged.tsv",
-                "-o", release_dir + "annotated.tsv"]
+        args = ["python", "add_annotation.py", "-i", artifacts_dir + "merged.tsv",
+                "-o", artifacts_dir + "annotated.tsv", "-a", artifacts_dir, "-v"]
         print "Running add_annotation.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        check_file_for_contents(release_dir + "annotated.tsv")
+        check_file_for_contents(artifacts_dir + "annotated.tsv")
 
 
 @requires(AnnotateMergedOutput)
 class AggregateMergedOutput(luigi.Task):
 
     def output(self):
-        release_dir = self.output_dir + "/release/"
-        return luigi.LocalTarget(release_dir + "aggregated.tsv")
+        artifacts_dir = self.output_dir + "/release/artifacts/"
+        return luigi.LocalTarget(artifacts_dir + "aggregated.tsv")
 
     def run(self):
-        release_dir = self.output_dir + "/release/"
+        artifacts_dir = self.output_dir + "/release/artifacts/"
         os.chdir(data_merging_method_dir)
 
-        args = ["python", "aggregate_across_columns.py", "-i", release_dir + "annotated.tsv",
-                "-o", release_dir + "aggregated.tsv"]
+        args = ["python", "aggregate_across_columns.py", "-i", artifacts_dir + "annotated.tsv",
+                "-o", artifacts_dir + "aggregated.tsv"]
         print "Running aggregate_across_columns.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        check_file_for_contents(release_dir + "aggregated.tsv")
+        check_file_for_contents(artifacts_dir + "aggregated.tsv")
 
 
 @requires(AggregateMergedOutput)
@@ -1348,22 +1356,114 @@ class BuildAggregatedOutput(luigi.Task):
 
     def run(self):
         release_dir = self.output_dir + "/release/"
+        artifacts_dir = release_dir + "artifacts/"
         brca_resources_dir = self.resources_dir
         os.chdir(data_merging_method_dir)
 
-        args = ["python", "brca_pseudonym_generator.py", "-i", release_dir + "/aggregated.tsv", "-p",
+        args = ["python", "brca_pseudonym_generator.py", "-i", artifacts_dir + "/aggregated.tsv", "-p",
                 "-j", brca_resources_dir + "/hg18.fa",
                 "-k", brca_resources_dir + "/hg19.fa",
                 "-l", brca_resources_dir + "/hg38.fa",
                 "-r", brca_resources_dir + "/refseq_annotation.hg18.gp",
                 "-s", brca_resources_dir + "/refseq_annotation.hg19.gp",
                 "-t", brca_resources_dir + "/refseq_annotation.hg38.gp",
-                "-o", release_dir + "built.tsv"]
+                "-o", release_dir + "built.tsv",
+                "--artifacts_dir", artifacts_dir]
         print "Running brca_pseudonym_generator.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
         check_file_for_contents(release_dir + "built.tsv")
+
+
+@requires(BuildAggregatedOutput)
+class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
+
+    def output(self):
+        release_dir = self.output_dir + "/release/"
+        diff_dir = create_path_if_nonexistent(release_dir + "diff/")
+        return {'built_with_change_types': luigi.LocalTarget(release_dir + "built_with_change_types.tsv"),
+                'removed': luigi.LocalTarget(diff_dir + "removed.tsv"),
+                'added': luigi.LocalTarget(diff_dir + "added.tsv"),
+                'added_data': luigi.LocalTarget(diff_dir + "added_data.tsv"),
+                'diff': luigi.LocalTarget(diff_dir + "diff.txt"),
+                'README': luigi.LocalTarget(diff_dir + "README.txt")}
+
+    def run(self):
+        release_dir = self.output_dir + "/release/"
+        artifacts_dir = release_dir + "artifacts/"
+        diff_dir = create_path_if_nonexistent(release_dir + "diff/")
+        os.chdir(utilities_method_dir)
+
+        args = ["python", "releaseDiff.py", "--v2", release_dir + "built.tsv", "--v1", self.previous_release,
+                "--removed", diff_dir + "removed.tsv", "--added", diff_dir + "added.tsv", "--added_data",
+                diff_dir + "added_data.tsv", "--diff", diff_dir + "diff.txt", "--output",
+                release_dir + "built_with_change_types.tsv", "--artifacts_dir", artifacts_dir, "--diff_dir", diff_dir,
+                "--v1_release_date", self.previous_release_date]
+        print "Running releaseDiff.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(release_dir + "built_with_change_types.tsv")
+
+
+@requires(RunDiffAndAppendChangeTypesToOutput)
+class GenerateReleaseNotes(luigi.Task):
+
+    def output(self):
+        metadata_dir = create_path_if_nonexistent(self.output_dir + "/release/metadata/")
+        return luigi.LocalTarget(metadata_dir + "version.json")
+
+    def run(self):
+        metadata_dir = self.output_dir + "/release/metadata/"
+        os.chdir(data_merging_method_dir)
+
+        args = ["python", "buildVersionMetadata.py", "--date", str(self.date), "--notes", self.release_notes,
+                "--output", metadata_dir + "version.json"]
+        print "Running buildVersionMetadata.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(metadata_dir + "version.json")
+
+
+@requires(GenerateReleaseNotes)
+class GenerateMD5Sums(luigi.Task):
+
+    def output(self):
+        return luigi.LocalTarget(self.output_dir + "/md5sums.txt")
+
+    def run(self):
+        output_dir = self.output_dir
+        md5sumsFile = output_dir + "/md5sums.txt"
+
+        os.chdir(utilities_method_dir)
+
+        args = ["python", "generateMD5Sums.py", "-i", output_dir, "-o", md5sumsFile]
+        print "Generating md5sums with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(md5sumsFile)
+
+
+@requires(GenerateMD5Sums)
+class GenerateReleaseArchive(luigi.Task):
+
+    def getArchiveName(self):
+        # Format archive filename as release-mm-dd-yy.tar.gz
+        return "release-" + self.date.strftime("%x").replace('/', '-') + ".tar.gz"
+
+    def getArchiveParentDirectory(self):
+        return os.path.dirname(self.output_dir) + "/"
+
+    def output(self):
+        return luigi.LocalTarget(self.getArchiveParentDirectory() + self.getArchiveName())
+
+    def run(self):
+        os.chdir(self.getArchiveParentDirectory())
+        with tarfile.open(self.getArchiveParentDirectory() + self.getArchiveName(), "w:gz") as tar:
+            tar.add(self.output_dir, arcname=os.path.basename(self.output_dir))
 
 
 ###############################################
@@ -1389,8 +1489,29 @@ class RunAll(luigi.WrapperTask):
     file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
                                       description='directory to store all individual task related files')
 
+    previous_release = luigi.Parameter(default=None, description='previous release for diffing versions \
+                                       and producing change types for variants')
+
+    previous_release_date = luigi.Parameter(default=None, description='date that previous_release was produced')
+
+    release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
+
     def requires(self):
-        yield BuildAggregatedOutput(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        '''
+        If release notes and a previous release are provided, generate a version.json file and
+        run the releaseDiff.py script to generate change_types between releases of variants.
+        '''
+        if self.release_notes and self.previous_release:
+            yield GenerateReleaseArchive(self.date, self.resources_dir, self.output_dir,
+                                         self.file_parent_dir, self.previous_release, self.previous_release_date,
+                                         self.release_notes)
+        elif self.previous_release:
+            yield RunDiffAndAppendChangeTypesToOutput(self.date, self.resources_dir, self.output_dir,
+                                                      self.file_parent_dir, self.previous_release,
+                                                      self.previous_release_date)
+        else:
+            yield BuildAggregatedOutput(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+
         yield CopyClinvarVCFToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyESPOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyBICOutputToOutputDir(self.date, self.u, self.p, self.resources_dir, self.output_dir,
@@ -1400,5 +1521,5 @@ class RunAll(luigi.WrapperTask):
         yield CopyEXLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopySharedLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield DownloadLatestEnigmaData(self.date, self.synapse_username, self.synapse_password,
-                                      self.synapse_enigma_file_id, self.resources_dir,
-                                      self.output_dir, self.file_parent_dir)
+                                       self.synapse_enigma_file_id, self.resources_dir,
+                                       self.output_dir, self.file_parent_dir)

@@ -50,8 +50,7 @@ CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "Allele_Origin": "Origin",
                   "Protein": "Protein",
                   "Method": "Method"}
-LOVD_FIELDS = {"Origin_of_variant": "genetic_origin",
-               "Variant_frequency": "frequency",
+LOVD_FIELDS = {"Variant_frequency": "frequency",
                "Variant_haplotype": "haplotype",
                "Functional_analysis_result": "functionalanalysis_result",
                "Functional_analysis_technique": "functionalanalysis_technique",
@@ -114,11 +113,13 @@ def options(parser):
                         action="store_true")
     parser.add_argument('-r', "--reference", help="reference data directory",
                         default="/home/brca/pipeline-data/pipeline-resources/")
+    parser.add_argument('-a', "--artifacts_dir", help='Artifacts directory with pipeline artifact files.')
     parser.add_argument("-v", "--verbose", action="count", default=False, help="determines logging")
 
 ARGS = None
 BRCA1 = None
 BRCA2 = None
+
 
 def init(args):
     global BRCA1, BRCA2, ARGS
@@ -133,6 +134,7 @@ def init(args):
              "hg19": {"start": 32800000,
                       "sequence": open(ARGS.reference + "brca2_hg19.txt", "r").read().upper()}}
 
+
 def main():
     parser = argparse.ArgumentParser()
     options(parser)
@@ -144,32 +146,30 @@ def main():
     else:
         logging_level = logging.CRITICAL
 
-    logging.basicConfig(filename='variant-merging.log', filemode="w", level=logging_level)
-    tmp_dir = tempfile.mkdtemp()
-    try:
-        # merge repeats within data sources before merging between data sources
-        source_dict, columns, variants = preprocessing(tmp_dir)
+    log_file_path = ARGS.artifacts_dir + "variant-merging.log"
+    logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level)
 
-        # merges repeats from different data sources, adds necessary columns and data
-        print "\n------------merging different datasets------------------------------"
-        for source_name, file in source_dict.iteritems():
-            (columns, variants) = add_new_source(columns, variants, source_name,
-                                                 file, FIELD_DICT[source_name])
+    # merge repeats within data sources before merging between data sources
+    source_dict, columns, variants = preprocessing()
 
-        # standardizes genomic coordinates for variants
-        print "\n------------standardizing genomic coordinates-------------"
-        variants = variant_standardize(variants=variants)
+    # merges repeats from different data sources, adds necessary columns and data
+    print "\n------------merging different datasets------------------------------"
+    for source_name, file in source_dict.iteritems():
+        (columns, variants) = add_new_source(columns, variants, source_name,
+                                             file, FIELD_DICT[source_name])
 
-        # compare dna sequence results of variants and merge if equivalent
-        print "------------dna sequence comparison merge-------------------------------"
-        variants = string_comparison_merge(variants)
+    # standardizes genomic coordinates for variants
+    print "\n------------standardizing genomic coordinates-------------"
+    variants = variant_standardize(variants=variants)
 
-        # write final output to file
-        write_new_tsv(ARGS.output + "merged.tsv", columns, variants)
-        print "final number of variants: %d" % len(variants)
-        print "Done"
-    finally:
-        shutil.rmtree(tmp_dir)
+    # compare dna sequence results of variants and merge if equivalent
+    print "------------dna sequence comparison merge-------------------------------"
+    variants = string_comparison_merge(variants)
+
+    # write final output to file
+    write_new_tsv(ARGS.output + "merged.tsv", columns, variants)
+    print "final number of variants: %d" % len(variants)
+    print "Done"
 
 
 def variant_standardize(variants="pickle"):
@@ -212,43 +212,81 @@ def variant_standardize(variants="pickle"):
             variants_to_remove.append(ev)
             continue
 
-        #if type(items[2]) == list:
-        #    variant_names = items[2]
-        #else:
-        #    variant_names = [items[2]]
-        #new_names = []
-        #for vv in variant_names:
-        #    if ("-" in vv) or refOrAltMissing(vv):
-        #        vv2 = add_leading_base(vv)
-        #    else:
-        #        vv2 = vv
-        #    if not re.search("None", vv2):
-        #        new_names.append(trim_bases(vv2))
-        #    else:
-        #        new_names.append(vv2)
-        #
-        #new_names = [add_leading_base(v) if ("-" in v) or refOrAltMissing(v)  else v for v in variant_names]
-        #new_names = [trim_bases(v) if "None" not in v else v for v in new_names]
-        #new_names = ",".join(list(set(new_names)))
         items[COLUMN_VCF_POS] = pos
         items[COLUMN_VCF_REF] = ref
         items[COLUMN_VCF_ALT] = alt
-        newHgvs = "chr%s:%s:%s>%s" % (str(chr), str(pos), ref, str(alt))
+        newHgvs = "chr%s:g.%s:%s>%s" % (str(chr), str(pos), ref, str(alt))
+
         if newHgvs != ev:
+            logging.debug("Changed genomic coordinate representation, replacing %s with %s", ev, newHgvs)
             variants_to_remove.append(ev)
             variants_to_add[newHgvs] = items
-    for old_variant in variants_to_remove:
-        variants.pop(old_variant)
-    for key, values in variants_to_add.iteritems():
-        variants[key] = values
-    return variants
 
-# def refOrAltMissing(v):
-#     ref, alt = v.split(":")[2].split(">")
-#     if len(ref) < 1 or len(alt) < 1:
-#         return True
-#     else:
-#         return False
+    # remove old variant representations and bad variants
+    for old_variant in variants_to_remove:
+        popped = variants.pop(old_variant)
+
+    # TODO: create generic merge function to handle this case and merging in string_comparison_merge.
+    # add new variant representations and merge equivalent variants
+    for genomic_coordinate, values in variants_to_add.iteritems():
+        # if the variant already exists, merge
+        if genomic_coordinate in variants:
+            existing_variant = variants[genomic_coordinate]
+            equivalent_variant = values
+            logging.info("Merging equivalent variants \n %s and \n %s", existing_variant, equivalent_variant)
+            assert(len(existing_variant) == len(equivalent_variant))
+
+            # merge properties from equivalent variant into existing variant
+            for i, existing_variant_property in enumerate(existing_variant):
+
+                # skip if dealing with chr, pos, ref, or alt since one representation is enough
+                if i == COLUMN_VCF_CHR or i == COLUMN_VCF_POS or i == COLUMN_VCF_REF or i == COLUMN_VCF_ALT:
+                    continue
+
+                # get same property from equivalent variant
+                equivalent_variant_property = equivalent_variant[i]
+
+                # standardize empty data representation
+                if equivalent_variant_property is None or equivalent_variant_property == '':
+                    equivalent_variant_property = DEFAULT_CONTENTS
+                if existing_variant_property is None or existing_variant_property == '':
+                    existing_variant_property = DEFAULT_CONTENTS
+                    # overwrite none values with default none representation
+                    existing_variant[i] = existing_variant_property
+
+                # move on if they're equal or if equivalent variant property is blank
+                if equivalent_variant_property == existing_variant_property or equivalent_variant_property == "-":
+                    continue
+
+                # if the old value is blank, replace it with the new value
+                if existing_variant_property == "-":
+                    existing_variant[i] = equivalent_variant_property
+                else:
+                    # combine properties into a list
+                    if type(existing_variant_property) != list:
+                        merged_properties = [existing_variant_property]
+                    else:
+                        merged_properties = existing_variant_property
+
+                    assert type(merged_properties) == list
+
+                    if type(equivalent_variant_property) == list:
+                        for prop in equivalent_variant_property:
+                            if prop not in merged_properties:
+                                merged_properties.append(prop)
+                    elif equivalent_variant_property not in merged_properties:
+                        merged_properties.append(equivalent_variant_property)
+
+                    # replace existing data with updates
+                    existing_variant[i] = merged_properties
+                    logging.debug("Merged properties: %s", merged_properties)
+
+            logging.debug('Merged output: \n %s', existing_variant)
+
+        else:
+            variants[genomic_coordinate] = values
+
+    return variants
 
 def trim_bases(chr, pos, ref, alt):
     #ref, alt = v.split(":")[2].split(">")
@@ -375,6 +413,7 @@ def string_comparison_merge(variants):
         variants[",".join(list(equivalent_v))] = merged_row
     return variants
 
+
 def find_equivalent_variant(variants):
     genome_coors = variants.keys()
     uniq_variants = {}
@@ -389,9 +428,6 @@ def find_equivalent_variant(variants):
                 v1 = [variants[v][COLUMN_VCF_CHR], variants[v][COLUMN_VCF_POS], variants[v][COLUMN_VCF_REF], variants[v][COLUMN_VCF_ALT]]
                 v2 = [variants[existing_v][COLUMN_VCF_CHR], variants[existing_v][COLUMN_VCF_POS], variants[existing_v][COLUMN_VCF_REF], variants[existing_v][COLUMN_VCF_ALT]]
                 if variant_equal(v1, v2):
-                # v1 = v.replace("-", "").replace("chr", "").replace(">", ":").replace(">", ":")
-                # v2 = existing_v.replace("-", "").replace("chr", "").replace(">", ":").replace(">", ":")
-                # if variant_equal(v1.split(":"), v2.split(":")):
                     logging.info("Equal variants: \n %s \n %s", str(v1), str(v2))
                     variant_exist = True
                     uniq_variants[existing_v].add(v)
@@ -404,9 +440,10 @@ def find_equivalent_variant(variants):
     print equivalent_variants
     return equivalent_variants
 
-def preprocessing(tmp_dir):
+def preprocessing():
     # Preprocessing variants:
-    source_dict = {"1000_Genomes": GENOME1K_FILE + "for_pipeline",
+    source_dict = {
+                   "1000_Genomes": GENOME1K_FILE + "for_pipeline",
                    "ClinVar": CLINVAR_FILE,
                    "LOVD": LOVD_FILE,
                    "exLOVD": EX_LOVD_FILE,
@@ -429,13 +466,13 @@ def preprocessing(tmp_dir):
     for source_name, file_name in source_dict.iteritems():
         print "convert to one variant per line in ", source_name
         f_in = open(ARGS.input + file_name, "r")
-        f_out = open(tmp_dir + "/" + source_name + ".vcf", "w")
+        f_out = open(ARGS.output + source_name + ".vcf", "w")
         one_variant_transform(f_in, f_out)
         f_in.close()
         f_out.close()
         print "merge repetitive variants within ", source_name
-        f_in = open(tmp_dir + "/" + source_name + ".vcf", "r")
-        f_out = open(tmp_dir + "/" + source_name + "ready.vcf", "w")
+        f_in = open(ARGS.output + source_name + ".vcf", "r")
+        f_out = open(ARGS.output + source_name + "ready.vcf", "w")
         repeat_merging(f_in, f_out)
         source_dict[source_name] = f_out.name
 
@@ -448,7 +485,7 @@ def preprocessing(tmp_dir):
             os.makedirs(d_wrong)
         f_wrong = open(ARGS.output + "wrong_genome_coors/" +
                        source_name + "_wrong_genome_coor.vcf", "w")
-        f_right = open(tmp_dir + "/right" + source_name, "w")
+        f_right = open(ARGS.output + "right" + source_name, "w")
         vcf_reader = vcf.Reader(f, strict_whitespace=True)
         vcf_wrong_writer = vcf.Writer(f_wrong, vcf_reader)
         vcf_right_writer = vcf.Writer(f_right, vcf_reader)
@@ -566,7 +603,6 @@ def add_new_source(columns, variants, source, source_file, source_dict):
         else:
             variants[genome_coor] = ['-'] * old_column_num
             variants[genome_coor][COLUMN_SOURCE] = source
-            chrm = genome_coor.split(":")[0]
             if record.CHROM == "13":
                 variants[genome_coor][COLUMN_GENE] = "BRCA2"
             elif record.CHROM == "17":
@@ -584,8 +620,9 @@ def add_new_source(columns, variants, source, source_file, source_dict):
             except KeyError:
                 if source == "BIC":
                     variants[genome_coor].append(DEFAULT_CONTENTS)
+                    logging.debug("Could not find value %s for source %s in variant %s, inserting default content %s instead.", value, source, DEFAULT_CONTENTS)
                 else:
-                    raise Exception("uncaught weirdness")
+                    raise Exception("There was a problem appending a value for %s to variant %s" % (value, variats[genome_coor]))
     # for those enigma record that doesn't have a hit with new genome coordinate
     # add extra cells of "-" to the end of old record
     for value in variants.values():
@@ -594,7 +631,7 @@ def add_new_source(columns, variants, source, source_file, source_dict):
     print "number of variants in " + source + " is ", variants_num
     print "overlap with previous dataset: ", overlap
     print "number of total variants with the addition of " + source + " is: ", len(variants), "\n"
-    for index,value in variants.iteritems():
+    for index, value in variants.iteritems():
         if len(value) != len(columns):
             raise Exception("mismatching number of columns in head and row")
     return (columns, variants)
@@ -630,7 +667,7 @@ def save_enigma_to_dict(path):
             items.insert(COLUMN_VCF_ALT, alt)
             for ii in range(len(items)):
                 if items[ii] == None:
-                    items[ii] = DEFAULT_CONTENTS 
+                    items[ii] = DEFAULT_CONTENTS
             if ref_correct(chrom, pos, ref, alt):
                 hgvs = "chr%s:g.%s:%s>%s" % (str(chrom), str(pos), ref, alt)
                 variants[hgvs] = items

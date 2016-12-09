@@ -1,6 +1,6 @@
 {
   "name": "brcaexchange",
-  "version": "2.3.0",
+  "version": "3.7.0-alpha.0",
   "description": "brca variant browser",
   "main": "index.js",
   "scripts": {
@@ -47,6 +47,7 @@
     "webpack-dev-server": "^1.7.0"
   },
   "dependencies": {
+    "anchorme": "^0.7.1",
     "babel-runtime": "^5.1.13",
     "bootstrap": "^3.3.4",
     "classnames": "^2.1.5",

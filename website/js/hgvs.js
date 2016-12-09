@@ -19,12 +19,9 @@
 
 var _ = require('underscore');
 
-var gene = 'Gene_Symbol';
 var pathogenicity = 'Clinical_significance_ENIGMA';
 
 var hgvsPatterns = [
-    {regex: /^(NM_007294\.3(\(BRCA1\))?|BRCA1)(:|$)/i, value: 'BRCA1', column: gene},
-    {regex: /^(NM_000059\.3(\(BRCA2\))?|BRCA2)(:|$)/i, value: 'BRCA2', column: gene},
     {regex: /^[Pp]athogenic(:|$)/i, value: 'Pathogenic', column: pathogenicity},
     {regex: /^[Bb]enign(:|$)/i, value: 'Benign', column: pathogenicity},
     {regex: /^([Vv]ariants of unknown significance|VUS)(:|$)/i, value: 'VUS', column: pathogenicity}

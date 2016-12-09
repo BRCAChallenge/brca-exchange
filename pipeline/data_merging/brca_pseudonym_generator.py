@@ -50,6 +50,7 @@ def parse_args():
                         help='Set flag for hgvs protein fill-in. May not result in complete fill-in.')
     parser.add_argument('-o', '--outBRCA', type=argparse.FileType('w'),
                         help='Output filled in ENIGMA BRCA datatable file.')
+    parser.add_argument('--artifacts_dir', help='Artifacts directory with pipeline artifact files.')
 
     parser.set_defaults(calcProtein=False)
     options = parser.parse_args()
@@ -68,8 +69,12 @@ def main(args):
     refSeq38 = options.inRefSeq38
     outputFile = options.outBRCA
     calcProtein = options.calcProtein
+    artifacts_dir = options.artifacts_dir
 
-    logging.basicConfig(filename='brca_pseudonym_generator.log', filemode="w", level=logging.DEBUG)
+    if not os.path.exists(artifacts_dir):
+        os.makedirs(artifacts_dir)
+    log_file_path = artifacts_dir + "brca-pseudonym-generator.log"
+    logging.basicConfig(filename=log_file_path, filemode="w", level=logging.DEBUG)
 
     hdp = hgvs_dataproviders_uta.connect()
     variantmapper = hgvs_variantmapper.EasyVariantMapper(hdp)
@@ -184,32 +189,34 @@ def main(args):
             except hgvs.exceptions.HGVSParseError as e:
                 template = "An exception of type {0} occured. Arguments:\n{1!r}"
                 message = template.format(type(ex).__name__, ex.args)
+                genomicChange = '{0}:g.{1}:{2}>{3}'.format(chrom38, offset38, ref38, alt38)
                 print('hgvs.exceptions.HGVSParseError: ', e)
                 print('Original GRCh38 Genomic Coordinate: ', oldHgvsGenomic38)
-                print('GRCh38 Genomic change: ', '{0}:{1}:{2}>{3}'.format(chrom38,offset38,ref38,alt38))
+                print('GRCh38 Genomic change: ', genomicChange)
                 logging.error(message)
                 logging.error(line)
-                logging.error('Proposed GRCh38 Genomic change for error: ', '{0}:{1}:{2}>{3}'.format(chrom38,offset38,ref38,alt38))
+                logging.error('Proposed GRCh38 Genomic change for error: %s', genomicChange)
 
             # Catch parse errors thrown by ometa.runtime.ParseError.
             except ParseError as ex:
                 template = "An exception of type {0} occured. Arguments:\n{1!r}"
                 message = template.format(type(ex).__name__, ex.args)
+                genomicChange = '{0}:g.{1}:{2}>{3}'.format(chrom38, offset38, ref38, alt38)
                 print(message)
                 print('ometa.runtime.ParseError', ex)
                 print('Original GRCh38 Genomic Coordinate: ', oldHgvsGenomic38)
-                print('GRCh38 Genomic change: ', '{0}:{1}:{2}>{3}'.format(chrom38,offset38,ref38,alt38))
+                print('GRCh38 Genomic change: ', genomicChange)
                 logging.error(message)
                 logging.error(line)
-                logging.error('Proposed GRCh38 Genomic change for error: ', '{0}:{1}:{2}>{3}'.format(chrom38,offset38,ref38,alt38))
+                logging.error('Proposed GRCh38 Genomic change for error: %s', genomicChange)
 
         # Add empty data for each new column to prepare for data insertion by index
         for i in range(len(new_columns_to_append)):
             line.append('-')
 
-        line[output_header_row.index("pyhgvs_Genomic_Coordinate_36")] = '{0}:{1}:{2}>{3}'.format(chrom36,offset36,ref36,alt36)
-        line[output_header_row.index("pyhgvs_Genomic_Coordinate_37")] = '{0}:{1}:{2}>{3}'.format(chrom37,offset37,ref37,alt37)
-        line[output_header_row.index("pyhgvs_Genomic_Coordinate_38")] = '{0}:{1}:{2}>{3}'.format(chrom38,offset38,ref38,alt38)
+        line[output_header_row.index("pyhgvs_Genomic_Coordinate_36")] = '{0}:g.{1}:{2}>{3}'.format(chrom36,offset36,ref36,alt36)
+        line[output_header_row.index("pyhgvs_Genomic_Coordinate_37")] = '{0}:g.{1}:{2}>{3}'.format(chrom37,offset37,ref37,alt37)
+        line[output_header_row.index("pyhgvs_Genomic_Coordinate_38")] = '{0}:g.{1}:{2}>{3}'.format(chrom38,offset38,ref38,alt38)
         line[output_header_row.index("pyhgvs_Hg37_Start")] = str(offset37)
         line[output_header_row.index("pyhgvs_Hg37_End")] = str(int(offset37) + len(ref38) - 1)
         line[output_header_row.index("pyhgvs_Hg36_Start")] = str(offset36)
@@ -227,7 +234,6 @@ def main(args):
     refSeq18.close()
     refSeq19.close()
     refSeq38.close()
-    input_file.close()
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))

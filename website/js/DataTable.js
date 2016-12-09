@@ -116,10 +116,19 @@ var DataTable = React.createClass({
           page: 0
         });
     },
+    clearFilters: function () {
+        // Reset release and changetype filters
+        this.setStateFetch({
+            release: undefined,
+            changeTypes: undefined,
+        });
+    },
     createDownload: function () {
-        var {search, sortBy, filterValues, columnSelection, sourceSelection} = this.state;
+        var {release, changeTypes, search, sortBy, filterValues, columnSelection, sourceSelection} = this.state;
         return this.props.url(merge({
-            format: 'csv',
+            format: 'tsv',
+            release,
+            changeTypes,
             pageLength: null,
             page: null,
             sortBy,
@@ -140,8 +149,10 @@ var DataTable = React.createClass({
     },
     fetch: function (state) {
         var {pageLength, search, page, sortBy,
-            filterValues, columnSelection, sourceSelection} = state;
+            filterValues, columnSelection, sourceSelection, release, changeTypes} = state;
         this.fetchq.onNext(merge({
+            release,
+            changeTypes,
             pageLength,
             page,
             sortBy,
@@ -179,7 +190,7 @@ var DataTable = React.createClass({
         this.setStateFetch({page: newPage, pageLength: length});
     },
     render: function () {
-        var {filterValues, filtersOpen, lollipopOpen, search, data, columnSelection,
+        var {release, changeTypes, filterValues, filtersOpen, lollipopOpen, search, data, columnSelection,
             page, totalPages, count, synonyms, error} = this.state;
         var {columns, filterColumns, className, advancedFilters, downloadButton, lollipopButton} = this.props;
         var renderColumns = _.filter(columns, c => columnSelection[c.prop]);
@@ -187,7 +198,19 @@ var DataTable = React.createClass({
             <SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
                          key={prop} label={`${name} is: `} value={filterDisplay(filterValues[prop])}
                          options={addAny(values)}/>);
-
+        // assumes added / changed are lumped together
+        var changeString;
+        if (changeTypes) {
+            if (changeTypes.includes('new')) {
+                changeString = "added";
+            } else if (changeTypes.includes('added_information')) {
+                changeString = "with new or changed information";
+            } else if (changeTypes.includes('added_classification')) {
+                changeString = "with new or changed classification";
+            } else if (changeTypes.includes('deleted')) {
+                changeString = "deleted";
+            }
+        }
         return (error ? <p>{error}</p> :
             <div className={this.props.className}>
             <div id="filters" className="container-fluid">
@@ -196,7 +219,6 @@ var DataTable = React.createClass({
                         <Button className="btn-sm rgt-buffer"
                                 onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}
                         </Button>
-
                         {lollipopButton(this.toggleLollipop, lollipopOpen)}
                     </Col>
                 </Row>
@@ -219,8 +241,15 @@ var DataTable = React.createClass({
                         <div className='form-inline'>
                             <div className='form-group'>
                                 <label className='control-label'>
-                                    {count} matching {pluralize(count, 'variant')} {synonyms ? 'of which ' + synonyms + ' matched on synonyms' : ''}
+                                    {count} matching {pluralize(count, 'variant')} {}
+                                    {changeString ? changeString : ''} {}
+                                    {release ? 'in release ' + release : ''} {}
+                                    {synonyms ? 'of which ' + synonyms + ' matched on synonyms' : ''}
                                 </label>
+                                {release || changeString ?
+                                    <Button className="btn-sm rgt-buffer"
+                                        onClick={this.clearFilters}>Clear Filters
+                                    </Button> : ''} {}
                                 {downloadButton(this.createDownload)}
                             </div>
                         </div>
@@ -241,6 +270,7 @@ var DataTable = React.createClass({
                         <VariantSearch
                             id='variants-search'
                             value={search}
+                            release={release}
                             onChange={v => {
                                 // reset the page number to zero on new searches
                                 this.setStateFetch({search: v, page: 0});

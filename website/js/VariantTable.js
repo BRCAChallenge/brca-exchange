@@ -45,7 +45,7 @@ function renderCell(val) {
 var filterColumns = [
     {name: 'Gene', prop: 'Gene_Symbol', values: ['BRCA1', 'BRCA2']},
 //    {name: 'Exon', values: ['Any', 1, 2, 3, 4, 5]}, // XXX needs refgene to get exon count
-    {name: 'Pathogenicity', prop: 'Pathogenicity_default', values: ['Pathogenic', 'Benign / Little Clinical Significance', 'Not Yet Classified']}
+    {name: 'Pathogenicity', prop: 'Pathogenicity_expert', values: ['Pathogenic', 'Benign / Little Clinical Significance', 'Not Yet Classified']}
 ];
 
 // XXX duplicate this functionality on the server, perhaps
@@ -83,10 +83,10 @@ var columns = [
     // Protein Identfifier is pulled from HGVS_Protein, this is handled in VariantDetail (index.js)
     {title: 'Protein Identifier', prop: 'HGVS_Protein_ID'},
     {title: 'Protein Abbrev', prop: 'Protein_Change'},
-    {title: 'BIC Designation', prop: 'BIC_Identifier'},
+    {title: 'BIC Designation', prop: 'BIC_Nomenclature'},
     {title: 'Genomic Nomenclature (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
     {title: 'Genomic Nomenclature (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
-    {title: 'Clinical Significance', prop: 'Pathogenicity_default'},
+    {title: 'Clinical Significance', prop: 'Pathogenicity_expert'},
     {title: 'IARC Class', prop: 'Clinical_significance_ENIGMA'},
     {title: 'Comment on Clinical Significance', prop: 'Comment_on_clinical_significance_ENIGMA'},
     {title: 'Clinical Significance Citations', prop: 'Clinical_significance_citations_ENIGMA'},
@@ -106,11 +106,11 @@ var researchModeColumns = [
     {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
 
     {title: 'Mutation category (BIC)', prop: 'Mutation_type_BIC'},
-    {title: 'PolyPhen score', prop: 'PolyPhen_VEP'},
-    {title: 'SIFT score', prop: 'SIFT_VEP'},
+    {title: 'PolyPhen score', prop: 'PolyPhen_Score'},
+    {title: 'SIFT score', prop: 'Sift_Score'},
 
 
-    {title: 'BIC Variant Identifier', prop: 'BIC_Identifier'},
+    {title: 'BIC Variant Identifier', prop: 'BIC_Nomenclature'},
     {title: 'Nucleotide', prop: 'HGVS_cDNA'},
     {title: 'Protein', prop: 'HGVS_Protein'},
     {title: 'SCV Accession (ClinVar)', prop: 'SCV_ClinVar'},
@@ -124,7 +124,6 @@ var researchModeColumns = [
     {title: 'Allele Origin (ENIGMA)', prop: 'Allele_origin_ENIGMA'},
     {title: 'Ethnicity (BIC)', prop: 'Ethnicity_BIC'},
     {title: 'Allele Origin (BIC)', prop: 'Germline_or_Somatic_BIC'},
-    {title: 'Allele Origin (LOVD)', prop: 'Origin_of_variant_LOVD'},
     {title: 'Patient Nationality (BIC)', prop: 'Patient_nationality_BIC'},
     {title: 'Variant Haplotype (LOVD)', prop: 'Variant_haplotype_LOVD'},
 
@@ -144,7 +143,7 @@ var researchModeColumns = [
     {title: 'Clinical Significance Citation (ENIGMA)', prop: 'Clinical_significance_citations_ENIGMA'},
     {title: 'Literature Reference (BIC)', prop: 'Literature_citation_BIC'},
     {title: 'Literature Reference (exLOVD)', prop: 'Literature_source_exLOVD'},
-    {title: 'Pathogenicity', prop: 'Pathogenicity_research'},
+    {title: 'Pathogenicity', prop: 'Pathogenicity_all'},
 
     {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_ENIGMA'},
     {title: 'Clinical Significance (BIC)', prop: 'Clinical_classification_BIC'},
@@ -185,7 +184,7 @@ var subColumns = [
     {
         subColTitle: "Variant Nomenclature",
         subColList: [
-            {title: 'BIC Variant Identifier', prop: 'BIC_Identifier', render: renderCell},
+            {title: 'BIC Variant Identifier', prop: 'BIC_Nomenclature', render: renderCell},
             {title: 'Protein', prop: 'HGVS_Protein', render: renderCell},
             {title: 'SCV Accession (ClinVar)', prop: 'SCV_ClinVar', render: renderCell},
             {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: renderCell},
@@ -200,7 +199,6 @@ var subColumns = [
             {title: 'Allele Origin (ENIGMA)', prop: 'Allele_origin_ENIGMA', render: renderCell},
             {title: 'Ethnicity (BIC)', prop: 'Ethnicity_BIC', render: renderCell},
             {title: 'Allele Origin (BIC)', prop: 'Germline_or_Somatic_BIC', render: renderCell},
-            {title: 'Allele Origin (LOVD)', prop: 'Origin_of_variant_LOVD', render: renderCell},
             {title: 'Patient Nationality (BIC)', prop: 'Patient_nationality_BIC', render: renderCell},
             {title: 'Variant Haplotype (LOVD)', prop: 'Variant_haplotype_LOVD', render: renderCell}
         ]
@@ -256,8 +254,8 @@ var subColumns = [
         subColTitle: "Bioinformatic Annotation",
         subColList: [
             {title: 'Mutation category (BIC)', prop: 'Mutation_type_BIC', render: renderCell},
-            {title: 'PolyPhen score', prop: 'PolyPhen_VEP', render: renderCell},
-            {title: 'SIFT score', prop: 'SIFT_VEP', render: renderCell}
+            {title: 'PolyPhen score', prop: 'PolyPhen_Score', render: renderCell},
+            {title: 'SIFT score', prop: 'Sift_Score', render: renderCell}
         ]
     },
     {
@@ -286,7 +284,7 @@ var subColumns = [
     {
         subColTitle: "Significance",
         subColList: [
-            {title: 'Pathogenicity', prop: 'Pathogenicity_research', render: renderCell},
+            {title: 'Pathogenicity', prop: 'Pathogenicity_all', render: renderCell},
             {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_ENIGMA', render: renderCell},
             {title: 'Clinical Significance (BIC)', prop: 'Clinical_classification_BIC', render: renderCell},
             {title: 'Clinical Importance (BIC)', prop: 'Clinical_importance_BIC', render: renderCell},
@@ -350,8 +348,8 @@ var subColumns = [
 
 //var defaultColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_default'];
 
-var defaultColumns = ['Gene_Symbol', 'HGVS_cDNA', 'HGVS_Protein', 'Protein_Change', 'BIC_Identifier', 'Pathogenicity_default'];
-var defaultResearchColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_research', 'Allele_Frequency'];
+var defaultColumns = ['Gene_Symbol', 'HGVS_cDNA', 'HGVS_Protein', 'Protein_Change', 'BIC_Nomenclature', 'Pathogenicity_expert'];
+var defaultResearchColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_all', 'Allele_Frequency'];
 
 var allSources = {
     "Variant_in_ENIGMA": 1,
@@ -463,7 +461,7 @@ var ResearchVariantTableSupplier = function (Component) {
             </label>);
         },
         getDownloadButton: function (callback) {
-            return <Button className="btn-sm rgt-buffer" download="variants.csv" href={callback()}>Download</Button>;
+            return <Button className="btn-sm rgt-buffer" download="variants.tsv" href={callback()}>Download</Button>;
         },
         getLollipopButton: function (callback, isOpen) {
             return (<Button id="lollipop-chart-toggle" className="btn-sm rgt-buffer"

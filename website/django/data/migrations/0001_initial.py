@@ -3,17 +3,32 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
+import django.db.models.deletion
+
+
+def add_change_types(apps, schema_editor):
+    ChangeType = apps.get_model("data", "ChangeType")
+    ChangeType.objects.create(name="new")
+    ChangeType.objects.create(name="deleted")
+    ChangeType.objects.create(name="added_classification")
+    ChangeType.objects.create(name="changed_classification")
+    ChangeType.objects.create(name="added_information")
+    ChangeType.objects.create(name="changed_information")
 
 
 class Migration(migrations.Migration):
-
+    # **********************************
+    # WARNING: Running this migration will delete VARIANT, DATA_RELEASE, and DATA_CHANGETYPE tables.
+    # **********************************
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
-        migrations.RunSQL("""DROP TABLE IF EXISTS variant CASCADE;
+        migrations.RunSQL("""
+        DROP TABLE IF EXISTS variant CASCADE;
+        DROP TABLE IF EXISTS data_release CASCADE;
+        DROP TABLE IF EXISTS data_changetype CASCADE;
         DROP FUNCTION IF EXISTS variant_fts_trigger();
         """),
         migrations.CreateModel(
@@ -51,7 +66,6 @@ class Migration(migrations.Migration):
                 ('Allele_Origin_ClinVar', models.TextField()),
                 ('Method_ClinVar', models.TextField()),
                 ('Functional_analysis_result_LOVD', models.TextField()),
-                ('Origin_of_variant_LOVD', models.TextField()),
                 ('Functional_analysis_technique_LOVD', models.TextField()),
                 ('Variant_frequency_LOVD', models.TextField()),
                 ('Variant_haplotype_LOVD', models.TextField()),
@@ -79,15 +93,19 @@ class Migration(migrations.Migration):
                 ('Posterior_probability_exLOVD', models.TextField()),
                 ('Missense_analysis_prior_probability_exLOVD', models.TextField()),
                 ('Segregation_LR_exLOVD', models.TextField()),
-                ('SIFT_VEP', models.TextField()),
-                ('PolyPhen_VEP', models.TextField()),
                 ('Gene_Symbol', models.TextField()),
                 ('Reference_Sequence', models.TextField()),
                 ('HGVS_cDNA', models.TextField()),
-                ('BIC_Identifier', models.TextField()),
+                ('BIC_Nomenclature', models.TextField()),
                 ('HGVS_Protein', models.TextField()),
                 ('Protein_Change', models.TextField()),
                 ('Allele_Frequency', models.TextField()),
+                ('Hg36_End', models.BigIntegerField(default=1)),
+                ('Hg36_Start', models.BigIntegerField(default=1)),
+                ('Hg37_End', models.BigIntegerField(default=1)),
+                ('Hg37_Start', models.BigIntegerField(default=1)),
+                ('Hg38_End', models.BigIntegerField(default=1)),
+                ('Hg38_Start', models.BigIntegerField(default=1)),
                 ('Max_Allele_Frequency', models.TextField()),
                 ('Genomic_Coordinate_hg38', models.TextField()),
                 ('Genomic_Coordinate_hg37', models.TextField()),
@@ -95,11 +113,101 @@ class Migration(migrations.Migration):
                 ('Source_URL', models.TextField()),
                 ('Discordant', models.TextField()),
                 ('Synonyms', models.TextField()),
-                ('Pathogenicity_default', models.TextField()),
-                ('Pathogenicity_research', models.TextField()),
+                ('Pathogenicity_expert', models.TextField()),
+                ('Pathogenicity_all', models.TextField()),
             ],
             options={
                 'db_table': 'variant',
             },
+        ),
+        migrations.CreateModel(
+            name='DataRelease',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('date', models.DateTimeField()),
+                ('notes', models.TextField()),
+                ('sources', models.TextField()),
+                ('schema', models.TextField()),
+                ('archive', models.TextField()),
+                ('md5sum', models.TextField()),
+            ],
+            options={
+                'db_table': 'data_release',
+            },
+        ),
+        migrations.AddField(
+             model_name='variant',
+             name='Data_Release',
+             # Get data_release_id_seq.start_value instead of assuming 1 ?
+             field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='data.DataRelease'),
+             preserve_default=False,
+        ),
+        migrations.CreateModel(
+            name='ChangeType',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.TextField()),
+            ],
+        ),
+        migrations.RunPython(add_change_types),
+        migrations.AddField(
+            model_name='variant',
+            name='Change_Type',
+            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='data.ChangeType'),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name='variant',
+            name='Alt',
+            field=models.TextField(default='-'),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name='variant',
+            name='Chr',
+            field=models.TextField(default='-'),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name='variant',
+            name='Polyphen_Prediction',
+            field=models.TextField(default='-'),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name='variant',
+            name='Polyphen_Score',
+            field=models.TextField(default='-'),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name='variant',
+            name='Pos',
+            field=models.TextField(default='-'),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name='variant',
+            name='Ref',
+            field=models.TextField(default='-'),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name='variant',
+            name='Sift_Prediction',
+            field=models.TextField(default='-'),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name='variant',
+            name='Sift_Score',
+            field=models.TextField(default='-'),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name='variant',
+            name='HGVS_RNA',
+            field=models.TextField(default='-'),
+            preserve_default=False
         ),
     ]

@@ -57,10 +57,10 @@ var D3Lollipop = React.createClass({
         );
     },
     filterAttributes: function (obj) {
-        var oldObj = _(obj).pick('Genomic_Coordinate_hg38', 'Pathogenicity_default');
+        var oldObj = _(obj).pick('Genomic_Coordinate_hg38', 'Pathogenicity_expert');
         var parts = oldObj.Genomic_Coordinate_hg38.split(':');
         // new format for genomic coordinates, now includes "g.", trim first two characters
-        var chrCoordinate = parseInt(parts[1].substr(2));
+        var chrCoordinate = parseInt(parts[1][0] === 'g' ? parts[1].substr(2) : parts[1]);
         var alleleChange = _.last(parts);
         var refAllele = alleleChange.split('>')[0];
         var altAllele = alleleChange.split('>')[1];
@@ -70,14 +70,14 @@ var D3Lollipop = React.createClass({
             chrCoordinate = String(chrCoordinate);
         }
 		/*eslint-disable dot-notation */
-        if (oldObj["Pathogenicity_default"] === 'Not Yet Classified') {
-            oldObj["Pathogenicity_default"] = "Uncertain";
+        if (oldObj["Pathogenicity_expert"] === 'Not Yet Classified') {
+            oldObj["Pathogenicity_expert"] = "Uncertain";
         }
-        if (oldObj["Pathogenicity_default"] === 'Benign / Little Clinical Significance') {
-            oldObj["Pathogenicity_default"] = "Benign";
+        if (oldObj["Pathogenicity_expert"] === 'Benign / Little Clinical Significance') {
+            oldObj["Pathogenicity_expert"] = "Benign";
         }
 		/*eslint-enable dot-notation */
-        var newObj = {category: oldObj.Pathogenicity_default, coord: chrCoordinate, value: 1, oldData: obj};
+        var newObj = {category: oldObj.Pathogenicity_expert, coord: chrCoordinate, value: 1, oldData: obj};
         return newObj;
     },
 

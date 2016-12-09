@@ -5,7 +5,7 @@ bioutils==0.1.4
 bx-python==0.7.3
 certifi==2016.8.2
 configparser==3.5.0
-CrossMap==0.2.3
+CrossMap>=0.2.4
 Cython==0.24.1
 Django==1.10
 django-cors-headers==1.1.0
