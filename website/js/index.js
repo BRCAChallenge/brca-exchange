@@ -44,7 +44,6 @@ var {Navigation, State, Route, RouteHandler,
     HistoryLocation, run, DefaultRoute, Link} = require('react-router');
 var {Releases, Release} = require('./Releases.js');
 var {dateFormat} = require('./util.js');
-window.dateFormat = dateFormat;
 
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 
