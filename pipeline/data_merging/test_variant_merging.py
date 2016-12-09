@@ -56,23 +56,23 @@ subseq = lists(base).map(lambda x: ''.join(x))
 # Note this doesn't catch all degenerate variants. A -> A would pass, for example.
 def not_noop(v):
     "False if ref and alt are empty"
-    (_, _, ref, alt, _) = v
+    (_, _, ref, alt) = v
     return ref != '' or alt != ''
 
 # A variant with all random fields.
-# (chrom, position, ref, alt, src)
-variant = tuples(chrom, pos, subseq, subseq, text()).filter(not_noop)
+# (chrom, position, ref, alt)
+variant = tuples(chrom, pos, subseq, subseq).filter(not_noop)
 
 # Note this doesn't catch all degenerate variants. A -> A would pass, for example.
 def not_on_ref_noop(v):
     "False if ref and alt are empty"
-    (_, _, reflen, alt, _) = v
+    (_, _, reflen, alt) = v
     return reflen != 0 or alt != ''
 
 # A variant where 'ref' is a length. We will later copy in the reference base
 # pairs from a reference sequence.
-# (chrom, position, ref, alt, src)
-variant_on_ref = tuples(chrom, pos, integers(min_value=0), subseq, text()).filter(not_on_ref_noop)
+# (chrom, position, ref, alt)
+variant_on_ref = tuples(chrom, pos, integers(min_value=0), subseq).filter(not_on_ref_noop)
 
 chrom_ref = {
     '13': BRCA2,
@@ -84,8 +84,8 @@ chrom_ref = {
 # to 1-based coords.
 def add_start(v, ref_id):
     "Add reference start position to a variant"
-    (chrom, pos, ref, alt, src) = v
-    return (chrom, pos + chrom_ref[chrom][ref_id]['start'] + 1, ref, alt, src)
+    (chrom, pos, ref, alt) = v
+    return (chrom, pos + chrom_ref[chrom][ref_id]['start'] + 1, ref, alt)
 
 
 #
@@ -115,7 +115,7 @@ def test_variant_equal_throws_above_reference():
 @given(variant, reference_id)
 def test_variant_equal_identity(v, ref_id):
     "A variant should be equal to itself"
-    (_, pos, ref, _, _) = v
+    (_, pos, ref, _) = v
     assume(pos + len(ref) <= reference_length)
     v = add_start(v, ref_id)
     assert variant_equal(v, v, ref_id)
@@ -124,8 +124,8 @@ def test_variant_equal_identity(v, ref_id):
 @given(variant, variant, reference_id)
 def test_variant_equal_commutative(v1, v2, ref_id):
     "Comparing x, y should be the same as comparing y, x"
-    (_, pos1, ref1, _, _) = v1
-    (_, pos2, ref2, _, _) = v2
+    (_, pos1, ref1, _) = v1
+    (_, pos2, ref2, _) = v2
     assume(pos1 + len(ref1) <= reference_length)
     assume(pos2 + len(ref2) <= reference_length)
 
@@ -170,7 +170,7 @@ def equiv_deletes(ref, pos, length):
 
 # normalize variant
 def normalize_variant(variant):
-    (chrom, pos, ref, alt, src) = variant
+    (chrom, pos, ref, alt) = variant
     while len(ref) > 0 and len(alt) > 0 and ref[0] == alt[0]:
         pos += 1
         ref = ref[1:]
@@ -178,14 +178,14 @@ def normalize_variant(variant):
     while len(ref) > 0 and len(alt) > 0 and ref[-1] == alt[-1]:
         ref = ref[:-1]
         alt = alt[:-1]
-    return (chrom, pos, ref, alt, src)
+    return (chrom, pos, ref, alt)
 
 def equiv_variants_delete(reference, variant):
-    (chrom, pos, ref, alt, src) = normalize_variant(variant)
+    (chrom, pos, ref, alt) = normalize_variant(variant)
     assert(alt == '') # must be a simple delete
     l = len(ref)
     equiv_pos = equiv_deletes(reference, pos, l)
-    return [(chrom, epos, reference[epos : epos + l], alt, src) for epos in equiv_pos]
+    return [(chrom, epos, reference[epos : epos + l], alt) for epos in equiv_pos]
 
 #
 # We generate variants in zero-based coords, so an insert
@@ -207,24 +207,24 @@ def equiv_inserts(ref, pos, alt):
     return itertools.chain(left_equiv_inserts(ref, pos, alt), right_equiv_inserts(ref, pos, alt))
 
 def equiv_variants_insert(reference, variant):
-    (chrom, pos, ref, alt, src) = normalize_variant(variant)
+    (chrom, pos, ref, alt) = normalize_variant(variant)
     assert(ref == '') # must be a simple insert
     equiv_pos = equiv_inserts(reference, pos, alt)
-    return [(chrom, epos, ref, ealt, src) for (epos, ealt) in equiv_pos]
+    return [(chrom, epos, ref, ealt) for (epos, ealt) in equiv_pos]
 
 #
 #
 
 def is_deletion(v):
-    (_, _, ref, alt, _) = v
+    (_, _, ref, alt) = v
     return len(ref) > 0 and len(alt) == 0
 
 def is_insertion(v):
-    (_, _, ref, alt, _) = v
+    (_, _, ref, alt) = v
     return len(ref) == 0 and len(alt) > 0
 
 def is_in_bounds(v):
-    (chrom, pos, ref, alt, _) = v
+    (chrom, pos, ref, alt) = v
     return pos + len(ref) < reference_length
 
 # Find all equivalent variant, neglecting changes
@@ -243,8 +243,8 @@ def all_norm_equiv(refsequence, v):
 # Take a variant with position and ref length, and copy
 # in the ref bases from a reference sequence.
 def inject_ref(refsequence, v_on_r):
-    (chrom, pos, reflen, alt, src) = v_on_r
-    return (chrom, pos, refsequence[pos : pos + reflen], alt, src)
+    (chrom, pos, reflen, alt) = v_on_r
+    return (chrom, pos, refsequence[pos : pos + reflen], alt)
 
 
 # To test that equivalent variants test equal, generate a random variant, then
@@ -256,7 +256,7 @@ def inject_ref(refsequence, v_on_r):
 #@settings(max_examples=runtimes, max_iterations=runtimes, timeout=-1)
 @given(variant_on_ref, reference_id)
 def test_variant_equal_equiv(v, ref_id):
-    (chrom, pos, reflen, alt, src) = v
+    (chrom, pos, reflen, alt) = v
     refsequence = chrom_ref[chrom][ref_id]["sequence"]
     assume(pos + reflen <= len(refsequence))
     v = inject_ref(refsequence, v)
@@ -269,15 +269,16 @@ def test_variant_equal_equiv(v, ref_id):
 
 def equiv_set(refsequence, v):
     full_set = all_norm_equiv(refsequence, v) + [normalize_variant(v)]
-    wo_src = [(chrom, pos, ref, alt) for (chrom, pos, ref, alt, _) in full_set]
+    # TODO: cleanup wo_src since src is now removed.
+    wo_src = [(chrom, pos, ref, alt) for (chrom, pos, ref, alt) in full_set]
     return set(wo_src)
 
 #@settings(max_examples=runtimes, max_iterations=runtimes, timeout=-1, database_file=None)
 #@settings(max_examples=runtimes, max_iterations=runtimes, timeout=-1)
 @given(variant_on_ref, variant_on_ref, reference_id)
 def test_variant_equal_not_equiv(v1, v2, ref_id):
-    (chrom1, pos1, reflen1, alt1, src1) = v1
-    (chrom2, pos2, reflen2, alt2, src2) = v2
+    (chrom1, pos1, reflen1, alt1) = v1
+    (chrom2, pos2, reflen2, alt2) = v2
     assume(pos1 + reflen1 <= reference_length)
     assume(pos2 + reflen2 <= reference_length)
     assume(not alt1 == '' and reflen1 == 0)
@@ -303,6 +304,6 @@ def test_variant_equal_not_equiv(v1, v2, ref_id):
 if __name__ == "__main__":
     # To reproduce failure conditions, paste them in here and run as
     # python ./test_variant_merging.py
-    #print variant_equal(v1 = ('17', 41100001, 'gcttccca', '', ''), v2 = ('17', 41100002, 'cttcccag', '', ''), version = 'hg38')
-    print variant_equal(('13', 32800003, '', 'A', ''), ('13', 32800005, '', 'A', ''), 'hg19')
+    #print variant_equal(v1 = ('17', 41100001, 'gcttccca', ''), v2 = ('17', 41100002, 'cttcccag', ''), version = 'hg38')
+    print variant_equal(('13', 32800003, '', 'A'), ('13', 32800005, '', 'A'), 'hg19')
     pass
