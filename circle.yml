@@ -5,7 +5,7 @@ test:
         - npm run lint -- -f junit -o $CIRCLE_TEST_REPORTS/lint-results.xml
         - npm run test -- -R xunit --reporter-options output=$CIRCLE_TEST_REPORTS/test-results.xml
         - cd ../pipeline/data && bash ./getdata
-        - cd ../pipeline && pip install -r test-requirements.txt && pytest --junitxml=${CIRCLE_TEST_REPORTS}/pipeline-results.xml
+        - cd ../pipeline && pip install -r test-requirements.txt && pytest "not loadingscript" --junitxml=${CIRCLE_TEST_REPORTS}/pipeline-results.xml
 deployment:
     dev:
         branch: master
