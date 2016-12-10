@@ -32,6 +32,12 @@ module.exports = {
 		port: port
 	},
 	module: {
+		preLoaders: [
+		  {
+		    test: /\.jsx?$/,
+		    loaders: ['eslint'],
+		  }
+		],
 		loaders: [
 			// The next three are required for muts-needle-plot.
 			{ test: /d3-svg-legend/, loader: "imports?d3=d3" },
