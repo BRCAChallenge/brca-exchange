@@ -28,7 +28,7 @@ $(outputFiles)/aggregated.tsv:	$(outputFiles)/annotated.tsv aggregate_across_col
 $(outputFiles)/annotated.tsv:	$(outputFiles)/merged.tsv add_annotation.py
 	add_annotation.py -i $< -o $@
 
-$(outputFiles)/merged.tsv:	$(inputVcfs) variant-merging.py
-	variant-merging.py -i $(inputVcfDir)/ -o $(outputFiles) -p -r $(resources)
+$(outputFiles)/merged.tsv:	$(inputVcfs) variant_merging.py
+	variant_merging.py -i $(inputVcfDir)/ -o $(outputFiles) -p -r $(resources)
 
 

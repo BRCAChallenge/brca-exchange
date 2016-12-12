@@ -146,7 +146,7 @@ def main():
     else:
         logging_level = logging.CRITICAL
 
-    log_file_path = ARGS.artifacts_dir + "variant-merging.log"
+    log_file_path = ARGS.artifacts_dir + "variant_merging.log"
     logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level)
 
     # merge repeats within data sources before merging between data sources
