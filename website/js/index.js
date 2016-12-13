@@ -112,10 +112,12 @@ var Home = React.createClass({
     },
     render: function() {
         var {suggestions} = this.props;
-        var latestRelease = _.max(this.state.releases, function(release){ return release.id; });
+        var latestRelease = _.max(this.state.releases, function(release) {
+            return release.id;
+        });
         if (latestRelease !== -Infinity) {
-            var latestReleaseDate = new Date(latestRelease.date)
-            latestReleaseDate = latestReleaseDate.toLocaleDateString("en-US")
+            var latestReleaseDate = new Date(latestRelease.date);
+            latestReleaseDate = latestReleaseDate.toLocaleDateString("en-US");
         }
         var logoItems = _.map(logos, ({id, logo, url}) => (
             <Col key={id} lg={4} md={6} xs={12} className="logo-item">
