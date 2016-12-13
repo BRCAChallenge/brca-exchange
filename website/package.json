@@ -24,6 +24,7 @@
     "css-loader": "^0.9.1",
     "d3-dsv": "^0.1.5",
     "eslint": "^1.10.3",
+    "eslint-loader": "^1.6.1",
     "eslint-plugin-react": "^3.16.1",
     "exports-loader": "^0.6.2",
     "expose-loader": "^0.7.0",
@@ -47,6 +48,7 @@
     "webpack-dev-server": "^1.7.0"
   },
   "dependencies": {
+    "anchorme": "^0.7.1",
     "babel-runtime": "^5.1.13",
     "bootstrap": "^3.3.4",
     "classnames": "^2.1.5",

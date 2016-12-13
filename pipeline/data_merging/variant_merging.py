@@ -103,38 +103,50 @@ EXAC_FILE = "exac.brca12.sorted.hg38.vcf"
 ESP_FILE = "esp.brca12.sorted.hg38.vcf"
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-i", "--input", help="Input VCF directory",
-                    default="/home/brca/pipeline-data/pipeline-input/")
-parser.add_argument("-o", "--output",
-                    default="/home/brca/pipeline-data/pipeline-output/")
-parser.add_argument("-p", "--de_novo", default=False,
-                    help="string comparison all over, instead of loading from pickle dump",
-                    action="store_true")
-parser.add_argument('-r', "--reference", help="reference data directory",
-                    default="/home/brca/pipeline-data/pipeline-resources/")
-parser.add_argument('-a', "--artifacts_dir", help='Artifacts directory with pipeline artifact files.')
-parser.add_argument("-v", "--verbose", action="count", default=False, help="determines logging")
+def options(parser):
+    parser.add_argument("-i", "--input", help="Input VCF directory",
+                        default="/home/brca/pipeline-data/pipeline-input/")
+    parser.add_argument("-o", "--output",
+                        default="/home/brca/pipeline-data/pipeline-output/")
+    parser.add_argument("-p", "--de_novo", default=False,
+                        help="string comparison all over, instead of loading from pickle dump",
+                        action="store_true")
+    parser.add_argument('-r', "--reference", help="reference data directory",
+                        default="/home/brca/pipeline-data/pipeline-resources/")
+    parser.add_argument('-a', "--artifacts_dir", help='Artifacts directory with pipeline artifact files.')
+    parser.add_argument("-v", "--verbose", action="count", default=False, help="determines logging")
 
-ARGS = parser.parse_args()
+ARGS = None
+BRCA1 = None
+BRCA2 = None
 
-BRCA1 = {"hg38": {"start": 43000000,
-                  "sequence": open(ARGS.reference + "brca1_hg38.txt", "r").read()},
-         "hg19": {"start": 41100000,
-                  "sequence": open(ARGS.reference + "brca1_hg19.txt", "r").read()}}
-BRCA2 = {"hg38": {"start": 32300000,
-                  "sequence": open(ARGS.reference + "brca2_hg38.txt", "r").read()},
-         "hg19": {"start": 32800000,
-                  "sequence": open(ARGS.reference + "brca2_hg19.txt", "r").read()}}
+
+def init(args):
+    global BRCA1, BRCA2, ARGS
+
+    ARGS = args
+    BRCA1 = {"hg38": {"start": 43000000,
+                      "sequence": open(ARGS.reference + "brca1_hg38.txt", "r").read().upper()},
+             "hg19": {"start": 41100000,
+                      "sequence": open(ARGS.reference + "brca1_hg19.txt", "r").read().upper()}}
+    BRCA2 = {"hg38": {"start": 32300000,
+                      "sequence": open(ARGS.reference + "brca2_hg38.txt", "r").read().upper()},
+             "hg19": {"start": 32800000,
+                      "sequence": open(ARGS.reference + "brca2_hg19.txt", "r").read().upper()}}
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    options(parser)
+
+    init(parser.parse_args())
+
     if ARGS.verbose:
         logging_level = logging.DEBUG
     else:
         logging_level = logging.CRITICAL
 
-    log_file_path = ARGS.artifacts_dir + "variant-merging.log"
+    log_file_path = ARGS.artifacts_dir + "variant_merging.log"
     logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level)
 
     # merge repeats within data sources before merging between data sources
@@ -669,7 +681,7 @@ def save_enigma_to_dict(path):
 
 
 def variant_equal(v1, v2, version="hg38"):
-    " return (edited1, edited2) "
+    "return edited1 == edited2"
     if v1 == v2:
         logging.debug("v1 == v2 %s %s", str(v1), str(v2))
         return True
@@ -686,7 +698,7 @@ def variant_equal(v1, v2, version="hg38"):
 
     # make sure that v1 is upstream of v2
     if pos1 > pos2:
-        return variant_equal(v2, v1)
+        return variant_equal(v2, v1, version)
 
     # lift coordinates and make everything 0-based
     if chr1 == "13":
@@ -698,13 +710,13 @@ def variant_equal(v1, v2, version="hg38"):
         pos1 = pos1 - 1 - BRCA1[version]["start"]
         pos2 = pos2 - 1 - BRCA1[version]["start"]
     else:
-        assert(False)
+        assert False, "Bad chrom in variant"
 
-    # correct error with when ref is empty string
-    if len(ref1) == 0:
-        pos1 += 1
-    if len(ref2) == 0:
-        pos2 += 1
+    assert pos1 >= 0, "v1 positions is below the reference"
+    assert pos2 >= 0, "v2 position is below the reference"
+    reflen = len(BRCA1[version]["sequence"])
+    assert pos1 + len(ref1) <= reflen, "v1 position is above the reference"
+    assert pos2 + len(ref2) <= reflen, "v2 position is above the reference"
 
     # replace vcf ref string with alt string
     edited_v1 = seq[0:pos1]+alt1+seq[pos1+len(ref1):]
