@@ -5,7 +5,7 @@ import csv
 import os
 import re
 import sys
-# Ideally, I'd import BRCA1 and BRCA2 from variant-merging.py instead of copying it,
+# Ideally, I'd import BRCA1 and BRCA2 from variant_merging.py instead of copying it,
 # but when I tried this, somehow it messed up my argument parsing.
 #from variant_merging import BRCA1, BRCA2  
 
@@ -68,7 +68,7 @@ def main():
     args = argparser.parse_args()
 
     #
-    # This is copied verbatim from variant-merging.py.  I don't like doing this, but
+    # This is copied verbatim from variant_merging.py.  I don't like doing this, but
     # my more sophisticated attempts to import the data left me with messed-up
     # argument parsing.
     BRCA1 = {"hg38": {"start": 43000000,
