@@ -95,7 +95,7 @@ var Release = React.createClass({
             latest = this.state.latest,
             s = n => n === 1 ? '' : 's';
         /* eslint-disable dot-notation */
-        return (
+        return !_.isEmpty(release) ? (
             <Grid fluid={true}>
                 <Row>
                     <Col sm={8} smOffset={2} md={6} mdOffset={3} className='text-left'>
@@ -128,7 +128,8 @@ var Release = React.createClass({
                 {release['data_sources']}
                     </Col>
                 </Row>
-            </Grid>);
+            </Grid>) :
+            (<Grid fluid={true}></Grid>);
             /* eslint-enable dot-notation */
     }
 });
