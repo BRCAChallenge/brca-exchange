@@ -14,7 +14,7 @@ npm run build:prod
 
 # deploy
 rsync -a --delete --rsync-path='sudo rsync' build/ ${USER}@${HOST}:/var/www/html/beta
-rsync -a --delete --exclude="/uploads/*" --rsync-path='sudo rsync' django/ ${USER}@${HOST}:/var/www/backend/beta/django
+rsync -a --delete --exclude="/uploads" --exclude="/downloads/*" --rsync-path='sudo rsync' django/ ${USER}@${HOST}:/var/www/backend/beta/django
 
 requirements=$(cat requirements.txt)
 requirements=$(echo ${requirements}) # drop carriage returns

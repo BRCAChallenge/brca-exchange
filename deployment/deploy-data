@@ -1,0 +1,55 @@
+#!/bin/bash
+set -o nounset
+set -o errexit
+
+# This script expects two arguments:
+
+# 1. Environment (beta or production)
+
+# 2. A path to a release directory of the format release-{mm-dd-yy} containing
+#    built_with_change_types.tsv, removed.tsv, version.json, and release-{mm-dd-yy}.tar.gz.
+
+# Example:
+
+# Running `./deployment/deploy-data beta PATH/TO/release-10-06-16`
+# would add the 10-06-16 release to the beta database and put files in the correct
+# locations for access, storage and download.
+
+HOST=${HOST:-brcaexchange.cloudapp.net}
+USER=brca
+
+# directory of this file
+DEPLOYMENT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+WEBSITE=${DEPLOYMENT}/../website
+
+# Expects environment (beta or production) as first argument.
+ENVIRONMENT=$1
+if [ "${ENVIRONMENT}" != "beta" ] && [ "${ENVIRONMENT}" != "production" ] ;then
+    echo "ERROR: Please only enter 'beta' or 'production' as environment."
+    exit 1
+fi
+
+# Expects path to release directory as second argument. Removes trailing / if present.
+RELEASEDIRECTORYPATH=$2
+if [ "${RELEASEDIRECTORYPATH: -1}" == "/" ] ;then
+    RELEASEDIRECTORYPATH=${RELEASEDIRECTORYPATH%?}
+fi
+
+RELEASEDIRECTORY=$(basename $RELEASEDIRECTORYPATH)
+REMOTERELEASES=/var/www/backend/${ENVIRONMENT}/django/downloads/releases
+
+cd ${WEBSITE}
+
+# Copies directory to downloads/releases/
+rsync -a --rsync-path='sudo rsync' $RELEASEDIRECTORYPATH ${USER}@${HOST}:$REMOTERELEASES/
+
+# Locations of files on remote server
+DATA=$REMOTERELEASES/$RELEASEDIRECTORY/built_with_change_types.tsv
+REMOVED=$REMOTERELEASES/$RELEASEDIRECTORY/removed.tsv
+METADATA=$REMOTERELEASES/$RELEASEDIRECTORY/version.json
+
+ssh -l${USER} ${HOST} <<-ENDSSH
+    set -o errexit
+    . /var/www/backend/${ENVIRONMENT}/virtualenv/bin/activate
+    python /var/www/backend/${ENVIRONMENT}/django/manage.py addrelease ${DATA} ${METADATA} ${REMOVED}
+ENDSSH

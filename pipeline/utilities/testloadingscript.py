@@ -1,3 +1,9 @@
+'''
+NOTE:
+This file has several issues, and has therefore been renamed to remove it from testing.
+To replace, change the name from testloadingscript.py to test_loadingscript.py.
+'''
+
 import nose2
 import unittest
 import logging

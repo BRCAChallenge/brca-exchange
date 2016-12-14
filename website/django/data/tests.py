@@ -18,7 +18,7 @@ from ga4gh.schemas.ga4gh import variant_service_pb2 as variant_service
 class VariantTestCase(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
-        datafile = os.path.join(settings.BASE_DIR, 'data', 'resources', 'releases', 'output_10_6_2016', 'built_with_change_types.tsv')
+        datafile = os.path.join(settings.BASE_DIR, 'data', 'resources', 'releases', 'release-10-06-16', 'built_with_change_types.tsv')
         self.db_size = sum(1 for _ in open(datafile)) - 1
 
     def test_variant_model(self):
@@ -306,7 +306,7 @@ class VariantTestCase(TestCase):
         """Ensures the search variants endpoint responds with expected failure modes"""
         request = variant_service.SearchVariantsRequest()
         req = self.factory.post("/data/ga4gh/variants/search",
-                                json.dumps(json_format._MessageToJsonObject(request, False)),
+                                json.dumps(json_format.MessageToDict(request, False)),
                                 content_type="application/json")
         response = views.search_variants(req)
         self.assertEqual(response.status_code, 400, "No variant set ID should 400")
@@ -315,7 +315,7 @@ class VariantTestCase(TestCase):
                              "No variant set ID in the request should provide a useful error")
         request.variant_set_id = "Something not null"
         req = self.factory.post("/data/ga4gh/variants/search",
-                                json.dumps(json_format._MessageToJsonObject(request, False)),
+                                json.dumps(json_format.MessageToDict(request, False)),
                                 content_type="application/json")
         response = views.search_variants(req)
         self.assertEquals(response.status_code, 400)
@@ -324,7 +324,7 @@ class VariantTestCase(TestCase):
                              "A useful error is thrown when the reference name is not present")
         request.reference_name = "chr17"
         req= self.factory.post("/data/ga4gh/variants/search",
-                               json.dumps(json_format._MessageToJsonObject(request, False)),
+                               json.dumps(json_format.MessageToDict(request, False)),
                                 content_type="application/json")
         response = views.search_variants(req)
         self.assertJSONEqual(response.content,
@@ -332,14 +332,14 @@ class VariantTestCase(TestCase):
                              "A useful error is thrown when no start is present")
         request.start = 14589
         req = self.factory.post("/data/ga4gh/variants/search",
-                                json.dumps(json_format._MessageToJsonObject(request, False)),
+                                json.dumps(json_format.MessageToDict(request, False)),
                                 content_type="application/json")
         response = views.search_variants(req)
         self.assertJSONEqual(response.content, views.ErrorMessages['end'],
                              "A useful error is provided when no end is present")
         request.end = 143295
         req = self.factory.post("/data/ga4gh/variants/search",
-                                json.dumps(json_format._MessageToJsonObject(request, False)),
+                                json.dumps(json_format.MessageToDict(request, False)),
                                 content_type="application/json")
         response = views.search_variants(req)
         self.assertEquals(response.status_code, 404, "A bad variant set ID should 404")
@@ -568,7 +568,7 @@ class VariantTestCase(TestCase):
 
         response = views.brca_to_ga4gh(variant, genomic_coordinate)
 
-        json_response = json_format._MessageToJsonObject(response, True)
+        json_response = json_format.MessageToDict(response, True)
         self.assertEqual(int(json_response['start']), 32923950)
         self.assertEqual(json_response['referenceBases'], "CA")
         self.assertEqual(json_response['alternateBases'][0], "C")
