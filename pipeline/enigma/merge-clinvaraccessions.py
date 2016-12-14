@@ -45,6 +45,5 @@ def main():
     # convert csv output to tsv for final output
     csv.writer(file(final_output_tsv, 'w+'), delimiter="\t").writerows(csv.reader(open(temp_csv)))
 
-
 if __name__ == "__main__":
     main()

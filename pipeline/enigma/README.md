@@ -68,10 +68,3 @@ raw_files/ENIGMA_SubmissionClinVar_2016-05-31_ncbi.xlsx
 3. Create environment variables for the path to your intended output directory $OUTPUT_DIR and to the hg38.fa file $HG38 often found in the brca-resources directory.
 
 4. under the new virtualenv, run `python enigma-processing.py -o $OUTPUT_DIR -g $HG38`. The output file is saved as $OUTPUT_DIR/ENIMGA_last_updated_yyyy-mm-dd.tsv, ready to be used in variant merging.
-
-
-
-******************************************************************
-
-
-
