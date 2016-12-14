@@ -58,6 +58,7 @@
     "jquery": "^2.2.0",
     "less": "^1.5.0",
     "markdown-it": "^4.4.0",
+    "moment": "^2.17.1",
     "qs": "2.4.1",
     "react": "^0.13.1",
     "react-autosuggest": "git+https://github.com/moroshko/react-autosuggest.git#785ee38a752a929cceacec0e9207175592446a1a",

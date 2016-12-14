@@ -20,6 +20,7 @@ var backend = require('./backend');
 var {NavBarNew} = require('./NavBarNew');
 var Rx = require('rx');
 require('rx-dom');
+var moment = require('moment');
 
 var brcaLogo = require('./img/BRCA-Exchange-tall-tranparent.png');
 var logos = require('./logos');
@@ -43,7 +44,6 @@ var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Route, RouteHandler,
     HistoryLocation, run, DefaultRoute, Link} = require('react-router');
 var {Releases, Release} = require('./Releases.js');
-var {dateFormat} = require('./util.js');
 
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 
@@ -430,12 +430,6 @@ var VariantDetail = React.createClass({
         }
         var rows = _.map(cols, ({prop, title}) => {
             var rowItem;
-            var months = ["January", "February", "March", "April", "May", "June", "July",
-                          "August", "September", "October", "November", "December"];
-            var dateFormat = function(str) {
-                var d = str.split('/');
-                return "" + d[1] + " " + months[d[0] - 1] + " 20" + d[2];
-            };
             if (prop === "Protein_Change") {
                 title = "Abbreviated AA Change";
             }
@@ -464,7 +458,7 @@ var VariantDetail = React.createClass({
                 } else if (prop === "HGVS_Protein") {
                     rowItem = variant[prop].split(":")[1];
                 } else if (prop === "Date_last_evaluated_ENIGMA") {
-                    rowItem = dateFormat(variant[prop]);
+                    rowItem = moment(variant[prop], "MM/DD/YYYY").format("DD MMMM YYYY");
                 } else {
                     rowItem = variant[prop];
                 }
@@ -548,7 +542,7 @@ var VariantDetail = React.createClass({
             /* eslint-disable dot-notation */
             versionRows.push(
                 <tr className={hightlightRow ? 'danger' : ''}>
-                    <td><Link to={`/release/${release.id}`}>{dateFormat(release["date"])}</Link></td>
+                    <td><Link to={`/release/${release.id}`}>{moment(release["date"], "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</Link></td>
                     <td>{version["Pathogenicity_expert"]}</td>
                     <td>{changes}</td>
                 </tr>
