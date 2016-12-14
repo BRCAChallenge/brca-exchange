@@ -1,2 +1,8 @@
 *.DS_Store
 pipeline/brca/*
+*.cache/
+*.hypothesis/
+/pipeline/data/brca1_hg19.txt
+/pipeline/data/brca1_hg38.txt
+/pipeline/data/brca2_hg19.txt
+/pipeline/data/brca2_hg38.txt
