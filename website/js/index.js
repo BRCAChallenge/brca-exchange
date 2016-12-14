@@ -475,6 +475,7 @@ var VariantDetail = React.createClass({
         var versionRows = [];
         // which keys represent comma seperated lists? for filtering out re-ordered lists
         var listKeys = [
+            "Pathogenicity_all",
             "Submitter_ClinVar",
             "Method_ClinVar",
             "Source",
@@ -498,26 +499,23 @@ var VariantDetail = React.createClass({
                 }
                 for (var key in version) {
                     if (!_.contains(["Data_Release", "Change_Type", "id"], key) && version[key] !== previous[key]) { //eslint-disable-line dot-notation
-                        // handle nested list in Pathogenicity_all
-                        if (key === "Pathogenicity_all") {
-                            let pathogenicityCurrent = _.map(version[key].split(';'), elem => elem.split(',').sort().join(','));
-                            let pathogenicityPrevious = _.map(previous[key].split(';'), elem => elem.split(',').sort().join(','));
-                            let added = _.map(_.difference(pathogenicityCurrent, pathogenicityPrevious), elem => `+${elem.trim().replace(/_/g, " ")}`);
-                            let deleted = _.map(_.difference(pathogenicityPrevious, pathogenicityCurrent), elem => `-${elem.trim().replace(/_/g, " ")}`);
-                            if (added.length || deleted.length) {
-                                changes.push(
-                                    <span>
-                                        <strong>{ getDisplayName(key) }: </strong> <br />
-                                        { added.join(', ') }{ !!(added.length && deleted.length) && ', '}{ deleted.join(', ') }
-                                    </span>, <br />
-                                );
+                        if (_.contains(listKeys, key)) {
+                            let delimiter = key === "Pathogenicity_all" ? ';' : ',';
+                            let trimmedVersion = _.map(version[key].split(delimiter), elem => elem.replace(/_/g, " ").trim());
+                            let trimmedPrevious = _.map(previous[key].split(delimiter), elem => elem.replace(/_/g, " ").trim());
+
+                            if (key === "Pathogenicity_all") {
+                                let sortSublists = function(elem) {
+                                    var submitter = elem.match(/\([a-zA-Z]*\)/)[0];
+                                    return elem.replace(submitter, '').trim().split(',').sort().join(',');
+                                };
+                                trimmedVersion = _.map(trimmedVersion, sortSublists);
+                                trimmedPrevious = _.map(trimmedPrevious, sortSublists);
                             }
-                        }
-                        else if (_.contains(listKeys, key)) {
-                            let trimmedVersion = _.map(version[key].split(','), elem => elem.replace(/_/g, " ").trim());
-                            let trimmedPrevious = _.map(previous[key].split(','), elem => elem.replace(/_/g, " ").trim());
+
                             let added = _.map(_.difference(trimmedVersion, trimmedPrevious), elem => `+${elem}`);
                             let deleted = _.map(_.difference(trimmedPrevious, trimmedVersion), elem => `-${elem}`);
+
                             if (added.length || deleted.length) {
                                 changes.push(
                                     <span>
@@ -529,6 +527,7 @@ var VariantDetail = React.createClass({
                         } else {
                             let previousDisplay = isEmptyField(previous[key].toString()) ? <span className='empty'></span> : previous[key].toString();
                             let versionDisplay = isEmptyField(version[key].toString()) ? <span className='empty'></span> : version[key].toString();
+
                             changes.push(
                                 <span>
                                     <strong>{ getDisplayName(key) }: </strong>
