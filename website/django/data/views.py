@@ -60,9 +60,11 @@ def variant(request):
 
 
 def variant_to_dict(variant_object):
+    change_types_map = {x['name']:x['id'] for x in ChangeType.objects.values().all()}
     variant_dict = model_to_dict(variant_object)
     variant_dict["Data_Release"] = model_to_dict(variant_object.Data_Release)
     variant_dict["Data_Release"]["date"] = variant_object.Data_Release.date
+    variant_dict["Change_Type"] = ChangeType.objects.get(id=variant_dict["Change_Type"]).name
     return variant_dict
 
 

@@ -20,6 +20,7 @@ var backend = require('./backend');
 var {NavBarNew} = require('./NavBarNew');
 var Rx = require('rx');
 require('rx-dom');
+var moment = require('moment');
 
 var brcaLogo = require('./img/BRCA-Exchange-tall-tranparent.png');
 var logos = require('./logos');
@@ -41,7 +42,7 @@ var {ChangePassword} = require('./ChangePassword');
 var {Profile} = require('./Profile');
 var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Route, RouteHandler,
-    HistoryLocation, run, DefaultRoute} = require('react-router');
+    HistoryLocation, run, DefaultRoute, Link} = require('react-router');
 var {Releases, Release} = require('./Releases.js');
 
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
@@ -368,6 +369,35 @@ var Key = React.createClass({
     }
 });
 
+// get display name for a given key from VariantTable.js column specification,
+// if we are in expert reviewed mode, search expert reviewed names then fall back to
+// all data, otherwise go straight to all data. Finally, if key is not found, replace
+// _ with space in the key and return that.
+function getDisplayName(key) {
+    var researchMode = (localStorage.getItem("research-mode") === 'true');
+    var displayName;
+    if (!researchMode) {
+        displayName = columns.find(e => e.prop === key);
+        displayName = displayName && displayName.title;
+    }
+    // we are not in expert reviewed more, or key wasn't found in expert reviewed columns
+    if (displayName === undefined) {
+        displayName = researchModeColumns.find(e => e.prop === key);
+        displayName = displayName && displayName.title;
+    }
+    // key was not found at all
+    if (displayName === undefined) {
+        displayName = key.replace(/_/g, " ");
+    }
+    return displayName;
+}
+
+// test for the various forms of blank fields
+function isEmptyField(value) {
+    var v = value.trim();
+    return v === '' || v === '-';
+}
+
 var VariantDetail = React.createClass({
     mixins: [Navigation],
     showHelp: function (title) {
@@ -400,12 +430,6 @@ var VariantDetail = React.createClass({
         }
         var rows = _.map(cols, ({prop, title}) => {
             var rowItem;
-            var months = ["January", "February", "March", "April", "May", "June", "July",
-                          "August", "September", "October", "November", "December"];
-            var dateFormat = function(str) {
-                var d = str.split('/');
-                return "" + d[1] + " " + months[d[0] - 1] + " 20" + d[2];
-            };
             if (prop === "Protein_Change") {
                 title = "Abbreviated AA Change";
             }
@@ -434,7 +458,7 @@ var VariantDetail = React.createClass({
                 } else if (prop === "HGVS_Protein") {
                     rowItem = variant[prop].split(":")[1];
                 } else if (prop === "Date_last_evaluated_ENIGMA") {
-                    rowItem = dateFormat(variant[prop]);
+                    rowItem = moment(variant[prop], "MM/DD/YYYY").format("DD MMMM YYYY");
                 } else {
                     rowItem = variant[prop];
                 }
@@ -448,6 +472,83 @@ var VariantDetail = React.createClass({
 				</tr>);
         });
 
+        var versionRows = [];
+        // which keys represent comma seperated lists? for filtering out re-ordered lists
+        var listKeys = [
+            "Pathogenicity_all",
+            "Submitter_ClinVar",
+            "Method_ClinVar",
+            "Source",
+            "Date_Last_Updated_ClinVar",
+            "Source_URL",
+            "SCV_ClinVar",
+            "Clinical_Significance_ClinVar",
+            "Allele_Origin_ClinVar"
+        ];
+        for (var i = 0; i < data.length; i++) {
+            let version = data[i],
+                changes = [],
+                release = version["Data_Release"], //eslint-disable-line dot-notation
+                hightlightRow = false;
+
+            // if this is not the oldest version of the variant, diff them
+            if (i < data.length - 1) {
+                let previous = data[i + 1];
+                if (version["Pathogenicity_expert"] !== previous["Pathogenicity_expert"]) { //eslint-disable-line dot-notation
+                    hightlightRow = true;
+                }
+                for (var key in version) {
+                    if (!_.contains(["Data_Release", "Change_Type", "id"], key) && version[key] !== previous[key]) { //eslint-disable-line dot-notation
+                        if (_.contains(listKeys, key)) {
+                            let delimiter = key === "Pathogenicity_all" ? ';' : ',';
+                            let trimmedVersion = _.map(version[key].split(delimiter), elem => elem.replace(/_/g, " ").trim());
+                            let trimmedPrevious = _.map(previous[key].split(delimiter), elem => elem.replace(/_/g, " ").trim());
+
+                            if (key === "Pathogenicity_all") {
+                                let sortSublists = function(elem) {
+                                    var submitter = elem.match(/\([a-zA-Z]*\)/)[0];
+                                    return elem.replace(submitter, '').trim().split(',').sort().join(',');
+                                };
+                                trimmedVersion = _.map(trimmedVersion, sortSublists);
+                                trimmedPrevious = _.map(trimmedPrevious, sortSublists);
+                            }
+
+                            let added = _.map(_.difference(trimmedVersion, trimmedPrevious), elem => `+${elem}`);
+                            let deleted = _.map(_.difference(trimmedPrevious, trimmedVersion), elem => `-${elem}`);
+
+                            if (added.length || deleted.length) {
+                                changes.push(
+                                    <span>
+                                        <strong>{ getDisplayName(key) }: </strong> <br />
+                                        { added.join(', ') }{ !!(added.length && deleted.length) && ', '}{ deleted.join(', ') }
+                                    </span>, <br />
+                                );
+                            }
+                        } else {
+                            let previousDisplay = isEmptyField(previous[key].toString()) ? <span className='empty'></span> : previous[key].toString();
+                            let versionDisplay = isEmptyField(version[key].toString()) ? <span className='empty'></span> : version[key].toString();
+
+                            changes.push(
+                                <span>
+                                    <strong>{ getDisplayName(key) }: </strong>
+                                    {previousDisplay} <span className="glyphicon glyphicon-arrow-right"></span> {versionDisplay}
+                                </span>, <br />
+                            );
+                        }
+                    }
+                }
+            }
+            /* eslint-disable dot-notation */
+            versionRows.push(
+                <tr className={hightlightRow ? 'danger' : ''}>
+                    <td><Link to={`/release/${release.id}`}>{moment(release["date"], "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</Link></td>
+                    <td>{version["Pathogenicity_expert"]}</td>
+                    <td>{changes}</td>
+                </tr>
+            );
+            /* eslint-enable dot-notation */
+        }
+
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
@@ -460,6 +561,26 @@ var VariantDetail = React.createClass({
                         <Table striped bordered>
                             <tbody>
                                 {rows}
+                            </tbody>
+                        </Table>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col md={8} mdOffset={2}>
+                        { /* eslint-disable dot-notation */ }
+                        <h3>{variant["HGVS_cDNA"]}</h3>
+                        { /* eslint-enable dot-notation */ }
+                        <h4>Previous Versions of this Variant:</h4>
+                        <Table className='variant-history' bordered>
+                            <thead>
+                                <tr className='active'>
+                                    <th>Date</th>
+                                    <th>Clinical Significance</th>
+                                    <th>Changes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {versionRows}
                             </tbody>
                         </Table>
                     </Col>

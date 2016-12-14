@@ -187,6 +187,23 @@ input:focus {
 }
 
 /**************************************************************/
+/**********     Variant detail page       *********************/
+/**************************************************************/
+.variant-history td:first-child {
+    white-space: nowrap;
+}
+.variant-history span.empty {
+    border: 1px solid black;
+    border-radius: 2px;
+    padding: 1px;
+    font-size: 11px;
+    background-color: #fafafa;
+}
+.variant-history span.empty::after {
+    content: 'Empty';
+}
+
+/**************************************************************/
 /**********     Homepage text             *********************/
 /**************************************************************/
 

@@ -1,11 +1,13 @@
 'use strict';
 
+var _ = require('underscore');
+var moment = require('moment');
+
 var React = require('react');
 var {Link} = require('react-router');
 var {Table, Grid, Row, Col} = require('react-bootstrap');
-var _ = require('underscore');
+
 var backend = require('./backend');
-var {dateFormat} = require('./util');
 var config = require('config');
 var anchorme = require("anchorme");
 
@@ -29,7 +31,7 @@ var Releases = React.createClass({
         var rows = _.map(releases, release => (
             <tr>
                 <td><Link to={`/release/${release.id}`}>Version {release.id}</Link></td>
-                <td>{dateFormat(release['date'])}</td>
+                <td>{moment(release["date"], "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</td>
                 <td>{release['sources']}</td>
                 <td><Link to={`/variants?release=${release.id}&changeTypes[]=new`}>{release['variants_added']}</Link></td>
                 <td><Link to={`/variants?release=${release.id}&changeTypes[]=added_classification&changeTypes[]=changed_classification`}>{release['variants_classified']}</Link></td>
@@ -122,7 +124,7 @@ var Release = React.createClass({
                             </tr>
                             <tr>
                                 <td className="active"><b>Date</b></td>
-                                <td>{dateFormat(release['date'])}</td>
+                                <td>{moment(release["date"], "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</td>
                             </tr>
                         </Table>
                 {release['data_sources']}
