@@ -7,6 +7,11 @@ import sys
 
 
 def main():
+    '''
+    This script merges clinvar accession numbers from a .txt file provided by clinvar into enigma data provided by
+    enigma. Note that the Enigma file is usually provided as a .xlsx file and must be converted using the steps
+    outlined in pipeline/enigma/README.md.
+    '''
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--enigma_input",
                         help="Enigma variants")
