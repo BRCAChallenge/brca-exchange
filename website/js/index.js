@@ -392,7 +392,7 @@ var VariantDetail = React.createClass({
         }
 
         var variant = data[0],
-            release = variant["Data_Release"], // eslint-disable-line dot-notation
+            release = variant["Data_Release"],
             cols;
         if (localStorage.getItem("research-mode") === 'true') {
             cols = researchModeColumns;
@@ -454,14 +454,12 @@ var VariantDetail = React.createClass({
                 <Row>
                     <div className='text-center Variant-detail-title'>
                         <h3>Variant Detail</h3>
-                        { /* eslint-disable dot-notation */ }
                         {variant['Change_Type'] === 2 &&
                             (<span className='deleted'>
                                 Note this variant has been removed from the BRCA Exchange.
                                 For reasons why, see the <Link to={`/release/${release.id}`}>release notes</Link>.
                             </span>)
                         }
-                        { /* eslint-enable dot-notation */ }
                     </div>
                 </Row>
                 <Row>

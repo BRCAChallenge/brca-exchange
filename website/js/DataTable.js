@@ -216,7 +216,7 @@ var DataTable = React.createClass({
                 changeString = "deleted";
             }
         }
-        var deletedCount = this.state['deleted_count']; //eslint-disable-line dot-notation
+        var deletedCount = this.state['deleted_count'];
         var deletedVariantsNote = '';
         if (deletedCount) {
             let pl = deletedCount !== 1;
