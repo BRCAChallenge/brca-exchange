@@ -140,7 +140,7 @@ def index(request):
         count = query.count()
         query = select_page(query, page_size, page_num)
         # call list() now to evaluate the query
-        response = JsonResponse({'count': count, 'deleted_count': deleted_count, 'synonyms': synonyms_count, 'data': list(query.values(*column))})
+        response = JsonResponse({'count': count, 'deletedCount': deleted_count, 'synonyms': synonyms_count, 'data': list(query.values(*column))})
         response['Access-Control-Allow-Origin'] = '*'
         return response
 

@@ -23,11 +23,11 @@ var merge = (...args) => _.extend({}, ...args);
 
 var Lollipop = require('./d3Lollipop');
 
-function setPages({data, count, deleted_count, synonyms}, pageLength) { //eslint-disable-line camelcase
+function setPages({data, count, deletedCount, synonyms}, pageLength) { //eslint-disable-line camelcase
     return {
         data,
         count,
-        deleted_count, //eslint-disable-line camelcase
+        deletedCount,
         synonyms,
         totalPages: Math.ceil(count / pageLength)
     };
@@ -216,7 +216,7 @@ var DataTable = React.createClass({
                 changeString = "deleted";
             }
         }
-        var deletedCount = this.state['deleted_count'];
+        var deletedCount = this.state.deletedCount;
         var deletedVariantsNote = '';
         if (deletedCount) {
             let pl = deletedCount !== 1;
