@@ -18,15 +18,15 @@ def fillInFounderMutations(row):
     Here, the first and second columns represent the gene name and BIC 
     nomenclature terms given by ENIGMA, and in parentheses are the other
     BIC terms to be added.  The single BIC term can be turned into a list of
-    BIC terms by delimiting the list with vertical bars.
+    BIC terms by delimiting the list with commas.
     Addresses GitHub Issue #213 
     (https://github.com/BD2KGenomics/brca-exchange/issues/213)
     """
     if row["Gene_symbol"] == "BRCA1":
         if row["BIC_Nomenclature"] == "185_186delAG":
-            row["BIC_Nomenclature"] += "|185delAG|186delAG|187delAG"
+            row["BIC_Nomenclature"] += ",185delAG|186delAG,187delAG"
         elif row["BIC_Nomenclature"] == "5382_5383insC":
-            row["BIC_Nomenclature"] += "|5382insC|5383insC|5384insC|5385insC"
+            row["BIC_Nomenclature"] += "|5382insC,5383insC,5384insC,5385insC"
     return row
 
 
@@ -42,6 +42,20 @@ def fixAssertionCitation(row):
     """
     row["Assertion_method_citation"] =  "https://enigmaconsortium.org/library/general-documents/"
     return row
+
+
+def fixBrokenAminoAcidChange(row):
+    """
+    For one particular variant, NM_000059.3(BRCA1):p.(Arg1190Trp), the one-letter
+    amino acid change is listed by ENIGMA as P1190S but should be R1190W.  A user noticed
+    the issue.  Mandy Spurdle confirms that this should be changed.
+    Addresses GitHub Issue # 184
+    (https://github.com/BD2KGenomics/brca-exchange/issues/184)
+    """
+    if row["HGVS_protein"] == "p.(Arg1190Trp)" and row["Abbrev_AA_change"] == "P1190S":
+        row["Abbrev_AA_change"] = "R1190W"
+    return row
+
 
 
 def main():
@@ -70,6 +84,7 @@ def main():
     for row in csvIn:
         row = fillInFounderMutations(row)
         row = fixAssertionCitation(row)
+        row = fixBrokenAminoAcidChange(row)
         csvOut.writerow(row)
 
 
