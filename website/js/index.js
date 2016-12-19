@@ -471,7 +471,6 @@ var VariantDetail = React.createClass({
 					<td><span className="row-wrap">{rowItem}</span></td>
 				</tr>);
         });
-
         var versionRows = [];
         // which keys represent comma seperated lists? for filtering out re-ordered lists
         var listKeys = [
@@ -485,6 +484,12 @@ var VariantDetail = React.createClass({
             "Clinical_Significance_ClinVar",
             "Allele_Origin_ClinVar"
         ];
+
+        // In research_mode, only show research_mode changes.
+        var relevantFieldsToDisplayChanges = cols.map(function(col) {
+            return col.prop;
+        });
+
         for (var i = 0; i < data.length; i++) {
             let version = data[i],
                 changes = [],
@@ -498,7 +503,9 @@ var VariantDetail = React.createClass({
                     hightlightRow = true;
                 }
                 for (var key in version) {
-                    if (!_.contains(["Data_Release", "Change_Type", "id"], key) && version[key] !== previous[key]) { //eslint-disable-line dot-notation
+                    if (relevantFieldsToDisplayChanges.indexOf(key) === -1) {
+                        continue;
+                    } else if (!_.contains(["Data_Release", "Change_Type", "id"], key) && version[key] !== previous[key]) { //eslint-disable-line dot-notation
                         if (_.contains(listKeys, key)) {
                             let delimiter = key === "Pathogenicity_all" ? ';' : ',';
                             let trimmedVersion = _.map(version[key].split(delimiter), elem => elem.replace(/_/g, " ").trim());
