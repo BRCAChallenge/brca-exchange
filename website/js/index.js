@@ -471,6 +471,7 @@ var VariantDetail = React.createClass({
 					<td><span className="row-wrap">{rowItem}</span></td>
 				</tr>);
         });
+
         var versionRows = [];
         // which keys represent comma seperated lists? for filtering out re-ordered lists
         var listKeys = [
