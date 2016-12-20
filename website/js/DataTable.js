@@ -221,8 +221,8 @@ var DataTable = React.createClass({
         if (deletedCount) {
             let pl = deletedCount !== 1;
             deletedVariantsNote = (<span>
-                There {pl ? 'are' : 'is'} {deletedCount} deleted variant{pl ? 's' : ''} that match{pl ? 'es' : ''} your search.
-                Click <a href="#" onClick={this.showDeleted}>here</a> to view these deleted variants.
+                There {pl ? 'are' : 'is'} {deletedCount} deleted variant{pl ? 's' : ''} that match{pl ? '' : 'es'} your search.
+                Click <a href="#" onClick={this.showDeleted}>here</a> to view {pl ? 'these' : 'this'} deleted variant{pl ? 's' : ''}.
             </span>);
         }
         return (error ? <p>{error}</p> :
@@ -251,7 +251,7 @@ var DataTable = React.createClass({
                     </Col>
                 </Row>
                 <Row id="download" className="btm-buffer">
-                    <Col sm={6} smOffset={1}>
+                    <Col sm={7} smOffset={1} lg={8}>
                         <div className='form-inline'>
                             <div className='form-group'>
                                 <label className='control-label'>
@@ -267,8 +267,10 @@ var DataTable = React.createClass({
                                 {downloadButton(this.createDownload)}
                             </div>
                         </div>
+                        { count === 0 && deletedCount !== 0 &&
+                          <div>{deletedVariantsNote}</div> }
                     </Col>
-                    <Col sm={4}>
+                    <Col sm={3} lg={2}>
                         <div className='form-inline pull-right-sm'>
                             <SelectField
                                 label="Page size:"
@@ -315,7 +317,7 @@ var DataTable = React.createClass({
                 </Row>
                 <Row>
                     <Col className="text-right" sm={10} smOffset={1}>
-                        {deletedVariantsNote}
+                        { count !== 0 && deletedVariantsNote }
                     </Col>
                 </Row>
                 </div>
