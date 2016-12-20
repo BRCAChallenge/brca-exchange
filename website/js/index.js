@@ -559,15 +559,16 @@ var VariantDetail = React.createClass({
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
-                    <div className='text-center Variant-detail-title'>
-                        <h3>Variant Detail</h3>
-                        {variant['Change_Type'] === 'deleted' &&
-                            (<span className='deleted'>
-                                Note this variant has been removed from the BRCA Exchange.
-                                For reasons why, see the <Link to={`/release/${release.id}`}>release notes</Link>.
-                            </span>)
-                        }
-                    </div>
+                    <Col md={8} mdOffset={2}>
+                        <div className='text-center Variant-detail-title'>
+                            <h3>Variant Detail</h3>
+                            {variant['Change_Type'] === 'deleted' &&
+                                (<p className='deleted text-left'>
+                                    Note: This variant has been removed from the BRCA Exchange. For reasons on why this variant was removed please see the <Link to={`/release/${release.id}`}>release notes</Link>.
+                                </p>)
+                            }
+                        </div>
+                    </Col>
                 </Row>
                 <Row>
                     <Col md={8} mdOffset={2}>
