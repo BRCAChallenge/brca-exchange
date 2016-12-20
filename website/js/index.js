@@ -489,6 +489,12 @@ var VariantDetail = React.createClass({
             "Clinical_Significance_ClinVar",
             "Allele_Origin_ClinVar"
         ];
+
+        // In research_mode, only show research_mode changes.
+        var relevantFieldsToDisplayChanges = cols.map(function(col) {
+            return col.prop;
+        });
+
         for (var i = 0; i < data.length; i++) {
             let version = data[i],
                 changes = [],
@@ -502,7 +508,9 @@ var VariantDetail = React.createClass({
                     highlightRow = true;
                 }
                 for (var key in version) {
-                    if (!_.contains(["Data_Release", "Change_Type", "id"], key) && version[key] !== previous[key]) {
+                    if (relevantFieldsToDisplayChanges.indexOf(key) === -1) {
+                        continue;
+                    } else if (!_.contains(["Data_Release", "Change_Type", "id", "Synonyms"], key) && version[key] !== previous[key]) {
                         if (_.contains(listKeys, key)) {
                             let delimiter = key === "Pathogenicity_all" ? ';' : ',';
                             let trimmedVersion = _.map(version[key].split(delimiter), elem => elem.replace(/_/g, " ").trim());
@@ -529,6 +537,10 @@ var VariantDetail = React.createClass({
                                 );
                             }
                         } else {
+                            if (key === "Date_last_evaluated_ENIGMA" &&
+                                moment(version[key], "MM/DD/YYYY").format("DD MMMM YYYY") === moment(version[key], "MM/DD/YYYY").format("DD MMMM YYYY")) {
+                                continue;
+                            }
                             let versionDisplay = isEmptyField(version[key].toString()) ? <span className='empty'></span> : version[key].toString();
                             if (isEmptyField(previous[key].toString())) {
                                 changes.push(
