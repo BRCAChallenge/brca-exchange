@@ -435,7 +435,10 @@ var VariantDetail = React.createClass({
                 title = "Abbreviated AA Change";
             }
             if (variant[prop] != null) {
-                if (prop === "URL_ENIGMA") {
+                if (prop === "Gene_Symbol") {
+                    rowItem = <i>{variant[prop]}</i>;
+                }
+                else if (prop === "URL_ENIGMA") {
                     if (variant[prop].length) {
                         rowItem = <a target="_blank" href={variant[prop]}>link to multifactorial analysis</a>;
 					}
@@ -496,13 +499,13 @@ var VariantDetail = React.createClass({
             let version = data[i],
                 changes = [],
                 release = version["Data_Release"],
-                hightlightRow = false;
+                highlightRow = false;
 
             // if this is not the oldest version of the variant, diff them
             if (i < data.length - 1) {
                 let previous = data[i + 1];
                 if (version["Pathogenicity_expert"] !== previous["Pathogenicity_expert"]) {
-                    hightlightRow = true;
+                    highlightRow = true;
                 }
                 for (var key in version) {
                     if (relevantFieldsToDisplayChanges.indexOf(key) === -1) {
@@ -538,21 +541,29 @@ var VariantDetail = React.createClass({
                                 moment(version[key], "MM/DD/YYYY").format("DD MMMM YYYY") === moment(version[key], "MM/DD/YYYY").format("DD MMMM YYYY")) {
                                 continue;
                             }
-                            let previousDisplay = isEmptyField(previous[key].toString()) ? <span className='empty'></span> : previous[key].toString();
                             let versionDisplay = isEmptyField(version[key].toString()) ? <span className='empty'></span> : version[key].toString();
-
-                            changes.push(
-                                <span>
-                                    <strong>{ getDisplayName(key) }: </strong>
-                                    {previousDisplay} <span className="glyphicon glyphicon-arrow-right"></span> {versionDisplay}
-                                </span>, <br />
-                            );
+                            if (isEmptyField(previous[key].toString())) {
+                                changes.push(
+                                    <span>
+                                        <strong>{ getDisplayName(key) }: </strong>
+                                        <span className='label label-success'><span className='glyphicon glyphicon-star'></span> New</span>
+                                        &nbsp;{ versionDisplay }
+                                    </span>, <br />
+                                );
+                            } else {
+                                changes.push(
+                                    <span>
+                                        <strong>{ getDisplayName(key) }: </strong>
+                                        {previous[key].toString()} <span className="glyphicon glyphicon-arrow-right"></span> {versionDisplay}
+                                    </span>, <br />
+                                );
+                            }
                         }
                     }
                 }
             }
             versionRows.push(
-                <tr className={hightlightRow ? 'danger' : ''}>
+                <tr className={highlightRow ? 'danger' : ''}>
                     <td><Link to={`/release/${release.id}`}>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</Link></td>
                     <td>{version["Pathogenicity_expert"]}</td>
                     <td>{changes}</td>
@@ -589,7 +600,7 @@ var VariantDetail = React.createClass({
                         <Table className='variant-history' bordered>
                             <thead>
                                 <tr className='active'>
-                                    <th>Date</th>
+                                    <th>Release Date</th>
                                     <th>Clinical Significance</th>
                                     <th>Changes</th>
                                 </tr>
