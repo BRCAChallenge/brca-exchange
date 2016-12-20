@@ -490,13 +490,13 @@ var VariantDetail = React.createClass({
             let version = data[i],
                 changes = [],
                 release = version["Data_Release"],
-                hightlightRow = false;
+                highlightRow = false;
 
             // if this is not the oldest version of the variant, diff them
             if (i < data.length - 1) {
                 let previous = data[i + 1];
                 if (version["Pathogenicity_expert"] !== previous["Pathogenicity_expert"]) {
-                    hightlightRow = true;
+                    highlightRow = true;
                 }
                 for (var key in version) {
                     if (!_.contains(["Data_Release", "Change_Type", "id"], key) && version[key] !== previous[key]) {
@@ -549,7 +549,7 @@ var VariantDetail = React.createClass({
                 }
             }
             versionRows.push(
-                <tr className={hightlightRow ? 'danger' : ''}>
+                <tr className={highlightRow ? 'danger' : ''}>
                     <td><Link to={`/release/${release.id}`}>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</Link></td>
                     <td>{version["Pathogenicity_expert"]}</td>
                     <td>{changes}</td>
