@@ -526,6 +526,10 @@ var VariantDetail = React.createClass({
                                 );
                             }
                         } else {
+                            if (key === "Date_last_evaluated_ENIGMA" &&
+                                moment(version[key], "MM/DD/YYYY").format("DD MMMM YYYY") === moment(version[key], "MM/DD/YYYY").format("DD MMMM YYYY")) {
+                                continue;
+                            }
                             let previousDisplay = isEmptyField(previous[key].toString()) ? <span className='empty'></span> : previous[key].toString();
                             let versionDisplay = isEmptyField(version[key].toString()) ? <span className='empty'></span> : version[key].toString();
 
