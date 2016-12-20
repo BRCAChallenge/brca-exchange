@@ -53,7 +53,7 @@ var Releases = React.createClass({
                                 <th>New Variants</th>
                                 <th>New Classifications</th>
                                 <th>Changed/Updated Variants</th>
-                                <th>Deleted Variants</th>
+                                <th>Removed Variants</th>
                             </thead>
                             <tbody>
                                 {rows}
@@ -109,7 +109,7 @@ var Release = React.createClass({
                         <h3><Link to={`/variants?release=${release.id}&changeTypes[]=new`}>{release['variants_added']} new variant{s(release['variants_added'])}</Link></h3>
                         <h3><Link to={`/variants?release=${release.id}&changeTypes[]=added_classification&changeTypes[]=changed_classification`}>{release['variants_classified']} new classification{s(release['variants_classified'])}</Link></h3>
                         <h3><Link to={`/variants?release=${release.id}&changeTypes[]=added_information&changeTypes[]=changed_information`}>{release['variants_modified']} changed/updated variant{s(release['variants_modified'])}</Link></h3>
-                        <h3><Link to={`/variants?release=${release.id}&changeTypes[]=deleted`}>{release['variants_deleted']} deleted variant{s(release['variants_deleted'])}</Link></h3>
+                        <h3><Link to={`/variants?release=${release.id}&changeTypes[]=deleted`}>{release['variants_deleted']} removed variant{s(release['variants_deleted'])}</Link></h3>
                     </Col>
                 </Row>
                 <Row>

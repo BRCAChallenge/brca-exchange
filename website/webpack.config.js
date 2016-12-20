@@ -9,15 +9,6 @@ var databaseKey = require('./databaseKey');
 var keyParam = databaseKey.map(function (k) { return "key[]=" + k; }).join("&");
 var fs = require('fs');
 
-var analytics = '';
-try {
-    analytics = fs.readFileSync(path.join(__dirname, '../analytics.html'));
-} catch (ex) {
-	if (ex.code !== 'ENOENT') {
-		throw ex;
-	}
-}
-
 var port = process.env.BRCAPORT || 8080;
 
 module.exports = {
@@ -66,8 +57,7 @@ module.exports = {
 		new HtmlWebpackPlugin({
 			title: "Template Project",
 			filename: "index.html",
-			template: "page.template",
-			analytics: analytics
+			template: "page.template"
 		}),
 		new webpack.OldWatchingPlugin()
 	],
