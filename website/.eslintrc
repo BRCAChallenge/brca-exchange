@@ -17,6 +17,7 @@
 	"parser": "babel-eslint",
 	"rules": {
 		"camelcase": 2,
+        "dot-notation": [2, { "allowKeywords": false , "allowPattern": "^[a-zA-Z]+(_[a-zA-Z]+)+$"}],
 		"eol-last": 2,
 		"eqeqeq": [2, "allow-null"],
 		"curly": 2,
