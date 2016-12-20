@@ -435,7 +435,10 @@ var VariantDetail = React.createClass({
                 title = "Abbreviated AA Change";
             }
             if (variant[prop] != null) {
-                if (prop === "URL_ENIGMA") {
+                if (prop === "Gene_Symbol") {
+                    rowItem = <i>{variant[prop]}</i>;
+                }
+                else if (prop === "URL_ENIGMA") {
                     if (variant[prop].length) {
                         rowItem = <a target="_blank" href={variant[prop]}>link to multifactorial analysis</a>;
 					}
@@ -526,7 +529,6 @@ var VariantDetail = React.createClass({
                                 );
                             }
                         } else {
-                            let previousDisplay = isEmptyField(previous[key].toString()) ? <span className='empty'></span> : previous[key].toString();
                             let versionDisplay = isEmptyField(version[key].toString()) ? <span className='empty'></span> : version[key].toString();
                             if (isEmptyField(previous[key].toString())) {
                                 changes.push(

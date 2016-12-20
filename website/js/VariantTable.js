@@ -75,7 +75,7 @@ var filterColumns = [
 //}
 
 var columns = [
-    {title: 'Gene', prop: 'Gene_Symbol'},
+    {title: 'Gene', prop: 'Gene_Symbol', render: gene => <i>{gene}</i>},
     {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: nucleotide => nucleotide.split(':')[1]},
     {title: 'Transcript Identifier', prop: 'Reference_Sequence'},
     {title: 'HGVS RNA', prop: 'HGVS_RNA'},
@@ -100,7 +100,7 @@ var columns = [
 
 var researchModeColumns = [
 
-    {title: 'Gene Symbol', prop: 'Gene_Symbol'},
+    {title: 'Gene Symbol', prop: 'Gene_Symbol', render: gene => <i>{gene}</i>},
     {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36'},
     {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
     {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
