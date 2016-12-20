@@ -588,7 +588,7 @@ var VariantDetail = React.createClass({
                         <Table className='variant-history' bordered>
                             <thead>
                                 <tr className='active'>
-                                    <th>Date</th>
+                                    <th>Release Date</th>
                                     <th>Clinical Significance</th>
                                     <th>Changes</th>
                                 </tr>
