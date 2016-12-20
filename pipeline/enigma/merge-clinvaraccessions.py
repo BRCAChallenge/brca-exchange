@@ -10,7 +10,7 @@ def main():
     '''
     This script merges clinvar accession numbers from a .txt file provided by clinvar into enigma data provided by
     enigma. Note that the Enigma file is usually provided as a .xlsx file and must be converted using the steps
-    outlined in pipeline/enigma/README.md.
+    outlined in ./README.md.
     '''
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--enigma_input",
@@ -49,6 +49,7 @@ def main():
 
     # convert csv output to tsv for final output
     csv.writer(file(final_output_tsv, 'w+'), delimiter="\t").writerows(csv.reader(open(temp_csv)))
+    os.remove(temp_csv)
 
 if __name__ == "__main__":
     main()

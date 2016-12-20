@@ -2,28 +2,27 @@
 
 ####Updated Enigma Processing Steps (taken by zfisch on 12/13/16):
 
+#####You will need an environment with the following requirements:
 
-1. Download latest data from enigma (provided by melissa on synapse)
-2. Download latest data with clinvar accessions (provided by melissa on synapse)
-3. Open enigma data in google spreadsheets, go to variants tab, select file -> download as -> Tab-separated values (tsv, .current sheet), rename file to `ENIGMA_variants_batch#_MM_DD_YYY.tsv`
-4. Remove all text in `ENIGMA_variants_batch#_MM_DD_YYY.tsv` before the column (header) names
-5. Remove all text in clinvar accession file before column (header) names.
-6. Run `python merge-clinvaraccessions.py -e /PATH/TO/ENIGMA_variants_batch#_MM_DD_YYYY.tsv -c /PATH/TO/CLINVARACCESSIONDATA.txt -o /PATH/TO/BATCH_OUTPUT`
+1. install pyhgvs library from counsyl, make sure pip version >= 8.1.2
+2. `pip install pip --upgrade`
+3. `git clone https://github.com/counsyl/hgvs.git`
+4. `cd hgvs`
+5. `python setup.py install`
+6. `pip install -r requirement.txt`
 
+#####Follow the steps below to produce an enigma input for the luigi pipeline:
 
-Steps required:
-
-1. Get latest file with clinvar accession data (might be in a different format than previous files).
-2. Merge in clinvar accession numbers with latest enigma data
-3. Write and run preprocessing script across data
-4. run enigma merge across all batches of preprocessed data to make new enigma combined file
-5. run cleanup script across combined file to normalize for input to pipeline
-
-Notes about scripts in synapse regarding enigma:
-* enigma_merge combines all batches into a combined file
-* enigma-processing-from-xlsx.py is not done
-* enigma processing batch scripts run over text exports from xlsx files (after some manual work is required -- must remove some header information, which has been consistent across batches)
-
+1. Get data from enigma (generally provided in xlsx format).
+2. Get data with clinvar accessions (if not already included in enigma data, generally provided in separate txt file)
+3. Open enigma data in google spreadsheets, go to variants tab, select file -> download as -> Tab-separated values (tsv, .current sheet).
+4. Remove all text in tsv file from step 3 except for the column names and variant data.
+5. Rename column "Alternate designations" to "BIC Nomenclature", rename column "Official allele name" to "Abbrev AA change", remove last column "Replaces ClinVarAccessions".
+6. Remove all text in clinvar accession file before column (header) names.
+7. Run `python merge-clinvaraccessions.py -e /PATH/TO/ENIGMA_TSV_FILE_FROM_STEP_5 -c /PATH/TO/CLINVAR_ACCESSION_DATA_TXT_FILE_FROM_STEP_6 -o /PATH/TO/OUTPUT_FILE`
+8. Run `python enigma-processing.py -i /PATH/TO/OUTPUT_FILE_FROM_STEP_& -o /PATH/TO/OUTPUT_DIRECTORY_CONTAINING_PROCESSED_ENIGMA_FILES/ENIGMA_last_updated_MM_DD_YY_hg38.tsv -g /PATH/TO/hg38.fa`
+9. Make sure all available ENIGMA_last_updated_MM_DD_YY_hg38.tsv files are in the same directory, then run `python enigma-merge_hg38.py -i /PATH/TO/OUTPUT_DIRECTORY_CONTAINING_PROCESSED_ENIGMA_FILES/ -o /PATH/TO/OUTPUT_DIRECTORY/`
+10. This procedure produces an `ENIGMA_combined_hg38.tsv` file that can be used in the luigi pipeline.
 
 ####Below are the old steps for reference:
 
