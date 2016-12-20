@@ -403,7 +403,9 @@ var VariantDetail = React.createClass({
     showHelp: function (title) {
         this.transitionTo(`/help#${slugify(title)}`);
     },
-    getInitialState: () => ({}),
+    getInitialState: () => ({
+        researchMode: localStorage.getItem("research-mode")
+    }),
     componentWillMount: function () {
         backend.variant(this.props.params.id).subscribe(
             resp => {
@@ -425,8 +427,10 @@ var VariantDetail = React.createClass({
         var cols;
         if (localStorage.getItem("research-mode") === 'true') {
             cols = researchModeColumns;
+            this.state.researchMode = true;
         } else {
             cols = columns;
+            this.state.researchMode = false;
         }
         var rows = _.map(cols, ({prop, title}) => {
             var rowItem;
@@ -583,6 +587,7 @@ var VariantDetail = React.createClass({
                                 {versionRows}
                             </tbody>
                         </Table>
+                        <p style={{display: this.state.researchMode ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show All Public Data on this Variant" to see these changes.</p>
                     </Col>
                 </Row>
                 <Row>
