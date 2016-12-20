@@ -99,7 +99,6 @@ var Community = React.createClass({
             var {city, state, country} = row;
             var locationString = _.values(_.pick({city, state, country}, v => v)).join(', ');
 
-			/*eslint-disable dot-notation*/
             return (<tr>
                 <td width="120px">
                     {avatar}
@@ -112,7 +111,6 @@ var Community = React.createClass({
                     <span id="contact">{row.email} {row["phone_number"]}</span>
                 </td>
             </tr>);
-			/*eslint-enable dot-notation*/
         });
 
         return (error ? <p>{error}</p> :

@@ -37,7 +37,8 @@ function url(opts) {
         include,
         exclude,
         release,
-        changeTypes
+        changeTypes,
+        showDeleted
         } = opts,
 
         [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v)));
@@ -56,7 +57,8 @@ function url(opts) {
         'include': include,
         'exclude': exclude,
         'release': release,
-        'change_types': changeTypes
+        'change_types': changeTypes,
+        'show_deleted': showDeleted
     }, v => v != null), {arrayFormat: 'repeat'})}`;
 }
 

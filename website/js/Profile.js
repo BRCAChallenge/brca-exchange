@@ -185,10 +185,10 @@ var EditProfileForm = React.createClass({
     getFormErrors: function () {
         var errors = {};
         if (this.refs.role.getDOMNode().value === "NONE") {
-            errors["role"] = <span>Please select a <strong>Roll</strong></span>; //eslint-disable-line dot-notation
+            errors.role = <span>Please select a <strong>Roll</strong></span>;
         }
         if (this.state.captcha === "") {
-            errors["captcha"] = <span>No <strong>CAPTCHA</strong> entered</span>; //eslint-disable-line dot-notation
+            errors.captcha = <span>No <strong>CAPTCHA</strong> entered</span>;
         }
         this.getCompulsoryFields().forEach(function (field) {
             var value = this.refs[field].getDOMNode().value.trim();

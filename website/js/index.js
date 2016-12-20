@@ -421,8 +421,9 @@ var VariantDetail = React.createClass({
             return <div></div>;
         }
 
-        var variant = data[0];
-        var cols;
+        var variant = data[0],
+            release = variant["Data_Release"],
+            cols;
         if (localStorage.getItem("research-mode") === 'true') {
             cols = researchModeColumns;
         } else {
@@ -462,8 +463,8 @@ var VariantDetail = React.createClass({
                 } else {
                     rowItem = variant[prop];
                 }
-            } else if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] != null) { //eslint-disable-line dot-notation
-                rowItem = variant["HGVS_Protein"].split(":")[0]; //eslint-disable-line dot-notation
+            } else if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] != null) {
+                rowItem = variant["HGVS_Protein"].split(":")[0];
             }
             return (
 				<tr key={prop}>
@@ -494,19 +495,19 @@ var VariantDetail = React.createClass({
         for (var i = 0; i < data.length; i++) {
             let version = data[i],
                 changes = [],
-                release = version["Data_Release"], //eslint-disable-line dot-notation
+                release = version["Data_Release"],
                 hightlightRow = false;
 
             // if this is not the oldest version of the variant, diff them
             if (i < data.length - 1) {
                 let previous = data[i + 1];
-                if (version["Pathogenicity_expert"] !== previous["Pathogenicity_expert"]) { //eslint-disable-line dot-notation
+                if (version["Pathogenicity_expert"] !== previous["Pathogenicity_expert"]) {
                     hightlightRow = true;
                 }
                 for (var key in version) {
                     if (relevantFieldsToDisplayChanges.indexOf(key) === -1) {
                         continue;
-                    } else if (!_.contains(["Data_Release", "Change_Type", "id"], key) && version[key] !== previous[key]) { //eslint-disable-line dot-notation
+                    } else if (!_.contains(["Data_Release", "Change_Type", "id"], key) && version[key] !== previous[key]) {
                         if (_.contains(listKeys, key)) {
                             let delimiter = key === "Pathogenicity_all" ? ';' : ',';
                             let trimmedVersion = _.map(version[key].split(delimiter), elem => elem.replace(/_/g, " ").trim());
@@ -546,15 +547,13 @@ var VariantDetail = React.createClass({
                     }
                 }
             }
-            /* eslint-disable dot-notation */
             versionRows.push(
                 <tr className={hightlightRow ? 'danger' : ''}>
-                    <td><Link to={`/release/${release.id}`}>{moment(release["date"], "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</Link></td>
+                    <td><Link to={`/release/${release.id}`}>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</Link></td>
                     <td>{version["Pathogenicity_expert"]}</td>
                     <td>{changes}</td>
                 </tr>
             );
-            /* eslint-enable dot-notation */
         }
 
         return (error ? <p>{error}</p> :
@@ -562,6 +561,12 @@ var VariantDetail = React.createClass({
                 <Row>
                     <div className='text-center Variant-detail-title'>
                         <h3>Variant Detail</h3>
+                        {variant['Change_Type'] === 'deleted' &&
+                            (<span className='deleted'>
+                                Note this variant has been removed from the BRCA Exchange.
+                                For reasons why, see the <Link to={`/release/${release.id}`}>release notes</Link>.
+                            </span>)
+                        }
                     </div>
                 </Row>
                 <Row>
@@ -575,9 +580,7 @@ var VariantDetail = React.createClass({
                 </Row>
                 <Row>
                     <Col md={8} mdOffset={2}>
-                        { /* eslint-disable dot-notation */ }
                         <h3>{variant["HGVS_cDNA"]}</h3>
-                        { /* eslint-enable dot-notation */ }
                         <h4>Previous Versions of this Variant:</h4>
                         <Table className='variant-history' bordered>
                             <thead>

@@ -20,7 +20,6 @@ var Releases = React.createClass({
             () => this.setState({error: 'Problem connecting to server'}));
     },
     render: function () {
-        /* eslint-disable dot-notation */
         // Ensure releases are in descending order
         var releases = this.state.releases;
         if (Array.isArray(releases)) {
@@ -31,15 +30,14 @@ var Releases = React.createClass({
         var rows = _.map(releases, release => (
             <tr>
                 <td><Link to={`/release/${release.id}`}>Version {release.id}</Link></td>
-                <td>{moment(release["date"], "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</td>
-                <td>{release['sources']}</td>
+                <td>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</td>
+                <td>{release.sources}</td>
                 <td><Link to={`/variants?release=${release.id}&changeTypes[]=new`}>{release['variants_added']}</Link></td>
                 <td><Link to={`/variants?release=${release.id}&changeTypes[]=added_classification&changeTypes[]=changed_classification`}>{release['variants_classified']}</Link></td>
                 <td><Link to={`/variants?release=${release.id}&changeTypes[]=added_information&changeTypes[]=changed_information`}>{release['variants_modified']}</Link></td>
                 <td><Link to={`/variants?release=${release.id}&changeTypes[]=deleted`}>{release['variants_deleted']}</Link></td>
             </tr>
         ));
-        /* eslint-enable dot-notation */
         return (
             <Grid fluid={true}>
                 <Row>
@@ -55,7 +53,7 @@ var Releases = React.createClass({
                                 <th>New Variants</th>
                                 <th>New Classifications</th>
                                 <th>Changed/Updated Variants</th>
-                                <th>Deleted Variants</th>
+                                <th>Removed Variants</th>
                             </thead>
                             <tbody>
                                 {rows}
@@ -96,7 +94,6 @@ var Release = React.createClass({
         var release = this.state.releases[0],
             latest = this.state.latest,
             s = n => n === 1 ? '' : 's';
-        /* eslint-disable dot-notation */
         return (
             <Grid fluid={true}>
                 <Row>
@@ -112,7 +109,7 @@ var Release = React.createClass({
                         <h3><Link to={`/variants?release=${release.id}&changeTypes[]=new`}>{release['variants_added']} new variant{s(release['variants_added'])}</Link></h3>
                         <h3><Link to={`/variants?release=${release.id}&changeTypes[]=added_classification&changeTypes[]=changed_classification`}>{release['variants_classified']} new classification{s(release['variants_classified'])}</Link></h3>
                         <h3><Link to={`/variants?release=${release.id}&changeTypes[]=added_information&changeTypes[]=changed_information`}>{release['variants_modified']} changed/updated variant{s(release['variants_modified'])}</Link></h3>
-                        <h3><Link to={`/variants?release=${release.id}&changeTypes[]=deleted`}>{release['variants_deleted']} deleted variant{s(release['variants_deleted'])}</Link></h3>
+                        <h3><Link to={`/variants?release=${release.id}&changeTypes[]=deleted`}>{release['variants_deleted']} removed variant{s(release['variants_deleted'])}</Link></h3>
                     </Col>
                 </Row>
                 <Row>
@@ -124,14 +121,13 @@ var Release = React.createClass({
                             </tr>
                             <tr>
                                 <td className="active"><b>Date</b></td>
-                                <td>{moment(release["date"], "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</td>
+                                <td>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</td>
                             </tr>
                         </Table>
                 {release['data_sources']}
                     </Col>
                 </Row>
             </Grid>);
-            /* eslint-enable dot-notation */
     }
 });
 
