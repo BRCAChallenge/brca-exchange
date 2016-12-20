@@ -507,7 +507,7 @@ var VariantDetail = React.createClass({
                 for (var key in version) {
                     if (relevantFieldsToDisplayChanges.indexOf(key) === -1) {
                         continue;
-                    } else if (!_.contains(["Data_Release", "Change_Type", "id"], key) && version[key] !== previous[key]) {
+                    } else if (!_.contains(["Data_Release", "Change_Type", "id", "Synonyms"], key) && version[key] !== previous[key]) {
                         if (_.contains(listKeys, key)) {
                             let delimiter = key === "Pathogenicity_all" ? ';' : ',';
                             let trimmedVersion = _.map(version[key].split(delimiter), elem => elem.replace(/_/g, " ").trim());
