@@ -421,8 +421,9 @@ var VariantDetail = React.createClass({
             return <div></div>;
         }
 
-        var variant = data[0];
-        var cols;
+        var variant = data[0],
+            release = variant["Data_Release"],
+            cols;
         if (localStorage.getItem("research-mode") === 'true') {
             cols = researchModeColumns;
         } else {
@@ -554,6 +555,12 @@ var VariantDetail = React.createClass({
                 <Row>
                     <div className='text-center Variant-detail-title'>
                         <h3>Variant Detail</h3>
+                        {variant['Change_Type'] === 'deleted' &&
+                            (<span className='deleted'>
+                                Note this variant has been removed from the BRCA Exchange.
+                                For reasons why, see the <Link to={`/release/${release.id}`}>release notes</Link>.
+                            </span>)
+                        }
                     </div>
                 </Row>
                 <Row>
