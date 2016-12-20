@@ -528,13 +528,22 @@ var VariantDetail = React.createClass({
                         } else {
                             let previousDisplay = isEmptyField(previous[key].toString()) ? <span className='empty'></span> : previous[key].toString();
                             let versionDisplay = isEmptyField(version[key].toString()) ? <span className='empty'></span> : version[key].toString();
-
-                            changes.push(
-                                <span>
-                                    <strong>{ getDisplayName(key) }: </strong>
-                                    {previousDisplay} <span className="glyphicon glyphicon-arrow-right"></span> {versionDisplay}
-                                </span>, <br />
-                            );
+                            if (isEmptyField(previous[key].toString())) {
+                                changes.push(
+                                    <span>
+                                        <strong>{ getDisplayName(key) }: </strong>
+                                        <span className='label label-success'><span className='glyphicon glyphicon-star'></span> New</span>
+                                        &nbsp;{ versionDisplay }
+                                    </span>, <br />
+                                );
+                            } else {
+                                changes.push(
+                                    <span>
+                                        <strong>{ getDisplayName(key) }: </strong>
+                                        {previous[key].toString()} <span className="glyphicon glyphicon-arrow-right"></span> {versionDisplay}
+                                    </span>, <br />
+                                );
+                            }
                         }
                     }
                 }
