@@ -254,7 +254,7 @@ var DataTable = React.createClass({
                     <Col sm={6} smOffset={1}>
                         <div className='form-inline'>
                             <div className='form-group'>
-                                <label className='control-label'>
+                                <label className='control-label label alert-danger matched-variant-count'>
                                     {count} matching {pluralize(count, 'variant')} {}
                                     {changeString ? changeString : ''} {}
                                     {release ? 'in release ' + release : ''} {}
