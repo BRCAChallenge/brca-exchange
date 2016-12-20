@@ -182,16 +182,16 @@ var SignupForm = React.createClass({
     getFormErrors: function () {
         var errors = {};
         if (this.refs.role.getDOMNode().value === "NONE") {
-            errors["role"] = <span>Please select a <strong>Roll</strong></span>; //eslint-disable-line dot-notation
+            errors.role = <span>Please select a <strong>Roll</strong></span>;
         }
         if (this.refs.email.getDOMNode().value !== this.refs.email_confirm.getDOMNode().value) {
-            errors["email_confirm"] = <span>The <strong>emails</strong> don't match</span>; //eslint-disable-line dot-notation
+            errors["email_confirm"] = <span>The <strong>emails</strong> don't match</span>;
         }
         if (this.refs.password.getDOMNode().value !== this.refs.password_confirm.getDOMNode().value) {
-            errors["password_confirm"] = <span>The <strong>passwords</strong> don't match</span>; //eslint-disable-line dot-notation
+            errors["password_confirm"] = <span>The <strong>passwords</strong> don't match</span>;
         }
         if (this.state.captcha === "") {
-            errors["captcha"] = <span>No <strong>CAPTCHA</strong> entered</span>; //eslint-disable-line dot-notation
+            errors.captcha = <span>No <strong>CAPTCHA</strong> entered</span>;
         }
         this.getCompulsoryFields().forEach(function (field) {
             var value = this.refs[field].getDOMNode().value.trim();

@@ -69,14 +69,12 @@ var D3Lollipop = React.createClass({
         } else {
             chrCoordinate = String(chrCoordinate);
         }
-		/*eslint-disable dot-notation */
         if (oldObj["Pathogenicity_expert"] === 'Not Yet Classified') {
             oldObj["Pathogenicity_expert"] = "Uncertain";
         }
         if (oldObj["Pathogenicity_expert"] === 'Benign / Little Clinical Significance') {
             oldObj["Pathogenicity_expert"] = "Benign";
         }
-		/*eslint-enable dot-notation */
         var newObj = {category: oldObj.Pathogenicity_expert, coord: chrCoordinate, value: 1, oldData: obj};
         return newObj;
     },
