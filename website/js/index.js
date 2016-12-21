@@ -537,8 +537,14 @@ var VariantDetail = React.createClass({
                                 );
                             }
                         } else {
+                            // If date changed from YY format to YYYY format, ignore. Ex: 1/10/15 -> 1/10/2015
                             if (key === "Date_last_evaluated_ENIGMA" &&
                                 moment(version[key], "MM/DD/YYYY").format("DD MMMM YYYY") === moment(version[key], "MM/DD/YYYY").format("DD MMMM YYYY")) {
+                                continue;
+                            }
+                            // exLOVD citation format changed, heuristic for matching: first word (i.e. first author) same -> ignore
+                            else if (key === "Literature_source_exLOVD" &&
+                                version[key].trim().split(' ')[0] === previous[key].trim().split(' ')[0]) {
                                 continue;
                             }
                             let versionDisplay = isEmptyField(version[key].toString()) ? <span className='empty'></span> : version[key].toString();
