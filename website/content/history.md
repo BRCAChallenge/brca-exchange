@@ -56,7 +56,7 @@ The BRCA Exchange represents the combined vision of clinicians, researchers and 
 
 * Sharon Plon, Baylor College of Medicine, Houston, USA
 
-* Gunnar Raetsch, Memorial Sloan Kettering Cancer Center, New York City, USA
+* Gunnar Raetsch, ETH Zurich, Zurich, Switzerland
 
 * Nazneen Rahman, Institute of Cancer Research, London, UK
 
