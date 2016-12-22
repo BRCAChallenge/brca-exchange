@@ -412,8 +412,8 @@ var VariantDetail = React.createClass({
             () => { this.setState({error: 'Problem connecting to server'}); });
     },
     onChildToggleMode: function() {
-        this.forceUpdate();
         this.props.toggleMode();
+	 this.forceUpdate();
     },
     render: function () {
         var {data, error} = this.state;
@@ -547,8 +547,14 @@ var VariantDetail = React.createClass({
                                 );
                             }
                         } else {
+                            // If date changed from YY format to YYYY format, ignore. Ex: 1/10/15 -> 1/10/2015
                             if (key === "Date_last_evaluated_ENIGMA" &&
                                 moment(version[key], "MM/DD/YYYY").format("DD MMMM YYYY") === moment(version[key], "MM/DD/YYYY").format("DD MMMM YYYY")) {
+                                continue;
+                            }
+                            // exLOVD citation format changed, heuristic for matching: first word (i.e. first author) same -> ignore
+                            else if (key === "Literature_source_exLOVD" &&
+                                version[key].trim().split(' ')[0] === previous[key].trim().split(' ')[0]) {
                                 continue;
                             }
                             changes.push(
@@ -573,15 +579,16 @@ var VariantDetail = React.createClass({
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
-                    <div className='text-center Variant-detail-title'>
-                        <h3>Variant Detail</h3>
-                        {variant['Change_Type'] === 'deleted' &&
-                            (<span className='deleted'>
-                                Note this variant has been removed from the BRCA Exchange.
-                                For reasons why, see the <Link to={`/release/${release.id}`}>release notes</Link>.
-                            </span>)
-                        }
-                    </div>
+                    <Col md={8} mdOffset={2}>
+                        <div className='text-center Variant-detail-title'>
+                            <h3>Variant Detail</h3>
+                            {variant['Change_Type'] === 'deleted' &&
+                                (<p className='deleted text-left'>
+                                    Note: This variant has been removed from the BRCA Exchange. For reasons on why this variant was removed please see the <Link to={`/release/${release.id}`}>release notes</Link>.
+                                </p>)
+                            }
+                        </div>
+                    </Col>
                 </Row>
                 <Row>
                     <Col md={8} mdOffset={2}>
@@ -608,6 +615,7 @@ var VariantDetail = React.createClass({
                                 {versionRows}
                             </tbody>
                         </Table>
+                        <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show All Public Data on this Variant" to see these changes.</p>
                     </Col>
                 </Row>
                 <Row>
@@ -663,7 +671,7 @@ var Application = React.createClass({
         return (
             <div>
                 <NavBarNew path={path} mode={this.state.mode} />
-                <RouteHandler toggleMode={this.onChildToggleMode} />
+                <RouteHandler toggleMode={this.onChildToggleMode} mode={this.state.mode} />
                 <Database
                     mode={this.state.mode}
                     toggleMode={this.onChildToggleMode}
