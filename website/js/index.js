@@ -511,7 +511,17 @@ var VariantDetail = React.createClass({
                     if (relevantFieldsToDisplayChanges.indexOf(key) === -1) {
                         continue;
                     } else if (!_.contains(["Data_Release", "Change_Type", "id", "Synonyms"], key) && version[key] !== previous[key]) {
-                        if (_.contains(listKeys, key)) {
+                        let versionDisplay = isEmptyField(version[key].toString()) ? <span className='empty'></span> : version[key].toString();
+                        if (isEmptyField(previous[key].toString())) {
+                            changes.push(
+                                <span>
+                                    <strong>{ getDisplayName(key) }: </strong>
+                                    <span className='label label-success'><span className='glyphicon glyphicon-star'></span> New</span>
+                                    &nbsp;{ versionDisplay }
+                                </span>, <br />
+                            );
+                        }
+                        else if (_.contains(listKeys, key)) {
                             let delimiter = key === "Pathogenicity_all" ? ';' : ',';
                             let trimmedVersion = _.map(version[key].split(delimiter), elem => elem.replace(/_/g, " ").trim());
                             let trimmedPrevious = _.map(previous[key].split(delimiter), elem => elem.replace(/_/g, " ").trim());
@@ -547,23 +557,12 @@ var VariantDetail = React.createClass({
                                 version[key].trim().split(' ')[0] === previous[key].trim().split(' ')[0]) {
                                 continue;
                             }
-                            let versionDisplay = isEmptyField(version[key].toString()) ? <span className='empty'></span> : version[key].toString();
-                            if (isEmptyField(previous[key].toString())) {
-                                changes.push(
-                                    <span>
-                                        <strong>{ getDisplayName(key) }: </strong>
-                                        <span className='label label-success'><span className='glyphicon glyphicon-star'></span> New</span>
-                                        &nbsp;{ versionDisplay }
-                                    </span>, <br />
-                                );
-                            } else {
-                                changes.push(
-                                    <span>
-                                        <strong>{ getDisplayName(key) }: </strong>
-                                        {previous[key].toString()} <span className="glyphicon glyphicon-arrow-right"></span> {versionDisplay}
-                                    </span>, <br />
-                                );
-                            }
+                            changes.push(
+                                <span>
+                                    <strong>{ getDisplayName(key) }: </strong>
+                                    {previous[key].toString()} <span className="glyphicon glyphicon-arrow-right"></span> {versionDisplay}
+                                </span>, <br />
+                            );
                         }
                     }
                 }
