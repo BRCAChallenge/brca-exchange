@@ -425,10 +425,8 @@ var VariantDetail = React.createClass({
         var cols;
         if (localStorage.getItem("research-mode") === 'true') {
             cols = researchModeColumns;
-            this.state.researchMode = true;
         } else {
             cols = columns;
-            this.state.researchMode = false;
         }
         var rows = _.map(cols, ({prop, title}) => {
             var rowItem;
