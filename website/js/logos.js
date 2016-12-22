@@ -31,5 +31,10 @@ module.exports = [
         id: 'CIMBA',
         logo: require('./img/cimba_logo.png'),
         url: 'http://apps.ccge.medschl.cam.ac.uk/consortia/cimba//'
+    },
+    {
+        id: 'LOVD',
+        logo: require('./img/lovd_logo.jpg'),
+        url: 'http://www.lovd.nl/',
     }
 ];
