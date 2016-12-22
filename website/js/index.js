@@ -413,7 +413,7 @@ var VariantDetail = React.createClass({
     },
     onChildToggleMode: function() {
         this.props.toggleMode();
-	this.forceUpdate();
+	 this.forceUpdate();
     },
     render: function () {
         var {data, error} = this.state;
