@@ -403,9 +403,7 @@ var VariantDetail = React.createClass({
     showHelp: function (title) {
         this.transitionTo(`/help#${slugify(title)}`);
     },
-    getInitialState: () => ({
-        researchMode: localStorage.getItem("research-mode")
-    }),
+    getInitialState: () => ({}),
     componentWillMount: function () {
         backend.variant(this.props.params.id).subscribe(
             resp => {
