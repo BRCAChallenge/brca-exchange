@@ -21,7 +21,6 @@ from collections import defaultdict
 import pyhgvs as hgvs
 import pyhgvs.utils as hgvs_utils
 from pygr.seqdb import SequenceFileDB
-import pdb
 
 
 def parse_args():
