@@ -510,6 +510,8 @@ var VariantDetail = React.createClass({
                 for (var key in version) {
                     if (relevantFieldsToDisplayChanges.indexOf(key) === -1) {
                         continue;
+                    } else if (isEmptyField(version[key].toString() && isEmptyField(previous[key]).toString())) {
+                        continue;
                     } else if (!_.contains(["Data_Release", "Change_Type", "id", "Synonyms"], key) && version[key] !== previous[key]) {
                         let versionDisplay = isEmptyField(version[key].toString()) ? <span className='empty'></span> : version[key].toString();
                         if (isEmptyField(previous[key].toString())) {
@@ -555,6 +557,10 @@ var VariantDetail = React.createClass({
                             // exLOVD citation format changed, heuristic for matching: first word (i.e. first author) same -> ignore
                             else if (key === "Literature_source_exLOVD" &&
                                 version[key].trim().split(' ')[0] === previous[key].trim().split(' ')[0]) {
+                                continue;
+                            }
+                            // ENIGMA rules URL's were previously broken, ignore the change from broken to correct links
+                            else if (key === "Assertion_method_citation_ENIGMA") {
                                 continue;
                             }
                             changes.push(
