@@ -18,7 +18,7 @@ from copy import deepcopy
 from pprint import pprint
 
 
-#GENOMIC VERSION:
+# GENOMIC VERSION:
 VERSION = "hg38" # equivalent to GRCh38
 
 # Specific columns in the output matrix
@@ -35,13 +35,14 @@ DEFAULT_CONTENTS = "-"
 
 # files needed for string comparison
 
-#key value pair dictionaries of all extra fields in various databases to add
+# key value pair dictionaries of all extra fields in various databases to add
 GENOME1K_FIELDS = {"Allele_frequency": "AF",
                    "EAS_Allele_frequency": "EAS_AF",
                    "EUR_Allele_frequency": "EUR_AF",
                    "AFR_Allele_frequency": "AFR_AF",
                    "AMR_Allele_frequency": "AMR_AF",
                    "SAS_Allele_frequency": "SAS_AF"}
+
 CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "Submitter": "Submitter",
                   "Clinical_Significance": "ClinicalSignificance",
@@ -50,13 +51,20 @@ CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "Allele_Origin": "Origin",
                   "Protein": "Protein",
                   "Method": "Method"}
+
+'''
+NOTE: the following fields are no longer present in LOVD data following
+the 11/5/2016 release.
+
+Variant_haplotype": "haplotype",
+Functional_analysis_result": "functionalanalysis_result",
+Functional_analysis_technique": "functionalanalysis_technique",
+dna_change_genomic": "dna_change_genomic",
+'''
 LOVD_FIELDS = {"Variant_frequency": "frequency",
-               "Variant_haplotype": "haplotype",
-               "Functional_analysis_result": "functionalanalysis_result",
-               "Functional_analysis_technique": "functionalanalysis_technique",
-               "dna_change_genomic": "dna_change_genomic",
-               "HGVS_cDNA": "dna_change",
-               "HGVS_protein": "protein_change"}
+               "HGVS_cDNA": "cDNA",
+               "HGVS_protein": "Protein"}
+
 EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "Segregation_LR": "segregation_lr",
                   "Sum_family_LR": "sum_family_lr",
@@ -68,6 +76,7 @@ EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "Literature_source": "observational_reference",
                   "HGVS_cDNA": "dna_change",
                   "HGVS_protein": "protein_change"}
+
 BIC_FIELDS = {"Clinical_classification": "Category",
               "Number_of_family_member_carrying_mutation": "Number_Reported",
               "Patient_nationality": "Nationality",
@@ -77,8 +86,10 @@ BIC_FIELDS = {"Clinical_classification": "Category",
               "Clinical_importance": "Clinically_Importance",
               "Ethnicity": "Ethnicity",
               "Literature_citation": "Reference"}
+
 ESP_FIELDS = {"polyPhen2_result": "PH",
               "Minor_allele_frequency": "MAF"}
+
 EXAC_FIELDS = {"Allele_frequency": "AF"}
 
 FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
@@ -622,7 +633,7 @@ def add_new_source(columns, variants, source, source_file, source_dict):
                     variants[genome_coor].append(DEFAULT_CONTENTS)
                     logging.debug("Could not find value %s for source %s in variant %s, inserting default content %s instead.", value, source, DEFAULT_CONTENTS)
                 else:
-                    raise Exception("There was a problem appending a value for %s to variant %s" % (value, variats[genome_coor]))
+                    raise Exception("There was a problem appending a value for %s to variant %s" % (value, variants[genome_coor]))
     # for those enigma record that doesn't have a hit with new genome coordinate
     # add extra cells of "-" to the end of old record
     for value in variants.values():
