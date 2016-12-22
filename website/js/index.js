@@ -412,8 +412,8 @@ var VariantDetail = React.createClass({
             () => { this.setState({error: 'Problem connecting to server'}); });
     },
     onChildToggleMode: function() {
-        this.forceUpdate();
         this.props.toggleMode();
+	 this.forceUpdate();
     },
     render: function () {
         var {data, error} = this.state;
@@ -610,6 +610,7 @@ var VariantDetail = React.createClass({
                                 {versionRows}
                             </tbody>
                         </Table>
+                        <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show All Public Data on this Variant" to see these changes.</p>
                     </Col>
                 </Row>
                 <Row>
@@ -665,7 +666,7 @@ var Application = React.createClass({
         return (
             <div>
                 <NavBarNew path={path} mode={this.state.mode} />
-                <RouteHandler toggleMode={this.onChildToggleMode} />
+                <RouteHandler toggleMode={this.onChildToggleMode} mode={this.state.mode} />
                 <Database
                     mode={this.state.mode}
                     toggleMode={this.onChildToggleMode}
