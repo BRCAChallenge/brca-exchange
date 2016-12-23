@@ -8,7 +8,7 @@ import re
 EMPTY = "-"
 FIELDS_TO_REMOVE=["Protein_ClinVar",
                   "HGVS_ClinVar", "HGVS_cDNA_LOVD", "HGVS_cDNA_exLOVD",
-                  "HGVS_protein_LOVD", "dna_change_genomic_LOVD",
+                  "HGVS_protein_LOVD",
                   "HGVS_protein_exLOVD",
                   "polyPhen2_result_ESP", 
                   "BIC_Designation_BIC", "BIC_Nomenclature_exLOVD"]
@@ -49,7 +49,7 @@ def main():
         print "working on row", rowCount
         csvOut.writerow(updateRow(row, FIELDS_TO_RENAME, FIELDS_TO_REMOVE))
 
-        
+
 def setOutputColumns(fields, toRemove, toAdd, toRename):
     newFields = []
     for item in fields:
