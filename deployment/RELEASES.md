@@ -37,6 +37,8 @@ git push origin master      # push master to github
 
 ## Create a new release
 
+Before running, make sure you're on master and pull the latest master from origin. Also make sure your working directory is clean.
+
 ```sh
 ./deployment/release new    # create release branch & push to github
 ```
