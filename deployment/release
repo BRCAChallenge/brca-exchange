@@ -39,6 +39,14 @@ run() {
 	fi
 }
 
+testing() {
+	if git diff-index --quiet HEAD --; then
+    	echo "DIFF STUFF"
+	else
+    	echo "NO DIFF STUFF"
+	fi
+}
+
 new() {
 	BRANCH=$(${SEMVER} -i minor ${VERSION})
 	run "Creating release branch ${BRANCH}" git checkout -b ${BRANCH}
@@ -98,6 +106,7 @@ case "$cmd" in
     new) new;;
     patch) patch "$@";;
     major) major;;
+	testing) testing;;
     "") usage;;
     *) usage;;
 esac
