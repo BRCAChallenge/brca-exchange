@@ -109,7 +109,6 @@ case "$cmd" in
     new) new;;
     patch) patch "$@";;
     major) major;;
-	testing) testing;;
     "") usage;;
     *) usage;;
 esac
