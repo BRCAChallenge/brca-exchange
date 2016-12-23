@@ -563,6 +563,10 @@ var VariantDetail = React.createClass({
                             else if (key === "Assertion_method_citation_ENIGMA") {
                                 continue;
                             }
+                            // Text change that actually means the same thing
+                            else if (key === "Pathogenicity_expert" && version[key] === "Not Yet Reviewed" && previous[key] === "Not Yet Classified") {
+                                continue;
+                            }
                             changes.push(
                                 <span>
                                     <strong>{ getDisplayName(key) }: </strong>
