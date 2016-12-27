@@ -61,7 +61,7 @@ class transformer(object):
                     newColumnsAdded.append(ncol)
         return (oldColumnsRemoved, newColumnsAdded, newToOldNameMapping)
 
-    def _consistentDelimitedLists(self, oldValues, newValues):
+    def _consistentDelimitedLists(self, oldValues, newValues, field):
         """Determine if the old and new values are comma-separated
         lists in which the same elements have been assembled in
         a differnt order
@@ -69,6 +69,8 @@ class transformer(object):
         listsAreConsistent = False
         if oldValues is None or newValues is None:
             return False
+        elif field == "Pathogenicity_all":
+            return _determineConsistentPathogenicityAll(self, oldValues, newValues)
         elif re.search(",", oldValues) and re.search(",", newValues):
             oldTokens = oldValues.split(",")
             newTokens = newValues.split(",")
@@ -80,6 +82,9 @@ class transformer(object):
                     numberSharedTokens == len(oldTokens):
                 listsAreConsistent = True
         return listsAreConsistent
+
+    def _determineConsistentPathogenicityAll(self, oldValues, newValues):
+        return sorted(oldValues) == sorted(newValues)
 
     def _normalize(self, value):
         """Make all values similar for improved comparison"""
@@ -113,7 +118,7 @@ class transformer(object):
             elif oldValue == "-" or oldValue in newValue:
                 variant = newRow["pyhgvs_Genomic_Coordinate_38"]
                 return "added data: %s | %s" % (oldValue, newValue)
-            elif self._consistentDelimitedLists(oldValue, newValue):
+            elif self._consistentDelimitedLists(oldValue, newValue, field):
                 return "unchanged"
             elif self._makeExpectedChanges.has_key(field):
                 updatedOldValue = self._normalize(self._makeExpectedChanges[field](oldValue))
