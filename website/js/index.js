@@ -461,7 +461,7 @@ var VariantDetail = React.createClass({
                     rowItem = variant[prop].split(":")[1];
                 } else if (prop === "HGVS_Protein") {
                     rowItem = variant[prop].split(":")[1];
-                } else if (prop === "Date_last_evaluated_ENIGMA") {
+                } else if (prop === "Date_last_evaluated_ENIGMA" && !isEmptyField(variant[prop])) {
                     rowItem = moment(variant[prop], "MM/DD/YYYY").format("DD MMMM YYYY");
                 } else {
                     rowItem = variant[prop];
