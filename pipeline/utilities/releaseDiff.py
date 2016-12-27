@@ -70,7 +70,7 @@ class transformer(object):
         if oldValues is None or newValues is None:
             return False
         elif field == "Pathogenicity_all":
-            return _determineConsistentPathogenicityAll(self, oldValues, newValues)
+            return self._determineConsistentPathogenicityAll(oldValues, newValues)
         elif re.search(",", oldValues) and re.search(",", newValues):
             oldTokens = oldValues.split(",")
             newTokens = newValues.split(",")
@@ -84,7 +84,7 @@ class transformer(object):
         return listsAreConsistent
 
     def _determineConsistentPathogenicityAll(self, oldValues, newValues):
-        return sorted(oldValues) == sorted(newValues)
+        return sorted(oldValues.strip()) == sorted(newValues.strip())
 
     def _normalize(self, value):
         """Make all values similar for improved comparison"""
