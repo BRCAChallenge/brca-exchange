@@ -69,8 +69,8 @@ class transformer(object):
         listsAreConsistent = False
         if oldValues is None or newValues is None:
             return False
-        elif re.search(";", oldValues) and re.search(";", newValues):
-            return equivalentSemicolonDelimitedValues(oldValues, newValues)
+        elif field == "Pathogenicity_all":
+            return equivalentPathogenicityAllValues(oldValues, newValues)
         elif re.search(",", oldValues) and re.search(",", newValues):
             oldTokens = oldValues.split(",")
             newTokens = newValues.split(",")
@@ -262,7 +262,13 @@ def appendVariantChangeTypesToOutput(variantChangeTypes, v2, output):
             writer.writerows(result)
 
 
-def equivalentSemicolonDelimitedValues(oldValues, newValues):
+def equivalentPathogenicityAllValues(oldValues, newValues):
+    '''
+    Pathogenicity_all is delimited by semicolons and commas, and may also have
+    reorders that affect the ability to simply compare by delimited values. As such,
+    direct character comparison is used between semicolon delimited sources (see test cases
+    for examples).
+    '''
     valuesAreEquivalent = False
     oldTokens = oldValues.split(";")
     newTokens = newValues.split(";")
