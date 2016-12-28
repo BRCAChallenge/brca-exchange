@@ -69,7 +69,7 @@ class transformer(object):
         listsAreConsistent = False
         if oldValues is None or newValues is None:
             return False
-        elif field == "Pathogenicity_all":
+        elif re.search(";", oldValues) and re.search(";", newValues):
             return equivalentSemicolonDelimitedValues(oldValues, newValues)
         elif re.search(",", oldValues) and re.search(",", newValues):
             oldTokens = oldValues.split(",")
