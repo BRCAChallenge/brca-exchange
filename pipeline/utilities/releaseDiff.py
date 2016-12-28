@@ -70,7 +70,7 @@ class transformer(object):
         if oldValues is None or newValues is None:
             return False
         elif field == "Pathogenicity_all":
-            return self._determineConsistentPathogenicityAll(oldValues, newValues)
+            return equivalentSemicolonDelimitedValues(oldValues, newValues)
         elif re.search(",", oldValues) and re.search(",", newValues):
             oldTokens = oldValues.split(",")
             newTokens = newValues.split(",")
@@ -82,9 +82,6 @@ class transformer(object):
                     numberSharedTokens == len(oldTokens):
                 listsAreConsistent = True
         return listsAreConsistent
-
-    def _determineConsistentPathogenicityAll(self, oldValues, newValues):
-        return sorted(oldValues.strip()) == sorted(newValues.strip())
 
     def _normalize(self, value):
         """Make all values similar for improved comparison"""
@@ -263,6 +260,22 @@ def appendVariantChangeTypesToOutput(variantChangeTypes, v2, output):
                 result.append(row)
 
             writer.writerows(result)
+
+
+def equivalentSemicolonDelimitedValues(oldValues, newValues):
+    valuesAreEquivalent = False
+    oldTokens = oldValues.split(";")
+    newTokens = newValues.split(";")
+    numberSharedTokens = 0
+    for token in oldTokens:
+        sortedOldToken = sorted(token)
+        for newToken in newTokens:
+            if sortedOldToken == sorted(newToken):
+                numberSharedTokens += 1
+    if numberSharedTokens == len(newTokens) and \
+            numberSharedTokens == len(oldTokens):
+        valuesAreEquivalent = True
+    return valuesAreEquivalent
 
 
 def generateReadme(args):
