@@ -47,7 +47,7 @@ run() {
 new() {
 	# Only run if current working directory is clean and on branch 'master'
 	if [ git diff-index --quiet HEAD -- ] && [ "$BRANCH_NAME" -eq "master" ]; then
-		run git pull origin master
+		run "Pulling master" git pull origin master
 		BRANCH=$(${SEMVER} -i minor ${VERSION})
 		run "Creating release branch ${BRANCH}" git checkout -b ${BRANCH}
 		run "Tagging release" npmversion minor
