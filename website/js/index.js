@@ -418,7 +418,7 @@ var VariantDetail = React.createClass({
     reformatDate: function(date) { //handles single dates or comma separated dates
         var dates = date.split(',');
         return dates.map(function(date) {
-            return moment(new Date(date)).format("DD MMMM YYYY");
+            return moment.utc(new Date(date)).format("DD MMMM YYYY");
         }).join();
     },
     render: function () {
@@ -534,7 +534,9 @@ var VariantDetail = React.createClass({
                         if (version[key] === previous[key]) {
                             continue;
                         }
-                    } else if (!_.contains(["Data_Release", "Change_Type", "id", "Synonyms"], key) && version[key] !== previous[key]) {
+                    }
+
+                    if (!_.contains(["Data_Release", "Change_Type", "id", "Synonyms"], key) && version[key] !== previous[key]) {
                         let versionDisplay = isEmptyField(version[key].toString()) ? <span className='empty'></span> : version[key].toString();
                         if (isEmptyField(previous[key].toString())) {
                             changes.push(
@@ -571,13 +573,8 @@ var VariantDetail = React.createClass({
                                 );
                             }
                         } else {
-                            // If date changed from YY format to YYYY format, ignore. Ex: 1/10/15 -> 1/10/2015
-                            if (key === "Date_last_evaluated_ENIGMA" &&
-                                moment(version[key], "MM/DD/YYYY").format("DD MMMM YYYY") === moment(version[key], "MM/DD/YYYY").format("DD MMMM YYYY")) {
-                                continue;
-                            }
                             // exLOVD citation format changed, heuristic for matching: first word (i.e. first author) same -> ignore
-                            else if (key === "Literature_source_exLOVD" &&
+                            if (key === "Literature_source_exLOVD" &&
                                 version[key].trim().split(' ')[0] === previous[key].trim().split(' ')[0]) {
                                 continue;
                             }
