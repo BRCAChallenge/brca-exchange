@@ -412,8 +412,8 @@ var VariantDetail = React.createClass({
             () => { this.setState({error: 'Problem connecting to server'}); });
     },
     onChildToggleMode: function() {
-        this.forceUpdate();
         this.props.toggleMode();
+	 this.forceUpdate();
     },
     reformatDate: function(date) { //handles single dates or comma separated dates
         var dates = date.split(',');
@@ -467,7 +467,7 @@ var VariantDetail = React.createClass({
                     rowItem = variant[prop].split(":")[1];
                 } else if (prop === "HGVS_Protein") {
                     rowItem = variant[prop].split(":")[1];
-                } else if (prop === "Date_last_evaluated_ENIGMA") {
+                } else if (prop === "Date_last_evaluated_ENIGMA" && !isEmptyField(variant[prop])) {
                     rowItem = moment(variant[prop], "MM/DD/YYYY").format("DD MMMM YYYY");
                 } else {
                     rowItem = variant[prop];
@@ -521,6 +521,10 @@ var VariantDetail = React.createClass({
                 }
                 for (var key in version) {
                     if (relevantFieldsToDisplayChanges.indexOf(key) === -1) {
+                        // Do not display changes for these fields.
+                        continue;
+                    } else if (isEmptyField(version[key].toString() && isEmptyField(previous[key]).toString())) {
+                        // If both are empty, there is no change.
                         continue;
                     }
 
@@ -530,10 +534,18 @@ var VariantDetail = React.createClass({
                         if (version[key] === previous[key]) {
                             continue;
                         }
-                    }
-
-                    if (!_.contains(["Data_Release", "Change_Type", "id", "Synonyms"], key) && version[key] !== previous[key]) {
-                        if (_.contains(listKeys, key)) {
+                    } else if (!_.contains(["Data_Release", "Change_Type", "id", "Synonyms"], key) && version[key] !== previous[key]) {
+                        let versionDisplay = isEmptyField(version[key].toString()) ? <span className='empty'></span> : version[key].toString();
+                        if (isEmptyField(previous[key].toString())) {
+                            changes.push(
+                                <span>
+                                    <strong>{ getDisplayName(key) }: </strong>
+                                    <span className='label label-success'><span className='glyphicon glyphicon-star'></span> New</span>
+                                    &nbsp;{ versionDisplay }
+                                </span>, <br />
+                            );
+                        }
+                        else if (_.contains(listKeys, key)) {
                             let delimiter = key === "Pathogenicity_all" ? ';' : ',';
                             let trimmedVersion = _.map(version[key].split(delimiter), elem => elem.replace(/_/g, " ").trim());
                             let trimmedPrevious = _.map(previous[key].split(delimiter), elem => elem.replace(/_/g, " ").trim());
@@ -559,23 +571,30 @@ var VariantDetail = React.createClass({
                                 );
                             }
                         } else {
-                            let versionDisplay = isEmptyField(version[key].toString()) ? <span className='empty'></span> : version[key].toString();
-                            if (isEmptyField(previous[key].toString())) {
-                                changes.push(
-                                    <span>
-                                        <strong>{ getDisplayName(key) }: </strong>
-                                        <span className='label label-success'><span className='glyphicon glyphicon-star'></span> New</span>
-                                        &nbsp;{ versionDisplay }
-                                    </span>, <br />
-                                );
-                            } else {
-                                changes.push(
-                                    <span>
-                                        <strong>{ getDisplayName(key) }: </strong>
-                                        {previous[key].toString()} <span className="glyphicon glyphicon-arrow-right"></span> {versionDisplay}
-                                    </span>, <br />
-                                );
+                            // If date changed from YY format to YYYY format, ignore. Ex: 1/10/15 -> 1/10/2015
+                            if (key === "Date_last_evaluated_ENIGMA" &&
+                                moment(version[key], "MM/DD/YYYY").format("DD MMMM YYYY") === moment(version[key], "MM/DD/YYYY").format("DD MMMM YYYY")) {
+                                continue;
                             }
+                            // exLOVD citation format changed, heuristic for matching: first word (i.e. first author) same -> ignore
+                            else if (key === "Literature_source_exLOVD" &&
+                                version[key].trim().split(' ')[0] === previous[key].trim().split(' ')[0]) {
+                                continue;
+                            }
+                            // ENIGMA rules URL's were previously broken, ignore the change from broken to correct links
+                            else if (key === "Assertion_method_citation_ENIGMA") {
+                                continue;
+                            }
+                            // Text change that actually means the same thing
+                            else if (key === "Pathogenicity_expert" && version[key] === "Not Yet Reviewed" && previous[key] === "Not Yet Classified") {
+                                continue;
+                            }
+                            changes.push(
+                                <span>
+                                    <strong>{ getDisplayName(key) }: </strong>
+                                    {previous[key].toString()} <span className="glyphicon glyphicon-arrow-right"></span> {versionDisplay}
+                                </span>, <br />
+                            );
                         }
                     }
                 }
@@ -592,15 +611,16 @@ var VariantDetail = React.createClass({
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
-                    <div className='text-center Variant-detail-title'>
-                        <h3>Variant Detail</h3>
-                        {variant['Change_Type'] === 'deleted' &&
-                            (<span className='deleted'>
-                                Note this variant has been removed from the BRCA Exchange.
-                                For reasons why, see the <Link to={`/release/${release.id}`}>release notes</Link>.
-                            </span>)
-                        }
-                    </div>
+                    <Col md={8} mdOffset={2}>
+                        <div className='text-center Variant-detail-title'>
+                            <h3>Variant Detail</h3>
+                            {variant['Change_Type'] === 'deleted' &&
+                                (<p className='deleted text-left'>
+                                    Note: This variant has been removed from the BRCA Exchange. For reasons on why this variant was removed please see the <Link to={`/release/${release.id}`}>release notes</Link>.
+                                </p>)
+                            }
+                        </div>
+                    </Col>
                 </Row>
                 <Row>
                     <Col md={8} mdOffset={2}>
@@ -627,6 +647,7 @@ var VariantDetail = React.createClass({
                                 {versionRows}
                             </tbody>
                         </Table>
+                        <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show All Public Data on this Variant" to see these changes.</p>
                     </Col>
                 </Row>
                 <Row>
@@ -682,7 +703,7 @@ var Application = React.createClass({
         return (
             <div>
                 <NavBarNew path={path} mode={this.state.mode} />
-                <RouteHandler toggleMode={this.onChildToggleMode} />
+                <RouteHandler toggleMode={this.onChildToggleMode} mode={this.state.mode} />
                 <Database
                     mode={this.state.mode}
                     toggleMode={this.onChildToggleMode}

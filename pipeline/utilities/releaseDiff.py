@@ -61,7 +61,7 @@ class transformer(object):
                     newColumnsAdded.append(ncol)
         return (oldColumnsRemoved, newColumnsAdded, newToOldNameMapping)
 
-    def _consistentDelimitedLists(self, oldValues, newValues):
+    def _consistentDelimitedLists(self, oldValues, newValues, field):
         """Determine if the old and new values are comma-separated
         lists in which the same elements have been assembled in
         a differnt order
@@ -69,6 +69,8 @@ class transformer(object):
         listsAreConsistent = False
         if oldValues is None or newValues is None:
             return False
+        elif field == "Pathogenicity_all":
+            return equivalentPathogenicityAllValues(oldValues, newValues)
         elif re.search(",", oldValues) and re.search(",", newValues):
             oldTokens = oldValues.split(",")
             newTokens = newValues.split(",")
@@ -113,7 +115,7 @@ class transformer(object):
             elif oldValue == "-" or oldValue in newValue:
                 variant = newRow["pyhgvs_Genomic_Coordinate_38"]
                 return "added data: %s | %s" % (oldValue, newValue)
-            elif self._consistentDelimitedLists(oldValue, newValue):
+            elif self._consistentDelimitedLists(oldValue, newValue, field):
                 return "unchanged"
             elif self._makeExpectedChanges.has_key(field):
                 updatedOldValue = self._normalize(self._makeExpectedChanges[field](oldValue))
@@ -136,7 +138,7 @@ class transformer(object):
         global total_variants_with_changes
 
         # Uncomment if using old data schema (e.g. pre pyhgvs_Genomic_Coordinate_38)
-        columns_to_ignore = ["change_type"]
+        columns_to_ignore = ["change_type", "Assertion_method_citation_ENIGMA"]
 
         # Header to group all logs the same variant
         variant_intro = "\n\n %s \n Old Source: %s \n New Source: %s \n\n" % (newRow["pyhgvs_Genomic_Coordinate_38"],
@@ -258,6 +260,28 @@ def appendVariantChangeTypesToOutput(variantChangeTypes, v2, output):
                 result.append(row)
 
             writer.writerows(result)
+
+
+def equivalentPathogenicityAllValues(oldValues, newValues):
+    '''
+    Pathogenicity_all is delimited by semicolons and commas, and may also have
+    reorders that affect the ability to simply compare by delimited values. As such,
+    direct character comparison is used between semicolon delimited sources (see test cases
+    for examples).
+    '''
+    valuesAreEquivalent = False
+    oldTokens = oldValues.split(";")
+    newTokens = newValues.split(";")
+    numberSharedTokens = 0
+    for token in oldTokens:
+        sortedOldToken = sorted(token)
+        for newToken in newTokens:
+            if sortedOldToken == sorted(newToken):
+                numberSharedTokens += 1
+    if numberSharedTokens == len(newTokens) and \
+            numberSharedTokens == len(oldTokens):
+        valuesAreEquivalent = True
+    return valuesAreEquivalent
 
 
 def generateReadme(args):

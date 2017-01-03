@@ -187,6 +187,10 @@ input:focus {
     background-color: transparent;    
 }
 
+.matched-variant-count {
+    font-size: 16px;
+}
+
 /**************************************************************/
 /**********     Variant pagination        *********************/
 /**************************************************************/
@@ -240,6 +244,9 @@ input:focus {
     height: 120px;
     padding: 10px;
     text-align: center;
+    float: none;
+    display: inline-block;
+    margin-right: -4px;
 }
 
 .logo-item img {

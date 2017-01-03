@@ -17,3 +17,4 @@ django/data/migrations/*.pyc
 django/brca/*.pyc
 django/python_notebook/.ipynb_checkpoints
 /../.idea/
+django/downloads/releases/*
