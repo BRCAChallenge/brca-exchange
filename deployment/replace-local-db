@@ -1,0 +1,55 @@
+#!/bin/bash
+set -o nounset
+set -o errexit
+
+# This script expects three arguments:
+
+# 1. Environment (beta or production)
+# 2. Local DB name (found in site_settings.py)
+# 3. Local user for db (found in site_settings.py)
+
+# Example:
+
+# Running `./deployment/replace-local-db beta storage.pg`
+# would replace the `storage.pg` db with the db from beta.
+# It will also overwrite the website/django/uploads/ directory.
+
+HOST=${HOST:-brcaexchange.cloudapp.net}
+USER=brca
+
+# Expects environment (beta or production) as first argument.
+ENVIRONMENT=$1
+LOCALDBNAME=$2
+LOCALUSER=#3
+
+if [ "${ENVIRONMENT}" == "beta" ] ;then
+    REMOTEDBNAME=storage.pg
+elif [ "${ENVIRONMENT}" != "production" ] ;then
+	REMOTEDBNAME=production.pg
+else
+	echo "ERROR: Please only enter 'beta' or 'production' as environment."
+    exit 1
+fi
+
+
+ssh -l${USER} ${HOST} <<-ENDSSH
+	set -o errexit
+	. /var/www/backend/${ENVIRONMENT}/virtualenv/bin/activate
+	sudo -u postgres pg_dump -d ${REMOTEDBNAME} -F c -c -f /tmp/full_db.dump
+ENDSSH
+
+# directory of this file
+DEPLOYMENT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+WEBSITE=${DEPLOYMENT}/../website
+
+REMOTEUPLOADS=/var/www/backend/${ENVIRONMENT}/django/uploads
+
+cd ${WEBSITE}
+
+# Copies remote uploads directory to local (contains community data specified in db)
+rsync -a --rsync-path='sudo rsync' ${USER}@${HOST}:$REMOTEUPLOADS/ ./django/uploads/ --delete
+# Copies db dump to local
+rsync -a --rsync-path='sudo rsync' ${USER}@${HOST}:/tmp/full_db.dump /tmp/
+
+# Overwrite local db with db dump.
+sudo -u ${LOCALUSER} pg_restore /tmp/full_db.dump -c -v -1 -d ${LOCALDBNAME}
