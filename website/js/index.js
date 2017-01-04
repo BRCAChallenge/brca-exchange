@@ -395,7 +395,7 @@ function getDisplayName(key) {
 // test for the various forms of blank fields
 function isEmptyField(value) {
     var v = value.trim();
-    return v === '' || v === '-';
+    return v === '' || v === '-' || v === 'None';
 }
 
 var VariantDetail = React.createClass({
@@ -414,6 +414,12 @@ var VariantDetail = React.createClass({
     onChildToggleMode: function() {
         this.props.toggleMode();
 	 this.forceUpdate();
+    },
+    reformatDate: function(date) { //handles single dates or comma separated dates
+        var dates = date.split(',');
+        return dates.map(function(date) {
+            return moment.utc(new Date(date)).format("DD MMMM YYYY");
+        }).join();
     },
     render: function () {
         var {data, error} = this.state;
@@ -490,6 +496,12 @@ var VariantDetail = React.createClass({
             "Allele_Origin_ClinVar"
         ];
 
+        // keys that contain date values that need reformatting for the ui
+        var dateKeys = [
+            "Date_Last_Updated_ClinVar",
+            "Date_last_evaluated_ENIGMA"
+        ];
+
         // In research_mode, only show research_mode changes.
         var relevantFieldsToDisplayChanges = cols.map(function(col) {
             return col.prop;
@@ -509,10 +521,22 @@ var VariantDetail = React.createClass({
                 }
                 for (var key in version) {
                     if (relevantFieldsToDisplayChanges.indexOf(key) === -1) {
+                        // Do not display changes for these fields.
                         continue;
                     } else if (isEmptyField(version[key].toString() && isEmptyField(previous[key]).toString())) {
+                        // If both are empty, there is no change.
                         continue;
-                    } else if (!_.contains(["Data_Release", "Change_Type", "id", "Synonyms"], key) && version[key] !== previous[key]) {
+                    }
+
+                    if (_.contains(dateKeys, key) && !isEmptyField(version[key])) {
+                        version[key] = this.reformatDate(version[key]);
+                        previous[key] = this.reformatDate(previous[key]);
+                        if (version[key] === previous[key]) {
+                            continue;
+                        }
+                    }
+
+                    if (!_.contains(["Data_Release", "Change_Type", "id", "Synonyms"], key) && version[key] !== previous[key]) {
                         let versionDisplay = isEmptyField(version[key].toString()) ? <span className='empty'></span> : version[key].toString();
                         if (isEmptyField(previous[key].toString())) {
                             changes.push(
@@ -549,13 +573,8 @@ var VariantDetail = React.createClass({
                                 );
                             }
                         } else {
-                            // If date changed from YY format to YYYY format, ignore. Ex: 1/10/15 -> 1/10/2015
-                            if (key === "Date_last_evaluated_ENIGMA" &&
-                                moment(version[key], "MM/DD/YYYY").format("DD MMMM YYYY") === moment(version[key], "MM/DD/YYYY").format("DD MMMM YYYY")) {
-                                continue;
-                            }
                             // exLOVD citation format changed, heuristic for matching: first word (i.e. first author) same -> ignore
-                            else if (key === "Literature_source_exLOVD" &&
+                            if (key === "Literature_source_exLOVD" &&
                                 version[key].trim().split(' ')[0] === previous[key].trim().split(' ')[0]) {
                                 continue;
                             }
