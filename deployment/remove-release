@@ -1,0 +1,50 @@
+#!/bin/bash
+set -o nounset
+set -o errexit
+
+# This script expects two arguments:
+
+# 1. Environment (dev or beta)
+# 2. User (only necessary if dev)
+
+# Example:
+
+# Running `./deployment/remove-release dev zfischma`
+# would remove the most recent data release from zfischma's dev box.
+# Note that beta does not require a user argument as it defaults to user brca.
+
+# directory of this file
+DEPLOYMENT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+WEBSITE=${DEPLOYMENT}/../website
+
+# Expects environment (beta or production) as first argument.
+ENVIRONMENT=$1
+
+if [ "${ENVIRONMENT}" == "dev" && $# -lt 2 ] ;then
+	echo "ERROR: Please enter a user for the dev environment."
+    exit 1
+fi
+
+USER=${2:-brca}
+
+if [ "${ENVIRONMENT}" == "dev" ] ;then
+	HOST=${HOST:-brcaexchange-dev.cloudapp.net}
+	ssh -l${USER} ${HOST} <<-ENDSSH
+	    set -o errexit
+    	. /var/www/backend/beta/virtualenv/bin/activate
+	    python /home/${USER}/brca-exchange/website/django/manage.py remove_last_release
+	ENDSSH
+elif [ "${ENVIRONMENT}" == "beta" ] ;then
+	HOST=${HOST:-brcaexchange.cloudapp.net}
+	ssh -l${USER} ${HOST} <<-ENDSSH
+	    set -o errexit
+	    . /var/www/backend/${ENVIRONMENT}/virtualenv/bin/activate
+		python /var/www/backend/${ENVIRONMENT}/django/manage.py remove_last_release
+	ENDSSH
+else
+    echo "ERROR: Please only enter 'dev' or 'beta' as environment."
+    exit 1
+fi
+
+echo "Done!"
+
