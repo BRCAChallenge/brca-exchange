@@ -96,3 +96,9 @@ To allow CCI to push code to azure, an authorized ssh key is added to the ssh co
 on the azure hosts. The ssh key can be managed in the CCI account settings.
 
 You may log in to circle-ci with your github credentials.
+
+# Community Data
+
+##### WARNING: This will delete and replace any relevant data in the beta database and `/var/www/backend/beta/django/uploads/` with data from production. Affected tables include all `auth` prefixed tables, all `users` prefixed tables, `django_admin_log`, and `django_content_type`.
+
+To copy community data from the production server and database to beta, run `sh deployment/copy-community-data.sh`.
