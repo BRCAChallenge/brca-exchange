@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connection
 from data.models import Variant, DataRelease
+from django.db import transaction
 
 
 class Command(BaseCommand):
@@ -27,14 +28,22 @@ class Command(BaseCommand):
                 CREATE INDEX words_idx ON words(word text_pattern_ops);
             """)
 
+    @transaction.atomic
     def handle(self, *args, **options):
-        latest_release_id = DataRelease.objects.all().order_by("-id")[0]
+        latest_release_id = DataRelease.objects.all().order_by("-id")[0].id
 
+        # Delete variants from latest release
         Variant.objects.filter(Data_Release_id=latest_release_id).delete()
-        DataRelease.objects.filter(id=latest_release_id).delete()
+
+        print "Deleted variants from most recent release."
+
+        # Delete latest data_release and update materialized view of variants
+        with connection.cursor() as cursor:
+            cursor.execute("DELETE FROM data_release WHERE id = %s", [latest_release_id])
+            cursor.execute("REFRESH MATERIALIZED VIEW currentvariant")
+
+        print "Deleted most recent data_release and updated materialized view."
 
         self.update_autocomplete_words()
 
-        # update materialized view of current variants
-        with connection.cursor() as cursor:
-            cursor.execute("REFRESH MATERIALIZED VIEW currentvariant")
+        print "Updated autocomplete words."
