@@ -17,7 +17,7 @@ set -o errexit
 DEPLOYMENT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 WEBSITE=${DEPLOYMENT}/../website
 
-# Expects environment (beta or production) as first argument.
+# Expects environment (dev or beta) as first argument.
 ENVIRONMENT=$1
 
 if [ "${ENVIRONMENT}" == "dev" && $# -lt 2 ] ;then
@@ -25,6 +25,7 @@ if [ "${ENVIRONMENT}" == "dev" && $# -lt 2 ] ;then
     exit 1
 fi
 
+# Expects user as second argument if environment is set to dev.
 USER=${2:-brca}
 
 if [ "${ENVIRONMENT}" == "dev" ] ;then
