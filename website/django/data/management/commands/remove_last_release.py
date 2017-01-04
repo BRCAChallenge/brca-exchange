@@ -47,3 +47,4 @@ class Command(BaseCommand):
         self.update_autocomplete_words()
 
         print "Updated autocomplete words."
+        print "Done!"
