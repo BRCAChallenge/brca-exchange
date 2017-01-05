@@ -8,6 +8,11 @@ PREID=alpha
 DIR=$(dirname "${BASH_SOURCE[0]}")
 cd ${DIR}/../website
 
+# Get name of current branch
+BRANCH_NAME="$(git symbolic-ref HEAD 2>/dev/null)" ||
+BRANCH_NAME="(unnamed branch)"     # detached HEAD
+BRANCH_NAME=${BRANCH_NAME##refs/heads/}
+
 # Horrible work-around for 'npm version'
 # https://github.com/npm/npm/issues/9111
 npmversion() {
@@ -40,12 +45,18 @@ run() {
 }
 
 new() {
-	BRANCH=$(${SEMVER} -i minor ${VERSION})
-	run "Creating release branch ${BRANCH}" git checkout -b ${BRANCH}
-	run "Tagging release" npmversion minor
-	run "Incrementing master version" git checkout master
-	run "" npmversion $(${SEMVER} --preid ${PREID} -i preminor ${VERSION})
-	run "Pushing to origin" git push origin --tags master ${BRANCH}
+	# Only run if current working directory is clean and on branch 'master'
+	if [ git diff-index --quiet HEAD -- ] && [ "$BRANCH_NAME" -eq "master" ]; then
+		run "Pulling master" git pull origin master
+		BRANCH=$(${SEMVER} -i minor ${VERSION})
+		run "Creating release branch ${BRANCH}" git checkout -b ${BRANCH}
+		run "Tagging release" npmversion minor
+		run "Incrementing master version" git checkout master
+		run "" npmversion $(${SEMVER} --preid ${PREID} -i preminor ${VERSION})
+		run "Pushing to origin" git push origin --tags master ${BRANCH}
+	else
+		{ echo "Error $? running '${cmd}' because git working directory is not clean and/or not on branch 'master'."; FAILED=true; }
+	fi
 #	run "Publishing" git checkout ${BRANCH}
 #	run "" npm publish
 }
