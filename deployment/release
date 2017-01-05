@@ -46,7 +46,7 @@ run() {
 
 new() {
 	# Only run if current working directory is clean and on branch 'master'
-	if [ git diff-index --quiet HEAD -- ] && [ "$BRANCH_NAME" -eq "master" ]; then
+	if [[ -z $(git status -s) ]] && [[ "$BRANCH_NAME" == "master" ]]; then
 		run "Pulling master" git pull origin master
 		BRANCH=$(${SEMVER} -i minor ${VERSION})
 		run "Creating release branch ${BRANCH}" git checkout -b ${BRANCH}
