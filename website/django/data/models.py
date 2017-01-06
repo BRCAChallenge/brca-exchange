@@ -8,6 +8,7 @@ class DataRelease(models.Model):
     notes = models.TextField()
     sources = models.TextField()
     md5sum = models.TextField()
+    created = models.DateTimeField(auto_now_add=True, null=True)
 
     class Meta:
         db_table = "data_release"
