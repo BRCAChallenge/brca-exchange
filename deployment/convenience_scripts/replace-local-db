@@ -27,7 +27,7 @@ LOCALUSER=$3
 
 if [ "${ENVIRONMENT}" == "beta" ] ;then
     REMOTEDBNAME=storage.pg
-elif [ "${ENVIRONMENT}" != "production" ] ;then
+elif [ "${ENVIRONMENT}" == "production" ] ;then
 	REMOTEDBNAME=production.pg
 else
 	echo "ERROR: Please only enter 'beta' or 'production' as environment."
