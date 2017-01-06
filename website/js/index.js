@@ -335,6 +335,7 @@ var Database = React.createClass({
         return  (
 			<Row>
 				<Col sm={10} smOffset={1}  className="alert alert-warning">
+					{this.props.mode === 'default' && <img id='enigma-logo' src={require('./img/enigma_logo.png')} />}
 					<RawHTML ref='content' html={message}/>
 					{this.props.mode === 'research_mode' && <Button className="btn-small" onClick={this.toggleMode}>
 						Show Expert Reviewed Data Only

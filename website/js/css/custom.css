@@ -489,6 +489,12 @@ th[role='columnheader'] .help, .help-target .help {
     object-fit: cover;
 }
 
+#enigma-logo {
+    height: 100px;
+    float: left;
+    padding-right: 30px;
+}
+
 /**************************************************************/
 /**********      Community                *********************/
 /**************************************************************/
