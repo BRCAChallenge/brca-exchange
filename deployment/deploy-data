@@ -18,10 +18,6 @@ set -o errexit
 HOST=${HOST:-brcaexchange.cloudapp.net}
 USER=brca
 
-# directory of this file
-DEPLOYMENT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-WEBSITE=${DEPLOYMENT}/../website
-
 # Expects environment (beta or production) as first argument.
 ENVIRONMENT=$1
 if [ "${ENVIRONMENT}" != "beta" ] && [ "${ENVIRONMENT}" != "production" ] ;then
@@ -38,8 +34,6 @@ fi
 RELEASEDIRECTORY=$(basename $RELEASEDIRECTORYPATH)
 REMOTERELEASES=/var/www/backend/${ENVIRONMENT}/django/downloads/releases
 
-cd ${WEBSITE}
-
 # Copies directory to downloads/releases/
 rsync -a --rsync-path='sudo rsync' $RELEASEDIRECTORYPATH ${USER}@${HOST}:$REMOTERELEASES/
 
@@ -52,4 +46,6 @@ ssh -l${USER} ${HOST} <<-ENDSSH
     set -o errexit
     . /var/www/backend/${ENVIRONMENT}/virtualenv/bin/activate
     python /var/www/backend/${ENVIRONMENT}/django/manage.py addrelease ${DATA} ${METADATA} ${REMOVED}
+    sudo rm /var/www/backend/${ENVIRONMENT}/django/downloads/releases/current_release.tar.gz
+    cp /var/www/backend/${ENVIRONMENT}/django/downloads/releases/${RELEASEDIRECTORY}/*.tar.gz /var/www/backend/${ENVIRONMENT}/django/downloads/releases/current_release.tar.gz
 ENDSSH
