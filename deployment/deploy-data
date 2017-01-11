@@ -47,5 +47,5 @@ ssh -l${USER} ${HOST} <<-ENDSSH
     . /var/www/backend/${ENVIRONMENT}/virtualenv/bin/activate
     python /var/www/backend/${ENVIRONMENT}/django/manage.py addrelease ${DATA} ${METADATA} ${REMOVED}
     sudo rm /var/www/backend/${ENVIRONMENT}/django/downloads/releases/current_release.tar.gz
-    cp /var/www/backend/${ENVIRONMENT}/django/downloads/releases/${RELEASEDIRECTORY}/*.tar.gz /var/www/backend/${ENVIRONMENT}/django/downloads/releases/current_release.tar.gz
+    find /var/www/backend/${ENVIRONMENT}/django/downloads/releases/${RELEASEDIRECTORY}/ -name 'release*.tar.gz' -exec cp {} /var/www/backend/${ENVIRONMENT}/django/downloads/releases/current_release.tar.gz  \;
 ENDSSH
