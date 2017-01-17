@@ -3,12 +3,16 @@
 import argparse
 import csv
 import re
+import json
 import logging
+import pdb
+
 
 added_data = None
 diff = None
 total_variants_with_changes = 0
 total_variants_with_additions = 0
+diff_json = {}
 
 # Change types as used in the DB to signify changes to variants between versions
 CHANGE_TYPES = {
@@ -105,6 +109,7 @@ class transformer(object):
         is unchanged.
         """
         global added_data
+        variant = newRow["pyhgvs_Genomic_Coordinate_38"]
         if field in self._newColumnsAdded:
             return "added"
         else:
@@ -113,7 +118,7 @@ class transformer(object):
             if oldValue == newValue:
                 return "unchanged"
             elif oldValue == "-" or oldValue in newValue:
-                variant = newRow["pyhgvs_Genomic_Coordinate_38"]
+                appendToJSON(variant, field, oldValue, newValue)
                 return "added data: %s | %s" % (oldValue, newValue)
             elif self._consistentDelimitedLists(oldValue, newValue, field):
                 return "unchanged"
@@ -122,8 +127,10 @@ class transformer(object):
                 if updatedOldValue == newValue:
                     return "minor change: %s | %s" % (oldValue, newValue)
                 else:
+                    appendToJSON(variant, field, oldValue, newValue)
                     return "major change: %s | %s" % (oldValue, newValue)
             else:
+                appendToJSON(variant, field, oldValue, newValue)
                 return "major change: %s | %s" % (oldValue, newValue)
 
     def compareRow(self, oldRow, newRow):
@@ -302,6 +309,19 @@ def generateReadme(args):
             readme.write(k + ": " + v + '\n\n')
 
 
+def appendToJSON(variant, field, oldRow, newRow):
+        global diff_json
+
+        if variant not in diff_json:
+            diff_json[variant] = []
+
+        pdb.set_trace()
+
+        diff_json[variant].append({
+            diff: []
+        })
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--v2", default="built.tsv",
@@ -317,6 +337,8 @@ def main():
                         help="Variants with data added in version 2")
     parser.add_argument("--diff", default="diff.txt",
                         help="Variant diff output file")
+    # parser.add_argument("--diff_json", default="diff.json",
+    #                     help="Variant diff output json")
     parser.add_argument("--output", default="built_with_change_types.tsv",
                         help="Output file with change_type column appended")
     parser.add_argument("--artifacts_dir", help='Artifacts directory with pipeline artifact files.')
