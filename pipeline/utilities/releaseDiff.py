@@ -110,11 +110,12 @@ class transformer(object):
         """
         global added_data
         variant = newRow["pyhgvs_Genomic_Coordinate_38"]
+        newValue = self._normalize(newRow[field])
+        oldValue = self._normalize(oldRow[self._newColumnNameToOld[field]])
         if field in self._newColumnsAdded:
-            return "added"
+            appendToJSON(variant, field, oldValue, newValue)
+            return "added data: %s | %s" % (oldValue, newValue)
         else:
-            newValue = self._normalize(newRow[field])
-            oldValue = self._normalize(oldRow[self._newColumnNameToOld[field]])
             if oldValue == newValue:
                 return "unchanged"
             elif oldValue == "-" or oldValue in newValue:
@@ -309,17 +310,54 @@ def generateReadme(args):
             readme.write(k + ": " + v + '\n\n')
 
 
-def appendToJSON(variant, field, oldRow, newRow):
-        global diff_json
+def appendToJSON(variant, field, oldValue, newValue):
+    global diff_json
 
-        if variant not in diff_json:
-            diff_json[variant] = []
+    if variant not in diff_json:
+        diff_json[variant] = []
 
-        pdb.set_trace()
+    diff = determineDiffForJSON(field, oldValue, newValue)
 
-        diff_json[variant].append({
-            diff: []
-        })
+    diff_json[variant].append(diff)
+
+
+def determineDiffForJSON(field, oldValue, newValue):
+    diff = {
+            'field': field,
+            'field_type': None,
+            'added': None,
+            'removed': None
+            }
+
+    if ',' in oldValue or ',' in newValue:
+        diff['field_type'] = 'list'
+    else:
+        diff['field_type'] = 'individual'
+
+    if diff['field_type'] == 'list':
+        oldValues = oldValue.split(',')
+        newValues = newValue.split(',')
+        (added, removed) = determineDiffForList(oldValues, newValues)
+    elif diff['field_type'] == 'individual':
+        added = newValue
+        removed = oldValue
+
+    diff['added'] = added
+    diff['removed'] = removed
+
+    return diff
+
+
+def determineDiffForList(oldValues, newValues):
+    added = []
+    removed = []
+    for value in oldValues:
+        if value not in newValues:
+            removed.append(value)
+    for value in newValues:
+        if value not in oldValues:
+            added.append(value)
+    return (added, removed)
 
 
 def main():
