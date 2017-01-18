@@ -389,14 +389,14 @@ def checkPathogenicityAllDiffBySource(source, oldValuesBySource, newValuesBySour
                     for oV in oldVs:
                         if oV not in newVs:
                             if len(classificationRemoved) > 0:
-                                classificationRemoved += ' ,'
+                                classificationRemoved += ','
                             classificationRemoved += oV
 
                     # Check for added classifications
                     for nV in newVs:
                         if nV not in oldVs:
                             if len(classificationAdded) > 0:
-                                classificationAdded += ' ,'
+                                classificationAdded += ','
                             classificationAdded += nV
 
     # Replace the source at the end of the diff string.
