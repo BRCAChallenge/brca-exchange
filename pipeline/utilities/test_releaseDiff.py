@@ -61,6 +61,20 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(classificationAdded, 'Pending (BIC)')
         self.assertEqual(classificationRemoved, 'Uncertain_significance,Likely_benign (BIC)')
 
+    def test_pathogenicity_all_diff_by_source_drop_source_add_source(self):
+        prev = ["Pending (ClinVar)"]
+        new = ["Uncertain_significance,Likely_benign,Pending (BIC)"]
+
+        # Test ClinVar change
+        (classificationAdded, classificationRemoved) = checkPathogenicityAllDiffBySource("ClinVar", prev, new)
+        self.assertEqual(classificationAdded, '')
+        self.assertEqual(classificationRemoved, 'Pending (ClinVar)')
+
+        # Test BIC no change
+        (classificationAdded, classificationRemoved) = checkPathogenicityAllDiffBySource("BIC", prev, new)
+        self.assertEqual(classificationAdded, 'Uncertain_significance,Likely_benign,Pending (BIC)')
+        self.assertEqual(classificationRemoved, '')
+
 
 if __name__ == '__main__':
     pass

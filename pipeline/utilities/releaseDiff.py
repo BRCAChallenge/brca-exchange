@@ -370,12 +370,16 @@ def determineDiffForPathogenicityAll(oldValue, newValue):
 def checkPathogenicityAllDiffBySource(source, oldValuesBySource, newValuesBySource):
     # Check value diffs by source. oldValues and newValues are lists of classifications by source.
     # e.g. ["Pathogenic, Not Yet Reviewed (BIC)", "Benign (ClinVar)"]
+    foundSourceInOldValues = False
+    foundSourceInNewValues = False
     classificationAdded = ''
     classificationRemoved = ''
     for oldValues in oldValuesBySource:
         if source in oldValues:
+            foundSourceInOldValues = True
             for newValues in newValuesBySource:
                 if source in newValues:
+                    foundSourceInNewValues = True
 
                     # Remove source from string for comparison.
                     oldValues = oldValues.replace('({})'.format(source), '').strip()
@@ -404,6 +408,16 @@ def checkPathogenicityAllDiffBySource(source, oldValuesBySource, newValuesBySour
         classificationAdded += ' ({})'.format(source)
     if len(classificationRemoved) > 0:
         classificationRemoved += ' ({})'.format(source)
+
+    # Handle case where new source is added.
+    if foundSourceInOldValues is not True:
+        for newValues in newValuesBySource:
+            if source in newValues:
+                classificationAdded = newValues
+
+    # Handle case where old source is removed.
+    if foundSourceInNewValues is not True and foundSourceInOldValues is True:
+        classificationRemoved = oldValues
 
     return (classificationAdded, classificationRemoved)
 
