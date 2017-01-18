@@ -1,6 +1,6 @@
 import pytest
 import unittest
-from releaseDiff import equivalentPathogenicityAllValues, checkPathogenicityAllDiffBySource
+from releaseDiff import equivalentPathogenicityAllValues, checkPathogenicityAllDiffBySource, determineDiffForPathogenicityAll
 import pdb
 
 
@@ -74,6 +74,15 @@ class TestStringMethods(unittest.TestCase):
         (classificationAdded, classificationRemoved) = checkPathogenicityAllDiffBySource("BIC", prev, new)
         self.assertEqual(classificationAdded, 'Uncertain_significance,Likely_benign,Pending (BIC)')
         self.assertEqual(classificationRemoved, '')
+
+    def test_pathogenicity_all_diff_change(self):
+        prev = "Uncertain_significance,Likely_benign (BIC); Pending (ClinVar)"
+        new = "Uncertain_significance,Likely_benign,Pending (ClinVar); Pending (BIC)"
+        (added, removed) = determineDiffForPathogenicityAll(prev, new)
+        self.assertIn('Pending (BIC)', added)
+        self.assertIn('Uncertain_significance,Likely_benign (ClinVar)', added)
+        self.assertIn('Uncertain_significance,Likely_benign (BIC)', removed)
+        self.assertNotIn('Pending (ClinVar)', removed)
 
 
 if __name__ == '__main__':
