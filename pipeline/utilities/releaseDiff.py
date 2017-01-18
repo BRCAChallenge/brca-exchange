@@ -227,7 +227,7 @@ class v1ToV2(transformer):
                                                  re.sub("NM_007294", "NM_007294.3", xx))),
         # In an annoying thing, the old ExAC allele frequency was missing a ')'
         "Allele_Frequency": (lambda xx: re.sub("\(ExAC", "(ExAC)", xx)),
-        # for polyphen and sift predictions, the old data combined the 
+        # for polyphen and sift predictions, the old data combined the
         # numerical and categorical scores
         "Polyphen_Prediction": (lambda xx: re.sub("\(*$", "", xx)),
         "Sift_Prediction": (lambda xx: re.sub("\(*$", "", xx)),
@@ -292,24 +292,6 @@ def equivalentPathogenicityAllValues(oldValues, newValues):
     return valuesAreEquivalent
 
 
-def generateReadme(args):
-
-    output_file_descriptions = {
-        "v1": args.v1,
-        "v2": args.v2,
-        "v1_release_date": args.v1_release_date,
-        "removed.tsv": "This file lists variants that are present in " + args.v1 + " and that are not present in " + args.v2 + " as determined by their pyhgvs_Genomic_Coordinate_38 values.",
-        "added.tsv": "This file lists variants that are present in " + args.v2 + " and that are not present in " + args.v1 + " as determined by their pyhgvs_Genomic_Coordinate_38 values.",
-        "added_data.tsv": "This file lists variants and relevant additional data in " + args.v2 + " that was not present for the same variant in " + args.v1 + " . Variants are defined by their pyhgvs_Genomic_Coordinate_38 values.",
-        "diff.txt": "This file lists variants and changes in " + args.v2 + " that were different for the same variant in " + args.v1 + " . Variants are defined by their pyhgvs_Genomic_Coordinate_38 values."
-    }
-
-    with open(args.diff_dir + "README.txt", "w") as readme:
-        readme.write("This file contains basic information about the diff directory.\n\n\n")
-        for k, v in output_file_descriptions.iteritems():
-            readme.write(k + ": " + v + '\n\n')
-
-
 def appendToJSON(variant, field, oldValue, newValue):
     global diff_json
 
@@ -358,6 +340,29 @@ def determineDiffForList(oldValues, newValues):
         if value not in oldValues:
             added.append(value)
     return (added, removed)
+
+
+def generateDiffJSONFile(diff_json):
+    with open('diff.json', 'w') as outfile:
+        json.dump(diff_json, outfile)
+
+
+def generateReadme(args):
+
+    output_file_descriptions = {
+        "v1": args.v1,
+        "v2": args.v2,
+        "v1_release_date": args.v1_release_date,
+        "removed.tsv": "This file lists variants that are present in " + args.v1 + " and that are not present in " + args.v2 + " as determined by their pyhgvs_Genomic_Coordinate_38 values.",
+        "added.tsv": "This file lists variants that are present in " + args.v2 + " and that are not present in " + args.v1 + " as determined by their pyhgvs_Genomic_Coordinate_38 values.",
+        "added_data.tsv": "This file lists variants and relevant additional data in " + args.v2 + " that was not present for the same variant in " + args.v1 + " . Variants are defined by their pyhgvs_Genomic_Coordinate_38 values.",
+        "diff.txt": "This file lists variants and changes in " + args.v2 + " that were different for the same variant in " + args.v1 + " . Variants are defined by their pyhgvs_Genomic_Coordinate_38 values."
+    }
+
+    with open(args.diff_dir + "README.txt", "w") as readme:
+        readme.write("This file contains basic information about the diff directory.\n\n\n")
+        for k, v in output_file_descriptions.iteritems():
+            readme.write(k + ": " + v + '\n\n')
 
 
 def main():
@@ -433,6 +438,8 @@ def main():
 
     # Adds change_type column and values for each variant in v2 to the output
     appendVariantChangeTypesToOutput(variantChangeTypes, args.v2, args.output)
+
+    generateDiffJSONFile(diff_json)
 
     generateReadme(args)
 
