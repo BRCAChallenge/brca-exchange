@@ -6,6 +6,10 @@ import pdb
 
 class TestStringMethods(unittest.TestCase):
 
+    ###################################
+    # Tests for determining change type
+    ###################################
+
     def test_reordered_pathogenicity_all_data(self):
         prev = "Uncertain_significance,Likely_benign (ClinVar); Pending (BIC)"
         new = "Likely_benign,Uncertain_significance (ClinVar); Pending (BIC)"
@@ -25,6 +29,10 @@ class TestStringMethods(unittest.TestCase):
         prev = "Uncertain_significance,Likely_benign (ClinVar)"
         new = "Likely_benign,Uncertain_significance (ClinVar)"
         self.assertTrue(equivalentPathogenicityAllValues(prev, new))
+
+    ###################################
+    # Tests for determining diff json
+    ###################################
 
     def test_pathogenicity_all_diff_by_source_same_values_different_order(self):
         prev = "Uncertain_significance,Likely_benign (ClinVar)"
@@ -56,7 +64,7 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(classificationAdded, 'Uncertain_significance,Likely_benign (ClinVar)')
         self.assertEqual(classificationRemoved, '')
 
-        # Test BIC no change
+        # Test BIC
         (classificationAdded, classificationRemoved) = checkPathogenicityAllDiffBySource("BIC", prev, new)
         self.assertEqual(classificationAdded, 'Pending (BIC)')
         self.assertEqual(classificationRemoved, 'Uncertain_significance,Likely_benign (BIC)')
@@ -70,7 +78,7 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(classificationAdded, '')
         self.assertEqual(classificationRemoved, 'Pending (ClinVar)')
 
-        # Test BIC no change
+        # Test BIC change
         (classificationAdded, classificationRemoved) = checkPathogenicityAllDiffBySource("BIC", prev, new)
         self.assertEqual(classificationAdded, 'Uncertain_significance,Likely_benign,Pending (BIC)')
         self.assertEqual(classificationRemoved, '')
@@ -84,6 +92,12 @@ class TestStringMethods(unittest.TestCase):
         self.assertIn('Uncertain_significance,Likely_benign (BIC)', removed)
         self.assertNotIn('Pending (ClinVar)', removed)
 
+    def test_pathogenicity_all_diff_no_change(self):
+        prev = "Uncertain_significance,Likely_benign (BIC); Pending (ClinVar)"
+        new = "Uncertain_significance,Likely_benign (BIC); Pending (ClinVar)"
+        (added, removed) = determineDiffForPathogenicityAll(prev, new)
+        self.assertIsNone(added)
+        self.assertIsNone(removed)
 
 if __name__ == '__main__':
     pass

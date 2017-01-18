@@ -364,6 +364,10 @@ def determineDiffForPathogenicityAll(oldValue, newValue):
             added.append(classificationAdded)
         if len(classificationRemoved) > 0:
             removed.append(classificationRemoved)
+    if len(added) == 0:
+        added = None
+    if len(removed) == 0:
+        removed = None
     return (added, removed)
 
 
