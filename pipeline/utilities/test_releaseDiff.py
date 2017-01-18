@@ -1,6 +1,7 @@
 import pytest
 import unittest
-from releaseDiff import equivalentPathogenicityAllValues
+from releaseDiff import equivalentPathogenicityAllValues, checkPathogenicityAllDiffBySource
+import pdb
 
 
 class TestStringMethods(unittest.TestCase):
@@ -25,6 +26,26 @@ class TestStringMethods(unittest.TestCase):
         new = "Likely_benign,Uncertain_significance (ClinVar)"
         self.assertTrue(equivalentPathogenicityAllValues(prev, new))
 
+    def test_pathogenicity_all_diff_by_source_same_values_different_order(self):
+        prev = "Uncertain_significance,Likely_benign (ClinVar)"
+        new = "Likely_benign,Uncertain_significance (ClinVar)"
+        (classificationAdded, classificationRemoved) = checkPathogenicityAllDiffBySource("ClinVar", prev, new)
+        self.assertIs(classificationAdded, '')
+        self.assertIs(classificationRemoved, '')
+
+    def test_pathogenicity_all_diff_by_source_change(self):
+        prev = ["Uncertain_significance,Likely_benign (ClinVar)", "Pending (BIC)"]
+        new = ["Likely_benign,Pathogenic (ClinVar)", "Pending (BIC)"]
+
+        # Test ClinVar change
+        (classificationAdded, classificationRemoved) = checkPathogenicityAllDiffBySource("ClinVar", prev, new)
+        self.assertEqual(classificationAdded, 'Pathogenic (ClinVar)')
+        self.assertEqual(classificationRemoved, 'Uncertain_significance (ClinVar)')
+
+        # Test BIC no change
+        (classificationAdded, classificationRemoved) = checkPathogenicityAllDiffBySource("BIC", prev, new)
+        self.assertIs(classificationAdded, '')
+        self.assertIs(classificationRemoved, '')
 
 if __name__ == '__main__':
     pass

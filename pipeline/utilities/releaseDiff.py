@@ -326,8 +326,10 @@ def determineDiffForJSON(field, oldValue, newValue):
         added = newValue
         removed = oldValue
 
-    diff['added'] = added
-    diff['removed'] = removed
+    if len(added) > 0:
+        diff['added'] = added
+    if len(removed) > 0:
+        diff['removed'] = removed
 
     return diff
 
@@ -354,53 +356,56 @@ def determineDiffForPathogenicityAll(oldValue, newValue):
     sources = ['BIC', 'ClinVar', 'ENIGMA']
     added = []
     removed = []
-    oldValues = oldValue.split(';')
-    newValues = newValue.split(';')
+    oldValuesBySource = oldValue.split(';')
+    newValuesBySource = newValue.split(';')
     for source in sources:
-        (sourceAdded, sourceRemoved) = checkPathogenicityAllDiffBySource(source, oldValues, newValues)
-        if len(sourceAdded) > 0:
-            added.append(sourceAdded)
-        if len(sourceRemoved) > 0:
-            removed.append(sourceRemoved)
-    if len(added) == 0:
-        added = None
-    if len(removed) == 0:
-        removed = None
+        (classificationAdded, classificationRemoved) = checkPathogenicityAllDiffBySource(source, oldValuesBySource, newValuesBySource)
+        if len(classificationAdded) > 0:
+            added.append(classificationAdded)
+        if len(classificationRemoved) > 0:
+            removed.append(classificationRemoved)
     return (added, removed)
 
 
-def checkPathogenicityAllDiffBySource(source, oldValues, newValues):
+def checkPathogenicityAllDiffBySource(source, oldValuesBySource, newValuesBySource):
     # Check value diffs by source. oldValues and newValues are lists of classifications by source.
     # e.g. ["Pathogenic, Not Yet Reviewed (BIC)", "Benign (ClinVar)"]
-    sourceAdded = ''
-    sourceRemoved = ''
-    for oldValue in oldValues:
-        if source in oldValue:
-            for newValue in newValues:
-                if source in newValue:
-                    # Remove ({SOURCE}) from string for comparison.
-                    oldValue = oldValue.replace('({})'.format(source), '').strip()
-                    newValue = newValue.replace('({})'.format(source), '').strip()
+    classificationAdded = ''
+    classificationRemoved = ''
+    for oldValues in oldValuesBySource:
+        if source in oldValues:
+            for newValues in newValuesBySource:
+                if source in newValues:
+
+                    # Remove source from string for comparison.
+                    oldValues = oldValues.replace('({})'.format(source), '').strip()
+                    newValues = newValues.replace('({})'.format(source), '').strip()
 
                     # Split on comma to check list of classifications for source.
-                    oldVs = oldValue.split(',')
-                    newVs = newValue.split(',')
+                    oldVs = oldValues.split(',')
+                    newVs = newValues.split(',')
 
+                    # Check for removed classifications
                     for oV in oldVs:
                         if oV not in newVs:
-                            if len(sourceRemoved) > 0:
-                                sourceRemoved += ' ,'
-                            sourceRemoved += oV
+                            if len(classificationRemoved) > 0:
+                                classificationRemoved += ' ,'
+                            classificationRemoved += oV
+
+                    # Check for added classifications
                     for nV in newVs:
                         if nV not in oldVs:
-                            if len(sourceAdded) > 0:
-                                sourceAdded += ' ,'
-                            sourceAdded += nV
-        if len(sourceAdded) > 0:
-            sourceAdded += ' ({})'.format(source)
-        if len(sourceRemoved) > 0:
-            sourceRemoved += ' ({})'.format(source)
-    return (sourceAdded, sourceRemoved)
+                            if len(classificationAdded) > 0:
+                                classificationAdded += ' ,'
+                            classificationAdded += nV
+
+    # Replace the source at the end of the diff string.
+    if len(classificationAdded) > 0:
+        classificationAdded += ' ({})'.format(source)
+    if len(classificationRemoved) > 0:
+        classificationRemoved += ' ({})'.format(source)
+
+    return (classificationAdded, classificationRemoved)
 
 
 def generateDiffJSONFile(diff_json):
