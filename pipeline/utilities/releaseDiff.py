@@ -326,9 +326,9 @@ def determineDiffForJSON(field, oldValue, newValue):
         added = newValue
         removed = oldValue
 
-    if len(added) > 0:
+    if not isEmpty(added):
         diff['added'] = added
-    if len(removed) > 0:
+    if not isEmpty(removed):
         diff['removed'] = removed
 
     return diff
@@ -343,9 +343,9 @@ def determineDiffForList(oldValues, newValues):
     for value in newValues:
         if value not in oldValues:
             added.append(value)
-    if len(added) == 0:
+    if isEmpty(added):
         added = None
-    if len(removed) == 0:
+    if isEmpty(removed):
         removed = None
     return (added, removed)
 
@@ -360,13 +360,13 @@ def determineDiffForPathogenicityAll(oldValue, newValue):
     newValuesBySource = newValue.split(';')
     for source in sources:
         (classificationAdded, classificationRemoved) = checkPathogenicityAllDiffBySource(source, oldValuesBySource, newValuesBySource)
-        if len(classificationAdded) > 0:
+        if not isEmpty(classificationAdded):
             added.append(classificationAdded)
-        if len(classificationRemoved) > 0:
+        if not isEmpty(classificationRemoved):
             removed.append(classificationRemoved)
-    if len(added) == 0:
+    if isEmpty(added):
         added = None
-    if len(removed) == 0:
+    if isEmpty(removed):
         removed = None
     return (added, removed)
 
@@ -396,14 +396,14 @@ def checkPathogenicityAllDiffBySource(source, oldValuesBySource, newValuesBySour
                     # Check for removed classifications
                     for oV in oldVs:
                         if oV not in newVs:
-                            if len(classificationRemoved) > 0:
+                            if not isEmpty(classificationRemoved):
                                 classificationRemoved += ','
                             classificationRemoved += oV
 
                     # Check for added classifications
                     for nV in newVs:
                         if nV not in oldVs:
-                            if len(classificationAdded) > 0:
+                            if not isEmpty(classificationAdded):
                                 classificationAdded += ','
                             classificationAdded += nV
 
@@ -447,6 +447,12 @@ def generateReadme(args):
         readme.write("This file contains basic information about the diff directory.\n\n\n")
         for k, v in output_file_descriptions.iteritems():
             readme.write(k + ": " + v + '\n\n')
+
+
+def isEmpty(val):
+    if val is None or val == "-" or len(val) == 0:
+        return True
+    return False
 
 
 def main():
