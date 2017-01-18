@@ -341,6 +341,10 @@ def determineDiffForList(oldValues, newValues):
     for value in newValues:
         if value not in oldValues:
             added.append(value)
+    if len(added) == 0:
+        added = None
+    if len(removed) == 0:
+        removed = None
     return (added, removed)
 
 
@@ -353,34 +357,49 @@ def determineDiffForPathogenicityAll(oldValue, newValue):
     oldValues = oldValue.split(';')
     newValues = newValue.split(';')
     for source in sources:
-        (sourceAdded, sourceRemoved) = checkSourceDiffPathogenicityAll(source, oldValue, newValue)
+        (sourceAdded, sourceRemoved) = checkPathogenicityAllDiffBySource(source, oldValues, newValues)
         if len(sourceAdded) > 0:
             added.append(sourceAdded)
         if len(sourceRemoved) > 0:
             removed.append(sourceRemoved)
+    if len(added) == 0:
+        added = None
+    if len(removed) == 0:
+        removed = None
     return (added, removed)
 
 
-def checkSourceDiffPathogenicityAll(source, oldValue, newValue):
+def checkPathogenicityAllDiffBySource(source, oldValues, newValues):
+    # Check value diffs by source. oldValues and newValues are lists of classifications by source.
+    # e.g. ["Pathogenic, Not Yet Reviewed (BIC)", "Benign (ClinVar)"]
     sourceAdded = ''
     sourceRemoved = ''
-    if source in oldV.lower():
-        for newV in newValues:
-            if source in newV.lower():
-                oldV = oldV.replace('({}})'.format(source), '').strip()
-                newV = newV.replace('({}})'.format(source), '').strip()
-                oldVs = oldV.split(',')
-                newVs = newV.split(',')
-                for oV in oldVs:
-                    if oV not in newVs:
-                        sourceRemoved += oV
-                for nV in newVs:
-                    if nV not in oldVs:
-                        sourceAdded += nV
+    for oldValue in oldValues:
+        if source in oldValue:
+            for newValue in newValues:
+                if source in newValue:
+                    # Remove ({SOURCE}) from string for comparison.
+                    oldValue = oldValue.replace('({})'.format(source), '').strip()
+                    newValue = newValue.replace('({})'.format(source), '').strip()
+
+                    # Split on comma to check list of classifications for source.
+                    oldVs = oldValue.split(',')
+                    newVs = newValue.split(',')
+
+                    for oV in oldVs:
+                        if oV not in newVs:
+                            if len(sourceRemoved) > 0:
+                                sourceRemoved += ' ,'
+                            sourceRemoved += oV
+                    for nV in newVs:
+                        if nV not in oldVs:
+                            if len(sourceAdded) > 0:
+                                sourceAdded += ' ,'
+                            sourceAdded += nV
         if len(sourceAdded) > 0:
-            sourceAdded += ' ({}})'.format(source)
+            sourceAdded += ' ({})'.format(source)
         if len(sourceRemoved) > 0:
-            sourceRemoved += ' ({}})'.format(source)
+            sourceRemoved += ' ({})'.format(source)
     return (sourceAdded, sourceRemoved)
 
 
