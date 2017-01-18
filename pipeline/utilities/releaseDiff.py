@@ -311,12 +311,14 @@ def determineDiffForJSON(field, oldValue, newValue):
             'removed': None
             }
 
-    if ',' in oldValue or ',' in newValue:
+    if ',' in oldValue or ',' in newValue or field == 'Pathogenicity_all':
         diff['field_type'] = 'list'
     else:
         diff['field_type'] = 'individual'
 
-    if diff['field_type'] == 'list':
+    if field == 'Pathogenicity_all':
+        (added, removed) = determineDiffForPathogenicityAll(oldValue, newValue)
+    elif diff['field_type'] == 'list':
         oldValues = oldValue.split(',')
         newValues = newValue.split(',')
         (added, removed) = determineDiffForList(oldValues, newValues)
@@ -340,6 +342,46 @@ def determineDiffForList(oldValues, newValues):
         if value not in oldValues:
             added.append(value)
     return (added, removed)
+
+
+def determineDiffForPathogenicityAll(oldValue, newValue):
+    # Pathogenicity_all is a special case with semicolon delimited sources AND
+    # comma delimited classifications.
+    sources = ['BIC', 'ClinVar', 'ENIGMA']
+    added = []
+    removed = []
+    oldValues = oldValue.split(';')
+    newValues = newValue.split(';')
+    for source in sources:
+        (sourceAdded, sourceRemoved) = checkSourceDiffPathogenicityAll(source, oldValue, newValue)
+        if len(sourceAdded) > 0:
+            added.append(sourceAdded)
+        if len(sourceRemoved) > 0:
+            removed.append(sourceRemoved)
+    return (added, removed)
+
+
+def checkSourceDiffPathogenicityAll(source, oldValue, newValue):
+    sourceAdded = ''
+    sourceRemoved = ''
+    if source in oldV.lower():
+        for newV in newValues:
+            if source in newV.lower():
+                oldV = oldV.replace('({}})'.format(source), '').strip()
+                newV = newV.replace('({}})'.format(source), '').strip()
+                oldVs = oldV.split(',')
+                newVs = newV.split(',')
+                for oV in oldVs:
+                    if oV not in newVs:
+                        sourceRemoved += oV
+                for nV in newVs:
+                    if nV not in oldVs:
+                        sourceAdded += nV
+        if len(sourceAdded) > 0:
+            sourceAdded += ' ({}})'.format(source)
+        if len(sourceRemoved) > 0:
+            sourceRemoved += ' ({}})'.format(source)
+    return (sourceAdded, sourceRemoved)
 
 
 def generateDiffJSONFile(diff_json):
