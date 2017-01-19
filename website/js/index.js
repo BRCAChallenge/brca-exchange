@@ -514,6 +514,7 @@ var VariantDetail = React.createClass({
                 highlightRow = false;
 
             // if this is not the oldest version of the variant, diff them
+            // TODO: fix this diff following diff updates in pipeline.
             if (i < data.length - 1) {
                 let previous = data[i + 1];
                 if (version["Pathogenicity_expert"] !== previous["Pathogenicity_expert"]) {

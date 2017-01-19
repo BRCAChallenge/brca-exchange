@@ -124,6 +124,21 @@ class TestStringMethods(unittest.TestCase):
         self.assertIsNone(diff['added'])
         self.assertEqual(diff['removed'], ['BIC', 'ENIGMA'])
 
+    def test_diff_json_handles_list_data_added_from_nothing_correctly(self):
+        field = "Submitter_ClinVar"
+        prev = "-"
+        new = ("c/o_University_of_Cambridge,The_Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA),"
+               "Ambry_Genetics,Breast_Cancer_Information_Core_(BIC)_(BRCA2),Invitae")
+        diff = determineDiffForJSON(field, prev, new)
+        self.assertEqual(diff['field'], 'Submitter_ClinVar')
+        self.assertEqual(diff['field_type'], 'list')
+        self.assertIn('c/o_University_of_Cambridge', diff['added'])
+        self.assertIn('The_Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA)', diff['added'])
+        self.assertIn('Ambry_Genetics', diff['added'])
+        self.assertIn('Breast_Cancer_Information_Core_(BIC)_(BRCA2)', diff['added'])
+        self.assertIn('Invitae', diff['added'])
+        self.assertEqual(diff['removed'], ['-'])
+
     def test_diff_json_handles_individual_changes_correctly(self):
         field = "HGVS_Protein"
         prev = "NM_000059:p.His1085Arg"
@@ -141,8 +156,18 @@ class TestStringMethods(unittest.TestCase):
         diff = determineDiffForJSON(field, prev, new)
         self.assertEqual(diff['field'], 'HGVS_Protein')
         self.assertEqual(diff['field_type'], 'individual')
-        self.assertIsNone(diff['added'])
+        self.assertEqual(diff['added'], '-')
         self.assertEqual(diff['removed'], 'NM_000059:p.His1085Arg')
+
+    def test_diff_json_handles_individual_changes_data_added_from_nothing_correctly(self):
+        field = "HGVS_Protein"
+        prev = "-"
+        new = "NM_000059:p.His1085Arg"
+        diff = determineDiffForJSON(field, prev, new)
+        self.assertEqual(diff['field'], 'HGVS_Protein')
+        self.assertEqual(diff['field_type'], 'individual')
+        self.assertEqual(diff['added'], 'NM_000059:p.His1085Arg')
+        self.assertEqual(diff['removed'], '-')
 
 
 if __name__ == '__main__':

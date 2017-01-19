@@ -304,6 +304,18 @@ def appendToJSON(variant, field, oldValue, newValue):
 
 
 def determineDiffForJSON(field, oldValue, newValue):
+    listKeys = [
+                "Pathogenicity_all",
+                "Submitter_ClinVar",
+                "Method_ClinVar",
+                "Source",
+                "Date_Last_Updated_ClinVar",
+                "Source_URL",
+                "SCV_ClinVar",
+                "Clinical_Significance_ClinVar",
+                "Allele_Origin_ClinVar"
+               ]
+
     diff = {
             'field': field,
             'field_type': None,
@@ -311,7 +323,7 @@ def determineDiffForJSON(field, oldValue, newValue):
             'removed': None
             }
 
-    if ',' in oldValue or ',' in newValue or field == 'Pathogenicity_all':
+    if field in listKeys:
         diff['field_type'] = 'list'
     else:
         diff['field_type'] = 'individual'
@@ -408,9 +420,9 @@ def checkPathogenicityAllDiffBySource(source, oldValuesBySource, newValuesBySour
                             classificationAdded += nV
 
     # Replace the source at the end of the diff string.
-    if len(classificationAdded) > 0:
+    if not isEmpty(classificationAdded):
         classificationAdded += ' ({})'.format(source)
-    if len(classificationRemoved) > 0:
+    if not isEmpty(classificationRemoved):
         classificationRemoved += ' ({})'.format(source)
 
     # Handle case where new source is added.
@@ -450,7 +462,7 @@ def generateReadme(args):
 
 
 def isEmpty(val):
-    if val is None or val == "-" or len(val) == 0:
+    if val is None or len(val) == 0:
         return True
     return False
 
