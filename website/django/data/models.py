@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.postgres.fields import JSONField
 
 class DataRelease(models.Model):
     schema = models.TextField()
@@ -13,15 +13,18 @@ class DataRelease(models.Model):
     class Meta:
         db_table = "data_release"
 
-
 class ChangeType(models.Model):
     name = models.TextField()
 
+class VariantDiff(models.Model):
+    variant = models.ForeignKey('Variant')
+    # Postgres-specific JSON field. If migrating away from postgres, use TextField instead
+    # provides JSON validation
+    diff = JSONField()
 
 class VariantManager(models.Manager):
     def create_variant(self, row):
         return self.create(**row)
-
 
 class Variant(models.Model):
     # These are some extra derived columns that help with filtering
