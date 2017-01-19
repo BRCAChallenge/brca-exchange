@@ -124,6 +124,16 @@ class TestStringMethods(unittest.TestCase):
         self.assertIsNone(diff['added'])
         self.assertEqual(diff['removed'], ['BIC', 'ENIGMA'])
 
+    def test_diff_json_handles_list_changes_correctly_changed_order(self):
+        field = "Source_URL"
+        prev = "http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000075545, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000187590, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000144137"
+        new = "http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000187590, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000075545, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000144137"
+        diff = determineDiffForJSON(field, prev, new)
+        self.assertEqual(diff['field'], 'Source_URL')
+        self.assertEqual(diff['field_type'], 'list')
+        self.assertIsNone(diff['added'])
+        self.assertIsNone(diff['removed'])
+
     def test_diff_json_handles_list_data_added_from_nothing_correctly(self):
         field = "Submitter_ClinVar"
         prev = "-"

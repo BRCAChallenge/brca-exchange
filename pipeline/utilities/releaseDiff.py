@@ -349,6 +349,8 @@ def determineDiffForJSON(field, oldValue, newValue):
 def determineDiffForList(oldValues, newValues):
     added = []
     removed = []
+    oldValues = map(str.strip, oldValues)
+    newValues = map(str.strip, newValues)
     for value in oldValues:
         if value not in newValues:
             removed.append(value)
@@ -370,6 +372,8 @@ def determineDiffForPathogenicityAll(oldValue, newValue):
     removed = []
     oldValuesBySource = oldValue.split(';')
     newValuesBySource = newValue.split(';')
+    oldValuesBySource = map(str.strip, oldValuesBySource)
+    newValuesBySource = map(str.strip, newValuesBySource)
     for source in sources:
         (classificationAdded, classificationRemoved) = checkPathogenicityAllDiffBySource(source, oldValuesBySource, newValuesBySource)
         if not isEmpty(classificationAdded):
