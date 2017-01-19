@@ -17,7 +17,7 @@ class ChangeType(models.Model):
     name = models.TextField()
 
 class VariantDiff(models.Model):
-    variant = models.ForeignKey('Variant')
+    id = models.OneToOneField('Variant', primary_key=True)
     # Postgres-specific JSON field. If migrating away from postgres, use TextField instead
     # provides JSON validation
     diff = JSONField()
