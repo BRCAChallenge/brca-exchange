@@ -5,7 +5,6 @@ import csv
 import re
 import json
 import logging
-import pdb
 
 
 added_data = None
@@ -444,8 +443,8 @@ def checkPathogenicityAllDiffBySource(source, oldValuesBySource, newValuesBySour
     return (classificationAdded, classificationRemoved)
 
 
-def generateDiffJSONFile(diff_json):
-    with open('diff.json', 'w') as outfile:
+def generateDiffJSONFile(diff_json, diff_json_file):
+    with open(diff_json_file, 'w') as outfile:
         json.dump(diff_json, outfile)
 
 
@@ -488,8 +487,8 @@ def main():
                         help="Variants with data added in version 2")
     parser.add_argument("--diff", default="diff.txt",
                         help="Variant diff output file")
-    # parser.add_argument("--diff_json", default="diff.json",
-    #                     help="Variant diff output json")
+    parser.add_argument("--diff_json", default="diff.json",
+                        help="Variant diff output json")
     parser.add_argument("--output", default="built_with_change_types.tsv",
                         help="Output file with change_type column appended")
     parser.add_argument("--artifacts_dir", help='Artifacts directory with pipeline artifact files.')
@@ -547,7 +546,7 @@ def main():
     # Adds change_type column and values for each variant in v2 to the output
     appendVariantChangeTypesToOutput(variantChangeTypes, args.v2, args.output)
 
-    generateDiffJSONFile(diff_json)
+    generateDiffJSONFile(diff_json, args.diff_json)
 
     generateReadme(args)
 

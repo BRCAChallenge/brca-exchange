@@ -484,6 +484,7 @@ var VariantDetail = React.createClass({
 
         var versionRows = [];
         // which keys represent comma seperated lists? for filtering out re-ordered lists
+        // TODO: list keys now handled on the server, remove this code?
         var listKeys = [
             "Pathogenicity_all",
             "Submitter_ClinVar",
