@@ -313,7 +313,9 @@ def determineDiffForJSON(field, oldValue, newValue):
                 "Source_URL",
                 "SCV_ClinVar",
                 "Clinical_Significance_ClinVar",
-                "Allele_Origin_ClinVar"
+                "Allele_Origin_ClinVar",
+                "Synonyms",
+                "Genomic_Coordinate_hg38"
                ]
 
     diff = {
