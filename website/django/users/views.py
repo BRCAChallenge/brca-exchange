@@ -21,6 +21,8 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from brca import settings, site_settings
 from .models import MyUser, MailingListEmail
 
+import logging
+
 
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
@@ -33,8 +35,12 @@ def retrieve(request):
 
     # get mailing list status
     subscriber_hash = md5.new(data["email"]).hexdigest()
-    mailchimp_url = settings.MAILCHIMP_URL + 'lists/' + settings.MAILCHIMP_LIST + '/members/' + subscriber_hash
+    mailchimp_url = settings.MAILCHIMP_URL + '/lists/' + settings.MAILCHIMP_LIST + '/members/' + subscriber_hash
     mailchimp_response = requests.get(mailchimp_url, auth=('user', settings.MAILCHIMP_KEY))
+    try:
+        mailchimp_response.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        return mailingListErrorHandling(e)
 
     is_subscribed = False
     if mailchimp_response.status_code == requests.codes.ok:
@@ -71,8 +77,12 @@ def update(request):
         mailchimp_data = {'email_address': user[0].email,
                           'merge_fields': {'FNAME': fields['firstName'], 'LNAME': fields['lastName']},
                           'status': 'subscribed' if subscribe == 'true' else 'unsubscribed'}
-        mailchimp_url = settings.MAILCHIMP_URL + 'lists/' + settings.MAILCHIMP_LIST + '/members/' + subscriber_hash
+        mailchimp_url = settings.MAILCHIMP_URL + '/lists/' + settings.MAILCHIMP_LIST + '/members/' + subscriber_hash
         mailchimp_response = requests.put(mailchimp_url, auth=('user', settings.MAILCHIMP_KEY), json=mailchimp_data)
+        try:
+            mailchimp_response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            return mailingListErrorHandling(e)
 
     try:
         user.update(**fields)
@@ -81,6 +91,7 @@ def update(request):
             if image is not None:
                 save_picture(user[0].id, image)
     except Exception, e:
+        logging.error(repr(e))
         return JsonResponse({'success': False, 'error': str(e)})
 
     return JsonResponse({'success': True})
@@ -100,6 +111,7 @@ def register(request):
         content = json.loads(response.content)
         response = {'success': content['success']}
     except HTTPError:
+        logging.error(repr(HTTPError))
         return JsonResponse({'success': False, 'error': 'Wrong CAPTCHA'})
 
     # Create the user
@@ -134,6 +146,7 @@ def register(request):
         msg.send()
 
     except IntegrityError:
+        logging.error(repr(IntegrityError))
         return JsonResponse({'success': False, 'error': 'This email address already exists'})
 
     return JsonResponse({'success': True})
@@ -355,6 +368,7 @@ def mailinglist(request):
         content = json.loads(resp.content)
         response = JsonResponse({'success': content['success']})
     except HTTPError:
+        logging.error(repr(HTTPError))
         response = JsonResponse({'success': False, 'error': 'Wrong CAPTCHA'})
         response['Access-Control-Allow-Origin'] = '*'
         return response
@@ -362,13 +376,20 @@ def mailinglist(request):
     mailchimp_data = {'email_address': email,
                       'merge_fields': {'FNAME': first_name, 'LNAME': last_name},
                       'status': 'pending'}
-    mailchimp_response = requests.post(settings.MAILCHIMP_URL + 'lists/' + settings.MAILCHIMP_LIST + '/members', auth=('user', settings.MAILCHIMP_KEY), json=mailchimp_data)
+    mailchimp_response = requests.post(settings.MAILCHIMP_URL + '/lists/' + settings.MAILCHIMP_LIST + '/members', auth=('user', settings.MAILCHIMP_KEY), json=mailchimp_data)
 
-    if mailchimp_response.status_code != requests.codes.ok:
-        response = JsonResponse({'success': False, 'error': mailchimp_response.json()['title']})
-        response['Access-Control-Allow-Origin'] = '*'
-        return response
+    try:
+        mailchimp_response.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        return mailingListErrorHandling(e)
 
-    response = JsonResponse({'success': True}) 
+    response = JsonResponse({'success': True})
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
+
+
+def mailingListErrorHandling(e):
+    logging.error(repr(e))
+    response = JsonResponse({'success': False, 'error': 'There was an error connecting to our mailing list. Please contact brcaexchange@gmail.com for support.', 'debug_info': repr(e)}, status=500)
     response['Access-Control-Allow-Origin'] = '*'
     return response
