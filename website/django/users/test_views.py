@@ -7,7 +7,6 @@ import datetime
 import json
 import django
 from brca import settings
-import pdb
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'brca.settings'
 django.setup()
