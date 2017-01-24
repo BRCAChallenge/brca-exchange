@@ -1,4 +1,4 @@
-from httmock import urlmatch, HTTMock
+from httmock import all_requests, response, urlmatch, HTTMock
 import pytest
 import unittest
 import requests
@@ -7,12 +7,15 @@ import datetime
 import json
 import django
 from brca import settings
+import pdb
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'brca.settings'
 django.setup()
 
 from django.test import TestCase
 from django.utils import timezone
+from django.test.client import RequestFactory
+from django.contrib.auth.models import AnonymousUser
 from .models import MyUser
 from users import views
 
@@ -21,19 +24,46 @@ settings.MAILCHIMP_KEY = '12345'
 settings.MAILCHIMP_LIST = '12345'
 
 
-@urlmatch(netloc=r'(.*\.)?mailchimp\.com$')
+@urlmatch(netloc=r'(.*\.)?google\.com$')
 def google_mock(url, request):
-    return 'Feeling lucky, punk?'
+    headers = {'Set-Cookie': 'foo=bar;'}
+    content = {'success': True}
+    return response(200, content, headers, None, 5, request)
+
+
+@all_requests
+def response_content(url, request):
+    headers = {'Set-Cookie': 'foo=bar;'}
+    content = {'success': True}
+    return response(200, content, headers, None, 5, request)
 
 
 class TestViewsAPI(TestCase):
     def setUp(self):
+        self.factory = RequestFactory()
         self.test_user = self.create_test_user()
 
-    def test_get(self):
+    def test_mailinglist_signup_success(self):
+        with HTTMock(response_content):
+            request = self.factory.post('/mailinglist/', {
+                                        'email': 'test@example.com',
+                                        'firstName': 'test',
+                                        'lastName': 'example'
+                                        })
+            response = views.mailinglist(request)
+            self.assertEqual(response.status_code, 200)
+
+    def test_mailinglist_signup_failure(self):
         with HTTMock(google_mock):
-            r = requests.get('http://mailchimp.com/')
-            self.assertEqual(r.content, 'Feeling lucky, punk?')
+            request = self.factory.post('/mailinglist/', {
+                                        'email': 'test@example.com',
+                                        'firstName': 'test',
+                                        'lastName': 'example'
+                                        })
+            response = views.mailinglist(request)
+            response_json = json.loads(response.content)
+            self.assertEqual(response.status_code, 500)
+            self.assertFalse(response_json['success'])
 
     def test_password_reset_with_invalid_email(self):
         response = self.client.post('/accounts/password_reset/', {'email': 'nonexistant-email@example.com'})
