@@ -2,8 +2,12 @@ from httmock import urlmatch, HTTMock
 import pytest
 import unittest
 import requests
+import os
 from brca import settings
-
+os.environ['DJANGO_SETTINGS_MODULE'] = 'brca.settings'
+import django
+django.setup()
+from users import views
 
 settings.MAILCHIMP_URL = 'https://mailchimp.com'
 settings.MAILCHIMP_KEY = '12345'
