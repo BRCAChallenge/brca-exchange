@@ -40,7 +40,7 @@ def retrieve(request):
     try:
         mailchimp_response.raise_for_status()
     except requests.exceptions.HTTPError as e:
-        return mailingListErrorHandling(e)
+        return mailingListErrorHandling(mailchimp_response, e)
 
     is_subscribed = False
     if mailchimp_response.status_code == requests.codes.ok:
@@ -82,7 +82,7 @@ def update(request):
         try:
             mailchimp_response.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            return mailingListErrorHandling(e)
+            return mailingListErrorHandling(mailchimp_response, e)
 
     try:
         user.update(**fields)
@@ -377,19 +377,22 @@ def mailinglist(request):
                       'merge_fields': {'FNAME': first_name, 'LNAME': last_name},
                       'status': 'pending'}
     mailchimp_response = requests.post(settings.MAILCHIMP_URL + '/lists/' + settings.MAILCHIMP_LIST + '/members', auth=('user', settings.MAILCHIMP_KEY), json=mailchimp_data)
-
     try:
         mailchimp_response.raise_for_status()
     except requests.exceptions.HTTPError as e:
-        return mailingListErrorHandling(e)
+        return mailingListErrorHandling(mailchimp_response, e)
 
     response = JsonResponse({'success': True})
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
 
-def mailingListErrorHandling(e):
+def mailingListErrorHandling(mailchimp_response, e):
+    try:
+        error = mailchimp_response.json()['title']
+    except AttributeError:
+        error = 'There was an error connecting to our mailing list. Please contact brcaexchange@gmail.com for support.'
     logging.error(repr(e))
-    response = JsonResponse({'success': False, 'error': 'There was an error connecting to our mailing list. Please contact brcaexchange@gmail.com for support.', 'debug_info': repr(e)}, status=500)
+    response = JsonResponse({'success': False, 'error': error, 'debug_info': repr(e)}, status=500)
     response['Access-Control-Allow-Origin'] = '*'
     return response
