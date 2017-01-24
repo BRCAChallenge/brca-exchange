@@ -242,13 +242,13 @@ def check_password_token(request, password_reset_token):
 def update_password(request, password_reset_token):
     user = MyUser.objects.filter(password_reset_token=password_reset_token)
     if not user:
-        response = JsonResponse({'success': False, 'invalid_token': True})
+        response = JsonResponse({'success': False, 'invalid_token': True, 'error': 'Invalid link'})
         response['Access-Control-Allow-Origin'] = '*'
         return response
     user = user[0]
 
     if user.password_token_expires < timezone.now():
-        response = JsonResponse({'success': False, 'invalid_token': True})
+        response = JsonResponse({'success': False, 'invalid_token': True, 'error': 'Invalid link'})
         response['Access-Control-Allow-Origin'] = '*'
         return response
 
