@@ -390,7 +390,7 @@ def mailinglist(request):
 def mailingListErrorHandling(mailchimp_response, e):
     try:
         error = mailchimp_response.json()['title']
-    except AttributeError:
+    except (AttributeError, ValueError):
         error = 'There was an error connecting to our mailing list. Please contact brcaexchange@gmail.com for support.'
     logging.error(repr(e))
     response = JsonResponse({'success': False, 'error': error, 'debug_info': repr(e)}, status=500)
