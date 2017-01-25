@@ -13,7 +13,7 @@ test:
         - npm run test -- -R xunit --reporter-options output=$CIRCLE_TEST_REPORTS/test-results.xml
         - cd django/ && python manage.py migrate
         - cd ../pipeline/data && bash ./getdata
-        - pip install -r ../test-requirements.txt && pytest --junitxml=${CIRCLE_TEST_REPORTS}/pytest-results.xml
+        - pip install -r ../test-requirements.txt && ../pytest --junitxml=${CIRCLE_TEST_REPORTS}/pytest-results.xml
 deployment:
     dev:
         branch: master
