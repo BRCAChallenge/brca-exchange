@@ -1,6 +1,5 @@
 import pytest
 import unittest
-import pdb
 from releaseDiff import (equivalentPathogenicityAllValues, checkPathogenicityAllDiffBySource,
                          determineDiffForPathogenicityAll, determineDiffForJSON)
 
