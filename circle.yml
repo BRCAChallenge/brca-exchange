@@ -6,7 +6,7 @@ machine:
 database:
     override:
         - sudo -u postgres createdb storage.pg
-        - sudo -u postgres psql postgres
+        # - echo "ALTER USER postgres PASSWORD 'postgres';"
 test:
     override:
         - npm run lint -- -f junit -o $CIRCLE_TEST_REPORTS/lint-results.xml
