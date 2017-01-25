@@ -5,7 +5,8 @@ machine:
         - postgresql
 database:
     override:
-        - createdb storage
+        - sudo -u postgres createdb storage.pg
+        - sudo -u postgres psql postgres
 test:
     override:
         - npm run lint -- -f junit -o $CIRCLE_TEST_REPORTS/lint-results.xml
