@@ -5,7 +5,7 @@ test:
         - npm run lint -- -f junit -o $CIRCLE_TEST_REPORTS/lint-results.xml
         - npm run test -- -R xunit --reporter-options output=$CIRCLE_TEST_REPORTS/test-results.xml
         - cd ../pipeline/data && bash ./getdata
-        - pip install -r test-requirements.txt && pytest --junitxml=${CIRCLE_TEST_REPORTS}/pytest-results.xml
+        - pip install -r ./test-requirements.txt && pytest --junitxml=${CIRCLE_TEST_REPORTS}/pytest-results.xml
 deployment:
     dev:
         branch: master
