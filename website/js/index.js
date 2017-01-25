@@ -485,6 +485,7 @@ var VariantDetail = React.createClass({
 
         var versionRows = [];
         // which keys represent comma seperated lists? for filtering out re-ordered lists
+        // TODO: list keys now handled on the server, remove this code?
         var listKeys = [
             "Pathogenicity_all",
             "Submitter_ClinVar",
@@ -515,6 +516,7 @@ var VariantDetail = React.createClass({
                 highlightRow = false;
 
             // if this is not the oldest version of the variant, diff them
+            // TODO: fix this diff following diff updates in pipeline.
             if (i < data.length - 1) {
                 let previous = data[i + 1];
                 if (version["Pathogenicity_expert"] !== previous["Pathogenicity_expert"]) {
