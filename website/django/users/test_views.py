@@ -71,10 +71,10 @@ class TestViewsAPI(TestCase):
         self.assertEqual(json.loads(response.content)['error'], 'Email not found')
 
     def test_password_reset_valid_email(self):
-        response = self.client.post('/accounts/password_reset/', {'email': self.test_user.email})
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(json.loads(response.content)['success'], True)
+        with self.settings(EMAIL_BACKEND='django.core.mail.backends.dummy.EmailBackend'):
+            response = self.client.post('/accounts/password_reset/', {'email': self.test_user.email})
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(json.loads(response.content)['success'], True)
 
     def test_update_password_invalid_token(self):
         self.test_user.password_reset_token = '12345'
