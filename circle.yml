@@ -1,9 +1,11 @@
 general:
     build_dir: website
 machine:
-    services: postgresql
+    services:
+        - postgresql
 database:
-    override: createdb storage
+    override:
+        - createdb storage
 test:
     override:
         - npm run lint -- -f junit -o $CIRCLE_TEST_REPORTS/lint-results.xml
