@@ -1,2 +1,0 @@
-pytest==3.0.2
-httmock==1.2.6
