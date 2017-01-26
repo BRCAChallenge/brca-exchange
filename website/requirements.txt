@@ -11,3 +11,4 @@ requests==2.11.0
 wsgiref==0.1.2
 ga4gh-schemas==0.0.8
 protobuf==3.1.0
+httmock==1.2.6

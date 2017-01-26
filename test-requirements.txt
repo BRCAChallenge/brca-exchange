@@ -4,3 +4,4 @@ py==1.4.31
 pytest==3.0.2
 PyVCF==0.6.8
 wheel==0.24.0
+httmock==1.2.6
