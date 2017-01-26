@@ -22,4 +22,4 @@ class Command(BaseCommand):
                 variant_instance = Variant.objects.filter(Data_Release_id = release_id).filter(Genomic_Coordinate_hg38 = key).get()
                 VariantDiff.objects.create(id = variant_instance, diff = diff[key])
             except Variant.DoesNotExist:
-                print "Not found: Variant", key, "in release", release_id
+                print "Error adding Variant Diff: Variant", key, "in release", release_id, "not found."
