@@ -8,7 +8,7 @@ import psycopg2
 
 
 class Command(BaseCommand):
-    help = 'Add a new variant release to the database'
+    help = 'Add diff information to variants'
 
     def add_arguments(self, parser):
         parser.add_argument('release', type=int, help='release id')
