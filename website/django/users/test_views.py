@@ -71,7 +71,7 @@ class TestViewsAPI(TestCase):
         self.assertEqual(json.loads(response.content)['error'], 'Email not found')
 
     def test_password_reset_valid_email(self):
-        with self.settings(EMAIL_BACKEND='django.core.mail.backends.dummy.EmailBackend'):
+        with self.settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend'):
             response = self.client.post('/accounts/password_reset/', {'email': self.test_user.email})
             self.assertEqual(response.status_code, 200)
             self.assertEqual(json.loads(response.content)['success'], True)
