@@ -16,11 +16,15 @@ class DataRelease(models.Model):
 class ChangeType(models.Model):
     name = models.TextField()
 
+class LegacyJSONField(JSONField):
+    def db_type(self, connection):
+        return 'json'
+
 class VariantDiff(models.Model):
     variant = models.OneToOneField('Variant', primary_key=True)
     # Postgres-specific JSON field. If migrating away from postgres, use TextField instead
     # provides JSON validation
-    diff = JSONField()
+    diff = LegacyJSONField()
 
 class VariantManager(models.Manager):
     def create_variant(self, row):
