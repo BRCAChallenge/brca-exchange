@@ -178,6 +178,16 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(diff['added'], 'NM_000059:p.His1085Arg')
         self.assertEqual(diff['removed'], '-')
 
+    def test_diff_json_handles_hgvs_protein_non_changes_correctly(self):
+        field = "HGVS_Protein"
+        prev = "NM_000059:p.His1085Arg"
+        new = "NM_000059:p.His1085Arg"
+        diff = determineDiffForJSON(field, prev, new)
+        self.assertEqual(diff['field'], 'HGVS_Protein')
+        self.assertEqual(diff['field_type'], 'individual')
+        self.assertIsNone(diff['added'])
+        self.assertIsNone(diff['removed'])
+
 
 if __name__ == '__main__':
     pass

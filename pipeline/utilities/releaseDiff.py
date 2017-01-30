@@ -5,6 +5,7 @@ import csv
 import re
 import json
 import logging
+import pdb
 
 
 added_data = None
@@ -107,6 +108,8 @@ class transformer(object):
         the field is added, has cosmetic changes, has major changes, or
         is unchanged.
         """
+        if field == "HGVS_Protein":
+            pdb.set_trace()
         global added_data
         variant = newRow["pyhgvs_Genomic_Coordinate_38"]
         newValue = self._normalize(newRow[field])
@@ -323,7 +326,6 @@ def determineDiffForJSON(field, oldValue, newValue):
             'added': None,
             'removed': None
             }
-
     if field in listKeys:
         diff['field_type'] = 'list'
     else:
@@ -338,6 +340,12 @@ def determineDiffForJSON(field, oldValue, newValue):
     elif diff['field_type'] == 'individual':
         added = newValue
         removed = oldValue
+
+    # If added and removed are the same, this should not need to run.
+    if added == removed:
+        logging.error("Added: %s and Removed: %s properties are equal for Field: %s, "
+                      "there is a bug somewhere before this code.", added, removed, field)
+        return diff
 
     if not isEmpty(added):
         diff['added'] = added
