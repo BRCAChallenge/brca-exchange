@@ -548,20 +548,23 @@ var VariantDetail = React.createClass({
                 if (_.contains(dateKeys, fieldName)) {
                     added = this.reformatDate(fieldDiff.added);
                     removed = this.reformatDate(fieldDiff.removed);
-                } else {
+                } else if (fieldDiff.field_type === "list") {
                     added = _.map(fieldDiff.added, elem => elem.replace(/_/g, " ").trim());
                     removed = _.map(fieldDiff.removed, elem => elem.replace(/_/g, " ").trim());
+                } else {
+                    added = fieldDiff.added.trim();
+                    removed = fieldDiff.removed.trim();
                 }
 
                 if (added !== null || removed !== null) {
-                    diffHTML.push(
-                        <span>
-                            <strong>{ getDisplayName(fieldName) }: </strong> <br />
-                            { !isEmptyDiff(added) && `+${added}` }{ !!(!isEmptyDiff(added) && !isEmptyDiff(removed)) && ', '}{ !isEmptyDiff(removed) && `-${removed}` }
-                        </span>, <br />
-                    );
-
-                    if (fieldDiff.field_type === "individual") {
+                    if (fieldDiff.field_type === "list") {
+                        diffHTML.push(
+                            <span>
+                                <strong>{ getDisplayName(fieldName) }: </strong> <br />
+                                { !isEmptyDiff(added) && `+${added}` }{ !!(!isEmptyDiff(added) && !isEmptyDiff(removed)) && ', '}{ !isEmptyDiff(removed) && `-${removed}` }
+                            </span>, <br />
+                        );
+                    } else if (fieldDiff.field_type === "individual") {
                         diffHTML.push(
                             <span>
                                 <strong>{ getDisplayName(fieldName) }: </strong>
