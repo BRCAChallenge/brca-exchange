@@ -404,7 +404,7 @@ function isEmptyField(value) {
     }
 
     var v = value.trim();
-    return v === '' || v === '-' || v === 'None';
+    return v === '' || v === '-' || v === 'None' || v === undefined;
 }
 
 function isEmptyDiff(value) {
