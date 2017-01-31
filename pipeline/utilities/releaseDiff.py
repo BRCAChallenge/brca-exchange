@@ -5,7 +5,6 @@ import csv
 import re
 import json
 import logging
-import pdb
 
 
 added_data = None
@@ -108,8 +107,6 @@ class transformer(object):
         the field is added, has cosmetic changes, has major changes, or
         is unchanged.
         """
-        if field == "HGVS_Protein":
-            pdb.set_trace()
         global added_data
         variant = newRow["pyhgvs_Genomic_Coordinate_38"]
         newValue = self._normalize(newRow[field])
@@ -148,7 +145,8 @@ class transformer(object):
         global total_variants_with_changes
 
         # Uncomment if using old data schema (e.g. pre pyhgvs_Genomic_Coordinate_38)
-        columns_to_ignore = ["change_type", "Assertion_method_citation_ENIGMA"]
+        columns_to_ignore = ["change_type", "Assertion_method_citation_ENIGMA", "Genomic_Coordinate_hg36",
+                             "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg38", "HGVS_cDNA", "HGVS_Protein"]
 
         # Header to group all logs the same variant
         variant_intro = "\n\n %s \n Old Source: %s \n New Source: %s \n\n" % (newRow["pyhgvs_Genomic_Coordinate_38"],
