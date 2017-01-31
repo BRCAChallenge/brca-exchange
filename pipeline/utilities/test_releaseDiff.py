@@ -1,7 +1,8 @@
 import pytest
 import unittest
 from releaseDiff import (equivalentPathogenicityAllValues, checkPathogenicityAllDiffBySource,
-                         determineDiffForPathogenicityAll, determineDiffForJSON)
+                         determineDiffForPathogenicityAll, determineDiffForJSON, transformer,
+                         v1ToV2)
 
 
 class TestStringMethods(unittest.TestCase):
@@ -187,6 +188,184 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(diff['field_type'], 'individual')
         self.assertIsNone(diff['added'])
         self.assertIsNone(diff['removed'])
+
+    def test_compare_row_equal_rows(self):
+        fieldnames = [
+                      'Pathogenicity_all',
+                      'pyhgvs_cDNA',
+                      'Source',
+                      'HGVS_Protein',
+                      'Polyphen_Score',
+                      'pyhgvs_Hg37_Start',
+                      'Hg38_End',
+                      'HGVS_cDNA',
+                      'Hg37_End',
+                      'Hg38_Start',
+                      'Pathogenicity_expert',
+                      'pyhgvs_Hg36_End',
+                      'Hg36_End',
+                      'pyhgvs_Hg37_End',
+                      'Genomic_Coordinate_hg37',
+                      'Genomic_Coordinate_hg36',
+                      'pyhgvs_Genomic_Coordinate_37',
+                      'pyhgvs_Genomic_Coordinate_36',
+                      'Genomic_Coordinate_hg38',
+                      'pyhgvs_Hg36_Start',
+                      'pyhgvs_Genomic_Coordinate_38',
+                      'Protein_Change',
+                      'HGVS_RNA',
+                      'Hg37_Start',
+                      'Hg36_Start',
+                      'pyhgvs_Protein'
+                     ]
+        oldRow = {
+                  'Pathogenicity_all': '',
+                  'pyhgvs_cDNA': 'NM_007294.3:c.5406+54G>A',
+                  'Source': 'LOVD,1000_Genomes',
+                  'HGVS_Protein': '-',
+                  'Polyphen_Score': '-',
+                  'pyhgvs_Hg37_Start': '41201084',
+                  'Hg38_End': '43049067',
+                  'HGVS_cDNA': 'c.5406+54G>A',
+                  'Hg37_End': '-',
+                  'Hg38_Start': '43049067',
+                  'Pathogenicity_expert': 'Not Yet Reviewed',
+                  'pyhgvs_Hg36_End': '38454610',
+                  'Hg36_End': '-',
+                  'pyhgvs_Hg37_End': '41201084',
+                  'Genomic_Coordinate_hg37': '-',
+                  'Genomic_Coordinate_hg36': '-',
+                  'pyhgvs_Genomic_Coordinate_37': 'chr17:g.41201084:C>T',
+                  'pyhgvs_Genomic_Coordinate_36': 'chr17:g.38454610:C>T',
+                  'Genomic_Coordinate_hg38': 'chr17:g.43049067:C>T',
+                  'pyhgvs_Hg36_Start': '38454610',
+                  'pyhgvs_Genomic_Coordinate_38': 'chr17:g.43049067:C>T',
+                  'Protein_Change': '-',
+                  'HGVS_RNA': '-',
+                  'Hg37_Start': '-',
+                  'Hg36_Start': '-',
+                  'pyhgvs_Protein': 'NP_009225.1:p.?'
+                 }
+        newRow = {
+                  'Pathogenicity_all': '',
+                  'pyhgvs_cDNA': 'NM_007294.3:c.5406+54G>A',
+                  'Source': 'LOVD,1000_Genomes',
+                  'HGVS_Protein': '-',
+                  'Polyphen_Score': '-',
+                  'pyhgvs_Hg37_Start': '41201084',
+                  'Hg38_End': '43049067',
+                  'HGVS_cDNA': 'c.5406+54G>A',
+                  'Hg37_End': '-',
+                  'Hg38_Start': '43049067',
+                  'Pathogenicity_expert': 'Not Yet Reviewed',
+                  'pyhgvs_Hg36_End': '38454610',
+                  'Hg36_End': '-',
+                  'pyhgvs_Hg37_End': '41201084',
+                  'Genomic_Coordinate_hg37': '-',
+                  'Genomic_Coordinate_hg36': '-',
+                  'pyhgvs_Genomic_Coordinate_37': 'chr17:g.41201084:C>T',
+                  'pyhgvs_Genomic_Coordinate_36': 'chr17:g.38454610:C>T',
+                  'Genomic_Coordinate_hg38': 'chr17:g.43049067:C>T',
+                  'pyhgvs_Hg36_Start': '38454610',
+                  'pyhgvs_Genomic_Coordinate_38': 'chr17:g.43049067:C>T',
+                  'Protein_Change': '-',
+                  'HGVS_RNA': '-',
+                  'Hg37_Start': '-',
+                  'Hg36_Start': '-',
+                  'pyhgvs_Protein': 'NP_009225.1:p.?'
+                 }
+        v1v2 = v1ToV2(fieldnames, fieldnames)
+        change_type = v1v2.compareRow(oldRow, newRow)
+        self.assertIsNone(change_type)
+
+    def test_compare_row_added_data(self):
+        fieldnames = [
+                      'Pathogenicity_all',
+                      'pyhgvs_cDNA',
+                      'Source',
+                      'HGVS_Protein',
+                      'Polyphen_Score',
+                      'pyhgvs_Hg37_Start',
+                      'Hg38_End',
+                      'HGVS_cDNA',
+                      'Hg37_End',
+                      'Hg38_Start',
+                      'Pathogenicity_expert',
+                      'pyhgvs_Hg36_End',
+                      'Hg36_End',
+                      'pyhgvs_Hg37_End',
+                      'Genomic_Coordinate_hg37',
+                      'Genomic_Coordinate_hg36',
+                      'pyhgvs_Genomic_Coordinate_37',
+                      'pyhgvs_Genomic_Coordinate_36',
+                      'Genomic_Coordinate_hg38',
+                      'pyhgvs_Hg36_Start',
+                      'pyhgvs_Genomic_Coordinate_38',
+                      'Protein_Change',
+                      'HGVS_RNA',
+                      'Hg37_Start',
+                      'Hg36_Start',
+                      'pyhgvs_Protein'
+                     ]
+        oldRow = {
+                  'Pathogenicity_all': '',
+                  'pyhgvs_cDNA': 'NM_007294.3:c.5406+54G>A',
+                  'Source': 'LOVD,1000_Genomes',
+                  'HGVS_Protein': '-',
+                  'Polyphen_Score': '-',
+                  'pyhgvs_Hg37_Start': '41201084',
+                  'Hg38_End': '43049067',
+                  'HGVS_cDNA': 'c.5406+54G>A',
+                  'Hg37_End': '-',
+                  'Hg38_Start': '43049067',
+                  'Pathogenicity_expert': 'Not Yet Reviewed',
+                  'pyhgvs_Hg36_End': '38454610',
+                  'Hg36_End': '-',
+                  'pyhgvs_Hg37_End': '41201084',
+                  'Genomic_Coordinate_hg37': '-',
+                  'Genomic_Coordinate_hg36': '-',
+                  'pyhgvs_Genomic_Coordinate_37': 'chr17:g.41201084:C>T',
+                  'pyhgvs_Genomic_Coordinate_36': 'chr17:g.38454610:C>T',
+                  'Genomic_Coordinate_hg38': 'chr17:g.43049067:C>T',
+                  'pyhgvs_Hg36_Start': '38454610',
+                  'pyhgvs_Genomic_Coordinate_38': 'chr17:g.43049067:C>T',
+                  'Protein_Change': '-',
+                  'HGVS_RNA': '-',
+                  'Hg37_Start': '-',
+                  'Hg36_Start': '-',
+                  'pyhgvs_Protein': 'NP_009225.1:p.?'
+                 }
+        newRow = {
+                  'Pathogenicity_all': 'Benign (ClinVar)',
+                  'pyhgvs_cDNA': 'NM_007294.3:c.5406+54G>A',
+                  'Source': 'LOVD,1000_Genomes',
+                  'HGVS_Protein': '-',
+                  'Polyphen_Score': '-',
+                  'pyhgvs_Hg37_Start': '41201084',
+                  'Hg38_End': '43049067',
+                  'HGVS_cDNA': 'c.5406+54G>A',
+                  'Hg37_End': '-',
+                  'Hg38_Start': '43049067',
+                  'Pathogenicity_expert': 'Not Yet Reviewed',
+                  'pyhgvs_Hg36_End': '38454610',
+                  'Hg36_End': '-',
+                  'pyhgvs_Hg37_End': '41201084',
+                  'Genomic_Coordinate_hg37': '-',
+                  'Genomic_Coordinate_hg36': '-',
+                  'pyhgvs_Genomic_Coordinate_37': 'chr17:g.41201084:C>T',
+                  'pyhgvs_Genomic_Coordinate_36': 'chr17:g.38454610:C>T',
+                  'Genomic_Coordinate_hg38': 'chr17:g.43049067:C>T',
+                  'pyhgvs_Hg36_Start': '38454610',
+                  'pyhgvs_Genomic_Coordinate_38': 'chr17:g.43049067:C>T',
+                  'Protein_Change': '-',
+                  'HGVS_RNA': '-',
+                  'Hg37_Start': '-',
+                  'Hg36_Start': '-',
+                  'pyhgvs_Protein': 'NP_009225.1:p.?'
+                 }
+        v1v2 = v1ToV2(fieldnames, fieldnames)
+        change_type = v1v2.compareRow(oldRow, newRow)
+        self.assertEqual(change_type, "added_information")
 
 
 if __name__ == '__main__':
