@@ -251,6 +251,39 @@ class TestStringMethods(unittest.TestCase):
         change_type = v1v2.compareRow(self.oldRow, self.newRow)
         self.assertEqual(change_type, "added_information")
 
+    def test_ignores_unused_column_changes_in_compare_row(self):
+        releaseDiff.added_data = self.added_data
+        self.oldRow['pyhgvs_Protein'] = "NP_009225.1:p.?"
+        self.newRow['HGVS_Protein'] = "NM_000059:p.His1085Arg"
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        self.assertIsNone(change_type)
+
+    def test_catches_new_column_changes_in_compare_row(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        self.oldRow['pyhgvs_Protein'] = "NP_009225.1:p.?"
+        self.newRow['pyhgvs_Protein'] = "NM_000059:p.His1085Arg"
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json[variant]
+        self.assertEqual(change_type, "changed_information")
+        self.assertIs(diff[0]['removed'], 'NP_009225.1:p.?')
+        self.assertIs(diff[0]['added'], 'NM_000059:p.His1085Arg')
+
+    def test_builds_diff_with_adjusted_column_names_to_match_db(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        self.oldRow['pyhgvs_Protein'] = "NP_009225.1:p.?"
+        self.newRow['pyhgvs_Protein'] = "NM_000059:p.His1085Arg"
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json[variant]
+        self.assertIs(diff[0]['field'], 'HGVS_Protein')
 
 if __name__ == '__main__':
     pass

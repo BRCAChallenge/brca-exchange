@@ -5,6 +5,7 @@ import csv
 import re
 import json
 import logging
+import pdb
 
 
 added_data = None
@@ -24,6 +25,19 @@ CHANGE_TYPES = {
 
 # Field used to denote pathogenic classification of a variant from all sources
 CLASSIFICATION_FIELD = "Pathogenicity_all"
+
+# The following columns are stored in the DB with the following name adjustments
+ADJUSTED_COLUMN_NAMES = {
+    'pyhgvs_Genomic_Coordinate_38': 'Genomic_Coordinate_hg38',
+    'pyhgvs_Genomic_Coordinate_37': 'Genomic_Coordinate_hg37',
+    'pyhgvs_Genomic_Coordinate_36': 'Genomic_Coordinate_hg36',
+    'pyhgvs_Hg37_Start': 'Hg37_Start',
+    'pyhgvs_Hg37_End': 'Hg37_End',
+    'pyhgvs_Hg36_Start': 'Hg36_Start',
+    'pyhgvs_Hg36_End': 'Hg36_End',
+    'pyhgvs_cDNA': 'HGVS_cDNA',
+    'pyhgvs_Protein': 'HGVS_Protein'
+}
 
 
 class transformer(object):
@@ -318,12 +332,18 @@ def determineDiffForJSON(field, oldValue, newValue):
                 "Genomic_Coordinate_hg38"
                ]
 
+    if field in ADJUSTED_COLUMN_NAMES:
+        adjusted_field = ADJUSTED_COLUMN_NAMES[field]
+    else:
+        adjusted_field = field
+
     diff = {
-            'field': field,
+            'field': adjusted_field,
             'field_type': None,
             'added': None,
             'removed': None
             }
+
     if field in listKeys:
         diff['field_type'] = 'list'
     else:
