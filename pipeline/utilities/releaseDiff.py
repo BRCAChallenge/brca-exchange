@@ -5,7 +5,6 @@ import csv
 import re
 import json
 import logging
-import pdb
 
 
 added_data = None
