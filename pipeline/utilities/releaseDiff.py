@@ -159,7 +159,8 @@ class transformer(object):
 
         # Uncomment if using old data schema (e.g. pre pyhgvs_Genomic_Coordinate_38)
         columns_to_ignore = ["change_type", "Assertion_method_citation_ENIGMA", "Genomic_Coordinate_hg36",
-                             "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg38", "HGVS_cDNA", "HGVS_Protein"]
+                             "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg38", "HGVS_cDNA", "HGVS_Protein",
+                             "Hg37_Start", "Hg37_End", "Hg36_Start", "Hg36_End"]
 
         # Header to group all logs the same variant
         variant_intro = "\n\n %s \n Old Source: %s \n New Source: %s \n\n" % (newRow["pyhgvs_Genomic_Coordinate_38"],
@@ -328,7 +329,6 @@ def determineDiffForJSON(field, oldValue, newValue):
                 "Clinical_Significance_ClinVar",
                 "Allele_Origin_ClinVar",
                 "Synonyms",
-                "Genomic_Coordinate_hg38"
                ]
 
     if field in ADJUSTED_COLUMN_NAMES:
@@ -360,8 +360,8 @@ def determineDiffForJSON(field, oldValue, newValue):
 
     # If added and removed are the same, this should not need to run.
     if added == removed:
-        logging.error("Added: %s and Removed: %s properties are equal for Field: %s, "
-                      "there is a bug somewhere before this code.", added, removed, field)
+        logging.error("Added: %s and Removed: %s properties are equal for Field: %s (Adjusted Field: %s), "
+                      "there is a bug somewhere before this code.", added, removed, field, adjusted_field)
         return diff
 
     if not isEmpty(added):
