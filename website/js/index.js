@@ -126,6 +126,9 @@ var Home = React.createClass({
             top: '0',
             width: '100%',
         };
+        var youtubeStyles = {
+            marginTop: '60px'
+        };
         return (
             <Grid id="main-grid" className='home'>
                 <Row>
@@ -146,6 +149,7 @@ var Home = React.createClass({
                         <iframe src="https://player.vimeo.com/video/199396428" width="640" height="360" frameBorder="0" webkitallowfullscreen mozallowfullscreen allowFullScreen></iframe>
                         <div className="wistia_responsive_padding video-container" style={videoStyles}><div className="wistia_responsive_wrapper" style={videoWrapperStyles}><iframe src="//fast.wistia.net/embed/iframe/dl2zrjowtv?videoFoam=true" title="Wistia video player" allowTransparency="true" frameBorder="0" scrolling="no" className="wistia_embed" name="wistia_embed" allowFullScreen mozallowfullscreen webkitallowfullscreen oallowfullscreen msallowfullscreen width="100%" height="100%"></iframe></div></div>
                         <script src="//fast.wistia.net/assets/external/E-v1.js" async></script>
+                        <iframe style={youtubeStyles} width="560" height="315" src="https://www.youtube.com/embed/9avj2pYYN38" frameBorder="0" allowFullScreen></iframe>
                     </Col>
                 </Row>
                 <Row className="logo-block">
