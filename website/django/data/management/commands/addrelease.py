@@ -6,6 +6,7 @@ from argparse import FileType
 import json
 import csv
 import psycopg2
+from django.core.management import call_command
 
 
 class Command(BaseCommand):
@@ -16,6 +17,7 @@ class Command(BaseCommand):
         parser.add_argument('notes', type=FileType('r'), help='Release notes and metadata, in JSON format')
         parser.add_argument('deletions', nargs='?', default=None, type=FileType('r'),
                             help='Deleted variants, in TSV format, same schema sans change_type')
+        parser.add_argument('diffJSON', help='JSON diff file')
 
     def update_autocomplete_words(self):
         # Drop words table and recreate with latest data
@@ -42,13 +44,13 @@ class Command(BaseCommand):
         variants_tsv = options['variants']
         notes = json.load(options['notes'])
         deletions_tsv = options['deletions']
+        diff_json = options['diffJSON']
 
         notes['sources'] = ', '.join(notes['sources'])
         release_id = DataRelease.objects.create(**notes).id
 
         reader = csv.reader(variants_tsv, dialect="excel-tab")
         header = reader.next()
-
 
         change_types = {ct['name']: ct['id'] for ct in ChangeType.objects.values()}
 
@@ -104,3 +106,6 @@ class Command(BaseCommand):
         # update materialized view of current variants
         with connection.cursor() as cursor:
             cursor.execute("REFRESH MATERIALIZED VIEW currentvariant")
+
+        # calls django/data/management/commands/add_diff_json to add diff to db
+        call_command('add_diff_json', str(release_id), diff_json)

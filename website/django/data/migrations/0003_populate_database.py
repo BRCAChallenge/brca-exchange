@@ -60,6 +60,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL("DELETE FROM variant;"),
-        migrations.RunPython(load_from_tsv)
+        #############################################################
+        # NOTE: This migration has been disabled as it precludes    #
+        # future changes to models (e.g. changing the variant model #
+        # in a future migration will cause this migration to fail). #
+        #############################################################
+
+        # migrations.RunSQL("DELETE FROM variant;"),
+        # migrations.RunPython(load_from_tsv)
     ]

@@ -1387,6 +1387,7 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
                 'added': luigi.LocalTarget(diff_dir + "added.tsv"),
                 'added_data': luigi.LocalTarget(diff_dir + "added_data.tsv"),
                 'diff': luigi.LocalTarget(diff_dir + "diff.txt"),
+                'diff_json': luigi.LocalTarget(diff_dir + "diff.json"),
                 'README': luigi.LocalTarget(diff_dir + "README.txt")}
 
     def run(self):
@@ -1397,9 +1398,9 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
 
         args = ["python", "releaseDiff.py", "--v2", release_dir + "built.tsv", "--v1", self.previous_release,
                 "--removed", diff_dir + "removed.tsv", "--added", diff_dir + "added.tsv", "--added_data",
-                diff_dir + "added_data.tsv", "--diff", diff_dir + "diff.txt", "--output",
-                release_dir + "built_with_change_types.tsv", "--artifacts_dir", artifacts_dir, "--diff_dir", diff_dir,
-                "--v1_release_date", self.previous_release_date]
+                diff_dir + "added_data.tsv", "--diff", diff_dir + "diff.txt", "--diff_json", diff_dir + "diff.json",
+                "--output", release_dir + "built_with_change_types.tsv", "--artifacts_dir", artifacts_dir,
+                "--diff_dir", diff_dir, "--v1_release_date", self.previous_release_date]
         print "Running releaseDiff.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)

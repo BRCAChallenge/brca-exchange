@@ -3,12 +3,15 @@
 import argparse
 import csv
 import re
+import json
 import logging
+
 
 added_data = None
 diff = None
 total_variants_with_changes = 0
 total_variants_with_additions = 0
+diff_json = {}
 
 # Change types as used in the DB to signify changes to variants between versions
 CHANGE_TYPES = {
@@ -105,15 +108,17 @@ class transformer(object):
         is unchanged.
         """
         global added_data
+        variant = newRow["pyhgvs_Genomic_Coordinate_38"]
+        newValue = self._normalize(newRow[field])
+        oldValue = self._normalize(oldRow[self._newColumnNameToOld[field]])
         if field in self._newColumnsAdded:
-            return "added"
+            appendToJSON(variant, field, oldValue, newValue)
+            return "added data: %s | %s" % (oldValue, newValue)
         else:
-            newValue = self._normalize(newRow[field])
-            oldValue = self._normalize(oldRow[self._newColumnNameToOld[field]])
             if oldValue == newValue:
                 return "unchanged"
             elif oldValue == "-" or oldValue in newValue:
-                variant = newRow["pyhgvs_Genomic_Coordinate_38"]
+                appendToJSON(variant, field, oldValue, newValue)
                 return "added data: %s | %s" % (oldValue, newValue)
             elif self._consistentDelimitedLists(oldValue, newValue, field):
                 return "unchanged"
@@ -122,8 +127,10 @@ class transformer(object):
                 if updatedOldValue == newValue:
                     return "minor change: %s | %s" % (oldValue, newValue)
                 else:
+                    appendToJSON(variant, field, oldValue, newValue)
                     return "major change: %s | %s" % (oldValue, newValue)
             else:
+                appendToJSON(variant, field, oldValue, newValue)
                 return "major change: %s | %s" % (oldValue, newValue)
 
     def compareRow(self, oldRow, newRow):
@@ -219,7 +226,7 @@ class v1ToV2(transformer):
                                                  re.sub("NM_007294", "NM_007294.3", xx))),
         # In an annoying thing, the old ExAC allele frequency was missing a ')'
         "Allele_Frequency": (lambda xx: re.sub("\(ExAC", "(ExAC)", xx)),
-        # for polyphen and sift predictions, the old data combined the 
+        # for polyphen and sift predictions, the old data combined the
         # numerical and categorical scores
         "Polyphen_Prediction": (lambda xx: re.sub("\(*$", "", xx)),
         "Sift_Prediction": (lambda xx: re.sub("\(*$", "", xx)),
@@ -284,6 +291,163 @@ def equivalentPathogenicityAllValues(oldValues, newValues):
     return valuesAreEquivalent
 
 
+def appendToJSON(variant, field, oldValue, newValue):
+    global diff_json
+
+    if variant not in diff_json:
+        diff_json[variant] = []
+
+    diff = determineDiffForJSON(field, oldValue, newValue)
+
+    diff_json[variant].append(diff)
+
+
+def determineDiffForJSON(field, oldValue, newValue):
+    listKeys = [
+                "Pathogenicity_all",
+                "Submitter_ClinVar",
+                "Method_ClinVar",
+                "Source",
+                "Date_Last_Updated_ClinVar",
+                "Source_URL",
+                "SCV_ClinVar",
+                "Clinical_Significance_ClinVar",
+                "Allele_Origin_ClinVar",
+                "Synonyms",
+                "Genomic_Coordinate_hg38"
+               ]
+
+    diff = {
+            'field': field,
+            'field_type': None,
+            'added': None,
+            'removed': None
+            }
+
+    if field in listKeys:
+        diff['field_type'] = 'list'
+    else:
+        diff['field_type'] = 'individual'
+
+    if field == 'Pathogenicity_all':
+        (added, removed) = determineDiffForPathogenicityAll(oldValue, newValue)
+    elif diff['field_type'] == 'list':
+        oldValues = oldValue.split(',')
+        newValues = newValue.split(',')
+        (added, removed) = determineDiffForList(oldValues, newValues)
+    elif diff['field_type'] == 'individual':
+        added = newValue
+        removed = oldValue
+
+    if not isEmpty(added):
+        diff['added'] = added
+    if not isEmpty(removed):
+        diff['removed'] = removed
+
+    return diff
+
+
+def determineDiffForList(oldValues, newValues):
+    added = []
+    removed = []
+    oldValues = map(str.strip, oldValues)
+    newValues = map(str.strip, newValues)
+    for value in oldValues:
+        if value not in newValues:
+            removed.append(value)
+    for value in newValues:
+        if value not in oldValues:
+            added.append(value)
+    if isEmpty(added):
+        added = None
+    if isEmpty(removed):
+        removed = None
+    return (added, removed)
+
+
+def determineDiffForPathogenicityAll(oldValue, newValue):
+    # Pathogenicity_all is a special case with semicolon delimited sources AND
+    # comma delimited classifications.
+    sources = ['BIC', 'ClinVar', 'ENIGMA']
+    added = []
+    removed = []
+    oldValuesBySource = oldValue.split(';')
+    newValuesBySource = newValue.split(';')
+    oldValuesBySource = map(str.strip, oldValuesBySource)
+    newValuesBySource = map(str.strip, newValuesBySource)
+    for source in sources:
+        (classificationAdded, classificationRemoved) = checkPathogenicityAllDiffBySource(source, oldValuesBySource, newValuesBySource)
+        if not isEmpty(classificationAdded):
+            added.append(classificationAdded)
+        if not isEmpty(classificationRemoved):
+            removed.append(classificationRemoved)
+    if isEmpty(added):
+        added = None
+    if isEmpty(removed):
+        removed = None
+    return (added, removed)
+
+
+def checkPathogenicityAllDiffBySource(source, oldValuesBySource, newValuesBySource):
+    # Check value diffs by source. oldValues and newValues are lists of classifications by source.
+    # e.g. ["Pathogenic, Not Yet Reviewed (BIC)", "Benign (ClinVar)"]
+    foundSourceInOldValues = False
+    foundSourceInNewValues = False
+    classificationAdded = ''
+    classificationRemoved = ''
+    for oldValues in oldValuesBySource:
+        if source in oldValues:
+            foundSourceInOldValues = True
+            for newValues in newValuesBySource:
+                if source in newValues:
+                    foundSourceInNewValues = True
+
+                    # Remove source from string for comparison.
+                    oldValues = oldValues.replace('({})'.format(source), '').strip()
+                    newValues = newValues.replace('({})'.format(source), '').strip()
+
+                    # Split on comma to check list of classifications for source.
+                    oldVs = oldValues.split(',')
+                    newVs = newValues.split(',')
+
+                    # Check for removed classifications
+                    for oV in oldVs:
+                        if oV not in newVs:
+                            if not isEmpty(classificationRemoved):
+                                classificationRemoved += ','
+                            classificationRemoved += oV
+
+                    # Check for added classifications
+                    for nV in newVs:
+                        if nV not in oldVs:
+                            if not isEmpty(classificationAdded):
+                                classificationAdded += ','
+                            classificationAdded += nV
+
+    # Replace the source at the end of the diff string.
+    if not isEmpty(classificationAdded):
+        classificationAdded += ' ({})'.format(source)
+    if not isEmpty(classificationRemoved):
+        classificationRemoved += ' ({})'.format(source)
+
+    # Handle case where new source is added.
+    if foundSourceInOldValues is not True:
+        for newValues in newValuesBySource:
+            if source in newValues:
+                classificationAdded = newValues
+
+    # Handle case where old source is removed.
+    if foundSourceInNewValues is not True and foundSourceInOldValues is True:
+        classificationRemoved = oldValues
+
+    return (classificationAdded, classificationRemoved)
+
+
+def generateDiffJSONFile(diff_json, diff_json_file):
+    with open(diff_json_file, 'w') as outfile:
+        json.dump(diff_json, outfile)
+
+
 def generateReadme(args):
 
     output_file_descriptions = {
@@ -302,6 +466,12 @@ def generateReadme(args):
             readme.write(k + ": " + v + '\n\n')
 
 
+def isEmpty(val):
+    if val is None or len(val) == 0:
+        return True
+    return False
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--v2", default="built.tsv",
@@ -317,6 +487,8 @@ def main():
                         help="Variants with data added in version 2")
     parser.add_argument("--diff", default="diff.txt",
                         help="Variant diff output file")
+    parser.add_argument("--diff_json", default="diff.json",
+                        help="Variant diff output json")
     parser.add_argument("--output", default="built_with_change_types.tsv",
                         help="Output file with change_type column appended")
     parser.add_argument("--artifacts_dir", help='Artifacts directory with pipeline artifact files.')
@@ -373,6 +545,8 @@ def main():
 
     # Adds change_type column and values for each variant in v2 to the output
     appendVariantChangeTypesToOutput(variantChangeTypes, args.v2, args.output)
+
+    generateDiffJSONFile(diff_json, args.diff_json)
 
     generateReadme(args)
 
