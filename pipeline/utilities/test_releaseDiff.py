@@ -11,6 +11,7 @@ class TestStringMethods(unittest.TestCase):
     def setUp(self):
         self.fieldnames = [
                       'Pathogenicity_all',
+                      'Pathogenicity_expert',
                       'Source',
                       'HGVS_Protein',
                       'Pathogenicity_expert',
@@ -20,6 +21,7 @@ class TestStringMethods(unittest.TestCase):
                      ]
         self.oldRow = {
                   'Pathogenicity_all': '',
+                  'Pathogenicity_expert': '',
                   'Source': 'LOVD,1000_Genomes',
                   'HGVS_Protein': '-',
                   'Pathogenicity_expert': 'Not Yet Reviewed',
@@ -29,6 +31,7 @@ class TestStringMethods(unittest.TestCase):
                  }
         self.newRow = {
                   'Pathogenicity_all': '',
+                  'Pathogenicity_expert': '',
                   'Source': 'LOVD,1000_Genomes',
                   'HGVS_Protein': '-',
                   'Pathogenicity_expert': 'Not Yet Reviewed',
@@ -284,6 +287,21 @@ class TestStringMethods(unittest.TestCase):
         change_type = v1v2.compareRow(self.oldRow, self.newRow)
         diff = releaseDiff.diff_json[variant]
         self.assertIs(diff[0]['field'], 'HGVS_Protein')
+
+    def test_catches_pathogenicity_changes(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        self.oldRow['Pathogenicity_all'] = "Pathogenic,not_provided (ClinVar); Class 5 (BIC)"
+        self.oldRow['Pathogenicity_expert'] = "Not Yet Classified"
+        self.newRow['Pathogenicity_all'] = "Pathogenic(ENIGMA); Pathogenic,not_provided (ClinVar); Class 5 (BIC)"
+        self.newRow['Pathogenicity_expert'] = "Pathogenic"
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json[variant]
+        self.assertEqual(len(diff), 2)
+        self.assertIs(change_type, "changed_classification")
 
 if __name__ == '__main__':
     pass
