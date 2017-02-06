@@ -522,62 +522,60 @@ var VariantDetail = React.createClass({
         for (var i = 0; i < data.length; i++) {
             let version = data[i];
             let diff = version.Diff;
-
-            if (diff === null) {
-                continue;
-            }
-
             let release = version.Data_Release;
             let highlightRow = false;
             var diffHTML = [];
 
-            for (var j = 0; j < diff.length; j++) {
-                let fieldDiff = diff[j];
-                let fieldName = fieldDiff.field;
-                var added;
-                var removed;
+            if (diff !== null) {
+                for (var j = 0; j < diff.length; j++) {
+                    let fieldDiff = diff[j];
+                    let fieldName = fieldDiff.field;
+                    var added;
+                    var removed;
 
-                if (!_.contains(relevantFieldsToDisplayChanges, fieldName)) {
-                    continue;
-                }
+                    if (!_.contains(relevantFieldsToDisplayChanges, fieldName)) {
+                        continue;
+                    }
 
-                if (fieldName === "Pathogenicity_expert") {
-                    highlightRow = this.pathogenicityChanged(fieldDiff);
-                }
+                    if (fieldName === "Pathogenicity_expert") {
+                        highlightRow = this.pathogenicityChanged(fieldDiff);
+                    }
 
-                if (_.contains(dateKeys, fieldName)) {
-                    added = this.reformatDate(fieldDiff.added);
-                    removed = this.reformatDate(fieldDiff.removed);
-                } else if (fieldDiff.field_type === "list") {
-                    added = _.map(fieldDiff.added, elem => elem.replace(/_/g, " ").trim());
-                    removed = _.map(fieldDiff.removed, elem => elem.replace(/_/g, " ").trim());
-                } else {
-                    added = fieldDiff.added.trim();
-                    removed = fieldDiff.removed.trim();
-                }
+                    if (_.contains(dateKeys, fieldName)) {
+                        added = this.reformatDate(fieldDiff.added);
+                        removed = this.reformatDate(fieldDiff.removed);
+                    } else if (fieldDiff.field_type === "list") {
+                        added = _.map(fieldDiff.added, elem => elem.replace(/_/g, " ").trim());
+                        removed = _.map(fieldDiff.removed, elem => elem.replace(/_/g, " ").trim());
+                    } else {
+                        added = fieldDiff.added.trim();
+                        removed = fieldDiff.removed.trim();
+                    }
 
-                if (added !== null || removed !== null) {
-                    if (fieldDiff.field_type === "list") {
-                        diffHTML.push(
-                            <span>
-                                <strong>{ getDisplayName(fieldName) }: </strong> <br />
-                                { !isEmptyDiff(added) && `+${added}` }{ !!(!isEmptyDiff(added) && !isEmptyDiff(removed)) && ', '}{ !isEmptyDiff(removed) && `-${removed}` }
-                            </span>, <br />
-                        );
-                    } else if (fieldDiff.field_type === "individual") {
-                        diffHTML.push(
-                            <span>
-                                <strong>{ getDisplayName(fieldName) }: </strong>
-                                {removed} <span className="glyphicon glyphicon-arrow-right"></span> {added}
-                            </span>, <br />
-                        );
+                    if (added !== null || removed !== null) {
+                        if (fieldDiff.field_type === "list") {
+                            diffHTML.push(
+                                <span>
+                                    <strong>{ getDisplayName(fieldName) }: </strong> <br />
+                                    { !isEmptyDiff(added) && `+${added}` }{ !!(!isEmptyDiff(added) && !isEmptyDiff(removed)) && ', '}{ !isEmptyDiff(removed) && `-${removed}` }
+                                </span>, <br />
+                            );
+                        } else if (fieldDiff.field_type === "individual") {
+                            diffHTML.push(
+                                <span>
+                                    <strong>{ getDisplayName(fieldName) }: </strong>
+                                    {removed} <span className="glyphicon glyphicon-arrow-right"></span> {added}
+                                </span>, <br />
+                            );
+                        }
                     }
                 }
             }
+
             diffRows.push(
                 <tr className={highlightRow ? 'danger' : ''}>
                     <td><Link to={`/release/${release.id}`}>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</Link></td>
-                    <td>{diff["Pathogenicity_expert"]}</td>
+                    <td>{version["Pathogenicity_expert"]}</td>
                     <td>{diffHTML}</td>
                 </tr>
             );
