@@ -355,11 +355,6 @@ def sanitise_term(term):
     term += ":*"
     return term
 
-def latest_variants():
-    """Helper function provides variants from the latest release"""
-    latest = DataRelease.objects.order_by('-id')[0].id
-    variants = Variant.objects.filter(Data_Release_id = latest)
-    return variants
 
 @require_http_methods(["POST"])
 def search_variants(request):
@@ -385,7 +380,7 @@ def search_variants(request):
         page_token = '0'
 
     response = variant_service.SearchVariantsResponse()
-    variants = latest_variants()
+    variants = CurrentVariant.objects
     dataset_id, reference_genome = variant_set_id.split('-')
     if dataset_id != DATASET_ID:
         return HttpResponseBadRequest(
@@ -527,11 +522,11 @@ def get_variant(request, variant_id):
     else:
         set_id, v_id = variant_id.split('-')
         if set_id in SET_IDS:
-            variants = Variant.objects.values()
+            variants = CurrentVariant.objects.values()
             try:
                 variant = variants.get(id=int(v_id))
             except Exception:
-                return HttpResponseBadRequest(
+                return HttpResponse(
                     json.dumps(ErrorMessages['notFoundId']),
                     content_type='application/json',
                     status=404)
@@ -539,7 +534,7 @@ def get_variant(request, variant_id):
             response = json_format.MessageToDict(ga_variant, True)
             return JsonResponse(response)
         else:
-            return HttpResponseBadRequest(
+            return HttpResponse(
                 json.dumps(ErrorMessages['notFoundId']),
                 content_type='application/json',
                 status=404)

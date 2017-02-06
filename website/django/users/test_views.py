@@ -14,6 +14,7 @@ django.setup()
 from django.test import TestCase
 from django.utils import timezone
 from django.test.client import RequestFactory
+from django.test.utils import override_settings
 from django.contrib.auth.models import AnonymousUser
 from .models import MyUser
 from users import views
@@ -37,6 +38,7 @@ def response_content(url, request):
     return response(200, content, headers, None, 5, request)
 
 
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.console.EmailBackend')
 class TestViewsAPI(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
@@ -71,10 +73,9 @@ class TestViewsAPI(TestCase):
         self.assertEqual(json.loads(response.content)['error'], 'Email not found')
 
     def test_password_reset_valid_email(self):
-        with self.settings(EMAIL_BACKEND='django.core.mail.backends.dummy.EmailBackend'):
-            response = self.client.post('/accounts/password_reset/', {'email': self.test_user.email})
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(json.loads(response.content)['success'], True)
+        response = self.client.post('/accounts/password_reset/', {'email': self.test_user.email})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.content)['success'], True)
 
     def test_update_password_invalid_token(self):
         self.test_user.password_reset_token = '12345'

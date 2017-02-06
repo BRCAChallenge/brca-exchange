@@ -25,6 +25,19 @@ CHANGE_TYPES = {
 # Field used to denote pathogenic classification of a variant from all sources
 CLASSIFICATION_FIELD = "Pathogenicity_all"
 
+# The following columns are stored in the DB with the following name adjustments
+ADJUSTED_COLUMN_NAMES = {
+    'pyhgvs_Genomic_Coordinate_38': 'Genomic_Coordinate_hg38',
+    'pyhgvs_Genomic_Coordinate_37': 'Genomic_Coordinate_hg37',
+    'pyhgvs_Genomic_Coordinate_36': 'Genomic_Coordinate_hg36',
+    'pyhgvs_Hg37_Start': 'Hg37_Start',
+    'pyhgvs_Hg37_End': 'Hg37_End',
+    'pyhgvs_Hg36_Start': 'Hg36_Start',
+    'pyhgvs_Hg36_End': 'Hg36_End',
+    'pyhgvs_cDNA': 'HGVS_cDNA',
+    'pyhgvs_Protein': 'HGVS_Protein'
+}
+
 
 class transformer(object):
     """
@@ -145,7 +158,9 @@ class transformer(object):
         global total_variants_with_changes
 
         # Uncomment if using old data schema (e.g. pre pyhgvs_Genomic_Coordinate_38)
-        columns_to_ignore = ["change_type", "Assertion_method_citation_ENIGMA"]
+        columns_to_ignore = ["change_type", "Assertion_method_citation_ENIGMA", "Genomic_Coordinate_hg36",
+                             "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg38", "HGVS_cDNA", "HGVS_Protein",
+                             "Hg37_Start", "Hg37_End", "Hg36_Start", "Hg36_End"]
 
         # Header to group all logs the same variant
         variant_intro = "\n\n %s \n Old Source: %s \n New Source: %s \n\n" % (newRow["pyhgvs_Genomic_Coordinate_38"],
@@ -314,11 +329,15 @@ def determineDiffForJSON(field, oldValue, newValue):
                 "Clinical_Significance_ClinVar",
                 "Allele_Origin_ClinVar",
                 "Synonyms",
-                "Genomic_Coordinate_hg38"
                ]
 
+    if field in ADJUSTED_COLUMN_NAMES:
+        adjusted_field = ADJUSTED_COLUMN_NAMES[field]
+    else:
+        adjusted_field = field
+
     diff = {
-            'field': field,
+            'field': adjusted_field,
             'field_type': None,
             'added': None,
             'removed': None
@@ -338,6 +357,12 @@ def determineDiffForJSON(field, oldValue, newValue):
     elif diff['field_type'] == 'individual':
         added = newValue
         removed = oldValue
+
+    # If added and removed are the same, this should not need to run.
+    if added == removed:
+        logging.error("Added: %s and Removed: %s properties are equal for Field: %s (Adjusted Field: %s), "
+                      "there is a bug somewhere before this code.", added, removed, field, adjusted_field)
+        return diff
 
     if not isEmpty(added):
         diff['added'] = added
