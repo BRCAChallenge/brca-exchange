@@ -151,7 +151,6 @@ class transformer(object):
         Compare the contents of an old row to a new row.  Indicate any minor
         (cosmetic) changes, major changes, or new values
         """
-
         global added_data
         global diff
         global total_variants_with_additions
@@ -550,7 +549,11 @@ def main():
     # string is the key, and for which the value is the full row.
     oldData = {}
     for oldRow in v1In:
-        oldData[oldRow["pyhgvs_Genomic_Coordinate_38"]] = oldRow
+        # Account for old data if it doesn't have 'g.' in coordinate
+        genomic_coordinate = oldRow["pyhgvs_Genomic_Coordinate_38"]
+        if ":g." not in genomic_coordinate:
+            genomic_coordinate = genomic_coordinate[:6] + 'g.' + genomic_coordinate[6:]
+        oldData[genomic_coordinate] = oldRow
     newData = {}
     for newRow in v2In:
         newData[newRow["pyhgvs_Genomic_Coordinate_38"]] = newRow
