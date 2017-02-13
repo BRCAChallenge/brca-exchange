@@ -533,12 +533,12 @@ var VariantDetail = React.createClass({
                     var added;
                     var removed;
 
-                    if (!_.contains(relevantFieldsToDisplayChanges, fieldName)) {
-                        continue;
-                    }
-
                     if (fieldName === "Pathogenicity_expert") {
                         highlightRow = this.pathogenicityChanged(fieldDiff);
+                    }
+
+                    if (!_.contains(relevantFieldsToDisplayChanges, fieldName)) {
+                        continue;
                     }
 
                     if (_.contains(dateKeys, fieldName)) {
