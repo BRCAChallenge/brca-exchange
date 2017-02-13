@@ -561,12 +561,22 @@ var VariantDetail = React.createClass({
                                 </span>, <br />
                             );
                         } else if (fieldDiff.field_type === "individual") {
-                            diffHTML.push(
-                                <span>
-                                    <strong>{ getDisplayName(fieldName) }: </strong>
-                                    {removed} <span className="glyphicon glyphicon-arrow-right"></span> {added}
-                                </span>, <br />
-                            );
+                            if (isEmptyField(removed)) {
+                                diffHTML.push(
+                                    <span>
+                                        <strong>{ getDisplayName(fieldName) }: </strong>
+                                        <span className='label label-success'><span className='glyphicon glyphicon-star'></span> New</span>
+                                        &nbsp;{added}
+                                    </span>, <br />
+                                );
+                            } else {
+                                diffHTML.push(
+                                    <span>
+                                        <strong>{ getDisplayName(fieldName) }: </strong>
+                                        {removed} <span className="glyphicon glyphicon-arrow-right"></span> {added}
+                                    </span>, <br />
+                                );
+                            }
                         }
                     }
                 }
