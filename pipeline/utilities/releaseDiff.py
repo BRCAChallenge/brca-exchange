@@ -496,6 +496,12 @@ def isEmpty(val):
     return False
 
 
+def addGIfNecessary(genomic_coordinate):
+    if ":g." not in genomic_coordinate:
+        genomic_coordinate = genomic_coordinate[:6] + 'g.' + genomic_coordinate[6:]
+    return genomic_coordinate
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--v2", default="built.tsv",
@@ -549,11 +555,11 @@ def main():
     # string is the key, and for which the value is the full row.
     oldData = {}
     for oldRow in v1In:
-        # Account for old data if it doesn't have 'g.' in coordinate
-        genomic_coordinate = oldRow["pyhgvs_Genomic_Coordinate_38"]
-        if ":g." not in genomic_coordinate:
-            genomic_coordinate = genomic_coordinate[:6] + 'g.' + genomic_coordinate[6:]
-        oldData[genomic_coordinate] = oldRow
+        # Adjust data if it doesn't have 'g.' in coordinate
+        oldRow["pyhgvs_Genomic_Coordinate_38"] = addGIfNecessary(oldRow["pyhgvs_Genomic_Coordinate_38"])
+        oldRow["pyhgvs_Genomic_Coordinate_37"] = addGIfNecessary(oldRow["pyhgvs_Genomic_Coordinate_37"])
+        oldRow["pyhgvs_Genomic_Coordinate_36"] = addGIfNecessary(oldRow["pyhgvs_Genomic_Coordinate_36"])
+        oldData[oldRow["pyhgvs_Genomic_Coordinate_38"]] = oldRow
     newData = {}
     for newRow in v2In:
         newData[newRow["pyhgvs_Genomic_Coordinate_38"]] = newRow
