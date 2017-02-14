@@ -38,6 +38,10 @@ ADJUSTED_COLUMN_NAMES = {
     'pyhgvs_Protein': 'HGVS_Protein'
 }
 
+PYHGVS_GENOMIC_COORDINATE_FIELDS = ["pyhgvs_Genomic_Coordinate_38",
+                                    "pyhgvs_Genomic_Coordinate_37",
+                                    "pyhgvs_Genomic_Coordinate_36"]
+
 
 class transformer(object):
     """
@@ -151,7 +155,6 @@ class transformer(object):
         Compare the contents of an old row to a new row.  Indicate any minor
         (cosmetic) changes, major changes, or new values
         """
-
         global added_data
         global diff
         global total_variants_with_additions
@@ -497,6 +500,14 @@ def isEmpty(val):
     return False
 
 
+def addGsIfNecessary(row):
+    for field in PYHGVS_GENOMIC_COORDINATE_FIELDS:
+        # Adjust Genomic Coordinate if it doesn't have 'g.' in coordinate
+        if ":g." not in row[field]:
+            row[field] = row[field][:6] + 'g.' + row[field][6:]
+    return row
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--v2", default="built.tsv",
@@ -550,9 +561,11 @@ def main():
     # string is the key, and for which the value is the full row.
     oldData = {}
     for oldRow in v1In:
+        oldRow = addGsIfNecessary(oldRow)
         oldData[oldRow["pyhgvs_Genomic_Coordinate_38"]] = oldRow
     newData = {}
     for newRow in v2In:
+        newRow = addGsIfNecessary(newRow)
         newData[newRow["pyhgvs_Genomic_Coordinate_38"]] = newRow
     for oldVariant in oldData.keys():
         if not newData.has_key(oldVariant):

@@ -395,8 +395,20 @@ function getDisplayName(key) {
 
 // test for the various forms of blank fields
 function isEmptyField(value) {
+    if (value === null) {
+        return true;
+    }
+
+    if (Array.isArray(value)) {
+        value = value[0];
+    }
+
     var v = value.trim();
-    return v === '' || v === '-' || v === 'None';
+    return v === '' || v === '-' || v === 'None' || v === undefined;
+}
+
+function isEmptyDiff(value) {
+    return value === null || value.length < 1;
 }
 
 var VariantDetail = React.createClass({
@@ -416,11 +428,107 @@ var VariantDetail = React.createClass({
         this.props.toggleMode();
 	 this.forceUpdate();
     },
-    reformatDate: function(date) { //handles single dates or comma separated dates
-        var dates = date.split(',');
-        return dates.map(function(date) {
-            return moment.utc(new Date(date)).format("DD MMMM YYYY");
+    reformatDate: function(date) { //handles single dates or an array of dates
+        if (isEmptyField(date)) {
+            return date;
+        }
+        if (!Array.isArray(date)) {
+            date = date.split(',');
+        }
+        return date.map(function(d) {
+            return moment.utc(new Date(d)).format("DD MMMM YYYY");
         }).join();
+    },
+    pathogenicityChanged: function(pathogenicityDiff) {
+        return (pathogenicityDiff.added || pathogenicityDiff.removed) ? true : false;
+    },
+    generateDiffRows: function(cols, data) {
+        var diffRows = [];
+
+        // keys that contain date values that need reformatting for the ui
+        var dateKeys = [
+            "Date_Last_Updated_ClinVar",
+            "Date_last_evaluated_ENIGMA"
+        ];
+
+        // In research_mode, only show research_mode changes.
+        var relevantFieldsToDisplayChanges = cols.map(function(col) {
+            return col.prop;
+        });
+
+        for (var i = 0; i < data.length; i++) {
+            let version = data[i];
+            let diff = version.Diff;
+            let release = version.Data_Release;
+            let highlightRow = false;
+            var diffHTML = [];
+
+            if (diff !== null) {
+                for (var j = 0; j < diff.length; j++) {
+                    let fieldDiff = diff[j];
+                    let fieldName = fieldDiff.field;
+                    var added;
+                    var removed;
+
+                    if (fieldName === "Pathogenicity_expert") {
+                        highlightRow = this.pathogenicityChanged(fieldDiff);
+                    }
+
+                    if (!_.contains(relevantFieldsToDisplayChanges, fieldName)) {
+                        continue;
+                    }
+
+                    if (_.contains(dateKeys, fieldName)) {
+                        added = this.reformatDate(fieldDiff.added);
+                        removed = this.reformatDate(fieldDiff.removed);
+                    } else if (fieldDiff.field_type === "list") {
+                        added = _.map(fieldDiff.added, elem => elem.replace(/_/g, " ").trim());
+                        removed = _.map(fieldDiff.removed, elem => elem.replace(/_/g, " ").trim());
+                    } else {
+                        added = fieldDiff.added.trim();
+                        removed = fieldDiff.removed.trim();
+                    }
+
+                    if (added !== null || removed !== null) {
+                        if (fieldDiff.field_type === "list") {
+                            diffHTML.push(
+                                <span>
+                                    <strong>{ getDisplayName(fieldName) }: </strong> <br />
+                                    { !isEmptyDiff(added) && `+${added}` }{ !!(!isEmptyDiff(added) && !isEmptyDiff(removed)) && ', '}{ !isEmptyDiff(removed) && `-${removed}` }
+                                </span>, <br />
+                            );
+                        } else if (fieldDiff.field_type === "individual") {
+                            if (isEmptyField(removed)) {
+                                diffHTML.push(
+                                    <span>
+                                        <strong>{ getDisplayName(fieldName) }: </strong>
+                                        <span className='label label-success'><span className='glyphicon glyphicon-star'></span> New</span>
+                                        &nbsp;{added}
+                                    </span>, <br />
+                                );
+                            } else {
+                                diffHTML.push(
+                                    <span>
+                                        <strong>{ getDisplayName(fieldName) }: </strong>
+                                        {removed} <span className="glyphicon glyphicon-arrow-right"></span> {added}
+                                    </span>, <br />
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+
+            diffRows.push(
+                <tr className={highlightRow ? 'danger' : ''}>
+                    <td><Link to={`/release/${release.id}`}>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</Link></td>
+                    <td>{version["Pathogenicity_expert"]}</td>
+                    <td>{diffHTML}</td>
+                </tr>
+            );
+        }
+
+        return diffRows;
     },
     render: function () {
         var {data, error} = this.state;
@@ -483,130 +591,7 @@ var VariantDetail = React.createClass({
 				</tr>);
         });
 
-        var versionRows = [];
-        // which keys represent comma seperated lists? for filtering out re-ordered lists
-        // TODO: list keys now handled on the server, remove this code?
-        var listKeys = [
-            "Pathogenicity_all",
-            "Submitter_ClinVar",
-            "Method_ClinVar",
-            "Source",
-            "Date_Last_Updated_ClinVar",
-            "Source_URL",
-            "SCV_ClinVar",
-            "Clinical_Significance_ClinVar",
-            "Allele_Origin_ClinVar"
-        ];
-
-        // keys that contain date values that need reformatting for the ui
-        var dateKeys = [
-            "Date_Last_Updated_ClinVar",
-            "Date_last_evaluated_ENIGMA"
-        ];
-
-        // In research_mode, only show research_mode changes.
-        var relevantFieldsToDisplayChanges = cols.map(function(col) {
-            return col.prop;
-        });
-
-        for (var i = 0; i < data.length; i++) {
-            let version = data[i],
-                changes = [],
-                release = version["Data_Release"],
-                highlightRow = false;
-
-            // if this is not the oldest version of the variant, diff them
-            // TODO: fix this diff following diff updates in pipeline.
-            if (i < data.length - 1) {
-                let previous = data[i + 1];
-                if (version["Pathogenicity_expert"] !== previous["Pathogenicity_expert"]) {
-                    highlightRow = true;
-                }
-                for (var key in version) {
-                    if (relevantFieldsToDisplayChanges.indexOf(key) === -1) {
-                        // Do not display changes for these fields.
-                        continue;
-                    } else if (isEmptyField(version[key].toString() && isEmptyField(previous[key]).toString())) {
-                        // If both are empty, there is no change.
-                        continue;
-                    }
-
-                    if (_.contains(dateKeys, key) && !isEmptyField(version[key])) {
-                        version[key] = this.reformatDate(version[key]);
-                        previous[key] = this.reformatDate(previous[key]);
-                        if (version[key] === previous[key]) {
-                            continue;
-                        }
-                    }
-
-                    if (!_.contains(["Data_Release", "Change_Type", "id", "Synonyms"], key) && version[key] !== previous[key]) {
-                        let versionDisplay = isEmptyField(version[key].toString()) ? <span className='empty'></span> : version[key].toString();
-                        if (isEmptyField(previous[key].toString())) {
-                            changes.push(
-                                <span>
-                                    <strong>{ getDisplayName(key) }: </strong>
-                                    <span className='label label-success'><span className='glyphicon glyphicon-star'></span> New</span>
-                                    &nbsp;{ versionDisplay }
-                                </span>, <br />
-                            );
-                        }
-                        else if (_.contains(listKeys, key)) {
-                            let delimiter = key === "Pathogenicity_all" ? ';' : ',';
-                            let trimmedVersion = _.map(version[key].split(delimiter), elem => elem.replace(/_/g, " ").trim());
-                            let trimmedPrevious = _.map(previous[key].split(delimiter), elem => elem.replace(/_/g, " ").trim());
-
-                            if (key === "Pathogenicity_all") {
-                                let sortSublists = function(elem) {
-                                    var submitter = elem.match(/\([a-zA-Z]*\)/)[0];
-                                    return elem.replace(submitter, '').trim().split(',').sort().join(',');
-                                };
-                                trimmedVersion = _.map(trimmedVersion, sortSublists);
-                                trimmedPrevious = _.map(trimmedPrevious, sortSublists);
-                            }
-
-                            let added = _.map(_.difference(trimmedVersion, trimmedPrevious), elem => `+${elem}`);
-                            let deleted = _.map(_.difference(trimmedPrevious, trimmedVersion), elem => `-${elem}`);
-
-                            if (added.length || deleted.length) {
-                                changes.push(
-                                    <span>
-                                        <strong>{ getDisplayName(key) }: </strong> <br />
-                                        { added.join(', ') }{ !!(added.length && deleted.length) && ', '}{ deleted.join(', ') }
-                                    </span>, <br />
-                                );
-                            }
-                        } else {
-                            // exLOVD citation format changed, heuristic for matching: first word (i.e. first author) same -> ignore
-                            if (key === "Literature_source_exLOVD" &&
-                                version[key].trim().split(' ')[0] === previous[key].trim().split(' ')[0]) {
-                                continue;
-                            }
-                            // ENIGMA rules URL's were previously broken, ignore the change from broken to correct links
-                            else if (key === "Assertion_method_citation_ENIGMA") {
-                                continue;
-                            }
-                            // Text change that actually means the same thing
-                            else if (key === "Pathogenicity_expert" && version[key] === "Not Yet Reviewed" && previous[key] === "Not Yet Classified") {
-                                continue;
-                            }
-                            changes.push(
-                                <span>
-                                    <strong>{ getDisplayName(key) }: </strong>
-                                    {previous[key].toString()} <span className="glyphicon glyphicon-arrow-right"></span> {versionDisplay}
-                                </span>, <br />
-                            );
-                        }
-                    }
-                }
-            }
-            versionRows.push(
-                <tr className={highlightRow ? 'danger' : ''}>
-                    <td><Link to={`/release/${release.id}`}>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</Link></td>
-                    <td>{version["Pathogenicity_expert"]}</td>
-                    <td>{changes}</td>
-                </tr>
-            );
-        }
+        var diffRows = this.generateDiffRows(cols, data);
 
         return (error ? <p>{error}</p> :
             <Grid>
@@ -644,7 +629,7 @@ var VariantDetail = React.createClass({
                                 </tr>
                             </thead>
                             <tbody>
-                                {versionRows}
+                                {diffRows}
                             </tbody>
                         </Table>
                         <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show All Public Data on this Variant" to see these changes.</p>

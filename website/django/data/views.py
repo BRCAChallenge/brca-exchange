@@ -12,7 +12,7 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.gzip import gzip_page
 
-from .models import Variant, CurrentVariant, DataRelease, ChangeType
+from .models import Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType
 from django.views.decorators.http import require_http_methods
 
 # GA4GH related imports
@@ -65,6 +65,12 @@ def variant_to_dict(variant_object):
     variant_dict["Data_Release"] = model_to_dict(variant_object.Data_Release)
     variant_dict["Data_Release"]["date"] = variant_object.Data_Release.date
     variant_dict["Change_Type"] = ChangeType.objects.get(id=variant_dict["Change_Type"]).name
+    try:
+        variant_diff = VariantDiff.objects.get(variant_id=variant_object.id)
+        variant_dict["Diff"] = variant_diff.diff
+    except VariantDiff.DoesNotExist:
+        print "Variant Diff does not exist for Variant", variant_object.Genomic_Coordinate_hg38, "from release", variant_object.Data_Release.id
+        variant_dict["Diff"] = None
     return variant_dict
 
 
