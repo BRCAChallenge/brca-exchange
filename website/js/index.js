@@ -442,70 +442,7 @@ var VariantDetail = React.createClass({
     pathogenicityChanged: function(pathogenicityDiff) {
         return (pathogenicityDiff.added || pathogenicityDiff.removed) ? true : false;
     },
-    render: function () {
-        var {data, error} = this.state;
-        if (!data) {
-            return <div></div>;
-        }
-
-        var variant = data[0],
-            release = variant["Data_Release"],
-            cols;
-        if (localStorage.getItem("research-mode") === 'true') {
-            cols = researchModeColumns;
-        } else {
-            cols = columns;
-        }
-        var rows = _.map(cols, ({prop, title}) => {
-            var rowItem;
-            if (prop === "Protein_Change") {
-                title = "Abbreviated AA Change";
-            }
-            if (variant[prop] != null) {
-                if (prop === "Gene_Symbol") {
-                    rowItem = <i>{variant[prop]}</i>;
-                }
-                else if (prop === "URL_ENIGMA") {
-                    if (variant[prop].length) {
-                        rowItem = <a target="_blank" href={variant[prop]}>link to multifactorial analysis</a>;
-					}
-                } else if (prop === "Assertion_method_citation_ENIGMA") {
-                    rowItem = <a target="_blank" href="https://enigmaconsortium.org/library/general-documents/">Enigma Rules version Mar 26, 2015</a>;
-// this will be used in All Data display
-/*                } else if (prop == "Source_URL") {
-                    var url_count = 0;
-                    rowItem = _.map(variant[prop].split(','), url => (url.length != 0) && (<span><a key={"Source_URL"+(url_count++)} target="_blank" href={url}>link to multifactorial analysis ({url_count})</a><br /></span>));
-  */
-                } else if (prop === "Source_URL") {
-                    if (variant[prop].startsWith("http://hci-exlovd.hci.utah.edu")) {
-                        rowItem = <a target="_blank" href={variant[prop].split(',')[0]}>link to multifactorial analysis</a>;
-					}
-                } else if (prop === "Comment_on_clinical_significance_ENIGMA" || prop === "Clinical_significance_citations_ENIGMA") {
-                    var pubmed = "http://ncbi.nlm.nih.gov/pubmed/";
-                    rowItem = _.map(variant[prop].split(/PMID:? ?([0-9]+)/), piece =>
-                        (/^[0-9]+$/.test(piece)) ? <a target="_blank" href={pubmed + piece}>PMID: {piece}</a> : piece );
-                } else if (prop === "HGVS_cDNA") {
-                    rowItem = variant[prop].split(":")[1];
-                } else if (prop === "HGVS_Protein") {
-                    rowItem = variant[prop].split(":")[1];
-                } else if (prop === "Date_last_evaluated_ENIGMA" && !isEmptyField(variant[prop])) {
-                    rowItem = moment(variant[prop], "MM/DD/YYYY").format("DD MMMM YYYY");
-                } else {
-                    rowItem = variant[prop];
-                }
-            } else if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] != null) {
-                rowItem = variant["HGVS_Protein"].split(":")[0];
-            }
-            return (
-				<tr key={prop}>
-					<Key tableKey={title} columns={cols} onClick={() => this.showHelp(title)}/>
-					<td><span className="row-wrap">{rowItem}</span></td>
-				</tr>);
-        });
-
-        // TODO: Use function to generate diff
-        // diffHTML = this.generateDiffHTML()
-
+    generateDiffRows: function(cols, data) {
         var diffRows = [];
 
         // keys that contain date values that need reformatting for the ui
@@ -590,6 +527,71 @@ var VariantDetail = React.createClass({
                 </tr>
             );
         }
+
+        return diffRows;
+    },
+    render: function () {
+        var {data, error} = this.state;
+        if (!data) {
+            return <div></div>;
+        }
+
+        var variant = data[0],
+            release = variant["Data_Release"],
+            cols;
+        if (localStorage.getItem("research-mode") === 'true') {
+            cols = researchModeColumns;
+        } else {
+            cols = columns;
+        }
+        var rows = _.map(cols, ({prop, title}) => {
+            var rowItem;
+            if (prop === "Protein_Change") {
+                title = "Abbreviated AA Change";
+            }
+            if (variant[prop] != null) {
+                if (prop === "Gene_Symbol") {
+                    rowItem = <i>{variant[prop]}</i>;
+                }
+                else if (prop === "URL_ENIGMA") {
+                    if (variant[prop].length) {
+                        rowItem = <a target="_blank" href={variant[prop]}>link to multifactorial analysis</a>;
+					}
+                } else if (prop === "Assertion_method_citation_ENIGMA") {
+                    rowItem = <a target="_blank" href="https://enigmaconsortium.org/library/general-documents/">Enigma Rules version Mar 26, 2015</a>;
+// this will be used in All Data display
+/*                } else if (prop == "Source_URL") {
+                    var url_count = 0;
+                    rowItem = _.map(variant[prop].split(','), url => (url.length != 0) && (<span><a key={"Source_URL"+(url_count++)} target="_blank" href={url}>link to multifactorial analysis ({url_count})</a><br /></span>));
+  */
+                } else if (prop === "Source_URL") {
+                    if (variant[prop].startsWith("http://hci-exlovd.hci.utah.edu")) {
+                        rowItem = <a target="_blank" href={variant[prop].split(',')[0]}>link to multifactorial analysis</a>;
+					}
+                } else if (prop === "Comment_on_clinical_significance_ENIGMA" || prop === "Clinical_significance_citations_ENIGMA") {
+                    var pubmed = "http://ncbi.nlm.nih.gov/pubmed/";
+                    rowItem = _.map(variant[prop].split(/PMID:? ?([0-9]+)/), piece =>
+                        (/^[0-9]+$/.test(piece)) ? <a target="_blank" href={pubmed + piece}>PMID: {piece}</a> : piece );
+                } else if (prop === "HGVS_cDNA") {
+                    rowItem = variant[prop].split(":")[1];
+                } else if (prop === "HGVS_Protein") {
+                    rowItem = variant[prop].split(":")[1];
+                } else if (prop === "Date_last_evaluated_ENIGMA" && !isEmptyField(variant[prop])) {
+                    rowItem = moment(variant[prop], "MM/DD/YYYY").format("DD MMMM YYYY");
+                } else {
+                    rowItem = variant[prop];
+                }
+            } else if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] != null) {
+                rowItem = variant["HGVS_Protein"].split(":")[0];
+            }
+            return (
+				<tr key={prop}>
+					<Key tableKey={title} columns={cols} onClick={() => this.showHelp(title)}/>
+					<td><span className="row-wrap">{rowItem}</span></td>
+				</tr>);
+        });
+
+        var diffRows = this.generateDiffRows(cols, data);
 
         return (error ? <p>{error}</p> :
             <Grid>

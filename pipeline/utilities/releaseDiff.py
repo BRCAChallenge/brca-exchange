@@ -38,6 +38,10 @@ ADJUSTED_COLUMN_NAMES = {
     'pyhgvs_Protein': 'HGVS_Protein'
 }
 
+PYHGVS_GENOMIC_COORDINATE_FIELDS = ["pyhgvs_Genomic_Coordinate_38",
+                                    "pyhgvs_Genomic_Coordinate_37",
+                                    "pyhgvs_Genomic_Coordinate_36"]
+
 
 class transformer(object):
     """
@@ -496,10 +500,12 @@ def isEmpty(val):
     return False
 
 
-def addGIfNecessary(genomic_coordinate):
-    if ":g." not in genomic_coordinate:
-        genomic_coordinate = genomic_coordinate[:6] + 'g.' + genomic_coordinate[6:]
-    return genomic_coordinate
+def addGsIfNecessary(row):
+    for field in PYHGVS_GENOMIC_COORDINATE_FIELDS:
+        # Adjust Genomic Coordinate if it doesn't have 'g.' in coordinate
+        if ":g." not in row[field]:
+            row[field] = row[field][:6] + 'g.' + row[field][6:]
+    return row
 
 
 def main():
@@ -555,13 +561,11 @@ def main():
     # string is the key, and for which the value is the full row.
     oldData = {}
     for oldRow in v1In:
-        # Adjust data if it doesn't have 'g.' in coordinate
-        oldRow["pyhgvs_Genomic_Coordinate_38"] = addGIfNecessary(oldRow["pyhgvs_Genomic_Coordinate_38"])
-        oldRow["pyhgvs_Genomic_Coordinate_37"] = addGIfNecessary(oldRow["pyhgvs_Genomic_Coordinate_37"])
-        oldRow["pyhgvs_Genomic_Coordinate_36"] = addGIfNecessary(oldRow["pyhgvs_Genomic_Coordinate_36"])
+        oldRow = addGsIfNecessary(oldRow)
         oldData[oldRow["pyhgvs_Genomic_Coordinate_38"]] = oldRow
     newData = {}
     for newRow in v2In:
+        newRow = addGsIfNecessary(newRow)
         newData[newRow["pyhgvs_Genomic_Coordinate_38"]] = newRow
     for oldVariant in oldData.keys():
         if not newData.has_key(oldVariant):

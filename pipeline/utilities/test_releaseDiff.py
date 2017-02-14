@@ -17,6 +17,8 @@ class TestStringMethods(unittest.TestCase):
                       'Pathogenicity_expert',
                       'Genomic_Coordinate_hg38',
                       'pyhgvs_Genomic_Coordinate_38',
+                      'pyhgvs_Genomic_Coordinate_37',
+                      'pyhgvs_Genomic_Coordinate_36',
                       'pyhgvs_Protein'
                      ]
         self.oldRow = {
@@ -27,6 +29,8 @@ class TestStringMethods(unittest.TestCase):
                   'Pathogenicity_expert': 'Not Yet Reviewed',
                   'Genomic_Coordinate_hg38': 'chr17:g.43049067:C>T',
                   'pyhgvs_Genomic_Coordinate_38': 'chr17:g.43049067:C>T',
+                  'pyhgvs_Genomic_Coordinate_37': 'chr17:g.43049067:C>T',
+                  'pyhgvs_Genomic_Coordinate_36': 'chr17:g.43049067:C>T',
                   'pyhgvs_Protein': 'NP_009225.1:p.?'
                  }
         self.newRow = {
@@ -37,6 +41,8 @@ class TestStringMethods(unittest.TestCase):
                   'Pathogenicity_expert': 'Not Yet Reviewed',
                   'Genomic_Coordinate_hg38': 'chr17:g.43049067:C>T',
                   'pyhgvs_Genomic_Coordinate_38': 'chr17:g.43049067:C>T',
+                  'pyhgvs_Genomic_Coordinate_37': 'chr17:g.43049067:C>T',
+                  'pyhgvs_Genomic_Coordinate_36': 'chr17:g.43049067:C>T',
                   'pyhgvs_Protein': 'NP_009225.1:p.?'
                  }
 
@@ -302,6 +308,22 @@ class TestStringMethods(unittest.TestCase):
         diff = releaseDiff.diff_json[variant]
         self.assertEqual(len(diff), 2)
         self.assertIs(change_type, "changed_classification")
+
+    def test_add_gs_to_genomic_coordinate(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        self.oldRow['pyhgvs_Genomic_Coordinate_38'] = "chr17:43049067:C>T"
+        self.newRow['pyhgvs_Genomic_Coordinate_38'] = "chr17:g.43049067:C>T"
+        self.oldRow['pyhgvs_Genomic_Coordinate_37'] = "chr17:43049067:C>T"
+        self.newRow['pyhgvs_Genomic_Coordinate_37'] = "chr17:g.43049067:C>T"
+        self.oldRow['pyhgvs_Genomic_Coordinate_36'] = "chr17:43049067:C>T"
+        self.newRow['pyhgvs_Genomic_Coordinate_36'] = "chr17:g.43049067:C>T"
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        self.oldRow = releaseDiff.addGsIfNecessary(self.oldRow)
+        self.oldRow = releaseDiff.addGsIfNecessary(self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        self.assertIsNone(change_type)
 
 if __name__ == '__main__':
     pass
