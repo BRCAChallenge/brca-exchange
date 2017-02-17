@@ -115,20 +115,6 @@ var Home = React.createClass({
                 </a>
             </Col>
         ));
-        var videoStyles = {
-            padding: '56.25% 0 0 0',
-            position: 'relative'
-        };
-        var videoWrapperStyles = {
-            height: '100%',
-            left: '0',
-            position: 'absolute',
-            top: '0',
-            width: '100%',
-        };
-        var youtubeStyles = {
-            marginTop: '60px'
-        };
         return (
             <Grid id="main-grid" className='home'>
                 <Row>
