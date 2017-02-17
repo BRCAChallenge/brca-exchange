@@ -21,6 +21,13 @@ def main():
                               "ESP": 0,
                              }
 
+    num_variants_by_change_type = {
+                                    "new": 0,
+                                    "changed_classification": 0,
+                                    "changed_information": 0,
+                                    "added_information": 0,
+                                  }
+
     total_number_of_variants = 0
 
     args = parser.parse_args()
@@ -31,8 +38,12 @@ def main():
         for source in num_variants_by_source.keys():
             if source in variant["Source"]:
                 num_variants_by_source[source] += 1
+        for change_type in num_variants_by_change_type.keys():
+            if change_type in variant["change_type"]:
+                num_variants_by_change_type[change_type] += 1
 
     print num_variants_by_source
+    print num_variants_by_change_type
     print "Total number of variants: %s" % (total_number_of_variants)
 
 if __name__ == "__main__":
