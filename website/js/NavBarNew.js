@@ -81,7 +81,7 @@ var NavBarNew = React.createClass({
                             <NavLink onClick={this.close} to='/about/api'>
                                 Webservices for API Data Access
                             </NavLink>
-                            <NavLink onClick={this.close} to='/about/dataUse'>
+                            <NavLink onClick={this.close} to='/about/dataSubmissionPolicy'>
                                 Data Submission Policy
                             </NavLink>
                         </DropdownButton>
