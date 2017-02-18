@@ -400,16 +400,16 @@ function getDisplayName(key) {
 
 // test for the various forms of blank fields
 function isEmptyField(value) {
-    if (value === null) {
-        return true;
-    }
-
     if (Array.isArray(value)) {
         value = value[0];
     }
 
+    if (value === null || (typeof value === 'undefined')) {
+        return true;
+    }
+
     var v = value.trim();
-    return v === '' || v === '-' || v === 'None' || v === undefined;
+    return v === '' || v === '-' || v === 'None';
 }
 
 function isEmptyDiff(value) {
@@ -495,7 +495,15 @@ var VariantDetail = React.createClass({
                     }
 
                     if (added !== null || removed !== null) {
-                        if (fieldDiff.field_type === "list") {
+                        if (isEmptyField(removed)) {
+                            diffHTML.push(
+                                <span>
+                                    <strong>{ getDisplayName(fieldName) }: </strong>
+                                    <span className='label label-success'><span className='glyphicon glyphicon-star'></span> New</span>
+                                    &nbsp;{added}
+                                </span>, <br />
+                            );
+                        } else if (fieldDiff.field_type === "list") {
                             diffHTML.push(
                                 <span>
                                     <strong>{ getDisplayName(fieldName) }: </strong> <br />
@@ -503,22 +511,12 @@ var VariantDetail = React.createClass({
                                 </span>, <br />
                             );
                         } else if (fieldDiff.field_type === "individual") {
-                            if (isEmptyField(removed)) {
-                                diffHTML.push(
-                                    <span>
-                                        <strong>{ getDisplayName(fieldName) }: </strong>
-                                        <span className='label label-success'><span className='glyphicon glyphicon-star'></span> New</span>
-                                        &nbsp;{added}
-                                    </span>, <br />
-                                );
-                            } else {
-                                diffHTML.push(
-                                    <span>
-                                        <strong>{ getDisplayName(fieldName) }: </strong>
-                                        {removed} <span className="glyphicon glyphicon-arrow-right"></span> {added}
-                                    </span>, <br />
-                                );
-                            }
+                            diffHTML.push(
+                                <span>
+                                    <strong>{ getDisplayName(fieldName) }: </strong>
+                                    {removed} <span className="glyphicon glyphicon-arrow-right"></span> {added}
+                                </span>, <br />
+                            );
                         }
                     }
                 }
