@@ -185,6 +185,17 @@ class transformer(object):
                 if field == CLASSIFICATION_FIELD and oldRow[field] != newRow[field]:
                     changed_classification = True
 
+        # If a field is no longer present in the new data, make sure to include it in the diff
+        for field in oldRow.keys():
+            if field not in columns_to_ignore and field not in newRow.keys():
+                variant = newRow["pyhgvs_Genomic_Coordinate_38"]
+                oldValue = self._normalize(oldRow[field])
+                newValue = "-"
+                if oldValue != newValue:
+                    appendToJSON(variant, field, oldValue, newValue)
+                    result = "%s | %s" % (oldValue, newValue)
+                    changeset += "%s: %s \n" % (field, result)
+
         # If there are any changes, log them in the diff
         if len(changeset) > 0:
             diff.write(variant_intro)
@@ -556,7 +567,7 @@ def main():
     variantChangeTypes = {}
 
     v1v2 = v1ToV2(v1In.fieldnames, v2In.fieldnames)
-    #
+
     # Save the old variants in a dictionary for which the pyhgvs_genomic_coordinate_38
     # string is the key, and for which the value is the full row.
     oldData = {}
