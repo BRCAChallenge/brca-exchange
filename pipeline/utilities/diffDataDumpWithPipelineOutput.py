@@ -21,7 +21,6 @@ To use, follow these steps:
 
 import argparse
 import csv
-import pdb
 
 
 def addGsIfNecessary(genomic_coordinate):
