@@ -325,5 +325,18 @@ class TestStringMethods(unittest.TestCase):
         change_type = v1v2.compareRow(self.oldRow, self.newRow)
         self.assertIsNone(change_type)
 
+    def test_properly_classifies_variants_with_removed_columns(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        self.oldRow["Functional_analysis_result_LOVD"] = "test"
+        self.newRow['Source'] += ",ENIGMA"
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json[variant]
+        self.assertEqual(len(diff), 2)
+        self.assertIs(change_type, "changed_information")
+
 if __name__ == '__main__':
     pass
