@@ -189,11 +189,12 @@ class transformer(object):
         for field in oldRow.keys():
             if field not in columns_to_ignore and field not in newRow.keys():
                 variant = newRow["pyhgvs_Genomic_Coordinate_38"]
-                oldValue = oldRow[field]
+                oldValue = self._normalize(oldRow[field])
                 newValue = "-"
-                appendToJSON(variant, field, oldValue, newValue)
-                result = "%s | %s" % (oldValue, newValue)
-                changeset += "%s: %s \n" % (field, result)
+                if oldValue != newValue:
+                    appendToJSON(variant, field, oldValue, newValue)
+                    result = "%s | %s" % (oldValue, newValue)
+                    changeset += "%s: %s \n" % (field, result)
 
         # If there are any changes, log them in the diff
         if len(changeset) > 0:
