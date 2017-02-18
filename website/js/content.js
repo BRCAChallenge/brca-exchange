@@ -10,6 +10,7 @@ var content = {
     helpResearch: require('../content/help_research.md'),
     disclaimer: require('../content/disclaimer.md'),
     thisSite: require('../content/thisSite.md'),
+    dataSubmissionPolicy: require('../content/dataSubmissionPolicy.md'),
     api: require('../content/api.md'),
     variantsDefault: require('../content/variantsDefault.md'),
     variantsResearch: require('../content/variantsResearch.md'),
