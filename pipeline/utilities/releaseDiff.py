@@ -179,11 +179,13 @@ class transformer(object):
                 if re.search("major change", result):
                     result = re.sub("major change: ", "", result)
                     changeset += "%s: %s \n" % (field, result)
+                    if field == CLASSIFICATION_FIELD:
+                        changed_classification = True
                 if re.search("added data", result):
                     result = re.sub("added data: ", "", result)
                     added_data_str += "%s: %s \n" % (field, result)
-                if field == CLASSIFICATION_FIELD and oldRow[field] != newRow[field]:
-                    changed_classification = True
+                    if field == CLASSIFICATION_FIELD:
+                        changed_classification = True
 
         # If a field is no longer present in the new data, make sure to include it in the diff
         for field in oldRow.keys():

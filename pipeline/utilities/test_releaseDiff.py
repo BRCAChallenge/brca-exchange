@@ -69,8 +69,11 @@ class TestStringMethods(unittest.TestCase):
     ###################################
 
     def test_reordered_pathogenicity_all_data(self):
-        prev = "Uncertain_significance,Likely_benign (ClinVar); Pending (BIC)"
-        new = "Likely_benign,Uncertain_significance (ClinVar); Pending (BIC)"
+        prev = "Pathogenic(ENIGMA); not_provided,Pathogenic (ClinVar); Class 5 (BIC)"
+        new = "Pathogenic(ENIGMA); Pathogenic,not_provided (ClinVar); Class 5 (BIC)"
+        prevTwo = "Uncertain_significance,Likely_benign (ClinVar); Pending (BIC)"
+        newTwo = "Likely_benign,Uncertain_significance (ClinVar); Pending (BIC)"
+        self.assertTrue(releaseDiff.equivalentPathogenicityAllValues(prev, new))
         self.assertTrue(releaseDiff.equivalentPathogenicityAllValues(prev, new))
 
     def test_swapped_pathogenicity_all_data(self):
@@ -308,6 +311,21 @@ class TestStringMethods(unittest.TestCase):
         diff = releaseDiff.diff_json[variant]
         self.assertEqual(len(diff), 2)
         self.assertIs(change_type, "changed_classification")
+
+    def test_change_type_ignores_reorders(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        self.oldRow['Pathogenicity_all'] = "Pathogenic(ENIGMA); not_provided,Pathogenic (ClinVar); Class 5 (BIC)"
+        self.oldRow['Pathogenicity_expert'] = "Pathogenic"
+        self.newRow['Pathogenicity_all'] = "Pathogenic(ENIGMA); Pathogenic,not_provided (ClinVar); Class 5 (BIC)"
+        self.newRow['Pathogenicity_expert'] = "Pathogenic"
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(len(diff), 0)
+        self.assertIsNone(change_type)
 
     def test_add_gs_to_genomic_coordinate(self):
         releaseDiff.added_data = self.added_data
