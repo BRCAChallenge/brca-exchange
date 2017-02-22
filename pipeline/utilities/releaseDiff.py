@@ -5,7 +5,6 @@ import csv
 import re
 import json
 import logging
-import pdb
 
 
 added_data = None
@@ -93,8 +92,8 @@ class transformer(object):
         elif field == "Pathogenicity_all":
             return equivalentPathogenicityAllValues(oldValues, newValues)
         elif re.search(",", oldValues) and re.search(",", newValues):
-            oldTokens = oldValues.split(",")
-            newTokens = newValues.split(",")
+            oldTokens = [s.strip() for s in oldValues.split(",")]
+            newTokens = [s.strip() for s in newValues.split(",")]
             numberSharedTokens = 0
             for token in oldTokens:
                 if token in newTokens:

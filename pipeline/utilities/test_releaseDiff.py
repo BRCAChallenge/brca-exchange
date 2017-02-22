@@ -4,7 +4,6 @@ import tempfile
 import csv
 import releaseDiff
 from os import path
-import pdb
 
 
 class TestStringMethods(unittest.TestCase):
@@ -21,7 +20,8 @@ class TestStringMethods(unittest.TestCase):
                       'pyhgvs_Genomic_Coordinate_37',
                       'pyhgvs_Genomic_Coordinate_36',
                       'pyhgvs_Protein',
-                      'Submitter_ClinVar'
+                      'Submitter_ClinVar',
+                      'Source_URL'
                      ]
         self.oldRow = {
                   'Pathogenicity_all': '',
@@ -371,6 +371,19 @@ class TestStringMethods(unittest.TestCase):
         self.oldRow["Submitter_ClinVar"] = "Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA),_c/o_University_of_Cambridge"
         self.newRow["Submitter_ClinVar"] = "The_Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA),c/o_University_of_Cambridge"
 
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
+    def test_catches_reordered_source_urls(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        self.oldRow["Source_URL"] = "http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000075538, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000144133, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000109288"
+        self.newRow["Source_URL"] = "http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000144133, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000075538, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000109288"
         change_type = v1v2.compareRow(self.oldRow, self.newRow)
         diff = releaseDiff.diff_json
         self.assertEqual(diff, {})
