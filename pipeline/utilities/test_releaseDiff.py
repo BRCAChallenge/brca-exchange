@@ -4,6 +4,7 @@ import tempfile
 import csv
 import releaseDiff
 from os import path
+import pdb
 
 
 class TestStringMethods(unittest.TestCase):
@@ -19,7 +20,8 @@ class TestStringMethods(unittest.TestCase):
                       'pyhgvs_Genomic_Coordinate_38',
                       'pyhgvs_Genomic_Coordinate_37',
                       'pyhgvs_Genomic_Coordinate_36',
-                      'pyhgvs_Protein'
+                      'pyhgvs_Protein',
+                      'Submitter_ClinVar'
                      ]
         self.oldRow = {
                   'Pathogenicity_all': '',
@@ -350,6 +352,30 @@ class TestStringMethods(unittest.TestCase):
         diff = releaseDiff.diff_json[variant]
         self.assertEqual(len(diff), 1)
         self.assertIs(change_type, "added_information")
+
+    def test_ignores_cosmetic_changes_in_diff(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+
+        self.oldRow["Submitter_ClinVar"] = "The_Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA),c/o_University_of_Cambridge"
+        self.newRow["Submitter_ClinVar"] = "Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA),_c/o_University_of_Cambridge"
+
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
+        self.oldRow["Submitter_ClinVar"] = "Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA),_c/o_University_of_Cambridge"
+        self.newRow["Submitter_ClinVar"] = "The_Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA),c/o_University_of_Cambridge"
+
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
 
 if __name__ == '__main__':
     pass
