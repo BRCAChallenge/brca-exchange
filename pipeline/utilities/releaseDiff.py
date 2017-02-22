@@ -42,6 +42,18 @@ PYHGVS_GENOMIC_COORDINATE_FIELDS = ["pyhgvs_Genomic_Coordinate_38",
                                     "pyhgvs_Genomic_Coordinate_37",
                                     "pyhgvs_Genomic_Coordinate_36"]
 
+LIST_KEYS = [
+            "Pathogenicity_all",
+            "Submitter_ClinVar",
+            "Method_ClinVar",
+            "Source",
+            "Date_Last_Updated_ClinVar",
+            "Source_URL",
+            "SCV_ClinVar",
+            "Clinical_Significance_ClinVar",
+            "Allele_Origin_ClinVar",
+            "Synonyms",
+           ]
 
 class transformer(object):
     """
@@ -90,10 +102,11 @@ class transformer(object):
         if oldValues is None or newValues is None:
             return False
         elif field == "Pathogenicity_all":
-            return equivalentPathogenicityAllValues(oldValues, newValues)
-        elif re.search(",", oldValues) and re.search(",", newValues):
-            oldTokens = [s.strip() for s in oldValues.split(",")]
-            newTokens = [s.strip() for s in newValues.split(",")]
+            (added, removed) = determineDiffForPathogenicityAll(oldValues, newValues)
+            return (added is None and removed is None)
+        elif field in LIST_KEYS:
+            oldTokens = set([s.strip() for s in oldValues.split(",")])
+            newTokens = set([s.strip() for s in newValues.split(",")])
             numberSharedTokens = 0
             for token in oldTokens:
                 if token in newTokens:
@@ -159,11 +172,11 @@ class transformer(object):
         else:
             if oldValue == newValue:
                 return "unchanged"
+            elif self._consistentDelimitedLists(oldValue, newValue, field):
+                return "unchanged"
             elif oldValue == "-" or oldValue in newValue:
                 appendToJSON(variant, field, oldValue, newValue)
                 return "added data: %s | %s" % (oldValue, newValue)
-            elif self._consistentDelimitedLists(oldValue, newValue, field):
-                return "unchanged"
             # elif self._makeExpectedChanges.has_key(field):
             #     updatedOldValue = self._normalize(self._makeExpectedChanges[field](oldValue), field)
             #     if updatedOldValue == newValue:
@@ -359,19 +372,6 @@ def appendToJSON(variant, field, oldValue, newValue):
 
 
 def determineDiffForJSON(field, oldValue, newValue):
-    listKeys = [
-                "Pathogenicity_all",
-                "Submitter_ClinVar",
-                "Method_ClinVar",
-                "Source",
-                "Date_Last_Updated_ClinVar",
-                "Source_URL",
-                "SCV_ClinVar",
-                "Clinical_Significance_ClinVar",
-                "Allele_Origin_ClinVar",
-                "Synonyms",
-               ]
-
     if field in ADJUSTED_COLUMN_NAMES:
         adjusted_field = ADJUSTED_COLUMN_NAMES[field]
     else:
@@ -384,7 +384,7 @@ def determineDiffForJSON(field, oldValue, newValue):
             'removed': None
             }
 
-    if field in listKeys:
+    if field in LIST_KEYS:
         diff['field_type'] = 'list'
     else:
         diff['field_type'] = 'individual'

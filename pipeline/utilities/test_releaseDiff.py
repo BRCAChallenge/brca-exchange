@@ -21,7 +21,8 @@ class TestStringMethods(unittest.TestCase):
                       'pyhgvs_Genomic_Coordinate_36',
                       'pyhgvs_Protein',
                       'Submitter_ClinVar',
-                      'Source_URL'
+                      'Source_URL',
+                      'Clinical_Significance_ClinVar'
                      ]
         self.oldRow = {
                   'Pathogenicity_all': '',
@@ -384,6 +385,23 @@ class TestStringMethods(unittest.TestCase):
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
         self.oldRow["Source_URL"] = "http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000075538, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000144133, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000109288"
         self.newRow["Source_URL"] = "http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000144133, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000075538, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000109288"
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
+    def test_handle_repeat_data_correctly(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        self.oldRow["Pathogenicity_all"] = "Pathogenic,Pathogenic,not_provided"
+        self.newRow["Pathogenicity_all"] = "Pathogenic,not_provided"
+        self.oldRow["Clinical_Significance_ClinVar"] = "Pathogenic,Pathogenic,not_provided"
+        self.newRow["Clinical_Significance_ClinVar"] = "Pathogenic,not_provided"
+        self.oldRow["Submitter_ClinVar"] = "PreventionGenetics"
+        self.newRow["Submitter_ClinVar"] = "PreventionGenetics,PreventionGenetics"
         change_type = v1v2.compareRow(self.oldRow, self.newRow)
         diff = releaseDiff.diff_json
         self.assertEqual(diff, {})
