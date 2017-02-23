@@ -130,28 +130,42 @@ class transformer(object):
             value = value[:len(value)-1]
 
         if field == "Submitter_ClinVar":
+            # Nagging trailing underscore and other random disparities...
             value = re.sub("Invitae_", "Invitae", value)
             value = value.replace("The_Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA)", "Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA)")
             value = value.replace("_c/o_University_of_Cambridge", "c/o_University_of_Cambridge")
         elif field == "HGVS_Protein":
+            # overlook the following:
+            # - version numbers being provided in the new but not old accession
+            # - the addition of parentheses as delimiters
+            # - colons as delimiters before the 'p'
             value = re.sub(".p.", ":p.",
                            re.sub("$", ")",
                                   re.sub("p.", "p.(",
                                          re.sub("NM_000059", "NP_000050.2", value))))
         elif field == "Reference_Sequence":
+            # Handle reference sequence is accessions
             value = re.sub("NM_000059", "NM_000059.3",
                            re.sub("NM_007294", "NM_007294.3", value))
         elif field == "Allele_Frequency":
+            # Some ExAC allele frequencies are missing a ')'
             value = re.sub("\(ExAC", "(ExAC)", value)
         elif field == "Polyphen_Prediction":
+            # for sift predictions, some data combines the
+            # numerical and categorical scores
             value = re.sub("\(*$", "", value)
         elif field == "Sift_Prediction":
+            # for sift predictions, some data combines the
+            # numerical and categorical scores
             value = re.sub("\(*$", "", value)
         elif field == "Clinical_significance_citations_ENIGMA":
+            # In some data, empty fields are indicated by a single hyphen
             value = re.sub("", "-", value)
         elif field == "Date_last_evaluated_ENIGMA":
+            # Some dates had two-digit years. Some have four digits.
             value = re.sub("/15$", "/2015", value)
         elif field == "Pathogenicity_expert":
+            # Updated wording for non-expert-reviewed...
             value = value.replace("Not Yet Classified", "Not Yet Reviewed")
 
         return value
@@ -177,13 +191,6 @@ class transformer(object):
             elif oldValue == "-" or oldValue in newValue:
                 appendToJSON(variant, field, oldValue, newValue)
                 return "added data: %s | %s" % (oldValue, newValue)
-            # elif self._makeExpectedChanges.has_key(field):
-            #     updatedOldValue = self._normalize(self._makeExpectedChanges[field](oldValue), field)
-            #     if updatedOldValue == newValue:
-            #         return "minor change: %s | %s" % (oldValue, newValue)
-            #     else:
-            #         appendToJSON(variant, field, oldValue, newValue)
-            #         return "major change: %s | %s" % (oldValue, newValue)
             else:
                 appendToJSON(variant, field, oldValue, newValue)
                 return "major change: %s | %s" % (oldValue, newValue)
@@ -273,44 +280,6 @@ class v1ToV2(transformer):
                        "Pathogenicity_default": "Pathogenicity_expert",
                        "Pathogenicity_research": "Pathogenicity_all"}
 
-    # #
-    # # This dictionary documents and implements some expected formatting changes between the
-    # # April 2016 release and the September 2016 release.  For each named field, there is a
-    # # lambda function that if applied to the old value, would generate the equivalent new value.
-    # #
-    # _makeExpectedChanges = {
-    #     # ignore leading commas in the old data
-    #     "Synonyms": (lambda xx: re.sub("^,", "", xx)),
-    #     # overlook the following:
-    #     # - version numbers being provided in the new but not old accession
-    #     # - the addition of parentheses as delimiters
-    #     # - colons as delimiters before the 'p'
-    #     "HGVS_Protein": (lambda xx: re.sub(".p.", ":p.",
-    #                                        re.sub("$", ")",
-    #                                               re.sub("p.", "p.(",
-    #                                                      re.sub("NM_000059", "NP_000050.2",
-    #                                                             xx))))),
-    #     # The reference sequence is accessioned in the new but not old data
-    #     "Reference_Sequence": (lambda xx: re.sub("NM_000059", "NM_000059.3",
-    #                                              re.sub("NM_007294", "NM_007294.3", xx))),
-    #     # In an annoying thing, the old ExAC allele frequency was missing a ')'
-    #     "Allele_Frequency": (lambda xx: re.sub("\(ExAC", "(ExAC)", xx)),
-    #     # for polyphen and sift predictions, the old data combined the
-    #     # numerical and categorical scores
-    #     "Polyphen_Prediction": (lambda xx: re.sub("\(*$", "", xx)),
-    #     "Sift_Prediction": (lambda xx: re.sub("\(*$", "", xx)),
-    #     # In the new data, empty fields are indicated by a single hyphen
-    #     "Clinical_significance_citations_ENIGMA": (lambda xx: re.sub("", "-", xx)),
-    #     # The old dates had two-digit years.  Now, the years have four digits.
-    #     "Date_last_evaluated_ENIGMA": (lambda xx: re.sub("/15$", "/2015", xx)),
-    #     # Nagging trailing underscore...
-    #     "Submitter_ClinVar": (lambda xx: re.sub("Invitae_", "Invitae", xx)),
-    #                                             # re.sub("The_Consortium_of_Investigators", "Consortium_of_Investigators",
-    #                                                    # re.sub("c/o_University_of", "_c/o_University_of", xx)))),
-    #     # Updated wording for non-expert-reviewed...
-    #     "Pathogenicity_expert": (lambda xx: re.sub("Not Yet Classified", "Not Yet Reviewed", xx))
-    #     }
-
 
 def appendVariantChangeTypesToOutput(variantChangeTypes, v2, output):
     # This function copies v2 into the output file with an appended change_type column and
@@ -338,28 +307,6 @@ def appendVariantChangeTypesToOutput(variantChangeTypes, v2, output):
                 result.append(row)
 
             writer.writerows(result)
-
-
-def equivalentPathogenicityAllValues(oldValues, newValues):
-    '''
-    Pathogenicity_all is delimited by semicolons and commas, and may also have
-    reorders that affect the ability to simply compare by delimited values. As such,
-    direct character comparison is used between semicolon delimited sources (see test cases
-    for examples).
-    '''
-    valuesAreEquivalent = False
-    oldTokens = oldValues.split(";")
-    newTokens = newValues.split(";")
-    numberSharedTokens = 0
-    for token in oldTokens:
-        sortedOldToken = sorted(token)
-        for newToken in newTokens:
-            if sortedOldToken == sorted(newToken):
-                numberSharedTokens += 1
-    if numberSharedTokens == len(newTokens) and \
-            numberSharedTokens == len(oldTokens):
-        valuesAreEquivalent = True
-    return valuesAreEquivalent
 
 
 def appendToJSON(variant, field, oldValue, newValue):
