@@ -61,8 +61,6 @@ class transformer(object):
     """
     _renamedColumns = {}
 
-    # _makeExpectedChanges = {}
-
     def __init__(self, oldColumns, newColumns):
         (self._oldColumnsRemoved, self._newColumnsAdded,
          self._newColumnNameToOld) = self._mapColumnNames(oldColumns,
