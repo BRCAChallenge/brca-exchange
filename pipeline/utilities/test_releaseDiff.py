@@ -4,6 +4,7 @@ import tempfile
 import csv
 import releaseDiff
 from os import path
+import pdb
 
 
 class TestStringMethods(unittest.TestCase):
@@ -76,23 +77,35 @@ class TestStringMethods(unittest.TestCase):
         new = "Pathogenic(ENIGMA); Pathogenic,not_provided (ClinVar); Class 5 (BIC)"
         prevTwo = "Uncertain_significance,Likely_benign (ClinVar); Pending (BIC)"
         newTwo = "Likely_benign,Uncertain_significance (ClinVar); Pending (BIC)"
-        self.assertTrue(releaseDiff.equivalentPathogenicityAllValues(prev, new))
-        self.assertTrue(releaseDiff.equivalentPathogenicityAllValues(prev, new))
+        added, removed = releaseDiff.determineDiffForPathogenicityAll(prev, new)
+        addedTwo, removedTwo = releaseDiff.determineDiffForPathogenicityAll(prevTwo, newTwo)
+        self.assertIsNone(added)
+        self.assertIsNone(removed)
+        self.assertIsNone(addedTwo)
+        self.assertIsNone(addedTwo)
 
     def test_swapped_pathogenicity_all_data(self):
         prev = "Uncertain_significance,Likely_benign (ClinVar); Pending (BIC)"
         new = "Uncertain_significance,Likely_benign (BIC); Pending (ClinVar)"
-        self.assertFalse(releaseDiff.equivalentPathogenicityAllValues(prev, new))
+        added, removed = releaseDiff.determineDiffForPathogenicityAll(prev, new)
+        self.assertIn('Uncertain_significance,Likely_benign (BIC)', added)
+        self.assertIn('Pending (ClinVar)', added)
+        self.assertIn('Pending (BIC)', removed)
+        self.assertIn('Uncertain_significance,Likely_benign (ClinVar)', removed)
 
     def test_different_pathogenicity_all_data(self):
         prev = "Uncertain_significance,Likely_benign (ClinVar); Pending (BIC)"
         new = "Likely_benign (ClinVar); Pending (BIC)"
-        self.assertFalse(releaseDiff.equivalentPathogenicityAllValues(prev, new))
+        added, removed = releaseDiff.determineDiffForPathogenicityAll(prev, new)
+        self.assertIsNone(added)
+        self.assertIn('Uncertain_significance (ClinVar)', removed)
 
     def test_same_pathogenicity_all_data_single_source(self):
         prev = "Uncertain_significance,Likely_benign (ClinVar)"
         new = "Likely_benign,Uncertain_significance (ClinVar)"
-        self.assertTrue(releaseDiff.equivalentPathogenicityAllValues(prev, new))
+        added, removed = releaseDiff.determineDiffForPathogenicityAll(prev, new)
+        self.assertIsNone(added)
+        self.assertIsNone(removed)
 
     ###################################
     # Tests for determining diff json
