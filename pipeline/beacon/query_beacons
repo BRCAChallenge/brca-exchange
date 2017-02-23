@@ -1,0 +1,238 @@
+#!/usr/bin/env python
+# Author: Audrey Musselman-Brown
+# February 2017
+#
+# query_beacons
+# 
+# This script acquires a list of BRCA1 and BRCA2 variants present in the BRCA
+# Exchange using the BRCA Exchange GA4GH instance, and submits queries against
+# the Beacon Network for all the single nucleotide variants.
+
+import sys
+import requests
+import json
+import time
+import threading
+import os
+import logging
+import argparse
+from ga4gh.client import client
+
+URL_MAX = 1000  # The maximum allowed length of HTTP request URLs
+BEACON_RESPONSE_URL = "https://beacon-network.org/api/responses" # URL for variant requests in the beacon network
+BEACON_BEACONS_URL = "https://beacon-network.org/api/beacons" # URL for beacon list requests
+BRCA_GA4GH_URL = "http://brcaexchange-dev.cloudapp.net:9004/data/ga4gh/v0.6.0a7/" # URL for BRCA Exchange GA4GH instance
+
+# BRCA 1 and 2 locations
+BRCA1_CHR = "chr17" 
+BRCA1_START = 41160094
+BRCA1_END = 41322380
+
+BRCA2_CHR = "chr13"
+BRCA2_START = 32889080
+BRCA2_END = 32973779
+
+GENE_BUFFER = 5 # The number of extra bases surrounding a gene to request from GA4GH
+
+VARIANT_D = {} # Dictionary to store accumulated variant data
+
+class Gene (object):
+
+    def __init__(self, chromosome, start, end):
+        object.__init__(self)
+        self.chromosome = chromosome
+        self.start = start
+        self.end = end
+
+
+class QueryBeacons (threading.Thread):
+    """
+    Starts a thread that queries each of the beacons for the given variant, skipping aggregators
+    """
+
+    def __init__(self, beacons, variant, request, tries):
+        threading.Thread.__init__(self)
+        self.beacons = beacons
+        self.variant = variant
+        self.request = request
+        self.tries = tries
+
+    def run(self):
+
+        query_beacons(self.beacons, self.variant, self.request, self.tries)
+            
+
+def build_variant_dictionary(variant, beacon_responses):
+    """
+    Adds data from beacon_responses to the variant dictionary entry for variant
+    """
+    for response in beacon_responses:
+        if 'response' in response['beacon'] and response['beacon']['response']:
+
+            if response['beacon']['id'] == 'bob':
+                continue
+
+            VARIANT_D[variant]['beaconNames'].append(response['beacon']['name'])
+            VARIANT_D[variant]['beaconIDs'].append(response['beacon']['id'])
+            VARIANT_D[variant]['numBeacons'] += 1
+            logging.debug("No response from {}: {}".format(beacon["id"], str(content)))
+
+
+def query_beacons(beacons, variant, request, tries):
+    """
+    Queries the given list of beacons for the given variant one beacon at a time, skipping
+    the beacon-of-beacons. 
+    """
+    beacon_responses = []
+    for beacon in beacons:
+	logging.info("Requesting variant from beacon: {}".format(beacon["id"]))        
+        if beacon["id"] == "bob":
+            continue
+
+        for i in range(tries):
+            try:
+                r = requests.get(BEACON_RESPONSE_URL + "/" +  beacon["id"] + request, timeout=20)
+                logging.debug("Requesting {}/{}{}".format(BEACON_RESPONSE_URL, beacon["id"], request))
+                content = json.loads(r.content)
+                beacon_responses.append(content)
+                break
+
+            except:
+                # Report failure if we've run out of tries
+                if i+1 == tries:
+                    logging.error("Failed request: variant: {}, beacon: {}".format(variant, beacon["id"]))
+
+    build_variant_dictionary(variant, beacon_responses)
+
+
+def query_beacons_one_request(beacons, variant, request, tries):
+    """
+    Queries the given list of beacons for the given variant in a single request
+    """
+    contents = ''
+    for i in range(tries):
+        try:
+            r = requests.get(BEACON_RESPONSE_URL + request, timeout=180)
+            logging.debug("Requesting {}{}".format(BEACON_RESPONSE_URL, request))
+            contents = json.loads(r.content)
+            break
+        except:
+            # Report failure if we've run out of tries
+            if i+1 == tries:
+                logging.error("Failed request: variant: {}".format(variant))
+
+    build_variant_dictionary(variant, contents)
+
+
+def parse_arguments(args):
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-p', '--parallel', action='store_true',
+                        help="Make beacon requests in parallel")
+    parser.add_argument('-o', '--output-file', default='brca_beacons.json', type=str,
+                        help="The filename for outputting json-formatted data")
+    parser.add_argument('-l', '--log-file', default='brca_beacons.log', type=str,
+                        help="The filename for outputting logging info")
+    parser.add_argument('-e', '--log-level', default='WARNING', type=str,
+                        help="The amount of logging output. Logging level"
+                             " options are: DEBUG, INFO, WARNING, ERROR")
+    parser.add_argument('-w', '--wait-time', default=0, type=int,
+                        help="The number of seconds to wait between starting"
+                             " threads when running in parallel")
+    parser.add_argument('-t', '--tries', default=5, type=int,
+                        help="The number of times to attempt each"
+                             " beacon network request")
+    parser.add_argument('--test', action='store_true',
+                        help="Run the script in test mode, which only makes requests"
+                             " for variants in a 100BP range for each gene.")
+
+    options = parser.parse_args()
+
+    numeric_level = getattr(logging, options.log_level.upper(), None)
+    logging.basicConfig(filename=options.log_file, level=numeric_level)
+    
+    if options.test:
+        global BRCA1_END
+        BRCA1_END = BRCA1_START + 100
+        global BRCA2_END
+        BRCA2_END = BRCA2_START + 100
+        options.output_file = "brca_beacons_test.json"
+
+    return options 
+
+def main(args):
+
+    options = parse_arguments(args)
+
+    brca1 = Gene(BRCA1_CHR, BRCA1_START, BRCA1_END)
+    brca2 = Gene(BRCA2_CHR, BRCA2_START, BRCA2_END)
+
+    # Get current list of beacons
+    for i in range(options.tries):
+        try:
+            beacons = json.loads(requests.get(BEACON_BEACONS_URL).content)
+            beacon_ids = map(lambda x: str(x["id"]), beacons)
+            for beacon in beacons:
+                if beacon['aggregator'] == True:
+                    beacon_ids.remove(str(beacon['id']))
+            beacon_id_str = "[" + ",".join(beacon_ids) + "]"
+            break
+        except:
+            logging.error("Failed to access the Beacon Network")
+            if i+1 == options.tries:
+                raise
+        time.sleep(20)
+
+    # Get all BRCA Exchange variants and request them from the Beacon Network
+    threads = []
+    ga4gh_client = client.HttpClient(BRCA_GA4GH_URL)
+
+    for gene in [brca1, brca2]:
+        for variant in ga4gh_client.search_variants(reference_name=gene.chromosome,
+                                         variant_set_id="brca-hg37",
+                                         start=gene.start+GENE_BUFFER,
+                                         end=gene.end+GENE_BUFFER):
+
+            if len(variant.reference_bases) != 1 or len(variant.alternate_bases) != 1:
+                logging.info("Variant {} is not a SNP: skipping".format(variant.id))
+                continue
+            
+            request = "?chrom={}&pos={}&allele={}&ref=GRCh37".format(
+                          variant.reference_name, variant.start,
+                          variant.alternate_bases[0])
+
+            website_url = "https://beacon-network.org/#/search?chrom={}&pos={}&ref={}&allele={}&rs=GRCh37".format(
+                              variant.reference_name, variant.start,
+                              variant.reference_bases, variant.alternate_bases[0])
+
+            if len(request) > URL_MAX:
+                logging.info("Skipping variant {}: URL too long".format(variant.id))
+                continue
+
+            VARIANT_D[variant.id] = {"url": website_url, "beaconNames": [], "beaconIDs": [], "numBeacons": 0}
+
+            if options.parallel:
+                thread = QueryBeacons(beacons, variant.id, request, options.tries)
+                thread.start()
+                threads.append(thread)
+                time.sleep(options.wait_time)
+            else:
+                query_beacons_one_request(beacons, variant.id, request, options.tries)
+   
+            logging.info("Variant {} processed".format(variant.id))
+
+    for thread in threads:
+        thread.join()
+
+    # Write variant dictionary to output file as json
+    jsonD = {'beacons': beacons, 'variants': VARIANT_D}
+    variant_json = json.dumps(jsonD)
+    outfile = open(options.output_file, 'w')
+    outfile.write(variant_json)
+    logging.info("Output written to {}".format(options.output_file))
+
+
+if __name__=="__main__":
+    sys.exit(main(sys.argv[1:]))
+
