@@ -87,12 +87,32 @@ var Signup = React.createClass({
         var self = this;
         var showSuccess = () => {this.transitionTo('/community', null, {registrationSuccess: true});};
         var showFailure = msg => {this.setState({error: msg});};
+        var address = '';
+
+        var addLeadingCommaIfNecessary = function(address) {
+            if (address.length > 0) {
+                address += ", ";
+            }
+            return address;
+        };
+
+        var determineAddressFromCityStateCountry = function(formData) {
+            if (formData.city) {
+                address = addLeadingCommaIfNecessary(address);
+                address += formData.city;
+            }
+            if (formData.state) {
+                address = addLeadingCommaIfNecessary(address);
+                address += formData.state;
+            }
+            if (formData.country) {
+                address = addLeadingCommaIfNecessary(address);
+                address += formData.country;
+            }
+            return address;
+        };
 
         var withGoogleMaps = function () {
-            var geo = new google.maps.Geocoder();
-            var formData = self.refs.contactForm.getFormData();
-            var address = "" + formData.institution + "," + formData.city + "," + formData.state + "," + formData.country;
-
             var submit = function () {
                 self.setState({submitted: formData});
                 var url = config.backend_url + '/accounts/register/';
@@ -119,7 +139,9 @@ var Signup = React.createClass({
                 xhr.open('post', url);
                 xhr.send(fd);
             };
-
+            var geo = new google.maps.Geocoder();
+            var formData = self.refs.contactForm.getFormData();
+            address = determineAddressFromCityStateCountry(formData);
             if (address.length > 3) {
                 geo.geocode({address: address}, (results, status) => {
                     var loc;
@@ -127,14 +149,17 @@ var Signup = React.createClass({
                         loc = results[0].geometry.location;
                         formData.latitude = loc.lat().toString();
                         formData.longitude = loc.lng().toString();
+                    } else {
+                        geo.geocode({address: formData.institution}, (results, status) => {
+                            if (status === google.maps.GeocoderStatus.OK) {
+                                loc = results[0].geometry.location;
+                                formData.latitude = loc.lat().toString();
+                                formData.longitude = loc.lng().toString();
+                            } else {
+                                console.log("Error parsing address.");
+                            });
+                        }
                     }
-                    /* else if (status === google.maps.GeocoderStatus.ZERO_RESULTS) {
-                        showFailure("Please check your location information, or leave it blank.");
-                        return;
-                    } else if (status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
-                        showFailure("Error checking your location information, please submit again.");
-                        return;
-                    } */
                     submit();
                 });
             } else {
