@@ -13,12 +13,17 @@ import sys
 def variantToAllele(variant, gene, length):
     """Given a variant in genomic HGVS representation, return the alternative allele string,
     consisting of the ALT portion of the HGVS identifier plus flanking bases"""
-    (chrom, position, ref, alt) = re.split("[:|>]", variant)
+    (chrom, rawPosition, ref, alt) = re.split("[:|>]", variant)
+    if re.search("\.", rawPosition):
+        position = rawPosition.split(".")[1]
+    else:
+        position = rawPosition
     relativeStart = int(position) - gene["hg38"]["start"] - 1
     prefixStart = relativeStart - length
     prefix = gene["hg38"]["sequence"][prefixStart:(prefixStart + length)]
     suffixStart = relativeStart
-    suffix = gene["hg38"]["sequence"][suffixStart:suffixStart+length]
+    suffixLength = len(ref) + length
+    suffix = gene["hg38"]["sequence"][suffixStart:suffixStart+suffixLength]
     if not re.search("^"+ref, suffix):
         sys.exit("Error: reference allele %s from variant %s not found in variant %s|%s" \
                      % (ref, variant, prefix, suffix))
