@@ -113,6 +113,8 @@ var Signup = React.createClass({
         };
 
         var withGoogleMaps = function () {
+            var geo = new google.maps.Geocoder();
+            var formData = self.refs.contactForm.getFormData();
             var submit = function () {
                 self.setState({submitted: formData});
                 var url = config.backend_url + '/accounts/register/';
@@ -139,8 +141,6 @@ var Signup = React.createClass({
                 xhr.open('post', url);
                 xhr.send(fd);
             };
-            var geo = new google.maps.Geocoder();
-            var formData = self.refs.contactForm.getFormData();
             address = determineAddressFromCityStateCountry(formData);
             if (address.length > 3) {
                 geo.geocode({address: address}, (results, status) => {
@@ -157,8 +157,8 @@ var Signup = React.createClass({
                                 formData.longitude = loc.lng().toString();
                             } else {
                                 console.log("Error parsing address.");
-                            });
-                        }
+                            }
+                        });
                     }
                     submit();
                 });

@@ -252,7 +252,7 @@ var CommunityMap = React.createClass({
                     });
                     markers = self.markers = newMarkers;
 /*eslint-disable camelcase*/
-                    _.map(data, ({id, firstName, lastName, title, role, role_other, institution, latitude, longitude, has_image, country})  => {
+                    _.map(data, ({id, firstName, lastName, title, role, role_other, institution, latitude, longitude, has_image})  => {
                         if (latitude !== "" || longitude !== "") {
                             var avatar;
                             if (has_image) {
