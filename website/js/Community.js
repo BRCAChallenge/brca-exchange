@@ -251,7 +251,7 @@ var CommunityMap = React.createClass({
                         }
                     });
                     markers = self.markers = newMarkers;
-/*eslint-disable camelcase*/
+                    /*eslint-disable camelcase*/
                     _.map(data, ({id, firstName, lastName, title, role, role_other, institution, latitude, longitude, has_image})  => {
                         if (latitude !== "" || longitude !== "") {
                             var avatar;
@@ -269,7 +269,7 @@ var CommunityMap = React.createClass({
                                     <span>{institution}</span>
                                 </div>
                             </div>);
-    /*eslint-enable camelcase*/
+                            /*eslint-enable camelcase*/
                             var marker = new google.maps.Marker({
                                 position: { lat: parseFloat(latitude), lng: parseFloat(longitude) },
                                 map: map,
