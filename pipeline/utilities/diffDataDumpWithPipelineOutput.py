@@ -9,14 +9,15 @@ To use, follow these steps:
    the fields the same):
 
     `Copy (SELECT "id", "Genomic_Coordinate_hg38", "Pathogenicity_all", "Pathogenicity_expert", "Source",
-    "HGVS_cDNA" from variant where "Data_Release_id"=1 ORDER BY "id" ASC) To '/tmp/pathogenicities.csv' CSV HEADER;`
+    "HGVS_cDNA" from variant where "Data_Release_id"=1 ORDER BY "id" ASC) To '/tmp/pgdump.csv' CSV HEADER;`
 
-2. Update the headers in the CSV file to match their respective headers in the tsv file. E.G.
-   Genomic_Coordinate_hg38 maps to pyhgvs_Genomic_Coordinate in the tsv file outputs from the pipeline.
+2. Update the headers in the pgdump.csv (dump from DB) file to match their respective headers in the built.tsv
+   (pipeline output) file. e.g. Genomic_Coordinate_hg38 maps to pyhgvs_Genomic_Coordinate_38 in the tsv file output
+   from the pipeline.
 
 3. Double check that all necessary fields are present or adjust the script as needed!!
 
-4. Run `python testPostgresCSVOutputMatchesBuilt.py --built /PATH/TO/built.tsv --pgdump /PATH/TO/pgdump.csv
+4. Run `python diffDataDumpWithPipelineOutput.py --built /PATH/TO/built.tsv --pgdump /PATH/TO/pgdump.csv`
 '''
 
 import argparse
