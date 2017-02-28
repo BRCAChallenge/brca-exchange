@@ -14,8 +14,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--users", default="users.csv",
                         help="CSV dump from users_myuser table in DB")
-    parser.add_argument("--output", default="bad_locations.csv",
-                        help="File with users that have bad locations.")
+    parser.add_argument("--output", default="user_location_check.csv",
+                        help="File with check on user location.")
 
     args = parser.parse_args()
     users = csv.DictReader(open(args.users, "r"), delimiter=",")
@@ -37,10 +37,10 @@ def main():
             lat = user['latitude']
             lng = user['longitude']
 
-            # current address method
-            address = "" + institution + "," + city + "," + state + "," + country
+            address = getAddress(institution, city, state, country)
 
-            # todo: test better address methods
+            if len(address) == 0:
+                continue
 
             GOOGLE_MAPS_API_URL = 'https://maps.googleapis.com/maps/api/geocode/json'
 
@@ -110,6 +110,37 @@ def convert(input):
         return input.encode('ascii', 'ignore')
     else:
         return input
+
+
+def addCommaIfNecessary(address):
+    if len(address) > 0:
+        address += ', '
+    return address
+
+
+def getAddress(institution, city, state, country):
+    # current address method implemented in website/js/Signup.js (This should match the existing code,
+    # you may need to update it if the code has changed -- ZF 2/27/17).
+    address = ''
+
+    if len(city) > 0:
+        address += city
+
+    if len(state) > 0:
+        address = addCommaIfNecessary(address)
+        address += state
+
+    if len(country) > 0:
+        address = addCommaIfNecessary(address)
+        address += country
+
+    if len(address) < 4:
+        address = institution
+
+    if len(address) < 4:
+        address = ""
+
+    return address
 
 
 if __name__ == "__main__":
