@@ -42,14 +42,24 @@ PYHGVS_GENOMIC_COORDINATE_FIELDS = ["pyhgvs_Genomic_Coordinate_38",
                                     "pyhgvs_Genomic_Coordinate_37",
                                     "pyhgvs_Genomic_Coordinate_36"]
 
+LIST_KEYS = [
+            "Pathogenicity_all",
+            "Submitter_ClinVar",
+            "Method_ClinVar",
+            "Source",
+            "Date_Last_Updated_ClinVar",
+            "Source_URL",
+            "SCV_ClinVar",
+            "Clinical_Significance_ClinVar",
+            "Allele_Origin_ClinVar",
+            "Synonyms",
+           ]
 
 class transformer(object):
     """
     Make the expected changes to update data from one version to another
     """
     _renamedColumns = {}
-
-    _makeExpectedChanges = {}
 
     def __init__(self, oldColumns, newColumns):
         (self._oldColumnsRemoved, self._newColumnsAdded,
@@ -90,10 +100,11 @@ class transformer(object):
         if oldValues is None or newValues is None:
             return False
         elif field == "Pathogenicity_all":
-            return equivalentPathogenicityAllValues(oldValues, newValues)
-        elif re.search(",", oldValues) and re.search(",", newValues):
-            oldTokens = oldValues.split(",")
-            newTokens = newValues.split(",")
+            (added, removed) = determineDiffForPathogenicityAll(oldValues, newValues)
+            return (added is None and removed is None)
+        elif field in LIST_KEYS:
+            oldTokens = set([s.strip() for s in oldValues.split(",")])
+            newTokens = set([s.strip() for s in newValues.split(",")])
             numberSharedTokens = 0
             for token in oldTokens:
                 if token in newTokens:
@@ -103,20 +114,59 @@ class transformer(object):
                 listsAreConsistent = True
         return listsAreConsistent
 
-    def _normalize(self, value):
+    def _normalize(self, value, field):
         """Make all values similar for improved comparison"""
 
         # Replace all blank values with dashes for easier comparison
         if value == "" or value is None:
-            return "-"
+            value = "-"
         # Some values start with ", " which throws off the comparison -- overwrite it.
-        elif value[:2] == ", ":
-            return value[2:]
+        if value[:2] == ", ":
+            value = value[2:]
         # Some values end with "," which throws off the comparison -- overwrite it.
-        elif value[len(value)-1] == ",":
-            return value[:len(value)-1]
-        else:
-            return value
+        if value[len(value)-1] == ",":
+            value = value[:len(value)-1]
+
+        if field == "Submitter_ClinVar":
+            # Nagging trailing underscore and other random disparities...
+            value = re.sub("Invitae_", "Invitae", value)
+            value = value.replace("The_Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA)", "Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA)")
+            value = value.replace("_c/o_University_of_Cambridge", "c/o_University_of_Cambridge")
+        elif field == "HGVS_Protein":
+            # overlook the following:
+            # - version numbers being provided in the new but not old accession
+            # - the addition of parentheses as delimiters
+            # - colons as delimiters before the 'p'
+            value = re.sub(".p.", ":p.",
+                           re.sub("$", ")",
+                                  re.sub("p.", "p.(",
+                                         re.sub("NM_000059", "NP_000050.2", value))))
+        elif field == "Reference_Sequence":
+            # Handle reference sequence is accessions
+            value = re.sub("NM_000059", "NM_000059.3",
+                           re.sub("NM_007294", "NM_007294.3", value))
+        elif field == "Allele_Frequency":
+            # Some ExAC allele frequencies are missing a ')'
+            value = re.sub("\(ExAC", "(ExAC)", value)
+        elif field == "Polyphen_Prediction":
+            # for sift predictions, some data combines the
+            # numerical and categorical scores
+            value = re.sub("\(*$", "", value)
+        elif field == "Sift_Prediction":
+            # for sift predictions, some data combines the
+            # numerical and categorical scores
+            value = re.sub("\(*$", "", value)
+        elif field == "Clinical_significance_citations_ENIGMA":
+            # In some data, empty fields are indicated by a single hyphen
+            value = re.sub("", "-", value)
+        elif field == "Date_last_evaluated_ENIGMA":
+            # Some dates had two-digit years. Some have four digits.
+            value = re.sub("/15$", "/2015", value)
+        elif field == "Pathogenicity_expert":
+            # Updated wording for non-expert-reviewed...
+            value = value.replace("Not Yet Classified", "Not Yet Reviewed")
+
+        return value
 
     def compareField(self, oldRow, newRow, field):
         """
@@ -126,26 +176,19 @@ class transformer(object):
         """
         global added_data
         variant = newRow["pyhgvs_Genomic_Coordinate_38"]
-        newValue = self._normalize(newRow[field])
-        oldValue = self._normalize(oldRow[self._newColumnNameToOld[field]])
+        newValue = self._normalize(newRow[field], field)
+        oldValue = self._normalize(oldRow[self._newColumnNameToOld[field]], field)
         if field in self._newColumnsAdded:
             appendToJSON(variant, field, oldValue, newValue)
             return "added data: %s | %s" % (oldValue, newValue)
         else:
             if oldValue == newValue:
                 return "unchanged"
+            elif self._consistentDelimitedLists(oldValue, newValue, field):
+                return "unchanged"
             elif oldValue == "-" or oldValue in newValue:
                 appendToJSON(variant, field, oldValue, newValue)
                 return "added data: %s | %s" % (oldValue, newValue)
-            elif self._consistentDelimitedLists(oldValue, newValue, field):
-                return "unchanged"
-            elif self._makeExpectedChanges.has_key(field):
-                updatedOldValue = self._normalize(self._makeExpectedChanges[field](oldValue))
-                if updatedOldValue == newValue:
-                    return "minor change: %s | %s" % (oldValue, newValue)
-                else:
-                    appendToJSON(variant, field, oldValue, newValue)
-                    return "major change: %s | %s" % (oldValue, newValue)
             else:
                 appendToJSON(variant, field, oldValue, newValue)
                 return "major change: %s | %s" % (oldValue, newValue)
@@ -191,7 +234,7 @@ class transformer(object):
         for field in oldRow.keys():
             if field not in columns_to_ignore and field not in newRow.keys():
                 variant = newRow["pyhgvs_Genomic_Coordinate_38"]
-                oldValue = self._normalize(oldRow[field])
+                oldValue = self._normalize(oldRow[field], field)
                 newValue = "-"
                 if oldValue != newValue:
                     appendToJSON(variant, field, oldValue, newValue)
@@ -235,42 +278,6 @@ class v1ToV2(transformer):
                        "Pathogenicity_default": "Pathogenicity_expert",
                        "Pathogenicity_research": "Pathogenicity_all"}
 
-    #
-    # This dictionary documents and implements some expected formatting changes between the
-    # April 2016 release and the September 2016 release.  For each named field, there is a
-    # lambda function that if applied to the old value, would generate the equivalent new value.
-    #
-    _makeExpectedChanges = {
-        # ignore leading commas in the old data
-        "Synonyms": (lambda xx: re.sub("^,", "", xx)),
-        # overlook the following:
-        # - version numbers being provided in the new but not old accession
-        # - the addition of parentheses as delimiters
-        # - colons as delimiters before the 'p'
-        "HGVS_Protein": (lambda xx: re.sub(".p.", ":p.",
-                                           re.sub("$", ")",
-                                                  re.sub("p.", "p.(",
-                                                         re.sub("NM_000059", "NP_000050.2",
-                                                                xx))))),
-        # The reference sequence is accessioned in the new but not old data
-        "Reference_Sequence": (lambda xx: re.sub("NM_000059", "NM_000059.3",
-                                                 re.sub("NM_007294", "NM_007294.3", xx))),
-        # In an annoying thing, the old ExAC allele frequency was missing a ')'
-        "Allele_Frequency": (lambda xx: re.sub("\(ExAC", "(ExAC)", xx)),
-        # for polyphen and sift predictions, the old data combined the
-        # numerical and categorical scores
-        "Polyphen_Prediction": (lambda xx: re.sub("\(*$", "", xx)),
-        "Sift_Prediction": (lambda xx: re.sub("\(*$", "", xx)),
-        # In the new data, empty fields are indicated by a single hyphen
-        "Clinical_significance_citations_ENIGMA": (lambda xx: re.sub("", "-", xx)),
-        # The old dates had two-digit years.  Now, the years have four digits.
-        "Date_last_evaluated_ENIGMA": (lambda xx: re.sub("/15$", "/2015", xx)),
-        # Nagging trailing underscore...
-        "Submitter_ClinVar": (lambda xx: re.sub("Invitae_", "Invitae", xx)),
-        # Updated wording for non-expert-reviewed...
-        "Pathogenicity_expert": (lambda xx: re.sub("Not Yet Classified", "Not Yet Reviewed", xx))
-        }
-
 
 def appendVariantChangeTypesToOutput(variantChangeTypes, v2, output):
     # This function copies v2 into the output file with an appended change_type column and
@@ -300,28 +307,6 @@ def appendVariantChangeTypesToOutput(variantChangeTypes, v2, output):
             writer.writerows(result)
 
 
-def equivalentPathogenicityAllValues(oldValues, newValues):
-    '''
-    Pathogenicity_all is delimited by semicolons and commas, and may also have
-    reorders that affect the ability to simply compare by delimited values. As such,
-    direct character comparison is used between semicolon delimited sources (see test cases
-    for examples).
-    '''
-    valuesAreEquivalent = False
-    oldTokens = oldValues.split(";")
-    newTokens = newValues.split(";")
-    numberSharedTokens = 0
-    for token in oldTokens:
-        sortedOldToken = sorted(token)
-        for newToken in newTokens:
-            if sortedOldToken == sorted(newToken):
-                numberSharedTokens += 1
-    if numberSharedTokens == len(newTokens) and \
-            numberSharedTokens == len(oldTokens):
-        valuesAreEquivalent = True
-    return valuesAreEquivalent
-
-
 def appendToJSON(variant, field, oldValue, newValue):
     global diff_json
 
@@ -334,19 +319,6 @@ def appendToJSON(variant, field, oldValue, newValue):
 
 
 def determineDiffForJSON(field, oldValue, newValue):
-    listKeys = [
-                "Pathogenicity_all",
-                "Submitter_ClinVar",
-                "Method_ClinVar",
-                "Source",
-                "Date_Last_Updated_ClinVar",
-                "Source_URL",
-                "SCV_ClinVar",
-                "Clinical_Significance_ClinVar",
-                "Allele_Origin_ClinVar",
-                "Synonyms",
-               ]
-
     if field in ADJUSTED_COLUMN_NAMES:
         adjusted_field = ADJUSTED_COLUMN_NAMES[field]
     else:
@@ -359,7 +331,7 @@ def determineDiffForJSON(field, oldValue, newValue):
             'removed': None
             }
 
-    if field in listKeys:
+    if field in LIST_KEYS:
         diff['field_type'] = 'list'
     else:
         diff['field_type'] = 'individual'

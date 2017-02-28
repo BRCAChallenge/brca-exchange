@@ -4,6 +4,7 @@ import tempfile
 import csv
 import releaseDiff
 from os import path
+import pdb
 
 
 class TestStringMethods(unittest.TestCase):
@@ -19,7 +20,10 @@ class TestStringMethods(unittest.TestCase):
                       'pyhgvs_Genomic_Coordinate_38',
                       'pyhgvs_Genomic_Coordinate_37',
                       'pyhgvs_Genomic_Coordinate_36',
-                      'pyhgvs_Protein'
+                      'pyhgvs_Protein',
+                      'Submitter_ClinVar',
+                      'Source_URL',
+                      'Clinical_Significance_ClinVar'
                      ]
         self.oldRow = {
                   'Pathogenicity_all': '',
@@ -73,23 +77,35 @@ class TestStringMethods(unittest.TestCase):
         new = "Pathogenic(ENIGMA); Pathogenic,not_provided (ClinVar); Class 5 (BIC)"
         prevTwo = "Uncertain_significance,Likely_benign (ClinVar); Pending (BIC)"
         newTwo = "Likely_benign,Uncertain_significance (ClinVar); Pending (BIC)"
-        self.assertTrue(releaseDiff.equivalentPathogenicityAllValues(prev, new))
-        self.assertTrue(releaseDiff.equivalentPathogenicityAllValues(prev, new))
+        added, removed = releaseDiff.determineDiffForPathogenicityAll(prev, new)
+        addedTwo, removedTwo = releaseDiff.determineDiffForPathogenicityAll(prevTwo, newTwo)
+        self.assertIsNone(added)
+        self.assertIsNone(removed)
+        self.assertIsNone(addedTwo)
+        self.assertIsNone(addedTwo)
 
     def test_swapped_pathogenicity_all_data(self):
         prev = "Uncertain_significance,Likely_benign (ClinVar); Pending (BIC)"
         new = "Uncertain_significance,Likely_benign (BIC); Pending (ClinVar)"
-        self.assertFalse(releaseDiff.equivalentPathogenicityAllValues(prev, new))
+        added, removed = releaseDiff.determineDiffForPathogenicityAll(prev, new)
+        self.assertIn('Uncertain_significance,Likely_benign (BIC)', added)
+        self.assertIn('Pending (ClinVar)', added)
+        self.assertIn('Pending (BIC)', removed)
+        self.assertIn('Uncertain_significance,Likely_benign (ClinVar)', removed)
 
     def test_different_pathogenicity_all_data(self):
         prev = "Uncertain_significance,Likely_benign (ClinVar); Pending (BIC)"
         new = "Likely_benign (ClinVar); Pending (BIC)"
-        self.assertFalse(releaseDiff.equivalentPathogenicityAllValues(prev, new))
+        added, removed = releaseDiff.determineDiffForPathogenicityAll(prev, new)
+        self.assertIsNone(added)
+        self.assertIn('Uncertain_significance (ClinVar)', removed)
 
     def test_same_pathogenicity_all_data_single_source(self):
         prev = "Uncertain_significance,Likely_benign (ClinVar)"
         new = "Likely_benign,Uncertain_significance (ClinVar)"
-        self.assertTrue(releaseDiff.equivalentPathogenicityAllValues(prev, new))
+        added, removed = releaseDiff.determineDiffForPathogenicityAll(prev, new)
+        self.assertIsNone(added)
+        self.assertIsNone(removed)
 
     ###################################
     # Tests for determining diff json
@@ -368,6 +384,60 @@ class TestStringMethods(unittest.TestCase):
         diff = releaseDiff.diff_json[variant]
         self.assertEqual(len(diff), 1)
         self.assertIs(change_type, "added_information")
+
+    def test_ignores_cosmetic_changes_in_diff(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+
+        self.oldRow["Submitter_ClinVar"] = "The_Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA),c/o_University_of_Cambridge"
+        self.newRow["Submitter_ClinVar"] = "Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA),_c/o_University_of_Cambridge"
+
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
+        self.oldRow["Submitter_ClinVar"] = "Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA),_c/o_University_of_Cambridge"
+        self.newRow["Submitter_ClinVar"] = "The_Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA),c/o_University_of_Cambridge"
+
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
+    def test_catches_reordered_source_urls(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        self.oldRow["Source_URL"] = "http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000075538, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000144133, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000109288"
+        self.newRow["Source_URL"] = "http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000144133, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000075538, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000109288"
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
+    def test_handle_repeat_data_correctly(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        self.oldRow["Pathogenicity_all"] = "Pathogenic,Pathogenic,not_provided"
+        self.newRow["Pathogenicity_all"] = "Pathogenic,not_provided"
+        self.oldRow["Clinical_Significance_ClinVar"] = "Pathogenic,Pathogenic,not_provided"
+        self.newRow["Clinical_Significance_ClinVar"] = "Pathogenic,not_provided"
+        self.oldRow["Submitter_ClinVar"] = "PreventionGenetics"
+        self.newRow["Submitter_ClinVar"] = "PreventionGenetics,PreventionGenetics"
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
 
 if __name__ == '__main__':
     pass
