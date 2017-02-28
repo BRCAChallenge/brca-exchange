@@ -131,7 +131,7 @@ var Home = React.createClass({
                     </div>
                 </Row>
                 <Row>
-                    <Col md={8} mdOffset={2} className="text-center video-container">
+                    <Col md={10} mdOffset={1} className="text-center video-container">
                         <iframe src="https://player.vimeo.com/video/199396428" className="vimeo-video" frameBorder="0" webkitallowfullscreen mozallowfullscreen allowFullScreen></iframe>
                     </Col>
                 </Row>

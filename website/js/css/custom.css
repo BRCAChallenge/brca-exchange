@@ -233,8 +233,15 @@ input:focus {
 }
 
 .vimeo-video {
-    width: 640px;
-    height: 360px;
+    width: 864px;
+    height: 486px;
+}
+
+@media only screen and (max-width : 1199px) {
+    .vimeo-video {
+        width: 640px;
+        height: 360px;
+    }
 }
 
 @media only screen and (max-width : 767px) {
