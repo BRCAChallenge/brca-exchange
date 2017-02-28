@@ -6,7 +6,6 @@ from argparse import FileType
 import psycopg2
 import csv
 import requests
-import pdb
 
 
 # NOTE: To use this command, a Google Geocode API key must be set in site_settings.py or settings.py.
