@@ -89,6 +89,34 @@ var Signup = React.createClass({
         var showFailure = msg => {this.setState({error: msg});};
         var address = '';
 
+
+        var submit = function (formData) {
+            self.setState({submitted: formData});
+            var url = config.backend_url + '/accounts/register/';
+
+            var fd = new FormData();
+            $.each(formData, function (k, v) {
+                fd.append(k, v);
+            });
+
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function () {
+                var responseData = JSON.parse(this.response);
+
+                if (this.status === 200 && responseData.success === true) {
+                    showSuccess();
+                } else {
+                    var message = responseData.error;
+                    if (message === null) {
+                        message = "Could not complete registration";
+                    }
+                    showFailure(message);
+                }
+            };
+            xhr.open('post', url);
+            xhr.send(fd);
+        };
+
         var addLeadingCommaIfNecessary = function(address) {
             if (address.length > 0) {
                 address += ", ";
@@ -112,58 +140,32 @@ var Signup = React.createClass({
             return address;
         };
 
-        var withGoogleMaps = function () {
+        var getLatLng = function(address, formData) {
             var geo = new google.maps.Geocoder();
+            geo.geocode({address: address}, (results, status) => {
+                var loc;
+                if (status === google.maps.GeocoderStatus.OK) {
+                    loc = results[0].geometry.location;
+                    formData.latitude = loc.lat().toString();
+                    formData.longitude = loc.lng().toString();
+                } else {
+                    console.log("Error parsing address.");
+                }
+                submit(formData);
+            });
+        };
+
+        var withGoogleMaps = function () {
+            debugger;
             var formData = self.refs.contactForm.getFormData();
-            var submit = function () {
-                self.setState({submitted: formData});
-                var url = config.backend_url + '/accounts/register/';
 
-                var fd = new FormData();
-                $.each(formData, function (k, v) {
-                    fd.append(k, v);
-                });
-
-                var xhr = new XMLHttpRequest();
-                xhr.onload = function () {
-                    var responseData = JSON.parse(this.response);
-
-                    if (this.status === 200 && responseData.success === true) {
-                        showSuccess();
-                    } else {
-                        var message = responseData.error;
-                        if (message === null) {
-                            message = "Could not complete registration";
-                        }
-                        showFailure(message);
-                    }
-                };
-                xhr.open('post', url);
-                xhr.send(fd);
-            };
             address = determineAddressFromCityStateCountry(formData);
             if (address.length > 3) {
-                geo.geocode({address: address}, (results, status) => {
-                    var loc;
-                    if (status === google.maps.GeocoderStatus.OK) {
-                        loc = results[0].geometry.location;
-                        formData.latitude = loc.lat().toString();
-                        formData.longitude = loc.lng().toString();
-                    } else {
-                        geo.geocode({address: formData.institution}, (results, status) => {
-                            if (status === google.maps.GeocoderStatus.OK) {
-                                loc = results[0].geometry.location;
-                                formData.latitude = loc.lat().toString();
-                                formData.longitude = loc.lng().toString();
-                            } else {
-                                console.log("Error parsing address.");
-                            }
-                        });
-                    }
-                    submit();
-                });
+                formData = getLatLng(address, formData);
+            } else if (formData.institution.length > 3) {
+                formData = getLatLng(formData.institution, formData);
             } else {
-                submit();
+                submit(formData);
             }
         };
 

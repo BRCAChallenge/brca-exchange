@@ -291,7 +291,6 @@ var CommunityMap = React.createClass({
                             });
                         }
                     });
-                    console.log(markers.length);
                 });
                 if (infowindow) {
                     infowindow.close();
