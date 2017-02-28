@@ -156,7 +156,6 @@ var Signup = React.createClass({
         };
 
         var withGoogleMaps = function () {
-            debugger;
             var formData = self.refs.contactForm.getFormData();
 
             address = determineAddressFromCityStateCountry(formData);
