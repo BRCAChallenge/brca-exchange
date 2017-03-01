@@ -87,58 +87,84 @@ var Signup = React.createClass({
         var self = this;
         var showSuccess = () => {this.transitionTo('/community', null, {registrationSuccess: true});};
         var showFailure = msg => {this.setState({error: msg});};
+        var address = '';
+
+
+        var submit = function (formData) {
+            self.setState({submitted: formData});
+            var url = config.backend_url + '/accounts/register/';
+
+            var fd = new FormData();
+            $.each(formData, function (k, v) {
+                fd.append(k, v);
+            });
+
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function () {
+                var responseData = JSON.parse(this.response);
+
+                if (this.status === 200 && responseData.success === true) {
+                    showSuccess();
+                } else {
+                    var message = responseData.error;
+                    if (message === null) {
+                        message = "Could not complete registration";
+                    }
+                    showFailure(message);
+                }
+            };
+            xhr.open('post', url);
+            xhr.send(fd);
+        };
+
+        var addLeadingCommaIfNecessary = function(address) {
+            if (address.length > 0) {
+                address += ", ";
+            }
+            return address;
+        };
+
+        var determineAddressFromCityStateCountry = function(formData) {
+            if (formData.city) {
+                address = addLeadingCommaIfNecessary(address);
+                address += formData.city;
+            }
+            if (formData.state) {
+                address = addLeadingCommaIfNecessary(address);
+                address += formData.state;
+            }
+            if (formData.country) {
+                address = addLeadingCommaIfNecessary(address);
+                address += formData.country;
+            }
+            return address;
+        };
+
+        var getLatLng = function(address, formData) {
+            var geo = new google.maps.Geocoder();
+            geo.geocode({address: address}, (results, status) => {
+                var loc;
+                if (status === google.maps.GeocoderStatus.OK) {
+                    loc = results[0].geometry.location;
+                    formData.latitude = loc.lat().toString();
+                    formData.longitude = loc.lng().toString();
+                } else {
+                    console.log("Error parsing address.");
+                }
+                submit(formData);
+            });
+        };
 
         var withGoogleMaps = function () {
-            var geo = new google.maps.Geocoder();
             var formData = self.refs.contactForm.getFormData();
-            var address = "" + formData.institution + "," + formData.city + "," + formData.state + "," + formData.country;
 
-            var submit = function () {
-                self.setState({submitted: formData});
-                var url = config.backend_url + '/accounts/register/';
-
-                var fd = new FormData();
-                $.each(formData, function (k, v) {
-                    fd.append(k, v);
-                });
-
-                var xhr = new XMLHttpRequest();
-                xhr.onload = function () {
-                    var responseData = JSON.parse(this.response);
-
-                    if (this.status === 200 && responseData.success === true) {
-                        showSuccess();
-                    } else {
-                        var message = responseData.error;
-                        if (message === null) {
-                            message = "Could not complete registration";
-                        }
-                        showFailure(message);
-                    }
-                };
-                xhr.open('post', url);
-                xhr.send(fd);
-            };
-
+            address = determineAddressFromCityStateCountry(formData);
             if (address.length > 3) {
-                geo.geocode({address: address}, (results, status) => {
-                    var loc;
-                    if (status === google.maps.GeocoderStatus.OK) {
-                        loc = results[0].geometry.location;
-                        formData.latitude = loc.lat().toString();
-                        formData.longitude = loc.lng().toString();
-                    }
-                    /* else if (status === google.maps.GeocoderStatus.ZERO_RESULTS) {
-                        showFailure("Please check your location information, or leave it blank.");
-                        return;
-                    } else if (status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
-                        showFailure("Error checking your location information, please submit again.");
-                        return;
-                    } */
-                    submit();
-                });
+                formData = getLatLng(address, formData);
+            } else if (formData.institution.length > 3) {
+                formData = getLatLng(formData.institution, formData);
             } else {
-                submit();
+                submit(formData);
             }
         };
 

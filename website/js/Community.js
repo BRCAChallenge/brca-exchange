@@ -251,43 +251,45 @@ var CommunityMap = React.createClass({
                         }
                     });
                     markers = self.markers = newMarkers;
-/*eslint-disable camelcase*/
+                    /*eslint-disable camelcase*/
                     _.map(data, ({id, firstName, lastName, title, role, role_other, institution, latitude, longitude, has_image})  => {
-                        var avatar;
-                        if (has_image) {
-                            let avatar_link = config.backend_url + '/site_media/media/' + id;
-                            avatar = <object className="avatar" data={avatar_link} type="image/jpg"/>;
-                        } else {
-                            avatar = <img className="avatar" src={placeholder}/>;
+                        if (latitude !== "" || longitude !== "") {
+                            var avatar;
+                            if (has_image) {
+                                let avatar_link = config.backend_url + '/site_media/media/' + id;
+                                avatar = <object className="avatar" data={avatar_link} type="image/jpg"/>;
+                            } else {
+                                avatar = <img className="avatar" src={placeholder}/>;
+                            }
+                            var userInfo = (<div className="map-info-window">
+                                {avatar}
+                                <div>
+                                    <span>{firstName} {lastName}{title.length ? "," : ""} {title}</span><br />
+                                    <span id="role">{Role.other(role) ? role_other : Role.get(role)[2]}</span><br />
+                                    <span>{institution}</span>
+                                </div>
+                            </div>);
+                            /*eslint-enable camelcase*/
+                            var marker = new google.maps.Marker({
+                                position: { lat: parseFloat(latitude), lng: parseFloat(longitude) },
+                                map: map,
+                                title: `${firstName} ${lastName}${title.length ? "," : ""} ${title}`,
+                                icon: {
+                                    url: require(`./img/map/${role}.png`),
+                                    scaledSize: new google.maps.Size(20, 32)
+                                }
+                            });
+                            marker.userID = id;
+                            markers.push(marker);
+                            var info = new google.maps.InfoWindow({content: React.renderToStaticMarkup(userInfo) });
+                            marker.addListener('click', () => {
+                                if (infowindow) {
+                                    infowindow.close();
+                                }
+                                infowindow = info;
+                                info.open(map, marker);
+                            });
                         }
-                        var userInfo = (<div className="map-info-window">
-                            {avatar}
-                            <div>
-                                <span>{firstName} {lastName}{title.length ? "," : ""} {title}</span><br />
-                                <span id="role">{Role.other(role) ? role_other : Role.get(role)[2]}</span><br />
-                                <span>{institution}</span>
-                            </div>
-                        </div>);
-/*eslint-enable camelcase*/
-                        var marker = new google.maps.Marker({
-                            position: { lat: parseFloat(latitude), lng: parseFloat(longitude) },
-                            map: map,
-                            title: `${firstName} ${lastName}${title.length ? "," : ""} ${title}`,
-                            icon: {
-                                url: require(`./img/map/${role}.png`),
-                                scaledSize: new google.maps.Size(20, 32)
-                            }
-                        });
-                        marker.userID = id;
-                        markers.push(marker);
-                        var info = new google.maps.InfoWindow({content: React.renderToStaticMarkup(userInfo) });
-                        marker.addListener('click', () => {
-                            if (infowindow) {
-                                infowindow.close();
-                            }
-                            infowindow = info;
-                            info.open(map, marker);
-                        });
                     });
                 });
                 if (infowindow) {
