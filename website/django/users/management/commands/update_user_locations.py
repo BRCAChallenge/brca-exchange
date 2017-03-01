@@ -23,10 +23,10 @@ class Command(BaseCommand):
             try:
                 params = {
                     'address': address,
-                    'key': settings.GOOGLE_API_KEY
+                    'key': settings.GEOCODE_API_KEY
                 }
             except NameError as err:
-                print("Please add a GOOGLE_API_KEY variable with google geocode api key into settings.py before running.")
+                print("Please add a GEOCODE_API_KEY variable with google geocode api key into settings.py before running.")
                 sys.exit(1)
 
             # Do the request and get the response data
