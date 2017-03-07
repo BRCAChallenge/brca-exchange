@@ -481,6 +481,7 @@ def preprocessing():
         one_variant_transform(f_in, f_out)
         f_in.close()
         f_out.close()
+        # TODO: concatenate all files at this point to generate list of all observations
         print "merge repetitive variants within ", source_name
         f_in = open(ARGS.output + source_name + ".vcf", "r")
         f_out = open(ARGS.output + source_name + "ready.vcf", "w")
@@ -516,7 +517,9 @@ def preprocessing():
 
     return source_dict, columns, variants
 
+
 def repeat_merging(f_in, f_out):
+    # TODO: keep all observations separate, but referencing merged variants
     """takes a vcf file, collapses repetitive variant rows and write out
         to a new vcf file (without header)"""
     vcf_reader = vcf.Reader(f_in, strict_whitespace=True)
@@ -564,14 +567,19 @@ def one_variant_transform(f_in, f_out):
        one item, create multiple variant row based on that row, writes new vcf"""
     vcf_reader = vcf.Reader(f_in, strict_whitespace=True)
     vcf_writer = vcf.Writer(f_out, vcf_reader)
+    count = 1
     for record in vcf_reader:
         n = len(record.ALT)
         if n == 1:
+            record.INFO['BX_UUID'] = count
+            count += 1
             vcf_writer.write_record(record)
         else:
             for i in range(n):
                 new_record = deepcopy(record)
                 new_record.ALT = [deepcopy(record.ALT[i])]
+                new_record.INFO['BX_UUID'] = count
+                count += 1
                 for key in record.INFO.keys():
                     value = deepcopy(record.INFO[key])
                     if type(value) == list and len(value) == n:

@@ -1,9 +1,11 @@
 from hypothesis import given, assume, settings
 from hypothesis.strategies import integers, tuples, text, sampled_from, lists
 from variant_merging import variant_equal, init
+import unittest
 import itertools
 import os
 import pytest
+
 
 runtimes = 500000
 settings.register_profile('ci', settings(max_examples=runtimes, max_iterations=runtimes, timeout=-1))
@@ -297,6 +299,18 @@ def test_variant_equal_not_equiv(v1, v2, ref_id):
 # Do we need to explicitly test variations in surrounding reference length?
 # The tests above only test random variants against normalized (minimum reference)
 # variants.
+
+
+class TestVariantMerging(unittest.TestCase):
+
+    # TODO:
+    # 1. Add test cases to follow observation tracking and concatenation.
+    # 2. Add general unit tests around variant merging steps.
+    # 3. Ensure observations are related to variants properly.
+
+    def test_test_works(self):
+        self.assertEqual(1, 1)
+
 
 if __name__ == "__main__":
     # To reproduce failure conditions, paste them in here and run as
