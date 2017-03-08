@@ -1247,21 +1247,25 @@ class DownloadLatestEnigmaData(luigi.Task):
         account and access to the Enigma file directory with id syn7188267 owned by user MelissaCline.
         """
         create_path_if_nonexistent(self.output_dir)
-        output_file_path = self.output_dir + "/ENIGMA_combined.tsv"
+        output_file_path = self.output_dir + "/ENIGMA_combined_with_bx_ids.tsv"
         return luigi.LocalTarget(output_file_path)
 
     def run(self):
         """
-        Downloads enigma file and moves to correct output location.
+        Downloads enigma file, adds BX_ID's and moves to correct output location.
         """
         syn = synapseclient.Synapse()
         syn.login(self.synapse_username, self.synapse_password)
         enigma_file_dir = create_path_if_nonexistent(self.file_parent_dir + '/enigma')
         enigma_file = syn.get(str(self.synapse_enigma_file_id), downloadLocation=enigma_file_dir)
 
-        copy(enigma_file_dir + "/" + enigma_file.name, self.output_dir)
+        args = ["enigma_add_bx_id.py", "--input", enigma_file_dir + "/" + enigma_file.name,
+                "--output", enigma_file_dir + "/ENIGMA_combined_with_bx_ids.tsv"]
+        print "Running enigma_add_bx_id.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
 
-        os.rename(self.output_dir + "/" + enigma_file.name, self.output_dir + "/ENIGMA_combined.tsv")
+        copy(enigma_file_dir + "/ENIGMA_combined_with_bx_ids.tsv", self.output_dir)
 
 
 ###############################################
