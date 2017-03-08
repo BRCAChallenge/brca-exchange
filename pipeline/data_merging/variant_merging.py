@@ -41,7 +41,8 @@ GENOME1K_FIELDS = {"Allele_frequency": "AF",
                    "EUR_Allele_frequency": "EUR_AF",
                    "AFR_Allele_frequency": "AFR_AF",
                    "AMR_Allele_frequency": "AMR_AF",
-                   "SAS_Allele_frequency": "SAS_AF"}
+                   "SAS_Allele_frequency": "SAS_AF",
+                   "BX_UUID": "BX_UUID"}
 
 CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "Submitter": "Submitter",
@@ -50,7 +51,8 @@ CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "SCV": "SCV",
                   "Allele_Origin": "Origin",
                   "Protein": "Protein",
-                  "Method": "Method"}
+                  "Method": "Method",
+                  "BX_UUID": "BX_UUID"}
 
 '''
 NOTE: the following fields are no longer present in LOVD data following
@@ -63,7 +65,8 @@ dna_change_genomic": "dna_change_genomic",
 '''
 LOVD_FIELDS = {"Variant_frequency": "frequency",
                "HGVS_cDNA": "cDNA",
-               "HGVS_protein": "Protein"}
+               "HGVS_protein": "Protein",
+               "BX_UUID": "BX_UUID"}
 
 EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "Segregation_LR": "segregation_lr",
@@ -75,7 +78,8 @@ EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "BIC_Nomenclature": "bic_dna_change",
                   "Literature_source": "observational_reference",
                   "HGVS_cDNA": "dna_change",
-                  "HGVS_protein": "protein_change"}
+                  "HGVS_protein": "protein_change",
+                  "BX_UUID": "BX_UUID"}
 
 BIC_FIELDS = {"Clinical_classification": "Category",
               "Number_of_family_member_carrying_mutation": "Number_Reported",
@@ -85,12 +89,15 @@ BIC_FIELDS = {"Clinical_classification": "Category",
               "BIC_Designation": "Designation",
               "Clinical_importance": "Clinically_Importance",
               "Ethnicity": "Ethnicity",
-              "Literature_citation": "Reference"}
+              "Literature_citation": "Reference",
+              "BX_UUID": "BX_UUID"}
 
 ESP_FIELDS = {"polyPhen2_result": "PH",
-              "Minor_allele_frequency": "MAF"}
+              "Minor_allele_frequency": "MAF",
+              "BX_UUID": "BX_UUID"}
 
-EXAC_FIELDS = {"Allele_frequency": "AF"}
+EXAC_FIELDS = {"Allele_frequency": "AF",
+               "BX_UUID": "BX_UUID"}
 
 FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "ClinVar": CLINVAR_FIELDS,
@@ -481,7 +488,7 @@ def preprocessing():
         one_variant_transform(f_in, f_out)
         f_in.close()
         f_out.close()
-        # TODO: concatenate all files at this point to generate list of all observations
+        # TODO: concatenate all files at this point to generate list of all reports
         print "merge repetitive variants within ", source_name
         f_in = open(ARGS.output + source_name + ".vcf", "r")
         f_out = open(ARGS.output + source_name + "ready.vcf", "w")
@@ -519,7 +526,7 @@ def preprocessing():
 
 
 def repeat_merging(f_in, f_out):
-    # TODO: keep all observations separate, but referencing merged variants
+    # TODO: keep all reports separate, but referencing merged variants
     """takes a vcf file, collapses repetitive variant rows and write out
         to a new vcf file (without header)"""
     vcf_reader = vcf.Reader(f_in, strict_whitespace=True)
