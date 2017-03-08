@@ -42,7 +42,7 @@ GENOME1K_FIELDS = {"Allele_frequency": "AF",
                    "AFR_Allele_frequency": "AFR_AF",
                    "AMR_Allele_frequency": "AMR_AF",
                    "SAS_Allele_frequency": "SAS_AF",
-                   "BX_UUID": "BX_UUID"}
+                   "BX_ID": "BX_ID"}
 
 CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "Submitter": "Submitter",
@@ -52,7 +52,7 @@ CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "Allele_Origin": "Origin",
                   "Protein": "Protein",
                   "Method": "Method",
-                  "BX_UUID": "BX_UUID"}
+                  "BX_ID": "BX_ID"}
 
 '''
 NOTE: the following fields are no longer present in LOVD data following
@@ -66,7 +66,7 @@ dna_change_genomic": "dna_change_genomic",
 LOVD_FIELDS = {"Variant_frequency": "frequency",
                "HGVS_cDNA": "cDNA",
                "HGVS_protein": "Protein",
-               "BX_UUID": "BX_UUID"}
+               "BX_ID": "BX_ID"}
 
 EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "Segregation_LR": "segregation_lr",
@@ -79,7 +79,7 @@ EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "Literature_source": "observational_reference",
                   "HGVS_cDNA": "dna_change",
                   "HGVS_protein": "protein_change",
-                  "BX_UUID": "BX_UUID"}
+                  "BX_ID": "BX_ID"}
 
 BIC_FIELDS = {"Clinical_classification": "Category",
               "Number_of_family_member_carrying_mutation": "Number_Reported",
@@ -90,14 +90,14 @@ BIC_FIELDS = {"Clinical_classification": "Category",
               "Clinical_importance": "Clinically_Importance",
               "Ethnicity": "Ethnicity",
               "Literature_citation": "Reference",
-              "BX_UUID": "BX_UUID"}
+              "BX_ID": "BX_ID"}
 
 ESP_FIELDS = {"polyPhen2_result": "PH",
               "Minor_allele_frequency": "MAF",
-              "BX_UUID": "BX_UUID"}
+              "BX_ID": "BX_ID"}
 
 EXAC_FIELDS = {"Allele_frequency": "AF",
-               "BX_UUID": "BX_UUID"}
+               "BX_ID": "BX_ID"}
 
 FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "ClinVar": CLINVAR_FIELDS,
@@ -578,14 +578,14 @@ def one_variant_transform(f_in, f_out):
     for record in vcf_reader:
         n = len(record.ALT)
         if n == 1:
-            record.INFO['BX_UUID'] = count
+            record.INFO['BX_ID'] = count
             count += 1
             vcf_writer.write_record(record)
         else:
             for i in range(n):
                 new_record = deepcopy(record)
                 new_record.ALT = [deepcopy(record.ALT[i])]
-                new_record.INFO['BX_UUID'] = count
+                new_record.INFO['BX_ID'] = count
                 count += 1
                 for key in record.INFO.keys():
                     value = deepcopy(record.INFO[key])
