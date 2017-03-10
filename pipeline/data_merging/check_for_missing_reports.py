@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-checks that all bx_ids are accounted for
+checks that all reports are accounted for in final pipeline output
 """
 import argparse
 import csv
@@ -18,7 +18,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-b", "--built",
                         help="built.tsv with all variants")
-    parser.add_argument("-o", "--ready_input_dir",
+    parser.add_argument("-r", "--ready_input_dir",
                         help="file directory with all procesed files with bx_ids used to compile built.tsv")
     parser.add_argument('-a', "--artifacts_dir", help='Artifacts directory with pipeline artifact files.')
     parser.add_argument("-v", "--verbose", action="count", default=True, help="determines logging")

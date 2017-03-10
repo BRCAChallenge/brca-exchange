@@ -1381,6 +1381,25 @@ class BuildAggregatedOutput(luigi.Task):
 
 
 @requires(BuildAggregatedOutput)
+class FindMissingReports(luigi.Task):
+    def output(self):
+        artifacts_dir = self.output_dir + "/release/artifacts/"
+        return luigi.LocalTarget(artifacts_dir + "missing_reports.log")
+
+    def run(self):
+        artifacts_dir = self.output_dir + "/release/artifacts/"
+        os.chdir(data_merging_method_dir)
+
+        args = ["python", "check_for_missing_reports.py", "-b", release_dir + "built.tsv", "-r", artifacts_dir,
+                "-a", artifacts_dir, "-v"]
+        print "Running check_for_missing_reports.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(artifacts_dir + "missing_reports.log")
+
+
+@requires(FindMissingReports)
 class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
 
     def output(self):
@@ -1517,14 +1536,14 @@ class RunAll(luigi.WrapperTask):
         else:
             yield BuildAggregatedOutput(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
 
-        yield CopyClinvarVCFToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield CopyESPOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield CopyBICOutputToOutputDir(self.date, self.u, self.p, self.resources_dir, self.output_dir,
-                                       self.file_parent_dir)
-        yield CopyG1KOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield CopyEXACOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield CopyEXLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield CopySharedLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield DownloadLatestEnigmaData(self.date, self.synapse_username, self.synapse_password,
-                                       self.synapse_enigma_file_id, self.resources_dir,
-                                       self.output_dir, self.file_parent_dir)
+        # yield CopyClinvarVCFToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        # yield CopyESPOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        # yield CopyBICOutputToOutputDir(self.date, self.u, self.p, self.resources_dir, self.output_dir,
+        #                                self.file_parent_dir)
+        # yield CopyG1KOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        # yield CopyEXACOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        # yield CopyEXLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        # yield CopySharedLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        # yield DownloadLatestEnigmaData(self.date, self.synapse_username, self.synapse_password,
+        #                                self.synapse_enigma_file_id, self.resources_dir,
+        #                                self.output_dir, self.file_parent_dir)
