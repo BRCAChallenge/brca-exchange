@@ -10,7 +10,11 @@ from os.path import isfile, join, abspath
 import vcf
 
 
+ARGS = None
+
+
 def main():
+    global ARGS
     parser = argparse.ArgumentParser()
     parser.add_argument("-b", "--built",
                         help="built.tsv with all variants")
@@ -19,23 +23,27 @@ def main():
     parser.add_argument('-a', "--artifacts_dir", help='Artifacts directory with pipeline artifact files.')
     parser.add_argument("-v", "--verbose", action="count", default=True, help="determines logging")
 
-    args = parser.parse_args()
+    ARGS = parser.parse_args()
 
-    if args.verbose:
-        logging_level = logging.DEBUG
-    else:
-        logging_level = logging.CRITICAL
+    configure_logging()
 
-    log_file_path = args.artifacts_dir + "missing_reports.log"
-    logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level)
+    bx_ids = get_bx_ids()
 
+    matches_per_source = find_matches_per_source(bx_ids)
+
+    missing_reports = find_missing_reports(matches_per_source, bx_ids)
+
+    logging.debug("Reports absent from release: %s", missing_reports)
+
+
+def get_bx_ids():
+    # Get all bx_ids present in source files organized by source
     bx_ids = {}
 
-    files = [f for f in listdir(args.ready_input_dir) if isfile(join(args.ready_input_dir, f)) and "ready" in f or "ENIGMA_combined_with_bx_ids" in f]
+    files = [f for f in listdir(ARGS.ready_input_dir) if isfile(join(ARGS.ready_input_dir, f)) and "ready" in f or "ENIGMA_combined_with_bx_ids" in f]
 
-    # Get all bx_ids present in source files organized by source
     for file in files:
-        file_path = abspath(args.ready_input_dir + file)
+        file_path = abspath(ARGS.ready_input_dir + file)
         if file_path.endswith('.tsv'):
             source = "ENIGMA"
             bx_ids[source] = []
@@ -55,7 +63,12 @@ def main():
             except ValueError as e:
                 print e
 
-    built = csv.DictReader(open(args.built, "r"), delimiter='\t')
+    return bx_ids
+
+
+def find_matches_per_source(bx_ids):
+    matches_per_source = {}
+    built = csv.DictReader(open(ARGS.built, "r"), delimiter='\t')
     column_prefix = "BX_ID_"
     bx_id_columns = [f for f in built.fieldnames if column_prefix in f]
     matches_per_source = {}
@@ -83,7 +96,10 @@ def main():
                             matches_per_source[source].append(source_bx_id)
                         else:
                             logging.warning("Report(s) %s found on variant %s, but report does not exist from source %s", source_bx_ids, variant, source)
+    return matches_per_source
 
+
+def find_missing_reports(matches_per_source, bx_ids):
     missing_reports = {}
     for source in matches_per_source:
         matches = sorted(matches_per_source[source])
@@ -95,8 +111,17 @@ def main():
         if len(original_ids) != len(original_ids_set):
             print "Error with original ids"
         missing_reports[source] = matches_set.symmetric_difference(original_ids_set)
+    return missing_reports
 
-    logging.debug("Reports absent from release: %s", missing_reports)
+
+def configure_logging():
+    if ARGS.verbose:
+        logging_level = logging.DEBUG
+    else:
+        logging_level = logging.CRITICAL
+
+    log_file_path = ARGS.artifacts_dir + "missing_reports.log"
+    logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level)
 
 
 def isEmpty(value):
