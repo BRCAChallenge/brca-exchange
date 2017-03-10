@@ -5,7 +5,6 @@ adds bx_id for all enigma reports
 import argparse
 import csv
 import logging
-import pdb
 
 
 def main():

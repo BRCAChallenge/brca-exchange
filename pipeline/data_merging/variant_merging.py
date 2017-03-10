@@ -16,6 +16,7 @@ import logging
 from StringIO import StringIO
 from copy import deepcopy
 from pprint import pprint
+from shutil import copy
 
 
 # GENOMIC VERSION:
@@ -108,7 +109,8 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "BIC": BIC_FIELDS}
 
 # Enigma filename is different depending on which version of output data is used.
-ENIGMA_FILE = "ENIGMA_combined.tsv"
+ENIGMA_FILE = "ENIGMA_combined_with_bx_ids.tsv"
+# ENIGMA_FILE = "ENIGMA_combined.tsv"
 # ENIGMA_FILE = "enigma_variants_GRCh38_2-27-2016.tsv"
 # ENIGMA_FILE = "ENIGMA_last_updated.tsv"
 
@@ -186,6 +188,10 @@ def main():
 
     # write final output to file
     write_new_tsv(ARGS.output + "merged.tsv", columns, variants)
+
+    # copy enigma file to artifacts directory along with other ready files
+    copy(ARGS.input + ENIGMA_FILE, ARGS.output)
+
     print "final number of variants: %d" % len(variants)
     print "Done"
 
@@ -520,7 +526,7 @@ def preprocessing():
             n_total += 1
         f_right.close()
         f_wrong.close()
-        print "in {0}, wrong: {1}, total: {2}".format(source_name, n_wrong, n_total) 
+        print "in {0}, wrong: {1}, total: {2}".format(source_name, n_wrong, n_total)
 
     return source_dict, columns, variants
 
