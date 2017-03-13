@@ -262,8 +262,10 @@ def variant_standardize(columns, variants="pickle"):
                 else:
                     prefix = "BX_ID_"
                     source = key[len(prefix):]
-                    logging.warning("Report(s) discarded: %s \n Source: %s \n Reason for discard: Incorrect Reference \n Variant: %s", bx_ids_for_variant[key], source, hgvs)
-                    DISCARDED_REPORTS_WRITER.writerow({'Report_ids': bx_ids_for_variant[key], 'Source': source, 'Reason': 'Incorrect Reference', 'Variant': hgvs})
+                    for report in reports:
+                        report = int(report)
+                        logging.warning("Report(s) discarded: %s \n Source: %s \n Reason for discard: Incorrect Reference \n Variant: %s", report, source, hgvs)
+                        DISCARDED_REPORTS_WRITER.writerow({'Report_ids': report, 'Source': source, 'Reason': 'Incorrect Reference', 'Variant': hgvs})
             variants_to_remove.append(ev)
             continue
 
@@ -277,8 +279,10 @@ def variant_standardize(columns, variants="pickle"):
                 else:
                     prefix = "BX_ID_"
                     source = key[len(prefix):]
-                    logging.warning("Report(s) discarded: %s \n Source: %s \n Reason for discard: Incorrect Reference \n Variant: %s", bx_ids_for_variant[key], source, hgvs)
-                    DISCARDED_REPORTS_WRITER.writerow({'Report_ids': bx_ids_for_variant[key], 'Source': source, 'Reason': 'Variant ref and alt are equal', 'Variant': hgvs})
+                    for report in reports:
+                        report = int(report)
+                        logging.warning("Report(s) discarded: %s \n Source: %s \n Reason for discard: Incorrect Reference \n Variant: %s", report, source, hgvs)
+                        DISCARDED_REPORTS_WRITER.writerow({'Report_ids': report, 'Source': source, 'Reason': 'Variant ref and alt are equal', 'Variant': hgvs})
             variants_to_remove.append(ev)
             continue
 
