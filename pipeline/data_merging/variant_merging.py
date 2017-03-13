@@ -17,6 +17,7 @@ from StringIO import StringIO
 from copy import deepcopy
 from pprint import pprint
 from shutil import copy
+import csv
 
 
 # GENOMIC VERSION:
@@ -122,6 +123,8 @@ BIC_FILE = "bic_brca12.sorted.hg38.vcf"
 EXAC_FILE = "exac.brca12.sorted.hg38.vcf"
 ESP_FILE = "esp.brca12.sorted.hg38.vcf"
 
+DISCARDED_REPORTS_WRITER = None
+
 
 def options(parser):
     parser.add_argument("-i", "--input", help="Input VCF directory",
@@ -156,6 +159,8 @@ def init(args):
 
 
 def main():
+    global DISCARDED_REPORTS_WRITER
+
     parser = argparse.ArgumentParser()
     options(parser)
 
@@ -169,6 +174,13 @@ def main():
     log_file_path = ARGS.artifacts_dir + "variant_merging.log"
     logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level)
 
+    discarded_reports_file = open(ARGS.artifacts_dir + "discarded_reports.tsv", "w")
+
+    fieldnames = ['Report_ids', 'Source', 'Reason', 'Variant']
+
+    DISCARDED_REPORTS_WRITER = csv.DictWriter(discarded_reports_file, delimiter="\t", fieldnames=fieldnames)
+    DISCARDED_REPORTS_WRITER.writeheader()
+
     # merge repeats within data sources before merging between data sources
     source_dict, columns, variants = preprocessing()
 
@@ -180,7 +192,7 @@ def main():
 
     # standardizes genomic coordinates for variants
     print "\n------------standardizing genomic coordinates-------------"
-    variants = variant_standardize(variants=variants)
+    variants = variant_standardize(columns, variants=variants)
 
     # compare dna sequence results of variants and merge if equivalent
     print "------------dna sequence comparison merge-------------------------------"
@@ -192,23 +204,37 @@ def main():
     # copy enigma file to artifacts directory along with other ready files
     copy(ARGS.input + ENIGMA_FILE, ARGS.output)
 
+    discarded_reports_file.close()
+
     print "final number of variants: %d" % len(variants)
     print "Done"
 
 
-def variant_standardize(variants="pickle"):
+def variant_standardize(columns, variants="pickle"):
     """standardize variants such
     1. "-" in ref or alt is removed, and a leading base is added, e.g. ->T is changed to N > NT
     2. remove trailing same bases: e.g. AGGGG > TGGGG is changed to A>T
     3. remove leading same baes: e.g. position 100, AAT > AAG is changed to position 102 T>G
     """
-    if variants=="pickle":
+
+    global DISCARDED_REPORTS_WRITER
+
+    # Get indexes of all BX_ID columns by source.
+    bx_id_column_indexes = {}
+    for i, column in enumerate(columns):
+        if "BX_ID" in column:
+            bx_id_column_indexes[column] = i
+
+    if variants == "pickle":
         with open("temp_variants.pkl", "r") as fv:
             variants = pickle.loads(fv.read())
         fv.close()
     variants_to_remove = list()
     variants_to_add = {}
     for ev, items in variants.iteritems():
+        bx_ids_for_variant = {}
+        for key in bx_id_column_indexes.keys():
+            bx_ids_for_variant[key] = items[bx_id_column_indexes[key]]
         chr = items[COLUMN_VCF_CHR]
         pos = items[COLUMN_VCF_POS]
         ref = items[COLUMN_VCF_REF]
@@ -223,16 +249,36 @@ def variant_standardize(variants="pickle"):
             (chr, pos, ref, alt) = add_leading_base(chr, pos, ref, alt)
         (chr, pos, ref, alt) = trim_bases(chr, pos, ref, alt)
 
+        hgvs = "chr%s:g.%s:%s>%s" % (str(chr), str(pos), ref, alt)
+
         # If the reference is wrong, remove the variant
         if not ref_correct(chr, pos, ref, alt):
             logging.warning("Ref incorrect using chr, pos, ref, alt: %s, %s, %s, %s", chr, pos, ref, alt)
             logging.warning("Original variant representation of incorrect ref variant before add_leading_base: %s", str(items))
+            for key in bx_ids_for_variant.keys():
+                reports = bx_ids_for_variant[key]
+                if isEmpty(reports):
+                    continue
+                else:
+                    prefix = "BX_ID_"
+                    source = key[len(prefix):]
+                    logging.warning("Report(s) discarded: %s \n Source: %s \n Reason for discard: Incorrect Reference \n Variant: %s", bx_ids_for_variant[key], source, hgvs)
+                    DISCARDED_REPORTS_WRITER.writerow({'Report_ids': bx_ids_for_variant[key], 'Source': source, 'Reason': 'Incorrect Reference', 'Variant': hgvs})
             variants_to_remove.append(ev)
             continue
 
         if variant_is_false(ref, alt):
-            logging.warning("Bad data chr, pos, ref, alt: %s, %s, %s, %s", chr, pos, ref, alt)
+            logging.warning("Bad data for variant %s", hgvs)
             logging.warning("Original variant representation of bad data: %s", str(items))
+            for key in bx_ids_for_variant.keys():
+                reports = bx_ids_for_variant[key]
+                if isEmpty(reports):
+                    continue
+                else:
+                    prefix = "BX_ID_"
+                    source = key[len(prefix):]
+                    logging.warning("Report(s) discarded: %s \n Source: %s \n Reason for discard: Incorrect Reference \n Variant: %s", bx_ids_for_variant[key], source, hgvs)
+                    DISCARDED_REPORTS_WRITER.writerow({'Report_ids': bx_ids_for_variant[key], 'Source': source, 'Reason': 'Variant ref and alt are equal', 'Variant': hgvs})
             variants_to_remove.append(ev)
             continue
 
@@ -312,6 +358,7 @@ def variant_standardize(variants="pickle"):
 
     return variants
 
+
 def trim_bases(chr, pos, ref, alt):
     #ref, alt = v.split(":")[2].split(">")
     if len(ref) <= 1 or len(alt) <= 1:
@@ -322,6 +369,7 @@ def trim_bases(chr, pos, ref, alt):
         (chr, pos, ref, alt) = trim_leading(chr, pos, ref, alt)
         return (chr, pos, ref, alt)
 
+
 def trim_trailing(ref, alt):
     if len(ref) <= 1 or len(alt) <= 1:
         return ref, alt
@@ -331,6 +379,7 @@ def trim_trailing(ref, alt):
         ref = ref[:-1]
         alt = alt[:-1]
         return trim_trailing(ref, alt)
+
 
 def trim_leading(chr, pos, ref, alt):
     pos = int(pos)
@@ -464,6 +513,7 @@ def find_equivalent_variant(variants):
     print equivalent_variants
     return equivalent_variants
 
+
 def preprocessing():
     # Preprocessing variants:
     source_dict = {
@@ -491,10 +541,11 @@ def preprocessing():
         print "convert to one variant per line in ", source_name
         f_in = open(ARGS.input + file_name, "r")
         f_out = open(ARGS.output + source_name + ".vcf", "w")
+        # Individual reports (lines in VCF/TSV) are given ids as part of the one_variant_transform method.
         one_variant_transform(f_in, f_out)
         f_in.close()
         f_out.close()
-        # TODO: concatenate all files at this point to generate list of all reports
+
         print "merge repetitive variants within ", source_name
         f_in = open(ARGS.output + source_name + ".vcf", "r")
         f_out = open(ARGS.output + source_name + "ready.vcf", "w")
@@ -519,6 +570,8 @@ def preprocessing():
             ref = record.REF.replace("-", "")
             v = [record.CHROM, record.POS, ref, "dummy"]
             if not ref_correct(record.CHROM, record.POS, record.REF, record.ALT):
+                logging.warning("Reference incorrect for Chrom: %s, Pos: %s, Ref: %s, and Alt: %s",
+                                record.CHROM, record.POS, record.REF, record.ALT)
                 vcf_wrong_writer.write_record(record)
                 n_wrong += 1
             else:
@@ -532,7 +585,6 @@ def preprocessing():
 
 
 def repeat_merging(f_in, f_out):
-    # TODO: keep all reports separate, but referencing merged variants
     """takes a vcf file, collapses repetitive variant rows and write out
         to a new vcf file (without header)"""
     vcf_reader = vcf.Reader(f_in, strict_whitespace=True)
@@ -568,6 +620,7 @@ def repeat_merging(f_in, f_out):
     f_in.close()
     f_out.close()
 
+
 def get_header(f):
     header = ""
     for line in f:
@@ -575,9 +628,11 @@ def get_header(f):
             header += line
     return header
 
+
 def one_variant_transform(f_in, f_out):
     """takes a vcf file, read each row, if the ALT field contains more than
-       one item, create multiple variant row based on that row, writes new vcf"""
+       one item, create multiple variant row based on that row. also adds
+       ids to all individual reports (each line in the vcf). writes new vcf"""
     vcf_reader = vcf.Reader(f_in, strict_whitespace=True)
     vcf_writer = vcf.Writer(f_out, vcf_reader)
     count = 1
@@ -598,6 +653,7 @@ def one_variant_transform(f_in, f_out):
                     if type(value) == list and len(value) == n:
                         new_record.INFO[key] = [value[i]]
                 vcf_writer.write_record(new_record)
+
 
 def write_new_tsv(filename, columns, variants):
     merged_file = open(filename, "w")
@@ -650,6 +706,7 @@ def add_new_source(columns, variants, source, source_file, source_dict):
             try:
                 variants[genome_coor].append(record.INFO[value])
             except KeyError:
+                logging.warning("KeyError appending VCF record.INFO[value] to variant. Variant: %s \n Record.INFO: %s \n value: %s", variants[genome_coor], record.INFO, value)
                 if source == "BIC":
                     variants[genome_coor].append(DEFAULT_CONTENTS)
                     logging.debug("Could not find value %s for source %s in variant %s, inserting default content %s instead.", value, source, DEFAULT_CONTENTS)
@@ -670,12 +727,15 @@ def add_new_source(columns, variants, source, source_file, source_dict):
 
 
 def save_enigma_to_dict(path):
+    global DISCARDED_REPORTS_WRITER
+
     enigma_file = open(path, "r")
     variants = dict()
     columns = ""
     line_num = 0
     f_wrong = open(ARGS.output + "ENIGMA_wrong_genome.txt", "w")
     n_wrong, n_total = 0, 0
+    bx_id_column_index = None
     for line in enigma_file:
         line_num += 1
         if line_num == 1:
@@ -687,6 +747,9 @@ def save_enigma_to_dict(path):
             columns.insert(COLUMN_VCF_POS, "Pos")
             columns.insert(COLUMN_VCF_REF, "Ref")
             columns.insert(COLUMN_VCF_ALT, "Alt")
+            for i, column in enumerate(columns):
+                if "BX_ID" in column:
+                    bx_id_column_index = i
             f_wrong.write(line)
         else:
             items = line.strip().split("\t")
@@ -698,15 +761,27 @@ def save_enigma_to_dict(path):
             items.insert(COLUMN_VCF_REF, ref)
             items.insert(COLUMN_VCF_ALT, alt)
             for ii in range(len(items)):
-                if items[ii] == None:
+                if items[ii] is None:
                     items[ii] = DEFAULT_CONTENTS
+
+            bx_id = items[bx_id_column_index]
+            hgvs = "chr%s:g.%s:%s>%s" % (str(chrom), str(pos), ref, alt)
+
             if ref_correct(chrom, pos, ref, alt):
-                hgvs = "chr%s:g.%s:%s>%s" % (str(chrom), str(pos), ref, alt)
+                if hgvs in variants:
+                    logging.warning("Overwriting enigma variant %s with %s", variants[hgvs], items)
+                    logging.warning("Report(s) discarded: %s \n Source: ENIGMA \n Reason for discard: Variant overwritten \n Variant: %s", bx_id, hgvs)
+                    DISCARDED_REPORTS_WRITER.writerow({'Report_ids': bx_id, 'Source': 'ENIGMA', 'Reason': 'Variant overwritten'})
                 variants[hgvs] = items
             else:
+                logging.warning("Ref incorrect for Enigma report, throwing away: %s", line)
+                logging.warning("Report(s) discarded: %s \n Source: ENIGMA \n Reason for discard: Incorrect Reference \n Variant: %s", bx_id, hgvs)
+                DISCARDED_REPORTS_WRITER.writerow({'Report_ids': bx_id, 'Source': 'ENIGMA', 'Reason': 'Incorrect Reference', 'Variant': hgvs})
                 n_wrong += 1
                 f_wrong.write(line)
+
             n_total += 1
+
     f_wrong.close()
     print "in ENIGMA, wrong: {0}, total: {1}".format(n_wrong, n_total)
     return (columns, variants)
@@ -761,6 +836,7 @@ def variant_equal(v1, v2, version="hg38"):
 
     return edited_v1 == edited_v2
 
+
 def ref_correct(chr, pos, ref, alt, version="hg38"):
     if pos == "None":
         return False
@@ -781,6 +857,10 @@ def ref_correct(chr, pos, ref, alt, version="hg38"):
         return False
     else:
         return True
+
+
+def isEmpty(value):
+    return value == '-' or value is None or value == [] or value == ['-']
 
 
 if __name__ == "__main__":

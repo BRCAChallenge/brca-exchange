@@ -1258,8 +1258,9 @@ class DownloadLatestEnigmaData(luigi.Task):
         syn.login(self.synapse_username, self.synapse_password)
         enigma_file_dir = create_path_if_nonexistent(self.file_parent_dir + '/enigma')
         enigma_file = syn.get(str(self.synapse_enigma_file_id), downloadLocation=enigma_file_dir)
+        os.chdir(enigma_method_dir)
 
-        args = ["enigma_add_bx_id.py", "--input", enigma_file_dir + "/" + enigma_file.name,
+        args = ["python", "enigma_add_bx_id.py", "--input", enigma_file_dir + "/" + enigma_file.name,
                 "--output", enigma_file_dir + "/ENIGMA_combined_with_bx_ids.tsv"]
         print "Running enigma_add_bx_id.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -1387,6 +1388,7 @@ class FindMissingReports(luigi.Task):
         return luigi.LocalTarget(artifacts_dir + "missing_reports.log")
 
     def run(self):
+        release_dir = self.output_dir + "/release/"
         artifacts_dir = self.output_dir + "/release/artifacts/"
         os.chdir(data_merging_method_dir)
 
@@ -1536,14 +1538,14 @@ class RunAll(luigi.WrapperTask):
         else:
             yield BuildAggregatedOutput(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
 
-        # yield CopyClinvarVCFToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        # yield CopyESPOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        # yield CopyBICOutputToOutputDir(self.date, self.u, self.p, self.resources_dir, self.output_dir,
-        #                                self.file_parent_dir)
-        # yield CopyG1KOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        # yield CopyEXACOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        # yield CopyEXLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        # yield CopySharedLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        # yield DownloadLatestEnigmaData(self.date, self.synapse_username, self.synapse_password,
-        #                                self.synapse_enigma_file_id, self.resources_dir,
-        #                                self.output_dir, self.file_parent_dir)
+        yield CopyClinvarVCFToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield CopyESPOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield CopyBICOutputToOutputDir(self.date, self.u, self.p, self.resources_dir, self.output_dir,
+                                       self.file_parent_dir)
+        yield CopyG1KOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield CopyEXACOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield CopyEXLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield CopySharedLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield DownloadLatestEnigmaData(self.date, self.synapse_username, self.synapse_password,
+                                       self.synapse_enigma_file_id, self.resources_dir,
+                                       self.output_dir, self.file_parent_dir)
