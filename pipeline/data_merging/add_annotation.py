@@ -52,6 +52,7 @@ def main():
         csvOut.writerow(row)
         logging.info("Completed writerow.")
 
+
 def setOutputColumns(fields, toAdd):
     newFields = []
     for item in fields:
@@ -60,14 +61,15 @@ def setOutputColumns(fields, toAdd):
         newFields.append(item)
     return(newFields)
 
+
 def addVepResults(row, vepTranscriptConsequenceFields):
     # Initialize to the default output
     defaultOutput = "-"
     for label, field in vepTranscriptConsequenceFields.iteritems():
         row[label] = defaultOutput
-    # Assemble a query.  As of this writing, the API doesn't seem to work for 
+    # Assemble a query.  As of this writing, the API doesn't seem to work for
     # anything other than simple missense substitutions.  Skip this process
-    # unless both the reference and alt alleles are one of the four canonical 
+    # unless both the reference and alt alleles are one of the four canonical
     # bases, and are different from each other.
     if row["Ref"] in ['A', 'C', 'G', 'T'] \
             and row['Alt'] in ['A', 'C', 'G', 'T'] \
