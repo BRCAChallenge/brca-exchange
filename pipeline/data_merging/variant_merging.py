@@ -176,7 +176,7 @@ def main():
 
     discarded_reports_file = open(ARGS.artifacts_dir + "discarded_reports.tsv", "w")
 
-    fieldnames = ['Report_ids', 'Source', 'Reason', 'Variant']
+    fieldnames = ['Report_id', 'Source', 'Reason', 'Variant']
 
     DISCARDED_REPORTS_WRITER = csv.DictWriter(discarded_reports_file, delimiter="\t", fieldnames=fieldnames)
     DISCARDED_REPORTS_WRITER.writeheader()
@@ -262,10 +262,8 @@ def variant_standardize(columns, variants="pickle"):
                 else:
                     prefix = "BX_ID_"
                     source = key[len(prefix):]
-                    for report in reports:
-                        report = int(report)
-                        logging.warning("Report(s) discarded: %s \n Source: %s \n Reason for discard: Incorrect Reference \n Variant: %s", report, source, hgvs)
-                        DISCARDED_REPORTS_WRITER.writerow({'Report_ids': report, 'Source': source, 'Reason': 'Incorrect Reference', 'Variant': hgvs})
+                    reason_for_discard = "Incorrect Reference"
+                    log_discarded_reports(source, reports, hgvs, reason_for_discard)
             variants_to_remove.append(ev)
             continue
 
@@ -279,10 +277,8 @@ def variant_standardize(columns, variants="pickle"):
                 else:
                     prefix = "BX_ID_"
                     source = key[len(prefix):]
-                    for report in reports:
-                        report = int(report)
-                        logging.warning("Report(s) discarded: %s \n Source: %s \n Reason for discard: Incorrect Reference \n Variant: %s", report, source, hgvs)
-                        DISCARDED_REPORTS_WRITER.writerow({'Report_ids': report, 'Source': source, 'Reason': 'Variant ref and alt are equal', 'Variant': hgvs})
+                    reason_for_discard = "Variant ref and alt are the same"
+                    log_discarded_reports(source, reports, hgvs, reason_for_discard)
             variants_to_remove.append(ev)
             continue
 
@@ -774,13 +770,11 @@ def save_enigma_to_dict(path):
             if ref_correct(chrom, pos, ref, alt):
                 if hgvs in variants:
                     logging.warning("Overwriting enigma variant %s with %s", variants[hgvs], items)
-                    logging.warning("Report(s) discarded: %s \n Source: ENIGMA \n Reason for discard: Variant overwritten \n Variant: %s", bx_id, hgvs)
-                    DISCARDED_REPORTS_WRITER.writerow({'Report_ids': bx_id, 'Source': 'ENIGMA', 'Reason': 'Variant overwritten'})
+                    log_discarded_reports("ENIGMA", bx_id, hgvs, "Variant overwritten")
                 variants[hgvs] = items
             else:
                 logging.warning("Ref incorrect for Enigma report, throwing away: %s", line)
-                logging.warning("Report(s) discarded: %s \n Source: ENIGMA \n Reason for discard: Incorrect Reference \n Variant: %s", bx_id, hgvs)
-                DISCARDED_REPORTS_WRITER.writerow({'Report_ids': bx_id, 'Source': 'ENIGMA', 'Reason': 'Incorrect Reference', 'Variant': hgvs})
+                log_discarded_reports("ENIGMA", bx_id, hgvs, "Incorrect Reference")
                 n_wrong += 1
                 f_wrong.write(line)
 
@@ -865,6 +859,22 @@ def ref_correct(chr, pos, ref, alt, version="hg38"):
 
 def isEmpty(value):
     return value == '-' or value is None or value == [] or value == ['-']
+
+
+def log_discarded_reports(source, reports, hgvs, reason):
+    # if reports is a list, log each report individually
+    if not isinstance(reports, basestring):
+        for report in reports:
+            log_discarded_report(source, report, hgvs, reason)
+    else:
+        report = reports
+        log_discarded_report(source, report, hgvs, reason)
+
+
+def log_discarded_report(source, report, hgvs, reason):
+    report = int(report)
+    logging.warning("Report discarded: %s \n Source: %s \n Reason for discard: %s \n Variant: %s", report, source, reason, hgvs)
+    DISCARDED_REPORTS_WRITER.writerow({'Report_id': report, 'Source': source, 'Reason': reason, 'Variant': hgvs})
 
 
 if __name__ == "__main__":
