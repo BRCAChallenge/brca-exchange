@@ -70,6 +70,9 @@ This process will add an additional release to the database and rebuild the word
  * Add the archive of the release (e.g. `release-10-06-16.tar.gz`) to `brca-exchange/website/django/uploads/releases/` so the archive can be downloaded by users.
  * Run `./manage.py addrelease ./data/resources/releases/release-{MM-DD-YY}/built_with_change_types.tsv ./data/resources/releases/release-{MM-DD-YY}/version.json ./data/resources/releases/release-{MM-DD-YY}/removed.tsv` to add new data to the database, rebuild the words table, and generate a new release.
 
+## How to add/approve new users on the community page
+* Go to http://brcaexchange.org/backend/admin/ and follow necessary steps.
+
 ### References
  * http://blog.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/
  * http://webpack.github.io/
