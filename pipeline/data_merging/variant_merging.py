@@ -265,7 +265,7 @@ def variant_standardize(columns, variants="pickle"):
         if newHgvs != ev:
             logging.debug("Changed genomic coordinate representation, replacing %s with %s", ev, newHgvs)
             variants_to_remove.append(ev)
-            variants_to_add = add_variant_to_dict(variants_to_add, newHgvs, items)\
+            variants_to_add = add_variant_to_dict(variants_to_add, newHgvs, items)
 
     # remove old variant representations and bad variants
     for old_variant in variants_to_remove:
