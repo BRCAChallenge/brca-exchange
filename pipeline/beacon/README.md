@@ -16,4 +16,4 @@ Options can be viewed using:
 The GA4GH client package and the Requests package must be installed.
 To install, run:
 
-    pip install requests ga4gh-client
+    pip install requests ga4gh==0.3.5
