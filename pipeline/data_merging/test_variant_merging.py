@@ -1,6 +1,6 @@
 from hypothesis import given, assume, settings
 from hypothesis.strategies import integers, tuples, text, sampled_from, lists
-from variant_merging import variant_equal, init
+from variant_merging import variant_equal, init, normalize_values
 import unittest
 import itertools
 import os
@@ -308,8 +308,15 @@ class TestVariantMerging(unittest.TestCase):
     # 2. Add general unit tests around variant merging steps.
     # 3. Ensure observations are related to variants properly.
 
-    def test_test_works(self):
-        self.assertEqual(1, 1)
+    def test_normalize_values(self):
+        empty_string = normalize_values('')
+        none_value = normalize_values(None)
+        whitespace = normalize_values(' value ')
+        list_values = normalize_values(['dog ', ' fish ', '', None])
+        self.assertEqual(empty_string, '-')
+        self.assertEqual(none_value, '-')
+        self.assertEqual(whitespace, 'value')
+        self.assertEqual(list_values, ['dog', 'fish'])
 
 
 if __name__ == "__main__":
