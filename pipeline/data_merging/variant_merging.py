@@ -290,73 +290,89 @@ def variant_standardize(columns, variants="pickle"):
         if newHgvs != ev:
             logging.debug("Changed genomic coordinate representation, replacing %s with %s", ev, newHgvs)
             variants_to_remove.append(ev)
-            variants_to_add[newHgvs] = items
+            variants_to_add = add_variant_to_dict(variants_to_add, newHgvs, items)\
 
     # remove old variant representations and bad variants
     for old_variant in variants_to_remove:
         popped = variants.pop(old_variant)
 
-    # TODO: create generic merge function to handle this case and merging in string_comparison_merge.
     # add new variant representations and merge equivalent variants
     for genomic_coordinate, values in variants_to_add.iteritems():
-        # if the variant already exists, merge
-        if genomic_coordinate in variants:
-            existing_variant = variants[genomic_coordinate]
-            equivalent_variant = values
-            logging.info("Merging equivalent variants \n %s and \n %s", existing_variant, equivalent_variant)
-            assert(len(existing_variant) == len(equivalent_variant))
-
-            # merge properties from equivalent variant into existing variant
-            for i, existing_variant_property in enumerate(existing_variant):
-
-                # skip if dealing with chr, pos, ref, or alt since one representation is enough
-                if i == COLUMN_VCF_CHR or i == COLUMN_VCF_POS or i == COLUMN_VCF_REF or i == COLUMN_VCF_ALT:
-                    continue
-
-                # get same property from equivalent variant
-                equivalent_variant_property = equivalent_variant[i]
-
-                # standardize empty data representation
-                if equivalent_variant_property is None or equivalent_variant_property == '':
-                    equivalent_variant_property = DEFAULT_CONTENTS
-                if existing_variant_property is None or existing_variant_property == '':
-                    existing_variant_property = DEFAULT_CONTENTS
-                    # overwrite none values with default none representation
-                    existing_variant[i] = existing_variant_property
-
-                # move on if they're equal or if equivalent variant property is blank
-                if equivalent_variant_property == existing_variant_property or equivalent_variant_property == "-":
-                    continue
-
-                # if the old value is blank, replace it with the new value
-                if existing_variant_property == "-":
-                    existing_variant[i] = equivalent_variant_property
-                else:
-                    # combine properties into a list
-                    if type(existing_variant_property) != list:
-                        merged_properties = [existing_variant_property]
-                    else:
-                        merged_properties = existing_variant_property
-
-                    assert type(merged_properties) == list
-
-                    if type(equivalent_variant_property) == list:
-                        for prop in equivalent_variant_property:
-                            if prop not in merged_properties:
-                                merged_properties.append(prop)
-                    elif equivalent_variant_property not in merged_properties:
-                        merged_properties.append(equivalent_variant_property)
-
-                    # replace existing data with updates
-                    existing_variant[i] = merged_properties
-                    logging.debug("Merged properties: %s", merged_properties)
-
-            logging.debug('Merged output: \n %s', existing_variant)
-
-        else:
-            variants[genomic_coordinate] = values
+        variants = add_variant_to_dict(variants, genomic_coordinate, values)
 
     return variants
+
+
+def add_variant_to_dict(variant_dict, genomic_coordinate, values):
+    # If the variant is already in the dictionary, merge them together.
+    if genomic_coordinate in variant_dict:
+        existing_variant = variant_dict[genomic_coordinate]
+        equivalent_variant = values
+        logging.info("Merging equivalent variants \n %s and \n %s", existing_variant, equivalent_variant)
+        assert(len(existing_variant) == len(equivalent_variant))
+
+        # merge properties from equivalent variant into existing variant
+        for i, existing_variant_property in enumerate(existing_variant):
+
+            # skip if dealing with chr, pos, ref, or alt since one representation is enough
+            if i == COLUMN_VCF_CHR or i == COLUMN_VCF_POS or i == COLUMN_VCF_REF or i == COLUMN_VCF_ALT:
+                continue
+
+            # get same property from equivalent variant
+            equivalent_variant_property = normalize_values(equivalent_variant[i])
+            existing_variant_property = normalize_values(existing_variant_property)
+            existing_variant[i] = existing_variant_property
+
+            # move on if they're equal or if equivalent variant property is blank
+            if equivalent_variant_property == existing_variant_property or equivalent_variant_property == "-":
+                continue
+
+            # if the old value is blank, replace it with the new value
+            if existing_variant_property == "-":
+                existing_variant[i] = equivalent_variant_property
+            else:
+                # combine properties into a list
+                if type(existing_variant_property) != list:
+                    merged_properties = [existing_variant_property]
+                else:
+                    merged_properties = existing_variant_property
+
+                assert type(merged_properties) == list
+
+                if type(equivalent_variant_property) == list:
+                    for prop in equivalent_variant_property:
+                        if prop not in merged_properties:
+                            merged_properties.append(prop)
+                elif equivalent_variant_property not in merged_properties:
+                    merged_properties.append(equivalent_variant_property)
+
+                # replace existing data with updates
+                existing_variant[i] = merged_properties
+                logging.debug("Merged properties: %s", merged_properties)
+
+        logging.debug('Merged output: \n %s', existing_variant)
+    else:
+        variant_dict[genomic_coordinate] = values
+
+    return variant_dict
+
+
+def normalize_values(value):
+    # standardize data representation by denoting empty as '-' and stripping whitespace off strings
+    if value is None or value == "":
+        value = DEFAULT_CONTENTS
+    if isinstance(value, basestring):
+        value = value.strip()
+    else:
+        normalized_values = []
+        for v in value:
+            if v is None or v == "-" or v == "":
+                continue
+            else:
+                normalized_values.append(v.strip())
+        value = normalized_values
+
+    return value
 
 
 def trim_bases(chr, pos, ref, alt):
@@ -768,10 +784,7 @@ def save_enigma_to_dict(path):
             hgvs = "chr%s:g.%s:%s>%s" % (str(chrom), str(pos), ref, alt)
 
             if ref_correct(chrom, pos, ref, alt):
-                if hgvs in variants:
-                    logging.warning("Overwriting enigma variant %s with %s", variants[hgvs], items)
-                    log_discarded_reports("ENIGMA", bx_id, hgvs, "Variant overwritten")
-                variants[hgvs] = items
+                variants = add_variant_to_dict(variants, hgvs, items)
             else:
                 logging.warning("Ref incorrect for Enigma report, throwing away: %s", line)
                 log_discarded_reports("ENIGMA", bx_id, hgvs, "Incorrect Reference")
