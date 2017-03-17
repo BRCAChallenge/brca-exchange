@@ -97,7 +97,13 @@ def main(args):
             INFO_field.append('{0}={1}'.format(field, field_value))
 
         # extract hgvs cDNA term for variant and cleanup formatting
-        hgvsName = parsedLine[fieldIdxDict['cDNA']]
+        # Sometimes dna_change is in the field cDNA, sometimes it's labeled dna_change.
+        if 'cDNA' in fieldIdxDict:
+            hgvsName = parsedLine[fieldIdxDict['cDNA']]
+        elif 'dna_change' in fieldIdxDict:
+            hgvsName = parsedLine[fieldIdxDict['dna_change']]
+        else:
+            sys.exit("ERROR: could not parse hgvs name.")
         if hgvsName == '-':
             print(parsedLine)
             continue
