@@ -102,16 +102,16 @@ def find_matches_per_source(bx_ids):
 def find_missing_reports(matches_per_source, bx_ids):
     missing_reports = {}
     for source in matches_per_source:
-        matches = sorted(matches_per_source[source])
-        matches_set = set(matches)
-        if len(matches) != len(matches_set):
-            print "Error with matches"
-        original_ids = sorted(bx_ids[source])
-        original_ids_set = set(original_ids)
-        if len(original_ids) != len(original_ids_set):
-            print "Error with original ids"
+        matches_set = get_set_of_ids(matches_per_source[source])
+        original_ids_set = get_set_of_ids(bx_ids[source])
         missing_reports[source] = matches_set.symmetric_difference(original_ids_set)
     return missing_reports
+
+
+def get_set_of_ids(ids):
+    id_set = set(ids)
+    assert len(ids) == len(set(id_set))
+    return id_set
 
 
 def configure_logging():
@@ -125,7 +125,7 @@ def configure_logging():
 
 
 def isEmpty(value):
-    return value == '-' or value is None
+    return value == '-' or value is None or value == '' or value == []
 
 
 if __name__ == "__main__":
