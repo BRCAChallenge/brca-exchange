@@ -53,7 +53,16 @@ LIST_KEYS = [
             "Clinical_Significance_ClinVar",
             "Allele_Origin_ClinVar",
             "Synonyms",
+            "BX_ID_ENIGMA",
+            "BX_ID_ClinVar",
+            "BX_ID_BIC",
+            "BX_ID_ExAC",
+            "BX_ID_LOVD",
+            "BX_ID_exLOVD",
+            "BX_ID_1000_Genomes",
+            "BX_ID_ESP"
            ]
+
 
 class transformer(object):
     """
@@ -86,8 +95,8 @@ class transformer(object):
             else:
                 oldColumnsRemoved.append(ocol)
         for ncol in newColumns:
-            if not ncol in oldColumns:
-                if not ncol in self._renamedColumns.values():
+            if ncol not in oldColumns:
+                if ncol not in self._renamedColumns.values():
                     newColumnsAdded.append(ncol)
         return (oldColumnsRemoved, newColumnsAdded, newToOldNameMapping)
 
@@ -206,7 +215,8 @@ class transformer(object):
         # Uncomment if using old data schema (e.g. pre pyhgvs_Genomic_Coordinate_38)
         columns_to_ignore = ["change_type", "Assertion_method_citation_ENIGMA", "Genomic_Coordinate_hg36",
                              "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg38", "HGVS_cDNA", "HGVS_Protein",
-                             "Hg37_Start", "Hg37_End", "Hg36_Start", "Hg36_End"]
+                             "Hg37_Start", "Hg37_End", "Hg36_Start", "Hg36_End", "BX_ID_ENIGMA", "BX_ID_ClinVar",
+                             "BX_ID_BIC", "BX_ID_ExAC", "BX_ID_LOVD", "BX_ID_exLOVD", "BX_ID_1000_Genomes", "BX_ID_ESP"]
 
         # Header to group all logs the same variant
         variant_intro = "\n\n %s \n Old Source: %s \n New Source: %s \n\n" % (newRow["pyhgvs_Genomic_Coordinate_38"],
