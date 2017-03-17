@@ -18,7 +18,6 @@ from copy import deepcopy
 from pprint import pprint
 from shutil import copy
 import csv
-import pdb
 
 
 # GENOMIC VERSION:
@@ -230,7 +229,6 @@ def variant_standardize(columns, variants="pickle"):
     variants_to_remove = list()
     variants_to_add = {}
     for ev, items in variants.iteritems():
-        # pdb.set_trace()
         bx_ids_for_variant = get_bx_ids_for_variant(bx_id_column_indexes, items)
         chr = items[COLUMN_VCF_CHR]
         pos = items[COLUMN_VCF_POS]
@@ -250,7 +248,6 @@ def variant_standardize(columns, variants="pickle"):
 
         # If the reference is wrong, remove the variant
         if not ref_correct(chr, pos, ref, alt):
-            pdb.set_trace()
             reason_for_discard = "Incorrect Reference"
             variants_to_remove = prepare_variant_for_removal_and_log(ev, hgvs, items, bx_ids_for_variant, reason_for_discard, variants_to_remove)
             continue
