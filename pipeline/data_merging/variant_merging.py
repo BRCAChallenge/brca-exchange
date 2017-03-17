@@ -18,6 +18,7 @@ from copy import deepcopy
 from pprint import pprint
 from shutil import copy
 import csv
+import pdb
 
 
 # GENOMIC VERSION:
@@ -220,10 +221,7 @@ def variant_standardize(columns, variants="pickle"):
     global DISCARDED_REPORTS_WRITER
 
     # Get indexes of all BX_ID columns by source.
-    bx_id_column_indexes = {}
-    for i, column in enumerate(columns):
-        if "BX_ID" in column:
-            bx_id_column_indexes[column] = i
+    bx_id_column_indexes = get_bx_id_column_indexes(columns)
 
     if variants == "pickle":
         with open("temp_variants.pkl", "r") as fv:
@@ -232,9 +230,8 @@ def variant_standardize(columns, variants="pickle"):
     variants_to_remove = list()
     variants_to_add = {}
     for ev, items in variants.iteritems():
-        bx_ids_for_variant = {}
-        for key in bx_id_column_indexes.keys():
-            bx_ids_for_variant[key] = items[bx_id_column_indexes[key]]
+        # pdb.set_trace()
+        bx_ids_for_variant = get_bx_ids_for_variant(bx_id_column_indexes, items)
         chr = items[COLUMN_VCF_CHR]
         pos = items[COLUMN_VCF_POS]
         ref = items[COLUMN_VCF_REF]
@@ -253,33 +250,14 @@ def variant_standardize(columns, variants="pickle"):
 
         # If the reference is wrong, remove the variant
         if not ref_correct(chr, pos, ref, alt):
-            logging.warning("Ref incorrect using chr, pos, ref, alt: %s, %s, %s, %s", chr, pos, ref, alt)
-            logging.warning("Original variant representation of incorrect ref variant before add_leading_base: %s", str(items))
-            for key in bx_ids_for_variant.keys():
-                reports = bx_ids_for_variant[key]
-                if isEmpty(reports):
-                    continue
-                else:
-                    prefix = "BX_ID_"
-                    source = key[len(prefix):]
-                    reason_for_discard = "Incorrect Reference"
-                    log_discarded_reports(source, reports, hgvs, reason_for_discard)
-            variants_to_remove.append(ev)
+            pdb.set_trace()
+            reason_for_discard = "Incorrect Reference"
+            variants_to_remove = prepare_variant_for_removal_and_log(ev, hgvs, items, bx_ids_for_variant, reason_for_discard, variants_to_remove)
             continue
 
         if variant_is_false(ref, alt):
-            logging.warning("Bad data for variant %s", hgvs)
-            logging.warning("Original variant representation of bad data: %s", str(items))
-            for key in bx_ids_for_variant.keys():
-                reports = bx_ids_for_variant[key]
-                if isEmpty(reports):
-                    continue
-                else:
-                    prefix = "BX_ID_"
-                    source = key[len(prefix):]
-                    reason_for_discard = "Variant ref and alt are the same"
-                    log_discarded_reports(source, reports, hgvs, reason_for_discard)
-            variants_to_remove.append(ev)
+            reason_for_discard = "Variant ref and alt are the same"
+            variants_to_remove = prepare_variant_for_removal_and_log(ev, hgvs, items, bx_ids_for_variant, reason_for_discard, variants_to_remove)
             continue
 
         items[COLUMN_VCF_POS] = pos
@@ -355,6 +333,21 @@ def add_variant_to_dict(variant_dict, genomic_coordinate, values):
         variant_dict[genomic_coordinate] = values
 
     return variant_dict
+
+
+def get_bx_ids_for_variant(bx_id_column_indexes, items):
+    bx_ids_for_variant = {}
+    for key in bx_id_column_indexes.keys():
+        bx_ids_for_variant[key] = items[bx_id_column_indexes[key]]
+    return bx_ids_for_variant
+
+
+def get_bx_id_column_indexes(columns):
+    bx_id_column_indexes = {}
+    for i, column in enumerate(columns):
+        if "BX_ID" in column:
+            bx_id_column_indexes[column] = i
+    return bx_id_column_indexes
 
 
 def normalize_values(value):
@@ -875,6 +868,29 @@ def ref_correct(chr, pos, ref, alt, version="hg38"):
 
 def isEmpty(value):
     return value == '-' or value is None or value == [] or value == ['-']
+
+
+def prepare_variant_for_removal_and_log(original_hgvs, normalized_hgvs, items, bx_ids_for_variant, reason_for_discard, variants_to_remove):
+    if reason_for_discard == "Incorrect Reference":
+        logging.warning("Ref incorrect using %s", normalized_hgvs)
+        logging.warning("Original variant representation of incorrect ref variant before add_leading_base: %s", str(items))
+    elif reason_for_discard == "Variant ref and alt are the same":
+        logging.warning("Variant ref and alt are the same for variant %s", normalized_hgvs)
+        logging.warning("Original variant representation: %s", str(items))
+    else:
+        logging.warning("Bad data for variant: %s", normalized_hgvs)
+        logging.warning("Original variant representation: %s", str(items))
+
+    for key in bx_ids_for_variant.keys():
+        reports = bx_ids_for_variant[key]
+        if isEmpty(reports):
+            continue
+        else:
+            prefix = "BX_ID_"
+            source = key[len(prefix):]
+            log_discarded_reports(source, reports, normalized_hgvs, reason_for_discard)
+    variants_to_remove.append(original_hgvs)
+    return variants_to_remove
 
 
 def log_discarded_reports(source, reports, hgvs, reason):
