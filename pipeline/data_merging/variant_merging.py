@@ -359,6 +359,7 @@ def add_variant_to_dict(variant_dict, genomic_coordinate, values):
 
 def normalize_values(value):
     # standardize data representation by denoting empty as '-' and stripping whitespace off strings
+    assert isinstance(value, basestring) or isinstance(value, (list)) or value is None
     if value is None or value == "":
         value = DEFAULT_CONTENTS
     if isinstance(value, basestring):
@@ -369,7 +370,9 @@ def normalize_values(value):
             if v is None or v == "-" or v == "":
                 continue
             else:
-                normalized_values.append(v.strip())
+                if isinstance(v, basestring):
+                    v = v.strip()
+                normalized_values.append(v)
         value = normalized_values
 
     return value
