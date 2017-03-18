@@ -267,14 +267,21 @@ def variant_standardize(columns, variants="pickle"):
             variants_to_remove.append(ev)
             variants_to_add = add_variant_to_dict(variants_to_add, newHgvs, items)
 
-    # remove old variant representations and bad variants
-    for old_variant in variants_to_remove:
-        popped = variants.pop(old_variant)
+    variants = remove_bad_variants(variants_to_remove, variants)
+    variants = add_and_merge_new_variant_representations(variants_to_add, variants)
 
-    # add new variant representations and merge equivalent variants
+    return variants
+
+
+def remove_bad_variants(variants_to_remove, variants):
+    for old_variant in variants_to_remove:
+        del variants[old_variant]
+    return variants
+
+
+def add_and_merge_new_variant_representations(variants_to_add, variants):
     for genomic_coordinate, values in variants_to_add.iteritems():
         variants = add_variant_to_dict(variants, genomic_coordinate, values)
-
     return variants
 
 
