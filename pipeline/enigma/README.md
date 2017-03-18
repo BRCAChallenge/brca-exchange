@@ -18,10 +18,12 @@
 3. Open enigma data in google spreadsheets, go to variants tab, select file -> download as -> Tab-separated values (tsv, .current sheet).
 4. Remove all text in tsv file from step 3 except for the column names and variant data.
 5. Rename column "Alternate designations" to "BIC Nomenclature", rename column "Official allele name" to "Abbrev AA change", remove last column "Replaces ClinVarAccessions".
+5b. If there are "Illegal byte string" errors, see http://stackoverflow.com/questions/19242275/re-error-illegal-byte-sequence-on-mac-os-x for a workaround.
 6. Remove all text in clinvar accession file before column (header) names.
 7. Run `python merge-clinvaraccessions.py -e /PATH/TO/ENIGMA_TSV_FILE_FROM_STEP_5 -c /PATH/TO/CLINVAR_ACCESSION_DATA_TXT_FILE_FROM_STEP_6 -o /PATH/TO/OUTPUT_FILE`
-8. Run `python enigma-processing.py -i /PATH/TO/OUTPUT_FILE_FROM_STEP_& -o /PATH/TO/OUTPUT_DIRECTORY_CONTAINING_PROCESSED_ENIGMA_FILES/ENIGMA_last_updated_MM_DD_YY_hg38.tsv -g /PATH/TO/hg38.fa`
+8. Run `python enigma-processing.py -i /PATH/TO/OUTPUT_FILE_FROM_STEP_7 -o /PATH/TO/OUTPUT_DIRECTORY_CONTAINING_PROCESSED_ENIGMA_FILES/ENIGMA_last_updated_MM_DD_YY_hg38.tsv -g /PATH/TO/hg38.fa`
 9. Make sure all available ENIGMA_last_updated_MM_DD_YY_hg38.tsv files are in the same directory, then run `python enigma-merge_hg38.py -i /PATH/TO/OUTPUT_DIRECTORY_CONTAINING_PROCESSED_ENIGMA_FILES/ -o /PATH/TO/OUTPUT_DIRECTORY/`
+10.Run `enigma_postprocess.py -i ~/PATH/TO_OUTPUT_FILE_FROM_STEP_9 -o ~/PATH/TO/OUTPUT_DIRECTORY -a /PATH/TO/LOG_FILE_DIRECTORY  
 10. This procedure produces an `ENIGMA_combined_hg38.tsv` file that can be used in the luigi pipeline.
 11. Update all relevant files in Synapse. This includes updating the existing `ENIGMA_combined_hg38.tsv` file as well as uploading the new `ENIGMA_last_updated_MM_DD_YY_hg38.tsv` file.
 

@@ -81,8 +81,11 @@ def main():
             continue
         OMIM_id_index = column_idx["Condition_ID_value"]
         items[OMIM_id_index] = convert_OMIM_id(items[OMIM_id_index])
-        HGVS_cDNA = (items[column_idx["Reference_sequence"]] +
-                     ":" + items[column_idx["HGVS"]])
+        print items[column_idx["Reference_sequence"]], items[column_idx["HGVS"]]
+        items[column_idx["HGVS"]] = cleanup_HGVS(items[column_idx["Reference_sequence"]],
+                                 items[column_idx["HGVS"]], HP, EVM)
+        HGVS_cDNA = items[column_idx["Reference_sequence"]] + ":" + items[column_idx["HGVS"]]
+        print items[column_idx["Reference_sequence"]], items[column_idx["HGVS"]], HGVS_cDNA
         try:
             genome_coor, HGVS_p = convert_HGVS(HGVS_cDNA, GENOME)
         except:
@@ -99,6 +102,23 @@ def main():
         f_out.write(new_line)
     f_in.close()
     f_out.close()
+
+def cleanup_HGVS(reference_sequence, cdna_hgvs, hp, evm):
+    """The pyhgvs library breaks on HGVS strings that do not specify a ref or alt allele.  The hgvs
+    library is robust to these HGVS strings, but does not map to hg38.  Here. use the HGVS library
+    to convert the HGVS cDNA string to a HGVS genomic string (against GRCh37), and convert that genomic
+    string back to a HGVS cDNA string.  The resulting string can be parsed by the pyhgvs library more
+    reliably.  But, it has a strange error with certain insertions.  So don't do this with insertions..."""
+    if re.search("ins", cdna_hgvs) and not re.search("del", cdna_hgvs):
+        return reference_sequence + ":" + cdna_hgvs
+    else: 
+        initial_cdna_hgvs = hp.parse_hgvs_variant(reference_sequence + ":" + cdna_hgvs)
+        genomic_hgvs = evm.c_to_g(initial_cdna_hgvs)
+        refined_cdna_hgvs = evm.g_to_c(genomic_hgvs, reference_sequence)
+        printable_cdna_hgvs = "{xx}".format(xx=refined_cdna_hgvs)
+        cleaned_nucleotide_cdna = re.sub(reference_sequence + ":", "", printable_cdna_hgvs)
+        return cleaned_nucleotide_cdna
+
 
 
 def convert_OMIM_id(OMIM_id):
