@@ -26,11 +26,11 @@ BRCA_GA4GH_URL = "http://brcaexchange-dev.cloudapp.net:9004/data/ga4gh/v0.6.0a7/
 # BRCA 1 and 2 locations
 BRCA1_CHR = "chr17" 
 BRCA1_START = 41160094
-BRCA1_END = 41322380
+BRCA1_END = 41322387
 
 BRCA2_CHR = "chr13"
 BRCA2_START = 32889080
-BRCA2_END = 32973779
+BRCA2_END = 32974403
 
 GENE_BUFFER = 5 # The number of extra bases surrounding a gene to request from GA4GH
 

@@ -595,7 +595,7 @@ class ConvertEXLOVDBRCA1ExtractToVCF(luigi.Task):
 
         args = ["./lovd2vcf", "-i", ex_lovd_file_dir + "/BRCA1.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", "-a", "exLOVDAnnotation",
-                "-b", "1", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
+                "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
                 brca_resources_dir + "/hg19.fa"]
         print "Running lovd2vcf with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -617,7 +617,7 @@ class ConvertEXLOVDBRCA2ExtractToVCF(luigi.Task):
 
         args = ["./lovd2vcf", "-i", ex_lovd_file_dir + "/BRCA2.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf", "-a", "exLOVDAnnotation",
-                "-b", "2", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
+                "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
                 brca_resources_dir + "/hg19.fa"]
         print "Running lovd2vcf with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -708,7 +708,7 @@ class CopyEXLOVDOutputToOutputDir(luigi.Task):
 ###############################################
 
 
-class ExtractDataFromLatestSharedLOVD(luigi.Task):
+class ConvertSharedLOVDToVCF(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
 
     resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
@@ -721,66 +721,16 @@ class ExtractDataFromLatestSharedLOVD(luigi.Task):
                                       description='directory to store all individual task related files')
 
     def output(self):
-        lovd_file_dir = self.file_parent_dir + '/LOVD'
-
-        return {'brca1': luigi.LocalTarget(lovd_file_dir + "/BRCA1.txt"),
-                'brca2': luigi.LocalTarget(lovd_file_dir + "/BRCA2.txt")}
-
-    def run(self):
-        lovd_file_dir = create_path_if_nonexistent(self.file_parent_dir + '/LOVD')
-        brca_resources_dir = self.resources_dir
-
-        os.chdir(lovd_method_dir)
-
-        lovd_data_host_url = "http://databases.lovd.nl/shared/"
-        args = ["extract_data.py", "-u", lovd_data_host_url, "-l", "BRCA1", "BRCA2", "-o", lovd_file_dir]
-        print "Running extract_data.py with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print_subprocess_output_and_error(sp)
-
-        print "Extracted data from %s." % (lovd_data_host_url)
-
-        if not os.path.exists(lovd_file_dir + "/BRCA2.txt"):
-            copy(brca_resources_dir + "/BRCA2.txt", lovd_file_dir)
-            print "*** WARNING: Could not fetch new BRCA2.txt, using readily available version from BRCA_RESOURCES ***"
-
-
-@requires(ExtractDataFromLatestSharedLOVD)
-class ConvertSharedLOVDBRCA1ExtractToVCF(luigi.Task):
-
-    def output(self):
         lovd_file_dir = self.file_parent_dir + "/LOVD"
-        return luigi.LocalTarget(lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf")
+        return luigi.LocalTarget(lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf")
 
     def run(self):
         lovd_file_dir = self.file_parent_dir + "/LOVD"
         brca_resources_dir = self.resources_dir
 
-        args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA1.txt",
-                "-o", lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf", "-a",
-                "sharedLOVDAnnotation", "-b", "1", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp",
-                "-g", brca_resources_dir + "/hg19.fa"]
-        print "Running lovd2vcf with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print_subprocess_output_and_error(sp)
-
-        check_file_for_contents(lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf")
-
-
-@requires(ConvertSharedLOVDBRCA1ExtractToVCF)
-class ConvertSharedLOVDBRCA2ExtractToVCF(luigi.Task):
-
-    def output(self):
-        lovd_file_dir = self.file_parent_dir + "/LOVD"
-        return luigi.LocalTarget(lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf")
-
-    def run(self):
-        lovd_file_dir = self.file_parent_dir + "/LOVD"
-        brca_resources_dir = self.resources_dir
-
-        args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA2.txt", "-o",
-                lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf", "-a", "sharedLOVDAnnotation",
-                "-b", "2", "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
+        args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA.txt", "-o",
+                lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf", "-a", "sharedLOVDAnnotation",
+                "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
                 brca_resources_dir + "/hg19.fa"]
         print "Running lovd2vcf with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -789,28 +739,7 @@ class ConvertSharedLOVDBRCA2ExtractToVCF(luigi.Task):
         check_file_for_contents(lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf")
 
 
-@requires(ConvertSharedLOVDBRCA2ExtractToVCF)
-class ConcatenateSharedLOVDVCFFiles(luigi.Task):
-
-    def output(self):
-        lovd_file_dir = self.file_parent_dir + "/LOVD"
-        return luigi.LocalTarget(lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf")
-
-    def run(self):
-        lovd_file_dir = self.file_parent_dir + "/LOVD"
-
-        lovd_brca12_hg19_vcf_file = lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf"
-        writable_lovd_brca12_hg19_vcf_file = open(lovd_brca12_hg19_vcf_file, 'w')
-        args = ["vcf-concat", lovd_file_dir + "/sharedLOVD_brca1.hg19.vcf",
-                lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf"]
-        print "Running vcf-concat with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=writable_lovd_brca12_hg19_vcf_file, stderr=subprocess.PIPE)
-        print_subprocess_output_and_error(sp)
-
-        check_file_for_contents(lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf")
-
-
-@requires(ConcatenateSharedLOVDVCFFiles)
+@requires(ConvertSharedLOVDToVCF)
 class CrossmapConcatenatedSharedLOVDData(luigi.Task):
 
     def output(self):
