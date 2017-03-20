@@ -17,6 +17,7 @@ from StringIO import StringIO
 from copy import deepcopy
 from pprint import pprint
 from shutil import copy
+from numbers import Number
 import csv
 
 
@@ -369,7 +370,8 @@ def normalize_values(value):
             else:
                 if isinstance(v, basestring):
                     v = v.strip()
-                normalized_values.append(v)
+                if v not in normalized_values:
+                    normalized_values.append(v)
         value = normalized_values
 
     return value
@@ -777,7 +779,7 @@ def save_enigma_to_dict(path):
             items.insert(COLUMN_VCF_REF, ref)
             items.insert(COLUMN_VCF_ALT, alt)
             for ii in range(len(items)):
-                if items[ii] is None:
+                if items[ii] == None:
                     items[ii] = DEFAULT_CONTENTS
 
             bx_id = items[bx_id_column_index]
@@ -899,7 +901,7 @@ def prepare_variant_for_removal_and_log(original_hgvs, normalized_hgvs, items, b
 
 def log_discarded_reports(source, reports, hgvs, reason):
     # if reports is a list, log each report individually
-    if not isinstance(reports, basestring):
+    if not isinstance(reports, basestring) and not isinstance(reports, Number):
         for report in reports:
             log_discarded_report(source, report, hgvs, reason)
     else:

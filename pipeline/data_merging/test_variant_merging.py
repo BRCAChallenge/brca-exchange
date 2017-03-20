@@ -331,7 +331,7 @@ class TestVariantMerging(unittest.TestCase):
         empty_string = normalize_values('')
         none_value = normalize_values(None)
         whitespace = normalize_values(' value ')
-        list_values = normalize_values(['dog ', ' fish ', '', None])
+        list_values = normalize_values(['dog ', ' fish ', '', None, 'dog'])
         self.assertEqual(empty_string, '-')
         self.assertEqual(none_value, '-')
         self.assertEqual(whitespace, 'value')

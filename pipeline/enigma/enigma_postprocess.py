@@ -7,7 +7,6 @@ import argparse
 import csv
 import logging
 
-
 def fillInFounderMutations(row):
     """
     Make sure that the founder mutations are represented with each of their
@@ -16,11 +15,11 @@ def fillInFounderMutations(row):
     BRCA1 185_186delAG (a.k.a. 185delAG, 186delAG, 187delAG)
     BRCA1 5382_5383insC (a.k.a. 5382insC, 5383insC, 5384insC, 5385insC)
     BRCA2 6174delT
-    Here, the first and second columns represent the gene name and BIC
+    Here, the first and second columns represent the gene name and BIC 
     nomenclature terms given by ENIGMA, and in parentheses are the other
     BIC terms to be added.  The single BIC term can be turned into a list of
     BIC terms by delimiting the list with commas.
-    Addresses GitHub Issue #213
+    Addresses GitHub Issue #213 
     (https://github.com/BD2KGenomics/brca-exchange/issues/213)
     """
     if row["Gene_symbol"] == "BRCA1":
@@ -35,13 +34,13 @@ def fixAssertionCitation(row):
     """
     The Assertion Citation refers to the set of rules that were used by
     ENIGMA in their classification.  These rules documents are not necessarily
-    accessible from outside the ENIGMA site, i.e. you can't link to them
+    accessible from outside the ENIGMA site, i.e. you can't link to them 
     directly from an outside URL, but if you link directly to a general URL,
     you can navigate from there to the rules document.
     Addresses GitHub Issue #237
     (https://github.com/BD2KGenomics/brca-exchange/issues/237)
     """
-    row["Assertion_method_citation"] = "https://enigmaconsortium.org/library/general-documents/"
+    row["Assertion_method_citation"] =  "https://enigmaconsortium.org/library/general-documents/"
     return row
 
 
@@ -58,15 +57,16 @@ def fixBrokenAminoAcidChange(row):
     return row
 
 
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input",
+    parser.add_argument("-i", "--input", 
                         help="input file with merged ENIGMA data")
     parser.add_argument("-o", "--output",
                         help="Output file with corrected ENIGMA data")
-    parser.add_argument('-a', "--artifacts_dir",
+    parser.add_argument('-a', "--artifacts_dir", 
                         help='Artifacts directory with pipeline artifact files.')
-    parser.add_argument("-v", "--verbose", action="count", default=False,
+    parser.add_argument("-v", "--verbose", action="count", default=False, 
                         help="determines logging")
     args = parser.parse_args()
 
