@@ -8,6 +8,7 @@ import socket
 from shutil import copy
 import luigi
 import synapseclient
+import csv
 from luigi.util import inherits, requires
 
 from retrying import retry
@@ -83,15 +84,28 @@ def download_file_with_basic_auth(url, file_name, username, password):
 
 
 def check_file_for_contents(file_path):
-    now = str(datetime.datetime.utcnow())
+    handle_process_success_or_failure(os.stat(file_path).st_size != 0, file_path)
+
+
+def check_input_and_output_tsvs_for_same_number_variants(tsvIn, tsvOut):
+    tsvInput = csv.DictReader(open(tsvIn, 'r'), delimiter='\t')
+    numVariantsIn = len(list(tsvInput))
+    tsvOutput = csv.DictReader(open(tsvOut, 'r'), delimiter='\t')
+    numVariantsOut = len(list(tsvOutput))
+    print("Number of variants in input: %s \nNumber of variants in output: %s\n" % (numVariantsIn, numVariantsOut))
+    handle_process_success_or_failure(numVariantsIn == numVariantsOut, tsvOut)
+
+
+def handle_process_success_or_failure(process_succeeded, file_path):
     file_name = file_path.split('/')[-1]
-    file_directory = os.path.dirname(file_path)
-    if os.stat(file_path).st_size == 0:
+    if process_succeeded is True:
+        print("Completed writing %s. \n" % (file_name))
+    else:
+        now = str(datetime.datetime.utcnow())
+        file_directory = os.path.dirname(file_path)
         failed_file_name = "FAILED_" + now + "_" + file_name
         os.rename(file_path, file_directory + "/" + failed_file_name)
-        print "**** Failed to write %s ****" % (file_name)
-    else:
-        print "Completed writing %s." % (file_name)
+        print("**** Failure creating %s ****\n" % (file_name))
 
 
 #######################################
@@ -1176,21 +1190,26 @@ class DownloadLatestEnigmaData(luigi.Task):
         account and access to the Enigma file directory with id syn7188267 owned by user MelissaCline.
         """
         create_path_if_nonexistent(self.output_dir)
-        output_file_path = self.output_dir + "/ENIGMA_combined.tsv"
+        output_file_path = self.output_dir + "/ENIGMA_combined_with_bx_ids.tsv"
         return luigi.LocalTarget(output_file_path)
 
     def run(self):
         """
-        Downloads enigma file and moves to correct output location.
+        Downloads enigma file, adds BX_ID's and moves to correct output location.
         """
         syn = synapseclient.Synapse()
         syn.login(self.synapse_username, self.synapse_password)
         enigma_file_dir = create_path_if_nonexistent(self.file_parent_dir + '/enigma')
         enigma_file = syn.get(str(self.synapse_enigma_file_id), downloadLocation=enigma_file_dir)
+        os.chdir(enigma_method_dir)
 
-        copy(enigma_file_dir + "/" + enigma_file.name, self.output_dir)
+        args = ["python", "enigma_add_bx_id.py", "--input", enigma_file_dir + "/" + enigma_file.name,
+                "--output", enigma_file_dir + "/ENIGMA_combined_with_bx_ids.tsv"]
+        print "Running enigma_add_bx_id.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
 
-        os.rename(self.output_dir + "/" + enigma_file.name, self.output_dir + "/ENIGMA_combined.tsv")
+        copy(enigma_file_dir + "/ENIGMA_combined_with_bx_ids.tsv", self.output_dir)
 
 
 ###############################################
@@ -1253,7 +1272,8 @@ class AnnotateMergedOutput(luigi.Task):
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        check_file_for_contents(artifacts_dir + "annotated.tsv")
+        check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "merged.tsv",
+                                                             artifacts_dir + "annotated.tsv")
 
 
 @requires(AnnotateMergedOutput)
@@ -1273,7 +1293,8 @@ class AggregateMergedOutput(luigi.Task):
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        check_file_for_contents(artifacts_dir + "aggregated.tsv")
+        check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "annotated.tsv",
+                                                             artifacts_dir + "aggregated.tsv")
 
 
 @requires(AggregateMergedOutput)
@@ -1302,10 +1323,31 @@ class BuildAggregatedOutput(luigi.Task):
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        check_file_for_contents(release_dir + "built.tsv")
+        check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "aggregated.tsv",
+                                                             release_dir + "built.tsv")
 
 
 @requires(BuildAggregatedOutput)
+class FindMissingReports(luigi.Task):
+    def output(self):
+        artifacts_dir = self.output_dir + "/release/artifacts/"
+        return luigi.LocalTarget(artifacts_dir + "missing_reports.log")
+
+    def run(self):
+        release_dir = self.output_dir + "/release/"
+        artifacts_dir = self.output_dir + "/release/artifacts/"
+        os.chdir(data_merging_method_dir)
+
+        args = ["python", "check_for_missing_reports.py", "-b", release_dir + "built.tsv", "-r", artifacts_dir,
+                "-a", artifacts_dir, "-v"]
+        print "Running check_for_missing_reports.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(artifacts_dir + "missing_reports.log")
+
+
+@requires(FindMissingReports)
 class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
 
     def output(self):
@@ -1334,7 +1376,8 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        check_file_for_contents(release_dir + "built_with_change_types.tsv")
+        check_input_and_output_tsvs_for_same_number_variants(release_dir + "built.tsv",
+                                                             release_dir + "built_with_change_types.tsv")
 
 
 @requires(RunDiffAndAppendChangeTypesToOutput)

@@ -1,15 +1,17 @@
 from hypothesis import given, assume, settings
 from hypothesis.strategies import integers, tuples, text, sampled_from, lists
-from variant_merging import variant_equal, init
+from variant_merging import variant_equal, init, normalize_values, add_variant_to_dict, COLUMN_SOURCE, COLUMN_GENE, COLUMN_GENOMIC_HGVS, COLUMN_VCF_CHR, COLUMN_VCF_POS, COLUMN_VCF_REF, COLUMN_VCF_ALT
+import unittest
 import itertools
 import os
 import pytest
+
 
 runtimes = 500000
 settings.register_profile('ci', settings(max_examples=runtimes, max_iterations=runtimes, timeout=-1))
 
 # Uncomment this for longer test runs.
-#settings.load_profile('ci')
+# settings.load_profile('ci')
 
 #
 # initialize module
@@ -298,9 +300,83 @@ def test_variant_equal_not_equiv(v1, v2, ref_id):
 # The tests above only test random variants against normalized (minimum reference)
 # variants.
 
+
+class TestVariantMerging(unittest.TestCase):
+
+    # TODO:
+    # 1. Add test cases to follow observation tracking and concatenation.
+    # 2. Add general unit tests around variant merging steps.
+    # 3. Ensure observations are related to variants properly.
+
+    def setUp(self):
+        self.variant_dict = {'chr13:g.32339228:GAA>G':
+                             ['ENIGMA', 'BRCA2', 'chr13:32339228:GAA>G', '13', '32339228', 'GAA', 'G', 'NM_000059.3',
+                              'c.4876_4877delAA ', '5104delAA', 'N1626Sfs*12', '', 'OMIM',
+                              'BREAST-OVARIAN CANCER, FAMILIAL, SUSCEPTIBILITY TO, 2; BROVCA2 (612555)', 'Disease',
+                              'Pathogenic', '22/4/2016', 'ENIGMA BRCA1/2 Classification Criteria (2015)',
+                              'https://enigmaconsortium.org/wp-content/uploads/2016/06/ENIGMA_Rules_2015-03-26.pdf', '',
+                              'Variant allele predicted to encode a truncated non-functional protein.', 'Curation',
+                              'Germline', 'SCV000282396.1', 'p.(Asn1626SerfsTer12)', '46']
+                             }
+        self.genomic_coordinate = 'chr13:g.32339228:GAA>G'
+        self.values_to_add = ['BIC', 'BRCA2', 'chr13:32339228:GAA>G', '13', '32339228', 'GAA', 'G', 'NM_000059.3',
+                              'c.4876_4877delAA', '', 'N1626Sfs*12', '', 'OMIM',
+                              'BREAST-OVARIAN CANCER, FAMILIAL, SUSCEPTIBILITY TO, 2; BROVCA2 (612555)', 'Disease',
+                              'Pathogenic', '2016-09-08', 'ENIGMA BRCA1/2 Classification Criteria (2015)',
+                              'https://enigmaconsortium.org/wp-content/uploads/2016/06/ENIGMA_Rules_2015-03-26.pdf', '',
+                              'Variant allele predicted to encode a truncated non-functional protein.', 'Curation',
+                              'Germline', 'SCV000282396.1', 'p.(Asn1626SerfsTer12)', '677']
+
+    def test_normalize_values(self):
+        empty_string = normalize_values('')
+        none_value = normalize_values(None)
+        whitespace = normalize_values(' value ')
+        list_values = normalize_values(['dog ', ' fish ', '', None, 'dog'])
+        self.assertEqual(empty_string, '-')
+        self.assertEqual(none_value, '-')
+        self.assertEqual(whitespace, 'value')
+        self.assertEqual(list_values, ['dog', 'fish'])
+
+    def test_add_variant_to_dict(self):
+        genomic_coordinate = 'chr13:g.32332705:GA>G'
+        values = ['ENIGMA', 'BRCA2', 'chr13:32332705:GA>G', '13', '32332705', 'GA', 'G', 'NM_000059.3', 'c.1231delA',
+                  '1459delA', 'I411Yfs*19', '', 'OMIM',
+                  'BREAST-OVARIAN CANCER, FAMILIAL, SUSCEPTIBILITY TO, 2; BROVCA2 (612555)', 'Disease', 'Pathogenic',
+                  '22/4/2016', 'ENIGMA BRCA1/2 Classification Criteria (2015)',
+                  'https://enigmaconsortium.org/wp-content/uploads/2016/06/ENIGMA_Rules_2015-03-26.pdf', '',
+                  'Variant allele predicted to encode a truncated non-functional protein.', 'Curation', 'Germline',
+                  'SCV000282353.1', 'p.(Ile411TyrfsTer19)', '2']
+
+        variant_dict = add_variant_to_dict(self.variant_dict, genomic_coordinate, values)
+        self.assertIn('chr13:g.32332705:GA>G', variant_dict)
+        self.assertEqual(variant_dict['chr13:g.32332705:GA>G'], values)
+
+    def test_add_variant_to_dict_merge_different_values(self):
+        variant_dict = add_variant_to_dict(self.variant_dict, self.genomic_coordinate, self.values_to_add)
+        merged = variant_dict[self.genomic_coordinate]
+        date_index = 16
+        bx_id_index = -1
+        self.assertIn('22/4/2016', merged[date_index])
+        self.assertIn('2016-09-08', merged[date_index])
+        self.assertIn('677', merged[bx_id_index])
+        self.assertIn('46', merged[bx_id_index])
+        self.assertIn('BIC', merged[COLUMN_SOURCE])
+        self.assertIn('ENIGMA', merged[COLUMN_SOURCE])
+
+    def test_add_variant_to_dict_merge_ignores_trailing_spaces(self):
+        variant_dict = add_variant_to_dict(self.variant_dict, self.genomic_coordinate, self.values_to_add)
+        merged = variant_dict[self.genomic_coordinate]
+        self.assertEqual('c.4876_4877delAA', merged[8])
+
+    def test_add_variant_to_dict_merge_adds_new_data_to_empty_fields(self):
+        variant_dict = add_variant_to_dict(self.variant_dict, self.genomic_coordinate, self.values_to_add)
+        merged = variant_dict[self.genomic_coordinate]
+        self.assertEqual('5104delAA', merged[9])
+
+
 if __name__ == "__main__":
     # To reproduce failure conditions, paste them in here and run as
     # python ./test_variant_merging.py
-    #print variant_equal(v1 = ('17', 41100001, 'gcttccca', ''), v2 = ('17', 41100002, 'cttcccag', ''), version = 'hg38')
+    # print variant_equal(v1 = ('17', 41100001, 'gcttccca', ''), v2 = ('17', 41100002, 'cttcccag', ''), version = 'hg38')
     print variant_equal(('13', 32800003, '', 'A'), ('13', 32800005, '', 'A'), 'hg19')
     pass

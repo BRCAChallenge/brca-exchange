@@ -16,6 +16,9 @@ import logging
 from StringIO import StringIO
 from copy import deepcopy
 from pprint import pprint
+from shutil import copy
+from numbers import Number
+import csv
 
 
 # GENOMIC VERSION:
@@ -41,7 +44,8 @@ GENOME1K_FIELDS = {"Allele_frequency": "AF",
                    "EUR_Allele_frequency": "EUR_AF",
                    "AFR_Allele_frequency": "AFR_AF",
                    "AMR_Allele_frequency": "AMR_AF",
-                   "SAS_Allele_frequency": "SAS_AF"}
+                   "SAS_Allele_frequency": "SAS_AF",
+                   "BX_ID": "BX_ID"}
 
 CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "Submitter": "Submitter",
@@ -50,7 +54,8 @@ CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "SCV": "SCV",
                   "Allele_Origin": "Origin",
                   "Protein": "Protein",
-                  "Method": "Method"}
+                  "Method": "Method",
+                  "BX_ID": "BX_ID"}
 
 '''
 NOTE: the following fields are no longer present in LOVD data following
@@ -63,7 +68,8 @@ dna_change_genomic": "dna_change_genomic",
 '''
 LOVD_FIELDS = {"Variant_frequency": "frequency",
                "HGVS_cDNA": "cDNA",
-               "HGVS_protein": "Protein"}
+               "HGVS_protein": "Protein",
+               "BX_ID": "BX_ID"}
 
 EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "Segregation_LR": "segregation_lr",
@@ -75,7 +81,8 @@ EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "BIC_Nomenclature": "bic_dna_change",
                   "Literature_source": "observational_reference",
                   "HGVS_cDNA": "dna_change",
-                  "HGVS_protein": "protein_change"}
+                  "HGVS_protein": "protein_change",
+                  "BX_ID": "BX_ID"}
 
 BIC_FIELDS = {"Clinical_classification": "Category",
               "Number_of_family_member_carrying_mutation": "Number_Reported",
@@ -85,12 +92,15 @@ BIC_FIELDS = {"Clinical_classification": "Category",
               "BIC_Designation": "Designation",
               "Clinical_importance": "Clinically_Importance",
               "Ethnicity": "Ethnicity",
-              "Literature_citation": "Reference"}
+              "Literature_citation": "Reference",
+              "BX_ID": "BX_ID"}
 
 ESP_FIELDS = {"polyPhen2_result": "PH",
-              "Minor_allele_frequency": "MAF"}
+              "Minor_allele_frequency": "MAF",
+              "BX_ID": "BX_ID"}
 
-EXAC_FIELDS = {"Allele_frequency": "AF"}
+EXAC_FIELDS = {"Allele_frequency": "AF",
+               "BX_ID": "BX_ID"}
 
 FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "ClinVar": CLINVAR_FIELDS,
@@ -101,7 +111,8 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "BIC": BIC_FIELDS}
 
 # Enigma filename is different depending on which version of output data is used.
-ENIGMA_FILE = "ENIGMA_combined.tsv"
+ENIGMA_FILE = "ENIGMA_combined_with_bx_ids.tsv"
+# ENIGMA_FILE = "ENIGMA_combined.tsv"
 # ENIGMA_FILE = "enigma_variants_GRCh38_2-27-2016.tsv"
 # ENIGMA_FILE = "ENIGMA_last_updated.tsv"
 
@@ -112,6 +123,8 @@ EX_LOVD_FILE = "exLOVD_brca12.sorted.hg38.vcf"
 BIC_FILE = "bic_brca12.sorted.hg38.vcf"
 EXAC_FILE = "exac.brca12.sorted.hg38.vcf"
 ESP_FILE = "esp.brca12.sorted.hg38.vcf"
+
+DISCARDED_REPORTS_WRITER = None
 
 
 def options(parser):
@@ -147,6 +160,8 @@ def init(args):
 
 
 def main():
+    global DISCARDED_REPORTS_WRITER
+
     parser = argparse.ArgumentParser()
     options(parser)
 
@@ -160,6 +175,13 @@ def main():
     log_file_path = ARGS.artifacts_dir + "variant_merging.log"
     logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level)
 
+    discarded_reports_file = open(ARGS.artifacts_dir + "discarded_reports.tsv", "w")
+
+    fieldnames = ['Report_id', 'Source', 'Reason', 'Variant']
+
+    DISCARDED_REPORTS_WRITER = csv.DictWriter(discarded_reports_file, delimiter="\t", fieldnames=fieldnames)
+    DISCARDED_REPORTS_WRITER.writeheader()
+
     # merge repeats within data sources before merging between data sources
     source_dict, columns, variants = preprocessing()
 
@@ -171,7 +193,7 @@ def main():
 
     # standardizes genomic coordinates for variants
     print "\n------------standardizing genomic coordinates-------------"
-    variants = variant_standardize(variants=variants)
+    variants = variant_standardize(columns, variants=variants)
 
     # compare dna sequence results of variants and merge if equivalent
     print "------------dna sequence comparison merge-------------------------------"
@@ -179,23 +201,36 @@ def main():
 
     # write final output to file
     write_new_tsv(ARGS.output + "merged.tsv", columns, variants)
+
+    # copy enigma file to artifacts directory along with other ready files
+    copy(ARGS.input + ENIGMA_FILE, ARGS.output)
+
+    discarded_reports_file.close()
+
     print "final number of variants: %d" % len(variants)
     print "Done"
 
 
-def variant_standardize(variants="pickle"):
+def variant_standardize(columns, variants="pickle"):
     """standardize variants such
     1. "-" in ref or alt is removed, and a leading base is added, e.g. ->T is changed to N > NT
     2. remove trailing same bases: e.g. AGGGG > TGGGG is changed to A>T
     3. remove leading same baes: e.g. position 100, AAT > AAG is changed to position 102 T>G
     """
-    if variants=="pickle":
+
+    global DISCARDED_REPORTS_WRITER
+
+    # Get indexes of all BX_ID columns by source.
+    bx_id_column_indexes = get_bx_id_column_indexes(columns)
+
+    if variants == "pickle":
         with open("temp_variants.pkl", "r") as fv:
             variants = pickle.loads(fv.read())
         fv.close()
     variants_to_remove = list()
     variants_to_add = {}
     for ev, items in variants.iteritems():
+        bx_ids_for_variant = get_bx_ids_for_variant(bx_id_column_indexes, items)
         chr = items[COLUMN_VCF_CHR]
         pos = items[COLUMN_VCF_POS]
         ref = items[COLUMN_VCF_REF]
@@ -210,17 +245,17 @@ def variant_standardize(variants="pickle"):
             (chr, pos, ref, alt) = add_leading_base(chr, pos, ref, alt)
         (chr, pos, ref, alt) = trim_bases(chr, pos, ref, alt)
 
+        hgvs = "chr%s:g.%s:%s>%s" % (str(chr), str(pos), ref, alt)
+
         # If the reference is wrong, remove the variant
         if not ref_correct(chr, pos, ref, alt):
-            logging.warning("Ref incorrect using chr, pos, ref, alt: %s, %s, %s, %s", chr, pos, ref, alt)
-            logging.warning("Original variant representation of incorrect ref variant before add_leading_base: %s", str(items))
-            variants_to_remove.append(ev)
+            reason_for_discard = "Incorrect Reference"
+            variants_to_remove = prepare_variant_for_removal_and_log(ev, hgvs, items, bx_ids_for_variant, reason_for_discard, variants_to_remove)
             continue
 
         if variant_is_false(ref, alt):
-            logging.warning("Bad data chr, pos, ref, alt: %s, %s, %s, %s", chr, pos, ref, alt)
-            logging.warning("Original variant representation of bad data: %s", str(items))
-            variants_to_remove.append(ev)
+            reason_for_discard = "Variant ref and alt are the same"
+            variants_to_remove = prepare_variant_for_removal_and_log(ev, hgvs, items, bx_ids_for_variant, reason_for_discard, variants_to_remove)
             continue
 
         items[COLUMN_VCF_POS] = pos
@@ -231,73 +266,116 @@ def variant_standardize(variants="pickle"):
         if newHgvs != ev:
             logging.debug("Changed genomic coordinate representation, replacing %s with %s", ev, newHgvs)
             variants_to_remove.append(ev)
-            variants_to_add[newHgvs] = items
+            variants_to_add = add_variant_to_dict(variants_to_add, newHgvs, items)
 
-    # remove old variant representations and bad variants
-    for old_variant in variants_to_remove:
-        popped = variants.pop(old_variant)
-
-    # TODO: create generic merge function to handle this case and merging in string_comparison_merge.
-    # add new variant representations and merge equivalent variants
-    for genomic_coordinate, values in variants_to_add.iteritems():
-        # if the variant already exists, merge
-        if genomic_coordinate in variants:
-            existing_variant = variants[genomic_coordinate]
-            equivalent_variant = values
-            logging.info("Merging equivalent variants \n %s and \n %s", existing_variant, equivalent_variant)
-            assert(len(existing_variant) == len(equivalent_variant))
-
-            # merge properties from equivalent variant into existing variant
-            for i, existing_variant_property in enumerate(existing_variant):
-
-                # skip if dealing with chr, pos, ref, or alt since one representation is enough
-                if i == COLUMN_VCF_CHR or i == COLUMN_VCF_POS or i == COLUMN_VCF_REF or i == COLUMN_VCF_ALT:
-                    continue
-
-                # get same property from equivalent variant
-                equivalent_variant_property = equivalent_variant[i]
-
-                # standardize empty data representation
-                if equivalent_variant_property is None or equivalent_variant_property == '':
-                    equivalent_variant_property = DEFAULT_CONTENTS
-                if existing_variant_property is None or existing_variant_property == '':
-                    existing_variant_property = DEFAULT_CONTENTS
-                    # overwrite none values with default none representation
-                    existing_variant[i] = existing_variant_property
-
-                # move on if they're equal or if equivalent variant property is blank
-                if equivalent_variant_property == existing_variant_property or equivalent_variant_property == "-":
-                    continue
-
-                # if the old value is blank, replace it with the new value
-                if existing_variant_property == "-":
-                    existing_variant[i] = equivalent_variant_property
-                else:
-                    # combine properties into a list
-                    if type(existing_variant_property) != list:
-                        merged_properties = [existing_variant_property]
-                    else:
-                        merged_properties = existing_variant_property
-
-                    assert type(merged_properties) == list
-
-                    if type(equivalent_variant_property) == list:
-                        for prop in equivalent_variant_property:
-                            if prop not in merged_properties:
-                                merged_properties.append(prop)
-                    elif equivalent_variant_property not in merged_properties:
-                        merged_properties.append(equivalent_variant_property)
-
-                    # replace existing data with updates
-                    existing_variant[i] = merged_properties
-                    logging.debug("Merged properties: %s", merged_properties)
-
-            logging.debug('Merged output: \n %s', existing_variant)
-
-        else:
-            variants[genomic_coordinate] = values
+    variants = remove_bad_variants(variants_to_remove, variants)
+    variants = add_and_merge_new_variant_representations(variants_to_add, variants)
 
     return variants
+
+
+def remove_bad_variants(variants_to_remove, variants):
+    for old_variant in variants_to_remove:
+        del variants[old_variant]
+    return variants
+
+
+def add_and_merge_new_variant_representations(variants_to_add, variants):
+    for genomic_coordinate, values in variants_to_add.iteritems():
+        variants = add_variant_to_dict(variants, genomic_coordinate, values)
+    return variants
+
+
+def add_variant_to_dict(variant_dict, genomic_coordinate, values):
+    # If the variant is already in the dictionary, merge them together.
+    if genomic_coordinate in variant_dict:
+        existing_variant = variant_dict[genomic_coordinate]
+        equivalent_variant = values
+        logging.info("Merging equivalent variants \n %s and \n %s", existing_variant, equivalent_variant)
+        assert(len(existing_variant) == len(equivalent_variant))
+
+        # merge properties from equivalent variant into existing variant
+        for i, existing_variant_property in enumerate(existing_variant):
+
+            # skip if dealing with chr, pos, ref, or alt since one representation is enough
+            if i == COLUMN_VCF_CHR or i == COLUMN_VCF_POS or i == COLUMN_VCF_REF or i == COLUMN_VCF_ALT:
+                continue
+
+            # get same property from equivalent variant
+            equivalent_variant_property = normalize_values(equivalent_variant[i])
+            existing_variant_property = normalize_values(existing_variant_property)
+            existing_variant[i] = existing_variant_property
+
+            # move on if they're equal or if equivalent variant property is blank
+            if equivalent_variant_property == existing_variant_property or equivalent_variant_property == "-":
+                continue
+
+            # if the old value is blank, replace it with the new value
+            if existing_variant_property == "-":
+                existing_variant[i] = equivalent_variant_property
+            else:
+                # combine properties into a list
+                if type(existing_variant_property) != list:
+                    merged_properties = [existing_variant_property]
+                else:
+                    merged_properties = existing_variant_property
+
+                assert type(merged_properties) == list
+
+                if type(equivalent_variant_property) == list:
+                    for prop in equivalent_variant_property:
+                        if prop not in merged_properties:
+                            merged_properties.append(prop)
+                elif equivalent_variant_property not in merged_properties:
+                    merged_properties.append(equivalent_variant_property)
+
+                # replace existing data with updates
+                existing_variant[i] = merged_properties
+                logging.debug("Merged properties: %s", merged_properties)
+
+        logging.debug('Merged output: \n %s', existing_variant)
+    else:
+        variant_dict[genomic_coordinate] = values
+
+    return variant_dict
+
+
+def get_bx_ids_for_variant(bx_id_column_indexes, items):
+    bx_ids_for_variant = {}
+    for key in bx_id_column_indexes.keys():
+        bx_ids_for_variant[key] = items[bx_id_column_indexes[key]]
+    return bx_ids_for_variant
+
+
+def get_bx_id_column_indexes(columns):
+    bx_id_column_indexes = {}
+    for i, column in enumerate(columns):
+        if "BX_ID" in column:
+            bx_id_column_indexes[column] = i
+    return bx_id_column_indexes
+
+
+def normalize_values(value):
+    # standardize data representation by denoting empty as '-' and stripping whitespace off strings
+    assert isinstance(value, basestring) or isinstance(value, (list)) or value is None
+    if value is None or value == "":
+        value = DEFAULT_CONTENTS
+    if isinstance(value, basestring):
+        value = value.strip()
+    else:
+        normalized_values = []
+        for v in value:
+            if v is None or v == "-" or v == "":
+                continue
+            else:
+                if isinstance(v, basestring):
+                    v = v.strip()
+                if v not in normalized_values:
+                    normalized_values.append(v)
+        value = normalized_values
+
+    return value
+
 
 def trim_bases(chr, pos, ref, alt):
     #ref, alt = v.split(":")[2].split(">")
@@ -309,6 +387,7 @@ def trim_bases(chr, pos, ref, alt):
         (chr, pos, ref, alt) = trim_leading(chr, pos, ref, alt)
         return (chr, pos, ref, alt)
 
+
 def trim_trailing(ref, alt):
     if len(ref) <= 1 or len(alt) <= 1:
         return ref, alt
@@ -318,6 +397,7 @@ def trim_trailing(ref, alt):
         ref = ref[:-1]
         alt = alt[:-1]
         return trim_trailing(ref, alt)
+
 
 def trim_leading(chr, pos, ref, alt):
     pos = int(pos)
@@ -451,6 +531,7 @@ def find_equivalent_variant(variants):
     print equivalent_variants
     return equivalent_variants
 
+
 def preprocessing():
     # Preprocessing variants:
     source_dict = {
@@ -478,9 +559,11 @@ def preprocessing():
         print "convert to one variant per line in ", source_name
         f_in = open(ARGS.input + file_name, "r")
         f_out = open(ARGS.output + source_name + ".vcf", "w")
+        # Individual reports (lines in VCF/TSV) are given ids as part of the one_variant_transform method.
         one_variant_transform(f_in, f_out)
         f_in.close()
         f_out.close()
+
         print "merge repetitive variants within ", source_name
         f_in = open(ARGS.output + source_name + ".vcf", "r")
         f_out = open(ARGS.output + source_name + "ready.vcf", "w")
@@ -505,6 +588,8 @@ def preprocessing():
             ref = record.REF.replace("-", "")
             v = [record.CHROM, record.POS, ref, "dummy"]
             if not ref_correct(record.CHROM, record.POS, record.REF, record.ALT):
+                logging.warning("Reference incorrect for Chrom: %s, Pos: %s, Ref: %s, and Alt: %s",
+                                record.CHROM, record.POS, record.REF, record.ALT)
                 vcf_wrong_writer.write_record(record)
                 n_wrong += 1
             else:
@@ -512,9 +597,10 @@ def preprocessing():
             n_total += 1
         f_right.close()
         f_wrong.close()
-        print "in {0}, wrong: {1}, total: {2}".format(source_name, n_wrong, n_total) 
+        print "in {0}, wrong: {1}, total: {2}".format(source_name, n_wrong, n_total)
 
     return source_dict, columns, variants
+
 
 def repeat_merging(f_in, f_out):
     """takes a vcf file, collapses repetitive variant rows and write out
@@ -552,6 +638,7 @@ def repeat_merging(f_in, f_out):
     f_in.close()
     f_out.close()
 
+
 def get_header(f):
     header = ""
     for line in f:
@@ -559,24 +646,32 @@ def get_header(f):
             header += line
     return header
 
+
 def one_variant_transform(f_in, f_out):
     """takes a vcf file, read each row, if the ALT field contains more than
-       one item, create multiple variant row based on that row, writes new vcf"""
+       one item, create multiple variant row based on that row. also adds
+       ids to all individual reports (each line in the vcf). writes new vcf"""
     vcf_reader = vcf.Reader(f_in, strict_whitespace=True)
     vcf_writer = vcf.Writer(f_out, vcf_reader)
+    count = 1
     for record in vcf_reader:
         n = len(record.ALT)
         if n == 1:
+            record.INFO['BX_ID'] = count
+            count += 1
             vcf_writer.write_record(record)
         else:
             for i in range(n):
                 new_record = deepcopy(record)
                 new_record.ALT = [deepcopy(record.ALT[i])]
+                new_record.INFO['BX_ID'] = count
+                count += 1
                 for key in record.INFO.keys():
                     value = deepcopy(record.INFO[key])
                     if type(value) == list and len(value) == n:
                         new_record.INFO[key] = [value[i]]
                 vcf_writer.write_record(new_record)
+
 
 def write_new_tsv(filename, columns, variants):
     merged_file = open(filename, "w")
@@ -629,6 +724,7 @@ def add_new_source(columns, variants, source, source_file, source_dict):
             try:
                 variants[genome_coor].append(record.INFO[value])
             except KeyError:
+                logging.warning("KeyError appending VCF record.INFO[value] to variant. Variant: %s \n Record.INFO: %s \n value: %s", variants[genome_coor], record.INFO, value)
                 if source == "BIC":
                     variants[genome_coor].append(DEFAULT_CONTENTS)
                     logging.debug("Could not find value %s for source %s in variant %s, inserting default content %s instead.", value, source, DEFAULT_CONTENTS)
@@ -649,12 +745,15 @@ def add_new_source(columns, variants, source, source_file, source_dict):
 
 
 def save_enigma_to_dict(path):
+    global DISCARDED_REPORTS_WRITER
+
     enigma_file = open(path, "r")
     variants = dict()
     columns = ""
     line_num = 0
     f_wrong = open(ARGS.output + "ENIGMA_wrong_genome.txt", "w")
     n_wrong, n_total = 0, 0
+    bx_id_column_index = None
     for line in enigma_file:
         line_num += 1
         if line_num == 1:
@@ -666,6 +765,9 @@ def save_enigma_to_dict(path):
             columns.insert(COLUMN_VCF_POS, "Pos")
             columns.insert(COLUMN_VCF_REF, "Ref")
             columns.insert(COLUMN_VCF_ALT, "Alt")
+            for i, column in enumerate(columns):
+                if "BX_ID" in column:
+                    bx_id_column_index = i
             f_wrong.write(line)
         else:
             items = line.strip().split("\t")
@@ -679,13 +781,20 @@ def save_enigma_to_dict(path):
             for ii in range(len(items)):
                 if items[ii] == None:
                     items[ii] = DEFAULT_CONTENTS
+
+            bx_id = items[bx_id_column_index]
+            hgvs = "chr%s:g.%s:%s>%s" % (str(chrom), str(pos), ref, alt)
+
             if ref_correct(chrom, pos, ref, alt):
-                hgvs = "chr%s:g.%s:%s>%s" % (str(chrom), str(pos), ref, alt)
-                variants[hgvs] = items
+                variants = add_variant_to_dict(variants, hgvs, items)
             else:
+                logging.warning("Ref incorrect for Enigma report, throwing away: %s", line)
+                log_discarded_reports("ENIGMA", bx_id, hgvs, "Incorrect Reference")
                 n_wrong += 1
                 f_wrong.write(line)
+
             n_total += 1
+
     f_wrong.close()
     print "in ENIGMA, wrong: {0}, total: {1}".format(n_wrong, n_total)
     return (columns, variants)
@@ -740,6 +849,7 @@ def variant_equal(v1, v2, version="hg38"):
 
     return edited_v1 == edited_v2
 
+
 def ref_correct(chr, pos, ref, alt, version="hg38"):
     if pos == "None":
         return False
@@ -760,6 +870,49 @@ def ref_correct(chr, pos, ref, alt, version="hg38"):
         return False
     else:
         return True
+
+
+def isEmpty(value):
+    return value == '-' or value is None or value == [] or value == ['-']
+
+
+def prepare_variant_for_removal_and_log(original_hgvs, normalized_hgvs, items, bx_ids_for_variant, reason_for_discard, variants_to_remove):
+    if reason_for_discard == "Incorrect Reference":
+        logging.warning("Ref incorrect using %s", normalized_hgvs)
+        logging.warning("Original variant representation of incorrect ref variant before add_leading_base: %s", str(items))
+    elif reason_for_discard == "Variant ref and alt are the same":
+        logging.warning("Variant ref and alt are the same for variant %s", normalized_hgvs)
+        logging.warning("Original variant representation: %s", str(items))
+    else:
+        logging.warning("Bad data for variant: %s", normalized_hgvs)
+        logging.warning("Original variant representation: %s", str(items))
+
+    for key in bx_ids_for_variant.keys():
+        reports = bx_ids_for_variant[key]
+        if isEmpty(reports):
+            continue
+        else:
+            prefix = "BX_ID_"
+            source = key[len(prefix):]
+            log_discarded_reports(source, reports, normalized_hgvs, reason_for_discard)
+    variants_to_remove.append(original_hgvs)
+    return variants_to_remove
+
+
+def log_discarded_reports(source, reports, hgvs, reason):
+    # if reports is a list, log each report individually
+    if not isinstance(reports, basestring) and not isinstance(reports, Number):
+        for report in reports:
+            log_discarded_report(source, report, hgvs, reason)
+    else:
+        report = reports
+        log_discarded_report(source, report, hgvs, reason)
+
+
+def log_discarded_report(source, report, hgvs, reason):
+    report = int(report)
+    logging.warning("Report discarded: %s \n Source: %s \n Reason for discard: %s \n Variant: %s", report, source, reason, hgvs)
+    DISCARDED_REPORTS_WRITER.writerow({'Report_id': report, 'Source': source, 'Reason': reason, 'Variant': hgvs})
 
 
 if __name__ == "__main__":

@@ -74,7 +74,7 @@ def main():
         logging_level = logging.DEBUG
     else:
         logging_level = logging.CRITICAL
-    log_file_path = args.artifacts_dir + "add-annotation.log"
+    log_file_path = args.artifacts_dir + "enigma-postprocess.log"
     logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level)
 
     csvIn = csv.DictReader(open(args.input, "r"), delimiter='\t')
