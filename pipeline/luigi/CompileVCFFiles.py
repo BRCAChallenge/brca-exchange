@@ -8,6 +8,7 @@ import socket
 from shutil import copy
 import luigi
 import synapseclient
+import csv
 from luigi.util import inherits, requires
 
 from retrying import retry
@@ -83,15 +84,28 @@ def download_file_with_basic_auth(url, file_name, username, password):
 
 
 def check_file_for_contents(file_path):
-    now = str(datetime.datetime.utcnow())
+    handle_process_success_or_failure(os.stat(file_path).st_size != 0, file_path)
+
+
+def check_input_and_output_tsvs_for_same_number_variants(tsvIn, tsvOut):
+    tsvInput = csv.DictReader(open(tsvIn, 'r'), delimiter='\t')
+    numVariantsIn = len(list(tsvInput))
+    tsvOutput = csv.DictReader(open(tsvOut, 'r'), delimiter='\t')
+    numVariantsOut = len(list(tsvOutput))
+    print("Number of variants in input: %s \nNumber of variants in output: %s\n" % (numVariantsIn, numVariantsOut))
+    handle_process_success_or_failure(numVariantsIn == numVariantsOut, tsvOut)
+
+
+def handle_process_success_or_failure(process_succeeded, file_path):
     file_name = file_path.split('/')[-1]
-    file_directory = os.path.dirname(file_path)
-    if os.stat(file_path).st_size == 0:
+    if process_succeeded is True:
+        print("Completed writing %s. \n" % (file_name))
+    else:
+        now = str(datetime.datetime.utcnow())
+        file_directory = os.path.dirname(file_path)
         failed_file_name = "FAILED_" + now + "_" + file_name
         os.rename(file_path, file_directory + "/" + failed_file_name)
-        print "**** Failed to write %s ****" % (file_name)
-    else:
-        print "Completed writing %s." % (file_name)
+        print("**** Failure creating %s ****\n" % (file_name))
 
 
 #######################################
@@ -1258,7 +1272,8 @@ class AnnotateMergedOutput(luigi.Task):
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        check_file_for_contents(artifacts_dir + "annotated.tsv")
+        check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "merged.tsv",
+                                                             artifacts_dir + "annotated.tsv")
 
 
 @requires(AnnotateMergedOutput)
@@ -1278,7 +1293,8 @@ class AggregateMergedOutput(luigi.Task):
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        check_file_for_contents(artifacts_dir + "aggregated.tsv")
+        check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "annotated.tsv",
+                                                             artifacts_dir + "aggregated.tsv")
 
 
 @requires(AggregateMergedOutput)
@@ -1307,7 +1323,8 @@ class BuildAggregatedOutput(luigi.Task):
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        check_file_for_contents(release_dir + "built.tsv")
+        check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "aggregated.tsv",
+                                                             release_dir + "built.tsv")
 
 
 @requires(BuildAggregatedOutput)
@@ -1359,7 +1376,8 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        check_file_for_contents(release_dir + "built_with_change_types.tsv")
+        check_input_and_output_tsvs_for_same_number_variants(release_dir + "built.tsv",
+                                                             release_dir + "built_with_change_types.tsv")
 
 
 @requires(RunDiffAndAppendChangeTypesToOutput)

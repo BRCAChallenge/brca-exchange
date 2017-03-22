@@ -150,14 +150,15 @@ def main(args):
         if ref38 == '-': ref38 = ''
         if alt38 == '-': alt38 = ''
         if alt38 == 'None': alt38 = ''
-
         transcript38 = get_transcript38(line[refSeqIndex])
         transcript37 = get_transcript37(line[refSeqIndex])
         transcript36 = get_transcript36(line[refSeqIndex])
 
         # Normalize hgvs cdna string to fit what the counsyl hgvs parser determines to be the correct format
+        if transcript38 is None:
+            print("ERROR: could not parse transcript38 for variant: %s \n" % (line))
+            continue
         cdna_coord = str(pyhgvs.format_hgvs_name("chr" + chrom38, int(offset38), ref38, alt38, genome38, transcript38, use_gene=False, max_allele_length=100))
-
         chrom38, offset38, ref38, alt38 = pyhgvs.parse_hgvs_name(cdna_coord, genome38, get_transcript=get_transcript38)
         chrom37, offset37, ref37, alt37 = pyhgvs.parse_hgvs_name(cdna_coord, genome37, get_transcript=get_transcript37)
         chrom36, offset36, ref36, alt36 = pyhgvs.parse_hgvs_name(cdna_coord, genome36, get_transcript=get_transcript36)

@@ -358,10 +358,10 @@ def get_bx_id_column_indexes(columns):
 def normalize_values(value):
     # standardize data representation by denoting empty as '-' and stripping whitespace off strings
     assert isinstance(value, basestring) or isinstance(value, (list)) or value is None
-    if isinstance(value, basestring):
-        value = value.strip()
     if value is None or value == "":
         value = DEFAULT_CONTENTS
+    if isinstance(value, basestring):
+        value = value.strip()
     else:
         normalized_values = []
         for v in value:

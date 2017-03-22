@@ -46,9 +46,8 @@ def main():
     rowCount = 0
     for row in csvIn:
         rowCount += 1
-        print "working on row", rowCount
         csvOut.writerow(updateRow(row, FIELDS_TO_RENAME, FIELDS_TO_REMOVE))
-
+    print "Process complete, aggregated %s variants." % (rowCount)
 
 def setOutputColumns(fields, toRemove, toAdd, toRename):
     newFields = []
