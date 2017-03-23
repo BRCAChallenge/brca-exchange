@@ -9,15 +9,16 @@ import vcf
 import logging
 import csv
 from variant_merging import GENOME1K_FIELDS, CLINVAR_FIELDS, LOVD_FIELDS, EX_LOVD_FIELDS, BIC_FIELDS, ESP_FIELDS, EXAC_FIELDS, FIELD_DICT, ENIGMA_FILE, COLUMN_SOURCE, COLUMN_GENE, COLUMN_GENOMIC_HGVS, COLUMN_VCF_CHR, COLUMN_VCF_POS, COLUMN_VCF_REF, COLUMN_VCF_ALT
-
+import pdb
 
 def write_reports_tsv(filename, columns, ready_files_dir):
     reports_output = open(filename, "w")
-    reports_output.write("\t".join(columns)+"\n")
 
     reports_files = [ready_files_dir + r for r in get_reports_files(ready_files_dir)]
 
     reports = aggregate_reports(reports_files, columns)
+
+    reports_output.write("\t".join(columns)+"\n")
 
     for report in reports:
         if len(reports) != len(columns):
@@ -37,7 +38,6 @@ def write_reports_tsv(filename, columns, ready_files_dir):
 
 def aggregate_reports(reports_files, columns):
     # Gathers all reports from an input directory, normalizes them, and combines them into a single list.
-
     for file in reports_files:
         file_reports = normalize_reports(file, columns)
         print "finished normalizing %s" % (file)
@@ -79,9 +79,11 @@ def normalize_reports(file, columns):
             report[COLUMN_VCF_POS] = record.POS
             report[COLUMN_VCF_REF] = record.REF
             report[COLUMN_VCF_ALT] = str(record.ALT[0])
-            for value in FIELD_DICT[source].values():
+            for key, value in FIELD_DICT[source].iteritems():
                 try:
-                    report.append(record.INFO[value])
+                    column_name = key + "_" + source
+                    column_index = columns.index(column_name)
+                    report[column_index] = record.INFO[value]
                 except KeyError:
                     # logging.warning("KeyError appending VCF record.INFO[value] to variant. Variant: %s \n Record.INFO: %s \n value: %s", variants[genome_coor], record.INFO, value)
                     # if source == "BIC":
@@ -91,9 +93,48 @@ def normalize_reports(file, columns):
                         # raise Exception("There was a problem appending a value for %s to variant %s" % (value, variants[genome_coor]))
                     print "WARNING: Key error, needs attn."
             reports.append(report)
-    # TODO:
-    # elif file_extension == ".tsv":
-        # handle enigma data
+    elif file_extension == ".tsv":
+        enigma_columns = ''
+        enigma_file = open(file, 'r')
+        line_num = 0
+        enigma_column_indexes_in_columns = {}
+        for line in enigma_file:
+            line_num += 1
+            if line_num == 1:
+                enigma_columns = line.strip().split("\t")
+                enigma_columns = [c + "_ENIGMA" for c in enigma_columns if c != "Genomic_Coordinate"]
+                enigma_columns.insert(COLUMN_SOURCE, "Source")
+                enigma_columns.insert(COLUMN_GENOMIC_HGVS, "Genomic_Coordinate")
+                enigma_columns.insert(COLUMN_VCF_CHR, "Chr")
+                enigma_columns.insert(COLUMN_VCF_POS, "Pos")
+                enigma_columns.insert(COLUMN_VCF_REF, "Ref")
+                enigma_columns.insert(COLUMN_VCF_ALT, "Alt")
+                for key, value in enumerate(enigma_columns):
+                    enigma_column_indexes_in_columns[key] = value
+            else:
+                items = line.strip().split("\t")
+                items.insert(COLUMN_SOURCE, "ENIGMA")
+                v = items[COLUMN_GENOMIC_HGVS].replace("-", "").replace("chr", "").replace(">", ":")
+                (chrom, pos, ref, alt) = v.split(":")
+                items.insert(COLUMN_VCF_CHR, chrom)
+                items.insert(COLUMN_VCF_POS, pos)
+                items.insert(COLUMN_VCF_REF, ref)
+                items.insert(COLUMN_VCF_ALT, alt)
+                for ii in range(len(items)):
+                    if items[ii] is None or items[ii] == '':
+                        items[ii] = '-'
+                report = ['-'] * len(columns)
+                for key, value in enigma_column_indexes_in_columns.iteritems():
+                    report[columns.index(value)] = items[key]
+                reports.append(report)
+        enigma_file.close()
+
+    for report in reports:
+        if len(report) != len(columns):
+            report += [DEFAULT_CONTENTS] * len(FIELD_DICT[source])
+    for report in reports:
+        if len(report) != len(columns):
+            raise Exception("mismatching number of columns in head and row")
     return reports
 
 
