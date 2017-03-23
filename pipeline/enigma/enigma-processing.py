@@ -56,10 +56,10 @@ def main():
     global REFGENE
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--readable_input', type=argparse.FileType('r'),
-                        help='Opened readable input file for conversion.')
-    parser.add_argument('-o', '--writable_output', type=argparse.FileType('w'),
-                        help='Opened writable output file for conversion.')
+    parser.add_argument('-i', '--readable_input', 
+                        help='readable input file for conversion.')
+    parser.add_argument('-o', '--writable_output', 
+                        help='writable output file for conversion.')
     parser.add_argument('-g', '--genome_path', help='Link to hg38.fa.')
     parser.add_argument('-r', '--reference_genome', default='./hg38.BRCA.refGene.txt',
                         help='Link to hg38.BRCA.refgene.txt.')
@@ -68,10 +68,14 @@ def main():
     GENOME = SequenceFileDB(args.genome_path)
     REFGENE = args.reference_genome
 
-    f_out = args.writable_output
+    f_in = open(args.readable_input, "r")
+    f_out = open(args.writable_output, "w")
     f_out.write("\t".join(OUTPUT_COLUMNS) + "\n")
-    f_in = args.readable_input
     for index, line in enumerate(f_in):
+        # 
+        # Clean the line by removing leading or trailing spaces adjacent to tabs.  
+        #
+        line = re.sub("( )*\t( )*", "\t", line)
         items = np.array(line.rstrip().split("\t"))
         if index == 0:
             # Handle column names
@@ -79,9 +83,13 @@ def main():
             index_to_save = [np.where(columns == i)[0][0] for i in COLUMNS_TO_SAVE]
             column_idx = dict(zip(COLUMNS_TO_SAVE, index_to_save))
             continue
+        #
+        # In the date last evaluated field, delete the time last evaluated if provided.
+        #
+        date_last_evaluated_idx = column_idx["Date_last_evaluated"]
+        items[date_last_evaluated_idx] = items[date_last_evaluated_idx].split(' ')[0]
         OMIM_id_index = column_idx["Condition_ID_value"]
         items[OMIM_id_index] = convert_OMIM_id(items[OMIM_id_index])
-        print items[column_idx["Reference_sequence"]], items[column_idx["HGVS"]]
         items[column_idx["HGVS"]] = cleanup_HGVS(items[column_idx["Reference_sequence"]],
                                  items[column_idx["HGVS"]], HP, EVM)
         HGVS_cDNA = items[column_idx["Reference_sequence"]] + ":" + items[column_idx["HGVS"]]
@@ -110,7 +118,7 @@ def cleanup_HGVS(reference_sequence, cdna_hgvs, hp, evm):
     string back to a HGVS cDNA string.  The resulting string can be parsed by the pyhgvs library more
     reliably.  But, it has a strange error with certain insertions.  So don't do this with insertions..."""
     if re.search("ins", cdna_hgvs) and not re.search("del", cdna_hgvs):
-        return reference_sequence + ":" + cdna_hgvs
+        return cdna_hgvs
     else: 
         initial_cdna_hgvs = hp.parse_hgvs_variant(reference_sequence + ":" + cdna_hgvs)
         genomic_hgvs = evm.c_to_g(initial_cdna_hgvs)
