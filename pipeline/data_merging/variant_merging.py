@@ -711,19 +711,20 @@ def add_new_source(columns, variants, source, source_file, source_dict):
                 variants[genome_coor][COLUMN_SOURCE] = [variants[genome_coor][COLUMN_SOURCE]]
             variants[genome_coor][COLUMN_SOURCE].append(source)
         else:
-            variants[genome_coor] = ['-'] * old_column_num
-            variants[genome_coor][COLUMN_SOURCE] = source
-            if record.CHROM == "13":
-                variants[genome_coor][COLUMN_GENE] = "BRCA2"
-            elif record.CHROM == "17":
-                variants[genome_coor][COLUMN_GENE] = "BRCA1"
-            else:
-                raise Exception("Wrong chromosome")
-            variants[genome_coor][COLUMN_GENOMIC_HGVS] = genome_coor
-            variants[genome_coor][COLUMN_VCF_CHR] = record.CHROM
-            variants[genome_coor][COLUMN_VCF_POS] = record.POS
-            variants[genome_coor][COLUMN_VCF_REF] = record.REF
-            variants[genome_coor][COLUMN_VCF_ALT] = str(record.ALT[0])
+            variants[genome_coor] = associate_chr_pos_ref_alt_with_item(record, old_column_num, source, genome_coor)
+            # variants[genome_coor] = ['-'] * old_column_num
+            # variants[genome_coor][COLUMN_SOURCE] = source
+            # if record.CHROM == "13":
+            #     variants[genome_coor][COLUMN_GENE] = "BRCA2"
+            # elif record.CHROM == "17":
+            #     variants[genome_coor][COLUMN_GENE] = "BRCA1"
+            # else:
+            #     raise Exception("Wrong chromosome")
+            # variants[genome_coor][COLUMN_GENOMIC_HGVS] = genome_coor
+            # variants[genome_coor][COLUMN_VCF_CHR] = record.CHROM
+            # variants[genome_coor][COLUMN_VCF_POS] = record.POS
+            # variants[genome_coor][COLUMN_VCF_REF] = record.REF
+            # variants[genome_coor][COLUMN_VCF_ALT] = str(record.ALT[0])
         for value in source_dict.values():
             try:
                 variants[genome_coor].append(record.INFO[value])
@@ -746,6 +747,24 @@ def add_new_source(columns, variants, source, source_file, source_dict):
         if len(value) != len(columns):
             raise Exception("mismatching number of columns in head and row")
     return (columns, variants)
+
+
+def associate_chr_pos_ref_alt_with_item(line, column_num, source, genome_coor):
+    # places genomic coordinate data in correct positions to align with relevant columns in output tsv file.
+    item = ['-'] * column_num
+    item[COLUMN_SOURCE] = source
+    if line.CHROM == "13":
+        item[COLUMN_GENE] = "BRCA2"
+    elif line.CHROM == "17":
+        item[COLUMN_GENE] = "BRCA1"
+    else:
+        raise Exception("Wrong chromosome")
+    item[COLUMN_GENOMIC_HGVS] = genome_coor
+    item[COLUMN_VCF_CHR] = line.CHROM
+    item[COLUMN_VCF_POS] = line.POS
+    item[COLUMN_VCF_REF] = line.REF
+    item[COLUMN_VCF_ALT] = str(line.ALT[0])
+    return item
 
 
 def save_enigma_to_dict(path):

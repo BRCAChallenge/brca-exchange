@@ -8,7 +8,25 @@ import os
 import vcf
 import logging
 import csv
-from variant_merging import GENOME1K_FIELDS, CLINVAR_FIELDS, LOVD_FIELDS, EX_LOVD_FIELDS, BIC_FIELDS, ESP_FIELDS, EXAC_FIELDS, FIELD_DICT, ENIGMA_FILE, COLUMN_SOURCE, COLUMN_GENE, COLUMN_GENOMIC_HGVS, COLUMN_VCF_CHR, COLUMN_VCF_POS, COLUMN_VCF_REF, COLUMN_VCF_ALT
+from variant_merging import (
+     associate_chr_pos_ref_alt_with_item,
+     BIC_FIELDS,
+     COLUMN_SOURCE,
+     COLUMN_GENE,
+     COLUMN_GENOMIC_HGVS,
+     COLUMN_VCF_CHR,
+     COLUMN_VCF_POS,
+     COLUMN_VCF_REF,
+     COLUMN_VCF_ALT,
+     CLINVAR_FIELDS,
+     EX_LOVD_FIELDS,
+     ESP_FIELDS,
+     EXAC_FIELDS,
+     FIELD_DICT,
+     ENIGMA_FILE,
+     GENOME1K_FIELDS,
+     LOVD_FIELDS
+     )
 
 
 def write_reports_tsv(filename, columns, ready_files_dir):
@@ -81,21 +99,7 @@ def normalize_vcf_reports(file, columns, filename, file_extension):
         genome_coor = ("chr" + str(record.CHROM) + ":g." + str(record.POS) + ":" +
                        record.REF + ">" + str(record.ALT[0]))
 
-        # first set all values to default
-        report = ['-'] * len(columns)
-
-        report[COLUMN_SOURCE] = source
-        if record.CHROM == "13":
-            report[COLUMN_GENE] = "BRCA2"
-        elif record.CHROM == "17":
-            report[COLUMN_GENE] = "BRCA1"
-        else:
-            raise Exception("Wrong chromosome")
-        report[COLUMN_GENOMIC_HGVS] = genome_coor
-        report[COLUMN_VCF_CHR] = record.CHROM
-        report[COLUMN_VCF_POS] = record.POS
-        report[COLUMN_VCF_REF] = record.REF
-        report[COLUMN_VCF_ALT] = str(record.ALT[0])
+        report = associate_chr_pos_ref_alt_with_item(record, len(columns), source, genome_coor)
         for key, value in FIELD_DICT[source].iteritems():
             try:
                 column_name = key + "_" + source
