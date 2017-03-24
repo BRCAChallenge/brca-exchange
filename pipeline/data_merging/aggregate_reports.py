@@ -9,6 +9,8 @@ import vcf
 import logging
 import csv
 from variant_merging import (
+     add_columns_to_enigma_data,
+     associate_chr_pos_ref_alt_with_enigma_item,
      associate_chr_pos_ref_alt_with_item,
      BIC_FIELDS,
      COLUMN_SOURCE,
@@ -118,35 +120,17 @@ def normalize_vcf_reports(file, columns, filename, file_extension):
 
 def normalize_enigma_tsv_reports(file, columns, filename, file_extension):
     reports = []
-    enigma_columns = ''
     enigma_file = open(file, 'r')
     line_num = 0
     enigma_column_indexes_in_columns = {}
     for line in enigma_file:
         line_num += 1
         if line_num == 1:
-            enigma_columns = line.strip().split("\t")
-            enigma_columns = [c + "_ENIGMA" for c in enigma_columns if c != "Genomic_Coordinate"]
-            enigma_columns.insert(COLUMN_SOURCE, "Source")
-            enigma_columns.insert(COLUMN_GENOMIC_HGVS, "Genomic_Coordinate")
-            enigma_columns.insert(COLUMN_VCF_CHR, "Chr")
-            enigma_columns.insert(COLUMN_VCF_POS, "Pos")
-            enigma_columns.insert(COLUMN_VCF_REF, "Ref")
-            enigma_columns.insert(COLUMN_VCF_ALT, "Alt")
+            enigma_columns = add_columns_to_enigma_data(line)
             for key, value in enumerate(enigma_columns):
                 enigma_column_indexes_in_columns[key] = value
         else:
-            items = line.strip().split("\t")
-            items.insert(COLUMN_SOURCE, "ENIGMA")
-            v = items[COLUMN_GENOMIC_HGVS].replace("-", "").replace("chr", "").replace(">", ":")
-            (chrom, pos, ref, alt) = v.split(":")
-            items.insert(COLUMN_VCF_CHR, chrom)
-            items.insert(COLUMN_VCF_POS, pos)
-            items.insert(COLUMN_VCF_REF, ref)
-            items.insert(COLUMN_VCF_ALT, alt)
-            for ii in range(len(items)):
-                if items[ii] is None or items[ii] == '':
-                    items[ii] = '-'
+            (items, chrom, pos, ref, alt) = associate_chr_pos_ref_alt_with_enigma_item(line)
             report = ['-'] * len(columns)
             for key, value in enigma_column_indexes_in_columns.iteritems():
                 report[columns.index(value)] = items[key]
