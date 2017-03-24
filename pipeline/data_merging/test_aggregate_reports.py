@@ -4,7 +4,6 @@ import tempfile
 import csv
 from os import path
 import aggregate_reports
-import pdb
 
 
 VCF_TESTDATA_FILENAME = path.join(path.dirname(__file__), '1000_Genomesready.vcf')

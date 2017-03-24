@@ -9,7 +9,7 @@ import vcf
 import logging
 import csv
 from variant_merging import GENOME1K_FIELDS, CLINVAR_FIELDS, LOVD_FIELDS, EX_LOVD_FIELDS, BIC_FIELDS, ESP_FIELDS, EXAC_FIELDS, FIELD_DICT, ENIGMA_FILE, COLUMN_SOURCE, COLUMN_GENE, COLUMN_GENOMIC_HGVS, COLUMN_VCF_CHR, COLUMN_VCF_POS, COLUMN_VCF_REF, COLUMN_VCF_ALT
-import pdb
+
 
 def write_reports_tsv(filename, columns, ready_files_dir):
     reports_output = open(filename, "w")
@@ -21,15 +21,16 @@ def write_reports_tsv(filename, columns, ready_files_dir):
     reports_output.write("\t".join(columns)+"\n")
 
     for report in reports:
-        if len(reports) != len(columns):
+        if len(report) != len(columns):
             raise Exception("mismatching number of columns in head and row")
-        for ii in range(len(reports)):
-            if type(reports[ii]) == list:
-                comma_delimited_string = ",".join(str(xx) for xx in reports[ii])
-                reports[ii] = comma_delimited_string
-            elif type(reports[ii]) == int:
-                reports[ii] = str(reports[ii])
-        reports_output.write("\t".join(reports)+"\n")
+        for ii in range(len(report)):
+            if type(report[ii]) == list:
+                comma_delimited_string = ",".join(str(xx) for xx in report[ii])
+                report[ii] = comma_delimited_string
+            elif type(report[ii]) == int:
+                report[ii] = str(report[ii])
+        reports_output.write("\t".join(report)+"\n")
+
     reports_output.close()
 
     print "final number of reports: %d" % len(reports)
@@ -38,6 +39,8 @@ def write_reports_tsv(filename, columns, ready_files_dir):
 
 def aggregate_reports(reports_files, columns):
     # Gathers all reports from an input directory, normalizes them, and combines them into a single list.
+    reports = []
+
     for file in reports_files:
         file_reports = normalize_reports(file, columns)
         print "finished normalizing %s" % (file)
