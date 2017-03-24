@@ -54,89 +54,100 @@ def get_reports_files(input_directory):
 
 
 def normalize_reports(file, columns):
-    reports = []
     filename, file_extension = os.path.splitext(file)
-    # with open(file, "r") as f_in:
     if file_extension == ".vcf":
-        reader = vcf.Reader(open(file, "r"), strict_whitespace=True)
-        count = 0
-        source_suffix = "ready.vcf"
-        source = os.path.basename(file)[:-len(source_suffix)]
-        for record in reader:
-            count += 1
-            genome_coor = ("chr" + str(record.CHROM) + ":g." + str(record.POS) + ":" +
-                           record.REF + ">" + str(record.ALT[0]))
-
-            # first set all values to default
-            report = ['-'] * len(columns)
-
-            report[COLUMN_SOURCE] = source
-            if record.CHROM == "13":
-                report[COLUMN_GENE] = "BRCA2"
-            elif record.CHROM == "17":
-                report[COLUMN_GENE] = "BRCA1"
-            else:
-                raise Exception("Wrong chromosome")
-            report[COLUMN_GENOMIC_HGVS] = genome_coor
-            report[COLUMN_VCF_CHR] = record.CHROM
-            report[COLUMN_VCF_POS] = record.POS
-            report[COLUMN_VCF_REF] = record.REF
-            report[COLUMN_VCF_ALT] = str(record.ALT[0])
-            for key, value in FIELD_DICT[source].iteritems():
-                try:
-                    column_name = key + "_" + source
-                    column_index = columns.index(column_name)
-                    report[column_index] = record.INFO[value]
-                except KeyError:
-                    # if source == "BIC":
-                        # variants[genome_coor].append(DEFAULT_CONTENTS)
-                        # logging.debug("Could not find value %s for source %s in variant %s, inserting default content %s instead.", value, source, DEFAULT_CONTENTS)
-                    # else:
-                        # raise Exception("There was a problem appending a value for %s to variant %s" % (value, variants[genome_coor]))
-                    raise Exception("WARNING: Key error with report: %s \n\nError on value: %s \n\n Error in record.INFO: %s \n\nNeeds attn." % (report, value, record.INFO))
-            reports.append(report)
+        reports = normalize_vcf_reports(file, columns, filename, file_extension)
     elif file_extension == ".tsv":
-        enigma_columns = ''
-        enigma_file = open(file, 'r')
-        line_num = 0
-        enigma_column_indexes_in_columns = {}
-        for line in enigma_file:
-            line_num += 1
-            if line_num == 1:
-                enigma_columns = line.strip().split("\t")
-                enigma_columns = [c + "_ENIGMA" for c in enigma_columns if c != "Genomic_Coordinate"]
-                enigma_columns.insert(COLUMN_SOURCE, "Source")
-                enigma_columns.insert(COLUMN_GENOMIC_HGVS, "Genomic_Coordinate")
-                enigma_columns.insert(COLUMN_VCF_CHR, "Chr")
-                enigma_columns.insert(COLUMN_VCF_POS, "Pos")
-                enigma_columns.insert(COLUMN_VCF_REF, "Ref")
-                enigma_columns.insert(COLUMN_VCF_ALT, "Alt")
-                for key, value in enumerate(enigma_columns):
-                    enigma_column_indexes_in_columns[key] = value
-            else:
-                items = line.strip().split("\t")
-                items.insert(COLUMN_SOURCE, "ENIGMA")
-                v = items[COLUMN_GENOMIC_HGVS].replace("-", "").replace("chr", "").replace(">", ":")
-                (chrom, pos, ref, alt) = v.split(":")
-                items.insert(COLUMN_VCF_CHR, chrom)
-                items.insert(COLUMN_VCF_POS, pos)
-                items.insert(COLUMN_VCF_REF, ref)
-                items.insert(COLUMN_VCF_ALT, alt)
-                for ii in range(len(items)):
-                    if items[ii] is None or items[ii] == '':
-                        items[ii] = '-'
-                report = ['-'] * len(columns)
-                for key, value in enigma_column_indexes_in_columns.iteritems():
-                    report[columns.index(value)] = items[key]
-                reports.append(report)
-        enigma_file.close()
-
+        if "ENIGMA" not in filename.upper():
+            raise Exception("ERROR: received tsv file that is not for ENIGMA: %s" % (filename))
+        reports = normalize_enigma_tsv_reports(file, columns, filename, file_extension)
     for report in reports:
         if len(report) != len(columns):
             report += [DEFAULT_CONTENTS] * len(FIELD_DICT[source])
     for report in reports:
         if len(report) != len(columns):
             raise Exception("mismatching number of columns in head and row")
+    return reports
+
+
+def normalize_vcf_reports(file, columns, filename, file_extension):
+    reports = []
+    reader = vcf.Reader(open(file, "r"), strict_whitespace=True)
+    count = 0
+    source_suffix = "ready.vcf"
+    source = os.path.basename(file)[:-len(source_suffix)]
+    for record in reader:
+        count += 1
+        genome_coor = ("chr" + str(record.CHROM) + ":g." + str(record.POS) + ":" +
+                       record.REF + ">" + str(record.ALT[0]))
+
+        # first set all values to default
+        report = ['-'] * len(columns)
+
+        report[COLUMN_SOURCE] = source
+        if record.CHROM == "13":
+            report[COLUMN_GENE] = "BRCA2"
+        elif record.CHROM == "17":
+            report[COLUMN_GENE] = "BRCA1"
+        else:
+            raise Exception("Wrong chromosome")
+        report[COLUMN_GENOMIC_HGVS] = genome_coor
+        report[COLUMN_VCF_CHR] = record.CHROM
+        report[COLUMN_VCF_POS] = record.POS
+        report[COLUMN_VCF_REF] = record.REF
+        report[COLUMN_VCF_ALT] = str(record.ALT[0])
+        for key, value in FIELD_DICT[source].iteritems():
+            try:
+                column_name = key + "_" + source
+                column_index = columns.index(column_name)
+                report[column_index] = record.INFO[value]
+            except KeyError:
+                # if source == "BIC":
+                    # variants[genome_coor].append(DEFAULT_CONTENTS)
+                    # logging.debug("Could not find value %s for source %s in variant %s, inserting default content %s instead.", value, source, DEFAULT_CONTENTS)
+                # else:
+                    # raise Exception("There was a problem appending a value for %s to variant %s" % (value, variants[genome_coor]))
+                raise Exception("WARNING: Key error with report: %s \n\nError on value: %s \n\n Error in record.INFO: %s \n\nNeeds attn." % (report, value, record.INFO))
+        reports.append(report)
+    return reports
+
+
+def normalize_enigma_tsv_reports(file, columns, filename, file_extension):
+    reports = []
+    enigma_columns = ''
+    enigma_file = open(file, 'r')
+    line_num = 0
+    enigma_column_indexes_in_columns = {}
+    for line in enigma_file:
+        line_num += 1
+        if line_num == 1:
+            enigma_columns = line.strip().split("\t")
+            enigma_columns = [c + "_ENIGMA" for c in enigma_columns if c != "Genomic_Coordinate"]
+            enigma_columns.insert(COLUMN_SOURCE, "Source")
+            enigma_columns.insert(COLUMN_GENOMIC_HGVS, "Genomic_Coordinate")
+            enigma_columns.insert(COLUMN_VCF_CHR, "Chr")
+            enigma_columns.insert(COLUMN_VCF_POS, "Pos")
+            enigma_columns.insert(COLUMN_VCF_REF, "Ref")
+            enigma_columns.insert(COLUMN_VCF_ALT, "Alt")
+            for key, value in enumerate(enigma_columns):
+                enigma_column_indexes_in_columns[key] = value
+        else:
+            items = line.strip().split("\t")
+            items.insert(COLUMN_SOURCE, "ENIGMA")
+            v = items[COLUMN_GENOMIC_HGVS].replace("-", "").replace("chr", "").replace(">", ":")
+            (chrom, pos, ref, alt) = v.split(":")
+            items.insert(COLUMN_VCF_CHR, chrom)
+            items.insert(COLUMN_VCF_POS, pos)
+            items.insert(COLUMN_VCF_REF, ref)
+            items.insert(COLUMN_VCF_ALT, alt)
+            for ii in range(len(items)):
+                if items[ii] is None or items[ii] == '':
+                    items[ii] = '-'
+            report = ['-'] * len(columns)
+            for key, value in enigma_column_indexes_in_columns.iteritems():
+                report[columns.index(value)] = items[key]
+            reports.append(report)
+    enigma_file.close()
     return reports
 
 
