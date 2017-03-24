@@ -88,13 +88,12 @@ def normalize_reports(file, columns):
                     column_index = columns.index(column_name)
                     report[column_index] = record.INFO[value]
                 except KeyError:
-                    # logging.warning("KeyError appending VCF record.INFO[value] to variant. Variant: %s \n Record.INFO: %s \n value: %s", variants[genome_coor], record.INFO, value)
                     # if source == "BIC":
                         # variants[genome_coor].append(DEFAULT_CONTENTS)
                         # logging.debug("Could not find value %s for source %s in variant %s, inserting default content %s instead.", value, source, DEFAULT_CONTENTS)
                     # else:
                         # raise Exception("There was a problem appending a value for %s to variant %s" % (value, variants[genome_coor]))
-                    print "WARNING: Key error, needs attn."
+                    raise Exception("WARNING: Key error with report: %s \n\nError on value: %s \n\n Error in record.INFO: %s \n\nNeeds attn." % (report, value, record.INFO))
             reports.append(report)
     elif file_extension == ".tsv":
         enigma_columns = ''
