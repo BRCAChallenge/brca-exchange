@@ -27,8 +27,8 @@ d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id, varlink) {
     var maxPos = 1;
     if (id === 'BRCA1') {
         xAxisLabel = 'Coordinate Selection (GRCh38 chr 17)';
-        minPos = 43030000;
-        maxPos = 43130000;
+        minPos = 43000000;
+        maxPos = 43170000;
     } else if (id === 'BRCA2') {
         xAxisLabel = 'Coordinate Selection (GRCh38 chr 13)';
         minPos = 32300000;
