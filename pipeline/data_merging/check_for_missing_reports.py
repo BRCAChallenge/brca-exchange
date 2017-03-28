@@ -7,6 +7,7 @@ import csv
 import logging
 from os import listdir
 from os.path import isfile, join, abspath
+from aggregate_reports import get_reports_files
 import vcf
 
 
@@ -40,7 +41,7 @@ def get_bx_ids():
     # Get all bx_ids present in source files organized by source
     bx_ids = {}
 
-    files = [f for f in listdir(ARGS.ready_input_dir) if isfile(join(ARGS.ready_input_dir, f)) and "ready" in f or "ENIGMA_combined_with_bx_ids" in f]
+    files = get_reports_files(ARGS.ready_input_dir)
 
     for file in files:
         file_path = abspath(ARGS.ready_input_dir + file)
@@ -52,7 +53,7 @@ def get_bx_ids():
                 ids = map(int, report['BX_ID'].split(','))
                 bx_ids[source] = bx_ids[source] + ids
         else:
-            suffix = 'ready.vcf'
+            suffix = '.vcf'
             source = file[:(len(file)-len(suffix))]
             bx_ids[source] = []
             vcf_reader = vcf.Reader(open(file_path, 'r'), strict_whitespace=True)
