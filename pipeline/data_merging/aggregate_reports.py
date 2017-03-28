@@ -5,7 +5,6 @@ import os
 import vcf
 import logging
 import csv
-import pdb
 from variant_merging import (
      add_columns_to_enigma_data,
      associate_chr_pos_ref_alt_with_enigma_item,
