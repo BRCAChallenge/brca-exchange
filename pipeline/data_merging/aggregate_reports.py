@@ -1,13 +1,11 @@
 #!/usr/bin/env python
-"""
-this scripts takes the enigma variant list and merge vcf files in a folder into
-the exisitng enigma variants:
-"""
+
 import argparse
 import os
 import vcf
 import logging
 import csv
+import pdb
 from variant_merging import (
      add_columns_to_enigma_data,
      associate_chr_pos_ref_alt_with_enigma_item,
@@ -70,7 +68,12 @@ def aggregate_reports(reports_files, columns):
 
 
 def get_reports_files(input_directory):
-    return [f for f in os.listdir(input_directory) if os.path.isfile(os.path.join(input_directory, f)) and "ready" in f or "ENIGMA_combined_with_bx_ids" in f]
+    reports_files = []
+    for f in os.listdir(input_directory):
+        filename, file_extension = os.path.splitext(f)
+        if (filename in FIELD_DICT and file_extension == ".vcf") or filename == "ENIGMA_combined_with_bx_ids":
+            reports_files.append(f)
+    return reports_files
 
 
 def normalize_reports(file, columns):
@@ -94,7 +97,7 @@ def normalize_vcf_reports(file, columns, filename, file_extension):
     reports = []
     reader = vcf.Reader(open(file, "r"), strict_whitespace=True)
     count = 0
-    source_suffix = "ready.vcf"
+    source_suffix = ".vcf"
     source = os.path.basename(file)[:-len(source_suffix)]
     for record in reader:
         count += 1
@@ -108,11 +111,6 @@ def normalize_vcf_reports(file, columns, filename, file_extension):
                 column_index = columns.index(column_name)
                 report[column_index] = record.INFO[value]
             except KeyError:
-                # if source == "BIC":
-                    # variants[genome_coor].append(DEFAULT_CONTENTS)
-                    # logging.debug("Could not find value %s for source %s in variant %s, inserting default content %s instead.", value, source, DEFAULT_CONTENTS)
-                # else:
-                    # raise Exception("There was a problem appending a value for %s to variant %s" % (value, variants[genome_coor]))
                 raise Exception("WARNING: Key error with report: %s \n\nError on value: %s \n\n Error in record.INFO: %s \n\nNeeds attn." % (report, value, record.INFO))
         reports.append(report)
     return reports
@@ -137,7 +135,3 @@ def normalize_enigma_tsv_reports(file, columns, filename, file_extension):
             reports.append(report)
     enigma_file.close()
     return reports
-
-
-if __name__ == "__main__":
-    main()
