@@ -1,0 +1,31 @@
+##fileformat=VCFv4.0
+##source=exLOVD
+##reference=GRCh37
+##liftOverProgram=CrossMap(https://sourceforge.net/projects/crossmap/)
+##liftOverFile=/Volumes/FLASH/UCSC/brca-resources/hg19ToHg38.over.chain.gz
+##new_reference_genome=/Volumes/FLASH/UCSC/brca-resources/hg38.fa
+##liftOverTime=March26,2017
+##INFO=<ID=dbsnp_id,Number=.,Type=String,Description="The dbSNP ID.">
+##INFO=<ID=db_id,Number=.,Type=String,Description="Database ID of variant, grouping multiple observations of the same variant together, starting with the HGNC gene symbol, followed by an underscore (_) and a six digit number (e.g. DMD_012345). _000000 is used for variants where DNA was not analysed (change predicted from RNA analysis), variants seen in animal models or variants not seen in humans but functionally tested in vitro.">
+##INFO=<ID=reference,Number=.,Type=String,Description="publication describing the variant submitted, incl. links to OMIM, PubMed or other source, e.g. den Dunnen ASHG2003 P2346.">
+##INFO=<ID=functionalanalysis_result,Number=.,Type=String,Description="Result of functional analysis.">
+##INFO=<ID=methylation,Number=.,Type=String,Description="Result of methylation test; GOM (gain of methylation), LOM (loss of methylation), 30% (30% methylated). NOTE: when several tests were done mention the method as well (e.g. MS-PCR 75%).">
+##INFO=<ID=genetic_origin,Number=.,Type=String,Description="Origin of variant; unknown, germline (inherited), somatic, de novo, from parental disomy (maternal or paternal) or in vitro (cloned) when tested for functional consequences. All options:([Unknown], [Germline (inherited)], [Somatic], [De novo], [Uniparental disomy], [Uniparental disomy, maternal allele], [Uniparental disomy, paternal allele], [In vitro (cloned)], or [Not applicable])">
+##INFO=<ID=haplotype,Number=.,Type=String,Description="Haplotype on which variant was found.">
+##INFO=<ID=vip,Number=.,Type=String,Description="Variant VIP-status was requested for matchmaking - need collaboration(s) to crack the case - please contact the submitter/curator. NOTE: to get VIP status ask the curator.">
+##INFO=<ID=effect,Number=.,Type=String,Description="The variants affect on a proteins function, in the format Reported/Curator concluded; [+] indicating the variant affects function, [+?] probably affects function, [-] does not affect function, [-?] probably does not affect function, [?] effect unknown, [.] effect not classified.">
+##INFO=<ID=protein_change,Number=.,Type=String,Description="Description of variant at protein level (following HGVS recommendations). e.g. p.(Arg345Pro) = change predicted from DNA (RNA not analysed), p.Arg345Pro = change derived from RNA analysis, p.? = unknown effect, p.0? = probably no protein produced.">
+##INFO=<ID=dna_change_genomic,Number=.,Type=String,Description="Description of variant at DNA level, based on the genomic DNA reference sequence (following HGVS recommendations); e.g. g.12345678C>T, g.12345678_12345890del, g.12345678_12345890dup.">
+##INFO=<ID=functionalanalysis_technique,Number=.,Type=String,Description="Functional analysis technique(s).">
+##INFO=<ID=frequency,Number=.,Type=String,Description="Frequency in which the variant was found; e.g 5/760 chromosomes (in 5 of 760 chromosomes tested), 1/33 patients (in 1 of 33 patients analysed in study), 0.05 controls (in 5% of control cases tested).">
+##INFO=<ID=dna_change,Number=.,Type=String,Description="Description of variant at DNA level, based on a coding DNA reference sequence (following HGVS recommendations); e.g. c.123C>T, c.123_145del, c.123_126dup.">
+##INFO=<ID=rna_change,Number=.,Type=String,Description="Description of variant at RNA level (following HGVS recommendations). e.g. r.123c>u, r.? = unknown, r.(?) = RNA not analysed but probably transcribed copy of DNA variant, r.spl? = RNA not analysed but variant probably affects splicing, r.(spl?) = RNA not analysed but variant may affect splicing, r.0? = change expected to abolish transcription.">
+##INFO=<ID=segregation,Number=.,Type=String,Description="Indicates whether the variant segregates with the phenotype (yes), does not segregate with the phenotype (no) or segregation is unknown (?). All options: [? = unknown], [yes = segregates with phenotype], [no = does not segregate with phenotype], [- = not applicable]">
+##INFO=<ID=owner,Number=.,Type=String,Description="The author or curator of this data entry.">
+##INFO=<ID=exon,Number=.,Type=String,Description="Number of exon/intron containing variant; 2 = exon 2, 12i = intron 12, 2i_7i = exons 3 to 7, 8i_9 = border intron 8/exon 9.">
+##INFO=<ID=re_site,Number=.,Type=String,Description="Restriction enzyme recognition site created (+) or destroyed (-); e.g. BglII+, BamHI-.">
+##INFO=<ID=variant_remarks,Number=.,Type=String,Description="Remarks regarding variant described, e.g. germline mosaicism in mother, 345 kb deletion, muscle RNA analysed, not in 200 control chromosomes tested, on founder haplotype, etc.">
+##INFO=<ID=published_as,Number=.,Type=String,Description="Listed only when different from DNA change; variant as reported originally (e.g. 521delT). Variants seen in animal models, tested in vitro, predicted from RNA analysis, etc. are described between brackets like c.(456C>G)">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+13	32315537	NM_000059.3:c.-170C>T	C	T	.	.	genetic_origin=Unknown;frequency=;BX_ID=1;DBID=BRCA2_002317;Protein=p.(=);RNA=r.(=);cDNA=NM_000059.3:c.-170C>T;chromosome=chr13;gDNA=g.32889674C>T;geneid=BRCA2;individuals=1;submitters=Juul Wijnen (Leiden,NL);variant_effect=?/?
+17	43126325	NM_007294.3:c.-1074C>G	G	C	.	.	genetic_origin=Unknown;frequency=47/1658;BX_ID=3075;DBID=BRCA1_002939;Protein=p.(=);RNA=r.(=);cDNA=NM_007294.3:c.-1074C>G;chromosome=chr17;gDNA=g.41278342G>C;geneid=BRCA1;individuals=1;submitters=kConFab - Heather Thorne (Melbourne,AU);variant_effect=-/-

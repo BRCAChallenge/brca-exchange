@@ -1,0 +1,17 @@
+##fileformat=VCFv4.0
+##source=ClinVar
+##reference=GRCh38
+##INFO=<ID=HGVS,Number=.,Type=String,Description="">
+##INFO=<ID=Submitter,Number=.,Type=String,Description="">
+##INFO=<ID=ClinicalSignificance,Number=.,Type=String,Description="">
+##INFO=<ID=DateLastUpdated,Number=.,Type=String,Description="">
+##INFO=<ID=SCV,Number=.,Type=String,Description="">
+##INFO=<ID=ID,Number=.,Type=String,Description="">
+##INFO=<ID=Origin,Number=.,Type=String,Description="">
+##INFO=<ID=Method,Number=.,Type=String,Description="">
+##INFO=<ID=Genomic_Coordinate,Number=.,Type=String,Description="">
+##INFO=<ID=Symbol,Number=.,Type=String,Description="">
+##INFO=<ID=Protein,Number=.,Type=String,Description="">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+13	32314943	.	A	G	.	.	HGVS=NM_000059.3.c.-764A>G;Submitter=Evidence-based_Network_for_the_Interpretation_of_Germline_Mutant_Alleles_(ENIGMA);ClinicalSignificance=Benign;DateLastUpdated=2015-01-12;SCV=SCV000244909;ID=456404;Origin=germline;Method=curation;Genomic_Coordinate=chr13.32314943.A>G;Symbol=BRCA2;Protein=None;BX_ID=1
+13	32315226	.	G	A	.	.	HGVS=NM_000059.3.c.-481G>A;Submitter=Evidence-based_Network_for_the_Interpretation_of_Germline_Mutant_Alleles_(ENIGMA);ClinicalSignificance=Benign;DateLastUpdated=2015-01-12;SCV=SCV000244910;ID=456405;Origin=germline;Method=curation;Genomic_Coordinate=chr13.32315226.G>A;Symbol=BRCA2;Protein=None;BX_ID=2
