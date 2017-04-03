@@ -56,7 +56,16 @@ def fixBrokenAminoAcidChange(row):
         row["Abbrev_AA_change"] = "R1190W"
     return row
 
-
+def updateNotYetClassifiedVariants(row):
+    """
+    For variants with the expert-reviewed clinical status of "Not Yet Classified",
+    change the status to "Not Yet Reviewed"
+    Addresses GitHub Issue # 362
+    (https://github.com/BD2KGenomics/brca-exchange/issues/184)
+    """
+    if row["Clinical_significance"] == "Not Yet Classified":
+        row["Clinical_significance"] = "Not Yet Reviewed"
+    return row
 
 def main():
     parser = argparse.ArgumentParser()

@@ -3,6 +3,7 @@ bioutils==0.1.4
 configparser==3.5.0
 hgvs==0.3
 numpy==1.11.1
+openpyxl=2.4.5
 Parsley==1.3
 psycopg2==2.6.2
 pygr==0.8.2
