@@ -2,6 +2,7 @@
 
 import argparse
 import csv
+import re
 import os
 import sys
 
@@ -28,7 +29,23 @@ def main():
     final_output_tsv = args.output_file
     temp_csv = args.output_file.replace('.tsv', '.csv')
 
-    clinvar_accessions = csv.DictReader(open(args.clinvar_input, "rb"), delimiter="\t")
+    #
+    # The ClinVar accessions file will begin with a header, with pound signs in the first
+    # column.  Most annoyingly, the header row also contains pound signs in the first
+    # column, so we can't simply ignore lines with pound signs.  The header row is the
+    # first line with tab-delimited content.  So, read down to the first line with
+    # more than a single token, and interpret that as the header, and then continue
+    # to interpret the file as a normal csv.DictReader.
+    #
+    fp = open(args.clinvar_input, "rb")
+    past_header = False
+    while not past_header:
+        row = fp.next()
+        tokens = row.split('\t')
+        if len(tokens) > 1:
+            header = tokens
+            past_header = True
+    clinvar_accessions = csv.DictReader(fp, fieldnames=header, delimiter='\t')
     enigma_variants = csv.DictReader(open(args.enigma_input, "rb"), delimiter="\t")
 
     with open(temp_csv, 'wb') as csvfile:
@@ -40,6 +57,7 @@ def main():
         for clinvar_variant in clinvar_accessions:
             hgvs = clinvar_variant['Your_variant_description'].split(":")[1]
             accession = clinvar_variant['SCV']
+            print hgvs, accession
 
             enigma_variants = csv.DictReader(open(args.enigma_input, "rb"), delimiter="\t")
             for enigma_variant in enigma_variants:
