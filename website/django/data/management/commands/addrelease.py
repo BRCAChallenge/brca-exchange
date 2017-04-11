@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 # from django.conf import settings
-from django.db import connection
+from django.db import connection, transaction
 from data.models import Variant, DataRelease, ChangeType
 from argparse import FileType
 import json
@@ -40,6 +40,7 @@ class Command(BaseCommand):
                 CREATE INDEX words_idx ON words(word text_pattern_ops);
             """)
 
+    @transaction.atomic
     def handle(self, *args, **options):
         variants_tsv = options['variants']
         notes = json.load(options['notes'])
@@ -58,21 +59,7 @@ class Command(BaseCommand):
             # split Source column into booleans
             row_dict = dict(zip(header, row))
             if 'change_type' in row_dict and row_dict['change_type']:
-                for source in row_dict['Source'].split(','):
-                    row_dict['Variant_in_' + source] = True
-                row_dict['Data_Release_id'] = release_id
-                row_dict['Change_Type_id'] = change_types[row_dict.pop('change_type')]
-                # use cleaned up genomic coordinates
-                row_dict['Genomic_Coordinate_hg38'] = row_dict.pop('pyhgvs_Genomic_Coordinate_38')
-                row_dict['Genomic_Coordinate_hg37'] = row_dict.pop('pyhgvs_Genomic_Coordinate_37')
-                row_dict['Genomic_Coordinate_hg36'] = row_dict.pop('pyhgvs_Genomic_Coordinate_36')
-                row_dict['Hg37_Start'] = row_dict.pop('pyhgvs_Hg37_Start')
-                row_dict['Hg37_End'] = row_dict.pop('pyhgvs_Hg37_End')
-                row_dict['Hg36_Start'] = row_dict.pop('pyhgvs_Hg36_Start')
-                row_dict['Hg36_End'] = row_dict.pop('pyhgvs_Hg36_End')
-                row_dict['HGVS_cDNA'] = row_dict.pop('pyhgvs_cDNA')
-                row_dict['HGVS_Protein'] = row_dict.pop('pyhgvs_Protein')
-
+                row_dict = update_variant_values_for_insertion(row_dict, release_id, change_types)
                 Variant.objects.create_variant(row_dict)
 
         # deleted variants
@@ -82,23 +69,7 @@ class Command(BaseCommand):
             for row in reader:
                 # split Source column into booleans
                 row_dict = dict(zip(header, row))
-                for source in row_dict['Source'].split(','):
-                    row_dict['Variant_in_' + source] = True
-                row_dict['Data_Release_id'] = release_id
-                # remove change type property, Variant only has Change_Type_id property
-                row_dict.pop('change_type', None)
-                row_dict['Change_Type_id'] = change_types['deleted']
-                # use cleaned up genomic coordinates
-                row_dict['Genomic_Coordinate_hg38'] = row_dict.pop('pyhgvs_Genomic_Coordinate_38')
-                row_dict['Genomic_Coordinate_hg37'] = row_dict.pop('pyhgvs_Genomic_Coordinate_37')
-                row_dict['Genomic_Coordinate_hg36'] = row_dict.pop('pyhgvs_Genomic_Coordinate_36')
-                row_dict['Hg37_Start'] = row_dict.pop('pyhgvs_Hg37_Start')
-                row_dict['Hg37_End'] = row_dict.pop('pyhgvs_Hg37_End')
-                row_dict['Hg36_Start'] = row_dict.pop('pyhgvs_Hg36_Start')
-                row_dict['Hg36_End'] = row_dict.pop('pyhgvs_Hg36_End')
-                row_dict['HGVS_cDNA'] = row_dict.pop('pyhgvs_cDNA')
-                row_dict['HGVS_Protein'] = row_dict.pop('pyhgvs_Protein')
-
+                row_dict = update_variant_values_for_insertion(row_dict, release_id, change_types, True)
                 Variant.objects.create_variant(row_dict)
 
         self.update_autocomplete_words()
@@ -109,3 +80,25 @@ class Command(BaseCommand):
 
         # calls django/data/management/commands/add_diff_json to add diff to db
         call_command('add_diff_json', str(release_id), diff_json)
+
+    def update_variant_values_for_insertion(row_dict, release_id, change_types, set_change_type_to_none=False):
+        for source in row_dict['Source'].split(','):
+            row_dict['Variant_in_' + source] = True
+        row_dict['Data_Release_id'] = release_id
+        if set_change_type_to_none is True:
+            row_dict.pop('change_type', None)
+            row_dict['Change_Type_id'] = change_types['deleted']
+        else:
+            row_dict['Change_Type_id'] = change_types[row_dict.pop('change_type')]
+
+        # use cleaned up genomic coordinates and other values
+        row_dict['Genomic_Coordinate_hg38'] = row_dict.pop('pyhgvs_Genomic_Coordinate_38')
+        row_dict['Genomic_Coordinate_hg37'] = row_dict.pop('pyhgvs_Genomic_Coordinate_37')
+        row_dict['Genomic_Coordinate_hg36'] = row_dict.pop('pyhgvs_Genomic_Coordinate_36')
+        row_dict['Hg37_Start'] = row_dict.pop('pyhgvs_Hg37_Start')
+        row_dict['Hg37_End'] = row_dict.pop('pyhgvs_Hg37_End')
+        row_dict['Hg36_Start'] = row_dict.pop('pyhgvs_Hg36_Start')
+        row_dict['Hg36_End'] = row_dict.pop('pyhgvs_Hg36_End')
+        row_dict['HGVS_cDNA'] = row_dict.pop('pyhgvs_cDNA')
+        row_dict['HGVS_Protein'] = row_dict.pop('pyhgvs_Protein')
+        return row_dict

@@ -137,7 +137,7 @@ class ReportManager(models.Manager):
 
 
 class Report(models.Model):
-    Variant = models.OneToOneField('Variant')
+    Variant = models.ForeignKey('Variant')
     Source = models.TextField()
     Gene_symbol_ENIGMA = models.TextField()
     Genomic_Coordinate = models.TextField()
@@ -213,6 +213,8 @@ class Report(models.Model):
     HGVS_protein_exLOVD = models.TextField()
 
     Data_Release = models.ForeignKey(DataRelease)
+
+    objects = ReportManager()
 
     class Meta:
         db_table = 'report'
