@@ -120,6 +120,14 @@ class Variant(models.Model):
     Polyphen_Score = models.TextField()
     Sift_Score = models.TextField()
     Sift_Prediction = models.TextField()
+    BX_ID_ENIGMA = models.TextField(default='')
+    BX_ID_LOVD = models.TextField(default='')
+    BX_ID_ESP = models.TextField(default='')
+    BX_ID_BIC = models.TextField(default='')
+    BX_ID_ClinVar = models.TextField(default='')
+    BX_ID_1000_Genomes = models.TextField(default='')
+    BX_ID_ExAC = models.TextField(default='')
+    BX_ID_exLOVD = models.TextField(default='')
 
     # Data Versioning
     Data_Release = models.ForeignKey(DataRelease)
@@ -311,6 +319,14 @@ class CurrentVariant(models.Model):
     Polyphen_Score = models.TextField()
     Sift_Score = models.TextField()
     Sift_Prediction = models.TextField()
+    BX_ID_ENIGMA = models.TextField(default='')
+    BX_ID_LOVD = models.TextField(default='')
+    BX_ID_ESP = models.TextField(default='')
+    BX_ID_BIC = models.TextField(default='')
+    BX_ID_ClinVar = models.TextField(default='')
+    BX_ID_1000_Genomes = models.TextField(default='')
+    BX_ID_ExAC = models.TextField(default='')
+    BX_ID_exLOVD = models.TextField(default='')
 
     # Data Versioning
     Data_Release = models.ForeignKey(DataRelease)
