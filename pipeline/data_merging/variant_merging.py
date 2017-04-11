@@ -203,11 +203,11 @@ def main():
     # write final output to file
     write_new_tsv(ARGS.output + "merged.tsv", columns, variants)
 
-    # write reports to reports file
-    aggregate_reports.write_reports_tsv(ARGS.output + "reports.tsv", columns, ARGS.artifacts_dir)
-
     # copy enigma file to artifacts directory along with other ready files
     copy(ARGS.input + ENIGMA_FILE, ARGS.output)
+
+    # write reports to reports file
+    aggregate_reports.write_reports_tsv(ARGS.output + "reports.tsv", columns, ARGS.artifacts_dir)
 
     discarded_reports_file.close()
 
