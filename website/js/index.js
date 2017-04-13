@@ -478,10 +478,6 @@ const IsoGrid = React.createClass({
     }
 });
 
-// temporary config for swapping out different variant details styles
-const USING_PACKERY = true;
-const USING_PANELS = true;
-
 var VariantDetail = React.createClass({
     mixins: [Navigation],
     showHelp: function (title) {
@@ -858,41 +854,25 @@ var VariantDetail = React.createClass({
                 groupsEmpty += 1;
             }
 
-            if (USING_PANELS) {
-                const panel = (
-                    <Panel
-                        header={(<h2>{groupTitle}</h2>)}
-                        onSelect={(event) => this.onChangeGroupVisibility(groupTitle, event, panel)}
-                        collapsable={true}
-                        defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
-                        <Table>
-                            <tbody>
-                                {rows}
-                            </tbody>
-                        </Table>
-                    </Panel>
-                );
+            const panel = (
+                <Panel
+                    header={(<h2>{groupTitle}</h2>)}
+                    onSelect={(event) => this.onChangeGroupVisibility(groupTitle, event, panel)}
+                    collapsable={true}
+                    defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
+                    <Table>
+                        <tbody>
+                            {rows}
+                        </tbody>
+                    </Table>
+                </Panel>
+            );
 
-                return (
-                    <div key={`group_collection-${groupTitle}`} className={ allEmpty && this.state.hideEmptyItems ? "group-empty" : "" }>
-                    {panel}
-                    </div>
-                );
-            }
-            else {
-                return (
-                    <div key={`group_collection-${groupTitle}`} className={ allEmpty && this.state.hideEmptyItems ? "group-empty" : "" }>
-                        <Table striped bordered>
-                            <thead>
-                                <h3>{groupTitle}</h3>
-                            </thead>
-                            <tbody>
-                                {rows}
-                            </tbody>
-                        </Table>
-                    </div>
-                );
-            }
+            return (
+                <div key={`group_collection-${groupTitle}`} className={ allEmpty && this.state.hideEmptyItems ? "group-empty" : "" }>
+                {panel}
+                </div>
+            );
         });
 
         const diffRows = this.generateDiffRows(cols, data);
@@ -929,7 +909,6 @@ var VariantDetail = React.createClass({
                 }
 
                 {
-                    (USING_PACKERY) ?
                     <Row>
                         <div className="container-fluid">
                             <IsoGrid>
@@ -946,16 +925,6 @@ var VariantDetail = React.createClass({
                                 }
                             </IsoGrid>
                         </div>
-                    </Row>
-                    :
-                    <Row>
-                    {
-                        // we're mapping each group into a column so we can horizontally stack them
-                        groupTables.map((x, i) => {
-                            return (<Col key={"group_col-" + i} md={6} lg={4} className="variant-detail-group">{x}</Col>);
-                            // return (<div key={"group_col-" + i} className="col-md-6 col-lg-4 variant-detail-group">{x}</div>);
-                        })
-                    }
                     </Row>
                 }
 
