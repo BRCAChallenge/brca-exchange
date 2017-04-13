@@ -642,3 +642,72 @@ th[role='columnheader'] .help, .help-target .help {
 .release-notes {
     white-space: pre-line;
 }
+
+
+/* faisal: alternate design for details page */
+
+div.variant-detail-group table.table-bordered {
+    border: solid 1px #9a9a9a;
+}
+
+div.variant-detail-group table.table-bordered td {
+    border: none;
+    border-bottom: solid 1px #ccc;
+}
+
+div.variant-detail-group table td.help-target {
+    font-weight: bold;
+    text-align: right;
+    text-decoration: dashed;
+    width: 200px;
+}
+
+div.variant-detail-group .panel table {
+    margin-bottom: 10px;
+}
+
+span.help-target-inline {
+    border-bottom: dotted 1px gray;
+    cursor: help;
+}
+
+div.variant-detail-group table.table-bordered {
+    border-top: solid 5px #777777;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.row-wrap-nowidth {
+    word-wrap: break-word;
+    float: left;
+}
+
+/* hide empty variant information client-side */
+div.variant-detail-group .variantfield-empty {
+    display: none;
+}
+
+div.variant-detail-group .group-empty {
+    display: none;
+}
+
+/* special panel styling */
+
+.isogrid {
+    /* makes isogrid line up with bootstrap's columns; it ordinarily wouldn't due to its gutter option */
+    margin-left: -10px;
+    margin-right: -10px;
+}
+
+div.variant-detail-group .panel {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+div.variant-detail-group .panel-body {
+    padding: 0;
+    background-color: white;
+}
+
+/* faisal: hack for packery to minimize the impact of the graphical glitch of opening/closing a section */
+.variant-history-col {
+    background-color: white;
+}

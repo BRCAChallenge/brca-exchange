@@ -74,6 +74,82 @@ var filterColumns = [
 //    return sorted;
 //}
 
+const groups = [
+    {groupTitle: 'Identification', internalGroupName: 'Variant Nomenclature', innerCols: [
+        {title: 'Gene', prop: 'Gene_Symbol', render: gene => <i>{gene}</i>},
+        {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: nucleotide => nucleotide.split(':')[1]},
+        {title: 'HGVS Protein', prop: 'HGVS_Protein', render: protein => protein.split(':')[1]},
+        {title: 'BIC Designation', prop: 'BIC_Nomenclature'},
+        {title: 'ClinVar Accession', prop: 'ClinVarAccession_ENIGMA'},
+        {title: 'Reference cDNA Sequence', prop: 'Reference_Sequence'},
+        {title: 'Protein Amino Acid Change', prop: 'Protein_Change'},
+    ]},
+
+    {groupTitle: 'Significance', internalGroupName: 'Significance', innerCols: [
+        {title: 'Pathogenicity', prop: 'Pathogenicity_all'},
+        {title: 'Prior probability of pathogenicity (exLOVD)', prop: 'Combined_prior_probablility_exLOVD'},
+        {title: 'Missense analysis probability of pathogenicity (exLOVD)', prop: 'Missense_analysis_prior_probability_exLOVD'},
+        {title: 'Probability of pathogenicity (exLOVD)', prop: 'Posterior_probability_exLOVD'},
+    ]},
+
+    {groupTitle: 'Genomic', internalGroupName: 'Genomic', innerCols: [
+        {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
+        {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
+        {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36'}
+    ]},
+
+    {groupTitle: 'Source', internalGroupName: 'Source', innerCols: [
+        {title: 'Source(s)', prop: 'Source'},
+        {title: 'Source URL(s)', prop: 'Source_URL'},
+    ]},
+
+    {groupTitle: 'Bioinformatic Annotation', internalGroupName: 'Bioinformatic Annotation', innerCols: [
+        {title: 'Mutation category (BIC)', prop: 'Mutation_type_BIC'},
+        {title: 'PolyPhen score', prop: 'PolyPhen_Score'},
+        {title: 'SIFT score', prop: 'Sift_Score'}
+    ]},
+
+    {groupTitle: 'Allele Origin and Pedigree Data', internalGroupName: 'Allele Origin and Pedigree Data', innerCols: [
+        {title: 'Allele Origin (ClinVar)', prop: 'Allele_Origin_ClinVar'},
+        {title: 'Allele Origin (ENIGMA)', prop: 'Allele_origin_ENIGMA'},
+        {title: 'Allele Origin (BIC)', prop: 'Germline_or_Somatic_BIC'},
+        {title: 'Patient Nationality (BIC)', prop: 'Patient_nationality_BIC'},
+        {title: 'Ethnicity (BIC)', prop: 'Ethnicity_BIC'},
+        {title: 'Family members carrying this variant (BIC)', prop: 'Number_of_family_member_carrying_mutation_BIC'},
+        {title: 'Variant Haplotype (LOVD)', prop: 'Variant_haplotype_LOVD'},
+    ]},
+
+    {groupTitle: 'Publications', internalGroupName: 'Publications', innerCols: [
+        {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_citation_ENIGMA'},
+        {title: 'Clinical Significance Citation (ENIGMA)', prop: 'Clinical_significance_citations_ENIGMA'},
+        {title: 'Literature Reference (BIC)', prop: 'Literature_citation_BIC'},
+        {title: 'Literature Reference (exLOVD)', prop: 'Literature_source_exLOVD'}
+    ]},
+
+    {groupTitle: 'Allele Frequency Data', internalGroupName: 'Allele Frequency Data', innerCols: [
+        {title: 'African Allele Frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes'},
+        {title: 'Allele Frequency', prop: 'Allele_Frequency'},
+        {title: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes'},
+        {title: 'Allele Frequency (ExAC)', prop: 'Allele_frequency_ExAC'},
+        {title: 'AMR Allele Frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes'},
+        {title: 'EAS Allele Frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes'},
+        {title: 'EUR Allele Frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes'},
+        {title: 'Maximum Allele Frequency', prop: 'Max_Allele_Frequency'},
+        {title: 'Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP'},
+        {title: 'South Asian Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes'},
+        {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'}
+    ]},
+
+    {groupTitle: 'Probability', internalGroupName: 'Probability', innerCols: [
+        {title: 'Co-occurrence likelihood (exLOVD)', prop: 'Co_occurrence_LR_exLOVD'},
+        {title: 'Prior probability of pathogenicity (exLOVD)', prop: 'Combined_prior_probablility_exLOVD'},
+        {title: 'Missense analysis probability of pathogenicity (exLOVD)', prop: 'Missense_analysis_prior_probability_exLOVD'},
+        {title: 'Probability of pathogenicity (exLOVD)', prop: 'Posterior_probability_exLOVD'},
+        {title: 'Segregation Likelihood Ratio (exLOVD)', prop: 'Segregation_LR_exLOVD'},
+        {title: 'Summary Family History Likelihood Ratio (exLOVD)', prop: 'Sum_family_LR_exLOVD'}
+    ]},
+];
+
 var columns = [
     {title: 'Gene', prop: 'Gene_Symbol', render: gene => <i>{gene}</i>},
     {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: nucleotide => nucleotide.split(':')[1]},
@@ -525,5 +601,7 @@ module.exports = {
 	VariantTable: VariantTableSupplier(Table),
 	ResearchVariantTable: ResearchVariantTableSupplier(Table),
 	researchModeColumns: researchModeColumns,
-	columns: columns
+	columns: columns,
+
+    groups: groups
 };
