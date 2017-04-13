@@ -645,10 +645,10 @@ var VariantDetail = React.createClass({
         if (localStorage.getItem("research-mode") === 'true') {
             return this.renderAllData();
         } else {
-            return this.renderExpertRevied();
+            return this.renderExpertReviewed();
         }
     },
-    renderExpertRevied: function() {
+    renderExpertReviewed: function() {
         // copied from previous version
 
         var {data, error} = this.state;
