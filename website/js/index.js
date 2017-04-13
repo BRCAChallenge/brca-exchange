@@ -823,6 +823,23 @@ var VariantDetail = React.createClass({
                     } else if (prop === "Date_last_evaluated_ENIGMA" && !isEmptyField(variant[prop])) {
                         rowItem = moment(variant[prop], "MM/DD/YYYY").format("DD MMMM YYYY");
                     } else {
+                        // FIXME: make this less of a hack in the future
+                        // make sure commas wrap
+                        if (variant[prop]) {
+                            variant[prop] = variant[prop].split(",")
+                                .map(x => x.trim())
+                                .filter(x => x !== '-')
+                                .join(", ");
+
+                            // and that blank fields are replaced with hyphens
+                            if (variant[prop].trim() === "") {
+                                variant[prop] = "-";
+                            }
+                        }
+                        else {
+                            variant[prop] = "-";
+                        }
+
                         rowItem = variant[prop];
                     }
                 } else if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] !== null) {
