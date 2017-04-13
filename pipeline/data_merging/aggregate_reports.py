@@ -70,7 +70,7 @@ def get_reports_files(input_directory):
     reports_files = []
     for f in os.listdir(input_directory):
         filename, file_extension = os.path.splitext(f)
-        if (filename in FIELD_DICT and file_extension == ".vcf") or filename == "ENIGMA_combined_with_bx_ids":
+        if (filename in FIELD_DICT and file_extension == ".vcf") or f == ENIGMA_FILE:
             reports_files.append(f)
     return reports_files
 
@@ -80,8 +80,8 @@ def normalize_reports(file, columns):
     if file_extension == ".vcf":
         reports = normalize_vcf_reports(file, columns, filename, file_extension)
     elif file_extension == ".tsv":
-        if "ENIGMA" not in filename.upper():
-            raise Exception("ERROR: received tsv file that is not for ENIGMA: %s" % (filename))
+        if os.path.basename(file) != ENIGMA_FILE:
+            raise Exception("ERROR: received tsv file that is not for ENIGMA: %s" % (file))
         reports = normalize_enigma_tsv_reports(file, columns, filename, file_extension)
     for report in reports:
         if len(report) != len(columns):
@@ -119,17 +119,17 @@ def normalize_enigma_tsv_reports(file, columns, filename, file_extension):
     reports = []
     enigma_file = open(file, 'r')
     line_num = 0
-    enigma_column_indexes_in_columns = {}
+    enigma_column_indexes = {}
     for line in enigma_file:
         line_num += 1
         if line_num == 1:
             enigma_columns = add_columns_to_enigma_data(line)
             for key, value in enumerate(enigma_columns):
-                enigma_column_indexes_in_columns[key] = value
+                enigma_column_indexes[key] = value
         else:
             (items, chrom, pos, ref, alt) = associate_chr_pos_ref_alt_with_enigma_item(line)
             report = ['-'] * len(columns)
-            for key, value in enigma_column_indexes_in_columns.iteritems():
+            for key, value in enigma_column_indexes.iteritems():
                 report[columns.index(value)] = items[key]
             reports.append(report)
     enigma_file.close()
