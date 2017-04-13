@@ -742,6 +742,8 @@ class ConvertSharedLOVDToVCF(luigi.Task):
         lovd_file_dir = self.file_parent_dir + "/LOVD"
         brca_resources_dir = self.resources_dir
 
+        os.chdir(lovd_method_dir)
+
         args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA.txt", "-o",
                 lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf", "-a", "sharedLOVDAnnotation",
                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
@@ -750,7 +752,7 @@ class ConvertSharedLOVDToVCF(luigi.Task):
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        check_file_for_contents(lovd_file_dir + "/sharedLOVD_brca2.hg19.vcf")
+        check_file_for_contents(lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf")
 
 
 @requires(ConvertSharedLOVDToVCF)

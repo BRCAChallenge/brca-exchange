@@ -41,9 +41,9 @@ def main():
             if source in variant["Source"]:
                 num_variants_by_source[source] += 1
         if args.change_type:
-          for change_type in num_variants_by_change_type.keys():
-              if change_type in variant["change_type"]:
-                  num_variants_by_change_type[change_type] += 1
+            for change_type in num_variants_by_change_type.keys():
+                if change_type in variant["change_type"]:
+                    num_variants_by_change_type[change_type] += 1
 
     print num_variants_by_source
     if args.change_type:

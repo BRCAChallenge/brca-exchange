@@ -19,6 +19,7 @@ from pprint import pprint
 from shutil import copy
 from numbers import Number
 import csv
+import aggregate_reports
 
 
 # GENOMIC VERSION:
@@ -204,6 +205,9 @@ def main():
 
     # copy enigma file to artifacts directory along with other ready files
     copy(ARGS.input + ENIGMA_FILE, ARGS.output)
+
+    # write reports to reports file
+    aggregate_reports.write_reports_tsv(ARGS.output + "reports.tsv", columns, ARGS.artifacts_dir)
 
     discarded_reports_file.close()
 
@@ -707,19 +711,7 @@ def add_new_source(columns, variants, source, source_file, source_dict):
                 variants[genome_coor][COLUMN_SOURCE] = [variants[genome_coor][COLUMN_SOURCE]]
             variants[genome_coor][COLUMN_SOURCE].append(source)
         else:
-            variants[genome_coor] = ['-'] * old_column_num
-            variants[genome_coor][COLUMN_SOURCE] = source
-            if record.CHROM == "13":
-                variants[genome_coor][COLUMN_GENE] = "BRCA2"
-            elif record.CHROM == "17":
-                variants[genome_coor][COLUMN_GENE] = "BRCA1"
-            else:
-                raise Exception("Wrong chromosome")
-            variants[genome_coor][COLUMN_GENOMIC_HGVS] = genome_coor
-            variants[genome_coor][COLUMN_VCF_CHR] = record.CHROM
-            variants[genome_coor][COLUMN_VCF_POS] = record.POS
-            variants[genome_coor][COLUMN_VCF_REF] = record.REF
-            variants[genome_coor][COLUMN_VCF_ALT] = str(record.ALT[0])
+            variants[genome_coor] = associate_chr_pos_ref_alt_with_item(record, old_column_num, source, genome_coor)
         for value in source_dict.values():
             try:
                 variants[genome_coor].append(record.INFO[value])
@@ -744,12 +736,58 @@ def add_new_source(columns, variants, source, source_file, source_dict):
     return (columns, variants)
 
 
+def associate_chr_pos_ref_alt_with_item(line, column_num, source, genome_coor):
+    # places genomic coordinate data in correct positions to align with relevant columns in output tsv file.
+    item = ['-'] * column_num
+    item[COLUMN_SOURCE] = source
+    if line.CHROM == "13":
+        item[COLUMN_GENE] = "BRCA2"
+    elif line.CHROM == "17":
+        item[COLUMN_GENE] = "BRCA1"
+    else:
+        raise Exception("Wrong chromosome")
+    item[COLUMN_GENOMIC_HGVS] = genome_coor
+    item[COLUMN_VCF_CHR] = line.CHROM
+    item[COLUMN_VCF_POS] = line.POS
+    item[COLUMN_VCF_REF] = line.REF
+    item[COLUMN_VCF_ALT] = str(line.ALT[0])
+    return item
+
+
+def associate_chr_pos_ref_alt_with_enigma_item(line):
+    # places source and genomic coordinate data in correct positions to align with enigma columns
+    items = line.strip().split("\t")
+    items.insert(COLUMN_SOURCE, "ENIGMA")
+    v = items[COLUMN_GENOMIC_HGVS].replace("-", "").replace("chr", "").replace(">", ":")
+    (chrom, pos, ref, alt) = v.split(":")
+    items.insert(COLUMN_VCF_CHR, chrom)
+    items.insert(COLUMN_VCF_POS, pos)
+    items.insert(COLUMN_VCF_REF, ref)
+    items.insert(COLUMN_VCF_ALT, alt)
+    for ii in range(len(items)):
+        if items[ii] is None or items[ii] == '':
+            items[ii] = DEFAULT_CONTENTS
+    return (items, chrom, pos, ref, alt)
+
+
+def add_columns_to_enigma_data(line):
+    # adds necessary columns to enigma data
+    columns = line.strip().split("\t")
+    columns = [c + "_ENIGMA" for c in columns if c != "Genomic_Coordinate"]
+    columns.insert(COLUMN_SOURCE, "Source")
+    columns.insert(COLUMN_GENOMIC_HGVS, "Genomic_Coordinate")
+    columns.insert(COLUMN_VCF_CHR, "Chr")
+    columns.insert(COLUMN_VCF_POS, "Pos")
+    columns.insert(COLUMN_VCF_REF, "Ref")
+    columns.insert(COLUMN_VCF_ALT, "Alt")
+    return columns
+
+
 def save_enigma_to_dict(path):
     global DISCARDED_REPORTS_WRITER
 
     enigma_file = open(path, "r")
     variants = dict()
-    columns = ""
     line_num = 0
     f_wrong = open(ARGS.output + "ENIGMA_wrong_genome.txt", "w")
     n_wrong, n_total = 0, 0
@@ -757,31 +795,13 @@ def save_enigma_to_dict(path):
     for line in enigma_file:
         line_num += 1
         if line_num == 1:
-            columns = line.strip().split("\t")
-            columns = [c + "_ENIGMA" for c in columns if c != "Genomic_Coordinate"]
-            columns.insert(COLUMN_SOURCE, "Source")
-            columns.insert(COLUMN_GENOMIC_HGVS, "Genomic_Coordinate")
-            columns.insert(COLUMN_VCF_CHR, "Chr")
-            columns.insert(COLUMN_VCF_POS, "Pos")
-            columns.insert(COLUMN_VCF_REF, "Ref")
-            columns.insert(COLUMN_VCF_ALT, "Alt")
+            columns = add_columns_to_enigma_data(line)
             for i, column in enumerate(columns):
                 if "BX_ID" in column:
                     bx_id_column_index = i
             f_wrong.write(line)
         else:
-            items = line.strip().split("\t")
-            items.insert(COLUMN_SOURCE, "ENIGMA")
-            v = items[COLUMN_GENOMIC_HGVS].replace("-", "").replace("chr", "").replace(">", ":")
-            (chrom, pos, ref, alt) = v.split(":")
-            items.insert(COLUMN_VCF_CHR, chrom)
-            items.insert(COLUMN_VCF_POS, pos)
-            items.insert(COLUMN_VCF_REF, ref)
-            items.insert(COLUMN_VCF_ALT, alt)
-            for ii in range(len(items)):
-                if items[ii] == None:
-                    items[ii] = DEFAULT_CONTENTS
-
+            (items, chrom, pos, ref, alt) = associate_chr_pos_ref_alt_with_enigma_item(line)
             bx_id = items[bx_id_column_index]
             hgvs = "chr%s:g.%s:%s>%s" % (str(chrom), str(pos), ref, alt)
 

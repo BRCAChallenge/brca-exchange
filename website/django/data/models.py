@@ -120,6 +120,14 @@ class Variant(models.Model):
     Polyphen_Score = models.TextField()
     Sift_Score = models.TextField()
     Sift_Prediction = models.TextField()
+    BX_ID_ENIGMA = models.TextField(default='')
+    BX_ID_LOVD = models.TextField(default='')
+    BX_ID_ESP = models.TextField(default='')
+    BX_ID_BIC = models.TextField(default='')
+    BX_ID_ClinVar = models.TextField(default='')
+    BX_ID_1000_Genomes = models.TextField(default='')
+    BX_ID_ExAC = models.TextField(default='')
+    BX_ID_exLOVD = models.TextField(default='')
 
     # Data Versioning
     Data_Release = models.ForeignKey(DataRelease)
@@ -129,6 +137,95 @@ class Variant(models.Model):
 
     class Meta:
         db_table = 'variant'
+
+
+class ReportManager(models.Manager):
+    def create_report(self, row):
+        return self.create(**row)
+
+
+class Report(models.Model):
+    Variant = models.ForeignKey('Variant')
+    Source = models.TextField()
+    Gene_symbol_ENIGMA = models.TextField()
+    Genomic_Coordinate = models.TextField()
+    Chr = models.TextField()
+    Pos = models.TextField()
+    Ref = models.TextField()
+    Alt = models.TextField()
+    Reference_sequence_ENIGMA = models.TextField()
+    HGVS_cDNA_ENIGMA = models.TextField()
+    BIC_Nomenclature_ENIGMA = models.TextField()
+    Abbrev_AA_change_ENIGMA = models.TextField()
+    URL_ENIGMA = models.TextField()
+    Condition_ID_type_ENIGMA = models.TextField()
+    Condition_ID_value_ENIGMA = models.TextField()
+    Condition_category_ENIGMA = models.TextField()
+    Clinical_significance_ENIGMA = models.TextField()
+    Date_last_evaluated_ENIGMA = models.TextField()
+    Assertion_method_ENIGMA = models.TextField()
+    Assertion_method_citation_ENIGMA = models.TextField()
+    Clinical_significance_citations_ENIGMA = models.TextField()
+    Comment_on_clinical_significance_ENIGMA = models.TextField()
+    Collection_method_ENIGMA = models.TextField()
+    Allele_origin_ENIGMA = models.TextField()
+    ClinVarAccession_ENIGMA = models.TextField()
+    HGVS_protein_ENIGMA = models.TextField()
+    BX_ID_ENIGMA = models.TextField()
+    Clinical_Significance_ClinVar = models.TextField()
+    Date_Last_Updated_ClinVar = models.TextField()
+    BX_ID_ClinVar = models.TextField()
+    HGVS_ClinVar = models.TextField()
+    Submitter_ClinVar = models.TextField()
+    Protein_ClinVar = models.TextField()
+    SCV_ClinVar = models.TextField()
+    Allele_Origin_ClinVar = models.TextField()
+    Method_ClinVar = models.TextField()
+    BX_ID_LOVD = models.TextField()
+    Variant_frequency_LOVD = models.TextField()
+    HGVS_cDNA_LOVD = models.TextField()
+    HGVS_protein_LOVD = models.TextField()
+    BX_ID_ESP = models.TextField()
+    Minor_allele_frequency_ESP = models.TextField()
+    polyPhen2_result_ESP = models.TextField()
+    EUR_Allele_frequency_1000_Genomes = models.TextField()
+    AFR_Allele_frequency_1000_Genomes = models.TextField()
+    AMR_Allele_frequency_1000_Genomes = models.TextField()
+    EAS_Allele_frequency_1000_Genomes = models.TextField()
+    BX_ID_1000_Genomes = models.TextField()
+    Allele_frequency_1000_Genomes = models.TextField()
+    SAS_Allele_frequency_1000_Genomes = models.TextField()
+    Allele_frequency_ExAC = models.TextField()
+    BX_ID_ExAC = models.TextField()
+    BX_ID_BIC = models.TextField()
+    Patient_nationality_BIC = models.TextField()
+    Clinical_importance_BIC = models.TextField()
+    Clinical_classification_BIC = models.TextField()
+    BIC_Designation_BIC = models.TextField()
+    Literature_citation_BIC = models.TextField()
+    Number_of_family_member_carrying_mutation_BIC = models.TextField()
+    Germline_or_Somatic_BIC = models.TextField()
+    Ethnicity_BIC = models.TextField()
+    Mutation_type_BIC = models.TextField()
+    IARC_class_exLOVD = models.TextField()
+    BIC_Nomenclature_exLOVD = models.TextField()
+    Sum_family_LR_exLOVD = models.TextField()
+    Combined_prior_probablility_exLOVD = models.TextField()
+    BX_ID_exLOVD = models.TextField()
+    HGVS_cDNA_exLOVD = models.TextField()
+    Literature_source_exLOVD = models.TextField()
+    Co_occurrence_LR_exLOVD = models.TextField()
+    Posterior_probability_exLOVD = models.TextField()
+    Missense_analysis_prior_probability_exLOVD = models.TextField()
+    Segregation_LR_exLOVD = models.TextField()
+    HGVS_protein_exLOVD = models.TextField()
+
+    Data_Release = models.ForeignKey(DataRelease)
+
+    objects = ReportManager()
+
+    class Meta:
+        db_table = 'report'
 
 
 # materialized view containing only the most current version of each variant
@@ -222,6 +319,14 @@ class CurrentVariant(models.Model):
     Polyphen_Score = models.TextField()
     Sift_Score = models.TextField()
     Sift_Prediction = models.TextField()
+    BX_ID_ENIGMA = models.TextField(default='')
+    BX_ID_LOVD = models.TextField(default='')
+    BX_ID_ESP = models.TextField(default='')
+    BX_ID_BIC = models.TextField(default='')
+    BX_ID_ClinVar = models.TextField(default='')
+    BX_ID_1000_Genomes = models.TextField(default='')
+    BX_ID_ExAC = models.TextField(default='')
+    BX_ID_exLOVD = models.TextField(default='')
 
     # Data Versioning
     Data_Release = models.ForeignKey(DataRelease)
