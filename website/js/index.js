@@ -434,7 +434,28 @@ function isEmptyDiff(value) {
     return value === null || value.length < 1;
 }
 
-// let masonryHack = null;
+// replaces commas with comma-spaces to wrap long lines better, removes blank entries from comma-delimited lists,
+// and normalizes blank/null values to a single hyphen
+function normalizedFieldDisplay(value) {
+    if (value) {
+        // make sure commas, if present, wrap
+        value = value.split(",")
+            .map(x => x.trim())
+            .filter(x => x && x !== '-')
+            .join(", ");
+
+        // ensure that blank entries are always normalized to hyphens
+        if (value.trim() === "") {
+            value = "-";
+        }
+    }
+    else {
+        // similar to above, normalize blank entries to a hyphen
+        value = "-";
+    }
+
+    return value;
+}
 
 const IsoGrid = React.createClass({
     displayName: 'IsoGrid',
@@ -469,8 +490,6 @@ const IsoGrid = React.createClass({
                     gutter: 0
                 }
             });
-
-            // masonryHack = this.masonry;
         }
         else {
             this.masonry.reloadItems();
@@ -518,7 +537,7 @@ var VariantDetail = React.createClass({
             hideEmptyItems: hideEmptyItems
         });
     },
-    onChangeGroupVisibility(groupTitle, event, panel) {
+    onChangeGroupVisibility(groupTitle, event) {
         // stop the page from scrolling to the top (due to navigating to the fragment '#')
         event.preventDefault();
 
@@ -528,32 +547,14 @@ var VariantDetail = React.createClass({
         localStorage.setItem("collapse-group_" + groupTitle, isCollapsed);
 
         // defer re-layout until the state change has completed
-        // const targ = event.target.parentNode.parentNode.parentNode;
         const me = this;
 
-        console.log("panel: ", panel);
-
         setTimeout(() => {
-            // re-rendering will lay everything out again
-            // FIXME: it'd be lovely if we could do this continually, but i think that requires using CSS3 transitions
-            // (currently react-bootstrap animates its collapsing panels via straight js)
+            // this forces a re-render after a group has expanded/collapsed, fixing the layout
+            // note that 300ms just happens to be the duration of the expand/collapse animation
+            // it'd be better to run the re-layout whenever the animation ends
             me.forceUpdate();
         }, 300);
-
-        /*
-        let lastHeight = 0;
-
-        const id = setInterval(function() {
-            if (lastHeight > 100) {
-                clearInterval(id);
-            }
-            else {
-                // continually lay out the thing every 5ms
-                masonryHack.layout();
-                lastHeight += 1;
-            }
-        }, 10);
-        */
     },
     generateDiffRows: function(cols, data) {
         var diffRows = [];
@@ -823,24 +824,7 @@ var VariantDetail = React.createClass({
                     } else if (prop === "Date_last_evaluated_ENIGMA" && !isEmptyField(variant[prop])) {
                         rowItem = moment(variant[prop], "MM/DD/YYYY").format("DD MMMM YYYY");
                     } else {
-                        // FIXME: make this less of a hack in the future
-                        // make sure commas wrap
-                        if (variant[prop]) {
-                            variant[prop] = variant[prop].split(",")
-                                .map(x => x.trim())
-                                .filter(x => x !== '-')
-                                .join(", ");
-
-                            // and that blank fields are replaced with hyphens
-                            if (variant[prop].trim() === "") {
-                                variant[prop] = "-";
-                            }
-                        }
-                        else {
-                            variant[prop] = "-";
-                        }
-
-                        rowItem = variant[prop];
+                        rowItem = normalizedFieldDisplay(variant[prop]);
                     }
                 } else if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] !== null) {
                     rowItem = variant["HGVS_Protein"].split(":")[0];
@@ -874,7 +858,7 @@ var VariantDetail = React.createClass({
             const panel = (
                 <Panel
                     header={(<h2>{groupTitle}</h2>)}
-                    onSelect={(event) => this.onChangeGroupVisibility(groupTitle, event, panel)}
+                    onSelect={(event) => this.onChangeGroupVisibility(groupTitle, event)}
                     collapsable={true}
                     defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
                     <Table>
