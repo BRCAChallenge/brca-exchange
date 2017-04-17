@@ -4,7 +4,6 @@ import tempfile
 import csv
 import releaseDiff
 from os import path
-import pdb
 
 
 class TestStringMethods(unittest.TestCase):
@@ -421,6 +420,21 @@ class TestStringMethods(unittest.TestCase):
         diff = releaseDiff.diff_json
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
+
+    def test_catches_changed_numeric_values_after_normalization(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+
+        self.oldRow['Allele_frequency_ExAC'] = '9.841e-06'
+        self.newRow['Allele_frequency_ExAC'] = '9.841e-07'
+
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(len(diff), 1)
+        self.assertIs(change_type, "changed_information")
 
     def test_catches_reordered_source_urls(self):
         releaseDiff.added_data = self.added_data

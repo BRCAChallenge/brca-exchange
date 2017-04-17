@@ -177,6 +177,7 @@ class transformer(object):
 
         try:
             value = float(value)
+            value = str(value)
         except ValueError:
             pass
 
