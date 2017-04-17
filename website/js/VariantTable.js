@@ -85,9 +85,6 @@ const groups = [
         {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38', core: true},
         {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
         {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36'},
-
-        // move to where?
-        {title: 'ClinVar Accession', prop: 'ClinVarAccession_ENIGMA'},
     ]},
 
     {groupTitle: 'Clinical Significance (ENIGMA)', internalGroupName: 'Significance (ENIGMA)', innerCols: [
