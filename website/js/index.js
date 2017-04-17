@@ -28,6 +28,7 @@ var slugify = require('./slugify');
 
 var content = require('./content');
 var Community = require('./Community');
+var FactSheet = require('./FactSheet');
 var {MailingList} = require('./MailingList');
 
 var databaseKey = require('../databaseKey');
@@ -706,6 +707,7 @@ var routes = (
     <Route handler={Application}>
         <DefaultRoute handler={Home}/>
         <Route path='about/:page' handler={About}/>
+        <Route path='factsheet' handler={FactSheet}/>
         <Route path='help' handler={Help}/>
         <Route path='community' handler={Community}/>
         <Route path='signup' handler={Signup}/>
