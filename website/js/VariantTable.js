@@ -107,7 +107,6 @@ const groups = [
     ]},
 
     {groupTitle: 'Clinical Significance (LOVD)', internalGroupName: 'Significance (LOVD)', innerCols: [
-        // FIXME: what is 'Effect (LOVD)'? assuming it's this functional analysis result/method, but unsure
         {title: 'Functional Analysis Result (LOVD)', prop: 'Functional_analysis_result_LOVD'},
         {title: 'Functional Analysis Method (LOVD)', prop: 'Functional_analysis_technique_LOVD'},
         {title: 'Variant Haplotype (LOVD)', prop: 'Variant_haplotype_LOVD'},
@@ -126,8 +125,7 @@ const groups = [
     ]},
 
     {groupTitle: 'Allele Frequency Reference Sets', internalGroupName: 'Allele Frequency Reference Sets', innerCols: [
-        // FIXME: where is 'Maximum Allele Frequency (1000 Genomes and ESP)'? is it the following?
-        {title: 'Maximum Allele Frequency', prop: 'Max_Allele_Frequency', core: true},
+        {title: 'Maximum Allele Frequency (1000 Genomes and ESP)', prop: 'Max_Allele_Frequency', core: true},
         {title: 'Allele Frequency', prop: 'Allele_Frequency', core: true},
         {title: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes', core: true},
         {title: 'African Allele Frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes', core: true},
@@ -135,10 +133,8 @@ const groups = [
         {title: 'EAS Allele Frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes', core: true},
         {title: 'EUR Allele Frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes', core: true},
         {title: 'South Asian Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes', core: true},
-        // FIXME: should i compute 'Allele Frequency (ExAC minus TCGA)'?
-        {title: 'Allele Frequency (ExAC)', prop: 'Allele_frequency_ExAC', core: true},
+        {title: 'Allele Frequency (ExAC minus TCGA)', prop: 'Allele_frequency_ExAC', core: true},
         {title: 'Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP', core: true},
-        // REMOVED: {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'}
     ]},
 
     {groupTitle: 'Multifactorial Likelihood Analysis', internalGroupName: 'Multifactorial Likelihood Analysis', innerCols: [
