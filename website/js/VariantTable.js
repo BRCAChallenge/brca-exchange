@@ -75,78 +75,83 @@ var filterColumns = [
 //}
 
 const groups = [
-    {groupTitle: 'Identification', internalGroupName: 'Variant Nomenclature', innerCols: [
-        {title: 'Gene', prop: 'Gene_Symbol', render: gene => <i>{gene}</i>},
-        {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: nucleotide => nucleotide.split(':')[1]},
-        {title: 'HGVS Protein', prop: 'HGVS_Protein', render: protein => protein.split(':')[1]},
-        {title: 'BIC Designation', prop: 'BIC_Nomenclature'},
-        {title: 'ClinVar Accession', prop: 'ClinVarAccession_ENIGMA'},
-        {title: 'Reference cDNA Sequence', prop: 'Reference_Sequence'},
-        {title: 'Protein Amino Acid Change', prop: 'Protein_Change'},
-    ]},
-
-    {groupTitle: 'Significance', internalGroupName: 'Significance', innerCols: [
-        {title: 'Pathogenicity', prop: 'Pathogenicity_all'},
-        {title: 'Prior probability of pathogenicity (exLOVD)', prop: 'Combined_prior_probablility_exLOVD'},
-        {title: 'Missense analysis probability of pathogenicity (exLOVD)', prop: 'Missense_analysis_prior_probability_exLOVD'},
-        {title: 'Probability of pathogenicity (exLOVD)', prop: 'Posterior_probability_exLOVD'},
-    ]},
-
-    {groupTitle: 'Genomic', internalGroupName: 'Genomic', innerCols: [
-        {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
+    {groupTitle: 'Variant Nomenclature', internalGroupName: 'Variant Nomenclature', innerCols: [
+        {title: 'Gene Symbol', prop: 'Gene_Symbol', render: gene => <i>{gene}</i>, core: true},
+        {title: 'Reference cDNA Sequence', prop: 'Reference_Sequence', core: true},
+        {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: nucleotide => nucleotide.split(':')[1], core: true},
+        {title: 'HGVS Protein', prop: 'HGVS_Protein', render: protein => protein.split(':')[1], core: true},
+        {title: 'Protein Amino Acid Change', prop: 'Protein_Change', core: true},
+        {title: 'BIC Designation', prop: 'BIC_Nomenclature', core: true},
+        {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38', core: true},
         {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
-        {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36'}
+        {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36'},
+
+        // move to where?
+        {title: 'ClinVar Accession', prop: 'ClinVarAccession_ENIGMA'},
     ]},
 
-    {groupTitle: 'Source', internalGroupName: 'Source', innerCols: [
-        {title: 'Source(s)', prop: 'Source'},
-        {title: 'Source URL(s)', prop: 'Source_URL'},
+    {groupTitle: 'Clinical Significance (ENIGMA)', internalGroupName: 'Significance (ENIGMA)', innerCols: [
+        {title: 'Clinical Significance (ENIGMA)', prop: 'Clinical_significance_ENIGMA', core: true},
+        {title: 'Comment on Clinical Significance (ENIGMA)', prop: 'Comment_on_clinical_significance_ENIGMA', core: true},
+        {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_ENIGMA', core: true},
+        {title: 'Date last evaluated (ENIGMA)', prop: 'Date_last_evaluated_ENIGMA', core: true},
+        {title: 'Collection Method (ENIGMA)', prop: 'Collection_method_ENIGMA', core: true},
+        {title: 'Clinical Significance Citation (ENIGMA)', prop: 'Clinical_significance_citations_ENIGMA', core: true},
+        {title: 'Allele Origin (ENIGMA)', prop: 'Allele_origin_ENIGMA', core: true},
     ]},
 
-    {groupTitle: 'Bioinformatic Annotation', internalGroupName: 'Bioinformatic Annotation', innerCols: [
-        {title: 'Mutation category (BIC)', prop: 'Mutation_type_BIC'},
-        {title: 'PolyPhen score', prop: 'PolyPhen_Score'},
-        {title: 'SIFT score', prop: 'Sift_Score'}
+    {groupTitle: 'Clinical Significance (ClinVar)', internalGroupName: 'Significance (ClinVar)', innerCols: [
+        {title: 'Clinical Significance (ClinVar)', prop: 'Clinical_Significance_ClinVar', core: true},
+        {title: 'Submitter (ClinVar)', prop: 'Submitter_ClinVar', core: true},
+        {title: 'Analysis Method (ClinVar)', prop: 'Method_ClinVar', core: true},
+        {title: 'Date last updated (ClinVar)', prop: 'Date_Last_Updated_ClinVar', core: true},
+        {title: 'SCV Accession (ClinVar)', prop: 'SCV_ClinVar', core: true},
+        {title: 'Allele Origin (ClinVar)', prop: 'Allele_Origin_ClinVar', core: true},
     ]},
 
-    {groupTitle: 'Allele Origin and Pedigree Data', internalGroupName: 'Allele Origin and Pedigree Data', innerCols: [
-        {title: 'Allele Origin (ClinVar)', prop: 'Allele_Origin_ClinVar'},
-        {title: 'Allele Origin (ENIGMA)', prop: 'Allele_origin_ENIGMA'},
-        {title: 'Allele Origin (BIC)', prop: 'Germline_or_Somatic_BIC'},
-        {title: 'Patient Nationality (BIC)', prop: 'Patient_nationality_BIC'},
-        {title: 'Ethnicity (BIC)', prop: 'Ethnicity_BIC'},
-        {title: 'Family members carrying this variant (BIC)', prop: 'Number_of_family_member_carrying_mutation_BIC'},
+    {groupTitle: 'Clinical Significance (LOVD)', internalGroupName: 'Significance (LOVD)', innerCols: [
+        // FIXME: what is 'Effect (LOVD)'? assuming it's this functional analysis result/method, but unsure
+        {title: 'Functional Analysis Result (LOVD)', prop: 'Functional_analysis_result_LOVD'},
+        {title: 'Functional Analysis Method (LOVD)', prop: 'Functional_analysis_technique_LOVD'},
         {title: 'Variant Haplotype (LOVD)', prop: 'Variant_haplotype_LOVD'},
     ]},
 
-    {groupTitle: 'Publications', internalGroupName: 'Publications', innerCols: [
-        {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_citation_ENIGMA'},
-        {title: 'Clinical Significance Citation (ENIGMA)', prop: 'Clinical_significance_citations_ENIGMA'},
-        {title: 'Literature Reference (BIC)', prop: 'Literature_citation_BIC'},
-        {title: 'Literature Reference (exLOVD)', prop: 'Literature_source_exLOVD'}
+    {groupTitle: 'Clinical Significance (BIC)', internalGroupName: 'Significance (BIC)', innerCols: [
+        // FIXME: what is 'class 1/class 5' from melissa's comments?
+        {title: 'Clinical Significance (BIC)', prop: 'Clinical_classification_BIC', core: true},
+        {title: 'Clinical Importance (BIC)', prop: 'Clinical_importance_BIC', core: true},
+        {title: 'Patient Nationality (BIC)', prop: 'Patient_nationality_BIC'},
+        {title: 'Ethnicity (BIC)', prop: 'Ethnicity_BIC'},
+        // FIXME: combine into single 'Patient Nationality/Ethnicity' field?
+        {title: 'Family members carrying this variant (BIC)', prop: 'Number_of_family_member_carrying_mutation_BIC'},
+        {title: 'Literature Reference (BIC)', prop: 'Literature_citation_BIC', core: true},
+        {title: 'Allele Origin (BIC)', prop: 'Germline_or_Somatic_BIC'},
     ]},
 
-    {groupTitle: 'Allele Frequency Data', internalGroupName: 'Allele Frequency Data', innerCols: [
-        {title: 'African Allele Frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes'},
-        {title: 'Allele Frequency', prop: 'Allele_Frequency'},
-        {title: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes'},
-        {title: 'Allele Frequency (ExAC)', prop: 'Allele_frequency_ExAC'},
-        {title: 'AMR Allele Frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes'},
-        {title: 'EAS Allele Frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes'},
-        {title: 'EUR Allele Frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes'},
-        {title: 'Maximum Allele Frequency', prop: 'Max_Allele_Frequency'},
-        {title: 'Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP'},
-        {title: 'South Asian Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes'},
-        {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'}
+    {groupTitle: 'Allele Frequency Reference Sets', internalGroupName: 'Allele Frequency Reference Sets', innerCols: [
+        // FIXME: where is 'Maximum Allele Frequency (1000 Genomes and ESP)'? is it the following?
+        {title: 'Maximum Allele Frequency', prop: 'Max_Allele_Frequency', core: true},
+        {title: 'Allele Frequency', prop: 'Allele_Frequency', core: true},
+        {title: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes', core: true},
+        {title: 'African Allele Frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes', core: true},
+        {title: 'AMR Allele Frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes', core: true},
+        {title: 'EAS Allele Frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes', core: true},
+        {title: 'EUR Allele Frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes', core: true},
+        {title: 'South Asian Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes', core: true},
+        // FIXME: should i compute 'Allele Frequency (ExAC minus TCGA)'?
+        {title: 'Allele Frequency (ExAC)', prop: 'Allele_frequency_ExAC', core: true},
+        {title: 'Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP', core: true},
+        // REMOVED: {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'}
     ]},
 
-    {groupTitle: 'Probability', internalGroupName: 'Probability', innerCols: [
-        {title: 'Co-occurrence likelihood (exLOVD)', prop: 'Co_occurrence_LR_exLOVD'},
-        {title: 'Prior probability of pathogenicity (exLOVD)', prop: 'Combined_prior_probablility_exLOVD'},
-        {title: 'Missense analysis probability of pathogenicity (exLOVD)', prop: 'Missense_analysis_prior_probability_exLOVD'},
-        {title: 'Probability of pathogenicity (exLOVD)', prop: 'Posterior_probability_exLOVD'},
-        {title: 'Segregation Likelihood Ratio (exLOVD)', prop: 'Segregation_LR_exLOVD'},
-        {title: 'Summary Family History Likelihood Ratio (exLOVD)', prop: 'Sum_family_LR_exLOVD'}
+    {groupTitle: 'Multifactorial Likelihood Analysis', internalGroupName: 'Multifactorial Likelihood Analysis', innerCols: [
+        {title: 'Probability of pathogenicity (exLOVD)', prop: 'Posterior_probability_exLOVD', core: true},
+        {title: 'Prior probability of pathogenicity (exLOVD)', prop: 'Combined_prior_probablility_exLOVD', core: true},
+        {title: 'Missense analysis probability of pathogenicity (exLOVD)', prop: 'Missense_analysis_prior_probability_exLOVD', core: true},
+        {title: 'Co-occurrence likelihood (exLOVD)', prop: 'Co_occurrence_LR_exLOVD', core: true},
+        {title: 'Segregation Likelihood Ratio (exLOVD)', prop: 'Segregation_LR_exLOVD', core: true},
+        {title: 'Summary Family History Likelihood Ratio (exLOVD)', prop: 'Sum_family_LR_exLOVD', core: true},
+        {title: 'Literature Reference (exLOVD)', prop: 'Literature_source_exLOVD', core: true}
     ]},
 ];
 
