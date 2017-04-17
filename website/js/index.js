@@ -438,8 +438,11 @@ function isEmptyDiff(value) {
 // and normalizes blank/null values to a single hyphen
 function normalizedFieldDisplay(value) {
     if (value) {
+        // replace any number of underscores with spaces
         // make sure commas, if present, wrap
-        value = value.split(",")
+        value = value
+            .split(/_+/).join(" ")
+            .split(",")
             .map(x => x.trim())
             .filter(x => x && x !== '-')
             .join(", ");
