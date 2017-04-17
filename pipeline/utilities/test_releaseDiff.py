@@ -23,7 +23,9 @@ class TestStringMethods(unittest.TestCase):
                       'pyhgvs_Protein',
                       'Submitter_ClinVar',
                       'Source_URL',
-                      'Clinical_Significance_ClinVar'
+                      'Clinical_Significance_ClinVar',
+                      'Allele_frequency_ExAC',
+                      'EAS_Allele_frequency_1000_Genomes'
                      ]
         self.oldRow = {
                   'Pathogenicity_all': '',
@@ -35,7 +37,9 @@ class TestStringMethods(unittest.TestCase):
                   'pyhgvs_Genomic_Coordinate_38': 'chr17:g.43049067:C>T',
                   'pyhgvs_Genomic_Coordinate_37': 'chr17:g.43049067:C>T',
                   'pyhgvs_Genomic_Coordinate_36': 'chr17:g.43049067:C>T',
-                  'pyhgvs_Protein': 'NP_009225.1:p.?'
+                  'pyhgvs_Protein': 'NP_009225.1:p.?',
+                  'Allele_frequency_ExAC': '9.841E-06',
+                  'EAS_Allele_frequency_1000_Genomes': '0'
                  }
         self.newRow = {
                   'Pathogenicity_all': '',
@@ -47,7 +51,9 @@ class TestStringMethods(unittest.TestCase):
                   'pyhgvs_Genomic_Coordinate_38': 'chr17:g.43049067:C>T',
                   'pyhgvs_Genomic_Coordinate_37': 'chr17:g.43049067:C>T',
                   'pyhgvs_Genomic_Coordinate_36': 'chr17:g.43049067:C>T',
-                  'pyhgvs_Protein': 'NP_009225.1:p.?'
+                  'pyhgvs_Protein': 'NP_009225.1:p.?',
+                  'Allele_frequency_ExAC': '9.841E-06',
+                  'EAS_Allele_frequency_1000_Genomes': '0'
                  }
 
         self.test_dir = tempfile.mkdtemp()
@@ -402,6 +408,14 @@ class TestStringMethods(unittest.TestCase):
 
         self.oldRow["Submitter_ClinVar"] = "Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA),_c/o_University_of_Cambridge"
         self.newRow["Submitter_ClinVar"] = "The_Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA),c/o_University_of_Cambridge"
+
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
+        self.newRow['EAS_Allele_frequency_1000_Genomes'] = '0.0'
+        self.newRow['Allele_frequency_ExAC'] = '9.841e-06'
 
         change_type = v1v2.compareRow(self.oldRow, self.newRow)
         diff = releaseDiff.diff_json

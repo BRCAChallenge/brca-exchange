@@ -175,6 +175,11 @@ class transformer(object):
             # Updated wording for non-expert-reviewed...
             value = value.replace("Not Yet Classified", "Not Yet Reviewed")
 
+        try:
+            value = float(value)
+        except ValueError:
+            pass
+
         return value
 
     def compareField(self, oldRow, newRow, field):
