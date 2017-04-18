@@ -107,8 +107,7 @@ const groups = [
     ]},
 
     {groupTitle: 'Clinical Significance (LOVD)', internalGroupName: 'Significance (LOVD)', innerCols: [
-        {title: 'Functional Analysis Result (LOVD)', prop: 'Functional_analysis_result_LOVD'},
-        {title: 'Functional Analysis Method (LOVD)', prop: 'Functional_analysis_technique_LOVD'},
+        {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'},
         {title: 'Variant Haplotype (LOVD)', prop: 'Variant_haplotype_LOVD'},
     ]},
 
