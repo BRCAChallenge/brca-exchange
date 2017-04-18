@@ -126,7 +126,6 @@ const groups = [
 
     {groupTitle: 'Allele Frequency Reference Sets', internalGroupName: 'Allele Frequency Reference Sets', innerCols: [
         {title: 'Maximum Allele Frequency (1000 Genomes and ESP)', prop: 'Max_Allele_Frequency', core: true},
-        {title: 'Allele Frequency', prop: 'Allele_Frequency', core: true},
         {title: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes', core: true},
         {title: 'African Allele Frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes', core: true},
         {title: 'AMR Allele Frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes', core: true},
