@@ -20,6 +20,7 @@ from shutil import copy
 from numbers import Number
 import csv
 import aggregate_reports
+import urllib
 
 
 # GENOMIC VERSION:
@@ -70,7 +71,13 @@ dna_change_genomic": "dna_change_genomic",
 LOVD_FIELDS = {"Variant_frequency": "frequency",
                "HGVS_cDNA": "cDNA",
                "HGVS_protein": "Protein",
-               "BX_ID": "BX_ID"}
+               "Genetic_origin": "genetic_origin",
+               "RNA": "RNA",
+               "Variant_effect": "variant_effect",
+               "Individuals": "individuals",
+               "Submitters": "submitters",
+               "BX_ID": "BX_ID"
+               }
 
 EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "Segregation_LR": "segregation_lr",
@@ -714,7 +721,12 @@ def add_new_source(columns, variants, source, source_file, source_dict):
             variants[genome_coor] = associate_chr_pos_ref_alt_with_item(record, old_column_num, source, genome_coor)
         for value in source_dict.values():
             try:
-                variants[genome_coor].append(record.INFO[value])
+                if source == "LOVD":
+                    # TODO: make sure this does not format data incorrectly
+                    field_value = map(urllib.unquote_plus, record.INFO[value])
+                    variants[genome_coor].append(field_value)
+                else:
+                    variants[genome_coor].append(record.INFO[value])
             except KeyError:
                 logging.warning("KeyError appending VCF record.INFO[value] to variant. Variant: %s \n Record.INFO: %s \n value: %s", variants[genome_coor], record.INFO, value)
                 if source == "BIC":

@@ -466,6 +466,22 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
 
+    # TODO: set up tests for new LOVD fields
+    # def test_handles_new_columns_in_v2_data_correctly(self):
+    #     releaseDiff.added_data = self.added_data
+    #     releaseDiff.diff = self.diff
+    #     releaseDiff.diff_json = self.diff_json
+    #     variant = 'chr17:g.43049067:C>T'
+    #     self.updated_fieldnames = self.fieldnames + ['Genetic_origin_LOVD', 'RNA_LOVD', 'Submitters_LOVD']
+    #     v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.updated_fieldnames)
+    #     self.newRow["Genetic_origin_LOVD"] = "Pathogenic,not_provided"
+    #     self.newRow["RNA_LOVD"] = "Pathogenic,Pathogenic,not_provided"
+    #     self.newRow["Submitters_LOVD"] = "Pathogenic,not_provided"
+    #     change_type = v1v2.compareRow(self.oldRow, self.newRow)
+    #     diff = releaseDiff.diff_json
+    #     self.assertEqual(diff, {})
+    #     self.assertIsNone(change_type)
+
 
 if __name__ == '__main__':
     pass

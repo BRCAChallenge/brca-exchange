@@ -21,6 +21,10 @@ from collections import defaultdict
 import pyhgvs as hgvs
 import pyhgvs.utils as hgvs_utils
 from pygr.seqdb import SequenceFileDB
+import pdb
+import urllib
+
+LOVD_LIST_FIELDS = ["genetic_origin", "RNA", "variant_effect", "individuals", "submitters"]
 
 
 def parse_args():
@@ -92,8 +96,7 @@ def main(args):
         for field in headerline:
             field_index = fieldIdxDict[field]
             field_value = parsedLine[field_index]
-            if ';' in field_value:
-                field_value = field_value.replace(';', '')
+            field_value = normalize(field, field_value)
             INFO_field.append('{0}={1}'.format(field, field_value))
 
         # extract hgvs cDNA term for variant and cleanup formatting
@@ -115,6 +118,30 @@ def main(args):
             print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(chrom, offset, queryHgvsName, ref, alt, INFO_field_string), file=vcfFile)
         except Exception as e:
             print(str(e)+': could not parse hgvs field '+queryHgvsName)
+
+
+def normalize(field, field_value):
+    if not is_empty(field_value):
+        # VCF doesn't allow spaces, replace with [] for parsing.
+        if field_value[0] == ';':
+            field_value = field_value[1:]
+        if field_value[-1] == ';':
+            field_value = field_value[:-1]
+        if field not in LOVD_LIST_FIELDS and ';' in field_value:
+            field_value = field_value.replace(';', '')
+        # if field in LOVD_LIST_FIELDS and ', ' in field_value:
+        #     field_value = field_value.replace(', ', ',')
+        if field in LOVD_LIST_FIELDS and ';' in field_value:
+            field_value = field_value.replace(';', ', ')
+        if field in LOVD_LIST_FIELDS:
+            # VCF can't handle certain characters, this avoids the problem using url encoding which is decoded in variant_merging.py
+            field_value = urllib.quote_plus(field_value)
+    return field_value
+
+
+def is_empty(field_value):
+    return field_value == '' or field_value is None
+
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
