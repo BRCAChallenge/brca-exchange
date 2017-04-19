@@ -88,39 +88,39 @@ const groups = [
     ]},
 
     {groupTitle: 'Clinical Significance (ENIGMA)', internalGroupName: 'Significance (ENIGMA)', innerCols: [
-        {title: 'Clinical Significance (ENIGMA)', prop: 'Clinical_significance_ENIGMA', core: true},
-        {title: 'Comment on Clinical Significance (ENIGMA)', prop: 'Comment_on_clinical_significance_ENIGMA', core: true},
-        {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_ENIGMA', core: true},
-        {title: 'Date last evaluated (ENIGMA)', prop: 'Date_last_evaluated_ENIGMA', core: true},
-        {title: 'Collection Method (ENIGMA)', prop: 'Collection_method_ENIGMA', core: true},
-        {title: 'Clinical Significance Citation (ENIGMA)', prop: 'Clinical_significance_citations_ENIGMA', core: true},
-        {title: 'Allele Origin (ENIGMA)', prop: 'Allele_origin_ENIGMA', core: true},
+        {title: 'Clinical Significance', prop: 'Clinical_significance_ENIGMA', core: true},
+        {title: 'Comment on Clinical Significance', prop: 'Comment_on_clinical_significance_ENIGMA', core: true},
+        {title: 'Assertion Method', prop: 'Assertion_method_ENIGMA', core: true},
+        {title: 'Date last evaluated', prop: 'Date_last_evaluated_ENIGMA', core: true},
+        {title: 'Collection Method', prop: 'Collection_method_ENIGMA', core: true},
+        {title: 'Clinical Significance Citation', prop: 'Clinical_significance_citations_ENIGMA', core: true},
+        {title: 'Allele Origin', prop: 'Allele_origin_ENIGMA', core: true},
     ]},
 
     {groupTitle: 'Clinical Significance (ClinVar)', internalGroupName: 'Significance (ClinVar)', innerCols: [
-        {title: 'Clinical Significance (ClinVar)', prop: 'Clinical_Significance_ClinVar', core: true},
-        {title: 'Submitter (ClinVar)', prop: 'Submitter_ClinVar', core: true},
-        {title: 'Analysis Method (ClinVar)', prop: 'Method_ClinVar', core: true},
-        {title: 'Date last updated (ClinVar)', prop: 'Date_Last_Updated_ClinVar', core: true},
-        {title: 'SCV Accession (ClinVar)', prop: 'SCV_ClinVar', core: true},
-        {title: 'Allele Origin (ClinVar)', prop: 'Allele_Origin_ClinVar', core: true},
+        {title: 'Clinical Significance', prop: 'Clinical_Significance_ClinVar', core: true},
+        {title: 'Submitter', prop: 'Submitter_ClinVar', core: true},
+        {title: 'Analysis Method', prop: 'Method_ClinVar', core: true},
+        {title: 'Date last updated', prop: 'Date_Last_Updated_ClinVar', core: true},
+        {title: 'SCV Accession', prop: 'SCV_ClinVar', core: true},
+        {title: 'Allele Origin', prop: 'Allele_Origin_ClinVar', core: true},
     ]},
 
     {groupTitle: 'Clinical Significance (LOVD)', internalGroupName: 'Significance (LOVD)', innerCols: [
-        {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'},
-        {title: 'Variant Haplotype (LOVD)', prop: 'Variant_haplotype_LOVD'},
+        {title: 'Variant Frequency', prop: 'Variant_frequency_LOVD'},
+        {title: 'Variant Haplotype', prop: 'Variant_haplotype_LOVD'},
     ]},
 
     {groupTitle: 'Clinical Significance (BIC)', internalGroupName: 'Significance (BIC)', innerCols: [
         // FIXME: what is 'class 1/class 5' from melissa's comments?
-        {title: 'Clinical Significance (BIC)', prop: 'Clinical_classification_BIC', core: true},
-        {title: 'Clinical Importance (BIC)', prop: 'Clinical_importance_BIC', core: true},
-        {title: 'Patient Nationality (BIC)', prop: 'Patient_nationality_BIC'},
-        {title: 'Ethnicity (BIC)', prop: 'Ethnicity_BIC'},
+        {title: 'Clinical Significance', prop: 'Clinical_classification_BIC', core: true},
+        {title: 'Clinical Importance', prop: 'Clinical_importance_BIC', core: true},
+        {title: 'Patient Nationality', prop: 'Patient_nationality_BIC'},
+        {title: 'Ethnicity', prop: 'Ethnicity_BIC'},
         // FIXME: combine into single 'Patient Nationality/Ethnicity' field?
-        {title: 'Family members carrying this variant (BIC)', prop: 'Number_of_family_member_carrying_mutation_BIC'},
-        {title: 'Literature Reference (BIC)', prop: 'Literature_citation_BIC', core: true},
-        {title: 'Allele Origin (BIC)', prop: 'Germline_or_Somatic_BIC'},
+        {title: 'Family members carrying this variant', prop: 'Number_of_family_member_carrying_mutation_BIC'},
+        {title: 'Literature Reference', prop: 'Literature_citation_BIC', core: true},
+        {title: 'Allele Origin', prop: 'Germline_or_Somatic_BIC'},
     ]},
 
     {groupTitle: 'Allele Frequency Reference Sets', internalGroupName: 'Allele Frequency Reference Sets', innerCols: [
@@ -136,13 +136,13 @@ const groups = [
     ]},
 
     {groupTitle: 'Multifactorial Likelihood Analysis', internalGroupName: 'Multifactorial Likelihood Analysis', innerCols: [
-        {title: 'Probability of pathogenicity (exLOVD)', prop: 'Posterior_probability_exLOVD', core: true},
-        {title: 'Prior probability of pathogenicity (exLOVD)', prop: 'Combined_prior_probablility_exLOVD', core: true},
-        {title: 'Missense analysis probability of pathogenicity (exLOVD)', prop: 'Missense_analysis_prior_probability_exLOVD', core: true},
-        {title: 'Co-occurrence likelihood (exLOVD)', prop: 'Co_occurrence_LR_exLOVD', core: true},
-        {title: 'Segregation Likelihood Ratio (exLOVD)', prop: 'Segregation_LR_exLOVD', core: true},
-        {title: 'Summary Family History Likelihood Ratio (exLOVD)', prop: 'Sum_family_LR_exLOVD', core: true},
-        {title: 'Literature Reference (exLOVD)', prop: 'Literature_source_exLOVD', core: true}
+        {title: 'Probability of pathogenicity', prop: 'Posterior_probability_exLOVD', core: true},
+        {title: 'Prior probability of pathogenicity', prop: 'Combined_prior_probablility_exLOVD', core: true},
+        {title: 'Missense analysis probability of pathogenicity', prop: 'Missense_analysis_prior_probability_exLOVD', core: true},
+        {title: 'Co-occurrence likelihood', prop: 'Co_occurrence_LR_exLOVD', core: true},
+        {title: 'Segregation Likelihood Ratio', prop: 'Segregation_LR_exLOVD', core: true},
+        {title: 'Summary Family History Likelihood Ratio', prop: 'Sum_family_LR_exLOVD', core: true},
+        {title: 'Literature Reference', prop: 'Literature_source_exLOVD', core: true}
     ]},
 ];
 
