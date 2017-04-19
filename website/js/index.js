@@ -40,7 +40,7 @@ var databaseKey = require('../databaseKey');
 var {Grid, Col, Row, Table, Button, Modal, Panel} = require('react-bootstrap');
 
 /* FAISAL: added 'groups' collection that specifies how to map columns to higher-level groups */
-var {VariantTable, ResearchVariantTable, researchModeColumns, columns, groups} = require('./VariantTable');
+var {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups} = require('./VariantTable');
 var {Signup} = require('./Signup');
 var {Signin, ResetPassword} = require('./Signin');
 var {ConfirmEmail} = require('./ConfirmEmail');
@@ -366,22 +366,6 @@ var Database = React.createClass({
     }
 });
 
-// FAISAL: retained because the expert-reviewed portal still uses this
-var Key = React.createClass({
-    render() {
-        var {onClick, tableKey} = this.props;
-        return (
-             <td className='help-target'>
-                {tableKey}
-                <span className="text-nowrap">
-                    <span role='button' onClick={onClick}
-                        className='help glyphicon glyphicon-question-sign superscript'/>
-                </span>
-             </td>
-        );
-    }
-});
-
 const KeyInline = React.createClass({
     render() {
         const {onClick, tableKey} = this.props;
@@ -645,129 +629,7 @@ var VariantDetail = React.createClass({
 
         return diffRows;
     },
-    render: function() {
-        if (localStorage.getItem("research-mode") === 'true') {
-            return this.renderAllData();
-        } else {
-            return this.renderExpertReviewed();
-        }
-    },
-    renderExpertReviewed: function() {
-        // copied from previous version
-
-        var {data, error} = this.state;
-        if (!data) {
-            return <div></div>;
-        }
-
-        var variant = data[0],
-            release = variant["Data_Release"],
-            cols;
-        if (localStorage.getItem("research-mode") === 'true') {
-            cols = researchModeColumns;
-        } else {
-            cols = columns;
-        }
-        var rows = _.map(cols, ({prop, title}) => {
-            var rowItem;
-            if (prop === "Protein_Change") {
-                title = "Abbreviated AA Change";
-            }
-            if (variant[prop] != null) {
-                if (prop === "Gene_Symbol") {
-                    rowItem = <i>{variant[prop]}</i>;
-                }
-                else if (prop === "URL_ENIGMA") {
-                    if (variant[prop].length) {
-                        rowItem = <a target="_blank" href={variant[prop]}>link to multifactorial analysis</a>;
-                    }
-                } else if (prop === "Assertion_method_citation_ENIGMA") {
-                    rowItem = <a target="_blank" href="https://enigmaconsortium.org/library/general-documents/">Enigma Rules version Mar 26, 2015</a>;
-// this will be used in All Data display
-                    /*                } else if (prop == "Source_URL") {
-                     var url_count = 0;
-                     rowItem = _.map(variant[prop].split(','), url => (url.length != 0) && (<span><a key={"Source_URL"+(url_count++)} target="_blank" href={url}>link to multifactorial analysis ({url_count})</a><br /></span>));
-                     */
-                } else if (prop === "Source_URL") {
-                    if (variant[prop].startsWith("http://hci-exlovd.hci.utah.edu")) {
-                        rowItem = <a target="_blank" href={variant[prop].split(',')[0]}>link to multifactorial analysis</a>;
-                    }
-                } else if (prop === "Comment_on_clinical_significance_ENIGMA" || prop === "Clinical_significance_citations_ENIGMA") {
-                    var pubmed = "http://ncbi.nlm.nih.gov/pubmed/";
-                    rowItem = _.map(variant[prop].split(/PMID:? ?([0-9]+)/), piece =>
-                        (/^[0-9]+$/.test(piece)) ? <a target="_blank" href={pubmed + piece}>PMID: {piece}</a> : piece );
-                } else if (prop === "HGVS_cDNA") {
-                    rowItem = variant[prop].split(":")[1];
-                } else if (prop === "HGVS_Protein") {
-                    rowItem = variant[prop].split(":")[1];
-                } else if (prop === "Date_last_evaluated_ENIGMA" && !isEmptyField(variant[prop])) {
-                    rowItem = moment(variant[prop], "MM/DD/YYYY").format("DD MMMM YYYY");
-                } else {
-                    rowItem = variant[prop];
-                }
-            } else if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] != null) {
-                rowItem = variant["HGVS_Protein"].split(":")[0];
-            }
-            return (
-                <tr key={prop}>
-                    <Key tableKey={title} columns={cols} onClick={() => this.showHelp(title)}/>
-                    <td><span className="row-wrap">{rowItem}</span></td>
-                </tr>);
-        });
-
-        var diffRows = this.generateDiffRows(cols, data);
-
-        return (error ? <p>{error}</p> :
-                <Grid>
-                    <Row>
-                        <Col md={8} mdOffset={2}>
-                            <div className='text-center Variant-detail-title'>
-                                <h3>Variant Detail</h3>
-                                {variant['Change_Type'] === 'deleted' &&
-                                (<p className='deleted text-left'>
-                                    Note: This variant has been removed from the BRCA Exchange. For reasons on why this variant was removed please see the <Link to={`/release/${release.id}`}>release notes</Link>.
-                                </p>)
-                                }
-                            </div>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col md={8} mdOffset={2}>
-                            <Table striped bordered>
-                                <tbody>
-                                    {rows}
-                                </tbody>
-                            </Table>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col md={8} mdOffset={2}>
-                            <h3>{variant["HGVS_cDNA"]}</h3>
-                            <h4>Previous Versions of this Variant:</h4>
-                            <Table className='variant-history' bordered>
-                                <thead>
-                                    <tr className='active'>
-                                        <th>Release Date</th>
-                                        <th>Clinical Significance</th>
-                                        <th>Changes</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {diffRows}
-                                </tbody>
-                            </Table>
-                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show All Public Data on this Variant" to see these changes.</p>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col md={8} mdOffset={2}>
-                            <DisclaimerModal buttonModal onToggleMode={this.onChildToggleMode} text="Show All Public Data on this Variant"/>
-                        </Col>
-                    </Row>
-                </Grid>
-        );
-    },
-    renderAllData: function () {
+    render: function () {
         const {data, error} = this.state;
         if (!data) {
             return <div />;
@@ -775,17 +637,22 @@ var VariantDetail = React.createClass({
 
         let variant = data[0],
             release = variant["Data_Release"],
-            cols;
+            cols,
+            groups;
 
-        // FAISAL: this method is now specific to research mode (aka the all data portal), so no need to check local storage
-        cols = researchModeColumns;
-
+        if (localStorage.getItem("research-mode") === 'true') {
+            cols = researchModeColumns;
+            groups = researchModeGroups;
+        } else {
+            cols = columns;
+            groups = expertModeGroups;
+        }
         // FAISAL: rather than directly map cols, we create a higher-level groups structure
         // the higher-level groups structure maps a subset of columns to that group
         let groupsEmpty = 0;
         let totalRowsEmpty = 0;
 
-        const groupTables = _.map(groups, ({groupTitle, innerCols }) => {
+        const groupTables = _.map(groups, ({ groupTitle, innerCols }) => {
             let rowsEmpty = 0;
 
             // now map the group's columns to a list of row objects
@@ -795,6 +662,7 @@ var VariantDetail = React.createClass({
                 if (prop === "Protein_Change") {
                     title = "Abbreviated AA Change";
                 }
+
                 if (variant[prop] !== null) {
                     if (prop === "Gene_Symbol") {
                         rowItem = <i>{variant[prop]}</i>;
@@ -843,7 +711,7 @@ var VariantDetail = React.createClass({
 
                 return (
                     <tr key={prop} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
-                        <KeyInline tableKey={title} columns={cols} onClick={() => this.showHelp(title)}/>
+                        <KeyInline tableKey={title} onClick={() => this.showHelp(title)}/>
                         <td><span className="row-wrap-nowidth">{rowItem}</span></td>
                     </tr>
                 );
@@ -884,7 +752,7 @@ var VariantDetail = React.createClass({
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
-                    <Col md={4} mdOffset={4} className="vcenterblock">
+                    <Col xs={4} sm={4} smOffset={4} md={4} mdOffset={4} className="vcenterblock">
                         <div className='text-center Variant-detail-title'>
                             <h3>Variant Detail</h3>
                             {variant['Change_Type'] === 'deleted' &&
@@ -894,7 +762,7 @@ var VariantDetail = React.createClass({
                             }
                         </div>
                     </Col>
-                    <Col md={4} className="vcenterblock">
+                    <Col xs={8} sm={4} md={4} className="vcenterblock">
                         <div className="Variant-detail-headerbar">
                             <Button
                                 onClick={this.setEmptyRowVisibility.bind(this, !this.state.hideEmptyItems)}
@@ -909,9 +777,24 @@ var VariantDetail = React.createClass({
                     </Col>
                 </Row>
 
-                {
-                    <Row>
-                        <div className="container-fluid variant-details-body">
+                <Row>
+                    <div className="container-fluid variant-details-body">
+                    {
+                        // this case applies mostly to the expert-reviewed portal (which only has two groups)
+                        (groupTables.length < 3) ?
+                            <IsoGrid>
+                                <div className={`isogrid-sizer col-xs-12 col-md-${12 / groupTables.length}`} />
+                                {
+                                    groupTables.map((x, i) => {
+                                        return (
+                                            <Col key={"group_col-" + i} xs={12} md={12 / groupTables.length} className="variant-detail-group isogrid-item">
+                                            {x}
+                                            </Col>
+                                        );
+                                    })
+                                }
+                            </IsoGrid>
+                        :
                             <IsoGrid>
                                 <div className="isogrid-sizer col-xs-12 col-md-6 col-lg-4" />
                                 {
@@ -925,9 +808,9 @@ var VariantDetail = React.createClass({
                                     })
                                 }
                             </IsoGrid>
-                        </div>
-                    </Row>
-                }
+                    }
+                    </div>
+                </Row>
 
                 <Row>
                     <Col md={12} className="variant-history-col">
