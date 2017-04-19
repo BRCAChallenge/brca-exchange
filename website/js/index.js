@@ -37,7 +37,7 @@ var {MailingList} = require('./MailingList');
 
 var databaseKey = require('../databaseKey');
 
-var {Grid, Col, Row, Table, Button, Modal, Alert, Panel} = require('react-bootstrap');
+var {Grid, Col, Row, Table, Button, Modal, Panel} = require('react-bootstrap');
 
 /* FAISAL: added 'groups' collection that specifies how to map columns to higher-level groups */
 var {VariantTable, ResearchVariantTable, researchModeColumns, columns, groups} = require('./VariantTable');
@@ -884,7 +884,7 @@ var VariantDetail = React.createClass({
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
-                    <Col md={8} mdOffset={2}>
+                    <Col md={4} mdOffset={4} className="vcenterblock">
                         <div className='text-center Variant-detail-title'>
                             <h3>Variant Detail</h3>
                             {variant['Change_Type'] === 'deleted' &&
@@ -894,27 +894,24 @@ var VariantDetail = React.createClass({
                             }
                         </div>
                     </Col>
+                    <Col md={4} className="vcenterblock">
+                        <div className="Variant-detail-headerbar">
+                            <Button
+                                onClick={this.setEmptyRowVisibility.bind(this, !this.state.hideEmptyItems)}
+                                bsStyle={!this.state.hideEmptyItems ? "primary" : "default"}
+                                bsSize="lg">
+                                { this.state.hideEmptyItems ?
+                                    <span>show empty items</span> :
+                                    <span>hide empty items</span>
+                                }
+                            </Button>
+                        </div>
+                    </Col>
                 </Row>
 
                 {
-                    // if there are empty items to hide/show, show a message that allows them to be shown/hidden
-                    (totalRowsEmpty + groupsEmpty) > 0 &&
                     <Row>
-                        <Col md={12}>
-                            <Alert bsStyle="warning">
-                            There are <b>{ totalRowsEmpty }</b> empty fields and <b>{ groupsEmpty }</b> empty groups{ this.state.hideEmptyItems ? " which are currently hidden" : "" }. (
-                                { this.state.hideEmptyItems ?
-                                    <a href="#" onClick={this.setEmptyRowVisibility.bind(this, false)}>show empty items</a> :
-                                    <a href="#" onClick={this.setEmptyRowVisibility.bind(this, true)}>hide empty items</a> }
-                            )
-                            </Alert>
-                        </Col>
-                    </Row>
-                }
-
-                {
-                    <Row>
-                        <div className="container-fluid">
+                        <div className="container-fluid variant-details-body">
                             <IsoGrid>
                                 <div className="isogrid-sizer col-xs-12 col-md-6 col-lg-4" />
                                 {

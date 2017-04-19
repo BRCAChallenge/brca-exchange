@@ -707,7 +707,22 @@ div.variant-detail-group .panel-body {
     background-color: white;
 }
 
+div.variant-details-body {
+    margin-top: 2em;
+}
+
 /* faisal: hack for packery to minimize the impact of the graphical glitch of opening/closing a section */
 .variant-history-col {
     background-color: white;
+}
+
+.Variant-detail-headerbar {
+    text-align: right;
+    vertical-align: bottom;
+}
+
+.vcenterblock {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
 }
