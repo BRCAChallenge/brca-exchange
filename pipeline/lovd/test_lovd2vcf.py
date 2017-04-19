@@ -1,7 +1,7 @@
 import pytest
 import unittest
 from os import path, getcwd
-import lovd2vcf
+# import lovd2vcf
 import vcf
 
 
