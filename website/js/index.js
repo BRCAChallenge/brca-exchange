@@ -461,7 +461,7 @@ const IsoGrid = React.createClass({
     componentDidUpdate: function() {
         if (this.masonry) {
             this.masonry.reloadItems();
-            this.masonry.layout();
+            this.masonry.arrange();
         }
     },
 
@@ -480,6 +480,7 @@ const IsoGrid = React.createClass({
         }
         else {
             this.masonry.reloadItems();
+            this.masonry.arrange();
         }
     }
 });
@@ -647,6 +648,7 @@ var VariantDetail = React.createClass({
             cols = columns;
             groups = expertModeGroups;
         }
+
         // FAISAL: rather than directly map cols, we create a higher-level groups structure
         // the higher-level groups structure maps a subset of columns to that group
         let groupsEmpty = 0;
@@ -766,8 +768,7 @@ var VariantDetail = React.createClass({
                         <div className="Variant-detail-headerbar">
                             <Button
                                 onClick={this.setEmptyRowVisibility.bind(this, !this.state.hideEmptyItems)}
-                                bsStyle={!this.state.hideEmptyItems ? "primary" : "default"}
-                                bsSize="lg">
+                                bsStyle={!this.state.hideEmptyItems ? "primary" : "default"}>
                                 { this.state.hideEmptyItems ?
                                     <span>show empty items</span> :
                                     <span>hide empty items</span>
@@ -779,36 +780,36 @@ var VariantDetail = React.createClass({
 
                 <Row>
                     <div className="container-fluid variant-details-body">
-                    {
-                        // this case applies mostly to the expert-reviewed portal (which only has two groups)
-                        (groupTables.length < 3) ?
+                        { (groupTables.length < 3) ?
                             <IsoGrid>
-                                <div className={`isogrid-sizer col-xs-12 col-md-${12 / groupTables.length}`} />
+                                <div className={`isogrid-sizer col-xs-12 col-md-${12 / groupTables.length}`}/>
                                 {
                                     groupTables.map((x, i) => {
                                         return (
-                                            <Col key={"group_col-" + i} xs={12} md={12 / groupTables.length} className="variant-detail-group isogrid-item">
-                                            {x}
+                                            <Col key={"group_col-" + i} xs={12} md={12 / groupTables.length}
+                                                className="variant-detail-group isogrid-item">
+                                                {x}
                                             </Col>
                                         );
                                     })
                                 }
                             </IsoGrid>
-                        :
+                            :
                             <IsoGrid>
-                                <div className="isogrid-sizer col-xs-12 col-md-6 col-lg-4" />
+                                <div className="isogrid-sizer col-xs-12 col-md-6 col-lg-4"/>
                                 {
                                     // we're mapping each group into a column so we can horizontally stack them
                                     groupTables.map((x, i) => {
                                         return (
-                                            <Col key={"group_col-" + i} xs={12} md={6} lg={4} className="variant-detail-group isogrid-item">
-                                            {x}
+                                            <Col key={"group_col-" + i} xs={12} md={6} lg={4}
+                                                className="variant-detail-group isogrid-item">
+                                                {x}
                                             </Col>
                                         );
                                     })
                                 }
                             </IsoGrid>
-                    }
+                        }
                     </div>
                 </Row>
 
