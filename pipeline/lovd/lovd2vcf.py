@@ -121,20 +121,26 @@ def main(args):
 
 
 def normalize(field, field_value):
+    # TODO: handle all semicolon delimited fields properly to prevent errors and bad data
     if not is_empty(field_value):
-        # VCF doesn't allow spaces, replace with [] for parsing.
         if field_value[0] == ';':
             field_value = field_value[1:]
         if field_value[-1] == ';':
             field_value = field_value[:-1]
         if field not in LOVD_LIST_FIELDS and ';' in field_value:
+            # print("______removing semicolons______")
+            # print(field, field_value)
             field_value = field_value.replace(';', '')
-        # if field in LOVD_LIST_FIELDS and ', ' in field_value:
-        #     field_value = field_value.replace(', ', ',')
+            # print(field, field_value)
+            # print("_______________________________")
         if field in LOVD_LIST_FIELDS and ';' in field_value:
+            # print("______replacing semicolons with commas______")
+            # print(field, field_value)
             field_value = field_value.replace(';', ', ')
+            # print(field, field_value)
+            # print("_______________________________")
         if field in LOVD_LIST_FIELDS:
-            # VCF can't handle certain characters, this avoids the problem using url encoding which is decoded in variant_merging.py
+            # VCF can't handle certain characters, uses url encoding which is later decoded in variant_merging.py
             field_value = urllib.quote_plus(field_value)
     return field_value
 
