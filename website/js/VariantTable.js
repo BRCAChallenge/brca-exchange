@@ -74,6 +74,105 @@ var filterColumns = [
 //    return sorted;
 //}
 
+const expertModeGroups = [
+    {groupTitle: 'Variant Nomenclature', internalGroupName: 'Variant Nomenclature', innerCols: [
+        {title: 'Gene', prop: 'Gene_Symbol', render: gene => <i>{gene}</i>},
+        {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: nucleotide => nucleotide.split(':')[1]},
+        {title: 'Transcript Identifier', prop: 'Reference_Sequence'},
+        {title: 'HGVS RNA', prop: 'HGVS_RNA'},
+        {title: 'HGVS Protein', prop: 'HGVS_Protein', render: protein => protein.split(':')[1]},
+        // Protein Identfifier is pulled from HGVS_Protein, this is handled in VariantDetail (index.js)
+        {title: 'Protein Identifier', prop: 'HGVS_Protein_ID'},
+        {title: 'Protein Abbrev', prop: 'Protein_Change'},
+        {title: 'BIC Designation', prop: 'BIC_Nomenclature'},
+        {title: 'Genomic Nomenclature (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
+        {title: 'Genomic Nomenclature (GRCh37)', prop: 'Genomic_Coordinate_hg37'}
+    ]},
+
+    {groupTitle: 'Clinical Significance (ENIGMA)', internalGroupName: 'Significance (ENIGMA)', innerCols: [
+        {title: 'Clinical Significance', prop: 'Pathogenicity_expert'},
+        {title: 'IARC Class', prop: 'Clinical_significance_ENIGMA'},
+        {title: 'Comment on Clinical Significance', prop: 'Comment_on_clinical_significance_ENIGMA'},
+        {title: 'Clinical Significance Citations', prop: 'Clinical_significance_citations_ENIGMA'},
+        {title: 'Supporting Evidence URL(s)', prop: 'URL_ENIGMA'},
+        {title: 'Date Last Evaluated', prop: 'Date_last_evaluated_ENIGMA'},
+        {title: 'Assertion Method', prop: 'Assertion_method_ENIGMA'},
+        {title: 'Assertion Method Citation', prop: 'Assertion_method_citation_ENIGMA'},
+        {title: 'Allele Origin', prop: 'Allele_origin_ENIGMA'},
+        {title: 'ClinVar Accession', prop: 'ClinVarAccession_ENIGMA'}
+    ]},
+];
+
+const researchModeGroups = [
+    {groupTitle: 'Variant Nomenclature', internalGroupName: 'Variant Nomenclature', innerCols: [
+        {title: 'Gene Symbol', prop: 'Gene_Symbol', render: gene => <i>{gene}</i>, core: true},
+        {title: 'Reference cDNA Sequence', prop: 'Reference_Sequence', core: true},
+        {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: nucleotide => nucleotide.split(':')[1], core: true},
+        {title: 'HGVS Protein', prop: 'HGVS_Protein', render: protein => protein.split(':')[1], core: true},
+        {title: 'Protein Amino Acid Change', prop: 'Protein_Change', core: true},
+        {title: 'BIC Designation', prop: 'BIC_Nomenclature', core: true},
+        {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38', core: true},
+        {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
+        {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36'},
+    ]},
+
+    {groupTitle: 'Clinical Significance (ENIGMA)', internalGroupName: 'Significance (ENIGMA)', innerCols: [
+        {title: 'Clinical Significance', prop: 'Clinical_significance_ENIGMA', core: true},
+        {title: 'Comment on Clinical Significance', prop: 'Comment_on_clinical_significance_ENIGMA', core: true},
+        {title: 'Assertion Method', prop: 'Assertion_method_ENIGMA', core: true},
+        {title: 'Date last evaluated', prop: 'Date_last_evaluated_ENIGMA', core: true},
+        {title: 'Collection Method', prop: 'Collection_method_ENIGMA', core: true},
+        {title: 'Clinical Significance Citation', prop: 'Clinical_significance_citations_ENIGMA', core: true},
+        {title: 'Allele Origin', prop: 'Allele_origin_ENIGMA', core: true},
+    ]},
+
+    {groupTitle: 'Clinical Significance (ClinVar)', internalGroupName: 'Significance (ClinVar)', innerCols: [
+        {title: 'Clinical Significance', prop: 'Clinical_Significance_ClinVar', core: true},
+        {title: 'Submitter', prop: 'Submitter_ClinVar', core: true},
+        {title: 'Analysis Method', prop: 'Method_ClinVar', core: true},
+        {title: 'Date last updated', prop: 'Date_Last_Updated_ClinVar', core: true},
+        {title: 'SCV Accession', prop: 'SCV_ClinVar', core: true},
+        {title: 'Allele Origin', prop: 'Allele_Origin_ClinVar', core: true},
+    ]},
+
+    {groupTitle: 'Clinical Significance (LOVD)', internalGroupName: 'Significance (LOVD)', innerCols: [
+        {title: 'Variant Frequency', prop: 'Variant_frequency_LOVD'},
+        {title: 'Variant Haplotype', prop: 'Variant_haplotype_LOVD'},
+    ]},
+
+    {groupTitle: 'Clinical Significance (BIC)', internalGroupName: 'Significance (BIC)', innerCols: [
+        {title: 'Clinical Significance', prop: 'Clinical_classification_BIC', core: true},
+        {title: 'Clinical Importance', prop: 'Clinical_importance_BIC', core: true},
+        {title: 'Patient Nationality', prop: 'Patient_nationality_BIC'},
+        {title: 'Ethnicity', prop: 'Ethnicity_BIC'},
+        {title: 'Family members carrying this variant', prop: 'Number_of_family_member_carrying_mutation_BIC'},
+        {title: 'Literature Reference', prop: 'Literature_citation_BIC', core: true},
+        {title: 'Allele Origin', prop: 'Germline_or_Somatic_BIC'},
+    ]},
+
+    {groupTitle: 'Allele Frequency Reference Sets', internalGroupName: 'Allele Frequency Reference Sets', innerCols: [
+        {title: 'Maximum Allele Frequency (1000 Genomes and ESP)', prop: 'Max_Allele_Frequency', core: true},
+        {title: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes', core: true},
+        {title: 'African Allele Frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes', core: true},
+        {title: 'AMR Allele Frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes', core: true},
+        {title: 'EAS Allele Frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes', core: true},
+        {title: 'EUR Allele Frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes', core: true},
+        {title: 'South Asian Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes', core: true},
+        {title: 'Allele Frequency (ExAC minus TCGA)', prop: 'Allele_frequency_ExAC', core: true},
+        {title: 'Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP', core: true},
+    ]},
+
+    {groupTitle: 'Multifactorial Likelihood Analysis', internalGroupName: 'Multifactorial Likelihood Analysis', innerCols: [
+        {title: 'Probability of pathogenicity', prop: 'Posterior_probability_exLOVD', core: true},
+        {title: 'Prior probability of pathogenicity', prop: 'Combined_prior_probablility_exLOVD', core: true},
+        {title: 'Missense analysis probability of pathogenicity', prop: 'Missense_analysis_prior_probability_exLOVD', core: true},
+        {title: 'Co-occurrence likelihood', prop: 'Co_occurrence_LR_exLOVD', core: true},
+        {title: 'Segregation Likelihood Ratio', prop: 'Segregation_LR_exLOVD', core: true},
+        {title: 'Summary Family History Likelihood Ratio', prop: 'Sum_family_LR_exLOVD', core: true},
+        {title: 'Literature Reference', prop: 'Literature_source_exLOVD', core: true}
+    ]},
+];
+
 var columns = [
     {title: 'Gene', prop: 'Gene_Symbol', render: gene => <i>{gene}</i>},
     {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: nucleotide => nucleotide.split(':')[1]},
@@ -525,5 +624,8 @@ module.exports = {
 	VariantTable: VariantTableSupplier(Table),
 	ResearchVariantTable: ResearchVariantTableSupplier(Table),
 	researchModeColumns: researchModeColumns,
-	columns: columns
+	columns: columns,
+
+    researchModeGroups: researchModeGroups,
+    expertModeGroups: expertModeGroups
 };
