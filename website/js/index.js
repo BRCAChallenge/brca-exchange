@@ -668,6 +668,15 @@ var VariantDetail = React.createClass({
         const groupTables = _.map(groups, ({ groupTitle, innerCols }) => {
             let rowsEmpty = 0;
 
+            // remove the BIC classification and importance fields unless the classification is 1 or 5
+            if (groupTitle === 'Clinical Significance (BIC)') {
+                const bicClass = variant['Clinical_classification_BIC'];
+
+                if (bicClass !== 'Class 1' && bicClass !== 'Class 5') {
+                    innerCols = innerCols.filter(x => x.prop !== 'Clinical_classification_BIC' && x.prop !== 'Clinical_importance_BIC');
+                }
+            }
+
             // now map the group's columns to a list of row objects
             const rows = _.map(innerCols, ({prop, title}) => {
                 let rowItem;

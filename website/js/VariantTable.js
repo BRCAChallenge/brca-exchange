@@ -141,12 +141,10 @@ const researchModeGroups = [
     ]},
 
     {groupTitle: 'Clinical Significance (BIC)', internalGroupName: 'Significance (BIC)', innerCols: [
-        // FIXME: what is 'class 1/class 5' from melissa's comments?
         {title: 'Clinical Significance', prop: 'Clinical_classification_BIC', core: true},
         {title: 'Clinical Importance', prop: 'Clinical_importance_BIC', core: true},
         {title: 'Patient Nationality', prop: 'Patient_nationality_BIC'},
         {title: 'Ethnicity', prop: 'Ethnicity_BIC'},
-        // FIXME: combine into single 'Patient Nationality/Ethnicity' field?
         {title: 'Family members carrying this variant', prop: 'Number_of_family_member_carrying_mutation_BIC'},
         {title: 'Literature Reference', prop: 'Literature_citation_BIC', core: true},
         {title: 'Allele Origin', prop: 'Germline_or_Somatic_BIC'},
