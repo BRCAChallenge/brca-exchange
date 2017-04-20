@@ -430,6 +430,24 @@ function isEmptyDiff(value) {
     return value === null || value.length < 1;
 }
 
+// attempts to parse the given date string using a variety of formats,
+// returning the formatted result as something like '08 September 2016'.
+// just returns the input if every pattern fails to match
+function normalizeDateFieldDisplay(value) {
+    // extend this if there are more formats in the future
+    const formats = ["MM/DD/YYYY", "YYYY-MM-DD"];
+
+    for (let i = 0; i < formats.length; i++) {
+        const q = moment(value, formats[i]);
+
+        if (q.isValid()) {
+            return q.format("DD MMMM YYYY");
+        }
+    }
+
+    return value;
+}
+
 // replaces commas with comma-spaces to wrap long lines better, removes blank entries from comma-delimited lists,
 // and normalizes blank/null values to a single hyphen
 function normalizedFieldDisplay(value) {
@@ -541,9 +559,16 @@ var VariantDetail = React.createClass({
         // stop the page from scrolling to the top (due to navigating to the fragment '#')
         event.preventDefault();
 
+        // the event target is actually the span *inside* the 'a' tag, but we need to check the 'a' tag for the
+        // collapsed state
+        const collapsingElem = event.target.parentElement;
+
         // FIXME: there must be a better way to get at the panel's state than reading the class
         // maybe we'll subclass Panel and let it handle its own visibility persistence
-        const isCollapsed = !(event.target !== null && event.target.getAttribute("class") === "collapsed");
+
+        // this looks silly, but at the time this method is called the item is starting to transition,
+        // so its state when it's done will be the opposite of what it currently is
+        const isCollapsed = !(collapsingElem.getAttribute("class") === "collapsed");
         localStorage.setItem("collapse-group_" + groupTitle, isCollapsed);
 
         // defer re-layout until the state change has completed
@@ -716,7 +741,8 @@ var VariantDetail = React.createClass({
                     } else if (prop === "HGVS_Protein") {
                         rowItem = variant[prop].split(":")[1];
                     } else if (prop === "Date_last_evaluated_ENIGMA" && !isEmptyField(variant[prop])) {
-                        rowItem = moment(variant[prop], "MM/DD/YYYY").format("DD MMMM YYYY");
+                        // try a variety of formats until one works, or just display the value if not?
+                        rowItem = normalizeDateFieldDisplay(variant[prop]);
                     } else {
                         rowItem = normalizedFieldDisplay(variant[prop]);
                     }
