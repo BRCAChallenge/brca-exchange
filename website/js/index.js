@@ -14,6 +14,7 @@ var DisclaimerModal = require('./DisclaimerModal');
 var RawHTML = require('./RawHTML');
 require('bootstrap/dist/css/bootstrap.css');
 require('font-awesome-webpack');
+require('css/bootstrap-xlgrid.css'); // adds xl, xxl, xxxl grid sizes to bootstrap 3
 require('css/custom.css');
 var _ = require('underscore');
 var backend = require('./backend');
@@ -816,13 +817,13 @@ var VariantDetail = React.createClass({
                             </IsoGrid>
                             :
                             <IsoGrid>
-                                <div className="isogrid-sizer col-xs-12 col-md-6 col-lg-4"/>
+                                <div className="isogrid-sizer col-xs-12 col-md-6 col-lg-6 col-xl-4"/>
                                 {
                                     // we're mapping each group into a column so we can horizontally stack them
                                     groupTables.map((x, i) => {
                                         return (
-                                            <Col key={"group_col-" + i} xs={12} md={6} lg={4}
-                                                className="variant-detail-group isogrid-item">
+                                            <Col key={"group_col-" + i} xs={12} md={6} lg={6}
+                                                className="variant-detail-group isogrid-item col-xl-4">
                                                 {x}
                                             </Col>
                                         );
