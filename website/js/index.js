@@ -714,20 +714,12 @@ var VariantDetail = React.createClass({
                 if (variant[prop] !== null) {
                     if (prop === "Gene_Symbol") {
                         rowItem = <i>{variant[prop]}</i>;
-                    }
-                    else if (prop === "URL_ENIGMA") {
+                    } else if (prop === "URL_ENIGMA") {
                         if (variant[prop].length) {
                             rowItem = <a target="_blank" href={variant[prop]}>link to multifactorial analysis</a>;
                         }
                     } else if (prop === "Assertion_method_citation_ENIGMA") {
                         rowItem = <a target="_blank" href="https://enigmaconsortium.org/library/general-documents/">Enigma Rules version Mar 26, 2015</a>;
-
-                        // this will be used in All Data display
-                        /*
-                        } else if (prop == "Source_URL") {
-                         var url_count = 0;
-                         rowItem = _.map(variant[prop].split(','), url => (url.length != 0) && (<span><a key={"Source_URL"+(url_count++)} target="_blank" href={url}>link to multifactorial analysis ({url_count})</a><br /></span>));
-                        */
                     } else if (prop === "Source_URL") {
                         if (variant[prop].startsWith("http://hci-exlovd.hci.utah.edu")) {
                             rowItem = <a target="_blank" href={variant[prop].split(',')[0]}>link to multifactorial analysis</a>;
@@ -767,8 +759,6 @@ var VariantDetail = React.createClass({
             });
 
             // check if all our rows are empty, in which case our group should be flagged as empty
-            // rows.some(x => x && x.className.contains("prop-empty"));
-
             const allEmpty = rowsEmpty >= rows.length;
 
             if (allEmpty) {
