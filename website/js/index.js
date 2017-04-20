@@ -377,6 +377,17 @@ const KeyInline = React.createClass({
     }
 });
 
+const GroupHelpButton = React.createClass({
+    render() {
+        const {onClick} = this.props;
+        return (
+            <span role='button' onClick={onClick} aria-label="Help"
+                className='panel-help-btn glyphicon glyphicon-question-sign'
+            />
+        );
+    }
+});
+
 // get display name for a given key from VariantTable.js column specification,
 // if we are in expert reviewed mode, search expert reviewed names then fall back to
 // all data, otherwise go straight to all data. Finally, if key is not found, replace
@@ -728,23 +739,23 @@ var VariantDetail = React.createClass({
                 groupsEmpty += 1;
             }
 
-            const panel = (
-                <Panel
-                    header={(<h2>{groupTitle}</h2>)}
-                    onSelect={(event) => this.onChangeGroupVisibility(groupTitle, event)}
-                    collapsable={true}
-                    defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
-                    <Table>
-                        <tbody>
-                            {rows}
-                        </tbody>
-                    </Table>
-                </Panel>
+            const header = (
+                <h3>{groupTitle} <GroupHelpButton group={groupTitle} onClick={() => this.showHelp(groupTitle)} /></h3>
             );
 
             return (
                 <div key={`group_collection-${groupTitle}`} className={ allEmpty && this.state.hideEmptyItems ? "group-empty" : "" }>
-                {panel}
+                    <Panel
+                        header={header}
+                        onSelect={(event) => this.onChangeGroupVisibility(groupTitle, event)}
+                        collapsable={true}
+                        defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
+                        <Table>
+                            <tbody>
+                                {rows}
+                            </tbody>
+                        </Table>
+                    </Panel>
                 </div>
             );
         });
