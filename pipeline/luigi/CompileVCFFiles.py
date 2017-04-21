@@ -744,7 +744,7 @@ class ConvertSharedLOVDToVCF(luigi.Task):
 
         os.chdir(lovd_method_dir)
 
-        args = ["./lovd2vcf", "-i", lovd_file_dir + "/BRCA.txt", "-o",
+        args = ["python", "lovd2vcf.py", "-i", lovd_file_dir + "/BRCA.txt", "-o",
                 lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf", "-a", "sharedLOVDAnnotation",
                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
                 brca_resources_dir + "/hg19.fa"]
