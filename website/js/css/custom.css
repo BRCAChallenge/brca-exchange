@@ -228,29 +228,19 @@ input:focus {
 /**********     Homepage video             ********************/
 /**************************************************************/
 
-.video-container {
-    margin-top: 60px;
-}
-
 .vimeo-video {
-    width: 864px;
+    width: 100%;
     height: 486px;
 }
 
 @media only screen and (max-width : 1199px) {
     .vimeo-video {
-        width: 640px;
         height: 360px;
     }
 }
 
 @media only screen and (max-width : 767px) {
-    .video-container {
-        padding: 0 0 0 0;
-    }
-
     .vimeo-video {
-        width: 320px;
         height: 180px;
     }
 }
