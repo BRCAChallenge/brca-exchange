@@ -2,15 +2,19 @@
 
 var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
-var {Grid, Col, Row, Button, Table, Alert} = require('react-bootstrap');
+var {Grid, Col, Row, Alert} = require('react-bootstrap');
 var backend = require('backend');
-var config  = require('./config');
-var {Navigation, Link} = require('react-router');
-var _ = require('underscore');
+var {Link} = require('react-router');
 
 var FactSheet = React.createClass({
     mixins: [PureRenderMixin],
-    componentDidMount() {
+    getInitialState: function() {
+        return {};
+    },
+    componentWillMount: function() {
+        backend.variantCounts().subscribe(
+            resp => this.setState(this.setState(resp)),
+            () => this.setState({error: 'Problem connecting to server'}));
     },
     render: function () {
         //var {data, page, totalPages, error} = this.state;
@@ -27,18 +31,19 @@ var FactSheet = React.createClass({
                             <li>By switching from the ‘expert reviewed portal’ to the ‘all public data portal’, users may also explore information on variants that have not yet been classified by the expert panel. For these unclassified variants, the impact on health has not yet been established.</li>
                         </ul>
                         <u>Web portal statistics:</u>
+                        {this.state.error ? <p>&nbsp;&nbsp;&nbsp;({this.state.error})</p> :
                         <ul>
-                            <li>Number of unique BRCA variants in the portal: 17,946</li>
+                            <li>Number of unique BRCA variants in the portal: {Number(this.state.total).toLocaleString()}</li>
                             <ul>
-                                <li>Unique BRCA1 variants in the portal: 8,648</li>
-                                <li>Unique BRCA2 variants in the portal: 9,298</li>
+                                <li>Unique BRCA1 variants in the portal: {Number(this.state.brca1).toLocaleString()}</li>
+                                <li>Unique BRCA2 variants in the portal: {Number(this.state.brca2).toLocaleString()}</li>
                             </ul>
-                            <li>Number of ENIGMA expert-classified variants in the portal: 3,881</li>
+                            <li>Number of ENIGMA expert-classified variants in the portal: {Number(this.state.enigma).toLocaleString()}</li>
                             <ul>
-                                <li>Variants expert-classified as pathogenic: 2,896</li>
-                                <li>Variants expert-classified as benign: 985</li>
+                                <li>Variants expert-classified as pathogenic: {Number(this.state.enigmabrca1).toLocaleString()}</li>
+                                <li>Variants expert-classified as benign: {Number(this.state.enigmabrca2).toLocaleString()}</li>
                             </ul>
-                        </ul>
+                        </ul>}
                         <Alert bsStyle="info">
                             For more information, please visit:
                             <ul>
