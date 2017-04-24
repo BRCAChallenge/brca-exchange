@@ -39,7 +39,7 @@ module.exports = [
     },
     {
         id: 'LOVD',
-        logo: require('./img/lovd_logo.jpg'),
+        logo: require('./img/LOVD-hires.png'),
         url: 'http://www.lovd.nl/',
     }
 ];

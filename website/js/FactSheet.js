@@ -13,11 +13,10 @@ var FactSheet = React.createClass({
     },
     componentWillMount: function() {
         backend.variantCounts().subscribe(
-            resp => this.setState(this.setState(resp)),
+            resp => this.setState(resp),
             () => this.setState({error: 'Problem connecting to server'}));
     },
     render: function () {
-        //var {data, page, totalPages, error} = this.state;
         return (
             <Grid id="main-grid" className="main-grid">
                 <Row>
