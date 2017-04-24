@@ -136,7 +136,7 @@ var Home = React.createClass({
                 <Row>
                     <div className="jumbotron">
                         <RawHTML html={content.pages.home} />
-                        <Button bsStyle="primary" className="center-block" onClick={() => this.setState({ showModal: true })}>
+                        <Button bsStyle="primary" className="center-block video-button" onClick={() => this.setState({ showModal: true })}>
                             <Glyphicon glyph="play-circle" />&nbsp;&nbsp;Video Overview
                         </Button>
                     </div>

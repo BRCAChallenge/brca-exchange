@@ -233,6 +233,14 @@ input:focus {
     height: 486px;
 }
 
+.video-button {
+    font-size: 21px;
+}
+
+.video-button .glyphicon {
+    top: 3px;
+}
+
 @media only screen and (max-width : 1199px) {
     .vimeo-video {
         height: 360px;
