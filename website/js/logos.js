@@ -19,7 +19,7 @@ module.exports = [
     },
     {
         id: 'ENIGMA',
-        logo: require('./img/enigma_logo.png'),
+        logo: require('./img/enigma_logo.jpeg'),
         url: 'http://enigmaconsortium.org'
     },
     {
@@ -28,13 +28,18 @@ module.exports = [
         url: 'http://www.humanvariomeproject.org'
     },
     {
-        id: 'CIMBA',
-        logo: require('./img/cimba_logo.png'),
-        url: 'http://apps.ccge.medschl.cam.ac.uk/consortia/cimba//'
+        id: 'UCSC',
+        logo: require('./img/UC-Santa-Cruz-Genomics-Inst_090314.png'),
+        url: 'http://ucscgenomics.soe.ucsc.edu'
+    },
+    {
+        id: 'ETHZurich',
+        logo: require('./img/ETHzurich.png'),
+        url: 'http://www.ethz.ch/en.html'
     },
     {
         id: 'LOVD',
-        logo: require('./img/lovd_logo.jpg'),
+        logo: require('./img/LOVD-hires.png'),
         url: 'http://www.lovd.nl/',
     }
 ];

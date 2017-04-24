@@ -34,6 +34,7 @@ var slugify = require('./slugify');
 
 var content = require('./content');
 var Community = require('./Community');
+var FactSheet = require('./FactSheet');
 var {MailingList} = require('./MailingList');
 
 var databaseKey = require('../databaseKey');
@@ -347,7 +348,7 @@ var Database = React.createClass({
         return  (
 			<Row>
 				<Col sm={10} smOffset={1}  className="alert alert-warning">
-					{this.props.mode === 'default' && <img id='enigma-logo' src={require('./img/enigma_logo.png')} />}
+					{this.props.mode === 'default' && <img id='enigma-logo' src={require('./img/enigma_logo.jpeg')} />}
 					<RawHTML ref='content' html={message}/>
 					{this.props.mode === 'research_mode' && <Button className="btn-small" onClick={this.toggleMode}>
 						Show Expert Reviewed Data Only
@@ -937,6 +938,7 @@ var routes = (
     <Route handler={Application}>
         <DefaultRoute handler={Home}/>
         <Route path='about/:page' handler={About}/>
+        <Route path='factsheet' handler={FactSheet}/>
         <Route path='help' handler={Help}/>
         <Route path='community' handler={Community}/>
         <Route path='signup' handler={Signup}/>

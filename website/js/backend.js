@@ -70,6 +70,10 @@ function variant(variant) {
     return Rx.DOM.get(`${config.backend_url}/data/variant/?variant_id=${variant}`).map(xhr => JSON.parse(xhr.responseText));
 }
 
+function variantCounts() {
+    return Rx.DOM.get(`${config.backend_url}/data/variantcounts`).map(xhr => JSON.parse(xhr.responseText));
+}
+
 function releases() {
     return Rx.DOM.get(`${config.backend_url}/data/releases`).map(xhr => JSON.parse(xhr.responseText));
 }
@@ -103,6 +107,7 @@ function lollipopData(opts) {
 module.exports = {
     data,
     variant,
+    variantCounts,
     releases,
     release,
     users,
