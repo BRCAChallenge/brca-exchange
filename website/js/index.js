@@ -39,7 +39,7 @@ var {MailingList} = require('./MailingList');
 
 var databaseKey = require('../databaseKey');
 
-var {Grid, Col, Row, Table, Button, Modal, Panel} = require('react-bootstrap');
+var {Grid, Col, Row, Table, Button, Modal, Panel, Glyphicon} = require('react-bootstrap');
 
 /* FAISAL: added 'groups' collection that specifies how to map columns to higher-level groups */
 var {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups} = require('./VariantTable');
@@ -107,7 +107,8 @@ var Home = React.createClass({
     getInitialState() {
         return {
             index: 0,
-            direction: null
+            direction: null,
+            showModal: false
         };
     },
 
@@ -136,16 +137,17 @@ var Home = React.createClass({
                 <Row>
                     <div className="jumbotron">
                         <RawHTML html={content.pages.home} />
+                        <Button bsStyle="primary" className="center-block video-button" onClick={() => this.setState({ showModal: true })}>
+                            <Glyphicon glyph="play-circle" />&nbsp;&nbsp;Video Overview
+                        </Button>
                     </div>
-                </Row>
-                <Row>
-                    <Col md={10} mdOffset={1} className="text-center video-container">
-                        <iframe src="https://player.vimeo.com/video/199396428" className="vimeo-video" frameBorder="0" webkitallowfullscreen mozallowfullscreen allowFullScreen></iframe>
-                    </Col>
                 </Row>
                 <Row className="logo-block">
                     {logoItems}
                 </Row>
+                {this.state.showModal && <Modal bsSize="large" onRequestHide={() => this.setState({ showModal: false })}>
+                    <iframe className="vimeo-video" src="https://player.vimeo.com/video/199396428" className="vimeo-video" frameBorder="0" webkitallowfullscreen mozallowfullscreen allowFullScreen></iframe>
+                </Modal>}
             </Grid>
         );
     }
