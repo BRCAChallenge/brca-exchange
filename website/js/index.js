@@ -606,6 +606,7 @@ var VariantDetail = React.createClass({
             var diffHTML = [];
 
             if (diff !== null) {
+                debugger;
                 for (var j = 0; j < diff.length; j++) {
                     let fieldDiff = diff[j];
                     let fieldName = fieldDiff.field;
