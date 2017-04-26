@@ -205,7 +205,6 @@ var researchModeColumns = [
     {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
 
     {title: 'Mutation category (BIC)', prop: 'Mutation_type_BIC'},
-    {title: 'PolyPhen score', prop: 'PolyPhen_Score'},
     {title: 'SIFT score', prop: 'Sift_Score'},
 
 
@@ -353,7 +352,6 @@ var subColumns = [
         subColTitle: "Bioinformatic Annotation",
         subColList: [
             {title: 'Mutation category (BIC)', prop: 'Mutation_type_BIC', render: renderCell},
-            {title: 'PolyPhen score', prop: 'PolyPhen_Score', render: renderCell},
             {title: 'SIFT score', prop: 'Sift_Score', render: renderCell}
         ]
     },

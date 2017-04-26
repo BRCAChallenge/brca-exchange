@@ -157,10 +157,6 @@ class transformer(object):
         elif field == "Allele_Frequency":
             # Some ExAC allele frequencies are missing a ')'
             value = re.sub("\(ExAC", "(ExAC)", value)
-        elif field == "Polyphen_Prediction":
-            # for sift predictions, some data combines the
-            # numerical and categorical scores
-            value = re.sub("\(*$", "", value)
         elif field == "Sift_Prediction":
             # for sift predictions, some data combines the
             # numerical and categorical scores
@@ -222,7 +218,8 @@ class transformer(object):
         columns_to_ignore = ["change_type", "Assertion_method_citation_ENIGMA", "Genomic_Coordinate_hg36",
                              "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg38", "HGVS_cDNA", "HGVS_Protein",
                              "Hg37_Start", "Hg37_End", "Hg36_Start", "Hg36_End", "BX_ID_ENIGMA", "BX_ID_ClinVar",
-                             "BX_ID_BIC", "BX_ID_ExAC", "BX_ID_LOVD", "BX_ID_exLOVD", "BX_ID_1000_Genomes", "BX_ID_ESP"]
+                             "BX_ID_BIC", "BX_ID_ExAC", "BX_ID_LOVD", "BX_ID_exLOVD", "BX_ID_1000_Genomes", "BX_ID_ESP",
+                             "Polyphen_Prediction", "Polyphen_Score"]
 
         # Header to group all logs the same variant
         variant_intro = "\n\n %s \n Old Source: %s \n New Source: %s \n\n" % (newRow["pyhgvs_Genomic_Coordinate_38"],
