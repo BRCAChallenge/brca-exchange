@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connection
-from data.models import Variant, DataRelease
+from data.models import Variant, DataRelease, Report
 from django.db import transaction
 
 
@@ -28,6 +28,18 @@ class Command(BaseCommand):
                 CREATE INDEX words_idx ON words(word text_pattern_ops);
             """)
 
+    def reset_sequence_ids(self):
+        # NOTE: tried using sqlsequencereset to programatically generate these commands but cursor failed to execute them.
+        # Ensure these are the correct commands before running this script!
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT setval(pg_get_serial_sequence('"data_release"','id'), coalesce(max("id"), 1), max("id") IS NOT null) FROM "data_release";
+                SELECT setval(pg_get_serial_sequence('"data_changetype"','id'), coalesce(max("id"), 1), max("id") IS NOT null) FROM "data_changetype";
+                SELECT setval(pg_get_serial_sequence('"variant"','id'), coalesce(max("id"), 1), max("id") IS NOT null) FROM "variant";
+                SELECT setval(pg_get_serial_sequence('"report"','id'), coalesce(max("id"), 1), max("id") IS NOT null) FROM "report";
+                SELECT setval(pg_get_serial_sequence('"currentvariant"','id'), coalesce(max("id"), 1), max("id") IS NOT null) FROM "currentvariant";
+            """)
+
     @transaction.atomic
     def handle(self, *args, **options):
         latest_release_id = DataRelease.objects.all().order_by("-id")[0].id
@@ -36,6 +48,10 @@ class Command(BaseCommand):
         Variant.objects.filter(Data_Release_id=latest_release_id).delete()
 
         print "Deleted variants from most recent release."
+
+        Report.objects.filter(Data_Release_id=latest_release_id).delete()
+
+        print "Deleted reports from most recent release."
 
         # Delete latest data_release and update materialized view of variants
         with connection.cursor() as cursor:
@@ -47,4 +63,9 @@ class Command(BaseCommand):
         self.update_autocomplete_words()
 
         print "Updated autocomplete words."
+
+        self.reset_sequence_ids()
+
+        print "Reset sequence ids in DB."
+
         print "Done!"
