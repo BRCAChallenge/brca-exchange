@@ -714,7 +714,6 @@ var VariantDetail = React.createClass({
                     title = "Abbreviated AA Change";
                 }
 
-
                 if (variant[prop] !== null) {
                     if (prop === "Gene_Symbol") {
                         rowItem = <i>{variant[prop]}</i>;
