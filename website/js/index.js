@@ -714,6 +714,7 @@ var VariantDetail = React.createClass({
                     title = "Abbreviated AA Change";
                 }
 
+
                 if (variant[prop] !== null) {
                     if (prop === "Gene_Symbol") {
                         rowItem = <i>{variant[prop]}</i>;
@@ -745,10 +746,11 @@ var VariantDetail = React.createClass({
                     rowItem = variant["HGVS_Protein"].split(":")[0];
                 }
 
-                const isEmptyValue = (!variant[prop] || variant[prop].toString().trim() === "-" || !variant[prop].trim());
+                const isEmptyValue = isEmptyField(variant[prop]);
 
                 if (isEmptyValue) {
                     rowsEmpty += 1;
+                    rowItem = '-';
                 }
 
                 totalRowsEmpty += rowsEmpty;
