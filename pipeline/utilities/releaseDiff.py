@@ -130,8 +130,8 @@ class transformer(object):
         if value == "" or value is None:
             value = "-"
         # Some values start with ", " which throws off the comparison -- overwrite it.
-        if value[:2] == ", ":
-            value = value[2:]
+        if value[:1] == ",":
+            value = value[1:]
         # Some values end with "," which throws off the comparison -- overwrite it.
         if value[len(value)-1] == ",":
             value = value[:len(value)-1]
@@ -170,6 +170,9 @@ class transformer(object):
         elif field == "Pathogenicity_expert":
             # Updated wording for non-expert-reviewed...
             value = value.replace("Not Yet Classified", "Not Yet Reviewed")
+
+        # Strip leading and trailing whitespace
+        value = value.strip()
 
         try:
             value = float(value)
