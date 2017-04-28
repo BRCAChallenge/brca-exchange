@@ -2,6 +2,27 @@
 
 To search just start typing a variant in the search box and it will auto complete. Variants are identified using [HGVS nomenclature](http://www.hgvs.org/mutnomen/), a standard created by the Human Genome Variation Society.  Most genetic test results are reported in HGVS nomenclature. This nomenclature describes a variant by indicating (1) a reference sequence, (2) what kind of sequence it is (genomic, cDNA or protein), (3) the position of the variant in relation this reference sequence, and (4) the nucloetide or protein differences between the variant and the reference sequence.  For example, _NM_007294.3:c.5053A>G_ indicates a variant relative to reference sequence _NM_007294.3_, which is a cDNA sequence (as indicated by _c_), that the variant is in position 5053, and that it involves changing an _A_ to a _G_.
 
+* * * * * * * * * * *
+
+# Column Groups
+
+#### Clinical Significance (ENIGMA)
+Variant clinical classification and supporting information as provided by ENIGMA expert panel review.
+
+#### Clinical Significance (ClinVar)
+Fields extracted from ClinVar ([website](https://www.ncbi.nlm.nih.gov/clinvar/)) relating to variant clinical classification, for individual submitters to ClinVar (excludes ENIGMA and BIC - see other panels on the Variant Details page).
+
+#### Clinical Significance (BIC)
+Fields extracted from BIC ([website](https://research.nhgri.nih.gov/bic/)) relevant to variant clinical classification.
+
+#### Clinical Significance (LOVD)
+Fields extracted from LOVD ([website](http://www.lovd.nl/3.0/home)) relevant to variant clinical classification.
+
+#### Multifactorial Likelihood Analysis Classification
+Component likelihoods and final classification from multifactorial likelihood analysis, a quantitative integrated evaluation of variant pathogenicity. 
+
+* * * * * * * * * * *
+
 # Table Columns
 
 ### Variant Nomenclature
@@ -87,6 +108,9 @@ Allele frequency in the Southeast Asian population, from 1000 Genomes
 
 #### Variant Frequency (LOVD)
 Allele frequency, from LOVD, expressed as a fraction relative to the reference population
+
+#### Allele Frequency in reference sets
+Variant allele frequency in non-cancer sample sets of different ethnicities. The term "minus TCGA" indicates that information from The Cancer Genome Atlas dataset was excluded when determining frequency Maximum allele frequency is the maximum allele frequency observed in any single ethnic group.
 
 ## Genomic
 
@@ -278,11 +302,13 @@ Submitting organization.  From ClinVar.
 #### URL (ENIGMA)
 URL listing the variant.  From ENIGMA.
 
+* * * * * * * * * * *
 
 # Downloading Variant Data
 
 To download the variant data click on the 'Download' button located above the search bar within the Variants Table page. When you click on it the data that is downloaded is a comma delimited .csv file containing the set of variant details for the variants that matched the search and/or filtering criteria. The first row in the file represent the column labels.
 
+* * * * * * * * * * *
 
 # Lollipop Plots
 

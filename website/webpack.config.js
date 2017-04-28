@@ -69,7 +69,11 @@ module.exports = {
 			'rx.coincidence$': 'rx/dist/rx.coincidence',
 			// The npm version of d3-tip is broken. We over-ride the transitive
 			// dependency here, with the version we've installed.
-			'd3-tip$': require.resolve('d3-tip')
+			'd3-tip$': require.resolve('d3-tip'),
+
+            // FAISAL: needed for isotope, ref: http://isotope.metafizzy.co/extras.html#webpack
+            'masonry': 'masonry-layout',
+            'isotope': 'isotope-layout'
 		},
 		extensions: ['', '.js', '.json', '.coffee'],
 		root: __dirname + "/js"

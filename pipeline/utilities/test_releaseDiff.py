@@ -3,6 +3,7 @@ import unittest
 import tempfile
 import csv
 import releaseDiff
+import copy
 from os import path
 
 
@@ -24,7 +25,9 @@ class TestStringMethods(unittest.TestCase):
                       'Source_URL',
                       'Clinical_Significance_ClinVar',
                       'Allele_frequency_ExAC',
-                      'EAS_Allele_frequency_1000_Genomes'
+                      'EAS_Allele_frequency_1000_Genomes',
+                      'Polyphen_Prediction',
+                      'Polyphen_Score'
                      ]
         self.oldRow = {
                   'Pathogenicity_all': '',
@@ -38,22 +41,12 @@ class TestStringMethods(unittest.TestCase):
                   'pyhgvs_Genomic_Coordinate_36': 'chr17:g.43049067:C>T',
                   'pyhgvs_Protein': 'NP_009225.1:p.?',
                   'Allele_frequency_ExAC': '9.841E-06',
-                  'EAS_Allele_frequency_1000_Genomes': '0'
+                  'EAS_Allele_frequency_1000_Genomes': '0',
+                  'Polyphen_Prediction': 'benign',
+                  'Polyphen_Score': '0.992'
                  }
-        self.newRow = {
-                  'Pathogenicity_all': '',
-                  'Pathogenicity_expert': '',
-                  'Source': 'LOVD,1000_Genomes',
-                  'HGVS_Protein': '-',
-                  'Pathogenicity_expert': 'Not Yet Reviewed',
-                  'Genomic_Coordinate_hg38': 'chr17:g.43049067:C>T',
-                  'pyhgvs_Genomic_Coordinate_38': 'chr17:g.43049067:C>T',
-                  'pyhgvs_Genomic_Coordinate_37': 'chr17:g.43049067:C>T',
-                  'pyhgvs_Genomic_Coordinate_36': 'chr17:g.43049067:C>T',
-                  'pyhgvs_Protein': 'NP_009225.1:p.?',
-                  'Allele_frequency_ExAC': '9.841E-06',
-                  'EAS_Allele_frequency_1000_Genomes': '0'
-                 }
+
+        self.newRow = copy.deepcopy(self.oldRow)
 
         self.test_dir = tempfile.mkdtemp()
 
@@ -481,6 +474,37 @@ class TestStringMethods(unittest.TestCase):
     #     diff = releaseDiff.diff_json
     #     self.assertEqual(diff, {})
     #     self.assertIsNone(change_type)
+
+    def test_ignores_polyphen_fields(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+
+        self.newRow["Polyphen_Score"] = "0.283"
+        self.newRow["Polyphen_Prediction"] = "probably_damaging"
+
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
+    def test_ignores_change_from_none_to_empty_string(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+
+        self.oldRow["Submitter_ClinVar"] = "Quest_Diagnostics_Nichols_Institute_San_Juan_Capistrano"
+        self.newRow["Submitter_ClinVar"] = ",Quest_Diagnostics_Nichols_Institute_San_Juan_Capistrano"
+
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+>>>>>>> 9bb1e69d8080ca3468134a88f23c2955190caa36
 
 
 if __name__ == '__main__':
