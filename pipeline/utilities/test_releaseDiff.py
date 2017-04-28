@@ -459,7 +459,7 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
 
-    def test_ignored_polyphen_fields(self):
+    def test_ignores_polyphen_fields(self):
         releaseDiff.added_data = self.added_data
         releaseDiff.diff = self.diff
         releaseDiff.diff_json = self.diff_json
@@ -468,6 +468,21 @@ class TestStringMethods(unittest.TestCase):
 
         self.newRow["Polyphen_Score"] = "0.283"
         self.newRow["Polyphen_Prediction"] = "probably_damaging"
+
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
+    def test_ignores_change_from_none_to_empty_string(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+
+        self.oldRow["Submitter_ClinVar"] = "Quest_Diagnostics_Nichols_Institute_San_Juan_Capistrano"
+        self.newRow["Submitter_ClinVar"] = ",Quest_Diagnostics_Nichols_Institute_San_Juan_Capistrano"
 
         change_type = v1v2.compareRow(self.oldRow, self.newRow)
         diff = releaseDiff.diff_json
