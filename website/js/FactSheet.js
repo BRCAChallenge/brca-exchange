@@ -4,7 +4,6 @@ var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 var {Grid, Col, Row, Alert} = require('react-bootstrap');
 var backend = require('backend');
-var {Link} = require('react-router');
 
 var FactSheet = React.createClass({
     mixins: [PureRenderMixin],
