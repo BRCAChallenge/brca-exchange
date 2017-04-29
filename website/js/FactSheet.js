@@ -4,7 +4,6 @@ var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 var {Grid, Col, Row, Alert} = require('react-bootstrap');
 var backend = require('backend');
-var {Link} = require('react-router');
 
 var FactSheet = React.createClass({
     mixins: [PureRenderMixin],
@@ -43,14 +42,7 @@ var FactSheet = React.createClass({
                                 <li>Variants expert-classified as benign: {Number(this.state.enigmabrca2).toLocaleString()}</li>
                             </ul>
                         </ul>}
-                        <Alert bsStyle="info">
-                            For more information, please visit:
-                            <ul>
-                                <li><Link to="/about/variation">BRCA Genes and Cancer</Link></li>
-                                <li><Link to="/about/history">History of the BRCA Exchange</Link></li>
-                            </ul>
-                        </Alert>
-
+                        <br />
                         <h4>Media Inquiries</h4>
                         For media inquiries, please contact the GA4GH Communications Lead, Angela Page (<a href="mailto:angela.page@genomicsandhealth.org">angela.page@genomicsandhealth.org</a>)
                         <br />
