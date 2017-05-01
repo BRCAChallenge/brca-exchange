@@ -36,8 +36,24 @@ function setPages({data, count, deletedCount, synonyms}, pageLength) { //eslint-
 // Wrap Table with a version having PureRenderMixin
 var FastTable = React.createClass({
     mixins: [PureRenderMixin],
+    truncateGenomicCoordinates: function(variantData) {
+        const genomicCoordinateFields = ["Genomic_Coordinate_hg36", "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg38"];
+        genomicCoordinateFields.forEach(function(field) {
+            if (variantData[field].length > 35) {
+                variantData[field] = variantData[field].substring(0, 35) + "...";
+            } else {
+                return variantData[field];
+            }
+        });
+        return variantData;
+    },
     render: function () {
         var {dataArray, ...props} = this.props;
+        if (dataArray.length > 0) {
+            dataArray = _.map(dataArray, function(variantData) {
+                return this.truncateGenomicCoordinates(variantData);
+            }, this);
+        }
         return <Table {...props} dataArray={dataArray}/>;
     }
 });

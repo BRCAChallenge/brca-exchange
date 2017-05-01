@@ -757,7 +757,7 @@ var VariantDetail = React.createClass({
                 return (
                     <tr key={prop} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
                         <KeyInline tableKey={title} onClick={() => this.showHelp(title)}/>
-                        <td><span className="row-wrap-nowidth">{rowItem}</span></td>
+                        <td><span className="row-value">{rowItem}</span></td>
                     </tr>
                 );
             });
