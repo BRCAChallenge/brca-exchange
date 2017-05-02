@@ -399,7 +399,7 @@ div#main {
 }
 
 .row-value {
-    width: 99%; /*100% width causes last period in ellipsis to be cut off*/
+    width: 99%; /*Prevents data cutoff*/
     float: left;
     word-wrap: break-word;
 }
