@@ -390,15 +390,18 @@ div#main {
     float: left;
 }
 
-.row-value {
+.row-value-truncated {
     width: 99%; /*100% width causes last period in ellipsis to be cut off*/
     float: left;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
-    /*To wrap instead of cutting off with ellipsis, uncomment word-wrap: break-word; and
-    remove text-overflow, overflow, and white-space properties.*/
-    /*word-wrap: break-word;*/
+}
+
+.row-value {
+    width: 99%; /*Prevents data cutoff*/
+    float: left;
+    word-wrap: break-word;
 }
 
 /* id helper to access the variant data table for better responsive layouts */
