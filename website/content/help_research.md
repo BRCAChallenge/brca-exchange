@@ -18,7 +18,7 @@ Fields extracted from BIC ([website](https://research.nhgri.nih.gov/bic/)) relev
 #### Clinical Significance (LOVD)
 Fields extracted from LOVD ([website](http://www.lovd.nl/3.0/home)) relevant to variant clinical classification.
 
-#### Multifactorial Likelihood Analysis Classification
+#### [Multifactorial Likelihood Analysis Classification](https://www.ncbi.nlm.nih.gov/pubmed/21990134)
 Component likelihoods and final classification from multifactorial likelihood analysis, a quantitative integrated evaluation of variant pathogenicity. 
 
 * * * * * * * * * * *
