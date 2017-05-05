@@ -159,13 +159,13 @@ const researchModeGroups = [
         {title: 'EUR Allele Frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes', core: true},
         {title: 'South Asian Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes', core: true},
         {title: 'Allele Frequency (ExAC minus TCGA)', prop: 'Allele_frequency_ExAC', core: true},
-        {title: 'Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP', core: true},
+        {title: '% Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP', core: true},
     ]},
 
     {groupTitle: 'Multifactorial Likelihood Analysis', internalGroupName: 'Multifactorial Likelihood Analysis', innerCols: [
-        {title: 'Probability of pathogenicity', prop: 'Posterior_probability_exLOVD', core: true},
+        {title: 'Posterior probability of pathogenicity', prop: 'Posterior_probability_exLOVD', core: true},
         {title: 'Prior probability of pathogenicity', prop: 'Combined_prior_probablility_exLOVD', core: true},
-        {title: 'Missense analysis probability of pathogenicity', prop: 'Missense_analysis_prior_probability_exLOVD', core: true},
+        {title: 'Missense analysis pathogenicity prior', prop: 'Missense_analysis_prior_probability_exLOVD', core: true},
         {title: 'Co-occurrence likelihood', prop: 'Co_occurrence_LR_exLOVD', core: true},
         {title: 'Segregation Likelihood Ratio', prop: 'Segregation_LR_exLOVD', core: true},
         {title: 'Summary Family History Likelihood Ratio', prop: 'Sum_family_LR_exLOVD', core: true},
