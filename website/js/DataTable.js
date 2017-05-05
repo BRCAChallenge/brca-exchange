@@ -101,11 +101,15 @@ var DataTable = React.createClass({
         this.fetch(this.state);
     },
     getInitialState: function () {
+        let filterValues = JSON.parse(localStorage.getItem('filterValues'));
+        if (filterValues === null || filterValues === undefined) {
+            filterValues = {};
+        }
         return mergeState({
             data: [],
             lollipopOpen: false,
             filtersOpen: false,
-            filterValues: {},
+            filterValues: filterValues,
             search: '',
             columnSelection: this.props.columnSelection,
             sourceSelection: this.props.sourceSelection,
@@ -125,8 +129,10 @@ var DataTable = React.createClass({
         this.setState({windowWidth: window.innerWidth});
     },
     setFilters: function (obj) {
-        var {filterValues} = this.state,
+        let {filterValues} = this.state,
             newFilterValues = merge(filterValues, obj);
+
+        localStorage.setItem('filterValues', JSON.stringify(newFilterValues));
 
         this.setStateFetch({
           filterValues: newFilterValues,
@@ -134,6 +140,7 @@ var DataTable = React.createClass({
         });
     },
     clearFilters: function () {
+        localStorage.setItem('filterValues', null);
         // Reset release and changetype filters
         this.setStateFetch({
             release: undefined,
