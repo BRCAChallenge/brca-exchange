@@ -42,7 +42,7 @@ var databaseKey = require('../databaseKey');
 var {Grid, Col, Row, Table, Button, Modal, Panel, Glyphicon} = require('react-bootstrap');
 
 /* FAISAL: added 'groups' collection that specifies how to map columns to higher-level groups */
-var {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups, defaultExpertColumns, defaultResearchColumns, allSources} = require('./VariantTable');
+var {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups} = require('./VariantTable');
 var {Signup} = require('./Signup');
 var {Signin, ResetPassword} = require('./Signin');
 var {ConfirmEmail} = require('./ConfirmEmail');
@@ -215,9 +215,7 @@ function databaseParams(paramsIn) {
     return {changeTypes, search, sortBy, ...numParams};
 }
 
-var transpose = a => _.zip.apply(_, a);
-
-function urlFromDatabase(state, mode) {
+function urlFromDatabase(state) {
     // Need to diff from defaults. The defaults are in DataTable.
     // We could keep the defaults here, or in a different module.
     var {release, changeTypes, search, page, pageLength,
@@ -282,9 +280,9 @@ var Database = React.createClass({
                 d3TipDiv[0].style.opacity = '0';
                 d3TipDiv[0].style.pointerEvents = 'none';
             }
-            if (this.state.showModal != true) {
+            if (this.state.showModal !== true) {
                 // Don't change url if modal is open -- user is still deciding whether to change modes.
-                this.transitionTo('/variants', {}, urlFromDatabase(state, this.props.mode));
+                this.transitionTo('/variants', {}, urlFromDatabase(state));
             }
         }
     },
