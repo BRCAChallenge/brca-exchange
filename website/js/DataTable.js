@@ -72,6 +72,7 @@ var DataTable = React.createClass({
     shouldComponentUpdate: function (nextProps, nextState) {
         return (
             this.state.filtersOpen !== nextState.filtersOpen ||
+            this.state.advancedFiltersOpen !== nextState.advancedFiltersOpen ||
             this.state.lollipopOpen !== nextState.lollipopOpen ||
             this.state.page !== nextState.page ||
             this.state.count !== nextState.count ||
@@ -105,6 +106,7 @@ var DataTable = React.createClass({
             data: [],
             lollipopOpen: false,
             filtersOpen: false,
+            advancedFiltersOpen: false,
             filterValues: {},
             search: '',
             columnSelection: this.props.columnSelection,
@@ -194,6 +196,9 @@ var DataTable = React.createClass({
     toggleFilters: function () {
         this.setState({filtersOpen: !this.state.filtersOpen});
     },
+    toggleAdvancedFilters: function() {
+        this.setState({advancedFiltersOpen: !this.state.advancedFiltersOpen});
+    },
     showDeleted: function () {
         this.setStateFetch({showDeleted: true});
     },
@@ -211,9 +216,9 @@ var DataTable = React.createClass({
         this.setStateFetch({page: newPage, pageLength: length});
     },
     render: function () {
-        var {release, changeTypes, filterValues, filtersOpen, lollipopOpen, search, data, columnSelection,
+        var {release, changeTypes, filterValues, filtersOpen, advancedFiltersOpen, lollipopOpen, search, data, columnSelection,
             page, totalPages, count, synonyms, error} = this.state;
-        var {columns, filterColumns, className, advancedFilters, downloadButton, lollipopButton} = this.props;
+        var {columns, filterColumns, className, advancedFilters, downloadButton, lollipopButton, mode} = this.props;
         var renderColumns = _.filter(columns, c => columnSelection[c.prop]);
         var filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
             <SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
@@ -249,13 +254,16 @@ var DataTable = React.createClass({
                         <Button className="btn-sm rgt-buffer"
                                 onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}
                         </Button>
+                        {mode === "research_mode" && <Button className="btn-sm rgt-buffer"
+                                onClick={this.toggleAdvancedFilters}>{(advancedFiltersOpen ? 'Hide' : 'Show' ) + ' Advanced Filters'}
+                        </Button>}
                         {lollipopButton(this.toggleLollipop, lollipopOpen)}
                     </Col>
                 </Row>
                 <Row id="filters">
                     <Col sm={10} smOffset={1}>
                         {filtersOpen && <div className='form-inline'>{filterFormEls}</div>}
-                        {filtersOpen && <div className='form-inline'>
+                        {advancedFiltersOpen && mode === "research_mode" && <div className='form-inline'>
                             {advancedFilters}
                         </div>}
                     </Col>

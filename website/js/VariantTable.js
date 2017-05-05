@@ -477,7 +477,7 @@ var hasSelection = () => !(window.getSelection && window.getSelection().isCollap
 var Table = React.createClass({
     mixins: [PureRenderMixin],
     render: function () {
-        var {data, onHeaderClick, onRowClick, hiddenSources, ...opts} = this.props;
+        var {data, onHeaderClick, onRowClick, hiddenSources, mode, ...opts} = this.props;
         return (
             <DataTable
                 ref='table'
@@ -491,7 +491,8 @@ var Table = React.createClass({
                 initialData={data}
                 initialPageLength={20}
                 initialSortBy={{prop: 'Gene_Symbol', order: 'descending'}}
-                pageLengthOptions={[ 20, 50, 100 ]}/>
+                pageLengthOptions={[ 20, 50, 100 ]}
+                mode={mode}/>
         );
     }
 });
