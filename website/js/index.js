@@ -209,40 +209,25 @@ function toNumber(v) {
 }
 
 function databaseParams(paramsIn) {
-    var {filter, filterValue, hide, hideSources, excludeSources, orderBy, order, search = '', changeTypes} = paramsIn;
+    var {orderBy, order, search = '', changeTypes} = paramsIn;
     var numParams = _.mapObject(_.pick(paramsIn, 'page', 'pageLength', 'release'), toNumber);
     var sortBy = {prop: orderBy, order};
-    var columnSelection = _.object(hide, _.map(hide, _.constant(false)));
-    var sourceSelection = {..._.object(hideSources, _.map(hideSources, _.constant(0))),
-                           ..._.object(excludeSources, _.map(excludeSources, _.constant(-1)))};
-    var filterValues = _.object(filter, filterValue);
-    return {changeTypes, search, sortBy, columnSelection, sourceSelection, filterValues, hide, ...numParams};
+    return {changeTypes, search, sortBy, ...numParams};
 }
-
-var transpose = a => _.zip.apply(_, a);
 
 function urlFromDatabase(state) {
     // Need to diff from defaults. The defaults are in DataTable.
     // We could keep the defaults here, or in a different module.
-    var {release, changeTypes, columnSelection, filterValues, sourceSelection,
-            search, page, pageLength, sortBy: {prop, order}} = state;
-    var hide = _.keys(_.pick(columnSelection, v => v === false));
-    var hideSources = _.keys(_.pick(sourceSelection, v => v === 0));
-    var excludeSources = _.keys(_.pick(sourceSelection, v => v === -1));
-    var [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v === true)));
+    var {release, changeTypes, search, page, pageLength,
+        sortBy: {prop, order}} = state;
     return _.pick({
         release,
         changeTypes,
         search: search === '' ? null : backend.trimSearchTerm(search),
-        filter,
-        filterValue,
         page: page === 0 ? null : page,
         pageLength: pageLength === 20 ? null : pageLength,
         orderBy: prop,
-        order,
-        hideSources: hideSources,
-        excludeSources: excludeSources,
-        hide: hide.length === 0 ? null : hide
+        order
     }, v => v != null);
 
 }
@@ -295,7 +280,10 @@ var Database = React.createClass({
                 d3TipDiv[0].style.opacity = '0';
                 d3TipDiv[0].style.pointerEvents = 'none';
             }
-            this.transitionTo('/variants', {}, urlFromDatabase(state));
+            if (this.state.showModal !== true) {
+                // Don't change url if modal is open -- user is still deciding whether to change modes.
+                this.transitionTo('/variants', {}, urlFromDatabase(state));
+            }
         }
     },
     toggleMode: function () {
@@ -397,8 +385,8 @@ const GroupHelpButton = React.createClass({
 // all data, otherwise go straight to all data. Finally, if key is not found, replace
 // _ with space in the key and return that.
 function getDisplayName(key) {
-    var researchMode = (localStorage.getItem("research-mode") === 'true');
-    var displayName;
+    const researchMode = (localStorage.getItem("research-mode") === 'true');
+    let displayName;
     if (!researchMode) {
         displayName = columns.find(e => e.prop === key);
         displayName = displayName && displayName.title;

@@ -501,28 +501,40 @@ var ResearchVariantTableSupplier = function (Component) {
         mixins: [PureRenderMixin],
 
         getInitialState: function () {
-            var defaultColumnSelection = _.object(
-                _.map(this.getColumns(),
-                    c => _.contains(this.getDefaultColumns(), c.prop) ? [c.prop, true] : [c.prop, false]));
-            var columnSelectionQueryParams = this.props.initialState.columnSelection;
+            /*
+            Check localStorage first for column and source selections,
+            otherwise use defaults.
+            */
+            let selectedColumns = JSON.parse(localStorage.getItem('columnSelection'));
+            if (selectedColumns === null || selectedColumns === undefined) {
+                selectedColumns = _.object(_.map(this.getColumns(),
+                    c => _.contains(this.getDefaultColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
+                );
+            }
+            let selectedSources = JSON.parse(localStorage.getItem('selectedSources'));
+            if (selectedSources === null || selectedSources === undefined) {
+                selectedSources = allSources;
+            }
 
             return {
-                sourceSelection: {...allSources, ...this.props.sourceSelection},
-                columnSelection: {...defaultColumnSelection, ...columnSelectionQueryParams}
+                sourceSelection: {...allSources},
+                columnSelection: {...selectedColumns}
             };
         },
         toggleColumns: function (prop) {
-            var {columnSelection} = this.state,
+            let {columnSelection} = this.state,
                 val = columnSelection[prop],
                 cs = {...columnSelection, [prop]: !val};
+            localStorage.setItem('columnSelection', JSON.stringify(cs));
             this.setState({columnSelection: cs});
         },
         setSource: function (prop, event) {
             // this function uses 1, 0 and -1 to accommodate excluding sources as well as not-including them
             // currently only uses 1 and 0 because exclusion is not being used
-            var {sourceSelection} = this.state;
-            var value = event.target.checked ? 1 : 0;
-            var ss = {...sourceSelection, [prop]: value};
+            let {sourceSelection} = this.state;
+            let value = event.target.checked ? 1 : 0;
+            let ss = {...sourceSelection, [prop]: value};
+            localStorage.setItem('sourceSelection', JSON.stringify(ss));
             this.setState({sourceSelection: ss});
         },
         filterFormCols: function (subColList, columnSelection) {
@@ -593,19 +605,20 @@ var VariantTableSupplier = function (Component) {
         getColumns: function () {
             return columns;
         },
-        getDefaultColumns: function () {
+        getDefaultExpertColumns: function () {
             return defaultColumns;
         },
         render: function () {
-            var columnSelection = _.object(
-                _.map(this.getColumns(),
-                    c => _.contains(this.getDefaultColumns(), c.prop) ? [c.prop, true] : [c.prop, false]));
-            var sourceSelection = allSources;
+            let expertColumns = _.object(_.map(this.getColumns(),
+                c => _.contains(this.getDefaultExpertColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
+            );
+            // Expert portal always shows all sources
+            let sourceSelection = allSources;
             return (
                 <Component
                     {...this.props}
                     columns={this.getColumns()}
-                    columnSelection={columnSelection}
+                    columnSelection={expertColumns}
                     sourceSelection={sourceSelection}
                     downloadButton={()=> null}
                     lollipopButton={()=> null}/>
@@ -621,7 +634,9 @@ module.exports = {
 	ResearchVariantTable: ResearchVariantTableSupplier(Table),
 	researchModeColumns: researchModeColumns,
 	columns: columns,
-
     researchModeGroups: researchModeGroups,
-    expertModeGroups: expertModeGroups
+    expertModeGroups: expertModeGroups,
+    defaultExpertColumns: defaultColumns,
+    defaultResearchColumns: defaultResearchColumns,
+    allSources: allSources
 };
