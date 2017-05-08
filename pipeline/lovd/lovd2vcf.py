@@ -24,7 +24,7 @@ from pygr.seqdb import SequenceFileDB
 import pdb
 import urllib
 
-LOVD_LIST_FIELDS = ["genetic_origin", "RNA", "variant_effect", "individuals", "submitters"]
+LOVD_LIST_FIELDS = ["genetic_origin", "RNA", "variant_effect", "individuals", "submitters", "Protein", "cDNA"]
 
 
 def parse_args():
@@ -128,17 +128,9 @@ def normalize(field, field_value):
         if field_value[-1] == ';':
             field_value = field_value[:-1]
         if field not in LOVD_LIST_FIELDS and ';' in field_value:
-            # print("______removing semicolons______")
-            # print(field, field_value)
             field_value = field_value.replace(';', '')
-            # print(field, field_value)
-            # print("_______________________________")
         if field in LOVD_LIST_FIELDS and ';' in field_value:
-            # print("______replacing semicolons with commas______")
-            # print(field, field_value)
             field_value = field_value.replace(';', ', ')
-            # print(field, field_value)
-            # print("_______________________________")
         if field in LOVD_LIST_FIELDS:
             # VCF can't handle certain characters, uses url encoding which is later decoded in variant_merging.py
             field_value = urllib.quote_plus(field_value)

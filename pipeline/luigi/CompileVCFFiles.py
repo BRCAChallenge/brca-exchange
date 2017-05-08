@@ -607,7 +607,7 @@ class ConvertEXLOVDBRCA1ExtractToVCF(luigi.Task):
 
         os.chdir(lovd_method_dir)
 
-        args = ["./lovd2vcf", "-i", ex_lovd_file_dir + "/BRCA1.txt", "-o",
+        args = ["./lovd2vcf.py", "-i", ex_lovd_file_dir + "/BRCA1.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", "-a", "exLOVDAnnotation",
                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
                 brca_resources_dir + "/hg19.fa"]
@@ -629,7 +629,7 @@ class ConvertEXLOVDBRCA2ExtractToVCF(luigi.Task):
         ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
         brca_resources_dir = self.resources_dir
 
-        args = ["./lovd2vcf", "-i", ex_lovd_file_dir + "/BRCA2.txt", "-o",
+        args = ["./lovd2vcf.py", "-i", ex_lovd_file_dir + "/BRCA2.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf", "-a", "exLOVDAnnotation",
                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
                 brca_resources_dir + "/hg19.fa"]
