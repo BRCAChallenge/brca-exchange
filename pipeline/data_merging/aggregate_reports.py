@@ -5,6 +5,7 @@ import os
 import vcf
 import logging
 import csv
+import urllib
 from variant_merging import (
      add_columns_to_enigma_data,
      associate_chr_pos_ref_alt_with_enigma_item,
@@ -108,7 +109,10 @@ def normalize_vcf_reports(file, columns, filename, file_extension):
             try:
                 column_name = key + "_" + source
                 column_index = columns.index(column_name)
-                report[column_index] = record.INFO[value]
+                if source == "LOVD":
+                    report[column_index] = map(urllib.unquote_plus, record.INFO[value])
+                else:
+                    report[column_index] = record.INFO[value]
             except KeyError:
                 raise Exception("WARNING: Key error with report: %s \n\nError on value: %s \n\n Error in record.INFO: %s \n\nNeeds attn." % (report, value, record.INFO))
         reports.append(report)
