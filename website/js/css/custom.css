@@ -547,6 +547,21 @@ th[role='columnheader'] .help, .help-target .help {
     padding-right: 30px;
 }
 
+/* image captions that match the width of the image */
+.image-with-caption {
+    display: table;
+}
+
+.image-caption {
+    display: table-caption;
+    caption-side: bottom;
+}
+
+/* prevent overflow on small screens */
+.image-with-caption img {
+    max-width: 100%;
+}
+
 /**************************************************************/
 /**********      Community                *********************/
 /**************************************************************/
