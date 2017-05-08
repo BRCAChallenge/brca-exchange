@@ -558,6 +558,14 @@ var VariantDetail = React.createClass({
             hideEmptyItems: hideEmptyItems
         });
     },
+    truncateData: function(field) {
+        const fieldsToTruncate = ["Genomic_Coordinate_hg38", "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg36"];
+        if (fieldsToTruncate.indexOf(field) > -1) {
+            return true;
+        } else {
+            return false;
+        }
+    },
     onChangeGroupVisibility(groupTitle, event) {
         // stop the page from scrolling to the top (due to navigating to the fragment '#')
         event.preventDefault();
@@ -745,10 +753,11 @@ var VariantDetail = React.createClass({
                     rowItem = variant["HGVS_Protein"].split(":")[0];
                 }
 
-                const isEmptyValue = (!variant[prop] || variant[prop].toString().trim() === "-" || !variant[prop].trim());
+                const isEmptyValue = isEmptyField(variant[prop]);
 
                 if (isEmptyValue) {
                     rowsEmpty += 1;
+                    rowItem = '-';
                 }
 
                 totalRowsEmpty += rowsEmpty;
@@ -756,7 +765,7 @@ var VariantDetail = React.createClass({
                 return (
                     <tr key={prop} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
                         <KeyInline tableKey={title} onClick={() => this.showHelp(title)}/>
-                        <td><span className="row-wrap-nowidth">{rowItem}</span></td>
+                        <td><span className={ this.truncateData(prop) ? "row-value-truncated" : "row-value" }>{rowItem}</span></td>
                     </tr>
                 );
             });

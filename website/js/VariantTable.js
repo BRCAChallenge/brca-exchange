@@ -443,8 +443,6 @@ var subColumns = [
     },
 ];
 
-//var defaultColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_default'];
-
 var defaultColumns = ['Gene_Symbol', 'HGVS_cDNA', 'HGVS_Protein', 'Protein_Change', 'BIC_Nomenclature', 'Pathogenicity_expert'];
 var defaultResearchColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_all', 'Allele_Frequency'];
 
@@ -483,9 +481,9 @@ var Table = React.createClass({
         return (
             <DataTable
                 ref='table'
-                className='row-clickable'
+                className='row-clickable data-table'
                 {...opts}
-                buildRowOptions={r => ({className: r['Change_Type_id'] === 2 ? 'warning' : '', title: 'click for details', onClick: () => hasSelection() ? null : onRowClick(r)})}
+                buildRowOptions={r => ({className: r['Change_Type_id'] === 2 ? 'warning data-table-row' : 'data-table-row', title: 'click for details', onClick: () => hasSelection() ? null : onRowClick(r)})}
                 buildHeader={title => buildHeader(onHeaderClick, title)}
                 onRowClick={onRowClick}
                 onHeaderClick={onHeaderClick}

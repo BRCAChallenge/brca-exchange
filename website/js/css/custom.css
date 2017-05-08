@@ -390,6 +390,20 @@ div#main {
     float: left;
 }
 
+.row-value-truncated {
+    width: 99%; /*100% width causes last period in ellipsis to be cut off*/
+    float: left;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.row-value {
+    width: 99%; /*Prevents data cutoff*/
+    float: left;
+    word-wrap: break-word;
+}
+
 /* id helper to access the variant data table for better responsive layouts */
 #data-table-container {
     overflow-x: visible;
@@ -416,6 +430,13 @@ table.community td > span {
 
 table.community h3 {
     margin-top: 0;
+}
+
+.data-table-row td {
+    max-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /**************************************************************/
@@ -676,11 +697,6 @@ div.variant-detail-group table.table-bordered {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
-.row-wrap-nowidth {
-    word-wrap: break-word;
-    float: left;
-}
-
 /* hide empty variant information client-side */
 div.variant-detail-group .variantfield-empty {
     display: none;
@@ -688,6 +704,10 @@ div.variant-detail-group .variantfield-empty {
 
 div.variant-detail-group .group-empty {
     display: none;
+}
+
+div.variant-detail-group table {
+    table-layout: fixed;
 }
 
 /* special panel styling */
