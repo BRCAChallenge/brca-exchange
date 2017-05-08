@@ -72,7 +72,7 @@ var Community = React.createClass({
         if (queryParams.registrationSuccess === "true") {
             message = (
 				<div className="alert alert-success">
-					<p>Thanks for signing up. We have sent you an email with a confirmation link to complete your registration.</p>
+					<p>Thanks for signing up. We have sent you an email with a confirmation link to complete your registration. After you complete your registration our administrator will confirm your profile and it will appear on the Community Pages.</p>
 				</div>);
         } else if (queryParams.updateSuccess === "true") {
             message = (
