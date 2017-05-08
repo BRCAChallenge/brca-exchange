@@ -122,7 +122,7 @@ var Community = React.createClass({
                     </Col>
                 </Row>
                 <Row>
-                    <Col>
+                    <Col md={8} mdOffset={2} sm={10} smOffset={1}>
                         <CommunityMap onFilterRole={this.onFilterRole} search={this.state.search}/>
                     </Col>
                 </Row>
