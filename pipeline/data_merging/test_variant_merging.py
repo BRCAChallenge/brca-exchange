@@ -303,9 +303,6 @@ def test_variant_equal_not_equiv(v1, v2, ref_id):
 
 class TestVariantMerging(unittest.TestCase):
 
-    # TODO:
-    # 1. Add general unit tests around variant merging steps.
-
     def setUp(self):
         self.variant_dict = {'chr13:g.32339228:GAA>G':
                              ['ENIGMA', 'BRCA2', 'chr13:32339228:GAA>G', '13', '32339228', 'GAA', 'G', 'NM_000059.3',

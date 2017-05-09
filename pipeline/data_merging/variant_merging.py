@@ -722,7 +722,6 @@ def add_new_source(columns, variants, source, source_file, source_dict):
         for value in source_dict.values():
             try:
                 if source == "LOVD":
-                    # TODO: make sure this does not format data incorrectly
                     field_value = map(urllib.unquote_plus, record.INFO[value])
                     variants[genome_coor].append(field_value)
                 else:

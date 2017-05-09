@@ -21,8 +21,8 @@ from collections import defaultdict
 import pyhgvs as hgvs
 import pyhgvs.utils as hgvs_utils
 from pygr.seqdb import SequenceFileDB
-import pdb
 import urllib
+
 
 LOVD_LIST_FIELDS = ["genetic_origin", "RNA", "variant_effect", "individuals", "submitters", "Protein", "cDNA"]
 
@@ -121,7 +121,6 @@ def main(args):
 
 
 def normalize(field, field_value):
-    # TODO: handle all semicolon delimited fields properly to prevent errors and bad data
     if not is_empty(field_value):
         if field_value[0] == ';':
             field_value = field_value[1:]
@@ -130,9 +129,12 @@ def normalize(field, field_value):
         if field not in LOVD_LIST_FIELDS and ';' in field_value:
             field_value = field_value.replace(';', '')
         if field in LOVD_LIST_FIELDS and ';' in field_value:
+            # Semicolons are sometimes used as a list delimiter,
+            # this changes them to commas for consistency with other fields.
             field_value = field_value.replace(';', ', ')
         if field in LOVD_LIST_FIELDS:
-            # VCF can't handle certain characters, uses url encoding which is later decoded in variant_merging.py
+            # Use url encoding to prevent issues in VCF file format.
+            # Decoded during merging and reports aggregation.
             field_value = urllib.quote_plus(field_value)
     return field_value
 
