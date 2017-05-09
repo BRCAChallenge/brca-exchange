@@ -7,7 +7,7 @@ import re
 
 EMPTY = "-"
 FIELDS_TO_REMOVE=["Protein_ClinVar",
-                  "HGVS_ClinVar", "HGVS_cDNA_LOVD", "HGVS_cDNA_exLOVD",
+                  "HGVS_ClinVar", "HGVS_cDNA_exLOVD",
                   "HGVS_protein_LOVD",
                   "HGVS_protein_exLOVD",
                   "polyPhen2_result_ESP", 
