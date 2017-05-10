@@ -477,7 +477,7 @@ var hasSelection = () => !(window.getSelection && window.getSelection().isCollap
 var Table = React.createClass({
     mixins: [PureRenderMixin],
     render: function () {
-        var {data, onHeaderClick, onRowClick, hiddenSources, ...opts} = this.props;
+        var {data, onHeaderClick, onRowClick, hiddenSources, mode, ...opts} = this.props;
         return (
             <DataTable
                 ref='table'
@@ -491,7 +491,8 @@ var Table = React.createClass({
                 initialData={data}
                 initialPageLength={20}
                 initialSortBy={{prop: 'Gene_Symbol', order: 'descending'}}
-                pageLengthOptions={[ 20, 50, 100 ]}/>
+                pageLengthOptions={[ 20, 50, 100 ]}
+                mode={mode}/>
         );
     }
 });
@@ -530,15 +531,7 @@ var ResearchVariantTableSupplier = function (Component) {
                 <ColumnCheckbox onChange={() => this.toggleColumns(prop)} key={prop} label={prop} title={title}
                                 initialCheck={columnSelection}/>);
         },
-        getAdvancedFilters() {
-            var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
-                <Col sm={6} md={3} key={name}>
-                    <Input type="checkbox"
-                        onChange={v => this.setSource(name, v)}
-                        label={name.substring(11).replace(/_/g, " ")} // eg "Variant_in_1000_Genomes" => "1000 Genomes"
-                        checked={value > 0}/>
-                </Col>
-            );
+        getColumnSelectors() {
             var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
                 <Col sm={6} md={4} key={subColTitle}>
                     <Panel header={subColTitle}>
@@ -547,11 +540,23 @@ var ResearchVariantTableSupplier = function (Component) {
                 </Col>
             );
             return (<label className='control-label'>
-                <Panel className="top-buffer" header="Source Selection">
-                    {sourceCheckboxes}
-                </Panel>
                 <Panel header="Column Selection">
                     {filterFormSubCols}
+                </Panel>
+            </label>);
+        },
+        getFilters: function() {
+            var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
+                <Col sm={6} md={3} key={name}>
+                    <Input type="checkbox"
+                        onChange={v => this.setSource(name, v)}
+                        label={name.substring(11).replace(/_/g, " ")} // eg "Variant_in_1000_Genomes" => "1000 Genomes"
+                        checked={value > 0}/>
+                </Col>
+            );
+            return (<label className='control-label'>
+                <Panel className="top-buffer" header="Source Selection">
+                    {sourceCheckboxes}
                 </Panel>
             </label>);
         },
@@ -576,7 +581,8 @@ var ResearchVariantTableSupplier = function (Component) {
                 <Component
                     {...this.props}
                     columns={this.getColumns()}
-                    advancedFilters={this.getAdvancedFilters()}
+                    columnSelectors={this.getColumnSelectors()}
+                    filters={this.getFilters()}
                     sourceSelection={sourceSelection}
                     columnSelection={columnSelection}
                     downloadButton={this.getDownloadButton}
