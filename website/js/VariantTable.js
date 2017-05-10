@@ -531,7 +531,7 @@ var ResearchVariantTableSupplier = function (Component) {
                 <ColumnCheckbox onChange={() => this.toggleColumns(prop)} key={prop} label={prop} title={title}
                                 initialCheck={columnSelection}/>);
         },
-        getAdvancedFilters() {
+        getColumnSelectors() {
             var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
                 <Col sm={6} md={4} key={subColTitle}>
                     <Panel header={subColTitle}>
@@ -581,7 +581,7 @@ var ResearchVariantTableSupplier = function (Component) {
                 <Component
                     {...this.props}
                     columns={this.getColumns()}
-                    advancedFilters={this.getAdvancedFilters()}
+                    columnSelectors={this.getColumnSelectors()}
                     filters={this.getFilters()}
                     sourceSelection={sourceSelection}
                     columnSelection={columnSelection}
