@@ -113,6 +113,7 @@ var DataTable = React.createClass({
             filterValues: filterValues,
             columnSelectorsOpen: false,
             search: '',
+            mode: this.props.mode,
             columnSelection: this.props.columnSelection,
             sourceSelection: this.props.sourceSelection,
             pageLength: 20,
@@ -175,7 +176,8 @@ var DataTable = React.createClass({
     },
     fetch: function (state) {
         var {pageLength, search, page, sortBy,
-            filterValues, columnSelection, sourceSelection, release, changeTypes, showDeleted} = state;
+            filterValues, columnSelection, sourceSelection,
+            release, changeTypes, showDeleted, mode} = state;
         this.fetchq.onNext(merge({
             release,
             changeTypes,
@@ -184,6 +186,7 @@ var DataTable = React.createClass({
             page,
             sortBy,
             search,
+            mode,
             searchColumn: _.keys(_.pick(columnSelection, v => v)),
             include: _.keys(_.pick(sourceSelection, v => v === 1)),
             exclude: _.keys(_.pick(sourceSelection, v => v === -1)),

@@ -209,25 +209,40 @@ function toNumber(v) {
 }
 
 function databaseParams(paramsIn) {
-    var {orderBy, order, search = '', changeTypes} = paramsIn;
+    var {filter, filterValue, hide, hideSources, excludeSources, orderBy, order, search = '', changeTypes} = paramsIn;
     var numParams = _.mapObject(_.pick(paramsIn, 'page', 'pageLength', 'release'), toNumber);
     var sortBy = {prop: orderBy, order};
-    return {changeTypes, search, sortBy, ...numParams};
+    var columnSelection = _.object(hide, _.map(hide, _.constant(false)));
+    var sourceSelection = {..._.object(hideSources, _.map(hideSources, _.constant(0))),
+                           ..._.object(excludeSources, _.map(excludeSources, _.constant(-1)))};
+    var filterValues = _.object(filter, filterValue);
+    return {changeTypes, search, sortBy, columnSelection, sourceSelection, filterValues, hide, ...numParams};
 }
+
+var transpose = a => _.zip.apply(_, a);
 
 function urlFromDatabase(state) {
     // Need to diff from defaults. The defaults are in DataTable.
     // We could keep the defaults here, or in a different module.
-    var {release, changeTypes, search, page, pageLength,
-        sortBy: {prop, order}} = state;
+    var {release, changeTypes, columnSelection, filterValues, sourceSelection,
+         search, page, pageLength, sortBy: {prop, order}} = state;
+    var hide = _.keys(_.pick(columnSelection, v => v === false));
+    var hideSources = _.keys(_.pick(sourceSelection, v => v === 0));
+    var excludeSources = _.keys(_.pick(sourceSelection, v => v === -1));
+    var [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v === true)));
     return _.pick({
         release,
         changeTypes,
         search: search === '' ? null : backend.trimSearchTerm(search),
+        filter,
+        filterValue,
         page: page === 0 ? null : page,
         pageLength: pageLength === 20 ? null : pageLength,
         orderBy: prop,
-        order
+        order,
+        hideSources: hideSources,
+        excludeSources: excludeSources,
+        hide: hide.length === 0 ? null : hide
     }, v => v != null);
 
 }
@@ -880,25 +895,6 @@ var VariantDetail = React.createClass({
         );
     }
 });
-
-// XXX implement in server
-//var dontSuggest = [
-//    'Assertion_method_citation',
-//    'URL'
-//];
-
-//var flatmap = (coll, fn) => _.flatten(_.map(coll, fn), true);
-//var minSuggestion = 3; // minimum length of string to use in autocomplete
-//var rowWords = row => flatmap(_.values(_.omit(row, dontSuggest)),
-//        v => v.toLowerCase().split(/\s+/));
-
-// Pull out interesting strings from the data, for use in
-// auto-completion.
-//function getSuggestions(data) {
-//    return _.uniq(flatmap(data, row =>
-//                _.filter(rowWords(row), w => w.length >= minSuggestion)).sort(),
-//            true);
-//}
 
 var Application = React.createClass({
     mixins: [State],
