@@ -308,7 +308,8 @@ var Database = React.createClass({
 					onToggleMode={this}
 					keys={databaseKey}
 					onHeaderClick={this.showHelp}
-					onRowClick={this.showVariant}/>);
+					onRowClick={this.showVariant}
+                    mode={this.props.mode}/>);
             message = this.renderMessage(content.pages.variantsResearch);
         } else {
             params.columnSelection = {};
@@ -324,7 +325,8 @@ var Database = React.createClass({
 					onToggleMode={this}
 					keys={databaseKey}
 					onHeaderClick={this.showHelp}
-					onRowClick={this.showVariant}/>);
+					onRowClick={this.showVariant}
+                    mode={this.props.mode}/>);
             message = this.renderMessage(content.pages.variantsDefault);
         }
         return (
