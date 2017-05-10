@@ -532,14 +532,6 @@ var ResearchVariantTableSupplier = function (Component) {
                                 initialCheck={columnSelection}/>);
         },
         getAdvancedFilters() {
-            var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
-                <Col sm={6} md={3} key={name}>
-                    <Input type="checkbox"
-                        onChange={v => this.setSource(name, v)}
-                        label={name.substring(11).replace(/_/g, " ")} // eg "Variant_in_1000_Genomes" => "1000 Genomes"
-                        checked={value > 0}/>
-                </Col>
-            );
             var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
                 <Col sm={6} md={4} key={subColTitle}>
                     <Panel header={subColTitle}>
@@ -548,11 +540,23 @@ var ResearchVariantTableSupplier = function (Component) {
                 </Col>
             );
             return (<label className='control-label'>
-                <Panel className="top-buffer" header="Source Selection">
-                    {sourceCheckboxes}
-                </Panel>
                 <Panel header="Column Selection">
                     {filterFormSubCols}
+                </Panel>
+            </label>);
+        },
+        getFilters: function() {
+            var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
+                <Col sm={6} md={3} key={name}>
+                    <Input type="checkbox"
+                        onChange={v => this.setSource(name, v)}
+                        label={name.substring(11).replace(/_/g, " ")} // eg "Variant_in_1000_Genomes" => "1000 Genomes"
+                        checked={value > 0}/>
+                </Col>
+            );
+            return (<label className='control-label'>
+                <Panel className="top-buffer" header="Source Selection">
+                    {sourceCheckboxes}
                 </Panel>
             </label>);
         },
@@ -578,6 +582,7 @@ var ResearchVariantTableSupplier = function (Component) {
                     {...this.props}
                     columns={this.getColumns()}
                     advancedFilters={this.getAdvancedFilters()}
+                    filters={this.getFilters()}
                     sourceSelection={sourceSelection}
                     columnSelection={columnSelection}
                     downloadButton={this.getDownloadButton}

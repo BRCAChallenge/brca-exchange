@@ -218,7 +218,7 @@ var DataTable = React.createClass({
     render: function () {
         var {release, changeTypes, filterValues, filtersOpen, advancedFiltersOpen, lollipopOpen, search, data, columnSelection,
             page, totalPages, count, synonyms, error} = this.state;
-        var {columns, filterColumns, className, advancedFilters, downloadButton, lollipopButton, mode} = this.props;
+        var {columns, filterColumns, className, advancedFilters, filters, downloadButton, lollipopButton, mode} = this.props;
         var renderColumns = _.filter(columns, c => columnSelection[c.prop]);
         var filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
             <SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
@@ -255,14 +255,14 @@ var DataTable = React.createClass({
                                 onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}
                         </Button>
                         {mode === "research_mode" && <Button className="btn-sm rgt-buffer"
-                                onClick={this.toggleAdvancedFilters}>{(advancedFiltersOpen ? 'Hide' : 'Show' ) + ' Advanced Filters'}
+                                onClick={this.toggleAdvancedFilters}>{(advancedFiltersOpen ? 'Hide' : 'Show' ) + ' Column Selectors'}
                         </Button>}
                         {lollipopButton(this.toggleLollipop, lollipopOpen)}
                     </Col>
                 </Row>
                 <Row id="filters">
                     <Col sm={10} smOffset={1}>
-                        {filtersOpen && <div className='form-inline'>{filterFormEls}</div>}
+                        {filtersOpen && <div className='form-inline'>{filterFormEls}{filters}</div>}
                         {advancedFiltersOpen && mode === "research_mode" && <div className='form-inline'>
                             {advancedFilters}
                         </div>}
