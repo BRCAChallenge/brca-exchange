@@ -16,7 +16,7 @@ var DataTable = require('./DataTable');
 var _ = require('underscore');
 var {Col, Panel, Button, Input} = require('react-bootstrap');
 var ColumnCheckbox = require('./ColumnCheckbox');
-
+var {defaultExpertColumns, defaultResearchColumns, allSources} = require('./VariantTableDefaults');
 
 require('react-data-components-bd2k/css/table-twbs.css');
 
@@ -30,49 +30,14 @@ function buildHeader(onClick, title) {
     );
 }
 
-//function renderClinVarLink(val) {
-//    return (
-//        <a title="View on ClinVar"
-//            onClick={ev => ev.stopPropagation()}
-//            href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + val}>{val}</a>
-//    );
-//}
-
 function renderCell(val) {
     return <span>{val}</span>;
 }
 
 var filterColumns = [
     {name: 'Gene', prop: 'Gene_Symbol', values: ['BRCA1', 'BRCA2']},
-//    {name: 'Exon', values: ['Any', 1, 2, 3, 4, 5]}, // XXX needs refgene to get exon count
     {name: 'Pathogenicity', prop: 'Pathogenicity_expert', values: ['Pathogenic', 'Benign / Little Clinical Significance', 'Not Yet Classified']}
 ];
-
-// XXX duplicate this functionality on the server, perhaps
-// by having the client pass in order_by of Genomic_Coordinate
-// for hgvs columns.
-//var strPropCmpFn = prop => (a, b) => {
-//    var ap = a[prop],
-//        bp = b[prop];
-//    if (ap == null && bp == null || ap === bp) {
-//        return 0;
-//    }
-//    if (bp == null || bp < ap) {
-//        return 1;
-//    }
-//    return -1;
-//};
-//
-//var posCmpFn = strPropCmpFn('Genomic_Coordinate');
-//
-//function sortColumns(columns, {prop, order}, data) {
-//    var sortFn = _.findWhere(columns, {prop: prop}).sortFn || strPropCmpFn(prop),
-//        sorted = data.slice(0).sort(sortFn);
-//    if (order === 'descending') {
-//        sorted.reverse();
-//    }
-//    return sorted;
-//}
 
 const expertModeGroups = [
     {groupTitle: 'Variant Nomenclature', internalGroupName: 'Variant Nomenclature', innerCols: [
@@ -443,19 +408,6 @@ var subColumns = [
     },
 ];
 
-var defaultColumns = ['Gene_Symbol', 'HGVS_cDNA', 'HGVS_Protein', 'Protein_Change', 'BIC_Nomenclature', 'Pathogenicity_expert'];
-var defaultResearchColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_all', 'Allele_Frequency'];
-
-var allSources = {
-    "Variant_in_ENIGMA": 1,
-    "Variant_in_ClinVar": 1,
-    "Variant_in_1000_Genomes": 1,
-    "Variant_in_ExAC": 1,
-    "Variant_in_LOVD": 1,
-    "Variant_in_BIC": 1,
-    "Variant_in_ESP": 1,
-    "Variant_in_exLOVD": 1
-};
 /*eslint-enable camelcase */
 
 // Work-around to allow the user to select text in the table. The browser does not distinguish between
@@ -509,7 +461,7 @@ var ResearchVariantTableSupplier = function (Component) {
             let selectedColumns = JSON.parse(localStorage.getItem('columnSelection'));
             if (selectedColumns === null || selectedColumns === undefined) {
                 selectedColumns = _.object(_.map(this.getColumns(),
-                    c => _.contains(this.getDefaultColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
+                    c => _.contains(this.getDefaultResearchColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
                 );
             }
             let selectedSources = JSON.parse(localStorage.getItem('selectedSources'));
@@ -583,7 +535,7 @@ var ResearchVariantTableSupplier = function (Component) {
         getColumns: function () {
             return researchModeColumns;
         },
-        getDefaultColumns: function () {
+        getDefaultResearchColumns: function () {
             return defaultResearchColumns;
         },
         render: function () {
@@ -612,7 +564,7 @@ var VariantTableSupplier = function (Component) {
             return columns;
         },
         getDefaultExpertColumns: function () {
-            return defaultColumns;
+            return defaultExpertColumns;
         },
         render: function () {
             let expertColumns = _.object(_.map(this.getColumns(),
@@ -641,8 +593,5 @@ module.exports = {
 	researchModeColumns: researchModeColumns,
 	columns: columns,
     researchModeGroups: researchModeGroups,
-    expertModeGroups: expertModeGroups,
-    defaultExpertColumns: defaultColumns,
-    defaultResearchColumns: defaultResearchColumns,
-    allSources: allSources
+    expertModeGroups: expertModeGroups
 };
