@@ -464,13 +464,13 @@ var ResearchVariantTableSupplier = function (Component) {
                     c => _.contains(this.getDefaultResearchColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
                 );
             }
-            let selectedSources = JSON.parse(localStorage.getItem('selectedSources'));
+            let selectedSources = JSON.parse(localStorage.getItem('sourceSelection'));
             if (selectedSources === null || selectedSources === undefined) {
                 selectedSources = allSources;
             }
 
             return {
-                sourceSelection: {...allSources},
+                sourceSelection: {...selectedSources},
                 columnSelection: {...selectedColumns}
             };
         },

@@ -33,6 +33,20 @@ function setPages({data, count, deletedCount, synonyms}, pageLength) { //eslint-
     };
 }
 
+function clean(obj) {
+    // Removes all empty values from object.
+    var propNames = Object.getOwnPropertyNames(obj);
+    for (var i = 0; i < propNames.length; i++) {
+        let propName = propNames[i];
+        let val = obj[propName];
+        if ((typeof val === 'string' || val instanceof String) && val.trim() === '') {
+            delete obj[propName];
+        } else if (val === null || val === undefined) {
+            delete obj[propName];
+        }
+    }
+}
+
 // Wrap Table with a version having PureRenderMixin
 var FastTable = React.createClass({
     mixins: [PureRenderMixin],
@@ -132,8 +146,9 @@ var DataTable = React.createClass({
         this.setState({windowWidth: window.innerWidth});
     },
     setFilters: function (obj) {
-        let {filterValues} = this.state,
-            newFilterValues = merge(filterValues, obj);
+        let {filterValues} = this.state;
+        let newFilterValues = merge(filterValues, obj);
+        clean(newFilterValues);
 
         localStorage.setItem('filterValues', JSON.stringify(newFilterValues));
 

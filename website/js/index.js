@@ -52,8 +52,6 @@ var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Route, RouteHandler,
     HistoryLocation, run, DefaultRoute, Link} = require('react-router');
 var {Releases, Release} = require('./Releases.js');
-var {defaultExpertColumns, defaultResearchColumns, allSources} = require('./VariantTableDefaults');
-
 
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 
@@ -234,7 +232,7 @@ function urlFromDatabase(state) {
     var hide = _.keys(_.pick(columnSelection, v => v === false));
     var hideSources = _.keys(_.pick(sourceSelection, v => v === 0));
     var excludeSources = _.keys(_.pick(sourceSelection, v => v === -1));
-    var [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v === true)));
+    var [filter, filterValue] = transpose(_.pairs(filterValues, v => (v !== null && v !== undefined && v !== '')));
     return _.pick({
         release,
         changeTypes,
