@@ -52,6 +52,8 @@ var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Route, RouteHandler,
     HistoryLocation, run, DefaultRoute, Link} = require('react-router');
 var {Releases, Release} = require('./Releases.js');
+var {defaultExpertColumns, defaultResearchColumns, allSources} = require('./VariantTableDefaults');
+
 
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 
@@ -222,8 +224,11 @@ function databaseParams(paramsIn) {
 var transpose = a => _.zip.apply(_, a);
 
 function urlFromDatabase(state) {
-    // Need to diff from defaults. The defaults are in DataTable.
-    // We could keep the defaults here, or in a different module.
+    // TODO: diff from defaults
+    // Use REACT tools in chrome to see flow of state/props. Make sure to build
+    // URL depending on mode -- i.e. if mode is default (expert), only hide non expert columns
+    // and deactivate all filters. If state filters/column selections are the same as defaults and
+    // if mode is research mode, check local storage to set filters/column selection.
     var {release, changeTypes, columnSelection, filterValues, sourceSelection,
          search, page, pageLength, sortBy: {prop, order}} = state;
     var hide = _.keys(_.pick(columnSelection, v => v === false));
@@ -327,7 +332,9 @@ var Database = React.createClass({
                     mode={this.props.mode}/>);
             message = this.renderMessage(content.pages.variantsResearch);
         } else {
+            // Always reset column and source selections to default in expert mode.
             params.columnSelection = {};
+            params.sourceSelection = {};
             table = (
 				<VariantTable
 					ref='table'
