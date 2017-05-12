@@ -63,6 +63,28 @@ if (typeof console === "undefined") {
     };
 }
 
+function isEmptyVal(val) {
+    if ((typeof val === 'string' || val instanceof String) && val.trim() === '') {
+            return true;
+        } else if (val === null || val === undefined) {
+            return true;
+        } else {
+            return false;
+        }
+}
+
+function clean(obj) {
+    // Removes all empty values from object.
+    var propNames = Object.getOwnPropertyNames(obj);
+    for (var i = 0; i < propNames.length; i++) {
+        let propName = propNames[i];
+        let val = obj[propName];
+        if (isEmptyVal(val)) {
+            delete obj[propName];
+        }
+    }
+}
+
 var Footer = React.createClass({
     mixins: [PureRenderMixin],
     render: function() {
@@ -448,16 +470,6 @@ function isEmptyField(value) {
     return v === '' || v === '-' || v === 'None';
 }
 
-function isEmptyVal(val) {
-    if ((typeof val === 'string' || val instanceof String) && val.trim() === '') {
-            return true;
-        } else if (val === null || val === undefined) {
-            return true;
-        } else {
-            return false;
-        }
-}
-
 function isEmptyDiff(value) {
     return value === null || value.length < 1;
 }
@@ -504,18 +516,6 @@ function normalizedFieldDisplay(value) {
     }
 
     return value;
-}
-
-function clean(obj) {
-    // Removes all empty values from object.
-    var propNames = Object.getOwnPropertyNames(obj);
-    for (var i = 0; i < propNames.length; i++) {
-        let propName = propNames[i];
-        let val = obj[propName];
-        if (isEmptyVal(val)) {
-            delete obj[propName];
-        }
-    }
 }
 
 const IsoGrid = React.createClass({
