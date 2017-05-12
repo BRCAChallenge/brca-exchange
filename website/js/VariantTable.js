@@ -17,6 +17,7 @@ var _ = require('underscore');
 var {Col, Panel, Button, Input} = require('react-bootstrap');
 var ColumnCheckbox = require('./ColumnCheckbox');
 var {defaultExpertColumns, defaultResearchColumns, allSources} = require('./VariantTableDefaults');
+var {State} = require('react-router');
 
 require('react-data-components-bd2k/css/table-twbs.css');
 
@@ -451,27 +452,60 @@ var Table = React.createClass({
 
 var ResearchVariantTableSupplier = function (Component) {
     var ResearchVariantTableComponent = React.createClass({
-        mixins: [PureRenderMixin],
+        mixins: [State, PureRenderMixin],
 
         getInitialState: function () {
             /*
-            Check localStorage first for column and source selections,
-            otherwise use defaults.
+            Selections take the following order of priority:
+                1. Query params in URL
+                2. Local Storage
+                3. Default settings
+
+            To accomplish this, first set selections to default. Then update selections
+            according to query params if present. If no query params are present, update
+            according to local storage if present. If neither query params nor local storage
+            specify changes, the default settings persist.
             */
-            let selectedColumns = JSON.parse(localStorage.getItem('columnSelection'));
-            if (selectedColumns === null || selectedColumns === undefined) {
-                selectedColumns = _.object(_.map(this.getColumns(),
-                    c => _.contains(this.getDefaultResearchColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
-                );
-            }
-            let selectedSources = JSON.parse(localStorage.getItem('sourceSelection'));
-            if (selectedSources === null || selectedSources === undefined) {
-                selectedSources = allSources;
+
+            // Set defaults.
+            var selectedColumns = _.object(_.map(this.getColumns(),
+                c => _.contains(this.getDefaultResearchColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
+            );
+            var selectedSources = allSources;
+
+            // Get query params.
+            const urlParams = this.getQuery();
+            const useQueryParams = urlParams.hasOwnProperty("hide") || urlParams.hasOwnProperty("hideSources");
+
+            if (useQueryParams) {
+                // If query params are present, use them for settings.
+                if (urlParams.hasOwnProperty("hide")) {
+                    const columnsToHide = urlParams.hide;
+                    for (let i = 0; i < columnsToHide.length; i++) {
+                        selectedColumns[columnsToHide[i]] = false;
+                    }
+                }
+                if (urlParams.hasOwnProperty("hideSources")) {
+                    const sourcesToHide = urlParams.hideSources;
+                    for (let i = 0; i < sourcesToHide.length; i++) {
+                        selectedSources[sourcesToHide[i]] = 0;
+                    }
+                }
+            } else {
+                // If no query params are present, check local storage.
+                const lsSelectedColumns = JSON.parse(localStorage.getItem('columnSelection'));
+                if (lsSelectedColumns !== null && lsSelectedColumns !== undefined) {
+                    selectedColumns = lsSelectedColumns;
+                }
+                const lsSelectedSources = JSON.parse(localStorage.getItem('sourceSelection'));
+                if (lsSelectedSources !== null || lsSelectedSources !== undefined) {
+                    selectedSources = lsSelectedSources;
+                }
             }
 
             return {
-                sourceSelection: {...selectedSources},
-                columnSelection: {...selectedColumns}
+                sourceSelection: selectedSources,
+                columnSelection: selectedColumns
             };
         },
         toggleColumns: function (prop) {
@@ -539,8 +573,8 @@ var ResearchVariantTableSupplier = function (Component) {
             return defaultResearchColumns;
         },
         render: function () {
-            var sourceSelection = this.state.sourceSelection;
-            var columnSelection = this.state.columnSelection;
+            const sourceSelection = this.state.sourceSelection;
+            const columnSelection = this.state.columnSelection;
             return (
                 <Component
                     {...this.props}
