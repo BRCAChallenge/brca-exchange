@@ -227,12 +227,21 @@ function urlFromDatabase(state) {
     // URL depending on mode -- i.e. if mode is default (expert), only hide non expert columns
     // and deactivate all filters. If state filters/column selections are the same as defaults and
     // if mode is research mode, check local storage to set filters/column selection.
-    var {release, changeTypes, columnSelection, filterValues, sourceSelection,
-         search, page, pageLength, sortBy: {prop, order}} = state;
-    var hide = _.keys(_.pick(columnSelection, v => v === false));
-    var hideSources = _.keys(_.pick(sourceSelection, v => v === 0));
-    var excludeSources = _.keys(_.pick(sourceSelection, v => v === -1));
-    var [filter, filterValue] = transpose(_.pairs(filterValues, v => (v !== null && v !== undefined && v !== '')));
+    let {release, changeTypes, columnSelection, filterValues, sourceSelection,
+         search, page, pageLength, mode, sortBy: {prop, order}} = state;
+    if (mode !== "default") {
+        // Default mode (expert portal) has static columns/sources.
+        var hide = _.keys(_.pick(columnSelection, v => v === false));
+        var hideSources = _.keys(_.pick(sourceSelection, v => v === 0));
+        var excludeSources = _.keys(_.pick(sourceSelection, v => v === -1));
+    } else {
+        hide = '';
+        hideSources = '';
+        excludeSources = '';
+    }
+    // Remove empty values.
+    clean(filterValues);
+    let [filter, filterValue] = transpose(_.pairs(filterValues, v => (v !== null && v !== undefined && v !== '')));
     return _.pick({
         release,
         changeTypes,
@@ -246,7 +255,7 @@ function urlFromDatabase(state) {
         hideSources: hideSources,
         excludeSources: excludeSources,
         hide: hide.length === 0 ? null : hide
-    }, v => v != null);
+    }, v => (!isEmptyVal(v)));
 
 }
 
@@ -439,6 +448,16 @@ function isEmptyField(value) {
     return v === '' || v === '-' || v === 'None';
 }
 
+function isEmptyVal(val) {
+    if ((typeof val === 'string' || val instanceof String) && val.trim() === '') {
+            return true;
+        } else if (val === null || val === undefined) {
+            return true;
+        } else {
+            return false;
+        }
+}
+
 function isEmptyDiff(value) {
     return value === null || value.length < 1;
 }
@@ -485,6 +504,18 @@ function normalizedFieldDisplay(value) {
     }
 
     return value;
+}
+
+function clean(obj) {
+    // Removes all empty values from object.
+    var propNames = Object.getOwnPropertyNames(obj);
+    for (var i = 0; i < propNames.length; i++) {
+        let propName = propNames[i];
+        let val = obj[propName];
+        if (isEmptyVal(val)) {
+            delete obj[propName];
+        }
+    }
 }
 
 const IsoGrid = React.createClass({
