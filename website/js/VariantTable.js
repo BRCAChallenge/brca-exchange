@@ -16,7 +16,7 @@ var DataTable = require('./DataTable');
 var _ = require('underscore');
 var {Col, Panel, Button, Input} = require('react-bootstrap');
 var ColumnCheckbox = require('./ColumnCheckbox');
-var {defaultExpertColumns, defaultResearchColumns, allSources} = require('./VariantTableDefaults');
+var {getDefaultExpertColumns, getDefaultResearchColumns, getAllSources} = require('./VariantTableDefaults');
 var {State} = require('react-router');
 
 require('react-data-components-bd2k/css/table-twbs.css');
@@ -430,12 +430,22 @@ var hasSelection = () => !(window.getSelection && window.getSelection().isCollap
 var Table = React.createClass({
     mixins: [PureRenderMixin],
     render: function () {
-        var {data, onHeaderClick, onRowClick, hiddenSources, mode, ...opts} = this.props;
+        // Expert portal always shows all sources and default columns
+        var {data, onHeaderClick, onRowClick, hiddenSources, mode, columnSelection, sourceSelection, ...opts} = this.props;
+        if (mode === "default") {
+            // Always show default columns/sources in expert mode.
+            columnSelection = _.object(_.map(columns,
+                            c => _.contains(getDefaultExpertColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
+                        );
+            sourceSelection = getAllSources();
+        }
         return (
             <DataTable
                 ref='table'
                 className='row-clickable data-table'
                 {...opts}
+                columnSelection={columnSelection}
+                sourceSelection={sourceSelection}
                 buildRowOptions={r => ({className: r['Change_Type_id'] === 2 ? 'warning data-table-row' : 'data-table-row', title: 'click for details', onClick: () => hasSelection() ? null : onRowClick(r)})}
                 buildHeader={title => buildHeader(onHeaderClick, title)}
                 onRowClick={onRowClick}
@@ -469,9 +479,9 @@ var ResearchVariantTableSupplier = function (Component) {
 
             // Set defaults.
             var selectedColumns = _.object(_.map(this.getColumns(),
-                c => _.contains(this.getDefaultResearchColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
+                c => _.contains(getDefaultResearchColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
             );
-            var selectedSources = allSources;
+            var selectedSources = getAllSources();
 
             // Get query params.
             const urlParams = this.getQuery();
@@ -565,12 +575,8 @@ var ResearchVariantTableSupplier = function (Component) {
             return (<Button id="lollipop-chart-toggle" className="btn-sm rgt-buffer"
                            onClick={callback}>{(isOpen ? 'Hide' : 'Show' ) + ' Lollipop Chart'}</Button>);
         },
-
         getColumns: function () {
             return researchModeColumns;
-        },
-        getDefaultResearchColumns: function () {
-            return defaultResearchColumns;
         },
         render: function () {
             const sourceSelection = this.state.sourceSelection;
@@ -597,15 +603,12 @@ var VariantTableSupplier = function (Component) {
         getColumns: function () {
             return columns;
         },
-        getDefaultExpertColumns: function () {
-            return defaultExpertColumns;
-        },
         render: function () {
             let expertColumns = _.object(_.map(this.getColumns(),
-                c => _.contains(this.getDefaultExpertColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
+                c => _.contains(getDefaultExpertColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
             );
             // Expert portal always shows all sources
-            let sourceSelection = allSources;
+            let sourceSelection = getAllSources();
             return (
                 <Component
                     {...this.props}
