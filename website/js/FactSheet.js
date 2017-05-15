@@ -47,8 +47,10 @@ var FactSheet = React.createClass({
                         For media inquiries, please contact the GA4GH Communications Lead, Angela Page (<a href="mailto:angela.page@genomicsandhealth.org">angela.page@genomicsandhealth.org</a>)
                         <br />
                         <br />
-                        <img src={require('../content/BRCA_scaled.JPG')}></img>
-                        <small><em>Source: https://commons.wikimedia.org/wiki/File:BRCA_1.JPG</em></small>
+                        <div className='image-with-caption'>
+                            <img src={require('../content/BRCA_scaled.JPG')}></img>
+                            <small className='image-caption'><em>Source: https://commons.wikimedia.org/wiki/File:BRCA_1.JPG</em></small>
+                        </div>
 
                         <h3>BRCA Genes & Cancer</h3>
                         <ul>
@@ -121,8 +123,10 @@ var FactSheet = React.createClass({
                         <br />
                     </Col>
                     <Col md={6} mdOffset={3}>
-                        <img src={require('../content/DNA_cyclepath_to_Shelford_-_geograph.org.uk_-_538440.jpg')}></img>
-                        <small style={{float: 'left'}}><em>The BRCA genes loom large in public awareness. This photo shows a bicycle path in Shelford, England that depicts the sequence of the BRCA2 gene. The lanes of the path are separated by colored stripes. Each stripe represents one base of BRCA2, with the stripes color-coded according to the nucleotide. See also <a href='http://www.bshs.org.uk/travel-guide/dna-cycle-path-cambridge-england'>http://www.bshs.org.uk/travel-guide/dna-cycle-path-cambridge-england</a></em></small>
+                        <div className='image-with-caption'>
+                            <img src={require('../content/DNA_cyclepath_to_Shelford_-_geograph.org.uk_-_538440.jpg')}></img>
+                            <small className='image-caption'><em>The BRCA genes loom large in public awareness. This photo shows a bicycle path in Shelford, England that depicts the sequence of the BRCA2 gene. The lanes of the path are separated by colored stripes. Each stripe represents one base of BRCA2, with the stripes color-coded according to the nucleotide. See also <a href='http://www.bshs.org.uk/travel-guide/dna-cycle-path-cambridge-england'>http://www.bshs.org.uk/travel-guide/dna-cycle-path-cambridge-england</a></em></small>
+                        </div>
                     </Col>
                     <Col md={8} mdOffset={2}>
                         <br />
