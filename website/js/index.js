@@ -244,10 +244,7 @@ function databaseParams(paramsIn) {
 var transpose = a => _.zip.apply(_, a);
 
 function urlFromDatabase(state) {
-    // TODO: diff from defaults
-    // Use REACT tools in chrome to see flow of state/props. Make sure to build
-    // URL depending on mode -- i.e. if mode is default (expert), only hide non expert columns
-    // and deactivate all filters. If state filters/column selections are the same as defaults and
+    // If state filters/column selections are the same as defaults and
     // if mode is research mode, check local storage to set filters/column selection.
     let {release, changeTypes, columnSelection, filterValues, sourceSelection,
          search, page, pageLength, mode, sortBy: {prop, order}} = state;
@@ -261,7 +258,7 @@ function urlFromDatabase(state) {
         hideSources = '';
         excludeSources = '';
     }
-    // Remove empty values.
+    // Remove empty values from filterValues.
     clean(filterValues);
     let [filter, filterValue] = transpose(_.pairs(filterValues, v => (v !== null && v !== undefined && v !== '')));
     return _.pick({

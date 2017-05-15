@@ -508,7 +508,7 @@ var ResearchVariantTableSupplier = function (Component) {
                     selectedColumns = lsSelectedColumns;
                 }
                 const lsSelectedSources = JSON.parse(localStorage.getItem('sourceSelection'));
-                if (lsSelectedSources !== null || lsSelectedSources !== undefined) {
+                if (lsSelectedSources !== null && lsSelectedSources !== undefined) {
                     selectedSources = lsSelectedSources;
                 }
             }

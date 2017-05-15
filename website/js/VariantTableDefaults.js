@@ -20,17 +20,17 @@ const allSources = {
 const getDefaultExpertColumns = function() {
     // Returns clone of default expert columns.
     return defaultExpertColumns.slice(0);
-}
+};
 
 const getDefaultResearchColumns = function() {
     // Returns clone of default research columns.
     return defaultResearchColumns.slice(0);
-}
+};
 
 const getAllSources = function() {
     // Returns a clone of all sources object.
     return _.clone(allSources);
-}
+};
 
 module.exports = {
     getDefaultExpertColumns: getDefaultExpertColumns,
