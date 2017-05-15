@@ -471,16 +471,16 @@ var ResearchVariantTableSupplier = function (Component) {
                 2. Local Storage
                 3. Default settings
 
-            To accomplish this, first set selections to default. Then update selections
-            according to query params if present. If no query params are present, update
-            according to local storage if present. If neither query params nor local storage
-            specify changes, the default settings persist.
+            To accomplish this, first set all column selections to true and all filters off.
+            Then, update selections according to query params if present. If no query params
+            are present, update according to local storage if present. If neither query params
+            nor local storage specify changes, use default settings.
             */
 
-            // Set defaults.
-            var selectedColumns = _.object(_.map(this.getColumns(),
-                c => _.contains(getDefaultResearchColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
-            );
+            // Start with all columns set to true and data showing from all sources.
+            var selectedColumns = selectedColumns = _.object(_.map(this.getColumns(),
+                                    c => [c.prop, true])
+                                );
             var selectedSources = getAllSources();
 
             // Get query params.
@@ -506,6 +506,11 @@ var ResearchVariantTableSupplier = function (Component) {
                 const lsSelectedColumns = JSON.parse(localStorage.getItem('columnSelection'));
                 if (lsSelectedColumns !== null && lsSelectedColumns !== undefined) {
                     selectedColumns = lsSelectedColumns;
+                } else {
+                    // If no query params and no local storage, use default settings.
+                    selectedColumns = _.object(_.map(this.getColumns(),
+                        c => _.contains(getDefaultResearchColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
+                    );
                 }
                 const lsSelectedSources = JSON.parse(localStorage.getItem('sourceSelection'));
                 if (lsSelectedSources !== null && lsSelectedSources !== undefined) {

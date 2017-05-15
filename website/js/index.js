@@ -244,8 +244,6 @@ function databaseParams(paramsIn) {
 var transpose = a => _.zip.apply(_, a);
 
 function urlFromDatabase(state) {
-    // If state filters/column selections are the same as defaults and
-    // if mode is research mode, check local storage to set filters/column selection.
     let {release, changeTypes, columnSelection, filterValues, sourceSelection,
          search, page, pageLength, mode, sortBy: {prop, order}} = state;
     if (mode !== "default") {
