@@ -508,9 +508,7 @@ var ResearchVariantTableSupplier = function (Component) {
                     selectedColumns = lsSelectedColumns;
                 } else {
                     // If no query params and no local storage, use default settings.
-                    selectedColumns = _.object(_.map(this.getColumns(),
-                        c => _.contains(getDefaultResearchColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
-                    );
+                    selectedColumns = this.getDefaultColumnSelections();
                 }
                 const lsSelectedSources = JSON.parse(localStorage.getItem('sourceSelection'));
                 if (lsSelectedSources !== null && lsSelectedSources !== undefined) {
@@ -583,17 +581,33 @@ var ResearchVariantTableSupplier = function (Component) {
         getColumns: function () {
             return researchModeColumns;
         },
+        getDefaultColumnSelections: function() {
+            return _.object(_.map(columns,
+                c => _.contains(getDefaultResearchColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
+            );
+        },
+        getDefaultSourceSelections: function() {
+            return getAllSources();
+        },
+        researchVariantTableRestoreDefaults: function(callback) {
+            const columnSelection = this.getDefaultColumnSelections();
+            const sourceSelection = this.getDefaultSourceSelections();
+            this.setState({columnSelection: columnSelection,
+                           sourceSelection: sourceSelection},
+                           function() {
+                                this.props.restoreDefaults(callback);
+                           });
+        },
         render: function () {
-            const sourceSelection = this.state.sourceSelection;
-            const columnSelection = this.state.columnSelection;
             return (
                 <Component
                     {...this.props}
+                    researchVariantTableRestoreDefaults={this.researchVariantTableRestoreDefaults}
                     columns={this.getColumns()}
                     columnSelectors={this.getColumnSelectors()}
                     filters={this.getFilters()}
-                    sourceSelection={sourceSelection}
-                    columnSelection={columnSelection}
+                    sourceSelection={this.state.sourceSelection}
+                    columnSelection={this.state.columnSelection}
                     downloadButton={this.getDownloadButton}
                     lollipopButton={this.getLollipopButton}/>
             );
@@ -608,6 +622,9 @@ var VariantTableSupplier = function (Component) {
         getColumns: function () {
             return columns;
         },
+        expertVariantTableRestoreDefaults: function(callback) {
+            this.props.restoreDefaults(callback);
+        },
         render: function () {
             let expertColumns = _.object(_.map(this.getColumns(),
                 c => _.contains(getDefaultExpertColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
@@ -620,6 +637,7 @@ var VariantTableSupplier = function (Component) {
                     columns={this.getColumns()}
                     columnSelection={expertColumns}
                     sourceSelection={sourceSelection}
+                    expertVariantTableRestoreDefaults={this.expertVariantTableRestoreDefaults}
                     downloadButton={()=> null}
                     lollipopButton={()=> null}/>
             );

@@ -283,6 +283,7 @@ var Database = React.createClass({
     getInitialState: function () {
         return {
             showModal: false,
+            restoringDefaults: false
         };
     },
     showVariant: function (row) {
@@ -308,6 +309,16 @@ var Database = React.createClass({
     componentWillUnmount: function () {
         this.subs.dispose();
     },
+    restoreDefaults: function(callback) {
+        this.setState({restoringDefaults: true}, function() {
+            this.transitionTo('/variants', null, null);
+
+            // Callback resets filters in DataTable.
+            // HACK: wrapped in setTimeout to ensure that it happens
+            // after transitionTo is complete.
+            setTimeout(callback, 0);
+        });
+    },
     // XXX An oddity of the state flow here: we update the url when table settings
     // change, so the page can be bookmarked, and forward/back buttons work. We
     // do it on a timeout so we don't generate history entries for every keystroke,
@@ -324,9 +335,12 @@ var Database = React.createClass({
                 d3TipDiv[0].style.opacity = '0';
                 d3TipDiv[0].style.pointerEvents = 'none';
             }
-            if (this.state.showModal !== true) {
+            if (!this.state.showModal && !this.state.restoringDefaults) {
                 // Don't change url if modal is open -- user is still deciding whether to change modes.
                 this.transitionTo('/variants', {}, urlFromDatabase(state));
+            } else if (this.state.restoringDefaults) {
+                // If restoring defaults, transition to is already being called with different params.
+                this.setState({restoringDefaults: false});
             }
         }
     },
@@ -339,6 +353,11 @@ var Database = React.createClass({
             params = databaseParams(this.getQuery());
         // XXX is 'keys' used?
         var table, message;
+        if (this.state.restoringDefaults) {
+            params.columnSelection = {};
+            params.sourceSelection = {};
+            params.filterValues = {};
+        }
         if (this.props.mode === 'research_mode') {
             table = (
 				<ResearchVariantTable
@@ -353,6 +372,7 @@ var Database = React.createClass({
 					keys={databaseKey}
 					onHeaderClick={this.showHelp}
 					onRowClick={this.showVariant}
+                    restoreDefaults={this.restoreDefaults}
                     mode={this.props.mode}/>);
             message = this.renderMessage(content.pages.variantsResearch);
         } else {
@@ -372,6 +392,7 @@ var Database = React.createClass({
 					keys={databaseKey}
 					onHeaderClick={this.showHelp}
 					onRowClick={this.showVariant}
+                    restoreDefaults={this.restoreDefaults}
                     mode={this.props.mode}/>);
             message = this.renderMessage(content.pages.variantsDefault);
         }
