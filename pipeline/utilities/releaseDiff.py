@@ -53,6 +53,10 @@ LIST_KEYS = [
             "Clinical_Significance_ClinVar",
             "Allele_Origin_ClinVar",
             "Synonyms",
+            "Submitters_LOVD",
+            "RNA_LOVD",
+            "Variant_effect_LOVD",
+            "Genetic_origin_LOVD",
             "BX_ID_ENIGMA",
             "BX_ID_ClinVar",
             "BX_ID_BIC",
@@ -191,11 +195,12 @@ class transformer(object):
         global added_data
         variant = newRow["pyhgvs_Genomic_Coordinate_38"]
         newValue = self._normalize(newRow[field], field)
-        oldValue = self._normalize(oldRow[self._newColumnNameToOld[field]], field)
         if field in self._newColumnsAdded:
+            oldValue = "-"
             appendToJSON(variant, field, oldValue, newValue)
             return "added data: %s | %s" % (oldValue, newValue)
         else:
+            oldValue = self._normalize(oldRow[self._newColumnNameToOld[field]], field)
             if oldValue == newValue:
                 return "unchanged"
             elif self._consistentDelimitedLists(oldValue, newValue, field):
