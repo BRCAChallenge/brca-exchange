@@ -63,6 +63,28 @@ if (typeof console === "undefined") {
     };
 }
 
+function isEmptyVal(val) {
+    if ((typeof val === 'string' || val instanceof String) && val.trim() === '') {
+            return true;
+        } else if (val === null || val === undefined) {
+            return true;
+        } else {
+            return false;
+        }
+}
+
+function clean(obj) {
+    // Removes all empty values from object.
+    var propNames = Object.getOwnPropertyNames(obj);
+    for (var i = 0; i < propNames.length; i++) {
+        let propName = propNames[i];
+        let val = obj[propName];
+        if (isEmptyVal(val)) {
+            delete obj[propName];
+        }
+    }
+}
+
 var Footer = React.createClass({
     mixins: [PureRenderMixin],
     render: function() {
@@ -222,14 +244,21 @@ function databaseParams(paramsIn) {
 var transpose = a => _.zip.apply(_, a);
 
 function urlFromDatabase(state) {
-    // Need to diff from defaults. The defaults are in DataTable.
-    // We could keep the defaults here, or in a different module.
-    var {release, changeTypes, columnSelection, filterValues, sourceSelection,
-            search, page, pageLength, sortBy: {prop, order}} = state;
-    var hide = _.keys(_.pick(columnSelection, v => v === false));
-    var hideSources = _.keys(_.pick(sourceSelection, v => v === 0));
-    var excludeSources = _.keys(_.pick(sourceSelection, v => v === -1));
-    var [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v === true)));
+    let {release, changeTypes, columnSelection, filterValues, sourceSelection,
+         search, page, pageLength, mode, sortBy: {prop, order}} = state;
+    if (mode !== "default") {
+        // Default mode (expert portal) has static columns/sources.
+        var hide = _.keys(_.pick(columnSelection, v => v === false));
+        var hideSources = _.keys(_.pick(sourceSelection, v => v === 0));
+        var excludeSources = _.keys(_.pick(sourceSelection, v => v === -1));
+    } else {
+        hide = '';
+        hideSources = '';
+        excludeSources = '';
+    }
+    // Remove empty values from filterValues.
+    clean(filterValues);
+    let [filter, filterValue] = transpose(_.pairs(filterValues, v => (v !== null && v !== undefined && v !== '')));
     return _.pick({
         release,
         changeTypes,
@@ -243,7 +272,7 @@ function urlFromDatabase(state) {
         hideSources: hideSources,
         excludeSources: excludeSources,
         hide: hide.length === 0 ? null : hide
-    }, v => v != null);
+    }, v => (!isEmptyVal(v)));
 
 }
 
@@ -254,6 +283,7 @@ var Database = React.createClass({
     getInitialState: function () {
         return {
             showModal: false,
+            restoringDefaults: false
         };
     },
     showVariant: function (row) {
@@ -279,6 +309,16 @@ var Database = React.createClass({
     componentWillUnmount: function () {
         this.subs.dispose();
     },
+    restoreDefaults: function(callback) {
+        this.setState({restoringDefaults: true}, function() {
+            this.transitionTo('/variants', null, null);
+
+            // Callback resets filters in DataTable.
+            // HACK: wrapped in setTimeout to ensure that it happens
+            // after transitionTo is complete.
+            setTimeout(callback, 0);
+        });
+    },
     // XXX An oddity of the state flow here: we update the url when table settings
     // change, so the page can be bookmarked, and forward/back buttons work. We
     // do it on a timeout so we don't generate history entries for every keystroke,
@@ -295,7 +335,13 @@ var Database = React.createClass({
                 d3TipDiv[0].style.opacity = '0';
                 d3TipDiv[0].style.pointerEvents = 'none';
             }
-            this.transitionTo('/variants', {}, urlFromDatabase(state));
+            if (!this.state.showModal && !this.state.restoringDefaults) {
+                // Don't change url if modal is open -- user is still deciding whether to change modes.
+                this.transitionTo('/variants', {}, urlFromDatabase(state));
+            } else if (this.state.restoringDefaults) {
+                // If restoring defaults, transition to is already being called with different params.
+                this.setState({restoringDefaults: false});
+            }
         }
     },
     toggleMode: function () {
@@ -307,6 +353,11 @@ var Database = React.createClass({
             params = databaseParams(this.getQuery());
         // XXX is 'keys' used?
         var table, message;
+        if (this.state.restoringDefaults) {
+            params.columnSelection = {};
+            params.sourceSelection = {};
+            params.filterValues = {};
+        }
         if (this.props.mode === 'research_mode') {
             table = (
 				<ResearchVariantTable
@@ -321,10 +372,13 @@ var Database = React.createClass({
 					keys={databaseKey}
 					onHeaderClick={this.showHelp}
 					onRowClick={this.showVariant}
+                    restoreDefaults={this.restoreDefaults}
                     mode={this.props.mode}/>);
             message = this.renderMessage(content.pages.variantsResearch);
         } else {
+            // Always reset column and source selections to default in expert mode.
             params.columnSelection = {};
+            params.sourceSelection = {};
             table = (
 				<VariantTable
 					ref='table'
@@ -338,6 +392,7 @@ var Database = React.createClass({
 					keys={databaseKey}
 					onHeaderClick={this.showHelp}
 					onRowClick={this.showVariant}
+                    restoreDefaults={this.restoreDefaults}
                     mode={this.props.mode}/>);
             message = this.renderMessage(content.pages.variantsDefault);
         }
@@ -399,8 +454,8 @@ const GroupHelpButton = React.createClass({
 // all data, otherwise go straight to all data. Finally, if key is not found, replace
 // _ with space in the key and return that.
 function getDisplayName(key) {
-    var researchMode = (localStorage.getItem("research-mode") === 'true');
-    var displayName;
+    const researchMode = (localStorage.getItem("research-mode") === 'true');
+    let displayName;
     if (!researchMode) {
         displayName = columns.find(e => e.prop === key);
         displayName = displayName && displayName.title;
@@ -892,25 +947,6 @@ var VariantDetail = React.createClass({
         );
     }
 });
-
-// XXX implement in server
-//var dontSuggest = [
-//    'Assertion_method_citation',
-//    'URL'
-//];
-
-//var flatmap = (coll, fn) => _.flatten(_.map(coll, fn), true);
-//var minSuggestion = 3; // minimum length of string to use in autocomplete
-//var rowWords = row => flatmap(_.values(_.omit(row, dontSuggest)),
-//        v => v.toLowerCase().split(/\s+/));
-
-// Pull out interesting strings from the data, for use in
-// auto-completion.
-//function getSuggestions(data) {
-//    return _.uniq(flatmap(data, row =>
-//                _.filter(rowWords(row), w => w.length >= minSuggestion)).sort(),
-//            true);
-//}
 
 var Application = React.createClass({
     mixins: [State],

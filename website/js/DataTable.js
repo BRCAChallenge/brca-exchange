@@ -102,13 +102,18 @@ var DataTable = React.createClass({
         this.fetch(this.state);
     },
     getInitialState: function () {
+        let filterValues = JSON.parse(localStorage.getItem('filterValues'));
+        if (filterValues === null || filterValues === undefined) {
+            filterValues = {};
+        }
         return mergeState({
             data: [],
             lollipopOpen: false,
             filtersOpen: false,
+            filterValues: filterValues,
             columnSelectorsOpen: false,
-            filterValues: {},
             search: '',
+            mode: this.props.mode,
             columnSelection: this.props.columnSelection,
             sourceSelection: this.props.sourceSelection,
             pageLength: 20,
@@ -127,19 +132,14 @@ var DataTable = React.createClass({
         this.setState({windowWidth: window.innerWidth});
     },
     setFilters: function (obj) {
-        var {filterValues} = this.state,
-            newFilterValues = merge(filterValues, obj);
+        let {filterValues} = this.state;
+        let newFilterValues = merge(filterValues, obj);
+
+        localStorage.setItem('filterValues', JSON.stringify(newFilterValues));
 
         this.setStateFetch({
           filterValues: newFilterValues,
           page: 0
-        });
-    },
-    clearFilters: function () {
-        // Reset release and changetype filters
-        this.setStateFetch({
-            release: undefined,
-            changeTypes: undefined,
         });
     },
     createDownload: function () {
@@ -168,7 +168,8 @@ var DataTable = React.createClass({
     },
     fetch: function (state) {
         var {pageLength, search, page, sortBy,
-            filterValues, columnSelection, sourceSelection, release, changeTypes, showDeleted} = state;
+            filterValues, columnSelection, sourceSelection,
+            release, changeTypes, showDeleted, mode} = state;
         this.fetchq.onNext(merge({
             release,
             changeTypes,
@@ -177,6 +178,7 @@ var DataTable = React.createClass({
             page,
             sortBy,
             search,
+            mode,
             searchColumn: _.keys(_.pick(columnSelection, v => v)),
             include: _.keys(_.pick(sourceSelection, v => v === 1)),
             exclude: _.keys(_.pick(sourceSelection, v => v === -1)),
@@ -214,6 +216,29 @@ var DataTable = React.createClass({
             newPage = Math.floor((page * pageLength) / length);
 
         this.setStateFetch({page: newPage, pageLength: length});
+    },
+    restoreDefaults: function() {
+        // Clears local storage, resets filters/columns/sources/releases/changetypes,
+        // and resets url to /variants (parent method uses a flag to ensure query params remain empty).
+        delete localStorage.columnSelection;
+        delete localStorage.filterValues;
+        delete localStorage.sourceSelection;
+        let that = this;
+        if (this.state.mode === 'default') {
+            this.props.expertVariantTableRestoreDefaults(function() {
+                that.setState({filterValues: {},
+                               release: undefined,
+                               changeTypes: undefined
+                             });
+            });
+        } else {
+            this.props.researchVariantTableRestoreDefaults(function() {
+                that.setState({filterValues: {},
+                               release: undefined,
+                               changeTypes: undefined
+                             });
+            });
+        }
     },
     render: function () {
         var {release, changeTypes, filterValues, filtersOpen, columnSelectorsOpen, lollipopOpen, search, data, columnSelection,
@@ -257,6 +282,9 @@ var DataTable = React.createClass({
                         {mode === "research_mode" && <Button className="btn-sm rgt-buffer"
                                 onClick={this.toggleColumnSelectors}>{(columnSelectorsOpen ? 'Hide' : 'Show' ) + ' Column Selectors'}
                         </Button>}
+                        <Button className="btn-sm rgt-buffer"
+                                onClick={this.restoreDefaults}>Restore Defaults
+                        </Button>
                         {lollipopButton(this.toggleLollipop, lollipopOpen)}
                     </Col>
                 </Row>
@@ -284,10 +312,6 @@ var DataTable = React.createClass({
                                     {release ? 'in release ' + release : ''} {}
                                     {synonyms ? 'of which ' + synonyms + ' matched on synonyms' : ''}
                                 </label>
-                                {release || changeString ?
-                                    <Button className="btn-sm rgt-buffer"
-                                        onClick={this.clearFilters}>Clear Filters
-                                    </Button> : ''} {}
                                 {downloadButton(this.createDownload)}
                             </div>
                         </div>

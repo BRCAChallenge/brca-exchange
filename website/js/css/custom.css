@@ -411,7 +411,6 @@ div#main {
 
 @media only screen and (min-width: 768px) {
     #data-table-container table {
-        table-layout: fixed;
         min-width: 612px;
     }
 
