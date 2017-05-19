@@ -582,7 +582,7 @@ var ResearchVariantTableSupplier = function (Component) {
             return researchModeColumns;
         },
         getDefaultColumnSelections: function() {
-            return _.object(_.map(columns,
+            return _.object(_.map(researchModeColumns,
                 c => _.contains(getDefaultResearchColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
             );
         },
