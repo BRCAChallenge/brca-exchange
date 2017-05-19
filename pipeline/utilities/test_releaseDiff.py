@@ -459,7 +459,7 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
 
-    def test_handles_new_columns_in_v2_data_correctly(self):
+    def test_handles_new_data_in_new_columns_in_v2_data_correctly(self):
         releaseDiff.added_data = self.added_data
         releaseDiff.diff = self.diff
         releaseDiff.diff_json = self.diff_json
@@ -473,6 +473,21 @@ class TestStringMethods(unittest.TestCase):
         diff = releaseDiff.diff_json
         self.assertEqual(change_type, "added_information")
         self.assertTrue(len(diff[variant]) == 3)
+
+    def test_handles_null_data_in_new_columns_in_v2_data_correctly(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        self.updated_fieldnames = self.fieldnames + ['Genetic_origin_LOVD', 'RNA_LOVD', 'Submitters_LOVD']
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.updated_fieldnames)
+        self.newRow["Genetic_origin_LOVD"] = ""
+        self.newRow["RNA_LOVD"] = None
+        self.newRow["Submitters_LOVD"] = "-"
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
 
     def test_ignores_polyphen_fields(self):
         releaseDiff.added_data = self.added_data
