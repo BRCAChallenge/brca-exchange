@@ -80,6 +80,7 @@ const researchModeGroups = [
         {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38', core: true},
         {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
         {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36'},
+        {title: 'RNA (LOVD)', prop: 'RNA_LOVD'}
     ]},
 
     {groupTitle: 'Clinical Significance (ENIGMA)', internalGroupName: 'Significance (ENIGMA)', innerCols: [
@@ -104,6 +105,9 @@ const researchModeGroups = [
     {groupTitle: 'Clinical Significance (LOVD)', internalGroupName: 'Significance (LOVD)', innerCols: [
         {title: 'Variant Frequency', prop: 'Variant_frequency_LOVD'},
         {title: 'Variant Haplotype', prop: 'Variant_haplotype_LOVD'},
+        {title: 'Submitters', prop: 'Submitters_LOVD'},
+        {title: 'Genetic Origin', prop: 'Genetic_origin_LOVD'},
+        {title: 'Individuals', prop: 'Individuals_LOVD'},
     ]},
 
     {groupTitle: 'Clinical Significance (BIC)', internalGroupName: 'Significance (BIC)', innerCols: [
@@ -183,6 +187,10 @@ var researchModeColumns = [
     {title: 'Synonyms', prop: 'Synonyms'},
     {title: 'Protein Amino Acid Change', prop: 'Protein_Change'},
     {title: 'Reference cDNA Sequence', prop: 'Reference_Sequence'},
+    {title: 'RNA (LOVD)', prop: 'RNA_LOVD'},
+    {title: 'Submitters (LOVD)', prop: 'Submitters_LOVD'},
+    {title: 'Genetic Origin (LOVD)', prop: 'Genetic_origin_LOVD'},
+    {title: 'Individuals (LOVD)', prop: 'Individuals_LOVD'},
 
     {title: 'Allele Origin (ClinVar)', prop: 'Allele_Origin_ClinVar'},
     {title: 'Allele Origin (ENIGMA)', prop: 'Allele_origin_ENIGMA'},
@@ -253,7 +261,8 @@ var subColumns = [
             {title: 'SCV Accession (ClinVar)', prop: 'SCV_ClinVar', render: renderCell},
             {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: renderCell},
             {title: 'Protein Amino Acid Change', prop: 'Protein_Change', render: renderCell},
-            {title: 'Reference cDNA Sequence', prop: 'Reference_Sequence', render: renderCell}
+            {title: 'Reference cDNA Sequence', prop: 'Reference_Sequence', render: renderCell},
+            {title: 'RNA (LOVD)', prop: 'RNA_LOVD', render: renderCell}
         ]
     },
     {
@@ -368,6 +377,9 @@ var subColumns = [
                 prop: 'Functional_analysis_technique_LOVD',
                 render: renderCell
             },
+            {title: 'Submitters (LOVD)', prop: 'Submitters_LOVD', render: renderCell},
+            {title: 'Genetic Origin (LOVD)', prop: 'Genetic_origin_LOVD', render: renderCell},
+            {title: 'Individuals (LOVD)', prop: 'Individuals_LOVD', render: renderCell},
             {title: 'Analysis Method (ClinVar)', prop: 'Method_ClinVar', render: renderCell}
         ]
     },
