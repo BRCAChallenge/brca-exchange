@@ -52,7 +52,7 @@ REMOTEUPLOADS=/var/www/backend/${ENVIRONMENT}/django/uploads
 cd ${WEBSITE}
 
 # Copy remote uploads directory to local (contains community data specified in db)
-rsync -a --rsync-path='sudo rsync' ${USER}@${HOST}:${REMOTEUPLOADS}/ ./django/uploads/ --delete
+rsync -a --rsync-path='sudo rsync' ${USER}@${HOST}:${REMOTEUPLOADS} ./django/uploads/ --delete
 echo "Rsync'd remote uploads/ dir to local."
 # Copy db dump to local
 rsync -a --rsync-path='sudo rsync' ${USER}@${HOST}:/tmp/full_db.dump /tmp/
