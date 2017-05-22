@@ -702,7 +702,7 @@ var VariantDetail = React.createClass({
                                 <span>
                                     <strong>{ getDisplayName(fieldName) }: </strong>
                                     <span className='label label-success'><span className='glyphicon glyphicon-star'></span> New</span>
-                                    &nbsp;{added}
+                                    &nbsp;{`${added}`}
                                 </span>, <br />
                             );
                         } else if (fieldDiff.field_type === "list") {
