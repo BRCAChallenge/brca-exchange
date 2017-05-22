@@ -365,8 +365,8 @@ def determineDiffForJSON(field, oldValue, newValue):
     if field == 'Pathogenicity_all':
         (added, removed) = determineDiffForPathogenicityAll(oldValue, newValue)
     elif diff['field_type'] == 'list':
-        oldValues = oldValue.split(',')
-        newValues = newValue.split(',')
+        oldValues = breakUpValueIntoList(oldValue)
+        newValues = breakUpValueIntoList(newValue)
         (added, removed) = determineDiffForList(oldValues, newValues)
     elif diff['field_type'] == 'individual':
         added = newValue
@@ -384,6 +384,13 @@ def determineDiffForJSON(field, oldValue, newValue):
         diff['removed'] = removed
 
     return diff
+
+
+def breakUpValueIntoList(value):
+    # Split on commas, but ignore commas in parentheses
+    # e.g. "Genevieve Michils (Leuven,BE), Zack Fischmann (Portland,OR)"
+    # would return ["Genevieve Michils (Leuven,BE)", "Zack Fischmann (Portland,OR)"]
+    return re.split(r',\s*(?![^()]*\))', value)
 
 
 def determineDiffForList(oldValues, newValues):
