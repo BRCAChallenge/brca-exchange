@@ -519,6 +519,26 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
 
+    def test_handles_fields_with_commas_in_parentheses_correctly(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        self.updated_fieldnames = self.fieldnames + ['Genetic_origin_LOVD', 'RNA_LOVD', 'Submitters_LOVD']
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.updated_fieldnames)
+
+        self.newRow["Submitters_LOVD"] = "Ans M.W. van den Ouweland (Rotterdam,NL), Genevieve Michils (Leuven,BE), Rien Blok (Maastricht NL)"
+
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(len(diff), 1)
+        v_diff = diff['chr17:g.43049067:C>T'][0]
+        self.assertEqual(v_diff['field'], 'Submitters_LOVD')
+        self.assertEqual(len(v_diff['added']), 3)
+        self.assertIn("Ans M.W. van den Ouweland (Rotterdam,NL)", v_diff['added'])
+        self.assertIn("Genevieve Michils (Leuven,BE)", v_diff['added'])
+        self.assertIn("Rien Blok (Maastricht NL)", v_diff['added'])
+
 
 if __name__ == '__main__':
     pass
