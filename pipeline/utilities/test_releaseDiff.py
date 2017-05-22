@@ -527,7 +527,7 @@ class TestStringMethods(unittest.TestCase):
         self.updated_fieldnames = self.fieldnames + ['Genetic_origin_LOVD', 'RNA_LOVD', 'Submitters_LOVD']
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.updated_fieldnames)
 
-        self.newRow["Submitters_LOVD"] = "Ans M.W. van den Ouweland (Rotterdam,NL), Genevieve Michils (Leuven,BE), Rien Blok (Maastricht,NL)"
+        self.newRow["Submitters_LOVD"] = "Ans M.W. van den Ouweland (Rotterdam,NL), Genevieve Michils (Leuven,BE), Rien Blok (Maastricht NL)"
 
         change_type = v1v2.compareRow(self.oldRow, self.newRow)
         diff = releaseDiff.diff_json
@@ -537,7 +537,7 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(len(v_diff['added']), 3)
         self.assertIn("Ans M.W. van den Ouweland (Rotterdam,NL)", v_diff['added'])
         self.assertIn("Genevieve Michils (Leuven,BE)", v_diff['added'])
-        self.assertIn("Rien Blok (Maastricht,NL)", v_diff['added'])
+        self.assertIn("Rien Blok (Maastricht NL)", v_diff['added'])
 
 
 if __name__ == '__main__':
