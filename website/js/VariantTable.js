@@ -108,6 +108,7 @@ const researchModeGroups = [
         {title: 'Submitters', prop: 'Submitters_LOVD'},
         {title: 'Genetic Origin', prop: 'Genetic_origin_LOVD'},
         {title: 'Individuals', prop: 'Individuals_LOVD'},
+        {title: 'Variant Effect', prop: 'Variant_effect_LOVD'},
     ]},
 
     {groupTitle: 'Clinical Significance (BIC)', internalGroupName: 'Significance (BIC)', innerCols: [
@@ -191,6 +192,7 @@ var researchModeColumns = [
     {title: 'Submitters (LOVD)', prop: 'Submitters_LOVD'},
     {title: 'Genetic Origin (LOVD)', prop: 'Genetic_origin_LOVD'},
     {title: 'Individuals (LOVD)', prop: 'Individuals_LOVD'},
+    {title: 'Variant Effect (LOVD)', prop: 'Variant_effect_LOVD'},
 
     {title: 'Allele Origin (ClinVar)', prop: 'Allele_Origin_ClinVar'},
     {title: 'Allele Origin (ENIGMA)', prop: 'Allele_origin_ENIGMA'},
@@ -380,6 +382,7 @@ var subColumns = [
             {title: 'Submitters (LOVD)', prop: 'Submitters_LOVD', render: renderCell},
             {title: 'Genetic Origin (LOVD)', prop: 'Genetic_origin_LOVD', render: renderCell},
             {title: 'Individuals (LOVD)', prop: 'Individuals_LOVD', render: renderCell},
+            {title: 'Variant Effect (LOVD)', prop: 'Variant_effect_LOVD', render: renderCell},
             {title: 'Analysis Method (ClinVar)', prop: 'Method_ClinVar', render: renderCell}
         ]
     },
@@ -660,10 +663,10 @@ var VariantTableSupplier = function (Component) {
 
 
 module.exports = {
-	VariantTable: VariantTableSupplier(Table),
-	ResearchVariantTable: ResearchVariantTableSupplier(Table),
-	researchModeColumns: researchModeColumns,
-	columns: columns,
+    VariantTable: VariantTableSupplier(Table),
+    ResearchVariantTable: ResearchVariantTableSupplier(Table),
+    researchModeColumns: researchModeColumns,
+    columns: columns,
     researchModeGroups: researchModeGroups,
     expertModeGroups: expertModeGroups
 };
