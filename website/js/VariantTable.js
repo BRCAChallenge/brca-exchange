@@ -394,7 +394,7 @@ var ResearchVariantTableSupplier = function (Component) {
         getColumnSelectors() {
             var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
                 <Col sm={6} md={4} key={subColTitle}>
-                    <Panel header={subColTitle}>
+                    <Panel header={subColTitle} collapsable={true} defaultExpanded={true}>
                         {this.filterFormCols(subColList, this.state.columnSelection)}
                     </Panel>
                 </Col>
