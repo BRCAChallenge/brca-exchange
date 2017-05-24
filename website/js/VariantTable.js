@@ -391,10 +391,36 @@ var ResearchVariantTableSupplier = function (Component) {
                 <ColumnCheckbox onChange={() => this.toggleColumns(prop)} key={prop} label={prop} title={title}
                                 initialCheck={columnSelection}/>);
         },
+        onChangeSubcolVisibility(subColTitle, event) {
+            // stop the page from scrolling to the top (due to navigating to the fragment '#')
+            event.preventDefault();
+
+            const collapsingElem = event.target;
+
+            // FIXME: there must be a better way to get at the panel's state than reading the class
+            // maybe we'll subclass Panel and let it handle its own visibility persistence
+
+            const isCollapsed = (collapsingElem.getAttribute("class") === "collapsed");
+            localStorage.setItem("collapse-subcol_" + subColTitle, !isCollapsed);
+
+            // defer re-layout until the state change has completed
+            const me = this;
+
+            setTimeout(() => {
+                // this forces a re-render after a group has expanded/collapsed, fixing the layout
+                // note that 300ms just happens to be the duration of the expand/collapse animation
+                // it'd be better to run the re-layout whenever the animation ends
+                me.forceUpdate();
+            }, 300);
+        },
         getColumnSelectors() {
             var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
                 <Col sm={6} md={4} key={subColTitle}>
-                    <Panel header={subColTitle} collapsable={true} defaultExpanded={true}>
+                    <Panel
+                        header={subColTitle}
+                        collapsable={true}
+                        defaultExpanded={true}
+                        onSelect={(event) => this.onChangeSubcolVisibility(subColTitle, event)}>
                         {this.filterFormCols(subColList, this.state.columnSelection)}
                     </Panel>
                 </Col>
