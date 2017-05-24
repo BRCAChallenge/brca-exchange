@@ -402,16 +402,6 @@ var ResearchVariantTableSupplier = function (Component) {
 
             const isCollapsed = (collapsingElem.getAttribute("class") === "collapsed");
             localStorage.setItem("collapse-subcol_" + subColTitle, !isCollapsed);
-
-            // defer re-layout until the state change has completed
-            const me = this;
-
-            setTimeout(() => {
-                // this forces a re-render after a group has expanded/collapsed, fixing the layout
-                // note that 300ms just happens to be the duration of the expand/collapse animation
-                // it'd be better to run the re-layout whenever the animation ends
-                me.forceUpdate();
-            }, 300);
         },
         getColumnSelectors() {
             var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
