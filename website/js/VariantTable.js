@@ -419,7 +419,7 @@ var ResearchVariantTableSupplier = function (Component) {
                     <Panel
                         header={subColTitle}
                         collapsable={true}
-                        defaultExpanded={true}
+                        defaultExpanded={localStorage.getItem("collapse-subcol_" + subColTitle) !== "true"}
                         onSelect={(event) => this.onChangeSubcolVisibility(subColTitle, event)}>
                         {this.filterFormCols(subColList, this.state.columnSelection)}
                     </Panel>
