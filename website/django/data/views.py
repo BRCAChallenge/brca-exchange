@@ -45,15 +45,15 @@ def releases(request):
     return response
 
 def variant_counts(request):
-    query = CurrentVariant.objects
+    query = CurrentVariant.objects.all().exclude(Change_Type__name='deleted')
     total_count = query.count()
     brca1_count = query.filter(Gene_Symbol='BRCA1').count()
     brca2_count = query.filter(Gene_Symbol='BRCA2').count()
     query = query.filter(Variant_in_ENIGMA=True)
     enigma_count = query.count()
-    enigma_brca1_count = query.filter(Gene_Symbol='BRCA1').count()
-    enigma_brca2_count = query.filter(Gene_Symbol='BRCA2').count()
-    response = JsonResponse({"total": total_count, "brca1": brca1_count, "brca2": brca2_count, "enigma": enigma_count, "enigmabrca1": enigma_brca1_count, "enigmabrca2": enigma_brca2_count})
+    enigma_pathogenic_count = query.filter(Pathogenicity_expert='Pathogenic').count()
+    enigma_benign_count = query.filter(Pathogenicity_expert__contains='Benign').count()
+    response = JsonResponse({"total": total_count, "brca1": brca1_count, "brca2": brca2_count, "enigma": enigma_count, "enigmaPathogenic": enigma_pathogenic_count, "enigmaBenign": enigma_benign_count})
     response['Access-Control-Allow-Origin'] = '*'
     return response
 

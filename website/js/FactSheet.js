@@ -38,8 +38,8 @@ var FactSheet = React.createClass({
                             </ul>
                             <li>Number of ENIGMA expert-classified variants in the portal: {Number(this.state.enigma).toLocaleString()}</li>
                             <ul>
-                                <li>Variants expert-classified as pathogenic: {Number(this.state.enigmabrca1).toLocaleString()}</li>
-                                <li>Variants expert-classified as benign: {Number(this.state.enigmabrca2).toLocaleString()}</li>
+                                <li>Variants expert-classified as pathogenic: {Number(this.state.enigmaPathogenic).toLocaleString()}</li>
+                                <li>Variants expert-classified as benign: {Number(this.state.enigmaBenign).toLocaleString()}</li>
                             </ul>
                         </ul>}
                         <br />
