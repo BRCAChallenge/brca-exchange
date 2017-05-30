@@ -228,14 +228,16 @@ var DataTable = React.createClass({
             this.props.expertVariantTableRestoreDefaults(function() {
                 that.setState({filterValues: {},
                                release: undefined,
-                               changeTypes: undefined
+                               changeTypes: undefined,
+                               showDeleted: undefined
                              });
             });
         } else {
             this.props.researchVariantTableRestoreDefaults(function() {
                 that.setState({filterValues: {},
                                release: undefined,
-                               changeTypes: undefined
+                               changeTypes: undefined,
+                               showDeleted: undefined
                              });
             });
         }
