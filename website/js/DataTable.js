@@ -244,7 +244,7 @@ var DataTable = React.createClass({
     },
     render: function () {
         var {release, changeTypes, filterValues, filtersOpen, columnSelectorsOpen, lollipopOpen, search, data, columnSelection,
-            page, totalPages, count, synonyms, error} = this.state;
+            page, totalPages, count, synonyms, error, showDeleted} = this.state;
         var {columns, filterColumns, className, columnSelectors, filters, downloadButton, lollipopButton, mode} = this.props;
         var renderColumns = _.filter(columns, c => columnSelection[c.prop]);
         var filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
@@ -263,6 +263,9 @@ var DataTable = React.createClass({
             } else if (changeTypes.includes('deleted')) {
                 changeString = "deleted";
             }
+        }
+        if (showDeleted === true) {
+            changeString = "deleted";
         }
         var deletedCount = this.state.deletedCount;
         var deletedVariantsNote = '';

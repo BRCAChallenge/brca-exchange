@@ -130,6 +130,9 @@ def index(request):
         deleted_count = query.filter(Change_Type_id=change_types_map['deleted']).count()
         query = query.exclude(Change_Type_id=change_types_map['deleted'])
 
+    if show_deleted:
+        query = query.filter(Change_Type_id=change_types_map['deleted'])
+
     if order_by:
         query = apply_order(query, order_by, direction)
 
