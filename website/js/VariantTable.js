@@ -430,7 +430,7 @@ var ResearchVariantTableSupplier = function (Component) {
                         checked={value > 0}/>
                 </Col>
             );
-            return (<label className='control-label'>
+            return (<label className='control-label source-filters'>
                 <Panel className="top-buffer" header="Source Selection">
                     {sourceCheckboxes}
                 </Panel>

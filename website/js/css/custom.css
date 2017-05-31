@@ -468,6 +468,18 @@ html {
     margin-bottom: 1em;
 }
 
+#filters .source-filters {
+    display: block;
+    width: 80%;
+}
+
+@media only screen and (max-width: 991px) {
+    #filters .source-filters {
+        width: 100%;
+    }
+}
+
+
 /* Hide lollipop chart toggle if screen is too small to display chart */
 @media only screen and (max-width: 991px) {
     #lollipop-chart-toggle {
