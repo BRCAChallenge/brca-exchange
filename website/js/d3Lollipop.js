@@ -122,7 +122,7 @@ var Lollipop = React.createClass({
         this.fetchData(newProps.opts);
     },
     componentWillMount: function () {
-        this.fetchData = _.debounce(this.fetchData, 600, true);
+        this.fetchData = _.debounce(this.fetchData, 600, false);
         this.fetchData(this.props.opts);
     },
     fetchData: function (opts) {
