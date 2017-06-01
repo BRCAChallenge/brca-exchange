@@ -202,11 +202,11 @@ def breakUpESPAlleleFrequencies(newRow):
         if newRow["Minor_allele_frequency_ESP"] != None:
             tokens = newRow["Minor_allele_frequency_ESP"].split(",")
             if len(tokens) > 2:
-                alleleFrequency = float(tokens[2]) / 100
+                alleleFrequency = "%s" % (float(tokens[2]) / 100)
             if len(tokens) > 1:
-                aaAlleleFrequency = float(tokens[1]) / 100
+                aaAlleleFrequency = "%s" % (float(tokens[1]) / 100)
             if len(tokens) > 0:
-                eaAlleleFrequency = float(tokens[0]) / 100
+                eaAlleleFrequency = "%s" % (float(tokens[0]) / 100)
     return (eaAlleleFrequency, aaAlleleFrequency, alleleFrequency)
 
 
