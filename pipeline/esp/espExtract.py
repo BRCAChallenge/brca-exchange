@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-From ESP, extract data  for the BRCA1 and BRCA2 regions.  Either produce data 
+From ESP, extract data for the BRCA1 and BRCA2 regions.  Either produce data
 in the following format:
 
 chrom_pos_ref_alt Freq
@@ -13,6 +13,7 @@ or if the --full option is given, echo the full VCF record.
 """
 import argparse
 import vcf
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -46,8 +47,8 @@ def main():
                         elif args.ancestry == "AA":
                             maf = record.INFO["MAF"][1]
                         for alt in record.ALT:
-                            print "%s_%s_%s_%s %s" % (record.CHROM, 
-                                                      record.POS, 
+                            print "%s_%s_%s_%s %s" % (record.CHROM,
+                                                      record.POS,
                                                       record.REF,
                                                       alt, maf)
 
@@ -55,5 +56,3 @@ def main():
 if __name__ == "__main__":
     # execute only if run as a script
     main()
-
-            
