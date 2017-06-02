@@ -95,31 +95,6 @@ class TestStringMethods(unittest.TestCase):
             'Alt': 'T'
         }
 
-    def test_break_up_esp_allele_frequencies(self):
-        self.newRow["Minor_allele_frequency_ESP"] = '0.2181,0.0704,0.1678'
-        (eaAlleleFrequency, aaAlleleFrequency, alleleFrequency) = aggregate_across_columns.breakUpESPAlleleFrequencies(self.newRow)
-        self.assertEqual(eaAlleleFrequency, "%s" % (float(0.2181) / 100))
-        self.assertEqual(aaAlleleFrequency, "%s" % (float(0.0704) / 100))
-        self.assertEqual(alleleFrequency, "%s" % (float(0.1678) / 100))
-
-        self.newRow["Minor_allele_frequency_ESP"] = '-'
-        (eaAlleleFrequency, aaAlleleFrequency, alleleFrequency) = aggregate_across_columns.breakUpESPAlleleFrequencies(self.newRow)
-        self.assertEqual(eaAlleleFrequency, '-')
-        self.assertEqual(aaAlleleFrequency, '-')
-        self.assertEqual(alleleFrequency, '-')
-
-        self.newRow["Minor_allele_frequency_ESP"] = None
-        (eaAlleleFrequency, aaAlleleFrequency, alleleFrequency) = aggregate_across_columns.breakUpESPAlleleFrequencies(self.newRow)
-        self.assertEqual(eaAlleleFrequency, '-')
-        self.assertEqual(aaAlleleFrequency, '-')
-        self.assertEqual(alleleFrequency, '-')
-
-        self.newRow["Minor_allele_frequency_ESP"] = '0.2181'
-        (eaAlleleFrequency, aaAlleleFrequency, alleleFrequency) = aggregate_across_columns.breakUpESPAlleleFrequencies(self.newRow)
-        self.assertEqual(eaAlleleFrequency, "%s" % (float(0.2181) / 100))
-        self.assertEqual(aaAlleleFrequency, '-')
-        self.assertEqual(alleleFrequency, '-')
-
 
 if __name__ == '__main__':
     pass
