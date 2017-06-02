@@ -17,9 +17,6 @@ FIELDS_TO_ADD = ["Hg38_Start", "Hg38_End", "Hg37_Start", "Hg37_End",
                  "HGVS_RNA",
                  "Allele_Frequency",
                  "Max_Allele_Frequency",
-                 "EA Allele Frequency (ESP)",
-                 "AA Allele Frequency (ESP)",
-                 "Allele Frequency (ESP)",
                  "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg36",
                  "Source_URL", "Discordant", "Synonyms",
                  "Pathogenicity_expert", "Pathogenicity_all"]
@@ -75,9 +72,6 @@ def updateRow(row, toRename, toRemove):
     newRow["BIC_Nomenclature"] = BICUpdate(row)
     (newRow["Pathogenicity_expert"],
      newRow["Pathogenicity_all"]) = pathogenicityUpdate(newRow)
-    (newRow["EA Allele Frequency (ESP)"],
-     newRow["AA Allele Frequency (ESP)"],
-     newRow["Allele Frequency (ESP)"]) = breakUpESPAlleleFrequencies(newRow)
     newRow["Allele_Frequency"] = selectAlleleFrequency(newRow)
     newRow["Max_Allele_Frequency"] = selectMaxAlleleFrequency(newRow)
     newRow["Discordant"] = checkDiscordantStatus(newRow)
@@ -192,22 +186,6 @@ def pathogenicityUpdate(row):
     if pathoAll == "":
         pathAll = EMPTY
     return(pathoExpert, pathoAll)
-
-
-def breakUpESPAlleleFrequencies(newRow):
-    eaAlleleFrequency = EMPTY
-    aaAlleleFrequency = EMPTY
-    alleleFrequency = EMPTY
-    if newRow["Minor_allele_frequency_ESP"] != EMPTY:
-        if newRow["Minor_allele_frequency_ESP"] != None:
-            tokens = newRow["Minor_allele_frequency_ESP"].split(",")
-            if len(tokens) > 2:
-                alleleFrequency = "%s" % (float(tokens[2]) / 100)
-            if len(tokens) > 1:
-                aaAlleleFrequency = "%s" % (float(tokens[1]) / 100)
-            if len(tokens) > 0:
-                eaAlleleFrequency = "%s" % (float(tokens[0]) / 100)
-    return (eaAlleleFrequency, aaAlleleFrequency, alleleFrequency)
 
 
 def selectAlleleFrequency(row):
