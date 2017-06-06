@@ -51,6 +51,9 @@ var VariantSearch = React.createClass({
         var value = React.findDOMNode(this.refs.input).value;
         this.props.onSearch(value);
     },
+    onClickSearchButton: function () {
+        this.props.onSearch(this.state.value);
+    },
     showHelp: function (title) {
         this.transitionTo(`/help#${slugify(title)}`);
     },
@@ -109,8 +112,9 @@ var VariantSearch = React.createClass({
                             onSuggestionSelected={v => onSearch(v)}
                             suggestionRenderer={renderSuggestion}
                             ref='input' />
-                        <span onClick={() => this.showHelp('Searching')}
-                            className="glyphicon glyphicon-question-sign superscript help"/>
+                        <span
+                            className="glyphicon glyphicon-search search-box-icon"
+                            onClick={this.onClickSearchButton}/>
                     </div>
                 </form>
             </div>
