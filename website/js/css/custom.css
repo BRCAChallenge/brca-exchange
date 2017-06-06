@@ -158,7 +158,7 @@
     padding-bottom: 60px;
 }
 
-/* change input width to a percentage of its container 
+/* change input width to a percentage of its container
  * font-size is a percentage of its viewpoint width (2.2%)
  *
  * */
@@ -180,6 +180,27 @@
     -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
     -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
     transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+}
+
+.search-box input[placeholder] { text-overflow: ellipsis; }
+
+.search-box input::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+  max-width: 90%;
+}
+
+.search-box input::-moz-placeholder { /* Firefox 19+ */
+  max-width: 90%;
+  text-overflow: ellipsis;
+}
+
+.search-box input:-ms-input-placeholder { /* IE 10+ */
+  max-width: 90%;
+  text-overflow: ellipsis;
+}
+
+.search-box input:-moz-placeholder { /* Firefox 18- */
+  max-width: 90%;
+  text-overflow: ellipsis;
 }
 
 input:focus {
