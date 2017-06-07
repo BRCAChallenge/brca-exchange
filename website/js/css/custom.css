@@ -24,6 +24,16 @@
 		float: right;
 	}
 }
+
+/**************************************************************/
+/**********         General               *********************/
+/**************************************************************/
+
+p {
+    font-size: 1.2em;
+    font-weight: 200;
+}
+
 /**************************************************************/
 /**********         NavBar                *********************/
 /**************************************************************/
@@ -223,7 +233,8 @@ input:focus {
 }
 
 .matched-variant-count {
-    font-size: 16px;
+    font-size: 1.2em;
+    line-height: 34px;
 }
 
 /**************************************************************/
@@ -257,6 +268,11 @@ input:focus {
 .jumbotron {
     background-color: rgba(169,169,169, 0.13);
     margin: 20px;
+    padding: 40px;
+}
+
+.jumbotron p {
+    font-size: 1.2em;
 }
 
 /**************************************************************/
@@ -269,7 +285,8 @@ input:focus {
 }
 
 .video-button {
-    font-size: 21px;
+    font-size: 1.2em;
+    margin-top: 15px;
 }
 
 .video-button .glyphicon {
@@ -305,7 +322,7 @@ input:focus {
 }
 
 .logo-item {
-    height: 120px;
+    height: 100px;
     padding: 10px;
     text-align: center;
     float: none;
@@ -480,6 +497,17 @@ html {
     font-size: 10px;
 }
 
+.alert-warning {
+    background-color: rgba(169,169,169, 0.13);
+    color: inherit;
+    border: none;
+}
+
+#download .alert-danger {
+    padding: 7px;
+    vertical-align: bottom;
+}
+
 .form-group label {
     margin-right: 1em;
 }
@@ -616,6 +644,9 @@ th[role='columnheader'] .help, .help-target .help {
 /**********      Community                *********************/
 /**************************************************************/
 
+.community-message {
+    font-weight: 200;
+}
 
 #communityMap {
     width: 100%;

@@ -397,7 +397,7 @@ var Database = React.createClass({
             message = this.renderMessage(content.pages.variantsDefault);
         }
         return (
-            <Grid fluid={true} id="main-grid" style={{display: show ? 'block' : 'none'}}>
+            <Grid id="main-grid" style={{display: show ? 'block' : 'none'}}>
                 {message}
                 {table}
             </Grid>
@@ -406,14 +406,14 @@ var Database = React.createClass({
     renderMessage: function(message) {
         return  (
 			<Row>
-				<Col sm={10} smOffset={1}  className="alert alert-warning">
+				<Col className="jumbotron">
 					{this.props.mode === 'default' && <img id='enigma-logo' src={require('./img/enigma_logo.jpeg')} />}
 					<RawHTML ref='content' html={message}/>
-					{this.props.mode === 'research_mode' && <Button className="btn-small" onClick={this.toggleMode}>
+					{this.props.mode === 'research_mode' && <Button onClick={this.toggleMode}>
 						Show Expert Reviewed Data Only
 					</Button>}
 					{this.props.mode === 'default' &&
-					<Button className="btn-small" onClick={() =>this.setState({showModal: true})}>
+					<Button onClick={() =>this.setState({showModal: true})}>
 						Show All Public Data
 					</Button>}
 					{this.props.mode === 'default' && this.state.showModal &&
@@ -874,10 +874,10 @@ var VariantDetail = React.createClass({
                         <div className="Variant-detail-headerbar">
                             <Button
                                 onClick={this.setEmptyRowVisibility.bind(this, !this.state.hideEmptyItems)}
-                                bsStyle={!this.state.hideEmptyItems ? "primary" : "default"}>
+                                bsStyle={"default"}>
                                 { this.state.hideEmptyItems ?
-                                    <span>show empty items</span> :
-                                    <span>hide empty items</span>
+                                    <span>Show Empty Items</span> :
+                                    <span>Hide Empty Items</span>
                                 }
                             </Button>
                         </div>

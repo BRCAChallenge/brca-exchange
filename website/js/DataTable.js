@@ -278,13 +278,13 @@ var DataTable = React.createClass({
             <div id="filters" className="container-fluid">
                 <Row id="show-hide" className="btm-buffer">
                     <Col sm={10} smOffset={1}>
-                        <Button className="btn-sm rgt-buffer"
+                        <Button className="btn-default rgt-buffer"
                                 onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}
                         </Button>
-                        {mode === "research_mode" && <Button className="btn-sm rgt-buffer"
+                        {mode === "research_mode" && <Button className="btn-default rgt-buffer"
                                 onClick={this.toggleColumnSelectors}>{(columnSelectorsOpen ? 'Hide' : 'Show' ) + ' Column Selectors'}
                         </Button>}
-                        <Button className="btn-sm rgt-buffer"
+                        <Button className="btn-default rgt-buffer"
                                 onClick={this.restoreDefaults}>Restore Defaults
                         </Button>
                         {lollipopButton(this.toggleLollipop, lollipopOpen)}

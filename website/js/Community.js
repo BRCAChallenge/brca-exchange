@@ -118,7 +118,7 @@ var Community = React.createClass({
                 <Row id="message"> {message} </Row>
                 <Row>
                     <Col md={10} mdOffset={1} sm={12}>
-                        <span>The BRCA Exchange supports the exchange of information about BRCA1 and BRCA2 variants. Show your support by joining our mailing list and/or listing your name below as one of our supporters.</span>
+                        <p className="community-message">The BRCA Exchange supports the exchange of information about BRCA1 and BRCA2 variants. Show your support by joining our mailing list and/or listing your name below as one of our supporters.</p>
                     </Col>
                 </Row>
                 <Row>
@@ -324,13 +324,22 @@ var CommunityMap = React.createClass({
 });
 
 var CommunitySearch = React.createClass({
-    getInitialState: () => ({ search: "" }),
+    getInitialState: () => ({
+        search: "",
+        placeholder: "name, organization, city, etc."
+     }),
     onChange: function(e) {
         this.setState({search: e.target.value});
         this.props.onChange(e.target.value);
     },
     onSubmit: function (ev) {
         ev.preventDefault();
+    },
+    onBlur: function () {
+        this.setState({placeholder: "name, organization, city, etc."});
+    },
+    onFocus: function () {
+        this.setState({placeholder: ""});
     },
     appendSearch: function(term) {
         this.setState({search: `${this.state.search.trim()} ${term}`.trim()});
@@ -342,8 +351,14 @@ var CommunitySearch = React.createClass({
                 <input type='submit' className='input-sm'style={{display: 'none'}} />
                 <div className='text-nowrap help-target'>
                     <div>
-                        <input className='community-search-input' placeholder='name, organization, city, etc.' type='text'
-                            onChange={this.onChange} value={this.state.search} />
+                        <input className='community-search-input'
+                               onBlur={this.onBlur}
+                               onFocus={this.onFocus}
+                               placeholder={this.state.placeholder}
+                               type='text'
+                               onChange={this.onChange}
+                               value={this.state.search} />
+                        <span className="glyphicon glyphicon-search search-box-icon"/>
                     </div>
                 </div>
             </form>
