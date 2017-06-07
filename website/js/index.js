@@ -409,11 +409,11 @@ var Database = React.createClass({
 				<Col className="jumbotron">
 					{this.props.mode === 'default' && <img id='enigma-logo' src={require('./img/enigma_logo.jpeg')} />}
 					<RawHTML ref='content' html={message}/>
-					{this.props.mode === 'research_mode' && <Button onClick={this.toggleMode}>
+					{this.props.mode === 'research_mode' && <Button className="btn-default" onClick={this.toggleMode}>
 						Show Expert Reviewed Data Only
 					</Button>}
 					{this.props.mode === 'default' &&
-					<Button onClick={() =>this.setState({showModal: true})}>
+					<Button className="btn-default" onClick={() =>this.setState({showModal: true})}>
 						Show All Public Data
 					</Button>}
 					{this.props.mode === 'default' && this.state.showModal &&

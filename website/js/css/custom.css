@@ -497,6 +497,16 @@ html {
     font-size: 10px;
 }
 
+#main-grid li {
+    font-size: 1.2em;
+    font-weight: 200;
+}
+
+#main-grid h5 {
+    font-size: 1.2em;
+    font-weight: 400;
+}
+
 .alert-warning {
     background-color: rgba(169,169,169, 0.13);
     color: inherit;

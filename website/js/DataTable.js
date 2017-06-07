@@ -268,10 +268,10 @@ var DataTable = React.createClass({
         var deletedVariantsNote = '';
         if (deletedCount) {
             let pl = deletedCount !== 1;
-            deletedVariantsNote = (<span>
+            deletedVariantsNote = (<p>
                 There {pl ? 'are' : 'is'} {deletedCount} deleted variant{pl ? 's' : ''} that match{pl ? '' : 'es'} your search.
                 Click <a href="#" onClick={this.showDeleted}>here</a> to view {pl ? 'these' : 'this'} deleted variant{pl ? 's' : ''}.
-            </span>);
+            </p>);
         }
         return (error ? <p>{error}</p> :
             <div className={this.props.className}>
