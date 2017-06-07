@@ -39,12 +39,10 @@ var Releases = React.createClass({
             </tr>
         ));
         return (
-            <Grid fluid={true}>
+            <Grid>
                 <Row>
-                    <Col sm={8} smOffset={2}><h2>Release Notes</h2></Col>
-                </Row>
-                <Row>
-                    <Col sm={8} smOffset={2}>
+                    <Col smOffset={1} sm={10}>
+                        <h2>Release Notes</h2>
                         <table className="table table-bordered table-condensed">
                             <thead>
                                 <th>Notes</th>

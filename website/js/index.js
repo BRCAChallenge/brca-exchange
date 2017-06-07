@@ -182,7 +182,7 @@ var About = React.createClass({
         return (
             <Grid id="main-grid" className="main-grid">
                 <Row>
-                    <Col md={8} mdOffset={2}>
+                    <Col smOffset={1} sm={10}>
                         <RawHTML html={content.pages[page]} />
                     </Col>
                 </Row>
