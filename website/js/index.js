@@ -217,7 +217,7 @@ var Help = React.createClass({
                 {fragment === '' ? null :
                     <style>{`#${fragment} { animation-name: emphasis; animation-duration: 10s; } `}</style>}
                 <Row>
-                    <Col md={8} mdOffset={2}>
+                    <Col smOffset={1} sm={10}>
                         <RawHTML ref='content' html={helpContent}/>
                     </Col>
                 </Row>
