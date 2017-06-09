@@ -138,7 +138,10 @@ def index(request):
         cursor = connection.cursor()
         with tempfile.NamedTemporaryFile() as f:
             os.chmod(f.name, 0606)
-            cursor.execute("COPY ({}) TO '{}' WITH DELIMITER ',' CSV HEADER".format(query.query, f.name))
+            query = "COPY ({}) TO '{}' WITH DELIMITER ',' CSV HEADER".format(query.query, f.name)
+            # HACK to add quotes around search terms
+            query = re.sub(r'LIKE UPPER\((.+?)\)', r"LIKE UPPER('\1')", query)
+            cursor.execute(query)
 
             response = HttpResponse(f.read(), content_type='text/csv')
             response['Content-Disposition'] = 'attachment;filename="variants.csv"'
@@ -149,11 +152,15 @@ def index(request):
         cursor = connection.cursor()
         with tempfile.NamedTemporaryFile() as f:
             os.chmod(f.name, 0606)
-            cursor.execute("COPY ({}) TO '{}' WITH DELIMITER '\t' CSV HEADER".format(query.query, f.name))
+            query = "COPY ({}) TO '{}' WITH DELIMITER '\t' CSV HEADER".format(query.query, f.name)
+            # HACK to add quotes around search terms
+            query = re.sub(r'LIKE UPPER\((.+?)\)', r"LIKE UPPER('\1')", query)
+            cursor.execute(query)
 
             response = HttpResponse(f.read(), content_type='text/csv')
             response['Content-Disposition'] = 'attachment;filename="variants.tsv"'
             return response
+
     elif format == 'json':
         count = query.count()
         query = select_page(query, page_size, page_num)
