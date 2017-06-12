@@ -117,8 +117,7 @@ def index(request):
         quotes = '\''
     else:
         quotes = ''
-    # if include or exclude:
-    #     pdb.set_trace()
+
     query = apply_sources(query, include, exclude)
 
     if filters:
