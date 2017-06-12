@@ -117,8 +117,8 @@ def index(request):
         quotes = '\''
     else:
         quotes = ''
-    if include or exclude:
-        query = apply_sources(query, include, exclude)
+
+    query = apply_sources(query, include, exclude)
 
     if filters:
         query = apply_filters(query, filter_values, filters, quotes=quotes)
@@ -173,10 +173,16 @@ def index(request):
 def apply_sources(query, include, exclude):
     # if there are multiple sources given then OR them:
     # the row must match in at least one column
-    include_list = (Q(**{column: True}) for column in include)
-    exclude_dict = {exclusion: False for exclusion in exclude}
-
-    return query.filter(reduce(__or__, include_list)).filter(**exclude_dict)
+    if len(include) > 0:
+        include_list = (Q(**{column: True}) for column in include)
+        query = query.filter(reduce(__or__, include_list))
+    else:
+        # exclude all sources if none are included
+        exclude = [f.name for f in Variant._meta.get_fields() if "Variant_in" in f.name]
+    if exclude:
+        exclude_dict = {exclusion: False for exclusion in exclude}
+        query = query.filter(**exclude_dict)
+    return query
 
 
 def apply_filters(query, filterValues, filters, quotes=''):
