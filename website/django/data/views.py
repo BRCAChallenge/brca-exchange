@@ -173,8 +173,9 @@ def apply_sources(query, include, exclude):
     else:
         # exclude all sources if none are included
         exclude = [f.name for f in Variant._meta.get_fields() if "Variant_in" in f.name]
-    exclude_dict = {exclusion: False for exclusion in exclude}
-    query = query.filter(**exclude_dict)
+    if exclude:
+        exclude_dict = {exclusion: False for exclusion in exclude}
+        query = query.filter(**exclude_dict)
     return query
 
 
