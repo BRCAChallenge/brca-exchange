@@ -7,36 +7,17 @@ from matplotlib.backends.backend_pdf import PdfPages
 subpopulations on the x axis and frequencies on the y axis"""
 
 
-def plotAlleles(alleleList, filename):
+def plotAlleles(alleleList, color, title, pdfName):
     """Given an alleleList, will produce 2 bar charts rendering allele freq
     data"""
-    figureNum = 0 #will allow "figure 1" and "figure 2" to be made
-    for allele in alleleList: #allele is an object with attributes
-        if len(allele.pops) == 5:
-            color = 'cyan'
-            title = '1000 Genomes Frequencies'
-            chromPos = 'chrom ' + str(allele.chrom) + ', ' + 'position ' + str(allele.pos)
-            plotAllele(allele, title, color, filename)
-            truncPlot(allele, title, color, filename)
-            for sp in allele.pops:
-                print sp.namepop, sp.af
-            figureNum += 1
-            print 'plotdone'
-        elif len(allele.pops) == 7:
-            color = 'salmon'
-            title = 'ExAC Frequencies'
-            chromPos = 'chrom ' + str(allele.chrom)+', '+'position '+str(allele.pos)
-            plotAllele(allele, title, color, filename)
-            truncPlot(allele, title, color, filename)
-            for sp in allele.pops:
-                print sp.namepop, sp.af
-            figureNum += 1
-            print 'plotdone'
-        else:
-            print "vcf.gz file not compatible"
+    with PdfPages(pdfName) as pdf:  # defines a scope for the file being open
+        for allele in alleleList: #allele is an object with attributes
+            plotAllele(allele, title, color, pdf)
+            truncPlot(allele, title, color, pdf)
 
 
-def plotAllele(allele, title, color, filename):
+
+def plotAllele(allele, color, title, pdf):
     """given an allele, will create a bar chart for its allele frequencies"""
     #pp = PdfPages(filename)
     labels, AFs = makeFrequencyVectors(allele)
@@ -49,12 +30,11 @@ def plotAllele(allele, title, color, filename):
     ax.set_title(title)
     ax.set_xticks(xAlign) #this is the line that made a difference for label alignment
     ax.set_xticklabels(labels)
-    #ax.set_ylim((0,1))
-    #pp.savefig()
-    #pp.close()
-    plt.show()
+    pdf.savefig()
+    plt.close()
 
-def truncPlot(allele, title, color, filename):
+
+def truncPlot(allele, color, title, pdf):
     #pp = PdfPages(filename) #do some stripping?
     labels, AFs = makeFrequencyVectors(allele)
     sigLine = np.full(len(labels), 0.01)
@@ -86,10 +66,8 @@ def truncPlot(allele, title, color, filename):
     ax2.set_xlabel('populations')
     ax.set_xticks(xAlign)  # this is the line that made a difference for label alignment
     ax.set_xticklabels(labels)
-
-    #pp.savefig()
-    #pp.close()
-    plt.show()
+    pdf.savefig()
+    plt.close()
 
 def findYLim(allele):
     afs = []
@@ -101,9 +79,9 @@ def findYLim(allele):
         yLim = 0.003
     return yLim
 
-def makePdfFilename(filename):
-    newFn = filename.strip('.vcf')
-    newerFn = filename.strip
+# def makePdfFilename(filename):
+#     newFn = filename.strip('.vcf')
+#     newerFn = filename.strip
 
 
 def makeFrequencyVectors(allele):
