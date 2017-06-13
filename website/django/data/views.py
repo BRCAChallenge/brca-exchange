@@ -468,7 +468,7 @@ def brca_to_ga4gh(brca_variant, reference_genome):
         variant.end = brca_variant['Hg38_End']
     variant.id = '{}-{}'.format(reference_genome, str(brca_variant['id']))
     variant.variant_set_id = '{}-{}'.format(DATASET_ID, reference_genome)
-    names = [i for i in str(brca_variant['Synonyms']).split(',')]
+    names = [i.encode('utf-8') for i in brca_variant['Synonyms'].split(',')]
     for name in names:
         variant.names.append(name)
     for key in brca_variant:
