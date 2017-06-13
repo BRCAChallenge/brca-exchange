@@ -1,7 +1,13 @@
+import django
 import json
 import os
 import unittest
 import pytest
+
+os.environ['DJANGO_SETTINGS_MODULE'] = 'brca.settings'
+django.setup()
+
+import data.views as views
 from urllib import quote
 from django.http import JsonResponse, HttpResponse
 from django.test import TestCase
@@ -10,7 +16,6 @@ from brca import settings
 from data import test_data
 from data.models import Variant
 from data.views import index, autocomplete
-import data.views as views
 
 # GA4GH related modules
 import google.protobuf.json_format as json_format
