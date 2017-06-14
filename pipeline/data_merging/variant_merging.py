@@ -710,7 +710,7 @@ def one_variant_transform(f_in, f_out, source_name):
                     allele_number = record.INFO[("AN_" + subpopulation)]
                     allele_frequency = "-"
                     if len(allele_count) > 0 and allele_number != 0:
-                        allele_frequency = int(allele_count[0]) / int(allele_number)
+                        allele_frequency = float(allele_count[0]) / float(allele_number)
                     record.INFO[("AF_" + subpopulation)] = allele_frequency
             record.INFO['BX_ID'] = count
             count += 1
@@ -733,7 +733,7 @@ def one_variant_transform(f_in, f_out, source_name):
                         allele_number = record.INFO[("AN_" + subpopulation)]
                         allele_frequency = "-"
                         if allele_number != 0:
-                            allele_frequency = int(allele_count) / int(allele_number)
+                            allele_frequency = float(allele_count) / float(allele_number)
                         new_record.INFO[("AF_" + subpopulation)] = allele_frequency
                 vcf_writer.write_record(new_record)
 
