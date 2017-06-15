@@ -3,7 +3,6 @@
 this scripts takes the enigma variant list and merge vcf files in a folder into
 the exisitng enigma variants:
 """
-import pdb
 import argparse
 import datetime
 import os
@@ -704,14 +703,7 @@ def one_variant_transform(f_in, f_out, source_name):
         n = len(record.ALT)
         if n == 1:
             if source_name == "ExAC":
-                for subpopulation in EXAC_SUBPOPULATIONS:
-                    # calculate allele frequencies for each subpopulation
-                    allele_count = record.INFO[("AC_" + subpopulation)]
-                    allele_number = record.INFO[("AN_" + subpopulation)]
-                    allele_frequency = "-"
-                    if len(allele_count) > 0 and allele_number != 0:
-                        allele_frequency = float(allele_count[0]) / float(allele_number)
-                    record.INFO[("AF_" + subpopulation)] = allele_frequency
+                record = append_exac_allele_frequencies(record)
             record.INFO['BX_ID'] = count
             count += 1
             vcf_writer.write_record(record)
@@ -726,16 +718,31 @@ def one_variant_transform(f_in, f_out, source_name):
                     if type(value) == list and len(value) == n:
                         new_record.INFO[key] = [value[i]]
                 if source_name == "ExAC":
-                    # calculate allele frequencies for each subpopulation using index of alt
-                    new_record.INFO['AF'] = record.INFO['AF'][i]
-                    for subpopulation in EXAC_SUBPOPULATIONS:
-                        allele_count = record.INFO[("AC_" + subpopulation)][i]
-                        allele_number = record.INFO[("AN_" + subpopulation)]
-                        allele_frequency = "-"
-                        if allele_number != 0:
-                            allele_frequency = float(allele_count) / float(allele_number)
-                        new_record.INFO[("AF_" + subpopulation)] = allele_frequency
+                    new_record = append_exac_allele_frequencies(record, new_record, i)
                 vcf_writer.write_record(new_record)
+
+
+def append_exac_allele_frequencies(record, new_record=None, i=None):
+    if new_record is None:
+        for subpopulation in EXAC_SUBPOPULATIONS:
+            # calculate allele frequencies for each subpopulation
+            allele_count = record.INFO[("AC_" + subpopulation)]
+            allele_number = record.INFO[("AN_" + subpopulation)]
+            allele_frequency = "-"
+            if len(allele_count) > 0 and allele_number != 0:
+                allele_frequency = float(allele_count[0]) / float(allele_number)
+            record.INFO[("AF_" + subpopulation)] = allele_frequency
+        return record
+    else:
+        new_record.INFO['AF'] = record.INFO['AF'][i]
+        for subpopulation in EXAC_SUBPOPULATIONS:
+            allele_count = record.INFO[("AC_" + subpopulation)][i]
+            allele_number = record.INFO[("AN_" + subpopulation)]
+            allele_frequency = "-"
+            if allele_number != 0:
+                allele_frequency = float(allele_count) / float(allele_number)
+            new_record.INFO[("AF_" + subpopulation)] = allele_frequency
+        return new_record
 
 
 def write_new_tsv(filename, columns, variants):
