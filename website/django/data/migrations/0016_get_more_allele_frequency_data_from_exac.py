@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('data', '0016_split_minor_allele_frequency_data'),
+        ('data', '0015_auto_20170602_1458'),
     ]
 
     operations = [
