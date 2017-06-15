@@ -81,7 +81,6 @@ class Command(BaseCommand):
                 row_dict = dict(zip(deletions_header, row))
                 row_dict = self.update_variant_values_for_insertion(row_dict, release_id, change_types, True)
                 variant = Variant.objects.create_variant(row_dict)
-                self.create_and_associate_reports_to_variant(variant, reports_dict, sources, release_id)
 
         self.update_autocomplete_words()
 
