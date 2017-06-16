@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css?family=Lato:200,600');
+
 /* Note that bootstrap 3 media sizes are as follows:
   @media(max-width:767px){}  // xs
   @media(min-width:768px){}  // sm
@@ -79,12 +81,26 @@ offending file, for future reference: website/node_modules/react-data-components
     float: left;
 }
 
+.navbar-custom-spacing {
+    font-size: 18px;
+    line-height: 42px;
+    margin-left: 0;
+    padding-left: 40px;
+}
+
 .navbar-brand  span.BRCA {
-    color: #C03657;
+    font-family: 'Lato', sans-serif;
+    color: black;
+    font-weight: 600;
 }
 
 .navbar-brand span.exchange {
-    color: #E8A2A0;
+    /*color: #E8A2A0;*/
+    font-family: 'Lato', sans-serif;
+    color: black;
+    font-weight: 200;
+    /*font-variant: small-caps;*/
+    /*text-transform: uppercase;*/
 }
 
 /* Ensures BRCA exchange logo and menu items are on a single line across different devices */
