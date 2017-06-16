@@ -250,6 +250,12 @@ input:focus {
     line-height: 34px;
 }
 
+/* used for the message on the search page */
+div.colorized-jumbo {
+    border: solid 1px #d1dce2;
+    background-color: #eff8fd;
+}
+
 /**************************************************************/
 /**********     Variant pagination        *********************/
 /**************************************************************/

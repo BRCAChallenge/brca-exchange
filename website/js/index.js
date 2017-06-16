@@ -406,7 +406,7 @@ var Database = React.createClass({
     renderMessage: function(message) {
         return  (
 			<Row>
-				<Col className="jumbotron">
+				<Col className="jumbotron colorized-jumbo">
 					{this.props.mode === 'default' && <img id='enigma-logo' src={require('./img/enigma_logo.jpeg')} />}
 					<RawHTML ref='content' html={message}/>
 					{this.props.mode === 'research_mode' && <Button className="btn-default" onClick={this.toggleMode}>
