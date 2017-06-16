@@ -274,7 +274,6 @@ div.colorized-jumbo {
     border-radius: 2px;
     padding: 1px;
     font-size: 11px;
-    background-color: #fafafa;
 }
 .variant-history span.empty::after {
     content: 'Empty';
@@ -341,8 +340,9 @@ div.colorized-jumbo {
 }
 
 .logo-item {
-    height: 100px;
+    height: 120px;
     padding: 10px;
+    margin-bottom: 10px;
     text-align: center;
     float: none;
     display: inline-block;
