@@ -34,6 +34,19 @@ p {
     font-weight: 200;
 }
 
+/* should be used by all tables on the site, along with dropping the table-condensed class */
+.table-grayheader th {
+    background-color: #f5f5f5;
+}
+
+/*
+circumvents react-data-components-bd2k applying cursor: pointer to every "table"-classed thing's th.
+offending file, for future reference: website/node_modules/react-data-components-bd2k/css/table-twbs.css
+*/
+.table.nopointer th {
+    cursor: auto;
+}
+
 /**************************************************************/
 /**********         NavBar                *********************/
 /**************************************************************/

@@ -354,7 +354,7 @@ var DataTable = React.createClass({
                 <Row>
                     <Col id="data-table-container" className="table-responsive" sm={12}>
                         <FastTable
-                            className={cx(className, "table table-hover table-bordered table-condensed")}
+                            className={cx(className, "table table-hover table-bordered table-grayheader")}
                             dataArray={data}
                             columns={renderColumns}
                             keys={this.props.keys}

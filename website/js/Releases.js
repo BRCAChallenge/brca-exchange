@@ -43,7 +43,7 @@ var Releases = React.createClass({
                 <Row>
                     <Col smOffset={1} sm={10}>
                         <h2>Release Notes</h2>
-                        <table className="table table-bordered table-condensed">
+                        <table className="table table-bordered table-grayheader nopointer">
                             <thead>
                                 <th>Notes</th>
                                 <th>Date</th>

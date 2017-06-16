@@ -296,7 +296,7 @@ var Table = React.createClass({
         return (
             <DataTable
                 ref='table'
-                className='row-clickable data-table'
+                className='row-clickable data-table table-grayheader'
                 {...opts}
                 columnSelection={columnSelection}
                 sourceSelection={sourceSelection}
