@@ -29,8 +29,8 @@ var Releases = React.createClass({
         }
         var rows = _.map(releases, release => (
             <tr>
-                <td><Link to={`/release/${release.id}`}>Version {release.id}</Link></td>
-                <td>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</td>
+                <td style={{ whiteSpace: 'nowrap' }}><Link to={`/release/${release.id}`}>Version {release.id}</Link></td>
+                <td style={{ whiteSpace: 'nowrap' }}>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</td>
                 <td>{release.sources}</td>
                 <td><Link to={`/variants?release=${release.id}&changeTypes[]=new`}>{release['variants_added']}</Link></td>
                 <td><Link to={`/variants?release=${release.id}&changeTypes[]=added_classification&changeTypes[]=changed_classification`}>{release['variants_classified']}</Link></td>
@@ -39,10 +39,11 @@ var Releases = React.createClass({
             </tr>
         ));
         return (
-            <Grid>
+            <Grid id="main-grid" className="main-grid">
                 <Row>
                     <Col smOffset={1} sm={10}>
                         <h2>Release Notes</h2>
+                        <br />
                         <table className="table table-bordered table-grayheader nopointer">
                             <thead>
                                 <th>Notes</th>
