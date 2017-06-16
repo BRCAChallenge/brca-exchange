@@ -160,9 +160,9 @@ var Community = React.createClass({
                 </Row>
                 <Row>
                     <Col md={10} mdOffset={1} sm={12}>
-                        <span style={{verticalAlign: 'middle', display: 'inline-block'}}>
-                        {(this.state.page * this.state.pageLength) + 1}-{Math.min((this.state.page + 1) * this.state.pageLength, this.state.count)} out of {this.state.count} members
-                        </span>
+                        <p style={{verticalAlign: 'bottom', display: 'inline-block'}}>
+                        {`${(this.state.page * this.state.pageLength) + 1}-${Math.min((this.state.page + 1) * this.state.pageLength, this.state.count)} out of ${this.state.count} members`}
+                        </p>
 
                         <Pagination
                             className="pagination pull-right-sm"
