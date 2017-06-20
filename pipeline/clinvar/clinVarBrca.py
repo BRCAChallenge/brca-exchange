@@ -51,6 +51,7 @@ def main():
                     try:
                         submissionSet = clinvar.clinVarSet(cvs)
                     except AttributeError:
+                        # TODO: this is a hack to avoid errors, figure out how to correctly handle these reports.
                         logging.debug("AttributeError running clinvar.clinVarSet(cvs), inputBuffer: %s, cvs: %s", inputBuffer, cvs)
                         continue
                     variant = submissionSet.referenceAssertion.variant
