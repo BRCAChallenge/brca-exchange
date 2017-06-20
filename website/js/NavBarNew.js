@@ -53,7 +53,7 @@ var NavBarNew = React.createClass({
         var brand = (
             <a className="navbar-brand navbar-custom-spacing" href="/">
                 <h1>
-                    <span style={{position: 'relative', top: '-5px', marginRight: '15px' }}>
+                    <span className="logo-img">
                         <img src={brcaHeaderLogo} height="40" />
                     </span>
                     <span className="BRCA">BRCA</span>
