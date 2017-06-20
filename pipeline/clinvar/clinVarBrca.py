@@ -12,26 +12,33 @@ so, it prints it.  If it's not reading a ClinVarSet record, then it
 echoes each line to stdout.
 """
 import argparse
-import clinvar 
+import clinvar
 import gzip
 import xml.etree.ElementTree as ET
 import sys
+import logging
 
 # Below is a magic formula that keeps the code from choking on characters
 # beyond the standard ASCII set.
 reload(sys)
 sys.setdefaultencoding('utf8')
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("clinVarXmlFilename")
+    parser.add_argument('-a', "--artifacts_dir", help='Artifacts directory with pipeline artifact files.')
     args = parser.parse_args()
+
+    logging_level = logging.DEBUG
+    log_file_path = args.artifacts_dir + "clinvarbrcapy.log"
+    logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level)
+
     inputBuffer = ""
 
     with gzip.open(args.clinVarXmlFilename) as inputFile:
         inClinVarSet = False
         for line in inputFile:
-            #print "inClinVarSet", inClinVarSet, " input:", line.rstrip()
             if "<ClinVarSet" in line:
                 inHeader = False
                 inputBuffer = line
@@ -41,7 +48,11 @@ def main():
                 inClinVarSet = False
                 cvs = ET.fromstring(inputBuffer)
                 if clinvar.isCurrent(cvs):
-                    submissionSet = clinvar.clinVarSet(cvs)
+                    try:
+                        submissionSet = clinvar.clinVarSet(cvs)
+                    except AttributeError:
+                        logging.debug("AttributeError running clinvar.clinVarSet(cvs), inputBuffer: %s, cvs: %s", inputBuffer, cvs)
+                        continue
                     variant = submissionSet.referenceAssertion.variant
                     if variant != None:
                         if variant.geneSymbol == "BRCA1" or variant.geneSymbol == "BRCA2":

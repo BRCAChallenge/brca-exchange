@@ -402,9 +402,12 @@ def get_bx_id_column_indexes(columns):
 
 def normalize_values(value):
     # standardize data representation by denoting empty as '-' and stripping whitespace off strings
-    assert isinstance(value, basestring) or isinstance(value, (list)) or value is None
     if value is None or value == "":
         value = DEFAULT_CONTENTS
+
+    if isinstance(value, int) or isinstance(value, float):
+        value = str(value)
+
     if isinstance(value, basestring):
         value = value.strip()
     else:
@@ -415,10 +418,11 @@ def normalize_values(value):
             else:
                 if isinstance(v, basestring):
                     v = v.strip()
+                if isinstance(v, int) or isinstance(v, float):
+                    v = str(v)
                 if v not in normalized_values:
                     normalized_values.append(v)
         value = normalized_values
-
     return value
 
 
@@ -731,7 +735,7 @@ def append_exac_allele_frequencies(record, new_record=None, i=None):
             allele_frequency = "-"
             if len(allele_count) > 0 and allele_number != 0:
                 allele_frequency = float(allele_count[0]) / float(allele_number)
-            record.INFO[("AF_" + subpopulation)] = allele_frequency
+            record.INFO[("AF_" + subpopulation)] = str(allele_frequency)
         return record
     else:
         new_record.INFO['AF'] = record.INFO['AF'][i]
@@ -741,7 +745,7 @@ def append_exac_allele_frequencies(record, new_record=None, i=None):
             allele_frequency = "-"
             if allele_number != 0:
                 allele_frequency = float(allele_count) / float(allele_number)
-            new_record.INFO[("AF_" + subpopulation)] = allele_frequency
+            new_record.INFO[("AF_" + subpopulation)] = str(allele_frequency)
         return new_record
 
 
