@@ -45,15 +45,15 @@ def releases(request):
     return response
 
 def variant_counts(request):
-    query = CurrentVariant.objects
+    query = CurrentVariant.objects.all().exclude(Change_Type__name='deleted')
     total_count = query.count()
     brca1_count = query.filter(Gene_Symbol='BRCA1').count()
     brca2_count = query.filter(Gene_Symbol='BRCA2').count()
     query = query.filter(Variant_in_ENIGMA=True)
     enigma_count = query.count()
-    enigma_brca1_count = query.filter(Gene_Symbol='BRCA1').count()
-    enigma_brca2_count = query.filter(Gene_Symbol='BRCA2').count()
-    response = JsonResponse({"total": total_count, "brca1": brca1_count, "brca2": brca2_count, "enigma": enigma_count, "enigmabrca1": enigma_brca1_count, "enigmabrca2": enigma_brca2_count})
+    enigma_pathogenic_count = query.filter(Pathogenicity_expert='Pathogenic').count()
+    enigma_benign_count = query.filter(Pathogenicity_expert__contains='Benign').count()
+    response = JsonResponse({"total": total_count, "brca1": brca1_count, "brca2": brca2_count, "enigma": enigma_count, "enigmaPathogenic": enigma_pathogenic_count, "enigmaBenign": enigma_benign_count})
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
@@ -117,8 +117,8 @@ def index(request):
         quotes = '\''
     else:
         quotes = ''
-    if include or exclude:
-        query = apply_sources(query, include, exclude)
+
+    query = apply_sources(query, include, exclude)
 
     if filters:
         query = apply_filters(query, filter_values, filters, quotes=quotes)
@@ -138,7 +138,10 @@ def index(request):
         cursor = connection.cursor()
         with tempfile.NamedTemporaryFile() as f:
             os.chmod(f.name, 0606)
-            cursor.execute("COPY ({}) TO '{}' WITH DELIMITER ',' CSV HEADER".format(query.query, f.name))
+            query = "COPY ({}) TO '{}' WITH DELIMITER ',' CSV HEADER".format(query.query, f.name)
+            # HACK to add quotes around search terms
+            query = re.sub(r'LIKE UPPER\((.+?)\)', r"LIKE UPPER('\1')", query)
+            cursor.execute(query)
 
             response = HttpResponse(f.read(), content_type='text/csv')
             response['Content-Disposition'] = 'attachment;filename="variants.csv"'
@@ -149,11 +152,15 @@ def index(request):
         cursor = connection.cursor()
         with tempfile.NamedTemporaryFile() as f:
             os.chmod(f.name, 0606)
-            cursor.execute("COPY ({}) TO '{}' WITH DELIMITER '\t' CSV HEADER".format(query.query, f.name))
+            query = "COPY ({}) TO '{}' WITH DELIMITER '\t' CSV HEADER".format(query.query, f.name)
+            # HACK to add quotes around search terms
+            query = re.sub(r'LIKE UPPER\((.+?)\)', r"LIKE UPPER('\1')", query)
+            cursor.execute(query)
 
             response = HttpResponse(f.read(), content_type='text/csv')
             response['Content-Disposition'] = 'attachment;filename="variants.tsv"'
             return response
+
     elif format == 'json':
         count = query.count()
         query = select_page(query, page_size, page_num)
@@ -166,10 +173,16 @@ def index(request):
 def apply_sources(query, include, exclude):
     # if there are multiple sources given then OR them:
     # the row must match in at least one column
-    include_list = (Q(**{column: True}) for column in include)
-    exclude_dict = {exclusion: False for exclusion in exclude}
-
-    return query.filter(reduce(__or__, include_list)).filter(**exclude_dict)
+    if len(include) > 0:
+        include_list = (Q(**{column: True}) for column in include)
+        query = query.filter(reduce(__or__, include_list))
+    else:
+        # exclude all sources if none are included
+        exclude = [f.name for f in Variant._meta.get_fields() if "Variant_in" in f.name]
+    if exclude:
+        exclude_dict = {exclusion: False for exclusion in exclude}
+        query = query.filter(**exclude_dict)
+    return query
 
 
 def apply_filters(query, filterValues, filters, quotes=''):

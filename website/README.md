@@ -1,6 +1,6 @@
 # website for BRCA challenge
 To contribute:
-Fork the repository, make the changes, and submit pull request. 
+Fork the repository, make the changes, and submit pull request.
 
 ## Build the frontend
 The build is based on npm and webpack.
@@ -9,29 +9,28 @@ The build is based on npm and webpack.
        * `brew install git`
        * `brew install node`
    * On Linux:
-        * `sudo apt-get install git-all`    
+        * `sudo apt-get install git-all`
         * `curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -`
         * `sudo apt-get install -y nodejs`
-* **Checkout the repo**
-   * `git clone https://github.com/BD2KGenomics/brca-website.git`
 * **Start the frontend**
-   * `cd brca-website`
+   * `cd website`
    * `npm install`
    * `npm start`
 
 ## Build the server
 The server runs on Django with postgres so install and set up those
-* **Install postgres** 
+* **Install postgres**
    * For Mac:
        * The easiest way is to install postgress.app from http://postgresapp.com/
-   * Linux: 
+   * Linux:
        * `sudo apt-get install postgresql postgresql-contrib`
-* **Create the database** 
+* **Create the database**
    * `sudo -u postgres createdb  storage.pg`
-* **Set the postgres role's password** 
+* **Set the postgres role's password**
    * `sudo -u postgres psql postgres`
    *  at the prompt type `\password postgres` to set the password to `postgres`
 * **Install the python dependencies**
+   * `cd website`
    * `pip install -qU -r requirements.txt`
 * **Run the initial migration to populate the database**
    * `cd django`

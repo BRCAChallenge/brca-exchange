@@ -72,6 +72,7 @@ var DataTable = React.createClass({
     shouldComponentUpdate: function (nextProps, nextState) {
         return (
             this.state.filtersOpen !== nextState.filtersOpen ||
+            this.state.columnSelectorsOpen !== nextState.columnSelectorsOpen ||
             this.state.lollipopOpen !== nextState.lollipopOpen ||
             this.state.page !== nextState.page ||
             this.state.count !== nextState.count ||
@@ -101,12 +102,18 @@ var DataTable = React.createClass({
         this.fetch(this.state);
     },
     getInitialState: function () {
+        let filterValues = JSON.parse(localStorage.getItem('filterValues'));
+        if (filterValues === null || filterValues === undefined) {
+            filterValues = {};
+        }
         return mergeState({
             data: [],
             lollipopOpen: false,
             filtersOpen: false,
-            filterValues: {},
+            filterValues: filterValues,
+            columnSelectorsOpen: false,
             search: '',
+            mode: this.props.mode,
             columnSelection: this.props.columnSelection,
             sourceSelection: this.props.sourceSelection,
             pageLength: 20,
@@ -125,19 +132,14 @@ var DataTable = React.createClass({
         this.setState({windowWidth: window.innerWidth});
     },
     setFilters: function (obj) {
-        var {filterValues} = this.state,
-            newFilterValues = merge(filterValues, obj);
+        let {filterValues} = this.state;
+        let newFilterValues = merge(filterValues, obj);
+
+        localStorage.setItem('filterValues', JSON.stringify(newFilterValues));
 
         this.setStateFetch({
           filterValues: newFilterValues,
           page: 0
-        });
-    },
-    clearFilters: function () {
-        // Reset release and changetype filters
-        this.setStateFetch({
-            release: undefined,
-            changeTypes: undefined,
         });
     },
     createDownload: function () {
@@ -166,7 +168,8 @@ var DataTable = React.createClass({
     },
     fetch: function (state) {
         var {pageLength, search, page, sortBy,
-            filterValues, columnSelection, sourceSelection, release, changeTypes, showDeleted} = state;
+            filterValues, columnSelection, sourceSelection,
+            release, changeTypes, showDeleted, mode} = state;
         this.fetchq.onNext(merge({
             release,
             changeTypes,
@@ -175,6 +178,7 @@ var DataTable = React.createClass({
             page,
             sortBy,
             search,
+            mode,
             searchColumn: _.keys(_.pick(columnSelection, v => v)),
             include: _.keys(_.pick(sourceSelection, v => v === 1)),
             exclude: _.keys(_.pick(sourceSelection, v => v === -1)),
@@ -194,6 +198,9 @@ var DataTable = React.createClass({
     toggleFilters: function () {
         this.setState({filtersOpen: !this.state.filtersOpen});
     },
+    toggleColumnSelectors: function() {
+        this.setState({columnSelectorsOpen: !this.state.columnSelectorsOpen});
+    },
     showDeleted: function () {
         this.setStateFetch({showDeleted: true});
     },
@@ -210,10 +217,35 @@ var DataTable = React.createClass({
 
         this.setStateFetch({page: newPage, pageLength: length});
     },
+    restoreDefaults: function() {
+        // Clears local storage, resets filters/columns/sources/releases/changetypes,
+        // and resets url to /variants (parent method uses a flag to ensure query params remain empty).
+        delete localStorage.columnSelection;
+        delete localStorage.filterValues;
+        delete localStorage.sourceSelection;
+        let that = this;
+        if (this.state.mode === 'default') {
+            this.props.expertVariantTableRestoreDefaults(function() {
+                that.setState({filterValues: {},
+                               release: undefined,
+                               changeTypes: undefined,
+                               showDeleted: undefined
+                             });
+            });
+        } else {
+            this.props.researchVariantTableRestoreDefaults(function() {
+                that.setState({filterValues: {},
+                               release: undefined,
+                               changeTypes: undefined,
+                               showDeleted: undefined
+                             });
+            });
+        }
+    },
     render: function () {
-        var {release, changeTypes, filterValues, filtersOpen, lollipopOpen, search, data, columnSelection,
+        var {release, changeTypes, filterValues, filtersOpen, columnSelectorsOpen, lollipopOpen, search, data, columnSelection,
             page, totalPages, count, synonyms, error} = this.state;
-        var {columns, filterColumns, className, advancedFilters, downloadButton, lollipopButton} = this.props;
+        var {columns, filterColumns, className, columnSelectors, filters, downloadButton, lollipopButton, mode} = this.props;
         var renderColumns = _.filter(columns, c => columnSelection[c.prop]);
         var filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
             <SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
@@ -249,14 +281,20 @@ var DataTable = React.createClass({
                         <Button className="btn-sm rgt-buffer"
                                 onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}
                         </Button>
+                        {mode === "research_mode" && <Button className="btn-sm rgt-buffer"
+                                onClick={this.toggleColumnSelectors}>{(columnSelectorsOpen ? 'Hide' : 'Show' ) + ' Column Selectors'}
+                        </Button>}
+                        <Button className="btn-sm rgt-buffer"
+                                onClick={this.restoreDefaults}>Restore Defaults
+                        </Button>
                         {lollipopButton(this.toggleLollipop, lollipopOpen)}
                     </Col>
                 </Row>
                 <Row id="filters">
                     <Col sm={10} smOffset={1}>
-                        {filtersOpen && <div className='form-inline'>{filterFormEls}</div>}
-                        {filtersOpen && <div className='form-inline'>
-                            {advancedFilters}
+                        {filtersOpen && <div className='form-inline'>{filterFormEls}{filters}</div>}
+                        {columnSelectorsOpen && mode === "research_mode" && <div className='form-inline'>
+                            {columnSelectors}
                         </div>}
                     </Col>
                 </Row>
@@ -276,10 +314,6 @@ var DataTable = React.createClass({
                                     {release ? 'in release ' + release : ''} {}
                                     {synonyms ? 'of which ' + synonyms + ' matched on synonyms' : ''}
                                 </label>
-                                {release || changeString ?
-                                    <Button className="btn-sm rgt-buffer"
-                                        onClick={this.clearFilters}>Clear Filters
-                                    </Button> : ''} {}
                                 {downloadButton(this.createDownload)}
                             </div>
                         </div>

@@ -24,6 +24,7 @@ from pygr.seqdb import SequenceFileDB
         Currently only works for insertion and deletion strings less than or equal to 100 bases long. Can be modified to be larger.
 '''
 
+
 def parse_args():
     """
     Description:
@@ -31,7 +32,7 @@ def parse_args():
         object containing the arguments and their values. Default values are 'False' if option
         is not listed in the command, else the option value is set to True.
     """
-    parser = argparse.ArgumentParser(description='Fill in hg18, hg19 genomic coordinates and cDNA hgvs strings in  merged BRCA variant dataset.')
+    parser = argparse.ArgumentParser(description='Fill in hg18, hg19 genomic coordinates and cDNA hgvs strings in merged BRCA variant dataset.')
     parser.add_argument('-i', '--inBRCA', type=argparse.FileType('r'),
                         help='Input ENIGMA BRCA datatable file for conversion.')
     parser.add_argument('-j', '--inHg18', type=argparse.FileType('r'),
@@ -102,6 +103,7 @@ def main(args):
     hgvsG38ColumnName = 'Genomic_Coordinate_hg38'
     refSeqColumnName = 'Reference_Sequence'
     hgvsCDNAColumnName = 'HGVS_cDNA'
+    hgvsCDNALOVDColumnName = 'HGVS_cDNA_LOVD'
     hgvsPColumnName = 'HGVS_Protein'
 
     # Set up header for output file
@@ -125,6 +127,7 @@ def main(args):
     refSeqIndex = input_header_row.index(refSeqColumnName)
     hgvsCDNAIndex = input_header_row.index(hgvsCDNAColumnName)
     hgvsPIndex = input_header_row.index(hgvsPColumnName)
+    hgvsCDNALOVDIndex = input_header_row.index(hgvsCDNALOVDColumnName)
     geneSymbolIndex = input_header_row.index("Gene_Symbol")
     synonymIndex = input_header_row.index("Synonyms")
 
@@ -170,7 +173,6 @@ def main(args):
             synonymString = []
         else:
             synonymString = line[synonymIndex].split(",")
-
         if line[geneSymbolIndex] == 'BRCA1':
             for transcriptName in refSeqBRCA1Transcripts:
                 transcript38 = get_transcript38(transcriptName)
@@ -181,6 +183,31 @@ def main(args):
                 transcript38 = get_transcript38(transcriptName)
                 cdna_synonym = str(pyhgvs.format_hgvs_name(chrom38, int(offset38), ref38, alt38, genome38, transcript38, use_gene=False, max_allele_length=100))
                 synonymString.append(cdna_synonym)
+
+        # Add hgvs_cDNA values from LOVD to synonyms if not already present
+        for cdna_coord_LOVD in line[hgvsCDNALOVDIndex].split(','):
+            # Skip if blank
+            if cdna_coord_LOVD == "-" or cdna_coord_LOVD is None or cdna_coord_LOVD == "":
+                continue
+
+            # Don't add to synonyms if main hgvs_cDNA field is already equivalent to hgvs_cDNA value from LOVD
+            cdna_coord_LOVD_for_comparison = cdna_coord_LOVD.split(':')[1]
+            if cdna_coord_LOVD_for_comparison in line[hgvsCDNAIndex]:
+                continue
+
+            chrom38LOVD, offset38LOVD, ref38LOVD, alt38LOVD = pyhgvs.parse_hgvs_name(cdna_coord_LOVD, genome38, get_transcript=get_transcript38)
+            if line[geneSymbolIndex] == 'BRCA1':
+                for transcriptName in refSeqBRCA1Transcripts:
+                    transcript38 = get_transcript38(transcriptName)
+                    cdna_synonym = str(pyhgvs.format_hgvs_name(chrom38LOVD, int(offset38LOVD), ref38LOVD, alt38LOVD, genome38, transcript38, use_gene=False, max_allele_length=100))
+                    if cdna_synonym not in synonymString:
+                        synonymString.append(cdna_synonym)
+            elif line[geneSymbolIndex] == 'BRCA2':
+                for transcriptName in refSeqBRCA2Transcripts:
+                    transcript38 = get_transcript38(transcriptName)
+                    cdna_synonym = str(pyhgvs.format_hgvs_name(chrom38LOVD, int(offset38LOVD), ref38LOVD, alt38LOVD, genome38, transcript38, use_gene=False, max_allele_length=100))
+                    if cdna_synonym not in synonymString:
+                        synonymString.append(cdna_synonym)
 
         if calcProtein == True:
 

@@ -16,7 +16,8 @@ var DataTable = require('./DataTable');
 var _ = require('underscore');
 var {Col, Panel, Button, Input} = require('react-bootstrap');
 var ColumnCheckbox = require('./ColumnCheckbox');
-
+var {getDefaultExpertColumns, getDefaultResearchColumns, getAllSources} = require('./VariantTableDefaults');
+var {State} = require('react-router');
 
 require('react-data-components-bd2k/css/table-twbs.css');
 
@@ -30,49 +31,14 @@ function buildHeader(onClick, title) {
     );
 }
 
-//function renderClinVarLink(val) {
-//    return (
-//        <a title="View on ClinVar"
-//            onClick={ev => ev.stopPropagation()}
-//            href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + val}>{val}</a>
-//    );
-//}
-
 function renderCell(val) {
     return <span>{val}</span>;
 }
 
-var filterColumns = [
+const filterColumns = [
     {name: 'Gene', prop: 'Gene_Symbol', values: ['BRCA1', 'BRCA2']},
-//    {name: 'Exon', values: ['Any', 1, 2, 3, 4, 5]}, // XXX needs refgene to get exon count
-    {name: 'Pathogenicity', prop: 'Pathogenicity_expert', values: ['Pathogenic', 'Benign / Little Clinical Significance', 'Not Yet Classified']}
+    {name: 'Pathogenicity', prop: 'Pathogenicity_expert', values: ['Pathogenic', 'Benign / Little Clinical Significance', 'Not Yet Reviewed']}
 ];
-
-// XXX duplicate this functionality on the server, perhaps
-// by having the client pass in order_by of Genomic_Coordinate
-// for hgvs columns.
-//var strPropCmpFn = prop => (a, b) => {
-//    var ap = a[prop],
-//        bp = b[prop];
-//    if (ap == null && bp == null || ap === bp) {
-//        return 0;
-//    }
-//    if (bp == null || bp < ap) {
-//        return 1;
-//    }
-//    return -1;
-//};
-//
-//var posCmpFn = strPropCmpFn('Genomic_Coordinate');
-//
-//function sortColumns(columns, {prop, order}, data) {
-//    var sortFn = _.findWhere(columns, {prop: prop}).sortFn || strPropCmpFn(prop),
-//        sorted = data.slice(0).sort(sortFn);
-//    if (order === 'descending') {
-//        sorted.reverse();
-//    }
-//    return sorted;
-//}
 
 const expertModeGroups = [
     {groupTitle: 'Variant Nomenclature', internalGroupName: 'Variant Nomenclature', innerCols: [
@@ -114,6 +80,7 @@ const researchModeGroups = [
         {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38', core: true},
         {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
         {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36'},
+        {title: 'RNA (LOVD)', prop: 'RNA_LOVD'}
     ]},
 
     {groupTitle: 'Clinical Significance (ENIGMA)', internalGroupName: 'Significance (ENIGMA)', innerCols: [
@@ -138,6 +105,10 @@ const researchModeGroups = [
     {groupTitle: 'Clinical Significance (LOVD)', internalGroupName: 'Significance (LOVD)', innerCols: [
         {title: 'Variant Frequency', prop: 'Variant_frequency_LOVD'},
         {title: 'Variant Haplotype', prop: 'Variant_haplotype_LOVD'},
+        {title: 'Submitters', prop: 'Submitters_LOVD'},
+        {title: 'Genetic Origin', prop: 'Genetic_origin_LOVD'},
+        {title: 'Individuals', prop: 'Individuals_LOVD'},
+        {title: 'Variant Effect', prop: 'Variant_effect_LOVD'},
     ]},
 
     {groupTitle: 'Clinical Significance (BIC)', internalGroupName: 'Significance (BIC)', innerCols: [
@@ -159,13 +130,15 @@ const researchModeGroups = [
         {title: 'EUR Allele Frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes', core: true},
         {title: 'South Asian Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes', core: true},
         {title: 'Allele Frequency (ExAC minus TCGA)', prop: 'Allele_frequency_ExAC', core: true},
-        {title: 'Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP', core: true},
+        {title: 'EA Allele Frequency (ESP)', prop: 'EA_Allele_Frequency_ESP', core: true},
+        {title: 'AA Allele Frequency (ESP)', prop: 'AA_Allele_Frequency_ESP', core: true},
+        {title: 'Allele Frequency (ESP)', prop: 'Allele_Frequency_ESP', core: true},
     ]},
 
     {groupTitle: 'Multifactorial Likelihood Analysis', internalGroupName: 'Multifactorial Likelihood Analysis', innerCols: [
-        {title: 'Probability of pathogenicity', prop: 'Posterior_probability_exLOVD', core: true},
+        {title: 'Posterior probability of pathogenicity', prop: 'Posterior_probability_exLOVD', core: true},
         {title: 'Prior probability of pathogenicity', prop: 'Combined_prior_probablility_exLOVD', core: true},
-        {title: 'Missense analysis probability of pathogenicity', prop: 'Missense_analysis_prior_probability_exLOVD', core: true},
+        {title: 'Missense analysis pathogenicity prior', prop: 'Missense_analysis_prior_probability_exLOVD', core: true},
         {title: 'Co-occurrence likelihood', prop: 'Co_occurrence_LR_exLOVD', core: true},
         {title: 'Segregation Likelihood Ratio', prop: 'Segregation_LR_exLOVD', core: true},
         {title: 'Summary Family History Likelihood Ratio', prop: 'Sum_family_LR_exLOVD', core: true},
@@ -173,7 +146,22 @@ const researchModeGroups = [
     ]},
 ];
 
-var columns = [
+// subColumns populate the column selection checkboxes.
+// They should match the variant detail groupings.
+const subColumns = _.map(researchModeGroups, function (group) {
+    return {
+        subColTitle: group.groupTitle,
+        subColList: _.map(group.innerCols, function (innerCol) {
+            return {
+                title: innerCol.title,
+                prop: innerCol.prop,
+                render: renderCell
+            };
+        })
+    };
+});
+
+const columns = [
     {title: 'Gene', prop: 'Gene_Symbol', render: gene => <i>{gene}</i>},
     {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: nucleotide => nucleotide.split(':')[1]},
     {title: 'Transcript Identifier', prop: 'Reference_Sequence'},
@@ -197,17 +185,13 @@ var columns = [
     {title: 'ClinVar Accession', prop: 'ClinVarAccession_ENIGMA'}
 ];
 
-var researchModeColumns = [
-
+const researchModeColumns = [
     {title: 'Gene Symbol', prop: 'Gene_Symbol', render: gene => <i>{gene}</i>},
     {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36'},
     {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
     {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
-
     {title: 'Mutation category (BIC)', prop: 'Mutation_type_BIC'},
     {title: 'SIFT score', prop: 'Sift_Score'},
-
-
     {title: 'BIC Variant Identifier', prop: 'BIC_Nomenclature'},
     {title: 'Nucleotide', prop: 'HGVS_cDNA'},
     {title: 'Protein', prop: 'HGVS_Protein'},
@@ -217,16 +201,18 @@ var researchModeColumns = [
     {title: 'Synonyms', prop: 'Synonyms'},
     {title: 'Protein Amino Acid Change', prop: 'Protein_Change'},
     {title: 'Reference cDNA Sequence', prop: 'Reference_Sequence'},
-
+    {title: 'RNA (LOVD)', prop: 'RNA_LOVD'},
+    {title: 'Submitters (LOVD)', prop: 'Submitters_LOVD'},
+    {title: 'Genetic Origin (LOVD)', prop: 'Genetic_origin_LOVD'},
+    {title: 'Individuals (LOVD)', prop: 'Individuals_LOVD'},
+    {title: 'Variant Effect (LOVD)', prop: 'Variant_effect_LOVD'},
     {title: 'Allele Origin (ClinVar)', prop: 'Allele_Origin_ClinVar'},
     {title: 'Allele Origin (ENIGMA)', prop: 'Allele_origin_ENIGMA'},
     {title: 'Ethnicity (BIC)', prop: 'Ethnicity_BIC'},
     {title: 'Allele Origin (BIC)', prop: 'Germline_or_Somatic_BIC'},
     {title: 'Patient Nationality (BIC)', prop: 'Patient_nationality_BIC'},
     {title: 'Variant Haplotype (LOVD)', prop: 'Variant_haplotype_LOVD'},
-
     {title: 'Family members carrying this variant (BIC)', prop: 'Number_of_family_member_carrying_mutation_BIC'},
-
     {title: 'Co-occurrence likelihood (exLOVD)', prop: 'Co_occurrence_LR_exLOVD'},
     {title: 'Prior probability of pathogenicity (exLOVD)', prop: 'Combined_prior_probablility_exLOVD'},
     {
@@ -236,13 +222,11 @@ var researchModeColumns = [
     {title: 'Probability of pathogenicity (exLOVD)', prop: 'Posterior_probability_exLOVD'},
     {title: 'Segregation Likelihood Ratio (exLOVD)', prop: 'Segregation_LR_exLOVD'},
     {title: 'Summary Family History Likelihood Ratio (exLOVD)', prop: 'Sum_family_LR_exLOVD'},
-
     {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_citation_ENIGMA'},
     {title: 'Clinical Significance Citation (ENIGMA)', prop: 'Clinical_significance_citations_ENIGMA'},
     {title: 'Literature Reference (BIC)', prop: 'Literature_citation_BIC'},
     {title: 'Literature Reference (exLOVD)', prop: 'Literature_source_exLOVD'},
     {title: 'Pathogenicity', prop: 'Pathogenicity_all'},
-
     {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_ENIGMA'},
     {title: 'Clinical Significance (BIC)', prop: 'Clinical_classification_BIC'},
     {title: 'Clinical Importance (BIC)', prop: 'Clinical_importance_BIC'},
@@ -256,14 +240,12 @@ var researchModeColumns = [
     {title: 'Functional Analysis Result (LOVD)', prop: 'Functional_analysis_result_LOVD'},
     {title: 'Functional Analysis Method (LOVD)', prop: 'Functional_analysis_technique_LOVD'},
     {title: 'Analysis Method (ClinVar)', prop: 'Method_ClinVar'},
-
     {title: 'ClinVar Accession', prop: 'ClinVarAccession_ENIGMA'},
     {title: 'Condition Category (ENIGMA)', prop: 'Condition_category_ENIGMA'},
     {title: 'Condition ID Type (ENIGMA)', prop: 'Condition_ID_type_ENIGMA'},
     {title: 'Condition ID Value (ENIGMA)', prop: 'Condition_ID_value_ENIGMA'},
     {title: 'Submitter (ClinVar)', prop: 'Submitter_ClinVar'},
     {title: 'URL (ENIGMA)', prop: 'URL_ENIGMA'},
-
     {title: 'African Allele Frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes'},
     {title: 'Allele Frequency', prop: 'Allele_Frequency'},
     {title: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes'},
@@ -272,190 +254,15 @@ var researchModeColumns = [
     {title: 'EAS Allele Frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes'},
     {title: 'EUR Allele Frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes'},
     {title: 'Maximum Allele Frequency', prop: 'Max_Allele_Frequency'},
-    {title: 'Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP'},
+    {title: 'EA Allele Frequency (ESP)', prop: 'EA_Allele_Frequency_ESP'},
+    {title: 'AA Allele Frequency (ESP)', prop: 'AA_Allele_Frequency_ESP'},
+    {title: 'Allele Frequency (ESP)', prop: 'Allele_Frequency_ESP'},
+
     {title: 'South Asian Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes'},
     {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'}
 
 ];
 
-var subColumns = [
-    {
-        subColTitle: "Variant Nomenclature",
-        subColList: [
-            {title: 'BIC Variant Identifier', prop: 'BIC_Nomenclature', render: renderCell},
-            {title: 'Protein', prop: 'HGVS_Protein', render: renderCell},
-            {title: 'SCV Accession (ClinVar)', prop: 'SCV_ClinVar', render: renderCell},
-            {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: renderCell},
-            {title: 'Protein Amino Acid Change', prop: 'Protein_Change', render: renderCell},
-            {title: 'Reference cDNA Sequence', prop: 'Reference_Sequence', render: renderCell}
-        ]
-    },
-    {
-        subColTitle: "Origin",
-        subColList: [
-            {title: 'Allele Origin (ClinVar)', prop: 'Allele_Origin_ClinVar', render: renderCell},
-            {title: 'Allele Origin (ENIGMA)', prop: 'Allele_origin_ENIGMA', render: renderCell},
-            {title: 'Ethnicity (BIC)', prop: 'Ethnicity_BIC', render: renderCell},
-            {title: 'Allele Origin (BIC)', prop: 'Germline_or_Somatic_BIC', render: renderCell},
-            {title: 'Patient Nationality (BIC)', prop: 'Patient_nationality_BIC', render: renderCell},
-            {title: 'Variant Haplotype (LOVD)', prop: 'Variant_haplotype_LOVD', render: renderCell}
-        ]
-    },
-
-    {
-        subColTitle: "Frequency",
-        subColList: [
-            {
-                title: 'African Allele Frequency (1000 Genomes)',
-                prop: 'AFR_Allele_frequency_1000_Genomes',
-                render: renderCell
-            },
-            {title: 'Allele Frequency', prop: 'Allele_Frequency', render: renderCell},
-            {title: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes', render: renderCell},
-            {title: 'Allele Frequency (ExAC)', prop: 'Allele_frequency_ExAC', render: renderCell},
-            {
-                title: 'AMR Allele Frequency (1000 Genomes)',
-                prop: 'AMR_Allele_frequency_1000_Genomes',
-                render: renderCell
-            },
-            {
-                title: 'EAS Allele Frequency (1000 Genomes)',
-                prop: 'EAS_Allele_frequency_1000_Genomes',
-                render: renderCell
-            },
-            {
-                title: 'EUR Allele Frequency (1000 Genomes)',
-                prop: 'EUR_Allele_frequency_1000_Genomes',
-                render: renderCell
-            },
-            {title: 'Maximum Allele Frequency', prop: 'Max_Allele_Frequency', render: renderCell},
-            {title: 'Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP', render: renderCell},
-            {
-                title: 'South Asian Allele Frequency (1000 Genomes)',
-                prop: 'SAS_Allele_frequency_1000_Genomes',
-                render: renderCell
-            },
-            {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD', render: renderCell}
-        ]
-    },
-
-    {
-        subColTitle: "Genomic",
-        subColList: [
-            {title: 'Gene Symbol', prop: 'Gene_Symbol', render: renderCell},
-            {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38', render: renderCell},
-            {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36', render: renderCell},
-            {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37', render: renderCell}
-        ]
-    },
-    {
-        subColTitle: "Bioinformatic Annotation",
-        subColList: [
-            {title: 'Mutation category (BIC)', prop: 'Mutation_type_BIC', render: renderCell},
-            {title: 'SIFT score', prop: 'Sift_Score', render: renderCell}
-        ]
-    },
-    {
-        subColTitle: "Probability",
-        subColList: [
-            {title: 'Co-occurrence likelihood (exLOVD)', prop: 'Co_occurrence_LR_exLOVD', render: renderCell},
-            {
-                title: 'Prior probability of pathogenicity (exLOVD)',
-                prop: 'Combined_prior_probablility_exLOVD',
-                render: renderCell
-            },
-            {
-                title: 'Missense analysis probability of pathogenicity (exLOVD)',
-                prop: 'Missense_analysis_prior_probability_exLOVD',
-                render: renderCell
-            },
-            {title: 'Probability of pathogenicity (exLOVD)', prop: 'Posterior_probability_exLOVD', render: renderCell},
-            {title: 'Segregation Likelihood Ratio (exLOVD)', prop: 'Segregation_LR_exLOVD', render: renderCell},
-            {
-                title: 'Summary Family History Likelihood Ratio (exLOVD)',
-                prop: 'Sum_family_LR_exLOVD',
-                render: renderCell
-            }
-        ]
-    },
-    {
-        subColTitle: "Significance",
-        subColList: [
-            {title: 'Pathogenicity', prop: 'Pathogenicity_all', render: renderCell},
-            {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_ENIGMA', render: renderCell},
-            {title: 'Clinical Significance (BIC)', prop: 'Clinical_classification_BIC', render: renderCell},
-            {title: 'Clinical Importance (BIC)', prop: 'Clinical_importance_BIC', render: renderCell},
-            {title: 'Clinical Significance (ClinVar)', prop: 'Clinical_Significance_ClinVar', render: renderCell},
-            {title: 'Clinical Significance (ENIGMA)', prop: 'Clinical_significance_ENIGMA', render: renderCell},
-            {title: 'Collection Method (ENIGMA)', prop: 'Collection_method_ENIGMA', render: renderCell},
-            {
-                title: 'Comment on Clinical Significance (ENIGMA)',
-                prop: 'Comment_on_clinical_significance_ENIGMA',
-                render: renderCell
-            },
-            {title: 'Date last evaluated (ENIGMA)', prop: 'Date_last_evaluated_ENIGMA', render: renderCell},
-            {title: 'Date last updated (ClinVar)', prop: 'Date_Last_Updated_ClinVar', render: renderCell},
-            {title: 'Has Discordant Evidence', prop: 'Discordant', render: renderCell},
-            {title: 'Functional Analysis Result (LOVD)', prop: 'Functional_analysis_result_LOVD', render: renderCell},
-            {
-                title: 'Functional Analysis Method (LOVD)',
-                prop: 'Functional_analysis_technique_LOVD',
-                render: renderCell
-            },
-            {title: 'Analysis Method (ClinVar)', prop: 'Method_ClinVar', render: renderCell}
-        ]
-    },
-    {
-        subColTitle: "Pedigree",
-        subColList: [
-            {
-                title: 'Family members carrying this variant (BIC)',
-                prop: 'Number_of_family_member_carrying_mutation_BIC',
-                render: renderCell
-            }
-        ]
-    },
-    {
-        subColTitle: "Publications",
-        subColList: [
-            {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_citation_ENIGMA', render: renderCell},
-            {
-                title: 'Clinical Significance Citation (ENIGMA)',
-                prop: 'Clinical_significance_citations_ENIGMA',
-                render: renderCell
-            },
-            {title: 'Literature Reference (BIC)', prop: 'Literature_citation_BIC', render: renderCell},
-            {title: 'Literature Reference (exLOVD)', prop: 'Literature_source_exLOVD', render: renderCell}
-        ]
-    },
-    {
-        subColTitle: "Source",
-        subColList: [
-            {title: 'ClinVar Accession', prop: 'ClinVarAccession_ENIGMA', render: renderCell},
-            {title: 'Condition Category (ENIGMA)', prop: 'Condition_category_ENIGMA', render: renderCell},
-            {title: 'Condition ID Type (ENIGMA)', prop: 'Condition_ID_type_ENIGMA', render: renderCell},
-            {title: 'Condition ID Value (ENIGMA)', prop: 'Condition_ID_value_ENIGMA', render: renderCell},
-            {title: 'Submitter (ClinVar)', prop: 'Submitter_ClinVar', render: renderCell},
-            {title: 'URL (ENIGMA)', prop: 'URL_ENIGMA', render: renderCell},
-            {title: 'Source(s)', prop: 'Source', render: renderCell},
-            {title: 'Source URL(s)', prop: 'Source_URL', render: renderCell}
-        ]
-    },
-];
-
-var defaultColumns = ['Gene_Symbol', 'HGVS_cDNA', 'HGVS_Protein', 'Protein_Change', 'BIC_Nomenclature', 'Pathogenicity_expert'];
-var defaultResearchColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_all', 'Allele_Frequency'];
-
-var allSources = {
-    "Variant_in_ENIGMA": 1,
-    "Variant_in_ClinVar": 1,
-    "Variant_in_1000_Genomes": 1,
-    "Variant_in_ExAC": 1,
-    "Variant_in_LOVD": 1,
-    "Variant_in_BIC": 1,
-    "Variant_in_ESP": 1,
-    "Variant_in_exLOVD": 1
-};
 /*eslint-enable camelcase */
 
 // Work-around to allow the user to select text in the table. The browser does not distinguish between
@@ -477,12 +284,22 @@ var hasSelection = () => !(window.getSelection && window.getSelection().isCollap
 var Table = React.createClass({
     mixins: [PureRenderMixin],
     render: function () {
-        var {data, onHeaderClick, onRowClick, hiddenSources, ...opts} = this.props;
+        // Expert portal always shows all sources and default columns
+        var {data, onHeaderClick, onRowClick, hiddenSources, mode, columnSelection, sourceSelection, ...opts} = this.props;
+        if (mode === "default") {
+            // Always show default columns/sources in expert mode.
+            columnSelection = _.object(_.map(columns,
+                            c => _.contains(getDefaultExpertColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
+                        );
+            sourceSelection = getAllSources();
+        }
         return (
             <DataTable
                 ref='table'
                 className='row-clickable data-table'
                 {...opts}
+                columnSelection={columnSelection}
+                sourceSelection={sourceSelection}
                 buildRowOptions={r => ({className: r['Change_Type_id'] === 2 ? 'warning data-table-row' : 'data-table-row', title: 'click for details', onClick: () => hasSelection() ? null : onRowClick(r)})}
                 buildHeader={title => buildHeader(onHeaderClick, title)}
                 onRowClick={onRowClick}
@@ -491,38 +308,87 @@ var Table = React.createClass({
                 initialData={data}
                 initialPageLength={20}
                 initialSortBy={{prop: 'Gene_Symbol', order: 'descending'}}
-                pageLengthOptions={[ 20, 50, 100 ]}/>
+                pageLengthOptions={[ 20, 50, 100 ]}
+                mode={mode}/>
         );
     }
 });
 
 var ResearchVariantTableSupplier = function (Component) {
     var ResearchVariantTableComponent = React.createClass({
-        mixins: [PureRenderMixin],
+        mixins: [State, PureRenderMixin],
 
         getInitialState: function () {
-            var defaultColumnSelection = _.object(
-                _.map(this.getColumns(),
-                    c => _.contains(this.getDefaultColumns(), c.prop) ? [c.prop, true] : [c.prop, false]));
-            var columnSelectionQueryParams = this.props.initialState.columnSelection;
+            /*
+            Selections take the following order of priority:
+                1. Query params in URL
+                2. Local Storage
+                3. Default settings
+
+            To accomplish this, first set all column selections to true and all filters off.
+            Then, update selections according to query params if present. If no query params
+            are present, update according to local storage if present. If neither query params
+            nor local storage specify changes, use default settings.
+            */
+
+            // Start with all columns set to true and data showing from all sources.
+            var selectedColumns = selectedColumns = _.object(_.map(this.getColumns(),
+                                    c => [c.prop, true])
+                                );
+            var selectedSources = getAllSources();
+
+            // Get query params.
+            const urlParams = this.getQuery();
+            const useQueryParams = urlParams.hasOwnProperty("hide") || urlParams.hasOwnProperty("hideSources");
+
+            if (useQueryParams) {
+                // If query params are present, use them for settings.
+                if (urlParams.hasOwnProperty("hide")) {
+                    const columnsToHide = urlParams.hide;
+                    for (let i = 0; i < columnsToHide.length; i++) {
+                        selectedColumns[columnsToHide[i]] = false;
+                    }
+                }
+                if (urlParams.hasOwnProperty("hideSources")) {
+                    const sourcesToHide = urlParams.hideSources;
+                    for (let i = 0; i < sourcesToHide.length; i++) {
+                        selectedSources[sourcesToHide[i]] = 0;
+                    }
+                }
+            } else {
+                // If no query params are present, check local storage.
+                const lsSelectedColumns = JSON.parse(localStorage.getItem('columnSelection'));
+                if (lsSelectedColumns !== null && lsSelectedColumns !== undefined) {
+                    selectedColumns = lsSelectedColumns;
+                } else {
+                    // If no query params and no local storage, use default settings.
+                    selectedColumns = this.getDefaultColumnSelections();
+                }
+                const lsSelectedSources = JSON.parse(localStorage.getItem('sourceSelection'));
+                if (lsSelectedSources !== null && lsSelectedSources !== undefined) {
+                    selectedSources = lsSelectedSources;
+                }
+            }
 
             return {
-                sourceSelection: {...allSources, ...this.props.sourceSelection},
-                columnSelection: {...defaultColumnSelection, ...columnSelectionQueryParams}
+                sourceSelection: selectedSources,
+                columnSelection: selectedColumns
             };
         },
         toggleColumns: function (prop) {
-            var {columnSelection} = this.state,
+            let {columnSelection} = this.state,
                 val = columnSelection[prop],
                 cs = {...columnSelection, [prop]: !val};
+            localStorage.setItem('columnSelection', JSON.stringify(cs));
             this.setState({columnSelection: cs});
         },
         setSource: function (prop, event) {
             // this function uses 1, 0 and -1 to accommodate excluding sources as well as not-including them
             // currently only uses 1 and 0 because exclusion is not being used
-            var {sourceSelection} = this.state;
-            var value = event.target.checked ? 1 : 0;
-            var ss = {...sourceSelection, [prop]: value};
+            let {sourceSelection} = this.state;
+            let value = event.target.checked ? 1 : 0;
+            let ss = {...sourceSelection, [prop]: value};
+            localStorage.setItem('sourceSelection', JSON.stringify(ss));
             this.setState({sourceSelection: ss});
         },
         filterFormCols: function (subColList, columnSelection) {
@@ -530,7 +396,37 @@ var ResearchVariantTableSupplier = function (Component) {
                 <ColumnCheckbox onChange={() => this.toggleColumns(prop)} key={prop} label={prop} title={title}
                                 initialCheck={columnSelection}/>);
         },
-        getAdvancedFilters() {
+        onChangeSubcolVisibility(subColTitle, event) {
+            // stop the page from scrolling to the top (due to navigating to the fragment '#')
+            event.preventDefault();
+
+            const collapsingElem = event.target;
+
+            // FIXME: there must be a better way to get at the panel's state than reading the class
+            // maybe we'll subclass Panel and let it handle its own visibility persistence
+
+            const isCollapsed = (collapsingElem.getAttribute("class") === "collapsed");
+            localStorage.setItem("collapse-subcol_" + subColTitle, !isCollapsed);
+        },
+        getColumnSelectors() {
+            var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
+                <Col sm={6} md={4} key={subColTitle}>
+                    <Panel
+                        header={subColTitle}
+                        collapsable={true}
+                        defaultExpanded={localStorage.getItem("collapse-subcol_" + subColTitle) !== "true"}
+                        onSelect={(event) => this.onChangeSubcolVisibility(subColTitle, event)}>
+                        {this.filterFormCols(subColList, this.state.columnSelection)}
+                    </Panel>
+                </Col>
+            );
+            return (<label className='control-label'>
+                <Panel header="Column Selection">
+                    {filterFormSubCols}
+                </Panel>
+            </label>);
+        },
+        getFilters: function() {
             var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
                 <Col sm={6} md={3} key={name}>
                     <Input type="checkbox"
@@ -539,19 +435,9 @@ var ResearchVariantTableSupplier = function (Component) {
                         checked={value > 0}/>
                 </Col>
             );
-            var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
-                <Col sm={6} md={4} key={subColTitle}>
-                    <Panel header={subColTitle}>
-                        {this.filterFormCols(subColList, this.state.columnSelection)}
-                    </Panel>
-                </Col>
-            );
-            return (<label className='control-label'>
+            return (<label className='control-label source-filters'>
                 <Panel className="top-buffer" header="Source Selection">
                     {sourceCheckboxes}
-                </Panel>
-                <Panel header="Column Selection">
-                    {filterFormSubCols}
                 </Panel>
             </label>);
         },
@@ -562,23 +448,36 @@ var ResearchVariantTableSupplier = function (Component) {
             return (<Button id="lollipop-chart-toggle" className="btn-sm rgt-buffer"
                            onClick={callback}>{(isOpen ? 'Hide' : 'Show' ) + ' Lollipop Chart'}</Button>);
         },
-
         getColumns: function () {
             return researchModeColumns;
         },
-        getDefaultColumns: function () {
-            return defaultResearchColumns;
+        getDefaultColumnSelections: function() {
+            return _.object(_.map(researchModeColumns,
+                c => _.contains(getDefaultResearchColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
+            );
+        },
+        getDefaultSourceSelections: function() {
+            return getAllSources();
+        },
+        researchVariantTableRestoreDefaults: function(callback) {
+            const columnSelection = this.getDefaultColumnSelections();
+            const sourceSelection = this.getDefaultSourceSelections();
+            this.setState({columnSelection: columnSelection,
+                           sourceSelection: sourceSelection},
+                           function() {
+                                this.props.restoreDefaults(callback);
+                           });
         },
         render: function () {
-            var sourceSelection = this.state.sourceSelection;
-            var columnSelection = this.state.columnSelection;
             return (
                 <Component
                     {...this.props}
+                    researchVariantTableRestoreDefaults={this.researchVariantTableRestoreDefaults}
                     columns={this.getColumns()}
-                    advancedFilters={this.getAdvancedFilters()}
-                    sourceSelection={sourceSelection}
-                    columnSelection={columnSelection}
+                    columnSelectors={this.getColumnSelectors()}
+                    filters={this.getFilters()}
+                    sourceSelection={this.state.sourceSelection}
+                    columnSelection={this.state.columnSelection}
                     downloadButton={this.getDownloadButton}
                     lollipopButton={this.getLollipopButton}/>
             );
@@ -593,20 +492,22 @@ var VariantTableSupplier = function (Component) {
         getColumns: function () {
             return columns;
         },
-        getDefaultColumns: function () {
-            return defaultColumns;
+        expertVariantTableRestoreDefaults: function(callback) {
+            this.props.restoreDefaults(callback);
         },
         render: function () {
-            var columnSelection = _.object(
-                _.map(this.getColumns(),
-                    c => _.contains(this.getDefaultColumns(), c.prop) ? [c.prop, true] : [c.prop, false]));
-            var sourceSelection = allSources;
+            let expertColumns = _.object(_.map(this.getColumns(),
+                c => _.contains(getDefaultExpertColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
+            );
+            // Expert portal always shows all sources
+            let sourceSelection = getAllSources();
             return (
                 <Component
                     {...this.props}
                     columns={this.getColumns()}
-                    columnSelection={columnSelection}
+                    columnSelection={expertColumns}
                     sourceSelection={sourceSelection}
+                    expertVariantTableRestoreDefaults={this.expertVariantTableRestoreDefaults}
                     downloadButton={()=> null}
                     lollipopButton={()=> null}/>
             );
@@ -617,11 +518,10 @@ var VariantTableSupplier = function (Component) {
 
 
 module.exports = {
-	VariantTable: VariantTableSupplier(Table),
-	ResearchVariantTable: ResearchVariantTableSupplier(Table),
-	researchModeColumns: researchModeColumns,
-	columns: columns,
-
+    VariantTable: VariantTableSupplier(Table),
+    ResearchVariantTable: ResearchVariantTableSupplier(Table),
+    researchModeColumns: researchModeColumns,
+    columns: columns,
     researchModeGroups: researchModeGroups,
     expertModeGroups: expertModeGroups
 };

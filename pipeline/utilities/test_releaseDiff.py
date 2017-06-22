@@ -459,6 +459,36 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
 
+    def test_handles_new_data_in_new_columns_in_v2_data_correctly(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        self.updated_fieldnames = self.fieldnames + ['Genetic_origin_LOVD', 'RNA_LOVD', 'Submitters_LOVD']
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.updated_fieldnames)
+        self.newRow["Genetic_origin_LOVD"] = "lorem ipsum"
+        self.newRow["RNA_LOVD"] = "lorem ipsum"
+        self.newRow["Submitters_LOVD"] = "lorem ipsum"
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(change_type, "added_information")
+        self.assertTrue(len(diff[variant]) == 3)
+
+    def test_handles_null_data_in_new_columns_in_v2_data_correctly(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        self.updated_fieldnames = self.fieldnames + ['Genetic_origin_LOVD', 'RNA_LOVD', 'Submitters_LOVD']
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.updated_fieldnames)
+        self.newRow["Genetic_origin_LOVD"] = ""
+        self.newRow["RNA_LOVD"] = None
+        self.newRow["Submitters_LOVD"] = "-"
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
     def test_ignores_polyphen_fields(self):
         releaseDiff.added_data = self.added_data
         releaseDiff.diff = self.diff
@@ -488,6 +518,26 @@ class TestStringMethods(unittest.TestCase):
         diff = releaseDiff.diff_json
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
+
+    def test_handles_fields_with_commas_in_parentheses_correctly(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        self.updated_fieldnames = self.fieldnames + ['Genetic_origin_LOVD', 'RNA_LOVD', 'Submitters_LOVD']
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.updated_fieldnames)
+
+        self.newRow["Submitters_LOVD"] = "Ans M.W. van den Ouweland (Rotterdam,NL), Genevieve Michils (Leuven,BE), Rien Blok (Maastricht NL)"
+
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(len(diff), 1)
+        v_diff = diff['chr17:g.43049067:C>T'][0]
+        self.assertEqual(v_diff['field'], 'Submitters_LOVD')
+        self.assertEqual(len(v_diff['added']), 3)
+        self.assertIn("Ans M.W. van den Ouweland (Rotterdam,NL)", v_diff['added'])
+        self.assertIn("Genevieve Michils (Leuven,BE)", v_diff['added'])
+        self.assertIn("Rien Blok (Maastricht NL)", v_diff['added'])
 
 
 if __name__ == '__main__':

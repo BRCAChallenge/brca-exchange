@@ -53,6 +53,11 @@ LIST_KEYS = [
             "Clinical_Significance_ClinVar",
             "Allele_Origin_ClinVar",
             "Synonyms",
+            "Submitters_LOVD",
+            "RNA_LOVD",
+            "Variant_effect_LOVD",
+            "Genetic_origin_LOVD",
+            "HGVS_cDNA_LOVD",
             "BX_ID_ENIGMA",
             "BX_ID_ClinVar",
             "BX_ID_BIC",
@@ -191,11 +196,16 @@ class transformer(object):
         global added_data
         variant = newRow["pyhgvs_Genomic_Coordinate_38"]
         newValue = self._normalize(newRow[field], field)
-        oldValue = self._normalize(oldRow[self._newColumnNameToOld[field]], field)
         if field in self._newColumnsAdded:
-            appendToJSON(variant, field, oldValue, newValue)
-            return "added data: %s | %s" % (oldValue, newValue)
+            if newValue == "-":
+                # Ignore new columns with no data in diff
+                return "unchanged"
+            else:
+                oldValue = "-"
+                appendToJSON(variant, field, oldValue, newValue)
+                return "added data: %s | %s" % (oldValue, newValue)
         else:
+            oldValue = self._normalize(oldRow[self._newColumnNameToOld[field]], field)
             if oldValue == newValue:
                 return "unchanged"
             elif self._consistentDelimitedLists(oldValue, newValue, field):
@@ -355,8 +365,8 @@ def determineDiffForJSON(field, oldValue, newValue):
     if field == 'Pathogenicity_all':
         (added, removed) = determineDiffForPathogenicityAll(oldValue, newValue)
     elif diff['field_type'] == 'list':
-        oldValues = oldValue.split(',')
-        newValues = newValue.split(',')
+        oldValues = breakUpValueIntoList(oldValue)
+        newValues = breakUpValueIntoList(newValue)
         (added, removed) = determineDiffForList(oldValues, newValues)
     elif diff['field_type'] == 'individual':
         added = newValue
@@ -374,6 +384,13 @@ def determineDiffForJSON(field, oldValue, newValue):
         diff['removed'] = removed
 
     return diff
+
+
+def breakUpValueIntoList(value):
+    # Split on commas, but ignore commas in parentheses
+    # e.g. "Genevieve Michils (Leuven,BE), Zack Fischmann (Portland,OR)"
+    # would return ["Genevieve Michils (Leuven,BE)", "Zack Fischmann (Portland,OR)"]
+    return re.split(r',\s*(?![^()]*\))', value)
 
 
 def determineDiffForList(oldValues, newValues):
