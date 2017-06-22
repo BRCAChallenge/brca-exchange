@@ -577,7 +577,9 @@ const IsoGrid = React.createClass({
 
 var VariantDetail = React.createClass({
     mixins: [Navigation],
-    showHelp: function (title) {
+    showHelp: function (event, title) {
+        event.preventDefault();
+
         this.transitionTo(`/help#${slugify(title)}`);
     },
     getInitialState: () => ({
@@ -821,7 +823,7 @@ var VariantDetail = React.createClass({
 
                 return (
                     <tr key={prop} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
-                        <KeyInline tableKey={title} onClick={() => this.showHelp(title)}/>
+                        <KeyInline tableKey={title} onClick={(event) => this.showHelp(event, title)}/>
                         <td><span className={ this.truncateData(prop) ? "row-value-truncated" : "row-value" }>{rowItem}</span></td>
                     </tr>
                 );
@@ -835,14 +837,16 @@ var VariantDetail = React.createClass({
             }
 
             const header = (
-                <h3>{groupTitle} <GroupHelpButton group={groupTitle} onClick={() => this.showHelp(groupTitle)} /></h3>
+                <h3>
+                    <a href="#" onClick={(event) => this.onChangeGroupVisibility(groupTitle, event)}>{groupTitle}</a>
+                    <GroupHelpButton group={groupTitle} onClick={(event) => { this.showHelp(event, groupTitle); return true; }} />
+                </h3>
             );
 
             return (
                 <div key={`group_collection-${groupTitle}`} className={ allEmpty && this.state.hideEmptyItems ? "group-empty" : "" }>
                     <Panel
                         header={header}
-                        onSelect={(event) => this.onChangeGroupVisibility(groupTitle, event)}
                         collapsable={true}
                         defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
                         <Table>

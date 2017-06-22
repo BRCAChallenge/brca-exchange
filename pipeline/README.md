@@ -1,6 +1,6 @@
 # brca-pipeine
 
-Contains source code used to wrangle the BRCA variation data that is presented in the brca-exchange site.  
+Contains source code used to wrangle the BRCA variation data that is presented in the brca-exchange site.
 ##### Overall Dependencies
  * create a Synapse account, contact Melissa for access to the ENIGMA data under Synapse, and do a 'pip install synapseclient'
  * create a directory for genomic resources.  Point to it with the environment variable $BCRA_RESOURCES
@@ -39,7 +39,7 @@ Contains source code used to wrangle the BRCA variation data that is presented i
 ## Misc Instructions
 ### Convert refseq .psl file to .gp (genepred) format (required format for hgvs conversion)
   This is the gene feature coordinate file that coincides with the '-r' option of umd2vcf and bic2vcf scripts.
-  
+
   1. Add '/cluster/bin/x86_64/mrnaToGene' to your PATH environment variable
   2. mrnaToGene [options] psl genePredFile
   3. Insert an extra column on the left-hand most side for each row in the genepred file and put any number there designating the id of the refseq annotation. The exact number doesn't matter as long as it is unique. This is needed for proper formatting so that the hgvs python package can properly interpret the genepred file.
@@ -55,11 +55,14 @@ See `https://raw.githubusercontent.com/BD2KGenomics/brca/master/umd/README.txt`
 
 #### Generate bic vcf files from webscrapped data and upload to server
 See `https://raw.githubusercontent.com/BD2KGenomics/brca/master/bic/README.txt`
- 
-#### Webscrap data from LOVD, generate LOVD vcf files and upload to server
-  1. Install leiden package and its dependencies via command `python setup.py install` in the `leidenv1.0_package` directory.
 
-##### Webscrap exLOVD (`http://hci-exlovd.hci.utah.edu/`) 
+#### Get data from LOVD
+  1. Log into brcaexchange-dev.cloudapp.net.
+  2. Run `wget http://databases.lovd.nl/shared/export/BRCA`.
+  3. Create a subdirectory called "LOVD" in the target directory used during the pipeline run.
+  4. Move the BRCA file downloaded from LOVD into the LOVD directory and rename the file `BRCA.txt`.
+
+##### Webscrap exLOVD (`http://hci-exlovd.hci.utah.edu/`)
 See `https://raw.githubusercontent.com/BD2KGenomics/brca/master/lovd/README.md`
 
 ##### Webscrap sharedLOVD (`http://databases.lovd.nl/shared/`)
