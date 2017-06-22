@@ -5,6 +5,86 @@ var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PR
 var {Grid, Col, Row, Alert} = require('react-bootstrap');
 var backend = require('backend');
 
+var Chart = require('./BarChart');
+var Highcharts = require('highcharts');
+
+var chartOptions1 = {
+    chart: {
+        plotBackgroundColor: null,
+        plotBorderWidth: null,
+        plotShadow: false,
+        type: 'column'
+    },
+    title: {
+        text: 'Unique Variants'
+    },
+    tooltip: {
+        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+    },
+    plotOptions: {
+        bar: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.y}',
+                style: {
+                    color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                }
+            }
+        }
+    },
+    yAxis: {
+        lineColor: 'black',
+        lineWidth: 2,
+        title: false,
+        tickInterval: 1000,
+    },
+    spacing: [0, 0, 0, 0],
+    series: [{
+        name: "BRCA1",
+        data: [
+            { name: "BRCA1", y: 0 }
+        ]
+    }, {
+        name: "BRCA2",
+        data: [
+            { name: "BRCA2", y: 0 }
+        ]
+    }]
+};
+
+var chartOptions2 = {
+    chart: {
+        plotBackgroundColor: null,
+        plotBorderWidth: null,
+        plotShadow: false,
+        type: 'pie'
+    },
+    title: {
+        text: 'Expert Reviewed Pathogenicities'
+    },
+    tooltip: {
+        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+    },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.y}',
+                style: {
+                    color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                }
+            }
+        }
+    },
+    series: [{
+        data: [ { name: "Pathogenic", y: 5000}, { name: "Benign", y: 1000} ]
+    }]
+};
+
 var FactSheet = React.createClass({
     mixins: [PureRenderMixin],
     getInitialState: function() {
@@ -12,7 +92,20 @@ var FactSheet = React.createClass({
     },
     componentWillMount: function() {
         backend.variantCounts().subscribe(
-            resp => this.setState(resp),
+            resp => {
+                this.refs.chart1.getChart().series[0].setData([
+                        {
+                        name: "BRCA1",
+                        y: resp.brca1
+                        }]);
+                this.refs.chart1.getChart().series[1].setData([
+                        {
+                        name: "BRCA2",
+                        y: resp.brca2
+                        }
+                        ]);
+                this.setState(resp);
+            },
             () => this.setState({error: 'Problem connecting to server'}));
     },
     render: function () {
@@ -30,18 +123,27 @@ var FactSheet = React.createClass({
                         </ul>
                         <u>Web portal statistics:</u>
                         {this.state.error ? <p>&nbsp;&nbsp;&nbsp;({this.state.error})</p> :
-                        <ul>
-                            <li>Number of unique BRCA variants in the portal: {Number(this.state.total).toLocaleString()}</li>
+                        <div>
+                            <Col md={6}>
+                                <Chart ref='chart1' container='chart1' options={chartOptions1}></Chart>
+                            </Col>
+                            <Col md={6}>
+                                <Chart ref='chart2' container='chart2' options={chartOptions2}></Chart>
+                            </Col>
+                            <br />
                             <ul>
-                                <li>Unique BRCA1 variants in the portal: {Number(this.state.brca1).toLocaleString()}</li>
-                                <li>Unique BRCA2 variants in the portal: {Number(this.state.brca2).toLocaleString()}</li>
+                                <li>Number of unique BRCA variants in the portal: {Number(this.state.total).toLocaleString()}</li>
+                                <ul>
+                                    <li>Unique BRCA1 variants in the portal: {Number(this.state.brca1).toLocaleString()}</li>
+                                    <li>Unique BRCA2 variants in the portal: {Number(this.state.brca2).toLocaleString()}</li>
+                                </ul>
+                                <li>Number of ENIGMA expert-classified variants in the portal: {Number(this.state.enigma).toLocaleString()}</li>
+                                <ul>
+                                    <li>Variants expert-classified as pathogenic: {Number(this.state.enigmabrca1).toLocaleString()}</li>
+                                    <li>Variants expert-classified as benign: {Number(this.state.enigmabrca2).toLocaleString()}</li>
+                                </ul>
                             </ul>
-                            <li>Number of ENIGMA expert-classified variants in the portal: {Number(this.state.enigma).toLocaleString()}</li>
-                            <ul>
-                                <li>Variants expert-classified as pathogenic: {Number(this.state.enigmabrca1).toLocaleString()}</li>
-                                <li>Variants expert-classified as benign: {Number(this.state.enigmabrca2).toLocaleString()}</li>
-                            </ul>
-                        </ul>}
+                        </div>}
                         <br />
                         <h4>Media Inquiries</h4>
                         For media inquiries, please contact the GA4GH Communications Lead, Angela Page (<a href="mailto:angela.page@genomicsandhealth.org">angela.page@genomicsandhealth.org</a>)
