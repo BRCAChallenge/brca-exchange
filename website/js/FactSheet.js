@@ -21,7 +21,7 @@ var FactSheet = React.createClass({
                 <Row>
                     <Col smOffset={1} sm={10}>
                         <h1>BRCA Exchange: Facts & Stats</h1>
-                        <br />
+                        <hr />
                         <h3>BRCA Exchange Web Portal</h3>
                         <ul>
                             <li>The BRCA Exchange web portal is the largest public source for information on BRCA1 and BRCA2 variants.</li>

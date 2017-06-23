@@ -42,7 +42,7 @@ var Releases = React.createClass({
             <Grid id="main-grid" className="main-grid">
                 <Row>
                     <Col smOffset={1} sm={10}>
-                        <h2>Release Notes</h2>
+                        <h1>Release Notes</h1>
                         <br />
                         <table className="table table-bordered table-grayheader nopointer">
                             <thead>

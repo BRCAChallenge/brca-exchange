@@ -3,13 +3,13 @@
 ---
 
 
-# Searching
+## Searching
 
 To search just start typing a variant in the search box and it will auto complete. Variants are identified using [HGVS nomenclature](http://www.hgvs.org/mutnomen/), a standard created by the Human Genome Variation Society.  Most genetic test results are reported in HGVS nomenclature. This nomenclature describes a variant by indicating (1) a reference sequence, (2) what kind of sequence it is (genomic, cDNA or protein), (3) the position of the variant in relation this reference sequence, and (4) the nucloetide or protein differences between the variant and the reference sequence.  For example, _NM_007294.3:c.5053A>G_ indicates a variant relative to reference sequence _NM_007294.3_, which is a cDNA sequence (as indicated by _c_), that the variant is in position 5053, and that it involves changing an _A_ to a _G_.
 
 * * * * * * * * * * *
 
-# Column Groups
+## Column Groups
 
 #### Clinical Significance (ENIGMA)
 Variant clinical classification and supporting information as provided by ENIGMA expert panel review.
@@ -28,7 +28,7 @@ Component likelihoods and final classification from multifactorial likelihood an
 
 * * * * * * * * * * *
 
-# Table Columns
+## Table Columns
 
 ### Variant Nomenclature
 
@@ -309,13 +309,13 @@ URL listing the variant.  From ENIGMA.
 
 * * * * * * * * * * *
 
-# Downloading Variant Data
+## Downloading Variant Data
 
 To download the variant data click on the 'Download' button located above the search bar within the Variants Table page. When you click on it the data that is downloaded is a comma delimited .csv file containing the set of variant details for the variants that matched the search and/or filtering criteria. The first row in the file represent the column labels.
 
 * * * * * * * * * * *
 
-# Lollipop Plots
+## Lollipop Plots
 
 Lollipop plots are a tool to visualize the chromosomal position and pathogenicity classification for each variant in a gene.  Here, each circle-capped 'lollipop' indicates whether a _BRCA1_ and _BRCA2_ variant is pathogenic (labeled in red), benign (labeled in light-blue), or the variants clinical significance is uncertain (labeled in dark-blue). The y-axis represents the pathogenicity classification of a variant. The x-axis represents the genomic coordinates of those variants in GRCh38 human reference space. The bottom box that runs along the x-axis of the diagram displays the position of each exon in the selected gene.
 
