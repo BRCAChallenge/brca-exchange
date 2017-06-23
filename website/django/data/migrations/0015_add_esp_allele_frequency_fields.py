@@ -15,31 +15,37 @@ class Migration(migrations.Migration):
             model_name='report',
             name='AA_Allele_Frequency_ESP',
             field=models.TextField(default='-'),
+            preserve_default=False,
         ),
         migrations.AddField(
             model_name='report',
             name='Allele_Frequency_ESP',
             field=models.TextField(default='-'),
+            preserve_default=False,
         ),
         migrations.AddField(
             model_name='report',
             name='EA_Allele_Frequency_ESP',
             field=models.TextField(default='-'),
+            preserve_default=False,
         ),
         migrations.AddField(
             model_name='variant',
             name='AA_Allele_Frequency_ESP',
             field=models.TextField(default='-'),
+            preserve_default=False,
         ),
         migrations.AddField(
             model_name='variant',
             name='Allele_Frequency_ESP',
             field=models.TextField(default='-'),
+            preserve_default=False,
         ),
         migrations.AddField(
             model_name='variant',
             name='EA_Allele_Frequency_ESP',
             field=models.TextField(default='-'),
+            preserve_default=False,
         ),
         migrations.RunSQL(
             """
