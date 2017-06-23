@@ -203,11 +203,16 @@ offending file, for future reference: website/node_modules/react-data-components
 /**************************************************************/
 /**********     Variant Detail            *********************/
 /**************************************************************/
-.Variant-detail-title .deleted {
-    font-size: 20px;
+.deleted-variant-message {
     color: red;
+    text-align: center;
 }
 
+@media only screen and (max-width : 767px) {
+    .deleted-variant-message {
+        text-align: left;
+    }
+}
 /**************************************************************/
 /**********     Variant Search box       *********************/
 /**************************************************************/

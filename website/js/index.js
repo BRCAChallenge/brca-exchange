@@ -867,11 +867,6 @@ var VariantDetail = React.createClass({
                     <Col xs={4} sm={4} smOffset={4} md={4} mdOffset={4} className="vcenterblock">
                         <div className='text-center Variant-detail-title'>
                             <h3>Variant Detail</h3>
-                            {variant['Change_Type'] === 'deleted' &&
-                                (<p className='deleted text-left'>
-                                    Note: This variant has been removed from the BRCA Exchange. For reasons on why this variant was removed please see the <Link to={`/release/${release.id}`}>release notes</Link>.
-                                </p>)
-                            }
                         </div>
                     </Col>
                     <Col xs={8} sm={4} md={4} className="vcenterblock">
@@ -886,6 +881,13 @@ var VariantDetail = React.createClass({
                             </Button>
                         </div>
                     </Col>
+                    {variant['Change_Type'] === 'deleted' &&
+                        (<Col xs={12} className="vcenterblock">
+                            <p className='deleted-variant-message'>
+                            Note: This variant has been removed from the BRCA Exchange. For reasons on why this variant was removed please see the <Link to={`/release/${release.id}`}>release notes</Link>.
+                            </p>
+                        </Col>)
+                    }
                 </Row>
 
                 <Row>
