@@ -1,0 +1,43 @@
+'use strict';
+
+var React = require('react'),
+    _ = require('lodash'),
+    Highcharts = require('highcharts'),
+    Chart = require('./Chart');
+
+var defaultOptions = {
+    chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false,
+            type: 'pie'
+    },
+    title: {
+        text: 'Browser market shares January, 2015 to May, 2015'
+    },
+    tooltip: {
+        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+    },
+    plotOptions: {
+        pie: {
+        allowPointSelect: true,
+        cursor: 'pointer',
+            dataLabels: {
+                enabled: false
+            },
+            showInLegend: true
+        }
+    }
+};
+
+var PieChart = React.createClass({
+    render() {
+        var options = _.merge({}, defaultOptions, this.props.options);
+        return <Chart ref={"chart"} container={this.props.container} options={options}></Chart>;
+    },
+    getChart() {
+        return this.refs.chart.chart;
+    }
+});
+
+module.exports = PieChart;

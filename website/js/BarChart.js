@@ -15,17 +15,22 @@ var defaultOptions = {
         type: 'column'
     },
     plotOptions: {
-        bar: {
+        column: {
             allowPointSelect: true,
             cursor: 'pointer',
             dataLabels: {
                 enabled: true,
-                format: '<b>{point.name}</b>: {point.y}',
+                format: '<b>{point.y}</b>',
                 style: {
                     color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
                 }
             }
         }
+    },
+    xAxis: {
+        labels: false,
+        minorTickLength: 0,
+        tickLength: 0
     },
     yAxis: {
         lineColor: 'black',
@@ -35,8 +40,8 @@ var defaultOptions = {
         events: {
             pointBreak: pointBreakColumn
         }
-    },
-    spacing: [0, 0, 0, 0],
+    }
+//    spacing: [0, 0, 0, 0],
 };
 
 Highcharts.wrap(Highcharts.Axis.prototype, 'getLinePath', function (proceed, lineWidth) {

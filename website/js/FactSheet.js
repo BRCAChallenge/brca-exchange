@@ -5,42 +5,28 @@ var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PR
 var {Grid, Col, Row, Alert} = require('react-bootstrap');
 var backend = require('backend');
 
-var Chart = require('./BarChart');
+var PieChart = require('./PieChart');
+var BarChart = require('./BarChart');
 var Highcharts = require('highcharts');
+require('highcharts/modules/broken-axis')(Highcharts);
 
 var chartOptions1 = {
-    chart: {
-        plotBackgroundColor: null,
-        plotBorderWidth: null,
-        plotShadow: false,
-        type: 'column'
-    },
     title: {
         text: 'Unique Variants'
     },
     tooltip: {
-        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-    },
-    plotOptions: {
-        bar: {
-            allowPointSelect: true,
-            cursor: 'pointer',
-            dataLabels: {
-                enabled: true,
-                format: '<b>{point.name}</b>: {point.y}',
-                style: {
-                    color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-                }
-            }
-        }
+        pointFormat: '{point.y}'
     },
     yAxis: {
         lineColor: 'black',
         lineWidth: 2,
         title: false,
         tickInterval: 1000,
+        breaks: [{
+            from: 2500,
+            to: 5000
+        }]
     },
-    spacing: [0, 0, 0, 0],
     series: [{
         name: "BRCA1",
         data: [
@@ -55,33 +41,17 @@ var chartOptions1 = {
 };
 
 var chartOptions2 = {
-    chart: {
-        plotBackgroundColor: null,
-        plotBorderWidth: null,
-        plotShadow: false,
-        type: 'pie'
-    },
     title: {
         text: 'Expert Reviewed Pathogenicities'
     },
     tooltip: {
-        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-    },
-    plotOptions: {
-        pie: {
-            allowPointSelect: true,
-            cursor: 'pointer',
-            dataLabels: {
-                enabled: true,
-                format: '<b>{point.name}</b>: {point.y}',
-                style: {
-                    color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-                }
-            }
-        }
+        pointFormat: '{point.y} ({point.percentage:.1f}%)'
     },
     series: [{
-        data: [ { name: "Pathogenic", y: 5000}, { name: "Benign", y: 1000} ]
+        data: [
+            { name: "Pathogenic", y: 0 },
+            { name: "Benign", y: 0 }
+        ] 
     }]
 };
 
@@ -93,17 +63,12 @@ var FactSheet = React.createClass({
     componentWillMount: function() {
         backend.variantCounts().subscribe(
             resp => {
-                this.refs.chart1.getChart().series[0].setData([
-                        {
-                        name: "BRCA1",
-                        y: resp.brca1
-                        }]);
-                this.refs.chart1.getChart().series[1].setData([
-                        {
-                        name: "BRCA2",
-                        y: resp.brca2
-                        }
-                        ]);
+                var chart1 = this.refs.chart1.getChart();
+                var chart2 = this.refs.chart2.getChart();
+
+                chart1.series[0].setData([{ name: "BRCA1", y: resp.brca1 }], false);
+                chart1.series[1].setData([{ name: "BRCA2", y: resp.brca2 }], true);
+                chart2.series[0].setData([{ name: "Benign", y: resp.enigmaBenign }, { name: "Pathogenic", y: resp.enigmaPathogenic }]);
                 this.setState(resp);
             },
             () => this.setState({error: 'Problem connecting to server'}));
@@ -125,10 +90,10 @@ var FactSheet = React.createClass({
                         {this.state.error ? <p>&nbsp;&nbsp;&nbsp;({this.state.error})</p> :
                         <div>
                             <Col md={6}>
-                                <Chart ref='chart1' container='chart1' options={chartOptions1}></Chart>
+                                <BarChart ref='chart1' container='chart1' options={chartOptions1}></BarChart>
                             </Col>
                             <Col md={6}>
-                                <Chart ref='chart2' container='chart2' options={chartOptions2}></Chart>
+                                <PieChart ref='chart2' container='chart2' options={chartOptions2}></PieChart>
                             </Col>
                             <br />
                             <ul>
