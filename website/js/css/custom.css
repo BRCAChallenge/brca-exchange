@@ -95,12 +95,9 @@ offending file, for future reference: website/node_modules/react-data-components
 }
 
 .navbar-brand span.exchange {
-    /*color: #E8A2A0;*/
     font-family: 'Lato', sans-serif;
     color: black;
     font-weight: 200;
-    /*font-variant: small-caps;*/
-    /*text-transform: uppercase;*/
 }
 
 .navbar-brand .logo-img {
