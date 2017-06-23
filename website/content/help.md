@@ -1,4 +1,4 @@
-# Help and Glossary
+# Help
 
 ---
 
