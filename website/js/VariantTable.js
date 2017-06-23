@@ -296,7 +296,7 @@ var Table = React.createClass({
         return (
             <DataTable
                 ref='table'
-                className='row-clickable data-table'
+                className='row-clickable data-table table-grayheader'
                 {...opts}
                 columnSelection={columnSelection}
                 sourceSelection={sourceSelection}
@@ -442,10 +442,10 @@ var ResearchVariantTableSupplier = function (Component) {
             </label>);
         },
         getDownloadButton: function (callback) {
-            return <Button className="btn-sm rgt-buffer" download="variants.tsv" href={callback()}>Download</Button>;
+            return <Button className="btn-default rgt-buffer" download="variants.tsv" href={callback()}>Download</Button>;
         },
         getLollipopButton: function (callback, isOpen) {
-            return (<Button id="lollipop-chart-toggle" className="btn-sm rgt-buffer"
+            return (<Button id="lollipop-chart-toggle" className="btn-default rgt-buffer"
                            onClick={callback}>{(isOpen ? 'Hide' : 'Show' ) + ' Lollipop Chart'}</Button>);
         },
         getColumns: function () {

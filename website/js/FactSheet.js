@@ -19,16 +19,16 @@ var FactSheet = React.createClass({
         return (
             <Grid id="main-grid" className="main-grid">
                 <Row>
-                    <Col md={8} mdOffset={2}>
+                    <Col smOffset={1} sm={10}>
                         <h1>BRCA Exchange: Facts & Stats</h1>
-                        <br />
+                        <hr />
                         <h3>BRCA Exchange Web Portal</h3>
                         <ul>
                             <li>The BRCA Exchange web portal is the largest public source for information on BRCA1 and BRCA2 variants.</li>
                             <li>By default, the web portal shows variants that have been expert-classified by an international panel (the ENIGMA consortium).</li>
                             <li>By switching from the ‘expert reviewed portal’ to the ‘all public data portal’, users may also explore information on variants that have not yet been classified by the expert panel. For these unclassified variants, the impact on health has not yet been established.</li>
                         </ul>
-                        <u>Web portal statistics:</u>
+                        <p><u>Web portal statistics:</u></p>
                         {this.state.error ? <p>&nbsp;&nbsp;&nbsp;({this.state.error})</p> :
                         <ul>
                             <li>Number of unique BRCA variants in the portal: {Number(this.state.total).toLocaleString()}</li>
@@ -44,7 +44,7 @@ var FactSheet = React.createClass({
                         </ul>}
                         <br />
                         <h4>Media Inquiries</h4>
-                        For media inquiries, please contact the GA4GH Communications Lead, Angela Page (<a href="mailto:angela.page@genomicsandhealth.org">angela.page@genomicsandhealth.org</a>)
+                        <p>For media inquiries, please contact the GA4GH Communications Lead, Angela Page (<a href="mailto:angela.page@genomicsandhealth.org">angela.page@genomicsandhealth.org</a>)</p>
                         <br />
                         <br />
                         <div className='image-with-caption'>
@@ -74,7 +74,7 @@ var FactSheet = React.createClass({
                             <li>Genetic testing centres each hold a portion of the world’s knowledge about BRCA variants. By aggregating this knowledge together into one shared resource, scientists around the world can have access to greater amounts of information to assist them in classifying variants as ‘pathogenic’ or ‘benign’. This means more accurate and consistent information for doctors, patients, and families.</li>
                         </ul>
                         <Alert bsStyle="info">
-                            For more information about BRCA genes and cancer, please see:
+                            <p>For more information about BRCA genes and cancer, please see:</p>
                             <ul>
                                 <li><a href='http://www.cancer.gov/about-cancer/causes-prevention/genetics/brca-fact-sheet'>http://www.cancer.gov/about-cancer/causes-prevention/genetics/brca-fact-sheet</a></li>
                                 <li><a href='https://seer.cancer.gov/archive/csr/1975_2011/'>SEER Cancer Statistics Review</a>, 1975-2011, National Cancer Institute. Bethesda, MD</li>
@@ -131,7 +131,7 @@ var FactSheet = React.createClass({
                     <Col md={8} mdOffset={2}>
                         <br />
                         <Alert bsStyle='info'>
-                            For more information about the BRCA Challenge and GA4GH, please visit:
+                            <p>For more information about the BRCA Challenge and GA4GH, please visit:</p>
                             <ul>
                                 <li><a href="http://www.genomicsandhealth.org/">Global Alliance for Genomics and Health</a> (GA4GH)</li>
                                 <li><a href="https://genomicsandhealth.org/work-products-demonstration-projects/brca-challenge-0">BRCA Challenge</a></li>

@@ -1,4 +1,6 @@
-# About this site
+# About this Site
+
+---
 
 This site provides information on catalogued _BRCA1_ and _BRCA2_ genetic variants.  By default, it shows variants that have been curated and classified by an international expert panel, the [ENIGMA](http://enigmaconsortium.org/) consortium, to assess their *pathogenicity* (associated disease risk).  Optional settings allow the user to look at unclassified variants.  In most cases, these variants are awaiting expert review, and their pathogenicity has not yet been established.
 
@@ -6,8 +8,10 @@ The <a href="http://brcaexchange.org">BRCA Exchange</a> website is a product of 
 
 Variant data on this site are made available using the standards based <a href="https://genomicsandhealth.org/work-products-demonstration-projects/genomics-api">GA4GH Genomics API</a>. For more information, and example usage please visit our <a href="/about/api">API description</a>.
 
-<div style="display:inline-block;text-align:center">
-    <a href="http://genomicsandhealth.org"><img src="ga4gh-logo-more.png" style="width:240px;"></a>
-    <a href="https://genomics.soe.ucsc.edu"><img src="ucsc_logo.png" style="width:260px;"></a>
-    <a href="https://www.ethz.ch/en.html"><img src="https://www.ethz.ch/services/en/service/communication/corporate-design/logo/_jcr_content/par/twocolumn_1/par_left/fullwidthimage/image.imageformat.lightbox.151244596.png" style="width:240px;"></a>
+---
+
+<div style="display:block; text-align: center;">
+    <a href="http://genomicsandhealth.org"><img src="ga4gh-logo-more.png" style="width:240px; margin: 10px 20px;"></a>
+    <a href="https://genomics.soe.ucsc.edu"><img src="ucsc_logo.png" style="width:260px; margin: 10px 20px;"></a>
+    <a href="https://www.ethz.ch/en.html"><img src="https://www.ethz.ch/services/en/service/communication/corporate-design/logo/_jcr_content/par/twocolumn_1/par_left/fullwidthimage/image.imageformat.lightbox.151244596.png" style="width:240px; margin: 10px 20px;"></a>
 </div>

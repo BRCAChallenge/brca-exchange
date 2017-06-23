@@ -182,7 +182,7 @@ var About = React.createClass({
         return (
             <Grid id="main-grid" className="main-grid">
                 <Row>
-                    <Col md={8} mdOffset={2}>
+                    <Col smOffset={1} sm={10}>
                         <RawHTML html={content.pages[page]} />
                     </Col>
                 </Row>
@@ -217,7 +217,7 @@ var Help = React.createClass({
                 {fragment === '' ? null :
                     <style>{`#${fragment} { animation-name: emphasis; animation-duration: 10s; } `}</style>}
                 <Row>
-                    <Col md={8} mdOffset={2}>
+                    <Col smOffset={1} sm={10}>
                         <RawHTML ref='content' html={helpContent}/>
                     </Col>
                 </Row>
@@ -397,7 +397,7 @@ var Database = React.createClass({
             message = this.renderMessage(content.pages.variantsDefault);
         }
         return (
-            <Grid fluid={true} id="main-grid" style={{display: show ? 'block' : 'none'}}>
+            <Grid id="main-grid" style={{display: show ? 'block' : 'none'}}>
                 {message}
                 {table}
             </Grid>
@@ -406,14 +406,14 @@ var Database = React.createClass({
     renderMessage: function(message) {
         return  (
 			<Row>
-				<Col sm={10} smOffset={1}  className="alert alert-warning">
+				<Col className="jumbotron colorized-jumbo">
 					{this.props.mode === 'default' && <img id='enigma-logo' src={require('./img/enigma_logo.jpeg')} />}
 					<RawHTML ref='content' html={message}/>
-					{this.props.mode === 'research_mode' && <Button className="btn-small" onClick={this.toggleMode}>
+					{this.props.mode === 'research_mode' && <Button className="btn-default" onClick={this.toggleMode}>
 						Show Expert Reviewed Data Only
 					</Button>}
 					{this.props.mode === 'default' &&
-					<Button className="btn-small" onClick={() =>this.setState({showModal: true})}>
+					<Button className="btn-default" onClick={() =>this.setState({showModal: true})}>
 						Show All Public Data
 					</Button>}
 					{this.props.mode === 'default' && this.state.showModal &&
@@ -867,25 +867,27 @@ var VariantDetail = React.createClass({
                     <Col xs={4} sm={4} smOffset={4} md={4} mdOffset={4} className="vcenterblock">
                         <div className='text-center Variant-detail-title'>
                             <h3>Variant Detail</h3>
-                            {variant['Change_Type'] === 'deleted' &&
-                                (<p className='deleted text-left'>
-                                    Note: This variant has been removed from the BRCA Exchange. For reasons on why this variant was removed please see the <Link to={`/release/${release.id}`}>release notes</Link>.
-                                </p>)
-                            }
                         </div>
                     </Col>
                     <Col xs={8} sm={4} md={4} className="vcenterblock">
                         <div className="Variant-detail-headerbar">
                             <Button
                                 onClick={this.setEmptyRowVisibility.bind(this, !this.state.hideEmptyItems)}
-                                bsStyle={!this.state.hideEmptyItems ? "primary" : "default"}>
+                                bsStyle={"default"}>
                                 { this.state.hideEmptyItems ?
-                                    <span>show empty items</span> :
-                                    <span>hide empty items</span>
+                                    <span>Show Empty Items</span> :
+                                    <span>Hide Empty Items</span>
                                 }
                             </Button>
                         </div>
                     </Col>
+                    {variant['Change_Type'] === 'deleted' &&
+                        (<Col xs={12} className="vcenterblock">
+                            <p className='deleted-variant-message'>
+                            Note: This variant has been removed from the BRCA Exchange. For reasons on why this variant was removed please see the <Link to={`/release/${release.id}`}>release notes</Link>.
+                            </p>
+                        </Col>)
+                    }
                 </Row>
 
                 <Row>
@@ -927,7 +929,7 @@ var VariantDetail = React.createClass({
                     <Col md={12} className="variant-history-col">
                         <h3>{variant["HGVS_cDNA"]}</h3>
                         <h4>Previous Versions of this Variant:</h4>
-                        <Table className='variant-history' bordered>
+                        <Table className='variant-history nopointer' bordered>
                             <thead>
                                 <tr className='active'>
                                     <th>Release Date</th>
