@@ -5,7 +5,10 @@ machine:
         - postgresql
     node:
         version: 4.4.4
-
+dependencies:
+  override:
+    - bundle install:
+        timeout: 1500 # fail if it takes over 25 minutes (some migrations take a while)
 database:
     override:
         - sudo -u postgres createdb storage.pg
