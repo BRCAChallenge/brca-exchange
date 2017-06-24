@@ -20,8 +20,10 @@ deployment:
     dev:
         branch: master
         commands:
-            - ../deployment/deploy-dev
+            - ../deployment/deploy-dev:
+                timeout: 1500 # fail if it takes over 25 minutes (some migrations take a while)
     beta:
         tag: /v[0-9]+(\.[0-9]+)*/
         commands:
-            - HOST=brcaexchange.cloudapp.net ../deployment/deploy-dev
+            - HOST=brcaexchange.cloudapp.net ../deployment/deploy-dev:
+                timeout: 1500 # fail if it takes over 25 minutes (some migrations take a while)
