@@ -1,6 +1,7 @@
 import json
 import os
 import pytest
+import pdb
 from urllib import quote
 from django.http import JsonResponse, HttpResponse
 from brca import settings
@@ -57,7 +58,7 @@ class VariantTestCase(TestCase):
         """This tests creation and retreival of a new variant by the Genomic_Coordinate_hg38 column"""
         Variant.objects.create_variant(row=(test_data.new_variant()))
         new_variant_genomic_coordinate_hg38 = test_data.new_variant()['Genomic_Coordinate_hg38']
-        retrieved_variant = Variant.objects.get(Genomic_Coordinate_hg38='chr17:g.43070959:A>G')
+        retrieved_variant = Variant.objects.get(Genomic_Coordinate_hg38=new_variant_genomic_coordinate_hg38)
         self.assertIsNotNone(retrieved_variant)
         self.assertEqual(retrieved_variant.Genomic_Coordinate_hg38, new_variant_genomic_coordinate_hg38)
 
@@ -65,7 +66,7 @@ class VariantTestCase(TestCase):
         """This tests creation of a new Variant and that the associated CurrentVariant has the same basic properties."""
         (new_variant, new_current_variant) = create_variant_and_materialized_view(test_data.new_variant())
         new_current_variant_genomic_coordinate_hg38 = test_data.new_variant()['Genomic_Coordinate_hg38']
-        retrieved_variant = Variant.objects.get(Genomic_Coordinate_hg38=new_current_variant_genomic_coordinate_hg38)
+        retrieved_variant = CurrentVariant.objects.get(Genomic_Coordinate_hg38=new_current_variant_genomic_coordinate_hg38)
         self.assertIsNotNone(retrieved_variant)
         self.assertIsInstance(retrieved_variant, CurrentVariant)
         self.assertEqual(new_variant.Genomic_Coordinate_hg38, retrieved_variant.Genomic_Coordinate_hg38)
@@ -100,7 +101,7 @@ class VariantTestCase(TestCase):
         """Tests searching for a variant by id using a filter"""
         existing_current_variant_id = self.existing_variant_materialized_view.id
         request = self.factory.get(
-            '/data/?format=json&filter=id&filterValue=%s&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD' % 5)
+            '/data/?format=json&filter=id&filterValue=%s&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD' % existing_current_variant_id)
         response = index(request)
 
         self.assertIsInstance(response, JsonResponse)
@@ -127,7 +128,7 @@ class VariantTestCase(TestCase):
     def test_source_filter_for_variant_excludes_variant(self):
         """Tests all source filters on returns no variants"""
         request = self.factory.get(
-            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=&include=Variant_in_ENIGMA')
+            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=')
         response = index(request)
 
         self.assertIsInstance(response, JsonResponse)
@@ -140,7 +141,7 @@ class VariantTestCase(TestCase):
         '''Tests that searching for a variant with a genomic_coordinate_hg38 search term is successful'''
         existing_genomic_coordinate = self.existing_variant_materialized_view.Genomic_Coordinate_hg38
         request = self.factory.get(
-            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&include=Variant_in_ENIGMA&search_term=%s' % "chr17:999999:A>G")
+            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&include=Variant_in_ENIGMA&search_term=%s' % existing_genomic_coordinate)
         response = index(request)
 
         self.assertIsInstance(response, JsonResponse)
@@ -154,7 +155,7 @@ class VariantTestCase(TestCase):
 
     def test_search_by_combined_gene_symbol_and_genomic_coordinate(self):
         """Tests that searching for a variant with a 'gene_symbol:genomic_coordinate_hg38' search term is successful"""
-        gene_symbol_genomic_coordinate_hg38 = self.existing_variant_materialized_view.Gene_Symbol + '_' + self.existing_variant_materialized_view.Genomic_Coordinate_hg38
+        gene_symbol_genomic_coordinate_hg38 = self.existing_variant_materialized_view.Gene_Symbol + ':' + self.existing_variant_materialized_view.Genomic_Coordinate_hg38
         request = self.factory.get(
             '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=%s&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD' % gene_symbol_genomic_coordinate_hg38)
         response = index(request)
@@ -163,6 +164,7 @@ class VariantTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         response_data = json.loads(response.content)
+
         self.assertEqual(response_data["count"], 1)
 
         response_variant = response_data["data"][0]
@@ -216,3 +218,39 @@ class VariantTestCase(TestCase):
     NP_009225.1:p.(Ala280Gly) --> HGVS_Protein
     NP_009225.1:A280G --> HGVS_Protein.split(':')[0]:Protein_Change
     '''
+
+    def test_faulty_string_search_returns_no_results(self):
+        '''Tests if faulty string searches return no results'''
+
+
+
+
+    def test_gene_symbol_and_genomic_coordinate_hg38_with_colon(self):
+        '''Tests searching for 'Gene_Symbol:Genomic_Coordinate_hg38' with colon separator
+        BRCA1:chr17:g.43094692:G>C --> Gene_Symbol:Genomic_Coordinate_hg38'''
+
+
+
+
+    def test_gene_symbol_and_genomic_coordinate_hg37_with_colon(self):
+        '''Tests searching for 'Gene_Symbol:Genomic_Coordinate_hg37' with colon separator
+        BRCA1:chr17:g.41246709:G>C --> Gene_Symbol:Genomic_Coordinate_hg37'''
+
+
+
+
+    def test_gene_symbol_and_genomic_coordinate_hg36_with_colon(self):
+        '''Tests searching for 'Gene_Symbol:Genomic_Coordinate_hg36' with colon separator
+        BRCA1:chr17:g.38500235:G>C --> Gene_Symbol:Genomic_Coordinate_hg36'''
+
+
+
+    def test_gene_symbol_and_bic_nomenclature_with_colon(self):
+        '''Tests searching for 'Gene_Symbol:BIC_Nomenclature' with colon separator
+        BRCA1:958C>G --> Gene_Symbol:BIC_Nomenclature'''
+
+
+
+    def test_seference_sequence_and_genomic_coordinate_hg38_with_colon(self):
+        '''Tests searching for 'Reference_Sequence:Genomic_Coordinate_hg38' with colon separator
+        BRCA1:c.839C>G --> Gene_Symbol:HGVS_cDNA'''
