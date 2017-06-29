@@ -302,10 +302,8 @@ const researchModeColumns = [
     {title: 'Allele number SAS (ExAC minus TCGA)', prop: 'Allele_number_SAS_ExAC'},
     {title: 'Allele frequency SAS (ExAC minus TCGA)', prop: 'Allele_frequency_SAS_ExAC'},
     {title: 'Homozygous count SAS (ExAC minus TCGA)', prop: 'Homozygous_count_SAS_ExAC'},
-
     {title: 'South Asian Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes'},
     {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'}
-
 ];
 
 /*eslint-enable camelcase */
