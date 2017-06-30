@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import connection
 from data.models import Variant, Report
 from django.db import transaction
+from math import floor, log10
 import pdb
 
 
@@ -27,9 +28,9 @@ class Command(BaseCommand):
                 """
             )
 
-    def round_sigfigs(num, sig_figs):
+    def round_sigfigs(self, num, sig_figs):
         if num != 0:
-            return round(num, -int(math.floor(math.log10(abs(num))) - (sig_figs - 1)))
+            return round(num, -int(floor(log10(abs(num))) - (sig_figs - 1)))
         else:
             return 0  # Can't take the log of 0
 
@@ -39,9 +40,12 @@ class Command(BaseCommand):
             objs = Obj.objects.all()
             for obj in objs:
                 for field in FIELDS_TO_ROUND:
-                    if obj[field] != EMPTY:
-                        pdb.set_trace()
-                        obj[field] = round_sigfigs(float(obj[field], 3))
+                    val = getattr(obj, field)
+                    if val is not None and val != EMPTY:
+                        try:
+                            setattr(obj, field, str(self.round_sigfigs(float(val), 3)))
+                        except ValueError:
+                            setattr(obj, field, EMPTY)
                 obj.save()
 
         self.update_autocomplete_words()
