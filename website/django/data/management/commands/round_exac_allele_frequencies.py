@@ -3,7 +3,6 @@ from django.db import connection
 from data.models import Variant, Report
 from django.db import transaction
 from math import floor, log10
-import pdb
 
 
 EMPTY = '-'
