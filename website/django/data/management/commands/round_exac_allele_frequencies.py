@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connection
-from data.models import Variant, Report
+from data.models import Variant, Report, VariantDiff
 from django.db import transaction
 from math import floor, log10
 
@@ -35,6 +35,18 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
+        VariantDiffs = VariantDiff.objects.all()
+        for diffs in VariantDiffs:
+            diff = diffs.diff
+            for df in diff:
+                if df['field'] in FIELDS_TO_ROUND:
+                    val = df['added']
+                    if val is not None and val != EMPTY:
+                        try:
+                            df['added'] = str(self.round_sigfigs(float(val), 3))
+                        except ValueError:
+                            print val
+            diffs.save()
         for Obj in [Variant, Report]:
             objs = Obj.objects.all()
             for obj in objs:
