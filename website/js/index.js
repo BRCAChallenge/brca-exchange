@@ -631,15 +631,19 @@ var VariantDetail = React.createClass({
 
         // the event target is actually the span *inside* the 'a' tag, but we need to check the 'a' tag for the
         // collapsed state
-        const collapsingElem = event.target.parentElement;
+        const collapsingElemParent = event.target.parentElement;
 
-        // FIXME: there must be a better way to get at the panel's state than reading the class
-        // maybe we'll subclass Panel and let it handle its own visibility persistence
+        let willBeCollapsed = true;
 
-        // this looks silly, but at the time this method is called the item is starting to transition,
-        // so its state when it's done will be the opposite of what it currently is
-        const isCollapsed = !(collapsingElem.getAttribute("class") === "collapsed");
-        localStorage.setItem("collapse-group_" + groupTitle, isCollapsed);
+        collapsingElemParent.childNodes.forEach(function(child) {
+            // FIXME: there must be a better way to get at the panel's state than reading the class
+            // Maybe we'll subclass Panel and let it handle its own visibility persistence.
+            if (child.getAttribute("class") === "collapsed") {
+                // if it's already collapsed, this method should expand it
+                willBeCollapsed = false;
+            }
+        });
+        localStorage.setItem("collapse-group_" + groupTitle, willBeCollapsed);
 
         // defer re-layout until the state change has completed
         const me = this;
