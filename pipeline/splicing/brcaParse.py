@@ -9,6 +9,15 @@ import argparse
 import os
 
 #NOTE: subprocess, popen(part of subprocess) for script output capture,  
+######################################################################
+'''
+The function of this program is to parse a BRCA exchange .tsv file for
+useful delimeters and parameters. The program requires MaxEntScan's perl
+script to find entropy scores for the 3 and 5 prime scores. 
+'''
+######################################################################
+
+
 
 #reverse compliment of dna string
 def revComp(dna):
@@ -80,11 +89,12 @@ class brcaParse:
 
     #Parses through the string to make all the new variant strings. If the variant is an indel
     #rather than a SNP, the definition will make more iterations to account for the new modifications.
+    #tempSeq is the variant sequence, np.amax gets the maximum maxentscan score.
     def maxEntForm(self,output):
         f = open(output, 'w')
         f.write("id\tGene\tSignificance\tSpliceSite\t5'Max\t5'Ref\t3'Max\t3'Ref\tupscore\tdownscore\n")
         for i in range(0,len(self.Gene)):
-            if self.Gene[i] == "BRCA":
+            if self.Gene[i] == "BRCA1":
                 f.write(self.id[i] +"\t" + self.Gene[i] + "\t" + self.Sig[i] + "\t")
                 lenSplice = 9
                 loc = (int(self.Pos[i]) - int(self.BRCA1hg38Start))
@@ -93,12 +103,10 @@ class brcaParse:
 
                 tempSeq = self.BRCA1hg38Seq[:loc-1] + self.Alt[i] + self.BRCA1hg38Seq[loc+len(self.Ref[i])-1:]
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
-                #f.write(str(orgSeqScore) + "\t" + str(newSeqScore) + "\t" + str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
                 f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
 
                 lenSplice = 23
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
-                #f.write(str(orgSeqScore) + "\t" + str(newSeqScore) + "\t" + str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\n")
                 f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
 
                 f.write(str(upscore) + "\t" + str(downscore) + "\n")
@@ -112,15 +120,13 @@ class brcaParse:
 
                 tempSeq = self.BRCA2hg38Seq[:loc-1] + self.Alt[i] + self.BRCA2hg38Seq[loc+len(self.Ref[i])-1:]
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
-                #f.write(str(orgSeqScore) + "\t" + str(newSeqScore) + "\t" + str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\n")
                 f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
 
                 lenSplice = 23
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
-                #f.write(str(orgSeqScore) + "\t" + str(newSeqScore) + "\t" + str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\n")
                 f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
                 f.write(str(upscore) + "\t" + str(downscore) + "\n")
-                
+
     def getEntScore(self,seq):
         temporary = open("temp", "w")
         temporary.write(seq)
@@ -128,7 +134,7 @@ class brcaParse:
         temporary.close()#must close file before using the subprocess
         if len(seq) == 9:
             pipe = subprocess.Popen(["perl","score5.pl", var], stdout=subprocess.PIPE)
-        else:
+        if len(seq) == 23:
             pipe = subprocess.Popen(["perl","score3.pl", var], stdout=subprocess.PIPE)
         result = pipe.stdout.read()
         entScore = re.findall("[+-]?\d+(?:\.\d+)?", str(result))
@@ -152,6 +158,7 @@ class brcaParse:
             newSeq = tempSeq[n:o]
             newSeqScore.append(self.getEntScore(newSeq))
             orgSeq = self.BRCA2hg38Seq[n:o]
+            print(orgSeq + "\t" + str(self.Pos[i]))
             orgSeqScore.append(self.getEntScore(orgSeq))
         return(orgSeqScore, newSeqScore)
     
@@ -189,7 +196,6 @@ class brcaParse:
             downStream = min(exonStop, key=lambda x:abs(x-int(self.Pos[i])))
             upStreamScore, downStreamScore = self.getSpliceMaxEnt(i,upStream, downStream)
             
-            
             for j in range(0,len(exonStop)):
                 if (abs(int(self.Pos[i])-exonStop[j])<=9):
                     return("5'",upStreamScore, downStreamScore)
@@ -217,7 +223,7 @@ class brcaParse:
                 
 
 
-
+# format for command line: pythonfile.py inputfile.tsv outputfile.tsv
 def main():
     parser = argparse.ArgumentParser(description='Program to produce maxEntScan values from and input file of .tsv. output is a .tsv file as well')
 
@@ -236,4 +242,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
