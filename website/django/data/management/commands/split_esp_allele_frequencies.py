@@ -29,11 +29,11 @@ class Command(BaseCommand):
         for Obj in [Variant, Report]:
             objs = Obj.objects.all()
             for obj in objs:
-                if obj.Minor_allele_frequency_ESP and obj.Minor_allele_frequency_ESP != EMPTY:
+                if obj.Minor_allele_frequency_ESP_percent and obj.Minor_allele_frequency_ESP_percent != EMPTY:
                     eaAlleleFrequency = EMPTY
                     aaAlleleFrequency = EMPTY
                     alleleFrequency = EMPTY
-                    maf = obj.Minor_allele_frequency_ESP.split(',')
+                    maf = obj.Minor_allele_frequency_ESP_percent.split(',')
 
                     if len(maf) > 2:
                         alleleFrequency = "%s" % (float(maf[2]) / 100)
