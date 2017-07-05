@@ -1,8 +1,10 @@
 # Contributing Guide
 
+If you do not have write permissions, but would like to make a contribution, please refer to the following guidelines.
+
 ## Pull Request Guidelines
 
-Before submitting a pull request, please make sure to meet the following guidelines.
+Before submitting a pull request, please make sure to meet the following:
 
 1. Include tests for bug fixes. Make sure the tests fail if the bug persists and pass if the bug is resolved.
 1. Make any necessary updates to documentation.
