@@ -1,0 +1,14 @@
+Go to https://github.com/BRCAChallenge/brca-exchange.
+
+Click "fork" to fork repo.
+
+Clone the repo (e.g. git clone https://github.com/{username}/brca-exchange.git)
+
+Cd into the directory
+
+git remote add upstream https://github.com/BRCAChallenge/brca-exchange.git
+
+git remote -v to ensure upstream exists
+
+git fetch upstream to get all branches and code
+
