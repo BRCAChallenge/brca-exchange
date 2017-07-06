@@ -96,35 +96,53 @@ class brcaParse:
         for i in range(0,len(self.Gene)):
             if self.Gene[i] == "BRCA1":
                 f.write(self.id[i] +"\t" + self.Gene[i] + "\t" + self.Sig[i] + "\t")
-                lenSplice = 9
                 loc = (int(self.Pos[i]) - int(self.BRCA1hg38Start))
                 site, upscore, downscore = self.inSpliceSite(i)
                 f.write("{}\t".format(site))
-
+                if (site != "N/A"):
+                    upscore = 0
+                    downscore = 0
+                
+                lenSplice = 9
                 tempSeq = self.BRCA1hg38Seq[:loc-1] + self.Alt[i] + self.BRCA1hg38Seq[loc+len(self.Ref[i])-1:]
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
-                f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
-
+                if (site != "3'"):
+                    f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
+                else:
+                    f.write("0"+ "\t" + "0" + "\t")
+                    
                 lenSplice = 23
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
-                f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
-
+                if (site != "5'"):
+                    f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
+                else:
+                    f.write("0"+ "\t" + "0" + "\t")
                 f.write(str(upscore) + "\t" + str(downscore) + "\n")
+               
         for i in range(0,len(self.Gene)):
             if self.Gene[i] == "BRCA2":
                 f.write(self.id[i] +"\t" + self.Gene[i] + "\t" + self.Sig[i] + "\t")
-                lenSplice = 9
                 loc = (int(self.Pos[i]) - int(self.BRCA2hg38Start))
                 site, upscore, downscore = self.inSpliceSite(i)
                 f.write("{}\t".format(site))
-
+                if (site != "N/A"):
+                    upscore = 0
+                    downscore = 0
+                    
+                lenSplice = 9
                 tempSeq = self.BRCA2hg38Seq[:loc-1] + self.Alt[i] + self.BRCA2hg38Seq[loc+len(self.Ref[i])-1:]
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
-                f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
+                if (site != "3'"):
+                    f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
+                else:
+                    f.write("0"+ "\t" + "0" + "\t")
 
                 lenSplice = 23
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
-                f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
+                if (site != "5'"):
+                    f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
+                else:
+                    f.write("0"+ "\t" + "0" + "\t")
                 f.write(str(upscore) + "\t" + str(downscore) + "\n")
 
     def getEntScore(self,seq):
@@ -158,7 +176,6 @@ class brcaParse:
             newSeq = tempSeq[n:o]
             newSeqScore.append(self.getEntScore(newSeq))
             orgSeq = self.BRCA2hg38Seq[n:o]
-            print(orgSeq + "\t" + str(self.Pos[i]))
             orgSeqScore.append(self.getEntScore(orgSeq))
         return(orgSeqScore, newSeqScore)
     
