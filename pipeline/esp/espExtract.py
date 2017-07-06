@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-From ESP, extract data  for the BRCA1 and BRCA2 regions.  Either produce data 
+From ESP, extract data for the BRCA1 and BRCA2 regions.  Either produce data
 in the following format:
 
 chrom_pos_ref_alt Freq
@@ -13,6 +13,9 @@ or if the --full option is given, echo the full VCF record.
 """
 import argparse
 import vcf
+
+EMPTY = '-'
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -39,6 +42,10 @@ def main():
                     if args.full:
                         record.CHROM = chrom
                         record.POS = pos
+                        (eaAlleleFrequency, aaAlleleFrequency, alleleFrequency) = breakUpESPAlleleFrequencies(record.INFO["MAF"])
+                        record.INFO['BX_EAAF'] = eaAlleleFrequency
+                        record.INFO['BX_AAAF'] = aaAlleleFrequency
+                        record.INFO['BX_AF'] = alleleFrequency
                         writer.write_record(record)
                     else:
                         if args.ancestry == "EA":
@@ -46,14 +53,25 @@ def main():
                         elif args.ancestry == "AA":
                             maf = record.INFO["MAF"][1]
                         for alt in record.ALT:
-                            print "%s_%s_%s_%s %s" % (record.CHROM, 
-                                                      record.POS, 
+                            print "%s_%s_%s_%s %s" % (record.CHROM,
+                                                      record.POS,
                                                       record.REF,
                                                       alt, maf)
+
+
+def breakUpESPAlleleFrequencies(mafArray):
+    eaAlleleFrequency = EMPTY
+    aaAlleleFrequency = EMPTY
+    alleleFrequency = EMPTY
+    if len(mafArray) > 2:
+        alleleFrequency = "%s" % (float(mafArray[2]) / 100)
+    if len(mafArray) > 1:
+        aaAlleleFrequency = "%s" % (float(mafArray[1]) / 100)
+    if len(mafArray) > 0:
+        eaAlleleFrequency = "%s" % (float(mafArray[0]) / 100)
+    return (eaAlleleFrequency, aaAlleleFrequency, alleleFrequency)
 
 
 if __name__ == "__main__":
     # execute only if run as a script
     main()
-
-            

@@ -161,15 +161,17 @@ class DownloadLatestClinvarData(luigi.Task):
 class ConvertLatestClinvarDataToXML(luigi.Task):
 
     def output(self):
+        artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts/")
         return luigi.LocalTarget(self.file_parent_dir + "/ClinVar/ClinVarBrca.xml")
 
     def run(self):
+        artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts/")
         clinvar_file_dir = self.file_parent_dir + "/ClinVar"
         os.chdir(clinvar_method_dir)
 
         clinvar_xml_file = clinvar_file_dir + "/ClinVarBrca.xml"
         writable_clinvar_xml_file = open(clinvar_xml_file, "w")
-        args = ["python", "clinVarBrca.py", clinvar_file_dir + "/ClinVarFullRelease_00-latest.xml.gz"]
+        args = ["python", "clinVarBrca.py", clinvar_file_dir + "/ClinVarFullRelease_00-latest.xml.gz", "-a", artifacts_dir]
         print "Running clinVarBrca.py with the following args: %s. This takes a while..." % (args)
         sp = subprocess.Popen(args, stdout=writable_clinvar_xml_file, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)

@@ -51,6 +51,9 @@ var VariantSearch = React.createClass({
         var value = React.findDOMNode(this.refs.input).value;
         this.props.onSearch(value);
     },
+    onClickSearchButton: function () {
+        this.props.onSearch(this.state.value);
+    },
     showHelp: function (title) {
         this.transitionTo(`/help#${slugify(title)}`);
     },
@@ -79,8 +82,15 @@ var VariantSearch = React.createClass({
     getInitialState: function () {
         return {
             value: this.props.value,
-            release: this.props.release
+            release: this.props.release,
+            placeholder: "search for \"c.1105G>A\", \"brca1\" or \"IVS7+1037T>C\""
         };
+    },
+    onFocus: function () {
+        this.setState({placeholder: ""});
+    },
+    onBlur: function() {
+        this.setState({placeholder: "search for \"c.1105G>A\", \"brca1\" or \"IVS7+1037T>C\""});
     },
     componentWillReceiveProps: function (newProps) {
         this.setState({value: newProps.value});
@@ -101,16 +111,19 @@ var VariantSearch = React.createClass({
                             release={release}
                             inputAttributes={{
                                 className: 'variant-search-input',
-                                placeholder: "search for \"c.1105G>A\", \"brca1\" or \"IVS7+1037T>C\"",
-                                onChange: this.onChange
+                                placeholder: this.state.placeholder,
+                                onChange: this.onChange,
+                                onFocus: this.onFocus,
+                                onBlur: this.onBlur
                             }}
                             showWhen={input => input.trim().length > 0}
                             suggestions={_.debounce(getSuggestions, 200)}
                             onSuggestionSelected={v => onSearch(v)}
                             suggestionRenderer={renderSuggestion}
                             ref='input' />
-                        <span onClick={() => this.showHelp('Searching')}
-                            className="glyphicon glyphicon-question-sign superscript help"/>
+                        <span
+                            className="glyphicon glyphicon-search search-box-icon"
+                            onClick={this.onClickSearchButton}/>
                     </div>
                 </form>
             </div>

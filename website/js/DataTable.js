@@ -228,14 +228,16 @@ var DataTable = React.createClass({
             this.props.expertVariantTableRestoreDefaults(function() {
                 that.setState({filterValues: {},
                                release: undefined,
-                               changeTypes: undefined
+                               changeTypes: undefined,
+                               showDeleted: undefined
                              });
             });
         } else {
             this.props.researchVariantTableRestoreDefaults(function() {
                 that.setState({filterValues: {},
                                release: undefined,
-                               changeTypes: undefined
+                               changeTypes: undefined,
+                               showDeleted: undefined
                              });
             });
         }
@@ -266,30 +268,30 @@ var DataTable = React.createClass({
         var deletedVariantsNote = '';
         if (deletedCount) {
             let pl = deletedCount !== 1;
-            deletedVariantsNote = (<span>
+            deletedVariantsNote = (<p>
                 There {pl ? 'are' : 'is'} {deletedCount} deleted variant{pl ? 's' : ''} that match{pl ? '' : 'es'} your search.
                 Click <a href="#" onClick={this.showDeleted}>here</a> to view {pl ? 'these' : 'this'} deleted variant{pl ? 's' : ''}.
-            </span>);
+            </p>);
         }
         return (error ? <p>{error}</p> :
             <div className={this.props.className}>
             <div id="filters" className="container-fluid">
                 <Row id="show-hide" className="btm-buffer">
-                    <Col sm={10} smOffset={1}>
-                        <Button className="btn-sm rgt-buffer"
+                    <Col sm={12}>
+                        <Button className="btn-default rgt-buffer"
                                 onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}
                         </Button>
-                        {mode === "research_mode" && <Button className="btn-sm rgt-buffer"
+                        {mode === "research_mode" && <Button className="btn-default rgt-buffer"
                                 onClick={this.toggleColumnSelectors}>{(columnSelectorsOpen ? 'Hide' : 'Show' ) + ' Column Selectors'}
                         </Button>}
-                        <Button className="btn-sm rgt-buffer"
+                        <Button className="btn-default rgt-buffer"
                                 onClick={this.restoreDefaults}>Restore Defaults
                         </Button>
                         {lollipopButton(this.toggleLollipop, lollipopOpen)}
                     </Col>
                 </Row>
                 <Row id="filters">
-                    <Col sm={10} smOffset={1}>
+                    <Col sm={12}>
                         {filtersOpen && <div className='form-inline'>{filterFormEls}{filters}</div>}
                         {columnSelectorsOpen && mode === "research_mode" && <div className='form-inline'>
                             {columnSelectors}
@@ -297,13 +299,13 @@ var DataTable = React.createClass({
                     </Col>
                 </Row>
                 <Row id="lollipop-chart">
-                    <Col sm={10} smOffset={1}>
+                    <Col sm={12}>
                         {lollipopOpen && this.state.windowWidth > 991 &&
                         <Lollipop fetch={this.props.fetchLollipop} opts={this.lollipopOpts()} onHeaderClick={this.props.onHeaderClick} onRowClick={this.props.onRowClick}/> }
                     </Col>
                 </Row>
                 <Row id="download" className="btm-buffer">
-                    <Col sm={7} smOffset={1} lg={8}>
+                    <Col sm={8} lg={10}>
                         <div className='form-inline'>
                             <div className='form-group'>
                                 <label className='control-label label alert-danger matched-variant-count'>
@@ -318,7 +320,7 @@ var DataTable = React.createClass({
                         { count === 0 && deletedCount !== 0 &&
                           <div>{deletedVariantsNote}</div> }
                     </Col>
-                    <Col sm={3} lg={2}>
+                    <Col sm={4} lg={2}>
                         <div className='form-inline pull-right-sm'>
                             <SelectField
                                 label="Page size:"
@@ -330,7 +332,7 @@ var DataTable = React.createClass({
                     </Col>
                 </Row>
                 <Row id='variant-search-row' className="btm-buffer">
-                    <Col sm={4} smOffset={1}>
+                    <Col sm={6}>
                         <VariantSearch
                             id='variants-search'
                             value={search}
@@ -350,9 +352,9 @@ var DataTable = React.createClass({
                     </Col>
                 </Row>
                 <Row>
-                    <Col id="data-table-container" className="table-responsive" sm={10} smOffset={1}>
+                    <Col id="data-table-container" className="table-responsive" sm={12}>
                         <FastTable
-                            className={cx(className, "table table-hover table-bordered table-condensed")}
+                            className={cx(className, "table table-hover table-bordered table-grayheader")}
                             dataArray={data}
                             columns={renderColumns}
                             keys={this.props.keys}
@@ -364,7 +366,7 @@ var DataTable = React.createClass({
                     </Col>
                 </Row>
                 <Row>
-                    <Col className="text-right" sm={10} smOffset={1}>
+                    <Col className="text-right" sm={12}>
                         { count !== 0 && deletedVariantsNote }
                     </Col>
                 </Row>

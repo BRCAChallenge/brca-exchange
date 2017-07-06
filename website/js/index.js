@@ -182,7 +182,7 @@ var About = React.createClass({
         return (
             <Grid id="main-grid" className="main-grid">
                 <Row>
-                    <Col md={8} mdOffset={2}>
+                    <Col smOffset={1} sm={10}>
                         <RawHTML html={content.pages[page]} />
                     </Col>
                 </Row>
@@ -217,7 +217,7 @@ var Help = React.createClass({
                 {fragment === '' ? null :
                     <style>{`#${fragment} { animation-name: emphasis; animation-duration: 10s; } `}</style>}
                 <Row>
-                    <Col md={8} mdOffset={2}>
+                    <Col smOffset={1} sm={10}>
                         <RawHTML ref='content' html={helpContent}/>
                     </Col>
                 </Row>
@@ -397,7 +397,7 @@ var Database = React.createClass({
             message = this.renderMessage(content.pages.variantsDefault);
         }
         return (
-            <Grid fluid={true} id="main-grid" style={{display: show ? 'block' : 'none'}}>
+            <Grid id="main-grid" style={{display: show ? 'block' : 'none'}}>
                 {message}
                 {table}
             </Grid>
@@ -406,14 +406,14 @@ var Database = React.createClass({
     renderMessage: function(message) {
         return  (
 			<Row>
-				<Col sm={10} smOffset={1}  className="alert alert-warning">
+				<Col className="jumbotron colorized-jumbo">
 					{this.props.mode === 'default' && <img id='enigma-logo' src={require('./img/enigma_logo.jpeg')} />}
 					<RawHTML ref='content' html={message}/>
-					{this.props.mode === 'research_mode' && <Button className="btn-small" onClick={this.toggleMode}>
+					{this.props.mode === 'research_mode' && <Button className="btn-default" onClick={this.toggleMode}>
 						Show Expert Reviewed Data Only
 					</Button>}
 					{this.props.mode === 'default' &&
-					<Button className="btn-small" onClick={() =>this.setState({showModal: true})}>
+					<Button className="btn-default" onClick={() =>this.setState({showModal: true})}>
 						Show All Public Data
 					</Button>}
 					{this.props.mode === 'default' && this.state.showModal &&
@@ -577,7 +577,9 @@ const IsoGrid = React.createClass({
 
 var VariantDetail = React.createClass({
     mixins: [Navigation],
-    showHelp: function (title) {
+    showHelp: function (event, title) {
+        event.preventDefault();
+
         this.transitionTo(`/help#${slugify(title)}`);
     },
     getInitialState: () => ({
@@ -629,15 +631,19 @@ var VariantDetail = React.createClass({
 
         // the event target is actually the span *inside* the 'a' tag, but we need to check the 'a' tag for the
         // collapsed state
-        const collapsingElem = event.target.parentElement;
+        const collapsingElemParent = event.target.parentElement;
 
-        // FIXME: there must be a better way to get at the panel's state than reading the class
-        // maybe we'll subclass Panel and let it handle its own visibility persistence
+        let willBeCollapsed = true;
 
-        // this looks silly, but at the time this method is called the item is starting to transition,
-        // so its state when it's done will be the opposite of what it currently is
-        const isCollapsed = !(collapsingElem.getAttribute("class") === "collapsed");
-        localStorage.setItem("collapse-group_" + groupTitle, isCollapsed);
+        collapsingElemParent.childNodes.forEach(function(child) {
+            // FIXME: there must be a better way to get at the panel's state than reading the class
+            // Maybe we'll subclass Panel and let it handle its own visibility persistence.
+            if (child.getAttribute("class") === "collapsed") {
+                // if it's already collapsed, this method should expand it
+                willBeCollapsed = false;
+            }
+        });
+        localStorage.setItem("collapse-group_" + groupTitle, willBeCollapsed);
 
         // defer re-layout until the state change has completed
         const me = this;
@@ -821,7 +827,7 @@ var VariantDetail = React.createClass({
 
                 return (
                     <tr key={prop} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
-                        <KeyInline tableKey={title} onClick={() => this.showHelp(title)}/>
+                        <KeyInline tableKey={title} onClick={(event) => this.showHelp(event, title)}/>
                         <td><span className={ this.truncateData(prop) ? "row-value-truncated" : "row-value" }>{rowItem}</span></td>
                     </tr>
                 );
@@ -835,14 +841,16 @@ var VariantDetail = React.createClass({
             }
 
             const header = (
-                <h3>{groupTitle} <GroupHelpButton group={groupTitle} onClick={() => this.showHelp(groupTitle)} /></h3>
+                <h3>
+                    <a href="#" onClick={(event) => this.onChangeGroupVisibility(groupTitle, event)}>{groupTitle}</a>
+                    <GroupHelpButton group={groupTitle} onClick={(event) => { this.showHelp(event, groupTitle); return true; }} />
+                </h3>
             );
 
             return (
                 <div key={`group_collection-${groupTitle}`} className={ allEmpty && this.state.hideEmptyItems ? "group-empty" : "" }>
                     <Panel
                         header={header}
-                        onSelect={(event) => this.onChangeGroupVisibility(groupTitle, event)}
                         collapsable={true}
                         defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
                         <Table>
@@ -863,25 +871,27 @@ var VariantDetail = React.createClass({
                     <Col xs={4} sm={4} smOffset={4} md={4} mdOffset={4} className="vcenterblock">
                         <div className='text-center Variant-detail-title'>
                             <h3>Variant Detail</h3>
-                            {variant['Change_Type'] === 'deleted' &&
-                                (<p className='deleted text-left'>
-                                    Note: This variant has been removed from the BRCA Exchange. For reasons on why this variant was removed please see the <Link to={`/release/${release.id}`}>release notes</Link>.
-                                </p>)
-                            }
                         </div>
                     </Col>
                     <Col xs={8} sm={4} md={4} className="vcenterblock">
                         <div className="Variant-detail-headerbar">
                             <Button
                                 onClick={this.setEmptyRowVisibility.bind(this, !this.state.hideEmptyItems)}
-                                bsStyle={!this.state.hideEmptyItems ? "primary" : "default"}>
+                                bsStyle={"default"}>
                                 { this.state.hideEmptyItems ?
-                                    <span>show empty items</span> :
-                                    <span>hide empty items</span>
+                                    <span>Show Empty Items</span> :
+                                    <span>Hide Empty Items</span>
                                 }
                             </Button>
                         </div>
                     </Col>
+                    {variant['Change_Type'] === 'deleted' &&
+                        (<Col xs={12} className="vcenterblock">
+                            <p className='deleted-variant-message'>
+                            Note: This variant has been removed from the BRCA Exchange. For reasons on why this variant was removed please see the <Link to={`/release/${release.id}`}>release notes</Link>.
+                            </p>
+                        </Col>)
+                    }
                 </Row>
 
                 <Row>
@@ -923,7 +933,7 @@ var VariantDetail = React.createClass({
                     <Col md={12} className="variant-history-col">
                         <h3>{variant["HGVS_cDNA"]}</h3>
                         <h4>Previous Versions of this Variant:</h4>
-                        <Table className='variant-history' bordered>
+                        <Table className='variant-history nopointer' bordered>
                             <thead>
                                 <tr className='active'>
                                     <th>Release Date</th>

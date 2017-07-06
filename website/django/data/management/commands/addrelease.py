@@ -81,7 +81,6 @@ class Command(BaseCommand):
                 row_dict = dict(zip(deletions_header, row))
                 row_dict = self.update_variant_values_for_insertion(row_dict, release_id, change_types, True)
                 variant = Variant.objects.create_variant(row_dict)
-                self.create_and_associate_reports_to_variant(variant, reports_dict, sources, release_id)
 
         self.update_autocomplete_words()
 
@@ -112,6 +111,8 @@ class Command(BaseCommand):
         row_dict['Hg36_End'] = row_dict.pop('pyhgvs_Hg36_End')
         row_dict['HGVS_cDNA'] = row_dict.pop('pyhgvs_cDNA')
         row_dict['HGVS_Protein'] = row_dict.pop('pyhgvs_Protein')
+        # Denote percent value in field name
+        row_dict['Minor_allele_frequency_ESP_percent'] = row_dict.pop('Minor_allele_frequency_ESP')
         return row_dict
 
     def build_report_dictionary_by_source(self, reports_reader, reports_header, sources):
@@ -141,6 +142,8 @@ class Command(BaseCommand):
         report = reports_dict[source][bx_id]
         report['Data_Release_id'] = release_id
         report['Variant'] = variant
+        # Denote percentage in field name
+        report['Minor_allele_frequency_ESP_percent'] = report.pop('Minor_allele_frequency_ESP')
         Report.objects.create_report(report)
 
     def is_empty(self, value):

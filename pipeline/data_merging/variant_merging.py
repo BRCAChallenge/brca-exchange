@@ -105,10 +105,44 @@ BIC_FIELDS = {"Clinical_classification": "Category",
 
 ESP_FIELDS = {"polyPhen2_result": "PH",
               "Minor_allele_frequency": "MAF",
+              "EA_Allele_Frequency": "BX_EAAF",
+              "AA_Allele_Frequency": "BX_AAAF",
+              "Allele_Frequency": "BX_AF",
               "BX_ID": "BX_ID"}
 
+
 EXAC_FIELDS = {"Allele_frequency": "AF",
+               "Allele_count_AFR": "AC_AFR",
+               "Allele_number_AFR": "AN_AFR",
+               "Allele_frequency_AFR": "AF_AFR",
+               "Homozygous_count_AFR": "Hom_AFR",
+               "Allele_count_AMR": "AC_AMR",
+               "Allele_number_AMR": "AN_AMR",
+               "Allele_frequency_AMR": "AF_AMR",
+               "Homozygous_count_AMR": "Hom_AMR",
+               "Allele_count_EAS": "AC_EAS",
+               "Allele_number_EAS": "AN_EAS",
+               "Allele_frequency_EAS": "AF_EAS",
+               "Homozygous_count_EAS": "Hom_EAS",
+               "Allele_count_FIN": "AC_FIN",
+               "Allele_number_FIN": "AN_FIN",
+               "Allele_frequency_FIN": "AF_FIN",
+               "Homozygous_count_FIN": "Hom_FIN",
+               "Allele_count_NFE": "AC_NFE",
+               "Allele_number_NFE": "AN_NFE",
+               "Allele_frequency_NFE": "AF_NFE",
+               "Homozygous_count_NFE": "Hom_NFE",
+               "Allele_count_OTH": "AC_OTH",
+               "Allele_number_OTH": "AN_OTH",
+               "Allele_frequency_OTH": "AF_OTH",
+               "Homozygous_count_OTH": "Hom_OTH",
+               "Allele_count_SAS": "AC_SAS",
+               "Allele_number_SAS": "AN_SAS",
+               "Allele_frequency_SAS": "AF_SAS",
+               "Homozygous_count_SAS": "Hom_SAS",
                "BX_ID": "BX_ID"}
+
+EXAC_SUBPOPULATIONS = ["AFR", "AMR", "EAS", "FIN", "NFE", "OTH", "SAS"]
 
 FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "ClinVar": CLINVAR_FIELDS,
@@ -368,9 +402,12 @@ def get_bx_id_column_indexes(columns):
 
 def normalize_values(value):
     # standardize data representation by denoting empty as '-' and stripping whitespace off strings
-    assert isinstance(value, basestring) or isinstance(value, (list)) or value is None
     if value is None or value == "":
         value = DEFAULT_CONTENTS
+
+    if isinstance(value, int) or isinstance(value, float):
+        value = str(value)
+
     if isinstance(value, basestring):
         value = value.strip()
     else:
@@ -381,10 +418,11 @@ def normalize_values(value):
             else:
                 if isinstance(v, basestring):
                     v = v.strip()
+                if isinstance(v, int) or isinstance(v, float):
+                    v = str(v)
                 if v not in normalized_values:
                     normalized_values.append(v)
         value = normalized_values
-
     return value
 
 
@@ -571,7 +609,7 @@ def preprocessing():
         f_in = open(ARGS.input + file_name, "r")
         f_out = open(ARGS.output + source_name + ".vcf", "w")
         # Individual reports (lines in VCF/TSV) are given ids as part of the one_variant_transform method.
-        one_variant_transform(f_in, f_out)
+        one_variant_transform(f_in, f_out, source_name)
         f_in.close()
         f_out.close()
 
@@ -658,7 +696,7 @@ def get_header(f):
     return header
 
 
-def one_variant_transform(f_in, f_out):
+def one_variant_transform(f_in, f_out, source_name):
     """takes a vcf file, read each row, if the ALT field contains more than
        one item, create multiple variant row based on that row. also adds
        ids to all individual reports (each line in the vcf). writes new vcf"""
@@ -668,6 +706,8 @@ def one_variant_transform(f_in, f_out):
     for record in vcf_reader:
         n = len(record.ALT)
         if n == 1:
+            if source_name == "ExAC":
+                record = append_exac_allele_frequencies(record)
             record.INFO['BX_ID'] = count
             count += 1
             vcf_writer.write_record(record)
@@ -681,7 +721,32 @@ def one_variant_transform(f_in, f_out):
                     value = deepcopy(record.INFO[key])
                     if type(value) == list and len(value) == n:
                         new_record.INFO[key] = [value[i]]
+                if source_name == "ExAC":
+                    new_record = append_exac_allele_frequencies(record, new_record, i)
                 vcf_writer.write_record(new_record)
+
+
+def append_exac_allele_frequencies(record, new_record=None, i=None):
+    if new_record is None:
+        for subpopulation in EXAC_SUBPOPULATIONS:
+            # calculate allele frequencies for each subpopulation
+            allele_count = record.INFO[("AC_" + subpopulation)]
+            allele_number = record.INFO[("AN_" + subpopulation)]
+            allele_frequency = "-"
+            if len(allele_count) > 0 and allele_number != 0:
+                allele_frequency = float(allele_count[0]) / float(allele_number)
+            record.INFO[("AF_" + subpopulation)] = str(allele_frequency)
+        return record
+    else:
+        new_record.INFO['AF'] = record.INFO['AF'][i]
+        for subpopulation in EXAC_SUBPOPULATIONS:
+            allele_count = record.INFO[("AC_" + subpopulation)][i]
+            allele_number = record.INFO[("AN_" + subpopulation)]
+            allele_frequency = "-"
+            if allele_number != 0:
+                allele_frequency = float(allele_count) / float(allele_number)
+            new_record.INFO[("AF_" + subpopulation)] = str(allele_frequency)
+        return new_record
 
 
 def write_new_tsv(filename, columns, variants):

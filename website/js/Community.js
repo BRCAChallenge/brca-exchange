@@ -117,17 +117,17 @@ var Community = React.createClass({
             <Grid id="main-grid">
                 <Row id="message"> {message} </Row>
                 <Row>
-                    <Col sm={10} smOffset={1} md={8} mdOffset={2}>
-                        <span>The BRCA Exchange supports the exchange of information about BRCA1 and BRCA2 variants. Show your support by joining our mailing list and/or listing your name below as one of our supporters.</span>
+                    <Col md={10} mdOffset={1} sm={12}>
+                        <p className="community-message">The BRCA Exchange supports the exchange of information about BRCA1 and BRCA2 variants. Show your support by joining our mailing list and/or listing your name below as one of our supporters.</p>
                     </Col>
                 </Row>
                 <Row>
-                    <Col md={8} mdOffset={2} sm={10} smOffset={1}>
+                    <Col md={10} mdOffset={1} sm={12}>
                         <CommunityMap onFilterRole={this.onFilterRole} search={this.state.search}/>
                     </Col>
                 </Row>
                 <Row>
-                    <Col className="text-center" sm={12} smOffset={0} md={10} mdOffset={1}>
+                    <Col className="text-center" md={10} mdOffset={1} sm={12}>
                         <Link to="/mailinglist"><Button disabled={config.environment === 'beta' && 'disabled'}>Join the mailing list only</Button></Link>&nbsp;
                         <Link to="/signup"><Button disabled={config.environment === 'beta' && 'disabled'}>Join the mailing list and add me to the supporters</Button></Link>&nbsp;
                         <Link to="/signin"><Button disabled={config.environment === 'beta' && 'disabled'}>Edit your profile</Button></Link>
@@ -140,7 +140,7 @@ var Community = React.createClass({
 
                 </Row>
                 <Row>
-                    <Col className="btm-buffer" sm={10} smOffset={1} md={8} mdOffset={2}>
+                    <Col className="btm-buffer" md={10} mdOffset={1} sm={12}>
                         <Col sm={6} lg={5} style={{paddingRight: "0"}}>
                             <h4>Search for a community member:</h4>
                         </Col>
@@ -150,7 +150,7 @@ var Community = React.createClass({
                     </Col>
                 </Row>
                 <Row>
-                    <Col md={8} mdOffset={2} sm={10} smOffset={1}>
+                    <Col md={10} mdOffset={1} sm={12}>
                         <Table className="community" striped bordered>
                             <tbody>
                                 {rows}
@@ -159,10 +159,10 @@ var Community = React.createClass({
                     </Col>
                 </Row>
                 <Row>
-                    <Col sm={10} smOffset={1} md={8} mdOffset={2}>
-                        <span style={{verticalAlign: 'middle', display: 'inline-block'}}>
-                        {(this.state.page * this.state.pageLength) + 1}-{Math.min((this.state.page + 1) * this.state.pageLength, this.state.count)} out of {this.state.count} members
-                        </span>
+                    <Col md={10} mdOffset={1} sm={12}>
+                        <p style={{verticalAlign: 'bottom', display: 'inline-block'}}>
+                        {`${(this.state.page * this.state.pageLength) + 1}-${Math.min((this.state.page + 1) * this.state.pageLength, this.state.count)} out of ${this.state.count} members`}
+                        </p>
 
                         <Pagination
                             className="pagination pull-right-sm"
@@ -194,8 +194,8 @@ var CommunityMap = React.createClass({
             var infowindow;
             var markers = this.markers = [];
             var map = this.map = new google.maps.Map(document.getElementById('communityMap'), {
-                center: {lat: 17, lng: -2.5},
-                zoom: 1,
+                center: {lat: 17, lng: 9.4},
+                zoom: 2,
                 scrollwheel: false,
                 mapTypeControl: false,
                 streetViewControl: false,
@@ -203,7 +203,10 @@ var CommunityMap = React.createClass({
                     "featureType": "administrative",
                     "elementType": "geometry.fill",
                     "stylers": [{ "visibility": "off" }]
-                }]
+                }],
+                zoomControlOptions: {
+                    position: google.maps.ControlPosition.LEFT_BOTTOM
+                }
             });
 
             map.addListener('click', function() {
@@ -321,13 +324,22 @@ var CommunityMap = React.createClass({
 });
 
 var CommunitySearch = React.createClass({
-    getInitialState: () => ({ search: "" }),
+    getInitialState: () => ({
+        search: "",
+        placeholder: "name, organization, city, etc."
+     }),
     onChange: function(e) {
         this.setState({search: e.target.value});
         this.props.onChange(e.target.value);
     },
     onSubmit: function (ev) {
         ev.preventDefault();
+    },
+    onBlur: function () {
+        this.setState({placeholder: "name, organization, city, etc."});
+    },
+    onFocus: function () {
+        this.setState({placeholder: ""});
     },
     appendSearch: function(term) {
         this.setState({search: `${this.state.search.trim()} ${term}`.trim()});
@@ -339,8 +351,14 @@ var CommunitySearch = React.createClass({
                 <input type='submit' className='input-sm'style={{display: 'none'}} />
                 <div className='text-nowrap help-target'>
                     <div>
-                        <input className='community-search-input' placeholder='name, organization, city, etc.' type='text'
-                            onChange={this.onChange} value={this.state.search} />
+                        <input className='community-search-input'
+                               onBlur={this.onBlur}
+                               onFocus={this.onFocus}
+                               placeholder={this.state.placeholder}
+                               type='text'
+                               onChange={this.onChange}
+                               value={this.state.search} />
+                        <span className="glyphicon glyphicon-search search-box-icon"/>
                     </div>
                 </div>
             </form>
