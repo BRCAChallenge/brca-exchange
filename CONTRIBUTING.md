@@ -6,9 +6,9 @@ If you do not have write permissions, but would like to make a contribution, ple
 
 Before submitting a pull request, please make sure to meet the following:
 
-1. Include tests for bug fixes. Make sure the tests fail if the bug persists and pass if the bug is resolved.
+1. Include tests for bug fixes in server side code. Make sure the tests fail if the bug persists and pass if the bug is resolved.
 1. Make any necessary updates to documentation.
-1. Resolve all conflicts before submitting a PR.
+1. Resolve all merge conflicts before submitting a PR.
 
 
 ## Suggested Workflow
