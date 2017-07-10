@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Lato:200,600');
+@import url('https://fonts.googleapis.com/css?family=Lato:300,600');
 
 /* Note that bootstrap 3 media sizes are as follows:
   @media(max-width:767px){}  // xs
@@ -42,8 +42,8 @@ p {
 }
 
 /*
-circumvents react-data-components-bd2k applying cursor: pointer to every "table"-classed thing's th.
-offending file, for future reference: website/node_modules/react-data-components-bd2k/css/table-twbs.css
+circumvents react-data-partials-bd2k applying cursor: pointer to every "table"-classed thing's th.
+offending file, for future reference: website/node_modules/react-data-partials-bd2k/css/table-twbs.css
 */
 .table.nopointer th {
     cursor: auto;

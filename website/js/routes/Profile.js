@@ -3,12 +3,12 @@
 var React = require('react');
 var $ = require('jquery');
 var _ = require('underscore');
-var config  = require('./config');
+var config  = require('../config');
 var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {Navigation} = require('react-router');
-var auth = require('./auth');
+var auth = require('../auth');
 var {Role, $c} = require('./Signup');
-var countries = require('raw!../content/countries.txt').split('\n');
+var countries = require('raw!../../content/countries.txt').split('\n');
 
 var Profile = React.createClass({
     statics: {

@@ -3,8 +3,8 @@
 
 var React = require('react');
 var {Modal, Button} = require('react-bootstrap');
-var RawHTML = require('./RawHTML');
-var content = require('./content');
+var RawHTML = require('../helpers/RawHTML');
+var content = require('../data/content');
 
 var DisclaimerModal = React.createClass({
     getInitialState() {

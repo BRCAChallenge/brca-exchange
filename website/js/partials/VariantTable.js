@@ -3,7 +3,7 @@
 // The intent here was to split the generic table code
 // in DataTable from the variant domain knowledge, which
 // would be here. That division has broken down due to
-// peculiarities of react-data-components DataMixin, and
+// peculiarities of react-data-partials DataMixin, and
 // time pressure. Knowledge about variants is in both files.
 // This needs to be revisited.
 
@@ -11,12 +11,12 @@
 'use strict';
 
 var React = require('react');
-var PureRenderMixin = require('./PureRenderMixin');
+var PureRenderMixin = require('../helpers/PureRenderMixin');
 var DataTable = require('./DataTable');
 var _ = require('underscore');
 var {Col, Panel, Button, Input} = require('react-bootstrap');
 var ColumnCheckbox = require('./ColumnCheckbox');
-var {getDefaultExpertColumns, getDefaultResearchColumns, getAllSources} = require('./VariantTableDefaults');
+var {getDefaultExpertColumns, getDefaultResearchColumns, getAllSources} = require('../VariantTableDefaults');
 var {State} = require('react-router');
 
 require('react-data-components-bd2k/css/table-twbs.css');

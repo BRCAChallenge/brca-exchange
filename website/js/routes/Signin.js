@@ -3,9 +3,9 @@
 var React = require('react');
 var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {State, Navigation, Link} = require('react-router');
-var auth = require('./auth');
+var auth = require('../auth');
 var {$c} = require('./Signup');
-var config  = require('./config');
+var config  = require('../config');
 var $ = require('jquery');
 var _ = require('underscore');
 

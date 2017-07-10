@@ -4,7 +4,7 @@ var React = require('react');
 var {Grid, Row} = require('react-bootstrap');
 var {State, Navigation} = require('react-router');
 var $ = require('jquery');
-var config = require('./config');
+var config = require('../config');
 
 
 var ConfirmEmail = React.createClass({

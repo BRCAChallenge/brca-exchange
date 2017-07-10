@@ -4,19 +4,19 @@
 var React = require('react');
 var _ = require('underscore');
 require('muts-needle-plot/src/js/d3-svg-legend');
-require('./css/d3Lollipop.css');
+require('../css/d3Lollipop.css');
 var Mutneedles = require("muts-needle-plot");
-var PureRenderMixin = require('./PureRenderMixin');
+var PureRenderMixin = require('../helpers/PureRenderMixin');
 
 var {Grid, Row, Nav, NavItem} = require('react-bootstrap');
 
 
 var brca12JSON = {
     BRCA1: {
-        brcaDomainFile: require('raw!../content/brca1LollipopDomain.json')
+        brcaDomainFile: require('raw!../../content/brca1LollipopDomain.json')
     },
     BRCA2: {
-        brcaDomainFile: require('raw!../content/brca2LollipopDomain.json')
+        brcaDomainFile: require('raw!../../content/brca2LollipopDomain.json')
     }
 };
 var d3Lollipop = {};

@@ -1,7 +1,7 @@
 /*global module: false */
 'use strict';
 
-var slugify = require('../js/slugify');
+var slugify = require('../js/helpers/slugify');
 
 module.exports = function(md) {
 	var originalHeadingOpen = md.renderer.rules.heading_open;

@@ -2,7 +2,7 @@
 'use strict';
 
 var React = require('react');
-var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
+var PureRenderMixin = require('../helpers/PureRenderMixin'); // deep-equals version of PRM
 var {Input} = require('react-bootstrap');
 
 var ColumnCheckbox = React.createClass({

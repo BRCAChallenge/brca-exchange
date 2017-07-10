@@ -1,14 +1,14 @@
 'use strict';
 
 var React = require('react');
-var config = require('./config');
+var config = require('../config');
 var classNames = require('classnames');
 
 
 var {Navbar, Nav, DropdownButton} = require('react-bootstrap');
 var {Link} = require('react-router');
 
-var brcaHeaderLogo = require('./img/brca-logo-transp.png');
+var brcaHeaderLogo = require('../img/brca-logo-transp.png');
 
 var NavLink = React.createClass({
     render: function () {

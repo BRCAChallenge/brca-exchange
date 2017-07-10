@@ -2,7 +2,7 @@
 
 var React = require('react');
 var $ = require('jquery');
-var config  = require('./config');
+var config  = require('../config');
 var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {Navigation, Link} = require('react-router');
 

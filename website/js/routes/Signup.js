@@ -2,12 +2,12 @@
 'use strict';
 
 var React = require('react');
-var content = require('./content');
-var RawHTML = require('./RawHTML');
-var countries = require('raw!../content/countries.txt').split("\n");
+var content = require('../data/content');
+var RawHTML = require('../helpers/RawHTML');
+var countries = require('raw!../../content/countries.txt').split("\n");
 var $ = require('jquery');
 var _ = require('underscore');
-var config  = require('./config');
+var config  = require('../config');
 var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {Navigation} = require('react-router');
 

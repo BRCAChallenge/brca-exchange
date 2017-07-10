@@ -3,14 +3,14 @@
 'use strict';
 
 var React = require('react');
-var slugify = require('./slugify');
+var slugify = require('../helpers/slugify');
 var {Navigation} = require('react-router');
 var AutoSuggest = require('react-autosuggest');
 var _ = require('underscore');
 var $ = require('jquery');
-var config = require('./config');
+var config = require('../config');
 
-require('./css/Autosuggest.css');
+require('../css/Autosuggest.css');
 
 
 function getSuggestions(value, callback) {

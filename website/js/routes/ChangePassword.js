@@ -6,7 +6,7 @@ var {State, Navigation} = require('react-router');
 var {$c} = require('./Signup');
 
 var $ = require('jquery');
-var config = require('./config');
+var config = require('../config');
 
 
 var ChangePassword = React.createClass({

@@ -1,16 +1,16 @@
 'use strict';
 
 var React = require('react');
-var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
+var PureRenderMixin = require('../helpers/PureRenderMixin'); // deep-equals version of PRM
 var {Grid, Col, Row, Button, Table} = require('react-bootstrap');
-var backend = require('backend');
-var config  = require('./config');
+var backend = require('../backend');
+var config  = require('../config');
 var {Role} = require('./Signup');
 var {Navigation, Link} = require('react-router');
 var {Pagination} = require('react-data-components-bd2k');
 var _ = require('underscore');
-var placeholder = require('./img/placeholder.png');
-var auth = require('./auth');
+var placeholder = require('../img/placeholder.png');
+var auth = require('../auth');
 var Rx = require('rx');
 
 var Community = React.createClass({
@@ -219,13 +219,13 @@ var CommunityMap = React.createClass({
             var legendControl = document.createElement('div');
             var roleMarkers = Role.options.map(role =>
                 <div className="map-legend-col" data-role={role[0]}>
-                    <img src={require(`./img/map/${role[0]}key.png`)} /> {role.length === 3 ? role[2] : role[1]}
+                    <img src={require(`../img/map/${role[0]}key.png`)} /> {role.length === 3 ? role[2] : role[1]}
                 </div>
             );
             roleMarkers = _.values(_.groupBy(roleMarkers, (item, index) => index % 4)).map(group => <div className="map-legend-row">{group}</div>);
             legendControl.innerHTML = React.renderToStaticMarkup(
                 <div>
-                    <img src={require("./img/map/1.png")} className="map-legend-icon" />
+                    <img src={require("../img/map/1.png")} className="map-legend-icon" />
                     <div className="map-legend-slide">
                         <div className="map-legend-full">
                             {roleMarkers}
@@ -282,7 +282,7 @@ var CommunityMap = React.createClass({
                                 map: map,
                                 title: `${firstName} ${lastName}${title.length ? "," : ""} ${title}`,
                                 icon: {
-                                    url: require(`./img/map/${role}.png`),
+                                    url: require(`../img/map/${role}.png`),
                                     scaledSize: new google.maps.Size(20, 32)
                                 }
                             });

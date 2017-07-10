@@ -10,8 +10,8 @@ var VariantSearch = require('./VariantSearch');
 var SelectField = require('./SelectField');
 var _ = require('underscore');
 var cx = require('classnames');
-var hgvs = require('./hgvs');
-var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
+var hgvs = require('../hgvs');
+var PureRenderMixin = require('../helpers/PureRenderMixin'); // deep-equals version of PRM
 
 var filterDisplay = v => v == null ? 'Any' : v;
 var filterAny = v => v === 'Any' ? null : v;

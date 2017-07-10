@@ -7,8 +7,8 @@ var React = require('react');
 var {Link} = require('react-router');
 var {Table, Grid, Row, Col} = require('react-bootstrap');
 
-var backend = require('./backend');
-var config = require('config');
+var backend = require('../backend');
+var config = require('../config');
 var anchorme = require("anchorme");
 
 
