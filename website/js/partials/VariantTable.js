@@ -16,7 +16,7 @@ var DataTable = require('./DataTable');
 var _ = require('underscore');
 var {Col, Panel, Button, Input} = require('react-bootstrap');
 var ColumnCheckbox = require('./ColumnCheckbox');
-var {getDefaultExpertColumns, getDefaultResearchColumns, getAllSources} = require('../VariantTableDefaults');
+var {getDefaultExpertColumns, getDefaultResearchColumns, getAllSources} = require('../data/VariantTableDefaults');
 var {State} = require('react-router');
 
 require('react-data-components-bd2k/css/table-twbs.css');
