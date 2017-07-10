@@ -10,6 +10,12 @@ var BarChart = require('./BarChart');
 var Highcharts = require('highcharts');
 require('highcharts/modules/broken-axis')(Highcharts);
 
+Highcharts.setOptions({
+    lang: {
+        thousandsSep: ""
+    }
+});
+
 var chartOptions1 = {
     title: {
         text: 'Unique Variants'
@@ -22,10 +28,6 @@ var chartOptions1 = {
         lineWidth: 2,
         title: false,
         tickInterval: 1000,
-        breaks: [{
-            from: 2500,
-            to: 5000
-        }]
     },
     series: [{
         name: "BRCA1",
@@ -51,7 +53,7 @@ var chartOptions2 = {
         data: [
             { name: "Pathogenic", y: 0 },
             { name: "Benign", y: 0 }
-        ] 
+        ]
     }]
 };
 
@@ -90,10 +92,10 @@ var FactSheet = React.createClass({
                         {this.state.error ? <p>&nbsp;&nbsp;&nbsp;({this.state.error})</p> :
                         <div>
                             <Col md={6}>
-                                <BarChart ref='chart1' container='chart1' options={chartOptions1}></BarChart>
+                                <BarChart ref='chart1' container='chart1' options={chartOptions1} />
                             </Col>
                             <Col md={6}>
-                                <PieChart ref='chart2' container='chart2' options={chartOptions2}></PieChart>
+                                <PieChart ref='chart2' container='chart2' options={chartOptions2} />
                             </Col>
                             <br />
                             <ul>

@@ -102,7 +102,7 @@ function pointBreakColumn(e) {
 var BarChart = React.createClass({
     render() {
         var options = _.merge({}, defaultOptions, this.props.options);
-        return <Chart ref={"chart"} container={this.props.container} options={options}></Chart>;
+        return <Chart ref={"chart"} container={this.props.container} options={options} />;
     },
     getChart() {
         return this.refs.chart.chart;
