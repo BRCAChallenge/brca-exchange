@@ -375,7 +375,7 @@ var ResearchVariantTableSupplier = function (Component) {
             */
 
             // Start with all columns set to true and data showing from all sources.
-            var selectedColumns = selectedColumns = _.object(_.map(this.getColumns(),
+            var selectedColumns = _.object(_.map(this.getColumns(),
                                     c => [c.prop, true])
                                 );
             var selectedSources = getAllSources();
@@ -526,6 +526,7 @@ var ResearchVariantTableSupplier = function (Component) {
             );
         }
     });
+
     return ResearchVariantTableComponent;
 };
 
