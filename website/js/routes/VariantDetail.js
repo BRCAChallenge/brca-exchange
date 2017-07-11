@@ -13,7 +13,12 @@ require('isotope-packery');
 var backend = require('../backend');
 var slugify = require('../helpers/slugify');
 
-var {researchModeColumns, columns, researchModeGroups, expertModeGroups} = require('../partials/VariantTable');
+var {
+    columns,
+    researchModeColumns,
+    researchModeGroups, expertModeGroups
+} = require("../data/columns");
+
 var DisclaimerModal = require('../partials/DisclaimerModal');
 
 // replaces commas with comma-spaces to wrap long lines better, removes blank entries from comma-delimited lists,
