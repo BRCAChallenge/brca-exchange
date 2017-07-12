@@ -105,7 +105,7 @@ BIC_FIELDS = {"Clinical_classification": "Category",
               "BX_ID": "BX_ID"}
 
 ESP_FIELDS = {"polyPhen2_result": "PH",
-              "Minor_allele_frequency": "MAF",
+              "Minor_allele_frequency_percent": "MAF",
               "EA_Allele_Frequency": "BX_EAAF",
               "AA_Allele_Frequency": "BX_AAAF",
               "Allele_Frequency": "BX_AF",

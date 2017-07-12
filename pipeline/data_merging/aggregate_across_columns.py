@@ -27,7 +27,7 @@ FIELDS_TO_RENAME = {"Gene_symbol_ENIGMA": "Gene_Symbol",
                     "HGVS_cDNA_ENIGMA": "HGVS_cDNA",
                     "HGVS_protein_ENIGMA": "HGVS_Protein",
                     "BIC_Nomenclature_ENIGMA": "BIC_Nomenclature",
-                    "Minor_allele_frequency_ESP": "Minor_allele_frequency_ESP_percent"}
+                    "Minor_allele_frequency_ESP": "Minor_allele_frequency_percent_ESP"}
 
 
 def main():
@@ -192,8 +192,8 @@ def pathogenicityUpdate(row):
 def selectAlleleFrequency(row):
     if row["Allele_frequency_ExAC"] != EMPTY:
         return "%s (ExAC minus TCGA)" % row["Allele_frequency_ExAC"]
-    elif row["Minor_allele_frequency_ESP_percent"] != EMPTY:
-        return "%s (ESP)" % row["Minor_allele_frequency_ESP_percent"].split(',')[-1]
+    elif row["Minor_allele_frequency_percent_ESP"] != EMPTY:
+        return "%s (ESP)" % row["Minor_allele_frequency_percent_ESP"].split(',')[-1]
     elif row["Allele_frequency_1000_Genomes"] != EMPTY:
         return "%s (1000 Genomes)" % row["Allele_frequency_1000_Genomes"]
     else:

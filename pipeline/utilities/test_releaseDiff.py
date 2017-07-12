@@ -575,11 +575,11 @@ class TestStringMethods(unittest.TestCase):
         releaseDiff.diff_json = self.diff_json
         variant = 'chr17:g.43049067:C>T'
 
-        self.updated_fieldnames = self.fieldnames + ['Minor_allele_frequency_ESP_percent']
+        self.updated_fieldnames = self.fieldnames + ['Minor_allele_frequency_percent_ESP']
         self.updated_fieldnames.remove('Minor_allele_frequency_ESP')
 
         self.oldRow['Minor_allele_frequency_ESP'] = '2.5'
-        self.newRow['Minor_allele_frequency_ESP_percent'] = '2.5'
+        self.newRow['Minor_allele_frequency_percent_ESP'] = '2.5'
 
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.updated_fieldnames)
         change_type = v1v2.compareRow(self.oldRow, self.newRow)
@@ -593,18 +593,18 @@ class TestStringMethods(unittest.TestCase):
         releaseDiff.diff_json = self.diff_json
         variant = 'chr17:g.43049067:C>T'
 
-        self.updated_fieldnames = self.fieldnames + ['Minor_allele_frequency_ESP_percent']
+        self.updated_fieldnames = self.fieldnames + ['Minor_allele_frequency_percent_ESP']
         self.updated_fieldnames.remove('Minor_allele_frequency_ESP')
 
         self.oldRow['Minor_allele_frequency_ESP'] = '1.5'
-        self.newRow['Minor_allele_frequency_ESP_percent'] = '2.5'
+        self.newRow['Minor_allele_frequency_percent_ESP'] = '2.5'
 
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.updated_fieldnames)
         change_type = v1v2.compareRow(self.oldRow, self.newRow)
         diff = releaseDiff.diff_json
         v_diff = diff['chr17:g.43049067:C>T'][0]
         self.assertEqual(len(diff), 1)
-        self.assertEqual(v_diff['field'], 'Minor_allele_frequency_ESP_percent')
+        self.assertEqual(v_diff['field'], 'Minor_allele_frequency_percent_ESP')
         self.assertEqual(v_diff['added'], '2.5')
         self.assertEqual(v_diff['removed'], '1.5')
         self.assertEqual(change_type, "changed_information")
@@ -615,18 +615,18 @@ class TestStringMethods(unittest.TestCase):
         releaseDiff.diff_json = self.diff_json
         variant = 'chr17:g.43049067:C>T'
 
-        self.updated_fieldnames = self.fieldnames + ['Minor_allele_frequency_ESP_percent']
+        self.updated_fieldnames = self.fieldnames + ['Minor_allele_frequency_percent_ESP']
         self.updated_fieldnames.remove('Minor_allele_frequency_ESP')
 
         self.oldRow['Minor_allele_frequency_ESP'] = '-'
-        self.newRow['Minor_allele_frequency_ESP_percent'] = '2.5'
+        self.newRow['Minor_allele_frequency_percent_ESP'] = '2.5'
 
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.updated_fieldnames)
         change_type = v1v2.compareRow(self.oldRow, self.newRow)
         diff = releaseDiff.diff_json
         v_diff = diff['chr17:g.43049067:C>T'][0]
         self.assertEqual(len(diff), 1)
-        self.assertEqual(v_diff['field'], 'Minor_allele_frequency_ESP_percent')
+        self.assertEqual(v_diff['field'], 'Minor_allele_frequency_percent_ESP')
         self.assertEqual(v_diff['added'], '2.5')
         self.assertEqual(v_diff['removed'], '-')
         self.assertEqual(change_type, "added_information")

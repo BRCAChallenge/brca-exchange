@@ -303,7 +303,7 @@ class v1ToV2(transformer):
                        "BIC_Identifier": "BIC_Nomenclature",
                        "Pathogenicity_default": "Pathogenicity_expert",
                        "Pathogenicity_research": "Pathogenicity_all",
-                       "Minor_allele_frequency_ESP": "Minor_allele_frequency_ESP_percent"
+                       "Minor_allele_frequency_ESP": "Minor_allele_frequency_percent_ESP"
                        }
 
 
