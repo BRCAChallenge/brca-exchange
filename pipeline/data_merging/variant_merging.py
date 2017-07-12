@@ -21,6 +21,7 @@ from numbers import Number
 import csv
 import aggregate_reports
 import urllib
+import utilities
 
 
 # GENOMIC VERSION:
@@ -735,7 +736,7 @@ def append_exac_allele_frequencies(record, new_record=None, i=None):
             allele_frequency = "-"
             if len(allele_count) > 0 and allele_number != 0:
                 allele_frequency = float(allele_count[0]) / float(allele_number)
-            record.INFO[("AF_" + subpopulation)] = str(allele_frequency)
+            record.INFO[("AF_" + subpopulation)] = str(utilities.round_sigfigs(allele_frequency, 3))
         return record
     else:
         new_record.INFO['AF'] = record.INFO['AF'][i]
@@ -745,7 +746,7 @@ def append_exac_allele_frequencies(record, new_record=None, i=None):
             allele_frequency = "-"
             if allele_number != 0:
                 allele_frequency = float(allele_count) / float(allele_number)
-            new_record.INFO[("AF_" + subpopulation)] = str(allele_frequency)
+            new_record.INFO[("AF_" + subpopulation)] = str(utilities.round_sigfigs(allele_frequency, 3))
         return new_record
 
 
