@@ -1,22 +1,35 @@
+import home from '../../content/home.md';
+import history from '../../content/history.md';
+import variation from '../../content/variationAndCancer.md';
+import help from '../../content/help.md';
+import helpResearch from '../../content/help_research.md';
+import disclaimer from '../../content/disclaimer.md';
+import thisSite from '../../content/thisSite.md';
+import dataSubmissionPolicy from '../../content/dataSubmissionPolicy.md';
+import api from '../../content/api.md';
+import variantsDefault from '../../content/variantsDefault.md';
+import variantsResearch from '../../content/variantsResearch.md';
+import researchWarning from '../../content/researchWarning.md';
+import signupMessage from '../../content/signupMessage.md';
 /*eslint-env browser */
 /*global require: false, module: false */
 
 var content = {
-    home: require('../../content/home.md'),
-    history: require('../../content/history.md'),
-    variation: require('../../content/variationAndCancer.md'),
-    help: require('../../content/help.md'),
-    helpResearch: require('../../content/help_research.md'),
-    disclaimer: require('../../content/disclaimer.md'),
-    thisSite: require('../../content/thisSite.md'),
-    dataSubmissionPolicy: require('../../content/dataSubmissionPolicy.md'),
-    api: require('../../content/api.md'),
-    variantsDefault: require('../../content/variantsDefault.md'),
-    variantsResearch: require('../../content/variantsResearch.md'),
-    researchWarning: require('../../content/researchWarning.md'),
-    signupMessage: require('../../content/signupMessage.md')
+    home,
+    history,
+    variation,
+    help,
+    helpResearch,
+    disclaimer,
+    thisSite,
+    dataSubmissionPolicy,
+    api,
+    variantsDefault,
+    variantsResearch,
+    researchWarning,
+    signupMessage
 };
 
-module.exports = {
+export default {
     pages: content
 };

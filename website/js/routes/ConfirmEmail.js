@@ -1,9 +1,9 @@
 
-var React = require('react');
-var {Grid, Row} = require('react-bootstrap');
-var {State, Navigation} = require('react-router');
-var $ = require('jquery');
-var config = require('../config');
+import React from 'react';
+import { Grid, Row } from 'react-bootstrap';
+import { State, Navigation } from 'react-router';
+import $ from 'jquery';
+import config from '../config';
 
 
 var ConfirmEmail = React.createClass({
@@ -39,6 +39,4 @@ var ConfirmEmail = React.createClass({
 });
 
 
-module.exports = ({
-    ConfirmEmail: ConfirmEmail
-});
+export default ConfirmEmail;

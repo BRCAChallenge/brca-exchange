@@ -1,6 +1,6 @@
 /*global module: false, require: false */
 
-var React = require('react');
+import React from 'react';
 
 var RawHTML = React.createClass({
     render: function() {
@@ -11,4 +11,4 @@ var RawHTML = React.createClass({
     }
 });
 
-module.exports = RawHTML;
+export default RawHTML;

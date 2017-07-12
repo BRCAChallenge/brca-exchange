@@ -1,12 +1,11 @@
 
-var React = require('react');
-var {State} = require('react-router');
-var {Grid, Col, Row} = require('react-bootstrap');
-
-var content = require('../data/content');
-var {navbarHeight} = require('../data/constants');
-var slugify = require('../helpers/slugify');
-var RawHTML = require("../helpers/RawHTML");
+import React from 'react';
+import { State } from 'react-router';
+import { Grid, Col, Row } from 'react-bootstrap';
+import content from '../data/content';
+import { navbarHeight } from '../data/constants';
+import slugify from '../helpers/slugify';
+import RawHTML from '../helpers/RawHTML';
 
 var Help = React.createClass({
     mixins: [State],
@@ -43,4 +42,4 @@ var Help = React.createClass({
     }
 });
 
-module.exports = Help;
+export default Help;

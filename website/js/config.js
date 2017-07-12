@@ -1,2 +1,2 @@
 
-module.exports = window.config;
+export default window.config;

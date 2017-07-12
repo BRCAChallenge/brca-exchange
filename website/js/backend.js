@@ -1,10 +1,11 @@
 /*global require: false, module: false */
 
-var Rx = require('rx');
-require('rx-dom');
-var _ = require('underscore');
-var config = require('./config');
-var qs = require('qs');
+import Rx from 'rx';
+
+import 'rx-dom';
+import _ from 'underscore';
+import config from './config';
+import qs from 'qs';
 
 var transpose = a => _.zip.apply(_, a);
 
@@ -103,7 +104,7 @@ function lollipopData(opts) {
     return Rx.DOM.get(url(opts)).map(xhr => JSON.parse(xhr.responseText));
 }
 
-module.exports = {
+const backend = {
     data,
     variant,
     variantCounts,
@@ -115,3 +116,5 @@ module.exports = {
     url,
     trimSearchTerm
 };
+
+export default backend;

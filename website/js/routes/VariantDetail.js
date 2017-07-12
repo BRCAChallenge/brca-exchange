@@ -1,23 +1,17 @@
-var React = require('react');
-var {Navigation, Link} = require('react-router');
-var _ = require('underscore');
-var moment = require('moment');
-var {Grid, Col, Row, Table, Button, Panel} = require('react-bootstrap');
+import React from 'react';
+import { Navigation, Link } from 'react-router';
+import _ from 'underscore';
+import moment from 'moment';
+import { Grid, Col, Row, Table, Button, Panel } from 'react-bootstrap';
 
 // faisal: includes for masonry/isotope
-var Isotope = require('isotope-layout');
-require('isotope-packery');
+import Isotope from 'isotope-layout';
 
-var backend = require('../backend');
-var slugify = require('../helpers/slugify');
-
-var {
-    columns,
-    researchModeColumns,
-    researchModeGroups, expertModeGroups
-} = require("../data/columns");
-
-var DisclaimerModal = require('../partials/DisclaimerModal');
+import 'isotope-packery';
+import backend from '../backend';
+import slugify from '../helpers/slugify';
+import { columns, researchModeColumns, researchModeGroups, expertModeGroups } from '../data/columns';
+import DisclaimerModal from '../partials/DisclaimerModal';
 
 // replaces commas with comma-spaces to wrap long lines better, removes blank entries from comma-delimited lists,
 // and normalizes blank/null values to a single hyphen
@@ -542,4 +536,4 @@ var VariantDetail = React.createClass({
     }
 });
 
-module.exports = VariantDetail;
+export default VariantDetail;

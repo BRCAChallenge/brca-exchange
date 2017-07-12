@@ -1,6 +1,6 @@
 /*global require: false, module: false */
 
-module.exports = [
+export default [
     {
         id: 'human-variome-project',
         logo: require('../img/hvp_logo.png'),

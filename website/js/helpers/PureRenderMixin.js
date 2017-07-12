@@ -1,11 +1,11 @@
-/*global require: false, module: false */
+import _ from 'underscore';
 
-var _ = require('underscore');
+const PureRenderMixin = {
+    shouldComponentUpdate: function (nextProps, nextState) {
+        return !_.isEqual(this.props, nextProps) ||
+            !_.isEqual(this.state, nextState);
+    }
+};
 
 // deep equality check for pure rendering
-module.exports = {
-  shouldComponentUpdate: function(nextProps, nextState) {
-    return !_.isEqual(this.props, nextProps) ||
-           !_.isEqual(this.state, nextState);
-  }
-};
+export default PureRenderMixin;

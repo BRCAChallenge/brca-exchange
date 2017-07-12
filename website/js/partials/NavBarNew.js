@@ -1,13 +1,10 @@
 
-var React = require('react');
-var config = require('../config');
-var classNames = require('classnames');
-
-
-var {Navbar, Nav, DropdownButton} = require('react-bootstrap');
-var {Link} = require('react-router');
-
-var brcaHeaderLogo = require('../img/brca-logo-transp.png');
+import React from 'react';
+import config from '../config';
+import classNames from 'classnames';
+import { Navbar, Nav, DropdownButton } from 'react-bootstrap';
+import { Link } from 'react-router';
+import brcaHeaderLogo from '../img/brca-logo-transp.png';
 
 var NavLink = React.createClass({
     render: function () {
@@ -95,7 +92,7 @@ var NavBarNew = React.createClass({
 });
 
 
-module.exports = {
+export {
     NavLink,
     NavBarNew
 };

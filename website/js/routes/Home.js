@@ -1,12 +1,11 @@
-var React = require('react');
-var {Navigation} = require('react-router');
-var {Grid, Col, Row, Button, Modal, Glyphicon} = require('react-bootstrap');
-var _ = require('underscore');
-
-var content = require('../data/content');
-var logos = require('../data/logos');
-var VariantSearch = require("../partials/VariantSearch");
-var RawHTML = require("../helpers/RawHTML");
+import React from 'react';
+import { Navigation } from 'react-router';
+import { Grid, Col, Row, Button, Modal, Glyphicon } from 'react-bootstrap';
+import _ from 'underscore';
+import content from '../data/content';
+import logos from '../data/logos';
+import VariantSearch from '../partials/VariantSearch';
+import RawHTML from '../helpers/RawHTML';
 
 var Home = React.createClass({
     mixins: [Navigation],
@@ -61,4 +60,4 @@ var Home = React.createClass({
     }
 });
 
-module.exports = Home;
+export default Home;

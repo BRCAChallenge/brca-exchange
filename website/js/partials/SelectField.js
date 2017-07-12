@@ -1,9 +1,10 @@
 /*global module: false, require: false */
 
-var React = require('react');
-var PureRenderMixin = require('../helpers/PureRenderMixin'); // deep-equals version of PRM
-var {Input} = require('react-bootstrap');
-var _ = require('underscore');
+import React from 'react';
+
+import PureRenderMixin from '../helpers/PureRenderMixin'; // deep-equals version of PRM
+import { Input } from 'react-bootstrap';
+import _ from 'underscore';
 
 var SelectField = React.createClass({
     mixins: [PureRenderMixin],
@@ -22,4 +23,4 @@ var SelectField = React.createClass({
     }
 });
 
-module.exports = SelectField;
+export default SelectField;

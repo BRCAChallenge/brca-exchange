@@ -1,11 +1,10 @@
 
-var React = require('react');
-var {Grid, Row, Col, Button} = require('react-bootstrap');
-var {State, Navigation} = require('react-router');
-var {$c} = require('./Signup');
-
-var $ = require('jquery');
-var config = require('../config');
+import React from 'react';
+import { Grid, Row, Col, Button } from 'react-bootstrap';
+import { State, Navigation } from 'react-router';
+import { $c } from './Signup';
+import $ from 'jquery';
+import config from '../config';
 
 
 var ChangePassword = React.createClass({
@@ -145,6 +144,4 @@ var ChangePasswordForm = React.createClass({
 });
 
 
-module.exports = ({
-    ChangePassword: ChangePassword
-});
+export default ChangePassword;

@@ -9,25 +9,17 @@
 
 /*global module: false, require: false, window: false */
 
-var React = require('react');
-var {State} = require('react-router');
+import React from 'react';
 
-var _ = require('underscore');
-var {Col, Panel, Button, Input} = require('react-bootstrap');
-var ColumnCheckbox = require('./ColumnCheckbox');
-
-var {getDefaultExpertColumns, getDefaultResearchColumns, getAllSources} = require('../data/VariantTableDefaults');
-var PureRenderMixin = require('../helpers/PureRenderMixin');
-var DataTable = require('./DataTable');
-
-require('react-data-components-bd2k/css/table-twbs.css');
-
-var {
-    filterColumns,
-    subColumns,
-    columns,
-    researchModeColumns
-} = require("../data/columns");
+import { State } from 'react-router';
+import _ from 'underscore';
+import { Col, Panel, Button, Input } from 'react-bootstrap';
+import ColumnCheckbox from './ColumnCheckbox';
+import { getDefaultExpertColumns, getDefaultResearchColumns, getAllSources } from '../data/VariantTableDefaults';
+import PureRenderMixin from '../helpers/PureRenderMixin';
+import DataTable from './DataTable';
+import 'react-data-components-bd2k/css/table-twbs.css';
+import { filterColumns, subColumns, columns, researchModeColumns } from '../data/columns';
 
 /*eslint-enable camelcase */
 
@@ -293,8 +285,10 @@ var VariantTableSupplier = function (Component) {
     });
 };
 
+const VariantTable = VariantTableSupplier(Table);
+const ResearchVariantTable = ResearchVariantTableSupplier(Table);
 
-module.exports = {
-    VariantTable: VariantTableSupplier(Table),
-    ResearchVariantTable: ResearchVariantTableSupplier(Table)
+export {
+    VariantTable,
+    ResearchVariantTable
 };

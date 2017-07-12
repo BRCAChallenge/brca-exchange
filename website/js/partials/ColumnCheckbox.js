@@ -1,8 +1,9 @@
 /*global module: false, require: false */
 
-var React = require('react');
-var PureRenderMixin = require('../helpers/PureRenderMixin'); // deep-equals version of PRM
-var {Input} = require('react-bootstrap');
+import React from 'react';
+
+import PureRenderMixin from '../helpers/PureRenderMixin'; // deep-equals version of PRM
+import { Input } from 'react-bootstrap';
 
 var ColumnCheckbox = React.createClass({
     mixins: [PureRenderMixin],
@@ -19,4 +20,4 @@ var ColumnCheckbox = React.createClass({
     }
 });
 
-module.exports = ColumnCheckbox;
+export default ColumnCheckbox;

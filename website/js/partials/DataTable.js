@@ -1,16 +1,17 @@
 /*global module: false, require: false, URL: false, Blob: false */
 
-var React = require('react');
-var Rx = require('rx');
-require('rx/dist/rx.time');
-var {Table, Pagination} = require('react-data-components-bd2k');
-var {Button, Row, Col} = require('react-bootstrap');
-var VariantSearch = require('./VariantSearch');
-var SelectField = require('./SelectField');
-var _ = require('underscore');
-var cx = require('classnames');
-var hgvs = require('../helpers/hgvs');
-var PureRenderMixin = require('../helpers/PureRenderMixin'); // deep-equals version of PRM
+import React from 'react';
+
+import Rx from 'rx';
+import 'rx/dist/rx.time';
+import { Table, Pagination } from 'react-data-components-bd2k';
+import { Button, Row, Col } from 'react-bootstrap';
+import VariantSearch from './VariantSearch';
+import SelectField from './SelectField';
+import _ from 'underscore';
+import cx from 'classnames';
+import hgvs from '../helpers/hgvs';
+import PureRenderMixin from '../helpers/PureRenderMixin'; // deep-equals version of PRM
 
 var filterDisplay = v => v == null ? 'Any' : v;
 var filterAny = v => v === 'Any' ? null : v;
@@ -20,7 +21,7 @@ var pluralize = (n, s) => n === 1 ? s : s + 's';
 
 var merge = (...args) => _.extend({}, ...args);
 
-var Lollipop = require('./d3Lollipop');
+import Lollipop from './d3Lollipop';
 
 function setPages({data, count, deletedCount, synonyms}, pageLength) { //eslint-disable-line camelcase
     return {
@@ -375,4 +376,4 @@ var DataTable = React.createClass({
     }
 });
 
-module.exports = DataTable;
+export default DataTable;

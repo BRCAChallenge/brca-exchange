@@ -1,21 +1,23 @@
 /*global module: false, require: false */
 
-var React = require('react');
-var _ = require('underscore');
-require('muts-needle-plot/src/js/d3-svg-legend');
-require('../css/d3Lollipop.css');
-var Mutneedles = require("muts-needle-plot");
-var PureRenderMixin = require('../helpers/PureRenderMixin');
+import React from 'react';
 
-var {Grid, Row, Nav, NavItem} = require('react-bootstrap');
+import _ from 'underscore';
+import 'muts-needle-plot/src/js/d3-svg-legend';
+import '../css/d3Lollipop.css';
+import Mutneedles from 'muts-needle-plot';
+import PureRenderMixin from '../helpers/PureRenderMixin';
+import { Grid, Row, Nav, NavItem } from 'react-bootstrap';
+import brca1DomainFile from 'raw-loader!../../content/brca1LollipopDomain.json';
+import brca2DomainFile from 'raw-loader!../../content/brca2LollipopDomain.json';
 
 
 var brca12JSON = {
     BRCA1: {
-        brcaDomainFile: require('raw-loader!../../content/brca1LollipopDomain.json')
+        brcaDomainFile: brca1DomainFile
     },
     BRCA2: {
-        brcaDomainFile: require('raw-loader!../../content/brca2LollipopDomain.json')
+        brcaDomainFile: brca2DomainFile
     }
 };
 var d3Lollipop = {};
@@ -151,4 +153,4 @@ var Lollipop = React.createClass({
     }
 });
 
-module.exports = Lollipop;
+export default Lollipop;

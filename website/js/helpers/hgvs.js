@@ -16,7 +16,7 @@
 
 /*global module: false, require: false */
 
-var _ = require('underscore');
+import _ from 'underscore';
 
 var pathogenicity = 'Clinical_significance_ENIGMA';
 
@@ -41,6 +41,8 @@ function filters(search, filterValues) {
         };
 }
 
-module.exports = {
+const hgvs = {
     filters: filters
 };
+
+export default hgvs;

@@ -1,15 +1,14 @@
-var React = require('react');
-var {Navigation, State} = require('react-router');
-var Rx = require('rx');
-var _ = require('underscore');
-var {Grid, Col, Row, Button, Modal} = require('react-bootstrap');
-
-var backend = require('../backend');
-var {VariantTable, ResearchVariantTable} = require('../partials/VariantTable');
-var databaseKey = require('../../databaseKey');
-var content = require('../data/content');
-var RawHTML = require("../helpers/RawHTML");
-var slugify = require('../helpers/slugify');
+import React from 'react';
+import { Navigation, State } from 'react-router';
+import Rx from 'rx';
+import _ from 'underscore';
+import { Grid, Col, Row, Button, Modal } from 'react-bootstrap';
+import backend from '../backend';
+import { VariantTable, ResearchVariantTable } from '../partials/VariantTable';
+import databaseKey from '../../databaseKey';
+import content from '../data/content';
+import RawHTML from '../helpers/RawHTML';
+import slugify from '../helpers/slugify';
 
 var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
 
@@ -236,4 +235,4 @@ var Database = React.createClass({
     }
 });
 
-module.exports = Database;
+export default Database;

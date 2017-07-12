@@ -1,10 +1,8 @@
 
-var React = require('react');
-var PureRenderMixin = require('../helpers/PureRenderMixin'); // deep-equals version of PRM
-
-var brcaLogo = require('../img/BRCA-Exchange-tall-tranparent.png');
-
-var DisclaimerModal = require('./DisclaimerModal');
+import React from 'react';
+import PureRenderMixin from '../helpers/PureRenderMixin'; // deep-equals version of PRM
+import brcaLogo from '../img/BRCA-Exchange-tall-tranparent.png';
+import DisclaimerModal from './DisclaimerModal';
 
 var Footer = React.createClass({
     mixins: [PureRenderMixin],
@@ -45,4 +43,4 @@ var Footer = React.createClass({
     }
 });
 
-module.exports = Footer;
+export default Footer;

@@ -1,6 +1,6 @@
 
-var React = require('react');
-var _ = require('underscore');
+import React from 'react';
+import _ from 'underscore';
 
 function renderCell(val) {
     return <span>{val}</span>;
@@ -277,11 +277,11 @@ const researchModeColumns = [
     {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'}
 ];
 
-module.exports = ({
+export {
     filterColumns,
     expertModeGroups,
     researchModeGroups,
     subColumns,
     columns,
     researchModeColumns
-});
+};

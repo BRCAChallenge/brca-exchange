@@ -1,9 +1,9 @@
 
-var React = require('react');
-var $ = require('jquery');
-var config  = require('../config');
-var {Grid, Row, Col, Button} = require('react-bootstrap');
-var {Navigation, Link} = require('react-router');
+import React from 'react';
+import $ from 'jquery';
+import config from '../config';
+import { Grid, Row, Col, Button } from 'react-bootstrap';
+import { Navigation, Link } from 'react-router';
 
 /* use classList for this */
 function $c(staticClassName, conditionalClassNames) {
@@ -199,7 +199,7 @@ var MailingListForm = React.createClass({
     }
 });
 
-module.exports = ({
-    "MailingList": MailingList,
-    "$c": $c
-});
+export {
+    MailingList,
+    $c
+};

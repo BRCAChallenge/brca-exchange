@@ -1,5 +1,6 @@
 /*global module: false */
 
+
 module.exports = function(text) {
   return text.toString().toLowerCase()
     .replace(/\s+/g, '-')           // Replace spaces with -

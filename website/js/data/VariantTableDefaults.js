@@ -1,6 +1,6 @@
 /*global module: false, require: false, URL: false, Blob: false */
 
-var _ = require('underscore');
+import _ from 'underscore';
 
 
 const defaultExpertColumns = ['Gene_Symbol', 'HGVS_cDNA', 'HGVS_Protein', 'Protein_Change', 'BIC_Nomenclature', 'Pathogenicity_expert'];
@@ -32,8 +32,8 @@ const getAllSources = function() {
     return _.clone(allSources);
 };
 
-module.exports = {
-    getDefaultExpertColumns: getDefaultExpertColumns,
-    getDefaultResearchColumns: getDefaultResearchColumns,
-    getAllSources: getAllSources
+export {
+    getDefaultExpertColumns,
+    getDefaultResearchColumns,
+    getAllSources
 };

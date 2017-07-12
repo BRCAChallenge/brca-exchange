@@ -1,16 +1,16 @@
 
-var React = require('react');
-var PureRenderMixin = require('../helpers/PureRenderMixin'); // deep-equals version of PRM
-var {Grid, Col, Row, Button, Table} = require('react-bootstrap');
-var backend = require('../backend');
-var config  = require('../config');
-var {Role} = require('./Signup');
-var {Navigation, Link} = require('react-router');
-var {Pagination} = require('react-data-components-bd2k');
-var _ = require('underscore');
-var placeholder = require('../img/placeholder.png');
-var auth = require('../auth');
-var Rx = require('rx');
+import React from 'react';
+import PureRenderMixin from '../helpers/PureRenderMixin'; // deep-equals version of PRM
+import { Grid, Col, Row, Button, Table } from 'react-bootstrap';
+import backend from '../backend';
+import config from '../config';
+import { Role } from './Signup';
+import { Navigation, Link } from 'react-router';
+import { Pagination } from 'react-data-components-bd2k';
+import _ from 'underscore';
+import placeholder from '../img/placeholder.png';
+import auth from '../auth';
+import Rx from 'rx';
 
 var Community = React.createClass({
     mixins: [PureRenderMixin, Navigation],
@@ -365,4 +365,4 @@ var CommunitySearch = React.createClass({
     }
 });
 
-module.exports = Community;
+export default Community;

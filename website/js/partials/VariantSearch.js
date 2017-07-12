@@ -1,15 +1,15 @@
 /*global require: false, module: false */
 /*eslint-env browser */
 
-var React = require('react');
-var slugify = require('../helpers/slugify');
-var {Navigation} = require('react-router');
-var AutoSuggest = require('react-autosuggest');
-var _ = require('underscore');
-var $ = require('jquery');
-var config = require('../config');
+import React from 'react';
 
-require('../css/Autosuggest.css');
+import slugify from '../helpers/slugify';
+import { Navigation } from 'react-router';
+import AutoSuggest from 'react-autosuggest';
+import _ from 'underscore';
+import $ from 'jquery';
+import config from '../config';
+import '../css/Autosuggest.css';
 
 
 function getSuggestions(value, callback) {
@@ -130,4 +130,4 @@ var VariantSearch = React.createClass({
     }
 });
 
-module.exports = VariantSearch;
+export default VariantSearch;

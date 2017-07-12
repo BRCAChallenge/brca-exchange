@@ -1,7 +1,7 @@
-var React = require('react');
-var PureRenderMixin = require('../helpers/PureRenderMixin'); // deep-equals version of PRM
-var {Grid, Col, Row, Alert} = require('react-bootstrap');
-var backend = require('../backend');
+import React from 'react';
+import PureRenderMixin from '../helpers/PureRenderMixin'; // deep-equals version of PRM
+import { Grid, Col, Row, Alert } from 'react-bootstrap';
+import backend from '../backend';
 
 var FactSheet = React.createClass({
     mixins: [PureRenderMixin],
@@ -142,4 +142,4 @@ var FactSheet = React.createClass({
     }
 });
 
-module.exports = FactSheet;
+export default FactSheet;

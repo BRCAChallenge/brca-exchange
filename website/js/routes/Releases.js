@@ -1,14 +1,12 @@
 
-var _ = require('underscore');
-var moment = require('moment');
-
-var React = require('react');
-var {Link} = require('react-router');
-var {Table, Grid, Row, Col} = require('react-bootstrap');
-
-var backend = require('../backend');
-var config = require('../config');
-var anchorme = require("anchorme");
+import _ from 'underscore';
+import moment from 'moment';
+import React from 'react';
+import { Link } from 'react-router';
+import { Table, Grid, Row, Col } from 'react-bootstrap';
+import backend from '../backend';
+import config from '../config';
+import anchorme from 'anchorme';
 
 
 var Releases = React.createClass({
@@ -129,7 +127,7 @@ var Release = React.createClass({
     }
 });
 
-module.exports = ({
-    Releases: Releases,
-    Release: Release,
-});
+export {
+    Releases,
+    Release
+};

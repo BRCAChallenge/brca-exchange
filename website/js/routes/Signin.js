@@ -1,12 +1,12 @@
 
-var React = require('react');
-var {Grid, Row, Col, Button} = require('react-bootstrap');
-var {State, Navigation, Link} = require('react-router');
-var auth = require('../auth');
-var {$c} = require('./Signup');
-var config  = require('../config');
-var $ = require('jquery');
-var _ = require('underscore');
+import React from 'react';
+import { Grid, Row, Col, Button } from 'react-bootstrap';
+import { State, Navigation, Link } from 'react-router';
+import auth from '../auth';
+import { $c } from './Signup';
+import config from '../config';
+import $ from 'jquery';
+import _ from 'underscore';
 
 var ResetPassword = React.createClass({
     mixins: [State, Navigation],
@@ -276,7 +276,7 @@ var SigninForm = React.createClass({
     }
 });
 
-module.exports = ({
-    Signin: Signin,
-    ResetPassword: ResetPassword
-});
+export {
+    Signin,
+    ResetPassword
+};

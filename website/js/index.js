@@ -7,42 +7,46 @@
 // require('es5-shim/es5-sham');
 
 // library CSS includes
-require('bootstrap/dist/css/bootstrap.css');
-require('font-awesome-webpack');
+import 'bootstrap/dist/css/bootstrap.css';
+import 'font-awesome-webpack';
+
 // local CSS/image includes
-require('./css/bootstrap-xlgrid.css'); // adds xl, xxl, xxxl grid sizes to bootstrap 3
-require('./css/custom.css');
-require('./data/favicons');
+import './css/bootstrap-xlgrid.css'; // adds xl, xxl, xxxl grid sizes to bootstrap 3
+import './css/custom.css';
+import './data/favicons';
 
 // library includes
-var React = require('react');
-var {State, Route, RouteHandler, HistoryLocation, run, DefaultRoute} = require('react-router');
+import React from 'react';
 
+import { State, Route, RouteHandler, HistoryLocation, run, DefaultRoute } from 'react-router';
+
+// partials
+import { NavBarNew } from './partials/NavBarNew';
+import Footer from './partials/Footer';
+
+// routes
+import Home from './routes/Home';
+import About from './routes/About';
+import FactSheet from './routes/FactSheet';
+import Help from './routes/Help';
+import Community from './routes/Community';
+import { Signup } from './routes/Signup';
+import { Signin, ResetPassword } from './routes/Signin';
+import { MailingList } from './routes/MailingList';
+import Profile from './routes/Profile';
+import ConfirmEmail from './routes/ConfirmEmail';
+import ChangePassword from './routes/ChangePassword';
+import Database from './routes/Database'; // pseudo-route
+import VariantDetail from './routes/VariantDetail';
+import { Releases, Release } from './routes/Releases.js';
+
+
+// no-op log function when there's no console
 if (typeof console === "undefined") {
     window.console = {
         log: function () {}
     };
 }
-
-// partials
-var {NavBarNew} = require('./partials/NavBarNew');
-var Footer = require('./partials/Footer');
-
-// routes
-var Home = require('./routes/Home');
-var About = require('./routes/About');
-var FactSheet = require('./routes/FactSheet');
-var Help = require('./routes/Help');
-var Community = require('./routes/Community');
-var {Signup} = require('./routes/Signup');
-var {Signin, ResetPassword} = require('./routes/Signin');
-var {MailingList} = require('./routes/MailingList');
-var {Profile} = require('./routes/Profile');
-var {ConfirmEmail} = require('./routes/ConfirmEmail');
-var {ChangePassword} = require('./routes/ChangePassword');
-var Database = require('./routes/Database'); // pseudo-route
-var VariantDetail = require('./routes/VariantDetail');
-var {Releases, Release} = require('./routes/Releases.js');
 
 
 var Application = React.createClass({

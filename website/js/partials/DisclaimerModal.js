@@ -1,9 +1,10 @@
 /*global module: false, require: false */
 
-var React = require('react');
-var {Modal, Button} = require('react-bootstrap');
-var RawHTML = require('../helpers/RawHTML');
-var content = require('../data/content');
+import React from 'react';
+
+import { Modal, Button } from 'react-bootstrap';
+import RawHTML from '../helpers/RawHTML';
+import content from '../data/content';
 
 var DisclaimerModal = React.createClass({
     getInitialState() {
@@ -66,4 +67,4 @@ var DisclaimerModal = React.createClass({
     }
 });
 
-module.exports = DisclaimerModal;
+export default DisclaimerModal;

@@ -1,6 +1,6 @@
 /*global module: false, require: false, window: false */
 
-var React = require('react');
+import React from 'react';
 
 var D3LollipopSVG = React.createClass({
     render: function () {
@@ -18,4 +18,4 @@ var D3LollipopSVG = React.createClass({
     }
 });
 
-module.exports = D3LollipopSVG;
+export default D3LollipopSVG;

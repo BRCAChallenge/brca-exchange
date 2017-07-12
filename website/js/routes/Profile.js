@@ -1,12 +1,12 @@
 
-var React = require('react');
-var $ = require('jquery');
-var _ = require('underscore');
-var config  = require('../config');
-var {Grid, Row, Col, Button} = require('react-bootstrap');
-var {Navigation} = require('react-router');
-var auth = require('../auth');
-var {Role, $c} = require('./Signup');
+import React from 'react';
+import $ from 'jquery';
+import _ from 'underscore';
+import config from '../config';
+import { Grid, Row, Col, Button } from 'react-bootstrap';
+import { Navigation } from 'react-router';
+import auth from '../auth';
+import { Role, $c } from './Signup';
 var countries = require('raw-loader!../../content/countries.txt').split('\n');
 
 var Profile = React.createClass({
@@ -417,6 +417,4 @@ var EditProfileForm = React.createClass({
     }
 });
 
-module.exports = ({
-    Profile: Profile
-});
+export default Profile;

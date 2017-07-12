@@ -1,7 +1,7 @@
-var config = require('./config');
-var $ = require('jquery');
+import config from './config';
+import $ from 'jquery';
 
-module.exports = {
+export default {
     login: function (username, pass, cb) {
         this.logout();
         // Todo: handle the expiration of the tokens

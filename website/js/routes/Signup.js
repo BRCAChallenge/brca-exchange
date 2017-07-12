@@ -1,14 +1,15 @@
 /*global grecaptcha: false */
 
-var React = require('react');
-var content = require('../data/content');
-var RawHTML = require('../helpers/RawHTML');
+import React from 'react';
+
+import content from '../data/content';
+import RawHTML from '../helpers/RawHTML';
 var countries = require('raw-loader!../../content/countries.txt').split("\n");
-var $ = require('jquery');
-var _ = require('underscore');
-var config  = require('../config');
-var {Grid, Row, Col, Button} = require('react-bootstrap');
-var {Navigation} = require('react-router');
+import $ from 'jquery';
+import _ from 'underscore';
+import config from '../config';
+import { Grid, Row, Col, Button } from 'react-bootstrap';
+import { Navigation } from 'react-router';
 
 var Role = {
     ROLE_DATA_PROVIDER: 12,
@@ -411,8 +412,8 @@ var SignupForm = React.createClass({
     }
 });
 
-module.exports = ({
-    Signup: Signup,
-    Role: Role,
-    $c: $c
-});
+export {
+    Signup,
+    Role,
+    $c
+};

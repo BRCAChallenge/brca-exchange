@@ -1,9 +1,8 @@
 
-var React = require('react');
-var {Grid, Col, Row} = require('react-bootstrap');
-
-var content = require('../data/content');
-var RawHTML = require("../helpers/RawHTML");
+import React from 'react';
+import { Grid, Col, Row } from 'react-bootstrap';
+import content from '../data/content';
+import RawHTML from '../helpers/RawHTML';
 
 var About = React.createClass({
     render: function() {
@@ -21,4 +20,4 @@ var About = React.createClass({
     }
 });
 
-module.exports = About;
+export default About;
