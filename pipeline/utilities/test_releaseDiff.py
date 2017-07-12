@@ -28,7 +28,8 @@ class TestStringMethods(unittest.TestCase):
                       'EAS_Allele_frequency_1000_Genomes',
                       'Polyphen_Prediction',
                       'Polyphen_Score',
-                      'Allele_count_AFR'
+                      'Allele_count_AFR',
+                      'Minor_allele_frequency_ESP'
                      ]
         self.oldRow = {
                   'Pathogenicity_all': '',
@@ -45,7 +46,7 @@ class TestStringMethods(unittest.TestCase):
                   'EAS_Allele_frequency_1000_Genomes': '0',
                   'Polyphen_Prediction': 'benign',
                   'Polyphen_Score': '0.992',
-                  'Allele_count_AFR': '-'
+                  'Allele_count_AFR': '-',
                  }
 
         self.newRow = copy.deepcopy(self.oldRow)
@@ -567,6 +568,69 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(v_diff['field'], 'Allele_count_AFR')
         self.assertEqual(v_diff['added'], '567')
         self.assertEqual(v_diff['removed'], '-')
+
+    def test_properly_handles_field_name_changes_same_data(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+
+        self.updated_fieldnames = self.fieldnames + ['Minor_allele_frequency_ESP_percent']
+        self.updated_fieldnames.remove('Minor_allele_frequency_ESP')
+
+        self.oldRow['Minor_allele_frequency_ESP'] = '2.5'
+        self.newRow['Minor_allele_frequency_ESP_percent'] = '2.5'
+
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.updated_fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
+    def test_properly_handles_field_name_changes_updated_data(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+
+        self.updated_fieldnames = self.fieldnames + ['Minor_allele_frequency_ESP_percent']
+        self.updated_fieldnames.remove('Minor_allele_frequency_ESP')
+
+        self.oldRow['Minor_allele_frequency_ESP'] = '1.5'
+        self.newRow['Minor_allele_frequency_ESP_percent'] = '2.5'
+
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.updated_fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        v_diff = diff['chr17:g.43049067:C>T'][0]
+        self.assertEqual(len(diff), 1)
+        self.assertEqual(v_diff['field'], 'Minor_allele_frequency_ESP_percent')
+        self.assertEqual(v_diff['added'], '2.5')
+        self.assertEqual(v_diff['removed'], '1.5')
+        self.assertEqual(change_type, "changed_information")
+
+    def test_properly_handles_field_name_changes_added_data(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+
+        self.updated_fieldnames = self.fieldnames + ['Minor_allele_frequency_ESP_percent']
+        self.updated_fieldnames.remove('Minor_allele_frequency_ESP')
+
+        self.oldRow['Minor_allele_frequency_ESP'] = '-'
+        self.newRow['Minor_allele_frequency_ESP_percent'] = '2.5'
+
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.updated_fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        v_diff = diff['chr17:g.43049067:C>T'][0]
+        self.assertEqual(len(diff), 1)
+        self.assertEqual(v_diff['field'], 'Minor_allele_frequency_ESP_percent')
+        self.assertEqual(v_diff['added'], '2.5')
+        self.assertEqual(v_diff['removed'], '-')
+        self.assertEqual(change_type, "added_information")
+
 
 if __name__ == '__main__':
     pass

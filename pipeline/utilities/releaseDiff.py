@@ -93,14 +93,13 @@ class transformer(object):
         for ocol in oldColumns:
             if ocol in newColumns:
                 newToOldNameMapping[ocol] = ocol
-            elif self._renamedColumns.has_key(ocol):
-                newToOldNameMapping[self._renamedColumns[ocol]] = ocol
             else:
                 oldColumnsRemoved.append(ocol)
+            if self._renamedColumns.has_key(ocol):
+                newToOldNameMapping[self._renamedColumns[ocol]] = ocol
         for ncol in newColumns:
             if ncol not in oldColumns:
-                if ncol not in self._renamedColumns.values():
-                    newColumnsAdded.append(ncol)
+                newColumnsAdded.append(ncol)
         return (oldColumnsRemoved, newColumnsAdded, newToOldNameMapping)
 
     def _consistentDelimitedLists(self, oldValues, newValues, field):
@@ -188,7 +187,7 @@ class transformer(object):
         global added_data
         variant = newRow["pyhgvs_Genomic_Coordinate_38"]
         newValue = self._normalize(newRow[field], field)
-        if field in self._newColumnsAdded:
+        if field in self._newColumnsAdded and field not in self._renamedColumns.values():
             if newValue == "-":
                 # Ignore new columns with no data in diff
                 return "unchanged"
@@ -233,7 +232,7 @@ class transformer(object):
                              "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg38", "HGVS_cDNA", "HGVS_Protein",
                              "Hg37_Start", "Hg37_End", "Hg36_Start", "Hg36_End", "BX_ID_ENIGMA", "BX_ID_ClinVar",
                              "BX_ID_BIC", "BX_ID_ExAC", "BX_ID_LOVD", "BX_ID_exLOVD", "BX_ID_1000_Genomes", "BX_ID_ESP",
-                             "Polyphen_Prediction", "Polyphen_Score"]
+                             "Polyphen_Prediction", "Polyphen_Score", "Minor_allele_frequency_ESP"]
 
         # Header to group all logs the same variant
         variant_intro = "\n\n %s \n Old Source: %s \n New Source: %s \n\n" % (newRow["pyhgvs_Genomic_Coordinate_38"],
@@ -297,13 +296,15 @@ class transformer(object):
 
 
 class v1ToV2(transformer):
-    # Here are columns that were renamed between the April 2016 release and the September 2016
+    # Here are columns that were renamed between the July 2017 release and the September 2016
     # release. In this dictionary, the key is the old name, and the value is the new name.
     _renamedColumns = {"SIFT_VEP": "Sift_Prediction",
                        "PolyPhen_VEP": "Polyphen_Prediction",
                        "BIC_Identifier": "BIC_Nomenclature",
                        "Pathogenicity_default": "Pathogenicity_expert",
-                       "Pathogenicity_research": "Pathogenicity_all"}
+                       "Pathogenicity_research": "Pathogenicity_all",
+                       "Minor_allele_frequency_ESP": "Minor_allele_frequency_ESP_percent"
+                       }
 
 
 def appendVariantChangeTypesToOutput(variantChangeTypes, v2, output):
