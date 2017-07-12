@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-
 import argparse
 import csv
 import re
 import json
 import logging
-
 
 added_data = None
 diff = None
@@ -179,12 +177,6 @@ class transformer(object):
         # Strip leading and trailing whitespace
         value = value.strip()
 
-        try:
-            value = float(value)
-            value = str(value)
-        except ValueError:
-            pass
-
         return value
 
     def compareField(self, oldRow, newRow, field):
@@ -206,6 +198,15 @@ class transformer(object):
                 return "added data: %s | %s" % (oldValue, newValue)
         else:
             oldValue = self._normalize(oldRow[self._newColumnNameToOld[field]], field)
+            try:
+                # This handles special cases dealing with scientific notation and
+                # equivalent values with different representations (e.g. 0 == 0.0)
+                oldValueCopy = float(oldValue)
+                newValueCopy = float(newValue)
+                if oldValueCopy == newValueCopy:
+                    return "unchanged"
+            except ValueError:
+                pass
             if oldValue == newValue:
                 return "unchanged"
             elif self._consistentDelimitedLists(oldValue, newValue, field):

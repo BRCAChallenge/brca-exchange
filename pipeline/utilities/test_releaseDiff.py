@@ -27,7 +27,8 @@ class TestStringMethods(unittest.TestCase):
                       'Allele_frequency_ExAC',
                       'EAS_Allele_frequency_1000_Genomes',
                       'Polyphen_Prediction',
-                      'Polyphen_Score'
+                      'Polyphen_Score',
+                      'Allele_count_AFR'
                      ]
         self.oldRow = {
                   'Pathogenicity_all': '',
@@ -43,17 +44,18 @@ class TestStringMethods(unittest.TestCase):
                   'Allele_frequency_ExAC': '9.841E-06',
                   'EAS_Allele_frequency_1000_Genomes': '0',
                   'Polyphen_Prediction': 'benign',
-                  'Polyphen_Score': '0.992'
+                  'Polyphen_Score': '0.992',
+                  'Allele_count_AFR': '-'
                  }
 
         self.newRow = copy.deepcopy(self.oldRow)
 
         self.test_dir = tempfile.mkdtemp()
 
-        self.added = csv.DictWriter(open(path.join(self.test_dir, 'removed.tsv'), 'w'), delimiter="\t", fieldnames=self.fieldnames)
+        self.added = csv.DictWriter(open(path.join(self.test_dir, 'added.tsv'), 'w'), delimiter="\t", fieldnames=self.fieldnames)
         self.added.writeheader()
 
-        self.removed = csv.DictWriter(open(path.join(self.test_dir, 'added.tsv'), 'w'), delimiter="\t", fieldnames=self.fieldnames)
+        self.removed = csv.DictWriter(open(path.join(self.test_dir, 'removed.tsv'), 'w'), delimiter="\t", fieldnames=self.fieldnames)
         self.removed.writeheader()
 
         self.added_data = open(path.join(self.test_dir, 'added_data.tsv'), 'w')
@@ -414,6 +416,16 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
 
+        self.oldRow['EAS_Allele_frequency_1000_Genomes'] = '0.0'
+        self.oldRow['Allele_frequency_ExAC'] = '9.841e-06'
+        self.newRow['EAS_Allele_frequency_1000_Genomes'] = '0'
+        self.newRow['Allele_frequency_ExAC'] = '9.841E-06'
+
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
     def test_catches_changed_numeric_values_after_normalization(self):
         releaseDiff.added_data = self.added_data
         releaseDiff.diff = self.diff
@@ -539,6 +551,22 @@ class TestStringMethods(unittest.TestCase):
         self.assertIn("Genevieve Michils (Leuven,BE)", v_diff['added'])
         self.assertIn("Rien Blok (Maastricht NL)", v_diff['added'])
 
+    def test_displays_integers_as_integers_not_floats(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        self.oldRow['Allele_count_AFR'] = '-'
+        self.newRow['Allele_count_AFR'] = '567'
+
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        v_diff = diff['chr17:g.43049067:C>T'][0]
+        self.assertEqual(len(diff), 1)
+        self.assertEqual(v_diff['field'], 'Allele_count_AFR')
+        self.assertEqual(v_diff['added'], '567')
+        self.assertEqual(v_diff['removed'], '-')
 
 if __name__ == '__main__':
     pass
