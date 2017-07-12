@@ -1,5 +1,3 @@
-'use strict';
-
 var React = require('react');
 var {Navigation} = require('react-router');
 var {Grid, Col, Row, Button, Modal, Glyphicon} = require('react-bootstrap');

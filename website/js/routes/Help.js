@@ -1,4 +1,3 @@
-'use strict';
 
 var React = require('react');
 var {State} = require('react-router');

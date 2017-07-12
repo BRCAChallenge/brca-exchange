@@ -1,5 +1,3 @@
-'use strict';
-
 var React = require('react');
 var {Navigation, Link} = require('react-router');
 var _ = require('underscore');
@@ -301,7 +299,7 @@ var VariantDetail = React.createClass({
                             diffHTML.push(
                                 <span>
                                     <strong>{ getDisplayName(fieldName) }: </strong>
-                                    <span className='label label-success'><span className='glyphicon glyphicon-star'></span> New</span>
+                                    <span className='label label-success'><span className='glyphicon glyphicon-star' /> New</span>
                                     &nbsp;{`${added}`}
                                 </span>, <br />
                             );
@@ -316,7 +314,7 @@ var VariantDetail = React.createClass({
                             diffHTML.push(
                                 <span>
                                     <strong>{ getDisplayName(fieldName) }: </strong>
-                                    {removed} <span className="glyphicon glyphicon-arrow-right"></span> {added}
+                                    {removed} <span className="glyphicon glyphicon-arrow-right" /> {added}
                                 </span>, <br />
                             );
                         }
@@ -356,8 +354,6 @@ var VariantDetail = React.createClass({
 
         // FAISAL: rather than directly map cols, we create a higher-level groups structure
         // the higher-level groups structure maps a subset of columns to that group
-        let groupsEmpty = 0;
-        let totalRowsEmpty = 0;
 
         const groupTables = _.map(groups, ({ groupTitle, innerCols }) => {
             let rowsEmpty = 0;
@@ -417,8 +413,6 @@ var VariantDetail = React.createClass({
                     rowItem = '-';
                 }
 
-                totalRowsEmpty += rowsEmpty;
-
                 return (
                     <tr key={prop} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
                         <KeyInline tableKey={title} onClick={(event) => this.showHelp(event, title)}/>
@@ -429,10 +423,6 @@ var VariantDetail = React.createClass({
 
             // check if all our rows are empty, in which case our group should be flagged as empty
             const allEmpty = rowsEmpty >= rows.length;
-
-            if (allEmpty) {
-                groupsEmpty += 1;
-            }
 
             const header = (
                 <h3>

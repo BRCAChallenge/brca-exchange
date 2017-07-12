@@ -1,5 +1,4 @@
 /*global module: false */
-'use strict';
 
 module.exports = function(text) {
   return text.toString().toLowerCase()

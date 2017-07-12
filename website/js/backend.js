@@ -1,5 +1,4 @@
 /*global require: false, module: false */
-'use strict';
 
 var Rx = require('rx');
 require('rx-dom');

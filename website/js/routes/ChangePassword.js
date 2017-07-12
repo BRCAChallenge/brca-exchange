@@ -1,4 +1,3 @@
-'use strict';
 
 var React = require('react');
 var {Grid, Row, Col, Button} = require('react-bootstrap');

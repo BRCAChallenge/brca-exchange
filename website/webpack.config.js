@@ -12,10 +12,9 @@ var fs = require('fs');
 var port = process.env.BRCAPORT || 8080;
 
 module.exports = {
-	historyApiFallback: true,
 	entry: "./js/index",
 	output: {
-		path: "build",
+		path: path.join(__dirname, "build"),
 		publicPath: "/",
 		filename: "[name].js"
 	},
@@ -23,30 +22,58 @@ module.exports = {
 		port: port
 	},
 	module: {
-		preLoaders: [
-		  {
-		    test: /\.jsx?$/,
-		    loaders: ['eslint'],
-		  }
-		],
-		loaders: [
+		rules: [
+            {
+                test: /\.jsx?$/,
+                enforce: "pre", // replaces module.preLoaders from webpack 1.x
+                loaders: ['eslint-loader'],
+            },
+
 			// The next three are required for muts-needle-plot.
-			{ test: /d3-svg-legend/, loader: "imports?d3=d3" },
-			{ test: /muts-needle-plot/, loader: "imports?_=underscore" },
+			{ test: /d3-svg-legend/, loader: "imports-loader?d3=d3" },
+			{ test: /muts-needle-plot/, loader: "imports-loader?_=underscore" },
 			// The d3-tip AMD loader does not populate d3.tip, which is expected
 			// by muts-needle-plot. So, we disable it here. The CommonJS loader
 			// will populate d3.tip.
-			{ test: /d3-tip/, loader: "imports?define=>false" },
+			{ test: /d3-tip/, loader: "imports-loader?define=>false" },
 
-			{ test: /rx-dom/, loader: "imports?define=>false" },
-			{ test: /\.css$/, loader: "style!css" },
-			{ test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader?optional=es7.objectRestSpread,optional=runtime,cacheDirectory=true'},
+			{ test: /rx-dom/, loader: "imports-loader?define=>false" },
+
+			{
+			    test: /\.css$/,
+                use: [
+                    "style-loader",
+                    "css-loader"
+                ]
+            },
+			{
+			    test: /\.js$/,
+                exclude: /node_modules/,
+                loader: 'babel-loader',
+                options: {
+                    cacheDirectory: true,
+			        presets: ['es2017', 'react', 'stage-2']
+                }
+            },
 			{
 				test: /\.(jpe?g|png|gif|svg|eot|woff2?|ttf)(\?v=[0-9]\.[0-9]\.[0-9])?$/i,
-				loaders: ['url?limit=10000'],
+				loaders: ['url-loader?limit=10000'],
 				exclude: [path.resolve(__dirname, "js/img/favicon")]
 			},
-			{ test: /\.md/, loader: 'html!markdown-it' },
+			{
+			    test: /\.md/,
+                use: [
+                    { loader: 'html-loader' },
+                    {
+                        loader: 'markdown-it-loader',
+                        options: {
+                            html: true,
+                            use: [mdih]
+                        }
+                    }
+                ]
+            },
+
 			// This is a custom loader for the database tsv file that emits a compact
 			// json file (no repeated property names), and does a simple sanity check,
 			// ensuring that the primary key is, in fact, unique.
@@ -57,9 +84,9 @@ module.exports = {
 		new HtmlWebpackPlugin({
 			title: "Template Project",
 			filename: "index.html",
-			template: "page.template"
-		}),
-		new webpack.OldWatchingPlugin()
+			template: "page.template",
+            inject: false
+		})
 	],
 	resolve: {
 		alias: {
@@ -75,16 +102,15 @@ module.exports = {
             'masonry': 'masonry-layout',
             'isotope': 'isotope-layout'
 		},
-		extensions: ['', '.js', '.json', '.coffee'],
-		root: __dirname + "/js"
+		extensions: ['*', '.js', '.json', '.coffee'],
+        modules: [
+            path.resolve(__dirname, "js"),
+            "node_modules"
+        ]
 	},
 	resolveLoader: {
 		alias: {
 			'copy': 'file-loader?name=[path][name].[ext]&context=./js'
 		}
-	},
-	'markdown-it': {
-		html: true,
-		use: [mdih]
 	}
 };

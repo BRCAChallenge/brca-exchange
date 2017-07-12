@@ -1,5 +1,3 @@
-'use strict';
-
 var React = require('react');
 var {Navigation, State} = require('react-router');
 var Rx = require('rx');

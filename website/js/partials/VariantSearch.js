@@ -1,6 +1,5 @@
 /*global require: false, module: false */
 /*eslint-env browser */
-'use strict';
 
 var React = require('react');
 var slugify = require('../helpers/slugify');

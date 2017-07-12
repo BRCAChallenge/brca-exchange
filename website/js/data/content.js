@@ -1,6 +1,5 @@
 /*eslint-env browser */
 /*global require: false, module: false */
-'use strict';
 
 var content = {
     home: require('../../content/home.md'),

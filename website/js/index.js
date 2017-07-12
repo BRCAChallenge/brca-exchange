@@ -1,18 +1,17 @@
 /*eslint-env browser */
 /*global require: false */
-'use strict';
 
 // shims for older browsers
-require('babel/polyfill');
-require('es5-shim');
-require('es5-shim/es5-sham');
+// require('babel/polyfill');
+// require('es5-shim');
+// require('es5-shim/es5-sham');
 
 // library CSS includes
 require('bootstrap/dist/css/bootstrap.css');
 require('font-awesome-webpack');
 // local CSS/image includes
-require('css/bootstrap-xlgrid.css'); // adds xl, xxl, xxxl grid sizes to bootstrap 3
-require('css/custom.css');
+require('./css/bootstrap-xlgrid.css'); // adds xl, xxl, xxxl grid sizes to bootstrap 3
+require('./css/custom.css');
 require('./data/favicons');
 
 // library includes

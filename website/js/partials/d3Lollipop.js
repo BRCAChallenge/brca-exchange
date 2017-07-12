@@ -1,5 +1,4 @@
 /*global module: false, require: false */
-'use strict';
 
 var React = require('react');
 var _ = require('underscore');
@@ -13,10 +12,10 @@ var {Grid, Row, Nav, NavItem} = require('react-bootstrap');
 
 var brca12JSON = {
     BRCA1: {
-        brcaDomainFile: require('raw!../../content/brca1LollipopDomain.json')
+        brcaDomainFile: require('raw-loader!../../content/brca1LollipopDomain.json')
     },
     BRCA2: {
-        brcaDomainFile: require('raw!../../content/brca2LollipopDomain.json')
+        brcaDomainFile: require('raw-loader!../../content/brca2LollipopDomain.json')
     }
 };
 var d3Lollipop = {};
@@ -80,7 +79,7 @@ var D3Lollipop = React.createClass({
     },
 
      componentDidMount: function() {
-        var {data, brcakey, onRowClick, ...opts} = this.props;
+        var {data, brcakey, onRowClick} = this.props;
         var subSetData = data.map(this.filterAttributes);
         var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
         var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
@@ -91,7 +90,7 @@ var D3Lollipop = React.createClass({
         // only rebuild plot if number of variants has changed
         if (newProps.data.length !== this.props.data.length) {
             this.cleanupBRCA();
-            var {data, brcakey, onRowClick, ...opts} = newProps;
+            var {data, brcakey, onRowClick} = newProps;
             var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
             while (d3svgBrcaRef.lastChild) {
                 d3svgBrcaRef.removeChild(d3svgBrcaRef.lastChild);

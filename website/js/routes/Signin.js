@@ -1,4 +1,3 @@
-'use strict';
 
 var React = require('react');
 var {Grid, Row, Col, Button} = require('react-bootstrap');
@@ -160,7 +159,7 @@ var Signin = React.createClass({
                 <Row id="submit">
                     <Col md={8} mdOffset={2}>
                             <div className="form-group" style={{marginLeft: "-15px", marginRight: "-15px"}}>
-                                <label className="col-sm-4 control-label"></label>
+                                <label className="col-sm-4 control-label"/>
                                 <Col sm={6}>
                                     <Button type="button" className="btn btn-primary btn-block" onClick={this.handleSubmit}>
                                         Sign in

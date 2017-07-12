@@ -1,4 +1,3 @@
-'use strict';
 
 var React = require('react');
 var $ = require('jquery');
@@ -8,7 +7,7 @@ var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {Navigation} = require('react-router');
 var auth = require('../auth');
 var {Role, $c} = require('./Signup');
-var countries = require('raw!../../content/countries.txt').split('\n');
+var countries = require('raw-loader!../../content/countries.txt').split('\n');
 
 var Profile = React.createClass({
     statics: {
@@ -359,7 +358,7 @@ var EditProfileForm = React.createClass({
         var options = opts.map(value => <option key={id + value[0]} value={value[0]}>{value[1]}</option>);
         return this.renderField(id, label,
             <select className="form-control" id={id} ref={id} value={defaultValue} onChange={handleChange}>
-                <option key={id + "NONE"} value=""></option>
+                <option key={id + "NONE"} value="" />
                 {options}
             </select>
         );

@@ -1,4 +1,3 @@
-'use strict';
 
 var React = require('react');
 var $ = require('jquery');
@@ -166,12 +165,11 @@ var MailingListForm = React.createClass({
         return isValid;
     },
     getFormData: function () {
-        var data = {
+        return {
             "email": this.refs.email.getDOMNode().value,
             "firstName": this.refs.firstName.getDOMNode().value,
             "lastName": this.refs.lastName.getDOMNode().value,
         };
-        return data;
     },
     render: function () {
         return (
@@ -188,7 +186,7 @@ var MailingListForm = React.createClass({
             <input type="text" className="form-control" id={id} ref={id}/>);
     },
     renderCAPTCHA: function(id, label) {
-        return this.renderField(id, label, <div ref="mailinglistCAPTCHA"></div>);
+        return this.renderField(id, label, <div ref="mailinglistCAPTCHA" />);
     },
     renderField: function (id, label, field) {
         return (

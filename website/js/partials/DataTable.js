@@ -1,5 +1,4 @@
 /*global module: false, require: false, URL: false, Blob: false */
-'use strict';
 
 var React = require('react');
 var Rx = require('rx');

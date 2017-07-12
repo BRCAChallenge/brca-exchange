@@ -1,5 +1,4 @@
 /*global module: false, require: false, window: false */
-'use strict';
 
 var React = require('react');
 

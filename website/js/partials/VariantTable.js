@@ -8,7 +8,6 @@
 // This needs to be revisited.
 
 /*global module: false, require: false, window: false */
-'use strict';
 
 var React = require('react');
 var {State} = require('react-router');
@@ -62,7 +61,7 @@ var Table = React.createClass({
     mixins: [PureRenderMixin],
     render: function () {
         // Expert portal always shows all sources and default columns
-        var {data, onHeaderClick, onRowClick, hiddenSources, mode, columnSelection, sourceSelection, ...opts} = this.props;
+        var {data, onHeaderClick, onRowClick, mode, columnSelection, sourceSelection, ...opts} = this.props;
         if (mode === "default") {
             // Always show default columns/sources in expert mode.
             columnSelection = _.object(_.map(columns,

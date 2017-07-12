@@ -1,5 +1,3 @@
-'use strict';
-
 var React = require('react');
 var PureRenderMixin = require('../helpers/PureRenderMixin'); // deep-equals version of PRM
 var {Grid, Col, Row, Alert} = require('react-bootstrap');
@@ -48,7 +46,7 @@ var FactSheet = React.createClass({
                         <br />
                         <br />
                         <div className='image-with-caption'>
-                            <img src={require('../../content/BRCA_scaled.JPG')}></img>
+                            <img src={require('../../content/BRCA_scaled.JPG')} />
                             <small className='image-caption'><em>Source: https://commons.wikimedia.org/wiki/File:BRCA_1.JPG</em></small>
                         </div>
 
@@ -124,7 +122,7 @@ var FactSheet = React.createClass({
                     </Col>
                     <Col md={6} mdOffset={3}>
                         <div className='image-with-caption'>
-                            <img src={require('../../content/DNA_cyclepath_to_Shelford_-_geograph.org.uk_-_538440.jpg')}></img>
+                            <img src={require('../../content/DNA_cyclepath_to_Shelford_-_geograph.org.uk_-_538440.jpg')} />
                             <small className='image-caption'><em>The BRCA genes loom large in public awareness. This photo shows a bicycle path in Shelford, England that depicts the sequence of the BRCA2 gene. The lanes of the path are separated by colored stripes. Each stripe represents one base of BRCA2, with the stripes color-coded according to the nucleotide. See also <a href='http://www.bshs.org.uk/travel-guide/dna-cycle-path-cambridge-england'>http://www.bshs.org.uk/travel-guide/dna-cycle-path-cambridge-england</a></em></small>
                         </div>
                     </Col>

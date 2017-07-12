@@ -1,10 +1,9 @@
 /*global grecaptcha: false */
-'use strict';
 
 var React = require('react');
 var content = require('../data/content');
 var RawHTML = require('../helpers/RawHTML');
-var countries = require('raw!../../content/countries.txt').split("\n");
+var countries = require('raw-loader!../../content/countries.txt').split("\n");
 var $ = require('jquery');
 var _ = require('underscore');
 var config  = require('../config');
@@ -359,7 +358,7 @@ var SignupForm = React.createClass({
         var options = opts.map(value => <option key={id + value[0]} value={value[0]}>{value[1]}</option>);
         return this.renderField(id, label,
             <select className="form-control" id={id} ref={id}>
-                <option key={id + "NONE"} value=""></option>
+                <option key={id + "NONE"} value="" />
                 {options}
             </select>
         );
@@ -399,7 +398,7 @@ var SignupForm = React.createClass({
         return this.renderField(id, "", checkbox);
     },
     renderCAPTCHA: function(id, label) {
-        return this.renderField(id, label, <div ref="signupCAPTCHA"></div>);
+        return this.renderField(id, label, <div ref="signupCAPTCHA" />);
     },
     renderField: function (id, label, field) {
         return (

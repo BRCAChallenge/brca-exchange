@@ -1,4 +1,3 @@
-'use strict';
 
 var React = require('react');
 var PureRenderMixin = require('../helpers/PureRenderMixin'); // deep-equals version of PRM
@@ -319,7 +318,7 @@ var CommunityMap = React.createClass({
     componentWillUnmount: function() { window.removeEventListener('resize', this.handleResize); },
 
     render: function() {
-        return <div id="communityMap"></div>;
+        return <div id="communityMap" />;
     }
 });
 
