@@ -1,5 +1,5 @@
 /*global require: false */
-'use strict';
+// 'use strict';
 
 //require('./some-test-file');
 
