@@ -190,7 +190,7 @@ def pathogenicityUpdate(row):
 
 def selectAlleleFrequency(row):
     if row["Allele_frequency_ExAC"] != EMPTY:
-        return "%s (ExAC)" % row["Allele_frequency_ExAC"]
+        return "%s (ExAC minus TCGA)" % row["Allele_frequency_ExAC"]
     elif row["Minor_allele_frequency_ESP"] != EMPTY:
         return "%s (ESP)" % row["Minor_allele_frequency_ESP"].split(',')[-1]
     elif row["Allele_frequency_1000_Genomes"] != EMPTY:
