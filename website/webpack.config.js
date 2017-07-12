@@ -52,7 +52,7 @@ module.exports = {
                 loader: 'babel-loader',
                 options: {
                     cacheDirectory: true,
-			        presets: ['es2017', 'react', 'stage-2']
+                    presets: ['es2017', 'react', 'stage-2']
                 }
             },
 			{
