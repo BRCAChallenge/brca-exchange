@@ -1,4 +1,4 @@
-/*global __dirname: false */
+/*global module: false, __dirname: false */
 const webpack = require('webpack');
 const path = require('path');
 const config = require('./webpack.config');
