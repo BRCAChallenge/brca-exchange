@@ -376,8 +376,11 @@ class TestVariantMerging(unittest.TestCase):
             record = append_exac_allele_frequencies(record, new_record=None, i=None)
             for subpopulation in EXAC_SUBPOPULATIONS:
                 val = record.INFO["AF_" + subpopulation]
-                float_val = float(val)
-                self.assertEqual(float_val, round_sigfigs(float(val), 3))
+                try:
+                    float_val = float(val)
+                    self.assertEqual(float_val, round_sigfigs(float(val), 3))
+                except ValueError:
+                    self.assertEqual(val, '-')
 
 
 if __name__ == "__main__":
