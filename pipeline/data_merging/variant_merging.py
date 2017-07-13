@@ -736,7 +736,8 @@ def append_exac_allele_frequencies(record, new_record=None, i=None):
             allele_frequency = "-"
             if len(allele_count) > 0 and allele_number != 0:
                 allele_frequency = float(allele_count[0]) / float(allele_number)
-            record.INFO[("AF_" + subpopulation)] = str(utilities.round_sigfigs(allele_frequency, 3))
+                allele_frequency = str(utilities.round_sigfigs(allele_frequency, 3))
+            record.INFO[("AF_" + subpopulation)] = allele_frequency
         return record
     else:
         new_record.INFO['AF'] = record.INFO['AF'][i]
@@ -746,7 +747,8 @@ def append_exac_allele_frequencies(record, new_record=None, i=None):
             allele_frequency = "-"
             if allele_number != 0:
                 allele_frequency = float(allele_count) / float(allele_number)
-            new_record.INFO[("AF_" + subpopulation)] = str(utilities.round_sigfigs(allele_frequency, 3))
+                allele_frequency = str(utilities.round_sigfigs(allele_frequency, 3))
+            new_record.INFO[("AF_" + subpopulation)] = allele_frequency
         return new_record
 
 
