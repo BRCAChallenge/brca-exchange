@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-
 import argparse
 import copy
 import csv
 import re
+import utilities
 
 EMPTY = "-"
 FIELDS_TO_REMOVE = ["Protein_ClinVar",
@@ -26,8 +26,7 @@ FIELDS_TO_RENAME = {"Gene_symbol_ENIGMA": "Gene_Symbol",
                     "Abbrev_AA_change_ENIGMA": "Protein_Change",
                     "HGVS_cDNA_ENIGMA": "HGVS_cDNA",
                     "HGVS_protein_ENIGMA": "HGVS_Protein",
-                    "BIC_Nomenclature_ENIGMA": "BIC_Nomenclature",
-                    "Minor_allele_frequency_ESP": "Minor_allele_frequency_percent_ESP"}
+                    "BIC_Nomenclature_ENIGMA": "BIC_Nomenclature"}
 
 
 def main():
@@ -260,7 +259,13 @@ def selectMaxAlleleFrequency(newRow):
                 source = determineSourceForMAF(field)
                 subpopulation = determineSubpopulationForMAF(field)
                 maxFreq = max_in_field
-                maxFreqString = "%f (%s from %s)" % (max_in_field, subpopulation, source)
+                if "ExAC" in source:
+                    # Ensure exac values maintain 3 sigfigs
+                    maxFreqStringPrefix = str(utilities.round_sigfigs(float(max_in_field), 3))
+                    maxFreqStringSuffix = " (%s from %s)" % (subpopulation, source)
+                    maxFreqString = maxFreqStringPrefix + maxFreqStringSuffix
+                else:
+                    maxFreqString = "%f (%s from %s)" % (max_in_field, subpopulation, source)
     return(maxFreqString)
 
 
