@@ -29,7 +29,6 @@ class TestStringMethods(unittest.TestCase):
                       'Polyphen_Prediction',
                       'Polyphen_Score',
                       'Allele_count_AFR',
-                      'Minor_allele_frequency_ESP'
                      ]
         self.oldRow = {
                   'Pathogenicity_all': '',
@@ -576,7 +575,7 @@ class TestStringMethods(unittest.TestCase):
         variant = 'chr17:g.43049067:C>T'
 
         self.updated_fieldnames = self.fieldnames + ['Minor_allele_frequency_percent_ESP']
-        self.updated_fieldnames.remove('Minor_allele_frequency_ESP')
+        self.fieldnames = self.fieldnames + ['Minor_allele_frequency_ESP']
 
         self.oldRow['Minor_allele_frequency_ESP'] = '2.5'
         self.newRow['Minor_allele_frequency_percent_ESP'] = '2.5'
@@ -594,7 +593,7 @@ class TestStringMethods(unittest.TestCase):
         variant = 'chr17:g.43049067:C>T'
 
         self.updated_fieldnames = self.fieldnames + ['Minor_allele_frequency_percent_ESP']
-        self.updated_fieldnames.remove('Minor_allele_frequency_ESP')
+        self.fieldnames = self.fieldnames + ['Minor_allele_frequency_ESP']
 
         self.oldRow['Minor_allele_frequency_ESP'] = '1.5'
         self.newRow['Minor_allele_frequency_percent_ESP'] = '2.5'
@@ -616,7 +615,7 @@ class TestStringMethods(unittest.TestCase):
         variant = 'chr17:g.43049067:C>T'
 
         self.updated_fieldnames = self.fieldnames + ['Minor_allele_frequency_percent_ESP']
-        self.updated_fieldnames.remove('Minor_allele_frequency_ESP')
+        self.fieldnames = self.fieldnames + ['Minor_allele_frequency_ESP']
 
         self.oldRow['Minor_allele_frequency_ESP'] = '-'
         self.newRow['Minor_allele_frequency_percent_ESP'] = '2.5'
