@@ -77,9 +77,7 @@ class brcaParse:
         self.Sig = brcaParse.column(self.A, d)  # Clinical significance column
         self.Gene = brcaParse.column(self.A, e)  # BRCA1/2 column for direction of sequence
         self.id = brcaParse.column(self.A, g) #id number column
-        print(self.id)
         self.ExonRef = brcaParse.column(self.A, h) #dicates what exon starts and stops should be used..reference sequence
-        print(self.ExonRef)
         
         self.matOut = np.vstack((self.Alt, self.Ref, self.Pos, self.Sig, self.Gene))
 
