@@ -27,7 +27,8 @@ class TestStringMethods(unittest.TestCase):
                       'Allele_frequency_ExAC',
                       'EAS_Allele_frequency_1000_Genomes',
                       'Polyphen_Prediction',
-                      'Polyphen_Score'
+                      'Polyphen_Score',
+                      'Allele_count_AFR',
                      ]
         self.oldRow = {
                   'Pathogenicity_all': '',
@@ -43,17 +44,18 @@ class TestStringMethods(unittest.TestCase):
                   'Allele_frequency_ExAC': '9.841E-06',
                   'EAS_Allele_frequency_1000_Genomes': '0',
                   'Polyphen_Prediction': 'benign',
-                  'Polyphen_Score': '0.992'
+                  'Polyphen_Score': '0.992',
+                  'Allele_count_AFR': '-',
                  }
 
         self.newRow = copy.deepcopy(self.oldRow)
 
         self.test_dir = tempfile.mkdtemp()
 
-        self.added = csv.DictWriter(open(path.join(self.test_dir, 'removed.tsv'), 'w'), delimiter="\t", fieldnames=self.fieldnames)
+        self.added = csv.DictWriter(open(path.join(self.test_dir, 'added.tsv'), 'w'), delimiter="\t", fieldnames=self.fieldnames)
         self.added.writeheader()
 
-        self.removed = csv.DictWriter(open(path.join(self.test_dir, 'added.tsv'), 'w'), delimiter="\t", fieldnames=self.fieldnames)
+        self.removed = csv.DictWriter(open(path.join(self.test_dir, 'removed.tsv'), 'w'), delimiter="\t", fieldnames=self.fieldnames)
         self.removed.writeheader()
 
         self.added_data = open(path.join(self.test_dir, 'added_data.tsv'), 'w')
@@ -414,6 +416,16 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
 
+        self.oldRow['EAS_Allele_frequency_1000_Genomes'] = '0.0'
+        self.oldRow['Allele_frequency_ExAC'] = '9.841e-06'
+        self.newRow['EAS_Allele_frequency_1000_Genomes'] = '0'
+        self.newRow['Allele_frequency_ExAC'] = '9.841E-06'
+
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
     def test_catches_changed_numeric_values_after_normalization(self):
         releaseDiff.added_data = self.added_data
         releaseDiff.diff = self.diff
@@ -538,6 +550,85 @@ class TestStringMethods(unittest.TestCase):
         self.assertIn("Ans M.W. van den Ouweland (Rotterdam,NL)", v_diff['added'])
         self.assertIn("Genevieve Michils (Leuven,BE)", v_diff['added'])
         self.assertIn("Rien Blok (Maastricht NL)", v_diff['added'])
+
+    def test_displays_integers_as_integers_not_floats(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        self.oldRow['Allele_count_AFR'] = '-'
+        self.newRow['Allele_count_AFR'] = '567'
+
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        v_diff = diff['chr17:g.43049067:C>T'][0]
+        self.assertEqual(len(diff), 1)
+        self.assertEqual(v_diff['field'], 'Allele_count_AFR')
+        self.assertEqual(v_diff['added'], '567')
+        self.assertEqual(v_diff['removed'], '-')
+
+    def test_properly_handles_field_name_changes_same_data(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+
+        self.updated_fieldnames = self.fieldnames + ['Minor_allele_frequency_percent_ESP']
+        self.fieldnames = self.fieldnames + ['Minor_allele_frequency_ESP']
+
+        self.oldRow['Minor_allele_frequency_ESP'] = '2.5'
+        self.newRow['Minor_allele_frequency_percent_ESP'] = '2.5'
+
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.updated_fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
+    def test_properly_handles_field_name_changes_updated_data(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+
+        self.updated_fieldnames = self.fieldnames + ['Minor_allele_frequency_percent_ESP']
+        self.fieldnames = self.fieldnames + ['Minor_allele_frequency_ESP']
+
+        self.oldRow['Minor_allele_frequency_ESP'] = '1.5'
+        self.newRow['Minor_allele_frequency_percent_ESP'] = '2.5'
+
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.updated_fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        v_diff = diff['chr17:g.43049067:C>T'][0]
+        self.assertEqual(len(diff), 1)
+        self.assertEqual(v_diff['field'], 'Minor_allele_frequency_percent_ESP')
+        self.assertEqual(v_diff['added'], '2.5')
+        self.assertEqual(v_diff['removed'], '1.5')
+        self.assertEqual(change_type, "changed_information")
+
+    def test_properly_handles_field_name_changes_added_data(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+
+        self.updated_fieldnames = self.fieldnames + ['Minor_allele_frequency_percent_ESP']
+        self.fieldnames = self.fieldnames + ['Minor_allele_frequency_ESP']
+
+        self.oldRow['Minor_allele_frequency_ESP'] = '-'
+        self.newRow['Minor_allele_frequency_percent_ESP'] = '2.5'
+
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.updated_fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        v_diff = diff['chr17:g.43049067:C>T'][0]
+        self.assertEqual(len(diff), 1)
+        self.assertEqual(v_diff['field'], 'Minor_allele_frequency_percent_ESP')
+        self.assertEqual(v_diff['added'], '2.5')
+        self.assertEqual(v_diff['removed'], '-')
+        self.assertEqual(change_type, "added_information")
 
 
 if __name__ == '__main__':
