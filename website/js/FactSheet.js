@@ -17,29 +17,28 @@ Highcharts.setOptions({
 });
 
 var chartOptions1 = {
-    title: {
-        text: 'Unique Variants'
-    },
-    tooltip: {
-        pointFormat: '{point.y}'
-    },
+    title: { text: 'Unique Variants' },
+    tooltip: { pointFormat: '{series.name}<br />{point.y}' },
+    xAxis: { categories: ["BRCA1", "BRCA2"] },
     yAxis: {
         lineColor: 'black',
         lineWidth: 2,
         title: false,
         tickInterval: 1000,
+        stackLabels: {
+            enabled: true,
+            style: {
+                fontWeight: 'bold',
+                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+            }
+        }
     },
-    series: [{
-        name: "BRCA1",
-        data: [
-            { name: "BRCA1", y: 0 }
-        ]
-    }, {
-        name: "BRCA2",
-        data: [
-            { name: "BRCA2", y: 0 }
-        ]
-    }]
+    plotOptions: { column: { stacking: 'normal' } },
+    series: [
+        { name: "Benign", data: [ 0, 0 ] },
+        { name: "Pathogenic", data: [ 0, 0 ] },
+        { name: "Unclassified", data: [ 0, 0 ] }
+    ]
 };
 
 var chartOptions2 = {
@@ -52,7 +51,8 @@ var chartOptions2 = {
     series: [{
         data: [
             { name: "Pathogenic", y: 0 },
-            { name: "Benign", y: 0 }
+            { name: "Benign", y: 0 },
+            { name: "Unclassified", y: 0 }
         ]
     }]
 };
@@ -68,9 +68,10 @@ var FactSheet = React.createClass({
                 var chart1 = this.refs.chart1.getChart();
                 var chart2 = this.refs.chart2.getChart();
 
-                chart1.series[0].setData([{ name: "BRCA1", y: resp.brca1 }], false);
-                chart1.series[1].setData([{ name: "BRCA2", y: resp.brca2 }], true);
-                chart2.series[0].setData([{ name: "Benign", y: resp.enigmaBenign }, { name: "Pathogenic", y: resp.enigmaPathogenic }]);
+                chart1.series[0].setData([resp.brca1.benign, resp.brca2.benign], false);
+                chart1.series[1].setData([resp.brca1.pathogenic, resp.brca2.pathogenic], false);
+                chart1.series[2].setData([resp.brca1.total - resp.brca1.pathogenic - resp.brca1.benign, resp.brca2.total - resp.brca2.pathogenic - resp.brca2.benign], true);
+                chart2.series[0].setData([{ name: "Benign", y: resp.enigmaBenign }, { name: "Pathogenic", y: resp.enigmaPathogenic }, { name: "Unclassified", y: resp.total - resp.enigma }]);
                 this.setState(resp);
             },
             () => this.setState({error: 'Problem connecting to server'}));
@@ -101,8 +102,8 @@ var FactSheet = React.createClass({
                             <ul>
                                 <li>Number of unique BRCA variants in the portal: {Number(this.state.total).toLocaleString()}</li>
                                 <ul>
-                                    <li>Unique BRCA1 variants in the portal: {Number(this.state.brca1).toLocaleString()}</li>
-                                    <li>Unique BRCA2 variants in the portal: {Number(this.state.brca2).toLocaleString()}</li>
+                                    <li>Unique BRCA1 variants in the portal: {Number(this.state.brca1 && this.state.brca1.total).toLocaleString()}</li>
+                                    <li>Unique BRCA2 variants in the portal: {Number(this.state.brca2 && this.state.brca2.total).toLocaleString()}</li>
                                 </ul>
                                 <li>Number of ENIGMA expert-classified variants in the portal: {Number(this.state.enigma).toLocaleString()}</li>
                                 <ul>

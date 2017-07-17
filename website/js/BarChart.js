@@ -18,17 +18,9 @@ var defaultOptions = {
         column: {
             allowPointSelect: true,
             cursor: 'pointer',
-            dataLabels: {
-                enabled: true,
-                format: '<b>{point.y}</b>',
-                style: {
-                    color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-                }
-            }
         }
     },
     xAxis: {
-        labels: false,
         minorTickLength: 0,
         tickLength: 0
     },
