@@ -52,6 +52,8 @@ var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Route, RouteHandler,
     HistoryLocation, run, DefaultRoute, Link} = require('react-router');
 var {Releases, Release} = require('./Releases.js');
+var BarChart = require('./BarChart.js');
+var Highcharts = require('highcharts');
 
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 
@@ -741,6 +743,70 @@ var VariantDetail = React.createClass({
 
         return diffRows;
     },
+    alleleCharts: function (variant) {
+        let frequencyProps = [
+            //{label: 'Maximum Allele Frequency (1000 Genomes and ESP)', prop: 'Max_Allele_Frequency'},
+            //{label: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes'},
+            {label: 'AFR', prop: 'AFR_Allele_frequency_1000_Genomes'},
+            {label: 'AMR', prop: 'AMR_Allele_frequency_1000_Genomes'},
+            {label: 'EAS', prop: 'EAS_Allele_frequency_1000_Genomes'},
+            {label: 'EUR', prop: 'EUR_Allele_frequency_1000_Genomes'},
+            {label: 'SAS', prop: 'SAS_Allele_frequency_1000_Genomes'},
+            {label: 'EA', prop: 'EA_Allele_Frequency_ESP'},
+            {label: 'AA', prop: 'AA_Allele_Frequency_ESP'},
+            //{label: 'Allele Frequency (ESP)', prop: 'Allele_Frequency_ESP'},
+            //{label: 'Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_ExAC'},
+            /*{label: 'AFR', prop: 'Allele_frequency_AFR_ExAC'},
+            {label: 'AMR', prop: 'Allele_frequency_AMR_ExAC'},
+            {label: 'EAS', prop: 'Allele_frequency_EAS_ExAC'},
+            {label: 'FIN', prop: 'Allele_frequency_FIN_ExAC'},
+            {label: 'NFE', prop: 'Allele_frequency_NFE_ExAC'},
+            {label: 'OTH', prop: 'Allele_frequency_OTH_ExAC'},
+            {label: 'SAS', prop: 'Allele_frequency_SAS_ExAC'},*/
+        ];
+
+        let categories = [];
+        let data = [];
+
+        for (let frequencyType of frequencyProps) {
+            if (!isEmptyField(variant[frequencyType.prop])) {
+                categories.push(frequencyType.label);
+                data.push(parseFloat(variant[frequencyType.prop]));
+            }
+        }
+
+        let chart2Max = Math.max(parseFloat(variant['Max_Allele_Frequency']), 0.01);
+        let fullscaleChartOptions = {
+            legend: { enabled: false },
+            yAxis: {
+                max: 1.0,
+                tickInterval: null,
+                plotLines: [{
+                    color: 'red',
+                    dashStyle: 'dash',
+                    value: chart2Max,
+                    width: 1,
+                    zIndex: 5
+                }]
+            },
+            xAxis: { categories: categories },
+            series: [{ data: data }]
+        };
+
+        let scaledChartOptions = {
+            legend: { enabled: false },
+            yAxis: {
+                max: chart2Max,
+                tickInterval: null,
+            },
+            xAxis: { categories: categories },
+            series: [{ data: data }]
+        };
+        return [
+            <BarChart container="alleleFreq1" options={fullscaleChartOptions}></BarChart>,
+            <BarChart container="alleleFreq2" options={scaledChartOptions}></BarChart>,
+        ];
+    },
     render: function () {
         const {data, error} = this.state;
         if (!data) {
@@ -827,7 +893,9 @@ var VariantDetail = React.createClass({
 
                 return (
                     <tr key={prop} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
-                        <KeyInline tableKey={title} onClick={(event) => this.showHelp(event, title)}/>
+                        { prop !== "Allele_Frequency_Charts" &&
+                            <KeyInline tableKey={title} onClick={(event) => this.showHelp(event, title)}/>
+                        }
                         <td><span className={ this.truncateData(prop) ? "row-value-truncated" : "row-value" }>{rowItem}</span></td>
                     </tr>
                 );
@@ -853,6 +921,7 @@ var VariantDetail = React.createClass({
                         header={header}
                         collapsable={true}
                         defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
+                        { groupTitle === "Allele Frequency Reference Sets" && this.alleleCharts(variant) }
                         <Table>
                             <tbody>
                                 {rows}
