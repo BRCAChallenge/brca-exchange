@@ -12,7 +12,7 @@ var defaultOptions = {
         plotBackgroundColor: null,
         plotBorderWidth: null,
         plotShadow: false,
-        type: 'column'
+        type: 'column',
     },
 /*
     plotOptions: {
@@ -36,8 +36,8 @@ var defaultOptions = {
     },
 */
     yAxis: {
-        lineColor: 'black',
-        lineWidth: 2,
+        //lineColor: 'black',
+        //lineWidth: 2,
         title: false,
         tickInterval: 1000,
         events: {

@@ -744,6 +744,10 @@ var VariantDetail = React.createClass({
         return diffRows;
     },
     alleleCharts: function (variant) {
+        if (!variant['Variant_in_1000_Genomes']) {
+            return false;
+        };
+
         let frequencyProps = [
             //{label: 'Maximum Allele Frequency (1000 Genomes and ESP)', prop: 'Max_Allele_Frequency'},
             //{label: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes'},
@@ -752,17 +756,23 @@ var VariantDetail = React.createClass({
             {label: 'EAS', prop: 'EAS_Allele_frequency_1000_Genomes'},
             {label: 'EUR', prop: 'EUR_Allele_frequency_1000_Genomes'},
             {label: 'SAS', prop: 'SAS_Allele_frequency_1000_Genomes'},
+            /*
+            // ESP
             {label: 'EA', prop: 'EA_Allele_Frequency_ESP'},
             {label: 'AA', prop: 'AA_Allele_Frequency_ESP'},
-            //{label: 'Allele Frequency (ESP)', prop: 'Allele_Frequency_ESP'},
-            //{label: 'Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_ExAC'},
-            /*{label: 'AFR', prop: 'Allele_frequency_AFR_ExAC'},
+            {label: 'Allele Frequency (ESP)', prop: 'Allele_Frequency_ESP'},
+            */
+            /*
+            // ExAC
+            {label: 'Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_ExAC'},
+            {label: 'AFR', prop: 'Allele_frequency_AFR_ExAC'},
             {label: 'AMR', prop: 'Allele_frequency_AMR_ExAC'},
             {label: 'EAS', prop: 'Allele_frequency_EAS_ExAC'},
             {label: 'FIN', prop: 'Allele_frequency_FIN_ExAC'},
             {label: 'NFE', prop: 'Allele_frequency_NFE_ExAC'},
             {label: 'OTH', prop: 'Allele_frequency_OTH_ExAC'},
-            {label: 'SAS', prop: 'Allele_frequency_SAS_ExAC'},*/
+            {label: 'SAS', prop: 'Allele_frequency_SAS_ExAC'},
+            */
         ];
 
         let categories = [];
@@ -777,10 +787,19 @@ var VariantDetail = React.createClass({
 
         let chart2Max = Math.max(parseFloat(variant['Max_Allele_Frequency']), 0.01);
         let fullscaleChartOptions = {
+            title: { text: "1000 Genomes"},
             legend: { enabled: false },
+            plotOptions: { column: { tooltip: { pointFormat: "{point.y}" } } }, 
+            chart: { spacing: [ 8, 4, 14, 8 ] },
             yAxis: {
                 max: 1.0,
                 tickInterval: null,
+                labels: {
+                    rotation: 45,
+                    style: { fontSize: "8px" },
+                    x: -2,
+                    y: 2
+                },
                 plotLines: [{
                     color: 'red',
                     dashStyle: 'dash',
@@ -794,17 +813,26 @@ var VariantDetail = React.createClass({
         };
 
         let scaledChartOptions = {
+            title: { text: "1000 Genomes (scaled)"},
             legend: { enabled: false },
+            plotOptions: { column: { tooltip: { pointFormat: "{point.y}" } } }, 
+            chart: { spacing: [ 8, 10, 14, 0 ] },
             yAxis: {
                 max: chart2Max,
                 tickInterval: null,
+                labels: {
+                    rotation: 45,
+                    style: { fontSize: "8px" },
+                    x: -2,
+                    y: 2
+                }
             },
             xAxis: { categories: categories },
             series: [{ data: data }]
         };
         return [
-            <BarChart container="alleleFreq1" options={fullscaleChartOptions}></BarChart>,
-            <BarChart container="alleleFreq2" options={scaledChartOptions}></BarChart>,
+            <BarChart container="alleleFreq1" options={fullscaleChartOptions} />,
+            <BarChart container="alleleFreq2" options={scaledChartOptions} />,
         ];
     },
     render: function () {
