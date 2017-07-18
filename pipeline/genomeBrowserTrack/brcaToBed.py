@@ -23,8 +23,10 @@ def addUrls(s, url=None):
     return ", ".join(lines)
 
 ifh = open("output/release/built_with_change_types.tsv")
+print ("Reading %s..." % ifh.name)
 
-ofh = open("brcaExchange.bed", "w")
+ofh = open("brcaExchange.hg19.bed", "w")
+ofh38 = open("brcaExchange.hg38.bed", "w")
 asFh = open("brcaExchange.as", "w")
 
 asFh.write("""table brcaExchanges
@@ -137,5 +139,18 @@ for line in ifh:
 
     ofh.write("\t".join(outRow)+"\n")
 
-print "wrote to %s and %s" % (ofh, asFh)
+    # write out a the hg38 version of this line
+    ftLen = int(end)-int(start)
+    start = str(int(rec.Hg38_Start)-1)
+    end = str(int(start)+ftLen)
+    thickStart = start
+    thickEnd = end
+    outRow[1] = start
+    outRow[2] = end
+    outRow[6] = thickStart
+    outRow[7] = thickEnd
+
+    ofh38.write("\t".join(outRow)+"\n")
+
+print "wrote to %s, %s and %s" % (ofh.name, ofh38.name, asFh.name)
 
