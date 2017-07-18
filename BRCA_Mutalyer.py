@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 # Melissa Meredith (meredith705)
 
-# Runs Mutalyzer and returns a binary flags for intronic and 'out of range' variants
+# Runs Mutalyzer and returns a Mutalyzerfile with binary flags for intronic and 'out of range' variants
 # In the event of truncation it returns the locaiton of a stop codon
 
 import sys
