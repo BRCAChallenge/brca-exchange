@@ -113,7 +113,7 @@ var Footer = React.createClass({
                             </a>
                         </li>
                         <li>
-                            <a href="https://github.com/BD2KGenomics/brca-website">
+                            <a href="https://github.com/BRCAChallenge/brca-exchange">
                                 Source code
                             </a>
                         </li>
