@@ -46,6 +46,7 @@ class brcaParse:
         self.BRCA2 = {"hg38": {"start": 32300000, "sequence": open("brca2_hg38.txt", "r").read()},
                       "hg19": {"start": 32800000, "sequence": open("brca2_hg19.txt", "r").read()}}
 
+        #remane for better understanding!!!!
         # finds column in matrix associated with header label
         a = labels.index("Alt")
         b = labels.index("Ref")
@@ -53,6 +54,7 @@ class brcaParse:
         d = labels.index("Clinical_significance_ENIGMA")
         e = labels.index("Gene_Symbol")
         g = labels.index("id")
+        h = labels.index("Reference_Sequence")
 
         buildMat = []
         buildMat.append(labels)
@@ -60,13 +62,13 @@ class brcaParse:
         # for loop used to append a complete data set associated with an id number. Later put into matrix/array.
         #A is all of the input data as a matrix. matOut is the selected columns as lists.
         for lines in f:
-            l = f.readline()
-            if len(l.split("\t")) == len(labels):
-                buildMat.append(l.split('\t'))
-            #f_out.write(l)
+            #l = f.readline()
+            if len(lines.split("\t")) == len(labels):
+                buildMat.append(lines.split('\t'))
+            print(len(lines.split("\t")),len(labels))
         L = np.vstack(buildMat)
         self.A = L
-        #f_out.close()
+        
 
         # use column definition to get list of a, b, c, and d. Now this is modification, reference, position and significance.
         self.Alt = brcaParse.column(self.A, a)  # positon of mutation column
@@ -75,6 +77,7 @@ class brcaParse:
         self.Sig = brcaParse.column(self.A, d)  # Clinical significance column
         self.Gene = brcaParse.column(self.A, e)  # BRCA1/2 column for direction of sequence
         self.id = brcaParse.column(self.A, g) #id number column
+        self.ExonRef = brcaParse.column(self.A, h) #dicates what exon starts and stops should be used..reference sequence
         
         self.matOut = np.vstack((self.Alt, self.Ref, self.Pos, self.Sig, self.Gene))
 
@@ -92,8 +95,9 @@ class brcaParse:
     #tempSeq is the variant sequence, np.amax gets the maximum maxentscan score.
     def maxEntForm(self,output):
         f = open(output, 'w')
-        f.write("id\tGene\tSignificance\tSpliceSite\t5'Max\t5'Ref\t3'Max\t3'Ref\tupscore\tdownscore\n")
+        f.write("id\tGene\tSignificance\tSpliceSite\t5'Max\t5'Ref\t3'Max\t3'Ref\tupscore\tdownscore\tinExon\n")
         for i in range(0,len(self.Gene)):
+            print(self.id)
             if self.Gene[i] == "BRCA1":
                 f.write(self.id[i] +"\t" + self.Gene[i] + "\t" + self.Sig[i] + "\t")
                 loc = (int(self.Pos[i]) - int(self.BRCA1hg38Start))
@@ -105,6 +109,7 @@ class brcaParse:
                 
                 lenSplice = 9
                 tempSeq = self.BRCA1hg38Seq[:loc-1] + self.Alt[i] + self.BRCA1hg38Seq[loc+len(self.Ref[i])-1:]
+
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
                 if (site != "3'"):
                     f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
@@ -117,7 +122,11 @@ class brcaParse:
                     f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
                 else:
                     f.write("0"+ "\t" + "0" + "\t")
-                f.write(str(upscore) + "\t" + str(downscore) + "\n")
+                f.write(str(upscore) + "\t" + str(downscore) + "\t")
+                if(site != "N/A"):
+                    f.write("1\n")
+                else:
+                    f.write("0\n")
                
         for i in range(0,len(self.Gene)):
             if self.Gene[i] == "BRCA2":
@@ -143,7 +152,11 @@ class brcaParse:
                     f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
                 else:
                     f.write("0"+ "\t" + "0" + "\t")
-                f.write(str(upscore) + "\t" + str(downscore) + "\n")
+                f.write(str(upscore) + "\t" + str(downscore) + "\t")
+                if(site != "N/A"):
+                    f.write("1\n")
+                else:
+                    f.write("0\n")
 
     def getEntScore(self,seq):
         temporary = open("temp", "w")
@@ -259,5 +272,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
