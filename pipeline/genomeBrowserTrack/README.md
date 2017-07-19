@@ -10,6 +10,6 @@ On the hgwdev server at UCSC, Max runs the code like this:
 
     bedToBigBed -type=bed9+ -as=brcaExchange.as -tab brcaExchange.hg19.bed hg19.chrom.sizes hg19/brcaExchange.bb
     bedToBigBed -type=bed9+ -as=brcaExchange.as -tab brcaExchange.hg38.bed hg38.chrom.sizes hg38/brcaExchange.bb
-    cp brcaExchange.bb ~/public_html/immuno/track/hub/hg19/
+    cp -R hub.txt genomes.txt hg19/ hg38/ ~/public_html/brcaexchangeHub/
 
 bedSort and bedToBigBed are tools from the UCSC kent tool collection: http://hgdownload.cse.ucsc.edu/admin/exe/
