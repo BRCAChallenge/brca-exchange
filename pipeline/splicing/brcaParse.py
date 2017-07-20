@@ -3,6 +3,7 @@
 
 import pandas as pd
 import numpy as np
+from matplotlib import pyplot
 import re
 import subprocess
 import argparse
@@ -23,6 +24,12 @@ script to find entropy scores for the 3 and 5 prime scores.
 def revComp(dna):
     complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
     return ''.join([complement[base] for base in dna[::-1]])
+
+#Histogram
+def Histo(entScores):
+    bins = [i for i in range(-20,20,5)]
+    pyplot.hist(entScores, bins, histtype='bar')
+    pyplot.show()
 
 """This class turns all of the lines into lists, separated by tabs. the np.vstack is used
 to create a matrix. this will be used later for selecting the column desired.dimesnion is
@@ -80,7 +87,11 @@ class brcaParse:
         self.ExonRef = brcaParse.column(self.A, h) #dicates what exon starts and stops should be used..reference sequence
         
         self.matOut = np.vstack((self.Alt, self.Ref, self.Pos, self.Sig, self.Gene))
+        
+         # entScores for visualization
 
+        self.entScores9 = []
+        self.entScores23 = []
 
     #gets the desired data and puts to object
     def getDat(self):
@@ -204,7 +215,7 @@ class brcaParse:
             upStream = min(exonStop, key=lambda x:abs(x-int(self.Pos[i])))
             downStream = min(exonStart, key=lambda x:abs(x-int(self.Pos[i])))
             upStreamScore, downStreamScore = self.getSpliceMaxEnt(i,upStream, downStream)
-            
+                          
             for j in range(0,len(exonStart)):
                 if (abs(int(self.Pos[i])-exonStart[j])<=9):
                     return("5'", upStreamScore, downStreamScore)
@@ -222,6 +233,20 @@ class brcaParse:
                         32341196,32344653,32346896,32355288,32356609,32357929,32362693,32363533,32370557,32371100,
                         32376791,32379515,32379913,32380145,32394933,32397044,32399672]
             
+            for j in range(0,len(exonStart)):
+               exonStart[j] -= 32300000
+               exonStop[j] -= 32300000
+                
+            for loc in exonStart:
+                self.entScores23.append(self.getEntScore(self.BRCA2hg38Seq[loc-20:loc+3]))
+
+            for loc in exonStop:
+                self.entScores9.append(self.getEntScore(self.BRCA2hg38Seq[loc-3:loc+6]))
+            
+            for j in range(0,len(exonStart)):
+               exonStart[j] += 32300000
+               exonStop[j] += 32300000
+                
             upStream = min(exonStart, key=lambda x:abs(x-int(self.Pos[i])))
             downStream = min(exonStop, key=lambda x:abs(x-int(self.Pos[i])))
             upStreamScore, downStreamScore = self.getSpliceMaxEnt(i,upStream, downStream)
