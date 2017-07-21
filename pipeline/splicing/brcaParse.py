@@ -7,6 +7,8 @@ import re
 import subprocess
 import argparse
 import os
+# link to install hgvs module: http://hgvs.readthedocs.io/en/master/installation.html  
+import hgvs.parser
 
 #NOTE: subprocess, popen(part of subprocess) for script output capture,  
 ######################################################################
@@ -129,7 +131,7 @@ class brcaParse:
             #l = f.readline()
             if len(lines.split("\t")) == len(labels):
                 buildMat.append(lines.split('\t'))
-            print(len(lines.split("\t")),len(labels))
+            #print(len(lines.split("\t")),len(labels))
         L = np.vstack(buildMat)
         self.A = L
         
@@ -161,11 +163,13 @@ class brcaParse:
         f = open(output, 'w')
         f.write("id\tGene\tSignificance\tSpliceSite\t5'Max\t5'Ref\t3'Max\t3'Ref\tupscore\tdownscore\tinExon\n")
         for i in range(0,len(self.Gene)):
-            print(self.id)
+            print("i:", i)
             if self.Gene[i] == "BRCA1":
                 f.write(self.id[i] +"\t" + self.Gene[i] + "\t" + self.Sig[i] + "\t")
                 loc = (int(self.Pos[i]) - int(self.BRCA1hg38Start))
                 #    must add a 4th variable to output the splice site later on (MMM)
+                tempSeq = self.BRCA1hg38Seq[:loc-1] + self.Alt[i] + self.BRCA1hg38Seq[loc+len(self.Ref[i])-1:]
+
                 site, upscore, downscore = self.inSpliceSite(i, tempSeq)
                 f.write("{}\t".format(site))
                 if (site != "N/A"):
@@ -173,7 +177,6 @@ class brcaParse:
                     downscore = 0
                 
                 lenSplice = 9
-                tempSeq = self.BRCA1hg38Seq[:loc-1] + self.Alt[i] + self.BRCA1hg38Seq[loc+len(self.Ref[i])-1:]
 
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
                 if (site != "3'"):
@@ -197,6 +200,7 @@ class brcaParse:
             if self.Gene[i] == "BRCA2":
                 f.write(self.id[i] +"\t" + self.Gene[i] + "\t" + self.Sig[i] + "\t")
                 loc = (int(self.Pos[i]) - int(self.BRCA2hg38Start))
+                tempSeq = self.BRCA2hg38Seq[:loc-1] + self.Alt[i] + self.BRCA2hg38Seq[loc+len(self.Ref[i])-1:]
                 site, upscore, downscore = self.inSpliceSite(i, tempSeq)
                 f.write("{}\t".format(site))
                 if (site != "N/A"):
@@ -204,7 +208,6 @@ class brcaParse:
                     downscore = 0
                     
                 lenSplice = 9
-                tempSeq = self.BRCA2hg38Seq[:loc-1] + self.Alt[i] + self.BRCA2hg38Seq[loc+len(self.Ref[i])-1:]
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
                 if (site != "3'"):
                     f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
@@ -259,6 +262,7 @@ class brcaParse:
     
     def inSpliceSite(self, i, tempSeq):
         if self.Gene[i] == "BRCA1":
+            BRCA1exons = ""
             exonStart = [43044294,43047642,43049120,43051062,43057051,43063332,43063873,43067607,43070927,
                           43074330,43076487,43082403,43090943,43094743,43095845,43097243,43099774,43104121,
                           43104867,43106455,43115725,43124016]
@@ -291,6 +295,7 @@ class brcaParse:
                 return("N/A",upStreamScore, downStreamScore)
                 
         if self.Gene[i] == "BRCA2":
+            BRCA2exons = ""
             exonStart = [32315479,32316421,32319076,32325075,32326100,32326241,32326498,32329442,32330918,32332271,
                          32336264,32344557,32346826,32354860,32356427,32357741,32362522,32363178,32370401,32370955,
                          32376669,32379316,32379749,32380006,32394688,32396897,32398161]
@@ -359,4 +364,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
