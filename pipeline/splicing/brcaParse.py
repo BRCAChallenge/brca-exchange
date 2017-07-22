@@ -32,35 +32,32 @@ def codon(BRCA, HGVS_list):
     codons = {  'TTT': 'F', 'TCT': 'S', 'TAT': 'Y', 'TGT': 'C', 'TTC': 'F', 'TCC': 'S', 'TAC': 'Y', 'TGC': 'C', 'TTA': 'L', 'TCA': 'S', 'TAA': '*', 'TGA': '*', 'TTG': 'L', 'TCG': 'S', 'TAG': '*', 'TGG': 'W', 'CTT': 'L', 'CCT': 'P', 'CAT': 'H', 'CGT': 'R', 'CTC': 'L', 'CCC': 'P', 'CAC': 'H', 'CGC': 'R', 'CTA': 'L', 'CCA': 'P', 'CAA': 'Q', 'CGA': 'R', 'CTG': 'L', 'CCG': 'P', 'CAG': 'Q', 'CGG': 'R','ATT': 'I', 'ACT': 'T', 'AAT': 'N', 'AGT': 'S', 'ATC': 'I', 'ACC': 'T', 'AAC': 'N', 'AGC': 'S', 'ATA': 'I', 'ACA': 'T', 'AAA': 'K', 'AGA': 'R', 'ATG': 'M', 'ACG': 'T', 'AAG': 'K', 'AGG': 'R', 'GTT': 'V', 'GCT': 'A', 'GAT': 'D', 'GGT': 'G', 'GTC': 'V', 'GCC': 'A', 'GAC': 'D', 'GGC': 'G', 'GTA': 'V', 'GCA': 'A', 'GAA': 'E', 'GGA': 'G', 'GTG': 'V', 'GCG': 'A', 'GAG': 'E', 'GGG': 'G'}
     codon_counter = 0
         
-    # for v in range(1,len(HGVS_list)):
-    #     counter+=1
-    #     print("counter", counter)
-    #     variant = HGVS_list[v]
-    #     # run Mutalyzer here...if frame shift...
-    #     var = hgvsparser.parse_hgvs_variant(variant)
-    #     # the locations are integers in referance to gene start location
-    #     var_Cstart_loc = var.posedit.pos.start.base
-    #     var_Cend_loc = var.posedit.pos.end.base
-    #     print("\tvariant", variant)
-    #     print("\tHGVS:\tvar_start_loc %d \n\t var_end_loc %d" % (var_Cstart_loc, var_Cend_loc))
-    #     print("var.posedit.edit", var.posedit.edit)
-
+    for v in range(1,len(HGVS_list)):
+        variant = HGVS_list[v]
+        # run Mutalyzer here...if frame shift...
+        var = hgvsparser.parse_hgvs_variant(variant)
+        # the locations are integers in referance to gene start location
+        var_Cstart_loc = var.posedit.pos.start.base
+        var_Cend_loc = var.posedit.pos.end.base
+        #print("\tvariant", variant)
+        # print("\tHGVS:\tvar_start_loc %d \n\t var_end_loc %d" % (var_Cstart_loc, var_Cend_loc))
+        # print("var.posedit.edit", var.posedit.edit)
+    protein_sequence = str() 
+    current_codon = ""
     for bp in range(0, len(BRCA)):    
-
-        current_codon = ""
-        protein_sequence = str() 
+        
+        
         codon_counter+=1
         current_codon=current_codon+BRCA[bp]
-        print("current codon",( bp, current_codon))
 
-        if (codon_counter>0 and codon_counter%3==0):
-            
-            if(current_codon in codons and codons[current_codon]=="*"):
+        if (codon_counter>0 and codon_counter%3==0): 
+            print("current codon",( bp, current_codon))
+            if(current_codon in codons and codons[current_codon]=='*'):
                 protein_sequence=protein_sequence+codons[current_codon]
                 stopCodon = (bp + var_Cend_loc)
-                print("\t\t(stop protein seq:", protein_sequence)
+                print("\t\t({} stop protein seq:".format(HGVS_list[v], protein_sequence))
                 break
-            elif(current_codon in codons and codons[current_codon]!="*"):
+            elif(current_codon in codons and codons[current_codon]!='*'):
                 protein_sequence=protein_sequence+codons[current_codon]
                 current_codon = ""
                 codon_counter=0
@@ -69,10 +66,10 @@ def codon(BRCA, HGVS_list):
                 break
 
     
-    print("len proteinseq:\t", len(protein_sequence))
+#    print("proteinseq:\t", (protein_sequence))
 #!!!!!!!!!Return the location of the first stop codon!!!!!!!!!!!!!!!!
     if (len(protein_sequence)>0) and (protein_sequence[0]=='M' and protein_sequence[len(protein_sequence)-1]=="*"):
-        print("\tcomplete coding sequence, stop codon: {}".format(protein_sequence.index('*')))
+        print("\tcomplete coding sequence, stop codon: {}th amino acid".format(protein_sequence.index('*')))
         del protein_sequence
     elif(protein_sequence[0]=='M' and protein_sequence[len(protein_sequence)-1]!="*"):
         print("\t3'-partial coding sequence")
@@ -82,7 +79,7 @@ def codon(BRCA, HGVS_list):
         print("\t 5'-partial coding sequence, no start codon (ATG: methionine) present after mutation.")
         del protein_sequence
     elif('!!!' in protein_sequence) and (protein_sequence[len(protein_sequence)-1]!="*"):
-        print("\tframe-shift in coding sequence. {} amino acids after mutation location.".format(len(protein_sequence)-1))
+        print("\tframe-shift. Codon not in coding sequence. {} amino acids after mutation location.".format(len(protein_sequence)-1))
         del protein_sequence
     else:
         print("\tinternal partial coding sequence.")
@@ -170,7 +167,7 @@ class brcaParse:
                 #    must add a 4th variable to output the splice site later on (MMM)
                 tempSeq = self.BRCA1hg38Seq[:loc-1] + self.Alt[i] + self.BRCA1hg38Seq[loc+len(self.Ref[i])-1:]
 
-                site, upscore, downscore = self.inSpliceSite(i, tempSeq)
+                site, upscore, downscore = self.inSpliceSite(i, revComp(tempSeq))
                 f.write("{}\t".format(site))
                 if (site != "N/A"):
                     upscore = 0
@@ -269,18 +266,24 @@ class brcaParse:
             exonStop = [43045802,43047703,43049194,43051117,43057135,43063373,43063951,43067695,43071238,
                         43074521,43076611,43082575,43091032,43094860,43095922,43097289,43099880,43104261,
                         43104956,43106533,43115779,43124115]
-            
-            print("len of self.Alt",len(self.Alt[i]))
+
+            exonStart.reverse()
+            exonStop.reverse()
+            print("self.Alt:{}\t self.ref:{}".format(self.Alt[i], self.Ref[i]))
+
             #all this works, butt the string is only 3682 bp's long
             if (len(self.Ref[i])!=len(self.Alt[i])) and (len(self.Alt[i])%3!=0): 
              #   print("self.Alt",self.Alt[i])
                 for t in range(0,len(exonStop)):    
-                    BRCA1exon = tempSeq[exonStart[t]-self.BRCA1hg38Start:exonStop[t]-self.BRCA1hg38Start]
+                    BRCA1exon = tempSeq[exonStart[t]-self.BRCA1hg38Start+18:exonStop[t]-self.BRCA1hg38Start]
+                    print("exon:{} len(exon):{}".format(t, len(BRCA1exon)))
                     BRCA1exons = BRCA1exons + BRCA1exon
-                codon(revComp(BRCA1exons), self.hgvs_cDNA)
+                codon(BRCA1exons, self.hgvs_cDNA)
 
             #print("BRCA1Exon String:",len(BRCA1exons))
-            
+            exonStart.reverse()
+            exonStop.reverse()
+
             upStream = min(exonStop, key=lambda x:abs(x-int(self.Pos[i])))
             downStream = min(exonStart, key=lambda x:abs(x-int(self.Pos[i])))
             upStreamScore, downStreamScore = self.getSpliceMaxEnt(i,upStream, downStream)
