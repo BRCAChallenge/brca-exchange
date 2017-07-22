@@ -9,6 +9,7 @@ import utilities
 import config
 import os
 
+
 data_path = config.data_path
 
 def shannon_entropy(reader):
