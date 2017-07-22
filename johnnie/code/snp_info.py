@@ -5,7 +5,7 @@ from pprint import pprint
 import numpy as np
 import pickle
 from matplotlib import pyplot as plt
-import utilities
+import utils
 import config
 import os
 
@@ -23,7 +23,7 @@ def shannon_entropy(reader):
       #break
       pass
     R = len(snp.alleles)
-    probs = utilities.allele_frequencies(snp)
+    probs = utils.allele_frequencies(snp)
     for i in range(R):
       if probs[i] <= 0:
         print snp
@@ -40,7 +40,7 @@ def simpson_index(reader):
       #break
       pass
     R = len(snp.alleles)
-    probs = utilities.allele_frequencies(snp)
+    probs = utils.allele_frequencies(snp)
     simpson_index = sum([probs[i]**2 for i in range(R)])
     simpson_indices.append((count, simpson_index))
     count += 1
@@ -50,7 +50,7 @@ def shannon_and_simpson(use_toy):
   input_fn = '1000G_brca.hg38.vcf'
   toy_fn = input_fn[:-4]+'.toy.vcf' if use_toy else input_fn
   if not os.path.exists(data_path+toy_fn):
-    utilities.make_toy(input_fn, toy_fn, 20)
+    utils.make_toy(input_fn, toy_fn, 20)
 
   vcf_reader = vcf.Reader(open(data_path+toy_fn, 'rb'))
   shannon = sorted(shannon_entropy(vcf_reader), key=lambda i : i[1], reverse=True)

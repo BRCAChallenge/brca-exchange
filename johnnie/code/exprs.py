@@ -1,4 +1,4 @@
-import utilities
+import utils
 import snp_info
 import vcf
 from matplotlib import pyplot as plt
@@ -15,11 +15,11 @@ def snp_sampling(exon_fn):
   sub_fn = exon_fn[:-4] + '.subset.vcf'
   uniqs_dob = []
   uniqs = []
-  dobs = utilities.synthetic_dob(2504)
+  dobs = utils.synthetic_dob(2504)
   for size in subset_sizes:
     print 'Using random', size, '% of SNPs'
     # TODO: do more times and get mean
-    utilities.make_toy(data_path+exon_fn, data_path+sub_fn, size)
+    utils.make_toy(data_path+exon_fn, data_path+sub_fn, size)
     uniq_dob = snp_info.uniqueness(data_path+sub_fn, use_dob=True, dobs=dobs)
     uniq = snp_info.uniqueness(data_path+sub_fn, use_dob=False, dobs=dobs)
     uniqs_dob.append(uniq_dob)
@@ -43,12 +43,12 @@ def plot_af_per_snp(input_fn):
   afs = []
   max_a_num = 0
   for snp in vcf_reader:
-    af = utilities.allele_frequencies(snp)
+    af = utils.allele_frequencies(snp)
     afs.append(af)
     if len(af) > max_a_num:
       max_a_num = len(af)
 
-  afs = utilities.fill_zeros(afs, max_a_num)
+  afs = utils.fill_zeros(afs, max_a_num)
   afs = sorted(afs, key=lambda i: i[0], reverse=True)
   afs = np.array(afs).T
   ind = np.arange(len(afs[0]))
