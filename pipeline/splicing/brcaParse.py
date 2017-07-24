@@ -7,6 +7,8 @@ import re
 import subprocess
 import argparse
 import os
+# link to install hgvs module: http://hgvs.readthedocs.io/en/master/installation.html  
+import hgvs.parser
 
 #NOTE: subprocess, popen(part of subprocess) for script output capture,  
 ######################################################################
@@ -23,6 +25,66 @@ script to find entropy scores for the 3 and 5 prime scores.
 def revComp(dna):
     complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
     return ''.join([complement[base] for base in dna[::-1]])
+
+# Melissa Meredith's Codon Function (7/20/17)
+def codon(BRCA, HGVS_list):    
+    hgvsparser = hgvs.parser.Parser()    
+    codons = {  'TTT': 'F', 'TCT': 'S', 'TAT': 'Y', 'TGT': 'C', 'TTC': 'F', 'TCC': 'S', 'TAC': 'Y', 'TGC': 'C', 'TTA': 'L', 'TCA': 'S', 'TAA': '*', 'TGA': '*', 'TTG': 'L', 'TCG': 'S', 'TAG': '*', 'TGG': 'W', 'CTT': 'L', 'CCT': 'P', 'CAT': 'H', 'CGT': 'R', 'CTC': 'L', 'CCC': 'P', 'CAC': 'H', 'CGC': 'R', 'CTA': 'L', 'CCA': 'P', 'CAA': 'Q', 'CGA': 'R', 'CTG': 'L', 'CCG': 'P', 'CAG': 'Q', 'CGG': 'R','ATT': 'I', 'ACT': 'T', 'AAT': 'N', 'AGT': 'S', 'ATC': 'I', 'ACC': 'T', 'AAC': 'N', 'AGC': 'S', 'ATA': 'I', 'ACA': 'T', 'AAA': 'K', 'AGA': 'R', 'ATG': 'M', 'ACG': 'T', 'AAG': 'K', 'AGG': 'R', 'GTT': 'V', 'GCT': 'A', 'GAT': 'D', 'GGT': 'G', 'GTC': 'V', 'GCC': 'A', 'GAC': 'D', 'GGC': 'G', 'GTA': 'V', 'GCA': 'A', 'GAA': 'E', 'GGA': 'G', 'GTG': 'V', 'GCG': 'A', 'GAG': 'E', 'GGG': 'G'}
+    codon_counter = 0
+        
+    for v in range(1,len(HGVS_list)):
+        variant = HGVS_list[v]
+        # run Mutalyzer here...if frame shift...
+        var = hgvsparser.parse_hgvs_variant(variant)
+        # the locations are integers in referance to gene start location
+        var_Cstart_loc = var.posedit.pos.start.base
+        var_Cend_loc = var.posedit.pos.end.base
+        #print("\tvariant", variant)
+        # print("\tHGVS:\tvar_start_loc %d \n\t var_end_loc %d" % (var_Cstart_loc, var_Cend_loc))
+        # print("var.posedit.edit", var.posedit.edit)
+    protein_sequence = str() 
+    current_codon = ""
+    for bp in range(0, len(BRCA)):    
+        
+        
+        codon_counter+=1
+        current_codon=current_codon+BRCA[bp]
+
+        if (codon_counter>0 and codon_counter%3==0): 
+            print("current codon",( bp, current_codon))
+            if(current_codon in codons and codons[current_codon]=='*'):
+                protein_sequence=protein_sequence+codons[current_codon]
+                stopCodon = (bp + var_Cend_loc)
+                print("\t\t({} stop protein seq:".format(HGVS_list[v], protein_sequence))
+                break
+            elif(current_codon in codons and codons[current_codon]!='*'):
+                protein_sequence=protein_sequence+codons[current_codon]
+                current_codon = ""
+                codon_counter=0
+            else:
+                protein_sequence=protein_sequence+"!!!"
+                break
+
+    
+#    print("proteinseq:\t", (protein_sequence))
+#!!!!!!!!!Return the location of the first stop codon!!!!!!!!!!!!!!!!
+    if (len(protein_sequence)>0) and (protein_sequence[0]=='M' and protein_sequence[len(protein_sequence)-1]=="*"):
+        print("\tcomplete coding sequence, stop codon: {}th amino acid".format(protein_sequence.index('*')))
+        del protein_sequence
+    elif(protein_sequence[0]=='M' and protein_sequence[len(protein_sequence)-1]!="*"):
+        print("\t3'-partial coding sequence")
+        del protein_sequence
+    elif(protein_sequence[0]!='M' and protein_sequence[len(protein_sequence)-1]=="*"):
+        print("stop Codon:", stopCodon)
+        print("\t 5'-partial coding sequence, no start codon (ATG: methionine) present after mutation.")
+        del protein_sequence
+    elif('!!!' in protein_sequence) and (protein_sequence[len(protein_sequence)-1]!="*"):
+        print("\tframe-shift. Codon not in coding sequence. {} amino acids after mutation location.".format(len(protein_sequence)-1))
+        del protein_sequence
+    else:
+        print("\tinternal partial coding sequence.")
+        del protein_sequence
+
 
 """This class turns all of the lines into lists, separated by tabs. the np.vstack is used
 to create a matrix. this will be used later for selecting the column desired.dimesnion is
@@ -55,6 +117,7 @@ class brcaParse:
         e = labels.index("Gene_Symbol")
         g = labels.index("id")
         h = labels.index("Reference_Sequence")
+        hgvs_cDNA = labels.index("HGVS_cDNA")
 
         buildMat = []
         buildMat.append(labels)
@@ -65,7 +128,7 @@ class brcaParse:
             #l = f.readline()
             if len(lines.split("\t")) == len(labels):
                 buildMat.append(lines.split('\t'))
-            print(len(lines.split("\t")),len(labels))
+            #print(len(lines.split("\t")),len(labels))
         L = np.vstack(buildMat)
         self.A = L
         
@@ -78,7 +141,7 @@ class brcaParse:
         self.Gene = brcaParse.column(self.A, e)  # BRCA1/2 column for direction of sequence
         self.id = brcaParse.column(self.A, g) #id number column
         self.ExonRef = brcaParse.column(self.A, h) #dicates what exon starts and stops should be used..reference sequence
-        
+        self.hgvs_cDNA = brcaParse.column(self.A, hgvs_cDNA) # genomic HGVS nomenclature
         self.matOut = np.vstack((self.Alt, self.Ref, self.Pos, self.Sig, self.Gene))
 
 
@@ -97,18 +160,20 @@ class brcaParse:
         f = open(output, 'w')
         f.write("id\tGene\tSignificance\tSpliceSite\t5'Max\t5'Ref\t3'Max\t3'Ref\tupscore\tdownscore\tinExon\n")
         for i in range(0,len(self.Gene)):
-            print(self.id)
+            print("i:", i)
             if self.Gene[i] == "BRCA1":
                 f.write(self.id[i] +"\t" + self.Gene[i] + "\t" + self.Sig[i] + "\t")
                 loc = (int(self.Pos[i]) - int(self.BRCA1hg38Start))
-                site, upscore, downscore = self.inSpliceSite(i)
+                #    must add a 4th variable to output the splice site later on (MMM)
+                tempSeq = self.BRCA1hg38Seq[:loc-1] + self.Alt[i] + self.BRCA1hg38Seq[loc+len(self.Ref[i])-1:]
+
+                site, upscore, downscore = self.inSpliceSite(i, revComp(tempSeq))
                 f.write("{}\t".format(site))
                 if (site != "N/A"):
                     upscore = 0
                     downscore = 0
                 
                 lenSplice = 9
-                tempSeq = self.BRCA1hg38Seq[:loc-1] + self.Alt[i] + self.BRCA1hg38Seq[loc+len(self.Ref[i])-1:]
 
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
                 if (site != "3'"):
@@ -132,14 +197,14 @@ class brcaParse:
             if self.Gene[i] == "BRCA2":
                 f.write(self.id[i] +"\t" + self.Gene[i] + "\t" + self.Sig[i] + "\t")
                 loc = (int(self.Pos[i]) - int(self.BRCA2hg38Start))
-                site, upscore, downscore = self.inSpliceSite(i)
+                tempSeq = self.BRCA2hg38Seq[:loc-1] + self.Alt[i] + self.BRCA2hg38Seq[loc+len(self.Ref[i])-1:]
+                site, upscore, downscore = self.inSpliceSite(i, tempSeq)
                 f.write("{}\t".format(site))
                 if (site != "N/A"):
                     upscore = 0
                     downscore = 0
                     
                 lenSplice = 9
-                tempSeq = self.BRCA2hg38Seq[:loc-1] + self.Alt[i] + self.BRCA2hg38Seq[loc+len(self.Ref[i])-1:]
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
                 if (site != "3'"):
                     f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
@@ -192,15 +257,33 @@ class brcaParse:
             orgSeqScore.append(self.getEntScore(orgSeq))
         return(orgSeqScore, newSeqScore)
     
-    def inSpliceSite(self, i):
+    def inSpliceSite(self, i, tempSeq):
         if self.Gene[i] == "BRCA1":
+            BRCA1exons = ""
             exonStart = [43044294,43047642,43049120,43051062,43057051,43063332,43063873,43067607,43070927,
                           43074330,43076487,43082403,43090943,43094743,43095845,43097243,43099774,43104121,
                           43104867,43106455,43115725,43124016]
             exonStop = [43045802,43047703,43049194,43051117,43057135,43063373,43063951,43067695,43071238,
                         43074521,43076611,43082575,43091032,43094860,43095922,43097289,43099880,43104261,
                         43104956,43106533,43115779,43124115]
-            
+
+            exonStart.reverse()
+            exonStop.reverse()
+            print("self.Alt:{}\t self.ref:{}".format(self.Alt[i], self.Ref[i]))
+
+            #all this works, butt the string is only 3682 bp's long
+            if (len(self.Ref[i])!=len(self.Alt[i])) and (len(self.Alt[i])%3!=0): 
+             #   print("self.Alt",self.Alt[i])
+                for t in range(0,len(exonStop)):    
+                    BRCA1exon = tempSeq[exonStart[t]-self.BRCA1hg38Start+18:exonStop[t]-self.BRCA1hg38Start]
+                    print("exon:{} len(exon):{}".format(t, len(BRCA1exon)))
+                    BRCA1exons = BRCA1exons + BRCA1exon
+                codon(BRCA1exons, self.hgvs_cDNA)
+
+            #print("BRCA1Exon String:",len(BRCA1exons))
+            exonStart.reverse()
+            exonStop.reverse()
+
             upStream = min(exonStop, key=lambda x:abs(x-int(self.Pos[i])))
             downStream = min(exonStart, key=lambda x:abs(x-int(self.Pos[i])))
             upStreamScore, downStreamScore = self.getSpliceMaxEnt(i,upStream, downStream)
@@ -215,12 +298,24 @@ class brcaParse:
                 return("N/A",upStreamScore, downStreamScore)
                 
         if self.Gene[i] == "BRCA2":
+            BRCA2exons = ""
             exonStart = [32315479,32316421,32319076,32325075,32326100,32326241,32326498,32329442,32330918,32332271,
                          32336264,32344557,32346826,32354860,32356427,32357741,32362522,32363178,32370401,32370955,
                          32376669,32379316,32379749,32380006,32394688,32396897,32398161]
             exonStop = [32315667,32316527,32319325,32325184,32326150,32326282,32326613,32329492,32331030,32333387,
                         32341196,32344653,32346896,32355288,32356609,32357929,32362693,32363533,32370557,32371100,
                         32376791,32379515,32379913,32380145,32394933,32397044,32399672]
+            
+            #all this works, butt the string is only 3682 bp's long
+            if (len(self.Ref[i])!=len(self.Alt[i])) and (len(self.Alt[i])%3!=0): 
+                print("self.Alt",self.Alt[i])
+                
+                for t in range(0,len(exonStop)):    
+                    BRCA2exon = tempSeq[exonStart[t]-self.BRCA2hg38Start:exonStop[t]-self.BRCA2hg38Start]
+                    BRCA2exons = BRCA2exons + BRCA2exon
+                codon(BRCA2exons, self.hgvs_cDNA)
+
+            #print("BRCA2Exon String:",len(BRCA2exons))
             
             upStream = min(exonStart, key=lambda x:abs(x-int(self.Pos[i])))
             downStream = min(exonStop, key=lambda x:abs(x-int(self.Pos[i])))
@@ -272,4 +367,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
