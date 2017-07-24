@@ -1,11 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=Lato:200,600');
 
-#alleleFreq1, #alleleFreq2 {
-    width: 50%;
-    height: 300px;
-    float: left;
-}
-
 /* Note that bootstrap 3 media sizes are as follows:
   @media(max-width:767px){}  // xs
   @media(min-width:768px){}  // sm
@@ -209,6 +203,17 @@ offending file, for future reference: website/node_modules/react-data-components
 .deleted-variant-message {
     color: red;
     text-align: center;
+}
+
+.alleleFrequencyChart {
+    width: 50%;
+    float: left;
+}
+
+@media(max-width:400px) {
+    .alleleFrequencyChart {
+        width: 100%;
+    }
 }
 
 @media only screen and (max-width : 767px) {
