@@ -329,12 +329,14 @@ class TestVariantMerging(unittest.TestCase):
         none_value = normalize_values(None)
         whitespace = normalize_values(' value ')
         list_values = normalize_values(['dog ', ' fish ', '', None, 'dog'])
-        list_values_empty = normalize_values(['-'])
+        list_values_default = normalize_values(['-'])
+        list_values_empty_list = normalize_values([])
         self.assertEqual(empty_string, '-')
         self.assertEqual(none_value, '-')
         self.assertEqual(whitespace, 'value')
         self.assertEqual(list_values, ['dog', 'fish'])
-        self.assertEqual(list_values_empty, ['-'])
+        self.assertEqual(list_values_default, ['-'])
+        self.assertEqual(list_values_empty_list, ['-'])
 
     def test_add_variant_to_dict(self):
         genomic_coordinate = 'chr13:g.32332705:GA>G'

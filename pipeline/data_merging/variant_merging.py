@@ -407,8 +407,8 @@ def normalize_values(value):
         value = DEFAULT_CONTENTS
         return value
 
-    if value == ['-']:
-        return value
+    if value == ['-'] or value == []:
+        return [DEFAULT_CONTENTS]
 
     if isinstance(value, int) or isinstance(value, float):
         value = str(value)
