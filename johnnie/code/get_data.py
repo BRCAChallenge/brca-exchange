@@ -17,11 +17,22 @@ vcf-sort $G1K/1000G_brca.hg38.vcf > $G1K/1000G_brca.sorted.hg38.vcf
 echo Done!
 """
 
+extract_high_af_cmd = 
+"""
+vcftools --vcf """ +
+exon_fn + " --maf " + str(0.01) + """
+"""
+
+# File names
+start_fn = """1000G_brca.hg38.vcf"""
+exon_fn = """1000G_brca.hg38_exon.vcf"""
+af_fn = """1000G_brca.hg38_exon_high_af.vcf"""
+
 # Download data files
 os.system(download_data_cmd)
 
 # Extract exons
-utils.extract_exon('1000G_brca.hg38.vcf', '1000G_brca.hg38_exon.vcf')
+utils.extract_exon(start_fn, exon_fn)
 
 # Extract high allele frequencies
-
+os.system(extract_high_af_cmd)
