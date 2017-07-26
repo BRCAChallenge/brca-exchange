@@ -60,6 +60,7 @@ def snp_sampling(input_fn):
   plt.close()
 
 def plot_af_per_snp(input_fn):
+  """ Generate allele frequency plot, sorted by. """
   vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
   afs = []
   max_a_num = 0

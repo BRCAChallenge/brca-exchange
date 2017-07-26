@@ -143,39 +143,6 @@ def conditional(input_fn):
   print 'done'
 
   dists_a, dists_b, dists_ab = prior_dists
-    
-  # P(b|a) = P(ab) / P(a)
-  #b_given_as = []
-  #for i in range(num_snp):
-  #  dist_a = dists_a[i]
-  #  #print dist_a
-  #  dist_ab = dists_ab[i]
-  #  #print dist_ab
-  #  b_given_a = {}
-  #  for a in dist_a.keys():
-  #    for ab in dist_ab.keys():
-  #      if ab[0] == a:
-  #        b_a = ab[1]+'_given_'+a
-  #        b_given_a.update({b_a : dist_ab[ab] / dist_a[a]})
-  #  #print b_given_a
-  #  b_given_as.append(b_given_a)
-
-  # P(a|b) = P(ab) / P(b)
-  #a_given_bs = []
-  #for i in range(num_snp):
-  #  dist_b = dists_b[i]
-  #  dist_ab = dists_ab[i]
-  #  a_given_b = {}
-  #  for b in dist_b.keys():
-  #    for ab in dist_ab.keys():
-  #      if ab[1] == b:
-  #        a_b = b+'_given_'+ab[0]
-  #        a_given_b.update({a_b : dist_ab[ab] / dist_b[b]})
-  #  #print b_given_a
-  #  a_given_bs.append(a_given_b)
-
-  #pickle.dump(b_given_as, open(data_path + 'cond_dists_b_a.pickle', 'wb'))
-  #pickle.dump(a_given_bs, open(data_path + 'cond_dists_a_b.pickle', 'wb'))
   
   def get_conditionals(joints, margs, num_snp, marg_ind):
     assert marg_ind == 0 or marg_ind == 1, 'Bad index of marginal'
@@ -205,4 +172,7 @@ def conditional(input_fn):
       conditionals = pickle.load(open(data_path + cond_file, 'rb'))
     return conditionals
 
+  # P(b|a) = P(ab) / P(a)
   b_given_as = get_conditionals(dists_ab, dists_a, num_snp, 0)
+  # P(a|b) = P(ab) / P(b)
+  a_given_bs = get_conditionals(dists_ab, dists_b, num_snp, 1)
