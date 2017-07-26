@@ -21,6 +21,7 @@ from numbers import Number
 import csv
 import aggregate_reports
 import urllib
+import utilities
 
 
 # GENOMIC VERSION:
@@ -104,7 +105,7 @@ BIC_FIELDS = {"Clinical_classification": "Category",
               "BX_ID": "BX_ID"}
 
 ESP_FIELDS = {"polyPhen2_result": "PH",
-              "Minor_allele_frequency": "MAF",
+              "Minor_allele_frequency_percent": "MAF",
               "EA_Allele_Frequency": "BX_EAAF",
               "AA_Allele_Frequency": "BX_AAAF",
               "Allele_Frequency": "BX_AF",
@@ -404,6 +405,10 @@ def normalize_values(value):
     # standardize data representation by denoting empty as '-' and stripping whitespace off strings
     if value is None or value == "":
         value = DEFAULT_CONTENTS
+        return value
+
+    if value == ['-'] or value == []:
+        return [DEFAULT_CONTENTS]
 
     if isinstance(value, int) or isinstance(value, float):
         value = str(value)
@@ -411,6 +416,7 @@ def normalize_values(value):
     if isinstance(value, basestring):
         value = value.strip()
     else:
+        # handle lists
         normalized_values = []
         for v in value:
             if v is None or v == "-" or v == "":
@@ -735,7 +741,8 @@ def append_exac_allele_frequencies(record, new_record=None, i=None):
             allele_frequency = "-"
             if len(allele_count) > 0 and allele_number != 0:
                 allele_frequency = float(allele_count[0]) / float(allele_number)
-            record.INFO[("AF_" + subpopulation)] = str(allele_frequency)
+                allele_frequency = str(utilities.round_sigfigs(allele_frequency, 3))
+            record.INFO[("AF_" + subpopulation)] = allele_frequency
         return record
     else:
         new_record.INFO['AF'] = record.INFO['AF'][i]
@@ -745,7 +752,8 @@ def append_exac_allele_frequencies(record, new_record=None, i=None):
             allele_frequency = "-"
             if allele_number != 0:
                 allele_frequency = float(allele_count) / float(allele_number)
-            new_record.INFO[("AF_" + subpopulation)] = str(allele_frequency)
+                allele_frequency = str(utilities.round_sigfigs(allele_frequency, 3))
+            new_record.INFO[("AF_" + subpopulation)] = allele_frequency
         return new_record
 
 

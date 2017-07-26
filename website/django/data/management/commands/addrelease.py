@@ -9,6 +9,9 @@ import psycopg2
 from django.core.management import call_command
 
 
+OLD_MAF_ESP_FIELD_NAMES = ['Minor_allele_frequency_ESP', 'Minor_allele_frequency_ESP_percent']
+
+
 class Command(BaseCommand):
     help = 'Add a new variant release to the database'
 
@@ -111,8 +114,12 @@ class Command(BaseCommand):
         row_dict['Hg36_End'] = row_dict.pop('pyhgvs_Hg36_End')
         row_dict['HGVS_cDNA'] = row_dict.pop('pyhgvs_cDNA')
         row_dict['HGVS_Protein'] = row_dict.pop('pyhgvs_Protein')
-        # Denote percent value in field name
-        row_dict['Minor_allele_frequency_ESP_percent'] = row_dict.pop('Minor_allele_frequency_ESP')
+
+        # Denote percentage in field name, two different fieldnames were used previously so both are handled below
+        for oldName in OLD_MAF_ESP_FIELD_NAMES:
+            if oldName in row_dict:
+                row_dict['Minor_allele_frequency_percent_ESP'] = row_dict.pop(oldName)
+
         return row_dict
 
     def build_report_dictionary_by_source(self, reports_reader, reports_header, sources):
@@ -142,8 +149,12 @@ class Command(BaseCommand):
         report = reports_dict[source][bx_id]
         report['Data_Release_id'] = release_id
         report['Variant'] = variant
-        # Denote percentage in field name
-        report['Minor_allele_frequency_ESP_percent'] = report.pop('Minor_allele_frequency_ESP')
+
+        # Denote percentage in field name, two different fieldnames were used previously so both are handled below
+        for oldName in OLD_MAF_ESP_FIELD_NAMES:
+            if oldName in report:
+                report['Minor_allele_frequency_percent_ESP'] = report.pop(oldName)
+
         Report.objects.create_report(report)
 
     def is_empty(self, value):

@@ -1,10 +1,12 @@
 from hypothesis import given, assume, settings
 from hypothesis.strategies import integers, tuples, text, sampled_from, lists
-from variant_merging import variant_equal, init, normalize_values, add_variant_to_dict, COLUMN_SOURCE, COLUMN_GENE, COLUMN_GENOMIC_HGVS, COLUMN_VCF_CHR, COLUMN_VCF_POS, COLUMN_VCF_REF, COLUMN_VCF_ALT
+from variant_merging import variant_equal, init, normalize_values, add_variant_to_dict, COLUMN_SOURCE, COLUMN_GENE, COLUMN_GENOMIC_HGVS, COLUMN_VCF_CHR, COLUMN_VCF_POS, COLUMN_VCF_REF, COLUMN_VCF_ALT, append_exac_allele_frequencies, EXAC_SUBPOPULATIONS
 import unittest
 import itertools
 import os
 import pytest
+import vcf
+from utilities import round_sigfigs
 
 
 runtimes = 500000
@@ -327,10 +329,14 @@ class TestVariantMerging(unittest.TestCase):
         none_value = normalize_values(None)
         whitespace = normalize_values(' value ')
         list_values = normalize_values(['dog ', ' fish ', '', None, 'dog'])
+        list_values_default = normalize_values(['-'])
+        list_values_empty_list = normalize_values([])
         self.assertEqual(empty_string, '-')
         self.assertEqual(none_value, '-')
         self.assertEqual(whitespace, 'value')
         self.assertEqual(list_values, ['dog', 'fish'])
+        self.assertEqual(list_values_default, ['-'])
+        self.assertEqual(list_values_empty_list, ['-'])
 
     def test_add_variant_to_dict(self):
         genomic_coordinate = 'chr13:g.32332705:GA>G'
@@ -367,6 +373,18 @@ class TestVariantMerging(unittest.TestCase):
         variant_dict = add_variant_to_dict(self.variant_dict, self.genomic_coordinate, self.values_to_add)
         merged = variant_dict[self.genomic_coordinate]
         self.assertEqual('5104delAA', merged[9])
+
+    def test_append_exac_allele_frequencies_rounds_to_three_sig_figs(self):
+        EXAC_VCF_FILENAME = os.path.join(os.path.dirname(__file__), 'test_files/ExAC_AF.vcf')
+        for record in vcf.Reader(open(EXAC_VCF_FILENAME, 'r')):
+            record = append_exac_allele_frequencies(record, new_record=None, i=None)
+            for subpopulation in EXAC_SUBPOPULATIONS:
+                val = record.INFO["AF_" + subpopulation]
+                try:
+                    float_val = float(val)
+                    self.assertEqual(float_val, round_sigfigs(float(val), 3))
+                except ValueError:
+                    self.assertEqual(val, '-')
 
 
 if __name__ == "__main__":

@@ -71,7 +71,7 @@ def existing_variant():
         'Clinical_importance_BIC': 'unknown',
         'Discordant': 'Concordant',
         'Condition_category_ENIGMA': 'Disease',
-        'Minor_allele_frequency_ESP_percent': '-',
+        'Minor_allele_frequency_percent_ESP': '-',
         'Segregation_LR_exLOVD': '0.012',
         'Variant_in_exLOVD': True,
         'Clinical_Significance_ClinVar': 'Benign,Likely_benign,Uncertain_significance',
