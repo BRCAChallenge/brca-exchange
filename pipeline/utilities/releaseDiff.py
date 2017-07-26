@@ -4,6 +4,7 @@ import csv
 import re
 import json
 import logging
+from math import floor, log10
 
 added_data = None
 diff = None
@@ -65,6 +66,18 @@ LIST_KEYS = [
             "BX_ID_1000_Genomes",
             "BX_ID_ESP"
            ]
+
+
+EXAC_AF_FIELDS = [
+    "Allele_frequency_ExAC",
+    "Allele_frequency_AFR_ExAC",
+    "Allele_frequency_AMR_ExAC",
+    "Allele_frequency_EAS_ExAC",
+    "Allele_frequency_FIN_ExAC",
+    "Allele_frequency_NFE_ExAC",
+    "Allele_frequency_OTH_ExAC",
+    "Allele_frequency_SAS_ExAC"
+]
 
 
 class transformer(object):
@@ -143,6 +156,7 @@ class transformer(object):
             value = re.sub("Invitae_", "Invitae", value)
             value = value.replace("The_Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA)", "Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA)")
             value = value.replace("_c/o_University_of_Cambridge", "c/o_University_of_Cambridge")
+            value = value.replace("LabCorp", "Laboratory_Corporation_of_America")
         elif field == "HGVS_Protein":
             # overlook the following:
             # - version numbers being provided in the new but not old accession
@@ -156,9 +170,14 @@ class transformer(object):
             # Handle reference sequence is accessions
             value = re.sub("NM_000059", "NM_000059.3",
                            re.sub("NM_007294", "NM_007294.3", value))
-        elif field == "Allele_Frequency":
-            # Some ExAC allele frequencies are missing a ')'
-            value = re.sub("\(ExAC", "(ExAC)", value)
+        elif field == "Allele_Frequency" and 'ExAC' in value:
+            value_source_list = value.split(' ', 1)
+            val = value_source_list[0]
+            source = value_source_list[1]
+            val = str(round_sigfigs(float(val), 3))
+            value = val + ' ' + source
+            # (ExAC) was changed to (ExAC minus TCGA)
+            value = re.sub("\(ExAC\)", "(ExAC minus TCGA)", value)
         elif field == "Sift_Prediction":
             # for sift predictions, some data combines the
             # numerical and categorical scores
@@ -172,6 +191,9 @@ class transformer(object):
         elif field == "Pathogenicity_expert":
             # Updated wording for non-expert-reviewed...
             value = value.replace("Not Yet Classified", "Not Yet Reviewed")
+
+        if field in EXAC_AF_FIELDS and value != "-":
+            value = str(round_sigfigs(float(value), 3))
 
         # Strip leading and trailing whitespace
         value = value.strip()
@@ -526,6 +548,13 @@ def addGsIfNecessary(row):
         if ":g." not in row[field]:
             row[field] = row[field][:6] + 'g.' + row[field][6:]
     return row
+
+
+def round_sigfigs(num, sig_figs):
+    if num != 0:
+        return round(num, -int(floor(log10(abs(num))) - (sig_figs - 1)))
+    else:
+        return 0  # Can't take the log of 0
 
 
 def main():
