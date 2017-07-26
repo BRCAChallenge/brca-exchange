@@ -171,11 +171,12 @@ class transformer(object):
             value = re.sub("NM_000059", "NM_000059.3",
                            re.sub("NM_007294", "NM_007294.3", value))
         elif field == "Allele_Frequency" and 'ExAC' in value:
+            # Ensure value is rounded to 3 sig figs
             value_source_list = value.split(' ', 1)
             val = value_source_list[0]
-            source = value_source_list[1]
+            source_string = value_source_list[1]
             val = str(round_sigfigs(float(val), 3))
-            value = val + ' ' + source
+            value = val + ' ' + source_string
             # (ExAC) was changed to (ExAC minus TCGA)
             value = re.sub("\(ExAC\)", "(ExAC minus TCGA)", value)
         elif field == "Sift_Prediction":
