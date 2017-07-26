@@ -12,6 +12,28 @@ import os
 
 data_path = config.data_path
 
+def extract_high_af(input_fn, output_fn, t):
+  """ Output files  """
+  if os.path.exists(data_path+output_fn):
+    print "Regenerating", data_path+output_fn
+
+  vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
+  snp_indices = []
+  for snp_ind, snp in enumerate(vcf_reader):
+    if all(af >= 0.01 * t for af in allele_frequencies(snp)):
+      snp_indices.append(snp_ind)
+
+  with open(data_path+output_fn, 'wb') as outfile:
+    with open(data_path+input_fn, 'rb') as infile:
+      snp_ind = 0
+      for line in infile:
+        if line.startswith('#'):
+          outfile.write(line)
+        else:
+          if snp_ind in snp_indices:
+            outfile.write(line)
+          snp_ind += 1
+
 def exon_starts_ends(input_fn, names):
   exon_starts = []
   exon_ends = []
@@ -134,27 +156,27 @@ def make_synthetic_coreference(input_fn, output_fn, p):
         snp_count += 1
   return sample_num
 
-def all_possible_dobs(min_age, max_age):
+def all_possible_dobs(min_age, max_age, birth_type):
   """ Return all possible dates of birth of each year, given a range of ages. """
   now = datetime.datetime.now()
   min_year = now.year - max_age
   max_year = now.year - min_age
-  dobs = []
+  births = []
   for year in range(min_year, max_year+1):
-    frst_day = date(year, 1, 1)
-    last_day = date(year, 12, 31)
-    delta = last_day - frst_day
-    dobs += [frst_day + timedelta(days=i) for i in range(delta.days + 1)]
-    #if calendar.isleap(year):
-    #  years.append([i for i in range(366)])
-    #else:
-    #  years.append([i for i in range(365)])
-  return dobs
+    if birth_type == 'date':
+      frst_day = date(year, 1, 1)
+      last_day = date(year, 12, 31)
+      delta = last_day - frst_day
+      births += [frst_day + timedelta(days=i) for i in range(delta.days + 1)]
+    elif birth_type == 'year':
+      births += [year]
+  return births
 
 def synthetic_dob(m):
   """ Sample dates of birth of m persons. """
-  dobs = all_possible_dobs(20, 65)
+  dobs = all_possible_dobs(20, 65, config.birth_type)
   return np.random.choice(dobs, m, replace=True)
+
 
 def fill_zeros(m, max_len):
   """ Append zeros to each list in m until they have length max_len;

@@ -66,8 +66,8 @@ def shannon_and_simpson(use_toy):
   #pprint(simpson)
   # => Entropy and Simpson give similar ranking; expected as both based on probs
 
-def uniqueness(input_fn, use_dob, dobs=None):
-  """ Computes uniqueness of individuals in the dataset. """
+def identifiability(input_fn, use_dob, dobs=None):
+  """ Computes identifiability of individuals in the dataset. """
   vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
   m = len(vcf_reader.samples)
   n = sum(1 for _ in vcf_reader)
@@ -95,5 +95,114 @@ def uniqueness(input_fn, use_dob, dobs=None):
   print 'num of unique SNP strings merged, w/' + o + ' DOB', len(counter)
   #print 'num of groups of persons sharing, w/' + o + ' DOB', len([v for v in counter.values() if v > 1])
 
-  return 1.0*len(counter)/m
+  return 1.0*len(counter)/m, n
 
+def conditional(input_fn):
+  """ Computes conditional distribution of each SNP:
+      how informative the allele on one chromotid is
+      about the allele on the other chromotid.
+  """
+  vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
+  dists_a = []
+  dists_b = []
+  dists_ab = []
+  num_snp = sum([1 for _ in vcf_reader])
+  vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
+  
+  #                            ?
+  # For each SNP, for each chromotid, probability of each observed value,
+  #           and for both chromotids, joint probability
+  prior_dists_file = 'prior_dists_a_b_ab.pickle'
+  if not os.path.exists(data_path + prior_dists_file):
+    for snp in vcf_reader:
+      hist_a = {}
+      hist_b = {}
+      hist_ab = {}
+      for ind in snp.samples:
+        bases = ind.gt_bases.split('|')
+        a = bases[0]
+        b = bases[1]
+        ab = tuple(bases)
+        hist_a.update({a : hist_a.get(a, 0) + 1})
+        hist_b.update({b : hist_b.get(b, 0) + 1})
+        hist_ab.update({ab : hist_ab.get(ab, 0) + 1})
+      dists_a.append(hist_a)
+      dists_b.append(hist_b)
+      dists_ab.append(hist_ab)
+    prior_dists = (dists_a, dists_b, dists_ab)
+    pickle.dump(prior_dists, open(data_path + prior_dists_file, 'wb'))
+  
+  else:
+    prior_dists = pickle.load(open(data_path + prior_dists_file, 'rb'))
+
+  for dists in prior_dists:
+    for hist in dists:
+      v_sum = sum(hist.values())
+      for k, v in hist.items():
+        hist.update({k : 1.0*v/v_sum})
+  print 'done'
+
+  dists_a, dists_b, dists_ab = prior_dists
+    
+  # P(b|a) = P(ab) / P(a)
+  #b_given_as = []
+  #for i in range(num_snp):
+  #  dist_a = dists_a[i]
+  #  #print dist_a
+  #  dist_ab = dists_ab[i]
+  #  #print dist_ab
+  #  b_given_a = {}
+  #  for a in dist_a.keys():
+  #    for ab in dist_ab.keys():
+  #      if ab[0] == a:
+  #        b_a = ab[1]+'_given_'+a
+  #        b_given_a.update({b_a : dist_ab[ab] / dist_a[a]})
+  #  #print b_given_a
+  #  b_given_as.append(b_given_a)
+
+  # P(a|b) = P(ab) / P(b)
+  #a_given_bs = []
+  #for i in range(num_snp):
+  #  dist_b = dists_b[i]
+  #  dist_ab = dists_ab[i]
+  #  a_given_b = {}
+  #  for b in dist_b.keys():
+  #    for ab in dist_ab.keys():
+  #      if ab[1] == b:
+  #        a_b = b+'_given_'+ab[0]
+  #        a_given_b.update({a_b : dist_ab[ab] / dist_b[b]})
+  #  #print b_given_a
+  #  a_given_bs.append(a_given_b)
+
+  #pickle.dump(b_given_as, open(data_path + 'cond_dists_b_a.pickle', 'wb'))
+  #pickle.dump(a_given_bs, open(data_path + 'cond_dists_a_b.pickle', 'wb'))
+  
+  def get_conditionals(joints, margs, num_snp, marg_ind):
+    assert marg_ind == 0 or marg_ind == 1, 'Bad index of marginal'
+    if marg_ind == 0:
+      cond_file = 'cond_dists_b_a.pickle'
+    else:
+      cond_file = 'cond_dists_a_b.pickle'
+
+    if not os.path.exists(data_path + cond_file):
+      conditionals = []
+      for i in range(num_snp):
+        joint = joints[i]
+        marg = margs[i]
+        cond = {}
+        for m in marg.keys():
+          for j in joint.keys():
+            if j[marg_ind] == m:
+              if marg_ind == 0:
+                c = j[1]+'_given_'+m
+              else:
+                c = m+'_given_'+j[0]
+              cond.update({c : joint[j] / marg[m]})
+        print cond
+        conditionals.append(cond)
+        pickle.dump(conditionals, open(data_path + cond_file, 'wb'))
+    else:
+      conditionals = pickle.load(open(data_path + cond_file, 'rb'))
+    return conditionals
+
+  b_given_as = get_conditionals(dists_ab, dists_a, num_snp, 0)
