@@ -649,6 +649,25 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
 
+    def test_catches_value_change_for_exac_allele_frequency(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+
+        self.oldRow['Allele_Frequency'] = '9.42e-06 (ExAC)'
+        self.newRow['Allele_Frequency'] = '9.99e-06 (ExAC minus TCGA)'
+
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        v_diff = diff['chr17:g.43049067:C>T'][0]
+        self.assertEqual(len(diff), 1)
+        self.assertEqual(v_diff['field'], 'Allele_Frequency')
+        self.assertEqual(v_diff['added'], '9.99e-06 (ExAC minus TCGA)')
+        self.assertEqual(v_diff['removed'], '9.42e-06 (ExAC minus TCGA)')
+        self.assertEqual(change_type, "changed_information")
+
     def test_properly_ignores_exac_minus_tcga_rounding_changes_for_generic_allele_frequency(self):
         releaseDiff.added_data = self.added_data
         releaseDiff.diff = self.diff
@@ -697,7 +716,6 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(v_diff['added'], '9.41')
         self.assertEqual(v_diff['removed'], '9.42')
         self.assertEqual(change_type, "changed_information")
-
 
 
 if __name__ == '__main__':
