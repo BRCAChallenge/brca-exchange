@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  26 JUL 2017 13:56
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  26 JUL 2017 14:17
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -352,25 +352,16 @@ Underfull \hbox (badness 10000) in paragraph at lines 32--34
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 35--52
+Underfull \hbox (badness 10000) in paragraph at lines 35--53
 
  []
 
 
 LaTeX Warning: Citation `pang2012revisiting' on page 1 undefined on input line 
-54.
+55.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 54--67
-
- []
-
-
-LaTeX Warning: Citation `hyvonen2006semantic' on page 1 undefined on input line
- 68.
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 68--77
+Underfull \hbox (badness 10000) in paragraph at lines 55--68
 
  []
 
@@ -378,38 +369,47 @@ Underfull \hbox (badness 10000) in paragraph at lines 68--77
 
 {/usr/local/texlive/2015/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 
-LaTeX Warning: Citation `wolf2006use' on page 2 undefined on input line 78.
+LaTeX Warning: Citation `hyvonen2006semantic' on page 2 undefined on input line
+ 69.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 78--86
+Underfull \hbox (badness 10000) in paragraph at lines 69--78
+
+ []
+
+
+LaTeX Warning: Citation `wolf2006use' on page 2 undefined on input line 79.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 79--87
 
  []
 
 
 LaTeX Warning: Citation `ghosh2016contextual' on page 2 undefined on input line
- 87.
+ 88.
 
 
 LaTeX Warning: Citation `fazly2003testing' on page 2 undefined on input line 10
-0.
+1.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 100--110
+Underfull \hbox (badness 10000) in paragraph at lines 101--111
 
  []
 
 
 LaTeX Warning: Citation `wood1996windmill' on page 2 undefined on input line 11
-1.
+2.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 111--122
+Underfull \hbox (badness 10000) in paragraph at lines 112--123
 
  []
 
 
 LaTeX Warning: Citation `wang2005exploiting' on page 2 undefined on input line 
-124.
+125.
 
 [2]
 No file cryptohash_writeup.bbl.
@@ -431,7 +431,7 @@ Here is how much of TeX's memory you used:
 </usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></
 usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></us
 r/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb>
-Output written on cryptohash_writeup.pdf (3 pages, 72478 bytes).
+Output written on cryptohash_writeup.pdf (3 pages, 72647 bytes).
 PDF statistics:
  34 PDF objects out of 1000 (max. 8388607)
  23 compressed objects within 1 object stream
