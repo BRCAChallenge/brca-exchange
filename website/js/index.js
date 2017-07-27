@@ -810,7 +810,6 @@ var VariantDetail = React.createClass({
                         // try a variety of formats until one works, or just display the value if not?
                         rowItem = normalizeDateFieldDisplay(variant[prop]);
                     } else if (prop === "Genomic_Coordinate_hg38") {
-                        debugger;
                         let genomicCoordinateElements = variant[prop].split(':');
                         let chr = genomicCoordinateElements[0];
                         let position = parseInt(genomicCoordinateElements[1].split('.')[1]);
