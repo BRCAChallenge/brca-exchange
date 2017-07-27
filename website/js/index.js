@@ -741,6 +741,16 @@ var VariantDetail = React.createClass({
 
         return diffRows;
     },
+    generateLinkToGenomeBrowser: function (prop, variant) {
+        let hgVal = (prop === "Genomic_Coordinate_hg38") ? '38' : '19';
+        let genomicCoordinateElements = variant[prop].split(':');
+        let chr = genomicCoordinateElements[0];
+        let position = parseInt(genomicCoordinateElements[1].split('.')[1]);
+        let positionRangeStart = position - 1;
+        let positionRangeEnd = position + 1;
+        let genomeBrowserUrl = 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg' + hgVal + '&position=' + chr + ':' + positionRangeStart + '-' + positionRangeEnd + '&hubUrl=http://brcaexchange.org/trackhubs/hub.txt';
+        return <a target="_blank" href={genomeBrowserUrl}>{variant[prop]}</a>;
+    },
     render: function () {
         const {data, error} = this.state;
         if (!data) {
@@ -809,14 +819,8 @@ var VariantDetail = React.createClass({
                     } else if (prop === "Date_last_evaluated_ENIGMA" && !isEmptyField(variant[prop])) {
                         // try a variety of formats until one works, or just display the value if not?
                         rowItem = normalizeDateFieldDisplay(variant[prop]);
-                    } else if (prop === "Genomic_Coordinate_hg38") {
-                        let genomicCoordinateElements = variant[prop].split(':');
-                        let chr = genomicCoordinateElements[0];
-                        let position = parseInt(genomicCoordinateElements[1].split('.')[1]);
-                        let positionRangeStart = position - 1;
-                        let positionRangeEnd = position + 1;
-                        let genomeBrowserUrl = 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&position=' + chr + ':' + positionRangeStart + '-' + positionRangeEnd + '&hubUrl=http://brcaexchange.org/trackhubs/hub.txt';
-                        rowItem = <a href={genomeBrowserUrl}>{variant[prop]}</a>;
+                    } else if (prop === "Genomic_Coordinate_hg38" || prop === "Genomic_Coordinate_hg37") {
+                        rowItem = this.generateLinkToGenomeBrowser(prop, variant);
                     } else {
                         rowItem = normalizedFieldDisplay(variant[prop]);
                     }
