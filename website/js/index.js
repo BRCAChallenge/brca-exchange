@@ -813,6 +813,10 @@ var VariantDetail = React.createClass({
                     } else if (prop === "Date_last_evaluated_ENIGMA" && !isEmptyField(variant[prop])) {
                         // try a variety of formats until one works, or just display the value if not?
                         rowItem = normalizeDateFieldDisplay(variant[prop]);
+                    } else if (/Allele_frequency_.*_ExAC/.test(prop)) {
+                        let count = variant[prop.replace("frequency", "count")],
+                            number = variant[prop.replace("frequency", "number")];
+                        rowItem = [ variant[prop], <small style={{float: 'right'}}>({count} of {number})</small> ]
                     } else {
                         rowItem = normalizedFieldDisplay(variant[prop]);
                     }

@@ -38,16 +38,16 @@ var alleleFrequencyCharts = function (variant, prop) {
             return false;
         }
         frequencyProps = [
-            {label: 'AFR', prop: 'Allele_frequency_AFR_ExAC', number: 'Allele_number_AFR_ExAC'},
-            {label: 'AMR', prop: 'Allele_frequency_AMR_ExAC', number: 'Allele_number_AMR_ExAC'},
-            {label: 'EAS', prop: 'Allele_frequency_EAS_ExAC', number: 'Allele_number_EAS_ExAC'},
-            {label: 'FIN', prop: 'Allele_frequency_FIN_ExAC', number: 'Allele_number_FIN_ExAC'},
-            {label: 'NFE', prop: 'Allele_frequency_NFE_ExAC', number: 'Allele_number_NFE_ExAC'},
-            {label: 'OTH', prop: 'Allele_frequency_OTH_ExAC', number: 'Allele_number_OTH_ExAC'},
-            {label: 'SAS', prop: 'Allele_frequency_SAS_ExAC', number: 'Allele_number_SAS_ExAC'},
+            {label: 'AFR', prop: 'Allele_frequency_AFR_ExAC'},
+            {label: 'AMR', prop: 'Allele_frequency_AMR_ExAC'},
+            {label: 'EAS', prop: 'Allele_frequency_EAS_ExAC'},
+            {label: 'FIN', prop: 'Allele_frequency_FIN_ExAC'},
+            {label: 'NFE', prop: 'Allele_frequency_NFE_ExAC'},
+            {label: 'OTH', prop: 'Allele_frequency_OTH_ExAC'},
+            {label: 'SAS', prop: 'Allele_frequency_SAS_ExAC'},
         ];
         title = 'ExAC';
-        pointFormat =  "{point.y}<br /><em>(of {point.number})</em>"; 
+        pointFormat =  "{point.y}<br /><em>({point.count} of {point.number})</em>"; 
     } else {
         return false;
     }
@@ -68,9 +68,13 @@ var alleleFrequencyCharts = function (variant, prop) {
     let data = [];
 
     for (let frequencyType of frequencyProps) {
-        if (!isEmptyField(variant[frequencyType.prop]) && parseFloat(variant[frequencyType.prop]) !== 0) {
+        if (!isEmptyField(variant[frequencyType.prop])) {
             categories.push(frequencyType.label);
-            data.push({ y: parseFloat(variant[frequencyType.prop]), number: variant[frequencyType.number] });
+            data.push({
+                y: parseFloat(variant[frequencyType.prop]),
+                number: variant[frequencyType.prop.replace("frequency", "number")],
+                count: variant[frequencyType.prop.replace("frequency", "count")]
+            });
         }
     }
 
