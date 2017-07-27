@@ -30,8 +30,12 @@ af_fn = """1000G_brca.hg38_exon_high_af.vcf"""
 
 # Download data files
 os.system(download_data_cmd)
+# TODO RefSeq files?
 
 # Extract exons
+starts, ends = utils.exon_starts_ends('RefSeq.genepred', ['NM_000059.3', 'NM_007294.3'])
+with open('exon_starts_ends.txt', 'wb') as exon_ind_file:
+  for start in starts:
 utils.extract_exon(start_fn, exon_fn)
 
 # Extract high allele frequencies
