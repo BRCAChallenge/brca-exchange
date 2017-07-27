@@ -33,7 +33,6 @@ var defaultOptions = {
             pointBreak: pointBreakColumn
         }
     }
-//    spacing: [0, 0, 0, 0],
 };
 
 Highcharts.wrap(Highcharts.Axis.prototype, 'getLinePath', function (proceed, lineWidth) {
