@@ -1,11 +1,12 @@
 from collections import namedtuple, OrderedDict
 
+
 def addUrls(s, url=None):
     " transform a list of URLs to hrefs "
     lines = []
     for part in s.split(","):
         part = part.strip()
-        if part=="":
+        if part == "":
             continue
         if part.startswith("http"):
             label = part.split("/")[-1]
@@ -14,7 +15,7 @@ def addUrls(s, url=None):
             part = "<a href='%s'>%s</a>" % (part, label)
             lines.append(part)
         else:
-            if url==None:
+            if url == None:
                 lines.append(part)
             else:
                 part = "<a href='%s%s'>%s</a>" % (url, part, part)
@@ -66,18 +67,9 @@ for line in ifh:
     chrom = "chr"+rec.Chr
     start = str(int(rec.pyhgvs_Hg37_Start)-1)
     end = rec.pyhgvs_Hg37_End
-
-    #name = rec.Protein_Change
-    #if name=="-":
-        #name = rec.pyhgvs_Protein.split(".")[-1].strip("(").strip(")")
-    #if name=="-":
-        #name = rec.HGVS_cDNA
-    #if name=="?" or name=="=":
     name = rec.pyhgvs_cDNA.split(":")[-1]
-    if name=="?":
+    if name == "?":
         assert(False)
-    
-    #score = len(rec.Source.split(","))
     score = 0
     strand = "."
     thickStart = start
@@ -106,33 +98,33 @@ for line in ifh:
         if h in skipCols:
             continue
         val = rd[h]
-        if val=="-":
+        if val == "-":
             val = ""
         val = val.strip().strip(",").strip()
 
-        if h=="Source":
+        if h == "Source":
             val = val.replace(",", ", ")
-        if h=="Assertion_method_citation_ENIGMA" and val!="":
+        if h == "Assertion_method_citation_ENIGMA" and val != "":
             val = "<a href='%s'>%s</a>" % (val, val.split("/")[-1])
-        if h=="Source_URL":
+        if h == "Source_URL":
             val = addUrls(val)
-        if h=="SCV_ClinVar":
+        if h == "SCV_ClinVar":
             val = addUrls(val, url="https://www.ncbi.nlm.nih.gov/clinvar/?term=")
-        if h=="Submitter_ClinVar":
+        if h == "Submitter_ClinVar":
             val = val.replace("_", " ")
         if "," in val:
             val = val.replace(",", ", ")
 
-        outRow.append( val )
+        outRow.append(val)
 
     outRow = [str(x) for x in outRow]
 
     mouseOvers = []
-    if rec.Pathogenicity_all!="":
+    if rec.Pathogenicity_all != "":
         mouseOvers.append(rec.Pathogenicity_all)
-    if rec.pyhgvs_cDNA!="-":
+    if rec.pyhgvs_cDNA != "-":
         mouseOvers.append(rec.pyhgvs_cDNA)
-    if rec.Discordant!="Concordant":
+    if rec.Discordant != "Concordant":
         mouseOvers.append(rec.Discordant)
     mouseOver = ", ".join(mouseOvers)
     outRow.append(mouseOver)
@@ -153,4 +145,3 @@ for line in ifh:
     ofh38.write("\t".join(outRow)+"\n")
 
 print "wrote to %s, %s and %s" % (ofh.name, ofh38.name, asFh.name)
-
