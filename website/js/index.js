@@ -775,6 +775,8 @@ var VariantDetail = React.createClass({
                 if (bicClass !== 'Class 1' && bicClass !== 'Class 5') {
                     innerCols = innerCols.filter(x => x.prop !== 'Clinical_classification_BIC' && x.prop !== 'Clinical_importance_BIC');
                 }
+            } else if (groupTitle === 'Allele Counts (ExAC minus TCGA)') {
+                return false;
             }
 
             // now map the group's columns to a list of row objects
@@ -816,7 +818,7 @@ var VariantDetail = React.createClass({
                     } else if (/Allele_frequency_.*_ExAC/.test(prop)) {
                         let count = variant[prop.replace("frequency", "count")],
                             number = variant[prop.replace("frequency", "number")];
-                        rowItem = [ variant[prop], <small style={{float: 'right'}}>({count} of {number})</small> ]
+                        rowItem = [ variant[prop], <small style={{float: 'right'}}>({count} of {number})</small> ];
                     } else {
                         rowItem = normalizedFieldDisplay(variant[prop]);
                     }

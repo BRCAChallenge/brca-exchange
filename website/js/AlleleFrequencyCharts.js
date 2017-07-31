@@ -31,7 +31,7 @@ var alleleFrequencyCharts = function (variant, prop) {
             {label: 'SAS', prop: 'SAS_Allele_frequency_1000_Genomes'},
         ];
         title = '1000 Genomes';
-        pointFormat =  "{point.y}"; 
+        pointFormat =  "{point.y}";
     }
     else if (prop === 'Allele_Frequency_Charts_ExAC') {
         if (!variant['Variant_in_ExAC']) {
@@ -47,7 +47,7 @@ var alleleFrequencyCharts = function (variant, prop) {
             {label: 'SAS', prop: 'Allele_frequency_SAS_ExAC'},
         ];
         title = 'ExAC';
-        pointFormat =  "{point.y}<br /><em>({point.count} of {point.number})</em>"; 
+        pointFormat =  "{point.y}<br /><em>({point.count} of {point.number})</em>";
     } else {
         return false;
     }
