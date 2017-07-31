@@ -87,7 +87,7 @@ var FactSheet = React.createClass({
                         <ul>
                             <li>The BRCA Exchange web portal is the largest public source for information on BRCA1 and BRCA2 variants.</li>
                             <li>By default, the web portal shows variants that have been expert-classified by an international panel (the ENIGMA consortium).</li>
-                            <li>By switching from the ‘expert reviewed portal’ to the ‘all public data portal’, users may also explore information on variants that have not yet been classified by the expert panel. For these unclassified variants, the impact on health has not yet been established.</li>
+                            <li>By switching from the ‘expert reviewed portal’ to the ‘all public data portal’, users may also explore information on variants that have not yet been reviewd by the expert panel. For these variants, the impact on disease risk has not yet been established.</li>
                         </ul>
                         <p><u>Web portal statistics:</u></p>
                         {this.state.error ? <p>&nbsp;&nbsp;&nbsp;({this.state.error})</p> :
