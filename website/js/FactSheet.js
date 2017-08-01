@@ -37,7 +37,7 @@ var chartOptions1 = {
     series: [
         { name: "Benign", data: [ 0, 0 ] },
         { name: "Pathogenic", data: [ 0, 0 ] },
-        { name: "Unclassified", data: [ 0, 0 ] }
+        { name: "Not Yet Reviewed", data: [ 0, 0 ] }
     ]
 };
 
@@ -52,7 +52,7 @@ var chartOptions2 = {
         data: [
             { name: "Pathogenic", y: 0 },
             { name: "Benign", y: 0 },
-            { name: "Unclassified", y: 0 }
+            { name: "Not Yet Reviewed", y: 0 }
         ]
     }]
 };
@@ -71,7 +71,7 @@ var FactSheet = React.createClass({
                 chart1.series[0].setData([resp.brca1.benign, resp.brca2.benign], false);
                 chart1.series[1].setData([resp.brca1.pathogenic, resp.brca2.pathogenic], false);
                 chart1.series[2].setData([resp.brca1.total - resp.brca1.pathogenic - resp.brca1.benign, resp.brca2.total - resp.brca2.pathogenic - resp.brca2.benign], true);
-                chart2.series[0].setData([{ name: "Benign", y: resp.enigmaBenign }, { name: "Pathogenic", y: resp.enigmaPathogenic }, { name: "Unclassified", y: resp.total - resp.enigma }]);
+                chart2.series[0].setData([{ name: "Benign", y: resp.enigmaBenign }, { name: "Pathogenic", y: resp.enigmaPathogenic }, { name: "Not Yet Reviewed", y: resp.total - resp.enigma }]);
                 this.setState(resp);
             },
             () => this.setState({error: 'Problem connecting to server'}));
@@ -87,7 +87,7 @@ var FactSheet = React.createClass({
                         <ul>
                             <li>The BRCA Exchange web portal is the largest public source for information on BRCA1 and BRCA2 variants.</li>
                             <li>By default, the web portal shows variants that have been expert-classified by an international panel (the ENIGMA consortium).</li>
-                            <li>By switching from the ‘expert reviewed portal’ to the ‘all public data portal’, users may also explore information on variants that have not yet been reviewd by the expert panel. For these variants, the impact on disease risk has not yet been established.</li>
+                            <li>By switching from the ‘expert reviewed portal’ to the ‘all public data portal’, users may also explore information on variants that have not yet been reviewed by the expert panel. For these variants, the impact on disease risk has not yet been established.</li>
                         </ul>
                         <p><u>Web portal statistics:</u></p>
                         {this.state.error ? <p>&nbsp;&nbsp;&nbsp;({this.state.error})</p> :
