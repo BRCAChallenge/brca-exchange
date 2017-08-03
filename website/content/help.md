@@ -4,14 +4,14 @@
 
 # Searching
 
-To search just start typing a variant in the search box and it will auto complete. Variants are identified using [HGVS nomenclature](http://varnomen.hgvs.org/), a standard created by the Human Genome Variation Society.  Most genetic test results are reported in HGVS nomenclature. This nomenclature describes a variant by indicating (1): a reference sequence, (2): what kind of sequence it is (genomic, coding DNA or protein), (3): the position of the variant in relation this reference sequence, and (4): the nucleotide or protein differences between the variant and the reference sequence.  For example, _NM_007294.3:c.5053A>G_ indicates a variant relative to reference sequence _NM_007294.3_, which is a coding DNA reference sequence (as indicated by _c_), that the variant is in position 5053, and that it involves changing an _A_ to a _G_.
+To search just start typing a variant in the search box and it will auto complete. Variants are identified using <a href="http://varnomen.hgvs.org/" target="_blank" rel="noopener">HGVS nomenclature</a>, a standard created by the Human Genome Variation Society.  Most genetic test results are reported in HGVS nomenclature. This nomenclature describes a variant by indicating (1): a reference sequence, (2): what kind of sequence it is (genomic, coding DNA or protein), (3): the position of the variant in relation this reference sequence, and (4): the nucleotide or protein differences between the variant and the reference sequence.  For example, _NM_007294.3:c.5053A>G_ indicates a variant relative to reference sequence _NM_007294.3_, which is a coding DNA reference sequence (as indicated by _c_), that the variant is in position 5053, and that it involves changing an _A_ to a _G_.
 
 # Understanding the data
 
 #### Gene
 
 The Gene column displays the name of the gene on which the variant was found,
-as named by [HGNC](http://www.genenames.org/).  This will be either _BRCA1_ or 
+as named by <a href="http://www.genenames.org/" target="_blank" rel="noopener">HGNC</a>.  This will be either _BRCA1_ or 
 _BRCA2_.
 
 
@@ -33,7 +33,7 @@ Shortened abbreviation of the HGVS Protein field using the one-letter abbreviati
 
 #### BIC Designation
 
-Variant identifier in [BIC](https://research.nhgri.nih.gov/bic/) nomenclature.
+Variant identifier in <a href="https://research.nhgri.nih.gov/bic/" target="_blank" rel="noopener">BIC</a> nomenclature.
 
 ### Clinical Significance 
 
