@@ -6,7 +6,7 @@ import re
 import utilities
 
 EMPTY = "-"
-FIELDS_TO_REMOVE = ["Protein_ClinVar",
+FIELDS_TO_REMOVE = ["Protein_ClinVar", "Description_ClinVar",
                     "HGVS_ClinVar", "HGVS_cDNA_exLOVD",
                     "HGVS_protein_LOVD",
                     "HGVS_protein_exLOVD",
