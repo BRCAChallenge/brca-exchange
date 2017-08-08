@@ -79,6 +79,7 @@
     "spin.js": "^2.3.2",
     "svg-to-react": "^0.1.0",
     "underscore": "^1.7.0",
-    "vcf.js": "^0.2.6"
+    "vcf.js": "^0.2.6",
+    "vitullo-spinner": "^0.1.5"
   }
 }
