@@ -90,22 +90,9 @@ var D3Lollipop = React.createClass({
     componentDidMount: function() {
         var {data, brcakey, onRowClick, ...opts} = this.props;
         console.log('componentDidmount start');
-        let spinnerOpts = {
-          lines: 9, // The number of lines to draw
-          length: 9, // The length of each line
-          width: 5, // The line thickness
-          radius: 14, // The radius of the inner circle
-          color: '#EE3124', // #rgb or #rrggbb or array of colors
-          speed: 1.9, // Rounds per second
-          trail: 40, // Afterglow percentage
-          className: 'spinner', // The CSS class to assign to the spinner
-        };
-        let spinTarget = document.getElementById('brcaLollipop');
-        let spinner = new Spinner(spinnerOpts);
-        spinner.spin(spinTarget);
-        var {data, brcakey, onRowClick, ...opts} = this.props;
-        console.log('componentDidmount start');
+        var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
         var subSetData = data.map(this.filterAttributes);
+        var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
         // Don't render chart if there's no data recieved yet
         if (this.props.data.length !== 0) {
             this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
@@ -146,9 +133,6 @@ var D3Lollipop = React.createClass({
     componentDidUpdate: function () {
         console.log('componentDidUpdate');
     },
-    componentWillUpdate: function () {
-        console.log('componentWillUpdate');
-    },
     componentWillUnmount: function() {
         this.cleanupBRCA();
         console.log('componentWillUnmount');
@@ -183,10 +167,6 @@ var Lollipop = React.createClass({
     },
     componentWillUnmount: function() {
         console.log('Outer componentWillUnmount');
-    },
-    componentWillReceiveProps: function (newProps) {
-        console.log('Outer componentWillReveiveProps');
-        this.fetchData(newProps.opts);
     },
     fetchData: function (opts) {
         this.props.fetch(opts).subscribe(
