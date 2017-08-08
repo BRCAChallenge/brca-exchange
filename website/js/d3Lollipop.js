@@ -63,16 +63,6 @@ var D3Lollipop = React.createClass({
             <div id='brcaLollipop' ref='d3svgBrca'/>
         );
     },
-    spinnerOpts: {
-      lines: 9, // The number of lines to draw
-      length: 9, // The length of each line
-      width: 5, // The line thickness
-      radius: 14, // The radius of the inner circle
-      color: '#EE3124', // #rgb or #rrggbb or array of colors
-      speed: 1.9, // Rounds per second
-      trail: 40, // Afterglow percentage
-      className: 'spinner', // The CSS class to assign to the spinner
-    },
     filterAttributes: function (obj) {
         var oldObj = _(obj).pick('Genomic_Coordinate_hg38', 'Pathogenicity_expert');
         var parts = oldObj.Genomic_Coordinate_hg38.split(':');
@@ -99,23 +89,31 @@ var D3Lollipop = React.createClass({
         console.log('componentWillmount start isLoading: ', this.props.isLoading);
     },
     componentDidMount: function() {
+        let spinnerOpts = {
+          lines: 9, // The number of lines to draw
+          length: 9, // The length of each line
+          width: 5, // The line thickness
+          radius: 14, // The radius of the inner circle
+          color: '#EE3124', // #rgb or #rrggbb or array of colors
+          speed: 1.9, // Rounds per second
+          trail: 40, // Afterglow percentage
+          className: 'spinner', // The CSS class to assign to the spinner
+        };
+        let spinTarget = document.getElementById('brcaLollipop');
+        let spinner = new Spinner(spinnerOpts);
+        spinner.spin(spinTarget);
         var {data, brcakey, onRowClick, ...opts} = this.props;
-        this.props.isLoading = true;
-        this.props.spinTarget = document.getElementById('brcaLollipop');
-        this.props.spinner = new Spinner(this.spinnerOpts).spin(this.props.spinTarget);
-        console.log('componentDidmount start isLoading: ', this.props.isLoading);
+        console.log('componentDidmount start');
         var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
         var subSetData = data.map(this.filterAttributes);
         var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
         this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
-        console.log('componentDidmount end isLoading: ', this.props.isLoading);
+        console.log('componentDidmount end');
     },
-
     componentWillReceiveProps: function(newProps) {
         // only rebuild plot if number of variants has changed
         if (newProps.data.length !== this.props.data.length) {
-            this.props.isLoading = true;
-            console.log('componentWillReveiveProps start isLoading: ', this.props.isLoading);
+            console.log('componentWillReveiveProps start');
             this.cleanupBRCA();
             var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
             var {spinner, spinTarget, data, brcakey, onRowClick, ...opts} = newProps;
@@ -129,17 +127,16 @@ var D3Lollipop = React.createClass({
             }
             var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
             this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
-            this.props.isLoading = false;
-            console.log('componentWillReveiveProps end isLoading: ', this.props.isLoading);
-            this.props.spinner.stop();
+            console.log('componentWillReveiveProps end');
+            this.spinner.stop();
         }
     },
     componentWillUpdate: function () {
-        console.log('componentWillUpdate isLoading: ', this.props.isLoading);
+        console.log('componentWillUpdate');
     },
     componentWillUnmount: function() {
         this.cleanupBRCA();
-        console.log('componentWillUnmount isLoading: ', this.props.isLoading);
+        console.log('componentWillUnmount');
     }
 });
 
@@ -149,7 +146,6 @@ var Lollipop = React.createClass({
         return {
             brcakey: "BRCA1",
             data: [],
-            isLoading: true,
         };
     },
     componentWillMount: function () {
@@ -181,7 +177,7 @@ var Lollipop = React.createClass({
                             <NavItem eventKey="BRCA2">BRCA2</NavItem>
                         </Nav>
                         <span onClick={() => this.props.onHeaderClick('Lollipop Plots')}/>
-                        <D3Lollipop isLoading={this.state.isLoading} data={this.state.data} opts={this.props.opts} key={this.state.brcakey} brcakey={this.state.brcakey} onRowClick={this.props.onRowClick} id='brcaLollipop' ref='d3svgBrca'/>
+                        <D3Lollipop data={this.state.data} opts={this.props.opts} key={this.state.brcakey} brcakey={this.state.brcakey} onRowClick={this.props.onRowClick} id='brcaLollipop' ref='d3svgBrca'/>
                     </Row>
                 </div>
             </Grid>
