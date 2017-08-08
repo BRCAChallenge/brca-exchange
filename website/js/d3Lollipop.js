@@ -10,6 +10,7 @@ var PureRenderMixin = require('./PureRenderMixin');
 
 var {Grid, Row, Nav, NavItem} = require('react-bootstrap');
 
+var Spinner = require('spin.js');
 
 var brca12JSON = {
     BRCA1: {
@@ -78,18 +79,36 @@ var D3Lollipop = React.createClass({
         var newObj = {category: oldObj.Pathogenicity_expert, coord: chrCoordinate, value: 1, oldData: obj};
         return newObj;
     },
-
-     componentDidMount: function() {
+    componentWillMount: function() {
+        console.log('componentWillmount start isLoading: ', this.props.isLoading);
+    },
+    componentDidMount: function() {
+        let spinnerOpts = {
+          lines: 9, // The number of lines to draw
+          length: 9, // The length of each line
+          width: 5, // The line thickness
+          radius: 14, // The radius of the inner circle
+          color: '#EE3124', // #rgb or #rrggbb or array of colors
+          speed: 1.9, // Rounds per second
+          trail: 40, // Afterglow percentage
+          className: 'spinner', // The CSS class to assign to the spinner
+        };
+        let spinTarget = document.getElementById('brcaLollipop');
+        let spinner = new Spinner(spinnerOpts);
+        spinner.spin(spinTarget);
         var {data, brcakey, onRowClick, ...opts} = this.props;
+        console.log('componentDidmount start');
         var subSetData = data.map(this.filterAttributes);
         var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
         var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
         this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
+        console.log('componentDidmount end');
     },
 
     componentWillReceiveProps: function(newProps) {
         // only rebuild plot if number of variants has changed
         if (newProps.data.length !== this.props.data.length) {
+            console.log('componentWillReveiveProps start');
             this.cleanupBRCA();
             var {data, brcakey, onRowClick, ...opts} = newProps;
             var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
@@ -103,10 +122,16 @@ var D3Lollipop = React.createClass({
             }
             var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
             this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
+            console.log('componentWillReveiveProps end');
+            this.spinner.stop();
         }
+    },
+    componentWillUpdate: function () {
+        console.log('componentWillUpdate');
     },
     componentWillUnmount: function() {
         this.cleanupBRCA();
+        console.log('componentWillUnmount');
     }
 });
 
@@ -118,17 +143,20 @@ var Lollipop = React.createClass({
             data: []
         };
     },
-    componentWillReceiveProps: function (newProps) {
-        this.fetchData(newProps.opts);
-    },
     componentWillMount: function () {
+        console.log('Outer componentWillMount')
         this.fetchData = _.debounce(this.fetchData, 600, true);
         this.fetchData(this.props.opts);
+    },
+    componentWillReceiveProps: function (newProps) {
+        console.log('Outer componentWillReveiveProps');
+        this.fetchData(newProps.opts);
     },
     fetchData: function (opts) {
         this.props.fetch(opts).subscribe(
             function (d) {
                 this.setState({data: d.data});
+                console.log('fetchingData');
             }.bind(this));
     },
     onSelect: function (key) {
