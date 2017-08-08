@@ -1,7 +1,8 @@
 'use strict';
 
 var React = require('react'),
-    BarChart = require('./BarChart');
+    BarChart = require('./BarChart'),
+    _ = require('lodash');
 
 // copied from index.js, move to utility file
 function isEmptyField(value) {
@@ -46,9 +47,14 @@ var alleleFrequencyCharts = function (variant, prop) {
             {label: 'OTH', prop: 'Allele_frequency_OTH_ExAC'},
             {label: 'SAS', prop: 'Allele_frequency_SAS_ExAC'},
         ];
+
         title = 'ExAC';
         pointFormat =  "{point.y}<br /><em>({point.count} of {point.number})</em>";
     } else {
+        return false;
+    }
+
+    if (_.every(_.values(_.pick(variant, _.map(frequencyProps, e => e.prop))), isEmptyField)) {
         return false;
     }
     /*
@@ -78,7 +84,9 @@ var alleleFrequencyCharts = function (variant, prop) {
         }
     }
 
-    let chart2Max = Math.max(parseFloat(variant['Max_Allele_Frequency']), 0.01);
+    //let chart2Max = Math.max(parseFloat(variant['Max_Allele_Frequency']), 0.01);
+    let chart2Max = Math.max.apply(null, _.map(_.values(_.pick(variant, _.map(frequencyProps, e => e.prop))), parseFloat));
+    console.log("c2max:" + chart2Max);
     let fullscaleChartOptions = {
         title: { text: title},
         legend: { enabled: false },
@@ -118,7 +126,14 @@ var alleleFrequencyCharts = function (variant, prop) {
                 style: { fontSize: "8px" },
                 x: -2,
                 y: 2
-            }
+            },
+            plotLines: [{
+                color: 'red',
+                dashStyle: 'dash',
+                value: chart2Max,
+                width: 1,
+                zIndex: 5
+            }]
         },
         xAxis: { categories: categories },
         series: [{ data: data }]
