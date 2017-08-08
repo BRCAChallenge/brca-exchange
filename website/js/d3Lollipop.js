@@ -144,7 +144,7 @@ var Lollipop = React.createClass({
         };
     },
     componentWillMount: function () {
-        console.log('Outer componentWillMount')
+        console.log('Outer componentWillMount');
         this.fetchData = _.debounce(this.fetchData, 600, true);
         this.fetchData(this.props.opts);
     },
