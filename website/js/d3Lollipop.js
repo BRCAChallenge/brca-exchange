@@ -10,6 +10,9 @@ var PureRenderMixin = require('./PureRenderMixin');
 
 var {Grid, Row, Nav, NavItem} = require('react-bootstrap');
 
+var Spinjs = require('spin.js');
+//var ReactSpinner = require('react-spinjs');
+//var Spinner = require('vitullo-spinner');
 
 var brca12JSON = {
     BRCA1: {
@@ -19,16 +22,19 @@ var brca12JSON = {
         brcaDomainFile: require('raw!../content/brca2LollipopDomain.json')
     }
 };
+
+
 var d3Lollipop = {};
 
 d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id, varlink) {
+
     var xAxisLabel = '';
     var minPos = 0;
     var maxPos = 1;
     if (id === 'BRCA1') {
         xAxisLabel = 'Coordinate Selection (GRCh38 chr 17)';
         minPos = 43000000;
-        maxPos = 43170000;
+        maxPos = 43180000;
     } else if (id === 'BRCA2') {
         xAxisLabel = 'Coordinate Selection (GRCh38 chr 13)';
         minPos = 32300000;
@@ -48,13 +54,47 @@ d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id, varlink) {
     };
 };
 
+// Set initial isLoading state for preserving state after unMounting
+let isLoading = false;
+let hiddenButtonActive = false;
+
 var D3Lollipop = React.createClass({
-    //mixins: [PureRenderMixin],
     shouldComponentUpdate: () => false,
+    getInitialState: function () {
+        // loader settings
+        var loaderopts = {
+          lines: 9, // The number of lines to draw
+          length: 9, // The length of each line
+          width: 5, // The line thickness
+          radius: 14, // The radius of the inner circle
+          color: '#EE3124', // #rgb or #rrggbb or array of colors
+          speed: 1.9, // Rounds per second
+          trail: 40, // Afterglow percentage
+          className: 'spinner', // The CSS class to assign to the spinner
+        };
+        return {
+            spinner: new Spinjs(loaderopts),
+            isLoading: isLoading,
+        };
+    },
     render: function () {
         return (
-            <div id='brcaLollipop' ref='d3svgBrca'/>
+            <div id="spinnerContainer">
+                <div id='brcaLollipop' ref='d3svgBrca'/>
+            </div>
         );
+    },
+    startSpinner: function () {
+        // Plot target
+        var targetElement = document.getElementById('spinnerContainer') || 'spinnerContainer' || document.body;   // Where to append the plot (svg)
+        console.log('spinner state start before: ', this.state.spinner);
+        this.state.spinner.spin(targetElement);
+        console.log('spinner state start after: ', this.state.spinner);
+    },
+    stopSpinner: function () {
+        console.log('spinner state stop before: ', this.state.spinner);
+        this.state.spinner.stop();
+        console.log('spinner state stop after: ', this.state.spinner);
     },
     filterAttributes: function (obj) {
         var oldObj = _(obj).pick('Genomic_Coordinate_hg38', 'Pathogenicity_expert');
@@ -78,61 +118,143 @@ var D3Lollipop = React.createClass({
         var newObj = {category: oldObj.Pathogenicity_expert, coord: chrCoordinate, value: 1, oldData: obj};
         return newObj;
     },
-
-     componentDidMount: function() {
-        var {data, brcakey, onRowClick, ...opts} = this.props;
-        var subSetData = data.map(this.filterAttributes);
-        var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
-        var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
-        this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
+    componentWillMount: function() {
+        console.log('componentWillmount');
     },
-
+    componentDidMount: function() {
+        if (this.state.isLoading === false) {
+            this.startSpinner();
+        };
+        var {data, brcakey, onRowClick, ...opts} = this.props;
+        console.log('componentDidmount start');
+        var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
+        var subSetData = data.map(this.filterAttributes);
+        var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
+        // Don't render chart if there's no data recieved yet
+        console.log('this.props.data.length: ', this.props.data.length);
+        if (this.props.data.length !== 0) {
+            console.log('start Render');
+            this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
+            console.log('end Render');
+        };
+        console.log('componentDidmount end');
+        console.log('was unmounted: ', this.state.isLoading);
+    },
     componentWillReceiveProps: function(newProps) {
         // only rebuild plot if number of variants has changed
+        console.log('componentWillReveiveProps start');
         if (newProps.data.length !== this.props.data.length) {
-            this.cleanupBRCA();
-            var {data, brcakey, onRowClick, ...opts} = newProps;
+            // Don't remove a chart if it wasn't built yet
+            if (this.props.data.length !== 0) {
+                this.cleanupBRCA();
+            };
+            this.state.isLoading = isLoading;
             var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
+            var {data, brcakey, onRowClick, ...opts} = newProps;
             while (d3svgBrcaRef.lastChild) {
                 d3svgBrcaRef.removeChild(d3svgBrcaRef.lastChild);
             }
-            var subSetData = data.map(this.filterAttributes);
             d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
             while (d3svgBrcaRef.lastChild ) {
                 d3svgBrcaRef.removeChild(d3svgBrcaRef.lastChild);
             }
+            var subSetData = data.map(this.filterAttributes);
             var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
             this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
-        }
+        };
+        if (newProps.brcakey !== this.props.brcakey) {
+            console.log('Inner brcakey changed');
+        };
+        console.log('componentWillReveiveProps end');
+        if (this.state.isLoading === false) {
+            this.stopSpinner();
+        };
+    },
+    componentWillUpdate: function () {
+        console.log('componentWillUpdate');
+    },
+    componentDidUpdate: function () {
+        console.log('componentDidUpdate');
     },
     componentWillUnmount: function() {
         this.cleanupBRCA();
+        console.log('componentWillUnmount');
+        //this.startSpinner();
+        if (hiddenButtonActive === false) {
+            isLoading = true;
+        }
+        console.log('was unmounted: ', isLoading);
     }
 });
 
 var Lollipop = React.createClass({
     mixins: [PureRenderMixin],
     getInitialState: function () {
+        // loader settings
+        var loaderopts = {
+          lines: 9, // The number of lines to draw
+          length: 9, // The length of each line
+          width: 5, // The line thickness
+          radius: 14, // The radius of the inner circle
+          color: '#EE3124', // #rgb or #rrggbb or array of colors
+          speed: 1.9, // Rounds per second
+          trail: 40, // Afterglow percentage
+          className: 'spinner', // The CSS class to assign to the spinner
+        };
         return {
             brcakey: "BRCA1",
-            data: []
+            data: [],
+            spinner: new Spinjs(loaderopts),
         };
     },
-    componentWillReceiveProps: function (newProps) {
-        this.fetchData(newProps.opts);
+    startSpinner: function () {
+        // Plot target
+        var targetElement = document.getElementById('spinnerContainer') || 'spinnerContainer' || document.body;   // Where to append the plot (svg)
+        console.log('Outer spinner state start before: ', this.state.spinner);
+        this.state.spinner.spin(targetElement);
+        console.log('Outer spinner state start after: ', this.state.spinner);
+    },
+    stopSpinner: function () {
+        console.log('Outer spinner state stop before: ', this.state.spinner);
+        this.state.spinner.stop();
+        console.log('Outer spinner state stop after: ', this.state.spinner);
     },
     componentWillMount: function () {
-        this.fetchData = _.debounce(this.fetchData, 600, true);
+        console.log('Outer componentWillMount');
+        this.fetchData = _.debounce(this.fetchData, 1000, true);
         this.fetchData(this.props.opts);
+    },
+    componentDidMount: function () {
+        console.log('Outer componentDidMount');
+    },
+    componentWillReceiveProps: function (newProps) {
+        console.log('Outer componentWillReveiveProps');
+        isLoading = false;
+        this.fetchData(newProps.opts);
+    },
+    componentWillUpdate: function () {
+        console.log('Outer componentWillUpdate');
+        this.startSpinner();
+    },
+    componentDidUpdate: function () {
+        console.log('Outer componentDidUpdate');
+        this.stopSpinner();
+    },
+    componentWillUnmount: function() {
+        console.log('Outer componentWillUnmount');
+        hiddenButtonActive = true;
+        isLoading = false;
     },
     fetchData: function (opts) {
         this.props.fetch(opts).subscribe(
             function (d) {
                 this.setState({data: d.data});
+                console.log('fetchingData');
             }.bind(this));
     },
     onSelect: function (key) {
         this.setState({brcakey: key});
+        console.log('brcakey changed');
     },
     render: function () {
         return (
@@ -143,6 +265,7 @@ var Lollipop = React.createClass({
                             <NavItem eventKey="BRCA1">BRCA1</NavItem>
                             <NavItem eventKey="BRCA2">BRCA2</NavItem>
                         </Nav>
+                        <div id="spinnerContainer"/>
                         <span onClick={() => this.props.onHeaderClick('Lollipop Plots')}/>
                         <D3Lollipop data={this.state.data} opts={this.props.opts} key={this.state.brcakey} brcakey={this.state.brcakey} onRowClick={this.props.onRowClick} id='brcaLollipop' ref='d3svgBrca'/>
                     </Row>
