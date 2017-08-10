@@ -10,7 +10,7 @@ var PureRenderMixin = require('./PureRenderMixin');
 
 var {Grid, Row, Nav, NavItem} = require('react-bootstrap');
 
-//var Spinner = require('spin.js');
+var Spinjs = require('spin.js');
 //var ReactSpinner = require('react-spinjs');
 //var Spinner = require('vitullo-spinner');
 
@@ -26,7 +26,7 @@ var brca12JSON = {
 
 var d3Lollipop = {};
 
-d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id, varlink) {
+d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id, varlink, spinner) {
 
     var xAxisLabel = '';
     var minPos = 0;
@@ -46,7 +46,7 @@ d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id, varlink) {
       "Pathogenic": "red",
       "Benign": "lightblue"
     };
-    var config = {variantDetailLink: varlink, minCoord: minPos, maxCoord: maxPos, mutationData: muts, regionData: domain, targetElement: ref.id, legends: legends, colorMap: colorMap };
+    var config = {spinner: spinner, variantDetailLink: varlink, minCoord: minPos, maxCoord: maxPos, mutationData: muts, regionData: domain, targetElement: ref.id, legends: legends, colorMap: colorMap };
     var instance =  new Mutneedles(config);
     return function() {
         instance.tip.destroy();
@@ -87,21 +87,22 @@ var D3Lollipop = React.createClass({
         console.log('componentWillmount');
     },
     componentDidMount: function() {
-        var {data, brcakey, onRowClick, ...opts} = this.props;
+        var {spinner, data, brcakey, onRowClick, ...opts} = this.props;
         console.log('componentDidmount start');
         var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
         var subSetData = data.map(this.filterAttributes);
         var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
         // Don't render chart if there's no data recieved yet
+        console.log('this.props.data.length: ', this.props.data.length);
         if (this.props.data.length !== 0) {
-            this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
+            console.log('start Render');
+            this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick, spinner);
+            console.log('end Render');
         };
         console.log('componentDidmount end');
     },
     componentWillReceiveProps: function(newProps) {
         // only rebuild plot if number of variants has changed
-        console.log('newProps.data.length: ', newProps.data.length);
-        console.log('this.props.data.length: ', this.props.data.length);
         console.log('componentWillReveiveProps start');
         if (newProps.data.length !== this.props.data.length) {
             // Don't remove a chart if it wasn't built yet
@@ -109,17 +110,17 @@ var D3Lollipop = React.createClass({
                 this.cleanupBRCA();
             };
             var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
-            var {spinner, spinTarget, data, brcakey, onRowClick, ...opts} = newProps;
+            var {spinner, data, brcakey, onRowClick, ...opts} = newProps;
             while (d3svgBrcaRef.lastChild) {
                 d3svgBrcaRef.removeChild(d3svgBrcaRef.lastChild);
             }
-            var subSetData = data.map(this.filterAttributes);
             d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
             while (d3svgBrcaRef.lastChild ) {
                 d3svgBrcaRef.removeChild(d3svgBrcaRef.lastChild);
             }
+            var subSetData = data.map(this.filterAttributes);
             var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
-            this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
+            this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick, spinner);
         };
         if (newProps.brcakey !== this.props.brcakey) {
             console.log('Inner brcakey changed');
@@ -153,6 +154,21 @@ var Lollipop = React.createClass({
     },
     componentDidMount: function () {
         console.log('Outer componentDidMount');
+        // Plot target
+        var targetElement = document.getElementById('spinnerContainer') || 'spinnerContainer' || document.body;   // Where to append the plot (svg)
+        // loader settings
+        var loaderopts = {
+          lines: 9, // The number of lines to draw
+          length: 9, // The length of each line
+          width: 5, // The line thickness
+          radius: 14, // The radius of the inner circle
+          color: '#EE3124', // #rgb or #rrggbb or array of colors
+          speed: 1.9, // Rounds per second
+          trail: 40, // Afterglow percentage
+          className: 'spinner', // The CSS class to assign to the spinner
+        };
+        // trigger loading spinner
+        this.spinner = new Spinjs(loaderopts).spin(targetElement);
     },
     componentWillReceiveProps: function (newProps) {
         console.log('Outer componentWillReveiveProps');
@@ -160,6 +176,8 @@ var Lollipop = React.createClass({
     },
     componentWillUpdate: function () {
         console.log('Outer componentWillUpdate');
+        // trigger loading spinner
+        this.spinner.spin();
     },
     componentDidUpdate: function () {
         console.log('Outer componentDidUpdate');
@@ -188,7 +206,9 @@ var Lollipop = React.createClass({
                             <NavItem eventKey="BRCA2">BRCA2</NavItem>
                         </Nav>
                         <span onClick={() => this.props.onHeaderClick('Lollipop Plots')}/>
-                        <D3Lollipop data={this.state.data} opts={this.props.opts} key={this.state.brcakey} brcakey={this.state.brcakey} onRowClick={this.props.onRowClick} id='brcaLollipop' ref='d3svgBrca'/>
+                        <div id="spinnerContainer">
+                            <D3Lollipop spinner={this.spinner} data={this.state.data} opts={this.props.opts} key={this.state.brcakey} brcakey={this.state.brcakey} onRowClick={this.props.onRowClick} id='brcaLollipop' ref='d3svgBrca'/>
+                        </div>
                     </Row>
                 </div>
             </Grid>
