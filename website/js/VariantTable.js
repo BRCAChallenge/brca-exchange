@@ -122,7 +122,6 @@ const researchModeGroups = [
     ]},
 
     {groupTitle: 'Allele Frequency Reference Sets', internalGroupName: 'Allele Frequency Reference Sets', innerCols: [
-        {title: 'Maximum Allele Frequency (1000 Genomes, ESP, ExAC minus TCGA)', prop: 'Max_Allele_Frequency', core: true},
         {title: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes', core: true},
         {title: 'AFR Allele Frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes', core: true},
         {title: 'AMR Allele Frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes', core: true},
@@ -269,7 +268,6 @@ const researchModeColumns = [
     {title: 'AMR Allele Frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes'},
     {title: 'EAS Allele Frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes'},
     {title: 'EUR Allele Frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes'},
-    {title: 'Maximum Allele Frequency', prop: 'Max_Allele_Frequency'},
     {title: 'EA Allele Frequency (ESP)', prop: 'EA_Allele_Frequency_ESP'},
     {title: 'AA Allele Frequency (ESP)', prop: 'AA_Allele_Frequency_ESP'},
     {title: 'Allele Frequency (ESP)', prop: 'Allele_Frequency_ESP'},

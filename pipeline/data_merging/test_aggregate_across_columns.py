@@ -1,6 +1,6 @@
 import pytest
 import unittest
-from aggregate_across_columns import selectMaxAlleleFrequency, determineSourceForMAF, determineSubpopulationForMAF
+from aggregate_across_columns import selectMaxAlleleFrequency
 
 
 class TestStringMethods(unittest.TestCase):
@@ -151,39 +151,19 @@ class TestStringMethods(unittest.TestCase):
 
         self.maxAlleleFrequencyField = "AFR_Allele_frequency_1000_Genomes"
 
-    def test_determine_source_for_max_allele_frequency(self):
-        source = determineSourceForMAF(self.maxAlleleFrequencyField)
-        self.assertEquals(source, "1000 Genomes")
-
-    def test_determine_subpopulation_for_max_allele_frequency(self):
-        subpopulation = determineSubpopulationForMAF(self.maxAlleleFrequencyField)
-        self.assertEquals(subpopulation, "AFR")
-
     def test_select_max_allele_frequency(self):
         maxFreqString = selectMaxAlleleFrequency(self.newRowAlleleFrequencies)
-        self.assertIn("0.1475", maxFreqString)
-        self.assertIn("AFR", maxFreqString)
-        self.assertIn("1000 Genomes", maxFreqString)
+        self.assertEquals(maxFreqString, '-')
 
         self.newRowAlleleFrequencies["Allele_frequency_SAS_ExAC"] = '0.305'
         maxFreqString = selectMaxAlleleFrequency(self.newRowAlleleFrequencies)
-        self.assertIn("0.305", maxFreqString)
-        # Ensure extra sig figs are not added
-        self.assertNotIn("0.3050", maxFreqString)
-        self.assertIn("SAS", maxFreqString)
-        self.assertIn("ExAC minus TCGA", maxFreqString)
+        self.assertEquals(maxFreqString, '-')
 
         for attr, value in self.newRowAlleleFrequencies.iteritems():
             self.newRowAlleleFrequencies[attr] = '-'
 
         maxFreqString = selectMaxAlleleFrequency(self.newRowAlleleFrequencies)
         self.assertEquals(maxFreqString, '-')
-
-        self.newRowAlleleFrequencies["Allele_frequency_SAS_ExAC"] = '9.03e-05'
-        maxFreqString = selectMaxAlleleFrequency(self.newRowAlleleFrequencies)
-        self.assertIn("9.03e-05", maxFreqString)
-        self.assertIn("SAS", maxFreqString)
-        self.assertIn("ExAC minus TCGA", maxFreqString)
 
 if __name__ == '__main__':
     pass
