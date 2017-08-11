@@ -1,7 +1,8 @@
 'use strict';
 
 var React = require('react'),
-    Highcharts = require('highcharts');
+    Highcharts = require('highcharts'),
+    _ = require('lodash');
 
 var defaultOptions = {
     credits: {

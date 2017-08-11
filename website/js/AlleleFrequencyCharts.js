@@ -84,9 +84,7 @@ var alleleFrequencyCharts = function (variant, prop) {
         }
     }
 
-    //let chart2Max = Math.max(parseFloat(variant['Max_Allele_Frequency']), 0.01);
-    let chart2Max = Math.max.apply(null, _.map(_.values(_.pick(variant, _.map(frequencyProps, e => e.prop))), parseFloat));
-    console.log("c2max:" + chart2Max);
+    let chart2Max = Math.max.apply(null, [0.01].concat(_.map(_.values(_.pick(variant, _.map(frequencyProps, e => e.prop))), parseFloat)));
     let fullscaleChartOptions = {
         title: { text: title},
         legend: { enabled: false },
@@ -102,11 +100,29 @@ var alleleFrequencyCharts = function (variant, prop) {
                 y: 2
             },
             plotLines: [{
-                color: 'red',
-                dashStyle: 'dash',
+                color: 'blue',
+                dashStyle: 'Dash',
                 value: chart2Max,
                 width: 1,
-                zIndex: 5
+                zIndex: 6,
+                label: {
+                    text: 'Scale',
+                    align: 'right',
+                    textAlign: 'right',
+                    style: { color: 'blue' },
+                    x: -10
+                },
+            }, {
+                color: 'red',
+                dashStyle: 'DashDot',
+                value: 0.01,
+                width: 1,
+                zIndex: 5,
+                label: {
+                    text: 'ENIGMA cutoff',
+                    align: 'left',
+                    style: { color: 'red' }
+                }
             }]
         },
         xAxis: { categories: categories },
@@ -128,11 +144,29 @@ var alleleFrequencyCharts = function (variant, prop) {
                 y: 2
             },
             plotLines: [{
-                color: 'red',
-                dashStyle: 'dash',
+                color: 'blue',
+                dashStyle: 'Dash',
                 value: chart2Max,
                 width: 1,
-                zIndex: 5
+                zIndex: 6,
+                label: {
+                    text: 'Scale',
+                    align: 'right',
+                    textAlign: 'right',
+                    style: { color: 'blue' },
+                    x: -10
+                },
+            }, {
+                color: 'red',
+                dashStyle: 'DashDot',
+                value: 0.01,
+                width: 1,
+                zIndex: 5,
+                label: {
+                    text: 'ENIGMA cutoff',
+                    align: 'left',
+                    style: { color: 'red' }
+                }
             }]
         },
         xAxis: { categories: categories },
