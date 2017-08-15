@@ -199,74 +199,9 @@ def selectAlleleFrequency(row):
         return EMPTY
 
 
-def determineSubpopulationForMAF(field):
-    if "EA_" in field:
-        return "EA"
-    elif "AA_" in field:
-        return "AA"
-    elif "EUR_" in field:
-        return "EUR"
-    elif "AFR_" in field:
-        return "AFR"
-    elif "AMR_" in field:
-        return "AMR"
-    elif "EAS_" in field:
-        return "EAS"
-    elif "FIN_" in field:
-        return "FIN"
-    elif "NFE_" in field:
-        return "NFE"
-    elif "OTH_" in field:
-        return "OTH"
-    elif "SAS_" in field:
-        return "SAS"
-
-
-def determineSourceForMAF(field):
-    if "_ExAC" in field:
-        return "ExAC minus TCGA"
-    elif "_1000_Genomes" in field:
-        return "1000 Genomes"
-    elif "_ESP" in field:
-        return "ESP"
-
-
 def selectMaxAlleleFrequency(newRow):
-    maxFreq = 0
-    maxFreqString = EMPTY
-    allele_frequency_fields = [
-        "EA_Allele_Frequency_ESP",
-        "AA_Allele_Frequency_ESP",
-        "Allele_Frequency_ESP",
-        "EUR_Allele_frequency_1000_Genomes",
-        "AFR_Allele_frequency_1000_Genomes",
-        "AMR_Allele_frequency_1000_Genomes",
-        "EAS_Allele_frequency_1000_Genomes",
-        "SAS_Allele_frequency_1000_Genomes",
-        "Allele_frequency_AFR_ExAC",
-        "Allele_frequency_AMR_ExAC",
-        "Allele_frequency_EAS_ExAC",
-        "Allele_frequency_FIN_ExAC",
-        "Allele_frequency_NFE_ExAC",
-        "Allele_frequency_OTH_ExAC",
-        "Allele_frequency_SAS_ExAC"
-    ]
-    for field in allele_frequency_fields:
-        if newRow[field] != EMPTY and newRow[field] != None:
-            freqs = [float(i) for i in newRow[field].split(',')]
-            max_in_field = max(freqs)
-            if max_in_field > maxFreq:
-                source = determineSourceForMAF(field)
-                subpopulation = determineSubpopulationForMAF(field)
-                maxFreq = max_in_field
-                if "ExAC" in source:
-                    # Ensure exac values maintain 3 sigfigs
-                    maxFreqStringPrefix = str(utilities.round_sigfigs(float(max_in_field), 3))
-                    maxFreqStringSuffix = " (%s from %s)" % (subpopulation, source)
-                    maxFreqString = maxFreqStringPrefix + maxFreqStringSuffix
-                else:
-                    maxFreqString = "%f (%s from %s)" % (max_in_field, subpopulation, source)
-    return(maxFreqString)
+    # MaxAF was removed from the UI and is now automatically set to '-' as of 8/11/17.
+    return '-'
 
 
 def checkDiscordantStatus(row):

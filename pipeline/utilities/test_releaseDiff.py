@@ -30,7 +30,8 @@ class TestStringMethods(unittest.TestCase):
                       'Polyphen_Score',
                       'Allele_count_AFR',
                       'Allele_Frequency',
-                      'Allele_frequency_FIN_ExAC'
+                      'Allele_frequency_FIN_ExAC',
+                      'Max_Allele_Frequency'
                      ]
         self.oldRow = {
                   'Pathogenicity_all': '',
@@ -49,7 +50,8 @@ class TestStringMethods(unittest.TestCase):
                   'Polyphen_Score': '0.992',
                   'Allele_count_AFR': '-',
                   'Allele_Frequency': '-',
-                  'Allele_frequency_FIN_ExAC': '-'
+                  'Allele_frequency_FIN_ExAC': '-',
+                  'Max_Allele_Frequency': '0.000132 (EAS from ExAC minus TCGA)'
                  }
 
         self.newRow = copy.deepcopy(self.oldRow)
@@ -514,6 +516,20 @@ class TestStringMethods(unittest.TestCase):
 
         self.newRow["Polyphen_Score"] = "0.283"
         self.newRow["Polyphen_Prediction"] = "probably_damaging"
+
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
+    def test_ignores_max_allele_frequency_field(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+
+        self.newRow["Max_Allele_Frequency"] = "-"
 
         change_type = v1v2.compareRow(self.oldRow, self.newRow)
         diff = releaseDiff.diff_json
