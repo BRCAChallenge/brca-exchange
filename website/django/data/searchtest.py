@@ -2,7 +2,6 @@ import json
 import os
 import pytest
 import string
-import pdb
 import shutil, tempfile
 from os import path
 from urllib import quote
@@ -25,21 +24,6 @@ Because of this, we need to test both the Variant and CurrentVariant models.
 The CurrentVariant model is a materialized view of the Variant model.
 see https://www.postgresql.org/docs/9.3/static/rules-materializedviews.html for
 more information about materialized views. The models can be found in data/models.py.
-
-
-TODO LIST
-1. Filters (managed by filters and filter_values params)
-2. Sources (managed by the include params)
-3. Release (release param)
-4. Change Types (change_types param)
-5. Show Deleted (show_deleted param)
-6. Format (format param)
-
-Start by testing that the correct objects are used (e.g. if a release number is specified, 
-the response should contain a Variant object(s), otherwise it should contain only 
-CurrentVariant(s)). Next, test that each of the params mentioned in the numbered 
-list above returns the expected result. To do this, you will need to make adjustments 
-to existing_variant in test_data.py, and possibly create other objects with additional data.
 '''
 
 
@@ -98,15 +82,6 @@ class VariantTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.content)['count'], 1)
 
-
-    def test_index_resource_csv(self):
-        """Tests searching for all the data in csv format returns an HttpResponse"""
-        request = self.factory.get(
-            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD')
-        response = index(request)
-
-        self.assertIsInstance(response, HttpResponse)
-        self.assertEqual(response.status_code, 200)
 
     @skip("Not complete")
     def test_format_tsv(self):
@@ -184,22 +159,9 @@ class VariantTestCase(TestCase):
         self.assertEqual(response_data["count"], 0)
 
 
-    def test_source_filter_for_variant_excludes_variant(self):
-        """Tests all source filters on returns no variants"""
-        request = self.factory.get(
-            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=')
-        response = index(request)
-
-        self.assertIsInstance(response, JsonResponse)
-        self.assertEqual(response.status_code, 200)
-
-        response_data = json.loads(response.content)
-        self.assertEqual(response_data["count"], 0)
-
-
     def test_request_with_release_number(self):
         '''Tests that the correct objects are used when release number is specified'''
-        #create a new variant with new random release ID
+        #create a new variant with specific release ID
         new_variant_1 = test_data.new_variant()
         new_variant_1["Data_Release_id"] = 4
         (new_variant_1, new_current_variant_1) = create_variant_and_materialized_view(new_variant_1)
@@ -211,7 +173,7 @@ class VariantTestCase(TestCase):
 
         release_number = self.existing_variant.Data_Release_id
         request = self.factory.get(
-            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=%s&release=4&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD' % new_variant_1.Genomic_Coordinate_hg38)
+            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=&release=%s&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD' % new_variant_1.Genomic_Coordinate_hg38)
         response = index(request)
 
         self.assertEqual(len(Variant.objects.all()), 3)
@@ -224,7 +186,7 @@ class VariantTestCase(TestCase):
 
         response_variant = response_data["data"][0]
 
-        self.assertEqual(response_variant["Data_Release_id"], new_variant_1.Data_Release_id)
+        self.assertEqual(response_variant["Data_Release_id"], new_variant_2.Data_Release_id)
 
 
     def test_request_without_release_number(self):
@@ -254,12 +216,12 @@ class VariantTestCase(TestCase):
 
     #Filter testing: Gene type, pathogenicity, and source selection are all filter options
     def test_filter_by_gene_type_brca_1(self):
-        '''Tests filtering by 'Gene' option by BRCA1'''
+        '''Tests gene filter to ensure only variants with the gene specified in the request are returned'''
         #creates a new BRCA2 variant
-        new_variant_brca2 = test_data.new_variant()
-        new_variant_brca2["Gene_Symbol"] = "BRCA2"
-        new_variant_brca2["Genomic_Coordinate_hg38"] = "chr13:111111:A>G"
-        (new_variant_brca2, new_current_variant_brca2) = create_variant_and_materialized_view(new_variant_brca2)
+        new_variant_brca1 = test_data.new_variant()
+        new_variant_brca1["Gene_Symbol"] = "BRCA1"
+        new_variant_brca1["Genomic_Coordinate_hg38"] = "chr13:111111:A>G"
+        (new_variant_brca1, new_current_variant_brca1) = create_variant_and_materialized_view(new_variant_brca1)
 
         request = self.factory.get(
             '/data/?format=json&filter=Gene_Symbol&filterValue=BRCA1&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD')
@@ -277,7 +239,7 @@ class VariantTestCase(TestCase):
         self.assertEqual(response_variant["Genomic_Coordinate_hg38"], self.existing_variant.Genomic_Coordinate_hg38)
 
     def test_filter_by_gene_type_brca_2(self):
-        '''Tests filtering by 'Gene' option by BRCA2'''
+        '''Tests gene filter to ensure only variants with the gene specified in the request are returned'''
         #creates a new BRCA2 variant
         new_variant_brca2 = test_data.new_variant()
         new_variant_brca2["Gene_Symbol"] = "BRCA2"
@@ -298,7 +260,7 @@ class VariantTestCase(TestCase):
         self.assertEqual(response_variant["Genomic_Coordinate_hg38"], new_variant_brca2.Genomic_Coordinate_hg38)
 
     def test_filter_by_gene_type_any(self):
-        '''Tests filtering by 'Gene' option by Any'''
+        '''Tests filtering by "Any" Gene returns variants of both BRCA1 and BRCA2 genes'''
         #creates a new BRCA2 variant
         new_variant_brca2 = test_data.new_variant()
         new_variant_brca2["Gene_Symbol"] = "BRCA2"
@@ -354,10 +316,12 @@ class VariantTestCase(TestCase):
 
             response_data = json.loads(response.content)
             response_variants = response_data['data']
-            variant_num = 1  
+
+            expected_number_of_variants_in_response = 1  
             for variant in response_variants:
+                #Because existing_variant and new_variant_* have same pathogenicity_expert values, we would expect two values to be returned
                 if self.existing_variant_materialized_view.Pathogenicity_expert == variant['Pathogenicity_expert']:
-                    variant_num = 2
+                    expected_number_of_variants_in_response = 2
 
                 self.assertEqual(variant_num, response_data['count'])
                 self.assertTrue(filter_name in variant['Pathogenicity_expert'], message)
@@ -453,16 +417,6 @@ class VariantTestCase(TestCase):
 
     def test_show_deleted_not_true(self):
         '''Tests show_deleted parameter when show_deleted is not called'''
-        new_variant_1 = test_data.existing_variant()
-        new_variant_1['Data_Release_id'] = 7
-        new_variant_1['Chr'] = 'not_deleted_1'
-        (new_variant_1, new_current_variant_1) = create_variant_and_materialized_view(new_variant_1)
-
-        new_variant_2 = test_data.existing_variant()
-        new_variant_2['Data_Release_id'] = 6
-        new_variant_2['Chr'] = 'not_deleted_2'
-        (new_variant_2, new_current_variant_2) = create_variant_and_materialized_view(new_variant_2)
-
         new_variant_deleted = test_data.new_variant()
         new_variant_deleted['Data_Release_id'] = 6
         new_variant_deleted['Change_Type_id'] = 2
@@ -479,22 +433,13 @@ class VariantTestCase(TestCase):
 
         response_data = json.loads(response.content)
 
-        self.assertEqual(response_data['count'], 1)
+        #0 variants should be in response_data['count']
+        self.assertEqual(response_data['count'], 0)
         self.assertEqual(response_data['deletedCount'], 1)
 
         
     def test_show_deleted_true(self):
         '''Tests show_deleted parameter when show_deleted=true'''
-        new_variant_1 = test_data.existing_variant()
-        new_variant_1['Data_Release_id'] = 7
-        new_variant_1['Chr'] = 'not_deleted_1'
-        (new_variant_1, new_current_variant_1) = create_variant_and_materialized_view(new_variant_1)
-
-        new_variant_2 = test_data.existing_variant()
-        new_variant_2['Data_Release_id'] = 6
-        new_variant_2['Chr'] = 'not_deleted_2'
-        (new_variant_2, new_current_variant_2) = create_variant_and_materialized_view(new_variant_2)
-
         new_variant_deleted = test_data.new_variant()
         new_variant_deleted['Data_Release_id'] = 6
         new_variant_deleted['Change_Type_id'] = 2
@@ -512,7 +457,8 @@ class VariantTestCase(TestCase):
 
         response_data = json.loads(response.content)
 
-        self.assertEqual(response_data['count'], 2)
+        #the formerly deleted variant should now be shown in response_data['count']
+        self.assertEqual(response_data['count'], 1)
         self.assertEqual(response_data['deletedCount'], 0)
 
 
@@ -676,6 +622,7 @@ class VariantTestCase(TestCase):
 
             response_variant = response_data['data'][0]
             self.assertEqual(response_variant[field_2], getattr(self.existing_variant,field_2), message)
+            self.assertEqual(response_variant[field_1], getattr(self.existing_variant, field_1), message)
 
 
     def test_search_by_gene_symbol_and_hgvs_protein_with_colon(self):
@@ -699,7 +646,7 @@ class VariantTestCase(TestCase):
 
     def test_search_by_hgvs_protein_and_protein_change_with_colon(self):
         '''Tests searching for 'HGVS_Protein:Protein_Change' with colon separator
-        NP_009225.1:A280G --> HGVS_Protein.split(':')[0] Protein_Change'''
+        NP_009225.1:A280G --> HGVS_Protein.split(':')[0]:Protein_Change'''
         hgvs_protein_protein_change = self.existing_variant_materialized_view.HGVS_Protein.split(':')[0] + ':' + self.existing_variant_materialized_view.Protein_Change
         request = self.factory.get(
             '/data/?format=json&order_by=HGVS_Protein&direction=ascending&page_size=20&page_num=0&search_term=%s&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD' % hgvs_protein_protein_change)
