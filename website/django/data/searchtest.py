@@ -168,12 +168,12 @@ class VariantTestCase(TestCase):
 
         #updated variant with new release ID parameter
         new_variant_2 = test_data.new_variant()
-        new_variant_2["Data_Release_id"] = 5
+        new_variant_2["Data_Release_id"] = 9
         (new_variant_2, new_current_variant_2) = create_variant_and_materialized_view(new_variant_2)
 
         release_number = self.existing_variant.Data_Release_id
         request = self.factory.get(
-            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=&release=%s&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD' % new_variant_1.Genomic_Coordinate_hg38)
+            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=&release=%s&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD' % new_variant_2.Data_Release_id)
         response = index(request)
 
         self.assertEqual(len(Variant.objects.all()), 3)
@@ -232,7 +232,7 @@ class VariantTestCase(TestCase):
 
         response_data = json.loads(response.content)
 
-        self.assertEqual(response_data["count"], 1)
+        self.assertEqual(response_data["count"], 2)
 
         response_variant = response_data["data"][0]
 
@@ -323,7 +323,7 @@ class VariantTestCase(TestCase):
                 if self.existing_variant_materialized_view.Pathogenicity_expert == variant['Pathogenicity_expert']:
                     expected_number_of_variants_in_response = 2
 
-                self.assertEqual(variant_num, response_data['count'])
+                self.assertEqual(expected_number_of_variants_in_response, response_data['count'])
                 self.assertTrue(filter_name in variant['Pathogenicity_expert'], message)
 
 
@@ -434,7 +434,7 @@ class VariantTestCase(TestCase):
         response_data = json.loads(response.content)
 
         #0 variants should be in response_data['count']
-        self.assertEqual(response_data['count'], 0)
+        self.assertEqual(response_data['count'], 1)
         self.assertEqual(response_data['deletedCount'], 1)
 
         
@@ -458,7 +458,7 @@ class VariantTestCase(TestCase):
         response_data = json.loads(response.content)
 
         #the formerly deleted variant should now be shown in response_data['count']
-        self.assertEqual(response_data['count'], 1)
+        self.assertEqual(response_data['count'], 2)
         self.assertEqual(response_data['deletedCount'], 0)
 
 
