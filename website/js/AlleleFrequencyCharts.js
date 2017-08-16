@@ -57,18 +57,6 @@ var alleleFrequencyCharts = function (variant, prop) {
     if (_.every(_.values(_.pick(variant, _.map(frequencyProps, e => e.prop))), isEmptyField)) {
         return false;
     }
-    /*
-    let frequencyProps = [
-        //{label: 'Maximum Allele Frequency (1000 Genomes and ESP)', prop: 'Max_Allele_Frequency'},
-        //{label: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes'},
-        // ESP
-        {label: 'EA', prop: 'EA_Allele_Frequency_ESP'},
-        {label: 'AA', prop: 'AA_Allele_Frequency_ESP'},
-        {label: 'Allele Frequency (ESP)', prop: 'Allele_Frequency_ESP'},
-        // ExAC
-        {label: 'Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_ExAC'},
-    ];
-    */
 
     let categories = [];
     let data = [];
@@ -100,22 +88,7 @@ var alleleFrequencyCharts = function (variant, prop) {
                 x: -2,
                 y: 2
             },
-            plotLines: [
-                /*{
-                color: 'blue',
-                dashStyle: 'Dash',
-                value: chart2Max,
-                width: 1,
-                zIndex: 6,
-                label: {
-                    text: 'Scale',
-                    align: 'right',
-                    textAlign: 'right',
-                    style: { color: 'blue' },
-                    x: -10
-                },
-            }, */
-                {
+            plotLines: [{
                 color: lineColor,
                 dashStyle: 'Dash',
                 value: 0.01,
@@ -146,22 +119,7 @@ var alleleFrequencyCharts = function (variant, prop) {
                 x: -2,
                 y: 2
             },
-            plotLines: [
-                /*{
-                color: 'blue',
-                dashStyle: 'Dash',
-                value: chart2Max,
-                width: 1,
-                zIndex: 6,
-                label: {
-                    text: 'Scale',
-                    align: 'right',
-                    textAlign: 'right',
-                    style: { color: 'blue' },
-                    x: -10
-                },
-            },*/ 
-            {
+            plotLines: [{
                 color: lineColor,
                 dashStyle: 'Dash',
                 value: 0.01,
