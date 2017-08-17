@@ -58,6 +58,7 @@ CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "Allele_Origin": "Origin",
                   "Protein": "Protein",
                   "Method": "Method",
+                  "Description": "Description",
                   "BX_ID": "BX_ID"}
 
 '''

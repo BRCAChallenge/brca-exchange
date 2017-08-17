@@ -9,10 +9,12 @@ import re
 import sys
 import xml.etree.ElementTree as ET
 
+
 def printHeader():
     print("\t".join(("HGVS", "Submitter", "ClinicalSignificance",
                      "DateLastUpdated", "SCV", "ID", "Origin", "Method",
-                     "Genomic_Coordinate", "Symbol", "Protein")))
+                     "Genomic_Coordinate", "Symbol", "Protein", "Description")))
+
 
 def processSubmission(submissionSet, assembly):
     ra = submissionSet.referenceAssertion
@@ -20,7 +22,7 @@ def processSubmission(submissionSet, assembly):
         submitter = oa.submitter
         variant = ra.variant
         if oa.origin == "germline":
-            hgvs = re.sub("\(" + "(BRCA[1|2])" + "\)", 
+            hgvs = re.sub("\(" + "(BRCA[1|2])" + "\)",
                           "", variant.name.split()[0])
             proteinChange = None
             if variant.attribute.has_key("HGVS, protein, RefSeq"):
@@ -37,10 +39,10 @@ def processSubmission(submissionSet, assembly):
                 alternateAllele = genomicData.alternateAllele
                 genomicCoordinate = "chr%s:%s:%s>%s" % (chrom, start, referenceAllele,
                                                         alternateAllele)
-                # 
+
                 # Omit the variants that don't have any genomic start coordinate indicated.
                 if start != None and start != "None" and start != "NA":
-                    print("\t".join((str(hgvs),  oa.submitter.encode('utf-8'), 
+                    print("\t".join((str(hgvs),  oa.submitter.encode('utf-8'),
                                      str(oa.clinicalSignificance),
                                      str(oa.dateLastUpdated),
                                      str(oa.accession),
@@ -49,7 +51,8 @@ def processSubmission(submissionSet, assembly):
                                      str(oa.method),
                                      genomicCoordinate,
                                      str(variant.geneSymbol),
-                                     str(proteinChange)
+                                     str(proteinChange),
+                                     str(oa.description)
                                      )))
 
 
@@ -65,7 +68,6 @@ def main():
     with open(args.clinVarXmlFilename) as inputFile:
         inClinVarSet = False
         for line in inputFile:
-            #print "inClinVarSet", inClinVarSet, " input:", line.rstrip()
             if "<ClinVarSet" in line:
                 inHeader = False
                 inputBuffer = line
