@@ -12,9 +12,8 @@ var defaultOptions = {
         plotBackgroundColor: null,
         plotBorderWidth: null,
         plotShadow: false,
-        type: 'column',
+        type: 'column'
     },
-/*
     plotOptions: {
         column: {
             allowPointSelect: true,
@@ -28,23 +27,13 @@ var defaultOptions = {
             }
         }
     },
-/*
-    xAxis: {
-        labels: false,
-        minorTickLength: 0,
-        tickLength: 0
-    },
-*/
     yAxis: {
-        //lineColor: 'black',
-        //lineWidth: 2,
         title: false,
         tickInterval: 1000,
         events: {
             pointBreak: pointBreakColumn
         }
     }
-//    spacing: [0, 0, 0, 0],
 };
 
 Highcharts.wrap(Highcharts.Axis.prototype, 'getLinePath', function (proceed, lineWidth) {

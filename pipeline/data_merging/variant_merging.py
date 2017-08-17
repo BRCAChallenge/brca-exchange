@@ -58,6 +58,7 @@ CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "Allele_Origin": "Origin",
                   "Protein": "Protein",
                   "Method": "Method",
+                  "Description": "Description",
                   "BX_ID": "BX_ID"}
 
 '''
@@ -405,6 +406,10 @@ def normalize_values(value):
     # standardize data representation by denoting empty as '-' and stripping whitespace off strings
     if value is None or value == "":
         value = DEFAULT_CONTENTS
+        return value
+
+    if value == ['-'] or value == []:
+        return [DEFAULT_CONTENTS]
 
     if isinstance(value, int) or isinstance(value, float):
         value = str(value)
@@ -412,6 +417,7 @@ def normalize_values(value):
     if isinstance(value, basestring):
         value = value.strip()
     else:
+        # handle lists
         normalized_values = []
         for v in value:
             if v is None or v == "-" or v == "":

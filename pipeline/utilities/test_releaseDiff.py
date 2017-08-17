@@ -29,6 +29,9 @@ class TestStringMethods(unittest.TestCase):
                       'Polyphen_Prediction',
                       'Polyphen_Score',
                       'Allele_count_AFR',
+                      'Allele_Frequency',
+                      'Allele_frequency_FIN_ExAC',
+                      'Max_Allele_Frequency'
                      ]
         self.oldRow = {
                   'Pathogenicity_all': '',
@@ -46,6 +49,9 @@ class TestStringMethods(unittest.TestCase):
                   'Polyphen_Prediction': 'benign',
                   'Polyphen_Score': '0.992',
                   'Allele_count_AFR': '-',
+                  'Allele_Frequency': '-',
+                  'Allele_frequency_FIN_ExAC': '-',
+                  'Max_Allele_Frequency': '0.000132 (EAS from ExAC minus TCGA)'
                  }
 
         self.newRow = copy.deepcopy(self.oldRow)
@@ -516,6 +522,20 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
 
+    def test_ignores_max_allele_frequency_field(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+
+        self.newRow["Max_Allele_Frequency"] = "-"
+
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
     def test_ignores_change_from_none_to_empty_string(self):
         releaseDiff.added_data = self.added_data
         releaseDiff.diff = self.diff
@@ -629,6 +649,89 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(v_diff['added'], '2.5')
         self.assertEqual(v_diff['removed'], '-')
         self.assertEqual(change_type, "added_information")
+
+    def test_ignored_exac_minus_tcga_instead_of_exac(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+
+        self.oldRow['Allele_Frequency'] = '9.42e-06 (ExAC)'
+        self.newRow['Allele_Frequency'] = '9.42e-06 (ExAC minus TCGA)'
+
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
+    def test_catches_value_change_for_exac_allele_frequency(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+
+        self.oldRow['Allele_Frequency'] = '9.42e-06 (ExAC)'
+        self.newRow['Allele_Frequency'] = '9.99e-06 (ExAC minus TCGA)'
+
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        v_diff = diff['chr17:g.43049067:C>T'][0]
+        self.assertEqual(len(diff), 1)
+        self.assertEqual(v_diff['field'], 'Allele_Frequency')
+        self.assertEqual(v_diff['added'], '9.99e-06 (ExAC minus TCGA)')
+        self.assertEqual(v_diff['removed'], '9.42e-06 (ExAC minus TCGA)')
+        self.assertEqual(change_type, "changed_information")
+
+    def test_properly_ignores_exac_minus_tcga_rounding_changes_for_generic_allele_frequency(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+
+        self.oldRow['Allele_Frequency'] = '9.419e-06 (ExAC minus TCGA)'
+        self.newRow['Allele_Frequency'] = '9.42e-06 (ExAC minus TCGA)'
+
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
+    def test_ignores_rounding_for_exac_af_fields(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+
+        self.oldRow['Allele_frequency_FIN_ExAC'] = '9.4181237657'
+        self.newRow['Allele_frequency_FIN_ExAC'] = '9.42'
+
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
+    def test_different_values_for_exac_af_fields(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+        variant = 'chr17:g.43049067:C>T'
+
+        self.oldRow['Allele_frequency_FIN_ExAC'] = '9.4181237657'
+        self.newRow['Allele_frequency_FIN_ExAC'] = '9.41'
+
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        diff = releaseDiff.diff_json
+        v_diff = diff['chr17:g.43049067:C>T'][0]
+        self.assertEqual(len(diff), 1)
+        self.assertEqual(v_diff['field'], 'Allele_frequency_FIN_ExAC')
+        self.assertEqual(v_diff['added'], '9.41')
+        self.assertEqual(v_diff['removed'], '9.42')
+        self.assertEqual(change_type, "changed_information")
 
 
 if __name__ == '__main__':

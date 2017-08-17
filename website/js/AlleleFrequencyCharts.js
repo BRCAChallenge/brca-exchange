@@ -77,7 +77,12 @@ var alleleFrequencyCharts = function (variant, prop) {
     let fullscaleChartOptions = {
         title: { text: title},
         legend: { enabled: false },
-        plotOptions: { column: { tooltip: { pointFormat: pointFormat } } },
+        plotOptions: {
+            column: {
+                tooltip: { pointFormat: pointFormat },
+                dataLabels: { enabled: false }
+            }
+        },
         chart: { spacing: [ 8, 4, 14, 8 ], height: 300 },
         yAxis: {
             max: 1.0,
@@ -108,7 +113,12 @@ var alleleFrequencyCharts = function (variant, prop) {
     let scaledChartOptions = {
         title: { text: `${title} (scaled)`},
         legend: { enabled: false },
-        plotOptions: { column: { tooltip: { pointFormat: pointFormat } } },
+        plotOptions: {
+            column: {
+                tooltip: { pointFormat: pointFormat },
+                dataLabels: { enabled: false }
+            }
+        },
         chart: { spacing: [ 8, 10, 14, 0 ], height: 300 },
         yAxis: {
             max: chart2Max,

@@ -741,6 +741,16 @@ var VariantDetail = React.createClass({
 
         return diffRows;
     },
+    generateLinkToGenomeBrowser: function (prop, variant) {
+        let hgVal = (prop === "Genomic_Coordinate_hg38") ? '38' : '19';
+        let genomicCoordinateElements = variant[prop].split(':');
+        let chr = genomicCoordinateElements[0];
+        let position = parseInt(genomicCoordinateElements[1].split('.')[1]);
+        let positionRangeStart = position - 1;
+        let positionRangeEnd = position + 1;
+        let genomeBrowserUrl = 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg' + hgVal + '&position=' + chr + ':' + positionRangeStart + '-' + positionRangeEnd + '&hubUrl=http://brcaexchange.org/trackhubs/hub.txt';
+        return <a target="_blank" href={genomeBrowserUrl}>{variant[prop]}</a>;
+    },
     render: function () {
         const {data, error} = this.state;
         if (!data) {
@@ -819,6 +829,8 @@ var VariantDetail = React.createClass({
                         let count = variant[prop.replace("frequency", "count")],
                             number = variant[prop.replace("frequency", "number")];
                         rowItem = [ variant[prop], <small style={{float: 'right'}}>({count} of {number})</small> ];
+                    } else if (prop === "Genomic_Coordinate_hg38" || prop === "Genomic_Coordinate_hg37") {
+                        rowItem = this.generateLinkToGenomeBrowser(prop, variant);
                     } else {
                         rowItem = normalizedFieldDisplay(variant[prop]);
                     }

@@ -2,7 +2,6 @@
 
 var React = require('react'),
     _ = require('lodash'),
-//    Highcharts = require('highcharts'),
     Chart = require('./Chart');
 
 var defaultOptions = {
@@ -11,9 +10,6 @@ var defaultOptions = {
             plotBorderWidth: null,
             plotShadow: false,
             type: 'pie'
-    },
-    title: {
-        text: 'Browser market shares January, 2015 to May, 2015'
     },
     tooltip: {
         pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
