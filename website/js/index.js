@@ -38,6 +38,7 @@ var FactSheet = require('./FactSheet');
 var {MailingList} = require('./MailingList');
 
 var databaseKey = require('../databaseKey');
+var util = require('./util');
 
 var {Grid, Col, Row, Table, Button, Modal, Panel, Glyphicon} = require('react-bootstrap');
 
@@ -472,20 +473,6 @@ function getDisplayName(key) {
     return displayName;
 }
 
-// test for the various forms of blank fields
-function isEmptyField(value) {
-    if (Array.isArray(value)) {
-        value = value[0];
-    }
-
-    if (value === null || (typeof value === 'undefined')) {
-        return true;
-    }
-
-    var v = value.trim();
-    return v === '' || v === '-' || v === 'None';
-}
-
 function isEmptyDiff(value) {
     return value === null || value.length < 1;
 }
@@ -597,7 +584,7 @@ var VariantDetail = React.createClass({
         this.forceUpdate();
     },
     reformatDate: function(date) { //handles single dates or an array of dates
-        if (isEmptyField(date)) {
+        if (util.isEmptyField(date)) {
             return date;
         }
         if (!Array.isArray(date)) {
@@ -703,7 +690,7 @@ var VariantDetail = React.createClass({
                     }
 
                     if (added !== null || removed !== null) {
-                        if (isEmptyField(removed)) {
+                        if (util.isEmptyField(removed)) {
                             diffHTML.push(
                                 <span>
                                     <strong>{ getDisplayName(fieldName) }: </strong>
@@ -822,7 +809,7 @@ var VariantDetail = React.createClass({
                         rowItem = variant[prop].split(":")[1];
                     } else if (prop === "HGVS_Protein") {
                         rowItem = variant[prop].split(":")[1];
-                    } else if (prop === "Date_last_evaluated_ENIGMA" && !isEmptyField(variant[prop])) {
+                    } else if (prop === "Date_last_evaluated_ENIGMA" && !util.isEmptyField(variant[prop])) {
                         // try a variety of formats until one works, or just display the value if not?
                         rowItem = normalizeDateFieldDisplay(variant[prop]);
                     } else if (/Allele_frequency_.*_ExAC/.test(prop)) {
@@ -838,7 +825,7 @@ var VariantDetail = React.createClass({
                     rowItem = variant["HGVS_Protein"].split(":")[0];
                 }
 
-                const isEmptyValue = rowDescriptor.replace ? rowItem === false : isEmptyField(variant[prop]);
+                const isEmptyValue = rowDescriptor.replace ? rowItem === false : util.isEmptyField(variant[prop]);
 
                 if (isEmptyValue) {
                     rowsEmpty += 1;

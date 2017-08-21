@@ -123,7 +123,6 @@ const researchModeGroups = [
     ]},
 
     {groupTitle: 'Allele Frequency Reference Sets', internalGroupName: 'Allele Frequency Reference Sets', innerCols: [
-        {title: 'Maximum Allele Frequency (1000 Genomes, ESP, ExAC minus TCGA)', prop: 'Max_Allele_Frequency', core: true},
         {title: 'Allele Frequency Charts (ExAC)', prop: 'Allele_Frequency_Charts_ExAC', replace: alleleFrequencyCharts, tableKey: false, dummy: true},
         {title: 'Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_ExAC', core: true},
         {title: 'AFR Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_AFR_ExAC', core: true},

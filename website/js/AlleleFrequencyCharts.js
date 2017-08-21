@@ -2,21 +2,8 @@
 
 var React = require('react'),
     BarChart = require('./BarChart'),
+    util = require('./util'),
     _ = require('lodash');
-
-// copied from index.js, move to utility file
-function isEmptyField(value) {
-    if (Array.isArray(value)) {
-        value = value[0];
-    }
-
-    if (value === null || (typeof value === 'undefined')) {
-        return true;
-    }
-
-    var v = value.trim();
-    return v === '' || v === '-' || v === 'None';
-}
 
 var alleleFrequencyCharts = function (variant, prop) {
     let frequencyProps, title, pointFormat;
@@ -54,7 +41,7 @@ var alleleFrequencyCharts = function (variant, prop) {
         return false;
     }
 
-    if (_.every(_.values(_.pick(variant, _.map(frequencyProps, e => e.prop))), isEmptyField)) {
+    if (_.every(_.values(_.pick(variant, _.map(frequencyProps, e => e.prop))), util.isEmptyField)) {
         return false;
     }
 
@@ -62,7 +49,7 @@ var alleleFrequencyCharts = function (variant, prop) {
     let data = [];
 
     for (let frequencyType of frequencyProps) {
-        if (!isEmptyField(variant[frequencyType.prop])) {
+        if (!util.isEmptyField(variant[frequencyType.prop])) {
             categories.push(frequencyType.label);
             data.push({
                 y: parseFloat(variant[frequencyType.prop]),
