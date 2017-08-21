@@ -11,5 +11,5 @@ module.exports.isEmptyField = function isEmptyField(value) {
 
     var v = value.trim();
     return v === '' || v === '-' || v === 'None';
-}
+};
 
