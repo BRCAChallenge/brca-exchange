@@ -42,7 +42,7 @@ def main():
     while not past_header:
         row = fp.next()
         tokens = row.split('\t')
-        if len(tokens) > 1:
+        if re.search("Your_variant_id\t", row):
             header = tokens
             past_header = True
     clinvar_accessions = csv.DictReader(fp, fieldnames=header, delimiter='\t')

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import argparse
 import os
 import vcf
@@ -95,7 +94,12 @@ def normalize_reports(file, columns):
 
 def normalize_vcf_reports(file, columns, filename, file_extension):
     reports = []
-    reader = vcf.Reader(open(file, "r"), strict_whitespace=True)
+    if "clinvar" in filename.lower():
+        # Descriptions in clinvar contain spaces -- cause strict whitespace failure
+        strict_whitespace = False
+    else:
+        strict_whitespace = True
+    reader = vcf.Reader(open(file, "r"), strict_whitespace=strict_whitespace)
     count = 0
     source_suffix = ".vcf"
     source = os.path.basename(file)[:-len(source_suffix)]
