@@ -606,13 +606,14 @@ class ConvertEXLOVDBRCA1ExtractToVCF(luigi.Task):
     def run(self):
         ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
         brca_resources_dir = self.resources_dir
+        artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts/")
 
         os.chdir(lovd_method_dir)
 
         args = ["./lovd2vcf.py", "-i", ex_lovd_file_dir + "/BRCA1.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", "-a", "exLOVDAnnotation",
                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa"]
+                brca_resources_dir + "/hg19.fa", '-e', artifacts_dir + '/exLOVD_BRCA1_error_variants.txt']
         print "Running lovd2vcf with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
@@ -630,11 +631,12 @@ class ConvertEXLOVDBRCA2ExtractToVCF(luigi.Task):
     def run(self):
         ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
         brca_resources_dir = self.resources_dir
+        artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts/")
 
         args = ["./lovd2vcf.py", "-i", ex_lovd_file_dir + "/BRCA2.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf", "-a", "exLOVDAnnotation",
                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa"]
+                brca_resources_dir + "/hg19.fa", '-e', artifacts_dir + '/exLOVD_BRCA2_error_variants.txt']
         print "Running lovd2vcf with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
@@ -655,7 +657,7 @@ class ConcatenateEXLOVDVCFFiles(luigi.Task):
         ex_lovd_brca12_hg19_vcf_file = ex_lovd_file_dir + "/exLOVD_brca12.hg19.vcf"
         writable_ex_lovd_brca12_hg19_vcf_file = open(ex_lovd_brca12_hg19_vcf_file, 'w')
         args = ["vcf-concat", ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf"]
-        print "Running lovd2vcf with the following args: %s" % (args)
+        print "Running vcf-concat with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=writable_ex_lovd_brca12_hg19_vcf_file, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
@@ -743,13 +745,14 @@ class ConvertSharedLOVDToVCF(luigi.Task):
     def run(self):
         lovd_file_dir = self.file_parent_dir + "/LOVD"
         brca_resources_dir = self.resources_dir
+        artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts/")
 
         os.chdir(lovd_method_dir)
 
         args = ["python", "lovd2vcf.py", "-i", lovd_file_dir + "/BRCA.txt", "-o",
                 lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf", "-a", "sharedLOVDAnnotation",
                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa"]
+                brca_resources_dir + "/hg19.fa", '-e', artifacts_dir + '/LOVD_error_variants.txt']
         print "Running lovd2vcf with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
