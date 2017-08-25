@@ -50,7 +50,9 @@ def main():
     output = open(args.output_folder + "ENIGMA_combined_hg38.tsv", "w")
     output.write("\t".join(COLUMNS) + "\n")
 
+    print "input_files", input_files
     for filename in input_files:
+        print "combining", filename
         f_in = open(filename, "r")
         for index, line in enumerate(f_in):
             items = np.array(line.rstrip().split("\t"))

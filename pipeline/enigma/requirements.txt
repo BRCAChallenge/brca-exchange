@@ -11,3 +11,4 @@ pyhgvs==0.9.4
 pysam==0.9.1.4
 recordtype==1.1
 requests==2.10.0
+synapseclient==1.7.2
