@@ -11,36 +11,18 @@ from data import test_data
 from data.models import Variant
 from data.views import index, autocomplete
 import data.views as views
+from searchtest import create_variant_and_materialized_view
 
 # GA4GH related modules
 import google.protobuf.json_format as json_format
 from ga4gh.schemas.ga4gh import variant_service_pb2 as variant_service
+
 
 class VariantTestCase(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
         datafile = os.path.join(settings.BASE_DIR, 'data', 'resources', 'releases', 'release-10-06-16', 'built_with_change_types.tsv')
         self.db_size = sum(1 for _ in open(datafile)) - 1
-
-    @skip("not complete")
-    def test_variant_model(self):
-        """Create a new variant and then retrieve it by the Genomic_Coordinate_hg38 column"""
-        self.assertEqual(len(Variant.objects.all()), self.db_size)
-        Variant.objects.create_variant(row=(test_data.new_variant()))
-        self.assertEqual(len(Variant.objects.all()), self.db_size + 1)
-        retrieved_variant = Variant.objects.get(Genomic_Coordinate_hg38="chr17:999999:A>G")
-        self.assertIsNotNone(retrieved_variant)
-
-    @skip("Not Complete")
-    def test_index_resource_json(self):
-        """Searching for all the data in json format returns a JsonResponse"""
-        request = self.factory.get(
-            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=')
-        response = index(request)
-
-        self.assertIsInstance(response, JsonResponse)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(json.loads(response.content)['count'], self.db_size)
 
     def test_index_resource_csv(self):
         """Searching for all the data in csv format returns an HttpResponse"""
@@ -62,32 +44,6 @@ class VariantTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content, {"count": 1, "data": [test_data.existing_variant()]})
 
-    @skip("Not complete")
-    def test_autocomplete_nucleotide(self):
-        """Getting autocomplete suggestions for words starting with c.2123 should return 2 results"""
-        search_term = quote('c.2123')
-        expected_autocomplete_results = [["c.2123c>a"], ["c.2123c>t"]]
-
-        request = self.factory.get('/data/suggestions/?term=%s' % search_term)
-        response = autocomplete(request)
-
-        self.assertIsInstance(response, JsonResponse)
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(response.content, {"suggestions": expected_autocomplete_results})
-
-    @skip("Not complete")
-    def test_autocomplete_bic(self):
-        """Getting autocomplete suggestions for words starting with IVS7+10 should return 2 results"""
-        search_term = quote('ivs7+10')
-        expected_autocomplete_results = [["ivs7+1028t>a"], ["ivs7+1037t>c"]]
-
-        query = '/data/suggestions/?term=%s' % search_term
-        request = self.factory.get(query)
-        response = autocomplete(request)
-
-        self.assertIsInstance(response, JsonResponse)
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(response.content, {"suggestions": expected_autocomplete_results})
 
     #######################
     # GA4GH related tests #

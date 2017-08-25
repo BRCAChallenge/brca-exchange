@@ -2,12 +2,13 @@ import json
 import os
 import pytest
 import string
-import shutil, tempfile
+import shutil
+import tempfile
 from os import path
 from urllib import quote
 from django.http import JsonResponse, HttpResponse
 from brca import settings
-from data.models import Variant, CurrentVariant, ChangeType
+from data.models import Variant, CurrentVariant, ChangeType, DataRelease
 from django.test import TestCase, RequestFactory
 import data.views as views
 from django.db import connection
@@ -15,7 +16,7 @@ from unittest import skip
 from django.test.client import RequestFactory
 from data import test_data
 from data.views import index, autocomplete
-
+from utilities import update_autocomplete_words
 
 '''
 NOTE:
@@ -33,9 +34,15 @@ def create_variant_and_materialized_view(variant_data):
     at the same time (meaning a new CurrentVariant is created to match the Variant).
     """
     variant = Variant.objects.create_variant(row=variant_data)
+    release_id = variant_data['Data_Release_id']
+    try:
+        data_release = DataRelease.objects.get(id=release_id)
+    except DataRelease.DoesNotExist:
+        data_release = DataRelease.objects.create(date='2017-12-26', id=release_id)
     with connection.cursor() as cursor:
         cursor.execute("REFRESH MATERIALIZED VIEW currentvariant")
     materialized_view = CurrentVariant.objects.get(Genomic_Coordinate_hg38=variant.Genomic_Coordinate_hg38)
+    update_autocomplete_words()
     return (variant, materialized_view)
 
 
@@ -139,6 +146,42 @@ class VariantTestCase(TestCase):
 
         response_variant = response_data["data"][0]
         self.assertEqual(response_variant["Genomic_Coordinate_hg38"], self.existing_variant.Genomic_Coordinate_hg38)
+
+    def test_autocomplete_nucleotide(self):
+        """Getting autocomplete suggestions for words starting with c.4955 should return 1 results"""
+        new_variant = test_data.new_variant()
+        (new_variant, new_current_variant) = create_variant_and_materialized_view(new_variant)
+
+        existing_variant_nucleotide = self.existing_variant_materialized_view.HGVS_cDNA.split(':')[1].lower()
+        new_variant_nucleotide = new_current_variant.HGVS_cDNA.split(':')[1].lower()
+
+        search_term = quote('c.4955')
+        expected_autocomplete_results = [[existing_variant_nucleotide], [new_variant_nucleotide]]
+
+        request = self.factory.get('/data/suggestions/?term=%s' % search_term)
+        response = autocomplete(request)
+
+        self.assertIsInstance(response, JsonResponse)
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {"suggestions": expected_autocomplete_results})
+
+    def test_autocomplete_bic(self):
+        """Getting autocomplete suggestions for words starting with 5074 should return 1 result"""
+        new_variant = test_data.new_variant()
+        (new_variant, new_current_variant) = create_variant_and_materialized_view(new_variant)
+
+        search_term = quote('5074')
+        existing_variant_bic_nomenclature = self.existing_variant_materialized_view.BIC_Nomenclature.lower()
+        new_variant_bic_nomenclature = new_current_variant.BIC_Nomenclature.lower()
+        expected_autocomplete_results = [[existing_variant_bic_nomenclature], [new_variant_bic_nomenclature]]
+
+        query = '/data/suggestions/?term=%s' % search_term
+        request = self.factory.get(query)
+        response = autocomplete(request)
+
+        self.assertIsInstance(response, JsonResponse)
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {"suggestions": expected_autocomplete_results})
 
     def test_source_filters_all_off(self):
         """Tests all source filters on returns no variants"""
