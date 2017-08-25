@@ -49,7 +49,6 @@ class VariantTestCase(TestCase):
         self.factory = RequestFactory()
         (self.existing_variant, self.existing_variant_materialized_view) = create_variant_and_materialized_view(test_data.existing_variant())
 
-
     def test_variant_model(self):
         """This tests creation and retreival of a new variant by the Genomic_Coordinate_hg38 column"""
         Variant.objects.create_variant(row=(test_data.new_variant()))
@@ -57,7 +56,6 @@ class VariantTestCase(TestCase):
         retrieved_variant = Variant.objects.get(Genomic_Coordinate_hg38=new_variant_genomic_coordinate_hg38)
         self.assertIsNotNone(retrieved_variant)
         self.assertEqual(retrieved_variant.Genomic_Coordinate_hg38, new_variant_genomic_coordinate_hg38)
-
 
     def test_current_variant_model(self):
         """This tests creation of a new Variant and that the associated CurrentVariant has the same basic properties."""
@@ -67,7 +65,6 @@ class VariantTestCase(TestCase):
         self.assertIsNotNone(retrieved_variant)
         self.assertIsInstance(retrieved_variant, CurrentVariant)
         self.assertEqual(new_variant.Genomic_Coordinate_hg38, retrieved_variant.Genomic_Coordinate_hg38)
-
 
     def test_index_resource_json(self):
         #Tests search for all data in json format returns a JsonResponse
@@ -81,7 +78,6 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.content)['count'], 1)
-
 
     @skip("Not complete")
     def test_format_tsv(self):
@@ -128,7 +124,6 @@ class VariantTestCase(TestCase):
         self.assertEqual(response.content['count'], 1)
         self.assertTrue(response.content['data'][0]['Genomic_Coordinate_hg38'] != variant_2['Genomic_Coordinate_hg38'])
 
-
     def test_search_by_id(self):
         """Tests searching for a variant by id using a filter"""
         existing_current_variant_id = self.existing_variant_materialized_view.id
@@ -145,7 +140,6 @@ class VariantTestCase(TestCase):
         response_variant = response_data["data"][0]
         self.assertEqual(response_variant["Genomic_Coordinate_hg38"], self.existing_variant.Genomic_Coordinate_hg38)
 
-
     def test_source_filters_all_off(self):
         """Tests all source filters on returns no variants"""
         request = self.factory.get(
@@ -157,7 +151,6 @@ class VariantTestCase(TestCase):
 
         response_data = json.loads(response.content)
         self.assertEqual(response_data["count"], 0)
-
 
     def test_request_with_release_number(self):
         '''Tests that the correct objects are used when release number is specified'''
@@ -188,7 +181,6 @@ class VariantTestCase(TestCase):
 
         self.assertEqual(response_variant["Data_Release_id"], new_variant_2.Data_Release_id)
 
-
     def test_request_without_release_number(self):
         '''Tests that the latest release of a variant is returned when release number is NOT specified'''     
         count = 4
@@ -212,7 +204,6 @@ class VariantTestCase(TestCase):
         response_variant = response_data["data"][0]
 
         self.assertEqual(response_variant["Data_Release_id"], latest_new_variant.Data_Release_id)
-
 
     #Filter testing: Gene type, pathogenicity, and source selection are all filter options
     def test_filter_by_gene_type_brca_1(self):
@@ -275,8 +266,7 @@ class VariantTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         response_data = json.loads(response.content)
-        self.assertEqual(response_data["count"], 2)        
-
+        self.assertEqual(response_data["count"], 2)
 
     def test_filter_by_pathogenicity(self):
         '''Tests filtering by 'Pathogenicity' option'''
@@ -317,7 +307,7 @@ class VariantTestCase(TestCase):
             response_data = json.loads(response.content)
             response_variants = response_data['data']
 
-            expected_number_of_variants_in_response = 1  
+            expected_number_of_variants_in_response = 1
             for variant in response_variants:
                 #Because existing_variant and new_variant_* have same pathogenicity_expert values, we would expect two values to be returned
                 if self.existing_variant_materialized_view.Pathogenicity_expert == variant['Pathogenicity_expert']:
@@ -325,7 +315,6 @@ class VariantTestCase(TestCase):
 
                 self.assertEqual(expected_number_of_variants_in_response, response_data['count'])
                 self.assertTrue(filter_name in variant['Pathogenicity_expert'], message)
-
 
     def test_filter_by_sources(self):
         '''Tests filtering by 'Source' options'''
@@ -348,7 +337,6 @@ class VariantTestCase(TestCase):
             new_variant_esp,
             new_variant_exlovd
             ]
-
 
         source_list = ['ENIGMA','ClinVar','1000_Genomes','ExAC','LOVD','BIC','ESP','exLOVD']
 
@@ -384,7 +372,6 @@ class VariantTestCase(TestCase):
             for variant in response_variants:
                 self.assertTrue(variant['Variant_in_' + source_name], message)
 
-
     def test_change_types(self):
         '''Tests change_types parameter'''
         change_types_list = ChangeType.objects.values()
@@ -414,7 +401,6 @@ class VariantTestCase(TestCase):
 
             self.assertEqual(response_variant['Genomic_Coordinate_hg38'], change_type['name'])
 
-
     def test_show_deleted_not_true(self):
         '''Tests show_deleted parameter when show_deleted is not called'''
         new_variant_deleted = test_data.new_variant()
@@ -437,7 +423,6 @@ class VariantTestCase(TestCase):
         self.assertEqual(response_data['count'], 1)
         self.assertEqual(response_data['deletedCount'], 1)
 
-        
     def test_show_deleted_true(self):
         '''Tests show_deleted parameter when show_deleted=true'''
         new_variant_deleted = test_data.new_variant()
@@ -446,7 +431,6 @@ class VariantTestCase(TestCase):
         new_variant_deleted['Genomic_Coordinate_hg38'] = 'deleted_variant'
         new_variant_deleted['Chr'] = 'deleted'
         (new_variant_deleted, new_current_variant_deleted) = create_variant_and_materialized_view(new_variant_deleted)
-
 
         request = self.factory.get(
             '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD&show_deleted=true')
@@ -460,7 +444,6 @@ class VariantTestCase(TestCase):
         #the formerly deleted variant should now be shown in response_data['count']
         self.assertEqual(response_data['count'], 2)
         self.assertEqual(response_data['deletedCount'], 0)
-
 
     #Begin search_by tests
     #-------------------------------------------------------------------------------------------------------------
@@ -480,7 +463,6 @@ class VariantTestCase(TestCase):
 
         response_variant = response_data['data'][0]
         self.assertEqual(response_variant['Genomic_Coordinate_hg38'], self.existing_variant.Genomic_Coordinate_hg38)
-
 
     def test_search_by_combined_gene_symbol_and_genomic_coordinate(self):
         '''Tests that searching for a variant with a 'gene_symbol:genomic_coordinate_hg38' search term is successful'''
@@ -586,21 +568,20 @@ class VariantTestCase(TestCase):
             response_variant = response_data['data'][0]
             #self.assertEqual(response_variant[test_term], getattr(self.existing_variant, test_term), message)
 
-
     def test_search_by_colon_delimiters(self):
         #Tests searching for variants with colon delimiters
         test_list = {
-            'Gene_Symbol':'Genomic_Coordinate_hg38',
-            'Gene_Symbol':'Genomic_Coordinate_hg37',
-            'Gene_Symbol':'Genomic_Coordinate_hg36',
-            'Gene_Symbol':'BIC_Nomenclature',
-            'Gene_Symbol':'HGVS_cDNA',
-            'Reference_Sequence':'Genomic_Coordinate_hg38',
-            'Reference_Sequence':'Genomic_Coordinate_hg37',
-            'Reference_Sequence':'Genomic_Coordinate_hg36',
-            'Reference_Sequence':'BIC_Nomenclature',
-            'Reference_Sequence':'HGVS_cDNA',
-            'Gene_Symbol':'Protein_Change'
+            'Gene_Symbol': 'Genomic_Coordinate_hg38',
+            'Gene_Symbol': 'Genomic_Coordinate_hg37',
+            'Gene_Symbol': 'Genomic_Coordinate_hg36',
+            'Gene_Symbol': 'BIC_Nomenclature',
+            'Gene_Symbol': 'HGVS_cDNA',
+            'Reference_Sequence': 'Genomic_Coordinate_hg38',
+            'Reference_Sequence': 'Genomic_Coordinate_hg37',
+            'Reference_Sequence': 'Genomic_Coordinate_hg36',
+            'Reference_Sequence': 'BIC_Nomenclature',
+            'Reference_Sequence': 'HGVS_cDNA',
+            'Gene_Symbol': 'Protein_Change'
         }
 
         #This loops through test_list dictionary, providing matching pairs of correctly-ordered search terms as field_1 and field_2
@@ -624,7 +605,6 @@ class VariantTestCase(TestCase):
             self.assertEqual(response_variant[field_2], getattr(self.existing_variant,field_2), message)
             self.assertEqual(response_variant[field_1], getattr(self.existing_variant, field_1), message)
 
-
     def test_search_by_gene_symbol_and_hgvs_protein_with_colon(self):
         '''Tests searching for 'BRCA1 p.(Ala280Gly) --> Gene_Symbol HGVS_Protein.split(':')[1]' with colon separator
         BRCA1:p.(Ala280Gly) --> Gene_Symbol:HGVS_Protein.split(':')[1] (HGVS_Protein is actually stored as NP_009225.1:p.(Ala280Gly), so this has to be split on the ':')'''
@@ -642,7 +622,6 @@ class VariantTestCase(TestCase):
 
         response_variant = response_data['data'][0]
         self.assertEqual(response_variant['HGVS_Protein'], self.existing_variant.HGVS_Protein)
-
 
     def test_search_by_hgvs_protein_and_protein_change_with_colon(self):
         '''Tests searching for 'HGVS_Protein:Protein_Change' with colon separator
@@ -662,22 +641,21 @@ class VariantTestCase(TestCase):
         response_variant = response_data['data'][0]
         self.assertEqual(response_variant['Protein_Change'], self.existing_variant.Protein_Change)
 
-
     @skip('Spaces not yet implemented')
     def test_search_by_space_delimiters(self):
         #Tests searching for different search terms with space delimiters
         test_list = {
-            'Gene_Symbol':'Genomic_Coordinate_hg38',
-            'Gene_Symbol':'Genomic_Coordinate_hg37',
-            'Gene_Symbol':'Genomic_Coordinate_hg36',
-            'Gene_Symbol':'BIC_Nomenclature',
-            'Gene_Symbol':'HGVS_cDNA',
-            'Reference_Sequence':'Genomic_Coordinate_hg38',
-            'Reference_Sequence':'Genomic_Coordinate_hg37',
-            'Reference_Sequence':'Genomic_Coordinate_hg36',
-            'Reference_Sequence':'BIC_Nomenclature',
-            'Reference_Sequence':'HGVS_cDNA',
-            'Gene_Symbol':'Protein_Change'
+            'Gene_Symbol': 'Genomic_Coordinate_hg38',
+            'Gene_Symbol': 'Genomic_Coordinate_hg37',
+            'Gene_Symbol': 'Genomic_Coordinate_hg36',
+            'Gene_Symbol': 'BIC_Nomenclature',
+            'Gene_Symbol': 'HGVS_cDNA',
+            'Reference_Sequence': 'Genomic_Coordinate_hg38',
+            'Reference_Sequence': 'Genomic_Coordinate_hg37',
+            'Reference_Sequence': 'Genomic_Coordinate_hg36',
+            'Reference_Sequence': 'BIC_Nomenclature',
+            'Reference_Sequence': 'HGVS_cDNA',
+            'Gene_Symbol': 'Protein_Change'
         }
         #This loops through the test_list dictionary, providing matching pairs of correctly-ordered search terms
         for field_1, field_2 in test_list.items():
@@ -699,7 +677,6 @@ class VariantTestCase(TestCase):
             response_variant = response_data['data'][0]
             self.assertEqual(response_variant[field_2], getattr(self.existing_variant,field_2), message)
 
-
     @skip('Spaces not yet implemented')
     def test_search_by_gene_symbol_and_hgvs_protein_with_space(self):
         '''Tests searching for 'BRCA1 p.(Ala280Gly) --> Gene_Symbol HGVS_Protein.split(':')[1]' with colon separator
@@ -719,7 +696,6 @@ class VariantTestCase(TestCase):
         response_variant = response_data['data'][0]
         self.assertEqual(response_variant['HGVS_Protein'], self.existing_variant.HGVS_Protein)
 
-
     @skip('Spaces not yet implemented')
     def test_search_by_hgvs_protein_and_protein_change_with_space(self):
         '''Tests searching for 'HGVS_Protein:Protein_Change' with colon separator
@@ -738,7 +714,6 @@ class VariantTestCase(TestCase):
 
         response_variant = response_data['data'][0]
         self.assertEqual(response_variant['Protein_Change'], self.existing_variant.Protein_Change)
-
 
     @skip('Functionality not yet implemented')
     def test_search_by_combined_gene_symbol_and_genomic_coordinate_with_space(self):
@@ -764,8 +739,6 @@ class VariantTestCase(TestCase):
         response_variant = response_data['data'][0]
         self.assertEqual(response_variant['Genomic_Coordinate_hg38'], self.existing_variant.Genomic_Coordinate_hg38)
 
-
-
     #FAULTY STRING SEARCHES (These should fail/return no result)
     #**********************************************************************************
     def test_search_by_incorrect_delimiters(self):
@@ -787,7 +760,6 @@ class VariantTestCase(TestCase):
 
             self.assertEqual(response_data['count'], 0, message)
 
-
     def test_search_by_gibberish(self):
         '''Tests gibberish searches
         gibberish,<.>/?'';:[{]}\|=+-_)(*&%^$#@!~`'''
@@ -803,7 +775,6 @@ class VariantTestCase(TestCase):
 
         response_data = json.loads(response.content)
         self.assertEqual(response_data['count'], 0)
-        
 
     def test_search_by_too_many_fields(self):
         '''Tests searches that input more than two fields
@@ -820,7 +791,6 @@ class VariantTestCase(TestCase):
 
         self.assertEqual(response_data['count'], 0)
 
-
     def test_search_by_too_many_colons(self):
         '''Tests searches with more than one colon in a row
         Field::Field'''
@@ -835,7 +805,6 @@ class VariantTestCase(TestCase):
         response_data = json.loads(response.content)
 
         self.assertEqual(response_data['count'], 0)
-
 
     def test_search_by_beginning_colon(self):
         '''Tests searches with a beginning colon (uses hgvs_protein and protein_change fields as a test case)
@@ -852,7 +821,6 @@ class VariantTestCase(TestCase):
 
         self.assertEqual(response_data['count'], 0)
 
-
     @skip('Not complete')
     def test_search_by_sql_injection(self):
         '''Tests the safeguards against SQL Injection
@@ -861,24 +829,24 @@ class VariantTestCase(TestCase):
     def test_search_by_flipped_search_terms(self):
         #tests that flipping search terms does not work
         test_list = {
-            'Gene_Symbol':'Genomic_Coordinate_hg38',
-            'Gene_Symbol':'Genomic_Coordinate_hg37',
-            'Gene_Symbol':'Genomic_Coordinate_hg36',
-            'Gene_Symbol':'BIC_Nomenclature',
-            'Gene_Symbol':'HGVS_cDNA',
-            'Reference_Sequence':'Genomic_Coordinate_hg38',
-            'Reference_Sequence':'Genomic_Coordinate_hg37',
-            'Reference_Sequence':'Genomic_Coordinate_hg36',
-            'Reference_Sequence':'BIC_Nomenclature',
-            'Reference_Sequence':'HGVS_cDNA',  
-            'Gene_Symbol':'Protein_Change'
+            'Gene_Symbol': 'Genomic_Coordinate_hg38',
+            'Gene_Symbol': 'Genomic_Coordinate_hg37',
+            'Gene_Symbol': 'Genomic_Coordinate_hg36',
+            'Gene_Symbol': 'BIC_Nomenclature',
+            'Gene_Symbol': 'HGVS_cDNA',
+            'Reference_Sequence': 'Genomic_Coordinate_hg38',
+            'Reference_Sequence': 'Genomic_Coordinate_hg37',
+            'Reference_Sequence': 'Genomic_Coordinate_hg36',
+            'Reference_Sequence': 'BIC_Nomenclature',
+            'Reference_Sequence': 'HGVS_cDNA',
+            'Gene_Symbol': 'Protein_Change'
         }
 
         for field_1, field_2 in test_list.items():
             test_case = getattr(self.existing_variant_materialized_view,field_2) + ':' + getattr(self.existing_variant_materialized_view,field_1)
 
             request = self.factory.get(
-            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=%s&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD' % test_case)
+                '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=%s&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD' % test_case)
             response = index(request)
 
             #build a string for failure message
@@ -890,5 +858,3 @@ class VariantTestCase(TestCase):
             response_data = json.loads(response.content)
 
             self.assertEqual(response_data['count'], 0, message)
-
-
