@@ -151,6 +151,10 @@ var D3Lollipop = React.createClass({
     componentDidMount: function() {
         this.startSpinner();
         var {data, brcakey, onRowClick, ...opts} = this.props;
+        // Don't start the loading spinner if there's no data recieved yet
+        //if (this.props.data.length !== 0) {
+        //    this.startSpinner();
+        //};
         var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
         var subSetData = data.map(this.filterAttributes);
         console.log('BRCAKEY: ', brcakey);
@@ -164,6 +168,7 @@ var D3Lollipop = React.createClass({
     componentWillReceiveProps: function(newProps) {
         // only rebuild plot if number of variants has changed
         if (newProps.data.length !== this.props.data.length) {
+            this.startSpinner();
             // Don't remove a chart if it wasn't built yet
             if (this.props.data.length !== 0) {
                 this.cleanupBRCA();
@@ -184,7 +189,10 @@ var D3Lollipop = React.createClass({
         }
     },
     componentWillUnmount: function() {
-        this.cleanupBRCA();
+        // only unmount plot if it was built
+        if (typeof this.cleanupBRCA !== "undefined") {
+            this.cleanupBRCA();
+        };
     }
 });
 
