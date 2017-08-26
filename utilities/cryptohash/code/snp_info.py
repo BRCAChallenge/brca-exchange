@@ -66,21 +66,21 @@ def shannon_and_simpson(use_toy):
   #pprint(simpson)
   # => Entropy and Simpson give similar ranking; expected as both based on probs
 
-def identifiability(input_fn, use_dob, dobs=None):
-  """ Computes identifiability of individuals in the dataset. """
+def genotypes(input_fn, m, n, use_dob, dobs=None):
+  """ Get concatenated genotype strings of individuals in input file. """
   vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
-  m = len(vcf_reader.samples)
-  n = sum(1 for _ in vcf_reader)
-  vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
+
+  # Collect DNA sequences of individuals.
+  # There are 2 DNA sequences per person.
   matrix1 = np.matrix(np.zeros(shape=(n, m)), dtype=str)
   matrix2 = np.matrix(np.zeros(shape=(n, m)), dtype=str)
-
   for i, snp in enumerate(vcf_reader):
     for j, ind in enumerate(snp.samples):
       matrix1[i, j], matrix2[i, j] = ind.gt_bases.split('|')
   matrix1 = matrix1.transpose()
   matrix2 = matrix2.transpose()
 
+  # Genotype sequence of each individual.
   seqs = []
   for i in range(m):
     snp_str1 = ''.join(matrix1[i].tolist()[0])
@@ -89,11 +89,23 @@ def identifiability(input_fn, use_dob, dobs=None):
       seqs.append(snp_str1 + snp_str2 + str(dobs[i]))
     else:
       seqs.append(snp_str1 + snp_str2)
+  return seqs
+
+def identifiability(input_fn, use_dob, dobs=None):
+  """ Computes identifiability of individuals in the dataset.
+      Returns identifiability (proportion of uniquely identified individuals)
+      and number of SNPs in input file.
+  """
+  vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
+  m = len(vcf_reader.samples)
+  n = sum(1 for _ in vcf_reader)
+  seqs = genotypes(input_fn, m, n, use_dob, dobs)
   counter = Counter(seqs)
 
   o = '' if use_dob else 'o'
   print 'num of unique SNP strings merged, w/' + o + ' DOB', len(counter)
-  #print 'num of groups of persons sharing, w/' + o + ' DOB', len([v for v in counter.values() if v > 1])
+  #print 'num of groups of persons sharing, w/' + o + ' DOB',\
+  #      len([v for v in counter.values() if v > 1])
 
   return 1.0*len(counter)/m, n
 

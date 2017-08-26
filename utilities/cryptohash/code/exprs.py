@@ -11,10 +11,12 @@ plot_path = config.plot_path
 
 def init():
   parser = argparse.ArgumentParser(description="Specify parameters of experiment")
-  parser.add_argument("-f", "--vcf_file", help="VCF file to use", default='1000G_brca.hg38_exon.vcf')
+  parser.add_argument("-i", "--input", help="Input VCF file.", default='1000G_brca.hg38_exon.vcf')
+  parser.add_argument("-o", "--output", help="Output VCF file.", default='output.txt')
   #parser.add_argument("-e", "--experiments", help="File specifying experiments to run", default="def_exprs.txt")
   parser.add_argument("-s", "--snp_sampling", help="Run SNP sampling expr.", action='store_true')
   parser.add_argument("-a", "--af_plot", help="Run allele frequency expr.", action='store_true')
+  parser.add_argument("-c", "--crypto_hash", help="Generate cryptographic hash.", action='store_true')
   parser.add_argument("-b", "--birth_type", help="Use date or year of birth", default='date')
   args = parser.parse_args()
 
@@ -87,13 +89,35 @@ def plot_af_per_snp(input_fn):
   plt.savefig(plot_path+'af_per_SNP_'+input_fn[:-4]+'.pdf')
   plt.close()
 
+def hash_func(strings):
+  """ Place holder function to compute hash. """
+  return strings
+
+def make_hash(input_fn, output_fn, use_dob=True, dobs=None):
+  """ Generate hash code for individuals in input file. """
+  vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
+  m = len(vcf_reader.samples)
+  n = sum(1 for _ in vcf_reader)
+  if dobs == None:
+    dobs = utils.synthetic_dob(m)
+  genotypes = snp_info.genotypes(input_fn, m, n, use_dob, dobs)
+
+  hashes = hash_func(genotypes)
+  with open(data_path+output_fn, 'wb') as outfile:
+    for hash in hashes:
+      outfile.write(hash)
+      outfile.write('\n')
+
 if __name__ == '__main__':
   args = init()
 
-  file = args.vcf_file
+  infile = args.input
+  outfile = args.output
   config.birth_type = args.birth_type
 
   if args.snp_sampling:
-    snp_sampling(file)
+    snp_sampling(infile)
   if args.af_plot:
-    plot_af_per_snp(file)
+    plot_af_per_snp(infile)
+  if args.crypto_hash:
+    make_hash(infile, outfile)
