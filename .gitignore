@@ -6,3 +6,4 @@ pipeline/brca/*
 /pipeline/data/brca1_hg38.txt
 /pipeline/data/brca2_hg19.txt
 /pipeline/data/brca2_hg38.txt
+utilities/cryptohash/writeups/*
