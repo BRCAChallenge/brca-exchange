@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 import config
 import numpy as np
 import argparse
+import hashlib
 
 data_path = config.data_path
 plot_path = config.plot_path
@@ -13,7 +14,6 @@ def init():
   parser = argparse.ArgumentParser(description="Specify parameters of experiment")
   parser.add_argument("-i", "--input", help="Input VCF file.", default='1000G_brca.hg38_exon.vcf')
   parser.add_argument("-o", "--output", help="Output VCF file.", default='output.txt')
-  #parser.add_argument("-e", "--experiments", help="File specifying experiments to run", default="def_exprs.txt")
   parser.add_argument("-s", "--snp_sampling", help="Run SNP sampling expr.", action='store_true')
   parser.add_argument("-a", "--af_plot", help="Run allele frequency expr.", action='store_true')
   parser.add_argument("-c", "--crypto_hash", help="Generate cryptographic hash.", action='store_true')
@@ -90,8 +90,8 @@ def plot_af_per_snp(input_fn):
   plt.close()
 
 def hash_func(strings):
-  """ Place holder function to compute hash. """
-  return strings
+  """ Function to compute hashes, using hexdigest of SHA256. """
+  return [hashlib.sha256(s).hexdigest() for s in strings]
 
 def make_hash(input_fn, output_fn, use_dob=True, dobs=None):
   """ Generate hash code for individuals in input file. """

@@ -9,7 +9,6 @@ import utils
 import config
 import os
 
-
 data_path = config.data_path
 
 def shannon_entropy(reader):
@@ -67,7 +66,10 @@ def shannon_and_simpson(use_toy):
   # => Entropy and Simpson give similar ranking; expected as both based on probs
 
 def genotypes(input_fn, m, n, use_dob, dobs=None):
-  """ Get concatenated genotype strings of individuals in input file. """
+  """ Returns concatenated genotype strings
+      (and birth information)
+      of individuals in input file.
+  """
   vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
 
   # Collect DNA sequences of individuals.
