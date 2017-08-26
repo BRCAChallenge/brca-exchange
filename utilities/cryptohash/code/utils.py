@@ -12,6 +12,20 @@ import os
 
 data_path = config.data_path
 
+def get_snps(input_fn, output_fn):
+  pass
+  #""" Get the list of SNPs in file. """
+  #if os.path.exists(data_path+output_fn):
+  #  print "Regenerating", data_path+output_fn
+  #vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
+  #with open(data_path+output_fn, 'wb') as outfile:
+  #  with open(data_path+input_fn, 'rb') as infile:
+  #    for line in infile:
+  #      if line.startswith('#'):
+  #        continue
+  #      else:
+  #        pass
+
 def extract_high_af(input_fn, output_fn, t):
   """ Output files  """
   if os.path.exists(data_path+output_fn):
