@@ -1,7 +1,7 @@
 *.DS_Store
 code/*.pyc
-<<<<<<< HEAD
 code/*.swp
-=======
->>>>>>> 75b8e0feb52744cd818e096ff806ab7f30f7337e
-writeups/*
+writeups/*.aux
+writeups/*.log
+writeups/*.pdf
+writeups/*.synctex.gz
