@@ -232,11 +232,11 @@ var Lollipop = React.createClass({
                 <div>
                     <Row style={{marginBottom: '2px', marginTop: '2px'}}>
                         <Nav bsStyle="tabs" activeKey={this.state.brcakey} onSelect={this.onSelect} id="bg-vertical-dropdown-1">
-                            <DropdownButton eventKey="BRCA1Path" title="BRCA1" id="brca1-dropdown">
+                            <DropdownButton className={this.state.brcakey.indexOf('BRCA1') > -1 ? 'active' : ''} title="BRCA1" id="brca1-dropdown">
                                 <MenuItem eventKey="BRCA1Path">Pathogenicity</MenuItem>
                                 <MenuItem eventKey="BRCA1Allele">Allele Frequency</MenuItem>
                             </DropdownButton>
-                            <DropdownButton eventKey="BRCA2Path" title="BRCA2" id="brca2-dropdown">
+                            <DropdownButton className={this.state.brcakey.indexOf('BRCA2') > -1 ? 'active' : ''} title="BRCA2" id="brca2-dropdown">
                                 <MenuItem eventKey="BRCA2Path">Pathogenicity</MenuItem>
                                 <MenuItem eventKey="BRCA2Allele">Allele Frequency</MenuItem>
                             </DropdownButton>
