@@ -89,8 +89,26 @@ def existing_variant():
         'Alt': 'G'
     }
 
-
 def new_variant():
     v = existing_variant()
     v["Genomic_Coordinate_hg38"] = "chr17:999999:A>G"
     return v
+
+def new_variant_no_source():
+    v = existing_variant()
+    v["Genomic_Coordinate_hg38"] = "chr17:000000:A>G"
+    v['Variant_in_LOVD'] = False
+    v['Variant_in_ExAC'] = False
+    v['Variant_in_1000_Genomes'] = False
+    v['Variant_in_ESP'] = False
+    v['Variant_in_BIC'] = False
+    v['Variant_in_ENIGMA'] = False
+    v['Variant_in_ClinVar'] = False
+    v['Variant_in_exLOVD'] = False
+    return v
+
+def new_variant_no_enigma_classification():
+    v = existing_variant()
+    v['Clinical_significance_ENIGMA'] = '-'
+    return v
+

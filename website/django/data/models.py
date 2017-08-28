@@ -219,6 +219,7 @@ class Report(models.Model):
     SCV_ClinVar = models.TextField()
     Allele_Origin_ClinVar = models.TextField()
     Method_ClinVar = models.TextField()
+    Description_ClinVar = models.TextField(default="-")
     BX_ID_LOVD = models.TextField()
     Variant_frequency_LOVD = models.TextField()
     HGVS_cDNA_LOVD = models.TextField()

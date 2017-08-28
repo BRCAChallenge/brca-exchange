@@ -1,9 +1,8 @@
 """
-ClinVarUtils: basic 
+ClinVarUtils: basic
 """
 
 import xml.etree.ElementTree as ET
-
 
 def isCurrent(element):
     """Determine if the indicated clinvar set is current"""
@@ -150,6 +149,7 @@ class clinVarAssertion:
             self.accession = cva.get("Acc", default=None)
         self.origin = None
         self.method = None
+        self.description = None
         oi = element.find("ObservedIn")
         if oi != None:
             sample = oi.find("Sample")
@@ -158,6 +158,11 @@ class clinVarAssertion:
             method = oi.find("Method")
             if method != None:
                 self.method = textIfPresent(method, "MethodType")
+            description = oi.find("ObservedData")
+            if description != None:
+                for attr in description.findall("Attribute"):
+                    if attr.attrib["Type"] == 'Description':
+                        self.description = textIfPresent(description, "Attribute")
         self.clinicalSignificance = None
         self.reviewStatus = None
         self.dateLastUpdated = None

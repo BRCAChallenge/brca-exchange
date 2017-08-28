@@ -4,7 +4,7 @@ var _ = require('underscore');
 
 
 const defaultExpertColumns = ['Gene_Symbol', 'HGVS_cDNA', 'HGVS_Protein', 'Protein_Change', 'BIC_Nomenclature', 'Pathogenicity_expert'];
-const defaultResearchColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_all', 'Max_Allele_Frequency'];
+const defaultResearchColumns = ['Gene_Symbol', 'Genomic_Coordinate_hg38', 'HGVS_cDNA', 'HGVS_Protein', 'Pathogenicity_all', 'Allele_Frequency'];
 
 const allSources = {
     "Variant_in_ENIGMA": 1,

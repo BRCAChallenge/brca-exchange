@@ -18,10 +18,10 @@
 3. Run `enigma-excel-to-tsv.py -i /PATH_TO_FILE_FROM_STEP_1 -o /PATH_TO_OUTPUT_FILE
 4. Run `python merge-clinvaraccessions.py -e /PATH_TO_ENIGMA_TSV_FILE_FROM_STEP_3 -c /PATH_TO_CLINVAR_ACCESSION_DATA_TXT_FILE_FROM_STEP_2 -o /PATH_TO_OUTPUT_FILE`
 5. Run `python enigma-processing.py -i /PATH_TO_OUTPUT_FILE_FROM_STEP_4 -o /PATH_TO_OUTPUT_DIRECTORY_CONTAINING_PROCESSED_ENIGMA_FILES/ENIGMA_last_updated_MM_DD_YY_hg38.tsv -g /PATH/TO/hg38.fa`
-6. Make sure all available ENIGMA_last_updated_MM_DD_YY_hg38.tsv files are in the same directory, then run `python enigma-merge_hg38.py -i /PATH/TO/OUTPUT_DIRECTORY_CONTAINING_PROCESSED_ENIGMA_FILES/ -o /PATH/TO/OUTPUT_DIRECTORY/`
-7.Run `enigma_postprocess.py -i ~/PATH/TO_OUTPUT_FILE_FROM_STEP_9 -o ~/PATH/TO/OUTPUT_DIRECTORY -a /PATH/TO/LOG_FILE_DIRECTORY  
-8. This procedure produces an `ENIGMA_combined_hg38.tsv` file that can be used in the luigi pipeline.
-9. Update all relevant files in Synapse. This includes updating the existing `ENIGMA_combined_hg38.tsv` file as well as uploading the new `ENIGMA_last_updated_MM_DD_YY_hg38.tsv` file.
+6. Upload ENIGMA_last_updated_MM_DD_YY_hg38.tsv to Synapse
+7. Run 'enigma_merge_postprocess.py -u SYNAPSE_USERNAME -p SYNAPSE_PASSWORD -a PIPELINE_ARTIFACTS_DIR'
+8. This procedure produces an `ENIGMA_combined_hg38.tsv` file that can be used in the luigi pipeline and uploads it to Synapse.
+
 
 ####Below are the old steps for reference:
 
