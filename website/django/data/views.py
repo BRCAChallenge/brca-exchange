@@ -1,4 +1,3 @@
-import pdb
 import os
 import re
 import tempfile
@@ -434,7 +433,6 @@ def search_variants(request):
     variants = ga4gh_brca_page(variants, int(page_size), int(page_token))
 
     ga_variants = [brca_to_ga4gh(i, reference_genome) for i in variants.values()]
-    pdb.set_trace()
     if len(ga_variants) > page_size:
         ga_variants.pop()
         page_token = str(1 + int(page_token))
