@@ -145,30 +145,25 @@ var D3Lollipop = React.createClass({
             maxAlleleFreqCategory = "Uncertain";
         };
         var newObj = {category: oldObj.Pathogenicity_expert, coord: chrCoordinate, alleleFreqCategory: maxAlleleFreqCategory, alleleFreq: maxAlleleFreq, value: 1, oldData: obj};
-        //console.log('filtered data :', newObj);
         return newObj;
     },
     componentDidMount: function() {
         this.startSpinner();
         var {data, brcakey, onRowClick, ...opts} = this.props;
-        // Don't start the loading spinner if there's no data recieved yet
-        //if (this.props.data.length !== 0) {
-        //    this.startSpinner();
-        //};
+        // Redraw the chart when brcakey has changed.
         var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
         var subSetData = data.map(this.filterAttributes);
         console.log('BRCAKEY: ', brcakey);
         var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
-        // Don't render chart if there's no data recieved yet
         if (this.props.data.length !== 0) {
             this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
+            // Prevent the spinner from showing up when changing the gene tab
             this.stopSpinner();
         };
     },
     componentWillReceiveProps: function(newProps) {
         // only rebuild plot if number of variants has changed
         if (newProps.data.length !== this.props.data.length) {
-            this.startSpinner();
             // Don't remove a chart if it wasn't built yet
             if (this.props.data.length !== 0) {
                 this.cleanupBRCA();
@@ -187,6 +182,9 @@ var D3Lollipop = React.createClass({
             this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
             this.stopSpinner();
         }
+        if (newProps.data.length === 0) {
+            this.stopSpinner();
+        }
     },
     componentWillUnmount: function() {
         // only unmount plot if it was built
@@ -202,6 +200,7 @@ var Lollipop = React.createClass({
         return {
             brcakey: "BRCA1Path",
             data: [],
+            dataIsEmpty: false,
         };
     },
     componentWillMount: function () {
@@ -214,7 +213,13 @@ var Lollipop = React.createClass({
     fetchData: function (opts) {
         this.props.fetch(opts).subscribe(
             function (d) {
-                this.setState({data: d.data});
+                // Added in dataIsEmpty state to make sure that empty data will retrigger componentWillReceiveProps in the child
+                //  which is where the stop spinner function is called.
+                if (d.data.length === 0) {
+                    this.setState({dataIsEmpty: true, data: d.data});
+                } else {
+                    this.setState({dataIsEmpty: false, data: d.data});
+                };
                 console.log('fetchingData');
             }.bind(this));
     },
@@ -237,7 +242,7 @@ var Lollipop = React.createClass({
                             </DropdownButton>
                         </Nav>
                         <span onClick={() => this.props.onHeaderClick('Lollipop Plots')}/>
-                        <D3Lollipop data={this.state.data} opts={this.props.opts} key={this.state.brcakey} brcakey={this.state.brcakey} onRowClick={this.props.onRowClick} id='brcaLollipop' ref='d3svgBrca'/>
+                        <D3Lollipop dataIsEmpty={this.state.dataIsEmpty} data={this.state.data} opts={this.props.opts} key={this.state.brcakey} brcakey={this.state.brcakey} onRowClick={this.props.onRowClick} id='brcaLollipop' ref='d3svgBrca'/>
                     </Row>
                 </div>
             </Grid>
