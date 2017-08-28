@@ -343,14 +343,14 @@ class GA4GHTestCase(TestCase):
     # @skip("Not complete")
     def test_search_variants_requested_range_present(self):
         """Ensures variants returned via search have the expected range."""
-        start = 41246794
+        start = 41222970
         end = 41247374
         request = self.factory.post("/data/ga4gh/variants/search",
                                     json.dumps({"end": end,
                                                 "referenceName": "chr17",
                                                 "variantSetId": "brca-hg37",
                                                 "start": start}),
-                                    content_type = "application/json")
+                                    content_type="application/json")
         response = views.search_variants(request)
         jresp = json.loads(response.content)
         self.assertGreater(len(jresp["variants"]), 0)
@@ -367,7 +367,7 @@ class GA4GHTestCase(TestCase):
                                                 "referenceName": "17",
                                                 "variantSetId": "brca-hg37",
                                                 "start": start}),
-                                    content_type = "application/json")
+                                    content_type="application/json")
         response1 = views.search_variants(request)
         self.assertEqual(response.content, response1.content,
                          "Both 17 and chr17 return the same results")
