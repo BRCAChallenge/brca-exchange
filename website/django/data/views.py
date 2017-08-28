@@ -1,3 +1,4 @@
+import pdb
 import os
 import re
 import tempfile
@@ -433,6 +434,7 @@ def search_variants(request):
     variants = ga4gh_brca_page(variants, int(page_size), int(page_token))
 
     ga_variants = [brca_to_ga4gh(i, reference_genome) for i in variants.values()]
+    pdb.set_trace()
     if len(ga_variants) > page_size:
         ga_variants.pop()
         page_token = str(1 + int(page_token))
@@ -441,6 +443,7 @@ def search_variants(request):
     response.variants.extend(ga_variants)
     resp = json_format.MessageToDict(response, True)
     return JsonResponse(resp)
+
 
 def range_filter(reference_genome, variants, reference_name, start, end):
     """Filters variants by range depending on the reference_genome"""
@@ -456,7 +459,6 @@ def range_filter(reference_genome, variants, reference_name, start, end):
     elif reference_genome == 'hg38':
         variants = variants.order_by('Hg38_Start')
         variants = variants.filter(Hg38_Start__lt=end, Hg38_End__gt=start)
-
     return variants
 
 def ga4gh_brca_page(query, page_size, page_token):
