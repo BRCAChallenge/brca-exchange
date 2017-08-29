@@ -112,19 +112,23 @@ var D3Lollipop = React.createClass({
         return newObj;
     },
     componentDidMount: function() {
+        console.log('componentDidMount');
         this.startSpinner();
-        var {data, brcakey, onRowClick, ...opts} = this.props;
+        var {dataIsEmpty, data, brcakey, onRowClick, ...opts} = this.props;
         // Redraw the chart when brcakey has changed.
         var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
         var subSetData = data.map(this.filterAttributes);
         var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
-        if (this.props.data.length !== 0) {
-            this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
+        if (data.length !== 0 || dataIsEmpty) {
+            if (!dataIsEmpty) {
+                this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
+            };
             // Prevent the spinner from showing up when changing the gene tab
             this.stopSpinner();
         };
     },
     componentWillReceiveProps: function(newProps) {
+        console.log('componentWillReceiveProps');
         // only rebuild plot if number of variants has changed
         if (newProps.data.length !== this.props.data.length) {
             // Don't remove a chart if it wasn't built yet
