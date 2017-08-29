@@ -112,7 +112,6 @@ var D3Lollipop = React.createClass({
         return newObj;
     },
     componentDidMount: function() {
-        console.log('componentDidMount');
         this.startSpinner();
         var {dataIsEmpty, data, brcakey, onRowClick, ...opts} = this.props;
         // Redraw the chart when brcakey has changed.
@@ -128,7 +127,6 @@ var D3Lollipop = React.createClass({
         };
     },
     componentWillReceiveProps: function(newProps) {
-        console.log('componentWillReceiveProps');
         // only rebuild plot if number of variants has changed
         if (newProps.data.length !== this.props.data.length) {
             // Don't remove a chart if it wasn't built yet
