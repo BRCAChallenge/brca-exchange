@@ -118,11 +118,21 @@ var D3Lollipop = React.createClass({
         var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
         var subSetData = data.map(this.filterAttributes);
         var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
-        if (data.length !== 0 || dataIsEmpty) {
-            if (!dataIsEmpty) {
-                this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
-            };
+        // data.length indicates whether data had PREVIOSLY been loaded.
+        // dataIsEmpty indicates if the data is empty AFTER data has been fetched.
+        // If 0 data has already been loaded and data will not be empty after data has been fetched,
+        //     don't do anything since the chart will be rendered in componentWillReceiveProps.
+        //     This occurs when first opening the lollipop chart.
+        // If more than 0 data has already been loaded, rerender the chart and stop the spinner.
+        //     This occurs when switching gene tabs when there's > 0 matching variants.
+        // If the data is still empty after data has been fetched, stop the spinner. Don't render the chart
+        //     because there's no data to display.
+        //     This occurs when switching gene tabs when there's 0 matching variants.
+        if (data.length !== 0) {
+            this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
             // Prevent the spinner from showing up when changing the gene tab
+            this.stopSpinner();
+        } else if (dataIsEmpty) {
             this.stopSpinner();
         };
     },
@@ -185,7 +195,6 @@ var Lollipop = React.createClass({
                 } else {
                     this.setState({dataIsEmpty: false, data: d.data});
                 };
-                console.log('fetchingData');
             }.bind(this));
     },
     onSelect: function (key) {
