@@ -7,6 +7,7 @@ import json
 import csv
 import psycopg2
 from django.core.management import call_command
+from data.utilities import update_autocomplete_words
 
 
 OLD_MAF_ESP_FIELD_NAMES = ['Minor_allele_frequency_ESP', 'Minor_allele_frequency_ESP_percent']
@@ -22,27 +23,6 @@ class Command(BaseCommand):
         parser.add_argument('deletions', nargs='?', default=None, type=FileType('r'),
                             help='Deleted variants, in TSV format, same schema sans change_type')
         parser.add_argument('diffJSON', help='JSON diff file')
-
-    def update_autocomplete_words(self):
-        # Drop words table and recreate with latest data
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                DROP TABLE IF EXISTS words;
-                CREATE TABLE words AS SELECT DISTINCT left(word, 300) as word, release_id FROM (
-                SELECT regexp_split_to_table(lower("Genomic_Coordinate_hg38"), '[\s|''"]') as word, "Data_Release_id" as release_id from variant UNION
-                SELECT regexp_split_to_table(lower("Genomic_Coordinate_hg37"), '[\s|''"]') as word, "Data_Release_id" as release_id from variant UNION
-                SELECT regexp_split_to_table(lower("Genomic_Coordinate_hg36"), '[\s|''"]') as word, "Data_Release_id" as release_id from variant UNION
-                SELECT regexp_split_to_table(lower("Clinical_significance_ENIGMA"), '[\s|''"]') as word, "Data_Release_id" as release_id from variant UNION
-                SELECT regexp_split_to_table(lower("Gene_Symbol"), '[\s|''"]') as word, "Data_Release_id" as release_id from variant UNION
-                SELECT regexp_split_to_table(lower("Reference_Sequence"), '[\s|''"]') as word, "Data_Release_id" as release_id from variant UNION
-                SELECT regexp_split_to_table(lower("HGVS_cDNA"), '[\s|:''"]')  as word, "Data_Release_id" as release_id from variant UNION
-                SELECT regexp_split_to_table(lower("BIC_Nomenclature"), '[\s|''"]') as word, "Data_Release_id" as release_id from variant UNION
-                SELECT regexp_split_to_table(lower("HGVS_Protein"), '[\s|''"]') as word, "Data_Release_id" as release_id from variant
-                )
-                AS combined_words;
-
-                CREATE INDEX words_idx ON words(word text_pattern_ops);
-            """)
 
     @transaction.atomic
     def handle(self, *args, **options):
@@ -85,7 +65,7 @@ class Command(BaseCommand):
                 row_dict = self.update_variant_values_for_insertion(row_dict, release_id, change_types, True)
                 variant = Variant.objects.create_variant(row_dict)
 
-        self.update_autocomplete_words()
+        update_autocomplete_words()
 
         # update materialized view of current variants
         with connection.cursor() as cursor:
