@@ -57,7 +57,7 @@ d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, brcakey, varlink) {
             "<0.0001": "red",
             "<0.001": "pink",
             "<0.01": "lightblue",
-            "<0.05": "blue",
+            "<0.1": "blue",
             "<0.5": "lightgreen",
             ">=0.5": "green"
         };
@@ -106,7 +106,7 @@ var D3Lollipop = React.createClass({
         this.state.spinner.stop();
     },
     filterAttributes: function (obj) {
-        var oldObj = _(obj).pick('Genomic_Coordinate_hg38', 'Pathogenicity_expert', 'Max_Allele_Frequency');
+        var oldObj = _(obj).pick('Genomic_Coordinate_hg38', 'Pathogenicity_expert', 'Allele_Frequency');
         var parts = oldObj.Genomic_Coordinate_hg38.split(':');
         // Process genomic coordinates
         // new format for genomic coordinates, now includes "g.", trim first two characters
@@ -127,36 +127,38 @@ var D3Lollipop = React.createClass({
             oldObj["Pathogenicity_expert"] = "Benign";
         }
         // Process Allele Frequency format
-        var maxAlleleFreq = parseFloat(oldObj["Max_Allele_Frequency"]);
-        var maxAlleleFreqCategory = "";
-        if (maxAlleleFreq < 0.0001) {
-            maxAlleleFreqCategory = "<0.0001";
-        } else if (maxAlleleFreq < 0.001) {
-            maxAlleleFreqCategory = "<0.001";
-        } else if (maxAlleleFreq < 0.01) {
-            maxAlleleFreqCategory = "<0.01";
-        } else if (maxAlleleFreq < 0.05) {
-            maxAlleleFreqCategory = "<0.05";
-        } else if (maxAlleleFreq < 0.5) {
-            maxAlleleFreqCategory = "<0.5";
-        } else if (maxAlleleFreq >= 0.5) {
-            maxAlleleFreqCategory = ">=0.5";
+        var alleleFreq = parseFloat(oldObj["Allele_Frequency"]);
+        var alleleFreqCategory = "";
+        if (alleleFreq < 0.0001) {
+            alleleFreqCategory = "<0.0001";
+        } else if (alleleFreq < 0.001) {
+            alleleFreqCategory = "<0.001";
+        } else if (alleleFreq < 0.01) {
+            alleleFreqCategory = "<0.01";
+        } else if (alleleFreq < 0.1) {
+            alleleFreqCategory = "<0.1";
+        } else if (alleleFreq < 0.5) {
+            alleleFreqCategory = "<0.5";
+        } else if (alleleFreq >= 0.5) {
+            alleleFreqCategory = ">=0.5";
         } else {
-            maxAlleleFreqCategory = "Uncertain";
+            alleleFreqCategory = "Uncertain";
         };
-        var newObj = {category: oldObj.Pathogenicity_expert, coord: chrCoordinate, alleleFreqCategory: maxAlleleFreqCategory, alleleFreq: maxAlleleFreq, value: 1, oldData: obj};
+        var newObj = {category: oldObj.Pathogenicity_expert, coord: chrCoordinate, alleleFreqCategory: alleleFreqCategory, alleleFreq: alleleFreq, value: 1, oldData: obj};
         return newObj;
     },
     componentDidMount: function() {
         this.startSpinner();
-        var {data, brcakey, onRowClick, ...opts} = this.props;
+        var {dataIsEmpty, data, brcakey, onRowClick, ...opts} = this.props;
         // Redraw the chart when brcakey has changed.
         var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
         var subSetData = data.map(this.filterAttributes);
         console.log('BRCAKEY: ', brcakey);
         var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
-        if (this.props.data.length !== 0) {
-            this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
+        if (data.length !== 0 || dataIsEmpty) {
+            if (!dataIsEmpty) {
+                this.cleanupBRCA = d3Lollipop.drawStuffWithD3(d3svgBrcaRef, subSetData, domainBRCA, brcakey, onRowClick);
+            };
             // Prevent the spinner from showing up when changing the gene tab
             this.stopSpinner();
         };
