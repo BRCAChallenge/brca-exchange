@@ -13,9 +13,10 @@ test:
     override:
         - npm run lint -- -f junit -o $CIRCLE_TEST_REPORTS/lint-results.xml
         - npm run test -- -R xunit --reporter-options output=$CIRCLE_TEST_REPORTS/test-results.xml
-        - cd django/ && python manage.py migrate
+        - pip install -r ../test-requirements.txt
+        - cd django/ && python manage.py migrate && python manage.py test
         - cd ../pipeline/data && bash ./getdata
-        - cd .. && pip install -r test-requirements.txt && pytest --junitxml=${CIRCLE_TEST_REPORTS}/pytest-results.xml
+        - cd .. && pytest --junitxml=${CIRCLE_TEST_REPORTS}/pytest-results.xml
 deployment:
     dev:
         branch: master
