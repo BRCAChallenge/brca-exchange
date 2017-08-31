@@ -1,6 +1,6 @@
 import pytest
 import unittest
-from aggregate_across_columns import selectMaxAlleleFrequency
+from aggregate_across_columns import selectMaxAlleleFrequency, selectAlleleFrequency
 
 
 class TestStringMethods(unittest.TestCase):
@@ -142,7 +142,7 @@ class TestStringMethods(unittest.TestCase):
             'AMR_Allele_frequency_1000_Genomes': '0.0072',
             'Allele_Frequency': '0.0401358 (1000 Genomes)',
             'Allele_frequency_ExAC': '-',
-            'Minor_allele_frequency_percent_ESP': '-',
+            'Minor_allele_frequency_percent_ESP': '20.345',
             'Allele_Frequency_ESP': '-',
             'AA_Allele_Frequency_ESP': '-',
             'EA_Allele_Frequency_ESP': '-',
@@ -164,6 +164,11 @@ class TestStringMethods(unittest.TestCase):
 
         maxFreqString = selectMaxAlleleFrequency(self.newRowAlleleFrequencies)
         self.assertEquals(maxFreqString, '-')
+
+    def test_select_allele_frequency(self):
+        AF = selectAlleleFrequency(self.newRowAlleleFrequencies)
+        self.assertEquals(AF, '0.20345 (ESP)')
+
 
 if __name__ == '__main__':
     pass
