@@ -8,15 +8,21 @@ require('./css/d3Lollipop.css');
 var Mutneedles = require("muts-needle-plot");
 var PureRenderMixin = require('./PureRenderMixin');
 
-var {Grid, Row, Nav, NavItem} = require('react-bootstrap');
+var {Grid, Row, Nav, DropdownButton, MenuItem} = require('react-bootstrap');
 
 var Spinjs = require('spin.js');
 
 var brca12JSON = {
-    BRCA1: {
+    BRCA1Path: {
         brcaDomainFile: require('raw!../content/brca1LollipopDomain.json')
     },
-    BRCA2: {
+    BRCA1Allele: {
+        brcaDomainFile: require('raw!../content/brca1LollipopDomain.json')
+    },
+    BRCA2Path: {
+        brcaDomainFile: require('raw!../content/brca2LollipopDomain.json')
+    },
+    BRCA2Allele: {
         brcaDomainFile: require('raw!../content/brca2LollipopDomain.json')
     }
 };
@@ -24,27 +30,38 @@ var brca12JSON = {
 
 var d3Lollipop = {};
 
-d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, id, varlink) {
-
+d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, brcakey, varlink) {
     var xAxisLabel = '';
     var minPos = 0;
     var maxPos = 1;
-    if (id === 'BRCA1') {
+    if (brcakey.indexOf('BRCA1') !== -1) {
         xAxisLabel = 'Coordinate Selection (GRCh38 chr 17)';
         minPos = 43000000;
         maxPos = 43180000;
-    } else if (id === 'BRCA2') {
+    } else if (brcakey.indexOf('BRCA2') !== -1) {
         xAxisLabel = 'Coordinate Selection (GRCh38 chr 13)';
         minPos = 32300000;
         maxPos = 32410000;
     }
     var legends = {x: xAxisLabel, y: ""};
     var colorMap = {
-      // mutation categories
+      // Mutation pathogenicity categories
       "Pathogenic": "red",
       "Benign": "lightblue"
     };
-    var config = {variantDetailLink: varlink, minCoord: minPos, maxCoord: maxPos, mutationData: muts, regionData: domain, targetElement: ref.id, legends: legends, colorMap: colorMap };
+    if (brcakey.indexOf('Allele') !== -1) {
+        colorMap = {
+            // Allele frequency categories
+            "Uncertain": "purple",
+            "<0.0001": "red",
+            "<0.001": "pink",
+            "<0.01": "lightblue",
+            "<0.1": "blue",
+            "<0.5": "lightgreen",
+            ">=0.5": "green"
+        };
+    };
+    var config = {variantDetailLink: varlink, minCoord: minPos, maxCoord: maxPos, mutationData: muts, regionData: domain, targetElement: ref.id, legends: legends, colorMap: colorMap, brcakey: brcakey};
     var instance =  new Mutneedles(config);
     return function() {
         instance.tip.destroy();
@@ -88,7 +105,7 @@ var D3Lollipop = React.createClass({
         this.state.spinner.stop();
     },
     filterAttributes: function (obj) {
-        var oldObj = _(obj).pick('Genomic_Coordinate_hg38', 'Pathogenicity_expert');
+        var oldObj = _(obj).pick('Genomic_Coordinate_hg38', 'Pathogenicity_expert', 'Allele_Frequency');
         var parts = oldObj.Genomic_Coordinate_hg38.split(':');
         // Process genomic coordinates
         // new format for genomic coordinates, now includes "g.", trim first two characters
@@ -108,7 +125,25 @@ var D3Lollipop = React.createClass({
         if (oldObj["Pathogenicity_expert"] === 'Benign / Little Clinical Significance') {
             oldObj["Pathogenicity_expert"] = "Benign";
         }
-        var newObj = {category: oldObj.Pathogenicity_expert, coord: chrCoordinate, value: 1, oldData: obj};
+        // Process Allele Frequency format
+        var alleleFreq = parseFloat(oldObj["Allele_Frequency"]);
+        var alleleFreqCategory = "";
+        if (alleleFreq < 0.0001) {
+            alleleFreqCategory = "<0.0001";
+        } else if (alleleFreq < 0.001) {
+            alleleFreqCategory = "<0.001";
+        } else if (alleleFreq < 0.01) {
+            alleleFreqCategory = "<0.01";
+        } else if (alleleFreq < 0.1) {
+            alleleFreqCategory = "<0.1";
+        } else if (alleleFreq < 0.5) {
+            alleleFreqCategory = "<0.5";
+        } else if (alleleFreq >= 0.5) {
+            alleleFreqCategory = ">=0.5";
+        } else {
+            alleleFreqCategory = "Uncertain";
+        };
+        var newObj = {category: oldObj.Pathogenicity_expert, coord: chrCoordinate, alleleFreqCategory: alleleFreqCategory, alleleFreq: alleleFreq, value: 1, oldData: obj};
         return newObj;
     },
     componentDidMount: function() {
@@ -173,7 +208,7 @@ var Lollipop = React.createClass({
     mixins: [PureRenderMixin],
     getInitialState: function () {
         return {
-            brcakey: "BRCA1",
+            brcakey: "BRCA1Path",
             data: [],
             dataIsEmpty: false,
         };
@@ -205,9 +240,15 @@ var Lollipop = React.createClass({
             <Grid>
                 <div>
                     <Row style={{marginBottom: '2px', marginTop: '2px'}}>
-                        <Nav bsStyle="tabs" eventKey={0} activeKey={this.state.brcakey} onSelect={this.onSelect} title="Select Gene" id="bg-vertical-dropdown-1">
-                            <NavItem eventKey="BRCA1">BRCA1</NavItem>
-                            <NavItem eventKey="BRCA2">BRCA2</NavItem>
+                        <Nav bsStyle="tabs" activeKey={this.state.brcakey} onSelect={this.onSelect} id="bg-vertical-dropdown-1">
+                            <DropdownButton className={this.state.brcakey.indexOf('BRCA1') > -1 ? 'active' : ''} title="BRCA1" id="brca1-dropdown">
+                                <MenuItem eventKey="BRCA1Path">Pathogenicity</MenuItem>
+                                <MenuItem eventKey="BRCA1Allele">Allele Frequency</MenuItem>
+                            </DropdownButton>
+                            <DropdownButton className={this.state.brcakey.indexOf('BRCA2') > -1 ? 'active' : ''} title="BRCA2" id="brca2-dropdown">
+                                <MenuItem eventKey="BRCA2Path">Pathogenicity</MenuItem>
+                                <MenuItem eventKey="BRCA2Allele">Allele Frequency</MenuItem>
+                            </DropdownButton>
                         </Nav>
                         <span onClick={() => this.props.onHeaderClick('Lollipop Plots')}/>
                         <D3Lollipop dataIsEmpty={this.state.dataIsEmpty} data={this.state.data} opts={this.props.opts} key={this.state.brcakey} brcakey={this.state.brcakey} onRowClick={this.props.onRowClick} id='brcaLollipop' ref='d3svgBrca'/>
