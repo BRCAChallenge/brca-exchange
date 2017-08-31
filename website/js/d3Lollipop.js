@@ -129,7 +129,6 @@ var D3Lollipop = React.createClass({
         }
         // Process Allele Frequency format
         var alleleFreq = parseFloat(oldObj["Allele_Frequency"]);
-        console.log(obj);
         var alleleFreqCategory = "";
         if (alleleFreq === 0.0) {
             alleleFreqCategory = "None";
