@@ -166,8 +166,21 @@ class TestStringMethods(unittest.TestCase):
         self.assertEquals(maxFreqString, '-')
 
     def test_select_allele_frequency(self):
+        for attr, value in self.newRowAlleleFrequencies.iteritems():
+            self.newRowAlleleFrequencies[attr] = '-'
+
+
+        self.newRowAlleleFrequencies['Minor_allele_frequency_percent_ESP'] = '20.345'
         AF = selectAlleleFrequency(self.newRowAlleleFrequencies)
         self.assertEquals(AF, '0.20345 (ESP)')
+
+        self.newRowAlleleFrequencies['Minor_allele_frequency_percent_ESP'] = '0.0'
+        AF = selectAlleleFrequency(self.newRowAlleleFrequencies)
+        self.assertEquals(AF, '0.0 (ESP)')
+
+        self.newRowAlleleFrequencies['Minor_allele_frequency_percent_ESP'] = '2'
+        AF = selectAlleleFrequency(self.newRowAlleleFrequencies)
+        self.assertEquals(AF, '0.02 (ESP)')
 
 
 if __name__ == '__main__':
