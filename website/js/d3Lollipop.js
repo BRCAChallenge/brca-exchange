@@ -54,6 +54,7 @@ d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, brcakey, varlink) {
         colorMap = {
             // Allele frequency categories
             "Uncertain": "purple",
+            "None": "orange",
             "<0.0001": "red",
             "<0.001": "pink",
             "<0.01": "lightblue",
@@ -128,8 +129,11 @@ var D3Lollipop = React.createClass({
         }
         // Process Allele Frequency format
         var alleleFreq = parseFloat(oldObj["Allele_Frequency"]);
+        console.log(obj);
         var alleleFreqCategory = "";
-        if (alleleFreq < 0.0001) {
+        if (alleleFreq === 0.0) {
+            alleleFreqCategory = "None";
+        } else if (alleleFreq < 0.0001) {
             alleleFreqCategory = "<0.0001";
         } else if (alleleFreq < 0.001) {
             alleleFreqCategory = "<0.001";
