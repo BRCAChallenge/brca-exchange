@@ -31,7 +31,6 @@ var brca12JSON = {
 var d3Lollipop = {};
 
 d3Lollipop.drawStuffWithD3 = function(ref, muts, domain, brcakey, varlink) {
-
     var xAxisLabel = '';
     var minPos = 0;
     var maxPos = 1;

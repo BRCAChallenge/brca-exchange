@@ -79,7 +79,8 @@ def existing_variant():
         'HGVS_RNA': '-',
         'Literature_source_exLOVD': 'Easton DF et al., Am J Hum Genet, 81: 873-883, 2007.',
         'Polyphen_Prediction': 'possibly_damaging',
-        'Data_Release_id': 1, 'Hg37_Start': 41222976L,
+        'Data_Release_id': 1,
+        'Hg37_Start': 41222976L,
         'Hg36_Start': 38476502L,
         'Literature_citation_BIC': '-',
         'Variant_haplotype_LOVD': '-',
@@ -89,10 +90,14 @@ def existing_variant():
         'Alt': 'G'
     }
 
+
 def new_variant():
     v = existing_variant()
     v["Genomic_Coordinate_hg38"] = "chr17:999999:A>G"
+    v['HGVS_cDNA'] = 'NM_007294.3:c.4955T>TC'
+    v['BIC_Nomenclature'] = '5074T>TC'
     return v
+
 
 def new_variant_no_source():
     v = existing_variant()
@@ -107,8 +112,8 @@ def new_variant_no_source():
     v['Variant_in_exLOVD'] = False
     return v
 
+
 def new_variant_no_enigma_classification():
     v = existing_variant()
     v['Clinical_significance_ENIGMA'] = '-'
     return v
-

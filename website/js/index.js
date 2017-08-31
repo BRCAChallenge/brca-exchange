@@ -38,6 +38,7 @@ var FactSheet = require('./FactSheet');
 var {MailingList} = require('./MailingList');
 
 var databaseKey = require('../databaseKey');
+var util = require('./util');
 
 var {Grid, Col, Row, Table, Button, Modal, Panel, Glyphicon} = require('react-bootstrap');
 
@@ -472,20 +473,6 @@ function getDisplayName(key) {
     return displayName;
 }
 
-// test for the various forms of blank fields
-function isEmptyField(value) {
-    if (Array.isArray(value)) {
-        value = value[0];
-    }
-
-    if (value === null || (typeof value === 'undefined')) {
-        return true;
-    }
-
-    var v = value.trim();
-    return v === '' || v === '-' || v === 'None';
-}
-
 function isEmptyDiff(value) {
     return value === null || value.length < 1;
 }
@@ -597,7 +584,7 @@ var VariantDetail = React.createClass({
         this.forceUpdate();
     },
     reformatDate: function(date) { //handles single dates or an array of dates
-        if (isEmptyField(date)) {
+        if (util.isEmptyField(date)) {
             return date;
         }
         if (!Array.isArray(date)) {
@@ -703,7 +690,7 @@ var VariantDetail = React.createClass({
                     }
 
                     if (added !== null || removed !== null) {
-                        if (isEmptyField(removed)) {
+                        if (util.isEmptyField(removed)) {
                             diffHTML.push(
                                 <span>
                                     <strong>{ getDisplayName(fieldName) }: </strong>
@@ -785,17 +772,23 @@ var VariantDetail = React.createClass({
                 if (bicClass !== 'Class 1' && bicClass !== 'Class 5') {
                     innerCols = innerCols.filter(x => x.prop !== 'Clinical_classification_BIC' && x.prop !== 'Clinical_importance_BIC');
                 }
+            } else if (groupTitle === 'Allele Counts (ExAC minus TCGA)') {
+                return false;
             }
 
             // now map the group's columns to a list of row objects
-            const rows = _.map(innerCols, ({prop, title}) => {
+            const rows = _.map(innerCols, (rowDescriptor) => {
+                let {prop, title} = rowDescriptor;
                 let rowItem;
 
                 if (prop === "Protein_Change") {
                     title = "Abbreviated AA Change";
                 }
 
-                if (variant[prop] !== null) {
+                if (rowDescriptor.replace) {
+                    rowItem = rowDescriptor.replace(variant, prop);
+                }
+                else if (variant[prop] !== null) {
                     if (prop === "Gene_Symbol") {
                         rowItem = <i>{variant[prop]}</i>;
                     } else if (prop === "URL_ENIGMA") {
@@ -816,9 +809,13 @@ var VariantDetail = React.createClass({
                         rowItem = variant[prop].split(":")[1];
                     } else if (prop === "HGVS_Protein") {
                         rowItem = variant[prop].split(":")[1];
-                    } else if (prop === "Date_last_evaluated_ENIGMA" && !isEmptyField(variant[prop])) {
+                    } else if (prop === "Date_last_evaluated_ENIGMA" && !util.isEmptyField(variant[prop])) {
                         // try a variety of formats until one works, or just display the value if not?
                         rowItem = normalizeDateFieldDisplay(variant[prop]);
+                    } else if (/Allele_frequency_.*_ExAC/.test(prop)) {
+                        let count = variant[prop.replace("frequency", "count")],
+                            number = variant[prop.replace("frequency", "number")];
+                        rowItem = [ variant[prop], <small style={{float: 'right'}}>({count} of {number})</small> ];
                     } else if (prop === "Genomic_Coordinate_hg38" || prop === "Genomic_Coordinate_hg37") {
                         rowItem = this.generateLinkToGenomeBrowser(prop, variant);
                     } else {
@@ -828,7 +825,7 @@ var VariantDetail = React.createClass({
                     rowItem = variant["HGVS_Protein"].split(":")[0];
                 }
 
-                const isEmptyValue = isEmptyField(variant[prop]);
+                const isEmptyValue = rowDescriptor.replace ? rowItem === false : util.isEmptyField(variant[prop]);
 
                 if (isEmptyValue) {
                     rowsEmpty += 1;
@@ -839,8 +836,10 @@ var VariantDetail = React.createClass({
 
                 return (
                     <tr key={prop} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
-                        <KeyInline tableKey={title} onClick={(event) => this.showHelp(event, title)}/>
-                        <td><span className={ this.truncateData(prop) ? "row-value-truncated" : "row-value" }>{rowItem}</span></td>
+                        { rowDescriptor.tableKey !== false &&
+                            <KeyInline tableKey={title} onClick={(event) => this.showHelp(event, title)}/>
+                        }
+                        <td colSpan={rowDescriptor.tableKey === false ? 2 : null} ><span className={ this.truncateData(prop) ? "row-value-truncated" : "row-value" }>{rowItem}</span></td>
                     </tr>
                 );
             });

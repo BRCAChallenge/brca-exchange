@@ -205,6 +205,17 @@ offending file, for future reference: website/node_modules/react-data-components
     text-align: center;
 }
 
+.alleleFrequencyChart {
+    width: 50%;
+    float: left;
+}
+
+@media(max-width:400px) {
+    .alleleFrequencyChart {
+        width: 100%;
+    }
+}
+
 @media only screen and (max-width : 767px) {
     .deleted-variant-message {
         text-align: left;

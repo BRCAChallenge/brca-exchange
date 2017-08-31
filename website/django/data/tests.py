@@ -7,87 +7,20 @@ from django.test import TestCase
 from django.test.client import RequestFactory
 from brca import settings
 from data import test_data
-from data.models import Variant
+from data.models import Variant, CurrentVariant
 from data.views import index, autocomplete
 import data.views as views
+from searchtest import create_variant_and_materialized_view
 
 # GA4GH related modules
 import google.protobuf.json_format as json_format
 from ga4gh.schemas.ga4gh import variant_service_pb2 as variant_service
 
-class VariantTestCase(TestCase):
+
+class GA4GHTestCase(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
-        datafile = os.path.join(settings.BASE_DIR, 'data', 'resources', 'releases', 'release-10-06-16', 'built_with_change_types.tsv')
-        self.db_size = sum(1 for _ in open(datafile)) - 1
-
-    def test_variant_model(self):
-        """Create a new variant and then retrieve it by the Genomic_Coordinate_hg38 column"""
-        self.assertEqual(len(Variant.objects.all()), self.db_size)
-        Variant.objects.create_variant(row=(test_data.new_variant()))
-        self.assertEqual(len(Variant.objects.all()), self.db_size + 1)
-        retrieved_variant = Variant.objects.get(Genomic_Coordinate_hg38="chr17:999999:A>G")
-        self.assertIsNotNone(retrieved_variant)
-
-    def test_index_resource_json(self):
-        """Searching for all the data in json format returns a JsonResponse"""
-        request = self.factory.get(
-            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=')
-        response = index(request)
-
-        self.assertIsInstance(response, JsonResponse)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(json.loads(response.content)['count'], self.db_size)
-
-    def test_index_resource_csv(self):
-        """Searching for all the data in csv format returns an HttpResponse"""
-        request = self.factory.get(
-            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=')
-        response = index(request)
-
-        self.assertIsInstance(response, HttpResponse)
-        self.assertEqual(response.status_code, 200)
-
-    def search_by_id(self):
-        """Searching for a variant by id using a filter should return the expected result"""
-        existing_id = test_data.existing_variant()["id"]
-        request = self.factory.get(
-            '/data/?format=json&filter=id&filterValue=%s&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=' % existing_id)
-        response = index(request)
-
-        self.assertIsInstance(response, JsonResponse)
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(response.content, {"count": 1, "data": [test_data.existing_variant()]})
-
-
-    def test_autocomplete_nucleotide(self):
-        """Getting autocomplete suggestions for words starting with c.2123 should return 2 results"""
-        search_term = quote('c.2123')
-        expected_autocomplete_results = [["c.2123c>a"], ["c.2123c>t"]]
-
-        request = self.factory.get('/data/suggestions/?term=%s' % search_term)
-        response = autocomplete(request)
-
-        self.assertIsInstance(response, JsonResponse)
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(response.content, {"suggestions": expected_autocomplete_results})
-
-    def test_autocomplete_bic(self):
-        """Getting autocomplete suggestions for words starting with IVS7+10 should return 2 results"""
-        search_term = quote('ivs7+10')
-        expected_autocomplete_results = [["ivs7+1028t>a"], ["ivs7+1037t>c"]]
-
-        query = '/data/suggestions/?term=%s' % search_term
-        request = self.factory.get(query)
-        response = autocomplete(request)
-
-        self.assertIsInstance(response, JsonResponse)
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(response.content, {"suggestions": expected_autocomplete_results})
-
-    #######################
-    # GA4GH related tests #
-    #######################
+        (self.existing_variant, self.existing_variant_materialized_view) = create_variant_and_materialized_view(test_data.existing_variant())
 
     ######################
     # Datasets endpoints #
@@ -355,19 +288,30 @@ class VariantTestCase(TestCase):
     def test_search_variants_paging_token(self):
         """Tests that paging works as expected for the search variants endpoint."""
         # Request a very large range of variants
+        counter = 50
+        start = 31222950
+        end = 51222977
+        while counter > 5:
+            new_v = test_data.existing_variant()
+            # Genomic coordinates are irrelevant to this test, but the format is required regardless
+            new_v['Genomic_Coordinate_hg38'] = 'chr17:g.' + str(start-counter) + ':A>G'
+            new_v['Genomic_Coordinate_hg37'] = 'chr17:g.' + str(end-counter) + ':A>G'
+            new_v['Hg37_Start'] = end - counter
+            new_v['Hg37_End'] = end - counter
+            create_variant_and_materialized_view(new_v)
+            counter -= 1
+
         request = self.factory.post(
             "/data/ga4gh/variants/search", json.dumps(
-                {"end": 45158029,
-                 "referenceName": "chr13",
+                {"end": end,
+                 "referenceName": "chr17",
                  "variantSetId": "brca-hg37",
-                 "start": 20425158,
+                 "start": start,
                  "pageSize": 5}), content_type="application/json")
         response = views.search_variants(request)
         self.assertEqual(
             json.loads(response.content)["nextPageToken"],
             "1", "A page token should be set")
-        start = 41245664
-        end = 42245664
         request = self.factory.post(
             "/data/ga4gh/variants/search", json.dumps(
                 {"end": end,
@@ -405,14 +349,14 @@ class VariantTestCase(TestCase):
 
     def test_search_variants_requested_range_present(self):
         """Ensures variants returned via search have the expected range."""
-        start = 41246794
+        start = 41222970
         end = 41247374
         request = self.factory.post("/data/ga4gh/variants/search",
                                     json.dumps({"end": end,
                                                 "referenceName": "chr17",
                                                 "variantSetId": "brca-hg37",
                                                 "start": start}),
-                                    content_type = "application/json")
+                                    content_type="application/json")
         response = views.search_variants(request)
         jresp = json.loads(response.content)
         self.assertGreater(len(jresp["variants"]), 0)
@@ -429,7 +373,7 @@ class VariantTestCase(TestCase):
                                                 "referenceName": "17",
                                                 "variantSetId": "brca-hg37",
                                                 "start": start}),
-                                    content_type = "application/json")
+                                    content_type="application/json")
         response1 = views.search_variants(request)
         self.assertEqual(response.content, response1.content,
                          "Both 17 and chr17 return the same results")
@@ -535,24 +479,24 @@ class VariantTestCase(TestCase):
                              views.ErrorMessages['methodNotAllowed'])
 
     def test_origin(self):
-        variant_id = "hg37-55"
+        variant_id = "hg37-" + str(self.existing_variant_materialized_view.id)
         request = self.factory.get("/data/ga4gh/variants/"+variant_id)
         response = views.get_variant(request, variant_id)
         json_response = json.loads(response.content)
         hgvs_start = int(
-            json_response['info']["Genomic_Coordinate_hg37"][0].split(':')[1].replace('g.',''))
+            json_response['info']["Genomic_Coordinate_hg37"][0].split(':')[1].replace('g.', ''))
         # Note that `Genomic Coordinate hg37` is 1 base offset from its determined 'start' position"""
         self.assertEqual(int(json_response['start']), hgvs_start,
                          "`base_1_start`, obtained from 'Genomic Coordinate hg37' minus 1 should be equal to the `start` Variant parameter {} {}".format(
                              int(json_response['start']), hgvs_start - 1))
 
-        variant_id = "hg38-945"
+        variant_id = "hg38-" + str(self.existing_variant_materialized_view.id)
         request = self.factory.get("/data/ga4gh/variants/" + variant_id)
         response = views.get_variant(request, variant_id)
         json_response = json.loads(response.content)
         # Note that `start` is 0 base offset from its determined 'Genomic Coordinate' field"""
-        hgvs_start = int(json_response['info']['Genomic_Coordinate_hg38'][0].split(':')[1].replace('g.',''))
-        self.assertEqual(int(json_response['start']), hgvs_start - 1)
+        hgvs_start = int(json_response['info']['Genomic_Coordinate_hg38'][0].split(':')[1].replace('g.', ''))
+        self.assertEqual(int(json_response['start']), hgvs_start)
 
     def test_brca_to_ga4gh(self):
         """
