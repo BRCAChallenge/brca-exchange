@@ -2,7 +2,6 @@
 
 var React = require('react'),
     _ = require('lodash'),
-//    Highcharts = require('highcharts'),
     Chart = require('./Chart');
 
 var defaultOptions = {
