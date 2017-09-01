@@ -787,6 +787,9 @@ var VariantDetail = React.createClass({
 
                 if (rowDescriptor.replace) {
                     rowItem = rowDescriptor.replace(variant, prop);
+                    if (rowItem === false) {
+                        return false;
+                    }
                 }
                 else if (variant[prop] !== null) {
                     if (prop === "Gene_Symbol") {
