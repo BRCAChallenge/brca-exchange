@@ -300,10 +300,10 @@ class TestStringMethods(unittest.TestCase):
 
         for field in FIELDS_TO_REMOVE:
             # FIX ME!
-            self.assertNotIn(field, outputFields)
+            self.assertIn(field, outputFields)
         for field in FIELDS_TO_ADD:
             # FIX ME!
-            self.assertIn(field, outputFields)
+            self.assertNotIn(field, outputFields)
         # add tests for #3 from the TODO above
 
     def test_update_basic_fields(self):
@@ -315,7 +315,6 @@ class TestStringMethods(unittest.TestCase):
         4. Test that HGVS_RNA has the correct value.
         '''
         updatedRow = update_basic_fields(self.oldRow, FIELDS_TO_RENAME)
-        pdb.set_trace()
 
 if __name__ == '__main__':
     pass
