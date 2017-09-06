@@ -299,12 +299,14 @@ class TestStringMethods(unittest.TestCase):
         outputFields = setOutputColumns(self.initialFields, FIELDS_TO_REMOVE, FIELDS_TO_ADD, FIELDS_TO_RENAME)
 
         for field in FIELDS_TO_REMOVE:
-            # FIX ME!
-            self.assertIn(field, outputFields)
-        for field in FIELDS_TO_ADD:
-            # FIX ME!
             self.assertNotIn(field, outputFields)
-        # add tests for #3 from the TODO above
+            
+        for field in FIELDS_TO_ADD:
+            self.assertIn(field, outputFields)
+            
+        for oldName, newName in FIELDS_TO_RENAME.iteritems():
+            self.assertNotIn(oldName, outputFields)
+            self.assertIn(newName, outputFields)
 
     def test_update_basic_fields(self):
         '''
@@ -315,6 +317,26 @@ class TestStringMethods(unittest.TestCase):
         4. Test that HGVS_RNA has the correct value.
         '''
         updatedRow = update_basic_fields(self.oldRow, FIELDS_TO_RENAME)
+
+        for oldName, newName in FIELDS_TO_RENAME.iteritems():
+            self.assertNotIn(oldName, updatedRow.keys())
+            self.assertIn(newName, updatedRow.keys())
+
+        expected_start = self.oldRow["Pos"]
+        self.assertEqual(expected_start, updatedRow["Hg38_Start"])
+
+        expected_end = int(expected_start) + len(self.oldRow["Ref"]) - 1
+        self.assertEqual(expected_end, updatedRow["Hg38_End"])
+
+        self.oldRow["Genomic_Coordinate_hg38"] = 'chr17:32314943:A>G'
+        updatedRow = update_basic_fields(self.oldRow, FIELDS_TO_RENAME)
+        self.assertEqual(updatedRow["Gene_Symbol"], 'BRCA1')
+
+        self.oldRow["Genomic_Coordinate_hg38"] = 'chr13:32314943:A>G'
+        updatedRow = update_basic_fields(self.oldRow, FIELDS_TO_RENAME)
+        self.assertEqual(updatedRow["Gene_Symbol"], 'BRCA2')
+
+        self.assertEqual(updatedRow["HGVS_RNA"], EMPTY)
 
 if __name__ == '__main__':
     pass
