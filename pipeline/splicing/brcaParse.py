@@ -72,7 +72,6 @@ class brcaParse:
             #l = f.readline()
             if len(lines.split("\t")) == len(labels):
                 buildMat.append(lines.split('\t'))
-            print(len(lines.split("\t")),len(labels))
         L = np.vstack(buildMat)
         self.A = L
         
@@ -104,70 +103,125 @@ class brcaParse:
     #Parses through the string to make all the new variant strings. If the variant is an indel
     #rather than a SNP, the definition will make more iterations to account for the new modifications.
     #tempSeq is the variant sequence, np.amax gets the maximum maxentscan score.
-    def maxEntForm(self,output):
+    def maxEntForm(self,output):#,Exonfile):
         f = open(output, 'w')
-        f.write("id\tGene\tSignificance\tSpliceSite\t5'Max\t5'Ref\t3'Max\t3'Ref\tupscore\tdownscore\tinExon\n")
+        f.write("ID\tPos\trawMaxEntScore\tMaxEntScorePercentile\tCanScore\tinExon\tfirst20Intron\tlast20Intron\tdonorSite\t"
+                + "donorPos\tdonorRefSpliceScore\tdonorRefSplicePercentile\tdonorAltSpliceScore\tdonorAltSplicePercentile\t"
+                + "acceptorPos\tacceptorPos\tacceptorRefSpliceScore\tacceptorRefSplicePercentile\tacceptorAltSpliceScore\t"
+                + "acceptorAltSplicePercentile\tdeNovoPos\tdeNovoScore\tdeNovoPercentile\tmaxScorePos\tmaxAltScore\t"
+                + "maxScorePercentile\tRefPos\tRefScore\tRefPercentile\tupstreamDonorPos\tupstreamDonorScore\tupstreamPercentile\t"
+                + "downstreamDonorPos\tdownstreamDonorScore\tdownstreamPercentile\tframeShift\tprematureStop\tstopPos\tkeyDomain\t"
+                + "deNovoFrameShift\tdeNovoPrematureStop\tstopPos\tdeNovoKeyDomain\n")
+                
+#        f.write("id\tGene\tSignificance\tSpliceSite\t5'Max\t5'Ref\t3'Max\t3'Ref\tupscore\tdownscore\tinExon\n")
         for i in range(0,len(self.Gene)):
-            print(self.id)
             if self.Gene[i] == "BRCA1":
-                f.write(self.id[i] +"\t" + self.Gene[i] + "\t" + self.Sig[i] + "\t")
+                #f.write(self.id[i] +"\t" + self.Gene[i] + "\t" + self.Sig[i] + "\t")
+                f.write(self.id[i] +"\t" + self.Pos[i] +"\t" + "N/A"+"\t" + "N/A" +"\t" + "N/A" + "\t"+ "N/A" +"\t"+ "N/A"+ "\t"+"N/A" +"\t")
+                
                 loc = (int(self.Pos[i]) - int(self.BRCA1hg38Start))
-                site, upscore, downscore = self.inSpliceSite(i)
-                f.write("{}\t".format(site))
-                if (site != "N/A"):
-                    upscore = 0
-                    downscore = 0
+                site, upscore, downscore = self.inSpliceSite(i)#,Exonfile)
+                #f.write("{}\t".format(site))
+                
+                #if (site != "N/A"):
+                    #upscore = 0
+                    #downscore = 0
                 
                 lenSplice = 9
                 tempSeq = self.BRCA1hg38Seq[:loc-1] + self.Alt[i] + self.BRCA1hg38Seq[loc+len(self.Ref[i])-1:]
-
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
-                if (site != "3'"):
-                    f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
-                else:
-                    f.write("0"+ "\t" + "0" + "\t")
+                #make sure acceptor is aceptor and donor is donor site for these
+                if (site == "3'"):
+                    f.write("1" + "\t" +"N/A" + "\t" +str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t" +"N/A" + "\t" +
+                        str(np.amax(newSeqScore)) + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t"+"N/A" + "\n")
+                    #f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
+                #else:
+                    #f.write("0"+ "\t" + "0" + "\t")
                     
                 lenSplice = 23
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
-                if (site != "5'"):
-                    f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
-                else:
-                    f.write("0"+ "\t" + "0" + "\t")
-                f.write(str(upscore) + "\t" + str(downscore) + "\t")
-                if(site != "N/A"):
-                    f.write("1\n")
-                else:
-                    f.write("0\n")
+                if (site == "5'"):
+                    f.write("N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" + "N/A" + "\t" +
+                        "1" + "\t" +"N/A" + "\t" +str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t" +"N/A" + "\t" +
+                        str(np.amax(newSeqScore)) + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\n")
+                    #f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
+                #else:
+                    #f.write("0"+ "\t" + "0" + "\t")
+                #f.write(str(upscore) + "\t" + str(downscore) + "\t")
+                if(site == "N/A"):
+                    f.write("N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +str(newSeqScore) + "\t" +"N/A" + "\t" +"N/A" + "\t" +str(np.amax(newSeqScore)) + "\t" +
+                        "N/A" + "\t"+"N/A" + "\t" +str(orgSeqScore)  + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t"+"N/A" + "\t"+
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" + "\n")
+                    #f.write("1\n")
+                #else:
+                    #f.write("0\n")
                
         for i in range(0,len(self.Gene)):
             if self.Gene[i] == "BRCA2":
-                f.write(self.id[i] +"\t" + self.Gene[i] + "\t" + self.Sig[i] + "\t")
+                #f.write(self.id[i] +"\t" + self.Gene[i] + "\t" + self.Sig[i] + "\t")
                 loc = (int(self.Pos[i]) - int(self.BRCA2hg38Start))
-                site, upscore, downscore = self.inSpliceSite(i)
-                f.write("{}\t".format(site))
-                if (site != "N/A"):
-                    upscore = 0
-                    downscore = 0
-                    
+                site, upscore, downscore = self.inSpliceSite(i)#,Exonfile)
+                f.write(self.id[i] +"\t" + self.Pos[i] +"\t" + "N/A"+"\t" + "N/A" +"\t" + "N/A" + "\t"+ "N/A" +"\t"+ "N/A"+ "\t"+"N/A" +"\t")
+                #f.write("{}\t".format(site))
+                #if (site != "N/A"):
+#                    upscore = 0
+#                    downscore = 0
                 lenSplice = 9
                 tempSeq = self.BRCA2hg38Seq[:loc-1] + self.Alt[i] + self.BRCA2hg38Seq[loc+len(self.Ref[i])-1:]
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
-                if (site != "3'"):
-                    f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
-                else:
-                    f.write("0"+ "\t" + "0" + "\t")
+                if (site == "3'"):
+                    f.write("1" + "\t" +"N/A" + "\t" +str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t" +"N/A" + "\t" +
+                        str(np.amax(newSeqScore)) + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\n")
+#                    f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
+#                else:
+#                    f.write("0"+ "\t" + "0" + "\t")
 
                 lenSplice = 23
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
-                if (site != "5'"):
-                    f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
-                else:
-                    f.write("0"+ "\t" + "0" + "\t")
-                f.write(str(upscore) + "\t" + str(downscore) + "\t")
-                if(site != "N/A"):
-                    f.write("1\n")
-                else:
-                    f.write("0\n")
+                if (site == "5'"):
+                    f.write("N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" + "N/A" + "\t" +
+                        "1" + "\t" +"N/A" + "\t" +str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t" +"N/A" + "\t" +
+                        str(np.amax(newSeqScore)) + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\n")
+#                    f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
+                #else:
+#                    f.write("0"+ "\t" + "0" + "\t")
+#                f.write(str(upscore) + "\t" + str(downscore) + "\t")
+                if(site == "N/A"):
+                    f.write("N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +str(newSeqScore) + "\t" +"N/A" + "\t" +"N/A" + "\t" +str(np.amax(newSeqScore)) + "\t" +
+                        "N/A" + "\t"+"N/A" + "\t" +str(orgSeqScore)  + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t"+"N/A" + "\t"+
+                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" + "\n")
+#                else:
+#                    f.write("0\n")
 
     def getEntScore(self,seq):
         temporary = open("temp", "w")
@@ -203,8 +257,11 @@ class brcaParse:
             orgSeqScore.append(self.getEntScore(orgSeq))
         return(orgSeqScore, newSeqScore)
     
-    def inSpliceSite(self, i):
+    def inSpliceSite(self, i):#, Exonfile):
+        exonFile = open("Exonfile", "w")
+        #get confirmation and check for accuracy and understanding
         if self.Gene[i] == "BRCA1":
+            
             exonStart = [43044294,43047642,43049120,43051062,43057051,43063332,43063873,43067607,43070927,
                           43074330,43076487,43082403,43090943,43094743,43095845,43097243,43099774,43104121,
                           43104867,43106455,43115725,43124016]
@@ -284,13 +341,15 @@ def main():
 
     parser.add_argument('input', action="store")
     parser.add_argument('output', action="store")
+    #parser.add_argument('Exonfile',action='store')
     args = parser.parse_args()
 
     inFile = args.input
     a = brcaParse(inFile)
     A, matOut = a.getDat()
-    maxEnt = args.output + ".tsv"
-    a.maxEntForm(maxEnt) #get acceptor splice sites 23mers UNCOMMENT FOR 23 mer!
+    outFile = args.output + ".tsv"
+    #Exonfile = args.Exonfile
+    a.maxEntForm(outFile) #,Exonfile) #get acceptor splice sites 23mers UNCOMMENT FOR 23 mer!
     os.remove("temp")
 
 # Make loops. if BRCA1 or 2, reference BRCA1 or BRCA1, then replace string with alt(eration).
