@@ -8,6 +8,7 @@ The <a href="http://brcaexchange.org">BRCA Exchange</a> website is a product of 
 
 Variant data on this site are made available using the standards based <a href="https://genomicsandhealth.org/work-products-demonstration-projects/genomics-api">GA4GH Genomics API</a>. For more information, and example usage please visit our <a href="/about/api">API description</a>.
 
+Charting of allele frequencies, as well as bar and pie charts on the Facts and Stats page, is powered by [Highcharts](https://www.highcharts.com/) under the [Creative Commons (CC) Attribution-NonCommercial licence](http://creativecommons.org/licenses/by-nc/3.0/) for non-profit organizations.
 ---
 
 <div style="display:block; text-align: center;">

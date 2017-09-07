@@ -192,7 +192,8 @@ def selectAlleleFrequency(row):
     if row["Allele_frequency_ExAC"] != EMPTY:
         return "%s (ExAC minus TCGA)" % row["Allele_frequency_ExAC"]
     elif row["Minor_allele_frequency_percent_ESP"] != EMPTY:
-        return "%s (ESP)" % row["Minor_allele_frequency_percent_ESP"].split(',')[-1]
+        # Percent must be converted to a fraction
+        return "%s (ESP)" % (float(row["Minor_allele_frequency_percent_ESP"].split(',')[-1])/100)
     elif row["Allele_frequency_1000_Genomes"] != EMPTY:
         return "%s (1000 Genomes)" % row["Allele_frequency_1000_Genomes"]
     else:
