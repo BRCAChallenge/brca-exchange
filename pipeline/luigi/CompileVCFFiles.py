@@ -726,7 +726,12 @@ class CopyEXLOVDOutputToOutputDir(luigi.Task):
 ###############################################
 
 
-class ConvertSharedLOVDToVCF(luigi.Task):
+class DownloadLOVDInputFile(luigi.Task):
+    """ Downloads the shared LOVD data
+
+    If the pipeline is run on a machine from which it is not possible to download the data (currently IP based authentication)
+    the file can be manually staged in the path of `lovd_data_file`. In this case, the task will not be run.
+    """
     date = luigi.DateParameter(default=datetime.date.today())
 
     resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
@@ -738,26 +743,46 @@ class ConvertSharedLOVDToVCF(luigi.Task):
     file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
                                       description='directory to store all individual task related files')
 
+    lovd_data_file = luigi.Parameter(default='', description='path, where the shared LOVD data will be stored')
+
+    shared_lovd_data_url = luigi.Parameter(default='http://databases.lovd.nl/shared/export/BRCA',
+                                            description='URL to download shared LOVD data from')
+
     def output(self):
-        lovd_file_dir = self.file_parent_dir + "/LOVD"
-        return luigi.LocalTarget(lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf")
+        if len(str(self.lovd_data_file)) == 0:
+            path = self.file_parent_dir + "/LOVD/BRCA.txt"
+        else:
+            path = str(self.lovd_data_file)
+
+        return luigi.LocalTarget(path)
 
     def run(self):
-        lovd_file_dir = self.file_parent_dir + "/LOVD"
+        download_file_and_display_progress(self.shared_lovd_data_url, self.output())
+
+@requires(DownloadLOVDInputFile)
+class ConvertSharedLOVDToVCF(luigi.Task):
+
+    def output(self):
+        return luigi.LocalTarget(self.file_parent_dir + "/LOVD/sharedLOVD_brca12.hg19.vcf")
+
+    def run(self):
+
         brca_resources_dir = self.resources_dir
-        artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts/")
+        artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts")
 
         os.chdir(lovd_method_dir)
 
-        args = ["python", "lovd2vcf.py", "-i", lovd_file_dir + "/BRCA.txt", "-o",
-                lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf", "-a", "sharedLOVDAnnotation",
+        args = ["python", "lovd2vcf.py", "-i", self.input().path, "-o",
+                self.output().path, "-a", "sharedLOVDAnnotation",
                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
                 brca_resources_dir + "/hg19.fa", '-e', artifacts_dir + '/LOVD_error_variants.txt']
+
         print "Running lovd2vcf with the following args: %s" % (args)
+
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        check_file_for_contents(lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf")
+        check_file_for_contents(self.output().path)
 
 
 @requires(ConvertSharedLOVDToVCF)
@@ -1499,7 +1524,8 @@ class RunAll(luigi.WrapperTask):
         yield CopyG1KOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyEXACOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopyEXLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield CopySharedLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield CopySharedLOVDOutputToOutputDir(date=self.date, resources_dir=self.resources_dir, output_dir=self.output_dir, file_parent_dir=self.file_parent_dir)
+
         yield DownloadLatestEnigmaData(self.date, self.synapse_username, self.synapse_password,
                                        self.synapse_enigma_file_id, self.resources_dir,
                                        self.output_dir, self.file_parent_dir)
