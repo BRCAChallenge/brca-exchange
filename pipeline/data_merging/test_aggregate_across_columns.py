@@ -1,6 +1,5 @@
 import pytest
 import unittest
-import pdb
 from aggregate_across_columns import selectMaxAlleleFrequency, FIELDS_TO_REMOVE, FIELDS_TO_ADD, FIELDS_TO_RENAME, setOutputColumns, update_basic_fields, EMPTY
 
 
@@ -290,12 +289,10 @@ class TestStringMethods(unittest.TestCase):
 
     def test_set_output_columns(self):
         '''
-        TODO: Write a test that ensures the setOutputColumns function on line 53 in aggregate_across_columns.py works as expected.
-        Use the self.initialFields list as in input, and confirm the ouput meets the following criteria:
-        1. None of the fields in FIELDS_TO_REMOVE are present.
-        2. All of the fields in FIELDS_TO_ADD are present.
-        3. All of the fields in FIELDS_TO_RENAME have been properly renamed (none of the old names are present,
-           all of the new names are present).
+        Tests that: 
+        none of the fields in FIELDS_TO_REMOVE are present, 
+        all of the fields from FIELDS_TO_ADD are present, 
+        and that all of the fields in FIEDLS_TO_RENAME have been properly renamed.
         '''
         outputFields = setOutputColumns(self.initialFields, FIELDS_TO_REMOVE, FIELDS_TO_ADD, FIELDS_TO_RENAME)
 
@@ -311,17 +308,15 @@ class TestStringMethods(unittest.TestCase):
 
     def test_update_basic_fields(self):
         '''
-        TODO: Test the following features of update_basic_fields:
-        1. All fields have been appropriately renamed (can reuse logic from test_set_output_columns if it's helpful)
-        2. Test that the Hg38_Start and Hg38_End fields are set to the correct values.
-        3. Test that the correct Gene_Symbol property is set.
-        4. Test that HGVS_RNA has the correct value.
+        Tests that:
+        all fields have been appropriately renamed,
+        Hg38_Start and Hg38_End are set to the correct values,
+        Gene_Symbol is set correctly based on the chromosome number,
+        and HGVS_RNA is set to the correct value.
         '''
         oldRow_copy1 = self.oldRow.copy()
         oldRow_copy2 = self.oldRow.copy()
         updatedRow = update_basic_fields(self.oldRow, FIELDS_TO_RENAME)
-
-        #pdb.set_trace()
         
         for oldName, newName in FIELDS_TO_RENAME.iteritems():
             self.assertNotIn(oldName, updatedRow.keys())
