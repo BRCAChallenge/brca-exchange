@@ -1,5 +1,6 @@
 import pytest
 import unittest
+import pdb
 from aggregate_across_columns import selectMaxAlleleFrequency, FIELDS_TO_REMOVE, FIELDS_TO_ADD, FIELDS_TO_RENAME, setOutputColumns, update_basic_fields, EMPTY
 
 
@@ -316,8 +317,12 @@ class TestStringMethods(unittest.TestCase):
         3. Test that the correct Gene_Symbol property is set.
         4. Test that HGVS_RNA has the correct value.
         '''
+        oldRow_copy1 = self.oldRow.copy()
+        oldRow_copy2 = self.oldRow.copy()
         updatedRow = update_basic_fields(self.oldRow, FIELDS_TO_RENAME)
 
+        #pdb.set_trace()
+        
         for oldName, newName in FIELDS_TO_RENAME.iteritems():
             self.assertNotIn(oldName, updatedRow.keys())
             self.assertIn(newName, updatedRow.keys())
@@ -328,12 +333,12 @@ class TestStringMethods(unittest.TestCase):
         expected_end = int(expected_start) + len(self.oldRow["Ref"]) - 1
         self.assertEqual(expected_end, updatedRow["Hg38_End"])
 
-        self.oldRow["Genomic_Coordinate_hg38"] = 'chr17:32314943:A>G'
-        updatedRow = update_basic_fields(self.oldRow, FIELDS_TO_RENAME)
+        oldRow_copy1["Genomic_Coordinate"] = 'chr17:32314943:A>G'
+        updatedRow = update_basic_fields(oldRow_copy1, FIELDS_TO_RENAME)
         self.assertEqual(updatedRow["Gene_Symbol"], 'BRCA1')
 
-        self.oldRow["Genomic_Coordinate_hg38"] = 'chr13:32314943:A>G'
-        updatedRow = update_basic_fields(self.oldRow, FIELDS_TO_RENAME)
+        oldRow_copy2["Genomic_Coordinate"] = 'chr13:32314943:A>G'
+        updatedRow = update_basic_fields(oldRow_copy2, FIELDS_TO_RENAME)
         self.assertEqual(updatedRow["Gene_Symbol"], 'BRCA2')
 
         self.assertEqual(updatedRow["HGVS_RNA"], EMPTY)
