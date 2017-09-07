@@ -1,8 +1,6 @@
 import pytest
 import unittest
-from aggregate_across_columns import selectMaxAlleleFrequency, FIELDS_TO_REMOVE, FIELDS_TO_ADD, FIELDS_TO_RENAME, setOutputColumns, update_basic_fields, EMPTY
-
-
+from aggregate_across_columns import selectMaxAlleleFrequency, selectAlleleFrequency, FIELDS_TO_REMOVE, FIELDS_TO_ADD, FIELDS_TO_RENAME, setOutputColumns, update_basic_fields, EMPTY
 
 class TestStringMethods(unittest.TestCase):
 
