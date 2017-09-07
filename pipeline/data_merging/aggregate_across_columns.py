@@ -98,7 +98,7 @@ def update_basic_fields(row, columnsToReplace):
     row["Hg38_Start"] = row['Pos']
     row["Hg38_End"] = int(row["Hg38_Start"]) + len(row["Ref"]) - 1
     if row["Gene_Symbol"] == EMPTY:
-        if re.search("^chr17", row["Genomic_Coordinate_hg38"] ):
+        if re.search("^chr17", row["Genomic_Coordinate_hg38"]):
             row["Gene_Symbol"] = "BRCA1"
         else:
             row["Gene_Symbol"] = "BRCA2"
