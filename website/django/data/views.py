@@ -246,6 +246,11 @@ def apply_search(query, search_term, quotes='', release=None):
     '''
     search_term = search_term.lower().strip()
 
+    if 'chr17:' in search_term and 'g.' not in search_term:
+        search_term = search_term.replace('chr17:', 'chr17:g.')
+    if 'chr13:' in search_term and 'g.' not in search_term:
+        search_term = search_term.replace('chr13:', 'chr13:g.')
+
     p_hgvs_protein = re.compile("^np_[0-9]{6}.[0-9]:")
     m_hgvs_protein = p_hgvs_protein.match(search_term)
 

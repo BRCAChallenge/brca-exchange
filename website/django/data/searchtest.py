@@ -510,19 +510,21 @@ class VariantTestCase(TestCase):
     def test_search_by_combined_gene_symbol_and_genomic_coordinate(self):
         '''Tests that searching for a variant with a 'gene_symbol:genomic_coordinate_hg38' search term is successful'''
         gene_symbol_genomic_coordinate_hg38 = self.existing_variant_materialized_view.Gene_Symbol + ':' + self.existing_variant_materialized_view.Genomic_Coordinate_hg38
-        request = self.factory.get(
-            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=%s&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD' % gene_symbol_genomic_coordinate_hg38)
-        response = index(request)
+        gene_symbol_genomic_coordinate_hg38_without_g = self.existing_variant_materialized_view.Gene_Symbol + ':' + self.existing_variant_materialized_view.Genomic_Coordinate_hg38.replace('g.', '')
+        for combo in [gene_symbol_genomic_coordinate_hg38, gene_symbol_genomic_coordinate_hg38_without_g]:
+            request = self.factory.get(
+                '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=%s&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD' % combo)
+            response = index(request)
 
-        self.assertIsInstance(response, JsonResponse)
-        self.assertEqual(response.status_code, 200)
+            self.assertIsInstance(response, JsonResponse)
+            self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+            response_data = json.loads(response.content)
 
-        self.assertEqual(response_data['count'], 1)
+            self.assertEqual(response_data['count'], 1)
 
-        response_variant = response_data['data'][0]
-        self.assertEqual(response_variant['Genomic_Coordinate_hg38'], self.existing_variant.Genomic_Coordinate_hg38)
+            response_variant = response_data['data'][0]
+            self.assertEqual(response_variant['Genomic_Coordinate_hg38'], self.existing_variant.Genomic_Coordinate_hg38)
 
 
     '''
@@ -579,17 +581,43 @@ class VariantTestCase(TestCase):
             'BRCA1:chr17:g.43094692:G>C',
             'BRCA1:chr17:g.41246709:G>C',
             'BRCA1:chr17:g.38500235:G>C',
+            'BRCA1:chr17:43094692:G>C',
+            'BRCA1:chr17:41246709:G>C',
+            'BRCA1:chr17:38500235:G>C',
             'BRCA1:958C>G',
             'BRCA1:c.839C>G',
             'NM_007294.3:chr17:g.43094692:G>C',
+            'NM_007294.3:chr17:43094692:G>C',
             'NM_007294.3:chr17:g.41246709:G>C',
+            'NM_007294.3:chr17:41246709:G>C',
             'NM_007294.3:chr17:g.38500235:G>C',
+            'NM_007294.3:chr17:38500235:G>C',
             'NM_007294.3:958C>G',
             'NM_007294.3:c.839C>G',
             'BRCA1:p.(Ala280Gly)',
             'BRCA1:A280G',
             'NP_009225.1:p.(Ala280Gly)',
             'NP_009225.1:A280G',
+            'BRCA1 chr17:g.43094692:G>C',
+            'BRCA1 chr17:g.41246709:G>C',
+            'BRCA1 chr17:g.38500235:G>C',
+            'BRCA1 chr17:43094692:G>C',
+            'BRCA1 chr17:41246709:G>C',
+            'BRCA1 chr17:38500235:G>C',
+            'BRCA1 958C>G',
+            'BRCA1 c.839C>G',
+            'NM_007294.3 chr17:g.43094692:G>C',
+            'NM_007294.3 chr17:43094692:G>C',
+            'NM_007294.3 chr17:g.41246709:G>C',
+            'NM_007294.3 chr17:41246709:G>C',
+            'NM_007294.3 chr17:g.38500235:G>C',
+            'NM_007294.3 chr17:38500235:G>C',
+            'NM_007294.3 958C>G',
+            'NM_007294.3 c.839C>G',
+            'BRCA1 p.(Ala280Gly)',
+            'BRCA1 A280G',
+            'NP_009225.1 p.(Ala280Gly)',
+            'NP_009225.1 A280G',
             'BRCA2 6174delT',
             'BRCA1 185delAG'
             ]
@@ -610,6 +638,25 @@ class VariantTestCase(TestCase):
 
             response_variant = response_data['data'][0]
             #self.assertEqual(response_variant[test_term], getattr(self.existing_variant, test_term), message)
+
+    def test_genomic_coordinate_without_g(self):
+        '''Tests that searching for a variant with a genomic_coordinate_hg38 search term is successful'''
+        existing_genomic_coordinate = self.existing_variant_materialized_view.Genomic_Coordinate_hg38
+        existing_genomic_coordinate_without_g = existing_genomic_coordinate.replace('g.', '')
+        request = self.factory.get(
+            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&include=Variant_in_ENIGMA&search_term=%s' % existing_genomic_coordinate_without_g)
+        response = index(request)
+
+        self.assertIsInstance(response, JsonResponse)
+        self.assertEqual(response.status_code, 200)
+
+        response_data = json.loads(response.content)
+        self.assertEqual(response_data['count'], 1)
+
+        response_variant = response_data['data'][0]
+        self.assertEqual(response_variant['Genomic_Coordinate_hg38'], self.existing_variant.Genomic_Coordinate_hg38)
+
+
 
     def test_search_by_colon_delimiters(self):
         #Tests searching for variants with colon delimiters
