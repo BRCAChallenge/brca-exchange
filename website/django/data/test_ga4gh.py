@@ -1,3 +1,4 @@
+import pdb
 import json
 import os
 import unittest
@@ -26,6 +27,7 @@ class GA4GHTestCase(TestCase):
     # Datasets endpoints #
     ######################
     def test_datasets_alive(self):
+        pdb.set_trace()
         """Tests that datasets search endpoint is alive."""
         request = self.factory.post(
             "/data/ga4gh/datasets/search",
@@ -519,5 +521,3 @@ class GA4GHTestCase(TestCase):
         self.assertEqual(json_response['referenceName'], "13")
         self.assertEqual(json_response['id'], "hg37-1")
 
-if __name__ == '__main__':
-    unittest.main()
