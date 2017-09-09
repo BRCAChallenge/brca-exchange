@@ -26,7 +26,6 @@ class GA4GHTestCase(TestCase):
     # Datasets endpoints #
     ######################
     def test_datasets_alive(self):
-        pdb.set_trace()
         """Tests that datasets search endpoint is alive."""
         request = self.factory.post(
             "/data/ga4gh/datasets/search",
