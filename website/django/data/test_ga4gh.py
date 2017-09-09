@@ -1,4 +1,3 @@
-import pdb
 import json
 import os
 import unittest
@@ -11,7 +10,7 @@ from data import test_data
 from data.models import Variant, CurrentVariant
 from data.views import index, autocomplete
 import data.views as views
-from searchtest import create_variant_and_materialized_view
+from test_search import create_variant_and_materialized_view
 
 # GA4GH related modules
 import google.protobuf.json_format as json_format
