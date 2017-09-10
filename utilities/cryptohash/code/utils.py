@@ -27,7 +27,7 @@ def get_snps(input_fn, output_fn):
   #        pass
 
 def extract_high_af(input_fn, output_fn, t):
-  """ Output files  """
+  """ Output file with all SNPs with allele frequencies all >= t% """
   if os.path.exists(data_path+output_fn):
     print "Regenerating", data_path+output_fn
 

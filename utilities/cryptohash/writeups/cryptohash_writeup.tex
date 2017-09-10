@@ -33,8 +33,8 @@
 
 \section{Problem Statement and Motivation}
 We are given some datasets of allele data on a number of genes/regions to analyze.
-We expect that each dataset has a different set of allele fields (attributes),
-where the intersection of these allele fields includes SNPs in the genes BRCA1 and BRCA2,
+We expect that each dataset has a different set of genotype attributes,
+where the intersection of these genotype attributes includes SNPs in the genes BRCA1 and BRCA2,
 In these datasets, a record represents an individual and consists of alleles of that individual.
 In other words, each dataset represents individuals with different attributes,
 and our goal is to identify individuals using the intersection of the attributes of each dataset. 
@@ -54,12 +54,21 @@ As a result, we want to compare the amount of information the SNPs provide as we
 in order to conclude the most informative and smallest subset of SNPs that provides the highest identifiability in combination with other available personal information.
 \\
 %
-\subsection{Reducing Redundancy with Linkage Disequilibrium}
+\subsection{SNP Selection}
+% How do we select SNPs?
+For some SNPs in our datasets, many individuals have the same alleles
+%How do we evaluate how much information a SNP provides? 
+abcd.
+\\
+%
+\subsection{Redundancy Reduction with Linkage Disequilibrium}
 % Why is there redundancy? What is LD and what is haplotype?
 Studies have found that some SNPs, typically those that are located closely on the genotyping array, tend to be inherited together.
 In other words, these SNPs have the same variability and provide the same information in terms of identifiability,
 and they are hence redundant to have as our attributes.
-
+\\
+%
+%\subsection{Allele Inferrence with Haplotypes}
 %
 %
 %

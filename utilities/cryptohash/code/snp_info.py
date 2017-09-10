@@ -23,9 +23,8 @@ def shannon_entropy(reader):
       pass
     R = len(snp.alleles)
     probs = utils.allele_frequencies(snp)
-    for i in range(R):
-      if probs[i] <= 0:
-        print snp
+    #for i in range(R):
+    #  assert probs[i] >= 0
     entropy = -1.0 * sum([probs[i] * math.log(probs[i]) if probs[i] > 0 else 0 for i in range(R)])
     entropies.append((count, entropy))
     count += 1
@@ -110,6 +109,11 @@ def identifiability(input_fn, use_dob, dobs=None):
   #      len([v for v in counter.values() if v > 1])
 
   return 1.0*len(counter)/m, n
+
+def score_snp(snp):
+  """ Score a SNP on its identifiability of individuals.
+      Returns a double score s, 0 <= s <= 1.
+  """
 
 def conditional(input_fn):
   """ Computes conditional distribution of each SNP:
