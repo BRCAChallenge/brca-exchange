@@ -576,6 +576,8 @@ class VariantTestCase(TestCase):
             evmv.Gene_Symbol + ' ' + evmv.HGVS_cDNA.split(':')[1],
             evmv.Gene_Symbol + ':' + evmv.HGVS_Protein.split(':')[1],
             evmv.Gene_Symbol + ' ' + evmv.HGVS_Protein.split(':')[1],
+            evmv.Gene_Symbol + ':' + evmv.HGVS_Protein.split(':')[1].replace('(', '').replace(')', ''),
+            evmv.Gene_Symbol + ' ' + evmv.HGVS_Protein.split(':')[1].replace('(', '').replace(')', ''),
             evmv.Gene_Symbol + ':' + evmv.Protein_Change,
             evmv.Gene_Symbol + ' ' + evmv.Protein_Change,
             evmv.Gene_Symbol + ':' + evmv.BIC_Nomenclature,
@@ -673,6 +675,23 @@ class VariantTestCase(TestCase):
             response_variant = response_data['data'][0]
             self.assertEqual(response_variant[field_2], getattr(self.existing_variant,field_2), message)
             self.assertEqual(response_variant[field_1], getattr(self.existing_variant, field_1), message)
+
+    def test_search_by_hgvs_protein_without_parentheses(self):
+        hgvs_protein_without_parens = self.existing_variant_materialized_view.HGVS_Protein.replace('(', '').replace(')', '')
+        request = self.factory.get(
+            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=%s&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD' % hgvs_protein_without_parens)
+        response = index(request)
+
+        self.assertIsInstance(response, JsonResponse)
+        self.assertEqual(response.status_code, 200)
+
+        response_data = json.loads(response.content)
+
+        self.assertEqual(response_data['count'], 1)
+
+        response_variant = response_data['data'][0]
+        self.assertEqual(response_variant['HGVS_Protein'], self.existing_variant.HGVS_Protein)
+
 
     def test_search_by_gene_symbol_and_hgvs_protein_with_colon(self):
         '''Tests searching for 'BRCA1 p.(Ala280Gly) --> Gene_Symbol HGVS_Protein.split(':')[1]' with colon separator

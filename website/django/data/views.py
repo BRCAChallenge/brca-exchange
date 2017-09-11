@@ -216,6 +216,13 @@ def apply_filters(query, filterValues, filters, quotes=''):
     return query
 
 
+def add_paren_to_hgvs_protein_if_absent(value):
+    if value.startswith('p.') and '(' not in value:
+        return value[:2] + '(' + value[2:]
+    else:
+        return value
+
+
 def apply_search(query, search_term, quotes='', release=None):
     '''
     NOTE: there is some additional handling of search terms on the front-end in
@@ -271,10 +278,15 @@ def apply_search(query, search_term, quotes='', release=None):
     if m_hgvs_protein_space or m_hgvs_protein_colon:
         prefix = search_term[:11]
         suffix = search_term[12:]
+
+        # accept hgvs_protein sequences without parentheses
+        suffix = add_paren_to_hgvs_protein_if_absent(suffix)
+
         # values in synonyms column are separated by commas
         comma_prefixed_suffix = ',' + suffix
         results = query.filter(HGVS_Protein__istartswith=prefix).filter(
             Q(Protein_Change__istartswith=suffix) |
+            Q(HGVS_Protein__icontains=suffix) |
             Q(Synonyms__icontains=comma_prefixed_suffix) |
             Q(Synonyms__istartswith=suffix)
         ) | query.filter(Q(HGVS_Protein__icontains=search_term) | Q(Synonyms__icontains=search_term))
@@ -284,6 +296,9 @@ def apply_search(query, search_term, quotes='', release=None):
     elif has_gene_symbol_prefix:
         prefix = search_term[:5]
         suffix = search_term[6:]
+
+        suffix = add_paren_to_hgvs_protein_if_absent(suffix)
+
         comma_prefixed_suffix = ',' + suffix
         # need to check synonym column for colon prefixes in the case of HGVS_cDNA and HGVS_Protein fields
         colon_prefixed_suffix = ':' + suffix
