@@ -3,7 +3,6 @@ import re
 import tempfile
 import json
 from operator import __or__
-
 from django.db import connection
 from django.db.models import Q
 from django.db.models import Value
@@ -123,6 +122,7 @@ def index(request):
     show_deleted = (request.GET.get('show_deleted', False) != False)
     deleted_count = 0
     synonyms_count = 0
+
     if release:
         query = Variant.objects.filter(Data_Release_id=int(release))
         if(change_types):
@@ -246,19 +246,29 @@ def apply_search(query, search_term, quotes='', release=None):
     '''
     search_term = search_term.lower().strip()
 
+    # Accept genomic coordinates with or without a 'g.' before the position
     if 'chr17:' in search_term and 'g.' not in search_term:
         search_term = search_term.replace('chr17:', 'chr17:g.')
     if 'chr13:' in search_term and 'g.' not in search_term:
         search_term = search_term.replace('chr13:', 'chr13:g.')
 
-    p_hgvs_protein = re.compile("^np_[0-9]{6}.[0-9]:")
-    m_hgvs_protein = p_hgvs_protein.match(search_term)
+    p_hgvs_protein_colon = re.compile("^np_[0-9]{6}.[0-9]:")
+    m_hgvs_protein_colon = p_hgvs_protein_colon.match(search_term)
+    p_hgvs_protein_space = re.compile("^np_[0-9]{6}.[0-9] ")
+    m_hgvs_protein_space = p_hgvs_protein_space.match(search_term)
 
-    p_reference_sequence = re.compile("^nm_[0-9]{6}.[0-9]:")
-    m_reference_sequence = p_reference_sequence.match(search_term)
+    p_reference_sequence_colon = re.compile("^nm_[0-9]{6}.[0-9]:")
+    m_reference_sequence_colon = p_reference_sequence_colon.match(search_term)
+    p_reference_sequence_space = re.compile("^nm_[0-9]{6}.[0-9] ")
+    m_reference_sequence_space = p_reference_sequence_space.match(search_term)
+
+    has_gene_symbol_prefix = False
+    for accepted_prefix in ['brca1:', 'brca2:', 'brca1 ', 'brca2 ']:
+        if search_term.startswith(accepted_prefix):
+            has_gene_symbol_prefix = True
 
     # Handle HGVS_Protein searches
-    if m_hgvs_protein:
+    if m_hgvs_protein_space or m_hgvs_protein_colon:
         prefix = search_term[:11]
         suffix = search_term[12:]
         # values in synonyms column are separated by commas
@@ -271,7 +281,7 @@ def apply_search(query, search_term, quotes='', release=None):
         non_synonyms = results.filter(Protein_Change__istartswith=suffix) | query.filter(HGVS_Protein__icontains=search_term)
 
     # Handle gene symbol prefixed searches
-    elif search_term.startswith('brca1:') or search_term.startswith('brca2:'):
+    elif has_gene_symbol_prefix:
         prefix = search_term[:5]
         suffix = search_term[6:]
         comma_prefixed_suffix = ',' + suffix
@@ -298,7 +308,7 @@ def apply_search(query, search_term, quotes='', release=None):
         )
 
     # Handle Reference_Sequence prefixed searches
-    elif m_reference_sequence:
+    elif m_reference_sequence_space or m_reference_sequence_colon:
         prefix = search_term[:11]
         suffix = search_term[12:]
         comma_prefixed_suffix = ',' + suffix
@@ -317,7 +327,7 @@ def apply_search(query, search_term, quotes='', release=None):
             Q(BIC_Nomenclature__istartswith=suffix)
         )
 
-    # Generic searches (no prefixes)
+        # Generic searches (no prefixes)
     else:
         # filter non-special-case searches against the following fields
         results = query.filter(

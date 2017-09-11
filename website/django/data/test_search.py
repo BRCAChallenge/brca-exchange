@@ -1,6 +1,5 @@
 import json
 import os
-import pytest
 import string
 import shutil
 import tempfile
@@ -552,75 +551,55 @@ class VariantTestCase(TestCase):
     NP_009225.1:p.(Ala280Gly) --> HGVS_Protein !!! NOT included in test_list
     NP_009225.1:A280G --> HGVS_Protein.split(':')[0]:Protein_Change
     Add test case for space separator
-
-
-    EXAMPLES OF SEARCHES THAT MUST BE SUPPORTED (with space or colon delimiter)
-
-    BRCA1:chr17:g.43094692:G>C
-    BRCA1:chr17:g.41246709:G>C
-    BRCA1:chr17:g.38500235:G>C
-    BRCA1:958C>G
-    BRCA1:c.839C>G
-    NM_007294.3:chr17:g.43094692:G>C
-    NM_007294.3:chr17:g.41246709:G>C
-    NM_007294.3:chr17:g.38500235:G>C
-    NM_007294.3:958C>G
-    NM_007294.3:c.839C>G
-    BRCA1:p.(Ala280Gly)
-    BRCA1:A280G
-    NP_009225.1:p.(Ala280Gly)
-    NP_009225.1:A280G
-    BRCA2 6174delT
-    BRCA1 185delAG
     '''
 
-    @skip("Full functionality not yet implemented")
     def test_search_examples(self):
         '''When search functionality is complete, this test should pass. This tests all the different ways to search'''
+        # Accepts space or colon delimiter
+        evmv = self.existing_variant_materialized_view
         test_list = [
-            'BRCA1:chr17:g.43094692:G>C',
-            'BRCA1:chr17:g.41246709:G>C',
-            'BRCA1:chr17:g.38500235:G>C',
-            'BRCA1:chr17:43094692:G>C',
-            'BRCA1:chr17:41246709:G>C',
-            'BRCA1:chr17:38500235:G>C',
-            'BRCA1:958C>G',
-            'BRCA1:c.839C>G',
-            'NM_007294.3:chr17:g.43094692:G>C',
-            'NM_007294.3:chr17:43094692:G>C',
-            'NM_007294.3:chr17:g.41246709:G>C',
-            'NM_007294.3:chr17:41246709:G>C',
-            'NM_007294.3:chr17:g.38500235:G>C',
-            'NM_007294.3:chr17:38500235:G>C',
-            'NM_007294.3:958C>G',
-            'NM_007294.3:c.839C>G',
-            'BRCA1:p.(Ala280Gly)',
-            'BRCA1:A280G',
-            'NP_009225.1:p.(Ala280Gly)',
-            'NP_009225.1:A280G',
-            'BRCA1 chr17:g.43094692:G>C',
-            'BRCA1 chr17:g.41246709:G>C',
-            'BRCA1 chr17:g.38500235:G>C',
-            'BRCA1 chr17:43094692:G>C',
-            'BRCA1 chr17:41246709:G>C',
-            'BRCA1 chr17:38500235:G>C',
-            'BRCA1 958C>G',
-            'BRCA1 c.839C>G',
-            'NM_007294.3 chr17:g.43094692:G>C',
-            'NM_007294.3 chr17:43094692:G>C',
-            'NM_007294.3 chr17:g.41246709:G>C',
-            'NM_007294.3 chr17:41246709:G>C',
-            'NM_007294.3 chr17:g.38500235:G>C',
-            'NM_007294.3 chr17:38500235:G>C',
-            'NM_007294.3 958C>G',
-            'NM_007294.3 c.839C>G',
-            'BRCA1 p.(Ala280Gly)',
-            'BRCA1 A280G',
-            'NP_009225.1 p.(Ala280Gly)',
-            'NP_009225.1 A280G',
-            'BRCA2 6174delT',
-            'BRCA1 185delAG'
-            ]
+            evmv.Gene_Symbol + ':' + evmv.Genomic_Coordinate_hg38,
+            evmv.Gene_Symbol + ' ' + evmv.Genomic_Coordinate_hg38,
+            evmv.Gene_Symbol + ':' + evmv.Genomic_Coordinate_hg38.replace('g.', ''),
+            evmv.Gene_Symbol + ' ' + evmv.Genomic_Coordinate_hg38.replace('g.', ''),
+            evmv.Gene_Symbol + ':' + evmv.Genomic_Coordinate_hg37,
+            evmv.Gene_Symbol + ' ' + evmv.Genomic_Coordinate_hg37,
+            evmv.Gene_Symbol + ':' + evmv.Genomic_Coordinate_hg37.replace('g.', ''),
+            evmv.Gene_Symbol + ' ' + evmv.Genomic_Coordinate_hg37.replace('g.', ''),
+            evmv.Gene_Symbol + ':' + evmv.Genomic_Coordinate_hg36,
+            evmv.Gene_Symbol + ' ' + evmv.Genomic_Coordinate_hg36,
+            evmv.Gene_Symbol + ':' + evmv.Genomic_Coordinate_hg36.replace('g.', ''),
+            evmv.Gene_Symbol + ' ' + evmv.Genomic_Coordinate_hg36.replace('g.', ''),
+            evmv.Gene_Symbol + ':' + evmv.BIC_Nomenclature,
+            evmv.Gene_Symbol + ' ' + evmv.BIC_Nomenclature,
+            evmv.Gene_Symbol + ':' + evmv.HGVS_cDNA.split(':')[1],
+            evmv.Gene_Symbol + ' ' + evmv.HGVS_cDNA.split(':')[1],
+            evmv.Gene_Symbol + ':' + evmv.HGVS_Protein.split(':')[1],
+            evmv.Gene_Symbol + ' ' + evmv.HGVS_Protein.split(':')[1],
+            evmv.Gene_Symbol + ':' + evmv.Protein_Change,
+            evmv.Gene_Symbol + ' ' + evmv.Protein_Change,
+            evmv.Gene_Symbol + ':' + evmv.BIC_Nomenclature,
+            evmv.Gene_Symbol + ' ' + evmv.BIC_Nomenclature,
+            evmv.Reference_Sequence + ':' + evmv.Genomic_Coordinate_hg38,
+            evmv.Reference_Sequence + ' ' + evmv.Genomic_Coordinate_hg38,
+            evmv.Reference_Sequence + ':' + evmv.Genomic_Coordinate_hg38.replace('g.', ''),
+            evmv.Reference_Sequence + ' ' + evmv.Genomic_Coordinate_hg38.replace('g.', ''),
+            evmv.Reference_Sequence + ':' + evmv.Genomic_Coordinate_hg37,
+            evmv.Reference_Sequence + ' ' + evmv.Genomic_Coordinate_hg37,
+            evmv.Reference_Sequence + ':' + evmv.Genomic_Coordinate_hg37.replace('g.', ''),
+            evmv.Reference_Sequence + ' ' + evmv.Genomic_Coordinate_hg37.replace('g.', ''),
+            evmv.Reference_Sequence + ':' + evmv.Genomic_Coordinate_hg36,
+            evmv.Reference_Sequence + ' ' + evmv.Genomic_Coordinate_hg36,
+            evmv.Reference_Sequence + ':' + evmv.Genomic_Coordinate_hg36.replace('g.', ''),
+            evmv.Reference_Sequence + ' ' + evmv.Genomic_Coordinate_hg36.replace('g.', ''),
+            evmv.Reference_Sequence + ':' + evmv.BIC_Nomenclature,
+            evmv.Reference_Sequence + ' ' + evmv.BIC_Nomenclature,
+            evmv.Reference_Sequence + ':' + evmv.HGVS_cDNA.split(':')[1],
+            evmv.Reference_Sequence + ' ' + evmv.HGVS_cDNA.split(':')[1],
+            evmv.HGVS_Protein,
+            evmv.HGVS_Protein.split(':')[0] + ':' + evmv.Protein_Change,
+            evmv.HGVS_Protein.split(':')[0] + ' ' + evmv.Protein_Change
+        ]
 
         for test_term in test_list:
             request = self.factory.get(
@@ -731,7 +710,6 @@ class VariantTestCase(TestCase):
         response_variant = response_data['data'][0]
         self.assertEqual(response_variant['Protein_Change'], self.existing_variant.Protein_Change)
 
-    @skip('Spaces not yet implemented')
     def test_search_by_space_delimiters(self):
         #Tests searching for different search terms with space delimiters
         test_list = {
@@ -749,7 +727,15 @@ class VariantTestCase(TestCase):
         }
         #This loops through the test_list dictionary, providing matching pairs of correctly-ordered search terms
         for field_1, field_2 in test_list.items():
-            test_case = getattr(self.existing_variant_materialized_view, field_1) + ' ' + getattr(self.existing_variant_materialized_view, field_2)
+
+            field_1_val = getattr(self.existing_variant_materialized_view, field_1)
+
+            if field_2 == "HGVS_cDNA":
+                field_2_val = getattr(self.existing_variant_materialized_view, field_2).split(':')[1]
+            else:
+                field_2_val = getattr(self.existing_variant_materialized_view, field_2)
+
+            test_case = field_1_val + ' ' + field_2_val
 
             request = self.factory.get(
             '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=%s&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD' % test_case)
@@ -767,7 +753,6 @@ class VariantTestCase(TestCase):
             response_variant = response_data['data'][0]
             self.assertEqual(response_variant[field_2], getattr(self.existing_variant,field_2), message)
 
-    @skip('Spaces not yet implemented')
     def test_search_by_gene_symbol_and_hgvs_protein_with_space(self):
         '''Tests searching for 'BRCA1 p.(Ala280Gly) --> Gene_Symbol HGVS_Protein.split(':')[1]' with colon separator
         BRCA1:p.(Ala280Gly) --> Gene_Symbol:HGVS_Protein.split(':')[1] (HGVS_Protein is actually stored as NP_009225.1:p.(Ala280Gly), so this has to be split on the ':')'''
@@ -786,7 +771,6 @@ class VariantTestCase(TestCase):
         response_variant = response_data['data'][0]
         self.assertEqual(response_variant['HGVS_Protein'], self.existing_variant.HGVS_Protein)
 
-    @skip('Spaces not yet implemented')
     def test_search_by_hgvs_protein_and_protein_change_with_space(self):
         '''Tests searching for 'HGVS_Protein:Protein_Change' with colon separator
         NP_009225.1:A280G --> HGVS_Protein.split(':')[0] Protein_Change'''
@@ -805,16 +789,9 @@ class VariantTestCase(TestCase):
         response_variant = response_data['data'][0]
         self.assertEqual(response_variant['Protein_Change'], self.existing_variant.Protein_Change)
 
-    @skip('Functionality not yet implemented')
     def test_search_by_combined_gene_symbol_and_genomic_coordinate_with_space(self):
-        '''Tests searching for 'gene_symbol genomic_coordinate_hg38' is successful
+        #Tests searching for 'gene_symbol genomic_coordinate_hg38' is successful
 
-        NOTE: This is an example of a test for future functionality. It fails (as it should) because we have not implemented code
-        to support this search type (only colon delimiters at the moment, not spaces). Failing tests are incredibly useful
-        to developers when they implement a new feature that would cause the test to pass. Writing tests to define the
-        parameters of a new feature prior to implementation is known as Test Driven Development (TDD).
-
-        If you find the failure bothersome, uncomment the skip line above the test.'''
         gene_symbol_genomic_coordinate_hg38 = self.existing_variant_materialized_view.Gene_Symbol + ' ' + self.existing_variant_materialized_view.Genomic_Coordinate_hg38
         request = self.factory.get(
             '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=%s&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD' % gene_symbol_genomic_coordinate_hg38)
@@ -829,7 +806,7 @@ class VariantTestCase(TestCase):
         response_variant = response_data['data'][0]
         self.assertEqual(response_variant['Genomic_Coordinate_hg38'], self.existing_variant.Genomic_Coordinate_hg38)
 
-    #FAULTY STRING SEARCHES (These should fail/return no result)
+    #FAULTY STRING SEARCHES (These should return no result)
     #**********************************************************************************
     def test_search_by_incorrect_delimiters(self):
         '''Tests searches that incorrect delimiters do not work'''
