@@ -3,11 +3,11 @@
 
 import pandas as pd
 import numpy as np
-from matplotlib import pyplot
 import re
 import subprocess
 import argparse
 import os
+import exonDict
 
 #NOTE: subprocess, popen(part of subprocess) for script output capture,  
 ######################################################################
@@ -18,18 +18,26 @@ script to find entropy scores for the 3 and 5 prime scores.
 '''
 ######################################################################
 
-
+#todo:make sure loc is the splice site loc, set up code for decision making, ref cdna seq set up,  python 2.7 set up
+#splice loc, json import, de novo classification, 2.7?
 
 #reverse compliment of dna string
 def revComp(dna):
     complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
     return ''.join([complement[base] for base in dna[::-1]])
 
-#Histogram
-def Histo(entScores):
-    bins = [i for i in range(-20,20,5)]
-    pyplot.hist(entScores, bins, histtype='bar')
-    pyplot.show()
+def getEntScore(seq):
+        temporary = open("temp", "w")
+        temporary.write(seq)
+        var = "temp"
+        temporary.close()#must close file before using the subprocess
+        if len(seq) == 9:
+            pipe = subprocess.Popen(["perl","score5.pl", var], stdout=subprocess.PIPE)
+        if len(seq) == 23:
+            pipe = subprocess.Popen(["perl","score3.pl", var], stdout=subprocess.PIPE)
+        result = pipe.stdout.read()
+        entScore = re.findall("[+-]?\d+(?:\.\d+)?", str(result))
+        return(float(entScore[0]))
 
 """This class turns all of the lines into lists, separated by tabs. the np.vstack is used
 to create a matrix. this will be used later for selecting the column desired.dimesnion is
@@ -86,155 +94,94 @@ class brcaParse:
         self.ExonRef = brcaParse.column(self.A, h) #dicates what exon starts and stops should be used..reference sequence
         
         self.matOut = np.vstack((self.Alt, self.Ref, self.Pos, self.Sig, self.Gene))
-        
-         # entScores for visualization
-
-        self.entScores9 = []
-        self.entScores23 = []
-
-    #gets the desired data and puts to object
-    def getDat(self):
-        return (self.A, self.matOut)
 
     #Creates a column from the matrix of data.
     def column(matrix, i):
         return [row[i] for row in matrix]
+    
 
     #Parses through the string to make all the new variant strings. If the variant is an indel
     #rather than a SNP, the definition will make more iterations to account for the new modifications.
     #tempSeq is the variant sequence, np.amax gets the maximum maxentscan score.
-    def maxEntForm(self,output):#,Exonfile):
+    def maxEntForm(self,output):
         f = open(output, 'w')
-        f.write("ID\tPos\trawMaxEntScore\tMaxEntScorePercentile\tCanScore\tinExon\tfirst20Intron\tlast20Intron\tdonorSite\t"
-                + "donorPos\tdonorRefSpliceScore\tdonorRefSplicePercentile\tdonorAltSpliceScore\tdonorAltSplicePercentile\t"
-                + "acceptorPos\tacceptorPos\tacceptorRefSpliceScore\tacceptorRefSplicePercentile\tacceptorAltSpliceScore\t"
-                + "acceptorAltSplicePercentile\tdeNovoPos\tdeNovoScore\tdeNovoPercentile\tmaxScorePos\tmaxAltScore\t"
-                + "maxScorePercentile\tRefPos\tRefScore\tRefPercentile\tupstreamDonorPos\tupstreamDonorScore\tupstreamPercentile\t"
-                + "downstreamDonorPos\tdownstreamDonorScore\tdownstreamPercentile\tframeShift\tprematureStop\tstopPos\tkeyDomain\t"
-                + "deNovoFrameShift\tdeNovoPrematureStop\tstopPos\tdeNovoKeyDomain\n")
-                
-#        f.write("id\tGene\tSignificance\tSpliceSite\t5'Max\t5'Ref\t3'Max\t3'Ref\tupscore\tdownscore\tinExon\n")
+        f.write("id\tGene\tSignificance\tSpliceSite\t5'Max\t5'MaxZScore\t5'Ref\t5'RefZScore\t3'Max\t3'MaxZScore\t3'Ref\t3'RefZScore\tupscore\tdownscore\tinExon\texonLoc\tpathProb\n")
         for i in range(0,len(self.Gene)):
             if self.Gene[i] == "BRCA1":
-                #f.write(self.id[i] +"\t" + self.Gene[i] + "\t" + self.Sig[i] + "\t")
-                f.write(self.id[i] +"\t" + self.Pos[i] +"\t" + "N/A"+"\t" + "N/A" +"\t" + "N/A" + "\t"+ "N/A" +"\t"+ "N/A"+ "\t"+"N/A" +"\t")
-                
+                f.write(self.id[i] +"\t" + self.Gene[i] + "\t" + self.Sig[i] + "\t")
                 loc = (int(self.Pos[i]) - int(self.BRCA1hg38Start))
-                site, upscore, downscore = self.inSpliceSite(i)#,Exonfile)
-                #f.write("{}\t".format(site))
-                
-                #if (site != "N/A"):
-                    #upscore = 0
-                    #downscore = 0
-                
+                site, upscore, downscore, exonLoc = self.inSpliceSite(i)
+                f.write("{}\t".format(site))
+
+                if (site != "N/A"):
+                    upscore = 0
+                    downscore = 0
+                    
                 lenSplice = 9
                 tempSeq = self.BRCA1hg38Seq[:loc-1] + self.Alt[i] + self.BRCA1hg38Seq[loc+len(self.Ref[i])-1:]
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
-                #make sure acceptor is aceptor and donor is donor site for these
-                if (site == "3'"):
-                    f.write("1" + "\t" +"N/A" + "\t" +str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t" +"N/A" + "\t" +
-                        str(np.amax(newSeqScore)) + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t"+"N/A" + "\n")
-                    #f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
-                #else:
-                    #f.write("0"+ "\t" + "0" + "\t")
+                if (site != "3'"):
+                    f.write(str(np.amax(newSeqScore)) + "\t" + str(self.getZScore(np.amax(newSeqScore),site))+
+                            "\t"+ str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t"+ str(self.getZScore(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))],site))+"\t")
                     
+                    pathProb = self.pathProb(self.getZScore(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))],site),self.getZScore(np.amax(newSeqScore),site),site,i)
+                else:
+                    f.write("0"+ "\t" + "0" + "\t"+"0"+ "\t" + "0" + "\t")
+
                 lenSplice = 23
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
-                if (site == "5'"):
-                    f.write("N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" + "N/A" + "\t" +
-                        "1" + "\t" +"N/A" + "\t" +str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t" +"N/A" + "\t" +
-                        str(np.amax(newSeqScore)) + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\n")
-                    #f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
-                #else:
-                    #f.write("0"+ "\t" + "0" + "\t")
-                #f.write(str(upscore) + "\t" + str(downscore) + "\t")
-                if(site == "N/A"):
-                    f.write("N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +str(newSeqScore) + "\t" +"N/A" + "\t" +"N/A" + "\t" +str(np.amax(newSeqScore)) + "\t" +
-                        "N/A" + "\t"+"N/A" + "\t" +str(orgSeqScore)  + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t"+"N/A" + "\t"+
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" + "\n")
-                    #f.write("1\n")
-                #else:
-                    #f.write("0\n")
+                if (site != "5'"):
+                    f.write(str(np.amax(newSeqScore)) + "\t" + str(self.getZScore(np.amax(newSeqScore),site))+
+                            "\t"+ str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t"+ str(self.getZScore(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))],site))+"\t")
+                    pathProb = self.pathProb(self.getZScore(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))],site),self.getZScore(np.amax(newSeqScore),site),site,i)
+                else:
+                    f.write("0"+ "\t" + "0" + "\t"+"0"+ "\t" + "0" + "\t")
+                f.write(str(upscore) + "\t" + str(downscore) + "\t")            
+                if(site != "N/A"):
+                    f.write("1\t" +str(exonLoc)+"\t")
+                else:
+                    f.write("0\t"+str(exonLoc)+"\t")
+                f.write(str(pathProb) +"\n")
+                
                
         for i in range(0,len(self.Gene)):
             if self.Gene[i] == "BRCA2":
-                #f.write(self.id[i] +"\t" + self.Gene[i] + "\t" + self.Sig[i] + "\t")
+                f.write(self.id[i] +"\t" + self.Gene[i] + "\t" + self.Sig[i] + "\t")
                 loc = (int(self.Pos[i]) - int(self.BRCA2hg38Start))
-                site, upscore, downscore = self.inSpliceSite(i)#,Exonfile)
-                f.write(self.id[i] +"\t" + self.Pos[i] +"\t" + "N/A"+"\t" + "N/A" +"\t" + "N/A" + "\t"+ "N/A" +"\t"+ "N/A"+ "\t"+"N/A" +"\t")
-                #f.write("{}\t".format(site))
-                #if (site != "N/A"):
-#                    upscore = 0
-#                    downscore = 0
+                site, upscore, downscore, exonLoc = self.inSpliceSite(i)
+                f.write("{}\t".format(site))
+                
+                if (site != "N/A"):
+                    upscore = 0
+                    downscore = 0
+                    
                 lenSplice = 9
                 tempSeq = self.BRCA2hg38Seq[:loc-1] + self.Alt[i] + self.BRCA2hg38Seq[loc+len(self.Ref[i])-1:]
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
-                if (site == "3'"):
-                    f.write("1" + "\t" +"N/A" + "\t" +str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t" +"N/A" + "\t" +
-                        str(np.amax(newSeqScore)) + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\n")
-#                    f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
-#                else:
-#                    f.write("0"+ "\t" + "0" + "\t")
+                if (site != "3'"):
+                    f.write(str(np.amax(newSeqScore)) + "\t" + str(self.getZScore(np.amax(newSeqScore),site))+
+                            "\t"+ str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t"+ str(self.getZScore(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))],site))+"\t")
+                    pathProb = self.pathProb(self.getZScore(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))],site),self.getZScore(np.amax(newSeqScore),site),site,i)
+
+                else:
+                    f.write("0"+ "\t" + "0" + "\t"+"0"+ "\t" + "0" + "\t")
 
                 lenSplice = 23
                 orgSeqScore, newSeqScore = self.getSeqVar(i, loc, lenSplice, tempSeq)
-                if (site == "5'"):
-                    f.write("N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" + "N/A" + "\t" +
-                        "1" + "\t" +"N/A" + "\t" +str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t" +"N/A" + "\t" +
-                        str(np.amax(newSeqScore)) + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\n")
-#                    f.write(str(np.amax(newSeqScore)) + "\t" + str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t")
-                #else:
-#                    f.write("0"+ "\t" + "0" + "\t")
-#                f.write(str(upscore) + "\t" + str(downscore) + "\t")
-                if(site == "N/A"):
-                    f.write("N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +str(newSeqScore) + "\t" +"N/A" + "\t" +"N/A" + "\t" +str(np.amax(newSeqScore)) + "\t" +
-                        "N/A" + "\t"+"N/A" + "\t" +str(orgSeqScore)  + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t"+"N/A" + "\t"+
-                        "N/A" + "\t" +"N/A" + "\t" +"N/A" + "\t" + "\n")
-#                else:
-#                    f.write("0\n")
+                if (site != "5'"):
+                    f.write(str(np.amax(newSeqScore)) + "\t" + str(self.getZScore(np.amax(newSeqScore),site))+
+                            "\t"+ str(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))]) + "\t"+ str(self.getZScore(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))],site))+"\t")
+                    pathProb = self.pathProb(self.getZScore(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))],site),self.getZScore(np.amax(newSeqScore),site),site,i)
 
-    def getEntScore(self,seq):
-        temporary = open("temp", "w")
-        temporary.write(seq)
-        var = "temp"
-        temporary.close()#must close file before using the subprocess
-        if len(seq) == 9:
-            pipe = subprocess.Popen(["perl","score5.pl", var], stdout=subprocess.PIPE)
-        if len(seq) == 23:
-            pipe = subprocess.Popen(["perl","score3.pl", var], stdout=subprocess.PIPE)
-        result = pipe.stdout.read()
-        entScore = re.findall("[+-]?\d+(?:\.\d+)?", str(result))
-        return(float(entScore[0]))
+                else:
+                    f.write("0"+ "\t" + "0" + "\t"+"0"+ "\t" + "0" + "\t")
+                f.write(str(upscore) + "\t" + str(downscore) + "\t")            
+                if(site != "N/A"):
+                    f.write("1\t" +str(exonLoc)+"\t")
+                else:
+                    f.write("0\t"+str(exonLoc)+"\t")
+                f.write(str(pathProb) +"\n")
+#put maxentscan here maybe
 
     def getSeqVar(self, i, loc, lenSplice, tempSeq):
         newSeqScore = []
@@ -245,94 +192,139 @@ class brcaParse:
             
         if self.Gene[i] =="BRCA1":
             newSeq = revComp(tempSeq[n:o])
-            newSeqScore.append(self.getEntScore(newSeq))
+            newSeqScore.append(getEntScore(newSeq))
             orgSeq = revComp(self.BRCA1hg38Seq[n:o])
-            orgSeqScore.append(self.getEntScore(orgSeq))
+            orgSeqScore.append(getEntScore(orgSeq))
 
             
         if self.Gene[i] =="BRCA2":
             newSeq = tempSeq[n:o]
-            newSeqScore.append(self.getEntScore(newSeq))
+            newSeqScore.append(getEntScore(newSeq))
             orgSeq = self.BRCA2hg38Seq[n:o]
-            orgSeqScore.append(self.getEntScore(orgSeq))
+            orgSeqScore.append(getEntScore(orgSeq))
         return(orgSeqScore, newSeqScore)
     
-    def inSpliceSite(self, i):#, Exonfile):
-        exonFile = open("Exonfile", "w")
-        #get confirmation and check for accuracy and understanding
+    def inSpliceSite(self, i):
         if self.Gene[i] == "BRCA1":
-            
-            exonStart = [43044294,43047642,43049120,43051062,43057051,43063332,43063873,43067607,43070927,
-                          43074330,43076487,43082403,43090943,43094743,43095845,43097243,43099774,43104121,
-                          43104867,43106455,43115725,43124016]
-            exonStop = [43045802,43047703,43049194,43051117,43057135,43063373,43063951,43067695,43071238,
-                        43074521,43076611,43082575,43091032,43094860,43095922,43097289,43099880,43104261,
-                        43104956,43106533,43115779,43124115]
+            exonStart = exonDict.exonStarts.get(self.ExonRef[i])
+            exonStop = exonDict.exonStops.get(self.ExonRef[i])
             
             upStream = min(exonStop, key=lambda x:abs(x-int(self.Pos[i])))
             downStream = min(exonStart, key=lambda x:abs(x-int(self.Pos[i])))
             upStreamScore, downStreamScore = self.getSpliceMaxEnt(i,upStream, downStream)
-                          
+            
             for j in range(0,len(exonStart)):
                 if (abs(int(self.Pos[i])-exonStart[j])<=9):
-                    return("5'", upStreamScore, downStreamScore)
+                    exonLoc = exonStart[j]
+                    print(exonLoc,self.Pos[i])
+                    return("5'", upStreamScore, downStreamScore,exonLoc)
             for j in range(0,len(exonStop)):
                 if (abs(int(self.Pos[i])-exonStop[j])<=23):
-                    return("3'",upStreamScore, downStreamScore)
-            else:
-                return("N/A",upStreamScore, downStreamScore)
+                    exonLoc = exonStop[j]
+                    print(exonLoc, self.Pos[i])
+                    return("3'",upStreamScore, downStreamScore,exonLoc)
+                else:
+                    return("N/A",upStreamScore, downStreamScore,0)
                 
         if self.Gene[i] == "BRCA2":
-            exonStart = [32315479,32316421,32319076,32325075,32326100,32326241,32326498,32329442,32330918,32332271,
-                         32336264,32344557,32346826,32354860,32356427,32357741,32362522,32363178,32370401,32370955,
-                         32376669,32379316,32379749,32380006,32394688,32396897,32398161]
-            exonStop = [32315667,32316527,32319325,32325184,32326150,32326282,32326613,32329492,32331030,32333387,
-                        32341196,32344653,32346896,32355288,32356609,32357929,32362693,32363533,32370557,32371100,
-                        32376791,32379515,32379913,32380145,32394933,32397044,32399672]
+            exonStart = exonDict.exonStarts.get(self.ExonRef[i])
+            exonStop = exonDict.exonStops.get(self.ExonRef[i])
             
-            for j in range(0,len(exonStart)):
-               exonStart[j] -= 32300000
-               exonStop[j] -= 32300000
-                
-            for loc in exonStart:
-                self.entScores23.append(self.getEntScore(self.BRCA2hg38Seq[loc-20:loc+3]))
-
-            for loc in exonStop:
-                self.entScores9.append(self.getEntScore(self.BRCA2hg38Seq[loc-3:loc+6]))
-            
-            for j in range(0,len(exonStart)):
-               exonStart[j] += 32300000
-               exonStop[j] += 32300000
-                
             upStream = min(exonStart, key=lambda x:abs(x-int(self.Pos[i])))
             downStream = min(exonStop, key=lambda x:abs(x-int(self.Pos[i])))
             upStreamScore, downStreamScore = self.getSpliceMaxEnt(i,upStream, downStream)
             
             for j in range(0,len(exonStop)):
+                
                 if (abs(int(self.Pos[i])-exonStop[j])<=9):
-                    return("5'",upStreamScore, downStreamScore)
+                    exonLoc = exonStart[j]
+                    print(exonLoc, self.Pos[i])
+                    
+                    return("5'",upStreamScore, downStreamScore, exonLoc)
             for j in range(0,len(exonStart)):
                 if (abs(int(self.Pos[i])-exonStart[j])<=23):
-                    return("3'",upStreamScore, downStreamScore)
+                    exonLoc = exonStart[j]
+                    print(exonLoc, self.Pos[i])                    
+                    return("3'",upStreamScore, downStreamScore, exonLoc)
             else:
-                return("N/A",upStreamScore, downStreamScore)
+                return("N/A",upStreamScore, downStreamScore,0)
             
     def getSpliceMaxEnt(self, i, upStream, downStream):
         if self.Gene[i] == "BRCA1":
             loc1 = (upStream - int(self.BRCA1hg38Start))
             loc2 = (downStream - int(self.BRCA1hg38Start))
-            orgScore1 = self.getEntScore(revComp(self.BRCA1hg38Seq[loc1-3:loc1+6]))
-            orgScore2 = self.getEntScore(revComp(self.BRCA1hg38Seq[loc2-20:loc2+3]))
+            orgScore1 = getEntScore(revComp(self.BRCA1hg38Seq[loc1-3:loc1+6]))
+            orgScore2 = getEntScore(revComp(self.BRCA1hg38Seq[loc2-20:loc2+3]))
             return(orgScore1,orgScore2)
 
         if self.Gene[i] == "BRCA2":
             loc1 = (upStream - int(self.BRCA2hg38Start))
             loc2 = (downStream - int(self.BRCA2hg38Start))
-            orgScore1 = self.getEntScore(self.BRCA2hg38Seq[loc1-3:loc1+6])
-            orgScore2 = self.getEntScore(self.BRCA2hg38Seq[loc2-20:loc2+3])
+            orgScore1 = getEntScore(self.BRCA2hg38Seq[loc1-3:loc1+6])
+            orgScore2 = getEntScore(self.BRCA2hg38Seq[loc2-20:loc2+3])
             return(orgScore1,orgScore2)
 
-                
+    def getZScore(self,entScore,site):
+        #set up parse txt file
+        
+        donorstd = 2.16#240#5334713458
+        donormean = 8.22#2291666666667
+
+        acceptorstd = 2.61#74666704340925
+        acceptormean =8.13#87499999999999
+        if(site =="5'"):
+            score = (entScore-donormean)/donorstd
+             
+        if (site =="3'"):
+            score = (entScore-acceptormean)/acceptorstd
+
+        if(site == "N/A"):
+            score = (entScore-donormean)/donorstd
+        return(score)
+
+    def pathProb(self,zScoreRef, zScoreAlt, site,i):
+        pathProb = 0
+        if (site == "3'"):
+            if (zScoreAlt > zScoreRef):
+                pass
+            if (zScoreRef < -1.5 and zScoreAlt-zScoreRef>0.5):
+                pathProb = 0.97
+            if (zScoreAlt > 0.5):
+                pathProb = 0
+            if (zScoreAlt >= -1.5 and zScoreAlt <= 0.5):
+                pathProb = 0.34
+            if (zScoreAlt < -1.5):
+                pathProb = 0.97
+        if (site == "5'"):
+            if (zScoreAlt > zScoreRef):
+                pass
+            if (zScoreRef < -1.0 and zScoreAlt-zScoreRef>0.5):
+                pathProb = 0.97
+            if (zScoreAlt > 0):
+                pathProb = 0
+            if (zScoreAlt >= -2 and zScoreAlt <= 0):
+                pathProb = 0.34
+            if (zScoreAlt < -2):
+                pathProb = 0.97
+        if (site == "N/A"):
+            exonStart = exonDict.exonStarts.get(self.ExonRef[i])
+            exonStop = exonDict.exonStops.get(self.ExonRef[i])
+            
+
+
+            for j in range(0,len(exonStart)):
+                if(int(self.Pos[i])>=exonStart[j] and int(self.Pos[i])<=exonStop[j]):
+                    if zScoreAlt <-2:
+                        pass
+                    if zScoreAlt>= -2 and zScoreAlt<0.3:
+                        pathProb = 0.3
+                    if zScoreAlt>0:
+                        pathProb = 0.64
+#if zref(subsequent splice donor)< zScoreAlt, promote path prob by one step
+                    
+        return(pathProb)
+            
+            
 
 
 # format for command line: pythonfile.py inputfile.tsv outputfile.tsv
@@ -341,19 +333,15 @@ def main():
 
     parser.add_argument('input', action="store")
     parser.add_argument('output', action="store")
-    #parser.add_argument('Exonfile',action='store')
     args = parser.parse_args()
 
     inFile = args.input
     a = brcaParse(inFile)
-    A, matOut = a.getDat()
-    outFile = args.output + ".tsv"
-    #Exonfile = args.Exonfile
-    a.maxEntForm(outFile) #,Exonfile) #get acceptor splice sites 23mers UNCOMMENT FOR 23 mer!
+    maxEnt = args.output + ".tsv"
+    a.maxEntForm(maxEnt) #get acceptor splice sites 23mers UNCOMMENT FOR 23 mer!
     os.remove("temp")
 
 # Make loops. if BRCA1 or 2, reference BRCA1 or BRCA1, then replace string with alt(eration).
 
 if __name__ == "__main__":
     main()
-
