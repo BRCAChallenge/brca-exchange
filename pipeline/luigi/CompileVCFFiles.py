@@ -757,6 +757,7 @@ class DownloadLOVDInputFile(luigi.Task):
         return luigi.LocalTarget(path)
 
     def run(self):
+        create_path_if_nonexistent(os.path.dirname(self.output().path))
         download_file_and_display_progress(self.shared_lovd_data_url, self.output())
 
 @requires(DownloadLOVDInputFile)
