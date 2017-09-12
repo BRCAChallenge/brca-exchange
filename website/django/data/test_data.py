@@ -93,7 +93,7 @@ def existing_variant():
 
 def new_variant():
     v = existing_variant()
-    v["Genomic_Coordinate_hg38"] = "chr17:999999:A>G"
+    v["Genomic_Coordinate_hg38"] = "chr17:g.999999:A>G"
     v['HGVS_cDNA'] = 'NM_007294.3:c.4955T>TC'
     v['BIC_Nomenclature'] = '5074T>TC'
     return v
@@ -101,7 +101,7 @@ def new_variant():
 
 def new_variant_no_source():
     v = existing_variant()
-    v["Genomic_Coordinate_hg38"] = "chr17:000000:A>G"
+    v["Genomic_Coordinate_hg38"] = "chr17:g.000000:A>G"
     v['Variant_in_LOVD'] = False
     v['Variant_in_ExAC'] = False
     v['Variant_in_1000_Genomes'] = False

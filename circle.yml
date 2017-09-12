@@ -16,7 +16,7 @@ test:
         - pip install -r ../test-requirements.txt
         - cd django/ && python manage.py migrate && python manage.py test
         - cd ../pipeline/data && bash ./getdata
-        - cd .. && pytest --junitxml=${CIRCLE_TEST_REPORTS}/pytest-results.xml
+        - cd .. && pytest --ignore=website/ --junitxml=${CIRCLE_TEST_REPORTS}/pytest-results.xml
 deployment:
     dev:
         branch: master

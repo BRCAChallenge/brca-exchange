@@ -10,7 +10,7 @@ from data import test_data
 from data.models import Variant, CurrentVariant
 from data.views import index, autocomplete
 import data.views as views
-from searchtest import create_variant_and_materialized_view
+from test_search import create_variant_and_materialized_view
 
 # GA4GH related modules
 import google.protobuf.json_format as json_format
@@ -519,5 +519,3 @@ class GA4GHTestCase(TestCase):
         self.assertEqual(json_response['referenceName'], "13")
         self.assertEqual(json_response['id'], "hg37-1")
 
-if __name__ == '__main__':
-    unittest.main()
