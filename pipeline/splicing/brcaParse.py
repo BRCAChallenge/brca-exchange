@@ -18,11 +18,13 @@ script to find entropy scores for the 3 and 5 prime scores.
 '''
 ######################################################################
 
+#todo:make sure loc is the splice site loc, set up code for decision making, ref cdna seq set up, z score calculator, python 2.7 set up
 
 #reverse compliment of dna string
 def revComp(dna):
     complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
     return ''.join([complement[base] for base in dna[::-1]])
+
 
 #Calls the perl scripts to get the MaxEntScore of the dna sequence
 def getEntScore(seq):
@@ -104,22 +106,27 @@ class brcaParse:
     #tempSeq is the variant sequence, np.amax gets the maximum maxentscan score.
     def maxEntForm(self,output):
         f = open(output, 'w')
+
         f.write("HGVS_cDNA\tGene\tSignificance\tSpliceSite\t5'Alt\t5'AltZScore\t5'Ref\t5'RefZScore\t3'Alt\t3'AltZScore\t3'Ref\t3'RefZScore\tupscore\tdownscore"+
                 "\tMax5'deNovo\tMax5'deNovoZScore\t5'Ref\t5'ZScore\tmaxScoreLoc\tinSpliceSite\texonLoc\tpathProb\n")
+
         for i in range(0,len(self.Gene)):
             if self.Gene[i] == "BRCA1":
                 f.write(self.id[i] +"\t" + self.Gene[i] + "\t" + self.Sig[i] + "\t")
                 loc = (int(self.Pos[i]) - int(self.BRCA1hg38Start))
                 site, upscore, downscore, exonLoc = self.inSpliceSite(i)
+
                 exLoc = int(exonLoc) - int(self.BRCA1hg38Start)#normalized location for seuqence
                 f.write("{}\t".format(site))
 
                 if (site != "N/A" or site !="inExon"):
+
                     upscore = 0
                     downscore = 0
                     
                 lenSplice = 9
                 tempSeq = self.BRCA1hg38Seq[:loc-1] + self.Alt[i] + self.BRCA1hg38Seq[loc+len(self.Ref[i])-1:]
+
                 if (site == "5'"):
                     altScore = getEntScore(revComp(tempSeq[exLoc-3:exLoc+6]))#score for the splice site with the mutation
                     oriScore = getEntScore(revComp(self.BRCA1hg38Seq[exLoc-3:exLoc+6]))#score for unaltered cDNA
@@ -129,6 +136,7 @@ class brcaParse:
                             "\t"+ str(oriScore) + "\t"+ str(self.getZScore(oriScore,site))+"\t")
                     
                     pathProb = self.pathProb(self.getZScore(oriScore,site),self.getZScore(altScore,site),site,i)
+
                 else:
                     f.write("0"+ "\t" + "0" + "\t"+"0"+ "\t" + "0" + "\t")
 
@@ -169,14 +177,17 @@ class brcaParse:
                 f.write(self.id[i] +"\t" + self.Gene[i] + "\t" + self.Sig[i] + "\t")
                 loc = (int(self.Pos[i]) - int(self.BRCA2hg38Start))
                 site, upscore, downscore, exonLoc = self.inSpliceSite(i)
+
                 exLoc = int(exonLoc) - int(self.BRCA2hg38Start)#normalized location for seuqence
                 f.write("{}\t".format(site))
 
                 if (site != "N/A" or site !="inExon"):
+
                     upscore = 0
                     downscore = 0
                     
                 lenSplice = 9
+
                 tempSeq = self.BRCA1hg38Seq[:loc-1] + self.Alt[i] + self.BRCA1hg38Seq[loc+len(self.Ref[i])-1:]
                 if (site == "5'"):
                     altScore = getEntScore(tempSeq[exLoc-3:exLoc+6])#score for the splice site with the mutation
@@ -187,10 +198,12 @@ class brcaParse:
                             "\t"+ str(oriScore) + "\t"+ str(self.getZScore(oriScore,site))+"\t")
                     
                     pathProb = self.pathProb(self.getZScore(oriScore,site),self.getZScore(altScore,site),site,i)
+
                 else:
                     f.write("0"+ "\t" + "0" + "\t"+"0"+ "\t" + "0" + "\t")
 
                 lenSplice = 23
+
                 pathProb = self.pathProb(self.getZScore(orgSeqScore[newSeqScore.index(np.amax(newSeqScore))],site),self.getZScore(np.amax(newSeqScore),site),site,i)
 
                 if (site == "3'"):
@@ -227,6 +240,7 @@ class brcaParse:
         for j in range(0,lenSplice- 1 + (len(self.Ref[i]))):
             n = loc-lenSplice+j
             o = loc+j
+
             if self.Gene[i] =="BRCA1":
                 newSeq = revComp(tempSeq[n:o])
                 newSeqScore.append(getEntScore(newSeq))
@@ -239,12 +253,15 @@ class brcaParse:
                 newSeqScore.append(getEntScore(newSeq))
                 orgSeq = self.BRCA2hg38Seq[n:o]
                 orgSeqScore.append(getEntScore(orgSeq))
+
         return(orgSeqScore, newSeqScore)
     
     def inSpliceSite(self, i):
         if self.Gene[i] == "BRCA1":
+
             exonStart = exonDict.exonStarts.get(self.ExonRef[i])
             exonStop = exonDict.exonStops.get(self.ExonRef[i])
+
             upStream = min(exonStop, key=lambda x:abs(x-int(self.Pos[i])))
             exonStop.remove(upStream)
             downStream = min(exonStop, key=lambda x:abs(x-int(self.Pos[i])))
@@ -255,6 +272,7 @@ class brcaParse:
             for j in range(0,len(exonStart)):
                 if (abs(int(self.Pos[i])-exonStart[j])<=9):
                     exonLoc = exonStart[j]
+
                     return("5'", upStreamScore, downStreamScore,exonLoc)
 
             for j in range(0,len(exonStop)):
@@ -279,8 +297,10 @@ class brcaParse:
             upStreamScore, downStreamScore = self.getSpliceMaxEnt(i,upStream, downStream)
            
             for j in range(0,len(exonStop)):
+                
                 if (abs(int(self.Pos[i])-exonStop[j])<=9):
                     exonLoc = exonStart[j]
+
                     return("5'",upStreamScore, downStreamScore, exonLoc)
                 
             for j in range(0,len(exonStart)):
@@ -300,6 +320,7 @@ class brcaParse:
             loc1 = (upStream - int(self.BRCA1hg38Start))
             loc2 = (downStream - int(self.BRCA1hg38Start))
             orgScore1 = getEntScore(revComp(self.BRCA1hg38Seq[loc1-3:loc1+6]))
+
             orgScore2 = getEntScore(revComp(self.BRCA1hg38Seq[loc2-3:loc2+6]))
             return(orgScore1,orgScore2)
 
@@ -308,6 +329,7 @@ class brcaParse:
             loc1 = (upStream - int(self.BRCA2hg38Start))
             loc2 = (downStream - int(self.BRCA2hg38Start))
             orgScore1 = getEntScore(self.BRCA2hg38Seq[loc1-3:loc1+6])
+
             orgScore2 = getEntScore(self.BRCA2hg38Seq[loc2-3:loc2+6])
             return(orgScore1,orgScore2)
 
@@ -324,6 +346,7 @@ class brcaParse:
              
         if (site =="3'"):
             score = (entScore-acceptormean)/acceptorstd
+
 
         if(site == "N/A" or site =="inExon"):
             score = (entScore-donormean)/donorstd
@@ -353,6 +376,7 @@ class brcaParse:
                 pathProb = 0.34
             if (zScoreAlt < -2):
                 pathProb = 0.97
+
         if (site == "N/A" or site =="inExon"):
             exonStart = exonDict.exonStarts.get(self.ExonRef[i])
             exonStop = exonDict.exonStops.get(self.ExonRef[i])
