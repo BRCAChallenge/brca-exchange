@@ -933,7 +933,7 @@ class ExtractCHR13BRCAData(luigi.Task):
         writable_chr13_brca2_vcf_file = open(chr13_brca2_vcf_file, "w")
         args = ["tabix", "-h",
                 g1k_file_dir + "/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz",
-                "13:32889080-32973809"]
+                "13:32889617-32973809"]
         print "Running tabix with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=writable_chr13_brca2_vcf_file, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
@@ -955,7 +955,7 @@ class ExtractCHR17BRCAData(luigi.Task):
         writable_chr17_brca1_vcf_file = open(chr17_brca1_vcf_file, "w")
         args = ["tabix", "-h",
                 g1k_file_dir + "/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz",
-                "17:41191488-41322420"]
+                "17:41196312-41277500"]
         print "Running tabix with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=writable_chr17_brca1_vcf_file, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
@@ -1097,7 +1097,7 @@ class ExtractBRCA1DataFromExac(luigi.Task):
         exac_brca1_hg19_vcf_file = exac_file_dir + "/exac.brca1.hg19.vcf"
         writable_exac_brca1_hg19_vcf_file = open(exac_brca1_hg19_vcf_file, 'w')
 
-        args = ["tabix", "-h", exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz", "17:41191488-41322420"]
+        args = ["tabix", "-h", exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz", "17:41196312-41277500"]
         print "Running tabix with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=writable_exac_brca1_hg19_vcf_file, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
@@ -1117,7 +1117,7 @@ class ExtractBRCA2DataFromExac(luigi.Task):
         exac_brca2_hg19_vcf_file = exac_file_dir + "/exac.brca2.hg19.vcf"
         writable_exac_brca2_hg19_vcf_file = open(exac_brca2_hg19_vcf_file, 'w')
 
-        args = ["tabix", "-h", exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz", "13:32889080-32973809"]
+        args = ["tabix", "-h", exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz", "13:32889617-32973809"]
         print "Running tabix with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=writable_exac_brca2_hg19_vcf_file, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
