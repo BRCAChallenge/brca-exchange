@@ -197,15 +197,15 @@ class Zoom extends React.Component {
             let totalWidth = 0;
             for (let i = preceding; i <= following; i++) {
                 totalWidth += exonSizeTx(exons[i][1] - exons[i][0]);
-                if (i < exons.length - 1) {
+                if (i <= following - 1) {
                     totalWidth += intronWidth;
+                    // variant is intronic
+                    if (following - preceding === 1) {
+                        totalWidth += intronWidth;
+                    }
                 }
             }
-            // variant is intronic
-            if (following - preceding === 1) {
-                totalWidth += intronWidth;
-            }
-            scale = (18 + width - 2 * zoomMargin) / totalWidth;
+            scale = (width - 2 * zoomMargin) / totalWidth;
         }
 
         for (let i = preceding; i <= following; i++) {
@@ -222,12 +222,15 @@ class Zoom extends React.Component {
 
             x += exonWidth;
             if (i != following) {
-                let _variant;
+                let _variant, _intronWidth = intronWidth;
                 if (variant["Hg38_Start"] > exon[1] && variant["Hg38_Start"] < exons[i+1][0]) { // intron contains variant
                     _variant = variant;
                 }
-                blocks.push(<Intron txStart={exon[1]} txEnd={exons[i+1][0]} x={x} width={intronWidth} height={60} highlight={true} variant={_variant} />);
-                x += intronWidth;
+                if (following - preceding == 1) {
+                    _intronWidth *= 2;
+                }
+                blocks.push(<Intron txStart={exon[1]} txEnd={exons[i+1][0]} x={x} width={scale * _intronWidth} height={60} highlight={true} variant={_variant} />);
+                x += scale * _intronWidth;
             }
         }
         return (
