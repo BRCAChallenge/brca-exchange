@@ -1,4 +1,3 @@
-
 import subprocess
 import os
 import urllib2
@@ -745,7 +744,7 @@ class DownloadLOVDInputFile(luigi.Task):
 
     lovd_data_file = luigi.Parameter(default='', description='path, where the shared LOVD data will be stored')
 
-    shared_lovd_data_url = luigi.Parameter(default='http://databases.lovd.nl/shared/export/BRCA',
+    shared_lovd_data_url = luigi.Parameter(default='https://databases.lovd.nl/shared/export/BRCA',
                                             description='URL to download shared LOVD data from')
 
     def output(self):
@@ -758,7 +757,9 @@ class DownloadLOVDInputFile(luigi.Task):
 
     def run(self):
         create_path_if_nonexistent(os.path.dirname(self.output().path))
-        download_file_and_display_progress(self.shared_lovd_data_url, self.output())
+        data = urlopen_with_retry(self.shared_lovd_data_url).read()
+        with open(self.output().path, "wb") as f:
+            f.write(data)
 
 @requires(DownloadLOVDInputFile)
 class ConvertSharedLOVDToVCF(luigi.Task):
