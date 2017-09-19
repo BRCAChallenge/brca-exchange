@@ -1,3 +1,4 @@
+import pdb
 import os
 import re
 import tempfile
@@ -432,6 +433,7 @@ def sanitise_term(term):
 @require_http_methods(["POST"])
 def search_variants(request):
     """Handles requests to the /variants/search method"""
+    print "WHAT"
     conditional = validate_search_variants_request(request)
     if conditional:
         return conditional
@@ -462,7 +464,12 @@ def search_variants(request):
     variants = range_filter(reference_genome, variants, reference_name, start, end)
     variants = ga4gh_brca_page(variants, int(page_size), int(page_token))
 
-    ga_variants = [brca_to_ga4gh(i, reference_genome) for i in variants.values()]
+    ga_variants = []
+    for i in variants.values():
+        try:
+            ga_variants.append(brca_to_ga4gh(i, reference_genome))
+        except ValueError as e:
+            print e
     if len(ga_variants) > page_size:
         ga_variants.pop()
         page_token = str(1 + int(page_token))
@@ -497,6 +504,7 @@ def ga4gh_brca_page(query, page_size, page_token):
 
 def brca_to_ga4gh(brca_variant, reference_genome):
     """Function that translates elements in BRCA-database to GA4GH format."""
+    brca_variant = {k: unicode(v).encode("utf-8") for k,v in brca_variant.iteritems()}
     variant = variants.Variant()
     bases = brca_variant['Genomic_Coordinate_' + reference_genome].split(':')[2]
     variant.reference_bases, alternbases = bases.split('>')
@@ -506,17 +514,17 @@ def brca_to_ga4gh(brca_variant, reference_genome):
     variant.updated = 0
     variant.reference_name = brca_variant['Chr']
     if reference_genome == 'hg36':
-        variant.start = brca_variant['Hg36_Start']
-        variant.end = brca_variant['Hg36_End']
+        variant.start = int(brca_variant['Hg36_Start'])
+        variant.end = int(brca_variant['Hg36_End'])
     elif reference_genome == 'hg37':
-        variant.start = brca_variant['Hg37_Start']
-        variant.end = brca_variant['Hg37_End']
+        variant.start = int(brca_variant['Hg37_Start'])
+        variant.end = int(brca_variant['Hg37_End'])
     elif reference_genome == 'hg38':
-        variant.start = brca_variant['Hg38_Start']
-        variant.end = brca_variant['Hg38_End']
+        variant.start = int(brca_variant['Hg38_Start'])
+        variant.end = int(brca_variant['Hg38_End'])
     variant.id = '{}-{}'.format(reference_genome, str(brca_variant['id']))
     variant.variant_set_id = '{}-{}'.format(DATASET_ID, reference_genome)
-    names = [i.encode('utf-8') for i in brca_variant['Synonyms'].split(',')]
+    names = brca_variant['Synonyms'].split(',')
     for name in names:
         variant.names.append(name)
     for key in brca_variant:
