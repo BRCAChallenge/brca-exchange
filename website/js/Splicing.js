@@ -15,7 +15,8 @@ var intronWidth = 40,
     highlightStroke = "rgba(0, 0, 0, 0.5)",
     // made up values, how do I get UTR sizes for BRCA1 and BRCA2?
     leaderSize = 75,
-    tailSize = 50;
+    tailSize = 50,
+    zoomMargin = 200;
 
 function exonSizeTx (bases) {
     return bases > 150 ? 150 + Math.sqrt(bases - 150) : bases;
@@ -51,9 +52,9 @@ class Exon extends React.Component {
 
         return (
             <g>
-                <rect x={x} width={width} height={40} rx={4} ry={4} fill={highlight ? highlightFill : exonFill} stroke={highlight ? highlightStroke : exonStroke} />
+                <rect x={x} width={width} height={height} rx={4} ry={4} fill={highlight ? highlightFill : exonFill} stroke={highlight ? highlightStroke : exonStroke} />
                 { variant !== undefined &&
-                    <rect x={variantX} width={variantWidth} height={40} fill="red" /> }
+                    <rect x={variantX} width={variantWidth} height={height} fill="red" /> }
             </g>
         );
     }
@@ -101,7 +102,11 @@ class Transcript extends React.Component {
               width
         } = this.props;
 
-        let scale;
+        let scale,
+            blocks = [],
+            x,
+            zoomLineStartLeft,
+            zoomLineStartRight;
 
         // precalculate scale
         {
@@ -120,8 +125,7 @@ class Transcript extends React.Component {
             scale = (this.props.width - 2) / totalWidth;
         }
 
-        let blocks = [],
-            x = leaderSize * scale;
+        x = leaderSize * scale;
 
         for (let i = 0; i < exons.length; i++) {
             let exon = exons[i];
@@ -136,7 +140,13 @@ class Transcript extends React.Component {
                         _variant = variant;
                     }
                 }
-                blocks.push(<Exon x={x} width={exonWidth} txStart={exon[0]} txEnd={exon[1]} highlight={highlight} variant={_variant} />);
+                blocks.push(<Exon x={x} width={exonWidth} height={40} txStart={exon[0]} txEnd={exon[1]} highlight={highlight} variant={_variant} />);
+            }
+
+            if (i == preceding) {
+                zoomLineStartLeft = x;
+            } else if (i == following) {
+                zoomLineStartRight = x + exonWidth;
             }
 
             x += exonWidth;
@@ -155,10 +165,74 @@ class Transcript extends React.Component {
             }
         }
         return (
-            <g transform="translate(0, 10)">
-            <rect x={1} y={8} width={scale * leaderSize} height={24} fill={intronFill} stroke={intronStroke} />
-            { blocks }
-            <rect x={x} y={8} width={scale * tailSize} height={24} fill={intronFill} stroke={intronStroke} />
+            <g>
+                <g transform="translate(0, 10)">
+                    <rect x={1} y={8} width={scale * leaderSize} height={24} fill={intronFill} stroke={intronStroke} />
+                    { blocks }
+                    <rect x={x} y={8} width={scale * tailSize} height={24} fill={intronFill} stroke={intronStroke} />
+                </g>
+                <line x1={zoomLineStartLeft} y1={50} x2={zoomMargin} y2={95} stroke="#ccc" strokeWidth="3" strokeDasharray="8,3" fill="none" />
+                <line x1={zoomLineStartRight} y1={50} x2={width - zoomMargin - 2.5} y2={95} stroke="#ccc" strokeWidth="3" strokeDasharray="8,3" fill="none" />
+            </g>
+        );
+    }
+}
+
+class Zoom extends React.Component {
+    render() {
+        let { variant,
+              exons,
+              preceding,
+              following,
+              width
+        } = this.props; 
+
+        let blocks = [],
+            scale,
+            x = zoomMargin;
+
+
+        // precalculate scale
+        {  
+            let totalWidth = 0;
+            for (let i = preceding; i <= following; i++) {
+                totalWidth += exonSizeTx(exons[i][1] - exons[i][0]);
+                if (i < exons.length - 1) {
+                    totalWidth += intronWidth;
+                }
+            }
+            // variant is intronic
+            if (following - preceding === 1) {
+                totalWidth += intronWidth;
+            }
+            scale = (18 + width - 2 * zoomMargin) / totalWidth;
+        }
+
+        for (let i = preceding; i <= following; i++) {
+            let exon = exons[i],
+                exonWidth = scale * exonSizeTx(exon[1] - exon[0]);
+
+            {
+                let _variant;
+                if (variant["Hg38_Start"] > exon[0] && variant["Hg38_Start"] < exon[1]) { // exon contains variant
+                    _variant = variant;
+                }
+                blocks.push(<Exon txStart={exon[0]} txEnd={exon[1]} x={x} width={exonWidth} height={80} highlight={true} variant={_variant} />);
+            }
+
+            x += exonWidth;
+            if (i != following) {
+                let _variant;
+                if (variant["Hg38_Start"] > exon[1] && variant["Hg38_Start"] < exons[i+1][0]) { // intron contains variant
+                    _variant = variant;
+                }
+                blocks.push(<Intron txStart={exon[1]} txEnd={exons[i+1][0]} x={x} width={intronWidth} height={60} highlight={true} variant={_variant} />);
+                x += intronWidth;
+            }
+        }
+        return (
+            <g transform="translate(0, 100)">
+                { blocks }
             </g>
         );
     }
@@ -195,6 +269,7 @@ class Splicing extends React.Component {
         return (
             <svg width={width} height={height}>
                 <Transcript variant={variant} exons={exons} preceding={precedingExonIndex} following={followingExonIndex} width={width} />
+                <Zoom variant={variant} exons={exons} preceding={precedingExonIndex} following={followingExonIndex} width={width} />
             </svg>
         );
     }
