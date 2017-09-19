@@ -33,8 +33,6 @@ ARG res=/files/resources
 
 ENV BRCA_RESOURCES=$res
 
-# TODO: setup previous release folder.
-
 RUN mkdir -p $res /files/data && chmod -R o+rwx /files
 
 RUN mkdir -p /.synapseCache && chmod o+rwx /.synapseCache  
@@ -44,9 +42,8 @@ RUN git clone https://github.com/counsyl/hgvs.git
 RUN cd hgvs && git checkout aebe5bd9683f4b5937fd653ce4b13fcd4f3ebb10 && python setup.py install
 
 
-# TODO: change repo, once pr is merged!
 #leiden brca
-RUN git clone https://github.com/izcram/leiden.git && cd leiden && git checkout fix_parsing && python setup.py install
+RUN git clone https://github.com/BRCAChallenge/leiden.git && cd leiden && python setup.py install
 
 
 RUN git clone https://github.com/BRCAChallenge/brca-exchange.git
