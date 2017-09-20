@@ -798,6 +798,18 @@ var VariantDetail = React.createClass({
                         if (variant[prop].length) {
                             rowItem = <a target="_blank" href={variant[prop]}>link to multifactorial analysis</a>;
                         }
+                    } else if (prop === "SCV_ClinVar" && variant[prop].toLowerCase().indexOf("scv") !== -1) {
+                        // Link all clinvar submissions back to clinvar
+                        let accessions = variant[prop].split(',');
+                        rowItem = [];
+                        for (let i = 0; i < accessions.length; i++) {
+                            if (i < (accessions.length - 1)) {
+                                rowItem.push(<span><a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{accessions[i]}</a>, </span>);
+                            } else {
+                                // exclude trailing comma
+                                rowItem.push(<a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{accessions[i]}</a>);
+                            }
+                        }
                     } else if (prop === "Assertion_method_citation_ENIGMA") {
                         rowItem = <a target="_blank" href="https://enigmaconsortium.org/library/general-documents/">Enigma Rules version Mar 26, 2015</a>;
                     } else if (prop === "Source_URL") {
