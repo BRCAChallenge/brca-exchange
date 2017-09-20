@@ -1,4 +1,3 @@
-import pdb
 import os
 import re
 import tempfile
@@ -433,7 +432,6 @@ def sanitise_term(term):
 @require_http_methods(["POST"])
 def search_variants(request):
     """Handles requests to the /variants/search method"""
-    print "WHAT"
     conditional = validate_search_variants_request(request)
     if conditional:
         return conditional
