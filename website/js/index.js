@@ -798,7 +798,7 @@ var VariantDetail = React.createClass({
                         if (variant[prop].length) {
                             rowItem = <a target="_blank" href={variant[prop]}>link to multifactorial analysis</a>;
                         }
-                    } else if (prop === "SCV_ClinVar" && variant[prop].toLowerCase().includes("scv")) {
+                    } else if (prop === "SCV_ClinVar" && variant[prop].toLowerCase().indexOf("scv") !== -1) {
                         // Link all clinvar submissions back to clinvar
                         let accessions = variant[prop].split(',');
                         rowItem = [];
