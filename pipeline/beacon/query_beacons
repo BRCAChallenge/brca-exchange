@@ -20,7 +20,7 @@ from ga4gh.client import client
 URL_MAX = 1000  # The maximum allowed length of HTTP request URLs
 BEACON_RESPONSE_URL = "https://beacon-network.org/api/responses" # URL for variant requests in the beacon network
 BEACON_BEACONS_URL = "https://beacon-network.org/api/beacons" # URL for beacon list requests
-BRCA_GA4GH_URL = "http://brcaexchange-dev.cloudapp.net/backend/data/ga4gh/v0.6.0a7/" # URL for BRCA Exchange GA4GH instance
+BRCA_GA4GH_URL = "http://brcaexchange.org/backend/data/ga4gh/v0.6.0a7/" # URL for BRCA Exchange GA4GH instance
 
 # BRCA 1 and 2 locations
 BRCA1_CHR = "chr17" 
@@ -161,6 +161,7 @@ def parse_arguments(args):
         options.output_file = "brca_beacons_test.json"
 
     return options 
+
 
 def main(args):
 
