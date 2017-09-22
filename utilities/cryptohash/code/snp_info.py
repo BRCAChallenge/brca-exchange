@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 import utils
 import config
 import os
+from datetime import datetime
 
 data_path = config.data_path
 
@@ -114,6 +115,7 @@ def score_snp(snp):
   """ Score a SNP on its identifiability of individuals.
       Returns a double score s, 0 <= s <= 1.
   """
+  pass
 
 def conditional(input_fn):
   """ Computes conditional distribution of each SNP:
@@ -194,3 +196,32 @@ def conditional(input_fn):
   b_given_as = get_conditionals(dists_ab, dists_a, num_snp, 0)
   # P(a|b) = P(ab) / P(b)
   a_given_bs = get_conditionals(dists_ab, dists_b, num_snp, 1)
+
+def ld_information(input_fn, proxy_dict):
+  """ Compute the LD score. """
+  def score_ld(rsid, proxy_dict):
+    proxies = proxy_dict[rsid]
+    num_prx = len(proxies)
+    sum_rsq = 0
+    for proxy in proxies:
+      rsq = float(proxy['rsquared'])
+      sum_rsq += rsq
+    mean_rsq = sum_rsq/num_prx
+    return mean_rsq
+
+  vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
+  found = 0
+  snp_ld_dict = {}
+  for snp in vcf_reader:
+    if snp.ID in proxy_dict.keys():
+      found += 1
+      score = score_ld(snp.ID, proxy_dict)
+      #print score
+    else:
+      score = 0
+    snp_ld_dict[snp.ID] = score
+  #pprint(snp_ld_dict)
+  found = 1.0 * sum([v for v in snp_ld_dict.values() if v != 0])
+  print 100*found/len(snp_ld_dict), '% of SNPs in dataset found in SNAP output'
+  print [k for k, v in snp_ld_dict.items() if v != 0]
+  return [k for k, v in snp_ld_dict.items() if v != 0]

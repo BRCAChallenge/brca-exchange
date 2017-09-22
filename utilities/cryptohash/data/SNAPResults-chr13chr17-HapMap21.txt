@@ -1,0 +1,1695 @@
+SNP	Proxy	Distance	RSquared	DPrime	Arrays	Chromosome	Coordinate_HG17
+rs556172218	WARNING	Query snp not in Release 21
+rs556172218	WARNING	No matching proxy snps found
+rs55880202	WARNING	Query snp not in Release 21
+rs55880202	WARNING	No matching proxy snps found
+rs567110692	WARNING	Query snp not in Release 21
+rs567110692	WARNING	No matching proxy snps found
+rs55641815	WARNING	Query snp not in Release 21
+rs55641815	WARNING	No matching proxy snps found
+rs572082150	WARNING	Query snp not in Release 21
+rs572082150	WARNING	No matching proxy snps found
+rs545321666	WARNING	Query snp not in Release 21
+rs545321666	WARNING	No matching proxy snps found
+rs206118	rs206118	0	1.000	1.000	OQ,AxM	chr13	31787792
+rs206118	rs206135	13278	0.913	0.956	CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr13	31774514
+rs206118	rs206134	13288	0.913	0.956	None	chr13	31774504
+rs206118	rs206133	13379	0.913	0.956	AS,A5,A6	chr13	31774413
+rs206118	rs206131	14029	0.913	0.956	AS,A5,A6	chr13	31773763
+rs206118	rs206130	15149	0.913	0.956	None	chr13	31772643
+rs206118	rs206129	15890	0.913	0.956	None	chr13	31771902
+rs206118	rs9590896	12096	0.870	0.954	AS,A5,A6,I2,I5,I6,I6Q,IM,IMD,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr13	31775696
+rs206118	rs206120	1914	0.828	0.952	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr13	31789706
+rs1799943	rs1799943	0	1.000	1.000	I1,I2,I5,I6,I6Q,IM,IMD,IBC,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr13	31788572
+rs1799943	rs9567552	345	0.957	1.000	OQ,AxM,OE,O24,O28,O54,O5E,OEE	chr13	31788227
+rs138705202	WARNING	Query snp not in Release 21
+rs138705202	WARNING	No matching proxy snps found
+rs76874770	WARNING	Query snp not in Release 21
+rs76874770	WARNING	No matching proxy snps found
+rs80358762	WARNING	Query snp not in Release 21
+rs80358762	WARNING	No matching proxy snps found
+rs4987046	WARNING	No LD data is available for rs4987046 in Release 21, panel CEU
+rs4987046	WARNING	No matching proxy snps found
+rs201523522	WARNING	Query snp not in Release 21
+rs201523522	WARNING	No matching proxy snps found
+rs56091799	WARNING	Query snp not in Release 21
+rs56091799	WARNING	No matching proxy snps found
+rs28897700	WARNING	Query snp not in Release 21
+rs28897700	WARNING	No matching proxy snps found
+rs28897701	WARNING	Query snp not in Release 21
+rs28897701	WARNING	No matching proxy snps found
+rs114446594	WARNING	Query snp not in Release 21
+rs114446594	WARNING	No matching proxy snps found
+rs572782576	WARNING	Query snp not in Release 21
+rs572782576	WARNING	No matching proxy snps found
+rs80358567	WARNING	Query snp not in Release 21
+rs80358567	WARNING	No matching proxy snps found
+rs375125172	WARNING	Query snp not in Release 21
+rs375125172	WARNING	No matching proxy snps found
+rs571823764	WARNING	Query snp not in Release 21
+rs571823764	WARNING	No matching proxy snps found
+rs539929888	WARNING	Query snp not in Release 21
+rs539929888	WARNING	No matching proxy snps found
+rs200942633	WARNING	Query snp not in Release 21
+rs200942633	WARNING	No matching proxy snps found
+rs80358677	WARNING	Query snp not in Release 21
+rs80358677	WARNING	No matching proxy snps found
+rs68071147	WARNING	Query snp not in Release 21
+rs68071147	WARNING	No matching proxy snps found
+rs372188754	WARNING	Query snp not in Release 21
+rs372188754	WARNING	No matching proxy snps found
+rs185506536	WARNING	Query snp not in Release 21
+rs185506536	WARNING	No matching proxy snps found
+rs55854959	WARNING	Query snp not in Release 21
+rs55854959	WARNING	No matching proxy snps found
+rs549269828	WARNING	Query snp not in Release 21
+rs549269828	WARNING	No matching proxy snps found
+rs80359088	WARNING	Query snp not in Release 21
+rs80359088	WARNING	No matching proxy snps found
+rs766173	rs766173	0	1.000	1.000	AG,IM,IMD,IBC,OQ,AxM,OE,O24,AAE	chr13	31804480
+rs766173	rs11147486	482	1.000	1.000	None	chr13	31803998
+rs766173	rs1801439	500	1.000	1.000	IM,IMD,CYT,OQ,AxM,OE,O24,O28,O54,O5E,OEE	chr13	31804980
+rs766173	rs11571650	3576	1.000	1.000	None	chr13	31808056
+rs766173	rs1799944	4983	1.000	1.000	AS,A6,IM,IMD,IBC,OQ,OE,O24,O28,O54,O5E,OEE	chr13	31809463
+rs766173	rs3783265	6331	1.000	1.000	AN,A6,IM,IMD	chr13	31798149
+rs766173	rs11571610	7092	1.000	1.000	IM,IMD,O54,O5E	chr13	31797388
+rs766173	rs11571605	8242	1.000	1.000	None	chr13	31796238
+rs766173	rs12585596	9804	1.000	1.000	None	chr13	31794676
+rs766173	rs11571671	11742	1.000	1.000	None	chr13	31816222
+rs766173	rs11147488	12750	1.000	1.000	None	chr13	31817230
+rs766173	rs11571681	14826	1.000	1.000	AS,A5,A6	chr13	31819306
+rs766173	rs11571684	15056	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr13	31819536
+rs766173	rs11571699	20174	1.000	1.000	AS,A5,A6	chr13	31824654
+rs766173	rs721185	20464	1.000	1.000	None	chr13	31824944
+rs766173	rs11571722	31693	1.000	1.000	None	chr13	31836173
+rs766173	rs11571727	32605	1.000	1.000	AN,A6	chr13	31837085
+rs766173	rs11571809	59284	1.000	1.000	AS,A5,A6	chr13	31863764
+rs766173	rs11571813	60766	1.000	1.000	None	chr13	31865246
+rs766173	rs11147494	64119	1.000	1.000	IBC	chr13	31868599
+rs79483201	WARNING	Query snp not in Release 21
+rs79483201	WARNING	No matching proxy snps found
+rs11571640	WARNING	No LD data is available for rs11571640 in Release 21, panel CEU
+rs11571640	WARNING	No matching proxy snps found
+rs28897706	WARNING	Query snp not in Release 21
+rs28897706	WARNING	No matching proxy snps found
+rs561002197	WARNING	Query snp not in Release 21
+rs561002197	WARNING	No matching proxy snps found
+rs544942885	WARNING	Query snp not in Release 21
+rs544942885	WARNING	No matching proxy snps found
+rs41293473	WARNING	Query snp not in Release 21
+rs41293473	WARNING	No matching proxy snps found
+rs55800493	WARNING	Query snp not in Release 21
+rs55800493	WARNING	No matching proxy snps found
+rs542343726	WARNING	Query snp not in Release 21
+rs542343726	WARNING	No matching proxy snps found
+rs561004600	WARNING	Query snp not in Release 21
+rs561004600	WARNING	No matching proxy snps found
+rs144848	rs144848	0	1.000	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr13	31804729
+rs80358408	WARNING	Query snp not in Release 21
+rs80358408	WARNING	No matching proxy snps found
+rs397507263	WARNING	Query snp not in Release 21
+rs397507263	WARNING	No matching proxy snps found
+rs532847894	WARNING	Query snp not in Release 21
+rs532847894	WARNING	No matching proxy snps found
+rs80358414	WARNING	Query snp not in Release 21
+rs80358414	WARNING	No matching proxy snps found
+rs79597821	WARNING	Query snp not in Release 21
+rs79597821	WARNING	No matching proxy snps found
+rs34355306	WARNING	Query snp not in Release 21
+rs34355306	WARNING	No matching proxy snps found
+rs548313038	WARNING	Query snp not in Release 21
+rs548313038	WARNING	No matching proxy snps found
+rs55919657	WARNING	Query snp not in Release 21
+rs55919657	WARNING	No matching proxy snps found
+rs1801439	rs1801439	0	1.000	1.000	IM,IMD,CYT,OQ,AxM,OE,O24,O28,O54,O5E,OEE	chr13	31804980
+rs1801439	rs766173	500	1.000	1.000	AG,IM,IMD,IBC,OQ,AxM,OE,O24,AAE	chr13	31804480
+rs1801439	rs11147486	982	1.000	1.000	None	chr13	31803998
+rs1801439	rs11571650	3076	1.000	1.000	None	chr13	31808056
+rs1801439	rs1799944	4483	1.000	1.000	AS,A6,IM,IMD,IBC,OQ,OE,O24,O28,O54,O5E,OEE	chr13	31809463
+rs1801439	rs3783265	6831	1.000	1.000	AN,A6,IM,IMD	chr13	31798149
+rs1801439	rs11571610	7592	1.000	1.000	IM,IMD,O54,O5E	chr13	31797388
+rs1801439	rs11571605	8742	1.000	1.000	None	chr13	31796238
+rs1801439	rs12585596	10304	1.000	1.000	None	chr13	31794676
+rs1801439	rs11571671	11242	1.000	1.000	None	chr13	31816222
+rs1801439	rs11147488	12250	1.000	1.000	None	chr13	31817230
+rs1801439	rs11571681	14326	1.000	1.000	AS,A5,A6	chr13	31819306
+rs1801439	rs11571684	14556	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr13	31819536
+rs1801439	rs11571699	19674	1.000	1.000	AS,A5,A6	chr13	31824654
+rs1801439	rs721185	19964	1.000	1.000	None	chr13	31824944
+rs1801439	rs11571722	31193	1.000	1.000	None	chr13	31836173
+rs1801439	rs11571727	32105	1.000	1.000	AN,A6	chr13	31837085
+rs1801439	rs11571809	58784	1.000	1.000	AS,A5,A6	chr13	31863764
+rs1801439	rs11571813	60266	1.000	1.000	None	chr13	31865246
+rs1801439	rs11147494	63619	1.000	1.000	IBC	chr13	31868599
+rs80358432	WARNING	Query snp not in Release 21
+rs80358432	WARNING	No matching proxy snps found
+rs571155346	WARNING	Query snp not in Release 21
+rs571155346	WARNING	No matching proxy snps found
+rs28897708	WARNING	Query snp not in Release 21
+rs28897708	WARNING	No matching proxy snps found
+rs557258016	WARNING	Query snp not in Release 21
+rs557258016	WARNING	No matching proxy snps found
+rs276174810	WARNING	Query snp not in Release 21
+rs276174810	WARNING	No matching proxy snps found
+rs536218070	WARNING	Query snp not in Release 21
+rs536218070	WARNING	No matching proxy snps found
+rs554273481	WARNING	Query snp not in Release 21
+rs554273481	WARNING	No matching proxy snps found
+rs55986646	WARNING	Query snp not in Release 21
+rs55986646	WARNING	No matching proxy snps found
+rs80358457	WARNING	Query snp not in Release 21
+rs80358457	WARNING	No matching proxy snps found
+rs373400041	WARNING	Query snp not in Release 21
+rs373400041	WARNING	No matching proxy snps found
+rs11571642	WARNING	No LD data is available for rs11571642 in Release 21, panel CEU
+rs11571642	WARNING	No matching proxy snps found
+rs28897710	WARNING	Query snp not in Release 21
+rs28897710	WARNING	No matching proxy snps found
+rs75419644	WARNING	Query snp not in Release 21
+rs75419644	WARNING	No matching proxy snps found
+rs11571652	WARNING	No LD data is available for rs11571652 in Release 21, panel CEU
+rs11571652	WARNING	No matching proxy snps found
+rs28897711	WARNING	Query snp not in Release 21
+rs28897711	WARNING	No matching proxy snps found
+rs527579384	WARNING	Query snp not in Release 21
+rs527579384	WARNING	No matching proxy snps found
+rs552526845	WARNING	Query snp not in Release 21
+rs552526845	WARNING	No matching proxy snps found
+rs144192844	WARNING	Query snp not in Release 21
+rs144192844	WARNING	No matching proxy snps found
+rs80358486	WARNING	Query snp not in Release 21
+rs80358486	WARNING	No matching proxy snps found
+rs80358487	WARNING	Query snp not in Release 21
+rs80358487	WARNING	No matching proxy snps found
+rs80358488	WARNING	Query snp not in Release 21
+rs80358488	WARNING	No matching proxy snps found
+rs535547513	WARNING	Query snp not in Release 21
+rs535547513	WARNING	No matching proxy snps found
+rs55816687	WARNING	Query snp not in Release 21
+rs55816687	WARNING	No matching proxy snps found
+rs112566179	WARNING	Query snp not in Release 21
+rs112566179	WARNING	No matching proxy snps found
+rs539724529	WARNING	Query snp not in Release 21
+rs539724529	WARNING	No matching proxy snps found
+rs431825296	WARNING	Query snp not in Release 21
+rs431825296	WARNING	No matching proxy snps found
+rs1801499	WARNING	No LD data is available for rs1801499 in Release 21, panel CEU
+rs1801499	WARNING	No matching proxy snps found
+rs374691587	WARNING	Query snp not in Release 21
+rs374691587	WARNING	No matching proxy snps found
+rs11571653	WARNING	No LD data is available for rs11571653 in Release 21, panel CEU
+rs11571653	WARNING	No matching proxy snps found
+rs574039421	WARNING	Query snp not in Release 21
+rs574039421	WARNING	No matching proxy snps found
+rs11571654	WARNING	Query snp not in Release 21
+rs11571654	WARNING	No matching proxy snps found
+rs80359785	WARNING	Query snp not in Release 21
+rs80359785	WARNING	No matching proxy snps found
+rs80358521	WARNING	Query snp not in Release 21
+rs80358521	WARNING	No matching proxy snps found
+rs546036225	WARNING	Query snp not in Release 21
+rs546036225	WARNING	No matching proxy snps found
+rs564197624	WARNING	Query snp not in Release 21
+rs564197624	WARNING	No matching proxy snps found
+rs2227943	WARNING	No LD data is available for rs2227943 in Release 21, panel CEU
+rs2227943	WARNING	No matching proxy snps found
+rs28897716	WARNING	Query snp not in Release 21
+rs28897716	WARNING	No matching proxy snps found
+rs149753706	WARNING	Query snp not in Release 21
+rs149753706	WARNING	No matching proxy snps found
+rs80358535	WARNING	Query snp not in Release 21
+rs80358535	WARNING	No matching proxy snps found
+rs11571655	WARNING	No LD data is available for rs11571655 in Release 21, panel CEU
+rs11571655	WARNING	No matching proxy snps found
+rs45525041	WARNING	Query snp not in Release 21
+rs45525041	WARNING	No matching proxy snps found
+rs539613324	WARNING	Query snp not in Release 21
+rs539613324	WARNING	No matching proxy snps found
+rs144862123	WARNING	Query snp not in Release 21
+rs144862123	WARNING	No matching proxy snps found
+rs11571656	WARNING	No LD data is available for rs11571656 in Release 21, panel CEU
+rs11571656	WARNING	No matching proxy snps found
+rs80358541	WARNING	Query snp not in Release 21
+rs80358541	WARNING	No matching proxy snps found
+rs2227944	WARNING	No LD data is available for rs2227944 in Release 21, panel CEU
+rs2227944	WARNING	No matching proxy snps found
+rs1799944	rs1799944	0	1.000	1.000	AS,A6,IM,IMD,IBC,OQ,OE,O24,O28,O54,O5E,OEE	chr13	31809463
+rs1799944	rs11571650	1407	1.000	1.000	None	chr13	31808056
+rs1799944	rs1801439	4483	1.000	1.000	IM,IMD,CYT,OQ,AxM,OE,O24,O28,O54,O5E,OEE	chr13	31804980
+rs1799944	rs766173	4983	1.000	1.000	AG,IM,IMD,IBC,OQ,AxM,OE,O24,AAE	chr13	31804480
+rs1799944	rs11147486	5465	1.000	1.000	None	chr13	31803998
+rs1799944	rs11571671	6759	1.000	1.000	None	chr13	31816222
+rs1799944	rs11147488	7767	1.000	1.000	None	chr13	31817230
+rs1799944	rs11571681	9843	1.000	1.000	AS,A5,A6	chr13	31819306
+rs1799944	rs11571684	10073	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr13	31819536
+rs1799944	rs3783265	11314	1.000	1.000	AN,A6,IM,IMD	chr13	31798149
+rs1799944	rs11571610	12075	1.000	1.000	IM,IMD,O54,O5E	chr13	31797388
+rs1799944	rs11571605	13225	1.000	1.000	None	chr13	31796238
+rs1799944	rs12585596	14787	1.000	1.000	None	chr13	31794676
+rs1799944	rs11571699	15191	1.000	1.000	AS,A5,A6	chr13	31824654
+rs1799944	rs721185	15481	1.000	1.000	None	chr13	31824944
+rs1799944	rs11571722	26710	1.000	1.000	None	chr13	31836173
+rs1799944	rs11571727	27622	1.000	1.000	AN,A6	chr13	31837085
+rs1799944	rs11571809	54301	1.000	1.000	AS,A5,A6	chr13	31863764
+rs1799944	rs11571813	55783	1.000	1.000	None	chr13	31865246
+rs1799944	rs11147494	59136	1.000	1.000	IBC	chr13	31868599
+rs55638633	WARNING	Query snp not in Release 21
+rs55638633	WARNING	No matching proxy snps found
+rs80358550	WARNING	Query snp not in Release 21
+rs80358550	WARNING	No matching proxy snps found
+rs191744583	WARNING	Query snp not in Release 21
+rs191744583	WARNING	No matching proxy snps found
+rs545974734	WARNING	Query snp not in Release 21
+rs545974734	WARNING	No matching proxy snps found
+rs564316199	WARNING	Query snp not in Release 21
+rs564316199	WARNING	No matching proxy snps found
+rs145605603	WARNING	Query snp not in Release 21
+rs145605603	WARNING	No matching proxy snps found
+rs543748012	WARNING	Query snp not in Release 21
+rs543748012	WARNING	No matching proxy snps found
+rs36060526	WARNING	Query snp not in Release 21
+rs36060526	WARNING	No matching proxy snps found
+rs80358575	WARNING	Query snp not in Release 21
+rs80358575	WARNING	No matching proxy snps found
+rs369294255	WARNING	Query snp not in Release 21
+rs369294255	WARNING	No matching proxy snps found
+rs558973276	WARNING	Query snp not in Release 21
+rs558973276	WARNING	No matching proxy snps found
+rs532871047	WARNING	Query snp not in Release 21
+rs532871047	WARNING	No matching proxy snps found
+rs1801406	rs1801406	0	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr13	31809888
+rs1801406	rs11571662	3636	0.962	1.000	None	chr13	31813524
+rs1801406	rs9567578	10056	0.962	1.000	AN,A5,A6,AxM	chr13	31819944
+rs1801406	rs9567576	7749	0.889	0.961	CM	chr13	31817637
+rs1801406	rs11571579	20090	0.889	1.000	OQ,OE,O24,O28,O54,O5E,OEE	chr13	31789798
+rs1801406	rs3752451	10955	0.855	0.961	None	chr13	31798933
+rs118093942	WARNING	Query snp not in Release 21
+rs118093942	WARNING	No matching proxy snps found
+rs200808363	WARNING	Query snp not in Release 21
+rs200808363	WARNING	No matching proxy snps found
+rs80358589	WARNING	Query snp not in Release 21
+rs80358589	WARNING	No matching proxy snps found
+rs183920365	WARNING	Query snp not in Release 21
+rs183920365	WARNING	No matching proxy snps found
+rs80358600	WARNING	Query snp not in Release 21
+rs80358600	WARNING	No matching proxy snps found
+rs1799952	WARNING	Query snp not in Release 21
+rs1799952	WARNING	No matching proxy snps found
+rs192892005	WARNING	Query snp not in Release 21
+rs192892005	WARNING	No matching proxy snps found
+rs397507311	WARNING	Query snp not in Release 21
+rs397507311	WARNING	No matching proxy snps found
+rs543304	rs543304	0	1.000	1.000	I1,I2,I5,I6,I6Q,IM,IMD,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE	chr13	31810299
+rs543304	rs206077	3998	0.955	1.000	None	chr13	31814297
+rs543304	rs206081	9837	0.955	1.000	AN,A5,A6,I2,I5,I6,I6Q,IM,IMD,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr13	31820136
+rs543304	rs206120	20593	0.909	0.953	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr13	31789706
+rs543304	rs206070	15453	0.864	0.952	CYT,OQ,CM,OE,O24,O28,O54,O5E,OEE	chr13	31794846
+rs41293485	WARNING	Query snp not in Release 21
+rs41293485	WARNING	No matching proxy snps found
+rs543339423	WARNING	Query snp not in Release 21
+rs543339423	WARNING	No matching proxy snps found
+rs199863034	WARNING	Query snp not in Release 21
+rs199863034	WARNING	No matching proxy snps found
+rs28897724	WARNING	Query snp not in Release 21
+rs28897724	WARNING	No matching proxy snps found
+rs140556653	WARNING	Query snp not in Release 21
+rs140556653	WARNING	No matching proxy snps found
+rs56248502	WARNING	Query snp not in Release 21
+rs56248502	WARNING	No matching proxy snps found
+rs28897725	WARNING	Query snp not in Release 21
+rs28897725	WARNING	No matching proxy snps found
+rs55969723	WARNING	Query snp not in Release 21
+rs55969723	WARNING	No matching proxy snps found
+rs70953664	WARNING	Query snp not in Release 21
+rs70953664	WARNING	No matching proxy snps found
+rs143667871	WARNING	Query snp not in Release 21
+rs143667871	WARNING	No matching proxy snps found
+rs28897727	WARNING	Query snp not in Release 21
+rs28897727	WARNING	No matching proxy snps found
+rs80358667	WARNING	Query snp not in Release 21
+rs80358667	WARNING	No matching proxy snps found
+rs528810278	WARNING	Query snp not in Release 21
+rs528810278	WARNING	No matching proxy snps found
+rs431825319	WARNING	Query snp not in Release 21
+rs431825319	WARNING	No matching proxy snps found
+rs117187202	WARNING	Query snp not in Release 21
+rs117187202	WARNING	No matching proxy snps found
+rs188234310	WARNING	Query snp not in Release 21
+rs188234310	WARNING	No matching proxy snps found
+rs200185407	WARNING	Query snp not in Release 21
+rs200185407	WARNING	No matching proxy snps found
+rs206075	WARNING	No LD data is available for rs206075 in Release 21, panel CEU
+rs206075	WARNING	No matching proxy snps found
+rs202022822	WARNING	Query snp not in Release 21
+rs202022822	WARNING	No matching proxy snps found
+rs80359788	WARNING	Query snp not in Release 21
+rs80359788	WARNING	No matching proxy snps found
+rs28897728	WARNING	Query snp not in Release 21
+rs28897728	WARNING	No matching proxy snps found
+rs45520945	WARNING	Query snp not in Release 21
+rs45520945	WARNING	No matching proxy snps found
+rs80358698	WARNING	Query snp not in Release 21
+rs80358698	WARNING	No matching proxy snps found
+rs2219594	WARNING	No LD data is available for rs2219594 in Release 21, panel CEU
+rs2219594	WARNING	No matching proxy snps found
+rs544688816	WARNING	Query snp not in Release 21
+rs544688816	WARNING	No matching proxy snps found
+rs28897730	WARNING	Query snp not in Release 21
+rs28897730	WARNING	No matching proxy snps found
+rs80358703	WARNING	Query snp not in Release 21
+rs80358703	WARNING	No matching proxy snps found
+rs543172402	WARNING	Query snp not in Release 21
+rs543172402	WARNING	No matching proxy snps found
+rs200582465	WARNING	Query snp not in Release 21
+rs200582465	WARNING	No matching proxy snps found
+rs528771743	WARNING	Query snp not in Release 21
+rs528771743	WARNING	No matching proxy snps found
+rs201431881	WARNING	Query snp not in Release 21
+rs201431881	WARNING	No matching proxy snps found
+rs565268514	WARNING	Query snp not in Release 21
+rs565268514	WARNING	No matching proxy snps found
+rs200265692	WARNING	Query snp not in Release 21
+rs200265692	WARNING	No matching proxy snps found
+rs80358731	WARNING	Query snp not in Release 21
+rs80358731	WARNING	No matching proxy snps found
+rs80358732	WARNING	Query snp not in Release 21
+rs80358732	WARNING	No matching proxy snps found
+rs80358734	WARNING	Query snp not in Release 21
+rs80358734	WARNING	No matching proxy snps found
+rs55639415	WARNING	Query snp not in Release 21
+rs55639415	WARNING	No matching proxy snps found
+rs28897734	WARNING	Query snp not in Release 21
+rs28897734	WARNING	No matching proxy snps found
+rs80358755	WARNING	Query snp not in Release 21
+rs80358755	WARNING	No matching proxy snps found
+rs183478654	WARNING	Query snp not in Release 21
+rs183478654	WARNING	No matching proxy snps found
+rs80358765	WARNING	Query snp not in Release 21
+rs80358765	WARNING	No matching proxy snps found
+rs34351119	WARNING	Query snp not in Release 21
+rs34351119	WARNING	No matching proxy snps found
+rs80359791	WARNING	Query snp not in Release 21
+rs80359791	WARNING	No matching proxy snps found
+rs80358766	WARNING	Query snp not in Release 21
+rs80358766	WARNING	No matching proxy snps found
+rs138489917	WARNING	Query snp not in Release 21
+rs138489917	WARNING	No matching proxy snps found
+rs372951842	WARNING	Query snp not in Release 21
+rs372951842	WARNING	No matching proxy snps found
+rs573514896	WARNING	Query snp not in Release 21
+rs573514896	WARNING	No matching proxy snps found
+rs80358782	WARNING	Query snp not in Release 21
+rs80358782	WARNING	No matching proxy snps found
+rs55996097	WARNING	Query snp not in Release 21
+rs55996097	WARNING	No matching proxy snps found
+rs11571657	WARNING	No LD data is available for rs11571657 in Release 21, panel CEU
+rs11571657	WARNING	No matching proxy snps found
+rs146351301	WARNING	Query snp not in Release 21
+rs146351301	WARNING	No matching proxy snps found
+rs4987048	WARNING	No LD data is available for rs4987048 in Release 21, panel CEU
+rs4987048	WARNING	No matching proxy snps found
+rs149474191	WARNING	Query snp not in Release 21
+rs149474191	WARNING	No matching proxy snps found
+rs55875643	WARNING	Query snp not in Release 21
+rs55875643	WARNING	No matching proxy snps found
+rs4987117	rs4987117	0	1.000	1.000	AG,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IBC,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAE	chr13	31812236
+rs1799953	WARNING	Query snp not in Release 21
+rs1799953	WARNING	No matching proxy snps found
+rs45491005	WARNING	Query snp not in Release 21
+rs45491005	WARNING	No matching proxy snps found
+rs79538375	WARNING	Query snp not in Release 21
+rs79538375	WARNING	No matching proxy snps found
+rs80358811	WARNING	Query snp not in Release 21
+rs80358811	WARNING	No matching proxy snps found
+rs556893517	WARNING	Query snp not in Release 21
+rs556893517	WARNING	No matching proxy snps found
+rs148618542	WARNING	Query snp not in Release 21
+rs148618542	WARNING	No matching proxy snps found
+rs80358833	WARNING	Query snp not in Release 21
+rs80358833	WARNING	No matching proxy snps found
+rs554663691	WARNING	Query snp not in Release 21
+rs554663691	WARNING	No matching proxy snps found
+rs572976024	WARNING	Query snp not in Release 21
+rs572976024	WARNING	No matching proxy snps found
+rs540799830	WARNING	Query snp not in Release 21
+rs540799830	WARNING	No matching proxy snps found
+rs147961615	WARNING	Query snp not in Release 21
+rs147961615	WARNING	No matching proxy snps found
+rs1799954	WARNING	No LD data is available for rs1799954 in Release 21, panel CEU
+rs1799954	WARNING	No matching proxy snps found
+rs56191579	WARNING	Query snp not in Release 21
+rs56191579	WARNING	No matching proxy snps found
+rs562893642	WARNING	Query snp not in Release 21
+rs562893642	WARNING	No matching proxy snps found
+rs34309943	WARNING	Query snp not in Release 21
+rs34309943	WARNING	No matching proxy snps found
+rs541826447	WARNING	Query snp not in Release 21
+rs541826447	WARNING	No matching proxy snps found
+rs397507838	WARNING	Query snp not in Release 21
+rs397507838	WARNING	No matching proxy snps found
+rs55794205	WARNING	Query snp not in Release 21
+rs55794205	WARNING	No matching proxy snps found
+rs35029074	WARNING	Query snp not in Release 21
+rs35029074	WARNING	No matching proxy snps found
+rs79456940	WARNING	Query snp not in Release 21
+rs79456940	WARNING	No matching proxy snps found
+rs55953736	WARNING	Query snp not in Release 21
+rs55953736	WARNING	No matching proxy snps found
+rs11571659	WARNING	No LD data is available for rs11571659 in Release 21, panel CEU
+rs11571659	WARNING	No matching proxy snps found
+rs80358879	WARNING	Query snp not in Release 21
+rs80358879	WARNING	No matching proxy snps found
+rs206076	WARNING	No LD data is available for rs206076 in Release 21, panel CEU
+rs206076	WARNING	No matching proxy snps found
+rs75925841	WARNING	Query snp not in Release 21
+rs75925841	WARNING	No matching proxy snps found
+rs80358899	WARNING	Query snp not in Release 21
+rs80358899	WARNING	No matching proxy snps found
+rs559106452	WARNING	Query snp not in Release 21
+rs559106452	WARNING	No matching proxy snps found
+rs577406621	WARNING	Query snp not in Release 21
+rs577406621	WARNING	No matching proxy snps found
+rs199522406	WARNING	Query snp not in Release 21
+rs199522406	WARNING	No matching proxy snps found
+rs55712212	WARNING	Query snp not in Release 21
+rs55712212	WARNING	No matching proxy snps found
+rs576279166	WARNING	Query snp not in Release 21
+rs576279166	WARNING	No matching proxy snps found
+rs181183366	WARNING	Query snp not in Release 21
+rs181183366	WARNING	No matching proxy snps found
+rs186810431	WARNING	Query snp not in Release 21
+rs186810431	WARNING	No matching proxy snps found
+rs80358916	WARNING	Query snp not in Release 21
+rs80358916	WARNING	No matching proxy snps found
+rs184442109	WARNING	Query snp not in Release 21
+rs184442109	WARNING	No matching proxy snps found
+rs201500887	WARNING	Query snp not in Release 21
+rs201500887	WARNING	No matching proxy snps found
+rs45574331	WARNING	Query snp not in Release 21
+rs45574331	WARNING	No matching proxy snps found
+rs80358932	WARNING	Query snp not in Release 21
+rs80358932	WARNING	No matching proxy snps found
+rs200078639	WARNING	Query snp not in Release 21
+rs200078639	WARNING	No matching proxy snps found
+rs570826002	WARNING	Query snp not in Release 21
+rs570826002	WARNING	No matching proxy snps found
+rs55977008	WARNING	Query snp not in Release 21
+rs55977008	WARNING	No matching proxy snps found
+rs1799955	WARNING	Query snp not in Release 21
+rs1799955	WARNING	No matching proxy snps found
+rs80358954	WARNING	Query snp not in Release 21
+rs80358954	WARNING	No matching proxy snps found
+rs4986860	WARNING	No LD data is available for rs4986860 in Release 21, panel CEU
+rs4986860	WARNING	No matching proxy snps found
+rs553984945	WARNING	Query snp not in Release 21
+rs553984945	WARNING	No matching proxy snps found
+rs572945276	WARNING	Query snp not in Release 21
+rs572945276	WARNING	No matching proxy snps found
+rs169547	WARNING	No LD data is available for rs169547 in Release 21, panel CEU
+rs169547	WARNING	No matching proxy snps found
+rs80358965	WARNING	Query snp not in Release 21
+rs80358965	WARNING	No matching proxy snps found
+rs11571707	WARNING	No LD data is available for rs11571707 in Release 21, panel CEU
+rs11571707	WARNING	No matching proxy snps found
+rs55716624	WARNING	Query snp not in Release 21
+rs55716624	WARNING	No matching proxy snps found
+rs56070345	WARNING	Query snp not in Release 21
+rs56070345	WARNING	No matching proxy snps found
+rs571800995	WARNING	Query snp not in Release 21
+rs571800995	WARNING	No matching proxy snps found
+rs545454796	WARNING	Query snp not in Release 21
+rs545454796	WARNING	No matching proxy snps found
+rs74047012	WARNING	Query snp not in Release 21
+rs74047012	WARNING	No matching proxy snps found
+rs61754138	WARNING	Query snp not in Release 21
+rs61754138	WARNING	No matching proxy snps found
+rs551834979	WARNING	Query snp not in Release 21
+rs551834979	WARNING	No matching proxy snps found
+rs55689095	WARNING	Query snp not in Release 21
+rs55689095	WARNING	No matching proxy snps found
+rs142899125	WARNING	Query snp not in Release 21
+rs142899125	WARNING	No matching proxy snps found
+rs529779203	WARNING	Query snp not in Release 21
+rs529779203	WARNING	No matching proxy snps found
+rs80359800	WARNING	Query snp not in Release 21
+rs80359800	WARNING	No matching proxy snps found
+rs28897745	WARNING	Query snp not in Release 21
+rs28897745	WARNING	No matching proxy snps found
+rs146430937	WARNING	Query snp not in Release 21
+rs146430937	WARNING	No matching proxy snps found
+rs201483108	WARNING	Query snp not in Release 21
+rs201483108	WARNING	No matching proxy snps found
+rs374625452	WARNING	Query snp not in Release 21
+rs374625452	WARNING	No matching proxy snps found
+rs80359052	WARNING	Query snp not in Release 21
+rs80359052	WARNING	No matching proxy snps found
+rs186224762	WARNING	Query snp not in Release 21
+rs186224762	WARNING	No matching proxy snps found
+rs80359055	WARNING	Query snp not in Release 21
+rs80359055	WARNING	No matching proxy snps found
+rs28897747	WARNING	Query snp not in Release 21
+rs28897747	WARNING	No matching proxy snps found
+rs28897749	WARNING	Query snp not in Release 21
+rs28897749	WARNING	No matching proxy snps found
+rs80359065	WARNING	Query snp not in Release 21
+rs80359065	WARNING	No matching proxy snps found
+rs80359080	WARNING	Query snp not in Release 21
+rs80359080	WARNING	No matching proxy snps found
+rs201057885	WARNING	Query snp not in Release 21
+rs201057885	WARNING	No matching proxy snps found
+rs371278843	WARNING	Query snp not in Release 21
+rs371278843	WARNING	No matching proxy snps found
+rs9590940	WARNING	No LD data is available for rs9590940 in Release 21, panel CEU
+rs9590940	WARNING	No matching proxy snps found
+rs558819788	WARNING	Query snp not in Release 21
+rs558819788	WARNING	No matching proxy snps found
+rs11571746	WARNING	No LD data is available for rs11571746 in Release 21, panel CEU
+rs11571746	WARNING	No matching proxy snps found
+rs544212043	WARNING	Query snp not in Release 21
+rs544212043	WARNING	No matching proxy snps found
+rs80359105	WARNING	Query snp not in Release 21
+rs80359105	WARNING	No matching proxy snps found
+rs11571747	WARNING	Query snp not in Release 21
+rs11571747	WARNING	No matching proxy snps found
+rs569080122	WARNING	Query snp not in Release 21
+rs569080122	WARNING	No matching proxy snps found
+rs373203204	WARNING	Query snp not in Release 21
+rs373203204	WARNING	No matching proxy snps found
+rs80359129	WARNING	Query snp not in Release 21
+rs80359129	WARNING	No matching proxy snps found
+rs4987047	WARNING	No LD data is available for rs4987047 in Release 21, panel CEU
+rs4987047	WARNING	No matching proxy snps found
+rs535486498	WARNING	Query snp not in Release 21
+rs535486498	WARNING	No matching proxy snps found
+rs28897754	WARNING	Query snp not in Release 21
+rs28897754	WARNING	No matching proxy snps found
+rs11571769	WARNING	No LD data is available for rs11571769 in Release 21, panel CEU
+rs11571769	WARNING	No matching proxy snps found
+rs59004709	WARNING	Query snp not in Release 21
+rs59004709	WARNING	No matching proxy snps found
+rs202155613	WARNING	Query snp not in Release 21
+rs202155613	WARNING	No matching proxy snps found
+rs151275325	WARNING	Query snp not in Release 21
+rs151275325	WARNING	No matching proxy snps found
+rs200635661	WARNING	Query snp not in Release 21
+rs200635661	WARNING	No matching proxy snps found
+rs55933907	WARNING	Query snp not in Release 21
+rs55933907	WARNING	No matching proxy snps found
+rs574271678	WARNING	Query snp not in Release 21
+rs574271678	WARNING	No matching proxy snps found
+rs41293521	WARNING	Query snp not in Release 21
+rs41293521	WARNING	No matching proxy snps found
+rs56204128	WARNING	Query snp not in Release 21
+rs56204128	WARNING	No matching proxy snps found
+rs571971903	WARNING	Query snp not in Release 21
+rs571971903	WARNING	No matching proxy snps found
+rs201172050	WARNING	Query snp not in Release 21
+rs201172050	WARNING	No matching proxy snps found
+rs563889433	WARNING	Query snp not in Release 21
+rs563889433	WARNING	No matching proxy snps found
+rs200598289	WARNING	Query snp not in Release 21
+rs200598289	WARNING	No matching proxy snps found
+rs80359228	WARNING	Query snp not in Release 21
+rs80359228	WARNING	No matching proxy snps found
+rs528504546	WARNING	Query snp not in Release 21
+rs528504546	WARNING	No matching proxy snps found
+rs546682485	WARNING	Query snp not in Release 21
+rs546682485	WARNING	No matching proxy snps found
+rs55775473	WARNING	Query snp not in Release 21
+rs55775473	WARNING	No matching proxy snps found
+rs80359237	WARNING	Query snp not in Release 21
+rs80359237	WARNING	No matching proxy snps found
+rs80359238	WARNING	Query snp not in Release 21
+rs80359238	WARNING	No matching proxy snps found
+rs11571831	WARNING	No LD data is available for rs11571831 in Release 21, panel CEU
+rs11571831	WARNING	No matching proxy snps found
+rs11571832	WARNING	Query snp not in Release 21
+rs11571832	WARNING	No matching proxy snps found
+rs200210279	WARNING	Query snp not in Release 21
+rs200210279	WARNING	No matching proxy snps found
+rs56121817	WARNING	Query snp not in Release 21
+rs56121817	WARNING	No matching proxy snps found
+rs369047997	WARNING	Query snp not in Release 21
+rs369047997	WARNING	No matching proxy snps found
+rs544677125	WARNING	Query snp not in Release 21
+rs544677125	WARNING	No matching proxy snps found
+rs562881210	WARNING	Query snp not in Release 21
+rs562881210	WARNING	No matching proxy snps found
+rs192049298	WARNING	Query snp not in Release 21
+rs192049298	WARNING	No matching proxy snps found
+rs11571833	rs11571833	0	1.000	1.000	AG,IBC,AAE	chr13	31870626
+rs11571833	rs11571815	4076	1.000	1.000	None	chr13	31866550
+rs567476314	WARNING	Query snp not in Release 21
+rs567476314	WARNING	No matching proxy snps found
+rs113507014	WARNING	Query snp not in Release 21
+rs113507014	WARNING	No matching proxy snps found
+rs546597661	WARNING	Query snp not in Release 21
+rs546597661	WARNING	No matching proxy snps found
+rs28897762	WARNING	Query snp not in Release 21
+rs28897762	WARNING	No matching proxy snps found
+rs56309455	WARNING	Query snp not in Release 21
+rs56309455	WARNING	No matching proxy snps found
+rs55853199	WARNING	Query snp not in Release 21
+rs55853199	WARNING	No matching proxy snps found
+rs1801426	WARNING	No LD data is available for rs1801426 in Release 21, panel CEU
+rs1801426	WARNING	No matching proxy snps found
+rs535952730	WARNING	Query snp not in Release 21
+rs535952730	WARNING	No matching proxy snps found
+rs373436334	WARNING	Query snp not in Release 21
+rs373436334	WARNING	No matching proxy snps found
+rs573123419	WARNING	Query snp not in Release 21
+rs573123419	WARNING	No matching proxy snps found
+rs190726611	WARNING	Query snp not in Release 21
+rs190726611	WARNING	No matching proxy snps found
+rs181968651	WARNING	Query snp not in Release 21
+rs181968651	WARNING	No matching proxy snps found
+rs15869	rs15869	0	1.000	1.000	I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr13	31871012
+rs15869	rs206342	5203	1.000	1.000	None	chr13	31865809
+rs15869	rs206340	7702	1.000	1.000	IBC,OQ,OE,O24,O28,O54,O5E,OEE	chr13	31863310
+rs15869	rs206146	16255	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr13	31854757
+rs15869	rs206099	33710	1.000	1.000	None	chr13	31837302
+rs186227858	WARNING	Query snp not in Release 21
+rs186227858	WARNING	No matching proxy snps found
+rs574533117	WARNING	Query snp not in Release 21
+rs574533117	WARNING	No matching proxy snps found
+rs574944914	WARNING	Query snp not in Release 21
+rs574944914	WARNING	No matching proxy snps found
+rs542356535	WARNING	Query snp not in Release 21
+rs542356535	WARNING	No matching proxy snps found
+rs561034209	WARNING	Query snp not in Release 21
+rs561034209	WARNING	No matching proxy snps found
+rs11571834	WARNING	Query snp not in Release 21
+rs11571834	WARNING	No matching proxy snps found
+rs546854814	WARNING	Query snp not in Release 21
+rs546854814	WARNING	No matching proxy snps found
+rs7334543	rs7334543	0	1.000	1.000	None	chr13	31871276
+rs7334543	rs1012130	3245	1.000	1.000	AH,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,OE,O24,O28,O54,O5E,OEE	chr13	31868031
+rs7334543	rs10870659	17167	1.000	1.000	None	chr13	31854109
+rs7334543	rs10492395	27739	1.000	1.000	AX	chr13	31843537
+rs7334543	rs11571742	29178	1.000	1.000	None	chr13	31842098
+rs7334543	rs9943888	45074	0.902	0.949	AN,A6,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr13	31826202
+rs559790882	WARNING	Query snp not in Release 21
+rs559790882	WARNING	No matching proxy snps found
+rs56003538	WARNING	Query snp not in Release 21
+rs56003538	WARNING	No matching proxy snps found
+rs11571835	WARNING	Query snp not in Release 21
+rs11571835	WARNING	No matching proxy snps found
+rs11571836	rs11571836	0	1.000	1.000	IM,IMD,IBC,OQ,OE,O24,O28,O54,O5E,OEE	chr13	31871439
+rs11571836	rs9567639	14790	1.000	1.000	None	chr13	31856649
+rs11571836	rs11571787	14973	1.000	1.000	None	chr13	31856466
+rs11571836	rs7337784	15467	1.000	1.000	None	chr13	31855972
+rs11571836	rs7337574	15620	1.000	1.000	AxM	chr13	31855819
+rs11571836	rs3764792	22324	1.000	1.000	None	chr13	31849115
+rs11571836	rs9634672	29383	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,OQ,IWQ,OE,O24	chr13	31842056
+rs11571836	rs11571725	34558	0.947	1.000	AN,A5,A6,AAH	chr13	31836881
+rs547910249	WARNING	Query snp not in Release 21
+rs547910249	WARNING	No matching proxy snps found
+rs556392709	WARNING	Query snp not in Release 21
+rs556392709	WARNING	No matching proxy snps found
+rs185674638	WARNING	Query snp not in Release 21
+rs185674638	WARNING	No matching proxy snps found
+rs534169505	WARNING	Query snp not in Release 21
+rs534169505	WARNING	No matching proxy snps found
+rs145550800	WARNING	Query snp not in Release 21
+rs145550800	WARNING	No matching proxy snps found
+rs190094748	WARNING	Query snp not in Release 21
+rs190094748	WARNING	No matching proxy snps found
+rs183701513	WARNING	Query snp not in Release 21
+rs183701513	WARNING	No matching proxy snps found
+rs74047022	WARNING	Query snp not in Release 21
+rs74047022	WARNING	No matching proxy snps found
+rs139813105	WARNING	Query snp not in Release 21
+rs139813105	WARNING	No matching proxy snps found
+rs76358429	WARNING	Query snp not in Release 21
+rs76358429	WARNING	No matching proxy snps found
+rs186619625	WARNING	Query snp not in Release 21
+rs186619625	WARNING	No matching proxy snps found
+rs192347116	WARNING	Query snp not in Release 21
+rs192347116	WARNING	No matching proxy snps found
+rs572993583	WARNING	Query snp not in Release 21
+rs572993583	WARNING	No matching proxy snps found
+rs144947432	WARNING	Query snp not in Release 21
+rs144947432	WARNING	No matching proxy snps found
+rs565100089	WARNING	Query snp not in Release 21
+rs565100089	WARNING	No matching proxy snps found
+rs8176320	WARNING	Query snp not in Release 21
+rs8176320	WARNING	No matching proxy snps found
+rs184237074	WARNING	Query snp not in Release 21
+rs184237074	WARNING	No matching proxy snps found
+rs189382442	WARNING	Query snp not in Release 21
+rs189382442	WARNING	No matching proxy snps found
+rs12516	WARNING	No LD data is available for rs12516 in Release 21, panel CEU
+rs12516	WARNING	No matching proxy snps found
+rs548275991	WARNING	Query snp not in Release 21
+rs548275991	WARNING	No matching proxy snps found
+rs570062354	WARNING	Query snp not in Release 21
+rs570062354	WARNING	No matching proxy snps found
+rs537703484	WARNING	Query snp not in Release 21
+rs537703484	WARNING	No matching proxy snps found
+rs552911643	WARNING	Query snp not in Release 21
+rs552911643	WARNING	No matching proxy snps found
+rs571007748	WARNING	Query snp not in Release 21
+rs571007748	WARNING	No matching proxy snps found
+rs111791349	WARNING	Query snp not in Release 21
+rs111791349	WARNING	No matching proxy snps found
+rs553643790	WARNING	Query snp not in Release 21
+rs553643790	WARNING	No matching proxy snps found
+rs375357592	WARNING	Query snp not in Release 21
+rs375357592	WARNING	No matching proxy snps found
+rs535563803	WARNING	Query snp not in Release 21
+rs535563803	WARNING	No matching proxy snps found
+rs556653436	WARNING	Query snp not in Release 21
+rs556653436	WARNING	No matching proxy snps found
+rs397857709	WARNING	Query snp not in Release 21
+rs397857709	WARNING	No matching proxy snps found
+rs8176319	WARNING	Query snp not in Release 21
+rs8176319	WARNING	No matching proxy snps found
+rs138782023	WARNING	Query snp not in Release 21
+rs138782023	WARNING	No matching proxy snps found
+rs564043252	WARNING	Query snp not in Release 21
+rs564043252	WARNING	No matching proxy snps found
+rs572848769	WARNING	Query snp not in Release 21
+rs572848769	WARNING	No matching proxy snps found
+rs540031582	WARNING	Query snp not in Release 21
+rs540031582	WARNING	No matching proxy snps found
+rs561954959	WARNING	Query snp not in Release 21
+rs561954959	WARNING	No matching proxy snps found
+rs530117586	WARNING	Query snp not in Release 21
+rs530117586	WARNING	No matching proxy snps found
+rs141850147	WARNING	Query snp not in Release 21
+rs141850147	WARNING	No matching proxy snps found
+rs563493286	WARNING	Query snp not in Release 21
+rs563493286	WARNING	No matching proxy snps found
+rs530929756	WARNING	Query snp not in Release 21
+rs530929756	WARNING	No matching proxy snps found
+rs552648003	WARNING	Query snp not in Release 21
+rs552648003	WARNING	No matching proxy snps found
+rs571148033	WARNING	Query snp not in Release 21
+rs571148033	WARNING	No matching proxy snps found
+rs8176318	rs8176318	0	1.000	1.000	AS,A6,I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38450800
+rs8176318	rs8176322	1501	1.000	1.000	None	chr17	38449299
+rs8176318	rs8176323	1563	1.000	1.000	None	chr17	38449237
+rs8176318	rs3092988	4428	1.000	1.000	None	chr17	38455228
+rs8176318	rs8176297	6051	1.000	1.000	I1	chr17	38456851
+rs8176318	rs11657053	6145	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38444655
+rs8176318	rs4793191	7103	1.000	1.000	None	chr17	38457903
+rs8176318	rs8176289	8782	1.000	1.000	None	chr17	38459582
+rs8176318	rs8176273	14379	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38465179
+rs8176318	rs8176265	16722	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38467522
+rs8176318	rs915945	17410	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38433390
+rs8176318	rs3092994	18551	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38469351
+rs8176318	rs8176242	20600	1.000	1.000	None	chr17	38471400
+rs8176318	rs4793194	21059	1.000	1.000	IM,IMD,O54,O5E	chr17	38471859
+rs8176318	rs1799966	25820	1.000	1.000	AG,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,AxM,IWQ,AAE,AAH	chr17	38476620
+rs8176318	rs12939251	32954	1.000	1.000	None	chr17	38483754
+rs8176318	rs8176194	33947	1.000	1.000	None	chr17	38484747
+rs8176318	rs8176193	34242	1.000	1.000	None	chr17	38485042
+rs8176318	rs4793197	34628	1.000	1.000	AS,A5,A6,IM,IMD,O54,O5E	chr17	38485428
+rs8176318	rs1060915	37196	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38487996
+rs8176318	rs3950989	40679	1.000	1.000	IM,IMD,O54,O5E	chr17	38491479
+rs8176318	rs2070834	45011	1.000	1.000	AAH	chr17	38495811
+rs8176318	rs16942	46726	1.000	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497526
+rs8176318	rs16941	47161	1.000	1.000	I1,IM,IMD,OQ,AxM,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497961
+rs8176318	rs16940	47963	1.000	1.000	I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38498763
+rs8176318	rs1799949	48192	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,OEE,AAE	chr17	38498992
+rs8176318	rs8176140	54372	1.000	1.000	None	chr17	38505172
+rs8176318	rs8176126	61775	1.000	1.000	AN,A5,A6,I1,IM,IMD,O54,O5E	chr17	38512575
+rs8176318	rs3765640	78973	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38529773
+rs8176318	rs11653069	86103	1.000	1.000	IM,IMD,O54,O5E	chr17	38536903
+rs8176318	rs2175957	89548	1.000	1.000	I1,IM,IMD,CYT	chr17	38540348
+rs8176318	rs11656097	93339	1.000	1.000	None	chr17	38544139
+rs8176318	rs2292595	93400	1.000	1.000	None	chr17	38544200
+rs8176318	rs11658754	95465	1.000	1.000	None	chr17	38546265
+rs8176318	rs11079056	103525	1.000	1.000	None	chr17	38554325
+rs8176318	rs1973646	113221	1.000	1.000	IMD,O54,O5E	chr17	38564021
+rs8176318	rs2271573	130347	1.000	1.000	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38581147
+rs8176318	rs2271574	130374	1.000	1.000	AAH	chr17	38581174
+rs8176318	rs11651623	132573	1.000	1.000	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38583373
+rs8176318	rs11657883	132750	1.000	1.000	OQ	chr17	38583550
+rs8176318	rs11653460	134032	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584832
+rs8176318	rs11650913	134323	1.000	1.000	OQ	chr17	38585123
+rs8176318	rs12936831	134542	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38585342
+rs8176318	rs1399323	135056	1.000	1.000	OQ	chr17	38585856
+rs8176318	rs8070085	144710	1.000	1.000	AS,A5,A6,I1,IM,IMD,O28,O54,O5E	chr17	38595510
+rs8176318	rs13851	276570	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38727370
+rs8176318	rs4520874	320248	1.000	1.000	AS,A5,A6	chr17	38771048
+rs8176318	rs4793229	323060	1.000	1.000	AN,A5,A6	chr17	38773860
+rs8176318	rs1824889	326602	1.000	1.000	None	chr17	38777402
+rs8176318	rs9646417	328979	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr17	38779779
+rs8176318	rs1545764	329291	1.000	1.000	None	chr17	38780091
+rs8176318	rs11651341	332787	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38783587
+rs8176318	rs7406700	2835	0.964	1.000	None	chr17	38453635
+rs8176318	rs8070179	5414	0.964	1.000	None	chr17	38456214
+rs8176318	rs9911630	8932	0.964	1.000	AS,A5,A6,I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38441868
+rs8176318	rs11653253	14612	0.964	1.000	None	chr17	38436188
+rs8176318	rs2298862	20586	0.964	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38430214
+rs8176318	rs2236762	29401	0.964	1.000	None	chr17	38480201
+rs8176318	rs8176198	33263	0.964	1.000	AS,A6	chr17	38484063
+rs8176318	rs8067269	38525	0.964	1.000	A6,IM,IMD,O54,O5E	chr17	38489325
+rs8176318	rs799916	45916	0.964	1.000	AN,A5,A6,IM,IMD,O54,O5E	chr17	38496716
+rs8176318	rs799917	47662	0.964	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38498462
+rs8176318	rs799912	59860	0.964	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38510660
+rs8176318	rs799905	79913	0.964	1.000	I1	chr17	38530713
+rs8176318	rs799906	80842	0.964	1.000	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38531642
+rs8176318	rs7223062	100378	0.964	1.000	None	chr17	38551178
+rs8176318	rs4239149	130821	0.964	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38581621
+rs8176318	rs9646418	330627	0.964	1.000	A6	chr17	38781427
+rs8176318	rs9646413	330883	0.964	1.000	A6	chr17	38781683
+rs8176318	rs7405989	332129	0.964	1.000	None	chr17	38782929
+rs8176318	rs11657004	347477	0.930	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38798277
+rs8176318	rs9912203	349871	0.930	1.000	AS,A5,A6,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38800671
+rs8176318	rs11653231	134186	0.928	0.963	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584986
+rs8176317	WARNING	Query snp not in Release 21
+rs8176317	WARNING	No matching proxy snps found
+rs371540942	WARNING	Query snp not in Release 21
+rs371540942	WARNING	No matching proxy snps found
+rs56108540	WARNING	Query snp not in Release 21
+rs56108540	WARNING	No matching proxy snps found
+rs557030603	WARNING	Query snp not in Release 21
+rs557030603	WARNING	No matching proxy snps found
+rs189442183	WARNING	Query snp not in Release 21
+rs189442183	WARNING	No matching proxy snps found
+rs539044217	WARNING	Query snp not in Release 21
+rs539044217	WARNING	No matching proxy snps found
+rs137892861	WARNING	Query snp not in Release 21
+rs137892861	WARNING	No matching proxy snps found
+rs3092995	WARNING	No LD data is available for rs3092995 in Release 21, panel CEU
+rs3092995	WARNING	No matching proxy snps found
+rs80356920	WARNING	Query snp not in Release 21
+rs80356920	WARNING	No matching proxy snps found
+rs531210457	WARNING	Query snp not in Release 21
+rs531210457	WARNING	No matching proxy snps found
+rs373810778	WARNING	Query snp not in Release 21
+rs373810778	WARNING	No matching proxy snps found
+rs55808233	WARNING	Query snp not in Release 21
+rs55808233	WARNING	No matching proxy snps found
+rs576727185	WARNING	Query snp not in Release 21
+rs576727185	WARNING	No matching proxy snps found
+rs138493864	WARNING	Query snp not in Release 21
+rs138493864	WARNING	No matching proxy snps found
+rs571834423	WARNING	Query snp not in Release 21
+rs571834423	WARNING	No matching proxy snps found
+rs56195342	WARNING	Query snp not in Release 21
+rs56195342	WARNING	No matching proxy snps found
+rs397509229	WARNING	Query snp not in Release 21
+rs397509229	WARNING	No matching proxy snps found
+rs80356860	WARNING	Query snp not in Release 21
+rs80356860	WARNING	No matching proxy snps found
+rs142459158	WARNING	Query snp not in Release 21
+rs142459158	WARNING	No matching proxy snps found
+rs549640262	WARNING	Query snp not in Release 21
+rs549640262	WARNING	No matching proxy snps found
+rs1799967	WARNING	No LD data is available for rs1799967 in Release 21, panel CEU
+rs1799967	WARNING	No matching proxy snps found
+rs201810810	WARNING	Query snp not in Release 21
+rs201810810	WARNING	No matching proxy snps found
+rs70953661	WARNING	Query snp not in Release 21
+rs70953661	WARNING	No matching proxy snps found
+rs4986854	WARNING	No LD data is available for rs4986854 in Release 21, panel CEU
+rs4986854	WARNING	No matching proxy snps found
+rs70953660	WARNING	Query snp not in Release 21
+rs70953660	WARNING	No matching proxy snps found
+rs1799966	rs1799966	0	1.000	1.000	AG,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,AxM,IWQ,AAE,AAH	chr17	38476620
+rs1799966	rs4793194	4761	1.000	1.000	IM,IMD,O54,O5E	chr17	38471859
+rs1799966	rs8176242	5220	1.000	1.000	None	chr17	38471400
+rs1799966	rs12939251	7134	1.000	1.000	None	chr17	38483754
+rs1799966	rs3092994	7269	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38469351
+rs1799966	rs8176194	8127	1.000	1.000	None	chr17	38484747
+rs1799966	rs8176193	8422	1.000	1.000	None	chr17	38485042
+rs1799966	rs4793197	8808	1.000	1.000	AS,A5,A6,IM,IMD,O54,O5E	chr17	38485428
+rs1799966	rs8176265	9098	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38467522
+rs1799966	rs1060915	11376	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38487996
+rs1799966	rs8176273	11441	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38465179
+rs1799966	rs3950989	14859	1.000	1.000	IM,IMD,O54,O5E	chr17	38491479
+rs1799966	rs8176289	17038	1.000	1.000	None	chr17	38459582
+rs1799966	rs4793191	18717	1.000	1.000	None	chr17	38457903
+rs1799966	rs2070834	19191	1.000	1.000	AAH	chr17	38495811
+rs1799966	rs8176297	19769	1.000	1.000	I1	chr17	38456851
+rs1799966	rs16942	20906	1.000	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497526
+rs1799966	rs16941	21341	1.000	1.000	I1,IM,IMD,OQ,AxM,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497961
+rs1799966	rs3092988	21392	1.000	1.000	None	chr17	38455228
+rs1799966	rs16940	22143	1.000	1.000	I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38498763
+rs1799966	rs1799949	22372	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,OEE,AAE	chr17	38498992
+rs1799966	rs8176318	25820	1.000	1.000	AS,A6,I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38450800
+rs1799966	rs8176322	27321	1.000	1.000	None	chr17	38449299
+rs1799966	rs8176323	27383	1.000	1.000	None	chr17	38449237
+rs1799966	rs8176140	28552	1.000	1.000	None	chr17	38505172
+rs1799966	rs11657053	31965	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38444655
+rs1799966	rs8176126	35955	1.000	1.000	AN,A5,A6,I1,IM,IMD,O54,O5E	chr17	38512575
+rs1799966	rs915945	43230	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38433390
+rs1799966	rs3765640	53153	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38529773
+rs1799966	rs11653069	60283	1.000	1.000	IM,IMD,O54,O5E	chr17	38536903
+rs1799966	rs2175957	63728	1.000	1.000	I1,IM,IMD,CYT	chr17	38540348
+rs1799966	rs11656097	67519	1.000	1.000	None	chr17	38544139
+rs1799966	rs2292595	67580	1.000	1.000	None	chr17	38544200
+rs1799966	rs11658754	69645	1.000	1.000	None	chr17	38546265
+rs1799966	rs11079056	77705	1.000	1.000	None	chr17	38554325
+rs1799966	rs1973646	87401	1.000	1.000	IMD,O54,O5E	chr17	38564021
+rs1799966	rs2271573	104527	1.000	1.000	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38581147
+rs1799966	rs2271574	104554	1.000	1.000	AAH	chr17	38581174
+rs1799966	rs11651623	106753	1.000	1.000	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38583373
+rs1799966	rs11657883	106930	1.000	1.000	OQ	chr17	38583550
+rs1799966	rs11653460	108212	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584832
+rs1799966	rs11650913	108503	1.000	1.000	OQ	chr17	38585123
+rs1799966	rs12936831	108722	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38585342
+rs1799966	rs1399323	109236	1.000	1.000	OQ	chr17	38585856
+rs1799966	rs8070085	118890	1.000	1.000	AS,A5,A6,I1,IM,IMD,O28,O54,O5E	chr17	38595510
+rs1799966	rs13851	250750	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38727370
+rs1799966	rs4520874	294428	1.000	1.000	AS,A5,A6	chr17	38771048
+rs1799966	rs4793229	297240	1.000	1.000	AN,A5,A6	chr17	38773860
+rs1799966	rs1824889	300782	1.000	1.000	None	chr17	38777402
+rs1799966	rs9646417	303159	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr17	38779779
+rs1799966	rs1545764	303471	1.000	1.000	None	chr17	38780091
+rs1799966	rs11651341	306967	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38783587
+rs1799966	rs2236762	3581	0.964	1.000	None	chr17	38480201
+rs1799966	rs8176198	7443	0.964	1.000	AS,A6	chr17	38484063
+rs1799966	rs8067269	12705	0.964	1.000	A6,IM,IMD,O54,O5E	chr17	38489325
+rs1799966	rs799916	20096	0.964	1.000	AN,A5,A6,IM,IMD,O54,O5E	chr17	38496716
+rs1799966	rs8070179	20406	0.964	1.000	None	chr17	38456214
+rs1799966	rs799917	21842	0.964	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38498462
+rs1799966	rs7406700	22985	0.964	1.000	None	chr17	38453635
+rs1799966	rs799912	34040	0.964	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38510660
+rs1799966	rs9911630	34752	0.964	1.000	AS,A5,A6,I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38441868
+rs1799966	rs11653253	40432	0.964	1.000	None	chr17	38436188
+rs1799966	rs2298862	46406	0.964	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38430214
+rs1799966	rs799905	54093	0.964	1.000	I1	chr17	38530713
+rs1799966	rs799906	55022	0.964	1.000	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38531642
+rs1799966	rs7223062	74558	0.964	1.000	None	chr17	38551178
+rs1799966	rs4239149	105001	0.964	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38581621
+rs1799966	rs9646418	304807	0.964	1.000	A6	chr17	38781427
+rs1799966	rs9646413	305063	0.964	1.000	A6	chr17	38781683
+rs1799966	rs7405989	306309	0.964	1.000	None	chr17	38782929
+rs1799966	rs11657004	321657	0.930	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38798277
+rs1799966	rs9912203	324051	0.930	1.000	AS,A5,A6,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38800671
+rs1799966	rs11653231	108366	0.928	0.963	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584986
+rs80356833	WARNING	Query snp not in Release 21
+rs80356833	WARNING	No matching proxy snps found
+rs28897693	WARNING	Query snp not in Release 21
+rs28897693	WARNING	No matching proxy snps found
+rs568753972	WARNING	Query snp not in Release 21
+rs568753972	WARNING	No matching proxy snps found
+rs56119278	WARNING	Query snp not in Release 21
+rs56119278	WARNING	No matching proxy snps found
+rs56158747	WARNING	Query snp not in Release 21
+rs56158747	WARNING	No matching proxy snps found
+rs564757581	WARNING	Query snp not in Release 21
+rs564757581	WARNING	No matching proxy snps found
+rs28897691	WARNING	Query snp not in Release 21
+rs28897691	WARNING	No matching proxy snps found
+rs55815649	WARNING	Query snp not in Release 21
+rs55815649	WARNING	No matching proxy snps found
+rs1800744	WARNING	Query snp not in Release 21
+rs1800744	WARNING	No matching proxy snps found
+rs73983787	WARNING	Query snp not in Release 21
+rs73983787	WARNING	No matching proxy snps found
+rs80357075	WARNING	Query snp not in Release 21
+rs80357075	WARNING	No matching proxy snps found
+rs80357022	WARNING	Query snp not in Release 21
+rs80357022	WARNING	No matching proxy snps found
+rs80356840	WARNING	Query snp not in Release 21
+rs80356840	WARNING	No matching proxy snps found
+rs1060915	rs1060915	0	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38487996
+rs1060915	rs4793197	2568	1.000	1.000	AS,A5,A6,IM,IMD,O54,O5E	chr17	38485428
+rs1060915	rs8176193	2954	1.000	1.000	None	chr17	38485042
+rs1060915	rs8176194	3249	1.000	1.000	None	chr17	38484747
+rs1060915	rs3950989	3483	1.000	1.000	IM,IMD,O54,O5E	chr17	38491479
+rs1060915	rs12939251	4242	1.000	1.000	None	chr17	38483754
+rs1060915	rs2070834	7815	1.000	1.000	AAH	chr17	38495811
+rs1060915	rs16942	9530	1.000	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497526
+rs1060915	rs16941	9965	1.000	1.000	I1,IM,IMD,OQ,AxM,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497961
+rs1060915	rs16940	10767	1.000	1.000	I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38498763
+rs1060915	rs1799949	10996	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,OEE,AAE	chr17	38498992
+rs1060915	rs1799966	11376	1.000	1.000	AG,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,AxM,IWQ,AAE,AAH	chr17	38476620
+rs1060915	rs4793194	16137	1.000	1.000	IM,IMD,O54,O5E	chr17	38471859
+rs1060915	rs8176242	16596	1.000	1.000	None	chr17	38471400
+rs1060915	rs8176140	17176	1.000	1.000	None	chr17	38505172
+rs1060915	rs3092994	18645	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38469351
+rs1060915	rs8176265	20474	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38467522
+rs1060915	rs8176273	22817	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38465179
+rs1060915	rs8176126	24579	1.000	1.000	AN,A5,A6,I1,IM,IMD,O54,O5E	chr17	38512575
+rs1060915	rs8176289	28414	1.000	1.000	None	chr17	38459582
+rs1060915	rs4793191	30093	1.000	1.000	None	chr17	38457903
+rs1060915	rs8176297	31145	1.000	1.000	I1	chr17	38456851
+rs1060915	rs3092988	32768	1.000	1.000	None	chr17	38455228
+rs1060915	rs8176318	37196	1.000	1.000	AS,A6,I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38450800
+rs1060915	rs8176322	38697	1.000	1.000	None	chr17	38449299
+rs1060915	rs8176323	38759	1.000	1.000	None	chr17	38449237
+rs1060915	rs3765640	41777	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38529773
+rs1060915	rs11657053	43341	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38444655
+rs1060915	rs11653069	48907	1.000	1.000	IM,IMD,O54,O5E	chr17	38536903
+rs1060915	rs2175957	52352	1.000	1.000	I1,IM,IMD,CYT	chr17	38540348
+rs1060915	rs915945	54606	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38433390
+rs1060915	rs11656097	56143	1.000	1.000	None	chr17	38544139
+rs1060915	rs2292595	56204	1.000	1.000	None	chr17	38544200
+rs1060915	rs11658754	58269	1.000	1.000	None	chr17	38546265
+rs1060915	rs11079056	66329	1.000	1.000	None	chr17	38554325
+rs1060915	rs1973646	76025	1.000	1.000	IMD,O54,O5E	chr17	38564021
+rs1060915	rs2271573	93151	1.000	1.000	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38581147
+rs1060915	rs2271574	93178	1.000	1.000	AAH	chr17	38581174
+rs1060915	rs11651623	95377	1.000	1.000	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38583373
+rs1060915	rs11657883	95554	1.000	1.000	OQ	chr17	38583550
+rs1060915	rs11653460	96836	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584832
+rs1060915	rs11650913	97127	1.000	1.000	OQ	chr17	38585123
+rs1060915	rs12936831	97346	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38585342
+rs1060915	rs1399323	97860	1.000	1.000	OQ	chr17	38585856
+rs1060915	rs8070085	107514	1.000	1.000	AS,A5,A6,I1,IM,IMD,O28,O54,O5E	chr17	38595510
+rs1060915	rs13851	239374	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38727370
+rs1060915	rs4520874	283052	1.000	1.000	AS,A5,A6	chr17	38771048
+rs1060915	rs4793229	285864	1.000	1.000	AN,A5,A6	chr17	38773860
+rs1060915	rs1824889	289406	1.000	1.000	None	chr17	38777402
+rs1060915	rs9646417	291783	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr17	38779779
+rs1060915	rs1545764	292095	1.000	1.000	None	chr17	38780091
+rs1060915	rs11651341	295591	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38783587
+rs1060915	rs8067269	1329	0.964	1.000	A6,IM,IMD,O54,O5E	chr17	38489325
+rs1060915	rs8176198	3933	0.964	1.000	AS,A6	chr17	38484063
+rs1060915	rs2236762	7795	0.964	1.000	None	chr17	38480201
+rs1060915	rs799916	8720	0.964	1.000	AN,A5,A6,IM,IMD,O54,O5E	chr17	38496716
+rs1060915	rs799917	10466	0.964	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38498462
+rs1060915	rs799912	22664	0.964	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38510660
+rs1060915	rs8070179	31782	0.964	1.000	None	chr17	38456214
+rs1060915	rs7406700	34361	0.964	1.000	None	chr17	38453635
+rs1060915	rs799905	42717	0.964	1.000	I1	chr17	38530713
+rs1060915	rs799906	43646	0.964	1.000	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38531642
+rs1060915	rs9911630	46128	0.964	1.000	AS,A5,A6,I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38441868
+rs1060915	rs11653253	51808	0.964	1.000	None	chr17	38436188
+rs1060915	rs2298862	57782	0.964	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38430214
+rs1060915	rs7223062	63182	0.964	1.000	None	chr17	38551178
+rs1060915	rs4239149	93625	0.964	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38581621
+rs1060915	rs9646418	293431	0.964	1.000	A6	chr17	38781427
+rs1060915	rs9646413	293687	0.964	1.000	A6	chr17	38781683
+rs1060915	rs7405989	294933	0.964	1.000	None	chr17	38782929
+rs1060915	rs11657004	310281	0.930	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38798277
+rs1060915	rs9912203	312675	0.930	1.000	AS,A5,A6,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38800671
+rs1060915	rs11653231	96990	0.928	0.963	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584986
+rs541512953	WARNING	Query snp not in Release 21
+rs541512953	WARNING	No matching proxy snps found
+rs398122684	WARNING	Query snp not in Release 21
+rs398122684	WARNING	No matching proxy snps found
+rs78951648	WARNING	Query snp not in Release 21
+rs78951648	WARNING	No matching proxy snps found
+rs576828558	WARNING	Query snp not in Release 21
+rs576828558	WARNING	No matching proxy snps found
+rs147448807	WARNING	Query snp not in Release 21
+rs147448807	WARNING	No matching proxy snps found
+rs80357345	WARNING	Query snp not in Release 21
+rs80357345	WARNING	No matching proxy snps found
+rs28897689	WARNING	Query snp not in Release 21
+rs28897689	WARNING	No matching proxy snps found
+rs80356828	WARNING	Query snp not in Release 21
+rs80356828	WARNING	No matching proxy snps found
+rs80357036	WARNING	Query snp not in Release 21
+rs80357036	WARNING	No matching proxy snps found
+rs80357280	WARNING	Query snp not in Release 21
+rs80357280	WARNING	No matching proxy snps found
+rs140588714	WARNING	Query snp not in Release 21
+rs140588714	WARNING	No matching proxy snps found
+rs200648498	WARNING	Query snp not in Release 21
+rs200648498	WARNING	No matching proxy snps found
+rs483353090	WARNING	Query snp not in Release 21
+rs483353090	WARNING	No matching proxy snps found
+rs80357099	WARNING	Query snp not in Release 21
+rs80357099	WARNING	No matching proxy snps found
+rs80357191	WARNING	Query snp not in Release 21
+rs80357191	WARNING	No matching proxy snps found
+rs28897687	WARNING	Query snp not in Release 21
+rs28897687	WARNING	No matching proxy snps found
+rs41293451	WARNING	Query snp not in Release 21
+rs41293451	WARNING	No matching proxy snps found
+rs537737635	WARNING	Query snp not in Release 21
+rs537737635	WARNING	No matching proxy snps found
+rs56214134	WARNING	Query snp not in Release 21
+rs56214134	WARNING	No matching proxy snps found
+rs16942	rs16942	0	1.000	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497526
+rs16942	rs16941	435	1.000	1.000	I1,IM,IMD,OQ,AxM,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497961
+rs16942	rs16940	1237	1.000	1.000	I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38498763
+rs16942	rs1799949	1466	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,OEE,AAE	chr17	38498992
+rs16942	rs2070834	1715	1.000	1.000	AAH	chr17	38495811
+rs16942	rs3950989	6047	1.000	1.000	IM,IMD,O54,O5E	chr17	38491479
+rs16942	rs8176140	7646	1.000	1.000	None	chr17	38505172
+rs16942	rs1060915	9530	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38487996
+rs16942	rs4793197	12098	1.000	1.000	AS,A5,A6,IM,IMD,O54,O5E	chr17	38485428
+rs16942	rs8176193	12484	1.000	1.000	None	chr17	38485042
+rs16942	rs8176194	12779	1.000	1.000	None	chr17	38484747
+rs16942	rs12939251	13772	1.000	1.000	None	chr17	38483754
+rs16942	rs8176126	15049	1.000	1.000	AN,A5,A6,I1,IM,IMD,O54,O5E	chr17	38512575
+rs16942	rs1799966	20906	1.000	1.000	AG,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,AxM,IWQ,AAE,AAH	chr17	38476620
+rs16942	rs4793194	25667	1.000	1.000	IM,IMD,O54,O5E	chr17	38471859
+rs16942	rs8176242	26126	1.000	1.000	None	chr17	38471400
+rs16942	rs3092994	28175	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38469351
+rs16942	rs8176265	30004	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38467522
+rs16942	rs3765640	32247	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38529773
+rs16942	rs8176273	32347	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38465179
+rs16942	rs8176289	37944	1.000	1.000	None	chr17	38459582
+rs16942	rs11653069	39377	1.000	1.000	IM,IMD,O54,O5E	chr17	38536903
+rs16942	rs4793191	39623	1.000	1.000	None	chr17	38457903
+rs16942	rs8176297	40675	1.000	1.000	I1	chr17	38456851
+rs16942	rs3092988	42298	1.000	1.000	None	chr17	38455228
+rs16942	rs2175957	42822	1.000	1.000	I1,IM,IMD,CYT	chr17	38540348
+rs16942	rs11656097	46613	1.000	1.000	None	chr17	38544139
+rs16942	rs2292595	46674	1.000	1.000	None	chr17	38544200
+rs16942	rs8176318	46726	1.000	1.000	AS,A6,I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38450800
+rs16942	rs8176322	48227	1.000	1.000	None	chr17	38449299
+rs16942	rs8176323	48289	1.000	1.000	None	chr17	38449237
+rs16942	rs11658754	48739	1.000	1.000	None	chr17	38546265
+rs16942	rs11657053	52871	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38444655
+rs16942	rs11079056	56799	1.000	1.000	None	chr17	38554325
+rs16942	rs915945	64136	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38433390
+rs16942	rs1973646	66495	1.000	1.000	IMD,O54,O5E	chr17	38564021
+rs16942	rs2271573	83621	1.000	1.000	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38581147
+rs16942	rs2271574	83648	1.000	1.000	AAH	chr17	38581174
+rs16942	rs11651623	85847	1.000	1.000	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38583373
+rs16942	rs11657883	86024	1.000	1.000	OQ	chr17	38583550
+rs16942	rs11653460	87306	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584832
+rs16942	rs11650913	87597	1.000	1.000	OQ	chr17	38585123
+rs16942	rs12936831	87816	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38585342
+rs16942	rs1399323	88330	1.000	1.000	OQ	chr17	38585856
+rs16942	rs8070085	97984	1.000	1.000	AS,A5,A6,I1,IM,IMD,O28,O54,O5E	chr17	38595510
+rs16942	rs13851	229844	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38727370
+rs16942	rs4520874	273522	1.000	1.000	AS,A5,A6	chr17	38771048
+rs16942	rs4793229	276334	1.000	1.000	AN,A5,A6	chr17	38773860
+rs16942	rs1824889	279876	1.000	1.000	None	chr17	38777402
+rs16942	rs9646417	282253	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr17	38779779
+rs16942	rs1545764	282565	1.000	1.000	None	chr17	38780091
+rs16942	rs11651341	286061	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38783587
+rs16942	rs799916	810	0.964	1.000	AN,A5,A6,IM,IMD,O54,O5E	chr17	38496716
+rs16942	rs799917	936	0.964	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38498462
+rs16942	rs8067269	8201	0.964	1.000	A6,IM,IMD,O54,O5E	chr17	38489325
+rs16942	rs799912	13134	0.964	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38510660
+rs16942	rs8176198	13463	0.964	1.000	AS,A6	chr17	38484063
+rs16942	rs2236762	17325	0.964	1.000	None	chr17	38480201
+rs16942	rs799905	33187	0.964	1.000	I1	chr17	38530713
+rs16942	rs799906	34116	0.964	1.000	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38531642
+rs16942	rs8070179	41312	0.964	1.000	None	chr17	38456214
+rs16942	rs7406700	43891	0.964	1.000	None	chr17	38453635
+rs16942	rs7223062	53652	0.964	1.000	None	chr17	38551178
+rs16942	rs9911630	55658	0.964	1.000	AS,A5,A6,I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38441868
+rs16942	rs11653253	61338	0.964	1.000	None	chr17	38436188
+rs16942	rs2298862	67312	0.964	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38430214
+rs16942	rs4239149	84095	0.964	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38581621
+rs16942	rs9646418	283901	0.964	1.000	A6	chr17	38781427
+rs16942	rs9646413	284157	0.964	1.000	A6	chr17	38781683
+rs16942	rs7405989	285403	0.964	1.000	None	chr17	38782929
+rs16942	rs11657004	300751	0.930	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38798277
+rs16942	rs9912203	303145	0.930	1.000	AS,A5,A6,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38800671
+rs16942	rs11653231	87460	0.928	0.963	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584986
+rs56336919	WARNING	Query snp not in Release 21
+rs56336919	WARNING	No matching proxy snps found
+rs183119644	WARNING	Query snp not in Release 21
+rs183119644	WARNING	No matching proxy snps found
+rs80356918	WARNING	Query snp not in Release 21
+rs80356918	WARNING	No matching proxy snps found
+rs80357272	WARNING	Query snp not in Release 21
+rs80357272	WARNING	No matching proxy snps found
+rs2227945	WARNING	No LD data is available for rs2227945 in Release 21, panel CEU
+rs2227945	WARNING	No matching proxy snps found
+rs530464947	WARNING	Query snp not in Release 21
+rs530464947	WARNING	No matching proxy snps found
+rs80357201	WARNING	Query snp not in Release 21
+rs80357201	WARNING	No matching proxy snps found
+rs80357263	WARNING	Query snp not in Release 21
+rs80357263	WARNING	No matching proxy snps found
+rs528254652	WARNING	Query snp not in Release 21
+rs528254652	WARNING	No matching proxy snps found
+rs4986852	WARNING	Query snp not in Release 21
+rs4986852	WARNING	No matching proxy snps found
+rs16941	rs16941	0	1.000	1.000	I1,IM,IMD,OQ,AxM,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497961
+rs16941	rs16942	435	1.000	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497526
+rs16941	rs16940	802	1.000	1.000	I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38498763
+rs16941	rs1799949	1031	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,OEE,AAE	chr17	38498992
+rs16941	rs2070834	2150	1.000	1.000	AAH	chr17	38495811
+rs16941	rs3950989	6482	1.000	1.000	IM,IMD,O54,O5E	chr17	38491479
+rs16941	rs8176140	7211	1.000	1.000	None	chr17	38505172
+rs16941	rs1060915	9965	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38487996
+rs16941	rs4793197	12533	1.000	1.000	AS,A5,A6,IM,IMD,O54,O5E	chr17	38485428
+rs16941	rs8176193	12919	1.000	1.000	None	chr17	38485042
+rs16941	rs8176194	13214	1.000	1.000	None	chr17	38484747
+rs16941	rs12939251	14207	1.000	1.000	None	chr17	38483754
+rs16941	rs8176126	14614	1.000	1.000	AN,A5,A6,I1,IM,IMD,O54,O5E	chr17	38512575
+rs16941	rs1799966	21341	1.000	1.000	AG,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,AxM,IWQ,AAE,AAH	chr17	38476620
+rs16941	rs4793194	26102	1.000	1.000	IM,IMD,O54,O5E	chr17	38471859
+rs16941	rs8176242	26561	1.000	1.000	None	chr17	38471400
+rs16941	rs3092994	28610	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38469351
+rs16941	rs8176265	30439	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38467522
+rs16941	rs3765640	31812	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38529773
+rs16941	rs8176273	32782	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38465179
+rs16941	rs8176289	38379	1.000	1.000	None	chr17	38459582
+rs16941	rs11653069	38942	1.000	1.000	IM,IMD,O54,O5E	chr17	38536903
+rs16941	rs4793191	40058	1.000	1.000	None	chr17	38457903
+rs16941	rs8176297	41110	1.000	1.000	I1	chr17	38456851
+rs16941	rs2175957	42387	1.000	1.000	I1,IM,IMD,CYT	chr17	38540348
+rs16941	rs3092988	42733	1.000	1.000	None	chr17	38455228
+rs16941	rs11656097	46178	1.000	1.000	None	chr17	38544139
+rs16941	rs2292595	46239	1.000	1.000	None	chr17	38544200
+rs16941	rs8176318	47161	1.000	1.000	AS,A6,I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38450800
+rs16941	rs11658754	48304	1.000	1.000	None	chr17	38546265
+rs16941	rs8176322	48662	1.000	1.000	None	chr17	38449299
+rs16941	rs8176323	48724	1.000	1.000	None	chr17	38449237
+rs16941	rs11657053	53306	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38444655
+rs16941	rs11079056	56364	1.000	1.000	None	chr17	38554325
+rs16941	rs915945	64571	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38433390
+rs16941	rs1973646	66060	1.000	1.000	IMD,O54,O5E	chr17	38564021
+rs16941	rs2271573	83186	1.000	1.000	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38581147
+rs16941	rs2271574	83213	1.000	1.000	AAH	chr17	38581174
+rs16941	rs11651623	85412	1.000	1.000	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38583373
+rs16941	rs11657883	85589	1.000	1.000	OQ	chr17	38583550
+rs16941	rs11653460	86871	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584832
+rs16941	rs11650913	87162	1.000	1.000	OQ	chr17	38585123
+rs16941	rs12936831	87381	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38585342
+rs16941	rs1399323	87895	1.000	1.000	OQ	chr17	38585856
+rs16941	rs8070085	97549	1.000	1.000	AS,A5,A6,I1,IM,IMD,O28,O54,O5E	chr17	38595510
+rs16941	rs13851	229409	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38727370
+rs16941	rs4520874	273087	1.000	1.000	AS,A5,A6	chr17	38771048
+rs16941	rs4793229	275899	1.000	1.000	AN,A5,A6	chr17	38773860
+rs16941	rs1824889	279441	1.000	1.000	None	chr17	38777402
+rs16941	rs9646417	281818	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr17	38779779
+rs16941	rs1545764	282130	1.000	1.000	None	chr17	38780091
+rs16941	rs11651341	285626	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38783587
+rs16941	rs799917	501	0.964	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38498462
+rs16941	rs799916	1245	0.964	1.000	AN,A5,A6,IM,IMD,O54,O5E	chr17	38496716
+rs16941	rs8067269	8636	0.964	1.000	A6,IM,IMD,O54,O5E	chr17	38489325
+rs16941	rs799912	12699	0.964	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38510660
+rs16941	rs8176198	13898	0.964	1.000	AS,A6	chr17	38484063
+rs16941	rs2236762	17760	0.964	1.000	None	chr17	38480201
+rs16941	rs799905	32752	0.964	1.000	I1	chr17	38530713
+rs16941	rs799906	33681	0.964	1.000	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38531642
+rs16941	rs8070179	41747	0.964	1.000	None	chr17	38456214
+rs16941	rs7406700	44326	0.964	1.000	None	chr17	38453635
+rs16941	rs7223062	53217	0.964	1.000	None	chr17	38551178
+rs16941	rs9911630	56093	0.964	1.000	AS,A5,A6,I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38441868
+rs16941	rs11653253	61773	0.964	1.000	None	chr17	38436188
+rs16941	rs2298862	67747	0.964	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38430214
+rs16941	rs4239149	83660	0.964	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38581621
+rs16941	rs9646418	283466	0.964	1.000	A6	chr17	38781427
+rs16941	rs9646413	283722	0.964	1.000	A6	chr17	38781683
+rs16941	rs7405989	284968	0.964	1.000	None	chr17	38782929
+rs16941	rs11657004	300316	0.930	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38798277
+rs16941	rs9912203	302710	0.930	1.000	AS,A5,A6,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38800671
+rs16941	rs11653231	87025	0.928	0.963	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584986
+rs80357459	WARNING	Query snp not in Release 21
+rs80357459	WARNING	No matching proxy snps found
+rs1800704	WARNING	No LD data is available for rs1800704 in Release 21, panel CEU
+rs1800704	WARNING	No matching proxy snps found
+rs56321129	WARNING	Query snp not in Release 21
+rs56321129	WARNING	No matching proxy snps found
+rs144853230	WARNING	Query snp not in Release 21
+rs144853230	WARNING	No matching proxy snps found
+rs559190752	WARNING	Query snp not in Release 21
+rs559190752	WARNING	No matching proxy snps found
+rs80356851	WARNING	Query snp not in Release 21
+rs80356851	WARNING	No matching proxy snps found
+rs4986847	WARNING	Query snp not in Release 21
+rs4986847	WARNING	No matching proxy snps found
+rs199954851	WARNING	Query snp not in Release 21
+rs199954851	WARNING	No matching proxy snps found
+rs1800740	WARNING	Query snp not in Release 21
+rs1800740	WARNING	No matching proxy snps found
+rs799917	rs799917	0	1.000	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38498462
+rs799917	rs799916	1746	1.000	1.000	AN,A5,A6,IM,IMD,O54,O5E	chr17	38496716
+rs799917	rs8067269	9137	1.000	1.000	A6,IM,IMD,O54,O5E	chr17	38489325
+rs799917	rs799912	12198	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38510660
+rs799917	rs8176198	14399	1.000	1.000	AS,A6	chr17	38484063
+rs799917	rs2236762	18261	1.000	1.000	None	chr17	38480201
+rs799917	rs799905	32251	1.000	1.000	I1	chr17	38530713
+rs799917	rs799906	33180	1.000	1.000	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38531642
+rs799917	rs8070179	42248	1.000	1.000	None	chr17	38456214
+rs799917	rs7223062	52716	1.000	1.000	None	chr17	38551178
+rs799917	rs9911630	56594	1.000	1.000	AS,A5,A6,I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38441868
+rs799917	rs4239149	83159	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38581621
+rs799917	rs9646418	282965	1.000	1.000	A6	chr17	38781427
+rs799917	rs9646413	283221	1.000	1.000	A6	chr17	38781683
+rs799917	rs7405989	284467	1.000	1.000	None	chr17	38782929
+rs799917	rs11657004	299815	0.965	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38798277
+rs799917	rs9912203	302209	0.965	1.000	AS,A5,A6,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38800671
+rs799917	rs16940	301	0.964	1.000	I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38498763
+rs799917	rs16941	501	0.964	1.000	I1,IM,IMD,OQ,AxM,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497961
+rs799917	rs1799949	530	0.964	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,OEE,AAE	chr17	38498992
+rs799917	rs16942	936	0.964	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497526
+rs799917	rs2070834	2651	0.964	1.000	AAH	chr17	38495811
+rs799917	rs8176140	6710	0.964	1.000	None	chr17	38505172
+rs799917	rs3950989	6983	0.964	1.000	IM,IMD,O54,O5E	chr17	38491479
+rs799917	rs1060915	10466	0.964	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38487996
+rs799917	rs4793197	13034	0.964	1.000	AS,A5,A6,IM,IMD,O54,O5E	chr17	38485428
+rs799917	rs8176193	13420	0.964	1.000	None	chr17	38485042
+rs799917	rs8176194	13715	0.964	1.000	None	chr17	38484747
+rs799917	rs8176126	14113	0.964	1.000	AN,A5,A6,I1,IM,IMD,O54,O5E	chr17	38512575
+rs799917	rs12939251	14708	0.964	1.000	None	chr17	38483754
+rs799917	rs1799966	21842	0.964	1.000	AG,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,AxM,IWQ,AAE,AAH	chr17	38476620
+rs799917	rs4793194	26603	0.964	1.000	IM,IMD,O54,O5E	chr17	38471859
+rs799917	rs8176242	27062	0.964	1.000	None	chr17	38471400
+rs799917	rs3092994	29111	0.964	1.000	I1,IM,IMD,O54,O5E	chr17	38469351
+rs799917	rs8176265	30940	0.964	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38467522
+rs799917	rs3765640	31311	0.964	1.000	I1,IM,IMD,O54,O5E	chr17	38529773
+rs799917	rs8176273	33283	0.964	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38465179
+rs799917	rs11653069	38441	0.964	1.000	IM,IMD,O54,O5E	chr17	38536903
+rs799917	rs8176289	38880	0.964	1.000	None	chr17	38459582
+rs799917	rs4793191	40559	0.964	1.000	None	chr17	38457903
+rs799917	rs8176297	41611	0.964	1.000	I1	chr17	38456851
+rs799917	rs2175957	41886	0.964	1.000	I1,IM,IMD,CYT	chr17	38540348
+rs799917	rs3092988	43234	0.964	1.000	None	chr17	38455228
+rs799917	rs11656097	45677	0.964	1.000	None	chr17	38544139
+rs799917	rs2292595	45738	0.964	1.000	None	chr17	38544200
+rs799917	rs8176318	47662	0.964	1.000	AS,A6,I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38450800
+rs799917	rs11658754	47803	0.964	1.000	None	chr17	38546265
+rs799917	rs8176322	49163	0.964	1.000	None	chr17	38449299
+rs799917	rs8176323	49225	0.964	1.000	None	chr17	38449237
+rs799917	rs11657053	53807	0.964	1.000	I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38444655
+rs799917	rs11079056	55863	0.964	1.000	None	chr17	38554325
+rs799917	rs915945	65072	0.964	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38433390
+rs799917	rs1973646	65559	0.964	1.000	IMD,O54,O5E	chr17	38564021
+rs799917	rs2271573	82685	0.964	1.000	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38581147
+rs799917	rs2271574	82712	0.964	1.000	AAH	chr17	38581174
+rs799917	rs11651623	84911	0.964	1.000	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38583373
+rs799917	rs11657883	85088	0.964	1.000	OQ	chr17	38583550
+rs799917	rs11653460	86370	0.964	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584832
+rs799917	rs11650913	86661	0.964	1.000	OQ	chr17	38585123
+rs799917	rs12936831	86880	0.964	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38585342
+rs799917	rs1399323	87394	0.964	1.000	OQ	chr17	38585856
+rs799917	rs8070085	97048	0.964	1.000	AS,A5,A6,I1,IM,IMD,O28,O54,O5E	chr17	38595510
+rs799917	rs13851	228908	0.964	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38727370
+rs799917	rs4520874	272586	0.964	1.000	AS,A5,A6	chr17	38771048
+rs799917	rs4793229	275398	0.964	1.000	AN,A5,A6	chr17	38773860
+rs799917	rs1824889	278940	0.964	1.000	None	chr17	38777402
+rs799917	rs9646417	281317	0.964	1.000	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr17	38779779
+rs799917	rs1545764	281629	0.964	1.000	None	chr17	38780091
+rs799917	rs11651341	285125	0.964	1.000	I2,I5,I6,I6Q,IM,IMD,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38783587
+rs799917	rs7406700	44827	0.929	0.964	None	chr17	38453635
+rs799917	rs11653253	62274	0.929	0.964	None	chr17	38436188
+rs799917	rs2298862	68248	0.929	0.964	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38430214
+rs799917	rs11653231	86524	0.894	0.963	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584986
+rs556684572	WARNING	Query snp not in Release 21
+rs556684572	WARNING	No matching proxy snps found
+rs80356892	WARNING	Query snp not in Release 21
+rs80356892	WARNING	No matching proxy snps found
+rs1800709	rs1800709	0	1.000	1.000	IM,IMD,OQ,AxM,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38498553
+rs564375670	WARNING	Query snp not in Release 21
+rs564375670	WARNING	No matching proxy snps found
+rs28897683	WARNING	Query snp not in Release 21
+rs28897683	WARNING	No matching proxy snps found
+rs56082113	WARNING	Query snp not in Release 21
+rs56082113	WARNING	No matching proxy snps found
+rs192655097	WARNING	Query snp not in Release 21
+rs192655097	WARNING	No matching proxy snps found
+rs41286298	WARNING	Query snp not in Release 21
+rs41286298	WARNING	No matching proxy snps found
+rs55914168	WARNING	Query snp not in Release 21
+rs55914168	WARNING	No matching proxy snps found
+rs16940	rs16940	0	1.000	1.000	I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38498763
+rs16940	rs1799949	229	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,OEE,AAE	chr17	38498992
+rs16940	rs16941	802	1.000	1.000	I1,IM,IMD,OQ,AxM,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497961
+rs16940	rs16942	1237	1.000	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497526
+rs16940	rs2070834	2952	1.000	1.000	AAH	chr17	38495811
+rs16940	rs8176140	6409	1.000	1.000	None	chr17	38505172
+rs16940	rs3950989	7284	1.000	1.000	IM,IMD,O54,O5E	chr17	38491479
+rs16940	rs1060915	10767	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38487996
+rs16940	rs4793197	13335	1.000	1.000	AS,A5,A6,IM,IMD,O54,O5E	chr17	38485428
+rs16940	rs8176193	13721	1.000	1.000	None	chr17	38485042
+rs16940	rs8176126	13812	1.000	1.000	AN,A5,A6,I1,IM,IMD,O54,O5E	chr17	38512575
+rs16940	rs8176194	14016	1.000	1.000	None	chr17	38484747
+rs16940	rs12939251	15009	1.000	1.000	None	chr17	38483754
+rs16940	rs1799966	22143	1.000	1.000	AG,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,AxM,IWQ,AAE,AAH	chr17	38476620
+rs16940	rs4793194	26904	1.000	1.000	IM,IMD,O54,O5E	chr17	38471859
+rs16940	rs8176242	27363	1.000	1.000	None	chr17	38471400
+rs16940	rs3092994	29412	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38469351
+rs16940	rs3765640	31010	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38529773
+rs16940	rs8176265	31241	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38467522
+rs16940	rs8176273	33584	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38465179
+rs16940	rs11653069	38140	1.000	1.000	IM,IMD,O54,O5E	chr17	38536903
+rs16940	rs8176289	39181	1.000	1.000	None	chr17	38459582
+rs16940	rs4793191	40860	1.000	1.000	None	chr17	38457903
+rs16940	rs2175957	41585	1.000	1.000	I1,IM,IMD,CYT	chr17	38540348
+rs16940	rs8176297	41912	1.000	1.000	I1	chr17	38456851
+rs16940	rs3092988	43535	1.000	1.000	None	chr17	38455228
+rs16940	rs11656097	45376	1.000	1.000	None	chr17	38544139
+rs16940	rs2292595	45437	1.000	1.000	None	chr17	38544200
+rs16940	rs11658754	47502	1.000	1.000	None	chr17	38546265
+rs16940	rs8176318	47963	1.000	1.000	AS,A6,I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38450800
+rs16940	rs8176322	49464	1.000	1.000	None	chr17	38449299
+rs16940	rs8176323	49526	1.000	1.000	None	chr17	38449237
+rs16940	rs11657053	54108	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38444655
+rs16940	rs11079056	55562	1.000	1.000	None	chr17	38554325
+rs16940	rs1973646	65258	1.000	1.000	IMD,O54,O5E	chr17	38564021
+rs16940	rs915945	65373	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38433390
+rs16940	rs2271573	82384	1.000	1.000	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38581147
+rs16940	rs2271574	82411	1.000	1.000	AAH	chr17	38581174
+rs16940	rs11651623	84610	1.000	1.000	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38583373
+rs16940	rs11657883	84787	1.000	1.000	OQ	chr17	38583550
+rs16940	rs11653460	86069	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584832
+rs16940	rs11650913	86360	1.000	1.000	OQ	chr17	38585123
+rs16940	rs12936831	86579	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38585342
+rs16940	rs1399323	87093	1.000	1.000	OQ	chr17	38585856
+rs16940	rs8070085	96747	1.000	1.000	AS,A5,A6,I1,IM,IMD,O28,O54,O5E	chr17	38595510
+rs16940	rs13851	228607	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38727370
+rs16940	rs4520874	272285	1.000	1.000	AS,A5,A6	chr17	38771048
+rs16940	rs4793229	275097	1.000	1.000	AN,A5,A6	chr17	38773860
+rs16940	rs1824889	278639	1.000	1.000	None	chr17	38777402
+rs16940	rs9646417	281016	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr17	38779779
+rs16940	rs1545764	281328	1.000	1.000	None	chr17	38780091
+rs16940	rs11651341	284824	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38783587
+rs16940	rs799917	301	0.964	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38498462
+rs16940	rs799916	2047	0.964	1.000	AN,A5,A6,IM,IMD,O54,O5E	chr17	38496716
+rs16940	rs8067269	9438	0.964	1.000	A6,IM,IMD,O54,O5E	chr17	38489325
+rs16940	rs799912	11897	0.964	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38510660
+rs16940	rs8176198	14700	0.964	1.000	AS,A6	chr17	38484063
+rs16940	rs2236762	18562	0.964	1.000	None	chr17	38480201
+rs16940	rs799905	31950	0.964	1.000	I1	chr17	38530713
+rs16940	rs799906	32879	0.964	1.000	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38531642
+rs16940	rs8070179	42549	0.964	1.000	None	chr17	38456214
+rs16940	rs7406700	45128	0.964	1.000	None	chr17	38453635
+rs16940	rs7223062	52415	0.964	1.000	None	chr17	38551178
+rs16940	rs9911630	56895	0.964	1.000	AS,A5,A6,I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38441868
+rs16940	rs11653253	62575	0.964	1.000	None	chr17	38436188
+rs16940	rs2298862	68549	0.964	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38430214
+rs16940	rs4239149	82858	0.964	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38581621
+rs16940	rs9646418	282664	0.964	1.000	A6	chr17	38781427
+rs16940	rs9646413	282920	0.964	1.000	A6	chr17	38781683
+rs16940	rs7405989	284166	0.964	1.000	None	chr17	38782929
+rs16940	rs11657004	299514	0.930	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38798277
+rs16940	rs9912203	301908	0.930	1.000	AS,A5,A6,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38800671
+rs16940	rs11653231	86223	0.928	0.963	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584986
+rs201875054	WARNING	Query snp not in Release 21
+rs201875054	WARNING	No matching proxy snps found
+rs273898682	WARNING	Query snp not in Release 21
+rs273898682	WARNING	No matching proxy snps found
+rs4986846	WARNING	Query snp not in Release 21
+rs4986846	WARNING	No matching proxy snps found
+rs4986845	WARNING	No LD data is available for rs4986845 in Release 21, panel CEU
+rs4986845	WARNING	No matching proxy snps found
+rs80357147	WARNING	Query snp not in Release 21
+rs80357147	WARNING	No matching proxy snps found
+rs568312345	WARNING	Query snp not in Release 21
+rs568312345	WARNING	No matching proxy snps found
+rs4986844	WARNING	Query snp not in Release 21
+rs4986844	WARNING	No matching proxy snps found
+rs1799949	rs1799949	0	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,OEE,AAE	chr17	38498992
+rs1799949	rs16940	229	1.000	1.000	I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38498763
+rs1799949	rs16941	1031	1.000	1.000	I1,IM,IMD,OQ,AxM,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497961
+rs1799949	rs16942	1466	1.000	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497526
+rs1799949	rs2070834	3181	1.000	1.000	AAH	chr17	38495811
+rs1799949	rs8176140	6180	1.000	1.000	None	chr17	38505172
+rs1799949	rs3950989	7513	1.000	1.000	IM,IMD,O54,O5E	chr17	38491479
+rs1799949	rs1060915	10996	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38487996
+rs1799949	rs4793197	13564	1.000	1.000	AS,A5,A6,IM,IMD,O54,O5E	chr17	38485428
+rs1799949	rs8176126	13583	1.000	1.000	AN,A5,A6,I1,IM,IMD,O54,O5E	chr17	38512575
+rs1799949	rs8176193	13950	1.000	1.000	None	chr17	38485042
+rs1799949	rs8176194	14245	1.000	1.000	None	chr17	38484747
+rs1799949	rs12939251	15238	1.000	1.000	None	chr17	38483754
+rs1799949	rs1799966	22372	1.000	1.000	AG,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,AxM,IWQ,AAE,AAH	chr17	38476620
+rs1799949	rs4793194	27133	1.000	1.000	IM,IMD,O54,O5E	chr17	38471859
+rs1799949	rs8176242	27592	1.000	1.000	None	chr17	38471400
+rs1799949	rs3092994	29641	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38469351
+rs1799949	rs3765640	30781	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38529773
+rs1799949	rs8176265	31470	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38467522
+rs1799949	rs8176273	33813	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38465179
+rs1799949	rs11653069	37911	1.000	1.000	IM,IMD,O54,O5E	chr17	38536903
+rs1799949	rs8176289	39410	1.000	1.000	None	chr17	38459582
+rs1799949	rs4793191	41089	1.000	1.000	None	chr17	38457903
+rs1799949	rs2175957	41356	1.000	1.000	I1,IM,IMD,CYT	chr17	38540348
+rs1799949	rs8176297	42141	1.000	1.000	I1	chr17	38456851
+rs1799949	rs3092988	43764	1.000	1.000	None	chr17	38455228
+rs1799949	rs11656097	45147	1.000	1.000	None	chr17	38544139
+rs1799949	rs2292595	45208	1.000	1.000	None	chr17	38544200
+rs1799949	rs11658754	47273	1.000	1.000	None	chr17	38546265
+rs1799949	rs8176318	48192	1.000	1.000	AS,A6,I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38450800
+rs1799949	rs8176322	49693	1.000	1.000	None	chr17	38449299
+rs1799949	rs8176323	49755	1.000	1.000	None	chr17	38449237
+rs1799949	rs11657053	54337	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38444655
+rs1799949	rs11079056	55333	1.000	1.000	None	chr17	38554325
+rs1799949	rs1973646	65029	1.000	1.000	IMD,O54,O5E	chr17	38564021
+rs1799949	rs915945	65602	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38433390
+rs1799949	rs2271573	82155	1.000	1.000	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38581147
+rs1799949	rs2271574	82182	1.000	1.000	AAH	chr17	38581174
+rs1799949	rs11651623	84381	1.000	1.000	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38583373
+rs1799949	rs11657883	84558	1.000	1.000	OQ	chr17	38583550
+rs1799949	rs11653460	85840	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584832
+rs1799949	rs11650913	86131	1.000	1.000	OQ	chr17	38585123
+rs1799949	rs12936831	86350	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38585342
+rs1799949	rs1399323	86864	1.000	1.000	OQ	chr17	38585856
+rs1799949	rs8070085	96518	1.000	1.000	AS,A5,A6,I1,IM,IMD,O28,O54,O5E	chr17	38595510
+rs1799949	rs13851	228378	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38727370
+rs1799949	rs4520874	272056	1.000	1.000	AS,A5,A6	chr17	38771048
+rs1799949	rs4793229	274868	1.000	1.000	AN,A5,A6	chr17	38773860
+rs1799949	rs1824889	278410	1.000	1.000	None	chr17	38777402
+rs1799949	rs9646417	280787	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr17	38779779
+rs1799949	rs1545764	281099	1.000	1.000	None	chr17	38780091
+rs1799949	rs11651341	284595	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38783587
+rs1799949	rs799917	530	0.964	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38498462
+rs1799949	rs799916	2276	0.964	1.000	AN,A5,A6,IM,IMD,O54,O5E	chr17	38496716
+rs1799949	rs8067269	9667	0.964	1.000	A6,IM,IMD,O54,O5E	chr17	38489325
+rs1799949	rs799912	11668	0.964	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38510660
+rs1799949	rs8176198	14929	0.964	1.000	AS,A6	chr17	38484063
+rs1799949	rs2236762	18791	0.964	1.000	None	chr17	38480201
+rs1799949	rs799905	31721	0.964	1.000	I1	chr17	38530713
+rs1799949	rs799906	32650	0.964	1.000	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38531642
+rs1799949	rs8070179	42778	0.964	1.000	None	chr17	38456214
+rs1799949	rs7406700	45357	0.964	1.000	None	chr17	38453635
+rs1799949	rs7223062	52186	0.964	1.000	None	chr17	38551178
+rs1799949	rs9911630	57124	0.964	1.000	AS,A5,A6,I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38441868
+rs1799949	rs11653253	62804	0.964	1.000	None	chr17	38436188
+rs1799949	rs2298862	68778	0.964	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38430214
+rs1799949	rs4239149	82629	0.964	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38581621
+rs1799949	rs9646418	282435	0.964	1.000	A6	chr17	38781427
+rs1799949	rs9646413	282691	0.964	1.000	A6	chr17	38781683
+rs1799949	rs7405989	283937	0.964	1.000	None	chr17	38782929
+rs1799949	rs11657004	299285	0.930	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38798277
+rs1799949	rs9912203	301679	0.930	1.000	AS,A5,A6,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38800671
+rs1799949	rs11653231	85994	0.928	0.963	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584986
+rs4986850	rs4986850	0	1.000	1.000	AG,IM,IMD,OQ,AxM,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38498997
+rs545736576	WARNING	Query snp not in Release 21
+rs545736576	WARNING	No matching proxy snps found
+rs28897680	WARNING	Query snp not in Release 21
+rs28897680	WARNING	No matching proxy snps found
+rs572835027	WARNING	Query snp not in Release 21
+rs572835027	WARNING	No matching proxy snps found
+rs80356895	WARNING	Query snp not in Release 21
+rs80356895	WARNING	No matching proxy snps found
+rs561988641	WARNING	Query snp not in Release 21
+rs561988641	WARNING	No matching proxy snps found
+rs28897679	WARNING	Query snp not in Release 21
+rs28897679	WARNING	No matching proxy snps found
+rs80358329	WARNING	Query snp not in Release 21
+rs80358329	WARNING	No matching proxy snps found
+rs80357220	WARNING	Query snp not in Release 21
+rs80357220	WARNING	No matching proxy snps found
+rs80357371	WARNING	Query snp not in Release 21
+rs80357371	WARNING	No matching proxy snps found
+rs530914551	WARNING	Query snp not in Release 21
+rs530914551	WARNING	No matching proxy snps found
+rs552505690	WARNING	Query snp not in Release 21
+rs552505690	WARNING	No matching proxy snps found
+rs80357159	WARNING	Query snp not in Release 21
+rs80357159	WARNING	No matching proxy snps found
+rs56012641	WARNING	Query snp not in Release 21
+rs56012641	WARNING	No matching proxy snps found
+rs80357374	WARNING	Query snp not in Release 21
+rs80357374	WARNING	No matching proxy snps found
+rs200616937	WARNING	Query snp not in Release 21
+rs200616937	WARNING	No matching proxy snps found
+rs56272539	WARNING	Query snp not in Release 21
+rs56272539	WARNING	No matching proxy snps found
+rs80357445	WARNING	Query snp not in Release 21
+rs80357445	WARNING	No matching proxy snps found
+rs369588942	WARNING	Query snp not in Release 21
+rs369588942	WARNING	No matching proxy snps found
+rs55906931	WARNING	Query snp not in Release 21
+rs55906931	WARNING	No matching proxy snps found
+rs55720177	WARNING	Query snp not in Release 21
+rs55720177	WARNING	No matching proxy snps found
+rs199540030	WARNING	Query snp not in Release 21
+rs199540030	WARNING	No matching proxy snps found
+rs533802049	WARNING	Query snp not in Release 21
+rs533802049	WARNING	No matching proxy snps found
+rs372400428	WARNING	Query snp not in Release 21
+rs372400428	WARNING	No matching proxy snps found
+rs574008372	WARNING	Query snp not in Release 21
+rs574008372	WARNING	No matching proxy snps found
+rs80357024	WARNING	Query snp not in Release 21
+rs80357024	WARNING	No matching proxy snps found
+rs562553169	WARNING	Query snp not in Release 21
+rs562553169	WARNING	No matching proxy snps found
+rs56128296	WARNING	Query snp not in Release 21
+rs56128296	WARNING	No matching proxy snps found
+rs1799950	rs1799950	0	1.000	1.000	AG,IM,IMD,OQ,AxM,CM,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38500007
+rs41286292	WARNING	Query snp not in Release 21
+rs41286292	WARNING	No matching proxy snps found
+rs80357464	WARNING	Query snp not in Release 21
+rs80357464	WARNING	No matching proxy snps found
+rs1800063	WARNING	Query snp not in Release 21
+rs1800063	WARNING	No matching proxy snps found
+rs561998108	WARNING	Query snp not in Release 21
+rs561998108	WARNING	No matching proxy snps found
+rs186274774	WARNING	Query snp not in Release 21
+rs186274774	WARNING	No matching proxy snps found
+rs397509328	WARNING	Query snp not in Release 21
+rs397509328	WARNING	No matching proxy snps found
+rs8176153	WARNING	Query snp not in Release 21
+rs8176153	WARNING	No matching proxy snps found
+rs80357244	WARNING	Query snp not in Release 21
+rs80357244	WARNING	No matching proxy snps found
+rs149867679	WARNING	Query snp not in Release 21
+rs149867679	WARNING	No matching proxy snps found
+rs201441987	WARNING	Query snp not in Release 21
+rs201441987	WARNING	No matching proxy snps found
+rs62625299	WARNING	Query snp not in Release 21
+rs62625299	WARNING	No matching proxy snps found
+rs28897675	WARNING	Query snp not in Release 21
+rs28897675	WARNING	No matching proxy snps found
+rs147519994	WARNING	Query snp not in Release 21
+rs147519994	WARNING	No matching proxy snps found
+rs191872612	WARNING	Query snp not in Release 21
+rs191872612	WARNING	No matching proxy snps found
+rs201596327	WARNING	Query snp not in Release 21
+rs201596327	WARNING	No matching proxy snps found
+rs1799965	WARNING	Query snp not in Release 21
+rs1799965	WARNING	No matching proxy snps found
+rs80357090	WARNING	Query snp not in Release 21
+rs80357090	WARNING	No matching proxy snps found
+rs201536070	WARNING	Query snp not in Release 21
+rs201536070	WARNING	No matching proxy snps found
+rs55688530	WARNING	Query snp not in Release 21
+rs55688530	WARNING	No matching proxy snps found
+rs56187033	WARNING	Query snp not in Release 21
+rs56187033	WARNING	No matching proxy snps found
+rs542687218	WARNING	Query snp not in Release 21
+rs542687218	WARNING	No matching proxy snps found
+rs80356888	WARNING	Query snp not in Release 21
+rs80356888	WARNING	No matching proxy snps found
+rs190900046	WARNING	Query snp not in Release 21
+rs190900046	WARNING	No matching proxy snps found
+rs80357102	WARNING	Query snp not in Release 21
+rs80357102	WARNING	No matching proxy snps found
+rs199522616	WARNING	Query snp not in Release 21
+rs199522616	WARNING	No matching proxy snps found
+rs1800062	WARNING	Query snp not in Release 21
+rs1800062	WARNING	No matching proxy snps found
+rs183557525	WARNING	Query snp not in Release 21
+rs183557525	WARNING	No matching proxy snps found
+rs80357134	WARNING	Query snp not in Release 21
+rs80357134	WARNING	No matching proxy snps found
+rs528902306	WARNING	Query snp not in Release 21
+rs528902306	WARNING	No matching proxy snps found
+rs149402012	WARNING	Query snp not in Release 21
+rs149402012	WARNING	No matching proxy snps found
+rs544342552	WARNING	Query snp not in Release 21
+rs544342552	WARNING	No matching proxy snps found
+rs549332987	WARNING	Query snp not in Release 21
+rs549332987	WARNING	No matching proxy snps found
+rs529629382	WARNING	Query snp not in Release 21
+rs529629382	WARNING	No matching proxy snps found
+rs544857747	WARNING	Query snp not in Release 21
+rs544857747	WARNING	No matching proxy snps found
+rs187992882	WARNING	Query snp not in Release 21
+rs187992882	WARNING	No matching proxy snps found
+rs527449526	WARNING	Query snp not in Release 21
+rs527449526	WARNING	No matching proxy snps found
+rs548750620	WARNING	Query snp not in Release 21
+rs548750620	WARNING	No matching proxy snps found
+rs190861568	WARNING	Query snp not in Release 21
+rs190861568	WARNING	No matching proxy snps found
+rs148196794	WARNING	Query snp not in Release 21
+rs148196794	WARNING	No matching proxy snps found
+rs113323025	WARNING	Query snp not in Release 21
+rs113323025	WARNING	No matching proxy snps found
+rs569113962	WARNING	Query snp not in Release 21
+rs569113962	WARNING	No matching proxy snps found
+rs539845430	WARNING	Query snp not in Release 21
+rs539845430	WARNING	No matching proxy snps found

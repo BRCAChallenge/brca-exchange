@@ -12,6 +12,28 @@ def write_query_rsids(infile_name, outfile_name=None):
     for snp in vcf_reader:
       outfile.write(snp.ID+'\n')
 
+def read_snapout(snapout_name):
+  """ Read SNAP output into dictionary.
+      Each entry has a SNP being the key and all proxies and their LD info being the value.
+  """
+  snapout = csv.DictReader(open(config.data_path+snapout_name, 'rb'), delimiter='\t')
+  ld_dict = {}
+  for line in snapout:
+    snp, prx, rsq, dpr = line['SNP'], line['Proxy'], line['RSquared'], line['DPrime']
+
+    # Check if is error line
+    if prx.startswith('WARNING') or prx.startswith('ERROR'):
+      continue
+
+    if snp in ld_dict.keys():
+      lds = ld_dict[snp]
+    else:
+      lds = []
+    lds.append({'proxy': prx, 'rsquared': rsq, 'dprime': dpr})
+    ld_dict[snp] = lds
+
+  return ld_dict
+
 def write_snap_to_vcf(snapout_name, outvcf_name):
   """ Write a VCF file from SNAP output file. """
   # Read SNAP output as dicts
@@ -19,16 +41,6 @@ def write_snap_to_vcf(snapout_name, outvcf_name):
   for d in snapout:
     if d['Proxy'].startswith('WARNING') or d['Proxy'].startswith('ERROR'):
       pass
-
-  # Read vcf as dicts
-  #vcf_reader = vcf.Reader(open(config.data_path+'1000G_brca.hg38_exon.vcf', 'rb'))
-  #myout = []
-  #for snp in vcf_reader:
-  #  d = {}
-  #  d['Coordinate_HG38'] = snp.POS
-  #  d['Chromosome'] = snp.CHROM
-  #  d['SNP'] = snp.ID
-  #  myout.append(d)
 
   # Create VCF file from SNAP
   vcf_reader = vcf.Reader(open(config.data_path+'1000G_brca.hg38_exon.vcf', 'rb'))
@@ -44,10 +56,13 @@ def write_snap_to_vcf(snapout_name, outvcf_name):
 
 
 if __name__ == '__main__':
-  # Create query file
-  #write_query_rsids('1000G_brca.hg38_exon.vcf')
+  # Convert from HG38 to HG18: 38 to 19, 19 to 18
 
-  # Manually query from SNAP
+  # Create query file
+  write_query_rsids('1000G_brca.hg38to19to18_exon.vcf')
+
+  # Manually query from SNAP by loading query file to their web app
 
   # Convert to VCF
-  write_snap_to_vcf('SNAPResults-chr13chr17-1K1.txt', 'test_writer.vcf')
+  #write_snap_to_vcf('SNAPResults-chr13chr17-1K1.txt', 'test_writer.vcf')
+
