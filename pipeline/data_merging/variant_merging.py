@@ -78,6 +78,7 @@ LOVD_FIELDS = {"Variant_frequency": "frequency",
                "Variant_effect": "variant_effect",
                "Individuals": "individuals",
                "Submitters": "submitters",
+               "DBID": "DBID",
                "BX_ID": "BX_ID"
                }
 
