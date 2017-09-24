@@ -36,16 +36,24 @@ def expr_vary_af_treshold(input_fn, type='a'):
     thresholds = [r for r in range(0, 11)]
   if type == 'b': # 0, 0.1, ..., 1
     thresholds = [0.1 * r for r in range(0, 11)]
-  plot_vary_af_threshold(input_fn, thresholds, type)
+  vary_af_threshold(input_fn, thresholds, type)
 
-def plot_vary_af_threshold(input_fn, thresholds, type):
+def expr_vary_af_treshold_2(input_fn):
+  if type == 'a': # 0, 1, ..., 10
+    thresholds = [r for r in range(0, 11)]
+  if type == 'b': # 0, 0.1, ..., 1
+    thresholds = [0.1 * r for r in range(0, 11)]
+  idabs, snp_nums = vary_af_threshold(input_fn, thresholds)
+  
+
+def vary_af_threshold(input_fn, thresholds, type):
   """ Vary allele frequency threshold and plot change in identifiability. """
   dobs = utils.synthetic_dob(2504)
 
   # Find identifiability of SNPs selected using each threshold.
   expr_data_path = data_path+'expr_data_vary_af_thresh.pickle'
   if os.path.exists(expr_data_path):
-    idabs, snp_nums = pickle.load(expr_data_path)
+    idabs, snp_nums = pickle.load(open(expr_data_path, 'rb'))
   else:
     idabs = []
     snp_nums = []
@@ -55,7 +63,9 @@ def plot_vary_af_threshold(input_fn, thresholds, type):
       idab, snp_num = snp_info.identifiability(af_thresh_fn, use_dob=config.birth_type, dobs=dobs)
       idabs.append(idab)
       snp_nums.append(snp_num)
-    pickle.dump((idabs, snp_nums), expr_data_path)
+    pickle.dump((idabs, snp_nums), open(expr_data_path, 'wb'))
+
+#  return idabs, snp_nums
 
   # Plot identifiability change.
   plt.plot(thresholds, idabs)
