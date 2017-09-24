@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 import utils
 import snp_info
 import vcf
@@ -6,6 +8,8 @@ import config
 import numpy as np
 import argparse
 import hashlib
+import os
+import pickle
 
 data_path = config.data_path
 plot_path = config.plot_path
@@ -39,19 +43,24 @@ def plot_vary_af_threshold(input_fn, thresholds, type):
   dobs = utils.synthetic_dob(2504)
 
   # Find identifiability of SNPs selected using each threshold.
-  idabs = []
-  snp_nums = []
-  for t in thresholds:
-    af_thresh_fn = input_fn[:-4] + '_af' + str(t) + '.vcf'
-    utils.extract_high_af(input_fn, af_thresh_fn, t)
-    idab, snp_num = snp_info.identifiability(af_thresh_fn, use_dob=True, dobs=dobs)
-    idabs.append(idab)
-    snp_nums.append(snp_num)
+  expr_data_path = data_path+'expr_data_vary_af_thresh.pickle'
+  if os.path.exists(expr_data_path):
+    idabs, snp_nums = pickle.load(expr_data_path)
+  else:
+    idabs = []
+    snp_nums = []
+    for t in thresholds:
+      af_thresh_fn = input_fn[:-4] + '_af' + str(t) + '.vcf'
+      utils.extract_high_af(input_fn, af_thresh_fn, t)
+      idab, snp_num = snp_info.identifiability(af_thresh_fn, use_dob=config.birth_type, dobs=dobs)
+      idabs.append(idab)
+      snp_nums.append(snp_num)
+    pickle.dump((idabs, snp_nums), expr_data_path)
 
   # Plot identifiability change.
   plt.plot(thresholds, idabs)
   # In xticks show number of SNPs obtained with each threshold
-  plt.xticks(thresholds, [t+'\n'+str(snp_nums[i]) for i, t in enumerate(thresholds)])
+  plt.xticks(thresholds, [str(t)+'\n'+str(snp_nums[i]) for i, t in enumerate(thresholds)])
   plt.title('Identifiability using SNPs with each allele frequency >= t%')
   plt.savefig(plot_path+'thresholds'+'_'+type+'_birth'+config.birth_type+'.pdf')
 
