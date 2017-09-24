@@ -29,7 +29,8 @@ def get_snps(input_fn, output_fn):
 def extract_high_af(input_fn, output_fn, t):
   """ Output file with all SNPs with allele frequencies all >= t% """
   if os.path.exists(data_path+output_fn):
-    print "Regenerating", data_path+output_fn
+    #print "Regenerating", data_path+output_fn
+    print output_fn, "exists, not recreating"
 
   vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
   snp_indices = []

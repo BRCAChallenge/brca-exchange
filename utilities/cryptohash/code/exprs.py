@@ -26,6 +26,24 @@ def high_af_snps(high_af_fn):
   """  """
   pass
 
+def expr_vary_af_treshold():
+  pass
+
+def plot_vary_af_threshold(input_fn, thresholds):
+  """ Vary allele frequency threshold and plot change in identifiability. """
+  dobs = utils.syntehtic_dob(2504)
+
+  # Find identifiability of SNPs selected using each threshold.
+  idabs = []
+  for t in thresholds:
+    output_fn = input_fn[:-4] + "_af" + t + ".vcf"
+    utils.extract_high_af(input_fn, af_thresh_fn, t)
+    idab, snp_num = snp_info.identifiability(af_thresh_fn, use_dob=true, dobs=dobs)
+    idabs.append(idab)
+
+  # Plot identifiability change.
+  
+
 def snp_sampling(input_fn):
   """ Vary the size of subsets of SNPs (10%, 20%, ..., 100%), 
       and show how identifiability is affected. """

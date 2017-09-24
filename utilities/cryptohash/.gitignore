@@ -1,7 +1,4 @@
 *.DS_Store
 code/*.pyc
 code/*.swp
-writeups/*.aux
-writeups/*.log
-writeups/*.pdf
-writeups/*.synctex.gz
+writeups/

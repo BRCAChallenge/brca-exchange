@@ -1,8 +1,8 @@
 
 
-def knapSack(W, wt, val, n):
-  """ A Dynamic Programming based Python Program for 0-1 Knapsack problem
-      Returns the maximum value that can be put in a knapsack of capacity W
+def knapsack(W, wt, val, n):
+  """ A Dynamic Programming based Python Program for 0-1 Knapsack problem.
+      Returns the maximum value that can be put in a knapsack of capacity W.
   """
     K = [[0 for x in range(W+1)] for x in range(n+1)]
     for i in range(n+1):
@@ -15,4 +15,23 @@ def knapSack(W, wt, val, n):
                 K[i][w] = K[i-1][w]
  
     return K[n][W]
+
+def select_ld(prx_dict, curr_selection):
+  """ Greedily select SNPs out of current selection,
+      based on proxy dictionary from SNAP output:
+      An unselected SNP is selected only if it is not a proxy of any selected SNP.
+      Returns the set of selected SNPs.
+  """
+  selection = set()
+  correlated = set()
+  for snp in curr_selection:
+    if snp in correlated:
+      continue
+    if snp in prx_dict.keys():
+      c = [prx['proxy'] for prx in prx_dict[snp]]
+    else:
+      c = []
+    correlated.update(c)
+    selection.add(snp)
+  return selection
 
