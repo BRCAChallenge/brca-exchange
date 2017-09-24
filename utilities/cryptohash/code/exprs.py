@@ -18,7 +18,7 @@ def init():
   parser.add_argument("-a", "--af_plot", help="Run allele frequency expr.", action='store_true')
   parser.add_argument("-t", "--af_threshold", help="Run allele freq. threshold expr.", default=None)
   parser.add_argument("-c", "--crypto_hash", help="Generate cryptographic hash.", action='store_true')
-  parser.add_argument("-b", "--birth_type", help="Use date or year of birth", default='date')
+  parser.add_argument("-b", "--birth_type", help="Use date or year of birth", default='')
   args = parser.parse_args()
 
   return args
@@ -40,18 +40,20 @@ def plot_vary_af_threshold(input_fn, thresholds, type):
 
   # Find identifiability of SNPs selected using each threshold.
   idabs = []
+  snp_nums = []
   for t in thresholds:
     af_thresh_fn = input_fn[:-4] + '_af' + str(t) + '.vcf'
     utils.extract_high_af(input_fn, af_thresh_fn, t)
-    idab, snp_num = snp_info.identifiability(af_thresh_fn, use_dob=False, dobs=dobs)
+    idab, snp_num = snp_info.identifiability(af_thresh_fn, use_dob=True, dobs=dobs)
     idabs.append(idab)
+    snp_nums.append(snp_num)
 
   # Plot identifiability change.
   plt.plot(thresholds, idabs)
   # In xticks show number of SNPs obtained with each threshold
-  #plt.xticks
+  plt.xticks(thresholds, [t+'\n'+str(snp_nums[i]) for i, t in enumerate(thresholds)])
   plt.title('Identifiability using SNPs with each allele frequency >= t%')
-  plt.savefig(plot_path+'_birth'+birth_type+'_thresholds_'+type+'.pdf')
+  plt.savefig(plot_path+'thresholds'+'_'+type+'_birth'+config.birth_type+'.pdf')
 
 def snp_sampling(input_fn):
   """ Vary the size of subsets of SNPs (10%, 20%, ..., 100%), 
