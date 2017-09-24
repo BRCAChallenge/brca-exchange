@@ -16,6 +16,7 @@ def init():
   parser.add_argument("-o", "--output", help="Output VCF file.", default='output.txt')
   parser.add_argument("-s", "--snp_sampling", help="Run SNP sampling expr.", action='store_true')
   parser.add_argument("-a", "--af_plot", help="Run allele frequency expr.", action='store_true')
+  parser.add_argument("-t", "--af_threshold", help="Run allele freq. threshold expr.", default=None)
   parser.add_argument("-c", "--crypto_hash", help="Generate cryptographic hash.", action='store_true')
   parser.add_argument("-b", "--birth_type", help="Use date or year of birth", default='date')
   args = parser.parse_args()
@@ -26,23 +27,31 @@ def high_af_snps(high_af_fn):
   """  """
   pass
 
-def expr_vary_af_treshold():
-  pass
+def expr_vary_af_treshold(input_fn, type='a'):
+  if type == 'a': # 0, 1, ..., 10
+    thresholds = [r for r in range(0, 11)]
+  if type == 'b': # 0, 0.1, ..., 1
+    thresholds = [0.1 * r for r in range(0, 11)]
+  plot_vary_af_threshold(input_fn, thresholds, type)
 
-def plot_vary_af_threshold(input_fn, thresholds):
+def plot_vary_af_threshold(input_fn, thresholds, type):
   """ Vary allele frequency threshold and plot change in identifiability. """
-  dobs = utils.syntehtic_dob(2504)
+  dobs = utils.synthetic_dob(2504)
 
   # Find identifiability of SNPs selected using each threshold.
   idabs = []
   for t in thresholds:
-    output_fn = input_fn[:-4] + "_af" + t + ".vcf"
+    af_thresh_fn = input_fn[:-4] + '_af' + str(t) + '.vcf'
     utils.extract_high_af(input_fn, af_thresh_fn, t)
-    idab, snp_num = snp_info.identifiability(af_thresh_fn, use_dob=true, dobs=dobs)
+    idab, snp_num = snp_info.identifiability(af_thresh_fn, use_dob=False, dobs=dobs)
     idabs.append(idab)
 
   # Plot identifiability change.
-  
+  plt.plot(thresholds, idabs)
+  # In xticks show number of SNPs obtained with each threshold
+  #plt.xticks
+  plt.title('Identifiability using SNPs with each allele frequency >= t%')
+  plt.savefig(plot_path+'_birth'+birth_type+'_thresholds_'+type+'.pdf')
 
 def snp_sampling(input_fn):
   """ Vary the size of subsets of SNPs (10%, 20%, ..., 100%), 
@@ -54,7 +63,6 @@ def snp_sampling(input_fn):
   dobs = utils.synthetic_dob(2504)
   for size in subset_sizes:
     print 'Using random', size, '% of SNPs'
-    # TODO: do more times and get mean
     utils.make_toy(data_path+input_fn, data_path+sub_fn, size)
     uniq_dob, snp_num = snp_info.identifiability(data_path+sub_fn, use_dob=True, dobs=dobs)
     uniq, snp_num = snp_info.identifiability(data_path+sub_fn, use_dob=False, dobs=dobs)
@@ -139,3 +147,5 @@ if __name__ == '__main__':
     plot_af_per_snp(infile)
   if args.crypto_hash:
     make_hash(infile, outfile)
+  if args.af_threshold:
+    expr_vary_af_treshold(infile, args.af_threshold)
