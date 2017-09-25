@@ -34,6 +34,7 @@ def read_snapout(snapout_name):
 
   return ld_dict
 
+
 def write_snap_to_vcf(snapout_name, outvcf_name):
   """ Write a VCF file from SNAP output file. """
   # Read SNAP output as dicts
@@ -56,7 +57,7 @@ def write_snap_to_vcf(snapout_name, outvcf_name):
 
 
 if __name__ == '__main__':
-  # Convert from HG38 to HG18: 38 to 19, 19 to 18
+  # Don't need to: Convert from HG38 to HG18: 38 to 19, 19 to 18
 
   # Create query file
   write_query_rsids('1000G_brca.hg38to19to18_exon.vcf')

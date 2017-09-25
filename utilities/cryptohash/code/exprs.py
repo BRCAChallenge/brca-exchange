@@ -15,14 +15,15 @@ data_path = config.data_path
 plot_path = config.plot_path
 
 def init():
-  parser = argparse.ArgumentParser(description="Specify parameters of experiment")
-  parser.add_argument("-i", "--input", help="Input VCF file.", default='1000G_brca.hg38_exon.vcf')
-  parser.add_argument("-o", "--output", help="Output VCF file.", default='output.txt')
-  parser.add_argument("-s", "--snp_sampling", help="Run SNP sampling expr.", action='store_true')
-  parser.add_argument("-a", "--af_plot", help="Run allele frequency expr.", action='store_true')
-  parser.add_argument("-t", "--af_threshold", help="Run allele freq. threshold expr.", default=None)
-  parser.add_argument("-c", "--crypto_hash", help="Generate cryptographic hash.", action='store_true')
-  parser.add_argument("-b", "--birth_type", help="Use date or year of birth", default='')
+  parser = argparse.ArgumentParser(description='Specify parameters of experiment')
+  parser.add_argument('-i', '--input', help='Input VCF file.', default='1000G_brca.hg38_exon.vcf')
+  parser.add_argument('-o', '--output', help='Output VCF file.', default='output.txt')
+  parser.add_argument('-s', '--snp_sampling', help='Run SNP sampling expr.', action='store_true')
+  parser.add_argument('-a', '--af_plot', help='Run allele frequency expr.', action='store_true')
+  parser.add_argument('-t', '--af_threshold', help='Run AF threshold expr.: 1-3', type=int, default=0)
+  parser.add_argument('-c', '--crypto_hash', help='Generate cryptographic hash.', action='store_true')
+  parser.add_argument('-b', '--birth_type', help='Use date or year of birth', default='')
+  parser.add_argument('-p', '--snap_output', help='SNAP output .txt file', default='SNAPResults-BRCA12exon-HapMap3r2_rsq08.txt')
   args = parser.parse_args()
 
   return args
@@ -31,48 +32,98 @@ def high_af_snps(high_af_fn):
   """  """
   pass
 
-def expr_vary_af_treshold(input_fn, type='a'):
-  if type == 'a': # 0, 1, ..., 10
-    thresholds = [r for r in range(0, 11)]
-  if type == 'b': # 0, 0.1, ..., 1
-    thresholds = [0.1 * r for r in range(0, 11)]
-  vary_af_threshold(input_fn, thresholds, type)
 
-def expr_vary_af_treshold_2(input_fn):
-  if type == 'a': # 0, 1, ..., 10
-    thresholds = [r for r in range(0, 11)]
-  if type == 'b': # 0, 0.1, ..., 1
-    thresholds = [0.1 * r for r in range(0, 11)]
-  idabs, snp_nums = vary_af_threshold(input_fn, thresholds)
-  
+def expr_vary_af_treshold(input_fn, expr):
+  thresholds = [r for r in range(0, 11)]
+  births = ['year', 'date', '']
+  plot_data = []
+  for birth in births:
+    data = get_data_vary_af_threshold(input_fn, thresholds, birth, expr)
+    plot_data.append(data)
+  plot_vary_af_threshold(thresholds, plot_data, births, expr)
 
-def vary_af_threshold(input_fn, thresholds, type):
+def plot_vary_af_threshold(thresholds, plot_data, births, expr):
+  # Plot identifiability change.
+  colors = ['r', 'b', 'g', 'm', 'c']
+  ymax, ymin = 0.0, 1.0
+  for i, (idabs, snp_nums) in enumerate(plot_data):
+    birth_type = births[i] if births[i] else 'no birth'
+    plt.plot(thresholds, idabs, colors[i], label=birth_type, alpha=1)
+    ymax = max(ymax, max(idabs))
+    ymin = min(ymin, min(idabs))
+
+  # In xticks show number of SNPs obtained with each threshold
+  plt.xticks(thresholds, [str(t)+'%\n'+str(snp_nums[i]) for i, t in enumerate(thresholds)])
+  plt.legend(loc='best', shadow=True)
+
+  title = 'Identifiability Using SNPs Filtered with '
+  af_ttl = 'AF Threshold x% '
+  snap_ttl = 'r2 Threshold 0.8 '
+  then_ttl = '\nand then '
+  if expr == 1:
+    title = (title + af_ttl).strip()
+  elif expr == 2:
+    title = (title + af_ttl + then_ttl + snap_ttl).strip()
+  elif expr == 3:
+    title = (title + snap_ttl + then_ttl + af_ttl).strip()
+  plt.title(title)
+
+  plt.xlabel('AF Threshold % and SNP Number')
+  xmax, xmin = max(thresholds), min(thresholds)
+  xrng = xmax - xmin
+  ymin = 0.45
+  yrng = ymax - ymin
+  plt.xlim([xmin - 0.05 * xrng, xmax + 0.05 * xrng])
+  plt.ylim([ymin - 0.05 * yrng, ymax + 0.05 * yrng])
+  plt.savefig(plot_path+'vary_af_expr'+str(expr)+'.pdf')
+    
+def get_data_vary_af_threshold(input_fn, thresholds, birth, expr):
   """ Vary allele frequency threshold and plot change in identifiability. """
-  dobs = utils.synthetic_dob(2504)
+  if birth:
+    config.birth_type = birth
+    dobs = utils.synthetic_dob(2504)
+  else:
+    dobs = []
+  return get_idabs(input_fn, thresholds, birth, expr, dobs)
 
+def get_idabs(input_fn, thresholds, birth, expr, dobs):
   # Find identifiability of SNPs selected using each threshold.
-  expr_data_path = data_path+'expr_data_vary_af_thresh.pickle'
+  birth_type = birth if birth else 'nobirth'
+  expr_data_path = data_path+'vary_af_thresh_'+birth_type+'_expr'+str(expr)+'.pickle'
   if os.path.exists(expr_data_path):
     idabs, snp_nums = pickle.load(open(expr_data_path, 'rb'))
+
   else:
     idabs = []
     snp_nums = []
     for t in thresholds:
-      af_thresh_fn = input_fn[:-4] + '_af' + str(t) + '.vcf'
-      utils.extract_high_af(input_fn, af_thresh_fn, t)
-      idab, snp_num = snp_info.identifiability(af_thresh_fn, use_dob=config.birth_type, dobs=dobs)
+      # Extract SNPs according to expriment
+      id_fn = ''
+      if expr == 1:
+        # Extract with AF threshold
+        id_fn = af_thresh_fn = input_fn[:-4] + '_af' + str(t) + '.vcf'
+        utils.extract_high_af(input_fn, af_thresh_fn, t)
+      elif expr == 2:
+        # Extract with AF threshold, then extract with SNAP
+        af_thresh_fn = input_fn[:-4] + '_af' + str(t) + '.vcf'
+        id_fn = redund_fn = af_thresh_fn[:-4] + '_snap.vcf'
+        utils.extract_high_af(input_fn, af_thresh_fn, t)
+        utils.extract_low_redund(af_thresh_fn, redund_fn, config.snapout_fn)
+      elif expr == 3:
+        # Extract with SNAP, then extract with AF threshold
+        redund_fn = input_fn[:-4] + '_snap.vcf'
+        id_fn = af_thresh_fn = redund_fn[:-4] + '_af' + str(t) + '.vcf'
+        utils.extract_low_redund(input_fn, redund_fn, config.snapout_fn)
+        utils.extract_high_af(redund_fn, af_thresh_fn, t)
+      #idab, snp_num = snp_info.identifiability(af_thresh_fn, use_dob=birth, dobs=dobs)
+
+      # Get identifiability data
+      idab, snp_num = snp_info.identifiability(id_fn, use_dob=birth, dobs=dobs)
       idabs.append(idab)
       snp_nums.append(snp_num)
     pickle.dump((idabs, snp_nums), open(expr_data_path, 'wb'))
 
-#  return idabs, snp_nums
-
-  # Plot identifiability change.
-  plt.plot(thresholds, idabs)
-  # In xticks show number of SNPs obtained with each threshold
-  plt.xticks(thresholds, [str(t)+'\n'+str(snp_nums[i]) for i, t in enumerate(thresholds)])
-  plt.title('Identifiability using SNPs with each allele frequency >= t%')
-  plt.savefig(plot_path+'thresholds'+'_'+type+'_birth'+config.birth_type+'.pdf')
+  return idabs, snp_nums
 
 def snp_sampling(input_fn):
   """ Vary the size of subsets of SNPs (10%, 20%, ..., 100%), 
@@ -161,6 +212,7 @@ if __name__ == '__main__':
   infile = args.input
   outfile = args.output
   config.birth_type = args.birth_type
+  config.snapout_fn = args.snap_output
 
   if args.snp_sampling:
     snp_sampling(infile)

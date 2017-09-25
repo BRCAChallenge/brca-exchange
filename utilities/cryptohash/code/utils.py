@@ -9,6 +9,7 @@ import pickle
 import numpy as np
 import config
 import os
+import snap_reader
 
 data_path = config.data_path
 
@@ -26,11 +27,47 @@ def get_snps(input_fn, output_fn):
   #      else:
   #        pass
 
+def extract_low_redund(input_fn, output_fn, snapout_fn):
+  """ Output file with non-redundant SNPs using given SNAP output file. """
+  if os.path.exists(data_path+output_fn):
+    print output_fn, "exists, not recreating"
+    return
+  print "creating", output_fn
+
+  proxy_dict = snap_reader.read_snapout(snapout_fn)
+  vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
+
+  selection = set()
+  correlated = set()
+  for snp in vcf_reader:
+    if snp.ID in correlated:
+      continue
+    if snp.ID in proxy_dict:
+      c = [proxy['proxy'] for proxy in proxy_dict[snp.ID]]
+    else:
+      c = []
+    correlated.update(c)
+    selection.add(snp.ID)
+
+  print input_fn, len(selection)
+  with open(data_path+output_fn, 'wb') as outfile:
+    with open(data_path+input_fn, 'rb') as infile:
+      for line in infile:
+        if line.startswith('#'):
+          outfile.write(line)
+        else:
+          snp_id = line.split('\t')[2]
+          if snp_id in selection:
+            outfile.write(line)
+          else:
+            continue
+
 def extract_high_af(input_fn, output_fn, t):
   """ Output file with all SNPs with allele frequencies all >= t% """
   if os.path.exists(data_path+output_fn):
     #print "Regenerating", data_path+output_fn
     print output_fn, "exists, not recreating"
+    return
 
   vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
   snp_indices = []
