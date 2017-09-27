@@ -12,29 +12,29 @@ from datetime import datetime
 
 data_path = config.data_path
 
-def shannon_entropy(reader):
+def shannon_entropy(vcf_reader):
   """ Computes the Shannon Entropy of each SNP.
-      Returns a list of entropies.
+      Returns a list of entropies and a list of RSIDs in corresponding order.
   """
-  entropies = []
-  count = 0
-  for snp in reader:
-    if count > 10:
-      #break
-      pass
+  ents_rsids = []
+  #rsids = []
+  for snp in vcf_reader:
     R = len(snp.alleles)
     probs = utils.allele_frequencies(snp)
     #for i in range(R):
     #  assert probs[i] >= 0
     entropy = -1.0 * sum([probs[i] * math.log(probs[i]) if probs[i] > 0 else 0 for i in range(R)])
-    entropies.append((count, entropy))
-    count += 1
-  return entropies
+    ents_rsids.append((entropy, snp.ID))
+  ents_rsids = sorted(ents_rsids, reverse=True, key=lambda i : i[0])
+  #print ents_rsids
+  entropies = [ent for ent, rsid in ents_rsids]
+  rsids = [rsid for ent, rsid in ents_rsids]
+  return entropies, rsids
 
-def simpson_index(reader):
+def simpson_index(vcf_reader):
   simpson_indices = []
   count = 0
-  for snp in reader:
+  for snp in vcf_reader:
     if count > 10:
       #break
       pass
@@ -65,7 +65,7 @@ def shannon_and_simpson(use_toy):
   #pprint(simpson)
   # => Entropy and Simpson give similar ranking; expected as both based on probs
 
-def genotypes(input_fn, m, n, use_dob, dobs=None):
+def genotypes(input_fn, m, n, use_dob, dobs=None, snps=None):
   """ Returns concatenated genotype strings
       (and birth information)
       of individuals in input file.
@@ -77,8 +77,9 @@ def genotypes(input_fn, m, n, use_dob, dobs=None):
   matrix1 = np.matrix(np.zeros(shape=(n, m)), dtype=str)
   matrix2 = np.matrix(np.zeros(shape=(n, m)), dtype=str)
   for i, snp in enumerate(vcf_reader):
-    for j, ind in enumerate(snp.samples):
-      matrix1[i, j], matrix2[i, j] = ind.gt_bases.split('|')
+    if not snps or snp.ID in snps: # snps=None or snp.ID in snps
+      for j, ind in enumerate(snp.samples):
+        matrix1[i, j], matrix2[i, j] = ind.gt_bases.split('|')
   matrix1 = matrix1.transpose()
   matrix2 = matrix2.transpose()
 
@@ -93,7 +94,7 @@ def genotypes(input_fn, m, n, use_dob, dobs=None):
       seqs.append(snp_str1 + snp_str2)
   return seqs
 
-def identifiability(input_fn, use_dob, dobs=None):
+def identifiability(input_fn, use_dob, dobs=None, snps=None):
   """ Computes identifiability of individuals in the dataset.
       Returns identifiability (proportion of uniquely identified individuals)
       and number of SNPs in input file.
@@ -101,7 +102,7 @@ def identifiability(input_fn, use_dob, dobs=None):
   vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
   m = len(vcf_reader.samples)
   n = sum(1 for _ in vcf_reader)
-  seqs = genotypes(input_fn, m, n, use_dob, dobs)
+  seqs = genotypes(input_fn, m, n, use_dob, dobs, snps)
   counter = Counter(seqs)
 
   o = '' if use_dob else 'o'

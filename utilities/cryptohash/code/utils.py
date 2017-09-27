@@ -13,29 +13,16 @@ import snap_reader
 
 data_path = config.data_path
 
-def get_snps(input_fn, output_fn):
-  pass
-  #""" Get the list of SNPs in file. """
-  #if os.path.exists(data_path+output_fn):
-  #  print "Regenerating", data_path+output_fn
-  #vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
-  #with open(data_path+output_fn, 'wb') as outfile:
-  #  with open(data_path+input_fn, 'rb') as infile:
-  #    for line in infile:
-  #      if line.startswith('#'):
-  #        continue
-  #      else:
-  #        pass
-
-def extract_low_redund(input_fn, output_fn, snapout_fn):
+def extract_low_redund_2(input_fn, snapout_fn, rsq_thresh):
   """ Output file with non-redundant SNPs using given SNAP output file. """
-  if os.path.exists(data_path+output_fn):
-    print output_fn, "exists, not recreating"
-    return
-  print "creating", output_fn
+  selection_pkl = input_fn[:-4] + '_snap_r2=' + str(rsq_thresh).zfill(2) + '.pickle'
+  if os.path.exists(data_path + selection_pkl):
+    print selection_pkl, "exists, not recreating"
+    return pickle.load(open(data_path + selection_pkl, 'rb'))
+  print "creating", selection_pkl
 
   proxy_dict = snap_reader.read_snapout(snapout_fn)
-  vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
+  vcf_reader = vcf.Reader(open(data_path + input_fn, 'rb'))
 
   selection = set()
   correlated = set()
@@ -49,7 +36,32 @@ def extract_low_redund(input_fn, output_fn, snapout_fn):
     correlated.update(c)
     selection.add(snp.ID)
 
-  print input_fn, len(selection)
+  pickle.dump(selection, open(data_path + selection_pkl, 'wb'))
+
+  return selection
+
+def extract_low_redund(input_fn, output_fn, snapout_fn):
+  """ Output file with non-redundant SNPs using given SNAP output file. """
+  if os.path.exists(data_path + output_fn):
+    print output_fn, "exists, not recreating"
+    return
+  print "creating", output_fn
+
+  proxy_dict = snap_reader.read_snapout(snapout_fn)
+  vcf_reader = vcf.Reader(open(data_path + input_fn, 'rb'))
+
+  selection = set()
+  correlated = set()
+  for snp in vcf_reader:
+    if snp.ID in correlated:
+      continue
+    if snp.ID in proxy_dict:
+      c = [proxy['proxy'] for proxy in proxy_dict[snp.ID]]
+    else:
+      c = []
+    correlated.update(c)
+    selection.add(snp.ID)
+
   with open(data_path+output_fn, 'wb') as outfile:
     with open(data_path+input_fn, 'rb') as infile:
       for line in infile:
@@ -64,19 +76,19 @@ def extract_low_redund(input_fn, output_fn, snapout_fn):
 
 def extract_high_af(input_fn, output_fn, t):
   """ Output file with all SNPs with allele frequencies all >= t% """
-  if os.path.exists(data_path+output_fn):
-    #print "Regenerating", data_path+output_fn
+  if os.path.exists(data_path + output_fn):
+    #print "Regenerating", data_path + output_fn
     print output_fn, "exists, not recreating"
     return
 
-  vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
+  vcf_reader = vcf.Reader(open(data_path + input_fn, 'rb'))
   snp_indices = []
   for snp_ind, snp in enumerate(vcf_reader):
     if all(af >= 0.01 * t for af in allele_frequencies(snp)):
       snp_indices.append(snp_ind)
 
-  with open(data_path+output_fn, 'wb') as outfile:
-    with open(data_path+input_fn, 'rb') as infile:
+  with open(data_path + output_fn, 'wb') as outfile:
+    with open(data_path + input_fn, 'rb') as infile:
       snp_ind = 0
       for line in infile:
         if line.startswith('#'):

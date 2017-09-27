@@ -21,6 +21,8 @@ def init():
   parser.add_argument('-s', '--snp_sampling', help='Run SNP sampling expr.', action='store_true')
   parser.add_argument('-a', '--af_plot', help='Run allele frequency expr.', action='store_true')
   parser.add_argument('-t', '--af_threshold', help='Run AF threshold expr.: 1-3', type=int, default=0)
+  parser.add_argument('-e', '--entropy', help='Run top k entropy expr.: 1-3', type=int, default=0)
+  parser.add_argument('-d', '--redundancy', help='Run redundancy expr.', type=int, default=0)
   parser.add_argument('-c', '--crypto_hash', help='Generate cryptographic hash.', action='store_true')
   parser.add_argument('-b', '--birth_type', help='Use date or year of birth', default='')
   parser.add_argument('-p', '--snap_output', help='SNAP output .txt file', default='SNAPResults-BRCA12exon-HapMap3r2_rsq08.txt')
@@ -32,6 +34,120 @@ def high_af_snps(high_af_fn):
   """  """
   pass
 
+def expr_vary_rsq(input_fn):
+  """ Run experiment to compare identifiabilities of SNPs
+      reduced from using varying r2 thresholds.
+  """
+  rsqs = range(1, 11)
+  births = ['year', 'date', '']
+#  births = ['year']
+  plot_data = []
+  for birth in births:
+    print birth
+    data = get_data_vary_rsq(input_fn, rsqs, birth, 1)
+    plot_data.append(data)
+  plot_vary_rsq(rsqs, plot_data, births, 1)
+
+def plot_vary_rsq(rsqs, plot_data, births, expr):
+  colors = ['r', 'b', 'g', 'm', 'c']
+  ymax, ymin = 0.0, 1.0
+  for i, (idabs, snp_nums) in enumerate(plot_data):
+    birth_type = births[i] if births[i] else 'no birth'
+    plt.plot(rsqs, idabs, colors[i], label=birth_type, alpha=1)
+    ymax = max(ymax, max(idabs))
+    ymin = min(ymin, min(idabs))
+  plt.legend(loc='best', shadow=True)
+  plt.title('Identifiability of SNPs After Removing Correlated SNPs with Varying r^2')
+  plt.xlabel('r^2')
+  xmax, xmin = max(rsqs), min(rsqs)
+  xrng = xmax - xmin
+  yrng = ymax - ymin
+  plt.xlim([xmin - 0.05 * xrng, xmax + 0.05 * xrng])
+  plt.ylim([ymin - 0.05 * yrng, ymax + 0.05 * yrng])
+  plt.savefig(plot_path + 'vary_rsq.pdf')  
+
+def get_data_vary_rsq(input_fn, rsqs, birth, expr):
+  if birth:
+    config.birth_type = birth
+    dobs = utils.synthetic_dob(2504)
+  else:
+    dobs = []
+  print len(dobs)
+  return get_idabs_vary_rsq(input_fn, rsqs, birth, dobs, expr)
+
+def get_idabs_vary_rsq(input_fn, rsqs, birth, dobs, expr):
+  birth_type = birth if birth else 'nobirth'
+  expr_data_path = data_path + 'vary_rsq_data_'+birth_type+'.pickle'
+  if os.path.exists(expr_data_path):
+    idabs, snp_nums = pickle.load(open(expr_data_path, 'rb'))
+  else:
+    idabs = []
+    snp_nums = []
+    for rsq in rsqs:
+      proxy_fn = 'SNAPResults-BRCA12exon-HapMap3r2_rsq'+ str(rsq).zfill(2) +'.txt'
+      selection = utils.extract_low_redund_2(input_fn, proxy_fn, rsq)
+      idab, snp_num = snp_info.identifiability(input_fn, use_dob=birth, dobs=dobs, snps=selection)
+      idabs.append(idab)
+      snp_nums.append(snp_num)
+    pickle.dump((idabs, snp_nums), open(expr_data_path, 'wb'))
+  return idabs, snp_nums
+  
+def expr_top_k_entropy(input_fn):
+  """ Find identifiability of top k SNPs ranked with entropy, varying k. """
+  ks = range(1, 51)
+  births = ['year', 'date', '']
+  plot_data = []
+  for birth in births:
+    print birth
+    data = get_data_top_k_entropy(input_fn, ks, birth, 1)
+    plot_data.append(data)
+  plot_top_k_entropy(ks, plot_data, births, 1)
+
+def plot_top_k_entropy(ks, plot_data, births, expr):
+  colors = ['r', 'b', 'g', 'm', 'c']
+  ymax, ymin = 0.0, 1.0
+  for i, idabs in enumerate(plot_data):
+    birth_type = births[i] if births[i] else 'no birth'
+    plt.plot(ks, idabs, colors[i], label=birth_type, alpha=1)
+    ymax = max(ymax, max(idabs))
+    ymin = min(ymin, min(idabs))
+  plt.legend(loc='best', shadow=True)
+  plt.title('Identifiability of Top k SNPs ranked by Entropy')
+  plt.xlabel('Number k of SNPs')
+  xmax, xmin = max(ks), min(ks)
+  xrng = xmax - xmin
+  ymin = 0.45
+  yrng = ymax - ymin
+  plt.xlim([xmin - 0.05 * xrng, xmax + 0.05 * xrng])
+  plt.ylim([ymin - 0.05 * yrng, ymax + 0.05 * yrng])
+  plt.savefig(plot_path + 'top_k_entropy.pdf')
+
+def get_data_top_k_entropy(input_fn, ks, birth, expr):
+  if birth:
+    config.birth_type = birth
+    dobs = utils.synthetic_dob(2504)
+  else:
+    dobs = []
+  print len(dobs)
+  return get_idabs_top_k_entropy(input_fn, ks, birth, dobs, expr)
+
+def get_idabs_top_k_entropy(input_fn, ks, birth, dobs, expr):
+  birth_type = birth if birth else 'nobirth'
+  #expr_path = 'top_k_entropy'
+  expr_data_path = data_path + 'top_k_entropy_data_'+birth_type+'.pickle'
+  if os.path.exists(expr_data_path):
+    idabs = pickle.load(open(expr_data_path, 'rb'))
+  else:
+    vcf_reader = vcf.Reader(open(data_path + input_fn, 'rb'))
+    entropies, snpids = snp_info.shannon_entropy(vcf_reader)
+    #print entropies
+    idabs = []
+    for k in ks:
+      topk_entropies, topk_snps = entropies[:k], snpids[:k]
+      idab, _ = snp_info.identifiability(input_fn, use_dob=birth, dobs=dobs, snps=topk_snps)
+      idabs.append(idab)
+    pickle.dump(idabs, open(expr_data_path, 'wb'))
+  return idabs
 
 def expr_vary_af_treshold(input_fn, expr):
   thresholds = [r for r in range(0, 11)]
@@ -56,8 +172,8 @@ def plot_vary_af_threshold(thresholds, plot_data, births, expr):
   plt.xticks(thresholds, [str(t)+'%\n'+str(snp_nums[i]) for i, t in enumerate(thresholds)])
   plt.legend(loc='best', shadow=True)
 
-  title = 'Identifiability Using SNPs Filtered with '
-  af_ttl = 'AF Threshold x% '
+  title = 'Identifiability of SNPs Filtered with '
+  af_ttl = 'min AF Threshold x% '
   snap_ttl = 'r2 Threshold 0.8 '
   then_ttl = '\nand then '
   if expr == 1:
@@ -84,12 +200,13 @@ def get_data_vary_af_threshold(input_fn, thresholds, birth, expr):
     dobs = utils.synthetic_dob(2504)
   else:
     dobs = []
-  return get_idabs(input_fn, thresholds, birth, expr, dobs)
+  return get_idabs_vary_af_threshold(input_fn, thresholds, birth, expr, dobs)
 
-def get_idabs(input_fn, thresholds, birth, expr, dobs):
+def get_idabs_vary_af_threshold(input_fn, thresholds, birth, expr, dobs):
   # Find identifiability of SNPs selected using each threshold.
   birth_type = birth if birth else 'nobirth'
-  expr_data_path = data_path+'vary_af_thresh_'+birth_type+'_expr'+str(expr)+'.pickle'
+  expr_path = 'vary_af_expr' + str(expr) + '/'
+  expr_data_path = data_path + expr_path + 'vary_af_thresh_' + birth_type + '_expr' + str(expr) + '.pickle'
   if os.path.exists(expr_data_path):
     idabs, snp_nums = pickle.load(open(expr_data_path, 'rb'))
 
@@ -222,3 +339,8 @@ if __name__ == '__main__':
     make_hash(infile, outfile)
   if args.af_threshold:
     expr_vary_af_treshold(infile, args.af_threshold)
+  if args.entropy:
+    expr_top_k_entropy(infile)
+  if args.redundancy:
+    expr_vary_rsq(infile)
+
