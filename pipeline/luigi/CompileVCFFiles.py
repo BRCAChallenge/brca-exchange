@@ -392,7 +392,7 @@ class DownloadBRCA1BICData(luigi.Task):
     # NOTE: U/P can be found in /hive/groups/cgl/brca/phase1/data/bic/account.txt at UCSC
     date = luigi.DateParameter(default=datetime.date.today())
     u = luigi.Parameter()
-    p = luigi.Parameter()
+    p = luigi.Parameter(significant=False)
 
     resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
                                     description='directory to store brca-resources data')
@@ -1206,7 +1206,7 @@ class DownloadLatestEnigmaData(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
 
     synapse_username = luigi.Parameter(description='used to access preprocessed enigma files')
-    synapse_password = luigi.Parameter(description='used to access preprocessed enigma files')
+    synapse_password = luigi.Parameter(description='used to access preprocessed enigma files', significant=False)
     synapse_enigma_file_id = luigi.Parameter(description='file id for combined enigma tsv file')
 
     resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
@@ -1481,10 +1481,10 @@ class GenerateReleaseArchive(luigi.Task):
 class RunAll(luigi.WrapperTask):
     date = luigi.DateParameter(default=datetime.date.today())
     u = luigi.Parameter()
-    p = luigi.Parameter()
+    p = luigi.Parameter(significant=False)
 
     synapse_username = luigi.Parameter(description='used to access preprocessed enigma files')
-    synapse_password = luigi.Parameter(description='used to access preprocessed enigma files')
+    synapse_password = luigi.Parameter(description='used to access preprocessed enigma files', significant=False)
     synapse_enigma_file_id = luigi.Parameter(description='file id for combined enigma tsv file')
 
     resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
@@ -1528,6 +1528,5 @@ class RunAll(luigi.WrapperTask):
         yield CopyEXLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
         yield CopySharedLOVDOutputToOutputDir(date=self.date, resources_dir=self.resources_dir, output_dir=self.output_dir, file_parent_dir=self.file_parent_dir)
 
-        yield DownloadLatestEnigmaData(self.date, self.synapse_username, self.synapse_password,
-                                       self.synapse_enigma_file_id, self.resources_dir,
+        yield DownloadLatestEnigmaData(self.date, self.synapse_username, self.synapse_password, self.synapse_enigma_file_id, self.resources_dir,
                                        self.output_dir, self.file_parent_dir)

@@ -16,4 +16,4 @@ echo "Git hash: $(git log | head -n 1)"
 
 cd /opt/brca-exchange/pipeline/luigi
 
-python -m luigi --module CompileVCFFiles RunAll --resources-dir ${BRCA_RESOURCES} --file-parent-dir ${PARENT_DIR} --output-dir ${OUTPUT_DIR} --previous-release ${PREVIOUS_RELEASE} --previous-release-date ${PREVIOUS_RELEASE_DATE} --release-notes ${RELEASE_NOTES} --local-scheduler
+python -m luigi --logging-conf-file luigi_log_configuration.conf --module CompileVCFFiles RunAll --resources-dir ${BRCA_RESOURCES} --file-parent-dir ${PARENT_DIR} --output-dir ${OUTPUT_DIR} --previous-release ${PREVIOUS_RELEASE} --previous-release-date ${PREVIOUS_RELEASE_DATE} --release-notes ${RELEASE_NOTES} --local-scheduler
