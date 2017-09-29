@@ -221,7 +221,7 @@ def main(args):
                 protein_coord = variantmapper.c_to_p(var_c1)
             except hgvs.exceptions.HGVSParseError as e:
                 template = "An exception of type {0} occured. Arguments:\n{1!r}"
-                message = template.format(type(ex).__name__, ex.args)
+                message = template.format(type(e).__name__, e.args)
                 genomicChange = '{0}:g.{1}:{2}>{3}'.format(chrom38, offset38, ref38, alt38)
                 print('hgvs.exceptions.HGVSParseError: ', e)
                 print('Original GRCh38 Genomic Coordinate: ', oldHgvsGenomic38)
