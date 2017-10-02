@@ -10,33 +10,59 @@ import numpy as np
 import config
 import os
 import snap_reader
+import time
+import snp_info
 
 data_path = config.data_path
 
-def extract_low_redund_2(input_fn, snapout_fn, rsq_thresh):
-  """ Output file with non-redundant SNPs using given SNAP output file. """
-  selection_pkl = input_fn[:-4] + '_snap_r2=' + str(rsq_thresh).zfill(2) + '.pickle'
-  if os.path.exists(data_path + selection_pkl):
-    print selection_pkl, "exists, not recreating"
-    return pickle.load(open(data_path + selection_pkl, 'rb'))
-  print "creating", selection_pkl
-
-  proxy_dict = snap_reader.read_snapout(snapout_fn)
-  vcf_reader = vcf.Reader(open(data_path + input_fn, 'rb'))
-
-  selection = set()
-  correlated = set()
+def vcf_to_dicts(input_vcf):
+  vcf_reader = vcf.Reader(open(data_path + input_vcf, 'rb'))
+  snps = []
   for snp in vcf_reader:
-    if snp.ID in correlated:
+    snp_dict = {'snp': snp.ID, samples: []}
+  return snps
+
+def extract_low_redund_2(input_fn, snapout_fn, k=0):
+  """ From the input VCF file, return the (top k, if k > 0) most informative
+      rsq-independent SNPs, using given SNAP output file.
+  """
+
+  # If k > 0, rank SNPs by entropy.
+  if k > 0:
+    ranked_path = input_fn[:-4] + '_ranked.pickle'
+    if os.path.exists(data_path + ranked_path):
+      snps = pickle.load(open(data_path + ranked_path, 'rb'))
+    else:
+      vcf_reader = vcf.Reader(open(data_path + input_fn, 'rb'))
+      _, snps = snp_info.shannon_entropy(vcf_reader)
+      pickle.dump(snps, open(data_path + ranked_path, 'wb'))
+
+  # Else just take SNPs in the order they come.
+  else:
+    unranked_path = input_fn[:-4] + '_unranked.pickle'
+    if os.path.exists(data_path + unranked_path):
+      snps = pickle.load(open(data_path + unranked_path, 'rb'))
+    else:
+      vcf_reader = vcf.Reader(open(data_path + input_fn, 'rb'))
+      snps = [snp.ID for snp in vcf_reader]
+      pickle.dump(snps, open(data_path + unranked_path, 'wb'))
+
+  # Starting from the highest entropy to the lowest,
+  # select each SNP that is not correlated with already selected ones.
+  selection = list()
+  correlated = set()
+  proxy_dict = snap_reader.read_snapout(snapout_fn, input_vcf=input_fn)
+  for snp in snps:
+    if k > 0 and len(selection) == k:
+      break
+    if snp in correlated:
       continue
-    if snp.ID in proxy_dict:
-      c = [proxy['proxy'] for proxy in proxy_dict[snp.ID]]
+    if snp in proxy_dict:
+      c = [proxy['proxy'] for proxy in proxy_dict[snp]]
     else:
       c = []
     correlated.update(c)
-    selection.add(snp.ID)
-
-  pickle.dump(selection, open(data_path + selection_pkl, 'wb'))
+    selection.append(snp)
 
   return selection
 
@@ -47,7 +73,7 @@ def extract_low_redund(input_fn, output_fn, snapout_fn):
     return
   print "creating", output_fn
 
-  proxy_dict = snap_reader.read_snapout(snapout_fn)
+  proxy_dict = snap_reader.read_snapout(snapout_fn, input_vcf=input_fn)
   vcf_reader = vcf.Reader(open(data_path + input_fn, 'rb'))
 
   selection = set()

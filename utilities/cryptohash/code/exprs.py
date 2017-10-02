@@ -21,8 +21,9 @@ def init():
   parser.add_argument('-s', '--snp_sampling', help='Run SNP sampling expr.', action='store_true')
   parser.add_argument('-a', '--af_plot', help='Run allele frequency expr.', action='store_true')
   parser.add_argument('-t', '--af_threshold', help='Run AF threshold expr.: 1-3', type=int, default=0)
+  parser.add_argument('-d', '--independence', help='Run independence expr.', type=int, default=0)
   parser.add_argument('-e', '--entropy', help='Run top k entropy expr.: 1-3', type=int, default=0)
-  parser.add_argument('-d', '--redundancy', help='Run redundancy expr.', type=int, default=0)
+  parser.add_argument('-f', '--entind', help='Run entropy-independence expr.', type=int, default=0)
   parser.add_argument('-c', '--crypto_hash', help='Generate cryptographic hash.', action='store_true')
   parser.add_argument('-b', '--birth_type', help='Use date or year of birth', default='')
   parser.add_argument('-p', '--snap_output', help='SNAP output .txt file', default='SNAPResults-BRCA12exon-HapMap3r2_rsq08.txt')
@@ -30,9 +31,60 @@ def init():
 
   return args
 
-def high_af_snps(high_af_fn):
+def expr_top_k_independent(input_fn):
   """  """
-  pass
+  ks = range(1, 51)
+  births = ['year', 'date', '']
+  plot_data = []
+  for birth in births:
+    print birth
+    data = get_data_top_k_independent(input_fn, ks, birth, 1)
+    plot_data.append(data)
+  plot_top_k_entropy2(ks, plot_data, births, 1)
+
+def plot_top_k_entropy2(ks, plot_data, births, expr):
+  colors = ['r', 'b', 'g', 'm', 'c']
+  ymax, ymin = 0.0, 1.0
+  for i, (idabs, snp_nums) in enumerate(plot_data):
+    birth_type = births[i] if births[i] else 'no birth'
+    plt.plot(ks, idabs, colors[i], label=birth_type, alpha=1)
+    ymax = max(ymax, max(idabs))
+    ymin = min(ymin, min(idabs))
+  plt.legend(loc='best', shadow=True)
+  plt.title('Identifiability of Top k Independent SNPs Ranked by Entropy')
+  plt.xlabel('Number k of SNPs')
+  xmax, xmin = max(ks), min(ks)
+  xrng = xmax - xmin
+  yrng = ymax - ymin
+  plt.xlim([xmin - 0.05 * xrng, xmax + 0.05 * xrng])
+  plt.ylim([ymin - 0.05 * yrng, ymax + 0.05 * yrng])
+  plt.savefig(plot_path + 'top_k_entropy_independence.pdf')
+
+def get_data_top_k_independent(input_fn, ks, birth, expr):
+  if birth:
+    config.birth_type = birth
+    dobs = utils.synthetic_dob(2504)
+  else:
+    dobs = []
+  return get_idabs_top_k_independent(input_fn, ks, birth, dobs, expr)
+
+def get_idabs_top_k_independent(input_fn, ks, birth, dobs, expr):
+  birth_type = birth if birth else 'nobirth'
+  expr_data_path = data_path + 'top_k_indep_'+birth_type+'.pickle'
+  if os.path.exists(expr_data_path):
+    idabs, snp_nums = pickle.load(open(expr_data_path, 'rb'))
+  else:
+    idabs = []
+    snp_nums = []
+    rsq = 8 # 0.8
+    proxy_fn = 'SNAPResults-BRCA12exon-HapMap3r2_rsq'+ str(rsq).zfill(2) +'.txt'
+    for k in ks:
+      selection = utils.extract_low_redund_2(input_fn, proxy_fn, k=k)
+      idab, snp_num = snp_info.identifiability(input_fn, use_dob=birth, dobs=dobs, snps=selection)
+      idabs.append(idab)
+      snp_nums.append(snp_num)
+    pickle.dump((idabs, snp_nums), open(expr_data_path, 'wb'))
+  return idabs, snp_nums
 
 def expr_vary_rsq(input_fn):
   """ Run experiment to compare identifiabilities of SNPs
@@ -40,7 +92,6 @@ def expr_vary_rsq(input_fn):
   """
   rsqs = range(1, 11)
   births = ['year', 'date', '']
-#  births = ['year']
   plot_data = []
   for birth in births:
     print birth
@@ -58,6 +109,7 @@ def plot_vary_rsq(rsqs, plot_data, births, expr):
     ymin = min(ymin, min(idabs))
   plt.legend(loc='best', shadow=True)
   plt.title('Identifiability of SNPs After Removing Correlated SNPs with Varying r^2')
+  plt.xticks(rsqs, [str(0.1*rsq)+'\n'+str(snp_nums[i]) for i, rsq in enumerate(rsqs)])
   plt.xlabel('r^2')
   xmax, xmin = max(rsqs), min(rsqs)
   xrng = xmax - xmin
@@ -83,12 +135,14 @@ def get_idabs_vary_rsq(input_fn, rsqs, birth, dobs, expr):
   else:
     idabs = []
     snp_nums = []
+    selections = []
     for rsq in rsqs:
       proxy_fn = 'SNAPResults-BRCA12exon-HapMap3r2_rsq'+ str(rsq).zfill(2) +'.txt'
-      selection = utils.extract_low_redund_2(input_fn, proxy_fn, rsq)
+      selection = utils.extract_low_redund_2(input_fn, proxy_fn)
       idab, snp_num = snp_info.identifiability(input_fn, use_dob=birth, dobs=dobs, snps=selection)
       idabs.append(idab)
       snp_nums.append(snp_num)
+      selections.append(selection)
     pickle.dump((idabs, snp_nums), open(expr_data_path, 'wb'))
   return idabs, snp_nums
   
@@ -112,11 +166,10 @@ def plot_top_k_entropy(ks, plot_data, births, expr):
     ymax = max(ymax, max(idabs))
     ymin = min(ymin, min(idabs))
   plt.legend(loc='best', shadow=True)
-  plt.title('Identifiability of Top k SNPs ranked by Entropy')
+  plt.title('Identifiability of Top k SNPs Ranked by Entropy')
   plt.xlabel('Number k of SNPs')
   xmax, xmin = max(ks), min(ks)
   xrng = xmax - xmin
-  ymin = 0.45
   yrng = ymax - ymin
   plt.xlim([xmin - 0.05 * xrng, xmax + 0.05 * xrng])
   plt.ylim([ymin - 0.05 * yrng, ymax + 0.05 * yrng])
@@ -341,6 +394,8 @@ if __name__ == '__main__':
     expr_vary_af_treshold(infile, args.af_threshold)
   if args.entropy:
     expr_top_k_entropy(infile)
-  if args.redundancy:
+  if args.independence:
     expr_vary_rsq(infile)
+  if args.entind:
+    expr_top_k_independent(infile)
 

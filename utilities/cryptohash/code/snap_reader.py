@@ -1,6 +1,8 @@
 import vcf
 import csv
 import config
+import pickle
+import os
 
 def write_query_rsids(infile_name, outfile_name=None):
   """ Write RSIDs of all SNPs in infile (VCF) to outfile, one on each line. """
@@ -12,28 +14,54 @@ def write_query_rsids(infile_name, outfile_name=None):
     for snp in vcf_reader:
       outfile.write(snp.ID+'\n')
 
-def read_snapout(snapout_name):
+def read_snapout(snapout_name, input_vcf=None):
   """ Read SNAP output into dictionary.
       Each entry has a SNP being the key and all proxies and their LD info being the value.
   """
+  if input_vcf:
+    input_unranked_path = input_vcf[:-4] + '_unranked.pickle'
+    if os.path.exists(config.data_path + input_unranked_path):
+      unranked = pickle.load(open(config.data_path + input_unranked_path, 'rb'))
+    else:
+      vcf_reader = vcf.Reader(open(data_path + input_fn, 'rb'))
+      unranked = [snp.ID for snp in vcf_reader]
+      pickle.dump(snps, open(data_path + unranked_path, 'wb'))
+  else:
+    unranked = None
+  
   snapout = csv.DictReader(open(config.data_path+snapout_name, 'rb'), delimiter='\t')
-  ld_dict = {}
+  proxy_dict = {}
   for line in snapout:
     snp, prx, rsq, dpr = line['SNP'], line['Proxy'], line['RSquared'], line['DPrime']
-
-    # Check if is error line
+    # Check if is error line.
     if prx.startswith('WARNING') or prx.startswith('ERROR'):
       continue
-
-    if snp in ld_dict.keys():
-      lds = ld_dict[snp]
+    # Check if SNP or proxy not in input VCF .
+    if unranked and (snp not in unranked or prx not in unranked):
+      continue
+    if snp in proxy_dict.keys():
+      proxies = proxy_dict[snp]
     else:
-      lds = []
-    lds.append({'proxy': prx, 'rsquared': rsq, 'dprime': dpr})
-    ld_dict[snp] = lds
+      proxies = []
+    proxies.append({'proxy': prx, 'rsquared': rsq, 'dprime': dpr})
+    proxy_dict[snp] = proxies
+  return proxy_dict
 
-  return ld_dict
-
+def haplotype(proxy_dict):
+  """ Return list of haplotypes; each haplotype is a set of SNPs. """
+  haplotypes = []
+  for snp, proxies in proxy_dict.items():
+    added = False
+    proxy_ids = [prx['proxy'] for prx in proxies]
+    new_hap = set([snp] + proxy_ids)
+    for hap in haplotypes:
+      if any(rsid in hap for rsid in new_hap):
+        hap.update(new_hap)
+        added = True
+        break
+    if not added:
+      haplotypes.append(new_hap)
+  return haplotypes
 
 def write_snap_to_vcf(snapout_name, outvcf_name):
   """ Write a VCF file from SNAP output file. """

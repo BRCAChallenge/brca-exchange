@@ -9,6 +9,7 @@ import utils
 import config
 import os
 from datetime import datetime
+import time
 
 data_path = config.data_path
 
@@ -26,7 +27,6 @@ def shannon_entropy(vcf_reader):
     entropy = -1.0 * sum([probs[i] * math.log(probs[i]) if probs[i] > 0 else 0 for i in range(R)])
     ents_rsids.append((entropy, snp.ID))
   ents_rsids = sorted(ents_rsids, reverse=True, key=lambda i : i[0])
-  #print ents_rsids
   entropies = [ent for ent, rsid in ents_rsids]
   rsids = [rsid for ent, rsid in ents_rsids]
   return entropies, rsids
@@ -70,18 +70,20 @@ def genotypes(input_fn, m, n, use_dob, dobs=None, snps=None):
       (and birth information)
       of individuals in input file.
   """
-  vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
+  genotype_path = input_fn[:-4] + '_genotype.pickle'
+  # If not given set of SNPs to generate genotypes, use saved genotypes.
+  if not snps and os.path.exists(genotype_path):
+    return pickle.load(open(data_path + genotype_path, 'rb'))
 
+  vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
   # Collect DNA sequences of individuals.
   # There are 2 DNA sequences per person.
-  matrix1 = np.matrix(np.zeros(shape=(n, m)), dtype=str)
-  matrix2 = np.matrix(np.zeros(shape=(n, m)), dtype=str)
+  matrix1 = np.matrix(np.zeros(shape=(m, n)), dtype=str)
+  matrix2 = np.matrix(np.zeros(shape=(m, n)), dtype=str)
   for i, snp in enumerate(vcf_reader):
     if not snps or snp.ID in snps: # snps=None or snp.ID in snps
       for j, ind in enumerate(snp.samples):
-        matrix1[i, j], matrix2[i, j] = ind.gt_bases.split('|')
-  matrix1 = matrix1.transpose()
-  matrix2 = matrix2.transpose()
+        matrix1[j, i], matrix2[j, i] = ind.gt_bases.split('|')
 
   # Genotype sequence of each individual.
   seqs = []
@@ -92,6 +94,7 @@ def genotypes(input_fn, m, n, use_dob, dobs=None, snps=None):
       seqs.append(snp_str1 + snp_str2 + str(dobs[i]))
     else:
       seqs.append(snp_str1 + snp_str2)
+  pickle.dump(seqs, open(data_path + genotype_path, 'wb'))
   return seqs
 
 def identifiability(input_fn, use_dob, dobs=None, snps=None):
@@ -99,9 +102,15 @@ def identifiability(input_fn, use_dob, dobs=None, snps=None):
       Returns identifiability (proportion of uniquely identified individuals)
       and number of SNPs in input file.
   """
-  vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
-  m = len(vcf_reader.samples)
-  n = sum(1 for _ in vcf_reader)
+  start_time = time.time()
+  mn_path = input_fn[:-4] + '_mn.pickle'
+  if os.path.exists(data_path + mn_path):
+    m, n = pickle.load(open(data_path + mn_path, 'rb'))
+  else:
+    vcf_reader = vcf.Reader(open(data_path + input_fn, 'rb'))
+    m = len(vcf_reader.samples)
+    n = sum(1 for _ in vcf_reader)
+    pickle.dump((m, n), open(data_path + mn_path, 'wb'))
   seqs = genotypes(input_fn, m, n, use_dob, dobs, snps)
   counter = Counter(seqs)
 
@@ -110,7 +119,8 @@ def identifiability(input_fn, use_dob, dobs=None, snps=None):
   #print 'num of groups of persons sharing, w/' + o + ' DOB',\
   #      len([v for v in counter.values() if v > 1])
 
-  return 1.0*len(counter)/m, n
+  print 'identifiability', time.time() - start_time
+  return 1.0*len(counter)/m, len(snps) if snps else n
 
 def score_snp(snp):
   """ Score a SNP on its identifiability of individuals.
