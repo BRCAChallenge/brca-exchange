@@ -23,9 +23,9 @@ def read_snapout(snapout_name, input_vcf=None):
     if os.path.exists(config.data_path + input_unranked_path):
       unranked = pickle.load(open(config.data_path + input_unranked_path, 'rb'))
     else:
-      vcf_reader = vcf.Reader(open(data_path + input_fn, 'rb'))
+      vcf_reader = vcf.Reader(open(config.data_path + input_vcf, 'rb'))
       unranked = [snp.ID for snp in vcf_reader]
-      pickle.dump(snps, open(data_path + unranked_path, 'wb'))
+      pickle.dump(unranked, open(config.data_path + input_unranked_path, 'wb'))
   else:
     unranked = None
   
