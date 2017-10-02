@@ -3,6 +3,8 @@ import snp_info
 import snap_reader
 import config
 import argparse
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 import utils
 import pickle
@@ -120,12 +122,8 @@ def expr_vary_W(W, C):
     idabs.append(idab)
   return idabs
 
-def expr_vary_C(W, C):
+def expr_vary_C(W, C, crange):
   idabs = []
-  if C >= 10:
-    crange = range(1, C+1, (C+1)/10)
-  else:
-    crange = range(1, C+1)
   for c in crange:
     value, knap_snps = solve_knapsack(W, c)
     idab, _ = snp_info.identifiability(input_vcf, False, snps=knap_snps)
@@ -144,12 +142,16 @@ def plot_expr_results(idabs, var_WC, var, title=None, xlabel=None, xticks=None):
   pickle.dump(idabs, open(config.data_path + 'knapsack_vary_' + var + '_' + str(var_WC) + '.pickle', 'wb'))
   plt.savefig(config.plot_path + 'knapsack_vary_' + var + '_' + str(var_WC) + '.pdf')
 
-def plot_mult_expr_results(idabs_lst, xvar_len, ovars, figname='', title='', xlabel='', xticks=''):
+def plot_mult_expr_results(idabs_lst, xvar_len, ovar_range, figname='', title='', xlabel='', xticks=None):
   for i, idabs in enumerate(idabs_lst):
-    plt.plot(range(xvar_len), idabs, lable='W = '+str(ovars[i]))
-  plt.title(title)
-  plt.xlabel(xlabel)
-  plt.xticks(xticks)
+    plt.plot(range(len(idabs)), idabs, label='W = '+str(ovar_range[i]))
+  if title:
+    plt.title(title)
+  if xlabel:
+    plt.xlabel(xlabel)
+  if xticks:
+    plt.xticks(range(xvar_len), xticks)
+  plt.legend(loc='best', shadow=True)
   plt.savefig(config.plot_path + figname)
 
 if __name__ == '__main__':
@@ -159,32 +161,37 @@ if __name__ == '__main__':
   C = args.count
 
   if args.experiment == 1:
-    idabs_lst_path = 'knapsack_x_C'+str(args.count)+'_W'+str(args.maxweight) + '.pickle'
-    figname = 'knapsack_x_C'+str(args.count)+'_W'+str(args.maxweight) + '.pdf'
+    idabs_lst_path = config.data_path+'knapsack_x_C'+str(C)+'_W'+str(W)+'.pickle'
+    figname = 'knapsack_x_C'+str(C)+'_W'+str(W) + '.pdf'
     title = 'Identifiability with Varying Number of SNPs'
     xlabel = 'Number of SNPs'
   elif args.experiment == 2:
-    idabs_lst_path = 'knapsack_x_W'+str(args.maxweight)+'_C'+str(args.count) + '.pickle'
-    figname = 'knapsack_x_W'+str(args.maxweight)+'_C'+str(args.count) + '.pdf'
+    idabs_lst_path = config.data_path+'knapsack_x_W'+str(W)+'_C'+str(C)+'.pickle'
+    figname = 'knapsack_x_W'+str(W)+'_C'+str(C) + '.pdf'
     title = 'Identifiability with Varying Max. Weight'
     xlabel = 'Maximum Weight'
 
+  if W >= 10:
+    wsteps = range(0, W, W/10)
+  else:
+    wsteps = range(W)
+  if C >= 10:
+    crange = range(1, C+1, (C+1)/10)
+  else:
+    crange = range(1, C+1)
+
   if os.path.exists(idabs_lst_path):
-    idabs_lst = pickle.load(idabs_lst_path)
+    idabs_lst = pickle.load(open(idabs_lst_path, 'rb'))
   else:
     idabs_lst = []
-    if args.maxweight >= 10:
-      wsteps = range(0, args.maxweight, args.maxweight/10)
-    else:
-      wsteps = range(args.maxweight)
     for w in wsteps:
-      idabs = expr_vary_C(w, C)
+      idabs = expr_vary_C(w, C, crange)
       idabs_lst.append(idabs)
       print 'w', w, 'C', C, 'num of idabs', len(idabs)
       print
     pickle.dump(idabs_lst, open(idabs_lst_path, 'wb'))
 
-  plot_mult_expr_results(idabs_lst, args.count, wsteps, figname=figname, title=title, xlabel=xlabel)
+  plot_mult_expr_results(idabs_lst, len(crange), wsteps, figname=figname, title=title, xlabel=xlabel, xticks=[str(r) for r in crange])
 
   #print idabs
   #plot_expr_results(idabs, W, 'W', title='Identifiability with 30 SNPs', xlabel='Max. Weight')
