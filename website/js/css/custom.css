@@ -920,6 +920,18 @@ div.variant-details-body {
     margin-top: 2em;
 }
 
+div.variant-submitter-group .submitter-header {
+    background: #edf5fa;
+    cursor: pointer;
+}
+div.variant-submitter-group .submitter-header td {
+    border-bottom-width: 3px;
+}
+
+.table > thead:first-child > tr.submitter-header:first-child > td {
+    border-bottom-width: 3px;
+}
+
 /* faisal: hack for packery to minimize the impact of the graphical glitch of opening/closing a section */
 .variant-history-col {
     background-color: white;

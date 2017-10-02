@@ -39,6 +39,7 @@ var {MailingList} = require('./MailingList');
 
 var databaseKey = require('../databaseKey');
 var util = require('./util');
+var mockSubmissions = require('./mockdata/submissions');
 
 var {Grid, Col, Row, Table, Button, Modal, Panel, Glyphicon} = require('react-bootstrap');
 
@@ -738,6 +739,87 @@ var VariantDetail = React.createClass({
         let genomeBrowserUrl = 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg' + hgVal + '&position=' + chr + ':' + positionRangeStart + '-' + positionRangeEnd + '&hubUrl=http://brcaexchange.org/trackhubs/hub.txt';
         return <a target="_blank" href={genomeBrowserUrl}>{variant[prop]}</a>;
     },
+    toggleSubmitterGroup: function(sourceName, submitter) {
+        this.setState((pstate) => {
+            // the key under the state collection for the visibility of this source-submitter group
+            const k = `submitter-group-${sourceName}-${submitter}`;
+
+            // if the key doesn't exist, set it to false; otherwise, invert it
+            return {
+                [k]: !(!pstate.hasOwnProperty(k) || pstate[k])
+            };
+        });
+    },
+    generateSubmitterPanels: function () {
+        // for each submitter, construct a panel
+        return mockSubmissions.sources.map(({ name: sourceName, submissions }) => {
+
+            const submitters = submissions.map(({ submitter, cols }) => {
+                // for each panel, construct key-value pairs as a row of the table
+                const submitterRows = cols.map(({prop, title, value}) => {
+                    const rowItem = value;
+                    const isEmptyValue = util.isEmptyField(value);
+
+                    return (
+                        <tr key={prop} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
+                            <KeyInline tableKey={title} onClick={(event) => this.showHelp(event, title)} />
+                            <td colSpan={2} ><span className={ this.truncateData(prop) ? "row-value-truncated" : "row-value" }>{rowItem}</span></td>
+                            <td>&nbsp;</td>
+                        </tr>
+                    );
+                });
+
+                const visibilityKey = `submitter-group-${sourceName}-${submitter}`;
+                const isVisible = (!this.state.hasOwnProperty(visibilityKey) || this.state[visibilityKey]);
+                // if we're not visible, these columns will be shown (if available)
+                const dateLast = cols.find(x => x.prop === 'date-last-updated');
+
+                return (
+                    <Table key={`submitter-name-${submitter}`}>
+                        <thead>
+                            <tr key="submitter-header" className="submitter-header" onClick={this.toggleSubmitterGroup.bind(this, sourceName, submitter)}>
+                                <td className='help-target'>
+                                    {
+                                        isVisible
+                                            ? <i className="fa fa-caret-down" aria-hidden="true" />
+                                            : <i className="fa fa-caret-right" aria-hidden="true" />
+                                    }
+                                    &nbsp;
+                                    <span>Submitter:</span>
+                                </td>
+                                <td colSpan={2}><b>{submitter}</b></td>
+                                <td style={{textAlign: 'right'}}>
+                                { !isVisible && dateLast && <span>(date: { dateLast.value })</span>}
+                                </td>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                        { isVisible ? submitterRows : null}
+                        </tbody>
+                    </Table>
+                );
+            });
+
+            // create the panel itself now
+            const groupTitle = `source-panel-${sourceName}`;
+            const header = <h3>{`Clinical Significance (${sourceName})`}</h3>;
+            const allEmpty = false; // FIXME: actually check if we're all empty or no
+
+            return (
+                <div className="variant-detail-group variant-submitter-group">
+                    <div key={`group_collection-${groupTitle}`} className={ allEmpty && this.state.hideEmptyItems ? "group-empty" : "" }>
+                        <Panel
+                            header={header}
+                            collapsable={true}
+                            defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
+                            {submitters}
+                        </Panel>
+                    </div>
+                </div>
+            );
+        });
+    },
     render: function () {
         const {data, error} = this.state;
         if (!data) {
@@ -891,6 +973,8 @@ var VariantDetail = React.createClass({
 
         const diffRows = this.generateDiffRows(cols, data);
 
+        const submitterPanels = this.generateSubmitterPanels(cols, data);
+
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
@@ -953,6 +1037,12 @@ var VariantDetail = React.createClass({
                             </IsoGrid>
                         }
                     </div>
+                </Row>
+
+                <Row>
+                    <Col md={12}>
+                        {submitterPanels}
+                    </Col>
                 </Row>
 
                 <Row>
