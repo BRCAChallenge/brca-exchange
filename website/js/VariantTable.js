@@ -110,6 +110,7 @@ const researchModeGroups = [
         {title: 'Genetic Origin', prop: 'Genetic_origin_LOVD'},
         {title: 'Individuals', prop: 'Individuals_LOVD'},
         {title: 'Variant Effect', prop: 'Variant_effect_LOVD'},
+        {title: 'Database ID', prop: 'DBID_LOVD'}
     ]},
 
     {groupTitle: 'Clinical Significance (BIC)', internalGroupName: 'Significance (BIC)', innerCols: [
@@ -226,6 +227,7 @@ const researchModeColumns = [
     {title: 'Genetic Origin (LOVD)', prop: 'Genetic_origin_LOVD'},
     {title: 'Individuals (LOVD)', prop: 'Individuals_LOVD'},
     {title: 'Variant Effect (LOVD)', prop: 'Variant_effect_LOVD'},
+    {title: 'Database ID (LOVD)', prop: 'DBID_LOVD'},
     {title: 'Allele Origin (ClinVar)', prop: 'Allele_Origin_ClinVar'},
     {title: 'Allele Origin (ENIGMA)', prop: 'Allele_origin_ENIGMA'},
     {title: 'Ethnicity (BIC)', prop: 'Ethnicity_BIC'},

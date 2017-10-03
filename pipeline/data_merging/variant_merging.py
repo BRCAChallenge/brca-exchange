@@ -78,6 +78,7 @@ LOVD_FIELDS = {"Variant_frequency": "frequency",
                "Variant_effect": "variant_effect",
                "Individuals": "individuals",
                "Submitters": "submitters",
+               "DBID": "DBID",
                "BX_ID": "BX_ID"
                }
 
@@ -250,7 +251,7 @@ def main():
     copy(ARGS.input + ENIGMA_FILE, ARGS.output)
 
     # write reports to reports file
-    aggregate_reports.write_reports_tsv(ARGS.output + "reports.tsv", columns, ARGS.artifacts_dir)
+    aggregate_reports.write_reports_tsv(ARGS.output + "reports.tsv", columns, ARGS.output)
 
     discarded_reports_file.close()
 
