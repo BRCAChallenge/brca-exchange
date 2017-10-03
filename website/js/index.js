@@ -790,8 +790,7 @@ var VariantDetail = React.createClass({
                     if (rowItem === false) {
                         return false;
                     }
-                }
-                else if (variant[prop] !== null) {
+                } else if (variant[prop] !== null) {
                     if (prop === "Gene_Symbol") {
                         rowItem = <i>{variant[prop]}</i>;
                     } else if (prop === "URL_ENIGMA") {
@@ -808,6 +807,17 @@ var VariantDetail = React.createClass({
                             } else {
                                 // exclude trailing comma
                                 rowItem.push(<a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{accessions[i]}</a>);
+                            }
+                        }
+                    } else if (prop === "DBID_LOVD" && variant[prop].toLowerCase().indexOf("brca") !== -1) { // Link all dbid's back to LOVD
+                        let ids = variant[prop].split(',');
+                        rowItem = [];
+                        for (let i = 0; i < ids.length; i++) {
+                            if (i < (ids.length - 1)) {
+                                rowItem.push(<span><a target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>, </span>);
+                            } else {
+                                // exclude trailing comma
+                                rowItem.push(<a target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>);
                             }
                         }
                     } else if (prop === "Assertion_method_citation_ENIGMA") {
