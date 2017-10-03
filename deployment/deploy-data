@@ -49,7 +49,7 @@ if [ "${ENVIRONMENT}" != "beta" ] && [ "${ENVIRONMENT}" != "production" ] && [ "
     exit 1
 fi
 
-# Expects path to release archive as second argument.
+# Expects path to release archive as second argument. Removes trailing / if present.
 RELEASE_ARCHIVE_PATH=$2
 
 if [ "${ENVIRONMENT}" == "local" ] ;then
@@ -70,6 +70,7 @@ if [ "${ENVIRONMENT}" == "beta" ] || [ "${ENVIRONMENT}" == "production" ] ;then
 
     RELEASE_DIRECTORY_NAME=$(basename ${RELEASE_ARCHIVE_PATH} .tar.gz)
 
+    # Copies tar to downloads/releases/
     rsync -a ${RELEASE_ARCHIVE_PATH} ${USER}@${HOST}:/tmp
 
     REMOTE_TAR_TMP=/tmp/${RELEASE_DIRECTORY_NAME}.tar.gz
