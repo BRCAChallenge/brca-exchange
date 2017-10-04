@@ -850,7 +850,17 @@ var VariantDetail = React.createClass({
                     rowItem = variant["HGVS_Protein"].split(":")[0];
                 }
 
-                const isEmptyValue = rowDescriptor.replace ? rowItem === false : util.isEmptyField(variant[prop]);
+                let isEmptyValue = rowDescriptor.replace ? rowItem === false : util.isEmptyField(variant[prop]);
+
+                if (title === "Beacons") {
+                    if (variant.Ref.length > 1 || variant.Alt.length > 1) {
+                        isEmptyValue = true;
+                    } else {
+                        let websiteUrl = `https://beacon-network.org/#/search?chrom=${variant.Chr}&pos=${variant.Hg37_Start}&ref=${variant.Ref}&allele=${variant.Alt}&rs=GRCh37`;
+                        rowItem = <a target="_blank" href={websiteUrl}>{websiteUrl}</a>;
+                        isEmptyValue = false;
+                    }
+                }
 
                 if (isEmptyValue) {
                     rowsEmpty += 1;
@@ -858,7 +868,6 @@ var VariantDetail = React.createClass({
                 }
 
                 totalRowsEmpty += rowsEmpty;
-
                 return (
                     <tr key={prop} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
                         { rowDescriptor.tableKey !== false &&
