@@ -221,6 +221,8 @@ class Report(models.Model):
     Allele_Origin_ClinVar = models.TextField()
     Method_ClinVar = models.TextField()
     Description_ClinVar = models.TextField(default="-")
+    Summary_Evidence_ClinVar = models.TextField(default="-")
+    Review_Status_ClinVar = models.TextField(default="-")
     BX_ID_LOVD = models.TextField()
     Variant_frequency_LOVD = models.TextField()
     HGVS_cDNA_LOVD = models.TextField()
