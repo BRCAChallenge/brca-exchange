@@ -95,7 +95,7 @@ def normalize_reports(file, columns):
 def normalize_vcf_reports(file, columns, filename, file_extension):
     reports = []
     if "clinvar" in filename.lower():
-        # Descriptions in clinvar contain spaces -- cause strict whitespace failure
+        # Descriptions and Summary Evidence in clinvar contain spaces -- cause strict whitespace failure
         strict_whitespace = False
     else:
         strict_whitespace = True
