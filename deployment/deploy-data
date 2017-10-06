@@ -21,8 +21,8 @@ USER=brca
 
 # Expects environment (beta or production) as first argument.
 ENVIRONMENT=$1
-if [ "${ENVIRONMENT}" != "beta" ] && [ "${ENVIRONMENT}" != "production" ] ;then
-    echo "ERROR: Please only enter 'beta' or 'production' as environment."
+if [ "${ENVIRONMENT}" != "beta" ] && [ "${ENVIRONMENT}" != "production" ] && ["${ENVIRONMENT}" != "local"] ;then
+    echo "ERROR: Please only enter 'local', 'beta' or 'production' as environment."
     exit 1
 fi
 
@@ -33,22 +33,37 @@ if [ "${RELEASEDIRECTORYPATH: -1}" == "/" ] ;then
 fi
 
 RELEASEDIRECTORY=$(basename $RELEASEDIRECTORYPATH)
-REMOTERELEASES=/var/www/backend/${ENVIRONMENT}/django/downloads/releases
 
-# Copies directory to downloads/releases/
-rsync -a --rsync-path='sudo rsync' $RELEASEDIRECTORYPATH ${USER}@${HOST}:$REMOTERELEASES/
+if ["${ENVIRONMENT}" == "local"] ;then
+	CURRENTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+	cd "$CURRENTDIR"
+    DATA=$RELEASEDIRECTORY/built_with_change_types.tsv
+	REMOVED=$RELEASEDIRECTORY/removed.tsv
+	METADATA=$RELEASEDIRECTORY/version.json
+	DIFFJSON=$RELEASEDIRECTORY/diff.json
+	REPORTS=$RELEASEDIRECTORY/reports.tsv
+	python ../website/django/manage.py addrelease ${DATA} ${REPORTS} ${METADATA} ${REMOVED} ${DIFFJSON}
+fi
 
-# Locations of files on remote server
-DATA=$REMOTERELEASES/$RELEASEDIRECTORY/built_with_change_types.tsv
-REMOVED=$REMOTERELEASES/$RELEASEDIRECTORY/removed.tsv
-METADATA=$REMOTERELEASES/$RELEASEDIRECTORY/version.json
-DIFFJSON=$REMOTERELEASES/$RELEASEDIRECTORY/diff.json
-REPORTS=$REMOTERELEASES/$RELEASEDIRECTORY/reports.tsv
+# if [ "${ENVIRONMENT}" != "beta" ] || [ "${ENVIRONMENT}" != "production" ] ;then
+# 	REMOTERELEASES=/var/www/backend/${ENVIRONMENT}/django/downloads/releases
 
-ssh -l${USER} ${HOST} <<-ENDSSH
-    set -o errexit
-    . /var/www/backend/${ENVIRONMENT}/virtualenv/bin/activate
-    python /var/www/backend/${ENVIRONMENT}/django/manage.py addrelease ${DATA} ${REPORTS} ${METADATA} ${REMOVED} ${DIFFJSON}
-    sudo rm /var/www/backend/${ENVIRONMENT}/django/downloads/releases/current_release.tar.gz
-    find /var/www/backend/${ENVIRONMENT}/django/downloads/releases/${RELEASEDIRECTORY}/ -name 'release*.tar.gz' -exec cp {} /var/www/backend/${ENVIRONMENT}/django/downloads/releases/current_release.tar.gz  \;
-ENDSSH
+# 	# Copies directory to downloads/releases/
+# 	rsync -a --rsync-path='sudo rsync' $RELEASEDIRECTORYPATH ${USER}@${HOST}:$REMOTERELEASES/
+
+# 	# Locations of files on remote server
+# 	DATA=$REMOTERELEASES/$RELEASEDIRECTORY/built_with_change_types.tsv
+# 	REMOVED=$REMOTERELEASES/$RELEASEDIRECTORY/removed.tsv
+# 	METADATA=$REMOTERELEASES/$RELEASEDIRECTORY/version.json
+# 	DIFFJSON=$REMOTERELEASES/$RELEASEDIRECTORY/diff.json
+# 	REPORTS=$REMOTERELEASES/$RELEASEDIRECTORY/reports.tsv
+
+# 	ssh -l${USER} ${HOST} <<-ENDSSH
+# 	    set -o errexit
+# 	    . /var/www/backend/${ENVIRONMENT}/virtualenv/bin/activate
+# 	    python /var/www/backend/${ENVIRONMENT}/django/manage.py addrelease ${DATA} ${REPORTS} ${METADATA} ${REMOVED} ${DIFFJSON}
+# 	    sudo rm /var/www/backend/${ENVIRONMENT}/django/downloads/releases/current_release.tar.gz
+# 	    find /var/www/backend/${ENVIRONMENT}/django/downloads/releases/${RELEASEDIRECTORY}/ -name 'release*.tar.gz' -exec cp {} /var/www/backend/${ENVIRONMENT}/django/downloads/releases/current_release.tar.gz  \;
+# 	ENDSSH
+# fi
+
