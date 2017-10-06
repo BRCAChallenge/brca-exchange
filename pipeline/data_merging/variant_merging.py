@@ -60,7 +60,7 @@ CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "Method": "Method",
                   "Description": "Description",
                   "Review_Status": "ReviewStatus",
-                  "Summary_Evidence": "SummaryEvidence"
+                  "Summary_Evidence": "SummaryEvidence",
                   "BX_ID": "BX_ID"}
 
 '''
