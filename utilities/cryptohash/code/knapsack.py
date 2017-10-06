@@ -33,7 +33,7 @@ if os.path.exists(hap_inds_path):
   print 'found', hap_inds_path
   hap_inds = pickle.load(open(hap_inds_path, 'rb'))
 else:
-  big_haplotypes = [hap for hap in snap_reader.haplotype(proxy_dict) if len(hap) > 1]
+  big_haplotypes = snap_reader.haplotype(proxy_dict)
   hap_inds = [sorted([ranked_snps.index(snp) for snp in hap]) for hap in big_haplotypes]
   pickle.dump(hap_inds, open(hap_inds_path, 'wb'))
 
@@ -107,7 +107,7 @@ def r2(snp_i, proxy):
 
 def value(snp_i):
   """ Return entropy of SNP. """
-  return entropies[snp_i]
+  return (entropies[snp_i]) ** 2
 
 def expr_vary_W(W, C):
   idabs = []
@@ -172,13 +172,16 @@ if __name__ == '__main__':
     xlabel = 'Maximum Weight'
 
   if W >= 10:
-    wsteps = range(0, W, W/10)
+    wsteps = range(0, W+W/10, W/10)
   else:
-    wsteps = range(W)
+    wsteps = range(W+1)
+
+  wsteps = [0, 4, 8, 12, 16, 20]
+
   if C >= 10:
-    crange = range(1, C+1, (C+1)/10)
+    crange = range(0, C+C/10, C/10)
   else:
-    crange = range(1, C+1)
+    crange = range(C+1)
 
   if os.path.exists(idabs_lst_path):
     idabs_lst = pickle.load(open(idabs_lst_path, 'rb'))

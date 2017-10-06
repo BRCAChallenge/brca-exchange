@@ -47,8 +47,8 @@ def read_snapout(snapout_name, input_vcf=None):
     proxy_dict[snp] = proxies
   return proxy_dict
 
-def haplotype(proxy_dict):
-  """ Return list of haplotypes; each haplotype is a set of SNPs. """
+def haplotype(proxy_dict, size_threshold=1):
+  """ Return list of haplotypes; each haplotype is a set (of size > size_threshold) of SNPs. """
   haplotypes = []
   for snp, proxies in proxy_dict.items():
     added = False
@@ -61,7 +61,7 @@ def haplotype(proxy_dict):
         break
     if not added:
       haplotypes.append(new_hap)
-  return haplotypes
+  return [hap for hap in haplotypes if len(hap) > size_threshold]
 
 def write_snap_to_vcf(snapout_name, outvcf_name):
   """ Write a VCF file from SNAP output file. """
