@@ -53,7 +53,7 @@ if [ "${ENVIRONMENT}" == "local" ] ;then
 	python ../website/django/manage.py addrelease ${DATA} ${REPORTS} ${METADATA} ${REMOVED} ${DIFFJSON}
 fi
 
-if [ "${ENVIRONMENT}" != "beta" ] || [ "${ENVIRONMENT}" != "production" ] ;then
+if [ "${ENVIRONMENT}" == "beta" ] || [ "${ENVIRONMENT}" == "production" ] ;then
 
 	REMOTERELEASES=/var/www/backend/${ENVIRONMENT}/django/downloads/releases
 
