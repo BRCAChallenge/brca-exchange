@@ -80,9 +80,9 @@ identifiability(S) = \frac{\sum\limits_{i = 1}^{m}
 \]
 %
 \section{Dataset}
-In this study, we use the 1000 Genome Project dataset, which contains 2504 individuals, each with 5,756 SNPs.
+In this study, we use the 1000 Genome Project dataset, which contains $2504$ individuals, each with $5756$ SNPs.
 In these datasets, a record represents an individual and consists of alleles of that individual.
-In other words, each dataset represents a set of individuals and their corresponding different genotype array.
+In other words, each dataset represents a set of individuals and their corresponding different genotype arrays.
 As some of our target sources of data are companies that focus on analyses of BRCA genes,
 we expect that exonic SNPs on the two BRCA genes are highly likely to exist in the intersecting attributes.
 Hence in the preprocess step we filter out other genes and intronic SNPs, leaving 525 exonic BRCA SNPs.
@@ -139,13 +139,13 @@ D_{AB} = p_A p_B - p_{AB}
 {r_{AB}}^2 = \frac{{D_{AB}}^2}{p_A(1-p_A)p_B(1-p_B)}
 \]
 We use SNP Annotation and Proxy Search (SNAP) \cite{johnson2008snap} to obtain pairwise LD information between SNPs in our dataset and SNPs in their dataset.
-Using the pairwise correlation $r^2$, we identify the haplotypes in our dataset, plotted in Figure \ref{fig:ents_haps}.
+Using the pairwise correlation $r^2$ with a threshold of $0.8$, we identify the haplotypes in our dataset, plotted in Figure \ref{fig:ents_haps}.
 %This identifies the SNPs that are highly correlated with each other, which are considered redundant and we would aim to exclude from the final set.
 According to data from SNAP, our dataset has 3 haplotypes:
 one haplotype is located around the $5^{th}$ SNP, one around the $22^{nd}$ and the other on the $176^{th}$ and the $444^{th}$ SNPs.
 \\
 With the haplotypes determined, we select SNPs in a greedy fashion.
-Having the SNPs ranked in an descending order of entropy 
+Having the SNPs ranked in a descending order of entropy 
 and iterating from the highest-entropy SNP to the lowest,
 we select a SNP only if it is not highly correlated with any already selected SNP,
 and otherwise we discard it.
@@ -237,7 +237,7 @@ We will refer to this solution as the Knapsack Solution.
       %(or a blank line to force the subfigure onto a new line)
     \begin{subfigure}{0.45\textwidth}
         \includegraphics[width=\textwidth]{knapsack_C50_W16_births}
-        \caption{With Fixed $W$ and varied birth information}
+        \caption{With fixed $W$ and varied birth information}
         \label{fig:C50W16births}
     \end{subfigure}
     \caption{Identifiability of top $k$ SNPs selected using the Knapsack Solution.}
@@ -246,13 +246,13 @@ We will refer to this solution as the Knapsack Solution.
 
 In this section we present the experiment results of solving the problem using methods and solutions discussed in Section \ref{sec:app_and_soln}.
 \subsection{Composition Solution}
-In Figure \ref{fig:topk_ents} we show the identifiability of top $k$ SNPs ranked by entropy, where $k$ varies from 1 to 50,
+In Figure \ref{fig:topk_ents} we show the identifiability of top $k$ SNPs ranked by entropy, where $k$ varies from 0 to 50,
 as well as the identifiability of low-$r^2$ (we chose 0.8 as the $r^2$ threshold) SNPs that is ranked and selected in the same fashion.
 We also compare the effects of different types of birth information being added in the attributes.
 Since we do not have access to the true birth information of the individuals in the 1000 Genome dataset,
 we generate synthetic birth information uniformly at random instead.
 Naturally, no birth information gives the lowest identifiability, birth year gives better identifiability, and birth date gives the highest.
-In particular, we can see that the birth year information is sufficient to give very high identifiability, at $98\%$,
+In particular, we can see that the birth year information is sufficient to give $98\%$ identifiability,
 using only $20$ SNPs without the removal of high-$r^2$ SNPs in Figure \ref{fig:ent}.
 % and using only $14$ after.
 %This is $3.8\%$ and $2.8\%$ of the original set of exonic SNPs.
@@ -263,7 +263,7 @@ $k=20$ in Figure \ref{fig:ent} and $k=14$ in Figure \ref{fig:ent_indep}, and aft
 This follows our expectation, as each excluded dependent SNP does not provide more information than its selected counterpart,
 and identifiability is not affect much by including it in the selection and increasing the size of the selection.
 Indeed, we observe a deceleration of growth in Figure \ref{fig:ent} between $k=2$ and $k=10$.
-That portion is removed in Figure \ref{fig:ent_indep}, and the number of SNPs required to reach $98\%$ identifiability is reduced.
+Such deceleration is unobserved in Figure \ref{fig:ent_indep}, and the number of SNPs required to reach $98\%$ identifiability is significantly reduced.
 %
 %
 %

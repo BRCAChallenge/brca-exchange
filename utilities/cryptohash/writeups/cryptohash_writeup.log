@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  7 OCT 2017 00:50
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  7 OCT 2017 01:05
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -455,7 +455,7 @@ nts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/2015/texmf-dist/fonts
 /type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2015/texmf-dist/fonts/
 type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2015/texmf-dist/fonts/ty
 pe1/public/amsfonts/cm/cmti10.pfb>
-Output written on cryptohash_writeup.pdf (7 pages, 249002 bytes).
+Output written on cryptohash_writeup.pdf (7 pages, 249172 bytes).
 PDF statistics:
  343 PDF objects out of 1000 (max. 8388607)
  115 compressed objects within 2 object streams
