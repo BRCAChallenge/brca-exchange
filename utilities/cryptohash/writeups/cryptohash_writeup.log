@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  6 OCT 2017 17:07
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  7 OCT 2017 00:50
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -222,11 +222,7 @@ Document Style - pseudocode environments for use with the `algorithmicx' style
 LaTeX Warning: Unused global option(s):
     [14pt].
 
-(./cryptohash_writeup.aux
-
-LaTeX Warning: Label `fig:topk_ents' multiply defined.
-
-)
+(./cryptohash_writeup.aux)
 \openout1 = `cryptohash_writeup.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 27.
@@ -377,7 +373,7 @@ ptohash/writeups/imgs/top_k_entropy.pdf Graphic file (type pdf)
 tohash/writeups/imgs/top_k_entropy.pdf>
 Package pdftex.def Info: /Users/johnnie/Documents/UCSC/Internship/BRCA/brca-exc
 hange/utilities/cryptohash/writeups/imgs/top_k_entropy.pdf used on input line 2
-05.
+14.
 (pdftex.def)             Requested size: 193.50076pt x 160.3582pt.
 
 </Users/johnnie/Documents/UCSC/Internship/BRCA/brca-exchange/utilities/cryptoha
@@ -390,7 +386,7 @@ ptohash/writeups/imgs/top_k_entropy_independence.pdf Graphic file (type pdf)
 tohash/writeups/imgs/top_k_entropy_independence.pdf>
 Package pdftex.def Info: /Users/johnnie/Documents/UCSC/Internship/BRCA/brca-exc
 hange/utilities/cryptohash/writeups/imgs/top_k_entropy_independence.pdf used on
- input line 212.
+ input line 221.
 (pdftex.def)             Requested size: 193.50076pt x 160.3582pt.
 
 </Users/johnnie/Documents/UCSC/Internship/BRCA/brca-exchange/utilities/cryptoha
@@ -402,7 +398,7 @@ ptohash/writeups/imgs/knapsack_x_C50_W20.pdf Graphic file (type pdf)
 tohash/writeups/imgs/knapsack_x_C50_W20.pdf>
 Package pdftex.def Info: /Users/johnnie/Documents/UCSC/Internship/BRCA/brca-exc
 hange/utilities/cryptohash/writeups/imgs/knapsack_x_C50_W20.pdf used on input l
-ine 223.
+ine 232.
 (pdftex.def)             Requested size: 193.50076pt x 166.74619pt.
 
 </Users/johnnie/Documents/UCSC/Internship/BRCA/brca-exchange/utilities/cryptoha
@@ -414,7 +410,7 @@ ptohash/writeups/imgs/knapsack_C50_W16_births.pdf Graphic file (type pdf)
 tohash/writeups/imgs/knapsack_C50_W16_births.pdf>
 Package pdftex.def Info: /Users/johnnie/Documents/UCSC/Internship/BRCA/brca-exc
 hange/utilities/cryptohash/writeups/imgs/knapsack_C50_W16_births.pdf used on in
-put line 230.
+put line 239.
 (pdftex.def)             Requested size: 193.50076pt x 166.96014pt.
  [4] [5 </Users/johnnie/Documents/UCSC/Internship/BRCA/brca-exchange/utilities/
 cryptohash/writeups/imgs/top_k_entropy.pdf> </Users/johnnie/Documents/UCSC/Inte
@@ -425,47 +421,44 @@ pdfTeX warning: /Library/TeX/texbin/pdflatex (file /Users/johnnie/Documents/UCS
 C/Internship/BRCA/brca-exchange/utilities/cryptohash/writeups/imgs/top_k_entrop
 y_independence.pdf): PDF inclusion: multiple pdfs with page group included in a
  single page
->]
-No file cryptohash_writeup.bbl.
-[6 </Users/johnnie/Documents/UCSC/Internship/BRCA/brca-exchange/utilities/crypt
-ohash/writeups/imgs/knapsack_x_C50_W20.pdf> </Users/johnnie/Documents/UCSC/Inte
-rnship/BRCA/brca-exchange/utilities/cryptohash/writeups/imgs/knapsack_C50_W16_b
-irths.pdf
+>] [6 </Users/johnnie/Documents/UCSC/Internship/BRCA/brca-exchange/utilities/cr
+yptohash/writeups/imgs/knapsack_x_C50_W20.pdf> </Users/johnnie/Documents/UCSC/I
+nternship/BRCA/brca-exchange/utilities/cryptohash/writeups/imgs/knapsack_C50_W1
+6_births.pdf
 
 pdfTeX warning: /Library/TeX/texbin/pdflatex (file /Users/johnnie/Documents/UCS
 C/Internship/BRCA/brca-exchange/utilities/cryptohash/writeups/imgs/knapsack_C50
 _W16_births.pdf): PDF inclusion: multiple pdfs with page group included in a si
 ngle page
->] (./cryptohash_writeup.aux)
-
-LaTeX Warning: There were multiply-defined labels.
-
- ) 
+>] (./cryptohash_writeup.bbl) [7] (./cryptohash_writeup.aux) ) 
 Here is how much of TeX's memory you used:
- 4626 strings out of 493089
- 70569 string characters out of 6134842
- 140741 words of memory out of 5000000
- 8027 multiletter control sequences out of 15000+600000
- 13894 words of font info for 57 fonts, out of 8000000 for 9000
+ 4633 strings out of 493089
+ 70688 string characters out of 6134842
+ 139716 words of memory out of 5000000
+ 8031 multiletter control sequences out of 15000+600000
+ 14240 words of font info for 58 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  42i,10n,40p,344b,482s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb
-></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb>
-</usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><
-/usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></u
-sr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr
-/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/l
-ocal/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/loc
-al/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/local
-/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/te
-xlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texli
-ve/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/
-2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2
-015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb>
-Output written on cryptohash_writeup.pdf (6 pages, 226251 bytes).
+</usr/local/texli
+ve/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/local/texliv
+e/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive
+/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/
+2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/local/texlive/20
+15/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2015
+/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/local/texlive/2015/t
+exmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2015/tex
+mf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/2015/texmf
+-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/local/texlive/2015/texmf-d
+ist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2015/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2015/texmf-dist/fo
+nts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/2015/texmf-dist/fonts
+/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2015/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2015/texmf-dist/fonts/ty
+pe1/public/amsfonts/cm/cmti10.pfb>
+Output written on cryptohash_writeup.pdf (7 pages, 249002 bytes).
 PDF statistics:
- 330 PDF objects out of 1000 (max. 8388607)
- 105 compressed objects within 2 object streams
+ 343 PDF objects out of 1000 (max. 8388607)
+ 115 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
  26 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -34,9 +34,9 @@ Genome-wide association studies (GWASs) are powered by analyzing and learning fr
 In order to increase the efficiency of collecting such large quantities of data,
 a strategy is to combine and merge smaller datasets collected individually by different institutes.
 This is challenging as it requires identifying overlapping individuals in the datasets,
-and sharing sensitive individual-level data incurs privacy concerns
-and is often not permissible due to Institutional Review Board (IRB) restrictions CITE.
-Turchin and Hirschhorn CITE developed a software that creates one-way cryptographic hashes for genotyping data
+and sharing sensitive individual-level data incurs privacy concerns.
+%and is often not permissible due to Institutional Review Board (IRB) restrictions CITE.
+Turchin and Hirschhorn \cite{turchin2012gencrypt} developed a software that creates one-way cryptographic hashes for genotyping data
 and allows the identification of overlapping individuals between datasets without the need to personal information.
 In practice, however, we are often not able to obtain the entire genotype array to distinguish individuals
 due to privacy concerns as well as divergent data collecting purposes.
@@ -65,7 +65,7 @@ As a result, we want to filter out the SNPs with less identifying ability and fi
 \subsection{Identifiability}
 Using genotype information as the main attributes and personal information as auxiliary attributes,
 our ultimate goal is to identify individuals in different sources of data.
-It is hence necessary to define identifiability of a set of SNPs in order to evaluate our approaches.
+It is hence necessary to define identifiability of a set of SNPs in order to evaluate our methodes.
 For our purpose, we define it as the proportion of individuals
 that are uniquely identified with the genotyping array consisting of the attributes we select.
 Formally, for dataset $D$ containing $m$ genotype arrays, the identifiability of SNP set $S$ is the following:
@@ -87,14 +87,14 @@ As some of our target sources of data are companies that focus on analyses of BR
 we expect that exonic SNPs on the two BRCA genes are highly likely to exist in the intersecting attributes.
 Hence in the preprocess step we filter out other genes and intronic SNPs, leaving 525 exonic BRCA SNPs.
 
-\section{Approaches and Solutions}\label{sec:app_and_soln}
+\section{Methods and Solutions}\label{sec:app_and_soln}
 With the goal of reducing the number of selected SNPs while maximizing the identifiability,
-we employ two main approaches to filter SNPs: informativeness and linkage disequilibrium (LD) information.
+we employ two main methods to filter SNPs: informativeness and linkage disequilibrium (LD) information.
 %The former approach formalizes informativeness of SNPs and helps incorporate that information in the selection of SNPs,
 %and the latter .
-Both approaches help evaluate SNPs and exclude less desirable ones from the final selection.
-Below we explain the rationale of these approaches in Sections \ref{sec:inf} and \ref{sec:ld},
-and we discuss the different ways to combine these approaches and come to the solution in Section \ref{sec:soln}.
+Both methods help evaluate SNPs and exclude less desirable ones from the final selection.
+Below we explain the rationale of these methods in Sections \ref{sec:inf} and \ref{sec:ld},
+and we discuss the different ways to combine these methods and come to the solution in Section \ref{sec:soln}.
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.7\linewidth]{exon_sorted_entropies_and_haps}
@@ -107,11 +107,11 @@ For some SNPs in our datasets, most individuals share the same alleles.
 From the perspective of information theory, such SNPs have lower entropies;
 they provide less information, and contribute less identifiability of individuals.
 These low-entropy SNPs are thus less desirable to keep in the selected set as we reduce the size.
-We measure the informativeness of the SNPs in our dataset using the standard metric, Shannon entropy:
+We measure the informativeness of any SNP $d$ in our dataset using the standard metric, Shannon entropy:
 \[
-H = - \sum_{i}{p_i \log_2(p_i)}
+H(d) = - \sum_{i}{p_i \log_2(p_i)}
 \]
-where $p_i$ is the frequency of the $i^{th}$ allele for the SNP.
+where $p_i$ is the frequency of the $i^{th}$ allele for $d$.
 In practice, most SNPs have one major allele, which has a much higher frequency than the other alleles.
 The entropies of these SNPs would be low, due to the minor alleles having too low of frequencies,
 so we want to select SNPs that have more frequent alleles.
@@ -138,7 +138,7 @@ D_{AB} = p_A p_B - p_{AB}
 \[
 {r_{AB}}^2 = \frac{{D_{AB}}^2}{p_A(1-p_A)p_B(1-p_B)}
 \]
-We use SNP Annotation and Proxy Search (SNAP) to obtain pairwise LD information between SNPs in our dataset and SNPs in their dataset.
+We use SNP Annotation and Proxy Search (SNAP) \cite{johnson2008snap} to obtain pairwise LD information between SNPs in our dataset and SNPs in their dataset.
 Using the pairwise correlation $r^2$, we identify the haplotypes in our dataset, plotted in Figure \ref{fig:ents_haps}.
 %This identifies the SNPs that are highly correlated with each other, which are considered redundant and we would aim to exclude from the final set.
 According to data from SNAP, our dataset has 3 haplotypes:
@@ -174,22 +174,31 @@ as all SNPs solely selected from its haplotype is the one that gives us the most
 %
 %
 \subsection{Solutions}\label{sec:soln}
-We propose two solutions to combine the two approaches discussed.
-One is the simple composition of the two approaches, by first removing high-$r^2$ SNPs and then removing low-entropy SNPs.
-We apply the two approaches in this order so we are able to vary the size of the final selection set and observe the resulted identifiabilities.
+We propose two solutions to combine the two methods discussed.
+One is the simple composition of the two methods, by first removing high-$r^2$ SNPs and then removing low-entropy SNPs.
+We apply the two methods in this order so we are able to vary the size of the final selection set and observe the resulted identifiabilities.
 We will refer to this solution as the Composition Solution.
-
+\\
 The other solution is to regard this problem as a combinatorial optimization problem:
 We want to minimize the size of the selected set of SNPs, to maximize the informativeness of the set of SNPs,
 and also to reduce the correlation between selected SNPs.
+Formally, for a set of $n$ SNPs, where the $i^{th}$ has weight $w_i$ and value $v_i$ and is selected $x_i \in {0, 1}$ times,
+the maximum weight of the selection is restricted to be $\leq W$,
+and the number of items selected is exactly $C$:
+\begin{align*}
+\text{maximize}  &\sum\limits_{i=1}^{n}{v_i x_i}\\
+\text{subject to } &\sum\limits_{i=1}^{n}{w_i x_i} \leq W \text{,}\\
+                           &\sum\limits_{i=1}^{n}{x_i} = C \text{, and}\\
+                           &x_i \in {0, 1}
+\end{align*}
 It is hence an instance of the Knapsack Problem, and we can solve it using the dynamic programming solution.
 The weight and value functions are not obvious in our case, but we can define them basing on the entropoy and LD functions.
 Below we define $w(d)$ the weight function of a SNP $d$ and $v(d)$ the value function of $d$,
 \begin{align*}
-w(d) &= \frac{\sum\limits_{p \in \Pi} r^2(d, p)}{n}\\
+w(d) &= \frac{\sum\limits_{p \in \Pi_d} r^2(d, p)}{n}\\
 v(d) &= H(d)
 \end{align*}
-where $\Pi$ is the set of proxies of SNP $d$ according to LD data from SNAP.
+where $\Pi_d$ is the set of proxies of SNP $d$ according to LD data from SNAP, and it depends on the $r^2$ threshold picked.
 Note that the weight function is the fraction of SNPs in the dataset that are in a haplotype of size $> 1$,
 weighted by the correlation measured in $r^2$, and thus it is normalized to be always between 0 and 1.
 And the value function is simply the entropy, as we prefer a SNP more if it has higher entropy.
@@ -221,21 +230,21 @@ We will refer to this solution as the Knapsack Solution.
     \centering
     \begin{subfigure}{0.45\textwidth}
         \includegraphics[width=\textwidth]{knapsack_x_C50_W20}
-        \caption{The }
+        \caption{With varied maximum weight $W$}
         \label{fig:C50W20}
     \end{subfigure}
     ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
       %(or a blank line to force the subfigure onto a new line)
     \begin{subfigure}{0.45\textwidth}
         \includegraphics[width=\textwidth]{knapsack_C50_W16_births}
-        \caption{With high-$r^2$ SNPs removed}
+        \caption{With Fixed $W$ and varied birth information}
         \label{fig:C50W16births}
     \end{subfigure}
     \caption{Identifiability of top $k$ SNPs selected using the Knapsack Solution.}
-    \label{fig:topk_ents}
+    \label{fig:knapsack}
 \end{figure}
 
-In this section we present the experiment results of solving the problem using approaches and solutions discussed in Section \ref{sec:app_and_soln}.
+In this section we present the experiment results of solving the problem using methods and solutions discussed in Section \ref{sec:app_and_soln}.
 \subsection{Composition Solution}
 In Figure \ref{fig:topk_ents} we show the identifiability of top $k$ SNPs ranked by entropy, where $k$ varies from 1 to 50,
 as well as the identifiability of low-$r^2$ (we chose 0.8 as the $r^2$ threshold) SNPs that is ranked and selected in the same fashion.
@@ -266,28 +275,33 @@ In Figure \ref{fig:C50W20} we fix birth information to use none of it, and we va
 and plot $W$ from $0$ to $20$ to observe the effect on identifiability of different choices of $W$.
 The identifiabilities are very similar for $W=8, 12, 16, 20$, and in particular $W=16$ gives the highest.
 In Figure \ref{fig:C50W16births} we compare effects of varied amount of birth information, fixing $W$ at $16$ as it produced the best results.
+\\
 We see a similar trend where the rate of growth of identifiability is high at the start and becomes low after a point, when the number of SNPs is $18$.
-This is rather similar to saw in Figure \ref{fig:ent_indep}, but the transition point comes later.
-Moreover, we observe that without birth information,
-the highest identifiability of the Knapsack Solution is lower than the Composition Solution (both using $50$ SNPs) by $5\%$. 
-Though formulated with more complexity, our Knapsack Solution in fact produces slightly worse selections of SNPs.
+This is similar to what we saw in Figure \ref{fig:ent_indep}, but the transition point comes later.
+We also observe that without birth information,
+the highest identifiability of the Knapsack Solution is lower than the Composition Solution (both using $50$ SNPs) by $5\%$.
+Moreover, we observe the same deceleration of the growth rate of the identifiability within the first $10$ SNPs, as we did in Figure \ref{fig:topk_ents},
+and we notice that the deceleration is shorter than \ref{fig:ent} but longer than \ref{fig:ent_indep}.
+Though better than using the entropy method alone, our Knapsack Solution produces slightly worse results than the Composition Solution.
 %
 %
 %
 %
 %
 \section{Conclusion and Future Work}
-In this study we use explore identifying overlapping individuals among different sources of data,
+In this study we explore identifying of overlapping individuals among different sources of data,
 using genotype attributes as well as personal attributes, namely SNPs and birth information.
-We develop two approaches to exclude less desirable SNPs, based on entropy and LD information.
-To combine these two approaches to produce resulting selections of SNPs we also develop two solutions:
-one is a simple composition of the two approaches,
+We develop two methods to exclude less desirable SNPs, based on entropy and LD information.
+To combine these two methods to produce resulting selections of SNPs we also develop two solutions:
+one is a simple composition of the two methods,
 and the other is defining a Knapsack problem where the weight function is based on the LD information and the value function on entropy.
 We compare the efficacy of these two solutions, and we find that the Composition Solution produces selections of SNPs that have higher identifiabilities.
-In conclusion, we are able select $17$ SNPs out of the $525$ exonic SNPs and achieve identifiability $98\%$ with birth year information, using the Composition Solution.
+In conclusion, we are able select $17$ SNPs out of the $525$ exonic BRCA1 and BRCA2 SNPs
+and achieve identifiability $98\%$ with birth year information, using the Composition Solution.
+\\
 Following is a complete comparison of the minimum amount of SNPs that each solution requires
 to reach a certain amount of identifiability for each type of birth information.
-We chose different identifiability threshold here as it converges differently across different birth types.
+We choose different identifiability thresholds here as they converge differently across different birth types.
 For each birth type, to reach the chosen identifiability, the Composition Solution always requires fewer SNPs than the Knapsack Solution.
 \begin{center}
   \begin{tabular}{ | r | c | c |}
@@ -301,9 +315,15 @@ For each birth type, to reach the chosen identifiability, the Composition Soluti
 \end{center}
 Nevertheless, the definitions of weight and value functions we adopted in this work are rather preliminary,
 and there may be more potential to the Knapsack Solution that we may want to explore.
-In addition, to obtain SNAP haplotypes we made an arbitrary choice of the $r^2$ threshold to be $0.8$,
-which seems to be a sensible choice and produced great results.
-But we may want to explore other thresholds as well as other SNAP dataset.
+For example, the current formulation of the Knapsack problem depreciates SNPs that are in a larger haplotype.
+This results in an unfair preference over SNPs with similar values but belong to smaller haplotypes.
+It also only account for LD above the selected $r^2$ threshold and loses more granular LD information.
+More importantly, the current formulation of the Knapsack problem assumes independence between an item and the selection made in the computation of weight,
+and this is not the case for our setting.
+Instead, we should weigh SNPs within a haplotype differently according to their value,
+so once the highest-value SNP in the haplotype is selected, the remaining are increasingly unlikely to be selected.
+In addition, in this study we focused on one dataset of SNAP and one $r^2$ threshold.
+We may want to explore other thresholds of $r^2$ and SNAP datasets for determining haplotypes.
 %
 %
 %
@@ -333,7 +353,7 @@ But we may want to explore other thresholds as well as other SNAP dataset.
 %
 %
 %
-\bibliographystyle{acm}
+\bibliographystyle{plain}
 \bibliography{cryptohash_writeup}
 %
 \end{document}  

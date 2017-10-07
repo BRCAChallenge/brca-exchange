@@ -1,3 +1,6 @@
 *.DS_Store
 code/*.pyc
 code/*.swp
+
+*.pickle
+*/*.pickle

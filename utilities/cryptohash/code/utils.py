@@ -22,13 +22,13 @@ def vcf_to_dicts(input_vcf):
     snp_dict = {'snp': snp.ID, samples: []}
   return snps
 
-def extract_low_redund_2(input_fn, snapout_fn, k=0):
-  """ From the input VCF file, return the (top k, if k > 0) most informative
+def extract_low_redund_2(input_fn, snapout_fn, k=-1):
+  """ From the input VCF file, return the (top k, if k >= 0) most informative
       rsq-independent SNPs, using given SNAP output file.
   """
 
   # If k > 0, rank SNPs by entropy.
-  if k > 0:
+  if k >= 0:
     ranked_path = input_fn[:-4] + '_ranked.pickle'
     if os.path.exists(data_path + ranked_path):
       snps = pickle.load(open(data_path + ranked_path, 'rb'))

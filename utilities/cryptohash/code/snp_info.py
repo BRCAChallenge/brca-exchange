@@ -72,7 +72,7 @@ def genotypes(input_fn, m, n, use_dob, dobs=None, snps=None):
   """
   genotype_path = input_fn[:-4] + '_genotype.pickle'
   # If not given set of SNPs to generate genotypes, use saved genotypes.
-  if not snps and os.path.exists(genotype_path):
+  if snps==None and os.path.exists(genotype_path):
     return pickle.load(open(data_path + genotype_path, 'rb'))
 
   vcf_reader = vcf.Reader(open(data_path+input_fn, 'rb'))
@@ -81,7 +81,7 @@ def genotypes(input_fn, m, n, use_dob, dobs=None, snps=None):
   matrix1 = np.matrix(np.zeros(shape=(m, n)), dtype=str)
   matrix2 = np.matrix(np.zeros(shape=(m, n)), dtype=str)
   for i, snp in enumerate(vcf_reader):
-    if not snps or snp.ID in snps: # snps=None or snp.ID in snps
+    if snps==None or snp.ID in snps: # snps=None or snp.ID in snps
       for j, ind in enumerate(snp.samples):
         matrix1[j, i], matrix2[j, i] = ind.gt_bases.split('|')
 
@@ -90,7 +90,7 @@ def genotypes(input_fn, m, n, use_dob, dobs=None, snps=None):
   for i in range(m):
     snp_str1 = ''.join(matrix1[i].tolist()[0])
     snp_str2 = ''.join(matrix2[i].tolist()[0])
-    if use_dob:
+    if dobs != None and len(dobs)>0:
       seqs.append(snp_str1 + snp_str2 + str(dobs[i]))
     else:
       seqs.append(snp_str1 + snp_str2)

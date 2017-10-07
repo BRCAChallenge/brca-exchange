@@ -1,0 +1,16 @@
+\begin{thebibliography}{1}
+
+\bibitem{johnson2008snap}
+Andrew~D Johnson, Robert~E Handsaker, Sara~L Pulit, Marcia~M Nizzari,
+  Christopher~J O'donnell, and Paul~IW De~Bakker.
+\newblock Snap: a web-based tool for identification and annotation of proxy
+  snps using hapmap.
+\newblock {\em Bioinformatics}, 24(24):2938--2939, 2008.
+
+\bibitem{turchin2012gencrypt}
+Michael~C Turchin and Joel~N Hirschhorn.
+\newblock Gencrypt: one-way cryptographic hashes to detect overlapping
+  individuals across samples.
+\newblock {\em Bioinformatics}, 28(6):886--888, 2012.
+
+\end{thebibliography}

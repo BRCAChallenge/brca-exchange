@@ -22,7 +22,8 @@ def ranked_entropy():
   plt.title('SNP Entropies and Haplotypes')
   plt.legend(loc='best', shadow=True)
   plt.xlim([0, 550])
-  plt.savefig(config.plot_path + 'exon_sorted_entropies_and_haps.pdf')
+  plt.grid(True)
+  plt.savefig(config.plot_path + 'exon_sorted_entropies_and_haps.pdf', bbox_inches='tight', pad_inches=0)
 
 if __name__ == '__main__':
   ents_rankedsnps_path = config.data_path + 'ents_rankedsnps.pickle'

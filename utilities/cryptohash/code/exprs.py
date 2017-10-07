@@ -34,7 +34,7 @@ def init():
 def expr_top_k_independent(input_fn):
   """  """
   ks = range(1, 51)
-  births = ['year', 'date', '']
+  births = ['date', 'year', '']
   plot_data = []
   for birth in births:
     print birth
@@ -58,7 +58,10 @@ def plot_top_k_entropy2(ks, plot_data, births, expr):
   yrng = ymax - ymin
   plt.xlim([xmin - 0.05 * xrng, xmax + 0.05 * xrng])
   plt.ylim([ymin - 0.05 * yrng, ymax + 0.05 * yrng])
-  plt.savefig(plot_path + 'top_k_entropy_independence.pdf')
+  plt.xlim([xmin, xmax])
+  plt.ylim([0, 1.02])
+  plt.grid(True)
+  plt.savefig(plot_path + 'top_k_entropy_independence.pdf', bbox_inches='tight', pad_inches=0)
 
 def get_data_top_k_independent(input_fn, ks, birth, expr):
   if birth:
@@ -91,7 +94,7 @@ def expr_vary_rsq(input_fn):
       reduced from using varying r2 thresholds.
   """
   rsqs = range(1, 11)
-  births = ['year', 'date', '']
+  births = ['date', 'year', '']
   plot_data = []
   for birth in births:
     print birth
@@ -149,7 +152,7 @@ def get_idabs_vary_rsq(input_fn, rsqs, birth, dobs, expr):
 def expr_top_k_entropy(input_fn):
   """ Find identifiability of top k SNPs ranked with entropy, varying k. """
   ks = range(1, 51)
-  births = ['year', 'date', '']
+  births = ['date', 'year', '']
   plot_data = []
   for birth in births:
     print birth
@@ -173,7 +176,10 @@ def plot_top_k_entropy(ks, plot_data, births, expr):
   yrng = ymax - ymin
   plt.xlim([xmin - 0.05 * xrng, xmax + 0.05 * xrng])
   plt.ylim([ymin - 0.05 * yrng, ymax + 0.05 * yrng])
-  plt.savefig(plot_path + 'top_k_entropy.pdf')
+  plt.xlim([xmin, xmax])
+  plt.ylim([0, 1.02])
+  plt.grid(True)
+  plt.savefig(plot_path + 'top_k_entropy.pdf', bbox_inches='tight', pad_inches=0)
 
 def get_data_top_k_entropy(input_fn, ks, birth, expr):
   if birth:
@@ -204,7 +210,7 @@ def get_idabs_top_k_entropy(input_fn, ks, birth, dobs, expr):
 
 def expr_vary_af_treshold(input_fn, expr):
   thresholds = [r for r in range(0, 11)]
-  births = ['year', 'date', '']
+  births = ['date', 'year', '']
   plot_data = []
   for birth in births:
     data = get_data_vary_af_threshold(input_fn, thresholds, birth, expr)

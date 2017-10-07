@@ -109,24 +109,30 @@ def value(snp_i):
   """ Return entropy of SNP. """
   return (entropies[snp_i]) ** 2
 
-def expr_vary_W(W, C):
+def expr_vary_W(W, C, birth=''):
   idabs = []
-  config.birth_type = 'year'
-  dobs = utils.synthetic_dob(2504)
-  dobs = None
+  if birth:
+    config.birth_type = birth
+    dobs = utils.synthetic_dob(2504)
+  else:
+    dobs = []
   for w in range(1, W+1):
     value, knap_snps = solve_knapsack(w, C)
-    #idab, _ = snp_info.identifiability(input_vcf, True, dobs=dobs, snps=knap_snps)
     idab, _ = snp_info.identifiability(input_vcf, False, dobs=dobs, snps=knap_snps)
     print 'accuracy at', w, 'th round:', idab
     idabs.append(idab)
   return idabs
 
-def expr_vary_C(W, C, crange):
+def expr_vary_C(W, C, crange, birth=''):
+  if birth:
+    config.birth_type = birth
+    dobs = utils.synthetic_dob(2504)
+  else:
+    dobs = []
   idabs = []
   for c in crange:
     value, knap_snps = solve_knapsack(W, c)
-    idab, _ = snp_info.identifiability(input_vcf, False, snps=knap_snps)
+    idab, _ = snp_info.identifiability(input_vcf, True, dobs=dobs, snps=knap_snps)
     print 'accuracy at', c, 'th round:', idab
     idabs.append(idab)
   return idabs
@@ -140,19 +146,26 @@ def plot_expr_results(idabs, var_WC, var, title=None, xlabel=None, xticks=None):
   if xticks:
     plt.xticks(xticks)
   pickle.dump(idabs, open(config.data_path + 'knapsack_vary_' + var + '_' + str(var_WC) + '.pickle', 'wb'))
-  plt.savefig(config.plot_path + 'knapsack_vary_' + var + '_' + str(var_WC) + '.pdf')
+  plt.savefig(config.plot_path + 'knapsack_vary_' + var + '_' + str(var_WC) + '.pdf', bbox_inches='tight', pad_inches=0)
 
-def plot_mult_expr_results(idabs_lst, xvar_len, ovar_range, figname='', title='', xlabel='', xticks=None):
+def plot_mult_expr_results(idabs_lst, xvar_len, ovar_range, figname='', title='', xlabel='', xticks=None, births=None):
+  colors = ['r', 'b', 'g']
   for i, idabs in enumerate(idabs_lst):
-    plt.plot(range(len(idabs)), idabs, label='W = '+str(ovar_range[i]))
+    if not births:
+      plt.plot(range(len(idabs)), idabs, label=r'$W = '+str(ovar_range[i])+r'$')
+    else:
+      plt.plot(range(len(idabs)), idabs, label=births[i] if births[i] else 'no birth', c=colors[i])
   if title:
     plt.title(title)
   if xlabel:
     plt.xlabel(xlabel)
   if xticks:
-    plt.xticks(range(xvar_len), xticks)
+    #plt.xticks(range(xvar_len), xticks)
+    plt.xticks([r for r in range(xvar_len) if r % 2 == 0], [str(r*10) for r in range(6)])
+  plt.ylim([0, 1.02])
   plt.legend(loc='best', shadow=True)
-  plt.savefig(config.plot_path + figname)
+  plt.grid(True)
+  plt.savefig(config.plot_path + figname, bbox_inches='tight', pad_inches=0)
 
 if __name__ == '__main__':
   args = init()
@@ -163,38 +176,74 @@ if __name__ == '__main__':
   if args.experiment == 1:
     idabs_lst_path = config.data_path+'knapsack_x_C'+str(C)+'_W'+str(W)+'.pickle'
     figname = 'knapsack_x_C'+str(C)+'_W'+str(W) + '.pdf'
-    title = 'Identifiability with Varying Number of SNPs'
+    title = 'Identifiability with Varying Number of SNPs,\nwithout Birth Information'
     xlabel = 'Number of SNPs'
   elif args.experiment == 2:
     idabs_lst_path = config.data_path+'knapsack_x_W'+str(W)+'_C'+str(C)+'.pickle'
     figname = 'knapsack_x_W'+str(W)+'_C'+str(C) + '.pdf'
     title = 'Identifiability with Varying Max. Weight'
     xlabel = 'Maximum Weight'
+  elif args.experiment == 3:
+    idabs_lst_path = config.data_path+'knapsack_fix_C'+str(C)+'_W'+str(W)+'.pickle'
+    figname = 'knapsack_fix_C'+str(C)+'_W'+str(W) + '.pdf'
+    title = 'Identifiability of Knapsack SNPs Varying W with fixed C='+str(C)
+    xlabel = 'Weight of Knapsack Solution SNPs'
+  elif args.experiment == 4:
+    # Vary births, fix W, vary C
+    idabs_lst_path = config.data_path+'knapsack_C'+str(C)+'_W'+str(W)+'_births.pickle'
+    figname = 'knapsack_C'+str(C)+'_W'+str(W)+'_births.pdf'
+    title = 'Identifiability of Knapsack SNPs with '+r'$W=16$'+'\nAnd Varying Birth Information'
+    xlabel = 'Number of SNPs'
 
-  if W >= 10:
-    wsteps = range(0, W+W/10, W/10)
-  else:
-    wsteps = range(W+1)
+  if args.experiment == 1 or args.experiment == 2:
+    if W >= 10:
+      wsteps = range(0, W+W/10, W/10)
+    else:
+      wsteps = range(W+1)
+  
+    wsteps = [0, 4, 8, 12, 16, 20]
+  
+    if C >= 10:
+      crange = range(0, C+C/10, C/10)
+    else:
+      crange = range(C+1)
+    #if crange[0] == 0:
+    #  crange[0] += 1
+  
+    if os.path.exists(idabs_lst_path):
+      idabs_lst = pickle.load(open(idabs_lst_path, 'rb'))
+    else:
+      idabs_lst = []
+      for w in wsteps:
+        idabs = expr_vary_C(w, C, crange)
+        idabs_lst.append(idabs)
+        print 'w', w, 'C', C, 'num of idabs', len(idabs)
+        print
+      pickle.dump(idabs_lst, open(idabs_lst_path, 'wb'))
+  
+    plot_mult_expr_results(idabs_lst, len(crange), wsteps, figname=figname, title=title, xlabel=xlabel, xticks=[str(r) for r in crange])
+    #plot_mult_expr_results(idabs_lst, len(crange), wsteps, figname=figname, title=title, xlabel=xlabel, xticks=[])
 
-  wsteps = [0, 4, 8, 12, 16, 20]
-
-  if C >= 10:
-    crange = range(0, C+C/10, C/10)
-  else:
+  elif args.experiment == 4:
+    if C >= 10:
+      crange = range(0, C+C/10, C/10)
+    else:
+      crange = range(C+1)
     crange = range(C+1)
 
-  if os.path.exists(idabs_lst_path):
-    idabs_lst = pickle.load(open(idabs_lst_path, 'rb'))
-  else:
-    idabs_lst = []
-    for w in wsteps:
-      idabs = expr_vary_C(w, C, crange)
-      idabs_lst.append(idabs)
-      print 'w', w, 'C', C, 'num of idabs', len(idabs)
-      print
-    pickle.dump(idabs_lst, open(idabs_lst_path, 'wb'))
-
-  plot_mult_expr_results(idabs_lst, len(crange), wsteps, figname=figname, title=title, xlabel=xlabel, xticks=[str(r) for r in crange])
+    births = ['date', 'year', '']
+    if os.path.exists(idabs_lst_path):
+      idabs_lst = pickle.load(open(idabs_lst_path, 'rb'))
+    else:
+      idabs_lst = []
+      for birth in births:
+        idabs = expr_vary_C(W, C, crange, birth=birth)
+        idabs_lst.append(idabs)
+        print 'W', W, 'C', C, 'num of idabs', len(idabs)
+        print
+      pickle.dump(idabs_lst, open(idabs_lst_path, 'wb'))
+    plot_mult_expr_results(idabs_lst, len(crange), [], figname=figname, title=title,
+                           xlabel=xlabel, births=births)
 
   #print idabs
   #plot_expr_results(idabs, W, 'W', title='Identifiability with 30 SNPs', xlabel='Max. Weight')
