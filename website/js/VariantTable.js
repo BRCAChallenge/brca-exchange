@@ -477,7 +477,7 @@ var ResearchVariantTableSupplier = function (Component) {
         getSourceName: function(name) {
             // eg "Variant_in_1000_Genomes" => "1000 Genomes"
             let source = name.substring(11).replace(/_/g, " ");
-            if (source.toLowerCase() == "exlovd") {
+            if (source.toLowerCase() === "exlovd") {
                 source = "ExUV";
             }
             return source;
