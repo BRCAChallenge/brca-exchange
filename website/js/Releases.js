@@ -21,7 +21,7 @@ var Releases = React.createClass({
     },
     getSourceRepresentations: (sources) => {
         // exLOVD was renamed ExUV in October 2017
-        return sources.replace('exLOVD', 'ExUV');
+        return sources.replace(/exlovd/ig, 'ExUV');
     },
     render: function () {
         // Ensure releases are in descending order
