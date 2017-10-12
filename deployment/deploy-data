@@ -39,7 +39,7 @@ function add_release_tar_to_db {
 }
 
 
-HOST=${HOST:-brcaexchange.cloudapp.net}
+export HOST=${HOST:-brcaexchange.cloudapp.net}
 USER=brca
 
 # Expects environment (local,beta or production) as first argument.
@@ -49,7 +49,7 @@ if [ "${ENVIRONMENT}" != "beta" ] && [ "${ENVIRONMENT}" != "production" ] && [ "
     exit 1
 fi
 
-# Expects path to release archive as second argument. Removes trailing / if present.
+# Expects path to release archive as second argument.
 RELEASE_ARCHIVE_PATH=$2
 
 if [ "${ENVIRONMENT}" == "local" ] ;then
@@ -70,7 +70,6 @@ if [ "${ENVIRONMENT}" == "beta" ] || [ "${ENVIRONMENT}" == "production" ] ;then
 
     RELEASE_DIRECTORY_NAME=$(basename ${RELEASE_ARCHIVE_PATH} .tar.gz)
 
-    # Copies tar to downloads/releases/
     rsync -a ${RELEASE_ARCHIVE_PATH} ${USER}@${HOST}:/tmp
 
     REMOTE_TAR_TMP=/tmp/${RELEASE_DIRECTORY_NAME}.tar.gz
@@ -92,4 +91,6 @@ if [ "${ENVIRONMENT}" == "beta" ] || [ "${ENVIRONMENT}" == "production" ] ;then
         rm ${REMOTE_TAR_TMP}
 ENDSSH
 
+     echo "Exporting data for Genome Browser..."
+    ../pipeline/genomeBrowserTrack/export_data_for_genome_browser.sh ${RELEASE_ARCHIVE_PATH}
 fi
