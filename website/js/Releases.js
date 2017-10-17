@@ -19,6 +19,10 @@ var Releases = React.createClass({
             resp => this.setState(resp),
             () => this.setState({error: 'Problem connecting to server'}));
     },
+    getSourceRepresentations: (sources) => {
+        // exLOVD was renamed ExUV in October 2017
+        return sources.replace(/exlovd/ig, 'ExUV');
+    },
     render: function () {
         // Ensure releases are in descending order
         var releases = this.state.releases;
@@ -31,7 +35,7 @@ var Releases = React.createClass({
             <tr>
                 <td style={{ whiteSpace: 'nowrap' }}><Link to={`/release/${release.id}`}>Version {release.id}</Link></td>
                 <td style={{ whiteSpace: 'nowrap' }}>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</td>
-                <td>{release.sources}</td>
+                <td>{this.getSourceRepresentations(release.sources)}</td>
                 <td><Link to={`/variants?release=${release.id}&changeTypes[]=new`}>{release['variants_added']}</Link></td>
                 <td><Link to={`/variants?release=${release.id}&changeTypes[]=added_classification&changeTypes[]=changed_classification`}>{release['variants_classified']}</Link></td>
                 <td><Link to={`/variants?release=${release.id}&changeTypes[]=added_information&changeTypes[]=changed_information`}>{release['variants_modified']}</Link></td>
@@ -86,6 +90,8 @@ var Release = React.createClass({
             releaseNotes = anchorme(releaseNotes);
             // remove mailto from text portion of emails without removing link
             releaseNotes = releaseNotes.replace(/>mailto:/, '>');
+            // rename exLOVD ExUV following the name change in October 2017
+            releaseNotes = releaseNotes.replace(/exlovd/ig, 'ExUV');
         }
         return {__html: releaseNotes};
     },
