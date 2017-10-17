@@ -9,6 +9,10 @@ import luigi
 import synapseclient
 import csv
 from luigi.util import inherits, requires
+import re
+import tempfile
+import shutil
+import json
 
 from retrying import retry
 
@@ -1263,10 +1267,8 @@ class MergeVCFsIntoTSVFile(luigi.Task):
     file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
                                       description='directory to store all individual task related files')
 
-    previous_release = luigi.Parameter(default=None, description='previous release for diffing versions \
+    previous_release_tar = luigi.Parameter(default=None, description='path to previous release tar for diffing versions \
                                        and producing change types for variants')
-
-    previous_release_date = luigi.Parameter(default=None, description='date that previous_release was produced')
 
     release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
 
@@ -1383,7 +1385,19 @@ class FindMissingReports(luigi.Task):
 
 @requires(FindMissingReports)
 class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
+    def _extract_release_date(self, version_json):
+        with open(version_json, 'r') as f:
+            j = json.load(f)
+            return datetime.datetime.strptime(j['date'], '%Y-%m-%d')
 
+        
+    def _extract_file(self, archive_path, tmp_dir, file_path):
+        with tarfile.open(archive_path, "r:gz") as tar:
+            tar.extract(file_path, tmp_dir)
+
+        return tmp_dir + '/' + file_path
+
+    
     def output(self):
         release_dir = self.output_dir + "/release/"
         diff_dir = create_path_if_nonexistent(release_dir + "diff/")
@@ -1401,14 +1415,23 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
         diff_dir = create_path_if_nonexistent(release_dir + "diff/")
         os.chdir(utilities_method_dir)
 
-        args = ["python", "releaseDiff.py", "--v2", release_dir + "built.tsv", "--v1", self.previous_release,
+        tmp_dir = tempfile.mkdtemp()
+        previous_data_path = self._extract_file(self.previous_release_tar, tmp_dir, 'output/release/built_with_change_types.tsv')
+        version_json_path = self._extract_file(self.previous_release_tar, tmp_dir, 'output/release/metadata/version.json')
+        previous_release_date = self._extract_release_date(version_json_path)
+        previous_release_date_str = datetime.datetime.strftime(previous_release_date, '%m-%d-%Y')
+        
+        args = ["python", "releaseDiff.py", "--v2", release_dir + "built.tsv", "--v1", previous_data_path,
                 "--removed", diff_dir + "removed.tsv", "--added", diff_dir + "added.tsv", "--added_data",
                 diff_dir + "added_data.tsv", "--diff", diff_dir + "diff.txt", "--diff_json", diff_dir + "diff.json",
                 "--output", release_dir + "built_with_change_types.tsv", "--artifacts_dir", artifacts_dir,
-                "--diff_dir", diff_dir, "--v1_release_date", self.previous_release_date]
+                "--diff_dir", diff_dir, "--v1_release_date", previous_release_date_str]
+
         print "Running releaseDiff.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
+
+        shutil.rmtree(tmp_dir) # cleaning up
 
         check_input_and_output_tsvs_for_same_number_variants(release_dir + "built.tsv",
                                                              release_dir + "built_with_change_types.tsv")
@@ -1496,10 +1519,8 @@ class RunAll(luigi.WrapperTask):
     file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
                                       description='directory to store all individual task related files')
 
-    previous_release = luigi.Parameter(default=None, description='previous release for diffing versions \
+    previous_release_tar = luigi.Parameter(default=None, description='path to previous release tar for diffing versions \
                                        and producing change types for variants')
-
-    previous_release_date = luigi.Parameter(default=None, description='date that previous_release was produced')
 
     release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
 
@@ -1508,14 +1529,13 @@ class RunAll(luigi.WrapperTask):
         If release notes and a previous release are provided, generate a version.json file and
         run the releaseDiff.py script to generate change_types between releases of variants.
         '''
-        if self.release_notes and self.previous_release:
+        if self.release_notes and self.previous_release_tar:
             yield GenerateReleaseArchive(self.date, self.resources_dir, self.output_dir,
-                                         self.file_parent_dir, self.previous_release, self.previous_release_date,
+                                         self.file_parent_dir, self.previous_release_tar,
                                          self.release_notes)
-        elif self.previous_release:
+        elif self.previous_release_tar:
             yield RunDiffAndAppendChangeTypesToOutput(self.date, self.resources_dir, self.output_dir,
-                                                      self.file_parent_dir, self.previous_release,
-                                                      self.previous_release_date)
+                                                      self.file_parent_dir, self.previous_release_tar)
         else:
             yield BuildAggregatedOutput(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
 
