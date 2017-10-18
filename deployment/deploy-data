@@ -39,7 +39,7 @@ function add_release_tar_to_db {
 }
 
 
-HOST=${HOST:-brcaexchange.cloudapp.net}
+export HOST=${HOST:-brcaexchange.cloudapp.net}
 USER=brca
 
 # Expects environment (local,beta or production) as first argument.
@@ -91,4 +91,6 @@ if [ "${ENVIRONMENT}" == "beta" ] || [ "${ENVIRONMENT}" == "production" ] ;then
         rm ${REMOTE_TAR_TMP}
 ENDSSH
 
+     echo "Exporting data for Genome Browser..."
+    ../pipeline/genomeBrowserTrack/export_data_for_genome_browser.sh ${RELEASE_ARCHIVE_PATH}
 fi
