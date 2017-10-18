@@ -43,15 +43,14 @@ In the following lines, paths on the host are mapped to paths in the container. 
 Note, that line concerning the code base can be omitted. In this case, the version of the pipeline already contained within the image is run.
 
 ```
-docker run -u $(id -u ${USER}):$(id -g ${USER}) \
+docker run --rm -u $(id -u ${USER}):$(id -g ${USER}) \
        -v  path_to_resource_files:/files/resources \
        -v  path_to_output_directory:/files/data \
        -v  optional_path_to_code_base:/opt/brca-exchange \
        -v  path_to_pipeline_credentials.cfg:/opt/luigi_pipeline_credentials.cfg \
-       -v  path_to_previous_release_built_with_change_types.tsv:/files/previous_release/built_with_change_types.tsv \
+       -v  path_to_previous_release_tar:/files/previous_release.tar.gz \
        -v  path_to_release_notes.txt:/files/release_notes.txt \
        -v /tmp:/.synapseCache \
-       -e PREVIOUS_RELEASE_DATE=MM-DD-YYYY \
        -it \
        brca-exchange-pipeline
 ```
