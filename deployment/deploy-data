@@ -4,7 +4,7 @@ set -o errexit
 
 # This script expects two arguments:
 
-# 1. Environment (beta or production)
+# 1. Environment (beta, production, or local)
 
 # 2. A path to a release archive of the format release-{mm-dd-yy}.tar.gz
 
