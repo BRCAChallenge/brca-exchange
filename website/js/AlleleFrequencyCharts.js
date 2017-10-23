@@ -86,7 +86,7 @@ class AlleleFrequencyCharts extends React.Component {
             }
         }
 
-        // find mad frequency of those present, parsing floats from strings an suppressing those that don't parse
+        // find max frequency of those present, parsing floats from strings and suppressing those that don't parse
         let chart2Max = Math.max.apply(null, _.filter(_.map(_.values(_.pick(variant, _.map(frequencyProps, e => e.prop))), parseFloat), e => isFinite(e)));
         this.scales = [chart2Max, 0.01, 0.001];
 
