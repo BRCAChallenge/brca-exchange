@@ -1,0 +1,1457 @@
+SNP	Proxy	Distance	RSquared	DPrime	Arrays	Chromosome	Coordinate_HG18
+rs556172218	WARNING	Query snp not in HapMap3_r2
+rs556172218	WARNING	No matching proxy snps found
+rs55880202	WARNING	Query snp not in HapMap3_r2
+rs55880202	WARNING	No matching proxy snps found
+rs567110692	WARNING	Query snp not in HapMap3_r2
+rs567110692	WARNING	No matching proxy snps found
+rs55641815	WARNING	Query snp not in HapMap3_r2
+rs55641815	WARNING	No matching proxy snps found
+rs572082150	WARNING	Query snp not in HapMap3_r2
+rs572082150	WARNING	No matching proxy snps found
+rs545321666	WARNING	Query snp not in HapMap3_r2
+rs545321666	WARNING	No matching proxy snps found
+rs206118	WARNING	Query snp not in HapMap3_r2
+rs206118	WARNING	No matching proxy snps found
+rs1799943	rs1799943	0	1.000	1.000	I1,I2,I5,I6,I6Q,IM,IMD,IBC,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr13	31788572
+rs138705202	WARNING	Query snp not in HapMap3_r2
+rs138705202	WARNING	No matching proxy snps found
+rs76874770	WARNING	Query snp not in HapMap3_r2
+rs76874770	WARNING	No matching proxy snps found
+rs80358762	WARNING	Query snp not in HapMap3_r2
+rs80358762	WARNING	No matching proxy snps found
+rs4987046	rs4987046	0	1.000	1.000	IM,IMD,O54,O5E,AAE	chr13	31791271
+rs201523522	WARNING	Query snp not in HapMap3_r2
+rs201523522	WARNING	No matching proxy snps found
+rs56091799	WARNING	Query snp not in HapMap3_r2
+rs56091799	WARNING	No matching proxy snps found
+rs28897700	WARNING	Query snp not in HapMap3_r2
+rs28897700	WARNING	No matching proxy snps found
+rs28897701	WARNING	Query snp not in HapMap3_r2
+rs28897701	WARNING	No matching proxy snps found
+rs114446594	WARNING	Query snp not in HapMap3_r2
+rs114446594	WARNING	No matching proxy snps found
+rs572782576	WARNING	Query snp not in HapMap3_r2
+rs572782576	WARNING	No matching proxy snps found
+rs80358567	WARNING	Query snp not in HapMap3_r2
+rs80358567	WARNING	No matching proxy snps found
+rs375125172	WARNING	Query snp not in HapMap3_r2
+rs375125172	WARNING	No matching proxy snps found
+rs571823764	WARNING	Query snp not in HapMap3_r2
+rs571823764	WARNING	No matching proxy snps found
+rs539929888	WARNING	Query snp not in HapMap3_r2
+rs539929888	WARNING	No matching proxy snps found
+rs200942633	WARNING	Query snp not in HapMap3_r2
+rs200942633	WARNING	No matching proxy snps found
+rs80358677	WARNING	Query snp not in HapMap3_r2
+rs80358677	WARNING	No matching proxy snps found
+rs68071147	WARNING	Query snp not in HapMap3_r2
+rs68071147	WARNING	No matching proxy snps found
+rs372188754	WARNING	Query snp not in HapMap3_r2
+rs372188754	WARNING	No matching proxy snps found
+rs185506536	WARNING	Query snp not in HapMap3_r2
+rs185506536	WARNING	No matching proxy snps found
+rs55854959	WARNING	Query snp not in HapMap3_r2
+rs55854959	WARNING	No matching proxy snps found
+rs549269828	WARNING	Query snp not in HapMap3_r2
+rs549269828	WARNING	No matching proxy snps found
+rs80359088	WARNING	Query snp not in HapMap3_r2
+rs80359088	WARNING	No matching proxy snps found
+rs766173	rs766173	0	1.000	1.000	AG,IM,IMD,IBC,OQ,AxM,OE,O24,AAE	chr13	31804480
+rs766173	rs1801439	500	1.000	1.000	IM,IMD,CYT,OQ,AxM,OE,O24,O28,O54,O5E,OEE	chr13	31804980
+rs766173	rs1801499	4241	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr13	31808721
+rs766173	rs1799944	4983	1.000	1.000	AS,A6,IM,IMD,IBC,OQ,OE,O24,O28,O54,O5E,OEE	chr13	31809463
+rs766173	rs3783265	6331	1.000	1.000	AN,A6,IM,IMD	chr13	31798149
+rs766173	rs11571610	7092	1.000	1.000	IM,IMD,O54,O5E	chr13	31797388
+rs766173	rs11571681	14826	1.000	1.000	AS,A5,A6	chr13	31819306
+rs766173	rs11571684	15056	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr13	31819536
+rs766173	rs11571699	20174	1.000	1.000	AS,A5,A6	chr13	31824654
+rs766173	rs11571727	32605	1.000	1.000	AN,A6	chr13	31837085
+rs766173	rs17636116	79525	0.871	1.000	IM,IMD,O54,O5E	chr13	31884005
+rs766173	rs11571591	11742	0.771	1.000	AN,A5,A6,AxM	chr13	31792738
+rs79483201	WARNING	Query snp not in HapMap3_r2
+rs79483201	WARNING	No matching proxy snps found
+rs11571640	rs11571640	0	1.000	1.000	IM,IMD,IBC,O54,O5E,AAE	chr13	31804579
+rs28897706	WARNING	No LD data is available for rs28897706 in HapMap3_r2, panel CEU
+rs28897706	WARNING	No matching proxy snps found
+rs561002197	WARNING	Query snp not in HapMap3_r2
+rs561002197	WARNING	No matching proxy snps found
+rs544942885	WARNING	Query snp not in HapMap3_r2
+rs544942885	WARNING	No matching proxy snps found
+rs41293473	WARNING	Query snp not in HapMap3_r2
+rs41293473	WARNING	No matching proxy snps found
+rs55800493	WARNING	Query snp not in HapMap3_r2
+rs55800493	WARNING	No matching proxy snps found
+rs542343726	WARNING	Query snp not in HapMap3_r2
+rs542343726	WARNING	No matching proxy snps found
+rs561004600	WARNING	Query snp not in HapMap3_r2
+rs561004600	WARNING	No matching proxy snps found
+rs144848	rs144848	0	1.000	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr13	31804729
+rs80358408	WARNING	Query snp not in HapMap3_r2
+rs80358408	WARNING	No matching proxy snps found
+rs397507263	WARNING	Query snp not in HapMap3_r2
+rs397507263	WARNING	No matching proxy snps found
+rs532847894	WARNING	Query snp not in HapMap3_r2
+rs532847894	WARNING	No matching proxy snps found
+rs80358414	WARNING	Query snp not in HapMap3_r2
+rs80358414	WARNING	No matching proxy snps found
+rs79597821	WARNING	Query snp not in HapMap3_r2
+rs79597821	WARNING	No matching proxy snps found
+rs34355306	WARNING	Query snp not in HapMap3_r2
+rs34355306	WARNING	No matching proxy snps found
+rs548313038	WARNING	Query snp not in HapMap3_r2
+rs548313038	WARNING	No matching proxy snps found
+rs55919657	WARNING	Query snp not in HapMap3_r2
+rs55919657	WARNING	No matching proxy snps found
+rs1801439	rs1801439	0	1.000	1.000	IM,IMD,CYT,OQ,AxM,OE,O24,O28,O54,O5E,OEE	chr13	31804980
+rs1801439	rs766173	500	1.000	1.000	AG,IM,IMD,IBC,OQ,AxM,OE,O24,AAE	chr13	31804480
+rs1801439	rs1801499	3741	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr13	31808721
+rs1801439	rs1799944	4483	1.000	1.000	AS,A6,IM,IMD,IBC,OQ,OE,O24,O28,O54,O5E,OEE	chr13	31809463
+rs1801439	rs3783265	6831	1.000	1.000	AN,A6,IM,IMD	chr13	31798149
+rs1801439	rs11571610	7592	1.000	1.000	IM,IMD,O54,O5E	chr13	31797388
+rs1801439	rs11571681	14326	1.000	1.000	AS,A5,A6	chr13	31819306
+rs1801439	rs11571684	14556	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr13	31819536
+rs1801439	rs11571699	19674	1.000	1.000	AS,A5,A6	chr13	31824654
+rs1801439	rs11571727	32105	1.000	1.000	AN,A6	chr13	31837085
+rs1801439	rs17636116	79025	0.871	1.000	IM,IMD,O54,O5E	chr13	31884005
+rs1801439	rs11571591	12242	0.771	1.000	AN,A5,A6,AxM	chr13	31792738
+rs80358432	WARNING	Query snp not in HapMap3_r2
+rs80358432	WARNING	No matching proxy snps found
+rs571155346	WARNING	Query snp not in HapMap3_r2
+rs571155346	WARNING	No matching proxy snps found
+rs28897708	rs28897708	0	1.000	1.000	IM,IMD,O54,O5E,AAE	chr13	31805129
+rs557258016	WARNING	Query snp not in HapMap3_r2
+rs557258016	WARNING	No matching proxy snps found
+rs276174810	WARNING	Query snp not in HapMap3_r2
+rs276174810	WARNING	No matching proxy snps found
+rs536218070	WARNING	Query snp not in HapMap3_r2
+rs536218070	WARNING	No matching proxy snps found
+rs554273481	WARNING	Query snp not in HapMap3_r2
+rs554273481	WARNING	No matching proxy snps found
+rs55986646	WARNING	Query snp not in HapMap3_r2
+rs55986646	WARNING	No matching proxy snps found
+rs80358457	WARNING	Query snp not in HapMap3_r2
+rs80358457	WARNING	No matching proxy snps found
+rs373400041	WARNING	Query snp not in HapMap3_r2
+rs373400041	WARNING	No matching proxy snps found
+rs11571642	WARNING	Query snp not in HapMap3_r2
+rs11571642	WARNING	No matching proxy snps found
+rs28897710	rs28897710	0	1.000	1.000	IM,IMD,IBC,O54,O5E,AAE	chr13	31805407
+rs75419644	WARNING	Query snp not in HapMap3_r2
+rs75419644	WARNING	No matching proxy snps found
+rs11571652	WARNING	Query snp not in HapMap3_r2
+rs11571652	WARNING	No matching proxy snps found
+rs28897711	WARNING	Query snp not in HapMap3_r2
+rs28897711	WARNING	No matching proxy snps found
+rs527579384	WARNING	Query snp not in HapMap3_r2
+rs527579384	WARNING	No matching proxy snps found
+rs552526845	WARNING	Query snp not in HapMap3_r2
+rs552526845	WARNING	No matching proxy snps found
+rs144192844	WARNING	Query snp not in HapMap3_r2
+rs144192844	WARNING	No matching proxy snps found
+rs80358486	WARNING	Query snp not in HapMap3_r2
+rs80358486	WARNING	No matching proxy snps found
+rs80358487	WARNING	Query snp not in HapMap3_r2
+rs80358487	WARNING	No matching proxy snps found
+rs80358488	WARNING	Query snp not in HapMap3_r2
+rs80358488	WARNING	No matching proxy snps found
+rs535547513	WARNING	Query snp not in HapMap3_r2
+rs535547513	WARNING	No matching proxy snps found
+rs55816687	WARNING	Query snp not in HapMap3_r2
+rs55816687	WARNING	No matching proxy snps found
+rs112566179	WARNING	Query snp not in HapMap3_r2
+rs112566179	WARNING	No matching proxy snps found
+rs539724529	WARNING	Query snp not in HapMap3_r2
+rs539724529	WARNING	No matching proxy snps found
+rs431825296	WARNING	Query snp not in HapMap3_r2
+rs431825296	WARNING	No matching proxy snps found
+rs1801499	rs1801499	0	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr13	31808721
+rs1801499	rs1799944	742	1.000	1.000	AS,A6,IM,IMD,IBC,OQ,OE,O24,O28,O54,O5E,OEE	chr13	31809463
+rs1801499	rs1801439	3741	1.000	1.000	IM,IMD,CYT,OQ,AxM,OE,O24,O28,O54,O5E,OEE	chr13	31804980
+rs1801499	rs766173	4241	1.000	1.000	AG,IM,IMD,IBC,OQ,AxM,OE,O24,AAE	chr13	31804480
+rs1801499	rs3783265	10572	1.000	1.000	AN,A6,IM,IMD	chr13	31798149
+rs1801499	rs11571681	10585	1.000	1.000	AS,A5,A6	chr13	31819306
+rs1801499	rs11571684	10815	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr13	31819536
+rs1801499	rs11571610	11333	1.000	1.000	IM,IMD,O54,O5E	chr13	31797388
+rs1801499	rs11571699	15933	1.000	1.000	AS,A5,A6	chr13	31824654
+rs1801499	rs11571727	28364	1.000	1.000	AN,A6	chr13	31837085
+rs1801499	rs17636116	75284	0.871	1.000	IM,IMD,O54,O5E	chr13	31884005
+rs1801499	rs11571591	15983	0.771	1.000	AN,A5,A6,AxM	chr13	31792738
+rs374691587	WARNING	Query snp not in HapMap3_r2
+rs374691587	WARNING	No matching proxy snps found
+rs11571653	rs11571653	0	1.000	1.000	AG,IM,IMD,IBC,AAE	chr13	31808842
+rs574039421	WARNING	Query snp not in HapMap3_r2
+rs574039421	WARNING	No matching proxy snps found
+rs11571654	rs11571654	0	1.000	1.000	IM,IMD,O54,O5E	chr13	31809030
+rs80359785	WARNING	Query snp not in HapMap3_r2
+rs80359785	WARNING	No matching proxy snps found
+rs80358521	WARNING	Query snp not in HapMap3_r2
+rs80358521	WARNING	No matching proxy snps found
+rs546036225	WARNING	Query snp not in HapMap3_r2
+rs546036225	WARNING	No matching proxy snps found
+rs564197624	WARNING	Query snp not in HapMap3_r2
+rs564197624	WARNING	No matching proxy snps found
+rs2227943	rs2227943	0	1.000	1.000	AG,A6,IM,IMD,IBC,AAE	chr13	31809278
+rs28897716	WARNING	Query snp not in HapMap3_r2
+rs28897716	WARNING	No matching proxy snps found
+rs149753706	WARNING	Query snp not in HapMap3_r2
+rs149753706	WARNING	No matching proxy snps found
+rs80358535	WARNING	Query snp not in HapMap3_r2
+rs80358535	WARNING	No matching proxy snps found
+rs11571655	WARNING	Query snp not in HapMap3_r2
+rs11571655	WARNING	No matching proxy snps found
+rs45525041	WARNING	Query snp not in HapMap3_r2
+rs45525041	WARNING	No matching proxy snps found
+rs539613324	WARNING	Query snp not in HapMap3_r2
+rs539613324	WARNING	No matching proxy snps found
+rs144862123	WARNING	Query snp not in HapMap3_r2
+rs144862123	WARNING	No matching proxy snps found
+rs11571656	rs11571656	0	1.000	1.000	IM,IMD,IBC,O54,O5E,AAE	chr13	31809419
+rs80358541	WARNING	Query snp not in HapMap3_r2
+rs80358541	WARNING	No matching proxy snps found
+rs2227944	WARNING	Query snp not in HapMap3_r2
+rs2227944	WARNING	No matching proxy snps found
+rs1799944	rs1799944	0	1.000	1.000	AS,A6,IM,IMD,IBC,OQ,OE,O24,O28,O54,O5E,OEE	chr13	31809463
+rs1799944	rs1801499	742	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr13	31808721
+rs1799944	rs1801439	4483	1.000	1.000	IM,IMD,CYT,OQ,AxM,OE,O24,O28,O54,O5E,OEE	chr13	31804980
+rs1799944	rs766173	4983	1.000	1.000	AG,IM,IMD,IBC,OQ,AxM,OE,O24,AAE	chr13	31804480
+rs1799944	rs11571681	9843	1.000	1.000	AS,A5,A6	chr13	31819306
+rs1799944	rs11571684	10073	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr13	31819536
+rs1799944	rs3783265	11314	1.000	1.000	AN,A6,IM,IMD	chr13	31798149
+rs1799944	rs11571610	12075	1.000	1.000	IM,IMD,O54,O5E	chr13	31797388
+rs1799944	rs11571699	15191	1.000	1.000	AS,A5,A6	chr13	31824654
+rs1799944	rs11571727	27622	1.000	1.000	AN,A6	chr13	31837085
+rs1799944	rs17636116	74542	0.871	1.000	IM,IMD,O54,O5E	chr13	31884005
+rs1799944	rs11571591	16725	0.771	1.000	AN,A5,A6,AxM	chr13	31792738
+rs55638633	WARNING	Query snp not in HapMap3_r2
+rs55638633	WARNING	No matching proxy snps found
+rs80358550	WARNING	Query snp not in HapMap3_r2
+rs80358550	WARNING	No matching proxy snps found
+rs191744583	WARNING	Query snp not in HapMap3_r2
+rs191744583	WARNING	No matching proxy snps found
+rs545974734	WARNING	Query snp not in HapMap3_r2
+rs545974734	WARNING	No matching proxy snps found
+rs564316199	WARNING	Query snp not in HapMap3_r2
+rs564316199	WARNING	No matching proxy snps found
+rs145605603	WARNING	Query snp not in HapMap3_r2
+rs145605603	WARNING	No matching proxy snps found
+rs543748012	WARNING	Query snp not in HapMap3_r2
+rs543748012	WARNING	No matching proxy snps found
+rs36060526	WARNING	Query snp not in HapMap3_r2
+rs36060526	WARNING	No matching proxy snps found
+rs80358575	WARNING	Query snp not in HapMap3_r2
+rs80358575	WARNING	No matching proxy snps found
+rs369294255	WARNING	Query snp not in HapMap3_r2
+rs369294255	WARNING	No matching proxy snps found
+rs558973276	WARNING	Query snp not in HapMap3_r2
+rs558973276	WARNING	No matching proxy snps found
+rs532871047	WARNING	Query snp not in HapMap3_r2
+rs532871047	WARNING	No matching proxy snps found
+rs1801406	rs1801406	0	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr13	31809888
+rs1801406	rs9567578	10056	0.977	1.000	AN,A5,A6,AxM	chr13	31819944
+rs118093942	WARNING	Query snp not in HapMap3_r2
+rs118093942	WARNING	No matching proxy snps found
+rs200808363	WARNING	Query snp not in HapMap3_r2
+rs200808363	WARNING	No matching proxy snps found
+rs80358589	WARNING	Query snp not in HapMap3_r2
+rs80358589	WARNING	No matching proxy snps found
+rs183920365	WARNING	Query snp not in HapMap3_r2
+rs183920365	WARNING	No matching proxy snps found
+rs80358600	WARNING	Query snp not in HapMap3_r2
+rs80358600	WARNING	No matching proxy snps found
+rs1799952	rs1799952	0	1.000	1.000	IM,IMD,OQ,AxM,OE,O24,O28,O54,O5E,OEE	chr13	31810008
+rs192892005	WARNING	Query snp not in HapMap3_r2
+rs192892005	WARNING	No matching proxy snps found
+rs397507311	WARNING	Query snp not in HapMap3_r2
+rs397507311	WARNING	No matching proxy snps found
+rs543304	rs543304	0	1.000	1.000	I1,I2,I5,I6,I6Q,IM,IMD,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE	chr13	31810299
+rs543304	rs206081	9837	0.976	1.000	AN,A5,A6,I2,I5,I6,I6Q,IM,IMD,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr13	31820136
+rs543304	rs15869	60713	0.743	1.000	I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr13	31871012
+rs543304	rs206146	44458	0.727	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr13	31854757
+rs41293485	WARNING	Query snp not in HapMap3_r2
+rs41293485	WARNING	No matching proxy snps found
+rs543339423	WARNING	Query snp not in HapMap3_r2
+rs543339423	WARNING	No matching proxy snps found
+rs199863034	WARNING	Query snp not in HapMap3_r2
+rs199863034	WARNING	No matching proxy snps found
+rs28897724	WARNING	Query snp not in HapMap3_r2
+rs28897724	WARNING	No matching proxy snps found
+rs140556653	WARNING	Query snp not in HapMap3_r2
+rs140556653	WARNING	No matching proxy snps found
+rs56248502	WARNING	Query snp not in HapMap3_r2
+rs56248502	WARNING	No matching proxy snps found
+rs28897725	WARNING	Query snp not in HapMap3_r2
+rs28897725	WARNING	No matching proxy snps found
+rs55969723	WARNING	Query snp not in HapMap3_r2
+rs55969723	WARNING	No matching proxy snps found
+rs70953664	WARNING	Query snp not in HapMap3_r2
+rs70953664	WARNING	No matching proxy snps found
+rs143667871	WARNING	Query snp not in HapMap3_r2
+rs143667871	WARNING	No matching proxy snps found
+rs28897727	WARNING	Query snp not in HapMap3_r2
+rs28897727	WARNING	No matching proxy snps found
+rs80358667	WARNING	Query snp not in HapMap3_r2
+rs80358667	WARNING	No matching proxy snps found
+rs528810278	WARNING	Query snp not in HapMap3_r2
+rs528810278	WARNING	No matching proxy snps found
+rs431825319	WARNING	Query snp not in HapMap3_r2
+rs431825319	WARNING	No matching proxy snps found
+rs117187202	WARNING	Query snp not in HapMap3_r2
+rs117187202	WARNING	No matching proxy snps found
+rs188234310	WARNING	Query snp not in HapMap3_r2
+rs188234310	WARNING	No matching proxy snps found
+rs200185407	WARNING	Query snp not in HapMap3_r2
+rs200185407	WARNING	No matching proxy snps found
+rs206075	WARNING	No LD data is available for rs206075 in HapMap3_r2, panel CEU
+rs206075	WARNING	No matching proxy snps found
+rs202022822	WARNING	Query snp not in HapMap3_r2
+rs202022822	WARNING	No matching proxy snps found
+rs80359788	WARNING	Query snp not in HapMap3_r2
+rs80359788	WARNING	No matching proxy snps found
+rs28897728	rs28897728	0	1.000	1.000	IM,IMD,O54,O5E,AAE	chr13	31811077
+rs45520945	WARNING	Query snp not in HapMap3_r2
+rs45520945	WARNING	No matching proxy snps found
+rs80358698	WARNING	Query snp not in HapMap3_r2
+rs80358698	WARNING	No matching proxy snps found
+rs2219594	WARNING	No LD data is available for rs2219594 in HapMap3_r2, panel CEU
+rs2219594	WARNING	No matching proxy snps found
+rs544688816	WARNING	Query snp not in HapMap3_r2
+rs544688816	WARNING	No matching proxy snps found
+rs28897730	WARNING	Query snp not in HapMap3_r2
+rs28897730	WARNING	No matching proxy snps found
+rs80358703	WARNING	Query snp not in HapMap3_r2
+rs80358703	WARNING	No matching proxy snps found
+rs543172402	WARNING	Query snp not in HapMap3_r2
+rs543172402	WARNING	No matching proxy snps found
+rs200582465	WARNING	Query snp not in HapMap3_r2
+rs200582465	WARNING	No matching proxy snps found
+rs528771743	WARNING	Query snp not in HapMap3_r2
+rs528771743	WARNING	No matching proxy snps found
+rs201431881	WARNING	Query snp not in HapMap3_r2
+rs201431881	WARNING	No matching proxy snps found
+rs565268514	WARNING	Query snp not in HapMap3_r2
+rs565268514	WARNING	No matching proxy snps found
+rs200265692	WARNING	Query snp not in HapMap3_r2
+rs200265692	WARNING	No matching proxy snps found
+rs80358731	WARNING	Query snp not in HapMap3_r2
+rs80358731	WARNING	No matching proxy snps found
+rs80358732	WARNING	Query snp not in HapMap3_r2
+rs80358732	WARNING	No matching proxy snps found
+rs80358734	WARNING	Query snp not in HapMap3_r2
+rs80358734	WARNING	No matching proxy snps found
+rs55639415	WARNING	Query snp not in HapMap3_r2
+rs55639415	WARNING	No matching proxy snps found
+rs28897734	rs28897734	0	1.000	1.000	IM,IMD,AxM,O54,O5E	chr13	31811691
+rs80358755	WARNING	Query snp not in HapMap3_r2
+rs80358755	WARNING	No matching proxy snps found
+rs183478654	WARNING	Query snp not in HapMap3_r2
+rs183478654	WARNING	No matching proxy snps found
+rs80358765	WARNING	Query snp not in HapMap3_r2
+rs80358765	WARNING	No matching proxy snps found
+rs34351119	WARNING	Query snp not in HapMap3_r2
+rs34351119	WARNING	No matching proxy snps found
+rs80359791	WARNING	Query snp not in HapMap3_r2
+rs80359791	WARNING	No matching proxy snps found
+rs80358766	WARNING	Query snp not in HapMap3_r2
+rs80358766	WARNING	No matching proxy snps found
+rs138489917	WARNING	Query snp not in HapMap3_r2
+rs138489917	WARNING	No matching proxy snps found
+rs372951842	WARNING	Query snp not in HapMap3_r2
+rs372951842	WARNING	No matching proxy snps found
+rs573514896	WARNING	Query snp not in HapMap3_r2
+rs573514896	WARNING	No matching proxy snps found
+rs80358782	WARNING	Query snp not in HapMap3_r2
+rs80358782	WARNING	No matching proxy snps found
+rs55996097	WARNING	Query snp not in HapMap3_r2
+rs55996097	WARNING	No matching proxy snps found
+rs11571657	rs11571657	0	1.000	1.000	AG,IM,IMD,IBC,O54,O5E,AAE	chr13	31812132
+rs146351301	WARNING	Query snp not in HapMap3_r2
+rs146351301	WARNING	No matching proxy snps found
+rs4987048	WARNING	No LD data is available for rs4987048 in HapMap3_r2, panel CEU
+rs4987048	WARNING	No matching proxy snps found
+rs149474191	WARNING	Query snp not in HapMap3_r2
+rs149474191	WARNING	No matching proxy snps found
+rs55875643	WARNING	Query snp not in HapMap3_r2
+rs55875643	WARNING	No matching proxy snps found
+rs4987117	WARNING	No LD data is available for rs4987117 in HapMap3_r2, panel CEU
+rs4987117	WARNING	No matching proxy snps found
+rs1799953	WARNING	Query snp not in HapMap3_r2
+rs1799953	WARNING	No matching proxy snps found
+rs45491005	WARNING	Query snp not in HapMap3_r2
+rs45491005	WARNING	No matching proxy snps found
+rs79538375	WARNING	Query snp not in HapMap3_r2
+rs79538375	WARNING	No matching proxy snps found
+rs80358811	WARNING	Query snp not in HapMap3_r2
+rs80358811	WARNING	No matching proxy snps found
+rs556893517	WARNING	Query snp not in HapMap3_r2
+rs556893517	WARNING	No matching proxy snps found
+rs148618542	WARNING	Query snp not in HapMap3_r2
+rs148618542	WARNING	No matching proxy snps found
+rs80358833	WARNING	Query snp not in HapMap3_r2
+rs80358833	WARNING	No matching proxy snps found
+rs554663691	WARNING	Query snp not in HapMap3_r2
+rs554663691	WARNING	No matching proxy snps found
+rs572976024	WARNING	Query snp not in HapMap3_r2
+rs572976024	WARNING	No matching proxy snps found
+rs540799830	WARNING	Query snp not in HapMap3_r2
+rs540799830	WARNING	No matching proxy snps found
+rs147961615	WARNING	Query snp not in HapMap3_r2
+rs147961615	WARNING	No matching proxy snps found
+rs1799954	WARNING	No LD data is available for rs1799954 in HapMap3_r2, panel CEU
+rs1799954	WARNING	No matching proxy snps found
+rs56191579	WARNING	Query snp not in HapMap3_r2
+rs56191579	WARNING	No matching proxy snps found
+rs562893642	WARNING	Query snp not in HapMap3_r2
+rs562893642	WARNING	No matching proxy snps found
+rs34309943	WARNING	Query snp not in HapMap3_r2
+rs34309943	WARNING	No matching proxy snps found
+rs541826447	WARNING	Query snp not in HapMap3_r2
+rs541826447	WARNING	No matching proxy snps found
+rs397507838	WARNING	Query snp not in HapMap3_r2
+rs397507838	WARNING	No matching proxy snps found
+rs55794205	WARNING	Query snp not in HapMap3_r2
+rs55794205	WARNING	No matching proxy snps found
+rs35029074	WARNING	Query snp not in HapMap3_r2
+rs35029074	WARNING	No matching proxy snps found
+rs79456940	WARNING	Query snp not in HapMap3_r2
+rs79456940	WARNING	No matching proxy snps found
+rs55953736	WARNING	Query snp not in HapMap3_r2
+rs55953736	WARNING	No matching proxy snps found
+rs11571659	rs11571659	0	1.000	1.000	IM,IMD,O54,O5E,AAE	chr13	31812904
+rs80358879	WARNING	Query snp not in HapMap3_r2
+rs80358879	WARNING	No matching proxy snps found
+rs206076	WARNING	Query snp not in HapMap3_r2
+rs206076	WARNING	No matching proxy snps found
+rs75925841	WARNING	Query snp not in HapMap3_r2
+rs75925841	WARNING	No matching proxy snps found
+rs80358899	WARNING	Query snp not in HapMap3_r2
+rs80358899	WARNING	No matching proxy snps found
+rs559106452	WARNING	Query snp not in HapMap3_r2
+rs559106452	WARNING	No matching proxy snps found
+rs577406621	WARNING	Query snp not in HapMap3_r2
+rs577406621	WARNING	No matching proxy snps found
+rs199522406	WARNING	Query snp not in HapMap3_r2
+rs199522406	WARNING	No matching proxy snps found
+rs55712212	WARNING	Query snp not in HapMap3_r2
+rs55712212	WARNING	No matching proxy snps found
+rs576279166	WARNING	Query snp not in HapMap3_r2
+rs576279166	WARNING	No matching proxy snps found
+rs181183366	WARNING	Query snp not in HapMap3_r2
+rs181183366	WARNING	No matching proxy snps found
+rs186810431	WARNING	Query snp not in HapMap3_r2
+rs186810431	WARNING	No matching proxy snps found
+rs80358916	WARNING	Query snp not in HapMap3_r2
+rs80358916	WARNING	No matching proxy snps found
+rs184442109	WARNING	Query snp not in HapMap3_r2
+rs184442109	WARNING	No matching proxy snps found
+rs201500887	WARNING	Query snp not in HapMap3_r2
+rs201500887	WARNING	No matching proxy snps found
+rs45574331	WARNING	Query snp not in HapMap3_r2
+rs45574331	WARNING	No matching proxy snps found
+rs80358932	WARNING	Query snp not in HapMap3_r2
+rs80358932	WARNING	No matching proxy snps found
+rs200078639	WARNING	Query snp not in HapMap3_r2
+rs200078639	WARNING	No matching proxy snps found
+rs570826002	WARNING	Query snp not in HapMap3_r2
+rs570826002	WARNING	No matching proxy snps found
+rs55977008	WARNING	Query snp not in HapMap3_r2
+rs55977008	WARNING	No matching proxy snps found
+rs1799955	WARNING	Query snp not in HapMap3_r2
+rs1799955	WARNING	No matching proxy snps found
+rs80358954	WARNING	Query snp not in HapMap3_r2
+rs80358954	WARNING	No matching proxy snps found
+rs4986860	rs4986860	0	1.000	1.000	AG,IM,IMD,IBC,AAE	chr13	31827309
+rs553984945	WARNING	Query snp not in HapMap3_r2
+rs553984945	WARNING	No matching proxy snps found
+rs572945276	WARNING	Query snp not in HapMap3_r2
+rs572945276	WARNING	No matching proxy snps found
+rs169547	WARNING	No LD data is available for rs169547 in HapMap3_r2, panel CEU
+rs169547	WARNING	No matching proxy snps found
+rs80358965	WARNING	Query snp not in HapMap3_r2
+rs80358965	WARNING	No matching proxy snps found
+rs11571707	rs11571707	0	1.000	1.000	IM,IMD,IBC,O54,O5E,AAE	chr13	31828598
+rs55716624	WARNING	Query snp not in HapMap3_r2
+rs55716624	WARNING	No matching proxy snps found
+rs56070345	WARNING	Query snp not in HapMap3_r2
+rs56070345	WARNING	No matching proxy snps found
+rs571800995	WARNING	Query snp not in HapMap3_r2
+rs571800995	WARNING	No matching proxy snps found
+rs545454796	WARNING	Query snp not in HapMap3_r2
+rs545454796	WARNING	No matching proxy snps found
+rs74047012	WARNING	Query snp not in HapMap3_r2
+rs74047012	WARNING	No matching proxy snps found
+rs61754138	WARNING	Query snp not in HapMap3_r2
+rs61754138	WARNING	No matching proxy snps found
+rs551834979	WARNING	Query snp not in HapMap3_r2
+rs551834979	WARNING	No matching proxy snps found
+rs55689095	WARNING	Query snp not in HapMap3_r2
+rs55689095	WARNING	No matching proxy snps found
+rs142899125	WARNING	Query snp not in HapMap3_r2
+rs142899125	WARNING	No matching proxy snps found
+rs529779203	WARNING	Query snp not in HapMap3_r2
+rs529779203	WARNING	No matching proxy snps found
+rs80359800	WARNING	Query snp not in HapMap3_r2
+rs80359800	WARNING	No matching proxy snps found
+rs28897745	rs28897745	0	1.000	1.000	IM,IMD,O54,O5E,AAE	chr13	31835333
+rs146430937	WARNING	Query snp not in HapMap3_r2
+rs146430937	WARNING	No matching proxy snps found
+rs201483108	WARNING	Query snp not in HapMap3_r2
+rs201483108	WARNING	No matching proxy snps found
+rs374625452	WARNING	Query snp not in HapMap3_r2
+rs374625452	WARNING	No matching proxy snps found
+rs80359052	WARNING	Query snp not in HapMap3_r2
+rs80359052	WARNING	No matching proxy snps found
+rs186224762	WARNING	Query snp not in HapMap3_r2
+rs186224762	WARNING	No matching proxy snps found
+rs80359055	WARNING	Query snp not in HapMap3_r2
+rs80359055	WARNING	No matching proxy snps found
+rs28897747	rs28897747	0	1.000	1.000	IM,IMD,O54,O5E,AAE	chr13	31835488
+rs28897749	rs28897749	0	1.000	1.000	IM,IMD,O54,AAE	chr13	31835521
+rs80359065	WARNING	Query snp not in HapMap3_r2
+rs80359065	WARNING	No matching proxy snps found
+rs80359080	WARNING	Query snp not in HapMap3_r2
+rs80359080	WARNING	No matching proxy snps found
+rs201057885	WARNING	Query snp not in HapMap3_r2
+rs201057885	WARNING	No matching proxy snps found
+rs371278843	WARNING	Query snp not in HapMap3_r2
+rs371278843	WARNING	No matching proxy snps found
+rs9590940	rs11147490	0	1.000	1.000	IM,IMD,IBC	chr13	31842667
+rs558819788	WARNING	Query snp not in HapMap3_r2
+rs558819788	WARNING	No matching proxy snps found
+rs11571746	rs11571746	0	1.000	1.000	AG,IM,IMD,IBC,OQ,OE,O54,O5E,AAE	chr13	31843108
+rs544212043	WARNING	Query snp not in HapMap3_r2
+rs544212043	WARNING	No matching proxy snps found
+rs80359105	WARNING	Query snp not in HapMap3_r2
+rs80359105	WARNING	No matching proxy snps found
+rs11571747	WARNING	Query snp not in HapMap3_r2
+rs11571747	WARNING	No matching proxy snps found
+rs569080122	WARNING	Query snp not in HapMap3_r2
+rs569080122	WARNING	No matching proxy snps found
+rs373203204	WARNING	Query snp not in HapMap3_r2
+rs373203204	WARNING	No matching proxy snps found
+rs80359129	WARNING	Query snp not in HapMap3_r2
+rs80359129	WARNING	No matching proxy snps found
+rs4987047	WARNING	No LD data is available for rs4987047 in HapMap3_r2, panel CEU
+rs4987047	WARNING	No matching proxy snps found
+rs535486498	WARNING	Query snp not in HapMap3_r2
+rs535486498	WARNING	No matching proxy snps found
+rs28897754	rs28897754	0	1.000	1.000	IM,IMD,O54,O5E,AAE	chr13	31851549
+rs28897754	rs28897743	32516	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr13	31819033
+rs28897754	rs28897729	40433	1.000	1.000	IM,IMD,O54,O5E	chr13	31811116
+rs11571769	rs11571769	0	1.000	1.000	AG,IM,IBC,AAE	chr13	31851550
+rs59004709	WARNING	Query snp not in HapMap3_r2
+rs59004709	WARNING	No matching proxy snps found
+rs202155613	WARNING	Query snp not in HapMap3_r2
+rs202155613	WARNING	No matching proxy snps found
+rs151275325	WARNING	Query snp not in HapMap3_r2
+rs151275325	WARNING	No matching proxy snps found
+rs200635661	WARNING	Query snp not in HapMap3_r2
+rs200635661	WARNING	No matching proxy snps found
+rs55933907	WARNING	Query snp not in HapMap3_r2
+rs55933907	WARNING	No matching proxy snps found
+rs574271678	WARNING	Query snp not in HapMap3_r2
+rs574271678	WARNING	No matching proxy snps found
+rs41293521	WARNING	Query snp not in HapMap3_r2
+rs41293521	WARNING	No matching proxy snps found
+rs56204128	WARNING	Query snp not in HapMap3_r2
+rs56204128	WARNING	No matching proxy snps found
+rs571971903	WARNING	Query snp not in HapMap3_r2
+rs571971903	WARNING	No matching proxy snps found
+rs201172050	WARNING	Query snp not in HapMap3_r2
+rs201172050	WARNING	No matching proxy snps found
+rs563889433	WARNING	Query snp not in HapMap3_r2
+rs563889433	WARNING	No matching proxy snps found
+rs200598289	WARNING	Query snp not in HapMap3_r2
+rs200598289	WARNING	No matching proxy snps found
+rs80359228	WARNING	Query snp not in HapMap3_r2
+rs80359228	WARNING	No matching proxy snps found
+rs528504546	WARNING	Query snp not in HapMap3_r2
+rs528504546	WARNING	No matching proxy snps found
+rs546682485	WARNING	Query snp not in HapMap3_r2
+rs546682485	WARNING	No matching proxy snps found
+rs55775473	WARNING	Query snp not in HapMap3_r2
+rs55775473	WARNING	No matching proxy snps found
+rs80359237	WARNING	Query snp not in HapMap3_r2
+rs80359237	WARNING	No matching proxy snps found
+rs80359238	WARNING	Query snp not in HapMap3_r2
+rs80359238	WARNING	No matching proxy snps found
+rs11571831	rs11571831	0	1.000	1.000	AG,IM,IMD,IBC,AAE	chr13	31870380
+rs11571831	rs28897744	41707	1.000	1.000	IM,IMD,O54,O5E,AAE	chr13	31828673
+rs11571832	WARNING	Query snp not in HapMap3_r2
+rs11571832	WARNING	No matching proxy snps found
+rs200210279	WARNING	Query snp not in HapMap3_r2
+rs200210279	WARNING	No matching proxy snps found
+rs56121817	WARNING	Query snp not in HapMap3_r2
+rs56121817	WARNING	No matching proxy snps found
+rs369047997	WARNING	Query snp not in HapMap3_r2
+rs369047997	WARNING	No matching proxy snps found
+rs544677125	WARNING	Query snp not in HapMap3_r2
+rs544677125	WARNING	No matching proxy snps found
+rs562881210	WARNING	Query snp not in HapMap3_r2
+rs562881210	WARNING	No matching proxy snps found
+rs192049298	WARNING	Query snp not in HapMap3_r2
+rs192049298	WARNING	No matching proxy snps found
+rs11571833	WARNING	Query snp not in HapMap3_r2
+rs11571833	WARNING	No matching proxy snps found
+rs567476314	WARNING	Query snp not in HapMap3_r2
+rs567476314	WARNING	No matching proxy snps found
+rs113507014	WARNING	Query snp not in HapMap3_r2
+rs113507014	WARNING	No matching proxy snps found
+rs546597661	WARNING	Query snp not in HapMap3_r2
+rs546597661	WARNING	No matching proxy snps found
+rs28897762	WARNING	Query snp not in HapMap3_r2
+rs28897762	WARNING	No matching proxy snps found
+rs56309455	WARNING	Query snp not in HapMap3_r2
+rs56309455	WARNING	No matching proxy snps found
+rs55853199	WARNING	Query snp not in HapMap3_r2
+rs55853199	WARNING	No matching proxy snps found
+rs1801426	rs1801426	0	1.000	1.000	AG,I6,IM,IMD,IBC,OQ,OE,O24,AAE	chr13	31870884
+rs535952730	WARNING	Query snp not in HapMap3_r2
+rs535952730	WARNING	No matching proxy snps found
+rs373436334	WARNING	Query snp not in HapMap3_r2
+rs373436334	WARNING	No matching proxy snps found
+rs573123419	WARNING	Query snp not in HapMap3_r2
+rs573123419	WARNING	No matching proxy snps found
+rs190726611	WARNING	Query snp not in HapMap3_r2
+rs190726611	WARNING	No matching proxy snps found
+rs181968651	WARNING	Query snp not in HapMap3_r2
+rs181968651	WARNING	No matching proxy snps found
+rs15869	rs15869	0	1.000	1.000	I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr13	31871012
+rs15869	rs206146	16255	0.979	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr13	31854757
+rs15869	rs206081	50876	0.761	1.000	AN,A5,A6,I2,I5,I6,I6Q,IM,IMD,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr13	31820136
+rs15869	rs543304	60713	0.743	1.000	I1,I2,I5,I6,I6Q,IM,IMD,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE	chr13	31810299
+rs186227858	WARNING	Query snp not in HapMap3_r2
+rs186227858	WARNING	No matching proxy snps found
+rs574533117	WARNING	Query snp not in HapMap3_r2
+rs574533117	WARNING	No matching proxy snps found
+rs574944914	WARNING	Query snp not in HapMap3_r2
+rs574944914	WARNING	No matching proxy snps found
+rs542356535	WARNING	Query snp not in HapMap3_r2
+rs542356535	WARNING	No matching proxy snps found
+rs561034209	WARNING	Query snp not in HapMap3_r2
+rs561034209	WARNING	No matching proxy snps found
+rs11571834	WARNING	Query snp not in HapMap3_r2
+rs11571834	WARNING	No matching proxy snps found
+rs546854814	WARNING	Query snp not in HapMap3_r2
+rs546854814	WARNING	No matching proxy snps found
+rs7334543	WARNING	Query snp not in HapMap3_r2
+rs7334543	WARNING	No matching proxy snps found
+rs559790882	WARNING	Query snp not in HapMap3_r2
+rs559790882	WARNING	No matching proxy snps found
+rs56003538	WARNING	Query snp not in HapMap3_r2
+rs56003538	WARNING	No matching proxy snps found
+rs11571835	WARNING	Query snp not in HapMap3_r2
+rs11571835	WARNING	No matching proxy snps found
+rs11571836	rs11571836	0	1.000	1.000	IM,IMD,IBC,OQ,OE,O24,O28,O54,O5E,OEE	chr13	31871439
+rs11571836	rs11571725	34558	0.967	1.000	AN,A5,A6,AAH	chr13	31836881
+rs11571836	rs10492397	2919	0.711	1.000	AH,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,CM,IWQ,OE,O24,O28,O54,O5E,OEE	chr13	31874358
+rs547910249	WARNING	Query snp not in HapMap3_r2
+rs547910249	WARNING	No matching proxy snps found
+rs556392709	WARNING	Query snp not in HapMap3_r2
+rs556392709	WARNING	No matching proxy snps found
+rs185674638	WARNING	Query snp not in HapMap3_r2
+rs185674638	WARNING	No matching proxy snps found
+rs534169505	WARNING	Query snp not in HapMap3_r2
+rs534169505	WARNING	No matching proxy snps found
+rs145550800	WARNING	Query snp not in HapMap3_r2
+rs145550800	WARNING	No matching proxy snps found
+rs190094748	WARNING	Query snp not in HapMap3_r2
+rs190094748	WARNING	No matching proxy snps found
+rs183701513	WARNING	Query snp not in HapMap3_r2
+rs183701513	WARNING	No matching proxy snps found
+rs74047022	WARNING	Query snp not in HapMap3_r2
+rs74047022	WARNING	No matching proxy snps found
+rs139813105	WARNING	Query snp not in HapMap3_r2
+rs139813105	WARNING	No matching proxy snps found
+rs76358429	WARNING	Query snp not in HapMap3_r2
+rs76358429	WARNING	No matching proxy snps found
+rs186619625	WARNING	Query snp not in HapMap3_r2
+rs186619625	WARNING	No matching proxy snps found
+rs192347116	WARNING	Query snp not in HapMap3_r2
+rs192347116	WARNING	No matching proxy snps found
+rs572993583	WARNING	Query snp not in HapMap3_r2
+rs572993583	WARNING	No matching proxy snps found
+rs144947432	WARNING	Query snp not in HapMap3_r2
+rs144947432	WARNING	No matching proxy snps found
+rs565100089	WARNING	Query snp not in HapMap3_r2
+rs565100089	WARNING	No matching proxy snps found
+rs8176320	rs8176320	0	1.000	1.000	IM,IMD,CYT	chr17	38449889
+rs8176320	rs8176176	41081	1.000	1.000	IM,IMD,O54,O5E	chr17	38490970
+rs184237074	WARNING	Query snp not in HapMap3_r2
+rs184237074	WARNING	No matching proxy snps found
+rs189382442	WARNING	Query snp not in HapMap3_r2
+rs189382442	WARNING	No matching proxy snps found
+rs12516	rs12516	0	1.000	1.000	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38449934
+rs12516	rs8176318	866	1.000	1.000	AS,A6,I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38450800
+rs12516	rs11657053	5279	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38444655
+rs12516	rs4793189	5693	1.000	1.000	IM,IMD,O54,O5E	chr17	38444241
+rs12516	rs8176296	7183	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38457117
+rs12516	rs8176273	15245	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38465179
+rs12516	rs12944458	15636	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38434298
+rs12516	rs915945	16544	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38433390
+rs12516	rs3092994	19417	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38469351
+rs12516	rs2298861	19577	1.000	1.000	IM,IMD,OQ,OE,O24	chr17	38430357
+rs12516	rs2298862	19720	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38430214
+rs12516	rs4793194	21925	1.000	1.000	IM,IMD,O54,O5E	chr17	38471859
+rs12516	rs1799966	26686	1.000	1.000	AG,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,AxM,IWQ,AAE,AAH	chr17	38476620
+rs12516	rs4793197	35494	1.000	1.000	AS,A5,A6,IM,IMD,O54,O5E	chr17	38485428
+rs12516	rs1060915	38062	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38487996
+rs12516	rs3950989	41545	1.000	1.000	IM,IMD,O54,O5E	chr17	38491479
+rs12516	rs8176161	44982	1.000	1.000	IM,IMD,O54,O5E	chr17	38494916
+rs12516	rs16942	47592	1.000	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497526
+rs12516	rs9911630	8066	0.981	1.000	AS,A5,A6,I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38441868
+rs12516	rs8176265	17588	0.981	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38467522
+rs12516	rs8067269	39391	0.981	1.000	A6,IM,IMD,O54,O5E	chr17	38489325
+rs12516	rs799916	46782	0.981	1.000	AN,A5,A6,IM,IMD,O54,O5E	chr17	38496716
+rs12516	rs16940	48829	0.925	0.962	I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38498763
+rs12516	rs8176145	52686	0.925	0.962	IM,IMD,O54,O5E,AAH	chr17	38502620
+rs12516	rs8176109	69368	0.925	0.962	IM,IMD,CYT,O54,O5E	chr17	38519302
+rs12516	rs8176092	73821	0.925	0.962	AS,A6,OQ	chr17	38523755
+rs12516	rs799917	48528	0.907	0.962	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38498462
+rs12516	rs799912	60726	0.907	0.962	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38510660
+rs12516	rs11653069	86969	0.907	0.961	IM,IMD,O54,O5E	chr17	38536903
+rs12516	rs2175957	90414	0.907	0.961	I1,IM,IMD,CYT	chr17	38540348
+rs12516	rs11652332	99081	0.907	0.961	IM,IMD,O54,O5E	chr17	38549015
+rs12516	rs12936816	105301	0.907	0.961	I6Q,IM,IMD,IC,ICQ,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38555235
+rs12516	rs2037075	109418	0.907	0.961	AN,A5,A6	chr17	38559352
+rs12516	rs6503727	116451	0.889	0.943	A6	chr17	38566385
+rs12516	rs11650132	129679	0.889	0.943	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38579613
+rs12516	rs2271573	131213	0.889	0.943	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38581147
+rs12516	rs11651623	133439	0.889	0.943	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38583373
+rs12516	rs11653460	134898	0.889	0.943	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584832
+rs12516	rs11653231	135052	0.889	0.943	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584986
+rs12516	rs12936831	135408	0.889	0.943	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38585342
+rs12516	rs13851	277436	0.889	0.943	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38727370
+rs12516	rs17600371	281147	0.889	0.943	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38731081
+rs12516	rs17600502	298887	0.889	0.943	I6Q,IM,IMD,IC,ICQ,CYT,O54,O5E	chr17	38748821
+rs12516	rs4430789	309303	0.889	0.943	IM,IMD,O54,O5E	chr17	38759237
+rs12516	rs4520874	321114	0.889	0.943	AS,A5,A6	chr17	38771048
+rs12516	rs4793229	323926	0.889	0.943	AN,A5,A6	chr17	38773860
+rs12516	rs11651341	333653	0.889	0.943	I2,I5,I6,I6Q,IM,IMD,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38783587
+rs12516	rs4534897	337400	0.889	0.943	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E,ICA,ICB	chr17	38787334
+rs12516	rs4239149	131687	0.871	0.942	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38581621
+rs12516	rs8070085	145576	0.871	0.942	AS,A5,A6,I1,IM,IMD,O28,O54,O5E	chr17	38595510
+rs12516	rs9646418	331493	0.871	0.942	A6	chr17	38781427
+rs12516	rs9646413	331749	0.871	0.942	A6	chr17	38781683
+rs12516	rs4793230	332995	0.871	0.942	I3,I5,I6,IM,IMD,IC,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38782929
+rs12516	rs11657004	348343	0.838	0.942	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38798277
+rs12516	rs9912203	350737	0.838	0.942	AS,A5,A6,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38800671
+rs12516	rs9646417	329845	0.803	0.922	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr17	38779779
+rs12516	rs4793234	341775	0.749	0.882	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38791709
+rs548275991	WARNING	Query snp not in HapMap3_r2
+rs548275991	WARNING	No matching proxy snps found
+rs570062354	WARNING	Query snp not in HapMap3_r2
+rs570062354	WARNING	No matching proxy snps found
+rs537703484	WARNING	Query snp not in HapMap3_r2
+rs537703484	WARNING	No matching proxy snps found
+rs552911643	WARNING	Query snp not in HapMap3_r2
+rs552911643	WARNING	No matching proxy snps found
+rs571007748	WARNING	Query snp not in HapMap3_r2
+rs571007748	WARNING	No matching proxy snps found
+rs111791349	WARNING	Query snp not in HapMap3_r2
+rs111791349	WARNING	No matching proxy snps found
+rs553643790	WARNING	Query snp not in HapMap3_r2
+rs553643790	WARNING	No matching proxy snps found
+rs375357592	WARNING	Query snp not in HapMap3_r2
+rs375357592	WARNING	No matching proxy snps found
+rs535563803	WARNING	Query snp not in HapMap3_r2
+rs535563803	WARNING	No matching proxy snps found
+rs556653436	WARNING	Query snp not in HapMap3_r2
+rs556653436	WARNING	No matching proxy snps found
+rs397857709	WARNING	Query snp not in HapMap3_r2
+rs397857709	WARNING	No matching proxy snps found
+rs8176319	WARNING	Query snp not in HapMap3_r2
+rs8176319	WARNING	No matching proxy snps found
+rs138782023	WARNING	Query snp not in HapMap3_r2
+rs138782023	WARNING	No matching proxy snps found
+rs564043252	WARNING	Query snp not in HapMap3_r2
+rs564043252	WARNING	No matching proxy snps found
+rs572848769	WARNING	Query snp not in HapMap3_r2
+rs572848769	WARNING	No matching proxy snps found
+rs540031582	WARNING	Query snp not in HapMap3_r2
+rs540031582	WARNING	No matching proxy snps found
+rs561954959	WARNING	Query snp not in HapMap3_r2
+rs561954959	WARNING	No matching proxy snps found
+rs530117586	WARNING	Query snp not in HapMap3_r2
+rs530117586	WARNING	No matching proxy snps found
+rs141850147	WARNING	Query snp not in HapMap3_r2
+rs141850147	WARNING	No matching proxy snps found
+rs563493286	WARNING	Query snp not in HapMap3_r2
+rs563493286	WARNING	No matching proxy snps found
+rs530929756	WARNING	Query snp not in HapMap3_r2
+rs530929756	WARNING	No matching proxy snps found
+rs552648003	WARNING	Query snp not in HapMap3_r2
+rs552648003	WARNING	No matching proxy snps found
+rs571148033	WARNING	Query snp not in HapMap3_r2
+rs571148033	WARNING	No matching proxy snps found
+rs8176318	rs8176318	0	1.000	1.000	AS,A6,I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38450800
+rs8176318	rs12516	866	1.000	1.000	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38449934
+rs8176318	rs11657053	6145	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38444655
+rs8176318	rs8176296	6317	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38457117
+rs8176318	rs4793189	6559	1.000	1.000	IM,IMD,O54,O5E	chr17	38444241
+rs8176318	rs8176273	14379	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38465179
+rs8176318	rs12944458	16502	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38434298
+rs8176318	rs915945	17410	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38433390
+rs8176318	rs3092994	18551	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38469351
+rs8176318	rs2298861	20443	1.000	1.000	IM,IMD,OQ,OE,O24	chr17	38430357
+rs8176318	rs2298862	20586	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38430214
+rs8176318	rs4793194	21059	1.000	1.000	IM,IMD,O54,O5E	chr17	38471859
+rs8176318	rs1799966	25820	1.000	1.000	AG,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,AxM,IWQ,AAE,AAH	chr17	38476620
+rs8176318	rs4793197	34628	1.000	1.000	AS,A5,A6,IM,IMD,O54,O5E	chr17	38485428
+rs8176318	rs1060915	37196	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38487996
+rs8176318	rs3950989	40679	1.000	1.000	IM,IMD,O54,O5E	chr17	38491479
+rs8176318	rs8176161	44116	1.000	1.000	IM,IMD,O54,O5E	chr17	38494916
+rs8176318	rs16942	46726	1.000	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497526
+rs8176318	rs9911630	8932	0.981	1.000	AS,A5,A6,I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38441868
+rs8176318	rs8176265	16722	0.981	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38467522
+rs8176318	rs8067269	38525	0.981	1.000	A6,IM,IMD,O54,O5E	chr17	38489325
+rs8176318	rs799916	45916	0.981	1.000	AN,A5,A6,IM,IMD,O54,O5E	chr17	38496716
+rs8176318	rs16940	47963	0.925	0.962	I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38498763
+rs8176318	rs8176145	51820	0.925	0.962	IM,IMD,O54,O5E,AAH	chr17	38502620
+rs8176318	rs8176109	68502	0.925	0.962	IM,IMD,CYT,O54,O5E	chr17	38519302
+rs8176318	rs8176092	72955	0.925	0.962	AS,A6,OQ	chr17	38523755
+rs8176318	rs799917	47662	0.907	0.962	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38498462
+rs8176318	rs799912	59860	0.907	0.962	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38510660
+rs8176318	rs11653069	86103	0.907	0.961	IM,IMD,O54,O5E	chr17	38536903
+rs8176318	rs2175957	89548	0.907	0.961	I1,IM,IMD,CYT	chr17	38540348
+rs8176318	rs11652332	98215	0.907	0.961	IM,IMD,O54,O5E	chr17	38549015
+rs8176318	rs12936816	104435	0.907	0.961	I6Q,IM,IMD,IC,ICQ,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38555235
+rs8176318	rs2037075	108552	0.907	0.961	AN,A5,A6	chr17	38559352
+rs8176318	rs6503727	115585	0.889	0.943	A6	chr17	38566385
+rs8176318	rs11650132	128813	0.889	0.943	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38579613
+rs8176318	rs2271573	130347	0.889	0.943	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38581147
+rs8176318	rs11651623	132573	0.889	0.943	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38583373
+rs8176318	rs11653460	134032	0.889	0.943	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584832
+rs8176318	rs11653231	134186	0.889	0.943	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584986
+rs8176318	rs12936831	134542	0.889	0.943	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38585342
+rs8176318	rs13851	276570	0.889	0.943	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38727370
+rs8176318	rs17600371	280281	0.889	0.943	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38731081
+rs8176318	rs17600502	298021	0.889	0.943	I6Q,IM,IMD,IC,ICQ,CYT,O54,O5E	chr17	38748821
+rs8176318	rs4430789	308437	0.889	0.943	IM,IMD,O54,O5E	chr17	38759237
+rs8176318	rs4520874	320248	0.889	0.943	AS,A5,A6	chr17	38771048
+rs8176318	rs4793229	323060	0.889	0.943	AN,A5,A6	chr17	38773860
+rs8176318	rs11651341	332787	0.889	0.943	I2,I5,I6,I6Q,IM,IMD,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38783587
+rs8176318	rs4534897	336534	0.889	0.943	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E,ICA,ICB	chr17	38787334
+rs8176318	rs4239149	130821	0.871	0.942	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38581621
+rs8176318	rs8070085	144710	0.871	0.942	AS,A5,A6,I1,IM,IMD,O28,O54,O5E	chr17	38595510
+rs8176318	rs9646418	330627	0.871	0.942	A6	chr17	38781427
+rs8176318	rs9646413	330883	0.871	0.942	A6	chr17	38781683
+rs8176318	rs4793230	332129	0.871	0.942	I3,I5,I6,IM,IMD,IC,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38782929
+rs8176318	rs11657004	347477	0.838	0.942	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38798277
+rs8176318	rs9912203	349871	0.838	0.942	AS,A5,A6,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38800671
+rs8176318	rs9646417	328979	0.803	0.922	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr17	38779779
+rs8176318	rs4793234	340909	0.749	0.882	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38791709
+rs8176317	WARNING	Query snp not in HapMap3_r2
+rs8176317	WARNING	No matching proxy snps found
+rs371540942	WARNING	Query snp not in HapMap3_r2
+rs371540942	WARNING	No matching proxy snps found
+rs56108540	WARNING	Query snp not in HapMap3_r2
+rs56108540	WARNING	No matching proxy snps found
+rs557030603	WARNING	Query snp not in HapMap3_r2
+rs557030603	WARNING	No matching proxy snps found
+rs189442183	WARNING	Query snp not in HapMap3_r2
+rs189442183	WARNING	No matching proxy snps found
+rs539044217	WARNING	Query snp not in HapMap3_r2
+rs539044217	WARNING	No matching proxy snps found
+rs137892861	WARNING	Query snp not in HapMap3_r2
+rs137892861	WARNING	No matching proxy snps found
+rs3092995	WARNING	Query snp not in HapMap3_r2
+rs3092995	WARNING	No matching proxy snps found
+rs80356920	WARNING	Query snp not in HapMap3_r2
+rs80356920	WARNING	No matching proxy snps found
+rs531210457	WARNING	Query snp not in HapMap3_r2
+rs531210457	WARNING	No matching proxy snps found
+rs373810778	WARNING	Query snp not in HapMap3_r2
+rs373810778	WARNING	No matching proxy snps found
+rs55808233	WARNING	Query snp not in HapMap3_r2
+rs55808233	WARNING	No matching proxy snps found
+rs576727185	WARNING	Query snp not in HapMap3_r2
+rs576727185	WARNING	No matching proxy snps found
+rs138493864	WARNING	Query snp not in HapMap3_r2
+rs138493864	WARNING	No matching proxy snps found
+rs571834423	WARNING	Query snp not in HapMap3_r2
+rs571834423	WARNING	No matching proxy snps found
+rs56195342	WARNING	Query snp not in HapMap3_r2
+rs56195342	WARNING	No matching proxy snps found
+rs397509229	WARNING	Query snp not in HapMap3_r2
+rs397509229	WARNING	No matching proxy snps found
+rs80356860	WARNING	Query snp not in HapMap3_r2
+rs80356860	WARNING	No matching proxy snps found
+rs142459158	WARNING	Query snp not in HapMap3_r2
+rs142459158	WARNING	No matching proxy snps found
+rs549640262	WARNING	Query snp not in HapMap3_r2
+rs549640262	WARNING	No matching proxy snps found
+rs1799967	rs1799967	0	1.000	1.000	AG,IM,IMD,O54,O5E,AAE	chr17	38476501
+rs1799967	rs11870959	349648	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38826149
+rs201810810	WARNING	Query snp not in HapMap3_r2
+rs201810810	WARNING	No matching proxy snps found
+rs70953661	WARNING	Query snp not in HapMap3_r2
+rs70953661	WARNING	No matching proxy snps found
+rs4986854	rs4986854	0	1.000	1.000	AG,IM,IMD,OQ,AxM,OE,O24,AAE	chr17	38476574
+rs70953660	WARNING	Query snp not in HapMap3_r2
+rs70953660	WARNING	No matching proxy snps found
+rs1799966	rs1799966	0	1.000	1.000	AG,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,AxM,IWQ,AAE,AAH	chr17	38476620
+rs1799966	rs4793194	4761	1.000	1.000	IM,IMD,O54,O5E	chr17	38471859
+rs1799966	rs3092994	7269	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38469351
+rs1799966	rs4793197	8808	1.000	1.000	AS,A5,A6,IM,IMD,O54,O5E	chr17	38485428
+rs1799966	rs1060915	11376	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38487996
+rs1799966	rs8176273	11441	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38465179
+rs1799966	rs3950989	14859	1.000	1.000	IM,IMD,O54,O5E	chr17	38491479
+rs1799966	rs8176161	18296	1.000	1.000	IM,IMD,O54,O5E	chr17	38494916
+rs1799966	rs8176296	19503	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38457117
+rs1799966	rs16942	20906	1.000	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497526
+rs1799966	rs8176318	25820	1.000	1.000	AS,A6,I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38450800
+rs1799966	rs12516	26686	1.000	1.000	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38449934
+rs1799966	rs11657053	31965	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38444655
+rs1799966	rs4793189	32379	1.000	1.000	IM,IMD,O54,O5E	chr17	38444241
+rs1799966	rs12944458	42322	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38434298
+rs1799966	rs915945	43230	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38433390
+rs1799966	rs2298861	46263	1.000	1.000	IM,IMD,OQ,OE,O24	chr17	38430357
+rs1799966	rs2298862	46406	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38430214
+rs1799966	rs8176265	9098	0.981	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38467522
+rs1799966	rs8067269	12705	0.981	1.000	A6,IM,IMD,O54,O5E	chr17	38489325
+rs1799966	rs799916	20096	0.981	1.000	AN,A5,A6,IM,IMD,O54,O5E	chr17	38496716
+rs1799966	rs9911630	34752	0.981	1.000	AS,A5,A6,I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38441868
+rs1799966	rs16940	22143	0.925	0.962	I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38498763
+rs1799966	rs8176145	26000	0.925	0.962	IM,IMD,O54,O5E,AAH	chr17	38502620
+rs1799966	rs8176109	42682	0.925	0.962	IM,IMD,CYT,O54,O5E	chr17	38519302
+rs1799966	rs8176092	47135	0.925	0.962	AS,A6,OQ	chr17	38523755
+rs1799966	rs799917	21842	0.907	0.962	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38498462
+rs1799966	rs799912	34040	0.907	0.962	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38510660
+rs1799966	rs11653069	60283	0.907	0.961	IM,IMD,O54,O5E	chr17	38536903
+rs1799966	rs2175957	63728	0.907	0.961	I1,IM,IMD,CYT	chr17	38540348
+rs1799966	rs11652332	72395	0.907	0.961	IM,IMD,O54,O5E	chr17	38549015
+rs1799966	rs12936816	78615	0.907	0.961	I6Q,IM,IMD,IC,ICQ,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38555235
+rs1799966	rs2037075	82732	0.907	0.961	AN,A5,A6	chr17	38559352
+rs1799966	rs6503727	89765	0.889	0.943	A6	chr17	38566385
+rs1799966	rs11650132	102993	0.889	0.943	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38579613
+rs1799966	rs2271573	104527	0.889	0.943	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38581147
+rs1799966	rs11651623	106753	0.889	0.943	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38583373
+rs1799966	rs11653460	108212	0.889	0.943	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584832
+rs1799966	rs11653231	108366	0.889	0.943	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584986
+rs1799966	rs12936831	108722	0.889	0.943	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38585342
+rs1799966	rs13851	250750	0.889	0.943	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38727370
+rs1799966	rs17600371	254461	0.889	0.943	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38731081
+rs1799966	rs17600502	272201	0.889	0.943	I6Q,IM,IMD,IC,ICQ,CYT,O54,O5E	chr17	38748821
+rs1799966	rs4430789	282617	0.889	0.943	IM,IMD,O54,O5E	chr17	38759237
+rs1799966	rs4520874	294428	0.889	0.943	AS,A5,A6	chr17	38771048
+rs1799966	rs4793229	297240	0.889	0.943	AN,A5,A6	chr17	38773860
+rs1799966	rs11651341	306967	0.889	0.943	I2,I5,I6,I6Q,IM,IMD,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38783587
+rs1799966	rs4534897	310714	0.889	0.943	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E,ICA,ICB	chr17	38787334
+rs1799966	rs4239149	105001	0.871	0.942	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38581621
+rs1799966	rs8070085	118890	0.871	0.942	AS,A5,A6,I1,IM,IMD,O28,O54,O5E	chr17	38595510
+rs1799966	rs9646418	304807	0.871	0.942	A6	chr17	38781427
+rs1799966	rs9646413	305063	0.871	0.942	A6	chr17	38781683
+rs1799966	rs4793230	306309	0.871	0.942	I3,I5,I6,IM,IMD,IC,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38782929
+rs1799966	rs11657004	321657	0.838	0.942	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38798277
+rs1799966	rs9912203	324051	0.838	0.942	AS,A5,A6,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38800671
+rs1799966	rs9646417	303159	0.803	0.922	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr17	38779779
+rs1799966	rs4793234	315089	0.749	0.882	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38791709
+rs80356833	WARNING	Query snp not in HapMap3_r2
+rs80356833	WARNING	No matching proxy snps found
+rs28897693	WARNING	Query snp not in HapMap3_r2
+rs28897693	WARNING	No matching proxy snps found
+rs568753972	WARNING	Query snp not in HapMap3_r2
+rs568753972	WARNING	No matching proxy snps found
+rs56119278	WARNING	Query snp not in HapMap3_r2
+rs56119278	WARNING	No matching proxy snps found
+rs56158747	WARNING	Query snp not in HapMap3_r2
+rs56158747	WARNING	No matching proxy snps found
+rs564757581	WARNING	Query snp not in HapMap3_r2
+rs564757581	WARNING	No matching proxy snps found
+rs28897691	rs28897691	0	1.000	1.000	IM,IMD,O54,O5E	chr17	38479913
+rs28897691	rs1800707	8173	1.000	1.000	IM,IMD,O54,O5E	chr17	38488086
+rs28897691	rs1800704	18137	1.000	1.000	IM,IMD,O54,O5E,AAE	chr17	38498050
+rs28897691	rs11658785	20394	1.000	1.000	IM,IMD,CYT,O54,O5E	chr17	38500307
+rs55815649	WARNING	Query snp not in HapMap3_r2
+rs55815649	WARNING	No matching proxy snps found
+rs1800744	WARNING	Query snp not in HapMap3_r2
+rs1800744	WARNING	No matching proxy snps found
+rs73983787	WARNING	Query snp not in HapMap3_r2
+rs73983787	WARNING	No matching proxy snps found
+rs80357075	WARNING	Query snp not in HapMap3_r2
+rs80357075	WARNING	No matching proxy snps found
+rs80357022	WARNING	Query snp not in HapMap3_r2
+rs80357022	WARNING	No matching proxy snps found
+rs80356840	WARNING	Query snp not in HapMap3_r2
+rs80356840	WARNING	No matching proxy snps found
+rs1060915	rs1060915	0	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38487996
+rs1060915	rs4793197	2568	1.000	1.000	AS,A5,A6,IM,IMD,O54,O5E	chr17	38485428
+rs1060915	rs3950989	3483	1.000	1.000	IM,IMD,O54,O5E	chr17	38491479
+rs1060915	rs8176161	6920	1.000	1.000	IM,IMD,O54,O5E	chr17	38494916
+rs1060915	rs16942	9530	1.000	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497526
+rs1060915	rs1799966	11376	1.000	1.000	AG,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,AxM,IWQ,AAE,AAH	chr17	38476620
+rs1060915	rs4793194	16137	1.000	1.000	IM,IMD,O54,O5E	chr17	38471859
+rs1060915	rs3092994	18645	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38469351
+rs1060915	rs8176273	22817	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38465179
+rs1060915	rs8176296	30879	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38457117
+rs1060915	rs8176318	37196	1.000	1.000	AS,A6,I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38450800
+rs1060915	rs12516	38062	1.000	1.000	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38449934
+rs1060915	rs11657053	43341	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38444655
+rs1060915	rs4793189	43755	1.000	1.000	IM,IMD,O54,O5E	chr17	38444241
+rs1060915	rs12944458	53698	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38434298
+rs1060915	rs915945	54606	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38433390
+rs1060915	rs2298861	57639	1.000	1.000	IM,IMD,OQ,OE,O24	chr17	38430357
+rs1060915	rs2298862	57782	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38430214
+rs1060915	rs8067269	1329	0.981	1.000	A6,IM,IMD,O54,O5E	chr17	38489325
+rs1060915	rs799916	8720	0.981	1.000	AN,A5,A6,IM,IMD,O54,O5E	chr17	38496716
+rs1060915	rs8176265	20474	0.981	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38467522
+rs1060915	rs9911630	46128	0.981	1.000	AS,A5,A6,I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38441868
+rs1060915	rs16940	10767	0.925	0.962	I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38498763
+rs1060915	rs8176145	14624	0.925	0.962	IM,IMD,O54,O5E,AAH	chr17	38502620
+rs1060915	rs8176109	31306	0.925	0.962	IM,IMD,CYT,O54,O5E	chr17	38519302
+rs1060915	rs8176092	35759	0.925	0.962	AS,A6,OQ	chr17	38523755
+rs1060915	rs799917	10466	0.907	0.962	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38498462
+rs1060915	rs799912	22664	0.907	0.962	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38510660
+rs1060915	rs11653069	48907	0.907	0.961	IM,IMD,O54,O5E	chr17	38536903
+rs1060915	rs2175957	52352	0.907	0.961	I1,IM,IMD,CYT	chr17	38540348
+rs1060915	rs11652332	61019	0.907	0.961	IM,IMD,O54,O5E	chr17	38549015
+rs1060915	rs12936816	67239	0.907	0.961	I6Q,IM,IMD,IC,ICQ,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38555235
+rs1060915	rs2037075	71356	0.907	0.961	AN,A5,A6	chr17	38559352
+rs1060915	rs6503727	78389	0.889	0.943	A6	chr17	38566385
+rs1060915	rs11650132	91617	0.889	0.943	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38579613
+rs1060915	rs2271573	93151	0.889	0.943	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38581147
+rs1060915	rs11651623	95377	0.889	0.943	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38583373
+rs1060915	rs11653460	96836	0.889	0.943	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584832
+rs1060915	rs11653231	96990	0.889	0.943	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584986
+rs1060915	rs12936831	97346	0.889	0.943	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38585342
+rs1060915	rs13851	239374	0.889	0.943	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38727370
+rs1060915	rs17600371	243085	0.889	0.943	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38731081
+rs1060915	rs17600502	260825	0.889	0.943	I6Q,IM,IMD,IC,ICQ,CYT,O54,O5E	chr17	38748821
+rs1060915	rs4430789	271241	0.889	0.943	IM,IMD,O54,O5E	chr17	38759237
+rs1060915	rs4520874	283052	0.889	0.943	AS,A5,A6	chr17	38771048
+rs1060915	rs4793229	285864	0.889	0.943	AN,A5,A6	chr17	38773860
+rs1060915	rs11651341	295591	0.889	0.943	I2,I5,I6,I6Q,IM,IMD,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38783587
+rs1060915	rs4534897	299338	0.889	0.943	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E,ICA,ICB	chr17	38787334
+rs1060915	rs4239149	93625	0.871	0.942	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38581621
+rs1060915	rs8070085	107514	0.871	0.942	AS,A5,A6,I1,IM,IMD,O28,O54,O5E	chr17	38595510
+rs1060915	rs9646418	293431	0.871	0.942	A6	chr17	38781427
+rs1060915	rs9646413	293687	0.871	0.942	A6	chr17	38781683
+rs1060915	rs4793230	294933	0.871	0.942	I3,I5,I6,IM,IMD,IC,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38782929
+rs1060915	rs11657004	310281	0.838	0.942	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38798277
+rs1060915	rs9912203	312675	0.838	0.942	AS,A5,A6,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38800671
+rs1060915	rs9646417	291783	0.803	0.922	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr17	38779779
+rs1060915	rs4793234	303713	0.749	0.882	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38791709
+rs541512953	WARNING	Query snp not in HapMap3_r2
+rs541512953	WARNING	No matching proxy snps found
+rs398122684	WARNING	Query snp not in HapMap3_r2
+rs398122684	WARNING	No matching proxy snps found
+rs78951648	WARNING	Query snp not in HapMap3_r2
+rs78951648	WARNING	No matching proxy snps found
+rs576828558	WARNING	Query snp not in HapMap3_r2
+rs576828558	WARNING	No matching proxy snps found
+rs147448807	WARNING	Query snp not in HapMap3_r2
+rs147448807	WARNING	No matching proxy snps found
+rs80357345	WARNING	Query snp not in HapMap3_r2
+rs80357345	WARNING	No matching proxy snps found
+rs28897689	rs28897689	0	1.000	1.000	IM,IMD,AxM,O54,O5E,AAE	chr17	38497035
+rs80356828	WARNING	Query snp not in HapMap3_r2
+rs80356828	WARNING	No matching proxy snps found
+rs80357036	WARNING	Query snp not in HapMap3_r2
+rs80357036	WARNING	No matching proxy snps found
+rs80357280	WARNING	Query snp not in HapMap3_r2
+rs80357280	WARNING	No matching proxy snps found
+rs140588714	WARNING	Query snp not in HapMap3_r2
+rs140588714	WARNING	No matching proxy snps found
+rs200648498	WARNING	Query snp not in HapMap3_r2
+rs200648498	WARNING	No matching proxy snps found
+rs483353090	WARNING	Query snp not in HapMap3_r2
+rs483353090	WARNING	No matching proxy snps found
+rs80357099	WARNING	Query snp not in HapMap3_r2
+rs80357099	WARNING	No matching proxy snps found
+rs80357191	WARNING	Query snp not in HapMap3_r2
+rs80357191	WARNING	No matching proxy snps found
+rs28897687	WARNING	No LD data is available for rs28897687 in HapMap3_r2, panel CEU
+rs28897687	WARNING	No matching proxy snps found
+rs41293451	WARNING	Query snp not in HapMap3_r2
+rs41293451	WARNING	No matching proxy snps found
+rs537737635	WARNING	Query snp not in HapMap3_r2
+rs537737635	WARNING	No matching proxy snps found
+rs56214134	WARNING	Query snp not in HapMap3_r2
+rs56214134	WARNING	No matching proxy snps found
+rs16942	rs16942	0	1.000	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497526
+rs16942	rs8176161	2610	1.000	1.000	IM,IMD,O54,O5E	chr17	38494916
+rs16942	rs3950989	6047	1.000	1.000	IM,IMD,O54,O5E	chr17	38491479
+rs16942	rs1060915	9530	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38487996
+rs16942	rs4793197	12098	1.000	1.000	AS,A5,A6,IM,IMD,O54,O5E	chr17	38485428
+rs16942	rs1799966	20906	1.000	1.000	AG,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,AxM,IWQ,AAE,AAH	chr17	38476620
+rs16942	rs4793194	25667	1.000	1.000	IM,IMD,O54,O5E	chr17	38471859
+rs16942	rs3092994	28175	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38469351
+rs16942	rs8176273	32347	1.000	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38465179
+rs16942	rs8176296	40409	1.000	1.000	I1,IM,IMD,O54,O5E	chr17	38457117
+rs16942	rs8176318	46726	1.000	1.000	AS,A6,I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38450800
+rs16942	rs12516	47592	1.000	1.000	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38449934
+rs16942	rs11657053	52871	1.000	1.000	I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38444655
+rs16942	rs4793189	53285	1.000	1.000	IM,IMD,O54,O5E	chr17	38444241
+rs16942	rs12944458	63228	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38434298
+rs16942	rs915945	64136	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38433390
+rs16942	rs2298861	67169	1.000	1.000	IM,IMD,OQ,OE,O24	chr17	38430357
+rs16942	rs2298862	67312	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38430214
+rs16942	rs799916	810	0.981	1.000	AN,A5,A6,IM,IMD,O54,O5E	chr17	38496716
+rs16942	rs8067269	8201	0.981	1.000	A6,IM,IMD,O54,O5E	chr17	38489325
+rs16942	rs8176265	30004	0.981	1.000	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38467522
+rs16942	rs9911630	55658	0.981	1.000	AS,A5,A6,I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38441868
+rs16942	rs16940	1237	0.925	0.962	I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38498763
+rs16942	rs8176145	5094	0.925	0.962	IM,IMD,O54,O5E,AAH	chr17	38502620
+rs16942	rs8176109	21776	0.925	0.962	IM,IMD,CYT,O54,O5E	chr17	38519302
+rs16942	rs8176092	26229	0.925	0.962	AS,A6,OQ	chr17	38523755
+rs16942	rs799917	936	0.907	0.962	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38498462
+rs16942	rs799912	13134	0.907	0.962	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38510660
+rs16942	rs11653069	39377	0.907	0.961	IM,IMD,O54,O5E	chr17	38536903
+rs16942	rs2175957	42822	0.907	0.961	I1,IM,IMD,CYT	chr17	38540348
+rs16942	rs11652332	51489	0.907	0.961	IM,IMD,O54,O5E	chr17	38549015
+rs16942	rs12936816	57709	0.907	0.961	I6Q,IM,IMD,IC,ICQ,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38555235
+rs16942	rs2037075	61826	0.907	0.961	AN,A5,A6	chr17	38559352
+rs16942	rs6503727	68859	0.889	0.943	A6	chr17	38566385
+rs16942	rs11650132	82087	0.889	0.943	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38579613
+rs16942	rs2271573	83621	0.889	0.943	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38581147
+rs16942	rs11651623	85847	0.889	0.943	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38583373
+rs16942	rs11653460	87306	0.889	0.943	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584832
+rs16942	rs11653231	87460	0.889	0.943	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584986
+rs16942	rs12936831	87816	0.889	0.943	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38585342
+rs16942	rs13851	229844	0.889	0.943	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38727370
+rs16942	rs17600371	233555	0.889	0.943	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38731081
+rs16942	rs17600502	251295	0.889	0.943	I6Q,IM,IMD,IC,ICQ,CYT,O54,O5E	chr17	38748821
+rs16942	rs4430789	261711	0.889	0.943	IM,IMD,O54,O5E	chr17	38759237
+rs16942	rs4520874	273522	0.889	0.943	AS,A5,A6	chr17	38771048
+rs16942	rs4793229	276334	0.889	0.943	AN,A5,A6	chr17	38773860
+rs16942	rs11651341	286061	0.889	0.943	I2,I5,I6,I6Q,IM,IMD,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38783587
+rs16942	rs4534897	289808	0.889	0.943	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E,ICA,ICB	chr17	38787334
+rs16942	rs4239149	84095	0.871	0.942	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38581621
+rs16942	rs8070085	97984	0.871	0.942	AS,A5,A6,I1,IM,IMD,O28,O54,O5E	chr17	38595510
+rs16942	rs9646418	283901	0.871	0.942	A6	chr17	38781427
+rs16942	rs9646413	284157	0.871	0.942	A6	chr17	38781683
+rs16942	rs4793230	285403	0.871	0.942	I3,I5,I6,IM,IMD,IC,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38782929
+rs16942	rs11657004	300751	0.838	0.942	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38798277
+rs16942	rs9912203	303145	0.838	0.942	AS,A5,A6,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38800671
+rs16942	rs9646417	282253	0.803	0.922	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr17	38779779
+rs16942	rs4793234	294183	0.749	0.882	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38791709
+rs56336919	WARNING	Query snp not in HapMap3_r2
+rs56336919	WARNING	No matching proxy snps found
+rs183119644	WARNING	Query snp not in HapMap3_r2
+rs183119644	WARNING	No matching proxy snps found
+rs80356918	WARNING	Query snp not in HapMap3_r2
+rs80356918	WARNING	No matching proxy snps found
+rs80357272	WARNING	Query snp not in HapMap3_r2
+rs80357272	WARNING	No matching proxy snps found
+rs2227945	rs2227945	0	1.000	1.000	AG,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497656
+rs530464947	WARNING	Query snp not in HapMap3_r2
+rs530464947	WARNING	No matching proxy snps found
+rs80357201	WARNING	Query snp not in HapMap3_r2
+rs80357201	WARNING	No matching proxy snps found
+rs80357263	WARNING	Query snp not in HapMap3_r2
+rs80357263	WARNING	No matching proxy snps found
+rs528254652	WARNING	Query snp not in HapMap3_r2
+rs528254652	WARNING	No matching proxy snps found
+rs4986852	rs4986852	0	1.000	1.000	AG,IM,IMD,OQ,AxM,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497955
+rs16941	WARNING	No LD data is available for rs16941 in HapMap3_r2, panel CEU
+rs16941	WARNING	No matching proxy snps found
+rs80357459	WARNING	Query snp not in HapMap3_r2
+rs80357459	WARNING	No matching proxy snps found
+rs1800704	rs1800704	0	1.000	1.000	IM,IMD,O54,O5E,AAE	chr17	38498050
+rs1800704	rs11658785	2257	1.000	1.000	IM,IMD,CYT,O54,O5E	chr17	38500307
+rs1800704	rs1800707	9964	1.000	1.000	IM,IMD,O54,O5E	chr17	38488086
+rs1800704	rs28897691	18137	1.000	1.000	IM,IMD,O54,O5E	chr17	38479913
+rs56321129	WARNING	Query snp not in HapMap3_r2
+rs56321129	WARNING	No matching proxy snps found
+rs144853230	WARNING	Query snp not in HapMap3_r2
+rs144853230	WARNING	No matching proxy snps found
+rs559190752	WARNING	Query snp not in HapMap3_r2
+rs559190752	WARNING	No matching proxy snps found
+rs80356851	WARNING	Query snp not in HapMap3_r2
+rs80356851	WARNING	No matching proxy snps found
+rs4986847	WARNING	Query snp not in HapMap3_r2
+rs4986847	WARNING	No matching proxy snps found
+rs199954851	WARNING	Query snp not in HapMap3_r2
+rs199954851	WARNING	No matching proxy snps found
+rs1800740	WARNING	Query snp not in HapMap3_r2
+rs1800740	WARNING	No matching proxy snps found
+rs799917	rs799917	0	1.000	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38498462
+rs799917	rs799912	12198	1.000	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38510660
+rs799917	rs16940	301	0.981	1.000	I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38498763
+rs799917	rs8176145	4158	0.981	1.000	IM,IMD,O54,O5E,AAH	chr17	38502620
+rs799917	rs8176109	20840	0.981	1.000	IM,IMD,CYT,O54,O5E	chr17	38519302
+rs799917	rs8176092	25293	0.981	1.000	AS,A6,OQ	chr17	38523755
+rs799917	rs6503727	67923	0.981	1.000	A6	chr17	38566385
+rs799917	rs11653069	38441	0.962	1.000	IM,IMD,O54,O5E	chr17	38536903
+rs799917	rs2175957	41886	0.962	1.000	I1,IM,IMD,CYT	chr17	38540348
+rs799917	rs11652332	50553	0.962	1.000	IM,IMD,O54,O5E	chr17	38549015
+rs799917	rs12936816	56773	0.962	1.000	I6Q,IM,IMD,IC,ICQ,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38555235
+rs799917	rs2037075	60890	0.962	1.000	AN,A5,A6	chr17	38559352
+rs799917	rs4239149	83159	0.962	0.981	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38581621
+rs799917	rs9646418	282965	0.962	0.981	A6	chr17	38781427
+rs799917	rs9646413	283221	0.962	0.981	A6	chr17	38781683
+rs799917	rs4793230	284467	0.962	0.981	I3,I5,I6,IM,IMD,IC,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38782929
+rs799917	rs11650132	81151	0.944	0.981	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38579613
+rs799917	rs2271573	82685	0.944	0.981	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38581147
+rs799917	rs11651623	84911	0.944	0.981	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38583373
+rs799917	rs11653460	86370	0.944	0.981	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584832
+rs799917	rs11653231	86524	0.944	0.981	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584986
+rs799917	rs12936831	86880	0.944	0.981	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38585342
+rs799917	rs13851	228908	0.944	0.981	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38727370
+rs799917	rs17600371	232619	0.944	0.981	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38731081
+rs799917	rs17600502	250359	0.944	0.981	I6Q,IM,IMD,IC,ICQ,CYT,O54,O5E	chr17	38748821
+rs799917	rs4430789	260775	0.944	0.981	IM,IMD,O54,O5E	chr17	38759237
+rs799917	rs4520874	272586	0.944	0.981	AS,A5,A6	chr17	38771048
+rs799917	rs4793229	275398	0.944	0.981	AN,A5,A6	chr17	38773860
+rs799917	rs11651341	285125	0.944	0.981	I2,I5,I6,I6Q,IM,IMD,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38783587
+rs799917	rs4534897	288872	0.944	0.981	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E,ICA,ICB	chr17	38787334
+rs799917	rs11657004	299815	0.926	0.981	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38798277
+rs799917	rs9912203	302209	0.926	0.981	AS,A5,A6,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38800671
+rs799917	rs799916	1746	0.925	0.962	AN,A5,A6,IM,IMD,O54,O5E	chr17	38496716
+rs799917	rs8067269	9137	0.925	0.962	A6,IM,IMD,O54,O5E	chr17	38489325
+rs799917	rs9911630	56594	0.925	0.962	AS,A5,A6,I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38441868
+rs799917	rs8070085	97048	0.925	0.962	AS,A5,A6,I1,IM,IMD,O28,O54,O5E	chr17	38595510
+rs799917	rs16942	936	0.907	0.962	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497526
+rs799917	rs8176161	3546	0.907	0.962	IM,IMD,O54,O5E	chr17	38494916
+rs799917	rs3950989	6983	0.907	0.962	IM,IMD,O54,O5E	chr17	38491479
+rs799917	rs1060915	10466	0.907	0.962	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38487996
+rs799917	rs4793197	13034	0.907	0.962	AS,A5,A6,IM,IMD,O54,O5E	chr17	38485428
+rs799917	rs1799966	21842	0.907	0.962	AG,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,AxM,IWQ,AAE,AAH	chr17	38476620
+rs799917	rs4793194	26603	0.907	0.962	IM,IMD,O54,O5E	chr17	38471859
+rs799917	rs3092994	29111	0.907	0.962	I1,IM,IMD,O54,O5E	chr17	38469351
+rs799917	rs8176273	33283	0.907	0.962	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38465179
+rs799917	rs8176296	41345	0.907	0.962	I1,IM,IMD,O54,O5E	chr17	38457117
+rs799917	rs8176318	47662	0.907	0.962	AS,A6,I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38450800
+rs799917	rs12516	48528	0.907	0.962	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38449934
+rs799917	rs11657053	53807	0.907	0.962	I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38444655
+rs799917	rs4793189	54221	0.907	0.962	IM,IMD,O54,O5E	chr17	38444241
+rs799917	rs12944458	64164	0.907	0.962	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38434298
+rs799917	rs915945	65072	0.907	0.962	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38433390
+rs799917	rs2298861	68105	0.907	0.962	IM,IMD,OQ,OE,O24	chr17	38430357
+rs799917	rs2298862	68248	0.907	0.962	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38430214
+rs799917	rs8176265	30940	0.889	0.943	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38467522
+rs799917	rs9646417	281317	0.855	0.942	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr17	38779779
+rs799917	rs4793234	293247	0.801	0.921	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38791709
+rs556684572	WARNING	Query snp not in HapMap3_r2
+rs556684572	WARNING	No matching proxy snps found
+rs80356892	WARNING	Query snp not in HapMap3_r2
+rs80356892	WARNING	No matching proxy snps found
+rs1800709	rs1800709	0	1.000	1.000	IM,IMD,OQ,AxM,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38498553
+rs564375670	WARNING	Query snp not in HapMap3_r2
+rs564375670	WARNING	No matching proxy snps found
+rs28897683	rs28897683	0	1.000	1.000	IM,IMD,O54,O5E	chr17	38498597
+rs56082113	WARNING	Query snp not in HapMap3_r2
+rs56082113	WARNING	No matching proxy snps found
+rs192655097	WARNING	Query snp not in HapMap3_r2
+rs192655097	WARNING	No matching proxy snps found
+rs41286298	WARNING	Query snp not in HapMap3_r2
+rs41286298	WARNING	No matching proxy snps found
+rs55914168	WARNING	Query snp not in HapMap3_r2
+rs55914168	WARNING	No matching proxy snps found
+rs16940	rs16940	0	1.000	1.000	I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38498763
+rs16940	rs8176145	3857	1.000	1.000	IM,IMD,O54,O5E,AAH	chr17	38502620
+rs16940	rs8176109	20539	1.000	1.000	IM,IMD,CYT,O54,O5E	chr17	38519302
+rs16940	rs8176092	24992	1.000	1.000	AS,A6,OQ	chr17	38523755
+rs16940	rs799917	301	0.981	1.000	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38498462
+rs16940	rs799912	11897	0.981	1.000	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38510660
+rs16940	rs11653069	38140	0.981	1.000	IM,IMD,O54,O5E	chr17	38536903
+rs16940	rs2175957	41585	0.981	1.000	I1,IM,IMD,CYT	chr17	38540348
+rs16940	rs11652332	50252	0.981	1.000	IM,IMD,O54,O5E	chr17	38549015
+rs16940	rs12936816	56472	0.981	1.000	I6Q,IM,IMD,IC,ICQ,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38555235
+rs16940	rs2037075	60589	0.981	1.000	AN,A5,A6	chr17	38559352
+rs16940	rs6503727	67622	0.962	0.981	A6	chr17	38566385
+rs16940	rs11650132	80850	0.962	0.981	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38579613
+rs16940	rs2271573	82384	0.962	0.981	I6Q,IM,IMD,IC,ICQ,OQ	chr17	38581147
+rs16940	rs11651623	84610	0.962	0.981	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38583373
+rs16940	rs11653460	86069	0.962	0.981	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584832
+rs16940	rs11653231	86223	0.962	0.981	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38584986
+rs16940	rs12936831	86579	0.962	0.981	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38585342
+rs16940	rs13851	228607	0.962	0.981	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38727370
+rs16940	rs17600371	232318	0.962	0.981	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38731081
+rs16940	rs17600502	250058	0.962	0.981	I6Q,IM,IMD,IC,ICQ,CYT,O54,O5E	chr17	38748821
+rs16940	rs4430789	260474	0.962	0.981	IM,IMD,O54,O5E	chr17	38759237
+rs16940	rs4520874	272285	0.962	0.981	AS,A5,A6	chr17	38771048
+rs16940	rs4793229	275097	0.962	0.981	AN,A5,A6	chr17	38773860
+rs16940	rs11651341	284824	0.962	0.981	I2,I5,I6,I6Q,IM,IMD,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38783587
+rs16940	rs4534897	288571	0.962	0.981	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E,ICA,ICB	chr17	38787334
+rs16940	rs4239149	82858	0.944	0.981	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38581621
+rs16940	rs8070085	96747	0.944	0.981	AS,A5,A6,I1,IM,IMD,O28,O54,O5E	chr17	38595510
+rs16940	rs9646418	282664	0.944	0.981	A6	chr17	38781427
+rs16940	rs9646413	282920	0.944	0.981	A6	chr17	38781683
+rs16940	rs4793230	284166	0.944	0.981	I3,I5,I6,IM,IMD,IC,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38782929
+rs16940	rs16942	1237	0.925	0.962	AG,I1,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,AxM,IWQ,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38497526
+rs16940	rs8176161	3847	0.925	0.962	IM,IMD,O54,O5E	chr17	38494916
+rs16940	rs3950989	7284	0.925	0.962	IM,IMD,O54,O5E	chr17	38491479
+rs16940	rs1060915	10767	0.925	0.962	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE	chr17	38487996
+rs16940	rs4793197	13335	0.925	0.962	AS,A5,A6,IM,IMD,O54,O5E	chr17	38485428
+rs16940	rs1799966	22143	0.925	0.962	AG,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,AxM,IWQ,AAE,AAH	chr17	38476620
+rs16940	rs4793194	26904	0.925	0.962	IM,IMD,O54,O5E	chr17	38471859
+rs16940	rs3092994	29412	0.925	0.962	I1,IM,IMD,O54,O5E	chr17	38469351
+rs16940	rs8176273	33584	0.925	0.962	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38465179
+rs16940	rs8176296	41646	0.925	0.962	I1,IM,IMD,O54,O5E	chr17	38457117
+rs16940	rs8176318	47963	0.925	0.962	AS,A6,I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38450800
+rs16940	rs12516	48829	0.925	0.962	I1,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38449934
+rs16940	rs11657053	54108	0.925	0.962	I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38444655
+rs16940	rs4793189	54522	0.925	0.962	IM,IMD,O54,O5E	chr17	38444241
+rs16940	rs12944458	64465	0.925	0.962	IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38434298
+rs16940	rs915945	65373	0.925	0.962	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38433390
+rs16940	rs2298861	68406	0.925	0.962	IM,IMD,OQ,OE,O24	chr17	38430357
+rs16940	rs2298862	68549	0.925	0.962	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38430214
+rs16940	rs11657004	299514	0.908	0.981	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,IWQ,O54,O5E	chr17	38798277
+rs16940	rs9912203	301908	0.908	0.981	AS,A5,A6,I3,I5,I6,I6Q,IM,IMD,IC,ICQ,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAE,AAH	chr17	38800671
+rs16940	rs799916	2047	0.907	0.962	AN,A5,A6,IM,IMD,O54,O5E	chr17	38496716
+rs16940	rs8067269	9438	0.907	0.962	A6,IM,IMD,O54,O5E	chr17	38489325
+rs16940	rs8176265	31241	0.907	0.962	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38467522
+rs16940	rs9911630	56895	0.907	0.962	AS,A5,A6,I2,I5,I6,I6Q,IM,IMD,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38441868
+rs16940	rs9646417	281016	0.873	0.961	I2,I5,I6,I6Q,IM,IMD,IWQ,O54,O5E	chr17	38779779
+rs16940	rs4793234	292946	0.817	0.922	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,IWQ,O54,O5E	chr17	38791709
+rs201875054	WARNING	Query snp not in HapMap3_r2
+rs201875054	WARNING	No matching proxy snps found
+rs273898682	WARNING	Query snp not in HapMap3_r2
+rs273898682	WARNING	No matching proxy snps found
+rs4986846	WARNING	Query snp not in HapMap3_r2
+rs4986846	WARNING	No matching proxy snps found
+rs4986845	rs4986845	0	1.000	1.000	IM,IMD,AAE	chr17	38498907
+rs80357147	WARNING	Query snp not in HapMap3_r2
+rs80357147	WARNING	No matching proxy snps found
+rs568312345	WARNING	Query snp not in HapMap3_r2
+rs568312345	WARNING	No matching proxy snps found
+rs4986844	WARNING	Query snp not in HapMap3_r2
+rs4986844	WARNING	No matching proxy snps found
+rs1799949	WARNING	No LD data is available for rs1799949 in HapMap3_r2, panel CEU
+rs1799949	WARNING	No matching proxy snps found
+rs4986850	rs4986850	0	1.000	1.000	AG,IM,IMD,OQ,AxM,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38498997
+rs4986850	rs8176305	44107	1.000	1.000	IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38454890
+rs4986850	rs1043284	99944	0.719	0.906	AX,AS,A5,A6,IM,IMD,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38399053
+rs4986850	rs2667945	111059	0.719	0.906	AN,A5,A6,IM,IMD,CYT,OQ,OE,O24,O28,O54,O5E,OEE	chr17	38387938
+rs4986850	rs528854	147363	0.719	0.906	I3,I5,I6,I6Q,IM,IMD,IC,ICQ,CYT,OQ,IWQ,OE,O24,O28,O54,O5E,OEE,AAH	chr17	38351634
+rs545736576	WARNING	Query snp not in HapMap3_r2
+rs545736576	WARNING	No matching proxy snps found
+rs28897680	WARNING	Query snp not in HapMap3_r2
+rs28897680	WARNING	No matching proxy snps found
+rs572835027	WARNING	Query snp not in HapMap3_r2
+rs572835027	WARNING	No matching proxy snps found
+rs80356895	WARNING	Query snp not in HapMap3_r2
+rs80356895	WARNING	No matching proxy snps found
+rs561988641	WARNING	Query snp not in HapMap3_r2
+rs561988641	WARNING	No matching proxy snps found
+rs28897679	WARNING	Query snp not in HapMap3_r2
+rs28897679	WARNING	No matching proxy snps found
+rs80358329	WARNING	Query snp not in HapMap3_r2
+rs80358329	WARNING	No matching proxy snps found
+rs80357220	WARNING	Query snp not in HapMap3_r2
+rs80357220	WARNING	No matching proxy snps found
+rs80357371	WARNING	Query snp not in HapMap3_r2
+rs80357371	WARNING	No matching proxy snps found
+rs530914551	WARNING	Query snp not in HapMap3_r2
+rs530914551	WARNING	No matching proxy snps found
+rs552505690	WARNING	Query snp not in HapMap3_r2
+rs552505690	WARNING	No matching proxy snps found
+rs80357159	WARNING	Query snp not in HapMap3_r2
+rs80357159	WARNING	No matching proxy snps found
+rs56012641	WARNING	Query snp not in HapMap3_r2
+rs56012641	WARNING	No matching proxy snps found
+rs80357374	WARNING	Query snp not in HapMap3_r2
+rs80357374	WARNING	No matching proxy snps found
+rs200616937	WARNING	Query snp not in HapMap3_r2
+rs200616937	WARNING	No matching proxy snps found
+rs56272539	WARNING	Query snp not in HapMap3_r2
+rs56272539	WARNING	No matching proxy snps found
+rs80357445	WARNING	Query snp not in HapMap3_r2
+rs80357445	WARNING	No matching proxy snps found
+rs369588942	WARNING	Query snp not in HapMap3_r2
+rs369588942	WARNING	No matching proxy snps found
+rs55906931	WARNING	Query snp not in HapMap3_r2
+rs55906931	WARNING	No matching proxy snps found
+rs55720177	WARNING	Query snp not in HapMap3_r2
+rs55720177	WARNING	No matching proxy snps found
+rs199540030	WARNING	Query snp not in HapMap3_r2
+rs199540030	WARNING	No matching proxy snps found
+rs533802049	WARNING	Query snp not in HapMap3_r2
+rs533802049	WARNING	No matching proxy snps found
+rs372400428	WARNING	Query snp not in HapMap3_r2
+rs372400428	WARNING	No matching proxy snps found
+rs574008372	WARNING	Query snp not in HapMap3_r2
+rs574008372	WARNING	No matching proxy snps found
+rs80357024	WARNING	Query snp not in HapMap3_r2
+rs80357024	WARNING	No matching proxy snps found
+rs562553169	WARNING	Query snp not in HapMap3_r2
+rs562553169	WARNING	No matching proxy snps found
+rs56128296	WARNING	Query snp not in HapMap3_r2
+rs56128296	WARNING	No matching proxy snps found
+rs1799950	rs1799950	0	1.000	1.000	AG,IM,IMD,OQ,AxM,CM,OE,O24,O28,O54,O5E,OEE,AAE	chr17	38500007
+rs1799950	rs8176163	5566	1.000	1.000	IM,IMD,O54,O5E	chr17	38494441
+rs41286292	WARNING	Query snp not in HapMap3_r2
+rs41286292	WARNING	No matching proxy snps found
+rs80357464	WARNING	Query snp not in HapMap3_r2
+rs80357464	WARNING	No matching proxy snps found
+rs1800063	WARNING	Query snp not in HapMap3_r2
+rs1800063	WARNING	No matching proxy snps found
+rs561998108	WARNING	Query snp not in HapMap3_r2
+rs561998108	WARNING	No matching proxy snps found
+rs186274774	WARNING	Query snp not in HapMap3_r2
+rs186274774	WARNING	No matching proxy snps found
+rs397509328	WARNING	Query snp not in HapMap3_r2
+rs397509328	WARNING	No matching proxy snps found
+rs8176153	rs8176153	0	1.000	1.000	IM,IMD,O54,O5E	chr17	38500251
+rs8176153	rs28897688	2890	1.000	1.000	IM,IMD,O54,O5E	chr17	38497361
+rs80357244	WARNING	Query snp not in HapMap3_r2
+rs80357244	WARNING	No matching proxy snps found
+rs149867679	WARNING	Query snp not in HapMap3_r2
+rs149867679	WARNING	No matching proxy snps found
+rs201441987	WARNING	Query snp not in HapMap3_r2
+rs201441987	WARNING	No matching proxy snps found
+rs62625299	WARNING	Query snp not in HapMap3_r2
+rs62625299	WARNING	No matching proxy snps found
+rs28897675	WARNING	Query snp not in HapMap3_r2
+rs28897675	WARNING	No matching proxy snps found
+rs147519994	WARNING	Query snp not in HapMap3_r2
+rs147519994	WARNING	No matching proxy snps found
+rs191872612	WARNING	Query snp not in HapMap3_r2
+rs191872612	WARNING	No matching proxy snps found
+rs201596327	WARNING	Query snp not in HapMap3_r2
+rs201596327	WARNING	No matching proxy snps found
+rs1799965	WARNING	Query snp not in HapMap3_r2
+rs1799965	WARNING	No matching proxy snps found
+rs80357090	WARNING	Query snp not in HapMap3_r2
+rs80357090	WARNING	No matching proxy snps found
+rs201536070	WARNING	Query snp not in HapMap3_r2
+rs201536070	WARNING	No matching proxy snps found
+rs55688530	WARNING	Query snp not in HapMap3_r2
+rs55688530	WARNING	No matching proxy snps found
+rs56187033	WARNING	Query snp not in HapMap3_r2
+rs56187033	WARNING	No matching proxy snps found
+rs542687218	WARNING	Query snp not in HapMap3_r2
+rs542687218	WARNING	No matching proxy snps found
+rs80356888	WARNING	Query snp not in HapMap3_r2
+rs80356888	WARNING	No matching proxy snps found
+rs190900046	WARNING	Query snp not in HapMap3_r2
+rs190900046	WARNING	No matching proxy snps found
+rs80357102	WARNING	Query snp not in HapMap3_r2
+rs80357102	WARNING	No matching proxy snps found
+rs199522616	WARNING	Query snp not in HapMap3_r2
+rs199522616	WARNING	No matching proxy snps found
+rs1800062	rs1800062	0	1.000	1.000	IM,IMD,CYT	chr17	38521289
+rs183557525	WARNING	Query snp not in HapMap3_r2
+rs183557525	WARNING	No matching proxy snps found
+rs80357134	WARNING	Query snp not in HapMap3_r2
+rs80357134	WARNING	No matching proxy snps found
+rs528902306	WARNING	Query snp not in HapMap3_r2
+rs528902306	WARNING	No matching proxy snps found
+rs149402012	WARNING	Query snp not in HapMap3_r2
+rs149402012	WARNING	No matching proxy snps found
+rs544342552	WARNING	Query snp not in HapMap3_r2
+rs544342552	WARNING	No matching proxy snps found
+rs549332987	WARNING	Query snp not in HapMap3_r2
+rs549332987	WARNING	No matching proxy snps found
+rs529629382	WARNING	Query snp not in HapMap3_r2
+rs529629382	WARNING	No matching proxy snps found
+rs544857747	WARNING	Query snp not in HapMap3_r2
+rs544857747	WARNING	No matching proxy snps found
+rs187992882	WARNING	Query snp not in HapMap3_r2
+rs187992882	WARNING	No matching proxy snps found
+rs527449526	WARNING	Query snp not in HapMap3_r2
+rs527449526	WARNING	No matching proxy snps found
+rs548750620	WARNING	Query snp not in HapMap3_r2
+rs548750620	WARNING	No matching proxy snps found
+rs190861568	WARNING	Query snp not in HapMap3_r2
+rs190861568	WARNING	No matching proxy snps found
+rs148196794	WARNING	Query snp not in HapMap3_r2
+rs148196794	WARNING	No matching proxy snps found
+rs113323025	WARNING	Query snp not in HapMap3_r2
+rs113323025	WARNING	No matching proxy snps found
+rs569113962	WARNING	Query snp not in HapMap3_r2
+rs569113962	WARNING	No matching proxy snps found
+rs539845430	WARNING	Query snp not in HapMap3_r2
+rs539845430	WARNING	No matching proxy snps found

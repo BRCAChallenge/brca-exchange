@@ -1,0 +1,8 @@
+*.DS_Store
+code/*.pyc
+code/*.swp
+plots/*
+data/leq/
+
+*.pickle
+*/*.pickle
