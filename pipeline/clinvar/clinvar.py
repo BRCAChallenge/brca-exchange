@@ -1,9 +1,8 @@
 """
-ClinVarUtils: basic 
+ClinVarUtils: basic
 """
 
 import xml.etree.ElementTree as ET
-
 
 def isCurrent(element):
     """Determine if the indicated clinvar set is current"""
@@ -17,10 +16,10 @@ def textIfPresent(element, field):
     """Return the text associated with a field under the element, or
     None if the field is not present"""
     ff = element.find(field)
-    if ff == None:
+    if ff == None or ff.text == None:
         return None
     else:
-        return(ff.text)
+        return(ff.text.encode('utf-8'))
 
 class genomicCoordinates:
     """Contains the genomic information on the variant"""
@@ -150,6 +149,7 @@ class clinVarAssertion:
             self.accession = cva.get("Acc", default=None)
         self.origin = None
         self.method = None
+        self.description = None
         oi = element.find("ObservedIn")
         if oi != None:
             sample = oi.find("Sample")
@@ -158,6 +158,11 @@ class clinVarAssertion:
             method = oi.find("Method")
             if method != None:
                 self.method = textIfPresent(method, "MethodType")
+            description = oi.find("ObservedData")
+            if description != None:
+                for attr in description.findall("Attribute"):
+                    if attr.attrib["Type"] == 'Description':
+                        self.description = textIfPresent(description, "Attribute")
         self.clinicalSignificance = None
         self.reviewStatus = None
         self.dateLastUpdated = None
@@ -166,6 +171,7 @@ class clinVarAssertion:
             self.dateLastUpdated = cs.get("DateLastEvaluated")
             self.clinicalSignificance = textIfPresent(cs, "Description")
             self.reviewStatus = textIfPresent(cs, "ReviewStatus")
+            self.summaryEvidence = textIfPresent(cs, "Comment")
                  
 
 class clinVarSet:
@@ -189,7 +195,3 @@ class clinVarSet:
                 cva = clinVarAssertion(item)
                 accession = cva.accession
                 self.otherAssertions[accession] = cva
-
-            
-
-        

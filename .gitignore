@@ -6,3 +6,10 @@ pipeline/brca/*
 /pipeline/data/brca1_hg38.txt
 /pipeline/data/brca2_hg19.txt
 /pipeline/data/brca2_hg38.txt
+/pipeline/data_merging/version.json
+/pipeline/genomeBrowserTrack/hg19/*.bb
+/pipeline/genomeBrowserTrack/hg38/*.bb
+/pipeline/genomeBrowserTrack/output/
+/pipeline/genomeBrowserTrack/bedToBigBed
+/pipeline/genomeBrowserTrack/*.bed
+/pipeline/genomeBrowserTrack/*.as

@@ -18,6 +18,7 @@ var {Col, Panel, Button, Input} = require('react-bootstrap');
 var ColumnCheckbox = require('./ColumnCheckbox');
 var {getDefaultExpertColumns, getDefaultResearchColumns, getAllSources} = require('./VariantTableDefaults');
 var {State} = require('react-router');
+var alleleFrequencyCharts = require('./AlleleFrequencyCharts');
 
 require('react-data-components-bd2k/css/table-twbs.css');
 
@@ -80,7 +81,8 @@ const researchModeGroups = [
         {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38', core: true},
         {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
         {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36'},
-        {title: 'RNA (LOVD)', prop: 'RNA_LOVD'}
+        {title: 'RNA (LOVD)', prop: 'RNA_LOVD'},
+        {title: 'Beacons', core: true},
     ]},
 
     {groupTitle: 'Clinical Significance (ENIGMA)', internalGroupName: 'Significance (ENIGMA)', innerCols: [
@@ -109,6 +111,7 @@ const researchModeGroups = [
         {title: 'Genetic Origin', prop: 'Genetic_origin_LOVD'},
         {title: 'Individuals', prop: 'Individuals_LOVD'},
         {title: 'Variant Effect', prop: 'Variant_effect_LOVD'},
+        {title: 'Database ID', prop: 'DBID_LOVD'}
     ]},
 
     {groupTitle: 'Clinical Significance (BIC)', internalGroupName: 'Significance (BIC)', innerCols: [
@@ -122,15 +125,35 @@ const researchModeGroups = [
     ]},
 
     {groupTitle: 'Allele Frequency Reference Sets', internalGroupName: 'Allele Frequency Reference Sets', innerCols: [
-        {title: 'Maximum Allele Frequency (1000 Genomes and ESP)', prop: 'Max_Allele_Frequency', core: true},
+        {title: 'Allele Frequency Charts (ExAC)', prop: 'Allele_Frequency_Charts_ExAC', replace: alleleFrequencyCharts, tableKey: false, dummy: true},
+        {title: 'Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_ExAC', core: true},
+        {title: 'AFR Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_AFR_ExAC', core: true},
+        {title: 'AMR Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_AMR_ExAC', core: true},
+        {title: 'EAS Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_EAS_ExAC', core: true},
+        {title: 'FIN Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_FIN_ExAC', core: true},
+        {title: 'NFE Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_NFE_ExAC', core: true},
+        {title: 'OTH Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_OTH_ExAC', core: true},
+        {title: 'SAS Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_SAS_ExAC', core: true},
+        {title: 'Allele Frequency Charts (1000 Genomes)', prop: 'Allele_Frequency_Charts_1000_Genomes', replace: alleleFrequencyCharts, tableKey: false, dummy: true},
         {title: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes', core: true},
-        {title: 'African Allele Frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes', core: true},
+        {title: 'AFR Allele Frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes', core: true},
         {title: 'AMR Allele Frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes', core: true},
         {title: 'EAS Allele Frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes', core: true},
         {title: 'EUR Allele Frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes', core: true},
-        {title: 'South Asian Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes', core: true},
-        {title: 'Allele Frequency (ExAC minus TCGA)', prop: 'Allele_frequency_ExAC', core: true},
-        {title: '% Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP', core: true},
+        {title: 'SAS Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes', core: true},
+        {title: 'EA Allele Frequency (ESP)', prop: 'EA_Allele_Frequency_ESP', core: true},
+        {title: 'AA Allele Frequency (ESP)', prop: 'AA_Allele_Frequency_ESP', core: true},
+        {title: 'Allele Frequency (ESP)', prop: 'Allele_Frequency_ESP', core: true},
+    ]},
+
+    {groupTitle: 'Allele Counts (ExAC minus TCGA)', internalGroupName: 'Allele Counts (ExAC minus TCGA)', innerCols: [
+        {title: 'AFR Allele count', prop: 'Allele_count_AFR_ExAC', core: true},
+        {title: 'AMR Allele count', prop: 'Allele_count_AMR_ExAC', core: true},
+        {title: 'EAS Allele count', prop: 'Allele_count_EAS_ExAC', core: true},
+        {title: 'FIN Allele count', prop: 'Allele_count_FIN_ExAC', core: true},
+        {title: 'NFE Allele count', prop: 'Allele_count_NFE_ExAC', core: true},
+        {title: 'OTH Allele count', prop: 'Allele_count_OTH_ExAC', core: true},
+        {title: 'SAS Allele count', prop: 'Allele_count_SAS_ExAC', core: true},
     ]},
 
     {groupTitle: 'Multifactorial Likelihood Analysis', internalGroupName: 'Multifactorial Likelihood Analysis', innerCols: [
@@ -149,7 +172,8 @@ const researchModeGroups = [
 const subColumns = _.map(researchModeGroups, function (group) {
     return {
         subColTitle: group.groupTitle,
-        subColList: _.map(group.innerCols, function (innerCol) {
+        // hide dummy columns from column selection
+        subColList: _.map(_.filter(group.innerCols, ({dummy}) => !dummy), function (innerCol) {
             return {
                 title: innerCol.title,
                 prop: innerCol.prop,
@@ -204,6 +228,7 @@ const researchModeColumns = [
     {title: 'Genetic Origin (LOVD)', prop: 'Genetic_origin_LOVD'},
     {title: 'Individuals (LOVD)', prop: 'Individuals_LOVD'},
     {title: 'Variant Effect (LOVD)', prop: 'Variant_effect_LOVD'},
+    {title: 'Database ID (LOVD)', prop: 'DBID_LOVD'},
     {title: 'Allele Origin (ClinVar)', prop: 'Allele_Origin_ClinVar'},
     {title: 'Allele Origin (ENIGMA)', prop: 'Allele_origin_ENIGMA'},
     {title: 'Ethnicity (BIC)', prop: 'Ethnicity_BIC'},
@@ -211,19 +236,19 @@ const researchModeColumns = [
     {title: 'Patient Nationality (BIC)', prop: 'Patient_nationality_BIC'},
     {title: 'Variant Haplotype (LOVD)', prop: 'Variant_haplotype_LOVD'},
     {title: 'Family members carrying this variant (BIC)', prop: 'Number_of_family_member_carrying_mutation_BIC'},
-    {title: 'Co-occurrence likelihood (exLOVD)', prop: 'Co_occurrence_LR_exLOVD'},
-    {title: 'Prior probability of pathogenicity (exLOVD)', prop: 'Combined_prior_probablility_exLOVD'},
+    {title: 'Co-occurrence likelihood (ExUV)', prop: 'Co_occurrence_LR_exLOVD'},
+    {title: 'Prior probability of pathogenicity (ExUV)', prop: 'Combined_prior_probablility_exLOVD'},
     {
-        title: 'Missense analysis probability of pathogenicity (exLOVD)',
+        title: 'Missense analysis probability of pathogenicity (ExUV)',
         prop: 'Missense_analysis_prior_probability_exLOVD'
     },
-    {title: 'Probability of pathogenicity (exLOVD)', prop: 'Posterior_probability_exLOVD'},
-    {title: 'Segregation Likelihood Ratio (exLOVD)', prop: 'Segregation_LR_exLOVD'},
-    {title: 'Summary Family History Likelihood Ratio (exLOVD)', prop: 'Sum_family_LR_exLOVD'},
+    {title: 'Probability of pathogenicity (ExUV)', prop: 'Posterior_probability_exLOVD'},
+    {title: 'Segregation Likelihood Ratio (ExUV)', prop: 'Segregation_LR_exLOVD'},
+    {title: 'Summary Family History Likelihood Ratio (ExUV)', prop: 'Sum_family_LR_exLOVD'},
     {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_citation_ENIGMA'},
     {title: 'Clinical Significance Citation (ENIGMA)', prop: 'Clinical_significance_citations_ENIGMA'},
     {title: 'Literature Reference (BIC)', prop: 'Literature_citation_BIC'},
-    {title: 'Literature Reference (exLOVD)', prop: 'Literature_source_exLOVD'},
+    {title: 'Literature Reference (ExUV)', prop: 'Literature_source_exLOVD'},
     {title: 'Pathogenicity', prop: 'Pathogenicity_all'},
     {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_ENIGMA'},
     {title: 'Clinical Significance (BIC)', prop: 'Clinical_classification_BIC'},
@@ -244,18 +269,47 @@ const researchModeColumns = [
     {title: 'Condition ID Value (ENIGMA)', prop: 'Condition_ID_value_ENIGMA'},
     {title: 'Submitter (ClinVar)', prop: 'Submitter_ClinVar'},
     {title: 'URL (ENIGMA)', prop: 'URL_ENIGMA'},
-    {title: 'African Allele Frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes'},
+    {title: 'AFR Allele Frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes'},
     {title: 'Allele Frequency', prop: 'Allele_Frequency'},
     {title: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes'},
-    {title: 'Allele Frequency (ExAC)', prop: 'Allele_frequency_ExAC'},
     {title: 'AMR Allele Frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes'},
     {title: 'EAS Allele Frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes'},
     {title: 'EUR Allele Frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes'},
     {title: 'Maximum Allele Frequency', prop: 'Max_Allele_Frequency'},
-    {title: 'Allele Frequencies: EA|AA|All (ESP)', prop: 'Minor_allele_frequency_ESP'},
-    {title: 'South Asian Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes'},
+    {title: 'EA Allele Frequency (ESP)', prop: 'EA_Allele_Frequency_ESP'},
+    {title: 'AA Allele Frequency (ESP)', prop: 'AA_Allele_Frequency_ESP'},
+    {title: 'Allele Frequency (ESP)', prop: 'Allele_Frequency_ESP'},
+    {title: 'Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_ExAC'},
+    {title: 'AFR Allele count (ExAC minus TCGA)', prop: 'Allele_count_AFR_ExAC'},
+    {title: 'AFR Allele number (ExAC minus TCGA)', prop: 'Allele_number_AFR_ExAC'},
+    {title: 'AFR Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_AFR_ExAC'},
+    {title: 'AFR Homozygous count (ExAC minus TCGA)', prop: 'Homozygous_count_AFR_ExAC'},
+    {title: 'AMR Allele count (ExAC minus TCGA)', prop: 'Allele_count_AMR_ExAC'},
+    {title: 'AMR Allele number (ExAC minus TCGA)', prop: 'Allele_number_AMR_ExAC'},
+    {title: 'AMR Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_AMR_ExAC'},
+    {title: 'AMR Homozygous count (ExAC minus TCGA)', prop: 'Homozygous_count_AMR_ExAC'},
+    {title: 'EAS Allele count (ExAC minus TCGA)', prop: 'Allele_count_EAS_ExAC'},
+    {title: 'EAS Allele number (ExAC minus TCGA)', prop: 'Allele_number_EAS_ExAC'},
+    {title: 'EAS Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_EAS_ExAC'},
+    {title: 'EAS Homozygous count (ExAC minus TCGA)', prop: 'Homozygous_count_EAS_ExAC'},
+    {title: 'FIN Allele count (ExAC minus TCGA)', prop: 'Allele_count_FIN_ExAC'},
+    {title: 'FIN Allele number (ExAC minus TCGA)', prop: 'Allele_number_FIN_ExAC'},
+    {title: 'FIN Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_FIN_ExAC'},
+    {title: 'FIN Homozygous count (ExAC minus TCGA)', prop: 'Homozygous_count_FIN_ExAC'},
+    {title: 'NFE Allele count (ExAC minus TCGA)', prop: 'Allele_count_NFE_ExAC'},
+    {title: 'NFE Allele number (ExAC minus TCGA)', prop: 'Allele_number_NFE_ExAC'},
+    {title: 'NFE Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_NFE_ExAC'},
+    {title: 'NFE Homozygous count (ExAC minus TCGA)', prop: 'Homozygous_count_NFE_ExAC'},
+    {title: 'OTH Allele count (ExAC minus TCGA)', prop: 'Allele_count_OTH_ExAC'},
+    {title: 'OTH Allele number (ExAC minus TCGA)', prop: 'Allele_number_OTH_ExAC'},
+    {title: 'OTH Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_OTH_ExAC'},
+    {title: 'OTH Homozygous count (ExAC minus TCGA)', prop: 'Homozygous_count_OTH_ExAC'},
+    {title: 'SAS Allele count (ExAC minus TCGA)', prop: 'Allele_count_SAS_ExAC'},
+    {title: 'SAS Allele number (ExAC minus TCGA)', prop: 'Allele_number_SAS_ExAC'},
+    {title: 'SAS Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_SAS_ExAC'},
+    {title: 'SAS Homozygous count (ExAC minus TCGA)', prop: 'Homozygous_count_SAS_ExAC'},
+    {title: 'SAS Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes'},
     {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'}
-
 ];
 
 /*eslint-enable camelcase */
@@ -291,7 +345,7 @@ var Table = React.createClass({
         return (
             <DataTable
                 ref='table'
-                className='row-clickable data-table'
+                className='row-clickable data-table table-grayheader'
                 {...opts}
                 columnSelection={columnSelection}
                 sourceSelection={sourceSelection}
@@ -421,12 +475,20 @@ var ResearchVariantTableSupplier = function (Component) {
                 </Panel>
             </label>);
         },
+        getSourceName: function(name) {
+            // eg "Variant_in_1000_Genomes" => "1000 Genomes"
+            let source = name.substring(11).replace(/_/g, " ");
+            if (source.toLowerCase() === "exlovd") {
+                source = "ExUV";
+            }
+            return source;
+        },
         getFilters: function() {
             var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
                 <Col sm={6} md={3} key={name}>
                     <Input type="checkbox"
                         onChange={v => this.setSource(name, v)}
-                        label={name.substring(11).replace(/_/g, " ")} // eg "Variant_in_1000_Genomes" => "1000 Genomes"
+                        label={this.getSourceName(name)}
                         checked={value > 0}/>
                 </Col>
             );
@@ -437,10 +499,10 @@ var ResearchVariantTableSupplier = function (Component) {
             </label>);
         },
         getDownloadButton: function (callback) {
-            return <Button className="btn-sm rgt-buffer" download="variants.tsv" href={callback()}>Download</Button>;
+            return <Button className="btn-default rgt-buffer" download="variants.tsv" href={callback()}>Download</Button>;
         },
         getLollipopButton: function (callback, isOpen) {
-            return (<Button id="lollipop-chart-toggle" className="btn-sm rgt-buffer"
+            return (<Button id="lollipop-chart-toggle" className="btn-default rgt-buffer"
                            onClick={callback}>{(isOpen ? 'Hide' : 'Show' ) + ' Lollipop Chart'}</Button>);
         },
         getColumns: function () {

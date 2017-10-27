@@ -8,6 +8,7 @@ import re
 import requests
 import sys
 import logging
+import time
 
 # Here are the canonical BRCA transcripts in ENSEMBL nomenclature
 BRCA1_CANONICAL = "ENST00000357654"
@@ -61,6 +62,21 @@ def setOutputColumns(fields, toAdd):
         newFields.append(item)
     return(newFields)
 
+def _make_request(url):
+    req = requests.get(url, headers={"Content-Type": "application/json"})
+
+    if req.status_code == 429 and 'Retry-After' in req.headers:
+        retry = float(req.headers['Retry-After'])
+        logging.info("Got rate limited by REST API. Going to retry in {}s.".format(retry))
+        time.sleep(retry)
+        return _make_request(url)
+                
+    if not req.ok:    
+        req.raise_for_status()
+        sys.exit()
+    
+    return req.json()
+
 
 def addVepResults(row, vepTranscriptConsequenceFields):
     # Initialize to the default output
@@ -78,12 +94,10 @@ def addVepResults(row, vepTranscriptConsequenceFields):
         ext = "/vep/human/hgvs/"
         hgvs = "%s:g.%s:%s>%s?" % (row["Chr"], row["Pos"],
                                    row["Ref"], row["Alt"])
-        req = requests.get(server+ext+hgvs,
-                           headers={"Content-Type": "application/json"})
-        if not req.ok:
-            req.raise_for_status()
-            sys.exit()
-        jsonOutput = req.json()
+        
+        req_url = server+ext+hgvs
+        jsonOutput = _make_request(req_url)
+
         assert(len(jsonOutput) == 1)
         assert(jsonOutput[0].has_key("transcript_consequences"))
         correctEntry = None

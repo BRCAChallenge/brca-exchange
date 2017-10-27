@@ -71,7 +71,7 @@ def existing_variant():
         'Clinical_importance_BIC': 'unknown',
         'Discordant': 'Concordant',
         'Condition_category_ENIGMA': 'Disease',
-        'Minor_allele_frequency_ESP': '-',
+        'Minor_allele_frequency_percent_ESP': '-',
         'Segregation_LR_exLOVD': '0.012',
         'Variant_in_exLOVD': True,
         'Clinical_Significance_ClinVar': 'Benign,Likely_benign,Uncertain_significance',
@@ -79,7 +79,8 @@ def existing_variant():
         'HGVS_RNA': '-',
         'Literature_source_exLOVD': 'Easton DF et al., Am J Hum Genet, 81: 873-883, 2007.',
         'Polyphen_Prediction': 'possibly_damaging',
-        'Data_Release_id': 1, 'Hg37_Start': 41222976L,
+        'Data_Release_id': 1,
+        'Hg37_Start': 41222976L,
         'Hg36_Start': 38476502L,
         'Literature_citation_BIC': '-',
         'Variant_haplotype_LOVD': '-',
@@ -92,5 +93,27 @@ def existing_variant():
 
 def new_variant():
     v = existing_variant()
-    v["Genomic_Coordinate_hg38"] = "chr17:999999:A>G"
+    v["Genomic_Coordinate_hg38"] = "chr17:g.999999:A>G"
+    v['HGVS_cDNA'] = 'NM_007294.3:c.4955T>TC'
+    v['BIC_Nomenclature'] = '5074T>TC'
+    return v
+
+
+def new_variant_no_source():
+    v = existing_variant()
+    v["Genomic_Coordinate_hg38"] = "chr17:g.000000:A>G"
+    v['Variant_in_LOVD'] = False
+    v['Variant_in_ExAC'] = False
+    v['Variant_in_1000_Genomes'] = False
+    v['Variant_in_ESP'] = False
+    v['Variant_in_BIC'] = False
+    v['Variant_in_ENIGMA'] = False
+    v['Variant_in_ClinVar'] = False
+    v['Variant_in_exLOVD'] = False
+    return v
+
+
+def new_variant_no_enigma_classification():
+    v = existing_variant()
+    v['Clinical_significance_ENIGMA'] = '-'
     return v

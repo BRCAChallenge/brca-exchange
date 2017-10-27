@@ -1,29 +1,34 @@
-# Searching
+# Help
 
-To search just start typing a variant in the search box and it will auto complete. Variants are identified using [HGVS nomenclature](http://www.hgvs.org/mutnomen/), a standard created by the Human Genome Variation Society.  Most genetic test results are reported in HGVS nomenclature. This nomenclature describes a variant by indicating (1) a reference sequence, (2) what kind of sequence it is (genomic, cDNA or protein), (3) the position of the variant in relation this reference sequence, and (4) the nucloetide or protein differences between the variant and the reference sequence.  For example, _NM_007294.3:c.5053A>G_ indicates a variant relative to reference sequence _NM_007294.3_, which is a cDNA sequence (as indicated by _c_), that the variant is in position 5053, and that it involves changing an _A_ to a _G_.
+---
+
+
+## Searching
+
+To search just start typing a variant in the search box and it will auto complete. Variants are identified using <a href="http://varnomen.hgvs.org/" target="_blank" rel="noopener">HGVS nomenclature</a>, a standard created by the Human Genome Variation Society.  Most genetic test results are reported in HGVS nomenclature. This nomenclature describes a variant by indicating (1): a reference sequence, (2): what kind of sequence it is (genomic, coding DNA or protein), (3): the position of the variant in relation this reference sequence, and (4): the nucleotide or protein differences between the variant and the reference sequence.  For example, _NM_007294.3:c.5053A>G_ indicates a variant relative to reference sequence _NM_007294.3_, which is a coding DNA reference sequence (as indicated by _c_), that the variant is in position 5053, and that it involves changing an _A_ to a _G_.
 
 * * * * * * * * * * *
 
-# Column Groups
+## Column Groups
 
 #### Clinical Significance (ENIGMA)
 Variant clinical classification and supporting information as provided by ENIGMA expert panel review.
 
 #### Clinical Significance (ClinVar)
-Fields extracted from ClinVar ([website](https://www.ncbi.nlm.nih.gov/clinvar/)) relating to variant clinical classification, for individual submitters to ClinVar (excludes ENIGMA and BIC - see other panels on the Variant Details page).
+Fields extracted from ClinVar (<a href="https://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" rel="noopener">website</a>) relating to variant clinical classification, for individual submitters to ClinVar (excludes ENIGMA and BIC - see other panels on the Variant Details page).
 
 #### Clinical Significance (BIC)
-Fields extracted from BIC ([website](https://research.nhgri.nih.gov/bic/)) relevant to variant clinical classification.
+Fields extracted from BIC (<a href="https://research.nhgri.nih.gov/bic/" target="_blank" rel="noopener">website</a>) relevant to variant clinical classification.
 
 #### Clinical Significance (LOVD)
-Fields extracted from LOVD ([website](http://www.lovd.nl/3.0/home)) relevant to variant clinical classification.
+Fields extracted from LOVD (<a href="http://www.lovd.nl/3.0/home" target="_blank" rel="noopener">website</a>) relevant to variant clinical classification.
 
-#### [Multifactorial Likelihood Analysis Classification](https://www.ncbi.nlm.nih.gov/pubmed/21990134)
+#### <a href="https://www.ncbi.nlm.nih.gov/pubmed/21990134" target="_blank" rel="noopener">Multifactorial Likelihood Analysis Classification</a>
 Component likelihoods and final classification from multifactorial likelihood analysis, a quantitative integrated evaluation of variant pathogenicity.
 
 * * * * * * * * * * *
 
-# Table Columns
+## Table Columns
 
 ### Variant Nomenclature
 
@@ -119,7 +124,7 @@ The Genomic columns describe genomic traits of the variant, such as the location
 
 #### Gene Symbol
 The Gene Symbol column displays the name of the gene on which the variant was found,
-as named by [HGNC](http://www.genenames.org/).  This will be either _BRCA1_ or
+as named by <a href="http://www.genenames.org/" target="_blank" rel="noopener">HGNC</a>.  This will be either _BRCA1_ or
 _BRCA2_.
 
 #### Genome (GRCh38)
@@ -153,25 +158,25 @@ SIFT score, indicating if the variant is tolerated, deleterious or other
 The Probability columns describe the likelihood that the variant is pathogenic, given the variant data, and possibly given
 a specific category of data on the variant.
 
-#### Co-occurrence likelihood (exLOVD)
+#### Co-occurrence likelihood (ExUV)
 The likelihood ratio based on the frequency of co-occurrence between the variant of interest and clearly
- pathogenic variants in the same gene. From exLOVD.
+ pathogenic variants in the same gene. From ExUV.
 
-#### Missense analysis probability of pathogenicity (exLOVD)
+#### Missense analysis probability of pathogenicity (ExUV)
 This prior probability estimate combines position in the protein with an evaluation of missense substitutions
- that fall in the proteins key functional domains.  From exLOVD.
+ that fall in the proteins key functional domains.  From ExUV.
 
-#### Prior probability of pathogenicity (exLOVD)
+#### Prior probability of pathogenicity (ExUV)
 The combined prior probability in favor of pathogenicity. is a combination of the missense analysis prior
- probability and the splicing analysis prior probability. Generally, it is the higher of these two prior probabilities.  From exLOVD.
+ probability and the splicing analysis prior probability. Generally, it is the higher of these two prior probabilities.  From ExUV.
 
-#### Probability of pathogenicity (exLOVD)
-Posterior probability of pathogenicity. From exLOVD.
+#### Probability of pathogenicity (ExUV)
+Posterior probability of pathogenicity. From ExUV.
 
-#### Segregation Likelihood Ratio (exLOVD)
+#### Segregation Likelihood Ratio (ExUV)
 The likelihood ratio based on segregation analysis
 
-#### Summary Family History Likelihood Ratio (exLOVD)
+#### Summary Family History Likelihood Ratio (ExUV)
 The likelihood ratio based on an analysis of the severity of summary family histories of breast and/ or ovarian
  cancer.
 
@@ -270,8 +275,8 @@ Citations that require a URL, or that do not have an identifier in one of the re
 #### Literature Reference (BIC)
 Literature Reference(s).  From BIC
 
-#### Literature Reference (exLOVD)
-Literature Reference(s).  From exLOVD.
+#### Literature Reference (ExUV)
+Literature Reference(s).  From ExUV.
 
 
 ## Source
@@ -304,13 +309,13 @@ URL listing the variant.  From ENIGMA.
 
 * * * * * * * * * * *
 
-# Downloading Variant Data
+## Downloading Variant Data
 
 To download the variant data click on the 'Download' button located above the search bar within the Variants Table page. When you click on it the data that is downloaded is a comma delimited .csv file containing the set of variant details for the variants that matched the search and/or filtering criteria. The first row in the file represent the column labels.
 
 * * * * * * * * * * *
 
-# Lollipop Plots
+## Lollipop Plots
 
 Lollipop plots are a tool to visualize the chromosomal position and pathogenicity classification for each variant in a gene.  Here, each circle-capped 'lollipop' indicates whether a _BRCA1_ and _BRCA2_ variant is pathogenic (labeled in red), benign (labeled in light-blue), or the variants clinical significance is uncertain (labeled in dark-blue). The y-axis represents the pathogenicity classification of a variant. The x-axis represents the genomic coordinates of those variants in GRCh38 human reference space. The bottom box that runs along the x-axis of the diagram displays the position of each exon in the selected gene.
 

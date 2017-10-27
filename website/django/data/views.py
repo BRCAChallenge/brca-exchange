@@ -3,7 +3,6 @@ import re
 import tempfile
 import json
 from operator import __or__
-
 from django.db import connection
 from django.db.models import Q
 from django.db.models import Value
@@ -53,7 +52,25 @@ def variant_counts(request):
     enigma_count = query.count()
     enigma_pathogenic_count = query.filter(Pathogenicity_expert='Pathogenic').count()
     enigma_benign_count = query.filter(Pathogenicity_expert__contains='Benign').count()
-    response = JsonResponse({"total": total_count, "brca1": brca1_count, "brca2": brca2_count, "enigma": enigma_count, "enigmaPathogenic": enigma_pathogenic_count, "enigmaBenign": enigma_benign_count})
+    query_brca1 = query.filter(Gene_Symbol='BRCA1')
+    brca1_enigma_pathogenic_count = query_brca1.filter(Pathogenicity_expert='Pathogenic').count()
+    brca1_enigma_benign_count = query_brca1.filter(Pathogenicity_expert__contains='Benign').count()
+    query_brca2 = query.filter(Gene_Symbol='BRCA2')
+    brca2_enigma_pathogenic_count = query_brca2.filter(Pathogenicity_expert='Pathogenic').count()
+    brca2_enigma_benign_count = query_brca2.filter(Pathogenicity_expert__contains='Benign').count()
+    response = JsonResponse({
+        "total": total_count,
+        "brca1": {
+            "total": brca1_count,
+            "pathogenic": brca1_enigma_pathogenic_count,
+            "benign": brca1_enigma_benign_count },
+        "brca2": {
+            "total": brca2_count,
+            "pathogenic": brca2_enigma_pathogenic_count,
+            "benign": brca2_enigma_benign_count },
+        "enigma": enigma_count,
+        "enigmaPathogenic": enigma_pathogenic_count,
+        "enigmaBenign": enigma_benign_count})
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
@@ -105,6 +122,7 @@ def index(request):
     show_deleted = (request.GET.get('show_deleted', False) != False)
     deleted_count = 0
     synonyms_count = 0
+
     if release:
         query = Variant.objects.filter(Data_Release_id=int(release))
         if(change_types):
@@ -117,8 +135,8 @@ def index(request):
         quotes = '\''
     else:
         quotes = ''
-    if include or exclude:
-        query = apply_sources(query, include, exclude)
+
+    query = apply_sources(query, include, exclude)
 
     if filters:
         query = apply_filters(query, filter_values, filters, quotes=quotes)
@@ -138,7 +156,10 @@ def index(request):
         cursor = connection.cursor()
         with tempfile.NamedTemporaryFile() as f:
             os.chmod(f.name, 0606)
-            cursor.execute("COPY ({}) TO '{}' WITH DELIMITER ',' CSV HEADER".format(query.query, f.name))
+            query = "COPY ({}) TO '{}' WITH DELIMITER ',' CSV HEADER".format(query.query, f.name)
+            # HACK to add quotes around search terms
+            query = re.sub(r'LIKE UPPER\((.+?)\)', r"LIKE UPPER('\1')", query)
+            cursor.execute(query)
 
             response = HttpResponse(f.read(), content_type='text/csv')
             response['Content-Disposition'] = 'attachment;filename="variants.csv"'
@@ -149,11 +170,15 @@ def index(request):
         cursor = connection.cursor()
         with tempfile.NamedTemporaryFile() as f:
             os.chmod(f.name, 0606)
-            cursor.execute("COPY ({}) TO '{}' WITH DELIMITER '\t' CSV HEADER".format(query.query, f.name))
+            query = "COPY ({}) TO '{}' WITH DELIMITER '\t' CSV HEADER".format(query.query, f.name)
+            # HACK to add quotes around search terms
+            query = re.sub(r'LIKE UPPER\((.+?)\)', r"LIKE UPPER('\1')", query)
+            cursor.execute(query)
 
             response = HttpResponse(f.read(), content_type='text/csv')
             response['Content-Disposition'] = 'attachment;filename="variants.tsv"'
             return response
+
     elif format == 'json':
         count = query.count()
         query = select_page(query, page_size, page_num)
@@ -166,10 +191,16 @@ def index(request):
 def apply_sources(query, include, exclude):
     # if there are multiple sources given then OR them:
     # the row must match in at least one column
-    include_list = (Q(**{column: True}) for column in include)
-    exclude_dict = {exclusion: False for exclusion in exclude}
-
-    return query.filter(reduce(__or__, include_list)).filter(**exclude_dict)
+    if len(include) > 0:
+        include_list = (Q(**{column: True}) for column in include)
+        query = query.filter(reduce(__or__, include_list))
+    else:
+        # exclude all sources if none are included
+        exclude = [f.name for f in Variant._meta.get_fields() if "Variant_in" in f.name]
+    if exclude:
+        exclude_dict = {exclusion: False for exclusion in exclude}
+        query = query.filter(**exclude_dict)
+    return query
 
 
 def apply_filters(query, filterValues, filters, quotes=''):
@@ -183,6 +214,13 @@ def apply_filters(query, filterValues, filters, quotes=''):
                 params=["{0}{1}%{0}".format(quotes, value)]
             )
     return query
+
+
+def add_paren_to_hgvs_protein_if_absent(value):
+    if value.startswith('p.') and '(' not in value:
+        return value[:2] + '(' + value[2:]
+    else:
+        return value
 
 
 def apply_search(query, search_term, quotes='', release=None):
@@ -215,29 +253,52 @@ def apply_search(query, search_term, quotes='', release=None):
     '''
     search_term = search_term.lower().strip()
 
-    p_hgvs_protein = re.compile("^np_[0-9]{6}.[0-9]:")
-    m_hgvs_protein = p_hgvs_protein.match(search_term)
+    # Accept genomic coordinates with or without a 'g.' before the position
+    if 'chr17:' in search_term and 'g.' not in search_term:
+        search_term = search_term.replace('chr17:', 'chr17:g.')
+    if 'chr13:' in search_term and 'g.' not in search_term:
+        search_term = search_term.replace('chr13:', 'chr13:g.')
 
-    p_reference_sequence = re.compile("^nm_[0-9]{6}.[0-9]:")
-    m_reference_sequence = p_reference_sequence.match(search_term)
+    p_hgvs_protein_colon = re.compile("^np_[0-9]{6}.[0-9]:")
+    m_hgvs_protein_colon = p_hgvs_protein_colon.match(search_term)
+    p_hgvs_protein_space = re.compile("^np_[0-9]{6}.[0-9] ")
+    m_hgvs_protein_space = p_hgvs_protein_space.match(search_term)
+
+    p_reference_sequence_colon = re.compile("^nm_[0-9]{6}.[0-9]:")
+    m_reference_sequence_colon = p_reference_sequence_colon.match(search_term)
+    p_reference_sequence_space = re.compile("^nm_[0-9]{6}.[0-9] ")
+    m_reference_sequence_space = p_reference_sequence_space.match(search_term)
+
+    has_gene_symbol_prefix = False
+    for accepted_prefix in ['brca1:', 'brca2:', 'brca1 ', 'brca2 ']:
+        if search_term.startswith(accepted_prefix):
+            has_gene_symbol_prefix = True
 
     # Handle HGVS_Protein searches
-    if m_hgvs_protein:
+    if m_hgvs_protein_space or m_hgvs_protein_colon:
         prefix = search_term[:11]
         suffix = search_term[12:]
+
+        # accept hgvs_protein sequences without parentheses
+        suffix = add_paren_to_hgvs_protein_if_absent(suffix)
+
         # values in synonyms column are separated by commas
         comma_prefixed_suffix = ',' + suffix
         results = query.filter(HGVS_Protein__istartswith=prefix).filter(
             Q(Protein_Change__istartswith=suffix) |
+            Q(HGVS_Protein__icontains=suffix) |
             Q(Synonyms__icontains=comma_prefixed_suffix) |
             Q(Synonyms__istartswith=suffix)
         ) | query.filter(Q(HGVS_Protein__icontains=search_term) | Q(Synonyms__icontains=search_term))
         non_synonyms = results.filter(Protein_Change__istartswith=suffix) | query.filter(HGVS_Protein__icontains=search_term)
 
     # Handle gene symbol prefixed searches
-    elif search_term.startswith('brca1:') or search_term.startswith('brca2:'):
+    elif has_gene_symbol_prefix:
         prefix = search_term[:5]
         suffix = search_term[6:]
+
+        suffix = add_paren_to_hgvs_protein_if_absent(suffix)
+
         comma_prefixed_suffix = ',' + suffix
         # need to check synonym column for colon prefixes in the case of HGVS_cDNA and HGVS_Protein fields
         colon_prefixed_suffix = ':' + suffix
@@ -262,7 +323,7 @@ def apply_search(query, search_term, quotes='', release=None):
         )
 
     # Handle Reference_Sequence prefixed searches
-    elif m_reference_sequence:
+    elif m_reference_sequence_space or m_reference_sequence_colon:
         prefix = search_term[:11]
         suffix = search_term[12:]
         comma_prefixed_suffix = ',' + suffix
@@ -281,7 +342,7 @@ def apply_search(query, search_term, quotes='', release=None):
             Q(BIC_Nomenclature__istartswith=suffix)
         )
 
-    # Generic searches (no prefixes)
+        # Generic searches (no prefixes)
     else:
         # filter non-special-case searches against the following fields
         results = query.filter(
@@ -401,7 +462,12 @@ def search_variants(request):
     variants = range_filter(reference_genome, variants, reference_name, start, end)
     variants = ga4gh_brca_page(variants, int(page_size), int(page_token))
 
-    ga_variants = [brca_to_ga4gh(i, reference_genome) for i in variants.values()]
+    ga_variants = []
+    for i in variants.values():
+        try:
+            ga_variants.append(brca_to_ga4gh(i, reference_genome))
+        except ValueError as e:
+            print e
     if len(ga_variants) > page_size:
         ga_variants.pop()
         page_token = str(1 + int(page_token))
@@ -410,6 +476,7 @@ def search_variants(request):
     response.variants.extend(ga_variants)
     resp = json_format.MessageToDict(response, True)
     return JsonResponse(resp)
+
 
 def range_filter(reference_genome, variants, reference_name, start, end):
     """Filters variants by range depending on the reference_genome"""
@@ -425,7 +492,6 @@ def range_filter(reference_genome, variants, reference_name, start, end):
     elif reference_genome == 'hg38':
         variants = variants.order_by('Hg38_Start')
         variants = variants.filter(Hg38_Start__lt=end, Hg38_End__gt=start)
-
     return variants
 
 def ga4gh_brca_page(query, page_size, page_token):
@@ -436,6 +502,7 @@ def ga4gh_brca_page(query, page_size, page_token):
 
 def brca_to_ga4gh(brca_variant, reference_genome):
     """Function that translates elements in BRCA-database to GA4GH format."""
+    brca_variant = {k: unicode(v).encode("utf-8") for k,v in brca_variant.iteritems()}
     variant = variants.Variant()
     bases = brca_variant['Genomic_Coordinate_' + reference_genome].split(':')[2]
     variant.reference_bases, alternbases = bases.split('>')
@@ -445,17 +512,17 @@ def brca_to_ga4gh(brca_variant, reference_genome):
     variant.updated = 0
     variant.reference_name = brca_variant['Chr']
     if reference_genome == 'hg36':
-        variant.start = brca_variant['Hg36_Start']
-        variant.end = brca_variant['Hg36_End']
+        variant.start = int(brca_variant['Hg36_Start'])
+        variant.end = int(brca_variant['Hg36_End'])
     elif reference_genome == 'hg37':
-        variant.start = brca_variant['Hg37_Start']
-        variant.end = brca_variant['Hg37_End']
+        variant.start = int(brca_variant['Hg37_Start'])
+        variant.end = int(brca_variant['Hg37_End'])
     elif reference_genome == 'hg38':
-        variant.start = brca_variant['Hg38_Start']
-        variant.end = brca_variant['Hg38_End']
+        variant.start = int(brca_variant['Hg38_Start'])
+        variant.end = int(brca_variant['Hg38_End'])
     variant.id = '{}-{}'.format(reference_genome, str(brca_variant['id']))
     variant.variant_set_id = '{}-{}'.format(DATASET_ID, reference_genome)
-    names = [i for i in str(brca_variant['Synonyms']).split(',')]
+    names = brca_variant['Synonyms'].split(',')
     for name in names:
         variant.names.append(name)
     for key in brca_variant:

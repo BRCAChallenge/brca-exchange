@@ -7,7 +7,6 @@
 # This script acquires a list of BRCA1 and BRCA2 variants present in the BRCA
 # Exchange using the BRCA Exchange GA4GH instance, and submits queries against
 # the Beacon Network for all the single nucleotide variants.
-
 import sys
 import requests
 import json
@@ -21,7 +20,7 @@ from ga4gh.client import client
 URL_MAX = 1000  # The maximum allowed length of HTTP request URLs
 BEACON_RESPONSE_URL = "https://beacon-network.org/api/responses" # URL for variant requests in the beacon network
 BEACON_BEACONS_URL = "https://beacon-network.org/api/beacons" # URL for beacon list requests
-BRCA_GA4GH_URL = "http://brcaexchange-dev.cloudapp.net:9004/data/ga4gh/v0.6.0a7/" # URL for BRCA Exchange GA4GH instance
+BRCA_GA4GH_URL = "http://brcaexchange.org/backend/data/ga4gh/v0.6.0a7/" # URL for BRCA Exchange GA4GH instance
 
 # BRCA 1 and 2 locations
 BRCA1_CHR = "chr17" 
@@ -60,7 +59,7 @@ class QueryBeacons (threading.Thread):
     def run(self):
 
         query_beacons(self.beacons, self.variant, self.request, self.tries)
-            
+
 
 def build_variant_dictionary(variant, beacon_responses):
     """
@@ -163,12 +162,14 @@ def parse_arguments(args):
 
     return options 
 
+
 def main(args):
 
     options = parse_arguments(args)
 
     brca1 = Gene(BRCA1_CHR, BRCA1_START, BRCA1_END)
     brca2 = Gene(BRCA2_CHR, BRCA2_START, BRCA2_END)
+
 
     # Get current list of beacons
     for i in range(options.tries):
@@ -185,7 +186,7 @@ def main(args):
             if i+1 == options.tries:
                 raise
         time.sleep(20)
-
+        
     # Get all BRCA Exchange variants and request them from the Beacon Network
     threads = []
     ga4gh_client = client.HttpClient(BRCA_GA4GH_URL)

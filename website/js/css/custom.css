@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css?family=Lato:200,600');
+
 /* Note that bootstrap 3 media sizes are as follows:
   @media(max-width:767px){}  // xs
   @media(min-width:768px){}  // sm
@@ -24,6 +26,29 @@
 		float: right;
 	}
 }
+
+/**************************************************************/
+/**********         General               *********************/
+/**************************************************************/
+
+p {
+    font-size: 1.2em;
+    font-weight: 200;
+}
+
+/* should be used by all tables on the site, along with dropping the table-condensed class */
+.table-grayheader th {
+    background-color: #f5f5f5;
+}
+
+/*
+circumvents react-data-components-bd2k applying cursor: pointer to every "table"-classed thing's th.
+offending file, for future reference: website/node_modules/react-data-components-bd2k/css/table-twbs.css
+*/
+.table.nopointer th {
+    cursor: auto;
+}
+
 /**************************************************************/
 /**********         NavBar                *********************/
 /**************************************************************/
@@ -56,12 +81,29 @@
     float: left;
 }
 
+.navbar-custom-spacing {
+    font-size: 18px;
+    line-height: 42px;
+    margin-left: 0;
+    padding-left: 40px;
+}
+
 .navbar-brand  span.BRCA {
-    color: #C03657;
+    font-family: 'Lato', sans-serif;
+    color: black;
+    font-weight: 600;
 }
 
 .navbar-brand span.exchange {
-    color: #E8A2A0;
+    font-family: 'Lato', sans-serif;
+    color: black;
+    font-weight: 200;
+}
+
+.navbar-brand .logo-img {
+    position: relative;
+    top: -5px;
+    margin-right: 15px
 }
 
 /* Ensures BRCA exchange logo and menu items are on a single line across different devices */
@@ -84,21 +126,35 @@
     .navbar-container.beta {
         height: 150px;
     }
+
+    .navbar-brand h1 {
+        float: none;
+    }
 }
 
 /* Shrink BRCA exchange logo on smaller devices so logo and menu items are on a single line across different devices */
 @media only screen and (max-width: 992px) {
     .navbar-brand h1 {
-        font-size: 28px;
+        font-size: 21px;
     }
 
     .navbar-container.beta {
         height: 200px;
     }
 
+    .navbar-brand {
+        position: relative;
+        top: -6px;
+    }
+
     .navbar-brand #research-label {
         font-size: 64%;
         float: left;
+        margin: -0.8em 1em 0 3.8em;
+    }
+
+    .navbar-brand .logo-img {
+        top: 8px;
     }
 }
 
@@ -144,11 +200,27 @@
 /**************************************************************/
 /**********     Variant Detail            *********************/
 /**************************************************************/
-.Variant-detail-title .deleted {
-    font-size: 20px;
+.deleted-variant-message {
     color: red;
+    text-align: center;
 }
 
+.alleleFrequencyChart {
+    width: 50%;
+    float: left;
+}
+
+@media(max-width:400px) {
+    .alleleFrequencyChart {
+        width: 100%;
+    }
+}
+
+@media only screen and (max-width : 767px) {
+    .deleted-variant-message {
+        text-align: left;
+    }
+}
 /**************************************************************/
 /**********     Variant Search box       *********************/
 /**************************************************************/
@@ -158,24 +230,53 @@
     padding-bottom: 60px;
 }
 
-/* change input width to a percentage of its container 
+/* change input width to a percentage of its container
  * font-size is a percentage of its viewpoint width (2.2%)
  *
  * */
 .search-box input {
     width: 100%;
-    border: 1px solid #E8A2A0;
     text-align: left;
     font-size: 1.22em;
-    height: 2.5em;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
     text-indent: 1em;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
-    border-radius: 3px;
+    height: 2.5em;
+    -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+    -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+}
+
+.search-box input[placeholder] { text-overflow: ellipsis; }
+
+.search-box input::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+  max-width: 90%;
+}
+
+.search-box input::-moz-placeholder { /* Firefox 19+ */
+  max-width: 90%;
+  text-overflow: ellipsis;
+}
+
+.search-box input:-ms-input-placeholder { /* IE 10+ */
+  max-width: 90%;
+  text-overflow: ellipsis;
+}
+
+.search-box input:-moz-placeholder { /* Firefox 18- */
+  max-width: 90%;
+  text-overflow: ellipsis;
 }
 
 input:focus {
-    border: 1px solid #C03657;
+    border: 1px solid;
     outline: none;
 }
 
@@ -184,11 +285,24 @@ input:focus {
 }
 
 .search-box Button:hover {
-    background-color: transparent;    
+    background-color: transparent;
+}
+
+.search-box-icon {
+    right: 30px;
+    color: #555;
+    cursor: pointer;
 }
 
 .matched-variant-count {
-    font-size: 16px;
+    font-size: 1.2em;
+    line-height: 34px;
+}
+
+/* used for the message on the search page */
+div.colorized-jumbo {
+    border: solid 1px #d1dce2;
+    background-color: #eff8fd;
 }
 
 /**************************************************************/
@@ -209,7 +323,6 @@ input:focus {
     border-radius: 2px;
     padding: 1px;
     font-size: 11px;
-    background-color: #fafafa;
 }
 .variant-history span.empty::after {
     content: 'Empty';
@@ -222,6 +335,11 @@ input:focus {
 .jumbotron {
     background-color: rgba(169,169,169, 0.13);
     margin: 20px;
+    padding: 40px;
+}
+
+.jumbotron p {
+    font-size: 1.2em;
 }
 
 /**************************************************************/
@@ -234,7 +352,8 @@ input:focus {
 }
 
 .video-button {
-    font-size: 21px;
+    font-size: 1.2em;
+    margin-top: 15px;
 }
 
 .video-button .glyphicon {
@@ -272,6 +391,7 @@ input:focus {
 .logo-item {
     height: 120px;
     padding: 10px;
+    margin-bottom: 10px;
     text-align: center;
     float: none;
     display: inline-block;
@@ -445,6 +565,27 @@ html {
     font-size: 10px;
 }
 
+#main-grid li {
+    font-size: 1.2em;
+    font-weight: 200;
+}
+
+#main-grid h5 {
+    font-size: 1.2em;
+    font-weight: 400;
+}
+
+.alert-warning {
+    background-color: rgba(169,169,169, 0.13);
+    color: inherit;
+    border: none;
+}
+
+#download .alert-danger {
+    padding: 7px;
+    vertical-align: bottom;
+}
+
 .form-group label {
     margin-right: 1em;
 }
@@ -581,6 +722,9 @@ th[role='columnheader'] .help, .help-target .help {
 /**********      Community                *********************/
 /**************************************************************/
 
+.community-message {
+    font-weight: 200;
+}
 
 #communityMap {
     width: 100%;

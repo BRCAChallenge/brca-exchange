@@ -41,6 +41,8 @@ def parse_args():
                         help='Input exLOVD annotation file for conversion. Tab-delimited with 1st column representing field name and 2nd column representing the field description. Default(/hive/groups/cgl/brca/phase1/data/resources/exLOVDAnnotation)')
     parser.add_argument('-o', '--out', type=argparse.FileType('w'),
                         help='Ouput VCF file result.')
+    parser.add_argument('-e', '--errors', type=argparse.FileType('w'),
+                        help='File containing all LOVD variants that could not be parsed.')
     parser.add_argument('-g', '--gpath', default='/hive/groups/cgl/brca/phase1/data/resources/hg19.fa',
                         help='Whole path to genome file. Default: (/hive/groups/cgl/brca/phase1/data/resources/hg19.fa)')
     parser.add_argument('-r', '--rpath', default='/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.gp',
@@ -57,6 +59,7 @@ def main(args):
     vcfFile = options.out
     genome_path = options.gpath
     refseq_path = options.rpath
+    errorsFile = options.errors
 
     with open(refseq_path) as infile:
         transcripts = hgvs_utils.read_transcripts(infile)
@@ -110,14 +113,14 @@ def main(args):
         if hgvsName == '-':
             print(parsedLine)
             continue
-        queryHgvsName = hgvsName.rstrip()
+        queryHgvsName = hgvsName.rstrip().split(';')[0]
         INFO_field_string = ';'.join(INFO_field)
         try:
             chrom, offset, ref, alt = hgvs.parse_hgvs_name(queryHgvsName, genome, get_transcript=get_transcript)
             chrom = chrom.replace('chr', '')
             print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(chrom, offset, queryHgvsName, ref, alt, INFO_field_string), file=vcfFile)
         except Exception as e:
-            print(str(e)+': could not parse hgvs field '+queryHgvsName)
+            print(str(e)+': could not parse hgvs field '+queryHgvsName, file=errorsFile)
 
 
 def normalize(field, field_value):

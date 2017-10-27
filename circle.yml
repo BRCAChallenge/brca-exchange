@@ -13,15 +13,18 @@ test:
     override:
         - npm run lint -- -f junit -o $CIRCLE_TEST_REPORTS/lint-results.xml
         - npm run test -- -R xunit --reporter-options output=$CIRCLE_TEST_REPORTS/test-results.xml
-        - cd django/ && python manage.py migrate
+        - pip install -r ../test-requirements.txt
+        - cd django/ && python manage.py migrate && python manage.py test
         - cd ../pipeline/data && bash ./getdata
-        - cd .. && pip install -r test-requirements.txt && pytest --junitxml=${CIRCLE_TEST_REPORTS}/pytest-results.xml
+        - cd .. && pytest --ignore=website/ --junitxml=${CIRCLE_TEST_REPORTS}/pytest-results.xml
 deployment:
     dev:
         branch: master
         commands:
-            - ../deployment/deploy-dev
+            - ../deployment/deploy-dev:
+                timeout: 1500 # fail if it takes over 25 minutes (some migrations take a while)
     beta:
         tag: /v[0-9]+(\.[0-9]+)*/
         commands:
-            - HOST=brcaexchange.cloudapp.net ../deployment/deploy-dev
+            - HOST=brcaexchange.cloudapp.net ../deployment/deploy-dev:
+                timeout: 1500 # fail if it takes over 25 minutes (some migrations take a while)

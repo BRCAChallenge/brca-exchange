@@ -135,7 +135,6 @@ def main(args):
     refSeqBRCA2Transcripts = ['U43746.1']
 
     for line in input_file:
-
         if line[geneSymbolIndex] == 'BRCA1':
             line[refSeqIndex] = 'NM_007294.3'
         elif line[geneSymbolIndex] == 'BRCA2':
@@ -190,24 +189,30 @@ def main(args):
             if cdna_coord_LOVD == "-" or cdna_coord_LOVD is None or cdna_coord_LOVD == "":
                 continue
 
+            cdna_coord_LOVD = cdna_coord_LOVD.strip()
+
             # Don't add to synonyms if main hgvs_cDNA field is already equivalent to hgvs_cDNA value from LOVD
             cdna_coord_LOVD_for_comparison = cdna_coord_LOVD.split(':')[1]
             if cdna_coord_LOVD_for_comparison in line[hgvsCDNAIndex]:
                 continue
 
-            chrom38LOVD, offset38LOVD, ref38LOVD, alt38LOVD = pyhgvs.parse_hgvs_name(cdna_coord_LOVD, genome38, get_transcript=get_transcript38)
-            if line[geneSymbolIndex] == 'BRCA1':
-                for transcriptName in refSeqBRCA1Transcripts:
-                    transcript38 = get_transcript38(transcriptName)
-                    cdna_synonym = str(pyhgvs.format_hgvs_name(chrom38LOVD, int(offset38LOVD), ref38LOVD, alt38LOVD, genome38, transcript38, use_gene=False, max_allele_length=100))
-                    if cdna_synonym not in synonymString:
-                        synonymString.append(cdna_synonym)
-            elif line[geneSymbolIndex] == 'BRCA2':
-                for transcriptName in refSeqBRCA2Transcripts:
-                    transcript38 = get_transcript38(transcriptName)
-                    cdna_synonym = str(pyhgvs.format_hgvs_name(chrom38LOVD, int(offset38LOVD), ref38LOVD, alt38LOVD, genome38, transcript38, use_gene=False, max_allele_length=100))
-                    if cdna_synonym not in synonymString:
-                        synonymString.append(cdna_synonym)
+            try:
+                chrom38LOVD, offset38LOVD, ref38LOVD, alt38LOVD = pyhgvs.parse_hgvs_name(cdna_coord_LOVD, genome38, get_transcript=get_transcript38)
+                if line[geneSymbolIndex] == 'BRCA1':
+                    for transcriptName in refSeqBRCA1Transcripts:
+                        transcript38 = get_transcript38(transcriptName)
+                        cdna_synonym = str(pyhgvs.format_hgvs_name(chrom38LOVD, int(offset38LOVD), ref38LOVD, alt38LOVD, genome38, transcript38, use_gene=False, max_allele_length=100))
+                        if cdna_synonym not in synonymString:
+                            synonymString.append(cdna_synonym)
+                elif line[geneSymbolIndex] == 'BRCA2':
+                    for transcriptName in refSeqBRCA2Transcripts:
+                        transcript38 = get_transcript38(transcriptName)
+                        cdna_synonym = str(pyhgvs.format_hgvs_name(chrom38LOVD, int(offset38LOVD), ref38LOVD, alt38LOVD, genome38, transcript38, use_gene=False, max_allele_length=100))
+                        if cdna_synonym not in synonymString:
+                            synonymString.append(cdna_synonym)
+            except Exception as e:
+                print('parse error: {}'.format(cdna_coord_LOVD))
+                print(e)
 
         if calcProtein == True:
 
@@ -216,7 +221,7 @@ def main(args):
                 protein_coord = variantmapper.c_to_p(var_c1)
             except hgvs.exceptions.HGVSParseError as e:
                 template = "An exception of type {0} occured. Arguments:\n{1!r}"
-                message = template.format(type(ex).__name__, ex.args)
+                message = template.format(type(e).__name__, e.args)
                 genomicChange = '{0}:g.{1}:{2}>{3}'.format(chrom38, offset38, ref38, alt38)
                 print('hgvs.exceptions.HGVSParseError: ', e)
                 print('Original GRCh38 Genomic Coordinate: ', oldHgvsGenomic38)

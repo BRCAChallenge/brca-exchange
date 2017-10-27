@@ -5,6 +5,58 @@ var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PR
 var {Grid, Col, Row, Alert} = require('react-bootstrap');
 var backend = require('backend');
 
+var PieChart = require('./PieChart');
+var BarChart = require('./BarChart');
+var Highcharts = require('highcharts');
+require('highcharts/modules/broken-axis')(Highcharts);
+
+Highcharts.setOptions({
+    lang: {
+        thousandsSep: ""
+    }
+});
+
+var chartOptions1 = {
+    title: { text: 'Unique Variants' },
+    tooltip: { pointFormat: '{series.name}<br />{point.y}' },
+    xAxis: { categories: ["BRCA1", "BRCA2"] },
+    yAxis: {
+        lineColor: 'black',
+        lineWidth: 2,
+        title: false,
+        tickInterval: 1000,
+        stackLabels: {
+            enabled: true,
+            style: {
+                fontWeight: 'bold',
+                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+            }
+        }
+    },
+    plotOptions: { column: { stacking: 'normal' } },
+    series: [
+        { name: "Benign", data: [ 0, 0 ] },
+        { name: "Pathogenic", data: [ 0, 0 ] },
+        { name: "Not Yet Reviewed", data: [ 0, 0 ] }
+    ]
+};
+
+var chartOptions2 = {
+    title: {
+        text: 'Expert Reviewed Pathogenicities'
+    },
+    tooltip: {
+        pointFormat: '{point.y} ({point.percentage:.1f}%)'
+    },
+    series: [{
+        data: [
+            { name: "Pathogenic", y: 0 },
+            { name: "Benign", y: 0 },
+            { name: "Not Yet Reviewed", y: 0 }
+        ]
+    }]
+};
+
 var FactSheet = React.createClass({
     mixins: [PureRenderMixin],
     getInitialState: function() {
@@ -12,39 +64,57 @@ var FactSheet = React.createClass({
     },
     componentWillMount: function() {
         backend.variantCounts().subscribe(
-            resp => this.setState(resp),
+            resp => {
+                var chart1 = this.refs.chart1.getChart();
+                var chart2 = this.refs.chart2.getChart();
+
+                chart1.series[0].setData([resp.brca1.benign, resp.brca2.benign], false);
+                chart1.series[1].setData([resp.brca1.pathogenic, resp.brca2.pathogenic], false);
+                chart1.series[2].setData([resp.brca1.total - resp.brca1.pathogenic - resp.brca1.benign, resp.brca2.total - resp.brca2.pathogenic - resp.brca2.benign], true);
+                chart2.series[0].setData([{ name: "Benign", y: resp.enigmaBenign }, { name: "Pathogenic", y: resp.enigmaPathogenic }, { name: "Not Yet Reviewed", y: resp.total - resp.enigma }]);
+                this.setState(resp);
+            },
             () => this.setState({error: 'Problem connecting to server'}));
     },
     render: function () {
         return (
             <Grid id="main-grid" className="main-grid">
                 <Row>
-                    <Col md={8} mdOffset={2}>
+                    <Col smOffset={1} sm={10}>
                         <h1>BRCA Exchange: Facts & Stats</h1>
-                        <br />
+                        <hr />
                         <h3>BRCA Exchange Web Portal</h3>
                         <ul>
                             <li>The BRCA Exchange web portal is the largest public source for information on BRCA1 and BRCA2 variants.</li>
                             <li>By default, the web portal shows variants that have been expert-classified by an international panel (the ENIGMA consortium).</li>
-                            <li>By switching from the ‘expert reviewed portal’ to the ‘all public data portal’, users may also explore information on variants that have not yet been classified by the expert panel. For these unclassified variants, the impact on health has not yet been established.</li>
+                            <li>By switching from the ‘expert reviewed portal’ to the ‘all public data portal’, users may also explore information on variants that have not yet been reviewed by the expert panel. For these variants, the impact on disease risk has not yet been established.</li>
                         </ul>
-                        <u>Web portal statistics:</u>
+                        <p><u>Web portal statistics:</u></p>
                         {this.state.error ? <p>&nbsp;&nbsp;&nbsp;({this.state.error})</p> :
-                        <ul>
-                            <li>Number of unique BRCA variants in the portal: {Number(this.state.total).toLocaleString()}</li>
+                        <div>
+                            <Col md={6}>
+                                <BarChart ref='chart1' container='chart1' options={chartOptions1} />
+                            </Col>
+                            <Col md={6}>
+                                <PieChart ref='chart2' container='chart2' options={chartOptions2} />
+                            </Col>
+                            <br />
                             <ul>
-                                <li>Unique BRCA1 variants in the portal: {Number(this.state.brca1).toLocaleString()}</li>
-                                <li>Unique BRCA2 variants in the portal: {Number(this.state.brca2).toLocaleString()}</li>
+                                <li>Number of unique BRCA variants in the portal: {Number(this.state.total).toLocaleString()}</li>
+                                <ul>
+                                    <li>Unique BRCA1 variants in the portal: {Number(this.state.brca1 && this.state.brca1.total).toLocaleString()}</li>
+                                    <li>Unique BRCA2 variants in the portal: {Number(this.state.brca2 && this.state.brca2.total).toLocaleString()}</li>
+                                </ul>
+                                <li>Number of ENIGMA expert-classified variants in the portal: {Number(this.state.enigma).toLocaleString()}</li>
+                                <ul>
+                                    <li>Variants expert-classified as pathogenic: {Number(this.state.enigmaPathogenic).toLocaleString()}</li>
+                                    <li>Variants expert-classified as benign: {Number(this.state.enigmaBenign).toLocaleString()}</li>
+                                </ul>
                             </ul>
-                            <li>Number of ENIGMA expert-classified variants in the portal: {Number(this.state.enigma).toLocaleString()}</li>
-                            <ul>
-                                <li>Variants expert-classified as pathogenic: {Number(this.state.enigmaPathogenic).toLocaleString()}</li>
-                                <li>Variants expert-classified as benign: {Number(this.state.enigmaBenign).toLocaleString()}</li>
-                            </ul>
-                        </ul>}
+                        </div>}
                         <br />
                         <h4>Media Inquiries</h4>
-                        For media inquiries, please contact the GA4GH Communications Lead, Angela Page (<a href="mailto:angela.page@genomicsandhealth.org">angela.page@genomicsandhealth.org</a>)
+                        <p>For media inquiries, please contact the GA4GH Communications Lead, Angela Page (<a href="mailto:angela.page@genomicsandhealth.org">angela.page@genomicsandhealth.org</a>)</p>
                         <br />
                         <br />
                         <div className='image-with-caption'>
@@ -74,7 +144,7 @@ var FactSheet = React.createClass({
                             <li>Genetic testing centres each hold a portion of the world’s knowledge about BRCA variants. By aggregating this knowledge together into one shared resource, scientists around the world can have access to greater amounts of information to assist them in classifying variants as ‘pathogenic’ or ‘benign’. This means more accurate and consistent information for doctors, patients, and families.</li>
                         </ul>
                         <Alert bsStyle="info">
-                            For more information about BRCA genes and cancer, please see:
+                            <p>For more information about BRCA genes and cancer, please see:</p>
                             <ul>
                                 <li><a href='http://www.cancer.gov/about-cancer/causes-prevention/genetics/brca-fact-sheet'>http://www.cancer.gov/about-cancer/causes-prevention/genetics/brca-fact-sheet</a></li>
                                 <li><a href='https://seer.cancer.gov/archive/csr/1975_2011/'>SEER Cancer Statistics Review</a>, 1975-2011, National Cancer Institute. Bethesda, MD</li>
@@ -131,7 +201,7 @@ var FactSheet = React.createClass({
                     <Col md={8} mdOffset={2}>
                         <br />
                         <Alert bsStyle='info'>
-                            For more information about the BRCA Challenge and GA4GH, please visit:
+                            <p>For more information about the BRCA Challenge and GA4GH, please visit:</p>
                             <ul>
                                 <li><a href="http://www.genomicsandhealth.org/">Global Alliance for Genomics and Health</a> (GA4GH)</li>
                                 <li><a href="https://genomicsandhealth.org/work-products-demonstration-projects/brca-challenge-0">BRCA Challenge</a></li>

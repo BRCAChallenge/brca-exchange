@@ -7,6 +7,10 @@ import json
 import csv
 import psycopg2
 from django.core.management import call_command
+from data.utilities import update_autocomplete_words
+
+
+OLD_MAF_ESP_FIELD_NAMES = ['Minor_allele_frequency_ESP', 'Minor_allele_frequency_ESP_percent']
 
 
 class Command(BaseCommand):
@@ -19,27 +23,6 @@ class Command(BaseCommand):
         parser.add_argument('deletions', nargs='?', default=None, type=FileType('r'),
                             help='Deleted variants, in TSV format, same schema sans change_type')
         parser.add_argument('diffJSON', help='JSON diff file')
-
-    def update_autocomplete_words(self):
-        # Drop words table and recreate with latest data
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                DROP TABLE IF EXISTS words;
-                CREATE TABLE words AS SELECT DISTINCT left(word, 300) as word, release_id FROM (
-                SELECT regexp_split_to_table(lower("Genomic_Coordinate_hg38"), '[\s|''"]') as word, "Data_Release_id" as release_id from variant UNION
-                SELECT regexp_split_to_table(lower("Genomic_Coordinate_hg37"), '[\s|''"]') as word, "Data_Release_id" as release_id from variant UNION
-                SELECT regexp_split_to_table(lower("Genomic_Coordinate_hg36"), '[\s|''"]') as word, "Data_Release_id" as release_id from variant UNION
-                SELECT regexp_split_to_table(lower("Clinical_significance_ENIGMA"), '[\s|''"]') as word, "Data_Release_id" as release_id from variant UNION
-                SELECT regexp_split_to_table(lower("Gene_Symbol"), '[\s|''"]') as word, "Data_Release_id" as release_id from variant UNION
-                SELECT regexp_split_to_table(lower("Reference_Sequence"), '[\s|''"]') as word, "Data_Release_id" as release_id from variant UNION
-                SELECT regexp_split_to_table(lower("HGVS_cDNA"), '[\s|:''"]')  as word, "Data_Release_id" as release_id from variant UNION
-                SELECT regexp_split_to_table(lower("BIC_Nomenclature"), '[\s|''"]') as word, "Data_Release_id" as release_id from variant UNION
-                SELECT regexp_split_to_table(lower("HGVS_Protein"), '[\s|''"]') as word, "Data_Release_id" as release_id from variant
-                )
-                AS combined_words;
-
-                CREATE INDEX words_idx ON words(word text_pattern_ops);
-            """)
 
     @transaction.atomic
     def handle(self, *args, **options):
@@ -81,9 +64,8 @@ class Command(BaseCommand):
                 row_dict = dict(zip(deletions_header, row))
                 row_dict = self.update_variant_values_for_insertion(row_dict, release_id, change_types, True)
                 variant = Variant.objects.create_variant(row_dict)
-                self.create_and_associate_reports_to_variant(variant, reports_dict, sources, release_id)
 
-        self.update_autocomplete_words()
+        update_autocomplete_words()
 
         # update materialized view of current variants
         with connection.cursor() as cursor:
@@ -112,6 +94,12 @@ class Command(BaseCommand):
         row_dict['Hg36_End'] = row_dict.pop('pyhgvs_Hg36_End')
         row_dict['HGVS_cDNA'] = row_dict.pop('pyhgvs_cDNA')
         row_dict['HGVS_Protein'] = row_dict.pop('pyhgvs_Protein')
+
+        # Denote percentage in field name, two different fieldnames were used previously so both are handled below
+        for oldName in OLD_MAF_ESP_FIELD_NAMES:
+            if oldName in row_dict:
+                row_dict['Minor_allele_frequency_percent_ESP'] = row_dict.pop(oldName)
+
         return row_dict
 
     def build_report_dictionary_by_source(self, reports_reader, reports_header, sources):
@@ -131,6 +119,8 @@ class Command(BaseCommand):
                 source = "BIC"
             elif source == "1000 Genomes":
                 source = "1000_Genomes"
+            elif source == "ExUV":
+                source = "exLOVD"
             bx_id_field = "BX_ID_" + source
             if not self.is_empty(getattr(variant, bx_id_field)):
                 bx_ids = getattr(variant, bx_id_field).split(',')
@@ -141,6 +131,12 @@ class Command(BaseCommand):
         report = reports_dict[source][bx_id]
         report['Data_Release_id'] = release_id
         report['Variant'] = variant
+
+        # Denote percentage in field name, two different fieldnames were used previously so both are handled below
+        for oldName in OLD_MAF_ESP_FIELD_NAMES:
+            if oldName in report:
+                report['Minor_allele_frequency_percent_ESP'] = report.pop(oldName)
+
         Report.objects.create_report(report)
 
     def is_empty(self, value):

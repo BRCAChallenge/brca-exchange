@@ -7,6 +7,21 @@ import argparse
 import csv
 import logging
 
+def classificationToBeRemoved(row):
+    """
+    The variant NM_000059.3:c.476-2A>G has classifications by ENIGMA as both 
+    pathogenic and uncertain.  The ENIGMA consortium wants to retain only the
+    pathogenic classification.  Return a binary flag indicating if this is
+    that classification, and should be skipped..
+    """
+    if row["Reference_sequence"] == "NM_000059.3" \
+            and row["HGVS_cDNA"] == "c.476-2A>G" \
+            and row["Clinical_significance"] != "Pathogenic":
+        return True
+    else:
+        return False
+
+
 def fillInFounderMutations(row):
     """
     Make sure that the founder mutations are represented with each of their
@@ -40,7 +55,7 @@ def fixAssertionCitation(row):
     Addresses GitHub Issue #237
     (https://github.com/BD2KGenomics/brca-exchange/issues/237)
     """
-    row["Assertion_method_citation"] =  "https://enigmaconsortium.org/library/general-documents/"
+    row["Assertion_method_citation"] = "https://enigmaconsortium.org/library/general-documents/"
     return row
 
 
@@ -94,7 +109,8 @@ def main():
         row = fillInFounderMutations(row)
         row = fixAssertionCitation(row)
         row = fixBrokenAminoAcidChange(row)
-        csvOut.writerow(row)
+        if not classificationToBeRemoved(row):
+            csvOut.writerow(row)
 
 
 if __name__ == "__main__":

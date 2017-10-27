@@ -4,51 +4,93 @@ set -o errexit
 
 # This script expects two arguments:
 
-# 1. Environment (beta or production)
+# 1. Environment (beta, production, or local)
 
-# 2. A path to a release directory of the format release-{mm-dd-yy} containing
-#    built_with_change_types.tsv, removed.tsv, version.json, diff.json, reports.tsv,
-#    and release-{mm-dd-yy}.tar.gz.
+# 2. A path to a release archive of the format release-{mm-dd-yy}.tar.gz
 
 # Example:
 
-# Running `./deployment/deploy-data beta PATH/TO/release-10-06-16`
+# Running `./deployment/deploy-data beta PATH/TO/release-10-06-16.tar.gz`
 # would add the 10-06-16 release to the beta database and put files in the correct
 # locations for access, storage and download.
 
-HOST=${HOST:-brcaexchange.cloudapp.net}
+function add_release_tar_to_db {
+    STAGING=$1
+    TAR=$2
+    MANAGE_SCRIPT=$3
+
+    RELEASE_DIR="${STAGING}/output/release"
+
+    DATA=${RELEASE_DIR}/built_with_change_types.tsv
+    REMOVED=${RELEASE_DIR}/diff/removed.tsv
+    METADATA=${RELEASE_DIR}/metadata/version.json
+    DIFFJSON=${RELEASE_DIR}/diff/diff.json
+    REPORTS=${RELEASE_DIR}/artifacts/reports.tsv
+
+    # unpacking of tar into a staging dir
+    [ -e ${STAGING} ] && rm -r ${STAGING}
+    mkdir -p ${STAGING}
+    tar zxf ${TAR} -C ${STAGING}
+
+    echo "Adding release to database"
+
+    # add data to DB
+    python ${MANAGE_SCRIPT} addrelease ${DATA} ${REPORTS} ${METADATA} ${REMOVED} ${DIFFJSON}
+}
+
+
+export HOST=${HOST:-brcaexchange.cloudapp.net}
 USER=brca
 
-# Expects environment (beta or production) as first argument.
+# Expects environment (local,beta or production) as first argument.
 ENVIRONMENT=$1
-if [ "${ENVIRONMENT}" != "beta" ] && [ "${ENVIRONMENT}" != "production" ] ;then
-    echo "ERROR: Please only enter 'beta' or 'production' as environment."
+if [ "${ENVIRONMENT}" != "beta" ] && [ "${ENVIRONMENT}" != "production" ] && [ "${ENVIRONMENT}" != "local" ]  ;then
+    echo "ERROR: Please only enter 'local', 'beta' or 'production' as environment."
     exit 1
 fi
 
-# Expects path to release directory as second argument. Removes trailing / if present.
-RELEASEDIRECTORYPATH=$2
-if [ "${RELEASEDIRECTORYPATH: -1}" == "/" ] ;then
-    RELEASEDIRECTORYPATH=${RELEASEDIRECTORYPATH%?}
+# Expects path to release archive as second argument.
+RELEASE_ARCHIVE_PATH=$2
+
+if [ "${ENVIRONMENT}" == "local" ] ;then
+    # Get deployment directory to have relative path to addrelease script
+    DEPLOYMENTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+    cd "$DEPLOYMENTDIR"
+
+    add_release_tar_to_db /tmp/brca_tar_staging ${RELEASE_ARCHIVE_PATH} "../website/django/manage.py"
 fi
 
-RELEASEDIRECTORY=$(basename $RELEASEDIRECTORYPATH)
-REMOTERELEASES=/var/www/backend/${ENVIRONMENT}/django/downloads/releases
+if [ "${ENVIRONMENT}" == "beta" ] || [ "${ENVIRONMENT}" == "production" ] ;then
 
-# Copies directory to downloads/releases/
-rsync -a --rsync-path='sudo rsync' $RELEASEDIRECTORYPATH ${USER}@${HOST}:$REMOTERELEASES/
+    REMOTERELEASES=/var/www/backend/${ENVIRONMENT}/django/downloads/releases
 
-# Locations of files on remote server
-DATA=$REMOTERELEASES/$RELEASEDIRECTORY/built_with_change_types.tsv
-REMOVED=$REMOTERELEASES/$RELEASEDIRECTORY/removed.tsv
-METADATA=$REMOTERELEASES/$RELEASEDIRECTORY/version.json
-DIFFJSON=$REMOTERELEASES/$RELEASEDIRECTORY/diff.json
-REPORTS=$REMOTERELEASES/$RELEASEDIRECTORY/reports.tsv
+    # directory to unpack release archive on the deployment host
+    REMOTE_STAGING=/home/brca/deploy_staging
 
-ssh -l${USER} ${HOST} <<-ENDSSH
-    set -o errexit
-    . /var/www/backend/${ENVIRONMENT}/virtualenv/bin/activate
-    python /var/www/backend/${ENVIRONMENT}/django/manage.py addrelease ${DATA} ${REPORTS} ${METADATA} ${REMOVED} ${DIFFJSON}
-    sudo rm /var/www/backend/${ENVIRONMENT}/django/downloads/releases/current_release.tar.gz
-    find /var/www/backend/${ENVIRONMENT}/django/downloads/releases/${RELEASEDIRECTORY}/ -name 'release*.tar.gz' -exec cp {} /var/www/backend/${ENVIRONMENT}/django/downloads/releases/current_release.tar.gz  \;
+    RELEASE_DIRECTORY_NAME=$(basename ${RELEASE_ARCHIVE_PATH} .tar.gz)
+
+    rsync -a ${RELEASE_ARCHIVE_PATH} ${USER}@${HOST}:/tmp
+
+    REMOTE_TAR_TMP=/tmp/${RELEASE_DIRECTORY_NAME}.tar.gz
+
+    ssh -l${USER} ${HOST} <<-ENDSSH
+        set -o errexit
+
+        $(declare -f add_release_tar_to_db)
+
+        source /var/www/backend/${ENVIRONMENT}/virtualenv/bin/activate
+        add_release_tar_to_db ${REMOTE_STAGING} ${REMOTE_TAR_TMP} /var/www/backend/${ENVIRONMENT}/django/manage.py
+
+        echo "Installing tar in downloads section"
+        mkdir -p ${REMOTERELEASES}/${RELEASE_DIRECTORY_NAME}
+        sudo cp ${REMOTE_TAR_TMP} ${REMOTERELEASES}/${RELEASE_DIRECTORY_NAME}/${RELEASE_DIRECTORY_NAME}.tar.gz
+        # swap out current_release.tar.gz with new release tar
+        sudo cp ${REMOTERELEASES}/${RELEASE_DIRECTORY_NAME}/${RELEASE_DIRECTORY_NAME}.tar.gz /var/www/backend/${ENVIRONMENT}/django/downloads/releases/current_release.tar.gz
+
+        rm ${REMOTE_TAR_TMP}
 ENDSSH
+
+     echo "Exporting data for Genome Browser..."
+    ../pipeline/genomeBrowserTrack/export_data_for_genome_browser.sh ${RELEASE_ARCHIVE_PATH}
+fi

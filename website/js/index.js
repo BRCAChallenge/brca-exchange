@@ -38,6 +38,7 @@ var FactSheet = require('./FactSheet');
 var {MailingList} = require('./MailingList');
 
 var databaseKey = require('../databaseKey');
+var util = require('./util');
 
 var {Grid, Col, Row, Table, Button, Modal, Panel, Glyphicon} = require('react-bootstrap');
 
@@ -113,7 +114,7 @@ var Footer = React.createClass({
                             </a>
                         </li>
                         <li>
-                            <a href="https://github.com/BD2KGenomics/brca-website">
+                            <a href="https://github.com/BRCAChallenge/brca-exchange">
                                 Source code
                             </a>
                         </li>
@@ -182,7 +183,7 @@ var About = React.createClass({
         return (
             <Grid id="main-grid" className="main-grid">
                 <Row>
-                    <Col md={8} mdOffset={2}>
+                    <Col smOffset={1} sm={10}>
                         <RawHTML html={content.pages[page]} />
                     </Col>
                 </Row>
@@ -217,7 +218,7 @@ var Help = React.createClass({
                 {fragment === '' ? null :
                     <style>{`#${fragment} { animation-name: emphasis; animation-duration: 10s; } `}</style>}
                 <Row>
-                    <Col md={8} mdOffset={2}>
+                    <Col smOffset={1} sm={10}>
                         <RawHTML ref='content' html={helpContent}/>
                     </Col>
                 </Row>
@@ -397,7 +398,7 @@ var Database = React.createClass({
             message = this.renderMessage(content.pages.variantsDefault);
         }
         return (
-            <Grid fluid={true} id="main-grid" style={{display: show ? 'block' : 'none'}}>
+            <Grid id="main-grid" style={{display: show ? 'block' : 'none'}}>
                 {message}
                 {table}
             </Grid>
@@ -406,14 +407,14 @@ var Database = React.createClass({
     renderMessage: function(message) {
         return  (
 			<Row>
-				<Col sm={10} smOffset={1}  className="alert alert-warning">
+				<Col className="jumbotron colorized-jumbo">
 					{this.props.mode === 'default' && <img id='enigma-logo' src={require('./img/enigma_logo.jpeg')} />}
 					<RawHTML ref='content' html={message}/>
-					{this.props.mode === 'research_mode' && <Button className="btn-small" onClick={this.toggleMode}>
+					{this.props.mode === 'research_mode' && <Button className="btn-default" onClick={this.toggleMode}>
 						Show Expert Reviewed Data Only
 					</Button>}
 					{this.props.mode === 'default' &&
-					<Button className="btn-small" onClick={() =>this.setState({showModal: true})}>
+					<Button className="btn-default" onClick={() =>this.setState({showModal: true})}>
 						Show All Public Data
 					</Button>}
 					{this.props.mode === 'default' && this.state.showModal &&
@@ -470,20 +471,6 @@ function getDisplayName(key) {
         displayName = key.replace(/_/g, " ");
     }
     return displayName;
-}
-
-// test for the various forms of blank fields
-function isEmptyField(value) {
-    if (Array.isArray(value)) {
-        value = value[0];
-    }
-
-    if (value === null || (typeof value === 'undefined')) {
-        return true;
-    }
-
-    var v = value.trim();
-    return v === '' || v === '-' || v === 'None';
 }
 
 function isEmptyDiff(value) {
@@ -577,7 +564,9 @@ const IsoGrid = React.createClass({
 
 var VariantDetail = React.createClass({
     mixins: [Navigation],
-    showHelp: function (title) {
+    showHelp: function (event, title) {
+        event.preventDefault();
+
         this.transitionTo(`/help#${slugify(title)}`);
     },
     getInitialState: () => ({
@@ -595,7 +584,7 @@ var VariantDetail = React.createClass({
         this.forceUpdate();
     },
     reformatDate: function(date) { //handles single dates or an array of dates
-        if (isEmptyField(date)) {
+        if (util.isEmptyField(date)) {
             return date;
         }
         if (!Array.isArray(date)) {
@@ -629,15 +618,19 @@ var VariantDetail = React.createClass({
 
         // the event target is actually the span *inside* the 'a' tag, but we need to check the 'a' tag for the
         // collapsed state
-        const collapsingElem = event.target.parentElement;
+        const collapsingElemParent = event.target.parentElement;
 
-        // FIXME: there must be a better way to get at the panel's state than reading the class
-        // maybe we'll subclass Panel and let it handle its own visibility persistence
+        let willBeCollapsed = true;
 
-        // this looks silly, but at the time this method is called the item is starting to transition,
-        // so its state when it's done will be the opposite of what it currently is
-        const isCollapsed = !(collapsingElem.getAttribute("class") === "collapsed");
-        localStorage.setItem("collapse-group_" + groupTitle, isCollapsed);
+        collapsingElemParent.childNodes.forEach(function(child) {
+            // FIXME: there must be a better way to get at the panel's state than reading the class
+            // Maybe we'll subclass Panel and let it handle its own visibility persistence.
+            if (child.getAttribute("class") === "collapsed") {
+                // if it's already collapsed, this method should expand it
+                willBeCollapsed = false;
+            }
+        });
+        localStorage.setItem("collapse-group_" + groupTitle, willBeCollapsed);
 
         // defer re-layout until the state change has completed
         const me = this;
@@ -697,7 +690,7 @@ var VariantDetail = React.createClass({
                     }
 
                     if (added !== null || removed !== null) {
-                        if (isEmptyField(removed)) {
+                        if (util.isEmptyField(removed)) {
                             diffHTML.push(
                                 <span>
                                     <strong>{ getDisplayName(fieldName) }: </strong>
@@ -735,6 +728,16 @@ var VariantDetail = React.createClass({
 
         return diffRows;
     },
+    generateLinkToGenomeBrowser: function (prop, variant) {
+        let hgVal = (prop === "Genomic_Coordinate_hg38") ? '38' : '19';
+        let genomicCoordinateElements = variant[prop].split(':');
+        let chr = genomicCoordinateElements[0];
+        let position = parseInt(genomicCoordinateElements[1].split('.')[1]);
+        let positionRangeStart = position - 1;
+        let positionRangeEnd = position + 1;
+        let genomeBrowserUrl = 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg' + hgVal + '&position=' + chr + ':' + positionRangeStart + '-' + positionRangeEnd + '&hubUrl=http://brcaexchange.org/trackhubs/hub.txt';
+        return <a target="_blank" href={genomeBrowserUrl}>{variant[prop]}</a>;
+    },
     render: function () {
         const {data, error} = this.state;
         if (!data) {
@@ -769,22 +772,53 @@ var VariantDetail = React.createClass({
                 if (bicClass !== 'Class 1' && bicClass !== 'Class 5') {
                     innerCols = innerCols.filter(x => x.prop !== 'Clinical_classification_BIC' && x.prop !== 'Clinical_importance_BIC');
                 }
+            } else if (groupTitle === 'Allele Counts (ExAC minus TCGA)') {
+                return false;
             }
 
             // now map the group's columns to a list of row objects
-            const rows = _.map(innerCols, ({prop, title}) => {
+            const rows = _.map(innerCols, (rowDescriptor) => {
+                let {prop, title} = rowDescriptor;
                 let rowItem;
 
                 if (prop === "Protein_Change") {
                     title = "Abbreviated AA Change";
                 }
 
-                if (variant[prop] !== null) {
+                if (rowDescriptor.replace) {
+                    rowItem = rowDescriptor.replace(variant, prop);
+                    if (rowItem === false) {
+                        return false;
+                    }
+                } else if (variant[prop] !== null) {
                     if (prop === "Gene_Symbol") {
                         rowItem = <i>{variant[prop]}</i>;
                     } else if (prop === "URL_ENIGMA") {
                         if (variant[prop].length) {
                             rowItem = <a target="_blank" href={variant[prop]}>link to multifactorial analysis</a>;
+                        }
+                    } else if (prop === "SCV_ClinVar" && variant[prop].toLowerCase().indexOf("scv") !== -1) {
+                        // Link all clinvar submissions back to clinvar
+                        let accessions = variant[prop].split(',');
+                        rowItem = [];
+                        for (let i = 0; i < accessions.length; i++) {
+                            if (i < (accessions.length - 1)) {
+                                rowItem.push(<span><a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{accessions[i]}</a>, </span>);
+                            } else {
+                                // exclude trailing comma
+                                rowItem.push(<a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{accessions[i]}</a>);
+                            }
+                        }
+                    } else if (prop === "DBID_LOVD" && variant[prop].toLowerCase().indexOf("brca") !== -1) { // Link all dbid's back to LOVD
+                        let ids = variant[prop].split(',');
+                        rowItem = [];
+                        for (let i = 0; i < ids.length; i++) {
+                            if (i < (ids.length - 1)) {
+                                rowItem.push(<span><a target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>, </span>);
+                            } else {
+                                // exclude trailing comma
+                                rowItem.push(<a target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>);
+                            }
                         }
                     } else if (prop === "Assertion_method_citation_ENIGMA") {
                         rowItem = <a target="_blank" href="https://enigmaconsortium.org/library/general-documents/">Enigma Rules version Mar 26, 2015</a>;
@@ -800,9 +834,15 @@ var VariantDetail = React.createClass({
                         rowItem = variant[prop].split(":")[1];
                     } else if (prop === "HGVS_Protein") {
                         rowItem = variant[prop].split(":")[1];
-                    } else if (prop === "Date_last_evaluated_ENIGMA" && !isEmptyField(variant[prop])) {
+                    } else if (prop === "Date_last_evaluated_ENIGMA" && !util.isEmptyField(variant[prop])) {
                         // try a variety of formats until one works, or just display the value if not?
                         rowItem = normalizeDateFieldDisplay(variant[prop]);
+                    } else if (/Allele_frequency_.*_ExAC/.test(prop)) {
+                        let count = variant[prop.replace("frequency", "count")],
+                            number = variant[prop.replace("frequency", "number")];
+                        rowItem = [ variant[prop], <small style={{float: 'right'}}>({count} of {number})</small> ];
+                    } else if (prop === "Genomic_Coordinate_hg38" || prop === "Genomic_Coordinate_hg37") {
+                        rowItem = this.generateLinkToGenomeBrowser(prop, variant);
                     } else {
                         rowItem = normalizedFieldDisplay(variant[prop]);
                     }
@@ -810,7 +850,17 @@ var VariantDetail = React.createClass({
                     rowItem = variant["HGVS_Protein"].split(":")[0];
                 }
 
-                const isEmptyValue = isEmptyField(variant[prop]);
+                let isEmptyValue = rowDescriptor.replace ? rowItem === false : util.isEmptyField(variant[prop]);
+
+                if (title === "Beacons") {
+                    if (variant.Ref.length > 1 || variant.Alt.length > 1) {
+                        isEmptyValue = true;
+                    } else {
+                        let websiteUrl = `https://beacon-network.org/#/search?chrom=${variant.Chr}&pos=${variant.Hg37_Start}&ref=${variant.Ref}&allele=${variant.Alt}&rs=GRCh37`;
+                        rowItem = <a target="_blank" href={websiteUrl}>{websiteUrl}</a>;
+                        isEmptyValue = false;
+                    }
+                }
 
                 if (isEmptyValue) {
                     rowsEmpty += 1;
@@ -818,11 +868,12 @@ var VariantDetail = React.createClass({
                 }
 
                 totalRowsEmpty += rowsEmpty;
-
                 return (
                     <tr key={prop} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
-                        <KeyInline tableKey={title} onClick={() => this.showHelp(title)}/>
-                        <td><span className={ this.truncateData(prop) ? "row-value-truncated" : "row-value" }>{rowItem}</span></td>
+                        { rowDescriptor.tableKey !== false &&
+                            <KeyInline tableKey={title} onClick={(event) => this.showHelp(event, title)}/>
+                        }
+                        <td colSpan={rowDescriptor.tableKey === false ? 2 : null} ><span className={ this.truncateData(prop) ? "row-value-truncated" : "row-value" }>{rowItem}</span></td>
                     </tr>
                 );
             });
@@ -835,14 +886,16 @@ var VariantDetail = React.createClass({
             }
 
             const header = (
-                <h3>{groupTitle} <GroupHelpButton group={groupTitle} onClick={() => this.showHelp(groupTitle)} /></h3>
+                <h3>
+                    <a href="#" onClick={(event) => this.onChangeGroupVisibility(groupTitle, event)}>{groupTitle}</a>
+                    <GroupHelpButton group={groupTitle} onClick={(event) => { this.showHelp(event, groupTitle); return true; }} />
+                </h3>
             );
 
             return (
                 <div key={`group_collection-${groupTitle}`} className={ allEmpty && this.state.hideEmptyItems ? "group-empty" : "" }>
                     <Panel
                         header={header}
-                        onSelect={(event) => this.onChangeGroupVisibility(groupTitle, event)}
                         collapsable={true}
                         defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
                         <Table>
@@ -863,25 +916,27 @@ var VariantDetail = React.createClass({
                     <Col xs={4} sm={4} smOffset={4} md={4} mdOffset={4} className="vcenterblock">
                         <div className='text-center Variant-detail-title'>
                             <h3>Variant Detail</h3>
-                            {variant['Change_Type'] === 'deleted' &&
-                                (<p className='deleted text-left'>
-                                    Note: This variant has been removed from the BRCA Exchange. For reasons on why this variant was removed please see the <Link to={`/release/${release.id}`}>release notes</Link>.
-                                </p>)
-                            }
                         </div>
                     </Col>
                     <Col xs={8} sm={4} md={4} className="vcenterblock">
                         <div className="Variant-detail-headerbar">
                             <Button
                                 onClick={this.setEmptyRowVisibility.bind(this, !this.state.hideEmptyItems)}
-                                bsStyle={!this.state.hideEmptyItems ? "primary" : "default"}>
+                                bsStyle={"default"}>
                                 { this.state.hideEmptyItems ?
-                                    <span>show empty items</span> :
-                                    <span>hide empty items</span>
+                                    <span>Show Empty Items</span> :
+                                    <span>Hide Empty Items</span>
                                 }
                             </Button>
                         </div>
                     </Col>
+                    {variant['Change_Type'] === 'deleted' &&
+                        (<Col xs={12} className="vcenterblock">
+                            <p className='deleted-variant-message'>
+                            Note: This variant has been removed from the BRCA Exchange. For reasons on why this variant was removed please see the <Link to={`/release/${release.id}`}>release notes</Link>.
+                            </p>
+                        </Col>)
+                    }
                 </Row>
 
                 <Row>
@@ -923,7 +978,7 @@ var VariantDetail = React.createClass({
                     <Col md={12} className="variant-history-col">
                         <h3>{variant["HGVS_cDNA"]}</h3>
                         <h4>Previous Versions of this Variant:</h4>
-                        <Table className='variant-history' bordered>
+                        <Table className='variant-history nopointer' bordered>
                             <thead>
                                 <tr className='active'>
                                     <th>Release Date</th>
