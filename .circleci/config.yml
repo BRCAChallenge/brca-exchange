@@ -1,0 +1,11 @@
+version: 2
+jobs:
+   build:
+     machine:
+       image: circleci/classic:edge
+
+     steps:
+       - checkout
+       - run: npm run lint -- -f junit -o $CIRCLE_TEST_REPORTS/lint-results.xml
+       - run: npm run test -- -R xunit --reporter-options output=$CIRCLE_TEST_REPORTS/test-results.xml
+       - run: echo "hello world"
