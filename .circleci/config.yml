@@ -3,11 +3,38 @@ jobs:
    build:
      docker:
        - image: circleci/node:4.8
+       - image: circleci/postgres:9.6.2
+         environment:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: storage.pg
      steps:
        - checkout
        - run:
            name: Setup npm
            working_directory: ~/project/website
            command: npm install
-       - run: cd website && npm run lint -- -f junit -o $CIRCLE_TEST_REPORTS/lint-results.xml
-       - run: npm run test -- -R xunit --reporter-options output=$CIRCLE_TEST_REPORTS/test-results.xml
+       - run:
+           name: run linter
+           working_directory: ~/project/website
+           command: |
+             mkdir ~/test_reports
+             npm run lint -- -f junit -o ~/test_reports/lint-results.xml
+       - run:
+           name: run tests
+           working_directory: ~/project/website
+           command: npm run test -- -R xunit --reporter-options output=~/test_reports/test-results.xml
+       - run:
+           name: setting up backend
+           working_directory: ~/project/website/django
+           command: |
+             sudo apt-get install python-pip python-dev
+             sudo pip install -r ~/project/test-requirements.txt
+             sudo pip install -r ~/project/website/requirements.txt
+             python manage.py migrate
+             python manage.py test
+             cd ~/project/pipeline/data && bash ./getdata
+       - run:
+           name: run tests in backend
+           command: pytest --ignore=website/ --junitxml=~/test_reports/pytest-results.xml
+       - store_test_results:
+           path: ~/test_reports
