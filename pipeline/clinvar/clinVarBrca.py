@@ -47,11 +47,11 @@ def main():
                 inputBuffer += line
                 inClinVarSet = False
                 cvs = ET.fromstring(inputBuffer)
-                if clinvar.isCurrent(cvs):
+                # Ignore non-brca variants
+                if clinvar.isCurrent(cvs) and "brca" in inputBuffer.lower():
                     try:
                         submissionSet = clinvar.clinVarSet(cvs)
                     except AttributeError:
-                        # TODO: this is a hack to avoid errors, figure out how to correctly handle these reports.
                         logging.debug("AttributeError running clinvar.clinVarSet(cvs), inputBuffer: %s, cvs: %s", inputBuffer, cvs)
                         continue
                     variant = submissionSet.referenceAssertion.variant
