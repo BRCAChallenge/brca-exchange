@@ -22,6 +22,19 @@ function exonSizeTx (bases) {
     return bases > 150 ? 150 + Math.sqrt(bases - 150) : bases;
 }
 
+function variantInfo (variant) {
+    let [before, after] = _.map(variant["Genomic_Coordinate_hg38"].split(':').pop().split('>'), e => e.length);
+    if (before == 1 && after == 1) {
+        return { changed: 1 }
+    }
+    before--, after--;
+    return {
+        changed: Math.min(before, after),
+        inserted: after > before ? after - before : 0,
+        deleted: before > after ? before - after : 0
+    };
+}
+
 class Exon extends React.Component {
     constructor(props) {
         super(props);
@@ -39,22 +52,40 @@ class Exon extends React.Component {
               highlight
         } = this.props;
 
-        let variantStart, variantEnd, variantX, variantWidth;
+        let variantStart, variantEnd, variantX, variantWidth, variantChange, variantChangedWidth, variantDeletedWidth, variantInsertedWidth;
 
         if (variant) {
             variantStart = variant["Hg38_Start"];
             variantEnd = variant["Hg38_End"];
             variantX = x + width * (variantStart - txStart) / (txEnd - txStart)
             variantWidth = width * (variantEnd - variantStart) / (txEnd - txStart);
-            console.log(variantWidth);
-            variantWidth = Math.max(variantWidth, 2);
+            variantWidth = Math.max(variantWidth, 3);
+            variantChange = variantInfo(variant);
+
+            variantChangedWidth = variantChange.changed ? width * variantChange.changed / (txEnd - txStart) : 0;
+            variantDeletedWidth = variantChange.deleted ? width * variantChange.deleted / (txEnd - txStart) : 0;
+            variantInsertedWidth = variantChange.inserted ? width * variantChange.inserted / (txEnd - txStart) : 0;
+
+            variantChangedWidth = variantChangedWidth && Math.max(2, variantChangedWidth);
+            variantDeletedWidth = variantDeletedWidth && Math.max(2, variantDeletedWidth);
+            variantInsertedWidth = variantInsertedWidth && Math.max(2, variantInsertedWidth);
+
+            if (variantX - x + variantChangedWidth + variantDeletedWidth + variantInsertedWidth > width) {
+                variantX = x + width - variantChangedWidth - variantDeletedWidth - variantInsertedWidth - 1;
+            }
         }
+
 
         return (
             <g>
                 <rect x={x} width={width} height={height} rx={4} ry={4} fill={highlight ? highlightFill : exonFill} stroke={highlight ? highlightStroke : exonStroke} />
-                { variant !== undefined &&
-                    <rect x={variantX} width={variantWidth} height={height} fill="red" /> }
+                { variant !== undefined && (
+                    <g>
+                        <rect x={variantX} width={variantChangedWidth} height={height} fill="lightgreen" />
+                        <rect x={variantX+variantChangedWidth} width={variantDeletedWidth} height={height} fill="url(#diagonalHatch)" />
+                        <rect x={variantX+variantChangedWidth} width={variantInsertedWidth} height={height} fill="lightblue" />
+                    </g>
+                )}
             </g>
         );
     }
@@ -71,23 +102,40 @@ class Intron extends React.Component {
               highlight
         } = this.props;
 
-        let variantStart, variantEnd, variantX, variantWidth;
+        let variantStart, variantEnd, variantX, variantWidth, variantChange, variantChangedWidth, variantDeletedWidth, variantInsertedWidth;
 
         if (variant) {
             variantStart = variant["Hg38_Start"];
             variantEnd = variant["Hg38_End"];
             variantX = x + width * (variantStart - txStart) / (txEnd - txStart)
             variantWidth = width * (variantEnd - variantStart) / (txEnd - txStart);
-            console.log(variantWidth);
-            variantWidth = Math.max(variantWidth, 2);
-        }
+            variantWidth = Math.max(variantWidth, 3);
+            variantChange = variantInfo(variant);
+
+            variantChangedWidth = variantChange.changed ? width * variantChange.changed / (txEnd - txStart) : 0;
+            variantDeletedWidth = variantChange.deleted ? width * variantChange.deleted / (txEnd - txStart) : 0;
+            variantInsertedWidth = variantChange.inserted ? width * variantChange.inserted / (txEnd - txStart) : 0;
+
+            variantChangedWidth = variantChangedWidth && Math.max(2, variantChangedWidth);
+            variantDeletedWidth = variantDeletedWidth && Math.max(2, variantDeletedWidth);
+            variantInsertedWidth = variantInsertedWidth && Math.max(2, variantInsertedWidth);
+
+            if (variantX - x + variantChangedWidth + variantDeletedWidth + variantInsertedWidth > width) {
+                variantX = x + width - variantChangedWidth - variantDeletedWidth - variantInsertedWidth - 1;
+            }
+        } 
 
         //let width = variant !== undefined ? 2 * intronWidth : intronWidth;
         return (
             <g>
                 <rect x={x} y={10} width={width} height={height} fill={highlight ? highlightFill : intronFill} stroke={highlight ? highlightStroke : intronStroke} />
-                { variant !== undefined &&
-                    <rect x={variantX} y={10} width={variantWidth} height={height} fill="red" /> }
+                { variant !== undefined && (
+                    <g>
+                        <rect x={variantX} y={10} width={variantChangedWidth} height={height} fill="lightgreen" />
+                        <rect x={variantX+variantChangedWidth} y={10} width={variantDeletedWidth} height={height} fill="url(#diagonalHatch)" />
+                        <rect x={variantX+variantChangedWidth} y={10} width={variantInsertedWidth} height={height} fill="lightblue" />
+                    </g>
+                )}
             </g>
         );
     }
@@ -254,6 +302,7 @@ class Splicing extends React.Component {
               width,
               height
         } = this.props;
+        let info = variantInfo(variant);
         let variantStart = variant["Hg38_Start"],
             exons = _.map(variant["Gene_Symbol"] === "BRCA1" ? brca1Exons : brca2Exons, e => e.coord.split('-')),
             precedingExonIndex, followingExonIndex;
@@ -270,10 +319,27 @@ class Splicing extends React.Component {
             }
         }
         return (
+        <div>
             <svg width={width} height={height}>
+                <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">
+                  <rect x="0" y="0" width="4" height="4" fill="#FF8888" />
+                  <path d="M-1,1 l2,-2
+                           M0,4 l4,-4
+                           M3,5 l2,-2" 
+                        stroke="black" strokeWidth={1} />
+                </pattern>
                 <Transcript variant={variant} exons={exons} preceding={precedingExonIndex} following={followingExonIndex} width={width} />
                 <Zoom variant={variant} exons={exons} preceding={precedingExonIndex} following={followingExonIndex} width={width} />
+                <g transform="translate(360,220)">
+                    <rect x="0" fill="lightgreen" stroke="black" width="20" height="10" />
+                    <text x="25" y="10">{ `Polymorphism (${info.changed})` }</text>
+                    <rect x="170" fill="url(#diagonalHatch)" stroke="black" width="20" height="10" />
+                    <text x="195" y="10">{ `Deletion (${info.deleted || 0})` }</text>
+                    <rect x="300" fill="lightblue" stroke="black" width="20" height="10"/>
+                    <text x="325" y="10">{ `Insertion (${info.inserted || 0})` }</text>
+                </g>
             </svg>
+        </div>
         );
     }
 /*
