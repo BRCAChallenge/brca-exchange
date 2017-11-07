@@ -158,25 +158,25 @@ SIFT score, indicating if the variant is tolerated, deleterious or other
 The Probability columns describe the likelihood that the variant is pathogenic, given the variant data, and possibly given
 a specific category of data on the variant.
 
-#### Co-occurrence likelihood (exLOVD)
+#### Co-occurrence likelihood (ExUV)
 The likelihood ratio based on the frequency of co-occurrence between the variant of interest and clearly
- pathogenic variants in the same gene. From exLOVD.
+ pathogenic variants in the same gene. From ExUV.
 
-#### Missense analysis probability of pathogenicity (exLOVD)
+#### Missense analysis probability of pathogenicity (ExUV)
 This prior probability estimate combines position in the protein with an evaluation of missense substitutions
- that fall in the proteins key functional domains.  From exLOVD.
+ that fall in the proteins key functional domains.  From ExUV.
 
-#### Prior probability of pathogenicity (exLOVD)
+#### Prior probability of pathogenicity (ExUV)
 The combined prior probability in favor of pathogenicity. is a combination of the missense analysis prior
- probability and the splicing analysis prior probability. Generally, it is the higher of these two prior probabilities.  From exLOVD.
+ probability and the splicing analysis prior probability. Generally, it is the higher of these two prior probabilities.  From ExUV.
 
-#### Probability of pathogenicity (exLOVD)
-Posterior probability of pathogenicity. From exLOVD.
+#### Probability of pathogenicity (ExUV)
+Posterior probability of pathogenicity. From ExUV.
 
-#### Segregation Likelihood Ratio (exLOVD)
+#### Segregation Likelihood Ratio (ExUV)
 The likelihood ratio based on segregation analysis
 
-#### Summary Family History Likelihood Ratio (exLOVD)
+#### Summary Family History Likelihood Ratio (ExUV)
 The likelihood ratio based on an analysis of the severity of summary family histories of breast and/ or ovarian
  cancer.
 
@@ -275,8 +275,8 @@ Citations that require a URL, or that do not have an identifier in one of the re
 #### Literature Reference (BIC)
 Literature Reference(s).  From BIC
 
-#### Literature Reference (exLOVD)
-Literature Reference(s).  From exLOVD.
+#### Literature Reference (ExUV)
+Literature Reference(s).  From ExUV.
 
 
 ## Source

@@ -6,12 +6,17 @@ import re
 import utilities
 
 EMPTY = "-"
-FIELDS_TO_REMOVE = ["Protein_ClinVar", "Description_ClinVar",
-                    "HGVS_ClinVar", "HGVS_cDNA_exLOVD",
+FIELDS_TO_REMOVE = ["Protein_ClinVar",
+                    "Description_ClinVar",
+                    "Summary_Evidence_ClinVar",
+                    "Review_Status_ClinVar",
+                    "HGVS_ClinVar",
+                    "HGVS_cDNA_exLOVD",
                     "HGVS_protein_LOVD",
                     "HGVS_protein_exLOVD",
                     "polyPhen2_result_ESP",
-                    "BIC_Designation_BIC", "BIC_Nomenclature_exLOVD"]
+                    "BIC_Designation_BIC",
+                    "BIC_Nomenclature_exLOVD"]
 FIELDS_TO_ADD = ["Hg38_Start", "Hg38_End", "Hg37_Start", "Hg37_End",
                  "Hg36_Start", "Hg36_End",
                  "HGVS_RNA",

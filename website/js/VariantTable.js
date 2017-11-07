@@ -81,7 +81,8 @@ const researchModeGroups = [
         {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38', core: true},
         {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
         {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36'},
-        {title: 'RNA (LOVD)', prop: 'RNA_LOVD'}
+        {title: 'RNA (LOVD)', prop: 'RNA_LOVD'},
+        {title: 'Beacons', core: true},
     ]},
 
     {groupTitle: 'Clinical Significance (ENIGMA)', internalGroupName: 'Significance (ENIGMA)', innerCols: [
@@ -110,6 +111,7 @@ const researchModeGroups = [
         {title: 'Genetic Origin', prop: 'Genetic_origin_LOVD'},
         {title: 'Individuals', prop: 'Individuals_LOVD'},
         {title: 'Variant Effect', prop: 'Variant_effect_LOVD'},
+        {title: 'Database ID', prop: 'DBID_LOVD'}
     ]},
 
     {groupTitle: 'Clinical Significance (BIC)', internalGroupName: 'Significance (BIC)', innerCols: [
@@ -226,6 +228,7 @@ const researchModeColumns = [
     {title: 'Genetic Origin (LOVD)', prop: 'Genetic_origin_LOVD'},
     {title: 'Individuals (LOVD)', prop: 'Individuals_LOVD'},
     {title: 'Variant Effect (LOVD)', prop: 'Variant_effect_LOVD'},
+    {title: 'Database ID (LOVD)', prop: 'DBID_LOVD'},
     {title: 'Allele Origin (ClinVar)', prop: 'Allele_Origin_ClinVar'},
     {title: 'Allele Origin (ENIGMA)', prop: 'Allele_origin_ENIGMA'},
     {title: 'Ethnicity (BIC)', prop: 'Ethnicity_BIC'},
@@ -233,19 +236,19 @@ const researchModeColumns = [
     {title: 'Patient Nationality (BIC)', prop: 'Patient_nationality_BIC'},
     {title: 'Variant Haplotype (LOVD)', prop: 'Variant_haplotype_LOVD'},
     {title: 'Family members carrying this variant (BIC)', prop: 'Number_of_family_member_carrying_mutation_BIC'},
-    {title: 'Co-occurrence likelihood (exLOVD)', prop: 'Co_occurrence_LR_exLOVD'},
-    {title: 'Prior probability of pathogenicity (exLOVD)', prop: 'Combined_prior_probablility_exLOVD'},
+    {title: 'Co-occurrence likelihood (ExUV)', prop: 'Co_occurrence_LR_exLOVD'},
+    {title: 'Prior probability of pathogenicity (ExUV)', prop: 'Combined_prior_probablility_exLOVD'},
     {
-        title: 'Missense analysis probability of pathogenicity (exLOVD)',
+        title: 'Missense analysis probability of pathogenicity (ExUV)',
         prop: 'Missense_analysis_prior_probability_exLOVD'
     },
-    {title: 'Probability of pathogenicity (exLOVD)', prop: 'Posterior_probability_exLOVD'},
-    {title: 'Segregation Likelihood Ratio (exLOVD)', prop: 'Segregation_LR_exLOVD'},
-    {title: 'Summary Family History Likelihood Ratio (exLOVD)', prop: 'Sum_family_LR_exLOVD'},
+    {title: 'Probability of pathogenicity (ExUV)', prop: 'Posterior_probability_exLOVD'},
+    {title: 'Segregation Likelihood Ratio (ExUV)', prop: 'Segregation_LR_exLOVD'},
+    {title: 'Summary Family History Likelihood Ratio (ExUV)', prop: 'Sum_family_LR_exLOVD'},
     {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_citation_ENIGMA'},
     {title: 'Clinical Significance Citation (ENIGMA)', prop: 'Clinical_significance_citations_ENIGMA'},
     {title: 'Literature Reference (BIC)', prop: 'Literature_citation_BIC'},
-    {title: 'Literature Reference (exLOVD)', prop: 'Literature_source_exLOVD'},
+    {title: 'Literature Reference (ExUV)', prop: 'Literature_source_exLOVD'},
     {title: 'Pathogenicity', prop: 'Pathogenicity_all'},
     {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_ENIGMA'},
     {title: 'Clinical Significance (BIC)', prop: 'Clinical_classification_BIC'},
@@ -472,12 +475,20 @@ var ResearchVariantTableSupplier = function (Component) {
                 </Panel>
             </label>);
         },
+        getSourceName: function(name) {
+            // eg "Variant_in_1000_Genomes" => "1000 Genomes"
+            let source = name.substring(11).replace(/_/g, " ");
+            if (source.toLowerCase() === "exlovd") {
+                source = "ExUV";
+            }
+            return source;
+        },
         getFilters: function() {
             var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
                 <Col sm={6} md={3} key={name}>
                     <Input type="checkbox"
                         onChange={v => this.setSource(name, v)}
-                        label={name.substring(11).replace(/_/g, " ")} // eg "Variant_in_1000_Genomes" => "1000 Genomes"
+                        label={this.getSourceName(name)}
                         checked={value > 0}/>
                 </Col>
             );

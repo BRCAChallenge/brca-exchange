@@ -119,6 +119,8 @@ class Command(BaseCommand):
                 source = "BIC"
             elif source == "1000 Genomes":
                 source = "1000_Genomes"
+            elif source == "ExUV":
+                source = "exLOVD"
             bx_id_field = "BX_ID_" + source
             if not self.is_empty(getattr(variant, bx_id_field)):
                 bx_ids = getattr(variant, bx_id_field).split(',')
