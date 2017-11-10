@@ -36,6 +36,7 @@ var chartOptions1 = {
     plotOptions: { column: { stacking: 'normal' } },
     series: [
         { name: "Benign", data: [ 0, 0 ] },
+        { name: "Likely Benign", data: [ 0, 0 ] },
         { name: "Pathogenic", data: [ 0, 0 ] },
         { name: "Not Yet Reviewed", data: [ 0, 0 ] }
     ]
@@ -50,8 +51,9 @@ var chartOptions2 = {
     },
     series: [{
         data: [
-            { name: "Pathogenic", y: 0 },
             { name: "Benign", y: 0 },
+            { name: "Likely Benign", y: 0 },
+            { name: "Pathogenic", y: 0 },
             { name: "Not Yet Reviewed", y: 0 }
         ]
     }]
@@ -69,9 +71,10 @@ var FactSheet = React.createClass({
                 var chart2 = this.refs.chart2.getChart();
 
                 chart1.series[0].setData([resp.brca1.benign, resp.brca2.benign], false);
-                chart1.series[1].setData([resp.brca1.pathogenic, resp.brca2.pathogenic], false);
-                chart1.series[2].setData([resp.brca1.total - resp.brca1.pathogenic - resp.brca1.benign, resp.brca2.total - resp.brca2.pathogenic - resp.brca2.benign], true);
-                chart2.series[0].setData([{ name: "Benign", y: resp.enigmaBenign }, { name: "Pathogenic", y: resp.enigmaPathogenic }, { name: "Not Yet Reviewed", y: resp.total - resp.enigma }]);
+                chart1.series[1].setData([resp.brca1.likelyBenign, resp.brca2.likelyBenign], false);
+                chart1.series[2].setData([resp.brca1.pathogenic, resp.brca2.pathogenic], false);
+                chart1.series[3].setData([resp.brca1.total - resp.brca1.pathogenic - resp.brca1.benign - resp.brca1.likelyBenign, resp.brca2.total - resp.brca2.pathogenic - resp.brca2.benign - resp.brca2.likelyBenign], true);
+                chart2.series[0].setData([{ name: "Benign", y: resp.enigmaBenign }, { name: "Likely Benign", y: resp.enigmaLikelyBenign }, { name: "Pathogenic", y: resp.enigmaPathogenic }, { name: "Not Yet Reviewed", y: resp.total - resp.enigma }]);
                 this.setState(resp);
             },
             () => this.setState({error: 'Problem connecting to server'}));
@@ -109,6 +112,7 @@ var FactSheet = React.createClass({
                                 <ul>
                                     <li>Variants expert-classified as pathogenic: {Number(this.state.enigmaPathogenic).toLocaleString()}</li>
                                     <li>Variants expert-classified as benign: {Number(this.state.enigmaBenign).toLocaleString()}</li>
+                                    <li>Variants expert-classified as likely benign: {Number(this.state.enigmaLikelyBenign).toLocaleString()}</li>
                                 </ul>
                             </ul>
                         </div>}
