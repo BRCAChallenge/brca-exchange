@@ -5,6 +5,16 @@ import csv
 from Bio.Seq import Seq
 import pyhgvs as hgvs
 
+'''
+checkVarHGVS
+
+Takes a tsv as input (usually built.tsv) and checks if the variant ref and alt alleles are consistent with the parsed HGVS_cDNA string for that variant
+
+Prints the total number of variants with inconsistencies
+
+Outputs a file that contains information for each inconsistent variant
+'''
+
 def getRevComp(sequence):
     '''Given a sequence returns the reverse complement'''
     revCompDict = {"A":"T",
@@ -20,7 +30,9 @@ def getRevComp(sequence):
 
 def parseVar(variantHGVS):
     '''
-    Parses the given variant HGVS and returns a dictionary containing the HGVS type, ref allele, and alt allele    ''' 
+    Parses the given variant HGVS and returns a dictionary containing: 
+    HGVS type, variant type, ref allele, and alt allele
+    ''' 
     varHGVS = hgvs.HGVSName(str(variantHGVS))
     typeHGVS = varHGVS.kind
     varRef = varHGVS.ref_allele
@@ -60,6 +72,15 @@ def getVarInfo(variant):
     return varInfo
     
 def checkVarHGVS(variant):
+    '''
+    Checks that ref and alt alleles for a variant are consistent with parsed HGVS_cDNA
+    If consistent, returns True
+    Otherwise returns a dictionary with 2 entries
+    "Consistent":False
+    and
+    "varData": a list of information about the variant that includes:
+        HGVS_cDNA, variant type, ref allele, alt allele, parsed cDNA ref allele, and parsed cDNA alt allele
+    '''
     varInfo = getVarInfo(variant)
     varType = varInfo["varType"]
     varGenRef = varInfo["varGenRef"]
