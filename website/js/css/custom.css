@@ -921,8 +921,11 @@ div.variant-details-body {
 }
 
 div.variant-submitter-group .submitter-header {
-    background: #edf5fa;
+    background: #f2f7ff;
     cursor: pointer;
+}
+div.variant-submitter-group .submitter-header.expanded {
+    box-shadow: inset 0 7px 15px -7px rgba(0, 0, 0, 0.23);
 }
 div.variant-submitter-group .submitter-header td {
     border-bottom-width: 3px;

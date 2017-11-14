@@ -55,6 +55,9 @@ var {Navigation, State, Route, RouteHandler,
     HistoryLocation, run, DefaultRoute, Link} = require('react-router');
 var {Releases, Release} = require('./Releases.js');
 
+var KeyInline = require('./components/KeyInline');
+var VariantSubmitter = require('./components/VariantSubmitter');
+
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 
 var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
@@ -429,17 +432,6 @@ var Database = React.createClass({
     }
 });
 
-const KeyInline = React.createClass({
-    render() {
-        const {onClick, tableKey} = this.props;
-        return (
-            <td className='help-target'>
-                <span className="help-target-inline" onClick={onClick}>{tableKey}</span>
-            </td>
-        );
-    }
-});
-
 const GroupHelpButton = React.createClass({
     render() {
         const {onClick} = this.props;
@@ -578,7 +570,17 @@ var VariantDetail = React.createClass({
             resp => {
                 return this.setState({data: resp.data, error: null});
             },
-            () => { this.setState({error: 'Problem connecting to server'}); });
+            () => { this.setState({error: 'Problem connecting to server'}); }
+        );
+
+        backend.variantReports(this.props.params.id).subscribe(
+            resp => {
+                return this.setState({reports: resp.data, error: null});
+            }, () => {
+                this.setState({reportError: 'Problem retrieving reports'});
+                console.warn("Couldn't retrieve reports!");
+            }
+        );
     },
     onChildToggleMode: function() {
         this.props.toggleMode();
@@ -754,52 +756,9 @@ var VariantDetail = React.createClass({
         // for each submitter, construct a panel
         return mockSubmissions.sources.map(({ name: sourceName, submissions }) => {
 
-            const submitters = submissions.map(({ submitter, cols }) => {
-                // for each panel, construct key-value pairs as a row of the table
-                const submitterRows = cols.map(({prop, title, value}) => {
-                    const rowItem = value;
-                    const isEmptyValue = util.isEmptyField(value);
-
-                    return (
-                        <tr key={prop} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
-                            <KeyInline tableKey={title} onClick={(event) => this.showHelp(event, title)} />
-                            <td colSpan={2} ><span className={ this.truncateData(prop) ? "row-value-truncated" : "row-value" }>{rowItem}</span></td>
-                            <td>&nbsp;</td>
-                        </tr>
-                    );
-                });
-
-                const visibilityKey = `submitter-group-${sourceName}-${submitter}`;
-                const isVisible = (!this.state.hasOwnProperty(visibilityKey) || this.state[visibilityKey]);
-                // if we're not visible, these columns will be shown (if available)
-                const dateLast = cols.find(x => x.prop === 'date-last-updated');
-
-                return (
-                    <Table key={`submitter-name-${submitter}`}>
-                        <thead>
-                            <tr key="submitter-header" className="submitter-header" onClick={this.toggleSubmitterGroup.bind(this, sourceName, submitter)}>
-                                <td className='help-target'>
-                                    {
-                                        isVisible
-                                            ? <i className="fa fa-caret-down" aria-hidden="true" />
-                                            : <i className="fa fa-caret-right" aria-hidden="true" />
-                                    }
-                                    &nbsp;
-                                    <span>Submitter:</span>
-                                </td>
-                                <td colSpan={2}><b>{submitter}</b></td>
-                                <td style={{textAlign: 'right'}}>
-                                { !isVisible && dateLast && <span>(date: { dateLast.value })</span>}
-                                </td>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                        { isVisible ? submitterRows : null}
-                        </tbody>
-                    </Table>
-                );
-            });
+            const submitters = submissions.map(({ submitter, cols }) =>
+                <VariantSubmitter key={submitter} cols={cols} submitter={submitter} defaultExpanded={true} />
+            );
 
             // create the panel itself now
             const groupTitle = `source-panel-${sourceName}`;
@@ -1059,7 +1018,7 @@ var VariantDetail = React.createClass({
                 </Row>
 
                 <Row>
-                    <Col md={12}>
+                    <Col md={12} style={{paddingLeft: '20px', paddingRight: '20px'}}>
                         {submitterPanels}
                     </Col>
                 </Row>
