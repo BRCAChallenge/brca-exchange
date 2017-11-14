@@ -10,31 +10,60 @@ calculates either the prior probability of pathogenicity or a prior ENGIMA class
 import argparse
 import csv
 
+
+def checkSequence(sequence):
+    '''Checks if a given sequence contains acceptable nucleotides returns True if sequence is comprised entirely of acceptable bases'''
+    acceptableBases = ["A", "C", "T", "G", "N", "R", "Y"]
+    badBases = 0
+    if len(sequence) > 0:
+        for base in sequence:
+            if base not in acceptableBases:
+                badBases += 1
+            if badBases == 0:
+                acceptableSequence = True
+            else:
+                # badBases > 0
+                acceptableSequence = False
+    else:
+        # len(sequence) = 0
+        acceptableSequence = False
+    return acceptableSequence
+
+
 def getVarType(variant):
     '''
-    Returns a string describing type of variant (substitution, deletion, insertion, or delins) depending on variant reference and alternate alleles
+    Returns a string describing type of variant (substitution, deletion, insertion, delins, other) depending on variant reference and alternate alleles
     '''
-    if len(variant["Ref"]) == len(variant["Alt"]):
-        if len(variant["Ref"]) == 1:
-            varType = "substitution"
-        else:
-            varType = "delins"
-    else:
-        # variant is an indel
-        if len(variant["Ref"]) > len(variant["Alt"]):
-            if len(variant["Alt"]) == 1:
-                varType = "deletion"
-            else:
-                # delins type variant
-                varType = "delins"
-        else:
-            # len(variant["Ref"]) < len(variant["Alt"])
+    acceptableRefSeq = checkSequence(variant["Ref"])
+    acceptableAltSeq = checkSequence(variant["Alt"])
+    if acceptableRefSeq == True and acceptableAltSeq == True: 
+        if len(variant["Ref"]) == len(variant["Alt"]):
             if len(variant["Ref"]) == 1:
-                varType = "insertion"
+                varType = "substitution"
             else:
-                # delins type variant
                 varType = "delins"
+        else:
+            # variant is an indel or other variant type
+            if len(variant["Ref"]) > len(variant["Alt"]):
+                if len(variant["Alt"]) == 1:
+                    varType = "deletion"
+                else:
+                    # delins type variant
+                    varType = "delins"
+            elif len(variant["Ref"]) < len(variant["Alt"]):
+                if len(variant["Ref"]) == 1:
+                    varType = "insertion"
+                else:
+                    # delins type variant
+                    varType = "delins"
+            else:
+                # variant is not an indel or substitution variant
+                varType = "other"
+    else:
+        # not acceptable ref seq and alt seq, variant will not be handled by code
+        varType = "other"
     return varType
+
 
 def getVarDict(variant):
     '''
