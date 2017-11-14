@@ -62,11 +62,14 @@ def getVarInfo(variant):
     if varGene == "BRCA2":
         cDNARef = varParse["varRef"]
         cDNAAlt = varParse["varAlt"]
-    else:
-        # varGene == "BRCA1"
+    elif varGene == "BRCA1":
         # gets reverse complement because BRCA1 on minus strand
         cDNARef = getRevComp(varParse["varRef"])
         cDNAAlt = getRevComp(varParse["varAlt"])
+    else:
+        # varGene is not BRCA1 or BRCA2
+        cDNARef = varParse["varRef"]
+        cDNAAlt = varParse["varAlt"]
     varInfo["cDNARef"] = cDNARef
     varInfo["cDNAAlt"] = cDNAAlt
     return varInfo
