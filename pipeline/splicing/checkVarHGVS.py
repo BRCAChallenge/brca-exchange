@@ -119,7 +119,7 @@ def checkVarHGVS(variant):
         return varEqual
     else:
         # varEqual == False
-        varData = varData = [varInfo["varcDNAHGVS"], varType, varGenRef, varGenAlt, cDNARef, cDNAAlt]
+        varData = varData = [varInfo["varGene"], varInfo["varcDNAHGVS"], varType, varGenRef, varGenAlt, cDNARef, cDNAAlt]
         return {"Consistent":varEqual,
                 "varData":varData}
             
@@ -132,7 +132,7 @@ def main():
     inputData = csv.DictReader(open(args.inputFile, "r"), delimiter="\t")
     outputData = csv.writer(open(args.outputFile, "w"), delimiter="\t")
 
-    headers = ["HGVS_cDNA", "varType", "genRef", "genAlt", "cDNARef", "cDNAAlt"]
+    headers = ["Gene_Symbol", "HGVS_cDNA", "varType", "genRef", "genAlt", "cDNARef", "cDNAAlt"]
     outputData.writerow(headers)
 
     inconVars = 0
