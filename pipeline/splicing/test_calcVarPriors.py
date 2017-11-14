@@ -12,6 +12,49 @@ class test_calcVarPriors(unittest.TestCase):
                         "Gene_Symbol":"BRCA2",
                         "pyhgvs_cDNA":"NM_000059.3:c.-764A>G"}
                            
+    def test_checkSequence(self):
+        '''Tests that checkSequence function categorized acceptable sequences correctly'''
+        # sequence with unacceptable letters
+        self.variant["Ref"] = "ATGSFHG"
+        self.variant["Alt"] = "AGTHA"
+        acceptableRefSeq = calcVarPriors.checkSequence(self.variant["Ref"])
+        acceptableAltSeq = calcVarPriors.checkSequence(self.variant["Alt"])
+        self.assertFalse(acceptableRefSeq)
+        self.assertFalse(acceptableAltSeq)
+
+        # sequence with numbers
+        self.variant["Ref"] = "3452345"
+        self.variant["Alt"] = "3456324"
+        acceptableRefSeq = calcVarPriors.checkSequence(self.variant["Ref"])
+        acceptableAltSeq = calcVarPriors.checkSequence(self.variant["Alt"])
+        self.assertFalse(acceptableRefSeq)
+        self.assertFalse(acceptableAltSeq)
+
+        # blank sequence
+        self.variant["Ref"] = ""
+        self.variant["Alt"] = ""
+        acceptableRefSeq = calcVarPriors.checkSequence(self.variant["Ref"])
+        acceptableAltSeq = calcVarPriors.checkSequence(self.variant["Alt"])
+        self.assertFalse(acceptableRefSeq)
+        self.assertFalse(acceptableAltSeq)
+
+        # sequence with only ATCG
+        self.variant["Ref"] = "ATGACG"
+        self.variant["Alt"] = "AGTAATA"
+        acceptableRefSeq = calcVarPriors.checkSequence(self.variant["Ref"])
+        acceptableAltSeq = calcVarPriors.checkSequence(self.variant["Alt"])
+        self.assertTrue(acceptableRefSeq)
+        self.assertTrue(acceptableAltSeq)
+
+        # sequence containing all possible acceptable bases
+        self.variant["Ref"] = "ATGRACYGN"
+        self.variant["Alt"] = "YAGRTNAATA"
+        acceptableRefSeq = calcVarPriors.checkSequence(self.variant["Ref"])
+        acceptableAltSeq = calcVarPriors.checkSequence(self.variant["Alt"])
+        self.assertTrue(acceptableRefSeq)
+        self.assertTrue(acceptableAltSeq)
+
+        
     def test_getVarType(self):
         '''
         Tests that variant type is set correctly to substitution, deletion, insertion, or delins based on variant "Ref" and "Alt" values
