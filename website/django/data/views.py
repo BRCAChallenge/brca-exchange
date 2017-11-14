@@ -11,7 +11,7 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.gzip import gzip_page
 
-from .models import Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType
+from .models import Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType, Report
 from django.views.decorators.http import require_http_methods
 
 # GA4GH related imports
@@ -74,6 +74,7 @@ def variant_counts(request):
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
+
 def variant(request):
     variant_id = int(request.GET.get('variant_id'))
 
@@ -84,6 +85,17 @@ def variant(request):
 
     variant_versions = map(variant_to_dict, query)
     response = JsonResponse({"data": variant_versions})
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
+
+
+def variant_reports(request, variant_id):
+    variant_id = int(variant_id)
+    query = Report.objects.filter(Variant_id=variant_id)
+    # .order_by('-Data_Release_id').select_related('Data_Release')
+
+    # variant_versions = map(variant_to_dict, query)
+    response = JsonResponse({"data":  [ model_to_dict(x) for x in query ]})
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
