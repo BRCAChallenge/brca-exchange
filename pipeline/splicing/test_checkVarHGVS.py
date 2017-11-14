@@ -1,5 +1,4 @@
 import unittest
-import pytest
 import checkVarHGVS
 
 class testCheckVarHGVS(unittest.TestCase):
