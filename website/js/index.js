@@ -170,7 +170,7 @@ var Home = React.createClass({
                     {logoItems}
                 </Row>
                 {this.state.showModal && <Modal bsSize="large" onRequestHide={() => this.setState({ showModal: false })}>
-                    <iframe className="vimeo-video" src="https://player.vimeo.com/video/199396428" className="vimeo-video" frameBorder="0" webkitallowfullscreen mozallowfullscreen allowFullScreen></iframe>
+                    <iframe className="vimeo-video" src="https://player.vimeo.com/video/199396428" frameBorder="0" webkitallowfullscreen mozallowfullscreen allowFullScreen></iframe>
                 </Modal>}
             </Grid>
         );
