@@ -733,12 +733,14 @@ var VariantDetail = React.createClass({
     },
     generateLinkToGenomeBrowser: function (prop, variant) {
         let hgVal = (prop === "Genomic_Coordinate_hg38") ? '38' : '19';
-        let genomicCoordinateElements = variant[prop].split(':');
-        let chr = genomicCoordinateElements[0];
+        let genomicCoordinate = variant[prop];
+        let genomicCoordinateElements = genomicCoordinate.split(':');
+        let ref = genomicCoordinateElements[2].split('>')[0];
         let position = parseInt(genomicCoordinateElements[1].split('.')[1]);
         let positionRangeStart = position - 1;
-        let positionRangeEnd = position + 1;
-        let genomeBrowserUrl = 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg' + hgVal + '&position=' + chr + ':' + positionRangeStart + '-' + positionRangeEnd + '&hubUrl=http://brcaexchange.org/trackhubs/hub.txt';
+        let positionRangeEnd = position + ref.length + 1;
+        let positionParameter = (genomicCoordinate.length > 1500) ? positionRangeStart + '-' + positionRangeEnd : genomicCoordinate;
+        let genomeBrowserUrl = 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg' + hgVal + '&position=' + positionParameter + '&hubUrl=http://brcaexchange.org/trackhubs/hub.txt';
         return <a target="_blank" href={genomeBrowserUrl}>{variant[prop]}</a>;
     },
     toggleSubmitterGroup: function(sourceName, submitter) {
