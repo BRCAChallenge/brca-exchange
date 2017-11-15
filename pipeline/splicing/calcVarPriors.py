@@ -9,6 +9,8 @@ calculates either the prior probability of pathogenicity or a prior ENGIMA class
 
 import argparse
 import csv
+import re
+from calcMaxEntScanMeanStd import fetch_gene_coordinates
 
 
 def checkSequence(sequence):
@@ -65,6 +67,98 @@ def getVarType(variant):
     return varType
 
 
+def getExonBoundaries(transcript):
+    '''
+    Given a transcript, returns a dictionary containing the exon number as the key and a tuple containing the exon start and exon end as the key for each exon
+    Uses fetch_gene_coordinates from calcMaxEntScanMeanStd to get information for a particular transcript
+    '''
+    varTranscript = fetch_gene_coordinates(str(transcript))
+    # parse exon starts and exon ends
+    varTranscript['exonStarts'] = re.sub(",(\s)*$", "", varTranscript['exonStarts'])
+    varTranscript['exonEnds'] = re.sub(",(\s)*$", "", varTranscript['exonEnds'])
+    if varTranscript['strand'] == "+":
+        exonStarts = varTranscript['exonStarts'].split(',')
+        exonEnds = varTranscript['exonEnds'].split(',')
+    else:
+        # variant is on '-' strand
+        exonStarts = list(reversed(varTranscript['exonEnds'].split(',')))
+        exonEnds = list(reversed(varTranscript['exonStarts'].split(',')))
+    varExons = {}
+    varExonCount = varTranscript['exonCount']
+    exonCount = 1
+    while exonCount <= varExonCount:
+        exonStart = int(exonStarts[exonCount-1])
+        exonEnd = int(exonEnds[exonCount-1])
+        exonName = "exon" + str(exonCount)
+        varExons[exonName] = {"exonStart":exonStart,
+                              "exonEnd":exonEnd}
+        exonCount += 1
+    return varExons
+
+def varOutsideBoundaries(variant):
+    '''
+    Given a variant, determines if variant genomic position is outside transcript boundaries, handles variants on positive and negative strand
+    Returns either True (outside boundaries) or False (inside boundaries)
+    '''
+    varGenPos = int(variant['Pos'])
+    varRefTranscript = variant["Reference_Sequence"]
+    varTranscript = fetch_gene_coordinates(str(varRefTranscript))
+    varStrand = varTranscript['strand']
+    outsideBoundaries = False
+    if varStrand == '+':
+        txnStart = int(varTranscript['txStart'])
+        txnEnd = int(varTranscript['txEnd'])
+        if varGenPos < txnStart or varGenPos > txnEnd:
+            outsideBoundaries = True
+    else:
+        # varStrand == '-'
+        txnStart = int(varTranscript['txEnd'])
+        txnEnd = int(varTranscript['txStart'])
+        if varGenPos > txnStart or varGenPos < txnEnd:
+            outsideBoundaries = True
+    return outsideBoundaries
+    
+def varInExon(variant):
+    '''
+    Given a variant, determines if variant genomic position is in an exon, handles variants on positive and negative strand
+    Returns either True (in an exon) or False (not in an exon)
+    '''
+    varGenPos = int(variant["Pos"])
+    varRefTranscript = variant["Reference_Sequence"]
+    varExons = getExonBoundaries(str(varRefTranscript))
+    varTranscript = fetch_gene_coordinates(str(varRefTranscript))
+    varStrand = varTranscript["strand"]
+    inExon = False
+    for exon in varExons:
+        exonBounds = varExons[exon]
+        exonStart = int(exonBounds['exonStart'])
+        exonEnd = int(exonBounds['exonEnd'])
+        if varStrand == '+':
+            if varGenPos >= exonStart and varGenPos <= exonEnd:
+                inExon = True
+        else:
+            # varStrand == '-'
+            if varGenPos <= exonStart and varGenPos >= exonEnd:
+                inExon = True
+    return inExon
+
+
+def getVarLocation(variant):
+    '''Given a variant, returns general location of variant (outside transcript boundaries, in an exon, or an intron)'''
+    varOutsideBounds = varOutsideBoundaries(variant)
+    varExon = varInExon(variant)
+    if varOutsideBounds == True:
+        varLoc = "outsideBoundaries"
+    else:
+        # varOutsideBoundaries == False
+        if varExon == True:
+            varLoc = "inExon"
+        else:
+            # inExon == False
+            varLoc = "inIntron"
+    return varLoc
+
+
 def getVarDict(variant):
     '''
     Given input data, returns a dictionary containing information for each variant in input
@@ -81,9 +175,7 @@ def getVarDict(variant):
         varStrand = '+'
     varGenCoordinate = variant["Pos"]
     varType = getVarType(variant)
-    varLoc = "-" # until implement varLocation function
-    # TO DO - implement varLocation function
-    # VarLoc = varLocation(variant)
+    varLoc = getVarLocation(variant)
     varDict = {"varGene":varGene,
                "varChrom":varChrom,
                "varStrand":varStrand,
