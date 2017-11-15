@@ -10,6 +10,7 @@ class test_calcVarPriors(unittest.TestCase):
                         "Ref":"A",
                         "Alt":"G",
                         "Gene_Symbol":"BRCA2",
+                        "Reference_Sequence": "NM_000059.3",
                         "pyhgvs_cDNA":"NM_000059.3:c.-764A>G"}
                            
     def test_checkSequence(self):
@@ -88,6 +89,134 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Alt"] = "GT"
         varType = calcVarPriors.getVarType(self.variant)
         self.assertEquals(varType, "delins")
+
+    def test_getExonBoundaries(self):
+        '''
+        Tests that getExonBoundaries returns the correct exon boundaries for a gene on the positive strand (BRCA2) and a gene on the negative strand (BRCA1) 
+        '''
+        self.variant["Reference_Sequence"] = "NM_007294.3"    # BRCA1
+        varExons = calcVarPriors.getExonBoundaries(self.variant["Reference_Sequence"])
+        # check correct number of exons
+        numExons = 23
+        self.assertEquals(len(varExons), numExons)
+        # because '-' strand gene, checks that exonEnd > exonStart
+        for exon in varExons.keys():
+            exonBounds = varExons[exon]
+            exonStart = exonBounds['exonStart']    
+            exonEnd = exonBounds['exonEnd'] 
+            self.assertGreater(exonStart, exonEnd)
+            exonNum = int(exon[4:])      # gets current exon number
+            nextExonNum = "exon" + str(exonNum + 1)  # gets key for next exon number
+            if nextExonNum <= numExons:
+                nextExonStart = varExons[nextExonNum]['exonStart']
+                # checks to make sure that next exon does not start until after current exon ends
+                self.assertGreater(exonEnd, nextExonStart)
+
+        self.variant["Reference_Sequence"] = "NM_000059.3"    # BRCA2
+        varExons = calcVarPriors.getExonBoundaries(self.variant["Reference_Sequence"])
+        # check correct number of exons
+        numExons = 27
+        self.assertEquals(len(varExons), numExons)
+        # because '+' strand gene, checks that exonEnd > exonStart
+        for exon in varExons.keys():
+            exonBounds = varExons[exon]
+            exonStart = exonBounds['exonStart']
+            exonEnd = exonBounds['exonEnd']
+            self.assertGreater(exonEnd, exonStart)
+            exonNum = int(exon[4:])      # get current exon number
+            nextExonNum = "exon" + str(exonNum + 1)   # gets key for next exon number
+            if nextExonNum <= numExons:
+                nextExonStart = varExons[nextExonNum]['exonStart']
+                # checks to make sure that next exon does not start until after current exon ends
+                self.assertGreater(nextExonStart, exonEnd)
+
+    def test_varOutsideBoundaries(self):
+        '''Tests that varOutsideBoundaries correctly classifies variants based on genomic posiiton'''
+        # checks BRCA1 variant outside transcript boundaries
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        self.variant["Pos"] = "43044274"
+        varOutBounds = calcVarPriors.varOutsideBoundaries(self.variant)
+        self.assertTrue(varOutBounds)
+
+        # checks BRCA1 variant inside transcript boundaries
+        self.variant["Pos"] = "43070957"
+        varOutBounds = calcVarPriors.varOutsideBoundaries(self.variant)
+        self.assertFalse(varOutBounds)
+
+        # checks BRCA2 variant outside transcript boundaries
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["Pos"] = "32315477"
+        varOutBounds = calcVarPriors.varOutsideBoundaries(self.variant)
+        self.assertTrue(varOutBounds)
+
+        #checks BRCA2 variant inside transcript boundaries
+        self.variant["Pos"] = "32326500"
+        varOutBounds = calcVarPriors.varOutsideBoundaries(self.variant)
+        self.assertFalse(varOutBounds)
+
+    def test_varInExon(self):    
+        '''Tests that variants are correctly classified as in an exon or outside of an exon'''
+        # checks BRCA1 variant in an exon
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        self.variant["Pos"] = "43097273"
+        varExon = calcVarPriors.varInExon(self.variant)
+        self.assertTrue(varExon)
+
+        # checks BRCA1 variant outside an exon
+        self.variant["Pos"] = "43047733"
+        varExon = calcVarPriors.varInExon(self.variant)
+        self.assertFalse(varExon)
+        
+        # checks BRCA2 variant in an exon
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["Pos"] = "32354890"
+        varExon = calcVarPriors.varInExon(self.variant)
+        self.assertTrue(varExon)
+        
+        # checks BRCA2 variant outside an exon
+        self.variant["Pos"] = "32379555"
+        varExon = calcVarPriors.varInExon(self.variant)
+        self.assertFalse(varExon)
+                
+    def test_getVarLocation(self):
+        '''
+        Tests that:
+        1. Variant location is set correctly for genomic position outside transcript boundaries
+        2. Variant location is set correctly for genomic position in exon
+        3. Variant location is set correclty for genomic position in intron
+        '''
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        # position before txn start site for BRCA1
+        self.variant["Pos"] = "43044274"
+        varLoc = calcVarPriors.getVarLocation(self.variant)
+        self.assertEquals(varLoc, "outsideBoundaries")
+
+        # position in exon for BRCA1
+        self.variant["Pos"] = "43070957"
+        varLoc = calcVarPriors.getVarLocation(self.variant)
+        self.assertEquals(varLoc, "inExon")
+        
+        # position in intron for BRCA1
+        self.variant["Pos"] = "43091062"
+        varLoc = calcVarPriors.getVarLocation(self.variant)
+        self.assertEquals(varLoc, "inIntron")
+
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        # position before txn start site for BRCA2
+        self.variant["Pos"] = "32315477"
+        varLoc = calcVarPriors.getVarLocation(self.variant)
+        self.assertEquals(varLoc, "outsideBoundaries")
+
+        # position in exon for BRCA2
+        self.variant["Pos"] = "32326500"
+        varLoc = calcVarPriors.getVarLocation(self.variant)
+        self.assertEquals(varLoc, "inExon")
+        
+        # position in intron for BRCA2
+        self.variant["Pos"] = "32330915"
+        varLoc = calcVarPriors.getVarLocation(self.variant)
+        self.assertEquals(varLoc, "inIntron")
+        
 
     def test_getVarDict(self):
         '''
