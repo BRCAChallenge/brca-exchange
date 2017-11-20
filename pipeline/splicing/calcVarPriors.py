@@ -9,7 +9,51 @@ calculates either the prior probability of pathogenicity or a prior ENGIMA class
 
 import argparse
 import csv
+import requests
+import sys
+import time
+import json
+import pdb
 
+def _make_request(url, varData):
+    '''
+    Adapted from _make_request in add_annotation.py
+    '''
+    headers={ "Content-Type" : "application/json", "Accept" : "application/json"}
+    req = requests.post(url, headers=headers, data=varData)
+    
+    if req.status_code == 429 and 'Retry-After' in req.headers:
+        retry = float(req.headers['Retry-After'])
+        time.sleep(retry)
+        return _make_request(url,varData)
+
+    if not req.ok:
+        req.raise_for_status()
+        sys.exit()
+
+    return req.json()
+
+def getVariantAnnotation(variant):
+    # TO DO - finish and test this!
+    server = "http://rest.ensembl.org"
+    ext = "/ga4gh/variantannotations/search"
+
+    varStart = int(variant["Hg38_Start"]) - 1
+    varEnd = int(variant["Hg38_End"])
+    varData = str({"variantAnnotationSetId": "Ensembl",
+               "start":varStart,
+               "end":varEnd})
+
+    req_url = server+ext
+    jsonOutput = _make_request(req_url, varData)
+
+    assert(len(jsonOutput) == 1)
+    assert(jsonOutput[0].has_key("variantAnnotations"))
+    varType = jsonOutput[0]["variantAnnotations"][0]["transcriptEffects"]["effects"][0]["term"]
+
+    return varType
+
+    # TO DO - figure out how to get necessary info out here!, variant term
 
 def checkSequence(sequence):
     '''Checks if a given sequence contains acceptable nucleotides returns True if sequence is comprised entirely of acceptable bases'''
@@ -110,11 +154,12 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', "--inputFile", default="built.tsv", help="File with variant information")
     parser.add_argument('-o', "--outputFile", help="File where results will be output")
-    parser.add_arguement('-b', "--boundaries", default="ENIGMA", help="Specifies which boundaries (either ENIGMA or PRIORS) to use for clinically important domains")
+    parser.add_argument('-b', "--boundaries", default="ENIGMA", help="Specifies which boundaries (either ENIGMA or PRIORS) to use for clinically important domains")
     args = parser.parse_args()
     
     inputData = csv.DictReader(open(args.inputFile, "r"), delimiter="\t")
     for variant in inputData:
+        pdb.set_trace()
         varDict = getVarDict(variant)
 
     # TO DO - create conditional to account for user selected boundaries
