@@ -66,7 +66,7 @@ def variant_counts(request):
         "brca1": {
             "total": brca1_count,
             "pathogenic": brca1_enigma_pathogenic_count,
-            "benign": brca1_enigma_benign_count ,
+            "benign": brca1_enigma_benign_count,
             "likelyBenign": brca1_enigma_likely_benign_count },
         "brca2": {
             "total": brca2_count,
