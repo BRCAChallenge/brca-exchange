@@ -9,51 +9,6 @@ calculates either the prior probability of pathogenicity or a prior ENGIMA class
 
 import argparse
 import csv
-import requests
-import sys
-import time
-import json
-import pdb
-
-def _make_request(url, varData):
-    '''
-    Adapted from _make_request in add_annotation.py
-    '''
-    headers={ "Content-Type" : "application/json", "Accept" : "application/json"}
-    req = requests.post(url, headers=headers, data=varData)
-    
-    if req.status_code == 429 and 'Retry-After' in req.headers:
-        retry = float(req.headers['Retry-After'])
-        time.sleep(retry)
-        return _make_request(url,varData)
-
-    if not req.ok:
-        req.raise_for_status()
-        sys.exit()
-
-    return req.json()
-
-def getVariantAnnotation(variant):
-    # TO DO - finish and test this!
-    server = "http://rest.ensembl.org"
-    ext = "/ga4gh/variantannotations/search"
-
-    varStart = int(variant["Hg38_Start"]) - 1
-    varEnd = int(variant["Hg38_End"])
-    varData = str({"variantAnnotationSetId": "Ensembl",
-               "start":varStart,
-               "end":varEnd})
-
-    req_url = server+ext
-    jsonOutput = _make_request(req_url, varData)
-
-    assert(len(jsonOutput) == 1)
-    assert(jsonOutput[0].has_key("variantAnnotations"))
-    varType = jsonOutput[0]["variantAnnotations"][0]["transcriptEffects"]["effects"][0]["term"]
-
-    return varType
-
-    # TO DO - figure out how to get necessary info out here!, variant term
 
 def checkSequence(sequence):
     '''Checks if a given sequence contains acceptable nucleotides returns True if sequence is comprised entirely of acceptable bases'''
@@ -71,11 +26,14 @@ def checkSequence(sequence):
     else:
         # len(sequence) = 0
         acceptableSequence = False
+        
     return acceptableSequence
+
 
 def getVarStrand(variant):
     '''Given a variant, returns the coding strand based on the variant's gene_symbol'''
     varGene = variant["Gene_Symbol"]
+
     if varGene == "BRCA1": 
         varStrand = '-'
     elif varGene == "BRCA2":
@@ -83,15 +41,19 @@ def getVarStrand(variant):
     else:
         # varGene not BRCA1 or BRCA2
         varStrand = ""
+
     return varStrand
 
 
 def getVarType(variant):
     '''
-    Returns a string describing type of variant (substitution, deletion, insertion, delins, other) depending on variant reference and alternate alleles
+    Returns a string describing type of variant 
+    -substitution, deletion, insertion, delins, other
+    depending on variant reference and alternate alleles
     '''
     acceptableRefSeq = checkSequence(variant["Ref"])
     acceptableAltSeq = checkSequence(variant["Alt"])
+    
     if acceptableRefSeq == True and acceptableAltSeq == True: 
         if len(variant["Ref"]) == len(variant["Alt"]):
             if len(variant["Ref"]) == 1:
@@ -104,13 +66,11 @@ def getVarType(variant):
                 if len(variant["Alt"]) == 1:
                     varType = "deletion"
                 else:
-                    # delins type variant
                     varType = "delins"
             elif len(variant["Ref"]) < len(variant["Alt"]):
                 if len(variant["Ref"]) == 1:
                     varType = "insertion"
                 else:
-                    # delins type variant
                     varType = "delins"
             else:
                 # variant is not an indel or substitution variant
@@ -118,6 +78,7 @@ def getVarType(variant):
     else:
         # not acceptable ref seq and alt seq, variant will not be handled by code
         varType = "other"
+        
     return varType
 
 
@@ -134,22 +95,21 @@ def getVarDict(variant):
     Dictionary key is variant HGVS_cDNA and value is a dictionary containing variant gene, variant chromosome, 
     variant strand, variant genomic coordinate, variant type, and variant location
     '''
-    varHGVS = variant["pyhgvs_cDNA"]
-    varGene = variant["Gene_Symbol"]
-    varChrom = variant["Chr"]
     varStrand = getVarStrand(variant)
-    varGenCoordinate = variant["Pos"]
     varType = getVarType(variant)
     varLoc = getVarLocation(variant)
-    varDict = {"varGene":varGene,
-               "varChrom":varChrom,
-               "varStrand":varStrand,
-               "varGenCoordinate":varGenCoordinate,
-               "varType":varType,
-               "varLoc":varLoc,
-               "varHGVScDNA":varHGVS}
+
+    varDict = {"varGene": variant["Gene_Symbol"],
+               "varChrom": variant["Chr"],
+               "varStrand": varStrand,
+               "varGenCoordinate": variant["Pos"],
+               "varType": varType,
+               "varLoc": varLoc,
+               "varHGVScDNA": variant["pyhgvs_cDNA"]}
+
     return varDict
-        
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', "--inputFile", default="built.tsv", help="File with variant information")
@@ -159,7 +119,6 @@ def main():
     
     inputData = csv.DictReader(open(args.inputFile, "r"), delimiter="\t")
     for variant in inputData:
-        pdb.set_trace()
         varDict = getVarDict(variant)
 
     # TO DO - create conditional to account for user selected boundaries
