@@ -5,14 +5,14 @@ class testCheckVarHGVS(unittest.TestCase):
 
     def setUp(self):
 
-        self.varBRCA1 = {"Ref":"C",
-                         "Alt":"T",
-                         "pyhgvs_cDNA":"NM_007294.3:c.5485G>A",
-                         "Gene_Symbol":"BRCA1"}
-        self.varBRCA2 = {"Ref":"A",
-                         "Alt":"T",
-                         "pyhgvs_cDNA":"NM_000059.3:c.66A>T",
-                         "Gene_Symbol":"BRCA2"}
+        self.varBRCA1 = {"Ref": "C",
+                         "Alt": "T",
+                         "pyhgvs_cDNA": "NM_007294.3:c.5485G>A",
+                         "Gene_Symbol": "BRCA1"}
+        self.varBRCA2 = {"Ref": "A",
+                         "Alt": "T",
+                         "pyhgvs_cDNA": "NM_000059.3:c.66A>T",
+                         "Gene_Symbol": "BRCA2"}
 
         self.sequence = "AGT"
 
@@ -45,34 +45,40 @@ class testCheckVarHGVS(unittest.TestCase):
         # checks that cDNARef and cDNAAlt are set correctly for BRCA1 (reverse complement)
         self.varBRCA1["Gene_Symbol"] = "BRCA1"
         varInfo = checkVarHGVS.getVarInfo(self.varBRCA1)
-        self.assertEquals(varInfo["cDNARef"],"C")
-        self.assertEquals(varInfo["cDNAAlt"],"T")
+        self.assertEquals(varInfo["cDNARef"], self.varBRCA1["Ref"])
+        self.assertEquals(varInfo["cDNAAlt"], self.varBRCA1["Alt"])
 
         # checks that cDNARef and cDNAAlt are set correctly for BRCA2
         self.varBRCA2["Gene_Symbol"] = "BRCA2"
         varInfo = checkVarHGVS.getVarInfo(self.varBRCA2)
-        self.assertEquals(varInfo["cDNARef"],"A")
-        self.assertEquals(varInfo["cDNAAlt"],"T")
+        self.assertEquals(varInfo["cDNARef"], self.varBRCA2["Ref"])
+        self.assertEquals(varInfo["cDNAAlt"], self.varBRCA2["Alt"])
 
     def test_checkVarHGVSSub(self):
         '''Tests checkVarHGVS for single nucleotide substitutions'''
         # checks that checkVarHGVS works for substitution in BRCA1
+        self.varBRCA1["Ref"] = "C"
+        self.varBRCA1["Alt"] = "T"
+        self.varBRCA1["pyhgvs_cDNA"] = "NM_007294.3:c.5485G>A"
         checkVar = checkVarHGVS.checkVarHGVS(self.varBRCA1)
         self.assertTrue(checkVar)
 
         self.varBRCA1["Ref"] = "T"
         self.varBRCA1["Alt"] = "G"
         checkVar = checkVarHGVS.checkVarHGVS(self.varBRCA1)
-        self.assertFalse(checkVar["Consistent"])
+        self.assertNotEqual(True, checkVar)
         
         # checks that checkVarHGVS works for substitution in BRCA2
+        self.varBRCA2["Ref"] = "A"
+        self.varBRCA2["Alt"] = "T"
+        self.varBRCA2["pyhgvs_cDNA"] = "NM_000059.3:c.66A>T"
         checkVar = checkVarHGVS.checkVarHGVS(self.varBRCA2)
         self.assertTrue(checkVar)
 
         self.varBRCA2["Ref"] = "T"
         self.varBRCA2["Alt"] = "G"
         checkVar = checkVarHGVS.checkVarHGVS(self.varBRCA2)
-        self.assertFalse(checkVar["Consistent"])
+        self.assertNotEqual(True, checkVar)
 
     def test_checkVarHGVSDelSingle(self):
         '''Tests checkVarHGVS for single nucleotide deletion variants'''
@@ -86,7 +92,7 @@ class testCheckVarHGVS(unittest.TestCase):
         self.varBRCA1["Ref"] = "TG"
         self.varBRCA1["Alt"] = "T"
         checkVar = checkVarHGVS.checkVarHGVS(self.varBRCA1)
-        self.assertFalse(checkVar["Consistent"])
+        self.assertNotEqual(True, checkVar)
 
         # checks that checkVarHGVS works for single nucleotide deletion in BRCA2
         self.varBRCA2["Ref"] = "TT"
@@ -98,7 +104,7 @@ class testCheckVarHGVS(unittest.TestCase):
         self.varBRCA2["Ref"] = "GG"
         self.varBRCA2["Alt"] = "G"
         checkVar = checkVarHGVS.checkVarHGVS(self.varBRCA2)
-        self.assertFalse(checkVar["Consistent"])
+        self.assertNotEqual(True, checkVar)
 
     def test_checkVarHGVSDelMult(self):
         '''Tests checkVarHGVS for multiple nucleotide deletions'''
@@ -112,7 +118,7 @@ class testCheckVarHGVS(unittest.TestCase):
         self.varBRCA1["Ref"] = "TATTA"
         self.varBRCA1["Alt"] = "T"
         checkVar = checkVarHGVS.checkVarHGVS(self.varBRCA1)
-        self.assertFalse(checkVar["Consistent"])
+        self.assertNotEqual(True, checkVar)
         
         # checks that checkVarHGVS works for a multiple nucleotide deletion in BRCA2
         self.varBRCA2["Ref"] = "GCG"
@@ -124,7 +130,7 @@ class testCheckVarHGVS(unittest.TestCase):
         self.varBRCA2["Ref"] = "TAGA"
         self.varBRCA2["Alt"] = "T"
         checkVar = checkVarHGVS.checkVarHGVS(self.varBRCA2)
-        self.assertFalse(checkVar["Consistent"])
+        self.assertNotEqual(True, checkVar)
 
     def test_checkVarHGVSInsSingle(self):
         '''Tests checkVarHGVS for single nucleotide insertions'''
@@ -138,7 +144,7 @@ class testCheckVarHGVS(unittest.TestCase):
         self.varBRCA1["Ref"] = "T"
         self.varBRCA1["Alt"] = "TT"
         checkVar = checkVarHGVS.checkVarHGVS(self.varBRCA1)
-        self.assertFalse(checkVar["Consistent"])
+        self.assertNotEqual(True, checkVar)
 
         # checks that checkVarHGVS works for a single nucleotide insertion in BRCA2
         self.varBRCA2["Ref"] = "C"
@@ -150,7 +156,7 @@ class testCheckVarHGVS(unittest.TestCase):
         self.varBRCA2["Ref"] = "G"
         self.varBRCA2["Alt"] = "GG"
         checkVar = checkVarHGVS.checkVarHGVS(self.varBRCA2)
-        self.assertFalse(checkVar["Consistent"])
+        self.assertNotEqual(True, checkVar)
 
     def test_checkVarHGVSInsMult(self):
         '''Tests checkVarHGVS for multiple nucleotide insertions'''
@@ -164,7 +170,7 @@ class testCheckVarHGVS(unittest.TestCase):
         self.varBRCA1["Ref"] = "T"
         self.varBRCA1["Alt"] = "TATTAC"
         checkVar = checkVarHGVS.checkVarHGVS(self.varBRCA1)
-        self.assertFalse(checkVar["Consistent"])
+        self.assertNotEqual(True, checkVar)
         
         # checks that checkVarHGVS works for a multiple nucleotide insertion in BRCA2
         self.varBRCA2["Ref"] = "A"
@@ -176,7 +182,7 @@ class testCheckVarHGVS(unittest.TestCase):
         self.varBRCA2["Ref"] = "A"
         self.varBRCA2["Alt"] = "ATTAC"
         checkVar = checkVarHGVS.checkVarHGVS(self.varBRCA2)
-        self.assertFalse(checkVar["Consistent"])
+        self.assertNotEqual(True, checkVar)
         
     def test_checkVarHGVSDupSingle(self):
         '''Tests checkVarHGVS for single nucleotide duplications'''
@@ -190,7 +196,7 @@ class testCheckVarHGVS(unittest.TestCase):
         self.varBRCA1["Ref"] = "G"
         self.varBRCA1["Alt"] = "GG"
         checkVar = checkVarHGVS.checkVarHGVS(self.varBRCA1)
-        self.assertFalse(checkVar["Consistent"])
+        self.assertNotEqual(True, checkVar)
 
         # checks that checkVarHGVS works for a single nucleotide duplication in BRCA2
 
@@ -203,7 +209,7 @@ class testCheckVarHGVS(unittest.TestCase):
         self.varBRCA2["Ref"] = "T"
         self.varBRCA2["Alt"] = "TG"
         checkVar = checkVarHGVS.checkVarHGVS(self.varBRCA2)
-        self.assertFalse(checkVar["Consistent"])
+        self.assertNotEqual(True, checkVar)
 
         
     def test_checkVarHGVSDupMult(self):
@@ -218,7 +224,7 @@ class testCheckVarHGVS(unittest.TestCase):
         self.varBRCA1["Ref"] = "G"
         self.varBRCA1["Alt"] = "GCG"
         checkVar = checkVarHGVS.checkVarHGVS(self.varBRCA1)
-        self.assertFalse(checkVar["Consistent"])
+        self.assertNotEqual(True, checkVar)
         
         # checks that checkVarHGVS works for a multiple nucleotide duplication in BRCA2
         self.varBRCA2["Ref"] = "G"
@@ -230,7 +236,7 @@ class testCheckVarHGVS(unittest.TestCase):
         self.varBRCA2["Ref"] = "T"
         self.varBRCA2["Alt"] = "TGGAC"
         checkVar = checkVarHGVS.checkVarHGVS(self.varBRCA2)
-        self.assertFalse(checkVar["Consistent"])
+        self.assertNotEqual(True, checkVar)
 
 
     def test_checkVarHGVSDelinsEqual(self):
@@ -246,7 +252,7 @@ class testCheckVarHGVS(unittest.TestCase):
         self.varBRCA1["Ref"] = "GG"
         self.varBRCA1["Alt"] = "TT"
         checkVar = checkVarHGVS.checkVarHGVS(self.varBRCA1)
-        self.assertFalse(checkVar["Consistent"])
+        self.assertNotEqual(True, checkVar)
         
         # checks that checkVarHGVS works for an equal nucleotide delins in BRCA2
         self.varBRCA2["Ref"] = "GC"
@@ -258,7 +264,7 @@ class testCheckVarHGVS(unittest.TestCase):
         self.varBRCA2["Ref"] = "TA"
         self.varBRCA2["Alt"] = "GC"
         checkVar = checkVarHGVS.checkVarHGVS(self.varBRCA2)
-        self.assertFalse(checkVar["Consistent"])
+        self.assertNotEqual(True, checkVar)
 
         
     def test_checkVarHGVSDelinsUnequal(self):
@@ -274,7 +280,7 @@ class testCheckVarHGVS(unittest.TestCase):
         self.varBRCA1["Ref"] = "TCGAT"
         self.varBRCA1["Alt"] = "TA"
         checkVar = checkVarHGVS.checkVarHGVS(self.varBRCA1)
-        self.assertFalse(checkVar["Consistent"])
+        self.assertNotEqual(True, checkVar)
         
         # checks that checkVarHGVS works for an unequal nucleotide delins in BRCA2
         self.varBRCA2["Ref"] = "TACCCCTATTG"
@@ -286,4 +292,4 @@ class testCheckVarHGVS(unittest.TestCase):
         self.varBRCA2["Ref"] = "GCATGCTATGA"
         self.varBRCA2["Alt"] = "GTCA"
         checkVar = checkVarHGVS.checkVarHGVS(self.varBRCA2)
-        self.assertFalse(checkVar["Consistent"])
+        self.assertNotEqual(True, checkVar)
