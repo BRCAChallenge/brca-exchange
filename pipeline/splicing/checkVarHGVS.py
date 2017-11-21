@@ -17,16 +17,19 @@ Outputs a file that contains information for each inconsistent variant
 
 def getRevComp(sequence):
     '''Given a sequence returns the reverse complement'''
-    revCompDict = {"A":"T",
-                   "T":"A",
-                   "C":"G",
-                   "G":"C",
-                   "N":"N"}
+    revCompDict = {"A": "T",
+                   "T": "A",
+                   "C": "G",
+                   "G": "C",
+                   "N": "N"}
+
     if len(sequence) == 1:
         revComp = revCompDict[sequence]
     else:
         revComp = str(Seq(sequence).reverse_complement())
+
     return revComp
+
 
 def parseVar(variantHGVS):
     '''
@@ -34,31 +37,32 @@ def parseVar(variantHGVS):
     HGVS type, variant type, ref allele, and alt allele
     ''' 
     varHGVS = hgvs.HGVSName(str(variantHGVS))
-    typeHGVS = varHGVS.kind
-    varRef = varHGVS.ref_allele
-    varAlt = varHGVS.alt_allele
-    varType = varHGVS.mutation_type
-    varParsed =  {"typeHGVS":typeHGVS,
-                  "varRef":varRef,
-                  "varAlt":varAlt,
-                  "varType":varType}
+    
+    varParsed =  {"typeHGVS": varHGVS.kind,
+                  "varRef": varHGVS.ref_allele,
+                  "varAlt": varHGVS.alt_allele,
+                  "varType": varHGVS.mutation_type}
+    
     return varParsed
+
 
 def getVarInfo(variant):
     '''
-    Given a variant, returns a dictionary containing HGVS_cDNA, varType, varGenRef, varGenAlt, and depending on if varGene is BRCA1 or BRCA2 either the reverse complement or normal cDNA ref and alt alleles respectively
-    ''' 
-    varGenRef = variant["Ref"]
-    varGenAlt = variant["Alt"]
-    varcDNAHGVS = variant["pyhgvs_cDNA"]
+    Given a variant, returns a dictionary containing: 
+    HGVS_cDNA, varType, varGenRef, varGenAlt, and cDNA ref and alt alleles
+    If varGene is BRCA1, cDNA ref and alt are the reverse complement 
+    If varGene is BRCA2, cDNA ref and alt are normal
+    '''
     varGene = variant["Gene_Symbol"]
-    varParse = parseVar(varcDNAHGVS)
-    varType = varParse["varType"]
-    varInfo = {"varGenRef":varGenRef,
-               "varGenAlt":varGenAlt,
-               "varcDNAHGVS":varcDNAHGVS,
-               "varType":varType,
-               "varGene":varGene}
+    varHGVS = variant["pyhgvs_cDNA"]
+    varParse = parseVar(varHGVS)
+
+    varInfo = {"varGenRef": variant["Ref"],
+               "varGenAlt": variant["Alt"],
+               "varcDNAHGVS": varHGVS,
+               "varType": varParse["varType"],
+               "varGene": varGene}
+
     if varGene == "BRCA2":
         cDNARef = varParse["varRef"]
         cDNAAlt = varParse["varAlt"]
@@ -70,10 +74,13 @@ def getVarInfo(variant):
         # varGene is not BRCA1 or BRCA2
         cDNARef = varParse["varRef"]
         cDNAAlt = varParse["varAlt"]
+        
     varInfo["cDNARef"] = cDNARef
     varInfo["cDNAAlt"] = cDNAAlt
+
     return varInfo
-    
+
+
 def checkVarHGVS(variant):
     '''
     Checks that ref and alt alleles for a variant are consistent with parsed HGVS_cDNA
@@ -90,38 +97,48 @@ def checkVarHGVS(variant):
     varGenAlt = varInfo["varGenAlt"]
     cDNARef = varInfo["cDNARef"]
     cDNAAlt = varInfo["cDNAAlt"]
+    
     if varType == ">" or varType == "delins":
         if varGenRef == cDNARef and varGenAlt == cDNAAlt:
             varEqual = True
         else:
-            # varGenRef != cDNARef and varGenAlt != cDNAAlt
             varEqual = False
     elif varType == "del":
+        # compares cDNA ref allele with second base to end of the genomic ref allele
+        # first base of genomic ref allele is unchaged between genomic ref and alt alleles
+        # and HGVS_cDNA does not include unchanged bases
+        # so is excluded from comparison between cDNA ref and genomic ref alleles
         tempVarGenRef = varGenRef[1:]
-        if tempVarGenRef == cDNARef:
-            varEqual = True
-        else:
-            varEqual = False
+        varEqual = tempVarGenRef == cDNARef
     elif varType == "dup":
+        # compares cDNA ref allele with second base to end of the genomic alt allele
+        # first base of genomic alt allele is unchanged between genomic ref and alt alleles
+        # so it is excluded from comparison
+        # compare cDNA ref to genomic alt because cDNA alt is actually duplicated cDNA ref sequence
         tempVarGenAlt = varGenAlt[1:]
-        if tempVarGenAlt == cDNARef:
-            varEqual = True
-        else:
-            varEqual = False
+        varEqual = tempVarGenAlt == cDNARef
     else:
         # varType == "ins":
+        # compares cDNA alt allele with second base to end of genomic alt allele
+        # first base of genomic alt allele is unchanged between genomic ref and alt alleles
+        # and HGVS_cDNA does not include unchanged bases
+        # so first based is excluded from comparison between cDNA alt and genomic alt alleles
         tempVarGenAlt = varGenAlt[1:]
-        if tempVarGenAlt == cDNAAlt:
-            varEqual = True
-        else:
-            varEqual = False
+        varEqual = tempVarGenAlt == cDNAAlt
+        
     if varEqual == True:
         return varEqual
     else:
         # varEqual == False
-        varData = varData = [varInfo["varGene"], varInfo["varcDNAHGVS"], varType, varGenRef, varGenAlt, cDNARef, cDNAAlt]
-        return {"Consistent":varEqual,
-                "varData":varData}
+        varData = [varInfo["varGene"],
+                   varInfo["varcDNAHGVS"],
+                   varType,
+                   varGenRef,
+                   varGenAlt,
+                   cDNARef,
+                   cDNAAlt]
+        
+        return varData
             
 def main():
     parser = argparse.ArgumentParser()
@@ -142,9 +159,11 @@ def main():
             pass
         else:
             inconVars += 1
-            outputData.writerow(checkVar["varData"])
-
+            outputData.writerow(checkVar)
+    
     print "Number of inconsitent genomic and cDNA HGVS variants is:" + str(inconVars)
+
+    outputData.close()
             
 if __name__ == "__main__":
     main()
