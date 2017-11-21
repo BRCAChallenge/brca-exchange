@@ -5,13 +5,21 @@ class test_calcVarPriors(unittest.TestCase):
 
     def setUp(self):
 
-        self.variant = {"Chr":"13",
-                        "Pos":"32314943",
-                        "Ref":"A",
-                        "Alt":"G",
-                        "Gene_Symbol":"BRCA2",
+        self.variant = {"Chr": "13",
+                        "Pos": "32314943",
+                        "Ref": "A",
+                        "Alt": "G",
+                        "Gene_Symbol": "BRCA2",
                         "Reference_Sequence": "NM_000059.3",
-                        "pyhgvs_cDNA":"NM_000059.3:c.-764A>G"}
+                        "pyhgvs_cDNA": "NM_000059.3:c.-764A>G"}
+
+        self.strand = {"minus": "-",
+                       "plus": "+"}
+
+        self.varTypes = {"sub": "substitution",
+                         "ins": "insertion",
+                         "del": "deletion",
+                         "delins": "delins"}
                            
     def test_checkSequence(self):
         '''Tests that checkSequence function categorized acceptable sequences correctly'''
@@ -60,19 +68,11 @@ class test_calcVarPriors(unittest.TestCase):
         '''Tests that variant strand is set correctly based on variant's gene_symbol'''
         self.variant["Gene_Symbol"] = "BRCA1"
         varStrand = calcVarPriors.getVarStrand(self.variant)
-        self.assertEquals(varStrand, '-')
-
-        self.variant["Reference_Sequence"] = "NM_007294.3"
-        varStrand = calcVarPriors.getVarStrand(self.variant)
-        self.assertEquals(varStrand, '-')
+        self.assertEquals(varStrand, self.strand["minus"])
 
         self.variant["Gene_Symbol"] = "BRCA2"
         varStrand = calcVarPriors.getVarStrand(self.variant)
-        self.assertEquals(varStrand, '+')
-
-        self.variant["Reference_Sequence"] = "NM_000059.3"
-        varStrand = calcVarPriors.getVarStrand(self.variant)
-        self.assertEquals(varStrand, '+')
+        self.assertEquals(varStrand, self.strand["plus"])
 
         
     def test_getVarType(self):
@@ -82,32 +82,32 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "T"
         varType = calcVarPriors.getVarType(self.variant)
-        self.assertEquals(varType, "substitution")
+        self.assertEquals(varType, self.varTypes["sub"])
 
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "AAA"
         varType = calcVarPriors.getVarType(self.variant)
-        self.assertEquals(varType, "insertion")
+        self.assertEquals(varType, self.varTypes["ins"])
 
         self.variant["Ref"] = "AGT"
         self.variant["Alt"] = "A"
         varType = calcVarPriors.getVarType(self.variant)
-        self.assertEquals(varType, "deletion")
+        self.assertEquals(varType, self.varTypes["del"])
 
         self.variant["Ref"] = "AG"
         self.variant["Alt"] = "AGTA"
         varType = calcVarPriors.getVarType(self.variant)
-        self.assertEquals(varType, "delins")
+        self.assertEquals(varType, self.varTypes["delins"])
 
         self.variant["Ref"] = "AGTA"
         self.variant["Alt"] = "AG"
         varType = calcVarPriors.getVarType(self.variant)
-        self.assertEquals(varType, "delins")
+        self.assertEquals(varType, self.varTypes["delins"])
 
         self.variant["Ref"] = "AG"
         self.variant["Alt"] = "GT"
         varType = calcVarPriors.getVarType(self.variant)
-        self.assertEquals(varType, "delins")
+        self.assertEquals(varType, self.varTypes["delins"])
     
     def test_getVarLocation(self):
         '''
