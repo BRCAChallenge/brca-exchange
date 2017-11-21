@@ -299,11 +299,10 @@ class Splicing extends React.Component {
     }
     render() {
         let { variant,
-              width,
-              height
         } = this.props;
-        let info = variantInfo(variant);
-        let variantStart = variant["Hg38_Start"],
+        let width = 800, height = 400,
+            info = variantInfo(variant),
+            variantStart = variant["Hg38_Start"],
             exons = _.map(variant["Gene_Symbol"] === "BRCA1" ? brca1Exons : brca2Exons, e => e.coord.split('-')),
             precedingExonIndex, followingExonIndex;
 
@@ -320,7 +319,7 @@ class Splicing extends React.Component {
         }
         return (
         <div>
-            <svg width={width} height={height}>
+            <svg /*width={width} height={height} */ viewBox="-4 0 800 240" preserveAspectRatio={true}>
                 <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">
                   <rect x="0" y="0" width="4" height="4" fill="#FF8888" />
                   <path d="M-1,1 l2,-2

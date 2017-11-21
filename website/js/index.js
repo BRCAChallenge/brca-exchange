@@ -946,6 +946,13 @@ var VariantDetail = React.createClass({
         }
         */
 
+        const splicingHeader = (
+            <h3>
+                <a href="#" onClick={(event) => this.onChangeGroupVisibility("splicing-vis", event)}>Transcript Visualization</a>
+                <GroupHelpButton group={"splicing-vis"} onClick={(event) => { this.showHelp(event, "splicing-vis"); return true; }} />
+            </h3>
+        );
+
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
@@ -973,10 +980,6 @@ var VariantDetail = React.createClass({
                             </p>
                         </Col>)
                     }
-                    <Col>
-                        <div>Splicing prototype</div>
-                        <Splicing variant={variant} width={800} height={400} />
-                    </Col>
                 </Row>
 
                 <Row>
@@ -998,6 +1001,11 @@ var VariantDetail = React.createClass({
                             :
                             <IsoGrid>
                                 <div className="isogrid-sizer col-xs-12 col-md-6 col-lg-6 col-xl-4"/>
+                                    <Col key={"splicing_vis"} xs={12} md={12} lg={12} className="variant-detail-group isogrid-item col-xl-8">
+                                        <Panel header={splicingHeader} collapsable={true} defaultExpanded={localStorage.getItem("collapse-group_splicing-vis") !== "true"}>
+                                            <Splicing variant={variant} />
+                                        </Panel>
+                                    </Col>
                                 {
                                     // we're mapping each group into a column so we can horizontally stack them
                                     groupTables.map((x, i) => {
