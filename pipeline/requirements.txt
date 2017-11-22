@@ -12,7 +12,7 @@ hgvs==0.3.7
 lockfile==0.12.2
 luigi==2.2.0
 nose==1.3.7
-numpy==1.11.1
+numpy==1.13.1
 Parsley==1.3
 pip==9.0.1
 pygr==0.8.2
