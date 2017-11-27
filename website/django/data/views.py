@@ -98,10 +98,22 @@ def variant(request):
 def variant_reports(request, variant_id):
     variant_id = int(variant_id)
     query = Report.objects.filter(Variant_id=variant_id)
-    # .order_by('-Data_Release_id').select_related('Data_Release')
 
-    # variant_versions = map(variant_to_dict, query)
-    response = JsonResponse({"data":  [ model_to_dict(x) for x in query ]})
+    # filter out enigma submissions to clinvar/lovd and bic submissions to clinvar
+    filtered_query = []
+    for report in query:
+        if report.Source == "ClinVar":
+            submitter = report.Submitter_ClinVar.lower()
+            if "(enigma)" not in submitter and "(bic)" not in submitter:
+                filtered_query.append(report)
+        elif report.Source == "LOVD":
+            submitter = report.Submitter_ClinVar.lower()
+            if "(enigma)" not in submitter:
+                filtered_query.append(report)
+        else:
+            filtered_query.append(report)
+
+    response = JsonResponse({"data":  [ model_to_dict(x) for x in filtered_query ]})
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
