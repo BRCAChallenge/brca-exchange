@@ -90,13 +90,13 @@ def check_file_for_contents(file_path):
     handle_process_success_or_failure(os.stat(file_path).st_size != 0, file_path)
 
 
-def check_input_and_output_tsvs_for_same_number_variants(tsvIn, tsvOut, offset=0):
+def check_input_and_output_tsvs_for_same_number_variants(tsvIn, tsvOut, numVariantsRemoved=0):
     tsvInput = csv.DictReader(open(tsvIn, 'r'), delimiter='\t')
     numVariantsIn = len(list(tsvInput))
     tsvOutput = csv.DictReader(open(tsvOut, 'r'), delimiter='\t')
     numVariantsOut = len(list(tsvOutput))
-    print("Number of variants in input: %s \nNumber of variants in output: %s \n Offset: %s\n" % (numVariantsIn, numVariantsOut, offset))
-    handle_process_success_or_failure(numVariantsIn - offset == numVariantsOut, tsvOut)
+    print("Number of variants in input: %s \nNumber of variants in output: %s \n Number of variants removed: %s\n" % (numVariantsIn, numVariantsOut, numVariantsRemoved))
+    handle_process_success_or_failure(numVariantsIn - numVariantsRemoved == numVariantsOut, tsvOut)
 
 
 def handle_process_success_or_failure(process_succeeded, file_path):
@@ -1309,16 +1309,16 @@ class AnnotateMergedOutput(luigi.Task):
         print_subprocess_output_and_error(sp)
 
         # get number of variants thrown out
-        offset = 0
+        numVariantsRemoved = 0
         with open(artifacts_dir + "add-annotation.log") as fp:
             lines = fp.readlines()
             for line in lines:
                 if "ERROR COUNT" in line:
                     # pull integer from error count line
-                    offset = int(filter(str.isdigit, line))
+                    numVariantsRemoved = int(filter(str.isdigit, line))
 
         check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "merged.tsv",
-                                                             artifacts_dir + "annotated.tsv", offset)
+                                                             artifacts_dir + "annotated.tsv", numVariantsRemoved)
 
 
 @requires(AnnotateMergedOutput)
