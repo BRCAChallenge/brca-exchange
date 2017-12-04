@@ -6,10 +6,9 @@ var React = require('react'),
     brca2Exons = JSON.parse(require('raw!../content/brca2LollipopDomain.json'));
 
 var intronWidth = 40,
-    maxUnscaledExonWidth = 150, // base count
-    exonFill = "#92c3e5",
+    exonFill = "#c1ddf0",
     exonStroke = "rgba(0, 0, 0, 0.5)",
-    intronFill = "#b5c4d2",
+    intronFill = "#dfe6ec",
     intronStroke = "rgba(0, 0, 0, 0.5)",
     highlightFill = "#ffffbb",
     highlightStroke = "rgba(0, 0, 0, 0.5)",
@@ -23,9 +22,9 @@ function exonSizeTx (bases) {
 }
 
 function variantInfo (variant) {
-    let [before, after] = _.map(variant["Genomic_Coordinate_hg38"].split(':').pop().split('>'), e => e.length);
-    if (before == 1 && after == 1) {
-        return { changed: 1 }
+    let [before, after] = _.map(variant.Genomic_Coordinate_hg38.split(':').pop().split('>'), e => e.length);
+    if (before === 1 && after === 1) {
+        return { changed: 1 };
     }
     before--, after--;
     return {
@@ -35,6 +34,48 @@ function variantInfo (variant) {
     };
 }
 
+class Variant extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+    render() {
+        let { variant,
+              x,
+              width,
+              height,
+              txStart,
+              txEnd } = this.props;
+
+        let variantStart, variantEnd, variantX, variantWidth, variantChange, variantChangedWidth, variantDeletedWidth, variantInsertedWidth;
+
+        variantStart = variant.Hg38_Start;
+        variantEnd = variant.Hg38_End;
+        variantX = x + width * (variantStart - txStart) / (txEnd - txStart);
+        variantWidth = width * (variantEnd - variantStart) / (txEnd - txStart);
+        variantWidth = Math.max(variantWidth, 3);
+        variantChange = variantInfo(variant);
+
+        variantChangedWidth = variantChange.changed ? width * variantChange.changed / (txEnd - txStart) : 0;
+        variantDeletedWidth = variantChange.deleted ? width * variantChange.deleted / (txEnd - txStart) : 0;
+        variantInsertedWidth = variantChange.inserted ? width * variantChange.inserted / (txEnd - txStart) : 0;
+
+        variantChangedWidth = variantChangedWidth && Math.max(2, variantChangedWidth);
+        variantDeletedWidth = variantDeletedWidth && Math.max(2, variantDeletedWidth);
+        variantInsertedWidth = variantInsertedWidth && Math.max(2, variantInsertedWidth);
+
+        if (variantX - x + variantChangedWidth + variantDeletedWidth + variantInsertedWidth > width) {
+            variantX = x + width - variantChangedWidth - variantDeletedWidth - variantInsertedWidth - 1;
+        }
+        return (
+            <g>
+                <rect x={variantX} width={variantChangedWidth} height={height} fill="lightgreen" />
+                <rect x={variantX + variantChangedWidth} width={variantDeletedWidth} height={height} fill="url(#diagonalHatch)" />
+                <rect x={variantX + variantChangedWidth} width={variantInsertedWidth} height={height} fill="lightblue" />
+            </g>
+        );
+    }
+}
+
 class Exon extends React.Component {
     constructor(props) {
         super(props);
@@ -42,9 +83,9 @@ class Exon extends React.Component {
     componendDidMount() {
     }
     render() {
-        let { txStart,
+        let { n,
+              txStart,
               txEnd,
-              xScale,
               width,
               height,
               x,
@@ -52,40 +93,12 @@ class Exon extends React.Component {
               highlight
         } = this.props;
 
-        let variantStart, variantEnd, variantX, variantWidth, variantChange, variantChangedWidth, variantDeletedWidth, variantInsertedWidth;
-
-        if (variant) {
-            variantStart = variant["Hg38_Start"];
-            variantEnd = variant["Hg38_End"];
-            variantX = x + width * (variantStart - txStart) / (txEnd - txStart)
-            variantWidth = width * (variantEnd - variantStart) / (txEnd - txStart);
-            variantWidth = Math.max(variantWidth, 3);
-            variantChange = variantInfo(variant);
-
-            variantChangedWidth = variantChange.changed ? width * variantChange.changed / (txEnd - txStart) : 0;
-            variantDeletedWidth = variantChange.deleted ? width * variantChange.deleted / (txEnd - txStart) : 0;
-            variantInsertedWidth = variantChange.inserted ? width * variantChange.inserted / (txEnd - txStart) : 0;
-
-            variantChangedWidth = variantChangedWidth && Math.max(2, variantChangedWidth);
-            variantDeletedWidth = variantDeletedWidth && Math.max(2, variantDeletedWidth);
-            variantInsertedWidth = variantInsertedWidth && Math.max(2, variantInsertedWidth);
-
-            if (variantX - x + variantChangedWidth + variantDeletedWidth + variantInsertedWidth > width) {
-                variantX = x + width - variantChangedWidth - variantDeletedWidth - variantInsertedWidth - 1;
-            }
-        }
-
-
         return (
             <g>
                 <rect x={x} width={width} height={height} rx={4} ry={4} fill={highlight ? highlightFill : exonFill} stroke={highlight ? highlightStroke : exonStroke} />
-                { variant !== undefined && (
-                    <g>
-                        <rect x={variantX} width={variantChangedWidth} height={height} fill="lightgreen" />
-                        <rect x={variantX+variantChangedWidth} width={variantDeletedWidth} height={height} fill="url(#diagonalHatch)" />
-                        <rect x={variantX+variantChangedWidth} width={variantInsertedWidth} height={height} fill="lightblue" />
-                    </g>
-                )}
+                <text x={x + width / 2} y={height + 14} textAnchor="middle">{n}</text>
+                { variant &&
+                    <Variant variant={variant} x={x} width={width} height={height} txStart={txStart} txEnd={txEnd} /> }
             </g>
         );
     }
@@ -102,40 +115,11 @@ class Intron extends React.Component {
               highlight
         } = this.props;
 
-        let variantStart, variantEnd, variantX, variantWidth, variantChange, variantChangedWidth, variantDeletedWidth, variantInsertedWidth;
-
-        if (variant) {
-            variantStart = variant["Hg38_Start"];
-            variantEnd = variant["Hg38_End"];
-            variantX = x + width * (variantStart - txStart) / (txEnd - txStart)
-            variantWidth = width * (variantEnd - variantStart) / (txEnd - txStart);
-            variantWidth = Math.max(variantWidth, 3);
-            variantChange = variantInfo(variant);
-
-            variantChangedWidth = variantChange.changed ? width * variantChange.changed / (txEnd - txStart) : 0;
-            variantDeletedWidth = variantChange.deleted ? width * variantChange.deleted / (txEnd - txStart) : 0;
-            variantInsertedWidth = variantChange.inserted ? width * variantChange.inserted / (txEnd - txStart) : 0;
-
-            variantChangedWidth = variantChangedWidth && Math.max(2, variantChangedWidth);
-            variantDeletedWidth = variantDeletedWidth && Math.max(2, variantDeletedWidth);
-            variantInsertedWidth = variantInsertedWidth && Math.max(2, variantInsertedWidth);
-
-            if (variantX - x + variantChangedWidth + variantDeletedWidth + variantInsertedWidth > width) {
-                variantX = x + width - variantChangedWidth - variantDeletedWidth - variantInsertedWidth - 1;
-            }
-        } 
-
-        //let width = variant !== undefined ? 2 * intronWidth : intronWidth;
         return (
-            <g>
-                <rect x={x} y={10} width={width} height={height} fill={highlight ? highlightFill : intronFill} stroke={highlight ? highlightStroke : intronStroke} />
-                { variant !== undefined && (
-                    <g>
-                        <rect x={variantX} y={10} width={variantChangedWidth} height={height} fill="lightgreen" />
-                        <rect x={variantX+variantChangedWidth} y={10} width={variantDeletedWidth} height={height} fill="url(#diagonalHatch)" />
-                        <rect x={variantX+variantChangedWidth} y={10} width={variantInsertedWidth} height={height} fill="lightblue" />
-                    </g>
-                )}
+            <g transform="translate(0, 10)">
+                <rect x={x} width={width} height={height} fill={highlight ? highlightFill : intronFill} stroke={highlight ? highlightStroke : intronStroke} />
+                { variant !== undefined &&
+                    <Variant variant={variant} x={x} width={width} height={height} txStart={txStart} txEnd={txEnd} /> }
             </g>
         );
     }
@@ -156,7 +140,11 @@ class Transcript extends React.Component {
             zoomLineStartLeft,
             zoomLineStartRight;
 
+        preceding = Math.max(preceding, 0);
+        following = Math.min(following, exons.length - 1);
+
         // precalculate scale
+        // TODO: scales are slightly different between exonic / intronic variants. fix.
         {
             let totalWidth = 0;
             for (let i = 0; i < exons.length; i++) {
@@ -184,16 +172,16 @@ class Transcript extends React.Component {
                 let highlight, _variant;
                 if (i >= preceding && i <= following) { // exon is adjacent to, or contains, variant
                     highlight = true;
-                    if (variant["Hg38_Start"] >= exon[0] && variant["Hg38_Start"] <= exon[1]) { // exon contains variant
+                    if (variant.Hg38_Start >= exon[0] && variant.Hg38_Start <= exon[1]) { // exon contains variant
                         _variant = variant;
                     }
                 }
-                blocks.push(<Exon x={x} width={exonWidth} height={40} txStart={exon[0]} txEnd={exon[1]} highlight={highlight} variant={_variant} />);
+                blocks.push(<Exon n={i + 1} x={x} width={exonWidth} height={40} txStart={exon[0]} txEnd={exon[1]} highlight={highlight} variant={_variant} />);
             }
 
-            if (i == preceding) {
+            if (i === preceding) {
                 zoomLineStartLeft = x;
-            } else if (i == following) {
+            } else if (i === following) {
                 zoomLineStartRight = x + exonWidth;
             }
 
@@ -204,23 +192,24 @@ class Transcript extends React.Component {
                 let highlight, _variant;
                 if (i >= preceding && i < following) {  // intron is adjacent to, or contains, variant
                     highlight = true;
-                    if (variant["Hg38_Start"] > exon[1] && variant["Hg38_Start"] < exons[i+1][0]) { // intron contains variant
+                    if (variant.Hg38_Start > exon[1] && variant.Hg38_Start < exons[i + 1][0]) { // intron contains variant
                         _variant = variant;
                     }
                 }
-                blocks.push(<Intron txStart={exon[1]} txEnd={exons[i+1][0]} x={x} width={scale * intronWidth} height={20} highlight={highlight} variant={_variant} />);
+                blocks.push(<Intron txStart={exon[1]} txEnd={exons[i + 1][0]} x={x} width={scale * intronWidth} height={20} highlight={highlight} variant={_variant} />);
                 x += scale * intronWidth;
             }
         }
         return (
             <g>
+                <line x1={zoomLineStartLeft} y1={50} x2={zoomMargin} y2={95} stroke="#ccc" strokeWidth="3" strokeDasharray="8,3" fill="none" />
+                <line x1={zoomLineStartRight} y1={50} x2={width - zoomMargin - 2.5} y2={95} stroke="#ccc" strokeWidth="3" strokeDasharray="8,3" fill="none" />
+                <rect x={0} y={53} width={820} height={14} fill="rgba(255,255,255,0.6" />
                 <g transform="translate(0, 10)">
                     <rect x={1} y={8} width={scale * leaderSize} height={24} fill={intronFill} stroke={intronStroke} />
                     { blocks }
                     <rect x={x} y={8} width={scale * tailSize} height={24} fill={intronFill} stroke={intronStroke} />
                 </g>
-                <line x1={zoomLineStartLeft} y1={50} x2={zoomMargin} y2={95} stroke="#ccc" strokeWidth="3" strokeDasharray="8,3" fill="none" />
-                <line x1={zoomLineStartRight} y1={50} x2={width - zoomMargin - 2.5} y2={95} stroke="#ccc" strokeWidth="3" strokeDasharray="8,3" fill="none" />
             </g>
         );
     }
@@ -233,15 +222,17 @@ class Zoom extends React.Component {
               preceding,
               following,
               width
-        } = this.props; 
+        } = this.props;
 
         let blocks = [],
             scale,
             x = zoomMargin;
 
+        preceding = Math.max(preceding, 0);
+        following = Math.min(following, exons.length - 1);
 
         // precalculate scale
-        {  
+        {
             let totalWidth = 0;
             for (let i = preceding; i <= following; i++) {
                 totalWidth += exonSizeTx(exons[i][1] - exons[i][0]);
@@ -262,22 +253,22 @@ class Zoom extends React.Component {
 
             {
                 let _variant;
-                if (variant["Hg38_Start"] > exon[0] && variant["Hg38_Start"] < exon[1]) { // exon contains variant
+                if (variant.Hg38_Start > exon[0] && variant.Hg38_Start < exon[1]) { // exon contains variant
                     _variant = variant;
                 }
-                blocks.push(<Exon txStart={exon[0]} txEnd={exon[1]} x={x} width={exonWidth} height={80} highlight={true} variant={_variant} />);
+                blocks.push(<Exon n={i + 1} txStart={exon[0]} txEnd={exon[1]} x={x} width={exonWidth} height={80} highlight={true} variant={_variant} />);
             }
 
             x += exonWidth;
-            if (i != following) {
+            if (i !== following) {
                 let _variant, _intronWidth = intronWidth;
-                if (variant["Hg38_Start"] > exon[1] && variant["Hg38_Start"] < exons[i+1][0]) { // intron contains variant
+                if (variant.Hg38_Start > exon[1] && variant.Hg38_Start < exons[i + 1][0]) { // intron contains variant
                     _variant = variant;
                 }
-                if (following - preceding == 1) {
+                if (following - preceding === 1) {
                     _intronWidth *= 2;
                 }
-                blocks.push(<Intron txStart={exon[1]} txEnd={exons[i+1][0]} x={x} width={scale * _intronWidth} height={60} highlight={true} variant={_variant} />);
+                blocks.push(<Intron txStart={exon[1]} txEnd={exons[i + 1][0]} x={x} width={scale * _intronWidth} height={60} highlight={true} variant={_variant} />);
                 x += scale * _intronWidth;
             }
         }
@@ -290,21 +281,25 @@ class Zoom extends React.Component {
 }
 
 class Splicing extends React.Component {
-    /* props:
-       variant, width, height
-    */
     componentDidMount() {
     }
     componentWillUnmount() {
     }
     render() {
-        let { variant,
-        } = this.props;
-        let width = 800, height = 400,
+        let { variant } = this.props;
+
+        let width = 800,
             info = variantInfo(variant),
-            variantStart = variant["Hg38_Start"],
-            exons = _.map(variant["Gene_Symbol"] === "BRCA1" ? brca1Exons : brca2Exons, e => e.coord.split('-')),
+            variantStart = variant.Hg38_Start,
+            variantEnd = variant.Hg38_End,
+            exons = _.map(variant.Gene_Symbol === "BRCA1" ? brca1Exons : brca2Exons, e => e.coord.split('-')),
             precedingExonIndex, followingExonIndex;
+
+        if (variantStart < exons[0][0] || variantEnd > exons[exons.length - 1][1]) {
+            return (
+                <h4 style={{textAlign: 'center'}}>Variant is outside of transcript.</h4>
+            );
+        }
 
         for (let i = 0; i < exons.length; i++) {
             if (exons[i][0] > variantStart) {
@@ -317,119 +312,32 @@ class Splicing extends React.Component {
                 break;
             }
         }
+
+        let plural = n => n === 1 ? '' : 's';
         return (
         <div>
-            <svg /*width={width} height={height} */ viewBox="-4 0 800 240" preserveAspectRatio={true}>
+            <svg viewBox="-4 0 808 240" preserveAspectRatio="true">
                 <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">
                   <rect x="0" y="0" width="4" height="4" fill="#FF8888" />
                   <path d="M-1,1 l2,-2
                            M0,4 l4,-4
-                           M3,5 l2,-2" 
+                           M3,5 l2,-2"
                         stroke="black" strokeWidth={1} />
                 </pattern>
                 <Transcript variant={variant} exons={exons} preceding={precedingExonIndex} following={followingExonIndex} width={width} />
                 <Zoom variant={variant} exons={exons} preceding={precedingExonIndex} following={followingExonIndex} width={width} />
-                <g transform="translate(360,220)">
+                <g transform="translate(274,220)">
                     <rect x="0" fill="lightgreen" stroke="black" width="20" height="10" />
-                    <text x="25" y="10">{ `Polymorphism (${info.changed})` }</text>
-                    <rect x="170" fill="url(#diagonalHatch)" stroke="black" width="20" height="10" />
-                    <text x="195" y="10">{ `Deletion (${info.deleted || 0})` }</text>
-                    <rect x="300" fill="lightblue" stroke="black" width="20" height="10"/>
-                    <text x="325" y="10">{ `Insertion (${info.inserted || 0})` }</text>
+                    <text x="22" y="10">{ `Substitution (${info.changed} base${plural(info.changed)})` }</text>
+                    <rect x="192" fill="url(#diagonalHatch)" stroke="black" width="20" height="10" />
+                    <text x="214" y="10">{ `Deletion (${info.deleted || 0} base${plural(info.deleted)})` }</text>
+                    <rect x="360" fill="#56F" stroke="black" width="20" height="10"/>
+                    <text x="382" y="10">{ `Insertion (${info.inserted || 0} base${plural(info.inserted)})` }</text>
                 </g>
             </svg>
         </div>
         );
     }
-/*
-        let variant = this.props.variant,
-            exons = _.map(variant["Gene_Symbol"] === "BRCA1" ? brca1Exons : brca2Exons, e => e.coord.split('-')),
-            exonBlocks = [],
-            exonLabels = [],
-            layout = [],
-            lastExonEnd = 0,
-            unscaledSize = leaderSize,
-            variantLocation = variant["Hg38_Start"],
-            precedingExonIndex, followingExonIndex;
-
-        // determine exon/intron that contains variant
-        for (let i = 0; i < exons.length; i++) {
-            // ??? do we need to anticipate variants in the leader/tail?
-            if (exons[i][0] > variantLocation) {
-                followingExonIndex = i;
-                if (exons[i - 1][1] < variantLocation) {
-                    // variant is intronic
-                    precedingExonIndex = i - 1;
-                } else {
-                    // variant is exonic
-                    precedingExonIndex = i - 2;
-                }
-                break;
-            }
-        }
-
-        // compute total width first, to allow for clean scaling
-        for (let i = 0; i < exons.length; i++) {
-            let exonWidth = exons[i][1] - exons[i][0];
-
-            if (exonWidth > maxUnscaledExonWidth) {
-                exonWidth = maxUnscaledExonWidth + Math.sqrt(exonWidth);
-            }
-            unscaledSize += intronWidth + exonWidth;
-
-            // intronic variant
-            if (precedingExonIndex === i && followingExonIndex === i + 1) {
-                unscaledSize += intronWidth;
-            }
-        }
-        unscaledSize += tailSize;
-
-        let scaleFactor = 799 / unscaledSize;
-        lastExonEnd = scaleFactor * leaderSize;
-        let variantBlock;
-        for (let i = 0; i < exons.length; i++) {
-            let exonWidth = exons[i][1] - exons[i][0];
-
-            if (exonWidth > maxUnscaledExonWidth) {
-                exonWidth = maxUnscaledExonWidth + Math.sqrt(exonWidth);
-            }
-
-            exonLabels.push(<text x={lastExonEnd + (scaleFactor * exonWidth)/2} textAnchor='middle'>{i+1}</text>);
-
-            if (variantLocation > exons[i][0] && variantLocation < exons[i][1]) {
-                let start = scaleFactor * exonWidth * (variantLocation - exons[i][0])/(exons[i][1] - exons[i][0]);
-                let width = scaleFactor * exonWidth * (variant["Hg38_End"] - variantLocation)/(exons[i][1] - exons[i][0]);
-                variantBlock = <rect x={lastExonEnd + start} width={Math.max(width, 1)} height={40} fill="red" />;
-            } else if (precedingExonIndex === i && followingExonIndex === i + 1) {
-                let start = scaleFactor * intronWidth * 2 * (variantLocation - exons[i][1])/(exons[i + 1][0] - exons[i][1]);
-                let width = scaleFactor * intronWidth * 2 * (variant["Hg38_End"] - variantLocation)/(exons[i + 1][0] - exons[i][1]);
-                variantBlock = <rect x={lastExonEnd + scaleFactor * exonWidth + start} width={Math.max(width, 1)} y={15} height={10} fill="red" />;
-            }
-
-            lastExonEnd += scaleFactor * (intronWidth + exonWidth);
-            // intronic variant
-            if (precedingExonIndex === i && followingExonIndex === i + 1) {
-                lastExonEnd += scaleFactor * intronWidth;
-            }
-        }
-        return (
-            <svg width={800} height={300}>
-                <rect x={exonBlocks[0].props.x + 1} width={exonBlocks[exonBlocks.length - 1].props.x + 1} fill={intronFillColor} stroke={intronStrokeColor} y={35} height={10} />
-                <g fill={exonFillColor} stroke={exonStrokeColor} strokeWidth={0.5} transform='translate(0,20)'>
-                    <rect x={1} width={scaleFactor * leaderSize} y={10} height={20}  fill={intronFillColor}/>
-                    { exonBlocks }
-                    <rect x={exonBlocks[exonBlocks.length - 1].props.x + exonBlocks[exonBlocks.length - 1].props.width} width={scaleFactor * tailSize} y={10} height={20} fill={intronFillColor} />
-                </g>
-                <g transform='translate(0,20)'>
-                    { variantBlock }
-                </g>
-                <g transform='translate(0,74)'>
-                    { exonLabels }
-                </g>
-            </svg>
-        );
-    }
-    */
 }
 
 module.exports = Splicing;
