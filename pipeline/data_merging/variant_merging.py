@@ -483,8 +483,8 @@ def add_leading_base(chr, pos, ref, alt, version="hg38"):
     else:
         raise Exception("wrong chromosome number")
 
-    leading_base = seq[brca_pos-1]
-    return (chr, str(pos-1), leading_base + ref, leading_base + alt)
+    leading_base = seq[brca_pos]
+    return (chr, str(pos), leading_base + ref, leading_base + alt)
 
 
 def variant_is_false(ref, alt):
