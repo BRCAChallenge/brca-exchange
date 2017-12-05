@@ -9,6 +9,15 @@ calculates either the prior probability of pathogenicity or a prior ENGIMA class
 
 import argparse
 import csv
+import requests
+import sys
+import time
+import json
+import re
+
+# Here are the canonical BRCA transcripts in ENSEMBL nomenclature
+BRCA1_CANONICAL = "ENST00000357654"
+BRCA2_CANONICAL = "ENST00000380152"
 
 def checkSequence(sequence):
     '''Checks if a given sequence contains acceptable nucleotides returns True if sequence is comprised entirely of acceptable bases'''
@@ -44,6 +53,56 @@ def getVarStrand(variant):
 
     return varStrand
 
+
+def _make_request(url):
+    req = requests.get(url, headers = {"Content-Type": "application/json"})
+    
+    if req.status_code == 429 and 'Retry-After' in req.headers:
+        retry = float(req.headers['Retry-After'])
+        time.sleep(retry)
+        return _make_request(url, varData)
+
+    if not req.ok:
+        req.raise_for_status()
+        sys.exit()
+
+    return req.json()
+
+
+def getVarConsequences(variant):
+    server = "http://rest.ensembl.org"
+    ext = "/vep/human/region/"
+
+    varStrand = 1
+    varAlt = variant["Alt"]
+    
+    if variant["Chr"] not in ["13", "17"]:
+        varConsequences = "unable_to_determine"
+    else:
+        altSeqClear = False
+        for base in varAlt:
+            if base not in ["A", "C", "G", "T"]:
+                varConsequences = "unable_to_determine"     
+            else:
+                altSeqClear = True
+        if altSeqClear == True:
+            query = "%s:%s-%s:%s/%s?" % (variant["Chr"], variant["Hg38_Start"],
+                                         variant["Hg38_End"], varStrand, varAlt)
+    
+            req_url = server+ext+query
+            jsonOutput = _make_request(req_url)
+    
+            assert(len(jsonOutput) == 1)
+            assert(jsonOutput[0].has_key("transcript_consequences"))
+            for gene in jsonOutput[0]["transcript_consequences"]:
+                if gene.has_key("transcript_id"):
+                    if re.search(BRCA1_CANONICAL, gene["transcript_id"]):
+                        varConsequences = gene["consequence_terms"][0]
+                    elif re.search(BRCA2_CANONICAL, gene["transcript_id"]):
+                        varConsequences = gene["consequence_terms"][0]
+    
+    return varConsequences
+    
 
 def getVarType(variant):
     '''
@@ -114,13 +173,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', "--inputFile", default="built.tsv", help="File with variant information")
     parser.add_argument('-o', "--outputFile", help="File where results will be output")
-    parser.add_argument('-b', "--boundaries", default="ENIGMA", help="Specifies which boundaries (either ENIGMA or PRIORS) to use for clinically important domains")
-    args = parser.parse_args()
+    parser.add_argument('-b', "--boundaries", default="ENIGMA",
+                        help="Specifies which boundaries (ENIGMA or PRIORS) to use for clinically important domains")
+    args = parser.parse_args()    
     
     inputData = csv.DictReader(open(args.inputFile, "r"), delimiter="\t")
     for variant in inputData:
         varDict = getVarDict(variant)
-
+        
     # TO DO - create conditional to account for user selected boundaries
     newColumns = ["varType", "varLoc", "pathProb", "ENIGMAClass", "donorVarMES",
                   "donorVarZ", "donorRefMES", "donorRefZ", "accVarMES", "accVarZ",
