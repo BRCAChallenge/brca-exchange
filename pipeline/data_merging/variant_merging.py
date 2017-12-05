@@ -470,10 +470,14 @@ def trim_leading(chr, pos, ref, alt):
 
 def add_leading_base(chr, pos, ref, alt, version="hg38"):
     pos = int(pos)
+    empty_ref = False
+    empty_alt = False
     if ref == "-":
         ref = ""
+        empty_ref = True
     if alt == "-":
         alt = ""
+        empty_alt = True
     if chr == "13":
         seq = BRCA2[version]["sequence"]
         brca_pos = pos - 1 - BRCA2[version]["start"]
@@ -482,9 +486,17 @@ def add_leading_base(chr, pos, ref, alt, version="hg38"):
         brca_pos = pos - 1 - BRCA1[version]["start"]
     else:
         raise Exception("wrong chromosome number")
-
-    leading_base = seq[brca_pos]
-    return (chr, str(pos), leading_base + ref, leading_base + alt)
+    if empty_ref is True and empty_alt is True:
+        raise Exception("both ref and alt are empty")
+    elif empty_ref is True:
+        # If the ref is empty, get the base at the position and append it to ref and alt
+        leading_base = seq[brca_pos]
+        return (chr, str(pos), leading_base + ref, leading_base + alt)
+    elif empty_alt is True:
+        # If the alt is empty, get the base at the position just before where the deletion happens
+        # and append it to the ref and alt
+        leading_base = seq[brca_pos - 1]
+        return (chr, str(pos - 1), leading_base + ref, leading_base + alt)
 
 
 def variant_is_false(ref, alt):
@@ -964,17 +976,18 @@ def ref_correct(chr, pos, ref, alt, version="hg38"):
     pos = int(pos)
     if chr == "13":
         seq = BRCA2[version]["sequence"]
-        pos = pos - 1 - BRCA2[version]["start"]
+        brca_pos = pos - 1 - BRCA2[version]["start"]
     elif chr == "17":
         seq = BRCA1[version]["sequence"]
-        pos = pos - 1 - BRCA1[version]["start"]
+        brca_pos = pos - 1 - BRCA1[version]["start"]
     else:
         assert(False)
-    genomeRef = seq[pos:pos+len(ref)].upper()
-    if len(ref) != 0 and len(genomeRef)==0:
+    genomeRef = seq[brca_pos:brca_pos + len(ref)].upper()
+    if len(ref) != 0 and len(genomeRef) == 0:
         print "%s:%s:%s>%s" % (chr, pos, ref, alt)
         raise Exception("ref not inside BRCA1 or BRCA2")
     if (genomeRef != ref):
+        pdb.set_trace()
         return False
     else:
         return True
