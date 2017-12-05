@@ -55,6 +55,7 @@ def getVarStrand(variant):
 
 
 def _make_request(url):
+    '''Makes request to API and returns json file'''
     req = requests.get(url, headers = {"Content-Type": "application/json"})
     
     if req.status_code == 429 and 'Retry-After' in req.headers:
@@ -70,9 +71,17 @@ def _make_request(url):
 
 
 def getVarConsequences(variant):
+    '''
+    Given a variant, uses Ensembl VEP API to get variant consequences
+    (e.g. intron variant, frameshift variant, missense variant)
+    using variant chromosome, Hg38 start, Hg38 end, and alternate allele as input for API
+    returns a string detailing consequences of variant
+    '''
+
     server = "http://rest.ensembl.org"
     ext = "/vep/human/region/"
 
+    # varStrand always 1 because all alternate alleles and positions refer to the plus strand
     varStrand = 1
     varAlt = variant["Alt"]
     
@@ -81,6 +90,7 @@ def getVarConsequences(variant):
     else:
         altSeqClear = False
         for base in varAlt:
+            # API only works for alt alleles that are composed of the 4 canonical bases
             if base not in ["A", "C", "G", "T"]:
                 varConsequences = "unable_to_determine"     
             else:
@@ -94,10 +104,13 @@ def getVarConsequences(variant):
     
             assert(len(jsonOutput) == 1)
             assert(jsonOutput[0].has_key("transcript_consequences"))
+            # below is to extract variant consequence from json file
             for gene in jsonOutput[0]["transcript_consequences"]:
                 if gene.has_key("transcript_id"):
+                    # need to filter for canonical BRCA1 transcript
                     if re.search(BRCA1_CANONICAL, gene["transcript_id"]):
                         varConsequences = gene["consequence_terms"][0]
+                    # need to filter for canonical BRCA2 transcript
                     elif re.search(BRCA2_CANONICAL, gene["transcript_id"]):
                         varConsequences = gene["consequence_terms"][0]
     
