@@ -22,21 +22,13 @@ BRCA2_CANONICAL = "ENST00000380152"
 def checkSequence(sequence):
     '''Checks if a given sequence contains acceptable nucleotides returns True if sequence is comprised entirely of acceptable bases'''
     acceptableBases = ["A", "C", "T", "G", "N", "R", "Y"]
-    badBases = 0
     if len(sequence) > 0:
         for base in sequence:
             if base not in acceptableBases:
-                badBases += 1
-            if badBases == 0:
-                acceptableSequence = True
-            else:
-                # badBases > 0
-                acceptableSequence = False
+                return False
+        return True
     else:
-        # len(sequence) = 0
-        acceptableSequence = False
-        
-    return acceptableSequence
+        return False
 
 
 def getVarStrand(variant):
@@ -44,14 +36,11 @@ def getVarStrand(variant):
     varGene = variant["Gene_Symbol"]
 
     if varGene == "BRCA1": 
-        varStrand = '-'
+        return '-'
     elif varGene == "BRCA2":
-        varStrand = '+'
+         return '+'
     else:
-        # varGene not BRCA1 or BRCA2
-        varStrand = ""
-
-    return varStrand
+        return ""
 
 
 def _make_request(url):
@@ -86,35 +75,30 @@ def getVarConsequences(variant):
     varAlt = variant["Alt"]
     
     if variant["Chr"] not in ["13", "17"]:
-        varConsequences = "unable_to_determine"
+        return "unable_to_determine"
     else:
-        altSeqClear = False
         for base in varAlt:
             # API only works for alt alleles that are composed of the 4 canonical bases
             if base not in ["A", "C", "G", "T"]:
-                varConsequences = "unable_to_determine"     
-            else:
-                altSeqClear = True
-        if altSeqClear == True:
-            query = "%s:%s-%s:%s/%s?" % (variant["Chr"], variant["Hg38_Start"],
-                                         variant["Hg38_End"], varStrand, varAlt)
+                return "unable_to_determine"     
+           
+        query = "%s:%s-%s:%s/%s?" % (variant["Chr"], variant["Hg38_Start"],
+                                     variant["Hg38_End"], varStrand, varAlt)
     
-            req_url = server+ext+query
-            jsonOutput = _make_request(req_url)
+        req_url = server+ext+query
+        jsonOutput = _make_request(req_url)
     
-            assert(len(jsonOutput) == 1)
-            assert(jsonOutput[0].has_key("transcript_consequences"))
-            # below is to extract variant consequence from json file
-            for gene in jsonOutput[0]["transcript_consequences"]:
-                if gene.has_key("transcript_id"):
-                    # need to filter for canonical BRCA1 transcript
-                    if re.search(BRCA1_CANONICAL, gene["transcript_id"]):
-                        varConsequences = gene["consequence_terms"][0]
-                    # need to filter for canonical BRCA2 transcript
-                    elif re.search(BRCA2_CANONICAL, gene["transcript_id"]):
-                        varConsequences = gene["consequence_terms"][0]
-    
-    return varConsequences
+        assert(len(jsonOutput) == 1)
+        assert(jsonOutput[0].has_key("transcript_consequences"))
+        # below is to extract variant consequence from json file
+        for gene in jsonOutput[0]["transcript_consequences"]:
+            if gene.has_key("transcript_id"):
+                # need to filter for canonical BRCA1 transcript
+                if re.search(BRCA1_CANONICAL, gene["transcript_id"]):
+                    return gene["consequence_terms"][0]
+                # need to filter for canonical BRCA2 transcript
+                elif re.search(BRCA2_CANONICAL, gene["transcript_id"]):
+                    return gene["consequence_terms"][0]
     
 
 def getVarType(variant):
@@ -131,30 +115,28 @@ def getVarType(variant):
     if acceptableRefSeq == True and acceptableAltSeq == True: 
         if len(varRef) == len(varAlt):
             if len(varRef) == 1:
-                varType = "substitution"
+                return "substitution"
             else:
-                varType = "delins"
+                return "delins"
         else:
             # variant is an indel or other variant type
             if len(varRef) > len(varAlt):
                 if len(varAlt) == 1:
-                    varType = "deletion"
+                    return "deletion"
                 else:
-                    varType = "delins"
+                    return "delins"
             elif len(varRef) < len(varAlt):
                 if len(varRef) == 1:
-                    varType = "insertion"
+                    return "insertion"
                 else:
-                    varType = "delins"
+                    return "delins"
             else:
                 # variant is not an indel or substitution variant
-                varType = "other"
+                return "other"
     else:
         # not acceptable ref seq and alt seq, variant will not be handled by code
-        varType = "other"
+        return "other"
         
-    return varType
-
 
 def getVarLocation(variant):
     '''Given a variant, returns location of variant using Ensembl API for variant annotation'''
