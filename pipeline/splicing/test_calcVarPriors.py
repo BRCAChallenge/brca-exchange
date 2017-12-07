@@ -20,6 +20,9 @@ class test_calcVarPriors(unittest.TestCase):
                          "ins": "insertion",
                          "del": "deletion",
                          "delins": "delins"}
+
+        self.numExons = {"BRCA1": 23,
+                         "BRCA2": 27}
                            
     def test_checkSequence(self):
         '''Tests that checkSequence function categorized acceptable sequences correctly'''
@@ -143,6 +146,49 @@ class test_calcVarPriors(unittest.TestCase):
         varCons = calcVarPriors.getVarConsequences(self.variant)
         self.assertEquals(varCons, "unable_to_determine")
 
+
+    def test_getExonBoundaries(self):
+        '''
+        Tests that:
+        1. Exon boundaries are set correctly for:
+        gene on minus strand (BRCA1) and gene on plus strand (BRCA2)
+            - checks that exon does not start before it ends
+            - next exon does not start before current exon ends
+        2. length of varExons matches number of exons for a specific gene
+        '''
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        self.variant["Gene_Symbol"] = "BRCA1"
+        varExons = calcVarPriors.getExonBoundaries(self.variant)
+        # check correct number of exons
+        self.assertEquals(len(varExons), self.numExons["BRCA1"])
+        # because '-' strand gene, checks that exonStart > exonEnd
+        for exon in varExons.keys():
+            exonBounds = varExons[exon]
+            self.assertGreater(exonBounds["exonStart"], exonBounds["exonEnd"])
+            currentExonNum = int(exon[4:])
+            nextExonNum = str(currentExonNum + 1)
+            nextExonKey = "exon" + nextExonNum
+            if nextExonNum <= self.numExons["BRCA1"]:
+                nextExonStart = varExons[nextExonKey]["exonStart"]
+                # checks that next exon does not start before current exon ends
+                self.assertGreater(exonBounds["exonEnd"], nextExonStart)
+
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        varExons = calcVarPriors.getExonBoundaries(self.variant)
+        # check correct number of exons
+        self.assertEquals(len(varExons), self.numExons["BRCA2"])
+        # because '+' strand gene, checks that exonEnd > exonStart
+        for exon in varExons.keys():
+            exonBounds = varExons[exon]
+            self.assertGreater(exonBounds["exonEnd"], exonBounds["exonStart"])
+            currentExonNum = int(exon[4:])
+            nextExonNum = str(currentExonNum + 1)
+            nextExonKey = "exon" + nextExonNum
+            if nextExonNum <= self.numExons["BRCA2"]:
+                nextExonStart = varExons[nextExonKey]["exonStart"]
+                # cehcks that next exon does not start before current exon ends
+                self.assertGreater(nextExonStart, exonBounds["exonEnd"])
         
     def test_getVarLocation(self):
         '''
