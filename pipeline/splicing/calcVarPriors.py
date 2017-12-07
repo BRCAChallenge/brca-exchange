@@ -34,7 +34,7 @@ def checkSequence(sequence):
     else:
         return False
 
-
+    
 def getVarStrand(variant):
     '''Given a variant, returns the coding strand based on the variant's gene_symbol'''
     varGene = variant["Gene_Symbol"]
@@ -83,6 +83,7 @@ def getVarConsequences(variant):
             # API only works for alt alleles that are composed of the 4 canonical bases
             if base not in ["A", "C", "G", "T"]:
                 return "unable_to_determine"     
+
            
         query = "%s:%s-%s:%s/%s?" % (variant["Chr"], variant["Hg38_Start"],
                                      variant["Hg38_End"], varStrand, varAlt)
@@ -139,7 +140,7 @@ def getVarType(variant):
         # not acceptable ref seq and alt seq, variant will not be handled by code
         return "other"
 
-
+    
 def getExonBoundaries(variant):
     '''
     Given a variant, returns the exon boundaries for the variant's transcript in a dictionary with format:
