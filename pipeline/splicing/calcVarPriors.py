@@ -51,24 +51,26 @@ def getVarType(variant):
     -substitution, deletion, insertion, delins, other
     depending on variant reference and alternate alleles
     '''
-    acceptableRefSeq = checkSequence(variant["Ref"])
-    acceptableAltSeq = checkSequence(variant["Alt"])
+    varRef = variant["Ref"]
+    varAlt = variant["Alt"]
+    acceptableRefSeq = checkSequence(varRef)
+    acceptableAltSeq = checkSequence(varAlt)
     
     if acceptableRefSeq == True and acceptableAltSeq == True: 
-        if len(variant["Ref"]) == len(variant["Alt"]):
-            if len(variant["Ref"]) == 1:
+        if len(varRef) == len(varAlt):
+            if len(varRef) == 1:
                 varType = "substitution"
             else:
                 varType = "delins"
         else:
             # variant is an indel or other variant type
-            if len(variant["Ref"]) > len(variant["Alt"]):
-                if len(variant["Alt"]) == 1:
+            if len(varRef) > len(varAlt):
+                if len(varAlt) == 1:
                     varType = "deletion"
                 else:
                     varType = "delins"
-            elif len(variant["Ref"]) < len(variant["Alt"]):
-                if len(variant["Ref"]) == 1:
+            elif len(varRef) < len(varAlt):
+                if len(varRef) == 1:
                     varType = "insertion"
                 else:
                     varType = "delins"
