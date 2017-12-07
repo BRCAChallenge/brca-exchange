@@ -158,6 +158,11 @@ def getVarType(variant):
 
 
 def getExonBoundaries(variant):
+    '''
+    Given a variant, returns the exon boundaries for the variant's transcript in a dictionary with format:
+    key = exon number, value = dictionary with exon start and exon end for specific exon
+    Uses function implemented in calcMaxEntScanMeanStd to get data for variant's transcript
+    '''
     varTranscript = variant["Reference_Sequence"]
     transcriptData = fetch_gene_coordinates(str(varTranscript))
 
@@ -191,7 +196,25 @@ def getExonBoundaries(variant):
         exonCount += 1
 
     return varExons
-    
+
+def getRefSpliceDonorBoundaries(variant):
+    varExons = getExonBoundaries(variant)
+    varStrand = getVarStrand(variant)
+    donorBoundaries = {}
+    for exon in varExons.keys():
+        exonEnd = int(varExons[exon]["exonEnd"])
+        if varStrand == "+":
+            donorStart = exonEnd - 3 + 1
+            donorEnd = exonEnd + 6
+        else:
+            # varStrand == "-"
+            donorStart = exonEnd + 3
+            donorEnd = exonEnd - 6 + 1
+        donorBoundaries[exon] = {"donorStart": donorStart,
+                                 "donorEnd": donorEnd}
+
+    return donorBoundaries
+
 
 def getVarLocation(variant):
     '''Given a variant, returns location of variant using Ensembl API for variant annotation'''
