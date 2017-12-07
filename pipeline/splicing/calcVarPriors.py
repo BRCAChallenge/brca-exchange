@@ -14,6 +14,7 @@ import sys
 import time
 import json
 import re
+from calcMaxEntScanMeanStd import fetch_gene_coordinates
 
 # Here are the canonical BRCA transcripts in ENSEMBL nomenclature
 BRCA1_CANONICAL = "ENST00000357654"
@@ -138,6 +139,42 @@ def getVarType(variant):
         # not acceptable ref seq and alt seq, variant will not be handled by code
         return "other"
 
+
+def getExonBoundaries(variant):
+    varTranscript = variant["Reference_Sequence"]
+    transcriptData = fetch_gene_coordinates(str(varTranscript))
+
+    # parse exon starts and exon ends
+    transcriptData["exonStarts"] = re.sub(",(\s)*$", "", transcriptData["exonStarts"])
+    transcriptData["exonEnds"] = re.sub(",(\s)*$", "", transcriptData["exonEnds"])
+    if transcriptData["strand"] == "+":
+        exonStarts = transcriptData["exonStarts"].split(",")
+        exonEnds = transcriptData["exonEnds"].split(",")
+    else:
+        # transcript is on '-' strand
+        exonStarts = list(reversed(transcriptData["exonEnds"].split(",")))
+        exonEnds = list(reversed(transcriptData["exonStarts"].split(",")))
+
+    varExons = {}
+    varExonCount = transcriptData["exonCount"]
+    exonCount = 1
+    while exonCount <= varExonCount:
+        exonStart = int(exonStarts[exonCount - 1])
+        exonEnd = int(exonEnds[exonCount - 1])
+        if varTranscript == "NM_007294.3":
+            if exonCount >= 4:
+                # because transcript NM_007294.3 does not include an exon 4, goes from exon 3 to exon 5
+                exonName = "exon" + str(exonCount + 1)
+            else:
+                exonName = "exon" + str(exonCount)
+        else:
+            exonName = "exon" + str(exonCount)
+        varExons[exonName] = {"exonStart": exonStart,
+                              "exonEnd": exonEnd}
+        exonCount += 1
+
+    return varExons
+    
 
 def getVarLocation(variant):
     '''Given a variant, returns location of variant using Ensembl API for variant annotation'''
