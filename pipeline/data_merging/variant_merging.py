@@ -472,10 +472,10 @@ def add_leading_base(chr, pos, ref, alt, version="hg38"):
     pos = int(pos)
     empty_ref = False
     empty_alt = False
-    if ref == "-":
+    if isEmpty(ref):
         ref = ""
         empty_ref = True
-    if alt == "-":
+    if isEmpty(alt):
         alt = ""
         empty_alt = True
     if chr == "13":
@@ -497,6 +497,8 @@ def add_leading_base(chr, pos, ref, alt, version="hg38"):
         # and append it to the ref and alt
         leading_base = seq[brca_pos - 1]
         return (chr, str(pos - 1), leading_base + ref, leading_base + alt)
+    else:
+        raise Exception("add leading base called but both ref and alt were provided!")
 
 
 def variant_is_false(ref, alt):
@@ -987,14 +989,14 @@ def ref_correct(chr, pos, ref, alt, version="hg38"):
         print "%s:%s:%s>%s" % (chr, pos, ref, alt)
         raise Exception("ref not inside BRCA1 or BRCA2")
     if (genomeRef != ref):
-        pdb.set_trace()
+        logging.warning("genomeref not equal ref for: chr, pos, brca_pos, ref, genomeref, alt: %s, %s, %s, %s, %s, %s", chr, pos, brca_pos, ref, genomeRef, alt)
         return False
     else:
         return True
 
 
 def isEmpty(value):
-    return value == '-' or value is None or value == [] or value == ['-']
+    return value == '-' or value is None or value == [] or value == ['-'] or value == ''
 
 
 def prepare_variant_for_removal_and_log(original_hgvs, normalized_hgvs, items, bx_ids_for_variant, reason_for_discard, variants_to_remove):
