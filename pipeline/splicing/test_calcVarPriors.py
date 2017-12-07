@@ -23,6 +23,12 @@ class test_calcVarPriors(unittest.TestCase):
 
         self.numExons = {"BRCA1": 23,
                          "BRCA2": 27}
+
+        self.exonDonorBoundsBRCA1 = {"exon16": {"donorStart": 43070930,
+                                                "donorEnd": 43070922}}
+
+        self.exonDonorBoundsBRCA2 = {"exon15": {"donorStart": 32356607,
+                                                "donorEnd": 32356615}}
                            
     def test_checkSequence(self):
         '''Tests that checkSequence function categorized acceptable sequences correctly'''
@@ -189,7 +195,27 @@ class test_calcVarPriors(unittest.TestCase):
                 nextExonStart = varExons[nextExonKey]["exonStart"]
                 # cehcks that next exon does not start before current exon ends
                 self.assertGreater(nextExonStart, exonBounds["exonEnd"])
-        
+
+
+    def test_getRefSpliceDonorBoundaries(self):
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        self.variant["Gene_Symbol"] = "BRCA1"
+        spliceDonorBounds = calcVarPriors.getRefSpliceDonorBoundaries(self.variant)
+        exon = self.exonDonorBoundsBRCA1.keys()[0]
+        self.assertEquals(self.exonDonorBoundsBRCA1[exon]["donorStart"],
+                          spliceDonorBounds[exon]["donorStart"])
+        self.assertEquals(self.exonDonorBoundsBRCA1[exon]["donorEnd"],
+                          spliceDonorBounds[exon]["donorEnd"])
+
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        spliceDonorBounds = calcVarPriors.getRefSpliceDonorBoundaries(self.variant)
+        exon = self.exonDonorBoundsBRCA2.keys()[0]
+        self.assertEquals(self.exonDonorBoundsBRCA2[exon]["donorStart"],
+                          spliceDonorBounds[exon]["donorStart"])
+        self.assertEquals(self.exonDonorBoundsBRCA2[exon]["donorEnd"],
+                          spliceDonorBounds[exon]["donorEnd"])
+                
     def test_getVarLocation(self):
         '''
         Tests that:
