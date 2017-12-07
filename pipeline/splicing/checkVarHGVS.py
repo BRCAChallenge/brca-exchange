@@ -85,10 +85,7 @@ def checkVarHGVS(variant):
     '''
     Checks that ref and alt alleles for a variant are consistent with parsed HGVS_cDNA
     If consistent, returns True
-    Otherwise returns a dictionary with 2 entries
-    "Consistent":False
-    and
-    "varData": a list of information about the variant that includes:
+    Otherwise returns a list with information about the variant that includes:
         HGVS_cDNA, variant type, ref allele, alt allele, parsed cDNA ref allele, and parsed cDNA alt allele
     '''
     varInfo = getVarInfo(variant)
@@ -118,7 +115,6 @@ def checkVarHGVS(variant):
         tempVarGenAlt = varGenAlt[1:]
         varEqual = tempVarGenAlt == cDNARef
     else:
-        # varType == "ins":
         # compares cDNA alt allele with second base to end of genomic alt allele
         # first base of genomic alt allele is unchanged between genomic ref and alt alleles
         # and HGVS_cDNA does not include unchanged bases
@@ -129,7 +125,6 @@ def checkVarHGVS(variant):
     if varEqual == True:
         return varEqual
     else:
-        # varEqual == False
         varData = [varInfo["varGene"],
                    varInfo["varcDNAHGVS"],
                    varType,
