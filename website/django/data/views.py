@@ -52,25 +52,31 @@ def variant_counts(request):
     enigma_count = query.count()
     enigma_pathogenic_count = query.filter(Pathogenicity_expert='Pathogenic').count()
     enigma_benign_count = query.filter(Pathogenicity_expert__contains='Benign').count()
+    enigma_likely_benign_count = query.filter(Pathogenicity_expert__contains='Likely benign').count()
     query_brca1 = query.filter(Gene_Symbol='BRCA1')
     brca1_enigma_pathogenic_count = query_brca1.filter(Pathogenicity_expert='Pathogenic').count()
     brca1_enigma_benign_count = query_brca1.filter(Pathogenicity_expert__contains='Benign').count()
+    brca1_enigma_likely_benign_count = query_brca1.filter(Pathogenicity_expert__contains='Likely benign').count()
     query_brca2 = query.filter(Gene_Symbol='BRCA2')
     brca2_enigma_pathogenic_count = query_brca2.filter(Pathogenicity_expert='Pathogenic').count()
     brca2_enigma_benign_count = query_brca2.filter(Pathogenicity_expert__contains='Benign').count()
+    brca2_enigma_likely_benign_count = query_brca2.filter(Pathogenicity_expert__contains='Likely benign').count()
     response = JsonResponse({
         "total": total_count,
         "brca1": {
             "total": brca1_count,
             "pathogenic": brca1_enigma_pathogenic_count,
-            "benign": brca1_enigma_benign_count },
+            "benign": brca1_enigma_benign_count,
+            "likelyBenign": brca1_enigma_likely_benign_count },
         "brca2": {
             "total": brca2_count,
             "pathogenic": brca2_enigma_pathogenic_count,
-            "benign": brca2_enigma_benign_count },
+            "benign": brca2_enigma_benign_count,
+            "likelyBenign": brca2_enigma_likely_benign_count },
         "enigma": enigma_count,
         "enigmaPathogenic": enigma_pathogenic_count,
-        "enigmaBenign": enigma_benign_count})
+        "enigmaBenign": enigma_benign_count,
+        "enigmaLikelyBenign": enigma_likely_benign_count })
     response['Access-Control-Allow-Origin'] = '*'
     return response
 

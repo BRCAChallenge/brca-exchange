@@ -136,7 +136,7 @@ def getVarType(variant):
     else:
         # not acceptable ref seq and alt seq, variant will not be handled by code
         return "other"
-        
+
 
 def getVarLocation(variant):
     '''Given a variant, returns location of variant using Ensembl API for variant annotation'''
