@@ -13,21 +13,13 @@ import csv
 def checkSequence(sequence):
     '''Checks if a given sequence contains acceptable nucleotides returns True if sequence is comprised entirely of acceptable bases'''
     acceptableBases = ["A", "C", "T", "G", "N", "R", "Y"]
-    badBases = 0
     if len(sequence) > 0:
         for base in sequence:
             if base not in acceptableBases:
-                badBases += 1
-            if badBases == 0:
-                acceptableSequence = True
-            else:
-                # badBases > 0
-                acceptableSequence = False
+                return False
+        return True
     else:
-        # len(sequence) = 0
-        acceptableSequence = False
-        
-    return acceptableSequence
+        return False
 
 
 def getVarStrand(variant):
@@ -35,14 +27,11 @@ def getVarStrand(variant):
     varGene = variant["Gene_Symbol"]
 
     if varGene == "BRCA1": 
-        varStrand = '-'
+        return '-'
     elif varGene == "BRCA2":
-        varStrand = '+'
+        return '+'
     else:
-        # varGene not BRCA1 or BRCA2
-        varStrand = ""
-
-    return varStrand
+        return ""
 
 
 def getVarType(variant):
@@ -59,29 +48,27 @@ def getVarType(variant):
     if acceptableRefSeq == True and acceptableAltSeq == True: 
         if len(varRef) == len(varAlt):
             if len(varRef) == 1:
-                varType = "substitution"
+                return "substitution"
             else:
-                varType = "delins"
+                return "delins"
         else:
             # variant is an indel or other variant type
             if len(varRef) > len(varAlt):
                 if len(varAlt) == 1:
-                    varType = "deletion"
+                    return "deletion"
                 else:
-                    varType = "delins"
+                    return "delins"
             elif len(varRef) < len(varAlt):
                 if len(varRef) == 1:
-                    varType = "insertion"
+                    return "insertion"
                 else:
-                    varType = "delins"
+                    return "delins"
             else:
                 # variant is not an indel or substitution variant
-                varType = "other"
+                return "other"
     else:
         # not acceptable ref seq and alt seq, variant will not be handled by code
-        varType = "other"
-        
-    return varType
+        return "other"
 
 
 def getVarLocation(variant):
