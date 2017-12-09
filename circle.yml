@@ -14,6 +14,8 @@ test:
         - npm run lint -- -f junit -o $CIRCLE_TEST_REPORTS/lint-results.xml
         - npm run test -- -R xunit --reporter-options output=$CIRCLE_TEST_REPORTS/test-results.xml
         - pip install -r ../test-requirements.txt
+        - git clone https://github.com/counsyl/hgvs.git
+        - cd hgvs && git checkout aebe5bd9683f4b5937fd653ce4b13fcd4f3ebb10 && python setup.py install
         - cd django/ && python manage.py migrate && python manage.py test
         - cd ../pipeline/data && bash ./getdata
         - cd .. && pytest --ignore=website/ --junitxml=${CIRCLE_TEST_REPORTS}/pytest-results.xml
