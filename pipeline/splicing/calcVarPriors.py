@@ -190,7 +190,6 @@ def getRefSpliceDonorBoundaries(variant):
             donorStart = exonEnd - 3 + 1
             donorEnd = exonEnd + 6
         else:
-            # varStrand == "-"
             donorStart = exonEnd + 3
             donorEnd = exonEnd - 6 + 1
         donorBoundaries[exon] = {"donorStart": donorStart,
@@ -198,7 +197,24 @@ def getRefSpliceDonorBoundaries(variant):
 
     return donorBoundaries
 
+def getRefSpliceAcceptorBoundaries(variant):
+    varExons = getExonBoundaries(variant)
+    varStrand = getVarStrand(variant)
+    acceptorBoundaries = {}
+    for exon in varExons.keys():
+        exonStart = int(varExons[exon]["exonStart"])
+        if varStrand == "+":
+            acceptorStart = exonStart - 20 + 1
+            acceptorEnd = exonStart + 3
+        else:
+            acceptorStart = exonStart + 20
+            acceptorEnd = exonStart - 3 + 1
+        acceptorBoundaries[exon] = {"acceptorStart": acceptorStart,
+                                    "acceptorEnd": acceptorEnd}
 
+    return acceptorBoundaries
+
+            
 def getVarLocation(variant):
     '''Given a variant, returns location of variant using Ensembl API for variant annotation'''
     # TO DO - Implement this function using Ensembl API so that variant location is identified
