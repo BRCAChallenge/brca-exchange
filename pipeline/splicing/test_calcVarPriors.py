@@ -29,6 +29,12 @@ class test_calcVarPriors(unittest.TestCase):
 
         self.exonDonorBoundsBRCA2 = {"exon15": {"donorStart": 32356607,
                                                 "donorEnd": 32356615}}
+
+        self.exonAcceptorBoundsBRCA1 = {"exon21": {"acceptorStart": 43051137,
+                                                   "acceptorEnd": 43051115}}
+
+        self.exonAcceptorBoundsBRCA2 = {"exon20": {"acceptorStart": 32370936,
+                                                   "acceptorEnd": 32370958}}
                            
     def test_checkSequence(self):
         '''Tests that checkSequence function categorized acceptable sequences correctly'''
@@ -215,6 +221,27 @@ class test_calcVarPriors(unittest.TestCase):
                           spliceDonorBounds[exon]["donorStart"])
         self.assertEquals(self.exonDonorBoundsBRCA2[exon]["donorEnd"],
                           spliceDonorBounds[exon]["donorEnd"])
+
+
+    def test_getRefSpliceAcceptorBoundaries(self):
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        self.variant["Gene_Symbol"] = "BRCA1"
+        spliceAcceptorBounds = calcVarPriors.getRefSpliceAcceptorBoundaries(self.variant)
+        exon = self.exonAcceptorBoundsBRCA1.keys()[0]
+        self.assertEquals(self.exonAcceptorBoundsBRCA1[exon]["acceptorStart"],
+                          spliceAcceptorBounds[exon]["acceptorStart"])
+        self.assertEquals(self.exonAcceptorBoundsBRCA1[exon]["acceptorEnd"],
+                          spliceAcceptorBounds[exon]["acceptorEnd"])
+
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        spliceAcceptorBounds = calcVarPriors.getRefSpliceAcceptorBoundaries(self.variant)
+        exon = self.exonAcceptorBoundsBRCA2.keys()[0]
+        self.assertEquals(self.exonAcceptorBoundsBRCA2[exon]["acceptorStart"],
+                          spliceAcceptorBounds[exon]["acceptorStart"])
+        self.assertEquals(self.exonAcceptorBoundsBRCA2[exon]["acceptorEnd"],
+                          spliceAcceptorBounds[exon]["acceptorEnd"])
+        
                 
     def test_getVarLocation(self):
         '''
