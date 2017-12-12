@@ -187,6 +187,55 @@ class test_calcVarPriors(unittest.TestCase):
         varOutBounds = calcVarPriors.varOutsideBoundaries(self.variant)
         self.assertFalse(varOutBounds)
 
+
+    def test_varInUTR(self):
+        '''Tests that variants in 5' and 3' UTR are correctly identified'''
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        self.variant["Gene_Symbol"] = "BRCA1"
+
+        # checks for BRCA1 variant in 5' UTR
+        self.variant["Pos"] = "43124110"
+        varInUTR = calcVarPriors.varInUTR(self.variant)
+        self.assertTrue(varInUTR)
+
+        # checks for BRCA1 variant in 3' UTR
+        self.variant["Pos"] = "43045668"
+        varInUTR = calcVarPriors.varInUTR(self.variant)
+        self.assertTrue(varInUTR)
+
+        # checks for BRCA1 variant in exon
+        self.variant["Pos"] = "43049184"
+        varInUTR = calcVarPriors.varInUTR(self.variant)
+        self.assertFalse(varInUTR)
+
+        # checks for BRCA1 variant in intron
+        self.variant["Pos"] = "43049213"
+        varInUTR = calcVarPriors.varInUTR(self.variant)
+        self.assertFalse(varInUTR)
+
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["Gene_Symbol"] = "BRCA2"
+
+        # checks for BRCA2 variant in 5' UTR
+        self.variant["Pos"] = "32316434"
+        varInUTR = calcVarPriors.varInUTR(self.variant)
+        self.assertTrue(varInUTR)
+
+        # checks for BRCA2 variant in 3' UTR
+        self.variant["Pos"] = "32398781"
+        varInUTR = calcVarPriors.varInUTR(self.variant)
+        self.assertTrue(varInUTR)
+
+        # checks for BRCA2 variant in exon
+        self.variant["Pos"] = "32394719"
+        varInUTR = calcVarPriors.varInUTR(self.variant)
+        self.assertFalse(varInUTR)
+
+        # checks for BRCA2 variant in intron
+        self.variant["Pos"] = "32396875"
+        varInUTR = calcVarPriors.varInUTR(self.variant)
+        self.assertFalse(varInUTR)
+
     def test_getExonBoundaries(self):
         '''
         Tests that:
