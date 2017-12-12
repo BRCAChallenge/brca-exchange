@@ -159,8 +159,36 @@ def varOutsideBoundaries(variant):
             return True
 
     return False
-            
-    
+
+
+def varInUTR(variant):
+    '''
+    Given a variant, if variant is inside transcript boundaries, 
+    determines if variant is in 3' or 5' UTR of transcript
+    '''
+    varGenPos = int(variant["Pos"])
+    varTranscript = variant["Reference_Sequence"]
+    transcriptData = fetch_gene_coordinates(varTranscript)
+    varStrand = getVarStrand(variant)
+    varOutBounds = varOutsideBoundaries(variant)
+    if varOutBounds == False:
+        if varStrand == "+":
+            tsnStart = int(transcriptData["cdsStart"])
+            tsnEnd = int(transcriptData["cdsEnd"])
+            if varGenPos < tsnStart:
+                return True
+            elif varGenPos > tsnEnd:
+                return True
+        else:
+            tsnStart = int(transcriptData["cdsEnd"])
+            tsnEnd = int(transcriptData["cdsStart"])
+            if varGenPos > tsnStart:
+                return True
+            elif varGenPos < tsnEnd:
+                return True
+        return False
+                
+
 def getExonBoundaries(variant):
     '''
     Given a variant, returns the exon boundaries for the variant's transcript in a dictionary with format:
@@ -201,6 +229,7 @@ def getExonBoundaries(variant):
 
     return varExons
 
+
 def getRefSpliceDonorBoundaries(variant):
     '''
     Given a variant, returns the splice donor boundaries 
@@ -223,6 +252,7 @@ def getRefSpliceDonorBoundaries(variant):
                                  "donorEnd": donorEnd}
 
     return donorBoundaries
+
 
 def getRefSpliceAcceptorBoundaries(variant):
     '''
@@ -253,7 +283,6 @@ def varInExon(variant):
     Given a variant, determines if variant genomic position is inside transcript boundaries
     AND if variant is in an exon
     Returns true if variant is in an exon
-    Return false if variant is in an intron
     '''
     varGenPos = int(variant["Pos"])
     varExons = getExonBoundaries(variant)
@@ -273,6 +302,7 @@ def varInExon(variant):
     else:
         return "varOutBounds"    
 
+    
 def varInSpliceDonor(variant):
     '''
     Given a variant, determines if a variant is in reference transcript's splice donor region
@@ -292,6 +322,7 @@ def varInSpliceDonor(variant):
             if varGenPos <= donorStart and varGenPos >= donorEnd:
                 return True
     return False
+
 
 def varInSpliceAcceptor(variant):
     '''
