@@ -138,7 +138,27 @@ def getVarType(variant):
     else:
         # not acceptable ref seq and alt seq, variant will not be handled by code
         return "other"
-       
+
+
+def varOutsideBoundaries(variant):
+    '''Given a variant, determines if variant is outside transcript boundaries'''
+    varGenPos = int(variant["Pos"])
+    varTranscript = variant["Reference_Sequence"]
+    transcriptData = fetch_gene_coordinates(str(varTranscript))
+    varStrand = getVarStrand(variant)
+    if varStrand == "+":
+        txnStart = int(transcriptData["txStart"])
+        txnEnd = int(transcriptData["txEnd"])
+        if varGenPos < txnStart or varGenPos > txnEnd:
+            return True
+    else:
+        txnStart = int(transcriptData["txEnd"])
+        txnEnd = int(transcriptData["txStart"])
+        if varGenPos > txnStart or varGenPos < txnEnd:
+            return True
+
+    return False
+            
 
 def getExonBoundaries(variant):
     '''
@@ -181,6 +201,12 @@ def getExonBoundaries(variant):
     return varExons
 
 def getRefSpliceDonorBoundaries(variant):
+    '''
+    Given a variant, returns the splice donor boundaries 
+    (splice donor region is last 3 bases in exon and frist 6 bases in intron) 
+    for the variant's transcript in a dictionary with the format:
+    key = exon number, value = dictionary with donor start and donor end for exon
+    '''
     varExons = getExonBoundaries(variant)
     varStrand = getVarStrand(variant)
     donorBoundaries = {}
@@ -198,6 +224,12 @@ def getRefSpliceDonorBoundaries(variant):
     return donorBoundaries
 
 def getRefSpliceAcceptorBoundaries(variant):
+    '''
+    Given a variant, returns the splice acceptor boundaries
+    (splice acceptor region is 20 bases before exon and first 3 bases in exon)
+    for the variant's transcript in a dictionary with the format:
+    key = exon number, value = a dictionary with acceptor start and acceptor end for exon
+    '''
     varExons = getExonBoundaries(variant)
     varStrand = getVarStrand(variant)
     acceptorBoundaries = {}
@@ -214,7 +246,73 @@ def getRefSpliceAcceptorBoundaries(variant):
 
     return acceptorBoundaries
 
-            
+
+def varInExon(variant):
+    '''
+    Given a variant, determines if variant genomic position is inside transcript boundaries
+    AND if variant is in an exon
+    Returns true if variant is in an exon
+    Return false if variant is in an intron
+    '''
+    varGenPos = int(variant["Pos"])
+    varExons = getExonBoundaries(variant)
+    varStrand = getVarStrand(variant)
+    varOutBounds = varOutsideBoundaries(variant)
+    if varOutBounds == False:
+        for exon in varExons.keys():
+            exonStart = varExons[exon]["exonStart"]
+            exonEnd = varExons[exon]["exonEnd"]
+            if varStrand == "+":
+                if varGenPos >= exonStart and varGenPos <= exonEnd:
+                    return True
+            else:
+                if varGenPos <= exonStart and varGenPos >= exonEnd:
+                    return True
+        return False
+    else:
+        return "varOutBounds"    
+
+def varInSpliceDonor(variant):
+    '''
+    Given a variant, determines if a variant is in reference transcript's splice donor region
+    splice donor region = last 3 bases in exon and first 6 bases in intron
+    Returns True if variant in splice donor region
+    '''
+    varGenPos = int(variant["Pos"])
+    varStrand = getVarStrand(variant)
+    donorBounds = getRefSpliceDonorBoundaries(variant)
+    for exon in donorBounds.keys():
+        donorStart = donorBounds[exon]["donorStart"]
+        donorEnd = donorBounds[exon]["donorEnd"]
+        if varStrand == "+":
+            if varGenPos >= donorStart and varGenPos <= donorEnd:
+                return True
+        else:
+            if varGenPos <= donorStart and varGenPos >= donorEnd:
+                return True
+    return False
+
+def varInSpliceAcceptor(variant):
+    '''
+    Given a variant, determines if a variant is in reference transcript's splice acceptor region
+    splice acceptor region = 20 bases preceding exon and first 3 bases in exon
+    Returns True if variant in splice acceptor region
+    '''
+    varGenPos = int(variant["Pos"])
+    varStrand = getVarStrand(variant)
+    acceptorBounds = getRefSpliceAcceptorBoundaries(variant)
+    for exon in acceptorBounds.keys():
+        acceptorStart = acceptorBounds[exon]["acceptorStart"]
+        acceptorEnd = acceptorBounds[exon]["acceptorEnd"]
+        if varStrand == "+":
+            if varGenPos >= acceptorStart and varGenPos <= acceptorEnd:
+                return True
+        else:
+            if varGenPos <= acceptorStart and varGenPos >= acceptorEnd:
+                return True
+    return False
+                
+
 def getVarLocation(variant):
     '''Given a variant, returns location of variant using Ensembl API for variant annotation'''
     # TO DO - Implement this function using Ensembl API so that variant location is identified
