@@ -10,6 +10,9 @@ PREVIOUS_RELEASE_TAR=/files/previous_release.tar.gz
 
 RELEASE_NOTES=/files/release_notes.txt
 
+CODE_MNT=$(mount | grep /opt/brca-exchange)
+[ -z "${CODE_MNT}" ] || echo "WARNING: BRCA Code base mounted from host file system"
+
 cd /opt/brca-exchange
 
 echo "Running brca exchange pipeline:"
