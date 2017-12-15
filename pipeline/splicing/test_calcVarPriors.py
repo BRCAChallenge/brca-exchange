@@ -108,7 +108,42 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Alt"] = "GT"
         varType = calcVarPriors.getVarType(self.variant)
         self.assertEquals(varType, self.varTypes["delins"])
-    
+
+    def test_getVarConsequences(self):
+        '''
+        Tests that:
+        1. Variants with non-BRCA1/BRCA2 chromosomes are skipped
+        2. Variants with Alt alleles that are not one of the 4 canonical bases are skipped
+        '''
+
+        self.variant["Chr"] = ""
+        varCons = calcVarPriors.getVarConsequences(self.variant)
+        self.assertEquals(varCons, "unable_to_determine")
+
+        self.variant["Chr"] = "41160094"
+        varCons = calcVarPriors.getVarConsequences(self.variant)
+        self.assertEquals(varCons, "unable_to_determine")
+
+        self.variant["Chr"] = "chr17:g.43008077:TAGG"
+        varCons = calcVarPriors.getVarConsequences(self.variant)
+        self.assertEquals(varCons, "unable_to_determine")
+
+        self.variant["Chr"] = "13"
+        self.variant["Hg38_Start"] = "32339320"
+        self.variant["Hg38_End"] = "32339320"
+        self.variant["Alt"] = "R"
+        varCons = calcVarPriors.getVarConsequences(self.variant)
+        self.assertEquals(varCons, "unable_to_determine")
+
+        self.variant["Alt"] = "-"
+        varCons = calcVarPriors.getVarConsequences(self.variant)
+        self.assertEquals(varCons, "unable_to_determine")
+
+        self.variant["Alt"] = "38413620"
+        varCons = calcVarPriors.getVarConsequences(self.variant)
+        self.assertEquals(varCons, "unable_to_determine")
+
+        
     def test_getVarLocation(self):
         '''
         Tests that:
