@@ -20,6 +20,9 @@ from calcMaxEntScanMeanStd import fetch_gene_coordinates
 BRCA1_CANONICAL = "ENST00000357654"
 BRCA2_CANONICAL = "ENST00000380152"
 
+# Rest Ensembl server
+SERVER = "http://rest.ensembl.org"
+
 def checkSequence(sequence):
     '''Checks if a given sequence contains acceptable nucleotides returns True if sequence is comprised entirely of acceptable bases'''
     acceptableBases = ["A", "C", "T", "G", "N", "R", "Y"]
@@ -68,8 +71,6 @@ def getVarConsequences(variant):
     using variant chromosome, Hg38 start, Hg38 end, and alternate allele as input for API
     returns a string detailing consequences of variant
     '''
-
-    server = "http://rest.ensembl.org"
     ext = "/vep/human/region/"
 
     # varStrand always 1 because all alternate alleles and positions refer to the plus strand
@@ -235,6 +236,10 @@ def getRefSpliceDonorBoundaries(variant):
     key = exon number, value = dictionary with donor start and donor end for exon
     '''
     varExons = getExonBoundaries(variant)
+    if variant["Gene_Symbol"] == "BRCA1":
+        del varExons["exon24"]
+    elif variant["Gene_Symbol"] == "BRCA2":
+        del varExons["exon27"]
     varStrand = getVarStrand(variant)
     donorBoundaries = {}
     for exon in varExons.keys():
@@ -258,6 +263,8 @@ def getRefSpliceAcceptorBoundaries(variant):
     key = exon number, value = a dictionary with acceptor start and acceptor end for exon
     '''
     varExons = getExonBoundaries(variant)
+    if variant["Gene_Symbol"] == "BRCA1" or variant["Gene_Symbol"] == "BRCA2":
+        del varExons["exon1"]
     varStrand = getVarStrand(variant)
     acceptorBoundaries = {}
     for exon in varExons.keys():
@@ -265,7 +272,7 @@ def getRefSpliceAcceptorBoundaries(variant):
         if varStrand == "+":
             acceptorStart = exonStart - 20 + 1
             acceptorEnd = exonStart + 3
-        else:
+        else:            
             acceptorStart = exonStart + 20
             acceptorEnd = exonStart - 3 + 1
         acceptorBoundaries[exon] = {"acceptorStart": acceptorStart,
