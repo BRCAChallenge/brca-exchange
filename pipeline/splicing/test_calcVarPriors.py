@@ -276,7 +276,7 @@ class test_calcVarPriors(unittest.TestCase):
             nextExonKey = "exon" + nextExonNum
             if nextExonNum <= self.numExons["BRCA2"]:
                 nextExonStart = varExons[nextExonKey]["exonStart"]
-                # cehcks that next exon does not start before current exon ends
+                # checks that next exon does not start before current exon ends
                 self.assertGreater(nextExonStart, exonBounds["exonEnd"])
 
 
@@ -288,6 +288,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
         spliceDonorBounds = calcVarPriors.getRefSpliceDonorBoundaries(self.variant)
+        # checks that region after last exon is not considered a splice donor region
+        self.assertNotIn("exon24", spliceDonorBounds)
         # to find exon specified in setUp function
         exon = self.exonDonorBoundsBRCA1.keys()[0]
         self.assertEquals(self.exonDonorBoundsBRCA1[exon]["donorStart"],
@@ -298,6 +300,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
         spliceDonorBounds = calcVarPriors.getRefSpliceDonorBoundaries(self.variant)
+        # checks that region after last exon is not considered a splice donor region
+        self.assertNotIn("exon27", spliceDonorBounds)
         # to find exon specified in setUp function
         exon = self.exonDonorBoundsBRCA2.keys()[0]
         self.assertEquals(self.exonDonorBoundsBRCA2[exon]["donorStart"],
@@ -314,6 +318,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
         spliceAcceptorBounds = calcVarPriors.getRefSpliceAcceptorBoundaries(self.variant)
+        # checks that region before first exon is not considered a splice acceptor region
+        self.assertNotIn("exon1", spliceAcceptorBounds)
         # to find exon specified in setUp function
         exon = self.exonAcceptorBoundsBRCA1.keys()[0]
         self.assertEquals(self.exonAcceptorBoundsBRCA1[exon]["acceptorStart"],
@@ -324,6 +330,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
         spliceAcceptorBounds = calcVarPriors.getRefSpliceAcceptorBoundaries(self.variant)
+        # checks that region before first exon is not considered a splice acceptor region
+        self.assertNotIn("exon1", spliceAcceptorBounds)
         # to find exon specified in setUp function
         exon = self.exonAcceptorBoundsBRCA2.keys()[0]
         self.assertEquals(self.exonAcceptorBoundsBRCA2[exon]["acceptorStart"],
@@ -408,6 +416,11 @@ class test_calcVarPriors(unittest.TestCase):
         inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
         self.assertFalse(inSpliceDonor)
 
+        # checks that region after exon 24 is  NOT counted as in splice donor
+        self.variant["Pos"] = "43044294"
+        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
+        self.assertFalse(inSpliceDonor)
+
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Chr"] = "13"
@@ -449,6 +462,11 @@ class test_calcVarPriors(unittest.TestCase):
 
         # checks that 4th to last base in exon is NOT counted as in splice donor
         self.variant["Pos"] = "32370554"
+        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
+        self.assertFalse(inSpliceDonor)
+
+        # checks that region after  exon 27 is NOT counted as in splice donor
+        self.variant["Pos"] = "32399672"
         inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
         self.assertFalse(inSpliceDonor)
 
@@ -498,7 +516,12 @@ class test_calcVarPriors(unittest.TestCase):
 
         # checks that 4th base in exon is NOT counted as in splice acceptor
         self.variant["Pos"] = "43063948"
-        inSpliceAcceptor = calcVarPriors.varInSpliceDonor(self.variant)
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
+        self.assertFalse(inSpliceAcceptor)
+
+        # checks that region before exon 1 is NOT counted as in splice acceptor
+        self.variant["Pos"] = "431254483"
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
         self.assertFalse(inSpliceAcceptor)
 
         self.variant["Reference_Sequence"] = "NM_000059.3"
@@ -541,6 +564,11 @@ class test_calcVarPriors(unittest.TestCase):
 
         # checks that 4th base in exon is NOT counted as in splice acceptor
         self.variant["Pos"] = "32362526"
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
+        self.assertFalse(inSpliceAcceptor)
+
+        # checks that region before exon 1 is NOT counted as in splice acceptor
+        self.variant["Pos"] = "32315479"
         inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
         self.assertFalse(inSpliceAcceptor)
         
