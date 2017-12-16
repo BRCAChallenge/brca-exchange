@@ -238,6 +238,10 @@ def getRefSpliceDonorBoundaries(variant):
     key = exon number, value = dictionary with donor start and donor end for exon
     '''
     varExons = getExonBoundaries(variant)
+    if variant["Gene_Symbol"] == "BRCA1":
+        del varExons["exon24"]
+    elif variant["Gene_Symbol"] == "BRCA2":
+        del varExons["exon27"]
     varStrand = getVarStrand(variant)
     donorBoundaries = {}
     for exon in varExons.keys():
@@ -262,6 +266,8 @@ def getRefSpliceAcceptorBoundaries(variant):
     key = exon number, value = a dictionary with acceptor start and acceptor end for exon
     '''
     varExons = getExonBoundaries(variant)
+    if variant["Gene_Symbol"] == "BRCA1" or variant["Gene_Symbol"] == "BRCA2":
+        del varExons["exon1"]
     varStrand = getVarStrand(variant)
     acceptorBoundaries = {}
     for exon in varExons.keys():
@@ -269,7 +275,7 @@ def getRefSpliceAcceptorBoundaries(variant):
         if varStrand == "+":
             acceptorStart = exonStart - 20 + 1
             acceptorEnd = exonStart + 3
-        else:
+        else:            
             acceptorStart = exonStart + 20
             acceptorEnd = exonStart - 3 + 1
         acceptorBoundaries[exon] = {"acceptorStart": acceptorStart,
