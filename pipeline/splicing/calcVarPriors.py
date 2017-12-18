@@ -47,9 +47,9 @@ brca2CIDomains = {"enigma": {"dnb": {"domStart": 32356433,
                                           "domEnd": 32398428}}}
 
 # BRCA1/BRCA2 grey xone boundaries
-greyZones = {"BRCA1": {"greyZoneStart": 43045704,
-                       "greyZoneEnd": 43045681},   # BRCA1 grey zone boundaries will be chagned based on email discussion
-             "BRCA2": {"greyZonStart": 32398438,
+greyZones = {"BRCA1": {"greyZoneStart": 43045707,
+                       "greyZoneEnd": 43045705},   # BRCA1 grey zone boundaries will be chagned based on email discussion
+             "BRCA2": {"greyZoneStart": 32398438,
                        "greyZoneEnd": 32398488}}
 
 
@@ -396,7 +396,31 @@ def varInCiDomain(variant, boundaries):
             if varGenPos >= domainStart and varGenPos <= domainEnd:
                 return True
     return False
-                
+
+
+def varInGreyZone(variant):
+    '''
+    Given a variant, determines if variant is before, in, or after the grey zone
+    Returns false if variant is before the grey zone
+    Returns "grey_zone_variant" if variant is in the grey zone
+    Return "after_grey_zone_variant" if variant is after the grey zone
+    '''
+    varGenPos = int(variant["Pos"])
+    varGene = variant["Gene_Symbol"]
+    greyZoneStart = greyZones[varGene]["greyZoneStart"]
+    greyZoneEnd = greyZones[varGene]["greyZoneEnd"]
+    if varGene == "BRCA1":
+        if varGenPos <= greyZoneStart and varGenPos >= greyZoneEnd:
+            return "grey_zone_variant"
+        elif varGenPos < greyZoneEnd:
+            return "after_grey_zone_variant"
+    elif varGene == "BRCA2":
+        if varGenPos >= greyZoneStart and varGenPos <= greyZoneEnd:
+            return "grey_zone_variant"
+        elif varGenPos > greyZoneEnd:
+            return "after_grey_zone_variant"
+    return False
+        
 
 def getVarLocation(variant):
     '''Given a variant, returns location of variant using Ensembl API for variant annotation'''
