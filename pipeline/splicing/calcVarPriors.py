@@ -23,22 +23,28 @@ BRCA2_CANONICAL = "ENST00000380152"
 # Rest Ensembl server
 SERVER = "http://rest.ensembl.org"
 
-# PRIORS clinically important domains
-priorsBRCA1CIDomains = {"initiation": {"genStart": 43124096,
-                                       "genEnd": 43124094},
-                        "ring": {"genStart": 43124084,
-                                 "genEnd": 43104875},
-                        "brct": {"genStart": 43070966,
-                                 "genEnd": 43045693}}
+# clinically important domain boundaries
+brca1CIDomains = {"enigma": {"ring": {"genStart": 43124096,
+                                      "genEnd": 43104260},
+                             "brct": {"genStart": 43070966,
+                                      "genEnd": 43045681}},   # brct genEnd will be changed soon based on email discussion
+                  "priors": {"initiation": {"genStart": 43124096,
+                                            "genEnd": 43124094},
+                             "ring": {"genStart": 43124084,
+                                      "genEnd": 43104875},
+                             "brct": {"genStart": 43070966,
+                                      "genEnd": 43045693}}}
 
-priorsBRCA2CIDomains = {"initiation": {"genStart": 32316461,
-                                       "genEnd": 32316463},
-                        "palb2": {"genStart": 32316491,
-                                  "genEnd": 32319108},
-                        "dnb": {"genStart": 32356433,
-                                "genEnd": 32396954},
-                        "tr2/rad5": {"genStart": 32398318,
-                                     "genEnd": 32398428}}
+brca2CIDomains = {"enigma": {"dnb": {"genStart": 32356433,
+                                     "genEnd": 32396954}},
+                  "priors": {"initiation": {"genStart": 32316461,
+                                            "genEnd": 32316463},
+                             "palb2": {"genStart": 32316491,
+                                       "genEnd": 32319108},
+                             "dnb": {"genStart": 32356433,
+                                     "genEnd": 32396954},
+                             "tr2/rad5": {"genStart": 32398318,
+                                          "genEnd": 32398428}}}
 
 
 def checkSequence(sequence):
@@ -363,23 +369,24 @@ def varInSpliceAcceptor(variant):
                 return True
     return False
 
-def varInPriorsCI(variant):
+def varInCiDomain(variant, boundaries):
     '''
-    Given a variant, determines if variant is in clinically important domains defined by PRIORS website
+    Given a variant, determines if variant is in a clinically important domain
+    Second argument determiens which boundaries (ENIGMA or PRIORS) are used for CI domains
     Returns True if variant in CI domain
     '''
     varGenPos = int(variant["Pos"])
     varGene = variant["Gene_Symbol"]
     if varGene == "BRCA1":
-        for domain in priorsBRCA1CIDomains.keys():
-            domainStart = priorsBRCA1CIDomains[domain]["genStart"]
-            domainEnd =  priorsBRCA1CIDomains[domain]["genEnd"]
-            if varGenPos <=  domainStart and varGenPos >= domainEnd:
+        for domain in brca1CIDomains[boundaries].keys():
+            domainStart = brca1CIDomains[boundaries][domain]["genStart"]
+            domainEnd = brca1CIDomains[boundaries][domain]["genEnd"]
+            if varGenPos <= domainStart and varGenPos >= domainEnd:
                 return True
     elif varGene == "BRCA2":
-        for domain in priorsBRCA2CIDomains.keys():
-            domainStart = priorsBRCA2CIDomains[domain]["genStart"]
-            domainEnd = priorsBRCA2CIDomains[domain]["genEnd"]
+        for domain in brca2CIDomains[boundaries].keys():
+            domainStart = brca2CIDomains[boundaries][domain]["genStart"]
+            domainEnd = brca2CIDomains[boundaries][domain]["genEnd"]
             if varGenPos >= domainStart and varGenPos <= domainEnd:
                 return True
     return False

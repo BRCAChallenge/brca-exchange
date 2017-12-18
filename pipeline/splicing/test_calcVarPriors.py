@@ -573,55 +573,88 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertFalse(inSpliceAcceptor)
 
 
-    def test_varInPriorsCI(self):
-        '''Tests that variant is correctly identified as in or NOT in CI domain as defined by PRIORS webiste'''
+    def testVarInEnigmaCiDomains(self):
+        boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
+
+        # checks variant in BRCA 1 RING domain is identified as in ENIGMA CI domain
+        self.variant["Pos"] = "43124089"
+        inEnigmaCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
+        self.assertTrue(inEnigmaCI)
+
+        # checks variant in BRCA1 BRCT domain is identified as in ENIGMA CI domain
+        self.variant["Pos"] = "43070945"
+        inEnigmaCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
+        self.assertTrue(inEnigmaCI)
+
+        # checks variant NOT in BRCA1 CI domain is NOT identified as in ENIGMA CI domain
+        self.variant["Pos"] = "43097274"
+        inEnigmaCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
+        self.assertFalse(inEnigmaCI)
+
+        self.variant["Gene_Symbol"] = "BRCA2"
+
+        # checks variant in BRCA2 DNB domain is identified as in ENIGMA CI domain
+        self.variant["Pos"] = "32379809"
+        inEnigmaCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
+        self.assertTrue(inEnigmaCI)
+
+        # checks variant NOT in BRCA2 CI domain is NOT identified as in ENIGMA CI domain
+        self.variant["Pos"] = "32398354"
+        inEnigmaCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
+        self.assertFalse(inEnigmaCI)
         
-        # checks variant in BRCA1 initiation domain is identified as in CI domain
+        
+    def test_varInPriorsCiDomain(self):
+        '''Tests that variant is correctly identified as in or NOT in CI domain as defined by PRIORS webiste'''
+        boundaries = "priors"
+        self.variant["Gene_Symbol"] = "BRCA1"
+
+        # checks variant in BRCA1 initiation domain is identified as in PRIORS CI domain
         self.variant["Pos"] = "43124096"
-        inPriorsCI = calcVarPriors.varInPriorsCI(self.variant)
+        inPriorsCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
         self.assertTrue(inPriorsCI)
 
-        # checks variant in BRCA1 RING domain is identified as in CI domain
+        # checks variant in BRCA1 RING domain is identified as in PRIORS CI domain
         self.variant["Pos"] = "43115746"
-        inPriorsCI = calcVarPriors.varInPriorsCI(self.variant)
+        inPriorsCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
         self.assertTrue(inPriorsCI)
 
-        # checks variant in BRCA1 BRCT domain is identified as in CI domain
+        # checks variant in BRCA1 BRCT domain is identified as in PRIORS CI domain
         self.variant["Pos"] = "43057092"
-        inPriorsCI = calcVarPriors.varInPriorsCI(self.variant)
+        inPriorsCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
         self.assertTrue(inPriorsCI)
 
-        # checks that variant NOT in BRCA1 CI domain is NOT identified as in CI domain
-        self.variant["Pos"] = "43091014"
-        inPriorsCI = calcVarPriors.varInPriorsCI(self.variant)
+        # checks that variant NOT in BRCA1 CI domain is NOT identified as in PRIORS CI domain
+        self.variant["Pos"] = "43124090"
+        inPriorsCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
         self.assertFalse(inPriorsCI)
 
         self.variant["Gene_Symbol"] = "BRCA2"
 
-        # checks variant in BRCA2 initiation domain is identified as in CI domain
+        # checks variant in BRCA2 initiation domain is identified as in PRIORS CI domain
         self.variant["Pos"] = "32316462"
-        inPriorsCI = calcVarPriors.varInPriorsCI(self.variant)
+        inPriorsCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
         self.assertTrue(inPriorsCI)
 
-        # checks variant in BRCA2 PALB2 domain is identified as in CI domain
+        # checks variant in BRCA2 PALB2 domain is identified as in PRIORS CI domain
         self.variant["Pos"] = "32319092"
-        inPriorsCI = calcVarPriors.varInPriorsCI(self.variant)
+        inPriorsCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
         self.assertTrue(inPriorsCI)
 
-        # checks variant in BRCA2 DNB domain is identified as in CI domain
+        # checks variant in BRCA2 DNB domain is identified as in PRIORS CI domain
         self.variant["Pos"] = "32362561"
-        inPriorsCI = calcVarPriors.varInPriorsCI(self.variant)
+        inPriorsCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
         self.assertTrue(inPriorsCI)
 
-        # checks variant in TR2/RAD5 domain is identified as in CI domain
+        # checks variant in TR2/RAD5 domain is identified as in PRIORS CI domain
         self.variant["Pos"] = "32398406"
-        inPriorsCI = calcVarPriors.varInPriorsCI(self.variant)
+        inPriorsCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
         self.assertTrue(inPriorsCI)
 
-        # checks that variant NOT in BRCA2 CI domain is NOT identified as in CI domain
+        # checks that variant NOT in BRCA2 CI domain is NOT identified as in PRIORS CI domain
         self.variant["Pos"] = "32336283"
-        inPriorsCI = calcVarPriors.varInPriorsCI(self.variant)
+        inPriorsCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
         self.assertFalse(inPriorsCI)
 
                 
