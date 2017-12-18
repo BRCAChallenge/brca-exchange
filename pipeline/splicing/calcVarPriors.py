@@ -24,27 +24,33 @@ BRCA2_CANONICAL = "ENST00000380152"
 SERVER = "http://rest.ensembl.org"
 
 # clinically important domain boundaries
-brca1CIDomains = {"enigma": {"ring": {"genStart": 43124096,
-                                      "genEnd": 43104260},
-                             "brct": {"genStart": 43070966,
-                                      "genEnd": 43045681}},   # brct genEnd will be changed soon based on email discussion
-                  "priors": {"initiation": {"genStart": 43124096,
-                                            "genEnd": 43124094},
-                             "ring": {"genStart": 43124084,
-                                      "genEnd": 43104875},
-                             "brct": {"genStart": 43070966,
-                                      "genEnd": 43045693}}}
+brca1CIDomains = {"enigma": {"ring": {"domStart": 43124096,
+                                      "domEnd": 43104260},
+                             "brct": {"domStart": 43070966,
+                                      "domEnd": 43045681}},   # brct genEnd will be changed soon based on email discussion
+                  "priors": {"initiation": {"domStart": 43124096,
+                                            "domEnd": 43124094},
+                             "ring": {"domStart": 43124084,
+                                      "domEnd": 43104875},
+                             "brct": {"domStart": 43070966,
+                                      "domEnd": 43045693}}}
 
-brca2CIDomains = {"enigma": {"dnb": {"genStart": 32356433,
-                                     "genEnd": 32396954}},
-                  "priors": {"initiation": {"genStart": 32316461,
-                                            "genEnd": 32316463},
-                             "palb2": {"genStart": 32316491,
-                                       "genEnd": 32319108},
-                             "dnb": {"genStart": 32356433,
-                                     "genEnd": 32396954},
-                             "tr2/rad5": {"genStart": 32398318,
-                                          "genEnd": 32398428}}}
+brca2CIDomains = {"enigma": {"dnb": {"domStart": 32356433,
+                                     "domEnd": 32396954}},
+                  "priors": {"initiation": {"domStart": 32316461,
+                                            "domEnd": 32316463},
+                             "palb2": {"domStart": 32316491,
+                                       "domEnd": 32319108},
+                             "dnb": {"domStart": 32356433,
+                                     "domEnd": 32396954},
+                             "tr2/rad5": {"domStart": 32398318,
+                                          "domEnd": 32398428}}}
+
+# BRCA1/BRCA2 grey xone boundaries
+greyZones = {"BRCA1": {"greyZoneStart": 43045704,
+                       "greyZoneEnd": 43045681},   # BRCA1 grey zone boundaries will be chagned based on email discussion
+             "BRCA2": {"greyZonStart": 32398438,
+                       "greyZoneEnd": 32398488}}
 
 
 def checkSequence(sequence):
@@ -384,14 +390,14 @@ def varInCiDomain(variant, boundaries):
     varGene = variant["Gene_Symbol"]
     if varGene == "BRCA1":
         for domain in brca1CIDomains[boundaries].keys():
-            domainStart = brca1CIDomains[boundaries][domain]["genStart"]
-            domainEnd = brca1CIDomains[boundaries][domain]["genEnd"]
+            domainStart = brca1CIDomains[boundaries][domain]["domStart"]
+            domainEnd = brca1CIDomains[boundaries][domain]["domEnd"]
             if varGenPos <= domainStart and varGenPos >= domainEnd:
                 return True
     elif varGene == "BRCA2":
         for domain in brca2CIDomains[boundaries].keys():
-            domainStart = brca2CIDomains[boundaries][domain]["genStart"]
-            domainEnd = brca2CIDomains[boundaries][domain]["genEnd"]
+            domainStart = brca2CIDomains[boundaries][domain]["domStart"]
+            domainEnd = brca2CIDomains[boundaries][domain]["domEnd"]
             if varGenPos >= domainStart and varGenPos <= domainEnd:
                 return True
     return False
