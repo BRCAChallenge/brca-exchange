@@ -571,7 +571,59 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32315479"
         inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
         self.assertFalse(inSpliceAcceptor)
+
+
+    def test_varInPriorsCI(self):
+        '''Tests that variant is correctly identified as in or NOT in CI domain as defined by PRIORS webiste'''
+        self.variant["Gene_Symbol"] = "BRCA1"
         
+        # checks variant in BRCA1 initiation domain is identified as in CI domain
+        self.variant["Pos"] = "43124096"
+        inPriorsCI = calcVarPriors.varInPriorsCI(self.variant)
+        self.assertTrue(inPriorsCI)
+
+        # checks variant in BRCA1 RING domain is identified as in CI domain
+        self.variant["Pos"] = "43115746"
+        inPriorsCI = calcVarPriors.varInPriorsCI(self.variant)
+        self.assertTrue(inPriorsCI)
+
+        # checks variant in BRCA1 BRCT domain is identified as in CI domain
+        self.variant["Pos"] = "43057092"
+        inPriorsCI = calcVarPriors.varInPriorsCI(self.variant)
+        self.assertTrue(inPriorsCI)
+
+        # checks that variant NOT in BRCA1 CI domain is NOT identified as in CI domain
+        self.variant["Pos"] = "43091014"
+        inPriorsCI = calcVarPriors.varInPriorsCI(self.variant)
+        self.assertFalse(inPriorsCI)
+
+        self.variant["Gene_Symbol"] = "BRCA2"
+
+        # checks variant in BRCA2 initiation domain is identified as in CI domain
+        self.variant["Pos"] = "32316462"
+        inPriorsCI = calcVarPriors.varInPriorsCI(self.variant)
+        self.assertTrue(inPriorsCI)
+
+        # checks variant in BRCA2 PALB2 domain is identified as in CI domain
+        self.variant["Pos"] = "32319092"
+        inPriorsCI = calcVarPriors.varInPriorsCI(self.variant)
+        self.assertTrue(inPriorsCI)
+
+        # checks variant in BRCA2 DNB domain is identified as in CI domain
+        self.variant["Pos"] = "32362561"
+        inPriorsCI = calcVarPriors.varInPriorsCI(self.variant)
+        self.assertTrue(inPriorsCI)
+
+        # checks variant in TR2/RAD5 domain is identified as in CI domain
+        self.variant["Pos"] = "32398406"
+        inPriorsCI = calcVarPriors.varInPriorsCI(self.variant)
+        self.assertTrue(inPriorsCI)
+
+        # checks that variant NOT in BRCA2 CI domain is NOT identified as in CI domain
+        self.variant["Pos"] = "32336283"
+        inPriorsCI = calcVarPriors.varInPriorsCI(self.variant)
+        self.assertFalse(inPriorsCI)
+
                 
     def test_getVarLocation(self):
         '''
