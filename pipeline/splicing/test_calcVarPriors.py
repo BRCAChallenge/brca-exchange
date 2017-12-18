@@ -658,7 +658,43 @@ class test_calcVarPriors(unittest.TestCase):
         inPriorsCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
         self.assertFalse(inPriorsCI)
 
-                
+
+    def test_varInGreyZone(self):
+        '''Tests that variant is correctly identified as before, in, or after the grey zone'''
+        self.variant["Gene_Symbol"] = "BRCA1"
+
+        # checks that variant before BRCA1 grey zone is NOT identified as in BRCA1 grey zone
+        self.variant["Pos"] = "43045708"
+        inGreyZone = calcVarPriors.varInGreyZone(self.variant)
+        self.assertFalse(inGreyZone)
+
+        # checks that variant in BRCA1 grey zone is identified as in BRCA1 grey zone
+        self.variant["Pos"] = "43045706"
+        inGreyZone = calcVarPriors.varInGreyZone(self.variant)
+        self.assertEquals(inGreyZone, "grey_zone_variant")
+
+        # checks that variant after BRCA1 grey zone is identified as after BRCA1 grey zone
+        self.variant["Pos"] = "43045692"
+        inGreyZone = calcVarPriors.varInGreyZone(self.variant)
+        self.assertEquals(inGreyZone, "after_grey_zone_variant")
+
+        self.variant["Gene_Symbol"] = "BRCA2"
+
+        # checks that variant before the BRCA2 grey zone is NOT identified as in BRCA2 grey zone
+        self.variant["Pos"] = "32398437"
+        inGreyZone = calcVarPriors.varInGreyZone(self.variant)
+        self.assertFalse(inGreyZone)
+
+        # checks that variant in BRCA2 grey zone is identified as in BRCA2 grey zone
+        self.variant["Pos"] = "32398459"
+        inGreyZone = calcVarPriors.varInGreyZone(self.variant)
+        self.assertEquals(inGreyZone, "grey_zone_variant")
+
+        # checks that variant after BRCA2 grey zone is identified as after BRCA2 grey zone
+        self.variant["Pos"] = "32398489"
+        inGreyZone = calcVarPriors.varInGreyZone(self.variant)
+        self.assertEquals(inGreyZone, "after_grey_zone_variant")
+        
     def test_getVarLocation(self):
         '''
         Tests that:
