@@ -574,6 +574,7 @@ class test_calcVarPriors(unittest.TestCase):
 
 
     def testVarInEnigmaCiDomains(self):
+        '''Tests that variant is correctly identified as in or NOT in CI domain as defined by ENIGMA rules'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
 
