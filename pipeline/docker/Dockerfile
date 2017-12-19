@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     python-pip \
     python-gdbm \
     python-lzo \
+    vim \
     wget \
     zlib1g-dev
 
