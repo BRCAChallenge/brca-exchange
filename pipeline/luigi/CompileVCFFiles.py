@@ -1465,10 +1465,20 @@ class GenerateReleaseNotes(luigi.Task):
 
         check_file_for_contents(metadata_dir + "version.json")
 
-
 @requires(GenerateReleaseNotes)
-class GenerateMD5Sums(luigi.Task):
+class TopLevelReadme(luigi.Task):
+    def output(self):
+        top_level_readme_dest = os.path.join(self.output_dir, "README.txt")
+        return luigi.LocalTarget(top_level_readme_dest)
 
+    def run(self):
+        top_level_readme_src = os.path.abspath(
+            os.path.join(os.path.realpath(__file__), os.pardir, os.pardir, "top_level_readme.txt"))
+        
+        shutil.copyfile(top_level_readme_src, self.output().path)
+
+@requires(TopLevelReadme)
+class GenerateMD5Sums(luigi.Task):        
     def output(self):
         return luigi.LocalTarget(self.output_dir + "/md5sums.txt")
 
