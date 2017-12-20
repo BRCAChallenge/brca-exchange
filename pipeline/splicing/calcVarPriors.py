@@ -111,7 +111,6 @@ def getVarConsequences(variant):
             # API only works for alt alleles that are composed of the 4 canonical bases
             if base not in ["A", "C", "G", "T"]:
                 return "unable_to_determine"     
-
            
         query = "%s:%s-%s:%s/%s?" % (variant["Chr"], variant["Hg38_Start"],
                                      variant["Hg38_End"], varStrand, varAlt)
@@ -378,6 +377,7 @@ def varInSpliceAcceptor(variant):
                 return True
     return False
 
+
 def varInCiDomain(variant, boundaries):
     '''
     Given a variant, determines if variant is in a clinically important domain
@@ -400,7 +400,7 @@ def varInCiDomain(variant, boundaries):
             if varGenPos >= domainStart and varGenPos <= domainEnd and inExon == True:
                 return True
     return False
-
+                
 
 def varInGreyZone(variant):
     '''
@@ -420,7 +420,7 @@ def varInGreyZone(variant):
         elif varGenPos > greyZoneEnd and inUTR == False:
             return "after_grey_zone_variant"
     return False
-        
+                
 
 def getVarLocation(variant, boundaries):
     '''
