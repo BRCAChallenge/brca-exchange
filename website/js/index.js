@@ -39,7 +39,7 @@ var {MailingList} = require('./MailingList');
 
 var databaseKey = require('../databaseKey');
 var util = require('./util');
-var mockSubmissions = require('./mockdata/submissions');
+// var mockSubmissions = require('./mockdata/submissions');
 
 var {Grid, Col, Row, Table, Button, Modal, Panel, Glyphicon} = require('react-bootstrap');
 
@@ -755,12 +755,32 @@ var VariantDetail = React.createClass({
         });
     },
     generateSubmitterPanels: function () {
-        // for each submitter, construct a panel
-        return mockSubmissions.sources.map(({ name: sourceName, submissions }) => {
+        if (!this.state.reports) {
+            return null;
+        }
 
-            const submitters = submissions.map(({ submitter, cols }) =>
-                <VariantSubmitter key={submitter} cols={cols} submitter={submitter} defaultExpanded={true} />
-            );
+        const sources = _.groupBy(this.state.reports, 'Source');
+
+        // for each submitter, construct a panel
+        return Object.entries(sources).map(([sourceName, submissions]) => {
+            sourceName = sourceName.replace(/_/g, " ");
+
+            console.log("Source: ", sourceName);
+            console.log("Submissions: ", submissions);
+
+            const submitters = submissions.map((x) => {
+                const cols = Object.keys(x).map(k => ({
+                    prop: k,
+                    title: k.replace(sourceName, "").trim().replace(/_/g, " "),
+                    value: (x[k] || "").toString().replace(/_/g, ' ')
+                }));
+
+                return <VariantSubmitter
+                    key={x.Submitter_ClinVar} cols={cols} submitter={x.Submitter_ClinVar}
+                    hideEmptyItems={this.state.hideEmptyItems}
+                    defaultExpanded={true}
+                />;
+            });
 
             // create the panel itself now
             const groupTitle = `source-panel-${sourceName}`;
