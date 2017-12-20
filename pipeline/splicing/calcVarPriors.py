@@ -27,13 +27,13 @@ SERVER = "http://rest.ensembl.org"
 brca1CIDomains = {"enigma": {"ring": {"domStart": 43124096,
                                       "domEnd": 43104260},
                              "brct": {"domStart": 43070966,
-                                      "domEnd": 43045681}},   # brct genEnd will be changed soon based on email discussion
+                                      "domEnd": 43045705}},
                   "priors": {"initiation": {"domStart": 43124096,
                                             "domEnd": 43124094},
                              "ring": {"domStart": 43124084,
                                       "domEnd": 43104875},
                              "brct": {"domStart": 43070966,
-                                      "domEnd": 43045693}}}
+                                      "domEnd": 43045705}}}
 
 brca2CIDomains = {"enigma": {"dnb": {"domStart": 32356433,
                                      "domEnd": 32396954}},
@@ -46,10 +46,8 @@ brca2CIDomains = {"enigma": {"dnb": {"domStart": 32356433,
                              "tr2/rad5": {"domStart": 32398318,
                                           "domEnd": 32398428}}}
 
-# BRCA1/BRCA2 grey xone boundaries
-greyZones = {"BRCA1": {"greyZoneStart": 43045707,
-                       "greyZoneEnd": 43045705},   # BRCA1 grey zone boundaries will be chagned based on email discussion
-             "BRCA2": {"greyZoneStart": 32398438,
+# BRCA1/BRCA2 grey zone boundaries
+greyZones = {"BRCA2": {"greyZoneStart": 32398438,
                        "greyZoneEnd": 32398488}}
 
 
@@ -326,7 +324,7 @@ def varInExon(variant):
             exonStart = varExons[exon]["exonStart"]
             exonEnd = varExons[exon]["exonEnd"]
             if varStrand == "+":
-                if varGenPos >= exonStart and varGenPos <= exonEnd:
+                if varGenPos > exonStart and varGenPos <= exonEnd:
                     return True
             else:
                 if varGenPos <= exonStart and varGenPos >= exonEnd:
@@ -383,17 +381,18 @@ def varInCiDomain(variant, boundaries):
     '''
     varGenPos = int(variant["Pos"])
     varGene = variant["Gene_Symbol"]
+    inExon = varInExon(variant)
     if varGene == "BRCA1":
         for domain in brca1CIDomains[boundaries].keys():
             domainStart = brca1CIDomains[boundaries][domain]["domStart"]
             domainEnd = brca1CIDomains[boundaries][domain]["domEnd"]
-            if varGenPos <= domainStart and varGenPos >= domainEnd:
+            if varGenPos <= domainStart and varGenPos >= domainEnd and inExon == True:
                 return True
     elif varGene == "BRCA2":
         for domain in brca2CIDomains[boundaries].keys():
             domainStart = brca2CIDomains[boundaries][domain]["domStart"]
             domainEnd = brca2CIDomains[boundaries][domain]["domEnd"]
-            if varGenPos >= domainStart and varGenPos <= domainEnd:
+            if varGenPos >= domainStart and varGenPos <= domainEnd and inExon == True:
                 return True
     return False
 
@@ -407,29 +406,63 @@ def varInGreyZone(variant):
     '''
     varGenPos = int(variant["Pos"])
     varGene = variant["Gene_Symbol"]
-    greyZoneStart = greyZones[varGene]["greyZoneStart"]
-    greyZoneEnd = greyZones[varGene]["greyZoneEnd"]
-    if varGene == "BRCA1":
-        if varGenPos <= greyZoneStart and varGenPos >= greyZoneEnd:
-            return "grey_zone_variant"
-        elif varGenPos < greyZoneEnd:
-            return "after_grey_zone_variant"
-    elif varGene == "BRCA2":
+    inUTR = varInUTR(variant)
+    if varGene == "BRCA2":
+        greyZoneStart = greyZones[varGene]["greyZoneStart"]
+        greyZoneEnd = greyZones[varGene]["greyZoneEnd"]
         if varGenPos >= greyZoneStart and varGenPos <= greyZoneEnd:
             return "grey_zone_variant"
-        elif varGenPos > greyZoneEnd:
+        elif varGenPos > greyZoneEnd and inUTR == False:
             return "after_grey_zone_variant"
     return False
         
 
-def getVarLocation(variant):
-    '''Given a variant, returns location of variant using Ensembl API for variant annotation'''
-    # TO DO - Implement this function using Ensembl API so that variant location is identified
-    varLoc = '-'
-    return varLoc
+def getVarLocation(variant, boundaries):
+    '''
+    Given a variant, returns the variant location as below
+    Second argument is for CI domain boundaries (PRIORS or ENIGMA)
+    '''
+    varOutBounds = varOutsideBoundaries(variant)
+    if varOutBounds == True:
+        return "outside_transcript_boundaries_variant"
+    inExon = varInExon(variant)
+    if inExon == True:
+        inCiDomain = varInCiDomain(variant, boundaries)
+        if inCiDomain == True:
+            inSpliceDonor = varInSpliceDonor(variant)
+            if inSpliceDonor == True:
+                return "CI_splice_donor_variant"
+            inSpliceAcceptor = varInSpliceAcceptor(variant)
+            if inSpliceAcceptor == True:
+                return "CI_splice_acceptor_variant"
+            return "CI_domain_variant"
+        inSpliceDonor = varInSpliceDonor(variant)
+        if inSpliceDonor == True:
+            return "splice_donor_variant"
+        inSpliceAcceptor = varInSpliceAcceptor(variant)
+        if inSpliceAcceptor == True:
+            return "splice_acceptor_variant"
+        inGreyZone = varInGreyZone(variant)
+        if inGreyZone != False:
+            return inGreyZone
+        inUTR = varInUTR(variant)
+        if inUTR == True:
+            return "UTR_variant"
+        return "exon_variant"
+    else:    
+        inSpliceDonor = varInSpliceDonor(variant)
+        if inSpliceDonor == True:
+            return "splice_donor_variant"
+        inSpliceAcceptor = varInSpliceAcceptor(variant)
+        if inSpliceAcceptor == True:
+            return "splice_acceptor_variant"
+        inUTR = varInUTR(variant)
+        if inUTR == True:
+            return "UTR_variant"
+        return "intron_variant"
+    
 
-
-def getVarDict(variant):
+def getVarDict(variant, boundaries):
     '''
     Given input data, returns a dictionary containing information for each variant in input
     Dictionary key is variant HGVS_cDNA and value is a dictionary containing variant gene, variant chromosome, 
@@ -437,7 +470,7 @@ def getVarDict(variant):
     '''
     varStrand = getVarStrand(variant)
     varType = getVarType(variant)
-    varLoc = getVarLocation(variant)
+    varLoc = getVarLocation(variant, boundaries)
 
     varDict = {"varGene": variant["Gene_Symbol"],
                "varChrom": variant["Chr"],
