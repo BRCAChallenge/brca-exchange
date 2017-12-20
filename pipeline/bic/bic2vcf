@@ -120,18 +120,12 @@ def main(args):
 			print('Hgvs not formatted properly, ambiguous fix. Skipping...')
 			continue
 		if brcaGene == 1:
-			queryHgvsName = 'U14680.1:'+queryHgvsName
+			queryHgvsName = 'NM_007294.3:'+queryHgvsName
 		elif brcaGene == 2:
-			queryHgvsName = 'U43746.1:'+queryHgvsName
-		print(len(parsedLine))
-		print(hgvsName)
-		print(queryHgvsName)
+			queryHgvsName = 'NM_000059.3:'+queryHgvsName
 		INFO_field_string = ';'.join(INFO_field)
-		print(INFO_field_string)
 		chrom, offset, ref, alt = hgvs.parse_hgvs_name(queryHgvsName, genome, get_transcript=get_transcript)
 		chrom = chrom.replace('chr', '')
-		#INFO_field_string = ';'.join(INFO_field)
-		#print(INFO_field_string)
 		print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(chrom,offset,queryHgvsName,ref,alt,INFO_field_string), file=vcfFile)
 
 if __name__ == "__main__":

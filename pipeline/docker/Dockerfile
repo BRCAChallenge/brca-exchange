@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     python-pip \
     python-gdbm \
     python-lzo \
+    vim \
     wget \
     zlib1g-dev
 
@@ -45,8 +46,12 @@ RUN cd hgvs && git checkout aebe5bd9683f4b5937fd653ce4b13fcd4f3ebb10 && python s
 #leiden brca
 RUN git clone https://github.com/BRCAChallenge/leiden.git && cd leiden && python setup.py install
 
+RUN rm -r /opt/leiden /opt/hgvs /root/.cache
 
-RUN git clone https://github.com/BRCAChallenge/brca-exchange.git
+ARG FORCE_REBUILD=0
+ARG BRCA_GIT_REPO=https://github.com/BRCAChallenge/brca-exchange.git
+ARG BRCA_EXCHANGE_COMMIT=master
+RUN git clone ${BRCA_GIT_REPO} && cd brca-exchange && git checkout ${BRCA_EXCHANGE_COMMIT}
 
 COPY run_luigi.sh .
 
