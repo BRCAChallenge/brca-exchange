@@ -39,7 +39,6 @@ var {MailingList} = require('./MailingList');
 
 var databaseKey = require('../databaseKey');
 var util = require('./util');
-// var mockSubmissions = require('./mockdata/submissions');
 
 var {Grid, Col, Row, Table, Button, Modal, Panel, Glyphicon} = require('react-bootstrap');
 
@@ -470,50 +469,6 @@ function isEmptyDiff(value) {
     return value === null || value.length < 1;
 }
 
-// attempts to parse the given date string using a variety of formats,
-// returning the formatted result as something like '08 September 2016'.
-// just returns the input if every pattern fails to match
-function normalizeDateFieldDisplay(value) {
-    // extend this if there are more formats in the future
-    const formats = ["MM/DD/YYYY", "YYYY-MM-DD"];
-
-    for (let i = 0; i < formats.length; i++) {
-        const q = moment(value, formats[i]);
-
-        if (q.isValid()) {
-            return q.format("DD MMMM YYYY");
-        }
-    }
-
-    return value;
-}
-
-// replaces commas with comma-spaces to wrap long lines better, removes blank entries from comma-delimited lists,
-// and normalizes blank/null values to a single hyphen
-function normalizedFieldDisplay(value) {
-    if (value) {
-        // replace any number of underscores with spaces
-        // make sure commas, if present, wrap
-        value = value
-            .split(/_+/).join(" ")
-            .split(",")
-            .map(x => x.trim())
-            .filter(x => x && x !== '-')
-            .join(", ");
-
-        // ensure that blank entries are always normalized to hyphens
-        if (value.trim() === "") {
-            value = "-";
-        }
-    }
-    else {
-        // similar to above, normalize blank entries to a hyphen
-        value = "-";
-    }
-
-    return value;
-}
-
 const IsoGrid = React.createClass({
     displayName: 'IsoGrid',
 
@@ -731,18 +686,6 @@ var VariantDetail = React.createClass({
 
         return diffRows;
     },
-    generateLinkToGenomeBrowser: function (prop, variant) {
-        let hgVal = (prop === "Genomic_Coordinate_hg38") ? '38' : '19';
-        let genomicCoordinate = variant[prop];
-        let genomicCoordinateElements = genomicCoordinate.split(':');
-        let ref = genomicCoordinateElements[2].split('>')[0];
-        let position = parseInt(genomicCoordinateElements[1].split('.')[1]);
-        let positionRangeStart = position - 1;
-        let positionRangeEnd = position + ref.length + 1;
-        let positionParameter = (genomicCoordinate.length > 1500) ? positionRangeStart + '-' + positionRangeEnd : genomicCoordinate;
-        let genomeBrowserUrl = 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg' + hgVal + '&position=' + positionParameter + '&hubUrl=http://brcaexchange.org/trackhubs/hub.txt';
-        return <a target="_blank" href={genomeBrowserUrl}>{variant[prop]}</a>;
-    },
     toggleSubmitterGroup: function(sourceName, submitter) {
         this.setState((pstate) => {
             // the key under the state collection for the visibility of this source-submitter group
@@ -754,52 +697,71 @@ var VariantDetail = React.createClass({
             };
         });
     },
-    generateSubmitterPanels: function () {
+    generateSubmitterPanels: function (cols) {
         if (!this.state.reports) {
             return null;
         }
 
-        const sources = _.groupBy(this.state.reports, 'Source');
+        const excludedProps = [
+            'id', 'Variant', 'Data_Release',
+            'Chr', 'Alt', 'Pos', 'Ref'
+        ];
+        // index cols by prop to speed up title lookups
+        const colsLabels = cols.reduce((a, x) => { a[x.prop] = x; return a; }, {});
 
-        // for each submitter, construct a panel
-        return Object.entries(sources).map(([sourceName, submissions]) => {
-            sourceName = sourceName.replace(/_/g, " ");
+        // group reports by source
+        return Object.entries(_.groupBy(this.state.reports, 'Source'))
+            .map(([sourceName, submissions]) => {
+                // for each source, construct a panel
 
-            console.log("Source: ", sourceName);
-            console.log("Submissions: ", submissions);
+                // make source human-readable
+                sourceName = sourceName.replace(/_/g, " ");
 
-            const submitters = submissions.map((x) => {
-                const cols = Object.keys(x).map(k => ({
-                    prop: k,
-                    title: k.replace(sourceName, "").trim().replace(/_/g, " "),
-                    value: (x[k] || "").toString().replace(/_/g, ' ')
-                }));
+                // create a per-submitter collapsible subsection within this source panel
+                const submitters = submissions.map((x) => {
+                    const submitterName = util.getFormattedFieldByProp('Submitter_ClinVar', x);
 
-                return <VariantSubmitter
-                    key={x.Submitter_ClinVar} cols={cols} submitter={x.Submitter_ClinVar}
-                    hideEmptyItems={this.state.hideEmptyItems}
-                    defaultExpanded={true}
-                />;
-            });
+                    const formattedCols = Object.keys(x)
+                        .filter(k => x[k] && !excludedProps.includes(k))
+                        .map(k => {
+                            // get metadata (title, optional render func) associated with this column
+                            const meta = colsLabels[k];
 
-            // create the panel itself now
-            const groupTitle = `source-panel-${sourceName}`;
-            const header = <h3>{`Clinical Significance (${sourceName})`}</h3>;
-            const allEmpty = false; // FIXME: actually check if we're all empty or no
+                            return {
+                                prop: k,
+                                title: meta ? meta.title : `?:${k}`,
+                                value: x[k].toString()
+                            };
+                        });
 
-            return (
-                <div className="variant-detail-group variant-submitter-group">
-                    <div key={`group_collection-${groupTitle}`} className={ allEmpty && this.state.hideEmptyItems ? "group-empty" : "" }>
-                        <Panel
-                            header={header}
-                            collapsable={true}
-                            defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
-                            {submitters}
-                        </Panel>
+                    return (
+                        <VariantSubmitter
+                            key={x.Submitter_ClinVar} submitter={submitterName}
+                            cols={formattedCols} source={x}
+                            hideEmptyItems={this.state.hideEmptyItems}
+                            defaultExpanded={true}
+                        />
+                    );
+                });
+
+                // create the source panel itself now
+                const groupTitle = `source-panel-${sourceName}`;
+                const header = <h3>{`Clinical Significance (${sourceName})`}</h3>;
+                const allEmpty = false; // FIXME: actually check if we're all empty or no
+
+                return (
+                    <div className="variant-detail-group variant-submitter-group">
+                        <div key={`group_collection-${groupTitle}`} className={ allEmpty && this.state.hideEmptyItems ? "group-empty" : "" }>
+                            <Panel
+                                header={header}
+                                collapsable={true}
+                                defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
+                                {submitters}
+                            </Panel>
+                        </div>
                     </div>
-                </div>
-            );
-        });
+                );
+            });
     },
     render: function () {
         const {data, error} = this.state;
@@ -854,61 +816,7 @@ var VariantDetail = React.createClass({
                         return false;
                     }
                 } else if (variant[prop] !== null) {
-                    if (prop === "Gene_Symbol") {
-                        rowItem = <i>{variant[prop]}</i>;
-                    } else if (prop === "URL_ENIGMA") {
-                        if (variant[prop].length) {
-                            rowItem = <a target="_blank" href={variant[prop]}>link to multifactorial analysis</a>;
-                        }
-                    } else if (prop === "SCV_ClinVar" && variant[prop].toLowerCase().indexOf("scv") !== -1) {
-                        // Link all clinvar submissions back to clinvar
-                        let accessions = variant[prop].split(',');
-                        rowItem = [];
-                        for (let i = 0; i < accessions.length; i++) {
-                            if (i < (accessions.length - 1)) {
-                                rowItem.push(<span><a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{accessions[i]}</a>, </span>);
-                            } else {
-                                // exclude trailing comma
-                                rowItem.push(<a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{accessions[i]}</a>);
-                            }
-                        }
-                    } else if (prop === "DBID_LOVD" && variant[prop].toLowerCase().indexOf("brca") !== -1) { // Link all dbid's back to LOVD
-                        let ids = variant[prop].split(',');
-                        rowItem = [];
-                        for (let i = 0; i < ids.length; i++) {
-                            if (i < (ids.length - 1)) {
-                                rowItem.push(<span><a target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>, </span>);
-                            } else {
-                                // exclude trailing comma
-                                rowItem.push(<a target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>);
-                            }
-                        }
-                    } else if (prop === "Assertion_method_citation_ENIGMA") {
-                        rowItem = <a target="_blank" href="https://enigmaconsortium.org/library/general-documents/">Enigma Rules version Mar 26, 2015</a>;
-                    } else if (prop === "Source_URL") {
-                        if (variant[prop].startsWith("http://hci-exlovd.hci.utah.edu")) {
-                            rowItem = <a target="_blank" href={variant[prop].split(',')[0]}>link to multifactorial analysis</a>;
-                        }
-                    } else if (prop === "Comment_on_clinical_significance_ENIGMA" || prop === "Clinical_significance_citations_ENIGMA") {
-                        const pubmed = "http://ncbi.nlm.nih.gov/pubmed/";
-                        rowItem = _.map(variant[prop].split(/PMID:? ?([0-9]+)/), piece =>
-                            (/^[0-9]+$/.test(piece)) ? <a target="_blank" href={pubmed + piece}>PMID: {piece}</a> : piece );
-                    } else if (prop === "HGVS_cDNA") {
-                        rowItem = variant[prop].split(":")[1];
-                    } else if (prop === "HGVS_Protein") {
-                        rowItem = variant[prop].split(":")[1];
-                    } else if (prop === "Date_last_evaluated_ENIGMA" && !util.isEmptyField(variant[prop])) {
-                        // try a variety of formats until one works, or just display the value if not?
-                        rowItem = normalizeDateFieldDisplay(variant[prop]);
-                    } else if (/Allele_frequency_.*_ExAC/.test(prop)) {
-                        let count = variant[prop.replace("frequency", "count")],
-                            number = variant[prop.replace("frequency", "number")];
-                        rowItem = [ variant[prop], <small style={{float: 'right'}}>({count} of {number})</small> ];
-                    } else if (prop === "Genomic_Coordinate_hg38" || prop === "Genomic_Coordinate_hg37") {
-                        rowItem = this.generateLinkToGenomeBrowser(prop, variant);
-                    } else {
-                        rowItem = normalizedFieldDisplay(variant[prop]);
-                    }
+                    rowItem = util.getFormattedFieldByProp(prop, variant);
                 } else if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] !== null) {
                     rowItem = variant["HGVS_Protein"].split(":")[0];
                 }

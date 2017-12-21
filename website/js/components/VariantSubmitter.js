@@ -35,12 +35,12 @@ const VariantSubmitter = React.createClass({
 
         // ----
 
-        const {submitter, cols} = this.props;
+        const {submitter, cols, source} = this.props;
 
         // for each panel, construct key-value pairs as a row of the table
         const submitterRows = cols.map(({prop, title, value}) => {
-            const rowItem = value;
             const isEmptyValue = util.isEmptyField(value);
+            const rowItem = util.getFormattedFieldByProp(prop, source);
 
             return (
                 <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
