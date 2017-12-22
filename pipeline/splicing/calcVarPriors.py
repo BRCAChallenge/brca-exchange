@@ -61,7 +61,6 @@ def checkSequence(sequence):
         return True
     else:
         return False
-
     
 def getVarStrand(variant):
     '''Given a variant, returns the coding strand based on the variant's gene_symbol'''
@@ -73,7 +72,6 @@ def getVarStrand(variant):
         return '+'
     else:
         return ""
-
 
 def _make_request(url):
     '''Makes request to API and returns json file'''
@@ -89,7 +87,6 @@ def _make_request(url):
         sys.exit()
 
     return req.json()
-
 
 def getVarConsequences(variant):
     '''
@@ -130,7 +127,6 @@ def getVarConsequences(variant):
                 elif re.search(BRCA2_CANONICAL, gene["transcript_id"]):
                     return gene["consequence_terms"][0]
     
-
 def getVarType(variant):
     '''
     Returns a string describing type of variant 
@@ -167,6 +163,20 @@ def getVarType(variant):
         # not acceptable ref seq and alt seq, variant will not be handled by code
         return "other"
 
+def checkWithinBoundaries(varStrand, varGenPos, boundaryStart, boundaryEnd):
+    '''
+    Checks whether a position (varGenPos) is within certain boundaries (boundaryStart and boundaryEnd)
+    Dependent on the variant's transcript strand (varStrand)
+    Function is inclusive of boundaryStart and boundaryEnd
+    '''
+    if varStrand == "+":
+        if varGenPos >= boundaryStart and varGenPos <= boundaryEnd:
+            return True
+    elif varStrand == "-":
+        if varGenPos <= boundaryStart and varGenPos >= boundaryEnd:
+            return True
+    else:
+        return False
 
 def varOutsideBoundaries(variant):
     '''Given a variant, determines if variant is outside transcript boundaries'''
@@ -187,18 +197,17 @@ def varOutsideBoundaries(variant):
 
     return False
 
-
 def varInUTR(variant):
     '''
     Given a variant, if variant is inside transcript boundaries, 
     determines if variant is in 3' or 5' UTR of transcript
     '''
-    varGenPos = int(variant["Pos"])
-    varTranscript = variant["Reference_Sequence"]
-    transcriptData = fetch_gene_coordinates(varTranscript)
-    varStrand = getVarStrand(variant)
     varOutBounds = varOutsideBoundaries(variant)
     if varOutBounds == False:
+        varGenPos = int(variant["Pos"])
+        varTranscript = variant["Reference_Sequence"]
+        transcriptData = fetch_gene_coordinates(varTranscript)
+        varStrand = getVarStrand(variant)
         if varStrand == "+":
             tsnStart = int(transcriptData["cdsStart"])
             tsnEnd = int(transcriptData["cdsEnd"])
@@ -213,9 +222,8 @@ def varInUTR(variant):
                 return True
             elif varGenPos < tsnEnd:
                 return True
-        return False
+    return False
                 
-
 def getExonBoundaries(variant):
     '''
     Given a variant, returns the exon boundaries for the variant's transcript in a dictionary with format:
@@ -238,6 +246,8 @@ def getExonBoundaries(variant):
 
     varExons = {}
     varExonCount = transcriptData["exonCount"]
+    # exonCount starts at 1 because there is no exon 0 in transcripts
+    # and exonCount is directly used for exon name
     exonCount = 1
     while exonCount <= varExonCount:
         exonStart = int(exonStarts[exonCount - 1])
@@ -252,10 +262,10 @@ def getExonBoundaries(variant):
             exonName = "exon" + str(exonCount)
         varExons[exonName] = {"exonStart": exonStart,
                               "exonEnd": exonEnd}
+        
         exonCount += 1
 
     return varExons
-
 
 def getRefSpliceDonorBoundaries(variant):
     '''
@@ -274,16 +284,19 @@ def getRefSpliceDonorBoundaries(variant):
     for exon in varExons.keys():
         exonEnd = int(varExons[exon]["exonEnd"])
         if varStrand == "+":
+            # - 3 + 1 because genomic position in RefSeq starts to the right of the first base
+            # which affects 5' side of sequence, donor start is 5' to exon end for + strand transcripts
             donorStart = exonEnd - 3 + 1
             donorEnd = exonEnd + 6
         else:
             donorStart = exonEnd + 3
+            # - 6 + 1 because genomic position in RefSeq starts to the right of the first base
+            # which affects 5' side of sequence, donor end is 5' to exon end for - strand transcripts
             donorEnd = exonEnd - 6 + 1
         donorBoundaries[exon] = {"donorStart": donorStart,
                                  "donorEnd": donorEnd}
 
     return donorBoundaries
-
 
 def getRefSpliceAcceptorBoundaries(variant):
     '''
@@ -300,16 +313,19 @@ def getRefSpliceAcceptorBoundaries(variant):
     for exon in varExons.keys():
         exonStart = int(varExons[exon]["exonStart"])
         if varStrand == "+":
+            # -20 + 1 because genomic position in RefSeq starts to the right of the first base
+            # which affects 5' side of sequence, acceptor start is 5' to exon start for + strand transcripts
             acceptorStart = exonStart - 20 + 1
             acceptorEnd = exonStart + 3
         else:            
             acceptorStart = exonStart + 20
+            # -3 + 1 because genomic position in RefSeq starts to the right of the first base
+            # which affects 5' side of sequence, acceptor end is 5' to exon start for - strand transcripts
             acceptorEnd = exonStart - 3 + 1
         acceptorBoundaries[exon] = {"acceptorStart": acceptorStart,
                                     "acceptorEnd": acceptorEnd}
 
     return acceptorBoundaries
-
 
 def varInExon(variant):
     '''
@@ -317,11 +333,11 @@ def varInExon(variant):
     AND if variant is in an exon
     Returns true if variant is in an exon
     '''
-    varGenPos = int(variant["Pos"])
-    varExons = getExonBoundaries(variant)
-    varStrand = getVarStrand(variant)
     varOutBounds = varOutsideBoundaries(variant)
     if varOutBounds == False:
+        varGenPos = int(variant["Pos"])
+        varExons = getExonBoundaries(variant)
+        varStrand = getVarStrand(variant)
         for exon in varExons.keys():
             exonStart = varExons[exon]["exonStart"]
             exonEnd = varExons[exon]["exonEnd"]
@@ -329,12 +345,11 @@ def varInExon(variant):
                 if varGenPos > exonStart and varGenPos <= exonEnd:
                     return True
             else:
-                if varGenPos <= exonStart and varGenPos >= exonEnd:
+                withinBoundaries = checkWithinBoundaries(varStrand, varGenPos, exonStart, exonEnd)
+                if withinBoundaries == True:
                     return True
-        return False
-    else:
-        return "varOutBounds"    
-
+    return False
+    
     
 def varInSpliceDonor(variant):
     '''
@@ -348,14 +363,10 @@ def varInSpliceDonor(variant):
     for exon in donorBounds.keys():
         donorStart = donorBounds[exon]["donorStart"]
         donorEnd = donorBounds[exon]["donorEnd"]
-        if varStrand == "+":
-            if varGenPos >= donorStart and varGenPos <= donorEnd:
-                return True
-        else:
-            if varGenPos <= donorStart and varGenPos >= donorEnd:
-                return True
+        withinBoundaries = checkWithinBoundaries(varStrand, varGenPos, donorStart, donorEnd)
+        if withinBoundaries == True:
+            return True
     return False
-
 
 def varInSpliceAcceptor(variant):
     '''
@@ -369,14 +380,10 @@ def varInSpliceAcceptor(variant):
     for exon in acceptorBounds.keys():
         acceptorStart = acceptorBounds[exon]["acceptorStart"]
         acceptorEnd = acceptorBounds[exon]["acceptorEnd"]
-        if varStrand == "+":
-            if varGenPos >= acceptorStart and varGenPos <= acceptorEnd:
-                return True
-        else:
-            if varGenPos <= acceptorStart and varGenPos >= acceptorEnd:
-                return True
+        withinBoundaries = checkWithinBoundaries(varStrand, varGenPos, acceptorStart, acceptorEnd)
+        if withinBoundaries == True:
+            return True
     return False
-
 
 def varInCiDomain(variant, boundaries):
     '''
@@ -386,42 +393,61 @@ def varInCiDomain(variant, boundaries):
     '''
     varGenPos = int(variant["Pos"])
     varGene = variant["Gene_Symbol"]
+    varStrand = getVarStrand(variant)
     inExon = varInExon(variant)
-    if varGene == "BRCA1":
-        for domain in brca1CIDomains[boundaries].keys():
-            domainStart = brca1CIDomains[boundaries][domain]["domStart"]
-            domainEnd = brca1CIDomains[boundaries][domain]["domEnd"]
-            if varGenPos <= domainStart and varGenPos >= domainEnd and inExon == True:
-                return True
-    elif varGene == "BRCA2":
-        for domain in brca2CIDomains[boundaries].keys():
-            domainStart = brca2CIDomains[boundaries][domain]["domStart"]
-            domainEnd = brca2CIDomains[boundaries][domain]["domEnd"]
-            if varGenPos >= domainStart and varGenPos <= domainEnd and inExon == True:
-                return True
+    if inExon == True:
+        if varGene == "BRCA1":
+            for domain in brca1CIDomains[boundaries].keys():
+                domainStart = brca1CIDomains[boundaries][domain]["domStart"]
+                domainEnd = brca1CIDomains[boundaries][domain]["domEnd"]
+                withinBoundaries = checkWithinBoundaries(varStrand, varGenPos, domainStart, domainEnd)
+                if withinBoundaries == True:
+                    return True
+        elif varGene == "BRCA2":
+            for domain in brca2CIDomains[boundaries].keys():
+                domainStart = brca2CIDomains[boundaries][domain]["domStart"]
+                domainEnd = brca2CIDomains[boundaries][domain]["domEnd"]
+                withinBoundaries = checkWithinBoundaries(varStrand, varGenPos, domainStart, domainEnd)
+                if withinBoundaries == True:
+                    return True
     return False
                 
-
 def varInGreyZone(variant):
     '''
-    Given a variant, determines if variant is before, in, or after the grey zone
-    Returns false if variant is before the grey zone
-    Returns "grey_zone_variant" if variant is in the grey zone
-    Return "after_grey_zone_variant" if variant is after the grey zone
+    Given a variant, determines if variant is in the grey zone
+    Returns True if variant is in the grey zone
+    Returns False if variant is NOT in the grey zone
     '''
     varGenPos = int(variant["Pos"])
     varGene = variant["Gene_Symbol"]
-    inUTR = varInUTR(variant)
+    varStrand = getVarStrand(variant)
     if varGene == "BRCA2":
         greyZoneStart = greyZones[varGene]["greyZoneStart"]
         greyZoneEnd = greyZones[varGene]["greyZoneEnd"]
-        if varGenPos >= greyZoneStart and varGenPos <= greyZoneEnd:
-            return "grey_zone_variant"
-        elif varGenPos > greyZoneEnd and inUTR == False:
-            return "after_grey_zone_variant"
+        withinBoundaries = checkWithinBoundaries(varStrand, varGenPos, greyZoneStart, greyZoneEnd)
+        if withinBoundaries == True:
+            return True
+    return False
+
+def varAfterGreyZone(variant):
+    '''
+    Given a variant, determines if variant is after the gene grey zone
+    Returns True if variant is after the grey zone
+    '''
+    varGenPos = int(variant["Pos"])
+    varGene = variant["Gene_Symbol"]
+    # checks that varGene == BRCA2 because only BRCA2 has a grey zone
+    if varGene == "BRCA2":
+        inUTR = varInUTR(variant)
+        inGreyZone = varInGreyZone(variant)
+        # makes sure that variant is not in grey zone
+        # and makes sure that variant is not in UTR of gene
+        if inGreyZone == False and inUTR == False:
+            greyZoneEnd = greyZones[varGene]["greyZoneEnd"]
+            if varGenPos > greyZoneEnd:
+                return True
     return False
                 
-
 def getVarLocation(variant, boundaries):
     '''
     Given a variant, returns the variant location as below
@@ -431,34 +457,33 @@ def getVarLocation(variant, boundaries):
     if varOutBounds == True:
         return "outside_transcript_boundaries_variant"
     inExon = varInExon(variant)
+    inSpliceDonor = varInSpliceDonor(variant)
+    inSpliceAcceptor = varInSpliceAcceptor(variant)
     if inExon == True:
         inCiDomain = varInCiDomain(variant, boundaries)
+        if inCiDomain == True and inSpliceDonor == True:
+            return "CI_splice_donor_variant"
+        if inCiDomain == True and inSpliceAcceptor == True:
+            return "CI_splice_acceptor_variant"
         if inCiDomain == True:
-            inSpliceDonor = varInSpliceDonor(variant)
-            if inSpliceDonor == True:
-                return "CI_splice_donor_variant"
-            inSpliceAcceptor = varInSpliceAcceptor(variant)
-            if inSpliceAcceptor == True:
-                return "CI_splice_acceptor_variant"
             return "CI_domain_variant"
-        inSpliceDonor = varInSpliceDonor(variant)
         if inSpliceDonor == True:
             return "splice_donor_variant"
-        inSpliceAcceptor = varInSpliceAcceptor(variant)
         if inSpliceAcceptor == True:
             return "splice_acceptor_variant"
         inGreyZone = varInGreyZone(variant)
-        if inGreyZone != False:
-            return inGreyZone
+        if inGreyZone == True:
+            return "grey_zone_variant"
+        afterGreyZone = varAfterGreyZone(variant)
+        if afterGreyZone == True:
+            return "after_grey_zone_variant"
         inUTR = varInUTR(variant)
         if inUTR == True:
             return "UTR_variant"
         return "exon_variant"
     else:    
-        inSpliceDonor = varInSpliceDonor(variant)
         if inSpliceDonor == True:
             return "splice_donor_variant"
-        inSpliceAcceptor = varInSpliceAcceptor(variant)
         if inSpliceAcceptor == True:
             return "splice_acceptor_variant"
         inUTR = varInUTR(variant)
@@ -466,7 +491,6 @@ def getVarLocation(variant, boundaries):
             return "UTR_variant"
         return "intron_variant"
     
-
 def getVarDict(variant, boundaries):
     '''
     Given input data, returns a dictionary containing information for each variant in input
@@ -486,7 +510,6 @@ def getVarDict(variant, boundaries):
                "varHGVScDNA": variant["pyhgvs_cDNA"]}
 
     return varDict
-
 
 def main():
     parser = argparse.ArgumentParser()

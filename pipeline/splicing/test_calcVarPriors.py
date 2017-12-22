@@ -90,7 +90,6 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertTrue(acceptableRefSeq)
         self.assertTrue(acceptableAltSeq)
 
-
     def test_getVarStrand(self):
         '''Tests that variant strand is set correctly based on variant's gene_symbol'''
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -100,7 +99,6 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Gene_Symbol"] = "BRCA2"
         varStrand = calcVarPriors.getVarStrand(self.variant)
         self.assertEquals(varStrand, self.strand["plus"])
-
         
     def test_getVarType(self):
         '''
@@ -170,6 +168,67 @@ class test_calcVarPriors(unittest.TestCase):
         varCons = calcVarPriors.getVarConsequences(self.variant)
         self.assertEquals(varCons, "unable_to_determine")
 
+    def test_checkWithinBoundaries(self):
+        '''
+        Tests that positions are correctly identified as in/not in boundaries and that boundaries are inclusive
+        '''
+        varStrand = self.strand["plus"]
+        boundaryStart = 32357742
+        boundaryEnd = 32357780
+
+        # check that last position before boundary start is NOT included
+        position = 32357741
+        withinBoundaries = calcVarPriors.checkWithinBoundaries(varStrand, position, boundaryStart, boundaryEnd)
+        self.assertFalse(withinBoundaries)
+
+        # check that first position after boundary end is NOT included
+        position = 32357781
+        withinBoundaries = calcVarPriors.checkWithinBoundaries(varStrand, position, boundaryStart, boundaryEnd)
+        self.assertFalse(withinBoundaries)
+
+        # check that boundaryStart is included
+        position = 32357742
+        withinBoundaries = calcVarPriors.checkWithinBoundaries(varStrand, position, boundaryStart, boundaryEnd)
+        self.assertTrue(withinBoundaries)
+
+        # check that boundaryEnd is included
+        position = 32357780
+        withinBoundaries = calcVarPriors.checkWithinBoundaries(varStrand, position, boundaryStart, boundaryEnd)
+        self.assertTrue(withinBoundaries)
+
+        # check that position within boundaries is included
+        position = 32357758
+        withinBoundaries = calcVarPriors.checkWithinBoundaries(varStrand, position, boundaryStart, boundaryEnd)
+        self.assertTrue(withinBoundaries)
+
+        varStrand = self.strand["minus"]
+        boundaryStart = 43067695
+        boundaryEnd = 43067649
+
+        # check that last position before boundary start is NOT included
+        position = 43067696
+        withinBoundaries = calcVarPriors.checkWithinBoundaries(varStrand, position, boundaryStart, boundaryEnd)
+        self.assertFalse(withinBoundaries)
+
+        # check that first position after boundary end is NOT included
+        position = 43067648
+        withinBoundaries = calcVarPriors.checkWithinBoundaries(varStrand, position, boundaryStart, boundaryEnd)
+        self.assertFalse(withinBoundaries)
+
+        # check that boundaryStart is included
+        position = 43067695
+        withinBoundaries = calcVarPriors.checkWithinBoundaries(varStrand, position, boundaryStart, boundaryEnd)
+        self.assertTrue(withinBoundaries)
+        
+        # check that boundaryEnd is included
+        position = 43067649
+        withinBoundaries = calcVarPriors.checkWithinBoundaries(varStrand, position, boundaryStart, boundaryEnd)
+        self.assertTrue(withinBoundaries)
+
+        # check that position within boundaries is included
+        position = 43067669
+        withinBoundaries = calcVarPriors.checkWithinBoundaries(varStrand, position, boundaryStart, boundaryEnd)
+        self.assertTrue(withinBoundaries)        
 
     def test_varOutsideBoundaries(self):
         '''Tests that variant outside/inside transcript boundaries are correctly identified'''
@@ -198,7 +257,6 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32326500"
         varOutBounds = calcVarPriors.varOutsideBoundaries(self.variant)
         self.assertFalse(varOutBounds)
-
 
     def test_varInUTR(self):
         '''Tests that variants in 5' and 3' UTR are correctly identified'''
@@ -291,7 +349,6 @@ class test_calcVarPriors(unittest.TestCase):
                 # checks that next exon does not start before current exon ends
                 self.assertGreater(nextExonStart, exonBounds["exonEnd"])
 
-
     def test_getRefSpliceDonorBoundaries(self):
         '''
         Tests that splice donor boundaries are set correctly for reference transcript and strand
@@ -321,7 +378,6 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(self.exonDonorBoundsBRCA2[exon]["donorEnd"],
                           spliceDonorBounds[exon]["donorEnd"])
 
-
     def test_getRefSpliceAcceptorBoundaries(self):
         '''
         Tests that splice acceptor boundaries are set correctly for refernce transcript and strand
@@ -350,7 +406,6 @@ class test_calcVarPriors(unittest.TestCase):
                           spliceAcceptorBounds[exon]["acceptorStart"])
         self.assertEquals(self.exonAcceptorBoundsBRCA2[exon]["acceptorEnd"],
                           spliceAcceptorBounds[exon]["acceptorEnd"])
-
 
     def test_varInExon(self):
         '''Tests that variant is correctly identified as inside or outside an exon'''
@@ -522,7 +577,6 @@ class test_calcVarPriors(unittest.TestCase):
         inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
         self.assertFalse(inSpliceDonor)
 
-
     def test_varInSpliceAcceptor(self):
         '''
         Tests that variant is correctly identified as in or NOT in a splice acceptor region
@@ -624,7 +678,6 @@ class test_calcVarPriors(unittest.TestCase):
         inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
         self.assertFalse(inSpliceAcceptor)
 
-
     def testVarInEnigmaCiDomains(self):
         '''Tests that variant is correctly identified as in or NOT in CI domain as defined by ENIGMA rules'''
         boundaries = "enigma"
@@ -658,8 +711,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32398354"
         inEnigmaCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
         self.assertFalse(inEnigmaCI)
-        
-        
+                
     def test_varInPriorsCiDomain(self):
         '''Tests that variant is correctly identified as in or NOT in CI domain as defined by PRIORS webiste'''
         boundaries = "priors"
@@ -714,9 +766,8 @@ class test_calcVarPriors(unittest.TestCase):
         inPriorsCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
         self.assertFalse(inPriorsCI)
 
-
     def test_varInGreyZone(self):
-        '''Tests that variant is correctly identified as before, in, or after the grey zone'''
+        '''Tests that variant is correctly identified as in the grey zone'''
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
 
@@ -736,13 +787,31 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that variant in BRCA2 grey zone is identified as in BRCA2 grey zone
         self.variant["Pos"] = "32398459"
         inGreyZone = calcVarPriors.varInGreyZone(self.variant)
-        self.assertEquals(inGreyZone, "grey_zone_variant")
+        self.assertTrue(inGreyZone)
+        
+    def test_varAfterGreyZone(self):
+        '''Tests that variant is correctly identifed as after the grey zone'''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
 
+        # checks that BRCA1 variant is NOT considered after grey zone
+        self.variant["Pos"] = "43045689"
+        afterGreyZone = calcVarPriors.varAfterGreyZone(self.variant)
+        self.assertFalse(afterGreyZone)
+
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+
+        # checks that variant in BRCA2 grey zone is NOT identified as after BRCA2 grey zone
+        self.variant["Pos"] = "32398459"
+        afterGreyZone = calcVarPriors.varAfterGreyZone(self.variant)
+        self.assertFalse(afterGreyZone)
+        
         # checks that variant after BRCA2 grey zone is identified as after BRCA2 grey zone
         self.variant["Pos"] = "32398489"
-        inGreyZone = calcVarPriors.varInGreyZone(self.variant)
-        self.assertEquals(inGreyZone, "after_grey_zone_variant")
-        
+        afterGreyZone = calcVarPriors.varAfterGreyZone(self.variant)
+        self.assertTrue(afterGreyZone)
+
     def test_getVarLocation(self):
         '''Tests that variant location is set correctly based on genomic position'''
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -911,8 +980,7 @@ class test_calcVarPriors(unittest.TestCase):
         # BRCA2 variant in intron
         self.variant["Pos"] = "32344537"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inIntron"])
-        
+        self.assertEquals(varLoc, self.variantLocations["inIntron"])        
 
     def test_getVarDict(self):
         '''
