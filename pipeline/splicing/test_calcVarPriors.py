@@ -1,5 +1,81 @@
 import unittest
 import calcVarPriors
+import calcMaxEntScanMeanStd
+import mock
+
+# dictionary containing possible strands for variants
+strand = {"minus": "-",
+          "plus": "+"}
+
+# dictionary containing possible variant types
+varTypes = {"sub": "substitution",
+            "ins": "insertion",
+            "del": "deletion",
+            "delins": "delins"}
+
+# dictionary containing the number of exons for particular genes
+numExons = {"BRCA1": 23,
+            "BRCA2": 27}
+
+# example donor exon boundaries for BRCA1 and BRCA2
+exonDonorBoundsBRCA1 = {"exon16": {"donorStart": 43070930,
+                                   "donorEnd": 43070922}}
+exonDonorBoundsBRCA2 = {"exon15": {"donorStart": 32356607,
+                                   "donorEnd": 32356615}}
+
+# example acceptor exon boundaries for BRCA1 and BRCA2
+exonAcceptorBoundsBRCA1 = {"exon21": {"acceptorStart": 43051137,
+                                      "acceptorEnd": 43051115}}
+exonAcceptorBoundsBRCA2 = {"exon20": {"acceptorStart": 32370936,
+                                      "acceptorEnd": 32370958}}
+
+# dictionary containing possible variant locations
+variantLocations = {"outBounds": "outside_transcript_boundaries_variant",
+                    "inCI": "CI_domain_variant",
+                    "inCISpliceDonor": "CI_splice_donor_variant",
+                    "inCISpliceAcceptor": "CI_splice_acceptor_variant",
+                    "inSpliceDonor": "splice_donor_variant",
+                    "inSpliceAcceptor": "splice_acceptor_variant",
+                    "inGreyZone": "grey_zone_variant",
+                    "afterGreyZone": "after_grey_zone_variant",
+                    "inExon": "exon_variant",
+                    "inUTR": "UTR_variant",
+                    "inIntron": "intron_variant"}
+
+# transcript data to mock response from fetch_gene_coordinates for BRCA1 and BRCA2
+transcriptDataBRCA1 = {'bin': '114',
+                       'exonEnds': '43045802,43047703,43049194,43051117,43057135,43063373,43063951,43067695,43071238,43074521,43076614,43082575,43091032,43094860,43095922,43097289,43099880,43104261,43104956,43106533,43115779,43124115,43125483,',
+                       'exonFrames': '1,0,1,0,0,1,1,0,1,2,1,0,1,1,2,1,0,1,2,2,2,0,-1,',
+                       'name': 'NM_007294.3',
+                       'txStart': 43044294,
+                       'exonCount': 23,
+                       'cdsEndStat': 'cmpl',
+                       'cdsEnd': 43124096,
+                       'score': 0,
+                       'name2': 'BRCA1',
+                       'strand': '-',
+                       'cdsStart': 43045677,
+                       'cdsStartStat': 'cmpl',
+                       'chrom': 'chr17',
+                       'txEnd': 43125483,
+                       'exonStarts': '43044294,43047642,43049120,43051062,43057051,43063332,43063873,43067607,43070927,43074330,43076487,43082403,43090943,43091434,43095845,43097243,43099774,43104121,43104867,43106455,43115725,43124016,43125270,'}
+
+transcriptDataBRCA2 = {'bin': '103',
+                       'exonEnds': '32315667,32316527,32319325,32325184,32326150,32326282,32326613,32329492,32331030,32333387,32341196,32344653,32346896,32355288,32356609,32357929,32362693,32363533,32370557,32371100,32376791,32379515,32379913,32380145,32394933,32397044,32399672,',
+                       'exonFrames': '-1,0,1,1,2,1,0,1,0,1,1,1,1,2,1,0,2,2,0,0,1,0,1,0,1,0,0,',
+                       'name': 'NM_000059.3',
+                       'txStart': 32315479,
+                       'exonCount': 27,
+                       'cdsEndStat': 'cmpl',
+                       'cdsEnd': 32398770,
+                       'score': 0,
+                       'name2': 'BRCA2',
+                       'strand': '+',
+                       'cdsStart': 32316460,
+                       'cdsStartStat': 'cmpl',
+                       'chrom': 'chr13',
+                       'txEnd': 32399672,
+                       'exonStarts': '32315479,32316421,32319076,32325075,32326100,32326241,32326498,32329442,32330918,32332271,32336264,32344557,32346826,32354860,32356427,32357741,32362522,32363178,32370401,32370955,32376669,32379316,32379749,32380006,32394688,32396897,32398161,'}
 
 class test_calcVarPriors(unittest.TestCase):
 
@@ -12,42 +88,7 @@ class test_calcVarPriors(unittest.TestCase):
                         "Gene_Symbol": "BRCA2",
                         "Reference_Sequence": "NM_000059.3",
                         "pyhgvs_cDNA": "NM_000059.3:c.-764A>G"}
-
-        self.strand = {"minus": "-",
-                       "plus": "+"}
-
-        self.varTypes = {"sub": "substitution",
-                         "ins": "insertion",
-                         "del": "deletion",
-                         "delins": "delins"}
-
-        self.numExons = {"BRCA1": 23,
-                         "BRCA2": 27}
-
-        self.exonDonorBoundsBRCA1 = {"exon16": {"donorStart": 43070930,
-                                                "donorEnd": 43070922}}
-
-        self.exonDonorBoundsBRCA2 = {"exon15": {"donorStart": 32356607,
-                                                "donorEnd": 32356615}}
-
-        self.exonAcceptorBoundsBRCA1 = {"exon21": {"acceptorStart": 43051137,
-                                                   "acceptorEnd": 43051115}}
-
-        self.exonAcceptorBoundsBRCA2 = {"exon20": {"acceptorStart": 32370936,
-                                                   "acceptorEnd": 32370958}}
-
-        self.variantLocations = {"outBounds": "outside_transcript_boundaries_variant",
-                                 "inCI": "CI_domain_variant",
-                                 "inCISpliceDonor": "CI_splice_donor_variant",
-                                 "inCISpliceAcceptor": "CI_splice_acceptor_variant",
-                                 "inSpliceDonor": "splice_donor_variant",
-                                 "inSpliceAcceptor": "splice_acceptor_variant",
-                                 "inGreyZone": "grey_zone_variant",
-                                 "afterGreyZone": "after_grey_zone_variant",
-                                 "inExon": "exon_variant",
-                                 "inUTR": "UTR_variant",
-                                 "inIntron": "intron_variant"}
-                           
+                  
     def test_checkSequence(self):
         '''Tests that checkSequence function categorized acceptable sequences correctly'''
         # sequence with unacceptable letters
@@ -94,11 +135,11 @@ class test_calcVarPriors(unittest.TestCase):
         '''Tests that variant strand is set correctly based on variant's gene_symbol'''
         self.variant["Gene_Symbol"] = "BRCA1"
         varStrand = calcVarPriors.getVarStrand(self.variant)
-        self.assertEquals(varStrand, self.strand["minus"])
+        self.assertEquals(varStrand, strand["minus"])
 
         self.variant["Gene_Symbol"] = "BRCA2"
         varStrand = calcVarPriors.getVarStrand(self.variant)
-        self.assertEquals(varStrand, self.strand["plus"])
+        self.assertEquals(varStrand, strand["plus"])
         
     def test_getVarType(self):
         '''
@@ -107,32 +148,32 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "T"
         varType = calcVarPriors.getVarType(self.variant)
-        self.assertEquals(varType, self.varTypes["sub"])
+        self.assertEquals(varType, varTypes["sub"])
 
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "AAA"
         varType = calcVarPriors.getVarType(self.variant)
-        self.assertEquals(varType, self.varTypes["ins"])
+        self.assertEquals(varType, varTypes["ins"])
 
         self.variant["Ref"] = "AGT"
         self.variant["Alt"] = "A"
         varType = calcVarPriors.getVarType(self.variant)
-        self.assertEquals(varType, self.varTypes["del"])
+        self.assertEquals(varType, varTypes["del"])
 
         self.variant["Ref"] = "AG"
         self.variant["Alt"] = "AGTA"
         varType = calcVarPriors.getVarType(self.variant)
-        self.assertEquals(varType, self.varTypes["delins"])
+        self.assertEquals(varType, varTypes["delins"])
 
         self.variant["Ref"] = "AGTA"
         self.variant["Alt"] = "AG"
         varType = calcVarPriors.getVarType(self.variant)
-        self.assertEquals(varType, self.varTypes["delins"])
+        self.assertEquals(varType, varTypes["delins"])
 
         self.variant["Ref"] = "AG"
         self.variant["Alt"] = "GT"
         varType = calcVarPriors.getVarType(self.variant)
-        self.assertEquals(varType, self.varTypes["delins"])
+        self.assertEquals(varType, varTypes["delins"])
 
     def test_getVarConsequences(self):
         '''
@@ -172,7 +213,7 @@ class test_calcVarPriors(unittest.TestCase):
         '''
         Tests that positions are correctly identified as in/not in boundaries and that boundaries are inclusive
         '''
-        varStrand = self.strand["plus"]
+        varStrand = strand["plus"]
         boundaryStart = 32357742
         boundaryEnd = 32357780
 
@@ -201,7 +242,7 @@ class test_calcVarPriors(unittest.TestCase):
         withinBoundaries = calcVarPriors.checkWithinBoundaries(varStrand, position, boundaryStart, boundaryEnd)
         self.assertTrue(withinBoundaries)
 
-        varStrand = self.strand["minus"]
+        varStrand = strand["minus"]
         boundaryStart = 43067695
         boundaryEnd = 43067649
 
@@ -230,8 +271,9 @@ class test_calcVarPriors(unittest.TestCase):
         withinBoundaries = calcVarPriors.checkWithinBoundaries(varStrand, position, boundaryStart, boundaryEnd)
         self.assertTrue(withinBoundaries)        
 
-    def test_varOutsideBoundaries(self):
-        '''Tests that variant outside/inside transcript boundaries are correctly identified'''
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
+    def test_varOutsideBoundariesBRCA1(self, fetch_gene_coordinates):
+        '''Tests that variant outside/inside transcript boundaries are correctly identified for BRCA1'''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
 
@@ -245,6 +287,9 @@ class test_calcVarPriors(unittest.TestCase):
         varOutBounds = calcVarPriors.varOutsideBoundaries(self.variant)
         self.assertFalse(varOutBounds)
 
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)    
+    def test_varOutsideBoundariesBRCA2(self, fetch_gene_coordinates):
+        '''Tests that variant outside/inside transcript boundaries are correctly identified for BRCA2'''
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
 
@@ -257,9 +302,10 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32326500"
         varOutBounds = calcVarPriors.varOutsideBoundaries(self.variant)
         self.assertFalse(varOutBounds)
-
-    def test_varInUTR(self):
-        '''Tests that variants in 5' and 3' UTR are correctly identified'''
+        
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)  
+    def test_varInUTRBRCA1(self, fetch_gene_coordinates):
+        '''Tests that variants in 5' and 3' UTR are correctly identified for BRCA1'''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
         
@@ -283,6 +329,9 @@ class test_calcVarPriors(unittest.TestCase):
         varInUTR = calcVarPriors.varInUTR(self.variant)
         self.assertFalse(varInUTR)
 
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)  
+    def test_varInUTRBRCA2(self, fetch_gene_coordinates):
+        '''Tests that variants in 5' and 3' UTR are correctly identified for BRCA2'''
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
         
@@ -306,20 +355,20 @@ class test_calcVarPriors(unittest.TestCase):
         varInUTR = calcVarPriors.varInUTR(self.variant)
         self.assertFalse(varInUTR)
 
-    def test_getExonBoundaries(self):
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
+    def test_getExonBoundariesBRCA1(self, fetch_gene_coordinates):
         '''
         Tests that:
-        1. Exon boundaries are set correctly for:
-        gene on minus strand (BRCA1) and gene on plus strand (BRCA2)
+        1. Exon boundaries are set correctly for gene on minus strand (BRCA1)
             - checks that exon does not start before it ends
             - next exon does not start before current exon ends
-        2. length of varExons matches number of exons for a specific gene
+        2. length of varExons matches number of exons for BRCA1
         '''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
         varExons = calcVarPriors.getExonBoundaries(self.variant)
         # check correct number of exons
-        self.assertEquals(len(varExons), self.numExons["BRCA1"])
+        self.assertEquals(len(varExons), numExons["BRCA1"])
         # because '-' strand gene, checks that exonStart > exonEnd
         for exon in varExons.keys():
             exonBounds = varExons[exon]
@@ -327,16 +376,25 @@ class test_calcVarPriors(unittest.TestCase):
             currentExonNum = int(exon[4:])
             nextExonNum = str(currentExonNum + 1)
             nextExonKey = "exon" + nextExonNum
-            if nextExonNum <= self.numExons["BRCA1"]:
+            if nextExonNum <= numExons["BRCA1"]:
                 nextExonStart = varExons[nextExonKey]["exonStart"]
                 # checks that next exon does not start before current exon ends
                 self.assertGreater(exonBounds["exonEnd"], nextExonStart)
 
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)          
+    def test_getExonBoundariesBRCA2(self, fetch_gene_coordinates):
+        '''
+        Tests that:
+        1. Exon boundaries are set correctly for gene on plus strand (BRCA2)
+            - checks that exon does not start before it ends
+            - next exon does not start before current exon ends
+        2. length of varExons matches number of exons for BRCA2
+        '''
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
         varExons = calcVarPriors.getExonBoundaries(self.variant)
         # check correct number of exons
-        self.assertEquals(len(varExons), self.numExons["BRCA2"])
+        self.assertEquals(len(varExons), numExons["BRCA2"])
         # because '+' strand gene, checks that exonEnd > exonStart
         for exon in varExons.keys():
             exonBounds = varExons[exon]
@@ -344,15 +402,16 @@ class test_calcVarPriors(unittest.TestCase):
             currentExonNum = int(exon[4:])
             nextExonNum = str(currentExonNum + 1)
             nextExonKey = "exon" + nextExonNum
-            if nextExonNum <= self.numExons["BRCA2"]:
+            if nextExonNum <= numExons["BRCA2"]:
                 nextExonStart = varExons[nextExonKey]["exonStart"]
                 # checks that next exon does not start before current exon ends
                 self.assertGreater(nextExonStart, exonBounds["exonEnd"])
 
-    def test_getRefSpliceDonorBoundaries(self):
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)             
+    def test_getRefSpliceDonorBoundariesBRCA1(self, fetch_gene_cooridnates):
         '''
-        Tests that splice donor boundaries are set correctly for reference transcript and strand
-        Uses example exon boundaries set in setUp function
+        Tests that splice donor boundaries are set correctly for reference transcript (NM_000059.3) and strand (-)
+        Uses example exon boundaries for BRCA1 set in setUp function
         '''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -360,28 +419,35 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that region after last exon is not considered a splice donor region
         self.assertNotIn("exon24", spliceDonorBounds)
         # to find exon specified in setUp function
-        exon = self.exonDonorBoundsBRCA1.keys()[0]
-        self.assertEquals(self.exonDonorBoundsBRCA1[exon]["donorStart"],
+        exon = exonDonorBoundsBRCA1.keys()[0]
+        self.assertEquals(exonDonorBoundsBRCA1[exon]["donorStart"],
                           spliceDonorBounds[exon]["donorStart"])
-        self.assertEquals(self.exonDonorBoundsBRCA1[exon]["donorEnd"],
+        self.assertEquals(exonDonorBoundsBRCA1[exon]["donorEnd"],
                           spliceDonorBounds[exon]["donorEnd"])
 
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)             
+    def test_getRefSpliceDonorBoundariesBRCA2(self, fetch_gene_cooridnates):
+        '''
+        Tests that splice donor boundaries are set correctly for reference transcript (NM_000059.3) and strand (+)
+        Uses example exon boundaries for BRCA2 set in setUp function
+        '''
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
         spliceDonorBounds = calcVarPriors.getRefSpliceDonorBoundaries(self.variant)
         # checks that region after last exon is not considered a splice donor region
         self.assertNotIn("exon27", spliceDonorBounds)
         # to find exon specified in setUp function
-        exon = self.exonDonorBoundsBRCA2.keys()[0]
-        self.assertEquals(self.exonDonorBoundsBRCA2[exon]["donorStart"],
+        exon = exonDonorBoundsBRCA2.keys()[0]
+        self.assertEquals(exonDonorBoundsBRCA2[exon]["donorStart"],
                           spliceDonorBounds[exon]["donorStart"])
-        self.assertEquals(self.exonDonorBoundsBRCA2[exon]["donorEnd"],
+        self.assertEquals(exonDonorBoundsBRCA2[exon]["donorEnd"],
                           spliceDonorBounds[exon]["donorEnd"])
 
-    def test_getRefSpliceAcceptorBoundaries(self):
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)
+    def test_getRefSpliceAcceptorBoundariesBRCA1(self, fetch_gene_boundaries):
         '''
-        Tests that splice acceptor boundaries are set correctly for refernce transcript and strand
-        Uses example exon boundaries in setUp function
+        Tests that splice acceptor boundaries are set correctly for reference transcript (NM_007294.3) and strand (-)
+        Uses example exon boundaries for BRCA1 in setUp function
         '''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -389,26 +455,33 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that region before first exon is not considered a splice acceptor region
         self.assertNotIn("exon1", spliceAcceptorBounds)
         # to find exon specified in setUp function
-        exon = self.exonAcceptorBoundsBRCA1.keys()[0]
-        self.assertEquals(self.exonAcceptorBoundsBRCA1[exon]["acceptorStart"],
+        exon = exonAcceptorBoundsBRCA1.keys()[0]
+        self.assertEquals(exonAcceptorBoundsBRCA1[exon]["acceptorStart"],
                           spliceAcceptorBounds[exon]["acceptorStart"])
-        self.assertEquals(self.exonAcceptorBoundsBRCA1[exon]["acceptorEnd"],
+        self.assertEquals(exonAcceptorBoundsBRCA1[exon]["acceptorEnd"],
                           spliceAcceptorBounds[exon]["acceptorEnd"])
 
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
+    def test_getRefSpliceAcceptorBoundariesBRCA2(self, fetch_gene_boundaries):
+        '''
+        Tests that splice acceptor boundaries are set correctly for reference transcript (NM_000059.3) and strand (+)
+        Uses example exon boundaries for BRCA2 in setUp function
+        '''
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
         spliceAcceptorBounds = calcVarPriors.getRefSpliceAcceptorBoundaries(self.variant)
         # checks that region before first exon is not considered a splice acceptor region
         self.assertNotIn("exon1", spliceAcceptorBounds)
         # to find exon specified in setUp function
-        exon = self.exonAcceptorBoundsBRCA2.keys()[0]
-        self.assertEquals(self.exonAcceptorBoundsBRCA2[exon]["acceptorStart"],
+        exon = exonAcceptorBoundsBRCA2.keys()[0]
+        self.assertEquals(exonAcceptorBoundsBRCA2[exon]["acceptorStart"],
                           spliceAcceptorBounds[exon]["acceptorStart"])
-        self.assertEquals(self.exonAcceptorBoundsBRCA2[exon]["acceptorEnd"],
+        self.assertEquals(exonAcceptorBoundsBRCA2[exon]["acceptorEnd"],
                           spliceAcceptorBounds[exon]["acceptorEnd"])
 
-    def test_varInExon(self):
-        '''Tests that variant is correctly identified as inside or outside an exon'''
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
+    def test_varInExonBRCA1(self, fetch_gene_coordinates):
+        '''Tests that variant is correctly identified as inside or outside an exon for BRCA1'''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
 
@@ -442,6 +515,9 @@ class test_calcVarPriors(unittest.TestCase):
         inExon = calcVarPriors.varInExon(self.variant)
         self.assertFalse(inExon)
 
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)    
+    def test_varInExonBRCA2(self, fetch_gene_coordinates):
+        '''Tests that variant is correctly identified as inside or outside an exon for BRCA2'''
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
 
@@ -475,10 +551,11 @@ class test_calcVarPriors(unittest.TestCase):
         inExon = calcVarPriors.varInExon(self.variant)
         self.assertFalse(inExon)
 
-    def test_varInSpliceDonor(self):
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
+    def test_varInSpliceDonorBRCA1(self, fetch_gene_coordinates):
         '''
         Tests that variant is correctly identified as in or NOT in a splice donor region 
-        for multiple positions across multiple exons
+        for multiple positions across multiple exons in BRCA1
         '''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -527,6 +604,13 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43044294"
         inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
         self.assertFalse(inSpliceDonor)
+
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)    
+    def test_varInSpliceDonorBRCA2(self, fetch_gene_coordinates):
+        '''
+        Tests that variant is correctly identified as in or NOT in a splice donor region 
+        for multiple positions across multiple exons in BRCA2
+        '''
 
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -577,10 +661,11 @@ class test_calcVarPriors(unittest.TestCase):
         inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
         self.assertFalse(inSpliceDonor)
 
-    def test_varInSpliceAcceptor(self):
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
+    def test_varInSpliceAcceptorBRCA1(self, fetch_gene_coordinates):
         '''
         Tests that variant is correctly identified as in or NOT in a splice acceptor region
-        uses multiple positions across multiple exons
+        uses multiple positions across multiple exons for BRCA1
         '''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -630,6 +715,12 @@ class test_calcVarPriors(unittest.TestCase):
         inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
         self.assertFalse(inSpliceAcceptor)
 
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)    
+    def test_varInSpliceAcceptorBRCA2(self, fetch_gene_coordinates):
+        '''
+        Tests that variant is correctly identified as in or NOT in a splice acceptor region
+        uses multiple positions across multiple exons for BRCA2
+        '''
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
 
@@ -678,8 +769,9 @@ class test_calcVarPriors(unittest.TestCase):
         inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
         self.assertFalse(inSpliceAcceptor)
 
-    def testVarInEnigmaCiDomains(self):
-        '''Tests that variant is correctly identified as in or NOT in CI domain as defined by ENIGMA rules'''
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
+    def testVarInEnigmaCiDomainsBRCA1(self, fetch_gene_coordinates):
+        '''Tests that variant is correctly identified as in or NOT in CI domain in BRCA1 as defined by ENIGMA rules'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
@@ -698,7 +790,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43097274"
         inEnigmaCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
         self.assertFalse(inEnigmaCI)
-
+        
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)    
+    def testVarInEnigmaCiDomainsBRCA2(self, fetch_gene_coordinates):
+        '''Tests that variant is correctly identified as in or NOT in CI domain in BRCA2 as defined by ENIGMA rules'''
+        boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
 
@@ -711,9 +807,10 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32398354"
         inEnigmaCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
         self.assertFalse(inEnigmaCI)
-                
-    def test_varInPriorsCiDomain(self):
-        '''Tests that variant is correctly identified as in or NOT in CI domain as defined by PRIORS webiste'''
+
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
+    def test_varInPriorsCiDomainBRCA1(self, fetch_gene_coordinates):
+        '''Tests that variant is correctly identified as in or NOT in CI domain in BRCA1 as defined by PRIORS webiste'''
         boundaries = "priors"
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
@@ -737,7 +834,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43124090"
         inPriorsCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
         self.assertFalse(inPriorsCI)
-
+        
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)    
+    def test_varInPriorsCiDomainBRCA2(self, fetch_gene_coordinates):
+        '''Tests that variant is correctly identified as in or NOT in CI domain in BRCA2 as defined by PRIORS webiste'''
+        boundaries = "priors"
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
 
@@ -789,8 +890,8 @@ class test_calcVarPriors(unittest.TestCase):
         inGreyZone = calcVarPriors.varInGreyZone(self.variant)
         self.assertTrue(inGreyZone)
         
-    def test_varAfterGreyZone(self):
-        '''Tests that variant is correctly identifed as after the grey zone'''
+    def test_varAfterGreyZoneBRCA1(self):
+        '''Tests that variant in BRCA1 is NOT considered as after the grey zone'''
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
 
@@ -799,6 +900,9 @@ class test_calcVarPriors(unittest.TestCase):
         afterGreyZone = calcVarPriors.varAfterGreyZone(self.variant)
         self.assertFalse(afterGreyZone)
 
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)     
+    def test_varAfterGreyZoneBRCA2(self, fetch_gene_coordinates):
+        '''Tests that variant in BRCA2 is correctly identified as after the grey zone'''
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
 
@@ -812,8 +916,9 @@ class test_calcVarPriors(unittest.TestCase):
         afterGreyZone = calcVarPriors.varAfterGreyZone(self.variant)
         self.assertTrue(afterGreyZone)
 
-    def test_getVarLocation(self):
-        '''Tests that variant location is set correctly based on genomic position'''
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
+    def test_getVarLocationBRCA1(self, fetch_gene_coordinates):
+        '''Tests that variant location is set correctly based on genomic position for BRCA1'''
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
         boundaries = "enigma"
@@ -821,78 +926,81 @@ class test_calcVarPriors(unittest.TestCase):
         # BRCA1 variant outside transcript boundaries (before txn start)
         self.variant["Pos"] = "43125600"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["outBounds"])
+        self.assertEquals(varLoc, variantLocations["outBounds"])
 
         # BRCA1 variant outside transcript boundaries (after txn end)
         self.variant["Pos"] = "43044000"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["outBounds"])
+        self.assertEquals(varLoc, variantLocations["outBounds"])
 
         # BRCA1 variant in middle of ENIGMA CI domain
         self.variant["Pos"] = "43063930"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inCI"])
+        self.assertEquals(varLoc, variantLocations["inCI"])
 
         # BRCA1 variant in middle of PRIORS CI domain
         boundaries = "priors"
         self.variant["Pos"] = "43106502"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inCI"])
+        self.assertEquals(varLoc, variantLocations["inCI"])
 
         # BRCA1 variant in ENIGMA CI domain splice donor region
         boundaries = "enigma"
         self.variant["Pos"] = "43104868"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inCISpliceDonor"])
+        self.assertEquals(varLoc, variantLocations["inCISpliceDonor"])
         
         # BRCA1 variant in PRIORS CI domain splice donor region
         boundaries = "priors"
         self.variant["Pos"] = "43106456"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inCISpliceDonor"])
+        self.assertEquals(varLoc, variantLocations["inCISpliceDonor"])
         
         # BRCA1 variant in splice donor region
         self.variant["Pos"] = "43074331"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inSpliceDonor"])
+        self.assertEquals(varLoc, variantLocations["inSpliceDonor"])
 
         # BRCA1 variant in ENIGMA CI domain splice acceptor region
         boundaries = "enigma"
         self.variant["Pos"] = "43063373"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inCISpliceAcceptor"])
+        self.assertEquals(varLoc, variantLocations["inCISpliceAcceptor"])
 
         # BRCA1 variant in PRIORS CI domain splice acceptor region
         boundaries = "priors"
         self.variant["Pos"] = "43057135"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inCISpliceAcceptor"])
+        self.assertEquals(varLoc, variantLocations["inCISpliceAcceptor"])
 
         # BRCA1 variant in splice acceptor region
         self.variant["Pos"] = "43082575"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inSpliceAcceptor"])
+        self.assertEquals(varLoc, variantLocations["inSpliceAcceptor"])
 
         # BRCA1 variant in exon
         self.variant["Pos"] = "43071220"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inExon"])
+        self.assertEquals(varLoc, variantLocations["inExon"])
 
         # BRCA1 variant in 5' UTR
         self.variant["Pos"] = "43124138"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inUTR"])
+        self.assertEquals(varLoc, variantLocations["inUTR"])
 
         # BRCA1 variant in 3' UTR
         self.variant["Pos"] = "43045660"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inUTR"])
+        self.assertEquals(varLoc, variantLocations["inUTR"])
 
         # BRCA1 variant in intron
         self.variant["Pos"] = "43071263"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inIntron"])
+        self.assertEquals(varLoc, variantLocations["inIntron"])
 
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)    
+    def test_getVarLocationBRCA2(self, fetch_gene_coordinates):
+        '''Tests that variant location is set correctly based on genomic position for BRCA2'''
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
         boundaries = "enigma"
@@ -900,89 +1008,90 @@ class test_calcVarPriors(unittest.TestCase):
         # BRCA2 variant outside transcript boundaries (before txn start)
         self.variant["Pos"] = "32315300"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["outBounds"])
+        self.assertEquals(varLoc, variantLocations["outBounds"])
 
         # BRCA2 variant outside transcript boundaries (after txn end)
         self.variant["Pos"] = "32399800"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["outBounds"])
+        self.assertEquals(varLoc, variantLocations["outBounds"])
         
         # BRCA2 variant in middle of ENIGMA CI domain
         self.variant["Pos"] = "32376714"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inCI"])
+        self.assertEquals(varLoc, variantLocations["inCI"])
 
         # BRCA2 variant in middle of PRIORS CI domain
         boundaries = "priors"
         self.variant["Pos"] = "32363207"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inCI"])
+        self.assertEquals(varLoc, variantLocations["inCI"])
 
         # BRCA2 variant in ENIGMA CI splice donor region
         boundaries = "enigma"
         self.variant["Pos"] = "32357929"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inCISpliceDonor"])
+        self.assertEquals(varLoc, variantLocations["inCISpliceDonor"])
 
         # BRCA2 variant in PRIORS CI splice donor region
         boundaries = "priors"
         self.variant["Pos"] = "32316527"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inCISpliceDonor"])
+        self.assertEquals(varLoc, variantLocations["inCISpliceDonor"])
 
         # BRCA2 variant in splice donor region
         self.variant["Pos"] = "32333388"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inSpliceDonor"])
+        self.assertEquals(varLoc, variantLocations["inSpliceDonor"])
 
         # BRCA2 variant in ENIGMA CI splice acceptor region
         boundaries = "enigma"
         self.variant["Pos"] = "32376670"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inCISpliceAcceptor"])
+        self.assertEquals(varLoc, variantLocations["inCISpliceAcceptor"])
 
         # BRCA2 variant in PRIORS CI splice acceptor region
         boundaries = "priors"
         self.variant["Pos"] = "32363179"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inCISpliceAcceptor"])
+        self.assertEquals(varLoc, variantLocations["inCISpliceAcceptor"])
 
         # BRCA2 variant in splice acceptor region
         self.variant["Pos"] = "32329443"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inSpliceAcceptor"])
+        self.assertEquals(varLoc, variantLocations["inSpliceAcceptor"])
 
         # BRCA2 variant in grey zone
         self.variant["Pos"] = "32398465"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inGreyZone"])
+        self.assertEquals(varLoc, variantLocations["inGreyZone"])
 
         # BRCA2 variant after grey zone
         self.variant["Pos"] = "32398499"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["afterGreyZone"])
+        self.assertEquals(varLoc, variantLocations["afterGreyZone"])
 
         # BRCA2 variant in exon
         self.variant["Pos"] = "32336289"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inExon"])
+        self.assertEquals(varLoc, variantLocations["inExon"])
 
         # BRCA2 variant in 5' UTR
         self.variant["Pos"] = "32316398"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inUTR"])
+        self.assertEquals(varLoc, variantLocations["inUTR"])
 
         # BRCA2 variant in 3' UTR
         self.variant["Pos"] = "32398790"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inUTR"])
+        self.assertEquals(varLoc, variantLocations["inUTR"])
 
         # BRCA2 variant in intron
         self.variant["Pos"] = "32344537"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, self.variantLocations["inIntron"])        
+        self.assertEquals(varLoc, variantLocations["inIntron"])        
 
-    def test_getVarDict(self):
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
+    def test_getVarDict(self, fetch_gene_coordinates):
         '''
         Tests that: 
         1. Variant information is being parsed correctly
