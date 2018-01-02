@@ -787,9 +787,10 @@ var VariantDetail = React.createClass({
                     title = "Abbreviated AA Change";
                 }
 
-                // frequency charts are not displayed if they're empty
+                // get allele frequency chart components if they're available
                 if (rowDescriptor.replace) {
                     rowItem = rowDescriptor.replace(variant, prop);
+                    // frequency charts are not displayed if they're empty
                     if (rowItem === false) {
                         return false;
                     }
