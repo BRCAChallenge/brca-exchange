@@ -790,9 +790,23 @@ var VariantDetail = React.createClass({
                 // get allele frequency chart components if they're available
                 if (rowDescriptor.replace) {
                     rowItem = rowDescriptor.replace(variant, prop);
+
                     // frequency charts are not displayed if they're empty
                     if (rowItem === false) {
                         return false;
+                    }
+
+                    // don't insert rows for empty charts, but count them as empty rows
+                    if (prop === 'Allele_Frequency_Charts_1000_Genomes') {
+                        if (!variant['Variant_in_1000_Genomes']) { // eslint-disable-line dot-notation
+                            rowsEmpty += 1;
+                            return false;
+                        }
+                    } else if (prop === 'Allele_Frequency_Charts_ExAC') {
+                        if (!variant['Variant_in_ExAC']) {
+                            rowsEmpty += 1;
+                            return false;
+                        }
                     }
                 } else if (variant[prop] !== null) {
                     if (prop === "Gene_Symbol") {
@@ -855,19 +869,6 @@ var VariantDetail = React.createClass({
                 }
 
                 let isEmptyValue = rowDescriptor.replace ? rowItem === false : util.isEmptyField(variant[prop]);
-
-                // don't insert rows for empty charts, but count them as empty rows
-                if (prop === 'Allele_Frequency_Charts_1000_Genomes') {
-                    if (!variant['Variant_in_1000_Genomes']) { // eslint-disable-line dot-notation
-                        rowsEmpty += 1;
-                        return false;
-                    }
-                } else if (prop === 'Allele_Frequency_Charts_ExAC') {
-                    if (!variant['Variant_in_ExAC']) {
-                        rowsEmpty += 1;
-                        return false;
-                    }
-                }
 
                 if (title === "Beacons") {
                     if (variant.Ref.length > 1 || variant.Alt.length > 1) {
