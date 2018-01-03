@@ -43,7 +43,7 @@ var util = require('./util');
 var {Grid, Col, Row, Table, Button, Modal, Panel, Glyphicon} = require('react-bootstrap');
 
 /* FAISAL: added 'groups' collection that specifies how to map columns to higher-level groups */
-var {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups} = require('./VariantTable');
+var {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups, reportSourceFieldMapping} = require('./VariantTable');
 var {Signup} = require('./Signup');
 var {Signin, ResetPassword} = require('./Signin');
 var {ConfirmEmail} = require('./ConfirmEmail');
