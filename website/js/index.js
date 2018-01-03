@@ -702,42 +702,34 @@ var VariantDetail = React.createClass({
             return null;
         }
 
-        const excludedProps = [
-            'id', 'Variant', 'Data_Release',
-            'Chr', 'Alt', 'Pos', 'Ref'
-        ];
-        // index cols by prop to speed up title lookups
-        const colsLabels = cols.reduce((a, x) => { a[x.prop] = x; return a; }, {});
-
         // group reports by source
-        return Object.entries(_.groupBy(this.state.reports, 'Source'))
+        return Object.entries(_.groupBy(reports, 'Source'))
+            .filter(([sourceName]) => reportSourceFieldMapping[sourceName] !== undefined)
             .map(([sourceName, submissions]) => {
-                // for each source, construct a panel
+                // look up data for formatting this specific source, e.g. what fields to include, its name, etc.
+                const sourceMeta = reportSourceFieldMapping[sourceName];
 
-                // make source human-readable
-                sourceName = sourceName.replace(/_/g, " ");
+                // sort the submissions if this source specifies a sort function
+                if (sourceMeta.sortBy) {
+                    // (side note: we concat() to clone before sort()ing, because sort() mutates the array)
+                    submissions = submissions.concat().sort(sourceMeta.sortBy);
+                }
 
                 // create a per-submitter collapsible subsection within this source panel
-                const submitters = submissions.map((x) => {
-                    const submitterName = util.getFormattedFieldByProp('Submitter_ClinVar', x);
+                const submitters = submissions.map((submissionData, idx) => {
+                    // extract header fields, e.g. the submitter name
+                    const submitterName = util.getFormattedFieldByProp(sourceMeta.submitter.prop, submissionData);
 
-                    const formattedCols = Object.keys(x)
-                        .filter(k => x[k] && !excludedProps.includes(k))
-                        .map(k => {
-                            // get metadata (title, optional render func) associated with this column
-                            const meta = colsLabels[k];
-
-                            return {
-                                prop: k,
-                                title: meta ? meta.title : `?:${k}`,
-                                value: x[k].toString()
-                            };
-                        });
+                    // extract fields we care about from the submission data
+                    const formattedCols = sourceMeta.cols
+                        .map(({ title, prop }) => ({
+                            title, prop, value: submissionData[prop] ? submissionData[prop].toString() : `${prop}???`
+                        }));
 
                     return (
                         <VariantSubmitter
-                            key={x.Submitter_ClinVar} submitter={submitterName}
-                            cols={formattedCols} source={x}
+                            key={idx} submitter={submitterName} source={sourceName}
+                            meta={sourceMeta} cols={formattedCols} data={submissionData}
                             hideEmptyItems={this.state.hideEmptyItems}
                             defaultExpanded={true}
                         />
@@ -746,7 +738,7 @@ var VariantDetail = React.createClass({
 
                 // create the source panel itself now
                 const groupTitle = `source-panel-${sourceName}`;
-                const header = <h3>{`Clinical Significance (${sourceName})`}</h3>;
+                const header = <h3>{`Clinical Significance (${sourceMeta.displayName})`}</h3>;
                 const allEmpty = false; // FIXME: actually check if we're all empty or no
 
                 return (
