@@ -748,8 +748,8 @@ var VariantDetail = React.createClass({
                 const allEmpty = false; // FIXME: actually check if we're all empty or no
 
                 return (
-                    <div className="variant-detail-group variant-submitter-group">
-                        <div key={`group_collection-${groupTitle}`} className={ allEmpty && this.state.hideEmptyItems ? "group-empty" : "" }>
+                    <div key={`group_collection-${groupTitle}`} className="variant-detail-group variant-submitter-group">
+                        <div className={ allEmpty && this.state.hideEmptyItems ? "group-empty" : "" }>
                             <Panel
                                 header={header}
                                 collapsable={true}
