@@ -8,6 +8,10 @@ import classNames from 'classnames';
 import util from '../util';
 import KeyInline from './KeyInline';
 
+function sentenceCase(str) {
+    return str.replace(/\b\S/g, (t) => t.toUpperCase() );
+}
+
 const VariantSubmitter = React.createClass({
     mixins: [CollapsableMixin],
 
@@ -30,17 +34,40 @@ const VariantSubmitter = React.createClass({
         return fieldsToTruncate.indexOf(field) > -1;
     },
 
+    // source-specific headers
+    headerComponent: {
+        'ClinVar': function(data) {
+            const significance = util.getFormattedFieldByProp("Clinical_Significance_ClinVar", data);
+            const dateUpdated = util.getFormattedFieldByProp("Date_Last_Updated_ClinVar", data);
+
+            return (
+                <div style={{textAlign: 'left'}}>
+                {`${sentenceCase(significance)} (${dateUpdated})`}
+                </div>
+            );
+        },
+        'LOVD': function(data) {
+            const variantEffect = util.getFormattedFieldByProp("Variant_effect_LOVD", data);
+
+            return (
+                <div style={{textAlign: 'left'}}>
+                {`Variant Effect: ${variantEffect}`}
+                </div>
+            );
+        }
+    },
+
     render: function() {
         let styles = this.getCollapsableClassSet();
 
         // ----
 
-        const {submitter, cols, source} = this.props;
+        const {submitter, cols, data} = this.props;
 
         // for each panel, construct key-value pairs as a row of the table
-        const submitterRows = cols.map(({prop, title, value}) => {
+        const submitterRows = cols.map(({prop, title, value}, idx) => {
             const isEmptyValue = util.isEmptyField(value);
-            const rowItem = util.getFormattedFieldByProp(prop, source);
+            const rowItem = util.getFormattedFieldByProp(prop, data);
 
             return (
                 <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
@@ -51,14 +78,13 @@ const VariantSubmitter = React.createClass({
             );
         });
 
-        // if we're not visible, these columns will be shown (if available)
-        const dateLast = cols.find(x => x.prop === 'date-last-updated');
+        // FIXME: explain why we have two tables, one for the header and one for the collapsible contents
 
         return (
             <div>
-                <Table key={`submitter-name-${submitter}`} style={{marginBottom: 0, borderTop: 'solid 2px #ccc'}}>
+                <Table style={{marginBottom: 0, borderTop: 'solid 2px #ccc'}}>
                     <thead>
-                        <tr key="submitter-header" className={`submitter-header ${this.state.expanded ? 'expanded' : ''}`} onClick={this.onHandleToggle}>
+                        <tr className={`submitter-header ${this.state.expanded ? 'expanded' : ''}`} onClick={this.onHandleToggle}>
                             <td className='help-target'>
                                 {
                                     this.state.expanded
@@ -66,18 +92,17 @@ const VariantSubmitter = React.createClass({
                                         : <i className="fa fa-caret-right" aria-hidden="true" />
                                 }
                                 &nbsp;
-                                <span>Submitter:</span>
+                                <span>{this.props.meta.submitter.title}:</span>
                             </td>
                             <td colSpan={2}><b>{submitter}</b></td>
-                            <td style={{textAlign: 'right'}}>
-                                { !this.state.expanded && dateLast && <span>(date: { dateLast.value })</span>}
+                            <td>
+                            {
+                                // remaining header depend on the source
+                                this.headerComponent[this.props.source](data)
+                            }
                             </td>
                         </tr>
                     </thead>
-
-                    <tbody>
-
-                    </tbody>
                 </Table>
 
                 <div ref='panel' className={classNames(styles)}>
