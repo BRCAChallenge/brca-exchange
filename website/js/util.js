@@ -93,11 +93,11 @@ function getFormattedFieldByProp(prop, variant) {
         rowItem = [];
         for (let i = 0; i < accessions.length; i++) {
             if (i < (accessions.length - 1)) {
-                rowItem.push(<span><a target="_blank"
+                rowItem.push(<span key={i}><a target="_blank"
                     href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{accessions[i]}</a>, </span>);
             } else {
                 // exclude trailing comma
-                rowItem.push(<a target="_blank"
+                rowItem.push(<a key={i} target="_blank"
                     href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{accessions[i]}</a>);
             }
         }
@@ -106,10 +106,10 @@ function getFormattedFieldByProp(prop, variant) {
         rowItem = [];
         for (let i = 0; i < ids.length; i++) {
             if (i < (ids.length - 1)) {
-                rowItem.push(<span><a target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>, </span>);
+                rowItem.push(<span key={i}><a target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>, </span>);
             } else {
                 // exclude trailing comma
-                rowItem.push(<a target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>);
+                rowItem.push(<a key={i} target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>);
             }
         }
     } else if (prop === "Assertion_method_citation_ENIGMA") {
