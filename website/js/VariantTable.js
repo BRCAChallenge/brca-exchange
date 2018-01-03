@@ -312,6 +312,69 @@ const researchModeColumns = [
     {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'}
 ];
 
+
+// --- variant report metadata ---
+
+// maps a source to the fields where we find report data
+// if a source isn't present in this mapping, it's excluded from the output
+const reportSourceFieldMapping = {
+    'ClinVar': {
+        displayName: 'ClinVar',
+        sortBy: (a, b) => {
+            // sort by date in reverse chronological order
+            // (we receive strings for the date, so we have to first interpret them as dates)
+            // FIXME: is there a more reliable way to parse these strings as dates?
+            return (
+                new Date(b['Date_Last_Updated_ClinVar']).getTime() -
+                new Date(a['Date_Last_Updated_ClinVar']).getTime()
+            );
+        },
+        submitter: {title: 'Submitter', prop: 'Submitter_ClinVar'},
+        cols: [
+            // * from the wireframe:
+            // Submission Type: clinical testing
+            // SCV Accession: SCV000167236.10
+            // Summary Evidence: This variant is considered likely benign or benign based on...
+            // Supporting Observations: -
+
+            {title: 'Submission Type', prop: 'Method_ClinVar'}, // likely Method_ClinVar
+            {title: 'SCV Accession', prop: 'SCV_ClinVar'},
+            {title: 'Summary Evidence', prop: 'Summary_Evidence_ClinVar'},
+            {title: 'Supporting Observations', prop: 'Description_ClinVar'}, // possibly Description_ClinVar
+
+            // * extra fields from the existing tile
+            // {title: 'Clinical Significance', prop: 'Clinical_Significance_ClinVar'},
+            // {title: 'Submitter', prop: 'Submitter_ClinVar'},
+            // {title: 'Analysis Method', prop: 'Method_ClinVar'},
+            // {title: 'Date last updated', prop: 'Date_Last_Updated_ClinVar'},
+            // {title: 'Allele Origin', prop: 'Allele_Origin_ClinVar'},
+        ]
+    },
+    'LOVD': {
+        displayName: 'LOVD',
+        submitter: {title: 'Submitter(s)', prop: 'Submitters_LOVD'},
+        cols: [
+            // * from the wireframe:
+            // Genetic Origin: Germline
+            // Individuals: 12
+            // Submission ID: BRCA1_000155
+            // Variant Haplotype: -
+
+            {title: 'Genetic Origin', prop: 'Genetic_origin_LOVD'},
+            {title: 'Individuals', prop: 'Individuals_LOVD'},
+            {title: 'Submission ID', prop: 'DBID_LOVD'}, // possibly BX_ID_LOVD, DBID_LOVD?
+            {title: 'Variant Haplotype', prop: 'Variant_haplotype_LOVD'},
+
+            // * extra fields from the existing tile
+            // {title: 'Variant Frequency', prop: 'Variant_frequency_LOVD'},
+            // {title: 'Submitters', prop: 'Submitters_LOVD'},
+            // {title: 'Variant Effect', prop: 'Variant_effect_LOVD'},
+
+        ]
+    }
+};
+
+
 /*eslint-enable camelcase */
 
 // Work-around to allow the user to select text in the table. The browser does not distinguish between
@@ -580,5 +643,6 @@ module.exports = {
     researchModeColumns: researchModeColumns,
     columns: columns,
     researchModeGroups: researchModeGroups,
-    expertModeGroups: expertModeGroups
+    expertModeGroups: expertModeGroups,
+    reportSourceFieldMapping: reportSourceFieldMapping
 };
