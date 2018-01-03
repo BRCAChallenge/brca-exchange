@@ -697,8 +697,8 @@ var VariantDetail = React.createClass({
             };
         });
     },
-    generateSubmitterPanels: function (cols) {
-        if (!this.state.reports) {
+    generateSubmitterPanels: function (reports) {
+        if (!reports) {
             return null;
         }
 
@@ -881,7 +881,7 @@ var VariantDetail = React.createClass({
 
         const diffRows = this.generateDiffRows(cols, data);
 
-        const submitterPanels = this.generateSubmitterPanels(cols, data);
+        const submitterPanels = this.generateSubmitterPanels(this.state.reports);
 
         return (error ? <p>{error}</p> :
             <Grid>
