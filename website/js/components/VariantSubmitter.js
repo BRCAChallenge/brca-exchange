@@ -44,7 +44,7 @@ const VariantSubmitter = React.createClass({
 
             return (
                 <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
-                    <KeyInline tableKey={title} onClick={(event) => this.showHelp(event, title)} />
+                    <KeyInline tableKey={title} onClick={(event) => this.props.showHelp(event, title)} />
                     <td colSpan={2} ><span className={ this.truncateData(prop) ? "row-value-truncated" : "row-value" }>{rowItem}</span></td>
                     <td>&nbsp;</td>
                 </tr>

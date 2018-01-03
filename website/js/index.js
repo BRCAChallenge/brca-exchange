@@ -731,6 +731,7 @@ var VariantDetail = React.createClass({
                             key={idx} submitter={submitterName} source={sourceName}
                             meta={sourceMeta} cols={formattedCols} data={submissionData}
                             hideEmptyItems={this.state.hideEmptyItems}
+                            showHelp={this.showHelp}
                             defaultExpanded={
                                 /*
                                 show all items expanded if there are only a few of them.
