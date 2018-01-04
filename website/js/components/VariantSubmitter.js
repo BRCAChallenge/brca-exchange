@@ -12,6 +12,14 @@ function sentenceCase(str) {
     return str.replace(/\b\S/g, (t) => t.toUpperCase() );
 }
 
+const ellipsizedStyle = {
+    fontWeight: 'bold',
+    textOverflow: 'ellipsis',
+    /* Required for text-overflow to do anything */
+    whiteSpace: 'nowrap',
+    overflow: 'hidden'
+};
+
 const VariantSubmitter = React.createClass({
     mixins: [CollapsableMixin],
 
@@ -94,7 +102,7 @@ const VariantSubmitter = React.createClass({
                                 &nbsp;
                                 <span>{this.props.meta.submitter.title}:</span>
                             </td>
-                            <td colSpan={2}><b>{submitter}</b></td>
+                            <td colSpan={2} style={!this.state.expanded ? ellipsizedStyle : {}}>{ submitter }</td>
                             <td>
                             {
                                 // remaining header depend on the source
