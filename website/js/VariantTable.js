@@ -341,6 +341,7 @@ const reportSourceFieldMapping = {
             {title: 'SCV Accession', prop: 'SCV_ClinVar'},
             {title: 'Summary Evidence', prop: 'Summary_Evidence_ClinVar'},
             {title: 'Supporting Observations', prop: 'Description_ClinVar'}, // possibly Description_ClinVar
+            {title: 'Review Status', prop: 'Review_Status_ClinVar'},
 
             // * extra fields from the existing tile
             // {title: 'Clinical Significance', prop: 'Clinical_Significance_ClinVar'},
@@ -369,7 +370,6 @@ const reportSourceFieldMapping = {
             // {title: 'Variant Frequency', prop: 'Variant_frequency_LOVD'},
             // {title: 'Submitters', prop: 'Submitters_LOVD'},
             // {title: 'Variant Effect', prop: 'Variant_effect_LOVD'},
-
         ]
     }
 };
