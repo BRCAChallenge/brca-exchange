@@ -947,9 +947,19 @@ var VariantDetail = React.createClass({
                 </Row>
 
                 <Row>
-                    <Col md={12} style={{paddingLeft: '20px', paddingRight: '20px'}}>
-                        {submitterPanels}
+                    <Col md={12} style={{paddingLeft: '20px', paddingRight: '20px', margin: '20px 0'}}>
+                        <h3>Individual Reports</h3>
                     </Col>
+                </Row>
+
+                <Row>
+                {
+                    submitterPanels && submitterPanels.map((panel, idx) => (
+                        <div key={idx} className="col col-md-12 col-lg-6">
+                        {panel}
+                        </div>
+                    ))
+                }
                 </Row>
 
                 <Row>
