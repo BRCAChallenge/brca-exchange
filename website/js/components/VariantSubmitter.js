@@ -20,6 +20,41 @@ const ellipsizedStyle = {
     overflow: 'hidden'
 };
 
+// from https://www.ncbi.nlm.nih.gov/clinvar/docs/review_status/#revstat_def
+const starsToRevstatuses = {
+    4: ['practice_guideline'],
+    3: ['reviewed_by_expert_panel'],
+    2: [],
+    1: ['criteria_provided,_single_submitter'],
+    0: ['no_assertion_criteria_provided', 'no_assertion_provided'],
+};
+
+function getStarsForReviewStatus(status) {
+    let stars = 0;
+
+    // determine how many stars correspond to this review status
+    for (let starStatus of Object.entries(starsToRevstatuses)) {
+        if (starStatus[1].includes(status)) {
+            stars = starStatus[0];
+            break;
+        }
+    }
+
+    // returns an array of length 4 (the maximum number of stars) where
+    // the number of stars corresponding to this status are highlighted
+    return (<span>
+    {
+        Array.from({ length: 4 })
+            .map((_, x) => (
+                <i key={x} className="fa fa-star"
+                    style={{ color: (x < stars) ? '#ffe86d' : '#cbcbcb' }}
+                    aria-hidden="true"
+                />
+            ))
+    }
+    </span>);
+}
+
 const VariantSubmitter = React.createClass({
     mixins: [CollapsableMixin],
 
@@ -49,8 +84,13 @@ const VariantSubmitter = React.createClass({
             const dateUpdated = util.getFormattedFieldByProp("Date_Last_Updated_ClinVar", data);
 
             return (
-                <div style={{textAlign: 'left'}}>
-                {`${sentenceCase(significance)} (${dateUpdated})`}
+                <div style={{display: 'flex'}}>
+                    <div style={{flex: '1 1 auto', textAlign: 'left'}}>
+                    {`${sentenceCase(significance)} (${dateUpdated})`}
+                    </div>
+                    <div style={{flex: '0 1 auto', textAlign: 'right', whiteSpace: 'nowrap'}}>
+                    { getStarsForReviewStatus(data['Review_Status_ClinVar']) }
+                    </div>
                 </div>
             );
         },
@@ -105,7 +145,7 @@ const VariantSubmitter = React.createClass({
                             <td colSpan={2} style={!this.state.expanded ? ellipsizedStyle : {}}>{ submitter }</td>
                             <td>
                             {
-                                // remaining header depend on the source
+                                // remaining header elements depend on the source
                                 this.headerComponent[this.props.source](data)
                             }
                             </td>
