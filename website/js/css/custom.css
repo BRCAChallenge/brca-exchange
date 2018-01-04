@@ -923,6 +923,9 @@ div.variant-details-body {
 div.variant-submitter-group .submitter-header {
     background: #f2f7ff;
     cursor: pointer;
+
+    display: flex; flex-direction: row; width: 100%;
+    align-items: center;
 }
 div.variant-submitter-group .submitter-header.expanded {
     box-shadow: inset 0 7px 15px -7px rgba(0, 0, 0, 0.23);
@@ -931,9 +934,35 @@ div.variant-submitter-group .submitter-header td {
     border-bottom-width: 3px;
 }
 
+.submitter-header .submitter-cell {
+    padding: 10px;
+}
+
+.submitter-header .submitter-cell.submitter-label {
+    font-weight: bold;
+    text-align: right;
+    text-decoration: dashed;
+    white-space: nowrap;
+
+    flex: 0 0 200px;
+}
+
+.submitter-header .submitter-cell.submitter-name {
+    /*font-weight: bold;*/
+}
+
+.submitter-header .submitter-cell.submitter-name.collapsed {
+    font-weight: bold;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
 .table > thead:first-child > tr.submitter-header:first-child > td {
     border-bottom-width: 3px;
 }
+
+
 
 /* faisal: hack for packery to minimize the impact of the graphical glitch of opening/closing a section */
 .variant-history-col {
