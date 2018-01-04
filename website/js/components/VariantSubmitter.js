@@ -73,7 +73,7 @@ const VariantSubmitter = React.createClass({
         const {submitter, cols, data} = this.props;
 
         // for each panel, construct key-value pairs as a row of the table
-        const submitterRows = cols.map(({prop, title, value}, idx) => {
+        const submitterRows = cols.map(({prop, title, value}) => {
             const isEmptyValue = util.isEmptyField(value);
             const rowItem = util.getFormattedFieldByProp(prop, data);
 
