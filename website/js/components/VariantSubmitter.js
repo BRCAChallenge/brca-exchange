@@ -42,7 +42,7 @@ function getStarsForReviewStatus(status) {
 
     // returns an array of length 4 (the maximum number of stars) where
     // the number of stars corresponding to this status are highlighted
-    return (<span>
+    return (<span title={`${stars} stars out of 4`} style={{display: 'inline-block', marginRight: '10px'}}>
     {
         Array.from({ length: 4 })
             .map((_, x) => (
