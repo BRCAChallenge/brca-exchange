@@ -946,21 +946,24 @@ var VariantDetail = React.createClass({
                     </div>
                 </Row>
 
-                <Row>
-                    <Col md={12} style={{paddingLeft: '20px', paddingRight: '20px', margin: '20px 0'}}>
-                        <h3>Individual Reports</h3>
-                    </Col>
-                </Row>
-
-                <Row>
                 {
-                    submitterPanels && submitterPanels.map((panel, idx) => (
-                        <div key={idx} className="col col-md-12 col-lg-6">
-                        {panel}
-                        </div>
-                    ))
+                    // only display reports in research mode (aka 'all data' mode)
+                    (this.props.mode === "research_mode") && (
+                        <Row style={{paddingLeft: '5px', paddingRight: '5px'}}>
+                            <Col md={12}>
+                                <h3>Individual Reports</h3>
+                            </Col>
+
+                            {
+                                submitterPanels && submitterPanels.map((panel, idx) => (
+                                    <div key={idx} className="col col-md-12 col-lg-6">
+                                        {panel}
+                                    </div>
+                                ))
+                            }
+                        </Row>
+                    )
                 }
-                </Row>
 
                 <Row>
                     <Col md={12} className="variant-history-col">
