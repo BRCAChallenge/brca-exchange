@@ -95,6 +95,9 @@ const researchModeGroups = [
         {title: 'Allele Origin', prop: 'Allele_origin_ENIGMA', core: true},
     ]},
 
+    /*
+    // the below are commented out b/c clinical significance for ClinVar, LOVD are replaced by per-report tiles
+
     {groupTitle: 'Clinical Significance (ClinVar)', internalGroupName: 'Significance (ClinVar)', innerCols: [
         {title: 'Clinical Significance', prop: 'Clinical_Significance_ClinVar', core: true},
         {title: 'Submitter', prop: 'Submitter_ClinVar', core: true},
@@ -113,6 +116,7 @@ const researchModeGroups = [
         {title: 'Variant Effect', prop: 'Variant_effect_LOVD'},
         {title: 'Database ID', prop: 'DBID_LOVD'}
     ]},
+    */
 
     {groupTitle: 'Clinical Significance (BIC)', internalGroupName: 'Significance (BIC)', innerCols: [
         {title: 'Clinical Significance', prop: 'Clinical_classification_BIC', core: true},
