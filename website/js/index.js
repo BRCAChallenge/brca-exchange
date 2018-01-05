@@ -134,7 +134,6 @@ var Home = React.createClass({
             showModal: false
         };
     },
-
     onSearch(value) {
         this.transitionTo('/variants', null, {search: value});
     },
@@ -1031,6 +1030,15 @@ var Application = React.createClass({
             mode: (localStorage.getItem("research-mode") === 'true') ? 'research_mode' : 'default',
         };
     },
+    componentDidUpdate() {
+        let localStorageMode = (localStorage.getItem("research-mode") === "true") ? "research_mode" : "default";
+        if (localStorageMode !== this.state.mode) {
+            this.setMode();
+        }
+    },
+    setMode: function () {
+        this.setState({mode: (localStorage.getItem("research-mode") === 'true') ? 'research_mode' : 'default'});
+    },
     toggleMode: function () {
         if (this.state.mode === 'research_mode') {
             localStorage.setItem('research-mode', false);
@@ -1044,7 +1052,7 @@ var Application = React.createClass({
         var path = this.getPath().slice(1);
         return (
             <div>
-                <NavBarNew path={path} mode={this.state.mode} />
+                <NavBarNew path={path} mode={this.state.mode}/>
                 <RouteHandler toggleMode={this.onChildToggleMode} mode={this.state.mode} />
                 <Database
                     mode={this.state.mode}
