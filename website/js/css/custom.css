@@ -949,13 +949,13 @@ div.variant-submitter-group .submitter-header td {
 
 .submitter-header .submitter-cell.submitter-name {
     /*font-weight: bold;*/
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .submitter-header .submitter-cell.submitter-name.collapsed {
     font-weight: bold;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
 }
 
 .table > thead:first-child > tr.submitter-header:first-child > td {

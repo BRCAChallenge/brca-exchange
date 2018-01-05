@@ -351,6 +351,9 @@ const reportSourceFieldMapping = {
             // Summary Evidence: This variant is considered likely benign or benign based on...
             // Supporting Observations: -
 
+            // displayed here in full since the display in the header is potentially truncated
+            {title: 'Submitter', prop: 'Submitter_ClinVar'},
+
             {title: 'Submission Type', prop: 'Method_ClinVar'}, // likely Method_ClinVar
             {title: 'SCV Accession', prop: 'SCV_ClinVar'},
             {title: 'Summary Evidence', prop: 'Summary_Evidence_ClinVar'},
@@ -374,6 +377,9 @@ const reportSourceFieldMapping = {
             // Individuals: 12
             // Submission ID: BRCA1_000155
             // Variant Haplotype: -
+
+            // displayed here in full since the display in the header is potentially truncated
+            {title: 'Submitter(s)', prop: 'Submitters_LOVD'},
 
             {title: 'Genetic Origin', prop: 'Genetic_origin_LOVD'},
             {title: 'Individuals', prop: 'Individuals_LOVD'},
@@ -458,7 +464,7 @@ var ResearchVariantTableSupplier = function (Component) {
             */
 
             // Start with all columns set to true and data showing from all sources.
-            var selectedColumns = selectedColumns = _.object(_.map(this.getColumns(),
+            var selectedColumns = _.object(_.map(this.getColumns(),
                                     c => [c.prop, true])
                                 );
             var selectedSources = getAllSources();
