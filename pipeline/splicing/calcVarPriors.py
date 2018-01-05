@@ -14,6 +14,7 @@ import sys
 import time
 import json
 import re
+from Bio.Seq import Seq
 from calcMaxEntScanMeanStd import fetch_gene_coordinates
 
 # Here are the canonical BRCA transcripts in ENSEMBL nomenclature
@@ -490,6 +491,73 @@ def getVarLocation(variant, boundaries):
         if inUTR == True:
             return "UTR_variant"
         return "intron_variant"
+
+def getFastaSeq(chrom, strand, rangeStart, rangeStop):
+    '''
+    Given chromosome (in format 'chr13'), strand ('+'/'-'), egion genomic start position, and
+    region genomic end position:
+    Returns a string containing the sequence inclusive of rangeStart and rangeStop
+    To get + strand sequence, rangeStart < rangeStop
+    '''
+    url = "http://togows.org/api/ucsc/hg38/%s:%d-%d.fasta" % (chrom, rangeStart, rangeStop)
+    req = requests.get(url)
+    lines = req.content.split('\n')
+
+    sequence = ""
+    for base in range(1, len(lines)):
+        sequence += lines[base]
+    return sequence
+
+def getSeqLocDict(chrom, strand, rangeStart, rangeStop):
+    '''
+    Given chromosome, strand, region genomic start position, and region genomic end position
+    returns a dictionary containing the genomic position as the key and reference allele as the value
+    For BRCA1 rangeStart > rangeStop, for BRCA2 rangeStart < rangeEnd
+    '''
+    seqLocDict = {}
+    if strand == "-":
+        regionStart = int(rangeStop)
+        regionEnd = int(rangeStart)
+    else:
+        regionStart = int(rangeStart)
+        regionEnd = int(rangeStop)
+
+    sequence = getFastaSeq(chrom, strand, regionStart, regionEnd)
+    genPos = regionStart   
+    while genPos <= regionEnd:
+        for base in sequence:
+            seqLocDict[genPos] = base
+            genPos += 1
+    return seqLocDict
+
+def getAltSeqDict(variant, seqLocDict):
+    '''
+    Given a variant and a dictionary containing a sequence with bases and their locations,
+    returns the dictionary with the alternate allele in place of the reference allele
+    at the variant's genomic position
+    '''
+    varRef = variant["Ref"]
+    varAlt = variant["Alt"]
+    varGenPos = int(variant["Pos"])
+    seqLocDictRef = seqLocDict[varGenPos]
+    if varRef == seqLocDictRef:
+        altSeqDict = seqLocDict.copy()
+        altSeqDict[varGenPos] = varAlt
+    return altSeqDict
+
+def getAltSeq(altSeqDict, strand):
+    '''
+    Given a dictionary containing an alternate sequence with bases and their locations
+    and the strand that the alternate allele is on
+    Returns a string of the sequence containing the alternate allele
+    '''
+    sequence = ""
+    # to ensure that items in dictionary are sorted numerically
+    for key, value in sorted(altSeqDict.items()):
+        sequence += altSeqDict[key]
+    if strand == "-":
+        sequence = str(Seq(sequence).reverse_complement())
+    return sequence
     
 def getVarDict(variant, boundaries):
     '''

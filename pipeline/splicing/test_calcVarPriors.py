@@ -77,6 +77,11 @@ transcriptDataBRCA2 = {'bin': '103',
                        'txEnd': 32399672,
                        'exonStarts': '32315479,32316421,32319076,32325075,32326100,32326241,32326498,32329442,32330918,32332271,32336264,32344557,32346826,32354860,32356427,32357741,32362522,32363178,32370401,32370955,32376669,32379316,32379749,32380006,32394688,32396897,32398161,'}
 
+# sample sequence data for BRCA1 and BRCA2
+brca1Seq = "GATCTGGAAGAAGAGAGGAAGAG"
+brca2Seq = "TGTGTAACACATTATTACAGTGG"
+
+
 class test_calcVarPriors(unittest.TestCase):
 
     def setUp(self):
@@ -1090,6 +1095,112 @@ class test_calcVarPriors(unittest.TestCase):
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
         self.assertEquals(varLoc, variantLocations["inIntron"])        
 
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = brca1Seq)    
+    def test_getSeqLocDictBRCA1(self, getFastaSeq):
+        '''
+        Tests that boundary endpoints for BRCA1 are:
+        1. Included in dictionary
+        2. Have the correct base based on mocked sequence
+        '''
+        chrom = "chr17"
+        strand = "-"
+        rangeStart = 43051137
+        rangeStop = 43051115
+        seqLocDict = calcVarPriors.getSeqLocDict(chrom, strand, rangeStart, rangeStop)
+        self.assertEquals(seqLocDict[rangeStart], brca1Seq[-1])
+        self.assertEquals(seqLocDict[rangeStop], brca1Seq[0])
+        
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = brca2Seq)
+    def test_getSeqLocDictBRCA2(self, getFastaSeq):
+        '''
+        Tests that boundary endpoints for BRCA2 are:
+        1. Included in dictionary
+        2. Have the correct base based on mocked sequence
+        '''
+        chrom = "chr13"
+        strand = "+"
+        rangeStart = 32370936
+        rangeStop = 32370958
+        seqLocDict = calcVarPriors.getSeqLocDict(chrom, strand, rangeStart, rangeStop)
+        self.assertEquals(seqLocDict[rangeStart], brca2Seq[0])
+        self.assertEquals(seqLocDict[rangeStop], brca2Seq[-1])
+
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = brca1Seq)
+    def test_getAltSeqDictBRCA1(self, getFastaSeq):
+        '''
+        Tests that for given variant genomic position:
+        1. Reference allele is set correctly in original dictionary (refSeqDict)
+        2. Alternate allele is set correctly in alternate sequence dicitonary (altSeqDict)
+        '''
+        chrom = "chr17"
+        strand = "-"
+        rangeStart = 43051137
+        rangeStop = 43051115
+        refSeqDict = calcVarPriors.getSeqLocDict(chrom, strand, rangeStart, rangeStop)
+        self.variant["Pos"] = "43051120"
+        self.variant["Ref"] = "G"
+        self.variant["Alt"] = "C"
+        altSeqDict = calcVarPriors.getAltSeqDict(self.variant, refSeqDict)
+        self.assertEquals(refSeqDict[int(self.variant["Pos"])], self.variant["Ref"])
+        self.assertEquals(altSeqDict[int(self.variant["Pos"])], self.variant["Alt"])
+
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = brca2Seq)
+    def test_getAltSeqDictBRCA2(self, getFastaSeq):
+        '''
+        Tests that for given variant genomic position:
+        1. Reference allele is set correctly in original dictionary (refSeqDict)
+        2. Alternate allele is set correctly in alternate sequence dictionary (altSeqDict)
+        '''
+        chrom = "chr13"
+        strand = "+"
+        rangeStart = 32370936
+        rangeStop = 32370958
+        refSeqDict = calcVarPriors.getSeqLocDict(chrom, strand, rangeStart, rangeStop)
+        self.variant["Pos"] = "32370944"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "C"
+        altSeqDict = calcVarPriors.getAltSeqDict(self.variant, refSeqDict)
+        self.assertEquals(refSeqDict[int(self.variant["Pos"])], self.variant["Ref"])
+        self.assertEquals(altSeqDict[int(self.variant["Pos"])], self.variant["Alt"])
+
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = brca1Seq)
+    def test_getAltSeqBRCA1(self, getFastaSeq):
+        '''Tests that alternate sequence string generated is correct for - strand gene (BRCA1)'''
+        chrom = "chr17"
+        strand = "-"
+        rangeStart = 43051137
+        rangeStop = 43051115
+        refSeqDict = calcVarPriors.getSeqLocDict(chrom, strand, rangeStart, rangeStop)
+        self.variant["Pos"] = "43051120"
+        self.variant["Ref"] = "G"
+        self.variant["Alt"] = "C"
+        altSeqDict = calcVarPriors.getAltSeqDict(self.variant, refSeqDict)
+        altSeq = calcVarPriors.getAltSeq(altSeqDict, strand)
+        # reference sequence on plus strand
+        brca1RefSeq = "GATCTGGAAGAAGAGAGGAAGAG"
+        # reverse complement with variant included
+        brca1AltSeq = "CTCTTCCTCTCTTCTTCGAGATC"
+        self.assertEquals(altSeq, brca1AltSeq)
+
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = brca2Seq)
+    def test_getAltSeqBRCA2(self, getFastaSeq):
+        '''Tests that alternate sequence string generated is correct for + strand gene (BRCA2)'''
+        chrom = "chr13"
+        strand = "+"
+        rangeStart = 32370936
+        rangeStop = 32370958
+        refSeqDict = calcVarPriors.getSeqLocDict(chrom, strand, rangeStart, rangeStop)
+        self.variant["Pos"] = "32370944"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "C"
+        altSeqDict = calcVarPriors.getAltSeqDict(self.variant, refSeqDict)
+        altSeq = calcVarPriors.getAltSeq(altSeqDict, strand)
+        # reference sequence on plus strand
+        brca2RefSeq = "TGTGTAACACATTATTACAGTGG"
+        # alternate sequence containing the alterante allele
+        brca2AltSeq = "TGTGTAACCCATTATTACAGTGG"
+        self.assertEquals(altSeq, brca2AltSeq)
+        
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     def test_getVarDict(self, fetch_gene_coordinates):
         '''
