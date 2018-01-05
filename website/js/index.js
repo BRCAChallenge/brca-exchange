@@ -134,7 +134,6 @@ var Home = React.createClass({
             showModal: false
         };
     },
-
     onSearch(value) {
         this.transitionTo('/variants', null, {search: value});
     },
@@ -306,7 +305,6 @@ var Database = React.createClass({
     componentDidMount: function () {
         var q = this.urlq = new Rx.Subject();
         this.subs = q.debounce(500).subscribe(this.onChange);
-        this.props.setMode();
     },
     componentWillUnmount: function () {
         this.subs.dispose();
@@ -375,8 +373,7 @@ var Database = React.createClass({
 					onHeaderClick={this.showHelp}
 					onRowClick={this.showVariant}
                     restoreDefaults={this.restoreDefaults}
-                    mode={this.props.mode}
-                    setMode={this.props.setMode}/>);
+                    mode={this.props.mode}/>);
             message = this.renderMessage(content.pages.variantsResearch);
         } else {
             // Always reset column and source selections to default in expert mode.
@@ -396,8 +393,7 @@ var Database = React.createClass({
 					onHeaderClick={this.showHelp}
 					onRowClick={this.showVariant}
                     restoreDefaults={this.restoreDefaults}
-                    mode={this.props.mode}
-                    setMode={this.props.setMode}/>);
+                    mode={this.props.mode}/>);
             message = this.renderMessage(content.pages.variantsDefault);
         }
         return (
@@ -581,9 +577,6 @@ var VariantDetail = React.createClass({
                 return this.setState({data: resp.data, error: null});
             },
             () => { this.setState({error: 'Problem connecting to server'}); });
-    },
-    componentDidMount: function () {
-        this.props.setMode();
     },
     onChildToggleMode: function() {
         this.props.toggleMode();
@@ -1021,6 +1014,15 @@ var Application = React.createClass({
             mode: (localStorage.getItem("research-mode") === 'true') ? 'research_mode' : 'default',
         };
     },
+    componentDidUpdate() {
+        let localStorageMode = (localStorage.getItem("research-mode") === "true") ? "research_mode" : "default";
+        if (localStorageMode !== this.state.mode) {
+            this.setMode();
+        }
+    },
+    setMode: function () {
+        this.setState({mode: (localStorage.getItem("research-mode") === 'true') ? 'research_mode' : 'default'});
+    },
     toggleMode: function () {
         if (this.state.mode === 'research_mode') {
             localStorage.setItem('research-mode', false);
@@ -1030,19 +1032,15 @@ var Application = React.createClass({
             this.setState({mode: 'research_mode'});
         }
     },
-    setMode: function () {
-        this.setState({mode: (localStorage.getItem("research-mode") === 'true') ? 'research_mode' : 'default'});
-    },
     render: function () {
         var path = this.getPath().slice(1);
         return (
             <div>
                 <NavBarNew path={path} mode={this.state.mode}/>
-                <RouteHandler toggleMode={this.onChildToggleMode} setMode={this.setMode} mode={this.state.mode} />
+                <RouteHandler toggleMode={this.onChildToggleMode} mode={this.state.mode} />
                 <Database
                     mode={this.state.mode}
                     toggleMode={this.onChildToggleMode}
-                    setMode={this.setMode}
                     show={path.indexOf('variants') === 0} />
                 <Footer />
             </div>

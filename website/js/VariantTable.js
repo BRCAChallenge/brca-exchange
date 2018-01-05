@@ -424,9 +424,6 @@ var ResearchVariantTableSupplier = function (Component) {
                 columnSelection: selectedColumns
             };
         },
-        componentDidMount: function() {
-            this.props.setMode();
-        },
         toggleColumns: function (prop) {
             let {columnSelection} = this.state,
                 val = columnSelection[prop],
@@ -549,9 +546,6 @@ var ResearchVariantTableSupplier = function (Component) {
 var VariantTableSupplier = function (Component) {
     var VariantTableComponent = React.createClass({
         mixins: [PureRenderMixin],
-        componentDidMount: function() {
-            this.props.setMode();
-        },
         getColumns: function () {
             return columns;
         },
