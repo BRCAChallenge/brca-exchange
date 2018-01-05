@@ -99,6 +99,9 @@ def variant_reports(request, variant_id):
     variant_id = int(variant_id)
     query = Report.objects.filter(Variant_id=variant_id)
 
+    '''
+    Uncomment the following code to filter enigma/bic submissions to clinvar/lovd
+
     # filter out enigma submissions to clinvar/lovd and bic submissions to clinvar
     filtered_query = []
     for report in query:
@@ -107,13 +110,17 @@ def variant_reports(request, variant_id):
             if "(enigma)" not in submitter and "(bic)" not in submitter:
                 filtered_query.append(report)
         elif report.Source == "LOVD":
-            submitter = report.Submitter_ClinVar.lower()
-            if "(enigma)" not in submitter:
+            submitter = report.Submitters_LOVD.lower()
+            print submitter
+            if "enigma" not in submitter:
                 filtered_query.append(report)
         else:
             filtered_query.append(report)
 
-    response = JsonResponse({"data":  [ model_to_dict(x) for x in filtered_query ]})
+    query = filtered_query
+    '''
+
+    response = JsonResponse({"data":  [ model_to_dict(x) for x in query ]})
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
