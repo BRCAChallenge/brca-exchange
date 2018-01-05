@@ -492,7 +492,7 @@ def getVarLocation(variant, boundaries):
             return "UTR_variant"
         return "intron_variant"
 
-def getFastaSeq(chrom, strand, rangeStart, rangeStop):
+def getFastaSeq(chrom, rangeStart, rangeStop):
     '''
     Given chromosome (in format 'chr13'), strand ('+'/'-'), egion genomic start position, and
     region genomic end position:
@@ -522,7 +522,7 @@ def getSeqLocDict(chrom, strand, rangeStart, rangeStop):
         regionStart = int(rangeStart)
         regionEnd = int(rangeStop)
 
-    sequence = getFastaSeq(chrom, strand, regionStart, regionEnd)
+    sequence = getFastaSeq(chrom, regionStart, regionEnd)
     genPos = regionStart   
     while genPos <= regionEnd:
         for base in sequence:
