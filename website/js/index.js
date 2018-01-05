@@ -715,6 +715,10 @@ var VariantDetail = React.createClass({
                     submissions = submissions.concat().sort(sourceMeta.sortBy);
                 }
 
+                // keeps track of how many non-enigma/bic reports we've seen so we can expand the first one
+                // FIXME: this anoying introduces a side effect into the below map(); maybe there's a better way
+                let nonEnigmaBics = 0;
+
                 // create a per-submitter collapsible subsection within this source panel
                 const submitters = submissions.map((submissionData, idx) => {
                     // extract header fields, e.g. the submitter name
@@ -723,8 +727,25 @@ var VariantDetail = React.createClass({
                     // extract fields we care about from the submission data
                     const formattedCols = sourceMeta.cols
                         .map(({ title, prop }) => ({
-                            title, prop, value: submissionData[prop] ? submissionData[prop].toString() : `${prop}???`
+                            title, prop, value: submissionData[prop]
+                                ? submissionData[prop].toString()
+                                // FIXME: maybe we should just ignore requested fields that aren't in the data payload
+                                : `${prop}???`
                         }));
+
+                    const isEnigmaOrBic = (
+                        typeof submitterName === "string" &&
+                        (
+                            submitterName.toLowerCase().indexOf("enigma") !== -1 ||
+                            submitterName.toLowerCase().indexOf("(bic)") !== -1
+                        )
+                    );
+
+                    if (!isEnigmaOrBic) {
+                        // we only really care about the first, but this is the cleanest way to do this
+                        // with a single var
+                        nonEnigmaBics += 1;
+                    }
 
                     return (
                         <VariantSubmitter
@@ -734,10 +755,11 @@ var VariantDetail = React.createClass({
                             showHelp={this.showHelp}
                             defaultExpanded={
                                 /*
+                                always collapse ENIGMA and BIC submissions.
                                 show all items expanded if there are only a few of them.
-                                otherwise, expand the first elem by default, but nothing else.
+                                otherwise, expand the first non-enigma/bic elem by default, but nothing else.
                                 */
-                                submissions.length <= 3 || idx === 0
+                                ( !isEnigmaOrBic ) && (submissions.length <= 3 || nonEnigmaBics === 1)
                             }
                         />
                     );
