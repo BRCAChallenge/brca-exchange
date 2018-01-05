@@ -55,7 +55,7 @@ var {Navigation, State, Route, RouteHandler,
 var {Releases, Release} = require('./Releases.js');
 
 var KeyInline = require('./components/KeyInline');
-var VariantSubmitter = require('./components/VariantSubmitter');
+var {VariantSubmitter} = require('./components/VariantSubmitter');
 
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 

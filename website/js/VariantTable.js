@@ -10,6 +10,8 @@
 /*global module: false, require: false, window: false */
 'use strict';
 
+var {computeReviewStatusScore} = require("./components/VariantSubmitter");
+
 var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin');
 var DataTable = require('./DataTable');
@@ -325,13 +327,21 @@ const reportSourceFieldMapping = {
     'ClinVar': {
         displayName: 'ClinVar',
         sortBy: (a, b) => {
-            // sort by date in reverse chronological order
+            // sort first by stars, then by date in reverse chronological order
             // (we receive strings for the date, so we have to first interpret them as dates)
             // FIXME: is there a more reliable way to parse these strings as dates?
-            return (
+
+            const starDiff = (
+                computeReviewStatusScore(b['Review_Status_ClinVar']) -
+                computeReviewStatusScore(a['Review_Status_ClinVar'])
+            );
+
+            const datetimeDiff = (
                 new Date(b['Date_Last_Updated_ClinVar']).getTime() -
                 new Date(a['Date_Last_Updated_ClinVar']).getTime()
             );
+
+            return starDiff || datetimeDiff;
         },
         submitter: {title: 'Submitter', prop: 'Submitter_ClinVar'},
         cols: [

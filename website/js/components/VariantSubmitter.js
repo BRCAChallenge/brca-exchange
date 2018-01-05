@@ -13,7 +13,7 @@ function sentenceCase(str) {
 }
 
 // from https://www.ncbi.nlm.nih.gov/clinvar/docs/review_status/#revstat_def
-const starsToRevstatuses = {
+const marksToReviewStatuses = {
     4: ['practice_guideline'],
     3: ['reviewed_by_expert_panel'],
     2: [],
@@ -21,30 +21,36 @@ const starsToRevstatuses = {
     0: ['no_assertion_criteria_provided', 'no_assertion_provided'],
 };
 
-function getStarsForReviewStatus(status) {
-    let stars = 0;
-
-    // determine how many stars correspond to this review status
-    for (let starStatus of Object.entries(starsToRevstatuses)) {
-        if (starStatus[1].includes(status)) {
-            stars = starStatus[0];
-            break;
+function computeReviewStatusScore(status) {
+    // determine how many marks correspond to this review status
+    for (let marksStatus of Object.entries(marksToReviewStatuses)) {
+        if (marksStatus[1].includes(status)) {
+            return marksStatus[0];
         }
     }
 
-    // returns an array of length 4 (the maximum number of stars) where
-    // the number of stars corresponding to this status are highlighted
-    return (<span title={`${stars} stars out of 4`} style={{display: 'inline-block', marginRight: '10px'}}>
-    {
-        Array.from({ length: 4 })
-            .map((_, x) => (
-                <i key={x} className="fa fa-star"
-                    style={{ color: (x < stars) ? '#ffe86d' : '#cbcbcb' }}
-                    aria-hidden="true"
-                />
-            ))
-    }
-    </span>);
+    return 0;
+}
+
+function getMarksForReviewStatus(status) {
+    const marks = computeReviewStatusScore(status);
+    const icon = 'star';
+
+    // returns an array of length 4 (the maximum number of marks) where
+    // the number of marks corresponding to this status are highlighted
+    return (
+        <span title={`${marks} ${icon} out of 4`} style={{display: 'inline-block', marginRight: '10px'}}>
+        {
+            Array.from({ length: 4 })
+                .map((_, x) => (
+                    <i key={x} className={`fa fa-${icon}`}
+                        style={{ color: (x < marks) ? '#ffe86d' : '#cbcbcb', marginRight: '2px' }}
+                        aria-hidden="true"
+                    />
+                ))
+        }
+        </span>
+    );
 }
 
 const VariantSubmitter = React.createClass({
@@ -99,7 +105,7 @@ const VariantSubmitter = React.createClass({
                     {
                         // for ClinVar reports, display stars to the left of the submitter label
                         (this.props.source === 'ClinVar')
-                            ? getStarsForReviewStatus(data['Review_Status_ClinVar'])
+                            ? getMarksForReviewStatus(data['Review_Status_ClinVar'])
                             : null
                     }
 
@@ -171,4 +177,7 @@ const VariantSubmitter = React.createClass({
     }
 });
 
-export default VariantSubmitter;
+module.exports = {
+    VariantSubmitter,
+    computeReviewStatusScore
+};
