@@ -494,7 +494,7 @@ def getVarLocation(variant, boundaries):
 
 def getFastaSeq(chrom, rangeStart, rangeStop):
     '''
-    Given chromosome (in format 'chr13'), strand ('+'/'-'), egion genomic start position, and
+    Given chromosome (in format 'chr13'), region genomic start position, and
     region genomic end position:
     Returns a string containing the sequence inclusive of rangeStart and rangeStop
     To get + strand sequence, rangeStart < rangeStop
