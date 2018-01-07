@@ -767,7 +767,13 @@ var VariantDetail = React.createClass({
 
                 // create the source panel itself now
                 const groupTitle = `source-panel-${sourceName}`;
-                const header = <h3>{`Clinical Significance (${sourceMeta.displayName})`}</h3>;
+                const header = (
+                    <h3>
+                        <a href="#" onClick={(event) => this.onChangeGroupVisibility(groupTitle, event)}>
+                        {`Clinical Significance (${sourceMeta.displayName})`}
+                        </a>
+                    </h3>
+                );
                 const allEmpty = false; // FIXME: actually check if we're all empty or no
 
                 return (
