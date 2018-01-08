@@ -860,11 +860,13 @@ var VariantDetail = React.createClass({
                         rowItem = [ variant[prop], <small style={{float: 'right'}}>({count} of {number})</small> ];
                     } else if (prop === "Genomic_Coordinate_hg38" || prop === "Genomic_Coordinate_hg37") {
                         rowItem = this.generateLinkToGenomeBrowser(prop, variant);
+                    } else if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] !== null) {
+                        let val = variant["HGVS_Protein"].split(":")[0];
+                        variant[prop] = val;
+                        rowItem = val;
                     } else {
                         rowItem = normalizedFieldDisplay(variant[prop]);
                     }
-                } else if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] !== null) {
-                    rowItem = variant["HGVS_Protein"].split(":")[0];
                 }
 
                 let isEmptyValue = rowDescriptor.replace ? rowItem === false : util.isEmptyField(variant[prop]);
