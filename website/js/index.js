@@ -754,11 +754,9 @@ var VariantDetail = React.createClass({
                             hideEmptyItems={this.state.hideEmptyItems}
                             showHelp={this.showHelp}
                             defaultExpanded={
-                                /*
-                                always collapse ENIGMA and BIC submissions.
-                                show all items expanded if there are only a few of them.
-                                otherwise, expand the first non-enigma/bic elem by default, but nothing else.
-                                */
+                                // always collapse ENIGMA and BIC submissions.
+                                // show all items expanded if there are only a few of them.
+                                // otherwise, expand the first non-enigma/bic elem by default, but nothing else.
                                 ( !isEnigmaOrBic ) && (submissions.length <= 3 || nonEnigmaBics === 1)
                             }
                         />
