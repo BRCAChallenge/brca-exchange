@@ -820,10 +820,19 @@ var VariantDetail = React.createClass({
             // if it's a report source (i.e. the key reportSource is defined), then we defer
             // to our custom nested-report-rendering method to generate this entire group
             if (reportSource) {
-                if (!this.state.reports) {
-                    return <div>loading...</div>;
+                // hide this panel if we have no reports, or specifically none for this source
+                if (!this.state.reports || !this.state.reports[reportSource]) {
+                    return null;
                 }
 
+                // also hide this reportSource, but with a warning, if we don't have metadata for that source
+                // (we expect to have metadata for the source, since we both request the source and define its meta)
+                if (!reportSourceFieldMapping[reportSource]) {
+                    console.warn("Source report rendering requested for source with missing metadata: ", reportSource);
+                    return null;
+                }
+
+                // FIXME: we should override just the row-rendering part of the group element, not the whole thing
                 return this.generateSourceReportPanel(reportSource, this.state.reports[reportSource]);
             }
 
