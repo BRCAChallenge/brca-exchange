@@ -530,7 +530,10 @@ var VariantDetail = React.createClass({
 
         backend.variantReports(this.props.params.id).subscribe(
             resp => {
-                return this.setState({reports: resp.data, error: null});
+                // we always want reports grouped by source, so we'll do so centrally here
+                const groupedReports = _.groupBy(resp.data, 'Source');
+
+                return this.setState({reports: groupedReports, error: null});
             }, () => {
                 this.setState({reportError: 'Problem retrieving reports'});
                 console.warn("Couldn't retrieve reports!");
@@ -697,96 +700,95 @@ var VariantDetail = React.createClass({
             };
         });
     },
-    generateSubmitterPanels: function (reports) {
-        if (!reports) {
-            return null;
+    generateSourceReportPanel: function (sourceName, submissions) {
+        // look up data for formatting this specific source, e.g. what fields to include, its name, etc.
+        const sourceMeta = reportSourceFieldMapping[sourceName];
+
+        // sort the submissions if this source specifies a sort function
+        if (sourceMeta.sortBy) {
+            // (side note: we concat() to clone before sort()ing, because sort() mutates the array)
+            submissions = submissions.concat().sort(sourceMeta.sortBy);
         }
 
-        // group reports by source
-        return Object.entries(_.groupBy(reports, 'Source'))
-            .filter(([sourceName]) => reportSourceFieldMapping[sourceName] !== undefined)
-            .map(([sourceName, submissions]) => {
-                // look up data for formatting this specific source, e.g. what fields to include, its name, etc.
-                const sourceMeta = reportSourceFieldMapping[sourceName];
+        // keeps track of how many non-enigma/bic reports we've seen so we can expand the first one
+        // FIXME: this anoying introduces a side effect into the below map(); maybe there's a better way
+        let nonEnigmaBics = 0;
 
-                // sort the submissions if this source specifies a sort function
-                if (sourceMeta.sortBy) {
-                    // (side note: we concat() to clone before sort()ing, because sort() mutates the array)
-                    submissions = submissions.concat().sort(sourceMeta.sortBy);
-                }
+        // create a per-submitter collapsible subsection within this source panel
+        const submitters = submissions.map((submissionData, idx) => {
+            // extract header fields, e.g. the submitter name
+            const submitterName = util.getFormattedFieldByProp(sourceMeta.submitter.prop, submissionData);
 
-                // keeps track of how many non-enigma/bic reports we've seen so we can expand the first one
-                // FIXME: this anoying introduces a side effect into the below map(); maybe there's a better way
-                let nonEnigmaBics = 0;
+            // extract fields we care about from the submission data
+            const formattedCols = sourceMeta.cols
+                .map(({ title, prop }) => ({
+                    title, prop, value: submissionData[prop]
+                        ? submissionData[prop].toString()
+                        // FIXME: maybe we should just ignore requested fields that aren't in the data payload
+                        : `${prop}???`
+                }));
 
-                // create a per-submitter collapsible subsection within this source panel
-                const submitters = submissions.map((submissionData, idx) => {
-                    // extract header fields, e.g. the submitter name
-                    const submitterName = util.getFormattedFieldByProp(sourceMeta.submitter.prop, submissionData);
+            const isEnigmaOrBic = (
+                typeof submitterName === "string" &&
+                (
+                    submitterName.toLowerCase().indexOf("enigma") !== -1 ||
+                    submitterName.toLowerCase().indexOf("(bic)") !== -1
+                )
+            );
 
-                    // extract fields we care about from the submission data
-                    const formattedCols = sourceMeta.cols
-                        .map(({ title, prop }) => ({
-                            title, prop, value: submissionData[prop]
-                                ? submissionData[prop].toString()
-                                // FIXME: maybe we should just ignore requested fields that aren't in the data payload
-                                : `${prop}???`
-                        }));
+            if (!isEnigmaOrBic) {
+                // we only really care about the first, but this is the cleanest way to do this
+                // with a single var
+                nonEnigmaBics += 1;
+            }
 
-                    const isEnigmaOrBic = (
-                        typeof submitterName === "string" &&
-                        (
-                            submitterName.toLowerCase().indexOf("enigma") !== -1 ||
-                            submitterName.toLowerCase().indexOf("(bic)") !== -1
-                        )
-                    );
-
-                    if (!isEnigmaOrBic) {
-                        // we only really care about the first, but this is the cleanest way to do this
-                        // with a single var
-                        nonEnigmaBics += 1;
+            return (
+                <VariantSubmitter
+                    key={idx} submitter={submitterName} source={sourceName}
+                    meta={sourceMeta} cols={formattedCols} data={submissionData}
+                    hideEmptyItems={this.state.hideEmptyItems}
+                    onSubrowToggled={() => {
+                        setTimeout(() => {
+                            // this forces a re-render after a group has expanded/collapsed, fixing the layout
+                            // note that 300ms just happens to be the duration of the expand/collapse animation
+                            // it'd be better to run the re-layout whenever the animation ends
+                            this.forceUpdate();
+                        }, 300);
+                    }}
+                    showHelp={this.showHelp}
+                    defaultExpanded={
+                        // always collapse ENIGMA and BIC submissions.
+                        // show all items expanded if there are only a few of them.
+                        // otherwise, expand the first non-enigma/bic elem by default, but nothing else.
+                        ( !isEnigmaOrBic ) && (submissions.length <= 3 || nonEnigmaBics === 1)
                     }
+                />
+            );
+        });
 
-                    return (
-                        <VariantSubmitter
-                            key={idx} submitter={submitterName} source={sourceName}
-                            meta={sourceMeta} cols={formattedCols} data={submissionData}
-                            hideEmptyItems={this.state.hideEmptyItems}
-                            showHelp={this.showHelp}
-                            defaultExpanded={
-                                // always collapse ENIGMA and BIC submissions.
-                                // show all items expanded if there are only a few of them.
-                                // otherwise, expand the first non-enigma/bic elem by default, but nothing else.
-                                ( !isEnigmaOrBic ) && (submissions.length <= 3 || nonEnigmaBics === 1)
-                            }
-                        />
-                    );
-                });
+        // create the source panel itself now
+        const groupTitle = `source-panel-${sourceName}`;
+        const header = (
+            <h3>
+                <a href="#" onClick={(event) => this.onChangeGroupVisibility(groupTitle, event)}>
+                {`Clinical Significance (${sourceMeta.displayName})`}
+                </a>
+            </h3>
+        );
+        const allEmpty = false; // FIXME: actually check if we're all empty or no
 
-                // create the source panel itself now
-                const groupTitle = `source-panel-${sourceName}`;
-                const header = (
-                    <h3>
-                        <a href="#" onClick={(event) => this.onChangeGroupVisibility(groupTitle, event)}>
-                        {`Clinical Significance (${sourceMeta.displayName})`}
-                        </a>
-                    </h3>
-                );
-                const allEmpty = false; // FIXME: actually check if we're all empty or no
-
-                return (
-                    <div key={`group_collection-${groupTitle}`} className="variant-detail-group variant-submitter-group">
-                        <div className={ allEmpty && this.state.hideEmptyItems ? "group-empty" : "" }>
-                            <Panel
-                                header={header}
-                                collapsable={true}
-                                defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
-                                {submitters}
-                            </Panel>
-                        </div>
-                    </div>
-                );
-            });
+        return (
+            <div key={`group_collection-${groupTitle}`} className="variant-detail-group variant-submitter-group">
+                <div className={ allEmpty && this.state.hideEmptyItems ? "group-empty" : "" }>
+                    <Panel
+                        header={header}
+                        collapsable={true}
+                        defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
+                        {submitters}
+                    </Panel>
+                </div>
+            </div>
+        );
     },
     render: function () {
         const {data, error} = this.state;
@@ -812,8 +814,18 @@ var VariantDetail = React.createClass({
         let groupsEmpty = 0;
         let totalRowsEmpty = 0;
 
-        const groupTables = _.map(groups, ({ groupTitle, innerCols }) => {
+        const groupTables = _.map(groups, ({ groupTitle, innerCols, reportSource }) => {
             let rowsEmpty = 0;
+
+            // if it's a report source (i.e. the key reportSource is defined), then we defer
+            // to our custom nested-report-rendering method to generate this entire group
+            if (reportSource) {
+                if (!this.state.reports) {
+                    return <div>loading...</div>;
+                }
+                
+                return this.generateSourceReportPanel(reportSource, this.state.reports[reportSource]);
+            }
 
             // remove the BIC classification and importance fields unless the classification is 1 or 5
             if (groupTitle === 'Clinical Significance (BIC)') {
@@ -906,8 +918,6 @@ var VariantDetail = React.createClass({
 
         const diffRows = this.generateDiffRows(cols, data);
 
-        const submitterPanels = this.generateSubmitterPanels(this.state.reports);
-
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
@@ -973,6 +983,8 @@ var VariantDetail = React.createClass({
                 </Row>
 
                 {
+                    /*
+
                     // only display reports in research mode (aka 'all data' mode)
                     (this.props.mode === "research_mode") && (
                         <Row style={{paddingLeft: '5px', paddingRight: '5px'}}>
@@ -989,6 +1001,8 @@ var VariantDetail = React.createClass({
                             }
                         </Row>
                     )
+
+                    */
                 }
 
                 <Row>

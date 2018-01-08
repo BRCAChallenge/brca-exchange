@@ -120,6 +120,11 @@ const researchModeGroups = [
     ]},
     */
 
+    // FIXME: this is a quick hack to get reports to display inline with other tiles
+    // if a group contains reportSource, it'll be replaced with generateSourceReportPanel(reportSource, reports[reportSource])
+    {groupTitle: 'Clinical Significance (ClinVar)', internalGroupName: 'Significance (ClinVar)', reportSource: 'ClinVar'},
+    {groupTitle: 'Clinical Significance (LOVD)', internalGroupName: 'Significance (LOVD)', reportSource: 'LOVD'},
+
     {groupTitle: 'Clinical Significance (BIC)', internalGroupName: 'Significance (BIC)', innerCols: [
         {title: 'Clinical Significance', prop: 'Clinical_classification_BIC', core: true},
         {title: 'Clinical Importance', prop: 'Clinical_importance_BIC', core: true},
