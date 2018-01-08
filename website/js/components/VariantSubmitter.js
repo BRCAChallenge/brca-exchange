@@ -66,7 +66,14 @@ const VariantSubmitter = React.createClass({
 
     onHandleToggle: function(e) {
         e.preventDefault();
-        this.setState({expanded: !this.state.expanded});
+        this.setState({
+            expanded: !this.state.expanded
+        }, () => {
+            // tell our parent that we've changed our collapse status
+            if (this.props.onSubrowToggled) {
+                this.props.onSubrowToggled(this.state.expanded);
+            }
+        });
     },
 
     // FIXME: copied from index.js; find a way to use this without aliasing
