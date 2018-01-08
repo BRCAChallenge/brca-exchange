@@ -559,220 +559,260 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
     def test_varInSpliceDonorBRCA1(self, fetch_gene_coordinates):
         '''
-        Tests that variant is correctly identified as in or NOT in a splice donor region 
-        for multiple positions across multiple exons in BRCA1
+        Tests that:
+        1. Variant is correctly identified as in or NOT in a splice donor region 
+           for multiple positions across multiple exons in BRCA1
+        2. Function returns correct donor boundaries for a given variant (genomic position)
         '''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
+        spliceDonorBoundaries = False
 
         #checks that 7th base in intron is NOT counted as in splice donor
         self.variant["Pos"] = "43063326"
-        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
+        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant, spliceDonorBoundaries)
         self.assertFalse(inSpliceDonor)
         
         # checks that first base in intron counted as in splice donor
         self.variant["Pos"] =  "43097243"
-        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
+        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant, spliceDonorBoundaries)
         self.assertTrue(inSpliceDonor)
 
         # checks that middle base in intron counted as in splice donor
         self.variant["Pos"] = "43095842"
-        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
+        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant, spliceDonorBoundaries)
         self.assertTrue(inSpliceDonor)
 
         # checks that last base in intron counted as in splice donor
         self.variant["Pos"] = "43091429"
-        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
+        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant, spliceDonorBoundaries)
         self.assertTrue(inSpliceDonor)
 
         # checks that first base in exon counted as in splice donor
         self.variant["Pos"] = "43090946"
-        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
+        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant, spliceDonorBoundaries)
         self.assertTrue(inSpliceDonor)
 
         # checks that middle base in exon counted as in splice donor
         self.variant["Pos"] = "43082405"
-        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
+        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant, spliceDonorBoundaries)
         self.assertTrue(inSpliceDonor)
 
         # checks that last base in exon counted as in splice donor
         self.variant["Pos"] = "43076488"
-        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
+        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant, spliceDonorBoundaries)
         self.assertTrue(inSpliceDonor)
 
         # checks that 4th to last base in exon is NOT counted as in splice donor
         self.variant["Pos"] = "43057055"
-        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
+        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant, spliceDonorBoundaries)
         self.assertFalse(inSpliceDonor)
 
         # checks that region after exon 24 is  NOT counted as in splice donor
         self.variant["Pos"] = "43044294"
-        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
+        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant, spliceDonorBoundaries)
         self.assertFalse(inSpliceDonor)
+
+        # checks that variant in exon 16 splice donor region boundaries are returned correctly
+        spliceDonorBoundaries = True
+        self.variant["Pos"] = "43070925"
+        spliceDonorRegion = calcVarPriors.varInSpliceDonor(self.variant, spliceDonorBoundaries)
+        self.assertEquals(exonDonorBoundsBRCA1["exon16"]["donorStart"], spliceDonorRegion["donorStart"])
+        self.assertEquals(exonDonorBoundsBRCA1["exon16"]["donorEnd"], spliceDonorRegion["donorEnd"])
 
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)    
     def test_varInSpliceDonorBRCA2(self, fetch_gene_coordinates):
         '''
-        Tests that variant is correctly identified as in or NOT in a splice donor region 
-        for multiple positions across multiple exons in BRCA2
+        Tests that:
+        1. Variant is correctly identified as in or NOT in a splice donor region 
+           for multiple positions across multiple exons in BRCA2
+        2. Function returns correct donor boundaries for a given variant (genomic position) 
         '''
-
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Chr"] = "13"
+        spliceDonorBoundaries = False
 
         # checks that 7th base in intron is NOT counted as in splice donor
         self.variant["Pos"] = "32363540"
-        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
+        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant, spliceDonorBoundaries)
         self.assertFalse(inSpliceDonor)
 
         # checks that first base in intron counted as in splice donor
         self.variant["Pos"] = "32329493"
-        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
+        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant, spliceDonorBoundaries)
         self.assertTrue(inSpliceDonor)
 
         # checks that middle base in intron counted as in splice donor
         self.variant["Pos"] = "32331033"
-        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
+        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant, spliceDonorBoundaries)
         self.assertTrue(inSpliceDonor)
 
         # checks that last base in intron counted as in splice donor
         self.variant["Pos"] = "32333393"
-        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
+        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant, spliceDonorBoundaries)
         self.assertTrue(inSpliceDonor)
 
         # checks that first base in exon counted as in splice donor
         self.variant["Pos"] = "32341194"
-        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
+        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant, spliceDonorBoundaries)
         self.assertTrue(inSpliceDonor)
 
         # checks that middle base in exon counted as in splice donor
         self.variant["Pos"] = "32344652"
-        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
+        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant, spliceDonorBoundaries)
         self.assertTrue(inSpliceDonor)
 
         # checks that last base in exon counted as in splice donor
         self.variant["Pos"] = "32346896"
-        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
+        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant, spliceDonorBoundaries)
         self.assertTrue(inSpliceDonor)
 
         # checks that 4th to last base in exon is NOT counted as in splice donor
         self.variant["Pos"] = "32370554"
-        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
+        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant, spliceDonorBoundaries)
         self.assertFalse(inSpliceDonor)
 
         # checks that region after  exon 27 is NOT counted as in splice donor
         self.variant["Pos"] = "32399672"
-        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant)
+        inSpliceDonor = calcVarPriors.varInSpliceDonor(self.variant, spliceDonorBoundaries)
         self.assertFalse(inSpliceDonor)
+
+        # checks that variant in exon 16 splice donor region boundaries are returned correctly
+        spliceDonorBoundaries = True
+        self.variant["Pos"] = "32356608"
+        spliceDonorRegion = calcVarPriors.varInSpliceDonor(self.variant, spliceDonorBoundaries)
+        self.assertEquals(exonDonorBoundsBRCA2["exon15"]["donorStart"], spliceDonorRegion["donorStart"])
+        self.assertEquals(exonDonorBoundsBRCA2["exon15"]["donorEnd"], spliceDonorRegion["donorEnd"])
 
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
     def test_varInSpliceAcceptorBRCA1(self, fetch_gene_coordinates):
         '''
-        Tests that variant is correctly identified as in or NOT in a splice acceptor region
-        uses multiple positions across multiple exons for BRCA1
+        Tests that:
+        1. Variant is correctly identified as in or NOT in a splice acceptor region
+           uses multiple positions across multiple exons for BRCA1
+        2. Function returns correct donor boundaries for a given variant (genomic position) 
         '''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
+        spliceAccBoundaries = False
 
         # checks that -21st base in intron is NOT counted as in splice acceptor
         self.variant["Pos"] = "43067716"
-        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant, spliceAccBoundaries)
         self.assertFalse(inSpliceAcceptor)
         
         # checks that first base in intron counted as in splice acceptor
         self.variant["Pos"] = "43124135"
-        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant, spliceAccBoundaries)
         self.assertTrue(inSpliceAcceptor)
 
         # checks that middle base in intron counted as in splice acceptor
         self.variant["Pos"] = "43115787"
-        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant, spliceAccBoundaries)
         self.assertTrue(inSpliceAcceptor)
 
         # checks that last base in intron counted as in splice acceptor
         self.variant["Pos"] = "43106534"
-        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant, spliceAccBoundaries)
         self.assertTrue(inSpliceAcceptor)
 
         # checks that first base in exon counted as in splice acceptor
         self.variant["Pos"] = "43104956"
-        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant, spliceAccBoundaries)
         self.assertTrue(inSpliceAcceptor)
 
         # checks that middle base in exon counted as in splice acceptor
         self.variant["Pos"] = "43104260"
-        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant, spliceAccBoundaries)
         self.assertTrue(inSpliceAcceptor)
 
         # checks that last base in exon counted as in splice acceptor
         self.variant["Pos"] = "43099878"
-        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant, spliceAccBoundaries)
         self.assertTrue(inSpliceAcceptor)
 
         # checks that 4th base in exon is NOT counted as in splice acceptor
         self.variant["Pos"] = "43063948"
-        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant, spliceAccBoundaries)
         self.assertFalse(inSpliceAcceptor)
 
         # checks that region before exon 1 is NOT counted as in splice acceptor
         self.variant["Pos"] = "431254483"
-        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant, spliceAccBoundaries)
         self.assertFalse(inSpliceAcceptor)
+
+        # checks that variant in exon 21 splice acceptor region boundaries are returned correctly
+        spliceAccBoundaries = True
+        self.variant["Pos"] = "43051117"
+        spliceAccRegion = calcVarPriors.varInSpliceAcceptor(self.variant, spliceAccBoundaries)
+        self.assertEquals(exonAcceptorBoundsBRCA1["exon21"]["acceptorStart"], spliceAccRegion["acceptorStart"])
+        self.assertEquals(exonAcceptorBoundsBRCA1["exon21"]["acceptorEnd"], spliceAccRegion["acceptorEnd"])
 
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)    
     def test_varInSpliceAcceptorBRCA2(self, fetch_gene_coordinates):
         '''
-        Tests that variant is correctly identified as in or NOT in a splice acceptor region
-        uses multiple positions across multiple exons for BRCA2
+        Tests that:
+        1. Variant is correctly identified as in or NOT in a splice acceptor region
+           uses multiple positions across multiple exons for BRCA2
+        2. Function returns correct donor boundaries for a given variant (genomic position) 
         '''
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
+        spliceAccBoundaries = False
 
         # checks that -21st base in intron is NOT counted as in splice acceptor
         self.variant["Pos"] = "32357721"
-        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant, spliceAccBoundaries)
         self.assertFalse(inSpliceAcceptor)
 
         # checks that first base in intron counted as in splice acceptor
         self.variant["Pos"] = "32316402"
-        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant, spliceAccBoundaries)
         self.assertTrue(inSpliceAcceptor)
 
         # checks that middle base in intron counted as in splice acceptor
         self.variant["Pos"] = "32319069"
-        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant, spliceAccBoundaries)
         self.assertTrue(inSpliceAcceptor)
 
         # checks that last base in intron counted as in splice acceptor
         self.variant["Pos"] = "32325075"
-        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant, spliceAccBoundaries)
         self.assertTrue(inSpliceAcceptor)
 
         # checks that first base in exon counted as in splice acceptor
         self.variant["Pos"] = "32326101"
-        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant, spliceAccBoundaries)
         self.assertTrue(inSpliceAcceptor)
 
         # checks that middle base in exon counted as in splice acceptor
         self.variant["Pos"] = "32326243"
-        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant, spliceAccBoundaries)
         self.assertTrue(inSpliceAcceptor)
 
         # checks that last base in exon counted as in splice acceptor
         self.variant["Pos"] = "32326501"
-        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant, spliceAccBoundaries)
         self.assertTrue(inSpliceAcceptor)
 
         # checks that 4th base in exon is NOT counted as in splice acceptor
         self.variant["Pos"] = "32362526"
-        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant, spliceAccBoundaries)
         self.assertFalse(inSpliceAcceptor)
 
         # checks that region before exon 1 is NOT counted as in splice acceptor
         self.variant["Pos"] = "32315479"
-        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant)
+        inSpliceAcceptor = calcVarPriors.varInSpliceAcceptor(self.variant, spliceAccBoundaries)
         self.assertFalse(inSpliceAcceptor)
+
+        # checks that variant in exon 20 splice acceptor region boundaries are returned correctly
+        spliceAccBoundaries = True
+        self.variant["Pos"] = "32370948"
+        spliceAccRegion = calcVarPriors.varInSpliceAcceptor(self.variant, spliceAccBoundaries)
+        self.assertEquals(exonAcceptorBoundsBRCA2["exon20"]["acceptorStart"], spliceAccRegion["acceptorStart"])
+        self.assertEquals(exonAcceptorBoundsBRCA2["exon20"]["acceptorEnd"], spliceAccRegion["acceptorEnd"])
+
 
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
     def testVarInEnigmaCiDomainsBRCA1(self, fetch_gene_coordinates):
@@ -1197,7 +1237,7 @@ class test_calcVarPriors(unittest.TestCase):
         altSeq = calcVarPriors.getAltSeq(altSeqDict, strand)
         # reference sequence on plus strand
         brca2RefSeq = "TGTGTAACACATTATTACAGTGG"
-        # alternate sequence containing the alterante allele
+        # alternate sequence containng the alterante allele
         brca2AltSeq = "TGTGTAACCCATTATTACAGTGG"
         self.assertEquals(altSeq, brca2AltSeq)
         
