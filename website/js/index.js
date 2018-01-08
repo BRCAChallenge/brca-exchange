@@ -823,7 +823,7 @@ var VariantDetail = React.createClass({
                 if (!this.state.reports) {
                     return <div>loading...</div>;
                 }
-                
+
                 return this.generateSourceReportPanel(reportSource, this.state.reports[reportSource]);
             }
 
