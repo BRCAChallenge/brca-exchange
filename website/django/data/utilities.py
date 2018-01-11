@@ -1,4 +1,5 @@
 from django.db import connection
+from models import DataRelease
 
 
 def update_autocomplete_words():
@@ -21,3 +22,12 @@ def update_autocomplete_words():
 
                 CREATE INDEX words_idx ON words(word text_pattern_ops);
             """)
+
+
+def set_release_name_defaults(apps, schema_editor):
+    count = 1
+    releases = DataRelease.objects.all().order_by('date')
+    for release in releases:
+        release.name = str(count)
+        release.save()
+        count += 1
