@@ -7,6 +7,10 @@ import mock
 strand = {"minus": "-",
           "plus": "+"}
 
+# dictionary containing possible chromosomes for variants
+chromosomes = {"13": "chr13",
+               "17": "chr17"}
+
 # dictionary containing possible variant types
 varTypes = {"sub": "substitution",
             "ins": "insertion",
@@ -81,6 +85,24 @@ transcriptDataBRCA2 = {'bin': '103',
 brca1Seq = "GATCTGGAAGAAGAGAGGAAGAG"
 brca2Seq = "TGTGTAACACATTATTACAGTGG"
 
+# MaxEntScan score mean and std for donors and acceptors
+meanStdDict = {"donors": {"std": 2.162405334713458,
+                          "mean": 8.222291666666667},
+               "acceptors": {"std": 2.6174666704340925,
+                             "mean": 8.1387499999999999}}
+
+# possible predicted qualitative ENIGMA classes
+enigmaClasses = {"class1": "class_1",
+                 "class2": "class_2",
+                 "class3": "class_3",
+                 "class4": "class_4",
+                 "class5": "class_5"}
+
+# possible prior probability of pathogenecity values
+priorProbs = {"low": 0.04,
+              "moderate": 0.34,
+              "high": 0.97}
+
 
 class test_calcVarPriors(unittest.TestCase):
 
@@ -145,6 +167,16 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Gene_Symbol"] = "BRCA2"
         varStrand = calcVarPriors.getVarStrand(self.variant)
         self.assertEquals(varStrand, strand["plus"])
+
+    def test_getVarChrom(self):
+        '''Tests taht variant chromosome is set correctly based on variant's gene_symbol'''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        varChrom = calcVarPriors.getVarChrom(self.variant)
+        self.assertEquals(varChrom, chromosomes["17"])
+
+        self.variant["Gene_Symbol"] = "BRCA2"
+        varChrom = calcVarPriors.getVarChrom(self.variant)
+        self.assertEquals(varChrom, chromosomes["13"])
         
     def test_getVarType(self):
         '''
@@ -1240,6 +1272,251 @@ class test_calcVarPriors(unittest.TestCase):
         # alternate sequence containng the alterante allele
         brca2AltSeq = "TGTGTAACCCATTATTACAGTGG"
         self.assertEquals(altSeq, brca2AltSeq)
+
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = brca1Seq)
+    def test_getRefAltSeqsBRCA1(self, getFastaSeq):
+        '''Tests that ref and alt sequence are generated correctly for - strand gene (BRCA1)'''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        rangeStart = 43051137
+        rangeStop = 43051115
+        self.variant["Pos"] = "43051120"
+        self.variant["Ref"] = "G"
+        self.variant["Alt"] = "C"
+        refAltSeqs = calcVarPriors.getRefAltSeqs(self.variant, rangeStart, rangeStop)
+        # reference sequence on minus strand
+        brca1RefSeq = "CTCTTCCTCTCTTCTTCCAGATC"
+        # reverse complement with variant included
+        brca1AltSeq = "CTCTTCCTCTCTTCTTCGAGATC"
+        self.assertEquals(refAltSeqs["refSeq"], brca1RefSeq)
+        self.assertEquals(refAltSeqs["altSeq"], brca1AltSeq)
+
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = brca2Seq)
+    def test_getRefAltSeqsBRCA2(self, getFastaSeq):
+        '''Tests that ref and alt sequence are generated correctly for + strand gene (BRCA2)'''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        rangeStart = 32370936
+        rangeStop = 32370958
+        self.variant["Pos"] = "32370944"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "C"
+        refAltSeqs = calcVarPriors.getRefAltSeqs(self.variant, rangeStart, rangeStop)
+        # reference sequence on plus strand
+        brca2RefSeq = "TGTGTAACACATTATTACAGTGG"
+        # alternate sequence containng the alterante allele
+        brca2AltSeq = "TGTGTAACCCATTATTACAGTGG"
+        self.assertEquals(refAltSeqs["refSeq"], brca2RefSeq)
+        self.assertEquals(refAltSeqs["altSeq"], brca2AltSeq)
+
+    def test_getZScore(self):
+        '''
+        Tests that:
+        1. For score in splice donor site:
+            - checks that zscore is less than zero if MaxEntScan score less than donor mean
+            - checks that zscore is greater than zero if MaxEntScan score is greater than donor mean
+        2. For score in splice acceptor site:
+            - checks that zscore is less than zero if MaxEntScan score is less than acceptor mean
+            - checks that zscore is greater than zero if MaxEntScan score is greater than acceptor mean
+        '''
+        # score less than donor mean of ~8.22
+        maxEntScanScore = 8
+        zScore = calcVarPriors.getZScore(maxEntScanScore, donor=True)
+        self.assertLess(zScore, 0)
+
+        # score greater than donor mean of ~8.22
+        maxEntScanScore = 8.3
+        zScore = calcVarPriors.getZScore(maxEntScanScore, donor=True)
+        self.assertGreater(zScore, 0)
+
+        # score less than acceptor mean of ~8.14
+        maxEntScanScore = 8.1
+        zScore = calcVarPriors.getZScore(maxEntScanScore, donor=False)
+        self.assertLess(zScore, 0)
+
+        # score less than acceptor mean of ~8.14
+        maxEntScanScore = 8.2
+        zScore = calcVarPriors.getZScore(maxEntScanScore, donor=False)
+        self.assertGreater(zScore, 0)
+
+    def test_getRefAltScores(self):
+        '''
+        Tests that:
+        1. For splice donor site:
+           - checks that if alt seq creates weaker splice site, alt maxEntScan score and zscore are less than ref
+           - checks that if alt seq creates stronger splice site, alt maxEntScan score and zscore are greater than ref
+        2. For splice acceptor site:
+           - checks that if alt seq creates weaker splice site, alt maxEntScan score and zscore are less than ref
+           - checks that if alt seq creates stronger splice site, alt maxEntScan score and zscore are greater than ref
+        '''
+        # splice donor site in BRCA1 exon 16 that is weakened by variant
+        donorRefSeq = "TTTGTGAGT"
+        donorAltSeq = "TTTGCGAGT"
+        refAltScores = calcVarPriors.getRefAltScores(donorRefSeq, donorAltSeq, donor=True)
+        self.assertLess(refAltScores["altScores"]["maxEntScanScore"], refAltScores["refScores"]["maxEntScanScore"])
+        self.assertLess(refAltScores["altScores"]["zScore"], refAltScores["refScores"]["zScore"])
+
+        # splice donor site in BRCA2 exon 8 that is strengthened by variant
+        donorRefSeq = "GCTGTAAGT"
+        donorAltSeq = "GCCGTAAGT"
+        refAltScores = calcVarPriors.getRefAltScores(donorRefSeq, donorAltSeq, donor=True)
+        self.assertGreater(refAltScores["altScores"]["maxEntScanScore"], refAltScores["refScores"]["maxEntScanScore"])
+        self.assertGreater(refAltScores["altScores"]["zScore"], refAltScores["refScores"]["zScore"])
+
+        # splice accepotr site in BRCA2 exon 21 that is weakened by variant
+        acceptorRefSeq = "TAATCCTTTTGTTTTCTTAGAAA" 
+        acceptorAltSeq = "TAATCCTTTTGTTTTCTTACAAA"
+        refAltScores = calcVarPriors.getRefAltScores(acceptorRefSeq, acceptorAltSeq, donor=False)
+        self.assertLess(refAltScores["altScores"]["maxEntScanScore"], refAltScores["refScores"]["maxEntScanScore"])
+        self.assertLess(refAltScores["altScores"]["zScore"], refAltScores["refScores"]["zScore"])
+
+
+        # splice acceptor site in BRCA1 exon 3 that is strengthed by variant
+        acceptorRefSeq = "CTCCCCCCCTACCCTGCTAGTCT"
+        acceptorAltSeq = "CTCCCCCCCTACCCTGCTAGGCT"
+        refAltScores = calcVarPriors.getRefAltScores(acceptorRefSeq, acceptorAltSeq, donor=False)
+        self.assertGreater(refAltScores["altScores"]["maxEntScanScore"], refAltScores["refScores"]["maxEntScanScore"])
+        self.assertGreater(refAltScores["altScores"]["zScore"], refAltScores["refScores"]["zScore"])
+        
+    def test_getEnigmaClass(self):
+        ''''
+        Tests that predicted qualititative ENIGMA class is assigned correctly based on prior prob
+        Specifically tests edge cases of priorProb = 0.001, 0.05, 0.95, and 0.99
+        and most commonly assigned priorProb = 0.04, 0.34, and 0.97
+        '''
+        priorProb = 0.0001
+        enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
+        self.assertEquals(enigmaClass, enigmaClasses["class1"])
+
+        priorProb = 0.001
+        enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
+        self.assertEquals(enigmaClass, enigmaClasses["class2"])
+        
+        priorProb = 0.04
+        enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
+        self.assertEquals(enigmaClass, enigmaClasses["class2"])
+
+        priorProb = 0.05
+        enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
+        self.assertEquals(enigmaClass, enigmaClasses["class3"])
+        
+        priorProb = 0.34
+        enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
+        self.assertEquals(enigmaClass, enigmaClasses["class3"])
+
+        priorProb = 0.95
+        enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
+        self.assertEquals(enigmaClass, enigmaClasses["class4"])
+
+        priorProb = 0.97
+        enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
+        self.assertEquals(enigmaClass, enigmaClasses["class4"])
+        
+        priorProb = 0.99
+        enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
+        self.assertEquals(enigmaClass, enigmaClasses["class4"])
+        
+        priorProb = 0.995
+        enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
+        self.assertEquals(enigmaClass, enigmaClasses["class5"])
+
+        priorProb = "N/A"
+        enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
+        self.assertEquals(enigmaClass, None)
+
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCTTACCTT")
+    def test_getPriorProbSpliceDonorSNSBRCA1(self, getFastaSeq):
+        '''
+        Tests function for BRCA1 variants that:
+        1. creates a resaonble splice donor site
+        2. weakens a reasonably strong splice donor
+        3. makes a splice site stronger or equally strong
+        '''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+
+        # checks prior prob for BRCA1 variant that creates a reasonable splice donor site
+        self.variant["Pos"] = "43076489"
+        self.variant["Ref"] = "T"
+        self.variant["Alt"] = "C"
+        priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["low"])
+
+        # checks prior prob for BRCA1 variant that weakens a reasonably strong splice donor site
+        self.variant["Pos"] = "43076485"
+        self.variant["Ref"] = "T"
+        self.variant["Alt"] = "A"
+        priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["moderate"])
+
+        # checks prior prob for BRCA1 variant that makes a splice donor site stronger or equally strong
+        self.variant["Pos"] = "43076490"
+        self.variant["Ref"] = "T"
+        self.variant["Alt"] = "G"
+        priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["low"])
+
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "TTTTACCAA")
+    def test_getPriorProbSpliceDonorSNSHighProbBRCA1(self, getFastaSeq):
+        '''Tests fucntion for BRCA1 variant that further weakens a weak splice donor site'''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+
+        # checks prior prob for BRCA1 variant that further weakens a weak splice donor site
+        self.variant["Pos"] = "43104120"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "C"
+        priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["high"])
+        
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCGGTAAGA")
+    def test_getPriorProbSpliceDonorSNSBRCA2(self, getFastaSeq):
+        '''
+        Tests function for BRCA2 variants that:
+        1. creates a resaonble splice donor site
+        2. weakens a reasonably strong splice donor
+        3. makes a splice site stronger or equally strong
+        '''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+
+        # checks prior prob for BRCA2 variant that creates a reasonable splice donor site
+        self.variant["Pos"] = "32346895"
+        self.variant["Ref"] = "C"
+        self.variant["Alt"] = "G"
+        priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["low"])
+
+        # checks prior prob for BRCA2 variant that weakens a reasonably strong splice donor site
+        self.variant["Pos"] = "32346899"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "C"
+        priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["moderate"])
+
+        # checks prior prob for BRCA2 variant that makes a splice donor site stronger or equally strong
+        self.variant["Pos"] = "32346902"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "T"
+        priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["low"])
+
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "CAGGCAAGT")
+    def test_getPriorProbSpliceDonorSNSHighProbBRCA2(self, getFastaSeq):
+        '''Tests fucntion for BRCA2 variant that further weakens a weak splice donor site'''  
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+
+        # checks prior prob for BRCA2 variant that further weakens a weak splice donor site
+        self.variant["Pos"] = "32362694"
+        self.variant["Ref"] = "G"
+        self.variant["Alt"] = "A"
+        priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["high"])
         
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     def test_getVarDict(self, fetch_gene_coordinates):

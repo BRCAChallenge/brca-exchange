@@ -14,8 +14,10 @@ import sys
 import time
 import json
 import re
+import subprocess
+import tempfile
 from Bio.Seq import Seq
-from calcMaxEntScanMeanStd import fetch_gene_coordinates
+from calcMaxEntScanMeanStd import fetch_gene_coordinates, runMaxEntScan
 
 # Here are the canonical BRCA transcripts in ENSEMBL nomenclature
 BRCA1_CANONICAL = "ENST00000357654"
@@ -71,6 +73,17 @@ def getVarStrand(variant):
         return '-'
     elif varGene == "BRCA2":
         return '+'
+    else:
+        return ""
+
+def getVarChrom(variant):
+    '''Given a variant, returns the chromosome based on the variant's gene_symbol'''
+    varGene = variant["Gene_Symbol"]
+
+    if varGene == "BRCA1":
+        return "chr17"
+    elif varGene == "BRCA2":
+        return "chr13"
     else:
         return ""
 
@@ -571,7 +584,123 @@ def getAltSeq(altSeqDict, strand):
     if strand == "-":
         sequence = str(Seq(sequence).reverse_complement())
     return sequence
+
+def getRefAltSeqs(variant, rangeStart, rangeStop):
+    '''
+    Given a variant, rangeStart, and rangeStop:
+    Returns a dicitonary with ref and alt seq for the specified variant and range
+    '''
+    varChrom = getVarChrom(variant)
+    varStrand = getVarStrand(variant)
+    if varStrand == "-":
+        regionStart = rangeStop
+        regionEnd = rangeStart
+    else:
+        regionStart = rangeStart
+        regionEnd = rangeStop
+    refSeq = getFastaSeq(varChrom, regionStart, regionEnd)
+    if varStrand == "-":
+        refSeq = str(Seq(refSeq).reverse_complement())
+    refSeqDict = getSeqLocDict(varChrom, varStrand, rangeStart, rangeStop)
+    altSeqDict = getAltSeqDict(variant, refSeqDict)
+    altSeq = getAltSeq(altSeqDict, varStrand)
+
+    return {"refSeq": refSeq,
+            "altSeq": altSeq}
     
+def getZScore(maxEntScanScore, donor=False):
+    '''
+    Given a MaxEntScanScore, returns the zscore
+    If donor is True, uses splice donor mean and std
+    If donor is False, uses splice acceptor mean and std
+    '''
+    stdMeanData = json.load(open('brca.zscore.json'))
+    if donor == False:
+        std = stdMeanData["acceptors"]["std"]
+        mean = stdMeanData["acceptors"]["mean"]
+    else:
+        std = stdMeanData["donors"]["std"]
+        mean = stdMeanData["donors"]["mean"]
+        
+    zscore = (maxEntScanScore-mean)/std
+    return zscore
+
+def getRefAltScores(refSeq, altSeq, donor=False):
+    '''
+    Given ref and alt sequences and if sequence is in a splice donor region or not (True/False)
+    Returns a dictionary containing raw MaxEntScan scores and zscores for ref and alt sequences
+    '''
+    if donor == False:
+        refMaxEntScanScore = runMaxEntScan(refSeq, donor=False)
+        refZScore = getZScore(refMaxEntScanScore, donor=False)
+        altMaxEntScanScore = runMaxEntScan(altSeq, donor=False)
+        altZScore = getZScore(altMaxEntScanScore, donor=False)    
+    else:
+        refMaxEntScanScore = runMaxEntScan(refSeq, donor=True)
+        refZScore = getZScore(refMaxEntScanScore, donor=True)
+        altMaxEntScanScore = runMaxEntScan(altSeq, donor=True)
+        altZScore = getZScore(altMaxEntScanScore, donor=True)
+
+    scoreDict = {"refScores": {"maxEntScanScore": refMaxEntScanScore,
+                               "zScore": refZScore},
+                 "altScores": {"maxEntScanScore": altMaxEntScanScore,
+                               "zScore": altZScore}}
+    return scoreDict
+
+def getEnigmaClass(priorProb):
+    '''
+    Given a prior probability of pathogenecity, returns a predicted qualitative ENIGMA class
+    '''
+    # if variant has prior prob = N/A then a predicted qualitative ENIGMA class will have already been determined
+    if priorProb == "N/A":
+        return None 
+    else:
+        if priorProb > 0.99:
+            return "class_5"
+        elif priorProb <= 0.99 and priorProb >= 0.95:
+            return "class_4"
+        elif priorProb < 0.05 and priorProb >= 0.001:
+            return "class_2"
+        elif priorProb < 0.001:
+            return "class_1"
+        else:
+            return "class_3"
+
+def getPriorProbSpliceDonorSNS(variant, boundaries):
+    '''
+    Given a variant and location boundaries (either PRIORS or enigma)
+    Returns a dictionary containing prior probability of pathogenecity and predicted qualitative enigma class
+    '''
+    varType = getVarType(variant)
+    varLoc = getVarLocation(variant, boundaries)
+    varChrom = getVarChrom(variant)
+    varStrand = getVarStrand(variant)
+    if varType == "substitution" and varLoc == "splice_donor_variant":
+        # to get region boundaries to get ref and alt seq
+        spliceDonorBounds = varInSpliceDonor(variant, True)
+        refAltSeqs = getRefAltSeqs(variant, spliceDonorBounds["donorStart"], spliceDonorBounds["donorEnd"])
+        scores = getRefAltScores(refAltSeqs["refSeq"], refAltSeqs["altSeq"], donor=True)
+        refMaxEntScanScore = scores["refScores"]["maxEntScanScore"]
+        refZScore = scores["refScores"]["zScore"]
+        altMaxEntScanScore = scores["altScores"]["maxEntScanScore"]
+        altZScore = scores["altScores"]["zScore"]
+        if altMaxEntScanScore >= refMaxEntScanScore:
+            priorProb = 0.04
+        elif (refZScore < -1.5) and ((refZScore - altZScore) > 0.5):
+            priorProb = 0.97
+        else:
+            if altZScore > 0.0:
+                priorProb = 0.04
+            elif altZScore <= 0.0 and altZScore >= -2:
+                priorProb = 0.34
+            # leaving this last else in place because criteria here might change in the future
+            else:
+                priorProb = 0.34    
+        enigmaClass = getEnigmaClass(priorProb)
+        
+        return {"priorProb": priorProb,
+                "enigmaClass": enigmaClass}
+
 def getVarDict(variant, boundaries):
     '''
     Given input data, returns a dictionary containing information for each variant in input
