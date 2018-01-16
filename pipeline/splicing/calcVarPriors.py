@@ -6,7 +6,7 @@ calcVarPriors
 Parses a tsv file (default built.tsv) containing variant information and for each variant in file 
 calculates either the prior probability of pathogenicity or a prior ENGIMA classification based on variant type and variant location
 '''
-
+import pdb
 import argparse
 import csv
 import requests
@@ -746,6 +746,23 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries):
                 "altMaxEntScanScore": altMaxEntScanScore,
                 "refZScore": refZScore,
                 "altZScore": altZScore}
+
+def getPriorProbAfterGreyZoneSNS(variant, boundaries):
+    '''
+    Given a variant and location boundaries (either PRIORS or enigma)
+    Checks that variant is after the grey zone and is a single nucleotide substitution
+    Checks that variant is either a missense or nonsense mutation
+    Returns a dictionary containing prior probability of pathogenecity and predicted qualitative enigma class
+    '''
+    varType = getVarType(variant)
+    varLoc = getVarLocation(variant, boundaries)
+    varCons = getVarConsequences(variant)
+    if varType == "substitution" and varLoc == "after_grey_zone_variant":
+        if varCons == "stop_gained" or varCons == "missense_variant":
+            priorProb = "N/A"
+            enigmaClass = "class_2"
+        return {"priorProb": priorProb,
+                "enigmaClass": enigmaClass}
 
 def getVarDict(variant, boundaries):
     '''
