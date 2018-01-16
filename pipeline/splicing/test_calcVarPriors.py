@@ -1431,6 +1431,7 @@ class test_calcVarPriors(unittest.TestCase):
         1. creates a resaonble splice donor site
         2. weakens a reasonably strong splice donor
         3. makes a splice site stronger or equally strong
+        Also checks ENIGMA class for each variant
         '''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -1442,6 +1443,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Alt"] = "C"
         priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
         # checks prior prob for BRCA1 variant that weakens a reasonably strong splice donor site
         self.variant["Pos"] = "43076485"
@@ -1449,6 +1451,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Alt"] = "A"
         priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["moderate"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
         # checks prior prob for BRCA1 variant that makes a splice donor site stronger or equally strong
         self.variant["Pos"] = "43076490"
@@ -1456,6 +1459,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Alt"] = "G"
         priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "TTTTACCAA")
     def test_getPriorProbSpliceDonorSNSHighProbBRCA1(self, getFastaSeq):
@@ -1470,6 +1474,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Alt"] = "C"
         priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["high"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class4"])
         
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCGGTAAGA")
     def test_getPriorProbSpliceDonorSNSBRCA2(self, getFastaSeq):
@@ -1478,6 +1483,7 @@ class test_calcVarPriors(unittest.TestCase):
         1. creates a resaonble splice donor site
         2. weakens a reasonably strong splice donor
         3. makes a splice site stronger or equally strong
+        Also checks ENIGMA class for each variant
         '''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -1489,6 +1495,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Alt"] = "G"
         priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
         # checks prior prob for BRCA2 variant that weakens a reasonably strong splice donor site
         self.variant["Pos"] = "32346899"
@@ -1496,6 +1503,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Alt"] = "C"
         priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["moderate"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
         # checks prior prob for BRCA2 variant that makes a splice donor site stronger or equally strong
         self.variant["Pos"] = "32346902"
@@ -1503,6 +1511,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Alt"] = "T"
         priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "CAGGCAAGT")
     def test_getPriorProbSpliceDonorSNSHighProbBRCA2(self, getFastaSeq):
@@ -1512,12 +1521,117 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Reference_Sequence"] = "NM_000059.3"
 
         # checks prior prob for BRCA2 variant that further weakens a weak splice donor site
-        self.variant["Pos"] = "32362694"
+        self.variant["Pos"] = "32362693"
         self.variant["Ref"] = "G"
-        self.variant["Alt"] = "A"
+        self.variant["Alt"] = "T"
         priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["high"])
-        
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class4"])
+
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "CATCTGTAAAATACAAGGGAAAA")
+    def test_getPriorProbSpliceAcceptorSNSBRCA1(self, getFastaSeq):
+        '''
+        Tests function for BRCA1 variants that:
+        1. creates a resaonble splice acceptor site
+        2. weakens a reasonably strong splice acceptor
+        3. makes a splice site stronger or equally strong
+        Also checks ENIGMA class for each variant
+        '''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+
+        # checks prior prob for BRCA1 variant that creates a reasonable splice acceptor site
+        self.variant["Pos"] = "43104275"
+        self.variant["Ref"] = "G"
+        self.variant["Alt"] = "T"
+        priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["low"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+
+        # checks prior prob for BRCA1 variant that weakens a reasonably strong splice acceptor site
+        self.variant["Pos"] = "43104267"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "T"
+        priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["moderate"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
+
+        # checks prior prob for BRCA1 variant that makes a splice acceptor site stronger or equally strong
+        self.variant["Pos"] = "43104261"
+        self.variant["Ref"] = "T"
+        self.variant["Alt"] = "C"
+        priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["low"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "GAACTTTAACACATTAGAAAAAC")
+    def test_getPriorProbSpliceAcceptorSNSHighProbBRCA1(self, getFastaSeq):
+        '''Tests fucntion for BRCA1 variant that further weakens a weak splice acceptor site'''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+
+        # checks prior prob for BRCA1 variant that further weakens a weak splice acceptor site
+        self.variant["Pos"] = "43124116"
+        self.variant["Ref"] = "C"
+        self.variant["Alt"] = "G"
+        priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["high"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class4"])
+
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCTCATCTTTCTCCAAACAGTTA")
+    def test_getPriorProbSpliceAcceptorSNSBRCA2(self, getFastaSeq):
+        '''
+        Tests function for BRCA2 variants that:
+        1. creates a resaonble splice acceptor site
+        2. weakens a reasonably strong splice acceptor
+        3. makes a splice site stronger or equally strong
+        Also checks ENIGMA class for each variant
+        '''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+
+        # checks prior prob for BRCA2 variant that creates a reasonable splice acceptor site
+        self.variant["Pos"] = "32379751"
+        self.variant["Ref"] = "T"
+        self.variant["Alt"] = "C"
+        priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["low"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+
+        # checks prior prob for BRCA2 variant that weakens a reasonably strong splice acceptor site
+        self.variant["Pos"] = "32379746"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "T"
+        priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["moderate"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
+
+        # checks prior prob for BRCA2 variant that makes a splice acceptor site stronger or equally strong
+        self.variant["Pos"] = "32379731"
+        self.variant["Ref"] = "C"
+        self.variant["Alt"] = "T"
+        priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["low"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "AAGTATTTATTCTTTGATAGATT")
+    def test_getPriorProbSpliceAcceptorSNSHighProbBRCA2(self, getFastaSeq):
+        '''Tests fucntion for BRCA2 variant that further weakens a weak splice acceptor site'''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+
+        # checks prior prob for BRCA2 variant that further weakens a weak splice acceptor site
+        self.variant["Pos"] = "32356427"
+        self.variant["Ref"] = "G"
+        self.variant["Alt"] = "C"
+        priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["high"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class4"])
+
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     def test_getVarDict(self, fetch_gene_coordinates):
         '''

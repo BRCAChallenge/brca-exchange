@@ -6,7 +6,7 @@ calcVarPriors
 Parses a tsv file (default built.tsv) containing variant information and for each variant in file 
 calculates either the prior probability of pathogenicity or a prior ENGIMA classification based on variant type and variant location
 '''
-
+import pdb
 import argparse
 import csv
 import requests
@@ -669,13 +669,14 @@ def getEnigmaClass(priorProb):
 def getPriorProbSpliceDonorSNS(variant, boundaries):
     '''
     Given a variant and location boundaries (either PRIORS or enigma)
+    Checks that variant is in a splice donor site and is a single nucleotide substitution
     Returns a dictionary containing prior probability of pathogenecity and predicted qualitative enigma class
     '''
     varType = getVarType(variant)
     varLoc = getVarLocation(variant, boundaries)
     varChrom = getVarChrom(variant)
     varStrand = getVarStrand(variant)
-    if varType == "substitution" and varLoc == "splice_donor_variant":
+    if varType == "substitution" and (varLoc == "splice_donor_variant" or varLoc == "CI_splice_donor_variant"):
         # to get region boundaries to get ref and alt seq
         spliceDonorBounds = varInSpliceDonor(variant, True)
         refAltSeqs = getRefAltSeqs(variant, spliceDonorBounds["donorStart"], spliceDonorBounds["donorEnd"])
@@ -698,6 +699,42 @@ def getPriorProbSpliceDonorSNS(variant, boundaries):
                 priorProb = 0.34    
         enigmaClass = getEnigmaClass(priorProb)
         
+        return {"priorProb": priorProb,
+                "enigmaClass": enigmaClass}
+    
+def getPriorProbSpliceAcceptorSNS(variant, boundaries):
+    '''
+    Given a variant and location boundaries (either PRIORS or enigma)
+    Checks that variant is in a splice acceptor site and is a single nucleotide substitution
+    Returns a dictionary containing prior probability of pathogenecity and predicted qualitative enigma class
+    '''
+    varType = getVarType(variant)
+    varLoc = getVarLocation(variant, boundaries)
+    varChrom = getVarChrom(variant)
+    varStrand = getVarStrand(variant)
+    if varType == "substitution" and (varLoc == "splice_acceptor_variant" or varLoc == "CI_splice_acceptor_variant"):
+        # to get region boundaires to get ref and alt seq
+        spliceAcceptorBounds = varInSpliceAcceptor(variant, True)
+        refAltSeqs = getRefAltSeqs(variant, spliceAcceptorBounds["acceptorStart"], spliceAcceptorBounds["acceptorEnd"])
+        scores = getRefAltScores(refAltSeqs["refSeq"], refAltSeqs["altSeq"], donor=False)
+        refMaxEntScanScore = scores["refScores"]["maxEntScanScore"]
+        refZScore = scores["refScores"]["zScore"]
+        altMaxEntScanScore = scores["altScores"]["maxEntScanScore"]
+        altZScore = scores["altScores"]["zScore"]
+        if altMaxEntScanScore >= refMaxEntScanScore:
+            priorProb = 0.04
+        elif (refZScore < -1.0) and ((refZScore - altZScore) > 0.5):
+            priorProb = 0.97
+        else:
+            if altZScore > 0.5:
+                priorProb = 0.04
+            elif altZScore <= 0.5 and altZScore >= -1.5:
+                priorProb = 0.34
+            # leaving this last else in place because criteria here might change in the future
+            else:
+                priorProb = 0.34
+        enigmaClass = getEnigmaClass(priorProb)
+
         return {"priorProb": priorProb,
                 "enigmaClass": enigmaClass}
 
