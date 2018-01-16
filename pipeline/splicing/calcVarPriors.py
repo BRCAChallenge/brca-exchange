@@ -670,7 +670,8 @@ def getPriorProbSpliceDonorSNS(variant, boundaries):
     '''
     Given a variant and location boundaries (either PRIORS or enigma)
     Checks that variant is in a splice donor site and is a single nucleotide substitution
-    Returns a dictionary containing prior probability of pathogenecity and predicted qualitative enigma class
+    Returns a dictionary containing:
+     prior probability of pathogenecity, predicted qualitative enigma class, and ref and alt MES and zscores
     '''
     varType = getVarType(variant)
     varLoc = getVarLocation(variant, boundaries)
@@ -698,13 +699,18 @@ def getPriorProbSpliceDonorSNS(variant, boundaries):
         enigmaClass = getEnigmaClass(priorProb)
         
         return {"priorProb": priorProb,
-                "enigmaClass": enigmaClass}
+                "enigmaClass": enigmaClass,
+                "refMaxEntScanScore": refMaxEntScanScore,
+                "altMaxEntScanScore": altMaxEntScanScore,
+                "refZScore": refZScore,
+                "altZScore": altZScore}
     
 def getPriorProbSpliceAcceptorSNS(variant, boundaries):
     '''
     Given a variant and location boundaries (either PRIORS or enigma)
     Checks that variant is in a splice acceptor site and is a single nucleotide substitution
-    Returns a dictionary containing prior probability of pathogenecity and predicted qualitative enigma class
+    Returns a dictionary containing:
+     prior probability of pathogenecity, predicted qualitative enigma class, and ref and alt MES and zscores
     '''
     varType = getVarType(variant)
     varLoc = getVarLocation(variant, boundaries)
@@ -732,7 +738,11 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries):
         enigmaClass = getEnigmaClass(priorProb)
 
         return {"priorProb": priorProb,
-                "enigmaClass": enigmaClass}
+                "enigmaClass": enigmaClass,
+                "refMaxEntScanScore": refMaxEntScanScore,
+                "altMaxEntScanScore": altMaxEntScanScore,
+                "refZScore": refZScore,
+                "altZScore": altZScore}
 
 def getVarDict(variant, boundaries):
     '''
