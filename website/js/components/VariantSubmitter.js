@@ -127,7 +127,7 @@ const VariantSubmitter = React.createClass({
                 { submitter }
                 </div>
 
-                <div className="submitter-cell" style={{textAlign: 'left', flex: '0 1 auto', whiteSpace: 'nowrap'}}>
+                <div className="submitter-cell optional" style={{textAlign: 'left', flex: '0 1 auto', whiteSpace: 'nowrap'}}>
                 {
                     // remaining header elements depend on the source
                     extraHeaderItems

@@ -954,6 +954,12 @@ div.variant-submitter-group .submitter-header td {
     overflow: hidden;
 }
 
+@media (max-width: 500px) {
+    .submitter-header .submitter-cell.optional {
+        display: none;
+    }
+}
+
 .submitter-header .submitter-cell.submitter-name.collapsed {
     font-weight: bold;
 }
