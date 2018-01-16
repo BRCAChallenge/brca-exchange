@@ -359,6 +359,10 @@ const reportSourceFieldMapping = {
             // displayed here in full since the display in the header is potentially truncated
             {title: 'Submitter', prop: 'Submitter_ClinVar'},
 
+            // added these fields (redundantly?) b/c they're not noticeable in the header
+            {title: 'Clinical Significance', prop: 'Clinical_Significance_ClinVar'},
+            {title: 'Date Last Updated', prop: 'Date_Last_Updated_ClinVar'},
+
             {title: 'Submission Type', prop: 'Method_ClinVar'}, // likely Method_ClinVar
             {title: 'SCV Accession', prop: 'SCV_ClinVar'},
             {title: 'Summary Evidence', prop: 'Summary_Evidence_ClinVar'},
@@ -385,6 +389,9 @@ const reportSourceFieldMapping = {
 
             // displayed here in full since the display in the header is potentially truncated
             {title: 'Submitter(s)', prop: 'Submitters_LOVD'},
+
+            // added this field (redundantly?) b/c it's not noticeable in the header
+            {title: 'Variant Effect', prop: 'Variant_effect_LOVD'},
 
             {title: 'Genetic Origin', prop: 'Genetic_origin_LOVD'},
             {title: 'Individuals', prop: 'Individuals_LOVD'},
