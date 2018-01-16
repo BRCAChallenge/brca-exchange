@@ -1969,6 +1969,46 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "missense_variant")
+    def test_getPriorProbAfterGreyZoneMissenseSNS(self, getVarConsequences):
+        '''
+        Tests that:
+        prior prob is set to N/A and ENIGMA class is class 2 for a BRCA2 missense variant after the grey zone
+        '''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["Chr"] = "13"
+        self.variant["Hg38_Start"] = "32398528"
+        self.variant["Hg38_End"] = "32398528"
+
+        self.variant["Pos"] = "32398528"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "G"
+        priorProb = calcVarPriors.getPriorProbAfterGreyZoneSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
+    def test_getPriorProbAfterGreyZoneNonesenseSNS(self, getVarConsequences):
+        '''
+        Tests that:
+        prior prob is set to N/A and ENIGMA class is class 2 for a BRCA2 nonsense variant after the grey zone
+        '''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["Chr"] = "13"
+        self.variant["Hg38_Start"] = "32398492"
+        self.variant["Hg38_End"] = "32398492"
+
+        self.variant["Pos"] = "32398492"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "T"
+        priorProb = calcVarPriors.getPriorProbAfterGreyZoneSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     def test_getVarDict(self, fetch_gene_coordinates):
         '''
