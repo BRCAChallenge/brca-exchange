@@ -674,8 +674,6 @@ def getPriorProbSpliceDonorSNS(variant, boundaries):
     '''
     varType = getVarType(variant)
     varLoc = getVarLocation(variant, boundaries)
-    varChrom = getVarChrom(variant)
-    varStrand = getVarStrand(variant)
     if varType == "substitution" and (varLoc == "splice_donor_variant" or varLoc == "CI_splice_donor_variant"):
         # to get region boundaries to get ref and alt seq
         spliceDonorBounds = varInSpliceDonor(variant, True)
@@ -710,8 +708,6 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries):
     '''
     varType = getVarType(variant)
     varLoc = getVarLocation(variant, boundaries)
-    varChrom = getVarChrom(variant)
-    varStrand = getVarStrand(variant)
     if varType == "substitution" and (varLoc == "splice_acceptor_variant" or varLoc == "CI_splice_acceptor_variant"):
         # to get region boundaires to get ref and alt seq
         spliceAcceptorBounds = varInSpliceAcceptor(variant, True)
