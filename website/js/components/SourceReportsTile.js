@@ -132,13 +132,13 @@ export default class SourceReportsTile extends React.Component {
 
                 <a title='collapse all reports'
                     onClick={(event) => this.setAllReportExpansion(event, false)}
-                    style={{cursor: 'pointer', color: (this.state.reportExpanded.every(x => !x) ? 'black' : 'gray'), marginRight: '10px'}}>
+                    style={{cursor: 'pointer', marginRight: '10px'}}>
                     <i className="fa fa-angle-double-up" aria-hidden="true" />
                 </a>
 
                 <a title='expand all reports'
                     onClick={(event) => this.setAllReportExpansion(event, true)}
-                    style={{cursor: 'pointer', color: (this.state.reportExpanded.every(x => x) ? 'black' : 'gray')}}>
+                    style={{cursor: 'pointer'}}>
                     <i className="fa fa-angle-double-down" aria-hidden="true" />
                 </a>
             </h3>
