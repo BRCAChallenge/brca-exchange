@@ -934,6 +934,10 @@ div.variant-submitter-group .submitter-header td {
     border-bottom-width: 3px;
 }
 
+.submitter-header {
+    overflow: hidden; /* FIXME: safegaurd to clip overflowing content, but it should ideally be hidden as a unit */
+}
+
 .submitter-header .submitter-cell {
     padding: 10px;
 }

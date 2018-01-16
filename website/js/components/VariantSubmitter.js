@@ -87,7 +87,8 @@ const VariantSubmitter = React.createClass({
 
             extraHeaderItems = (
                 <div>
-                {`${sentenceCase(significance)} (${dateUpdated})`}
+                    <span style={{whiteSpace: 'nowrap'}}>{sentenceCase(significance)}</span>
+                    <span style={{whiteSpace: 'nowrap'}}>{` (${dateUpdated})`}</span>
                 </div>
             );
         }
@@ -95,7 +96,7 @@ const VariantSubmitter = React.createClass({
             const variantEffect = util.getFormattedFieldByProp("Variant_effect_LOVD", data);
 
             extraHeaderItems = (
-                <div>
+                <div style={{whiteSpace: 'nowrap', overflow: 'hidden'}}>
                 {`Variant Effect: ${variantEffect}`}
                 </div>
             );
@@ -127,7 +128,7 @@ const VariantSubmitter = React.createClass({
                 { submitter }
                 </div>
 
-                <div className="submitter-cell optional" style={{textAlign: 'left', flex: '0 1 auto', whiteSpace: 'nowrap'}}>
+                <div className="submitter-cell optional" style={{textAlign: 'left', flex: '0 1 auto'}}>
                 {
                     // remaining header elements depend on the source
                     extraHeaderItems
