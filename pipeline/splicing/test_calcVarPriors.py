@@ -1381,41 +1381,25 @@ class test_calcVarPriors(unittest.TestCase):
     def test_getEnigmaClass(self):
         ''''
         Tests that predicted qualititative ENIGMA class is assigned correctly based on prior prob
-        Specifically tests edge cases of priorProb = 0.001, 0.05, 0.95, and 0.99
+        Specifically tests for priors in class 1 and class 5
         and most commonly assigned priorProb = 0.04, 0.34, and 0.97
         '''
         priorProb = 0.0001
         enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
         self.assertEquals(enigmaClass, enigmaClasses["class1"])
-
-        priorProb = 0.001
-        enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
-        self.assertEquals(enigmaClass, enigmaClasses["class2"])
         
         priorProb = 0.04
         enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
         self.assertEquals(enigmaClass, enigmaClasses["class2"])
 
-        priorProb = 0.05
-        enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
-        self.assertEquals(enigmaClass, enigmaClasses["class3"])
-        
         priorProb = 0.34
         enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
         self.assertEquals(enigmaClass, enigmaClasses["class3"])
 
-        priorProb = 0.95
-        enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
-        self.assertEquals(enigmaClass, enigmaClasses["class4"])
-
         priorProb = 0.97
         enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
         self.assertEquals(enigmaClass, enigmaClasses["class4"])
-        
-        priorProb = 0.99
-        enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
-        self.assertEquals(enigmaClass, enigmaClasses["class4"])
-        
+                
         priorProb = 0.995
         enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
         self.assertEquals(enigmaClass, enigmaClasses["class5"])
