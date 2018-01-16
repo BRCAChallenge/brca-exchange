@@ -3,6 +3,8 @@
 'use strict';
 
 // shims for older browsers
+import SourceReportsTile from "./components/SourceReportsTile";
+
 require('babel/polyfill');
 require('es5-shim');
 require('es5-shim/es5-sham');
@@ -55,7 +57,6 @@ var {Navigation, State, Route, RouteHandler,
 var {Releases, Release} = require('./Releases.js');
 
 var KeyInline = require('./components/KeyInline');
-var {VariantSubmitter} = require('./components/VariantSubmitter');
 
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 
@@ -700,96 +701,6 @@ var VariantDetail = React.createClass({
             };
         });
     },
-    generateSourceReportPanel: function (sourceName, submissions) {
-        // look up data for formatting this specific source, e.g. what fields to include, its name, etc.
-        const sourceMeta = reportSourceFieldMapping[sourceName];
-
-        // sort the submissions if this source specifies a sort function
-        if (sourceMeta.sortBy) {
-            // (side note: we concat() to clone before sort()ing, because sort() mutates the array)
-            submissions = submissions.concat().sort(sourceMeta.sortBy);
-        }
-
-        // keeps track of how many non-enigma/bic reports we've seen so we can expand the first one
-        // FIXME: this anoying introduces a side effect into the below map(); maybe there's a better way
-        let nonEnigmaBics = 0;
-
-        // create a per-submitter collapsible subsection within this source panel
-        const submitters = submissions.map((submissionData, idx) => {
-            // extract header fields, e.g. the submitter name
-            const submitterName = util.getFormattedFieldByProp(sourceMeta.submitter.prop, submissionData);
-
-            // extract fields we care about from the submission data
-            const formattedCols = sourceMeta.cols
-                .map(({ title, prop }) => ({
-                    title, prop, value: submissionData[prop]
-                        ? submissionData[prop].toString()
-                        // FIXME: maybe we should just ignore requested fields that aren't in the data payload
-                        : `${prop}???`
-                }));
-
-            const isEnigmaOrBic = (
-                typeof submitterName === "string" &&
-                (
-                    submitterName.toLowerCase().indexOf("enigma") !== -1 ||
-                    submitterName.toLowerCase().indexOf("(bic)") !== -1
-                )
-            );
-
-            if (!isEnigmaOrBic) {
-                // we only really care about the first, but this is the cleanest way to do this
-                // with a single var
-                nonEnigmaBics += 1;
-            }
-
-            return (
-                <VariantSubmitter
-                    key={idx} submitter={submitterName} source={sourceName}
-                    meta={sourceMeta} cols={formattedCols} data={submissionData}
-                    hideEmptyItems={this.state.hideEmptyItems}
-                    onSubrowToggled={() => {
-                        setTimeout(() => {
-                            // this forces a re-render after a group has expanded/collapsed, fixing the layout
-                            // note that 300ms just happens to be the duration of the expand/collapse animation
-                            // it'd be better to run the re-layout whenever the animation ends
-                            this.forceUpdate();
-                        }, 300);
-                    }}
-                    showHelp={this.showHelp}
-                    defaultExpanded={
-                        // always collapse ENIGMA and BIC submissions.
-                        // show all items expanded if there are only a few of them.
-                        // otherwise, expand the first non-enigma/bic elem by default, but nothing else.
-                        ( !isEnigmaOrBic ) && (submissions.length <= 3 || nonEnigmaBics === 1)
-                    }
-                />
-            );
-        });
-
-        // create the source panel itself now
-        const groupTitle = `source-panel-${sourceName}`;
-        const header = (
-            <h3>
-                <a href="#" onClick={(event) => this.onChangeGroupVisibility(groupTitle, event)}>
-                {`Clinical Significance (${sourceMeta.displayName})`}
-                </a>
-            </h3>
-        );
-        const allEmpty = false; // FIXME: actually check if we're all empty or no
-
-        return (
-            <div key={`group_collection-${groupTitle}`} className="variant-detail-group variant-submitter-group">
-                <div className={ allEmpty && this.state.hideEmptyItems ? "group-empty" : "" }>
-                    <Panel
-                        header={header}
-                        collapsable={true}
-                        defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
-                        {submitters}
-                    </Panel>
-                </div>
-            </div>
-        );
-    },
     render: function () {
         const {data, error} = this.state;
         if (!data) {
@@ -832,8 +743,21 @@ var VariantDetail = React.createClass({
                     return null;
                 }
 
-                // FIXME: we should override just the row-rendering part of the group element, not the whole thing
-                return this.generateSourceReportPanel(reportSource, this.state.reports[reportSource]);
+                return (
+                    <SourceReportsTile
+                        sourceName={reportSource}
+                        submissions={this.state.reports[reportSource]}
+                        onChangeGroupVisibility={this.onChangeGroupVisibility}
+                        onReportToggled={() => {
+                            setTimeout(() => {
+                                // this forces a re-render after a group has expanded/collapsed, fixing the layout
+                                // note that 300ms just happens to be the duration of the expand/collapse animation
+                                // it'd be better to run the re-layout whenever the animation ends
+                                this.forceUpdate();
+                            }, 300);
+                        }}
+                    />
+                );
             }
 
             // remove the BIC classification and importance fields unless the classification is 1 or 5

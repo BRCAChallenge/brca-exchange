@@ -66,14 +66,9 @@ const VariantSubmitter = React.createClass({
 
     onHandleToggle: function(e) {
         e.preventDefault();
-        this.setState({
-            expanded: !this.state.expanded
-        }, () => {
-            // tell our parent that we've changed our collapse status
-            if (this.props.onSubrowToggled) {
-                this.props.onSubrowToggled(this.state.expanded);
-            }
-        });
+
+        // ask our parent to toggle us
+        this.props.onReportToggled(this.props.idx);
     },
 
     // FIXME: copied from index.js; find a way to use this without aliasing
@@ -107,7 +102,7 @@ const VariantSubmitter = React.createClass({
         }
 
         return (
-            <div className={`submitter-header ${this.state.expanded ? 'expanded' : ''}`} onClick={this.onHandleToggle}>
+            <div className={`submitter-header ${this.props.expanded ? 'expanded' : ''}`} onClick={this.onHandleToggle}>
                 <div className="submitter-cell submitter-label">
                     {
                         // for ClinVar reports, display stars to the left of the submitter label
@@ -117,7 +112,7 @@ const VariantSubmitter = React.createClass({
                     }
 
                     {
-                        this.state.expanded
+                        this.props.expanded
                             ? <i className="fa fa-caret-down" aria-hidden="true" />
                             : <i className="fa fa-caret-right" aria-hidden="true" />
                     }
@@ -126,7 +121,7 @@ const VariantSubmitter = React.createClass({
                 </div>
 
                 <div
-                    className={`submitter-cell submitter-name ${!this.state.expanded ? 'collapsed' : ''}`}
+                    className={`submitter-cell submitter-name ${!this.props.expanded ? 'collapsed' : ''}`}
                     style={{textAlign: 'left', flex: '1 1 auto'}}
                 >
                 { submitter }
