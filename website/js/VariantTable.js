@@ -120,7 +120,7 @@ const researchModeGroups = [
     ]},
     */
 
-    // FIXME: this is a quick hack to get reports to display inline with other tiles
+    // TODO: consider merging metadata from reportSourceFieldMapping (same file, far below) into this mapping
     // if a group contains reportSource, it'll be replaced with generateSourceReportPanel(reportSource, reports[reportSource])
     {groupTitle: 'Clinical Significance (ClinVar)', internalGroupName: 'Significance (ClinVar)', reportSource: 'ClinVar'},
     {groupTitle: 'Clinical Significance (LOVD)', internalGroupName: 'Significance (LOVD)', reportSource: 'LOVD'},

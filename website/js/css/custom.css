@@ -953,11 +953,10 @@ div.variant-submitter-group .submitter-header td {
     text-decoration: dashed;
     white-space: nowrap;
 
-    flex: 0 0 200px;
+    flex: 0 0 203px; /* the +3 gets it to line up with the columns below it */
 }
 
 .submitter-header .submitter-cell.submitter-name {
-    /*font-weight: bold;*/
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
