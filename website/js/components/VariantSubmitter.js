@@ -86,9 +86,9 @@ const VariantSubmitter = React.createClass({
             const dateUpdated = util.getFormattedFieldByProp("Date_Last_Updated_ClinVar", data);
 
             extraHeaderItems = (
-                <div>
-                    <span style={{whiteSpace: 'nowrap'}}>{sentenceCase(significance)}</span>
-                    <span style={{whiteSpace: 'nowrap'}}>{` (${dateUpdated})`}</span>
+                <div className="clinvar-extras">
+                    <span className="clin-sig">{sentenceCase(significance)}</span>
+                    <span className="date-updated">{` (${dateUpdated})`}</span>
                 </div>
             );
         }

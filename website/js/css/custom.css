@@ -839,7 +839,9 @@ th[role='columnheader'] .help, .help-target .help {
 }
 
 
-/* faisal: alternate design for details page */
+/**************************************************************/
+/**********     Variant Details: Tile Groups ******************/
+/**************************************************************/
 
 div.variant-detail-group table.table-bordered {
     border: solid 1px #9a9a9a;
@@ -920,6 +922,9 @@ div.variant-details-body {
     margin-top: 2em;
 }
 
+
+/* --- reports (nested subtiles) -------------- */
+
 div.variant-submitter-group .submitter-header {
     background: #f2f7ff;
     cursor: pointer;
@@ -958,6 +963,7 @@ div.variant-submitter-group .submitter-header td {
     overflow: hidden;
 }
 
+/* causes lower-priority header fields to be hidden when the screen isn't wide enough to display them */
 @media (max-width: 500px) {
     .submitter-header .submitter-cell.optional {
         display: none;
@@ -968,10 +974,12 @@ div.variant-submitter-group .submitter-header td {
     font-weight: bold;
 }
 
-.table > thead:first-child > tr.submitter-header:first-child > td {
-    border-bottom-width: 3px;
+.clinvar-extras > * {
+    white-space: nowrap;
 }
-
+.clinvar-extras .date-updated {
+    font-size: smaller;
+}
 
 
 /* faisal: hack for packery to minimize the impact of the graphical glitch of opening/closing a section */
