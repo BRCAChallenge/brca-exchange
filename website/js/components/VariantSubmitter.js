@@ -53,6 +53,12 @@ function getMarksForReviewStatus(status) {
     );
 }
 
+function abbreviatedSubmitter(originalSubmitter) {
+    return originalSubmitter
+        .replace('Evidence-based Network for the Interpretation of Germline Mutant Alleles (ENIGMA)', 'ENIGMA')
+        .replace('Breast Cancer Information Core (BIC)', 'BIC');
+}
+
 const VariantSubmitter = React.createClass({
     mixins: [CollapsableMixin],
 
@@ -125,7 +131,7 @@ const VariantSubmitter = React.createClass({
                     className={`submitter-cell submitter-name ${!this.props.expanded ? 'collapsed' : ''}`}
                     style={{textAlign: 'left', flex: '1 1 auto'}}
                 >
-                { submitter }
+                { abbreviatedSubmitter(submitter) }
                 </div>
 
                 <div className="submitter-cell optional" style={{textAlign: 'left', flex: '0 1 auto'}}>
