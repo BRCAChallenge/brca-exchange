@@ -128,12 +128,14 @@ def index(request):
     show_deleted = (request.GET.get('show_deleted', False) != False)
     deleted_count = 0
     synonyms_count = 0
+    release_name = None
 
     if release:
         query = Variant.objects.filter(Data_Release_id=int(release))
         if(change_types):
             change_types = map(lambda c: change_types_map[c], filter(lambda c: c in change_types_map, change_types))
             query = query.filter(Change_Type_id__in=change_types)
+        release_name = DataRelease.objects.get(id=int(release)).name
     else:
         query = CurrentVariant.objects
 
@@ -189,7 +191,7 @@ def index(request):
         count = query.count()
         query = select_page(query, page_size, page_num)
         # call list() now to evaluate the query
-        response = JsonResponse({'count': count, 'deletedCount': deleted_count, 'synonyms': synonyms_count, 'data': list(query.values(*column))})
+        response = JsonResponse({'count': count, 'deletedCount': deleted_count, 'synonyms': synonyms_count, 'releaseName': release_name, 'data': list(query.values(*column))})
         response['Access-Control-Allow-Origin'] = '*'
         return response
 

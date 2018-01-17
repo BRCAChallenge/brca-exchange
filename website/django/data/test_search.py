@@ -37,7 +37,7 @@ def create_variant_and_materialized_view(variant_data):
     try:
         data_release = DataRelease.objects.get(id=release_id)
     except DataRelease.DoesNotExist:
-        data_release = DataRelease.objects.create(date='2017-12-26', id=release_id)
+        data_release = DataRelease.objects.create(date='2017-12-26', id=release_id, name=1)
     with connection.cursor() as cursor:
         cursor.execute("REFRESH MATERIALIZED VIEW currentvariant")
     materialized_view = CurrentVariant.objects.get(Genomic_Coordinate_hg38=variant.Genomic_Coordinate_hg38)
@@ -218,6 +218,7 @@ class VariantTestCase(TestCase):
 
         response_data = json.loads(response.content)
         self.assertEqual(response_data["count"], 1)
+        self.assertEqual(response_data["releaseName"], 1)
 
         response_variant = response_data["data"][0]
 
@@ -242,6 +243,7 @@ class VariantTestCase(TestCase):
 
         response_data = json.loads(response.content)
         self.assertEqual(response_data["count"], 1)
+        self.assertIsNone(response_data["releaseName"])
 
         response_variant = response_data["data"][0]
 
