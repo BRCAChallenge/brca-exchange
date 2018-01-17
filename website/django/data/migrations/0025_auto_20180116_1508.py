@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='datarelease',
             name='name',
-            field=models.CharField(max_length=255, null=True)
+            field=models.PositiveIntegerField(null=True)
         ),
         migrations.RunPython(set_release_name_defaults),
 
@@ -34,6 +34,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='datarelease',
             name='name',
-            field=models.CharField(max_length=255),
+            field=models.PositiveIntegerField(),
         ),
     ]

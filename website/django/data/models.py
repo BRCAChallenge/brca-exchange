@@ -9,7 +9,7 @@ class DataRelease(models.Model):
     sources = models.TextField()
     md5sum = models.TextField()
     created = models.DateTimeField(auto_now_add=True, null=True)
-    name = models.CharField(max_length=255)
+    name = models.PositiveIntegerField(null=True)
 
     class Meta:
         db_table = "data_release"

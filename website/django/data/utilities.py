@@ -28,6 +28,6 @@ def set_release_name_defaults(apps, schema_editor):
     count = 1
     releases = DataRelease.objects.all().order_by('date')
     for release in releases:
-        release.name = str(count)
+        release.name = count
         release.save()
         count += 1
