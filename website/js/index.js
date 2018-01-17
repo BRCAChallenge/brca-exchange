@@ -748,6 +748,7 @@ var VariantDetail = React.createClass({
                         sourceName={reportSource}
                         submissions={this.state.reports[reportSource]}
                         onChangeGroupVisibility={this.onChangeGroupVisibility}
+                        hideEmptyItems={this.state.hideEmptyItems}
                         onReportToggled={() => {
                             setTimeout(() => {
                                 // this forces a re-render after a group has expanded/collapsed, fixing the layout

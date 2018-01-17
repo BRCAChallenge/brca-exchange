@@ -114,7 +114,7 @@ export default class SourceReportsTile extends React.Component {
                 <VariantSubmitter
                     key={submissionData.id} idx={idx} submitter={submitterName} source={this.props.sourceName}
                     meta={sourceMeta} cols={formattedCols} data={submissionData}
-                    hideEmptyItems={this.state.hideEmptyItems}
+                    hideEmptyItems={this.props.hideEmptyItems}
                     onReportToggled={this.reportToggled}
                     showHelp={this.showHelp}
                     expanded={this.state.reportExpanded[idx]}
