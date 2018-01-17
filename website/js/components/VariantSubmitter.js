@@ -88,7 +88,8 @@ const VariantSubmitter = React.createClass({
         let extraHeaderItems = null;
 
         if (source === 'ClinVar') {
-            const significance = util.getFormattedFieldByProp("Clinical_Significance_ClinVar", data);
+            const significance = util.getFormattedFieldByProp("Clinical_Significance_ClinVar", data)
+                .replace(/(variant of unknown significance|uncertain significance)/i, 'VUS');
             const dateUpdated = util.getFormattedFieldByProp("Date_Last_Updated_ClinVar", data);
 
             extraHeaderItems = (
@@ -160,7 +161,6 @@ const VariantSubmitter = React.createClass({
                 <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
                     <KeyInline tableKey={title} onClick={(event) => this.props.showHelp(event, title)} />
                     <td><span className={ this.truncateData(prop) ? "row-value-truncated" : "row-value" }>{rowItem}</span></td>
-                    {/*<td>&nbsp;</td>*/}
                 </tr>
             );
         });
