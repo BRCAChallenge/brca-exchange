@@ -1527,6 +1527,34 @@ class test_calcVarPriors(unittest.TestCase):
         zScore = calcVarPriors.getZScore(maxEntScanScore, donor=False)
         self.assertGreater(zScore, 0)
         
+    @mock.patch('calcVarPriors.getRefAltSeqs', return_value = {"refSeq": "TTACAAATCACCCCTCA",
+                                                               "altSeq": "TTACAAATGACCCCTCA"})
+    def test_getMaxMaxEntScanScoreSlidingWindowSNSBRCA1(self, getRefAltSeqs):
+        '''Tests that in first three in assigned correctly'''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        # information for variant which has highest socring window with variant NOT in first three base pairs
+        self.variant["Pos"] = "43095895"
+        self.variant["Ref"] = "G"
+        self.variant["Alt"] = "C"
+
+        maxWindowScores = calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS(self.variant)
+        self.assertFalse(maxWindowScores["inFirstThree"])
+
+    @mock.patch('calcVarPriors.getRefAltSeqs', return_value = {"refSeq": "TGGCCAAAAGGAAGTCT",
+                                                               "altSeq": "TGGCCAAAGGGAAGTCT"})
+    def test_getMaxMaxEntScanScoreSlidingWindowSNSBRCA2(self, getRefAltSeqs):
+        '''Tests that in first three is assigned correctly'''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        # information for variant which has highest scoring window with variant in first three base paris
+        self.variant["Pos"] = "32398222"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "G"
+    
+        maxWindowScores = calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS(self.variant)
+        self.assertTrue(maxWindowScores["inFirstThree"])
+        
     def test_getEnigmaClass(self):
         ''''
         Tests that predicted qualititative ENIGMA class is assigned correctly based on prior prob
@@ -1951,46 +1979,6 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["afterGreyZone"])
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
     def test_getPriorProbAfterGreyZoneNonesenseSNS(self, getVarType, getVarLocation, getVarConsequences):
-        '''
-        Tests that:
-        prior prob is set to N/A and ENIGMA class is class 2 for a BRCA2 nonsense variant after the grey zone
-        '''
-        boundaries = "enigma"
-        self.variant["Gene_Symbol"] = "BRCA2"
-        self.variant["Reference_Sequence"] = "NM_000059.3"
-        self.variant["Chr"] = "13"
-        self.variant["Hg38_Start"] = "32398492"
-        self.variant["Hg38_End"] = "32398492"
-
-        self.variant["Pos"] = "32398492"
-        self.variant["Ref"] = "A"
-        self.variant["Alt"] = "T"
-        priorProb = calcVarPriors.getPriorProbAfterGreyZoneSNS(self.variant, boundaries)
-        self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
-        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
-
-    @mock.patch('calcVarPriors.getVarConsequences', return_value = "missense_variant")
-    def test_getPriorProbAfterGreyZoneMissenseSNS(self, getVarConsequences):
-        '''
-        Tests that:
-        prior prob is set to N/A and ENIGMA class is class 2 for a BRCA2 missense variant after the grey zone
-        '''
-        boundaries = "enigma"
-        self.variant["Gene_Symbol"] = "BRCA2"
-        self.variant["Reference_Sequence"] = "NM_000059.3"
-        self.variant["Chr"] = "13"
-        self.variant["Hg38_Start"] = "32398528"
-        self.variant["Hg38_End"] = "32398528"
-
-        self.variant["Pos"] = "32398528"
-        self.variant["Ref"] = "A"
-        self.variant["Alt"] = "G"
-        priorProb = calcVarPriors.getPriorProbAfterGreyZoneSNS(self.variant, boundaries)
-        self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
-        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
-
-    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
-    def test_getPriorProbAfterGreyZoneNonesenseSNS(self, getVarConsequences):
         '''
         Tests that:
         prior prob is set to N/A and ENIGMA class is class 2 for a BRCA2 nonsense variant after the grey zone

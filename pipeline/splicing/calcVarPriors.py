@@ -626,7 +626,7 @@ def getRefAltSeqs(variant, rangeStart, rangeStop):
     altSeq = getAltSeq(altSeqDict, varStrand)
 
     return {"refSeq": refSeq,
-            "altSeq": altSeq}
+            "altSeq": altSeq}    
     
 def getZScore(maxEntScanScore, donor=False):
     '''
@@ -666,6 +666,56 @@ def getRefAltScores(refSeq, altSeq, donor=False):
                  "altScores": {"maxEntScanScore": altMaxEntScanScore,
                                "zScore": altZScore}}
     return scoreDict
+
+def getMaxMaxEntScanScoreSlidingWindowSNS(variant):
+    # TO DO write unittests for this function
+    varGenPos = int(variant["Pos"])
+    varStrand = getVarStrand(variant)
+    if varStrand == "-":
+        regionStart = varGenPos + 8
+        regionEnd = varGenPos - 8
+    else:
+        regionStart = varGenPos - 8
+        regionEnd = varGenPos + 8
+    refAltSeqs = getRefAltSeqs(variant, regionStart, regionEnd)
+    refSeq = refAltSeqs["refSeq"]
+    altSeq = refAltSeqs["altSeq"]
+    varPos = 9
+    windowStart = 0
+    windowEnd = 9
+    windowSeqs = {}
+    windowScores = {}
+    windowAltMaxEntScanScores = {}
+    while windowStart < 9:
+        refWindowSeq = refSeq[windowStart:windowEnd]
+        altWindowSeq = altSeq[windowStart:windowEnd]
+        windowSeqs[varPos] = {"refSeq": refWindowSeq,
+                              "altSeq": altWindowSeq}
+        refAltWindowScores = getRefAltScores(refWindowSeq, altWindowSeq, donor=True)
+        windowScores[varPos] = {"refMaxEntScanScore": refAltWindowScores["refScores"]["maxEntScanScore"],
+                                "refZScore": refAltWindowScores["refScores"]["zScore"],
+                                "altMaxEntScanScore": refAltWindowScores["altScores"]["maxEntScanScore"],
+                                "altZScore": refAltWindowScores["altScores"]["zScore"]}
+        windowAltMaxEntScanScores[varPos] = refAltWindowScores["altScores"]["maxEntScanScore"]
+        varPos -= 1
+        windowStart += 1
+        windowEnd += 1
+        
+    # to get tuple containing sequence with variant position with maximum alt MaxEntScan score
+    maxAltWindowScore = max(windowAltMaxEntScanScores.items(), key=lambda k: k[1])
+    maxVarPosition = maxAltWindowScore[0]
+    maxScores = windowScores[maxVarPosition]
+
+    # determines if variant is in the first three bases of the 9 bp donor sequence
+    inFirstThree = False
+    if maxVarPosition <= 3:
+        inFirstThree = True
+        
+    return {"refMaxEntScanScore": maxScores["refMaxEntScanScore"],
+            "refZScore": maxScores["refZScore"],
+            "altMaxEntScanScore": maxScores["altMaxEntScanScore"],
+            "altZScore": maxScores["altZScore"],
+            "inFirstThree": inFirstThree}
 
 def getEnigmaClass(priorProb):
     '''
