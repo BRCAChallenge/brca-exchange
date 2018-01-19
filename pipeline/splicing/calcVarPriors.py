@@ -364,76 +364,55 @@ def varInExon(variant):
                     return True
     return False
     
-def varInSpliceDonor(variant):
+def varInSpliceRegion(variant, donor=False):
     '''
-    Given a variant, determines if a variant is in reference transcript's splice donor region
+    Given a variant, determines if a variant is in reference transcript's splice donor/acceptor region
+    If donor=True, checks if variant is in a splice donor region
+    If donor=False, checks if variant is ina splice acceptor region
     splice donor region = last 3 bases in exon and first 6 bases in intron
-    Returns True if variant is in a splice donor region, false otherwise
-    '''
-    varGenPos = int(variant["Pos"])
-    varStrand = getVarStrand(variant)
-    donorBounds = getRefSpliceDonorBoundaries(variant)
-    for exon in donorBounds.keys():
-        donorStart = donorBounds[exon]["donorStart"]
-        donorEnd = donorBounds[exon]["donorEnd"]
-        withinBoundaries = checkWithinBoundaries(varStrand, varGenPos, donorStart, donorEnd)
-        if withinBoundaries == True:
-            return True
-    return False
-
-def getVarSpliceDonorBounds(variant):
-    '''
-    Given a variant, checks if variant is in a splice donor region
-    If variant is in a splice donor, returns a dictionary with donor region boundaries where variant is located
-    '''
-    inSpliceDonor = varInSpliceDonor(variant)
-    if inSpliceDonor == True:
-        varGenPos = int(variant["Pos"])
-        varStrand = getVarStrand(variant)
-        donorBounds = getRefSpliceDonorBoundaries(variant)
-        for exon in donorBounds.keys():
-            donorStart = donorBounds[exon]["donorStart"]
-            donorEnd = donorBounds[exon]["donorEnd"]
-            withinBoundaries = checkWithinBoundaries(varStrand, varGenPos, donorStart, donorEnd)
-            if withinBoundaries == True:
-                return {"donorStart": donorStart,
-                        "donorEnd": donorEnd}    
-                
-def varInSpliceAcceptor(variant):
-    '''
-    Given a variant, determines if a variant is in reference transcript's splice acceptor region
     splice acceptor region = 20 bases preceding exon and first 3 bases in exon
-    Returns True if variant in a splice acceptor region, False otherwise
+    Returns True if variant is in a splice region region, false otherwise
     '''
-    varGenPos = int(variant["Pos"])
-    varStrand = getVarStrand(variant)
-    acceptorBounds = getRefSpliceAcceptorBoundaries(variant)
-    for exon in acceptorBounds.keys():
-        acceptorStart = acceptorBounds[exon]["acceptorStart"]
-        acceptorEnd = acceptorBounds[exon]["acceptorEnd"]
-        withinBoundaries = checkWithinBoundaries(varStrand, varGenPos, acceptorStart, acceptorEnd)
+    if donor == False:
+        regionBounds = getRefSpliceAcceptorBoundaries(variant)
+    else:
+        regionBounds = getRefSpliceDonorBoundaries(variant)
+    for exon in regionBounds.keys():
+        if donor == False:
+            regionStart = regionBounds[exon]["acceptorStart"]
+            regionEnd = regionBounds[exon]["acceptorEnd"]
+        else:
+            regionStart = regionBounds[exon]["donorStart"]
+            regionEnd = regionBounds[exon]["donorEnd"]
+        withinBoundaries = checkWithinBoundaries(getVarStrand(variant), int(variant["Pos"]), regionStart, regionEnd)
         if withinBoundaries == True:
             return True
     return False
 
-def getVarSpliceAcceptorBounds(variant):
+def getVarSpliceRegionBounds(variant, donor=False):
     '''
-    Given a variant, checks if variant is in a splice acceptor region
-    If variant is in a splice acceptor, returns a dictionary with acceptor region boundaries where variant is located
+    Given a variant, checks if variant is in a splice donor/acceptor region
+    If donor=True, checks if variant is in a splice donor region and returns boundaries for splice donor region
+    If donor=False, checks if variant is ina splice acceptor region and returns boundaries for splice acceptor region
+    If variant is in a splice region, returns a dictionary with region boundaries where variant is located
     '''
-    inSpliceAcceptor = varInSpliceAcceptor(variant)
-    if inSpliceAcceptor == True:
-        varGenPos = int(variant["Pos"])
-        varStrand = getVarStrand(variant)
-        acceptorBounds = getRefSpliceAcceptorBoundaries(variant)
-        for exon in acceptorBounds.keys():
-            acceptorStart = acceptorBounds[exon]["acceptorStart"]
-            acceptorEnd = acceptorBounds[exon]["acceptorEnd"]
-            withinBoundaries = checkWithinBoundaries(varStrand, varGenPos, acceptorStart, acceptorEnd)
+    if varInSpliceRegion(variant, donor=donor):
+        if donor == False:
+            regionBounds = getRefSpliceAcceptorBoundaries(variant)
+            regionStartKey = "acceptorStart"
+            regionEndKey = "acceptorEnd"
+        else:        
+            regionBounds = getRefSpliceDonorBoundaries(variant)
+            regionStartKey = "donorStart"
+            regionEndKey = "donorEnd"
+        for exon in regionBounds.keys():
+            regionStart = regionBounds[exon][regionStartKey]
+            regionEnd = regionBounds[exon][regionEndKey]
+            withinBoundaries = checkWithinBoundaries(getVarStrand(variant), int(variant["Pos"]), regionStart, regionEnd)
             if withinBoundaries == True:
-                return {"acceptorStart": acceptorStart,
-                        "acceptorEnd": acceptorEnd}
-
+                return {regionStartKey: regionStart,
+                        regionEndKey: regionEnd}    
+                
 def varInCiDomain(variant, boundaries):
     '''
     Given a variant, determines if variant is in a clinically important domain
@@ -506,8 +485,8 @@ def getVarLocation(variant, boundaries):
     if varOutBounds == True:
         return "outside_transcript_boundaries_variant"
     inExon = varInExon(variant)
-    inSpliceDonor = varInSpliceDonor(variant)
-    inSpliceAcceptor = varInSpliceAcceptor(variant)
+    inSpliceDonor = varInSpliceRegion(variant, donor=True)
+    inSpliceAcceptor = varInSpliceRegion(variant, donor=False)
     if inExon == True:
         inCiDomain = varInCiDomain(variant, boundaries)
         if inCiDomain == True and inSpliceDonor == True:
@@ -699,7 +678,7 @@ def getPriorProbSpliceDonorSNS(variant, boundaries):
     varLoc = getVarLocation(variant, boundaries)
     if varType == "substitution" and (varLoc == "splice_donor_variant" or varLoc == "CI_splice_donor_variant"):
         # to get region boundaries to get ref and alt seq
-        spliceDonorBounds = getVarSpliceDonorBounds(variant)
+        spliceDonorBounds = getVarSpliceRegionBounds(variant, donor=True)
         refAltSeqs = getRefAltSeqs(variant, spliceDonorBounds["donorStart"], spliceDonorBounds["donorEnd"])
         scores = getRefAltScores(refAltSeqs["refSeq"], refAltSeqs["altSeq"], donor=True)
         refMaxEntScanScore = scores["refScores"]["maxEntScanScore"]
@@ -738,7 +717,7 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries):
     varLoc = getVarLocation(variant, boundaries)
     if varType == "substitution" and (varLoc == "splice_acceptor_variant" or varLoc == "CI_splice_acceptor_variant"):
         # to get region boundaires to get ref and alt seq
-        spliceAcceptorBounds = getVarSpliceAcceptorBounds(variant)
+        spliceAcceptorBounds = getVarSpliceRegionBounds(variant, donor=False)
         refAltSeqs = getRefAltSeqs(variant, spliceAcceptorBounds["acceptorStart"], spliceAcceptorBounds["acceptorEnd"])
         scores = getRefAltScores(refAltSeqs["refSeq"], refAltSeqs["altSeq"], donor=False)
         refMaxEntScanScore = scores["refScores"]["maxEntScanScore"]
