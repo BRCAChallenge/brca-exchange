@@ -14,8 +14,10 @@ import sys
 import time
 import json
 import re
+import subprocess
+import tempfile
 from Bio.Seq import Seq
-from calcMaxEntScanMeanStd import fetch_gene_coordinates
+from calcMaxEntScanMeanStd import fetch_gene_coordinates, runMaxEntScan
 
 # Here are the canonical BRCA transcripts in ENSEMBL nomenclature
 BRCA1_CANONICAL = "ENST00000357654"
@@ -71,6 +73,17 @@ def getVarStrand(variant):
         return '-'
     elif varGene == "BRCA2":
         return '+'
+    else:
+        return ""
+
+def getVarChrom(variant):
+    '''Given a variant, returns the chromosome based on the variant's gene_symbol'''
+    varGene = variant["Gene_Symbol"]
+
+    if varGene == "BRCA1":
+        return "chr17"
+    elif varGene == "BRCA2":
+        return "chr13"
     else:
         return ""
 
@@ -351,41 +364,55 @@ def varInExon(variant):
                     return True
     return False
     
-    
-def varInSpliceDonor(variant):
+def varInSpliceRegion(variant, donor=False):
     '''
-    Given a variant, determines if a variant is in reference transcript's splice donor region
+    Given a variant, determines if a variant is in reference transcript's splice donor/acceptor region
+    If donor=True, checks if variant is in a splice donor region
+    If donor=False, checks if variant is ina splice acceptor region
     splice donor region = last 3 bases in exon and first 6 bases in intron
-    Returns True if variant in splice donor region
-    '''
-    varGenPos = int(variant["Pos"])
-    varStrand = getVarStrand(variant)
-    donorBounds = getRefSpliceDonorBoundaries(variant)
-    for exon in donorBounds.keys():
-        donorStart = donorBounds[exon]["donorStart"]
-        donorEnd = donorBounds[exon]["donorEnd"]
-        withinBoundaries = checkWithinBoundaries(varStrand, varGenPos, donorStart, donorEnd)
-        if withinBoundaries == True:
-            return True
-    return False
-
-def varInSpliceAcceptor(variant):
-    '''
-    Given a variant, determines if a variant is in reference transcript's splice acceptor region
     splice acceptor region = 20 bases preceding exon and first 3 bases in exon
-    Returns True if variant in splice acceptor region
+    Returns True if variant is in a splice region region, false otherwise
     '''
-    varGenPos = int(variant["Pos"])
-    varStrand = getVarStrand(variant)
-    acceptorBounds = getRefSpliceAcceptorBoundaries(variant)
-    for exon in acceptorBounds.keys():
-        acceptorStart = acceptorBounds[exon]["acceptorStart"]
-        acceptorEnd = acceptorBounds[exon]["acceptorEnd"]
-        withinBoundaries = checkWithinBoundaries(varStrand, varGenPos, acceptorStart, acceptorEnd)
+    if donor == False:
+        regionBounds = getRefSpliceAcceptorBoundaries(variant)
+    else:
+        regionBounds = getRefSpliceDonorBoundaries(variant)
+    for exon in regionBounds.keys():
+        if donor == False:
+            regionStart = regionBounds[exon]["acceptorStart"]
+            regionEnd = regionBounds[exon]["acceptorEnd"]
+        else:
+            regionStart = regionBounds[exon]["donorStart"]
+            regionEnd = regionBounds[exon]["donorEnd"]
+        withinBoundaries = checkWithinBoundaries(getVarStrand(variant), int(variant["Pos"]), regionStart, regionEnd)
         if withinBoundaries == True:
             return True
     return False
 
+def getVarSpliceRegionBounds(variant, donor=False):
+    '''
+    Given a variant, checks if variant is in a splice donor/acceptor region
+    If donor=True, checks if variant is in a splice donor region and returns boundaries for splice donor region
+    If donor=False, checks if variant is ina splice acceptor region and returns boundaries for splice acceptor region
+    If variant is in a splice region, returns a dictionary with region boundaries where variant is located
+    '''
+    if varInSpliceRegion(variant, donor=donor):
+        if donor == False:
+            regionBounds = getRefSpliceAcceptorBoundaries(variant)
+            regionStartKey = "acceptorStart"
+            regionEndKey = "acceptorEnd"
+        else:        
+            regionBounds = getRefSpliceDonorBoundaries(variant)
+            regionStartKey = "donorStart"
+            regionEndKey = "donorEnd"
+        for exon in regionBounds.keys():
+            regionStart = regionBounds[exon][regionStartKey]
+            regionEnd = regionBounds[exon][regionEndKey]
+            withinBoundaries = checkWithinBoundaries(getVarStrand(variant), int(variant["Pos"]), regionStart, regionEnd)
+            if withinBoundaries == True:
+                return {regionStartKey: regionStart,
+                        regionEndKey: regionEnd}    
+                
 def varInCiDomain(variant, boundaries):
     '''
     Given a variant, determines if variant is in a clinically important domain
@@ -458,8 +485,8 @@ def getVarLocation(variant, boundaries):
     if varOutBounds == True:
         return "outside_transcript_boundaries_variant"
     inExon = varInExon(variant)
-    inSpliceDonor = varInSpliceDonor(variant)
-    inSpliceAcceptor = varInSpliceAcceptor(variant)
+    inSpliceDonor = varInSpliceRegion(variant, donor=True)
+    inSpliceAcceptor = varInSpliceRegion(variant, donor=False)
     if inExon == True:
         inCiDomain = varInCiDomain(variant, boundaries)
         if inCiDomain == True and inSpliceDonor == True:
@@ -558,7 +585,166 @@ def getAltSeq(altSeqDict, strand):
     if strand == "-":
         sequence = str(Seq(sequence).reverse_complement())
     return sequence
+
+def getRefAltSeqs(variant, rangeStart, rangeStop):
+    '''
+    Given a variant, rangeStart, and rangeStop:
+    Returns a dicitonary with ref and alt seq for the specified variant and range
+    '''
+    varChrom = getVarChrom(variant)
+    varStrand = getVarStrand(variant)
+    if varStrand == "-":
+        regionStart = rangeStop
+        regionEnd = rangeStart
+    else:
+        regionStart = rangeStart
+        regionEnd = rangeStop
+    refSeq = getFastaSeq(varChrom, regionStart, regionEnd)
+    if varStrand == "-":
+        refSeq = str(Seq(refSeq).reverse_complement())
+    refSeqDict = getSeqLocDict(varChrom, varStrand, rangeStart, rangeStop)
+    altSeqDict = getAltSeqDict(variant, refSeqDict)
+    altSeq = getAltSeq(altSeqDict, varStrand)
+
+    return {"refSeq": refSeq,
+            "altSeq": altSeq}
     
+def getZScore(maxEntScanScore, donor=False):
+    '''
+    Given a MaxEntScanScore, returns the zscore
+    If donor is True, uses splice donor mean and std
+    If donor is False, uses splice acceptor mean and std
+    '''
+    stdMeanData = json.load(open('brca.zscore.json'))
+    if donor == False:
+        std = stdMeanData["acceptors"]["std"]
+        mean = stdMeanData["acceptors"]["mean"]
+    else:
+        std = stdMeanData["donors"]["std"]
+        mean = stdMeanData["donors"]["mean"]
+        
+    zscore = (maxEntScanScore-mean)/std
+    return zscore
+
+def getRefAltScores(refSeq, altSeq, donor=False):
+    '''
+    Given ref and alt sequences and if sequence is in a splice donor region or not (True/False)
+    Returns a dictionary containing raw MaxEntScan scores and zscores for ref and alt sequences
+    '''
+    if donor == False:
+        refMaxEntScanScore = runMaxEntScan(refSeq, donor=False)
+        refZScore = getZScore(refMaxEntScanScore, donor=False)
+        altMaxEntScanScore = runMaxEntScan(altSeq, donor=False)
+        altZScore = getZScore(altMaxEntScanScore, donor=False)    
+    else:
+        refMaxEntScanScore = runMaxEntScan(refSeq, donor=True)
+        refZScore = getZScore(refMaxEntScanScore, donor=True)
+        altMaxEntScanScore = runMaxEntScan(altSeq, donor=True)
+        altZScore = getZScore(altMaxEntScanScore, donor=True)
+
+    scoreDict = {"refScores": {"maxEntScanScore": refMaxEntScanScore,
+                               "zScore": refZScore},
+                 "altScores": {"maxEntScanScore": altMaxEntScanScore,
+                               "zScore": altZScore}}
+    return scoreDict
+
+def getEnigmaClass(priorProb):
+    '''
+    Given a prior probability of pathogenecity, returns a predicted qualitative ENIGMA class
+    '''
+    # if variant has prior prob = N/A then a predicted qualitative ENIGMA class will have already been determined
+    if priorProb == "N/A":
+        return None 
+    else:
+        if priorProb > 0.99:
+            return "class_5"
+        elif priorProb <= 0.99 and priorProb >= 0.95:
+            return "class_4"
+        elif priorProb < 0.05 and priorProb >= 0.001:
+            return "class_2"
+        elif priorProb < 0.001:
+            return "class_1"
+        else:
+            return "class_3"
+
+def getPriorProbSpliceDonorSNS(variant, boundaries):
+    '''
+    Given a variant and location boundaries (either PRIORS or enigma)
+    Checks that variant is in a splice donor site and is a single nucleotide substitution
+    Returns a dictionary containing:
+     prior probability of pathogenecity, predicted qualitative enigma class, and ref and alt MES and zscores
+    '''
+    varType = getVarType(variant)
+    varLoc = getVarLocation(variant, boundaries)
+    if varType == "substitution" and (varLoc == "splice_donor_variant" or varLoc == "CI_splice_donor_variant"):
+        # to get region boundaries to get ref and alt seq
+        spliceDonorBounds = getVarSpliceRegionBounds(variant, donor=True)
+        refAltSeqs = getRefAltSeqs(variant, spliceDonorBounds["donorStart"], spliceDonorBounds["donorEnd"])
+        scores = getRefAltScores(refAltSeqs["refSeq"], refAltSeqs["altSeq"], donor=True)
+        refMaxEntScanScore = scores["refScores"]["maxEntScanScore"]
+        refZScore = scores["refScores"]["zScore"]
+        altMaxEntScanScore = scores["altScores"]["maxEntScanScore"]
+        altZScore = scores["altScores"]["zScore"]
+        if altMaxEntScanScore >= refMaxEntScanScore:
+            priorProb = 0.04
+        elif (refZScore < -1.5) and ((refZScore - altZScore) > 0.5):
+            priorProb = 0.97
+        else:
+            if altZScore > 0.0:
+                priorProb = 0.04
+            elif altZScore <= 0.0 and altZScore >= -2:
+                priorProb = 0.34
+            # leaving this last else in place because criteria here might change in the future
+            else:
+                priorProb = 0.34    
+        enigmaClass = getEnigmaClass(priorProb)
+        
+        return {"priorProb": priorProb,
+                "enigmaClass": enigmaClass,
+                "refMaxEntScanScore": refMaxEntScanScore,
+                "altMaxEntScanScore": altMaxEntScanScore,
+                "refZScore": refZScore,
+                "altZScore": altZScore}
+    
+def getPriorProbSpliceAcceptorSNS(variant, boundaries):
+    '''
+    Given a variant and location boundaries (either PRIORS or enigma)
+    Checks that variant is in a splice acceptor site and is a single nucleotide substitution
+    Returns a dictionary containing:
+     prior probability of pathogenecity, predicted qualitative enigma class, and ref and alt MES and zscores
+    '''
+    varType = getVarType(variant)
+    varLoc = getVarLocation(variant, boundaries)
+    if varType == "substitution" and (varLoc == "splice_acceptor_variant" or varLoc == "CI_splice_acceptor_variant"):
+        # to get region boundaires to get ref and alt seq
+        spliceAcceptorBounds = getVarSpliceRegionBounds(variant, donor=False)
+        refAltSeqs = getRefAltSeqs(variant, spliceAcceptorBounds["acceptorStart"], spliceAcceptorBounds["acceptorEnd"])
+        scores = getRefAltScores(refAltSeqs["refSeq"], refAltSeqs["altSeq"], donor=False)
+        refMaxEntScanScore = scores["refScores"]["maxEntScanScore"]
+        refZScore = scores["refScores"]["zScore"]
+        altMaxEntScanScore = scores["altScores"]["maxEntScanScore"]
+        altZScore = scores["altScores"]["zScore"]
+        if altMaxEntScanScore >= refMaxEntScanScore:
+            priorProb = 0.04
+        elif (refZScore < -1.0) and ((refZScore - altZScore) > 0.5):
+            priorProb = 0.97
+        else:
+            if altZScore > 0.5:
+                priorProb = 0.04
+            elif altZScore <= 0.5 and altZScore >= -1.5:
+                priorProb = 0.34
+            # leaving this last else in place because criteria here might change in the future
+            else:
+                priorProb = 0.34
+        enigmaClass = getEnigmaClass(priorProb)
+
+        return {"priorProb": priorProb,
+                "enigmaClass": enigmaClass,
+                "refMaxEntScanScore": refMaxEntScanScore,
+                "altMaxEntScanScore": altMaxEntScanScore,
+                "refZScore": refZScore,
+                "altZScore": altZScore}
+
 def getVarDict(variant, boundaries):
     '''
     Given input data, returns a dictionary containing information for each variant in input
