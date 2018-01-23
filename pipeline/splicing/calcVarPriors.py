@@ -16,6 +16,7 @@ import json
 import re
 import subprocess
 import tempfile
+import os
 from Bio.Seq import Seq
 from calcMaxEntScanMeanStd import fetch_gene_coordinates, runMaxEntScan
 
@@ -615,7 +616,7 @@ def getZScore(maxEntScanScore, donor=False):
     If donor is True, uses splice donor mean and std
     If donor is False, uses splice acceptor mean and std
     '''
-    stdMeanData = json.load(open('brca.zscore.json'))
+    stdMeanData = json.load(open(os.path.abspath('brca.zscore.json')))
     if donor == False:
         std = stdMeanData["acceptors"]["std"]
         mean = stdMeanData["acceptors"]["mean"]
