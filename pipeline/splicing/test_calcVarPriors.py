@@ -1340,7 +1340,6 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(refAltSeqs["refSeq"], brca2RefSeq)
         self.assertEquals(refAltSeqs["altSeq"], brca2AltSeq)
 
-    @unittest.skip('Missing dependency')
     def test_getZScore(self):
         '''
         Tests that:
@@ -1371,7 +1370,6 @@ class test_calcVarPriors(unittest.TestCase):
         zScore = calcVarPriors.getZScore(maxEntScanScore, donor=False)
         self.assertGreater(zScore, 0)
 
-    @unittest.skip('Missing dependency')
     def test_getRefAltScores(self):
         '''
         Tests that:
@@ -1441,7 +1439,6 @@ class test_calcVarPriors(unittest.TestCase):
         enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
         self.assertEquals(enigmaClass, None)
 
-    @unittest.skip('Missing dependency')
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCTTACCTT")
     def test_getPriorProbSpliceDonorSNSBRCA1(self, getFastaSeq):
         '''
@@ -1479,7 +1476,6 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
-    @unittest.skip('Missing dependency')
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "TTTTACCAA")
     def test_getPriorProbSpliceDonorSNSHighProbBRCA1(self, getFastaSeq):
         '''Tests fucntion for BRCA1 variant that further weakens a weak splice donor site'''
@@ -1495,7 +1491,6 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["priorProb"], priorProbs["high"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class4"])
 
-    @unittest.skip('Missing dependency')
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCGGTAAGA")
     def test_getPriorProbSpliceDonorSNSBRCA2(self, getFastaSeq):
         '''
@@ -1533,7 +1528,6 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
-    @unittest.skip('Missing dependency')
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "CAGGCAAGT")
     def test_getPriorProbSpliceDonorSNSHighProbBRCA2(self, getFastaSeq):
         '''Tests fucntion for BRCA2 variant that further weakens a weak splice donor site'''  
@@ -1549,7 +1543,6 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["priorProb"], priorProbs["high"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class4"])
 
-    @unittest.skip('Missing dependency')
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "CATCTGTAAAATACAAGGGAAAA")
     def test_getPriorProbSpliceAcceptorSNSBRCA1(self, getFastaSeq):
         '''
@@ -1587,7 +1580,6 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
-    @unittest.skip('Missing dependency')
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "GAACTTTAACACATTAGAAAAAC")
     def test_getPriorProbSpliceAcceptorSNSHighProbBRCA1(self, getFastaSeq):
         '''Tests fucntion for BRCA1 variant that further weakens a weak splice acceptor site'''
@@ -1603,7 +1595,6 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["priorProb"], priorProbs["high"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class4"])
 
-    @unittest.skip('Missing dependency')
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCTCATCTTTCTCCAAACAGTTA")
     def test_getPriorProbSpliceAcceptorSNSBRCA2(self, getFastaSeq):
         '''
@@ -1640,8 +1631,7 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
-
-    @unittest.skip('Missing dependency')
+        
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "AAGTATTTATTCTTTGATAGATT")
     def test_getPriorProbSpliceAcceptorSNSHighProbBRCA2(self, getFastaSeq):
         '''Tests fucntion for BRCA2 variant that further weakens a weak splice acceptor site'''
