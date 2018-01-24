@@ -5,7 +5,6 @@
 import React from "react";
 import {Panel} from 'react-bootstrap';
 import util from '../util';
-import {reportSourceFieldMapping} from "../VariantTable";
 import {VariantSubmitter} from "./VariantSubmitter";
 
 export default class SourceReportsTile extends React.Component {
@@ -33,13 +32,13 @@ export default class SourceReportsTile extends React.Component {
         let submissions = this.props.submissions;
 
         // sort the submissions if this source specifies a sort function
-        if (sourceMeta.sortBy) {
+        if (this.props.reportBinding.sortBy) {
             // (side note: we concat() to clone before sort()ing, because sort() mutates the array)
-            submissions = submissions.concat().sort(sourceMeta.sortBy);
+            submissions = submissions.concat().sort(this.props.reportBinding.sortBy);
         }
 
         return submissions.map((submissionData) => {
-            const submitterName = util.getFormattedFieldByProp(sourceMeta.submitter.prop, submissionData);
+            const submitterName = util.getFormattedFieldByProp(this.props.reportBinding.submitter.prop, submissionData);
 
             const isEnigmaOrBic = (
                 typeof submitterName === "string" &&
@@ -84,36 +83,30 @@ export default class SourceReportsTile extends React.Component {
     };
 
     render() {
-        // look up data for formatting this specific source, e.g. what fields to include, its name, etc.
-        const sourceMeta = reportSourceFieldMapping[this.props.sourceName];
-
         // put it in a temp b/c we're going to resort it
         let submissions = this.props.submissions;
 
         // sort the submissions if this source specifies a sort function
-        if (sourceMeta.sortBy) {
+        if (this.props.reportBinding.sortBy) {
             // (side note: we concat() to clone before sort()ing, because sort() mutates the array)
-            submissions = submissions.concat().sort(sourceMeta.sortBy);
+            submissions = submissions.concat().sort(this.props.reportBinding.sortBy);
         }
 
         // create a per-submitter collapsible subsection within this source panel
         const submitters = submissions.map((submissionData, idx) => {
             // extract header fields, e.g. the submitter name
-            const submitterName = util.getFormattedFieldByProp(sourceMeta.submitter.prop, submissionData);
+            const submitterName = util.getFormattedFieldByProp(this.props.reportBinding.submitter.prop, submissionData);
 
             // extract fields we care about from the submission data
-            const formattedCols = sourceMeta.cols
+            const formattedCols = this.props.reportBinding.cols
                 .map(({ title, prop }) => ({
                     title, prop, value: submissionData[prop]
-                        ? submissionData[prop].toString()
-                        // FIXME: maybe we should just ignore requested fields that aren't in the data payload
-                        : `${prop}???`
                 }));
 
             return (
                 <VariantSubmitter
                     key={submissionData.id} idx={idx} submitter={submitterName} source={this.props.sourceName}
-                    meta={sourceMeta} cols={formattedCols} data={submissionData}
+                    reportBinding={this.props.reportBinding} cols={formattedCols} data={submissionData}
                     hideEmptyItems={this.props.hideEmptyItems}
                     onReportToggled={this.reportToggled}
                     showHelp={this.showHelp}
@@ -127,7 +120,7 @@ export default class SourceReportsTile extends React.Component {
         const header = (
             <h3 style={{display: 'flex', flexDirection: 'row'}}>
                 <a style={{flexGrow: 1}} href="#" onClick={(event) => this.props.onChangeGroupVisibility(groupTitle, event)}>
-                    {`Clinical Significance (${sourceMeta.displayName})`}
+                    {this.props.groupTitle}
                 </a>
 
                 <a title='collapse all reports'

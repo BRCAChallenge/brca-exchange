@@ -125,7 +125,7 @@ const VariantSubmitter = React.createClass({
                             : <i className="fa fa-caret-right" aria-hidden="true" />
                     }
                     &nbsp;
-                    <span>{this.props.meta.submitter.title}</span>
+                    <span>{this.props.reportBinding.submitter.title}</span>
                 </div>
 
                 <div

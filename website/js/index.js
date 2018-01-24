@@ -45,7 +45,7 @@ var util = require('./util');
 var {Grid, Col, Row, Table, Button, Modal, Panel, Glyphicon} = require('react-bootstrap');
 
 /* FAISAL: added 'groups' collection that specifies how to map columns to higher-level groups */
-var {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups, reportSourceFieldMapping} = require('./VariantTable');
+var {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups} = require('./VariantTable');
 var {Signup} = require('./Signup');
 var {Signin, ResetPassword} = require('./Signin');
 var {ConfirmEmail} = require('./ConfirmEmail');
@@ -725,7 +725,7 @@ var VariantDetail = React.createClass({
         let groupsEmpty = 0;
         let totalRowsEmpty = 0;
 
-        const groupTables = _.map(groups, ({ groupTitle, innerCols, reportSource }) => {
+        const groupTables = _.map(groups, ({ groupTitle, innerCols, reportSource, reportBinding }) => {
             let rowsEmpty = 0;
 
             // if it's a report source (i.e. the key reportSource is defined), then we defer
@@ -738,14 +738,16 @@ var VariantDetail = React.createClass({
 
                 // also hide this reportSource, but with a warning, if we don't have metadata for that source
                 // (we expect to have metadata for the source, since we both request the source and define its meta)
-                if (!reportSourceFieldMapping[reportSource]) {
+                if (!reportBinding) {
                     console.warn("Source report rendering requested for source with missing metadata: ", reportSource);
                     return null;
                 }
 
                 return (
                     <SourceReportsTile
+                        groupTitle={groupTitle}
                         sourceName={reportSource}
+                        reportBinding={reportBinding}
                         submissions={this.state.reports[reportSource]}
                         onChangeGroupVisibility={this.onChangeGroupVisibility}
                         hideEmptyItems={this.state.hideEmptyItems}

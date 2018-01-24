@@ -97,33 +97,62 @@ const researchModeGroups = [
         {title: 'Allele Origin', prop: 'Allele_origin_ENIGMA', core: true},
     ]},
 
-    /*
-    // the below are commented out b/c clinical significance for ClinVar, LOVD are replaced by per-report tiles
-
-    {groupTitle: 'Clinical Significance (ClinVar)', internalGroupName: 'Significance (ClinVar)', innerCols: [
-        {title: 'Clinical Significance', prop: 'Clinical_Significance_ClinVar', core: true},
-        {title: 'Submitter', prop: 'Submitter_ClinVar', core: true},
-        {title: 'Analysis Method', prop: 'Method_ClinVar', core: true},
-        {title: 'Date last updated', prop: 'Date_Last_Updated_ClinVar', core: true},
-        {title: 'SCV Accession', prop: 'SCV_ClinVar', core: true},
-        {title: 'Allele Origin', prop: 'Allele_Origin_ClinVar', core: true},
-    ]},
-
-    {groupTitle: 'Clinical Significance (LOVD)', internalGroupName: 'Significance (LOVD)', innerCols: [
-        {title: 'Variant Frequency', prop: 'Variant_frequency_LOVD'},
-        {title: 'Variant Haplotype', prop: 'Variant_haplotype_LOVD'},
-        {title: 'Submitters', prop: 'Submitters_LOVD'},
-        {title: 'Genetic Origin', prop: 'Genetic_origin_LOVD'},
-        {title: 'Individuals', prop: 'Individuals_LOVD'},
-        {title: 'Variant Effect', prop: 'Variant_effect_LOVD'},
-        {title: 'Database ID', prop: 'DBID_LOVD'}
-    ]},
-    */
-
-    // TODO: consider merging metadata from reportSourceFieldMapping (same file, far below) into this mapping
     // if a group contains reportSource, it'll be replaced with generateSourceReportPanel(reportSource, reports[reportSource])
-    {groupTitle: 'Clinical Significance (ClinVar)', internalGroupName: 'Significance (ClinVar)', reportSource: 'ClinVar'},
-    {groupTitle: 'Clinical Significance (LOVD)', internalGroupName: 'Significance (LOVD)', reportSource: 'LOVD'},
+    // further, the reportBinding field describes how individual reports are bound to nested subtiles
+    // (note that specific sources are hardcoded to have different appearances in components/VariantSubmitter.js)
+    {groupTitle: 'Clinical Significance (ClinVar)', internalGroupName: 'Significance (ClinVar)', reportSource: 'ClinVar',
+        reportBinding: {
+            sortBy: (a, b) => {
+                // sort first by stars, then by date in reverse chronological order
+                // (we receive strings for the date, so we have to first interpret them as dates)
+                // FIXME: is there a more reliable way to parse these strings as dates?
+
+                const starDiff = (
+                    computeReviewStatusScore(b['Review_Status_ClinVar']) -
+                    computeReviewStatusScore(a['Review_Status_ClinVar'])
+                );
+
+                const datetimeDiff = (
+                    new Date(b['Date_Last_Updated_ClinVar']).getTime() -
+                    new Date(a['Date_Last_Updated_ClinVar']).getTime()
+                );
+
+                return starDiff || datetimeDiff;
+            },
+            submitter: {title: 'Submitter', prop: 'Submitter_ClinVar'},
+            cols: [
+                // displayed here in full since the display in the header is potentially truncated
+                {title: 'Submitter', prop: 'Submitter_ClinVar'},
+
+                // added these fields (redundantly?) b/c they're not noticeable in the header
+                {title: 'Clinical Significance', prop: 'Clinical_Significance_ClinVar'},
+                {title: 'Date Last Updated', prop: 'Date_Last_Updated_ClinVar'},
+
+                {title: 'Submission Type', prop: 'Method_ClinVar'}, // likely Method_ClinVar
+                {title: 'SCV Accession', prop: 'SCV_ClinVar'},
+                {title: 'Summary Evidence', prop: 'Summary_Evidence_ClinVar'},
+                {title: 'Supporting Observations', prop: 'Description_ClinVar'}, // possibly Description_ClinVar
+                {title: 'Review Status', prop: 'Review_Status_ClinVar'},
+            ]
+        }
+    },
+    {groupTitle: 'Clinical Significance (LOVD)', internalGroupName: 'Significance (LOVD)', reportSource: 'LOVD',
+        reportBinding: {
+            submitter: {title: 'Submitter(s)', prop: 'Submitters_LOVD'},
+            cols: [
+                // displayed here in full since the display in the header is potentially truncated
+                {title: 'Submitter(s)', prop: 'Submitters_LOVD'},
+
+                // added this field (redundantly?) b/c it's not noticeable in the header
+                {title: 'Variant Effect', prop: 'Variant_effect_LOVD'},
+
+                {title: 'Genetic Origin', prop: 'Genetic_origin_LOVD'},
+                {title: 'Individuals', prop: 'Individuals_LOVD'},
+                {title: 'Submission ID', prop: 'DBID_LOVD'}, // possibly BX_ID_LOVD, DBID_LOVD?
+                {title: 'Variant Haplotype', prop: 'Variant_haplotype_LOVD'},
+            ]
+        }
+    },
 
     {groupTitle: 'Clinical Significance (BIC)', internalGroupName: 'Significance (BIC)', innerCols: [
         {title: 'Clinical Significance', prop: 'Clinical_classification_BIC', core: true},
@@ -322,89 +351,6 @@ const researchModeColumns = [
     {title: 'SAS Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes'},
     {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'}
 ];
-
-
-// --- variant report metadata ---
-
-// maps a source to the fields where we find report data
-// if a source isn't present in this mapping, it's excluded from the output
-const reportSourceFieldMapping = {
-    'ClinVar': {
-        displayName: 'ClinVar',
-        sortBy: (a, b) => {
-            // sort first by stars, then by date in reverse chronological order
-            // (we receive strings for the date, so we have to first interpret them as dates)
-            // FIXME: is there a more reliable way to parse these strings as dates?
-
-            const starDiff = (
-                computeReviewStatusScore(b['Review_Status_ClinVar']) -
-                computeReviewStatusScore(a['Review_Status_ClinVar'])
-            );
-
-            const datetimeDiff = (
-                new Date(b['Date_Last_Updated_ClinVar']).getTime() -
-                new Date(a['Date_Last_Updated_ClinVar']).getTime()
-            );
-
-            return starDiff || datetimeDiff;
-        },
-        submitter: {title: 'Submitter', prop: 'Submitter_ClinVar'},
-        cols: [
-            // * from the wireframe:
-            // Submission Type: clinical testing
-            // SCV Accession: SCV000167236.10
-            // Summary Evidence: This variant is considered likely benign or benign based on...
-            // Supporting Observations: -
-
-            // displayed here in full since the display in the header is potentially truncated
-            {title: 'Submitter', prop: 'Submitter_ClinVar'},
-
-            // added these fields (redundantly?) b/c they're not noticeable in the header
-            {title: 'Clinical Significance', prop: 'Clinical_Significance_ClinVar'},
-            {title: 'Date Last Updated', prop: 'Date_Last_Updated_ClinVar'},
-
-            {title: 'Submission Type', prop: 'Method_ClinVar'}, // likely Method_ClinVar
-            {title: 'SCV Accession', prop: 'SCV_ClinVar'},
-            {title: 'Summary Evidence', prop: 'Summary_Evidence_ClinVar'},
-            {title: 'Supporting Observations', prop: 'Description_ClinVar'}, // possibly Description_ClinVar
-            {title: 'Review Status', prop: 'Review_Status_ClinVar'},
-
-            // * extra fields from the existing tile
-            // {title: 'Clinical Significance', prop: 'Clinical_Significance_ClinVar'},
-            // {title: 'Submitter', prop: 'Submitter_ClinVar'},
-            // {title: 'Analysis Method', prop: 'Method_ClinVar'},
-            // {title: 'Date last updated', prop: 'Date_Last_Updated_ClinVar'},
-            // {title: 'Allele Origin', prop: 'Allele_Origin_ClinVar'},
-        ]
-    },
-    'LOVD': {
-        displayName: 'LOVD',
-        submitter: {title: 'Submitter(s)', prop: 'Submitters_LOVD'},
-        cols: [
-            // * from the wireframe:
-            // Genetic Origin: Germline
-            // Individuals: 12
-            // Submission ID: BRCA1_000155
-            // Variant Haplotype: -
-
-            // displayed here in full since the display in the header is potentially truncated
-            {title: 'Submitter(s)', prop: 'Submitters_LOVD'},
-
-            // added this field (redundantly?) b/c it's not noticeable in the header
-            {title: 'Variant Effect', prop: 'Variant_effect_LOVD'},
-
-            {title: 'Genetic Origin', prop: 'Genetic_origin_LOVD'},
-            {title: 'Individuals', prop: 'Individuals_LOVD'},
-            {title: 'Submission ID', prop: 'DBID_LOVD'}, // possibly BX_ID_LOVD, DBID_LOVD?
-            {title: 'Variant Haplotype', prop: 'Variant_haplotype_LOVD'},
-
-            // * extra fields from the existing tile
-            // {title: 'Variant Frequency', prop: 'Variant_frequency_LOVD'},
-            // {title: 'Submitters', prop: 'Submitters_LOVD'},
-            // {title: 'Variant Effect', prop: 'Variant_effect_LOVD'},
-        ]
-    }
-};
 
 
 /*eslint-enable camelcase */
@@ -675,6 +621,5 @@ module.exports = {
     researchModeColumns: researchModeColumns,
     columns: columns,
     researchModeGroups: researchModeGroups,
-    expertModeGroups: expertModeGroups,
-    reportSourceFieldMapping: reportSourceFieldMapping
+    expertModeGroups: expertModeGroups
 };
