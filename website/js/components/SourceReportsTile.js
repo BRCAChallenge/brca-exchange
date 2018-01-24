@@ -15,14 +15,28 @@ export default class SourceReportsTile extends React.Component {
             reportExpanded: this.defaultReportExpansions()
         };
 
+        // we have to scan through all the fields in all the submissions, so let's cache it here
+        this.allEmptyCached = this.calculateAllEmpty(props.submissions);
+
         this.reportToggled = this.reportToggled.bind(this);
         this.setAllReportExpansion = this.setAllReportExpansion.bind(this);
+        this.calculateAllEmpty = this.calculateAllEmpty.bind(this);
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (this.props.submissions !== nextProps.submissions) {
+            // similar to the constructor, we update the cache when submissions changes
+            this.allEmptyCached = this.calculateAllEmpty(nextProps.submissions);
+        }
+    }
+
+    calculateAllEmpty(submissions) {
+        return submissions.length === 0 || submissions.every((submissionData) =>
+            this.props.reportBinding.cols.every(({prop}) => util.isEmptyField(submissionData[prop]))
+        );
     }
 
     defaultReportExpansions() {
-        // get metadata about source to determine if we need to sort, which prop is the submitter name, etc.
-        const sourceMeta = reportSourceFieldMapping[this.props.sourceName];
-
         // keep track of how many non-enigma/bic entries we've seen
         // (not a great solution b/c it introduces side effects into the map() below...)
         let nonEnigmaBics = 0;
@@ -136,7 +150,11 @@ export default class SourceReportsTile extends React.Component {
                 </a>
             </h3>
         );
-        const allEmpty = false; // FIXME: actually check if we're all empty or no
+
+        // checks if we either have no submissions for this source, or if every field in every submission is empty
+        // (consideration: it's very unlikely that we're ever actually all empty, so should we skip this?)
+        // (use the cache if it's available, or else recalculate)
+        const allEmpty = this.allEmptyCached != null ? this.allEmptyCached : this.calculateAllEmpty(submissions);
 
         return (
             <div key={`group_collection-${groupTitle}`} className="variant-detail-group variant-submitter-group">
