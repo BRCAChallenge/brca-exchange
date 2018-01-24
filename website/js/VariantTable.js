@@ -97,8 +97,8 @@ const researchModeGroups = [
         {title: 'Allele Origin', prop: 'Allele_origin_ENIGMA', core: true},
     ]},
 
-    // if a group contains reportSource, it'll be replaced with generateSourceReportPanel(reportSource, reports[reportSource])
-    // further, the reportBinding field describes how individual reports are bound to nested subtiles
+    // if a group contains reportSource, it'll be replaced with a SourceReportsTile component.
+    // the reportBinding field must also be specified, and describes how individual reports are bound to nested subtiles
     // (note that specific sources are hardcoded to have different appearances in components/VariantSubmitter.js)
     {groupTitle: 'Clinical Significance (ClinVar)', internalGroupName: 'Significance (ClinVar)', reportSource: 'ClinVar',
         reportBinding: {
