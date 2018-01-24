@@ -28,12 +28,12 @@ var Releases = React.createClass({
         var releases = this.state.releases;
         if (Array.isArray(releases)) {
             releases = releases.sort(function(a, b) {
-                return a.id - b.id;
+                return a.name - b.name;
             }).reverse();
         }
         var rows = _.map(releases, release => (
             <tr>
-                <td style={{ whiteSpace: 'nowrap' }}><Link to={`/release/${release.id}`}>Version {release.id}</Link></td>
+                <td style={{ whiteSpace: 'nowrap' }}><Link to={`/release/${release.id}`}>Version {release.name}</Link></td>
                 <td style={{ whiteSpace: 'nowrap' }}>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</td>
                 <td>{this.getSourceRepresentations(release.sources)}</td>
                 <td><Link to={`/variants?release=${release.id}&changeTypes[]=new`}>{release['variants_added']}</Link></td>

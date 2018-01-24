@@ -12,9 +12,9 @@ WEBSITE=${DEPLOYMENT}/../website
 cd ${WEBSITE}
 npm run build:prod
 
-# deploy
-rsync -a --delete --rsync-path='sudo rsync' build/ ${USER}@${HOST}:/var/www/html/beta
-rsync -a --delete --exclude="/uploads" --exclude="/downloads/*" --rsync-path='sudo rsync' django/ ${USER}@${HOST}:/var/www/backend/beta/django
+# deploy (not preserving owner/group)
+rsync -rlptD --delete --rsync-path='rsync' build/ ${USER}@${HOST}:/var/www/html/beta
+rsync -rlptD --delete --exclude="/uploads" --exclude="/downloads/*" --rsync-path='rsync' django/ ${USER}@${HOST}:/var/www/backend/beta/django
 
 requirements=$(cat requirements.txt)
 requirements=$(echo ${requirements}) # drop carriage returns

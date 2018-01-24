@@ -138,7 +138,6 @@ var Home = React.createClass({
             showModal: false
         };
     },
-
     onSearch(value) {
         this.transitionTo('/variants', null, {search: value});
     },
@@ -783,15 +782,34 @@ var VariantDetail = React.createClass({
                     title = "Abbreviated AA Change";
                 }
 
+                // get allele frequency chart components if they're available
                 if (rowDescriptor.replace) {
                     rowItem = rowDescriptor.replace(variant, prop);
+
+                    // frequency charts are not displayed if they're empty
                     if (rowItem === false) {
                         return false;
                     }
-                } else if (variant[prop] !== null) {
-                    rowItem = util.getFormattedFieldByProp(prop, variant);
+
+                    // don't insert rows for empty charts, but count them as empty rows
+                    if (prop === 'Allele_Frequency_Charts_1000_Genomes') {
+                        if (!variant['Variant_in_1000_Genomes']) { // eslint-disable-line dot-notation
+                            rowsEmpty += 1;
+                            return false;
+                        }
+                    } else if (prop === 'Allele_Frequency_Charts_ExAC') {
+                        if (!variant['Variant_in_ExAC']) {
+                            rowsEmpty += 1;
+                            return false;
+                        }
+                    }
                 } else if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] !== null) {
-                    rowItem = variant["HGVS_Protein"].split(":")[0];
+                    let val = variant["HGVS_Protein"].split(":")[0];
+                    variant[prop] = val;
+                    rowItem = val;
+                }
+                else if (variant[prop] !== null) {
+                    rowItem = util.getFormattedFieldByProp(prop, variant);
                 }
 
                 let isEmptyValue = rowDescriptor.replace ? rowItem === false : util.isEmptyField(variant[prop]);
@@ -957,6 +975,15 @@ var Application = React.createClass({
             mode: (localStorage.getItem("research-mode") === 'true') ? 'research_mode' : 'default',
         };
     },
+    componentDidUpdate() {
+        let localStorageMode = (localStorage.getItem("research-mode") === "true") ? "research_mode" : "default";
+        if (localStorageMode !== this.state.mode) {
+            this.setMode();
+        }
+    },
+    setMode: function () {
+        this.setState({mode: (localStorage.getItem("research-mode") === 'true') ? 'research_mode' : 'default'});
+    },
     toggleMode: function () {
         if (this.state.mode === 'research_mode') {
             localStorage.setItem('research-mode', false);
@@ -970,7 +997,7 @@ var Application = React.createClass({
         var path = this.getPath().slice(1);
         return (
             <div>
-                <NavBarNew path={path} mode={this.state.mode} />
+                <NavBarNew path={path} mode={this.state.mode}/>
                 <RouteHandler toggleMode={this.onChildToggleMode} mode={this.state.mode} />
                 <Database
                     mode={this.state.mode}

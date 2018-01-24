@@ -23,12 +23,13 @@ var merge = (...args) => _.extend({}, ...args);
 
 var Lollipop = require('./d3Lollipop');
 
-function setPages({data, count, deletedCount, synonyms}, pageLength) { //eslint-disable-line camelcase
+function setPages({data, count, deletedCount, synonyms, releaseName}, pageLength) { //eslint-disable-line camelcase
     return {
         data,
         count,
         deletedCount,
         synonyms,
+        releaseName,
         totalPages: Math.ceil(count / pageLength)
     };
 }
@@ -264,6 +265,7 @@ var DataTable = React.createClass({
                 changeString = "deleted";
             }
         }
+        let releaseName = this.state.releaseName;
         var deletedCount = this.state.deletedCount;
         var deletedVariantsNote = '';
         if (deletedCount) {
@@ -311,7 +313,7 @@ var DataTable = React.createClass({
                                 <label className='control-label label alert-danger matched-variant-count'>
                                     {count} matching {pluralize(count, 'variant')} {}
                                     {changeString ? changeString : ''} {}
-                                    {release ? 'in release ' + release : ''} {}
+                                    {release ? 'in release ' + releaseName : ''} {}
                                     {synonyms ? 'of which ' + synonyms + ' matched on synonyms' : ''}
                                 </label>
                                 {downloadButton(this.createDownload)}

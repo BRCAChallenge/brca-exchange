@@ -9,9 +9,11 @@ class DataRelease(models.Model):
     sources = models.TextField()
     md5sum = models.TextField()
     created = models.DateTimeField(auto_now_add=True, null=True)
+    name = models.PositiveIntegerField()
 
     class Meta:
         db_table = "data_release"
+        ordering = ['date']
 
 class ChangeType(models.Model):
     name = models.TextField()

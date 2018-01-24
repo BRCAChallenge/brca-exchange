@@ -36,7 +36,10 @@ class Command(BaseCommand):
 
         notes['sources'] = ', '.join(sources)
 
-        release_id = DataRelease.objects.create(**notes).id
+        # Currently, the release name is just an ascending number starting at one for the first release.
+        # To name the release we're adding, find the most recently added release and add 1 to its name.
+        release_name = int(DataRelease.objects.all().order_by('-name')[0].name) + 1
+        release_id = DataRelease.objects.create(name=release_name, **notes).id
 
         reports_reader = csv.reader(reports_tsv, dialect="excel-tab")
         reports_header = reports_reader.next()
