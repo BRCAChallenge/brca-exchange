@@ -93,12 +93,10 @@ function getFormattedFieldByProp(prop, variant) {
         rowItem = [];
         for (let i = 0; i < accessions.length; i++) {
             if (i < (accessions.length - 1)) {
-                rowItem.push(<span key={i}><a target="_blank"
-                    href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{accessions[i]}</a>, </span>);
+                rowItem.push(<span><a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{accessions[i]}</a>, </span>);
             } else {
                 // exclude trailing comma
-                rowItem.push(<a key={i} target="_blank"
-                    href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{accessions[i]}</a>);
+                rowItem.push(<a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{accessions[i]}</a>);
             }
         }
     } else if (prop === "DBID_LOVD" && variant[prop].toLowerCase().indexOf("brca") !== -1) { // Link all dbid's back to LOVD
@@ -106,17 +104,14 @@ function getFormattedFieldByProp(prop, variant) {
         rowItem = [];
         for (let i = 0; i < ids.length; i++) {
             if (i < (ids.length - 1)) {
-                rowItem.push(<span key={i}><a target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>, </span>);
+                rowItem.push(<span><a target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>, </span>);
             } else {
                 // exclude trailing comma
-                rowItem.push(<a key={i} target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>);
+                rowItem.push(<a target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>);
             }
         }
     } else if (prop === "Assertion_method_citation_ENIGMA") {
-        rowItem = (
-            <a target="_blank"
-                href="https://enigmaconsortium.org/library/general-documents/">Enigma Rules version Mar 26, 2015</a>
-        );
+        rowItem = <a target="_blank" href="https://enigmaconsortium.org/library/general-documents/">Enigma Rules version Mar 26, 2015</a>;
     } else if (prop === "Source_URL") {
         if (variant[prop].startsWith("http://hci-exlovd.hci.utah.edu")) {
             rowItem = <a target="_blank" href={variant[prop].split(',')[0]}>link to multifactorial analysis</a>;
@@ -130,7 +125,7 @@ function getFormattedFieldByProp(prop, variant) {
     } else if (prop === "HGVS_Protein") {
         rowItem = variant[prop].split(":")[1];
     } else if (prop === "Date_last_evaluated_ENIGMA" && !isEmptyField(variant[prop])) {
-        // try a variety of formats until one works, or just display the variant[prop] if not?
+        // try a variety of formats until one works, or just display the value if not?
         rowItem = normalizeDateFieldDisplay(variant[prop]);
     } else if (/Allele_frequency_.*_ExAC/.test(prop)) {
         let count = variant[prop.replace("frequency", "count")],
