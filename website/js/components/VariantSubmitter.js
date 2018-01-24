@@ -77,12 +77,6 @@ const VariantSubmitter = React.createClass({
         this.props.onReportToggled(this.props.idx);
     },
 
-    // FIXME: copied from index.js; find a way to use this without aliasing
-    truncateData: function(field) {
-        const fieldsToTruncate = ["Genomic_Coordinate_hg38", "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg36"];
-        return fieldsToTruncate.indexOf(field) > -1;
-    },
-
     // source-specific headers
     generateHeader: function(source, submitter, data) {
         let extraHeaderItems = null;
@@ -160,7 +154,7 @@ const VariantSubmitter = React.createClass({
             return (
                 <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
                     <KeyInline tableKey={title} onClick={(event) => this.props.showHelp(event, title)} />
-                    <td><span className={ this.truncateData(prop) ? "row-value-truncated" : "row-value" }>{rowItem}</span></td>
+                    <td><span className="row-value">{rowItem}</span></td>
                 </tr>
             );
         });
