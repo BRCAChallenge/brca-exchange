@@ -106,7 +106,7 @@ export default class SourceReportsTile extends React.Component {
                     reportBinding={this.props.reportBinding} cols={formattedCols} data={submissionData}
                     hideEmptyItems={this.props.hideEmptyItems}
                     onReportToggled={this.reportToggled}
-                    showHelp={this.showHelp}
+                    showHelp={this.props.showHelp}
                     expanded={this.state.reportExpanded[idx]}
                 />
             );

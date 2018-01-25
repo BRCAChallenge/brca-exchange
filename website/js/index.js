@@ -758,6 +758,7 @@ var VariantDetail = React.createClass({
                                 this.forceUpdate();
                             }, 300);
                         }}
+                        showHelp={this.showHelp}
                     />
                 );
             }
