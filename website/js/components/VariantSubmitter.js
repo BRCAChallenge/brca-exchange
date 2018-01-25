@@ -144,13 +144,17 @@ const VariantSubmitter = React.createClass({
         const {submitter, cols, data} = this.props;
 
         // for each panel, construct key-value pairs as a row of the table
-        const submitterRows = cols.map(({prop, title, value}) => {
+        const submitterRows = cols.map(({prop, title, value, helpKey}) => {
             const isEmptyValue = util.isEmptyField(value);
             const rowItem = util.getFormattedFieldByProp(prop, data);
 
             return (
                 <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
-                    <KeyInline tableKey={title} onClick={(event) => this.props.showHelp(event, title)} />
+                    {
+                        helpKey
+                            ? <KeyInline tableKey={title} onClick={(event) => this.props.showHelp(event, helpKey)}/>
+                            : <td className='help-target'><span style={{fontWeight: 'bold'}}>{title}</span></td>
+                    }
                     <td><span className="row-value">{rowItem}</span></td>
                 </tr>
             );

@@ -100,6 +100,7 @@ const researchModeGroups = [
     // if a group contains reportSource, it'll be replaced with a SourceReportsTile component.
     // the reportBinding field must also be specified, and describes how individual reports are bound to nested subtiles
     // (note that specific sources are hardcoded to have different appearances in components/VariantSubmitter.js)
+    // (note #2: specifying 'helpKey' on a 'cols' entry will cause the label to render as a help link w/'helpKey' as its target)
     {groupTitle: 'Clinical Significance (ClinVar)', internalGroupName: 'Significance (ClinVar)', reportSource: 'ClinVar',
         reportBinding: {
             sortBy: (a, b) => {
