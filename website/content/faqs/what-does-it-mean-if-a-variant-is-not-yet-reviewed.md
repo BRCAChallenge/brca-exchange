@@ -1,1 +1,2 @@
 A variant that is Not Yet Reviewed is simply a variant that has not yet been interpreted by the ENIGMA consortium. Accordingly, the variant will be marked as “Not Yet Reviewed” in the ENIGMA Classification tile on the Variant Details Page. A “Not Yet Reviewed” variant is *not* the same as a Variant of Uncertain Significance (VUS). Such a variant might still have ClinVar or LOVD interpretations available. These interpretations, from sources other than ENIGMA, will be found in the All Public Data Portal, alongside other helpful information such as Allele Frequencies.
+

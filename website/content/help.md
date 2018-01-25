@@ -28,7 +28,7 @@ The Expert Reviewed Data Portal contains an abridged view of the variant data in
 #### Variant Nomenclature Tile
 
 * _Gene_: The name of the gene on which the variant was found, as named by the HGNC. This will be either _BRCA1_ or _BRCA2_.
-* _HGVS Nomenclature_: A nomenlcature system standardized by the Human Genome Variation Society \(HGVS\) which  utilizes coordinates to name variants across genomic DNA, coding DNA, RNA, and protein molecules. Each coordinate provides an indicator of the biomolecule being referred to \('c.', 'g.', 'p.'\), a location in that biomolecule \('12345'\), and an indication of what changed in the variant \('G&gt;A', 'Asp...Asn'\). Most variant aliases utilize this standard nomenclature:
+* _HGVS Nomenclature_: A nomenclature system standardized by the Human Genome Variation Society \(HGVS\) which  utilizes coordinates to name variants across genomic DNA, coding DNA, RNA, and protein molecules. Each coordinate provides an indicator of the biomolecule being referred to \('c.', 'g.', 'p.'\), a location in that biomolecule \('12345'\), and an indication of what changed in the variant \('G&gt;A', 'Asp...Asn'\). Most variant aliases utilize this standard nomenclature:
   * _HGVS Nucleotide:_ HGVS variant alias which references the nucleotide change based ont he location in the coding DNA, not the genomic DNA.
   * _HGVS RNA_: The variant alias that uses RNA location
   * _HGVS Protein_: The predicted protein-level change \(if any\) that would be introduced by the genomic variant.
