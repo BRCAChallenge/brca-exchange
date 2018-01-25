@@ -128,10 +128,10 @@ const researchModeGroups = [
                 {title: 'Clinical Significance', prop: 'Clinical_Significance_ClinVar'},
                 {title: 'Date Last Updated', prop: 'Date_Last_Updated_ClinVar'},
 
-                {title: 'Submission Type', prop: 'Method_ClinVar'}, // likely Method_ClinVar
+                {title: 'Submission Type', prop: 'Method_ClinVar'},
                 {title: 'SCV Accession', prop: 'SCV_ClinVar'},
                 {title: 'Summary Evidence', prop: 'Summary_Evidence_ClinVar'},
-                {title: 'Supporting Observations', prop: 'Description_ClinVar'}, // possibly Description_ClinVar
+                {title: 'Supporting Observations', prop: 'Description_ClinVar'},
                 {title: 'Review Status', prop: 'Review_Status_ClinVar'},
             ]
         }
@@ -148,7 +148,7 @@ const researchModeGroups = [
 
                 {title: 'Genetic Origin', prop: 'Genetic_origin_LOVD'},
                 {title: 'Individuals', prop: 'Individuals_LOVD'},
-                {title: 'Submission ID', prop: 'DBID_LOVD'}, // possibly BX_ID_LOVD, DBID_LOVD?
+                {title: 'Submission ID', prop: 'DBID_LOVD'},
                 {title: 'Variant Haplotype', prop: 'Variant_haplotype_LOVD'},
             ]
         }

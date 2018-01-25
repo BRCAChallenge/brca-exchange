@@ -141,9 +141,6 @@ const VariantSubmitter = React.createClass({
 
     render: function() {
         let styles = this.getCollapsableClassSet();
-
-        // ----
-
         const {submitter, cols, data} = this.props;
 
         // for each panel, construct key-value pairs as a row of the table
