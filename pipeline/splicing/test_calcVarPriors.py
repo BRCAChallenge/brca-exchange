@@ -1526,35 +1526,7 @@ class test_calcVarPriors(unittest.TestCase):
         maxEntScanScore = 8
         zScore = calcVarPriors.getZScore(maxEntScanScore, donor=False)
         self.assertGreater(zScore, 0)
-        
-    @mock.patch('calcVarPriors.getRefAltSeqs', return_value = {"refSeq": "TTACAAATCACCCCTCA",
-                                                               "altSeq": "TTACAAATGACCCCTCA"})
-    def test_getMaxMaxEntScanScoreSlidingWindowSNSBRCA1(self, getRefAltSeqs):
-        '''Tests that in first three in assigned correctly'''
-        self.variant["Gene_Symbol"] = "BRCA1"
-        self.variant["Reference_Sequence"] = "NM_007294.3"
-        # information for variant which has highest socring window with variant NOT in first three base pairs
-        self.variant["Pos"] = "43095895"
-        self.variant["Ref"] = "G"
-        self.variant["Alt"] = "C"
-
-        maxWindowScores = calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS(self.variant)
-        self.assertFalse(maxWindowScores["inFirstThree"])
-
-    @mock.patch('calcVarPriors.getRefAltSeqs', return_value = {"refSeq": "TGGCCAAAAGGAAGTCT",
-                                                               "altSeq": "TGGCCAAAGGGAAGTCT"})
-    def test_getMaxMaxEntScanScoreSlidingWindowSNSBRCA2(self, getRefAltSeqs):
-        '''Tests that in first three is assigned correctly'''
-        self.variant["Gene_Symbol"] = "BRCA2"
-        self.variant["Reference_Sequence"] = "NM_000059.3"
-        # information for variant which has highest scoring window with variant in first three base paris
-        self.variant["Pos"] = "32398222"
-        self.variant["Ref"] = "A"
-        self.variant["Alt"] = "G"
-    
-        maxWindowScores = calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS(self.variant)
-        self.assertTrue(maxWindowScores["inFirstThree"])
-        
+                
     def test_getEnigmaClass(self):
         ''''
         Tests that predicted qualititative ENIGMA class is assigned correctly based on prior prob
