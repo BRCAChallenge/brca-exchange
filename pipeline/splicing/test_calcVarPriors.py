@@ -1930,9 +1930,11 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
-        
+
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["afterGreyZone"])
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "missense_variant")
-    def test_getPriorProbAfterGreyZoneMissenseSNS(self, getVarConsequences):
+    def test_getPriorProbAfterGreyZoneMissenseSNS(self, getVarType, getVarLocation, getVarConsequences):
         '''
         Tests that:
         prior prob is set to N/A and ENIGMA class is class 2 for a BRCA2 missense variant after the grey zone
@@ -1951,8 +1953,10 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["afterGreyZone"])
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
-    def test_getPriorProbAfterGreyZoneNonesenseSNS(self, getVarConsequences):
+    def test_getPriorProbAfterGreyZoneNonesenseSNS(self, getVarType, getVarLocation, getVarConsequences):
         '''
         Tests that:
         prior prob is set to N/A and ENIGMA class is class 2 for a BRCA2 nonsense variant after the grey zone
