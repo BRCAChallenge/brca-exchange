@@ -15,7 +15,7 @@ require('bootstrap/dist/css/bootstrap.css');
 var slugify = require('./slugify');
 var content = require('./content');
 
-var {Grid, Col, Row} = require('react-bootstrap');
+var {Grid, Panel, Row} = require('react-bootstrap');
 var {Navigation} = require('react-router');
 
 const navbarHeight = 70; // XXX This value MUST match the setting in custom.css
@@ -30,20 +30,25 @@ var Faq = React.createClass({
             let question = slugify(faq.question);
             return (
                 <Row>
-                    <Col smOffset={1} sm={10}>
-                        <h3 className="faq-question" onClick={() => this._showFaq(question)}>{faq.question}</h3>
-                    </Col>
-                    <Col key={question} smOffset={1} sm={10} className={this.state.selectedFAQ === question ? 'show' : 'hide'}>
+                    <Panel
+                        header={faq.question}
+                        collapsable={true}
+                        defaultExpanded={this.state.selectedFAQ === question}
+                        onSelect={() => this._showFaq(question)}>
                         <RawHTML html={faq.content} />
-                    </Col>
+                    </Panel>
                 </Row>
             );
         }, this);
     },
     _showFaq: function(question) {
-        let slugifiedQuestion = slugify(question);
-        this.transitionTo(`/faq#${slugifiedQuestion}`);
-        this.setState({ selectedFAQ: slugifiedQuestion });
+        // stops page from scrolling to top and clearing the url
+        event.preventDefault();
+
+        // sets url for most recently selected question
+        this.transitionTo(`/faq#${question}`);
+
+        this.setState({ selectedFAQ: question });
     },
     componentDidMount: function () {
         if (this.state.selectedFAQ !== '') {
@@ -64,6 +69,7 @@ var Faq = React.createClass({
         );
     }
 });
+
 
 // {selectedFAQ === '' ? null :
 //             <style>{`#${selectedFAQ} { animation-name: emphasis; animation-duration: 10s; } `}</style>}
