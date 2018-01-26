@@ -668,7 +668,14 @@ def getRefAltScores(refSeq, altSeq, donor=False):
     return scoreDict
 
 def getMaxMaxEntScanScoreSlidingWindowSNS(variant):
-    # TO DO write unittests for this function
+    '''
+    Given a variant, determines the maximum alt MaxEntScan score in a 9 bp sliding window
+       with the variant in each position (1-9)
+    Returns a dictionary containing the ref and alt MaxEntScan score and z-score for the highest scoring window
+    Dictionary also containing value "inFirstThree" that has value either True or False
+       If inFirstThree = True, then variant is in firt 3 bp of highest scoring sliding window
+       If inFirstThree = False, then variant is in last 6 bp of highest scoring sliding window 
+    '''
     varGenPos = int(variant["Pos"])
     varStrand = getVarStrand(variant)
     if varStrand == "-":
