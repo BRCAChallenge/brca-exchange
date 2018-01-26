@@ -825,7 +825,6 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(exonAcceptorBoundsBRCA2[exon]["acceptorEnd"],
                           spliceAcceptorBounds[exon]["acceptorEnd"])
 
-
     @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
     @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca1Exons)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
@@ -1194,7 +1193,6 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(exonAcceptorBoundsBRCA2["exon20"]["acceptorStart"], spliceAccRegion["acceptorStart"])
         self.assertEquals(exonAcceptorBoundsBRCA2["exon20"]["acceptorEnd"], spliceAccRegion["acceptorEnd"])
 
-
     @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     def test_varInCiDomainEnigmaBRCA1(self, getVarStrand, varInExon):
@@ -1504,7 +1502,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
     def test_getVarLocationSpliceRegionBRCA1(self, varOutsideBoundaries, getExonBoundaries, getRefSpliceDonorBoundaries,
                                              getRefSpliceAcceptorBoundaries):
-        '''Tests that BRCA1 variants in intronic splice regions are correctly identified as in splice regions'''
+        '''Tests that BRCA1 variants in splice regions are correctly identified as in splice regions'''
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
         boundaries = "enigma"
@@ -1525,7 +1523,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca2RefSpliceAcceptorBounds)
     def test_getVarLocationSpliceRegionBRCA2(self, varOutsideBoundaries, getExonBoundaries, getRefSpliceDonorBoundaries,
                                              getRefSpliceAcceptorBoundaries):
-        '''Tests that BRCA1 variants in intronic splice regions are correctly identified as in splice regions'''
+        '''Tests that BRCA1 variants in splice regions are correctly identified as in splice regions'''
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
         boundaries = "enigma"
