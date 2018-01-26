@@ -21,6 +21,7 @@ require('css/custom.css');
 var _ = require('underscore');
 var backend = require('./backend');
 var {NavBarNew} = require('./NavBarNew');
+var FAQ = require('./Faq');
 var Rx = require('rx');
 require('rx-dom');
 var moment = require('moment');
@@ -229,6 +230,7 @@ var Help = React.createClass({
         );
     }
 });
+
 
 function toNumber(v) {
     return _.isString(v) ? parseInt(v) : v;
@@ -1017,6 +1019,7 @@ var routes = (
         <Route path='factsheet' handler={FactSheet}/>
         <Route path='help' handler={Help}/>
         <Route path='community' handler={Community}/>
+        <Route path='faq' handler={FAQ}/>
         <Route path='signup' handler={Signup}/>
         <Route path='signin' handler={Signin}/>
         <Route path='mailinglist' handler={MailingList}/>
