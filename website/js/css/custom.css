@@ -570,6 +570,11 @@ html {
     font-weight: 200;
 }
 
+/* Double nested list items retain size of parent items */
+#main-grid ul li ul li {
+    font-size: 1em;
+}
+
 #main-grid h5 {
     font-size: 1.2em;
     font-weight: 400;
