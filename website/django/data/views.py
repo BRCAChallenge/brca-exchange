@@ -11,7 +11,7 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.gzip import gzip_page
 
-from .models import Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType
+from .models import Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType, Report
 from django.views.decorators.http import require_http_methods
 
 # GA4GH related imports
@@ -80,6 +80,7 @@ def variant_counts(request):
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
+
 def variant(request):
     variant_id = int(request.GET.get('variant_id'))
 
@@ -90,6 +91,36 @@ def variant(request):
 
     variant_versions = map(variant_to_dict, query)
     response = JsonResponse({"data": variant_versions})
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
+
+
+def variant_reports(request, variant_id):
+    variant_id = int(variant_id)
+    query = Report.objects.filter(Variant_id=variant_id)
+
+    '''
+    Uncomment the following code to filter enigma/bic submissions to clinvar/lovd
+
+    # filter out enigma submissions to clinvar/lovd and bic submissions to clinvar
+    filtered_query = []
+    for report in query:
+        if report.Source == "ClinVar":
+            submitter = report.Submitter_ClinVar.lower()
+            if "(enigma)" not in submitter and "(bic)" not in submitter:
+                filtered_query.append(report)
+        elif report.Source == "LOVD":
+            submitter = report.Submitters_LOVD.lower()
+            print submitter
+            if "enigma" not in submitter:
+                filtered_query.append(report)
+        else:
+            filtered_query.append(report)
+
+    query = filtered_query
+    '''
+
+    response = JsonResponse({"data":  [ model_to_dict(x) for x in query ]})
     response['Access-Control-Allow-Origin'] = '*'
     return response
 

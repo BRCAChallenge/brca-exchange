@@ -10,6 +10,8 @@
 /*global module: false, require: false, window: false */
 'use strict';
 
+var {computeReviewStatusScore} = require("./components/VariantSubmitter");
+
 var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin');
 var DataTable = require('./DataTable');
@@ -95,24 +97,63 @@ const researchModeGroups = [
         {title: 'Allele Origin', prop: 'Allele_origin_ENIGMA', core: true},
     ]},
 
-    {groupTitle: 'Clinical Significance (ClinVar)', internalGroupName: 'Significance (ClinVar)', innerCols: [
-        {title: 'Clinical Significance', prop: 'Clinical_Significance_ClinVar', core: true},
-        {title: 'Submitter', prop: 'Submitter_ClinVar', core: true},
-        {title: 'Analysis Method', prop: 'Method_ClinVar', core: true},
-        {title: 'Date last updated', prop: 'Date_Last_Updated_ClinVar', core: true},
-        {title: 'SCV Accession', prop: 'SCV_ClinVar', core: true},
-        {title: 'Allele Origin', prop: 'Allele_Origin_ClinVar', core: true},
-    ]},
+    // if a group contains reportSource, it'll be replaced with a SourceReportsTile component.
+    // the reportBinding field must also be specified, and describes how individual reports are bound to nested subtiles
+    // (note that specific sources are hardcoded to have different appearances in components/VariantSubmitter.js)
+    // (note #2: specifying 'helpKey' on a 'cols' entry will cause the label to render as a help link w/'helpKey' as its target)
+    {groupTitle: 'Clinical Significance (ClinVar)', internalGroupName: 'Significance (ClinVar)', reportSource: 'ClinVar',
+        reportBinding: {
+            sortBy: (a, b) => {
+                // sort first by stars, then by date in reverse chronological order
+                // (we receive strings for the date, so we have to first interpret them as dates)
+                // FIXME: is there a more reliable way to parse these strings as dates?
 
-    {groupTitle: 'Clinical Significance (LOVD)', internalGroupName: 'Significance (LOVD)', innerCols: [
-        {title: 'Variant Frequency', prop: 'Variant_frequency_LOVD'},
-        {title: 'Variant Haplotype', prop: 'Variant_haplotype_LOVD'},
-        {title: 'Submitters', prop: 'Submitters_LOVD'},
-        {title: 'Genetic Origin', prop: 'Genetic_origin_LOVD'},
-        {title: 'Individuals', prop: 'Individuals_LOVD'},
-        {title: 'Variant Effect', prop: 'Variant_effect_LOVD'},
-        {title: 'Database ID', prop: 'DBID_LOVD'}
-    ]},
+                const starDiff = (
+                    computeReviewStatusScore(b['Review_Status_ClinVar']) -
+                    computeReviewStatusScore(a['Review_Status_ClinVar'])
+                );
+
+                const datetimeDiff = (
+                    new Date(b['Date_Last_Updated_ClinVar']).getTime() -
+                    new Date(a['Date_Last_Updated_ClinVar']).getTime()
+                );
+
+                return starDiff || datetimeDiff;
+            },
+            submitter: {title: 'Submitter', prop: 'Submitter_ClinVar'},
+            cols: [
+                // displayed here in full since the display in the header is potentially truncated
+                {title: 'Submitter', prop: 'Submitter_ClinVar'},
+
+                // added these fields (redundantly?) b/c they're not noticeable in the header
+                {title: 'Clinical Significance', prop: 'Clinical_Significance_ClinVar'},
+                {title: 'Date Last Updated', prop: 'Date_Last_Updated_ClinVar'},
+
+                {title: 'Submission Type', prop: 'Method_ClinVar'},
+                {title: 'SCV Accession', prop: 'SCV_ClinVar'},
+                {title: 'Summary Evidence', prop: 'Summary_Evidence_ClinVar'},
+                {title: 'Supporting Observations', prop: 'Description_ClinVar'},
+                {title: 'Review Status', prop: 'Review_Status_ClinVar'},
+            ]
+        }
+    },
+    {groupTitle: 'Clinical Significance (LOVD)', internalGroupName: 'Significance (LOVD)', reportSource: 'LOVD',
+        reportBinding: {
+            submitter: {title: 'Submitter(s)', prop: 'Submitters_LOVD'},
+            cols: [
+                // displayed here in full since the display in the header is potentially truncated
+                {title: 'Submitter(s)', prop: 'Submitters_LOVD'},
+
+                // added this field (redundantly?) b/c it's not noticeable in the header
+                {title: 'Variant Effect', prop: 'Variant_effect_LOVD'},
+
+                {title: 'Genetic Origin', prop: 'Genetic_origin_LOVD'},
+                {title: 'Individuals', prop: 'Individuals_LOVD'},
+                {title: 'Submission ID', prop: 'DBID_LOVD'},
+                {title: 'Variant Haplotype', prop: 'Variant_haplotype_LOVD'},
+            ]
+        }
+    },
 
     {groupTitle: 'Clinical Significance (BIC)', internalGroupName: 'Significance (BIC)', innerCols: [
         {title: 'Clinical Significance', prop: 'Clinical_classification_BIC', core: true},
@@ -312,6 +353,7 @@ const researchModeColumns = [
     {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'}
 ];
 
+
 /*eslint-enable camelcase */
 
 // Work-around to allow the user to select text in the table. The browser does not distinguish between
@@ -381,7 +423,7 @@ var ResearchVariantTableSupplier = function (Component) {
             */
 
             // Start with all columns set to true and data showing from all sources.
-            var selectedColumns = selectedColumns = _.object(_.map(this.getColumns(),
+            var selectedColumns = _.object(_.map(this.getColumns(),
                                     c => [c.prop, true])
                                 );
             var selectedSources = getAllSources();

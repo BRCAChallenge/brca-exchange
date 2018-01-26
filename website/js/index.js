@@ -3,6 +3,8 @@
 'use strict';
 
 // shims for older browsers
+import SourceReportsTile from "./components/SourceReportsTile";
+
 require('babel/polyfill');
 require('es5-shim');
 require('es5-shim/es5-sham');
@@ -53,6 +55,8 @@ var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Route, RouteHandler,
     HistoryLocation, run, DefaultRoute, Link} = require('react-router');
 var {Releases, Release} = require('./Releases.js');
+
+var KeyInline = require('./components/KeyInline');
 
 var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 
@@ -168,7 +172,7 @@ var Home = React.createClass({
                     {logoItems}
                 </Row>
                 {this.state.showModal && <Modal bsSize="large" onRequestHide={() => this.setState({ showModal: false })}>
-                    <iframe className="vimeo-video" src="https://player.vimeo.com/video/199396428" className="vimeo-video" frameBorder="0" webkitallowfullscreen mozallowfullscreen allowFullScreen></iframe>
+                    <iframe className="vimeo-video" src="https://player.vimeo.com/video/199396428" frameBorder="0" webkitallowfullscreen mozallowfullscreen allowFullScreen></iframe>
                 </Modal>}
             </Grid>
         );
@@ -427,17 +431,6 @@ var Database = React.createClass({
     }
 });
 
-const KeyInline = React.createClass({
-    render() {
-        const {onClick, tableKey} = this.props;
-        return (
-            <td className='help-target'>
-                <span className="help-target-inline" onClick={onClick}>{tableKey}</span>
-            </td>
-        );
-    }
-});
-
 const GroupHelpButton = React.createClass({
     render() {
         const {onClick} = this.props;
@@ -474,50 +467,6 @@ function getDisplayName(key) {
 
 function isEmptyDiff(value) {
     return value === null || value.length < 1;
-}
-
-// attempts to parse the given date string using a variety of formats,
-// returning the formatted result as something like '08 September 2016'.
-// just returns the input if every pattern fails to match
-function normalizeDateFieldDisplay(value) {
-    // extend this if there are more formats in the future
-    const formats = ["MM/DD/YYYY", "YYYY-MM-DD"];
-
-    for (let i = 0; i < formats.length; i++) {
-        const q = moment(value, formats[i]);
-
-        if (q.isValid()) {
-            return q.format("DD MMMM YYYY");
-        }
-    }
-
-    return value;
-}
-
-// replaces commas with comma-spaces to wrap long lines better, removes blank entries from comma-delimited lists,
-// and normalizes blank/null values to a single hyphen
-function normalizedFieldDisplay(value) {
-    if (value) {
-        // replace any number of underscores with spaces
-        // make sure commas, if present, wrap
-        value = value
-            .split(/_+/).join(" ")
-            .split(",")
-            .map(x => x.trim())
-            .filter(x => x && x !== '-')
-            .join(", ");
-
-        // ensure that blank entries are always normalized to hyphens
-        if (value.trim() === "") {
-            value = "-";
-        }
-    }
-    else {
-        // similar to above, normalize blank entries to a hyphen
-        value = "-";
-    }
-
-    return value;
 }
 
 const IsoGrid = React.createClass({
@@ -576,7 +525,20 @@ var VariantDetail = React.createClass({
             resp => {
                 return this.setState({data: resp.data, error: null});
             },
-            () => { this.setState({error: 'Problem connecting to server'}); });
+            () => { this.setState({error: 'Problem connecting to server'}); }
+        );
+
+        backend.variantReports(this.props.params.id).subscribe(
+            resp => {
+                // we always want reports grouped by source, so we'll do so centrally here
+                const groupedReports = _.groupBy(resp.data, 'Source');
+
+                return this.setState({reports: groupedReports, error: null});
+            }, () => {
+                this.setState({reportError: 'Problem retrieving reports'});
+                console.warn("Couldn't retrieve reports!");
+            }
+        );
     },
     onChildToggleMode: function() {
         this.props.toggleMode();
@@ -727,17 +689,16 @@ var VariantDetail = React.createClass({
 
         return diffRows;
     },
-    generateLinkToGenomeBrowser: function (prop, variant) {
-        let hgVal = (prop === "Genomic_Coordinate_hg38") ? '38' : '19';
-        let genomicCoordinate = variant[prop];
-        let genomicCoordinateElements = genomicCoordinate.split(':');
-        let ref = genomicCoordinateElements[2].split('>')[0];
-        let position = parseInt(genomicCoordinateElements[1].split('.')[1]);
-        let positionRangeStart = position - 1;
-        let positionRangeEnd = position + ref.length + 1;
-        let positionParameter = (genomicCoordinate.length > 1500) ? positionRangeStart + '-' + positionRangeEnd : genomicCoordinate;
-        let genomeBrowserUrl = 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg' + hgVal + '&position=' + positionParameter + '&hubUrl=http://brcaexchange.org/trackhubs/hub.txt';
-        return <a target="_blank" href={genomeBrowserUrl}>{variant[prop]}</a>;
+    toggleSubmitterGroup: function(sourceName, submitter) {
+        this.setState((pstate) => {
+            // the key under the state collection for the visibility of this source-submitter group
+            const k = `submitter-group-${sourceName}-${submitter}`;
+
+            // if the key doesn't exist, set it to false; otherwise, invert it
+            return {
+                [k]: !(!pstate.hasOwnProperty(k) || pstate[k])
+            };
+        });
     },
     render: function () {
         const {data, error} = this.state;
@@ -763,8 +724,44 @@ var VariantDetail = React.createClass({
         let groupsEmpty = 0;
         let totalRowsEmpty = 0;
 
-        const groupTables = _.map(groups, ({ groupTitle, innerCols }) => {
+        const groupTables = _.map(groups, ({ groupTitle, innerCols, reportSource, reportBinding }) => {
             let rowsEmpty = 0;
+
+            // if it's a report source (i.e. the key reportSource is defined), then we defer
+            // to our custom nested-report-rendering method to generate this entire group
+            if (reportSource) {
+                // hide this panel if we have no reports, or specifically none for this source
+                if (!this.state.reports || !this.state.reports[reportSource]) {
+                    return null;
+                }
+
+                // also hide this reportSource, but with a warning, if we don't have metadata for that source
+                // (we expect to have metadata for the source, since we both request the source and define its meta)
+                if (!reportBinding) {
+                    console.warn("Source report rendering requested for source with missing metadata: ", reportSource);
+                    return null;
+                }
+
+                return (
+                    <SourceReportsTile
+                        groupTitle={groupTitle}
+                        sourceName={reportSource}
+                        reportBinding={reportBinding}
+                        submissions={this.state.reports[reportSource]}
+                        onChangeGroupVisibility={this.onChangeGroupVisibility}
+                        hideEmptyItems={this.state.hideEmptyItems}
+                        onReportToggled={() => {
+                            setTimeout(() => {
+                                // this forces a re-render after a group has expanded/collapsed, fixing the layout
+                                // note that 300ms just happens to be the duration of the expand/collapse animation
+                                // it'd be better to run the re-layout whenever the animation ends
+                                this.forceUpdate();
+                            }, 300);
+                        }}
+                        showHelp={this.showHelp}
+                    />
+                );
+            }
 
             // remove the BIC classification and importance fields unless the classification is 1 or 5
             if (groupTitle === 'Clinical Significance (BIC)') {
@@ -807,66 +804,13 @@ var VariantDetail = React.createClass({
                             return false;
                         }
                     }
-                } else if (variant[prop] !== null) {
-                    if (prop === "Gene_Symbol") {
-                        rowItem = <i>{variant[prop]}</i>;
-                    } else if (prop === "URL_ENIGMA") {
-                        if (variant[prop].length) {
-                            rowItem = <a target="_blank" href={variant[prop]}>link to multifactorial analysis</a>;
-                        }
-                    } else if (prop === "SCV_ClinVar" && variant[prop].toLowerCase().indexOf("scv") !== -1) {
-                        // Link all clinvar submissions back to clinvar
-                        let accessions = variant[prop].split(',');
-                        rowItem = [];
-                        for (let i = 0; i < accessions.length; i++) {
-                            if (i < (accessions.length - 1)) {
-                                rowItem.push(<span><a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{accessions[i]}</a>, </span>);
-                            } else {
-                                // exclude trailing comma
-                                rowItem.push(<a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{accessions[i]}</a>);
-                            }
-                        }
-                    } else if (prop === "DBID_LOVD" && variant[prop].toLowerCase().indexOf("brca") !== -1) { // Link all dbid's back to LOVD
-                        let ids = variant[prop].split(',');
-                        rowItem = [];
-                        for (let i = 0; i < ids.length; i++) {
-                            if (i < (ids.length - 1)) {
-                                rowItem.push(<span><a target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>, </span>);
-                            } else {
-                                // exclude trailing comma
-                                rowItem.push(<a target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>);
-                            }
-                        }
-                    } else if (prop === "Assertion_method_citation_ENIGMA") {
-                        rowItem = <a target="_blank" href="https://enigmaconsortium.org/library/general-documents/">Enigma Rules version Mar 26, 2015</a>;
-                    } else if (prop === "Source_URL") {
-                        if (variant[prop].startsWith("http://hci-exlovd.hci.utah.edu")) {
-                            rowItem = <a target="_blank" href={variant[prop].split(',')[0]}>link to multifactorial analysis</a>;
-                        }
-                    } else if (prop === "Comment_on_clinical_significance_ENIGMA" || prop === "Clinical_significance_citations_ENIGMA") {
-                        const pubmed = "http://ncbi.nlm.nih.gov/pubmed/";
-                        rowItem = _.map(variant[prop].split(/PMID:? ?([0-9]+)/), piece =>
-                            (/^[0-9]+$/.test(piece)) ? <a target="_blank" href={pubmed + piece}>PMID: {piece}</a> : piece );
-                    } else if (prop === "HGVS_cDNA") {
-                        rowItem = variant[prop].split(":")[1];
-                    } else if (prop === "HGVS_Protein") {
-                        rowItem = variant[prop].split(":")[1];
-                    } else if (prop === "Date_last_evaluated_ENIGMA" && !util.isEmptyField(variant[prop])) {
-                        // try a variety of formats until one works, or just display the value if not?
-                        rowItem = normalizeDateFieldDisplay(variant[prop]);
-                    } else if (/Allele_frequency_.*_ExAC/.test(prop)) {
-                        let count = variant[prop.replace("frequency", "count")],
-                            number = variant[prop.replace("frequency", "number")];
-                        rowItem = [ variant[prop], <small style={{float: 'right'}}>({count} of {number})</small> ];
-                    } else if (prop === "Genomic_Coordinate_hg38" || prop === "Genomic_Coordinate_hg37") {
-                        rowItem = this.generateLinkToGenomeBrowser(prop, variant);
-                    } else if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] !== null) {
-                        let val = variant["HGVS_Protein"].split(":")[0];
-                        variant[prop] = val;
-                        rowItem = val;
-                    } else {
-                        rowItem = normalizedFieldDisplay(variant[prop]);
-                    }
+                } else if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] !== null) {
+                    let val = variant["HGVS_Protein"].split(":")[0];
+                    variant[prop] = val;
+                    rowItem = val;
+                }
+                else if (variant[prop] !== null) {
+                    rowItem = util.getFormattedFieldByProp(prop, variant);
                 }
 
                 let isEmptyValue = rowDescriptor.replace ? rowItem === false : util.isEmptyField(variant[prop]);

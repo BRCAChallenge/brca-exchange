@@ -839,7 +839,9 @@ th[role='columnheader'] .help, .help-target .help {
 }
 
 
-/* faisal: alternate design for details page */
+/**************************************************************/
+/**********     Variant Details: Tile Groups ******************/
+/**************************************************************/
 
 div.variant-detail-group table.table-bordered {
     border: solid 1px #9a9a9a;
@@ -919,6 +921,65 @@ div.variant-detail-group .panel-body {
 div.variant-details-body {
     margin-top: 2em;
 }
+
+
+/* --- reports (nested subtiles) -------------- */
+
+div.variant-submitter-group .submitter-header {
+    background: #f2f7ff;
+    cursor: pointer;
+
+    display: flex; flex-direction: row; width: 100%;
+    align-items: center;
+}
+div.variant-submitter-group .submitter-header.expanded {
+    box-shadow: inset 0 7px 15px -7px rgba(0, 0, 0, 0.23);
+}
+div.variant-submitter-group .submitter-header td {
+    border-bottom-width: 3px;
+}
+
+.submitter-header {
+    overflow: hidden; /* FIXME: safegaurd to clip overflowing content, but it should ideally be hidden as a unit */
+}
+
+.submitter-header .submitter-cell {
+    padding: 10px;
+}
+
+.submitter-header .submitter-cell.submitter-label {
+    font-weight: bold;
+    text-align: right;
+    text-decoration: dashed;
+    white-space: nowrap;
+
+    flex: 0 0 203px; /* the +3 gets it to line up with the columns below it */
+}
+
+.submitter-header .submitter-cell.submitter-name {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* causes lower-priority header fields to be hidden when the screen isn't wide enough to display them */
+@media (max-width: 500px) {
+    .submitter-header .submitter-cell.optional {
+        display: none;
+    }
+}
+
+.submitter-header .submitter-cell.submitter-name.collapsed {
+    font-weight: bold;
+}
+
+.clinvar-extras > * {
+    white-space: nowrap;
+}
+.clinvar-extras .date-updated {
+    font-size: smaller;
+}
+
 
 /* faisal: hack for packery to minimize the impact of the graphical glitch of opening/closing a section */
 .variant-history-col {
