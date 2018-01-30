@@ -107,9 +107,9 @@ offending file, for future reference: website/node_modules/react-data-components
 }
 
 /* Ensures BRCA exchange logo and menu items are on a single line across different devices */
-@media only screen and (max-width: 992px) and (min-width: 768px) {
+@media only screen and (max-width: 991px) and (min-width: 768px) {
     .navbar-header {
-        width: 250px;
+        width: 235px;
     }
 
     .navbar-container.beta {
@@ -133,7 +133,7 @@ offending file, for future reference: website/node_modules/react-data-components
 }
 
 /* Shrink BRCA exchange logo on smaller devices so logo and menu items are on a single line across different devices */
-@media only screen and (max-width: 992px) {
+@media only screen and (max-width: 991px) {
     .navbar-brand h1 {
         font-size: 21px;
     }
@@ -175,7 +175,7 @@ offending file, for future reference: website/node_modules/react-data-components
 }
 
 #research-label {
-    margin: 0 1em 0 1em;
+    margin: 0 0 0 1em;
     font-size: 75%;
 }
 
