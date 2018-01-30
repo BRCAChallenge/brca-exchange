@@ -38,10 +38,9 @@ function variantInExon (variant, exon) {
     exon = exon.map(function(loc) {
         return parseInt(loc);
     });
-    if ((variant.Hg38_Start < exon[0] && variant.Hg38_End >= exon[0]) ||
-        (variant.Hg38_Start <= exon[1] && variant.Hg38_End > exon[1]) ||
-        (variant.Hg38_Start >= exon[0] && variant.Hg38_Start < exon[1]) ||
-        (variant.Hg38_End >= exon[0] && variant.Hg38_End < exon[1])
+    if ((variant.Hg38_Start <= exon[0] && variant.Hg38_End >= exon[0]) ||
+        (variant.Hg38_End >= exon[0] && variant.Hg38_End <= exon[1]) ||
+        (variant.Hg38_Start >= exon[0] && variant.Hg38_Start <= exon[1])
         ) {
         console.log('in exon: ', exon, variant.Hg38_Start, variant.Hg38_End);
         return true;
@@ -55,15 +54,21 @@ function variantInIntron (variant, exon, followingExon) {
     // Intron runs from end of one exon to beginning of next exon
     let intron = [parseInt(exon[1]) + 1];
     intron.push(parseInt(followingExon[0]) - 1);
-    if ((variant.Hg38_Start <= intron[0] && variant.Hg38_End >= intron[0]) ||
-        (variant.Hg38_Start < intron[1] && variant.Hg38_End >= intron[1]) ||
-        (variant.Hg38_Start > intron[1] && variant.Hg38_Start <= intron[1]) ||
-        (variant.Hg38_End > intron[1] && variant.Hg38_End <= intron[1])
+
+
+// if start is in
+// if end is in
+// if start is before and end is after
+// 
+// 
+
+    if ((variant.Hg38_Start <= intron[0] && variant.Hg38_End >= intron[1]) ||
+        (variant.Hg38_Start > intron[0] && variant.Hg38_Start < intron[1]) ||
+        (variant.Hg38_End > intron[0] && variant.Hg38_End < intron[1])
     ) {
         console.log('in intron: ', intron, variant.Hg38_Start, variant.Hg38_End);
         return true;
     } else {
-        console.log('not in intron: ', intron);
         return false;
     }
 };
@@ -212,6 +217,7 @@ class Transcript extends React.Component {
                 let highlight, _variant;
                 if (i >= preceding && i <= following) { // exon is adjacent to, or contains, variant
                     highlight = true;
+                    console.log(variant.Hg38_Start, variant.Hg38_End, exon);
                     if (variantInExon(variant, exon)) {
                         _variant = variant;
                     }
@@ -232,6 +238,7 @@ class Transcript extends React.Component {
                 let highlight, _variant;
                 if (i >= preceding && i < following) {  // intron is adjacent to, or contains, variant
                     highlight = true;
+                    console.log(exon[1], exons[i+1][0]);
                     if (variantInIntron(variant, exon, exons[i + 1])) {
                         _variant = variant;
                     }
