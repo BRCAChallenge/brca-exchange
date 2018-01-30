@@ -34,6 +34,40 @@ function variantInfo (variant) {
     };
 }
 
+function variantInExon (variant, exon) {
+    exon = exon.map(function(loc) {
+        return parseInt(loc);
+    });
+    if ((variant.Hg38_Start < exon[0] && variant.Hg38_End >= exon[0]) ||
+        (variant.Hg38_Start <= exon[1] && variant.Hg38_End > exon[1]) ||
+        (variant.Hg38_Start >= exon[0] && variant.Hg38_Start < exon[1]) ||
+        (variant.Hg38_End >= exon[0] && variant.Hg38_End < exon[1])
+        ) {
+        console.log('in exon: ', exon, variant.Hg38_Start, variant.Hg38_End);
+        return true;
+    } else {
+        return false;
+    }
+};
+
+function variantInIntron (variant, exon, followingExon) {
+    // TODO: determine how to handle intersection (where exon ends and intron starts)
+    // Intron runs from end of one exon to beginning of next exon
+    let intron = [parseInt(exon[1]) + 1];
+    intron.push(parseInt(followingExon[0]) - 1);
+    if ((variant.Hg38_Start <= intron[0] && variant.Hg38_End >= intron[0]) ||
+        (variant.Hg38_Start < intron[1] && variant.Hg38_End >= intron[1]) ||
+        (variant.Hg38_Start > intron[1] && variant.Hg38_Start <= intron[1]) ||
+        (variant.Hg38_End > intron[1] && variant.Hg38_End <= intron[1])
+    ) {
+        console.log('in intron: ', intron, variant.Hg38_Start, variant.Hg38_End);
+        return true;
+    } else {
+        console.log('not in intron: ', intron);
+        return false;
+    }
+};
+
 class Variant extends React.Component {
     constructor(props) {
         super(props);
@@ -46,26 +80,32 @@ class Variant extends React.Component {
               txStart,
               txEnd } = this.props;
 
-        let variantStart, variantEnd, variantX, variantWidth, variantChange, variantChangedWidth, variantDeletedWidth, variantInsertedWidth;
+        let variantStart, variantX, variantChange, variantChangedWidth, variantDeletedWidth, variantInsertedWidth;
 
         variantStart = variant.Hg38_Start;
-        variantEnd = variant.Hg38_End;
         variantX = x + width * (variantStart - txStart) / (txEnd - txStart);
-        variantWidth = width * (variantEnd - variantStart) / (txEnd - txStart);
-        variantWidth = Math.max(variantWidth, 3);
+
         variantChange = variantInfo(variant);
 
         variantChangedWidth = variantChange.changed ? width * variantChange.changed / (txEnd - txStart) : 0;
         variantDeletedWidth = variantChange.deleted ? width * variantChange.deleted / (txEnd - txStart) : 0;
         variantInsertedWidth = variantChange.inserted ? width * variantChange.inserted / (txEnd - txStart) : 0;
 
+        // Don't show less than 2 for a variant's width
         variantChangedWidth = variantChangedWidth && Math.max(2, variantChangedWidth);
         variantDeletedWidth = variantDeletedWidth && Math.max(2, variantDeletedWidth);
         variantInsertedWidth = variantInsertedWidth && Math.max(2, variantInsertedWidth);
 
+        // Variant may cross exon/intron boundaries, so the element's maximum size can only be that of
+        // its containing exon/intron
+        variantChangedWidth = Math.min(variantChangedWidth, width);
+        variantDeletedWidth = Math.min(variantDeletedWidth, width);
+        variantInsertedWidth = Math.min(variantInsertedWidth, width);
+
         if (variantX - x + variantChangedWidth + variantDeletedWidth + variantInsertedWidth > width) {
-            variantX = x + width - variantChangedWidth - variantDeletedWidth - variantInsertedWidth - 1;
+            variantX = x + width - variantChangedWidth - variantDeletedWidth - variantInsertedWidth;
         }
+
         return (
             <g>
                 <rect x={variantX} width={variantChangedWidth} height={height} fill="lightgreen" />
@@ -172,7 +212,7 @@ class Transcript extends React.Component {
                 let highlight, _variant;
                 if (i >= preceding && i <= following) { // exon is adjacent to, or contains, variant
                     highlight = true;
-                    if (variant.Hg38_Start >= exon[0] && variant.Hg38_Start <= exon[1]) { // exon contains variant
+                    if (variantInExon(variant, exon)) {
                         _variant = variant;
                     }
                 }
@@ -192,7 +232,7 @@ class Transcript extends React.Component {
                 let highlight, _variant;
                 if (i >= preceding && i < following) {  // intron is adjacent to, or contains, variant
                     highlight = true;
-                    if (variant.Hg38_Start > exon[1] && variant.Hg38_Start < exons[i + 1][0]) { // intron contains variant
+                    if (variantInIntron(variant, exon, exons[i + 1])) {
                         _variant = variant;
                     }
                 }
@@ -253,7 +293,7 @@ class Zoom extends React.Component {
 
             {
                 let _variant;
-                if (variant.Hg38_Start > exon[0] && variant.Hg38_Start < exon[1]) { // exon contains variant
+                if (variantInExon(variant, exon)) {
                     _variant = variant;
                 }
                 blocks.push(<Exon n={i + 1} txStart={exon[0]} txEnd={exon[1]} x={x} width={exonWidth} height={80} highlight={true} variant={_variant} />);
@@ -262,7 +302,7 @@ class Zoom extends React.Component {
             x += exonWidth;
             if (i !== following) {
                 let _variant, _intronWidth = intronWidth;
-                if (variant.Hg38_Start > exon[1] && variant.Hg38_Start < exons[i + 1][0]) { // intron contains variant
+                if (variantInIntron(variant, exon, exons[i + 1])) {
                     _variant = variant;
                 }
                 if (following - preceding === 1) {
@@ -302,14 +342,15 @@ class Splicing extends React.Component {
         }
 
         for (let i = 0; i < exons.length; i++) {
-            if (exons[i][0] > variantStart) {
-                followingExonIndex = i;
+            if (exons[i][0] > variantStart && precedingExonIndex === undefined) {
                 if (exons[i - 1][1] < variantStart) {
                     precedingExonIndex = i - 1;
                 } else {
                     precedingExonIndex = i - 2;
                 }
-                break;
+            }
+            if (exons[i][0] > variantEnd && followingExonIndex === undefined) {
+                    followingExonIndex = i;
             }
         }
 
