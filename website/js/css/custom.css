@@ -69,7 +69,7 @@ offending file, for future reference: website/node_modules/react-data-components
 }
 
 .navbar-brand {
-    margin: 0 1em 0 1em;
+    margin: 0 0 0 1em;
     padding: 0;
     float: left;
 }
