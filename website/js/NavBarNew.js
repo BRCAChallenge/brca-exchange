@@ -51,17 +51,24 @@ var NavBarNew = React.createClass({
     render: function () {
         var {path} = this.props;
         var brand = (
-            <a className="navbar-brand navbar-custom-spacing" href="/">
-                <h1>
-                    <span className="logo-img">
-                        <img src={brcaHeaderLogo} height="40" />
-                    </span>
-                    <span className="BRCA">BRCA</span>
-                    <span className="exchange"> Exchange</span>
-                </h1>
-                {this.props.mode === 'research_mode' && <span id="research-label" className="label label-info">All Public Data</span>}
-                {this.props.mode === 'default' && <span id="research-label" className="label label-info">Expert Reviewed</span>}
-            </a>);
+            <a className="branding-clickable" href="/">
+                <img className="logo-img" src={brcaHeaderLogo} height="40" />
+
+                <div className="brand-collapser">
+                    <h1>
+                        <span className="BRCA">BRCA</span>
+                        <span className="exchange"> Exchange</span>
+                    </h1>
+
+                    {
+                        this.props.mode === 'research_mode'
+                            ? <span id="research-label" className="label label-info">All Public Data</span>
+                            : <span id="research-label" className="label label-info">Expert Reviewed</span>
+                    }
+                </div>
+            </a>
+        );
+
         return (
             <div className={classNames("navbar-container", {"beta": this.state.isBeta})}>
                 <Navbar fixedTop brand={brand} toggleNavKey={0}>
