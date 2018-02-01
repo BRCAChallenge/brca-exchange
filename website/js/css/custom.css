@@ -69,6 +69,7 @@ offending file, for future reference: website/node_modules/react-data-components
 }
 
 .navbar-brand {
+    display: -ms-flexbox;
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -78,6 +79,7 @@ offending file, for future reference: website/node_modules/react-data-components
 }
 
 .navbar-brand .brand-collapser {
+    display: -ms-flexbox;
     display: flex;
     flex-direction: row;
     justify-content: center;
