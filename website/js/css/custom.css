@@ -108,6 +108,10 @@ offending file, for future reference: website/node_modules/react-data-components
     font-weight: 200;
 }
 
+#research-label {
+	padding: .3em .6em .3em;
+}
+
 /* at lower viewport widths, swaps the branding to a layout in which the research indicator is under a reduced title */
 @media only screen and (max-width: 991px) {
     .navbar-brand {
