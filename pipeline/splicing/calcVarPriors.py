@@ -209,7 +209,6 @@ def varOutsideBoundaries(variant):
         txnEnd = int(transcriptData["txStart"])
         if varGenPos > txnStart or varGenPos < txnEnd:
             return True
-    
     return False
 
 def varInUTR(variant):
