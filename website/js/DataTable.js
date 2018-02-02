@@ -310,11 +310,16 @@ var DataTable = React.createClass({
                     <Col sm={8} lg={10}>
                         <div className='form-inline'>
                             <div className='form-group'>
-                                <label className='control-label label alert-danger matched-variant-count'>
-                                    {count} matching {pluralize(count, 'variant')} {}
-                                    {changeString ? changeString : ''} {}
-                                    {release ? 'in release ' + releaseName : ''} {}
-                                    {synonyms ? 'of which ' + synonyms + ' matched on synonyms' : ''}
+                                <label className='alert-danger matched-variant-count'>
+                                {
+                                    `${count} matching ${pluralize(count, 'variant')}
+                                    ${changeString ? changeString : ''}
+                                    ${release ? 'in release ' + releaseName : ''}
+                                    ${synonyms ? 'of which ' + synonyms + ' matched on synonyms' : ''}`
+                                    .replace(/[\n\t]/g, '')
+                                    // using string interpolation prevents react from creating one span tag per string.
+                                    // the replace() removes the extra whitespace used to make the code legible
+                                }
                                 </label>
                                 {downloadButton(this.createDownload)}
                             </div>

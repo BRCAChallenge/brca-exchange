@@ -265,8 +265,11 @@ input:focus {
 }
 
 .matched-variant-count {
+    /* from bootstrap label */
+    border-radius: .25em;
+    
     font-size: 1.2em;
-    line-height: 34px;
+    /* line-height: 34px; */
 }
 
 /* used for the message on the search page */
@@ -558,7 +561,9 @@ html {
 
 #download .alert-danger {
     padding: 7px;
-    vertical-align: bottom;
+    /* causes the download button to properly vertically align with the label */
+    margin-top: 5px;
+    vertical-align: middle;
 }
 
 .form-group label {
