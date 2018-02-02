@@ -265,11 +265,8 @@ input:focus {
 }
 
 .matched-variant-count {
-    /* from bootstrap label */
     border-radius: .25em;
-    
     font-size: 1.2em;
-    /* line-height: 34px; */
 }
 
 /* used for the message on the search page */
