@@ -382,7 +382,27 @@ def varInExon(variant):
                 if withinBoundaries == True:
                     return True
     return False
-    
+
+def getVarExonNumber(variant):
+    '''
+    Given a variant, checks that variant is in an exon
+    If variant in an exon, returns the number of the exon variant is located within in format "exonN"
+    '''
+    if varInExon(variant) == True:
+        varGenPos = int(variant["Pos"])
+        varExons = getExonBoundaries(variant)
+        varStrand = getVarStrand(variant)
+        for exon in varExons.keys():
+            exonStart = varExons[exon]["exonStart"]
+            exonEnd = varExons[exon]["exonEnd"]
+            if varStrand == "+":
+                if varGenPos > exonStart and varGenPos <= exonEnd:
+                    return exon
+            else:
+                withinBoundaries = checkWithinBoundaries(varStrand, varGenPos, exonStart, exonEnd)
+                if withinBoundaries == True:
+                    return exon
+
 def varInSpliceRegion(variant, donor=False):
     '''
     Given a variant, determines if a variant is in reference transcript's splice donor/acceptor region
@@ -723,6 +743,108 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant):
             "altMaxEntScanScore": maxScores["altMaxEntScanScore"],
             "altZScore": maxScores["altZScore"],
             "inFirstThree": inFirstThree}
+
+def getSubsequentDonorScores(variant):
+    '''
+    Given a variant, checks if variant is in an exon
+    If exonic variant, returns a dictionary containing:
+       MaxEntScan score and z-score for reference subsequent donor sequence
+    '''
+    varGenPos = int(variant["Pos"])
+    inExon = varInExon(variant)
+    if inExon == True:
+        varChrom = getVarChrom(variant)
+        varStrand = getVarStrand(variant)
+        exonNumber = getVarExonNumber(variant)
+        refSpliceDonorBounds = getRefSpliceDonorBoundaries(variant)
+        subDonorBounds = refSpliceDonorBounds[exonNumber]
+        refSeq = getFastaSeq(varChrom, subDonorBounds["donorStart"], subDonorBounds["donorEnd"])
+        if varStrand == "-":
+            refSeq = str(Seq(refSeq).reverse_complement())
+            subMaxEntScanScore = runMaxEntScan(refSeq, donor=True)
+            subZScore = getZScore(subMaxEntScanScore, donor=True)
+
+            return {"maxEntScanScore": subMaxEntScanScore,
+                    "zScore": subZScore}
+
+def isCiDomainInRegion(regionStart, regionEnd, boundaries, gene):
+    '''
+    Given a region of interest, boundaries (either enigma or priors) and gene of interest
+    Determines if there is an overlap between the region of interest and a CI domain
+    For minus strand gene (BRCA1) regionStart > regionEnd
+    For plus strand gene (BRCA2) regionStart < regionEnd
+    Returns True if there is an overlap, False otherwise
+    '''
+    if gene == "BRCA1":
+        for domain in brca1CIDomains[boundaries].keys():
+            domainStart = brca1CIDomains[boundaries][domain]["domStart"]
+            domainEnd = brca1CIDomains[boundaries][domain]["domEnd"]
+            overlap = range(max(regionEnd, domainEnd), min(regionStart, domainStart) + 1)
+            if len(overlap) > 0:
+                return True
+    elif gene == "BRCA2":
+        for domain in brca2CIDomains[boundaries].keys():
+            domainStart = brca2CIDomains[boundaries][domain]["domStart"]
+            domainEnd = brca2CIDomains[boundaries][domain]["domEnd"]
+            overlap = range(max(regionStart, domainStart), min(regionEnd, domainEnd) + 1)
+            if len(overlap) > 0:
+                return True
+    return False
+
+def determineSpliceRescueSNS(variant, boundaries):
+    # TO DO leave this as is for now until can figure out what to do moving forward
+    varCons = getVarConsequences(variant)
+    inExon = varInExon(variant)
+    if varCons == "stop_gained" and inExon == True:
+        slidingWindowScores = getMaxMaxEntScanScoreSlidingWindowSNS(variant)
+        subDonorScores = getSubsequentDonorScores(variant)
+        spliceFlag = 0
+        spliceRescue = 0
+        if slidingWindowScores["inFirstThree"] == True:
+            priorProb = 0.97
+            spliceRescue = 0
+        else:
+        # need to determine if highest scoring 9 bp windown is in frame or out of frame
+        # if new exon length % 3 == old exon length % 3
+        # write function that calculates ref exon length (from fasta file, exonStart to exonEnd)
+        # new exon length, exon will cut after third base of 9 bp sequence
+        # can just figure out end of "new exon" using variant gen pos and variant pos in sliding window
+        # e.g. if variant is in 2nd position, new exon end will be varGenPos + 1
+            inFrame == True    # for now until can do the above
+            if inFrame == False:
+                priorProb = 0.99
+                spliceRescue = 0
+            else:
+                varGenPos = variant["Pos"]
+                varStrand = getVarStrand(variant)
+                varExonNum = getVarExonNumber(variant)
+                refSpliceAccBounds = getRefSpliceAcceptorBoundaries(variant)
+                regionEnd = refSpliceAccBounds[varExonNum + 1]["acceptorStart"]
+                if varStrand == "-":
+                    regionStart = varGenPos + 8
+                else:
+                    regionStart = varGenPos - 8
+                ciDomainInRegion = isCiDomainInRegion(regionStart, regionEnd, boundaries, variant["Gene_Symbol"])
+                if ciDomainInRegion == True:
+                    priorProb = 0.99
+                    spliceRescue = 0
+                # need to figure out if distance between de novo donor and wt-donor (in transcript coordinates)
+                # is divisible by three
+                isDivisible = True   # for now until can do the above
+                if isDivisible == False:
+                    priorProb = 0.99
+                    spliceRescue = 0
+                else:
+                    spliceFlag = 1
+                    priorProb = "N/A"
+                    enigmaClass = "N/A"
+
+        enigmaClass = getEnigmaClass(priorProb)
+
+        return {"priorProb": priorProb,
+                "enigmaClass": enigmaClass,
+                "spliceRescue": spliceRescue,
+                "spliceFlag": spliceFlag}
 
 def getEnigmaClass(priorProb):
     '''

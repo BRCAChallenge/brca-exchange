@@ -601,6 +601,33 @@ class test_calcVarPriors(unittest.TestCase):
         inExon = calcVarPriors.varInExon(self.variant)
         self.assertFalse(inExon)
 
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca1Exons)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
+    def test_getVarExonNumberBRCA1(self, varInExon, getExonBoundaries, getVarStrand):
+        '''Tests that exon number is set correctly for minus strand (BRCA1) variant in exon'''
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        self.variant["Gene_Symbol"] = "BRCA1"
+
+        # variant position in exon 13
+        self.variant["Pos"] = "43082564"
+        print self.variant
+        varExonNum = calcVarPriors.getVarExonNumber(self.variant)
+        self.assertEquals(varExonNum, "exon13")
+
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca2Exons)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
+    def test_getVarExonNumberBRCA2(self, varInExon, getExonBoundaries, getVarStrand):
+        '''Tests that exon number is set correctly for plus strand (BRCA2) variant in exon'''
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["Gene_Symbol"] = "BRCA2"
+
+        # variant position in exon 4
+        self.variant["Pos"] = "32325166"
+        varExonNum = calcVarPriors.getVarExonNumber(self.variant)
+        self.assertEquals(varExonNum, "exon4")
+        
     @mock.patch('calcVarPriors.getRefSpliceDonorBoundaries', return_value = brca1RefSpliceDonorBounds)
     def test_varInSpliceRegionDonorBRCA1(self, getRefDonorBoundaries):
         '''
@@ -1526,7 +1553,47 @@ class test_calcVarPriors(unittest.TestCase):
         maxEntScanScore = 8
         zScore = calcVarPriors.getZScore(maxEntScanScore, donor=False)
         self.assertGreater(zScore, 0)
-                
+
+    def test_isCiDomainInRegionBRCA1(self):
+        '''
+        Tests that region overlap is identified correctly for a variant on minus strand gene (BRCA1)
+        '''
+        self.variant["Gene_Symbol"] = "BRCA1"
+
+        boundaries = "enigma"
+        # region that includes ENIGMA BRCT domain
+        regionStart = 43067625
+        regionEnd = 43063950
+        ciDomainInRegion = calcVarPriors.isCiDomainInRegion(regionStart, regionEnd, boundaries, self.variant["Gene_Symbol"])
+        self.assertTrue(ciDomainInRegion)
+
+        # region that does not include any PRIORS CI domains
+        boundaries = "priors"
+        regionStart = 43095923
+        regionEnd = 43095857
+        ciDomainInRegion = calcVarPriors.isCiDomainInRegion(regionStart, regionEnd, boundaries, self.variant["Gene_Symbol"])
+        self.assertFalse(ciDomainInRegion)
+
+    def test_isCiDomainInRegionBRCA2(self):
+        '''
+        Tests that region overlap is identified correctly for a variant on plus strand gene (BRCA2)
+        '''
+        self.variant["Gene_Symbol"] = "BRCA2"
+
+        # region that does not include any ENIGMA CI domains
+        boundaries = "enigma"
+        regionStart = 32319089
+        regionEnd = 32325063
+        ciDomainInRegion = calcVarPriors.isCiDomainInRegion(regionStart, regionEnd, boundaries, self.variant["Gene_Symbol"])
+        self.assertFalse(ciDomainInRegion)
+
+        # region that includeds PRIORS DNB domain
+        boundaries = "priors"
+        regionStart = 32379502
+        regionEnd = 32379751
+        ciDomainInRegion = calcVarPriors.isCiDomainInRegion(regionStart, regionEnd, boundaries, self.variant["Gene_Symbol"])
+        self.assertTrue(ciDomainInRegion)
+        
     def test_getEnigmaClass(self):
         ''''
         Tests that predicted qualititative ENIGMA class is assigned correctly based on prior prob
