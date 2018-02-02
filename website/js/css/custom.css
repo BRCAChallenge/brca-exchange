@@ -69,96 +69,71 @@ offending file, for future reference: website/node_modules/react-data-components
 }
 
 .navbar-brand {
-    margin: 0 1em 0 1em;
-    padding: 0;
-    float: left;
+    display: -ms-flexbox;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    padding: 0 0 0 15px;
 }
 
-.navbar-brand h1 {
-    font-stretch: condensed;
-    margin: 0;
-    padding: 0;
-    float: left;
-}
+.navbar-brand .brand-collapser {
+    display: -ms-flexbox;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
 
-.navbar-custom-spacing {
-    font-size: 18px;
-    line-height: 42px;
-    margin-left: 0;
-    padding-left: 40px;
-}
-
-.navbar-brand  span.BRCA {
-    font-family: 'Lato', sans-serif;
-    color: black;
-    font-weight: 600;
-}
-
-.navbar-brand span.exchange {
-    font-family: 'Lato', sans-serif;
-    color: black;
-    font-weight: 200;
+    margin-left: 15px;
 }
 
 .navbar-brand .logo-img {
-    position: relative;
-    top: -5px;
-    margin-right: 15px
+    margin-bottom: 10px;
 }
 
-/* Ensures BRCA exchange logo and menu items are on a single line across different devices */
-@media only screen and (max-width: 992px) and (min-width: 768px) {
-    .navbar-header {
-        width: 250px;
-    }
+.navbar-brand h1 {
+    display: inline-block;
+    font-stretch: condensed;
+    margin: 0 10px 10px 0;
 
-    .navbar-container.beta {
-        height: 125px;
-    }
+    font-family: 'Lato', sans-serif;
+    color: black;
 }
 
-/* Ensures BRCA exchange logo and menu dropdown toggle are on a single line across different devices */
-@media only screen and (max-width: 767px) {
+.navbar-brand  span.BRCA {
+    font-weight: 600;
+}
+.navbar-brand span.exchange {
+    font-weight: 200;
+}
+
+#research-label {
+	padding: .3em .6em .3em;
+}
+
+/* at lower viewport widths, swaps the branding to a layout in which the research indicator is under a reduced title */
+@media only screen and (max-width: 991px) {
     .navbar-brand {
-        max-width: 70%;
+        align-items: flex-start;
     }
 
-    .navbar-container.beta {
-        height: 150px;
+    .navbar-brand .brand-collapser {
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
     }
 
     .navbar-brand h1 {
-        float: none;
+        font-size: 20px;
+        margin: 0 0 3px;
+    }
+
+    #research-label {
+        font-size: 12px;
     }
 }
 
-/* Shrink BRCA exchange logo on smaller devices so logo and menu items are on a single line across different devices */
-@media only screen and (max-width: 992px) {
-    .navbar-brand h1 {
-        font-size: 21px;
-    }
-
-    .navbar-container.beta {
-        height: 200px;
-    }
-
-    .navbar-brand {
-        position: relative;
-        top: -6px;
-    }
-
-    .navbar-brand #research-label {
-        font-size: 64%;
-        float: left;
-        margin: -0.8em 1em 0 3.8em;
-    }
-
-    .navbar-brand .logo-img {
-        top: 8px;
-    }
-}
-
-/* Shrink BRCA exchange logo on smaller devices so logo and menu items are on a single line across different devices */
 @media only screen and (max-width: 450px) {
     .navbar-container.beta {
         height: 300px;
@@ -172,11 +147,6 @@ offending file, for future reference: website/node_modules/react-data-components
     left: 0;
     position: fixed;
     padding: 0 10px 0 10px;
-}
-
-#research-label {
-    margin: 0 1em 0 1em;
-    font-size: 75%;
 }
 
 .navbar {
