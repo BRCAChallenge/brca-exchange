@@ -943,7 +943,7 @@ var VariantDetail = React.createClass({
                     <Col md={12} className="variant-history-col">
                         <h3>{variant["HGVS_cDNA"]}</h3>
                         <h4>Previous Versions of this Variant:</h4>
-                        <Table className='variant-history nopointer' bordered>
+                        <Table className='variant-history nopointer' responsive bordered>
                             <thead>
                                 <tr className='active'>
                                     <th>Release Date</th>

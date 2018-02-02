@@ -48,20 +48,22 @@ var Releases = React.createClass({
                     <Col smOffset={1} sm={10}>
                         <h1>Release Notes</h1>
                         <br />
-                        <table className="table table-bordered table-grayheader nopointer">
-                            <thead>
-                                <th>Notes</th>
-                                <th>Date</th>
-                                <th>Data Sources</th>
-                                <th>New Variants</th>
-                                <th>New Classifications</th>
-                                <th>Changed/Updated Variants</th>
-                                <th>Removed Variants</th>
-                            </thead>
-                            <tbody>
-                                {rows}
-                            </tbody>
-                        </table>
+                        <div className="table-responsive table-responsive-outset">
+                            <table className="table table-inset-bordered table-grayheader nopointer">
+                                <thead>
+                                    <th>Notes</th>
+                                    <th>Date</th>
+                                    <th>Data Sources</th>
+                                    <th>New Variants</th>
+                                    <th>New Classifications</th>
+                                    <th>Changed/Updated Variants</th>
+                                    <th>Removed Variants</th>
+                                </thead>
+                                <tbody>
+                                    {rows}
+                                </tbody>
+                            </table>
+                        </div>
                     </Col>
                 </Row>
             </Grid>);

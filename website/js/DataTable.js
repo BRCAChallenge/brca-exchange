@@ -310,11 +310,16 @@ var DataTable = React.createClass({
                     <Col sm={8} lg={10}>
                         <div className='form-inline'>
                             <div className='form-group'>
-                                <label className='control-label label alert-danger matched-variant-count'>
-                                    {count} matching {pluralize(count, 'variant')} {}
-                                    {changeString ? changeString : ''} {}
-                                    {release ? 'in release ' + releaseName : ''} {}
-                                    {synonyms ? 'of which ' + synonyms + ' matched on synonyms' : ''}
+                                <label className='alert-danger matched-variant-count'>
+                                {
+                                    `${count} matching ${pluralize(count, 'variant')}
+                                    ${changeString ? changeString : ''}
+                                    ${release ? 'in release ' + releaseName : ''}
+                                    ${synonyms ? 'of which ' + synonyms + ' matched on synonyms' : ''}`
+                                    .replace(/[\n\t]/g, '')
+                                    // using string interpolation prevents react from creating one span tag per string.
+                                    // the replace() removes the extra whitespace used to make the code legible
+                                }
                                 </label>
                                 {downloadButton(this.createDownload)}
                             </div>
@@ -354,17 +359,19 @@ var DataTable = React.createClass({
                     </Col>
                 </Row>
                 <Row>
-                    <Col id="data-table-container" className="table-responsive" sm={12}>
-                        <FastTable
-                            className={cx(className, "table table-hover table-bordered table-grayheader")}
-                            dataArray={data}
-                            columns={renderColumns}
-                            keys={this.props.keys}
-                            buildRowOptions={this.props.buildRowOptions}
-                            onRowClick={this.props.onRowClick}
-                            buildHeader={this.props.buildHeader}
-                            sortBy={this.state.sortBy}
-                            onSort={this.onSort} />
+                    <Col id="data-table-container" sm={12}>
+                        <div className="table-responsive">
+                            <FastTable
+                                className={cx(className, "table table-hover table-bordered table-grayheader")}
+                                dataArray={data}
+                                columns={renderColumns}
+                                keys={this.props.keys}
+                                buildRowOptions={this.props.buildRowOptions}
+                                onRowClick={this.props.onRowClick}
+                                buildHeader={this.props.buildHeader}
+                                sortBy={this.state.sortBy}
+                                onSort={this.onSort} />
+                        </div>
                     </Col>
                 </Row>
                 <Row>

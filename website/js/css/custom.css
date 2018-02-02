@@ -49,6 +49,38 @@ offending file, for future reference: website/node_modules/react-data-components
     cursor: auto;
 }
 
+/* table-inset-bordered draws borders on a table like table-bordered, but skips the outer border */
+.table-inset-bordered > thead > tr > th,
+.table-inset-bordered > tbody > tr > th,
+.table-inset-bordered > tfoot > tr > th,
+.table-inset-bordered > thead > tr > td,
+.table-inset-bordered > tbody > tr > td,
+.table-inset-bordered > tfoot > tr > td {
+    border: 1px solid #ddd;
+}
+
+/* double-thick bottom header border */
+.table-inset-bordered > thead > tr > th, .table-inset-bordered > thead > tr > td {
+    border-bottom-width: 2px;
+}
+
+/* strip borders on outer edges of the table */
+.table-inset-bordered > thead > tr > th:first-child { border-left: none; }
+.table-inset-bordered > thead > tr:first-child > th { border-top: none; }
+.table-inset-bordered > thead > tr > th:last-child { border-right: none; }
+.table-inset-bordered > tbody > tr > td:first-child { border-left: none; }
+.table-inset-bordered > tbody > tr > td:last-child { border-right: none; }
+.table-inset-bordered > tbody > tr:last-child > td { border-bottom: none; }
+
+/* if it's within a responsive 'outset' (i.e. the thing drawing the border), collapse the inner margin and add a new one */
+.table-responsive-outset .table-inset-bordered {
+    margin-bottom: 0;
+}
+.table-responsive-outset {
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+}
+
 /**************************************************************/
 /**********         NavBar                *********************/
 /**************************************************************/
@@ -265,8 +297,8 @@ input:focus {
 }
 
 .matched-variant-count {
+    border-radius: .25em;
     font-size: 1.2em;
-    line-height: 34px;
 }
 
 /* used for the message on the search page */
@@ -558,7 +590,9 @@ html {
 
 #download .alert-danger {
     padding: 7px;
-    vertical-align: bottom;
+    /* causes the download button to properly vertically align with the label */
+    margin-top: 5px;
+    vertical-align: middle;
 }
 
 .form-group label {
