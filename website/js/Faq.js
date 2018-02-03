@@ -15,7 +15,7 @@ require('bootstrap/dist/css/bootstrap.css');
 var slugify = require('./slugify');
 var content = require('./content');
 
-var {Grid, Panel, Row} = require('react-bootstrap');
+var {Grid, Panel} = require('react-bootstrap');
 var {Navigation} = require('react-router');
 
 const navbarHeight = 70; // XXX This value MUST match the setting in custom.css
