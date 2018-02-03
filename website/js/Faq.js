@@ -15,7 +15,7 @@ require('bootstrap/dist/css/bootstrap.css');
 var slugify = require('./slugify');
 var content = require('./content');
 
-var {Grid, Panel, Row} = require('react-bootstrap');
+var {Grid, Panel} = require('react-bootstrap');
 var {Navigation} = require('react-router');
 
 const navbarHeight = 70; // XXX This value MUST match the setting in custom.css
@@ -29,15 +29,13 @@ var Faq = React.createClass({
         return content.faqs.map(function(faq) {
             let question = slugify(faq.question);
             return (
-                <Row>
-                    <Panel
-                        header={faq.question}
-                        collapsable={true}
-                        defaultExpanded={this.state.selectedFAQ === question}
-                        onSelect={() => this._showFaq(question)}>
-                        <RawHTML html={faq.content} />
-                    </Panel>
-                </Row>
+                <Panel
+                    header={faq.question}
+                    collapsable={true}
+                    defaultExpanded={this.state.selectedFAQ === question}
+                    onSelect={() => this._showFaq(question)}>
+                    <RawHTML html={faq.content} />
+                </Panel>
             );
         }, this);
     },
