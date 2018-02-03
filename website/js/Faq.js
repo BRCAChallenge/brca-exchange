@@ -29,15 +29,13 @@ var Faq = React.createClass({
         return content.faqs.map(function(faq) {
             let question = slugify(faq.question);
             return (
-                <Row>
-                    <Panel
-                        header={faq.question}
-                        collapsable={true}
-                        defaultExpanded={this.state.selectedFAQ === question}
-                        onSelect={() => this._showFaq(question)}>
-                        <RawHTML html={faq.content} />
-                    </Panel>
-                </Row>
+                <Panel
+                    header={faq.question}
+                    collapsable={true}
+                    defaultExpanded={this.state.selectedFAQ === question}
+                    onSelect={() => this._showFaq(question)}>
+                    <RawHTML html={faq.content} />
+                </Panel>
             );
         }, this);
     },
