@@ -9,5 +9,4 @@ There are two main reasons you might not find a variant you searched. The first 
 * p.\(Pro1238Leu\) \(HGVS Protein\)
 * P1238L \(Abbreviated Amino Acid Change\)
 
-If you would like to check whether the company who did your genetic test contributes variants to BRCA Exchange, contact us at &lt;brca-exchange-contact@genomicsandhealth.org&gt;.
-
+If you would like to check whether the company who did your genetic test contributes variants to BRCA Exchange, contact us at <brca-exchange-contact@genomicsandhealth.org>.

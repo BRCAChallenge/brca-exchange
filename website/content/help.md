@@ -46,7 +46,7 @@ The Expert Reviewed Data Portal contains an abridged view of the variant data in
 This tile organizes ENIGMA classifications and contextual information for the variant.
 
 * _ENIGMA interpretation_: The most definitive, expertly reviewed interpretation for the variant according to [ENIGMA criteria](https://enigmaconsortium.org/wp-content/uploads/2017/12/ENIGMA_Rules_2017-06-29.pdf).
-* _IARC Class_: Clinical Classification provided by the [International Agency for Research on Cancer criteria](http://monographs.iarc.fr/ENG/Classification/), whose standards are also subsumed by ENIGMA’s classifications \([Plon et al 2008](https://www.ncbi.nlm.nih.gov/pubmed/?term=Sequence+variant+classification+and+reporting%3A+recommendations+for+improving+the+interpretation+of+cancer+susceptibility+genetic+test+results.+Hum+Mutat%2C+29%2C+1282-91.)\).
+* _IARC Class_: Clinical Classification provided by the [International Agency for Research on Cancer](http://monographs.iarc.fr/ENG/Classification/).
 * The rest of the fields in this this tile contain various citations, evidence, and other sources related to ENIGMA’s assessments
 
 #### Previous Versions Tile
