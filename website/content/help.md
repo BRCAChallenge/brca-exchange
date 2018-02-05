@@ -2,11 +2,11 @@
 
 ## How do I search for a variant?
 
-Welcome to the BRCA Exchange, where you can search BRCA1 and BRCA2 variants in our expertly curated and maintained data portal. This site allows you to access important, up-to-date information about a BRCA variant, such as its clinical significance.
+Welcome to the BRCA Exchange, where you can search _BRCA1_ and _BRCA2_ variants in our expertly curated and maintained data portal. This site allows you to access important, up-to-date information about a BRCA variant, such as its clinical significance.
 To begin, notice the search bar on the home page. This search bar accesses our databases directly, and can handle any identifying names for the variant or variants you are searching for. Here are some examples of what can be typed in this search box:
 
-* BRCA1 or BRCA2 \(Gene Symbol\)
-* BRCA1 c.1105G&gt;A \(Gene + HGVS Nucleotide\)
+* _BRCA1_ or _BRCA2_ \(Gene Symbol\)
+* _BRCA1_ c.1105G&gt;A \(Gene + HGVS Nucleotide\)
 * c.1105G&gt;A \(HGVS Nucleotide\)
 * chr17:g.4305831 \(Genomic Nomenclature\)
 * IVS19-1179G&gt;T, 2043G&gt;C \(BIC Designation\)
@@ -37,7 +37,7 @@ The Expert Reviewed Data Portal contains an abridged view of the variant data in
   * _Genomic Nomenclature GRCh38_: HGVS variant alias which references the nucleotide in genomic DNA, per the GRCh38 genome build. Click alias to access the UCSC Genome Browser.
   * _Genomic Nomenclature GRCh37_: HGVS variant alias which references the nucleotide in genomic DNA, per the GRCh37 genome build. Click alias to access the UCSC Genome Browser.
   * For more information on HGVS nomenclature, visit the [HGVS site](http://varnomen.hgvs.org/bg-material/simple/).
-* _Transcript Identifier_: These identifiers, which typically start in ‘NM’, are gene-specific, not variant-specific. They are generally used to keep track of different transcripts submitted to databases such as RefSeq, and are carried over to ClinVar. BRCA Exchange mainly uses contains two transcript identifiers. There is one main transcript used for BRCA1 \(NM 007294.3\) and another identifier used for BRCA2 \(NM 000059.3\). Other, less common transcripts are also present in the database.
+* _Transcript Identifier_: These identifiers, which typically start in ‘NM’, are gene-specific, not variant-specific. They are generally used to keep track of different transcripts submitted to databases such as RefSeq, and are carried over to ClinVar. BRCA Exchange mainly uses contains two transcript identifiers. There is one main transcript used for _BRCA1_ \(NM 007294.3\) and another identifier used for _BRCA2_ \(NM 000059.3\). Other, less common transcripts are also present in the database.
 * _Abbreviated AA Change_: A shortened abbreviation of the HGVS Protein alias using one-letter abbreviation for amino acids.
 * _BIC designation_: A variant alias presented in BIC Nomenclature, which predates HGVS nomenclature and thus follows a different format.
 
