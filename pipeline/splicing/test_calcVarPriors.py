@@ -1593,7 +1593,65 @@ class test_calcVarPriors(unittest.TestCase):
         regionEnd = 32379751
         ciDomainInRegion = calcVarPriors.isCiDomainInRegion(regionStart, regionEnd, boundaries, self.variant["Gene_Symbol"])
         self.assertTrue(ciDomainInRegion)
+
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.getVarExonNumber', return_value = "exon9")
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca1Exons)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
+    def test_getRefExonLengthBRCA1(self, varInExon, getVarExonNumber, getExonBoundaries, getVarStrand):
+        '''Tests that exon length is correctly calculated for minus strand (BRCA1) exon'''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        exon9PlusSeq = "CCTGCAATAAGTTGCCTTATTAACGGTATCTTCAGAAGAATCAGATC"
+        refExonLength = calcVarPriors.getRefExonLength(self.variant)
+        self.assertEquals(refExonLength, len(exon9PlusSeq))
+
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.getVarExonNumber', return_value = "exon5")
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca2Exons)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
+    def test_getRefExonLengthBRCA2(self, varInExon, getVarExonNumber, getExonBoundaries, getVarStrand):
+        '''Tests that exon length is correctly calculated for plus strand (BRCA2) exon'''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        exon5PlusSeq = "GTCCTGTTGTTCTACAATGTACACATGTAACACCACAAAGAGATAAGTCAG"
+        refExonLength = calcVarPriors.getRefExonLength(self.variant)
+        self.assertEquals(refExonLength, len(exon5PlusSeq))
+
+    def test_getNewSplicePositionBRCA1FirstThree(self):
+        '''Tests that new splice position is calculated correctly for minus strand (BRCA1) variant with max MES in first 3 bases'''
+        varStrand = "-"
+        inFirstThree = True
+        varGenPos = "43104189"
+        varWindowPos = 3
+        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inFirstThree)
+        self.assertEquals(newSplicePos, 43104189)
         
+    def test_getNewSplicePositionBRCA1LastSix(self):
+        '''Tests that new splice position is calculated correctly for minus strand (BRCA1) variant with max MES in last 6 bases'''
+        varStrand = "-"
+        inFirstThree = False
+        varGenPos = "43104249"
+        varWindowPos = 6
+        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inFirstThree)
+        self.assertEquals(newSplicePos, 43104252)
+        
+    def test_getNewSplicePositionBRCA2FirstThree(self):
+        '''Tests that new splice position is calculated correctly for plus strand (BRCA2) variant with max MES in first 3 bases'''
+        varStrand = "+"
+        inFirstThree = True
+        varGenPos = "32354881"
+        varWindowPos = 2
+        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inFirstThree)
+        self.assertEquals(newSplicePos, 32354882)
+        
+    def test_getNewSplicePositionBRCA2LastSix(self):
+        '''Tests that new splice position is calculated correctly for plus strand (BRCA2) variant with max MES in last 6 bases'''
+        varStrand = "+"
+        inFirstThree = False
+        varGenPos = "32326277"
+        varWindowPos = 8
+        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inFirstThree)
+        self.assertEquals(newSplicePos, 32326272)
+    
     def test_getEnigmaClass(self):
         ''''
         Tests that predicted qualititative ENIGMA class is assigned correctly based on prior prob

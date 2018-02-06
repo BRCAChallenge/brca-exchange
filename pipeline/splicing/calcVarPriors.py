@@ -6,7 +6,7 @@ calcVarPriors
 Parses a tsv file (default built.tsv) containing variant information and for each variant in file 
 calculates either the prior probability of pathogenicity or a prior ENGIMA classification based on variant type and variant location
 '''
-
+import pdb
 import argparse
 import csv
 import requests
@@ -691,7 +691,7 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant):
     '''
     Given a variant, determines the maximum alt MaxEntScan score in a 9 bp sliding window
        with the variant in each position (1-9)
-    Returns a dictionary containing the ref and alt MaxEntScan score and z-score for the highest scoring window
+    Returns a dictionary containing the ref and alt MaxEntScan score and z-score and position of variant for the highest scoring window
     Dictionary also containing value "inFirstThree" that has value either True or False
        If inFirstThree = True, then variant is in firt 3 bp of highest scoring sliding window
        If inFirstThree = False, then variant is in last 6 bp of highest scoring sliding window 
@@ -742,6 +742,7 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant):
             "refZScore": maxScores["refZScore"],
             "altMaxEntScanScore": maxScores["altMaxEntScanScore"],
             "altZScore": maxScores["altZScore"],
+            "varWindowPosition": maxVarPosition,
             "inFirstThree": inFirstThree}
 
 def getSubsequentDonorScores(variant):
@@ -763,7 +764,6 @@ def getSubsequentDonorScores(variant):
             refSeq = str(Seq(refSeq).reverse_complement())
             subMaxEntScanScore = runMaxEntScan(refSeq, donor=True)
             subZScore = getZScore(subMaxEntScanScore, donor=True)
-
             return {"maxEntScanScore": subMaxEntScanScore,
                     "zScore": subZScore}
 
@@ -791,6 +791,58 @@ def isCiDomainInRegion(regionStart, regionEnd, boundaries, gene):
                 return True
     return False
 
+def getRefExonLength(variant):
+    '''Given a variant, return the length of the reference exon'''
+    if varInExon(variant) == True:
+        varExonNum = getVarExonNumber(variant)
+        exonBounds = getExonBoundaries(variant)
+        if getVarStrand(variant) == "-":
+            varExonStart = int(exonBounds[varExonNum]["exonStart"])
+            # varExonEnd - 1 to account for RefSeq numbering which starts to the right of the first base
+            varExonEnd = int(exonBounds[varExonNum]["exonEnd"]) - 1
+            exonLength = varExonStart - varExonEnd
+        else:
+            # varExonStart -1 to account for RefSeq numbering which starts to the right of the first base
+            varExonStart = int(exonBounds[varExonNum]["exonStart"]) - 1
+            varExonEnd = int(exonBounds[varExonNum]["exonEnd"])
+            exonLength = varExonEnd - varExonStart
+        return exonLength
+
+def getNewSplicePosition(varGenPos, varStrand, varWindowPos, inFirstThree):
+    '''
+    Given a variant's:
+    genetic postion, strand, sliding window position with max MES score AND
+      whether that position is within first three bases of highest scoring window
+    Returns the position where splicing occurs for a de novo splice donor
+    '''
+    if varStrand == "+":
+        if inFirstThree == False:
+            newSplicePos = int(varGenPos) - (varWindowPos - 3)
+        else:
+            newSplicePos = int(varGenPos) + abs(varWindowPos - 3)
+    else:
+        if inFirstThree == False:
+            newSplicePos = int(varGenPos) + (varWindowPos - 3)
+        else:
+            newSplicePos = int(varGenPos) - abs(varWindowPos - 3)
+    return newSplicePos
+    
+def getAltExonLength(variant):
+    # TO DO write unittests for this
+    if varInExon(variant) == True:
+        varExonNum = getVarExonNumber(variant)
+        exonBounds = getExonBoundaries(variant)
+        slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant)
+        newSplicePos = getNewSplicePosition(variant["Pos"], getVarStrand(variant),
+                                            slidingWindowInfo["varWindowPosition"], slidingWindowInfo["inFirstThree"])
+        if getVarStrand(variant) == "-":
+            varExonStart = int(exonBounds[varExonNum]["exonStart"])
+            exonLength = varExonStart - newSplicePos
+        else:
+            varExonEnd = int(exonBounds[varExonNum]["exonEnd"])
+            exonLength = varExonEnd - newSpliecPos
+        return exonLength
+    
 def determineSpliceRescueSNS(variant, boundaries):
     # TO DO leave this as is for now until can figure out what to do moving forward
     varCons = getVarConsequences(variant)
