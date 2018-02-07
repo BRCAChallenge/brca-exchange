@@ -8,9 +8,11 @@ set -o errexit
 
 # 2. A path to a release archive of the format release-{mm-dd-yy}.tar.gz
 
+# 3. A path to export_data_for_genome_browser.sh for adding data for the genome browser.
+
 # Example:
 
-# Running `./deployment/deploy-data beta PATH/TO/release-10-06-16.tar.gz`
+# Running `./deployment/deploy-data beta PATH/TO/release-10-06-16.tar.gz PATH/TO/genomeBrowserTrack/export_data_for_genome_browser.sh`
 # would add the 10-06-16 release to the beta database and put files in the correct
 # locations for access, storage and download.
 
@@ -38,7 +40,6 @@ function add_release_tar_to_db {
     python ${MANAGE_SCRIPT} addrelease ${DATA} ${REPORTS} ${METADATA} ${REMOVED} ${DIFFJSON}
 }
 
-
 export HOST=${HOST:-brcaexchange.cloudapp.net}
 USER=brca
 
@@ -49,8 +50,19 @@ if [ "${ENVIRONMENT}" != "beta" ] && [ "${ENVIRONMENT}" != "production" ] && [ "
     exit 1
 fi
 
-# Expects path to release archive as second argument.
+# Expects absolute paths to release archive, manage.py and export_data_for_genome_browser.sh.
 RELEASE_ARCHIVE_PATH=$2
+GENOME_BROWSER_SCRIPT=$3
+declare -a arr=("$RELEASE_ARCHIVE_PATH" "$GENOME_BROWSER_SCRIPT")
+
+for i in "${arr[@]}"
+do
+    echo "$i"
+    if [[ "$i" = /* ]]; then
+        echo "ERROR: Must use absolute paths."
+        exit 1
+    fi
+done
 
 if [ "${ENVIRONMENT}" == "local" ] ;then
     # Get deployment directory to have relative path to addrelease script
@@ -90,7 +102,6 @@ if [ "${ENVIRONMENT}" == "beta" ] || [ "${ENVIRONMENT}" == "production" ] ;then
 
         rm ${REMOTE_TAR_TMP}
 ENDSSH
-
-     echo "Exporting data for Genome Browser..."
-    ../pipeline/genomeBrowserTrack/export_data_for_genome_browser.sh ${RELEASE_ARCHIVE_PATH}
+    echo "Exporting data for Genome Browser..."
+    ${GENOME_BROWSER_SCRIPT} ${RELEASE_ARCHIVE_PATH}
 fi
