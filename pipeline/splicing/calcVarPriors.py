@@ -708,14 +708,15 @@ def getPriorProbSpliceDonorSNS(variant, boundaries):
             priorProb = 0.04
         elif (refZScore < -1.5) and ((refZScore - altZScore) > 0.5):
             priorProb = 0.97
+        elif (refZScore < -1.5) and ((refZScore - altZScore) < 0.5):
+            priorProb = 0.34
         else:
             if altZScore > 0.0:
                 priorProb = 0.04
             elif altZScore <= 0.0 and altZScore >= -2:
                 priorProb = 0.34
-            # leaving this last else in place because criteria here might change in the future
             else:
-                priorProb = 0.34    
+                priorProb = 0.97    
         enigmaClass = getEnigmaClass(priorProb)
         
         return {"priorProb": priorProb,
@@ -747,14 +748,15 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries):
             priorProb = 0.04
         elif (refZScore < -1.0) and ((refZScore - altZScore) > 0.5):
             priorProb = 0.97
+        elif (refZScore < -1.0) and ((refZScore - altZScore) < 0.5):
+            priorProb = 0.34
         else:
             if altZScore > 0.5:
                 priorProb = 0.04
             elif altZScore <= 0.5 and altZScore >= -1.5:
                 priorProb = 0.34
-            # leaving this last else in place because criteria here might change in the future
             else:
-                priorProb = 0.34
+                priorProb = 0.97
         enigmaClass = getEnigmaClass(priorProb)
 
         return {"priorProb": priorProb,
