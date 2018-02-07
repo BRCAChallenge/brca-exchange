@@ -50,16 +50,16 @@ if [ "${ENVIRONMENT}" != "beta" ] && [ "${ENVIRONMENT}" != "production" ] && [ "
     exit 1
 fi
 
-# Expects absolute paths to release archive, manage.py and export_data_for_genome_browser.sh.
+# Expects absolute paths to release archive and export_data_for_genome_browser.sh.
 RELEASE_ARCHIVE_PATH=$2
 GENOME_BROWSER_SCRIPT=$3
 declare -a arr=("$RELEASE_ARCHIVE_PATH" "$GENOME_BROWSER_SCRIPT")
 
 for i in "${arr[@]}"
 do
-    echo "$i"
     if [[ "$i" = /* ]]; then
-        echo "ERROR: Must use absolute paths."
+        echo "$i"
+        echo "ERROR: Must use absolute path."
         exit 1
     fi
 done
