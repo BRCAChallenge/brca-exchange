@@ -16,6 +16,7 @@ import json
 import re
 import subprocess
 import tempfile
+import os
 from Bio.Seq import Seq
 from calcMaxEntScanMeanStd import fetch_gene_coordinates, runMaxEntScan
 
@@ -208,7 +209,6 @@ def varOutsideBoundaries(variant):
         txnEnd = int(transcriptData["txStart"])
         if varGenPos > txnStart or varGenPos < txnEnd:
             return True
-
     return False
 
 def varInUTR(variant):
@@ -289,14 +289,15 @@ def getRefSpliceDonorBoundaries(variant):
     key = exon number, value = dictionary with donor start and donor end for exon
     '''
     varExons = getExonBoundaries(variant)
+    donorExons = varExons.copy()
     if variant["Gene_Symbol"] == "BRCA1":
-        del varExons["exon24"]
+        del donorExons["exon24"]
     elif variant["Gene_Symbol"] == "BRCA2":
-        del varExons["exon27"]
+        del donorExons["exon27"]
     varStrand = getVarStrand(variant)
     donorBoundaries = {}
-    for exon in varExons.keys():
-        exonEnd = int(varExons[exon]["exonEnd"])
+    for exon in donorExons.keys():
+        exonEnd = int(donorExons[exon]["exonEnd"])
         if varStrand == "+":
             # - 3 + 1 because genomic position in RefSeq starts to the right of the first base
             # which affects 5' side of sequence, donor start is 5' to exon end for + strand transcripts
@@ -320,12 +321,13 @@ def getRefSpliceAcceptorBoundaries(variant):
     key = exon number, value = a dictionary with acceptor start and acceptor end for exon
     '''
     varExons = getExonBoundaries(variant)
+    acceptorExons = varExons.copy()
     if variant["Gene_Symbol"] == "BRCA1" or variant["Gene_Symbol"] == "BRCA2":
-        del varExons["exon1"]
+        del acceptorExons["exon1"]
     varStrand = getVarStrand(variant)
     acceptorBoundaries = {}
-    for exon in varExons.keys():
-        exonStart = int(varExons[exon]["exonStart"])
+    for exon in acceptorExons.keys():
+        exonStart = int(acceptorExons[exon]["exonStart"])
         if varStrand == "+":
             # -20 + 1 because genomic position in RefSeq starts to the right of the first base
             # which affects 5' side of sequence, acceptor start is 5' to exon start for + strand transcripts
@@ -353,8 +355,8 @@ def varInExon(variant):
         varExons = getExonBoundaries(variant)
         varStrand = getVarStrand(variant)
         for exon in varExons.keys():
-            exonStart = varExons[exon]["exonStart"]
-            exonEnd = varExons[exon]["exonEnd"]
+            exonStart = int(varExons[exon]["exonStart"])
+            exonEnd = int(varExons[exon]["exonEnd"])
             if varStrand == "+":
                 if varGenPos > exonStart and varGenPos <= exonEnd:
                     return True
@@ -615,7 +617,7 @@ def getZScore(maxEntScanScore, donor=False):
     If donor is True, uses splice donor mean and std
     If donor is False, uses splice acceptor mean and std
     '''
-    stdMeanData = json.load(open('brca.zscore.json'))
+    stdMeanData = json.load(open(os.path.join(os.path.dirname(__file__), 'brca.zscore.json')))
     if donor == False:
         std = stdMeanData["acceptors"]["std"]
         mean = stdMeanData["acceptors"]["mean"]

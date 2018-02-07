@@ -42,9 +42,9 @@ def runMaxEntScan(sequence, donor=False):
     fp.write(sequence)
     fp.close()
     if donor:
-        pipe = subprocess.Popen(["perl","score5.pl", tmpfile], stdout=subprocess.PIPE)
+        pipe = subprocess.Popen(["perl", os.path.join(os.path.dirname(__file__), 'score5.pl'), tmpfile], stdout=subprocess.PIPE)
     else:
-        pipe = subprocess.Popen(["perl","score3.pl", tmpfile], stdout=subprocess.PIPE)
+        pipe = subprocess.Popen(["perl", os.path.join(os.path.dirname(__file__), 'score3.pl'), tmpfile], stdout=subprocess.PIPE)
     result = pipe.stdout.read()
     entScore = re.findall("[+-]?\d+(?:\.\d+)?", str(result))
     os.remove(tmpfile)

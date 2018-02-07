@@ -1,7 +1,10 @@
 import unittest
+import mock
 import calcVarPriors
 import calcMaxEntScanMeanStd
-import mock
+from calcVarPriorsMockedResponses import brca1Exons, brca2Exons 
+from calcVarPriorsMockedResponses import brca1RefSpliceDonorBounds, brca2RefSpliceDonorBounds 
+from calcVarPriorsMockedResponses import brca1RefSpliceAcceptorBounds, brca2RefSpliceAcceptorBounds
 
 # dictionary containing possible strands for variants
 strand = {"minus": "-",
@@ -177,8 +180,9 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Gene_Symbol"] = "BRCA2"
         varChrom = calcVarPriors.getVarChrom(self.variant)
         self.assertEquals(varChrom, chromosomes["13"])
-        
-    def test_getVarType(self):
+
+    @mock.patch('calcVarPriors.checkSequence', return_value = True)
+    def test_getVarType(self, checkSequence):
         '''
         Tests that variant type is set correctly to substitution, deletion, insertion, or delins based on variant "Ref" and "Alt" values
         '''
@@ -308,8 +312,9 @@ class test_calcVarPriors(unittest.TestCase):
         withinBoundaries = calcVarPriors.checkWithinBoundaries(varStrand, position, boundaryStart, boundaryEnd)
         self.assertTrue(withinBoundaries)        
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
-    def test_varOutsideBoundariesBRCA1(self, fetch_gene_coordinates):
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
+    def test_varOutsideBoundariesBRCA1(self, fetch_gene_coordinates, getVarStrand):
         '''Tests that variant outside/inside transcript boundaries are correctly identified for BRCA1'''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -324,8 +329,9 @@ class test_calcVarPriors(unittest.TestCase):
         varOutBounds = calcVarPriors.varOutsideBoundaries(self.variant)
         self.assertFalse(varOutBounds)
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)    
-    def test_varOutsideBoundariesBRCA2(self, fetch_gene_coordinates):
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
+    def test_varOutsideBoundariesBRCA2(self, fetch_gene_coordinates, getVarStrand):
         '''Tests that variant outside/inside transcript boundaries are correctly identified for BRCA2'''
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -340,8 +346,10 @@ class test_calcVarPriors(unittest.TestCase):
         varOutBounds = calcVarPriors.varOutsideBoundaries(self.variant)
         self.assertFalse(varOutBounds)
         
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)  
-    def test_varInUTRBRCA1(self, fetch_gene_coordinates):
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)
+    @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
+    def test_varInUTRBRCA1(self, fetch_gene_coordinates, varOutsideBoundaries, getVarStrand):
         '''Tests that variants in 5' and 3' UTR are correctly identified for BRCA1'''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -366,8 +374,10 @@ class test_calcVarPriors(unittest.TestCase):
         varInUTR = calcVarPriors.varInUTR(self.variant)
         self.assertFalse(varInUTR)
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)  
-    def test_varInUTRBRCA2(self, fetch_gene_coordinates):
+    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
+    @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
+    def test_varInUTRBRCA2(self, fetch_gene_coordinates, varOutsideBoundaries, getVarStrand):
         '''Tests that variants in 5' and 3' UTR are correctly identified for BRCA2'''
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -444,8 +454,9 @@ class test_calcVarPriors(unittest.TestCase):
                 # checks that next exon does not start before current exon ends
                 self.assertGreater(nextExonStart, exonBounds["exonEnd"])
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)             
-    def test_getRefSpliceDonorBoundariesBRCA1(self, fetch_gene_cooridnates):
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca1Exons)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
+    def test_getRefSpliceDonorBoundariesBRCA1(self, getExonBoundaries, getVarStrand):
         '''
         Tests that splice donor boundaries are set correctly for reference transcript (NM_000059.3) and strand (-)
         Uses example exon boundaries for BRCA1 set in setUp function
@@ -462,8 +473,9 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(exonDonorBoundsBRCA1[exon]["donorEnd"],
                           spliceDonorBounds[exon]["donorEnd"])
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)             
-    def test_getRefSpliceDonorBoundariesBRCA2(self, fetch_gene_cooridnates):
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca2Exons)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
+    def test_getRefSpliceDonorBoundariesBRCA2(self, getExonBoundaries, getVarStrand):
         '''
         Tests that splice donor boundaries are set correctly for reference transcript (NM_000059.3) and strand (+)
         Uses example exon boundaries for BRCA2 set in setUp function
@@ -480,8 +492,9 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(exonDonorBoundsBRCA2[exon]["donorEnd"],
                           spliceDonorBounds[exon]["donorEnd"])
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)
-    def test_getRefSpliceAcceptorBoundariesBRCA1(self, fetch_gene_boundaries):
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca1Exons)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
+    def test_getRefSpliceAcceptorBoundariesBRCA1(self, getExonBoundaries, getVarStrand):
         '''
         Tests that splice acceptor boundaries are set correctly for reference transcript (NM_007294.3) and strand (-)
         Uses example exon boundaries for BRCA1 in setUp function
@@ -498,8 +511,9 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(exonAcceptorBoundsBRCA1[exon]["acceptorEnd"],
                           spliceAcceptorBounds[exon]["acceptorEnd"])
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
-    def test_getRefSpliceAcceptorBoundariesBRCA2(self, fetch_gene_boundaries):
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca2Exons)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
+    def test_getRefSpliceAcceptorBoundariesBRCA2(self, getExonBoundaries, getVarStrand):
         '''
         Tests that splice acceptor boundaries are set correctly for reference transcript (NM_000059.3) and strand (+)
         Uses example exon boundaries for BRCA2 in setUp function
@@ -516,8 +530,10 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(exonAcceptorBoundsBRCA2[exon]["acceptorEnd"],
                           spliceAcceptorBounds[exon]["acceptorEnd"])
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
-    def test_varInExonBRCA1(self, fetch_gene_coordinates):
+    @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca1Exons)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
+    def test_varInExonBRCA1(self, varOutsideBoundaries, getExonBoundaries, getVarStrand):
         '''Tests that variant is correctly identified as inside or outside an exon for BRCA1'''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -552,8 +568,10 @@ class test_calcVarPriors(unittest.TestCase):
         inExon = calcVarPriors.varInExon(self.variant)
         self.assertFalse(inExon)
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)    
-    def test_varInExonBRCA2(self, fetch_gene_coordinates):
+    @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca2Exons)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
+    def test_varInExonBRCA2(self, varOutsideBoundaries, getExonBoundaries, getVarStrand):
         '''Tests that variant is correctly identified as inside or outside an exon for BRCA2'''
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -588,8 +606,8 @@ class test_calcVarPriors(unittest.TestCase):
         inExon = calcVarPriors.varInExon(self.variant)
         self.assertFalse(inExon)
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
-    def test_varInSpliceRegionDonorBRCA1(self, fetch_gene_coordinates):
+    @mock.patch('calcVarPriors.getRefSpliceDonorBoundaries', return_value = brca1RefSpliceDonorBounds)
+    def test_varInSpliceRegionDonorBRCA1(self, getRefDonorBoundaries):
         '''
         Tests that:
         1. Variant is correctly identified as in or NOT in a splice donor region 
@@ -644,8 +662,9 @@ class test_calcVarPriors(unittest.TestCase):
         inSpliceDonor = calcVarPriors.varInSpliceRegion(self.variant, donor=donor)
         self.assertFalse(inSpliceDonor)
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
-    def test_getVarSpliceRegionBoundsDonorBRCA1(self, fetch_gene_coordinates):
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
+    @mock.patch('calcVarPriors.getRefSpliceDonorBoundaries', return_value = brca1RefSpliceDonorBounds)
+    def test_getVarSpliceRegionBoundsDonorBRCA1(self, varInSpliceRegion, getRefSpliceDonorBoundaries):
         '''
         Tests that:
         1. Function returns correct donor boundaries for a given variant (genomic position)
@@ -660,8 +679,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(exonDonorBoundsBRCA1["exon16"]["donorStart"], spliceDonorRegion["donorStart"])
         self.assertEquals(exonDonorBoundsBRCA1["exon16"]["donorEnd"], spliceDonorRegion["donorEnd"])
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)    
-    def test_varInSpliceRegionDonorBRCA2(self, fetch_gene_coordinates):
+    @mock.patch('calcVarPriors.getRefSpliceDonorBoundaries', return_value = brca2RefSpliceDonorBounds)
+    def test_varInSpliceRegionDonorBRCA2(self, getRefSpliceDonorBoundaries):
         '''
         Tests that:
         1. Variant is correctly identified as in or NOT in a splice donor region 
@@ -716,8 +735,9 @@ class test_calcVarPriors(unittest.TestCase):
         inSpliceDonor = calcVarPriors.varInSpliceRegion(self.variant, donor=donor)
         self.assertFalse(inSpliceDonor)
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)    
-    def test_getVarSpliceRegionBoundsDonorBRCA2(self, fetch_gene_coordinates):
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
+    @mock.patch('calcVarPriors.getRefSpliceDonorBoundaries', return_value = brca2RefSpliceDonorBounds)
+    def test_getVarSpliceRegionBoundsDonorBRCA2(self, varInSplcieRegion, getRefSpliceDonorBoundaries):
         '''
         Tests that:
         1. Function returns correct donor boundaries for a given variant (genomic position) 
@@ -732,8 +752,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(exonDonorBoundsBRCA2["exon15"]["donorStart"], spliceDonorRegion["donorStart"])
         self.assertEquals(exonDonorBoundsBRCA2["exon15"]["donorEnd"], spliceDonorRegion["donorEnd"])
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
-    def test_varInSpliceRegionAcceptorBRCA1(self, fetch_gene_coordinates):
+    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
+    def test_varInSpliceRegionAcceptorBRCA1(self, getRefSpliceAcceptorBoundaries):
         '''
         Tests that:
         1. Variant is correctly identified as in or NOT in a splice acceptor region
@@ -788,8 +808,9 @@ class test_calcVarPriors(unittest.TestCase):
         inSpliceAcceptor = calcVarPriors.varInSpliceRegion(self.variant, donor=donor)
         self.assertFalse(inSpliceAcceptor)
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
-    def test_getVarSpliceRegionBoundsAcceptorBRCA1(self, fetch_gene_coordinates):
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
+    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
+    def test_getVarSpliceRegionBoundsAcceptorBRCA1(self, varInSpliceRegion, getRefSpliceAcceptorBoundaries):
         '''
         Tests that:
         1. Function returns correct donor boundaries for a given variant (genomic position) 
@@ -804,8 +825,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(exonAcceptorBoundsBRCA1["exon21"]["acceptorStart"], spliceAccRegion["acceptorStart"])
         self.assertEquals(exonAcceptorBoundsBRCA1["exon21"]["acceptorEnd"], spliceAccRegion["acceptorEnd"])
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)    
-    def test_varInSpliceRegionAcceptorBRCA2(self, fetch_gene_coordinates):
+    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca2RefSpliceAcceptorBounds)
+    def test_varInSpliceRegionAcceptorBRCA2(self, getRefSpliceAcceptorBoundaries):
         '''
         Tests that:
         1. Variant is correctly identified as in or NOT in a splice acceptor region
@@ -860,8 +881,9 @@ class test_calcVarPriors(unittest.TestCase):
         inSpliceAcceptor = calcVarPriors.varInSpliceRegion(self.variant, donor=donor)
         self.assertFalse(inSpliceAcceptor)
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)    
-    def test_getVarSpliceRegionBoundsAcceptorBRCA2(self, fetch_gene_coordinates):
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
+    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca2RefSpliceAcceptorBounds)
+    def test_getVarSpliceRegionBoundsAcceptorBRCA2(self, varInSpliceRegion, getRefSpliceAcceptorBoundaries):
         '''
         Tests that:
         1. Function returns correct donor boundaries for a given variant (genomic position) 
@@ -876,9 +898,9 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(exonAcceptorBoundsBRCA2["exon20"]["acceptorStart"], spliceAccRegion["acceptorStart"])
         self.assertEquals(exonAcceptorBoundsBRCA2["exon20"]["acceptorEnd"], spliceAccRegion["acceptorEnd"])
 
-
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
-    def testVarInEnigmaCiDomainsBRCA1(self, fetch_gene_coordinates):
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    def test_varInCiDomainEnigmaBRCA1(self, getVarStrand, varInExon):
         '''Tests that variant is correctly identified as in or NOT in CI domain in BRCA1 as defined by ENIGMA rules'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -899,8 +921,9 @@ class test_calcVarPriors(unittest.TestCase):
         inEnigmaCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
         self.assertFalse(inEnigmaCI)
         
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)    
-    def testVarInEnigmaCiDomainsBRCA2(self, fetch_gene_coordinates):
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    def test_varInCiDomainEnigmaBRCA2(self, getVarStrand, varInExon):
         '''Tests that variant is correctly identified as in or NOT in CI domain in BRCA2 as defined by ENIGMA rules'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -916,8 +939,9 @@ class test_calcVarPriors(unittest.TestCase):
         inEnigmaCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
         self.assertFalse(inEnigmaCI)
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
-    def test_varInPriorsCiDomainBRCA1(self, fetch_gene_coordinates):
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    def test_varInCiDomainPriorsBRCA1(self, getVarStrand, varInExon):
         '''Tests that variant is correctly identified as in or NOT in CI domain in BRCA1 as defined by PRIORS webiste'''
         boundaries = "priors"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -943,8 +967,9 @@ class test_calcVarPriors(unittest.TestCase):
         inPriorsCI = calcVarPriors.varInCiDomain(self.variant, boundaries)
         self.assertFalse(inPriorsCI)
         
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)    
-    def test_varInPriorsCiDomainBRCA2(self, fetch_gene_coordinates):
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    def test_varInCiDomainPriorsBRCA2(self, getVarStrand, varInExon):
         '''Tests that variant is correctly identified as in or NOT in CI domain in BRCA2 as defined by PRIORS webiste'''
         boundaries = "priors"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -1008,25 +1033,31 @@ class test_calcVarPriors(unittest.TestCase):
         afterGreyZone = calcVarPriors.varAfterGreyZone(self.variant)
         self.assertFalse(afterGreyZone)
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)     
-    def test_varAfterGreyZoneBRCA2(self, fetch_gene_coordinates):
-        '''Tests that variant in BRCA2 is correctly identified as after the grey zone'''
+    @mock.patch('calcVarPriors.varInUTR', return_value = False)
+    @mock.patch('calcVarPriors.varInGreyZone', return_value = True)
+    def test_varAfterGreyZoneFalseBRCA2(self, varInUTR, varInGreyZone):
+        '''Tests that variant in BRCA2 is correctly identified as NOT after the grey zone'''
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
 
-        # checks that variant in BRCA2 grey zone is NOT identified as after BRCA2 grey zone
         self.variant["Pos"] = "32398459"
         afterGreyZone = calcVarPriors.varAfterGreyZone(self.variant)
         self.assertFalse(afterGreyZone)
         
-        # checks that variant after BRCA2 grey zone is identified as after BRCA2 grey zone
+    @mock.patch('calcVarPriors.varInUTR', return_value = False)
+    @mock.patch('calcVarPriors.varInGreyZone', return_value = False)
+    def test_varAfterGreyZoneFalseBRCA2(self, varInUTR, varInGreyZone):
+        '''Tests that variant after BRCA2 grey zone is correctly identified as after the grey zone'''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        
         self.variant["Pos"] = "32398489"
         afterGreyZone = calcVarPriors.varAfterGreyZone(self.variant)
         self.assertTrue(afterGreyZone)
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
-    def test_getVarLocationBRCA1(self, fetch_gene_coordinates):
-        '''Tests that variant location is set correctly based on genomic position for BRCA1'''
+    @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = True)
+    def test_getVarLocationOutBounds(self, varOutsideBoundaries):
+        '''Tests that variants outside transcript boundaries are correctly identified as outside transcript boundaries'''
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
         boundaries = "enigma"
@@ -1041,74 +1072,6 @@ class test_calcVarPriors(unittest.TestCase):
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
         self.assertEquals(varLoc, variantLocations["outBounds"])
 
-        # BRCA1 variant in middle of ENIGMA CI domain
-        self.variant["Pos"] = "43063930"
-        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, variantLocations["inCI"])
-
-        # BRCA1 variant in middle of PRIORS CI domain
-        boundaries = "priors"
-        self.variant["Pos"] = "43106502"
-        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, variantLocations["inCI"])
-
-        # BRCA1 variant in ENIGMA CI domain splice donor region
-        boundaries = "enigma"
-        self.variant["Pos"] = "43104868"
-        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, variantLocations["inCISpliceDonor"])
-        
-        # BRCA1 variant in PRIORS CI domain splice donor region
-        boundaries = "priors"
-        self.variant["Pos"] = "43106456"
-        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, variantLocations["inCISpliceDonor"])
-        
-        # BRCA1 variant in splice donor region
-        self.variant["Pos"] = "43074331"
-        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, variantLocations["inSpliceDonor"])
-
-        # BRCA1 variant in ENIGMA CI domain splice acceptor region
-        boundaries = "enigma"
-        self.variant["Pos"] = "43063373"
-        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, variantLocations["inCISpliceAcceptor"])
-
-        # BRCA1 variant in PRIORS CI domain splice acceptor region
-        boundaries = "priors"
-        self.variant["Pos"] = "43057135"
-        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, variantLocations["inCISpliceAcceptor"])
-
-        # BRCA1 variant in splice acceptor region
-        self.variant["Pos"] = "43082575"
-        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, variantLocations["inSpliceAcceptor"])
-
-        # BRCA1 variant in exon
-        self.variant["Pos"] = "43071220"
-        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, variantLocations["inExon"])
-
-        # BRCA1 variant in 5' UTR
-        self.variant["Pos"] = "43124138"
-        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, variantLocations["inUTR"])
-
-        # BRCA1 variant in 3' UTR
-        self.variant["Pos"] = "43045660"
-        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, variantLocations["inUTR"])
-
-        # BRCA1 variant in intron
-        self.variant["Pos"] = "43071263"
-        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, variantLocations["inIntron"])
-
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)    
-    def test_getVarLocationBRCA2(self, fetch_gene_coordinates):
-        '''Tests that variant location is set correctly based on genomic position for BRCA2'''
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
         boundaries = "enigma"
@@ -1122,6 +1085,34 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32399800"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
         self.assertEquals(varLoc, variantLocations["outBounds"])
+
+    @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
+    @mock.patch('calcVarPriors.varInCiDomain', return_value = True)
+    def test_getVarLocationCiDomain(self, varOutsideBoundaries, varInExon, varInSpliceRegion, varInCiDomain):
+        '''
+        Tests that variants in either PRIORS or ENIGMA CI domain and NOT in a splice region are
+        identified as in CI domain
+        '''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        boundaries = "enigma"
+        
+        # BRCA1 variant in middle of ENIGMA CI domain
+        self.variant["Pos"] = "43063930"
+        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
+        self.assertEquals(varLoc, variantLocations["inCI"])
+
+        # BRCA1 variant in middle of PRIORS CI domain
+        boundaries = "priors"
+        self.variant["Pos"] = "43106502"
+        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
+        self.assertEquals(varLoc, variantLocations["inCI"])
+        
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        boundaries = "enigma"
         
         # BRCA2 variant in middle of ENIGMA CI domain
         self.variant["Pos"] = "32376714"
@@ -1133,6 +1124,58 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32363207"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
         self.assertEquals(varLoc, variantLocations["inCI"])
+
+    @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInCiDomain', return_value = True)
+    @mock.patch('calcVarPriors.getRefSpliceDonorBoundaries', return_value = brca1RefSpliceDonorBounds)
+    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
+    def test_getVarLocationCiDomainSpliceRegionBRCA1(self, varOutsideBoundaries, varInExon, varInCiDomain,
+                                                     getRefSpliceDonorBoundaries, getRefSpliceAcceptorBoundaries):
+        '''
+        Tests that BRCA1 variants in either PRIORS or ENIGMA CI domains AND in splice region are
+        correctly identified as in CI domain splice region
+        '''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+                
+        # BRCA1 variant in ENIGMA CI domain splice donor region
+        boundaries = "enigma"
+        self.variant["Pos"] = "43104868"
+        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
+        self.assertEquals(varLoc, variantLocations["inCISpliceDonor"])
+        
+        # BRCA1 variant in PRIORS CI domain splice donor region
+        boundaries = "priors"
+        self.variant["Pos"] = "43106456"
+        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
+        self.assertEquals(varLoc, variantLocations["inCISpliceDonor"])
+
+        # BRCA1 variant in ENIGMA CI domain splice acceptor region
+        boundaries = "enigma"
+        self.variant["Pos"] = "43063373"
+        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
+        self.assertEquals(varLoc, variantLocations["inCISpliceAcceptor"])
+
+        # BRCA1 variant in PRIORS CI domain splice acceptor region
+        boundaries = "priors"
+        self.variant["Pos"] = "43057135"
+        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
+        self.assertEquals(varLoc, variantLocations["inCISpliceAcceptor"])
+        
+    @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInCiDomain', return_value = True)
+    @mock.patch('calcVarPriors.getRefSpliceDonorBoundaries', return_value = brca2RefSpliceDonorBounds)
+    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca2RefSpliceAcceptorBounds)
+    def test_getVarLocationCiDomainSpliceRegionBRCA2(self, varOutsideBoundaries, varInExon, varInCiDomain,
+                                                     getRefSpliceDonorBoundaries, getRefSpliceAcceptorBoundaries):
+        '''
+        Tests that BRCA2 variants in either PRIORS or ENIGMA CI domains AND in splice region are
+        correctly identified as in CI domain splice region
+        '''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
 
         # BRCA2 variant in ENIGMA CI splice donor region
         boundaries = "enigma"
@@ -1146,11 +1189,6 @@ class test_calcVarPriors(unittest.TestCase):
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
         self.assertEquals(varLoc, variantLocations["inCISpliceDonor"])
 
-        # BRCA2 variant in splice donor region
-        self.variant["Pos"] = "32333388"
-        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, variantLocations["inSpliceDonor"])
-
         # BRCA2 variant in ENIGMA CI splice acceptor region
         boundaries = "enigma"
         self.variant["Pos"] = "32376670"
@@ -1163,25 +1201,101 @@ class test_calcVarPriors(unittest.TestCase):
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
         self.assertEquals(varLoc, variantLocations["inCISpliceAcceptor"])
 
+    @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca1Exons)
+    @mock.patch('calcVarPriors.getRefSpliceDonorBoundaries', return_value = brca1RefSpliceDonorBounds)
+    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
+    def test_getVarLocationSpliceRegionBRCA1(self, varOutsideBoundaries, getExonBoundaries, getRefSpliceDonorBoundaries,
+                                             getRefSpliceAcceptorBoundaries):
+        '''Tests that BRCA1 variants in splice regions are correctly identified as in splice regions'''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        boundaries = "enigma"
+        
+        # BRCA1 variant in splice donor region
+        self.variant["Pos"] = "43074331"
+        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
+        self.assertEquals(varLoc, variantLocations["inSpliceDonor"])
+        
+        # BRCA1 variant in splice acceptor region
+        self.variant["Pos"] = "43082575"
+        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
+        self.assertEquals(varLoc, variantLocations["inSpliceAcceptor"])
+
+    @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca2Exons)
+    @mock.patch('calcVarPriors.getRefSpliceDonorBoundaries', return_value = brca2RefSpliceDonorBounds)
+    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca2RefSpliceAcceptorBounds)
+    def test_getVarLocationSpliceRegionBRCA2(self, varOutsideBoundaries, getExonBoundaries, getRefSpliceDonorBoundaries,
+                                             getRefSpliceAcceptorBoundaries):
+        '''Tests that BRCA1 variants in splice regions are correctly identified as in splice regions'''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        boundaries = "enigma"
+        
+        # BRCA2 variant in splice donor region
+        self.variant["Pos"] = "32333388"
+        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
+        self.assertEquals(varLoc, variantLocations["inSpliceDonor"])
+        
         # BRCA2 variant in splice acceptor region
         self.variant["Pos"] = "32329443"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
         self.assertEquals(varLoc, variantLocations["inSpliceAcceptor"])
 
-        # BRCA2 variant in grey zone
-        self.variant["Pos"] = "32398465"
-        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, variantLocations["inGreyZone"])
+    @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
+    @mock.patch('calcVarPriors.varInCiDomain', return_value = False)
+    def test_getVarLocationInExon(self, varOutsideBoundaries, varInExon, varInSpliceRegion, varInCiDomain):
+        '''Tests that variants in exons are correctly identified as in exons'''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        boundaries = "enigma"
 
-        # BRCA2 variant after grey zone
-        self.variant["Pos"] = "32398499"
+        # BRCA1 variant in exon
+        self.variant["Pos"] = "43071220"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, variantLocations["afterGreyZone"])
+        self.assertEquals(varLoc, variantLocations["inExon"])
+        
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        boundaries = "enigma"
 
         # BRCA2 variant in exon
         self.variant["Pos"] = "32336289"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
         self.assertEquals(varLoc, variantLocations["inExon"])
+
+    @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca1Exons)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
+    @mock.patch('calcVarPriors.varInUTR', return_value = True)
+    def test_getVarLocationInUtrBRCA1(self, varOutsideBoundaries, getExonBoundaries, varInSpliceRegion, varInUTR):
+        '''Tests that BRCA1 variants in UTR are correctly identified as in UTR'''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        boundaries = "enigma"
+
+        # BRCA1 variant in 5' UTR
+        self.variant["Pos"] = "43124138"
+        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
+        self.assertEquals(varLoc, variantLocations["inUTR"])
+
+        # BRCA1 variant in 3' UTR
+        self.variant["Pos"] = "43045660"
+        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
+        self.assertEquals(varLoc, variantLocations["inUTR"])
+        
+    @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca2Exons)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
+    @mock.patch('calcVarPriors.varInUTR', return_value = True)
+    def test_getVarLocationInUtrBRCA2(self, varOutsideBoundaries, getExonBoundaries, varInSpliceRegion, varInUTR):
+        '''Tests that BRCA2 variants in UTR are correctly identified as in UTR'''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        boundaries = "enigma"
 
         # BRCA2 variant in 5' UTR
         self.variant["Pos"] = "32316398"
@@ -1193,10 +1307,58 @@ class test_calcVarPriors(unittest.TestCase):
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
         self.assertEquals(varLoc, variantLocations["inUTR"])
 
+    @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
+    @mock.patch('calcVarPriors.varInExon', return_value = False)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
+    def test_getVarLocationInIntron(self, varOutsideBoundaries, varInExon, varInSpliceRegion):
+        '''Tests that variants in introns are correctly identified as in introns'''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        boundaries = "enigma"
+
+        # BRCA1 variant in intron
+        self.variant["Pos"] = "43071263"
+        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
+        self.assertEquals(varLoc, variantLocations["inIntron"])
+
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        boundaries = "enigma"
+        
         # BRCA2 variant in intron
         self.variant["Pos"] = "32344537"
         varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
-        self.assertEquals(varLoc, variantLocations["inIntron"])        
+        self.assertEquals(varLoc, variantLocations["inIntron"])
+
+    @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
+    @mock.patch('calcVarPriors.varInGreyZone', return_value = True)
+    def test_getVarLocationInGreyZone(self, varOutsideBoundaries, varInExon, varInSpliceRegion, varInGreyZone):
+        '''Tests that BRCA2 variant in grey zone is correctly identified as in grey zone'''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        boundaries = "enigma"
+
+        # BRCA2 variant in grey zone
+        self.variant["Pos"] = "32398465"
+        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
+        self.assertEquals(varLoc, variantLocations["inGreyZone"])
+
+    @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
+    @mock.patch('calcVarPriors.varAfterGreyZone', return_value = True)
+    def test_getVarLocationAfterGreyZone(self, varOutsideBoundaries, varInExon, varInSpliceRegion, varAfterGreyZone):
+        '''Tests that BRCA2 variant after grey zone is correctly identified as after grey zone'''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        boundaries = "enigma"
+
+        # BRCA2 variant after grey zone
+        self.variant["Pos"] = "32398499"
+        varLoc = calcVarPriors.getVarLocation(self.variant, boundaries)
+        self.assertEquals(varLoc, variantLocations["afterGreyZone"])
 
     @mock.patch('calcVarPriors.getFastaSeq', return_value = brca1Seq)    
     def test_getSeqLocDictBRCA1(self, getFastaSeq):
@@ -1340,7 +1502,6 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(refAltSeqs["refSeq"], brca2RefSeq)
         self.assertEquals(refAltSeqs["altSeq"], brca2AltSeq)
 
-    @unittest.skip('Missing dependency')
     def test_getZScore(self):
         '''
         Tests that:
@@ -1370,46 +1531,6 @@ class test_calcVarPriors(unittest.TestCase):
         maxEntScanScore = 8
         zScore = calcVarPriors.getZScore(maxEntScanScore, donor=False)
         self.assertGreater(zScore, 0)
-
-    @unittest.skip('Missing dependency')
-    def test_getRefAltScores(self):
-        '''
-        Tests that:
-        1. For splice donor site:
-           - checks that if alt seq creates weaker splice site, alt maxEntScan score and zscore are less than ref
-           - checks that if alt seq creates stronger splice site, alt maxEntScan score and zscore are greater than ref
-        2. For splice acceptor site:
-           - checks that if alt seq creates weaker splice site, alt maxEntScan score and zscore are less than ref
-           - checks that if alt seq creates stronger splice site, alt maxEntScan score and zscore are greater than ref
-        '''
-        # splice donor site in BRCA1 exon 16 that is weakened by variant
-        donorRefSeq = "TTTGTGAGT"
-        donorAltSeq = "TTTGCGAGT"
-        refAltScores = calcVarPriors.getRefAltScores(donorRefSeq, donorAltSeq, donor=True)
-        self.assertLess(refAltScores["altScores"]["maxEntScanScore"], refAltScores["refScores"]["maxEntScanScore"])
-        self.assertLess(refAltScores["altScores"]["zScore"], refAltScores["refScores"]["zScore"])
-
-        # splice donor site in BRCA2 exon 8 that is strengthened by variant
-        donorRefSeq = "GCTGTAAGT"
-        donorAltSeq = "GCCGTAAGT"
-        refAltScores = calcVarPriors.getRefAltScores(donorRefSeq, donorAltSeq, donor=True)
-        self.assertGreater(refAltScores["altScores"]["maxEntScanScore"], refAltScores["refScores"]["maxEntScanScore"])
-        self.assertGreater(refAltScores["altScores"]["zScore"], refAltScores["refScores"]["zScore"])
-
-        # splice accepotr site in BRCA2 exon 21 that is weakened by variant
-        acceptorRefSeq = "TAATCCTTTTGTTTTCTTAGAAA" 
-        acceptorAltSeq = "TAATCCTTTTGTTTTCTTACAAA"
-        refAltScores = calcVarPriors.getRefAltScores(acceptorRefSeq, acceptorAltSeq, donor=False)
-        self.assertLess(refAltScores["altScores"]["maxEntScanScore"], refAltScores["refScores"]["maxEntScanScore"])
-        self.assertLess(refAltScores["altScores"]["zScore"], refAltScores["refScores"]["zScore"])
-
-
-        # splice acceptor site in BRCA1 exon 3 that is strengthed by variant
-        acceptorRefSeq = "CTCCCCCCCTACCCTGCTAGTCT"
-        acceptorAltSeq = "CTCCCCCCCTACCCTGCTAGGCT"
-        refAltScores = calcVarPriors.getRefAltScores(acceptorRefSeq, acceptorAltSeq, donor=False)
-        self.assertGreater(refAltScores["altScores"]["maxEntScanScore"], refAltScores["refScores"]["maxEntScanScore"])
-        self.assertGreater(refAltScores["altScores"]["zScore"], refAltScores["refScores"]["zScore"])
         
     def test_getEnigmaClass(self):
         ''''
@@ -1441,16 +1562,17 @@ class test_calcVarPriors(unittest.TestCase):
         enigmaClass = calcVarPriors.getEnigmaClass(priorProb)
         self.assertEquals(enigmaClass, None)
 
-    @unittest.skip('Missing dependency')
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCTTACCTT")
-    def test_getPriorProbSpliceDonorSNSBRCA1(self, getFastaSeq):
-        '''
-        Tests function for BRCA1 variants that:
-        1. creates a resaonble splice donor site
-        2. weakens a reasonably strong splice donor
-        3. makes a splice site stronger or equally strong
-        Also checks ENIGMA class for each variant
-        '''
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = "splice_donor_variant")
+    @mock.patch('calcVarPriors.getVarSpliceRegionBounds', return_value = brca1RefSpliceDonorBounds["exon14"])
+    @mock.patch('calcVarPriors.getRefAltScores', return_value = {"refScores": {"maxEntScanScore": 10.57,
+                                                                               "zScore": 1.1300618149879533},
+                                                                 "altScores": {"maxEntScanScore": 9.21,
+                                                                               "zScore": 0.5461191272666394}})
+    def test_getPriorProbSpliceDonorSNSLowProbBRCA1(self, getFastaSeq, getVarType, getVarLocation,
+                                                    getVarSpliceRegionBounds, getRefAltScores):
+        '''Tests function for BRCA1 variant that creates a resaonble splice donor site'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
@@ -1463,6 +1585,21 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCTTACCTT")
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = "splice_donor_variant")
+    @mock.patch('calcVarPriors.getVarSpliceRegionBounds', return_value = brca1RefSpliceDonorBounds["exon14"])
+    @mock.patch('calcVarPriors.getRefAltScores', return_value = {"refScores": {"maxEntScanScore": 10.57,
+                                                                               "zScore": 1.1300618149879533},
+                                                                 "altScores": {"maxEntScanScore": 6.12,
+                                                                               "zScore": -0.7806330088060529}})
+    def test_getPriorProbSpliceDonorSNSModerateProbBRCA1(self, getFastaSeq, getVarType, getVarLocation,
+                                                         getVarSpliceRegionBounds, getRefAltScores):
+        '''Tests function for BRCA1 variant that weakens a reasonably strong splice donor'''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+
         # checks prior prob for BRCA1 variant that weakens a reasonably strong splice donor site
         self.variant["Pos"] = "43076485"
         self.variant["Ref"] = "T"
@@ -1471,17 +1608,16 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["priorProb"], priorProbs["moderate"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
-        # checks prior prob for BRCA1 variant that makes a splice donor site stronger or equally strong
-        self.variant["Pos"] = "43076490"
-        self.variant["Ref"] = "T"
-        self.variant["Alt"] = "G"
-        priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
-        self.assertEquals(priorProb["priorProb"], priorProbs["low"])
-        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
-
-    @unittest.skip('Missing dependency')
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "TTTTACCAA")
-    def test_getPriorProbSpliceDonorSNSHighProbBRCA1(self, getFastaSeq):
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = "splice_donor_variant")
+    @mock.patch('calcVarPriors.getVarSpliceRegionBounds', return_value = brca1RefSpliceDonorBounds["exon7"])
+    @mock.patch('calcVarPriors.getRefAltScores', return_value = {"refScores": {"maxEntScanScore": 3.23,
+                                                                               "zScore": -2.021511220213846},
+                                                                 "altScores": {"maxEntScanScore": -4.42,
+                                                                               "zScore": -5.306188838646238}})
+    def test_getPriorProbSpliceDonorSNSHighProbBRCA1(self, getFastaSeq, getVarType, getVarLocation,
+                                                     getVarSpliceRegionBounds, getRefAltScores):
         '''Tests fucntion for BRCA1 variant that further weakens a weak splice donor site'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -1494,17 +1630,41 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["high"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class4"])
+        
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCTTACCTT")
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = "splice_donor_variant")
+    @mock.patch('calcVarPriors.getVarSpliceRegionBounds', return_value = brca1RefSpliceDonorBounds["exon14"])
+    @mock.patch('calcVarPriors.getRefAltScores', return_value = {"refScores": {"maxEntScanScore": 10.57,
+                                                                               "zScore": 1.1300618149879533},
+                                                                 "altScores": {"maxEntScanScore": 10.77,
+                                                                               "zScore": 1.2159357396528523}})
+    def test_getPriorProbSpliceDonorSNSImprovedProbBRCA1(self, getFastaSeq, getVarType, getVarLocation,
+                                                         getVarSpliceRegionBounds, getRefAltScores):
+        '''Tests function for BRCA1 variant that makes a splice site stronger or equally strong'''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
 
-    @unittest.skip('Missing dependency')
+        # checks prior prob for BRCA1 variant that makes a splice donor site stronger or equally strong
+        self.variant["Pos"] = "43076490"
+        self.variant["Ref"] = "T"
+        self.variant["Alt"] = "G"
+        priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["low"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCGGTAAGA")
-    def test_getPriorProbSpliceDonorSNSBRCA2(self, getFastaSeq):
-        '''
-        Tests function for BRCA2 variants that:
-        1. creates a resaonble splice donor site
-        2. weakens a reasonably strong splice donor
-        3. makes a splice site stronger or equally strong
-        Also checks ENIGMA class for each variant
-        '''
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = "splice_donor_variant")
+    @mock.patch('calcVarPriors.getVarSpliceRegionBounds', return_value = brca2RefSpliceDonorBounds["exon13"])
+    @mock.patch('calcVarPriors.getRefAltScores', return_value = {"refScores": {"maxEntScanScore": 10.53,
+                                                                               "zScore": 1.1128870300549731},
+                                                                 "altScores": {"maxEntScanScore": 8.91,
+                                                                               "zScore": 0.4173082402692903}})
+    def test_getPriorProbSpliceDonorSNSLowProbBRCA2(self, getFastaSeq, getVarType, getVarLocation,
+                                                    getVarSpliceRegionBounds, getRefAltScores):
+        '''Tests function for BRCA2 variant that creates a resaonble splice donor site'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
@@ -1517,6 +1677,21 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCGGTAAGA")
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = "splice_donor_variant")
+    @mock.patch('calcVarPriors.getVarSpliceRegionBounds', return_value = brca2RefSpliceDonorBounds["exon13"])
+    @mock.patch('calcVarPriors.getRefAltScores', return_value = {"refScores": {"maxEntScanScore": 10.53,
+                                                                               "zScore": 1.1128870300549731},
+                                                                 "altScores": {"maxEntScanScore": 4.35,
+                                                                               "zScore": -1.5406172420904107}})
+    def test_getPriorProbSpliceDonorSNSModerateProbBRCA2(self, getFastaSeq, getVarType, getVarLocation,
+                                                         getVarSpliceRegionBounds, getRefAltScores):
+        '''Tests function for BRCA2 variant that weakens a reasonably strong splice donor'''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+
         # checks prior prob for BRCA2 variant that weakens a reasonably strong splice donor site
         self.variant["Pos"] = "32346899"
         self.variant["Ref"] = "A"
@@ -1524,18 +1699,17 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["moderate"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
-
-        # checks prior prob for BRCA2 variant that makes a splice donor site stronger or equally strong
-        self.variant["Pos"] = "32346902"
-        self.variant["Ref"] = "A"
-        self.variant["Alt"] = "T"
-        priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
-        self.assertEquals(priorProb["priorProb"], priorProbs["low"])
-        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
-
-    @unittest.skip('Missing dependency')
+        
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "CAGGCAAGT")
-    def test_getPriorProbSpliceDonorSNSHighProbBRCA2(self, getFastaSeq):
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = "splice_donor_variant")
+    @mock.patch('calcVarPriors.getVarSpliceRegionBounds', return_value = brca2RefSpliceDonorBounds["exon17"])
+    @mock.patch('calcVarPriors.getRefAltScores', return_value = {"refScores": {"maxEntScanScore": 3.1,
+                                                                               "zScore": -2.07732927124603},
+                                                                 "altScores": {"maxEntScanScore": 0.56,
+                                                                               "zScore": -3.1679281144902496}})
+    def test_getPriorProbSpliceDonorSNSHighProbBRCA2(self, getFastaSeq, getVarType, getVarLocation,
+                                                     getVarSpliceRegionBounds, getRefAltScores):
         '''Tests fucntion for BRCA2 variant that further weakens a weak splice donor site'''  
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -1548,17 +1722,41 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["high"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class4"])
+        
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCGGTAAGA")
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = "splice_donor_variant")
+    @mock.patch('calcVarPriors.getVarSpliceRegionBounds', return_value = brca2RefSpliceDonorBounds["exon13"])
+    @mock.patch('calcVarPriors.getRefAltScores', return_value = {"refScores": {"maxEntScanScore": 10.53,
+                                                                               "zScore": 1.1128870300549731},
+                                                                 "altScores": {"maxEntScanScore": 11.78,
+                                                                               "zScore": 1.649599059210593}})
+    def test_getPriorProbSpliceDonorSNSImprovedProbBRCA2(self, getFastaSeq, getVarType, getVarLocation,
+                                                         getVarSpliceRegionBounds, getRefAltScores):
+        '''Tests function for BRCA2 variant that makes a splice site stronger or equally strong'''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
 
-    @unittest.skip('Missing dependency')
+        # checks prior prob for BRCA2 variant that makes a splice donor site stronger or equally strong
+        self.variant["Pos"] = "32346902"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "T"
+        priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["low"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "CATCTGTAAAATACAAGGGAAAA")
-    def test_getPriorProbSpliceAcceptorSNSBRCA1(self, getFastaSeq):
-        '''
-        Tests function for BRCA1 variants that:
-        1. creates a resaonble splice acceptor site
-        2. weakens a reasonably strong splice acceptor
-        3. makes a splice site stronger or equally strong
-        Also checks ENIGMA class for each variant
-        '''
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = "splice_acceptor_variant")
+    @mock.patch('calcVarPriors.getVarSpliceRegionBounds', return_value = brca1RefSpliceAcceptorBounds["exon7"])
+    @mock.patch('calcVarPriors.getRefAltScores', return_value = {"refScores": {"maxEntScanScore": 11.68,
+                                                                               "zScore": 1.5183252360035546},
+                                                                 "altScores": {"maxEntScanScore": 10.94,
+                                                                               "zScore": 1.214256756422072}})
+    def test_getPriorProbSpliceAcceptorSNSLowProbBRCA1(self, getFastaSeq, getVarType, getVarLocation,
+                                                       getVarSpliceRegionBounds, getRefAltScores):
+        '''Tests function for BRCA1 variants that creates a resaonble splice acceptor site'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
@@ -1571,6 +1769,21 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "CATCTGTAAAATACAAGGGAAAA")
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = "splice_acceptor_variant")
+    @mock.patch('calcVarPriors.getVarSpliceRegionBounds', return_value = brca1RefSpliceAcceptorBounds["exon7"])
+    @mock.patch('calcVarPriors.getRefAltScores', return_value = {"refScores": {"maxEntScanScore": 11.68,
+                                                                               "zScore": 1.5183252360035546},
+                                                                 "altScores": {"maxEntScanScore": 9.01,
+                                                                               "zScore": 0.4212132894055031}})
+    def test_getPriorProbSpliceAcceptorSNSModerateProbBRCA1(self, getFastaSeq, getVarType, getVarLocation,
+                                                            getVarSpliceRegionBounds, getRefAltScores):
+        '''Tests function for BRCA1 variants that weakens a reasonably strong splice acceptor'''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+
         # checks prior prob for BRCA1 variant that weakens a reasonably strong splice acceptor site
         self.variant["Pos"] = "43104267"
         self.variant["Ref"] = "A"
@@ -1578,18 +1791,17 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["moderate"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
-
-        # checks prior prob for BRCA1 variant that makes a splice acceptor site stronger or equally strong
-        self.variant["Pos"] = "43104261"
-        self.variant["Ref"] = "T"
-        self.variant["Alt"] = "C"
-        priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries)
-        self.assertEquals(priorProb["priorProb"], priorProbs["low"])
-        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
-
-    @unittest.skip('Missing dependency')
+        
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "GAACTTTAACACATTAGAAAAAC")
-    def test_getPriorProbSpliceAcceptorSNSHighProbBRCA1(self, getFastaSeq):
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = "splice_acceptor_variant")
+    @mock.patch('calcVarPriors.getVarSpliceRegionBounds', return_value = brca1RefSpliceAcceptorBounds["exon2"])
+    @mock.patch('calcVarPriors.getRefAltScores', return_value = {"refScores": {"maxEntScanScore": 4.9,
+                                                                               "zScore":  -1.2675994823240817},
+                                                                 "altScores": {"maxEntScanScore": -3.17,
+                                                                               "zScore": -4.583589523165384}})
+    def test_getPriorProbSpliceAcceptorSNSHighProbBRCA1(self, getFastaSeq, getVarType, getVarLocation,
+                                                        getVarSpliceRegionBounds, getRefAltScores):
         '''Tests fucntion for BRCA1 variant that further weakens a weak splice acceptor site'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -1602,17 +1814,41 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["high"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class4"])
+        
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "CATCTGTAAAATACAAGGGAAAA")
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = "splice_acceptor_variant")
+    @mock.patch('calcVarPriors.getVarSpliceRegionBounds', return_value = brca1RefSpliceAcceptorBounds["exon7"])
+    @mock.patch('calcVarPriors.getRefAltScores', return_value = {"refScores": {"maxEntScanScore": 11.68,
+                                                                               "zScore": 1.5183252360035546},
+                                                                 "altScores": {"maxEntScanScore": 12.41,
+                                                                               "zScore": 1.8182846820771794}})
+    def test_getPriorProbSpliceAcceptorSNSImprovedProbBRCA1(self, getFastaSeq, getVarType, getVarLocation,
+                                                            getVarSpliceRegionBounds, getRefAltScores):
+        '''Tests function for BRCA1 variants that makes a splice site stronger or equally strong'''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+    
+        # checks prior prob for BRCA1 variant that makes a splice acceptor site stronger or equally strong
+        self.variant["Pos"] = "43104261"
+        self.variant["Ref"] = "T"
+        self.variant["Alt"] = "C"
+        priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["low"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
-    @unittest.skip('Missing dependency')
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCTCATCTTTCTCCAAACAGTTA")
-    def test_getPriorProbSpliceAcceptorSNSBRCA2(self, getFastaSeq):
-        '''
-        Tests function for BRCA2 variants that:
-        1. creates a resaonble splice acceptor site
-        2. weakens a reasonably strong splice acceptor
-        3. makes a splice site stronger or equally strong
-        Also checks ENIGMA class for each variant
-        '''
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = "splice_acceptor_variant")
+    @mock.patch('calcVarPriors.getVarSpliceRegionBounds', return_value = brca2RefSpliceAcceptorBounds["exon23"])
+    @mock.patch('calcVarPriors.getRefAltScores', return_value = {"refScores": {"maxEntScanScore": 10.35,
+                                                                               "zScore": 0.9718237794584578},
+                                                                 "altScores": {"maxEntScanScore": 10.09,
+                                                                               "zScore": 0.8649889082541532}})
+    def test_getPriorProbSpliceAcceptorSNSLowProbBRCA2(self, getFastaSeq, getVarType, getVarLocation,
+                                                       getVarSpliceRegionBounds, getRefAltScores):
+        '''Tests function for BRCA2 variant that creates a resaonble splice acceptor site'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
@@ -1625,6 +1861,21 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCTCATCTTTCTCCAAACAGTTA")
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = "splice_acceptor_variant")
+    @mock.patch('calcVarPriors.getVarSpliceRegionBounds', return_value = brca2RefSpliceAcceptorBounds["exon23"])
+    @mock.patch('calcVarPriors.getRefAltScores', return_value = {"refScores": {"maxEntScanScore": 10.35,
+                                                                               "zScore": 0.9718237794584578},
+                                                                 "altScores": {"maxEntScanScore": 8.84,
+                                                                               "zScore": 0.3513597197719193}})
+    def test_getPriorProbSpliceAcceptorSNSModerateProbBRCA2(self, getFastaSeq, getVarType, getVarLocation,
+                                                            getVarSpliceRegionBounds, getRefAltScores):
+        '''Tests function for BRCA2 variant that weakens a reasonably strong splice acceptor'''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+
         # checks prior prob for BRCA2 variant that weakens a reasonably strong splice acceptor site
         self.variant["Pos"] = "32379746"
         self.variant["Ref"] = "A"
@@ -1633,17 +1884,16 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["priorProb"], priorProbs["moderate"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
-        # checks prior prob for BRCA2 variant that makes a splice acceptor site stronger or equally strong
-        self.variant["Pos"] = "32379731"
-        self.variant["Ref"] = "C"
-        self.variant["Alt"] = "T"
-        priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries)
-        self.assertEquals(priorProb["priorProb"], priorProbs["low"])
-        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
-
-    @unittest.skip('Missing dependency')
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "AAGTATTTATTCTTTGATAGATT")
-    def test_getPriorProbSpliceAcceptorSNSHighProbBRCA2(self, getFastaSeq):
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = "splice_acceptor_variant")
+    @mock.patch('calcVarPriors.getVarSpliceRegionBounds', return_value = brca2RefSpliceAcceptorBounds["exon15"])
+    @mock.patch('calcVarPriors.getRefAltScores', return_value = {"refScores": {"maxEntScanScore": 5.16,
+                                                                               "zScore": -1.1607646111197771},
+                                                                 "altScores": {"maxEntScanScore": -2.91,
+                                                                               "zScore": -4.4767546519610795}})
+    def test_getPriorProbSpliceAcceptorSNSHighProbBRCA2(self, getFastaSeq, getVarType, getVarLocation,
+                                                        getVarSpliceRegionBounds, getRefAltScores):
         '''Tests fucntion for BRCA2 variant that further weakens a weak splice acceptor site'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -1656,7 +1906,30 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["high"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class4"])
+        
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCTCATCTTTCTCCAAACAGTTA")
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = "splice_acceptor_variant")
+    @mock.patch('calcVarPriors.getVarSpliceRegionBounds', return_value = brca2RefSpliceAcceptorBounds["exon23"])
+    @mock.patch('calcVarPriors.getRefAltScores', return_value = {"refScores": {"maxEntScanScore": 10.35,
+                                                                               "zScore": 0.9718237794584578},
+                                                                 "altScores": {"maxEntScanScore": 10.42,
+                                                                               "zScore": 1.000587014013463}})
+    def test_getPriorProbSpliceAcceptorSNSImprovedProbBRCA2(self, getFastaSeq, getVarType, getVarLocation,
+                                                            getVarSpliceRegionBounds, getRefAltScores):
+        '''Tests function for BRCA2 variant that makes a splice site stronger or equally strong'''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
 
+        # checks prior prob for BRCA2 variant that makes a splice acceptor site stronger or equally strong
+        self.variant["Pos"] = "32379731"
+        self.variant["Ref"] = "C"
+        self.variant["Alt"] = "T"
+        priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["low"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+        
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     def test_getVarDict(self, fetch_gene_coordinates):
         '''
