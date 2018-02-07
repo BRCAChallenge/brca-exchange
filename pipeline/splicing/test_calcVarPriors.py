@@ -313,9 +313,8 @@ class test_calcVarPriors(unittest.TestCase):
         withinBoundaries = calcVarPriors.checkWithinBoundaries(varStrand, position, boundaryStart, boundaryEnd)
         self.assertTrue(withinBoundaries)        
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
-    def test_varOutsideBoundariesBRCA1(self, fetch_gene_coordinates, getVarStrand):
+    def test_varOutsideBoundariesBRCA1(self, getVarStrand):
         '''Tests that variant outside/inside transcript boundaries are correctly identified for BRCA1'''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -330,9 +329,8 @@ class test_calcVarPriors(unittest.TestCase):
         varOutBounds = calcVarPriors.varOutsideBoundaries(self.variant)
         self.assertFalse(varOutBounds)
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
-    def test_varOutsideBoundariesBRCA2(self, fetch_gene_coordinates, getVarStrand):
+    def test_varOutsideBoundariesBRCA2(self, getVarStrand):
         '''Tests that variant outside/inside transcript boundaries are correctly identified for BRCA2'''
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -347,10 +345,9 @@ class test_calcVarPriors(unittest.TestCase):
         varOutBounds = calcVarPriors.varOutsideBoundaries(self.variant)
         self.assertFalse(varOutBounds)
         
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)
     @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
-    def test_varInUTRBRCA1(self, fetch_gene_coordinates, varOutsideBoundaries, getVarStrand):
+    def test_varInUTRBRCA1(self, varOutsideBoundaries, getVarStrand):
         '''Tests that variants in 5' and 3' UTR are correctly identified for BRCA1'''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -375,10 +372,9 @@ class test_calcVarPriors(unittest.TestCase):
         varInUTR = calcVarPriors.varInUTR(self.variant)
         self.assertFalse(varInUTR)
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
-    def test_varInUTRBRCA2(self, fetch_gene_coordinates, varOutsideBoundaries, getVarStrand):
+    def test_varInUTRBRCA2(self, varOutsideBoundaries, getVarStrand):
         '''Tests that variants in 5' and 3' UTR are correctly identified for BRCA2'''
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -403,8 +399,7 @@ class test_calcVarPriors(unittest.TestCase):
         varInUTR = calcVarPriors.varInUTR(self.variant)
         self.assertFalse(varInUTR)
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
-    def test_getExonBoundariesBRCA1(self, fetch_gene_coordinates):
+    def test_getExonBoundariesBRCA1(self):
         '''
         Tests that:
         1. Exon boundaries are set correctly for gene on minus strand (BRCA1)
@@ -429,8 +424,7 @@ class test_calcVarPriors(unittest.TestCase):
                 # checks that next exon does not start before current exon ends
                 self.assertGreater(exonBounds["exonEnd"], nextExonStart)
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)          
-    def test_getExonBoundariesBRCA2(self, fetch_gene_coordinates):
+    def test_getExonBoundariesBRCA2(self):
         '''
         Tests that:
         1. Exon boundaries are set correctly for gene on plus strand (BRCA2)
