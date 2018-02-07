@@ -1623,7 +1623,9 @@ class test_calcVarPriors(unittest.TestCase):
         varGenPos = "43104189"
         varWindowPos = 3
         newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inFirstThree)
-        self.assertEquals(newSplicePos, 43104189)
+        # because varWindowPos == 3, cut will occur after variant
+        actualNewSplicePos = 43104189
+        self.assertEquals(newSplicePos, actualNewSplicePos)
         
     def test_getNewSplicePositionBRCA1LastSix(self):
         '''Tests that new splice position is calculated correctly for minus strand (BRCA1) variant with max MES in last 6 bases'''
@@ -1632,7 +1634,9 @@ class test_calcVarPriors(unittest.TestCase):
         varGenPos = "43104249"
         varWindowPos = 6
         newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inFirstThree)
-        self.assertEquals(newSplicePos, 43104252)
+        # because varWindowPos == 6, cut will occur 3 bases to the left of the variant
+        actualNewSplicePos = 43104252
+        self.assertEquals(newSplicePos, actualNewSplicePos)
         
     def test_getNewSplicePositionBRCA2FirstThree(self):
         '''Tests that new splice position is calculated correctly for plus strand (BRCA2) variant with max MES in first 3 bases'''
@@ -1641,7 +1645,9 @@ class test_calcVarPriors(unittest.TestCase):
         varGenPos = "32354881"
         varWindowPos = 2
         newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inFirstThree)
-        self.assertEquals(newSplicePos, 32354882)
+        # because varWindowPos == 2, cut will occur 1 base to the right of the variant
+        actualNewSplicePos = 32354882
+        self.assertEquals(newSplicePos, actualNewSplicePos)
         
     def test_getNewSplicePositionBRCA2LastSix(self):
         '''Tests that new splice position is calculated correctly for plus strand (BRCA2) variant with max MES in last 6 bases'''
@@ -1650,8 +1656,60 @@ class test_calcVarPriors(unittest.TestCase):
         varGenPos = "32326277"
         varWindowPos = 8
         newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inFirstThree)
-        self.assertEquals(newSplicePos, 32326272)
-    
+        # because varWindowPos == 8, cut will occur 5 bases to the left of the variant
+        actualNewSplicePos = 32326272
+        self.assertEquals(newSplicePos, actualNewSplicePos)
+
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.getVarExonNumber', return_value = "exon21")
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca1Exons)
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -9.9,
+                                                                                       'altMaxEntScanScore': -7.45,
+                                                                                       'altZScore': -6.6071787973194605,
+                                                                                       'inFirstThree': True,
+                                                                                       'varWindowPosition': 2,
+                                                                                       'refZScore': -7.659134374464476})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43051109)
+    def test_getAltExonLengthBRCA1(self, varInExon, getVarExonNumber, getExonBoundaries,
+                                   getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition):
+        '''Tests that exon length is correctly calculated for minus strand (BRCA1) exon'''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        expectedCutSeq = "ATCTTCACG"
+        altExonLength = calcVarPriors.getAltExonLength(self.variant)
+        self.assertEquals(altExonLength, len(expectedCutSeq))
+
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.getVarExonNumber', return_value = "exon13")
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca2Exons)
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -9.89,
+                                                                                       'altMaxEntScanScore': -9.8,
+                                                                                       'altZScore': -7.616197412132026,
+                                                                                       'inFirstThree': False,
+                                                                                       'varWindowPosition': 9,
+                                                                                       'refZScore': -7.65484067823123})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32346831)
+    def test_getAltExonLengthBRCA2(self, varInExon, getVarExonNumber, getExonBoundaries,
+                                   getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition):
+        '''Tests that exon length is correctly calculated for plus strand (BRCA2) exon'''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        expectedCutSeq = "GCACA"
+        altExonLength = calcVarPriors.getAltExonLength(self.variant)
+        self.assertEquals(altExonLength, len(expectedCutSeq))
+
+    def test_compareRefAltExonLengths(self):
+        '''Tests that function correctly determines if ref and alt exons are in same reading frame'''
+        # ref and alt exons that share the same reading frame
+        refLength = 45
+        altLength = 33
+        inFrame = calcVarPriors.compareRefAltExonLengths(refLength, altLength)
+        self.assertTrue(inFrame)
+
+        # ref and alt exons that do NOT share the smae reading frame
+        refLength = 162
+        altLength = 103
+        inFrame = calcVarPriors.compareRefAltExonLengths(refLength, altLength)
+        self.assertFalse(inFrame)
+        
     def test_getEnigmaClass(self):
         ''''
         Tests that predicted qualititative ENIGMA class is assigned correctly based on prior prob

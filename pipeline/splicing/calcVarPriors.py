@@ -792,7 +792,7 @@ def isCiDomainInRegion(regionStart, regionEnd, boundaries, gene):
     return False
 
 def getRefExonLength(variant):
-    '''Given a variant, return the length of the reference exon'''
+    '''Given a variant, returns the length of the reference exon'''
     if varInExon(variant) == True:
         varExonNum = getVarExonNumber(variant)
         exonBounds = getExonBoundaries(variant)
@@ -828,7 +828,7 @@ def getNewSplicePosition(varGenPos, varStrand, varWindowPos, inFirstThree):
     return newSplicePos
     
 def getAltExonLength(variant):
-    # TO DO write unittests for this
+    '''Given a variant, returns the length of the alternate exon after splicing occurs in max MES window'''
     if varInExon(variant) == True:
         varExonNum = getVarExonNumber(variant)
         exonBounds = getExonBoundaries(variant)
@@ -837,11 +837,26 @@ def getAltExonLength(variant):
                                             slidingWindowInfo["varWindowPosition"], slidingWindowInfo["inFirstThree"])
         if getVarStrand(variant) == "-":
             varExonStart = int(exonBounds[varExonNum]["exonStart"])
-            exonLength = varExonStart - newSplicePos
+            # newSplicePos -1 to account for RefSeq numbering which starts to the right of the first base
+            exonLength = varExonStart - (newSplicePos - 1)
         else:
             varExonEnd = int(exonBounds[varExonNum]["exonEnd"])
-            exonLength = varExonEnd - newSpliecPos
+            refExonLength = getRefExonLength(variant)
+            # need to compare to refExonLength because of + strand gene
+            # newSplicePos -1 to account for RefSeq numbering which starts to the right of the first base
+            exonLength = refExonLength - (varExonEnd - (newSplicePos - 1))
         return exonLength
+
+def compareRefAltExonLengths(refLength, altLength):
+    '''
+    Compares ref and alt exon lengths
+    If both exon lengths % 3 are equal, then both ref and alt have the same reading frame
+    Returns true if both ref and alt exon have the same reading frame, false otherwise
+    '''
+    if refLength % 3 == altLength % 3:
+        return True
+    else:
+        return False
     
 def determineSpliceRescueSNS(variant, boundaries):
     # TO DO leave this as is for now until can figure out what to do moving forward
