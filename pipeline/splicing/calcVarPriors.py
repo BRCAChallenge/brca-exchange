@@ -6,7 +6,7 @@ calcVarPriors
 Parses a tsv file (default built.tsv) containing variant information and for each variant in file 
 calculates either the prior probability of pathogenicity or a prior ENGIMA classification based on variant type and variant location
 '''
-import pdb
+
 import argparse
 import csv
 import requests
@@ -54,6 +54,14 @@ brca2CIDomains = {"enigma": {"dnb": {"domStart": 32356433,
 greyZones = {"BRCA2": {"greyZoneStart": 32398438,
                        "greyZoneEnd": 32398488}}
 
+
+# Canonical BRCA transcripts in RefSeq nomenclature
+BRCA1_RefSeq = "NM_007294.3"
+BRCA2_RefSeq = "NM_000059.3"
+
+# Fetch transcript data for BRCA1/BRCA2 RefSeq transcripts
+brca1TranscriptData = fetch_gene_coordinates(BRCA1_RefSeq)
+brca2TranscriptData = fetch_gene_coordinates(BRCA2_RefSeq)
 
 def checkSequence(sequence):
     '''Checks if a given sequence contains acceptable nucleotides returns True if sequence is comprised entirely of acceptable bases'''
@@ -197,7 +205,10 @@ def varOutsideBoundaries(variant):
     '''Given a variant, determines if variant is outside transcript boundaries'''
     varGenPos = int(variant["Pos"])
     varTranscript = variant["Reference_Sequence"]
-    transcriptData = fetch_gene_coordinates(str(varTranscript))
+    if varTranscript == BRCA1_RefSeq:
+        transcriptData = brca1TranscriptData
+    elif varTranscript == BRCA2_RefSeq:
+        transcriptData = brca2TranscriptData
     varStrand = getVarStrand(variant)
     if varStrand == "+":
         txnStart = int(transcriptData["txStart"])
@@ -220,7 +231,10 @@ def varInUTR(variant):
     if varOutBounds == False:
         varGenPos = int(variant["Pos"])
         varTranscript = variant["Reference_Sequence"]
-        transcriptData = fetch_gene_coordinates(varTranscript)
+        if varTranscript == BRCA1_RefSeq:
+            transcriptData = brca1TranscriptData
+        elif varTranscript == BRCA2_RefSeq:
+            transcriptData = brca2TranscriptData
         varStrand = getVarStrand(variant)
         if varStrand == "+":
             tsnStart = int(transcriptData["cdsStart"])
@@ -245,7 +259,10 @@ def getExonBoundaries(variant):
     Uses function implemented in calcMaxEntScanMeanStd to get data for variant's transcript
     '''
     varTranscript = variant["Reference_Sequence"]
-    transcriptData = fetch_gene_coordinates(str(varTranscript))
+    if varTranscript == BRCA1_RefSeq:
+        transcriptData = brca1TranscriptData
+    elif varTranscript == BRCA2_RefSeq:
+        transcriptData = brca2TranscriptData
 
     # parse exon starts and exon ends
     transcriptData["exonStarts"] = re.sub(",(\s)*$", "", transcriptData["exonStarts"])
