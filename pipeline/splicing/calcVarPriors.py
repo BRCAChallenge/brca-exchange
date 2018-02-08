@@ -201,14 +201,21 @@ def checkWithinBoundaries(varStrand, varGenPos, boundaryStart, boundaryEnd):
     else:
         return False
 
+def getTranscriptData(referenceSequence):
+    '''
+    Given a reference sequence (e.g. "NM_007294.3"),
+    Returns transcript data for that reference sequencee
+    '''
+    if referenceSequence == BRCA1_RefSeq:
+        return brca1TranscriptData
+    elif referenceSequence == BRCA2_RefSeq:
+        return brca2TranscriptData
+    
 def varOutsideBoundaries(variant):
     '''Given a variant, determines if variant is outside transcript boundaries'''
     varGenPos = int(variant["Pos"])
     varTranscript = variant["Reference_Sequence"]
-    if varTranscript == BRCA1_RefSeq:
-        transcriptData = brca1TranscriptData
-    elif varTranscript == BRCA2_RefSeq:
-        transcriptData = brca2TranscriptData
+    transcriptData = getTranscriptData(varTranscript)
     varStrand = getVarStrand(variant)
     if varStrand == "+":
         txnStart = int(transcriptData["txStart"])
@@ -231,10 +238,7 @@ def varInUTR(variant):
     if varOutBounds == False:
         varGenPos = int(variant["Pos"])
         varTranscript = variant["Reference_Sequence"]
-        if varTranscript == BRCA1_RefSeq:
-            transcriptData = brca1TranscriptData
-        elif varTranscript == BRCA2_RefSeq:
-            transcriptData = brca2TranscriptData
+        transcriptData = getTranscriptData(varTranscript)
         varStrand = getVarStrand(variant)
         if varStrand == "+":
             tsnStart = int(transcriptData["cdsStart"])
@@ -259,11 +263,8 @@ def getExonBoundaries(variant):
     Uses function implemented in calcMaxEntScanMeanStd to get data for variant's transcript
     '''
     varTranscript = variant["Reference_Sequence"]
-    if varTranscript == BRCA1_RefSeq:
-        transcriptData = brca1TranscriptData
-    elif varTranscript == BRCA2_RefSeq:
-        transcriptData = brca2TranscriptData
-
+    transcriptData = getTranscriptData(varTranscript)
+    
     # parse exon starts and exon ends
     transcriptData["exonStarts"] = re.sub(",(\s)*$", "", transcriptData["exonStarts"])
     transcriptData["exonEnds"] = re.sub(",(\s)*$", "", transcriptData["exonEnds"])
