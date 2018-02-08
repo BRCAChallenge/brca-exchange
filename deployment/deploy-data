@@ -8,11 +8,9 @@ set -o errexit
 
 # 2. A path to a release archive of the format release-{mm-dd-yy}.tar.gz
 
-# 3. A path to export_data_for_genome_browser.sh for adding data for the genome browser.
-
 # Example:
 
-# Running `./deployment/deploy-data beta PATH/TO/release-10-06-16.tar.gz PATH/TO/genomeBrowserTrack/export_data_for_genome_browser.sh`
+# Running `./deployment/deploy-data beta PATH/TO/release-10-06-16.tar.gz`
 # would add the 10-06-16 release to the beta database and put files in the correct
 # locations for access, storage and download.
 
@@ -50,19 +48,7 @@ if [ "${ENVIRONMENT}" != "beta" ] && [ "${ENVIRONMENT}" != "production" ] && [ "
     exit 1
 fi
 
-# Expects absolute paths to release archive and export_data_for_genome_browser.sh.
 RELEASE_ARCHIVE_PATH=$2
-GENOME_BROWSER_SCRIPT=$3
-declare -a arr=("$RELEASE_ARCHIVE_PATH" "$GENOME_BROWSER_SCRIPT")
-
-for i in "${arr[@]}"
-do
-    if [[ "$i" = /* ]]; then
-        echo "$i"
-        echo "ERROR: Must use absolute path."
-        exit 1
-    fi
-done
 
 if [ "${ENVIRONMENT}" == "local" ] ;then
     # Get deployment directory to have relative path to addrelease script
@@ -102,6 +88,12 @@ if [ "${ENVIRONMENT}" == "beta" ] || [ "${ENVIRONMENT}" == "production" ] ;then
 
         rm ${REMOTE_TAR_TMP}
 ENDSSH
-    echo "Exporting data for Genome Browser..."
-    ${GENOME_BROWSER_SCRIPT} ${RELEASE_ARCHIVE_PATH}
+
+    if [ "${ENVIRONMENT}" == "production" ] ;then
+        echo "Exporting data for Genome Browser..."
+        SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+        GENOME_BROWSER_SCRIPT="${SCRIPT_DIR}/../pipeline/genomeBrowserTrack/export_data_for_genome_browser.sh"
+        ${GENOME_BROWSER_SCRIPT} ${RELEASE_ARCHIVE_PATH}
+    fi
+
 fi
