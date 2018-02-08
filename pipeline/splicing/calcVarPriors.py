@@ -264,7 +264,6 @@ def getExonBoundaries(variant):
     '''
     varTranscript = variant["Reference_Sequence"]
     transcriptData = getTranscriptData(varTranscript)
-    
     # parse exon starts and exon ends
     transcriptData["exonStarts"] = re.sub(",(\s)*$", "", transcriptData["exonStarts"])
     transcriptData["exonEnds"] = re.sub(",(\s)*$", "", transcriptData["exonEnds"])
