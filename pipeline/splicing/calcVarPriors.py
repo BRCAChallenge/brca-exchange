@@ -55,6 +55,14 @@ greyZones = {"BRCA2": {"greyZoneStart": 32398438,
                        "greyZoneEnd": 32398488}}
 
 
+# Canonical BRCA transcripts in RefSeq nomenclature
+BRCA1_RefSeq = "NM_007294.3"
+BRCA2_RefSeq = "NM_000059.3"
+
+# Fetch transcript data for BRCA1/BRCA2 RefSeq transcripts
+brca1TranscriptData = fetch_gene_coordinates(BRCA1_RefSeq)
+brca2TranscriptData = fetch_gene_coordinates(BRCA2_RefSeq)
+
 def checkSequence(sequence):
     '''Checks if a given sequence contains acceptable nucleotides returns True if sequence is comprised entirely of acceptable bases'''
     acceptableBases = ["A", "C", "T", "G", "N", "R", "Y"]
@@ -193,11 +201,21 @@ def checkWithinBoundaries(varStrand, varGenPos, boundaryStart, boundaryEnd):
     else:
         return False
 
+def getTranscriptData(referenceSequence):
+    '''
+    Given a reference sequence (e.g. "NM_007294.3"),
+    Returns transcript data for that reference sequencee
+    '''
+    if referenceSequence == BRCA1_RefSeq:
+        return brca1TranscriptData
+    elif referenceSequence == BRCA2_RefSeq:
+        return brca2TranscriptData
+    
 def varOutsideBoundaries(variant):
     '''Given a variant, determines if variant is outside transcript boundaries'''
     varGenPos = int(variant["Pos"])
     varTranscript = variant["Reference_Sequence"]
-    transcriptData = fetch_gene_coordinates(str(varTranscript))
+    transcriptData = getTranscriptData(varTranscript)
     varStrand = getVarStrand(variant)
     if varStrand == "+":
         txnStart = int(transcriptData["txStart"])
@@ -220,7 +238,7 @@ def varInUTR(variant):
     if varOutBounds == False:
         varGenPos = int(variant["Pos"])
         varTranscript = variant["Reference_Sequence"]
-        transcriptData = fetch_gene_coordinates(varTranscript)
+        transcriptData = getTranscriptData(varTranscript)
         varStrand = getVarStrand(variant)
         if varStrand == "+":
             tsnStart = int(transcriptData["cdsStart"])
@@ -245,8 +263,7 @@ def getExonBoundaries(variant):
     Uses function implemented in calcMaxEntScanMeanStd to get data for variant's transcript
     '''
     varTranscript = variant["Reference_Sequence"]
-    transcriptData = fetch_gene_coordinates(str(varTranscript))
-
+    transcriptData = getTranscriptData(varTranscript)
     # parse exon starts and exon ends
     transcriptData["exonStarts"] = re.sub(",(\s)*$", "", transcriptData["exonStarts"])
     transcriptData["exonEnds"] = re.sub(",(\s)*$", "", transcriptData["exonEnds"])
@@ -746,6 +763,23 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries):
                 "altMaxEntScanScore": altMaxEntScanScore,
                 "refZScore": refZScore,
                 "altZScore": altZScore}
+
+def getPriorProbAfterGreyZoneSNS(variant, boundaries):
+    '''
+    Given a variant and location boundaries (either PRIORS or enigma)
+    Checks that variant is after the grey zone and is a single nucleotide substitution
+    Checks that variant is either a missense or nonsense mutation
+    Returns a dictionary containing prior probability of pathogenecity and predicted qualitative enigma class
+    '''
+    varType = getVarType(variant)
+    varLoc = getVarLocation(variant, boundaries)
+    varCons = getVarConsequences(variant)
+    if varType == "substitution" and varLoc == "after_grey_zone_variant":
+        if varCons == "stop_gained" or varCons == "missense_variant":
+            priorProb = "N/A"
+            enigmaClass = "class_2"
+        return {"priorProb": priorProb,
+                "enigmaClass": enigmaClass}
 
 def getVarDict(variant, boundaries):
     '''

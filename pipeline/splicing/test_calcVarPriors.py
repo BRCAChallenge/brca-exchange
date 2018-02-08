@@ -104,7 +104,8 @@ enigmaClasses = {"class1": "class_1",
 # possible prior probability of pathogenecity values
 priorProbs = {"low": 0.04,
               "moderate": 0.34,
-              "high": 0.97}
+              "high": 0.97,
+              "NA": "N/A"}
 
 
 class test_calcVarPriors(unittest.TestCase):
@@ -312,9 +313,8 @@ class test_calcVarPriors(unittest.TestCase):
         withinBoundaries = calcVarPriors.checkWithinBoundaries(varStrand, position, boundaryStart, boundaryEnd)
         self.assertTrue(withinBoundaries)        
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
-    def test_varOutsideBoundariesBRCA1(self, fetch_gene_coordinates, getVarStrand):
+    def test_varOutsideBoundariesBRCA1(self, getVarStrand):
         '''Tests that variant outside/inside transcript boundaries are correctly identified for BRCA1'''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -329,9 +329,8 @@ class test_calcVarPriors(unittest.TestCase):
         varOutBounds = calcVarPriors.varOutsideBoundaries(self.variant)
         self.assertFalse(varOutBounds)
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
-    def test_varOutsideBoundariesBRCA2(self, fetch_gene_coordinates, getVarStrand):
+    def test_varOutsideBoundariesBRCA2(self, getVarStrand):
         '''Tests that variant outside/inside transcript boundaries are correctly identified for BRCA2'''
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -346,10 +345,9 @@ class test_calcVarPriors(unittest.TestCase):
         varOutBounds = calcVarPriors.varOutsideBoundaries(self.variant)
         self.assertFalse(varOutBounds)
         
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)
     @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
-    def test_varInUTRBRCA1(self, fetch_gene_coordinates, varOutsideBoundaries, getVarStrand):
+    def test_varInUTRBRCA1(self, varOutsideBoundaries, getVarStrand):
         '''Tests that variants in 5' and 3' UTR are correctly identified for BRCA1'''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -374,10 +372,9 @@ class test_calcVarPriors(unittest.TestCase):
         varInUTR = calcVarPriors.varInUTR(self.variant)
         self.assertFalse(varInUTR)
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
-    def test_varInUTRBRCA2(self, fetch_gene_coordinates, varOutsideBoundaries, getVarStrand):
+    def test_varInUTRBRCA2(self, varOutsideBoundaries, getVarStrand):
         '''Tests that variants in 5' and 3' UTR are correctly identified for BRCA2'''
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -402,8 +399,7 @@ class test_calcVarPriors(unittest.TestCase):
         varInUTR = calcVarPriors.varInUTR(self.variant)
         self.assertFalse(varInUTR)
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA1)    
-    def test_getExonBoundariesBRCA1(self, fetch_gene_coordinates):
+    def test_getExonBoundariesBRCA1(self):
         '''
         Tests that:
         1. Exon boundaries are set correctly for gene on minus strand (BRCA1)
@@ -428,8 +424,7 @@ class test_calcVarPriors(unittest.TestCase):
                 # checks that next exon does not start before current exon ends
                 self.assertGreater(exonBounds["exonEnd"], nextExonStart)
 
-    @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)          
-    def test_getExonBoundariesBRCA2(self, fetch_gene_coordinates):
+    def test_getExonBoundariesBRCA2(self):
         '''
         Tests that:
         1. Exon boundaries are set correctly for gene on plus strand (BRCA2)
@@ -1929,7 +1924,51 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
-        
+
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["afterGreyZone"])
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "missense_variant")
+    def test_getPriorProbAfterGreyZoneMissenseSNS(self, getVarType, getVarLocation, getVarConsequences):
+        '''
+        Tests that:
+        prior prob is set to N/A and ENIGMA class is class 2 for a BRCA2 missense variant after the grey zone
+        '''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["Chr"] = "13"
+        self.variant["Hg38_Start"] = "32398528"
+        self.variant["Hg38_End"] = "32398528"
+
+        self.variant["Pos"] = "32398528"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "G"
+        priorProb = calcVarPriors.getPriorProbAfterGreyZoneSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["afterGreyZone"])
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
+    def test_getPriorProbAfterGreyZoneNonesenseSNS(self, getVarType, getVarLocation, getVarConsequences):
+        '''
+        Tests that:
+        prior prob is set to N/A and ENIGMA class is class 2 for a BRCA2 nonsense variant after the grey zone
+        '''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["Chr"] = "13"
+        self.variant["Hg38_Start"] = "32398492"
+        self.variant["Hg38_End"] = "32398492"
+
+        self.variant["Pos"] = "32398492"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "T"
+        priorProb = calcVarPriors.getPriorProbAfterGreyZoneSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     def test_getVarDict(self, fetch_gene_coordinates):
         '''
