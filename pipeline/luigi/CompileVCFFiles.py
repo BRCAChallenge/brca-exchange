@@ -553,7 +553,7 @@ class CopyBICOutputToOutputDir(luigi.Task):
 
     def output(self):
         bic_file_dir = self.file_parent_dir + '/BIC'
-        return luigi.LocalTarget(bic_file_dir + "/bic_brca12.sorted.hg38.vcf")
+        return luigi.LocalTarget(self.output_dir + "/bic_brca12.sorted.hg38.vcf")
 
     def run(self):
         bic_file_dir = self.file_parent_dir + '/BIC'
