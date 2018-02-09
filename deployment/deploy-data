@@ -38,7 +38,6 @@ function add_release_tar_to_db {
     python ${MANAGE_SCRIPT} addrelease ${DATA} ${REPORTS} ${METADATA} ${REMOVED} ${DIFFJSON}
 }
 
-
 export HOST=${HOST:-brcaexchange.cloudapp.net}
 USER=brca
 
@@ -49,7 +48,6 @@ if [ "${ENVIRONMENT}" != "beta" ] && [ "${ENVIRONMENT}" != "production" ] && [ "
     exit 1
 fi
 
-# Expects path to release archive as second argument.
 RELEASE_ARCHIVE_PATH=$2
 
 if [ "${ENVIRONMENT}" == "local" ] ;then
@@ -91,6 +89,11 @@ if [ "${ENVIRONMENT}" == "beta" ] || [ "${ENVIRONMENT}" == "production" ] ;then
         rm ${REMOTE_TAR_TMP}
 ENDSSH
 
-     echo "Exporting data for Genome Browser..."
-    ../pipeline/genomeBrowserTrack/export_data_for_genome_browser.sh ${RELEASE_ARCHIVE_PATH}
+    if [ "${ENVIRONMENT}" == "production" ] ;then
+        echo "Exporting data for Genome Browser..."
+        SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+        GENOME_BROWSER_SCRIPT="${SCRIPT_DIR}/../pipeline/genomeBrowserTrack/export_data_for_genome_browser.sh"
+        ${GENOME_BROWSER_SCRIPT} ${RELEASE_ARCHIVE_PATH}
+    fi
+
 fi
