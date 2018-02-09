@@ -8,7 +8,7 @@ SPLICE SITES, AND CLINICALLY IMPORTANT REGIONS
 Exon boundary data
 */
 
-brca1Exons = {'exon1': {'exonEnd': 43125270,
+const brca1Exons = {'exon1': {'exonEnd': 43125270,
                         'exonStart': 43125483},
               'exon2': {'exonEnd': 43124016,
                         'exonStart': 43124115},
@@ -55,7 +55,7 @@ brca1Exons = {'exon1': {'exonEnd': 43125270,
               'exon24': {'exonEnd': 43044294,
                          'exonStart': 43045802}}
 
-brca2Exons = {'exon1': {'exonEnd': 32315667,
+const brca2Exons = {'exon1': {'exonEnd': 32315667,
                         'exonStart': 32315479},
               'exon2': {'exonEnd': 32316527,
                         'exonStart': 32316421},
@@ -114,7 +114,7 @@ brca2Exons = {'exon1': {'exonEnd': 32315667,
 Reference splice donor boundaries
 */
 
-brca1RefSpliceDonorBounds = {'exon1': {'donorStart': 43125273,
+const brca1RefSpliceDonorBounds = {'exon1': {'donorStart': 43125273,
                                        'donorEnd': 43125265},
                              'exon2': {'donorStart': 43124019,
                                        'donorEnd': 43124011},
@@ -159,7 +159,7 @@ brca1RefSpliceDonorBounds = {'exon1': {'donorStart': 43125273,
                              'exon23': {'donorStart': 43047645,
                                         'donorEnd': 43047637}}
 
-brca2RefSpliceDonorBounds = {'exon1': {'donorStart': 32315665,
+const brca2RefSpliceDonorBounds = {'exon1': {'donorStart': 32315665,
                                        'donorEnd': 32315673},
                              'exon2': {'donorStart': 32316525,
                                        'donorEnd': 32316533},
@@ -215,7 +215,7 @@ brca2RefSpliceDonorBounds = {'exon1': {'donorStart': 32315665,
 Reference splice acceptor boundaries
 */
 
-brca1RefSpliceAcceptorBounds = {'exon2': {'acceptorStart': 43124135,
+const brca1RefSpliceAcceptorBounds = {'exon2': {'acceptorStart': 43124135,
                                           'acceptorEnd': 43124113},
                                 'exon3': {'acceptorStart': 43115799,
                                           'acceptorEnd': 43115777},
@@ -260,7 +260,7 @@ brca1RefSpliceAcceptorBounds = {'exon2': {'acceptorStart': 43124135,
                                 'exon24': {'acceptorStart': 43045822,
                                            'acceptorEnd': 43045800}}
 
-brca2RefSpliceAcceptorBounds = {'exon2': {'acceptorStart': 32316402,
+const brca2RefSpliceAcceptorBounds = {'exon2': {'acceptorStart': 32316402,
                                           'acceptorEnd': 32316424},
                                 'exon3': {'acceptorStart': 32319057,
                                           'acceptorEnd': 32319079},
@@ -317,7 +317,7 @@ brca2RefSpliceAcceptorBounds = {'exon2': {'acceptorStart': 32316402,
 Clinically important regions 
 */
 
-brca1CIDomains = {"enigma": {"ring": {"domStart": 43124096,
+const brca1CIDomains = {"enigma": {"ring": {"domStart": 43124096,
                                       "domEnd": 43104260},
                              "brct": {"domStart": 43070966,
                                       "domEnd": 43045705}},
@@ -328,7 +328,7 @@ brca1CIDomains = {"enigma": {"ring": {"domStart": 43124096,
                              "brct": {"domStart": 43070966,
                                       "domEnd": 43045705}}}
 
-brca2CIDomains = {"enigma": {"dnb": {"domStart": 32356433,
+const brca2CIDomains = {"enigma": {"dnb": {"domStart": 32356433,
                                      "domEnd": 32396954}},
                   "priors": {"initiation": {"domStart": 32316461,
                                             "domEnd": 32316463},
