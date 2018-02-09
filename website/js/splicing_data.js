@@ -1,3 +1,5 @@
+'use strict';
+
 /*
 THIS FILE CONTAINS DATA DETAILING BRCA1/BRCA2 EXONS,
 SPLICE SITES, AND CLINICALLY IMPORTANT REGIONS
@@ -314,7 +316,7 @@ const brca2RefSpliceAcceptorBounds = {'exon2': {'acceptorStart': 32316402,
                                            'acceptorEnd': 32398164}}
 
 /*
-Clinically important regions 
+Clinically important regions
 */
 
 const brca1CIDomains = {"enigma": {"ring": {"domStart": 43124096,
@@ -339,3 +341,13 @@ const brca2CIDomains = {"enigma": {"dnb": {"domStart": 32356433,
                              "tr2/rad5": {"domStart": 32398318,
                                           "domEnd": 32398428}}}
 
+module.exports = {
+    brca1Exons,
+    brca2Exons,
+    brca1RefSpliceDonorBounds,
+    brca2RefSpliceDonorBounds,
+    brca1RefSpliceAcceptorBounds,
+    brca2RefSpliceAcceptorBounds,
+    brca1CIDomains,
+    brca2CIDomains
+};
