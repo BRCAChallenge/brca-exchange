@@ -1981,4 +1981,3 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(varDict["varChrom"], self.variant["Chr"])
         self.assertEquals(varDict["varGene"], self.variant["Gene_Symbol"])
         self.assertEquals(varDict["varGenCoordinate"], self.variant["Pos"])
-        
