@@ -15,6 +15,7 @@ The build is based on npm and webpack.
 * **Start the frontend**
    * `cd website`
    * `npm install`
+      * Note that you may encounter problems with node-gyp installing contextify. Try reinstalling after switching to Node 6.9.1. NVM is a recommended version manager for Node.
    * `npm start`
 
 ## Build the server
@@ -22,16 +23,19 @@ The server runs on Django with postgres so install and set up those
 * **Install postgres**
    * For Mac:
        * The easiest way is to install postgress.app from http://postgresapp.com/
+       * Alternatively, `brew install postgresql`
    * Linux:
        * `sudo apt-get install postgresql postgresql-contrib`
-* **Create the database**
-   * `sudo -u postgres createdb  storage.pg`
+* **Create a database called storage.pg**
+   * `sudo -u postgres createdb storage.pg`
+   * If this doesn't work, figure out how to create a db called `storage.pg` for user `postgres`.
 * **Set the postgres role's password**
    * `sudo -u postgres psql postgres`
    *  at the prompt type `\password postgres` to set the password to `postgres`
+   * If this doesn't work, figure out how to set user `postgres`'s password to `postgres`.
 * **Install the python dependencies**
    * `cd website`
-   * `pip install -qU -r requirements.txt`
+   * `pip install -qU -r requirements.txt`, if you encounter failures with psycopg2, try `pip install psycopg2==2.7.3.2`
 * **Run the initial migration to populate the database**
    * `cd django`
    * `python manage.py migrate`
