@@ -49,29 +49,18 @@ The server runs on Django with postgres so install and set up those
 
 Use `npm run lint` to run the lint rules. We lint with eslint and babel-eslint.
 
+## How to add data to your database
+This process will add data to your database.
 
-## How to change the data file
-This process will delete all the previous data from the `variants` table and replace it with data from a new tsv file.
+* Contact another developer to obtain a dump of the data from the beta or production site. The dump can be obtained by logging into the desired machine and running `sudo -u postgres pg_dump -d {REMOTEDBNAME} -F c -c -f /PATH/TO/full_db.dump` against whatever database is used as the source.
 
- * Replace the contents of `data/resources/aggregated.tsv` with the new data file
- * (Optional step if the schema has changed) Change the following files to correspond to schema changes (renamed / added / removed columns)
-    *  `django/data/models.py` - this is the python model that corresponds to all the table columns
-    *  `django/data/migrations/0001_initial.py` - specifies all the table columns, it matches the model above and the tsv headers
-    *  `django/data/migrations/0002_search_index.py` - specifies which columns are used in full text search
-    *  (if applicable) `django/data/migrations/0004_autocomplete_words.py` - specifies which columns are used in autocomplete suggestions
-    *  `js/VariantTable.js`:
-        * `columns` specifies which columns appear in the default mode and their names
-        * `research_mode_columns` specifies which columns appear in research mode and their names
-        * `subColumns` specifies which columns appear in the column selection filter and how they're grouped.
- * `cd django`
- * `python manage.py migrate --fake data zero && python manage.py migrate`
+* Once you have the data on your machine, run `pg_restore /PATH/TO/full_db.dump -c -v -1 -d storage.pg` to load the data into your local database.
 
 ## How to add additional releases
 This process will add an additional release to the database and rebuild the words table to update autocomplete.
 
- * Create a new directory at `brca-exchange/website/django/data/resources/releases/release-{MM-DD-YY}` that contains `built_with_change_types.tsv`, `removed.tsv`, and `version.json` from the desired pipeline output.
- * Add the archive of the release (e.g. `release-10-06-16.tar.gz`) to `brca-exchange/website/django/uploads/releases/` so the archive can be downloaded by users.
- * Run `./manage.py addrelease ./data/resources/releases/release-{MM-DD-YY}/built_with_change_types.tsv ./data/resources/releases/release-{MM-DD-YY}/reports.tsv ./data/resources/releases/release-{MM-DD-YY}/version.json ./data/resources/releases/release-{MM-DD-YY}/removed.tsv ./data/resources/releases/release-{MM-DD-YY}/diff.json` to add new data to the database, rebuild the words table, and generate a new release.
+ * Obtain a release archive (should be of the format release-MM-DD-YY.tar.gz).
+ * From the project root directory, run `./deployment/deploy-data local PATH/TO/release-MM-DD-YY.tar.gz`.
 
 ## How to add/approve new users on the community page
 * Go to http://brcaexchange.org/backend/admin/ and follow necessary steps.
