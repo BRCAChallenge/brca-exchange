@@ -5,6 +5,12 @@ THIS FILE CONTAINS DATA DETAILING BRCA1/BRCA2 EXONS,
 SPLICE SITES, AND CLINICALLY IMPORTANT REGIONS
 */
 
+/*
+NOTE: BRCA1 is transcribed on the minus strand, meaning it is read from right
+to left instead of the usual left to right. Genomic coordinates are always
+based on the plus strand so the start coordinate for BRCA1 occurs to the right
+of the end coordinate in genomic position (so it has a greater value)
+*/
 
 /*
 Exon boundary data
@@ -115,7 +121,7 @@ const brca2Exons = {'exon1': {'end': 32315667,
 /*
 Reference splice donor boundaries
 */
-
+// See note at top of file for explanation of start > end.
 const brca1RefSpliceDonorBounds = {'exon1': {'start': 43125273,
                                        'end': 43125265},
                              'exon2': {'start': 43124019,
@@ -216,7 +222,7 @@ const brca2RefSpliceDonorBounds = {'exon1': {'start': 32315665,
 /*
 Reference splice acceptor boundaries
 */
-
+// See note at top of file for explanation of start > end.
 const brca1RefSpliceAcceptorBounds = {'exon2': {'start': 43124135,
                                           'end': 43124113},
                                 'exon3': {'start': 43115799,
@@ -318,7 +324,7 @@ const brca2RefSpliceAcceptorBounds = {'exon2': {'start': 32316402,
 /*
 Clinically important regions
 */
-
+// See note at top of file for explanation of start > end.
 const brca1CIDomains = {"enigma": {"ring": {"start": 43124096,
                                       "end": 43104260},
                              "brct": {"start": 43070966,
