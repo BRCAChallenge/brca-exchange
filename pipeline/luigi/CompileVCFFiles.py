@@ -553,7 +553,7 @@ class CopyBICOutputToOutputDir(luigi.Task):
 
     def output(self):
         bic_file_dir = self.file_parent_dir + '/BIC'
-        return luigi.LocalTarget(bic_file_dir + "/bic_brca12.sorted.hg38.vcf")
+        return luigi.LocalTarget(self.output_dir + "/bic_brca12.sorted.hg38.vcf")
 
     def run(self):
         bic_file_dir = self.file_parent_dir + '/BIC'
@@ -1522,12 +1522,12 @@ class GenerateReleaseArchive(luigi.Task):
 
 class RunAll(luigi.WrapperTask):
     date = luigi.DateParameter(default=datetime.date.today())
-    u = luigi.Parameter()
-    p = luigi.Parameter(significant=False)
+    u = luigi.Parameter(default="UNKNOWN_USER")
+    p = luigi.Parameter(default="UNKNOWN_PASSWORD", significant=False)
 
-    synapse_username = luigi.Parameter(description='used to access preprocessed enigma files')
-    synapse_password = luigi.Parameter(description='used to access preprocessed enigma files', significant=False)
-    synapse_enigma_file_id = luigi.Parameter(description='file id for combined enigma tsv file')
+    synapse_username = luigi.Parameter(default="UNKNOWN_SYNAPSE_USER", description='used to access preprocessed enigma files')
+    synapse_password = luigi.Parameter(default="UNKNOWN_SYNAPSE_PASSWORD", description='used to access preprocessed enigma files', significant=False)
+    synapse_enigma_file_id = luigi.Parameter(default="UNKNOWN_SYNAPSE_FILEID", description='file id for combined enigma tsv file')
 
     resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
                                     description='directory to store brca-resources data')
