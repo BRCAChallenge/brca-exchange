@@ -99,12 +99,14 @@ enigmaClasses = {"class1": "class_1",
                  "class2": "class_2",
                  "class3": "class_3",
                  "class4": "class_4",
-                 "class5": "class_5"}
+                 "class5": "class_5",
+                 "NA": "N/A"}
 
 # possible prior probability of pathogenecity values
 priorProbs = {"low": 0.04,
               "moderate": 0.34,
               "high": 0.97,
+              "pathogenic": 0.99,
               "NA": "N/A"}
 
 
@@ -1554,6 +1556,18 @@ class test_calcVarPriors(unittest.TestCase):
         zScore = calcVarPriors.getZScore(maxEntScanScore, donor=False)
         self.assertGreater(zScore, 0)
 
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {"inFirstThree": True})
+    def test_varInFirstThreeTrue(self, getMaxMaxEntScanScoreSlidingWindowSNS):
+        '''Tests that varInFirstThree returns True if variant is in first 3 bp of window'''
+        inFirstThree = calcVarPriors.varInFirstThree(self.variant)
+        self.assertTrue(inFirstThree)
+
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {"inFirstThree": False})
+    def test_varinFirstThreeFalse(self, getMaxMaxEntScanScoreSlidingWindowSNS):
+        '''Tests that varInFirstThree returns False if variant is NOT in first 3 bp of window'''
+        inFirstThree = calcVarPriors.varInFirstThree(self.variant)
+        self.assertFalse(inFirstThree)
+
     def test_isCiDomainInRegionBRCA1(self):
         '''
         Tests that region overlap is identified correctly for a variant on minus strand gene (BRCA1)
@@ -1709,6 +1723,234 @@ class test_calcVarPriors(unittest.TestCase):
         altLength = 103
         inFrame = calcVarPriors.compareRefAltExonLengths(refLength, altLength)
         self.assertFalse(inFrame)
+
+    @mock.patch('calcVarPriors.getRefExonLength', return_value = 45)
+    @mock.patch('calcVarPriors.getAltExonLength', return_value = 30)
+    @mock.patch('calcVarPriors.compareRefAltExonLengths', return_value = True)    
+    def test_isSplicingWindowInFrameTrue(self, getRefExonLength, getAltExonLength, compareRefAltExonLengths):
+        '''Tests that if splicing window is in frame, function returns true'''
+        inFrame = calcVarPriors.isSplicingWindowInFrame(self.variant)
+        self.assertTrue(inFrame)
+        
+    @mock.patch('calcVarPriors.getRefExonLength', return_value = 45)
+    @mock.patch('calcVarPriors.getAltExonLength', return_value = 29)
+    @mock.patch('calcVarPriors.compareRefAltExonLengths', return_value = False)    
+    def test_isSplicingWindowInFrameFalse(self, getRefExonLength, getAltExonLength, compareRefAltExonLengths):
+        '''Tests that if splicing window is NOT in frame, function returns false'''
+        inFrame = calcVarPriors.isSplicingWindowInFrame(self.variant)
+        self.assertFalse(inFrame)        
+
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
+    @mock.patch('calcVarPriors.getVarExonNumber', return_value = "exon16")
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca1Exons)
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -7.31,
+                                                                                       'altMaxEntScanScore': -7.32,
+                                                                                       'altZScore': -6.551360746287276,
+                                                                                       'inFirstThree': True,
+                                                                                       'varWindowPosition': 1,
+                                                                                       'refZScore': -6.547067050054031})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43070934)
+    def test_compareDeNovoWildTypeSplicePosBRCA1True(self, getVarStrand, getVarExonNumber, getExonBoundaries,
+                                                     getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition):
+        '''
+        Tests that comparsion between de novo and wild-type splice position is correct for a BRCA1 variant that:
+            1. has highest scoring window with variant in first three nucleotides
+            2. AND distance between de novo and wild-type donor is divisble by 3
+        '''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        self.variant["Pos"] = "43070936"
+        self.variant["Ref"] = "C"
+        self.variant["Alt"] = "T"
+        isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant)
+        self.assertTrue(isDivisible)
+        
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
+    @mock.patch('calcVarPriors.getVarExonNumber', return_value = "exon9")
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca1Exons)
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -2.95,
+                                                                                       'altMaxEntScanScore': 5.56,
+                                                                                       'altZScore': -1.0210799978677707,
+                                                                                       'inFirstThree': False,
+                                                                                       'varWindowPosition': 4,
+                                                                                       'refZScore': -4.67501549235923})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43097266)
+    def test_compareDeNovoWildTypeSplicePosBRCA1False(self, getVarStrand, getVarExonNumber, getExonBoundaries,
+                                                      getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition):
+        '''
+        Tests that comparsion between de novo and wild-type splice position is correct for a BRCA1 variant that:
+            1. has highest scoring window with variant in last six nucleotides
+            2. AND distance between de novo and wild-type donor is NOT divisble by 3
+        '''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        self.variant["Pos"] = "43097265"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "C"
+        isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant)
+        self.assertFalse(isDivisible)
+                
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
+    @mock.patch('calcVarPriors.getVarExonNumber', return_value = "exon4")
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca2Exons)
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -9.22,
+                                                                                       'altMaxEntScanScore': -1.57,
+                                                                                       'altZScore': -4.082485412171425,
+                                                                                       'inFirstThree': False,
+                                                                                       'varWindowPosition': 5,
+                                                                                       'refZScore': -7.367163030603819})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32325178)
+    def test_compareDeNovoWildTypeSplicePosBRCA2True(self, getVarStrand, getVarExonNumber, getExonBoundaries,
+                                                     getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition):
+        '''
+        Tests that comparsion between de novo and wild-type splice position is correct for a BRCA2 variant that:
+            1. has highest scoring window with variant in last six nucleotides
+            2. AND distance between de novo and wild-type donor is divisble by 3
+        '''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["Pos"] = "32325180"
+        self.variant["Ref"] = "G"
+        self.variant["Alt"] = "T"
+        isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant)
+        self.assertTrue(isDivisible)
+
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
+    @mock.patch('calcVarPriors.getVarExonNumber', return_value = "exon23")
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca2Exons)
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -3.67,
+                                                                                       'altMaxEntScanScore': -0.32,
+                                                                                       'altZScore': -3.5457733830158054,
+                                                                                       'inFirstThree': True,
+                                                                                       'varWindowPosition': 2,
+                                                                                       'refZScore': -4.984161621152867})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32379873)
+    def test_compareDeNovoWildTypeSplicePosBRCA2False(self, getVarStrand, getVarExonNumber, getExonBoundaries,
+                                                      getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition):
+        '''
+        Tests that comparsion between de novo and wild-type splice position is correct for a BRCA2 variant that:
+            1. has highest scoring window with variant in first three nucleotides
+            2. AND distance between de novo and wild-type donor is NOT divisble by 3
+        '''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["Pos"] = "32379872"
+        self.variant["Ref"] = "C"
+        self.variant["Alt"] = "A"
+        isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant)
+        self.assertFalse(isDivisible)
+
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInFirstThree', return_value = True)
+    def test_determineSpliceRescueSNSinFirstThree(self, getVarConsequences, varInExon, varInFirstThree):
+        '''Tests that variant in first 3 bp of highest scoring window is assigned correct prior prob and splice rescue flag'''
+        boundaries = "enigma"
+        spliceRescueInfo = calcVarPriors.determineSpliceRescueSNS(self.variant, boundaries)
+        self.assertEquals(spliceRescueInfo["priorProb"], priorProbs["high"])
+        self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class4"])
+        self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
+        self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
+
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInFirstThree', return_value = False)
+    @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = False)
+    def test_determineSpliceRescueSNSFrameshift(self, getVarConsequences, varInExon, varInFirstThree, isSplicingWindowInFrame):
+        '''Tests that variant that causes a frameshift is assigned correct prior prob and splice rescue flag'''
+        boundaries = "enigma"
+        spliceRescueInfo = calcVarPriors.determineSpliceRescueSNS(self.variant, boundaries)
+        self.assertEquals(spliceRescueInfo["priorProb"], priorProbs["pathogenic"])
+        self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class5"])
+        self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
+        self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
+        
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInFirstThree', return_value = False)
+    @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
+    @mock.patch('calcVarPriors.getVarExonNumber', return_value = "exon20")
+    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
+    @mock.patch('calcVarPriors.isCiDomainInRegion', return_value = True)
+    @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = True)
+    def test_determineSpliceRescueSNSCiRegionEnigma(self, getVarConsequences, varInExon, varInFirstThree,
+                                                    isSplicingWindowInFrame, getVarStrand, getVarExonNumber,
+                                                    getRefSpliceAcceptorBoundaries, isCiDomainInRegion,
+                                                    compareDeNovoWildTypeSplicePos):
+        '''Tests that variant that truncates part of ENGIMA CI domain is assigned correct prior prob and splice rescue flag'''
+        boundaries = "enigma"
+        spliceRescueInfo = calcVarPriors.determineSpliceRescueSNS(self.variant, boundaries)
+        self.assertEquals(spliceRescueInfo["priorProb"], priorProbs["pathogenic"])
+        self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class5"])
+        self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
+        self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
+        
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInFirstThree', return_value = False)
+    @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
+    @mock.patch('calcVarPriors.getVarExonNumber', return_value = "exon2")
+    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
+    @mock.patch('calcVarPriors.isCiDomainInRegion', return_value = True)
+    @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = True)
+    def test_determineSpliceRescueSNSCiRegionPriors(self, getVarConsequences, varInExon, varInFirstThree,
+                                                    isSplicingWindowInFrame, getVarStrand, getVarExonNumber,
+                                                    getRefSpliceAcceptorBoundaries, isCiDomainInRegion,
+                                                    compareDeNovoWildTypeSplicePos):
+        '''Tests that variant that truncates part of PRIORS CI domain is assigned correct prior prob and splice rescue flag'''
+        boundaries = "priors"
+        spliceRescueInfo = calcVarPriors.determineSpliceRescueSNS(self.variant, boundaries)
+        self.assertEquals(spliceRescueInfo["priorProb"], priorProbs["pathogenic"])
+        self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class5"])
+        self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
+        self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
+        
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInFirstThree', return_value = False)
+    @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
+    @mock.patch('calcVarPriors.getVarExonNumber', return_value = "exon6")
+    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
+    @mock.patch('calcVarPriors.isCiDomainInRegion', return_value = False)
+    @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = False)
+    def test_determineSpliceRescueSNSNotDivisible(self, getVarConsequences, varInExon, varInFirstThree,
+                                                  isSplicingWindowInFrame, getVarStrand, getVarExonNumber,
+                                                  getRefSpliceAcceptorBoundaries, isCiDomainInRegion,
+                                                  compareDeNovoWildTypeSplicePos):
+        '''
+        Tests that variant that causes a frameshift (due to difference de novo vs wild-type splice position) 
+        is assigned correct prior prob and splice rescue flag
+        '''
+        boundaries = "enigma"
+        spliceRescueInfo = calcVarPriors.determineSpliceRescueSNS(self.variant, boundaries)
+        self.assertEquals(spliceRescueInfo["priorProb"], priorProbs["pathogenic"])
+        self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class5"])
+        self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
+        self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
+
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInFirstThree', return_value = False)
+    @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
+    @mock.patch('calcVarPriors.getVarExonNumber', return_value = "exon17")
+    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
+    @mock.patch('calcVarPriors.isCiDomainInRegion', return_value = False)
+    @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = True)
+    def test_determineSpliceRescueSNSWithSpliceFlag(self, getVarConsequences, varInExon, varInFirstThree,
+                                                  isSplicingWindowInFrame, getVarStrand, getVarExonNumber,
+                                                  getRefSpliceAcceptorBoundaries, isCiDomainInRegion,
+                                                  compareDeNovoWildTypeSplicePos):
+        '''Tests that variant with possibility of splice rescue is assigned correct splice rescue and splicing flag'''
+        boundaries = "engima"
+        spliceRescueInfo = calcVarPriors.determineSpliceRescueSNS(self.variant, boundaries)
+        self.assertEquals(spliceRescueInfo["priorProb"], priorProbs["NA"])
+        self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["NA"])
+        self.assertEquals(spliceRescueInfo["spliceRescue"], 1)
+        self.assertEquals(spliceRescueInfo["spliceFlag"], 1)
         
     def test_getEnigmaClass(self):
         ''''
