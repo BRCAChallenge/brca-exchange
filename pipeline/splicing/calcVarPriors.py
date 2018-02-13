@@ -772,10 +772,10 @@ def getSubsequentDonorScores(variant):
         refSeq = getFastaSeq(varChrom, subDonorBounds["donorStart"], subDonorBounds["donorEnd"])
         if varStrand == "-":
             refSeq = str(Seq(refSeq).reverse_complement())
-            subMaxEntScanScore = runMaxEntScan(refSeq, donor=True)
-            subZScore = getZScore(subMaxEntScanScore, donor=True)
-            return {"maxEntScanScore": subMaxEntScanScore,
-                    "zScore": subZScore}
+        subMaxEntScanScore = runMaxEntScan(refSeq, donor=True)
+        subZScore = getZScore(subMaxEntScanScore, donor=True)
+        return {"maxEntScanScore": subMaxEntScanScore,
+                "zScore": subZScore}
 
 def isCiDomainInRegion(regionStart, regionEnd, boundaries, gene):
     '''
