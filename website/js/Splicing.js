@@ -159,21 +159,34 @@ class Variant extends React.Component {
 class Exon extends React.Component {
     render() {
         let { n,
-              txStart,
-              txEnd,
-              width,
-              height,
-              x,
-              variant,
-              highlight
+            txStart,
+            txEnd,
+            width,
+            height,
+            x,
+            variant,
+            zoomed,
+            highlight
         } = this.props;
+
+        // the clip mask allows us to draw variants within the rounded-rectangle exon
+        // we need to assign different mask IDs for each exon, in either zoomed-in or full-transcript mode
+        const clipMaskID = `exon-${n}-clip-${zoomed ? 'zoomed' : 'full'}`;
 
         return (
             <g>
-                <rect x={x} width={width} height={height} rx={4} ry={4} fill={highlight ? highlightFill : exonFill} stroke={highlight ? highlightStroke : exonStroke} />
+                <defs>
+                    <clipPath id={clipMaskID}>
+                        <rect x={x} width={width} height={height} rx={exonBorderRadius} ry={exonBorderRadius} />
+                    </clipPath>
+                </defs>
+
+                <rect x={x} width={width} height={height} rx={exonBorderRadius} ry={exonBorderRadius} fill={highlight ? highlightFill : exonFill} stroke={highlight ? highlightStroke : exonStroke} />
                 <text x={x + width / 2} y={height + 14} textAnchor="middle">{n}</text>
-                { variant &&
-                    <Variant variant={variant} x={x} width={width} height={height} txStart={txStart} txEnd={txEnd} /> }
+                {
+                    variant &&
+                    <Variant variant={variant} x={x} width={width} height={height} txStart={txStart} txEnd={txEnd} mask={clipMaskID} />
+                }
             </g>
         );
     }
@@ -182,19 +195,18 @@ class Exon extends React.Component {
 class Intron extends React.Component {
     render() {
         let { txStart,
-              txEnd,
-              x,
-              height,
-              width,
-              variant,
-              highlight
+            txEnd,
+            x,
+            height,
+            width,
+            variant,
+            highlight
         } = this.props;
 
         return (
             <g transform="translate(0, 10)">
                 <rect x={x} width={width} height={height} fill={highlight ? highlightFill : intronFill} stroke={highlight ? highlightStroke : intronStroke} />
-                { variant !== undefined &&
-                    <Variant variant={variant} x={x} width={width} height={height} txStart={txStart} txEnd={txEnd} /> }
+                { variant && <Variant variant={variant} x={x} width={width} height={height} txStart={txStart} txEnd={txEnd} /> }
             </g>
         );
     }
@@ -203,10 +215,10 @@ class Intron extends React.Component {
 class Transcript extends React.Component {
     render() {
         let { variant,
-              exons,
-              preceding,
-              following,
-              width
+            exons,
+            preceding,
+            following,
+            width
         } = this.props;
 
         let scale,
@@ -245,14 +257,16 @@ class Transcript extends React.Component {
             // draw exon
             {
                 let highlight, _variant;
+
                 if (i >= preceding && i <= following) { // exon is adjacent to, or contains, variant
                     highlight = true;
-                    console.log(variant.Hg38_Start, variant.Hg38_End, exon);
+
                     if (variantInExon(variant, exon)) {
                         _variant = variant;
                     }
                 }
-                blocks.push(<Exon n={i + 1} x={x} width={exonWidth} height={40} txStart={exon[0]} txEnd={exon[1]} highlight={highlight} variant={_variant} />);
+
+                blocks.push(<Exon key={`exon_${i + 1}`} n={i + 1} x={x} width={exonWidth} height={40} txStart={exon[0]} txEnd={exon[1]} highlight={highlight} variant={_variant} zoomed={false} />);
             }
 
             if (i === preceding) {
@@ -266,21 +280,27 @@ class Transcript extends React.Component {
             // draw intron
             if (i < exons.length - 1) {
                 let highlight, _variant;
+
                 if (i >= preceding && i < following) {  // intron is adjacent to, or contains, variant
                     highlight = true;
+
                     if (variantInIntron(variant, exon, exons[i + 1])) {
                         _variant = variant;
                     }
                 }
-                blocks.push(<Intron txStart={exon[1]} txEnd={exons[i + 1][0]} x={x} width={scale * intronWidth} height={20} highlight={highlight} variant={_variant} />);
+
+                blocks.push(<Intron key={`intron_${i + 1}`} n={i + 1} txStart={exon[1] + 1} txEnd={exons[i + 1][0] - 1} x={x} width={scale * intronWidth} height={20} highlight={highlight} variant={_variant} />);
                 x += scale * intronWidth;
             }
         }
+
         return (
             <g>
                 <line x1={zoomLineStartLeft} y1={50} x2={zoomMargin} y2={95} stroke="#ccc" strokeWidth="3" strokeDasharray="8,3" fill="none" />
                 <line x1={zoomLineStartRight} y1={50} x2={width - zoomMargin - 2.5} y2={95} stroke="#ccc" strokeWidth="3" strokeDasharray="8,3" fill="none" />
+
                 <rect x={0} y={53} width={820} height={14} fill="rgba(255,255,255,0.6" />
+
                 <g transform="translate(0, 10)">
                     <rect x={1} y={8} width={scale * leaderSize} height={24} fill={intronFill} stroke={intronStroke} />
                     { blocks }
@@ -294,10 +314,10 @@ class Transcript extends React.Component {
 class Zoom extends React.Component {
     render() {
         let { variant,
-              exons,
-              preceding,
-              following,
-              width
+            exons,
+            preceding,
+            following,
+            width
         } = this.props;
 
         let blocks = [],
@@ -332,7 +352,7 @@ class Zoom extends React.Component {
                 if (variantInExon(variant, exon)) {
                     _variant = variant;
                 }
-                blocks.push(<Exon n={i + 1} txStart={exon[0]} txEnd={exon[1]} x={x} width={exonWidth} height={80} highlight={true} variant={_variant} />);
+                blocks.push(<Exon key={`exon_${i + 1}`} n={i + 1} txStart={exon[0]} txEnd={exon[1]} x={x} width={exonWidth} height={80} highlight={true} variant={_variant} zoomed={true} />);
             }
 
             x += exonWidth;
@@ -344,10 +364,11 @@ class Zoom extends React.Component {
                 if (following - preceding === 1) {
                     _intronWidth *= 2;
                 }
-                blocks.push(<Intron txStart={exon[1]} txEnd={exons[i + 1][0]} x={x} width={scale * _intronWidth} height={60} highlight={true} variant={_variant} />);
+                blocks.push(<Intron key={`intron_${i + 1}`} n={i + 1} txStart={exon[1] + 1} txEnd={exons[i + 1][0] - 1} x={x} width={scale * _intronWidth} height={60} highlight={true} variant={_variant} />);
                 x += scale * _intronWidth;
             }
         }
+
         return (
             <g transform="translate(0, 100)">
                 { blocks }
@@ -377,42 +398,49 @@ class Splicing extends React.Component {
             );
         }
 
+        // determine the zoomed-in region, consisting of the entire variant edit area plus buffer exons on either side
         for (let i = 0; i < exons.length; i++) {
             if (exons[i][0] > variantStart && precedingExonIndex === undefined) {
                 if (exons[i - 1][1] < variantStart) {
+                    // the preceding exon is entirely outside the variant's changed region,
+                    // so it captures the full changed view
                     precedingExonIndex = i - 1;
                 } else {
+                    // the preceding exon is within the the variant's changed region, so we
+                    // need to go one more exon back to capture the full view
                     precedingExonIndex = i - 2;
                 }
             }
             if (exons[i][0] > variantEnd && followingExonIndex === undefined) {
-                    followingExonIndex = i;
+                followingExonIndex = i;
             }
         }
 
         let plural = n => n === 1 ? '' : 's';
         return (
-        <div>
-            <svg viewBox="-4 0 808 240" preserveAspectRatio="true">
-                <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">
-                  <rect x="0" y="0" width="4" height="4" fill="#FF8888" />
-                  <path d="M-1,1 l2,-2
+            <div>
+                <svg viewBox="-4 0 808 240" preserveAspectRatio="xMidYMid">
+                    <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">
+                        <rect x="0" y="0" width="4" height="4" fill="#FF8888" />
+                        <path d="M-1,1 l2,-2
                            M0,4 l4,-4
                            M3,5 l2,-2"
-                        stroke="black" strokeWidth={1} />
-                </pattern>
-                <Transcript variant={variant} exons={exons} preceding={precedingExonIndex} following={followingExonIndex} width={width} />
-                <Zoom variant={variant} exons={exons} preceding={precedingExonIndex} following={followingExonIndex} width={width} />
-                <g transform="translate(274,220)">
-                    <rect x="0" fill="lightgreen" stroke="black" width="20" height="10" />
-                    <text x="22" y="10">{ `Substitution (${info.changed} base${plural(info.changed)})` }</text>
-                    <rect x="192" fill="url(#diagonalHatch)" stroke="black" width="20" height="10" />
-                    <text x="214" y="10">{ `Deletion (${info.deleted || 0} base${plural(info.deleted)})` }</text>
-                    <rect x="360" fill="#56F" stroke="black" width="20" height="10"/>
-                    <text x="382" y="10">{ `Insertion (${info.inserted || 0} base${plural(info.inserted)})` }</text>
-                </g>
-            </svg>
-        </div>
+                            stroke="black" strokeWidth={1} />
+                    </pattern>
+
+                    <Transcript variant={variant} exons={exons} preceding={precedingExonIndex} following={followingExonIndex} width={width} />
+                    <Zoom variant={variant} exons={exons} preceding={precedingExonIndex} following={followingExonIndex} width={width} />
+
+                    <g transform="translate(274,220)">
+                        <rect x="0" fill="lightgreen" stroke="black" width="20" height="10" />
+                        <text x="22" y="10">{ `Substitution (${info.changed} base${plural(info.changed)})` }</text>
+                        <rect x="192" fill="url(#diagonalHatch)" stroke="black" width="20" height="10" />
+                        <text x="214" y="10">{ `Deletion (${info.deleted || 0} base${plural(info.deleted)})` }</text>
+                        <rect x="360" fill="#56F" stroke="black" width="20" height="10"/>
+                        <text x="382" y="10">{ `Insertion (${info.inserted || 0} base${plural(info.inserted)})` }</text>
+                    </g>
+                </svg>
+            </div>
         );
     }
 }
