@@ -35,7 +35,7 @@ The server runs on Django with postgres so install and set up those
    * If this doesn't work, figure out how to set user `postgres`'s password to `postgres`.
 * **Install the python dependencies**
    * `cd website`
-   * `pip install -qU -r requirements.txt`, if you encounter failures with psycopg2, try `pip install -U -r requirements.txt` and diagnose errors accordingly. You may need to `pip install psycopg2==2.7.3.2`.
+   * `pip install -qU -r requirements.txt`, if you encounter errors, try `pip install -U -r requirements.txt` and diagnose accordingly. You may need to `pip install psycopg2==2.7.3.2`.
 * **Run the initial migration to populate the database**
    * `cd django`
    * `python manage.py migrate`
