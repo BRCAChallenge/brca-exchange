@@ -364,8 +364,12 @@ class Splicing extends React.Component {
             info = variantInfo(variant),
             variantStart = variant.Hg38_Start,
             variantEnd = variant.Hg38_End,
-            exons = _.map(variant.Gene_Symbol === "BRCA1" ? brca1Exons : brca2Exons, e => e.coord.split('-')),
             precedingExonIndex, followingExonIndex;
+
+        // maps coord: "<start>-<end>" to [start, end] where start and end are integers
+        // (parsing to integer centrally here saves us a lot of issues later on)
+        const exons = (variant.Gene_Symbol === "BRCA1" ? brca1Exons : brca2Exons)
+            .map(e => e.coord.split('-').map(x => parseInt(x)));
 
         if (variantStart < exons[0][0] || variantEnd > exons[exons.length - 1][1]) {
             return (
