@@ -770,8 +770,6 @@ def getSubsequentDonorScores(variant):
         refSpliceDonorBounds = getRefSpliceDonorBoundaries(variant)
         subDonorBounds = refSpliceDonorBounds[exonNumber]
         refSeq = getFastaSeq(varChrom, subDonorBounds["donorStart"], subDonorBounds["donorEnd"])
-        if varStrand == "-":
-            refSeq = str(Seq(refSeq).reverse_complement())
         subMaxEntScanScore = runMaxEntScan(refSeq, donor=True)
         subZScore = getZScore(subMaxEntScanScore, donor=True)
         return {"maxEntScanScore": subMaxEntScanScore,
