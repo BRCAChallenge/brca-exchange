@@ -60,58 +60,97 @@ function variantInIntron (variant, exon, followingExon) {
 
     return overlaps([variant.Hg38_Start, variant.Hg38_End], intron);
 }
+
+// ensure that the span lies entirely within the parent
+function constrain(regionStart, regionWidth, start, width, minWidth) {
+    // ensure the starting pos is no less than the parent's pos
+    start = Math.max(regionStart, start);
+
+    // ensure our width doesn't exceed the parent's end
+    if (start + width > regionStart + regionWidth) {
+        const overshootWidth = (start + width) - (regionStart + regionWidth);
+
+        // console.log("would overshoot by ", overshootWidth, "; shortened to fit within ", regionWidth);
+
+        // subtract the difference between our larger end and the parent's end,
+        // which should put us at just touching the parent
+        // FIXME: is this right? how should we deal with an event that overlaps the end of the region?
+        width -= (overshootWidth);
     }
-};
+
+    // if minWidth is given, ensure our pixel width is never less than that
+    // (done post-endpoint-adjustment to ensure this event is visible)
+    if (minWidth) {
+        width = Math.max(width, minWidth);
+    }
+
+    // FIXME: in large regions, short events near the start or end can get obscured by the border
+    // FIXME: flooring fractional differences helps if it's at the end, but it doesn't help the start...
+    return { start, width };
+}
 
 class Variant extends React.Component {
-    constructor(props) {
-        super(props);
-    }
     render() {
         let { variant,
-              x,
-              width,
-              height,
-              txStart,
-              txEnd } = this.props;
+            x,
+            width,
+            height,
+            txStart,
+            txEnd } = this.props;
 
-        let variantStart, variantX, variantChange, variantChangedWidth, variantDeletedWidth, variantInsertedWidth;
         // txStart, txEnd are the parent exon/intron's span in bases
         // width, height is the pixel width, height of the parent element
         // x is the pixel position of the parent exon/intron in the SVG
 
+        const regionWidth = (txEnd - txStart);
+
+        let variantStart, variantX, variantChange, variantChangedWidth, variantDeletedWidth, variantInsertedWidth;
+
         variantStart = variant.Hg38_Start;
-        variantX = x + width * (variantStart - txStart) / (txEnd - txStart);
+        variantX = x + (width * ((variantStart - txStart) / regionWidth));
 
-        variantChange = variantInfo(variant);
-
-        variantChangedWidth = variantChange.changed ? width * variantChange.changed / (txEnd - txStart) : 0;
-        variantDeletedWidth = variantChange.deleted ? width * variantChange.deleted / (txEnd - txStart) : 0;
-        variantInsertedWidth = variantChange.inserted ? width * variantChange.inserted / (txEnd - txStart) : 0;
-
-        // Don't show less than 2 for a variant's width
-        variantChangedWidth = variantChangedWidth && Math.max(2, variantChangedWidth);
-        variantDeletedWidth = variantDeletedWidth && Math.max(2, variantDeletedWidth);
-        variantInsertedWidth = variantInsertedWidth && Math.max(2, variantInsertedWidth);
         // variantStart is the start of this variant in bases
         // variantX is the pixel position of this variant (assumedly) within the parent exon/intron
         // (if variantX is negative, it's because the variant's start is before this region begins)
 
-        // Variant may cross exon/intron boundaries, so the element's maximum size can only be that of
-        // its containing exon/intron
-        variantChangedWidth = Math.min(variantChangedWidth, width);
-        variantDeletedWidth = Math.min(variantDeletedWidth, width);
-        variantInsertedWidth = Math.min(variantInsertedWidth, width);
+        variantChange = variantInfo(variant);
 
-        if (variantX - x + variantChangedWidth + variantDeletedWidth + variantInsertedWidth > width) {
-            variantX = x + width - variantChangedWidth - variantDeletedWidth - variantInsertedWidth;
-        }
+        // compute pixel widths for each event
+        variantChangedWidth = variantChange.changed ? width * variantChange.changed / regionWidth : 0;
+        variantDeletedWidth = variantChange.deleted ? width * variantChange.deleted / regionWidth : 0;
+        variantInsertedWidth = variantChange.inserted ? width * variantChange.inserted / regionWidth : 0;
+
+        // it's quite possible that the event begins before this region and/or ends after it.
+        // in those cases it's safe to just constrain the rendered event to this elements' boundaries.
+        // the other regions with partial overlaps will take care of rendering the event's full extent
+
+        // describe each event, and constrain each one's rendered representation to lie within the parent
+        const events = {
+            changed: {
+                fill: 'lightgreen',
+                span: (variantChange.changed > 0 ? constrain(x, width, variantX, variantChangedWidth, 2) : null)
+            },
+            deleted: {
+                fill: 'url(#diagonalHatch)',
+                span: (variantChange.deleted > 0 ? constrain(x, width, variantX + variantChangedWidth, variantDeletedWidth, 2) : null)
+            },
+            inserted: {
+                fill: 'lightblue',
+                // FIXME: should insertions be drawn as points, not intervals, since there's no corresponding region in the source to annotate?
+                span: (variantChange.inserted > 0 ? constrain(x, width, variantX + variantChangedWidth, variantInsertedWidth, 2) : null)
+            },
+        };
 
         return (
             <g>
-                <rect x={variantX} width={variantChangedWidth} height={height} fill="lightgreen" />
-                <rect x={variantX + variantChangedWidth} width={variantDeletedWidth} height={height} fill="url(#diagonalHatch)" />
-                <rect x={variantX + variantChangedWidth} width={variantInsertedWidth} height={height} fill="lightblue" />
+            {
+                // map each event with a valid span to a rect
+                _.toPairs(events)
+                    .filter((keyEvent) => keyEvent[1].span !== null)
+                    .map(([key, event]) =>
+                        <rect key={`event_${key}`} x={event.span.start} width={event.span.width} height={height} fill={event.fill} clipPath={this.props.mask && `url(#${this.props.mask})`} />
+                    )
+            }
             </g>
         );
     }
