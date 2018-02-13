@@ -761,7 +761,7 @@ class test_calcVarPriors(unittest.TestCase):
 
     @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
     @mock.patch('calcVarPriors.getRefSpliceDonorBoundaries', return_value = brca2RefSpliceDonorBounds)
-    def test_getVarSpliceRegionBoundsDonorBRCA2(self, varInSplcieRegion, getRefSpliceDonorBoundaries):
+    def test_getVarSpliceRegionBoundsDonorBRCA2(self, varInSpliceRegion, getRefSpliceDonorBoundaries):
         '''
         Tests that:
         1. Function returns correct donor boundaries for a given variant (genomic position) 
@@ -1851,6 +1851,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class4"])
         self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
         self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
+        self.assertEquals(spliceRescueInfo["frameshift"], 0)
 
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
@@ -1864,6 +1865,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class5"])
         self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
         self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
+        self.assertEquals(spliceRescueInfo["frameshift"], 1)
         
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
@@ -1885,6 +1887,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class5"])
         self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
         self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
+        self.assertEquals(spliceRescueInfo["frameshift"], 0)
         
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
@@ -1906,6 +1909,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class5"])
         self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
         self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
+        self.assertEquals(spliceRescueInfo["frameshift"], 0)
         
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
@@ -1930,6 +1934,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class5"])
         self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
         self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
+        self.assertEquals(spliceRescueInfo["frameshift"], 1)
 
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
@@ -1951,6 +1956,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["NA"])
         self.assertEquals(spliceRescueInfo["spliceRescue"], 1)
         self.assertEquals(spliceRescueInfo["spliceFlag"], 1)
+        self.assertEquals(spliceRescueInfo["frameshift"], 0)
         
     def test_getEnigmaClass(self):
         ''''

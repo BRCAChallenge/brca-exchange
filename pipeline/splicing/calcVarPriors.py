@@ -915,16 +915,19 @@ def determineSpliceRescueSNS(variant, boundaries):
     if varCons == "stop_gained" and varInExon(variant) == True:
         spliceFlag = 0
         spliceRescue = 0
+        frameshift = 0
         # if variant is in first 3 bp of highest scoring sliding window, no splice rescue
         if varInFirstThree(variant) == True:
             priorProb = 0.97
             spliceRescue = 0
+            frameshift = 0
         else:
             inFrame = isSplicingWindowInFrame(variant)
             # if variant causes a frameshift, no splice rescue
             if inFrame == False:
                 priorProb = 0.99
                 spliceRescue = 0
+                frameshift = 1
             else:
                 varGenPos = int(variant["Pos"])
                 varStrand = getVarStrand(variant)
@@ -942,10 +945,13 @@ def determineSpliceRescueSNS(variant, boundaries):
                 if ciDomainInRegion == True or isDivisible == False:
                     priorProb = 0.99
                     spliceRescue = 0
+                    if isDivisible == False:
+                        frameshift = 1
                 else:
                     # possibility of splice rescue, flag variant for further splicing assays
                     spliceFlag = 1
                     spliceRescue = 1
+                    frameshift = 0
                     priorProb = "N/A"
                     enigmaClass = "N/A"
 
@@ -957,7 +963,8 @@ def determineSpliceRescueSNS(variant, boundaries):
         return {"priorProb": priorProb,
                 "enigmaClass": enigmaClass,
                 "spliceRescue": spliceRescue,
-                "spliceFlag": spliceFlag}
+                "spliceFlag": spliceFlag,
+                "frameshift": frameshift}
 
 def getEnigmaClass(priorProb):
     '''
