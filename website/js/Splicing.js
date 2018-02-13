@@ -157,11 +157,6 @@ class Variant extends React.Component {
 }
 
 class Exon extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-    componendDidMount() {
-    }
     render() {
         let { n,
               txStart,
@@ -362,10 +357,6 @@ class Zoom extends React.Component {
 }
 
 class Splicing extends React.Component {
-    componentDidMount() {
-    }
-    componentWillUnmount() {
-    }
     render() {
         let { variant } = this.props;
 
