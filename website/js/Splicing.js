@@ -35,35 +35,31 @@ function variantInfo (variant) {
     };
 }
 
+// given the intervals (a: [a1, a2], b: [b1, b2]), return true if the two overlap (inclusive)
+function overlaps(a, b) {
+    // ensure the pairs are internally sorted
+    const as = (a[0] <= a[1]) ? a : [a[1], a[0]];
+    const bs = (b[0] <= b[1]) ? b : [b[1], b[0]];
+    // sort each pair to reduce the number of cases we need to check
+    const [first, second] = (as[0] < bs[0]) ? [as, bs] : [bs, as];
+
+    // they can only overlap if first extends into (including surpassing) second
+    return first[1] >= second[0];
+}
+
 function variantInExon (variant, exon) {
-    exon = exon.map(function(loc) {
-        return parseInt(loc);
-    });
-    if ((variant.Hg38_Start <= exon[0] && variant.Hg38_End >= exon[0]) ||
-        (variant.Hg38_End >= exon[0] && variant.Hg38_End <= exon[1]) ||
-        (variant.Hg38_Start >= exon[0] && variant.Hg38_Start <= exon[1])
-        ) {
-        console.log('in exon: ', exon, variant.Hg38_Start, variant.Hg38_End);
-        return true;
-    } else {
-        return false;
-    }
-};
+    return overlaps([variant.Hg38_Start, variant.Hg38_End], exon);
+}
 
 function variantInIntron (variant, exon, followingExon) {
     // TODO: determine how to handle intersection (where exon ends and intron starts)
+    // ^ the semantics of this function have changed to just returning whether the intron overlaps the variant,
+    // ^ possibly fixing the above in a roundabout way
     // Intron runs from end of one exon to beginning of next exon
-    let intron = [parseInt(exon[1]) + 1];
-    intron.push(parseInt(followingExon[0]) - 1);
+    let intron = [exon[1] + 1, followingExon[0] - 1];
 
-    if ((variant.Hg38_Start <= intron[0] && variant.Hg38_End >= intron[1]) ||
-        (variant.Hg38_Start > intron[0] && variant.Hg38_Start < intron[1]) ||
-        (variant.Hg38_End > intron[0] && variant.Hg38_End < intron[1])
-    ) {
-        console.log('in intron: ', intron, variant.Hg38_Start, variant.Hg38_End);
-        return true;
-    } else {
-        return false;
+    return overlaps([variant.Hg38_Start, variant.Hg38_End], intron);
+}
     }
 };
 
