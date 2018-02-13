@@ -5,9 +5,10 @@ var React = require('react'),
     brca1Exons = JSON.parse(require('raw!../content/brca1LollipopDomain.json')),
     brca2Exons = JSON.parse(require('raw!../content/brca2LollipopDomain.json'));
 
-var intronWidth = 40,
+const intronWidth = 40,
     exonFill = "#c1ddf0",
     exonStroke = "rgba(0, 0, 0, 0.5)",
+    exonBorderRadius = 4,
     intronFill = "#dfe6ec",
     intronStroke = "rgba(0, 0, 0, 0.5)",
     highlightFill = "#ffffbb",
@@ -26,7 +27,7 @@ function variantInfo (variant) {
     if (before === 1 && after === 1) {
         return { changed: 1 };
     }
-    before--, after--;
+    before--; after--; // since CG>G is a removal of one base, not a removal of two and insertion of one
     return {
         changed: Math.min(before, after),
         inserted: after > before ? after - before : 0,
@@ -79,6 +80,9 @@ class Variant extends React.Component {
               txEnd } = this.props;
 
         let variantStart, variantX, variantChange, variantChangedWidth, variantDeletedWidth, variantInsertedWidth;
+        // txStart, txEnd are the parent exon/intron's span in bases
+        // width, height is the pixel width, height of the parent element
+        // x is the pixel position of the parent exon/intron in the SVG
 
         variantStart = variant.Hg38_Start;
         variantX = x + width * (variantStart - txStart) / (txEnd - txStart);
@@ -93,6 +97,9 @@ class Variant extends React.Component {
         variantChangedWidth = variantChangedWidth && Math.max(2, variantChangedWidth);
         variantDeletedWidth = variantDeletedWidth && Math.max(2, variantDeletedWidth);
         variantInsertedWidth = variantInsertedWidth && Math.max(2, variantInsertedWidth);
+        // variantStart is the start of this variant in bases
+        // variantX is the pixel position of this variant (assumedly) within the parent exon/intron
+        // (if variantX is negative, it's because the variant's start is before this region begins)
 
         // Variant may cross exon/intron boundaries, so the element's maximum size can only be that of
         // its containing exon/intron
