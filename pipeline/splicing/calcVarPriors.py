@@ -1103,6 +1103,38 @@ def getPriorProbAfterGreyZoneSNS(variant, boundaries):
         return {"priorProb": priorProb,
                 "enigmaClass": enigmaClass}
 
+def getPriorProbDeNovoExonSNS(variant):
+    #TO DO write function description, modify to be inclusive for intronic variants in ref splice sites
+    if varInExon(variant) == True:
+        slidingWindowScores = getMaxMaxEntScanScoreSlidingWindowSNS(variant)
+        subDonorScores = getSubsequentDonorScores(variant)
+        altZScore = slidingWindowScores["altZScore"]
+        refZScore = slidingWindowScores["refZScore"]
+        if altZScore <= refZScore:
+            priorProb = 0
+        else:
+            if altZScore < -2.0:
+                priorProb = 0.02
+            elif altZScore >= -2.0 and altZScore < 0.0:
+                priorProb = 0.3
+            else:
+                priorProb = 0.64
+        if altZScore > subDonorScores["zScore"]:
+            if priorProb == 0:
+                priorProb = 0.3
+            elif priorProb == 0.02:
+                priorProb = 0.3
+            elif priorProb == 0.3:
+                priorProb = 0.64
+            else:
+                priorProb = priorProb
+                
+        if priorProb == 0:
+            return False
+        else:
+            return {"priorProb": priorProb,
+                    "enigmaClass": getEnigmaClass(priorProb)}
+
 def getVarDict(variant, boundaries):
     '''
     Given input data, returns a dictionary containing information for each variant in input
