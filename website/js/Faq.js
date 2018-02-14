@@ -33,13 +33,13 @@ var Faq = React.createClass({
                     header={faq.question}
                     collapsable={true}
                     defaultExpanded={this.state.selectedFAQ === question}
-                    onSelect={() => this._showFaq(question)}>
+                    onSelect={(event) => this._showFaq(question, event)}>
                     <RawHTML html={faq.content} />
                 </Panel>
             );
         }, this);
     },
-    _showFaq: function(question) {
+    _showFaq: function(question, event) {
         // stops page from scrolling to top and clearing the url
         event.preventDefault();
 
