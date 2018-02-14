@@ -775,23 +775,26 @@ def getVarWindowPosition(variant):
 
 def getSubsequentDonorScores(variant):
     '''
-    Given a variant, checks if variant is in an exon
+    Given a variant, determines scores for subsequent reference donor sequence
     If exonic variant, returns a dictionary containing:
        MaxEntScan score and z-score for reference subsequent donor sequence
+    If variant located in referene splice donor site, returns a dictionary containing:
+       MaxEntScan score and z-score for that reference splice donor sequence
     '''
     varGenPos = int(variant["Pos"])
-    inExon = varInExon(variant)
-    if inExon == True:
-        varChrom = getVarChrom(variant)
+    varChrom = getVarChrom(variant)
+    if varInExon(variant) == True:
         varStrand = getVarStrand(variant)
         exonNumber = getVarExonNumberSNS(variant)
         refSpliceDonorBounds = getRefSpliceDonorBoundaries(variant)
         subDonorBounds = refSpliceDonorBounds[exonNumber]
-        refSeq = getFastaSeq(varChrom, subDonorBounds["donorStart"], subDonorBounds["donorEnd"])
-        subMaxEntScanScore = runMaxEntScan(refSeq, donor=True)
-        subZScore = getZScore(subMaxEntScanScore, donor=True)
-        return {"maxEntScanScore": subMaxEntScanScore,
-                "zScore": subZScore}
+    if varInSpliceRegion(variant, donor=True) == True:
+        subDonorBounds = getVarSpliceRegionBounds(variant, donor=True)
+    refSeq = getFastaSeq(varChrom, subDonorBounds["donorStart"], subDonorBounds["donorEnd"])
+    subMaxEntScanScore = runMaxEntScan(refSeq, donor=True)
+    subZScore = getZScore(subMaxEntScanScore, donor=True)
+    return {"maxEntScanScore": subMaxEntScanScore,
+            "zScore": subZScore}
 
 def isCIDomainInRegion(regionStart, regionEnd, boundaries, gene):
     '''
