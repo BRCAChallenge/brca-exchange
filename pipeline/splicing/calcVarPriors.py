@@ -383,9 +383,9 @@ def varInExon(variant):
                     return True
     return False
 
-def getVarExonNumber(variant):
+def getVarExonNumberSNS(variant):
     '''
-    Given a variant, checks that variant is in an exon
+    Given a SNS variant, checks that variant is in an exon
     If variant in an exon, returns the number of the exon variant is located within in format "exonN"
     '''
     if varInExon(variant) == True:
@@ -452,7 +452,7 @@ def getVarSpliceRegionBounds(variant, donor=False):
                 return {regionStartKey: regionStart,
                         regionEndKey: regionEnd}    
                 
-def varInCiDomain(variant, boundaries):
+def varInCIDomain(variant, boundaries):
     '''
     Given a variant, determines if variant is in a clinically important domain
     Second argument determiens which boundaries (ENIGMA or PRIORS) are used for CI domains
@@ -527,12 +527,12 @@ def getVarLocation(variant, boundaries):
     inSpliceDonor = varInSpliceRegion(variant, donor=True)
     inSpliceAcceptor = varInSpliceRegion(variant, donor=False)
     if inExon == True:
-        inCiDomain = varInCiDomain(variant, boundaries)
-        if inCiDomain == True and inSpliceDonor == True:
+        inCIDomain = varInCIDomain(variant, boundaries)
+        if inCIDomain == True and inSpliceDonor == True:
             return "CI_splice_donor_variant"
-        if inCiDomain == True and inSpliceAcceptor == True:
+        if inCIDomain == True and inSpliceAcceptor == True:
             return "CI_splice_acceptor_variant"
-        if inCiDomain == True:
+        if inCIDomain == True:
             return "CI_domain_variant"
         if inSpliceDonor == True:
             return "splice_donor_variant"
@@ -644,7 +644,6 @@ def getRefAltSeqs(variant, rangeStart, rangeStop):
     refSeqDict = getSeqLocDict(varChrom, varStrand, rangeStart, rangeStop)
     altSeqDict = getAltSeqDict(variant, refSeqDict)
     altSeq = getAltSeq(altSeqDict, varStrand)
-
     return {"refSeq": refSeq,
             "altSeq": altSeq}    
     
@@ -698,6 +697,8 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant):
     '''
     varGenPos = int(variant["Pos"])
     varStrand = getVarStrand(variant)
+    # use +- 8 to get 17 bp region so that have sequence for each 9 bp window with variant in positions 1-9
+    # minus strand and plus strand are opposite for +- 8 to preserve sequence returned by getRefAltSeqs
     if varStrand == "-":
         regionStart = varGenPos + 8
         regionEnd = varGenPos - 8
@@ -755,6 +756,15 @@ def varInFirstThree(variant):
         return True
     return False
 
+def getVarWindowPosition(variant):
+    '''
+    Given a variant, determines window position for highest scoring sliding window
+    Returns integer 1-9 based on variant position with higest scoring window
+    '''
+    slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant)
+    varWindowPos = slidingWindowInfo["varWindowPosition"]
+    return varWindowPos
+
 def getSubsequentDonorScores(variant):
     '''
     Given a variant, checks if variant is in an exon
@@ -766,7 +776,7 @@ def getSubsequentDonorScores(variant):
     if inExon == True:
         varChrom = getVarChrom(variant)
         varStrand = getVarStrand(variant)
-        exonNumber = getVarExonNumber(variant)
+        exonNumber = getVarExonNumberSNS(variant)
         refSpliceDonorBounds = getRefSpliceDonorBoundaries(variant)
         subDonorBounds = refSpliceDonorBounds[exonNumber]
         refSeq = getFastaSeq(varChrom, subDonorBounds["donorStart"], subDonorBounds["donorEnd"])
@@ -775,7 +785,7 @@ def getSubsequentDonorScores(variant):
         return {"maxEntScanScore": subMaxEntScanScore,
                 "zScore": subZScore}
 
-def isCiDomainInRegion(regionStart, regionEnd, boundaries, gene):
+def isCIDomainInRegion(regionStart, regionEnd, boundaries, gene):
     '''
     Given a region of interest, boundaries (either enigma or priors) and gene of interest
     Determines if there is an overlap between the region of interest and a CI domain
@@ -802,7 +812,7 @@ def isCiDomainInRegion(regionStart, regionEnd, boundaries, gene):
 def getRefExonLength(variant):
     '''Given a variant, returns the length of the reference exon'''
     if varInExon(variant) == True:
-        varExonNum = getVarExonNumber(variant)
+        varExonNum = getVarExonNumberSNS(variant)
         exonBounds = getExonBoundaries(variant)
         if getVarStrand(variant) == "-":
             varExonStart = int(exonBounds[varExonNum]["exonStart"])
@@ -838,7 +848,7 @@ def getNewSplicePosition(varGenPos, varStrand, varWindowPos, inFirstThree):
 def getAltExonLength(variant):
     '''Given a variant, returns the length of the alternate exon after splicing occurs in max MES window'''
     if varInExon(variant) == True:
-        varExonNum = getVarExonNumber(variant)
+        varExonNum = getVarExonNumberSNS(variant)
         exonBounds = getExonBoundaries(variant)
         slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant)
         newSplicePos = getNewSplicePosition(variant["Pos"], getVarStrand(variant),
@@ -886,7 +896,7 @@ def compareDeNovoWildTypeSplicePos(variant):
     '''
     if varInExon(variant) == True:
         varStrand = getVarStrand(variant)
-        varExonNum = getVarExonNumber(variant)
+        varExonNum = getVarExonNumberSNS(variant)
         refExonBounds = getExonBoundaries(variant)
         wildTypeSplicePos = refExonBounds[varExonNum]["exonEnd"]
         slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant)
@@ -929,18 +939,20 @@ def determineSpliceRescueSNS(variant, boundaries):
             else:
                 varGenPos = int(variant["Pos"])
                 varStrand = getVarStrand(variant)
-                varExonNum = getVarExonNumber(variant)
+                varExonNum = getVarExonNumberSNS(variant)
+                # varExonNum returns a string in the format "exonN"
+                # nextExonNum parses out N from varExonNum and adds 1 to get next exon number key "exonN+1"
                 nextExonNum = "exon" + str(int(varExonNum[4:]) + 1)
                 refSpliceAccBounds = getRefSpliceAcceptorBoundaries(variant)
+                varWindowPos = getVarWindowPosition(variant)
+                inFirstThree = varInFirstThree(variant)
+                # gets region from new splice position to next splice acceptor
+                regionStart = getNewSplicePosition(varGenPos, varStrand, varWindowPos, inFirstThree)
                 regionEnd = refSpliceAccBounds[nextExonNum]["acceptorStart"]
-                if varStrand == "-":
-                    regionStart = varGenPos + 8
-                else:
-                    regionStart = varGenPos - 8
-                ciDomainInRegion = isCiDomainInRegion(regionStart, regionEnd, boundaries, variant["Gene_Symbol"])
+                CIDomainInRegion = isCIDomainInRegion(regionStart, regionEnd, boundaries, variant["Gene_Symbol"])
                 isDivisible = compareDeNovoWildTypeSplicePos(variant)
                 # if truncated region includes a clinically important domain or causes a frameshift
-                if ciDomainInRegion == True or isDivisible == False:
+                if CIDomainInRegion == True or isDivisible == False:
                     priorProb = 0.99
                     spliceRescue = 0
                     if isDivisible == False:
