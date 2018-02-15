@@ -2419,7 +2419,9 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': 1.49,
                                                                                        'altMaxEntScanScore': -3.56,
                                                                                        'altZScore': -4.936930962587172,
@@ -2428,17 +2430,43 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'refZScore': -2.7686143647984682})
     @mock.patch('calcVarPriors.getSubsequentDonorScores', return_value = {'zScore': 1.1729987773204027,
                                                                           'maxEntScanScore': 10.67})
-    def test_getPriorProbDeNovoExonSNSRefGreaterAltBRCA1(self, varInExon, getMaxMaxEntScanScoreSlidingWindowSNS,
-                                                         getSubsequentDonorScores):
+    def test_getPriorProbDeNovoExonSNSRefGreaterAltBRCA1(self, getVarType, varInExon, varInSpliceRegion,
+                                                         getMaxMaxEntScanScoreSlidingWindowSNS,getSubsequentDonorScores):
+        '''Tests BRCA1 variant in exon where ref zscore is greater than alt zscore'''
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Pos"] = "43097273"
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "C"
-        priorProb = calcVarPriors.getPriorProbDeNovoExonSNS(self.variant)
+        priorProb = calcVarPriors.getPriorProbDeNovoSNS(self.variant)
         self.assertFalse(priorProb)
 
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    # the below variant is in exonic portion of splice site, just making sure that function works if varInExon == False
+    @mock.patch('calcVarPriors.varInExon', return_value = False)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -12.18,
+                                                                                       'altMaxEntScanScore': -13.41,
+                                                                                       'altZScore': -9.166221752333454,
+                                                                                       'inFirstThree': True,
+                                                                                       'varWindowPosition': 1,
+                                                                                       'refZScore': -8.638097115644324})
+    @mock.patch('calcVarPriors.getSubsequentDonorScores', return_value = {'zScore': 0.27990996080545155,
+                                                                          'maxEntScanScore': 8.59})
+    def test_getPriorProbDeNovoSpliceSiteRefGreaterAltBRCA1(self, getVarType, varInExon, varInSpliceRegion,
+                                                            getMaxMaxEntScanScoreSlidingWindowSNS, getSubsequentDonorScores):
+        '''Tests BRCA1 variant in splice site where ref zscore is greater than alt zscore'''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        self.variant["Pos"] = "43090945"
+        self.variant["Ref"] = "T"
+        self.variant["Alt"] = "A"
+        priorProb = calcVarPriors.getPriorProbDeNovoSNS(self.variant)
+        self.assertFalse(priorProb)
+        
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -3.85,
                                                                                        'altMaxEntScanScore': -7.01,
                                                                                        'altZScore': -6.418256163056683,
@@ -2447,17 +2475,43 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'refZScore': -5.061448153351276})
     @mock.patch('calcVarPriors.getSubsequentDonorScores', return_value = {'zScore': -1.3516946078276324,
                                                                           'maxEntScanScore': 4.79})
-    def test_getPriorProbDeNovoExonSNSRefGreaterAltBRCA2(self, varInExon, getMaxMaxEntScanScoreSlidingWindowSNS,
-                                                         getSubsequentDonorScores):
+    def test_getPriorProbDeNovoExonSNSRefGreaterAltBRCA2(self, getVarType, varInExon, varInSpliceRegion,
+                                                         getMaxMaxEntScanScoreSlidingWindowSNS, getSubsequentDonorScores):
+        '''Tests BRCA2 variant in exon where ref zscore is greater than alt zscore'''
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Pos"] = "32344578"
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "G"
-        priorProb = calcVarPriors.getPriorProbDeNovoExonSNS(self.variant)
+        priorProb = calcVarPriors.getPriorProbDeNovoSNS(self.variant)
         self.assertFalse(priorProb)
 
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    # the below variant is in exonic portion of splice site, just making sure that function works if varInExon == False
+    @mock.patch('calcVarPriors.varInExon', return_value = False)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -14.69,
+                                                                                       'altMaxEntScanScore': -17.11,
+                                                                                       'altZScore': -10.75488935863409,
+                                                                                       'inFirstThree': True,
+                                                                                       'varWindowPosition': 1,
+                                                                                       'refZScore': -9.71581487018881})
+    @mock.patch('calcVarPriors.getSubsequentDonorScores', return_value = {'zScore': 1.1128870300549731,
+                                                                         'maxEntScanScore': 10.53})
+    def test_getPriorProbDeNovoSpliceSiteRefGreaterAltBRCA2(self, getVarType, varInExon, varInSpliceRegion,
+                                                            getMaxMaxEntScanScoreSlidingWindowSNS, getSubsequentDonorScores):
+        '''Tests BRCA2 variant in splice site where ref zscore is greater than alt zscore'''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["Pos"] = "32346895"
+        self.variant["Ref"] = "C"
+        self.variant["Alt"] = "T"
+        priorProb = calcVarPriors.getPriorProbDeNovoSNS(self.variant)
+        self.assertFalse(priorProb)
+        
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -5.67,
                                                                                        'altMaxEntScanScore': -3.44,
                                                                                        'altZScore': -4.885406607788233,
@@ -2466,18 +2520,45 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'refZScore': -5.842900867801858})
     @mock.patch('calcVarPriors.getSubsequentDonorScores', return_value = {'zScore': 1.1300618149879533,
                                                                           'maxEntScanScore': 10.57})
-    def test_getPriorProbDeNovoExonLowProbBRCA1(self, varInExon, getMaxMaxEntScanScoreSlidingWindowSNS,
-                                                getSubsequentDonorScores):
+    def test_getPriorProbDeNovoExonLowProbBRCA1(self, getVarType, varInExon, varInSpliceRegion,
+                                                getMaxMaxEntScanScoreSlidingWindowSNS, getSubsequentDonorScores):
+        '''Tests BRCA1 variant in exon with expected low (0.02) prior prob where alt zscore > ref zscore'''
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Pos"] = "43076557"
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "T"
-        priorProb = calcVarPriors.getPriorProbDeNovoExonSNS(self.variant)
+        priorProb = calcVarPriors.getPriorProbDeNovoSNS(self.variant)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoLow"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    # the below variant is in exonic portion of splice site, just making sure that function works if varInExon == False
+    @mock.patch('calcVarPriors.varInExon', return_value = False)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -4.41,
+                                                                                       'altMaxEntScanScore': -2.12,
+                                                                                       'altZScore': -4.318638704999898,
+                                                                                       'inFirstThree': False,
+                                                                                       'varWindowPosition': 7,
+                                                                                       'refZScore': -5.301895142412993})
+    @mock.patch('calcVarPriors.getSubsequentDonorScores', return_value = {'zScore': 1.1729987773204027,
+                                                                          'maxEntScanScore': 10.67})
+    def test_getPriorProbDeNovoSpliceSiteLowProbBRCA1(self, getVarType, varInExon, varInSpliceRegion,
+                                                      getMaxMaxEntScanScoreSlidingWindowSNS, getSubsequentDonorScores):
+        '''Tests BRCA1 variant in splice site with expected low (0.02) prior prob where alt zscore > ref zscore'''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        self.variant["Pos"] = "43097244"
+        self.variant["Ref"] = "C"
+        self.variant["Alt"] = "G"
+        priorProb = calcVarPriors.getPriorProbDeNovoSNS(self.variant)
+        self.assertEquals(priorProb["priorProb"], priorProbs["deNovoLow"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -12.7,
                                                                                        'altMaxEntScanScore': -5.05,
                                                                                        'altZScore': -5.57669170134067,
@@ -2486,18 +2567,45 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'refZScore': -8.861369319773063})
     @mock.patch('calcVarPriors.getSubsequentDonorScores', return_value = {'zScore': 0.6534615330977633,
                                                                           'maxEntScanScore': 9.46})
-    def test_getPriorProbDeNovoExonLowProbBRCA2(self, varInExon, getMaxMaxEntScanScoreSlidingWindowSNS,
-                                                getSubsequentDonorScores):
+    def test_getPriorProbDeNovoExonLowProbBRCA2(self, getVarType, varInExon, varInSpliceRegion,
+                                                getMaxMaxEntScanScoreSlidingWindowSNS, getSubsequentDonorScores):
+        '''Tests BRCA2 variant in exon with expected low (0.02) prior prob where alt zscore > ref zscore'''
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Pos"] = "32326110"
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "G"
-        priorProb = calcVarPriors.getPriorProbDeNovoExonSNS(self.variant)
+        priorProb = calcVarPriors.getPriorProbDeNovoSNS(self.variant)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoLow"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    # the below variant is in exonic portion of splice site, just making sure that function works if varInExon == False
+    @mock.patch('calcVarPriors.varInExon', return_value = False)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -6.24,
+                                                                                       'altMaxEntScanScore': -4.4,
+                                                                                       'altZScore': -5.297601446179749,
+                                                                                       'inFirstThree': False,
+                                                                                       'varWindowPosition': 9,
+                                                                                       'refZScore': -6.087641553096821})
+    @mock.patch('calcVarPriors.getSubsequentDonorScores', return_value = {'zScore': 1.164411384853913,
+                                                                          'maxEntScanScore': 10.65})
+    def test_getPriorProbDeNovoSpliceSiteLowProbBRCA2(self, getVarType, varInExon, varInSpliceRegion,
+                                                      getMaxMaxEntScanScoreSlidingWindowSNS, getSubsequentDonorScores):
+        '''Tests BRCA2 variant in splice site with expected low (0.02) prior prob where alt zscore > ref zscore'''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["Pos"] = "32397044"
+        self.variant["Ref"] = "G"
+        self.variant["Alt"] = "T"
+        priorProb = calcVarPriors.getPriorProbDeNovoSNS(self.variant)
+        self.assertEquals(priorProb["priorProb"], priorProbs["deNovoLow"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -2.47,
                                                                                        'altMaxEntScanScore': 3.73,
                                                                                        'altZScore': -1.8068264085515982,
@@ -2506,18 +2614,45 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'refZScore': -4.468918073163471})
     @mock.patch('calcVarPriors.getSubsequentDonorScores', return_value = {'zScore': 0.9196706995589503,
                                                                           'maxEntScanScore': 10.08})
-    def test_getPriorProbDeNovoExonModProbBRCA1(self, varInExon, getMaxMaxEntScanScoreSlidingWindowSNS,
-                                                getSubsequentDonorScores):
+    def test_getPriorProbDeNovoExonModProbBRCA1(self, getVarType, varInExon, varInSpliceRegion,
+                                                getMaxMaxEntScanScoreSlidingWindowSNS, getSubsequentDonorScores):
+        '''Tests BRCA1 variant in exon with expected moderate (0.3) prior prob where alt zscore > ref zscore'''
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Pos"] = "43115740"
         self.variant["Ref"] = "G"
         self.variant["Alt"] = "C"
-        priorProb = calcVarPriors.getPriorProbDeNovoExonSNS(self.variant)
+        priorProb = calcVarPriors.getPriorProbDeNovoSNS(self.variant)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoMod"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    # the below variant is in exonic portion of splice site, just making sure that function works if varInExon == False
+    @mock.patch('calcVarPriors.varInExon', return_value = False)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -0.35,
+                                                                                       'altMaxEntScanScore': 7.4,
+                                                                                       'altZScore': -0.2310398909506982,
+                                                                                       'inFirstThree': False,
+                                                                                       'varWindowPosition': 5,
+                                                                                       'refZScore': -3.558654471715541})
+    @mock.patch('calcVarPriors.getSubsequentDonorScores', return_value = {'zScore': 0.9196706995589503,
+                                                                          'maxEntScanScore': 10.08})
+    def test_getPriorProbDeNovoSpliceSiteModProbBRCA1(self, getVarType, varInExon, varInSpliceRegion,
+                                                      getMaxMaxEntScanScoreSlidingWindowSNS, getSubsequentDonorScores):
+        '''Tests BRCA1 variant in splice site with expected moderate (0.3) prior prob where alt zscore > ref zscore'''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        self.variant["Pos"] = "43115728"
+        self.variant["Ref"] = "G"
+        self.variant["Alt"] = "A"
+        priorProb = calcVarPriors.getPriorProbDeNovoSNS(self.variant)
+        self.assertEquals(priorProb["priorProb"], priorProbs["deNovoMod"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
+
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -3.5,
                                                                                        'altMaxEntScanScore': 5.0,
                                                                                        'altZScore': -1.2615269869294883,
@@ -2526,18 +2661,45 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'refZScore': -4.911168785187702})
     @mock.patch('calcVarPriors.getSubsequentDonorScores', return_value = {'zScore': 0.09528102277591848,
                                                                           'maxEntScanScore': 8.16})
-    def test_getPriorProbDeNovoExonModProbBRCA2(self, varInExon, getMaxMaxEntScanScoreSlidingWindowSNS,
-                                                getSubsequentDonorScores):
+    def test_getPriorProbDeNovoExonModProbBRCA2(self, getVarType, varInExon, varInSpliceRegion,
+                                                getMaxMaxEntScanScoreSlidingWindowSNS, getSubsequentDonorScores):
+        '''Tests BRCA2 variant in exon with expected moderate (0.3) prior prob where alt zscore > ref zscore'''
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Pos"] = "32332406"
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "G"
-        priorProb = calcVarPriors.getPriorProbDeNovoExonSNS(self.variant)
+        priorProb = calcVarPriors.getPriorProbDeNovoSNS(self.variant)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoMod"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    # the below variant is in exonic portion of splice site, just making sure that function works if varInExon == False
+    @mock.patch('calcVarPriors.varInExon', return_value = False)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -0.91,
+                                                                                       'altMaxEntScanScore': 6.84,
+                                                                                       'altZScore': -0.47148688001241607,
+                                                                                       'inFirstThree': False,
+                                                                                       'varWindowPosition': 5,
+                                                                                       'refZScore': -3.799101460777258})
+    @mock.patch('calcVarPriors.getSubsequentDonorScores', return_value = {'zScore': 0.17686125120757246,
+                                                                          'maxEntScanScore': 8.35})
+    def test_getPriorProbDeNovoSpliceSiteModProbBRCA2(self, getVarType, varInExon, varInSpliceRegion,
+                                                      getMaxMaxEntScanScoreSlidingWindowSNS, getSubsequentDonorScores):
+        '''Tests BRCA2 variant in splice site with expected moderate (0.3) prior prob where alt zscore > ref zscore'''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["Pos"] = "32316525"
+        self.variant["Ref"] = "C"
+        self.variant["Alt"] = "T"
+        priorProb = calcVarPriors.getPriorProbDeNovoSNS(self.variant)
+        self.assertEquals(priorProb["priorProb"], priorProbs["deNovoMod"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
+
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': 2.78,
                                                                                        'altMaxEntScanScore': 8.94,
                                                                                        'altZScore': 0.4301893289690249,
@@ -2546,18 +2708,21 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'refZScore': -2.2147275507098687})
     @mock.patch('calcVarPriors.getSubsequentDonorScores', return_value = {'zScore': 0.49030107623445457,
                                                                           'maxEntScanScore': 9.08})
-    def test_getPriorProbDeNovoExonHighProbBRCA1(self, varInExon, getMaxMaxEntScanScoreSlidingWindowSNS,
-                                                 getSubsequentDonorScores):
+    def test_getPriorProbDeNovoExonHighProbBRCA1(self, getVarType, varInExon, varInSpliceRegion,
+                                                 getMaxMaxEntScanScoreSlidingWindowSNS, getSubsequentDonorScores):
+        '''Tests BRCA1 variant in exon with expected high (0.64) prior prob where alt zscore > ref zscore'''
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Pos"] = "43099839"
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "C"
-        priorProb = calcVarPriors.getPriorProbDeNovoExonSNS(self.variant)
+        priorProb = calcVarPriors.getPriorProbDeNovoSNS(self.variant)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoHigh"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': 2.14,
                                                                                        'altMaxEntScanScore': 9.79,
                                                                                        'altZScore': 0.7951535087948461,
@@ -2566,18 +2731,21 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'refZScore': -2.4895241096375464})
     @mock.patch('calcVarPriors.getSubsequentDonorScores', return_value = {'zScore': 1.2545790057520567,
                                                                           'maxEntScanScore': 10.86})
-    def test_getPriorProbDeNovoExonHighProbBRCA2(self, varInExon, getMaxMaxEntScanScoreSlidingWindowSNS,
-                                                 getSubsequentDonorScores):
+    def test_getPriorProbDeNovoExonHighProbBRCA2(self, getVarType, varInExon, varInSpliceRegion,
+                                                 getMaxMaxEntScanScoreSlidingWindowSNS, getSubsequentDonorScores):
+        '''Tests BRCA2 variant in exon with expected high (0.64) prior prob where alt zscore > ref zscore'''
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Pos"] = "32379455"
         self.variant["Ref"] = "G"
         self.variant["Alt"] = "T"
-        priorProb = calcVarPriors.getPriorProbDeNovoExonSNS(self.variant)
+        priorProb = calcVarPriors.getPriorProbDeNovoSNS(self.variant)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoHigh"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': 3.77,
                                                                                        'altMaxEntScanScore': 3.37,
                                                                                        'altZScore': -1.9613994729484163,
@@ -2586,18 +2754,24 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'refZScore': -1.7896516236186177})
     @mock.patch('calcVarPriors.getSubsequentDonorScores', return_value = {'zScore': -2.021511220213846,
                                                                           'maxEntScanScore': 3.23})
-    def test_getPriorProbDeNovoExonLowProbGreaterSubBRCA1(self, varInExon, getMaxMaxEntScanScoreSlidingWindowSNS,
-                                                          getSubsequentDonorScores):
+    def test_getPriorProbDeNovoExonLowProbGreaterSubBRCA1(self, getVarType, varInExon, varInSpliceRegion,
+                                                          getMaxMaxEntScanScoreSlidingWindowSNS, getSubsequentDonorScores):
+        '''
+        Tests BRCA1 variant in exon with expected low (0.02) prior prob that is promoted to moderate prior prob 
+        because alt zscore > subsequent z score
+        '''
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Pos"] = "43104184"
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "A"
-        priorProb = calcVarPriors.getPriorProbDeNovoExonSNS(self.variant)
+        priorProb = calcVarPriors.getPriorProbDeNovoSNS(self.variant)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoMod"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': 0.21,
                                                                                        'altMaxEntScanScore': 3.25,
                                                                                        'altZScore': -2.012923827747356,
@@ -2606,18 +2780,24 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'refZScore': -3.318207482653823})
     @mock.patch('calcVarPriors.getSubsequentDonorScores', return_value = {'zScore': -2.07732927124603,
                                                                           'maxEntScanScore': 3.1})
-    def test_getPriorProbDeNovoExonLowProbGreaterSubBRCA2(self, varInExon, getMaxMaxEntScanScoreSlidingWindowSNS,
-                                                          getSubsequentDonorScores):
+    def test_getPriorProbDeNovoExonLowProbGreaterSubBRCA2(self, getVarType, varInExon, varInSpliceRegion,
+                                                          getMaxMaxEntScanScoreSlidingWindowSNS, getSubsequentDonorScores):
+        '''
+        Tests BRCA2 variant in exon with expected low (0.02) prior prob that is promoted to moderate prior prob 
+        because alt zscore > subsequent z score
+        '''
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Pos"] = "32362627"
         self.variant["Ref"] = "C"
         self.variant["Alt"] = "A"
-        priorProb = calcVarPriors.getPriorProbDeNovoExonSNS(self.variant)
+        priorProb = calcVarPriors.getPriorProbDeNovoSNS(self.variant)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoMod"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -0.17,
                                                                                        'altMaxEntScanScore': 7.59,
                                                                                        'altZScore': -0.14945966251904425,
@@ -2626,18 +2806,24 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'refZScore': -3.4813679395171317})
     @mock.patch('calcVarPriors.getSubsequentDonorScores', return_value = {'zScore': -0.9867304280018111,
                                                                           'maxEntScanScore': 5.64})
-    def test_getPriorProbDeNovoExonModProbGreaterSubBRCA1(self, varInExon, getMaxMaxEntScanScoreSlidingWindowSNS,
-                                                          getSubsequentDonorScores):
+    def test_getPriorProbDeNovoExonModProbGreaterSubBRCA1(self, getVarType, varInExon, varInSpliceRegion,
+                                                          getMaxMaxEntScanScoreSlidingWindowSNS, getSubsequentDonorScores):
+        '''
+        Tests BRCA1 variant in exon with expected moderate (0.3) prior prob that is promoted to high prior prob 
+        because alt zscore > subsequent z score
+        '''
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Referenec_Sequence"] = "NM_007294.3"
         self.variant["Pos"] = "43094762"
         self.variant["Ref"] = "G"
         self.variant["Alt"] = "A"
-        priorProb = calcVarPriors.getPriorProbDeNovoExonSNS(self.variant)
+        priorProb = calcVarPriors.getPriorProbDeNovoSNS(self.variant)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoHigh"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
-        
+
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': 6.34,
                                                                                        'altMaxEntScanScore': 6.92,
                                                                                        'altZScore': -0.43713731014645635,
@@ -2646,18 +2832,24 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'refZScore': -0.686171691674664})
     @mock.patch('calcVarPriors.getSubsequentDonorScores', return_value = {'zScore': -2.07732927124603,
                                                                           'maxEntScanScore': 3.1})
-    def test_getPriorProbDeNovoExonModProbGreaterSubBRCA2(self, varInExon, getMaxMaxEntScanScoreSlidingWindowSNS,
-                                                          getSubsequentDonorScores):
+    def test_getPriorProbDeNovoExonModProbGreaterSubBRCA2(self, getVarType, varInExon, varInSpliceRegion,
+                                                          getMaxMaxEntScanScoreSlidingWindowSNS, getSubsequentDonorScores):
+        '''
+        Tests BRCA2 variant in exon with expected moderate (0.3) prior prob that is promoted to high prior prob 
+        because alt zscore > subsequent z score
+        '''
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Referenec_Sequence"] = "NM_000059.3"
         self.variant["Pos"] = "32362546"
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "G"
-        priorProb = calcVarPriors.getPriorProbDeNovoExonSNS(self.variant)
+        priorProb = calcVarPriors.getPriorProbDeNovoSNS(self.variant)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoHigh"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': 3.77,
                                                                                        'altMaxEntScanScore': 9.26,
                                                                                        'altZScore': 0.5675876084328637,
@@ -2666,18 +2858,23 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'refZScore': -1.7896516236186177})
     @mock.patch('calcVarPriors.getSubsequentDonorScores', return_value = {'zScore': -2.021511220213846,
                                                                           'maxEntScanScore': 3.23})
-    def test_getPriorProbDeNovoExonHighProbGreaterSubBRCA1(self, varInExon, getMaxMaxEntScanScoreSlidingWindowSNS,
-                                                 getSubsequentDonorScores):
+    def test_getPriorProbDeNovoExonHighProbGreaterSubBRCA1(self, getVarType, varInExon, varInSpliceRegion,
+                                                           getMaxMaxEntScanScoreSlidingWindowSNS, getSubsequentDonorScores):
+        '''
+        Tests BRCA1 variant in exon with expected high (0.64) prior prob and alt zscore > subsequent z score
+        '''
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Pos"] = "43104184"
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "C"
-        priorProb = calcVarPriors.getPriorProbDeNovoExonSNS(self.variant)
+        priorProb = calcVarPriors.getPriorProbDeNovoSNS(self.variant)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoHigh"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
-        
+
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': 0.81,
                                                                                        'altMaxEntScanScore': 8.99,
                                                                                        'altZScore': 0.45165781013525,
@@ -2686,14 +2883,17 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'refZScore': -3.0605857086591257})
     @mock.patch('calcVarPriors.getSubsequentDonorScores', return_value = {'zScore': 0.4044271515695557,
                                                                           'maxEntScanScore': 8.88})
-    def test_getPriorProbDeNovoExonHighProbGreaterSubBRCA2(self, varInExon, getMaxMaxEntScanScoreSlidingWindowSNS,
-                                                 getSubsequentDonorScores):
+    def test_getPriorProbDeNovoExonHighProbGreaterSubBRCA2(self, getVarType, varInExon, varInSpliceRegion,
+                                                           getMaxMaxEntScanScoreSlidingWindowSNS, getSubsequentDonorScores):
+        '''
+        Tests BRCA2 variant in exon with expected high (0.64) prior prob and alt zscore > subsequent z score
+        '''
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Pos"] = "32363225"
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "G"
-        priorProb = calcVarPriors.getPriorProbDeNovoExonSNS(self.variant)
+        priorProb = calcVarPriors.getPriorProbDeNovoSNS(self.variant)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoHigh"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
         
