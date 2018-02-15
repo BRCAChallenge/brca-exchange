@@ -1,9 +1,14 @@
 'use strict';
 
 var React = require('react'),
-    _ = require('lodash'),
-    brca1Exons = JSON.parse(require('raw!../content/brca1LollipopDomain.json')),
-    brca2Exons = JSON.parse(require('raw!../content/brca2LollipopDomain.json'));
+    _ = require('lodash');
+
+/*
+var brca1Exons = JSON.parse(require('raw!../content/brca1LollipopDomain.json'));
+var brca2Exons = JSON.parse(require('raw!../content/brca2LollipopDomain.json'));
+*/
+
+import {brca1Exons, brca2Exons} from './SplicingData.js';
 
 const intronWidth = 40,
     exonFill = "#c1ddf0",
@@ -17,6 +22,11 @@ const intronWidth = 40,
     leaderSize = 75,
     tailSize = 50,
     zoomMargin = 200;
+
+
+// --------------------------------------------------------------------------------------------------------------
+// --- supporting methods
+// --------------------------------------------------------------------------------------------------------------
 
 function exonSizeTx (bases) {
     return bases > 150 ? 150 + Math.sqrt(bases - 150) : bases;
@@ -47,20 +57,6 @@ function overlaps(a, b) {
     return first[1] >= second[0];
 }
 
-function variantInExon (variant, exon) {
-    return overlaps([variant.Hg38_Start, variant.Hg38_End], exon);
-}
-
-function variantInIntron (variant, exon, followingExon) {
-    // TODO: determine how to handle intersection (where exon ends and intron starts)
-    // ^ the semantics of this function have changed to just returning whether the intron overlaps the variant,
-    // ^ possibly fixing the above in a roundabout way
-    // Intron runs from end of one exon to beginning of next exon
-    let intron = [exon[1] + 1, followingExon[0] - 1];
-
-    return overlaps([variant.Hg38_Start, variant.Hg38_End], intron);
-}
-
 // ensure that the span lies entirely within the parent
 function constrain(regionStart, regionWidth, start, width, minWidth) {
     // ensure the starting pos is no less than the parent's pos
@@ -70,7 +66,7 @@ function constrain(regionStart, regionWidth, start, width, minWidth) {
     if (start + width > regionStart + regionWidth) {
         const overshootWidth = (start + width) - (regionStart + regionWidth);
 
-        // console.log("would overshoot by ", overshootWidth, "; shortened to fit within ", regionWidth);
+        console.log("would overshoot by ", overshootWidth, "; shortened to fit within ", regionWidth);
 
         // subtract the difference between our larger end and the parent's end,
         // which should put us at just touching the parent
@@ -85,9 +81,19 @@ function constrain(regionStart, regionWidth, start, width, minWidth) {
     }
 
     // FIXME: in large regions, short events near the start or end can get obscured by the border
-    // FIXME: flooring fractional differences helps if it's at the end, but it doesn't help the start...
+    // (find an example of this, shouldn't be too hard...)
     return { start, width };
 }
+
+// given an array, returns pairs of successive elements; e.g. [1,2,3] produces [[1,2],[2,3]]
+function pairwise(seq) {
+    return _.zip(_.take(seq, seq.length - 1), _.tail(seq));
+}
+
+
+// --------------------------------------------------------------------------------------------------------------
+// --- components
+// --------------------------------------------------------------------------------------------------------------
 
 class Variant extends React.Component {
     render() {
@@ -102,7 +108,8 @@ class Variant extends React.Component {
         // width, height is the pixel width, height of the parent element
         // x is the pixel position of the parent exon/intron in the SVG
 
-        const regionWidth = (txEnd - txStart);
+        // length of the parent exon/intro in base-pairs
+        const regionWidth = Math.abs(txEnd - txStart);
 
         let variantStart, variantX, variantChange, variantChangedWidth, variantDeletedWidth, variantInsertedWidth;
 
@@ -148,7 +155,10 @@ class Variant extends React.Component {
                 _.toPairs(events)
                     .filter((keyEvent) => keyEvent[1].span !== null)
                     .map(([key, event]) =>
-                        <rect key={`event_${key}`} x={event.span.start} width={event.span.width} height={height} fill={event.fill} clipPath={this.props.mask && `url(#${this.props.mask})`} />
+                        (<rect key={`event_${key}`}
+                            x={event.span.start} width={event.span.width} height={height}
+                            fill={event.fill} clipPath={this.props.mask && `url(#${this.props.mask})`}
+                        />)
                     )
             }
             </g>
@@ -158,16 +168,7 @@ class Variant extends React.Component {
 
 class Exon extends React.Component {
     render() {
-        let { n,
-            txStart,
-            txEnd,
-            width,
-            height,
-            x,
-            variant,
-            zoomed,
-            highlight
-        } = this.props;
+        let { n, txStart, txEnd, width, height, x, variant, zoomed, highlight, isFlipped} = this.props;
 
         // the clip mask allows us to draw variants within the rounded-rectangle exon
         // we need to assign different mask IDs for each exon, in either zoomed-in or full-transcript mode
@@ -175,18 +176,22 @@ class Exon extends React.Component {
 
         return (
             <g>
-                <defs>
-                    <clipPath id={clipMaskID}>
-                        <rect x={x} width={width} height={height} rx={exonBorderRadius} ry={exonBorderRadius} />
-                    </clipPath>
-                </defs>
-
-                <rect x={x} width={width} height={height} rx={exonBorderRadius} ry={exonBorderRadius} fill={highlight ? highlightFill : exonFill} stroke={highlight ? highlightStroke : exonStroke} />
                 <text x={x + width / 2} y={height + 14} textAnchor="middle">{n}</text>
-                {
-                    variant &&
-                    <Variant variant={variant} x={x} width={width} height={height} txStart={txStart} txEnd={txEnd} mask={clipMaskID} />
-                }
+
+                <g transform={isFlipped ? `translate(${x + width}) scale(-1,1)` : `translate(${x})`}>
+                    <defs>
+                        <clipPath id={clipMaskID}>
+                            <rect x={0} width={width} height={height} rx={exonBorderRadius} ry={exonBorderRadius} />
+                        </clipPath>
+                    </defs>
+
+                    <rect x={0} width={width} height={height} rx={exonBorderRadius} ry={exonBorderRadius} fill={highlight ? highlightFill : exonFill} stroke={highlight ? highlightStroke : exonStroke} />
+
+                    {
+                        variant &&
+                        <Variant variant={variant} x={0} width={width} height={height} txStart={txStart} txEnd={txEnd} mask={clipMaskID} />
+                    }
+                </g>
             </g>
         );
     }
@@ -194,19 +199,14 @@ class Exon extends React.Component {
 
 class Intron extends React.Component {
     render() {
-        let { txStart,
-            txEnd,
-            x,
-            height,
-            width,
-            variant,
-            highlight
-        } = this.props;
+        let { txStart, txEnd, x, height, width, variant, highlight, isFlipped} = this.props;
 
         return (
             <g transform="translate(0, 10)">
-                <rect x={x} width={width} height={height} fill={highlight ? highlightFill : intronFill} stroke={highlight ? highlightStroke : intronStroke} />
-                { variant && <Variant variant={variant} x={x} width={width} height={height} txStart={txStart} txEnd={txEnd} /> }
+                <g transform={isFlipped ? `translate(${x + width}) scale(-1,1)` : `translate(${x})`}>
+                    <rect x={0} width={width} height={height} fill={highlight ? highlightFill : intronFill} stroke={highlight ? highlightStroke : intronStroke} />
+                    { variant && <Variant variant={variant} x={0} width={width} height={height} txStart={txStart} txEnd={txEnd} /> }
+                </g>
             </g>
         );
     }
@@ -214,85 +214,79 @@ class Intron extends React.Component {
 
 class Transcript extends React.Component {
     render() {
-        let { variant,
-            exons,
-            preceding,
-            following,
-            width
-        } = this.props;
+        let {variant, segments, preceding, following, width, isFullyIntronic, isFlipped} = this.props;
 
-        let scale,
-            blocks = [],
-            x,
-            zoomLineStartLeft,
-            zoomLineStartRight;
 
-        preceding = Math.max(preceding, 0);
-        following = Math.min(following, exons.length - 1);
+        // ------------------------------------------------
+        // --- precalculate scale
+        // --- TODO: scales are slightly different between exonic / intronic variants. fix.
+        // ------------------------------------------------
 
-        // precalculate scale
-        // TODO: scales are slightly different between exonic / intronic variants. fix.
-        {
-            let totalWidth = 0;
-            for (let i = 0; i < exons.length; i++) {
-                totalWidth += exonSizeTx(exons[i][1] - exons[i][0]);
-                if (i < exons.length - 1) {
-                    totalWidth += intronWidth;
-                }
+        let totalWidth = _.sum(segments.map((segment) => {
+            return (segment.type === 'exon') ? exonSizeTx(segment.span.end - segment.span.start) : intronWidth;
+        }));
+
+        // adjust for extra fake introns on the left and right
+        totalWidth += leaderSize + tailSize;
+
+        // increase the size of the figure if the variant is fully intronic
+        if (isFullyIntronic) { totalWidth += intronWidth; }
+
+        // set per-element scale from totalWidth
+        const scale = (this.props.width - 2) / totalWidth;
+
+
+        // ------------------------------------------------
+        // --- create visible elements for each segment
+        // ------------------------------------------------
+
+        // we precalculate the element offsets so that we don't have to keep state in our segment mapping below
+        // we also need to remember the position + width of the last element to place the 'tail' intron
+        const agg = segments.reduce((agg, segment) => {
+            // figure out the width of the current element
+            const curWidth = (segment.type === 'exon')
+                ? scale * exonSizeTx(segment.span.end - segment.span.start)
+                : scale * intronWidth;
+
+            // add the offset of this segment and move our cursor to the next position
+            agg.offsets.push({x: agg.curX, width: curWidth, highlighted: segment.highlighted}); agg.curX += curWidth;
+
+            return agg;
+        }, {offsets: [], curX: leaderSize * scale});
+        const tailPos = agg.curX;
+        const offsets = agg.offsets;
+
+        const blocks = segments.map((segment, i) => {
+            const passedVariant = overlaps([variant.Hg38_Start, variant.Hg38_End], [segment.span.start, segment.span.end]) ? variant : null;
+
+            if (segment.type === 'exon') {
+                return (
+                    <Exon key={`exon_${segment.id}`} n={segment.id}
+                        variant={passedVariant}
+                        txStart={segment.span.start} txEnd={segment.span.end}
+                        x={offsets[i].x} width={offsets[i].width} height={40}
+                        highlight={segment.highlighted} zoomed={false} isFlipped={isFlipped}
+                    />
+                );
             }
-            totalWidth += leaderSize + tailSize;
-            // variant is intronic
-            if (following - preceding === 1) {
-                totalWidth += intronWidth;
+            else if (segment.type === 'intron') {
+                return (
+                    <Intron key={`intron_${segment.id}`} n={segment.id}
+                        variant={passedVariant}
+                        txStart={segment.span.start} txEnd={segment.span.end}
+                        x={offsets[i].x} width={offsets[i].width} height={20}
+                        highlight={segment.highlighted} isFlipped={isFlipped}
+                    />
+                );
             }
-            scale = (this.props.width - 2) / totalWidth;
-        }
+        });
 
-        x = leaderSize * scale;
+        // zoom lines should always be determined by the first and last highlighted element
+        const highlightedOffsets = offsets.filter(x => x.highlighted);
+        const firstHighlight = _.first(highlightedOffsets), lastHighlight = _.last(highlightedOffsets);
 
-        for (let i = 0; i < exons.length; i++) {
-            let exon = exons[i];
-            let exonWidth = scale * exonSizeTx(exon[1] - exon[0]);
-
-            // draw exon
-            {
-                let highlight, _variant;
-
-                if (i >= preceding && i <= following) { // exon is adjacent to, or contains, variant
-                    highlight = true;
-
-                    if (variantInExon(variant, exon)) {
-                        _variant = variant;
-                    }
-                }
-
-                blocks.push(<Exon key={`exon_${i + 1}`} n={i + 1} x={x} width={exonWidth} height={40} txStart={exon[0]} txEnd={exon[1]} highlight={highlight} variant={_variant} zoomed={false} />);
-            }
-
-            if (i === preceding) {
-                zoomLineStartLeft = x;
-            } else if (i === following) {
-                zoomLineStartRight = x + exonWidth;
-            }
-
-            x += exonWidth;
-
-            // draw intron
-            if (i < exons.length - 1) {
-                let highlight, _variant;
-
-                if (i >= preceding && i < following) {  // intron is adjacent to, or contains, variant
-                    highlight = true;
-
-                    if (variantInIntron(variant, exon, exons[i + 1])) {
-                        _variant = variant;
-                    }
-                }
-
-                blocks.push(<Intron key={`intron_${i + 1}`} n={i + 1} txStart={exon[1] + 1} txEnd={exons[i + 1][0] - 1} x={x} width={scale * intronWidth} height={20} highlight={highlight} variant={_variant} />);
-                x += scale * intronWidth;
-            }
-        }
+        const zoomLineStartLeft = firstHighlight.x;
+        const zoomLineStartRight = lastHighlight.x + lastHighlight.width;
 
         return (
             <g>
@@ -304,7 +298,7 @@ class Transcript extends React.Component {
                 <g transform="translate(0, 10)">
                     <rect x={1} y={8} width={scale * leaderSize} height={24} fill={intronFill} stroke={intronStroke} />
                     { blocks }
-                    <rect x={x} y={8} width={scale * tailSize} height={24} fill={intronFill} stroke={intronStroke} />
+                    <rect x={tailPos} y={8} width={scale * tailSize} height={24} fill={intronFill} stroke={intronStroke} />
                 </g>
             </g>
         );
@@ -313,65 +307,70 @@ class Transcript extends React.Component {
 
 class Zoom extends React.Component {
     render() {
-        let { variant,
-            exons,
-            preceding,
-            following,
-            width
-        } = this.props;
+        let { variant, segments, width, isFullyIntronic, isFlipped} = this.props;
 
-        let blocks = [],
-            scale,
-            x = zoomMargin;
+        // ------------------------------------------------
+        // --- precalculate scale
+        // ------------------------------------------------
 
-        preceding = Math.max(preceding, 0);
-        following = Math.min(following, exons.length - 1);
+        let totalWidth = _.sum(segments.map((segment) => {
+            return (segment.type === 'exon')
+                ? exonSizeTx(segment.span.end - segment.span.start)
+                : intronWidth;
+        }));
 
-        // precalculate scale
-        {
-            let totalWidth = 0;
-            for (let i = preceding; i <= following; i++) {
-                totalWidth += exonSizeTx(exons[i][1] - exons[i][0]);
-                if (i <= following - 1) {
-                    totalWidth += intronWidth;
-                    // variant is intronic
-                    if (following - preceding === 1) {
-                        totalWidth += intronWidth;
-                    }
-                }
+        // increase the size of the figure if the variant is fully intronic
+        if (isFullyIntronic) { totalWidth += intronWidth; }
+
+        // set per-element scale from totalWidth
+        const scale = (width - 2 * zoomMargin) / totalWidth;
+
+
+        // ------------------------------------------------
+        // --- create visible elements for each segment
+        // ------------------------------------------------
+
+        // we precalculate the element offsets so that we don't have to keep state in our segment mapping below
+        const offsets = segments.reduce((agg, segment) => {
+            // figure out the width of the current element
+            const curWidth = (segment.type === 'exon')
+                ? scale * exonSizeTx(segment.span.end - segment.span.start)
+                : scale * ((isFullyIntronic) ? intronWidth * 2 : intronWidth);
+
+            // add the offset of this segment and move our cursor to the next position
+            agg.offsets.push({x: agg.curX, width: curWidth}); agg.curX += curWidth;
+
+            return agg;
+        }, {offsets: [], curX: zoomMargin}).offsets;
+
+        const blocks = segments.map((segment, i) => {
+            const passedVariant = overlaps([variant.Hg38_Start, variant.Hg38_End], [segment.span.start, segment.span.end]) ? variant : null;
+
+            if (segment.type === 'exon') {
+                return (
+                    <Exon key={`exon_${segment.id}`} n={segment.id}
+                        variant={passedVariant}
+                        txStart={segment.span.start} txEnd={segment.span.end}
+                        x={offsets[i].x} width={offsets[i].width} height={80}
+                        highlight={true} zoomed={true} isFlipped={isFlipped}
+                    />
+                );
             }
-            scale = (width - 2 * zoomMargin) / totalWidth;
-        }
-
-        for (let i = preceding; i <= following; i++) {
-            let exon = exons[i],
-                exonWidth = scale * exonSizeTx(exon[1] - exon[0]);
-
-            {
-                let _variant;
-                if (variantInExon(variant, exon)) {
-                    _variant = variant;
-                }
-                blocks.push(<Exon key={`exon_${i + 1}`} n={i + 1} txStart={exon[0]} txEnd={exon[1]} x={x} width={exonWidth} height={80} highlight={true} variant={_variant} zoomed={true} />);
+            else if (segment.type === 'intron') {
+                return (
+                    <Intron key={`intron_${i + 1}`} n={segment.id}
+                        variant={passedVariant}
+                        txStart={segment.span.start} txEnd={segment.span.end}
+                        x={offsets[i].x} width={offsets[i].width} height={60}
+                        highlight={true}  isFlipped={isFlipped}
+                    />
+                );
             }
-
-            x += exonWidth;
-            if (i !== following) {
-                let _variant, _intronWidth = intronWidth;
-                if (variantInIntron(variant, exon, exons[i + 1])) {
-                    _variant = variant;
-                }
-                if (following - preceding === 1) {
-                    _intronWidth *= 2;
-                }
-                blocks.push(<Intron key={`intron_${i + 1}`} n={i + 1} txStart={exon[1] + 1} txEnd={exons[i + 1][0] - 1} x={x} width={scale * _intronWidth} height={60} highlight={true} variant={_variant} />);
-                x += scale * _intronWidth;
-            }
-        }
+        });
 
         return (
             <g transform="translate(0, 100)">
-                { blocks }
+            { blocks }
             </g>
         );
     }
@@ -387,33 +386,85 @@ class Splicing extends React.Component {
             variantEnd = variant.Hg38_End,
             precedingExonIndex, followingExonIndex;
 
-        // maps coord: "<start>-<end>" to [start, end] where start and end are integers
-        // (parsing to integer centrally here saves us a lot of issues later on)
-        const exons = (variant.Gene_Symbol === "BRCA1" ? brca1Exons : brca2Exons)
-            .map(e => e.coord.split('-').map(x => parseInt(x)));
+        // --- pre-step: get data, sort and format it so we can process it
+        const targetGene = variant['Gene_Symbol'] === "BRCA1" ? brca1Exons : brca2Exons;
+        const exons = _.toPairs(targetGene).map(([name, span]) => ({id: parseInt(name.substr(4)), span}));
 
-        if (variantStart < exons[0][0] || variantEnd > exons[exons.length - 1][1]) {
+        // disregard strandedness so we can just build some intervals
+        const sortedExons = _.sortBy(
+            exons.map(exon => ({
+                id: exon.id,
+                span: {
+                    start: Math.min(exon.span.start, exon.span.end),
+                    end: Math.max(exon.span.start, exon.span.end),
+                }
+            })),
+            (a) => a.span.start
+        );
+
+        // sanity check: verify that the variant actually overlaps the gene at all
+        // FIXME: should this reject variants that don't lie entirely within this gene? currently we look for just an overlap
+        const variantSpan = [variantStart, variantEnd];
+        const geneSpan = [sortedExons[0].span.start, sortedExons[sortedExons.length - 1].span.end];
+
+        if (!overlaps(variantSpan, geneSpan)) {
+            console.log(`Variant ${variantSpan} falls outside of gene ${geneSpan}`);
             return (
                 <h4 style={{textAlign: 'center'}}>Variant is outside of transcript.</h4>
             );
         }
 
-        // determine the zoomed-in region, consisting of the entire variant edit area plus buffer exons on either side
-        for (let i = 0; i < exons.length; i++) {
-            if (exons[i][0] > variantStart && precedingExonIndex === undefined) {
-                if (exons[i - 1][1] < variantStart) {
-                    // the preceding exon is entirely outside the variant's changed region,
-                    // so it captures the full changed view
-                    precedingExonIndex = i - 1;
-                } else {
-                    // the preceding exon is within the the variant's changed region, so we
-                    // need to go one more exon back to capture the full view
-                    precedingExonIndex = i - 2;
-                }
-            }
-            if (exons[i][0] > variantEnd && followingExonIndex === undefined) {
-                followingExonIndex = i;
-            }
+        // --- step 1: build list of interleaved exons and introns, aka segments
+
+        // a 'segment' is either an exon or intron
+        // here we build a set of these segments, i.e. exons with introns between them
+        // (we need to use the sorted set so that 'start' and 'end' are consistent regardless of the gene's direction)
+        let segments = _.flatten(
+            // insert introns between each pair of exons
+            pairwise(sortedExons).map(([prevExon, nextExon]) => {
+                return [
+                    {type: 'exon', ...prevExon},
+                    {
+                        type: 'intron',
+                        id: (Math.abs(prevExon.id + nextExon.id) / 2.0), // kind of a hack, but it allows us to sort easily
+                        span: {start: prevExon.span.end + 1, end: nextExon.span.start - 1}
+                    }
+                ];
+            })
+        );
+        // and stick on the last element
+        segments.push({type: 'exon', ...(_.last(sortedExons))});
+
+
+        // --- step 2: identify the region of interest
+
+        // identify the highlighted boundary
+        const overlappingSegments = segments
+            .map((segment, idx) => ({idx: idx, segment: segment}))
+            .filter(({segment}) => overlaps(variantSpan, [segment.span.start, segment.span.end]));
+
+        const [firstSeg, lastSeg] = [_.first(overlappingSegments), _.last(overlappingSegments)];
+        const isFullyIntronic = overlappingSegments.length === 1 && overlappingSegments[0].segment.type === 'intron';
+
+        // compute region that we'll be zooming in on in the figure
+        // the region of interest is one exon before and one exon after the segments that overlap the variant
+        precedingExonIndex = Math.max(
+            (firstSeg.segment.type === 'intron') ? firstSeg.idx - 1 : firstSeg.idx - 2, 0
+        );
+        followingExonIndex = Math.min(
+            (lastSeg.segment.type === 'intron') ? lastSeg.idx + 1 : lastSeg.idx + 2, segments.length - 1
+        );
+
+        // update the objects to highlight them if they're in the region of interest
+        _.forEach(segments, (segment, idx) => {
+            segment.highlighted = (idx >= precedingExonIndex && idx <= followingExonIndex);
+        });
+
+        // --- step 3: render the whole thing
+
+        // if it's BRCA1, we need to reverse it
+        if (variant['Gene_Symbol'] === "BRCA1") {
+            segments = segments.reverse();
         }
 
         let plural = n => n === 1 ? '' : 's';
@@ -428,8 +479,12 @@ class Splicing extends React.Component {
                             stroke="black" strokeWidth={1} />
                     </pattern>
 
-                    <Transcript variant={variant} exons={exons} preceding={precedingExonIndex} following={followingExonIndex} width={width} />
-                    <Zoom variant={variant} exons={exons} preceding={precedingExonIndex} following={followingExonIndex} width={width} />
+                    <Transcript variant={variant} segments={segments} width={width}
+                        preceding={precedingExonIndex} following={followingExonIndex}
+                        isFullyIntronic={isFullyIntronic} isFlipped={(variant['Gene_Symbol'] === "BRCA1")} />
+
+                    <Zoom variant={variant} segments={segments.filter(x => x.highlighted)} width={width}
+                        isFullyIntronic={isFullyIntronic} isFlipped={(variant['Gene_Symbol'] === "BRCA1")} />
 
                     <g transform="translate(274,220)">
                         <rect x="0" fill="lightgreen" stroke="black" width="20" height="10" />
