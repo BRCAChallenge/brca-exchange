@@ -214,7 +214,7 @@ class Intron extends React.Component {
 
 class Transcript extends React.Component {
     render() {
-        let {variant, segments, preceding, following, width, isFullyIntronic, isFlipped} = this.props;
+        let {variant, segments, width, isFullyIntronic, isFlipped} = this.props;
 
 
         // ------------------------------------------------
