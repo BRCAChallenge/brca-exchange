@@ -330,12 +330,14 @@ def getRefSpliceDonorBoundaries(variant):
 
     return donorBoundaries
 
-def getRefSpliceAcceptorBoundaries(variant):
+def getSpliceAcceptorBoundaries(variant, deNovo=False):
     '''
     Given a variant, returns the splice acceptor boundaries
-    (splice acceptor region is 20 bases before exon and first 3 bases in exon)
     for the variant's transcript in a dictionary with the format:
     key = exon number, value = a dictionary with acceptor start and acceptor end for exon
+    If deNovo = False, returns reference splice acceptor boundaries (-20 to +3)
+    (reference splice acceptor region is 20 bases before exon and first 3 bases in exon)
+    If deNovo = True, returns region for which de novo splice acceptors can exits (-20 to +10)
     '''
     varExons = getExonBoundaries(variant)
     acceptorExons = varExons.copy()
@@ -346,15 +348,23 @@ def getRefSpliceAcceptorBoundaries(variant):
     for exon in acceptorExons.keys():
         exonStart = int(acceptorExons[exon]["exonStart"])
         if varStrand == "+":
-            # -20 + 1 because genomic position in RefSeq starts to the right of the first base
-            # which affects 5' side of sequence, acceptor start is 5' to exon start for + strand transcripts
-            acceptorStart = exonStart - 20 + 1
-            acceptorEnd = exonStart + 3
-        else:            
-            acceptorStart = exonStart + 20
-            # -3 + 1 because genomic position in RefSeq starts to the right of the first base
-            # which affects 5' side of sequence, acceptor end is 5' to exon start for - strand transcripts
-            acceptorEnd = exonStart - 3 + 1
+            if deNovo == False:
+                # -20 + 1 because genomic position in RefSeq starts to the right of the first base
+                # which affects 5' side of sequence, acceptor start is 5' to exon start for + strand transcripts
+                acceptorStart = exonStart - 20 + 1
+                acceptorEnd = exonStart + 3
+            else:
+                acceptorStart = exonStart -20 + 1
+                acceptorEnd = exonStart + 10
+        else:
+            if deNovo == False:
+                acceptorStart = exonStart + 20
+                # -3 + 1 because genomic position in RefSeq starts to the right of the first base
+                # which affects 5' side of sequence, acceptor end is 5' to exon start for - strand transcripts
+                acceptorEnd = exonStart - 3 + 1
+            else:
+                acceptorStart = exonStart + 20
+                acceptorEnd = exonStart - 10 + 1
         acceptorBoundaries[exon] = {"acceptorStart": acceptorStart,
                                     "acceptorEnd": acceptorEnd}
 
@@ -413,7 +423,7 @@ def varInSpliceRegion(variant, donor=False):
     Returns True if variant is in a splice region region, false otherwise
     '''
     if donor == False:
-        regionBounds = getRefSpliceAcceptorBoundaries(variant)
+        regionBounds = getSpliceAcceptorBoundaries(variant, deNovo=False)
     else:
         regionBounds = getRefSpliceDonorBoundaries(variant)
     for exon in regionBounds.keys():
@@ -437,7 +447,7 @@ def getVarSpliceRegionBounds(variant, donor=False):
     '''
     if varInSpliceRegion(variant, donor=donor):
         if donor == False:
-            regionBounds = getRefSpliceAcceptorBoundaries(variant)
+            regionBounds = getSpliceAcceptorBoundaries(variant, deNovo=False)
             regionStartKey = "acceptorStart"
             regionEndKey = "acceptorEnd"
         else:        
@@ -977,7 +987,7 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries):
                 # nextExonNum parses out N from varExonNum and adds 1 to get next exon number key "exonN+1"
                 # use [4:] to remove "exon" from "exonN" so can add 1 to N to get N+1
                 nextExonNum = "exon" + str(int(varExonNum[4:]) + 1)
-                refSpliceAccBounds = getRefSpliceAcceptorBoundaries(variant)
+                refSpliceAccBounds = getSpliceAcceptorBoundaries(variant, deNovo=False)
                 varWindowPos = getVarWindowPosition(variant)
                 inExonicPortion = varInExonicPortion(variant)
                 # gets region from new splice position to next splice acceptor

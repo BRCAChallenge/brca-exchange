@@ -459,14 +459,14 @@ class test_calcVarPriors(unittest.TestCase):
     def test_getRefSpliceDonorBoundariesBRCA1(self, getExonBoundaries, getVarStrand):
         '''
         Tests that splice donor boundaries are set correctly for reference transcript (NM_000059.3) and strand (-)
-        Uses example exon boundaries for BRCA1 set in setUp function
+        Uses example boundaries defined at beginning of script
         '''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
         spliceDonorBounds = calcVarPriors.getRefSpliceDonorBoundaries(self.variant)
         # checks that region after last exon is not considered a splice donor region
         self.assertNotIn("exon24", spliceDonorBounds)
-        # to find exon specified in setUp function
+        # to find exon specified in global variables
         exon = exonDonorBoundsBRCA1.keys()[0]
         self.assertEquals(exonDonorBoundsBRCA1[exon]["donorStart"],
                           spliceDonorBounds[exon]["donorStart"])
@@ -478,14 +478,14 @@ class test_calcVarPriors(unittest.TestCase):
     def test_getRefSpliceDonorBoundariesBRCA2(self, getExonBoundaries, getVarStrand):
         '''
         Tests that splice donor boundaries are set correctly for reference transcript (NM_000059.3) and strand (+)
-        Uses example exon boundaries for BRCA2 set in setUp function
+        Uses example boundaries defined at beginning of script
         '''
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
         spliceDonorBounds = calcVarPriors.getRefSpliceDonorBoundaries(self.variant)
         # checks that region after last exon is not considered a splice donor region
         self.assertNotIn("exon27", spliceDonorBounds)
-        # to find exon specified in setUp function
+        # to find exon specified in global variables
         exon = exonDonorBoundsBRCA2.keys()[0]
         self.assertEquals(exonDonorBoundsBRCA2[exon]["donorStart"],
                           spliceDonorBounds[exon]["donorStart"])
@@ -494,42 +494,74 @@ class test_calcVarPriors(unittest.TestCase):
 
     @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca1Exons)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
-    def test_getRefSpliceAcceptorBoundariesBRCA1(self, getExonBoundaries, getVarStrand):
+    def test_getSpliceAcceptorBoundariesRefBRCA1(self, getExonBoundaries, getVarStrand):
         '''
         Tests that splice acceptor boundaries are set correctly for reference transcript (NM_007294.3) and strand (-)
-        Uses example exon boundaries for BRCA1 in setUp function
+        Uses example boundaries defined at beginning of script
         '''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
-        spliceAcceptorBounds = calcVarPriors.getRefSpliceAcceptorBoundaries(self.variant)
+        spliceAcceptorBounds = calcVarPriors.getSpliceAcceptorBoundaries(self.variant, deNovo=False)
         # checks that region before first exon is not considered a splice acceptor region
         self.assertNotIn("exon1", spliceAcceptorBounds)
-        # to find exon specified in setUp function
+        # to find exon specified in global variables
         exon = exonAcceptorBoundsBRCA1.keys()[0]
         self.assertEquals(exonAcceptorBoundsBRCA1[exon]["acceptorStart"],
                           spliceAcceptorBounds[exon]["acceptorStart"])
         self.assertEquals(exonAcceptorBoundsBRCA1[exon]["acceptorEnd"],
                           spliceAcceptorBounds[exon]["acceptorEnd"])
 
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca1Exons)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
+    def test_getSpliceAcceptorBoundariesDeNovoBRCA1(self, getExonBoundaries, getVarStrand):
+        '''
+        Tests that de novo splice acceptor boundaries are set correctly for reference transcript (NM_007294.3) and strand (-)
+        '''
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        self.variant["Gene_Symbol"] = "BRCA1"
+        deNovoSpliceAccBounds = calcVarPriors.getSpliceAcceptorBoundaries(self.variant, deNovo=True)
+        expectedDeNovoRegionExon6 = {"acceptorStart": 43104976,
+                                     "acceptorEnd": 43104947}
+        self.assertEquals(deNovoSpliceAccBounds["exon6"]["acceptorStart"],
+                          expectedDeNovoRegionExon6["acceptorStart"])
+        self.assertEquals(deNovoSpliceAccBounds["exon6"]["acceptorEnd"],
+                          expectedDeNovoRegionExon6["acceptorEnd"])
+
     @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca2Exons)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
-    def test_getRefSpliceAcceptorBoundariesBRCA2(self, getExonBoundaries, getVarStrand):
+    def test_getSpliceAcceptorBoundariesRefBRCA2(self, getExonBoundaries, getVarStrand):
         '''
         Tests that splice acceptor boundaries are set correctly for reference transcript (NM_000059.3) and strand (+)
-        Uses example exon boundaries for BRCA2 in setUp function
+        Uses example boundaries defined at beginning of script
         '''
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
-        spliceAcceptorBounds = calcVarPriors.getRefSpliceAcceptorBoundaries(self.variant)
+        spliceAcceptorBounds = calcVarPriors.getSpliceAcceptorBoundaries(self.variant, deNovo=False)
         # checks that region before first exon is not considered a splice acceptor region
         self.assertNotIn("exon1", spliceAcceptorBounds)
-        # to find exon specified in setUp function
+        # to find exon specified in global variables
         exon = exonAcceptorBoundsBRCA2.keys()[0]
         self.assertEquals(exonAcceptorBoundsBRCA2[exon]["acceptorStart"],
                           spliceAcceptorBounds[exon]["acceptorStart"])
         self.assertEquals(exonAcceptorBoundsBRCA2[exon]["acceptorEnd"],
                           spliceAcceptorBounds[exon]["acceptorEnd"])
 
+    @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca2Exons)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
+    def test_getSpliceAcceptorBoundariesDeNovoBRCA2(self, getExonBoundaries, getVarStrand):
+        '''
+        Tests that de novo splice acceptor boundaries are set correctly for reference transcript (NM_000059.3) and strand (+)
+        '''
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        deNovoSpliceAccBounds = calcVarPriors.getSpliceAcceptorBoundaries(self.variant, deNovo=True)
+        expectedDeNovoRegionExon8 = {"acceptorStart": 32329423,
+                                     "acceptorEnd": 32329452}
+        self.assertEquals(deNovoSpliceAccBounds["exon8"]["acceptorStart"],
+                          expectedDeNovoRegionExon8["acceptorStart"])
+        self.assertEquals(deNovoSpliceAccBounds["exon8"]["acceptorEnd"],
+                          expectedDeNovoRegionExon8["acceptorEnd"])
+        
     @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
     @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca1Exons)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
@@ -779,8 +811,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(exonDonorBoundsBRCA2["exon15"]["donorStart"], spliceDonorRegion["donorStart"])
         self.assertEquals(exonDonorBoundsBRCA2["exon15"]["donorEnd"], spliceDonorRegion["donorEnd"])
 
-    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
-    def test_varInSpliceRegionAcceptorBRCA1(self, getRefSpliceAcceptorBoundaries):
+    @mock.patch('calcVarPriors.getSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
+    def test_varInSpliceRegionAcceptorBRCA1(self, getSpliceAcceptorBoundaries):
         '''
         Tests that:
         1. Variant is correctly identified as in or NOT in a splice acceptor region
@@ -836,8 +868,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertFalse(inSpliceAcceptor)
 
     @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
-    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
-    def test_getVarSpliceRegionBoundsAcceptorBRCA1(self, varInSpliceRegion, getRefSpliceAcceptorBoundaries):
+    @mock.patch('calcVarPriors.getSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
+    def test_getVarSpliceRegionBoundsAcceptorBRCA1(self, varInSpliceRegion, getSpliceAcceptorBoundaries):
         '''
         Tests that:
         1. Function returns correct donor boundaries for a given variant (genomic position) 
@@ -852,8 +884,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(exonAcceptorBoundsBRCA1["exon21"]["acceptorStart"], spliceAccRegion["acceptorStart"])
         self.assertEquals(exonAcceptorBoundsBRCA1["exon21"]["acceptorEnd"], spliceAccRegion["acceptorEnd"])
 
-    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca2RefSpliceAcceptorBounds)
-    def test_varInSpliceRegionAcceptorBRCA2(self, getRefSpliceAcceptorBoundaries):
+    @mock.patch('calcVarPriors.getSpliceAcceptorBoundaries', return_value = brca2RefSpliceAcceptorBounds)
+    def test_varInSpliceRegionAcceptorBRCA2(self, getSpliceAcceptorBoundaries):
         '''
         Tests that:
         1. Variant is correctly identified as in or NOT in a splice acceptor region
@@ -909,8 +941,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertFalse(inSpliceAcceptor)
 
     @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
-    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca2RefSpliceAcceptorBounds)
-    def test_getVarSpliceRegionBoundsAcceptorBRCA2(self, varInSpliceRegion, getRefSpliceAcceptorBoundaries):
+    @mock.patch('calcVarPriors.getSpliceAcceptorBoundaries', return_value = brca2RefSpliceAcceptorBounds)
+    def test_getVarSpliceRegionBoundsAcceptorBRCA2(self, varInSpliceRegion, getSpliceAcceptorBoundaries):
         '''
         Tests that:
         1. Function returns correct donor boundaries for a given variant (genomic position) 
@@ -1156,9 +1188,9 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.varInCIDomain', return_value = True)
     @mock.patch('calcVarPriors.getRefSpliceDonorBoundaries', return_value = brca1RefSpliceDonorBounds)
-    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
+    @mock.patch('calcVarPriors.getSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
     def test_getVarLocationCIDomainSpliceRegionBRCA1(self, varOutsideBoundaries, varInExon, varInCIDomain,
-                                                     getRefSpliceDonorBoundaries, getRefSpliceAcceptorBoundaries):
+                                                     getRefSpliceDonorBoundaries, getSpliceAcceptorBoundaries):
         '''
         Tests that BRCA1 variants in either PRIORS or ENIGMA CI domains AND in splice region are
         correctly identified as in CI domain splice region
@@ -1194,9 +1226,9 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.varInCIDomain', return_value = True)
     @mock.patch('calcVarPriors.getRefSpliceDonorBoundaries', return_value = brca2RefSpliceDonorBounds)
-    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca2RefSpliceAcceptorBounds)
+    @mock.patch('calcVarPriors.getSpliceAcceptorBoundaries', return_value = brca2RefSpliceAcceptorBounds)
     def test_getVarLocationCIDomainSpliceRegionBRCA2(self, varOutsideBoundaries, varInExon, varInCIDomain,
-                                                     getRefSpliceDonorBoundaries, getRefSpliceAcceptorBoundaries):
+                                                     getRefSpliceDonorBoundaries, getSpliceAcceptorBoundaries):
         '''
         Tests that BRCA2 variants in either PRIORS or ENIGMA CI domains AND in splice region are
         correctly identified as in CI domain splice region
@@ -1231,9 +1263,9 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
     @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca1Exons)
     @mock.patch('calcVarPriors.getRefSpliceDonorBoundaries', return_value = brca1RefSpliceDonorBounds)
-    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
+    @mock.patch('calcVarPriors.getSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
     def test_getVarLocationSpliceRegionBRCA1(self, varOutsideBoundaries, getExonBoundaries, getRefSpliceDonorBoundaries,
-                                             getRefSpliceAcceptorBoundaries):
+                                             getSpliceAcceptorBoundaries):
         '''Tests that BRCA1 variants in splice regions are correctly identified as in splice regions'''
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
@@ -1252,9 +1284,9 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.varOutsideBoundaries', return_value = False)
     @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca2Exons)
     @mock.patch('calcVarPriors.getRefSpliceDonorBoundaries', return_value = brca2RefSpliceDonorBounds)
-    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca2RefSpliceAcceptorBounds)
+    @mock.patch('calcVarPriors.getSpliceAcceptorBoundaries', return_value = brca2RefSpliceAcceptorBounds)
     def test_getVarLocationSpliceRegionBRCA2(self, varOutsideBoundaries, getExonBoundaries, getRefSpliceDonorBoundaries,
-                                             getRefSpliceAcceptorBoundaries):
+                                             getSpliceAcceptorBoundaries):
         '''Tests that BRCA1 variants in splice regions are correctly identified as in splice regions'''
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
@@ -1888,7 +1920,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
     @mock.patch('calcVarPriors.getVarExonNumberSNS', return_value = "exon20")
-    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
+    @mock.patch('calcVarPriors.getSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
     @mock.patch('calcVarPriors.getVarWindowPosition', return_value = 6)
     @mock.patch('calcVarPriors.isCIDomainInRegion', return_value = True)
     @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = True)
@@ -1911,7 +1943,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
     @mock.patch('calcVarPriors.getVarExonNumberSNS', return_value = "exon2")
-    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
+    @mock.patch('calcVarPriors.getSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
     @mock.patch('calcVarPriors.getVarWindowPosition', return_value = 7)
     @mock.patch('calcVarPriors.isCIDomainInRegion', return_value = True)
     @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = True)
@@ -1934,7 +1966,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
     @mock.patch('calcVarPriors.getVarExonNumberSNS', return_value = "exon6")
-    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
+    @mock.patch('calcVarPriors.getSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
     @mock.patch('calcVarPriors.getVarWindowPosition', return_value = 4)
     @mock.patch('calcVarPriors.isCIDomainInRegion', return_value = False)
     @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = False)
@@ -1960,7 +1992,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
     @mock.patch('calcVarPriors.getVarExonNumberSNS', return_value = "exon17")
-    @mock.patch('calcVarPriors.getRefSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
+    @mock.patch('calcVarPriors.getSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
     @mock.patch('calcVarPriors.getVarWindowPosition', return_value = 5)
     @mock.patch('calcVarPriors.isCIDomainInRegion', return_value = False)
     @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = True)
