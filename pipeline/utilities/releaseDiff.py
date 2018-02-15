@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import pdb
 import argparse
 import csv
 import re
@@ -11,6 +12,7 @@ diff = None
 total_variants_with_changes = 0
 total_variants_with_additions = 0
 diff_json = {}
+reports = False
 
 # Change types as used in the DB to signify changes to variants between versions
 CHANGE_TYPES = {
@@ -209,7 +211,10 @@ class transformer(object):
         is unchanged.
         """
         global added_data
-        variant = newRow["pyhgvs_Genomic_Coordinate_38"]
+        identifier = getIdentifier(newRow, reports)
+        if identifier is None:
+            pass
+        variant = newRow[identifier]
         newValue = self._normalize(newRow[field], field)
         if field in self._newColumnsAdded and field not in self._renamedColumns.values():
             if newValue == "-":
@@ -283,7 +288,10 @@ class transformer(object):
         # If a field is no longer present in the new data, make sure to include it in the diff
         for field in oldRow.keys():
             if field not in columns_to_ignore and field not in newRow.keys():
-                variant = newRow["pyhgvs_Genomic_Coordinate_38"]
+                identifier = getIdentifier(newRow, reports)
+                if identifier is None:
+                    pass
+                variant = newRow[identifier]
                 oldValue = self._normalize(oldRow[field], field)
                 newValue = "-"
                 if oldValue != newValue:
@@ -348,11 +356,16 @@ def appendVariantChangeTypesToOutput(variantChangeTypes, v2, output):
             result.append(headerRow)
 
             # store pyhgvs_genomic_coordinate_38 index for referencing variants in variantChangeTypes list
-            genomicCoordinateIndex = headerRow.index("pyhgvs_Genomic_Coordinate_38")
 
             # add change types for individual variants
             for row in reader:
-                row.append(variantChangeTypes[row[genomicCoordinateIndex]])
+                identifier = getIdentifier(row, reports)
+                if identifier is None:
+                    # default to None changetype for reports whose diff we don't care about
+                    row.append(None)
+                else:
+                    identifierIndex = headerRow.index(identifier)
+                    row.append(variantChangeTypes[row[identifierIndex]])
                 logging.debug('variant with change type: %s', row)
                 result.append(row)
 
@@ -520,19 +533,32 @@ def generateDiffJSONFile(diff_json, diff_json_file):
         json.dump(diff_json, outfile)
 
 
-def generateReadme(args):
+def generateReadme(args, isReport):
 
     output_file_descriptions = {
         "v1": args.v1,
         "v2": args.v2,
         "v1_release_date": args.v1_release_date,
-        "removed.tsv": "This file lists variants that are present in " + args.v1 + " and that are not present in " + args.v2 + " as determined by their pyhgvs_Genomic_Coordinate_38 values.",
-        "added.tsv": "This file lists variants that are present in " + args.v2 + " and that are not present in " + args.v1 + " as determined by their pyhgvs_Genomic_Coordinate_38 values.",
-        "added_data.tsv": "This file lists variants and relevant additional data in " + args.v2 + " that was not present for the same variant in " + args.v1 + " . Variants are defined by their pyhgvs_Genomic_Coordinate_38 values.",
-        "diff.txt": "This file lists variants and changes in " + args.v2 + " that were different for the same variant in " + args.v1 + " . Variants are defined by their pyhgvs_Genomic_Coordinate_38 values."
     }
 
-    with open(args.diff_dir + "README.txt", "w") as readme:
+    variants_files = {"removed.tsv": "This file lists variants that are present in " + args.v1 + " and that are not present in " + args.v2 + " as determined by their pyhgvs_Genomic_Coordinate_38 values.",
+    "added.tsv": "This file lists variants that are present in " + args.v2 + " and that are not present in " + args.v1 + " as determined by their pyhgvs_Genomic_Coordinate_38 values.",
+    "added_data.tsv": "This file lists variants and relevant additional data in " + args.v2 + " that was not present for the same variant in " + args.v1 + " . Variants are defined by their pyhgvs_Genomic_Coordinate_38 values.",
+    "diff.txt": "This file lists variants and changes in " + args.v2 + " that were different for the same variant in " + args.v1 + " . Variants are defined by their pyhgvs_Genomic_Coordinate_38 values."}
+
+    reports_files = {"removed_reports.tsv": "This file lists variants that are present in " + args.v1 + " and that are not present in " + args.v2 + " as determined by their unique identifier values.",
+    "added_reports.tsv": "This file lists variants that are present in " + args.v2 + " and that are not present in " + args.v1 + " as determined by their unique identifier values.",
+    "added_data_reports.tsv": "This file lists variants and relevant additional data in " + args.v2 + " that was not present for the same variant in " + args.v1 + " . Variants are defined by their unique identifier values.",
+    "diff_reports.txt": "This file lists variants and changes in " + args.v2 + " that were different for the same variant in " + args.v1 + " . Variants are defined by their unique identifier values."}
+
+    if isReport:
+        filename = "README_REPORTS.txt"
+        output_file_descriptions.update(reports_files)
+    else:
+        filename = "README.txt"
+        output_file_descriptions.update(variants_files)
+
+    with open(args.diff_dir + filename, "w") as readme:
         readme.write("This file contains basic information about the diff directory.\n\n\n")
         for k, v in output_file_descriptions.iteritems():
             readme.write(k + ": " + v + '\n\n')
@@ -559,6 +585,25 @@ def round_sigfigs(num, sig_figs):
         return 0  # Can't take the log of 0
 
 
+def getIdentifier(obj, isReport):
+    if isReport:
+        # reports have different identifiers based on their source
+        if type(obj) is list:
+            source = obj[0]
+        elif type(obj) is dict:
+            source = obj["Source"]
+        if source == "ClinVar":
+            return "SCV_ClinVar"
+        elif source == "LOVD":
+            return "DBID_LOVD"
+        else:
+            # ignore non clinvar/lovd reports
+            return None
+    else:
+        # variants are always identified by same genomic coordinate field
+        return "pyhgvs_Genomic_Coordinate_38"
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--v2", default="built.tsv",
@@ -580,6 +625,8 @@ def main():
                         help="Output file with change_type column appended")
     parser.add_argument("--artifacts_dir", help='Artifacts directory with pipeline artifact files.')
     parser.add_argument("--diff_dir", help='Diff directory with outputs from this file.')
+    parser.add_argument("--reports", help='True means the diff is run across reports instead of variants.',
+                        default="False")
 
     args = parser.parse_args()
 
@@ -602,6 +649,8 @@ def main():
     added_data = open(args.added_data, "w")
     global diff
     diff = open(args.diff, "w")
+    global reports
+    reports = args.reports
 
     # Keep track of change types for all variants to append to final output file
     variantChangeTypes = {}
@@ -611,16 +660,31 @@ def main():
     # Save the old variants in a dictionary for which the pyhgvs_genomic_coordinate_38
     # string is the key, and for which the value is the full row.
     oldData = {}
-    for oldRow in v1In:
-        oldRow = addGsIfNecessary(oldRow)
-        oldData[oldRow["pyhgvs_Genomic_Coordinate_38"]] = oldRow
     newData = {}
-    for newRow in v2In:
-        newRow = addGsIfNecessary(newRow)
-        newData[newRow["pyhgvs_Genomic_Coordinate_38"]] = newRow
+
+    if reports:
+        # handle reports
+        for oldRow in v1In:
+            identifier = getIdentifier(oldRow, reports)
+            if identifier is not None:
+                oldData[oldRow[identifier]] = oldRow
+        for newRow in v2In:
+            identifier = getIdentifier(newRow, reports)
+            if identifier is not None:
+                newData[newRow[identifier]] = newRow
+    else:
+        # handle variants
+        for oldRow in v1In:
+            oldRow = addGsIfNecessary(oldRow)
+            oldData[oldRow[getIdentifier(oldRow, reports)]] = oldRow
+        for newRow in v2In:
+            newRow = addGsIfNecessary(newRow)
+            newData[newRow[getIdentifier(newRow, reports)]] = newRow
+
     for oldVariant in oldData.keys():
         if not newData.has_key(oldVariant):
             removed.writerow(oldData[oldVariant])
+
     for newVariant in newData.keys():
         if not oldData.has_key(newVariant):
             variantChangeTypes[newVariant] = CHANGE_TYPES['ADDED']
@@ -637,7 +701,7 @@ def main():
 
     generateDiffJSONFile(diff_json, args.diff_json)
 
-    generateReadme(args)
+    generateReadme(args, reports)
 
     print "Number of variants with additions: " + str(total_variants_with_additions)
     print "Number of variants with changes: " + str(total_variants_with_changes)

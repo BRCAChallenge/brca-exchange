@@ -25,7 +25,9 @@ function add_release_tar_to_db {
     REMOVED=${RELEASE_DIR}/diff/removed.tsv
     METADATA=${RELEASE_DIR}/metadata/version.json
     DIFFJSON=${RELEASE_DIR}/diff/diff.json
-    REPORTS=${RELEASE_DIR}/artifacts/reports.tsv
+    REPORTS=${RELEASE_DIR}/reports_with_change_types.tsv
+    REMOVEDREPORTS=${RELEASE_DIR}/diff/removed_reports.tsv
+    REPORTSDIFF=${RELEASE_DIR}/diff/reports_diff.json
 
     # unpacking of tar into a staging dir
     [ -e ${STAGING} ] && rm -r ${STAGING}
@@ -35,7 +37,7 @@ function add_release_tar_to_db {
     echo "Adding release to database"
 
     # add data to DB
-    python ${MANAGE_SCRIPT} addrelease ${DATA} ${REPORTS} ${METADATA} ${REMOVED} ${DIFFJSON}
+    python ${MANAGE_SCRIPT} addrelease ${DATA} ${METADATA} ${REMOVED} ${DIFFJSON} ${REPORTS} ${REMOVEDREPORTS} ${REPORTSDIFF}
 }
 
 export HOST=${HOST:-brcaexchange.cloudapp.net}

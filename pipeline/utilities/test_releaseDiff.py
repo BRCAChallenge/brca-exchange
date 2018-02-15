@@ -56,6 +56,54 @@ class TestStringMethods(unittest.TestCase):
 
         self.newRow = copy.deepcopy(self.oldRow)
 
+        self.oldReportDict = {
+            'Chr': '13',
+            'Submitter_ClinVar': 'Evidence-based_Network_for_the_Interpretation_of_Germline_Mutant_Alleles_(ENIGMA)',
+            'Summary_Evidence_ClinVar': 'Class_1_not_pathogenic_based_on_frequency_>1%_in_an_outbred_sampleset._Frequency_0.14_(African),_derived_from_1000_genomes_(2012-04-30).',
+            'Method_ClinVar': 'curation',
+            'Genomic_Coordinate': 'chr13:g.32314943:A>G',
+            'Allele_Origin_ClinVar': 'germline',
+            'Source': 'ClinVar',
+            'Ref': 'A',
+            'BX_ID_ClinVar': '1',
+            'HGVS_ClinVar': 'NM_000059.3.c.-764A>G',
+            'Date_Last_Updated_ClinVar': '2015-01-12',
+            'SCV_ClinVar': 'SCV000244909',
+            'Review_Status_ClinVar': 'reviewed_by_expert_panel',
+            'Description_ClinVar': 'not_provided',
+            'Gene_symbol_ENIGMA': 'BRCA2',
+            'Clinical_Significance_ClinVar': 'Benign',
+            'Alt': 'G',
+            'Protein_ClinVar': 'None',
+            'Pos': '32314943',
+        }
+
+        self.newReportDict = copy.deepcopy(self.oldReportDict)
+
+        self.oldReportList = [
+            'ClinVar',
+            'BRCA2',
+            'chr13:g.32314943:A>G',
+            '13',
+            '32314943',
+            'A',
+            'G',
+            'reviewed_by_expert_panel',
+            '1',
+            'Evidence-based_Network_for_the_Interpretation_of_Germline_Mutant_Alleles_(ENIGMA)',
+            'curation',
+            '2015-01-12',
+            'not_provided',
+            'germline',
+            'NM_000059.3.c.-764A>G',
+            'Benign',
+            'None',
+            'SCV000244909',
+            'Class_1_not_pathogenic_based_on_frequency_>1%_in_an_outbred_sampleset._Frequency_0.14_(African),_derived_from_1000_genomes_(2012-04-30).'
+        ]
+
+        self.newReportList = copy.deepcopy(self.oldReportList)
+
         self.test_dir = tempfile.mkdtemp()
 
         self.added = csv.DictWriter(open(path.join(self.test_dir, 'added.tsv'), 'w'), delimiter="\t", fieldnames=self.fieldnames)
@@ -733,6 +781,29 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(v_diff['removed'], '9.42')
         self.assertEqual(change_type, "changed_information")
 
+    def test_getIdentifier(self):
+        self.oldReportDict['Source'] = 'ClinVar'
+        identifier = releaseDiff.getIdentifier(self.oldReportDict, True)
+        self.assertEqual(identifier, "SCV_ClinVar")
+
+        self.oldReportDict['Source'] = 'LOVD'
+        identifier = releaseDiff.getIdentifier(self.oldReportDict, True)
+        self.assertEqual(identifier, "DBID_LOVD")
+
+        self.oldReportList[0] = 'ClinVar'
+        identifier = releaseDiff.getIdentifier(self.oldReportList, True)
+        self.assertEqual(identifier, "SCV_ClinVar")
+
+        self.oldReportList[0] = 'LOVD'
+        identifier = releaseDiff.getIdentifier(self.oldReportList, True)
+        self.assertEqual(identifier, "DBID_LOVD")
+
+        identifier = releaseDiff.getIdentifier(self.oldRow, False)
+        self.assertEqual(identifier, "pyhgvs_Genomic_Coordinate_38")
+
+        identifier = releaseDiff.getIdentifier(self.newRow, False)
+        self.assertEqual(identifier, "pyhgvs_Genomic_Coordinate_38")
+
 
 if __name__ == '__main__':
-    pass
+    unittest.main()
