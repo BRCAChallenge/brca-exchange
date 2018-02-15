@@ -413,7 +413,7 @@ def getVarExonNumberSNS(variant):
                 if withinBoundaries == True:
                     return exon
 
-def varInSpliceRegion(variant, donor=False):
+def varInSpliceRegion(variant, donor=False, deNovo=False):
     '''
     Given a variant, determines if a variant is in reference transcript's splice donor/acceptor region
     If donor=True, checks if variant is in a splice donor region
@@ -422,8 +422,10 @@ def varInSpliceRegion(variant, donor=False):
     splice acceptor region = 20 bases preceding exon and first 3 bases in exon
     Returns True if variant is in a splice region region, false otherwise
     '''
-    if donor == False:
+    if donor == False and deNovo == False:
         regionBounds = getSpliceAcceptorBoundaries(variant, deNovo=False)
+    elif donor ==False and deNovo == True:
+        regionBounds = getSpliceAcceptorBoundaries(variant, deNovo=True)
     else:
         regionBounds = getRefSpliceDonorBoundaries(variant)
     for exon in regionBounds.keys():
@@ -438,16 +440,16 @@ def varInSpliceRegion(variant, donor=False):
             return True
     return False
 
-def getVarSpliceRegionBounds(variant, donor=False):
+def getVarSpliceRegionBounds(variant, donor=False, deNovo=False):
     '''
     Given a variant, checks if variant is in a splice donor/acceptor region
     If donor=True, checks if variant is in a splice donor region and returns boundaries for splice donor region
     If donor=False, checks if variant is ina splice acceptor region and returns boundaries for splice acceptor region
     If variant is in a splice region, returns a dictionary with region boundaries where variant is located
     '''
-    if varInSpliceRegion(variant, donor=donor):
+    if varInSpliceRegion(variant, donor=donor, deNovo=deNovo):
         if donor == False:
-            regionBounds = getSpliceAcceptorBoundaries(variant, deNovo=False)
+            regionBounds = getSpliceAcceptorBoundaries(variant, deNovo=deNovo)
             regionStartKey = "acceptorStart"
             regionEndKey = "acceptorEnd"
         else:        
@@ -534,8 +536,8 @@ def getVarLocation(variant, boundaries):
     if varOutBounds == True:
         return "outside_transcript_boundaries_variant"
     inExon = varInExon(variant)
-    inSpliceDonor = varInSpliceRegion(variant, donor=True)
-    inSpliceAcceptor = varInSpliceRegion(variant, donor=False)
+    inSpliceDonor = varInSpliceRegion(variant, donor=True, deNovo=False)
+    inSpliceAcceptor = varInSpliceRegion(variant, donor=False, deNovo=False)
     if inExon == True:
         inCIDomain = varInCIDomain(variant, boundaries)
         if inCIDomain == True and inSpliceDonor == True:
@@ -696,40 +698,51 @@ def getRefAltScores(refSeq, altSeq, donor=False):
                                "zScore": altZScore}}
     return scoreDict
 
-def getMaxEntScanScoresSlidingWindowSNS(variant):
+def getMaxEntScanScoresSlidingWindowSNS(variant, donor=True):
     '''
     Given a variant, determines window sequences and scores for a 9 bp sliding window
     Returns a dictionary containing:
         1. window sequences - ref and alt seq for each window (variant in positions 1-9)
         2. window scores - ref and alt MaxEntScan scores and zscores for each window
         3. window alt MaxEntScan scores - only contains alt MaxEntScan scores for each window
+    If donor = True, then uses 9 bp sliding window
+    If donor = False, then function uses 23 bp sliding window
     '''
     varGenPos = int(variant["Pos"])
     varStrand = getVarStrand(variant)
-    # for default window size (9) use +- 8 to be 17 bp region
-    # so that have sequence for each 9 bp window with variant in positions 1-9
-    # minus strand and plus strand are opposite for +- 8 to preserve sequence returned by getRefAltSeqs
-    if varStrand == "-":
-        regionStart = varGenPos + (windowSize - 1)
-        regionEnd = varGenPos - (windowSize - 1)
+    if donor == True:
+        # use +- 8 to get 17 bp region so that have sequence for each 9 bp window with variant in positions 1-9
+        # minus strand and plus strand are opposite for +- 8 to preserve sequence returned by getRefAltSeqs
+        offset = 8
+        varPos = 9
+        windowEnd = 9
+        totalPositions = 9
     else:
-        regionStart = varGenPos - (windowSize - 1)
-        regionEnd = varGenPos + (windowSize - 1)
+        # use +- 22 to get 45 bp region so that have sequence for each 23 bp window with variant in position 1-23
+        # minus strand and plus strand are opposite for +- 23 to preserve sequence returned by getRefAltSeqs
+        offset = 22
+        varPos = 23
+        windowEnd = 23
+        totalPositions = 23
+    if varStrand == "-":
+        regionStart = varGenPos + offset
+        regionEnd = varGenPos - offset
+    else:
+        regionStart = varGenPos - offset
+        regionEnd = varGenPos + offset
     refAltSeqs = getRefAltSeqs(variant, regionStart, regionEnd)
     refSeq = refAltSeqs["refSeq"]
     altSeq = refAltSeqs["altSeq"]
-    varPos = windowSize
     windowStart = 0
-    windowEnd = windowSize
     windowSeqs = {}
     windowScores = {}
     windowAltMaxEntScanScores = {}
-    while windowStart < windowSize:
+    while windowStart < totalPositions:
         refWindowSeq = refSeq[windowStart:windowEnd]
         altWindowSeq = altSeq[windowStart:windowEnd]
         windowSeqs[varPos] = {"refSeq": refWindowSeq,
                               "altSeq": altWindowSeq}
-        refAltWindowScores = getRefAltScores(refWindowSeq, altWindowSeq, donor=True)
+        refAltWindowScores = getRefAltScores(refWindowSeq, altWindowSeq, donor=donor)
         windowScores[varPos] = {"refMaxEntScanScore": refAltWindowScores["refScores"]["maxEntScanScore"],
                                 "refZScore": refAltWindowScores["refScores"]["zScore"],
                                 "altMaxEntScanScore": refAltWindowScores["altScores"]["maxEntScanScore"],
@@ -743,27 +756,33 @@ def getMaxEntScanScoresSlidingWindowSNS(variant):
             "windowScores": windowScores,
             "windowAltMaxEntScanScores": windowAltMaxEntScanScores}
 
-def getMaxMaxEntScanScoreSlidingWindowSNS(variant):
+def getMaxMaxEntScanScoreSlidingWindowSNS(variant, donor=True, deNovo=False):
     '''
-    Given a variant, determines the maximum alt MaxEntScan score in a 9 bp sliding window
-       with the variant in each position (1-9)
+    Given a variant, determines the maximum alt MaxEntScan score in 
+       a 9 bp sliding window with the variant in each position (1-9) if donor = True
+       a 23 bp sliding window with the variant in each position (1-23) if donor = False
+    If deNovo = True, then function determines score considering de novo splic acceptors
+    If doNovo = False, then de novo acceptors are not considered
     Returns a dictionary containing the ref and alt MaxEntScan score and z-score and position of variant for the highest scoring window
     Dictionary also containing value "inFirstThree" that has value either True or False
        If inFirstThree = True, then variant is in firt 3 bp of highest scoring sliding window
-       If inFirstThree = False, then variant is in last 6 bp of highest scoring sliding window 
+       If inFirstThree = False, then variant is in last 6 bp (for donor) or last 20 bp (for acceptor) of highest scoring sliding window 
     '''
-    inSpliceDonor = varInSpliceRegion(variant, donor=True)
-    slidingWindowInfo = getMaxEntScanScoresSlidingWindowSNS(variant)
+    slidingWindowInfo = getMaxEntScanScoresSlidingWindowSNS(variant, donor=donor)
     windowAltMaxEntScanScores = slidingWindowInfo["windowAltMaxEntScanScores"]
-    if inSpliceDonor == True:
-        refSpliceBounds = getVarSpliceRegionBounds(variant, donor=True)
-        refSpliceSeq = getFastaSeq(getVarChrom(variant), refSpliceBounds["donorStart"], refSpliceBounds["donorEnd"]).upper()
+    inSpliceDonor = varInSpliceRegion(variant, donor=True, deNovo=deNovo)
+    inDeNovoAcceptor = varInSpliceRegion(variant, donor=False, deNovo=deNovo)
+    if inSpliceDonor == True or inDeNovoAcceptor == True:
+        refSpliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=False)
+        if donor == True:
+            refSpliceSeq = getFastaSeq(getVarChrom(variant), refSpliceBounds["donorStart"], refSpliceBounds["donorEnd"]).upper()
+        else:
+            refSpliceSeq = getFastaSeq(getVarChrom(variant), refSpliceBounds["acceptorStart"], refSpliceBounds["acceptorEnd"]).upper()
         for position, seqs in slidingWindowInfo["windowSeqs"].iteritems():
             if seqs["refSeq"] == refSpliceSeq:
                 refSpliceWindow = position
                 # removes reference splice window so it is not considered for de novo splicing
                 del windowAltMaxEntScanScores[refSpliceWindow]
-                
     # to get tuple containing sequence with variant position with maximum alt MaxEntScan score
     maxAltWindowScore = max(windowAltMaxEntScanScores.items(), key=lambda k: k[1])
     maxVarPosition = maxAltWindowScore[0]
@@ -793,13 +812,13 @@ def varInExonicPortion(variant, exonicPortionSize=3):
         return True
     return False
 
-def getVarWindowPosition(variant):
+def getVarWindowPosition(variant, donor=True):
     '''
     Given a variant, determines window position for highest scoring sliding window
-    Returns an integer (1-windowSize) based on variant position with higest scoring window
-      default would be 1-9 because default windowSize is 9 bp
+    Returns integer 1-9 based on variant position in highest scoring window if donor=True
+    Returns integer 1-23 based on variant position in highest scoring window if donor=False
     '''
-    slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant)
+    slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, donor=donor)
     varWindowPos = slidingWindowInfo["varWindowPosition"]
     return varWindowPos
 
@@ -818,8 +837,8 @@ def getSubsequentDonorScores(variant):
         exonNumber = getVarExonNumberSNS(variant)
         refSpliceDonorBounds = getRefSpliceDonorBoundaries(variant)
         subDonorBounds = refSpliceDonorBounds[exonNumber]
-    if varInSpliceRegion(variant, donor=True) == True:
-        subDonorBounds = getVarSpliceRegionBounds(variant, donor=True)
+    if varInSpliceRegion(variant, donor=True, deNovo=False) == True:
+        subDonorBounds = getVarSpliceRegionBounds(variant, donor=True, deNovo=False)
     refSeq = getFastaSeq(varChrom, subDonorBounds["donorStart"], subDonorBounds["donorEnd"])
     subMaxEntScanScore = runMaxEntScan(refSeq, donor=True)
     subZScore = getZScore(subMaxEntScanScore, donor=True)
@@ -892,7 +911,7 @@ def getAltExonLength(variant):
     if varInExon(variant) == True:
         varExonNum = getVarExonNumberSNS(variant)
         exonBounds = getExonBoundaries(variant)
-        slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant)
+        slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, donor=True)
         newSplicePos = getNewSplicePosition(variant["Pos"], getVarStrand(variant),
                                             slidingWindowInfo["varWindowPosition"], slidingWindowInfo["inExonicPortion"])
         if getVarStrand(variant) == "-":
@@ -941,7 +960,7 @@ def compareDeNovoWildTypeSplicePos(variant):
         varExonNum = getVarExonNumberSNS(variant)
         refExonBounds = getExonBoundaries(variant)
         wildTypeSplicePos = refExonBounds[varExonNum]["exonEnd"]
-        slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant)
+        slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, donor=True)
         deNovoSplicePos = getNewSplicePosition(variant["Pos"], varStrand,
                                                slidingWindowInfo["varWindowPosition"], slidingWindowInfo["inExonicPortion"])
         if varStrand == "+":
@@ -1050,7 +1069,7 @@ def getPriorProbSpliceDonorSNS(variant, boundaries):
     varLoc = getVarLocation(variant, boundaries)
     if varType == "substitution" and (varLoc == "splice_donor_variant" or varLoc == "CI_splice_donor_variant"):
         # to get region boundaries to get ref and alt seq
-        spliceDonorBounds = getVarSpliceRegionBounds(variant, donor=True)
+        spliceDonorBounds = getVarSpliceRegionBounds(variant, donor=True, deNovo=False)
         refAltSeqs = getRefAltSeqs(variant, spliceDonorBounds["donorStart"], spliceDonorBounds["donorEnd"])
         scores = getRefAltScores(refAltSeqs["refSeq"], refAltSeqs["altSeq"], donor=True)
         refMaxEntScanScore = scores["refScores"]["maxEntScanScore"]
@@ -1090,7 +1109,8 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries):
     varLoc = getVarLocation(variant, boundaries)
     if varType == "substitution" and (varLoc == "splice_acceptor_variant" or varLoc == "CI_splice_acceptor_variant"):
         # to get region boundaires to get ref and alt seq
-        spliceAcceptorBounds = getVarSpliceRegionBounds(variant, donor=False)
+        # might change deNovo=False here once incorporate de novo accceptor sites
+        spliceAcceptorBounds = getVarSpliceRegionBounds(variant, donor=False, deNovo=False)
         refAltSeqs = getRefAltSeqs(variant, spliceAcceptorBounds["acceptorStart"], spliceAcceptorBounds["acceptorEnd"])
         scores = getRefAltScores(refAltSeqs["refSeq"], refAltSeqs["altSeq"], donor=False)
         refMaxEntScanScore = scores["refScores"]["maxEntScanScore"]
@@ -1144,7 +1164,7 @@ def getPriorProbDeNovoSNS(variant):
     Returns a dictionary containing prior probability of pathogenecity and predicted qualitative engima class 
     '''
     if getVarType(variant) == "substitution":
-        if varInExon(variant) == True or varInSpliceRegion(variant, donor=True) == True:
+        if varInExon(variant) == True or varInSpliceRegion(variant, donor=True, deNovo=False) == True:
             slidingWindowScores = getMaxMaxEntScanScoreSlidingWindowSNS(variant)
             subDonorScores = getSubsequentDonorScores(variant)
             altZScore = slidingWindowScores["altZScore"]
