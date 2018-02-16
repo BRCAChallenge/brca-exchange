@@ -21,8 +21,11 @@ const intronWidth = 40,
     // made up values, how do I get UTR sizes for BRCA1 and BRCA2?
     leaderSize = 75,
     tailSize = 50,
-    zoomMargin = 200,
+    zoomMargin = 20,
     intronMag = 2; // factor by which the intron for a fully-intronic variant is scaled
+
+const donorFill = '#ce67b3',
+    acceptorFill = '#7ba8ff';
 
 // --------------------------------------------------------------------------------------------------------------
 // --- supporting methods
@@ -195,7 +198,7 @@ class Region extends React.Component {
 
         // compute pixel widths for event and constrain to lie within the parent
         const eventWidthPx = (width * eventWidth) / regionWidth;
-        const span = constrain(x, width, eventX, eventWidthPx, 2);
+        const span = constrain(x, width, eventX, eventWidthPx, 4);
 
         return (
             <rect x={span.start} width={span.width} height={height} fill={fill} opacity={opacity} clipPath={mask && `url(#${mask})`} />
@@ -237,7 +240,7 @@ class Exon extends React.Component {
                         donors.map((donorSpan, idx) => (
                             <Region key={`donor_${n}_${idx}`} region={donorSpan}
                                 x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
-                                fill="red" opacity={0.5} mask={clipMaskID}
+                                fill={donorFill} opacity={0.5} mask={clipMaskID}
                             />
                         ))
                     }
@@ -246,7 +249,7 @@ class Exon extends React.Component {
                         acceptors.map((acceptorSpan, idx) => (
                             <Region key={`acceptor_${n}_${idx}`} region={acceptorSpan}
                                 x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
-                                fill="blue" opacity={0.5} mask={clipMaskID}
+                                fill={acceptorFill} opacity={0.5} mask={clipMaskID}
                             />
                         ))
                     }
@@ -273,7 +276,7 @@ class Intron extends React.Component {
                         donors.map((donorSpan, idx) => (
                             <Region key={`donor_intron_${idx}`} region={donorSpan}
                                 x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
-                                fill="red" opacity={0.5}
+                                fill={donorFill} opacity={0.5}
                             />
                         ))
                     }
@@ -282,7 +285,7 @@ class Intron extends React.Component {
                         acceptors.map((acceptorSpan, idx) => (
                             <Region key={`acceptor_intron_${idx}`} region={acceptorSpan}
                                 x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
-                                fill="blue" opacity={0.5}
+                                fill={acceptorFill} opacity={0.5}
                             />
                         ))
                     }
@@ -549,7 +552,7 @@ class Splicing extends React.Component {
                     <div>
                         <label>
                             <input style={{marginRight: '0.5em'}} type="checkbox" name="drawDonors" checked={this.state.drawDonors} onChange={this.toggleDrawing} />
-                            <span style={{...siteStyle, backgroundColor: 'red'}}>&nbsp;</span>
+                            <span style={{...siteStyle, backgroundColor: donorFill}} />
                             show donor sites
                         </label>
                     </div>
@@ -557,7 +560,7 @@ class Splicing extends React.Component {
                     <div>
                         <label style={{display: 'inline-block', marginRight: '1em'}}>
                             <input style={{marginRight: '0.5em'}} type="checkbox" name="drawAcceptors" checked={this.state.drawAcceptors} onChange={this.toggleDrawing} />
-                            <span style={{...siteStyle, backgroundColor: 'blue'}}>&nbsp;</span>
+                            <span style={{...siteStyle, backgroundColor: acceptorFill}} />
                             show acceptor sites
                         </label>
                     </div>
