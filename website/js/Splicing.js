@@ -167,6 +167,43 @@ class Variant extends React.Component {
     }
 }
 
+
+class Region extends React.Component {
+    render() {
+        let { region, x, width, height, txStart, txEnd, fill, opacity, mask } = this.props;
+
+        // txStart, txEnd are the parent exon/intron's span in bases
+        // width, height is the pixel width, height of the parent element
+        // x is the pixel position of the parent exon/intron in the SVG
+
+        // length of the event in bases
+        const eventWidth = Math.abs(region.end - region.start);
+        const eventMin = Math.min(region.start, region.end), txMin = Math.min(txStart, txEnd);
+
+        // no point drawing an invisible zero-width event
+        // TODO: perhaps we can support these to be drawn as lines? maybe a different component is more appropriate
+        if (eventWidth <= 0) {
+            return null;
+        }
+
+        // length of the parent exon/intro in bases
+        const regionWidth = Math.abs(txEnd - txStart);
+
+        // pixel position of the event within this region (or possibly outside)
+        // (if eventX is negative, it's because the variant's start is before this region begins)
+        const eventX = x + (width * ((eventMin - txMin) / regionWidth));
+
+        // compute pixel widths for event and constrain to lie within the parent
+        const eventWidthPx = (width * eventWidth) / regionWidth;
+        const span = constrain(x, width, eventX, eventWidthPx, 2);
+
+        return (
+            <rect x={span.start} width={span.width} height={height} fill={fill} opacity={opacity} clipPath={mask && `url(#${mask})`} />
+        );
+    }
+}
+
+
 class Exon extends React.Component {
     render() {
         let { n, txStart, txEnd, width, height, x, variant, zoomed, highlight, isFlipped} = this.props;
