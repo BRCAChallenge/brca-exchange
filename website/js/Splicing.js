@@ -8,7 +8,7 @@ var brca1Exons = JSON.parse(require('raw!../content/brca1LollipopDomain.json'));
 var brca2Exons = JSON.parse(require('raw!../content/brca2LollipopDomain.json'));
 */
 
-import {brca1Exons, brca2Exons} from './SplicingData.js';
+import {geneMeta} from './SplicingData.js';
 
 const intronWidth = 40,
     exonFill = "#c1ddf0",
@@ -21,18 +21,24 @@ const intronWidth = 40,
     // made up values, how do I get UTR sizes for BRCA1 and BRCA2?
     leaderSize = 75,
     tailSize = 50,
-    zoomMargin = 200;
-
+    zoomMargin = 200,
+    intronMag = 2; // factor by which the intron for a fully-intronic variant is scaled
 
 // --------------------------------------------------------------------------------------------------------------
 // --- supporting methods
 // --------------------------------------------------------------------------------------------------------------
 
-function exonSizeTx (bases) {
+function exonSizeTx(bases) {
     return bases > 150 ? 150 + Math.sqrt(bases - 150) : bases;
 }
 
-function variantInfo (variant) {
+function intronSizeTx() {
+    // like exonSizeTx() this method receives bases as an argument,
+    // in case we ever want to scale by the real size of the intron
+    return intronWidth;
+}
+
+function variantInfo(variant) {
     let [before, after] = _.map(variant.Genomic_Coordinate_hg38.split(':').pop().split('>'), e => e.length);
     if (before === 1 && after === 1) {
         return { changed: 1 };
@@ -214,7 +220,7 @@ class Intron extends React.Component {
 
 class Transcript extends React.Component {
     render() {
-        let {variant, segments, width, isFullyIntronic, isFlipped} = this.props;
+        let {variant, segments, width, isFlipped} = this.props;
 
 
         // ------------------------------------------------
@@ -222,15 +228,11 @@ class Transcript extends React.Component {
         // --- TODO: scales are slightly different between exonic / intronic variants. fix.
         // ------------------------------------------------
 
-        let totalWidth = _.sum(segments.map((segment) => {
-            return (segment.type === 'exon') ? exonSizeTx(segment.span.end - segment.span.start) : intronWidth;
+        let totalWidth = leaderSize + tailSize + _.sum(segments.map((segment) => {
+            return (segment.type === 'exon')
+                ? exonSizeTx(segment.span.end - segment.span.start)
+                : intronSizeTx(segment.span.end - segment.span.start);
         }));
-
-        // adjust for extra fake introns on the left and right
-        totalWidth += leaderSize + tailSize;
-
-        // increase the size of the figure if the variant is fully intronic
-        if (isFullyIntronic) { totalWidth += intronWidth; }
 
         // set per-element scale from totalWidth
         const scale = (this.props.width - 2) / totalWidth;
@@ -246,7 +248,7 @@ class Transcript extends React.Component {
             // figure out the width of the current element
             const curWidth = (segment.type === 'exon')
                 ? scale * exonSizeTx(segment.span.end - segment.span.start)
-                : scale * intronWidth;
+                : scale * intronSizeTx(segment.span.end - segment.span.start);
 
             // add the offset of this segment and move our cursor to the next position
             agg.offsets.push({x: agg.curX, width: curWidth, highlighted: segment.highlighted}); agg.curX += curWidth;
@@ -309,6 +311,7 @@ class Zoom extends React.Component {
     render() {
         let { variant, segments, width, isFullyIntronic, isFlipped} = this.props;
 
+
         // ------------------------------------------------
         // --- precalculate scale
         // ------------------------------------------------
@@ -316,11 +319,8 @@ class Zoom extends React.Component {
         let totalWidth = _.sum(segments.map((segment) => {
             return (segment.type === 'exon')
                 ? exonSizeTx(segment.span.end - segment.span.start)
-                : intronWidth;
+                : intronSizeTx(segment.span.end - segment.span.start) * (isFullyIntronic ? intronMag : 1);
         }));
-
-        // increase the size of the figure if the variant is fully intronic
-        if (isFullyIntronic) { totalWidth += intronWidth; }
 
         // set per-element scale from totalWidth
         const scale = (width - 2 * zoomMargin) / totalWidth;
@@ -335,7 +335,7 @@ class Zoom extends React.Component {
             // figure out the width of the current element
             const curWidth = (segment.type === 'exon')
                 ? scale * exonSizeTx(segment.span.end - segment.span.start)
-                : scale * ((isFullyIntronic) ? intronWidth * 2 : intronWidth);
+                : scale * intronSizeTx(segment.span.end - segment.span.start) * (isFullyIntronic ? intronMag : 1 );
 
             // add the offset of this segment and move our cursor to the next position
             agg.offsets.push({x: agg.curX, width: curWidth}); agg.curX += curWidth;
@@ -387,8 +387,8 @@ class Splicing extends React.Component {
             precedingExonIndex, followingExonIndex;
 
         // --- pre-step: get data, sort and format it so we can process it
-        const targetGene = variant['Gene_Symbol'] === "BRCA1" ? brca1Exons : brca2Exons;
-        const exons = _.toPairs(targetGene).map(([name, span]) => ({id: parseInt(name.substr(4)), span}));
+        const meta = geneMeta[variant['Gene_Symbol']];
+        const exons = _.toPairs(meta.exons).map(([name, span]) => ({id: parseInt(name.substr(4)), span}));
 
         // disregard strandedness so we can just build some intervals
         const sortedExons = _.sortBy(
@@ -413,6 +413,7 @@ class Splicing extends React.Component {
                 <h4 style={{textAlign: 'center'}}>Variant is outside of transcript.</h4>
             );
         }
+
 
         // --- step 1: build list of interleaved exons and introns, aka segments
 
@@ -444,7 +445,6 @@ class Splicing extends React.Component {
             .filter(({segment}) => overlaps(variantSpan, [segment.span.start, segment.span.end]));
 
         const [firstSeg, lastSeg] = [_.first(overlappingSegments), _.last(overlappingSegments)];
-        const isFullyIntronic = overlappingSegments.length === 1 && overlappingSegments[0].segment.type === 'intron';
 
         // compute region that we'll be zooming in on in the figure
         // the region of interest is one exon before and one exon after the segments that overlap the variant
@@ -460,12 +460,18 @@ class Splicing extends React.Component {
             segment.highlighted = (idx >= precedingExonIndex && idx <= followingExonIndex);
         });
 
+
         // --- step 3: render the whole thing
 
-        // if it's BRCA1, we need to reverse it
-        if (variant['Gene_Symbol'] === "BRCA1") {
-            segments = segments.reverse();
+        // if it's antisense, we need to reverse both the collection and the coordinate system for each segment
+        const isFlipped = (meta.strand === '-');
+
+        if (isFlipped) {
+            segments.reverse();
         }
+
+        // if it's fully intronic, we blow up the size of the intron in the zoom mode
+        const isFullyIntronic = overlappingSegments.length === 1 && overlappingSegments[0].segment.type === 'intron';
 
         let plural = n => n === 1 ? '' : 's';
         return (
@@ -480,11 +486,10 @@ class Splicing extends React.Component {
                     </pattern>
 
                     <Transcript variant={variant} segments={segments} width={width}
-                        preceding={precedingExonIndex} following={followingExonIndex}
-                        isFullyIntronic={isFullyIntronic} isFlipped={(variant['Gene_Symbol'] === "BRCA1")} />
+                        isFlipped={isFlipped} />
 
                     <Zoom variant={variant} segments={segments.filter(x => x.highlighted)} width={width}
-                        isFullyIntronic={isFullyIntronic} isFlipped={(variant['Gene_Symbol'] === "BRCA1")} />
+                        isFullyIntronic={isFullyIntronic} isFlipped={isFlipped} />
 
                     <g transform="translate(274,220)">
                         <rect x="0" fill="lightgreen" stroke="black" width="20" height="10" />
