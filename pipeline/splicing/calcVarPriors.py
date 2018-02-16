@@ -6,7 +6,7 @@ calcVarPriors
 Parses a tsv file (default built.tsv) containing variant information and for each variant in file 
 calculates either the prior probability of pathogenicity or a prior ENGIMA classification based on variant type and variant location
 '''
-
+import pdb
 import argparse
 import csv
 import requests
@@ -773,11 +773,17 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant, donor=True, deNovo=False):
     inSpliceDonor = varInSpliceRegion(variant, donor=True, deNovo=deNovo)
     inDeNovoAcceptor = varInSpliceRegion(variant, donor=False, deNovo=deNovo)
     if inSpliceDonor == True or inDeNovoAcceptor == True:
-        refSpliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=False)
+        refSpliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=deNovo)
         if donor == True:
             refSpliceSeq = getFastaSeq(getVarChrom(variant), refSpliceBounds["donorStart"], refSpliceBounds["donorEnd"]).upper()
         else:
-            refSpliceSeq = getFastaSeq(getVarChrom(variant), refSpliceBounds["acceptorStart"], refSpliceBounds["acceptorEnd"]).upper()
+            # acceptorEnd +- 7 because deNovo splice acceptor region is 7 bp longer than reference splice acceptor region
+            if getVarStrand(variant) == "+":
+                refSpliceSeq = getFastaSeq(getVarChrom(variant), refSpliceBounds["acceptorStart"],
+                                           (refSpliceBounds["acceptorEnd"] - 7)).upper()
+            else:
+                refSpliceSeq = getFastaSeq(getVarChrom(variant), refSpliceBounds["acceptorStart"],
+                                           (refSpliceBounds["acceptorEnd"] + 7)).upper()
         for position, seqs in slidingWindowInfo["windowSeqs"].iteritems():
             if seqs["refSeq"] == refSpliceSeq:
                 refSpliceWindow = position
@@ -812,38 +818,50 @@ def varInExonicPortion(variant, exonicPortionSize=3):
         return True
     return False
 
-def getVarWindowPosition(variant, donor=True):
+def getVarWindowPosition(variant, donor=True, deNovo=False):
     '''
     Given a variant, determines window position for highest scoring sliding window
     Returns integer 1-9 based on variant position in highest scoring window if donor=True
     Returns integer 1-23 based on variant position in highest scoring window if donor=False
     '''
-    slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, donor=donor)
+    slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, donor=donor, deNovo=deNovo)
     varWindowPos = slidingWindowInfo["varWindowPosition"]
     return varWindowPos
 
-def getSubsequentDonorScores(variant):
+def getClosestSpliceSiteScores(variant, donor=True, deNovo=False):
     '''
-    Given a variant, determines scores for subsequent reference donor sequence
+    Given a variant, determines scores for closest reference splice sequence
+       If donor = True, looks for closest splice donor sequence
+       If donor = False, looks for closest splice acceptor sequence
     If exonic variant, returns a dictionary containing:
-       MaxEntScan score and z-score for reference subsequent donor sequence
-    If variant located in referene splice donor site, returns a dictionary containing:
-       MaxEntScan score and z-score for that reference splice donor sequence
+       MaxEntScan score and z-score for reference closest splice sequence
+    If variant located in referene splice site, returns a dictionary containing:
+       MaxEntScan score and z-score for that reference splice site sequence
     '''
     varGenPos = int(variant["Pos"])
     varChrom = getVarChrom(variant)
     if varInExon(variant) == True:
-        varStrand = getVarStrand(variant)
         exonNumber = getVarExonNumberSNS(variant)
-        refSpliceDonorBounds = getRefSpliceDonorBoundaries(variant)
-        subDonorBounds = refSpliceDonorBounds[exonNumber]
-    if varInSpliceRegion(variant, donor=True, deNovo=False) == True:
-        subDonorBounds = getVarSpliceRegionBounds(variant, donor=True, deNovo=False)
-    refSeq = getFastaSeq(varChrom, subDonorBounds["donorStart"], subDonorBounds["donorEnd"])
-    subMaxEntScanScore = runMaxEntScan(refSeq, donor=True)
-    subZScore = getZScore(subMaxEntScanScore, donor=True)
-    return {"maxEntScanScore": subMaxEntScanScore,
-            "zScore": subZScore}
+        if donor == True:
+            refSpliceDonorBounds = getRefSpliceDonorBoundaries(variant)
+            closestSpliceBounds = refSpliceDonorBounds[exonNumber]
+        else:
+            refSpliceAccBounds = getSpliceAcceptorBoundaries(variant, deNovo=False)
+            cloesetSpliceBounds = refSpliceAccBounds[exonNumber]
+    if varInSpliceRegion(variant, donor=donor, deNovo=deNovo) == True:
+        closestSpliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=deNovo)
+    if donor == True:
+        refSeq = getFastaSeq(varChrom, closestSpliceBounds["donorStart"], closestSpliceBounds["donorEnd"])
+    else:
+        # acceptorEnd +- 7 because deNovo splice acceptor region is 7 bp longer than reference splice acceptor region
+        if getVarStrand(variant) == "+":
+            refSeq = getFastaSeq(varChrom, closestSpliceBounds["acceptorStart"], (closestSpliceBounds["acceptorEnd"] - 7))
+        else:
+            refSeq = getFastaSeq(varChrom, closestSpliceBounds["acceptorStart"], (closestSpliceBounds["acceptorEnd"] + 7))
+    closestMaxEntScanScore = runMaxEntScan(refSeq, donor=donor)
+    closestZScore = getZScore(closestMaxEntScanScore, donor=donor)
+    return {"maxEntScanScore": closestMaxEntScanScore,
+            "zScore": closestZScore}    
 
 def isCIDomainInRegion(regionStart, regionEnd, boundaries, gene):
     '''
@@ -1156,17 +1174,19 @@ def getPriorProbAfterGreyZoneSNS(variant, boundaries):
         return {"priorProb": priorProb,
                 "enigmaClass": enigmaClass}
 
-def getPriorProbDeNovoSNS(variant):
+def getPriorProbDeNovoDonorSNS(variant):
     '''
     Given a variant:
       1. checks that variant is a single nucleotide substitution
       2. checks that variant is in an exon or is in a reference splice donor region
-    Returns a dictionary containing prior probability of pathogenecity and predicted qualitative engima class 
+    Returns a dictionary containing: 
+      prior probability of pathogenecity and predicted qualitative engima class 
+      deNovo donor MaxEntScan scores and zscores for ref and alt
     '''
     if getVarType(variant) == "substitution":
         if varInExon(variant) == True or varInSpliceRegion(variant, donor=True, deNovo=False) == True:
-            slidingWindowScores = getMaxMaxEntScanScoreSlidingWindowSNS(variant)
-            subDonorScores = getSubsequentDonorScores(variant)
+            slidingWindowScores = getMaxMaxEntScanScoreSlidingWindowSNS(variant, donor=True, deNovo=False)
+            subDonorScores = getClosestSpliceSiteScores(variant, donor=True, deNovo=False)
             altZScore = slidingWindowScores["altZScore"]
             refZScore = slidingWindowScores["refZScore"]
             if altZScore <= refZScore:
@@ -1198,6 +1218,41 @@ def getPriorProbDeNovoSNS(variant):
                         "altMaxEntScanScore": slidingWindowScores["altMaxEntScanScore"],
                         "refZScore": refZScore,
                         "altZScore": altZScore}
+
+def getPriorProbDeNovoAcceptorSNS(variant):
+    '''
+    Given a variant:
+      1. checks that variant is a single nucleotide substitution
+      2. checks that variant is in de novo splice acceptor region (-20 to +10)
+    Returns a dictionary containing: 
+      prior probability of pathogenecity and predicted qualitative engima class (both N/A)
+      deNovo acceptor MaxEntScan scores and zscores for ref and alt sequence
+      deNovo acceptor flag: which equals 1 if stronger than closest splice acceptor, 0 otherwise
+    '''
+    deNovoAccFlag = 0
+    if getVarType(variant) == "substitution":
+        if varInSpliceRegion(variant, donor=False, deNovo=True) == True:
+            slidingWindowScores = getMaxMaxEntScanScoreSlidingWindowSNS(variant, donor=False, deNovo=True)
+            closestAccScores = getClosestSpliceSiteScores(variant, donor=False, deNovo=True)
+            altZScore = slidingWindowScores["altZScore"]
+            refZScore = slidingWindowScores["refZScore"]
+            closestZScore = closestAccScores["zScore"]
+            if altZScore <= refZScore:
+                deNovoAccFlag = 0
+            else:
+                if altZScore > closestZScore:
+                    deNovoAccFlag = 1
+                
+            if deNovoAccFlag == 0:
+                return False
+            else:
+                return {"priorProb": "N/A",
+                        "enigmaClass": "N/A",
+                        "refMaxEntScanScore": slidingWindowScores["refMaxEntScanScore"],
+                        "altMaxEntScanScore": slidingWindowScores["altMaxEntScanScore"],
+                        "refZScore": refZScore,
+                        "altZScore": altZScore,
+                        "deNovoAccFlag": deNovoAccFlag}
 
 def getVarDict(variant, boundaries):
     '''
