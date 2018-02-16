@@ -67,7 +67,7 @@ function overlaps(a, b) {
 }
 
 // ensure that the span lies entirely within the parent
-function constrain(regionStart, regionWidth, start, width, minWidth) {
+function constrain(regionStart, regionWidth, start, width, minWidth, adjustStart) {
     // ensure the starting pos is no less than the parent's pos
     start = Math.max(regionStart, start);
 
@@ -88,7 +88,12 @@ function constrain(regionStart, regionWidth, start, width, minWidth) {
         // subtract the difference between our larger end and the parent's end,
         // which should put us at just touching the parent
         // FIXME: is this right? how should we deal with an event that overlaps the end of the region?
-        start -= (overshootWidth);
+        if (adjustStart) {
+            start -= (overshootWidth);
+        }
+        else {
+            width -= (overshootWidth);
+        }
     }
 
     // FIXME: in large regions, short events near the start or end can get obscured by the border
@@ -108,7 +113,7 @@ function pairwise(seq) {
 
 class Variant extends React.Component {
     render() {
-        let { variant, x, width, height, txStart, txEnd } = this.props;
+        let { variant, x, width, height, txStart, txEnd, adjustStart } = this.props;
 
         // txStart, txEnd are the parent exon/intron's span in bases
         // width, height is the pixel width, height of the parent element
@@ -141,16 +146,16 @@ class Variant extends React.Component {
         const events = {
             changed: {
                 fill: 'lightgreen',
-                span: (variantChange.changed > 0 ? constrain(x, width, variantX, variantChangedWidth, 2) : null)
+                span: (variantChange.changed > 0 ? constrain(x, width, variantX, variantChangedWidth, 2, adjustStart) : null)
             },
             deleted: {
                 fill: 'url(#diagonalHatch)',
-                span: (variantChange.deleted > 0 ? constrain(x, width, variantX + variantChangedWidth, variantDeletedWidth, 2) : null)
+                span: (variantChange.deleted > 0 ? constrain(x, width, variantX + variantChangedWidth, variantDeletedWidth, 2, adjustStart) : null)
             },
             inserted: {
                 fill: 'lightblue',
                 // FIXME: should insertions be drawn as points, not intervals, since there's no corresponding region in the source to annotate?
-                span: (variantChange.inserted > 0 ? constrain(x, width, variantX + variantChangedWidth, variantInsertedWidth, 2) : null)
+                span: (variantChange.inserted > 0 ? constrain(x, width, variantX + variantChangedWidth, variantInsertedWidth, 2, adjustStart) : null)
             },
         };
 
@@ -175,7 +180,7 @@ class Variant extends React.Component {
 
 class Region extends React.Component {
     render() {
-        let { region, x, width, height, txStart, txEnd, fill, opacity, mask } = this.props;
+        let { region, x, width, height, txStart, txEnd, fill, opacity, mask, adjustStart } = this.props;
 
         // txStart, txEnd are the parent exon/intron's span in bases
         // width, height is the pixel width, height of the parent element
@@ -200,7 +205,7 @@ class Region extends React.Component {
 
         // compute pixel widths for event and constrain to lie within the parent
         const eventWidthPx = (width * eventWidth) / regionWidth;
-        const span = constrain(x, width, eventX, eventWidthPx, 4);
+        const span = constrain(x, width, eventX, eventWidthPx, 2, adjustStart);
 
         return (
             <rect x={span.start} width={span.width} height={height} fill={fill} opacity={opacity} clipPath={mask && `url(#${mask})`} />
@@ -213,7 +218,7 @@ class Exon extends React.Component {
     render() {
         let {
             n, txStart, txEnd, width, height, x, variant, zoomed, highlight, isFlipped,
-            donors, acceptors
+            donors, acceptors, adjustStart
         } = this.props;
 
         // the clip mask allows us to draw variants within the rounded-rectangle exon
@@ -234,15 +239,19 @@ class Exon extends React.Component {
                     <rect x={0} width={width} height={height} rx={exonBorderRadius} ry={exonBorderRadius} fill={highlight ? highlightFill : exonFill} stroke={highlight ? highlightStroke : exonStroke} />
 
                     {
-                        variant &&
-                        <Variant variant={variant} x={0} width={width} height={height} txStart={txStart} txEnd={txEnd} mask={clipMaskID} />
+                        variant && (
+                            <Variant variant={variant}
+                                x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
+                                mask={clipMaskID}  adjustStart={adjustStart}
+                            />
+                        )
                     }
 
                     {
                         donors.map((donorSpan, idx) => (
                             <Region key={`donor_${n}_${idx}`} region={donorSpan}
                                 x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
-                                fill={donorFill} opacity={0.5} mask={clipMaskID}
+                                fill={donorFill} opacity={0.5} mask={clipMaskID} adjustStart={adjustStart}
                             />
                         ))
                     }
@@ -251,7 +260,7 @@ class Exon extends React.Component {
                         acceptors.map((acceptorSpan, idx) => (
                             <Region key={`acceptor_${n}_${idx}`} region={acceptorSpan}
                                 x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
-                                fill={acceptorFill} opacity={0.5} mask={clipMaskID}
+                                fill={acceptorFill} opacity={0.5} mask={clipMaskID} adjustStart={adjustStart}
                             />
                         ))
                     }
@@ -265,20 +274,27 @@ class Intron extends React.Component {
     render() {
         let {
             txStart, txEnd, x, height, width, variant, highlight, isFlipped,
-            donors, acceptors
+            donors, acceptors, adjustStart
         } = this.props;
 
         return (
             <g transform="translate(0, 10)">
                 <g transform={isFlipped ? `translate(${x + width}) scale(-1,1)` : `translate(${x})`}>
                     <rect x={0} width={width} height={height} fill={highlight ? highlightFill : intronFill} stroke={highlight ? highlightStroke : intronStroke} />
-                    { variant && <Variant variant={variant} x={0} width={width} height={height} txStart={txStart} txEnd={txEnd} /> }
+                    {
+                        variant && (
+                            <Variant variant={variant}
+                                x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
+                                adjustStart={adjustStart}
+                            />
+                        )
+                    }
 
                     {
                         donors.map((donorSpan, idx) => (
                             <Region key={`donor_intron_${idx}`} region={donorSpan}
                                 x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
-                                fill={donorFill} opacity={0.5}
+                                fill={donorFill} opacity={0.5} adjustStart={adjustStart}
                             />
                         ))
                     }
@@ -287,7 +303,7 @@ class Intron extends React.Component {
                         acceptors.map((acceptorSpan, idx) => (
                             <Region key={`acceptor_intron_${idx}`} region={acceptorSpan}
                                 x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
-                                fill={acceptorFill} opacity={0.5}
+                                fill={acceptorFill} opacity={0.5} adjustStart={adjustStart}
                             />
                         ))
                     }
@@ -299,7 +315,7 @@ class Intron extends React.Component {
 
 class Transcript extends React.Component {
     render() {
-        let {variant, donors, acceptors, segments, width, isFlipped} = this.props;
+        let {variant, donors, acceptors, segments, width, isFlipped, adjustStart} = this.props;
 
 
         // ------------------------------------------------
@@ -351,7 +367,7 @@ class Transcript extends React.Component {
                         variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors}
                         txStart={segment.span.start} txEnd={segment.span.end}
                         x={offsets[i].x} width={offsets[i].width} height={40}
-                        highlight={segment.highlighted} zoomed={false} isFlipped={isFlipped}
+                        highlight={segment.highlighted} zoomed={false} isFlipped={isFlipped} adjustStart={adjustStart}
                     />
                 );
             }
@@ -361,7 +377,7 @@ class Transcript extends React.Component {
                         variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors}
                         txStart={segment.span.start} txEnd={segment.span.end}
                         x={offsets[i].x} width={offsets[i].width} height={20}
-                        highlight={segment.highlighted} isFlipped={isFlipped}
+                        highlight={segment.highlighted} isFlipped={isFlipped} adjustStart={adjustStart}
                     />
                 );
             }
@@ -393,7 +409,7 @@ class Transcript extends React.Component {
 
 class Zoom extends React.Component {
     render() {
-        let { variant, donors, acceptors, segments, width, isFullyIntronic, isFlipped } = this.props;
+        let { variant, donors, acceptors, segments, width, isFullyIntronic, isFlipped, adjustStart } = this.props;
 
 
         // ------------------------------------------------
@@ -441,7 +457,7 @@ class Zoom extends React.Component {
                         variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors}
                         txStart={segment.span.start} txEnd={segment.span.end}
                         x={offsets[i].x} width={offsets[i].width} height={80}
-                        highlight={true} zoomed={true} isFlipped={isFlipped}
+                        highlight={true} zoomed={true} isFlipped={isFlipped} adjustStart={adjustStart}
                     />
                 );
             }
@@ -451,7 +467,7 @@ class Zoom extends React.Component {
                         variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors}
                         txStart={segment.span.start} txEnd={segment.span.end}
                         x={offsets[i].x} width={offsets[i].width} height={60}
-                        highlight={true}  isFlipped={isFlipped}
+                        highlight={true}  isFlipped={isFlipped} adjustStart={adjustStart}
                     />
                 );
             }
@@ -471,16 +487,17 @@ class Splicing extends React.Component {
 
         this.state = {
             drawAcceptors: true,
-            drawDonors: true
+            drawDonors: true,
+            adjustStart: true
         };
 
         this.toggleDrawing = this.toggleDrawing.bind(this);
     }
 
     toggleDrawing(event) {
-        event.persist();
-        console.log(event);
-        this.setState({ [event.target.name]: event.target.checked });
+        this.setState({
+            [event.target.name]: event.target.checked
+        });
     }
 
     render() {
@@ -533,12 +550,12 @@ class Splicing extends React.Component {
                     <Transcript variant={variant} segments={segments} width={width}
                         donors={this.state.drawDonors ? meta.spliceDonors : {}}
                         acceptors={this.state.drawAcceptors ? meta.spliceAcceptors : {}}
-                        isFlipped={isFlipped} />
+                        isFlipped={isFlipped} adjustStart={this.state.adjustStart} />
 
                     <Zoom variant={variant} segments={segments.filter(x => x.highlighted)} width={width}
                         donors={this.state.drawDonors ? meta.spliceDonors : {}}
                         acceptors={this.state.drawAcceptors ? meta.spliceAcceptors : {}}
-                        isFullyIntronic={isFullyIntronic} isFlipped={isFlipped} />
+                        isFullyIntronic={isFullyIntronic} isFlipped={isFlipped} adjustStart={this.state.adjustStart} />
 
                     <g transform="translate(274,220)">
                         <rect x="0" fill="lightgreen" stroke="black" width="20" height="10" />
@@ -566,6 +583,13 @@ class Splicing extends React.Component {
                             show acceptor sites
                         </label>
                     </div>
+
+                    <div>
+                        <label style={{display: 'inline-block', marginRight: '1em'}}>
+                            <input style={{marginRight: '0.5em'}} type="checkbox" name="adjustStart" checked={this.state.adjustStart} onChange={this.toggleDrawing} />
+                            adjust start positions to fit
+                        </label>
+                    </div>
                 </div>
             </div>
         );
@@ -579,7 +603,7 @@ class Splicing extends React.Component {
      * @param exons the set of exons for this gene, given as [{id, span: {start, end}}, ...]
      * @param variantSpan start and end of this variant in genomic coords, given as [start, end]
      * @param isFlipped whether this gene is sense ('+') or antisense ('-')
-     * @returns an array of segments, i.e. [{type: 'intron'/'exon', id, span: {start,end}, highlighted}, ...]
+     * @returns {Array} an array of segments, i.e. [{type: 'intron'/'exon', id, span: {start,end}, highlighted}, ...]
      */
     buildSegments(exons, variantSpan, isFlipped) {
         // disregard strandedness so we can just build some intervals
