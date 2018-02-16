@@ -206,7 +206,10 @@ class Region extends React.Component {
 
 class Exon extends React.Component {
     render() {
-        let { n, txStart, txEnd, width, height, x, variant, zoomed, highlight, isFlipped} = this.props;
+        let {
+            n, txStart, txEnd, width, height, x, variant, zoomed, highlight, isFlipped,
+            donors, acceptors
+        } = this.props;
 
         // the clip mask allows us to draw variants within the rounded-rectangle exon
         // we need to assign different mask IDs for each exon, in either zoomed-in or full-transcript mode
@@ -229,6 +232,24 @@ class Exon extends React.Component {
                         variant &&
                         <Variant variant={variant} x={0} width={width} height={height} txStart={txStart} txEnd={txEnd} mask={clipMaskID} />
                     }
+
+                    {
+                        donors.map((donorSpan, idx) => (
+                            <Region key={`donor_${n}_${idx}`} region={donorSpan}
+                                x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
+                                fill="red" opacity={0.5} mask={clipMaskID}
+                            />
+                        ))
+                    }
+
+                    {
+                        acceptors.map((acceptorSpan, idx) => (
+                            <Region key={`acceptor_${n}_${idx}`} region={acceptorSpan}
+                                x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
+                                fill="blue" opacity={0.5} mask={clipMaskID}
+                            />
+                        ))
+                    }
                 </g>
             </g>
         );
@@ -237,13 +258,34 @@ class Exon extends React.Component {
 
 class Intron extends React.Component {
     render() {
-        let { txStart, txEnd, x, height, width, variant, highlight, isFlipped} = this.props;
+        let {
+            txStart, txEnd, x, height, width, variant, highlight, isFlipped,
+            donors, acceptors
+        } = this.props;
 
         return (
             <g transform="translate(0, 10)">
                 <g transform={isFlipped ? `translate(${x + width}) scale(-1,1)` : `translate(${x})`}>
                     <rect x={0} width={width} height={height} fill={highlight ? highlightFill : intronFill} stroke={highlight ? highlightStroke : intronStroke} />
                     { variant && <Variant variant={variant} x={0} width={width} height={height} txStart={txStart} txEnd={txEnd} /> }
+
+                    {
+                        donors.map((donorSpan, idx) => (
+                            <Region key={`donor_intron_${idx}`} region={donorSpan}
+                                x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
+                                fill="red" opacity={0.5}
+                            />
+                        ))
+                    }
+
+                    {
+                        acceptors.map((acceptorSpan, idx) => (
+                            <Region key={`acceptor_intron_${idx}`} region={acceptorSpan}
+                                x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
+                                fill="blue" opacity={0.5}
+                            />
+                        ))
+                    }
                 </g>
             </g>
         );
@@ -252,7 +294,7 @@ class Intron extends React.Component {
 
 class Transcript extends React.Component {
     render() {
-        let {variant, segments, width, isFlipped} = this.props;
+        let {variant, donors, acceptors, segments, width, isFlipped} = this.props;
 
 
         // ------------------------------------------------
@@ -293,10 +335,15 @@ class Transcript extends React.Component {
         const blocks = segments.map((segment, i) => {
             const passedVariant = overlaps([variant.Hg38_Start, variant.Hg38_End], [segment.span.start, segment.span.end]) ? variant : null;
 
+            const relevantDonors = Object.values(donors)
+                    .filter(site => overlaps([site.start, site.end], [segment.span.start, segment.span.end]));
+            const relevantAcceptors = Object.values(acceptors)
+                    .filter(site => overlaps([site.start, site.end], [segment.span.start, segment.span.end]));
+
             if (segment.type === 'exon') {
                 return (
                     <Exon key={`exon_${segment.id}`} n={segment.id}
-                        variant={passedVariant}
+                        variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors}
                         txStart={segment.span.start} txEnd={segment.span.end}
                         x={offsets[i].x} width={offsets[i].width} height={40}
                         highlight={segment.highlighted} zoomed={false} isFlipped={isFlipped}
@@ -306,7 +353,7 @@ class Transcript extends React.Component {
             else if (segment.type === 'intron') {
                 return (
                     <Intron key={`intron_${segment.id}`} n={segment.id}
-                        variant={passedVariant}
+                        variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors}
                         txStart={segment.span.start} txEnd={segment.span.end}
                         x={offsets[i].x} width={offsets[i].width} height={20}
                         highlight={segment.highlighted} isFlipped={isFlipped}
@@ -341,7 +388,7 @@ class Transcript extends React.Component {
 
 class Zoom extends React.Component {
     render() {
-        let { variant, segments, width, isFullyIntronic, isFlipped} = this.props;
+        let { variant, donors, acceptors, segments, width, isFullyIntronic, isFlipped } = this.props;
 
 
         // ------------------------------------------------
@@ -378,10 +425,15 @@ class Zoom extends React.Component {
         const blocks = segments.map((segment, i) => {
             const passedVariant = overlaps([variant.Hg38_Start, variant.Hg38_End], [segment.span.start, segment.span.end]) ? variant : null;
 
+            const relevantDonors = Object.values(donors)
+                    .filter(site => overlaps([site.start, site.end], [segment.span.start, segment.span.end]));
+            const relevantAcceptors = Object.values(acceptors)
+                    .filter(site => overlaps([site.start, site.end], [segment.span.start, segment.span.end]));
+
             if (segment.type === 'exon') {
                 return (
                     <Exon key={`exon_${segment.id}`} n={segment.id}
-                        variant={passedVariant}
+                        variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors}
                         txStart={segment.span.start} txEnd={segment.span.end}
                         x={offsets[i].x} width={offsets[i].width} height={80}
                         highlight={true} zoomed={true} isFlipped={isFlipped}
@@ -391,7 +443,7 @@ class Zoom extends React.Component {
             else if (segment.type === 'intron') {
                 return (
                     <Intron key={`intron_${i + 1}`} n={segment.id}
-                        variant={passedVariant}
+                        variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors}
                         txStart={segment.span.start} txEnd={segment.span.end}
                         x={offsets[i].x} width={offsets[i].width} height={60}
                         highlight={true}  isFlipped={isFlipped}
@@ -409,19 +461,122 @@ class Zoom extends React.Component {
 }
 
 class Splicing extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            drawAcceptors: true,
+            drawDonors: true
+        };
+
+        this.toggleDrawing = this.toggleDrawing.bind(this);
+    }
+
+    toggleDrawing(event) {
+        event.persist();
+        console.log(event);
+        this.setState({ [event.target.name]: event.target.checked });
+    }
+
     render() {
         let { variant } = this.props;
 
         let width = 800,
             info = variantInfo(variant),
             variantStart = variant.Hg38_Start,
-            variantEnd = variant.Hg38_End,
-            precedingExonIndex, followingExonIndex;
+            variantEnd = variant.Hg38_End;
 
         // --- pre-step: get data, sort and format it so we can process it
         const meta = geneMeta[variant['Gene_Symbol']];
         const exons = _.toPairs(meta.exons).map(([name, span]) => ({id: parseInt(name.substr(4)), span}));
+        const variantSpan = [variantStart, variantEnd];
+        const isFlipped = meta.strand === '-';
 
+        // get the segments (exons and introns interleaved),
+        // with segments that overlap the variant's span marked as highlighted
+        const segments = this.buildSegments(exons, variantSpan, isFlipped);
+
+        // if segments is null, it indicates that the variant doesn't overlap this gene at all
+        if (!segments) {
+            console.log(`Variant ${variantSpan} falls outside of gene`);
+            return (
+                <h4 style={{textAlign: 'center'}}>Variant is outside of transcript.</h4>
+            );
+        }
+
+        // if it's fully intronic, we blow up the size of the intron in the zoom mode
+        const isFullyIntronic = segments.length === 3 && segments[1].segment.type === 'intron';
+
+        let plural = n => n === 1 ? '' : 's';
+        const siteStyle = {
+            display: 'inline-block', verticalAlign: 'text-bottom',
+            width: '17px', height: '17px', marginRight: '8px', opacity: 0.5,
+            border: 'solid 1px black'
+        };
+
+        return (
+            <div>
+                <svg viewBox="-4 0 808 240" preserveAspectRatio="xMidYMid">
+                    <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">
+                        <rect x="0" y="0" width="4" height="4" fill="#FF8888" />
+                        <path d="M-1,1 l2,-2
+                           M0,4 l4,-4
+                           M3,5 l2,-2"
+                            stroke="black" strokeWidth={1} />
+                    </pattern>
+
+                    <Transcript variant={variant} segments={segments} width={width}
+                        donors={this.state.drawDonors ? meta.spliceDonors : {}}
+                        acceptors={this.state.drawAcceptors ? meta.spliceAcceptors : {}}
+                        isFlipped={isFlipped} />
+
+                    <Zoom variant={variant} segments={segments.filter(x => x.highlighted)} width={width}
+                        donors={this.state.drawDonors ? meta.spliceDonors : {}}
+                        acceptors={this.state.drawAcceptors ? meta.spliceAcceptors : {}}
+                        isFullyIntronic={isFullyIntronic} isFlipped={isFlipped} />
+
+                    <g transform="translate(274,220)">
+                        <rect x="0" fill="lightgreen" stroke="black" width="20" height="10" />
+                        <text x="22" y="10">{ `Substitution (${info.changed} base${plural(info.changed)})` }</text>
+                        <rect x="192" fill="url(#diagonalHatch)" stroke="black" width="20" height="10" />
+                        <text x="214" y="10">{ `Deletion (${info.deleted || 0} base${plural(info.deleted)})` }</text>
+                        <rect x="360" fill="#56F" stroke="black" width="20" height="10"/>
+                        <text x="382" y="10">{ `Insertion (${info.inserted || 0} base${plural(info.inserted)})` }</text>
+                    </g>
+                </svg>
+
+                <div style={{padding: '10px'}}>
+                    <div>
+                        <label>
+                            <input style={{marginRight: '0.5em'}} type="checkbox" name="drawDonors" checked={this.state.drawDonors} onChange={this.toggleDrawing} />
+                            <span style={{...siteStyle, backgroundColor: 'red'}}>&nbsp;</span>
+                            show donor sites
+                        </label>
+                    </div>
+
+                    <div>
+                        <label style={{display: 'inline-block', marginRight: '1em'}}>
+                            <input style={{marginRight: '0.5em'}} type="checkbox" name="drawAcceptors" checked={this.state.drawAcceptors} onChange={this.toggleDrawing} />
+                            <span style={{...siteStyle, backgroundColor: 'blue'}}>&nbsp;</span>
+                            show acceptor sites
+                        </label>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    /**
+     * Given a set of exons, creates a set of segments (exons and interleaved introns).
+     *
+     * Each segment has a highlighted field, indicating if it lies within the region of interest, i.e.
+     * the segments that overlap the variant plus some buffer exons/introns depending on whether the variant is intronic.
+     * @param exons the set of exons for this gene, given as [{id, span: {start, end}}, ...]
+     * @param variantSpan start and end of this variant in genomic coords, given as [start, end]
+     * @param isFlipped whether this gene is sense ('+') or antisense ('-')
+     * @returns an array of segments, i.e. [{type: 'intron'/'exon', id, span: {start,end}, highlighted}, ...]
+     */
+    buildSegments(exons, variantSpan, isFlipped) {
         // disregard strandedness so we can just build some intervals
         const sortedExons = _.sortBy(
             exons.map(exon => ({
@@ -436,16 +591,10 @@ class Splicing extends React.Component {
 
         // sanity check: verify that the variant actually overlaps the gene at all
         // FIXME: should this reject variants that don't lie entirely within this gene? currently we look for just an overlap
-        const variantSpan = [variantStart, variantEnd];
         const geneSpan = [sortedExons[0].span.start, sortedExons[sortedExons.length - 1].span.end];
-
         if (!overlaps(variantSpan, geneSpan)) {
-            console.log(`Variant ${variantSpan} falls outside of gene ${geneSpan}`);
-            return (
-                <h4 style={{textAlign: 'center'}}>Variant is outside of transcript.</h4>
-            );
+            return null;
         }
-
 
         // --- step 1: build list of interleaved exons and introns, aka segments
 
@@ -480,10 +629,10 @@ class Splicing extends React.Component {
 
         // compute region that we'll be zooming in on in the figure
         // the region of interest is one exon before and one exon after the segments that overlap the variant
-        precedingExonIndex = Math.max(
+        const precedingExonIndex = Math.max(
             (firstSeg.segment.type === 'intron') ? firstSeg.idx - 1 : firstSeg.idx - 2, 0
         );
-        followingExonIndex = Math.min(
+        const followingExonIndex = Math.min(
             (lastSeg.segment.type === 'intron') ? lastSeg.idx + 1 : lastSeg.idx + 2, segments.length - 1
         );
 
@@ -492,48 +641,12 @@ class Splicing extends React.Component {
             segment.highlighted = (idx >= precedingExonIndex && idx <= followingExonIndex);
         });
 
-
-        // --- step 3: render the whole thing
-
-        // if it's antisense, we need to reverse both the collection and the coordinate system for each segment
-        const isFlipped = (meta.strand === '-');
-
+        // if it's antisense, we need to flip the collection so that it's ordered from exon 1 to exon N
         if (isFlipped) {
             segments.reverse();
         }
 
-        // if it's fully intronic, we blow up the size of the intron in the zoom mode
-        const isFullyIntronic = overlappingSegments.length === 1 && overlappingSegments[0].segment.type === 'intron';
-
-        let plural = n => n === 1 ? '' : 's';
-        return (
-            <div>
-                <svg viewBox="-4 0 808 240" preserveAspectRatio="xMidYMid">
-                    <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">
-                        <rect x="0" y="0" width="4" height="4" fill="#FF8888" />
-                        <path d="M-1,1 l2,-2
-                           M0,4 l4,-4
-                           M3,5 l2,-2"
-                            stroke="black" strokeWidth={1} />
-                    </pattern>
-
-                    <Transcript variant={variant} segments={segments} width={width}
-                        isFlipped={isFlipped} />
-
-                    <Zoom variant={variant} segments={segments.filter(x => x.highlighted)} width={width}
-                        isFullyIntronic={isFullyIntronic} isFlipped={isFlipped} />
-
-                    <g transform="translate(274,220)">
-                        <rect x="0" fill="lightgreen" stroke="black" width="20" height="10" />
-                        <text x="22" y="10">{ `Substitution (${info.changed} base${plural(info.changed)})` }</text>
-                        <rect x="192" fill="url(#diagonalHatch)" stroke="black" width="20" height="10" />
-                        <text x="214" y="10">{ `Deletion (${info.deleted || 0} base${plural(info.deleted)})` }</text>
-                        <rect x="360" fill="#56F" stroke="black" width="20" height="10"/>
-                        <text x="382" y="10">{ `Insertion (${info.inserted || 0} base${plural(info.inserted)})` }</text>
-                    </g>
-                </svg>
-            </div>
-        );
+        return segments;
     }
 }
 
