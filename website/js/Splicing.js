@@ -72,7 +72,7 @@ function constrain(regionStart, regionWidth, start, width, minWidth) {
     if (start + width > regionStart + regionWidth) {
         const overshootWidth = (start + width) - (regionStart + regionWidth);
 
-        console.log("would overshoot by ", overshootWidth, "; shortened to fit within ", regionWidth);
+        // console.log("would overshoot by ", overshootWidth, "; shortened to fit within ", regionWidth);
 
         // subtract the difference between our larger end and the parent's end,
         // which should put us at just touching the parent
@@ -103,18 +103,13 @@ function pairwise(seq) {
 
 class Variant extends React.Component {
     render() {
-        let { variant,
-            x,
-            width,
-            height,
-            txStart,
-            txEnd } = this.props;
+        let { variant, x, width, height, txStart, txEnd } = this.props;
 
         // txStart, txEnd are the parent exon/intron's span in bases
         // width, height is the pixel width, height of the parent element
         // x is the pixel position of the parent exon/intron in the SVG
 
-        // length of the parent exon/intro in base-pairs
+        // length of the parent exon/intro in bases
         const regionWidth = Math.abs(txEnd - txStart);
 
         let variantStart, variantX, variantChange, variantChangedWidth, variantDeletedWidth, variantInsertedWidth;
