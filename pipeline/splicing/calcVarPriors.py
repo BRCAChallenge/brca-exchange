@@ -1076,12 +1076,13 @@ def getEnigmaClass(priorProb):
         else:
             return "class_3"
 
-def getPriorProbSpliceDonorSNS(variant, boundaries):
+def getPriorProbRefSpliceDonorSNS(variant, boundaries):
     '''
     Given a variant and location boundaries (either PRIORS or enigma)
     Checks that variant is in a splice donor site and is a single nucleotide substitution
     Returns a dictionary containing:
      prior probability of pathogenecity, predicted qualitative enigma class, and ref and alt MES and zscores
+     also has spliceSite variable = 1, so variant is marked as in a reference splice site
     '''
     varType = getVarType(variant)
     varLoc = getVarLocation(variant, boundaries)
@@ -1114,14 +1115,16 @@ def getPriorProbSpliceDonorSNS(variant, boundaries):
                 "refMaxEntScanScore": refMaxEntScanScore,
                 "altMaxEntScanScore": altMaxEntScanScore,
                 "refZScore": refZScore,
-                "altZScore": altZScore}
+                "altZScore": altZScore,
+                "spliceSite": 1}
     
-def getPriorProbSpliceAcceptorSNS(variant, boundaries):
+def getPriorProbRefSpliceAcceptorSNS(variant, boundaries):
     '''
     Given a variant and location boundaries (either PRIORS or enigma)
     Checks that variant is in a splice acceptor site and is a single nucleotide substitution
     Returns a dictionary containing:
      prior probability of pathogenecity, predicted qualitative enigma class, and ref and alt MES and zscores
+     also has spliceSite variable = 1, so variant is marked as in a reference splice site
     '''
     varType = getVarType(variant)
     varLoc = getVarLocation(variant, boundaries)
@@ -1155,7 +1158,8 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries):
                 "refMaxEntScanScore": refMaxEntScanScore,
                 "altMaxEntScanScore": altMaxEntScanScore,
                 "refZScore": refZScore,
-                "altZScore": altZScore}
+                "altZScore": altZScore,
+                "spliceSite": 1}
 
 def getPriorProbAfterGreyZoneSNS(variant, boundaries):
     '''
@@ -1253,6 +1257,106 @@ def getPriorProbDeNovoAcceptorSNS(variant):
                         "refZScore": refZScore,
                         "altZScore": altZScore,
                         "deNovoAccFlag": deNovoAccFlag}
+
+def getPriorProbSpliceSiteSNS(variant, boundaries, donor=True):
+    '''
+    Given a variant, boundaries (either PRIORS or ENIGMA) and donor argument
+      (donor=True if in ref splice donor site, donor=False if in ref splice acceptor site):
+    Determines reference and de novo scores for variant and donor arguement
+        if donor=True, ref and de novo splice donor scores
+        if donor=False, ref and de novo splice acceptor scores
+    Returns dicitionary containing scores for ref and de novo splice donor/acceptor
+        score = "-" if score not applicable for variant
+    Also contains other values:
+        applicable prior, highest prior if variant has 2 possible priors
+        applicable prior, highest prior if variant has 2 possible priors
+        ref prior, prior prob for reference splice sequence
+        de novo prior, prior prob for de novo splice sequence
+        splice flag = 1, because variant in reference splice site
+        de novo acc flag = 1 if variant is possible de novo acceptor variant
+    '''
+    if varInSpliceRegion(variant, donor=donor, deNovo=False):
+        if donor == True:
+            refSpliceInfo = getPriorProbRefSpliceDonorSNS(variant, boundaries)
+            deNovoSpliceInfo = getPriorProbDeNovoDonorSNS(variant)
+        else:
+            refSpliceInfo = getPriorProbRefSpliceAcceptorSNS(variant, boundaries)
+            deNovoSpliceInfo = getPriorProbDeNovoAcceptorSNS(variant)
+    if deNovoSpliceInfo != False:
+        refDeNovoMaxEntScanScore = deNovoSpliceInfo["refMaxEntScanScore"],
+        refDeNovoZScore = deNovoSpliceInfo["refZScore"],
+        altDeNovoMaxEntScanScore = deNovoSpliceInfo["altMaxEntScanScore"],
+        altDeNovoZScore = deNovoSpliceInfo["altZScore"]
+        deNovoPrior = deNovoSpliceInfo["priorProb"]
+        refPrior = refSpliceInfo["priorProb"]
+        if deNovoPrior != "N/A":
+            if refPrior >= deNovoPrior:
+                applicablePrior = refSpliceInfo["priorProb"]
+                applicableEnigmaClass = refSpliceInfo["enigmaClass"]
+            else:
+                applicablePrior = deNovoSpliceInfo["priorProb"]
+                applicableEnigmaClass = deNovoSpliceInfo["enigmaClass"]
+        else:
+            applicablePrior = refSpliceInfo["priorProb"]
+            applicableEnigmaClass = refSpliceInfo["enigmaClass"]
+        if donor == False:
+            deNovoAccFlag = deNovoSpliceInfo["deNovoAccFlag"]
+    else:
+        applicablePrior = refSpliceInfo["priorProb"]
+        applicableEnigmaClass = refSpliceInfo["enigmaClass"]
+        refPrior = refSpliceInfo["priorProb"]
+        refDeNovoMaxEntScanScore = "-"
+        refDeNovoZScore = "-"
+        altDeNovoMaxEntScanScore = "-"
+        altDeNovoZScore = "-"
+        deNovoPrior = "-"
+        deNovoAccFlag = 0
+    if donor == True:
+        return {"applicablePrior": applicablePrior,
+                "applicableEnigmaClass": applicableEnigmaClass,
+                "refDonorPrior": refPrior,
+                "deNovoDonorPrior": deNovoPrior,
+                "refRefDonorMES": refSpliceInfo["refMaxEntScanScore"],
+                "refRefDonorZ": refSpliceInfo["refZScore"],
+                "altRefDonorMES": refSpliceInfo["altMaxEntScanScore"],
+                "altRefDonorZ": refSpliceInfo["altZScore"],
+                "refDeNovoDonorMES": refDeNovoMaxEntScanScore,
+                "refDeNovoDonorZ": refDeNovoZScore,
+                "altDeNovoDonorMES": altDeNovoMaxEntScanScore,
+                "altDeNovoDonorZ": altDeNovoZScore,
+                "refRefAccMES": "-",
+                "refRefAccZ": "-",
+                "altRefAccMES": "-",
+                "altRefAccZ": "-",
+                "refDeNovoAccMES": "-",
+                "refDeNovoAccZ": "-",
+                "altDeNovoAccMES": "-",
+                "altDeNovoAccZ": "-",
+                "deNovoAccFlag": 0,
+                "spliceSite": refSpliceInfo["spliceSite"]}
+    else:
+        return {"applicablePrior": applicablePrior,
+                "applicableEnigmaClass": applicableEnigmaClass,
+                "refAccPrior": refPrior,
+                "deNovoAccPrior": deNovoPrior,
+                "refRefAccMES": refSpliceInfo["refMaxEntScanScore"],
+                "refRefAccZ": refSpliceInfo["refZScore"],
+                "altRefAccMES": refSpliceInfo["altMaxEntScanScore"],
+                "altRefAccZ": refSpliceInfo["altZScore"],
+                "refDeNovoAccMES": refDeNovoMaxEntScanScore,
+                "refDeNovoAccZ": refDeNovoZScore,
+                "altDeNovoAccMES": altDeNovoMaxEntScanScore,
+                "altDeNovoAccZ": altDeNovoZScore,
+                "deNovoAccFlag": deNovoAccFlag,
+                "refRefDonorMES": "-",
+                "refRefDonorZ": "-",
+                "altRefDonorMES": "-",
+                "altRefDonorZ": "-",
+                "refDeNovoDonorMES": "-",
+                "refDeNovoDonorZ": "-",
+                "altDeNovoDonorMES": "-",
+                "altDeNovoDonorZ": "-",
+                "spliceSite": refSpliceInfo["spliceSite"]}
 
 def getVarDict(variant, boundaries):
     '''
