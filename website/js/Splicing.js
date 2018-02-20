@@ -67,7 +67,7 @@ function overlaps(a, b) {
 }
 
 // ensure that the span lies entirely within the parent
-function constrain(regionStart, regionWidth, start, width, minWidth, adjustStart) {
+function constrain(regionStart, regionWidth, start, width, minWidth) {
     // ensure the starting pos is no less than the parent's pos
     start = Math.max(regionStart, start);
 
@@ -88,12 +88,7 @@ function constrain(regionStart, regionWidth, start, width, minWidth, adjustStart
         // subtract the difference between our larger end and the parent's end,
         // which should put us at just touching the parent
         // FIXME: is this right? how should we deal with an event that overlaps the end of the region?
-        if (adjustStart) {
-            start -= (overshootWidth);
-        }
-        else {
-            width -= (overshootWidth);
-        }
+        width -= (overshootWidth);
     }
 
     // FIXME: in large regions, short events near the start or end can get obscured by the border
@@ -102,6 +97,7 @@ function constrain(regionStart, regionWidth, start, width, minWidth, adjustStart
 }
 
 // given an array, returns pairs of successive elements; e.g. [1,2,3] produces [[1,2],[2,3]]
+// (used to create introns between pairs of exons later in the code)
 function pairwise(seq) {
     return _.zip(_.take(seq, seq.length - 1), _.tail(seq));
 }
@@ -111,9 +107,49 @@ function pairwise(seq) {
 // --- components
 // --------------------------------------------------------------------------------------------------------------
 
+class Region extends React.Component {
+    render() {
+        let { region, x, width, height, txStart, txEnd, fill, opacity, mask } = this.props;
+
+        // txStart, txEnd are the parent exon/intron's span in bases
+        // width, height is the pixel width, height of the parent element
+        // x is the pixel position of the parent exon/intron in the SVG
+
+        // length of the event in bases
+        const eventWidth = Math.abs(region.end - region.start);
+        const eventMin = Math.min(region.start, region.end), txMin = Math.min(txStart, txEnd);
+
+        // no point drawing an invisible zero-width event
+        // TODO: perhaps we can support these to be drawn as lines? maybe a different component is more appropriate
+        if (eventWidth <= 0) {
+            return null;
+        }
+
+        // length of the parent exon/intro in bases
+        const regionWidth = Math.abs(txEnd - txStart);
+
+        // pixel position of the event within this region (or possibly outside)
+        // (if eventX is negative, it's because the variant's start is before this region begins)
+        const eventX = x + (width * ((eventMin - txMin) / regionWidth));
+
+        // compute pixel widths for event and constrain to lie within the parent
+        const eventWidthPx = (width * eventWidth) / regionWidth;
+        const span = constrain(x, width, eventX, eventWidthPx, 2);
+
+        return (
+            <rect x={span.start} width={span.width} height={height} fill={fill} opacity={opacity} clipPath={mask && `url(#${mask})`} />
+        );
+    }
+}
+
+/**
+ * This is a special case of Region. It reads the variant info and creates up to two regions:
+ * 1. if the alt sequence is longer than the ref, it's an insertion and renders an inserted area
+ * 2.
+ */
 class Variant extends React.Component {
     render() {
-        let { variant, x, width, height, txStart, txEnd, adjustStart } = this.props;
+        let { variant, x, width, height, txStart, txEnd } = this.props;
 
         // txStart, txEnd are the parent exon/intron's span in bases
         // width, height is the pixel width, height of the parent element
@@ -140,22 +176,22 @@ class Variant extends React.Component {
 
         // it's quite possible that the event begins before this region and/or ends after it.
         // in those cases it's safe to just constrain the rendered event to this elements' boundaries.
-        // the other regions with partial overlaps will take care of rendering the event's full extent
+        // the other regions with partial overlaps will render the rest of the variant's extent
 
         // describe each event, and constrain each one's rendered representation to lie within the parent
         const events = {
             changed: {
                 fill: 'lightgreen',
-                span: (variantChange.changed > 0 ? constrain(x, width, variantX, variantChangedWidth, 2, adjustStart) : null)
+                span: (variantChange.changed > 0 ? constrain(x, width, variantX, variantChangedWidth, 2) : null)
             },
             deleted: {
                 fill: 'url(#diagonalHatch)',
-                span: (variantChange.deleted > 0 ? constrain(x, width, variantX + variantChangedWidth, variantDeletedWidth, 2, adjustStart) : null)
+                span: (variantChange.deleted > 0 ? constrain(x, width, variantX + variantChangedWidth, variantDeletedWidth, 2) : null)
             },
             inserted: {
                 fill: 'lightblue',
                 // FIXME: should insertions be drawn as points, not intervals, since there's no corresponding region in the source to annotate?
-                span: (variantChange.inserted > 0 ? constrain(x, width, variantX + variantChangedWidth, variantInsertedWidth, 2, adjustStart) : null)
+                span: (variantChange.inserted > 0 ? constrain(x, width, variantX + variantChangedWidth, variantInsertedWidth, 2) : null)
             },
         };
 
@@ -177,48 +213,49 @@ class Variant extends React.Component {
     }
 }
 
-
-class Region extends React.Component {
+class SegmentRegions extends React.Component {
     render() {
-        let { region, x, width, height, txStart, txEnd, fill, opacity, mask, adjustStart } = this.props;
-
-        // txStart, txEnd are the parent exon/intron's span in bases
-        // width, height is the pixel width, height of the parent element
-        // x is the pixel position of the parent exon/intron in the SVG
-
-        // length of the event in bases
-        const eventWidth = Math.abs(region.end - region.start);
-        const eventMin = Math.min(region.start, region.end), txMin = Math.min(txStart, txEnd);
-
-        // no point drawing an invisible zero-width event
-        // TODO: perhaps we can support these to be drawn as lines? maybe a different component is more appropriate
-        if (eventWidth <= 0) {
-            return null;
-        }
-
-        // length of the parent exon/intro in bases
-        const regionWidth = Math.abs(txEnd - txStart);
-
-        // pixel position of the event within this region (or possibly outside)
-        // (if eventX is negative, it's because the variant's start is before this region begins)
-        const eventX = x + (width * ((eventMin - txMin) / regionWidth));
-
-        // compute pixel widths for event and constrain to lie within the parent
-        const eventWidthPx = (width * eventWidth) / regionWidth;
-        const span = constrain(x, width, eventX, eventWidthPx, 2, adjustStart);
+        const {clipMaskID, variant, donors, acceptors, width, height, txStart, txEnd} = this.props;
+        const n = this.props.n || 'intron';
 
         return (
-            <rect x={span.start} width={span.width} height={height} fill={fill} opacity={opacity} clipPath={mask && `url(#${mask})`} />
-        );
+            <g>
+            {
+                variant && (
+                    <Variant variant={variant}
+                        x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
+                        mask={clipMaskID}
+                    />
+                )
+            }
+
+            {
+                donors.map((donorSpan, idx) => (
+                    <Region key={`donor_${n}_${idx}`} region={donorSpan}
+                        x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
+                        fill={donorFill} opacity={0.5} mask={clipMaskID}
+                    />
+                ))
+            }
+
+            {
+                acceptors.map((acceptorSpan, idx) => (
+                    <Region key={`acceptor_${n}_${idx}`} region={acceptorSpan}
+                        x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
+                        fill={acceptorFill} opacity={0.5} mask={clipMaskID}
+                    />
+                ))
+            }
+            </g>
+        )
     }
 }
-
 
 class Exon extends React.Component {
     render() {
         let {
             n, txStart, txEnd, width, height, x, variant, zoomed, highlight, isFlipped,
-            donors, acceptors, adjustStart
+            donors, acceptors
         } = this.props;
 
         // the clip mask allows us to draw variants within the rounded-rectangle exon
@@ -238,32 +275,9 @@ class Exon extends React.Component {
 
                     <rect x={0} width={width} height={height} rx={exonBorderRadius} ry={exonBorderRadius} fill={highlight ? highlightFill : exonFill} stroke={highlight ? highlightStroke : exonStroke} />
 
-                    {
-                        variant && (
-                            <Variant variant={variant}
-                                x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
-                                mask={clipMaskID}  adjustStart={adjustStart}
-                            />
-                        )
-                    }
-
-                    {
-                        donors.map((donorSpan, idx) => (
-                            <Region key={`donor_${n}_${idx}`} region={donorSpan}
-                                x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
-                                fill={donorFill} opacity={0.5} mask={clipMaskID} adjustStart={adjustStart}
-                            />
-                        ))
-                    }
-
-                    {
-                        acceptors.map((acceptorSpan, idx) => (
-                            <Region key={`acceptor_${n}_${idx}`} region={acceptorSpan}
-                                x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
-                                fill={acceptorFill} opacity={0.5} mask={clipMaskID} adjustStart={adjustStart}
-                            />
-                        ))
-                    }
+                    <SegmentRegions variant={variant} donors={donors} acceptors={acceptors}
+                        txStart={txStart} txEnd={txEnd}
+                        width={width} height={height} mask={clipMaskID} />
                 </g>
             </g>
         );
@@ -274,39 +288,17 @@ class Intron extends React.Component {
     render() {
         let {
             txStart, txEnd, x, height, width, variant, highlight, isFlipped,
-            donors, acceptors, adjustStart
+            donors, acceptors
         } = this.props;
 
         return (
             <g transform="translate(0, 10)">
                 <g transform={isFlipped ? `translate(${x + width}) scale(-1,1)` : `translate(${x})`}>
                     <rect x={0} width={width} height={height} fill={highlight ? highlightFill : intronFill} stroke={highlight ? highlightStroke : intronStroke} />
-                    {
-                        variant && (
-                            <Variant variant={variant}
-                                x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
-                                adjustStart={adjustStart}
-                            />
-                        )
-                    }
 
-                    {
-                        donors.map((donorSpan, idx) => (
-                            <Region key={`donor_intron_${idx}`} region={donorSpan}
-                                x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
-                                fill={donorFill} opacity={0.5} adjustStart={adjustStart}
-                            />
-                        ))
-                    }
-
-                    {
-                        acceptors.map((acceptorSpan, idx) => (
-                            <Region key={`acceptor_intron_${idx}`} region={acceptorSpan}
-                                x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
-                                fill={acceptorFill} opacity={0.5} adjustStart={adjustStart}
-                            />
-                        ))
-                    }
+                    <SegmentRegions variant={variant} donors={donors} acceptors={acceptors}
+                        txStart={txStart} txEnd={txEnd}
+                        width={width} height={height} />
                 </g>
             </g>
         );
@@ -315,7 +307,7 @@ class Intron extends React.Component {
 
 class Transcript extends React.Component {
     render() {
-        let {variant, donors, acceptors, segments, width, isFlipped, adjustStart} = this.props;
+        let {variant, donors, acceptors, segments, width, isFlipped} = this.props;
 
 
         // ------------------------------------------------
@@ -367,7 +359,7 @@ class Transcript extends React.Component {
                         variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors}
                         txStart={segment.span.start} txEnd={segment.span.end}
                         x={offsets[i].x} width={offsets[i].width} height={40}
-                        highlight={segment.highlighted} zoomed={false} isFlipped={isFlipped} adjustStart={adjustStart}
+                        highlight={segment.highlighted} zoomed={false} isFlipped={isFlipped}
                     />
                 );
             }
@@ -377,7 +369,7 @@ class Transcript extends React.Component {
                         variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors}
                         txStart={segment.span.start} txEnd={segment.span.end}
                         x={offsets[i].x} width={offsets[i].width} height={20}
-                        highlight={segment.highlighted} isFlipped={isFlipped} adjustStart={adjustStart}
+                        highlight={segment.highlighted} isFlipped={isFlipped}
                     />
                 );
             }
@@ -409,7 +401,7 @@ class Transcript extends React.Component {
 
 class Zoom extends React.Component {
     render() {
-        let { variant, donors, acceptors, segments, width, isFullyIntronic, isFlipped, adjustStart } = this.props;
+        let { variant, donors, acceptors, segments, width, isFullyIntronic, isFlipped } = this.props;
 
 
         // ------------------------------------------------
@@ -457,7 +449,7 @@ class Zoom extends React.Component {
                         variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors}
                         txStart={segment.span.start} txEnd={segment.span.end}
                         x={offsets[i].x} width={offsets[i].width} height={80}
-                        highlight={true} zoomed={true} isFlipped={isFlipped} adjustStart={adjustStart}
+                        highlight={true} zoomed={true} isFlipped={isFlipped}
                     />
                 );
             }
@@ -467,7 +459,7 @@ class Zoom extends React.Component {
                         variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors}
                         txStart={segment.span.start} txEnd={segment.span.end}
                         x={offsets[i].x} width={offsets[i].width} height={60}
-                        highlight={true}  isFlipped={isFlipped} adjustStart={adjustStart}
+                        highlight={true} isFlipped={isFlipped}
                     />
                 );
             }
@@ -487,8 +479,7 @@ class Splicing extends React.Component {
 
         this.state = {
             drawAcceptors: true,
-            drawDonors: true,
-            adjustStart: true
+            drawDonors: true
         };
 
         this.toggleDrawing = this.toggleDrawing.bind(this);
@@ -539,6 +530,7 @@ class Splicing extends React.Component {
         return (
             <div>
                 <svg viewBox="-4 0 808 240" preserveAspectRatio="xMidYMid">
+                    {/* definitions, not visible */}
                     <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">
                         <rect x="0" y="0" width="4" height="4" fill="#FF8888" />
                         <path d="M-1,1 l2,-2
@@ -547,6 +539,7 @@ class Splicing extends React.Component {
                             stroke="black" strokeWidth={1} />
                     </pattern>
 
+                    {/* transcript and zoomed-in parts */}
                     <Transcript variant={variant} segments={segments} width={width}
                         donors={this.state.drawDonors ? meta.spliceDonors : {}}
                         acceptors={this.state.drawAcceptors ? meta.spliceAcceptors : {}}
@@ -557,6 +550,7 @@ class Splicing extends React.Component {
                         acceptors={this.state.drawAcceptors ? meta.spliceAcceptors : {}}
                         isFullyIntronic={isFullyIntronic} isFlipped={isFlipped} adjustStart={this.state.adjustStart} />
 
+                    {/* legend */}
                     <g transform="translate(274,220)">
                         <rect x="0" fill="lightgreen" stroke="black" width="20" height="10" />
                         <text x="22" y="10">{ `Substitution (${info.changed} base${plural(info.changed)})` }</text>
@@ -567,6 +561,7 @@ class Splicing extends React.Component {
                     </g>
                 </svg>
 
+                {/* settings panel */}
                 <div style={{padding: '10px'}}>
                     <div>
                         <label>
@@ -581,13 +576,6 @@ class Splicing extends React.Component {
                             <input style={{marginRight: '0.5em'}} type="checkbox" name="drawAcceptors" checked={this.state.drawAcceptors} onChange={this.toggleDrawing} />
                             <span style={{...siteStyle, backgroundColor: acceptorFill}} />
                             show acceptor sites
-                        </label>
-                    </div>
-
-                    <div>
-                        <label style={{display: 'inline-block', marginRight: '1em'}}>
-                            <input style={{marginRight: '0.5em'}} type="checkbox" name="adjustStart" checked={this.state.adjustStart} onChange={this.toggleDrawing} />
-                            adjust start positions to fit
                         </label>
                     </div>
                 </div>
@@ -654,7 +642,7 @@ class Splicing extends React.Component {
             .map((segment, idx) => ({idx: idx, segment: segment}))
             .filter(({segment}) => overlaps(variantSpan, [segment.span.start, segment.span.end]));
 
-        const [firstSeg, lastSeg] = [_.first(overlappingSegments), _.last(overlappingSegments)];
+        const firstSeg = _.first(overlappingSegments), lastSeg = _.last(overlappingSegments);
 
         // compute region that we'll be zooming in on in the figure
         // the region of interest is one exon before and one exon after the segments that overlap the variant
@@ -670,7 +658,8 @@ class Splicing extends React.Component {
             segment.highlighted = (idx >= precedingExonIndex && idx <= followingExonIndex);
         });
 
-        // if it's antisense, we need to flip the collection so that it's ordered from exon 1 to exon N
+        // if it's antisense, we got the exons in descending ID
+        // we need to flip the collection so that it's ordered from exon 1 to exon N
         if (isFlipped) {
             segments.reverse();
         }
