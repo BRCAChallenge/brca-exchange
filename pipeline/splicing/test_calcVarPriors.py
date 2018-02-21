@@ -3037,9 +3037,9 @@ class test_calcVarPriors(unittest.TestCase):
                                                getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores):
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
-        self.variant["Pos"] = ""
-        self.variant["Ref"] = ""
-        self.variant["Alt"] = ""
+        self.variant["Pos"] = "43082571"
+        self.variant["Ref"] = "C"
+        self.variant["Alt"] = "A"
         priorProb = calcVarPriors.getPriorProbDeNovoAcceptorSNS(self.variant)
         self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
