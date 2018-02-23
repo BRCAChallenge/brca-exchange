@@ -1401,8 +1401,7 @@ def getPriorProbProteinSNS(variant, variantFile):
                 proteinPrior = float(var["protein_prior"])
                 return {"priorProb": proteinPrior,
                         "enigmaClass": getEnigmaClass(proteinPrior)}
-            
-    
+                
 def getVarDict(variant, boundaries):
     '''
     Given input data, returns a dictionary containing information for each variant in input
