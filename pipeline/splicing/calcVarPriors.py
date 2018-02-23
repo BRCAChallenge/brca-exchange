@@ -1384,7 +1384,25 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries):
                 "altDeNovoAccZ": deNovoAccInfo["altZScore"],
                 "deNovoAccFlag": deNovoAccInfo["deNovoAccFlag"],
                 "spliceSite": refSpliceInfo["spliceSite"]}
-        
+
+def getPriorProbProteinSNS(variant, variantFile):
+    '''
+    Given a variant and a file containing protein prior probabilities,
+    Returns a dictionary containing:
+      the variant's protein prior probability and enigma class for that prior
+    '''
+    if getVarType(variant) == "substitution":
+        varHGVS = variant["HGVS_cDNA"]
+        varGene = variant["Gene_Symbol"]
+
+        variantData = csv.DictReader(open(variantFile, "r"), delimiter="\t")
+        for var in variantData:
+            if var['gene'] == varGene and var['nthgvs'] == varHGVS:
+                proteinPrior = float(var["protein_prior"])
+                return {"priorProb": proteinPrior,
+                        "enigmaClass": getEnigmaClass(proteinPrior)}
+            
+    
 def getVarDict(variant, boundaries):
     '''
     Given input data, returns a dictionary containing information for each variant in input
@@ -1401,7 +1419,7 @@ def getVarDict(variant, boundaries):
                "varGenCoordinate": variant["Pos"],
                "varType": varType,
                "varLoc": varLoc,
-               "varHGVScDNA": variant["pyhgvs_cDNA"]}
+               "varHGVScDNA": variant["HGVS_cDNA"]}
 
     return varDict
 
@@ -1409,6 +1427,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', "--inputFile", default="built.tsv", help="File with variant information")
     parser.add_argument('-o', "--outputFile", help="File where results will be output")
+    parser.add_argument('-v', "--variantFile", help="File containing protein priors for variants")
     parser.add_argument('-b', "--boundaries", default="ENIGMA",
                         help="Specifies which boundaries (ENIGMA or PRIORS) to use for clinically important domains")
     args = parser.parse_args()    

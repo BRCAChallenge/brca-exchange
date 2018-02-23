@@ -104,6 +104,7 @@ enigmaClasses = {"class1": "class_1",
 
 # possible prior probability of pathogenecity values
 priorProbs = {"deNovoLow": 0.02,
+              "proteinLow": 0.03,
               "low": 0.04,
               "deNovoMod": 0.3,
               "moderate": 0.34,
@@ -123,7 +124,7 @@ class test_calcVarPriors(unittest.TestCase):
                         "Alt": "G",
                         "Gene_Symbol": "BRCA2",
                         "Reference_Sequence": "NM_000059.3",
-                        "pyhgvs_cDNA": "NM_000059.3:c.-764A>G"}
+                        "HGVS_cDNA": "c.-764A>G"}
                   
     def test_checkSequence(self):
         '''Tests that checkSequence function categorized acceptable sequences correctly'''
@@ -3264,6 +3265,33 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["altDeNovoDonorMES"], "-")
         self.assertEquals(priorProb["refRefDonorZ"], "-")
 
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('csv.DictReader', return_value = [{'exon': 'exon11',
+                                                  'nthgvs': 'c.3917T>A',
+                                                  'gene': 'BRCA1',
+                                                  'protein_prior': '0.99'},
+                                                  {'exon': 'exon25',
+                                                   'nthgvs': 'c.9265C>A',
+                                                   'gene': 'BRCA2',
+                                                   'protein_prior': '0.03'}])
+    def test_getPriorProbProteinSNS(self, getVarType, DictReader):
+        '''Tests that function parses return value of csv.DictReader correctly'''
+        variantFile = "mod_res_dn_brca20160525.txt"
+        # tests for BRCA1 variant
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["HGVS_cDNA"] = "c.3917T>A"
+        proteinPrior = calcVarPriors.getPriorProbProteinSNS(self.variant, variantFile)
+        self.assertEquals(proteinPrior["priorProb"], priorProbs["pathogenic"])
+        self.assertEquals(proteinPrior["enigmaClass"], enigmaClasses["class5"])
+
+        # tests for BRCA2 variant
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["HGVS_cDNA"] = "c.9265C>A"
+        variantFile = "mod_res_dn_brca20160525.txt"
+        proteinPrior = calcVarPriors.getPriorProbProteinSNS(self.variant, variantFile)
+        self.assertEquals(proteinPrior["priorProb"], priorProbs["proteinLow"])
+        self.assertEquals(proteinPrior["enigmaClass"], enigmaClasses["class2"])        
+
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     def test_getVarDict(self, fetch_gene_coordinates):
         '''
@@ -3272,7 +3300,7 @@ class test_calcVarPriors(unittest.TestCase):
         '''
         boundaries = "enigma"
         varDict = calcVarPriors.getVarDict(self.variant, boundaries)
-        self.assertEquals(varDict["varHGVScDNA"], self.variant["pyhgvs_cDNA"])
+        self.assertEquals(varDict["varHGVScDNA"], self.variant["HGVS_cDNA"])
         self.assertEquals(varDict["varChrom"], self.variant["Chr"])
         self.assertEquals(varDict["varGene"], self.variant["Gene_Symbol"])
         self.assertEquals(varDict["varGenCoordinate"], self.variant["Pos"])
