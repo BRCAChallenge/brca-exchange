@@ -1269,15 +1269,16 @@ def getPriorProbDeNovoAcceptorSNS(variant):
                     "altZScore": altZScore,
                     "deNovoAccFlag": deNovoAccFlag}
 
-def getPriorProbSpliceDonorSNS(variant, boundaries):
+def getPriorProbSpliceDonorSNS(variant, boundaries, variantFile):
     '''
-    Given a variant and boundaries (either PRIORS or ENIGMA)
+    Given a variant, boundaries (either PRIORS or ENIGMA), and file with protein priors
     Determines reference donor and de novo donor scores for variant
     Returns dicitionary containing scores for ref and de novo splice donor/acceptor
+        and protein prior if variant in exon
         score = "-" if score not applicable for variant
     Also contains other values:
-        applicable prior, highest prior if variant has 2 possible priors
-        applicable prior, highest prior if variant has 2 possible priors
+        applicable prior, highest prior if variant has multiple priors
+        applicable prior, highest prior if variant has multiple priors
         ref prior, prior prob for reference splice donor
         de novo prior, prior prob for de novo donor sequence
         splice flag = 1, because variant in reference splice site
@@ -1289,15 +1290,19 @@ def getPriorProbSpliceDonorSNS(variant, boundaries):
         deNovoSpliceInfo = getPriorProbDeNovoDonorSNS(variant)
         deNovoPrior = deNovoSpliceInfo["priorProb"]
         refPrior = refSpliceInfo["priorProb"]
-        applicablePrior = refSpliceInfo["priorProb"]
-        applicableClass = refSpliceInfo["enigmaClass"]
-        if deNovoPrior != "N/A":
-            if refPrior < deNovoPrior:
-                applicablePrior = deNovoSpliceInfo["priorProb"]
-                applicableClass = deNovoSpliceInfo["enigmaClass"]
-                
+        proteinPrior = "N/A"
+        if varInExon(variant) == True:
+            proteinInfo = getPriorProbProteinSNS(variant, variantFile)
+            proteinPrior = proteinInfo["priorProb"]
+        if deNovoPrior != "N/A" and proteinPrior != "N/A":
+            applicablePrior = max(deNovoPrior, refPrior, proteinPrior)
+        elif deNovoPrior == "N/A" and proteinPrior != "N/A":
+            applicablePrior = max(refPrior, proteinPrior)
+        elif deNovoPrior != "N/A" and proteinPrior == "N/A":
+            applicablePrior = max(deNovoPrior, refPrior)
         return {"applicablePrior": applicablePrior,
-                "applicableEnigmaClass": applicableClass,
+                "applicableEnigmaClass": getEnigmaClass(applicablePrior),
+                "proteinPrior": proteinPrior,
                 "refDonorPrior": refPrior,
                 "deNovoDonorPrior": deNovoPrior,
                 "refRefDonorMES": refSpliceInfo["refMaxEntScanScore"],
@@ -1321,16 +1326,16 @@ def getPriorProbSpliceDonorSNS(variant, boundaries):
                 "deNovoAccFlag": 0,
                 "spliceSite": refSpliceInfo["spliceSite"]}
 
-def getPriorProbSpliceAcceptorSNS(variant, boundaries):
+def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantFile):
     '''
-    Given a variant and boundaries (either PRIORS or ENIGMA)
+    Given a variant, boundaries (either PRIORS or ENIGMA), and file with protein priors
     Determines reference and de novo acceptor scores for variant
-      If variant in exon, also determines de novo donor scores
+      If variant in exon, also determines de novo donor scores and protein prior
     Returns dicitionary containing scores for ref and de novo splice donor/acceptor
         score = "-" if score not applicable for variant
     Also contains other values:
-        applicable prior, highest prior if variant has 2 possible priors
-        applicable prior, highest prior if variant has 2 possible priors
+        applicable prior, highest prior if variant has multiple priors
+        applicable prior, highest prior if variant has multiple priors
         ref prior, prior prob for reference splice sequence
         de novo donor and acceptor priors, prior prob for de novo splice sequence
         splice flag = 1, because variant in reference splice site
@@ -1340,27 +1345,30 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries):
     if varInSpliceRegion(variant, donor=False, deNovo=False):
         refSpliceInfo = getPriorProbRefSpliceAcceptorSNS(variant, boundaries)
         deNovoAccInfo = getPriorProbDeNovoAcceptorSNS(variant)
-        applicablePrior = refSpliceInfo["priorProb"]
-        applicableClass = refSpliceInfo["enigmaClass"]
         refPrior = refSpliceInfo["priorProb"]
+        proteinPrior = "N/A"
+        applicablePrior = refSpliceInfo["priorProb"]
         if varInExon(variant) == True:
             deNovoDonorInfo = getPriorProbDeNovoDonorSNS(variant, accDonor=True)
             deNovoDonorPrior = deNovoDonorInfo["priorProb"]
-            if deNovoDonorPrior != "N/A":
-                if refPrior < deNovoDonorPrior:
-                    applicablePrior = deNovoDonorInfo["priorProb"]
-                    applicableClass = deNovoDonorInfo["enigmaClass"]
+            proteinInfo = getPriorProbProteinSNS(variant, variantFile)
+            proteinPrior = proteinInfo["priorProb"]
+            if deNovoDonorPrior != "N/A" and proteinPrior != "N/A":
+                applicablePrior = max(deNovoDonorPrior, proteinPrior, refPrior)
+            else:
+                applicablePrior = max(proteinPrior, refPrior)
         else:
-            deNovoDonorPrior = "-"
+            deNovoDonorPrior = "N/A"
             deNovoDonorInfo = {"refMaxEntScanScore": "-",
                                "refZScore": "-",
                                "altMaxEntScanScore": "-",
                                "altZScore": "-",
                                "deNovoDonorFlag": 0,
-                               "priorProb": "-"}
+                               "priorProb": "N/A"}
         
         return {"applicablePrior": applicablePrior,
-                "applicableEnigmaClass": applicableClass,
+                "applicableEnigmaClass": getEnigmaClass(applicablePrior),
+                "proteinPrior": proteinPrior,
                 "refDonorPrior": "-",
                 "deNovoDonorPrior": deNovoDonorPrior,
                 "refRefDonorMES": "-",

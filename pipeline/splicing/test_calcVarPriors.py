@@ -106,6 +106,7 @@ enigmaClasses = {"class1": "class_1",
 priorProbs = {"deNovoLow": 0.02,
               "proteinLow": 0.03,
               "low": 0.04,
+              "proteinMod": 0.29,
               "deNovoMod": 0.3,
               "moderate": 0.34,
               "deNovoHigh": 0.64,
@@ -3085,39 +3086,45 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["deNovoAccFlag"], 1)
 
     @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.getPriorProbRefSpliceDonorSNS', return_value = {'refMaxEntScanScore': 10.08,
-                                                                               'altMaxEntScanScore': 9.09,
+                                                                               'altMaxEntScanScore': 8.31,
                                                                                'enigmaClass': 'class_2',
-                                                                               'altZScore': 0.49459477246769945,
+                                                                               'altZScore': 0.159686466274593,
                                                                                'priorProb': 0.04,
                                                                                'spliceSite': 1,
                                                                                'refZScore': 0.9196706995589503})
     @mock.patch('calcVarPriors.getPriorProbDeNovoDonorSNS', return_value = {'refMaxEntScanScore': -0.35,
-                                                                            'altMaxEntScanScore': -10.13,
+                                                                            'altMaxEntScanScore': -5.25,
                                                                             'enigmaClass': 'N/A',
-                                                                            'altZScore': -7.75788938782911,
+                                                                            'altZScore': -5.66256562600557,
                                                                             'priorProb': 'N/A',
                                                                             'deNovoDonorFlag': 0,
                                                                             'refZScore': -3.558654471715541})
-    def test_getPriorProbSpliceDonorSNSNoDeNovoBRCA1(self, varInSpliceRegion, getPriorProbRefSpliceDonorSNS,
-                                                     getPriorProbDeNovoDonorSNS):
+    @mock.patch('calcVarPriors.getPriorProbProteinSNS', return_value = {'enigmaClass': 'class_3',
+                                                                        'priorProb': 0.29})
+    def test_getPriorProbSpliceDonorSNSNoDeNovoBRCA1(self, varInSpliceRegion, varInExon, getPriorProbRefSpliceDonorSNS,
+                                                     getPriorProbDeNovoDonorSNS, getPriorProbProteinSNS):
         '''Tests that applicable prior for a variant in a reference splice site is assigned correctly (no de novo splicing)'''
         boundaries = "enigma"
+        variantFile = "mod_res_dn_brca20160525.txt"
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
-        self.variant["Pos"] = "43115727"
+        self.variant["HGVS_cDNA"] = "c.134A>T"
+        self.variant["Pos"] = "43115726"
         self.variant["Ref"] = "T"
-        self.variant["Alt"] = "G"
-        priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
+        self.variant["Alt"] = "A"
+        priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries, variantFile)
         # checks that variant splice site flag is assigned correctly
         self.assertEquals(priorProb["spliceSite"], 1)
         # checks that variant is NOT flagged as a de novo splice donor or acceptor
         self.assertEquals(priorProb["deNovoDonorFlag"], 0)
         self.assertEquals(priorProb["deNovoAccFlag"], 0)
         # checks that prior prob and enigma class are appropriate based on applicable prior
-        self.assertEquals(priorProb["applicablePrior"], priorProbs["low"])
-        self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class2"])
-        # checks that ref prior prob and de novo prior prob are set appropriately
+        self.assertEquals(priorProb["applicablePrior"], priorProbs["proteinMod"])
+        self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class3"])
+        # checks that protein prior prob, ref prior prob, and de novo prior prob are set appropriately
+        self.assertEquals(priorProb["proteinPrior"], priorProbs["proteinMod"])
         self.assertEquals(priorProb["refDonorPrior"], priorProbs["low"])
         self.assertEquals(priorProb["deNovoDonorPrior"], "N/A")
         # checks that a score is present for reference and de novo donor values
@@ -3128,6 +3135,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["refDeNovoAccMES"], "-")
         
     @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.getPriorProbRefSpliceDonorSNS', return_value = {'refMaxEntScanScore': 8.88,
                                                                                'altMaxEntScanScore': 5.83,
                                                                                'enigmaClass': 'class_3',
@@ -3142,16 +3150,20 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'priorProb': 0.02,
                                                                             'deNovoDonorFlag': 1,
                                                                             'refZScore': -7.461624347735207})
-    def test_getPriorProbSpliceDonorSNSWithDeNovoBRCA2(self, varInSpliceRegion, getPriorProbRefSpliceDonorSNS,
-                                                       getPriorProbDeNovoDonorSNS):
+    @mock.patch('calcVarPriors.getPriorProbProteinSNS', return_value = {'enigmaClass': 'class_2',
+                                                                        'priorProb': 0.02})
+    def test_getPriorProbSpliceDonorSNSWithDeNovoBRCA2(self, varInSpliceRegion, varInExon, getPriorProbRefSpliceDonorSNS,
+                                                       getPriorProbDeNovoDonorSNS, getPriorProbProteinSNS):
         '''Tests that applicable prior for a variant in a reference splice site is assigned correctly (with de novo splicing)'''
         boundaries = "enigma"
+        variantFile = "mod_res_dn_brca20160525.txt"
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["HGVS_cDNA"] = "c.515A>G"
         self.variant["Pos"] = "32326281"
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "G"
-        priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries)
+        priorProb = calcVarPriors.getPriorProbSpliceDonorSNS(self.variant, boundaries, variantFile)
         # checks that variant splice site flag and de novo splice flag are assigned correctly
         self.assertEquals(priorProb["spliceSite"], 1)
         self.assertEquals(priorProb["deNovoDonorFlag"], 1)
@@ -3160,7 +3172,8 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that prior prob and enigma class are appropriate based on applicable prior
         self.assertEquals(priorProb["applicablePrior"], priorProbs["moderate"])
         self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class3"])
-        # checks that ref prior prob and de novo prior prob are set appropriately
+        # checks that protein prior prob, ref prior prob, and de novo prior prob are set appropriately
+        self.assertEquals(priorProb["proteinPrior"], priorProbs["deNovoLow"])
         self.assertEquals(priorProb["refDonorPrior"], priorProbs["moderate"])
         self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs["deNovoLow"])
         # checks that a score is present for reference donor score and de novo splice donor score
@@ -3193,16 +3206,21 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'priorProb': 0.02,
                                                                             'deNovoDonorFlag': 1,
                                                                             'refZScore': -9.483955273593583})
+    @mock.patch('calcVarPriors.getPriorProbProteinSNS', return_value = {'enigmaClass': 'class_2',
+                                                                        'priorProb': 0.02})
     def test_getPriorProbSpliceAcceptorSNSNoDeNovoAccBRCA2(self, varInSpliceRegion, varInExon, getPriorProbRefSpliceAccceptorSNS,
-                                                           getPriorProbDeNovoAcceptorSNS, getPriorProbDeNovoDonorSNS):
+                                                           getPriorProbDeNovoAcceptorSNS, getPriorProbDeNovoDonorSNS,
+                                                           getPriorProbProteinSNS):
         '''Tests that applicable prior for a variant in a reference splice site is assigned correctly (no de novo splicing)'''
         boundaries = "enigma"
+        variantFile = "mod_res_dn_brca20160525.txt"
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["HGVS_cDNA"] = "c.7008C>G"
         self.variant["Pos"] = "32354861"
         self.variant["Ref"] = "C"
         self.variant["Alt"] = "G"
-        priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries)
+        priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries, variantFile)
         # checks that variant splice site flag is assigned correctly
         self.assertEquals(priorProb["spliceSite"], 1)
         # checks that variant is flagged as a de novo splice donro and is NOT flagged as a de novo splice acceptor
@@ -3211,7 +3229,8 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that prior prob and enigma class are appropriate based on applicable prior
         self.assertEquals(priorProb["applicablePrior"], priorProbs["low"])
         self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class2"])
-        # checks that ref prior prob and de novo prior probs are set appropriately
+        # checks that protein prior prob, ref prior prob, and de novo prior probs are set appropriately
+        self.assertEquals(priorProb["proteinPrior"], priorProbs["deNovoLow"])
         self.assertEquals(priorProb["refAccPrior"], priorProbs["low"])
         self.assertEquals(priorProb["deNovoAccPrior"], "N/A")
         self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs["deNovoLow"])
@@ -3242,12 +3261,14 @@ class test_calcVarPriors(unittest.TestCase):
                                                           getPriorProbDeNovoAcceptorSNS):
         '''Tests that applicable prior for a variant in a reference splice site is assigned correctly (with de novo splicing)'''
         boundaries = "enigma"
+        variantFile = "mod_res_dn_brca20160525.txt"
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
+        self.variant["HGVS_cDNA"] = "c.4186-16t>G"
         self.variant["Pos"] = "43082591"
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "C"
-        priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries)
+        priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries, variantFile)
         # checks that variant splice site flag is assigned correctly
         self.assertEquals(priorProb["spliceSite"], 1)
         # checks that variant is flagged as a de novo splice acceptor
@@ -3255,7 +3276,8 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that prior prob and enigma class are appropriate based on applicable prior
         self.assertEquals(priorProb["applicablePrior"], priorProbs["high"])
         self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class4"])
-        # checks that ref prior prob and de novo prior prob are set appropriately
+        # checks that protein prior prob, ref prior prob, and de novo prior prob are set appropriately
+        self.assertEquals(priorProb["proteinPrior"], priorProbs["NA"])
         self.assertEquals(priorProb["refAccPrior"], priorProbs["high"])
         self.assertEquals(priorProb["deNovoAccPrior"], priorProbs["NA"])
         # checks that a score is present for reference acceptor score and de novo splice acceptor score
