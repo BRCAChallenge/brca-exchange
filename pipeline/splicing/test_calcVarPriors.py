@@ -1556,17 +1556,17 @@ class test_calcVarPriors(unittest.TestCase):
         zScore = calcVarPriors.getZScore(maxEntScanScore, donor=False)
         self.assertGreater(zScore, 0)
 
-    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {"inFirstThree": True})
-    def test_varInFirstThreeTrue(self, getMaxMaxEntScanScoreSlidingWindowSNS):
-        '''Tests that varInFirstThree returns True if variant is in first 3 bp of window'''
-        inFirstThree = calcVarPriors.varInFirstThree(self.variant)
-        self.assertTrue(inFirstThree)
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {"inExonicPortion": True})
+    def test_varInExonicPortionTrue(self, getMaxMaxEntScanScoreSlidingWindowSNS):
+        '''Tests that varInExonicPortion returns True if variant is in exonic portion'''
+        inExonicPortion = calcVarPriors.varInExonicPortion(self.variant)
+        self.assertTrue(inExonicPortion)
 
-    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {"inFirstThree": False})
-    def test_varinFirstThreeFalse(self, getMaxMaxEntScanScoreSlidingWindowSNS):
-        '''Tests that varInFirstThree returns False if variant is NOT in first 3 bp of window'''
-        inFirstThree = calcVarPriors.varInFirstThree(self.variant)
-        self.assertFalse(inFirstThree)
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {"inExonicPortion": False})
+    def test_varInExonicPortionFalse(self, getMaxMaxEntScanScoreSlidingWindowSNS):
+        '''Tests that varInExonicPortion returns False if variant is NOT in exonic portion'''
+        inExonicPortion = calcVarPriors.varInExonicPortion(self.variant)
+        self.assertFalse(inExonicPortion)
 
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {"varWindowPosition": 2})
     def test_getVarWindowPositionFirstThree(self, getMaxMaxEntScanScoreSlidingWindowSNS):
@@ -1576,7 +1576,7 @@ class test_calcVarPriors(unittest.TestCase):
 
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {"varWindowPosition": 7})
     def test_getVarWindowPositionLastSix(self, getMaxMaxEntScanScoreSlidingWindowSNS):
-        '''Tests that function returns correct value for variant in first 3 bp of window'''
+        '''Tests that function returns correct value for variant NOT in first 3 bp of window'''
         windowPos = calcVarPriors.getVarWindowPosition(self.variant)
         self.assertEquals(windowPos, 7)
 
@@ -1642,46 +1642,46 @@ class test_calcVarPriors(unittest.TestCase):
         refExonLength = calcVarPriors.getRefExonLength(self.variant)
         self.assertEquals(refExonLength, len(exon5PlusSeq))
 
-    def test_getNewSplicePositionBRCA1FirstThree(self):
-        '''Tests that new splice position is calculated correctly for minus strand (BRCA1) variant with max MES in first 3 bases'''
+    def test_getNewSplicePositionBRCA1InExonicPortion(self):
+        '''Tests that new splice position is calculated correctly for minus strand (BRCA1) variant with max MES in exonic portion'''
         varStrand = "-"
-        inFirstThree = True
+        inExonicPortion = True
         varGenPos = "43104189"
         varWindowPos = 3
-        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inFirstThree)
+        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion)
         # because varWindowPos == 3, cut will occur after variant
         actualNewSplicePos = 43104189
         self.assertEquals(newSplicePos, actualNewSplicePos)
         
-    def test_getNewSplicePositionBRCA1LastSix(self):
-        '''Tests that new splice position is calculated correctly for minus strand (BRCA1) variant with max MES in last 6 bases'''
+    def test_getNewSplicePositionBRCA1NotInExonicPortion(self):
+        '''Tests that new splice position is calculated correctly for minus strand (BRCA1) variant with max MES NOT in exonic portion'''
         varStrand = "-"
-        inFirstThree = False
+        inExonicPortion = False
         varGenPos = "43104249"
         varWindowPos = 6
-        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inFirstThree)
+        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion)
         # because varWindowPos == 6, cut will occur 3 bases to the left of the variant
         actualNewSplicePos = 43104252
         self.assertEquals(newSplicePos, actualNewSplicePos)
         
-    def test_getNewSplicePositionBRCA2FirstThree(self):
-        '''Tests that new splice position is calculated correctly for plus strand (BRCA2) variant with max MES in first 3 bases'''
+    def test_getNewSplicePositionBRCA2InExonicPortion(self):
+        '''Tests that new splice position is calculated correctly for plus strand (BRCA2) variant with max MES in exonic portion'''
         varStrand = "+"
-        inFirstThree = True
+        inExonicPortion = True
         varGenPos = "32354881"
         varWindowPos = 2
-        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inFirstThree)
+        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion)
         # because varWindowPos == 2, cut will occur 1 base to the right of the variant
         actualNewSplicePos = 32354882
         self.assertEquals(newSplicePos, actualNewSplicePos)
         
-    def test_getNewSplicePositionBRCA2LastSix(self):
-        '''Tests that new splice position is calculated correctly for plus strand (BRCA2) variant with max MES in last 6 bases'''
+    def test_getNewSplicePositionBRCA2NotInExonicPortion(self):
+        '''Tests that new splice position is calculated correctly for plus strand (BRCA2) variant with max MES NOT in exonic portion'''
         varStrand = "+"
-        inFirstThree = False
+        inExonicPortion = False
         varGenPos = "32326277"
         varWindowPos = 8
-        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inFirstThree)
+        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion)
         # because varWindowPos == 8, cut will occur 5 bases to the left of the variant
         actualNewSplicePos = 32326272
         self.assertEquals(newSplicePos, actualNewSplicePos)
@@ -1692,7 +1692,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -9.9,
                                                                                        'altMaxEntScanScore': -7.45,
                                                                                        'altZScore': -6.6071787973194605,
-                                                                                       'inFirstThree': True,
+                                                                                       'inExonicPortion': True,
                                                                                        'varWindowPosition': 2,
                                                                                        'refZScore': -7.659134374464476})
     @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43051109)
@@ -1710,7 +1710,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -9.89,
                                                                                        'altMaxEntScanScore': -9.8,
                                                                                        'altZScore': -7.616197412132026,
-                                                                                       'inFirstThree': False,
+                                                                                       'inExonicPortion': False,
                                                                                        'varWindowPosition': 9,
                                                                                        'refZScore': -7.65484067823123})
     @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32346831)
@@ -1758,7 +1758,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -7.31,
                                                                                        'altMaxEntScanScore': -7.32,
                                                                                        'altZScore': -6.551360746287276,
-                                                                                       'inFirstThree': True,
+                                                                                       'inExonicPortion': True,
                                                                                        'varWindowPosition': 1,
                                                                                        'refZScore': -6.547067050054031})
     @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43070934)
@@ -1783,7 +1783,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -2.95,
                                                                                        'altMaxEntScanScore': 5.56,
                                                                                        'altZScore': -1.0210799978677707,
-                                                                                       'inFirstThree': False,
+                                                                                       'inExonicPortion': False,
                                                                                        'varWindowPosition': 4,
                                                                                        'refZScore': -4.67501549235923})
     @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43097266)
@@ -1808,7 +1808,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -9.22,
                                                                                        'altMaxEntScanScore': -1.57,
                                                                                        'altZScore': -4.082485412171425,
-                                                                                       'inFirstThree': False,
+                                                                                       'inExonicPortion': False,
                                                                                        'varWindowPosition': 5,
                                                                                        'refZScore': -7.367163030603819})
     @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32325178)
@@ -1833,7 +1833,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -3.67,
                                                                                        'altMaxEntScanScore': -0.32,
                                                                                        'altZScore': -3.5457733830158054,
-                                                                                       'inFirstThree': True,
+                                                                                       'inExonicPortion': True,
                                                                                        'varWindowPosition': 2,
                                                                                        'refZScore': -4.984161621152867})
     @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32379873)
@@ -1854,11 +1854,11 @@ class test_calcVarPriors(unittest.TestCase):
 
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
-    @mock.patch('calcVarPriors.varInFirstThree', return_value = True)
-    def test_determineSpliceRescueSNSinFirstThree(self, getVarConsequences, varInExon, varInFirstThree):
-        '''Tests that variant in first 3 bp of highest scoring window is assigned correct prior prob and splice rescue flag'''
+    @mock.patch('calcVarPriors.varInExonicPortion', return_value = True)
+    def test_getPriorProbSpliceRescueSNSInExonicPortion(self, getVarConsequences, varInExon, varInExonicPortion):
+        '''Tests that variant in exonic portion of highest scoring window is assigned correct prior prob and splice rescue flag'''
         boundaries = "enigma"
-        spliceRescueInfo = calcVarPriors.determineSpliceRescueSNS(self.variant, boundaries)
+        spliceRescueInfo = calcVarPriors.getPriorProbSpliceRescueSNS(self.variant, boundaries)
         self.assertEquals(spliceRescueInfo["priorProb"], priorProbs["high"])
         self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class4"])
         self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
@@ -1867,12 +1867,12 @@ class test_calcVarPriors(unittest.TestCase):
 
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
-    @mock.patch('calcVarPriors.varInFirstThree', return_value = False)
+    @mock.patch('calcVarPriors.varInExonicPortion', return_value = False)
     @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = False)
-    def test_determineSpliceRescueSNSFrameshift(self, getVarConsequences, varInExon, varInFirstThree, isSplicingWindowInFrame):
+    def test_getPriorProbSpliceRescueSNSFrameshift(self, getVarConsequences, varInExon, varInExonicPortion, isSplicingWindowInFrame):
         '''Tests that variant that causes a frameshift is assigned correct prior prob and splice rescue flag'''
         boundaries = "enigma"
-        spliceRescueInfo = calcVarPriors.determineSpliceRescueSNS(self.variant, boundaries)
+        spliceRescueInfo = calcVarPriors.getPriorProbSpliceRescueSNS(self.variant, boundaries)
         self.assertEquals(spliceRescueInfo["priorProb"], priorProbs["pathogenic"])
         self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class5"])
         self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
@@ -1881,7 +1881,7 @@ class test_calcVarPriors(unittest.TestCase):
         
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
-    @mock.patch('calcVarPriors.varInFirstThree', return_value = False)
+    @mock.patch('calcVarPriors.varInExonicPortion', return_value = False)
     @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
     @mock.patch('calcVarPriors.getVarExonNumberSNS', return_value = "exon20")
@@ -1889,13 +1889,13 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getVarWindowPosition', return_value = 6)
     @mock.patch('calcVarPriors.isCIDomainInRegion', return_value = True)
     @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = True)
-    def test_determineSpliceRescueSNSCIRegionEnigma(self, getVarConsequences, varInExon, varInFirstThree,
-                                                    isSplicingWindowInFrame, getVarStrand, getVarExonNumberSNS,
-                                                    getRefSpliceAcceptorBoundaries, getVarWindowPosition,
-                                                    isCIDomainInRegion, compareDeNovoWildTypeSplicePos):
+    def test_getPriorProbSpliceRescueSNSCIRegionEnigma(self, getVarConsequences, varInExon, varInExonicPortion,
+                                                       isSplicingWindowInFrame, getVarStrand, getVarExonNumberSNS,
+                                                       getRefSpliceAcceptorBoundaries, getVarWindowPosition,
+                                                       isCIDomainInRegion, compareDeNovoWildTypeSplicePos):
         '''Tests that variant that truncates part of ENGIMA CI domain is assigned correct prior prob and splice rescue flag'''
         boundaries = "enigma"
-        spliceRescueInfo = calcVarPriors.determineSpliceRescueSNS(self.variant, boundaries)
+        spliceRescueInfo = calcVarPriors.getPriorProbSpliceRescueSNS(self.variant, boundaries)
         self.assertEquals(spliceRescueInfo["priorProb"], priorProbs["pathogenic"])
         self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class5"])
         self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
@@ -1904,7 +1904,7 @@ class test_calcVarPriors(unittest.TestCase):
         
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
-    @mock.patch('calcVarPriors.varInFirstThree', return_value = False)
+    @mock.patch('calcVarPriors.varInExonicPortion', return_value = False)
     @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
     @mock.patch('calcVarPriors.getVarExonNumberSNS', return_value = "exon2")
@@ -1912,13 +1912,13 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getVarWindowPosition', return_value = 7)
     @mock.patch('calcVarPriors.isCIDomainInRegion', return_value = True)
     @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = True)
-    def test_determineSpliceRescueSNSCIRegionPriors(self, getVarConsequences, varInExon, varInFirstThree,
-                                                    isSplicingWindowInFrame, getVarStrand, getVarExonNumberSNS,
-                                                    getRefSpliceAcceptorBoundaries, getVarWindowPosition,
-                                                    isCIDomainInRegion, compareDeNovoWildTypeSplicePos):
+    def test_getPriorProbSpliceRescueSNSCIRegionPriors(self, getVarConsequences, varInExon, varInExonicPortion,
+                                                       isSplicingWindowInFrame, getVarStrand, getVarExonNumberSNS,
+                                                       getRefSpliceAcceptorBoundaries, getVarWindowPosition,
+                                                       isCIDomainInRegion, compareDeNovoWildTypeSplicePos):
         '''Tests that variant that truncates part of PRIORS CI domain is assigned correct prior prob and splice rescue flag'''
         boundaries = "priors"
-        spliceRescueInfo = calcVarPriors.determineSpliceRescueSNS(self.variant, boundaries)
+        spliceRescueInfo = calcVarPriors.getPriorProbSpliceRescueSNS(self.variant, boundaries)
         self.assertEquals(spliceRescueInfo["priorProb"], priorProbs["pathogenic"])
         self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class5"])
         self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
@@ -1927,7 +1927,7 @@ class test_calcVarPriors(unittest.TestCase):
         
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
-    @mock.patch('calcVarPriors.varInFirstThree', return_value = False)
+    @mock.patch('calcVarPriors.varInExonicPortion', return_value = False)
     @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
     @mock.patch('calcVarPriors.getVarExonNumberSNS', return_value = "exon6")
@@ -1935,16 +1935,16 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getVarWindowPosition', return_value = 4)
     @mock.patch('calcVarPriors.isCIDomainInRegion', return_value = False)
     @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = False)
-    def test_determineSpliceRescueSNSNotDivisible(self, getVarConsequences, varInExon, varInFirstThree,
-                                                  isSplicingWindowInFrame, getVarStrand, getVarExonNumberSNS,
-                                                  getRefSpliceAcceptorBoundaries, getVarWindowPosition,
-                                                  isCIDomainInRegion, compareDeNovoWildTypeSplicePos):
+    def test_getPriorProbSpliceRescueSNSNotDivisible(self, getVarConsequences, varInExon, varInExonicPortion,
+                                                     isSplicingWindowInFrame, getVarStrand, getVarExonNumberSNS,
+                                                     getRefSpliceAcceptorBoundaries, getVarWindowPosition,
+                                                     isCIDomainInRegion, compareDeNovoWildTypeSplicePos):
         '''
         Tests that variant that causes a frameshift (due to difference de novo vs wild-type splice position) 
         is assigned correct prior prob and splice rescue flag
         '''
         boundaries = "enigma"
-        spliceRescueInfo = calcVarPriors.determineSpliceRescueSNS(self.variant, boundaries)
+        spliceRescueInfo = calcVarPriors.getPriorProbSpliceRescueSNS(self.variant, boundaries)
         self.assertEquals(spliceRescueInfo["priorProb"], priorProbs["pathogenic"])
         self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class5"])
         self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
@@ -1953,7 +1953,7 @@ class test_calcVarPriors(unittest.TestCase):
 
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
-    @mock.patch('calcVarPriors.varInFirstThree', return_value = False)
+    @mock.patch('calcVarPriors.varInExonicPortion', return_value = False)
     @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
     @mock.patch('calcVarPriors.getVarExonNumberSNS', return_value = "exon17")
@@ -1961,13 +1961,13 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getVarWindowPosition', return_value = 5)
     @mock.patch('calcVarPriors.isCIDomainInRegion', return_value = False)
     @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = True)
-    def test_determineSpliceRescueSNSWithSpliceFlag(self, getVarConsequences, varInExon, varInFirstThree,
-                                                    isSplicingWindowInFrame, getVarStrand, getVarExonNumberSNS,
-                                                    getRefSpliceAcceptorBoundaries, getVarWindowPosition,
-                                                    isCIDomainInRegion, compareDeNovoWildTypeSplicePos):
+    def test_getPriorProbSpliceRescueSNSWithSpliceFlag(self, getVarConsequences, varInExon, varInExonicPortion,
+                                                       isSplicingWindowInFrame, getVarStrand, getVarExonNumberSNS,
+                                                       getRefSpliceAcceptorBoundaries, getVarWindowPosition,
+                                                       isCIDomainInRegion, compareDeNovoWildTypeSplicePos):
         '''Tests that variant with possibility of splice rescue is assigned correct splice rescue and splicing flag'''
         boundaries = "engima"
-        spliceRescueInfo = calcVarPriors.determineSpliceRescueSNS(self.variant, boundaries)
+        spliceRescueInfo = calcVarPriors.getPriorProbSpliceRescueSNS(self.variant, boundaries)
         self.assertEquals(spliceRescueInfo["priorProb"], priorProbs["NA"])
         self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["NA"])
         self.assertEquals(spliceRescueInfo["spliceRescue"], 1)
