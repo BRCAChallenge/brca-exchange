@@ -1488,7 +1488,7 @@ class RunDiffAndAppendChangeTypesToOutputReports(luigi.Task):
                 "--removed", diff_dir + "removed_reports.tsv", "--added", diff_dir + "added_reports.tsv", "--added_data",
                 diff_dir + "added_data_reports.tsv", "--diff", diff_dir + "diff_reports.txt", "--diff_json", diff_dir + "diff_reports.json",
                 "--output", release_dir + "reports_with_change_types.tsv", "--artifacts_dir", artifacts_dir,
-                "--diff_dir", diff_dir, "--v1_release_date", previous_release_date_str]
+                "--diff_dir", diff_dir, "--v1_release_date", previous_release_date_str, "--reports", True]
 
         print "Running releaseDiff.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -1607,7 +1607,7 @@ class RunAll(luigi.WrapperTask):
                                          self.file_parent_dir, self.previous_release_tar,
                                          self.release_notes)
         elif self.previous_release_tar:
-            yield RunDiffAndAppendChangeTypesToOutput(self.date, self.resources_dir, self.output_dir,
+            yield RunDiffAndAppendChangeTypesToOutputReports(self.date, self.resources_dir, self.output_dir,
                                                       self.file_parent_dir, self.previous_release_tar)
         else:
             yield BuildAggregatedOutput(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
