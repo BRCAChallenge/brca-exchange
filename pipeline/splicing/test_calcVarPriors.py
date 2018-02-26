@@ -3197,7 +3197,7 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                'enigmaClass': 'N/A',
                                                                                'altZScore': -5.705355670810582,
                                                                                'priorProb': 'N/A',
-                                                                               'deNovoAccFlag': 0,
+                                                                               'deNovoAccFlag': 1,
                                                                                'refZScore': -9.017236678144027})
     @mock.patch('calcVarPriors.getPriorProbDeNovoDonorSNS', return_value = {'refMaxEntScanScore': -14.15,
                                                                             'altMaxEntScanScore': -5.87,
@@ -3223,9 +3223,9 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbSpliceAcceptorSNS(self.variant, boundaries, variantFile)
         # checks that variant splice site flag is assigned correctly
         self.assertEquals(priorProb["spliceSite"], 1)
-        # checks that variant is flagged as a de novo splice donro and is NOT flagged as a de novo splice acceptor
+        # checks that variant is flagged as a de novo splice donor and acceptor
         self.assertEquals(priorProb["deNovoDonorFlag"], 1)
-        self.assertEquals(priorProb["deNovoAccFlag"], 0)
+        self.assertEquals(priorProb["deNovoAccFlag"], 1)
         # checks that prior prob and enigma class are appropriate based on applicable prior
         self.assertEquals(priorProb["applicablePrior"], priorProbs["low"])
         self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class2"])
