@@ -1244,7 +1244,7 @@ def getPriorProbDeNovoAcceptorSNS(variant):
     Returns a dictionary containing: 
       prior probability of pathogenecity and predicted qualitative engima class (both N/A)
       deNovo acceptor MaxEntScan scores and zscores for ref and alt sequence
-      deNovo acceptor flag: which equals 1 if stronger than closest splice acceptor, 0 otherwise
+      deNovo acceptor flag: which equals 1 alt > ref
     '''
     if getVarType(variant) == "substitution":
         if varInSpliceRegion(variant, donor=False, deNovo=True) == True:
@@ -1256,11 +1256,8 @@ def getPriorProbDeNovoAcceptorSNS(variant):
             if altZScore <= refZScore:
                 deNovoAccFlag = 0
             else:
-                if altZScore > closestZScore:
-                    deNovoAccFlag = 1
-                else:
-                    deNovoAccFlag = 0
-                         
+                deNovoAccFlag = 1
+                        
             return {"priorProb": "N/A",
                     "enigmaClass": "N/A",
                     "refMaxEntScanScore": slidingWindowScores["refMaxEntScanScore"],
