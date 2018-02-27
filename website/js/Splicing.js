@@ -143,70 +143,52 @@ class Region extends React.Component {
 }
 
 /**
- * This is a special case of Region. It reads the variant info and creates up to two regions:
- * 1. if the alt sequence is longer than the ref, it's an insertion and renders an inserted area
- * 2.
+ * A set of Regions, which can potentially render multiple regions for a variant onto the given segment.
+ *
+ * It reads the variant info and possibly creates the following regions:
+ * - insertion:
+ *      if the alt sequence is longer than the ref, it's an insertion and renders an inserted area
+ * - deletion:
+ *      if the ref sequence is longer than alt, it's a deletion and renders a deleted area
+ * - change:
+ *      if alt and ref both have lengths > 1, there's an overlapping 'changed' region of width
+ *      min(length(ref),length(alt)), rendered before the insertion/deletion region
+ * - single-base change:
+ *      if alt and ref both have lengths == 1, then only a changed region of width 1 is rendered
  */
 class Variant extends React.Component {
     render() {
-        let { variant, x, width, height, txStart, txEnd } = this.props;
+        let { variant, width, height, txStart, txEnd, mask } = this.props;
 
-        // txStart, txEnd are the parent exon/intron's span in bases
-        // width, height is the pixel width, height of the parent element
-        // x is the pixel position of the parent exon/intron in the SVG
+        const variantStart = variant.Hg38_Start;
+        const delta = variantInfo(variant);
 
-        // length of the parent exon/intro in bases
-        const regionWidth = Math.abs(txEnd - txStart);
-
-        let variantStart, variantX, variantChange, variantChangedWidth, variantDeletedWidth, variantInsertedWidth;
-
-        variantStart = variant.Hg38_Start;
-        variantX = x + (width * ((variantStart - txStart) / regionWidth));
-
-        // variantStart is the start of this variant in bases
-        // variantX is the pixel position of this variant (assumedly) within the parent exon/intron
-        // (if variantX is negative, it's because the variant's start is before this region begins)
-
-        variantChange = variantInfo(variant);
-
-        // compute pixel widths for each event
-        variantChangedWidth = variantChange.changed ? width * variantChange.changed / regionWidth : 0;
-        variantDeletedWidth = variantChange.deleted ? width * variantChange.deleted / regionWidth : 0;
-        variantInsertedWidth = variantChange.inserted ? width * variantChange.inserted / regionWidth : 0;
-
-        // it's quite possible that the event begins before this region and/or ends after it.
-        // in those cases it's safe to just constrain the rendered event to this elements' boundaries.
-        // the other regions with partial overlaps will render the rest of the variant's extent
-
-        // describe each event, and constrain each one's rendered representation to lie within the parent
         const events = {
             changed: {
                 fill: 'lightgreen',
-                span: (variantChange.changed > 0 ? constrain(x, width, variantX, variantChangedWidth, 2) : null)
+                span: {start: variantStart, end: variantStart + delta.changed}
             },
             deleted: {
                 fill: 'url(#diagonalHatch)',
-                span: (variantChange.deleted > 0 ? constrain(x, width, variantX + variantChangedWidth, variantDeletedWidth, 2) : null)
+                span: {start: variantStart + delta.changed, end: variantStart + delta.changed + delta.deleted}
             },
             inserted: {
-                fill: 'lightblue',
+                fill: '#56F', // 'lightblue',
                 // FIXME: should insertions be drawn as points, not intervals, since there's no corresponding region in the source to annotate?
-                span: (variantChange.inserted > 0 ? constrain(x, width, variantX + variantChangedWidth, variantInsertedWidth, 2) : null)
+                span: {start: variantStart + delta.changed, end: variantStart + delta.changed + delta.inserted}
             },
         };
 
         return (
             <g>
             {
-                // map each event with a valid span to a rect
                 _.toPairs(events)
-                    .filter((keyEvent) => keyEvent[1].span !== null)
-                    .map(([key, event]) =>
-                        (<rect key={`event_${key}`}
-                            x={event.span.start} width={event.span.width} height={height}
-                            fill={event.fill} clipPath={this.props.mask && `url(#${this.props.mask})`}
-                        />)
-                    )
+                    .map(([key, event]) => (
+                        <Region key={`event_${key}`} region={event.span}
+                            x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
+                            fill={event.fill} mask={mask}
+                        />
+                    ))
             }
             </g>
         );
