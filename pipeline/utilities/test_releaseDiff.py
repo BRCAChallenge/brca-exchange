@@ -323,14 +323,14 @@ class TestStringMethods(unittest.TestCase):
 
     def test_compare_row_equal_rows(self):
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         self.assertIsNone(change_type)
 
     def test_compare_row_added_data(self):
         releaseDiff.added_data = self.added_data
         self.newRow['Source'] += ",ENIGMA"
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         self.assertEqual(change_type, "added_information")
 
     def test_ignores_unused_column_changes_in_compare_row(self):
@@ -338,7 +338,7 @@ class TestStringMethods(unittest.TestCase):
         self.oldRow['pyhgvs_Protein'] = "NP_009225.1:p.?"
         self.newRow['HGVS_Protein'] = "NM_000059:p.His1085Arg"
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         self.assertIsNone(change_type)
 
     def test_catches_new_column_changes_in_compare_row(self):
@@ -349,7 +349,7 @@ class TestStringMethods(unittest.TestCase):
         self.oldRow['pyhgvs_Protein'] = "NP_009225.1:p.?"
         self.newRow['pyhgvs_Protein'] = "NM_000059:p.His1085Arg"
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json[variant]
         self.assertEqual(change_type, "changed_information")
         self.assertIs(diff[0]['removed'], 'NP_009225.1:p.?')
@@ -363,7 +363,7 @@ class TestStringMethods(unittest.TestCase):
         self.oldRow['pyhgvs_Protein'] = "NP_009225.1:p.?"
         self.newRow['pyhgvs_Protein'] = "NM_000059:p.His1085Arg"
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json[variant]
         self.assertIs(diff[0]['field'], 'HGVS_Protein')
 
@@ -377,7 +377,7 @@ class TestStringMethods(unittest.TestCase):
         self.newRow['Pathogenicity_all'] = "Pathogenic(ENIGMA); Pathogenic,not_provided (ClinVar); Class 5 (BIC)"
         self.newRow['Pathogenicity_expert'] = "Pathogenic"
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json[variant]
         self.assertEqual(len(diff), 2)
         self.assertIs(change_type, "changed_classification")
@@ -392,7 +392,7 @@ class TestStringMethods(unittest.TestCase):
         self.newRow['Pathogenicity_all'] = "Pathogenic(ENIGMA); Pathogenic,not_provided (ClinVar); Class 5 (BIC)"
         self.newRow['Pathogenicity_expert'] = "Pathogenic"
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         self.assertEqual(len(diff), 0)
         self.assertIsNone(change_type)
@@ -410,7 +410,7 @@ class TestStringMethods(unittest.TestCase):
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
         self.oldRow = releaseDiff.addGsIfNecessary(self.oldRow)
         self.oldRow = releaseDiff.addGsIfNecessary(self.newRow)
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         self.assertIsNone(change_type)
 
     def test_properly_classifies_variants_with_removed_columns(self):
@@ -421,7 +421,7 @@ class TestStringMethods(unittest.TestCase):
         self.oldRow["Functional_analysis_result_LOVD"] = "test"
         self.newRow['Source'] += ",ENIGMA"
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json[variant]
         self.assertEqual(len(diff), 2)
         self.assertIs(change_type, "changed_information")
@@ -434,7 +434,7 @@ class TestStringMethods(unittest.TestCase):
         self.oldRow["Functional_analysis_result_LOVD"] = "-"
         self.newRow['Source'] += ",ENIGMA"
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json[variant]
         self.assertEqual(len(diff), 1)
         self.assertIs(change_type, "added_information")
@@ -449,7 +449,7 @@ class TestStringMethods(unittest.TestCase):
         self.oldRow["Submitter_ClinVar"] = "The_Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA),c/o_University_of_Cambridge"
         self.newRow["Submitter_ClinVar"] = "Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA),_c/o_University_of_Cambridge"
 
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
@@ -457,7 +457,7 @@ class TestStringMethods(unittest.TestCase):
         self.oldRow["Submitter_ClinVar"] = "Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA),_c/o_University_of_Cambridge"
         self.newRow["Submitter_ClinVar"] = "The_Consortium_of_Investigators_of_Modifiers_of_BRCA1/2_(CIMBA),c/o_University_of_Cambridge"
 
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
@@ -465,7 +465,7 @@ class TestStringMethods(unittest.TestCase):
         self.newRow['EAS_Allele_frequency_1000_Genomes'] = '0.0'
         self.newRow['Allele_frequency_ExAC'] = '9.841e-06'
 
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
@@ -475,7 +475,7 @@ class TestStringMethods(unittest.TestCase):
         self.newRow['EAS_Allele_frequency_1000_Genomes'] = '0'
         self.newRow['Allele_frequency_ExAC'] = '9.841E-06'
 
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
@@ -490,7 +490,7 @@ class TestStringMethods(unittest.TestCase):
         self.oldRow['Allele_frequency_ExAC'] = '9.841e-06'
         self.newRow['Allele_frequency_ExAC'] = '9.841e-07'
 
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         self.assertEqual(len(diff), 1)
         self.assertIs(change_type, "changed_information")
@@ -503,7 +503,7 @@ class TestStringMethods(unittest.TestCase):
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
         self.oldRow["Source_URL"] = "http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000075538, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000144133, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000109288"
         self.newRow["Source_URL"] = "http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000144133, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000075538, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000109288"
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
@@ -520,7 +520,7 @@ class TestStringMethods(unittest.TestCase):
         self.newRow["Clinical_Significance_ClinVar"] = "Pathogenic,not_provided"
         self.oldRow["Submitter_ClinVar"] = "PreventionGenetics"
         self.newRow["Submitter_ClinVar"] = "PreventionGenetics,PreventionGenetics"
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
@@ -535,7 +535,7 @@ class TestStringMethods(unittest.TestCase):
         self.newRow["Genetic_origin_LOVD"] = "lorem ipsum"
         self.newRow["RNA_LOVD"] = "lorem ipsum"
         self.newRow["Submitters_LOVD"] = "lorem ipsum"
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         self.assertEqual(change_type, "added_information")
         self.assertTrue(len(diff[variant]) == 3)
@@ -550,7 +550,7 @@ class TestStringMethods(unittest.TestCase):
         self.newRow["Genetic_origin_LOVD"] = ""
         self.newRow["RNA_LOVD"] = None
         self.newRow["Submitters_LOVD"] = "-"
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
@@ -565,7 +565,7 @@ class TestStringMethods(unittest.TestCase):
         self.newRow["Polyphen_Score"] = "0.283"
         self.newRow["Polyphen_Prediction"] = "probably_damaging"
 
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
@@ -579,7 +579,7 @@ class TestStringMethods(unittest.TestCase):
 
         self.newRow["Max_Allele_Frequency"] = "-"
 
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
@@ -594,7 +594,7 @@ class TestStringMethods(unittest.TestCase):
         self.oldRow["Submitter_ClinVar"] = "Quest_Diagnostics_Nichols_Institute_San_Juan_Capistrano"
         self.newRow["Submitter_ClinVar"] = ",Quest_Diagnostics_Nichols_Institute_San_Juan_Capistrano"
 
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
@@ -609,7 +609,7 @@ class TestStringMethods(unittest.TestCase):
 
         self.newRow["Submitters_LOVD"] = "Ans M.W. van den Ouweland (Rotterdam,NL), Genevieve Michils (Leuven,BE), Rien Blok (Maastricht NL)"
 
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         self.assertEqual(len(diff), 1)
         v_diff = diff['chr17:g.43049067:C>T'][0]
@@ -628,7 +628,7 @@ class TestStringMethods(unittest.TestCase):
         self.newRow['Allele_count_AFR'] = '567'
 
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         v_diff = diff['chr17:g.43049067:C>T'][0]
         self.assertEqual(len(diff), 1)
@@ -649,7 +649,7 @@ class TestStringMethods(unittest.TestCase):
         self.newRow['Minor_allele_frequency_percent_ESP'] = '2.5'
 
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.updated_fieldnames)
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
@@ -667,7 +667,7 @@ class TestStringMethods(unittest.TestCase):
         self.newRow['Minor_allele_frequency_percent_ESP'] = '2.5'
 
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.updated_fieldnames)
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         v_diff = diff['chr17:g.43049067:C>T'][0]
         self.assertEqual(len(diff), 1)
@@ -689,7 +689,7 @@ class TestStringMethods(unittest.TestCase):
         self.newRow['Minor_allele_frequency_percent_ESP'] = '2.5'
 
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.updated_fieldnames)
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         v_diff = diff['chr17:g.43049067:C>T'][0]
         self.assertEqual(len(diff), 1)
@@ -708,7 +708,7 @@ class TestStringMethods(unittest.TestCase):
         self.newRow['Allele_Frequency'] = '9.42e-06 (ExAC minus TCGA)'
 
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
@@ -723,7 +723,7 @@ class TestStringMethods(unittest.TestCase):
         self.newRow['Allele_Frequency'] = '9.99e-06 (ExAC minus TCGA)'
 
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         v_diff = diff['chr17:g.43049067:C>T'][0]
         self.assertEqual(len(diff), 1)
@@ -742,7 +742,7 @@ class TestStringMethods(unittest.TestCase):
         self.newRow['Allele_Frequency'] = '9.42e-06 (ExAC minus TCGA)'
 
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
@@ -757,7 +757,7 @@ class TestStringMethods(unittest.TestCase):
         self.newRow['Allele_frequency_FIN_ExAC'] = '9.42'
 
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         self.assertEqual(diff, {})
         self.assertIsNone(change_type)
@@ -772,7 +772,7 @@ class TestStringMethods(unittest.TestCase):
         self.newRow['Allele_frequency_FIN_ExAC'] = '9.41'
 
         v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
-        change_type = v1v2.compareRow(self.oldRow, self.newRow)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
         diff = releaseDiff.diff_json
         v_diff = diff['chr17:g.43049067:C>T'][0]
         self.assertEqual(len(diff), 1)
