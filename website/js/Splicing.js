@@ -125,15 +125,16 @@ class Region extends React.Component {
             return null;
         }
 
+
         // length of the parent exon/intro in bases
         const regionWidth = Math.abs(txEnd - txStart);
 
         // pixel position of the event within this region (or possibly outside)
         // (if eventX is negative, it's because the variant's start is before this region begins)
-        const eventX = x + (width * ((eventMin - txMin) / regionWidth));
+        const eventX = x + width * ((eventMin - txMin) / regionWidth);
+        // relative width of this event scaled by the parent's width
+        const eventWidthPx = width * (eventWidth / regionWidth);
 
-        // compute pixel widths for event and constrain to lie within the parent
-        const eventWidthPx = (width * eventWidth) / regionWidth;
         const span = constrain(x, width, eventX, eventWidthPx, 2);
 
         return (
