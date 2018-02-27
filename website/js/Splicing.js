@@ -617,6 +617,7 @@ class Splicing extends React.Component {
 
         // a 'segment' is either an exon or intron
         // here we build a set of these segments, i.e. exons with introns between them
+        // here we build a set of these segments, i.e. a series of exons with following introns
         // (we need to use the sorted set so that 'start' and 'end' are consistent regardless of the gene's direction)
         let segments = _.flatten(
             // insert introns between each pair of exons
@@ -646,6 +647,7 @@ class Splicing extends React.Component {
 
         // compute region that we'll be zooming in on in the figure
         // the region of interest is one exon before and one exon after the segments that overlap the variant
+        // (if we're in an exon we need to move over by 2 elements to get to an exon, but in an intron it's only 1)
         const precedingExonIndex = Math.max(
             (firstSeg.segment.type === 'intron') ? firstSeg.idx - 1 : firstSeg.idx - 2, 0
         );
