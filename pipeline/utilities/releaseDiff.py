@@ -246,7 +246,7 @@ class transformer(object):
                 appendToJSON(variant, field, oldValue, newValue)
                 return "major change: %s | %s" % (oldValue, newValue)
 
-    def compareRow(self, oldRow, newRow):
+    def compareRow(self, oldRow, newRow, isReport):
         """
         Compare the contents of an old row to a new row.  Indicate any minor
         (cosmetic) changes, major changes, or new values
@@ -264,7 +264,7 @@ class transformer(object):
                              "Polyphen_Prediction", "Polyphen_Score", "Minor_allele_frequency_ESP", "Max_Allele_Frequency"]
 
         # Header to group all logs the same variant
-        variant_intro = "\n\n %s \n Old Source: %s \n New Source: %s \n\n" % (newRow["pyhgvs_Genomic_Coordinate_38"],
+        variant_intro = "\n\n %s \n Old Source: %s \n New Source: %s \n\n" % (newRow[getIdentifier(newRow, isReport)],
                                                                               oldRow["Source"], newRow["Source"])
 
         changeset = ""
@@ -683,7 +683,7 @@ def main():
             added.writerow(newData[newVariant])
         else:
             logging.debug('Finding change type...')
-            change_type = v1v2.compareRow(oldData[newVariant], newData[newVariant])
+            change_type = v1v2.compareRow(oldData[newVariant], newData[newVariant], reports)
             logging.debug("newV: %s change_type: %s", newVariant, change_type)
             assert(newVariant not in variantChangeTypes)
             variantChangeTypes[newVariant] = change_type

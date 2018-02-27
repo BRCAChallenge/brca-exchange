@@ -1470,7 +1470,7 @@ class RunDiffAndAppendChangeTypesToOutputReports(luigi.Task):
                 'added_data_reports': luigi.LocalTarget(diff_dir + "added_data_reports.tsv"),
                 'diff_reports': luigi.LocalTarget(diff_dir + "diff_reports.txt"),
                 'diff_json_reports': luigi.LocalTarget(diff_dir + "diff_reports.json"),
-                'README_REPORTS': luigi.LocalTarget(diff_dir + "README_REPORTS.txt")}
+                'README': luigi.LocalTarget(diff_dir + "README.txt")}
 
     def run(self):
         release_dir = self.output_dir + "/release/"
@@ -1488,7 +1488,7 @@ class RunDiffAndAppendChangeTypesToOutputReports(luigi.Task):
                 "--removed", diff_dir + "removed_reports.tsv", "--added", diff_dir + "added_reports.tsv", "--added_data",
                 diff_dir + "added_data_reports.tsv", "--diff", diff_dir + "diff_reports.txt", "--diff_json", diff_dir + "diff_reports.json",
                 "--output", release_dir + "reports_with_change_types.tsv", "--artifacts_dir", artifacts_dir,
-                "--diff_dir", diff_dir, "--v1_release_date", previous_release_date_str, "--reports", True]
+                "--diff_dir", diff_dir, "--v1_release_date", previous_release_date_str, "--reports", "True"]
 
         print "Running releaseDiff.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -1496,7 +1496,7 @@ class RunDiffAndAppendChangeTypesToOutputReports(luigi.Task):
 
         shutil.rmtree(tmp_dir) # cleaning up
 
-        check_input_and_output_tsvs_for_same_number_variants(release_dir + "reports.tsv",
+        check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "reports.tsv",
                                                              release_dir + "reports_with_change_types.tsv")
 
 
