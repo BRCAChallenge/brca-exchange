@@ -276,15 +276,21 @@ class Exon extends React.Component {
                 <g transform={isFlipped ? `translate(${x + width}) scale(-1,1)` : `translate(${x})`}>
                     <defs>
                         <clipPath id={clipMaskID}>
-                            <rect x={0} width={width} height={height} rx={exonBorderRadius} ry={exonBorderRadius} />
+                            <rect
+                                x={0} width={width} height={height} rx={exonBorderRadius} ry={exonBorderRadius}
+                                stroke={highlight ? highlightStroke : exonStroke}
+                            />
                         </clipPath>
                     </defs>
 
-                    <rect x={0} width={width} height={height} rx={exonBorderRadius} ry={exonBorderRadius} fill={highlight ? highlightFill : exonFill} stroke={highlight ? highlightStroke : exonStroke} />
+                    <rect x={0} width={width} height={height} rx={exonBorderRadius} ry={exonBorderRadius} fill={highlight ? highlightFill : exonFill} />
 
                     <SegmentRegions variant={variant} donors={donors} acceptors={acceptors}
                         txStart={txStart} txEnd={txEnd}
                         width={width} height={height} mask={clipMaskID} />
+
+                    {/* extra unfilled rect overlay, used to re-draw the outline on top of the regions */}
+                    <rect x={0} width={width} height={height} rx={exonBorderRadius} ry={exonBorderRadius} fill="transparent" stroke={highlight ? highlightStroke : exonStroke} />
                 </g>
             </g>
         );
@@ -301,11 +307,14 @@ class Intron extends React.Component {
         return (
             <g transform="translate(0, 10)">
                 <g transform={isFlipped ? `translate(${x + width}) scale(-1,1)` : `translate(${x})`}>
-                    <rect x={0} width={width} height={height} fill={highlight ? highlightFill : intronFill} stroke={highlight ? highlightStroke : intronStroke} />
+                    <rect x={0} width={width} height={height} fill={highlight ? highlightFill : intronFill} />
 
                     <SegmentRegions variant={variant} donors={donors} acceptors={acceptors}
                         txStart={txStart} txEnd={txEnd}
                         width={width} height={height} />
+
+                    {/* extra unfilled rect overlay, used to re-draw the outline on top of the regions */}
+                    <rect x={0} width={width} height={height} fill="transparent" stroke={highlight ? highlightStroke : intronStroke} />
                 </g>
             </g>
         );
