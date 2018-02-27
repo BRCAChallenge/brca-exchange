@@ -24,8 +24,8 @@ const intronWidth = 40,
     zoomMargin = 20,
     intronMag = 2; // factor by which the intron for a fully-intronic variant is scaled
 
-const donorFill = '#ce67b3',
-    acceptorFill = '#7ba8ff';
+const donorFill = 'rgba(206, 103, 179, 0.5)', // '#ce67b3'
+    acceptorFill = 'rgba(123, 168, 255, 0.5)'; //'#7ba8ff'
 
 // --------------------------------------------------------------------------------------------------------------
 // --- supporting methods
@@ -213,9 +213,16 @@ class Variant extends React.Component {
     }
 }
 
+/**
+ * Generates regions as overlays on a given segment.
+ *
+ * Current region types rendered:
+ * - donor, acceptor sites
+ * - variant inserted, deleted, changed regions
+ */
 class SegmentRegions extends React.Component {
     render() {
-        const {clipMaskID, variant, donors, acceptors, width, height, txStart, txEnd} = this.props;
+        const {mask, variant, donors, acceptors, width, height, txStart, txEnd} = this.props;
         const n = this.props.n || 'intron';
 
         return (
@@ -224,7 +231,7 @@ class SegmentRegions extends React.Component {
                 variant && (
                     <Variant variant={variant}
                         x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
-                        mask={clipMaskID}
+                        mask={mask}
                     />
                 )
             }
@@ -233,7 +240,7 @@ class SegmentRegions extends React.Component {
                 donors.map((donorSpan, idx) => (
                     <Region key={`donor_${n}_${idx}`} region={donorSpan}
                         x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
-                        fill={donorFill} opacity={0.5} mask={clipMaskID}
+                        fill={donorFill} mask={mask}
                     />
                 ))
             }
@@ -242,12 +249,12 @@ class SegmentRegions extends React.Component {
                 acceptors.map((acceptorSpan, idx) => (
                     <Region key={`acceptor_${n}_${idx}`} region={acceptorSpan}
                         x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
-                        fill={acceptorFill} opacity={0.5} mask={clipMaskID}
+                        fill={acceptorFill} mask={mask}
                     />
                 ))
             }
             </g>
-        )
+        );
     }
 }
 
@@ -523,7 +530,7 @@ class Splicing extends React.Component {
         let plural = n => n === 1 ? '' : 's';
         const siteStyle = {
             display: 'inline-block', verticalAlign: 'text-bottom',
-            width: '17px', height: '17px', marginRight: '8px', opacity: 0.5,
+            width: '18px', height: '17px', marginRight: '8px',
             border: 'solid 1px black'
         };
 
@@ -616,7 +623,6 @@ class Splicing extends React.Component {
         // --- step 1: build list of interleaved exons and introns, aka segments
 
         // a 'segment' is either an exon or intron
-        // here we build a set of these segments, i.e. exons with introns between them
         // here we build a set of these segments, i.e. a series of exons with following introns
         // (we need to use the sorted set so that 'start' and 'end' are consistent regardless of the gene's direction)
         let segments = _.flatten(
