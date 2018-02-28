@@ -1,5 +1,6 @@
 import unittest
 import mock
+import os
 import calcVarPriors
 import calcMaxEntScanMeanStd
 from calcVarPriorsMockedResponses import brca1Exons, brca2Exons 
@@ -3424,7 +3425,7 @@ class test_calcVarPriors(unittest.TestCase):
                                                    'protein_prior': '0.03'}])
     def test_getPriorProbProteinSNS(self, getVarType, DictReader):
         '''Tests that function parses return value of csv.DictReader correctly'''
-        variantFile = "mod_res_dn_brca20160525.txt"
+        variantFile = os.path.join(os.path.dirname(__file__), 'mod_res_dn_brca20160525.txt')
         # tests for BRCA1 variant
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["HGVS_cDNA"] = "c.3917T>A"
