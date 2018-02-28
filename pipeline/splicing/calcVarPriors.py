@@ -1223,9 +1223,31 @@ def getPriorProbAfterGreyZoneSNS(variant, boundaries):
         return {"priorProb": priorProb,
                 "enigmaClass": enigmaClass}
 
+def varInIneligibleDeNovoExon(variant, donor=True):
+    '''
+    Given a variant and donor argument:
+        (donor=True, if for a de novo donor, donor=False, if for a de novo acceptor)
+    Determines whether that variant is in an eligible exon to be evaluated for de novo splicing
+    If in ineligible exon, returns True, returns False otherwise
+    '''
+    if varInExon(variant) == True:
+        varGene = variant["Gene_Symbol"]
+        varExon = getVarExonNumberSNS(variant)
+        if donor == True:
+            # last exon not eligible for de novo splice donor
+            if varGene == "BRCA1" and varExon == "exon24":
+                return True
+            elif varGene == "BRCA2" and varExon == "exon27":
+                return True
+        else:
+            # first exon not eligible for de novo splice acceptor
+            if varExon == "exon1":
+                return True
+        return False
+
 def getPriorProbDeNovoDonorSNS(variant, exonicPortionSize, accDonor=False):
     '''
-    Given a variant:
+    Given a variant and exonicPortionSize (default 3)
       1. checks that variant is a single nucleotide substitution
       2. checks that variant is in an exon or is in a reference splice donor region
     Returns a dictionary containing: 
@@ -1236,6 +1258,10 @@ def getPriorProbDeNovoDonorSNS(variant, exonicPortionSize, accDonor=False):
     '''
     if getVarType(variant) == "substitution":
         if varInExon(variant) == True or varInSpliceRegion(variant, donor=True, deNovo=False) == True:
+            if varInExon(variant) == True and varInIneligibleDeNovoExon(variant, donor=True) == True:
+                return {"priorProb": "N/A",
+                        "enigmaClass": "N/A",
+                        "deNovoDonorFlag": 0}
             slidingWindowScores = getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, stdDeNovoLength,
                                                                         donor=True, deNovo=False, accDonor=accDonor)
             subDonorScores = getClosestSpliceSiteScores(variant, stdDeNovoOffset, donor=True, deNovo=False, accDonor=accDonor)
@@ -1261,7 +1287,7 @@ def getPriorProbDeNovoDonorSNS(variant, exonicPortionSize, accDonor=False):
                 else:
                     priorProb = priorProb
             
-            if priorProb == 0:
+            if priorProb == 0: 
                 priorProb = "N/A"
                 enigmaClass = "N/A"
                 deNovoDonorFlag = 0
@@ -1280,9 +1306,11 @@ def getPriorProbDeNovoDonorSNS(variant, exonicPortionSize, accDonor=False):
 
 def getPriorProbDeNovoAcceptorSNS(variant, exonicPortionSize, deNovoLength):
     '''
-    Given a variant:
+    Given a variant, exonic portion size, and de novo length:
+     standard exonic portion size = 3, standard de novo length = 10
       1. checks that variant is a single nucleotide substitution
-      2. checks that variant is in de novo splice acceptor region (-20 to +10)
+      2. checks that variant is in de novo splice acceptor region 
+         (-20 to +10) -if using standard exonic portion size and de novo length
     Returns a dictionary containing: 
       prior probability of pathogenecity and predicted qualitative engima class (both N/A)
       deNovo acceptor MaxEntScan scores and zscores for ref and alt sequence
@@ -1328,7 +1356,7 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantFile):
     ''' 
     if varInSpliceRegion(variant, donor=True, deNovo=False):
         refSpliceInfo = getPriorProbRefSpliceDonorSNS(variant, boundaries)
-        deNovoSpliceInfo = getPriorProbDeNovoDonorSNS(variant)
+        deNovoSpliceInfo = getPriorProbDeNovoDonorSNS(variant, stdExonicPortion)
         deNovoPrior = deNovoSpliceInfo["priorProb"]
         refPrior = refSpliceInfo["priorProb"]
         proteinPrior = "N/A"
@@ -1387,12 +1415,12 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantFile):
     '''
     if varInSpliceRegion(variant, donor=False, deNovo=False):
         refSpliceInfo = getPriorProbRefSpliceAcceptorSNS(variant, boundaries)
-        deNovoAccInfo = getPriorProbDeNovoAcceptorSNS(variant)
+        deNovoAccInfo = getPriorProbDeNovoAcceptorSNS(variant, stdExonicPortion, stdDeNovoLength)
         refPrior = refSpliceInfo["priorProb"]
         proteinPrior = "N/A"
         applicablePrior = refSpliceInfo["priorProb"]
         if varInExon(variant) == True:
-            deNovoDonorInfo = getPriorProbDeNovoDonorSNS(variant, accDonor=True)
+            deNovoDonorInfo = getPriorProbDeNovoDonorSNS(variant, stdExonicPortion, accDonor=True)
             deNovoDonorPrior = deNovoDonorInfo["priorProb"]
             proteinInfo = getPriorProbProteinSNS(variant, variantFile)
             proteinPrior = proteinInfo["priorProb"]
