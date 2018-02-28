@@ -921,7 +921,7 @@ def compareDeNovoWildTypeSplicePos(variant):
         else:
             return False
         
-def getPriorProbSpliceRescueSNS(variant, boundaries):
+def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries):
     '''
     Given a variant, determines if there is a possibility of splice rescue
     If there is a possibility of splice rescue, flags variant for further analysis
