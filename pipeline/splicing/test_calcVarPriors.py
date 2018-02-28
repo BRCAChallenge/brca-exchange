@@ -1603,14 +1603,20 @@ class test_calcVarPriors(unittest.TestCase):
 
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {"inExonicPortion": True})
     def test_varInExonicPortionTrue(self, getMaxMaxEntScanScoreSlidingWindowSNS):
-        '''Tests that varInExonicPortion returns True if variant is in exonic portion'''
-        inExonicPortion = calcVarPriors.varInExonicPortion(self.variant)
+        '''Tests that varInExonicPortion returns True if variant is in exonic portion of window'''
+        exonicPortion = 3
+        deNovoLength = 10
+        inExonicPortion = calcVarPriors.varInExonicPortion(self.variant, exonicPortion, deNovoLength,
+                                                           donor=True, deNovo=False)
         self.assertTrue(inExonicPortion)
 
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {"inExonicPortion": False})
     def test_varInExonicPortionFalse(self, getMaxMaxEntScanScoreSlidingWindowSNS):
-        '''Tests that varInExonicPortion returns False if variant is NOT in exonic portion'''
-        inExonicPortion = calcVarPriors.varInExonicPortion(self.variant)
+        '''Tests that varInExonicPortion returns False if variant is NOT in exonic portion of window'''
+        exonicPortion = 3
+        deNovoLength = 10
+        inExonicPortion = calcVarPriors.varInExonicPortion(self.variant, exonicPortion, deNovoLength,
+                                                           donor=False, deNovo=False)
         self.assertFalse(inExonicPortion)
 
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {"varWindowPosition": 2})
@@ -1699,7 +1705,8 @@ class test_calcVarPriors(unittest.TestCase):
         inExonicPortion = True
         varGenPos = "43104189"
         varWindowPos = 3
-        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion)
+        exonicPortionSize = 3
+        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, exonicPortionSize)
         # because varWindowPos == 3, cut will occur after variant
         actualNewSplicePos = 43104189
         self.assertEquals(newSplicePos, actualNewSplicePos)
@@ -1710,7 +1717,8 @@ class test_calcVarPriors(unittest.TestCase):
         inExonicPortion = False
         varGenPos = "43104249"
         varWindowPos = 6
-        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion)
+        exonicPortionSize = 3
+        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, exonicPortionSize)
         # because varWindowPos == 6, cut will occur 3 bases to the left of the variant
         actualNewSplicePos = 43104252
         self.assertEquals(newSplicePos, actualNewSplicePos)
@@ -1721,7 +1729,8 @@ class test_calcVarPriors(unittest.TestCase):
         inExonicPortion = True
         varGenPos = "32354881"
         varWindowPos = 2
-        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion)
+        exonicPortionSize = 3
+        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, exonicPortionSize)
         # because varWindowPos == 2, cut will occur 1 base to the right of the variant
         actualNewSplicePos = 32354882
         self.assertEquals(newSplicePos, actualNewSplicePos)
@@ -1732,7 +1741,8 @@ class test_calcVarPriors(unittest.TestCase):
         inExonicPortion = False
         varGenPos = "32326277"
         varWindowPos = 8
-        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion)
+        exonicPortionSize = 3
+        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, exonicPortionSize)
         # because varWindowPos == 8, cut will occur 5 bases to the left of the variant
         actualNewSplicePos = 32326272
         self.assertEquals(newSplicePos, actualNewSplicePos)
@@ -1751,26 +1761,30 @@ class test_calcVarPriors(unittest.TestCase):
                                    getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition):
         '''Tests that exon length is correctly calculated for minus strand (BRCA1) exon'''
         self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["HGVS_cDNA"] = "c.5285G>C"
         expectedCutSeq = "ATCTTCACG"
-        altExonLength = calcVarPriors.getAltExonLength(self.variant)
+        exonicPortionSize = 3
+        altExonLength = calcVarPriors.getAltExonLength(self.variant, exonicPortionSize)
         self.assertEquals(altExonLength, len(expectedCutSeq))
 
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.getVarExonNumberSNS', return_value = "exon13")
     @mock.patch('calcVarPriors.getExonBoundaries', return_value = brca2Exons)
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -9.89,
-                                                                                       'altMaxEntScanScore': -9.8,
-                                                                                       'altZScore': -7.616197412132026,
+                                                                                       'altMaxEntScanScore': -1.7,
+                                                                                       'altZScore': -4.13830346320361,
+                                                                                       'varWindowPosition': 4,
                                                                                        'inExonicPortion': False,
-                                                                                       'varWindowPosition': 9,
                                                                                        'refZScore': -7.65484067823123})
     @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32346831)
     def test_getAltExonLengthBRCA2(self, varInExon, getVarExonNumberSNS, getExonBoundaries,
                                    getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition):
         '''Tests that exon length is correctly calculated for plus strand (BRCA2) exon'''
         self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["HGVS_cDNA"] = "c.6943A>G"
         expectedCutSeq = "GCACA"
-        altExonLength = calcVarPriors.getAltExonLength(self.variant)
+        exonicPortionSize = 3
+        altExonLength = calcVarPriors.getAltExonLength(self.variant, exonicPortionSize)
         self.assertEquals(altExonLength, len(expectedCutSeq))
 
     def test_compareRefAltExonLengths(self):
@@ -1792,7 +1806,8 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.compareRefAltExonLengths', return_value = True)    
     def test_isSplicingWindowInFrameTrue(self, getRefExonLength, getAltExonLength, compareRefAltExonLengths):
         '''Tests that if splicing window is in frame, function returns true'''
-        inFrame = calcVarPriors.isSplicingWindowInFrame(self.variant)
+        exonicPortionSize = 3
+        inFrame = calcVarPriors.isSplicingWindowInFrame(self.variant, exonicPortionSize)
         self.assertTrue(inFrame)
         
     @mock.patch('calcVarPriors.getRefExonLength', return_value = 45)
@@ -1800,7 +1815,8 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.compareRefAltExonLengths', return_value = False)    
     def test_isSplicingWindowInFrameFalse(self, getRefExonLength, getAltExonLength, compareRefAltExonLengths):
         '''Tests that if splicing window is NOT in frame, function returns false'''
-        inFrame = calcVarPriors.isSplicingWindowInFrame(self.variant)
+        exonicPortionSize = 3
+        inFrame = calcVarPriors.isSplicingWindowInFrame(self.variant, exonicPortionSize)
         self.assertFalse(inFrame)        
 
     @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
@@ -1825,7 +1841,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43070936"
         self.variant["Ref"] = "C"
         self.variant["Alt"] = "T"
-        isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant)
+        exonicPortionSize = 3
+        isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant, exonicPortionSize)
         self.assertTrue(isDivisible)
         
     @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
@@ -1850,7 +1867,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43097265"
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "C"
-        isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant)
+        exonicPortionSize = 3
+        isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant, exonicPortionSize)
         self.assertFalse(isDivisible)
                 
     @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
@@ -1875,7 +1893,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32325180"
         self.variant["Ref"] = "G"
         self.variant["Alt"] = "T"
-        isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant)
+        exonicPortionSize = 3
+        isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant, exonicPortionSize)
         self.assertTrue(isDivisible)
 
     @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
@@ -1900,7 +1919,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32379872"
         self.variant["Ref"] = "C"
         self.variant["Alt"] = "A"
-        isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant)
+        exonicPortionSize = 3
+        isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant, exonicPortionSize)
         self.assertFalse(isDivisible)
 
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
@@ -2473,7 +2493,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': 1.49,
                                                                                        'altMaxEntScanScore': -3.56,
                                                                                        'altZScore': -4.936930962587172,
-                                                                                       'inFirstThree': True,
+                                                                                       'inExonicPortion': True,
                                                                                        'varWindowPosition': 2,
                                                                                        'refZScore': -2.7686143647984682})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 1.1729987773204027,
@@ -2498,7 +2518,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -12.18,
                                                                                        'altMaxEntScanScore': -13.41,
                                                                                        'altZScore': -9.166221752333454,
-                                                                                       'inFirstThree': True,
+                                                                                       'inExonicPortion': True,
                                                                                        'varWindowPosition': 1,
                                                                                        'refZScore': -8.638097115644324})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.27990996080545155,
@@ -2522,7 +2542,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -3.85,
                                                                                        'altMaxEntScanScore': -7.01,
                                                                                        'altZScore': -6.418256163056683,
-                                                                                       'inFirstThree': False,
+                                                                                       'inExonicPortion': False,
                                                                                        'varWindowPosition': 6,
                                                                                        'refZScore': -5.061448153351276})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -1.3516946078276324,
@@ -2547,7 +2567,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -14.69,
                                                                                        'altMaxEntScanScore': -17.11,
                                                                                        'altZScore': -10.75488935863409,
-                                                                                       'inFirstThree': True,
+                                                                                       'inExonicPortion': True,
                                                                                        'varWindowPosition': 1,
                                                                                        'refZScore': -9.71581487018881})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 1.1128870300549731,
@@ -2571,7 +2591,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -5.67,
                                                                                        'altMaxEntScanScore': -3.44,
                                                                                        'altZScore': -4.885406607788233,
-                                                                                       'inFirstThree': False,
+                                                                                       'inExonicPortion': False,
                                                                                        'varWindowPosition': 7,
                                                                                        'refZScore': -5.842900867801858})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 1.1300618149879533,
@@ -2595,7 +2615,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -4.41,
                                                                                        'altMaxEntScanScore': -2.12,
                                                                                        'altZScore': -4.318638704999898,
-                                                                                       'inFirstThree': False,
+                                                                                       'inExonicPortion': False,
                                                                                        'varWindowPosition': 7,
                                                                                        'refZScore': -5.301895142412993})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 1.1729987773204027,
@@ -2618,7 +2638,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -12.7,
                                                                                        'altMaxEntScanScore': -5.05,
                                                                                        'altZScore': -5.57669170134067,
-                                                                                       'inFirstThree': False,
+                                                                                       'inExonicPortion': False,
                                                                                        'varWindowPosition': 8,
                                                                                        'refZScore': -8.861369319773063})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.6534615330977633,
@@ -2642,7 +2662,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -6.24,
                                                                                        'altMaxEntScanScore': -4.4,
                                                                                        'altZScore': -5.297601446179749,
-                                                                                       'inFirstThree': False,
+                                                                                       'inExonicPortion': False,
                                                                                        'varWindowPosition': 9,
                                                                                        'refZScore': -6.087641553096821})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 1.164411384853913,
@@ -2665,7 +2685,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -2.47,
                                                                                        'altMaxEntScanScore': 3.73,
                                                                                        'altZScore': -1.8068264085515982,
-                                                                                       'inFirstThree': False,
+                                                                                       'inExonicPortion': False,
                                                                                        'varWindowPosition': 8,
                                                                                        'refZScore': -4.468918073163471})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.9196706995589503,
@@ -2689,7 +2709,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -0.35,
                                                                                        'altMaxEntScanScore': 7.4,
                                                                                        'altZScore': -0.2310398909506982,
-                                                                                       'inFirstThree': False,
+                                                                                       'inExonicPortion': False,
                                                                                        'varWindowPosition': 5,
                                                                                        'refZScore': -3.558654471715541})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.9196706995589503,
@@ -2712,7 +2732,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -3.5,
                                                                                        'altMaxEntScanScore': 5.0,
                                                                                        'altZScore': -1.2615269869294883,
-                                                                                       'inFirstThree': False,
+                                                                                       'inExonicPortion': False,
                                                                                        'varWindowPosition': 4,
                                                                                        'refZScore': -4.911168785187702})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.09528102277591848,
@@ -2736,7 +2756,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -0.91,
                                                                                        'altMaxEntScanScore': 6.84,
                                                                                        'altZScore': -0.47148688001241607,
-                                                                                       'inFirstThree': False,
+                                                                                       'inExonicPortion': False,
                                                                                        'varWindowPosition': 5,
                                                                                        'refZScore': -3.799101460777258})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.17686125120757246,
@@ -2759,7 +2779,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': 2.78,
                                                                                        'altMaxEntScanScore': 8.94,
                                                                                        'altZScore': 0.4301893289690249,
-                                                                                       'inFirstThree': True,
+                                                                                       'inExonicPortion': True,
                                                                                        'varWindowPosition': 3,
                                                                                        'refZScore': -2.2147275507098687})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.49030107623445457,
@@ -2782,7 +2802,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': 2.14,
                                                                                        'altMaxEntScanScore': 9.79,
                                                                                        'altZScore': 0.7951535087948461,
-                                                                                       'inFirstThree': False,
+                                                                                       'inExonicPortion': False,
                                                                                        'varWindowPosition': 5,
                                                                                        'refZScore': -2.4895241096375464})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 1.2545790057520567,
@@ -2805,7 +2825,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': 3.77,
                                                                                        'altMaxEntScanScore': 3.37,
                                                                                        'altZScore': -1.9613994729484163,
-                                                                                       'inFirstThree': True,
+                                                                                       'inExonicPortion': True,
                                                                                        'varWindowPosition': 3,
                                                                                        'refZScore': -1.7896516236186177})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -2.021511220213846,
@@ -2831,7 +2851,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': 0.21,
                                                                                        'altMaxEntScanScore': 3.25,
                                                                                        'altZScore': -2.012923827747356,
-                                                                                       'inFirstThree': False,
+                                                                                       'inExonicPortion': False,
                                                                                        'varWindowPosition': 7,
                                                                                        'refZScore': -3.318207482653823})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -2.07732927124603,
@@ -2857,7 +2877,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -0.17,
                                                                                        'altMaxEntScanScore': 7.59,
                                                                                        'altZScore': -0.14945966251904425,
-                                                                                       'inFirstThree': False,
+                                                                                       'inExonicPortion': False,
                                                                                        'varWindowPosition': 5,
                                                                                        'refZScore': -3.4813679395171317})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -0.9867304280018111,
@@ -2883,7 +2903,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': 6.34,
                                                                                        'altMaxEntScanScore': 6.92,
                                                                                        'altZScore': -0.43713731014645635,
-                                                                                       'inFirstThree': False,
+                                                                                       'inExonicPortion': False,
                                                                                        'varWindowPosition': 7,
                                                                                        'refZScore': -0.686171691674664})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -2.07732927124603,
@@ -2909,7 +2929,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': 3.77,
                                                                                        'altMaxEntScanScore': 9.26,
                                                                                        'altZScore': 0.5675876084328637,
-                                                                                       'inFirstThree': True,
+                                                                                       'inExonicPortion': True,
                                                                                        'varWindowPosition': 3,
                                                                                        'refZScore': -1.7896516236186177})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -2.021511220213846,
@@ -2934,7 +2954,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': 0.81,
                                                                                        'altMaxEntScanScore': 8.99,
                                                                                        'altZScore': 0.45165781013525,
-                                                                                       'inFirstThree': False,
+                                                                                       'inExonicPortion': False,
                                                                                        'varWindowPosition': 4,
                                                                                        'refZScore': -3.0605857086591257})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.4044271515695557,
@@ -2958,7 +2978,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -3.96,
                                                                                        'altMaxEntScanScore': -4.11,
                                                                                        'altZScore': -4.969838672904024,
-                                                                                       'inFirstThree': 'N/A',
+                                                                                       'inExonicPortion': 'N/A',
                                                                                        'varWindowPosition': 20,
                                                                                        'refZScore': -4.908203170286155})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.2815061501383356,
@@ -2980,7 +3000,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -11.02,
                                                                                        'altMaxEntScanScore': -11.86,
                                                                                        'altZScore': -8.154339641493873,
-                                                                                       'inFirstThree': 'N/A',
+                                                                                       'inExonicPortion': 'N/A',
                                                                                        'varWindowPosition': 16,
                                                                                        'refZScore': -7.8091808268338125})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.018528005635431572,
@@ -3002,7 +3022,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -0.03,
                                                                                        'altMaxEntScanScore': 0.26,
                                                                                        'altZScore': -3.174191029970134,
-                                                                                       'inFirstThree': 'N/A',
+                                                                                       'inExonicPortion': 'N/A',
                                                                                        'varWindowPosition': 23,
                                                                                        'refZScore': -3.2933530016980126})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.8280076066834324,
@@ -3024,7 +3044,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -7.9,
                                                                                        'altMaxEntScanScore': 0.7,
                                                                                        'altZScore': -2.9933935556243876,
-                                                                                       'inFirstThree': 'N/A',
+                                                                                       'inExonicPortion': 'N/A',
                                                                                        'varWindowPosition': 20,
                                                                                        'refZScore': -6.527162372382157})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -1.5305776268269857,
@@ -3046,7 +3066,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': 3.17,
                                                                                        'altMaxEntScanScore': 4.73,
                                                                                        'altZScore': -1.3374530519576655,
-                                                                                       'inFirstThree': 'N/A',
+                                                                                       'inExonicPortion': 'N/A',
                                                                                        'varWindowPosition': 22,
                                                                                        'refZScore': -1.9784622791834936})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -1.4031975880833913,
@@ -3068,7 +3088,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': 2.86,
                                                                                        'altMaxEntScanScore': 5.26,
                                                                                        'altZScore': -1.1196742760411986,
-                                                                                       'inFirstThree': 'N/A',
+                                                                                       'inExonicPortion': 'N/A',
                                                                                        'varWindowPosition': 13,
                                                                                        'refZScore': -2.1058423179270873})
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -1.5305776268269857,
