@@ -1,6 +1,5 @@
 import unittest
 import mock
-import os
 import calcVarPriors
 import calcMaxEntScanMeanStd
 from calcVarPriorsMockedResponses import brca1Exons, brca2Exons 
@@ -3413,33 +3412,6 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that scores are not present for ref splice donor site or de novo splice donor sites
         self.assertEquals(priorProb["altDeNovoDonorMES"], "-")
         self.assertEquals(priorProb["refRefDonorZ"], "-")
-
-    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
-    @mock.patch('csv.DictReader', return_value = [{'exon': 'exon11',
-                                                  'nthgvs': 'c.3917T>A',
-                                                  'gene': 'BRCA1',
-                                                  'protein_prior': '0.99'},
-                                                  {'exon': 'exon25',
-                                                   'nthgvs': 'c.9265C>A',
-                                                   'gene': 'BRCA2',
-                                                   'protein_prior': '0.03'}])
-    def test_getPriorProbProteinSNS(self, getVarType, DictReader):
-        '''Tests that function parses return value of csv.DictReader correctly'''
-        variantFile = os.path.join(os.path.dirname(__file__), 'mod_res_dn_brca20160525.txt')
-        # tests for BRCA1 variant
-        self.variant["Gene_Symbol"] = "BRCA1"
-        self.variant["HGVS_cDNA"] = "c.3917T>A"
-        proteinPrior = calcVarPriors.getPriorProbProteinSNS(self.variant, variantFile)
-        self.assertEquals(proteinPrior["priorProb"], priorProbs["pathogenic"])
-        self.assertEquals(proteinPrior["enigmaClass"], enigmaClasses["class5"])
-
-        # tests for BRCA2 variant
-        self.variant["Gene_Symbol"] = "BRCA2"
-        self.variant["HGVS_cDNA"] = "c.9265C>A"
-        variantFile = "mod_res_dn_brca20160525.txt"
-        proteinPrior = calcVarPriors.getPriorProbProteinSNS(self.variant, variantFile)
-        self.assertEquals(proteinPrior["priorProb"], priorProbs["proteinLow"])
-        self.assertEquals(proteinPrior["enigmaClass"], enigmaClasses["class2"])        
 
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     def test_getVarDict(self, fetch_gene_coordinates):
