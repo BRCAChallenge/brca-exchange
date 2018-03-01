@@ -605,7 +605,18 @@ var VariantDetail = React.createClass({
             me.forceUpdate();
         }, 300);
     },
-    generateDiffRows: function(cols, data) {
+    determineDiffRowColor: function(isReport, highlightRow) {
+        if (isReport) {
+            return 'success';
+        } else {
+            if (highlightRow) {
+                return 'danger';
+            } else {
+                return '';
+            }
+        }
+    },
+    generateDiffRows: function(cols, data, isReports) {
         var diffRows = [];
 
         // keys that contain date values that need reformatting for the ui
@@ -681,7 +692,7 @@ var VariantDetail = React.createClass({
             }
 
             diffRows.push(
-                <tr className={highlightRow ? 'danger' : ''}>
+                <tr className={this.determineDiffRowColor(isReports, highlightRow)}>
                     <td><Link to={`/release/${release.id}`}>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</Link></td>
                     <td>{version["Pathogenicity_expert"]}</td>
                     <td>{diffHTML}</td>
@@ -873,7 +884,15 @@ var VariantDetail = React.createClass({
             );
         });
 
-        const diffRows = this.generateDiffRows(cols, data);
+        const diffRows = this.generateDiffRows(cols, data, false);
+        if (this.state.reports !== undefined) {
+            if (this.state.reports.hasOwnProperty('ClinVar')) {
+                var clinvarDiffRows = this.generateDiffRows(cols, this.state.reports.ClinVar, true);
+            }
+            if (this.state.reports.hasOwnProperty('LOVD')) {
+                var lovdDiffRows = this.generateDiffRows(cols, this.state.reports.LOVD, true);
+            }
+        }
 
         return (error ? <p>{error}</p> :
             <Grid>
@@ -953,6 +972,8 @@ var VariantDetail = React.createClass({
                             </thead>
                             <tbody>
                                 {diffRows}
+                                {clinvarDiffRows}
+                                {lovdDiffRows}
                             </tbody>
                         </Table>
                         <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show All Public Data on this Variant" to see these changes.</p>
