@@ -3772,6 +3772,39 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["priorProb"], priorProbs["proteinHigh"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
+    @mock.patch('calcVarPriors.getVarLocation', return_value = "grey_zone_variant")
+    @mock.patch('calcVarPriors.getPriorProbProteinSNS', return_value = {"priorProb": 0.02,
+                                                                        "enigmaClass": "class_2"})
+    def test_getPriorProbInGreyZoneSNSLowProb(self, getVarType, getVarLocation, getPriorProbProteinSNS):
+        '''Tests that prior prob is correct for variant in the grey zone with a low protein prior'''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["HGVS_cDNA"] = "c.9930A>G"
+        self.variant["Pos"] = "32398443"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "G"
+        priorProb = calcVarPriors.getPriorProbInGreyZoneSNS(self.variant, boundaries, variantData)
+        self.assertEquals(priorProb["priorProb"], priorProbs["deNovoLow"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = "grey_zone_variant")
+    @mock.patch('calcVarPriors.getPriorProbProteinSNS', return_value = {"priorProb": 0.99,
+                                                                        "enigmaClass": "class_5"})
+    def test_getPriorProbInGreyZoneSNSHighProb(self, getVarType, getVarLocation, getPriorProbProteinSNS):
+        '''Tests that prior prob is correct for variant in the grey zone with a high protein prior'''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["HGVS_cDNA"] = "c.9943A>T"
+        self.variant["Pos"] = "32398456"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "T"
+        priorProb = calcVarPriors.getPriorProbInGreyZoneSNS(self.variant, boundaries, variantData)
+        self.assertEquals(priorProb["priorProb"], priorProbs["pathogenic"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class5"])
+        
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     def test_getVarDict(self, fetch_gene_coordinates):
         '''
