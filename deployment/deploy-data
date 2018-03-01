@@ -27,7 +27,7 @@ function add_release_tar_to_db {
     DIFFJSON=${RELEASE_DIR}/diff/diff.json
     REPORTS=${RELEASE_DIR}/reports_with_change_types.tsv
     REMOVEDREPORTS=${RELEASE_DIR}/diff/removed_reports.tsv
-    REPORTSDIFF=${RELEASE_DIR}/diff/reports_diff.json
+    REPORTSDIFF=${RELEASE_DIR}/diff/diff_reports.json
 
     # unpacking of tar into a staging dir
     [ -e ${STAGING} ] && rm -r ${STAGING}

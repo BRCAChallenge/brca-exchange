@@ -12,7 +12,6 @@ from data.utilities import update_autocomplete_words
 
 OLD_MAF_ESP_FIELD_NAMES = ['Minor_allele_frequency_ESP', 'Minor_allele_frequency_ESP_percent']
 
-
 class Command(BaseCommand):
     help = 'Add a new variant release to the database'
 
@@ -34,6 +33,7 @@ class Command(BaseCommand):
         notes = json.load(options['notes'])
         deletions_tsv = options['deletions']
         diff_json = options['diffJSON']
+        reports_diff_json = options['reportsDiffJSON']
 
         sources = notes['sources']
 
@@ -72,7 +72,6 @@ class Command(BaseCommand):
                 row_dict = dict(zip(deletions_header, row))
                 row_dict = self.update_variant_values_for_insertion(row_dict, release_id, change_types, True)
                 variant = Variant.objects.create_variant(row_dict)
-
         update_autocomplete_words()
 
         # update materialized view of current variants
@@ -80,7 +79,7 @@ class Command(BaseCommand):
             cursor.execute("REFRESH MATERIALIZED VIEW currentvariant")
 
         # calls django/data/management/commands/add_diff_json to add diff to db
-        call_command('add_diff_json', str(release_id), diff_json)
+        call_command('add_diff_json', str(release_id), diff_json, reports_diff_json)
 
     def update_variant_values_for_insertion(self, row_dict, release_id, change_types, set_change_type_to_none=False):
         for source in row_dict['Source'].split(','):
