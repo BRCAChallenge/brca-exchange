@@ -3212,6 +3212,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["deNovoAccFlag"], 1)
 
     @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.getPriorProbRefSpliceDonorSNS', return_value = {'refMaxEntScanScore': 10.08,
                                                                                'altMaxEntScanScore': 8.31,
@@ -3229,8 +3230,9 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'refZScore': -3.558654471715541})
     @mock.patch('calcVarPriors.getPriorProbProteinSNS', return_value = {'enigmaClass': 'class_3',
                                                                         'priorProb': 0.29})
-    def test_getPriorProbSpliceDonorSNSNoDeNovoBRCA1(self, varInSpliceRegion, varInExon, getPriorProbRefSpliceDonorSNS,
-                                                     getPriorProbDeNovoDonorSNS, getPriorProbProteinSNS):
+    def test_getPriorProbSpliceDonorSNSNoDeNovoBRCA1(self, varInSpliceRegion, getVarType, varInExon,
+                                                     getPriorProbRefSpliceDonorSNS, getPriorProbDeNovoDonorSNS,
+                                                     getPriorProbProteinSNS):
         '''Tests that applicable prior for a variant in a reference splice site is assigned correctly (no de novo splicing)'''
         boundaries = "enigma"
         variantFile = "mod_res_dn_brca20160525.txt"
@@ -3261,6 +3263,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["refDeNovoAccMES"], "-")
         
     @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.getPriorProbRefSpliceDonorSNS', return_value = {'refMaxEntScanScore': 8.88,
                                                                                'altMaxEntScanScore': 5.83,
@@ -3278,8 +3281,9 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'refZScore': -7.461624347735207})
     @mock.patch('calcVarPriors.getPriorProbProteinSNS', return_value = {'enigmaClass': 'class_2',
                                                                         'priorProb': 0.02})
-    def test_getPriorProbSpliceDonorSNSWithDeNovoBRCA2(self, varInSpliceRegion, varInExon, getPriorProbRefSpliceDonorSNS,
-                                                       getPriorProbDeNovoDonorSNS, getPriorProbProteinSNS):
+    def test_getPriorProbSpliceDonorSNSWithDeNovoBRCA2(self, varInSpliceRegion, getVarType, varInExon,
+                                                       getPriorProbRefSpliceDonorSNS, getPriorProbDeNovoDonorSNS,
+                                                       getPriorProbProteinSNS):
         '''Tests that applicable prior for a variant in a reference splice site is assigned correctly (with de novo splicing)'''
         boundaries = "enigma"
         variantFile = "mod_res_dn_brca20160525.txt"
@@ -3310,6 +3314,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["refRefAccMES"], "-")
 
     @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.getPriorProbRefSpliceAcceptorSNS', return_value = {'refMaxEntScanScore': 10.37,
                                                                                   'altMaxEntScanScore': 11.62,
@@ -3334,9 +3339,9 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'refZScore': -9.483955273593583})
     @mock.patch('calcVarPriors.getPriorProbProteinSNS', return_value = {'enigmaClass': 'class_2',
                                                                         'priorProb': 0.02})
-    def test_getPriorProbSpliceAcceptorSNSNoDeNovoAccBRCA2(self, varInSpliceRegion, varInExon, getPriorProbRefSpliceAccceptorSNS,
-                                                           getPriorProbDeNovoAcceptorSNS, getPriorProbDeNovoDonorSNS,
-                                                           getPriorProbProteinSNS):
+    def test_getPriorProbSpliceAcceptorSNSNoDeNovoAccBRCA2(self, varInSpliceRegion, getVarType, varInExon,
+                                                           getPriorProbRefSpliceAccceptorSNS, getPriorProbDeNovoAcceptorSNS,
+                                                           getPriorProbDeNovoDonorSNS, getPriorProbProteinSNS):
         '''Tests that applicable prior for a variant in a reference splice site is assigned correctly (no de novo splicing)'''
         boundaries = "enigma"
         variantFile = "mod_res_dn_brca20160525.txt"
@@ -3368,6 +3373,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["refRefDonorZ"], "-")
         
     @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = False)
     @mock.patch('calcVarPriors.getPriorProbRefSpliceAcceptorSNS', return_value = {'refMaxEntScanScore': 4.57,
                                                                                   'altMaxEntScanScore': 2.42,
@@ -3383,8 +3389,8 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                'priorProb': 'N/A',
                                                                                'deNovoAccFlag': 1,
                                                                                'refZScore': -4.057633234159576})
-    def test_getPriorProbSpliceAcceptorSNSWithDeNovoBRCA1(self, varInSpliceRegion, varInExon, getPriorProbRefSpliceAccceptorSNS,
-                                                          getPriorProbDeNovoAcceptorSNS):
+    def test_getPriorProbSpliceAcceptorSNSWithDeNovoBRCA1(self, varInSpliceRegion, getVarType, varInExon,
+                                                          getPriorProbRefSpliceAccceptorSNS, getPriorProbDeNovoAcceptorSNS):
         '''Tests that applicable prior for a variant in a reference splice site is assigned correctly (with de novo splicing)'''
         boundaries = "enigma"
         variantFile = "mod_res_dn_brca20160525.txt"

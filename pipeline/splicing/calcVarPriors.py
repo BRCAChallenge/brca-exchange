@@ -1354,7 +1354,7 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantFile):
         de novo donor flag = 1 if variant is possible de novo donor variant
         de novo acc flag = 0, because not applicable for variants in ref splice sites
     ''' 
-    if varInSpliceRegion(variant, donor=True, deNovo=False):
+    if varInSpliceRegion(variant, donor=True, deNovo=False) and getVarType(variant) == "substitution":
         refSpliceInfo = getPriorProbRefSpliceDonorSNS(variant, boundaries)
         deNovoSpliceInfo = getPriorProbDeNovoDonorSNS(variant, stdExonicPortion)
         deNovoPrior = deNovoSpliceInfo["priorProb"]
@@ -1413,7 +1413,7 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantFile):
         de novo acc flag = 1 if variant is possible de novo acceptor variant
         de novo donor flag = 1 if variant is possible de novo donor variant
     '''
-    if varInSpliceRegion(variant, donor=False, deNovo=False):
+    if varInSpliceRegion(variant, donor=False, deNovo=False) and getVarType(variant) == "substitution":
         refSpliceInfo = getPriorProbRefSpliceAcceptorSNS(variant, boundaries)
         deNovoAccInfo = getPriorProbDeNovoAcceptorSNS(variant, stdExonicPortion, stdDeNovoLength)
         refPrior = refSpliceInfo["priorProb"]
@@ -1463,7 +1463,7 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantFile):
                 "altDeNovoAccZ": deNovoAccInfo["altZScore"],
                 "deNovoAccFlag": deNovoAccInfo["deNovoAccFlag"],
                 "spliceSite": refSpliceInfo["spliceSite"]}
-
+    
 def getPriorProbProteinSNS(variant, variantFile):
     '''
     Given a variant and a file containing protein prior probabilities,
