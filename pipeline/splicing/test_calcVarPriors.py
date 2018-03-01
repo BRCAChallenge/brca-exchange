@@ -5,6 +5,7 @@ import calcMaxEntScanMeanStd
 from calcVarPriorsMockedResponses import brca1Exons, brca2Exons 
 from calcVarPriorsMockedResponses import brca1RefSpliceDonorBounds, brca2RefSpliceDonorBounds 
 from calcVarPriorsMockedResponses import brca1RefSpliceAcceptorBounds, brca2RefSpliceAcceptorBounds
+from calcVarPriorsMockedResponses import variantData
 
 # dictionary containing possible strands for variants
 strand = {"minus": "-",
@@ -113,6 +114,7 @@ priorProbs = {"deNovoLow": 0.02,
               "proteinMod": 0.29,
               "deNovoMod": 0.3,
               "moderate": 0.34,
+              "proteinHigh": 0.81,
               "deNovoHigh": 0.64,
               "high": 0.97,
               "pathogenic": 0.99,
@@ -3418,6 +3420,26 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that scores are not present for ref splice donor site or de novo splice donor sites
         self.assertEquals(priorProb["altDeNovoDonorMES"], "-")
         self.assertEquals(priorProb["refRefDonorZ"], "-")
+
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    def test_getPriorProbProteinSNS(self, getVarType):
+        # checks for BRCA1 variant
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["HGVS_cDNA"] = "c.592A>T"
+        self.variant["Ref"] = "T"
+        self.variant["Alt"] = "A"
+        priorProb = calcVarPriors.getPriorProbProteinSNS(self.variant, variantData)
+        self.assertEquals(priorProb["priorProb"], priorProbs["proteinMod"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
+
+        # checks for BRCA2 variant
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["HGVS_cDNA"] = "c.620C>T"
+        self.variant["Ref"] = "C"
+        self.variant["Alt"] = "T"
+        priorProb = calcVarPriors.getPriorProbProteinSNS(self.variant, variantData)
+        self.assertEquals(priorProb["priorProb"], priorProbs["proteinHigh"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     def test_getVarDict(self, fetch_gene_coordinates):

@@ -1336,9 +1336,9 @@ def getPriorProbDeNovoAcceptorSNS(variant, exonicPortionSize, deNovoLength):
                     "altZScore": altZScore,
                     "deNovoAccFlag": deNovoAccFlag}
 
-def getPriorProbSpliceDonorSNS(variant, boundaries, variantFile):
+def getPriorProbSpliceDonorSNS(variant, boundaries, variantData):
     '''
-    Given a variant, boundaries (either PRIORS or ENIGMA), and file with protein priors
+    Given a variant, boundaries (either PRIORS or ENIGMA), and a list of dictionaries with variant data
     Determines reference donor and de novo donor scores for variant
     Returns dicitionary containing scores for ref and de novo splice donor/acceptor
         and protein prior if variant in exon
@@ -1359,7 +1359,7 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantFile):
         refPrior = refSpliceInfo["priorProb"]
         proteinPrior = "N/A"
         if varInExon(variant) == True:
-            proteinInfo = getPriorProbProteinSNS(variant, variantFile)
+            proteinInfo = getPriorProbProteinSNS(variant, variantData)
             proteinPrior = proteinInfo["priorProb"]
         if deNovoPrior != "N/A" and proteinPrior != "N/A":
             applicablePrior = max(deNovoPrior, refPrior, proteinPrior)
@@ -1395,9 +1395,9 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantFile):
                 "deNovoAccFlag": 0,
                 "spliceSite": refSpliceInfo["spliceSite"]}
 
-def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantFile):
+def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData):
     '''
-    Given a variant, boundaries (either PRIORS or ENIGMA), and file with protein priors
+    Given a variant, boundaries (either PRIORS or ENIGMA), and list of dictionaries with variant data
     Determines reference and de novo acceptor scores for variant
       If variant in exon, also determines de novo donor scores and protein prior
     Returns dicitionary containing scores for ref and de novo splice donor/acceptor
@@ -1420,7 +1420,7 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantFile):
         if varInExon(variant) == True:
             deNovoDonorInfo = getPriorProbDeNovoDonorSNS(variant, stdExonicPortion, accDonor=True)
             deNovoDonorPrior = deNovoDonorInfo["priorProb"]
-            proteinInfo = getPriorProbProteinSNS(variant, variantFile)
+            proteinInfo = getPriorProbProteinSNS(variant, variantData)
             proteinPrior = proteinInfo["priorProb"]
             if deNovoDonorPrior != "N/A" and proteinPrior != "N/A":
                 applicablePrior = max(deNovoDonorPrior, proteinPrior, refPrior)
@@ -1462,9 +1462,9 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantFile):
                 "deNovoAccFlag": deNovoAccInfo["deNovoAccFlag"],
                 "spliceSite": refSpliceInfo["spliceSite"]}
     
-def getPriorProbProteinSNS(variant, variantFile):
+def getPriorProbProteinSNS(variant, variantData):
     '''
-    Given a variant and a file containing protein prior probabilities,
+    Given a variant and a list of dictionaries containing variant data,
     Returns a dictionary containing:
       the variant's protein prior probability and enigma class for that prior
     '''
@@ -1472,7 +1472,6 @@ def getPriorProbProteinSNS(variant, variantFile):
         varHGVS = variant["HGVS_cDNA"]
         varGene = variant["Gene_Symbol"]
 
-        variantData = csv.DictReader(open(variantFile, "r"), delimiter="\t")
         for var in variantData:
             if var['gene'] == varGene and var['nthgvs'] == varHGVS:
                 proteinPrior = float(var["protein_prior"])
@@ -1507,10 +1506,13 @@ def main():
     parser.add_argument('-b', "--boundaries", default="ENIGMA",
                         help="Specifies which boundaries (ENIGMA or PRIORS) to use for clinically important domains")
     args = parser.parse_args()    
+
+    variantData = csv.DictReader(open(args.variantFile, "r"), delimiter="\t")
     
     inputData = csv.DictReader(open(args.inputFile, "r"), delimiter="\t")
     for variant in inputData:
         varDict = getVarDict(variant)
+
     # TO DO - create conditional to account for user selected boundaries
     newColumns = ["varType", "varLoc", "pathProb", "ENIGMAClass", "donorVarMES",
                   "donorVarZ", "donorRefMES", "donorRefZ", "accVarMES", "accVarZ",
