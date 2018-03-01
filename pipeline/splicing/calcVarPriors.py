@@ -73,8 +73,6 @@ BRCA2_RefSeq = "NM_000059.3"
 brca1TranscriptData = fetch_gene_coordinates(BRCA1_RefSeq)
 brca2TranscriptData = fetch_gene_coordinates(BRCA2_RefSeq)
 
-
-
 def checkSequence(sequence):
     '''Checks if a given sequence contains acceptable nucleotides returns True if sequence is comprised entirely of acceptable bases'''
     acceptableBases = ["A", "C", "T", "G", "N", "R", "Y"]
