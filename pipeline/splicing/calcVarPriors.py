@@ -1711,6 +1711,7 @@ def getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries):
                 
 def getVarDict(variant, boundaries):
     '''
+
     Given input data, returns a dictionary containing information for each variant in input
     Dictionary key is variant HGVS_cDNA and value is a dictionary containing variant gene, variant chromosome, 
     variant strand, variant genomic coordinate, variant type, and variant location
