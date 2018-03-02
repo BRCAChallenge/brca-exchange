@@ -1434,7 +1434,7 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
                 "--removed", diff_dir + "removed.tsv", "--added", diff_dir + "added.tsv", "--added_data",
                 diff_dir + "added_data.tsv", "--diff", diff_dir + "diff.txt", "--diff_json", diff_dir + "diff.json",
                 "--output", release_dir + "built_with_change_types.tsv", "--artifacts_dir", artifacts_dir,
-                "--diff_dir", diff_dir, "--v1_release_date", previous_release_date_str]
+                "--diff_dir", diff_dir, "--v1_release_date", previous_release_date_str, "--reports", "False"]
 
         print "Running releaseDiff.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

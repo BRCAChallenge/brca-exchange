@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import pdb
 import argparse
 import csv
 import re
@@ -642,7 +641,10 @@ def main():
     global diff
     diff = open(args.diff, "w")
     global reports
-    reports = args.reports
+    if args.reports.lower() in ('yes', 'true', 't', 'y', '1'):
+        reports = True
+    else:
+        reports = False
 
     # Keep track of change types for all variants to append to final output file
     variantChangeTypes = {}
@@ -653,8 +655,7 @@ def main():
     # string is the key, and for which the value is the full row.
     oldData = {}
     newData = {}
-
-    if reports:
+    if reports is True:
         # handle reports
         for oldRow in v1In:
             identifier = getIdentifier(oldRow, reports)
