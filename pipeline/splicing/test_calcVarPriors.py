@@ -3423,6 +3423,7 @@ class test_calcVarPriors(unittest.TestCase):
 
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     def test_getPriorProbProteinSNS(self, getVarType):
+        '''Tests that function parses data from variantData correctly and returns correct prior prob/class'''
         # checks for BRCA1 variant
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["HGVS_cDNA"] = "c.592A>T"
