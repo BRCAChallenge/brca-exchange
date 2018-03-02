@@ -1563,7 +1563,8 @@ def getPriorProbProteinSNS(variant, variantData):
 
 def getPriorProbInGreyZoneSNS(variant, boundaries, variantData):
     '''
-    Given a variant and a variant file, return prior prob and enigma class
+    Given a variant and a list of dicitionaries with variant data,
+    Returns prior prob and enigma class based on protein priors for that variant
     '''
     if getVarType(variant) == "substitution" and getVarLocation(variant, boundaries) == "grey_zone_variant":
         proteinData = getPriorProbProteinSNS(variant, variantData)
