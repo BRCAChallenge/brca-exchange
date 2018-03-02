@@ -605,15 +605,19 @@ var VariantDetail = React.createClass({
             me.forceUpdate();
         }, 300);
     },
-    determineDiffRowColor: function(isReport, highlightRow) {
+    determineDiffRowColor: function(highlightRow) {
+        return highlightRow ? 'danger' : '';
+    },
+    getPathogenicity: function(version, isReport) {
         if (isReport) {
-            return 'success';
-        } else {
-            if (highlightRow) {
-                return 'danger';
+            if (version.Source === "ClinVar") {
+                return util.getFormattedFieldByProp("Clinical_Significance_ClinVar", version);
             } else {
-                return '';
+                return util.getFormattedFieldByProp("Variant_effect_LOVD", version);
             }
+        } else {
+            // Only concerned about expert pathogenicity for diff
+            return util.getFormattedFieldByProp("Pathogenicity_expert", version);
         }
     },
     generateDiffRows: function(cols, data, isReports) {
@@ -636,7 +640,6 @@ var VariantDetail = React.createClass({
             let release = version.Data_Release;
             let highlightRow = false;
             var diffHTML = [];
-
             if (diff !== null) {
                 for (var j = 0; j < diff.length; j++) {
                     let fieldDiff = diff[j];
@@ -692,9 +695,9 @@ var VariantDetail = React.createClass({
             }
 
             diffRows.push(
-                <tr className={this.determineDiffRowColor(isReports, highlightRow)}>
+                <tr className={this.determineDiffRowColor(highlightRow)}>
                     <td><Link to={`/release/${release.id}`}>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</Link></td>
-                    <td>{version["Pathogenicity_expert"]}</td>
+                    <td>{this.getPathogenicity(version, isReports)}</td>
                     <td>{diffHTML}</td>
                 </tr>
             );
@@ -884,14 +887,86 @@ var VariantDetail = React.createClass({
             );
         });
 
+        // generates variant diff rows
         const diffRows = this.generateDiffRows(cols, data, false);
+
+        // generates report diff rows
         if (this.state.reports !== undefined) {
+            let sortedSubmissions = {'ClinVar': {}, 'LOVD': {}};
+
+            // get all versions of clinvar submissions organized by accession number
             if (this.state.reports.hasOwnProperty('ClinVar')) {
-                var clinvarDiffRows = this.generateDiffRows(cols, this.state.reports.ClinVar, true);
+                let clinvarSubmissions = this.state.reports.ClinVar;
+                for (var i = 0; i < clinvarSubmissions.length; i++) {
+                    let key = clinvarSubmissions[i].SCV_ClinVar;
+                    if (sortedSubmissions.ClinVar.hasOwnProperty(key)) {
+                        sortedSubmissions.ClinVar[key].push(clinvarSubmissions[i]);
+                    } else {
+                        sortedSubmissions.ClinVar[key] = [clinvarSubmissions[i]];
+                    }
+                }
             }
+
+            // get all versions of lovd submissions organized by dbid
             if (this.state.reports.hasOwnProperty('LOVD')) {
-                var lovdDiffRows = this.generateDiffRows(cols, this.state.reports.LOVD, true);
+                let lovdSubmissions = this.state.reports.LOVD;
+                for (var j = 0; j < lovdSubmissions.length; j++) {
+                    let key = lovdSubmissions[j].DBID_LOVD;
+                    if (sortedSubmissions.LOVD.hasOwnProperty(key)) {
+                        sortedSubmissions.LOVD[key].push(lovdSubmissions[j]);
+                    } else {
+                        sortedSubmissions.LOVD[key] = [lovdSubmissions[j]];
+                    }
+                }
             }
+
+            var clinvarDiffRows = _.map(sortedSubmissions.ClinVar, function(submissions) {
+                return (
+                    <Row>
+                        <Col md={12} className="variant-history-col">
+                            <h3>{submissions[0]["SCV_ClinVar"]}</h3>
+                            <h4>Previous Versions of this Submission:</h4>
+                            <Table className='variant-history nopointer' responsive bordered>
+                                <thead>
+                                    <tr className='active'>
+                                        <th>Release Date</th>
+                                        <th>Clinical Significance</th>
+                                        <th>Changes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {this.generateDiffRows(cols, submissions, true)}
+                                </tbody>
+                            </Table>
+                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show All Public Data on this Variant" to see these changes.</p>
+                        </Col>
+                    </Row>
+                );
+            }, this);
+
+            var lovdDiffRows = _.map(sortedSubmissions.LOVD, function(submissions) {
+                return (
+                    <Row>
+                        <Col md={12} className="variant-history-col">
+                            <h3>{submissions[0]["DBID_LOVD"]}</h3>
+                            <h4>Previous Versions of this Submission:</h4>
+                            <Table className='variant-history nopointer' responsive bordered>
+                                <thead>
+                                    <tr className='active'>
+                                        <th>Release Date</th>
+                                        <th>Clinical Significance</th>
+                                        <th>Changes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {this.generateDiffRows(cols, submissions, true)}
+                                </tbody>
+                            </Table>
+                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show All Public Data on this Variant" to see these changes.</p>
+                        </Col>
+                    </Row>
+                );
+            }, this);
         }
 
         return (error ? <p>{error}</p> :
@@ -972,13 +1047,15 @@ var VariantDetail = React.createClass({
                             </thead>
                             <tbody>
                                 {diffRows}
-                                {clinvarDiffRows}
-                                {lovdDiffRows}
                             </tbody>
                         </Table>
                         <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show All Public Data on this Variant" to see these changes.</p>
                     </Col>
                 </Row>
+
+                {clinvarDiffRows}
+                {lovdDiffRows}
+
                 <Row>
                     <Col md={12} mdOffset={0}>
                         <DisclaimerModal buttonModal onToggleMode={this.onChildToggleMode} text="Show All Public Data on this Variant"/>
