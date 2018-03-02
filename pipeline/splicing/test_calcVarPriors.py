@@ -112,8 +112,9 @@ priorProbs = {"deNovoLow": 0.02,
               "proteinMod": 0.29,
               "deNovoMod": 0.3,
               "moderate": 0.34,
-              "proteinHigh": 0.81,
+              "capped": 0.5,
               "deNovoHigh": 0.64,
+              "proteinHigh": 0.81,
               "high": 0.97,
               "pathogenic": 0.99,
               "NA": "N/A"}
@@ -3803,8 +3804,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "T"
         priorProb = calcVarPriors.getPriorProbInGreyZoneSNS(self.variant, boundaries, variantData)
-        self.assertEquals(priorProb["priorProb"], priorProbs["pathogenic"])
-        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class5"])
+        self.assertEquals(priorProb["priorProb"], priorProbs["capped"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
         
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     def test_getVarDict(self, fetch_gene_coordinates):
