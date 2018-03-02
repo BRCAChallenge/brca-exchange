@@ -103,31 +103,13 @@ def variant_reports(request, variant_id):
         key = None
         if report.Source == "ClinVar":
             key = report.SCV_ClinVar
-            query = Report.objects.filter(SCV_ClinVar=key).order_by('-Data_Release_id').select_related('Data_Release')
+            report_query = Report.objects.filter(SCV_ClinVar=key).order_by('-Data_Release_id').select_related('Data_Release')
+            report_versions.extend(map(report_to_dict, report_query))
         elif report.Source == "LOVD":
             key = report.DBID_LOVD
-            query = Report.objects.filter(DBID_LOVD=key).order_by('-Data_Release_id').select_related('Data_Release')
-        report_versions.extend(map(report_to_dict, query))
-    '''
-    Uncomment the following code to filter enigma/bic submissions to clinvar/lovd
+            report_query = Report.objects.filter(DBID_LOVD=key).order_by('-Data_Release_id').select_related('Data_Release')
+            report_versions.extend(map(report_to_dict, report_query))
 
-    # filter out enigma submissions to clinvar/lovd and bic submissions to clinvar
-    filtered_query = []
-    for report in query:
-        if report.Source == "ClinVar":
-            submitter = report.Submitter_ClinVar.lower()
-            if "(enigma)" not in submitter and "(bic)" not in submitter:
-                filtered_query.append(report)
-        elif report.Source == "LOVD":
-            submitter = report.Submitters_LOVD.lower()
-            print submitter
-            if "enigma" not in submitter:
-                filtered_query.append(report)
-        else:
-            filtered_query.append(report)
-
-    query = filtered_query
-    '''
     response = JsonResponse({"data": report_versions})
     response['Access-Control-Allow-Origin'] = '*'
     return response
