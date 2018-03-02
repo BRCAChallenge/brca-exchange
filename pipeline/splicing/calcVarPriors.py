@@ -1585,6 +1585,87 @@ def getPriorProbInGreyZoneSNS(variant, boundaries, variantData):
                 "spliceRescue": 0,
                 "spliceFlag": 0,
                 "frameshift": 0}
+    
+def getPriorProbInExonSNS(variant, boundaries, variantData):
+    # TO DO write unittests and function description
+    varLoc = getVarLocation(variant, boundaries)
+    if varLoc == "exon_variant" or "CI_domain_variant":
+        proteinData = getPriorProbProteinSNS(variant, variantData)
+        varCons = getVarConsequences(variant)
+        if varCons == "stop_gained":
+            nonsenseData = getPriorProbSpliceRescueNonsenseSNS(variant)
+            return {"applicablePrior": nonsenseData["priorProb"],
+                    "applicableEnigmaClass": nonsenseData["enigmaClass"],
+                    "proteinPrior": proteinData["priorProb"],
+                    "refDonorPrior": "N/A",
+                    "deNovoDonorPrior": "N/A",
+                    "refRefDonorMES": "-",
+                    "refRefDonorZ": "-",
+                    "altRefDonorMES": "-",
+                    "altRefDonorZ": "-",
+                    "refDeNovoDonorMES": "-",
+                    "refDeNovoDonorZ": "-",
+                    "altDeNovoDonorMES": "-",
+                    "altDeNovoDonorZ": "-",
+                    "deNovoDonorFlag": 0,
+                    "deNovoAccPrior": "N/A",
+                    "refAccPrior": "N/A",
+                    "refRefAccMES": "-",
+                    "refRefAccZ": "-",
+                    "altRefAccMES": "-",
+                    "altRefAccZ": "-",
+                    "refDeNovoAccMES": "-",
+                    "refDeNovoAccZ": "-",
+                    "altDeNovoAccMES": "-",
+                    "altDeNovoAccZ": "-",
+                    "deNovoAccFlag": 0,
+                    "spliceSite": 0,
+                    "spliceRescue": nonsenseData["spliceRescue"],
+                    "spliceFlag": nonsenseData["spliceFlag"],
+                    "frameshift": nonsenseData["frameshift"]}
+        else:
+            deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, stdExonicPortion, accDonor=False)
+            applicablePrior = proteinData["priorProb"]
+            if deNovoDonorData["priorProb"] != "N/A":
+                applicablePrior = max(proteinData["priorProb"], deNovoDonorData["priorProb"])
+            if varInSpliceRegion(variant, donor=False, deNovo=True):
+                deNovoAccData = getPriorProbDeNovoAcceptorSNS(variant, stdExonicPortion, stdDeNovoLength)
+            else:
+                deNovoAccData = {"priorProb": "N/A",
+                                 "refMaxEntScanScore": "-",
+                                 "altMaxEntScanScore": "-",
+                                 "refZScore": "-",
+                                 "altZScore": "-",
+                                 "deNovoAccFlag": "-"}
+            return {"applicablePrior": applicablePrior,
+                    "applicableEnigmaClass": getEnigmaClass(applicablePrior),
+                    "proteinPrior": proteinData["priorProb"],
+                    "refDonorPrior": "N/A",
+                    "deNovoDonorPrior": deNovoDonorData["priorProb"],
+                    "refRefDonorMES": "-",
+                    "refRefDonorZ": "-",
+                    "altRefDonorMES": "-",
+                    "altRefDonorZ": "-",
+                    "refDeNovoDonorMES": deNovoDonorData["refMaxEntScanScore"],
+                    "refDeNovoDonorZ": deNovoDonorData["refZScore"],
+                    "altDeNovoDonorMES": deNovoDonorData["altMaxEntScanScore"],
+                    "altDeNovoDonorZ": deNovoDonorData["altZScore"],
+                    "deNovoDonorFlag": deNovoDonorData["deNovoDonorFlag"],
+                    "deNovoAccPrior": deNovoAccData["priorProb"],
+                    "refAccPrior": "N/A",
+                    "refRefAccMES": "-",
+                    "refRefAccZ": "-",
+                    "altRefAccMES": "-",
+                    "altRefAccZ": "-",
+                    "refDeNovoAccMES": deNovoAccData["refMaxEntScanScore"], 
+                    "refDeNovoAccZ": deNovoAccData["refZScore"],
+                    "altDeNovoAccMES": deNovoAccData["altMaxEntScanScore"],
+                    "altDeNovoAccZ": deNovoAccData["altZScore"],
+                    "deNovoAccFlag": deNovoAccData["deNovoAccFlag"],
+                    "spliceSite": 0,
+                    "spliceRescue": 0,
+                    "spliceFlag": 0,
+                    "frameshift": 0}
                 
 def getVarDict(variant, boundaries):
     '''
