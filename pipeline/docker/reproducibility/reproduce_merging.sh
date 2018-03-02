@@ -2,26 +2,32 @@
 
 ###############################################################################
 # Script to partially reproduce the result from the BRCA Exchange pipeline.
-#
-# Please edit the PLEASE EDIT parts accordingly
 ###############################################################################
 
-# Base directory
-# PLEASE EDIT
-BASE=~/please_edit
+if [[ $# -ne 3 ]]; then
+    echo "Expecting 3 arguments, got $#"
+    echo "Usage $0: base_dir release_date previous_release_date"
+    echo "where:"
+    echo "    base_dir: path to base directory for the analysis"
+    echo "    release_date: date of the release to reproduce, e.g. '2018-02-17'"
+    echo "    previous_release_date: date of the release prior to release to be reproduced, e.g. '2018-01-16'"
+    echo "Note: you can lookup release dates here: http://brcaexchange.org/releases"
+    exit 2
+fi
 
-# date of the release to reproduce
-# you can lookup release dates here: http://brcaexchange.org/releases
-# PLEASE EDIT
-RELEASE_DATE="2018-02-17" 
-
-# previous release date of the release to reproduce
-# PLEASE EDIT
-PREVIOUS_RELEASE_DATE="2018-01-16" 
+BASE=$1
+RELEASE_DATE=$2
+PREVIOUS_RELEASE_DATE=$3
 
 IMAGE="brcachallenge/brca-exchange-pipeline:data_release_${RELEASE_DATE}"
 
 ###############################################################################
+
+# convert to absolute path (required by docker daemon)
+if [[ ! "${BASE}" =~ ^/ ]]
+then
+    BASE="$(pwd)/${BASE}"
+fi
 
 SED_DATE_CONVERSION_CMD="s/20([0-9]{2})-([0-9]{2})-([0-9]{2})/\2-\3-\1/g"
 

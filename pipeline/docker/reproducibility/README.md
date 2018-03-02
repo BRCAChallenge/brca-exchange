@@ -7,6 +7,6 @@ The pipeline consists of 2 stages where the first one is to normalize the data f
 ## Reproducing Merging Stage
   
 1. Make sure you have docker installed on your system 
-2. Copy, edit accordingly the variables annotated with `PLEASE EDIT` and run [this script](https://github.com/BRCAChallenge/brca-exchange/blob/master/pipeline/docker/reproducibility/reproduce_merging.sh): 
+2. Copy and run [this script](https://github.com/BRCAChallenge/brca-exchange/blob/master/pipeline/docker/reproducibility/reproduce_merging.sh): 
    It will download necessary release archives, some auxiliary data and run the docker image of the merging part.
 3. If everything went well, the script will output a path were the newly generated release archive can be found.
