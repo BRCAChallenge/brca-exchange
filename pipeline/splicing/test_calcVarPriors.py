@@ -3772,7 +3772,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["priorProb"], priorProbs["proteinHigh"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
-    @mock.patch('calcVarPriors.getVarLocation', return_value = "grey_zone_variant")
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inGreyZone"])
     @mock.patch('calcVarPriors.getPriorProbProteinSNS', return_value = {"priorProb": 0.02,
                                                                         "enigmaClass": "class_2"})
     def test_getPriorProbInGreyZoneSNSLowProb(self, getVarType, getVarLocation, getPriorProbProteinSNS):
@@ -3789,7 +3790,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
-    @mock.patch('calcVarPriors.getVarLocation', return_value = "grey_zone_variant")
+    @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inGreyZone"])
     @mock.patch('calcVarPriors.getPriorProbProteinSNS', return_value = {"priorProb": 0.99,
                                                                         "enigmaClass": "class_5"})
     def test_getPriorProbInGreyZoneSNSHighProb(self, getVarType, getVarLocation, getPriorProbProteinSNS):
