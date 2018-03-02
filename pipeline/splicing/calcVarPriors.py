@@ -1568,8 +1568,11 @@ def getPriorProbInGreyZoneSNS(variant, boundaries, variantData):
     '''
     if getVarType(variant) == "substitution" and getVarLocation(variant, boundaries) == "grey_zone_variant":
         proteinData = getPriorProbProteinSNS(variant, variantData)
-        return {"priorProb": proteinData["priorProb"],
-                "enigmaClass": proteinData["enigmaClass"]}
+        proteinPrior = proteinData["priorProb"]
+        if proteinPrior == 0.99:
+            proteinPrior = 0.5
+        return {"priorProb": proteinPrior,
+                "enigmaClass": getEnigmaClass(proteinPrior)}
                 
 def getVarDict(variant, boundaries):
     '''
