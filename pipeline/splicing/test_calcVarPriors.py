@@ -3968,6 +3968,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["spliceFlag"], 0)
         # checks that frameshift flag is correct
         self.assertEquals(priorProb["frameshift"], 1)
+<<<<<<< 9603d757f85f7f1668af85a084fcc1db93ec9b25
         
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inExon"])
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -4050,7 +4051,7 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbOutsideTranscriptBoundsSNS(self.variant, boundaries)
         self.assertEquals(priorProb["applicablePrior"], priorProbs["deNovoLow"])
         self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class2"])
-                
+        
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     def test_getVarDict(self, fetch_gene_coordinates):
         '''
