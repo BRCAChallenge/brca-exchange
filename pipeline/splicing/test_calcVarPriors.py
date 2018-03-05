@@ -1686,7 +1686,7 @@ class test_calcVarPriors(unittest.TestCase):
     def test_getRefExonLengthBRCA1(self, varInExon, getVarExonNumberSNS, getExonBoundaries, getVarStrand):
         '''Tests that exon length is correctly calculated for minus strand (BRCA1) exon'''
         self.variant["Gene_Symbol"] = "BRCA1"
-        exon9PlusSeq = "CCTGCAATAAGTTGCCTTATTAACGGTATCTTCAGAAGAATCAGATC"
+        exon9PlusSeq = "CTGCAATAAGTTGCCTTATTAACGGTATCTTCAGAAGAATCAGATC"
         refExonLength = calcVarPriors.getRefExonLength(self.variant)
         self.assertEquals(refExonLength, len(exon9PlusSeq))
 
@@ -1697,7 +1697,7 @@ class test_calcVarPriors(unittest.TestCase):
     def test_getRefExonLengthBRCA2(self, varInExon, getVarExonNumberSNS, getExonBoundaries, getVarStrand):
         '''Tests that exon length is correctly calculated for plus strand (BRCA2) exon'''
         self.variant["Gene_Symbol"] = "BRCA2"
-        exon5PlusSeq = "GTCCTGTTGTTCTACAATGTACACATGTAACACCACAAAGAGATAAGTCAG"
+        exon5PlusSeq = "TCCTGTTGTTCTACAATGTACACATGTAACACCACAAAGAGATAAGTCAG"
         refExonLength = calcVarPriors.getRefExonLength(self.variant)
         self.assertEquals(refExonLength, len(exon5PlusSeq))
 
@@ -3537,10 +3537,10 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                      'frameshift': 0,
                                                                                      'priorProb': 0.97,
                                                                                      'spliceRescue': 0})
-    def test_getPriorProbSpliceDonorSNSNonsenseBRCA1(self, varInSpliceRegion, getVarType, varInExon,
-                                                     getPriorProbRefSpliceAcceptorSNS, getPriorProbDeNovoDonorSNS,
-                                                     getPriorProbDeNovoAcceptorSNS, getPriorProbProteinSNS,
-                                                     getVarConsequences, getPriorProbSpliceRescueNonsenseSNS):
+    def test_getPriorProbSpliceAcceptorSNSNonsenseBRCA1(self, varInSpliceRegion, getVarType, varInExon,
+                                                        getPriorProbRefSpliceAcceptorSNS, getPriorProbDeNovoDonorSNS,
+                                                        getPriorProbDeNovoAcceptorSNS, getPriorProbProteinSNS,
+                                                        getVarConsequences, getPriorProbSpliceRescueNonsenseSNS):
         '''Tests function with nonsense variant in reference acceptor site'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"

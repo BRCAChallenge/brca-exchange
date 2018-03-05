@@ -948,12 +948,10 @@ def getRefExonLength(variant):
         exonBounds = getExonBoundaries(variant)
         if getVarStrand(variant) == "-":
             varExonStart = int(exonBounds[varExonNum]["exonStart"])
-            # varExonEnd - 1 to account for RefSeq numbering which starts to the right of the first base
-            varExonEnd = int(exonBounds[varExonNum]["exonEnd"]) - 1
+            varExonEnd = int(exonBounds[varExonNum]["exonEnd"])
             exonLength = varExonStart - varExonEnd
         else:
-            # varExonStart -1 to account for RefSeq numbering which starts to the right of the first base
-            varExonStart = int(exonBounds[varExonNum]["exonStart"]) - 1
+            varExonStart = int(exonBounds[varExonNum]["exonStart"])
             varExonEnd = int(exonBounds[varExonNum]["exonEnd"])
             exonLength = varExonEnd - varExonStart
         return exonLength
@@ -999,8 +997,7 @@ def getAltExonLength(variant, exonicPortionSize, accDonor=False):
             varExonEnd = int(exonBounds[varExonNum]["exonEnd"])
             refExonLength = getRefExonLength(variant)
             # need to compare to refExonLength because of + strand gene
-            # newSplicePos -1 to account for RefSeq numbering which starts to the right of the first base
-            exonLength = refExonLength - (varExonEnd - (newSplicePos - 1))
+            exonLength = refExonLength - (varExonEnd - newSplicePos)
         return exonLength
 
 def compareRefAltExonLengths(refLength, altLength):
