@@ -45,7 +45,7 @@ const FAQContent = [
     },
     {
         "question": "What makes brca exchange different from other public databases?",
-        "content": require('../content/faqs/what-makes-brca-exchange-different-from-other-public-databases.md')   
+        "content": require('../content/faqs/what-makes-brca-exchange-different-from-other-public-databases.md')
     }
 ];
 
