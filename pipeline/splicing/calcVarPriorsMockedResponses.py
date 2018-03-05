@@ -332,7 +332,7 @@ variantData = [{'de_novo_prior': '0.02',
                 'nthgvs': 'c.620C>T',
                 'gene': 'BRCA2',
                 'removesKeyDomain': 'N',
-                'protein_prior': '0.81'}
+                'protein_prior': '0.81'},
                {'de_novo_prior': '0.02',
                 'refsplice_prior': '0.02',
                 'promote': 'NA',
