@@ -3879,7 +3879,10 @@ class test_calcVarPriors(unittest.TestCase):
     def test_getPriorProbInExonSNSEnigmaCIDeNovoAcceptorBRCA2(self, getVarLocation, getVarType, getPriorProbProteinSNS,
                                                               getVarConsequences, getPriorProbDeNovoDonorSNS, varInSpliceRegion,
                                                               getPriorProbDeNovoAcceptorSNS):
+<<<<<<< 032e443b1ed57d74c3762f612632ff4a9df43149
         '''Tests that function works correctly for missense variant in ENIGMA CI domain  with de novo acceptor score, no de novo donor'''
+=======
+>>>>>>> Adds function and unittests to get priorProb for inExonSNS
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
@@ -3931,10 +3934,16 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'deNovoDonorFlag': 1,
                                                                             'refZScore': -3.897856474141892})
     @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
+<<<<<<< 032e443b1ed57d74c3762f612632ff4a9df43149
     def test_getPriorProbInExonSNSPriorsCIWithoutSpliceRescueBRCA1(self, getVarLocation, getVarType, getPriorProbProteinSNS,
                                                                    getVarConsequences, getPriorProbSpliceRescueNonsenseSNS,
                                                                    getPriorProbDeNovoDonorSNS, varInSpliceRegion):
         '''Tests that funciton works correctly for nonsense variant in PRIORS CI domain that does not have splice rescue'''
+=======
+    def test_getPriorProbInExonSNSPriorsCIWithSpliceRescueBRCA1(self, getVarLocation, getVarType, getPriorProbProteinSNS,
+                                                                getVarConsequences, getPriorProbSpliceRescueNonsenseSNS,
+                                                                getPriorProbDeNovoDonorSNS, varInSpliceRegion):
+>>>>>>> Adds function and unittests to get priorProb for inExonSNS
         boundaries = "priors"
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
@@ -3968,6 +3977,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["spliceFlag"], 0)
         # checks that frameshift flag is correct
         self.assertEquals(priorProb["frameshift"], 1)
+<<<<<<< 032e443b1ed57d74c3762f612632ff4a9df43149
         
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inExon"])
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -4023,6 +4033,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["spliceRescue"], 1)
         self.assertEquals(priorProb["spliceFlag"], 1)
         self.assertEquals(priorProb["frameshift"], 0)        
+=======
+>>>>>>> Adds function and unittests to get priorProb for inExonSNS
         
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     def test_getVarDict(self, fetch_gene_coordinates):
