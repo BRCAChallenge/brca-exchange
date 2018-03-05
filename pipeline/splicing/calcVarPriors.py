@@ -348,7 +348,8 @@ def getSpliceAcceptorBoundaries(variant, deNovo=False, deNovoLength=10):
     If deNovo = False, returns reference splice acceptor boundaries (-20 to +3)
     (reference splice acceptor region is 20 bases before exon and first 3 bases in exon)
     If deNovo = True, returns region for which de novo splice acceptors can exits (-20 to +deNovoLength)
-    default deNovoLength = 10
+    deNovoLength refers to length of bases into the exon which de novo splice acceptor region spans
+    default deNovoLength is 10 bp
     '''
     varExons = getExonBoundaries(variant)
     acceptorExons = varExons.copy()
@@ -428,7 +429,8 @@ def varInSpliceRegion(variant, donor=False, deNovo=False):
     '''
     Given a variant, determines if a variant is in reference transcript's splice donor/acceptor region
     If donor=True, checks if variant is in a splice donor region
-    If donor=False, checks if variant is ina splice acceptor region
+    If donor=False and deNovo=False, checks if variant is in a reference splice acceptor region
+    If donor=False and deNovo=True, checks if variant is in a de novo splice acceptor region
     splice donor region = last 3 bases in exon and first 6 bases in intron
     splice acceptor region = 20 bases preceding exon and first 3 bases in exon
     Returns True if variant is in a splice region region, false otherwise
@@ -455,7 +457,8 @@ def getVarSpliceRegionBounds(variant, donor=False, deNovo=False):
     '''
     Given a variant, checks if variant is in a splice donor/acceptor region
     If donor=True, checks if variant is in a splice donor region and returns boundaries for splice donor region
-    If donor=False, checks if variant is ina splice acceptor region and returns boundaries for splice acceptor region
+    If donor=False and deNovo=False, checks if variant is in a ref splice acceptor region and returns boundaries for splice acceptor region
+    If donor=False and deNovo=True, checks if variant is in a de novo splice acceptor region and returns boundaries for that region
     If variant is in a splice region, returns a dictionary with region boundaries where variant is located
     '''
     if varInSpliceRegion(variant, donor=donor, deNovo=deNovo):
@@ -713,6 +716,8 @@ def getMaxEntScanScoresSlidingWindowSNS(variant, windowSize, donor=False):
     '''
     Given a variant and window size determines window sequences and scores for a sliding window
       that is the size of windowSize
+    If donor=True, calculates MaxEntScan scores for splice donors
+    If donor=False, calculates MaxEntScan scores for splice acceptors
     Returns a dictionary containing:
         1. window sequences - ref and alt seq for each window (variant in positions 1-windowSize)
         2. window scores - ref and alt MaxEntScan scores and zscores for each window
@@ -837,9 +842,15 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLeng
 def varInExonicPortion(variant, exonicPortionSize, deNovoLength, donor=True, deNovo=False, accDonor=False):
     '''
     Given a variant, determines if variant in in the exonic portion as specified
+    exonicPortionLength refers to the number of bases that are considered to be in the exon (default = 3)
+    deNovoLength refers to the number of bases in the exon that are considered part of deNovo acceptor region (default = 10)
     if donor=True and exonicPortionSize=3, determines if variant is in first 3 bp of highest scoring window
     if donor=False and exonicPortionSize=3, determines if variant is in last 3 bp of highest scoring window
-    Returns true if variant is in exonic portion, "N/A" if deNovo==True,False otherwise
+    If deNovo=False, does not consider deNovo splice acceptors
+    If deNovo=True, function does consider deNovo splice acceptors
+    If accDonor=True, function is used in context of looking for de novo donor scores in ref splice acceptor sites
+    if accDonor=False, function is not used for de novo donors in ref splice acceptor sites
+    Returns true if variant is in exonic portion, "N/A" if deNovo==True, False otherwise
     '''
     slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize=exonicPortionSize,
                                                               deNovoLength=deNovoLength, donor=donor,
@@ -853,10 +864,12 @@ def varInExonicPortion(variant, exonicPortionSize, deNovoLength, donor=True, deN
 def getVarWindowPosition(variant, donor=True, deNovo=False, accDonor=False):
     '''
     Given a variant, determines window position for highest scoring sliding window
+    donor=True if function being used for splice donor, donor=False if function being used for splice acceptor
     Returns integer 1-stdDonorSize based on variant position in highest scoring window if donor=True
     Returns integer 1-stdAccSize based on variant position in highest scoring window if donor=False
     stdDonorSize default value = 9, stdAccSize default value = 23
-    Has accDonor if looking for deNovoDonor in ref acceptor site
+    deNovo=True if accounting for deNovoAcceptors, False otherwise
+    accDonor=True if looking for deNovoDonor in ref acceptor site, False otherwise
     '''
     slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, stdExonicPortion, stdDeNovoLength,
                                                               donor=donor, deNovo=deNovo, accDonor=accDonor)
@@ -870,6 +883,7 @@ def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, 
         default value is 7 (deNovoLength = 10, exonicPortionSize=3)
        If donor = True, looks for closest splice donor sequence
        If donor = False, looks for closest splice acceptor sequence
+       If deNovo = True, accomodates for de novo splice acceptors
     If exonic variant, returns a dictionary containing:
        MaxEntScan score and z-score for reference closest splice sequence
     If variant located in referene splice site, returns a dictionary containing:
@@ -969,7 +983,7 @@ def getAltExonLength(variant, exonicPortionSize, accDonor=False):
     Given a variant and the exonic portion size (default value is 3),
     returns the length of the alternate exon after splicing occurs in max MES window
     Function can only be used for de novo donor variants
-    Has accDonor if looking for deNovoDonor in ref acceptor site
+    accDonor=True if looking for deNovoDonor in ref acceptor site, False otherwise
     '''
     if varInExon(variant) == True:
         varExonNum = getVarExonNumberSNS(variant)
@@ -1003,6 +1017,9 @@ def compareRefAltExonLengths(refLength, altLength):
 def isSplicingWindowInFrame(variant, exonicPortionSize, accDonor=False):
     '''
     Given a variant, determines ref and alt exon length and compares them
+    exonicPortionSize refers to length in bp that is considered to be in exonic portion of splice site
+       default value is 3
+    accDonor=True if looking for deNovoDonor in ref acceptor site, False otherwise
     If ref and alt exon are in the same reading frame, returns True
     '''
     refLength = getRefExonLength(variant)
@@ -1014,8 +1031,10 @@ def isSplicingWindowInFrame(variant, exonicPortionSize, accDonor=False):
 
 def compareDeNovoWildTypeSplicePos(variant, exonicPortionSize, accDonor=False):
     '''
-    Given a variant, compares de novo splicing position with wild-type splicign position
-    Has accDonor argument=True if looking for de novo donor in reference splice acceptor region
+    Given a variant, compares de novo splicing position with wild-type splicing position
+    exonicPortionSize refers to length in bp that is considered to be in exonic portion of splice site
+       default value is 3
+    accDonor argument=True if looking for de novo donor in reference splice acceptor region, False otherwise
     If distance between de novo and wild-type donors is divisible by 3, returns True
     returns False otherwise
     '''
@@ -1040,7 +1059,7 @@ def compareDeNovoWildTypeSplicePos(variant, exonicPortionSize, accDonor=False):
 def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, accDonor=False):
     '''
     Given a variant, determines if there is a possibility of splice rescue
-    Has accDonor argument = True  if looking for deNovoDonor in ref acceptor site
+    accDonor argument = True  if looking for deNovoDonor in ref acceptor site, False otherwise
     If there is a possibility of splice rescue, flags variant for further analysis
     Else assigns prior probability of pathogenecity and predicted qualitative ENIGMA class
     '''
@@ -1544,22 +1563,27 @@ def main():
     parser.add_argument('-i', "--inputFile", default="built.tsv", help="File with variant information")
     parser.add_argument('-o', "--outputFile", help="File where results will be output")
     parser.add_argument('-v', "--variantFile", help="File containing protein priors for variants")
-    parser.add_argument('-b', "--boundaries", default="ENIGMA",
-                        help="Specifies which boundaries (ENIGMA or PRIORS) to use for clinically important domains")
+    parser.add_argument('-b', "--boundaries", default="enigma",
+                        help="Specifies which boundaries ('enigma' or 'priors') to use for clinically important domains")
     args = parser.parse_args()    
 
-    variantData = csv.DictReader(open(args.variantFile, "r"), delimiter="\t")
-    
+    variantData = csv.DictReader(open(args.variantFile, "r"), delimiter="\t")    
     inputData = csv.DictReader(open(args.inputFile, "r"), delimiter="\t")
+    fieldnames = inputData.fieldnames
+    newHeaders = ["varType", "varLoc", "applicablePrior", "applicableEnigmaClass", "proteinPrior", "refDonorPrior", "deNovoDonorPrior",
+                  "refRefDonorMES", "refRefDonorZ", "altRefDonorMES", "altRefDonorZ", "refDeNovoDonorMES", "refDeNovoDonorZ", "altDeNovoDonorMES",
+                  "altDeNovoDonorZ", "deNovoDonorFlag", "refAccPrior", "deNovoAccPrior", "refRefAccMES", "refRefAccZ", "altRefAccMES",
+                  "altRefAccZ", "refDeNovoAccMES", "refDeNovoAccZ", "altDeNovoAccMES", "altDeNovoAccZ", "deNovoAccFlag", "spliceSite",
+                  "spliceRescue", "spliceFlag", "frameshift"]
+    for header in newHeaders:
+        fieldnames.append(header)
+    outputData = csv.DictWriter(open(args.outputFile, "w"), delimiter="\t", fieldnames=fieldnames)
+    outputData.writerow(dict((fn,fn) for fn in inputData.fieldnames))
+    
     for variant in inputData:
         varDict = getVarDict(variant)
-
     # TO DO - create conditional to account for user selected boundaries
-    newColumns = ["varType", "varLoc", "pathProb", "ENIGMAClass", "donorVarMES",
-                  "donorVarZ", "donorRefMES", "donorRefZ", "accVarMES", "accVarZ",
-                  "accRefMES", "accRefZ", "deNovoMES", "deNovoZ", "spliceSite",
-                  "spliceRescue", "frameshift", "CNV", "spliceFlag"]
-    # TO DO - create built_with_priors (copy of built) and append new columns
+    # TO DO - create built_with_priors (copy of built)
     
 if __name__ == "__main__":
     main()
