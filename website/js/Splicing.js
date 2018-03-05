@@ -3,6 +3,9 @@
 var React = require('react'),
     _ = require('lodash');
 
+// import * as d3s from 'd3-scale';
+import update from 'immutability-helper';
+
 /*
 var brca1Exons = JSON.parse(require('raw!../content/brca1LollipopDomain.json'));
 var brca2Exons = JSON.parse(require('raw!../content/brca2LollipopDomain.json'));
@@ -26,6 +29,11 @@ const intronWidth = 40,
 
 const donorFill = 'rgba(206, 103, 179, 0.5)', // '#ce67b3'
     acceptorFill = 'rgba(123, 168, 255, 0.5)'; //'#7ba8ff'
+
+const CIDomainFills = {
+    enigma: 'rgba(147, 0, 255, 0.3)',
+    priors: 'rgba(0, 200, 45, 0.3)',
+};
 
 // --------------------------------------------------------------------------------------------------------------
 // --- supporting methods
@@ -67,14 +75,15 @@ function overlaps(a, b) {
 }
 
 // ensure that the span lies entirely within the parent
+// TODO: consider replacing this with d3's scaling and clamping
 function constrain(regionStart, regionWidth, start, width, minWidth) {
     // ensure the starting pos is no less than the parent's pos
     start = Math.max(regionStart, start);
 
     // if minWidth is given, ensure our pixel width is never less than that (caveats below)
-    // * if this is done after the overshoot check, it could cause this element to overflow into the next region
-    // * if this is done before the overshoot check, like it is now, then we can't guarantee a minimum width
-    // * the final option is to adjust the start position to keep its minimum width, which is a bit of a white lie...
+    // - if this is done after the overshoot check, it could cause this element to overflow into the next region
+    // - if this is done before the overshoot check, like it is now, then we can't guarantee a minimum width
+    // - the final option is to adjust the start position to keep its minimum width, which is a bit of a white lie...
     if (minWidth) {
         width = Math.max(width, minWidth);
     }
@@ -109,7 +118,7 @@ function pairwise(seq) {
 
 class Region extends React.Component {
     render() {
-        let { region, x, width, height, txStart, txEnd, fill, opacity, mask } = this.props;
+        let { region, x, width, height, txStart, txEnd, fill, opacity, mask, selected } = this.props;
 
         // txStart, txEnd are the parent exon/intron's span in bases
         // width, height is the pixel width, height of the parent element
@@ -119,12 +128,10 @@ class Region extends React.Component {
         const eventWidth = Math.abs(region.end - region.start);
         const eventMin = Math.min(region.start, region.end), txMin = Math.min(txStart, txEnd);
 
-        // no point drawing an invisible zero-width event
-        // TODO: perhaps we can support these to be drawn as lines? maybe a different component is more appropriate
-        if (eventWidth <= 0) {
+        // no point drawing an invisible zero-width event or one that doesn't overlap this container
+        if (eventWidth <= 0 || !overlaps([region.start, region.end], [txStart, txEnd])) {
             return null;
         }
-
 
         // length of the parent exon/intro in bases
         const regionWidth = Math.abs(txEnd - txStart);
@@ -138,7 +145,13 @@ class Region extends React.Component {
         const span = constrain(x, width, eventX, eventWidthPx, 2);
 
         return (
-            <rect x={span.start} width={span.width} height={height} fill={fill} opacity={opacity} clipPath={mask && `url(#${mask})`} />
+            <g>
+                <rect x={span.start} width={span.width} height={height}
+                    fill={fill}
+                    stroke={selected ? 'black' : 'none'} strokeWidth={2}
+                    strokeLinejoin="round" strokeLinecap="round"
+                    opacity={opacity} clipPath={mask && `url(#${mask})`} />
+            </g>
         );
     }
 }
@@ -205,8 +218,10 @@ class Variant extends React.Component {
  */
 class SegmentRegions extends React.Component {
     render() {
-        const {mask, variant, donors, acceptors, width, height, txStart, txEnd} = this.props;
+        const {mask, variant, donors, acceptors, CIDomains, width, height, txStart, txEnd, zoomed} = this.props;
         const n = this.props.n || 'intron';
+
+        const flatDomains = _.flatMap(CIDomains, (v, k) => _.map(v, (x, n) => ({org: k, name: n, span: x})));
 
         return (
             <g>
@@ -236,6 +251,20 @@ class SegmentRegions extends React.Component {
                     />
                 ))
             }
+
+            {
+                flatDomains
+                    .filter(({span}) => overlaps([span.start, span.end], [txStart, txEnd]))
+                    .map(({org, name, span}, idx) =>
+                        <Region key={`cidomain_${org}_${name}_${idx}`}
+                            region={span} label={zoomed && `${org}: ${name}`}
+                            x={0} width={width} height={height}
+                            txStart={txStart} txEnd={txEnd}
+                            fill={CIDomainFills[org]} mask={mask}
+                            selected={this.props.selectedDomain === `${org}_${name}`}
+                        />
+                    )
+            }
             </g>
         );
     }
@@ -245,7 +274,7 @@ class Exon extends React.Component {
     render() {
         let {
             n, txStart, txEnd, width, height, x, variant, zoomed, highlight, isFlipped,
-            donors, acceptors
+            donors, acceptors, CIDomains
         } = this.props;
 
         // the clip mask allows us to draw variants within the rounded-rectangle exon
@@ -268,8 +297,9 @@ class Exon extends React.Component {
 
                     <rect x={0} width={width} height={height} rx={exonBorderRadius} ry={exonBorderRadius} fill={highlight ? highlightFill : exonFill} />
 
-                    <SegmentRegions variant={variant} donors={donors} acceptors={acceptors}
-                        txStart={txStart} txEnd={txEnd}
+                    <SegmentRegions n={n} variant={variant} donors={donors} acceptors={acceptors} CIDomains={CIDomains}
+                        selectedDomain={this.props.selectedDomain}
+                        txStart={txStart} txEnd={txEnd} zoomed={zoomed}
                         width={width} height={height} mask={clipMaskID} />
 
                     {/* extra unfilled rect overlay, used to re-draw the outline on top of the regions */}
@@ -283,8 +313,8 @@ class Exon extends React.Component {
 class Intron extends React.Component {
     render() {
         let {
-            txStart, txEnd, x, height, width, variant, highlight, isFlipped,
-            donors, acceptors
+            txStart, txEnd, x, height, width, variant, zoomed, highlight, isFlipped,
+            donors, acceptors, CIDomains
         } = this.props;
 
         return (
@@ -292,8 +322,9 @@ class Intron extends React.Component {
                 <g transform={isFlipped ? `translate(${x + width}) scale(-1,1)` : `translate(${x})`}>
                     <rect x={0} width={width} height={height} fill={highlight ? highlightFill : intronFill} />
 
-                    <SegmentRegions variant={variant} donors={donors} acceptors={acceptors}
-                        txStart={txStart} txEnd={txEnd}
+                    <SegmentRegions variant={variant} donors={donors} acceptors={acceptors} CIDomains={CIDomains}
+                        selectedDomain={this.props.selectedDomain}
+                        txStart={txStart} txEnd={txEnd} zoomed={zoomed}
                         width={width} height={height} />
 
                     {/* extra unfilled rect overlay, used to re-draw the outline on top of the regions */}
@@ -306,7 +337,7 @@ class Intron extends React.Component {
 
 class Transcript extends React.Component {
     render() {
-        let {variant, donors, acceptors, segments, width, isFlipped} = this.props;
+        let {variant, donors, acceptors,  CIDomains, segments, width, isFlipped} = this.props;
 
 
         // ------------------------------------------------
@@ -355,7 +386,8 @@ class Transcript extends React.Component {
             if (segment.type === 'exon') {
                 return (
                     <Exon key={`exon_${segment.id}`} n={segment.id}
-                        variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors}
+                        variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors} CIDomains={CIDomains}
+                        selectedDomain={this.props.selectedDomain}
                         txStart={segment.span.start} txEnd={segment.span.end}
                         x={offsets[i].x} width={offsets[i].width} height={40}
                         highlight={segment.highlighted} zoomed={false} isFlipped={isFlipped}
@@ -365,10 +397,11 @@ class Transcript extends React.Component {
             else if (segment.type === 'intron') {
                 return (
                     <Intron key={`intron_${segment.id}`} n={segment.id}
-                        variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors}
+                        variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors} CIDomains={CIDomains}
+                        selectedDomain={this.props.selectedDomain}
                         txStart={segment.span.start} txEnd={segment.span.end}
                         x={offsets[i].x} width={offsets[i].width} height={20}
-                        highlight={segment.highlighted} isFlipped={isFlipped}
+                        highlight={segment.highlighted} zoomed={false} isFlipped={isFlipped}
                     />
                 );
             }
@@ -400,7 +433,7 @@ class Transcript extends React.Component {
 
 class Zoom extends React.Component {
     render() {
-        let { variant, donors, acceptors, segments, width, isFullyIntronic, isFlipped } = this.props;
+        let { variant, donors, acceptors, CIDomains, segments, width, isFullyIntronic, isFlipped } = this.props;
 
 
         // ------------------------------------------------
@@ -445,7 +478,7 @@ class Zoom extends React.Component {
             if (segment.type === 'exon') {
                 return (
                     <Exon key={`exon_${segment.id}`} n={segment.id}
-                        variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors}
+                        variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors} CIDomains={CIDomains}
                         txStart={segment.span.start} txEnd={segment.span.end}
                         x={offsets[i].x} width={offsets[i].width} height={80}
                         highlight={true} zoomed={true} isFlipped={isFlipped}
@@ -455,10 +488,10 @@ class Zoom extends React.Component {
             else if (segment.type === 'intron') {
                 return (
                     <Intron key={`intron_${i + 1}`} n={segment.id}
-                        variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors}
+                        variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors} CIDomains={CIDomains}
                         txStart={segment.span.start} txEnd={segment.span.end}
                         x={offsets[i].x} width={offsets[i].width} height={60}
-                        highlight={true} isFlipped={isFlipped}
+                        highlight={true} zoomed={true} isFlipped={isFlipped}
                     />
                 );
             }
@@ -476,17 +509,44 @@ class Splicing extends React.Component {
     constructor(props) {
         super(props);
 
+        const meta = geneMeta[props.variant['Gene_Symbol']];
+
         this.state = {
             drawAcceptors: true,
-            drawDonors: true
+            drawDonors: true,
+            drawCIDomains: new Set(Object.keys(meta.CIDomains)),
+            selectedDomain: null
         };
 
         this.toggleDrawing = this.toggleDrawing.bind(this);
+        this.toggleCIDomain = this.toggleCIDomain.bind(this);
+        this.selectCIDomain = this.selectCIDomain.bind(this);
     }
 
     toggleDrawing(event) {
         this.setState({
             [event.target.name]: event.target.checked
+        });
+    }
+
+    toggleCIDomain(event) {
+        const boxChecked = event.target.checked;
+        const CIDomain = event.target.name;
+
+        this.setState((pstate) => {
+            return {
+                drawCIDomains: update(
+                    pstate.drawCIDomains,
+                    boxChecked ? {$add: [CIDomain]} :  {$remove: [CIDomain]}
+                )
+            };
+        });
+    }
+
+    selectCIDomain(domain) {
+        this.setState((pstate) => {
+            // toggle displaying any domain if we click on the same one again
+            return { selectedDomain: pstate.selectedDomain !== domain ? domain : null };
         });
     }
 
@@ -526,6 +586,9 @@ class Splicing extends React.Component {
             border: 'solid 1px black'
         };
 
+        // filter the CIDomains according to which ones we're including
+        const filteredCIDomains = _.pickBy(meta.CIDomains, (v, k) => this.state.drawCIDomains.has(k));
+
         return (
             <div>
                 <svg viewBox="-4 0 808 240" preserveAspectRatio="xMidYMid">
@@ -542,12 +605,14 @@ class Splicing extends React.Component {
                     <Transcript variant={variant} segments={segments} width={width}
                         donors={this.state.drawDonors ? meta.spliceDonors : {}}
                         acceptors={this.state.drawAcceptors ? meta.spliceAcceptors : {}}
-                        isFlipped={isFlipped} adjustStart={this.state.adjustStart} />
+                        CIDomains={filteredCIDomains} selectedDomain={this.state.selectedDomain}
+                        isFlipped={isFlipped} />
 
                     <Zoom variant={variant} segments={segments.filter(x => x.highlighted)} width={width}
                         donors={this.state.drawDonors ? meta.spliceDonors : {}}
                         acceptors={this.state.drawAcceptors ? meta.spliceAcceptors : {}}
-                        isFullyIntronic={isFullyIntronic} isFlipped={isFlipped} adjustStart={this.state.adjustStart} />
+                        CIDomains={filteredCIDomains}
+                        isFullyIntronic={isFullyIntronic} isFlipped={isFlipped} />
 
                     {/* legend */}
                     <g transform="translate(274,220)">
@@ -576,6 +641,56 @@ class Splicing extends React.Component {
                             <span style={{...siteStyle, backgroundColor: acceptorFill}} />
                             show acceptor sites
                         </label>
+                    </div>
+
+                    {
+                        _.toPairs(meta.CIDomains).map(([name]) =>
+                            <div>
+                                <label style={{display: 'inline-block', marginRight: '1em'}}>
+                                    <input style={{marginRight: '0.5em'}} type="checkbox"
+                                        name={name} checked={this.state.drawCIDomains.has(name)} onChange={this.toggleCIDomain}
+                                    />
+                                    <span style={{...siteStyle, backgroundColor: CIDomainFills[name]}} />
+                                    {`show "${name}" CI domains`}
+
+                                    {/*
+                                    <ol style={{fontWeight: 'normal', marginTop: '0.5em'}}>
+                                    {
+                                        _.toPairs(namedRegions).map(([name, region]) => <li><b>{name}:</b> {JSON.stringify(region)}</li>)
+                                    }
+                                    </ol>
+                                    */}
+                                </label>
+                            </div>
+                        )
+                    }
+
+                    <div>
+                    {
+                        _.toPairs(meta.CIDomains)
+                            .map(([org, regions]) => {
+                                const bits = _.toPairs(regions)
+                                    .map(([name, region], idx) => {
+                                        const selected = this.state.selectedDomain === `${org}_${name}`;
+
+                                        return (
+                                            <li key={idx}>
+                                                <a style={{cursor: 'pointer', fontWeight: selected ? 'bold' : 'normal'}}
+                                                    onClick={() => this.selectCIDomain(`${org}_${name}`)}>
+                                                    {name}
+                                                </a>
+                                            </li>
+                                        );
+                                    });
+
+                                return (
+                                    <div key={`${org}`}>
+                                        <h3>{org}</h3>
+                                        <ol>{bits}</ol>
+                                    </div>
+                                );
+                            })
+                    }
                     </div>
                 </div>
             </div>
