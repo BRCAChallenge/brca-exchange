@@ -1670,7 +1670,6 @@ def getPriorProbInExonSNS(variant, boundaries, variantData):
                 "frameshift": frameshift}
 
 def getPriorProbInExonSNS(variant, boundaries, variantData):
-    # TO DO write unittests
     '''
     Given a variant, boundaries (either "enigma" or "priors") and a list of dictionaries containing variant data:
       1. Checks that variant is in an exon or clinically important domains and NOT in a splice site
@@ -1697,9 +1696,9 @@ def getPriorProbInExonSNS(variant, boundaries, variantData):
         spliceRescue = 0
         spliceFlag = 0
         frameshift = 0
-        deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, stdExonicPortion, accDonor=False)
+        deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, STD_EXONIC_PORTION, accDonor=False)
         if varInSpliceRegion(variant, donor=False, deNovo=True):
-            deNovoAccData = getPriorProbDeNovoAcceptorSNS(variant, stdExonicPortion, stdDeNovoLength)
+            deNovoAccData = getPriorProbDeNovoAcceptorSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH)
         else:
             deNovoAccData = {"priorProb": "N/A",
                              "refMaxEntScanScore": "-",
@@ -1717,10 +1716,12 @@ def getPriorProbInExonSNS(variant, boundaries, variantData):
             frameshift = nonsenseData["frameshift"]
         else:
             applicablePrior = proteinData["priorProb"]
+            applicableClass = proteinData["enigmaClass"]
             if deNovoDonorData["priorProb"] != "N/A":
                 applicablePrior = max(proteinData["priorProb"], deNovoDonorData["priorProb"])
+                applicableClass = getEnigmaClass(applicablePrior)
         return {"applicablePrior": applicablePrior,
-                "applicableEnigmaClass": getEnigmaClass(applicablePrior),
+                "applicableEnigmaClass": applicableClass,
                 "proteinPrior": proteinData["priorProb"],
                 "refDonorPrior": "N/A",
                 "deNovoDonorPrior": deNovoDonorData["priorProb"],
