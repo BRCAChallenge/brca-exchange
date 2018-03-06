@@ -31,13 +31,27 @@ fi
 
 SED_DATE_CONVERSION_CMD="s/20([0-9]{2})-([0-9]{2})-([0-9]{2})/\2-\3-\1/g"
 
+function download_release_archive()
+{
+    DATE_US=$1
+    TARGET=$2
+
+    URL="http://brcaexchange.org/backend/downloads/releases/release-${DATE_US}/release-${DATE_US}.tar.gz" 
+    wget "${URL}" -O ${TARGET}
+
+    if [ "$?" -ne "0" ]; then
+        echo "Failed to download archive $URL. Please check http://brcaexchange.org/releases for the available release dates"
+        exit 1
+    fi
+}
+
 RELEASE_DATE_US=$(echo ${RELEASE_DATE} | sed -E ${SED_DATE_CONVERSION_CMD})
 RELEASE_ARCHIVE=${BASE}/release-${RELEASE_DATE_US}.tar.gz
-wget "http://brcaexchange.org/backend/downloads/releases/release-${RELEASE_DATE_US}/release-${RELEASE_DATE_US}.tar.gz" -O ${RELEASE_ARCHIVE}
+download_release_archive ${RELEASE_DATE_US} ${RELEASE_ARCHIVE}
 
 PREVIOUS_RELEASE_DATE_US=$(echo ${PREVIOUS_RELEASE_DATE} | sed -E ${SED_DATE_CONVERSION_CMD})
 PREVIOUS_RELEASE_ARCHIVE=${BASE}/release-${PREVIOUS_RELEASE_DATE_US}.tar.gz
-wget "http://brcaexchange.org/backend/downloads/releases/release-${PREVIOUS_RELEASE_DATE_US}/release-${PREVIOUS_RELEASE_DATE_US}.tar.gz" -O ${PREVIOUS_RELEASE_ARCHIVE}
+download_release_archive ${PREVIOUS_RELEASE_DATE_US} ${PREVIOUS_RELEASE_ARCHIVE}
 
 # Download auxiliary resources
 RESOURCE_DIR=${BASE}/resources
