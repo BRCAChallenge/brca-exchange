@@ -478,7 +478,8 @@ def getVarSpliceRegionBounds(variant, donor=False, deNovo=False):
             regionEnd = regionBounds[exon][regionEndKey]
             withinBoundaries = checkWithinBoundaries(getVarStrand(variant), int(variant["Pos"]), regionStart, regionEnd)
             if withinBoundaries == True:
-                return {regionStartKey: regionStart,
+                return {"exonName": exon,
+                        regionStartKey: regionStart,
                         regionEndKey: regionEnd}    
                 
 def varInCIDomain(variant, boundaries):
@@ -889,6 +890,7 @@ def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, 
     varChrom = getVarChrom(variant)
     if varInExon(variant) == True and deNovo == False:
         exonNumber = getVarExonNumberSNS(variant)
+        exonName = exonNumber
         if donor == True:
             refSpliceDonorBounds = getRefSpliceDonorBoundaries(variant, STD_DONOR_INTRONIC_LENGTH, STD_DONOR_EXONIC_LENGTH)
             closestSpliceBounds = refSpliceDonorBounds[exonNumber]
@@ -897,6 +899,7 @@ def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, 
             closestSpliceBounds = refSpliceAccBounds[exonNumber]
     if varInSpliceRegion(variant, donor=donor, deNovo=deNovo) == True and accDonor == False:
         closestSpliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=deNovo)
+        exonName = closestSpliceBounds["exonName"]
     if donor == True:
         refSeq = getFastaSeq(varChrom, closestSpliceBounds["donorStart"], closestSpliceBounds["donorEnd"])
     else:
@@ -907,7 +910,8 @@ def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, 
             refSeq = getFastaSeq(varChrom, closestSpliceBounds["acceptorStart"], (closestSpliceBounds["acceptorEnd"] + deNovoOffset))
     closestMaxEntScanScore = runMaxEntScan(refSeq, donor=donor)
     closestZScore = getZScore(closestMaxEntScanScore, donor=donor)
-    return {"maxEntScanScore": closestMaxEntScanScore,
+    return {"exonName": exonName,
+            "maxEntScanScore": closestMaxEntScanScore,
             "zScore": closestZScore}    
 
 def isCIDomainInRegion(regionStart, regionEnd, boundaries, gene):

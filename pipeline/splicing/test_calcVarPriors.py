@@ -2,7 +2,7 @@ import unittest
 import mock
 import calcVarPriors
 from calcVarPriors import STD_DONOR_INTRONIC_LENGTH, STD_DONOR_EXONIC_LENGTH, STD_ACC_INTRONIC_LENGTH, STD_ACC_EXONIC_LENGTH
-from calcVarPriors import STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH
+from calcVarPriors import STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH, STD_DE_NOVO_OFFSET
 import calcMaxEntScanMeanStd
 from calcVarPriorsMockedResponses import brca1Exons, brca2Exons 
 from calcVarPriorsMockedResponses import brca1RefSpliceDonorBounds, brca2RefSpliceDonorBounds 
@@ -743,6 +743,7 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that variant in exon 16 splice donor region boundaries are returned correctly
         self.variant["Pos"] = "43070925"
         spliceDonorRegion = calcVarPriors.getVarSpliceRegionBounds(self.variant, donor=donor, deNovo=deNovo)
+        self.assertEquals(spliceDonorRegion["exonName"], "exon16")
         self.assertEquals(exonDonorBoundsBRCA1["exon16"]["donorStart"], spliceDonorRegion["donorStart"])
         self.assertEquals(exonDonorBoundsBRCA1["exon16"]["donorEnd"], spliceDonorRegion["donorEnd"])
 
@@ -818,6 +819,7 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that variant in exon 16 splice donor region boundaries are returned correctly
         self.variant["Pos"] = "32356608"
         spliceDonorRegion = calcVarPriors.getVarSpliceRegionBounds(self.variant, donor=donor, deNovo=deNovo)
+        self.assertEquals(spliceDonorRegion["exonName"], "exon15")
         self.assertEquals(exonDonorBoundsBRCA2["exon15"]["donorStart"], spliceDonorRegion["donorStart"])
         self.assertEquals(exonDonorBoundsBRCA2["exon15"]["donorEnd"], spliceDonorRegion["donorEnd"])
 
@@ -893,6 +895,7 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that variant in exon 21 splice acceptor region boundaries are returned correctly
         self.variant["Pos"] = "43051117"
         spliceAccRegion = calcVarPriors.getVarSpliceRegionBounds(self.variant, donor=donor, deNovo=deNovo)
+        self.assertEquals(spliceAccRegion["exonName"], "exon21")
         self.assertEquals(exonAcceptorBoundsBRCA1["exon21"]["acceptorStart"], spliceAccRegion["acceptorStart"])
         self.assertEquals(exonAcceptorBoundsBRCA1["exon21"]["acceptorEnd"], spliceAccRegion["acceptorEnd"])
 
@@ -968,6 +971,7 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that variant in exon 20 splice acceptor region boundaries are returned correctly
         self.variant["Pos"] = "32370948"
         spliceAccRegion = calcVarPriors.getVarSpliceRegionBounds(self.variant, donor=donor, deNovo=deNovo)
+        self.assertEquals(spliceAccRegion["exonName"], "exon20")
         self.assertEquals(exonAcceptorBoundsBRCA2["exon20"]["acceptorStart"], spliceAccRegion["acceptorStart"])
         self.assertEquals(exonAcceptorBoundsBRCA2["exon20"]["acceptorEnd"], spliceAccRegion["acceptorEnd"])
 
@@ -1636,6 +1640,116 @@ class test_calcVarPriors(unittest.TestCase):
         '''Tests that functions returns correct value for de novo acceptor variant'''
         windowPos = calcVarPriors.getVarWindowPosition(self.variant, donor=False, deNovo=True)
         self.assertEquals(windowPos, 18)
+
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.getVarExonNumberSNS', return_value = "exon18")
+    @mock.patch('calcVarPriors.getRefSpliceDonorBoundaries', return_value = brca1RefSpliceDonorBounds)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "tctgtaagt")
+    @mock.patch('calcMaxEntScanMeanStd.runMaxEntScan', return_value = 7.96)
+    @mock.patch('calcVarPriors.getZScore', return_value = 0.009407098111019249)
+    def test_getClosestSpliceSiteScoresInExonDonorBRCA1(self, varInExon, getVarExonNumberSNS, getRefSpliceDonorBoundaries,
+                                                        varInSpliceRegion, getFastaSeq, runMaxEntScan, getZScore):
+        '''Tests function for variant in exon to get closest splice donor site in minus strand gene (BRCA1)'''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        self.variant["HGVS_cDNA"] = "c.5104A>G"
+        self.variant["Pos"] = "43063922"
+        self.variant["Ref"] = "T"
+        self.variant["Alt"] = "C"
+        deNovoOffset = 0
+        closestScores = calcVarPriors.getClosestSpliceSiteScores(self.variant, deNovoOffset, donor=True, deNovo=False, accDonor=True)
+        self.assertEquals(closestScores["exonName"], "exon18")
+
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.getVarExonNumberSNS', return_value = "exon8")
+    @mock.patch('calcVarPriors.getSpliceAcceptorBoundaries', return_value = brca2RefSpliceAcceptorBounds)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "CATAAATTTTTATCTTACAGTCA")
+    @mock.patch('calcMaxEntScanMeanStd.runMaxEntScan', return_value = 8.03)
+    @mock.patch('calcVarPriors.getZScore', return_value = 0.018528005635431572)
+    def test_getClosestSpliceSiteScoresInExonAccBRCA2(self, varInExon, getVarExonNumberSNS, getSpliceAcceptorBoundaries,
+                                                      varInSpliceRegion, getFastaSeq, runMaxEntScan, getZScore):
+        '''Tests function for variant in exon to get closest splice acceptor site in plus strand gene (BRCA2)'''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["HGVS_cDNA"] = "c.648A>G"
+        self.variant["Pos"] = "32329459"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "G"
+        deNovoOffset = 0
+        closestScores = calcVarPriors.getClosestSpliceSiteScores(self.variant, deNovoOffset, donor=False, deNovo=False, accDonor=False)
+        self.assertEquals(closestScores["exonName"], "exon8")
+
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.getVarExonNumberSNS', return_value = "exon20")
+    @mock.patch('calcVarPriors.getRefSpliceDonorBoundaries', return_value = brca2RefSpliceDonorBounds)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
+    @mock.patch('calcVarPriors.getVarSpliceRegionBounds', return_value = {'exonName': 'exon20',
+                                                                          'donorStart': 32371098,
+                                                                          'donorEnd': 32371106})
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "AAGGTAAAA")
+    @mock.patch('calcMaxEntScanMeanStd.runMaxEntScan', return_value = 8.38)
+    @mock.patch('calcVarPriors.getZScore', return_value = 0.18974233990730782)
+    def test_getClosestSpliceSiteScoresInRefDonorExonicBRCA2(self, varInExon, getVarExonNumberSNS, getRefSpliceDonorBoundaries,
+                                                             varInSpliceRegion, getVarSpliceRegionBounds, getFastaSeq,
+                                                             runMaxEntScan, getZScore):
+        '''Tests function for variant in exonic portion of ref donor site to get closest splice donor site in plus strand gene (BRCA2)'''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["HGVS_cDNA"] = "c.8631A>T"
+        self.variant["Pos"] = "32371099"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "T"
+        deNovoOffset = 0
+        closestScores = calcVarPriors.getClosestSpliceSiteScores(self.variant, deNovoOffset, donor=True, deNovo=False, accDonor=False)
+        self.assertEquals(closestScores["exonName"], "exon20")
+
+    @mock.patch('calcVarPriors.varInExon', return_value = False)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
+    @mock.patch('calcVarPriors.getVarSpliceRegionBounds', return_value = {'acceptorStart': 43106553,
+                                                                          'exonName': 'exon5',
+                                                                          'acceptorEnd': 43106531})
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "tctttctttataatttatagatt")
+    @mock.patch('calcMaxEntScanMeanStd.runMaxEntScan', return_value = 8.19)
+    @mock.patch('calcVarPriors.getZScore', return_value = 0.08427254176115757)
+    def test_getClosestSpliceSiteScoresInRefAccIntronicBRCA1(self, varInExon, varInSpliceRegion, getVarSpliceRegionBounds,
+                                                             getFastaSeq, runMaxEntScan, getZScore):
+        '''
+        Tests function for variant in intronic portion of ref acceptor site 
+        to get closest splice acceptor site in minus strand gene (BRCA1)
+        '''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        self.variant["HGVS_cDNA"] = "c.135-11a>C"
+        self.variant["Pos"] = "43106544"
+        self.variant["Ref"] = "T"
+        self.variant["Alt"] = "G"
+        deNovoOffset = 0
+        closestScores = calcVarPriors.getClosestSpliceSiteScores(self.variant, deNovoOffset, donor=False, deNovo=False, accDonor=False)
+        self.assertEquals(closestScores["exonName"], "exon5")
+
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
+    @mock.patch('calcVarPriors.getVarSpliceRegionBounds', return_value = {'acceptorStart': 32325056,
+                                                                          'exonName': 'exon4',
+                                                                          'acceptorEnd': 32325085})
+    @mock.patch('calcVarPriors.getFastaSeq', return_value = "GAATTATTGTACTGTTTCAGGAA")
+    @mock.patch('calcMaxEntScanMeanStd.runMaxEntScan', return_value = 8.41)
+    @mock.patch('calcVarPriors.getZScore', return_value = 0.174671278934031)
+    def test_getClosestSpliceSiteScoresInDeNovoAccBRCA2(self, varInExon, varInSpliceRegion, getVarSpliceRegionBounds,
+                                                        getFastaSeq, runMaxEntScan, getZScore):
+        '''Tests function for variant in exon to get closest splice acceptor site for de novo acceptor in plus strand gene (BRCA2)'''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["HGVS_cDNA"] = "c.320G>C"
+        self.variant["Pos"] = "32325079"
+        self.variant["Ref"] = "G"
+        self.variant["Alt"] = "C"
+        deNovoOffset = STD_DE_NOVO_OFFSET
+        closestScores = calcVarPriors.getClosestSpliceSiteScores(self.variant, deNovoOffset, donor=False, deNovo=True, accDonor=False)
+        self.assertEquals(closestScores["exonName"], "exon4")
+
 
     def test_isCIDomainInRegionBRCA1(self):
         '''
