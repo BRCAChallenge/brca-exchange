@@ -4033,10 +4033,10 @@ class test_calcVarPriors(unittest.TestCase):
         # checks for minus strand (BRCA1) variant
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
-        # the below information (Pos, Ref, Alt) does not represent a real variant
-        self.variant["Pos"] = "43125680"
-        self.variant["Ref"] = "A"
-        self.variant["Alt"] = "T"
+        self.variant["HGVS_cDNA"] = "c.-1074C>G"
+        self.variant["Pos"] = "43126325"
+        self.variant["Ref"] = "G"
+        self.variant["Alt"] = "C"
         priorProb = calcVarPriors.getPriorProbOutsideTranscriptBoundsSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoLow"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
@@ -4044,9 +4044,9 @@ class test_calcVarPriors(unittest.TestCase):
         # checks for plus strand (BRCA2) variant
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
-        # the below information (Pos, Ref, Alt) does not represent a real variant
-        self.variant["Pos"] = "32315350"
-        self.variant["Ref"] = "C"
+        self.variant["HGVS_cDNA"] = "c.-764A>G"
+        self.variant["Pos"] = "32314943"
+        self.variant["Ref"] = "A"
         self.variant["Alt"] = "G"
         priorProb = calcVarPriors.getPriorProbOutsideTranscriptBoundsSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoLow"])
