@@ -1053,8 +1053,8 @@ var VariantDetail = React.createClass({
                     </Col>
                 </Row>
 
-                {clinvarDiffRows}
-                {lovdDiffRows}
+                {this.props.mode === "research_mode" ? clinvarDiffRows : ''}
+                {this.props.mode === "research_mode" ? lovdDiffRows : ''}
 
                 <Row>
                     <Col md={12} mdOffset={0}>
