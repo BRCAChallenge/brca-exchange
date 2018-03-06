@@ -1,6 +1,8 @@
 import unittest
 import mock
 import calcVarPriors
+from calcVarPriors import STD_DONOR_INTRONIC_LENGTH, STD_DONOR_EXONIC_LENGTH, STD_ACC_INTRONIC_LENGTH, STD_ACC_EXONIC_LENGTH
+from calcVarPriors import STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH
 import calcMaxEntScanMeanStd
 from calcVarPriorsMockedResponses import brca1Exons, brca2Exons 
 from calcVarPriorsMockedResponses import brca1RefSpliceDonorBounds, brca2RefSpliceDonorBounds 
@@ -94,10 +96,6 @@ meanStdDict =  {"donors": {"std": 2.3289956850167082,
                            "mean": 7.9380909090909073},
                 "acceptors": {"std": 2.4336623152078452,
                               "mean": 7.984909090909091}}
-
-# standard exonic portion size and de novo length
-stdExonicPortion = 3
-stdDeNovoLength = 10
 
 # possible predicted qualitative ENIGMA classes
 enigmaClasses = {"class1": "class_1",
@@ -471,7 +469,7 @@ class test_calcVarPriors(unittest.TestCase):
         '''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
-        spliceDonorBounds = calcVarPriors.getRefSpliceDonorBoundaries(self.variant)
+        spliceDonorBounds = calcVarPriors.getRefSpliceDonorBoundaries(self.variant, STD_DONOR_INTRONIC_LENGTH, STD_DONOR_EXONIC_LENGTH)
         # checks that region after last exon is not considered a splice donor region
         self.assertNotIn("exon24", spliceDonorBounds)
         # to find exon specified in global variables
@@ -490,7 +488,7 @@ class test_calcVarPriors(unittest.TestCase):
         '''
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
-        spliceDonorBounds = calcVarPriors.getRefSpliceDonorBoundaries(self.variant)
+        spliceDonorBounds = calcVarPriors.getRefSpliceDonorBoundaries(self.variant, STD_DONOR_INTRONIC_LENGTH, STD_DONOR_EXONIC_LENGTH)
         # checks that region after last exon is not considered a splice donor region
         self.assertNotIn("exon27", spliceDonorBounds)
         # to find exon specified in global variables
@@ -509,7 +507,7 @@ class test_calcVarPriors(unittest.TestCase):
         '''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
-        spliceAcceptorBounds = calcVarPriors.getSpliceAcceptorBoundaries(self.variant, deNovo=False)
+        spliceAcceptorBounds = calcVarPriors.getSpliceAcceptorBoundaries(self.variant, STD_ACC_INTRONIC_LENGTH, STD_ACC_EXONIC_LENGTH)
         # checks that region before first exon is not considered a splice acceptor region
         self.assertNotIn("exon1", spliceAcceptorBounds)
         # to find exon specified in global variables
@@ -527,7 +525,7 @@ class test_calcVarPriors(unittest.TestCase):
         '''
         self.variant["Reference_Sequence"] = "NM_007294.3"
         self.variant["Gene_Symbol"] = "BRCA1"
-        deNovoSpliceAccBounds = calcVarPriors.getSpliceAcceptorBoundaries(self.variant, deNovo=True)
+        deNovoSpliceAccBounds = calcVarPriors.getSpliceAcceptorBoundaries(self.variant, STD_ACC_INTRONIC_LENGTH, STD_DE_NOVO_LENGTH)
         expectedDeNovoRegionExon6 = {"acceptorStart": 43104976,
                                      "acceptorEnd": 43104947}
         self.assertEquals(deNovoSpliceAccBounds["exon6"]["acceptorStart"],
@@ -544,7 +542,7 @@ class test_calcVarPriors(unittest.TestCase):
         '''
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
-        spliceAcceptorBounds = calcVarPriors.getSpliceAcceptorBoundaries(self.variant, deNovo=False)
+        spliceAcceptorBounds = calcVarPriors.getSpliceAcceptorBoundaries(self.variant, STD_ACC_INTRONIC_LENGTH, STD_ACC_EXONIC_LENGTH)
         # checks that region before first exon is not considered a splice acceptor region
         self.assertNotIn("exon1", spliceAcceptorBounds)
         # to find exon specified in global variables
@@ -562,7 +560,7 @@ class test_calcVarPriors(unittest.TestCase):
         '''
         self.variant["Reference_Sequence"] = "NM_000059.3"
         self.variant["Gene_Symbol"] = "BRCA2"
-        deNovoSpliceAccBounds = calcVarPriors.getSpliceAcceptorBoundaries(self.variant, deNovo=True)
+        deNovoSpliceAccBounds = calcVarPriors.getSpliceAcceptorBoundaries(self.variant, STD_ACC_INTRONIC_LENGTH, STD_DE_NOVO_LENGTH)
         expectedDeNovoRegionExon8 = {"acceptorStart": 32329423,
                                      "acceptorEnd": 32329452}
         self.assertEquals(deNovoSpliceAccBounds["exon8"]["acceptorStart"],
@@ -1610,14 +1608,14 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {"inExonicPortion": True})
     def test_varInExonicPortionTrue(self, getMaxMaxEntScanScoreSlidingWindowSNS):
         '''Tests that varInExonicPortion returns True if variant is in exonic portion of window'''
-        inExonicPortion = calcVarPriors.varInExonicPortion(self.variant, stdExonicPortion, stdDeNovoLength,
+        inExonicPortion = calcVarPriors.varInExonicPortion(self.variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH,
                                                            donor=True, deNovo=False)
         self.assertTrue(inExonicPortion)
 
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {"inExonicPortion": False})
     def test_varInExonicPortionFalse(self, getMaxMaxEntScanScoreSlidingWindowSNS):
         '''Tests that varInExonicPortion returns False if variant is NOT in exonic portion of window'''
-        inExonicPortion = calcVarPriors.varInExonicPortion(self.variant, stdExonicPortion, stdDeNovoLength,
+        inExonicPortion = calcVarPriors.varInExonicPortion(self.variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH,
                                                            donor=False, deNovo=False)
         self.assertFalse(inExonicPortion)
 
@@ -1707,7 +1705,7 @@ class test_calcVarPriors(unittest.TestCase):
         inExonicPortion = True
         varGenPos = "43104189"
         varWindowPos = 3
-        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, stdExonicPortion)
+        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, STD_EXONIC_PORTION)
         # because varWindowPos == 3, cut will occur after variant
         actualNewSplicePos = 43104189
         self.assertEquals(newSplicePos, actualNewSplicePos)
@@ -1718,7 +1716,7 @@ class test_calcVarPriors(unittest.TestCase):
         inExonicPortion = False
         varGenPos = "43104249"
         varWindowPos = 6
-        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, stdExonicPortion)
+        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, STD_EXONIC_PORTION)
         # because varWindowPos == 6, cut will occur 3 bases to the left of the variant
         actualNewSplicePos = 43104252
         self.assertEquals(newSplicePos, actualNewSplicePos)
@@ -1729,7 +1727,7 @@ class test_calcVarPriors(unittest.TestCase):
         inExonicPortion = True
         varGenPos = "32354881"
         varWindowPos = 2
-        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, stdExonicPortion)
+        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, STD_EXONIC_PORTION)
         # because varWindowPos == 2, cut will occur 1 base to the right of the variant
         actualNewSplicePos = 32354882
         self.assertEquals(newSplicePos, actualNewSplicePos)
@@ -1740,7 +1738,7 @@ class test_calcVarPriors(unittest.TestCase):
         inExonicPortion = False
         varGenPos = "32326277"
         varWindowPos = 8
-        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, stdExonicPortion)
+        newSplicePos = calcVarPriors.getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, STD_EXONIC_PORTION)
         # because varWindowPos == 8, cut will occur 5 bases to the left of the variant
         actualNewSplicePos = 32326272
         self.assertEquals(newSplicePos, actualNewSplicePos)
@@ -1761,7 +1759,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["HGVS_cDNA"] = "c.5285G>C"
         expectedCutSeq = "ATCTTCACG"
-        altExonLength = calcVarPriors.getAltExonLength(self.variant, stdExonicPortion, accDonor=False)
+        altExonLength = calcVarPriors.getAltExonLength(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(altExonLength, len(expectedCutSeq))
 
     @mock.patch('calcVarPriors.varInExon', return_value = True)
@@ -1780,7 +1778,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["HGVS_cDNA"] = "c.6943A>G"
         expectedCutSeq = "GCACA"
-        altExonLength = calcVarPriors.getAltExonLength(self.variant, stdExonicPortion, accDonor=False)
+        altExonLength = calcVarPriors.getAltExonLength(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(altExonLength, len(expectedCutSeq))
 
     def test_compareRefAltExonLengths(self):
@@ -1802,7 +1800,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.compareRefAltExonLengths', return_value = True)    
     def test_isSplicingWindowInFrameTrue(self, getRefExonLength, getAltExonLength, compareRefAltExonLengths):
         '''Tests that if splicing window is in frame, function returns true'''
-        inFrame = calcVarPriors.isSplicingWindowInFrame(self.variant, stdExonicPortion, accDonor=False)
+        inFrame = calcVarPriors.isSplicingWindowInFrame(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertTrue(inFrame)
         
     @mock.patch('calcVarPriors.getRefExonLength', return_value = 45)
@@ -1810,7 +1808,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.compareRefAltExonLengths', return_value = False)    
     def test_isSplicingWindowInFrameFalse(self, getRefExonLength, getAltExonLength, compareRefAltExonLengths):
         '''Tests that if splicing window is NOT in frame, function returns false'''
-        inFrame = calcVarPriors.isSplicingWindowInFrame(self.variant, stdExonicPortion, accDonor=False)
+        inFrame = calcVarPriors.isSplicingWindowInFrame(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertFalse(inFrame)        
 
     @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
@@ -1835,7 +1833,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43070936"
         self.variant["Ref"] = "C"
         self.variant["Alt"] = "T"
-        isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant, stdExonicPortion, accDonor=False)
+        isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertTrue(isDivisible)
         
     @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
@@ -1860,7 +1858,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43097265"
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "C"
-        isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant, stdExonicPortion, accDonor=False)
+        isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertFalse(isDivisible)
                 
     @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
@@ -1885,7 +1883,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32325180"
         self.variant["Ref"] = "G"
         self.variant["Alt"] = "T"
-        isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant, stdExonicPortion, accDonor=False)
+        isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertTrue(isDivisible)
 
     @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
@@ -1910,7 +1908,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32379872"
         self.variant["Ref"] = "C"
         self.variant["Alt"] = "A"
-        isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant, stdExonicPortion, accDonor=False)
+        isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertFalse(isDivisible)
 
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
@@ -2553,7 +2551,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43045765"
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "C"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
         self.assertEquals(priorProb["deNovoDonorFlag"], 0)
@@ -2570,7 +2568,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32398180"
         self.variant["Ref"] = "G"
         self.variant["Alt"] = "A"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
         self.assertEquals(priorProb["deNovoDonorFlag"], 0)
@@ -2595,7 +2593,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43097273"
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "C"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
         self.assertEquals(priorProb["deNovoDonorFlag"], 0)
@@ -2621,7 +2619,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43090945"
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "A"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
         self.assertEquals(priorProb["deNovoDonorFlag"], 0)
@@ -2646,7 +2644,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32344578"
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "G"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
         self.assertEquals(priorProb["deNovoDonorFlag"], 0)
@@ -2672,7 +2670,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32346895"
         self.variant["Ref"] = "C"
         self.variant["Alt"] = "T"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
         self.assertEquals(priorProb["deNovoDonorFlag"], 0)
@@ -2697,7 +2695,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43076557"
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "T"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoLow"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
@@ -2722,7 +2720,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43097244"
         self.variant["Ref"] = "C"
         self.variant["Alt"] = "G"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoLow"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
@@ -2746,7 +2744,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32326110"
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "G"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoLow"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
@@ -2771,7 +2769,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32397044"
         self.variant["Ref"] = "G"
         self.variant["Alt"] = "T"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoLow"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
 
@@ -2795,7 +2793,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43115740"
         self.variant["Ref"] = "G"
         self.variant["Alt"] = "C"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoMod"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
@@ -2820,7 +2818,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43115728"
         self.variant["Ref"] = "G"
         self.variant["Alt"] = "A"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoMod"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
@@ -2844,7 +2842,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32332406"
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "G"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoMod"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
@@ -2869,7 +2867,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32316525"
         self.variant["Ref"] = "C"
         self.variant["Alt"] = "T"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoMod"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
@@ -2893,7 +2891,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43099839"
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "C"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoHigh"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
@@ -2917,7 +2915,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32379455"
         self.variant["Ref"] = "G"
         self.variant["Alt"] = "T"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoHigh"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
@@ -2944,7 +2942,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43104184"
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "A"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoMod"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
@@ -2971,7 +2969,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32362627"
         self.variant["Ref"] = "C"
         self.variant["Alt"] = "A"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoMod"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
@@ -2998,7 +2996,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43094762"
         self.variant["Ref"] = "G"
         self.variant["Alt"] = "A"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoHigh"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
@@ -3025,7 +3023,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32362546"
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "G"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoHigh"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
@@ -3051,7 +3049,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43104184"
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "C"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoHigh"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
@@ -3077,7 +3075,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32363225"
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "G"
-        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, stdExonicPortion, accDonor=False)
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, STD_EXONIC_PORTION, accDonor=False)
         self.assertEquals(priorProb["priorProb"], priorProbs["deNovoHigh"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
             
@@ -3098,7 +3096,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43049200"
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "T"
-        priorProb = calcVarPriors.getPriorProbDeNovoAcceptorSNS(self.variant, stdExonicPortion, stdDeNovoLength)
+        priorProb = calcVarPriors.getPriorProbDeNovoAcceptorSNS(self.variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH)
         self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
         self.assertEquals(priorProb["deNovoAccFlag"], 0)
@@ -3120,7 +3118,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32329450"
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "C"
-        priorProb = calcVarPriors.getPriorProbDeNovoAcceptorSNS(self.variant, stdExonicPortion, stdDeNovoLength)
+        priorProb = calcVarPriors.getPriorProbDeNovoAcceptorSNS(self.variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH)
         self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
         self.assertEquals(priorProb["deNovoAccFlag"], 0)
@@ -3142,7 +3140,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43095922"
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "G"
-        priorProb = calcVarPriors.getPriorProbDeNovoAcceptorSNS(self.variant, stdExonicPortion, stdDeNovoLength)
+        priorProb = calcVarPriors.getPriorProbDeNovoAcceptorSNS(self.variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH)
         self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
         self.assertEquals(priorProb["deNovoAccFlag"], 1)
@@ -3164,7 +3162,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32370393"
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "G"
-        priorProb = calcVarPriors.getPriorProbDeNovoAcceptorSNS(self.variant, stdExonicPortion, stdDeNovoLength)
+        priorProb = calcVarPriors.getPriorProbDeNovoAcceptorSNS(self.variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH)
         self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
         self.assertEquals(priorProb["deNovoAccFlag"], 1)
@@ -3186,7 +3184,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43082571"
         self.variant["Ref"] = "C"
         self.variant["Alt"] = "A"
-        priorProb = calcVarPriors.getPriorProbDeNovoAcceptorSNS(self.variant, stdExonicPortion, stdDeNovoLength)
+        priorProb = calcVarPriors.getPriorProbDeNovoAcceptorSNS(self.variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH)
         self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
         self.assertEquals(priorProb["deNovoAccFlag"], 1)
@@ -3208,7 +3206,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32370408"
         self.variant["Ref"] = "G"
         self.variant["Alt"] = "C"
-        priorProb = calcVarPriors.getPriorProbDeNovoAcceptorSNS(self.variant, stdExonicPortion, stdDeNovoLength)
+        priorProb = calcVarPriors.getPriorProbDeNovoAcceptorSNS(self.variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH)
         self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
         self.assertEquals(priorProb["deNovoAccFlag"], 1)
