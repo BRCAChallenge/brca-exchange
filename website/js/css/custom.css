@@ -941,6 +941,42 @@ div.variant-details-body {
 }
 
 
+/* --- transcript viz. -------------- */
+
+.selected-ci-path {
+    stroke: black;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 4;
+
+    animation: dash 4s linear infinite;
+}
+
+@keyframes dash {
+    to {
+        stroke-dashoffset: 80;
+    }
+}
+
+.splicing-domain-list {
+    display: block;
+}
+.splicing-domain-list > li {
+    display: inline-block;
+    zoom: 1;
+    *display: inline;
+}
+.splicing-domain-list > li > a { cursor: pointer; }
+.splicing-domain-list > li:after {
+    content: ', ';
+    margin-right: 0.2em
+}
+.splicing-domain-list > li:last-child:after {
+    content: '';
+}
+
+
 /* --- reports (nested subtiles) -------------- */
 
 div.variant-submitter-group .submitter-header {
