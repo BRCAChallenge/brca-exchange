@@ -872,7 +872,7 @@ def getVarWindowPosition(variant, donor=True, deNovo=False, accDonor=False):
     varWindowPos = slidingWindowInfo["varWindowPosition"]
     return varWindowPos
 
-def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, accDonor=False):
+def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, accDonor=False, testMode=False):
     '''
     Given a variant, determines scores for closest reference splice sequence
     deNovoOffset refers to difference between de novo acceptor length and exonic portion size
@@ -908,11 +908,15 @@ def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, 
             refSeq = getFastaSeq(varChrom, closestSpliceBounds["acceptorStart"], (closestSpliceBounds["acceptorEnd"] - deNovoOffset))
         else:
             refSeq = getFastaSeq(varChrom, closestSpliceBounds["acceptorStart"], (closestSpliceBounds["acceptorEnd"] + deNovoOffset))
-    closestMaxEntScanScore = runMaxEntScan(refSeq, donor=donor)
-    closestZScore = getZScore(closestMaxEntScanScore, donor=donor)
-    return {"exonName": exonName,
-            "maxEntScanScore": closestMaxEntScanScore,
-            "zScore": closestZScore}    
+    if testMode == False:
+        # to prevent issue with running max ent scan score on unittests
+        closestMaxEntScanScore = runMaxEntScan(refSeq, donor=donor)
+        closestZScore = getZScore(closestMaxEntScanScore, donor=donor)
+        return {"exonName": exonName,
+                "maxEntScanScore": closestMaxEntScanScore,
+                "zScore": closestZScore}
+    else:
+        return {"exonName": exonName}
 
 def isCIDomainInRegion(regionStart, regionEnd, boundaries, gene):
     '''
