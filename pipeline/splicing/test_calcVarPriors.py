@@ -4022,9 +4022,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["spliceSite"], 0)
         self.assertEquals(priorProb["spliceRescue"], 1)
         self.assertEquals(priorProb["spliceFlag"], 1)
-        self.assertEquals(priorProb["frameshift"], 0)
-        
-        
+        self.assertEquals(priorProb["frameshift"], 0)        
         
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     def test_getVarDict(self, fetch_gene_coordinates):
