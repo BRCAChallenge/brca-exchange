@@ -1749,6 +1749,19 @@ def getPriorProbInExonSNS(variant, boundaries, variantData):
                 "spliceRescue": spliceRescue,
                 "spliceFlag": spliceFlag,
                 "frameshift": frameshift}
+
+def getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries):
+    '''
+    Given a variant and boundaries (either "enigma" or "priors"),
+    Checks that variant is outside transcript boundaries
+    Returns prior prob and predicted qualitative enigma class
+    '''
+    varLoc = getVarLocation(variant, boundaries)
+    varType = getVarType(variant)
+    if varLoc == "outside_transcript_boundaries_variant" and varType == "substitution":
+        priorProb = 0.02
+        return {"priorProb": priorProb,
+                "enigmaClass": getEnigmaClass(priorProb)}
                 
 def getVarDict(variant, boundaries):
     '''

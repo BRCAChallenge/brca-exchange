@@ -4023,7 +4023,34 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["spliceSite"], 0)
         self.assertEquals(priorProb["spliceRescue"], 1)
         self.assertEquals(priorProb["spliceFlag"], 1)
-        self.assertEquals(priorProb["frameshift"], 0)        
+        self.assertEquals(priorProb["frameshift"], 0)
+
+    @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["outBounds"])
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    def test_getPriorProbOutsideTranscriptBoundsSNS(self, getVarLocation, getVarType):
+        ''' Tests that function works correctly for both minus and plus strand variants outside transcript boundaries'''
+        boundaries = "enigma"
+        # checks for minus strand (BRCA1) variant
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        # the below information (Pos, Ref, Alt) does not represent a real variant
+        self.variant["Pos"] = "43125680"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "T"
+        priorProb = calcVarPriors.getPriorProbOutsideTranscriptBoundsSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["deNovoLow"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+
+        # checks for plus strand (BRCA2) variant
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        # the below information (Pos, Ref, Alt) does not represent a real variant
+        self.variant["Pos"] = "32315350"
+        self.variant["Ref"] = "C"
+        self.variant["Alt"] = "G"
+        priorProb = calcVarPriors.getPriorProbOutsideTranscriptBoundsSNS(self.variant, boundaries)
+        self.assertEquals(priorProb["priorProb"], priorProbs["deNovoLow"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
         
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inExon"])
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
