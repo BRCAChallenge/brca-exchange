@@ -1708,7 +1708,61 @@ def getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries):
                 "spliceRescue": 0,
                 "spliceFlag": 0,
                 "frameshift": 0}
-                
+
+def getPriorProbInIntronSNS(variant, boundaries):
+    '''
+    Given a variant and boundaries (either "priors or "enigma"),
+    Checks that variant is located in an intron and is a substitution variant
+    Determines if variant creates a de novo donor site in the intron
+    Returns a dictionary containing applicable prior and predicted qualitative enigma class
+    Dictionary also contains de novo donor ref and alt scores
+    AND a spliceFlag which is equal to 1 if variant creates a better de novo splice site than ref sequence
+    Rest of values in dictionary are equal to "-" or N/A 
+    '''
+    varLoc = getVarLocation(variant, boundaries)
+    varType = getVarType(variant)
+    if varLoc == "intron_variant" and varType == "substitution":
+        priorProb = 0.02
+        enigmaClass = getEnigmaClass(priorProb)
+        spliceFlag = 0
+        deNovoDonorScores = getMaxMaxEntScanScoreSlidingWindowSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH,
+                                                                  donor=True, deNovo=False, accDonor=False)
+        refMES = deNovoDonorScores["refMaxEntScanScore"]
+        altMES = deNovoDonorScores["altMaxEntScanScore"]
+        if altMES > refMES:
+            priorProb = "N/A"
+            enigmaClass = "N/A"
+            spliceFlag = 1
+        return {"applicablePrior": priorProb,
+                "applicableEnigmaClass": enigmaClass,
+                "proteinPrior": "N/A",
+                "refDonorPrior": "N/A",
+                "deNovoDonorPrior": "N/A",
+                "refRefDonorMES": "-",
+                "refRefDonorZ": "-",
+                "altRefDonorMES": "-",
+                "altRefDonorZ": "-",
+                "refDeNovoDonorMES": deNovoDonorScores["refMaxEntScanScore"],
+                "refDeNovoDonorZ": deNovoDonorScores["refZScore"],
+                "altDeNovoDonorMES": deNovoDonorScores["altMaxEntScanScore"],
+                "altDeNovoDonorZ": deNovoDonorScores["altZScore"],
+                "deNovoDonorFlag": 0,
+                "deNovoAccPrior": "N/A",
+                "refAccPrior": "N/A",
+                "refRefAccMES": "-",
+                "refRefAccZ": "-",
+                "altRefAccMES": "-",
+                "altRefAccZ": "-",
+                "refDeNovoAccMES": "-",
+                "refDeNovoAccZ": "-",
+                "altDeNovoAccMES": "-",
+                "altDeNovoAccZ": "-",
+                "deNovoAccFlag": 0,
+                "spliceSite": 0,
+                "spliceRescue": 0,
+                "spliceFlag": spliceFlag,
+                "frameshift": 0}
+                                                                                                                            
 def getVarDict(variant, boundaries):
     '''
 
