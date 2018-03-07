@@ -1545,22 +1545,6 @@ def getPriorProbProteinSNS(variant, variantData):
                 return {"priorProb": proteinPrior,
                         "enigmaClass": getEnigmaClass(proteinPrior)}
 
-def getPriorProbProteinSNS(variant, variantData):
-    '''
-    Given a variant and a file containing protein prior probabilities,
-    Returns a dictionary containing:
-      the variant's protein prior probability and enigma class for that prior
-    '''
-    if getVarType(variant) == "substitution":
-        varHGVS = variant["HGVS_cDNA"]
-        varGene = variant["Gene_Symbol"]
-        
-        for var in variantData:
-            if var['gene'] == varGene and var['nthgvs'] == varHGVS:
-                proteinPrior = float(var["protein_prior"])
-                return {"priorProb": proteinPrior,
-                        "enigmaClass": getEnigmaClass(proteinPrior)}
-
 def getPriorProbInGreyZoneSNS(variant, boundaries, variantData):
     '''
     Given a variant and a list of dicitionaries with variant data,
