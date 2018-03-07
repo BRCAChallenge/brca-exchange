@@ -4179,7 +4179,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["deNovoAccPrior"], priorProbs["NA"])
         # checks that there are NOT values present for de novo donor and acceptor
         self.assertEquals(priorProb["refDeNovoDonorMES"], "-")
-        self.assertEquals(priorProb["altDeNovoDonorZ"], "-")
+        self.assertEquals(priorProb["altDeNovoAccZ"], "-")
 
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inUTR"])
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -4203,7 +4203,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["deNovoAccPrior"], priorProbs["NA"])
         # checks that there are NOT values present for de novo donor and acceptor
         self.assertEquals(priorProb["refDeNovoDonorMES"], "-")
-        self.assertEquals(priorProb["altDeNovoDonorZ"], "-")
+        self.assertEquals(priorProb["altDeNovoAccZ"], "-")
 
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inUTR"])
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -4228,11 +4228,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Alt"] = "T"
         priorProb = calcVarPriors.getPriorProbUTRSNS(self.variant, boundaries)
         # checks that applicable prior, applicable class, and splice flag are correct
-        self.assertEquals(priorProb["applicablePrior"], priorProbs[""])
-        self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses[""])
+        self.assertEquals(priorProb["applicablePrior"], priorProbs["deNovoLow"])
+        self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class2"])
         self.assertEquals(priorProb["spliceFlag"], 0)
         # checks that de novo donor and acceptor priors are correct
-        self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs[""])
+        self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs["deNovoLow"])
         self.assertEquals(priorProb["deNovoAccPrior"], priorProbs["NA"])
         # checks that de novo donor and acceptor flags are correct
         self.assertEquals(priorProb["deNovoDonorFlag"], 1)
@@ -4240,16 +4240,16 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that values are present for de novo donor
         self.assertNotEquals(priorProb["refDeNovoDonorZ"], "-")
         # checks that values are NOT present for de novo acceptor
-        self.assertEquals(priorProb["altDeNovoDonorMES"], "-")
+        self.assertEquals(priorProb["altDeNovoAccMES"], "-")
 
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inUTR"])
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "5_prime_UTR_variant")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
-    @mock.patch('calcVarPriots.getPriorProbDeNovoAcceptorSNS', return_value = {})
+    @mock.patch('calcVarPriors.getPriorProbDeNovoAcceptorSNS', return_value = {})
     @mock.patch('calcVarPriors.getPriorProbDeNovoDonorSNS', return_value = {})
-    def test_getPriorProbUTR5PrimeExonDeNovoDonorAndAcc(self, getVarLocation, getVarType, getVarConsequences,
+    def test_getPriorProbUTR5PrimeExonDeNovoAccAndDonor(self, getVarLocation, getVarType, getVarConsequences,
                                                         varInExon, varInSpliceRegion, getPriorProbDeNovoAcceptorSNS,
                                                         getPriorProbDeNovoDonorSNS):
         boundaries = "enigma"
@@ -4272,7 +4272,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["deNovoAccFlag"], 1)
         # checks that values are present for de novo donor and de novo acceptor
         self.assertNotEquals(priorProb["refDeNovoDonorZ"], "-")
-        self.assertNotEquals(priorProb["altDeNovoDonorMES"], "-")
+        self.assertNotEquals(priorProb["altDeNovoAccMES"], "-")
 
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inUTR"])
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -4299,7 +4299,7 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that values are present for de novo donor
         self.assertNotEquals(priorProb["refDeNovoDonorZ"], "-")
         # checks that values are NOT present for de novo acceptor
-        self.assertEquals(priorProb["altDeNovoDonorMES"], "-")
+        self.assertEquals(priorProb["altDeNovoAccMES"], "-")
 
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inUTR"])
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -4326,7 +4326,7 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that values are present for de novo donor
         self.assertNotEquals(priorProb["refDeNovoDonorZ"], "-")
         # checks that values are NOT present for de novo acceptor
-        self.assertEquals(priorProb["altDeNovoDonorMES"], "-")
+        self.assertEquals(priorProb["altDeNovoAccMES"], "-")
         
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     def test_getVarDict(self, fetch_gene_coordinates):
