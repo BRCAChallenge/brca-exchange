@@ -1793,6 +1793,78 @@ def getPriorProbInIntronSNS(variant, boundaries):
                 "spliceRescue": 0,
                 "spliceFlag": deNovoDonorData["spliceFlag"],
                 "frameshift": 0}
+
+def getPriorProbUTRSNS(variant, boundaries):
+    #TO DO write function description and unittests
+    varLoc = getVarLocation(variant, boundaries)
+    varType = getVarType(variant)
+    if varLoc == "UTR_variant" and varType == "substitution":
+        deNovoAccData = {"priorProb": "N/A",
+                         "refMaxEntScanScore": "-",
+                         "altMaxEntScanScore": "-",
+                         "refZScore": "-",
+                         "altZScore": "-",
+                         "deNovoAccFlag": 0}
+        deNovoDonorData = {"priorProb": "N/A",
+                           "refMaxEntScanScore": "-",
+                           "altMaxEntScanScore": "-",
+                           "refZScore": "-",
+                           "altZScore": "-",
+                           "deNovoDonorFlag": 0}
+        varCons = getVarConsequences(variant)
+        if varCons == "3_prime_UTR_variant":
+            applicablePrior = 0.02
+            applicableClass = getEnigmaClass(applicablePrior)
+        elif varCons == "5_prime_UTR_variant":
+            # TO DO add in checks for creation of alternate start codon (ATG)
+            # TO DO if ATG is created and is OUT of frame --> priorProb = 0.10
+            # TO DO if ATG is created and is IN frame AND there is a stop codon before real start codon --> priorProb = 0.10
+            if varInExon(variant) == True:
+                if varInSpliceRegion(variant, donor=False, deNovo=True) == True:
+                    deNovoAccData = getPriorProbDeNovoAcceptorSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH)
+                else:
+                    deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, STD_EXONIC_PORTION, accDonor=False)
+                applicablePrior = deNovoDonorData["priorProb"]
+                applicableClass = deNovoDonorData["enigmaClass"]
+            else:
+                deNovoDonorData = getPriorProbIntronicDeNovoDonorSNS(variant)
+                if deNovoDonorData["spliceFlag"] == 1:
+                    applicablePrior = deNovoDonorData["priorProb"]
+                    applicableClass = deNovoDonorData["enigmaClass"]
+                else:
+                    applicablePrior = 0.02
+                    applicableClass = getEnigmaClass(applicablePrior)
+
+        return {"applicablePrior": applicablePrior,
+                "applicableEnigmaClass": applicableClass,
+                "proteinPrior": "N/A",
+                "refDonorPrior": "N/A",
+                "deNovoDonorPrior": deNovoDonorData["priorProb"],
+                "refRefDonorMES": "-",
+                "refRefDonorZ": "-",
+                "altRefDonorMES": "-",
+                "altRefDonorZ": "-",
+                "refDeNovoDonorMES": deNovoDonorData["refMaxEntScanScore"],
+                "refDeNovoDonorZ": deNovoDonorData["refZScore"],
+                "altDeNovoDonorMES": deNovoDonorData["altMaxEntScanScore"],
+                "altDeNovoDonorZ": deNovoDonorData["altZScore"],
+                "deNovoDonorFlag": deNovoDonorData["deNovoDonorFlag"],
+                "deNovoAccPrior": deNovoAccData["priorProb"],
+                "refAccPrior": "N/A",
+                "refRefAccMES": "-",
+                "refRefAccZ": "-",
+                "altRefAccMES": "-",
+                "altRefAccZ": "-",
+                "refDeNovoAccMES": deNovoAccData["refMaxEntScanScore"], 
+                "refDeNovoAccZ": deNovoAccData["refZScore"],
+                "altDeNovoAccMES": deNovoAccData["altMaxEntScanScore"],
+                "altDeNovoAccZ": deNovoAccData["altZScore"],
+                "deNovoAccFlag": deNovoAccData["deNovoAccFlag"],
+                "spliceSite": 0,
+                "spliceRescue": 0,
+                "spliceFlag": spliceFlag,
+                "frameshift": 0}
+                        
                                                                                                                             
 def getVarDict(variant, boundaries):
     '''
