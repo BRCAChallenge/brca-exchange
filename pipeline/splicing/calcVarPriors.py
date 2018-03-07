@@ -1717,7 +1717,7 @@ def getPriorProbInIntronSNS(variant, boundaries):
     Returns a dictionary containing applicable prior and predicted qualitative enigma class
     Dictionary also contains de novo donor ref and alt scores
     AND a spliceFlag which is equal to 1 if variant creates a better de novo splice site than ref sequence
-    Rest of values in dictionary are equal to "-" or N/A 
+    Rest of values in dictionary are equal to 0, "-", or N/A because they are not relevant to variant
     '''
     varLoc = getVarLocation(variant, boundaries)
     varType = getVarType(variant)
