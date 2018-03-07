@@ -1637,6 +1637,7 @@ def getPriorProbInExonSNS(variant, boundaries, variantData):
             if deNovoDonorData["priorProb"] != "N/A":
                 applicablePrior = max(proteinData["priorProb"], deNovoDonorData["priorProb"])
                 applicableClass = getEnigmaClass(applicablePrior)
+                
         return {"applicablePrior": applicablePrior,
                 "applicableEnigmaClass": applicableClass,
                 "proteinPrior": proteinData["priorProb"],
