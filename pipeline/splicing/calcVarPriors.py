@@ -1709,6 +1709,37 @@ def getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries):
                 "spliceFlag": 0,
                 "frameshift": 0}
 
+def getPriorProbIntronicDeNovoDonorSNS(variant):
+    '''
+    Given a variant,
+      1. Checks that variant is NOT in exon or reference donor/acceptor site
+      2. Checks that variant is a substitution variant
+    Determines if alt MES score is greater than ref MES score for highest scoring sliding window
+    If true, flag variant for further analysis (spliceFlag = 1), spliceFlag = 0 otherwise
+    Returns dictionary containing prior prob, enigma class, de novo donor scores, and splice flag
+    '''
+    inExon = varInExon(variant)
+    inRefDonor = varInSpliceRegion(variant, donor=True, deNovo=False)
+    inRefAcc = varInSpliceRegion(variant, donor=False, deNovo=False)
+    if inExon == False and inRefDonor == False and inRefAcc == False:
+        if getVarType(variant) == "substitution":
+            deNovoDonorScores = getMaxMaxEntScanScoreSlidingWindowSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH,
+                                                                      donor=True, deNovo=False, accDonor=False)
+            refMES = deNovoDonorScores["refMaxEntScanScore"]
+            altMES = deNovoDonorScores["altMaxEntScanScore"]
+            if altMES > refMES:
+                spliceFlag = 1
+            else:
+                spliceFlag = 0
+
+            return {"priorProb": "N/A",
+                    "enigmaClass": "N/A",
+                    "refMaxEntScanScore": refMES,
+                    "refZScore": deNovoDonorScores["refZScore"],
+                    "altMaxEntScanScore": altMES,
+                    "altZScore": deNovoDonorScores["altZScore"],
+                    "spliceFlag": spliceFlag}
+    
 def getPriorProbInIntronSNS(variant, boundaries):
     '''
     Given a variant and boundaries (either "priors or "enigma"),
@@ -1722,17 +1753,14 @@ def getPriorProbInIntronSNS(variant, boundaries):
     varLoc = getVarLocation(variant, boundaries)
     varType = getVarType(variant)
     if varLoc == "intron_variant" and varType == "substitution":
-        priorProb = 0.02
-        enigmaClass = getEnigmaClass(priorProb)
-        spliceFlag = 0
-        deNovoDonorScores = getMaxMaxEntScanScoreSlidingWindowSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH,
-                                                                  donor=True, deNovo=False, accDonor=False)
-        refMES = deNovoDonorScores["refMaxEntScanScore"]
-        altMES = deNovoDonorScores["altMaxEntScanScore"]
-        if altMES > refMES:
-            priorProb = "N/A"
-            enigmaClass = "N/A"
-            spliceFlag = 1
+        deNovoDonorData = getPriorProbIntronicDeNovoDonorSNS(variant)
+        if deNovoDonorData["spliceFlag"] == 0:
+            priorProb = 0.02
+            enigmaClass = getEnigmaClass(priorProb)
+        else:
+            priorProb = deNovoDonorData["priorProb"]
+            enigmaClass = deNovoDonorData["enigmaClass"]
+            
         return {"applicablePrior": priorProb,
                 "applicableEnigmaClass": enigmaClass,
                 "proteinPrior": "N/A",
@@ -1742,10 +1770,10 @@ def getPriorProbInIntronSNS(variant, boundaries):
                 "refRefDonorZ": "-",
                 "altRefDonorMES": "-",
                 "altRefDonorZ": "-",
-                "refDeNovoDonorMES": deNovoDonorScores["refMaxEntScanScore"],
-                "refDeNovoDonorZ": deNovoDonorScores["refZScore"],
-                "altDeNovoDonorMES": deNovoDonorScores["altMaxEntScanScore"],
-                "altDeNovoDonorZ": deNovoDonorScores["altZScore"],
+                "refDeNovoDonorMES": deNovoDonorData["refMaxEntScanScore"],
+                "refDeNovoDonorZ": deNovoDonorData["refZScore"],
+                "altDeNovoDonorMES": deNovoDonorData["altMaxEntScanScore"],
+                "altDeNovoDonorZ": deNovoDonorData["altZScore"],
                 "deNovoDonorFlag": 0,
                 "deNovoAccPrior": "N/A",
                 "refAccPrior": "N/A",
@@ -1760,7 +1788,7 @@ def getPriorProbInIntronSNS(variant, boundaries):
                 "deNovoAccFlag": 0,
                 "spliceSite": 0,
                 "spliceRescue": 0,
-                "spliceFlag": spliceFlag,
+                "spliceFlag": deNovoDonorData["spliceFlag"],
                 "frameshift": 0}
                                                                                                                             
 def getVarDict(variant, boundaries):

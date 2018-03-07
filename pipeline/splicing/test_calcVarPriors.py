@@ -4051,6 +4051,58 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["applicablePrior"], priorProbs["deNovoLow"])
         self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class2"])
 
+    @mock.patch('calcVarPriors.varInExon', return_value = False)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -13.63,
+                                                                                       'altMaxEntScanScore': -5.58,
+                                                                                       'altZScore': -5.804257601702654,
+                                                                                       'varWindowPosition': 8,
+                                                                                       'inExonicPortion': False,
+                                                                                       'refZScore': -9.260683069464845})
+    def test_getPriorProbIntronicDeNovoDonorSNSWithSpliceFlag(self, varInExon, varInSpliceRegion, getVarType,
+                                                              getMaxMaxEntScanScoreSlidingWindowSNS):
+        '''Tests that funciton works for variant with predicted splice flag = 1 (altMES > refMES)'''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        self.variant["HGVS_cDNA"] = "c.4986+19a>G"
+        self.variant["Pos"] = "43070909"
+        self.variant["Ref"] = "T"
+        self.variant["Alt"] = "C"
+        priorProb = calcVarPriors.getPriorProbIntronicDeNovoDonorSNS(self.variant)
+        # checks that prior prob, enigma class, and splice flag have the correct values
+        self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
+        self.assertEquals(priorProb["spliceFlag"], 1)
+        # checks that a de novo donor score is present
+        self.assertNotEquals(priorProb["altMaxEntScanScore"], "-")
+
+    @mock.patch('calcVarPriors.varInExon', return_value = False)
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -16.81,
+                                                                                       'altMaxEntScanScore': -17.75,
+                                                                                       'altZScore': -11.029685917561768,
+                                                                                       'varWindowPosition': 8,
+                                                                                       'inExonicPortion': False,
+                                                                                       'refZScore': -10.62607847163674})
+    def test_getPriorProbIntronicDeNovoDonorSNSNoSpliceFlag(self, varInExon, varInSpliceRegion, getVarType,
+                                                            getMaxMaxEntScanScoreSlidingWindowSNS):
+        '''Tests that function works for variant with predicted splice flag of 0 (refMES > altMES)'''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["HGVS_cDNA"] = "c.476-23t>C"
+        self.variant["Pos"] = "32326219"
+        self.variant["Ref"] = "T"
+        self.variant["Alt"] = "C"
+        priorProb = calcVarPriors.getPriorProbIntronicDeNovoDonorSNS(self.variant)
+        # checks that prior prob, enigma class, and splice flag have the correct values
+        self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
+        self.assertEquals(priorProb["spliceFlag"], 0)
+        # checks that a de novo donor score is present
+        self.assertNotEquals(priorProb["altMaxEntScanScore"], "-")
+
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inIntron"])
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'refMaxEntScanScore': -10.54,
