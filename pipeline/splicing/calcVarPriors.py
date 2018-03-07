@@ -1818,8 +1818,9 @@ def getPriorProbUTRSNS(variant, boundaries):
             spliceFlag = 0
         elif varCons == "5_prime_UTR_variant":
             # TO DO add in checks for creation of alternate start codon (ATG)
-            # TO DO if ATG is created and is OUT of frame --> priorProb = 0.10
-            # TO DO if ATG is created and is IN frame AND there is a stop codon before real start codon --> priorProb = 0.10
+            # TO DO either add a flag per MP or add priors as below per SVT
+            # TO DO if ATG is created and is OUT of frame --> flag/priorProb = 0.10
+            # TO DO if ATG is created and is IN frame AND there is a stop codon before real start codon --> flag/priorProb = 0.10
             if varInExon(variant) == True:
                 if varInSpliceRegion(variant, donor=False, deNovo=True) == True:
                     deNovoAccData = getPriorProbDeNovoAcceptorSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH)
@@ -1827,7 +1828,7 @@ def getPriorProbUTRSNS(variant, boundaries):
                     deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, STD_EXONIC_PORTION, accDonor=False)
                 applicablePrior = deNovoDonorData["priorProb"]
                 applicableClass = deNovoDonorData["enigmaClass"]
-                spliceFlag = deNovoDonorData["spliceFlag"]
+                spliceFlag = 0
             else:
                 deNovoDonorData = getPriorProbIntronicDeNovoDonorSNS(variant)
                 spliceFlag = deNovoDonorData["spliceFlag"]
