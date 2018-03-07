@@ -1815,6 +1815,7 @@ def getPriorProbUTRSNS(variant, boundaries):
         if varCons == "3_prime_UTR_variant":
             applicablePrior = 0.02
             applicableClass = getEnigmaClass(applicablePrior)
+            spliceFlag = 0
         elif varCons == "5_prime_UTR_variant":
             # TO DO add in checks for creation of alternate start codon (ATG)
             # TO DO if ATG is created and is OUT of frame --> priorProb = 0.10
@@ -1826,9 +1827,11 @@ def getPriorProbUTRSNS(variant, boundaries):
                     deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, STD_EXONIC_PORTION, accDonor=False)
                 applicablePrior = deNovoDonorData["priorProb"]
                 applicableClass = deNovoDonorData["enigmaClass"]
+                spliceFlag = deNovoDonorData["spliceFlag"]
             else:
                 deNovoDonorData = getPriorProbIntronicDeNovoDonorSNS(variant)
-                if deNovoDonorData["spliceFlag"] == 1:
+                spliceFlag = deNovoDonorData["spliceFlag"]
+                if spliceFlag == 1:
                     applicablePrior = deNovoDonorData["priorProb"]
                     applicableClass = deNovoDonorData["enigmaClass"]
                 else:
