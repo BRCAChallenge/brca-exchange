@@ -3787,8 +3787,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "G"
         priorProb = calcVarPriors.getPriorProbInGreyZoneSNS(self.variant, boundaries, variantData)
-        self.assertEquals(priorProb["priorProb"], priorProbs["deNovoLow"])
-        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+        self.assertEquals(priorProb["applicablePrior"], priorProbs["deNovoLow"])
+        self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class2"])
 
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inGreyZone"])
@@ -3804,8 +3804,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "T"
         priorProb = calcVarPriors.getPriorProbInGreyZoneSNS(self.variant, boundaries, variantData)
-        self.assertEquals(priorProb["priorProb"], priorProbs["capped"])
-        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
+        self.assertEquals(priorProb["applicablePrior"], priorProbs["capped"])
+        self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class3"])
         
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     def test_getVarDict(self, fetch_gene_coordinates):

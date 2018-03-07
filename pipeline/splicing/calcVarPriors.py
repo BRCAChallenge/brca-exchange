@@ -1564,15 +1564,42 @@ def getPriorProbProteinSNS(variant, variantData):
 def getPriorProbInGreyZoneSNS(variant, boundaries, variantData):
     '''
     Given a variant and a list of dicitionaries with variant data,
-    Returns prior prob and enigma class based on protein priors for that variant
+    Returns applicable prior and enigma class based on protein priors for that variant
+    Dictionary also contains other values that are either "N/A", "-", or 0 because they are not relevant
     '''
     if getVarType(variant) == "substitution" and getVarLocation(variant, boundaries) == "grey_zone_variant":
         proteinData = getPriorProbProteinSNS(variant, variantData)
         proteinPrior = proteinData["priorProb"]
         if proteinPrior == 0.99:
             proteinPrior = 0.5
-        return {"priorProb": proteinPrior,
-                "enigmaClass": getEnigmaClass(proteinPrior)}
+        return {"applicablePrior": proteinPrior,
+                "applicableEnigmaClass": getEnigmaClass(proteinPrior),
+                "proteinPrior": proteinPrior,
+                "refDonorPrior": "N/A",
+                "deNovoDonorPrior": "N/A",
+                "refRefDonorMES": "-",
+                "refRefDonorZ": "-",
+                "altRefDonorMES": "-",
+                "altRefDonorZ": "-",
+                "refDeNovoDonorMES": "-",
+                "refDeNovoDonorZ": "-",
+                "altDeNovoDonorMES": "-",
+                "altDeNovoDonorZ": "-",
+                "deNovoDonorFlag": 0,
+                "deNovoAccPrior": "-",
+                "refRefAccMES": "-",
+                "refRefAccZ": "-",
+                "altRefAccMES": "-",
+                "altRefAccZ": "-",
+                "refDeNovoAccMES": "-",
+                "refDeNovoAccZ": "-",
+                "altDeNovoAccMES": "-",
+                "altDeNovoAccZ": "-",
+                "deNovoAccFlag": 0,
+                "spliceSite": 0,
+                "spliceRescue": 0,
+                "spliceFlag": 0,
+                "frameshift": 0}
                 
 def getVarDict(variant, boundaries):
     '''
