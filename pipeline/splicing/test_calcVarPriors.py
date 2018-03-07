@@ -4070,9 +4070,10 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "C"
         priorProb = calcVarPriors.getPriorProbIntronicDeNovoDonorSNS(self.variant)
-        # checks that prior prob, enigma class, and splice flag have the correct values
+        # checks that prior prob, enigma class, de novo donor flag, and splice flag have the correct values
         self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
+        self.assertEquals(priorProb["deNovoDonorFlag"], 1)
         self.assertEquals(priorProb["spliceFlag"], 1)
         # checks that a de novo donor score is present
         self.assertNotEquals(priorProb["altMaxEntScanScore"], "-")
@@ -4096,9 +4097,10 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "C"
         priorProb = calcVarPriors.getPriorProbIntronicDeNovoDonorSNS(self.variant)
-        # checks that prior prob, enigma class, and splice flag have the correct values
+        # checks that prior prob, enigma class, de novo donor flag, and splice flag have the correct values
         self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
+        self.assertEquals(priorProb["deNovoDonorFlag"], 0)
         self.assertEquals(priorProb["spliceFlag"], 0)
         # checks that a de novo donor score is present
         self.assertNotEquals(priorProb["altMaxEntScanScore"], "-")
@@ -4121,9 +4123,10 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Ref"] = "C"
         self.variant["Alt"] = "T"
         priorProb = calcVarPriors.getPriorProbInIntronSNS(self.variant, boundaries)
-        # checks that prior prob, enigma class, and splice flag are all set correctly
+        # checks that prior prob, enigma class, de novo donor flag, and splice flag are all set correctly
         self.assertEquals(priorProb["applicablePrior"], priorProbs["deNovoLow"])
         self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class2"])
+        self.assertEquals(priorProb["deNovoDonorFlag"], 0)
         self.assertEquals(priorProb["spliceFlag"], 0)
         # checks that a value is presents for de novo donor scores
         self.assertNotEquals(priorProb["refDeNovoDonorZ"], "-")
@@ -4146,9 +4149,10 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "C"
         priorProb = calcVarPriors.getPriorProbInIntronSNS(self.variant, boundaries)
-        # checks that prior prob, enigma class, and splice flag are all set correctly
+        # checks that prior prob, enigma class, de novo donor flag, and splice flag are all set correctly
         self.assertEquals(priorProb["applicablePrior"], priorProbs["NA"])
         self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["NA"])
+        self.assertEquals(priorProb["deNovoDonorFlag"], 1)
         self.assertEquals(priorProb["spliceFlag"], 1)
         # checks that a value is presents for de novo donor scores
         self.assertNotEquals(priorProb["refDeNovoDonorZ"], "-")

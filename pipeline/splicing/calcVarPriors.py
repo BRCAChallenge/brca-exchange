@@ -1729,8 +1729,10 @@ def getPriorProbIntronicDeNovoDonorSNS(variant):
             altMES = deNovoDonorScores["altMaxEntScanScore"]
             if altMES > refMES:
                 spliceFlag = 1
+                deNovoDonorFlag = 1
             else:
                 spliceFlag = 0
+                deNovoDonorFlag = 0
 
             return {"priorProb": "N/A",
                     "enigmaClass": "N/A",
@@ -1738,6 +1740,7 @@ def getPriorProbIntronicDeNovoDonorSNS(variant):
                     "refZScore": deNovoDonorScores["refZScore"],
                     "altMaxEntScanScore": altMES,
                     "altZScore": deNovoDonorScores["altZScore"],
+                    "deNovoDonorFlag": deNovoDonorFlag,
                     "spliceFlag": spliceFlag}
     
 def getPriorProbInIntronSNS(variant, boundaries):
@@ -1774,7 +1777,7 @@ def getPriorProbInIntronSNS(variant, boundaries):
                 "refDeNovoDonorZ": deNovoDonorData["refZScore"],
                 "altDeNovoDonorMES": deNovoDonorData["altMaxEntScanScore"],
                 "altDeNovoDonorZ": deNovoDonorData["altZScore"],
-                "deNovoDonorFlag": 0,
+                "deNovoDonorFlag": deNovoDonorData["deNovoDonorFlag"],
                 "deNovoAccPrior": "N/A",
                 "refAccPrior": "N/A",
                 "refRefAccMES": "-",
