@@ -3968,7 +3968,6 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["spliceFlag"], 0)
         # checks that frameshift flag is correct
         self.assertEquals(priorProb["frameshift"], 1)
-<<<<<<< 032e443b1ed57d74c3762f612632ff4a9df43149
         
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inExon"])
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -4023,7 +4022,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["spliceSite"], 0)
         self.assertEquals(priorProb["spliceRescue"], 1)
         self.assertEquals(priorProb["spliceFlag"], 1)
-        self.assertEquals(priorProb["frameshift"], 0)
+        self.assertEquals(priorProb["frameshift"], 0)        
 
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["outBounds"])
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -4038,8 +4037,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Ref"] = "G"
         self.variant["Alt"] = "C"
         priorProb = calcVarPriors.getPriorProbOutsideTranscriptBoundsSNS(self.variant, boundaries)
-        self.assertEquals(priorProb["priorProb"], priorProbs["deNovoLow"])
-        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+        self.assertEquals(priorProb["applicablePrior"], priorProbs["deNovoLow"])
+        self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class2"])
 
         # checks for plus strand (BRCA2) variant
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -4049,66 +4048,9 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "G"
         priorProb = calcVarPriors.getPriorProbOutsideTranscriptBoundsSNS(self.variant, boundaries)
-        self.assertEquals(priorProb["priorProb"], priorProbs["deNovoLow"])
-        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
-        
-    @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inExon"])
-    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
-    @mock.patch('calcVarPriors.getPriorProbProteinSNS', return_value = {'enigmaClass': 'class_5',
-                                                                        'priorProb': 0.99})
-    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
-    @mock.patch('calcVarPriors.getPriorProbSpliceRescueNonsenseSNS', return_value = {'spliceFlag': 1,
-                                                                                     'enigmaClass': 'N/A',
-                                                                                     'frameshift': 0,
-                                                                                     'priorProb': 'N/A',
-                                                                                     'spliceRescue': 1})
-    @mock.patch('calcVarPriors.getPriorProbDeNovoDonorSNS', return_value = {'refMaxEntScanScore': -6.87,
-                                                                            'altMaxEntScanScore': -0.5,
-                                                                            'enigmaClass': 'class_2',
-                                                                            'altZScore': -3.6230599152142147,
-                                                                            'priorProb': 0.02,
-                                                                            'deNovoDonorFlag': 1,
-                                                                            'refZScore': -6.358144415791253})
-    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
-    def test_getPriorProbInExonSNSWithSpliceRescueBRCA2(self, getVarLocation, getVarType, getPriorProbProteinSNS,
-                                                        getVarConsequences, getPriorProbSpliceRescueNonsenseSNS,
-                                                        getPriorProbDeNovoDonorSNS, varInSpliceRegion):
-        '''Tests that function works correctly for nonsense variant in exon with possibility of splice rescue'''
-        boundaries = "enigma"
-        self.variant["Gene_Symbol"] = "BRCA2"
-        self.variant["Reference_Sequence"] = "NM_000059.3"
-        self.variant["HGVS_cDNA"] = "c.6996T>A"
-        self.variant["Pos"] = self.variant["Hg38_Start"] = self.variant["Hg38_End"] = "32346885"
-        self.variant["Ref"] = "T"
-        self.variant["Alt"] = "A"
-        priorProb = calcVarPriors.getPriorProbInExonSNS(self.variant, boundaries, variantData)
-        # checks that applicable prior and enigma class are correct
-        self.assertEquals(priorProb["applicablePrior"], priorProbs["NA"])
-        self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["NA"])
-        # checks that protein prior, ref donor prior, and ref acceptor prior are correct
-        self.assertEquals(priorProb["proteinPrior"], priorProbs["pathogenic"])
-        self.assertEquals(priorProb["refDonorPrior"], priorProbs["NA"])
-        self.assertEquals(priorProb["refAccPrior"], priorProbs["NA"])
-        # checks that de novo donor prior and de novo acceptor prior are correct
-        self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs["deNovoLow"])
-        self.assertEquals(priorProb["deNovoAccPrior"], priorProbs["NA"])
-        # checks that scores are present for de novo donor
-        self.assertNotEquals(priorProb["refDeNovoDonorMES"], "-")
-        # checks that flags are correct for de novo donor and acceptor
-        self.assertEquals(priorProb["deNovoDonorFlag"], 1)
-        self.assertEquals(priorProb["deNovoAccFlag"], 0)
-        # checks that scores are NOT present for ref splice acceptor, ref splice donor, and de novo acceptor
-        self.assertEquals(priorProb["refRefAccMES"], "-")
-        self.assertEquals(priorProb["refRefDonorZ"], "-")
-        self.assertEquals(priorProb["altDeNovoAccMES"], "-")
-        # checks that flags (splice site, splice rescue, splice flag) are all correct
-        self.assertEquals(priorProb["spliceSite"], 0)
-        self.assertEquals(priorProb["spliceRescue"], 1)
-        self.assertEquals(priorProb["spliceFlag"], 1)
-        self.assertEquals(priorProb["frameshift"], 0)
-        
-        
-        
+        self.assertEquals(priorProb["applicablePrior"], priorProbs["deNovoLow"])
+        self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class2"])
+                
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     def test_getVarDict(self, fetch_gene_coordinates):
         '''
