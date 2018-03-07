@@ -823,7 +823,7 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLeng
             inExonicPortion = True
     else:
     # determines if variant is in the last exonicPortionSize bp of the acceptor region
-        if (stdAccSize - maxVarPosition) < exonicPortionSize:
+        if (STD_ACC_SIZE - maxVarPosition) < exonicPortionSize:
             inExonicPortion = True
 
     if deNovo == True:
