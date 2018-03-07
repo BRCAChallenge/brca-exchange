@@ -898,6 +898,10 @@ var VariantDetail = React.createClass({
             if (this.state.reports.hasOwnProperty('ClinVar')) {
                 let clinvarSubmissions = this.state.reports.ClinVar;
                 for (var i = 0; i < clinvarSubmissions.length; i++) {
+                    if (clinvarSubmissions[i].Diff === null || clinvarSubmissions[i].Diff === undefined) {
+                        // don't show empty diffs for reports
+                        continue;
+                    }
                     let key = clinvarSubmissions[i].SCV_ClinVar;
                     if (sortedSubmissions.ClinVar.hasOwnProperty(key)) {
                         sortedSubmissions.ClinVar[key].push(clinvarSubmissions[i]);
@@ -911,6 +915,11 @@ var VariantDetail = React.createClass({
             if (this.state.reports.hasOwnProperty('LOVD')) {
                 let lovdSubmissions = this.state.reports.LOVD;
                 for (var j = 0; j < lovdSubmissions.length; j++) {
+                    // TODO: remove early break once LOVD provides individual submissions
+                    break;
+                    if (lovdSubmissions[j].Diff === null || lovdSubmissions[j].Diff === undefined) {
+                        continue;
+                    }
                     let key = lovdSubmissions[j].DBID_LOVD;
                     if (sortedSubmissions.LOVD.hasOwnProperty(key)) {
                         sortedSubmissions.LOVD[key].push(lovdSubmissions[j]);
@@ -924,7 +933,7 @@ var VariantDetail = React.createClass({
                 return (
                     <Row>
                         <Col md={12} className="variant-history-col">
-                            <h3>{submissions[0]["SCV_ClinVar"]}</h3>
+                            <h3>ClinVar Submission: {submissions[0]["SCV_ClinVar"]}</h3>
                             <h4>Previous Versions of this Submission:</h4>
                             <Table className='variant-history nopointer' responsive bordered>
                                 <thead>
@@ -948,7 +957,7 @@ var VariantDetail = React.createClass({
                 return (
                     <Row>
                         <Col md={12} className="variant-history-col">
-                            <h3>{submissions[0]["DBID_LOVD"]}</h3>
+                            <h3>LOVD Submission: {submissions[0]["DBID_LOVD"]}</h3>
                             <h4>Previous Versions of this Submission:</h4>
                             <Table className='variant-history nopointer' responsive bordered>
                                 <thead>
