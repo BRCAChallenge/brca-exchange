@@ -1897,7 +1897,6 @@ def getPriorProbUTRSNS(variant, boundaries):
                 "frameshift": 0}
 
 def getVarData(variant, boundaries, variantData):
-    # TO DO write unittests
     '''
     Given variant, boundaries (either "priors" or "enigma') and list of dictionaries with variant data
     Checks that variant is a single nucleotide substitution
@@ -1905,55 +1904,67 @@ def getVarData(variant, boundaries, variantData):
     Return dictionary containing all values for all new prior prob fields
     '''
     varLoc = getVarLocation(variant, boundaries)
-    if getVarType(variant) == "substitution":
+    varType = getVarType(variant)
+    if varType == "substitution":
         if varLoc == "outside_transcript_boundaries_variant":
-            return getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries)
+            varData = getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries)
         elif varLoc == "CI_splice_donor_variant" or varLoc == "splice_donor_variant":
-            return getPriorProbSpliceDonorSNS(variant, boundaries, variantData)
-        elif varLoc == "CI_splice_acceptor_variant" or varLoc == "splice_donor_variant":
-            return getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData)
+            varData =  getPriorProbSpliceDonorSNS(variant, boundaries, variantData)
+        elif varLoc == "CI_splice_acceptor_variant" or varLoc == "splice_acceptor_variant":
+            varData =  getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData)
         elif varLoc == "CI_domain_variant" or varLoc == "exon_variant":
-            return getPriorProbInExonSNS(variant, boundaries, variantData)
+            varData = getPriorProbInExonSNS(variant, boundaries, variantData)
         elif varLoc == "grey_zone_variant":
-            return getPriorProbInGreyZoneSNS(variant, boundaries, variantData)
+            varData = getPriorProbInGreyZoneSNS(variant, boundaries, variantData)
         elif varLoc == "after_grey_zone_variant":
-            return getPriorProbAfterGreyZoneSNS(variant, boundaries)
+            varData =  getPriorProbAfterGreyZoneSNS(variant, boundaries)
         elif varLoc == "UTR_variant":
-            return getPriorProbUTRSNS(variant, boundaries)
+            varData =  getPriorProbUTRSNS(variant, boundaries)
         elif varLoc == "intron_variant":
-            return getPriorProbInIntronSNS(variant, boundaries)
+            varData =  getPriorProbInIntronSNS(variant, boundaries)
     else:
         # to account for any non SNS variants
-        return {"applicablePrior": "-",
-                "applicableEnigmaClass": "-",
-                "proteinPrior": "-",
-                "refDonorPrior": "-",
-                "deNovoDonorPrior": "-",
-                "refRefDonorMES": "-",
-                "refRefDonorZ": "-",
-                "altRefDonorMES": "-",
-                "altRefDonorZ": "-",
-                "refDeNovoDonorMES": "-",
-                "refDeNovoDonorZ": "-",
-                "altDeNovoDonorMES": "-",
-                "altDeNovoDonorZ": "-",
-                "deNovoDonorFlag": "-",
-                "deNovoAccPrior": "-",
-                "refRefAccMES": "-",
-                "refRefAccZ": "-",
-                "altRefAccMES": "-",
-                "altRefAccZ": "-",
-                "refDeNovoAccMES": "-",
-                "refDeNovoAccZ": "-",
-                "altDeNovoAccMES": "-",
-                "altDeNovoAccZ": "-",
-                "deNovoAccFlag": "-",
-                "spliceSite": "-",
-                "spliceRescue": "-",
-                "spliceFlag": "-",
-                "frameshift": "-"}
+        varData = {"applicablePrior": "-",
+                  "applicableEnigmaClass": "-",
+                  "proteinPrior": "-",
+                  "refDonorPrior": "-",
+                  "deNovoDonorPrior": "-",
+                  "refRefDonorMES": "-",
+                  "refRefDonorZ": "-",
+                  "altRefDonorMES": "-",
+                  "altRefDonorZ": "-",
+                  "refDeNovoDonorMES": "-",
+                  "refDeNovoDonorZ": "-",
+                  "altDeNovoDonorMES": "-",
+                  "altDeNovoDonorZ": "-",
+                  "deNovoDonorFlag": "-",
+                  "deNovoAccPrior": "-",
+                  "refRefAccMES": "-",
+                  "refRefAccZ": "-",
+                  "altRefAccMES": "-",
+                  "altRefAccZ": "-",
+                  "refDeNovoAccMES": "-",
+                  "refDeNovoAccZ": "-",
+                  "altDeNovoAccMES": "-",
+                  "altDeNovoAccZ": "-",
+                  "deNovoAccFlag": "-",
+                  "spliceSite": "-",
+                  "spliceRescue": "-",
+                  "spliceFlag": "-",
+                  "frameshift": "-"}
+        
+    varData["varType"] = varType
+    varData["varLoc"] = varLoc
+    return varData
             
-    
+def addVarDataToRow(varData, inputRow):
+    '''
+    Given data about a particular variant and a row from input file,
+    Returns row with appended data
+    '''
+    for key in varData.keys():
+        inputRow[key] = varData[key]
+    return inputRow
                         
                                                                                                                             
 def getVarDict(variant, boundaries):
@@ -1997,11 +2008,15 @@ def main():
         fieldnames.append(header)
     outputData = csv.DictWriter(open(args.outputFile, "w"), delimiter="\t", fieldnames=fieldnames)
     outputData.writerow(dict((fn,fn) for fn in inputData.fieldnames))
-    
+
+    totalVariants = 0
     for variant in inputData:
-        varDict = getVarDict(variant)
-    # TO DO - create conditional to account for user selected boundaries
-    # TO DO - create built_with_priors (copy of built)
+        variantData = csv.DictReader(open(args.variantFile, "r"), delimiter="\t")    
+        varData = getVarData(variant, args.boundaries, variantData)
+        variant = addVarDataToRow(varData, variant)
+        outputData.writerow(variant)
+        totalVariants += 1
+        print "variant", totalVariants, "complete"
     
 if __name__ == "__main__":
     main()
