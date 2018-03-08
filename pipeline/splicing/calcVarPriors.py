@@ -1243,8 +1243,35 @@ def getPriorProbAfterGreyZoneSNS(variant, boundaries):
         if varCons == "stop_gained" or varCons == "missense_variant":
             priorProb = "N/A"
             enigmaClass = "class_2"
-        return {"priorProb": priorProb,
-                "enigmaClass": enigmaClass}
+        return {"applicablePrior": priorProb,
+                "applicableEnigmaClass": enigmaClass,
+                "proteinPrior": "N/A",
+                "refDonorPrior": "N/A",
+                "deNovoDonorPrior": "N/A",
+                "refRefDonorMES": "-",
+                "refRefDonorZ": "-",
+                "altRefDonorMES": "-",
+                "altRefDonorZ": "-",
+                "refDeNovoDonorMES": "-",
+                "refDeNovoDonorZ": "-",
+                "altDeNovoDonorMES": "-",
+                "altDeNovoDonorZ": "-",
+                "deNovoDonorFlag": 0,
+                "deNovoAccPrior": "N/A",
+                "refRefAccMES": "-",
+                "refRefAccZ": "-",
+                "altRefAccMES": "-",
+                "altRefAccZ": "-",
+                "refDeNovoAccMES": "-",
+                "refDeNovoAccZ": "-",
+                "altDeNovoAccMES": "-",
+                "altDeNovoAccZ": "-",
+                "deNovoAccFlag": 0,
+                "spliceSite": 0,
+                "spliceRescue": 0,
+                "spliceFlag": 0,
+                "frameshift": 0}
+
 
 def varInIneligibleDeNovoExon(variant, donor=True):
     '''
@@ -1868,6 +1895,65 @@ def getPriorProbUTRSNS(variant, boundaries):
                 "spliceRescue": 0,
                 "spliceFlag": spliceFlag,
                 "frameshift": 0}
+
+def getVarData(variant, boundaries, variantData):
+    # TO DO write unittests
+    '''
+    Given variant, boundaries (either "priors" or "enigma') and list of dictionaries with variant data
+    Checks that variant is a single nucleotide substitution
+    Determines prior prob dictionary based on variant location
+    Return dictionary containing all values for all new prior prob fields
+    '''
+    varLoc = getVarLocation(variant, boundaries)
+    if getVarType(variant) == "substitution":
+        if varLoc == "outside_transcript_boundaries_variant":
+            return getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries)
+        elif varLoc == "CI_splice_donor_variant" or varLoc == "splice_donor_variant":
+            return getPriorProbSpliceDonorSNS(variant, boundaries, variantData)
+        elif varLoc == "CI_splice_acceptor_variant" or varLoc == "splice_donor_variant":
+            return getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData)
+        elif varLoc == "CI_domain_variant" or varLoc == "exon_variant":
+            return getPriorProbInExonSNS(variant, boundaries, variantData)
+        elif varLoc == "grey_zone_variant":
+            return getPriorProbInGreyZoneSNS(variant, boundaries, variantData)
+        elif varLoc == "after_grey_zone_variant":
+            return getPriorProbAfterGreyZoneSNS(variant, boundaries)
+        elif varLoc == "UTR_variant":
+            return getPriorProbUTRSNS(variant, boundaries)
+        elif varLoc == "intron_variant":
+            return getPriorProbInIntronSNS(variant, boundaries)
+    else:
+        # to account for any non SNS variants
+        return {"applicablePrior": "-",
+                "applicableEnigmaClass": "-",
+                "proteinPrior": "-",
+                "refDonorPrior": "-",
+                "deNovoDonorPrior": "-",
+                "refRefDonorMES": "-",
+                "refRefDonorZ": "-",
+                "altRefDonorMES": "-",
+                "altRefDonorZ": "-",
+                "refDeNovoDonorMES": "-",
+                "refDeNovoDonorZ": "-",
+                "altDeNovoDonorMES": "-",
+                "altDeNovoDonorZ": "-",
+                "deNovoDonorFlag": "-",
+                "deNovoAccPrior": "-",
+                "refRefAccMES": "-",
+                "refRefAccZ": "-",
+                "altRefAccMES": "-",
+                "altRefAccZ": "-",
+                "refDeNovoAccMES": "-",
+                "refDeNovoAccZ": "-",
+                "altDeNovoAccMES": "-",
+                "altDeNovoAccZ": "-",
+                "deNovoAccFlag": "-",
+                "spliceSite": "-",
+                "spliceRescue": "-",
+                "spliceFlag": "-",
+                "frameshift": "-"}
+            
+    
                         
                                                                                                                             
 def getVarDict(variant, boundaries):
