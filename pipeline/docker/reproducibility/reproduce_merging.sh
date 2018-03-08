@@ -7,10 +7,16 @@
 if [[ $# -ne 3 ]]; then
     echo "Expecting 3 arguments, got $#"
     echo "Usage $0: base_dir release_date previous_release_date"
+    echo ""
     echo "where:"
     echo "    base_dir: path to base directory for the analysis"
     echo "    release_date: date of the release to reproduce, e.g. '2018-02-17'"
     echo "    previous_release_date: date of the release prior to release to be reproduced, e.g. '2018-01-16'"
+    echo ""
+    echo "Example:"
+    echo ""
+    echo "./reproduce_merging.sh /tmp/reproductions/ 2018-02-17 2018-01-16"
+    echo ""
     echo "Note: you can lookup release dates here: http://brcaexchange.org/releases"
     exit 2
 fi
@@ -79,7 +85,8 @@ mkdir -p ${OUTPUT_DIR}
 
 # extracting required files from release tar
 # excluding the output/release directory, because this is what we want to reproduce
-tar zxf ${RELEASE_ARCHIVE} -C ${OUTPUT_DIR} --exclude 'output/release' 'output/*.vcf*' 'output/*.tsv'
+[[ "$OSTYPE" == "linux-gnu" ]] && WILDCARDS_OPT='--wildcards' # hacking around differing support across platforms of the --wildcards tar option
+tar zxf ${RELEASE_ARCHIVE} ${WILDCARDS_OPT} -C ${OUTPUT_DIR} --exclude 'output/release' 'output/*.vcf*' 'output/*.tsv'
 
 echo "$(date) Running BRCA Exchange pipeline (merging part)"
 docker run --rm -u $(id -u ${USER}):$(id -g ${USER}) \
