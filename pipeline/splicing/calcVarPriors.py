@@ -1273,6 +1273,10 @@ def getPriorProbDeNovoDonorSNS(variant, exonicPortionSize, accDonor=False):
             if varInExon(variant) == True and varInIneligibleDeNovoExon(variant, donor=True) == True:
                 return {"priorProb": "N/A",
                         "enigmaClass": "N/A",
+                        "refMaxEntScanScore": "-",
+                        "altMaxEntScanScore": "-",
+                        "refZScore": "-",
+                        "altZScore": "-",
                         "deNovoDonorFlag": 0}
             slidingWindowScores = getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, STD_DE_NOVO_LENGTH,
                                                                         donor=True, deNovo=False, accDonor=accDonor)
@@ -1558,7 +1562,6 @@ def main():
                         help="Specifies which boundaries ('enigma' or 'priors') to use for clinically important domains")
     args = parser.parse_args()    
 
-    variantData = csv.DictReader(open(args.variantFile, "r"), delimiter="\t")    
     inputData = csv.DictReader(open(args.inputFile, "r"), delimiter="\t")
     fieldnames = inputData.fieldnames
     newHeaders = ["varType", "varLoc", "applicablePrior", "applicableEnigmaClass", "proteinPrior", "refDonorPrior", "deNovoDonorPrior",
@@ -1572,6 +1575,7 @@ def main():
     outputData.writerow(dict((fn,fn) for fn in inputData.fieldnames))
     
     for variant in inputData:
+        variantData = csv.DictReader(open(args.variantFile, "r"), delimiter="\t")    
         varDict = getVarDict(variant)
     # TO DO - create conditional to account for user selected boundaries
     # TO DO - create built_with_priors (copy of built)
