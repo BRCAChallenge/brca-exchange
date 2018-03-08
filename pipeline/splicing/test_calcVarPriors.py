@@ -3363,7 +3363,9 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that protein prior prob, ref prior prob, and de novo prior prob are set appropriately
         self.assertEquals(priorProb["proteinPrior"], priorProbs["proteinMod"])
         self.assertEquals(priorProb["refDonorPrior"], priorProbs["low"])
-        self.assertEquals(priorProb["deNovoDonorPrior"], "N/A")
+        self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs["NA"])
+        self.assertEquals(priorProb["refAccPrior"], priorProbs["NA"])
+        self.assertEquals(priorProb["deNovoAccPrior"], priorProbs["NA"])
         # checks that a score is present for reference and de novo donor values
         self.assertNotEquals(priorProb["altRefDonorZ"], "-")
         self.assertNotEquals(priorProb["refDeNovoDonorMES"], "-")
@@ -3420,6 +3422,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["proteinPrior"], priorProbs["deNovoLow"])
         self.assertEquals(priorProb["refDonorPrior"], priorProbs["moderate"])
         self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs["deNovoLow"])
+        self.assertEquals(priorProb["refAccPrior"], priorProbs["NA"])
+        self.assertEquals(priorProb["deNovoAccPrior"], priorProbs["NA"])
         # checks that a score is present for reference donor score and de novo splice donor score
         self.assertNotEquals(priorProb["altDeNovoDonorZ"], "-")
         self.assertNotEquals(priorProb["refRefDonorMES"], "-")
@@ -3482,6 +3486,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["proteinPrior"], priorProbs["pathogenic"])
         self.assertEquals(priorProb["refDonorPrior"], priorProbs["moderate"])
         self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs["deNovoLow"])
+        self.assertEquals(priorProb["refAccPrior"], priorProbs["NA"])
+        self.assertEquals(priorProb["deNovoAccPrior"], priorProbs["NA"])
         # checks that a score is present for reference donor score and de novo splice donor score
         self.assertNotEquals(priorProb["altDeNovoDonorZ"], "-")
         self.assertNotEquals(priorProb["refRefDonorMES"], "-")
