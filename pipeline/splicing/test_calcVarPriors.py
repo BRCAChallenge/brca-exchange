@@ -2623,8 +2623,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "G"
         priorProb = calcVarPriors.getPriorProbAfterGreyZoneSNS(self.variant, boundaries)
-        self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
-        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+        self.assertEquals(priorProb["applicablePrior"], priorProbs["NA"])
+        self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class2"])
 
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["afterGreyZone"])
@@ -2645,8 +2645,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "T"
         priorProb = calcVarPriors.getPriorProbAfterGreyZoneSNS(self.variant, boundaries)
-        self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
-        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+        self.assertEquals(priorProb["applicablePrior"], priorProbs["NA"])
+        self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class2"])
 
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.getVarExonNumberSNS', return_value = "exon24")
