@@ -1575,7 +1575,6 @@ def main():
     outputData.writerow(dict((fn,fn) for fn in inputData.fieldnames))
     
     for variant in inputData:
-        variantData = csv.DictReader(open(args.variantFile, "r"), delimiter="\t")    
         varDict = getVarDict(variant)
     # TO DO - create conditional to account for user selected boundaries
     # TO DO - create built_with_priors (copy of built)
