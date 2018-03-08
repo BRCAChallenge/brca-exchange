@@ -4177,6 +4177,9 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that de novo donor and acceptor priors are correct
         self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs["NA"])
         self.assertEquals(priorProb["deNovoAccPrior"], priorProbs["NA"])
+        # checks that de novo donor and acceptor flags are correct
+        self.assertEquals(priorProb["deNovoDonorFlag"], 0)
+        self.assertEquals(priorProb["deNovoAccFlag"], 0)
         # checks that there are NOT values present for de novo donor and acceptor
         self.assertEquals(priorProb["refDeNovoDonorMES"], "-")
         self.assertEquals(priorProb["altDeNovoAccZ"], "-")
@@ -4201,6 +4204,9 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that de novo donor and acceptor priors are correct
         self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs["NA"])
         self.assertEquals(priorProb["deNovoAccPrior"], priorProbs["NA"])
+        # checks that de novo donor and acceptor flags are correct
+        self.assertEquals(priorProb["deNovoDonorFlag"], 0)
+        self.assertEquals(priorProb["deNovoAccFlag"], 0)
         # checks that there are NOT values present for de novo donor and acceptor
         self.assertEquals(priorProb["refDeNovoDonorMES"], "-")
         self.assertEquals(priorProb["altDeNovoAccZ"], "-")
@@ -4219,6 +4225,7 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'refZScore': -8.204433796086585})
     def test_getPriorProbUTR5PrimeExonDeNovoDonor(self, getVarLocation, getVarType, getVarConsequences,
                                                   varInExon, varInSpliceRegion, getPriorProbDeNovoDonorSNS):
+        '''Test function for plus strand (BRCA2) variant in exonic portion of 5' UTR that has de novo donor, no de novo acceptor'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
@@ -4247,55 +4254,78 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "5_prime_UTR_variant")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
-    @mock.patch('calcVarPriors.getPriorProbDeNovoAcceptorSNS', return_value = {})
-    @mock.patch('calcVarPriors.getPriorProbDeNovoDonorSNS', return_value = {})
+    @mock.patch('calcVarPriors.getPriorProbDeNovoAcceptorSNS', return_value = {'refMaxEntScanScore': -8.78,
+                                                                               'altMaxEntScanScore': -0.18,
+                                                                               'enigmaClass': 'N/A',
+                                                                               'altZScore': -3.3549885043158807,
+                                                                               'priorProb': 'N/A',
+                                                                               'deNovoAccFlag': 1,
+                                                                               'refZScore': -6.888757321073649})
+    @mock.patch('calcVarPriors.getPriorProbDeNovoDonorSNS', return_value = {'refMaxEntScanScore': -4.19,
+                                                                            'altMaxEntScanScore': 0.17,
+                                                                            'enigmaClass': 'class_2',
+                                                                            'altZScore': -3.335382267586803,
+                                                                            'priorProb': 0.02,
+                                                                            'deNovoDonorFlag': 1,
+                                                                            'refZScore': -5.207433825281605})
     def test_getPriorProbUTR5PrimeExonDeNovoAccAndDonor(self, getVarLocation, getVarType, getVarConsequences,
                                                         varInExon, varInSpliceRegion, getPriorProbDeNovoAcceptorSNS,
                                                         getPriorProbDeNovoDonorSNS):
+        '''Tests function for minus strand (BRCA1) variant in exonic portion of 5' UTR that has de novo donor and acceptor'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
-        self.variant["HGVS_cDNA"] = ""
-        self.variant["Pos"] = self.variant["Hg38_Start"] = self.variant["Hg38_End"] = ""
-        self.variant["Ref"] = ""
-        self.variant["Alt"] = ""
+        self.variant["HGVS_cDNA"] = "c.-15T>G"
+        self.variant["Pos"] = self.variant["Hg38_Start"] = self.variant["Hg38_End"] = "43124111"
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "C"
         priorProb = calcVarPriors.getPriorProbUTRSNS(self.variant, boundaries)
         # checks that applicable prior, applicable class, and splice flag are correct
-        self.assertEquals(priorProb["applicablePrior"], priorProbs[""])
-        self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses[""])
+        self.assertEquals(priorProb["applicablePrior"], priorProbs["deNovoLow"])
+        self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class2"])
         self.assertEquals(priorProb["spliceFlag"], 0)
         # checks that de novo donor and acceptor priors is correct
-        self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs[""])
+        self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs["deNovoLow"])
         self.assertEquals(priorProb["deNovoAccPrior"], priorProbs["NA"])
         # checks that de novo donor and acceptor flags are correct
         self.assertEquals(priorProb["deNovoDonorFlag"], 1)
         self.assertEquals(priorProb["deNovoAccFlag"], 1)
         # checks that values are present for de novo donor and de novo acceptor
-        self.assertNotEquals(priorProb["refDeNovoDonorZ"], "-")
-        self.assertNotEquals(priorProb["altDeNovoAccMES"], "-")
+        self.assertNotEquals(priorProb["altDeNovoDonorMES"], "-")
+        self.assertNotEquals(priorProb["refDeNovoAccMES"], "-")
 
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inUTR"])
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
-    @mock.patch('calcVarPriors.getVarConsequences', return_value = "5_prime_UTR_variant")
-    @mock.patch('calcVarPriors.varInExon', return_value = False)
-    @mock.patch('calcVarPriors.getPriorProbIntronicDeNovoDonorSNS', return_value = {})
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "intron_variant")
+    @mock.patch('calcVarPriors.getPriorProbIntronicDeNovoDonorSNS', return_value = {'altZScore': -5.112972508150215,
+                                                                                    'spliceFlag': 1,
+                                                                                    'deNovoDonorFlag': 1,
+                                                                                    'refMaxEntScanScore': -11.72,
+                                                                                    'altMaxEntScanScore': -3.97,
+                                                                                    'enigmaClass': 'N/A',
+                                                                                    'priorProb': 'N/A',
+                                                                                    'refZScore': -8.44058708891506})
     def test_getPriorProbUTR5PrimeIntronWithSpliceFlag(self, getVarLocation, getVarType, getVarConsequences,
-                                                       varInExon, getPriorProbIntronicDeNovoDonorSNS):
+                                                       getPriorProbIntronicDeNovoDonorSNS):
+        '''Tests function for variant in intronic portion of 5' UTR for plus strand (BRCA2) gene that has de novo donor'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
-        self.variant["HGVS_cDNA"] = ""
-        self.variant["Pos"] = self.variant["Hg38_Start"] = self.variant["Hg38_End"] = ""
-        self.variant["Ref"] = ""
-        self.variant["Alt"] = ""
+        self.variant["HGVS_cDNA"] = "c.-39-23c>T"
+        self.variant["Pos"] = self.variant["Hg38_Start"] = self.variant["Hg38_End"] = "32316399"
+        self.variant["Ref"] = "C"
+        self.variant["Alt"] = "T"
         priorProb = calcVarPriors.getPriorProbUTRSNS(self.variant, boundaries)
         # checks that applicable prior, applicable class, and splice flag are correct
         self.assertEquals(priorProb["applicablePrior"], priorProbs["NA"])
         self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["NA"])
         self.assertEquals(priorProb["spliceFlag"], 1)
         # checks that de novo donor and acceptor priors is correct
-        self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs[""])
+        self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs["NA"])
         self.assertEquals(priorProb["deNovoAccPrior"], priorProbs["NA"])
+        # checks that de novo donor and acceptor flags are correct
+        self.assertEquals(priorProb["deNovoDonorFlag"], 1)
+        self.assertEquals(priorProb["deNovoAccFlag"], 0)
         # checks that values are present for de novo donor
         self.assertNotEquals(priorProb["refDeNovoDonorZ"], "-")
         # checks that values are NOT present for de novo acceptor
@@ -4303,18 +4333,25 @@ class test_calcVarPriors(unittest.TestCase):
 
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inUTR"])
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
-    @mock.patch('calcVarPriors.getVarConsequences', return_value = "5_prime_UTR_variant")
-    @mock.patch('calcVarPriors.varInExon', return_value = False)
-    @mock.patch('calcVarPriors.getPriorProbIntronicDeNovoDonorSNS', return_value = {})
-    def test_getPriorPRobUTR5PrimeIntronNoSpliceFlag(self, getVarLocation, getVarType, getVarConsequences,
-                                                     varInExon, getPriorProbIntronicDeNovoDonorSNS):
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "intron_variant")
+    @mock.patch('calcVarPriors.getPriorProbIntronicDeNovoDonorSNS', return_value = {'altZScore': -5.666859322238815,
+                                                                                    'spliceFlag': 0,
+                                                                                    'deNovoDonorFlag': 0,
+                                                                                    'refMaxEntScanScore': -4.93,
+                                                                                    'altMaxEntScanScore': -5.26,
+                                                                                    'enigmaClass': 'N/A',
+                                                                                    'priorProb': 'N/A',
+                                                                                    'refZScore': -5.525167346541731})
+    def test_getPriorProbUTR5PrimeIntronNoSpliceFlag(self, getVarLocation, getVarType, getVarConsequences,
+                                                     getPriorProbIntronicDeNovoDonorSNS):
+        '''Tests variant in intronic portion of 5' UTR for minus strand (BRCA1) gene that does not have de novo donor'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
-        self.variant["HGVS_cDNA"] = ""
-        self.variant["Pos"] = self.variant["Hg38_Start"] = self.variant["Hg38_End"] = ""
-        self.variant["Ref"] = ""
-        self.variant["Alt"] = ""
+        self.variant["HGVS_cDNA"] = "c.-19-24a>T"
+        self.variant["Pos"] = self.variant["Hg38_Start"] = self.variant["Hg38_End"] = "43124139"
+        self.variant["Ref"] = "T"
+        self.variant["Alt"] = "A"
         priorProb = calcVarPriors.getPriorProbUTRSNS(self.variant, boundaries)
         # checks that applicable prior, applicable class, and splice flag are correct
         self.assertEquals(priorProb["applicablePrior"], priorProbs["deNovoLow"])
@@ -4323,6 +4360,9 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that de novo donor and acceptor priors is correct
         self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs["NA"])
         self.assertEquals(priorProb["deNovoAccPrior"], priorProbs["NA"])
+        # checks that de novo donor and acceptor flags are correct
+        self.assertEquals(priorProb["deNovoDonorFlag"], 0)
+        self.assertEquals(priorProb["deNovoAccFlag"], 0)
         # checks that values are present for de novo donor
         self.assertNotEquals(priorProb["refDeNovoDonorZ"], "-")
         # checks that values are NOT present for de novo acceptor
