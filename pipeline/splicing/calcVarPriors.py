@@ -1828,7 +1828,7 @@ def getPriorProbUTRSNS(variant, boundaries):
                 spliceFlag = 0
                 if varInSpliceRegion(variant, donor=False, deNovo=True) == True:
                     deNovoAccData = getPriorProbDeNovoAcceptorSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH)
-        elif varCons == "intron_variant":
+        else:
             # to account for intronic variants in 5' UTR that are classified as intron variants by getVarConsequences function
             deNovoDonorData = getPriorProbIntronicDeNovoDonorSNS(variant)
             spliceFlag = deNovoDonorData["spliceFlag"]
