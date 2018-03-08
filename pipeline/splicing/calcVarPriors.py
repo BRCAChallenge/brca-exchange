@@ -1822,22 +1822,22 @@ def getPriorProbUTRSNS(variant, boundaries):
             # TO DO if ATG is created and is OUT of frame --> flag/priorProb = 0.10
             # TO DO if ATG is created and is IN frame AND there is a stop codon before real start codon --> flag/priorProb = 0.10
             if varInExon(variant) == True:
-                if varInSpliceRegion(variant, donor=False, deNovo=True) == True:
-                    deNovoAccData = getPriorProbDeNovoAcceptorSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH)
-                else:
-                    deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, STD_EXONIC_PORTION, accDonor=False)
+                deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, STD_EXONIC_PORTION, accDonor=False)
                 applicablePrior = deNovoDonorData["priorProb"]
                 applicableClass = deNovoDonorData["enigmaClass"]
                 spliceFlag = 0
+                if varInSpliceRegion(variant, donor=False, deNovo=True) == True:
+                    deNovoAccData = getPriorProbDeNovoAcceptorSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH)
+        elif varCons == "intron_variant":
+            # to account for intronic variants in 5' UTR that are classified as intron variants by getVarConsequences function
+            deNovoDonorData = getPriorProbIntronicDeNovoDonorSNS(variant)
+            spliceFlag = deNovoDonorData["spliceFlag"]
+            if spliceFlag == 1:
+                applicablePrior = deNovoDonorData["priorProb"]
+                applicableClass = deNovoDonorData["enigmaClass"]
             else:
-                deNovoDonorData = getPriorProbIntronicDeNovoDonorSNS(variant)
-                spliceFlag = deNovoDonorData["spliceFlag"]
-                if spliceFlag == 1:
-                    applicablePrior = deNovoDonorData["priorProb"]
-                    applicableClass = deNovoDonorData["enigmaClass"]
-                else:
-                    applicablePrior = 0.02
-                    applicableClass = getEnigmaClass(applicablePrior)
+                applicablePrior = 0.02
+                applicableClass = getEnigmaClass(applicablePrior)
 
         return {"applicablePrior": applicablePrior,
                 "applicableEnigmaClass": applicableClass,
