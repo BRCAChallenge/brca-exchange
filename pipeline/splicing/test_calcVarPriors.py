@@ -4367,6 +4367,32 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertNotEquals(priorProb["refDeNovoDonorZ"], "-")
         # checks that values are NOT present for de novo acceptor
         self.assertEquals(priorProb["altDeNovoAccMES"], "-")
+
+    @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inExon"])
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    def test_getVarDataNonACTG(self, getVarLocation, getVarType):
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["HGVS_cDNA"] = "c.4965C>R"
+        self.variant["Pos"] = "32339320"
+        self.variant["Ref"] = "C"
+        self.variant["Alt"] = "R"
+        priorProb = calcVarPriors.getVarData(self.variant, boundaries, variantData)
+        self.assertEquals(priorProb["applicablePrior"], "-")
+
+    @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inExon"])
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["ins"])
+    def test_getVarDataNonSNS(self, getVarLocation, getVarType):
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["Reference_Sequence"] = "NM_000059.3"
+        self.variant["HGVS_cDNA"] = "c.4965delCinsGA"
+        self.variant["Pos"] = "32339320"
+        self.variant["Ref"] = "C"
+        self.variant["Alt"] = "GA"
+        priorProb = calcVarPriors.getVarData(self.variant, boundaries, variantData)
+        self.assertEquals(priorProb["applicablePrior"], "-")
         
     @mock.patch('calcMaxEntScanMeanStd.fetch_gene_coordinates', return_value = transcriptDataBRCA2)
     def test_getVarDict(self, fetch_gene_coordinates):

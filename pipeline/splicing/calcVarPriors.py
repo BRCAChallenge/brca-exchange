@@ -1725,7 +1725,8 @@ def getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries):
                 "altDeNovoDonorMES": "-",
                 "altDeNovoDonorZ": "-",
                 "deNovoDonorFlag": 0,
-                "deNovoAccPrior": "-",
+                "refAccPrior": "N/A",
+                "deNovoAccPrior": "N/A",
                 "refRefAccMES": "-",
                 "refRefAccZ": "-",
                 "altRefAccMES": "-",
@@ -1826,7 +1827,16 @@ def getPriorProbInIntronSNS(variant, boundaries):
                 "frameshift": 0}
 
 def getPriorProbUTRSNS(variant, boundaries):
-    #TO DO write function description and unittests
+    '''
+    Given a variant and boundaries (either "priors" or "enigma"),
+    Checks that variant is a SNS variant in a UTR
+    Determines prior prob based on location (5'/3' UTR and intron/exon)
+    Returns a dictionary containing applicable prior and predicted qualitative enigma class
+    Dictionary also contains de novo donor/acceptor ref and alt scores if applicable
+    AND a spliceFlag which is equal to 1 if variant creates a better de novo splice site than ref sequence
+    Rest of values in dictionary are equal to 0, "-", or N/A because they are not relevant to variant
+    '''
+    # TO DO still need to account for creation of alternate ATG codons in 5' UTRs
     varLoc = getVarLocation(variant, boundaries)
     varType = getVarType(variant)
     if varLoc == "UTR_variant" and varType == "substitution":
@@ -1860,7 +1870,7 @@ def getPriorProbUTRSNS(variant, boundaries):
                 if varInSpliceRegion(variant, donor=False, deNovo=True) == True:
                     deNovoAccData = getPriorProbDeNovoAcceptorSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH)
         else:
-            # to account for intronic variants in 5' UTR that are classified as intron variants by getVarConsequences function
+            # to account for variants in 5' UTR that are classified as other variant types by getVarConsequences function
             deNovoDonorData = getPriorProbIntronicDeNovoDonorSNS(variant)
             spliceFlag = deNovoDonorData["spliceFlag"]
             if spliceFlag == 1:
@@ -1909,53 +1919,60 @@ def getVarData(variant, boundaries, variantData):
     '''
     varLoc = getVarLocation(variant, boundaries)
     varType = getVarType(variant)
+    blankDict = {"applicablePrior": "-",
+                 "applicableEnigmaClass": "-",
+                 "proteinPrior": "-",
+                 "refDonorPrior": "-",
+                 "deNovoDonorPrior": "-",
+                 "refRefDonorMES": "-",
+                 "refRefDonorZ": "-",
+                 "altRefDonorMES": "-",
+                 "altRefDonorZ": "-",
+                 "refDeNovoDonorMES": "-",
+                 "refDeNovoDonorZ": "-",
+                 "altDeNovoDonorMES": "-",
+                 "altDeNovoDonorZ": "-",
+                 "deNovoDonorFlag": "-",
+                 "deNovoAccPrior": "-",
+                 "refRefAccMES": "-",
+                 "refRefAccZ": "-",
+                 "altRefAccMES": "-",
+                 "altRefAccZ": "-",
+                 "refDeNovoAccMES": "-",
+                 "refDeNovoAccZ": "-",
+                 "altDeNovoAccMES": "-",
+                 "altDeNovoAccZ": "-",
+                 "deNovoAccFlag": "-",
+                 "spliceSite": "-",
+                 "spliceRescue": "-",
+                 "spliceFlag": "-",
+                 "frameshift": "-"}
     if varType == "substitution":
-        if varLoc == "outside_transcript_boundaries_variant":
-            varData = getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries)
-        elif varLoc == "CI_splice_donor_variant" or varLoc == "splice_donor_variant":
-            varData =  getPriorProbSpliceDonorSNS(variant, boundaries, variantData)
-        elif varLoc == "CI_splice_acceptor_variant" or varLoc == "splice_acceptor_variant":
-            varData =  getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData)
-        elif varLoc == "CI_domain_variant" or varLoc == "exon_variant":
-            varData = getPriorProbInExonSNS(variant, boundaries, variantData)
-        elif varLoc == "grey_zone_variant":
-            varData = getPriorProbInGreyZoneSNS(variant, boundaries, variantData)
-        elif varLoc == "after_grey_zone_variant":
-            varData =  getPriorProbAfterGreyZoneSNS(variant, boundaries)
-        elif varLoc == "UTR_variant":
-            varData =  getPriorProbUTRSNS(variant, boundaries)
-        elif varLoc == "intron_variant":
-            varData =  getPriorProbInIntronSNS(variant, boundaries)
+        # functions only work for variants with cannonical nucleotides (ACTG)
+        if variant["Ref"] in ["A", "C","G", "T"] and variant["Alt"] in ["A", "C", "G", "T"]:
+            if varLoc == "outside_transcript_boundaries_variant":
+                varData = getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries)
+            elif varLoc == "CI_splice_donor_variant" or varLoc == "splice_donor_variant":
+                varData =  getPriorProbSpliceDonorSNS(variant, boundaries, variantData)
+            elif varLoc == "CI_splice_acceptor_variant" or varLoc == "splice_acceptor_variant":
+                varData =  getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData)
+            elif varLoc == "CI_domain_variant" or varLoc == "exon_variant":
+                varData = getPriorProbInExonSNS(variant, boundaries, variantData)
+            elif varLoc == "grey_zone_variant":
+                varData = getPriorProbInGreyZoneSNS(variant, boundaries, variantData)
+            elif varLoc == "after_grey_zone_variant":
+                varData =  getPriorProbAfterGreyZoneSNS(variant, boundaries)
+            elif varLoc == "UTR_variant":
+                varData =  getPriorProbUTRSNS(variant, boundaries)
+            elif varLoc == "intron_variant":
+                varData =  getPriorProbInIntronSNS(variant, boundaries)
+            else:
+                varData = blankDict.copy()
+        else:
+            varData = blankDict.copy()
     else:
         # to account for any non SNS variants
-        varData = {"applicablePrior": "-",
-                  "applicableEnigmaClass": "-",
-                  "proteinPrior": "-",
-                  "refDonorPrior": "-",
-                  "deNovoDonorPrior": "-",
-                  "refRefDonorMES": "-",
-                  "refRefDonorZ": "-",
-                  "altRefDonorMES": "-",
-                  "altRefDonorZ": "-",
-                  "refDeNovoDonorMES": "-",
-                  "refDeNovoDonorZ": "-",
-                  "altDeNovoDonorMES": "-",
-                  "altDeNovoDonorZ": "-",
-                  "deNovoDonorFlag": "-",
-                  "deNovoAccPrior": "-",
-                  "refRefAccMES": "-",
-                  "refRefAccZ": "-",
-                  "altRefAccMES": "-",
-                  "altRefAccZ": "-",
-                  "refDeNovoAccMES": "-",
-                  "refDeNovoAccZ": "-",
-                  "altDeNovoAccMES": "-",
-                  "altDeNovoAccZ": "-",
-                  "deNovoAccFlag": "-",
-                  "spliceSite": "-",
-                  "spliceRescue": "-",
-                  "spliceFlag": "-",
-                  "frameshift": "-"}
+        varData = blankDict.copy()
         
     varData["varType"] = varType
     varData["varLoc"] = varLoc
