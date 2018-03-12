@@ -354,8 +354,6 @@ def appendVariantChangeTypesToOutput(variantChangeTypes, v2, output):
             headerRow.append('change_type')
             result.append(headerRow)
 
-            # store pyhgvs_genomic_coordinate_38 index for referencing variants in variantChangeTypes list
-
             # add change types for individual variants
             for row in reader:
                 identifier = getIdentifier(row, reports)
