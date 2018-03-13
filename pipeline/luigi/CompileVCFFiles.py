@@ -1347,7 +1347,7 @@ class BuildAggregatedOutput(luigi.Task):
 
     def output(self):
         release_dir = self.output_dir + "/release/"
-        return luigi.LocalTarget(release_dir + "built.tsv")
+        return luigi.LocalTarget(artifacts_dir + "built.tsv")
 
     def run(self):
         release_dir = self.output_dir + "/release/"
@@ -1362,17 +1362,40 @@ class BuildAggregatedOutput(luigi.Task):
                 "-r", brca_resources_dir + "/refseq_annotation.hg18.gp",
                 "-s", brca_resources_dir + "/refseq_annotation.hg19.gp",
                 "-t", brca_resources_dir + "/refseq_annotation.hg38.gp",
-                "-o", release_dir + "built.tsv",
+                "-o", artifacts_dir + "built.tsv",
                 "--artifacts_dir", artifacts_dir]
         print "Running brca_pseudonym_generator.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
         check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "aggregated.tsv",
-                                                             release_dir + "built.tsv")
+                                                             artifacts_dir + "built.tsv")
 
 
 @requires(BuildAggregatedOutput)
+class AppendMupitStructure(luigi.Task):
+
+    def output(self):
+        release_dir = self.output_dir + "/release/"
+        return luigi.LocalTarget(artifacts_dir + "built_with_mupit.tsv")
+
+    def run(self):
+        release_dir = self.output_dir + "/release/"
+        artifacts_dir = release_dir + "artifacts/"
+        brca_resources_dir = self.resources_dir
+        os.chdir(data_merging_method_dir)
+
+        args = ["python", "getMupitStructure.py", "-i", artifacts_dir + "built.tsv", "-o",
+                artifacts_dir + "/built_with_mupit.tsv"]
+        print "Running getMupitStructure.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "built.tsv",
+                                                             artifacts_dir + "built_with_mupit.tsv")
+
+
+@requires(AppendMupitStructure)
 class FindMissingReports(luigi.Task):
     def output(self):
         artifacts_dir = self.output_dir + "/release/artifacts/"
@@ -1383,7 +1406,7 @@ class FindMissingReports(luigi.Task):
         artifacts_dir = self.output_dir + "/release/artifacts/"
         os.chdir(data_merging_method_dir)
 
-        args = ["python", "check_for_missing_reports.py", "-b", release_dir + "built.tsv", "-r", artifacts_dir,
+        args = ["python", "check_for_missing_reports.py", "-b", artifacts_dir + "built.tsv", "-r", artifacts_dir,
                 "-a", artifacts_dir, "-v"]
         print "Running check_for_missing_reports.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -1430,7 +1453,7 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
         previous_release_date = self._extract_release_date(version_json_path)
         previous_release_date_str = datetime.datetime.strftime(previous_release_date, '%m-%d-%Y')
         
-        args = ["python", "releaseDiff.py", "--v2", release_dir + "built.tsv", "--v1", previous_data_path,
+        args = ["python", "releaseDiff.py", "--v2", artifacts_dir + "built.tsv", "--v1", previous_data_path,
                 "--removed", diff_dir + "removed.tsv", "--added", diff_dir + "added.tsv", "--added_data",
                 diff_dir + "added_data.tsv", "--diff", diff_dir + "diff.txt", "--diff_json", diff_dir + "diff.json",
                 "--output", release_dir + "built_with_change_types.tsv", "--artifacts_dir", artifacts_dir,
@@ -1442,7 +1465,7 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
 
         shutil.rmtree(tmp_dir) # cleaning up
 
-        check_input_and_output_tsvs_for_same_number_variants(release_dir + "built.tsv",
+        check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "built.tsv",
                                                              release_dir + "built_with_change_types.tsv")
 
 
