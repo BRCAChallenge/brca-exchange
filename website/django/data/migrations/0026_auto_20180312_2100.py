@@ -28,6 +28,12 @@ class Migration(migrations.Migration):
                 ('name', models.TextField()),
             ],
         ),
+        migrations.RunPython(add_mupit_structures),
+        migrations.AddField(
+            model_name='variant',
+            name='Mupit_Structure',
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='data.MupitStructure'),
+        ),
         migrations.RunSQL(
             """
             DROP MATERIALIZED VIEW IF EXISTS currentvariant;
@@ -37,11 +43,5 @@ class Migration(migrations.Migration):
                 )
             );
             """
-        ),
-        migrations.RunPython(add_mupit_structures),
-        migrations.AddField(
-            model_name='variant',
-            name='Mupit_Structure',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='data.MupitStructure'),
         ),
     ]
