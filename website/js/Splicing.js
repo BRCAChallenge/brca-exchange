@@ -27,8 +27,13 @@ const intronWidth = 40,
     zoomMargin = 20,
     intronMag = 2; // factor by which the intron for a fully-intronic variant is scaled
 
-const donorFill = 'rgba(206, 103, 179, 0.5)', // '#ce67b3'
-    acceptorFill = 'rgba(123, 168, 255, 0.5)'; //'#7ba8ff'
+const donorFill = 'rgba(206, 103, 179, 0.7)', // '#ce67b3'
+    acceptorFill = 'rgba(123, 168, 255, 0.8)'; //'#7ba8ff'
+
+/*
+const donorFill = '#b272ec',
+    acceptorFill = '#ffb378';
+*/
 
 const CIDomainFills = {
     enigma: 'rgba(147, 0, 255, 0.3)',
