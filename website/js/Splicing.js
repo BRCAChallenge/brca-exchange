@@ -83,37 +83,6 @@ function overlaps(a, b) {
     return first[1] >= second[0];
 }
 
-// ensure that the span lies entirely within the parent
-// TODO: consider replacing this with d3's scaling and clamping
-function constrain(regionStart, regionWidth, start, width, minWidth) {
-    // ensure the starting pos is no less than the parent's pos
-    start = Math.max(regionStart, start);
-
-    // if minWidth is given, ensure our pixel width is never less than that (caveats below)
-    // - if this is done after the overshoot check, it could cause this element to overflow into the next region
-    // - if this is done before the overshoot check, like it is now, then we can't guarantee a minimum width
-    // - the final option is to adjust the start position to keep its minimum width, which is a bit of a white lie...
-    if (minWidth) {
-        width = Math.max(width, minWidth);
-    }
-
-    // ensure our width doesn't exceed the parent's end
-    if (start + width > regionStart + regionWidth) {
-        const overshootWidth = (start + width) - (regionStart + regionWidth);
-
-        // console.log("would overshoot by ", overshootWidth, "; shortened to fit within ", regionWidth);
-
-        // subtract the difference between our larger end and the parent's end,
-        // which should put us at just touching the parent
-        // FIXME: is this right? how should we deal with an event that overlaps the end of the region?
-        width -= (overshootWidth);
-    }
-
-    // FIXME: in large regions, short events near the start or end can get obscured by the border
-    // (find an example of this, shouldn't be too hard...)
-    return { start, width };
-}
-
 // given an array, returns pairs of successive elements; e.g. [1,2,3] produces [[1,2],[2,3]]
 // (used to create introns between pairs of exons later in the code)
 function pairwise(seq) {
@@ -581,7 +550,7 @@ class Splicing extends React.Component {
     constructor(props) {
         super(props);
 
-        const meta = geneMeta[props.variant['Gene_Symbol']];
+        // const meta = geneMeta[props.variant['Gene_Symbol']];
 
         this.state = {
             drawAcceptors: true,
