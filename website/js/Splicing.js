@@ -96,53 +96,37 @@ function pairwise(seq) {
 
 class Region extends React.Component {
     render() {
-        let { region, x, width, height, txStart, txEnd, scale, fill, opacity, mask, selected } = this.props;
+        let { region, width, height, txStart, txEnd, scale, fill, opacity, mask, selected, nudgeable } = this.props;
 
         // txStart, txEnd are the parent exon/intron's span in bases
-        // width, height is the pixel width, height of the parent element
-        // x is the pixel position of the parent exon/intron in the SVG
-
-
-        // length of the event in bases
-        const eventWidth = Math.abs(region.end - region.start);
-        const eventMin = Math.min(region.start, region.end), txMin = Math.min(txStart, txEnd);
+        // height is the pixel height of the parent element
+        // scale is a d3 scaling object that converts from genomic coords to pixel positions in the parent
 
         // no point drawing an invisible zero-width event or one that doesn't overlap this container
-        if (eventWidth <= 0 || !overlaps([region.start, region.end], [txStart, txEnd])) {
+        if (Math.abs(region.end - region.start) <= 0 || !overlaps([region.start, region.end], [txStart, txEnd])) {
             return null;
         }
 
-        /*
-        // length of the parent exon/intro in bases
-        const regionWidth = Math.abs(txEnd - txStart);
-
-        // pixel position of the event within this region (or possibly outside)
-        // (if eventX is negative, it's because the variant's start is before this region begins)
-        const eventX = x + width * ((eventMin - txMin) / regionWidth);
-        // relative width of this event scaled by the parent's width
-        const eventWidthPx = width * (eventWidth / regionWidth);
-
-        const span = constrain(x, width, eventX, eventWidthPx, 2);
-        */
-
-        /*
-        const span = {
-            start: scale(region.start),
-            width: Math.abs(scale(region.end) - scale(region.start))
-        };
-        */
-
+        // project genomic coords into pixel positions
         const bpStartPx = scale(region.start);
         const bpEndPx = scale(region.end);
 
-        const span = {
-            start: Math.min(bpStartPx, bpEndPx),
-            width: Math.max(Math.abs(bpStartPx - bpEndPx), 2)
-        };
+        // convert coordinates (minning b/c they may be swapped) into a pos and a width
+        let bpMinPx = Math.min(bpStartPx, bpEndPx);
+        let widthPx = Math.abs(bpStartPx - bpEndPx);
+
+        // constrain to a minimum width, shifting away from the margin if necessary
+        if (nudgeable && widthPx < 2) {
+            widthPx = 2;
+
+            if (bpMinPx + widthPx > width) {
+                bpMinPx -= widthPx;
+            }
+        }
 
         return (
             <g>
-                <rect x={span.start} width={span.width} height={height}
+                <rect x={bpMinPx} width={widthPx} height={height}
                     fill={fill}
                     className={selected ? 'selected-ci-path' : ''}
                     opacity={opacity}
@@ -177,14 +161,17 @@ class Variant extends React.Component {
         const events = {
             changed: {
                 fill: 'lightgreen',
+                widthBP: delta.changed,
                 span: {start: variantStart, end: variantStart + delta.changed}
             },
             deleted: {
                 fill: 'url(#diagonalHatch)',
+                widthBP: delta.deleted,
                 span: {start: variantStart + delta.changed, end: variantStart + delta.changed + delta.deleted}
             },
             inserted: {
                 fill: '#56F', // 'lightblue',
+                widthBP: delta.inserted,
                 // FIXME: should insertions be drawn as points, not intervals, since there's no corresponding region in the source to annotate?
                 span: {start: variantStart + delta.changed, end: variantStart + delta.changed + delta.inserted}
             },
@@ -194,12 +181,13 @@ class Variant extends React.Component {
             <g>
             {
                 _.toPairs(events)
-                    .map(([key, event]) => (
+                    .filter((keyAndEvent) => keyAndEvent[1].widthBP > 0)
+                    .map(([key, event]) =>
                         <Region key={`event_${key}`} region={event.span}
                             x={0} width={width} height={height} txStart={txStart} txEnd={txEnd} scale={scale}
-                            fill={event.fill} mask={mask}
+                            fill={event.fill} mask={mask} nudgeable={true}
                         />
-                    ))
+                    )
             }
             </g>
         );
