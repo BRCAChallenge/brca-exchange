@@ -86,8 +86,7 @@ def variant(request):
 
     variant = Variant.objects.get(id=variant_id)
     key = variant.Genomic_Coordinate_hg38
-
-    query = Variant.objects.filter(Genomic_Coordinate_hg38=key).order_by('-Data_Release_id').select_related('Data_Release')
+    query = Variant.objects.filter(Genomic_Coordinate_hg38=key).order_by('-Data_Release_id').select_related('Data_Release').select_related('Mupit_Structure')
 
     variant_versions = map(variant_to_dict, query)
     response = JsonResponse({"data": variant_versions})
@@ -129,6 +128,8 @@ def variant_to_dict(variant_object):
     change_types_map = {x['name']:x['id'] for x in ChangeType.objects.values().all()}
     variant_dict = model_to_dict(variant_object)
     variant_dict["Data_Release"] = model_to_dict(variant_object.Data_Release)
+    if variant_object.Mupit_Structure is not None:
+        variant_dict["Mupit_Structure"] = model_to_dict(variant_object.Mupit_Structure)
     variant_dict["Data_Release"]["date"] = variant_object.Data_Release.date
     variant_dict["Change_Type"] = ChangeType.objects.get(id=variant_dict["Change_Type"]).name
     try:
