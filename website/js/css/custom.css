@@ -218,6 +218,10 @@ offending file, for future reference: website/node_modules/react-data-components
     }
 }
 
+.mupit-structure img {
+    width: 100%;
+}
+
 @media only screen and (max-width : 767px) {
     .deleted-variant-message {
         text-align: left;

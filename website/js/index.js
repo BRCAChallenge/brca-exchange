@@ -804,7 +804,7 @@ var VariantDetail = React.createClass({
                     title = "Abbreviated AA Change";
                 }
 
-                // get allele frequency chart components if they're available
+                // get allele frequency chart components and mupit structures if they're available
                 if (rowDescriptor.replace) {
                     rowItem = rowDescriptor.replace(variant, prop);
 
@@ -821,6 +821,12 @@ var VariantDetail = React.createClass({
                         }
                     } else if (prop === 'Allele_Frequency_Charts_ExAC') {
                         if (!variant['Variant_in_ExAC']) {
+                            rowsEmpty += 1;
+                            return false;
+                        }
+                    }
+                     else if (prop === "Mupit_Structure") {
+                        if (!variant[prop]) {
                             rowsEmpty += 1;
                             return false;
                         }
@@ -845,7 +851,6 @@ var VariantDetail = React.createClass({
                         isEmptyValue = false;
                     }
                 }
-
                 if (isEmptyValue) {
                     rowsEmpty += 1;
                     rowItem = '-';
@@ -877,7 +882,7 @@ var VariantDetail = React.createClass({
             );
 
             return (
-                <div key={`group_collection-${groupTitle}`} className={ allEmpty && this.state.hideEmptyItems ? "group-empty" : "" }>
+                <div key={`group_collection-${groupTitle}`} className={ (allEmpty && this.state.hideEmptyItems) || (allEmpty && groupTitle === "Mupit Structure") ? "group-empty" : "" }>
                     <Panel
                         header={header}
                         collapsable={true}
