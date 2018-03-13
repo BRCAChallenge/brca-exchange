@@ -260,19 +260,8 @@ class SegmentRegions extends React.Component {
         // apply the intervals we've constructed to the scale
         scale.domain(domain).range(range);
 
-
         return (
             <g>
-            {
-                variant && (
-                    <Variant variant={variant}
-                        x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
-                        scale={scale}
-                        mask={mask}
-                    />
-                )
-            }
-
             {
                 donors.map((donorSpan, idx) => (
                     <Region key={`donor_${n}_${idx}`} region={donorSpan}
@@ -303,6 +292,17 @@ class SegmentRegions extends React.Component {
                             selected={this.props.selectedDomain === `${org}_${name}`}
                         />
                     )
+            }
+
+            {
+                /* draw variants over everything else */
+                variant && (
+                    <Variant variant={variant}
+                        x={0} width={width} height={height} txStart={txStart} txEnd={txEnd}
+                        scale={scale}
+                        mask={mask}
+                    />
+                )
             }
             </g>
         );
