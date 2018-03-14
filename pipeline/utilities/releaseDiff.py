@@ -583,10 +583,8 @@ def getIdentifier(obj, isReport):
             source = obj["Source"]
         if source == "ClinVar":
             return "SCV_ClinVar"
-        elif source == "LOVD":
-            return "DBID_LOVD"
         else:
-            # ignore non clinvar/lovd reports
+            # ignore non clinvar reports
             return None
     else:
         # variants are always identified by same genomic coordinate field

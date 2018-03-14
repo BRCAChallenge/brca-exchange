@@ -105,10 +105,6 @@ def variant_reports(request, variant_id):
             key = report.SCV_ClinVar
             report_query = Report.objects.filter(SCV_ClinVar=key).order_by('-Data_Release_id').select_related('Data_Release')
             report_versions.extend(map(report_to_dict, report_query))
-        elif report.Source == "LOVD":
-            key = report.DBID_LOVD
-            report_query = Report.objects.filter(DBID_LOVD=key).order_by('-Data_Release_id').select_related('Data_Release')
-            report_versions.extend(map(report_to_dict, report_query))
 
     response = JsonResponse({"data": report_versions})
     response['Access-Control-Allow-Origin'] = '*'
@@ -142,8 +138,6 @@ def report_to_dict(report_object):
     except ReportDiff.DoesNotExist:
         if report_object.Source == "ClinVar":
             key = report_object.SCV_ClinVar
-        elif report_object.Source == "LOVD":
-            key = report_object.DBID_LOVD
         print "Report Diff does not exist for Report", key, "from release", report_object.Data_Release.id
         report_dict["Diff"] = None
     return report_dict

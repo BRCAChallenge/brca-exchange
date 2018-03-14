@@ -786,17 +786,9 @@ class TestStringMethods(unittest.TestCase):
         identifier = releaseDiff.getIdentifier(self.oldReportDict, True)
         self.assertEqual(identifier, "SCV_ClinVar")
 
-        self.oldReportDict['Source'] = 'LOVD'
-        identifier = releaseDiff.getIdentifier(self.oldReportDict, True)
-        self.assertEqual(identifier, "DBID_LOVD")
-
         self.oldReportList[0] = 'ClinVar'
         identifier = releaseDiff.getIdentifier(self.oldReportList, True)
         self.assertEqual(identifier, "SCV_ClinVar")
-
-        self.oldReportList[0] = 'LOVD'
-        identifier = releaseDiff.getIdentifier(self.oldReportList, True)
-        self.assertEqual(identifier, "DBID_LOVD")
 
         identifier = releaseDiff.getIdentifier(self.oldRow, False)
         self.assertEqual(identifier, "pyhgvs_Genomic_Coordinate_38")

@@ -892,7 +892,7 @@ var VariantDetail = React.createClass({
 
         // generates report diff rows
         if (this.state.reports !== undefined) {
-            let sortedSubmissions = {'ClinVar': {}, 'LOVD': {}};
+            let sortedSubmissions = {'ClinVar': {}};
 
             // get all versions of clinvar submissions organized by accession number
             if (this.state.reports.hasOwnProperty('ClinVar')) {
@@ -911,53 +911,11 @@ var VariantDetail = React.createClass({
                 }
             }
 
-            // get all versions of lovd submissions organized by dbid
-            if (this.state.reports.hasOwnProperty('LOVD')) {
-                let lovdSubmissions = this.state.reports.LOVD;
-                for (var j = 0; j < lovdSubmissions.length; j++) {
-                    // TODO: remove early break once LOVD provides individual submissions
-                    break;
-                    if (lovdSubmissions[j].Diff === null || lovdSubmissions[j].Diff === undefined) {
-                        continue;
-                    }
-                    let key = lovdSubmissions[j].DBID_LOVD;
-                    if (sortedSubmissions.LOVD.hasOwnProperty(key)) {
-                        sortedSubmissions.LOVD[key].push(lovdSubmissions[j]);
-                    } else {
-                        sortedSubmissions.LOVD[key] = [lovdSubmissions[j]];
-                    }
-                }
-            }
-
             var clinvarDiffRows = _.map(sortedSubmissions.ClinVar, function(submissions) {
                 return (
                     <Row>
                         <Col md={12} className="variant-history-col">
                             <h3>ClinVar Submission: {submissions[0]["SCV_ClinVar"]}</h3>
-                            <h4>Previous Versions of this Submission:</h4>
-                            <Table className='variant-history nopointer' responsive bordered>
-                                <thead>
-                                    <tr className='active'>
-                                        <th>Release Date</th>
-                                        <th>Clinical Significance</th>
-                                        <th>Changes</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {this.generateDiffRows(cols, submissions, true)}
-                                </tbody>
-                            </Table>
-                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show All Public Data on this Variant" to see these changes.</p>
-                        </Col>
-                    </Row>
-                );
-            }, this);
-
-            var lovdDiffRows = _.map(sortedSubmissions.LOVD, function(submissions) {
-                return (
-                    <Row>
-                        <Col md={12} className="variant-history-col">
-                            <h3>LOVD Submission: {submissions[0]["DBID_LOVD"]}</h3>
                             <h4>Previous Versions of this Submission:</h4>
                             <Table className='variant-history nopointer' responsive bordered>
                                 <thead>
@@ -1063,7 +1021,6 @@ var VariantDetail = React.createClass({
                 </Row>
 
                 {this.props.mode === "research_mode" ? clinvarDiffRows : ''}
-                {this.props.mode === "research_mode" ? lovdDiffRows : ''}
 
                 <Row>
                     <Col md={12} mdOffset={0}>
