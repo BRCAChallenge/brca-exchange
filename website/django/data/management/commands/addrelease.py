@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 # from django.conf import settings
 from django.db import connection, transaction
-from data.models import Variant, DataRelease, ChangeType, Report
+from data.models import Variant, DataRelease, ChangeType, Report, MupitStructure
 from argparse import FileType
 import json
 import csv
@@ -49,12 +49,13 @@ class Command(BaseCommand):
         variants_header = variants_reader.next()
 
         change_types = {ct['name']: ct['id'] for ct in ChangeType.objects.values()}
+        mupit_structures = {ms['name']: ms['id'] for ms in MupitStructure.objects.values()}
 
         for row in variants_reader:
             # split Source column into booleans
             row_dict = dict(zip(variants_header, row))
             if 'change_type' in row_dict and row_dict['change_type']:
-                row_dict = self.update_variant_values_for_insertion(row_dict, release_id, change_types)
+                row_dict = self.update_variant_values_for_insertion(row_dict, release_id, change_types, mupit_structures)
                 variant = Variant.objects.create_variant(row_dict)
                 self.create_and_associate_reports_to_variant(variant, reports_dict, sources, release_id)
 
@@ -65,7 +66,7 @@ class Command(BaseCommand):
             for row in deletions_reader:
                 # split Source column into booleans
                 row_dict = dict(zip(deletions_header, row))
-                row_dict = self.update_variant_values_for_insertion(row_dict, release_id, change_types, True)
+                row_dict = self.update_variant_values_for_insertion(row_dict, release_id, change_types, mupit_structures, True)
                 variant = Variant.objects.create_variant(row_dict)
 
         update_autocomplete_words()
@@ -77,15 +78,23 @@ class Command(BaseCommand):
         # calls django/data/management/commands/add_diff_json to add diff to db
         call_command('add_diff_json', str(release_id), diff_json)
 
-    def update_variant_values_for_insertion(self, row_dict, release_id, change_types, set_change_type_to_none=False):
+    def update_variant_values_for_insertion(self, row_dict, release_id, change_types, mupit_structures, set_ct_and_ms_to_none=False):
         for source in row_dict['Source'].split(','):
             row_dict['Variant_in_' + source] = True
         row_dict['Data_Release_id'] = release_id
-        if set_change_type_to_none is True:
+        if set_ct_and_ms_to_none is True:
             row_dict.pop('change_type', None)
+            row_dict.pop('mupit_structure', None)
             row_dict['Change_Type_id'] = change_types['deleted']
+            row_dict['Mupit_Structure_id'] = None
         else:
             row_dict['Change_Type_id'] = change_types[row_dict.pop('change_type')]
+            mupit_structure = row_dict.pop('mupit_structure')
+            if self.is_empty(mupit_structure):
+                row_dict['Mupit_Structure_id'] = None
+            else:
+                row_dict['Mupit_Structure_id'] = mupit_structures[mupit_structure]
+
 
         # use cleaned up genomic coordinates and other values
         row_dict['Genomic_Coordinate_hg38'] = row_dict.pop('pyhgvs_Genomic_Coordinate_38')
