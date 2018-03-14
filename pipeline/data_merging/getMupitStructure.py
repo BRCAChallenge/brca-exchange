@@ -35,8 +35,8 @@ def main(args):
     posIndex = input_header_row.index("Pos")
 
     for variant in input_file:
-        chrom = variant[chromIndex]
-        pos = variant[posIndex]
+        chrom = "chr" + variant[chromIndex]
+        pos = int(variant[posIndex])
 
         # Add empty data for each new column to prepare for data insertion by index
         for i in range(len(new_columns_to_append)):
