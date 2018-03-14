@@ -1346,7 +1346,7 @@ class AggregateMergedOutput(luigi.Task):
 class BuildAggregatedOutput(luigi.Task):
 
     def output(self):
-        release_dir = self.output_dir + "/release/"
+        artifacts_dir = self.output_dir + "/release/artifacts/"
         return luigi.LocalTarget(artifacts_dir + "built.tsv")
 
     def run(self):
@@ -1376,7 +1376,7 @@ class BuildAggregatedOutput(luigi.Task):
 class AppendMupitStructure(luigi.Task):
 
     def output(self):
-        release_dir = self.output_dir + "/release/"
+        artifacts_dir = self.output_dir + "/release/artifacts/"
         return luigi.LocalTarget(artifacts_dir + "built_with_mupit.tsv")
 
     def run(self):
