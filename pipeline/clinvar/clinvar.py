@@ -174,7 +174,7 @@ class clinVarAssertion:
         self.dateLastUpdated = None
         cs = element.find("ClinicalSignificance")
         if cs != None:
-            self.dateLastUpdated = cs.get("DateLastEvaluated")
+            self.dateLastUpdated = cva.get("DateUpdated")
             self.clinicalSignificance = textIfPresent(cs, "Description")
             self.reviewStatus = textIfPresent(cs, "ReviewStatus")
             self.summaryEvidence = textIfPresent(cs, "Comment")
