@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(call_command('update_mupit_structures')),
+        migrations.RunPython(update_mupit_structure_for_existing_variants),
         migrations.RunSQL(
             """
             DROP MATERIALIZED VIEW IF EXISTS currentvariant;

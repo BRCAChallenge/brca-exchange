@@ -42,22 +42,31 @@ def main(args):
         for i in range(len(new_columns_to_append)):
             variant.append('-')
 
-        mupit_structure = get_brca_struct(chrom, pos)
+        retries = 5
+        if (pos >= 32356427 and pos <= 32396972) or (pos >= 43045692 and pos <= 43125184):
+            mupit_structure = get_brca_struct(chrom, pos)
+            if mupit_structure == "retry":
+                if retries > 0:
+                    print "retrying chrom: %s, pos: %s" % (chrom, pos)
+                    retries -= 1
+                    time.sleep(10)
+                    mupit_structure = get_brca_struct(chrom, pos)
+                else:
+                    print "Request for position %s failed 5 times, exiting." % (pos)
+                    sys.exit(1)
 
-        variant[output_header_row.index("mupit_structure")] = mupit_structure
+            variant[output_header_row.index("mupit_structure")] = mupit_structure
 
-        print chrom, pos, mupit_structure
+            if mupit_structure is not '-':
+                print variant
 
-        if mupit_structure is not '-':
-            print variant
+            output_file.writerow(variant)
 
-        output_file.writerow(variant)
-
-        time.sleep(0.5)
+            time.sleep(0.1)
 
 
 def get_brca_struct(chrom, pos):
-    main_url = 'http://mupit.icm.jhu.edu/MuPIT_Interactive'
+    main_url = 'http://staging.cravat.us/MuPIT_Interactive'
     brca_structures = ['1t15','1jm7','4igk','fENSP00000380152_7']
     query_url = main_url+'/rest/showstructure/query'
     params = {
@@ -67,7 +76,11 @@ def get_brca_struct(chrom, pos):
              'search_protein':'',
              'search_upload_file':'',
              }
-    r = requests.post(query_url, data=params)
+    try:
+        r = requests.post(query_url, data=params)
+    except requests.exceptions.RequestException as e:
+        print e
+        return "retry"
     d = json.loads(r.text)
     structures = d['structures']
     main_struct = None;

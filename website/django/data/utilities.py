@@ -37,7 +37,22 @@ def set_release_name_defaults(apps, schema_editor):
         count += 1
 
 
-def update_mupit_structure_for_existing_variants():
+def send_mupit_request(query_url, params, retries=5):
+    if retries <= 0:
+        print "Request failed 5 times, exiting."
+        sys.exit(1)
+    try:
+        r = requests.post(query_url, data=params)
+        return r
+    except requests.exceptions.RequestException as e:
+        print e
+        time.sleep(10)
+        retries -= 1
+        r = send_mupit_request(query_url, params, retries)
+    return r
+
+
+def update_mupit_structure_for_existing_variants(apps, schema_editor):
     mupit_structures = {ms['name']: ms['id'] for ms in MupitStructure.objects.values()}
     cvs = CurrentVariant.objects.all()
     for cv in cvs:
@@ -45,7 +60,7 @@ def update_mupit_structure_for_existing_variants():
         chrom = "chr" + getattr(variant, 'Chr')
         pos = int(getattr(variant, 'Pos'))
         if (pos >= 32356427 and pos <= 32396972) or (pos >= 43045692 and pos <= 43125184):
-            main_url = 'http://mupit.icm.jhu.edu/MuPIT_Interactive'
+            main_url = 'http://staging.cravat.us/MuPIT_Interactive'
             brca_structures = ['1t15','1jm7','4igk','fENSP00000380152_7']
             query_url = main_url+'/rest/showstructure/query'
             params = {
@@ -55,7 +70,8 @@ def update_mupit_structure_for_existing_variants():
                      'search_protein':'',
                      'search_upload_file':'',
                      }
-            r = requests.post(query_url, data=params)
+
+            r = send_mupit_request(query_url, params)
             d = json.loads(r.text)
             structures = d['structures']
             main_struct = None;
@@ -87,4 +103,4 @@ def update_mupit_structure_for_existing_variants():
                 mupit_structure_id = mupit_structures[main_struct]
                 setattr(variant, "Mupit_Structure_id", mupit_structure_id)
                 variant.save()
-            time.sleep(0.5)
+            time.sleep(0.1)
