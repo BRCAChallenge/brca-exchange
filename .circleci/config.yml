@@ -29,8 +29,10 @@ jobs:
            command: |
              sudo apt-get install python-pip python-dev
              sudo pip install -r ~/project/test-requirements.txt
+             git clone https://github.com/counsyl/hgvs.git
+             cd hgvs && git checkout aebe5bd9683f4b5937fd653ce4b13fcd4f3ebb10 && sudo python setup.py install
              sudo pip install -r ~/project/website/requirements.txt
-             python manage.py migrate
+             cd ~/project/website/django && python manage.py migrate
              python manage.py test
              cd ~/project/pipeline/data && bash ./getdata
        - run:
@@ -38,3 +40,37 @@ jobs:
            command: pytest --ignore=website/ --junitxml=~/test_reports/pytest-results.xml
        - store_test_results:
            path: ~/test_reports
+   deploy-dev:
+      docker:
+        - image: circleci/node:4.8
+      steps:
+        - checkout
+        - run:
+            name: deploying to dev machine
+            command: ~/project/deployment/mock_deploy.sh
+   deploy-beta:
+      docker:
+        - image: circleci/node:4.8
+      steps:
+        - checkout
+        - run:
+            name: deploying to beta machine
+            working_directory: ~/project/deployment
+            command: HOST=betamachine mock_deploy.sh
+workflows:
+  version: 2
+  build-n-deploy:
+    jobs:
+      - build:
+      - deploy-dev:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+      - deploy-beta:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*/
