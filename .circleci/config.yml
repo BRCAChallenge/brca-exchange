@@ -20,24 +20,33 @@ jobs:
              mkdir ~/test_reports
              npm run lint -- -f junit -o ~/test_reports/lint-results.xml
        - run:
-           name: run tests
+           name: run JavaScript tests
            working_directory: ~/project/website
            command: npm run test -- -R xunit --reporter-options output=~/test_reports/test-results.xml
        - run:
-           name: setting up backend
-           working_directory: ~/project/website/django
+           name: Set up and run website backend tests
            command: |
              sudo apt-get install python-pip python-dev
-             sudo pip install -r ~/project/test-requirements.txt
-             git clone https://github.com/counsyl/hgvs.git
-             cd hgvs && git checkout aebe5bd9683f4b5937fd653ce4b13fcd4f3ebb10 && sudo python setup.py install
-             sudo pip install -r ~/project/website/requirements.txt
+             sudo pip install virtualenv
+             mkdir ~/project/website_virtualenv
+             virtualenv ~/project/website_virtualenv
+             source ~/project/website_virtualenv/bin/activate
+             pip install -r ~/project/website/requirements.txt
+             pip install -r ~/project/website/test-requirements.txt
              cd ~/project/website/django && python manage.py migrate
              python manage.py test
-             cd ~/project/pipeline/data && bash ./getdata
        - run:
-           name: run tests in backend
-           command: pytest --ignore=website/ --junitxml=~/test_reports/pytest-results.xml
+           name: Set up up run pipeline tests
+           command: |
+             mkdir ~/project/pipeline_virtualenv
+             virtualenv ~/project/pipeline_virtualenv
+             source ~/project/pipeline_virtualenv/bin/activate
+             git clone https://github.com/counsyl/hgvs.git
+             cd hgvs && git checkout aebe5bd9683f4b5937fd653ce4b13fcd4f3ebb10 && python setup.py install
+             pip install -r ~/project/pipeline/requirements.txt
+             pip install -r ~/project/test-requirements.txt
+             cd ~/project/pipeline/data && bash ./getdata
+             cd ~/project/pipeline && pytest --ignore=website/ --junitxml=~/test_reports/pytest-results.xml
        - store_test_results:
            path: ~/test_reports
    deploy-dev:
@@ -47,7 +56,7 @@ jobs:
         - checkout
         - run:
             name: deploying to dev machine
-            command: ~/project/deployment/mock_deploy.sh
+            command: ~/project/deployment/deploy-dev
    deploy-beta:
       docker:
         - image: circleci/node:4.8
@@ -55,8 +64,7 @@ jobs:
         - checkout
         - run:
             name: deploying to beta machine
-            working_directory: ~/project/deployment
-            command: HOST=betamachine mock_deploy.sh
+            command: HOST=brcaexchange.cloudapp.net ~/project/deployment/deploy-dev
 workflows:
   version: 2
   build-n-deploy:
