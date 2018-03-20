@@ -36,8 +36,8 @@ const donorFill = '#b272ec',
 */
 
 const CIDomainFills = {
-    enigma: 'rgba(147, 0, 255, 0.3)',
-    priors: 'rgba(0, 200, 45, 0.3)',
+    "ENIGMA Consortium": 'rgba(147, 0, 255, 0.3)',
+    "Huntsman Institute": 'rgba(0, 200, 45, 0.3)',
 };
 
 // --------------------------------------------------------------------------------------------------------------
@@ -667,7 +667,7 @@ class Splicing extends React.Component {
                         <label>
                             <input style={{marginRight: '0.5em'}} type="checkbox" name="drawDonors" checked={this.state.drawDonors} onChange={this.toggleDrawing} />
                             <span style={{...siteStyle, backgroundColor: donorFill}} />
-                            show donor sites
+                            Donor Sites
                         </label>
                     </div>
 
@@ -675,40 +675,12 @@ class Splicing extends React.Component {
                         <label style={{display: 'inline-block', marginRight: '1em'}}>
                             <input style={{marginRight: '0.5em'}} type="checkbox" name="drawAcceptors" checked={this.state.drawAcceptors} onChange={this.toggleDrawing} />
                             <span style={{...siteStyle, backgroundColor: acceptorFill}} />
-                            show acceptor sites
+                            Acceptor Sites
                         </label>
                     </div>
 
                     {
-                        _.toPairs(meta.CIDomains).map(([org, namedRegions]) =>
-                            <div key={org}>
-                                <label style={{display: 'inline-block', marginRight: '1em'}}>
-                                    <input style={{marginRight: '0.5em'}} type="checkbox"
-                                        name={org} checked={this.state.drawCIDomains.has(org)} onChange={this.toggleCIDomain}
-                                    />
-                                    <span style={{...siteStyle, backgroundColor: CIDomainFills[org]}} />
-                                    {`show "${org}" CI domains`}
-                                </label>
-
-                                <ol className="splicing-domain-list">
-                                {
-                                    _.toPairs(namedRegions)
-                                        .map(([name, region], idx) => {
-                                            const selected = this.state.selectedDomain === `${org}_${name}`;
-
-                                            return (
-                                                <li key={idx}>
-                                                    <a style={{fontWeight: selected ? 'bold' : 'normal'}}
-                                                        onClick={() => this.selectCIDomain(`${org}_${name}`, org)}>
-                                                        {name}
-                                                    </a>
-                                                </li>
-                                            );
-                                        })
-                                }
-                                </ol>
-                            </div>
-                        )
+                        this.generateCIDomainSelectors(meta, siteStyle)
                     }
                 </div>
             </div>
@@ -798,6 +770,44 @@ class Splicing extends React.Component {
         }
 
         return segments;
+    }
+
+    /**
+     * Creates UI elements to control visibility of clinically important (CI) domains.
+     *
+     * @param meta gene metadata, including the CI domains and their locations
+     * @param siteStyle
+     */
+    generateCIDomainSelectors(meta, siteStyle) {
+        return _.toPairs(meta.CIDomains).map(([org, namedRegions]) =>
+            <div key={org}>
+                <label style={{display: 'inline-block', marginRight: '1em'}}>
+                    <input style={{marginRight: '0.5em'}} type="checkbox"
+                        name={org} checked={this.state.drawCIDomains.has(org)} onChange={this.toggleCIDomain}
+                    />
+                    <span style={{...siteStyle, backgroundColor: CIDomainFills[org]}}/>
+                    {`Critical Functional Domains (${org})`}
+                </label>
+
+                <ol className="splicing-domain-list">
+                    {
+                        _.toPairs(namedRegions)
+                            .map(([name, region], idx) => {
+                                const selected = this.state.selectedDomain === `${org}_${name}`;
+
+                                return (
+                                    <li key={idx}>
+                                        <a style={{fontWeight: selected ? 'bold' : 'normal'}}
+                                            onClick={() => this.selectCIDomain(`${org}_${name}`, org)}>
+                                            {name}
+                                        </a>
+                                    </li>
+                                );
+                            })
+                    }
+                </ol>
+            </div>
+        );
     }
 }
 

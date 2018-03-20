@@ -630,7 +630,7 @@ Clinically important regions
 */
 // See note at top of file for explanation of start > end.
 const brca1CIDomains = {
-    "enigma": {
+    "ENIGMA Consortium": { // 'enigma'
         "ring": {
             "start": 43124096,
             "end": 43104260
@@ -640,7 +640,7 @@ const brca1CIDomains = {
             "end": 43045705
         }
     },
-    "priors": {
+    "Huntsman Institute": { // 'priors'
         "initiation": {
             "start": 43124096,
             "end": 43124094
@@ -657,13 +657,13 @@ const brca1CIDomains = {
 };
 
 const brca2CIDomains = {
-    "enigma": {
+    "ENIGMA Consortium": { // 'enigma'
         "dnb": {
             "start": 32356433,
             "end": 32396954
         }
     },
-    "priors": {
+    "Huntsman Institute": { // 'priors'
         "initiation": {
             "start": 32316461,
             "end": 32316463
