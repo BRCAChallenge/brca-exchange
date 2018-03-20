@@ -666,6 +666,11 @@ var VariantDetail = React.createClass({
                         removed = fieldDiff.removed.trim();
                     }
 
+                    if (fieldName === "Summary_Evidence_ClinVar" || fieldName === "Description_ClinVar" || fieldName === "Review_Status_ClinVar") {
+                        added = fieldDiff.added.replace(/_/g, " ").trim();
+                        removed = fieldDiff.removed.replace(/_/g, " ").trim();
+                    }
+
                     if (added !== null || removed !== null) {
                         if (util.isEmptyField(removed)) {
                             diffHTML.push(
@@ -890,6 +895,8 @@ var VariantDetail = React.createClass({
         // generates variant diff rows
         const diffRows = this.generateDiffRows(cols, data, false);
 
+        /* NOTE: Uncomment to display clinvar report diffs in UI
+
         // generates report diff rows
         if (this.state.reports !== undefined) {
             let sortedSubmissions = {'ClinVar': {}};
@@ -934,7 +941,9 @@ var VariantDetail = React.createClass({
                     </Row>
                 );
             }, this);
+
         }
+        */
 
         return (error ? <p>{error}</p> :
             <Grid>
@@ -1020,7 +1029,7 @@ var VariantDetail = React.createClass({
                     </Col>
                 </Row>
 
-                {this.props.mode === "research_mode" ? clinvarDiffRows : ''}
+                {/*this.props.mode === "research_mode" ? clinvarDiffRows : ''*/}
 
                 <Row>
                     <Col md={12} mdOffset={0}>
