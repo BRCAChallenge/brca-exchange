@@ -128,7 +128,7 @@ var FactSheet = React.createClass({
 
                         <h3>BRCA Genes & Cancer</h3>
                         <ul>
-                            <li>The BRCA1 and BRCA2 genes typically help to prevent cancer in humans. However, when either of these genes are altered by a variation in the gene sequence, the result can be an increase in risk for hereditary breast, ovarian, or other cancers in an individual.</li>
+                            <li>The BRCA1 and BRCA2 genes typically help to prevent cancer in humans. However, when the function of either of these genes is significantly altered by a variation in the gene sequence, the result can be an increase in risk for hereditary breast, ovarian, or other cancers in an individual.</li>
                             <li>Not all genetic sequence variations lead to increased cancer risk. In order to better understand the impact of a BRCA variant, scientists study each variant to predict its individual impact on health.</li>
                             <li>Genetic variants may be classified as ‘pathogenic’ or ‘likely pathogenic’ (associated with greatly increased risk of disease), ‘benign’ or ‘likely benign’ (not associated with a markedly increased risk of disease), or ‘variant of unknown significance’ (impact on disease risk is unclear at this time).</li>
                             <li>Women who have a pathogenic BRCA variant are at substantially greater risk of developing cancer over their lifetime:</li>
