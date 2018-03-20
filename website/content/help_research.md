@@ -307,6 +307,25 @@ Submitting organization.  From ClinVar.
 #### URL (ENIGMA)
 URL listing the variant.  From ENIGMA.
 
+
+* * * * * * * * * * *
+
+## Transcript Visualization
+
+The transcript visualization depicts a reference transcript of the gene (either BRCA1 or BRCA2) on which the current variant occurs. The gene  is drawn as a series of exons with intervening introns. Note that exons are drawn proportionally to their actual size, while introns are drawn at a fixed width.
+
+The gene is shown in full at the top of the visualization, with the exons/introns in which the variant lies (a.k.a. the area of interest) highlighted in yellow. The area of interest is shown zoomed-in below the full depiction, but otherwise contains the same information.
+
+The variant's modifications to the reference transcript are depicted in three colored regions:
+- changed bases (depicted in lime green)
+- deletions (depicted in red with cross-hatched black lines)
+- insertions (depicted in blue)
+
+In addition to the variant itself, the visualization displays other regions of interest, such as donor and acceptor sites
+and critical functional domains. These regions' visibilities can be toggled individually via the checkboxes below the transcript.
+
+The critical functional domains each contain a set of subdomains (e.g. the "ring" subdomain for the ENIGMA Consortium-identified domains). Clicking the label for a subdomain will display the corresponding subdomain in an animated outline to help distinguish it. Clicking again on the label will disable the outline, as will clicking another subdomain.
+
 * * * * * * * * * * *
 
 ## Downloading Variant Data
