@@ -1,0 +1,89 @@
+version: 2
+jobs:
+   build:
+     docker:
+       - image: circleci/node:6.13
+       - image: circleci/postgres:9.6.2
+         environment:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: storage.pg
+     steps:
+       - checkout
+       - run:
+           name: Setup npm
+           working_directory: ~/project/website
+           command: npm install
+       - run:
+           name: run linter
+           working_directory: ~/project/website
+           command: |
+             mkdir ~/test_reports
+             npm run lint -- -f junit -o ~/test_reports/lint-results.xml
+       - run:
+           name: run JavaScript tests
+           working_directory: ~/project/website
+           command: npm run test -- -R xunit --reporter-options output=~/test_reports/test-results.xml
+       - run:
+           name: Set up and run website backend tests
+           command: |
+             sudo apt-get install python-pip python-dev
+             sudo pip install virtualenv
+             mkdir ~/project/website_virtualenv
+             virtualenv ~/project/website_virtualenv
+             source ~/project/website_virtualenv/bin/activate
+             pip install -r ~/project/website/requirements.txt
+             pip install -r ~/project/website/test-requirements.txt
+             cd ~/project/website/django && python manage.py migrate
+             python manage.py test
+       - run:
+           name: Set up up run pipeline tests
+           command: |
+             mkdir ~/project/pipeline_virtualenv
+             virtualenv ~/project/pipeline_virtualenv
+             source ~/project/pipeline_virtualenv/bin/activate
+             git clone https://github.com/counsyl/hgvs.git
+             cd hgvs && git checkout aebe5bd9683f4b5937fd653ce4b13fcd4f3ebb10 && python setup.py install
+             pip install -r ~/project/pipeline/requirements.txt
+             pip install -r ~/project/test-requirements.txt
+             cd ~/project/pipeline/data && bash ./getdata
+             cd ~/project/pipeline && pytest --ignore=website/ --junitxml=~/test_reports/pytest-results.xml
+       - store_test_results:
+           path: ~/test_reports
+   deploy-dev:
+      docker:
+        - image: circleci/node:6.13
+      steps:
+        - checkout
+        - run:
+            name: deploying to dev machine
+            command: ~/project/deployment/deploy-dev
+   deploy-beta:
+      docker:
+        - image: circleci/node:6.13
+      steps:
+        - checkout
+        - run:
+            name: deploying to beta machine
+            command: HOST=brcaexchange.cloudapp.net ~/project/deployment/deploy-dev
+workflows:
+  version: 2
+  build-n-deploy:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
+      - deploy-dev:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+      - deploy-beta:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*/
+            branches:
+              ignore: /.*/
