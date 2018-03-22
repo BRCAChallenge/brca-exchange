@@ -13,6 +13,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        # Reports may be added to the database even if they're identical
+        # to existing reports, hence the need for the 'none' changetype
         migrations.RunSQL(
             """
             INSERT INTO data_changetype VALUES (7, 'none'); 

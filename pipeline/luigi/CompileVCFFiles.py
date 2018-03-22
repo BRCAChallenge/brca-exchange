@@ -111,6 +111,13 @@ def handle_process_success_or_failure(process_succeeded, file_path):
         print("**** Failure creating %s ****\n" % (file_name))
 
 
+def extract_file(archive_path, tmp_dir, file_path):
+        with tarfile.open(archive_path, "r:gz") as tar:
+            tar.extract(file_path, tmp_dir)
+
+        return tmp_dir + '/' + file_path
+
+
 #######################################
 # Default Globals / Env / Directories #
 #######################################
@@ -1399,14 +1406,7 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
             j = json.load(f)
             return datetime.datetime.strptime(j['date'], '%Y-%m-%d')
 
-        
-    def _extract_file(self, archive_path, tmp_dir, file_path):
-        with tarfile.open(archive_path, "r:gz") as tar:
-            tar.extract(file_path, tmp_dir)
 
-        return tmp_dir + '/' + file_path
-
-    
     def output(self):
         release_dir = self.output_dir + "/release/"
         diff_dir = create_path_if_nonexistent(release_dir + "diff/")
@@ -1425,8 +1425,8 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
         os.chdir(utilities_method_dir)
 
         tmp_dir = tempfile.mkdtemp()
-        previous_data_path = self._extract_file(self.previous_release_tar, tmp_dir, 'output/release/built_with_change_types.tsv')
-        version_json_path = self._extract_file(self.previous_release_tar, tmp_dir, 'output/release/metadata/version.json')
+        previous_data_path = extract_file(self.previous_release_tar, tmp_dir, 'output/release/built_with_change_types.tsv')
+        version_json_path = extract_file(self.previous_release_tar, tmp_dir, 'output/release/metadata/version.json')
         previous_release_date = self._extract_release_date(version_json_path)
         previous_release_date_str = datetime.datetime.strftime(previous_release_date, '%m-%d-%Y')
         
@@ -1454,13 +1454,6 @@ class RunDiffAndAppendChangeTypesToOutputReports(luigi.Task):
             return datetime.datetime.strptime(j['date'], '%Y-%m-%d')
 
 
-    def _extract_file(self, archive_path, tmp_dir, file_path):
-        with tarfile.open(archive_path, "r:gz") as tar:
-            tar.extract(file_path, tmp_dir)
-
-        return tmp_dir + '/' + file_path
-
-
     def output(self):
         release_dir = self.output_dir + "/release/"
         diff_dir = create_path_if_nonexistent(release_dir + "diff/")
@@ -1479,8 +1472,8 @@ class RunDiffAndAppendChangeTypesToOutputReports(luigi.Task):
         os.chdir(utilities_method_dir)
 
         tmp_dir = tempfile.mkdtemp()
-        previous_data_path = self._extract_file(self.previous_release_tar, tmp_dir, 'output/release/artifacts/reports.tsv')
-        version_json_path = self._extract_file(self.previous_release_tar, tmp_dir, 'output/release/metadata/version.json')
+        previous_data_path = extract_file(self.previous_release_tar, tmp_dir, 'output/release/artifacts/reports.tsv')
+        version_json_path = extract_file(self.previous_release_tar, tmp_dir, 'output/release/metadata/version.json')
         previous_release_date = self._extract_release_date(version_json_path)
         previous_release_date_str = datetime.datetime.strftime(previous_release_date, '%m-%d-%Y')
 
