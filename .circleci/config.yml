@@ -49,41 +49,25 @@ jobs:
              cd ~/project/pipeline && pytest --ignore=website/ --junitxml=~/test_reports/pytest-results.xml
        - store_test_results:
            path: ~/test_reports
-   deploy-dev:
-      docker:
-        - image: circleci/node:6.13
-      steps:
-        - checkout
-        - run:
-            name: deploying to dev machine
-            command: ~/project/deployment/deploy-dev
-   deploy-beta:
-      docker:
-        - image: circleci/node:6.13
-      steps:
-        - checkout
-        - run:
-            name: deploying to beta machine
-            command: HOST=brcaexchange.cloudapp.net ~/project/deployment/deploy-dev
-workflows:
-  version: 2
-  build-n-deploy:
-    jobs:
-      - build:
-          filters:
-            tags:
-              only: /.*/
-      - deploy-dev:
-          requires:
-            - build
-          filters:
-            branches:
-              only: master
-      - deploy-beta:
-          requires:
-            - build
-          filters:
-            tags:
-              only: /v[0-9]+(\.[0-9]+)*/
-            branches:
-              ignore: /.*/
+       - run:
+           name: Set up environment for deployment
+           command: sudo apt-get install rsync
+       - deploy:
+           name: deploy to dev if on master branch
+           command: |
+             if [ "${CIRCLE_BRANCH}" == "master" ]; then
+                 echo "Deploying master branch on dev machine"
+                 ~/project/deployment/deploy-dev
+             else
+                 echo "on branch ${CIRCLE_BRANCH}. No deployment on dev machine"
+             fi
+
+       - deploy:
+           name: deploy to beta if appropriate tag was pushed
+           command: |
+             if [[ "${CIRCLE_TAG}" =~ v[0-9]+(\.[0-9]+)* ]]; then
+                echo "Deploying tag ${CIRCLE_TAG} on beta machine"
+                HOST=brcaexchange.cloudapp.net ~/project/deployment/deploy-dev
+             else
+                echo "Tag is ${CIRCLE_TAG}. No deployment on beta"
+             fi
