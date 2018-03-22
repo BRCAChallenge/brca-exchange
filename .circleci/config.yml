@@ -49,12 +49,13 @@ jobs:
              cd ~/project/pipeline && pytest --ignore=website/ --junitxml=~/test_reports/pytest-results.xml
        - store_test_results:
            path: ~/test_reports
+    
    deploy-dev:
-      docker:
-        - image: circleci/node:6.13
-      steps:
-        - checkout
-        - run:
+     docker:
+       - image: circleci/node:6.13
+     steps:
+       - checkout
+       - run:
            name: Setup npm
            working_directory: ~/project/website
            command: npm install
@@ -67,15 +68,15 @@ jobs:
                  VerifyHostKeyDNS yes
                  StrictHostKeyChecking no
              EOF
-        - run:
-            name: deploying to dev machine
-            command: ~/project/deployment/deploy-dev
+       - run:
+           name: deploying to dev machine
+           command: ~/project/deployment/deploy-dev
    deploy-beta:
-      docker:
-        - image: circleci/node:6.13
-      steps:
-        - checkout
-        - run:
+     docker:
+       - image: circleci/node:6.13
+     steps:
+       - checkout
+       - run:
            name: Setup npm
            working_directory: ~/project/website
            command: npm install
@@ -88,28 +89,28 @@ jobs:
                  VerifyHostKeyDNS yes
                  StrictHostKeyChecking no
              EOF
-        - run:
-            name: deploying to beta machine
-            command: HOST=brcaexchange.cloudapp.net ~/project/deployment/deploy-dev
+       - run:
+           name: deploying to beta machine
+           command: HOST=brcaexchange.cloudapp.net ~/project/deployment/deploy-dev
 workflows:
-  version: 2
-  build-n-deploy:
-    jobs:
-      - build:
-          filters:
-            tags:
-              only: /.*/
-      - deploy-dev:
-          requires:
-            - build
-          filters:
-            branches:
-              only: master
-      - deploy-beta:
-          requires:
-            - build
-          filters:
-            tags:
-              only: /v[0-9]+(\.[0-9]+)*/
-            branches:
-              ignore: /.*/
+   version: 2
+   build-n-deploy:
+     jobs:
+       - build:
+           filters:
+             tags:
+               only: /.*/
+       - deploy-dev:
+           requires:
+             - build
+           filters:
+             branches:
+               only: master
+       - deploy-beta:
+           requires:
+             - build
+           filters:
+             tags:
+               only: /v[0-9]+(\.[0-9]+)*/
+             branches:
+               ignore: /.*/
