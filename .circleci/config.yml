@@ -51,7 +51,13 @@ jobs:
            path: ~/test_reports
        - run:
            name: Set up environment for deployment
-           command: sudo apt-get install rsync
+           command: |
+             sudo apt-get install rsync
+             [[ ! -d ~/.ssh ]] && mkdir ~/.ssh
+             cat >> ~/.ssh/config << EOF
+                 VerifyHostKeyDNS yes
+                 StrictHostKeyChecking no
+             EOF
        - deploy:
            name: deploy to dev if on master branch
            command: |
@@ -61,7 +67,6 @@ jobs:
              else
                  echo "on branch ${CIRCLE_BRANCH}. No deployment on dev machine"
              fi
-
        - deploy:
            name: deploy to beta if appropriate tag was pushed
            command: |
