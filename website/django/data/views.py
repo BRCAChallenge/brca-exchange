@@ -11,7 +11,7 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.gzip import gzip_page
 
-from .models import Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType, Report
+from .models import Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType, Report, ReportDiff
 from django.views.decorators.http import require_http_methods
 
 # GA4GH related imports
@@ -98,28 +98,18 @@ def variant(request):
 def variant_reports(request, variant_id):
     variant_id = int(variant_id)
     query = Report.objects.filter(Variant_id=variant_id)
-
     '''
-    Uncomment the following code to filter enigma/bic submissions to clinvar/lovd
-
-    # filter out enigma submissions to clinvar/lovd and bic submissions to clinvar
-    filtered_query = []
+    NOTE: Uncomment to send report versions to UI
+    report_versions = []
     for report in query:
+        key = None
         if report.Source == "ClinVar":
-            submitter = report.Submitter_ClinVar.lower()
-            if "(enigma)" not in submitter and "(bic)" not in submitter:
-                filtered_query.append(report)
-        elif report.Source == "LOVD":
-            submitter = report.Submitters_LOVD.lower()
-            print submitter
-            if "enigma" not in submitter:
-                filtered_query.append(report)
-        else:
-            filtered_query.append(report)
+            key = report.SCV_ClinVar
+            report_query = Report.objects.filter(SCV_ClinVar=key).order_by('-Data_Release_id').select_related('Data_Release')
+            report_versions.extend(map(report_to_dict, report_query))
 
-    query = filtered_query
+    response = JsonResponse({"data": report_versions})
     '''
-
     response = JsonResponse({"data":  [ model_to_dict(x) for x in query ]})
     response['Access-Control-Allow-Origin'] = '*'
     return response
@@ -138,6 +128,23 @@ def variant_to_dict(variant_object):
         print "Variant Diff does not exist for Variant", variant_object.Genomic_Coordinate_hg38, "from release", variant_object.Data_Release.id
         variant_dict["Diff"] = None
     return variant_dict
+
+
+def report_to_dict(report_object):
+    change_types_map = {x['name']:x['id'] for x in ChangeType.objects.values().all()}
+    report_dict = model_to_dict(report_object)
+    report_dict["Data_Release"] = model_to_dict(report_object.Data_Release)
+    report_dict["Data_Release"]["date"] = report_object.Data_Release.date
+    report_dict["Change_Type"] = ChangeType.objects.get(id=report_dict["Change_Type"]).name
+    try:
+        report_diff = ReportDiff.objects.get(report_id=report_object.id)
+        report_dict["Diff"] = report_diff.report_diff
+    except ReportDiff.DoesNotExist:
+        if report_object.Source == "ClinVar":
+            key = report_object.SCV_ClinVar
+        print "Report Diff does not exist for Report", key, "from release", report_object.Data_Release.id
+        report_dict["Diff"] = None
+    return report_dict
 
 
 @gzip_page

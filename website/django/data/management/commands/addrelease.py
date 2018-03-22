@@ -12,25 +12,28 @@ from data.utilities import update_autocomplete_words
 
 OLD_MAF_ESP_FIELD_NAMES = ['Minor_allele_frequency_ESP', 'Minor_allele_frequency_ESP_percent']
 
-
 class Command(BaseCommand):
     help = 'Add a new variant release to the database'
 
     def add_arguments(self, parser):
         parser.add_argument('variants', type=FileType('r'), help='Variants to be added, in TSV format')
-        parser.add_argument('reports', type=FileType('r'), help='Reports to be added, in TSV format')
         parser.add_argument('notes', type=FileType('r'), help='Release notes and metadata, in JSON format')
         parser.add_argument('deletions', nargs='?', default=None, type=FileType('r'),
                             help='Deleted variants, in TSV format, same schema sans change_type')
         parser.add_argument('diffJSON', help='JSON diff file')
+        parser.add_argument('reports', type=FileType('r'), help='Reports to be added, in TSV format')
+        parser.add_argument('removedReports', type=FileType('r'), help='Removed reports to be added, in TSV format')
+        parser.add_argument('reportsDiffJSON', help='Reports JSON diff file')
 
     @transaction.atomic
     def handle(self, *args, **options):
         variants_tsv = options['variants']
         reports_tsv = options['reports']
+        removed_reports_tsv = options['removedReports']
         notes = json.load(options['notes'])
         deletions_tsv = options['deletions']
         diff_json = options['diffJSON']
+        reports_diff_json = options['reportsDiffJSON']
 
         sources = notes['sources']
 
@@ -43,7 +46,9 @@ class Command(BaseCommand):
 
         reports_reader = csv.reader(reports_tsv, dialect="excel-tab")
         reports_header = reports_reader.next()
-        reports_dict = self.build_report_dictionary_by_source(reports_reader, reports_header, sources)
+        removed_reports_reader = csv.reader(removed_reports_tsv, dialect="excel-tab")
+        removed_reports_header = removed_reports_reader.next()
+        reports_dict = self.build_report_dictionary_by_source(reports_reader, reports_header, removed_reports_reader, removed_reports_header, sources)
 
         variants_reader = csv.reader(variants_tsv, dialect="excel-tab")
         variants_header = variants_reader.next()
@@ -56,7 +61,7 @@ class Command(BaseCommand):
             if 'change_type' in row_dict and row_dict['change_type']:
                 row_dict = self.update_variant_values_for_insertion(row_dict, release_id, change_types)
                 variant = Variant.objects.create_variant(row_dict)
-                self.create_and_associate_reports_to_variant(variant, reports_dict, sources, release_id)
+                self.create_and_associate_reports_to_variant(variant, reports_dict, sources, release_id, change_types)
 
         # deleted variants
         if (deletions_tsv):
@@ -67,7 +72,6 @@ class Command(BaseCommand):
                 row_dict = dict(zip(deletions_header, row))
                 row_dict = self.update_variant_values_for_insertion(row_dict, release_id, change_types, True)
                 variant = Variant.objects.create_variant(row_dict)
-
         update_autocomplete_words()
 
         # update materialized view of current variants
@@ -75,7 +79,7 @@ class Command(BaseCommand):
             cursor.execute("REFRESH MATERIALIZED VIEW currentvariant")
 
         # calls django/data/management/commands/add_diff_json to add diff to db
-        call_command('add_diff_json', str(release_id), diff_json)
+        call_command('add_diff_json', str(release_id), diff_json, reports_diff_json)
 
     def update_variant_values_for_insertion(self, row_dict, release_id, change_types, set_change_type_to_none=False):
         for source in row_dict['Source'].split(','):
@@ -105,18 +109,31 @@ class Command(BaseCommand):
 
         return row_dict
 
-    def build_report_dictionary_by_source(self, reports_reader, reports_header, sources):
+    def build_report_dictionary_by_source(self, reports_reader, reports_header, removed_reports_reader, removed_reports_header, sources):
         reports_dict = {}
         for row in reports_reader:
             report = dict(zip(reports_header, row))
+            if self.is_empty(report['change_type']):
+                report['change_type'] = 'none'
             source = report['Source']
             bx_id = report['BX_ID_' + source]
             if source not in reports_dict:
                 reports_dict[source] = {}
             reports_dict[source][bx_id] = report
+
+        # add removed reports to dict
+        for row in removed_reports_reader:
+            report = dict(zip(reports_header, row))
+            report['change_type'] = 'deleted'
+            source = report['Source']
+            bx_id = report['BX_ID_' + source]
+            if source not in reports_dict:
+                reports_dict[source] = {}
+            reports_dict[source][bx_id] = report
+
         return reports_dict
 
-    def create_and_associate_reports_to_variant(self, variant, reports_dict, sources, release_id):
+    def create_and_associate_reports_to_variant(self, variant, reports_dict, sources, release_id, change_types):
         for source in sources:
             if source == "Bic":
                 source = "BIC"
@@ -128,12 +145,13 @@ class Command(BaseCommand):
             if not self.is_empty(getattr(variant, bx_id_field)):
                 bx_ids = getattr(variant, bx_id_field).split(',')
                 for bx_id in bx_ids:
-                    self.create_and_associate_report_to_variant(bx_id, source, reports_dict, variant, release_id)
+                    self.create_and_associate_report_to_variant(bx_id, source, reports_dict, variant, release_id, change_types)
 
-    def create_and_associate_report_to_variant(self, bx_id, source, reports_dict, variant, release_id):
+    def create_and_associate_report_to_variant(self, bx_id, source, reports_dict, variant, release_id, change_types):
         report = reports_dict[source][bx_id]
         report['Data_Release_id'] = release_id
         report['Variant'] = variant
+        report['Change_Type_id'] = change_types[report.pop('change_type')]
 
         # Denote percentage in field name, two different fieldnames were used previously so both are handled below
         for oldName in OLD_MAF_ESP_FIELD_NAMES:

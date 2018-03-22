@@ -605,7 +605,22 @@ var VariantDetail = React.createClass({
             me.forceUpdate();
         }, 300);
     },
-    generateDiffRows: function(cols, data) {
+    determineDiffRowColor: function(highlightRow) {
+        return highlightRow ? 'danger' : '';
+    },
+    getPathogenicity: function(version, isReport) {
+        if (isReport) {
+            if (version.Source === "ClinVar") {
+                return util.getFormattedFieldByProp("Clinical_Significance_ClinVar", version);
+            } else {
+                return util.getFormattedFieldByProp("Variant_effect_LOVD", version);
+            }
+        } else {
+            // Only concerned about expert pathogenicity for diff
+            return util.getFormattedFieldByProp("Pathogenicity_expert", version);
+        }
+    },
+    generateDiffRows: function(cols, data, isReports) {
         var diffRows = [];
 
         // keys that contain date values that need reformatting for the ui
@@ -625,7 +640,6 @@ var VariantDetail = React.createClass({
             let release = version.Data_Release;
             let highlightRow = false;
             var diffHTML = [];
-
             if (diff !== null) {
                 for (var j = 0; j < diff.length; j++) {
                     let fieldDiff = diff[j];
@@ -650,6 +664,11 @@ var VariantDetail = React.createClass({
                     } else {
                         added = fieldDiff.added.trim();
                         removed = fieldDiff.removed.trim();
+                    }
+
+                    if (fieldName === "Summary_Evidence_ClinVar" || fieldName === "Description_ClinVar" || fieldName === "Review_Status_ClinVar") {
+                        added = fieldDiff.added.replace(/_/g, " ").trim();
+                        removed = fieldDiff.removed.replace(/_/g, " ").trim();
                     }
 
                     if (added !== null || removed !== null) {
@@ -681,9 +700,9 @@ var VariantDetail = React.createClass({
             }
 
             diffRows.push(
-                <tr className={highlightRow ? 'danger' : ''}>
+                <tr className={this.determineDiffRowColor(highlightRow)}>
                     <td><Link to={`/release/${release.id}`}>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</Link></td>
-                    <td>{version["Pathogenicity_expert"]}</td>
+                    <td>{this.getPathogenicity(version, isReports)}</td>
                     <td>{diffHTML}</td>
                 </tr>
             );
@@ -873,7 +892,58 @@ var VariantDetail = React.createClass({
             );
         });
 
-        const diffRows = this.generateDiffRows(cols, data);
+        // generates variant diff rows
+        const diffRows = this.generateDiffRows(cols, data, false);
+
+        /* NOTE: Uncomment to display clinvar report diffs in UI
+
+        // generates report diff rows
+        if (this.state.reports !== undefined) {
+            let sortedSubmissions = {'ClinVar': {}};
+
+            // get all versions of clinvar submissions organized by accession number
+            if (this.state.reports.hasOwnProperty('ClinVar')) {
+                let clinvarSubmissions = this.state.reports.ClinVar;
+                for (var i = 0; i < clinvarSubmissions.length; i++) {
+                    if (clinvarSubmissions[i].Diff === null || clinvarSubmissions[i].Diff === undefined) {
+                        // don't show empty diffs for reports
+                        continue;
+                    }
+                    let key = clinvarSubmissions[i].SCV_ClinVar;
+                    if (sortedSubmissions.ClinVar.hasOwnProperty(key)) {
+                        sortedSubmissions.ClinVar[key].push(clinvarSubmissions[i]);
+                    } else {
+                        sortedSubmissions.ClinVar[key] = [clinvarSubmissions[i]];
+                    }
+                }
+            }
+
+            var clinvarDiffRows = _.map(sortedSubmissions.ClinVar, function(submissions) {
+                return (
+                    <Row>
+                        <Col md={12} className="variant-history-col">
+                            <h3>ClinVar Submission: {submissions[0]["SCV_ClinVar"]}</h3>
+                            <h4>Previous Versions of this Submission:</h4>
+                            <Table className='variant-history nopointer' responsive bordered>
+                                <thead>
+                                    <tr className='active'>
+                                        <th>Release Date</th>
+                                        <th>Clinical Significance</th>
+                                        <th>Changes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {this.generateDiffRows(cols, submissions, true)}
+                                </tbody>
+                            </Table>
+                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show All Public Data on this Variant" to see these changes.</p>
+                        </Col>
+                    </Row>
+                );
+            }, this);
+
+        }
+        */
 
         return (error ? <p>{error}</p> :
             <Grid>
@@ -958,6 +1028,9 @@ var VariantDetail = React.createClass({
                         <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show All Public Data on this Variant" to see these changes.</p>
                     </Col>
                 </Row>
+
+                {/*this.props.mode === "research_mode" ? clinvarDiffRows : ''*/}
+
                 <Row>
                     <Col md={12} mdOffset={0}>
                         <DisclaimerModal buttonModal onToggleMode={this.onChildToggleMode} text="Show All Public Data on this Variant"/>

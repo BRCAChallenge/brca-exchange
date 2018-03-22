@@ -28,6 +28,12 @@ class VariantDiff(models.Model):
     # provides JSON validation
     diff = LegacyJSONField()
 
+class ReportDiff(models.Model):
+    report = models.OneToOneField('Report', primary_key=True)
+    # Postgres-specific JSON field. If migrating away from postgres, use TextField instead
+    # provides JSON validation
+    report_diff = LegacyJSONField()
+
 class VariantManager(models.Manager):
     def create_variant(self, row):
         return self.create(**row)
@@ -302,6 +308,7 @@ class Report(models.Model):
     HGVS_protein_exLOVD = models.TextField()
 
     Data_Release = models.ForeignKey(DataRelease)
+    Change_Type = models.ForeignKey(ChangeType)
 
     objects = ReportManager()
 

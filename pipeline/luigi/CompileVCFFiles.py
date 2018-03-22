@@ -111,6 +111,13 @@ def handle_process_success_or_failure(process_succeeded, file_path):
         print("**** Failure creating %s ****\n" % (file_name))
 
 
+def extract_file(archive_path, tmp_dir, file_path):
+        with tarfile.open(archive_path, "r:gz") as tar:
+            tar.extract(file_path, tmp_dir)
+
+        return tmp_dir + '/' + file_path
+
+
 #######################################
 # Default Globals / Env / Directories #
 #######################################
@@ -1399,14 +1406,7 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
             j = json.load(f)
             return datetime.datetime.strptime(j['date'], '%Y-%m-%d')
 
-        
-    def _extract_file(self, archive_path, tmp_dir, file_path):
-        with tarfile.open(archive_path, "r:gz") as tar:
-            tar.extract(file_path, tmp_dir)
 
-        return tmp_dir + '/' + file_path
-
-    
     def output(self):
         release_dir = self.output_dir + "/release/"
         diff_dir = create_path_if_nonexistent(release_dir + "diff/")
@@ -1425,8 +1425,8 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
         os.chdir(utilities_method_dir)
 
         tmp_dir = tempfile.mkdtemp()
-        previous_data_path = self._extract_file(self.previous_release_tar, tmp_dir, 'output/release/built_with_change_types.tsv')
-        version_json_path = self._extract_file(self.previous_release_tar, tmp_dir, 'output/release/metadata/version.json')
+        previous_data_path = extract_file(self.previous_release_tar, tmp_dir, 'output/release/built_with_change_types.tsv')
+        version_json_path = extract_file(self.previous_release_tar, tmp_dir, 'output/release/metadata/version.json')
         previous_release_date = self._extract_release_date(version_json_path)
         previous_release_date_str = datetime.datetime.strftime(previous_release_date, '%m-%d-%Y')
         
@@ -1434,7 +1434,7 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
                 "--removed", diff_dir + "removed.tsv", "--added", diff_dir + "added.tsv", "--added_data",
                 diff_dir + "added_data.tsv", "--diff", diff_dir + "diff.txt", "--diff_json", diff_dir + "diff.json",
                 "--output", release_dir + "built_with_change_types.tsv", "--artifacts_dir", artifacts_dir,
-                "--diff_dir", diff_dir, "--v1_release_date", previous_release_date_str]
+                "--diff_dir", diff_dir, "--v1_release_date", previous_release_date_str, "--reports", "False"]
 
         print "Running releaseDiff.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -1447,6 +1447,53 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
 
 
 @requires(RunDiffAndAppendChangeTypesToOutput)
+class RunDiffAndAppendChangeTypesToOutputReports(luigi.Task):
+    def _extract_release_date(self, version_json):
+        with open(version_json, 'r') as f:
+            j = json.load(f)
+            return datetime.datetime.strptime(j['date'], '%Y-%m-%d')
+
+
+    def output(self):
+        release_dir = self.output_dir + "/release/"
+        diff_dir = create_path_if_nonexistent(release_dir + "diff/")
+        return {'reports_with_change_types': luigi.LocalTarget(release_dir + "reports_with_change_types.tsv"),
+                'removed_reports': luigi.LocalTarget(diff_dir + "removed_reports.tsv"),
+                'added_reports': luigi.LocalTarget(diff_dir + "added_reports.tsv"),
+                'added_data_reports': luigi.LocalTarget(diff_dir + "added_data_reports.tsv"),
+                'diff_reports': luigi.LocalTarget(diff_dir + "diff_reports.txt"),
+                'diff_json_reports': luigi.LocalTarget(diff_dir + "diff_reports.json"),
+                'README': luigi.LocalTarget(diff_dir + "README.txt")}
+
+    def run(self):
+        release_dir = self.output_dir + "/release/"
+        artifacts_dir = release_dir + "artifacts/"
+        diff_dir = create_path_if_nonexistent(release_dir + "diff/")
+        os.chdir(utilities_method_dir)
+
+        tmp_dir = tempfile.mkdtemp()
+        previous_data_path = extract_file(self.previous_release_tar, tmp_dir, 'output/release/artifacts/reports.tsv')
+        version_json_path = extract_file(self.previous_release_tar, tmp_dir, 'output/release/metadata/version.json')
+        previous_release_date = self._extract_release_date(version_json_path)
+        previous_release_date_str = datetime.datetime.strftime(previous_release_date, '%m-%d-%Y')
+
+        args = ["python", "releaseDiff.py", "--v2", artifacts_dir + "reports.tsv", "--v1", previous_data_path,
+                "--removed", diff_dir + "removed_reports.tsv", "--added", diff_dir + "added_reports.tsv", "--added_data",
+                diff_dir + "added_data_reports.tsv", "--diff", diff_dir + "diff_reports.txt", "--diff_json", diff_dir + "diff_reports.json",
+                "--output", release_dir + "reports_with_change_types.tsv", "--artifacts_dir", artifacts_dir,
+                "--diff_dir", diff_dir, "--v1_release_date", previous_release_date_str, "--reports", "True"]
+
+        print "Running releaseDiff.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        shutil.rmtree(tmp_dir) # cleaning up
+
+        check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "reports.tsv",
+                                                             release_dir + "reports_with_change_types.tsv")
+
+
+@requires(RunDiffAndAppendChangeTypesToOutputReports)
 class GenerateReleaseNotes(luigi.Task):
 
     def output(self):
@@ -1553,7 +1600,7 @@ class RunAll(luigi.WrapperTask):
                                          self.file_parent_dir, self.previous_release_tar,
                                          self.release_notes)
         elif self.previous_release_tar:
-            yield RunDiffAndAppendChangeTypesToOutput(self.date, self.resources_dir, self.output_dir,
+            yield RunDiffAndAppendChangeTypesToOutputReports(self.date, self.resources_dir, self.output_dir,
                                                       self.file_parent_dir, self.previous_release_tar)
         else:
             yield BuildAggregatedOutput(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
