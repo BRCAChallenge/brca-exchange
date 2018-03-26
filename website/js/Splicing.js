@@ -37,7 +37,7 @@ const donorFill = '#b272ec',
 
 const CIDomainFills = {
     "ENIGMA Consortium": 'rgba(147, 0, 255, 0.3)',
-    "Huntsman Institute": 'rgba(0, 200, 45, 0.3)',
+    "Huntsman Cancer Institute": 'rgba(0, 200, 45, 0.3)',
 };
 
 // --------------------------------------------------------------------------------------------------------------
@@ -786,7 +786,7 @@ class Splicing extends React.Component {
                         name={org} checked={this.state.drawCIDomains.has(org)} onChange={this.toggleCIDomain}
                     />
                     <span style={{...siteStyle, backgroundColor: CIDomainFills[org]}}/>
-                    {`Critical Functional Domains (${org})`}
+                    {`Clinically Important Functional Domains (${org})`}
                 </label>
 
                 <ol className="splicing-domain-list">

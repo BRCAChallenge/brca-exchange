@@ -640,7 +640,7 @@ const brca1CIDomains = {
             "end": 43045705
         }
     },
-    "Huntsman Institute": { // 'priors'
+    "Huntsman Cancer Institute": { // 'priors'
         "initiation": {
             "start": 43124096,
             "end": 43124094
