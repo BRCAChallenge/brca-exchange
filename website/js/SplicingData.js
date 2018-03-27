@@ -631,55 +631,85 @@ Clinically important regions
 // See note at top of file for explanation of start > end.
 const brca1CIDomains = {
     "ENIGMA Consortium": { // 'enigma'
-        "ring": {
-            "start": 43124096,
-            "end": 43104260
-        },
-        "brct": {
-            "start": 43070966,
-            "end": 43045705
-        }
+        "code": 'enigma',
+        "label": "Clinically Important Functional Domains (ENIGMA Consortium)",
+        "domains": [
+            {
+                "name": "ring",
+                "start": 43124096,
+                "end": 43104260
+            },
+            {
+                "name": "brct",
+                "start": 43070966,
+                "end": 43045705
+            }
+        ]
     },
     "Huntsman Cancer Institute": { // 'priors'
-        "initiation": {
-            "start": 43124096,
-            "end": 43124094
-        },
-        "ring": {
-            "start": 43124084,
-            "end": 43104875
-        },
-        "brct": {
-            "start": 43070966,
-            "end": 43045705
-        }
+        "code": 'huntsman',
+        "label": "Huntsman Cancer Institute Functional Domains",
+        "domains": [
+            {
+                "name": "initiation",
+                "start": 43124096,
+                "end": 43124094
+            },
+            /*
+            {
+                "name": "ring",
+                "start": 43124084,
+                "end": 43104875
+            },
+            {
+                "name": "brct",
+                "start": 43070966,
+                "end": 43045705
+            }
+            */
+        ]
     }
 };
 
 const brca2CIDomains = {
     "ENIGMA Consortium": { // 'enigma'
-        "dnb": {
-            "start": 32356433,
-            "end": 32396954
-        }
+        "code": 'enigma',
+        "label": "Clinically Important Functional Domains (ENIGMA Consortium)",
+        "domains": [
+            {
+                "name": "dnb",
+                "start": 32356433,
+                "end": 32396954
+            }
+        ]
     },
-    "Huntsman Institute": { // 'priors'
-        "initiation": {
-            "start": 32316461,
-            "end": 32316463
-        },
-        "palb2": {
-            "start": 32316491,
-            "end": 32319108
-        },
-        "dnb": {
-            "start": 32356433,
-            "end": 32396954
-        },
-        "tr2/rad5": {
-            "start": 32398318,
-            "end": 32398428
-        }
+    "Huntsman Cancer Institute": { // 'priors'
+        "code": 'huntsman',
+        "label": "Huntsman Cancer Institute Functional Domains",
+        "domains": [
+            {
+                "name": "initiation",
+                "start": 32316461,
+                "end": 32316463
+            },
+            {
+                "name": "palb2",
+                "start": 32316491,
+                "end": 32319108
+            },
+            /*
+            {
+                "name": "dnb",
+                "start": 32356433,
+                "end": 32396954
+            },
+            */
+            {
+                "name": "tr2/rad5",
+                "start": 32398318,
+                "end": 32398428
+            }
+        ]
     }
 };
 

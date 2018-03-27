@@ -207,7 +207,10 @@ class SegmentRegions extends React.Component {
             mask, variant, donors, acceptors, CIDomains, width, height, txStart, txEnd, zoomed, isFlipped, isIntron
         } = this.props;
         const n = this.props.n || 'intron'; // section indicator, used for creating region keys
-        const flatDomains = _.flatMap(CIDomains, (v, k) => _.map(v, (x, n) => ({org: k, name: n, span: x})));
+        const flatDomains = _.flatMap(CIDomains, (v, k) => v.domains.map((x) => ({
+            org: k, name: x.name,
+            span: {start: x.start, end: x.end}
+        })));
 
         // regions drawn within this segment will use this scale to convert
         // from BP positions to (segment-relative) pixel positions
@@ -779,31 +782,30 @@ class Splicing extends React.Component {
      * @param siteStyle
      */
     generateCIDomainSelectors(meta, siteStyle) {
-        return _.toPairs(meta.CIDomains).map(([org, namedRegions]) =>
+        return _.toPairs(meta.CIDomains).map(([org, orgMeta]) =>
             <div key={org}>
                 <label style={{display: 'inline-block', marginRight: '1em'}}>
                     <input style={{marginRight: '0.5em'}} type="checkbox"
                         name={org} checked={this.state.drawCIDomains.has(org)} onChange={this.toggleCIDomain}
                     />
                     <span style={{...siteStyle, backgroundColor: CIDomainFills[org]}}/>
-                    {`Clinically Important Functional Domains (${org})`}
+                    {orgMeta.label}
                 </label>
 
                 <ol className="splicing-domain-list">
                     {
-                        _.toPairs(namedRegions)
-                            .map(([name, region], idx) => {
-                                const selected = this.state.selectedDomain === `${org}_${name}`;
+                        orgMeta.domains.map((domain, idx) => {
+                            const selected = (this.state.selectedDomain === `${org}_${domain.name}`);
 
-                                return (
-                                    <li key={idx}>
-                                        <a style={{fontWeight: selected ? 'bold' : 'normal'}}
-                                            onClick={() => this.selectCIDomain(`${org}_${name}`, org)}>
-                                            {name}
-                                        </a>
-                                    </li>
-                                );
-                            })
+                            return (
+                                <li key={idx}>
+                                    <a style={{fontWeight: selected ? 'bold' : 'normal'}}
+                                        onClick={() => this.selectCIDomain(`${org}_${domain.name}`, org)}>
+                                        {domain.name}
+                                    </a>
+                                </li>
+                            );
+                        })
                     }
                 </ol>
             </div>
