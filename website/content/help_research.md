@@ -310,7 +310,7 @@ URL listing the variant.  From ENIGMA.
 
 * * * * * * * * * * *
 
-#### Transcript Visualization
+## Transcript Visualization
 
 The transcript visualization depicts the reference transcript of the gene (either _BRCA1_ or _BRCA2_) on which the selected variant is found. The gene is drawn as a series of exons with intervening introns. Note that exons are drawn scaled (nonlinearly) to their actual size, to make the smaller exons easier to see, while introns are drawn at a fixed width.
 
