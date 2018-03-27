@@ -98,8 +98,6 @@ def variant(request):
 def variant_reports(request, variant_id):
     variant_id = int(variant_id)
     query = Report.objects.filter(Variant_id=variant_id)
-    '''
-    NOTE: Uncomment to send report versions to UI
     report_versions = []
     for report in query:
         key = None
@@ -109,8 +107,6 @@ def variant_reports(request, variant_id):
             report_versions.extend(map(report_to_dict, report_query))
 
     response = JsonResponse({"data": report_versions})
-    '''
-    response = JsonResponse({"data":  [ model_to_dict(x) for x in query ]})
     response['Access-Control-Allow-Origin'] = '*'
     return response
 

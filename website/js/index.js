@@ -895,8 +895,6 @@ var VariantDetail = React.createClass({
         // generates variant diff rows
         const diffRows = this.generateDiffRows(cols, data, false);
 
-        /* NOTE: Uncomment to display clinvar report diffs in UI
-
         // generates report diff rows
         if (this.state.reports !== undefined) {
             let sortedSubmissions = {'ClinVar': {}};
@@ -943,7 +941,6 @@ var VariantDetail = React.createClass({
             }, this);
 
         }
-        */
 
         return (error ? <p>{error}</p> :
             <Grid>
@@ -1029,7 +1026,7 @@ var VariantDetail = React.createClass({
                     </Col>
                 </Row>
 
-                {/*this.props.mode === "research_mode" ? clinvarDiffRows : ''*/}
+                {this.props.mode === "research_mode" ? clinvarDiffRows : ''}
 
                 <Row>
                     <Col md={12} mdOffset={0}>
