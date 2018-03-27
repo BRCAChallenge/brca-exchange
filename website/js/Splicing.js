@@ -299,7 +299,7 @@ class SegmentRegions extends React.Component {
 
 class Exon extends React.Component {
     render() {
-        let {
+        const {
             n, txStart, txEnd, width, height, x, variant, zoomed, highlight, isFlipped,
             donors, acceptors, CIDomains
         } = this.props;
@@ -339,7 +339,7 @@ class Exon extends React.Component {
 
 class Intron extends React.Component {
     render() {
-        let {
+        const {
             txStart, txEnd, x, height, width, variant, zoomed, highlight, isFlipped,
             donors, acceptors, CIDomains
         } = this.props;
@@ -364,7 +364,7 @@ class Intron extends React.Component {
 
 class Transcript extends React.Component {
     render() {
-        let {variant, donors, acceptors,  CIDomains, segments, width, isFlipped} = this.props;
+        const {variant, donors, acceptors,  CIDomains, segments, width, isFlipped} = this.props;
 
 
         // ------------------------------------------------
@@ -460,7 +460,7 @@ class Transcript extends React.Component {
 
 class Zoom extends React.Component {
     render() {
-        let { variant, donors, acceptors, CIDomains, segments, width, isFullyIntronic, isFlipped } = this.props;
+        const { variant, donors, acceptors, CIDomains, segments, width, isFullyIntronic, isFlipped } = this.props;
 
 
         // ------------------------------------------------
