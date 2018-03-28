@@ -49,8 +49,7 @@ The server runs on Django with postgres so install and set up those
    /*eslint-disable camelcase*/
    module.exports = {
        backend_url: 'http://localhost:8000',
-       // backend_url: 'http://brcaexchange.cloudapp.net/backend',
-       environment: 'beta'
+       environment: 'local'
    };
    ~~~~
 * **Browse to [http://localhost:8080/](http://localhost:8080/)**
