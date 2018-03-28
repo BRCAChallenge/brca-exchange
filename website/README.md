@@ -12,10 +12,11 @@ The build is based on npm and webpack.
         * `sudo apt-get install git-all`
         * `curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -`
         * `sudo apt-get install -y nodejs`
+        * Note that you may need to install npm on Linux. Try `sudo apt install npm`
 * **Start the frontend**
    * `cd website`
    * `npm install`
-      * Note that you may encounter problems with node-gyp installing contextify. Try reinstalling after switching to Node 6.9.1. NVM is a recommended version manager for Node.
+      * Note that you may encounter problems with node-gyp installing contextify. Try reinstalling after switching to Node 6.9.1 using `nvm install 6.9.1`. NVM is a recommended version manager for Node. If NVM is not installed, install it with `curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash`.
    * `npm start`
 
 ## Build the server
@@ -35,14 +36,23 @@ The server runs on Django with postgres so install and set up those
    * If this doesn't work, figure out how to set user `postgres`'s password to `postgres`.
 * **Install the python dependencies**
    * `cd website`
-   * `pip install -qU -r requirements.txt`, if you encounter errors, try `pip install -U -r requirements.txt` and diagnose accordingly. You may need to `pip install psycopg2==2.7.3.2`.
+   * `pip install -qU -r requirements.txt`, if you encounter errors, try `pip install -U -r requirements.txt` and diagnose accordingly. You may need to `pip install psycopg2==2.7.3.2` and `sudo apt-get install libpq-dev`.
 * **Run the initial migration to populate the database**
    * `cd django`
    * `python manage.py migrate`
 * **Start the server**
    * `python manage.py runserver`
 * If you're developing locally point the frontend at the local server
-   * Edit databaseUrl in `js/backend.js` to point to `localhost:8000`
+   * Edit `js/config.js` so it includes only the following code:
+   ~~~~
+   'use strict';
+   /*eslint-disable camelcase*/
+   module.exports = {
+       backend_url: 'http://localhost:8000',
+       // backend_url: 'http://brcaexchange.cloudapp.net/backend',
+       environment: 'beta'
+   };
+   ~~~~
 * **Browse to [http://localhost:8080/](http://localhost:8080/)**
 
 ### Lint
