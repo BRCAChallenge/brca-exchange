@@ -135,7 +135,7 @@ class Command(BaseCommand):
         # Used to associate removed reports with variants because removed report bx_ids refer
         # to bx_ids from the previous release.
         previous_release_id = DataRelease.objects.order_by('-id')[1].id
-        previous_version_of_variant = Variant.objects.filter(Data_Release_id=previous_release_id).filter(Genomic_Coordinate_hg38=variant.Genomic_Coordinate_hg38)[0]
+        previous_version_of_variant_query = Variant.objects.filter(Data_Release_id=previous_release_id).filter(Genomic_Coordinate_hg38=variant.Genomic_Coordinate_hg38)
 
         for source in sources:
             if source == "Bic":
@@ -153,14 +153,16 @@ class Command(BaseCommand):
 
             '''
             Associate removed reports with variant -- note that bx_ids are release specific,
-            so we must check the previous version of a variant for its bx_ids and compare them
+            so we must check the previous version of a variant (if it exists) for its bx_ids and compare them
             to the removed report bx_ids (removed report bx_ids are from the previous release).
             '''
-            if not self.is_empty(getattr(previous_version_of_variant, bx_id_field)):
-                bx_ids = getattr(previous_version_of_variant, bx_id_field).split(',')
-                for bx_id in bx_ids:
-                    if source in reports_dict['removed_reports'] and bx_id in reports_dict['removed_reports'][source]:
-                        self.create_and_associate_report_to_variant(bx_id, source, reports_dict, variant, release_id, change_types, True)
+            if len(previous_version_of_variant_query) > 0:
+                previous_version_of_variant = previous_version_of_variant_query[0]
+                if not self.is_empty(getattr(previous_version_of_variant, bx_id_field)):
+                    bx_ids = getattr(previous_version_of_variant, bx_id_field).split(',')
+                    for bx_id in bx_ids:
+                        if source in reports_dict['removed_reports'] and bx_id in reports_dict['removed_reports'][source]:
+                            self.create_and_associate_report_to_variant(bx_id, source, reports_dict, variant, release_id, change_types, True)
 
 
     def create_and_associate_report_to_variant(self, bx_id, source, reports_dict, variant, release_id, change_types, removed=False):
