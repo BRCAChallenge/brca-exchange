@@ -688,8 +688,25 @@ def getRefAltSeqs(variant, rangeStart, rangeStop):
     altSeqDict = getAltSeqDict(variant, refSeqDict)
     altSeq = getAltSeq(altSeqDict, varStrand)
     return {"refSeq": refSeq,
-            "altSeq": altSeq}    
-    
+            "altSeq": altSeq}
+
+def getVarSeqIndexSNS(refSeq, altSeq):
+    '''
+    Given a reference sequence and alternate sequence for a substitution variant
+    Determines the index at which the alt seq differs from the ref seq
+      - using zero indexing
+    Returns the index at which altSeq differs from refSeq
+    For example if the refSeq is ACTG and altSeq is AGTG, returns 1 
+    '''
+    if len(refSeq) == len(altSeq):
+        for index in xrange(len(refSeq)):
+            if refSeq.lower()[index] != altSeq.lower()[index]:
+                return index
+            else:
+                pass
+    else:
+        return "N/A"
+            
 def getZScore(maxEntScanScore, donor=False):
     '''
     Given a MaxEntScanScore, returns the zscore
@@ -798,6 +815,7 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLeng
     deNovoDonorInRefAcc = False if NOT checking for de novo splice donors in reference splice acceptor sites
     deNovoDonorInRefAcc = True if checking for de novo splice donors in reference splice acceptor sites        
     '''
+    # TO DO modify so that this returns the highest window sequences - both ref and alt (in addition to scores)
     if donor == True:
         # uses default window size for a splice donor region
         slidingWindowInfo = getMaxEntScanScoresSlidingWindowSNS(variant, STD_DONOR_SIZE, donor=donor)
@@ -887,6 +905,7 @@ def getVarWindowPosition(variant, donor=True, deNovoDonorInRefAcc=False):
 def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, deNovoDonorInRefAcc=False, testMode=False):
     '''
     Given a variant, determines scores for closest reference splice sequence
+    Also returns sequence of closest reference splice site
     deNovoOffset refers to difference between de novo acceptor length and exonic portion size
        If donor = True, looks for closest splice donor sequence
        If donor = False, looks for closest splice acceptor sequence
@@ -927,10 +946,12 @@ def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, 
         closestMaxEntScanScore = runMaxEntScan(refSeq, donor=donor)
         closestZScore = getZScore(closestMaxEntScanScore, donor=donor)
         return {"exonName": exonName,
+                "sequence": refSeq.upper(),
                 "maxEntScanScore": closestMaxEntScanScore,
                 "zScore": closestZScore}
     else:
-        return {"exonName": exonName}
+        return {"exonName": exonName,
+                "sequence": refSeq.upper()}
 
 def isCIDomainInRegion(regionStart, regionEnd, boundaries, gene):
     '''
@@ -1070,26 +1091,38 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
     deNovoDonorInRefAcc argument = True  if looking for deNovoDonor in ref acceptor site, False otherwise
     If there is a possibility of splice rescue, flags variant for further analysis
     Else assigns prior probability of pathogenecity and predicted qualitative ENIGMA class
+    Extra flags are included to provide more information about why splicing rescue does or does not occur
+      frameshiftFlag: equals 1 if variant causes a frameshift, 0 if not
+      inExonicPortionFlag: equals 1 if variant IS in exonic portion of highest scoring window, 0 if not
+      CIDomainRegionFlag: equals 1 if truncating region (between new donor and next reference splice acceptor) 
+         includes a clinicall import domain, 0 if not
+      isDivisibleFlag: equals 1 if distance between de novo donor and wild-type donor splice site is NOT divisible by 3, 
+         0 if not
     '''
-    varCons = getVarConsequences(variant)
+    # TO DO need to add intermediate flags and output them
+    # also need to modify function/make copy to check for frameshifts for de novo donors and acceptors
+    
     # check that variant causes a premature stop codon in an exon
-    if varCons == "stop_gained" and varInExon(variant) == True:
+    if getVarConsequences(variant) == "stop_gained" and varInExon(variant) == True:
         spliceFlag = 0
         spliceRescue = 0
-        frameshift = 0
+        frameshiftFlag = 0
+        inExonicPortionFlag = 0
+        CIDomainInRegionFlag = 0
+        isDivisibleFlag = 0
         # if variant is in specified exonic portion of highest scoring sliding window, no splice rescue
         if varInExonicPortion(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH, donor=True,
                               deNovoDonorInRefAcc=deNovoDonorInRefAcc) == True:
             priorProb = 0.97
+            inExonicPortionFlag = 1
             spliceRescue = 0
-            frameshift = 0
         else:
             inFrame = isSplicingWindowInFrame(variant, STD_EXONIC_PORTION, deNovoDonorInRefAcc=deNovoDonorInRefAcc)
             # if variant causes a frameshift, no splice rescue
             if inFrame == False:
                 priorProb = 0.99
+                frameshiftFlag = 1
                 spliceRescue = 0
-                frameshift = 1
             else:
                 varGenPos = int(variant["Pos"])
                 varStrand = getVarStrand(variant)
@@ -1111,13 +1144,15 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                 if CIDomainInRegion == True or isDivisible == False:
                     priorProb = 0.99
                     spliceRescue = 0
+                    if CIDomainInRegion == True:
+                        CIDomainInRegionFlag = 1
                     if isDivisible == False:
-                        frameshift = 1
+                        isDivisibleFlag = 1
+                        frameshiftFlag = 1
                 else:
                     # possibility of splice rescue, flag variant for further splicing assays
                     spliceFlag = 1
                     spliceRescue = 1
-                    frameshift = 0
                     priorProb = "N/A"
                     enigmaClass = "N/A"
 
@@ -1130,7 +1165,10 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                 "enigmaClass": enigmaClass,
                 "spliceRescue": spliceRescue,
                 "spliceFlag": spliceFlag,
-                "frameshift": frameshift}
+                "frameshiftFlag": frameshiftFlag,
+                "inExonicPortionFlag": inExonicPortionFlag,
+                "CIDomainInRegionFlag": CIDomainInRegionFlag,
+                "isDivisibleFlag": isDivisibleFlag}
 
 def getEnigmaClass(priorProb):
     '''
@@ -1156,7 +1194,12 @@ def getPriorProbRefSpliceDonorSNS(variant, boundaries):
     Given a variant and location boundaries (either PRIORS or enigma)
     Checks that variant is in a splice donor site and is a single nucleotide substitution
     Returns a dictionary containing:
-     prior probability of pathogenecity, predicted qualitative enigma class, and ref and alt MES and zscores
+     prior probability of pathogenecity, predicted qualitative enigma class, ref and alt sequences, and ref and alt MES and zscores
+     also contains variables needed to format ref and alt seq:
+       - varStart: index (based on 0 indexing) where variant is located in altSeq
+       - varLength: length of variant in altSeq (this function is only for SNS variants so varLength=1)
+       - exonStart: denotes index (0-indexed) where exonic portion of sequence starts, always equal to 0 because splice donor is at end of exon
+       - intronStart: denotes index (0-indexed) where intronic portion of sequence starts, equal to exonic portion size
      also has spliceSite variable = 1, so variant is marked as in a reference splice site
     '''
     varType = getVarType(variant)
@@ -1187,6 +1230,12 @@ def getPriorProbRefSpliceDonorSNS(variant, boundaries):
         
         return {"priorProb": priorProb,
                 "enigmaClass": enigmaClass,
+                "refSeq": refAltSeqs["refSeq"].upper(),
+                "altSeq": refAltSeqs["altSeq"].upper(),
+                "varStart": getVarSeqIndexSNS(refAltSeqs["refSeq"], refAltSeqs["altSeq"]),
+                "varLength": 1,
+                "exonStart": 0,
+                "intronStart": STD_EXONIC_PORTION,
                 "refMaxEntScanScore": refMaxEntScanScore,
                 "altMaxEntScanScore": altMaxEntScanScore,
                 "refZScore": refZScore,
@@ -1198,7 +1247,12 @@ def getPriorProbRefSpliceAcceptorSNS(variant, boundaries):
     Given a variant and location boundaries (either PRIORS or enigma)
     Checks that variant is in a splice acceptor site and is a single nucleotide substitution
     Returns a dictionary containing:
-     prior probability of pathogenecity, predicted qualitative enigma class, and ref and alt MES and zscores
+     prior probability of pathogenecity, predicted qualitative enigma class, ref and alt sequences, and ref and alt MES and zscores
+     also contains variables needed to format ref and alt seq:
+       - varStart: index (based on 0 indexing) where variant is located in altSeq
+       - varLength: length of variant in altSeq (this function is only for SNS variants so varLength=1)
+       - exonStart: denotes index (0-indexed) where exonic portion of sequence starts, always equal to 0 because splice donor is at end of exon
+       - intronStart: denotes index (0-indexed) where intronic portion of sequence starts, equal to exonic portion size
      also has spliceSite variable = 1, so variant is marked as in a reference splice site
     '''
     varType = getVarType(variant)
@@ -1229,6 +1283,12 @@ def getPriorProbRefSpliceAcceptorSNS(variant, boundaries):
 
         return {"priorProb": priorProb,
                 "enigmaClass": enigmaClass,
+                "refSeq": refAltSeqs["refSeq"].upper(),
+                "altSeq": refAltSeqs["altSeq"].upper(),
+                "varStart": getVarSeqIndexSNS(refAltSeqs["refSeq"], refAltSeqs["altSeq"]),
+                "varLength": 1,
+                "exonStart": len(refAltSeqs["refSeq"]) - STD_EXONIC_PORTION,
+                "intronStart": 0,
                 "refMaxEntScanScore": refMaxEntScanScore,
                 "altMaxEntScanScore": altMaxEntScanScore,
                 "refZScore": refZScore,
@@ -1244,9 +1304,9 @@ def getPriorProbAfterGreyZoneSNS(variant, boundaries):
     '''
     varType = getVarType(variant)
     varLoc = getVarLocation(variant, boundaries)
-    varCons = getVarConsequences(variant)
     if varType == "substitution" and varLoc == "after_grey_zone_variant":
-        if varCons == "stop_gained" or varCons == "missense_variant":
+        varCons = getVarConsequences(variant)
+        if varCons == "stop_gained" or varCons == "missense_variant" or varCons == "synonymous_variant":
             priorProb = "N/A"
             enigmaClass = "class_2"
         return {"applicablePrior": priorProb,
@@ -1258,6 +1318,12 @@ def getPriorProbAfterGreyZoneSNS(variant, boundaries):
                 "refRefDonorZ": "-",
                 "altRefDonorMES": "-",
                 "altRefDonorZ": "-",
+                "refRefDonorSeq": "-",
+                "refAltDonorSeq": "-",
+                "refDonorVarStart": "-",
+                "refDonorVarLength": "-",
+                "refDonorExonStart": "-",
+                "refDonorIntronStart": "-",
                 "refDeNovoDonorMES": "-",
                 "refDeNovoDonorZ": "-",
                 "altDeNovoDonorMES": "-",
@@ -1268,16 +1334,24 @@ def getPriorProbAfterGreyZoneSNS(variant, boundaries):
                 "refRefAccZ": "-",
                 "altRefAccMES": "-",
                 "altRefAccZ": "-",
+                "refRefAccSeq": "-",
+                "refAltAccSeq": "-",
+                "refAccVarStart": "-",
+                "refAccVarLength": "-",
+                "refAccExonStart": "-",
+                "refAccIntronStart": "-",                
                 "refDeNovoAccMES": "-",
                 "refDeNovoAccZ": "-",
                 "altDeNovoAccMES": "-",
                 "altDeNovoAccZ": "-",
                 "deNovoAccFlag": 0,
                 "spliceSite": 0,
-                "spliceRescue": 0,
+                "spliceRescue": "N/A",
                 "spliceFlag": 0,
-                "frameshift": 0}
-
+                "frameshiftFlag": "N/A",
+                "inExonicPortionFlag": "N/A",
+                "CIDomainInRegionFlag": "N/A",
+                "isDivisibleFlag": "N/A"}
 
 def varInIneligibleDeNovoExon(variant, donor=True):
     '''
@@ -1312,6 +1386,12 @@ def getPriorProbDeNovoDonorSNS(variant, exonicPortionSize, deNovoDonorInRefAcc=F
     deNovoDonorInRefAcc = False if NOT checking for de novo donor in reference splice acceptor site
     deNovoDonorInRefAcc = True if checking for de novo donors in reference splice acceptor site
     '''
+    # TO DO change de novo donor flag, need to switch to 2 flags
+    # TO DO first flag will be deNovoDonorAltRefFlag, will be equal to 1 altMES > refMES, 0 if altMES < refMES
+    # TO DO second flag will be deNovoDonorAltClosestFlag, will be equal to 1 if altMES > closestRefMES
+    # TO DO add ref and alt sequences for de novo donor
+    # TO DO add sequence and scores for closest ref donor
+    # TO DO need to check for potential frameshfits
     if getVarType(variant) == "substitution":
         if varInSpliceRegion(variant, donor=True, deNovo=True) == True:
             if varInExon(variant) == True and varInIneligibleDeNovoExon(variant, donor=True) == True:
@@ -1376,6 +1456,12 @@ def getPriorProbDeNovoAcceptorSNS(variant, exonicPortionSize, deNovoLength):
       deNovo acceptor MaxEntScan scores and zscores for ref and alt sequence
       deNovo acceptor flag: which equals 1 alt > ref
     '''
+    # TO DO change de novo acc flag, need to switch to 2 flags
+    # TO DO first flag will be deNovoAccAltRefFlag, will be equal to 1 altMES > refMES, 0 if altMES < refMES
+    # TO DO second flag will be deNovoAccAltClosestFlag, will be equal to 1 if altMES > closestRefMES
+    # TO DO add ref and alt sequences for de novo acceptor
+    # TO DO add sequence and scores for closest ref acceptor
+    # TO DO need to check for potential frameshfits
     if getVarType(variant) == "substitution":
         if varInSpliceRegion(variant, donor=False, deNovo=True) == True:
             slidingWindowScores = getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLength,
@@ -1403,9 +1489,9 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData):
     Given a variant, boundaries (either PRIORS or ENIGMA), and a list of dictionaries with variant data
     Determines reference donor and de novo donor scores for variant
     If variant causes a nonsense mutation, determines if splice rescue occurs
-    Returns dicitionary containing scores for ref and de novo splice donor/acceptor
+    Returns dicitionary containing scores and sequences for ref and de novo splice donor/acceptor
         and protein prior if variant in exon
-        score = "-" if score not applicable for variant
+        score = "N/A" if score not applicable for variant
     Also contains other values:
         applicable prior, highest prior if variant has multiple priors
         applicable prior, highest prior if variant has multiple priors
@@ -1414,9 +1500,16 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData):
         splice flag = 1, because variant in reference splice site
         de novo donor flag = 1 if variant is possible de novo donor variant
         de novo acc flag = 0, because not applicable for variants in ref splice sites
-        spliceRescue = 1 if splice rescue possible for nonsense variant, 0 otherwise
+        spliceRescue = 1 if splice rescue possible for nonsense variant, 0 otherwise, N/A if not nonsense variant
         spliceFlag = 1 if splice rescue is possible so variant can be flagged for further analysis, 0 otherwise
-        frameshift = 1 if nonsense variant causes a frameshift mutation also, 0 otherwise
+        frameshiftFlag = 1 if nonsense variant causes a frameshift mutation also, 0 if not, N/A if not nonsense variant
+        inExonicPortionFlag = 1 if variant IS in exonic portion of highest scoring window and variant is a nonsense variant, 
+           0 if NOT in exonic portion, N/A if not nonsense variant
+        CIDomainRegionFlag = 1 if truncating region (between new donor and next reference splice acceptor) 
+           includes a clinically import domain for nonsense variant, 0 if not, N/A if not nonsense variant
+        isDivisibleFlag = 1 if distance between de novo donor and wild-type donor splice site is NOT divisible by 3 for nonsense variant, 
+           0 if it IS divisible, N/A if not a nonsense variant
+    Dictionary also contains formatting variables for each listed sequence
     ''' 
     if varInSpliceRegion(variant, donor=True, deNovo=False) and getVarType(variant) == "substitution":
         refSpliceInfo = getPriorProbRefSpliceDonorSNS(variant, boundaries)
@@ -1436,16 +1529,26 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData):
         elif deNovoPrior == "N/A" and proteinPrior == "N/A":
             applicablePrior = refPrior
 
-        spliceRescue = 0
+        spliceRescue = "N/A"
         spliceFlag = 0
-        frameshift = 0
+        frameshiftFlag = "N/A"
+        inExonicPortionFlag = "N/A"
+        CIDomainInRegionFlag = "N/A"
+        isDivisibleFlag = "N/A"
         # to check for nonsense variants in exonic portion of splice donor site
         if varInExon(variant) == True and getVarConsequences(variant) == "stop_gained":
             nonsenseData = getPriorProbSpliceRescueNonsenseSNS(variant, boundaries)
             applicablePrior = nonsenseData["priorProb"]
             spliceRescue = nonsenseData["spliceRescue"]
             spliceFlag = nonsenseData["spliceFlag"]
-            frameshift = nonsenseData["frameshift"]
+            frameshiftFlag = nonsenseData["frameshiftFlag"]
+            inExonicPortionFlag = nonsenseData["inExonicPortionFlag"]
+            CIDomainInRegionFlag = nonsenseData["CIDomainInRegionFlag"]
+            isDivisibleFlag = nonsenseData["isDivisibleFlag"]
+
+        # TO DO add additional flags for de novo donor
+        # TO DO add sequences for ref and alt and add NA for closest splice site
+        # TO DO need to add additional formatting flags for future UI development (see slack convo with Zack)
             
         return {"applicablePrior": applicablePrior,
                 "applicableEnigmaClass": getEnigmaClass(applicablePrior),
@@ -1456,6 +1559,12 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData):
                 "refRefDonorZ": refSpliceInfo["refZScore"],
                 "altRefDonorMES": refSpliceInfo["altMaxEntScanScore"],
                 "altRefDonorZ": refSpliceInfo["altZScore"],
+                "refRefDonorSeq": refSpliceInfo["refSeq"],
+                "refAltDonorSeq": refSpliceInfo["altSeq"],
+                "refDonorVarStart": refSpliceInfo["varStart"],
+                "refDonorVarLength": refSpliceInfo["varLength"],
+                "refDonorExonStart": refSpliceInfo["exonStart"],
+                "refDonorIntronStart": refSpliceInfo["intronStart"],
                 "refDeNovoDonorMES": deNovoSpliceInfo["refMaxEntScanScore"],
                 "refDeNovoDonorZ": deNovoSpliceInfo["refZScore"],
                 "altDeNovoDonorMES": deNovoSpliceInfo["altMaxEntScanScore"],
@@ -1463,19 +1572,28 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData):
                 "deNovoDonorFlag": deNovoSpliceInfo["deNovoDonorFlag"],
                 "refAccPrior": "N/A",
                 "deNovoAccPrior": "N/A",
-                "refRefAccMES": "-",
-                "refRefAccZ": "-",
-                "altRefAccMES": "-",
-                "altRefAccZ": "-",
-                "refDeNovoAccMES": "-",
-                "refDeNovoAccZ": "-",
-                "altDeNovoAccMES": "-",
-                "altDeNovoAccZ": "-",
+                "refRefAccMES": "N/A",
+                "refRefAccZ": "N/A",
+                "altRefAccMES": "N/A",
+                "altRefAccZ": "N/A",
+                "refRefAccSeq": "N/A",
+                "refAltAccSeq": "N/A",
+                "refAccVarStart": "N/A",
+                "refAccVarLength": "N/A",
+                "refAccExonStart": "N/A",
+                "refAccIntronStart": "N/A",
+                "refDeNovoAccMES": "N/A",
+                "refDeNovoAccZ": "N/A",
+                "altDeNovoAccMES": "N/A",
+                "altDeNovoAccZ": "N/A",
                 "deNovoAccFlag": 0,
                 "spliceSite": refSpliceInfo["spliceSite"],
                 "spliceRescue": spliceRescue,
                 "spliceFlag": spliceFlag,
-                "frameshift": frameshift}
+                "frameshiftFlag": frameshiftFlag,
+                "inExonicPortionFlag": inExonicPortionFlag,
+                "CIDomainInRegionFlag": CIDomainInRegionFlag,
+                "isDivisibleFlag": isDivisibleFlag}
 
 def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData):
     '''
@@ -1483,7 +1601,7 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData):
     Determines reference and de novo acceptor scores for variant
       If variant in exon, also determines de novo donor scores and protein prior
     If variant causes a nonsense mutation, determines if splice rescue occurs
-    Returns dicitionary containing scores for ref and de novo splice donor/acceptor
+    Returns dicitionary containing scores for and sequences ref and de novo splice donor/acceptor
         score = "-" if score not applicable for variant
     Also contains other values:
         applicable prior, highest prior if variant has multiple priors
@@ -1493,9 +1611,16 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData):
         splice flag = 1, because variant in reference splice site
         de novo acc flag = 1 if variant is possible de novo acceptor variant
         de novo donor flag = 1 if variant is possible de novo donor variant
-        spliceRescue = 1 if splice rescue possible for nonsense variant, 0 otherwise
+        spliceRescue = 1 if splice rescue possible for nonsense variant, 0 otherwise, N/A if not nonsense variant
         spliceFlag = 1 if splice rescue is possible so variant can be flagged for further analysis, 0 otherwise
-        frameshift = 1 if nonsense variant causes a frameshift mutation also, 0 otherwise
+        frameshiftFlag = 1 if nonsense variant causes a frameshift mutation also, 0 if not, N/A if not nonsense variant
+        inExonicPortionFlag = 1 if variant IS in exonic portion of highest scoring window and variant is a nonsense variant, 
+           0 if NOT in exonic portion, N/A if not nonsense variant
+        CIDomainRegionFlag = 1 if truncating region (between new donor and next reference splice acceptor) 
+           includes a clinically import domain for nonsense variant, 0 if not, N/A if not nonsense variant
+        isDivisibleFlag = 1 if distance between de novo donor and wild-type donor splice site is NOT divisible by 3 for nonsense variant, 
+           0 if it IS divisible, N/A if not a nonsense variant
+    Dictionary also contains formatting variables for each listed sequence
     '''
     if varInSpliceRegion(variant, donor=False, deNovo=False) and getVarType(variant) == "substitution":
         refSpliceInfo = getPriorProbRefSpliceAcceptorSNS(variant, boundaries)
@@ -1514,33 +1639,49 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData):
                 applicablePrior = max(proteinPrior, refPrior)
         else:
             deNovoDonorPrior = "N/A"
-            deNovoDonorInfo = {"refMaxEntScanScore": "-",
-                               "refZScore": "-",
-                               "altMaxEntScanScore": "-",
-                               "altZScore": "-",
+            deNovoDonorInfo = {"refMaxEntScanScore": "N/A",
+                               "refZScore": "N/A",
+                               "altMaxEntScanScore": "N/A",
+                               "altZScore": "N/A",
                                "deNovoDonorFlag": 0,
                                "priorProb": "N/A"}
 
-        spliceRescue = 0
+        spliceRescue = "N/A"
         spliceFlag = 0
-        frameshift = 0
+        frameshiftFlag = "N/A"
+        inExonicPortionFlag = "N/A"
+        CIDomainInRegionFlag = "N/A"
+        isDivisibleFlag = "N/A"
         # to check for nonsense variants in exonic portion of splice acceptor site
         if varInExon(variant) == True and getVarConsequences(variant) == "stop_gained":
             nonsenseData = getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc=True)
             applicablePrior = nonsenseData["priorProb"]
             spliceRescue = nonsenseData["spliceRescue"]
             spliceFlag = nonsenseData["spliceFlag"]
-            frameshift = nonsenseData["frameshift"]
+            frameshiftFlag = nonsenseData["frameshiftFlag"]
+            inExonicPortionFlag = nonsenseData["inExonicPortionFlag"]
+            CIDomainInRegionFlag = nonsenseData["CIDomainInRegionFlag"]
+            isDivisibleFlag = nonsenseData["isDivisibleFlag"]
+
+        # TO DO add additional flags for de novo acceptor
+        # TO DO add sequences for ref and alt and add NA for closest splice site
+        # TO DO need to add additional formatting flags for future UI development (see slack convo with Zack)
         
         return {"applicablePrior": applicablePrior,
                 "applicableEnigmaClass": getEnigmaClass(applicablePrior),
                 "proteinPrior": proteinPrior,
                 "refDonorPrior": "-",
                 "deNovoDonorPrior": deNovoDonorPrior,
-                "refRefDonorMES": "-",
-                "refRefDonorZ": "-",
-                "altRefDonorMES": "-",
-                "altRefDonorZ": "-",
+                "refRefDonorMES": "N/A",
+                "refRefDonorZ": "N/A",
+                "altRefDonorMES": "N/A",
+                "altRefDonorZ": "N/A",
+                "refRefDonorSeq": "N/A",
+                "refAltDonorSeq": "N/A",
+                "refDonorVarStart": "N/A",
+                "refDonorVarLength": "N/A",
+                "refDonorExonStart": "N/A",
+                "refDonorIntronStart": "N/A",
                 "refDeNovoDonorMES": deNovoDonorInfo["refMaxEntScanScore"],
                 "refDeNovoDonorZ": deNovoDonorInfo["refZScore"],
                 "altDeNovoDonorMES": deNovoDonorInfo["altMaxEntScanScore"],
@@ -1552,6 +1693,12 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData):
                 "refRefAccZ": refSpliceInfo["refZScore"],
                 "altRefAccMES": refSpliceInfo["altMaxEntScanScore"],
                 "altRefAccZ": refSpliceInfo["altZScore"],
+                "refRefAccSeq": refSpliceInfo["refSeq"],
+                "refAltAccSeq": refSpliceInfo["altSeq"],
+                "refAccVarStart": refSpliceInfo["varStart"],
+                "refAccVarLength": refSpliceInfo["varLength"],
+                "refAccExonStart": refSpliceInfo["exonStart"],
+                "refAccIntronStart": refSpliceInfo["intronStart"],
                 "refDeNovoAccMES": deNovoAccInfo["refMaxEntScanScore"],
                 "refDeNovoAccZ": deNovoAccInfo["refZScore"],
                 "altDeNovoAccMES": deNovoAccInfo["altMaxEntScanScore"],
@@ -1560,7 +1707,10 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData):
                 "spliceSite": refSpliceInfo["spliceSite"],
                 "spliceRescue": spliceRescue,
                 "spliceFlag": spliceFlag,
-                "frameshift": frameshift}
+                "frameshiftFlag": frameshiftFlag,
+                "inExonicPortionFlag": inExonicPortionFlag,
+                "CIDomainInRegionFlag": CIDomainInRegionFlag,
+                "isDivisibleFlag": isDivisibleFlag}
     
 def getPriorProbProteinSNS(variant, variantData):
     '''
@@ -1603,6 +1753,12 @@ def getPriorProbInGreyZoneSNS(variant, boundaries, variantData):
                 "refRefDonorZ": "-",
                 "altRefDonorMES": "-",
                 "altRefDonorZ": "-",
+                "refRefDonorSeq": "-",
+                "refAltDonorSeq": "-",
+                "refDonorVarStart": "-",
+                "refDonorVarLength": "-",
+                "refDonorExonStart": "-",
+                "refDonorIntronStart": "-",
                 "refDeNovoDonorMES": "-",
                 "refDeNovoDonorZ": "-",
                 "altDeNovoDonorMES": "-",
@@ -1614,15 +1770,24 @@ def getPriorProbInGreyZoneSNS(variant, boundaries, variantData):
                 "refRefAccZ": "-",
                 "altRefAccMES": "-",
                 "altRefAccZ": "-",
+                "refRefAccSeq": "-",
+                "refAltAccSeq": "-",
+                "refAccVarStart": "-",
+                "refAccVarLength": "-",
+                "refAccExonStart": "-",
+                "refAccIntronStart": "-",
                 "refDeNovoAccMES": "-",
                 "refDeNovoAccZ": "-",
                 "altDeNovoAccMES": "-",
                 "altDeNovoAccZ": "-",
                 "deNovoAccFlag": 0,
                 "spliceSite": 0,
-                "spliceRescue": 0,
+                "spliceRescue": "N/A",
                 "spliceFlag": 0,
-                "frameshift": 0}
+                "frameshiftFlag": "N/A",
+                "inExonicPortionFlag": "N/A",
+                "CIDomainInRegionFlag": "N/A",
+                "isDivisibleFlag": "N/A"}
     
 def getPriorProbInExonSNS(variant, boundaries, variantData):
     '''
@@ -1643,23 +1808,33 @@ def getPriorProbInExonSNS(variant, boundaries, variantData):
         de novo donor flag = 1 if variant is possible de novo donor variant
         spliceRescue = 1 if splice rescue possible for nonsense variant, 0 otherwise
         spliceFlag = 1 if splice rescue is possible so variant can be flagged for further analysis, 0 otherwise
-        frameshift = 1 if nonsense variant causes a frameshift mutation also, 0 otherwise
+        frameshiftFlag = 1 if nonsense variant causes a frameshift mutation also, 0 if not, N/A if not nonsense variant
+        inExonicPortionFlag = 1 if variant IS in exonic portion of highest scoring window and variant is a nonsense variant, 
+           0 if NOT in exonic portion, N/A if not nonsense variant
+        CIDomainRegionFlag = 1 if truncating region (between new donor and next reference splice acceptor) 
+           includes a clinically import domain for nonsense variant, 0 if not, N/A if not nonsense variant
+        isDivisibleFlag = 1 if distance between de novo donor and wild-type donor splice site is NOT divisible by 3 for nonsense variant, 
+           0 if it IS divisible, N/A if not a nonsense variant
     '''
+    # TO DO need to add extra flags (de novo donor/acceptor and splice rescue flags)
     varLoc = getVarLocation(variant, boundaries)
     if (varLoc == "exon_variant" or "CI_domain_variant") and getVarType(variant) == "substitution":
         proteinData = getPriorProbProteinSNS(variant, variantData)
-        spliceRescue = 0
+        spliceRescue = "N/A"
         spliceFlag = 0
-        frameshift = 0
+        frameshiftFlag = "N/A"
+        inExonicPortionFlag = "N/A"
+        CIDomainInRegionFlag = "N/A"
+        isDivisibleFlag = "N/A"
         deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, STD_EXONIC_PORTION, deNovoDonorInRefAcc=False)
         if varInSpliceRegion(variant, donor=False, deNovo=True):
             deNovoAccData = getPriorProbDeNovoAcceptorSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH)
         else:
             deNovoAccData = {"priorProb": "N/A",
-                             "refMaxEntScanScore": "-",
-                             "altMaxEntScanScore": "-",
-                             "refZScore": "-",
-                             "altZScore": "-",
+                             "refMaxEntScanScore": "N/A",
+                             "altMaxEntScanScore": "N/A",
+                             "refZScore": "N/A",
+                             "altZScore": "N/A",
                              "deNovoAccFlag": 0}
         varCons = getVarConsequences(variant)
         if varCons == "stop_gained":
@@ -1668,7 +1843,10 @@ def getPriorProbInExonSNS(variant, boundaries, variantData):
             applicableClass = nonsenseData["enigmaClass"]
             spliceRescue = nonsenseData["spliceRescue"]
             spliceFlag = nonsenseData["spliceFlag"]
-            frameshift = nonsenseData["frameshift"]
+            frameshiftFlag = nonsenseData["frameshiftFlag"]
+            inExonicPortionFlag = nonsenseData["inExonicPortionFlag"]
+            CIDomainInRegionFlag = nonsenseData["CIDomainInRegionFlag"]
+            isDivisibleFlag = nonsenseData["isDivisibleFlag"]
         else:
             applicablePrior = proteinData["priorProb"]
             applicableClass = proteinData["enigmaClass"]
@@ -1681,10 +1859,16 @@ def getPriorProbInExonSNS(variant, boundaries, variantData):
                 "proteinPrior": proteinData["priorProb"],
                 "refDonorPrior": "N/A",
                 "deNovoDonorPrior": deNovoDonorData["priorProb"],
-                "refRefDonorMES": "-",
-                "refRefDonorZ": "-",
-                "altRefDonorMES": "-",
-                "altRefDonorZ": "-",
+                "refRefDonorMES": "N/A",
+                "refRefDonorZ": "N/A",
+                "altRefDonorMES": "N/A",
+                "altRefDonorZ": "N/A",
+                "refRefDonorSeq": "N/A",
+                "refAltDonorSeq": "N/A",
+                "refDonorVarStart": "N/A",
+                "refDonorVarLength": "N/A",
+                "refDonorExonStart": "N/A",
+                "refDonorIntronStart": "N/A",
                 "refDeNovoDonorMES": deNovoDonorData["refMaxEntScanScore"],
                 "refDeNovoDonorZ": deNovoDonorData["refZScore"],
                 "altDeNovoDonorMES": deNovoDonorData["altMaxEntScanScore"],
@@ -1692,10 +1876,16 @@ def getPriorProbInExonSNS(variant, boundaries, variantData):
                 "deNovoDonorFlag": deNovoDonorData["deNovoDonorFlag"],
                 "deNovoAccPrior": deNovoAccData["priorProb"],
                 "refAccPrior": "N/A",
-                "refRefAccMES": "-",
-                "refRefAccZ": "-",
-                "altRefAccMES": "-",
-                "altRefAccZ": "-",
+                "refRefAccMES": "N/A",
+                "refRefAccZ": "N/A",
+                "altRefAccMES": "N/A",
+                "altRefAccZ": "N/A",
+                "refRefAccSeq": "N/A",
+                "refAltAccSeq": "N/A",
+                "refAccVarStart": "N/A",
+                "refAccVarLength": "N/A",
+                "refAccExonStart": "N/A",
+                "refAccIntronStart": "N/A",
                 "refDeNovoAccMES": deNovoAccData["refMaxEntScanScore"], 
                 "refDeNovoAccZ": deNovoAccData["refZScore"],
                 "altDeNovoAccMES": deNovoAccData["altMaxEntScanScore"],
@@ -1704,7 +1894,10 @@ def getPriorProbInExonSNS(variant, boundaries, variantData):
                 "spliceSite": 0,
                 "spliceRescue": spliceRescue,
                 "spliceFlag": spliceFlag,
-                "frameshift": frameshift}
+                "frameshiftFlag": frameshiftFlag,
+                "inExonicPortionFlag": inExonicPortionFlag,
+                "CIDomainInRegionFlag": CIDomainInRegionFlag,
+                "isDivisibleFlag": isDivisibleFlag}
 
 def getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries):
     '''
@@ -1726,6 +1919,12 @@ def getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries):
                 "refRefDonorZ": "-",
                 "altRefDonorMES": "-",
                 "altRefDonorZ": "-",
+                "refRefDonorSeq": "-",
+                "refAltDonorSeq": "-",
+                "refDonorVarStart": "-",
+                "refDonorVarLength": "-",
+                "refDonorExonStart": "-",
+                "refDonorIntronStart": "-",
                 "refDeNovoDonorMES": "-",
                 "refDeNovoDonorZ": "-",
                 "altDeNovoDonorMES": "-",
@@ -1737,15 +1936,24 @@ def getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries):
                 "refRefAccZ": "-",
                 "altRefAccMES": "-",
                 "altRefAccZ": "-",
+                "refRefAccSeq": "-",
+                "refAltAccSeq": "-",
+                "refAccVarStart": "-",
+                "refAccVarLength": "-",
+                "refAccExonStart": "-",
+                "refAccIntronStart": "-",
                 "refDeNovoAccMES": "-",
                 "refDeNovoAccZ": "-",
                 "altDeNovoAccMES": "-",
                 "altDeNovoAccZ": "-",
                 "deNovoAccFlag": 0,
                 "spliceSite": 0,
-                "spliceRescue": 0,
+                "spliceRescue": "N/A",
                 "spliceFlag": 0,
-                "frameshift": 0}
+                "frameshiftFlag": "N/A",
+                "inExonicPortionFlag": "N/A",
+                "CIDomainInRegionFlag": "N/A",
+                "isDivisibleFlag": "N/A"}
 
 def getPriorProbIntronicDeNovoDonorSNS(variant):
     '''
@@ -1807,10 +2015,16 @@ def getPriorProbInIntronSNS(variant, boundaries):
                 "proteinPrior": "N/A",
                 "refDonorPrior": "N/A",
                 "deNovoDonorPrior": "N/A",
-                "refRefDonorMES": "-",
-                "refRefDonorZ": "-",
-                "altRefDonorMES": "-",
-                "altRefDonorZ": "-",
+                "refRefDonorMES": "N/A",
+                "refRefDonorZ": "N/A",
+                "altRefDonorMES": "N/A",
+                "altRefDonorZ": "N/A",
+                "refRefDonorSeq": "N/A",
+                "refAltDonorSeq": "N/A",
+                "refDonorVarStart": "N/A",
+                "refDonorVarLength": "N/A",
+                "refDonorExonStart": "N/A",
+                "refDonorIntronStart": "N/A",
                 "refDeNovoDonorMES": deNovoDonorData["refMaxEntScanScore"],
                 "refDeNovoDonorZ": deNovoDonorData["refZScore"],
                 "altDeNovoDonorMES": deNovoDonorData["altMaxEntScanScore"],
@@ -1818,19 +2032,28 @@ def getPriorProbInIntronSNS(variant, boundaries):
                 "deNovoDonorFlag": deNovoDonorData["deNovoDonorFlag"],
                 "deNovoAccPrior": "N/A",
                 "refAccPrior": "N/A",
-                "refRefAccMES": "-",
-                "refRefAccZ": "-",
-                "altRefAccMES": "-",
-                "altRefAccZ": "-",
+                "refRefAccMES": "N/A",
+                "refRefAccZ": "N/A",
+                "altRefAccMES": "N/A",
+                "altRefAccZ": "N/A",
+                "refRefAccSeq": "N/A",
+                "refAltAccSeq": "N/A",
+                "refAccVarStart": "N/A",
+                "refAccVarLength": "N/A",
+                "refAccExonStart": "N/A",
+                "refAccIntronStart": "N/A",
                 "refDeNovoAccMES": "-",
                 "refDeNovoAccZ": "-",
                 "altDeNovoAccMES": "-",
                 "altDeNovoAccZ": "-",
                 "deNovoAccFlag": 0,
                 "spliceSite": 0,
-                "spliceRescue": 0,
+                "spliceRescue": "N/A",
                 "spliceFlag": deNovoDonorData["spliceFlag"],
-                "frameshift": 0}
+                "frameshiftFlag": "N/A",
+                "inExonicPortionFlag": "N/A",
+                "CIDomainInRegionFlag": "N/A",
+                "isDivisibleFlag": "N/A"}
 
 def getPriorProbUTRSNS(variant, boundaries):
     '''
@@ -1864,10 +2087,6 @@ def getPriorProbUTRSNS(variant, boundaries):
             applicableClass = getEnigmaClass(applicablePrior)
             spliceFlag = 0
         elif varCons == "5_prime_UTR_variant":
-            # TO DO add in checks for creation of alternate start codon (ATG)
-            # TO DO either add a flag per MP or add priors as below per SVT
-            # TO DO if ATG is created and is OUT of frame --> flag/priorProb = 0.10
-            # TO DO if ATG is created and is IN frame AND there is a stop codon before real start codon --> flag/priorProb = 0.10
             if varInExon(variant) == True:
                 deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, STD_EXONIC_PORTION, deNovoDonorInRefAcc=False)
                 applicablePrior = deNovoDonorData["priorProb"]
@@ -1876,7 +2095,7 @@ def getPriorProbUTRSNS(variant, boundaries):
                 if varInSpliceRegion(variant, donor=False, deNovo=True) == True:
                     deNovoAccData = getPriorProbDeNovoAcceptorSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH)
         else:
-            # to account for variants in 5' UTR that are classified as other variant types by getVarConsequences function
+            # to account for variants in 5' UTR that are classified as other variant types
             deNovoDonorData = getPriorProbIntronicDeNovoDonorSNS(variant)
             spliceFlag = deNovoDonorData["spliceFlag"]
             if spliceFlag == 1:
@@ -1891,10 +2110,16 @@ def getPriorProbUTRSNS(variant, boundaries):
                 "proteinPrior": "N/A",
                 "refDonorPrior": "N/A",
                 "deNovoDonorPrior": deNovoDonorData["priorProb"],
-                "refRefDonorMES": "-",
-                "refRefDonorZ": "-",
-                "altRefDonorMES": "-",
-                "altRefDonorZ": "-",
+                "refRefDonorMES": "N/A",
+                "refRefDonorZ": "N/A",
+                "altRefDonorMES": "N/A",
+                "altRefDonorZ": "N/A",
+                "refRefDonorSeq": "N/A",
+                "refAltDonorSeq": "N/A",
+                "refDonorVarStart": "N/A",
+                "refDonorVarLength": "N/A",
+                "refDonorExonStart": "N/A",
+                "refDonorIntronStart": "N/A",
                 "refDeNovoDonorMES": deNovoDonorData["refMaxEntScanScore"],
                 "refDeNovoDonorZ": deNovoDonorData["refZScore"],
                 "altDeNovoDonorMES": deNovoDonorData["altMaxEntScanScore"],
@@ -1902,19 +2127,28 @@ def getPriorProbUTRSNS(variant, boundaries):
                 "deNovoDonorFlag": deNovoDonorData["deNovoDonorFlag"],
                 "deNovoAccPrior": deNovoAccData["priorProb"],
                 "refAccPrior": "N/A",
-                "refRefAccMES": "-",
-                "refRefAccZ": "-",
-                "altRefAccMES": "-",
-                "altRefAccZ": "-",
+                "refRefAccMES": "N/A",
+                "refRefAccZ": "N/A",
+                "altRefAccMES": "N/A",
+                "altRefAccZ": "N/A",
+                "refRefAccSeq": "N/A",
+                "refAltAccSeq": "N/A",
+                "refAccVarStart": "N/A",
+                "refAccVarLength": "N/A",
+                "refAccExonStart": "N/A",
+                "refAccIntronStart": "N/A",                
                 "refDeNovoAccMES": deNovoAccData["refMaxEntScanScore"], 
                 "refDeNovoAccZ": deNovoAccData["refZScore"],
                 "altDeNovoAccMES": deNovoAccData["altMaxEntScanScore"],
                 "altDeNovoAccZ": deNovoAccData["altZScore"],
                 "deNovoAccFlag": deNovoAccData["deNovoAccFlag"],
                 "spliceSite": 0,
-                "spliceRescue": 0,
+                "spliceRescue": "N/A",
                 "spliceFlag": spliceFlag,
-                "frameshift": 0}
+                "frameshiftFlag": "N/A",
+                "inExonicPortionFlag": "N/A",
+                "CIDomainInRegionFlag": "N/A",
+                "isDivisibleFlag": "N/A"}
 
 def getVarData(variant, boundaries, variantData):
     '''
@@ -1934,6 +2168,12 @@ def getVarData(variant, boundaries, variantData):
                  "refRefDonorZ": "-",
                  "altRefDonorMES": "-",
                  "altRefDonorZ": "-",
+                 "refRefDonorSeq": "-",
+                 "refAltDonorSeq": "-",
+                 "refDonorVarStart": "-",
+                 "refDonorVarLength": "-",
+                 "refDonorExonStart": "-",
+                 "refDonorIntronStart": "-",                
                  "refDeNovoDonorMES": "-",
                  "refDeNovoDonorZ": "-",
                  "altDeNovoDonorMES": "-",
@@ -1944,6 +2184,12 @@ def getVarData(variant, boundaries, variantData):
                  "refRefAccZ": "-",
                  "altRefAccMES": "-",
                  "altRefAccZ": "-",
+                 "refRefAccSeq": "-",
+                 "refAltAccSeq": "-",
+                 "refAccVarStart": "-",
+                 "refAccVarLength": "-",
+                 "refAccExonStart": "-",
+                 "refAccIntronStart": "-",                 
                  "refDeNovoAccMES": "-",
                  "refDeNovoAccZ": "-",
                  "altDeNovoAccMES": "-",
@@ -1952,7 +2198,10 @@ def getVarData(variant, boundaries, variantData):
                  "spliceSite": "-",
                  "spliceRescue": "-",
                  "spliceFlag": "-",
-                 "frameshift": "-"}
+                 "frameshiftFlag": "-",
+                 "inExonicPortionFlag": "-",
+                 "CIDomainInRegionFlag": "-",
+                 "isDivisibleFlag": "-"}
     if varType == "substitution":
         # functions only work for variants with cannonical nucleotides (ACTG)
         if variant["Ref"] in ["A", "C","G", "T"] and variant["Alt"] in ["A", "C", "G", "T"]:
@@ -2029,7 +2278,7 @@ def main():
                   "refRefDonorMES", "refRefDonorZ", "altRefDonorMES", "altRefDonorZ", "refDeNovoDonorMES", "refDeNovoDonorZ", "altDeNovoDonorMES",
                   "altDeNovoDonorZ", "deNovoDonorFlag", "refAccPrior", "deNovoAccPrior", "refRefAccMES", "refRefAccZ", "altRefAccMES",
                   "altRefAccZ", "refDeNovoAccMES", "refDeNovoAccZ", "altDeNovoAccMES", "altDeNovoAccZ", "deNovoAccFlag", "spliceSite",
-                  "spliceRescue", "spliceFlag", "frameshift"]
+                  "spliceRescue", "spliceFlag", "frameshiftFlag", "inExonicPortionFlag", "CIDomainInRegionFlag", "isDivisibleFlag"]
     for header in newHeaders:
         fieldnames.append(header)
     outputData = csv.DictWriter(open(args.outputFile, "w"), delimiter="\t", fieldnames=fieldnames)

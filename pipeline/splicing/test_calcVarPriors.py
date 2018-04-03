@@ -1646,6 +1646,27 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(refAltSeqs["refSeq"], brca2RefSeq)
         self.assertEquals(refAltSeqs["altSeq"], brca2AltSeq)
 
+    def test_getVarSeqIndexSNSDiffLengths(self):
+        '''Tests that function returns None for ref and alt seqs of different lengths'''
+        refSeq = "ACTGTACTC"
+        altSeq = "ACTGTAACTC"
+        varIndex = calcVarPriors.getVarSeqIndexSNS(refSeq, altSeq)
+        self.assertEquals(varIndex, "N/A")
+
+    def test_getVarSeqIndexSNSDiffCases(self):
+        '''Tests that function returns correct index for ref and alt seqs that have different cases'''
+        refSeq = "TGTGTAACACGTAATTACAGTGG"
+        altSeq = "tgtgtaacacgtaattacagtcg"
+        varIndex = calcVarPriors.getVarSeqIndexSNS(refSeq, altSeq)
+        self.assertEquals(varIndex, 21)
+
+    def test_getVarSeqIndexSNSSameCase(self):
+        '''Tests that function returns correct index for ref and alt seqs that are the same case'''
+        refSeq = "ctagtcgtt"
+        altSeq = "ctactcgtt"
+        varIndex = calcVarPriors.getVarSeqIndexSNS(refSeq, altSeq)
+        self.assertEquals(varIndex, 3)
+
     def test_getZScore(self):
         '''
         Tests that:
@@ -1724,6 +1745,7 @@ class test_calcVarPriors(unittest.TestCase):
         closestScores = calcVarPriors.getClosestSpliceSiteScores(self.variant, deNovoOffset, donor=True,
                                                                  deNovo=False, deNovoDonorInRefAcc=True, testMode=True)
         self.assertEquals(closestScores["exonName"], "exon18")
+        self.assertEquals(closestScores["sequence"], "TCTGTAAGT")
 
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.getVarExonNumberSNS', return_value = "exon8")
@@ -1743,6 +1765,7 @@ class test_calcVarPriors(unittest.TestCase):
         closestScores = calcVarPriors.getClosestSpliceSiteScores(self.variant, deNovoOffset, donor=False,
                                                                  deNovo=False, deNovoDonorInRefAcc=False, testMode=True)
         self.assertEquals(closestScores["exonName"], "exon8")
+        self.assertEquals(closestScores["sequence"], "CATAAATTTTTATCTTACAGTCA")
 
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.getVarExonNumberSNS', return_value = "exon20")
@@ -1765,6 +1788,7 @@ class test_calcVarPriors(unittest.TestCase):
         closestScores = calcVarPriors.getClosestSpliceSiteScores(self.variant, deNovoOffset, donor=True,
                                                                  deNovo=False, deNovoDonorInRefAcc=False, testMode=True)
         self.assertEquals(closestScores["exonName"], "exon20")
+        self.assertEquals(closestScores["sequence"], "AAGGTAAAA")
 
     @mock.patch('calcVarPriors.varInExon', return_value = False)
     @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
@@ -1788,6 +1812,7 @@ class test_calcVarPriors(unittest.TestCase):
         closestScores = calcVarPriors.getClosestSpliceSiteScores(self.variant, deNovoOffset, donor=False,
                                                                  deNovo=False, deNovoDonorInRefAcc=False, testMode=True)
         self.assertEquals(closestScores["exonName"], "exon5")
+        self.assertEquals(closestScores["sequence"], "TCTTTCTTTATAATTTATAGATT")
 
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
@@ -1808,7 +1833,6 @@ class test_calcVarPriors(unittest.TestCase):
         closestScores = calcVarPriors.getClosestSpliceSiteScores(self.variant, deNovoOffset, donor=False,
                                                                  deNovo=True, deNovoDonorInRefAcc=False, testMode=True)
         self.assertEquals(closestScores["exonName"], "exon4")
-
 
     def test_isCIDomainInRegionBRCA1(self):
         '''
@@ -2084,7 +2108,7 @@ class test_calcVarPriors(unittest.TestCase):
         isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant, STD_EXONIC_PORTION, deNovoDonorInRefAcc=False)
         self.assertFalse(isDivisible)
 
-    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")    
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.varInExonicPortion', return_value = True)
     def test_getPriorProbSpliceRescueNonsenseSNSInExonicPortion(self, getVarConsequences, varInExon, varInExonicPortion):
@@ -2095,7 +2119,10 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class4"])
         self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
         self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
-        self.assertEquals(spliceRescueInfo["frameshift"], 0)
+        self.assertEquals(spliceRescueInfo["frameshiftFlag"], 0)
+        self.assertEquals(spliceRescueInfo["inExonicPortionFlag"], 1)
+        self.assertEquals(spliceRescueInfo["CIDomainInRegionFlag"], 0)
+        self.assertEquals(spliceRescueInfo["isDivisibleFlag"], 0)
 
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
@@ -2109,8 +2136,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class5"])
         self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
         self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
-        self.assertEquals(spliceRescueInfo["frameshift"], 1)
-        
+        self.assertEquals(spliceRescueInfo["frameshiftFlag"], 1)
+        self.assertEquals(spliceRescueInfo["inExonicPortionFlag"], 0)
+        self.assertEquals(spliceRescueInfo["CIDomainInRegionFlag"], 0)
+        self.assertEquals(spliceRescueInfo["isDivisibleFlag"], 0)
+
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.varInExonicPortion', return_value = False)
@@ -2132,9 +2162,12 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class5"])
         self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
         self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
-        self.assertEquals(spliceRescueInfo["frameshift"], 0)
-        
-    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
+        self.assertEquals(spliceRescueInfo["frameshiftFlag"], 0)
+        self.assertEquals(spliceRescueInfo["inExonicPortionFlag"], 0)
+        self.assertEquals(spliceRescueInfo["CIDomainInRegionFlag"], 1)
+        self.assertEquals(spliceRescueInfo["isDivisibleFlag"], 0)
+
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")    
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.varInExonicPortion', return_value = False)
     @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
@@ -2155,9 +2188,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class5"])
         self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
         self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
-        self.assertEquals(spliceRescueInfo["frameshift"], 0)
-        
-    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
+        self.assertEquals(spliceRescueInfo["frameshiftFlag"], 0)
+        self.assertEquals(spliceRescueInfo["inExonicPortionFlag"], 0)
+        self.assertEquals(spliceRescueInfo["CIDomainInRegionFlag"], 1)
+        self.assertEquals(spliceRescueInfo["isDivisibleFlag"], 0)
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")        
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.varInExonicPortion', return_value = False)
     @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
@@ -2181,7 +2216,10 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class5"])
         self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
         self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
-        self.assertEquals(spliceRescueInfo["frameshift"], 1)
+        self.assertEquals(spliceRescueInfo["frameshiftFlag"], 1)
+        self.assertEquals(spliceRescueInfo["inExonicPortionFlag"], 0)
+        self.assertEquals(spliceRescueInfo["CIDomainInRegionFlag"], 0)
+        self.assertEquals(spliceRescueInfo["isDivisibleFlag"], 1)
 
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
@@ -2204,7 +2242,10 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["NA"])
         self.assertEquals(spliceRescueInfo["spliceRescue"], 1)
         self.assertEquals(spliceRescueInfo["spliceFlag"], 1)
-        self.assertEquals(spliceRescueInfo["frameshift"], 0)
+        self.assertEquals(spliceRescueInfo["frameshiftFlag"], 0)
+        self.assertEquals(spliceRescueInfo["inExonicPortionFlag"], 0)
+        self.assertEquals(spliceRescueInfo["CIDomainInRegionFlag"], 0)
+        self.assertEquals(spliceRescueInfo["isDivisibleFlag"], 0)
         
     def test_getEnigmaClass(self):
         ''''
@@ -2244,8 +2285,10 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                "zScore": 1.1300618149879533},
                                                                  "altScores": {"maxEntScanScore": 9.21,
                                                                                "zScore": 0.5461191272666394}})
+    @mock.patch('calcVarPriors.getVarSeqIndexSNS', return_value = 1)
     def test_getPriorProbRefSpliceDonorSNSLowProbBRCA1(self, getFastaSeq, getVarType, getVarLocation,
-                                                       getVarSpliceRegionBounds, getRefAltScores):
+                                                       getVarSpliceRegionBounds, getRefAltScores,
+                                                       getVarSeqIndexSNS):
         '''Tests function for BRCA1 variant that creates a resaonble splice donor site'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -2258,6 +2301,7 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbRefSpliceDonorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+        self.assertEquals(priorProb["varStart"], 1)
 
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCTTACCTT")
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -2267,8 +2311,10 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                "zScore": 1.1300618149879533},
                                                                  "altScores": {"maxEntScanScore": 6.12,
                                                                                "zScore": -0.7806330088060529}})
+    @mock.patch('calcVarPriors.getVarSeqIndexSNS', return_value = 5)
     def test_getPriorProbRefSpliceDonorSNSModerateProbBRCA1(self, getFastaSeq, getVarType, getVarLocation,
-                                                            getVarSpliceRegionBounds, getRefAltScores):
+                                                            getVarSpliceRegionBounds, getRefAltScores,
+                                                            getVarSeqIndexSNS):
         '''Tests function for BRCA1 variant that weakens a reasonably strong splice donor'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -2281,6 +2327,7 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbRefSpliceDonorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["moderate"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
+        self.assertEquals(priorProb["varStart"], 5)
 
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "TTTTACCAA")
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -2290,8 +2337,10 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                "zScore": -2.021511220213846},
                                                                  "altScores": {"maxEntScanScore": -4.42,
                                                                                "zScore": -5.306188838646238}})
+    @mock.patch('calcVarPriors.getVarSeqIndexSNS', return_value = 4)
     def test_getPriorProbRefSpliceDonorSNSHighProbBRCA1(self, getFastaSeq, getVarType, getVarLocation,
-                                                        getVarSpliceRegionBounds, getRefAltScores):
+                                                        getVarSpliceRegionBounds, getRefAltScores,
+                                                        getVarSeqIndexSNS):
         '''Tests fucntion for BRCA1 variant that further weakens a weak splice donor site'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -2304,6 +2353,7 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbRefSpliceDonorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["high"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class4"])
+        self.assertEquals(priorProb["varStart"], 4)
         
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCTTACCTT")
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -2327,6 +2377,7 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbRefSpliceDonorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+        self.assertEquals(priorProb["varStart"], 0)
 
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCGGTAAGA")
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -2350,6 +2401,7 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbRefSpliceDonorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+        self.assertEquals(priorProb["varStart"], 1)
 
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCGGTAAGA")
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -2373,6 +2425,7 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbRefSpliceDonorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["moderate"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
+        self.assertEquals(priorProb["varStart"], 5)        
         
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "CAGGCAAGT")
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -2396,6 +2449,7 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbRefSpliceDonorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["high"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class4"])
+        self.assertEquals(priorProb["varStart"], 2)        
         
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCGGTAAGA")
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -2419,6 +2473,7 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbRefSpliceDonorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+        self.assertEquals(priorProb["varStart"], 8)        
 
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "CATCTGTAAAATACAAGGGAAAA")
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -2442,6 +2497,7 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbRefSpliceAcceptorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+        self.assertEquals(priorProb["varStart"], 6)        
 
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "CATCTGTAAAATACAAGGGAAAA")
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -2465,6 +2521,7 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbRefSpliceAcceptorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["moderate"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
+        self.assertEquals(priorProb["varStart"], 14)        
         
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "GAACTTTAACACATTAGAAAAAC")
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -2488,6 +2545,7 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbRefSpliceAcceptorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["high"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class4"])
+        self.assertEquals(priorProb["varStart"], 19)        
         
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "CATCTGTAAAATACAAGGGAAAA")
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -2511,6 +2569,7 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbRefSpliceAcceptorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+        self.assertEquals(priorProb["varStart"], 20)        
 
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCTCATCTTTCTCCAAACAGTTA")
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -2534,6 +2593,7 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbRefSpliceAcceptorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+        self.assertEquals(priorProb["varStart"], 21)   
 
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCTCATCTTTCTCCAAACAGTTA")
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -2557,6 +2617,7 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbRefSpliceAcceptorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["moderate"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
+        self.assertEquals(priorProb["varStart"], 16)        
 
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "AAGTATTTATTCTTTGATAGATT")
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -2580,6 +2641,7 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbRefSpliceAcceptorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["high"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class4"])
+        self.assertEquals(priorProb["varStart"], 19)        
         
     @mock.patch('calcVarPriors.getFastaSeq', return_value = "TCTCATCTTTCTCCAAACAGTTA")
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -2603,11 +2665,11 @@ class test_calcVarPriors(unittest.TestCase):
         priorProb = calcVarPriors.getPriorProbRefSpliceAcceptorSNS(self.variant, boundaries)
         self.assertEquals(priorProb["priorProb"], priorProbs["low"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
+        self.assertEquals(priorProb["varStart"], 1)        
 
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["afterGreyZone"])
-    @mock.patch('calcVarPriors.getVarConsequences', return_value = "missense_variant")
-    def test_getPriorProbAfterGreyZoneMissenseSNS(self, getVarType, getVarLocation, getVarConsequences):
+    def test_getPriorProbAfterGreyZoneMissenseSNS(self, getVarType, getVarLocation):
         '''
         Tests that:
         prior prob is set to N/A and ENIGMA class is class 2 for a BRCA2 missense variant after the grey zone
@@ -2622,14 +2684,14 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32398528"
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "G"
+        varCons = "missense_variant"
         priorProb = calcVarPriors.getPriorProbAfterGreyZoneSNS(self.variant, boundaries)
         self.assertEquals(priorProb["applicablePrior"], priorProbs["NA"])
         self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class2"])
 
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["afterGreyZone"])
-    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
-    def test_getPriorProbAfterGreyZoneNonesenseSNS(self, getVarType, getVarLocation, getVarConsequences):
+    def test_getPriorProbAfterGreyZoneNonesenseSNS(self, getVarType, getVarLocation):
         '''
         Tests that:
         prior prob is set to N/A and ENIGMA class is class 2 for a BRCA2 nonsense variant after the grey zone
@@ -2644,6 +2706,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32398492"
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "T"
+        varCons = "stop_gained"
         priorProb = calcVarPriors.getPriorProbAfterGreyZoneSNS(self.variant, boundaries)
         self.assertEquals(priorProb["applicablePrior"], priorProbs["NA"])
         self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class2"])
@@ -3388,12 +3451,18 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.getPriorProbRefSpliceDonorSNS', return_value = {'refMaxEntScanScore': 10.08,
+                                                                               'altZScore': 0.159686466274593,
+                                                                               'varLength': 1,
+                                                                               'exonStart': 0,
+                                                                               'intronStart': 3,
+                                                                               'varStart': 2,
+                                                                               'refZScore': 0.9196706995589503,
                                                                                'altMaxEntScanScore': 8.31,
                                                                                'enigmaClass': 'class_2',
-                                                                               'altZScore': 0.159686466274593,
                                                                                'priorProb': 0.04,
+                                                                               'altSeq': 'CATGTAAGT',
                                                                                'spliceSite': 1,
-                                                                               'refZScore': 0.9196706995589503})
+                                                                               'refSeq': 'CAAGTAAGT'})
     @mock.patch('calcVarPriors.getPriorProbDeNovoDonorSNS', return_value = {'refMaxEntScanScore': -0.35,
                                                                             'altMaxEntScanScore': -5.25,
                                                                             'enigmaClass': 'N/A',
@@ -3435,23 +3504,32 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertNotEquals(priorProb["altRefDonorZ"], "-")
         self.assertNotEquals(priorProb["refDeNovoDonorMES"], "-")
         # checks that scores are not present for ref splice acceptor site or de novo splice acceptor sites
-        self.assertEquals(priorProb["altRefAccZ"], "-")
-        self.assertEquals(priorProb["refDeNovoAccMES"], "-")
-        # checks that splice rescue, splice flag, and frameshift are all equal to zero
-        self.assertEquals(priorProb["spliceRescue"], 0)
+        self.assertEquals(priorProb["altRefAccZ"], "N/A")
+        self.assertEquals(priorProb["refDeNovoAccMES"], "N/A")
+        # checks that splice rescue, splice flag, and splice rescue flags are all equal to approriate value (either 0 or N/A)
+        self.assertEquals(priorProb["spliceRescue"], "N/A")
         self.assertEquals(priorProb["spliceFlag"], 0)
-        self.assertEquals(priorProb["frameshift"], 0)
+        self.assertEquals(priorProb["frameshiftFlag"], "N/A")
+        self.assertEquals(priorProb["inExonicPortionFlag"], "N/A")
+        self.assertEquals(priorProb["CIDomainInRegionFlag"], "N/A")
+        self.assertEquals(priorProb["isDivisibleFlag"], "N/A")
         
     @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.getPriorProbRefSpliceDonorSNS', return_value = {'refMaxEntScanScore': 8.88,
+                                                                               'altZScore': -0.9051501995701567,
+                                                                               'varLength': 1,
+                                                                               'exonStart': 0,
+                                                                               'intronStart': 3,
+                                                                               'varStart': 1,
+                                                                               'refZScore': 0.4044271515695557,
                                                                                'altMaxEntScanScore': 5.83,
                                                                                'enigmaClass': 'class_3',
-                                                                               'altZScore': -0.9051501995701567,
                                                                                'priorProb': 0.34,
+                                                                               'altSeq': 'AGGGTAAAT',
                                                                                'spliceSite': 1,
-                                                                               'refZScore': 0.4044271515695557})
+                                                                               'refSeq': 'AAGGTAAAT'})
     @mock.patch('calcVarPriors.getPriorProbDeNovoDonorSNS', return_value = {'refMaxEntScanScore': -9.44,
                                                                             'altMaxEntScanScore': 1.56,
                                                                             'enigmaClass': 'class_2',
@@ -3493,23 +3571,32 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertNotEquals(priorProb["altDeNovoDonorZ"], "-")
         self.assertNotEquals(priorProb["refRefDonorMES"], "-")
         # checks that scores are not present for ref splice acceptor site or de novo splice acceptor sites
-        self.assertEquals(priorProb["altDeNovoAccZ"], "-")
-        self.assertEquals(priorProb["refRefAccMES"], "-")
-        # checks that splice rescue, splice flag, and frameshift are all equal to zero
-        self.assertEquals(priorProb["spliceRescue"], 0)
+        self.assertEquals(priorProb["altDeNovoAccZ"], "N/A")
+        self.assertEquals(priorProb["refRefAccMES"], "N/A")
+        # checks that splice rescue, splice flag, and splice rescue flags are all equal to approriate value (either 0 or N/A)
+        self.assertEquals(priorProb["spliceRescue"], "N/A")
         self.assertEquals(priorProb["spliceFlag"], 0)
-        self.assertEquals(priorProb["frameshift"], 0)
+        self.assertEquals(priorProb["frameshiftFlag"], "N/A")
+        self.assertEquals(priorProb["inExonicPortionFlag"], "N/A")
+        self.assertEquals(priorProb["CIDomainInRegionFlag"], "N/A")
+        self.assertEquals(priorProb["isDivisibleFlag"], "N/A")
 
     @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.getPriorProbRefSpliceDonorSNS', return_value = {'refMaxEntScanScore': 9.66,
+                                                                               'altZScore': -0.5358923235110902,
+                                                                               'varLength': 1,
+                                                                               'exonStart': 0,
+                                                                               'intronStart': 3,
+                                                                               'varStart': 2,
+                                                                               'refZScore': 0.7393354577626622,
                                                                                'altMaxEntScanScore': 6.69,
                                                                                'enigmaClass': 'class_3',
-                                                                               'altZScore': -0.5358923235110902,
                                                                                'priorProb': 0.34,
+                                                                               'altSeq': 'TATGTAAGT',
                                                                                'spliceSite': 1,
-                                                                               'refZScore': 0.7393354577626622})
+                                                                               'refSeq': 'TAGGTAAGT'})
     @mock.patch('calcVarPriors.getPriorProbDeNovoDonorSNS', return_value = {'refMaxEntScanScore': -1.72,
                                                                             'altMaxEntScanScore': -0.67,
                                                                             'enigmaClass': 'class_2',
@@ -3520,9 +3607,12 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getPriorProbProteinSNS', return_value = {'enigmaClass': 'class_5',
                                                                         'priorProb': 0.99})
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
-    @mock.patch('calcVarPriors.getPriorProbSpliceRescueNonsenseSNS', return_value = {'spliceFlag': 0,
+    @mock.patch('calcVarPriors.getPriorProbSpliceRescueNonsenseSNS', return_value = {'CIDomainInRegionFlag': 0,
+                                                                                     'inExonicPortionFlag': 0,
+                                                                                     'frameshiftFlag': 1,
+                                                                                     'isDivisibleFlag': 0,
+                                                                                     'spliceFlag': 0,
                                                                                      'enigmaClass': 'class_5',
-                                                                                     'frameshift': 1,
                                                                                      'priorProb': 0.99,
                                                                                      'spliceRescue': 0})
     def test_getPriorProbSpliceDonorSNSNonsenseBRCA2(self, varInSpliceRegion, getVarType, varInExon,
@@ -3557,24 +3647,34 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertNotEquals(priorProb["altDeNovoDonorZ"], "-")
         self.assertNotEquals(priorProb["refRefDonorMES"], "-")
         # checks that scores are not present for ref splice acceptor site or de novo splice acceptor sites
-        self.assertEquals(priorProb["altDeNovoAccZ"], "-")
-        self.assertEquals(priorProb["refRefAccMES"], "-")
+        self.assertEquals(priorProb["altDeNovoAccZ"], "N/A")
+        self.assertEquals(priorProb["refRefAccMES"], "N/A")
         # checks that splice rescue and splice flag are equal to zero
         self.assertEquals(priorProb["spliceRescue"], 0)
         self.assertEquals(priorProb["spliceFlag"], 0)
         # checks that frameshift is equal to 1, because nonsense variant causes frameshift mutation
-        self.assertEquals(priorProb["frameshift"], 1)
+        self.assertEquals(priorProb["frameshiftFlag"], 1)
+        # checks that other nonsense rescue flags are equal to zero
+        self.assertEquals(priorProb["inExonicPortionFlag"], 0)
+        self.assertEquals(priorProb["CIDomainInRegionFlag"], 0)
+        self.assertEquals(priorProb["isDivisibleFlag"], 0)
 
     @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
-    @mock.patch('calcVarPriors.getPriorProbRefSpliceAcceptorSNS', return_value = {'refMaxEntScanScore': 10.37,
-                                                                                  'altMaxEntScanScore': 11.62,
-                                                                                  'enigmaClass': 'class_2',
-                                                                                  'altZScore': 1.4936710349564073,
-                                                                                  'priorProb': 0.04,
-                                                                                  'spliceSite': 1,
-                                                                                  'refZScore': 0.9800418464741734})
+    @mock.patch('calcVarPriors.getPriorProbRefSpliceAcceptorSNS', return_value =  {'refMaxEntScanScore': 10.37,
+                                                                                   'altZScore': 1.4936710349564073,
+                                                                                   'varLength': 1,
+                                                                                   'exonStart': 20,
+                                                                                   'intronStart': 0,
+                                                                                   'varStart': 20,
+                                                                                   'refZScore': 0.9800418464741734,
+                                                                                   'altMaxEntScanScore': 11.62,
+                                                                                   'enigmaClass': 'class_2',
+                                                                                   'priorProb': 0.04,
+                                                                                   'altSeq': 'ATATTTTCTCCCCATTGCAGGAC',
+                                                                                   'spliceSite': 1,
+                                                                                   'refSeq': 'ATATTTTCTCCCCATTGCAGCAC'})
     @mock.patch('calcVarPriors.getPriorProbDeNovoAcceptorSNS', return_value = {'refMaxEntScanScore': -13.96,
                                                                                'altMaxEntScanScore': -5.9,
                                                                                'enigmaClass': 'N/A',
@@ -3622,23 +3722,32 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertNotEquals(priorProb["refRefAccZ"], "-")
         self.assertNotEquals(priorProb["refDeNovoAccZ"], "-")
         self.assertNotEquals(priorProb["refDeNovoDonorZ"], "-")
-        # checks that scores are not present for ref splice donor site or de novo splice acceptor sites
-        self.assertEquals(priorProb["refRefDonorZ"], "-")
-        # checks that splice rescue, splice flag, and frameshift are all equal to zero
-        self.assertEquals(priorProb["spliceRescue"], 0)
+        # checks that scores are not present for ref splice donor site
+        self.assertEquals(priorProb["refRefDonorZ"], "N/A")
+        # checks that splice rescue, splice flag, and splice rescue flags are all equal to approriate value (either 0 or N/A)
+        self.assertEquals(priorProb["spliceRescue"], "N/A")
         self.assertEquals(priorProb["spliceFlag"], 0)
-        self.assertEquals(priorProb["frameshift"], 0)
+        self.assertEquals(priorProb["frameshiftFlag"], "N/A")
+        self.assertEquals(priorProb["inExonicPortionFlag"], "N/A")
+        self.assertEquals(priorProb["CIDomainInRegionFlag"], "N/A")
+        self.assertEquals(priorProb["isDivisibleFlag"], "N/A")
         
     @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = False)
     @mock.patch('calcVarPriors.getPriorProbRefSpliceAcceptorSNS', return_value = {'refMaxEntScanScore': 4.57,
+                                                                                  'altZScore': -2.286639792272834,
+                                                                                  'varLength': 1,
+                                                                                  'exonStart': 20,
+                                                                                  'intronStart': 0,
+                                                                                  'varStart': 4,
+                                                                                  'refZScore': -1.4031975880833913,
                                                                                   'altMaxEntScanScore': 2.42,
                                                                                   'enigmaClass': 'class_4',
-                                                                                  'altZScore': -2.286639792272834,
                                                                                   'priorProb': 0.97,
+                                                                                  'altSeq': 'GCCAGTTATCGTTTTTGAAGCAG',
                                                                                   'spliceSite': 1,
-                                                                                  'refZScore': -1.4031975880833913})
+                                                                                  'refSeq': 'GCCATTTATCGTTTTTGAAGCAG'})
     @mock.patch('calcVarPriors.getPriorProbDeNovoAcceptorSNS', return_value = {'refMaxEntScanScore': -1.89,
                                                                                'altMaxEntScanScore': 6.71,
                                                                                'enigmaClass': 'N/A',
@@ -3675,23 +3784,32 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertNotEquals(priorProb["altDeNovoAccMES"], "-")
         self.assertNotEquals(priorProb["refRefAccZ"], "-")
         # checks that scores are not present for ref splice donor site or de novo splice donor sites
-        self.assertEquals(priorProb["altDeNovoDonorMES"], "-")
-        self.assertEquals(priorProb["refRefDonorZ"], "-")
-        # checks that splice rescue, splice flag, and frameshift are all equal to zero
-        self.assertEquals(priorProb["spliceRescue"], 0)
+        self.assertEquals(priorProb["altDeNovoDonorMES"], "N/A")
+        self.assertEquals(priorProb["refRefDonorZ"], "N/A")
+        # checks that splice rescue, splice flag, and splice rescue flags are all equal to approriate value (either 0 or N/A)
+        self.assertEquals(priorProb["spliceRescue"], "N/A")
         self.assertEquals(priorProb["spliceFlag"], 0)
-        self.assertEquals(priorProb["frameshift"], 0)
+        self.assertEquals(priorProb["frameshiftFlag"], "N/A")
+        self.assertEquals(priorProb["inExonicPortionFlag"], "N/A")
+        self.assertEquals(priorProb["CIDomainInRegionFlag"], "N/A")
+        self.assertEquals(priorProb["isDivisibleFlag"], "N/A")
 
     @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.getPriorProbRefSpliceAcceptorSNS', return_value = {'refMaxEntScanScore': 3.71,
+                                                                                  'altZScore': -2.0400977818013613,
+                                                                                  'varLength': 1,
+                                                                                  'exonStart': 20,
+                                                                                  'intronStart': 0,
+                                                                                  'varStart': 20,
+                                                                                  'refZScore': -1.7565744697591685,
                                                                                   'altMaxEntScanScore': 3.02,
                                                                                   'enigmaClass': 'class_3',
-                                                                                  'altZScore': -2.0400977818013613,
                                                                                   'priorProb': 0.34,
+                                                                                  'altSeq': 'TTCTTTACCATACTGTTTAGTAG',
                                                                                   'spliceSite': 1,
-                                                                                  'refZScore': -1.7565744697591685})
+                                                                                  'refSeq': 'TTCTTTACCATACTGTTTAGCAG'})
     @mock.patch('calcVarPriors.getPriorProbDeNovoDonorSNS', return_value = {'refMaxEntScanScore': 0.48,
                                                                             'altMaxEntScanScore': -1.52,
                                                                             'enigmaClass': 'N/A',
@@ -3709,9 +3827,13 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getPriorProbProteinSNS', return_value = {'enigmaClass': 'class_5',
                                                                         'priorProb': 0.99})
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
-    @mock.patch('calcVarPriors.getPriorProbSpliceRescueNonsenseSNS', return_value = {'spliceFlag': 0,
-                                                                                     'enigmaClass': 'class_4',
-                                                                                     'frameshift': 0,
+    @mock.patch('calcVarPriors.getPriorProbSpliceRescueNonsenseSNS', return_value = {'CIDomainInRegionFlag': 0,
+                                                                                     'inExonicPortionFlag': 1,
+                                                                                     'frameshiftFlag': 0,
+                                                                                     'isDivisibleFlag': 0,
+                                                                                     'spliceFlag': 0,
+                                                                                     'enigmaClass':
+                                                                                     'class_4',
                                                                                      'priorProb': 0.97,
                                                                                      'spliceRescue': 0})
     def test_getPriorProbSpliceAcceptorSNSNonsenseBRCA1(self, varInSpliceRegion, getVarType, varInExon,
@@ -3743,14 +3865,18 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["deNovoAccPrior"], priorProbs["NA"])
         # checks that a score is NOT present for reference donor score and is present for de novo splice donor score
         self.assertNotEquals(priorProb["altDeNovoDonorZ"], "-")
-        self.assertEquals(priorProb["refRefDonorMES"], "-")
+        self.assertEquals(priorProb["refRefDonorMES"], "N/A")
         # checks that scores are present for ref splice acceptor site or de novo splice acceptor sites
         self.assertNotEquals(priorProb["altDeNovoAccZ"], "-")
         self.assertNotEquals(priorProb["refRefAccMES"], "-")
-        # checks that splice rescue, splice flag, and frameshift are equal to zero
+        # checks that inExonicPortion flag is equal to 1
+        self.assertEquals(priorProb["inExonicPortionFlag"], 1)
+        # checks that splice rescue, splice flag, and splice rescue flags are equal to zero
         self.assertEquals(priorProb["spliceRescue"], 0)
         self.assertEquals(priorProb["spliceFlag"], 0)
-        self.assertEquals(priorProb["frameshift"], 0)
+        self.assertEquals(priorProb["frameshiftFlag"], 0)
+        self.assertEquals(priorProb["CIDomainInRegionFlag"], 0)
+        self.assertEquals(priorProb["isDivisibleFlag"], 0)
 
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     def test_getPriorProbProteinSNS(self, getVarType):
@@ -3847,14 +3973,17 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["deNovoDonorFlag"], 1)
         self.assertEquals(priorProb["deNovoAccFlag"], 0)
         # checks that scores are NOT present for ref splice acceptor, ref splice donor, and de novo acceptor
-        self.assertEquals(priorProb["refRefAccZ"], "-")
-        self.assertEquals(priorProb["altRefDonorMES"], "-")
-        self.assertEquals(priorProb["altDeNovoAccZ"], "-")
-        # checks that flags (splice site, splice rescue, splice flag, frameshift) are all equal to zero
+        self.assertEquals(priorProb["refRefAccZ"], "N/A")
+        self.assertEquals(priorProb["altRefDonorMES"], "N/A")
+        self.assertEquals(priorProb["altDeNovoAccZ"], "N/A")
+        # checks that flags (splice site, splice rescue, splice flag, splice rescue flags) are all equal to correct values
         self.assertEquals(priorProb["spliceSite"], 0)
-        self.assertEquals(priorProb["spliceRescue"], 0)
+        self.assertEquals(priorProb["spliceRescue"], "N/A")
         self.assertEquals(priorProb["spliceFlag"], 0)
-        self.assertEquals(priorProb["frameshift"], 0)
+        self.assertEquals(priorProb["frameshiftFlag"], "N/A")
+        self.assertEquals(priorProb["inExonicPortionFlag"], "N/A")
+        self.assertEquals(priorProb["CIDomainInRegionFlag"], "N/A")
+        self.assertEquals(priorProb["isDivisibleFlag"], "N/A")
 
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inCI"])
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -3877,8 +4006,8 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                'deNovoAccFlag': 1,
                                                                                'refZScore': -4.57126242264181})
     def test_getPriorProbInExonSNSEnigmaCIDeNovoAcceptorBRCA2(self, getVarLocation, getVarType, getPriorProbProteinSNS,
-                                                              getVarConsequences, getPriorProbDeNovoDonorSNS, varInSpliceRegion,
-                                                              getPriorProbDeNovoAcceptorSNS):
+                                                              getVarConsequences, getPriorProbDeNovoDonorSNS,
+                                                              varInSpliceRegion, getPriorProbDeNovoAcceptorSNS):
         '''Tests that function works correctly for missense variant in ENIGMA CI domain  with de novo acceptor score, no de novo donor'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -3905,22 +4034,28 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["deNovoDonorFlag"], 0)
         self.assertEquals(priorProb["deNovoAccFlag"], 1)
         # checks that scores are NOT present for ref splice acceptor and ref splice donor
-        self.assertEquals(priorProb["altRefAccMES"], "-")
-        self.assertEquals(priorProb["refRefDonorZ"], "-")
-        # checks that flags (splice site, splice rescue, splice flag, frameshift) are all equal to zero
+        self.assertEquals(priorProb["altRefAccMES"], "N/A")
+        self.assertEquals(priorProb["refRefDonorZ"], "N/A")
+        # checks that flags (splice site, splice rescue, splice flag, splice rescue flags) are all equal to correct values
         self.assertEquals(priorProb["spliceSite"], 0)
-        self.assertEquals(priorProb["spliceRescue"], 0)
+        self.assertEquals(priorProb["spliceRescue"], "N/A")
         self.assertEquals(priorProb["spliceFlag"], 0)
-        self.assertEquals(priorProb["frameshift"], 0)
+        self.assertEquals(priorProb["frameshiftFlag"], "N/A")
+        self.assertEquals(priorProb["inExonicPortionFlag"], "N/A")
+        self.assertEquals(priorProb["CIDomainInRegionFlag"], "N/A")
+        self.assertEquals(priorProb["isDivisibleFlag"], "N/A")
         
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inCI"])
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.getPriorProbProteinSNS', return_value = {'enigmaClass': 'class_5',
                                                                         'priorProb': 0.99})
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
-    @mock.patch('calcVarPriors.getPriorProbSpliceRescueNonsenseSNS', return_value = {'spliceFlag': 0,
+    @mock.patch('calcVarPriors.getPriorProbSpliceRescueNonsenseSNS', return_value = {'CIDomainInRegionFlag': 0,
+                                                                                     'inExonicPortionFlag': 0,
+                                                                                     'frameshiftFlag': 1,
+                                                                                     'isDivisibleFlag': 0,
+                                                                                     'spliceFlag': 0,
                                                                                      'enigmaClass': 'class_5',
-                                                                                     'frameshift': 1,
                                                                                      'priorProb': 0.99,
                                                                                      'spliceRescue': 0})
     @mock.patch('calcVarPriors.getPriorProbDeNovoDonorSNS', return_value = {'refMaxEntScanScore': -1.14,
@@ -3959,24 +4094,30 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["deNovoDonorFlag"], 1)
         self.assertEquals(priorProb["deNovoAccFlag"], 0)
         # checks that scores are NOT present for ref splice acceptor, ref splice donor, and de novo acceptor
-        self.assertEquals(priorProb["refRefAccMES"], "-")
-        self.assertEquals(priorProb["refRefDonorZ"], "-")
-        self.assertEquals(priorProb["altDeNovoAccMES"], "-")
-        # checks that flags (splice site, splice rescue, splice flag) are all equal to zero
+        self.assertEquals(priorProb["refRefAccMES"], "N/A")
+        self.assertEquals(priorProb["refRefDonorZ"], "N/A")
+        self.assertEquals(priorProb["altDeNovoAccMES"], "N/A")
+        # checks that flags (splice site, splice rescue, splice rescue flags) are all equal to zero
         self.assertEquals(priorProb["spliceSite"], 0)
         self.assertEquals(priorProb["spliceRescue"], 0)
         self.assertEquals(priorProb["spliceFlag"], 0)
+        self.assertEquals(priorProb["inExonicPortionFlag"], 0)
+        self.assertEquals(priorProb["CIDomainInRegionFlag"], 0)
+        self.assertEquals(priorProb["isDivisibleFlag"], 0)
         # checks that frameshift flag is correct
-        self.assertEquals(priorProb["frameshift"], 1)
+        self.assertEquals(priorProb["frameshiftFlag"], 1)
         
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inExon"])
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.getPriorProbProteinSNS', return_value = {'enigmaClass': 'class_5',
                                                                         'priorProb': 0.99})
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
-    @mock.patch('calcVarPriors.getPriorProbSpliceRescueNonsenseSNS', return_value = {'spliceFlag': 1,
+    @mock.patch('calcVarPriors.getPriorProbSpliceRescueNonsenseSNS', return_value = {'CIDomainInRegionFlag': 0,
+                                                                                     'inExonicPortionFlag': 0,
+                                                                                     'frameshiftFlag': 0,
+                                                                                     'isDivisibleFlag': 0,
+                                                                                     'spliceFlag': 1,
                                                                                      'enigmaClass': 'N/A',
-                                                                                     'frameshift': 0,
                                                                                      'priorProb': 'N/A',
                                                                                      'spliceRescue': 1})
     @mock.patch('calcVarPriors.getPriorProbDeNovoDonorSNS', return_value = {'refMaxEntScanScore': -6.87,
@@ -4015,14 +4156,17 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["deNovoDonorFlag"], 1)
         self.assertEquals(priorProb["deNovoAccFlag"], 0)
         # checks that scores are NOT present for ref splice acceptor, ref splice donor, and de novo acceptor
-        self.assertEquals(priorProb["refRefAccMES"], "-")
-        self.assertEquals(priorProb["refRefDonorZ"], "-")
-        self.assertEquals(priorProb["altDeNovoAccMES"], "-")
-        # checks that flags (splice site, splice rescue, splice flag) are all correct
+        self.assertEquals(priorProb["refRefAccMES"], "N/A")
+        self.assertEquals(priorProb["refRefDonorZ"], "N/A")
+        self.assertEquals(priorProb["altDeNovoAccMES"], "N/A")
+        # checks that flags (splice site, splice rescue, splice flag, and splice rescue flags) are all correct
         self.assertEquals(priorProb["spliceSite"], 0)
         self.assertEquals(priorProb["spliceRescue"], 1)
         self.assertEquals(priorProb["spliceFlag"], 1)
-        self.assertEquals(priorProb["frameshift"], 0)        
+        self.assertEquals(priorProb["frameshiftFlag"], 0)
+        self.assertEquals(priorProb["inExonicPortionFlag"], 0)
+        self.assertEquals(priorProb["CIDomainInRegionFlag"], 0)
+        self.assertEquals(priorProb["isDivisibleFlag"], 0)
 
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["outBounds"])
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
@@ -4186,8 +4330,7 @@ class test_calcVarPriors(unittest.TestCase):
 
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inUTR"])
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
-    @mock.patch('calcVarPriors.getVarConsequences', return_value = "3_prime_UTR_variant")
-    def test_getPriorProbUTRSNS3PrimeBRCA2(self, getVarLocation, getVarType, getVarConsequences):
+    def test_getPriorProbUTRSNS3PrimeBRCA2(self, getVarLocation, getVarType):
         '''Tests function for plus strand (BRCA2) variant in 3' UTR'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -4196,6 +4339,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = self.variant["Hg38_Start"] = self.variant["Hg38_End"] = "32398795"
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "G"
+        varCons = "3_prime_UTR_variant"
         priorProb = calcVarPriors.getPriorProbUTRSNS(self.variant, boundaries)
         # checks that applicable prior, applicable class, and splice flag are correct
         self.assertEquals(priorProb["applicablePrior"], priorProbs["deNovoLow"])
@@ -4223,8 +4367,8 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'priorProb': 0.02,
                                                                             'deNovoDonorFlag': 1,
                                                                             'refZScore': -8.204433796086585})
-    def test_getPriorProbUTR5PrimeExonDeNovoDonor(self, getVarLocation, getVarType, getVarConsequences,
-                                                  varInExon, varInSpliceRegion, getPriorProbDeNovoDonorSNS):
+    def test_getPriorProbUTR5PrimeExonDeNovoDonor(self, getVarLocation, getVarType, getVarConsequences, varInExon,
+                                                  varInSpliceRegion, getPriorProbDeNovoDonorSNS):
         '''Test function for plus strand (BRCA2) variant in exonic portion of 5' UTR that has de novo donor, no de novo acceptor'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
