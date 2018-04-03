@@ -915,13 +915,16 @@ var VariantDetail = React.createClass({
                     }
                 }
             }
-
             var clinvarDiffRows = _.map(sortedSubmissions.ClinVar, function(submissions) {
+                let newestSubmission = submissions ? submissions[0] : '';
+                const significance = util.sentenceCase(util.getFormattedFieldByProp("Clinical_Significance_ClinVar", newestSubmission)
+                .replace(/(variant of unknown significance|uncertain significance)/i, 'VUS'));
+                const submitter = util.abbreviatedSubmitter(util.getFormattedFieldByProp("Submitter_ClinVar", newestSubmission));
                 return (
                     <Row>
                         <Col md={12} className="variant-history-col">
-                            <h3>ClinVar Submission: {submissions[0]["SCV_ClinVar"]}</h3>
-                            <h4>Previous Versions of this Submission:</h4>
+                            <h3>ClinVar Submission: {newestSubmission["SCV_ClinVar"]} ({submitter}; {significance})</h3>
+                            <h4>Previous Versions of this Submission (since {util.normalizeDateFieldDisplay(newestSubmission.Data_Release.date)}):</h4>
                             <Table className='variant-history nopointer' responsive bordered>
                                 <thead>
                                     <tr className='active'>
