@@ -110,30 +110,33 @@ class Command(BaseCommand):
         return row_dict
 
     def build_report_dictionary_by_source(self, reports_reader, reports_header, removed_reports_reader, removed_reports_header, sources):
-        reports_dict = {}
+        reports_dict = {'reports': {}, 'removed_reports': {}}
         for row in reports_reader:
             report = dict(zip(reports_header, row))
             if self.is_empty(report['change_type']):
                 report['change_type'] = 'none'
             source = report['Source']
             bx_id = report['BX_ID_' + source]
-            if source not in reports_dict:
-                reports_dict[source] = {}
-            reports_dict[source][bx_id] = report
-
+            if source not in reports_dict['reports']:
+                reports_dict['reports'][source] = {}
+            reports_dict['reports'][source][bx_id] = report
         # add removed reports to dict
         for row in removed_reports_reader:
             report = dict(zip(reports_header, row))
             report['change_type'] = 'deleted'
             source = report['Source']
             bx_id = report['BX_ID_' + source]
-            if source not in reports_dict:
-                reports_dict[source] = {}
-            reports_dict[source][bx_id] = report
-
+            if source not in reports_dict['removed_reports']:
+                reports_dict['removed_reports'][source] = {}
+            reports_dict['removed_reports'][source][bx_id] = report
         return reports_dict
 
     def create_and_associate_reports_to_variant(self, variant, reports_dict, sources, release_id, change_types):
+        # Used to associate removed reports with variants because removed report bx_ids refer
+        # to bx_ids from the previous release.
+        previous_release_id = DataRelease.objects.order_by('-id')[1].id
+        previous_version_of_variant_query = Variant.objects.filter(Data_Release_id=previous_release_id).filter(Genomic_Coordinate_hg38=variant.Genomic_Coordinate_hg38)
+
         for source in sources:
             if source == "Bic":
                 source = "BIC"
@@ -142,13 +145,31 @@ class Command(BaseCommand):
             elif source == "ExUV":
                 source = "exLOVD"
             bx_id_field = "BX_ID_" + source
+
             if not self.is_empty(getattr(variant, bx_id_field)):
                 bx_ids = getattr(variant, bx_id_field).split(',')
                 for bx_id in bx_ids:
                     self.create_and_associate_report_to_variant(bx_id, source, reports_dict, variant, release_id, change_types)
 
-    def create_and_associate_report_to_variant(self, bx_id, source, reports_dict, variant, release_id, change_types):
-        report = reports_dict[source][bx_id]
+            '''
+            Associate removed reports with variant -- note that bx_ids are release specific,
+            so we must check the previous version of a variant (if it exists) for its bx_ids and compare them
+            to the removed report bx_ids (removed report bx_ids are from the previous release).
+            '''
+            if len(previous_version_of_variant_query) > 0:
+                previous_version_of_variant = previous_version_of_variant_query[0]
+                if not self.is_empty(getattr(previous_version_of_variant, bx_id_field)):
+                    bx_ids = getattr(previous_version_of_variant, bx_id_field).split(',')
+                    for bx_id in bx_ids:
+                        if source in reports_dict['removed_reports'] and bx_id in reports_dict['removed_reports'][source]:
+                            self.create_and_associate_report_to_variant(bx_id, source, reports_dict, variant, release_id, change_types, True)
+
+
+    def create_and_associate_report_to_variant(self, bx_id, source, reports_dict, variant, release_id, change_types, removed=False):
+        if removed == True:
+            report = reports_dict['removed_reports'][source][bx_id]
+        else:
+            report = reports_dict['reports'][source][bx_id]
         report['Data_Release_id'] = release_id
         report['Variant'] = variant
         report['Change_Type_id'] = change_types[report.pop('change_type')]

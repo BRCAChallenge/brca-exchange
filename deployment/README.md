@@ -84,7 +84,7 @@ to enable SSI on html files in the static asset directory.
 
 # Continuous integration
 
-CI is implemented with circle-ci (CCI). CCI will build any commits on 'master' branch,
+CI is implemented with circle-ci 2.0 (CCI). CCI will build any commits on 'master' branch,
 and deploy them on the beta vhost of brcaexchange-dev. The deploy script, deploy-dev,
 will rsync the build, and copy site settings into place.
 
@@ -96,6 +96,16 @@ To allow CCI to push code to azure, an authorized ssh key is added to the ssh co
 on the azure hosts. The ssh key can be managed in the CCI account settings.
 
 You may log in to circle-ci with your github credentials.
+
+## Running Circle CI Locally
+
+Version 2.0 of CCI can easily be run locally as well using
+
+```
+circleci build
+```
+
+See the [local client documentation](https://circleci.com/docs/2.0/local-cli/) for more details, also regarding installation.
 
 # Community Data
 

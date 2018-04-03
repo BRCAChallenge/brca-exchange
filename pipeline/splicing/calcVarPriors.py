@@ -382,7 +382,27 @@ def varInExon(variant):
                 if withinBoundaries == True:
                     return True
     return False
-    
+
+def getVarExonNumberSNS(variant):
+    '''
+    Given a SNS variant, checks that variant is in an exon
+    If variant in an exon, returns the number of the exon variant is located within in format "exonN"
+    '''
+    if varInExon(variant) == True:
+        varGenPos = int(variant["Pos"])
+        varExons = getExonBoundaries(variant)
+        varStrand = getVarStrand(variant)
+        for exon in varExons.keys():
+            exonStart = varExons[exon]["exonStart"]
+            exonEnd = varExons[exon]["exonEnd"]
+            if varStrand == "+":
+                if varGenPos > exonStart and varGenPos <= exonEnd:
+                    return exon
+            else:
+                withinBoundaries = checkWithinBoundaries(varStrand, varGenPos, exonStart, exonEnd)
+                if withinBoundaries == True:
+                    return exon
+
 def varInSpliceRegion(variant, donor=False):
     '''
     Given a variant, determines if a variant is in reference transcript's splice donor/acceptor region
@@ -432,7 +452,7 @@ def getVarSpliceRegionBounds(variant, donor=False):
                 return {regionStartKey: regionStart,
                         regionEndKey: regionEnd}    
                 
-def varInCiDomain(variant, boundaries):
+def varInCIDomain(variant, boundaries):
     '''
     Given a variant, determines if variant is in a clinically important domain
     Second argument determiens which boundaries (ENIGMA or PRIORS) are used for CI domains
@@ -507,12 +527,12 @@ def getVarLocation(variant, boundaries):
     inSpliceDonor = varInSpliceRegion(variant, donor=True)
     inSpliceAcceptor = varInSpliceRegion(variant, donor=False)
     if inExon == True:
-        inCiDomain = varInCiDomain(variant, boundaries)
-        if inCiDomain == True and inSpliceDonor == True:
+        inCIDomain = varInCIDomain(variant, boundaries)
+        if inCIDomain == True and inSpliceDonor == True:
             return "CI_splice_donor_variant"
-        if inCiDomain == True and inSpliceAcceptor == True:
+        if inCIDomain == True and inSpliceAcceptor == True:
             return "CI_splice_acceptor_variant"
-        if inCiDomain == True:
+        if inCIDomain == True:
             return "CI_domain_variant"
         if inSpliceDonor == True:
             return "splice_donor_variant"
@@ -624,9 +644,8 @@ def getRefAltSeqs(variant, rangeStart, rangeStop):
     refSeqDict = getSeqLocDict(varChrom, varStrand, rangeStart, rangeStop)
     altSeqDict = getAltSeqDict(variant, refSeqDict)
     altSeq = getAltSeq(altSeqDict, varStrand)
-
     return {"refSeq": refSeq,
-            "altSeq": altSeq}
+            "altSeq": altSeq}    
     
 def getZScore(maxEntScanScore, donor=False):
     '''
@@ -667,15 +686,316 @@ def getRefAltScores(refSeq, altSeq, donor=False):
                                "zScore": altZScore}}
     return scoreDict
 
+def getMaxMaxEntScanScoreSlidingWindowSNS(variant, windowSize=9, exonicPortionSize=3):
+    '''
+    Given a variant, window size, and an exonic portion size
+       determines the maximum alt MaxEntScan score in a sliding window with the variant in each position in the window
+       default window size is 9 with variant in positions 1-9
+       default exonic portion size is 3 so first 3 bases of sequence are considered as part of the exon
+    Returns a dictionary containing the ref and alt MaxEntScan score and z-score and position of variant for the highest scoring window
+    Dictionary also containing value "inExonicPortion" that has value either True or False
+       If inExonicPortion = True, then variant is in the specified exonic portion of highest scoring sliding window
+          default would be if variant is in the first 3 bp of highest scoring sliding window
+       If inExonicPortion = False, then variant is NOT in the specified exonic portion of highest scoring sliding window
+          default woudl be if variant is in the last 6 bp of highest scoring sliding window 
+    '''
+    varGenPos = int(variant["Pos"])
+    varStrand = getVarStrand(variant)
+    # for default window size (9) use +- 8 to be 17 bp region
+    # so that have sequence for each 9 bp window with variant in positions 1-9
+    # minus strand and plus strand are opposite for +- 8 to preserve sequence returned by getRefAltSeqs
+    if varStrand == "-":
+        regionStart = varGenPos + (windowSize - 1)
+        regionEnd = varGenPos - (windowSize - 1)
+    else:
+        regionStart = varGenPos - (windowSize - 1)
+        regionEnd = varGenPos + (windowSize - 1)
+    refAltSeqs = getRefAltSeqs(variant, regionStart, regionEnd)
+    refSeq = refAltSeqs["refSeq"]
+    altSeq = refAltSeqs["altSeq"]
+    varPos = windowSize
+    windowStart = 0
+    windowEnd = windowSize
+    windowSeqs = {}
+    windowScores = {}
+    windowAltMaxEntScanScores = {}
+    while windowStart < windowSize:
+        refWindowSeq = refSeq[windowStart:windowEnd]
+        altWindowSeq = altSeq[windowStart:windowEnd]
+        windowSeqs[varPos] = {"refSeq": refWindowSeq,
+                              "altSeq": altWindowSeq}
+        refAltWindowScores = getRefAltScores(refWindowSeq, altWindowSeq, donor=True)
+        windowScores[varPos] = {"refMaxEntScanScore": refAltWindowScores["refScores"]["maxEntScanScore"],
+                                "refZScore": refAltWindowScores["refScores"]["zScore"],
+                                "altMaxEntScanScore": refAltWindowScores["altScores"]["maxEntScanScore"],
+                                "altZScore": refAltWindowScores["altScores"]["zScore"]}
+        windowAltMaxEntScanScores[varPos] = refAltWindowScores["altScores"]["maxEntScanScore"]
+        varPos -= 1
+        windowStart += 1
+        windowEnd += 1
+        
+    # to get tuple containing sequence with variant position with maximum alt MaxEntScan score
+    maxAltWindowScore = max(windowAltMaxEntScanScores.items(), key=lambda k: k[1])
+    maxVarPosition = maxAltWindowScore[0]
+    maxScores = windowScores[maxVarPosition]
+
+    # determines if variant is in the exonic portion specified by exonic portion size
+    # default would be if variant is in first three bases of the 9 bp donor sequence
+    inExonicPortion = False
+    if maxVarPosition <= exonicPortionSize:
+        inExonicPortion = True
+            
+    return {"refMaxEntScanScore": maxScores["refMaxEntScanScore"],
+            "refZScore": maxScores["refZScore"],
+            "altMaxEntScanScore": maxScores["altMaxEntScanScore"],
+            "altZScore": maxScores["altZScore"],
+            "varWindowPosition": maxVarPosition,
+            "inExonicPortion": inExonicPortion}
+
+def varInExonicPortion(variant, exonicPortionSize=3):
+    '''
+    Given a variant, determines if variant in in the specified exonic portion
+    Returns true if variant is in specified exonic portion, False otherwise
+       default is True if first 3 bp of highest scoring sliding window, False otherwise
+    '''
+    slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize=exonicPortionSize)
+    if slidingWindowInfo["inExonicPortion"] == True:
+        return True
+    return False
+
+def getVarWindowPosition(variant):
+    '''
+    Given a variant, determines window position for highest scoring sliding window
+    Returns an integer (1-windowSize) based on variant position with higest scoring window
+      default would be 1-9 because default windowSize is 9 bp
+    '''
+    slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant)
+    varWindowPos = slidingWindowInfo["varWindowPosition"]
+    return varWindowPos
+
+def getSubsequentDonorScores(variant):
+    '''
+    Given a variant, checks if variant is in an exon
+    If exonic variant, returns a dictionary containing:
+       MaxEntScan score and z-score for reference subsequent donor sequence
+    '''
+    varGenPos = int(variant["Pos"])
+    inExon = varInExon(variant)
+    if inExon == True:
+        varChrom = getVarChrom(variant)
+        varStrand = getVarStrand(variant)
+        exonNumber = getVarExonNumberSNS(variant)
+        refSpliceDonorBounds = getRefSpliceDonorBoundaries(variant)
+        subDonorBounds = refSpliceDonorBounds[exonNumber]
+        refSeq = getFastaSeq(varChrom, subDonorBounds["donorStart"], subDonorBounds["donorEnd"])
+        subMaxEntScanScore = runMaxEntScan(refSeq, donor=True)
+        subZScore = getZScore(subMaxEntScanScore, donor=True)
+        return {"maxEntScanScore": subMaxEntScanScore,
+                "zScore": subZScore}
+
+def isCIDomainInRegion(regionStart, regionEnd, boundaries, gene):
+    '''
+    Given a region of interest, boundaries (either enigma or priors) and gene of interest
+    Determines if there is an overlap between the region of interest and a CI domain
+    For minus strand gene (BRCA1) regionStart > regionEnd
+    For plus strand gene (BRCA2) regionStart < regionEnd
+    Returns True if there is an overlap, False otherwise
+    '''
+    if gene == "BRCA1":
+        for domain in brca1CIDomains[boundaries].keys():
+            domainStart = brca1CIDomains[boundaries][domain]["domStart"]
+            domainEnd = brca1CIDomains[boundaries][domain]["domEnd"]
+            overlap = range(max(regionEnd, domainEnd), min(regionStart, domainStart) + 1)
+            if len(overlap) > 0:
+                return True
+    elif gene == "BRCA2":
+        for domain in brca2CIDomains[boundaries].keys():
+            domainStart = brca2CIDomains[boundaries][domain]["domStart"]
+            domainEnd = brca2CIDomains[boundaries][domain]["domEnd"]
+            overlap = range(max(regionStart, domainStart), min(regionEnd, domainEnd) + 1)
+            if len(overlap) > 0:
+                return True
+    return False
+
+def getRefExonLength(variant):
+    '''Given a variant, returns the length of the reference exon'''
+    if varInExon(variant) == True:
+        varExonNum = getVarExonNumberSNS(variant)
+        exonBounds = getExonBoundaries(variant)
+        if getVarStrand(variant) == "-":
+            varExonStart = int(exonBounds[varExonNum]["exonStart"])
+            # varExonEnd - 1 to account for RefSeq numbering which starts to the right of the first base
+            varExonEnd = int(exonBounds[varExonNum]["exonEnd"]) - 1
+            exonLength = varExonStart - varExonEnd
+        else:
+            # varExonStart -1 to account for RefSeq numbering which starts to the right of the first base
+            varExonStart = int(exonBounds[varExonNum]["exonStart"]) - 1
+            varExonEnd = int(exonBounds[varExonNum]["exonEnd"])
+            exonLength = varExonEnd - varExonStart
+        return exonLength
+
+def getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, exonicPortionSize=3):
+    '''
+    Given a variant's:
+    genetic postion, strand, sliding window position with max MES score AND
+      whether that position is within exonic portion of highest scoring window and exonic portion size
+      default exonic portion size is 3
+    Returns the position where splicing occurs for a de novo splice donor
+    '''
+    if varStrand == "+":
+        if inExonicPortion == False:
+            newSplicePos = int(varGenPos) - (varWindowPos - exonicPortionSize)
+        else:
+            newSplicePos = int(varGenPos) + abs(varWindowPos - exonicPortionSize)
+    else:
+        if inExonicPortion == False:
+            newSplicePos = int(varGenPos) + (varWindowPos - exonicPortionSize)
+        else:
+            newSplicePos = int(varGenPos) - abs(varWindowPos - exonicPortionSize)
+    return newSplicePos
+    
+def getAltExonLength(variant):
+    '''Given a variant, returns the length of the alternate exon after splicing occurs in max MES window'''
+    if varInExon(variant) == True:
+        varExonNum = getVarExonNumberSNS(variant)
+        exonBounds = getExonBoundaries(variant)
+        slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant)
+        newSplicePos = getNewSplicePosition(variant["Pos"], getVarStrand(variant),
+                                            slidingWindowInfo["varWindowPosition"], slidingWindowInfo["inExonicPortion"])
+        if getVarStrand(variant) == "-":
+            varExonStart = int(exonBounds[varExonNum]["exonStart"])
+            # newSplicePos -1 to account for RefSeq numbering which starts to the right of the first base
+            exonLength = varExonStart - (newSplicePos - 1)
+        else:
+            varExonEnd = int(exonBounds[varExonNum]["exonEnd"])
+            refExonLength = getRefExonLength(variant)
+            # need to compare to refExonLength because of + strand gene
+            # newSplicePos -1 to account for RefSeq numbering which starts to the right of the first base
+            exonLength = refExonLength - (varExonEnd - (newSplicePos - 1))
+        return exonLength
+
+def compareRefAltExonLengths(refLength, altLength):
+    '''
+    Compares ref and alt exon lengths
+    If both exon lengths % 3 are equal, then both ref and alt have the same reading frame
+    Returns true if both ref and alt exon have the same reading frame, false otherwise
+    '''
+    if refLength % 3 == altLength % 3:
+        return True
+    else:
+        return False
+
+def isSplicingWindowInFrame(variant):
+    '''
+    Given a variant, determines ref and alt exon length and compares them
+    If ref and alt exon are in the same reading frame, returns True
+    '''
+    refLength = getRefExonLength(variant)
+    altLength = getAltExonLength(variant)
+    inFrame = compareRefAltExonLengths(refLength, altLength)
+    if inFrame == True:
+        return True
+    return False
+
+def compareDeNovoWildTypeSplicePos(variant):
+    '''
+    Given a variant, compares de novo splicing position with wild-type splicign position
+    If distance between de novo and wild-type donors is divisible by 3, returns True
+    returns False otherwise
+    '''
+    if varInExon(variant) == True:
+        varStrand = getVarStrand(variant)
+        varExonNum = getVarExonNumberSNS(variant)
+        refExonBounds = getExonBoundaries(variant)
+        wildTypeSplicePos = refExonBounds[varExonNum]["exonEnd"]
+        slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant)
+        deNovoSplicePos = getNewSplicePosition(variant["Pos"], varStrand,
+                                               slidingWindowInfo["varWindowPosition"], slidingWindowInfo["inExonicPortion"])
+        if varStrand == "+":
+            distanceBetween = wildTypeSplicePos - deNovoSplicePos
+        else:
+            # +1 because of RefSeq numbering
+            distanceBetween = deNovoSplicePos - (wildTypeSplicePos + 1)
+        if distanceBetween % 3 == 0:
+            return True
+        else:
+            return False
+        
+def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries):
+    '''
+    Given a variant, determines if there is a possibility of splice rescue
+    If there is a possibility of splice rescue, flags variant for further analysis
+    Else assigns prior probability of pathogenecity and predicted qualitative ENIGMA class
+    '''
+    varCons = getVarConsequences(variant)
+    # check that variant causes a premature stop codon in an exon
+    if varCons == "stop_gained" and varInExon(variant) == True:
+        spliceFlag = 0
+        spliceRescue = 0
+        frameshift = 0
+        # if variant is in specified exonic portion of highest scoring sliding window, no splice rescue
+        # default is if variant is in first 3 bp of highest scoring window
+        if varInExonicPortion(variant) == True:
+            priorProb = 0.97
+            spliceRescue = 0
+            frameshift = 0
+        else:
+            inFrame = isSplicingWindowInFrame(variant)
+            # if variant causes a frameshift, no splice rescue
+            if inFrame == False:
+                priorProb = 0.99
+                spliceRescue = 0
+                frameshift = 1
+            else:
+                varGenPos = int(variant["Pos"])
+                varStrand = getVarStrand(variant)
+                varExonNum = getVarExonNumberSNS(variant)
+                # varExonNum returns a string in the format "exonN"
+                # nextExonNum parses out N from varExonNum and adds 1 to get next exon number key "exonN+1"
+                # use [4:] to remove "exon" from "exonN" so can add 1 to N to get N+1
+                nextExonNum = "exon" + str(int(varExonNum[4:]) + 1)
+                refSpliceAccBounds = getRefSpliceAcceptorBoundaries(variant)
+                varWindowPos = getVarWindowPosition(variant)
+                inExonicPortion = varInExonicPortion(variant)
+                # gets region from new splice position to next splice acceptor
+                regionStart = getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion)
+                regionEnd = refSpliceAccBounds[nextExonNum]["acceptorStart"]
+                CIDomainInRegion = isCIDomainInRegion(regionStart, regionEnd, boundaries, variant["Gene_Symbol"])
+                isDivisible = compareDeNovoWildTypeSplicePos(variant)
+                # if truncated region includes a clinically important domain or causes a frameshift
+                if CIDomainInRegion == True or isDivisible == False:
+                    priorProb = 0.99
+                    spliceRescue = 0
+                    if isDivisible == False:
+                        frameshift = 1
+                else:
+                    # possibility of splice rescue, flag variant for further splicing assays
+                    spliceFlag = 1
+                    spliceRescue = 1
+                    frameshift = 0
+                    priorProb = "N/A"
+                    enigmaClass = "N/A"
+
+        if priorProb == "N/A":
+            pass
+        else:
+            enigmaClass = getEnigmaClass(priorProb)
+
+        return {"priorProb": priorProb,
+                "enigmaClass": enigmaClass,
+                "spliceRescue": spliceRescue,
+                "spliceFlag": spliceFlag,
+                "frameshift": frameshift}
+
 def getEnigmaClass(priorProb):
     '''
     Given a prior probability of pathogenecity, returns a predicted qualitative ENIGMA class
     '''
     # if variant has prior prob = N/A then a predicted qualitative ENIGMA class will have already been determined
     if priorProb == "N/A":
-        return None 
+        pass 
     else:
-        if priorProb > 0.99:
+        if priorProb >= 0.99:
             return "class_5"
         elif priorProb <= 0.99 and priorProb >= 0.95:
             return "class_4"
