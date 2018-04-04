@@ -1645,7 +1645,7 @@ def getPriorProbInExonSNS(variant, boundaries, variantData):
         spliceRescue = 0
         spliceFlag = 0
         frameshift = 0
-        deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, STD_EXONIC_PORTION, accDonor=False)
+        deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, STD_EXONIC_PORTION, deNovoDonorInRefAcc=False)
         if varInSpliceRegion(variant, donor=False, deNovo=True):
             deNovoAccData = getPriorProbDeNovoAcceptorSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH)
         else:
@@ -1657,7 +1657,7 @@ def getPriorProbInExonSNS(variant, boundaries, variantData):
                              "deNovoAccFlag": 0}
         varCons = getVarConsequences(variant)
         if varCons == "stop_gained":
-            nonsenseData = getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, accDonor=False)
+            nonsenseData = getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc=False)
             applicablePrior = nonsenseData["priorProb"]
             applicableClass = nonsenseData["enigmaClass"]
             spliceRescue = nonsenseData["spliceRescue"]
@@ -1756,7 +1756,7 @@ def getPriorProbIntronicDeNovoDonorSNS(variant):
     if inExon == False and inRefDonor == False and inRefAcc == False:
         if getVarType(variant) == "substitution":
             deNovoDonorScores = getMaxMaxEntScanScoreSlidingWindowSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH,
-                                                                      donor=True, deNovo=False, accDonor=False)
+                                                                      donor=True, deNovo=False, deNovoDonorInRefAcc=False)
             refMES = deNovoDonorScores["refMaxEntScanScore"]
             altMES = deNovoDonorScores["altMaxEntScanScore"]
             if altMES > refMES:
@@ -1863,7 +1863,7 @@ def getPriorProbUTRSNS(variant, boundaries):
             # TO DO if ATG is created and is OUT of frame --> flag/priorProb = 0.10
             # TO DO if ATG is created and is IN frame AND there is a stop codon before real start codon --> flag/priorProb = 0.10
             if varInExon(variant) == True:
-                deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, STD_EXONIC_PORTION, accDonor=False)
+                deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, STD_EXONIC_PORTION, deNovoDonorInRefAcc=False)
                 applicablePrior = deNovoDonorData["priorProb"]
                 applicableClass = deNovoDonorData["enigmaClass"]
                 spliceFlag = 0
