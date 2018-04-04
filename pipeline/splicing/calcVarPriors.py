@@ -1093,7 +1093,7 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                 # use [4:] to remove "exon" from "exonN" so can add 1 to N to get N+1
                 nextExonNum = "exon" + str(int(varExonNum[4:]) + 1)
                 refSpliceAccBounds = getSpliceAcceptorBoundaries(variant, STD_ACC_INTRONIC_LENGTH, STD_ACC_EXONIC_LENGTH)
-                varWindowPos = getVarWindowPosition(variant, donor=True, deNovo=False, deNovoDonorInRefAcc=deNovoDonorInRefAcc)
+                varWindowPos = getVarWindowPosition(variant, donor=True, deNovoDonorInRefAcc=deNovoDonorInRefAcc)
                 inExonicPortion = varInExonicPortion(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH, donor=True,
                                                      deNovoDonorInRefAcc=deNovoDonorInRefAcc)
                 # gets region from new splice position to next splice acceptor
