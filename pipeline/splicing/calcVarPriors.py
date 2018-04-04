@@ -604,6 +604,12 @@ def getFastaSeq(chrom, rangeStart, rangeStop):
     '''
     url = "http://togows.org/api/ucsc/hg38/%s:%d-%d.fasta" % (chrom, rangeStart, rangeStop)
     req = requests.get(url)
+    
+    if req.status_code == 429 and 'Retry-After' in req.headers:
+        retry = float(req.headers['Retry-After'])
+        time.sleep(retry)
+        req = requests.get(url)
+    
     lines = req.content.split('\n')
 
     sequence = ""
@@ -1986,8 +1992,7 @@ def addVarDataToRow(varData, inputRow):
     for key in varData.keys():
         inputRow[key] = varData[key]
     return inputRow
-                        
-                                                                                                                            
+
 def getVarDict(variant, boundaries):
     '''
 
