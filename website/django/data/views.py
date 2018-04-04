@@ -138,7 +138,6 @@ def report_to_dict(report_object):
     except ReportDiff.DoesNotExist:
         if report_object.Source == "ClinVar":
             key = report_object.SCV_ClinVar
-        print "Report Diff does not exist for Report", key, "from release", report_object.Data_Release.id
         report_dict["Diff"] = None
     return report_dict
 
