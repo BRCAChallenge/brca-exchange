@@ -156,8 +156,6 @@ const researchModeGroups = [
     },
 
     {groupTitle: 'Clinical Significance (BIC)', internalGroupName: 'Significance (BIC)', innerCols: [
-        {title: 'Clinical Significance', prop: 'Clinical_classification_BIC', core: true},
-        {title: 'Clinical Importance', prop: 'Clinical_importance_BIC', core: true},
         {title: 'Patient Nationality', prop: 'Patient_nationality_BIC'},
         {title: 'Ethnicity', prop: 'Ethnicity_BIC'},
         {title: 'Family members carrying this variant', prop: 'Number_of_family_member_carrying_mutation_BIC'},
@@ -292,8 +290,6 @@ const researchModeColumns = [
     {title: 'Literature Reference (ExUV)', prop: 'Literature_source_exLOVD'},
     {title: 'Pathogenicity', prop: 'Pathogenicity_all'},
     {title: 'Assertion Method (ENIGMA)', prop: 'Assertion_method_ENIGMA'},
-    {title: 'Clinical Significance (BIC)', prop: 'Clinical_classification_BIC'},
-    {title: 'Clinical Importance (BIC)', prop: 'Clinical_importance_BIC'},
     {title: 'Clinical Significance (ClinVar)', prop: 'Clinical_Significance_ClinVar'},
     {title: 'Clinical Significance (ENIGMA)', prop: 'Clinical_significance_ENIGMA'},
     {title: 'Collection Method (ENIGMA)', prop: 'Collection_method_ENIGMA'},
