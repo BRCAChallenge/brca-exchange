@@ -1526,7 +1526,7 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData):
         frameshift = 0
         # to check for nonsense variants in exonic portion of splice acceptor site
         if varInExon(variant) == True and getVarConsequences(variant) == "stop_gained":
-            nonsenseData = getPriorProbSpliceRescueNonsenseSNS(variant, boundaries)
+            nonsenseData = getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc=True)
             applicablePrior = nonsenseData["priorProb"]
             spliceRescue = nonsenseData["spliceRescue"]
             spliceFlag = nonsenseData["spliceFlag"]
