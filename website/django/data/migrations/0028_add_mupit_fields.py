@@ -17,7 +17,7 @@ def add_mupit_structures(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('data', '0025_auto_20180116_1508'),
+        ('data', '0027_reportdiff'),
     ]
 
     operations = [
