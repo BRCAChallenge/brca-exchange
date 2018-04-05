@@ -808,6 +808,8 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLeng
     If donor=True, function determines highest scoring window for potential de novo donor
     If donor=False, function determines highest scoring window for potential de novo acceptor
     Returns a dictionary containing the ref and alt MaxEntScan score and z-score and position of variant for the highest scoring window
+    Ref and alt seqs for the highest scoring window are included in dictionary along with varStart (0-based index of variant for formatting)
+       and varLength (equal to 1 for this function, becuase this function only works for single nucleotide substitution variants
     Dictionary also containing value "inExonicPortion" that has value either True or False
        If inExonicPortion = True, then variant is in length of bp specified by exonicPortionSize of highest scoring sliding window
        If inExonicPortion = False, then variant is NOT in length of bp specified by exonicPortionSize highest scoring sliding window 
@@ -852,6 +854,7 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLeng
     maxAltWindowScore = max(windowAltMaxEntScanScores.items(), key=lambda k: k[1])
     maxVarPosition = maxAltWindowScore[0]
     maxScores = slidingWindowInfo["windowScores"][maxVarPosition]
+    maxSeqs = slidingWindowInfo["windowSeqs"][maxVarPosition]
     
     # determines if variant is in the exonic portion specified by exonicPortionLength
     inExonicPortion = False
@@ -868,6 +871,10 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLeng
             "refZScore": maxScores["refZScore"],
             "altMaxEntScanScore": maxScores["altMaxEntScanScore"],
             "altZScore": maxScores["altZScore"],
+            "refSeq": maxSeqs["refSeq"],
+            "altSeq": maxSeqs["altSeq"],
+            "varStart": maxVarPosition - 1,
+            "varLength": 1,
             "varWindowPosition": maxVarPosition,
             "inExonicPortion": inExonicPortion}
 
@@ -913,9 +920,10 @@ def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, 
          *Note only use argument deNovo=True in this function if donor=False
          *Function will not return correct sequence if donor=True and deNovo=True
     If exonic variant, returns a dictionary containing:
-       MaxEntScan score and z-score for reference closest splice sequence
+       MaxEntScan score, z-score, and splice site sequence for reference closest splice sequence
     If variant located in referene splice site, returns a dictionary containing:
-       MaxEntScan score and z-score for that reference splice site sequence
+       MaxEntScan score, z-score, and splice site sequence for that reference splice site sequence
+    Return dictionary also contains necessary formatting variables for splice site sequence (exonStart, intronStart)
     deNovoDonorInRefAcc = False if NOT checking for de novo splice donor sites in reference splice acceptor sites
     deNovoDonorInRefAcc = True if checking for de novo splice donor sites in reference splice acceptor sites 
     '''
@@ -935,18 +943,24 @@ def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, 
         exonName = closestSpliceBounds["exonName"]
     if donor == True:
         refSeq = getFastaSeq(varChrom, closestSpliceBounds["donorStart"], closestSpliceBounds["donorEnd"])
+        exonStart = 0
+        intronStart = STD_EXONIC_PORTION
     else:
         # acceptorEnd +- deNovoOffset because deNovo splice acceptor region is deNovoOffset bp longer than reference splice acceptor region
         if getVarStrand(variant) == "+":
             refSeq = getFastaSeq(varChrom, closestSpliceBounds["acceptorStart"], (closestSpliceBounds["acceptorEnd"] - deNovoOffset))
         else:
             refSeq = getFastaSeq(varChrom, closestSpliceBounds["acceptorStart"], (closestSpliceBounds["acceptorEnd"] + deNovoOffset))
+        exonStart = len(refSeq) - STD_EXONIC_PORTION
+        intronStart = 0
     if testMode == False:
         # to prevent issue with running max ent scan score on unittests
         closestMaxEntScanScore = runMaxEntScan(refSeq, donor=donor)
         closestZScore = getZScore(closestMaxEntScanScore, donor=donor)
         return {"exonName": exonName,
                 "sequence": refSeq.upper(),
+                "exonStart": exonStart,
+                "intronStart": intronStart,
                 "maxEntScanScore": closestMaxEntScanScore,
                 "zScore": closestZScore}
     else:
@@ -1397,27 +1411,43 @@ def getPriorProbDeNovoDonorSNS(variant, exonicPortionSize, deNovoDonorInRefAcc=F
             if varInExon(variant) == True and varInIneligibleDeNovoExon(variant, donor=True) == True:
                 return {"priorProb": "N/A",
                         "enigmaClass": "N/A",
-                        "refMaxEntScanScore": "-",
-                        "altMaxEntScanScore": "-",
-                        "refZScore": "-",
-                        "altZScore": "-",
-                        "deNovoDonorFlag": 0}
-            slidingWindowScores = getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, STD_DE_NOVO_LENGTH,
-                                                                        donor=True, deNovoDonorInRefAcc=deNovoDonorInRefAcc)
-            subDonorScores = getClosestSpliceSiteScores(variant, STD_DE_NOVO_OFFSET, donor=True, deNovo=False,
-                                                        deNovoDonorInRefAcc=deNovoDonorInRefAcc)
-            altZScore = slidingWindowScores["altZScore"]
-            refZScore = slidingWindowScores["refZScore"]
+                        "refMaxEntScanScore": "N/A",
+                        "altMaxEntScanScore": "N/A",
+                        "refZScore": "N/A",
+                        "altZScore": "N/A",
+                        "refSeq": "N/A",
+                        "altSeq": "N/A",
+                        "varStart": "N/A",
+                        "varLength": "N/A",
+                        "exonStart": "N/A",
+                        "intronStart": "N/A",
+                        "subMaxEntScanScore": "N/A",
+                        "subZScore": "N/A",
+                        "subSeq": "N/A",
+                        "subExonStart": "N/A",
+                        "subIntronStart": "N/A",
+                        "deNovoDonorAltGreaterRefFlag": 0,
+                        "deNovoDonorAltGreaterSubFlag": 0}
+            slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, STD_DE_NOVO_LENGTH,
+                                                                      donor=True, deNovoDonorInRefAcc=deNovoDonorInRefAcc)
+            subDonorInfo = getClosestSpliceSiteScores(variant, STD_DE_NOVO_OFFSET, donor=True, deNovo=False,
+                                                      deNovoDonorInRefAcc=deNovoDonorInRefAcc)
+            altZScore = slidingWindowInfo["altZScore"]
+            refZScore = slidingWindowInfo["refZScore"]
+            deNovoDonorAltGreaterRefFlag = 0
+            deNovoDonorAltGreaterSubFlag = 0
             if altZScore <= refZScore:
                 priorProb = 0
             else:
+                deNovoDonorAltGreaterRefFlag = 1
                 if altZScore < -2.0:
                     priorProb = 0.02
                 elif altZScore >= -2.0 and altZScore < 0.0:
                     priorProb = 0.3
                 else:
                     priorProb = 0.64
-            if altZScore > subDonorScores["zScore"]:
+            if altZScore > subDonorInfo["zScore"]:
+                deNovoDonorAltGreaterSubFlag = 1
                 # promote prior prob by one step
                 if priorProb == 0:
                     priorProb = 0.3
@@ -1431,7 +1461,6 @@ def getPriorProbDeNovoDonorSNS(variant, exonicPortionSize, deNovoDonorInRefAcc=F
             if priorProb == 0: 
                 priorProb = "N/A"
                 enigmaClass = "N/A"
-                deNovoDonorFlag = 0
             else:
                 priorProb = priorProb
                 enigmaClass = getEnigmaClass(priorProb)
@@ -1439,11 +1468,23 @@ def getPriorProbDeNovoDonorSNS(variant, exonicPortionSize, deNovoDonorInRefAcc=F
                 
             return {"priorProb": priorProb,
                     "enigmaClass": enigmaClass,
-                    "refMaxEntScanScore": slidingWindowScores["refMaxEntScanScore"],
-                    "altMaxEntScanScore": slidingWindowScores["altMaxEntScanScore"],
+                    "refMaxEntScanScore": slidingWindowInfo["refMaxEntScanScore"],
+                    "altMaxEntScanScore": slidingWindowInfo["altMaxEntScanScore"],
                     "refZScore": refZScore,
                     "altZScore": altZScore,
-                    "deNovoDonorFlag": deNovoDonorFlag}
+                    "refSeq": slidingWindowInfo["refSeq"],
+                    "altSeq": slidingWindowInfo["altSeq"],
+                    "varStart": slidingWindowInfo["varStart"],
+                    "varLength": slidingWindowInfo["varLength"],
+                    "exonStart": 0,
+                    "intronStart": STD_EXONIC_PORTION,
+                    "subMaxEntScanScore": subDonorInfo["maxEntScanScore"],
+                    "subZScore": subDonorInfo["zScore"],
+                    "subSeq": subDonorInfo["sequence"],
+                    "subExonStart": subDonorInfo["exonStart"],
+                    "subIntronStart": subDonorInfo["intronStart"],
+                    "deNovoDonorAltGreaterRefFlag": deNovoDonorAltGreaterRefFlag,
+                    "deNovoDonorAltGreaterSubFlag": deNovoDonorAltGreaterSubFlag}
 
 def getPriorProbDeNovoAcceptorSNS(variant, exonicPortionSize, deNovoLength):
     '''
