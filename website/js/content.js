@@ -72,6 +72,29 @@ const mupitStructures = [
     }
 ];
 
+const mupitStructures = [
+    {
+        "name": "1t15",
+        "image": require('../content/mupit/1t15.png'),
+        "url": "http://mupit.icm.jhu.edu/MuPIT_Interactive?structure_id=1t15&addtlinfo=brca"
+    },
+    {
+        "name": "1jm7",
+        "image": require('../content/mupit/1jm7.png'),
+        "url": "http://mupit.icm.jhu.edu/MuPIT_Interactive?structure_id=1jm7&addtlinfo=brca"
+    },
+    {
+        "name": "4igk",
+        "image": require('../content/mupit/4igk.png'),
+        "url": "http://mupit.icm.jhu.edu/MuPIT_Interactive?structure_id=4igk&addtlinfo=brca"
+    },
+    {
+        "name": "fENSP00000380152_7",
+        "image": require('../content/mupit/fENSP00000380152_7.png'),
+        "url": "http://mupit.icm.jhu.edu/MuPIT_Interactive/?gene=BRCA2&addtlinfo=brca"
+    }
+];
+
 module.exports = {
     pages: content,
     faqs: FAQContent,
