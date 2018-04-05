@@ -11,7 +11,7 @@ from django.core.management import call_command
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('data', '0026_auto_20180312_2100'),
+        ('data', '0027_reportdiff'),
     ]
 
     operations = [
