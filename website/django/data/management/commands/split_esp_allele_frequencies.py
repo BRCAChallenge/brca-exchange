@@ -2,6 +2,8 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import connection
 from data.models import Variant, Report
 from django.db import transaction
+from data.utilities import update_materialized_view
+
 
 
 EMPTY = '-'
@@ -10,19 +12,6 @@ EMPTY = '-'
 class Command(BaseCommand):
     help = 'Split existing allele frequencies into appropriate columns'
 
-    def update_autocomplete_words(self):
-        # Drop words table and recreate with latest data
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                DROP MATERIALIZED VIEW IF EXISTS currentvariant;
-                    CREATE MATERIALIZED VIEW currentvariant AS (
-                        SELECT * FROM "variant" WHERE (
-                            "id" IN ( SELECT DISTINCT ON ("Genomic_Coordinate_hg38") "id" FROM "variant" ORDER BY "Genomic_Coordinate_hg38" ASC, "Data_Release_id" DESC )
-                        )
-                    );
-                """
-            )
 
     @transaction.atomic
     def handle(self, *args, **options):
@@ -47,6 +36,6 @@ class Command(BaseCommand):
                     obj.Allele_Frequency_ESP = alleleFrequency
                     obj.save()
 
-        self.update_autocomplete_words()
+        update_materialized_view()
 
         print "Done!"
