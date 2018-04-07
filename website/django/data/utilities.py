@@ -75,7 +75,7 @@ def isMissenseSubstitution(ref, alt):
     return False
 
 
-def update_mupit_structure_for_existing_variants(apps, schema_editor):
+def update_mupit_structure_for_existing_variants():
     mupit_structures = {ms['name']: ms['id'] for ms in MupitStructure.objects.values()}
     cvs = CurrentVariant.objects.all()
     for cv in cvs:
