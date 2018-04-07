@@ -16,13 +16,14 @@ class MupitStructure extends React.Component {
     render() {
         let {variant, prop} = this.props;
         let mupitStructure = _.find(content.mupitStructures, function(structure) {return structure.name === variant[prop].name;});
-        debugger;
         let mupitUrl = mupitStructure.url + "&gm=chr" + variant.Chr + ":" + variant.Pos + "&altaa=" + variant.Alt.toLowerCase();
         return (
             <div className="mupit-structure">
+                <h5>View of {variant.Genomic_Coordinate_hg38} in the 3D structure of {variant[prop].name}</h5>
                 <a href={mupitUrl} target="_blank">
                     <img src={mupitStructure.image}></img>
                 </a>
+                <p>Click on this thumbnail to open CRAVAT and view the variant in a 3D protein structure context.</p>
             </div>
         );
     }

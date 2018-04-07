@@ -222,6 +222,15 @@ offending file, for future reference: website/node_modules/react-data-components
     width: 100%;
 }
 
+.mupit-structure h5 {
+    text-align: center;
+}
+
+.mupit-structure p {
+    font-weight: normal;
+    font-size: 14px;
+}
+
 @media only screen and (max-width : 767px) {
     .deleted-variant-message {
         text-align: left;
