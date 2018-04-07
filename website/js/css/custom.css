@@ -223,12 +223,15 @@ offending file, for future reference: website/node_modules/react-data-components
 }
 
 .mupit-structure h5 {
-    text-align: center;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 .mupit-structure p {
     font-weight: normal;
     font-size: 14px;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 @media only screen and (max-width : 767px) {
