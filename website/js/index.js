@@ -487,8 +487,13 @@ const IsoGrid = React.createClass({
     // When the DOM is rendered, let Masonry know what's changed
     componentDidUpdate: function() {
         if (this.masonry) {
-            this.masonry.reloadItems();
-            this.masonry.arrange();
+            var that = this;
+            setTimeout(() => {
+                // prevents improper layout of mupit tile, and potentially others
+                // 300ms is the time it takes for the tile to expand
+                that.masonry.reloadItems();
+                that.masonry.arrange();
+            }, 300);
         }
     },
 
