@@ -817,7 +817,6 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLeng
     deNovoDonorInRefAcc = False if NOT checking for de novo splice donors in reference splice acceptor sites
     deNovoDonorInRefAcc = True if checking for de novo splice donors in reference splice acceptor sites        
     '''
-    # TO DO modify so that this returns the highest window sequences - both ref and alt (in addition to scores)
     if donor == True:
         # uses default window size for a splice donor region
         slidingWindowInfo = getMaxEntScanScoresSlidingWindowSNS(variant, STD_DONOR_SIZE, donor=donor)
@@ -909,6 +908,38 @@ def getVarWindowPosition(variant, donor=True, deNovoDonorInRefAcc=False):
     varWindowPos = slidingWindowInfo["varWindowPosition"]
     return varWindowPos
 
+def getClosestExonNumberIntronicSNS(variant, boundaries, donor=True):
+    '''
+    Given a variant and boundaries (either priors or enigma),
+    1. Checks that variant is in an intron or UTR and is a SNS variant
+    2. Determines the exon end that is closest to that variant
+    Returns the closest exon end in the format "exonN"
+    If variant is not in an intron or UTR, returns "exon0"
+    '''
+    varLoc = getVarLocation(variant, boundaries)
+    if (varLoc == "intron_variant" or varLoc == "UTR_variant")  and getVarType(variant) == "substitution" and varInExon(variant) == False:
+        exonBounds = getExonBoundaries(variant)
+        varGenPos = variant["Pos"]
+        exonIntronDiffs = {}
+        for exon in exonBounds.keys():
+            if getVarStrand(variant) == "+":
+                if donor == True:
+                    exonIntronDiff = int(varGenPos) - int(exonBounds[exon]["exonEnd"])
+                else:
+                    exonIntronDiff = int(exonBounds[exon]["exonStart"]) - int(varGenPos)
+                if exonIntronDiff > 0:
+                    exonIntronDiffs[exon] = exonIntronDiff
+            else:
+                if donor == True:
+                    exonIntronDiff = int(exonBounds[exon]["exonEnd"]) - int(varGenPos)
+                else:
+                    exonIntronDiff = int(varGenPos) - int(exonBounds[exon]["exonStart"])
+                if exonIntronDiff > 0:
+                    exonIntronDiffs[exon] = exonIntronDiff
+        closestExonInfo = min(exonIntronDiffs.items(), key=lambda k: k[1])
+        return closestExonInfo[0]
+    return "exon0"
+                
 def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, deNovoDonorInRefAcc=False, testMode=False):
     '''
     Given a variant, determines scores for closest reference splice sequence
@@ -923,15 +954,23 @@ def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, 
        MaxEntScan score, z-score, and splice site sequence for reference closest splice sequence
     If variant located in referene splice site, returns a dictionary containing:
        MaxEntScan score, z-score, and splice site sequence for that reference splice site sequence
+    If intronic variant or variant in UTR, returns a dictionary containg:
+       MaxEntScan score, z-score, and splice site sequence for reference closest splice site
+       *Note if looking for closest ref acceptor for a variant in an intron, use deNovoOffset=0
     Return dictionary also contains necessary formatting variables for splice site sequence (exonStart, intronStart)
     deNovoDonorInRefAcc = False if NOT checking for de novo splice donor sites in reference splice acceptor sites
     deNovoDonorInRefAcc = True if checking for de novo splice donor sites in reference splice acceptor sites 
     '''
     varGenPos = int(variant["Pos"])
     varChrom = getVarChrom(variant)
-    if varInExon(variant) == True and deNovo == False:
-        exonNumber = getVarExonNumberSNS(variant)
-        exonName = exonNumber
+    varLoc = getVarLocation(variant, "enigma")
+    if (varInExon(variant) == True and deNovo == False) or (varLoc == "intron_variant" or varLoc == "UTR_variant"):
+        if varInExon(variant) == True:
+            exonNumber = getVarExonNumberSNS(variant)
+            exonName = exonNumber
+        if (varLoc == "intron_variant" or varLoc == "UTR_variant") and varInExon(variant) == False:
+            exonNumber = getClosestExonNumberIntronicSNS(variant, "enigma", donor=donor)
+            exonName = exonNumber
         if donor == True:
             refSpliceDonorBounds = getRefSpliceDonorBoundaries(variant, STD_DONOR_INTRONIC_LENGTH, STD_DONOR_EXONIC_LENGTH)
             closestSpliceBounds = refSpliceDonorBounds[exonNumber]
@@ -955,6 +994,13 @@ def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, 
         intronStart = 0
     if testMode == False:
         # to prevent issue with running max ent scan score on unittests
+        if exonName == "exon0":
+            return {"exonName": "N/A",
+                    "sequence": "N/A",
+                    "exonStart": "N/A",
+                    "intronStart": "N/A",
+                    "maxEntScanScore": "N/A",
+                    "zScore": "N/A"}
         closestMaxEntScanScore = runMaxEntScan(refSeq, donor=donor)
         closestZScore = getZScore(closestMaxEntScanScore, donor=donor)
         return {"exonName": exonName,
@@ -991,38 +1037,64 @@ def isCIDomainInRegion(regionStart, regionEnd, boundaries, gene):
                 return True
     return False
 
-def getRefExonLength(variant):
-    '''Given a variant, returns the length of the reference exon'''
+def getRefExonLength(variant, donor=True):
+    '''
+    Given a variant, returns the length of the reference exon
+    If variant is in an exon, returns length of that exon
+    If variant is in a reference splice region, returns length of exon in which exonic portion is included
+    If variant is in intron, returns exon in which either closest splice donor or acceptor is included depending on donor argument
+      If donor=True, returns exon length for previous exon
+      If donor=False, returns exon length for subsequent exon
+    '''
     if varInExon(variant) == True:
         varExonNum = getVarExonNumberSNS(variant)
-        exonBounds = getExonBoundaries(variant)
-        if getVarStrand(variant) == "-":
-            varExonStart = int(exonBounds[varExonNum]["exonStart"])
-            varExonEnd = int(exonBounds[varExonNum]["exonEnd"])
-            exonLength = varExonStart - varExonEnd
+    else:
+        if varInSpliceRegion(variant, donor=donor, deNovo=False) == True:
+            spliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=False)
+            varExonNum = spliceBounds["exonName"]
         else:
-            varExonStart = int(exonBounds[varExonNum]["exonStart"])
-            varExonEnd = int(exonBounds[varExonNum]["exonEnd"])
-            exonLength = varExonEnd - varExonStart
-        return exonLength
+            varExonNum = getClosestExonNumberIntronicSNS(variant, "enigma", donor=donor)
+    exonBounds = getExonBoundaries(variant)
+    if getVarStrand(variant) == "-":
+        varExonStart = int(exonBounds[varExonNum]["exonStart"])
+        varExonEnd = int(exonBounds[varExonNum]["exonEnd"])
+        exonLength = varExonStart - varExonEnd
+    else:
+        varExonStart = int(exonBounds[varExonNum]["exonStart"])
+        varExonEnd = int(exonBounds[varExonNum]["exonEnd"])
+        exonLength = varExonEnd - varExonStart
+    return exonLength
 
-def getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, exonicPortionSize):
+def getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, exonicPortionSize, intronicPortionSize, donor=True):
     '''
     Given a variant's:
     genetic postion, strand, sliding window position with max MES score AND
-      whether that position is within exonic portion of highest scoring window and exonic portion size
-    Returns the position where splicing occurs for a de novo splice donor
+      whether that position is within exonic portion of highest scoring window, exonic portion size, and intronic portion size
+    Returns the position where splicing occurs for a de novo splice donor or acceptor (depending on donor=True argument)
     '''
+    # TO DO write unittests to make sure this works for splice acceptors (make sure it works with +1 issue)
     if varStrand == "+":
         if inExonicPortion == False:
-            newSplicePos = int(varGenPos) - (varWindowPos - exonicPortionSize)
+            if donor == True:
+                newSplicePos = int(varGenPos) - (varWindowPos - exonicPortionSize)
+            else:
+                newSplicePos = int(varGenPos) + abs(varWindowPos - intronicPortionSize)
         else:
-            newSplicePos = int(varGenPos) + abs(varWindowPos - exonicPortionSize)
+            if donor == True:
+                newSplicePos = int(varGenPos) + abs(varWindowPos - exonicPortionSize)
+            else:
+                newSplicePos = int(varGenPos) - (varWindowPos - intronicPortionSize)
     else:
         if inExonicPortion == False:
-            newSplicePos = int(varGenPos) + (varWindowPos - exonicPortionSize)
+            if donor == True:
+                newSplicePos = int(varGenPos) + (varWindowPos - exonicPortionSize)
+            else:
+                newSplicePos = int(varGenPos) - (varWindowPos - intronicPortionSize)
         else:
-            newSplicePos = int(varGenPos) - abs(varWindowPos - exonicPortionSize)
+            if donor == True:
+                newSplicePos = int(varGenPos) - abs(varWindowPos - exonicPortionSize)
+            else:
+                newSplicePos = int(varGenPos) + abs(varWindowPos - intronicPortionSize)
     return newSplicePos
     
 def getAltExonLength(variant, exonicPortionSize, deNovoDonorInRefAcc=False):
@@ -1038,7 +1110,8 @@ def getAltExonLength(variant, exonicPortionSize, deNovoDonorInRefAcc=False):
         slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, STD_DE_NOVO_LENGTH, donor=True,
                                                                   deNovoDonorInRefAcc=deNovoDonorInRefAcc)
         newSplicePos = getNewSplicePosition(variant["Pos"], getVarStrand(variant), slidingWindowInfo["varWindowPosition"],
-                                            slidingWindowInfo["inExonicPortion"], exonicPortionSize)
+                                            slidingWindowInfo["inExonicPortion"], exonicPortionSize, 20)
+                                            # TO DO replace 20 with intronicPortionSize
         if getVarStrand(variant) == "-":
             varExonStart = int(exonBounds[varExonNum]["exonStart"])
             # newSplicePos -1 to account for RefSeq numbering which starts to the right of the first base
@@ -1088,7 +1161,8 @@ def compareDeNovoWildTypeSplicePos(variant, exonicPortionSize, deNovoDonorInRefA
         slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, STD_DE_NOVO_LENGTH, donor=True,
                                                                   deNovoDonorInRefAcc=deNovoDonorInRefAcc)
         deNovoSplicePos = getNewSplicePosition(variant["Pos"], varStrand, slidingWindowInfo["varWindowPosition"],
-                                               slidingWindowInfo["inExonicPortion"], exonicPortionSize)
+                                               slidingWindowInfo["inExonicPortion"], exonicPortionSize, 20)
+                                               # TO DO replace 20 with intronicPortionSize
         if varStrand == "+":
             distanceBetween = wildTypeSplicePos - deNovoSplicePos
         else:
@@ -1113,8 +1187,7 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
       isDivisibleFlag: equals 1 if distance between de novo donor and wild-type donor splice site is NOT divisible by 3, 
          0 if not
     '''
-    # TO DO need to add intermediate flags and output them
-    # also need to modify function/make copy to check for frameshifts for de novo donors and acceptors
+    # TO DO also need to modify function/make copy to check for frameshifts for de novo donors and acceptors
     
     # check that variant causes a premature stop codon in an exon
     if getVarConsequences(variant) == "stop_gained" and varInExon(variant) == True:
@@ -1150,7 +1223,8 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                 inExonicPortion = varInExonicPortion(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH, donor=True,
                                                      deNovoDonorInRefAcc=deNovoDonorInRefAcc)
                 # gets region from new splice position to next splice acceptor
-                regionStart = getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, STD_EXONIC_PORTION)
+                regionStart = getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, STD_EXONIC_PORTION, 20)
+                # TO DO replace 20 with intronicPortionSize
                 regionEnd = refSpliceAccBounds[nextExonNum]["acceptorStart"]
                 CIDomainInRegion = isCIDomainInRegion(regionStart, regionEnd, boundaries, variant["Gene_Symbol"])
                 isDivisible = compareDeNovoWildTypeSplicePos(variant, STD_EXONIC_PORTION, deNovoDonorInRefAcc=deNovoDonorInRefAcc)
@@ -1315,6 +1389,7 @@ def getPriorProbAfterGreyZoneSNS(variant, boundaries):
     Checks that variant is after the grey zone and is a single nucleotide substitution
     Checks that variant is either a missense or nonsense mutation
     Returns a dictionary containing prior probability of pathogenecity and predicted qualitative enigma class
+    Dictionary contains other values that are set to either N/A, "-", or 0 because they are not relevant
     '''
     varType = getVarType(variant)
     varLoc = getVarLocation(variant, boundaries)
@@ -1333,7 +1408,7 @@ def getPriorProbAfterGreyZoneSNS(variant, boundaries):
                 "altRefDonorMES": "-",
                 "altRefDonorZ": "-",
                 "refRefDonorSeq": "-",
-                "refAltDonorSeq": "-",
+                "altRefDonorSeq": "-",
                 "refDonorVarStart": "-",
                 "refDonorVarLength": "-",
                 "refDonorExonStart": "-",
@@ -1342,14 +1417,27 @@ def getPriorProbAfterGreyZoneSNS(variant, boundaries):
                 "refDeNovoDonorZ": "-",
                 "altDeNovoDonorMES": "-",
                 "altDeNovoDonorZ": "-",
-                "deNovoDonorFlag": 0,
+                "refDeNovoDonorSeq": "-",
+                "altDeNovoDonorSeq": "-",
+                "deNovoDonorVarStart": "-",
+                "deNovoDonorVarLength": "-",
+                "deNovoDonorExonStart": "-",
+                "deNovoDonorIntronStart": "-",
+                "closestDonorMES": "-",
+                "closestDonorZ": "-",
+                "closestDonorSeq": "-",
+                "closestDonorExonStart": "-",
+                "closestDonorIntronStart": "-",
+                "deNovoDonorAltGreaterRefFlag": "N/A",
+                "deNovoDonorAltGreaterClosestFlag": "N/A",
+                "refAccPrior": "N/A",
                 "deNovoAccPrior": "N/A",
                 "refRefAccMES": "-",
                 "refRefAccZ": "-",
                 "altRefAccMES": "-",
                 "altRefAccZ": "-",
                 "refRefAccSeq": "-",
-                "refAltAccSeq": "-",
+                "altRefAccSeq": "-",
                 "refAccVarStart": "-",
                 "refAccVarLength": "-",
                 "refAccExonStart": "-",
@@ -1358,7 +1446,19 @@ def getPriorProbAfterGreyZoneSNS(variant, boundaries):
                 "refDeNovoAccZ": "-",
                 "altDeNovoAccMES": "-",
                 "altDeNovoAccZ": "-",
-                "deNovoAccFlag": 0,
+                "refDeNovoAccSeq": "-",
+                "altDeNovoAccSeq": "-",
+                "deNovoAccVarStart": "-",
+                "deNovoAccVarLength": "-",
+                "deNovoAccExonStart": "-",
+                "deNovoAccIntronStart": "-",
+                "closestAccMES": "-",
+                "closestAccZ": "-",
+                "closestAccSeq": "-",
+                "closestAccExonStart": "-",
+                "closestAccIntronStart": "-",
+                "deNovoAccAltGreaterRefFlag": "N/A",
+                "deNovoAccAltGreaterClosestFlag": "N/A",
                 "spliceSite": 0,
                 "spliceRescue": "N/A",
                 "spliceFlag": 0,
@@ -1396,15 +1496,14 @@ def getPriorProbDeNovoDonorSNS(variant, exonicPortionSize, deNovoDonorInRefAcc=F
       2. checks that variant is in an exon or is in a reference splice donor region
     Returns a dictionary containing: 
       prior probability of pathogenecity and predicted qualitative engima class 
-      deNovo donor MaxEntScan scores and zscores for ref and alt
+      deNovo donor MaxEntScan scores, zscores, and sequences for ref and alt
+      closest donor MaxEntScan score, zscore, and sequence
+      deNovoDonorAltGreaterRefFlag: equals 1 if altZScore > refZScore, 0 otherwise
+      deNovoDonorAltGreaterClosestFlag: equals 1 if altZScore > closestRefZScore, 0 otherwise
+      variables necessary for formatting any sequences that are returned by this function
     deNovoDonorInRefAcc = False if NOT checking for de novo donor in reference splice acceptor site
     deNovoDonorInRefAcc = True if checking for de novo donors in reference splice acceptor site
     '''
-    # TO DO change de novo donor flag, need to switch to 2 flags
-    # TO DO first flag will be deNovoDonorAltRefFlag, will be equal to 1 altMES > refMES, 0 if altMES < refMES
-    # TO DO second flag will be deNovoDonorAltClosestFlag, will be equal to 1 if altMES > closestRefMES
-    # TO DO add ref and alt sequences for de novo donor
-    # TO DO add sequence and scores for closest ref donor
     # TO DO need to check for potential frameshfits
     if getVarType(variant) == "substitution":
         if varInSpliceRegion(variant, donor=True, deNovo=True) == True:
@@ -1421,13 +1520,13 @@ def getPriorProbDeNovoDonorSNS(variant, exonicPortionSize, deNovoDonorInRefAcc=F
                         "varLength": "N/A",
                         "exonStart": "N/A",
                         "intronStart": "N/A",
-                        "subMaxEntScanScore": "N/A",
-                        "subZScore": "N/A",
-                        "subSeq": "N/A",
-                        "subExonStart": "N/A",
-                        "subIntronStart": "N/A",
+                        "closestMaxEntScanScore": "N/A",
+                        "closestZScore": "N/A",
+                        "closestSeq": "N/A",
+                        "closestExonStart": "N/A",
+                        "closestIntronStart": "N/A",
                         "deNovoDonorAltGreaterRefFlag": 0,
-                        "deNovoDonorAltGreaterSubFlag": 0}
+                        "deNovoDonorAltGreaterClosestFlag": 0}
             slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, STD_DE_NOVO_LENGTH,
                                                                       donor=True, deNovoDonorInRefAcc=deNovoDonorInRefAcc)
             subDonorInfo = getClosestSpliceSiteScores(variant, STD_DE_NOVO_OFFSET, donor=True, deNovo=False,
@@ -1435,7 +1534,7 @@ def getPriorProbDeNovoDonorSNS(variant, exonicPortionSize, deNovoDonorInRefAcc=F
             altZScore = slidingWindowInfo["altZScore"]
             refZScore = slidingWindowInfo["refZScore"]
             deNovoDonorAltGreaterRefFlag = 0
-            deNovoDonorAltGreaterSubFlag = 0
+            deNovoDonorAltGreaterClosestFlag = 0
             if altZScore <= refZScore:
                 priorProb = 0
             else:
@@ -1447,7 +1546,7 @@ def getPriorProbDeNovoDonorSNS(variant, exonicPortionSize, deNovoDonorInRefAcc=F
                 else:
                     priorProb = 0.64
             if altZScore > subDonorInfo["zScore"]:
-                deNovoDonorAltGreaterSubFlag = 1
+                deNovoDonorAltGreaterClosestFlag = 1
                 # promote prior prob by one step
                 if priorProb == 0:
                     priorProb = 0.3
@@ -1478,13 +1577,13 @@ def getPriorProbDeNovoDonorSNS(variant, exonicPortionSize, deNovoDonorInRefAcc=F
                     "varLength": slidingWindowInfo["varLength"],
                     "exonStart": 0,
                     "intronStart": STD_EXONIC_PORTION,
-                    "subMaxEntScanScore": subDonorInfo["maxEntScanScore"],
-                    "subZScore": subDonorInfo["zScore"],
-                    "subSeq": subDonorInfo["sequence"],
-                    "subExonStart": subDonorInfo["exonStart"],
-                    "subIntronStart": subDonorInfo["intronStart"],
+                    "closestMaxEntScanScore": subDonorInfo["maxEntScanScore"],
+                    "closestZScore": subDonorInfo["zScore"],
+                    "closestSeq": subDonorInfo["sequence"],
+                    "closestExonStart": subDonorInfo["exonStart"],
+                    "closestIntronStart": subDonorInfo["intronStart"],
                     "deNovoDonorAltGreaterRefFlag": deNovoDonorAltGreaterRefFlag,
-                    "deNovoDonorAltGreaterSubFlag": deNovoDonorAltGreaterSubFlag}
+                    "deNovoDonorAltGreaterClosestFlag": deNovoDonorAltGreaterClosestFlag}
 
 def getPriorProbDeNovoAcceptorSNS(variant, exonicPortionSize, deNovoLength):
     '''
@@ -1494,53 +1593,65 @@ def getPriorProbDeNovoAcceptorSNS(variant, exonicPortionSize, deNovoLength):
          de novo splice acceptor region defined by deNovoLength
     Returns a dictionary containing: 
       prior probability of pathogenecity and predicted qualitative engima class (both N/A)
-      deNovo acceptor MaxEntScan scores and zscores for ref and alt sequence
-      deNovo acceptor flag: which equals 1 alt > ref
+      deNovo acceptor MaxEntScan scores, zscores, and sequence for ref and alt
+      MaxEntScan score, zscore, and sequence for closest ref splice acceptor
+      deNovoAccAltGreaterRefFlag: which equals 1 altZScore > refZScore, 0 otherwise
+      deNovoAccAltGreaterClosestFlag: which equals 1 if altZScore > closestRefZScore, 0 otherwise
+      variables necessary for formatting the returned sequences
     '''
-    # TO DO change de novo acc flag, need to switch to 2 flags
-    # TO DO first flag will be deNovoAccAltRefFlag, will be equal to 1 altMES > refMES, 0 if altMES < refMES
-    # TO DO second flag will be deNovoAccAltClosestFlag, will be equal to 1 if altMES > closestRefMES
-    # TO DO add ref and alt sequences for de novo acceptor
-    # TO DO add sequence and scores for closest ref acceptor
     # TO DO need to check for potential frameshfits
     if getVarType(variant) == "substitution":
         if varInSpliceRegion(variant, donor=False, deNovo=True) == True:
-            slidingWindowScores = getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLength,
+            slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLength,
                                                                         donor=False)
             deNovoOffset = deNovoLength - exonicPortionSize
-            closestAccScores = getClosestSpliceSiteScores(variant, deNovoOffset, donor=False, deNovo=True)
-            altZScore = slidingWindowScores["altZScore"]
-            refZScore = slidingWindowScores["refZScore"]
-            closestZScore = closestAccScores["zScore"]
-            if altZScore <= refZScore:
-                deNovoAccFlag = 0
-            else:
-                deNovoAccFlag = 1
-                        
+            closestAccInfo = getClosestSpliceSiteScores(variant, deNovoOffset, donor=False, deNovo=True)
+            altZScore = slidingWindowInfo["altZScore"]
+            refZScore = slidingWindowInfo["refZScore"]
+            closestZScore = closestAccInfo["zScore"]
+            deNovoAccAltGreaterRefFlag = 0
+            deNovoAccAltGreaterClosestFlag = 0
+            if altZScore > refZScore:
+                deNovoAccAltGreaterRefFlag = 1
+            if altZScore > closestZScore:
+                deNovoAccAltGreaterClosestFlag = 1                        
             return {"priorProb": "N/A",
                     "enigmaClass": "N/A",
-                    "refMaxEntScanScore": slidingWindowScores["refMaxEntScanScore"],
-                    "altMaxEntScanScore": slidingWindowScores["altMaxEntScanScore"],
+                    "refMaxEntScanScore": slidingWindowInfo["refMaxEntScanScore"],
+                    "altMaxEntScanScore": slidingWindowInfo["altMaxEntScanScore"],
                     "refZScore": refZScore,
                     "altZScore": altZScore,
-                    "deNovoAccFlag": deNovoAccFlag}
+                    "refSeq": slidingWindowInfo["refSeq"],
+                    "altSeq": slidingWindowInfo["altSeq"],
+                    "varStart": slidingWindowInfo["varStart"],
+                    "varLength": slidingWindowInfo["varLength"],
+                    "exonStart": STD_ACC_SIZE - STD_EXONIC_PORTION,
+                    "intronStart": 0,
+                    "closestMaxEntScanScore": closestAccInfo["maxEntScanScore"],
+                    "closestZScore": closestAccInfo["zScore"],
+                    "closestSeq": closestAccInfo["sequence"],
+                    "closestExonStart": closestAccInfo["exonStart"],
+                    "closestIntronStart": closestAccInfo["intronStart"],
+                    "deNovoAccAltGreaterRefFlag": deNovoAccAltGreaterRefFlag,
+                    "deNovoAccAltGreaterClosestFlag": deNovoAccAltGreaterClosestFlag}
 
 def getPriorProbSpliceDonorSNS(variant, boundaries, variantData):
     '''
     Given a variant, boundaries (either PRIORS or ENIGMA), and a list of dictionaries with variant data
     Determines reference donor and de novo donor scores for variant
     If variant causes a nonsense mutation, determines if splice rescue occurs
-    Returns dicitionary containing scores and sequences for ref and de novo splice donor/acceptor
-        and protein prior if variant in exon
-        score = "N/A" if score not applicable for variant
+    Returns dicitionary containing scores and sequences for ref and de novo splice donor/acceptor,
+        closest splice site scores and sequences, and protein prior if variant in exon
+        "N/A" if score, sequence or flag not applicable for variant
     Also contains other values:
-        applicable prior, highest prior if variant has multiple priors
         applicable prior, highest prior if variant has multiple priors
         ref prior, prior prob for reference splice donor
         de novo prior, prior prob for de novo donor sequence
         splice flag = 1, because variant in reference splice site
-        de novo donor flag = 1 if variant is possible de novo donor variant
-        de novo acc flag = 0, because not applicable for variants in ref splice sites
+        deNovoDonorAltGreaterRefFlag = 1 if variant is possible de novo donor variant
+        deNovoDonorAltGreaterClosestFlag = 1 if variant is possible de novo donor variant
+        deNovoAccAltGreaterRefFlag = N/A, because not applicable for variants in ref donor sites
+        deNovoAccAltGreaterClosestFlag = N/A, because not applicable for variants in ref donor sites
         spliceRescue = 1 if splice rescue possible for nonsense variant, 0 otherwise, N/A if not nonsense variant
         spliceFlag = 1 if splice rescue is possible so variant can be flagged for further analysis, 0 otherwise
         frameshiftFlag = 1 if nonsense variant causes a frameshift mutation also, 0 if not, N/A if not nonsense variant
@@ -1586,10 +1697,6 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData):
             inExonicPortionFlag = nonsenseData["inExonicPortionFlag"]
             CIDomainInRegionFlag = nonsenseData["CIDomainInRegionFlag"]
             isDivisibleFlag = nonsenseData["isDivisibleFlag"]
-
-        # TO DO add additional flags for de novo donor
-        # TO DO add sequences for ref and alt and add NA for closest splice site
-        # TO DO need to add additional formatting flags for future UI development (see slack convo with Zack)
             
         return {"applicablePrior": applicablePrior,
                 "applicableEnigmaClass": getEnigmaClass(applicablePrior),
@@ -1601,7 +1708,7 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData):
                 "altRefDonorMES": refSpliceInfo["altMaxEntScanScore"],
                 "altRefDonorZ": refSpliceInfo["altZScore"],
                 "refRefDonorSeq": refSpliceInfo["refSeq"],
-                "refAltDonorSeq": refSpliceInfo["altSeq"],
+                "altRefDonorSeq": refSpliceInfo["altSeq"],
                 "refDonorVarStart": refSpliceInfo["varStart"],
                 "refDonorVarLength": refSpliceInfo["varLength"],
                 "refDonorExonStart": refSpliceInfo["exonStart"],
@@ -1610,7 +1717,19 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData):
                 "refDeNovoDonorZ": deNovoSpliceInfo["refZScore"],
                 "altDeNovoDonorMES": deNovoSpliceInfo["altMaxEntScanScore"],
                 "altDeNovoDonorZ": deNovoSpliceInfo["altZScore"],
-                "deNovoDonorFlag": deNovoSpliceInfo["deNovoDonorFlag"],
+                "refDeNovoDonorSeq": deNovoSpliceInfo["refSeq"],
+                "altDeNovoDonorSeq": deNovoSpliceInfo["altSeq"],
+                "deNovoDonorVarStart": deNovoSpliceInfo["varStart"],
+                "deNovoDonorVarLength": deNovoSpliceInfo["varLength"],
+                "deNovoDonorExonStart": deNovoSpliceInfo["exonStart"],
+                "deNovoDonorIntronStart": deNovoSpliceInfo["intronStart"],
+                "closestDonorMES": deNovoSpliceInfo["closestMaxEntScanScore"],
+                "closestDonorZ": deNovoSpliceInfo["closestZScore"],
+                "closestDonorSeq": deNovoSpliceInfo["closestSeq"],
+                "closestDonorExonStart": deNovoSpliceInfo["closestExonStart"],
+                "closestDonorIntronStart": deNovoSpliceInfo["closestIntronStart"],
+                "deNovoDonorAltGreaterRefFlag": deNovoSpliceInfo["deNovoDonorAltGreaterRefFlag"],
+                "deNovoDonorAltGreaterClosestFlag": deNovoSpliceInfo["deNovoDonorAltGreaterClosestFlag"],
                 "refAccPrior": "N/A",
                 "deNovoAccPrior": "N/A",
                 "refRefAccMES": "N/A",
@@ -1618,7 +1737,7 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData):
                 "altRefAccMES": "N/A",
                 "altRefAccZ": "N/A",
                 "refRefAccSeq": "N/A",
-                "refAltAccSeq": "N/A",
+                "altRefAccSeq": "N/A",
                 "refAccVarStart": "N/A",
                 "refAccVarLength": "N/A",
                 "refAccExonStart": "N/A",
@@ -1627,7 +1746,19 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData):
                 "refDeNovoAccZ": "N/A",
                 "altDeNovoAccMES": "N/A",
                 "altDeNovoAccZ": "N/A",
-                "deNovoAccFlag": 0,
+                "refDeNovoAccSeq": "N/A",
+                "altDeNovoAccSeq": "N/A",
+                "deNovoAccVarStart": "N/A",
+                "deNovoAccVarLength": "N/A",
+                "deNovoAccExonStart": "N/A",
+                "deNovoAccIntronStart": "N/A",
+                "closestAccMES": "N/A",
+                "closestAccZ": "N/A",
+                "closestAccSeq": "N/A",
+                "closestAccExonStart": "N/A",
+                "closestAccIntronStart": "N/A",
+                "deNovoAccAltGreaterRefFlag": "N/A",
+                "deNovoAccAltGreaterClosestFlag": "N/A",
                 "spliceSite": refSpliceInfo["spliceSite"],
                 "spliceRescue": spliceRescue,
                 "spliceFlag": spliceFlag,
@@ -1642,16 +1773,19 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData):
     Determines reference and de novo acceptor scores for variant
       If variant in exon, also determines de novo donor scores and protein prior
     If variant causes a nonsense mutation, determines if splice rescue occurs
-    Returns dicitionary containing scores for and sequences ref and de novo splice donor/acceptor
-        score = "-" if score not applicable for variant
+    Returns dicitionary containing scores for and sequences ref and de novo splice donor/acceptor,
+        closest splice site scores and sequences and protein prior if variant in exon
+        "N/A" if score, sequence, or flag not applicable for variant
     Also contains other values:
         applicable prior, highest prior if variant has multiple priors
         applicable classe, highest predicted qualitative enigma class based on applicable prior
         ref prior, prior prob for reference splice sequence
         de novo donor and acceptor priors, prior prob for de novo splice sequence
         splice flag = 1, because variant in reference splice site
-        de novo acc flag = 1 if variant is possible de novo acceptor variant
-        de novo donor flag = 1 if variant is possible de novo donor variant
+        deNovoAccAltGreaterRefFlag = 1 if variant is possible de novo acceptor variant
+        deNovoAccAltGreaterClosestFlag = 1 if variant is possible de novo acceptor variant
+        deNovoDonorAltGreaterRefFlag = 1 if variant is possible de novo donor variant
+        deNovoDonorAltGreaterClosestFlag = 1 if variant is possible de novo donor variant
         spliceRescue = 1 if splice rescue possible for nonsense variant, 0 otherwise, N/A if not nonsense variant
         spliceFlag = 1 if splice rescue is possible so variant can be flagged for further analysis, 0 otherwise
         frameshiftFlag = 1 if nonsense variant causes a frameshift mutation also, 0 if not, N/A if not nonsense variant
@@ -1684,8 +1818,21 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData):
                                "refZScore": "N/A",
                                "altMaxEntScanScore": "N/A",
                                "altZScore": "N/A",
-                               "deNovoDonorFlag": 0,
-                               "priorProb": "N/A"}
+                               "refSeq": "N/A",
+                               "altSeq": "N/A",
+                               "varStart": "N/A",
+                               "varLength": "N/A",
+                               "exonStart": "N/A",
+                               "intronStart": "N/A",
+                               "closestMaxEntScanScore": "N/A",
+                               "closestZScore": "N/A",
+                               "closestSeq": "N/A",
+                               "closestExonStart": "N/A",
+                               "closestIntronStart": "N/A",
+                               "deNovoDonorAltGreaterRefFlag": "N/A",
+                               "deNovoDonorAltGreaterClosestFlag": "N/A",
+                               "priorProb": "N/A",
+                               "enigmaClass": "N/A"}
 
         spliceRescue = "N/A"
         spliceFlag = 0
@@ -1704,21 +1851,17 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData):
             CIDomainInRegionFlag = nonsenseData["CIDomainInRegionFlag"]
             isDivisibleFlag = nonsenseData["isDivisibleFlag"]
 
-        # TO DO add additional flags for de novo acceptor
-        # TO DO add sequences for ref and alt and add NA for closest splice site
-        # TO DO need to add additional formatting flags for future UI development (see slack convo with Zack)
-        
         return {"applicablePrior": applicablePrior,
                 "applicableEnigmaClass": getEnigmaClass(applicablePrior),
                 "proteinPrior": proteinPrior,
-                "refDonorPrior": "-",
+                "refDonorPrior": "N/A",
                 "deNovoDonorPrior": deNovoDonorPrior,
                 "refRefDonorMES": "N/A",
                 "refRefDonorZ": "N/A",
                 "altRefDonorMES": "N/A",
                 "altRefDonorZ": "N/A",
                 "refRefDonorSeq": "N/A",
-                "refAltDonorSeq": "N/A",
+                "altRefDonorSeq": "N/A",
                 "refDonorVarStart": "N/A",
                 "refDonorVarLength": "N/A",
                 "refDonorExonStart": "N/A",
@@ -1727,7 +1870,19 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData):
                 "refDeNovoDonorZ": deNovoDonorInfo["refZScore"],
                 "altDeNovoDonorMES": deNovoDonorInfo["altMaxEntScanScore"],
                 "altDeNovoDonorZ": deNovoDonorInfo["altZScore"],
-                "deNovoDonorFlag": deNovoDonorInfo["deNovoDonorFlag"],
+                "refDeNovoDonorSeq": deNovoDonorInfo["refSeq"],
+                "altDeNovoDonorSeq": deNovoDonorInfo["altSeq"],
+                "deNovoDonorVarStart": deNovoDonorInfo["varStart"],
+                "deNovoDonorVarLength": deNovoDonorInfo["varLength"],
+                "deNovoDonorExonStart": deNovoDonorInfo["exonStart"],
+                "deNovoDonorIntronStart": deNovoDonorInfo["intronStart"],
+                "closestDonorMES": deNovoDonorInfo["closestMaxEntScanScore"],
+                "closestDonorZ": deNovoDonorInfo["closestZScore"],
+                "closestDonorSeq": deNovoDonorInfo["closestSeq"],
+                "closestDonorExonStart": deNovoDonorInfo["closestExonStart"],
+                "closestDonorIntronStart": deNovoDonorInfo["closestIntronStart"],
+                "deNovoDonorAltGreaterRefFlag": deNovoDonorInfo["deNovoDonorAltGreaterRefFlag"],
+                "deNovoDonorAltGreaterClosestFlag": deNovoDonorInfo["deNovoDonorAltGreaterClosestFlag"],
                 "deNovoAccPrior": deNovoAccInfo["priorProb"],
                 "refAccPrior": refPrior,
                 "refRefAccMES": refSpliceInfo["refMaxEntScanScore"],
@@ -1735,7 +1890,7 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData):
                 "altRefAccMES": refSpliceInfo["altMaxEntScanScore"],
                 "altRefAccZ": refSpliceInfo["altZScore"],
                 "refRefAccSeq": refSpliceInfo["refSeq"],
-                "refAltAccSeq": refSpliceInfo["altSeq"],
+                "altRefAccSeq": refSpliceInfo["altSeq"],
                 "refAccVarStart": refSpliceInfo["varStart"],
                 "refAccVarLength": refSpliceInfo["varLength"],
                 "refAccExonStart": refSpliceInfo["exonStart"],
@@ -1744,7 +1899,19 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData):
                 "refDeNovoAccZ": deNovoAccInfo["refZScore"],
                 "altDeNovoAccMES": deNovoAccInfo["altMaxEntScanScore"],
                 "altDeNovoAccZ": deNovoAccInfo["altZScore"],
-                "deNovoAccFlag": deNovoAccInfo["deNovoAccFlag"],
+                "refDeNovoAccSeq": deNovoAccInfo["refSeq"],
+                "altDeNovoAccSeq": deNovoAccInfo["altSeq"],
+                "deNovoAccVarStart": deNovoAccInfo["varStart"],
+                "deNovoAccVarLength": deNovoAccInfo["varLength"],
+                "deNovoAccExonStart": deNovoAccInfo["exonStart"],
+                "deNovoAccIntronStart": deNovoAccInfo["intronStart"],
+                "closestAccMES": deNovoAccInfo["closestMaxEntScanScore"],
+                "closestAccZ": deNovoAccInfo["closestZScore"],
+                "closestAccSeq": deNovoAccInfo["closestSeq"],
+                "closestAccExonStart": deNovoAccInfo["closestExonStart"],
+                "closestAccIntronStart": deNovoAccInfo["closestIntronStart"],
+                "deNovoAccAltGreaterRefFlag": deNovoAccInfo["deNovoAccAltGreaterRefFlag"],
+                "deNovoAccAltGreaterClosestFlag": deNovoAccInfo["deNovoAccAltGreaterClosestFlag"],
                 "spliceSite": refSpliceInfo["spliceSite"],
                 "spliceRescue": spliceRescue,
                 "spliceFlag": spliceFlag,
@@ -1795,7 +1962,7 @@ def getPriorProbInGreyZoneSNS(variant, boundaries, variantData):
                 "altRefDonorMES": "-",
                 "altRefDonorZ": "-",
                 "refRefDonorSeq": "-",
-                "refAltDonorSeq": "-",
+                "altRefDonorSeq": "-",
                 "refDonorVarStart": "-",
                 "refDonorVarLength": "-",
                 "refDonorExonStart": "-",
@@ -1804,7 +1971,19 @@ def getPriorProbInGreyZoneSNS(variant, boundaries, variantData):
                 "refDeNovoDonorZ": "-",
                 "altDeNovoDonorMES": "-",
                 "altDeNovoDonorZ": "-",
-                "deNovoDonorFlag": 0,
+                "refDeNovoDonorSeq": "-",
+                "altDeNovoDonorSeq": "-",
+                "deNovoDonorVarStart": "-",
+                "deNovoDonorVarLength": "-",
+                "deNovoDonorExonStart": "-",
+                "deNovoDonorIntronStart": "-",
+                "closestDonorMES": "-",
+                "closestDonorZ": "-",
+                "closestDonorSeq": "-",
+                "closestDonorExonStart": "-",
+                "closestDonorIntronStart": "-",
+                "deNovoDonorAltGreaterRefFlag": "N/A",
+                "deNovoDonorAltGreaterClosestFlag": "N/A",
                 "refAccPrior": "N/A",
                 "deNovoAccPrior": "N/A",
                 "refRefAccMES": "-",
@@ -1812,7 +1991,7 @@ def getPriorProbInGreyZoneSNS(variant, boundaries, variantData):
                 "altRefAccMES": "-",
                 "altRefAccZ": "-",
                 "refRefAccSeq": "-",
-                "refAltAccSeq": "-",
+                "altRefAccSeq": "-",
                 "refAccVarStart": "-",
                 "refAccVarLength": "-",
                 "refAccExonStart": "-",
@@ -1821,7 +2000,19 @@ def getPriorProbInGreyZoneSNS(variant, boundaries, variantData):
                 "refDeNovoAccZ": "-",
                 "altDeNovoAccMES": "-",
                 "altDeNovoAccZ": "-",
-                "deNovoAccFlag": 0,
+                "refDeNovoAccSeq": "-",
+                "altDeNovoAccSeq": "-",
+                "deNovoAccVarStart": "-",
+                "deNovoAccVarLength": "-",
+                "deNovoAccExonStart": "-",
+                "deNovoAccIntronStart": "-",
+                "closestAccMES": "-",
+                "closestAccZ": "-",
+                "closestAccSeq": "-",
+                "closestAccExonStart": "-",
+                "closestAccIntronStart": "-",
+                "deNovoAccAltGreaterRefFlag": "N/A",
+                "deNovoAccAltGreaterClosestFlag": "N/A",
                 "spliceSite": 0,
                 "spliceRescue": "N/A",
                 "spliceFlag": 0,
@@ -1857,7 +2048,6 @@ def getPriorProbInExonSNS(variant, boundaries, variantData):
         isDivisibleFlag = 1 if distance between de novo donor and wild-type donor splice site is NOT divisible by 3 for nonsense variant, 
            0 if it IS divisible, N/A if not a nonsense variant
     '''
-    # TO DO need to add extra flags (de novo donor/acceptor and splice rescue flags)
     varLoc = getVarLocation(variant, boundaries)
     if (varLoc == "exon_variant" or "CI_domain_variant") and getVarType(variant) == "substitution":
         proteinData = getPriorProbProteinSNS(variant, variantData)
@@ -1876,7 +2066,19 @@ def getPriorProbInExonSNS(variant, boundaries, variantData):
                              "altMaxEntScanScore": "N/A",
                              "refZScore": "N/A",
                              "altZScore": "N/A",
-                             "deNovoAccFlag": 0}
+                             "refSeq": "N/A",
+                             "altSeq": "N/A",
+                             "varStart": "N/A",
+                             "varLength": "N/A",
+                             "exonStart": "N/A",
+                             "intronStart": "N/A",
+                             "closestMaxEntScanScore": "N/A",
+                             "closestZScore": "N/A",
+                             "closestSeq": "N/A",
+                             "closestExonStart": "N/A",
+                             "closestIntronStart": "N/A",
+                             "deNovoAccAltGreaterRefFlag": "N/A",
+                             "deNovoAccAltGreaterClosestFlag": "N/A"}
         varCons = getVarConsequences(variant)
         if varCons == "stop_gained":
             nonsenseData = getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc=False)
@@ -1905,7 +2107,7 @@ def getPriorProbInExonSNS(variant, boundaries, variantData):
                 "altRefDonorMES": "N/A",
                 "altRefDonorZ": "N/A",
                 "refRefDonorSeq": "N/A",
-                "refAltDonorSeq": "N/A",
+                "altRefDonorSeq": "N/A",
                 "refDonorVarStart": "N/A",
                 "refDonorVarLength": "N/A",
                 "refDonorExonStart": "N/A",
@@ -1914,7 +2116,19 @@ def getPriorProbInExonSNS(variant, boundaries, variantData):
                 "refDeNovoDonorZ": deNovoDonorData["refZScore"],
                 "altDeNovoDonorMES": deNovoDonorData["altMaxEntScanScore"],
                 "altDeNovoDonorZ": deNovoDonorData["altZScore"],
-                "deNovoDonorFlag": deNovoDonorData["deNovoDonorFlag"],
+                "refDeNovoDonorSeq": deNovoDonorData["refSeq"],
+                "altDeNovoDonorSeq": deNovoDonorData["altSeq"],
+                "deNovoDonorVarStart": deNovoDonorData["varStart"],
+                "deNovoDonorVarLength": deNovoDonorData["varLength"],
+                "deNovoDonorExonStart": deNovoDonorData["exonStart"],
+                "deNovoDonorIntronStart": deNovoDonorData["intronStart"],
+                "closestDonorMES": deNovoDonorData["closestMaxEntScanScore"],
+                "closestDonorZ": deNovoDonorData["closestZScore"],
+                "closestDonorSeq": deNovoDonorData["closestSeq"],
+                "closestDonorExonStart": deNovoDonorData["closestExonStart"],
+                "closestDonorIntronStart": deNovoDonorData["closestIntronStart"],
+                "deNovoDonorAltGreaterRefFlag": deNovoDonorData["deNovoDonorAltGreaterRefFlag"],
+                "deNovoDonorAltGreaterClosestFlag": deNovoDonorData["deNovoDonorAltGreaterClosestFlag"],
                 "deNovoAccPrior": deNovoAccData["priorProb"],
                 "refAccPrior": "N/A",
                 "refRefAccMES": "N/A",
@@ -1922,7 +2136,7 @@ def getPriorProbInExonSNS(variant, boundaries, variantData):
                 "altRefAccMES": "N/A",
                 "altRefAccZ": "N/A",
                 "refRefAccSeq": "N/A",
-                "refAltAccSeq": "N/A",
+                "altRefAccSeq": "N/A",
                 "refAccVarStart": "N/A",
                 "refAccVarLength": "N/A",
                 "refAccExonStart": "N/A",
@@ -1931,7 +2145,19 @@ def getPriorProbInExonSNS(variant, boundaries, variantData):
                 "refDeNovoAccZ": deNovoAccData["refZScore"],
                 "altDeNovoAccMES": deNovoAccData["altMaxEntScanScore"],
                 "altDeNovoAccZ": deNovoAccData["altZScore"],
-                "deNovoAccFlag": deNovoAccData["deNovoAccFlag"],
+                "refDeNovoAccSeq": deNovoAccData["refSeq"],
+                "altDeNovoAccSeq": deNovoAccData["altSeq"],
+                "deNovoAccVarStart": deNovoAccData["varStart"],
+                "deNovoAccVarLength": deNovoAccData["varLength"],
+                "deNovoAccExonStart": deNovoAccData["exonStart"],
+                "deNovoAccIntronStart": deNovoAccData["intronStart"],
+                "closestAccMES": deNovoAccData["closestMaxEntScanScore"],
+                "closestAccZ": deNovoAccData["closestZScore"],
+                "closestAccSeq": deNovoAccData["closestSeq"],
+                "closestAccExonStart": deNovoAccData["closestExonStart"],
+                "closestAccIntronStart": deNovoAccData["closestIntronStart"],
+                "deNovoAccAltGreaterRefFlag": deNovoAccData["deNovoAccAltGreaterRefFlag"],
+                "deNovoAccAltGreaterClosestFlag": deNovoAccData["deNovoAccAltGreaterClosestFlag"],
                 "spliceSite": 0,
                 "spliceRescue": spliceRescue,
                 "spliceFlag": spliceFlag,
@@ -1961,7 +2187,7 @@ def getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries):
                 "altRefDonorMES": "-",
                 "altRefDonorZ": "-",
                 "refRefDonorSeq": "-",
-                "refAltDonorSeq": "-",
+                "altRefDonorSeq": "-",
                 "refDonorVarStart": "-",
                 "refDonorVarLength": "-",
                 "refDonorExonStart": "-",
@@ -1970,7 +2196,19 @@ def getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries):
                 "refDeNovoDonorZ": "-",
                 "altDeNovoDonorMES": "-",
                 "altDeNovoDonorZ": "-",
-                "deNovoDonorFlag": 0,
+                "refDeNovoDonorSeq": "-",
+                "altDeNovoDonorSeq": "-",
+                "deNovoDonorVarStart": "-",
+                "deNovoDonorVarLength": "-",
+                "deNovoDonorExonStart": "-",
+                "deNovoDonorIntronStart": "-",
+                "closestDonorMES": "-",
+                "closestDonorZ": "-",
+                "closestDonorSeq": "-",
+                "closestDonorExonStart": "-",
+                "closestDonorIntronStart": "-",
+                "deNovoDonorAltGreaterRefFlag": "N/A",
+                "deNovoDonorAltGreaterClosestFlag": "N/A",
                 "refAccPrior": "N/A",
                 "deNovoAccPrior": "N/A",
                 "refRefAccMES": "-",
@@ -1978,7 +2216,7 @@ def getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries):
                 "altRefAccMES": "-",
                 "altRefAccZ": "-",
                 "refRefAccSeq": "-",
-                "refAltAccSeq": "-",
+                "altRefAccSeq": "-",
                 "refAccVarStart": "-",
                 "refAccVarLength": "-",
                 "refAccExonStart": "-",
@@ -1987,7 +2225,19 @@ def getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries):
                 "refDeNovoAccZ": "-",
                 "altDeNovoAccMES": "-",
                 "altDeNovoAccZ": "-",
-                "deNovoAccFlag": 0,
+                "refDeNovoAccSeq": "-",
+                "altDeNovoAccSeq": "-",
+                "deNovoAccVarStart": "-",
+                "deNovoAccVarLength": "-",
+                "deNovoAccExonStart": "-",
+                "deNovoAccIntronStart": "-",
+                "closestAccMES": "-",
+                "closestAccZ": "-",
+                "closestAccSeq": "-",
+                "closestAccExonStart": "-",
+                "closestAccIntronStart": "-",
+                "deNovoAccAltGreaterRefFlag": "N/A",
+                "deNovoAccAltGreaterClosestFlag": "N/A",
                 "spliceSite": 0,
                 "spliceRescue": "N/A",
                 "spliceFlag": 0,
@@ -2002,7 +2252,10 @@ def getPriorProbIntronicDeNovoDonorSNS(variant):
       1. Checks that variant is NOT in exon or reference donor/acceptor site
       2. Checks that variant is a substitution variant
     Determines if alt MES score is greater than ref MES score for highest scoring sliding window
-    If true, flag variant for further analysis (spliceFlag = 1), spliceFlag = 0 otherwise
+      If altMES > refMES, then deNovoDonorAltGreaterRefFlag = 1 (0 otherwise)
+    Determines closest ref donor scores
+      If altMES > closestRefDonorMES, then deNovoDonorAltGreaterClosestFlag = 1 (0 otherwise)
+    If either flag is equal to 1, flag variant for further analysis (spliceFlag = 1), spliceFlag = 0 otherwise
     Returns dictionary containing prior prob, enigma class, de novo donor scores, and splice flag
     '''
     inExon = varInExon(variant)
@@ -2010,24 +2263,42 @@ def getPriorProbIntronicDeNovoDonorSNS(variant):
     inRefAcc = varInSpliceRegion(variant, donor=False, deNovo=False)
     if inExon == False and inRefDonor == False and inRefAcc == False:
         if getVarType(variant) == "substitution":
-            deNovoDonorScores = getMaxMaxEntScanScoreSlidingWindowSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH,
-                                                                      donor=True, deNovo=False, deNovoDonorInRefAcc=False)
-            refMES = deNovoDonorScores["refMaxEntScanScore"]
-            altMES = deNovoDonorScores["altMaxEntScanScore"]
+            deNovoDonorInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH,
+                                                                    donor=True, deNovo=False, deNovoDonorInRefAcc=False)
+            refMES = deNovoDonorInfo["refMaxEntScanScore"]
+            altMES = deNovoDonorInfo["altMaxEntScanScore"]
+            deNovoOffset = 0
+            closestDonorInfo = getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, deNovoDonorInRefAcc=False, testMode=False)
+            closestMES = closestDonorInfo["maxEntScanScore"]
+            spliceFlag = 0
+            deNovoDonorAltGreaterRefFlag = 0
+            deNovoDonorAltGreaterClosestFlag = 0
             if altMES > refMES:
                 spliceFlag = 1
-                deNovoDonorFlag = 1
-            else:
-                spliceFlag = 0
-                deNovoDonorFlag = 0
+                deNovoDonorAltGreaterRefFlag = 1
+            if altMES > closestMES:
+                spliceFlag = 1
+                deNovoDonorAltGreaterClosestFlag = 1
 
             return {"priorProb": "N/A",
                     "enigmaClass": "N/A",
                     "refMaxEntScanScore": refMES,
-                    "refZScore": deNovoDonorScores["refZScore"],
+                    "refZScore": deNovoDonorInfo["refZScore"],
                     "altMaxEntScanScore": altMES,
-                    "altZScore": deNovoDonorScores["altZScore"],
-                    "deNovoDonorFlag": deNovoDonorFlag,
+                    "altZScore": deNovoDonorInfo["altZScore"],
+                    "refSeq": deNovoDonorInfo["refSeq"],
+                    "altSeq": deNovoDonorInfo["altSeq"],
+                    "varStart": deNovoDonorInfo["varStart"],
+                    "varLength": deNovoDonorInfo["varLength"],
+                    "exonStart": 0,
+                    "intronStart": STD_EXONIC_PORTION,
+                    "closestSeq": closestDonorInfo["sequence"],
+                    "closestMaxEntScanScore": closestMES,
+                    "closestZScore": closestDonorInfo["zScore"],
+                    "closestExonStart": closestDonorInfo["exonStart"],
+                    "closestIntronStart": closestDonorInfo["intronStart"],
+                    "deNovoDonorAltGreaterRefFlag": deNovoDonorAltGreaterRefFlag,
+                    "deNovoDonorAltGreaterClosestFlag": deNovoDonorAltGreaterClosestFlag,
                     "spliceFlag": spliceFlag}
     
 def getPriorProbInIntronSNS(variant, boundaries):
@@ -2061,7 +2332,7 @@ def getPriorProbInIntronSNS(variant, boundaries):
                 "altRefDonorMES": "N/A",
                 "altRefDonorZ": "N/A",
                 "refRefDonorSeq": "N/A",
-                "refAltDonorSeq": "N/A",
+                "altRefDonorSeq": "N/A",
                 "refDonorVarStart": "N/A",
                 "refDonorVarLength": "N/A",
                 "refDonorExonStart": "N/A",
@@ -2070,7 +2341,19 @@ def getPriorProbInIntronSNS(variant, boundaries):
                 "refDeNovoDonorZ": deNovoDonorData["refZScore"],
                 "altDeNovoDonorMES": deNovoDonorData["altMaxEntScanScore"],
                 "altDeNovoDonorZ": deNovoDonorData["altZScore"],
-                "deNovoDonorFlag": deNovoDonorData["deNovoDonorFlag"],
+                "refDeNovoDonorSeq": deNovoDonorData["refSeq"],
+                "altDeNovoDonorSeq": deNovoDonorData["altSeq"],
+                "deNovoDonorVarStart": deNovoDonorData["varStart"],
+                "deNovoDonorVarLength": deNovoDonorData["varLength"],
+                "deNovoDonorExonStart": deNovoDonorData["exonStart"],
+                "deNovoDonorIntronStart": deNovoDonorData["intronStart"],
+                "closestDonorMES": deNovoDonorData["closestMaxEntScanScore"],
+                "closestDonorZ": deNovoDonorData["closestZScore"],
+                "closestDonorSeq": deNovoDonorData["closestSeq"],
+                "closestDonorExonStart": deNovoDonorData["closestExonStart"],
+                "closestDonorIntronStart": deNovoDonorData["closestIntronStart"],
+                "deNovoDonorAltGreaterRefFlag": deNovoDonorData["deNovoDonorAltGreaterRefFlag"],
+                "deNovoDonorAltGreaterClosestFlag": deNovoDonorData["deNovoDonorAltGreaterClosestFlag"],
                 "deNovoAccPrior": "N/A",
                 "refAccPrior": "N/A",
                 "refRefAccMES": "N/A",
@@ -2078,16 +2361,28 @@ def getPriorProbInIntronSNS(variant, boundaries):
                 "altRefAccMES": "N/A",
                 "altRefAccZ": "N/A",
                 "refRefAccSeq": "N/A",
-                "refAltAccSeq": "N/A",
+                "altRefAccSeq": "N/A",
                 "refAccVarStart": "N/A",
                 "refAccVarLength": "N/A",
                 "refAccExonStart": "N/A",
                 "refAccIntronStart": "N/A",
-                "refDeNovoAccMES": "-",
-                "refDeNovoAccZ": "-",
-                "altDeNovoAccMES": "-",
-                "altDeNovoAccZ": "-",
-                "deNovoAccFlag": 0,
+                "refDeNovoAccMES": "N/A",
+                "refDeNovoAccZ": "N/A",
+                "altDeNovoAccMES": "N/A",
+                "altDeNovoAccZ": "N/A",
+                "refDeNovoAccSeq": "N/A",
+                "altDeNovoAccSeq": "N/A",
+                "deNovoAccVarStart": "N/A",
+                "deNovoAccVarLength": "N/A",
+                "deNovoAccExonStart": "N/A",
+                "deNovoAccIntronStart": "N/A",
+                "closestAccMES": "N/A",
+                "closestAccZ": "N/A",
+                "closestAccSeq": "N/A",
+                "closestAccExonStart": "N/A",
+                "closestAccIntronStart": "N/A",
+                "deNovoAccAltGreaterRefFlag": "N/A",
+                "deNovoAccAltGreaterClosestFlag": "N/A",
                 "spliceSite": 0,
                 "spliceRescue": "N/A",
                 "spliceFlag": deNovoDonorData["spliceFlag"],
@@ -2096,7 +2391,7 @@ def getPriorProbInIntronSNS(variant, boundaries):
                 "CIDomainInRegionFlag": "N/A",
                 "isDivisibleFlag": "N/A"}
 
-def getPriorProbUTRSNS(variant, boundaries):
+def getPriorProbInUTRSNS(variant, boundaries):
     '''
     Given a variant and boundaries (either "priors" or "enigma"),
     Checks that variant is a SNS variant in a UTR
@@ -2111,17 +2406,41 @@ def getPriorProbUTRSNS(variant, boundaries):
     varType = getVarType(variant)
     if varLoc == "UTR_variant" and varType == "substitution":
         deNovoAccData = {"priorProb": "N/A",
-                         "refMaxEntScanScore": "-",
-                         "altMaxEntScanScore": "-",
-                         "refZScore": "-",
-                         "altZScore": "-",
-                         "deNovoAccFlag": 0}
+                         "refMaxEntScanScore": "N/A",
+                         "altMaxEntScanScore": "N/A",
+                         "refZScore": "N/A",
+                         "altZScore": "N/A",
+                         "refSeq": "N/A",
+                         "altSeq": "N/A",
+                         "varStart": "N/A",
+                         "varLength": "N/A",
+                         "exonStart": "N/A",
+                         "intronStart": "N/A",
+                         "closestMaxEntScanScore": "N/A",
+                         "closestZScore": "N/A",
+                         "closestSeq": "N/A",
+                         "closestExonStart": "N/A",
+                         "closestIntronStart": "N/A",
+                         "deNovoAccAltGreaterRefFlag": "N/A",
+                         "deNovoAccAltGreaterClosestFlag": "N/A"}
         deNovoDonorData = {"priorProb": "N/A",
-                           "refMaxEntScanScore": "-",
-                           "altMaxEntScanScore": "-",
-                           "refZScore": "-",
-                           "altZScore": "-",
-                           "deNovoDonorFlag": 0}
+                           "refMaxEntScanScore": "N/A",
+                           "altMaxEntScanScore": "N/A",
+                           "refZScore": "N/A",
+                           "altZScore": "N/A",
+                           "refSeq": "N/A",
+                           "altSeq": "N/A",
+                           "varStart": "N/A",
+                           "varLength": "N/A",
+                           "exonStart": "N/A",
+                           "intronStart": "N/A",
+                           "closestMaxEntScanScore": "N/A",
+                           "closestZScore": "N/A",
+                           "closestSeq": "N/A",
+                           "closestExonStart": "N/A",
+                           "closestIntronStart": "N/A",
+                           "deNovoDonorAltGreaterRefFlag": "N/A",
+                           "deNovoDonorAltGreaterClosestFlag": "N/A"}
         varCons = getVarConsequences(variant)
         if varCons == "3_prime_UTR_variant":
             applicablePrior = 0.02
@@ -2156,7 +2475,7 @@ def getPriorProbUTRSNS(variant, boundaries):
                 "altRefDonorMES": "N/A",
                 "altRefDonorZ": "N/A",
                 "refRefDonorSeq": "N/A",
-                "refAltDonorSeq": "N/A",
+                "altRefDonorSeq": "N/A",
                 "refDonorVarStart": "N/A",
                 "refDonorVarLength": "N/A",
                 "refDonorExonStart": "N/A",
@@ -2165,7 +2484,19 @@ def getPriorProbUTRSNS(variant, boundaries):
                 "refDeNovoDonorZ": deNovoDonorData["refZScore"],
                 "altDeNovoDonorMES": deNovoDonorData["altMaxEntScanScore"],
                 "altDeNovoDonorZ": deNovoDonorData["altZScore"],
-                "deNovoDonorFlag": deNovoDonorData["deNovoDonorFlag"],
+                "refDeNovoDonorSeq": deNovoDonorData["refSeq"],
+                "altDeNovoDonorSeq": deNovoDonorData["altSeq"],
+                "deNovoDonorVarStart": deNovoDonorData["varStart"],
+                "deNovoDonorVarLength": deNovoDonorData["varLength"],
+                "deNovoDonorExonStart": deNovoDonorData["exonStart"],
+                "deNovoDonorIntronStart": deNovoDonorData["intronStart"],
+                "closestDonorMES": deNovoDonorData["closestMaxEntScanScore"],
+                "closestDonorZ": deNovoDonorData["closestZScore"],
+                "closestDonorSeq": deNovoDonorData["closestSeq"],
+                "closestDonorExonStart": deNovoDonorData["closestExonStart"],
+                "closestDonorIntronStart": deNovoDonorData["closestIntronStart"],
+                "deNovoDonorAltGreaterRefFlag": deNovoDonorData["deNovoDonorAltGreaterRefFlag"],
+                "deNovoDonorAltGreaterClosestFlag": deNovoDonorData["deNovoDonorAltGreaterClosestFlag"],
                 "deNovoAccPrior": deNovoAccData["priorProb"],
                 "refAccPrior": "N/A",
                 "refRefAccMES": "N/A",
@@ -2173,7 +2504,7 @@ def getPriorProbUTRSNS(variant, boundaries):
                 "altRefAccMES": "N/A",
                 "altRefAccZ": "N/A",
                 "refRefAccSeq": "N/A",
-                "refAltAccSeq": "N/A",
+                "altRefAccSeq": "N/A",
                 "refAccVarStart": "N/A",
                 "refAccVarLength": "N/A",
                 "refAccExonStart": "N/A",
@@ -2182,7 +2513,19 @@ def getPriorProbUTRSNS(variant, boundaries):
                 "refDeNovoAccZ": deNovoAccData["refZScore"],
                 "altDeNovoAccMES": deNovoAccData["altMaxEntScanScore"],
                 "altDeNovoAccZ": deNovoAccData["altZScore"],
-                "deNovoAccFlag": deNovoAccData["deNovoAccFlag"],
+                "refDeNovoAccSeq": deNovoAccData["refSeq"],
+                "altDeNovoAccSeq": deNovoAccData["altSeq"],
+                "deNovoAccVarStart": deNovoAccData["varStart"],
+                "deNovoAccVarLength": deNovoAccData["varLength"],
+                "deNovoAccExonStart": deNovoAccData["exonStart"],
+                "deNovoAccIntronStart": deNovoAccData["exonStart"],
+                "closestAccMES": deNovoAccData["closestMaxEntScanScore"],
+                "closestAccZ": deNovoAccData["closestZScore"],
+                "closestAccSeq": deNovoAccData["closestSeq"],
+                "closestAccExonStart": deNovoAccData["closestExonStart"],
+                "closestAccIntronStart": deNovoAccData["closestExonStart"],
+                "deNovoAccAltGreaterRefFlag": deNovoAccData["deNovoAccAltGreaterRefFlag"],
+                "deNovoAccAltGreaterClosestFlag": deNovoAccData["deNovoAccAltGreaterClosestFlag"],
                 "spliceSite": 0,
                 "spliceRescue": "N/A",
                 "spliceFlag": spliceFlag,
@@ -2210,7 +2553,7 @@ def getVarData(variant, boundaries, variantData):
                  "altRefDonorMES": "-",
                  "altRefDonorZ": "-",
                  "refRefDonorSeq": "-",
-                 "refAltDonorSeq": "-",
+                 "altRefDonorSeq": "-",
                  "refDonorVarStart": "-",
                  "refDonorVarLength": "-",
                  "refDonorExonStart": "-",
@@ -2219,14 +2562,27 @@ def getVarData(variant, boundaries, variantData):
                  "refDeNovoDonorZ": "-",
                  "altDeNovoDonorMES": "-",
                  "altDeNovoDonorZ": "-",
-                 "deNovoDonorFlag": "-",
+                 "refDeNovoDonorSeq": "-",
+                 "altDeNovoDonorSeq": "-",
+                 "deNovoDonorVarStart": "-",
+                 "deNovoDonorVarLength": "-",
+                 "deNovoDonorExonStart": "-",
+                 "deNovoDonorIntronStart": "-",
+                 "closestDonorMES": "-",
+                 "closestDonorZ": "-",
+                 "closestDonorSeq": "-",
+                 "closestDonorExonStart": "-",
+                 "closestDonorIntronStart": "-",
+                 "deNovoDonorAltGreaterRefFlag": "-",
+                 "deNovoDonorAltGreaterClosestFlag": "-",
+                 "refAccPrior": "-",
                  "deNovoAccPrior": "-",
                  "refRefAccMES": "-",
                  "refRefAccZ": "-",
                  "altRefAccMES": "-",
                  "altRefAccZ": "-",
                  "refRefAccSeq": "-",
-                 "refAltAccSeq": "-",
+                 "altRefAccSeq": "-",
                  "refAccVarStart": "-",
                  "refAccVarLength": "-",
                  "refAccExonStart": "-",
@@ -2235,7 +2591,19 @@ def getVarData(variant, boundaries, variantData):
                  "refDeNovoAccZ": "-",
                  "altDeNovoAccMES": "-",
                  "altDeNovoAccZ": "-",
-                 "deNovoAccFlag": "-",
+                 "refDeNovoAccSeq": "-",
+                 "altDeNovoAccSeq": "-",
+                 "deNovoAccVarStart": "-",
+                 "deNovoAccVarLength": "-",
+                 "deNovoAccExonStart": "-",
+                 "deNovoAccIntronStart": "-",
+                 "closestAccMES": "-",
+                 "closestAccZ": "-",
+                 "closestAccSeq": "-",
+                 "closestAccExonStart": "-",
+                 "closestAccIntronStart": "-",
+                 "deNovoAccAltGreaterRefFlag": "-",
+                 "deNovoAccAltGreaterClosestFlag": "-",
                  "spliceSite": "-",
                  "spliceRescue": "-",
                  "spliceFlag": "-",
@@ -2259,7 +2627,7 @@ def getVarData(variant, boundaries, variantData):
             elif varLoc == "after_grey_zone_variant":
                 varData =  getPriorProbAfterGreyZoneSNS(variant, boundaries)
             elif varLoc == "UTR_variant":
-                varData =  getPriorProbUTRSNS(variant, boundaries)
+                varData =  getPriorProbInUTRSNS(variant, boundaries)
             elif varLoc == "intron_variant":
                 varData =  getPriorProbInIntronSNS(variant, boundaries)
             else:
@@ -2316,10 +2684,17 @@ def main():
     inputData = csv.DictReader(open(args.inputFile, "r"), delimiter="\t")
     fieldnames = inputData.fieldnames
     newHeaders = ["varType", "varLoc", "applicablePrior", "applicableEnigmaClass", "proteinPrior", "refDonorPrior", "deNovoDonorPrior",
-                  "refRefDonorMES", "refRefDonorZ", "altRefDonorMES", "altRefDonorZ", "refDeNovoDonorMES", "refDeNovoDonorZ", "altDeNovoDonorMES",
-                  "altDeNovoDonorZ", "deNovoDonorFlag", "refAccPrior", "deNovoAccPrior", "refRefAccMES", "refRefAccZ", "altRefAccMES",
-                  "altRefAccZ", "refDeNovoAccMES", "refDeNovoAccZ", "altDeNovoAccMES", "altDeNovoAccZ", "deNovoAccFlag", "spliceSite",
-                  "spliceRescue", "spliceFlag", "frameshiftFlag", "inExonicPortionFlag", "CIDomainInRegionFlag", "isDivisibleFlag"]
+                  "refRefDonorMES", "refRefDonorZ", "altRefDonorMES", "altRefDonorZ", "refRefDonorSeq", "altRefDonorSeq", "refDonorVarStart",
+                  "refDonorVarLength", "refDonorExonStart", "refDonorIntronStart", "refDeNovoDonorMES", "refDeNovoDonorZ", "altDeNovoDonorMES",
+                  "altDeNovoDonorZ", "refDeNovoDonorSeq", "altDeNovoDonorSeq", "deNovoDonorVarStart", "deNovoDonorVarLength",
+                  "deNovoDonorExonStart", "deNovoDonorIntronStart", "closestDonorMES", "closestDonorZ", "closestDonorSeq", "closestDonorExonStart",
+                  "closestDonorIntronStart", "deNovoDonorAltGreaterRefFlag", "deNovoDonorAltGreaterClosestFlag", "refAccPrior", "deNovoAccPrior",
+                  "refRefAccMES", "refRefAccZ", "altRefAccMES", "altRefAccZ", "refRefAccSeq", "altRefAccSeq", "refAccVarStart", "refAccVarLength",
+                  "refAccExonStart", "refAccIntronStart", "refDeNovoAccMES", "refDeNovoAccZ", "altDeNovoAccMES", "altDeNovoAccZ",
+                  "refDeNovoAccSeq", "altDeNovoAccSeq", "deNovoAccVarStart", "deNovoAccVarLength", "deNovoAccExonStart", "deNovoAccIntronStart",
+                  "closestAccMES", "closestAccZ", "closestAccSeq", "closestAccExonStart", "closestAccIntronStart", "deNovoAccAltGreaterRefFlag",
+                  "deNovoAccAltGreaterClosestFlag", "spliceSite", "spliceRescue", "spliceFlag", "frameshiftFlag", "inExonicPortionFlag",
+                  "CIDomainInRegionFlag", "isDivisibleFlag"]
     for header in newHeaders:
         fieldnames.append(header)
     outputData = csv.DictWriter(open(args.outputFile, "w"), delimiter="\t", fieldnames=fieldnames)
