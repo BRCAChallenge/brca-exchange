@@ -72,7 +72,7 @@ const mupitStructures = [
         "name": "fENSP00000380152_7",
         "image": require('../content/mupit/fENSP00000380152_7.png'),
         "url": "http://mupit.icm.jhu.edu/MuPIT_Interactive/?gene=BRCA2&addtlinfo=brca",
-        "humanReadableName":  "BRCA2 Homology Model"
+        "humanReadableName": "BRCA2 Homology Model"
     }
 ];
 
