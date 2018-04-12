@@ -786,9 +786,9 @@ var VariantDetail = React.createClass({
             }
 
             if (alleleFrequencies) {
-                console.log(innerGroups);
                 return (
                     <AlleleFrequenciesTile
+                        alleleFrequencyData={innerGroups}
                         groupTitle={groupTitle}
                         onChangeGroupVisibility={this.onChangeGroupVisibility}
                         hideEmptyItems={this.state.hideEmptyItems}
@@ -801,6 +801,7 @@ var VariantDetail = React.createClass({
                             }, 300);
                         }}
                         showHelp={this.showHelp}
+                        variant={variant}
                     />
                 );
             }

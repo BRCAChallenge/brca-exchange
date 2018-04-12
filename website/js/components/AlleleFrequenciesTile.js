@@ -3,7 +3,8 @@
 'use strict';
 
 import React from "react";
-// import {Panel} from 'react-bootstrap';
+import {Panel} from 'react-bootstrap';
+const _ = require('underscore');
 // import util from '../util';
 
 export default class AlleleFrequenciesTile extends React.Component {
@@ -79,88 +80,52 @@ export default class AlleleFrequenciesTile extends React.Component {
     // };
 
     render() {
-        // put it in a temp b/c we're going to resort it
-        // let submissions = this.props.submissions;
+        const variant = this.props.variant;
+        const data = this.props.alleleFrequencyData;
+        const exacGraph = _.find(data, function(dd) {
+                                return dd.source === "ExAC";
+                            }).chart[0];
+        const renderedExacGraph = exacGraph.replace(variant, exacGraph.prop);
+        // const exacData;
+        const thousandGenomesGraph = _.find(data, function(dd) {
+                                return dd.source === "1000 Genomes";
+                            }).chart[0];
+        const renderedThousandGenomesGraph = thousandGenomesGraph.replace(variant, thousandGenomesGraph.prop);
+        // const thousandGenomesData;
+        // const esp;
 
-        // first, remove old versions of reports (they're only used for the diff)
-        // let seen = [];
-        // let filteredSubmissions = [];
-        // for (var i = 0; i < submissions.length; i++) {
-        //     if (submissions[i].Source === "ClinVar") {
-        //         var key = submissions[i].SCV_ClinVar;
-        //     } else if (submissions[i].Source === "LOVD") {
-        //         key = submissions[i].DBID_LOVD;
-        //     }
-        //     // reports are already sent to the ui sorted with the most recent first, so we can take the first one
-        //     if (seen.indexOf(key) < 0) {
-        //         filteredSubmissions.push(submissions[i]);
-        //     }
-        //     seen.push(key);
-        // }
+        // create the source panel itself now
+        const groupTitle = `source-panel-${this.props.sourceName}`;
+        const header = (
+            <h3 style={{display: 'flex', flexDirection: 'row'}}>
+                <a style={{flexGrow: 1}} href="#" onClick={(event) => this.props.onChangeGroupVisibility(groupTitle, event)}>
+                    {this.props.groupTitle}
+                </a>
 
-        // submissions = filteredSubmissions;
+                <a title='collapse all reports'
+                    onClick={(event) => this.setAllReportExpansion(event, false)}
+                    style={{cursor: 'pointer', marginRight: '10px'}}>
+                    <i className="fa fa-angle-double-up" aria-hidden="true" />
+                </a>
 
-        // // sort the submissions if this source specifies a sort function
-        // if (this.props.reportBinding.sortBy) {
-        //     // (side note: we concat() to clone before sort()ing, because sort() mutates the array)
-        //     submissions = submissions.concat().sort(this.props.reportBinding.sortBy);
-        // }
+                <a title='expand all reports'
+                    onClick={(event) => this.setAllReportExpansion(event, true)}
+                    style={{cursor: 'pointer'}}>
+                    <i className="fa fa-angle-double-down" aria-hidden="true" />
+                </a>
+            </h3>
+        );
 
-        // // create a per-submitter collapsible subsection within this source panel
-        // const submitters = submissions.map((submissionData, idx) => {
-        //     // extract header fields, e.g. the submitter name
-        //     const submitterName = util.getFormattedFieldByProp(this.props.reportBinding.submitter.prop, submissionData);
-
-        //     // extract fields we care about from the submission data
-        //     const formattedCols = this.props.reportBinding.cols
-        //         .map(({ title, prop, helpKey }) => ({
-        //             title, prop, helpKey, value: submissionData[prop]
-        //         }));
-
-            // return (
-            //     <VariantSubmitter
-            //         key={submissionData.id} idx={idx} submitter={submitterName} source={this.props.sourceName}
-            //         reportBinding={this.props.reportBinding} cols={formattedCols} data={submissionData}
-            //         hideEmptyItems={this.props.hideEmptyItems}
-            //         onReportToggled={this.reportToggled}
-            //         showHelp={this.props.showHelp}
-            //         expanded={this.state.reportExpanded[idx]}
-            //     />
-        //     );
-        // });
-
-        // // create the source panel itself now
-        // const groupTitle = `source-panel-${this.props.sourceName}`;
-        // const header = (
-        //     <h3 style={{display: 'flex', flexDirection: 'row'}}>
-        //         <a style={{flexGrow: 1}} href="#" onClick={(event) => this.props.onChangeGroupVisibility(groupTitle, event)}>
-        //             {this.props.groupTitle}
-        //         </a>
-
-        //         <a title='collapse all reports'
-        //             onClick={(event) => this.setAllReportExpansion(event, false)}
-        //             style={{cursor: 'pointer', marginRight: '10px'}}>
-        //             <i className="fa fa-angle-double-up" aria-hidden="true" />
-        //         </a>
-
-        //         <a title='expand all reports'
-        //             onClick={(event) => this.setAllReportExpansion(event, true)}
-        //             style={{cursor: 'pointer'}}>
-        //             <i className="fa fa-angle-double-down" aria-hidden="true" />
-        //         </a>
-        //     </h3>
-        // );
-
-        // return (
-        //     <div key={`group_collection-${groupTitle}`} className="variant-detail-group variant-submitter-group">
-        //         <Panel
-        //             header={header}
-        //             collapsable={true}
-        //             defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
-        //             {submitters}
-        //         </Panel>
-        //     </div>
-        // );
-        return (<div></div>);
+        return (
+            <div key={`group_collection-${groupTitle}`} className="variant-detail-group variant-submitter-group">
+                <Panel
+                    header={header}
+                    collapsable={true}
+                    defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
+                    {renderedExacGraph}
+                    {renderedThousandGenomesGraph}
+                </Panel>
+            </div>
+        );
     };
 }
