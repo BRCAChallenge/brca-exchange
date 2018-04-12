@@ -21,8 +21,10 @@ export default class AlleleFrequenciesTile extends React.Component {
         // this.setAllReportExpansion = this.setAllReportExpansion.bind(this);
     }
 
-    getRows(source, data, variant) {
-        return _.map(data, (rowDescriptor) => {
+    getRowsAndDetermineIfEmpty(source, data, variant) {
+        let rowsEmpty = 0;
+
+        const rows = _.map(data, (rowDescriptor) => {
             let {prop, title} = rowDescriptor;
             let rowItem;
 
@@ -33,13 +35,12 @@ export default class AlleleFrequenciesTile extends React.Component {
             let isEmptyValue = util.isEmptyField(variant[prop]);
 
             if (isEmptyValue) {
-                // rowsEmpty += 1;
+                rowsEmpty += 1;
                 rowItem = '-';
             }
 
-            // totalRowsEmpty += rowsEmpty;
             return (
-                <tr key={prop} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
+                <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
                     { rowDescriptor.tableKey !== false &&
                         <KeyInline tableKey={title} onClick={(event) => this.props.showHelp(event, title)}/>
                     }
@@ -47,90 +48,113 @@ export default class AlleleFrequenciesTile extends React.Component {
                 </tr>
             );
         });
+        const allEmpty = rowsEmpty >= data.length;
+
+        return [rows, allEmpty];
     }
-    // defaultReportExpansions() {
-        // // keep track of how many non-enigma/bic entries we've seen
-        // // (not a great solution b/c it introduces side effects into the map() below...)
-        // let nonEnigmaBics = 0;
 
-        // // put it in a temp b/c we may need to re-sort it
-        // // note that this is necessary because the order in which we process reports matters
-        // let submissions = this.props.submissions;
+    generateHeader(field, fieldName) {
 
-        // // sort the submissions if this source specifies a sort function
-        // if (this.props.reportBinding.sortBy) {
-        //     // (side note: we concat() to clone before sort()ing, because sort() mutates the array)
-        //     submissions = submissions.concat().sort(this.props.reportBinding.sortBy);
-        // }
+        return (
+            <div className={`allele-frequency-header ${this.props.expanded ? 'expanded' : ''}`} onClick={this.onHandleToggle}>
+                <div className="allele-frequency-cell allele-frequency-label">
+                    {
+                        this.props.expanded
+                            ? <i className="fa fa-caret-down" aria-hidden="true" />
+                            : <i className="fa fa-caret-right" aria-hidden="true" />
+                    }
+                    &nbsp;
+                    <span>{fieldName}</span>
+                </div>
 
-        // return submissions.map((submissionData) => {
-        //     const submitterName = util.getFormattedFieldByProp(this.props.reportBinding.submitter.prop, submissionData);
+                <div
+                    className={`allele-frequency-cell allele-frequency-name ${!this.props.expanded ? 'collapsed' : ''}`}
+                    style={{textAlign: 'left', flex: '1 1 auto'}}
+                >
+                </div>
+            </div>
+        );
+    }
 
-        //     const isEnigmaOrBic = (
-        //         typeof submitterName === "string" &&
-        //         (
-        //             submitterName.toLowerCase().indexOf("enigma") !== -1 ||
-        //             submitterName.toLowerCase().indexOf("(bic)") !== -1
-        //         )
+    generateCategoryTable(field, fieldName) {
+        let renderedField;
+        if (Array.isArray(renderedField)) {
+            renderedField = field[0];
+        } else {
+            renderedField = field;
+        }
+
+        // let styles = this.getCollapsableClassSet();
+        // const {submitter, cols, data} = this.props;
+
+        // for each panel, construct key-value pairs as a row of the table
+        // const submitterRows = cols.map(({prop, title, value, helpKey}) => {
+        //     const isEmptyValue = util.isEmptyField(value);
+        //     const rowItem = util.getFormattedFieldByProp(prop, data);
+
+        //     return (
+        //         <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
+        //             {
+        //                 helpKey
+        //                     ? <KeyInline tableKey={title} onClick={(event) => this.props.showHelp(event, helpKey)}/>
+        //                     : <td className='help-target'><span style={{fontWeight: 'bold'}}>{title}</span></td>
+        //             }
+        //             <td><span className="row-value">{rowItem}</span></td>
+        //         </tr>
         //     );
-
-        //     if (!isEnigmaOrBic) {
-        //         // we only really care about the first, but this is the cleanest way to do this
-        //         // with a single var
-        //         nonEnigmaBics += 1;
-        //     }
-
-        //     // always collapse ENIGMA and BIC submissions.
-        //     // show all items expanded if there are only a few of them.
-        //     // otherwise, expand the first non-enigma/bic elem by default, but nothing else.
-        //     return ( !isEnigmaOrBic ) && (this.props.submissions.length <= 3 || nonEnigmaBics === 1);
         // });
-    // }
 
-    // setAllReportExpansion(e, newExpansion) {
-    //     e.stopPropagation();
+        return (
+            <div>
+                <div style={{marginBottom: 0, borderTop: 'solid 2px #ccc'}}>
+                {
+                    this.generateHeader(field, fieldName)
+                }
+                </div>
 
-    //     this.setState({
-    //         reportExpanded: Array.from({ length: this.props.submissions.length }, () => newExpansion)
-    //     }, () => {
-    //         // causes the parent to perform a (delayed) reflow
-    //         this.props.onReportToggled();
-    //     });
-    // }
-
-    // reportToggled(idx) {
-    //     // return a new array in which only the selected element is toggled
-    //     this.setState((pstate) => ({
-    //         reportExpanded: pstate.reportExpanded.map((x, j) => (idx === j) ? !x : x)
-    //     }), () => {
-    //         // causes the parent to perform a (delayed) reflow
-    //         this.props.onReportToggled();
-    //     });
-    // };
+                <div ref='panel'>
+                    <Table key={`frequency-name-${fieldName}`}>
+                        <tbody>
+                            {renderedField}
+                        </tbody>
+                    </Table>
+                </div>
+            </div>
+        );
+    }
 
     render() {
         const variant = this.props.variant;
         const data = this.props.alleleFrequencyData;
+
         const exacGraph = _.find(data, function(dd) {
                                 return dd.source === "ExAC";
                             }).chart[0];
         const renderedExacGraph = exacGraph.replace(variant, exacGraph.prop);
+
         const exacData = _.find(data, function(dd) {
                                 return dd.source === "ExAC";
                             }).data;
-        const renderedExacData = this.getRows("ExAC", exacData, variant);
+        const renderedExacData = this.getRowsAndDetermineIfEmpty("ExAC", exacData, variant);
+
         const thousandGenomesGraph = _.find(data, function(dd) {
                                 return dd.source === "1000 Genomes";
                             }).chart[0];
         const renderedThousandGenomesGraph = thousandGenomesGraph.replace(variant, thousandGenomesGraph.prop);
+
         const thousandGenomesData = _.find(data, function(dd) {
                                 return dd.source === "1000 Genomes";
                             }).data;
-        const renderedThousandGenomesData = this.getRows("1000 Genomes", thousandGenomesData, variant);
+        const renderedThousandGenomesData = this.getRowsAndDetermineIfEmpty("1000 Genomes", thousandGenomesData, variant);
+
         const espData = _.find(data, function(dd) {
                                 return dd.source === "ESP";
                             }).data;
-        const renderedEspData = this.getRows("ESP", espData, variant);
+        const renderedEspData = this.getRowsAndDetermineIfEmpty("ESP", espData, variant);
+
+        const allEmpty = _.every([renderedExacData, renderedThousandGenomesData, renderedEspData], function(data) {
+                                return data[1] === true;
+                            }) && !variant.Variant_in_1000_Genomes && !variant.Variant_in_ExAC;
 
         // create the source panel itself now
         const groupTitle = `source-panel-${this.props.sourceName}`;
@@ -155,20 +179,16 @@ export default class AlleleFrequenciesTile extends React.Component {
         );
 
         return (
-            <div key={`group_collection-${groupTitle}`} className="variant-detail-group variant-submitter-group">
+            <div key={`group_collection-${groupTitle}`} className={ allEmpty && this.state.hideEmptyItems ? "group-empty variant-detail-group" : "variant-detail-group" }>
                 <Panel
                     header={header}
                     collapsable={true}
                     defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
-                    <Table>
-                        <tbody>
-                            {renderedExacGraph}
-                            {renderedExacData}
-                            {renderedThousandGenomesGraph}
-                            {renderedThousandGenomesData}
-                            {renderedEspData}
-                        </tbody>
-                    </Table>
+                    {this.generateCategoryTable(renderedExacGraph, 'ExAC Graph')}
+                    {this.generateCategoryTable(renderedExacData, 'ExAC Data')}
+                    {this.generateCategoryTable(renderedThousandGenomesGraph, '1000 Genomes Graph')}
+                    {this.generateCategoryTable(renderedThousandGenomesData, '1000 Genomes Data')}
+                    {this.generateCategoryTable(renderedEspData, 'ESP Data')}
                 </Panel>
             </div>
         );
