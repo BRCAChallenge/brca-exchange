@@ -2474,10 +2474,27 @@ class test_calcVarPriors(unittest.TestCase):
         isDivisible = calcVarPriors.compareDeNovoWildTypeSplicePos(self.variant, STD_EXONIC_PORTION, deNovoDonorInRefAcc=False)
         self.assertFalse(isDivisible)
 
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInIneligibleDeNovoExon', return_value = True)
+    def test_getPriorProbSpliceRescueNonsenseSNSInLastExon(self, getVarConsequences, varInExon, varInIneligibleDeNovoExon):
+        '''Tests that variant in last exon is assigned correct prior prob and splice rescue flags'''
+        boundaries = "enigma"
+        spliceRescueInfo = calcVarPriors.getPriorProbSpliceRescueNonsenseSNS(self.variant, boundaries, deNovoDonorInRefAcc=False)
+        self.assertEquals(spliceRescueInfo["priorProb"], priorProbs["pathogenic"])
+        self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class5"])
+        self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
+        self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
+        self.assertEquals(spliceRescueInfo["frameshiftFlag"], 0)
+        self.assertEquals(spliceRescueInfo["inExonicPortionFlag"], 0)
+        self.assertEquals(spliceRescueInfo["CIDomainInRegionFlag"], 0)
+        self.assertEquals(spliceRescueInfo["isDivisibleFlag"], 0)
+
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")    
     @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInIneligibleDeNovoExon', return_value = False)
     @mock.patch('calcVarPriors.varInExonicPortion', return_value = True)
-    def test_getPriorProbSpliceRescueNonsenseSNSInExonicPortion(self, getVarConsequences, varInExon, varInExonicPortion):
+    def test_getPriorProbSpliceRescueNonsenseSNSInExonicPortion(self, getVarConsequences, varInExon, varInIneligibleDeNovoExon, varInExonicPortion):
         '''Tests that variant in exonic portion of highest scoring window is assigned correct prior prob and splice rescue flag'''
         boundaries = "enigma"
         spliceRescueInfo = calcVarPriors.getPriorProbSpliceRescueNonsenseSNS(self.variant, boundaries, deNovoDonorInRefAcc=False)
@@ -2492,9 +2509,11 @@ class test_calcVarPriors(unittest.TestCase):
 
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInIneligibleDeNovoExon', return_value = False)
     @mock.patch('calcVarPriors.varInExonicPortion', return_value = False)
     @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = False)
-    def test_getPriorProbSpliceRescueNonsenseSNSFrameshift(self, getVarConsequences, varInExon, varInExonicPortion, isSplicingWindowInFrame):
+    def test_getPriorProbSpliceRescueNonsenseSNSFrameshift(self, getVarConsequences, varInExon, varInIneligibleDeNovoExon,
+                                                           varInExonicPortion, isSplicingWindowInFrame):
         '''Tests that variant that causes a frameshift is assigned correct prior prob and splice rescue flag'''
         boundaries = "enigma"
         spliceRescueInfo = calcVarPriors.getPriorProbSpliceRescueNonsenseSNS(self.variant, boundaries, deNovoDonorInRefAcc=False)
@@ -2509,6 +2528,7 @@ class test_calcVarPriors(unittest.TestCase):
 
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInIneligibleDeNovoExon', return_value = False)
     @mock.patch('calcVarPriors.varInExonicPortion', return_value = False)
     @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
@@ -2517,9 +2537,9 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getVarWindowPosition', return_value = 6)
     @mock.patch('calcVarPriors.isCIDomainInRegion', return_value = True)
     @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = True)
-    def test_getPriorProbSpliceRescueNonsenseSNSCIRegionEnigma(self, getVarConsequences, varInExon, varInExonicPortion,
-                                                               isSplicingWindowInFrame, getVarStrand, getVarExonNumberSNS,
-                                                               getSpliceAcceptorBoundaries, getVarWindowPosition,
+    def test_getPriorProbSpliceRescueNonsenseSNSCIRegionEnigma(self, getVarConsequences, varInExon, varInIneligibleDeNovoExon,
+                                                               varInExonicPortion, isSplicingWindowInFrame, getVarStrand,
+                                                               getVarExonNumberSNS, getSpliceAcceptorBoundaries, getVarWindowPosition,
                                                                isCIDomainInRegion, compareDeNovoWildTypeSplicePos):
         '''Tests that variant that truncates part of ENGIMA CI domain is assigned correct prior prob and splice rescue flag'''
         boundaries = "enigma"
@@ -2535,6 +2555,7 @@ class test_calcVarPriors(unittest.TestCase):
 
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")    
     @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInIneligibleDeNovoExon', return_value = False)
     @mock.patch('calcVarPriors.varInExonicPortion', return_value = False)
     @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
@@ -2543,9 +2564,9 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getVarWindowPosition', return_value = 7)
     @mock.patch('calcVarPriors.isCIDomainInRegion', return_value = True)
     @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = True)
-    def test_getPriorProbSpliceRescueNonsenseSNSCIRegionPriors(self, getVarConsequences, varInExon, varInExonicPortion,
-                                                               isSplicingWindowInFrame, getVarStrand, getVarExonNumberSNS,
-                                                               getSpliceAcceptorBoundaries, getVarWindowPosition,
+    def test_getPriorProbSpliceRescueNonsenseSNSCIRegionPriors(self, getVarConsequences, varInExon, varInIneligibleDeNovoExon,
+                                                               varInExonicPortion, isSplicingWindowInFrame, getVarStrand,
+                                                               getVarExonNumberSNS, getSpliceAcceptorBoundaries, getVarWindowPosition,
                                                                isCIDomainInRegion, compareDeNovoWildTypeSplicePos):
         '''Tests that variant that truncates part of PRIORS CI domain is assigned correct prior prob and splice rescue flag'''
         boundaries = "priors"
@@ -2558,8 +2579,10 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(spliceRescueInfo["inExonicPortionFlag"], 0)
         self.assertEquals(spliceRescueInfo["CIDomainInRegionFlag"], 1)
         self.assertEquals(spliceRescueInfo["isDivisibleFlag"], 0)
+        
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")        
     @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInIneligibleDeNovoExon', return_value = False)
     @mock.patch('calcVarPriors.varInExonicPortion', return_value = False)
     @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
@@ -2568,9 +2591,9 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getVarWindowPosition', return_value = 4)
     @mock.patch('calcVarPriors.isCIDomainInRegion', return_value = False)
     @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = False)
-    def test_getPriorProbSpliceRescueNonsenseSNSNotDivisible(self, getVarConsequences, varInExon, varInExonicPortion,
-                                                             isSplicingWindowInFrame, getVarStrand, getVarExonNumberSNS,
-                                                             getSpliceAcceptorBoundaries, getVarWindowPosition,
+    def test_getPriorProbSpliceRescueNonsenseSNSNotDivisible(self, getVarConsequences, varInExon, varInIneligibleDeNovoExon,
+                                                             varInExonicPortion, isSplicingWindowInFrame, getVarStrand,
+                                                             getVarExonNumberSNS, getSpliceAcceptorBoundaries, getVarWindowPosition,
                                                              isCIDomainInRegion, compareDeNovoWildTypeSplicePos):
         '''
         Tests that variant that causes a frameshift (due to difference de novo vs wild-type splice position) 
@@ -2589,6 +2612,7 @@ class test_calcVarPriors(unittest.TestCase):
 
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInIneligibleDeNovoExon', return_value = False)
     @mock.patch('calcVarPriors.varInExonicPortion', return_value = False)
     @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
     @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
@@ -2597,10 +2621,10 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getVarWindowPosition', return_value = 5)
     @mock.patch('calcVarPriors.isCIDomainInRegion', return_value = False)
     @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = True)
-    def test_getPriorProbSpliceRescueNonsenseSNSWithSpliceFlag(self, getVarConsequences, varInExon, varInExonicPortion,
-                                                               isSplicingWindowInFrame, getVarStrand, getVarExonNumberSNS,
-                                                               getSpliceAcceptorBoundaries, getVarWindowPosition,
-                                                               isCIDomainInRegion, compareDeNovoWildTypeSplicePos):
+    def test_getPriorProbSpliceRescueNonsenseSNSWithSpliceFlag(self, getVarConsequences, varInExon, varInIneligibleDeNovoExon,
+                                                               varInExonicPortion, isSplicingWindowInFrame,
+                                                               getVarStrand, getVarExonNumberSNS, getSpliceAcceptorBoundaries,
+                                                               getVarWindowPosition, isCIDomainInRegion, compareDeNovoWildTypeSplicePos):
         '''Tests that variant with possibility of splice rescue is assigned correct splice rescue and splicing flag'''
         boundaries = "enigma"
         spliceRescueInfo = calcVarPriors.getPriorProbSpliceRescueNonsenseSNS(self.variant, boundaries, deNovoDonorInRefAcc=False)

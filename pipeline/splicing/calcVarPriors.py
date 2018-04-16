@@ -1197,6 +1197,16 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
         inExonicPortionFlag = 0
         CIDomainInRegionFlag = 0
         isDivisibleFlag = 0
+        # if variant in last exon then de novo donor splicing is not possible so no splice rescue is possible
+        if varInIneligibleDeNovoExon(variant, donor=True):
+            return {"priorProb": 0.99,
+                    "enigmaClass": "class_5",
+                    "spliceRescue": spliceRescue,
+                    "spliceFlag": spliceFlag,
+                    "frameshiftFlag": frameshiftFlag,
+                    "inExonicPortionFlag": inExonicPortionFlag,
+                    "CIDomainInRegionFlag": CIDomainInRegionFlag,
+                    "isDivisibleFlag": isDivisibleFlag}
         # if variant is in specified exonic portion of highest scoring sliding window, no splice rescue
         if varInExonicPortion(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH, donor=True,
                               deNovoDonorInRefAcc=deNovoDonorInRefAcc) == True:
