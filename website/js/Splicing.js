@@ -589,10 +589,9 @@ class Splicing extends React.Component {
     render() {
         let { variant } = this.props;
 
-        let width = 800,
-            info = variantInfo(variant),
-            variantStart = variant.Hg38_Start,
-            variantEnd = variant.Hg38_End;
+        const width = 800, info = variantInfo(variant);
+        const variantStart = variant.Pos | 0;
+        const variantEnd = variantStart + info.changed + info.deleted + info.inserted;
 
         // --- pre-step: get data, sort and format it so we can process it
         const meta = geneMeta[variant['Gene_Symbol']];
