@@ -621,24 +621,13 @@ class Splicing extends React.Component {
                 <svg viewBox="-4 0 808 240" preserveAspectRatio="xMidYMid">
                     {/* variant fill definitions, declared here instead of in CSS b/c one of them is a <pattern> */}
                     <defs>
-                        {/* previously id='diagonalHatch', renamed for its role */}
-                        <pattern id="deletedFill" patternUnits="userSpaceOnUse" width="4" height="4">
+                        <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">
                             <rect x="0" y="0" width="4" height="4" fill="#FF8888" />
                             <path d="M-1,1 l2,-2
                            M0,4 l4,-4
                            M3,5 l2,-2"
                                 stroke="black" strokeWidth={1} />
                         </pattern>
-
-                        {/* we're using <linearGradient> with a single stop instead of <solidcolor>
-                        due to an unfortunatel lack of support for solidcolor */}
-                        <linearGradient id="insertedFill">
-                            <stop offset="0" stopColor="lightgreen" />
-                        </linearGradient>
-
-                        <linearGradient id="changedFill">
-                            <stop offset="0" stopColor="#56F" />
-                        </linearGradient>
                     </defs>
 
                     {/* transcript and zoomed-in parts */}
@@ -658,11 +647,11 @@ class Splicing extends React.Component {
 
                     {/* legend */}
                     <g transform="translate(274,220)">
-                        <rect x="0" fill="url(#insertedFill)" stroke="black" width="20" height="10" />
+                        <rect x="0" className="inserted" stroke="black" width="20" height="10" />
                         <text x="22" y="10">{ `Substitution (${info.changed} base${plural(info.changed)})` }</text>
-                        <rect x="192" fill="url(#deletedFill)" stroke="black" width="20" height="10" />
+                        <rect x="192" className="deleted" stroke="black" width="20" height="10" />
                         <text x="214" y="10">{ `Deletion (${info.deleted || 0} base${plural(info.deleted)})` }</text>
-                        <rect x="360" fill="url(#changedFill)" stroke="black" width="20" height="10"/>
+                        <rect x="360" className="changed" stroke="black" width="20" height="10"/>
                         <text x="382" y="10">{ `Insertion (${info.inserted || 0} base${plural(info.inserted)})` }</text>
                     </g>
                 </svg>
