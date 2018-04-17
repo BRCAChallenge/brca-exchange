@@ -16,20 +16,6 @@ const leaderSize = 75, tailSize = 50; // made up values, how do I get UTR sizes 
 const zoomMargin = 20;
 const intronMag = 2; // factor by which the intron for a fully-intronic variant is scaled
 
-// FIXME: these should be decided by the CSS eventually
-const donorFill = 'rgba(206, 103, 179, 0.7)', // '#ce67b3'
-    acceptorFill = 'rgba(123, 168, 255, 0.8)'; //'#7ba8ff'
-
-/*
-const donorFill = '#b272ec',
-    acceptorFill = '#ffb378';
-*/
-
-const CIDomainFills = {
-    "ENIGMA Consortium": 'rgba(147, 0, 255, 0.3)',
-    "Huntsman Cancer Institute": 'rgba(0, 200, 45, 0.3)',
-};
-
 // --------------------------------------------------------------------------------------------------------------
 // --- supporting methods
 // --------------------------------------------------------------------------------------------------------------
@@ -92,7 +78,7 @@ function pairwise(seq) {
  */
 class Region extends React.Component {
     render() {
-        let { region, width, height, txStart, txEnd, scale, fill, opacity, mask, selected, nudgeable } = this.props;
+        let { region, width, height, txStart, txEnd, scale, fill, opacity, mask, selected, nudgeable, className } = this.props;
 
         // txStart, txEnd are the parent exon/intron's span in bases
         // height is the pixel height of the parent element
@@ -124,7 +110,7 @@ class Region extends React.Component {
             <g>
                 <rect x={bpMinPx} width={widthPx} height={height}
                     fill={fill}
-                    className={selected ? 'selected-ci-path' : ''}
+                    className={`${selected ? 'selected-ci-path' : ''} ${className}`}
                     opacity={opacity}
                     clipPath={mask && `url(#${mask})`}
                 />
@@ -205,7 +191,7 @@ class SegmentRegions extends React.Component {
         } = this.props;
         const n = this.props.n || 'intron'; // section indicator, used for creating region keys
         const flatDomains = _.flatMap(CIDomains, (v, k) => v.domains.map((x) => ({
-            org: k, name: x.name,
+            org: k, name: x.name, code: v.code,
             span: {start: x.start, end: x.end}
         })));
 
@@ -255,7 +241,7 @@ class SegmentRegions extends React.Component {
                     <Region key={`donor_${n}_${idx}`} region={donorSpan}
                         className="region donor"
                         x={0} width={width} height={height} txStart={txStart} txEnd={txEnd} scale={scale}
-                        fill={donorFill} mask={mask}
+                        mask={mask}
                     />
                 ))
             }
@@ -265,7 +251,7 @@ class SegmentRegions extends React.Component {
                     <Region key={`acceptor_${n}_${idx}`} region={acceptorSpan}
                         className="region acceptor"
                         x={0} width={width} height={height} txStart={txStart} txEnd={txEnd} scale={scale}
-                        fill={acceptorFill} mask={mask}
+                        mask={mask}
                     />
                 ))
             }
@@ -273,13 +259,13 @@ class SegmentRegions extends React.Component {
             {
                 flatDomains
                     .filter(({span}) => overlaps([span.start, span.end], [txStart, txEnd]))
-                    .map(({org, name, span}, idx) =>
+                    .map(({org, name, code, span}, idx) =>
                         <Region key={`cidomain_${org}_${name}_${idx}`}
-                            className={`region cidomain domain-${org}_${name}`}
+                            className={`region cidomain domain-${code}`}
                             region={span} label={zoomed && `${org}: ${name}`}
                             x={0} width={width} height={height}
                             txStart={txStart} txEnd={txEnd} scale={scale}
-                            fill={CIDomainFills[org]} mask={mask}
+                            mask={mask} // fill={CIDomainFills[org]}
                             selected={this.props.selectedDomain === `${org}_${name}`}
                         />
                     )
@@ -295,6 +281,8 @@ class SegmentRegions extends React.Component {
                     />
                 )
             }
+
+            {/* FIXME: draw functional domain outlines above variants, too? */}
             </g>
         );
     }
@@ -616,11 +604,6 @@ class Splicing extends React.Component {
         const isFullyIntronic = segments.length === 3 && segments[1].segment.type === 'intron';
 
         let plural = n => n === 1 ? '' : 's';
-        const siteStyle = {
-            display: 'inline-block', verticalAlign: 'text-bottom',
-            width: '18px', height: '17px', marginRight: '8px',
-            border: 'solid 1px black'
-        };
 
         // filter the CIDomains according to which ones we're including
         const filteredCIDomains = _.pickBy(meta.CIDomains, (v, k) => this.state.drawCIDomains.has(k));
@@ -681,21 +664,21 @@ class Splicing extends React.Component {
                     <div>
                         <label>
                             <input style={{marginRight: '0.5em'}} type="checkbox" name="drawDonors" checked={this.state.drawDonors} onChange={this.toggleDrawing} />
-                            <span style={{...siteStyle, backgroundColor: donorFill}} />
+                            <svg className="site-indicator" width={18} height={18}><rect className="donor" /></svg>
                             Donor Sites
                         </label>
                     </div>
 
                     <div>
-                        <label style={{display: 'inline-block', marginRight: '1em'}}>
+                        <label style={{display: 'inline-block', marginRight: '1em', verticalAlign: 'baseline'}}>
                             <input style={{marginRight: '0.5em'}} type="checkbox" name="drawAcceptors" checked={this.state.drawAcceptors} onChange={this.toggleDrawing} />
-                            <span style={{...siteStyle, backgroundColor: acceptorFill}} />
+                            <svg className="site-indicator" width={18} height={18}><rect className="acceptor" /></svg>
                             Acceptor Sites
                         </label>
                     </div>
 
                     {
-                        this.generateCIDomainSelectors(meta, siteStyle)
+                        this.generateCIDomainSelectors(meta)
                     }
                 </div>
             </div>
@@ -791,16 +774,15 @@ class Splicing extends React.Component {
      * Creates UI elements to control visibility of clinically important (CI) domains.
      *
      * @param meta gene metadata, including the CI domains and their locations
-     * @param siteStyle
      */
-    generateCIDomainSelectors(meta, siteStyle) {
+    generateCIDomainSelectors(meta) {
         return _.toPairs(meta.CIDomains).map(([org, orgMeta]) =>
             <div key={org}>
                 <label style={{display: 'inline-block', marginRight: '1em'}}>
                     <input style={{marginRight: '0.5em'}} type="checkbox"
                         name={org} checked={this.state.drawCIDomains.has(org)} onChange={this.toggleCIDomain}
                     />
-                    <span style={{...siteStyle, backgroundColor: CIDomainFills[org]}}/>
+                    <svg className="site-indicator" width={18} height={18}><rect className={`domain-${orgMeta.code}`} /></svg>
                     {orgMeta.label}
                 </label>
 
