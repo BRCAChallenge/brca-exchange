@@ -1,32 +1,22 @@
 'use strict';
 
-var React = require('react'),
-    _ = require('lodash');
+var React = require('react');
+var _ = require('lodash');
 
 import * as d3s from 'd3-scale';
 import update from 'immutability-helper';
 
-/*
-var brca1Exons = JSON.parse(require('raw!../content/brca1LollipopDomain.json'));
-var brca2Exons = JSON.parse(require('raw!../content/brca2LollipopDomain.json'));
-*/
-
 import {geneMeta} from './SplicingData.js';
 
-const intronWidth = 40,
-    exonFill = "#c1ddf0",
-    exonStroke = "rgba(0, 0, 0, 0.5)",
-    exonBorderRadius = 4,
-    intronFill = "#dfe6ec",
-    intronStroke = "rgba(0, 0, 0, 0.5)",
-    highlightFill = "#ffffbb",
-    highlightStroke = "rgba(0, 0, 0, 0.5)",
-    // made up values, how do I get UTR sizes for BRCA1 and BRCA2?
-    leaderSize = 75,
-    tailSize = 50,
-    zoomMargin = 20,
-    intronMag = 2; // factor by which the intron for a fully-intronic variant is scaled
+// for some bizarre reason svg clipping masks don't pick this up from the CSS
+const exonBorderRadius = 4;
 
+const intronWidth = 40;
+const leaderSize = 75, tailSize = 50; // made up values, how do I get UTR sizes for BRCA1 and BRCA2?
+const zoomMargin = 20;
+const intronMag = 2; // factor by which the intron for a fully-intronic variant is scaled
+
+// FIXME: these should be decided by the CSS eventually
 const donorFill = 'rgba(206, 103, 179, 0.7)', // '#ce67b3'
     acceptorFill = 'rgba(123, 168, 255, 0.8)'; //'#7ba8ff'
 
@@ -96,6 +86,10 @@ function pairwise(seq) {
 // --- components
 // --------------------------------------------------------------------------------------------------------------
 
+/**
+ * A colored overlay on a specific exon or intron (aka a segment). Entities that span segment boundaries (e.g. variants,
+ * acceptor/donor sites) are split into one region per overlapped segment.
+ */
 class Region extends React.Component {
     render() {
         let { region, width, height, txStart, txEnd, scale, fill, opacity, mask, selected, nudgeable } = this.props;
@@ -258,6 +252,7 @@ class SegmentRegions extends React.Component {
             {
                 donors.map((donorSpan, idx) => (
                     <Region key={`donor_${n}_${idx}`} region={donorSpan}
+                        className="region donor"
                         x={0} width={width} height={height} txStart={txStart} txEnd={txEnd} scale={scale}
                         fill={donorFill} mask={mask}
                     />
@@ -267,6 +262,7 @@ class SegmentRegions extends React.Component {
             {
                 acceptors.map((acceptorSpan, idx) => (
                     <Region key={`acceptor_${n}_${idx}`} region={acceptorSpan}
+                        className="region acceptor"
                         x={0} width={width} height={height} txStart={txStart} txEnd={txEnd} scale={scale}
                         fill={acceptorFill} mask={mask}
                     />
@@ -278,6 +274,7 @@ class SegmentRegions extends React.Component {
                     .filter(({span}) => overlaps([span.start, span.end], [txStart, txEnd]))
                     .map(({org, name, span}, idx) =>
                         <Region key={`cidomain_${org}_${name}_${idx}`}
+                            className={`region cidomain domain-${org}_${name}`}
                             region={span} label={zoomed && `${org}: ${name}`}
                             x={0} width={width} height={height}
                             txStart={txStart} txEnd={txEnd} scale={scale}
@@ -322,12 +319,12 @@ class Exon extends React.Component {
                         <clipPath id={clipMaskID}>
                             <rect
                                 x={0} width={width} height={height} rx={exonBorderRadius} ry={exonBorderRadius}
-                                stroke={highlight ? highlightStroke : exonStroke}
+                                className={`segment exon`}
                             />
                         </clipPath>
                     </defs>
 
-                    <rect x={0} width={width} height={height} rx={exonBorderRadius} ry={exonBorderRadius} fill={highlight ? highlightFill : exonFill} />
+                    <rect x={0} className={`segment exon ${highlight && 'highlighted'}`} width={width} height={height} rx={exonBorderRadius} ry={exonBorderRadius} />
 
                     <SegmentRegions n={n} variant={variant} donors={donors} acceptors={acceptors} CIDomains={CIDomains}
                         selectedDomain={this.props.selectedDomain}
@@ -335,7 +332,7 @@ class Exon extends React.Component {
                         width={width} height={height} mask={clipMaskID} />
 
                     {/* extra unfilled rect overlay, used to re-draw the outline on top of the regions */}
-                    <rect x={0} width={width} height={height} rx={exonBorderRadius} ry={exonBorderRadius} fill="transparent" stroke={highlight ? highlightStroke : exonStroke} />
+                    <rect x={0} className="segment exon outline" width={width} height={height} rx={exonBorderRadius} ry={exonBorderRadius} />
                 </g>
             </g>
         );
@@ -352,7 +349,7 @@ class Intron extends React.Component {
         return (
             <g transform="translate(0, 10)">
                 <g transform={isFlipped ? `translate(${x + width}) scale(-1,1)` : `translate(${x})`}>
-                    <rect x={0} width={width} height={height} fill={highlight ? highlightFill : intronFill} />
+                    <rect x={0} className={`segment intron ${highlight && 'highlighted'}`} width={width} height={height} />
 
                     <SegmentRegions variant={variant} donors={donors} acceptors={acceptors} CIDomains={CIDomains}
                         selectedDomain={this.props.selectedDomain}
@@ -360,7 +357,7 @@ class Intron extends React.Component {
                         width={width} height={height} />
 
                     {/* extra unfilled rect overlay, used to re-draw the outline on top of the regions */}
-                    <rect x={0} width={width} height={height} fill="transparent" stroke={highlight ? highlightStroke : intronStroke} />
+                    <rect x={0} className="segment intron outline" width={width} height={height} />
                 </g>
             </g>
         );
@@ -448,15 +445,15 @@ class Transcript extends React.Component {
 
         return (
             <g>
-                <line x1={zoomLineStartLeft} y1={50} x2={zoomMargin} y2={95} stroke="#ccc" strokeWidth="3" strokeDasharray="8,3" fill="none" />
-                <line x1={zoomLineStartRight} y1={50} x2={width - zoomMargin - 2.5} y2={95} stroke="#ccc" strokeWidth="3" strokeDasharray="8,3" fill="none" />
+                <line x1={zoomLineStartLeft} y1={50} x2={zoomMargin} y2={95} className="zoomline" />
+                <line x1={zoomLineStartRight} y1={50} x2={width - zoomMargin - 2.5} y2={95} className="zoomline" />
 
-                <rect x={0} y={53} width={820} height={14} fill="rgba(255,255,255,0.6" />
+                <rect x={0} y={53} width={820} height={14} fill="rgba(255,255,255,0.6)" />
 
                 <g transform="translate(0, 10)">
-                    <rect x={1} y={8} width={scale * leaderSize} height={24} fill={intronFill} stroke={intronStroke} />
+                    <rect x={1} y={8} width={scale * leaderSize} height={24} className="segment intron cap" />
                     { blocks }
-                    <rect x={tailPos} y={8} width={scale * tailSize} height={24} fill={intronFill} stroke={intronStroke} />
+                    <rect x={tailPos} y={8} width={scale * tailSize} height={24} className="segment intron cap" />
                 </g>
             </g>
         );
@@ -629,7 +626,7 @@ class Splicing extends React.Component {
         const filteredCIDomains = _.pickBy(meta.CIDomains, (v, k) => this.state.drawCIDomains.has(k));
 
         return (
-            <div>
+            <div className="transcript-viz">
                 <svg viewBox="-4 0 808 240" preserveAspectRatio="xMidYMid">
                     {/* definitions, not visible */}
                     <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">

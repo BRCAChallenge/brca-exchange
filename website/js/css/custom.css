@@ -945,7 +945,7 @@ div.variant-details-body {
 
 .selected-ci-path {
     stroke: black;
-    stroke-width: 2;
+    stroke-width: 2px;
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-dasharray: 4;
@@ -955,7 +955,7 @@ div.variant-details-body {
 
 @keyframes dash {
     to {
-        stroke-dashoffset: 80;
+        stroke-dashoffset: 80px;
     }
 }
 
@@ -974,6 +974,56 @@ div.variant-details-body {
 }
 .splicing-domain-list > li:last-child:after {
     content: '';
+}
+
+/* all these segment styles have no outline, because the outline is drawn separately as an unfilled rect on top */
+.transcript-viz .segment.exon {
+    fill: #c1ddf0;
+    stroke: none;
+    border-radius: 4px;
+}
+
+.transcript-viz .segment.intron {
+    fill: #dfe6ec;
+    stroke: none;
+}
+
+.transcript-viz .segment.highlighted {
+    fill: #ffffbb;
+    stroke: none;
+}
+
+/* used for the 'overlay' rect that allows the outline to appear above any highlighted regions within the segment */
+.transcript-viz .segment.outline {
+    fill: transparent;
+    stroke: rgba(0, 0, 0, 0.5);
+}
+
+/* used for the 'fake' introns on either end of the genome, which are both filled and outlined */
+.transcript-viz .segment.cap {
+    stroke: rgba(0, 0, 0, 0.5);
+}
+
+.transcript-viz .zoomline {
+    stroke: #ccc;
+    stroke-width: 3px;
+    stroke-dasharray: 8,3;
+    fill: none;
+}
+
+.transcript-viz .region.donor {
+    fill: rgba(206, 103, 179, 0.7);
+}
+.transcript-viz .region.acceptor {
+    fill: rgba(123, 168, 255, 0.8);
+}
+
+.transcript-viz .cidomain.enigma {
+    fill: rgba(147, 0, 255, 0.3);
+}
+
+.transcript-viz .cidomain.priors {
+    fill: rgba(0, 200, 45, 0.3);
 }
 
 
