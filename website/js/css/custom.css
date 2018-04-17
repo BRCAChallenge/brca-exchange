@@ -1011,6 +1011,17 @@ div.variant-details-body {
     fill: none;
 }
 
+/* variant fill styles, refer to top-level svg's <defs> section */
+.transcript-viz .changed {
+    fill: url(#insertedFill);
+}
+.transcript-viz .deleted {
+    fill: url(#deletedFill);
+}
+.transcript-viz .inserted {
+    fill: url(#changedFill);
+}
+
 .transcript-viz .donor {
     fill: rgba(206, 103, 179, 0.7);
 }

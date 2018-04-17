@@ -143,17 +143,14 @@ class Variant extends React.Component {
         // the colors below are defined in the top-level svg's <defs> section
         const events = {
             changed: {
-                fill: 'url(#insertedFill)',
                 widthBP: delta.changed,
                 span: {start: variantStart, end: variantStart + delta.changed}
             },
             deleted: {
-                fill: 'url(#deletedFill)',
                 widthBP: delta.deleted,
                 span: {start: variantStart + delta.changed, end: variantStart + delta.changed + delta.deleted}
             },
             inserted: {
-                fill: 'url(#changedFill)', // 'lightblue',
                 widthBP: delta.inserted,
                 // FIXME: should insertions be drawn as points, not intervals, since there's no corresponding region in the source to annotate?
                 span: {start: variantStart + delta.changed, end: variantStart + delta.changed + delta.inserted}
@@ -167,8 +164,9 @@ class Variant extends React.Component {
                     .filter((keyAndEvent) => keyAndEvent[1].widthBP > 0)
                     .map(([key, event]) =>
                         <Region key={`event_${key}`} region={event.span}
+                            className={`variant-region ${key}`}
                             x={0} width={width} height={height} txStart={txStart} txEnd={txEnd} scale={scale}
-                            fill={event.fill} mask={mask} nudgeable={true}
+                            mask={mask} nudgeable={true}
                         />
                     )
             }
