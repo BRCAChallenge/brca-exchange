@@ -55,9 +55,11 @@ function intronSizeTx() {
 }
 
 function variantInfo(variant) {
-    let [before, after] = _.map(variant.Genomic_Coordinate_hg38.split(':').pop().split('>'), e => e.length);
+    // let [before, after] = _.map(variant.Genomic_Coordinate_hg38.split(':').pop().split('>'), e => e.length);
+    let before = variant.Ref.length, after = variant.Alt.length;
+
     if (before === 1 && after === 1) {
-        return { changed: 1 };
+        return { changed: 1, inserted: 0, deleted: 0 };
     }
     before--; after--; // since CG>G is a removal of one base, not a removal of two and insertion of one
     return {
