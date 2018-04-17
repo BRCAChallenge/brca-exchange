@@ -154,19 +154,20 @@ class Variant extends React.Component {
         const variantStart = variant.Hg38_Start;
         const delta = variantInfo(variant);
 
+        // the colors below are defined in the top-level svg's <defs> section
         const events = {
             changed: {
-                fill: 'lightgreen',
+                fill: 'url(#insertedFill)',
                 widthBP: delta.changed,
                 span: {start: variantStart, end: variantStart + delta.changed}
             },
             deleted: {
-                fill: 'url(#diagonalHatch)',
+                fill: 'url(#deletedFill)',
                 widthBP: delta.deleted,
                 span: {start: variantStart + delta.changed, end: variantStart + delta.changed + delta.deleted}
             },
             inserted: {
-                fill: '#56F', // 'lightblue',
+                fill: 'url(#changedFill)', // 'lightblue',
                 widthBP: delta.inserted,
                 // FIXME: should insertions be drawn as points, not intervals, since there's no corresponding region in the source to annotate?
                 span: {start: variantStart + delta.changed, end: variantStart + delta.changed + delta.inserted}
@@ -627,14 +628,27 @@ class Splicing extends React.Component {
         return (
             <div className="transcript-viz">
                 <svg viewBox="-4 0 808 240" preserveAspectRatio="xMidYMid">
-                    {/* definitions, not visible */}
-                    <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">
-                        <rect x="0" y="0" width="4" height="4" fill="#FF8888" />
-                        <path d="M-1,1 l2,-2
+                    {/* variant fill definitions, declared here instead of in CSS b/c one of them is a <pattern> */}
+                    <defs>
+                        {/* previously id='diagonalHatch', renamed for its role */}
+                        <pattern id="deletedFill" patternUnits="userSpaceOnUse" width="4" height="4">
+                            <rect x="0" y="0" width="4" height="4" fill="#FF8888" />
+                            <path d="M-1,1 l2,-2
                            M0,4 l4,-4
                            M3,5 l2,-2"
-                            stroke="black" strokeWidth={1} />
-                    </pattern>
+                                stroke="black" strokeWidth={1} />
+                        </pattern>
+
+                        {/* we're using <linearGradient> with a single stop instead of <solidcolor>
+                        due to an unfortunatel lack of support for solidcolor */}
+                        <linearGradient id="insertedFill">
+                            <stop offset="0" stopColor="lightgreen" />
+                        </linearGradient>
+
+                        <linearGradient id="changedFill">
+                            <stop offset="0" stopColor="#56F" />
+                        </linearGradient>
+                    </defs>
 
                     {/* transcript and zoomed-in parts */}
                     <Transcript variant={variant} segments={segments} width={width}
@@ -653,11 +667,11 @@ class Splicing extends React.Component {
 
                     {/* legend */}
                     <g transform="translate(274,220)">
-                        <rect x="0" fill="lightgreen" stroke="black" width="20" height="10" />
+                        <rect x="0" fill="url(#insertedFill)" stroke="black" width="20" height="10" />
                         <text x="22" y="10">{ `Substitution (${info.changed} base${plural(info.changed)})` }</text>
-                        <rect x="192" fill="url(#diagonalHatch)" stroke="black" width="20" height="10" />
+                        <rect x="192" fill="url(#deletedFill)" stroke="black" width="20" height="10" />
                         <text x="214" y="10">{ `Deletion (${info.deleted || 0} base${plural(info.deleted)})` }</text>
-                        <rect x="360" fill="#56F" stroke="black" width="20" height="10"/>
+                        <rect x="360" fill="url(#changedFill)" stroke="black" width="20" height="10"/>
                         <text x="382" y="10">{ `Insertion (${info.inserted || 0} base${plural(info.inserted)})` }</text>
                     </g>
                 </svg>
