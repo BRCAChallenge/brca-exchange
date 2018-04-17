@@ -16,6 +16,7 @@ const leaderSize = 75, tailSize = 50; // made up values, how do I get UTR sizes 
 const zoomMargin = 20;
 const intronMag = 2; // factor by which the intron for a fully-intronic variant is scaled
 
+
 // --------------------------------------------------------------------------------------------------------------
 // --- supporting methods
 // --------------------------------------------------------------------------------------------------------------
@@ -78,7 +79,7 @@ function pairwise(seq) {
  */
 class Region extends React.Component {
     render() {
-        let { region, width, height, txStart, txEnd, scale, fill, opacity, mask, selected, nudgeable, className } = this.props;
+        let { region, width, height, txStart, txEnd, scale, mask, selected, nudgeable, className } = this.props;
 
         // txStart, txEnd are the parent exon/intron's span in bases
         // height is the pixel height of the parent element
@@ -109,11 +110,22 @@ class Region extends React.Component {
         return (
             <g>
                 <rect x={bpMinPx} width={widthPx} height={height}
-                    fill={fill}
-                    className={`${selected ? 'selected-ci-path' : ''} ${className}`}
-                    opacity={opacity}
+                    className={className}
                     clipPath={mask && `url(#${mask})`}
                 />
+
+                {/*
+                draw the outline separately, ignoring the mask, so we can see it around variants
+                FIXME: this looks kind of weird, revisit it later perhaps
+                */}
+                { selected &&
+                    <rect x={bpMinPx} width={widthPx} height={height}
+                        rx={exonBorderRadius}
+                        fill="transparent"
+                        className={`selected-ci-path`}
+                        // clipPath={mask && `url(#${mask})`}
+                    />
+                }
             </g>
         );
     }
@@ -279,8 +291,6 @@ class SegmentRegions extends React.Component {
                     />
                 )
             }
-
-            {/* FIXME: draw functional domain outlines above variants, too? */}
             </g>
         );
     }
