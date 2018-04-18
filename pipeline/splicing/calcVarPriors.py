@@ -595,14 +595,22 @@ def getVarLocation(variant, boundaries):
             return "UTR_variant"
         return "intron_variant"
 
-def getFastaSeq(chrom, rangeStart, rangeStop):
+def getFastaSeq(chrom, rangeStart, rangeStop, plusSeq=True):
     '''
     Given chromosome (in format 'chr13'), region genomic start position, and
     region genomic end position:
     Returns a string containing the sequence inclusive of rangeStart and rangeStop
-    To get + strand sequence, rangeStart < rangeStop
+    If plusSeq=True, returns plus strand sequence
+    If plusSeq=False, returns minus strand sequence
     '''
-    url = "http://togows.org/api/ucsc/hg38/%s:%d-%d.fasta" % (chrom, rangeStart, rangeStop)
+    if rangeStart < rangeStop:
+        regionStart = rangeStart
+        regionEnd = rangeStop
+    else:
+        regionStart = rangeStop
+        regionEnd = rangeStart
+    
+    url = "http://genome.ucsc.edu/cgi-bin/das/hg38/dna?segment=%s:%d,%d" % (chrom, regionStart, regionEnd)
     req = requests.get(url)
     
     if req.status_code == 429 and 'Retry-After' in req.headers:
@@ -611,17 +619,19 @@ def getFastaSeq(chrom, rangeStart, rangeStop):
         req = requests.get(url)
     
     lines = req.content.split('\n')
-
-    sequence = ""
-    for base in range(1, len(lines)):
-        sequence += lines[base]
-    return sequence
+    # because sequence is located at index 5 in dictionary
+    sequence = lines[5]
+    if plusSeq == True:
+        return sequence.upper()
+    else:
+        return str(Seq(sequence.upper()).reverse_complement())
 
 def getSeqLocDict(chrom, strand, rangeStart, rangeStop):
     '''
     Given chromosome, strand, region genomic start position, and region genomic end position
     returns a dictionary containing the genomic position as the key and reference allele as the value
-    For BRCA1 rangeStart > rangeStop, for BRCA2 rangeStart < rangeEnd
+    For minus strand gene (rangeStart > rangeStop), for plus strand gene (rangeStart < rangeStop)
+    Always returns plus strand sequence 
     '''
     seqLocDict = {}
     if strand == "-":
@@ -630,8 +640,7 @@ def getSeqLocDict(chrom, strand, rangeStart, rangeStop):
     else:
         regionStart = int(rangeStart)
         regionEnd = int(rangeStop)
-
-    sequence = getFastaSeq(chrom, regionStart, regionEnd)
+    sequence = getFastaSeq(chrom, regionStart, regionEnd, plusSeq=True)
     genPos = regionStart   
     while genPos <= regionEnd:
         for base in sequence:
@@ -676,14 +685,9 @@ def getRefAltSeqs(variant, rangeStart, rangeStop):
     varChrom = getVarChrom(variant)
     varStrand = getVarStrand(variant)
     if varStrand == "-":
-        regionStart = rangeStop
-        regionEnd = rangeStart
+        refSeq = getFastaSeq(varChrom, rangeStart, rangeStop, plusSeq=False)
     else:
-        regionStart = rangeStart
-        regionEnd = rangeStop
-    refSeq = getFastaSeq(varChrom, regionStart, regionEnd)
-    if varStrand == "-":
-        refSeq = str(Seq(refSeq).reverse_complement())
+        refSeq = getFastaSeq(varChrom, rangeStart, rangeStop, plusSeq=True)
     refSeqDict = getSeqLocDict(varChrom, varStrand, rangeStart, rangeStop)
     altSeqDict = getAltSeqDict(variant, refSeqDict)
     altSeq = getAltSeq(altSeqDict, varStrand)
@@ -833,17 +837,20 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLeng
     if (inRefSpliceDonorRegion == True or inRefSpliceAccRegion == True) and deNovoDonorInRefAcc == False:
         if donor == True:
             refSpliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=False)
-            refSpliceSeq = getFastaSeq(getVarChrom(variant), refSpliceBounds["donorStart"], refSpliceBounds["donorEnd"]).upper()
+            if getVarStrand(variant) == "+":
+                refSpliceSeq = getFastaSeq(getVarChrom(variant), refSpliceBounds["donorStart"], refSpliceBounds["donorEnd"], plusSeq=True)
+            else:
+                refSpliceSeq = getFastaSeq(getVarChrom(variant), refSpliceBounds["donorStart"], refSpliceBounds["donorEnd"], plusSeq=False)
         else:
             refSpliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=True)
             deNovoOffset = deNovoLength - exonicPortionSize
             # acceptorEnd +- deNovoOffset because deNovo splice acceptor region is deNovoOffset bp longer than reference splice acceptor region
             if getVarStrand(variant) == "+":
                 refSpliceSeq = getFastaSeq(getVarChrom(variant), refSpliceBounds["acceptorStart"],
-                                           (refSpliceBounds["acceptorEnd"] - deNovoOffset)).upper()
+                                           (refSpliceBounds["acceptorEnd"] - deNovoOffset), plusSeq=True)
             else:
                 refSpliceSeq = getFastaSeq(getVarChrom(variant), refSpliceBounds["acceptorStart"],
-                                           (refSpliceBounds["acceptorEnd"] + deNovoOffset)).upper()
+                                           (refSpliceBounds["acceptorEnd"] + deNovoOffset), plusSeq=False)
         for position, seqs in slidingWindowInfo["windowSeqs"].iteritems():
             if seqs["refSeq"] == refSpliceSeq:
                 refSpliceWindow = position
@@ -981,15 +988,18 @@ def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, 
         closestSpliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=deNovo)
         exonName = closestSpliceBounds["exonName"]
     if donor == True:
-        refSeq = getFastaSeq(varChrom, closestSpliceBounds["donorStart"], closestSpliceBounds["donorEnd"])
+        if getVarStrand(variant) == "+":
+            refSeq = getFastaSeq(varChrom, closestSpliceBounds["donorStart"], closestSpliceBounds["donorEnd"], plusSeq=True)
+        else:
+            refSeq = getFastaSeq(varChrom, closestSpliceBounds["donorStart"], closestSpliceBounds["donorEnd"], plusSeq=False)
         exonStart = 0
         intronStart = STD_EXONIC_PORTION
     else:
         # acceptorEnd +- deNovoOffset because deNovo splice acceptor region is deNovoOffset bp longer than reference splice acceptor region
         if getVarStrand(variant) == "+":
-            refSeq = getFastaSeq(varChrom, closestSpliceBounds["acceptorStart"], (closestSpliceBounds["acceptorEnd"] - deNovoOffset))
+            refSeq = getFastaSeq(varChrom, closestSpliceBounds["acceptorStart"], (closestSpliceBounds["acceptorEnd"] - deNovoOffset), plusSeq=True)
         else:
-            refSeq = getFastaSeq(varChrom, closestSpliceBounds["acceptorStart"], (closestSpliceBounds["acceptorEnd"] + deNovoOffset))
+            refSeq = getFastaSeq(varChrom, closestSpliceBounds["acceptorStart"], (closestSpliceBounds["acceptorEnd"] + deNovoOffset), plusSeq=False)
         exonStart = len(refSeq) - STD_EXONIC_PORTION
         intronStart = 0
     if testMode == False:
@@ -1188,25 +1198,29 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
          0 if not
     '''
     # TO DO also need to modify function/make copy to check for frameshifts for de novo donors and acceptors
-    
+
     # check that variant causes a premature stop codon in an exon
-    if getVarConsequences(variant) == "stop_gained" and varInExon(variant) == True:
+    # AND checks that deNovoDonor probability is greater than moderate probability (0.30) before checking for splice rescue
+    #deNovoDonorInfo = getPriorProbDeNovoDonorSNS(variant, STD_EXONIC_PORTION, deNovoDonorInRefAcc=deNovoDonorInRefAcc)
+    #if deNovoDonorInfo["priorProb"] < 0.30:
+    #    return {"priorProb": 0.99,
+    #            "enigmaClass": "class_5",
+    #            "spliceRescue": 0,
+    #            "spliceFlag": "N/A",
+    #            "frameshiftFlag": "N/A",
+    #            "inExonicPortionFlag": "N/A",
+    #            "CIDomainInRegionFlag": "N/A",
+    #            "isDivisibleFlag": "N/A",
+    #            "deNovoDonorSufficientFlag": 0}
+#    if getVarConsequences(variant) == "stop_gained" and varInExon(variant) == True and deNovoDonorInfo["priorProb"] >= 0.30:
+    if getVarConsequences(variant) == "stop_gained" and varInExon(variant):
         spliceFlag = 0
         spliceRescue = 0
         frameshiftFlag = 0
         inExonicPortionFlag = 0
         CIDomainInRegionFlag = 0
         isDivisibleFlag = 0
-        # if variant in last exon then de novo donor splicing is not possible so no splice rescue is possible
-        if varInIneligibleDeNovoExon(variant, donor=True):
-            return {"priorProb": 0.99,
-                    "enigmaClass": "class_5",
-                    "spliceRescue": spliceRescue,
-                    "spliceFlag": spliceFlag,
-                    "frameshiftFlag": frameshiftFlag,
-                    "inExonicPortionFlag": inExonicPortionFlag,
-                    "CIDomainInRegionFlag": CIDomainInRegionFlag,
-                    "isDivisibleFlag": isDivisibleFlag}
+        #deNovoDonorSufficientFlag = 1
         # if variant is in specified exonic portion of highest scoring sliding window, no splice rescue
         if varInExonicPortion(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH, donor=True,
                               deNovoDonorInRefAcc=deNovoDonorInRefAcc) == True:
@@ -1267,6 +1281,7 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                 "inExonicPortionFlag": inExonicPortionFlag,
                 "CIDomainInRegionFlag": CIDomainInRegionFlag,
                 "isDivisibleFlag": isDivisibleFlag}
+#                "deNovoDonorSufficientFlag": deNovoDonorSufficientFlag}
 
 def getEnigmaClass(priorProb):
     '''
