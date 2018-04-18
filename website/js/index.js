@@ -792,7 +792,7 @@ var VariantDetail = React.createClass({
                         groupTitle={groupTitle}
                         onChangeGroupVisibility={this.onChangeGroupVisibility}
                         hideEmptyItems={this.state.hideEmptyItems}
-                        onReportToggled={() => {
+                        onFrequencyFieldToggled={() => {
                             setTimeout(() => {
                                 // this forces a re-render after a group has expanded/collapsed, fixing the layout
                                 // note that 300ms just happens to be the duration of the expand/collapse animation
