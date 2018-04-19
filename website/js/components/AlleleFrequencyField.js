@@ -80,15 +80,15 @@ const AlleleFrequencyField = React.createClass({
         const {field, fieldName, variant} = this.props;
         let renderedRows;
 
-        if (fieldName === "ExAC Graph") {
+        if (fieldName === "ExAC (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
-        } else if (fieldName === "ExAC Data") {
+        } else if (fieldName === "ExAC (Numerical)") {
             renderedRows = this.getRowsAndDetermineIfEmpty("ExAC", field, variant);
-        } else if (fieldName === "1000 Genomes Graph") {
+        } else if (fieldName === "1000 Genomes (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
-        } else if (fieldName === "1000 Genomes Data") {
+        } else if (fieldName === "1000 Genomes (Numerical)") {
             renderedRows = this.getRowsAndDetermineIfEmpty("1000 Genomes", field, variant);
-        } else if (fieldName === "ESP Data") {
+        } else if (fieldName === "ESP (Numerical)") {
             renderedRows = this.getRowsAndDetermineIfEmpty("ESP", field, variant);
         }
 

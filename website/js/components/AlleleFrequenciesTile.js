@@ -9,11 +9,11 @@ const _ = require('underscore');
 
 
 const fieldsOfInterest = {
-    'ExAC Graph': true,
-    'ExAC Data': true,
-    '1000 Genomes Graph': true,
-    '1000 Genomes Data': true,
-    'ESP Data': true
+    'ExAC (Graphical)': true,
+    'ExAC (Numerical)': true,
+    '1000 Genomes (Graphical)': true,
+    '1000 Genomes (Numerical)': true,
+    'ESP (Numerical)': true
 };
 
 export default class AlleleFrequenciesTile extends React.Component {
@@ -57,23 +57,23 @@ export default class AlleleFrequenciesTile extends React.Component {
 
         const exacGraph = [_.find(data, function(dd) {
                                 return dd.source === "ExAC";
-                            }).chart[0], "ExAC Graph"];
+                            }).chart[0], "ExAC (Graphical)"];
 
         const exacData = [_.find(data, function(dd) {
                                 return dd.source === "ExAC";
-                            }).data, "ExAC Data"];
+                            }).data, "ExAC (Numerical)"];
 
         const thousandGenomesGraph = [_.find(data, function(dd) {
                                 return dd.source === "1000 Genomes";
-                            }).chart[0], "1000 Genomes Graph"];
+                            }).chart[0], "1000 Genomes (Graphical)"];
 
         const thousandGenomesData = [_.find(data, function(dd) {
                                 return dd.source === "1000 Genomes";
-                            }).data, "1000 Genomes Data"];
+                            }).data, "1000 Genomes (Numerical)"];
 
         const espData = [_.find(data, function(dd) {
                                 return dd.source === "ESP";
-                            }).data, "ESP Data"];
+                            }).data, "ESP (Numerical)"];
 
         const alleleFrequencyFields = [exacGraph, exacData, thousandGenomesGraph, thousandGenomesData, espData].map((field, idx) => {
             let fieldValue = field[0];
