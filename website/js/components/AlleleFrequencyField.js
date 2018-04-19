@@ -77,7 +77,7 @@ const AlleleFrequencyField = React.createClass({
     },
 
     render: function() {
-        const {field, fieldName, variant} = this.props;
+        const {field, fieldName, variant, hideEmptyItems} = this.props;
         let renderedRows;
 
         if (fieldName === "ExAC (Graphical)") {
@@ -93,9 +93,15 @@ const AlleleFrequencyField = React.createClass({
         }
 
         let styles = this.getCollapsableClassSet();
+        let allEmpty = false;
+
+        if (Array.isArray(renderedRows)) {
+            allEmpty = renderedRows[1];
+            renderedRows = renderedRows[0];
+        }
 
         return (
-            <div>
+            <div className={ allEmpty && hideEmptyItems ? "group-empty" : "" }>
                 <div style={{marginBottom: 0, borderTop: 'solid 2px #ccc'}}>
                 {
                     this.generateHeader(field, fieldName)
