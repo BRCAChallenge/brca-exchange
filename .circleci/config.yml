@@ -41,6 +41,7 @@ jobs:
              mkdir ~/project/pipeline_virtualenv
              virtualenv ~/project/pipeline_virtualenv
              source ~/project/pipeline_virtualenv/bin/activate
+             pip install pip==9.0.3 # downgrading pip otherwise issues with the hgvs package install below
              git clone https://github.com/counsyl/hgvs.git
              cd hgvs && git checkout aebe5bd9683f4b5937fd653ce4b13fcd4f3ebb10 && python setup.py install
              pip install -r ~/project/pipeline/requirements.txt
