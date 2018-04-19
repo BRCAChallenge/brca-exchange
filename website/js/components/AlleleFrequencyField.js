@@ -79,21 +79,29 @@ const AlleleFrequencyField = React.createClass({
     render: function() {
         const {field, fieldName, variant, hideEmptyItems} = this.props;
         let renderedRows;
+        let allEmpty = false;
+        let styles = this.getCollapsableClassSet();
+        let isChart = false;
 
         if (fieldName === "ExAC (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
+            if (!variant['Variant_in_ExAC']) {
+                allEmpty = true;
+            }
+            isChart = true;
         } else if (fieldName === "ExAC (Numerical)") {
             renderedRows = this.getRowsAndDetermineIfEmpty("ExAC", field, variant);
         } else if (fieldName === "1000 Genomes (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
+            if (!variant['Variant_in_1000_Genomes']) {
+                allEmpty = true;
+            }
+            isChart = true;
         } else if (fieldName === "1000 Genomes (Numerical)") {
             renderedRows = this.getRowsAndDetermineIfEmpty("1000 Genomes", field, variant);
         } else if (fieldName === "ESP (Numerical)") {
             renderedRows = this.getRowsAndDetermineIfEmpty("ESP", field, variant);
         }
-
-        let styles = this.getCollapsableClassSet();
-        let allEmpty = false;
 
         if (Array.isArray(renderedRows)) {
             allEmpty = renderedRows[1];
@@ -101,14 +109,14 @@ const AlleleFrequencyField = React.createClass({
         }
 
         return (
-            <div className={ allEmpty && hideEmptyItems ? "group-empty" : "" }>
+            <div className={ allEmpty && (isChart || hideEmptyItems) ? "group-empty" : "" }>
                 <div style={{marginBottom: 0, borderTop: 'solid 2px #ccc'}}>
                 {
                     this.generateHeader(field, fieldName)
                 }
                 </div>
 
-                <div ref='panel' className={classNames(styles)}>
+                <div ref='panel' className={allEmpty && isChart ? "group-empty" : classNames(styles)}>
                     <Table key={`allele-frequency-name-${fieldName}`}>
                         <tbody>
                         { renderedRows }

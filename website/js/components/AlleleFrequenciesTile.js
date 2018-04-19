@@ -10,10 +10,10 @@ const _ = require('underscore');
 
 const fieldsOfInterest = {
     'ExAC (Graphical)': true,
-    'ExAC (Numerical)': true,
-    '1000 Genomes (Graphical)': true,
-    '1000 Genomes (Numerical)': true,
-    'ESP (Numerical)': true
+    'ExAC (Numerical)': false,
+    '1000 Genomes (Graphical)': false,
+    '1000 Genomes (Numerical)': false,
+    'ESP (Numerical)': false
 };
 
 export default class AlleleFrequenciesTile extends React.Component {
@@ -75,7 +75,9 @@ export default class AlleleFrequenciesTile extends React.Component {
                                 return dd.source === "ESP";
                             }).data, "ESP (Numerical)"];
 
-        const alleleFrequencyFields = [exacGraph, exacData, thousandGenomesGraph, thousandGenomesData, espData].map((field, idx) => {
+        const alleleFrequencyFields = [exacGraph, exacData, thousandGenomesGraph, thousandGenomesData, espData];
+
+        const renderedAlleleFrequencyFields = alleleFrequencyFields.map((field, idx) => {
             let fieldValue = field[0];
             let fieldName = field[1];
             let expanded = this.state[fieldName];
@@ -94,11 +96,8 @@ export default class AlleleFrequenciesTile extends React.Component {
             );
         });
 
-        // TODO: figure out how to determine if everything is empty
-        const allEmpty = false;
-        // const allEmpty = _.every([renderedExacData, renderedThousandGenomesData, renderedEspData], function(data) {
-        //                         return data[1] === true;
-        //                     }) && !variant.Variant_in_1000_Genomes && !variant.Variant_in_ExAC;
+        // TODO: figure out how to determine if everything is empty even though variant is in 10KG or ExAC
+        const allEmpty = !variant.Variant_in_1000_Genomes && !variant.Variant_in_ExAC;
 
         // create the source panel itself now
         const groupTitle = `source-panel-${this.props.sourceName}`;
@@ -123,13 +122,13 @@ export default class AlleleFrequenciesTile extends React.Component {
         );
 
         return (
-            <div key={`group_collection-${groupTitle}`} className={ allEmpty && this.state.hideEmptyItems ? "group-empty variant-detail-group" : "variant-detail-group" }>
+            <div key={`group_collection-${groupTitle}`} className={ allEmpty && this.props.hideEmptyItems ? "group-empty variant-detail-group" : "variant-detail-group" }>
                 <Panel
                     header={header}
                     collapsable={true}
                     defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}
-                    hideEmptyItems={this.state.hideEmptyItems}>
-                    {alleleFrequencyFields}
+                    hideEmptyItems={this.props.hideEmptyItems}>
+                    {renderedAlleleFrequencyFields}
                 </Panel>
             </div>
         );
