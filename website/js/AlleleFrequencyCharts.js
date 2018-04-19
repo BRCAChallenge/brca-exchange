@@ -166,7 +166,7 @@ class AlleleFrequencyCharts extends React.Component {
         return (
             <div>
                 <div className='alleleFrequencyChart'>
-                    <BarChart ref={`${prop}_alleleFreq2`} container={`${prop}_alleleFreq1`} options={fullscaleChartOptions} onClick={() => alert ('foo')}/>
+                    <BarChart ref={`${prop}_alleleFreq2`} container={`${prop}_alleleFreq1`} options={fullscaleChartOptions}/>
                 </div>
                 <div className='alleleFrequencyChart' onClick={this.toggleScale.bind(this, `${prop}_alleleFreq2`)}>
                     <BarChart ref={`${prop}_alleleFreq2`} container={`${prop}_alleleFreq2`} options={scaledChartOptions} />
