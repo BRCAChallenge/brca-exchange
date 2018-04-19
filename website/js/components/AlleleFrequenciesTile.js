@@ -134,7 +134,3 @@ export default class AlleleFrequenciesTile extends React.Component {
         );
     }
 };
-
-//         const allEmpty = _.every([renderedExacData, renderedThousandGenomesData, renderedEspData], function(data) {
-//                                 return data[1] === true;
-//                             }) && !variant.Variant_in_1000_Genomes && !variant.Variant_in_ExAC;
