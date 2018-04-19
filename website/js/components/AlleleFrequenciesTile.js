@@ -31,9 +31,11 @@ export default class AlleleFrequenciesTile extends React.Component {
 
         this.setState(function() {
             // updates all values in fieldsOfInterest to match newExpansion
-            return Object.keys(_.clone(fieldsOfInterest)).forEach( function(key, idx, arr) {
-                arr[key] = newExpansion;
+            let updatedFieldsOfInterest = _.clone(fieldsOfInterest);
+            Object.keys(updatedFieldsOfInterest).forEach( function(key) {
+                updatedFieldsOfInterest[key] = newExpansion;
             });
+            return updatedFieldsOfInterest;
         }, () => {
             // causes the parent to perform a (delayed) reflow
             this.props.onFrequencyFieldToggled();
