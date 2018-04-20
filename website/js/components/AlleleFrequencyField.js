@@ -85,7 +85,7 @@ const AlleleFrequencyField = React.createClass({
 
         if (fieldName === "ExAC (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
-            if (!variant['Variant_in_ExAC']) {
+            if (!variant.Variant_in_ExAC) {
                 allEmpty = true;
             }
             isChart = true;
@@ -93,7 +93,7 @@ const AlleleFrequencyField = React.createClass({
             renderedRows = this.getRowsAndDetermineIfEmpty("ExAC", field, variant);
         } else if (fieldName === "1000 Genomes (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
-            if (!variant['Variant_in_1000_Genomes']) {
+            if (!variant.Variant_in_1000_Genomes) {
                 allEmpty = true;
             }
             isChart = true;
