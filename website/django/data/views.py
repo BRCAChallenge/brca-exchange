@@ -1,3 +1,4 @@
+import pdb
 import os
 import re
 import tempfile
@@ -21,6 +22,7 @@ from ga4gh.schemas.ga4gh import metadata_service_pb2 as metadata_service
 from ga4gh.schemas.ga4gh import metadata_pb2 as metadata
 
 import google.protobuf.json_format as json_format
+from datetime import datetime
 
 
 def releases(request):
@@ -132,13 +134,19 @@ def report_to_dict(report_object):
     report_dict["Data_Release"] = model_to_dict(report_object.Data_Release)
     report_dict["Data_Release"]["date"] = report_object.Data_Release.date
     report_dict["Change_Type"] = ChangeType.objects.get(id=report_dict["Change_Type"]).name
+
+    # don't display report diffs prior to April 2018
+    cutoff_date = datetime.strptime('Apr 1 2018  12:00AM', '%b %d %Y %I:%M%p')
+    if report_dict["Data_Release"]["date"] < cutoff_date:
+        report_dict["Diff"] = None
+        return report_dict
+
     try:
         report_diff = ReportDiff.objects.get(report_id=report_object.id)
         report_dict["Diff"] = report_diff.report_diff
     except ReportDiff.DoesNotExist:
-        if report_object.Source == "ClinVar":
-            key = report_object.SCV_ClinVar
         report_dict["Diff"] = None
+
     return report_dict
 
 
