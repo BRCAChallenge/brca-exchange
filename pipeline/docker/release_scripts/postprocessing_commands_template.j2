@@ -1,0 +1,26 @@
+# A few useful commands
+# Running pipeline again
+{{ PIPELINE_COMMAND }}
+
+# updating release notes
+# Edit release notes in {{ RELEASE_NOTES }} . Then run the following command:
+/home/pipeline/monthly_releases/scripts/prepare_release_notes_update.sh {{ RELEASE_TAG }}
+# then run the pipeline again to include updated release notes into version.json and regenerate tar file
+{{ PIPELINE_COMMAND }}
+
+
+# Steps to perform after data has been validated
+
+# tag release in gitub
+cd /home/pipeline/monthly_releases/${RELEASE_TAG}/brca-exchange
+git tag -m {{ RELEASE_TAG }} -a {{ RELEASE_TAG }} $(git rev-parse HEAD)
+git push origin {{ RELEASE_TAG }}
+
+# push image to dockerhub (need to do docker login first)
+docker push brcachallenge/brca-exchange-pipeline:{{ RELEASE_TAG }}
+
+# Copy release tar to previous releases directory for next release
+PREVIOUS_RELEASES=/home/pipeline/previous_releases
+cp $(ls -t /home/pipeline/monthly_releases/{{ RELEASE_TAG }}/brca_out/release-*.tar.gz | head -n 1) ${PREVIOUS_RELEASES}
+rm ${PREVIOUS_RELEASES}/latest_release.tar.gz
+ln -s $(ls -t ${PREVIOUS_RELEASES}/release-*.tar.gz | head -n 1) ${PREVIOUS_RELEASES}/latest_release.tar.gz
