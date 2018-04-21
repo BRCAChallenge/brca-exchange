@@ -1062,11 +1062,6 @@ var Application = React.createClass({
         this.toggleMode();
     },
     getInitialState: function () {
-        // FIXME: if no mode has ever been set, set the mode to research mode for easier testing
-        if (localStorage.getItem('research-mode') === null) {
-            localStorage.setItem('research-mode', true);
-        }
-
         return {
             mode: (localStorage.getItem("research-mode") === 'true') ? 'research_mode' : 'default',
         };
