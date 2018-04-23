@@ -1082,7 +1082,6 @@ def getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, ex
       whether that position is within exonic portion of highest scoring window, exonic portion size, and intronic portion size
     Returns the position where splicing occurs for a de novo splice donor or acceptor (depending on donor=True argument)
     '''
-    # TO DO write unittests to make sure this works for splice acceptors (make sure it works with +1 issue)
     if varStrand == "+":
         if inExonicPortion == False:
             if donor == True:
@@ -1099,39 +1098,52 @@ def getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, ex
             if donor == True:
                 newSplicePos = int(varGenPos) + (varWindowPos - exonicPortionSize)
             else:
-                newSplicePos = int(varGenPos) - (varWindowPos - intronicPortionSize)
+                newSplicePos = int(varGenPos) - abs(varWindowPos - intronicPortionSize)
         else:
             if donor == True:
                 newSplicePos = int(varGenPos) - abs(varWindowPos - exonicPortionSize)
             else:
-                newSplicePos = int(varGenPos) + abs(varWindowPos - intronicPortionSize)
+                newSplicePos = int(varGenPos) + (varWindowPos - intronicPortionSize)
     return newSplicePos
     
-def getAltExonLength(variant, exonicPortionSize, deNovoDonorInRefAcc=False):
+def getAltExonLength(variant, exonicPortionSize, intronicPortionSize, deNovoDonorInRefAcc=False, donor=True):
     '''
     Given a variant and the exonic portion size,
     returns the length of the alternate exon after splicing occurs in max MES window
-    Function can only be used for de novo donor variants
+    Donor argument determines if function is used for de novo donor (donor=True) or de novo acceptor (donor=False)
     deNovoDonorInRefAcc=True if looking for deNovoDonor in ref acceptor site, False otherwise
     '''
     if varInExon(variant) == True:
         varExonNum = getVarExonNumberSNS(variant)
-        exonBounds = getExonBoundaries(variant)
-        slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, STD_DE_NOVO_LENGTH, donor=True,
-                                                                  deNovoDonorInRefAcc=deNovoDonorInRefAcc)
-        newSplicePos = getNewSplicePosition(variant["Pos"], getVarStrand(variant), slidingWindowInfo["varWindowPosition"],
-                                            slidingWindowInfo["inExonicPortion"], exonicPortionSize, 20)
-                                            # TO DO replace 20 with intronicPortionSize
-        if getVarStrand(variant) == "-":
+    else:
+        if varInSpliceRegion(variant, donor=donor, deNovo=False) == True:
+            spliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=False)
+            varExonNum = spliceBounds["exonName"]
+        else:
+            varExonNum = getClosestExonNumberIntronicSNS(variant, "enigma", donor=donor)
+    exonBounds = getExonBoundaries(variant)
+    slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, STD_DE_NOVO_LENGTH, donor=donor,
+                                                              deNovoDonorInRefAcc=deNovoDonorInRefAcc)
+    newSplicePos = getNewSplicePosition(variant["Pos"], getVarStrand(variant), slidingWindowInfo["varWindowPosition"],
+                                        slidingWindowInfo["inExonicPortion"], exonicPortionSize, intronicPortionSize, donor=donor)
+    if getVarStrand(variant) == "-":
+        if donor == True:
             varExonStart = int(exonBounds[varExonNum]["exonStart"])
             # newSplicePos -1 to account for RefSeq numbering which starts to the right of the first base
             exonLength = varExonStart - (newSplicePos - 1)
         else:
             varExonEnd = int(exonBounds[varExonNum]["exonEnd"])
-            refExonLength = getRefExonLength(variant)
+            # varExonEnd +1 to account for RefSeq numbering which starts to the right of the first base
+            exonLength = newSplicePos - (varExonEnd + 1)
+    else:
+        varExonEnd = int(exonBounds[varExonNum]["exonEnd"])
+        if donor == True:
+            refExonLength = getRefExonLength(variant, donor=donor)
             # need to compare to refExonLength because of + strand gene
             exonLength = refExonLength - (varExonEnd - newSplicePos)
-        return exonLength
+        else:
+            exonLength = varExonEnd - newSplicePos
+    return exonLength
 
 def compareRefAltExonLengths(refLength, altLength):
     '''
@@ -1144,44 +1156,62 @@ def compareRefAltExonLengths(refLength, altLength):
     else:
         return False
 
-def isSplicingWindowInFrame(variant, exonicPortionSize, deNovoDonorInRefAcc=False):
+def isSplicingWindowInFrame(variant, exonicPortionSize, intronicPortionSize, deNovoDonorInRefAcc=False, donor=True):
     '''
     Given a variant, determines ref and alt exon length and compares them
     exonicPortionSize refers to length in bp that is considered to be in exonic portion of splice site
+    intronicPortionSize referes to length in bp that is considered to be in intronic portion of splice site
     deNovoDonorInRefAcc=True if looking for deNovoDonor in ref acceptor site, False otherwise
+    Donor argument determines if function is used for de novo donor (donor=True) or de novo acceptor (donor=False)
     If ref and alt exon are in the same reading frame, returns True
     '''
-    refLength = getRefExonLength(variant)
-    altLength = getAltExonLength(variant, exonicPortionSize, deNovoDonorInRefAcc=deNovoDonorInRefAcc)
+    refLength = getRefExonLength(variant, donor=donor)
+    altLength = getAltExonLength(variant, exonicPortionSize, intronicPortionSize, deNovoDonorInRefAcc=deNovoDonorInRefAcc, donor=donor)
     return compareRefAltExonLengths(refLength, altLength)
 
-def compareDeNovoWildTypeSplicePos(variant, exonicPortionSize, deNovoDonorInRefAcc=False):
+def compareDeNovoWildTypeSplicePos(variant, exonicPortionSize, intronicPortionSize, deNovoDonorInRefAcc=False, donor=True):
     '''
     Given a variant, compares de novo splicing position with wild-type splicing position
     exonicPortionSize refers to length in bp that is considered to be in exonic portion of splice site
+    intronicPortionSize referes to length in bp that is considered to be in intronic portion of splice site
     deNovoDonorInRefAcc argument=True if looking for de novo donor in reference splice acceptor region, False otherwise
+    Donor argument determines if function is used for de novo donor (donor=True) or de novo acceptor (donor=False)
     If distance between de novo and wild-type donors is divisible by 3, returns True
     returns False otherwise
     '''
     if varInExon(variant) == True:
-        varStrand = getVarStrand(variant)
         varExonNum = getVarExonNumberSNS(variant)
-        refExonBounds = getExonBoundaries(variant)
+    else:
+        if varInSpliceRegion(variant, donor=donor, deNovo=False) == True:
+            spliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=False)
+            varExonNum = spliceBounds["exonName"]
+        else:
+            varExonNum = getClosestExonNumberIntronicSNS(variant, "enigma", donor=donor)
+    varStrand = getVarStrand(variant)
+    refExonBounds = getExonBoundaries(variant)
+    slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, STD_DE_NOVO_LENGTH, donor=donor,
+                                                              deNovoDonorInRefAcc=deNovoDonorInRefAcc)
+    deNovoSplicePos = getNewSplicePosition(variant["Pos"], varStrand, slidingWindowInfo["varWindowPosition"],
+                                           slidingWindowInfo["inExonicPortion"], exonicPortionSize, intronicPortionSize, donor=donor)
+    if donor == True:
         wildTypeSplicePos = refExonBounds[varExonNum]["exonEnd"]
-        slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, STD_DE_NOVO_LENGTH, donor=True,
-                                                                  deNovoDonorInRefAcc=deNovoDonorInRefAcc)
-        deNovoSplicePos = getNewSplicePosition(variant["Pos"], varStrand, slidingWindowInfo["varWindowPosition"],
-                                               slidingWindowInfo["inExonicPortion"], exonicPortionSize, 20)
-                                               # TO DO replace 20 with intronicPortionSize
         if varStrand == "+":
             distanceBetween = wildTypeSplicePos - deNovoSplicePos
         else:
+            wildTypeSplicePos = refExonBounds[varExonNum]["exonEnd"]
             # +1 because of RefSeq numbering
             distanceBetween = deNovoSplicePos - (wildTypeSplicePos + 1)
-        if distanceBetween % 3 == 0:
-            return True
+    else:
+        wildTypeSplicePos = refExonBounds[varExonNum]["exonStart"]
+        if varStrand == "+":
+            distanceBetween = abs(deNovoSplicePos - wildTypeSplicePos)
         else:
-            return False
+            # +1 because of RefSeq numbering
+            distanceBetween = abs((wildTypeSplicePos + 1) - deNovoSplicePos)
+            
+    if distanceBetween % 3 == 0:
+        return True
+    return False
         
 def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc=False):
     '''
@@ -1228,7 +1258,8 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
             inExonicPortionFlag = 1
             spliceRescue = 0
         else:
-            inFrame = isSplicingWindowInFrame(variant, STD_EXONIC_PORTION, deNovoDonorInRefAcc=deNovoDonorInRefAcc)
+            inFrame = isSplicingWindowInFrame(variant, STD_EXONIC_PORTION, STD_ACC_INTRONIC_LENGTH,
+                                              deNovoDonorInRefAcc=deNovoDonorInRefAcc, donor=True)
             # if variant causes a frameshift, no splice rescue
             if inFrame == False:
                 priorProb = 0.99
@@ -1247,11 +1278,12 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                 inExonicPortion = varInExonicPortion(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH, donor=True,
                                                      deNovoDonorInRefAcc=deNovoDonorInRefAcc)
                 # gets region from new splice position to next splice acceptor
-                regionStart = getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, STD_EXONIC_PORTION, 20)
-                # TO DO replace 20 with intronicPortionSize
+                regionStart = getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, STD_EXONIC_PORTION,
+                                                   STD_ACC_INTRONIC_LENGTH, donor=True)
                 regionEnd = refSpliceAccBounds[nextExonNum]["acceptorStart"]
                 CIDomainInRegion = isCIDomainInRegion(regionStart, regionEnd, boundaries, variant["Gene_Symbol"])
-                isDivisible = compareDeNovoWildTypeSplicePos(variant, STD_EXONIC_PORTION, deNovoDonorInRefAcc=deNovoDonorInRefAcc)
+                isDivisible = compareDeNovoWildTypeSplicePos(variant, STD_EXONIC_PORTION, STD_ACC_INTRONIC_LENGTH
+                                                             deNovoDonorInRefAcc=deNovoDonorInRefAcc, donor=donor)
                 # if truncated region includes a clinically important domain or causes a frameshift
                 if CIDomainInRegion == True or isDivisible == False:
                     priorProb = 0.99
