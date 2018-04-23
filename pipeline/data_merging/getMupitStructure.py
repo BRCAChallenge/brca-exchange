@@ -16,7 +16,7 @@ def parse_args():
     return options
 
 
-def isMissenseSubstitution(ref, alt):
+def isPointSubstitution(ref, alt):
     bases = ['a', 'c', 't', 'g']
     ref = ref.lower()
     alt = alt.lower()
@@ -52,33 +52,33 @@ def main(args):
         ref = variant[refIndex]
         alt = variant[altIndex]
 
-        # only concerned with missense substitutions
-        if isMissenseSubstitution(ref, alt):
+        # only concerned with point substitutions
+        if isPointSubstitution(ref, alt):
             # Add empty data for each new column to prepare for data insertion by index
             for i in range(len(new_columns_to_append)):
                 variant.append('-')
 
             retries = 5
-            if (pos >= 32356427 and pos <= 32396972) or (pos >= 43045692 and pos <= 43125184):
-                mupit_structure = get_brca_struct(chrom, pos)
-                if mupit_structure == "retry":
-                    if retries > 0:
-                        print "retrying chrom: %s, pos: %s" % (chrom, pos)
-                        retries -= 1
-                        time.sleep(10)
-                        mupit_structure = get_brca_struct(chrom, pos)
-                    else:
-                        print "Request for position %s failed 5 times, exiting." % (pos)
-                        sys.exit(1)
 
-                variant[output_header_row.index("mupit_structure")] = mupit_structure
+            mupit_structure = get_brca_struct(chrom, pos)
+            if mupit_structure == "retry":
+                if retries > 0:
+                    print "retrying chrom: %s, pos: %s" % (chrom, pos)
+                    retries -= 1
+                    time.sleep(10)
+                    mupit_structure = get_brca_struct(chrom, pos)
+                else:
+                    print "Request for position %s failed 5 times, exiting." % (pos)
+                    sys.exit(1)
 
-                if mupit_structure is not '-':
-                    print variant
+            variant[output_header_row.index("mupit_structure")] = mupit_structure
 
-                output_file.writerow(variant)
+            if mupit_structure is not '-':
+                print variant
 
-                time.sleep(0.1)
+            output_file.writerow(variant)
+
+            time.sleep(0.1)
 
 
 def get_brca_struct(chrom, pos):

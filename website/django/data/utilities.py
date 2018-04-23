@@ -66,7 +66,7 @@ def send_mupit_request(query_url, params, retries=5):
     return r
 
 
-def isMissenseSubstitution(ref, alt):
+def isPointSubstitution(ref, alt):
     bases = ['a', 'c', 't', 'g']
     ref = ref.lower()
     alt = alt.lower()
@@ -84,7 +84,7 @@ def update_mupit_structure_for_existing_variants():
         pos = int(getattr(variant, 'Pos'))
         ref = getattr(variant, 'Ref')
         alt = getattr(variant, 'Alt')
-        if isMissenseSubstitution(ref, alt) and ((pos >= 32356427 and pos <= 32396972) or (pos >= 43045692 and pos <= 43125184)):
+        if isPointSubstitution(ref, alt):
             main_url = 'http://staging.cravat.us/MuPIT_Interactive'
             brca_structures = ['1t15','1jm7','4igk','fENSP00000380152_7']
             query_url = main_url+'/rest/showstructure/query'
