@@ -140,10 +140,25 @@ function getFormattedFieldByProp(prop, variant) {
     return rowItem;
 }
 
+
+function abbreviatedSubmitter(originalSubmitter) {
+    return originalSubmitter
+        .replace('Evidence-based Network for the Interpretation of Germline Mutant Alleles (ENIGMA)', 'ENIGMA')
+        .replace('Breast Cancer Information Core (BIC)', 'BIC');
+}
+
+
+function sentenceCase(str) {
+    return str.replace(/\b\S/g, (t) => t.toUpperCase() );
+}
+
+
 module.exports = {
     isEmptyField,
     normalizeDateFieldDisplay,
     normalizedFieldDisplay,
     generateLinkToGenomeBrowser,
-    getFormattedFieldByProp
+    getFormattedFieldByProp,
+    abbreviatedSubmitter,
+    sentenceCase
 };

@@ -212,6 +212,10 @@ offending file, for future reference: website/node_modules/react-data-components
     float: left;
 }
 
+.alleleFrequencyChartContainer {
+    border-top: 1px solid #ddd;
+}
+
 @media(max-width:400px) {
     .alleleFrequencyChart {
         width: 100%;
@@ -987,6 +991,33 @@ div.variant-submitter-group .submitter-header td {
     text-decoration: dashed;
     white-space: nowrap;
 
+    flex: 0 0 203px; /* the +3 gets it to line up with the columns below it */
+}
+
+.allele-frequency-header td {
+    border-bottom-width: 3px;
+}
+
+.allele-frequency-header.expanded {
+    box-shadow: inset 0 7px 15px -7px rgba(0, 0, 0, 0.23);
+}
+
+.allele-frequency-header {
+   background: #f2f7ff;
+   cursor: pointer;
+   display: flex; flex-direction: row; width: 100%;
+   align-items: center; 
+   overflow: hidden;
+}
+
+.allele-frequency-header .allele-frequency-cell {
+    padding: 10px;
+}
+
+.allele-frequency-header .allele-frequency-cell.allele-frequency-label {
+    font-weight: bold;
+    white-space: nowrap;
+    text-align: right;
     flex: 0 0 203px; /* the +3 gets it to line up with the columns below it */
 }
 

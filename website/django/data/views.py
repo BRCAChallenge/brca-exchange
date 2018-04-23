@@ -21,6 +21,7 @@ from ga4gh.schemas.ga4gh import metadata_service_pb2 as metadata_service
 from ga4gh.schemas.ga4gh import metadata_pb2 as metadata
 
 import google.protobuf.json_format as json_format
+from datetime import datetime
 
 
 def releases(request):
@@ -97,8 +98,6 @@ def variant(request):
 def variant_reports(request, variant_id):
     variant_id = int(variant_id)
     query = Report.objects.filter(Variant_id=variant_id)
-    '''
-    NOTE: Uncomment to send report versions to UI
     report_versions = []
     for report in query:
         key = None
@@ -108,8 +107,6 @@ def variant_reports(request, variant_id):
             report_versions.extend(map(report_to_dict, report_query))
 
     response = JsonResponse({"data": report_versions})
-    '''
-    response = JsonResponse({"data":  [ model_to_dict(x) for x in query ]})
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
@@ -137,14 +134,19 @@ def report_to_dict(report_object):
     report_dict["Data_Release"] = model_to_dict(report_object.Data_Release)
     report_dict["Data_Release"]["date"] = report_object.Data_Release.date
     report_dict["Change_Type"] = ChangeType.objects.get(id=report_dict["Change_Type"]).name
+
+    # don't display report diffs prior to April 2018
+    cutoff_date = datetime.strptime('Apr 1 2018  12:00AM', '%b %d %Y %I:%M%p')
+    if report_dict["Data_Release"]["date"] < cutoff_date:
+        report_dict["Diff"] = None
+        return report_dict
+
     try:
         report_diff = ReportDiff.objects.get(report_id=report_object.id)
         report_dict["Diff"] = report_diff.report_diff
     except ReportDiff.DoesNotExist:
-        if report_object.Source == "ClinVar":
-            key = report_object.SCV_ClinVar
-        print "Report Diff does not exist for Report", key, "from release", report_object.Data_Release.id
         report_dict["Diff"] = None
+
     return report_dict
 
 
