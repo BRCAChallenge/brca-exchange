@@ -4,6 +4,7 @@
 
 // shims for older browsers
 import SourceReportsTile from "./components/SourceReportsTile";
+import AlleleFrequenciesTile from "./components/AlleleFrequenciesTile";
 
 require('babel/polyfill');
 require('es5-shim');
@@ -745,7 +746,7 @@ var VariantDetail = React.createClass({
         let groupsEmpty = 0;
         let totalRowsEmpty = 0;
 
-        const groupTables = _.map(groups, ({ groupTitle, innerCols, reportSource, reportBinding }) => {
+        const groupTables = _.map(groups, ({ groupTitle, innerCols, reportSource, reportBinding, alleleFrequencies, innerGroups }) => {
             let rowsEmpty = 0;
 
             // if it's a report source (i.e. the key reportSource is defined), then we defer
@@ -784,6 +785,27 @@ var VariantDetail = React.createClass({
                 );
             }
 
+            if (alleleFrequencies) {
+                return (
+                    <AlleleFrequenciesTile
+                        alleleFrequencyData={innerGroups}
+                        groupTitle={groupTitle}
+                        onChangeGroupVisibility={this.onChangeGroupVisibility}
+                        hideEmptyItems={this.state.hideEmptyItems}
+                        onFrequencyFieldToggled={() => {
+                            setTimeout(() => {
+                                // this forces a re-render after a group has expanded/collapsed, fixing the layout
+                                // note that 300ms just happens to be the duration of the expand/collapse animation
+                                // it'd be better to run the re-layout whenever the animation ends
+                                this.forceUpdate();
+                            }, 300);
+                        }}
+                        showHelp={this.showHelp}
+                        variant={variant}
+                    />
+                );
+            }
+
             // remove the BIC classification and importance fields unless the classification is 1 or 5
             if (groupTitle === 'Clinical Significance (BIC)') {
                 const bicClass = variant['Clinical_classification_BIC'];
@@ -805,27 +827,7 @@ var VariantDetail = React.createClass({
                 }
 
                 // get allele frequency chart components if they're available
-                if (rowDescriptor.replace) {
-                    rowItem = rowDescriptor.replace(variant, prop);
-
-                    // frequency charts are not displayed if they're empty
-                    if (rowItem === false) {
-                        return false;
-                    }
-
-                    // don't insert rows for empty charts, but count them as empty rows
-                    if (prop === 'Allele_Frequency_Charts_1000_Genomes') {
-                        if (!variant['Variant_in_1000_Genomes']) { // eslint-disable-line dot-notation
-                            rowsEmpty += 1;
-                            return false;
-                        }
-                    } else if (prop === 'Allele_Frequency_Charts_ExAC') {
-                        if (!variant['Variant_in_ExAC']) {
-                            rowsEmpty += 1;
-                            return false;
-                        }
-                    }
-                } else if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] !== null) {
+                if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] !== null) {
                     let val = variant["HGVS_Protein"].split(":")[0];
                     variant[prop] = val;
                     rowItem = val;
