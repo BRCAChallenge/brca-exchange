@@ -51,19 +51,22 @@ def set_release_name_defaults(apps, schema_editor):
         count += 1
 
 
-def send_mupit_request(query_url, params, retries=5):
-    if retries <= 0:
-        print "Request failed 5 times, exiting."
-        sys.exit(1)
-    try:
-        r = requests.post(query_url, data=params)
-        return r
-    except requests.exceptions.RequestException as e:
-        print e
-        time.sleep(10)
-        retries -= 1
-        r = send_mupit_request(query_url, params, retries)
-    return r
+def send_mupit_request(query_url, params):
+    MAX_TRIES = 5
+    tries = 0
+    resp = None
+    while tries < MAX_TRIES:
+        try:
+            resp = requests.post(query_url, data=params)
+            return resp
+        except requests.exceptions.RequestException as e:
+            print e
+            time.sleep(10)
+            tries += 1
+            continue
+        break
+    print "Request failed 5 times, exiting."
+    sys.exit(1)
 
 
 def isPointSubstitution(ref, alt):
@@ -95,7 +98,6 @@ def update_mupit_structure_for_existing_variants():
                      'search_protein':'',
                      'search_upload_file':'',
                      }
-
             r = send_mupit_request(query_url, params)
             d = json.loads(r.text)
             structures = d['structures']

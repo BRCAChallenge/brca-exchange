@@ -58,18 +58,7 @@ def main(args):
             for i in range(len(new_columns_to_append)):
                 variant.append('-')
 
-            retries = 5
-
             mupit_structure = get_brca_struct(chrom, pos)
-            if mupit_structure == "retry":
-                if retries > 0:
-                    print "retrying chrom: %s, pos: %s" % (chrom, pos)
-                    retries -= 1
-                    time.sleep(10)
-                    mupit_structure = get_brca_struct(chrom, pos)
-                else:
-                    print "Request for position %s failed 5 times, exiting." % (pos)
-                    sys.exit(1)
 
             variant[output_header_row.index("mupit_structure")] = mupit_structure
 
@@ -92,11 +81,21 @@ def get_brca_struct(chrom, pos):
              'search_protein':'',
              'search_upload_file':'',
              }
-    try:
-        r = requests.post(query_url, data=params)
-    except requests.exceptions.RequestException as e:
-        print e
-        return "retry"
+    MAX_TRIES = 5
+    tries = 0
+    r = None
+    while True:
+        try:
+            r = requests.post(query_url, data=params)
+        except requests.exceptions.RequestException as e:
+            print e
+            time.sleep(10)
+            tries += 1
+            if tries >= MAX_TRIES:
+                print "Request for position %s failed 5 times, exiting." % (pos)
+                sys.exit(1)
+            continue
+        break
     d = json.loads(r.text)
     structures = d['structures']
     main_struct = None;
