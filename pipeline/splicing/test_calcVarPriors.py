@@ -3198,6 +3198,35 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(spliceRescueInfo["CIDomainInRegionFlag"], 0)
         self.assertEquals(spliceRescueInfo["isDivisibleFlag"], 0)
 
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInIneligibleDeNovoExon', return_value = False)
+    @mock.patch('calcVarPriors.varInExonicPortion', return_value = False)
+    @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
+    @mock.patch('calcVarPriors.getVarExonNumberSNS', return_value = "exon3")
+    @mock.patch('calcVarPriors.getSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
+    @mock.patch('calcVarPriors.getVarWindowPosition', return_value = 6)
+    @mock.patch('calcVarPriors.isCIDomainInRegion', return_value = True)
+    @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = True)
+    def test_getPriorProbSpliceRescueNonsenseSNSBRCA1MissingExon4(self, getVarConsequences, varInExon, varInIneligibleDeNovoExon,
+                                                                  varInExonicPortion, isSplicingWindowInFrame,
+                                                                  getVarStrand, getVarExonNumberSNS, getSpliceAcceptorBoundaries,
+                                                                  getVarWindowPosition, isCIDomainInRegion, compareDeNovoWildTypeSplicePos):
+        '''Tests that function works correctly for exons in BRCA1 exon 3 (because BRCA1 exon 4 does not exist in numbering)'''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["HGVS_cDNA"] = "c.89T>A"
+        spliceRescueInfo = calcVarPriors.getPriorProbSpliceRescueNonsenseSNS(self.variant, boundaries, deNovoDonorInRefAcc=False)
+        self.assertEquals(spliceRescueInfo["priorProb"], priorProbs["pathogenic"])
+        self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class5"])
+        self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
+        self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
+        self.assertEquals(spliceRescueInfo["frameshiftFlag"], 0)
+        self.assertEquals(spliceRescueInfo["inExonicPortionFlag"], 0)
+        self.assertEquals(spliceRescueInfo["CIDomainInRegionFlag"], 1)
+        self.assertEquals(spliceRescueInfo["isDivisibleFlag"], 0)
+
     @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
     @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = True)
     def test_getDeNovoSpliceFrameshiftStatusDonorBRCA1(self, isSplicingWindowInFrame, compareDeNovoWildTypeSplicePos):

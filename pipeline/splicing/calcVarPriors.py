@@ -1282,6 +1282,9 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                 # nextExonNum parses out N from varExonNum and adds 1 to get next exon number key "exonN+1"
                 # use [4:] to remove "exon" from "exonN" so can add 1 to N to get N+1
                 nextExonNum = "exon" + str(int(varExonNum[4:]) + 1)
+                # skips to exon 5 because exon 4 does not exist in BRCA1 refseq transcript
+                if variant["Gene_Symbol"] == "BRCA1" and nextExonNum == "exon4":
+                    nextExonNum = "exon5"
                 refSpliceAccBounds = getSpliceAcceptorBoundaries(variant, STD_ACC_INTRONIC_LENGTH, STD_ACC_EXONIC_LENGTH)
                 varWindowPos = getVarWindowPosition(variant, donor=True, deNovoDonorInRefAcc=deNovoDonorInRefAcc)
                 inExonicPortion = varInExonicPortion(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH, donor=True,
