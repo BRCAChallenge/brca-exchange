@@ -1243,6 +1243,15 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
     #            "isDivisibleFlag": "N/A",
     #            "deNovoDonorSufficientFlag": 0}
 #    if getVarConsequences(variant) == "stop_gained" and varInExon(variant) == True and deNovoDonorInfo["priorProb"] >= 0.30:
+    if varInIneligibleDeNovoExon(variant, donor=True) == True:
+        return {"priorProb": 0.99,
+                "enigmaClass": "class_5",
+                "spliceRescue": 0,
+                "spliceFlag": 0,
+                "frameshiftFlag": 0,
+                "inExonicPortionFlag": 0,
+                "CIDomainInRegionFlag": 0,
+                "isDivisibleFlag": 0}
     if getVarConsequences(variant) == "stop_gained" and varInExon(variant):
         spliceFlag = 0
         spliceRescue = 0
@@ -1282,8 +1291,8 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                                                    STD_ACC_INTRONIC_LENGTH, donor=True)
                 regionEnd = refSpliceAccBounds[nextExonNum]["acceptorStart"]
                 CIDomainInRegion = isCIDomainInRegion(regionStart, regionEnd, boundaries, variant["Gene_Symbol"])
-                isDivisible = compareDeNovoWildTypeSplicePos(variant, STD_EXONIC_PORTION, STD_ACC_INTRONIC_LENGTH
-                                                             deNovoDonorInRefAcc=deNovoDonorInRefAcc, donor=donor)
+                isDivisible = compareDeNovoWildTypeSplicePos(variant, STD_EXONIC_PORTION, STD_ACC_INTRONIC_LENGTH,
+                                                             deNovoDonorInRefAcc=deNovoDonorInRefAcc, donor=True)
                 # if truncated region includes a clinically important domain or causes a frameshift
                 if CIDomainInRegion == True or isDivisible == False:
                     priorProb = 0.99

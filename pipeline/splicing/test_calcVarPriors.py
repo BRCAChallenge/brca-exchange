@@ -3035,8 +3035,6 @@ class test_calcVarPriors(unittest.TestCase):
                                                                    deNovoDonorInRefAcc=False, donor=False)
         self.assertFalse(isDivisible)
 
-    @unittest.skip
-    # TO DO remove this skip
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.varInIneligibleDeNovoExon', return_value = True)
