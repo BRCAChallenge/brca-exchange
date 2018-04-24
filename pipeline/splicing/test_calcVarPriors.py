@@ -3197,6 +3197,42 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(spliceRescueInfo["inExonicPortionFlag"], 0)
         self.assertEquals(spliceRescueInfo["CIDomainInRegionFlag"], 0)
         self.assertEquals(spliceRescueInfo["isDivisibleFlag"], 0)
+
+    @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
+    @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = True)
+    def test_getDeNovoSpliceFrameshiftStatusDonorBRCA1(self, isSplicingWindowInFrame, compareDeNovoWildTypeSplicePos):
+        '''Checks that function works for minus strand (BRCA1) variant in exon (also in reference splice site)'''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["HGVS_cDNA"] = "c.303T>G"
+        deNovoSpliceFrameshift = calcVarPriors.getDeNovoSpliceFrameshiftStatus(self.variant, donor=True, deNovoDonorInRefAcc=True)
+        self.assertFalse(deNovoSpliceFrameshift)
+
+    @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = False)
+    @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = False)
+    def test_getDeNovoSpliceFrameshiftStatusAccBRCA1(self, isSplicingWindowInFrame, compareDeNovoWildTypeSplicePos):
+        '''Checks that function works for minus strand (BRCA1) variant in intronic portion of reference acceptor site'''
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["HGVS_cDNA"] = "c.4358-12t>G"
+        deNovoSpliceFrameshift = calcVarPriors.getDeNovoSpliceFrameshiftStatus(self.variant, donor=False, deNovoDonorInRefAcc=False)
+        self.assertTrue(deNovoSpliceFrameshift)
+
+    @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = False)
+    @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = False)
+    def test_getDeNovoSpliceFrameshiftStatusDonorBRCA2(self, isSplicingWindowInFrame, compareDeNovoWildTypeSplicePos):
+        '''Checks that function works for plus strand (BRCA2) variant in intron (not in native splice site)'''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["HGVS_cDNA"] = "c.7805+11c>T"
+        deNovoSpliceFrameshift = calcVarPriors.getDeNovoSpliceFrameshiftStatus(self.variant, donor=True, deNovoDonorInRefAcc=False)
+        self.assertTrue(deNovoSpliceFrameshift)
+
+    @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
+    @mock.patch('calcVarPriors.compareDeNovoWildTypeSplicePos', return_value = True)
+    def test_getDeNovoSpliceFrameshiftStatusAccBRCA2(self, isSplicingWindowInFrame, compareDeNovoWildTypeSplicePos):
+        '''Checks that function works for plus strand (BRCA2) variant in exonic portion of reference acceptor site'''
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["HGVS_cDNA"] = "c.69T>G"
+        deNovoSpliceFrameshift = calcVarPriors.getDeNovoSpliceFrameshiftStatus(self.variant, donor=False, deNovoDonorInRefAcc=False)
+        self.assertFalse(deNovoSpliceFrameshift)
         
     def test_getEnigmaClass(self):
         ''''

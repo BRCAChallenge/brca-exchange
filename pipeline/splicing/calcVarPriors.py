@@ -1324,6 +1324,25 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                 "isDivisibleFlag": isDivisibleFlag}
 #                "deNovoDonorSufficientFlag": deNovoDonorSufficientFlag}
 
+def getDeNovoSpliceFrameshiftStatus(variant, donor=True, deNovoDonorInRefAcc=False):
+    '''
+    Given a variant, determiens if de novo splice site (either donor or acceptor based on donor argument)
+      causes a frameshift
+    Returns true if variant's de novo splice site causes a frameshift, false otherwise
+
+    deNovoDonorInRefAcc is True if looking for de novo donor in reference splice acceptor site, False otherwise
+    Frameshift is determined in 2 ways: inFrame and isDivisible
+    '''
+    # if inFrame == False then alt and ref exons are not in the same reading frame
+    inFrame = isSplicingWindowInFrame(variant, STD_EXONIC_PORTION, STD_ACC_INTRONIC_LENGTH,
+                                      deNovoDonorInRefAcc=deNovoDonorInRefAcc, donor=donor)
+    # if isDivisble == Flase then distance between old and new splice position is not divislbe by 3
+    isDivisible = compareDeNovoWildTypeSplicePos(variant, STD_EXONIC_PORTION, STD_ACC_INTRONIC_LENGTH,
+                                                 deNovoDonorInRefAcc=deNovoDonorInRefAcc, donor=donor)
+    if inFrame == False or isDivisible == False:
+        return True
+    return False
+
 def getEnigmaClass(priorProb):
     '''
     Given a prior probability of pathogenecity, returns a predicted qualitative ENIGMA class
