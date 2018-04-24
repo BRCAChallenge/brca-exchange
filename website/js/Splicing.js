@@ -647,11 +647,11 @@ class Splicing extends React.Component {
 
                     {/* legend */}
                     <g transform="translate(274,220)">
-                        <rect x="0" className="inserted" stroke="black" width="20" height="10" />
+                        <rect x="0" className="changed" stroke="black" width="20" height="10" />
                         <text x="22" y="10">{ `Substitution (${info.changed} base${plural(info.changed)})` }</text>
                         <rect x="192" className="deleted" stroke="black" width="20" height="10" />
                         <text x="214" y="10">{ `Deletion (${info.deleted || 0} base${plural(info.deleted)})` }</text>
-                        <rect x="360" className="changed" stroke="black" width="20" height="10"/>
+                        <rect x="360" className="inserted" stroke="black" width="20" height="10"/>
                         <text x="382" y="10">{ `Insertion (${info.inserted || 0} base${plural(info.inserted)})` }</text>
                     </g>
                 </svg>

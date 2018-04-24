@@ -1013,14 +1013,14 @@ div.variant-details-body {
 
 /* variant fill styles, refer to top-level svg's <defs> section */
 .transcript-viz .changed {
-    fill: #56F;
+    fill: lightgreen;
 }
 .transcript-viz .deleted {
     /* the red is #FF8888, not sure how to do the black stripes in CSS */
     fill: url(#diagonalHatch);
 }
 .transcript-viz .inserted {
-    fill: lightgreen;
+    fill: #56F;
 }
 
 .transcript-viz .donor {
