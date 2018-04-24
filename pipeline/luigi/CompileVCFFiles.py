@@ -755,7 +755,7 @@ class DownloadLOVDInputFile(luigi.Task):
 
     lovd_data_file = luigi.Parameter(default='', description='path, where the shared LOVD data will be stored')
 
-    shared_lovd_data_url = luigi.Parameter(default='https://databases.lovd.nl/shared/export/BRCA',
+    shared_lovd_data_url = luigi.Parameter(default='https://databases.lovd.nl/shared/export_ungrouped.php/BRCA',
                                             description='URL to download shared LOVD data from')
 
     def output(self):
