@@ -116,14 +116,12 @@ class Region extends React.Component {
 
                 {/*
                 draw the outline separately, ignoring the mask, so we can see it around variants
-                FIXME: this looks kind of weird, revisit it later perhaps
                 */}
                 { selected &&
                     <rect x={bpMinPx} width={widthPx} height={height}
                         rx={exonBorderRadius}
                         fill="transparent"
                         className={`selected-ci-path`}
-                        // clipPath={mask && `url(#${mask})`}
                     />
                 }
             </g>
@@ -540,12 +538,10 @@ class Splicing extends React.Component {
     constructor(props) {
         super(props);
 
-        // const meta = geneMeta[props.variant['Gene_Symbol']];
-
         this.state = {
             drawAcceptors: true,
             drawDonors: true,
-            drawCIDomains: new Set(), // new Set(Object.keys(meta.CIDomains)),
+            drawCIDomains: new Set(),
             selectedDomain: null,
             alternate_palette: false
         };

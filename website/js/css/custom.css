@@ -1051,14 +1051,10 @@ div.variant-details-body {
 }
 .site-indicator rect { width: 100%; height: 100%; }
 
-/* special section for differences in color perception */
-/* R's "colorblind-friendly" palette:
-(gray,     orange,    lightblue, green,     yellow,    darkblue,  red,       purple)
-("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
- */
+/* special section for differences in color perception, taken from R's colorblind-friendly palette */
 
 /* variant fill styles */
-.transcript-viz * { transition: fill ease-in 300ms; }
+.transcript-viz * { transition: fill ease-out 300ms; }
 .transcript-viz.altpalette .changed { fill: #009E73; }
 .transcript-viz.altpalette .inserted { fill: #0072B2; }
 .transcript-viz.altpalette .deleted-fill-rect { fill: #D55E00; }
