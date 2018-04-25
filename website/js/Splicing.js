@@ -244,8 +244,26 @@ class SegmentRegions extends React.Component {
         // apply the intervals we've constructed to the scale
         scale.domain(domain).range(range);
 
+        // note that the order of elements defines their rendering order;
+        // later elements will be rendered on top of earlier ones
+
         return (
             <g>
+            {
+                flatDomains
+                    .filter(({span}) => overlaps([span.start, span.end], [txStart, txEnd]))
+                    .map(({org, name, code, span}, idx) =>
+                        <Region key={`cidomain_${org}_${name}_${idx}`}
+                            className={`region cidomain domain-${code}`}
+                            region={span} label={zoomed && `${org}: ${name}`}
+                            x={0} width={width} height={height}
+                            txStart={txStart} txEnd={txEnd} scale={scale}
+                            mask={mask} // fill={CIDomainFills[org]}
+                            selected={this.props.selectedDomain === `${org}_${name}`}
+                        />
+                    )
+            }
+
             {
                 donors.map((donorSpan, idx) => (
                     <Region key={`donor_${n}_${idx}`} region={donorSpan}
@@ -264,21 +282,6 @@ class SegmentRegions extends React.Component {
                         mask={mask}
                     />
                 ))
-            }
-
-            {
-                flatDomains
-                    .filter(({span}) => overlaps([span.start, span.end], [txStart, txEnd]))
-                    .map(({org, name, code, span}, idx) =>
-                        <Region key={`cidomain_${org}_${name}_${idx}`}
-                            className={`region cidomain domain-${code}`}
-                            region={span} label={zoomed && `${org}: ${name}`}
-                            x={0} width={width} height={height}
-                            txStart={txStart} txEnd={txEnd} scale={scale}
-                            mask={mask} // fill={CIDomainFills[org]}
-                            selected={this.props.selectedDomain === `${org}_${name}`}
-                        />
-                    )
             }
 
             {
@@ -543,7 +546,8 @@ class Splicing extends React.Component {
             drawAcceptors: true,
             drawDonors: true,
             drawCIDomains: new Set(), // new Set(Object.keys(meta.CIDomains)),
-            selectedDomain: null
+            selectedDomain: null,
+            alternate_palette: false
         };
 
         this.toggleDrawing = this.toggleDrawing.bind(this);
@@ -617,16 +621,16 @@ class Splicing extends React.Component {
         const filteredCIDomains = _.pickBy(meta.CIDomains, (v, k) => this.state.drawCIDomains.has(k));
 
         return (
-            <div className="transcript-viz">
+            <div className={`transcript-viz ${this.state.alternate_palette ? 'altpalette' : ''}`}>
                 <svg viewBox="-4 0 808 240" preserveAspectRatio="xMidYMid">
                     {/* variant fill definitions, declared here instead of in CSS b/c one of them is a <pattern> */}
                     <defs>
                         <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">
-                            <rect x="0" y="0" width="4" height="4" fill="#FF8888" />
+                            <rect x="0" y="0" width="4" height="4" className="deleted-fill-rect" />
                             <path d="M-1,1 l2,-2
                            M0,4 l4,-4
                            M3,5 l2,-2"
-                                stroke="black" strokeWidth={1} />
+                                className="deleted-diagonal-lines" />
                         </pattern>
                     </defs>
 
@@ -677,6 +681,13 @@ class Splicing extends React.Component {
                     {
                         this.generateCIDomainSelectors(meta)
                     }
+
+                    <div>
+                        <label>
+                            <input style={{marginRight: '0.5em'}} type="checkbox" name="alternate_palette" checked={this.state.alternate_palette} onChange={this.toggleDrawing} />
+                            Alternate Palette
+                        </label>
+                    </div>
                 </div>
             </div>
         );

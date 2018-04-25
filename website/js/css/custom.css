@@ -1011,16 +1011,22 @@ div.variant-details-body {
     fill: none;
 }
 
-/* variant fill styles, refer to top-level svg's <defs> section */
+/* variant fill styles */
 .transcript-viz .changed {
     fill: lightgreen;
 }
-.transcript-viz .deleted {
-    /* the red is #FF8888, not sure how to do the black stripes in CSS */
-    fill: url(#diagonalHatch);
-}
 .transcript-viz .inserted {
     fill: #56F;
+}
+.transcript-viz .deleted {
+    fill: url(#diagonalHatch);
+}
+/* the below two styles customize the <pattern> #diagonalHatch, defined in the svg's defs section */
+.transcript-viz .deleted-fill-rect {
+    fill: #FF8888;
+}
+.transcript-viz .deleted-diagonal-lines {
+    stroke: black; stroke-width: 1px;
 }
 
 .transcript-viz .donor {
@@ -1045,6 +1051,34 @@ div.variant-details-body {
 }
 .site-indicator rect { width: 100%; height: 100%; }
 
+/* special section for differences in color perception */
+/* R's "colorblind-friendly" palette:
+(gray,     orange,    lightblue, green,     yellow,    darkblue,  red,       purple)
+("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+ */
+
+/* variant fill styles */
+.transcript-viz * { transition: fill ease-in 300ms; }
+.transcript-viz.altpalette .changed { fill: #009E73; }
+.transcript-viz.altpalette .inserted { fill: #0072B2; }
+.transcript-viz.altpalette .deleted-fill-rect { fill: #D55E00; }
+.transcript-viz.altpalette .deleted-diagonal-lines { stroke: black; stroke-width: 1px; }
+
+.transcript-viz.altpalette .donor { fill: rgba(204, 121, 167, 0.7); }
+.transcript-viz.altpalette .acceptor { fill: rgba(86, 180, 233, 0.8); }
+
+.transcript-viz.altpalette .domain-enigma { fill: rgba(230, 159, 0, 1); }
+.transcript-viz.altpalette .domain-huntsman { fill: rgba(230, 159, 0, 1); }
+
+/* segments (introns, exons) */
+.transcript-viz.altpalette .segment.exon { fill: white; }
+.transcript-viz.altpalette .segment.intron { fill: #cbcbcb; }
+.transcript-viz.altpalette .segment.highlighted { fill: #F0E442; }
+/* used for the 'overlay' rect that allows the outline to appear above any highlighted regions within the segment */
+.transcript-viz.altpalette .segment.outline {
+    fill: transparent;
+    stroke: rgba(0, 0, 0, 0.5);
+}
 
 /* --- reports (nested subtiles) -------------- */
 
