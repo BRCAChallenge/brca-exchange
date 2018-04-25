@@ -543,7 +543,7 @@ class Splicing extends React.Component {
             drawDonors: true,
             drawCIDomains: new Set(),
             selectedDomain: null,
-            alternate_palette: false
+            alternatePalette: false
         };
 
         this.toggleDrawing = this.toggleDrawing.bind(this);
@@ -617,7 +617,7 @@ class Splicing extends React.Component {
         const filteredCIDomains = _.pickBy(meta.CIDomains, (v, k) => this.state.drawCIDomains.has(k));
 
         return (
-            <div className={`transcript-viz ${this.state.alternate_palette ? 'altpalette' : ''}`}>
+            <div className={`transcript-viz ${this.state.alternatePalette ? 'altpalette' : ''}`}>
                 <svg viewBox="-4 0 808 240" preserveAspectRatio="xMidYMid">
                     {/* variant fill definitions, declared here instead of in CSS b/c one of them is a <pattern> */}
                     <defs>
@@ -680,7 +680,7 @@ class Splicing extends React.Component {
 
                     <div>
                         <label>
-                            <input style={{marginRight: '0.5em'}} type="checkbox" name="alternate_palette" checked={this.state.alternate_palette} onChange={this.toggleDrawing} />
+                            <input style={{marginRight: '0.5em'}} type="checkbox" name="alternatePalette" checked={this.state.alternatePalette} onChange={this.toggleDrawing} />
                             Alternate Palette
                         </label>
                     </div>
