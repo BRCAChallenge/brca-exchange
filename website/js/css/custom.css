@@ -32,7 +32,7 @@
 /**************************************************************/
 
 p {
-    font-size: 1.2em;
+    font-size: 18px;
     font-weight: 200;
 }
 
@@ -302,7 +302,7 @@ input:focus {
 
 .matched-variant-count {
     border-radius: .25em;
-    font-size: 1.2em;
+    font-size: 18px;
 }
 
 /* used for the message on the search page */
@@ -345,7 +345,7 @@ div.colorized-jumbo {
 }
 
 .jumbotron p {
-    font-size: 1.2em;
+    font-size: 18px;
 }
 
 /**************************************************************/
@@ -358,7 +358,7 @@ div.colorized-jumbo {
 }
 
 .video-button {
-    font-size: 1.2em;
+    font-size: 18px;
     margin-top: 15px;
 }
 
@@ -572,7 +572,7 @@ html {
 }
 
 #main-grid li {
-    font-size: 1.2em;
+    font-size: 18px;
     font-weight: 200;
 }
 
@@ -582,7 +582,7 @@ html {
 }
 
 #main-grid h5 {
-    font-size: 1.2em;
+    font-size: 18px;
     font-weight: 400;
 }
 
