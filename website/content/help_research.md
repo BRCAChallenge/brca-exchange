@@ -213,6 +213,25 @@ To open the lollipop chart click on the ‘Show Lollipop Chart’ button located
 
 <div style="max-width: 1000px; margin-left: auto; margin-right: auto; height: 0px; position: relative; padding-bottom: 59.552%;"><iframe src="https://streamable.com/e/zx9c?muted=1&amp;autoplay=1&amp;hd=1" frameborder="0" allowfullscreen webkitallowfullscreen mozallowfullscreen scrolling="no" style="width: 100%; height: 100%; position: absolute;"></iframe></div>
 
+* * * * * * * * * * *
+
+## Transcript Visualization
+
+The transcript visualization depicts the reference transcript of the gene (either _BRCA1_ or _BRCA2_) on which the selected variant is found. The gene is drawn as a series of exons with intervening introns. Note that exons are drawn scaled (nonlinearly) to their actual size, to make the smaller exons easier to see, while introns are drawn at a fixed width.
+
+The gene is shown in full at the top of the visualization, with the exons/introns in which the variant lies (i.e., the area of interest) highlighted in yellow. The area of interest is shown zoomed-in below the full depiction, but contains the same information.
+
+The variant's modifications to the reference transcript are depicted in three colored regions:
+* Substitution variants (depicted in lime green)
+* Deletions (depicted in red with cross-hatched black lines)
+* Insertions (depicted in blue)
+
+The visualization also displays other regions of interest for the gene, such as donor and acceptor sites and clinically important functional domains. The visibility of these regions can be toggled individually via the checkboxes below the transcript.
+
+Clinically important functional domains are regions of the gene that has ENIGMA has assessed to be relevant to risk.  More specifically, these domains are regions of the gene that ENIGMA has determined to be relevant to risk when modified by missense alterations or in-frame deletions that could encode a stable (non-truncated) protein. This determination is made using existing knowledge of pathogenicity for individual variants in these domains. Clicking the label for given clinically important domain will display the corresponding domain in an animated outline. Clicking again on the label will disable the outline, as will clicking another domain designated as clinically important.
+
+* * * * * * * * * * *
+
 
 ## Downloading Variant Data
 To download the variant data click on the ‘Download’ button located above the search bar within the Variants Table page. When you click on it the data that is downloaded is a comma delimited .csv file containing the set of variant details for the variants that matched the search and/or filtering criteria. The first row in the file represent the column labels.
