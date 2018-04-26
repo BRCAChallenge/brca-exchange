@@ -8,9 +8,6 @@ import classNames from 'classnames';
 import util from '../util';
 import KeyInline from './KeyInline';
 
-function sentenceCase(str) {
-    return str.replace(/\b\S/g, (t) => t.toUpperCase() );
-}
 
 // from https://www.ncbi.nlm.nih.gov/clinvar/docs/review_status/#revstat_def
 const marksToReviewStatuses = {
@@ -53,12 +50,6 @@ function getMarksForReviewStatus(status) {
     );
 }
 
-function abbreviatedSubmitter(originalSubmitter) {
-    return originalSubmitter
-        .replace('Evidence-based Network for the Interpretation of Germline Mutant Alleles (ENIGMA)', 'ENIGMA')
-        .replace('Breast Cancer Information Core (BIC)', 'BIC');
-}
-
 const VariantSubmitter = React.createClass({
     mixins: [CollapsableMixin],
 
@@ -88,7 +79,7 @@ const VariantSubmitter = React.createClass({
 
             extraHeaderItems = (
                 <div className="clinvar-extras">
-                    <span className="clin-sig">{sentenceCase(significance)}</span>
+                    <span className="clin-sig">{util.sentenceCase(significance)}</span>
                     <span className="date-updated">{` (${dateUpdated})`}</span>
                 </div>
             );
@@ -126,7 +117,7 @@ const VariantSubmitter = React.createClass({
                     className={`submitter-cell submitter-name ${!this.props.expanded ? 'collapsed' : ''}`}
                     style={{textAlign: 'left', flex: '1 1 auto'}}
                 >
-                { abbreviatedSubmitter(submitter) }
+                { util.abbreviatedSubmitter(submitter) }
                 </div>
 
                 <div className="submitter-cell optional" style={{textAlign: 'left', flex: '0 1 auto'}}>

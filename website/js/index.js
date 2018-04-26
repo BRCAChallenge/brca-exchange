@@ -4,6 +4,7 @@
 
 // shims for older browsers
 import SourceReportsTile from "./components/SourceReportsTile";
+import AlleleFrequenciesTile from "./components/AlleleFrequenciesTile";
 
 require('babel/polyfill');
 require('es5-shim');
@@ -746,7 +747,7 @@ var VariantDetail = React.createClass({
         let groupsEmpty = 0;
         let totalRowsEmpty = 0;
 
-        const groupTables = _.map(groups, ({ groupTitle, innerCols, reportSource, reportBinding }) => {
+        const groupTables = _.map(groups, ({ groupTitle, innerCols, reportSource, reportBinding, alleleFrequencies, innerGroups }) => {
             let rowsEmpty = 0;
 
             // if it's a report source (i.e. the key reportSource is defined), then we defer
@@ -785,6 +786,27 @@ var VariantDetail = React.createClass({
                 );
             }
 
+            if (alleleFrequencies) {
+                return (
+                    <AlleleFrequenciesTile
+                        alleleFrequencyData={innerGroups}
+                        groupTitle={groupTitle}
+                        onChangeGroupVisibility={this.onChangeGroupVisibility}
+                        hideEmptyItems={this.state.hideEmptyItems}
+                        onFrequencyFieldToggled={() => {
+                            setTimeout(() => {
+                                // this forces a re-render after a group has expanded/collapsed, fixing the layout
+                                // note that 300ms just happens to be the duration of the expand/collapse animation
+                                // it'd be better to run the re-layout whenever the animation ends
+                                this.forceUpdate();
+                            }, 300);
+                        }}
+                        showHelp={this.showHelp}
+                        variant={variant}
+                    />
+                );
+            }
+
             // remove the BIC classification and importance fields unless the classification is 1 or 5
             if (groupTitle === 'Clinical Significance (BIC)') {
                 const bicClass = variant['Clinical_classification_BIC'];
@@ -806,27 +828,7 @@ var VariantDetail = React.createClass({
                 }
 
                 // get allele frequency chart components if they're available
-                if (rowDescriptor.replace) {
-                    rowItem = rowDescriptor.replace(variant, prop);
-
-                    // frequency charts are not displayed if they're empty
-                    if (rowItem === false) {
-                        return false;
-                    }
-
-                    // don't insert rows for empty charts, but count them as empty rows
-                    if (prop === 'Allele_Frequency_Charts_1000_Genomes') {
-                        if (!variant['Variant_in_1000_Genomes']) { // eslint-disable-line dot-notation
-                            rowsEmpty += 1;
-                            return false;
-                        }
-                    } else if (prop === 'Allele_Frequency_Charts_ExAC') {
-                        if (!variant['Variant_in_ExAC']) {
-                            rowsEmpty += 1;
-                            return false;
-                        }
-                    }
-                } else if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] !== null) {
+                if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] !== null) {
                     let val = variant["HGVS_Protein"].split(":")[0];
                     variant[prop] = val;
                     rowItem = val;
@@ -896,8 +898,6 @@ var VariantDetail = React.createClass({
         // generates variant diff rows
         const diffRows = this.generateDiffRows(cols, data, false);
 
-        /* NOTE: Uncomment to display clinvar report diffs in UI
-
         // generates report diff rows
         if (this.state.reports !== undefined) {
             let sortedSubmissions = {'ClinVar': {}};
@@ -918,13 +918,16 @@ var VariantDetail = React.createClass({
                     }
                 }
             }
-
             var clinvarDiffRows = _.map(sortedSubmissions.ClinVar, function(submissions) {
+                let newestSubmission = submissions ? submissions[0] : '';
+                const significance = util.sentenceCase(util.getFormattedFieldByProp("Clinical_Significance_ClinVar", newestSubmission)
+                .replace(/(variant of unknown significance|uncertain significance)/i, 'VUS'));
+                const submitter = util.abbreviatedSubmitter(util.getFormattedFieldByProp("Submitter_ClinVar", newestSubmission));
                 return (
                     <Row>
                         <Col md={12} className="variant-history-col">
-                            <h3>ClinVar Submission: {submissions[0]["SCV_ClinVar"]}</h3>
-                            <h4>Previous Versions of this Submission:</h4>
+                            <h3>ClinVar Submission: {newestSubmission["SCV_ClinVar"]} ({submitter}; {significance})</h3>
+                            <h4>Previous Versions of this Submission (since {util.normalizeDateFieldDisplay(newestSubmission.Data_Release.date)}):</h4>
                             <Table className='variant-history nopointer' responsive bordered>
                                 <thead>
                                     <tr className='active'>
@@ -944,7 +947,6 @@ var VariantDetail = React.createClass({
             }, this);
 
         }
-        */
 
         const splicingHeader = (
             <h3>
@@ -1044,7 +1046,7 @@ var VariantDetail = React.createClass({
                     </Col>
                 </Row>
 
-                {/*this.props.mode === "research_mode" ? clinvarDiffRows : ''*/}
+                {this.props.mode === "research_mode" ? clinvarDiffRows : ''}
 
                 <Row>
                     <Col md={12} mdOffset={0}>
