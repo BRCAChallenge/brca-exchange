@@ -32,7 +32,7 @@
 /**************************************************************/
 
 p {
-    font-size: 1.2em;
+    font-size: 18px;
     font-weight: 200;
 }
 
@@ -318,7 +318,7 @@ input:focus {
 
 .matched-variant-count {
     border-radius: .25em;
-    font-size: 1.2em;
+    font-size: 18px;
 }
 
 /* used for the message on the search page */
@@ -361,7 +361,7 @@ div.colorized-jumbo {
 }
 
 .jumbotron p {
-    font-size: 1.2em;
+    font-size: 18px;
 }
 
 /**************************************************************/
@@ -374,7 +374,7 @@ div.colorized-jumbo {
 }
 
 .video-button {
-    font-size: 1.2em;
+    font-size: 18px;
     margin-top: 15px;
 }
 
@@ -588,7 +588,7 @@ html {
 }
 
 #main-grid li {
-    font-size: 1.2em;
+    font-size: 18px;
     font-weight: 200;
 }
 
@@ -598,7 +598,7 @@ html {
 }
 
 #main-grid h5 {
-    font-size: 1.2em;
+    font-size: 18px;
     font-weight: 400;
 }
 
@@ -960,6 +960,141 @@ div.variant-details-body {
     margin-top: 2em;
 }
 
+
+/* --- transcript viz. -------------- */
+
+.selected-ci-path {
+    stroke: black;
+    stroke-width: 2px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 4;
+
+    animation: dash 4s linear infinite;
+}
+
+@keyframes dash {
+    to {
+        stroke-dashoffset: 80px;
+    }
+}
+
+.splicing-domain-list {
+    display: block;
+}
+.splicing-domain-list > li {
+    display: inline-block;
+    zoom: 1;
+    *display: inline;
+}
+.splicing-domain-list > li > a { cursor: pointer; }
+.splicing-domain-list > li:after {
+    content: ', ';
+    margin-right: 0.2em
+}
+.splicing-domain-list > li:last-child:after {
+    content: '';
+}
+
+/* all these segment styles have no outline, because the outline is drawn separately as an unfilled rect on top */
+.transcript-viz .segment.exon {
+    fill: #c1ddf0;
+    stroke: none;
+    border-radius: 4px;
+}
+
+.transcript-viz .segment.intron {
+    fill: #dfe6ec;
+    stroke: none;
+}
+
+.transcript-viz .segment.highlighted {
+    fill: #ffffbb;
+    stroke: none;
+}
+
+/* used for the 'overlay' rect that allows the outline to appear above any highlighted regions within the segment */
+.transcript-viz .segment.outline {
+    fill: transparent;
+    stroke: rgba(0, 0, 0, 0.5);
+}
+
+/* used for the 'fake' introns on either end of the genome, which are both filled and outlined */
+.transcript-viz .segment.cap {
+    stroke: rgba(0, 0, 0, 0.5);
+}
+
+.transcript-viz .zoomline {
+    stroke: #ccc;
+    stroke-width: 3px;
+    stroke-dasharray: 8,3;
+    fill: none;
+}
+
+/* variant fill styles */
+.transcript-viz .changed {
+    fill: lightgreen;
+}
+.transcript-viz .inserted {
+    fill: #56F;
+}
+.transcript-viz .deleted {
+    fill: url(#diagonalHatch);
+}
+/* the below two styles customize the <pattern> #diagonalHatch, defined in the svg's defs section */
+.transcript-viz .deleted-fill-rect {
+    fill: #FF8888;
+}
+.transcript-viz .deleted-diagonal-lines {
+    stroke: black; stroke-width: 1px;
+}
+
+.transcript-viz .donor {
+    fill: rgba(206, 103, 179, 0.7);
+}
+.transcript-viz .acceptor {
+    fill: rgba(123, 168, 255, 0.8);
+}
+
+.transcript-viz .domain-enigma {
+    fill: rgba(147, 0, 255, 0.3);
+}
+
+.transcript-viz .domain-huntsman {
+    fill: rgba(0, 200, 45, 0.3);
+}
+
+.site-indicator {
+    vertical-align: top;
+    margin-right: 8px;
+    border: solid 1px #333;
+}
+.site-indicator rect { width: 100%; height: 100%; }
+
+/* special section for differences in color perception, taken from R's colorblind-friendly palette */
+
+/* variant fill styles */
+.transcript-viz * { transition: fill ease-out 300ms; }
+.transcript-viz.altpalette .changed { fill: #009E73; }
+.transcript-viz.altpalette .inserted { fill: #0072B2; }
+.transcript-viz.altpalette .deleted-fill-rect { fill: #D55E00; }
+.transcript-viz.altpalette .deleted-diagonal-lines { stroke: black; stroke-width: 1px; }
+
+.transcript-viz.altpalette .donor { fill: rgba(204, 121, 167, 0.7); }
+.transcript-viz.altpalette .acceptor { fill: rgba(86, 180, 233, 0.8); }
+
+.transcript-viz.altpalette .domain-enigma { fill: rgba(230, 159, 0, 1); }
+.transcript-viz.altpalette .domain-huntsman { fill: rgba(230, 159, 0, 1); }
+
+/* segments (introns, exons) */
+.transcript-viz.altpalette .segment.exon { fill: white; }
+.transcript-viz.altpalette .segment.intron { fill: #cbcbcb; }
+.transcript-viz.altpalette .segment.highlighted { fill: #F0E442; }
+/* used for the 'overlay' rect that allows the outline to appear above any highlighted regions within the segment */
+.transcript-viz.altpalette .segment.outline {
+    fill: transparent;
+    stroke: rgba(0, 0, 0, 0.5);
+}
 
 /* --- reports (nested subtiles) -------------- */
 
