@@ -106,6 +106,10 @@ def variant_reports(request, variant_id):
             key = report.SCV_ClinVar
             report_query = Report.objects.filter(SCV_ClinVar=key).order_by('-Data_Release_id').select_related('Data_Release')
             report_versions.extend(map(report_to_dict, report_query))
+        elif report.Source == "LOVD":
+            key = report.DBID_LOVD
+            report_query = Report.objects.filter(DBID_LOVD=key).order_by('-Data_Release_id').select_related('Data_Release')
+            report_versions.extend(map(report_to_dict, report_query))
 
     response = JsonResponse({"data": report_versions})
     response['Access-Control-Allow-Origin'] = '*'
