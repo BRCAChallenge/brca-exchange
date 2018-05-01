@@ -548,17 +548,6 @@ var VariantDetail = React.createClass({
         this.props.toggleMode();
         this.forceUpdate();
     },
-    reformatDate: function(date) { //handles single dates or an array of dates
-        if (util.isEmptyField(date)) {
-            return date;
-        }
-        if (!Array.isArray(date)) {
-            date = date.split(',');
-        }
-        return date.map(function(d) {
-            return moment.utc(new Date(d)).format("DD MMMM YYYY");
-        }).join();
-    },
     pathogenicityChanged: function(pathogenicityDiff) {
         return (pathogenicityDiff.added || pathogenicityDiff.removed) ? true : false;
     },
@@ -625,14 +614,6 @@ var VariantDetail = React.createClass({
     generateDiffRows: function(cols, data, isReports) {
         var diffRows = [];
 
-        // keys that contain date values that need reformatting for the ui
-        var dateKeys = [
-            "Date_Last_Updated_ClinVar",
-            "Date_last_evaluated_ENIGMA",
-            "Edited_date_LOVD",
-            "Created_date_LOVD"
-        ];
-
         // In research_mode, only show research_mode changes.
         var relevantFieldsToDisplayChanges = cols.map(function(col) {
             return col.prop;
@@ -659,9 +640,9 @@ var VariantDetail = React.createClass({
                         continue;
                     }
 
-                    if (_.contains(dateKeys, fieldName)) {
-                        added = this.reformatDate(fieldDiff.added);
-                        removed = this.reformatDate(fieldDiff.removed);
+                    if (_.contains(util.dateKeys, fieldName)) {
+                        added = util.reformatDate(fieldDiff.added);
+                        removed = util.reformatDate(fieldDiff.removed);
                     } else if (fieldDiff.field_type === "list") {
                         added = _.map(fieldDiff.added, elem => elem.replace(/_/g, " ").trim());
                         removed = _.map(fieldDiff.removed, elem => elem.replace(/_/g, " ").trim());
@@ -929,7 +910,7 @@ var VariantDetail = React.createClass({
                     <Row>
                         <Col md={12} className="variant-history-col">
                             <h3>ClinVar Submission: {newestSubmission["SCV_ClinVar"]} ({submitter}; {significance})</h3>
-                            <h4>Previous Versions of this Submission (since {util.normalizeDateFieldDisplay(newestSubmission.Data_Release.date)}):</h4>
+                            <h4>Previous Versions of this Submission (since {util.reformatDate(newestSubmission.Data_Release.date)}):</h4>
                             <Table className='variant-history nopointer' responsive bordered>
                                 <thead>
                                     <tr className='active'>

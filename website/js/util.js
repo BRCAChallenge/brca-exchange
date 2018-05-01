@@ -4,6 +4,15 @@ var React = require('react');
 var moment = require('moment');
 var _ = require('underscore');
 
+// keys that contain date values that need reformatting for the ui
+const dateKeys = [
+    "Date_Last_Updated_ClinVar",
+    "Date_last_evaluated_ENIGMA",
+    "Edited_date_LOVD",
+    "Created_date_LOVD"
+];
+
+
 function isEmptyField(value) {
     if (Array.isArray(value)) {
         value = value[0];
@@ -78,6 +87,19 @@ function generateLinkToGenomeBrowser(prop, value) {
 }
 
 
+function reformatDate(date) { //handles single dates or an array of dates
+    if (isEmptyField(date)) {
+        return date;
+    }
+    if (!Array.isArray(date)) {
+        date = date.split(',');
+    }
+    return date.map(function(d) {
+        return normalizeDateFieldDisplay(d);
+    }).join();
+}
+
+
 function getFormattedFieldByProp(prop, variant) {
     let rowItem;
 
@@ -124,9 +146,6 @@ function getFormattedFieldByProp(prop, variant) {
         rowItem = variant[prop].split(":")[1];
     } else if (prop === "HGVS_Protein") {
         rowItem = variant[prop].split(":")[1];
-    } else if (prop === "Date_last_evaluated_ENIGMA" && !isEmptyField(variant[prop])) {
-        // try a variety of formats until one works, or just display the value if not?
-        rowItem = normalizeDateFieldDisplay(variant[prop]);
     } else if (/Allele_frequency_.*_ExAC/.test(prop)) {
         let count = variant[prop.replace("frequency", "count")],
             number = variant[prop.replace("frequency", "number")];
@@ -135,6 +154,10 @@ function getFormattedFieldByProp(prop, variant) {
         rowItem = generateLinkToGenomeBrowser(prop, variant[prop]);
     } else {
         rowItem = normalizedFieldDisplay(variant[prop]);
+    }
+
+    if (_.contains(dateKeys, prop)) {
+        rowItem = reformatDate(variant[prop]);
     }
 
     return rowItem;
@@ -160,5 +183,7 @@ module.exports = {
     generateLinkToGenomeBrowser,
     getFormattedFieldByProp,
     abbreviatedSubmitter,
-    sentenceCase
+    sentenceCase,
+    reformatDate,
+    dateKeys
 };
