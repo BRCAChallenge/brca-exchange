@@ -3060,8 +3060,8 @@ class test_calcVarPriors(unittest.TestCase):
         '''Tests that variant in exonic portion of highest scoring window is assigned correct prior prob and splice rescue flag'''
         boundaries = "enigma"
         spliceRescueInfo = calcVarPriors.getPriorProbSpliceRescueNonsenseSNS(self.variant, boundaries, deNovoDonorInRefAcc=False)
-        self.assertEquals(spliceRescueInfo["priorProb"], priorProbs["high"])
-        self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class4"])
+        self.assertEquals(spliceRescueInfo["priorProb"], priorProbs["pathogenic"])
+        self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class5"])
         self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
         self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
         self.assertEquals(spliceRescueInfo["frameshiftFlag"], "-")
@@ -5882,8 +5882,8 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                      'frameshiftFlag': '-',
                                                                                      'isDivisibleFlag': '-',
                                                                                      'spliceFlag': 0,
-                                                                                     'enigmaClass': 'class_4',
-                                                                                     'priorProb': 0.97,
+                                                                                     'enigmaClass': 'class_5',
+                                                                                     'priorProb': 0.99,
                                                                                      'spliceRescue': 0})
     def test_getPriorProbSpliceAcceptorSNSNonsenseBRCA1(self, varInSpliceRegion, getVarType, varInExon,
                                                         getPriorProbRefSpliceAcceptorSNS, getPriorProbDeNovoDonorSNS,
@@ -5911,8 +5911,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["deNovoAccAltGreaterClosestAltFlag"], 1)
         self.assertEquals(priorProb["deNovoAccFrameshiftFlag"], 0)
         # checks that prior prob and enigma class are appropriate based on applicable prior
-        self.assertEquals(priorProb["applicablePrior"], priorProbs["high"])
-        self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class4"])
+        self.assertEquals(priorProb["applicablePrior"], priorProbs["pathogenic"])
+        self.assertEquals(priorProb["applicableEnigmaClass"], enigmaClasses["class5"])
         # checks that protein prior prob, ref prior prob, and de novo prior prob are set appropriately
         self.assertEquals(priorProb["proteinPrior"], priorProbs["pathogenic"])
         self.assertEquals(priorProb["refAccPrior"], priorProbs["moderate"])

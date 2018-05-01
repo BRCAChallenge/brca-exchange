@@ -1252,7 +1252,7 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
         # if variant is in specified exonic portion of highest scoring sliding window, no splice rescue
         if varInExonicPortion(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH, donor=True,
                               deNovoDonorInRefAcc=deNovoDonorInRefAcc) == True:
-            priorProb = 0.97
+            priorProb = 0.99
             inExonicPortionFlag = 1
             spliceRescue = 0
         else:
