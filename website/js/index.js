@@ -628,7 +628,9 @@ var VariantDetail = React.createClass({
         // keys that contain date values that need reformatting for the ui
         var dateKeys = [
             "Date_Last_Updated_ClinVar",
-            "Date_last_evaluated_ENIGMA"
+            "Date_last_evaluated_ENIGMA",
+            "Edited_date_LOVD",
+            "Created_date_LOVD"
         ];
 
         // In research_mode, only show research_mode changes.
