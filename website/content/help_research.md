@@ -39,7 +39,7 @@ Please note that searching for a variant using a genomic coordinate will return 
 # Variant Details Page
 
 ## Variant Nomenclature
-The Variant Nomenclature field contain forms of identification by which the variant can be labeled.
+The Variant Nomenclature fields contain forms of identification by which the variant can be labeled.
 
 * #### Gene Symbol
 	The Gene Symbol field displays the name of the gene on which the variant was found, as named by HGNC. This will be either _BRCA1_ or _BRCA2_.
