@@ -90,10 +90,11 @@ export default class SourceReportsTile extends React.Component {
             if (submissions[i].Source === "ClinVar") {
                 var key = submissions[i].SCV_ClinVar;
             } else if (submissions[i].Source === "LOVD") {
-                key = submissions[i].DBID_LOVD;
+                key = submissions[i].HGVS_cDNA_LOVD + submissions[i].Submitters_LOVD
             }
             // reports are already sent to the ui sorted with the most recent first, so we can take the first one
             if (seen.indexOf(key) < 0) {
+                //TODO: filter out aggregate submissions for LOVD if individual submissions are available
                 filteredSubmissions.push(submissions[i]);
             }
             seen.push(key);
