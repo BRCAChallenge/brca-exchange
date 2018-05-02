@@ -1035,17 +1035,29 @@ def isCIDomainInRegion(regionStart, regionEnd, boundaries, gene):
     Returns True if there is an overlap, False otherwise
     '''
     if gene == "BRCA1":
+        if regionStart < regionEnd:
+            start = regionEnd
+            end = regionStart
+        else:
+            start = regionStart
+            end = regionEnd
         for domain in brca1CIDomains[boundaries].keys():
             domainStart = brca1CIDomains[boundaries][domain]["domStart"]
             domainEnd = brca1CIDomains[boundaries][domain]["domEnd"]
-            overlap = range(max(regionEnd, domainEnd), min(regionStart, domainStart) + 1)
+            overlap = range(max(end, domainEnd), min(start, domainStart) + 1)
             if len(overlap) > 0:
                 return True
     elif gene == "BRCA2":
+        if regionStart < regionEnd:
+            start = regionStart
+            end = regionEnd
+        else:
+            start = regionEnd
+            end = regionStart
         for domain in brca2CIDomains[boundaries].keys():
             domainStart = brca2CIDomains[boundaries][domain]["domStart"]
             domainEnd = brca2CIDomains[boundaries][domain]["domEnd"]
-            overlap = range(max(regionStart, domainStart), min(regionEnd, domainEnd) + 1)
+            overlap = range(max(start, domainStart), min(end, domainEnd) + 1)
             if len(overlap) > 0:
                 return True
     return False
@@ -1627,9 +1639,65 @@ def varInIneligibleDeNovoExon(variant, donor=True):
                 return True
         return False
 
-def getPriorProbDeNovoDonorSNS(variant, exonicPortionSize, deNovoDonorInRefAcc=False):
+def getDeNovoFrameshiftAndCIStatus(variant, boundaries, donor=True, deNovoDonorInRefAcc=False):
     '''
-    Given a variant and exonicPortionSize
+    Given a variant, boundaries (enigma or priors), donor argument, and deNovoDonorInRefAcc argument:
+      donor argument = True for de novo donors, False for de novo acceptors
+      deNovoDonorInRefAcc argument = True if lookign for de novo donor in ref acceptor site, False otherwise
+    Determines if new splice position causes a frameshift and would disrupt a CI Domain
+    If de novo splicing would cause a frameshift, returns False
+    Else, checks to see if new splice position would splice out (skip) a CI domain
+    If variant de novo splice position does not cause a frameshift and does not disrupt a CI domain, reutrns True
+      Returns False otherwise
+    '''
+    frameshiftStatus = getDeNovoSpliceFrameshiftStatus(variant, donor=donor, deNovoDonorInRefAcc=deNovoDonorInRefAcc)
+    # checks to make sure that variant does not cause a frameshift
+    if frameshiftStatus == True:
+        return False
+    else:
+        # determine if CI domain is in region that would be skipped by new splicing
+        if varInExon(variant) == True:
+            varExonNum = getVarExonNumberSNS(variant)
+        else:
+            if varInSpliceRegion(variant, donor=donor, deNovo=False) == True:
+                spliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=False)
+                varExonNum = spliceBounds["exonName"]
+            else:
+                if donor == True:
+                    # if a variant is in an intron de novo donor cannot splice out any of the exon
+                    # so no part of a CI domain will be spliced out
+                    return True
+        # varExonNum is a string in the format "exonN"
+        varWindowPos = getVarWindowPosition(variant, donor=donor, deNovoDonorInRefAcc=deNovoDonorInRefAcc)
+        inExonicPortion = varInExonicPortion(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH, donor=donor,
+                                             deNovoDonorInRefAcc=deNovoDonorInRefAcc)
+        regionStart = getNewSplicePosition(variant["Pos"], getVarStrand(variant), varWindowPos, inExonicPortion,
+                                           STD_EXONIC_PORTION, STD_ACC_INTRONIC_LENGTH, donor=donor)
+        if donor == True:
+            # nextExonNum parses out N from varExonNum and adds 1 to get next exon number "exonN+1"
+            # uses [4:] to remove "exon" from "exonN" so can add 1 to N to get N+1
+            nextExonNum = "exon" + str(int(varExonNum[4:]) + 1)
+            # skips to exon 5 for any variants in BRCA1 exon 3 because exon 4 does not exist in BRCA1 RefSeq transcript
+            if variant["Gene_Symbol"] == "BRCA1" and nextExonNum == "exon4":
+                nextExonNum = "exon5"
+            refSpliceAccBounds = getSpliceAcceptorBoundaries(variant, STD_ACC_INTRONIC_LENGTH, STD_ACC_EXONIC_LENGTH)
+            regionEnd = refSpliceAccBounds[nextExonNum]["acceptorStart"]
+        else:
+            # prevExonNum parses out N from varExonNum and adds 1 to get previous exon number "exonN-1"
+            # uses [4:] to remove "exon" from "exonN" so can subtract 1 to N to get N-1
+            prevExonNum = "exon" + str(int(varExonNum[4:]) - 1)
+            if variant["Gene_Symbol"] == "BRCA1" and prevExonNum == "exon4":
+                prevExonNum = "exon3"
+            refSpliceDonorBounds = getRefSpliceDonorBoundaries(variant, STD_DONOR_INTRONIC_LENGTH, STD_DONOR_EXONIC_LENGTH)
+            regionEnd = refSpliceDonorBounds[prevExonNum]["donorEnd"]
+        CIDomainInRegion = isCIDomainInRegion(regionStart, regionEnd, boundaries, variant["Gene_Symbol"])
+        if CIDomainInRegion == False:
+            return True
+        return False
+
+def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, deNovoDonorInRefAcc=False):
+    '''
+    Given a variant, boundaries (either priors or enigma), and exonicPortionSize
       1. checks that variant is a single nucleotide substitution
       2. checks that variant is in an exon or is in a reference splice donor region
     Returns a dictionary containing: 
@@ -1720,6 +1788,12 @@ def getPriorProbDeNovoDonorSNS(variant, exonicPortionSize, deNovoDonorInRefAcc=F
                 altGreaterClosestRefFlag = 1
             if altZScore > refAltZScore and refAltZScore != "N/A":
                 altGreaterClosestAltFlag = 1
+
+            if frameshiftFlag == 0 and priorProb != 0:
+                frameshiftAndCIStatus = getDeNovoFrameshiftAndCIStatus(variant, boundaries, donor=True,
+                                                                       deNovoDonorInRefAcc=deNovoDonorInRefAcc)
+                if frameshiftAndCIStatus == True:
+                    priorProb = 0.02
             
             if priorProb == 0: 
                 priorProb = "N/A"
@@ -1860,7 +1934,7 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData):
     ''' 
     if varInSpliceRegion(variant, donor=True, deNovo=False) and getVarType(variant) == "substitution":
         refSpliceInfo = getPriorProbRefSpliceDonorSNS(variant, boundaries)
-        deNovoSpliceInfo = getPriorProbDeNovoDonorSNS(variant, STD_EXONIC_PORTION)
+        deNovoSpliceInfo = getPriorProbDeNovoDonorSNS(variant, boundaries, STD_EXONIC_PORTION)
         deNovoPrior = deNovoSpliceInfo["priorProb"]
         refPrior = refSpliceInfo["priorProb"]
         proteinPrior = "N/A"
@@ -2016,7 +2090,7 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData):
         proteinPrior = "N/A"
         applicablePrior = refSpliceInfo["priorProb"]
         if varInExon(variant) == True:
-            deNovoDonorInfo = getPriorProbDeNovoDonorSNS(variant, STD_EXONIC_PORTION, deNovoDonorInRefAcc=True)
+            deNovoDonorInfo = getPriorProbDeNovoDonorSNS(variant, boundaries, STD_EXONIC_PORTION, deNovoDonorInRefAcc=True)
             deNovoDonorPrior = deNovoDonorInfo["priorProb"]
             proteinInfo = getPriorProbProteinSNS(variant, variantData)
             proteinPrior = proteinInfo["priorProb"]
@@ -2303,7 +2377,7 @@ def getPriorProbInExonSNS(variant, boundaries, variantData):
         CIDomainInRegionFlag = "N/A"
         isDivisibleFlag = "N/A"
         lowMESFlag = "N/A"
-        deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, STD_EXONIC_PORTION, deNovoDonorInRefAcc=False)
+        deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, boundaries, STD_EXONIC_PORTION, deNovoDonorInRefAcc=False)
         if varInSpliceRegion(variant, donor=False, deNovo=True):
             deNovoAccData = getPriorProbDeNovoAcceptorSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH)
         else:
@@ -2754,7 +2828,7 @@ def getPriorProbInUTRSNS(variant, boundaries):
             spliceFlag = 0
         elif varCons == "5_prime_UTR_variant":
             if varInExon(variant) == True:
-                deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, STD_EXONIC_PORTION, deNovoDonorInRefAcc=False)
+                deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, boundaries, STD_EXONIC_PORTION, deNovoDonorInRefAcc=False)
                 applicablePrior = deNovoDonorData["priorProb"]
                 applicableClass = deNovoDonorData["enigmaClass"]
                 spliceFlag = 0
