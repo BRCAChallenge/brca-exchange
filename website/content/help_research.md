@@ -101,7 +101,7 @@ The Variant Nomenclature field contain forms of identification by which the vari
 ##### _Updates Coming Soon_
 
 * #### Clinical Significance
-	These fields are extracted from ClinVar \([website](https://www.ncbi.nlm.nih.gov/clinvar/)\) relating to variant clinical classification, for individual submitters to ClinVar \(includes repeated information from ENIGMA and BIC tiles\).
+	These fields are extracted from the [ClinVar website](https://www.ncbi.nlm.nih.gov/clinvar/) relating to variant clinical classification, for individual submitters to ClinVar \(includes repeated information from ENIGMA and BIC tiles\).
 
 	##### What do these classifications mean?
 	The below classifications will be found in ClinVar's "clinical significance" field. They are implemented per [recommendations by ACMG/AMP](https://www.ncbi.nlm.nih.gov/pubmed/25741868) for variants interpreted by Mendelian disorders.
@@ -128,7 +128,7 @@ For more information, please visit the [ClinVar website](https://www.ncbi.nlm.ni
 ##### _Updates Coming Soon_
 
 * #### Clinical Significance
-	These fields are extracted from LOVD \(website\) and are relevant to variant clinical classification.
+	These fields are extracted from [LOVD](http://www.lovd.nl/3.0/home) and are relevant to variant clinical classification.
 * ##### _Coming Soon:_
 	Submitters, Variant Effect, Genetic Origin, Submission ID, Variant Haplotype
 
@@ -198,13 +198,6 @@ The Allele Frequency fields describe how often the variant was observed overall,
 	* ##### _Coming Soon_:
 		Supplementary information about bar chart details and functionality
 
-
-# Previous Versions Tile
-The Previous Versions Tile contains the date a variant was last updated in ClinVar \(Date Last Updated\), as well as a history of the variant’s previous updates.
-
-Date Last Updated is not to be confused with Date Last Reviewed or Date Last Evaluated. Any information added to a variant report in ClinVar counts as an update. Furthermore, not all information available from a ClinVar export is displayed on BRCA Exchange, so you may not be able to find what was updated on our site. The update will still be reflected in Date Last Updated.
-
-For example, a new citation may be added for a VUS in ClinVar. Even though that citation may not be displayed on BRCA Exchange, we will reflect that ClinVar’s variant entry has been updated. You can visit ClinVar for the citation by clicking the SCV Accession number in the ClinVar Tile, and navigating to the “Assertion and Evidence Details” of ClinVar’s variant page. Clicking the SCV Accession number will automatically search your variant in ClinVar, so that you can view all variant information available in their database. Other clincically important details not in BRCA Exchange that are available in ClinVar include number of families and number of individuals reported to have the variant in question. 
 
 ## Lollipop Plots
 Lollipop plots are a tool to visualize the chromosomal position and pathogenicity classification for each variant in a gene. Here, each circle-capped ‘lollipop’ indicates whether a BRCA1 and BRCA2 variant is pathogenic (labeled in red), benign (labeled in light-blue), or the variants clinical significance is uncertain (labeled in dark-blue). The y-axis represents the pathogenicity classification of a variant. The x-axis represents the genomic coordinates of those variants in GRCh38 human reference space. The bottom box that runs along the x-axis of the diagram displays the position of each exon in the selected gene.
