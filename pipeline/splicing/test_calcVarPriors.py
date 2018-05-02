@@ -5305,6 +5305,7 @@ class test_calcVarPriors(unittest.TestCase):
     def test_getPriorProbDeNovoDonorSNSNoFrameshiftOrCIDisruptionBRCA1(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
                                                                        getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
                                                                        getDeNovoSpliceFrameshiftStatus, getDeNovoFrameshiftAndCIStatus):
+        '''Tests that prior prob is changed to low prob (0.02) when de novo splicing does not cause a frameshift or disrupt a CI domain'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
@@ -5345,6 +5346,7 @@ class test_calcVarPriors(unittest.TestCase):
     def test_getPriorProbDeNovoDonorSNSNoFrameshiftOrCIDisruptionBRCA2(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
                                                                        getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
                                                                        getDeNovoSpliceFrameshiftStatus, getDeNovoFrameshiftAndCIStatus):
+        '''Tests that prior prob is changed to low prob (0.02) when de novo splicing does not cause a frameshift or disrupt a CI domain'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
@@ -6289,9 +6291,10 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["priorProb"], priorProbs["proteinMod"])
         self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
 
-        # checks for BRCA2 variant
+        # checks for BRCA2 variant that has pyhgvs_cDNA instead of HGVS_cDNA
         self.variant["Gene_Symbol"] = "BRCA2"
-        self.variant["HGVS_cDNA"] = "c.620C>T"
+        self.variant["HGVS_cDNA"] = "-"
+        self.variant["pyhgvs_cDNA"] = "NM_000059.3:c.620C>T"
         self.variant["Ref"] = "C"
         self.variant["Alt"] = "T"
         priorProb = calcVarPriors.getPriorProbProteinSNS(self.variant, variantData)
