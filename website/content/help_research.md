@@ -10,11 +10,11 @@ There are two data views used by BRCA Exchange to aid researchers and clinicians
 ## Table of Contents
 * How do I search for a variant?
 * Variant Details Page
+	* Variant Nomenclature
 	* Clinical Significance Tiles
 	* Transcript Visualization
 	* Multifactorial Likelihood Analysis
 	* Allele Frequency Reference Sets
-	* Previous Versions Tile
 * Lollipop Plots
 * Downloading Variant Data
 * How do I use Filters?
@@ -39,7 +39,7 @@ Please note that searching for a variant using a genomic coordinate will return 
 # Variant Details Page
 
 ## Variant Nomenclature
-The Variant Nomenclature fields are forms of identification by which the variant can be labeled.
+The Variant Nomenclature fields contain forms of identification by which the variant can be labeled.
 
 * #### Gene Symbol
 	The Gene Symbol field displays the name of the gene on which the variant was found, as named by HGNC. This will be either _BRCA1_ or _BRCA2_.
@@ -48,7 +48,7 @@ The Variant Nomenclature fields are forms of identification by which the variant
 	This field provides the reference sequence on which the variant was observed, corresponding to the HGVS coordinates indicated in the Nucleotide field e.g. NM\_000492.3, NG\_016465.3, or NC\_000007.13.
 
 * #### HGVS Nucleotide
-	This is the HGVS variant alias which references the nucleotide change base on the location in the coding DNA, not the genomic DNA.
+	This is the HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA.
 
 * #### HGVS Protein
 	This alias utilizes predicted protein-level change \(if any\) that would be introduced by the genomic variant.
@@ -77,7 +77,7 @@ The Variant Nomenclature fields are forms of identification by which the variant
 	* Benign variants are not associated with any markedly increased risk of disease.
 	* Variants of uncertain significance \(VUS\) are those for which the evidence of disease risk is not clear yet, sometimes because there is not yet enough evidence to classify them as either pathogenic or benign.
 
-Markedly increased disease risk for a variant in _BRCA1_ and _BRCA2_ is currently defined as risk that is sufficient to alter patient management based ond etection of that single genetic variant, after considering other non-genetic risk factors for the individual.
+	Markedly increased disease risk for a variant in _BRCA1_ and _BRCA2_ is currently defined as risk that is sufficient to alter patient management based on detection of that single genetic variant, after considering other non-genetic risk factors for the individual.
 
 * #### Comment on Clinical Significance
 	This field comments on the derivation of the IARC class, provided by ENIGMA.
@@ -101,7 +101,7 @@ Markedly increased disease risk for a variant in _BRCA1_ and _BRCA2_ is currentl
 ##### _Updates Coming Soon_
 
 * #### Clinical Significance
-	These fields are extracted from ClinVar \([website](https://www.ncbi.nlm.nih.gov/clinvar/)\) relating to variant clinical classification, for individual submitters to ClinVar \(includes repeated information from ENIGMA and BIC tiles\).
+	These fields are extracted from the [ClinVar website](https://www.ncbi.nlm.nih.gov/clinvar/) relating to variant clinical classification, for individual submitters to ClinVar \(includes repeated information from ENIGMA and BIC tiles\).
 
 	##### What do these classifications mean?
 	The below classifications will be found in ClinVar's "clinical significance" field. They are implemented per [recommendations by ACMG/AMP](https://www.ncbi.nlm.nih.gov/pubmed/25741868) for variants interpreted by Mendelian disorders.
@@ -110,16 +110,16 @@ Markedly increased disease risk for a variant in _BRCA1_ and _BRCA2_ is currentl
 	* Likely pathogenic
 	* Likely benign
 	* Benign
-	* Variants of uncertain significance \(VUS\)
+	* Uncertain Significance
 
 * #### Submitter
 	This field provides the name of the submitting organization. From ClinVar.
 * #### SCV Accession
-	This is the SCV accession from the ClinVar repository
+	This is the SCV accession from the ClinVar repository.
 * #### Date last updated \(ClinVar\)
-	The field that shows the date the variant was last updated in ClinVar
+	The field that shows the date the variant was last submitted to ClinVar. Note that this date is not equivalent to the date last evaluated.
 * ##### _Coming Soon:_
-	Updated Classification descriptions, Information about tile functionality, resources for star review, definition of summary evidence
+	Updated Classification descriptions, Information about tile functionality, resources for star review, definition of summary evidence.
 
 For more information, please visit the [ClinVar website](https://www.ncbi.nlm.nih.gov/clinvar/) or the [ClinVar Data Dictionary](https://www.ncbi.nlm.nih.gov/projects/clinvar/ClinVarDataDictionary.pdf).
 
@@ -128,7 +128,7 @@ For more information, please visit the [ClinVar website](https://www.ncbi.nlm.ni
 ##### _Updates Coming Soon_
 
 * #### Clinical Significance
-	These fields are extracted from LOVD \(website\) relevant to variant clinical classification.
+	These fields are extracted from [LOVD](http://www.lovd.nl/3.0/home) and are relevant to variant clinical classification.
 * ##### _Coming Soon:_
 	Submitters, Variant Effect, Genetic Origin, Submission ID, Variant Haplotype
 
@@ -159,14 +159,14 @@ The variant's modifications to the reference transcript are depicted in three co
 
 The visualization also displays other regions of interest for the gene, such as donor and acceptor sites and clinically important functional domains. The visibility of these regions can be toggled individually via the checkboxes below the transcript.
 
-Clinically important functional domains are regions of the gene that has ENIGMA has assessed to be relevant to risk.  More specifically, these domains are regions of the gene that ENIGMA has determined to be relevant to risk when modified by missense alterations or in-frame deletions that could encode a stable \(non-truncated\) protein. This determination is made using existing knowledge of pathogenicity for individual variants in these domains. Clicking the label for given clinically important domain will display the corresponding domain in an animated outline. Clicking again on the label will disable the outline, as will clicking another domain designated as clinically important.
+Clinically important functional domains are regions of the gene that ENIGMA has assessed to be relevant to risk. More specifically, these domains are regions of the gene that ENIGMA has determined to be relevant to risk when modified by missense alterations or in-frame deletions that could encode a stable \(non-truncated\) protein. This determination is made using existing knowledge of pathogenicity for individual variants in these domains. Clicking the label for a given clinically important domain will display the corresponding domain in an animated outline. Clicking again on the label will disable the outline, as will clicking another domain designated as clinically important.
 
 ## [Multifactorial Likelihood Analysis Classification](https://www.ncbi.nlm.nih.gov/pubmed/21990134)
-Component likelihoods and final classification from multifactorial likelihood analysis, a quantitative integrated evaluation of variant pathogenicity.
+Component likelihoods and final classification are from multifactorial likelihood analysis, which is a quantitative integrated evaluation of variant pathogenicity.
 * #### Posterior Probability of pathogenicity \(ExUV\)
 	This value is the posterior probability of pathogenicity from ExUV.
 * #### Prior probability of pathogenicity \(ExUV\)
-	This value is the combined prior probability in favor of pathogenicity. is a combination of the missense analysis prior probability and the splicing analysis prior probability. Generally, it is the higher of these two prior probabilities. From ExUV.
+	This value is the combined prior probability in favor of pathogenicity. It is a combination of the missense analysis prior probability and the splicing analysis prior probability. Generally, it is the higher of these two prior probabilities. From ExUV.
 * #### Missense analysis probability of pathogenicity \(ExUV\)
 	This prior probability estimate combines position in the protein with an evaluation of missense substitutions that fall in the proteins key functional domains. From ExUV.
 * #### Co-occurrence likelihood \(ExUV\)
@@ -195,16 +195,9 @@ The Allele Frequency fields describe how often the variant was observed overall,
 * #### Allele Frequencies: EA|AA|All \(ESP\)
 	Allele frequencies from ESP, expressed as EA (European)|AA (African American)|All
 * #### Bar Charts
-	* ##### _Coming Soon_
-		* Supplementary information about bar chart details and functionality
+	* ##### _Coming Soon_:
+		Supplementary information about bar chart details and functionality
 
-
-# Previous Versions Tile
-The Previous Versions Tile contains the date a variant was last updated in ClinVar \(Date Last Updated\), as well as a history of the variant’s previous updates.
-
-Date Last Updated is not to be confused with Date Last Reviewed or Date Last Evaluated. Any information added to a variant report in ClinVar counts as an update. Furthermore, not all information available from a ClinVar export is displayed on BRCA Exchange, so you may not be able to find what was updated on our site. The update will still be reflected in Date Last Updated.
-
-For example, a new citation may be added for a VUS in ClinVar. Even though that citation may not be displayed on BRCA Exchange, we will reflect that ClinVar’s variant entry has been updated. You can visit ClinVar for the citation by clicking the SCV Accession number in the ClinVar Tile, and navigating to the “Assertion and Evidence Details” of ClinVar’s variant page. Clicking the SCV Accession number will automatically search your variant in ClinVar, so that you can view all variant information available in their database. Other clincically important details not in BRCA Exchange that are available in ClinVar include number of families and number of individuals reported to have the variant in question. 
 
 ## Lollipop Plots
 Lollipop plots are a tool to visualize the chromosomal position and pathogenicity classification for each variant in a gene. Here, each circle-capped ‘lollipop’ indicates whether a BRCA1 and BRCA2 variant is pathogenic (labeled in red), benign (labeled in light-blue), or the variants clinical significance is uncertain (labeled in dark-blue). The y-axis represents the pathogenicity classification of a variant. The x-axis represents the genomic coordinates of those variants in GRCh38 human reference space. The bottom box that runs along the x-axis of the diagram displays the position of each exon in the selected gene.
@@ -212,23 +205,6 @@ Lollipop plots are a tool to visualize the chromosomal position and pathogenicit
 To open the lollipop chart click on the ‘Show Lollipop Chart’ button located at the top of the Variants page. To alternate between the BRCA1 and BRCA2 lollipop charts, click on the tab that contains the relevant gene name located in the upper-left hand corner next to the lollipop chart. To select a specific area of the gene to zoom in on a region, simply click and drag on the lower box to create a shaded box which displays which region you have selected. You can also select for specific exon ranges by clicking on the relevant colored exon box on the lower box-chart. Mouse scrolling on the main chart itself will also zoom in and out of a region. To de-select or zoom all the way back out, you can either click on an unshaded space in the lower box or click the ‘Hide Lollipop Chart’ button at the top twice to refresh and reset the chart. On the legend located within the chart you can see the relative percentages of pathogenicity classifications of variants that match the search and filter criteria for a particular gene. To hide/dim a class of variants set of lollipops, click on the colored box on the legend. You can reset this by clicking on the colored box again.
 
 <div style="max-width: 1000px; margin-left: auto; margin-right: auto; height: 0px; position: relative; padding-bottom: 59.552%;"><iframe src="https://streamable.com/e/zx9c?muted=1&amp;autoplay=1&amp;hd=1" frameborder="0" allowfullscreen webkitallowfullscreen mozallowfullscreen scrolling="no" style="width: 100%; height: 100%; position: absolute;"></iframe></div>
-
-* * * * * * * * * * *
-
-## Transcript Visualization
-
-The transcript visualization depicts the reference transcript of the gene (either _BRCA1_ or _BRCA2_) on which the selected variant is found. The gene is drawn as a series of exons with intervening introns. Note that exons are drawn scaled (nonlinearly) to their actual size, to make the smaller exons easier to see, while introns are drawn at a fixed width.
-
-The gene is shown in full at the top of the visualization, with the exons/introns in which the variant lies (i.e., the area of interest) highlighted in yellow. The area of interest is shown zoomed-in below the full depiction, but contains the same information.
-
-The variant's modifications to the reference transcript are depicted in three colored regions:
-* Substitution variants (depicted in lime green)
-* Deletions (depicted in red with cross-hatched black lines)
-* Insertions (depicted in blue)
-
-The visualization also displays other regions of interest for the gene, such as donor and acceptor sites and clinically important functional domains. The visibility of these regions can be toggled individually via the checkboxes below the transcript.
-
-Clinically important functional domains are regions of the gene that has ENIGMA has assessed to be relevant to risk.  More specifically, these domains are regions of the gene that ENIGMA has determined to be relevant to risk when modified by missense alterations or in-frame deletions that could encode a stable (non-truncated) protein. This determination is made using existing knowledge of pathogenicity for individual variants in these domains. Clicking the label for given clinically important domain will display the corresponding domain in an animated outline. Clicking again on the label will disable the outline, as will clicking another domain designated as clinically important.
 
 * * * * * * * * * * *
 
