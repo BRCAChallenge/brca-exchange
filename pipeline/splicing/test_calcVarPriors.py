@@ -1914,11 +1914,13 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43063922"
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "C"
+        actualSplicePos = 43063873
         deNovoOffset = 0
         closestScores = calcVarPriors.getClosestSpliceSiteScores(self.variant, deNovoOffset, donor=True,
                                                                  deNovo=False, deNovoDonorInRefAcc=True, testMode=True)
         self.assertEquals(closestScores["exonName"], "exon18")
         self.assertEquals(closestScores["sequence"], "TCTGTAAGT")
+        self.assertEquals(closestScores["genomicSplicePos"], actualSplicePos)
 
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inExon"])
@@ -1935,11 +1937,13 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32329459"
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "G"
+        actualSplicePos = 32329442
         deNovoOffset = 0
         closestScores = calcVarPriors.getClosestSpliceSiteScores(self.variant, deNovoOffset, donor=False,
                                                                  deNovo=False, deNovoDonorInRefAcc=False, testMode=True)
         self.assertEquals(closestScores["exonName"], "exon8")
         self.assertEquals(closestScores["sequence"], "CATAAATTTTTATCTTACAGTCA")
+        self.assertEquals(closestScores["genomicSplicePos"], actualSplicePos)
 
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inCISpliceDonor"])
@@ -1960,11 +1964,13 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32371099"
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "T"
+        actualSplicePos = 32371101
         deNovoOffset = 0
         closestScores = calcVarPriors.getClosestSpliceSiteScores(self.variant, deNovoOffset, donor=True,
                                                                  deNovo=False, deNovoDonorInRefAcc=False, testMode=True)
         self.assertEquals(closestScores["exonName"], "exon20")
         self.assertEquals(closestScores["sequence"], "AAGGTAAAA")
+        self.assertEquals(closestScores["genomicSplicePos"], actualSplicePos)
 
     @mock.patch('calcVarPriors.varInExon', return_value = False)
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inSpliceAcceptor"])
@@ -1985,11 +1991,13 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43106544"
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "G"
+        actualSplicePos = 43106534
         deNovoOffset = 0
         closestScores = calcVarPriors.getClosestSpliceSiteScores(self.variant, deNovoOffset, donor=False,
                                                                  deNovo=False, deNovoDonorInRefAcc=False, testMode=True)
         self.assertEquals(closestScores["exonName"], "exon5")
         self.assertEquals(closestScores["sequence"], "TCTTTCTTTATAATTTATAGATT")
+        self.assertEquals(closestScores["genomicSplicePos"], actualSplicePos)
 
     @mock.patch('calcVarPriors.varInExon', return_value = True)
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inExon"])
@@ -2007,10 +2015,12 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32325079"
         self.variant["Ref"] = "G"
         self.variant["Alt"] = "C"
+        actualSplicePos = 32325075
         closestScores = calcVarPriors.getClosestSpliceSiteScores(self.variant, STD_DE_NOVO_OFFSET, donor=False,
                                                                  deNovo=True, deNovoDonorInRefAcc=False, testMode=True)
         self.assertEquals(closestScores["exonName"], "exon4")
         self.assertEquals(closestScores["sequence"], "GAATTATTGTACTGTTTCAGGAA")
+        self.assertEquals(closestScores["genomicSplicePos"], actualSplicePos)
 
     @mock.patch('calcVarPriors.varInExon', return_value = False)
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inIntron"])
@@ -2027,10 +2037,12 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43106557"
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "G"
+        actualSplicePos = 43115725
         closestScores = calcVarPriors.getClosestSpliceSiteScores(self.variant, STD_DE_NOVO_OFFSET, donor=True, deNovo=False,
                                                                  deNovoDonorInRefAcc=False, testMode=True)
         self.assertEquals(closestScores["exonName"], "exon3")
         self.assertEquals(closestScores["sequence"], "CAAGTAAGT")
+        self.assertEquals(closestScores["genomicSplicePos"], actualSplicePos)
 
     @mock.patch('calcVarPriors.varInExon', return_value = False)
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inIntron"])
@@ -2047,11 +2059,13 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32394951"
         self.variant["Ref"] = "C"
         self.variant["Alt"] = "T"
+        actualSplicePos = 32396897
         deNovoOffset = 0
         closestScores = calcVarPriors.getClosestSpliceSiteScores(self.variant, deNovoOffset, donor=False, deNovo=True,
                                                                  deNovoDonorInRefAcc=False, testMode=True)
         self.assertEquals(closestScores["exonName"], "exon26")
         self.assertEquals(closestScores["sequence"], "TTTTCCACTTATTTTCTTAGAAT")
+        self.assertEquals(closestScores["genomicSplicePos"], actualSplicePos)
 
     @mock.patch('calcVarPriors.varInExon', return_value = False)
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inUTR"])
@@ -2068,10 +2082,12 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "32316397"
         self.variant["Ref"] = "T"
         self.variant["Alt"] = "A"
+        actualSplicePos = 32315668
         closestScores = calcVarPriors.getClosestSpliceSiteScores(self.variant, STD_DE_NOVO_OFFSET, donor=True, deNovo=False,
                                                                  deNovoDonorInRefAcc=False, testMode=True)
         self.assertEquals(closestScores["exonName"], "exon1")
         self.assertEquals(closestScores["sequence"], "CGGGTTAGT")
+        self.assertEquals(closestScores["genomicSplicePos"], actualSplicePos)
 
     @mock.patch('calcVarPriors.varInExon', return_value = False)
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inUTR"])
@@ -2088,11 +2104,13 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Pos"] = "43124140"
         self.variant["Ref"] = "A"
         self.variant["Alt"] = "C"
+        actualSplicePos = 43124116
         deNovoOffset = 0
         closestScores = calcVarPriors.getClosestSpliceSiteScores(self.variant, deNovoOffset, donor=False, deNovo=True,
                                                                  deNovoDonorInRefAcc=False, testMode=True)
         self.assertEquals(closestScores["exonName"], "exon2")
         self.assertEquals(closestScores["sequence"], "GTTTTTCTAATGTGTTAAAGTTC")
+        self.assertEquals(closestScores["genomicSplicePos"], actualSplicePos)
 
     def test_isCIDomainInRegionBRCA1(self):
         '''
@@ -3275,6 +3293,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.9196706995589503,
                                                                             'sequence': 'CAAGTAAGT',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 43115725,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon3',
                                                                             'maxEntScanScore': 10.08})
@@ -3321,6 +3340,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -1.3516946078276324,
                                                                             'sequence': 'ATGGTAAAA',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 32344654,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon12',
                                                                             'maxEntScanScore': 4.79})
@@ -4336,16 +4356,18 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -4.936930962587172,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -2.7686143647984682})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43097271)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 1.1729987773204027,
                                                                             'sequence': 'CAGGTGAGT',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 43097243,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon9',
                                                                             'maxEntScanScore': 10.67})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
     def test_getPriorProbDeNovoDonorSNSExonRefGreaterAltBRCA1(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                              getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
-                                                              getDeNovoSpliceFrameshiftStatus):
+                                                              getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
+                                                              getClosestSpliceSiteScores, getDeNovoSpliceFrameshiftStatus):
         '''Tests BRCA1 variant in exon where ref zscore is greater than alt zscore'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -4377,9 +4399,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -9.166221752333454,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -8.638097115644324})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43090942)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.27990996080545155,
                                                                             'sequence': 'CAGGTAAAA',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 43090943,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon12',
                                                                             'maxEntScanScore': 8.59})
@@ -4398,8 +4422,9 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                'refSeq': 'CAGGTAAAA'})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
     def test_getPriorProbDeNovoDonorSNSSpliceSiteRefGreaterAltBRCA1(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                                    getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
-                                                                    getPriorProbRefSpliceDonorSNS, getDeNovoSpliceFrameshiftStatus):
+                                                                    getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
+                                                                    getClosestSpliceSiteScores, getPriorProbRefSpliceDonorSNS,
+                                                                    getDeNovoSpliceFrameshiftStatus):
         '''Tests BRCA1 variant in splice site where ref zscore is greater than alt zscore'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -4430,16 +4455,18 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -6.418256163056683,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -5.061448153351276})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32344576)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -1.3516946078276324,
                                                                             'sequence': 'ATGGTAAAA',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 32344654,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon12',
                                                                             'maxEntScanScore': 4.79})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = False)
     def test_getPriorProbDeNovoDonorSNSExonRefGreaterAltBRCA2(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                              getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
-                                                              getDeNovoSpliceFrameshiftStatus):
+                                                              getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
+                                                              getClosestSpliceSiteScores, getDeNovoSpliceFrameshiftStatus):
         '''Tests BRCA2 variant in exon where ref zscore is greater than alt zscore'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -4471,9 +4498,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -10.75488935863409,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -9.71581487018881})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32346898)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 1.1128870300549731,
                                                                             'sequence': 'TCGGTAAGA',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 32346897,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon13',
                                                                             'maxEntScanScore': 10.53})
@@ -4492,8 +4521,9 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                'refSeq': 'TCGGTAAGA'})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
     def test_getPriorProbDeNovoDonorSNSSpliceSiteRefGreaterAltBRCA2(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                                    getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
-                                                                    getPriorProbRefSpliceDonorSNS, getDeNovoSpliceFrameshiftStatus):
+                                                                    getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
+                                                                    getClosestSpliceSiteScores, getPriorProbRefSpliceDonorSNS,
+                                                                    getDeNovoSpliceFrameshiftStatus):
         '''Tests BRCA2 variant in splice site where ref zscore is greater than alt zscore'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -4524,16 +4554,18 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -4.885406607788233,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -5.842900867801858})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43076560)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 1.1300618149879533,
                                                                             'sequence': 'AAGGTAAGA',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 43076487,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon14',
                                                                             'maxEntScanScore': 10.57})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
     def test_getPriorProbDeNovoDonorSNSExonLowProbBRCA1(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                        getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
-                                                        getDeNovoSpliceFrameshiftStatus):
+                                                        getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
+                                                        getClosestSpliceSiteScores, getDeNovoSpliceFrameshiftStatus):
         '''Tests BRCA1 variant in exon with expected low (0.02) prior prob where alt zscore > ref zscore'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -4565,9 +4597,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -4.318638704999898,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -5.301895142412993})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43097247)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 1.1729987773204027,
                                                                             'sequence': 'CAGGTGAGT',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 43097243,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon9',
                                                                             'maxEntScanScore': 10.67})
@@ -4586,8 +4620,9 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                'refSeq': 'CAGGTGAGT'})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
     def test_getPriorProbDeNovoDonorSNSSpliceSiteLowProbBRCA1(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                              getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
-                                                              getPriorProbRefSpliceDonorSNS, getDeNovoSpliceFrameshiftStatus):
+                                                              getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
+                                                              getClosestSpliceSiteScores, getPriorProbRefSpliceDonorSNS,
+                                                              getDeNovoSpliceFrameshiftStatus):
         '''Tests BRCA1 variant in splice site with expected low (0.02) prior prob where alt zscore > ref zscore'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -4618,17 +4653,20 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -5.57669170134067,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -8.861369319773063})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32326106)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.6534615330977633,
                                                                             'sequence': 'CAGGTATGA',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 32326151,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon5',
                                                                             'maxEntScanScore': 9.46})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = False)
     @mock.patch('calcVarPriors.getDeNovoFrameshiftAndCIStatus', return_value = True)
     def test_getPriorProbDeNovoDonorSNSExonLowProbBRCA2(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                        getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
-                                                        getDeNovoSpliceFrameshiftStatus, getDeNovoFrameshiftAndCIStatus):
+                                                        getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
+                                                        getClosestSpliceSiteScores, getDeNovoSpliceFrameshiftStatus,
+                                                        getDeNovoFrameshiftAndCIStatus):
         '''Tests BRCA2 variant in exon with expected low (0.02) prior prob where alt zscore > ref zscore'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -4660,9 +4698,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -5.297601446179749,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -6.087641553096821})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32397039)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 1.164411384853913,
                                                                             'sequence': 'CTGGTAAGT',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 32397045,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon26',
                                                                             'maxEntScanScore': 10.65})
@@ -4682,9 +4722,9 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = False)
     @mock.patch('calcVarPriors.getDeNovoFrameshiftAndCIStatus', return_value = True)
     def test_getPriorProbDeNovoDonorSNSSpliceSiteLowProbBRCA2(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                              getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
-                                                              getPriorProbRefSpliceDonorSNS, getDeNovoSpliceFrameshiftStatus,
-                                                              getDeNovoFrameshiftAndCIStatus):
+                                                              getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
+                                                              getClosestSpliceSiteScores,getPriorProbRefSpliceDonorSNS,
+                                                              getDeNovoSpliceFrameshiftStatus, getDeNovoFrameshiftAndCIStatus):
         '''Tests BRCA2 variant in splice site with expected low (0.02) prior prob where alt zscore > ref zscore'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -4715,16 +4755,18 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -1.8068264085515982,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -4.468918073163471})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43115744)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.9196706995589503,
                                                                             'sequence': 'CAAGTAAGT',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 43115725,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon3',
                                                                             'maxEntScanScore': 10.08})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
     def test_getPriorProbDeNovoDonorSNSExonModProbBRCA1(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                        getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
-                                                        getDeNovoSpliceFrameshiftStatus):
+                                                        getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
+                                                        getClosestSpliceSiteScores, getDeNovoSpliceFrameshiftStatus):
         '''Tests BRCA1 variant in exon with expected moderate (0.3) prior prob where alt zscore > ref zscore'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -4756,9 +4798,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -0.2310398909506982,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -3.558654471715541})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43115729)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.9196706995589503,
                                                                             'sequence': 'CAAGTAAGT',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 43115725,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon3',
                                                                             'maxEntScanScore': 10.08})
@@ -4777,8 +4821,9 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                'refSeq': 'CAAGTAAGT'})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
     def test_getPriorProbDeNovoDonorSNSSpliceSiteModProbBRCA1(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                              getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
-                                                              getPriorProbRefSpliceDonorSNS, getDeNovoSpliceFrameshiftStatus):
+                                                              getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
+                                                              getClosestSpliceSiteScores, getPriorProbRefSpliceDonorSNS,
+                                                              getDeNovoSpliceFrameshiftStatus):
         '''Tests BRCA1 variant in splice site with expected moderate (0.3) prior prob where alt zscore > ref zscore'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -4809,16 +4854,18 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -1.2615269869294883,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -4.911168785187702})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32332406)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.09528102277591848,
                                                                             'sequence': 'CAGGTACCT',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 32333388,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon10',
                                                                             'maxEntScanScore': 8.16})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
     def test_getPriorProbDeNovoDonorSNSExonModProbBRCA2(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                        getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
-                                                        getDeNovoSpliceFrameshiftStatus):
+                                                        getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
+                                                        getClosestSpliceSiteScores, getDeNovoSpliceFrameshiftStatus):
         '''Tests BRCA2 variant in exon with expected moderate (0.3) prior prob where alt zscore > ref zscore'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -4850,9 +4897,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -0.9223249845031366,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -3.9880240950400365})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32341193)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.9883698392908697,
                                                                             'sequence': 'TGGGTAAGT',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 32341197,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon11',
                                                                             'maxEntScanScore': 10.24})
@@ -4871,8 +4920,9 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                'refSeq': 'TGGGTAAGT'})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
     def test_getPriorProbDeNovoDonorSNSSpliceSiteModProbBRCA2(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                              getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
-                                                              getPriorProbRefSpliceDonorSNS, getDeNovoSpliceFrameshiftStatus):
+                                                              getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
+                                                              getClosestSpliceSiteScores, getPriorProbRefSpliceDonorSNS,
+                                                              getDeNovoSpliceFrameshiftStatus):
         '''Tests BRCA2 variant in splice site with expected moderate prob (0.3) prior prob where alt zscore > ref zscore'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -4903,16 +4953,18 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': 0.4301893289690249,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -2.2147275507098687})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43099838)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.49030107623445457,
                                                                             'sequence': 'TGGGTAAGG',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 43099774,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon8',
                                                                             'maxEntScanScore': 9.08})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
     def test_getPriorProbDeNovoDonorSNSExonHighProbBRCA1(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                         getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
-                                                         getDeNovoSpliceFrameshiftStatus):
+                                                         getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
+                                                         getClosestSpliceSiteScores, getDeNovoSpliceFrameshiftStatus):
         '''Tests BRCA1 variant in exon with expected high (0.64) prior prob where alt zscore > ref zscore'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -4943,16 +4995,18 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': 0.7951535087948461,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -2.4895241096375464})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32379454)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 1.2545790057520567,
                                                                             'sequence': 'CAGGTAAGT',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 32379516,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon22',
                                                                             'maxEntScanScore': 10.86})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
     def test_getPriorProbDeNovoDonorSNSExonHighProbBRCA2(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                         getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
-                                                         getDeNovoSpliceFrameshiftStatus):
+                                                         getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
+                                                         getClosestSpliceSiteScores, getDeNovoSpliceFrameshiftStatus):
         '''Tests BRCA2 variant in exon with expected high (0.64) prior prob where alt zscore > ref zscore'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -4983,16 +5037,18 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -1.9613994729484163,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -1.7896516236186177})
+    @mock.patch('calcVarPriors.getNewSplicePosition', retunr_value = 43104183)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -2.021511220213846,
                                                                             'sequence': 'TTGGTAAAA',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 43104121,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon7',
                                                                             'maxEntScanScore': 3.23})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
     def test_getPriorProbDeNovoDonorSNSExonLowProbGreaterSubBRCA1(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                                  getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
-                                                                  getDeNovoSpliceFrameshiftStatus):
+                                                                  getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
+                                                                  getClosestSpliceSiteScores, getDeNovoSpliceFrameshiftStatus):
         '''
         Tests BRCA1 variant in exon with expected low (0.02) prior prob that is promoted to moderate prior prob 
         because alt zscore > subsequent z score
@@ -5026,16 +5082,18 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -2.012923827747356,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -3.318207482653823})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32362624)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -2.07732927124603,
                                                                             'sequence': 'CAGGCAAGT',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 32362694,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon17',
                                                                             'maxEntScanScore': 3.1})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
     def test_getPriorProbDeNovoDonorSNSExonLowProbGreaterSubBRCA2(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                                  getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
-                                                                  getDeNovoSpliceFrameshiftStatus):
+                                                                  getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
+                                                                  getClosestSpliceSiteScores, getDeNovoSpliceFrameshiftStatus):
         '''
         Tests BRCA2 variant in exon with expected low (0.02) prior prob that is promoted to moderate prior prob 
         because alt zscore > subsequent z score
@@ -5069,16 +5127,18 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -0.14945966251904425,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -3.4813679395171317})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43094763)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -0.9867304280018111,
                                                                             'sequence': 'TAGGTATTG',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 43091434,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon11',
                                                                             'maxEntScanScore': 5.64})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
     def test_getPriorProbDeNovoDonorSNSExonModProbGreaterSubBRCA1(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                                  getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
-                                                                  getDeNovoSpliceFrameshiftStatus):
+                                                                  getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
+                                                                  getClosestSpliceSiteScores, getDeNovoSpliceFrameshiftStatus):
         '''
         Tests BRCA1 variant in exon with expected moderate (0.3) prior prob that is promoted to high prior prob 
         because alt zscore > subsequent z score
@@ -5112,16 +5172,18 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -0.43713731014645635,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -0.686171691674664})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32362543)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -2.07732927124603,
                                                                             'sequence': 'CAGGCAAGT',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 32362694,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon17',
                                                                             'maxEntScanScore': 3.1})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
     def test_getPriorProbDeNovoDonorSNSExonModProbGreaterSubBRCA2(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                                  getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
-                                                                  getDeNovoSpliceFrameshiftStatus):
+                                                                  getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
+                                                                  getClosestSpliceSiteScores, getDeNovoSpliceFrameshiftStatus):
         '''
         Tests BRCA2 variant in exon with expected moderate (0.3) prior prob that is promoted to high prior prob 
         because alt zscore > subsequent z score
@@ -5155,16 +5217,18 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': 0.5675876084328637,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -1.7896516236186177})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43104183)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -2.021511220213846,
                                                                             'sequence': 'TTGGTAAAA',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 43104121,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon7',
                                                                             'maxEntScanScore': 3.23})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
     def test_getPriorProbDeNovoDonorSNSExonHighProbGreaterSubBRCA1(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                                   getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
-                                                                   getDeNovoSpliceFrameshiftStatus):
+                                                                   getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
+                                                                   getClosestSpliceSiteScores, getDeNovoSpliceFrameshiftStatus):
         '''
         Tests BRCA1 variant in exon with expected high (0.64) prior prob and alt zscore > subsequent z score
         '''
@@ -5197,17 +5261,20 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': 0.45165781013525,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -3.0605857086591257})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32363225)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.4044271515695557,
                                                                             'sequence': 'AAGGTAAAT',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 32363534,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon18',
                                                                             'maxEntScanScore': 8.88})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = False)
     @mock.patch('calcVarPriors.getDeNovoFrameshiftAndCIStatus', return_value = False)
     def test_getPriorProbDeNovoDonorSNSExonHighProbGreaterSubBRCA2(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                                   getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
-                                                                   getDeNovoSpliceFrameshiftStatus, getDeNovoFrameshiftAndCIStatus):
+                                                                   getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
+                                                                   getClosestSpliceSiteScores, getDeNovoSpliceFrameshiftStatus,
+                                                                   getDeNovoFrameshiftAndCIStatus):
         '''
         Tests BRCA2 variant in exon with expected high (0.64) prior prob and alt zscore > subsequent z score
         '''
@@ -5241,9 +5308,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -0.47148688001241607,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -3.799101460777258})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32316524)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.17686125120757246,
                                                                             'sequence': 'CAGGTATTG',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 32316528,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon2',
                                                                             'maxEntScanScore': 8.35})
@@ -5261,8 +5330,9 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                'spliceSite': 1,
                                                                                'refSeq': 'CAGGTATTG'})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
-    def test_getPriorProbDeNovoDonorSNSSpliceSiteHighProbGreaterClosestAltBRCA2(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                                                getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
+    def test_getPriorProbDeNovoDonorSNSSpliceSiteHighProbGreaterClosestAltBRCA2(self, getVarType, varInExon, varInSpliceRegion,
+                                                                                varInIneligibleDeNovoExon, getMaxMaxEntScanScoreSlidingWindowSNS,
+                                                                                getNewSplicePosition, getClosestSpliceSiteScores,
                                                                                 getPriorProbRefSpliceDonorSNS, getDeNovoSpliceFrameshiftStatus):
         '''Tests BRCA2 variant in splice site with expected high prob (0.64) prior prob where alt zscore > ref zscore and alt zscore > closestaltZ'''
         boundaries = "enigma"
@@ -5294,16 +5364,19 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -0.6475284255754594,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -4.288582831367183})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43082460)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -0.5573608046773153,
                                                                             'sequence': 'AAGGTGTGT',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 43082403,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon13',
                                                                             'maxEntScanScore': 6.64})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = False)
     @mock.patch('calcVarPriors.getDeNovoFrameshiftAndCIStatus', return_value = True)
-    def test_getPriorProbDeNovoDonorSNSNoFrameshiftOrCIDisruptionBRCA1(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                                       getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
+    def test_getPriorProbDeNovoDonorSNSNoFrameshiftOrCIDisruptionBRCA1(self, getVarType, varInExon, varInSpliceRegion,
+                                                                       varInIneligibleDeNovoExon, getMaxMaxEntScanScoreSlidingWindowSNS,
+                                                                       getNewSplicePosition, getClosestSpliceSiteScores,
                                                                        getDeNovoSpliceFrameshiftStatus, getDeNovoFrameshiftAndCIStatus):
         '''Tests that prior prob is changed to low prob (0.02) when de novo splicing does not cause a frameshift or disrupt a CI domain'''
         boundaries = "enigma"
@@ -5335,16 +5408,19 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': 0.8037409012613367,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -0.12799118135281953})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32326244)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.4044271515695557,
                                                                             'sequence': 'AAGGTAAAT',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 32326283,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon6',
                                                                             'maxEntScanScore': 8.88})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = False)
     @mock.patch('calcVarPriors.getDeNovoFrameshiftAndCIStatus', return_value = True)
-    def test_getPriorProbDeNovoDonorSNSNoFrameshiftOrCIDisruptionBRCA2(self, getVarType, varInExon, varInSpliceRegion, varInIneligibleDeNovoExon,
-                                                                       getMaxMaxEntScanScoreSlidingWindowSNS, getClosestSpliceSiteScores,
+    def test_getPriorProbDeNovoDonorSNSNoFrameshiftOrCIDisruptionBRCA2(self, getVarType, varInExon, varInSpliceRegion,
+                                                                       varInIneligibleDeNovoExon, getMaxMaxEntScanScoreSlidingWindowSNS,
+                                                                       getNewSplicePosition, getClosestSpliceSiteScores,
                                                                        getDeNovoSpliceFrameshiftStatus, getDeNovoFrameshiftAndCIStatus):
         '''Tests that prior prob is changed to low prob (0.02) when de novo splicing does not cause a frameshift or disrupt a CI domain'''
         boundaries = "enigma"
@@ -5374,9 +5450,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -4.969838672904024,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -4.908203170286155})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43049200)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.2815061501383356,
                                                                             'sequence': 'CATCTAAATGTCCATTTTAGATC',
                                                                             'exonStart': 20,
+                                                                            'genomicSplicePos': 43049195,
                                                                             'intronStart': 0,
                                                                             'exonName': 'exon22',
                                                                             'maxEntScanScore': 8.67})
@@ -5394,7 +5472,8 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                   'spliceSite': 1,
                                                                                   'refSeq': 'CATCTAAATGTCCATTTTAGATC'})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
-    def test_getPriorProbDeNovoAccSNSFalseAltLessRefBRCA1(self, getVarType, varInSpliceRegion, getMaxMaxEntScanScoreSlidingWindowSNS,
+    def test_getPriorProbDeNovoAccSNSFalseAltLessRefBRCA1(self, getVarType, varInSpliceRegion,
+                                                          getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
                                                           getClosestSpliceSiteScores, getPriorProbRefSpliceAcceptorSNS,
                                                           getDeNovoSpliceFrameshiftStatus):
         '''Tests that function works for variant in splice site altZ < refZ'''
@@ -5424,14 +5503,17 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -8.154339641493873,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -7.8091808268338125})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32329454)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.018528005635431572,
                                                                             'sequence': 'CATAAATTTTTATCTTACAGTCA',
                                                                             'exonStart': 20,
+                                                                            'genomicSplicePos': 32329442,
                                                                             'intronStart': 0,
                                                                             'exonName': 'exon8',
                                                                             'maxEntScanScore': 8.03})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = False)
-    def test_getPriorProbDeNovoAccSNSFalseAltLessRefBRCA2(self, getVarType, varInSpliceRegion, getMaxMaxEntScanScoreSlidingWindowSNS,
+    def test_getPriorProbDeNovoAccSNSFalseAltLessRefBRCA2(self, getVarType, varInSpliceRegion,
+                                                          getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
                                                           getClosestSpliceSiteScores, getDeNovoSpliceFrameshiftStatus):
         '''Tests that function works for variant in de novo splice region altZ < refZ'''
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -5460,9 +5542,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                         'altZScore': -3.174191029970134,
                                                                                         'varLength': 1,
                                                                                         'refZScore': -3.2933530016980126})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43095925)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.8280076066834324,
                                                                             'sequence': 'ACTCTGTCTTTTCCCTATAGTGT',
                                                                             'exonStart': 20,
+                                                                            'genomicSplicePos': 43095923,
                                                                             'intronStart': 0,
                                                                             'exonName': 'exon10',
                                                                             'maxEntScanScore': 10.0})
@@ -5480,7 +5564,8 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                   'spliceSite': 1,
                                                                                   'refSeq': 'ACTCTGTCTTTTCCCTATAGTGT'})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
-    def test_getPriorProbDeNovoAccSNSFlagAltGreaterRefBRCA1(self, getVarType, varInSpliceRegion, getMaxMaxEntScanScoreSlidingWindowSNS,
+    def test_getPriorProbDeNovoAccSNSFlagAltGreaterRefBRCA1(self, getVarType, varInSpliceRegion,
+                                                            getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
                                                             getClosestSpliceSiteScores, getPriorProbRefSpliceAcceptorSNS,
                                                             getDeNovoSpliceFrameshiftStatus):
         '''Tests that function works for variant in ref splice site altZ > refZ, altZ < closestAltZ'''
@@ -5510,9 +5595,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -2.9933935556243876,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -6.527162372382157})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32370393)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -1.5305776268269857,
                                                                             'sequence': 'ATATTTATTAATTTGTCCAGATT',
                                                                             'exonStart': 20,
+                                                                            'genomicSplicePos': 32370401,
                                                                             'intronStart': 0,
                                                                             'exonName': 'exon19',
                                                                             'maxEntScanScore': 4.26})
@@ -5530,7 +5617,8 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                   'spliceSite': 1,
                                                                                   'refSeq': 'ATATTTATTAATTTGTCCAGATT'})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
-    def test_getPriorProbDeNovoAccSNSFlagAltGreaterRefGreaterClosestAltBRCA2(self, getVarType, varInSpliceRegion, getMaxMaxEntScanScoreSlidingWindowSNS,
+    def test_getPriorProbDeNovoAccSNSFlagAltGreaterRefGreaterClosestAltBRCA2(self, getVarType, varInSpliceRegion,
+                                                                             getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
                                                                              getClosestSpliceSiteScores, getPriorProbRefSpliceAcceptorSNS,
                                                                              getDeNovoSpliceFrameshiftStatus):
         '''Tests function for variant in ref splice site altZ > refZ and altZ > closestALtZ'''
@@ -5560,14 +5648,17 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -1.3374530519576655,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -1.9784622791834936})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43082573)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -1.4031975880833913,
                                                                             'sequence': 'GCCATTTATCGTTTTTGAAGCAG',
                                                                             'exonStart': 20,
+                                                                            'genomicSplicePos': 43082576,
                                                                             'intronStart': 0,
                                                                             'exonName': 'exon13',
                                                                             'maxEntScanScore': 4.57})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = False)
-    def test_getPriorProbDeNovoAccSNSFlagAltGreaterClosestRefBRCA1(self, getVarType, varInSpliceRegion, getMaxMaxEntScanScoreSlidingWindowSNS,
+    def test_getPriorProbDeNovoAccSNSFlagAltGreaterClosestRefBRCA1(self, getVarType, varInSpliceRegion,
+                                                                   getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
                                                                    getClosestSpliceSiteScores, getDeNovoSpliceFrameshiftStatus):
         '''Tests function for variant in de novo splice region altZ > refZ and altZ > closestRefZ'''
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -5596,14 +5687,17 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -1.1196742760411986,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -2.1058423179270873})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32370415)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -1.5305776268269857,
                                                                             'sequence': 'ATATTTATTAATTTGTCCAGATT',
                                                                             'exonStart': 20,
+                                                                            'genomicSplicePos': 32370401,
                                                                             'intronStart': 0,
                                                                             'exonName': 'exon19',
                                                                             'maxEntScanScore': 4.26})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
-    def test_getPriorProbDeNovoAccSNSFlagAltGreaterClosestRefBRCA2(self, getVarType, varInSpliceRegion, getMaxMaxEntScanScoreSlidingWindowSNS,
+    def test_getPriorProbDeNovoAccSNSFlagAltGreaterClosestRefBRCA2(self, getVarType, varInSpliceRegion,
+                                                                   getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition,
                                                                    getClosestSpliceSiteScores, getDeNovoSpliceFrameshiftStatus):
         '''Tests function for variant in de novo splice region altZ > refZ and altZ > closestRefZ'''
         self.variant["Gene_Symbol"] = "BRCA2"
@@ -5652,9 +5746,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'closestRefZScore': 0.9196706995589503,
                                                                             'closestRefMaxEntScanScore': 10.08,
                                                                             'refZScore': -3.558654471715541,
+                                                                            'closestGenomicSplicePos': 43115725,
                                                                             'altMaxEntScanScore': -5.25,
                                                                             'enigmaClass': 'N/A',
                                                                             'priorProb': 'N/A',
+                                                                            'genomicSplicePos': 43115729,
                                                                             'closestIntronStart': 3,
                                                                             'altSeq': 'TTTGCATGT',
                                                                             'closestRefSeq': 'CAAGTAAGT',
@@ -5710,6 +5806,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["altDeNovoAccSeq"], "N/A")
         self.assertEquals(priorProb["closestAccRefMES"], "N/A")
         self.assertEquals(priorProb["closestAccAltMES"], "N/A")
+        # checks that splic positions are present for de novo and closest donor and NOT present for de novo and closest acceptor
+        self.assertNotEquals(priorProb["deNovoDonorGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestDonorGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["deNovoAccGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["closestAccGenomicSplicePos"], "N/A")
         # checks that splice rescue, splice flag, and splice rescue flags are all equal to approriate value (either 0 or N/A)
         self.assertEquals(priorProb["spliceRescue"], "N/A")
         self.assertEquals(priorProb["spliceFlag"], 0)
@@ -5751,9 +5852,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'closestRefZScore': 0.4044271515695557,
                                                                             'closestRefMaxEntScanScore': 8.88,
                                                                             'refZScore': -7.461624347735207,
+                                                                            'closestGenomicSplicePos': 32326283,
                                                                             'altMaxEntScanScore': 1.56,
                                                                             'enigmaClass': 'class_2',
                                                                             'priorProb': 0.02,
+                                                                            'genomicSplicePos': 32326277,
                                                                             'closestIntronStart': 3,
                                                                             'altSeq': 'TTTGTGAGG',
                                                                             'closestRefSeq': 'AAGGTAAAT',
@@ -5809,6 +5912,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["altRefAccSeq"], "N/A")
         self.assertEquals(priorProb["closestAccRefSeq"], "N/A")
         self.assertEquals(priorProb["closestAccAltSeq"], "N/A")
+        # checks that splice positions are present for de novo and closest donor and are NOT present for de novo and closest acceptor
+        self.assertNotEquals(priorProb["deNovoDonorGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestDonorGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["deNovoAccGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["closestAccGenomicSplicePos"], "N/A")
         # checks that splice rescue, splice flag, and splice rescue flags are all equal to approriate value (either 0 or N/A)
         self.assertEquals(priorProb["spliceRescue"], "N/A")
         self.assertEquals(priorProb["spliceFlag"], 0)
@@ -5850,9 +5958,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'closestRefZScore': 0.7393354577626622,
                                                                             'closestRefMaxEntScanScore': 9.66,
                                                                             'refZScore': -4.1468908556701,
+                                                                            'closestGenomicSplicePos': 32319326,
                                                                             'altMaxEntScanScore': -0.67,
                                                                             'enigmaClass': 'class_2',
                                                                             'priorProb': 0.02,
+                                                                            'genomicSplicePos': 32319322,
                                                                             'closestIntronStart': 3,
                                                                             'altSeq': 'GACTTATGT',
                                                                             'closestRefSeq': 'TAGGTAAGT',
@@ -5916,6 +6026,13 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["refRefAccMES"], "N/A")
         self.assertEquals(priorProb["altRefAccSeq"], "N/A")
         self.assertEquals(priorProb["refDeNovoAccSeq"], "N/A")
+        self.assertEquals(priorProb["closestAccRefZ"], "N/A")
+        self.assertEquals(priorProb["closestAccAltZ"], "N/A")
+        # checks that splice posiitons are present for de novo and closest donor and are NOT present for de novo and closest acceptor
+        self.assertNotEquals(priorProb["deNovoDonorGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestDonorGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["deNovoAccGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["closestAccGenomicSplicePos"], "N/A")
         # checks that splice rescue and splice flag are equal to zero
         self.assertEquals(priorProb["spliceRescue"], 0)
         self.assertEquals(priorProb["spliceFlag"], 0)
@@ -5962,11 +6079,13 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                'altMaxEntScanScore': -5.9,
                                                                                'enigmaClass': 'N/A',
                                                                                'priorProb': 'N/A',
+                                                                               'genomicSplicePos': 32354861,
                                                                                'closestIntronStart': 0,
                                                                                'altSeq': 'TATTTTCTCCCCATTGCAGGACA',
                                                                                'closestRefSeq': 'ATATTTTCTCCCCATTGCAGCAC',
                                                                                'altGreaterRefFlag': 1,
-                                                                               'refSeq': 'TATTTTCTCCCCATTGCAGCACA'})
+                                                                               'refSeq': 'TATTTTCTCCCCATTGCAGCACA',
+                                                                               'closestGenomicSplicePos': 32354860})
     @mock.patch('calcVarPriors.getPriorProbDeNovoDonorSNS', return_value = {'exonStart': 0,
                                                                             'closestAltZScore': 'N/A',
                                                                             'varStart': 3,
@@ -5983,9 +6102,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'closestRefZScore': -0.9867304280018111,
                                                                             'closestRefMaxEntScanScore': 5.64,
                                                                             'refZScore': -9.483955273593583,
+                                                                            'closestGenomicSplicePos': 32355289,
                                                                             'altMaxEntScanScore': -5.87,
                                                                             'enigmaClass': 'class_2',
                                                                             'priorProb': 0.02,
+                                                                            'genomicSplicePos': 32354861,
                                                                             'closestIntronStart': 3,
                                                                             'altSeq': 'CAGGACAAC',
                                                                             'closestRefSeq': 'TAGGTATTG',
@@ -6034,12 +6155,17 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertNotEquals(priorProb["refDeNovoDonorSeq"], "N/A")
         self.assertNotEquals(priorProb["altDeNovoAccSeq"], "N/A")
         self.assertNotEquals(priorProb["closestDonorRefMES"], "N/A")
-        self.assertEquals(priorProb["closestDonorAltMES"], "N/A")
         self.assertNotEquals(priorProb["closestAccRefZ"], "N/A")
         self.assertNotEquals(priorProb["closestAccAltZ"], "N/A")
-        # checks that scores and sequences are not present for ref splice donor site
+        # checks that splice positions are present for de novo and closest splice donor/acceptor
+        self.assertNotEquals(priorProb["deNovoAccGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestAccGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["deNovoDonorGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestDonorGenomicSplicePos"], "N/A")
+        # checks that scores and sequences are not present for ref splice donor site or alt splice donor
         self.assertEquals(priorProb["refRefDonorZ"], "N/A")
         self.assertEquals(priorProb["altRefDonorSeq"], "N/A")
+        self.assertEquals(priorProb["closestDonorAltMES"], "N/A")
         # checks that splice rescue, splice flag, and splice rescue flags are all equal to approriate value (either 0 or N/A)
         self.assertEquals(priorProb["spliceRescue"], "N/A")
         self.assertEquals(priorProb["spliceFlag"], 0)
@@ -6081,9 +6207,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                'closestRefZScore': -1.4031975880833913,
                                                                                'closestRefMaxEntScanScore': 4.57,
                                                                                'refZScore': -4.057633234159576,
+                                                                               'closestGenomicSplicePos': 43082576,
                                                                                'altMaxEntScanScore': 6.71,
                                                                                'enigmaClass': 'N/A',
                                                                                'priorProb': 'N/A',
+                                                                               'genomicSplicePos': 43082591,
                                                                                'closestIntronStart': 0,
                                                                                'altSeq': 'TTTCATTTTCTTGGTGCCAGTTA',
                                                                                'closestRefSeq': 'GCCATTTATCGTTTTTGAAGCAG',
@@ -6137,6 +6265,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["altRefDonorSeq"], "N/A")
         self.assertEquals(priorProb["closestDonorRefSeq"], "N/A")
         self.assertEquals(priorProb["closestDonorAltSeq"], "N/A")
+        # checks that splice positions are present for de novo and closest acceptor and are NOT present for de novo and closest donor
+        self.assertNotEquals(priorProb["deNovoAccGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestAccGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["deNovoDonorGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["closestDonorGenomicSplicePos"], "N/A")
         # checks that splice rescue, splice flag, and splice rescue flags are all equal to approriate value (either 0 or N/A)
         self.assertEquals(priorProb["spliceRescue"], "N/A")
         self.assertEquals(priorProb["spliceFlag"], 0)
@@ -6178,9 +6311,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'closestRefZScore': 0.49030107623445457,
                                                                             'closestRefMaxEntScanScore': 9.08,
                                                                             'refZScore': -3.2022776843562095,
+                                                                            'closestGenomicSplicePos': 43099774,
                                                                             'altMaxEntScanScore': -1.52,
                                                                             'enigmaClass': 'N/A',
                                                                             'priorProb': 'N/A',
+                                                                            'genomicSplicePos': 43099877,
                                                                             'closestIntronStart': 3,
                                                                             'altSeq': 'TAGGAAACC',
                                                                             'closestRefSeq': 'TGGGTAAGG',
@@ -6202,9 +6337,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                'closestRefZScore': -1.7565744697591685,
                                                                                'closestRefMaxEntScanScore': 3.71,
                                                                                'refZScore': -1.3169078844183761,
+                                                                               'closestGenomicSplicePos': 43099881,
                                                                                'altMaxEntScanScore': 3.43,
                                                                                'enigmaClass': 'N/A',
                                                                                'priorProb': 'N/A',
+                                                                               'genomicSplicePos': 43099878,
                                                                                'closestIntronStart': 0,
                                                                                'altSeq': 'TTTACCATACTGTTTAGTAGGAA',
                                                                                'closestRefSeq': 'TTCTTTACCATACTGTTTAGCAG',
@@ -6269,6 +6406,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertNotEquals(priorProb["refRefAccSeq"], "N/A")
         self.assertNotEquals(priorProb["closestAccRefZ"], "N/A")
         self.assertNotEquals(priorProb["closestAccAltZ"], "N/A")
+        # checks that splic positions are present for de novo and closest donor and acceptor
+        self.assertNotEquals(priorProb["deNovoDonorGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestDonorGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["deNovoAccGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestAccGenomicSplicePos"], "N/A")
         # checks that inExonicPortion flag is equal to 1
         self.assertEquals(priorProb["inExonicPortionFlag"], 1)
         # checks that splice rescue, splice flag, and splice rescue flags are equal to zero or "-" as approriate
@@ -6402,9 +6544,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'closestRefZScore': -0.870800629704197,
                                                                             'closestRefMaxEntScanScore': 5.91,
                                                                             'refZScore': -5.344832104745444,
+                                                                            'closestGenomicSplicePos': 43070927,
                                                                             'altMaxEntScanScore': 3.64,
                                                                             'enigmaClass': 'class_3',
                                                                             'priorProb': 0.3,
+                                                                            'genomicSplicePos': 43071156,
                                                                             'closestIntronStart': 3,
                                                                             'altSeq': 'AGGGTCAGC',
                                                                             'closestRefSeq': 'TTTGTGAGT',
@@ -6455,6 +6599,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["altDeNovoAccSeq"], "N/A")
         self.assertEquals(priorProb["closestAccRefZ"], "N/A")
         self.assertEquals(priorProb["closestAccAltZ"], "N/A")
+        # checks that splice positions are present for de novo and closest donor and are NOT present for de novo and closest acceptor
+        self.assertNotEquals(priorProb["deNovoDonorGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestDonorGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["deNovoAccGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["closestAccGenomicSplicePos"], "N/A")
         # checks that flags (splice site, splice rescue, splice flag, splice rescue flags) are all equal to correct values
         self.assertEquals(priorProb["spliceSite"], 0)
         self.assertEquals(priorProb["spliceRescue"], "N/A")
@@ -6486,9 +6635,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'closestRefZScore': 0.4044271515695557,
                                                                             'closestRefMaxEntScanScore': 8.88,
                                                                             'refZScore': -3.3997877110854775,
+                                                                            'closestGenomicSplicePos': 32363534,
                                                                             'altMaxEntScanScore': -0.07,
                                                                             'enigmaClass': 'N/A',
                                                                             'priorProb': 'N/A',
+                                                                            'genomicSplicePos': 32363184,
                                                                             'closestIntronStart': 3,
                                                                             'altSeq': 'ATGCTACGG',
                                                                             'closestRefSeq': 'AAGGTAAAT',
@@ -6511,9 +6662,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                'closestRefZScore': 1.444362632862113,
                                                                                'closestRefMaxEntScanScore': 11.5,
                                                                                'refZScore': -4.57126242264181,
+                                                                               'closestGenomicSplicePos': 32363178,
                                                                                'altMaxEntScanScore': -2.97,
                                                                                'enigmaClass': 'N/A',
                                                                                'priorProb': 'N/A',
+                                                                               'genomicSplicePos': 32363199,
                                                                                'closestIntronStart': 0,
                                                                                'altSeq': 'TATGCTACGGAAATTGATAGAAG',
                                                                                'closestRefSeq': 'ATTTTTGTTTTCACTTTTAGATA',
@@ -6559,6 +6712,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["deNovoAccAltGreaterClosestRefFlag"], 0)
         self.assertEquals(priorProb["deNovoAccAltGreaterClosestAltFlag"], "N/A")
         self.assertEquals(priorProb["deNovoAccFrameshiftFlag"], 0)
+        # checks that splice positions are present for de novo and closest donor and acceptor
+        self.assertNotEquals(priorProb["deNovoDonorGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestDonorGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["deNovoAccGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestAccGenomicSplicePos"], "N/A")
         # checks that scores and sequences are NOT present for ref splice acceptor and ref splice donor
         self.assertEquals(priorProb["altRefAccMES"], "N/A")
         self.assertEquals(priorProb["refRefDonorZ"], "N/A")
@@ -6604,9 +6762,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'closestRefZScore': 1.164411384853913,
                                                                             'closestRefMaxEntScanScore': 10.65,
                                                                             'refZScore': -3.897856474141892,
+                                                                            'closestGenomicSplicePos': 43124016,
                                                                             'altMaxEntScanScore': 0.08,
                                                                             'enigmaClass': 'class_2',
                                                                             'priorProb': 0.02,
+                                                                            'genomicSplicePos': 43124047,
                                                                             'closestIntronStart': 3,
                                                                             'altSeq': 'ATGCTATGT',
                                                                             'closestRefSeq': 'CTGGTAAGT',
@@ -6658,6 +6818,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["altDeNovoAccSeq"], "N/A")
         self.assertEquals(priorProb["closestAccRefMES"], "N/A")
         self.assertEquals(priorProb["closestAccAltMES"], "N/A")
+        # checks that splice positions are present for de novo and closest donor and NOT present for de novo and closest acceptor
+        self.assertNotEquals(priorProb["deNovoDonorGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestDonorGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["deNovoAccGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["closestAccGenomicSplicePos"], "N/A")
         # checks that flags (splice site, splice rescue, splice rescue flags) are all equal to zero or "-" as appropriate
         self.assertEquals(priorProb["spliceSite"], 0)
         self.assertEquals(priorProb["spliceRescue"], 0)
@@ -6699,9 +6864,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'closestRefZScore': 1.1128870300549731,
                                                                             'closestRefMaxEntScanScore': 10.53,
                                                                             'refZScore': -6.358144415791253,
+                                                                            'closestGenomicSplicePos': 32346897,
                                                                             'altMaxEntScanScore': -0.5,
                                                                             'enigmaClass': 'class_2',
                                                                             'priorProb': 0.02,
+                                                                            'genomicSplicePos': 32346882,
                                                                             'closestIntronStart': 3,
                                                                             'altSeq': 'TACCTGAGT',
                                                                             'closestRefSeq': 'TCGGTAAGA',
@@ -6753,6 +6920,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["refDeNovoAccSeq"], "N/A")
         self.assertEquals(priorProb["closestAccRefSeq"], "N/A")
         self.assertEquals(priorProb["closestAccAltSeq"], "N/A")
+        # checks that splice positions are present for de novo and closest donor and NOT present for de novo and closest acceptor
+        self.assertNotEquals(priorProb["deNovoDonorGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestDonorGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["deNovoAccGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["closestAccGenomicSplicePos"], "N/A")
         # checks that flags (splice site, splice rescue, splice flag, and splice rescue flags) are all correct
         self.assertEquals(priorProb["spliceSite"], 0)
         self.assertEquals(priorProb["spliceRescue"], 0)
@@ -6849,16 +7021,20 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -5.804257601702654,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -9.260683069464845})
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43070913)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -0.870800629704197,
                                                                             'sequence': 'TTTGTGAGT',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 43070927,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon16',
                                                                             'maxEntScanScore': 5.91})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
     def test_getPriorProbIntronicDeNovoDonorSNSWithSpliceFlag(self, varInExon, varInSpliceRegion, getVarType,
-                                                              getMaxMaxEntScanScoreSlidingWindowSNS,
-                                                              getClosestSpliceSiteScores, getDeNovoSpliceFrameshiftStatus):
+                                                              getMaxMaxEntScanScoreSlidingWindowSNS, getVarStrand,
+                                                              getNewSplicePosition, getClosestSpliceSiteScores,
+                                                              getDeNovoSpliceFrameshiftStatus):
         '''Tests that funciton works for variant with predicted splice flag = 1 (altMES > refMES)'''
         self.variant["Gene_Symbol"] = "BRCA1"
         self.variant["Reference_Sequence"] = "NM_007294.3"
@@ -6879,6 +7055,9 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertNotEquals(priorProb["altMaxEntScanScore"], "N/A")
         self.assertNotEquals(priorProb["refSeq"], "N/A")
         self.assertNotEquals(priorProb["closestRefMaxEntScanScore"], "N/A")
+        # checks that de novo donor and closest donor splice positions are present
+        self.assertNotEquals(priorProb["genomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestGenomicSplicePos"], "N/A")
 
     @mock.patch('calcVarPriors.varInExon', return_value = False)
     @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
@@ -6893,16 +7072,20 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                        'altZScore': -11.029685917561768,
                                                                                        'varLength': 1,
                                                                                        'refZScore': -10.62607847163674})
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 32326215)
     @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 0.6534615330977633,
                                                                             'sequence': 'CAGGTATGA',
                                                                             'exonStart': 0,
+                                                                            'genomicSplicePos': 32326151,
                                                                             'intronStart': 3,
                                                                             'exonName': 'exon5',
                                                                             'maxEntScanScore': 9.46})
     @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
     def test_getPriorProbIntronicDeNovoDonorSNSNoSpliceFlag(self, varInExon, varInSpliceRegion, getVarType,
-                                                            getMaxMaxEntScanScoreSlidingWindowSNS,
-                                                            getClosestSpliceSiteScores, getDeNovoSpliceFrameshiftStatus):
+                                                            getMaxMaxEntScanScoreSlidingWindowSNS, getVarStrand,
+                                                            getNewSplicePosition, getClosestSpliceSiteScores,
+                                                            getDeNovoSpliceFrameshiftStatus):
         '''Tests that function works for variant with predicted splice flag of 0 (refMES > altMES)'''
         self.variant["Gene_Symbol"] = "BRCA2"
         self.variant["Reference_Sequence"] = "NM_000059.3"
@@ -6923,26 +7106,34 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertNotEquals(priorProb["refMaxEntScanScore"], "N/A")
         self.assertNotEquals(priorProb["altSeq"], "N/A")
         self.assertNotEquals(priorProb["closestRefSeq"], "N/A")
+        # checks that de novo donor and closest donor splice positions are present
+        self.assertNotEquals(priorProb["genomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestGenomicSplicePos"], "N/A")
 
     @mock.patch('calcVarPriors.getVarLocation', return_value = variantLocations["inIntron"])
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.getPriorProbIntronicDeNovoDonorSNS', return_value = {'spliceFlag': 0,
                                                                                     'exonStart': 0,
+                                                                                    'closestAltZScore': 'N/A',
                                                                                     'varStart': 1,
                                                                                     'closestExonStart': 0,
                                                                                     'altGreaterClosestAltFlag': 'N/A',
                                                                                     'altZScore': -8.698208862909755,
                                                                                     'altGreaterClosestRefFlag': 0,
+                                                                                    'closestAltSeq': 'N/A',
                                                                                     'frameshiftFlag': 1,
                                                                                     'refMaxEntScanScore': -10.54,
                                                                                     'varLength': 1,
                                                                                     'intronStart': 3,
+                                                                                    'closestAltMaxEntScanScore': 'N/A',
                                                                                     'closestRefZScore': -0.11940378888632941,
                                                                                     'closestRefMaxEntScanScore': 7.66,
                                                                                     'refZScore': -7.933930933392152,
+                                                                                    'closestGenomicSplicePos': 32376792,
                                                                                     'altMaxEntScanScore': -12.32,
                                                                                     'enigmaClass': 'N/A',
                                                                                     'priorProb': 'N/A',
+                                                                                    'genomicSplicePos': 32379298,
                                                                                     'closestIntronStart': 3,
                                                                                     'altSeq': 'CTAATATCT',
                                                                                     'closestRefSeq': 'GAGGTGAGA',
@@ -6983,6 +7174,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs["NA"])
         self.assertEquals(priorProb["refAccPrior"], priorProbs["NA"])
         self.assertEquals(priorProb["deNovoAccPrior"], priorProbs["NA"])
+        # checks that splice positions are present for de novo and closest donor and NOT present for de novo and closest acceptor
+        self.assertNotEquals(priorProb["deNovoDonorGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestDonorGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["deNovoAccGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["closestAccGenomicSplicePos"], "N/A")
         # checks that all flags are equal to zero or N/A
         self.assertEquals(priorProb["deNovoAccAltGreaterRefFlag"], "N/A")
         self.assertEquals(priorProb["deNovoAccAltGreaterClosestRefFlag"], "N/A")
@@ -7000,21 +7196,26 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.getPriorProbIntronicDeNovoDonorSNS', return_value = {'spliceFlag': 1,
                                                                                     'exonStart': 0,
+                                                                                    'closestAltZScore': 'N/A',
                                                                                     'varStart': 7,
                                                                                     'closestExonStart': 0,
                                                                                     'altGreaterClosestAltFlag': 'N/A',
                                                                                     'altZScore': -5.877250437667818,
                                                                                     'altGreaterClosestRefFlag': 0,
+                                                                                    'closestAltSeq': 'N/A',
                                                                                     'frameshiftFlag': 1,
                                                                                     'refMaxEntScanScore': -14.16,
                                                                                     'varLength': 1,
                                                                                     'intronStart': 3,
+                                                                                    'closestAltMaxEntScanScore': 'N/A',
                                                                                     'closestRefZScore': -0.5573608046773153,
                                                                                     'closestRefMaxEntScanScore': 6.64,
                                                                                     'refZScore': -9.488248969826827,
+                                                                                    'closestGenomicSplicePos': 43082403,
                                                                                     'altMaxEntScanScore': -5.75,
                                                                                     'enigmaClass': 'N/A',
                                                                                     'priorProb': 'N/A',
+                                                                                    'genomicSplicePos': 43082390,
                                                                                     'closestIntronStart': 3,
                                                                                     'altSeq': 'TTGGCCAGA',
                                                                                     'closestRefSeq': 'AAGGTGTGT',
@@ -7055,6 +7256,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs["NA"])
         self.assertEquals(priorProb["refAccPrior"], priorProbs["NA"])
         self.assertEquals(priorProb["deNovoAccPrior"], priorProbs["NA"])
+        # checks that splice positions are present for de novo and closest donor and NOT present for de novo and closest acceptor
+        self.assertNotEquals(priorProb["deNovoDonorGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestDonorGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["deNovoAccGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["closestAccGenomicSplicePos"], "N/A")
         # checks that all flags are equal to zero or N/A
         self.assertEquals(priorProb["deNovoAccAltGreaterRefFlag"], "N/A")
         self.assertEquals(priorProb["deNovoAccAltGreaterClosestRefFlag"], "N/A")
@@ -7108,6 +7314,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["closestDonorAltZ"], "N/A")
         self.assertEquals(priorProb["closestAccRefSeq"], "N/A")
         self.assertEquals(priorProb["closestAccAltSeq"], "N/A")
+        # checks that splice positions are NOT present for de novo and closest donor or acceptor
+        self.assertEquals(priorProb["deNovoDonorGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["closestDonorGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["deNovoAccGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["closestAccGenomicSplicePos"], "N/A")
         # checks that all flags are equal to N/A
         self.assertEquals(priorProb["spliceRescue"], "N/A")
         self.assertEquals(priorProb["frameshiftFlag"], "N/A")
@@ -7156,6 +7367,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["closestDonorAltSeq"], "N/A")
         self.assertEquals(priorProb["closestAccRefMES"], "N/A")
         self.assertEquals(priorProb["closestAccAltMES"], "N/A")
+        # checks that splice positions are NOT present for de novo and closest donor or acceptor
+        self.assertEquals(priorProb["deNovoDonorGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["closestDonorGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["deNovoAccGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["closestAccGenomicSplicePos"], "N/A")
         # checks that all flags are equal to N/A
         self.assertEquals(priorProb["spliceRescue"], "N/A")
         self.assertEquals(priorProb["frameshiftFlag"], "N/A")
@@ -7185,9 +7401,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'closestRefZScore': 0.17686125120757246,
                                                                             'closestRefMaxEntScanScore': 8.35,
                                                                             'refZScore': -8.204433796086585,
+                                                                            'closestGenomicSplicePos': 32316528,
                                                                             'altMaxEntScanScore': -2.99,
                                                                             'enigmaClass': 'class_2',
                                                                             'priorProb': 0.02,
+                                                                            'genomicSplicePos': 32316436,
                                                                             'closestIntronStart': 3,
                                                                             'altSeq': 'AAGCTTTGG',
                                                                             'closestRefSeq': 'CAGGTATTG',
@@ -7232,6 +7450,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["altRefAccSeq"], "N/A")
         self.assertEquals(priorProb["closestAccRefMES"], "N/A")
         self.assertEquals(priorProb["closestAccAltMES"], "N/A")
+        # checks that splice positions are present for de novo and closest donor and NOT present for de novo and closest acceptor
+        self.assertNotEquals(priorProb["deNovoDonorGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestDonorGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["deNovoAccGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["closestAccGenomicSplicePos"], "N/A")
         # checks that all flags are equal to N/A
         self.assertEquals(priorProb["spliceRescue"], "N/A")
         self.assertEquals(priorProb["frameshiftFlag"], "N/A")
@@ -7261,9 +7484,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                'closestRefZScore': -1.2675994823240817,
                                                                                'closestRefMaxEntScanScore': 4.9,
                                                                                'refZScore': -6.888757321073649,
+                                                                               'closestGenomicSplicePos': 43124116,
                                                                                'altMaxEntScanScore': -0.18,
                                                                                'enigmaClass': 'N/A',
                                                                                'priorProb': 'N/A',
+                                                                               'genomicSplicePos': 43124111,
                                                                                'closestIntronStart': 0,
                                                                                'altSeq': 'TCTAATGTGTTAAAGTTCAGTGG',
                                                                                'closestRefSeq': 'GTTTTTCTAATGTGTTAAAGTTC',
@@ -7285,9 +7510,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'closestRefZScore': 1.164411384853913,
                                                                             'closestRefMaxEntScanScore': 10.65,
                                                                             'refZScore': -5.207433825281605,
+                                                                            'closestGenomicSplicePos': 43124016,
                                                                             'altMaxEntScanScore': 0.17,
                                                                             'enigmaClass': 'class_2',
                                                                             'priorProb': 0.02,
+                                                                            'genomicSplicePos': 43124115,
                                                                             'closestIntronStart': 3,
                                                                             'altSeq': 'AAGTTCAGT',
                                                                             'closestRefSeq': 'CTGGTAAGT',
@@ -7330,6 +7557,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["closestDonorAltZ"], "N/A")
         self.assertNotEquals(priorProb["closestAccRefSeq"], "N/A")
         self.assertEquals(priorProb["closestAccAltSeq"], "N/A")
+        # checks that splice positions are present for both de novo and closest donor/acceptor
+        self.assertNotEquals(priorProb["deNovoDonorGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestDonorGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["deNovoAccGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestAccGenomicSplicePos"], "N/A")
         # checks that values are NOT present for ref donor and acceptor
         self.assertEquals(priorProb["refRefDonorSeq"], "N/A")
         self.assertEquals(priorProb["altRefAccSeq"], "N/A")
@@ -7346,29 +7578,31 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "intron_variant")
     @mock.patch('calcVarPriors.getPriorProbIntronicDeNovoDonorSNS', return_value = {'spliceFlag': 1,
                                                                                     'exonStart': 0,
+                                                                                    'closestAltZScore': 'N/A',
                                                                                     'varStart': 4,
                                                                                     'closestExonStart': 0,
                                                                                     'altGreaterClosestAltFlag': 'N/A',
                                                                                     'altZScore': -5.112972508150215,
                                                                                     'altGreaterClosestRefFlag': 0,
+                                                                                    'closestAltSeq': 'N/A',
                                                                                     'frameshiftFlag': 1,
                                                                                     'refMaxEntScanScore': -11.72,
                                                                                     'varLength': 1,
                                                                                     'intronStart': 3,
+                                                                                    'closestAltMaxEntScanScore': 'N/A',
                                                                                     'closestRefZScore': -1.287289164328958,
                                                                                     'closestRefMaxEntScanScore': 4.94,
                                                                                     'refZScore': -8.44058708891506,
+                                                                                    'closestGenomicSplicePos': 32315668,
                                                                                     'altMaxEntScanScore': -3.97,
                                                                                     'enigmaClass': 'N/A',
                                                                                     'priorProb': 'N/A',
+                                                                                    'genomicSplicePos': 32316398,
                                                                                     'closestIntronStart': 3,
                                                                                     'altSeq': 'AGTGTATTT',
                                                                                     'closestRefSeq': 'CGGGTTAGT',
                                                                                     'altGreaterRefFlag': 1,
-                                                                                    'refSeq': 'AGTGCATTT',
-                                                                                    'closestAltSeq': "N/A",
-                                                                                    'closestAltMaxEntScanScore': "N/A",
-                                                                                    'closestAltZScore': "N/A"})
+                                                                                    'refSeq': 'AGTGCATTT'})
     def test_getPriorProbInUTRSNS5PrimeIntronWithSpliceFlag(self, getVarLocation, getVarType, getVarConsequences,
                                                             getPriorProbIntronicDeNovoDonorSNS):
         '''Tests function for variant in intronic portion of 5' UTR for plus strand (BRCA2) gene that has de novo donor'''
@@ -7402,6 +7636,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertNotEquals(priorProb["refDeNovoDonorZ"], "N/A")
         self.assertNotEquals(priorProb["closestDonorRefMES"], "N/A")
         self.assertEquals(priorProb["closestDonorAltMES"], "N/A")
+        # checks that splice positions are present for de novo and closest donor and NOT present for de novo and closest acceptor
+        self.assertNotEquals(priorProb["deNovoDonorGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestDonorGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["deNovoAccGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["closestAccGenomicSplicePos"], "N/A")
         # checks that values are NOT present for de novo acceptor, closest acceptor, and ref donor and acceptor
         self.assertEquals(priorProb["altDeNovoAccMES"], "N/A")
         self.assertEquals(priorProb["closestAccRefZ"], "N/A")
@@ -7436,9 +7675,11 @@ class test_calcVarPriors(unittest.TestCase):
                                                                                     'closestRefZScore': -0.965261946835586,
                                                                                     'closestRefMaxEntScanScore': 5.69,
                                                                                     'refZScore': -5.525167346541731,
+                                                                                    'closestGenomicSplicePos': 43125270,
                                                                                     'altMaxEntScanScore': -5.26,
                                                                                     'enigmaClass': 'N/A',
                                                                                     'priorProb': 'N/A',
+                                                                                    'genomicSplicePos': 43124139,
                                                                                     'closestIntronStart': 3,
                                                                                     'altSeq': 'TATTTATGT',
                                                                                     'closestRefSeq': 'AAGGTAGTA',
@@ -7477,6 +7718,11 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertNotEquals(priorProb["refDeNovoDonorZ"], "N/A")
         self.assertNotEquals(priorProb["closestDonorRefMES"], "N/A")
         self.assertEquals(priorProb["closestDonorAltMES"], "N/A")
+        # checks that splice positions are present for de novo and closest donor and NOT present for de novo and closest acceptor
+        self.assertNotEquals(priorProb["deNovoDonorGenomicSplicePos"], "N/A")
+        self.assertNotEquals(priorProb["closestDonorGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["deNovoAccGenomicSplicePos"], "N/A")
+        self.assertEquals(priorProb["closestAccGenomicSplicePos"], "N/A")
         # checks that values are NOT present for de novo acceptor, closest acceptor, and ref donor and acceptor
         self.assertEquals(priorProb["altDeNovoAccMES"], "N/A")
         self.assertEquals(priorProb["closestAccRefZ"], "N/A")
