@@ -83,7 +83,8 @@ LOVD_FIELDS = {"Variant_frequency": "frequency",
                "DBID": "DBID",
                "BX_ID": "BX_ID",
                "Created_date": "created_date",
-               "Edited_date": "edited_date"
+               "Edited_date": "edited_date",
+               "Submission_ID": "submission_id"
                }
 
 EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
