@@ -4,7 +4,7 @@
 ##liftOverProgram=CrossMap(https://sourceforge.net/projects/crossmap/)
 ##liftOverFile=/files/resources/hg19ToHg38.over.chain.gz
 ##new_reference_genome=/files/resources/hg38.fa
-##liftOverTime=April24,2018
+##liftOverTime=May08,2018
 ##INFO=<ID=dbsnp_id,Number=.,Type=String,Description="The dbSNP ID.">
 ##INFO=<ID=db_id,Number=.,Type=String,Description="Database ID of variant, grouping multiple observations of the same variant together, starting with the HGNC gene symbol, followed by an underscore (_) and a six digit number (e.g. DMD_012345). _000000 is used for variants where DNA was not analysed (change predicted from RNA analysis), variants seen in animal models or variants not seen in humans but functionally tested in vitro.">
 ##INFO=<ID=reference,Number=.,Type=String,Description="publication describing the variant submitted, incl. links to OMIM, PubMed or other source, e.g. den Dunnen ASHG2003 P2346.">
@@ -27,5 +27,5 @@
 ##INFO=<ID=variant_remarks,Number=.,Type=String,Description="Remarks regarding variant described, e.g. germline mosaicism in mother, 345 kb deletion, muscle RNA analysed, not in 200 control chromosomes tested, on founder haplotype, etc.">
 ##INFO=<ID=published_as,Number=.,Type=String,Description="Listed only when different from DNA change; variant as reported originally (e.g. 521delT). Variants seen in animal models, tested in vitro, predicted from RNA analysis, etc. are described between brackets like c.(456C>G)">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
-13	32314943	NM_000059.3:c.-764A>G	A	G	.	.	genetic_origin=SUMMARY+record;frequency=;BX_ID=1;DBID=BRCA2_003944;Protein=p.%28%3D%29;RNA=r.%28%3F%29;cDNA=NM_000059.3%3Ac.-764A%3EG;chromosome=chr13;created_date=2015-12-01 12:00:00;edited_date=2018-03-30 16:37:02;gDNA=g.32889080A>G;geneid=BRCA2;individuals=1;submitters=ENIGMA+consortium+%28Brisbane%2CAU%29;variant_effect=-%2F-
-17	43127866	NM_007294.3:c.-2617_-2616del	GAC	G	.	.	genetic_origin=SUMMARY+record;frequency=;BX_ID=17194;DBID=BRCA1_004602;Protein=p.%28%3D%29;RNA=r.%28%3F%29;cDNA=NM_007294.3%3Ac.-2617_-2616del;chromosome=chr17;created_date=2015-12-01 12:00:00;edited_date=2017-08-18 17:32:36;gDNA=g.41279884_41279885del;geneid=BRCA1;individuals=1;submitters=ENIGMA+consortium+%28Brisbane%2CAU%29;variant_effect=-%2F-
+13	32349814	NM_000059.3:c.7007+2936del	CA	C	.	.	genetic_origin=SUMMARY+record;frequency=;BX_ID=6110;DBID=BRCA2_005091;Protein=p.%28%3D%29;RNA=r.%28%3F%29;cDNA=NM_000059.3%3Ac.7007%2B2936del;chromosome=chr13;created_date=2016-09-28 12:00:00;edited_date=2018-03-30 16:37:02;gDNA=g.32923969del;geneid=BRCA2;individuals=1;submission_id=NM_000059.3:c.7007+2936delENIGMA consortium (Brisbane,AU);submitters=ENIGMA+consortium+%28Brisbane%2CAU%29;variant_effect=-%2F-
+17	43092719	NM_007294.3:c.2812C>T	G	A	.	.	genetic_origin=Unknown;frequency=;BX_ID=13673;DBID=BRCA1_001422;Protein=p.%28Pro938Ser%29;RNA=r.%28%3F%29;cDNA=NM_007294.3%3Ac.2812C%3ET;chromosome=chr17;created_date=2014-02-03 11:09:45;edited_date=2016-08-05 14:13:49;gDNA=g.41244736G>A;geneid=BRCA1;individuals=1;submission_id=NM_007294.3:c.2812C>THans Gille (Amsterdam,NL);submitters=Hans+Gille+%28Amsterdam%2CNL%29;variant_effect=%3F%2F%3F
