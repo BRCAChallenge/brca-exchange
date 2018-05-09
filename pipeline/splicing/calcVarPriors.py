@@ -1828,7 +1828,7 @@ def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, genome, t
             refZScore = slidingWindowInfo["refZScore"]
             altGreaterRefFlag = 0
             if altZScore <= refZScore:
-                priorProb = 0
+                priorProb = 0.02
             else:
                 altGreaterRefFlag = 1
                 if altZScore < -2.0:
@@ -1839,9 +1839,7 @@ def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, genome, t
                     priorProb = 0.64
             if (altZScore > subZScore and refAltZScore == "N/A") or (altZScore > refAltZScore and refAltZScore != "N/A"):
                 # promote prior prob by one step
-                if priorProb == 0:
-                    priorProb = 0.3
-                elif priorProb == 0.02:
+                if priorProb == 0.02:
                     priorProb = 0.3
                 elif priorProb == 0.3:
                     priorProb = 0.64
@@ -1859,13 +1857,6 @@ def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, genome, t
                 if frameshiftAndCIStatus == True:
                     priorProb = 0.02
 
-            if priorProb == 0: 
-                priorProb = "N/A"
-                enigmaClass = "N/A"
-            else:
-                priorProb = priorProb
-                enigmaClass = getEnigmaClass(priorProb)
-
             # converts genomic splice position to transcript splice position
             newTranscriptSplicePos = convertGenomicPosToTranscriptPos(newGenomicSplicePos, getVarChrom(variant), genome, transcript)
             # converts closest genomic splice position to transcript splice position
@@ -1873,7 +1864,7 @@ def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, genome, t
             closestTranscriptSplicePos = convertGenomicPosToTranscriptPos(closestGenomicSplicePos, getVarChrom(variant), genome, transcript)
                 
             return {"priorProb": priorProb,
-                    "enigmaClass": enigmaClass,
+                    "enigmaClass": getEnigmaClass(priorProb),
                     "refMaxEntScanScore": slidingWindowInfo["refMaxEntScanScore"],
                     "altMaxEntScanScore": slidingWindowInfo["altMaxEntScanScore"],
                     "refZScore": refZScore,

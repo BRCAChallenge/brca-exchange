@@ -4392,8 +4392,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Alt"] = "C"
         priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, boundaries, STD_EXONIC_PORTION, GENOME,
                                                              BRCA1_RefSeq, deNovoDonorInRefAcc=False)
-        self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
-        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
+        self.assertEquals(priorProb["priorProb"], priorProbs["deNovoLow"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
         self.assertEquals(priorProb["altGreaterRefFlag"], 0)
         self.assertEquals(priorProb["altGreaterClosestRefFlag"], 0)
         self.assertEquals(priorProb["altGreaterClosestAltFlag"], "N/A")
@@ -4453,8 +4453,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Alt"] = "A"
         priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, boundaries, STD_EXONIC_PORTION, GENOME,
                                                              BRCA1_RefSeq, deNovoDonorInRefAcc=False)
-        self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
-        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
+        self.assertEquals(priorProb["priorProb"], priorProbs["deNovoLow"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
         self.assertEquals(priorProb["altGreaterRefFlag"], 0)
         self.assertEquals(priorProb["altGreaterClosestRefFlag"], 0)
         self.assertEquals(priorProb["altGreaterClosestAltFlag"], 0)
@@ -4499,8 +4499,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Alt"] = "G"
         priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, boundaries, STD_EXONIC_PORTION, GENOME,
                                                              BRCA2_RefSeq, deNovoDonorInRefAcc=False)
-        self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
-        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
+        self.assertEquals(priorProb["priorProb"], priorProbs["deNovoLow"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
         self.assertEquals(priorProb["altGreaterRefFlag"], 0)
         self.assertEquals(priorProb["altGreaterClosestRefFlag"], 0)
         self.assertEquals(priorProb["altGreaterClosestAltFlag"], "N/A")
@@ -4560,8 +4560,8 @@ class test_calcVarPriors(unittest.TestCase):
         self.variant["Alt"] = "T"
         priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, boundaries, STD_EXONIC_PORTION, GENOME,
                                                              BRCA2_RefSeq, deNovoDonorInRefAcc=False)
-        self.assertEquals(priorProb["priorProb"], priorProbs["NA"])
-        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["NA"])
+        self.assertEquals(priorProb["priorProb"], priorProbs["deNovoLow"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class2"])
         self.assertEquals(priorProb["altGreaterRefFlag"], 0)
         self.assertEquals(priorProb["altGreaterClosestRefFlag"], 0)
         self.assertEquals(priorProb["altGreaterClosestAltFlag"], 0)
@@ -5878,8 +5878,8 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'altGreaterRefFlag': 0,
                                                                             'closestGenomicSplicePos': 'g.43115725',
                                                                             'altMaxEntScanScore': -5.25,
-                                                                            'enigmaClass': 'N/A',
-                                                                            'priorProb': 'N/A',
+                                                                            'enigmaClass': 'class_2',
+                                                                            'priorProb': 0.02,
                                                                             'genomicSplicePos': 'g.43115729',
                                                                             'closestRefSeq': 'CAAGTAAGT',
                                                                             'closestIntronStart': 3,
@@ -5888,9 +5888,9 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getPriorProbProteinSNS', return_value = {'enigmaClass': 'class_3',
                                                                         'priorProb': 0.29})
     @mock.patch('calcVarPriors.getVarConsequences', return_value = "missense_variant")
-    def test_getPriorProbSpliceDonorSNSNoDeNovoBRCA1(self, varInSpliceRegion, getVarType, varInExon,
-                                                     getPriorProbRefSpliceDonorSNS, getPriorProbDeNovoDonorSNS,
-                                                     getPriorProbProteinSNS, getVarConsequences):
+    def test_getPriorProbSpliceDonorSNSLowDeNovoProbBRCA1(self, varInSpliceRegion, getVarType, varInExon,
+                                                          getPriorProbRefSpliceDonorSNS, getPriorProbDeNovoDonorSNS,
+                                                          getPriorProbProteinSNS, getVarConsequences):
         '''Tests that applicable prior for a variant in a reference splice site is assigned correctly (no de novo splicing)'''
         boundaries = "enigma"
         self.variant["Gene_Symbol"] = "BRCA1"
@@ -5918,7 +5918,7 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that protein prior prob, ref prior prob, and de novo prior prob are set appropriately
         self.assertEquals(priorProb["proteinPrior"], priorProbs["proteinMod"])
         self.assertEquals(priorProb["refDonorPrior"], priorProbs["low"])
-        self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs["NA"])
+        self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs["deNovoLow"])
         self.assertEquals(priorProb["refAccPrior"], priorProbs["NA"])
         self.assertEquals(priorProb["deNovoAccPrior"], priorProbs["NA"])
         # checks that scores and sequences are present for reference and de novo donor values and closest donor site
@@ -6455,8 +6455,8 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'altGreaterRefFlag': 0,
                                                                             'closestGenomicSplicePos': 'g.43099774',
                                                                             'altMaxEntScanScore': -1.52,
-                                                                            'enigmaClass': 'N/A',
-                                                                            'priorProb': 'N/A',
+                                                                            'enigmaClass': 'class_2',
+                                                                            'priorProb': 0.02,
                                                                             'genomicSplicePos': 'g.43099877',
                                                                             'closestRefSeq': 'TGGGTAAGG',
                                                                             'closestIntronStart': 3,
@@ -6533,7 +6533,7 @@ class test_calcVarPriors(unittest.TestCase):
         # checks that protein prior prob, ref prior prob, and de novo prior prob are set appropriately
         self.assertEquals(priorProb["proteinPrior"], priorProbs["pathogenic"])
         self.assertEquals(priorProb["refAccPrior"], priorProbs["moderate"])
-        self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs["NA"])
+        self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs["deNovoLow"])
         self.assertEquals(priorProb["deNovoAccPrior"], priorProbs["NA"])
         # checks that a score and sequence are NOT present for reference donor score and are present for de novo splice donor score
         self.assertNotEquals(priorProb["altDeNovoDonorZ"], "N/A")
@@ -6785,8 +6785,8 @@ class test_calcVarPriors(unittest.TestCase):
                                                                             'altGreaterRefFlag': 0,
                                                                             'closestGenomicSplicePos': 'g.32363534',
                                                                             'altMaxEntScanScore': -0.07,
-                                                                            'enigmaClass': 'N/A',
-                                                                            'priorProb': 'N/A',
+                                                                            'enigmaClass': 'class_2',
+                                                                            'priorProb': 0.02,
                                                                             'genomicSplicePos': 'g.32363184',
                                                                             'closestRefSeq': 'AAGGTAAAT',
                                                                             'closestIntronStart': 3,
@@ -6841,7 +6841,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["refDonorPrior"], priorProbs["NA"])
         self.assertEquals(priorProb["refAccPrior"], priorProbs["NA"])
         # checks that de novo donor prior and de novo acceptor prior are correct
-        self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs["NA"])
+        self.assertEquals(priorProb["deNovoDonorPrior"], priorProbs["deNovoLow"])
         self.assertEquals(priorProb["deNovoAccPrior"], priorProbs["NA"])
         # checks that scores and sequences are present for de novo acceptor and de novo donor and closest donor/acceptor
         self.assertNotEquals(priorProb["altDeNovoAccZ"], "N/A")
