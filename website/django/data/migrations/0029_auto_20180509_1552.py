@@ -17,11 +17,6 @@ class Migration(migrations.Migration):
             name='Submission_ID_LOVD',
             field=models.TextField(default=b'-'),
         ),
-        migrations.AddField(
-            model_name='variant',
-            name='Submission_ID_LOVD',
-            field=models.TextField(default=b'-'),
-        ),
         migrations.RunSQL(
             """
             DROP MATERIALIZED VIEW IF EXISTS currentvariant;

@@ -24,7 +24,7 @@ from pygr.seqdb import SequenceFileDB
 import urllib
 
 
-LOVD_LIST_FIELDS = ["genetic_origin", "RNA", "variant_effect", "individuals", "Protein"]
+LOVD_LIST_FIELDS = ["genetic_origin", "RNA", "variant_effect", "individuals", "Protein", "submission_id", "submitters"]
 
 
 def parse_args():
