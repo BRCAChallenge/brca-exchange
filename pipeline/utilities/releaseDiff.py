@@ -584,8 +584,10 @@ def getIdentifier(obj, isReport):
             source = obj["Source"]
         if source == "ClinVar":
             return "SCV_ClinVar"
+        elif source == "LOVD":
+            return "Submission_ID_LOVD"
         else:
-            # ignore non clinvar reports
+            # ignore non clinvar/lovd reports
             return None
     else:
         # variants are always identified by same genomic coordinate field
@@ -656,7 +658,8 @@ def main():
         # handle reports
         for oldRow in v1In:
             identifier = getIdentifier(oldRow, reports)
-            if identifier is not None:
+            # if a new identifier is assigned, this will skip over old data that don't have the property
+            if identifier is not None and hasattr(oldRow, identifier):
                 oldData[oldRow[identifier]] = oldRow
         for newRow in v2In:
             identifier = getIdentifier(newRow, reports)

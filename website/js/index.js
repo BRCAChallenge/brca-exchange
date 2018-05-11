@@ -883,7 +883,7 @@ var VariantDetail = React.createClass({
 
         // generates report diff rows
         if (this.state.reports !== undefined) {
-            let sortedSubmissions = {'ClinVar': {}};
+            let sortedSubmissions = {'ClinVar': {}, 'LOVD': {}};
 
             // get all versions of clinvar submissions organized by accession number
             if (this.state.reports.hasOwnProperty('ClinVar')) {
@@ -901,6 +901,25 @@ var VariantDetail = React.createClass({
                     }
                 }
             }
+
+
+            // get all versions of lovd submissions organized by submission id
+            if (this.state.reports.hasOwnProperty('LOVD')) {
+                let lovdSubmissions = this.state.reports.LOVD;
+                for (var j = 0; j < lovdSubmissions.length; j++) {
+                    if (lovdSubmissions[j].Diff === null || lovdSubmissions[j].Diff === undefined) {
+                        // don't show empty diffs for reports
+                        continue;
+                    }
+                    let key = lovdSubmissions[j].Submission_ID_LOVD;
+                    if (sortedSubmissions.LOVD.hasOwnProperty(key)) {
+                        sortedSubmissions.LOVD[key].push(lovdSubmissions[j]);
+                    } else {
+                        sortedSubmissions.LOVD[key] = [lovdSubmissions[j]];
+                    }
+                }
+            }
+
             var clinvarDiffRows = _.map(sortedSubmissions.ClinVar, function(submissions) {
                 let newestSubmission = submissions ? submissions[0] : '';
                 const significance = util.sentenceCase(util.getFormattedFieldByProp("Clinical_Significance_ClinVar", newestSubmission)
@@ -910,6 +929,34 @@ var VariantDetail = React.createClass({
                     <Row>
                         <Col md={12} className="variant-history-col">
                             <h3>ClinVar Submission: {newestSubmission["SCV_ClinVar"]} ({submitter}; {significance})</h3>
+                            <h4>Previous Versions of this Submission (since {util.reformatDate(newestSubmission.Data_Release.date)}):</h4>
+                            <Table className='variant-history nopointer' responsive bordered>
+                                <thead>
+                                    <tr className='active'>
+                                        <th>Release Date</th>
+                                        <th>Clinical Significance</th>
+                                        <th>Changes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {this.generateDiffRows(cols, submissions, true)}
+                                </tbody>
+                            </Table>
+                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show All Public Data on this Variant" to see these changes.</p>
+                        </Col>
+                    </Row>
+                );
+            }, this);
+
+            var lovdDiffRows = _.map(sortedSubmissions.LOVD, function(submissions) {
+                let newestSubmission = submissions ? submissions[0] : '';
+                const significance = util.sentenceCase(util.getFormattedFieldByProp("Variant_Effect_LOVD", newestSubmission)
+                .replace(/(variant of unknown significance|uncertain significance)/i, 'VUS'));
+                const submitter = util.abbreviatedSubmitter(util.getFormattedFieldByProp("Submitters_LOVD", newestSubmission));
+                return (
+                    <Row>
+                        <Col md={12} className="variant-history-col">
+                            <h3>LOVD Submission: {newestSubmission["DBID_LOVD"]} ({submitter}; {significance})</h3>
                             <h4>Previous Versions of this Submission (since {util.reformatDate(newestSubmission.Data_Release.date)}):</h4>
                             <Table className='variant-history nopointer' responsive bordered>
                                 <thead>
@@ -1030,6 +1077,7 @@ var VariantDetail = React.createClass({
                 </Row>
 
                 {this.props.mode === "research_mode" ? clinvarDiffRows : ''}
+                {this.props.mode === "research_mode" ? lovdDiffRows : ''}
 
                 <Row>
                     <Col md={12} mdOffset={0}>
