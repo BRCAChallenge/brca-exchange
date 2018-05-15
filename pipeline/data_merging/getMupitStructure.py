@@ -16,6 +16,11 @@ def parse_args():
     return options
 
 
+def isRelevantPosition(pos):
+    # If positions requires updates, also update is_relevant_position in django/data/utilities.py
+    return (pos >= 32356427 and pos <= 32396972) or (pos >= 43045692 and pos <= 43125184)
+
+
 def isPointSubstitution(ref, alt):
     bases = ['a', 'c', 't', 'g']
     ref = ref.lower()
@@ -53,7 +58,7 @@ def main(args):
         alt = variant[altIndex]
 
         # only concerned with point substitutions
-        if isPointSubstitution(ref, alt):
+        if isPointSubstitution(ref, alt) and isRelevantPosition(pos):
             # Add empty data for each new column to prepare for data insertion by index
             for i in range(len(new_columns_to_append)):
                 variant.append('-')

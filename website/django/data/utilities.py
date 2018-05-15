@@ -78,6 +78,11 @@ def isPointSubstitution(ref, alt):
     return False
 
 
+def is_relevant_position(pos):
+    # If positions requires updates, also update isRelevantPosition in pipeline/data_merging/getMupitStructure.py
+    return (pos >= 32356427 and pos <= 32396972) or (pos >= 43045692 and pos <= 43125184)
+
+
 def update_mupit_structure_for_existing_variants():
     mupit_structures = {ms['name']: ms['id'] for ms in MupitStructure.objects.values()}
     cvs = CurrentVariant.objects.all()
@@ -87,7 +92,7 @@ def update_mupit_structure_for_existing_variants():
         pos = int(getattr(variant, 'Pos'))
         ref = getattr(variant, 'Ref')
         alt = getattr(variant, 'Alt')
-        if isPointSubstitution(ref, alt):
+        if isPointSubstitution(ref, alt) and is_relevant_position(pos):
             main_url = 'http://staging.cravat.us/MuPIT_Interactive'
             brca_structures = ['1t15','1jm7','4igk','fENSP00000380152_7']
             query_url = main_url+'/rest/showstructure/query'
