@@ -1,6 +1,6 @@
 {
   "name": "brcaexchange",
-  "version": "3.40.0-alpha.0",
+  "version": "3.43.0-alpha.0",
   "description": "brca variant browser",
   "main": "index.js",
   "scripts": {
@@ -52,11 +52,13 @@
     "bootstrap": "^3.3.4",
     "classnames": "^2.1.5",
     "d3": "^3.5.6",
+    "d3-scale": "^2.0.0",
     "d3-tip": "git+https://github.com/Caged/d3-tip.git#v0.6.7",
     "es5-shim": "^4.1.13",
     "font-awesome": "^4.5.0",
     "font-awesome-webpack": "0.0.3",
     "highcharts": "^5.0.12",
+    "immutability-helper": "^2.6.5",
     "isotope-fit-columns": "^1.1.3",
     "isotope-layout": "^3.0.3",
     "isotope-packery": "^2.0.0",

@@ -40,6 +40,7 @@ var content = require('./content');
 var Community = require('./Community');
 var FactSheet = require('./FactSheet');
 var {MailingList} = require('./MailingList');
+var Splicing = require('./Splicing');
 
 var databaseKey = require('../databaseKey');
 var util = require('./util');
@@ -962,6 +963,15 @@ var VariantDetail = React.createClass({
 
         }
 
+        const splicingHeader = (
+            <h3>
+                <a href="#" onClick={(event) => this.onChangeGroupVisibility("transcript-visualization", event)}>
+                {`${variant['Gene_Symbol']} ${variant['HGVS_cDNA']} Transcript Visualization`}
+                </a>
+                <GroupHelpButton group={"transcript-visualization"} onClick={(event) => { this.showHelp(event, "transcript-visualization"); return true; }} />
+            </h3>
+        );
+
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
@@ -1010,6 +1020,11 @@ var VariantDetail = React.createClass({
                             :
                             <IsoGrid>
                                 <div className="isogrid-sizer col-xs-12 col-md-6 col-lg-6 col-xl-4"/>
+                                    <Col key={"splicing_vis"} xs={12} md={12} lg={12} className="variant-detail-group isogrid-item col-xl-8">
+                                        <Panel header={splicingHeader} collapsable={true} defaultExpanded={localStorage.getItem("collapse-group_transcript-visualization") !== "true"}>
+                                            <Splicing variant={variant} />
+                                        </Panel>
+                                    </Col>
                                 {
                                     // we're mapping each group into a column so we can horizontally stack them
                                     groupTables.map((x, i) => {
