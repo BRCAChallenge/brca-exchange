@@ -57,11 +57,12 @@ def main(args):
         ref = variant[refIndex]
         alt = variant[altIndex]
 
-        # only concerned with point substitutions
+        # Add empty data for each new column to prepare for data insertion by index
+        for i in range(len(new_columns_to_append)):
+            variant.append('-')
+
+        # only check mupit structure for point substitutions in relevant positions
         if isPointSubstitution(ref, alt) and isRelevantPosition(pos):
-            # Add empty data for each new column to prepare for data insertion by index
-            for i in range(len(new_columns_to_append)):
-                variant.append('-')
 
             mupit_structure = get_brca_struct(chrom, pos)
 
@@ -70,9 +71,9 @@ def main(args):
             if mupit_structure is not '-':
                 print variant
 
-            output_file.writerow(variant)
-
             time.sleep(0.1)
+
+        output_file.writerow(variant)
 
 
 def get_brca_struct(chrom, pos):
