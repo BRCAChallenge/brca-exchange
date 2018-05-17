@@ -406,8 +406,7 @@ def varInExon(variant):
                 if varGenPos > exonStart and varGenPos <= exonEnd:
                     return True
             else:
-                withinBoundaries = checkWithinBoundaries(varStrand, varGenPos, exonStart, exonEnd)
-                if withinBoundaries == True:
+                if varGenPos <= exonStart and varGenPos > exonEnd:
                     return True
     return False
 
@@ -427,8 +426,7 @@ def getVarExonNumberSNS(variant):
                 if varGenPos > exonStart and varGenPos <= exonEnd:
                     return exon
             else:
-                withinBoundaries = checkWithinBoundaries(varStrand, varGenPos, exonStart, exonEnd)
-                if withinBoundaries == True:
+                if varGenPos <= exonStart and varGenPos > exonEnd:
                     return exon
 
 def varInSpliceRegion(variant, donor=False, deNovo=False):

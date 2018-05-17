@@ -598,7 +598,7 @@ class test_calcVarPriors(unittest.TestCase):
         # checks BRCA1 3' exon boundary (first base in intron)
         self.variant["Pos"] = "43067607"
         inExon = calcVarPriors.varInExon(self.variant)
-        self.assertTrue(inExon)
+        self.assertFalse(inExon)
         
         # checks BRCA1 variant inside an exon
         self.variant["Pos"] = "43049176"
