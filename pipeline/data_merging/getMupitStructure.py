@@ -68,16 +68,23 @@ def main(args):
 
             variant[output_header_row.index("mupit_structure")] = mupit_structure
 
-            if mupit_structure is not '-':
-                print variant
-
             time.sleep(0.1)
 
         output_file.writerow(variant)
 
 
 def get_brca_struct(chrom, pos):
-    main_url = 'http://staging.cravat.us/MuPIT_Interactive'
+    '''
+    When you submit a position, the mupit server responds with a bunch of structures that the position maps to.
+    Which structure to display first is determined client side.
+    It chooses which structure to display based on three tests.
+    If a higher test results in a tie, the next test is used to break the tie.
+    1) pref_level. Select the lowest pref_level, but ignore pref_levels of zero
+    2) no_query_pos. Select the structure that has the most hits from the submitted positions.
+    Mupit supports querying with multiple positions at once, though brca exchange does not do this.
+    3) no_res. Select the structure with the most residues (amino acids)
+    '''
+    main_url = 'http://mupit.icm.jhu.edu/MuPIT_Interactive'
     brca_structures = ['1t15','1jm7','4igk','fENSP00000380152_7']
     query_url = main_url+'/rest/showstructure/query'
     params = {
