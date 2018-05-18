@@ -49,7 +49,35 @@ const FAQContent = [
     }
 ];
 
+const mupitStructures = [
+    {
+        "name": "1t15",
+        "image": require('../content/mupit/1t15.png'),
+        "url": "http://mupit.icm.jhu.edu/MuPIT_Interactive?structure_id=1t15&addtlinfo=brca",
+        "humanReadableName": "BRCA1 BRCT Domain"
+    },
+    {
+        "name": "1jm7",
+        "image": require('../content/mupit/1jm7.png'),
+        "url": "http://mupit.icm.jhu.edu/MuPIT_Interactive?structure_id=1jm7&addtlinfo=brca",
+        "humanReadableName": "BRCA1 Ring Domain"
+    },
+    {
+        "name": "4igk",
+        "image": require('../content/mupit/4igk.png'),
+        "url": "http://mupit.icm.jhu.edu/MuPIT_Interactive?structure_id=4igk&addtlinfo=brca",
+        "humanReadableName": "BRCA1 BRCT Domain"
+    },
+    {
+        "name": "fENSP00000380152_7",
+        "image": require('../content/mupit/fENSP00000380152_7.png'),
+        "url": "http://mupit.icm.jhu.edu/MuPIT_Interactive/?gene=BRCA2&addtlinfo=brca",
+        "humanReadableName": "BRCA2 Homology Model"
+    }
+];
+
 module.exports = {
     pages: content,
-    faqs: FAQContent
+    faqs: FAQContent,
+    mupitStructures: mupitStructures
 };

@@ -489,8 +489,13 @@ const IsoGrid = React.createClass({
     // When the DOM is rendered, let Masonry know what's changed
     componentDidUpdate: function() {
         if (this.masonry) {
-            this.masonry.reloadItems();
-            this.masonry.arrange();
+            var that = this;
+            setTimeout(() => {
+                // prevents improper layout of mupit tile, and potentially others
+                // 300ms is the time it takes for the tile to expand
+                that.masonry.reloadItems();
+                that.masonry.arrange();
+            }, 300);
         }
     },
 
@@ -827,13 +832,24 @@ var VariantDetail = React.createClass({
                     title = "Abbreviated AA Change";
                 }
 
-                // get allele frequency chart components if they're available
-                if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] !== null) {
+                // get mupit structures if they're available
+                if (prop === "Mupit_Structure") {
+                    rowItem = rowDescriptor.replace(variant, prop);
+
+                    // mupit structures are not displayed if they're empty
+                    if (rowItem === false) {
+                        return false;
+                    }
+
+                    if (!variant[prop]) {
+                        rowsEmpty += 1;
+                        return false;
+                    }
+                } else if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] !== null) {
                     let val = variant["HGVS_Protein"].split(":")[0];
                     variant[prop] = val;
                     rowItem = val;
-                }
-                else if (variant[prop] !== null) {
+                } else if (variant[prop] !== null) {
                     rowItem = util.getFormattedFieldByProp(prop, variant);
                 }
 
@@ -848,7 +864,6 @@ var VariantDetail = React.createClass({
                         isEmptyValue = false;
                     }
                 }
-
                 if (isEmptyValue) {
                     rowsEmpty += 1;
                     rowItem = '-';
@@ -880,7 +895,7 @@ var VariantDetail = React.createClass({
             );
 
             return (
-                <div key={`group_collection-${groupTitle}`} className={ allEmpty && this.state.hideEmptyItems ? "group-empty" : "" }>
+                <div key={`group_collection-${groupTitle}`} className={ (allEmpty && this.state.hideEmptyItems) || (allEmpty && groupTitle === 'CRAVAT - MuPIT 3D Protein View') ? "group-empty" : "" }>
                     <Panel
                         header={header}
                         collapsable={true}

@@ -21,6 +21,7 @@ var ColumnCheckbox = require('./ColumnCheckbox');
 var {getDefaultExpertColumns, getDefaultResearchColumns, getAllSources} = require('./VariantTableDefaults');
 var {State} = require('react-router');
 var alleleFrequencyCharts = require('./AlleleFrequencyCharts');
+var mupitStructure = require('./MupitStructure');
 
 require('react-data-components-bd2k/css/table-twbs.css');
 
@@ -225,6 +226,10 @@ const researchModeGroups = [
         {title: 'Segregation Likelihood Ratio', prop: 'Segregation_LR_exLOVD', core: true},
         {title: 'Summary Family History Likelihood Ratio', prop: 'Sum_family_LR_exLOVD', core: true},
         {title: 'Literature Reference', prop: 'Literature_source_exLOVD', core: true}
+    ]},
+
+    {groupTitle: 'CRAVAT - MuPIT 3D Protein View', internalGroupName: 'Mupit Structure', innerCols: [
+        {title: 'Mupit Structure', prop: 'Mupit_Structure', replace: mupitStructure, tableKey: false, dummy: true}
     ]},
 ];
 

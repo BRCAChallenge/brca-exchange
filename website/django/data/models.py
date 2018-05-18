@@ -18,6 +18,9 @@ class DataRelease(models.Model):
 class ChangeType(models.Model):
     name = models.TextField()
 
+class MupitStructure(models.Model):
+    name = models.TextField()
+
 class LegacyJSONField(JSONField):
     def db_type(self, connection):
         return 'json'
@@ -175,6 +178,7 @@ class Variant(models.Model):
     BX_ID_1000_Genomes = models.TextField(default='')
     BX_ID_ExAC = models.TextField(default='')
     BX_ID_exLOVD = models.TextField(default='')
+    Mupit_Structure = models.ForeignKey(MupitStructure, null=True)
 
     # Data Versioning
     Data_Release = models.ForeignKey(DataRelease)
@@ -454,6 +458,7 @@ class CurrentVariant(models.Model):
     BX_ID_1000_Genomes = models.TextField(default='')
     BX_ID_ExAC = models.TextField(default='')
     BX_ID_exLOVD = models.TextField(default='')
+    Mupit_Structure = models.ForeignKey(MupitStructure, null=True)
 
     # Data Versioning
     Data_Release = models.ForeignKey(DataRelease)
