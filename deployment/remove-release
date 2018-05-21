@@ -36,7 +36,7 @@ if [ "${ENVIRONMENT}" == "dev" ] ;then
 	    python /home/${USER}/brca-exchange/website/django/manage.py remove_last_release
 	ENDSSH
 elif [ "${ENVIRONMENT}" == "beta" ] ;then
-	HOST=${HOST:-brcaexchange.cloudapp.net}
+	HOST=${HOST:-brcaexchange.org}
 	ssh -l${USER} ${HOST} <<-ENDSSH
 	    set -o errexit
 	    . /var/www/backend/${ENVIRONMENT}/virtualenv/bin/activate

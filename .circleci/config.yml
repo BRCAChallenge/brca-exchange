@@ -92,7 +92,7 @@ jobs:
              EOF
        - run:
            name: deploying to beta machine
-           command: HOST=brcaexchange.cloudapp.net ~/project/deployment/deploy-dev
+           command: HOST=brcaexchange.org ~/project/deployment/deploy-dev
 workflows:
    version: 2
    build-n-deploy:

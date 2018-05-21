@@ -3,7 +3,7 @@ set -x
 set -o nounset
 set -o errexit
 
-HOST=${HOST:-brcaexchange.cloudapp.net}
+HOST=${HOST:-brcaexchange.org}
 USER=brca
 
 ssh -l${USER} ${HOST} <<-'ENDSSH'
