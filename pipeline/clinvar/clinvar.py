@@ -84,7 +84,8 @@ class variant:
             for attrib in attrs.findall("Attribute"):
                 self.attribute[attrib.get("Type")] = attrib.text
 
-                if attrib.get('Change'):
+                attr_type = attrib.get('Type')
+                if 'HGVS' in attr_type or attr_type == 'nucleotide change':
                     self.variantAliases.append(attrib.text)
 
         self.coordinates = dict()

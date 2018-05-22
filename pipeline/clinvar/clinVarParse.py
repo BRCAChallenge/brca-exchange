@@ -61,7 +61,7 @@ def processSubmission(submissionSet, assembly):
                                      str(oa.description),
                                      str(oa.summaryEvidence),
                                      str(oa.reviewStatus),
-                                     ','.join(variant.variantAliases)
+                                     ';'.join(variant.variantAliases)
                                      )))
 
 
