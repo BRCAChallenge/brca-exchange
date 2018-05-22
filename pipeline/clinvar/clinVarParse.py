@@ -47,6 +47,9 @@ def processSubmission(submissionSet, assembly):
 
                 # Omit the variants that don't have any genomic start coordinate indicated.
                 if start != None and start != "None" and start != "NA":
+
+
+
                     print("\t".join((str(hgvs),
                                      oa.submitter.encode('utf-8'),
                                      str(oa.clinicalSignificance),
