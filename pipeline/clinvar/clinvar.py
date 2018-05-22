@@ -76,11 +76,17 @@ class variant:
         if debug:
             print("Parsing variant", self.id)
         self.name = name
-        
+
+        self.variantAliases = []
+
         self.attribute = dict()
         for attrs in element.findall("AttributeSet"):
             for attrib in attrs.findall("Attribute"):
                 self.attribute[attrib.get("Type")] = attrib.text
+
+                if attrib.get('Change'):
+                    self.variantAliases.append(attrib.text)
+
         self.coordinates = dict()
         for item in element.findall("SequenceLocation"):
             assembly = item.get("Assembly")
@@ -92,7 +98,8 @@ class variant:
             symbol = measureRelationship.find("Symbol")
             if symbol != None:
                 self.geneSymbol = textIfPresent(symbol, "ElementValue")
-            
+
+
 
 class referenceAssertion:
     """For gathering the reference assertion"""
@@ -142,7 +149,7 @@ class referenceAssertion:
             self.variant = variant(measureSet.find("Measure"), variantName, 
                                    measureSet.get("ID"), 
                                    debug=debug)
-                
+
 
 class clinVarAssertion:
     """Class for representing one submission (i.e. one annotation of a 
