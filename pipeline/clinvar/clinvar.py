@@ -21,6 +21,20 @@ def textIfPresent(element, field):
     else:
         return(ff.text.encode('utf-8'))
 
+
+def processClinicalSignificanceElement(el, obj):
+    if el != None:
+        obj.reviewStatus = textIfPresent(el, "ReviewStatus")
+        obj.clinicalSignificance = textIfPresent(el, "Description")
+        obj.summaryEvidence = textIfPresent(el, "Comment")
+        obj.dateSignificanceLastEvaluated = el.get('DateLastEvaluated', None)
+    else:
+        obj.reviewStatus = None
+        obj.clinicalSignificance = None
+        obj.summaryEvidence = None
+        obj.dateSignificanceLastEvaluated = None
+
+
 class genomicCoordinates:
     """Contains the genomic information on the variant"""
 
@@ -88,12 +102,10 @@ class referenceAssertion:
         self.id = element.get("ID")
         if debug:
             print("Parsing ReferenceClinVarAssertion", self.id)
-        self.reviewStatus = None
-        self.clinicalSignificance = None
-        cs = element.find("ClinicalSignificance")
-        if cs != None:
-            self.reviewStatus = textIfPresent(cs, "ReviewStatus")
-            self.clinicalSignificance = textIfPresent(cs, "Description")
+
+        processClinicalSignificanceElement(element.find(
+            "ClinicalSignificance"), self)
+
         obs = element.find("ObservedIn")
         if obs == None:
             self.origin = None
@@ -171,15 +183,11 @@ class clinVarAssertion:
                 for attr in description.findall("Attribute"):
                     if attr.attrib["Type"] == 'Description':
                         self.description = textIfPresent(description, "Attribute")
-        self.clinicalSignificance = None
-        self.reviewStatus = None
-        self.dateLastUpdated = None
-        cs = element.find("ClinicalSignificance")
-        if cs != None:
-            self.dateLastUpdated = cva.get("DateUpdated")
-            self.clinicalSignificance = textIfPresent(cs, "Description")
-            self.reviewStatus = textIfPresent(cs, "ReviewStatus")
-            self.summaryEvidence = textIfPresent(cs, "Comment")
+
+        processClinicalSignificanceElement(element.find(
+            "ClinicalSignificance"), self)
+
+        self.dateLastUpdated = cva.get("DateUpdated")
                  
 
 class clinVarSet:
