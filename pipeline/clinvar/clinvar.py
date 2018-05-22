@@ -153,6 +153,8 @@ class clinVarAssertion:
             self.accession = None
         else:
             self.accession = cva.get("Acc", default=None)
+            self.accession_version = cva.get("Version", default=None)
+
         self.origin = None
         self.method = None
         self.description = None

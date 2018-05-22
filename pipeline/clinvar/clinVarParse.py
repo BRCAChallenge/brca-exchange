@@ -12,7 +12,8 @@ import xml.etree.ElementTree as ET
 
 def printHeader():
     print("\t".join(("HGVS", "Submitter", "ClinicalSignificance",
-                     "DateLastUpdated", "SCV", "ID", "Origin", "Method",
+                     "DateLastUpdated", "SCV", "SCV_Version", "ID", "Origin",
+                     "Method",
                      "Genomic_Coordinate", "Symbol", "Protein", "Description",
                      "SummaryEvidence", "ReviewStatus")))
 
@@ -48,6 +49,7 @@ def processSubmission(submissionSet, assembly):
                                      str(oa.clinicalSignificance),
                                      str(oa.dateLastUpdated),
                                      str(oa.accession),
+                                     str(oa.accession_version),
                                      str(oa.id),
                                      str(oa.origin),
                                      str(oa.method),
