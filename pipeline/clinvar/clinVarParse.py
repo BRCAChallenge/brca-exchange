@@ -16,8 +16,10 @@ def printHeader():
                      "SCV_Version", "ID", "Origin",
                      "Method",
                      "Genomic_Coordinate", "Symbol", "Protein", "Description",
-                     "SummaryEvidence", "ReviewStatus", "VariantAliases")))
+                     "SummaryEvidence", "ReviewStatus", "VariantAliasesHGVS",
+                     "VariantAliasesNucleotideChange")))
 
+ALIASES_SEPARATOR=';'
 
 def processSubmission(submissionSet, assembly):
     ra = submissionSet.referenceAssertion
@@ -61,7 +63,9 @@ def processSubmission(submissionSet, assembly):
                                      str(oa.description),
                                      str(oa.summaryEvidence),
                                      str(oa.reviewStatus),
-                                     ';'.join(variant.variantAliases)
+                                     ALIASES_SEPARATOR.join(
+                                         variant.variantAliasesHGVS),
+                                     ALIASES_SEPARATOR.join(variant.variantAliasesNucleotideChange)
                                      )))
 
 
