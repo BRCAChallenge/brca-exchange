@@ -89,7 +89,7 @@ class variant:
                 if 'HGVS' in attr_type:
                     self.variantAliasesHGVS.append(attrib.text)
                 elif attr_type == 'nucleotide change':
-                    self.variantAliasesNucleotideChange.append(attrib.txt)
+                    self.variantAliasesNucleotideChange.append(attrib.text)
 
         self.coordinates = dict()
         for item in element.findall("SequenceLocation"):
