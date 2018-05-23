@@ -54,14 +54,19 @@ CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "Submitter": "Submitter",
                   "Clinical_Significance": "ClinicalSignificance",
                   "Date_Last_Updated": "DateLastUpdated",
+                  "DateSignificanceLastEvaluated":
+                      "DateSignificanceLastEvaluated",
                   "SCV": "SCV",
+                  "SCV_Version": "SCV_Version",
                   "Allele_Origin": "Origin",
                   "Protein": "Protein",
                   "Method": "Method",
                   "Description": "Description",
                   "Review_Status": "ReviewStatus",
                   "Summary_Evidence": "SummaryEvidence",
-                  "BX_ID": "BX_ID"}
+                  "BX_ID": "BX_ID",
+                  "VariantAliasesHGVS": "VariantAliasesHGVS",
+                  "VariantAliasesNucleotideChange": "VariantAliasesNucleotideChange"}
 
 '''
 NOTE: the following fields are no longer present in LOVD data following
