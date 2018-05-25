@@ -69,7 +69,7 @@ def send_mupit_request(query_url, params):
     sys.exit(1)
 
 
-def isPointSubstitution(ref, alt):
+def is_point_substitution(ref, alt):
     bases = ['a', 'c', 't', 'g']
     ref = ref.lower()
     alt = alt.lower()
@@ -83,6 +83,23 @@ def is_relevant_position(pos):
     return (pos >= 32356427 and pos <= 32396972) or (pos >= 43045692 and pos <= 43125184)
 
 
+def has_relevant_protein_change(hgvs_protein):
+    # NOTE: if this requires updating, also update hasRelevantProteinChange in pipeline/data_merging/getMupitStructure.py
+    # ignore variants with no amino acid change or variants with an unknown amino acid change
+    if "?" in hgvs_protein or "=" in hgvs_protein or "*" in hgvs_protein:
+        return False
+
+    # remove all numbers and brackets from protein
+    stripped_hgvs = ''.join([i for i in hgvs_protein if not (i.isdigit() or i in ['(', ')'])])
+    hgvs_last_three_chars = stripped_hgvs[-3:]
+
+    # ignore variants with an introduced stop codon
+    if hgvs_last_three_chars == "Ter":
+        return False
+
+    return True
+
+
 def update_mupit_structure_for_existing_variants():
     mupit_structures = {ms['name']: ms['id'] for ms in MupitStructure.objects.values()}
     cvs = CurrentVariant.objects.all()
@@ -92,7 +109,8 @@ def update_mupit_structure_for_existing_variants():
         pos = int(getattr(variant, 'Pos'))
         ref = getattr(variant, 'Ref')
         alt = getattr(variant, 'Alt')
-        if isPointSubstitution(ref, alt) and is_relevant_position(pos):
+        hgvs_protein = getattr(variant, 'HGVS_Protein')
+        if is_point_substitution(ref, alt) and is_relevant_position(pos) and has_relevant_protein_change(hgvs_protein):
             '''
             When you submit a position, the mupit server responds with a bunch of structures that the position maps to.
             Which structure to display first is determined client side.

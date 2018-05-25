@@ -30,6 +30,23 @@ def isPointSubstitution(ref, alt):
     return False
 
 
+def hasRelevantProteinChange(hgvsProtein):
+    # NOTE: if this requires updating, also update has_relevant_protein_change in django/data/utilities.py
+    # ignore variants with no amino acid change or variants with an unknown amino acid change
+    if "?" in hgvsProtein or "=" in hgvsProtein or "*" in hgvsProtein:
+        return False
+
+    # remove all numbers and brackets from protein
+    strippedHgvs = ''.join([i for i in hgvsProtein if not (i.isdigit() or i in ['(', ')'])])
+    hgvsLastThreeChars = strippedHgvs[-3:]
+
+    # ignore variants with an introduced stop codon
+    if hgvsLastThreeChars == "Ter":
+        return False
+
+    return True
+
+
 def main(args):
     options = parse_args()
     inputFile = options.input
@@ -50,19 +67,21 @@ def main(args):
     posIndex = input_header_row.index("Pos")
     refIndex = input_header_row.index("Ref")
     altIndex = input_header_row.index("Alt")
+    proteinIndex = input_header_row.index("pyhgvs_Protein")
 
     for variant in input_file:
         chrom = "chr" + variant[chromIndex]
         pos = int(variant[posIndex])
         ref = variant[refIndex]
         alt = variant[altIndex]
+        hgvsProtein = variant[proteinIndex]
 
         # Add empty data for each new column to prepare for data insertion by index
         for i in range(len(new_columns_to_append)):
             variant.append('-')
 
         # only check mupit structure for point substitutions in relevant positions
-        if isPointSubstitution(ref, alt) and isRelevantPosition(pos):
+        if isPointSubstitution(ref, alt) and isRelevantPosition(pos) and hasRelevantProteinChange(hgvsProtein):
 
             mupit_structure = get_brca_struct(chrom, pos)
 
