@@ -86,7 +86,7 @@ def is_relevant_position(pos):
 def has_relevant_protein_change(hgvs_protein):
     # NOTE: if this requires updating, also update hasRelevantProteinChange in pipeline/data_merging/getMupitStructure.py
     # ignore variants with no amino acid change or variants with an unknown amino acid change
-    if "?" in hgvs_protein or "=" in hgvs_protein:
+    if "?" in hgvs_protein or "=" in hgvs_protein or "*" in hgvs_protein:
         return False
 
     # remove all numbers and brackets from protein

@@ -836,6 +836,16 @@ var VariantDetail = React.createClass({
                 if (prop === "Mupit_Structure") {
                     rowItem = rowDescriptor.replace(variant, prop);
 
+                    /*
+                    Don't display mupit structures if they don't have an associated Amino Acid change.
+                    Note that there shouldn't be mupit structures for these variants in the first place,
+                    but there may be as getAminoAcidCode may change after the database is populated
+                    */
+                    if (util.getAminoAcidCode(variant["HGVS_Protein"]) === false) {
+                        rowsEmpty += 1;
+                        rowItem = false;
+                    }
+
                     // mupit structures are not displayed if they're empty
                     if (rowItem === false) {
                         return false;

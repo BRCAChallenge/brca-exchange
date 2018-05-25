@@ -33,7 +33,7 @@ def isPointSubstitution(ref, alt):
 def hasRelevantProteinChange(hgvsProtein):
     # NOTE: if this requires updating, also update has_relevant_protein_change in django/data/utilities.py
     # ignore variants with no amino acid change or variants with an unknown amino acid change
-    if "?" in hgvsProtein or "=" in hgvsProtein:
+    if "?" in hgvsProtein or "=" in hgvsProtein or "*" in hgvsProtein:
         return False
 
     # remove all numbers and brackets from protein

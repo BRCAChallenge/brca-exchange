@@ -4,6 +4,33 @@ var React = require('react');
 var moment = require('moment');
 var _ = require('underscore');
 
+
+const AminoAcids = {
+    'ala': 'a',
+    'arg': 'r',
+    'asn': 'n',
+    'asp': 'd',
+    'asx': 'b',
+    'cys': 'c',
+    'glu': 'e',
+    'gln': 'q',
+    'glx': 'z',
+    'gly': 'g',
+    'his': 'h',
+    'ile': 'i',
+    'leu': 'l',
+    'lys': 'k',
+    'met': 'm',
+    'phe': 'f',
+    'pro': 'p',
+    'ser': 's',
+    'thr': 't',
+    'trp': 'w',
+    'tyr': 'y',
+    'val': 'v'
+};
+
+
 function isEmptyField(value) {
     if (Array.isArray(value)) {
         value = value[0];
@@ -152,8 +179,23 @@ function sentenceCase(str) {
     return str.replace(/\b\S/g, (t) => t.toUpperCase() );
 }
 
+function getAminoAcidCode(hgvsProtein) {
+    let trimmedHgvs = hgvsProtein.replace(/[0-9()]/g, '');
+    if (trimmedHgvs.length < 3) {
+        return false;
+    } else {
+        let lastThreeChars = trimmedHgvs.substr(trimmedHgvs.length - 3).toLowerCase();
+        if (!(lastThreeChars in AminoAcids)) {
+            return false;
+        } else {
+            return AminoAcids[lastThreeChars];
+        }
+    }
+}
+
 
 module.exports = {
+    getAminoAcidCode,
     isEmptyField,
     normalizeDateFieldDisplay,
     normalizedFieldDisplay,
