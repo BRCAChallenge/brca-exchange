@@ -1652,7 +1652,7 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(refAltSeqs["altSeq"], brca2AltSeq)
 
     def test_getVarSeqIndexSNSDiffLengths(self):
-        '''Tests that function returns None for ref and alt seqs of different lengths'''
+        '''Tests that function returns "N/A" for ref and alt seqs of different lengths'''
         refSeq = "ACTGTACTC"
         altSeq = "ACTGTAACTC"
         varIndex = calcVarPriors.getVarSeqIndexSNS(refSeq, altSeq)

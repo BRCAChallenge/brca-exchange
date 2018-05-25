@@ -87,6 +87,28 @@ BRCA2_RefSeq = "NM_000059.3"
 brca1TranscriptData = fetch_gene_coordinates(BRCA1_RefSeq)
 brca2TranscriptData = fetch_gene_coordinates(BRCA2_RefSeq)
 
+# Probability constants from SVT and MP valid as of 5/24/18
+LOW_PROBABILITY = 0.02 
+LOW_SPLICING_PROBABILITY = 0.04
+MODERATE_DENOVO_PROBABILITY = 0.3
+MODERATE_SPLICING_PROBABILITY = 0.34
+HIGH_PROBABILITY = 0.64
+HIGH_SPLCING_PROBABILITY = 0.97
+PATHOGENIC_PROBABILITY = 0.99
+
+# Splicing cutoff constants from SVT and MP valid as of 5/24/18
+LOW_MES_CUTOFF = 6.2
+HIGH_MES_CUTOFF = 8.5
+MIN_REF_ALT_ZDIFF = 0.5
+REF_DONOR_REFZ_CUTOFF = -1.5
+REF_DONOR_HIGH_CUTOFF = 0.0
+REF_DONOR_LOW_CUTOFF = -2.0
+REF_ACC_REFZ_CUTOFF = -1.0
+REF_ACC_HIGH_CUTOFF = 0.5
+REF_ACC_LOW_CUTOFF = -1.5
+DE_NOVO_DONOR_HIGH_CUTOFF = 0.0
+DE_NOVO_DONOR_LOW_CUTOFF = -2.0
+
 def checkSequence(sequence):
     '''Checks if a given sequence contains acceptable nucleotides returns True if sequence is comprised entirely of acceptable bases'''
     acceptableBases = ["A", "C", "T", "G", "N", "R", "Y"]
@@ -598,13 +620,13 @@ def getVarLocation(variant, boundaries):
             return "UTR_variant"
         return "intron_variant"
 
-def getFastaSeq(chrom, rangeStart, rangeStop, plusSeq=True):
+def getFastaSeq(chrom, rangeStart, rangeStop, plusStrandSeq=True):
     '''
     Given chromosome (in format 'chr13'), region genomic start position, and
     region genomic end position:
     Returns a string containing the sequence inclusive of rangeStart and rangeStop
-    If plusSeq=True, returns plus strand sequence
-    If plusSeq=False, returns minus strand sequence
+    If plusStrandSeq=True, returns plus strand sequence
+    If plusStrandSeq=False, returns minus strand sequence
     '''
     if rangeStart < rangeStop:
         regionStart = rangeStart
@@ -624,7 +646,7 @@ def getFastaSeq(chrom, rangeStart, rangeStop, plusSeq=True):
     lines = req.content.split('\n')
     # because sequence is located at index 5 in dictionary
     sequence = lines[5]
-    if plusSeq == True:
+    if plusStrandSeq == True:
         return sequence.upper()
     else:
         return str(Seq(sequence.upper()).reverse_complement())
@@ -643,7 +665,7 @@ def getSeqLocDict(chrom, strand, rangeStart, rangeStop):
     else:
         regionStart = int(rangeStart)
         regionEnd = int(rangeStop)
-    sequence = getFastaSeq(chrom, regionStart, regionEnd, plusSeq=True)
+    sequence = getFastaSeq(chrom, regionStart, regionEnd, plusStrandSeq=True)
     genPos = regionStart   
     while genPos <= regionEnd:
         for base in sequence:
@@ -688,9 +710,9 @@ def getRefAltSeqs(variant, rangeStart, rangeStop):
     varChrom = getVarChrom(variant)
     varStrand = getVarStrand(variant)
     if varStrand == "-":
-        refSeq = getFastaSeq(varChrom, rangeStart, rangeStop, plusSeq=False)
+        refSeq = getFastaSeq(varChrom, rangeStart, rangeStop, plusStrandSeq=False)
     else:
-        refSeq = getFastaSeq(varChrom, rangeStart, rangeStop, plusSeq=True)
+        refSeq = getFastaSeq(varChrom, rangeStart, rangeStop, plusStrandSeq=True)
     refSeqDict = getSeqLocDict(varChrom, varStrand, rangeStart, rangeStop)
     altSeqDict = getAltSeqDict(variant, refSeqDict)
     altSeq = getAltSeq(altSeqDict, varStrand)
@@ -841,9 +863,9 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLeng
         if donor == True:
             refSpliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=False)
             if getVarStrand(variant) == "+":
-                refSpliceSeq = getFastaSeq(getVarChrom(variant), refSpliceBounds["donorStart"], refSpliceBounds["donorEnd"], plusSeq=True)
+                refSpliceSeq = getFastaSeq(getVarChrom(variant), refSpliceBounds["donorStart"], refSpliceBounds["donorEnd"], plusStrandSeq=True)
             else:
-                refSpliceSeq = getFastaSeq(getVarChrom(variant), refSpliceBounds["donorStart"], refSpliceBounds["donorEnd"], plusSeq=False)
+                refSpliceSeq = getFastaSeq(getVarChrom(variant), refSpliceBounds["donorStart"], refSpliceBounds["donorEnd"], plusStrandSeq=False)
         else:
             refSpliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=True)
             deNovoOffset = deNovoLength - exonicPortionSize
@@ -851,11 +873,11 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLeng
             if getVarStrand(variant) == "+":
                 # acceptorEnd - deNovoOffset because genomic position increases from left to right on plus strand, refSeq reduced to correct length
                 refSpliceSeq = getFastaSeq(getVarChrom(variant), refSpliceBounds["acceptorStart"],
-                                           (refSpliceBounds["acceptorEnd"] - deNovoOffset), plusSeq=True)
+                                           (refSpliceBounds["acceptorEnd"] - deNovoOffset), plusStrandSeq=True)
             else:
                 # acceptorEnd + deNovoOffset because genomic position decreases from left to right on minus strand, refSeq reduced to correct length
                 refSpliceSeq = getFastaSeq(getVarChrom(variant), refSpliceBounds["acceptorStart"],
-                                           (refSpliceBounds["acceptorEnd"] + deNovoOffset), plusSeq=False)
+                                           (refSpliceBounds["acceptorEnd"] + deNovoOffset), plusStrandSeq=False)
         for position, seqs in slidingWindowInfo["windowSeqs"].iteritems():
             if seqs["refSeq"] == refSpliceSeq:
                 refSpliceWindow = position
@@ -929,7 +951,7 @@ def getClosestExonNumberIntronicSNS(variant, boundaries, donor=True):
     If variant is not in an intron or UTR, returns "exon0"
     '''
     varLoc = getVarLocation(variant, boundaries)
-    if (varLoc == "intron_variant" or varLoc == "UTR_variant")  and getVarType(variant) == "substitution" and varInExon(variant) == False:
+    if (varLoc == "intron_variant" or varLoc == "UTR_variant") and getVarType(variant) == "substitution" and varInExon(variant) == False:
         exonBounds = getExonBoundaries(variant)
         varGenPos = variant["Pos"]
         exonIntronDiffs = {}
@@ -994,12 +1016,14 @@ def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, 
         exonName = closestSpliceBounds["exonName"]
     if donor == True:
         if getVarStrand(variant) == "+":
-            refSeq = getFastaSeq(varChrom, closestSpliceBounds["donorStart"], closestSpliceBounds["donorEnd"], plusSeq=True)
+            refSeq = getFastaSeq(varChrom, closestSpliceBounds["donorStart"], closestSpliceBounds["donorEnd"], plusStrandSeq=True)
             # splice site is 3 bp to the right of donor Start (+3 because plus strand numbering increases from left to right)
+            # splice site is 3 bp to the right because exon end is 3 bp to the right of donor start
             genomicSplicePos = closestSpliceBounds["donorStart"] + 3
         else:
-            refSeq = getFastaSeq(varChrom, closestSpliceBounds["donorStart"], closestSpliceBounds["donorEnd"], plusSeq=False)
+            refSeq = getFastaSeq(varChrom, closestSpliceBounds["donorStart"], closestSpliceBounds["donorEnd"], plusStrandSeq=False)
             # splice site is 3 bp to the right of donor Start (-3 because minus strand numbering decreases from left to right)
+            # splice site is 3 bp to the right because exon end is 3 bp to the right of donor start
             genomicSplicePos = closestSpliceBounds["donorStart"] - 3
         exonStart = 0
         intronStart = STD_EXONIC_PORTION
@@ -1010,12 +1034,12 @@ def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, 
         # for minus strand it is acceptorEnd + deNovoOffset because
         # the genomic position decreases from left to right on the minus strand and addition reduces the refSeq to correct length
         if getVarStrand(variant) == "+":
-            refSeq = getFastaSeq(varChrom, closestSpliceBounds["acceptorStart"], (closestSpliceBounds["acceptorEnd"] - deNovoOffset), plusSeq=True)
+            refSeq = getFastaSeq(varChrom, closestSpliceBounds["acceptorStart"], (closestSpliceBounds["acceptorEnd"] - deNovoOffset), plusStrandSeq=True)
             # splice site is 3 bp to the left of reference acceptor End (-3 because plus strand numbering increases from left to right)
             # minus deNovoOffset because deNovo splice acceptor region is deNovoOffset bp longer than reference splice acceptor region
             genomicSplicePos = closestSpliceBounds["acceptorEnd"] - 3 - deNovoOffset
         else:
-            refSeq = getFastaSeq(varChrom, closestSpliceBounds["acceptorStart"], (closestSpliceBounds["acceptorEnd"] + deNovoOffset), plusSeq=False)
+            refSeq = getFastaSeq(varChrom, closestSpliceBounds["acceptorStart"], (closestSpliceBounds["acceptorEnd"] + deNovoOffset), plusStrandSeq=False)
             # splice site is 3 bp to the left of reference acceptor End (+3 because minus strand numbering decreases from left to right)
             # plus deNovoOffset because deNovo splice acceptor region is deNovoOffset bp longer than reference splice acceptor region
             genomicSplicePos = closestSpliceBounds["acceptorEnd"] + 3 + deNovoOffset
@@ -1233,14 +1257,14 @@ def compareDeNovoWildTypeSplicePos(variant, exonicPortionSize, intronicPortionSi
             distanceBetween = wildTypeSplicePos - deNovoSplicePos
         else:
             wildTypeSplicePos = refExonBounds[varExonNum]["exonEnd"]
-            # +1 because of RefSeq numbering
+            # +1 for minus strand donor because splice position is the right of actual splice position
             distanceBetween = deNovoSplicePos - (wildTypeSplicePos + 1)
     else:
         wildTypeSplicePos = refExonBounds[varExonNum]["exonStart"]
         if varStrand == "+":
             distanceBetween = abs(deNovoSplicePos - wildTypeSplicePos)
         else:
-            # +1 because of RefSeq numbering
+            # +1 for minus strand acceptor because splice position is the left of actual splice position
             distanceBetween = abs((wildTypeSplicePos + 1) - deNovoSplicePos)
             
     if distanceBetween % 3 == 0:
@@ -1262,7 +1286,7 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
          0 if not
     '''
     if varInIneligibleDeNovoExon(variant, donor=True) == True:
-        return {"priorProb": 0.99,
+        return {"priorProb": PATHOGENIC_PROBABILITY,
                 "enigmaClass": "class_5",
                 "spliceRescue": 0,
                 "spliceFlag": 0,
@@ -1283,7 +1307,7 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
         # if variant is in specified exonic portion of highest scoring sliding window, no splice rescue
         if varInExonicPortion(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH, donor=True,
                               deNovoDonorInRefAcc=deNovoDonorInRefAcc) == True:
-            priorProb = 0.99
+            priorProb = PATHOGENIC_PROBABILITY
             inExonicPortionFlag = 1
             spliceRescue = 0
         else:
@@ -1291,7 +1315,7 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                                               deNovoDonorInRefAcc=deNovoDonorInRefAcc, donor=True)
             # if variant causes a frameshift, no splice rescue
             if inFrame == False:
-                priorProb = 0.99
+                priorProb = PATHOGENIC_PROBABILITY
                 frameshiftFlag = 1
                 inExonicPortionFlag = 0
                 spliceRescue = 0
@@ -1319,13 +1343,13 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                                                              deNovoDonorInRefAcc=deNovoDonorInRefAcc, donor=True)
                 # if truncated region includes a clinically important domain or causes a frameshift
                 if CIDomainInRegion == True:
-                    priorProb = 0.99
+                    priorProb = PATHOGENIC_PROBABILITY
                     spliceRescue = 0
                     CIDomainInRegionFlag = 1
                     inExonicPortionFlag = 0
                     frameshiftFlag = 0
                 elif isDivisible == False:
-                    priorProb = 0.99
+                    priorProb = PATHOGENIC_PROBABILITY
                     spliceRescue = 0
                     isDivisibleFlag = 1
                     frameshiftFlag = 1
@@ -1344,17 +1368,17 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                     altZScore = deNovoSpliceData["altZScore"]
                     if altZScore <= refZScore:
                         # variant creates a weaker splice site than was there previously, no change in splicing
-                        priorProb = 0.99
+                        priorProb = PATHOGENIC_PROBABILITY
                         spliceRescue = 0
                         lowMESFlag = 1
                     else:
                         # variant creates a stronger splice site than reference sequence
-                        if altMES < 6.2:
+                        if altMES < LOW_MES_CUTOFF:
                             # still a weak splice site, so no change in splicing
-                            priorProb = 0.99
+                            priorProb = PATHOGENIC_PROBABILITY
                             spliceRescue = 0
                             lowMESFlag = 1
-                        elif (altMES >= 6.2) and (altMES <= 8.5):
+                        elif (altMES >= LOW_MES_CUTOFF) and (altMES <= HIGH_MES_CUTOFF):
                             # still a weak splice site, but possibility of splice rescue
                             deNovoOffset = 0
                             closestRefData = getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False,
@@ -1372,11 +1396,11 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                                 lowMESFlag = 0
                             else:
                                 # splice site created by variant is weaker than subsequent (closest) wild-type donor
-                                priorProb = 0.99
+                                priorProb = PATHOGENIC_PROBABILITY
                                 spliceRescue = 0
                                 lowMESFlag = 1
                         else:
-                            # altMES > 8.5, strong splice site with higher possibility of splicing rescue
+                            # altMES > HIGH_MES_CUTOFF, strong splice site with higher possibility of splicing rescue
                             priorProb = "N/A"
                             enigmaClass = "N/A"
                             spliceRescue = 1
@@ -1461,18 +1485,18 @@ def getPriorProbRefSpliceDonorSNS(variant, boundaries):
         altMaxEntScanScore = scores["altScores"]["maxEntScanScore"]
         altZScore = scores["altScores"]["zScore"]
         if altMaxEntScanScore >= refMaxEntScanScore:
-            priorProb = 0.04
-        elif (refZScore < -1.5) and ((refZScore - altZScore) > 0.5):
-            priorProb = 0.97
-        elif (refZScore < -1.5) and ((refZScore - altZScore) < 0.5):
-            priorProb = 0.34
+            priorProb = LOW_SPLICING_PROBABILITY
+        elif (refZScore < REF_DONOR_REFZ_CUTOFF) and ((refZScore - altZScore) > MIN_REF_ALT_ZDIFF):
+            priorProb = HIGH_SPLCING_PROBABILITY
+        elif (refZScore < REF_DONOR_REFZ_CUTOFF) and ((refZScore - altZScore) < MIN_REF_ALT_ZDIFF):
+            priorProb = MODERATE_SPLICING_PROBABILITY
         else:
-            if altZScore > 0.0:
-                priorProb = 0.04
-            elif altZScore <= 0.0 and altZScore >= -2:
-                priorProb = 0.34
+            if altZScore > REF_DONOR_HIGH_CUTOFF:
+                priorProb = LOW_SPLICING_PROBABILITY
+            elif altZScore <= REF_DONOR_HIGH_CUTOFF and altZScore >= REF_DONOR_LOW_CUTOFF:
+                priorProb = MODERATE_SPLICING_PROBABILITY
             else:
-                priorProb = 0.97    
+                priorProb = HIGH_SPLCING_PROBABILITY
         enigmaClass = getEnigmaClass(priorProb)
         
         return {"priorProb": priorProb,
@@ -1514,18 +1538,18 @@ def getPriorProbRefSpliceAcceptorSNS(variant, boundaries):
         altMaxEntScanScore = scores["altScores"]["maxEntScanScore"]
         altZScore = scores["altScores"]["zScore"]
         if altMaxEntScanScore >= refMaxEntScanScore:
-            priorProb = 0.04
-        elif (refZScore < -1.0) and ((refZScore - altZScore) > 0.5):
-            priorProb = 0.97
-        elif (refZScore < -1.0) and ((refZScore - altZScore) < 0.5):
-            priorProb = 0.34
+            priorProb = LOW_SPLICING_PROBABILITY
+        elif (refZScore < REF_ACC_REFZ_CUTOFF) and ((refZScore - altZScore) > MIN_REF_ALT_ZDIFF):
+            priorProb = HIGH_SPLCING_PROBABILITY
+        elif (refZScore < REF_ACC_REFZ_CUTOFF) and ((refZScore - altZScore) < MIN_REF_ALT_ZDIFF):
+            priorProb = MODERATE_SPLICING_PROBABILITY
         else:
-            if altZScore > 0.5:
-                priorProb = 0.04
-            elif altZScore <= 0.5 and altZScore >= -1.5:
-                priorProb = 0.34
+            if altZScore > REF_ACC_HIGH_CUTOFF:
+                priorProb = LOW_SPLICING_PROBABILITY
+            elif altZScore <= REF_ACC_HIGH_CUTOFF and altZScore >= REF_ACC_LOW_CUTOFF:
+                priorProb = MODERATE_SPLICING_PROBABILITY
             else:
-                priorProb = 0.97
+                priorProb = HIGH_SPLCING_PROBABILITY
         enigmaClass = getEnigmaClass(priorProb)
 
         return {"priorProb": priorProb,
@@ -1826,21 +1850,21 @@ def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, genome, t
             refZScore = slidingWindowInfo["refZScore"]
             altGreaterRefFlag = 0
             if altZScore <= refZScore:
-                priorProb = 0.02
+                priorProb = LOW_PROBABILITY
             else:
                 altGreaterRefFlag = 1
-                if altZScore < -2.0:
-                    priorProb = 0.02
-                elif altZScore >= -2.0 and altZScore < 0.0:
-                    priorProb = 0.3
+                if altZScore < DE_NOVO_DONOR_LOW_CUTOFF:
+                    priorProb = LOW_PROBABILITY
+                elif altZScore >= DE_NOVO_DONOR_LOW_CUTOFF and altZScore < DE_NOVO_DONOR_HIGH_CUTOFF:
+                    priorProb = MODERATE_DENOVO_PROBABILITY
                 else:
-                    priorProb = 0.64
+                    priorProb = HIGH_PROBABILITY
             if (altZScore > subZScore and refAltZScore == "N/A") or (altZScore > refAltZScore and refAltZScore != "N/A"):
                 # promote prior prob by one step
-                if priorProb == 0.02:
-                    priorProb = 0.3
-                elif priorProb == 0.3:
-                    priorProb = 0.64
+                if priorProb == LOW_PROBABILITY:
+                    priorProb = MODERATE_DENOVO_PROBABILITY
+                elif priorProb == MODERATE_DENOVO_PROBABILITY:
+                    priorProb = HIGH_PROBABILITY
                 else:
                     priorProb = priorProb
 
@@ -1853,7 +1877,7 @@ def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, genome, t
                 frameshiftAndCIStatus = getDeNovoFrameshiftAndCIStatus(variant, boundaries, donor=True,
                                                                        deNovoDonorInRefAcc=deNovoDonorInRefAcc)
                 if frameshiftAndCIStatus == True:
-                    priorProb = 0.02
+                    priorProb = LOW_PROBABILITY
 
             # converts genomic splice position to transcript splice position
             newTranscriptSplicePos = convertGenomicPosToTranscriptPos(newGenomicSplicePos, getVarChrom(variant), genome, transcript)
@@ -2363,7 +2387,7 @@ def getPriorProbInGreyZoneSNS(variant, boundaries, variantData):
     if getVarType(variant) == "substitution" and getVarLocation(variant, boundaries) == "grey_zone_variant":
         proteinData = getPriorProbProteinSNS(variant, variantData)
         proteinPrior = proteinData["priorProb"]
-        if proteinPrior == 0.99:
+        if proteinPrior == PATHOGENIC_PROBABILITY:
             proteinPrior = 0.5
 
         return {"applicablePrior": proteinPrior,
@@ -2643,7 +2667,7 @@ def getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries):
     varLoc = getVarLocation(variant, boundaries)
     varType = getVarType(variant)
     if varLoc == "outside_transcript_boundaries_variant" and varType == "substitution":
-        priorProb = 0.02
+        priorProb = LOW_PROBABILITY
         return {"applicablePrior": priorProb,
                 "applicableEnigmaClass": getEnigmaClass(priorProb),
                 "proteinPrior": "N/A",
@@ -2837,7 +2861,7 @@ def getPriorProbInIntronSNS(variant, boundaries, genome, transcript):
     if varLoc == "intron_variant" and varType == "substitution":
         deNovoDonorData = getPriorProbIntronicDeNovoDonorSNS(variant, genome, transcript)
         if deNovoDonorData["spliceFlag"] == 0:
-            priorProb = 0.02
+            priorProb = LOW_PROBABILITY
             enigmaClass = getEnigmaClass(priorProb)
         else:
             priorProb = deNovoDonorData["priorProb"]
@@ -3003,7 +3027,7 @@ def getPriorProbInUTRSNS(variant, boundaries, genome, transcript):
                            "frameshiftFlag": "N/A"}
         varCons = getVarConsequences(variant)
         if varCons == "3_prime_UTR_variant":
-            applicablePrior = 0.02
+            applicablePrior = LOW_PROBABILITY
             applicableClass = getEnigmaClass(applicablePrior)
             spliceFlag = 0
         elif varCons == "5_prime_UTR_variant":
@@ -3024,7 +3048,7 @@ def getPriorProbInUTRSNS(variant, boundaries, genome, transcript):
                 applicablePrior = deNovoDonorData["priorProb"]
                 applicableClass = deNovoDonorData["enigmaClass"]
             else:
-                applicablePrior = 0.02
+                applicablePrior = LOW_PROBABILITY
                 applicableClass = getEnigmaClass(applicablePrior)
 
         return {"applicablePrior": applicablePrior,
