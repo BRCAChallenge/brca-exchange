@@ -232,6 +232,16 @@ class test_calcVarPriors(unittest.TestCase):
         varType = calcVarPriors.getVarType(self.variant)
         self.assertEquals(varType, varTypes["delins"])
 
+        self.variant["Ref"] = "A"
+        self.variant["Alt"] = "GCTCT"
+        varType = calcVarPriors.getVarType(self.variant)
+        self.assertEquals(varType, varTypes["delins"])
+
+        self.variant["Ref"] = "CC"
+        self.variant["Alt"] = "G"
+        varType = calcVarPriors.getVarType(self.variant)
+        self.assertEquals(varType, varTypes["delins"])
+
     def test_getVarConsequences(self):
         '''
         Tests that:

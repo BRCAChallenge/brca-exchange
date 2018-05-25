@@ -216,12 +216,12 @@ def getVarType(variant):
         else:
             # variant is an indel or other variant type
             if len(varRef) > len(varAlt):
-                if len(varAlt) == 1:
+                if len(varAlt) == 1 and varAlt == varRef[0]:
                     return "deletion"
                 else:
                     return "delins"
             elif len(varRef) < len(varAlt):
-                if len(varRef) == 1:
+                if len(varRef) == 1 and varRef == varAlt[0]:
                     return "insertion"
                 else:
                     return "delins"
