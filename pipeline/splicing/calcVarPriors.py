@@ -174,8 +174,9 @@ LOW_PROBABILITY = 0.02
 LOW_SPLICING_PROBABILITY = 0.04
 MODERATE_DENOVO_PROBABILITY = 0.3
 MODERATE_SPLICING_PROBABILITY = 0.34
+CAPPED_PROBABILITY = 0.5
 HIGH_PROBABILITY = 0.64
-HIGH_SPLCING_PROBABILITY = 0.97
+HIGH_SPLICING_PROBABILITY = 0.97
 PATHOGENIC_PROBABILITY = 0.99
 
 # Splicing cutoff constants from SVT and MP valid as of 5/24/18
@@ -1585,7 +1586,7 @@ def getPriorProbRefSpliceDonorSNS(variant, boundaries):
         if altMaxEntScanScore >= refMaxEntScanScore:
             priorProb = LOW_SPLICING_PROBABILITY
         elif (refZScore < REF_DONOR_REFZ_CUTOFF) and ((refZScore - altZScore) > MIN_REF_ALT_ZDIFF):
-            priorProb = HIGH_SPLCING_PROBABILITY
+            priorProb = HIGH_SPLICING_PROBABILITY
         elif (refZScore < REF_DONOR_REFZ_CUTOFF) and ((refZScore - altZScore) < MIN_REF_ALT_ZDIFF):
             priorProb = MODERATE_SPLICING_PROBABILITY
         else:
@@ -1594,7 +1595,18 @@ def getPriorProbRefSpliceDonorSNS(variant, boundaries):
             elif altZScore <= REF_DONOR_HIGH_CUTOFF and altZScore >= REF_DONOR_LOW_CUTOFF:
                 priorProb = MODERATE_SPLICING_PROBABILITY
             else:
-                priorProb = HIGH_SPLCING_PROBABILITY
+                priorProb = HIGH_SPLICING_PROBABILITY
+
+        # capped splicing probability due to special cases of in-frame exon skipping
+        varGene = variant["Gene_Symbol"]
+        exonName = spliceDonorBounds["exonName"]
+        if varGene == "BRCA1" and (exonName == "exon9" or exonName == "exon10"):
+            if priorProb == HIGH_SPLICING_PROBABILITY:
+                priorProb = CAPPED_PROBABILITY
+        if varGene == "BRCA2" and exonName == "exon12":
+            if priorProb == HIGH_SPLICING_PROBABILITY:
+                priorProb = CAPPED_PROBABILITY
+                
         enigmaClass = getEnigmaClass(priorProb)
         
         return {"priorProb": priorProb,
@@ -1638,7 +1650,7 @@ def getPriorProbRefSpliceAcceptorSNS(variant, boundaries):
         if altMaxEntScanScore >= refMaxEntScanScore:
             priorProb = LOW_SPLICING_PROBABILITY
         elif (refZScore < REF_ACC_REFZ_CUTOFF) and ((refZScore - altZScore) > MIN_REF_ALT_ZDIFF):
-            priorProb = HIGH_SPLCING_PROBABILITY
+            priorProb = HIGH_SPLICING_PROBABILITY
         elif (refZScore < REF_ACC_REFZ_CUTOFF) and ((refZScore - altZScore) < MIN_REF_ALT_ZDIFF):
             priorProb = MODERATE_SPLICING_PROBABILITY
         else:
@@ -1647,7 +1659,18 @@ def getPriorProbRefSpliceAcceptorSNS(variant, boundaries):
             elif altZScore <= REF_ACC_HIGH_CUTOFF and altZScore >= REF_ACC_LOW_CUTOFF:
                 priorProb = MODERATE_SPLICING_PROBABILITY
             else:
-                priorProb = HIGH_SPLCING_PROBABILITY
+                priorProb = HIGH_SPLICING_PROBABILITY
+
+        # capped splicing probability due to special cases of in-frame exon skipping
+        varGene = variant["Gene_Symbol"]
+        exonName = spliceAcceptorBounds["exonName"]
+        if varGene == "BRCA1" and (exonName == "exon9" or exonName == "exon10"):
+            if priorProb == HIGH_SPLICING_PROBABILITY:
+                priorProb = CAPPED_PROBABILITY
+        if varGene == "BRCA2" and exonName == "exon12":
+            if priorProb == HIGH_SPLICING_PROBABILITY:
+                priorProb = CAPPED_PROBABILITY
+                
         enigmaClass = getEnigmaClass(priorProb)
 
         return {"priorProb": priorProb,
@@ -2486,7 +2509,7 @@ def getPriorProbInGreyZoneSNS(variant, boundaries, variantData):
         proteinData = getPriorProbProteinSNS(variant, variantData)
         proteinPrior = proteinData["priorProb"]
         if proteinPrior == PATHOGENIC_PROBABILITY:
-            proteinPrior = 0.5
+            proteinPrior = CAPPED_PROBABILITY
 
         return {"applicablePrior": proteinPrior,
                 "applicableEnigmaClass": getEnigmaClass(proteinPrior),
