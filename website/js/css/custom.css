@@ -1074,7 +1074,7 @@ div.variant-details-body {
 /* special section for differences in color perception, taken from R's colorblind-friendly palette */
 
 /* variant fill styles */
-.transcript-viz * { transition: fill ease-out 300ms; }
+.transcript-viz .site-indicator, .transcript-viz rect { transition: fill ease-out 300ms; }
 .transcript-viz.altpalette .changed { fill: #009E73; }
 .transcript-viz.altpalette .inserted { fill: #0072B2; }
 .transcript-viz.altpalette .deleted-fill-rect { fill: #D55E00; }
