@@ -1033,7 +1033,15 @@ var VariantDetail = React.createClass({
                                 <div className="isogrid-sizer col-xs-12 col-md-6 col-lg-6 col-xl-4"/>
                                     <Col key={"splicing_vis"} xs={12} md={12} lg={12} className="variant-detail-group isogrid-item col-xl-8">
                                         <Panel header={splicingHeader} collapsable={true} defaultExpanded={localStorage.getItem("collapse-group_transcript-visualization") !== "true"}>
-                                            <Splicing variant={variant} />
+                                            <Splicing variant={variant}
+                                                onContentsChanged={() => {
+                                                    setTimeout(() => {
+                                                        // this forces a re-render after a group has expanded/collapsed, fixing the layout
+                                                        // the 0 timeout will run this once the queue is empty, i.e. after the animation has completed
+                                                        this.forceUpdate();
+                                                    }, 0);
+                                                }}
+                                            />
                                         </Panel>
                                     </Col>
                                 {
