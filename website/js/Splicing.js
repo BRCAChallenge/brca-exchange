@@ -705,7 +705,8 @@ class Splicing extends React.Component {
             exons.map(exon => ({
                 id: exon.id,
                 span: {
-                    start: Math.min(exon.span.start, exon.span.end),
+                    // the +1 makes the starting bound exclusive
+                    start: Math.min(exon.span.start, exon.span.end) + 1,
                     end: Math.max(exon.span.start, exon.span.end),
                 }
             })),
@@ -744,9 +745,10 @@ class Splicing extends React.Component {
         // --- step 2: identify the region of interest
 
         // identify the highlighted boundary
+        // (variants are defined inclusively in the starting coordinate and exclusively in the ending one)
         const overlappingSegments = segments
             .map((segment, idx) => ({idx: idx, segment: segment}))
-            .filter(({segment}) => overlaps(variantSpan, [segment.span.start, segment.span.end]));
+            .filter(({segment}) => overlaps([variantSpan[0], variantSpan[1] - 1], [segment.span.start, segment.span.end]));
 
         const firstSeg = _.first(overlappingSegments), lastSeg = _.last(overlappingSegments);
 
