@@ -23,6 +23,88 @@ from pygr.seqdb import SequenceFileDB
 from Bio.Seq import Seq
 from calcMaxEntScanMeanStd import fetch_gene_coordinates, runMaxEntScan
 
+'''
+GENERAL NOTES ON REFSEQ NUMBERING AND SPLICING
+
+MINUS VS PLUS STRAND NUMBERING
+Genes are transcribed from 5' to 3'
+For plus strand genes (e.g. BRCA2) this correlates to reading from left to right
+    so genomic position increases from left to right
+This means that for plus strand genes the exon start position is ALWAYS less than
+    the exon end position and that native splice acceptors have a lower genomic position
+    than native splice donors in the same exon
+For minus strand genes (e.g. BRCA1) this correlates to reading from right to left
+    so genomic position increases from right to left AND decreases from left to right
+This means that for minus strand genes the exon start position is ALWAYS greater than
+    the exon end position and that native splice acceptors have a higher genomic position
+    than native splice donors in the same exon
+
+REFSEQ NUMBERING
+RefSeq numbering starts to the right of the first base
+This effects the numbering for the lefthand side of genes when reading from left to right
+    in a layout where genomic position increases when you read from left to right
+For plus strand genes (e.g. BRCA2) this means that the RefSeq exon start genomic position
+    (which is the leftmost position in a layout where genomic position increases from left to right)
+    refers to the base immediately to the left of the first base of the exon
+    this base is the last base of the intron and is referred to as the -1 position in transcript coordinates 
+        (e.g. c.476-1)
+    so the exon actually starts at varExonStart + 1 which is the genomic position of the first base in the exon
+        because numbering increases from left to right so this is the base to the left of varExonStart
+For minus strand genes (e.g. BRCA1) this means that the RefSeq exon end genomic position position
+    (which is the leftmost position in a layout where genomic position increases from left to right
+        AND is the rightmost position in a layout where genomic position decreases form left to right)
+    refers to the base immediately to the right of the last base of the exon (when looking at a layout
+        where numbering decreases from left to right) 
+    this base in the first base of the intorn and is referred to as the +1 position in transcript coordinates
+    (e.g. 4185+1)
+    so the exon actually ends at varExonEnd + 1 which is the genomic position of the last base in the exon
+        because numbering decreases from left to right this is the base that is to the left of varExonEnd
+
+SPLICING AND SPLICE POSITIONS
+Native splice acceptors are located at the 5' ends of exons (near exonStart)
+Native splice donors are located at the 3' ends of exons (near exonEnd)
+For splice donors:
+    splicing occurs between the last base of the exon and the first base of the intron
+    this means that the last base in the exon is considered the wild-type splice cut position
+        (the function to get FASTA sequences is inclusive of the endpoints so this is the last base included)
+    this also means that the first base in the intron is considered the wild-type splice donor position
+        (per HCI PRIORS website) 
+    For example in a minus strand gene (BRCA1):
+        c.441 (g.43104122) is the last base in the exon and is the wild-type cut position 
+        and c.441+1 (g.43104121) is the first base in the intron and is the wild-type donor position
+        So the donor position is to the right of the cut position 
+            (when looking at a layout where numbering decreases from left to right)
+    For example in a plus strand gene (BRCA2):
+        c.7617 (g.32356609) is the last base in the exon and is the wild-type cut posiiton
+        and c.7617+1 (g.32356610) is the first base in the intron and is the wild-type donor position
+        So the donor position is to the right of the cut position
+            (when looking at a layout where numbering increases from left to right)
+For splice acceptors:
+    splicing occurs between the last base of the intron and the first base of the exon
+    this means that the first base in the exon is considered the wild-type splice cut position
+        (the function to get FASTA sequences is inclusive of the endpoints to this is the first base included)
+    this also means that the last base in the intron is considered the wild-type splice acceptor position
+        (which matches the guidelines used for splice donors on the HCI PRIORS website)
+    For example in a minus strand gene (BRCA1):
+        c.5194 (g.43057135) is the first base in the exon and is the wild-type cut posiiton
+        and c.5194-1 (g.43057136) is the last base in the intron and is the wild-type acceptor position
+        So the acceptor position is to the left of the cut position
+            (when looking at a layout where numbering decreases from left to right)
+    For example in a plus strand gene (BRCA2):
+        c.317 (g.32325076) is the first base in the exon and is the wild-type cut position
+        and c.317-1 (g.32325075) is the last base in the intron and is the wild-type acceptor position
+        So the acceptor position is to the left of the cut position
+            (when looking at a layout where numbering increases from left to right)
+'''
+
+'''
+NOTES ON PRIOR PROBABILITY DICTIONARIES
+
+These dictionaries are generated by functions that start with "getPriorPrior"
+All values in these dictionaries are assigned either numerical values, "N/A", or "-"
+"N/A" is included when that particular dictionary key is not relevant for a given variant
+"-" is included when a particular dictionary key is not evaluated (the value is not calculated)
+'''
 
 # Here are the canonical BRCA transcripts in ENSEMBL nomenclature
 BRCA1_CANONICAL = "ENST00000357654"
@@ -646,12 +728,14 @@ def getFastaSeq(chrom, rangeStart, rangeStop, plusStrandSeq=True):
     lines = req.content.split('\n')
     # because sequence is located at index 5 in dictionary
     sequence = lines[5]
+    for base in sequence:
+        assert base in ["A", "C", "G", "T", "a", "c", "g", "t"]
     if plusStrandSeq == True:
         return sequence.upper()
     else:
         return str(Seq(sequence.upper()).reverse_complement())
 
-def getSeqLocDict(chrom, strand, rangeStart, rangeStop):
+def getSeqLocDict(chrom, varStrand, rangeStart, rangeStop):
     '''
     Given chromosome, strand, region genomic start position, and region genomic end position
     returns a dictionary containing the genomic position as the key and reference allele as the value
@@ -659,7 +743,7 @@ def getSeqLocDict(chrom, strand, rangeStart, rangeStop):
     Always returns plus strand sequence 
     '''
     seqLocDict = {}
-    if strand == "-":
+    if varStrand == "-":
         regionStart = int(rangeStop)
         regionEnd = int(rangeStart)
     else:
@@ -688,7 +772,7 @@ def getAltSeqDict(variant, seqLocDict):
         altSeqDict[varGenPos] = varAlt
     return altSeqDict
 
-def getAltSeq(altSeqDict, strand):
+def getAltSeq(altSeqDict, varStrand):
     '''
     Given a dictionary containing an alternate sequence with bases and their locations
     and the strand that the alternate allele is on
@@ -698,7 +782,7 @@ def getAltSeq(altSeqDict, strand):
     # to ensure that items in dictionary are sorted numerically
     for key, value in sorted(altSeqDict.items()):
         sequence += altSeqDict[key]
-    if strand == "-":
+    if varStrand == "-":
         sequence = str(Seq(sequence).reverse_complement())
     return sequence
 
@@ -1126,10 +1210,18 @@ def getRefExonLength(variant, donor=True):
     if getVarStrand(variant) == "-":
         varExonStart = int(exonBounds[varExonNum]["exonStart"])
         varExonEnd = int(exonBounds[varExonNum]["exonEnd"])
+        # +1 is not included in the below equation for exonLength
+        # because due to RefSeq numbering varExonEnd is 1 bp too long
+        # varExonEnd is first intronic base (+1 position)
+        # for minus strand genes
         exonLength = varExonStart - varExonEnd
     else:
         varExonStart = int(exonBounds[varExonNum]["exonStart"])
         varExonEnd = int(exonBounds[varExonNum]["exonEnd"])
+        # +1 is not included in the below equatio for exonLength
+        # because due to RefSeq numbering varExonStart is 1 bp too long
+        # varExonStart is last intronic base (-1 position)
+        # for plus strand genes
         exonLength = varExonEnd - varExonStart
     return exonLength
 
@@ -1187,12 +1279,14 @@ def getAltExonLength(variant, exonicPortionSize, intronicPortionSize, deNovoDono
     if getVarStrand(variant) == "-":
         if donor == True:
             varExonStart = int(exonBounds[varExonNum]["exonStart"])
-            # newSplicePos -1 to account for RefSeq numbering which starts to the right of the first base
-            exonLength = varExonStart - (newSplicePos - 1)
+            # +1 to account for all positions including newSplicePos
+            # adding one to exonStart increases length by 1 bp because numbering decreases from left to right
+            exonLength = varExonStart - newSplicePos + 1
         else:
             varExonEnd = int(exonBounds[varExonNum]["exonEnd"])
-            # varExonEnd +1 to account for RefSeq numbering which starts to the right of the first base
-            exonLength = newSplicePos - (varExonEnd + 1)
+            # -1 to account for all position including newSplicePos
+            # subtracting one increases length by 1 bp because numbering decreases from left to right
+            exonLength = newSplicePos - varExonEnd - 1
     else:
         varExonEnd = int(exonBounds[varExonNum]["exonEnd"])
         if donor == True:
@@ -1227,7 +1321,8 @@ def isSplicingWindowInFrame(variant, exonicPortionSize, intronicPortionSize, deN
     altLength = getAltExonLength(variant, exonicPortionSize, intronicPortionSize, deNovoDonorInRefAcc=deNovoDonorInRefAcc, donor=donor)
     return compareRefAltExonLengths(refLength, altLength)
 
-def compareDeNovoWildTypeSplicePos(variant, exonicPortionSize, intronicPortionSize, deNovoDonorInRefAcc=False, donor=True):
+def isDeNovoWildTypeSplicePosDistanceDivisibleByThree(variant, exonicPortionSize, intronicPortionSize,
+                                                      deNovoDonorInRefAcc=False, donor=True):
     '''
     Given a variant, compares de novo splicing position with wild-type splicing position
     exonicPortionSize refers to length in bp that is considered to be in exonic portion of splice site
@@ -1236,6 +1331,9 @@ def compareDeNovoWildTypeSplicePos(variant, exonicPortionSize, intronicPortionSi
     Donor argument determines if function is used for de novo donor (donor=True) or de novo acceptor (donor=False)
     If distance between de novo and wild-type donors is divisible by 3, returns True
     returns False otherwise
+    This function is another way to check if a de novo splice site would cause a frameshift mutation
+       If it returns True, then de novo splicing would not cause a frameshift
+       If it returns False, then de novo splicing would cause a frameshift
     '''
     if varInExon(variant) == True:
         varExonNum = getVarExonNumberSNS(variant)
@@ -1339,8 +1437,8 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                                                    STD_ACC_INTRONIC_LENGTH, donor=True)
                 regionEnd = refSpliceAccBounds[nextExonNum]["acceptorStart"]
                 CIDomainInRegion = isCIDomainInRegion(regionStart, regionEnd, boundaries, variant["Gene_Symbol"])
-                isDivisible = compareDeNovoWildTypeSplicePos(variant, STD_EXONIC_PORTION, STD_ACC_INTRONIC_LENGTH,
-                                                             deNovoDonorInRefAcc=deNovoDonorInRefAcc, donor=True)
+                isDivisible = isDeNovoWildTypeSplicePosDistanceDivisibleByThree(variant, STD_EXONIC_PORTION, STD_ACC_INTRONIC_LENGTH,
+                                                                                deNovoDonorInRefAcc=deNovoDonorInRefAcc, donor=True)
                 # if truncated region includes a clinically important domain or causes a frameshift
                 if CIDomainInRegion == True:
                     priorProb = PATHOGENIC_PROBABILITY
@@ -1435,8 +1533,8 @@ def getDeNovoSpliceFrameshiftStatus(variant, donor=True, deNovoDonorInRefAcc=Fal
     inFrame = isSplicingWindowInFrame(variant, STD_EXONIC_PORTION, STD_ACC_INTRONIC_LENGTH,
                                       deNovoDonorInRefAcc=deNovoDonorInRefAcc, donor=donor)
     # if isDivisble == Flase then distance between old and new splice position is not divislbe by 3
-    isDivisible = compareDeNovoWildTypeSplicePos(variant, STD_EXONIC_PORTION, STD_ACC_INTRONIC_LENGTH,
-                                                 deNovoDonorInRefAcc=deNovoDonorInRefAcc, donor=donor)
+    isDivisible = isDeNovoWildTypeSplicePosDistanceDivisibleByThree(variant, STD_EXONIC_PORTION, STD_ACC_INTRONIC_LENGTH,
+                                                                    deNovoDonorInRefAcc=deNovoDonorInRefAcc, donor=donor)
     if inFrame == False or isDivisible == False:
         return True
     return False
@@ -1820,8 +1918,8 @@ def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, genome, t
                                                                       donor=True, deNovoDonorInRefAcc=deNovoDonorInRefAcc)
             # +-1 because per HCI PRIORS website donor position is defined as being first nucleotide that is NOT included in spliced exon
             if getVarStrand(variant) == "-":
-                 newGenomicSplicePos = getNewSplicePosition(variant["Pos"], "-", slidingWindowInfo["varWindowPosition"],
-                                                            slidingWindowInfo["inExonicPortion"], STD_EXONIC_PORTION, STD_ACC_INTRONIC_LENGTH,
+                newGenomicSplicePos = getNewSplicePosition(variant["Pos"], "-", slidingWindowInfo["varWindowPosition"],
+                                                           slidingWindowInfo["inExonicPortion"], STD_EXONIC_PORTION, STD_ACC_INTRONIC_LENGTH,
                                                             donor=True) - 1
             else:
                 newGenomicSplicePos = getNewSplicePosition(variant["Pos"], "+", slidingWindowInfo["varWindowPosition"],
