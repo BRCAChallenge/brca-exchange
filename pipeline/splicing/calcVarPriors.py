@@ -1355,15 +1355,14 @@ def isDeNovoWildTypeSplicePosDistanceDivisibleByThree(variant, exonicPortionSize
         if varStrand == "+":
             distanceBetween = wildTypeSplicePos - deNovoSplicePos
         else:
-            wildTypeSplicePos = refExonBounds[varExonNum]["exonEnd"]
-            # +1 for minus strand donor because splice position is the right of actual splice position
+            # +1 for minus strand donor because splice donor position is to the right of splice cut position
             distanceBetween = deNovoSplicePos - (wildTypeSplicePos + 1)
     else:
         wildTypeSplicePos = refExonBounds[varExonNum]["exonStart"]
         if varStrand == "+":
             distanceBetween = abs(deNovoSplicePos - wildTypeSplicePos)
         else:
-            # +1 for minus strand acceptor because splice position is the left of actual splice position
+            # +1 for minus strand acceptor because splice acceptor position is to the left of splice cut position
             distanceBetween = abs((wildTypeSplicePos + 1) - deNovoSplicePos)
             
     if distanceBetween % 3 == 0:
