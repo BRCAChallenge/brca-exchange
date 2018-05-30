@@ -36,7 +36,7 @@ var brcaLogo = require('./img/BRCA-Exchange-tall-tranparent.png');
 var logos = require('./logos');
 var slugify = require('./slugify');
 
-var content = require('./content');
+import content, {parseTooltips} from './content';
 var Community = require('./Community');
 var FactSheet = require('./FactSheet');
 var {MailingList} = require('./MailingList');
@@ -527,7 +527,8 @@ var VariantDetail = React.createClass({
         this.transitionTo(`/help#${slugify(title)}`);
     },
     getInitialState: () => ({
-        hideEmptyItems: (localStorage.getItem("hide-empties") === 'true')
+        hideEmptyItems: (localStorage.getItem("hide-empties") === 'true'),
+        tooltips: parseTooltips(localStorage.getItem("research-mode") === 'true')
     }),
     componentWillMount: function () {
         backend.variant(this.props.params.id).subscribe(
@@ -551,6 +552,10 @@ var VariantDetail = React.createClass({
     },
     onChildToggleMode: function() {
         this.props.toggleMode();
+        // we need to reparse the tooltips if the mode changed
+        this.setState({
+            tooltips: parseTooltips(localStorage.getItem("research-mode") === 'true')
+        });
         this.forceUpdate();
     },
     reformatDate: function(date) { //handles single dates or an array of dates
@@ -883,7 +888,10 @@ var VariantDetail = React.createClass({
                 return (
                     <tr key={prop} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
                         { rowDescriptor.tableKey !== false &&
-                            <KeyInline tableKey={title} onClick={(event) => this.showHelp(event, title)}/>
+                            (<KeyInline
+                                tableKey={title} tooltip={this.state.tooltips && this.state.tooltips[slugify(title)]}
+                                onClick={(event) => this.showHelp(event, title)}
+                            />)
                         }
                         <td colSpan={rowDescriptor.tableKey === false ? 2 : null} ><span className={ this.truncateData(prop) ? "row-value-truncated" : "row-value" }>{rowItem}</span></td>
                     </tr>
