@@ -1394,7 +1394,7 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                 "isDivisibleFlag": "N/A",
                 "lowMESFlag": "N/A"}
     # checks that variant causes a premature stop codon in an exon
-    if getVarConsequences(variant) == "stop_gained" and varInExon(variant):
+    if getVarConsequences(variant) == "stop_gained" and varInExon(variant) == True:
         spliceFlag = 0
         spliceRescue = 0
         frameshiftFlag = "-"
