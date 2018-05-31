@@ -1505,6 +1505,21 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                             spliceFlag = 1
                             lowMESFlag = 0
 
+        # capped nonsense probability due to special cases of in-frame exon skipping
+        # for BRCA1 exons 9/10 and BRCA2 exon 12 (only in splice donor/acceptor region)
+        if spliceFlag == 0:
+            # splice rescue does not occur
+            varGene = variant["Gene_Symbol"]
+            if varInExon(variant) == True:
+                exonName = getVarExonNumberSNS(variant)
+                if varGene == "BRCA1" and (exonName == "exon9" or exonName == "exon10"):
+                    priorProb = CAPPED_PROBABILITY
+                if varGene == "BRCA2":
+                    inSpliceDonor = varInSpliceRegion(variant, donor=True, deNovo=False)
+                    inSpliceAcceptor = varInSpliceRegion(variant, donor=False, deNovo=False)
+                    if inSpliceDonor == True or inSpliceAcceptor == True:
+                        priorProb = CAPPED_PROBABILITY
+
         if priorProb == "N/A":
             pass
         else:
@@ -1987,6 +2002,13 @@ def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, genome, t
                     priorProb = HIGH_PROBABILITY
                 else:
                     priorProb = priorProb
+                    
+            # capped splicing probability due to special cases of in-frame exon skipping
+            varGene = variant["Gene_Symbol"]
+            exonName = subDonorInfo["exonName"]
+            if varGene == "BRCA1" and (exonName == "exon9" or exonName == "exon10"):
+                if priorProb == HIGH_PROBABILITY:
+                    priorProb = CAPPED_PROBABILITY
 
             if altZScore > subZScore:
                 altGreaterClosestRefFlag = 1

@@ -3520,6 +3520,146 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(spliceRescueInfo["isDivisibleFlag"], "-")
         self.assertEquals(spliceRescueInfo["lowMESFlag"], "-")
 
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInIneligibleDeNovoExon', return_value = False)
+    @mock.patch('calcVarPriors.varInExonicPortion', return_value = False)
+    @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "-")
+    @mock.patch('calcVarPriors.getVarExonNumberSNS', return_value = "exon9")
+    @mock.patch('calcVarPriors.getSpliceAcceptorBoundaries', return_value = brca1RefSpliceAcceptorBounds)
+    @mock.patch('calcVarPriors.getVarWindowPosition', return_value = 5)
+    @mock.patch('calcVarPriors.isCIDomainInRegion', return_value = False)
+    @mock.patch('calcVarPriors.isDeNovoWildTypeSplicePosDistanceDivisibleByThree', return_value = True)
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'altSeq': 'TTCTTAAGA',
+                                                                                       'varWindowPosition': 5,
+                                                                                       'inExonicPortion': False,
+                                                                                       'refMaxEntScanScore': -10.62,
+                                                                                       'altMaxEntScanScore': -2.97,
+                                                                                       'refSeq': 'TTCTGAAGA',
+                                                                                       'varStart': 4,
+                                                                                       'altZScore': -4.68360288482572,
+                                                                                       'varLength': 1,
+                                                                                       'refZScore': -7.9682805032581125})
+    def test_getPriorProbSpliceRescueNonsenseSNSBRCA1CappedPriorExon9(self, getVarConsequences, varInExon, varInIneligibleDeNovoExon,
+                                                                      varInExonicPortion, isSplicingWindowInFrame,
+                                                                      getVarStrand, getVarExonNumberSNS, getSpliceAcceptorBoundaries,
+                                                                      getVarWindowPosition, isCIDomainInRegion,
+                                                                      isDeNovoWildTypeSplicePosDistanceDivisibleByThree,
+                                                                      getMaxMaxEntScanScoreSlidingWindowSNS):
+        '''Tests that function works correctly for nonsense variant in BRCA1 exon 9 (capped prior due to inframe exon skipping)'''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["HGVS_cDNA"] = "c.562G>T"
+        spliceRescueInfo = calcVarPriors.getPriorProbSpliceRescueNonsenseSNS(self.variant, boundaries, deNovoDonorInRefAcc=False)
+        self.assertEquals(spliceRescueInfo["priorProb"], priorProbs["capped"])
+        self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class3"])
+        self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
+        self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
+        self.assertEquals(spliceRescueInfo["frameshiftFlag"], 0)
+        self.assertEquals(spliceRescueInfo["inExonicPortionFlag"], 0)
+        self.assertEquals(spliceRescueInfo["CIDomainInRegionFlag"], 0)
+        self.assertEquals(spliceRescueInfo["isDivisibleFlag"], 0)
+        self.assertEquals(spliceRescueInfo["lowMESFlag"], 1)
+
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInIneligibleDeNovoExon', return_value = False)
+    @mock.patch('calcVarPriors.varInExonicPortion', return_value = False)
+    @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = False)
+    @mock.patch('calcVarPriors.getVarExonNumberSNS', return_value = "exon10")
+    def test_getPriorProbSpliceRescueNonsenseSNSBRCA1CappedPriorExon10(self, getVarConsequences, varInExon, varInIneligibleDeNovoExon,
+                                                                       varInExonicPortion, isSplicingWindowInFrame, getVarExonNumberSNS):
+        '''Tests that function works correctly for nonsense variant in BRCA1 exon 10 (capped prior due to inframe exon skipping)'''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["HGVS_cDNA"] = "c.667A>T"
+        spliceRescueInfo = calcVarPriors.getPriorProbSpliceRescueNonsenseSNS(self.variant, boundaries, deNovoDonorInRefAcc=False)
+        self.assertEquals(spliceRescueInfo["priorProb"], priorProbs["capped"])
+        self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class3"])
+        self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
+        self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
+        self.assertEquals(spliceRescueInfo["frameshiftFlag"], 1)
+        self.assertEquals(spliceRescueInfo["inExonicPortionFlag"], 0)
+        self.assertEquals(spliceRescueInfo["CIDomainInRegionFlag"], "-")
+        self.assertEquals(spliceRescueInfo["isDivisibleFlag"], "-")
+        self.assertEquals(spliceRescueInfo["lowMESFlag"], "-")
+        
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInIneligibleDeNovoExon', return_value = False)
+    @mock.patch('calcVarPriors.varInExonicPortion', return_value = False)
+    @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = False)
+    @mock.patch('calcVarPriors.getVarExonNumberSNS', return_value = "exon12")
+    @mock.patch('calcVarPriors.varInSpliceRegion', side_effect = [False, True])
+    def test_getPriorProbSpliceRescueNonsenseSNSBRCA2CappedPriorExon12SpliceAcceptor(self, getVarConsequences, varInExon,
+                                                                                     varInIneligibleDeNovoExon, varInExonicPortion,
+                                                                                     isSplicingWindowInFrame, getVarExonNumberSNS,
+                                                                                     varInSpliceRegion):
+        '''
+        Tests that function works correctly for nonsense variant in BRCA2 exon 12 splice acceptor 
+        (capped prior due to inframe exon skipping)
+        '''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["HGVS_cDNA"] = "c.6844G>T"
+        spliceRescueInfo = calcVarPriors.getPriorProbSpliceRescueNonsenseSNS(self.variant, boundaries, deNovoDonorInRefAcc=False)
+        self.assertEquals(spliceRescueInfo["priorProb"], priorProbs["capped"])
+        self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class3"])
+        self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
+        self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
+        self.assertEquals(spliceRescueInfo["frameshiftFlag"], 1)
+        self.assertEquals(spliceRescueInfo["inExonicPortionFlag"], 0)
+        self.assertEquals(spliceRescueInfo["CIDomainInRegionFlag"], "-")
+        self.assertEquals(spliceRescueInfo["isDivisibleFlag"], "-")
+        self.assertEquals(spliceRescueInfo["lowMESFlag"], "-")
+
+    @mock.patch('calcVarPriors.getVarConsequences', return_value = "stop_gained")
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInIneligibleDeNovoExon', return_value = False)
+    @mock.patch('calcVarPriors.varInExonicPortion', return_value = False)
+    @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
+    @mock.patch('calcVarPriors.getVarStrand', return_value = "+")
+    @mock.patch('calcVarPriors.getVarExonNumberSNS', return_value = "exon12")
+    @mock.patch('calcVarPriors.getSpliceAcceptorBoundaries', return_value = brca2RefSpliceAcceptorBounds)
+    @mock.patch('calcVarPriors.getVarWindowPosition', return_value = 4)
+    @mock.patch('calcVarPriors.isCIDomainInRegion', return_value = False)
+    @mock.patch('calcVarPriors.isDeNovoWildTypeSplicePosDistanceDivisibleByThree', return_value = True)
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'altSeq': 'CCTAAAAGG',
+                                                                                       'varWindowPosition': 4,
+                                                                                       'inExonicPortion': False,
+                                                                                       'refMaxEntScanScore': -11.85,
+                                                                                       'altMaxEntScanScore': -11.53,
+                                                                                       'refSeq': 'CCTTAAAGG',
+                                                                                       'varStart': 3,
+                                                                                       'altZScore': -8.359006860483403,
+                                                                                       'varLength': 1,
+                                                                                       'refZScore': -8.496405139947242})
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = False)
+    def test_getPriorProbSpliceRescueNonsenseSNSBRCA2NoCappedPriorExon12(self, getVarConsequences, varInExon,
+                                                                         varInIneligibleDeNovoExon, varInExonicPortion,
+                                                                         isSplicingWindowInFrame, getVarStrand,
+                                                                         getVarExonNumberSNS, getSpliceAcceptorBoundaries,
+                                                                         getVarWindowPosition, isCIDomainInRegion,
+                                                                         isDeNovoWildTypeSplicePosDistanceDivisibleByThree,
+                                                                         getMaxMaxEntScanScoreSlidingWindowSNS, varInSpliceRegion):
+        '''
+        Tests that function works correctly for nonsense variant in BRCA2 exon 12 (not in splice acceptor/donor)
+        '''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA2"
+        self.variant["HGVS_cDNA"] = "c.6911T>A"
+        spliceRescueInfo = calcVarPriors.getPriorProbSpliceRescueNonsenseSNS(self.variant, boundaries, deNovoDonorInRefAcc=False)
+        self.assertEquals(spliceRescueInfo["priorProb"], priorProbs["pathogenic"])
+        self.assertEquals(spliceRescueInfo["enigmaClass"], enigmaClasses["class5"])
+        self.assertEquals(spliceRescueInfo["spliceRescue"], 0)
+        self.assertEquals(spliceRescueInfo["spliceFlag"], 0)
+        self.assertEquals(spliceRescueInfo["frameshiftFlag"], 0)
+        self.assertEquals(spliceRescueInfo["inExonicPortionFlag"], 0)
+        self.assertEquals(spliceRescueInfo["CIDomainInRegionFlag"], 0)
+        self.assertEquals(spliceRescueInfo["isDivisibleFlag"], 0)
+        self.assertEquals(spliceRescueInfo["lowMESFlag"], 1)
+
     @mock.patch('calcVarPriors.isSplicingWindowInFrame', return_value = True)
     @mock.patch('calcVarPriors.isDeNovoWildTypeSplicePosDistanceDivisibleByThree', return_value = True)
     def test_getDeNovoSpliceFrameshiftStatusDonorBRCA1(self, isSplicingWindowInFrame, isDeNovoWildTypeSplicePosDistanceDivisibleByThree):
@@ -4683,7 +4823,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     # the below variant is in exonic portion of splice site, just making sure that function works if varInExon == False
     @mock.patch('calcVarPriors.varInExon', return_value = False)
-    @mock.patch('calcVarPriors.varInSpliceRegion', side_effect = [True, True])
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
     @mock.patch('calcVarPriors.varInIneligibleDeNovoExon', return_value = False)
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'altSeq': 'TGGTAAAAA',
                                                                                        'varWindowPosition': 1,
@@ -4897,7 +5037,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     # the below variant is in exonic portion of splice site, just making sure that function works if varInExon == False
     @mock.patch('calcVarPriors.varInExon', return_value = False)
-    @mock.patch('calcVarPriors.varInSpliceRegion', side_effect = [True, True])
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
     @mock.patch('calcVarPriors.varInIneligibleDeNovoExon', return_value = False)
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'altSeq': 'ATTGCACGT',
                                                                                        'varWindowPosition': 7,
@@ -5114,7 +5254,7 @@ class test_calcVarPriors(unittest.TestCase):
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     # the below variant is in exonic portion of splice site, just making sure that function works if varInExon == False
     @mock.patch('calcVarPriors.varInExon', return_value = False)
-    @mock.patch('calcVarPriors.varInSpliceRegion', side_effect = [True, True])
+    @mock.patch('calcVarPriors.varInSpliceRegion', return_value = True)
     @mock.patch('calcVarPriors.varInIneligibleDeNovoExon', return_value = False)
     @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'altSeq': 'TTTGTAAGT',
                                                                                        'varWindowPosition': 5,
@@ -5821,6 +5961,116 @@ class test_calcVarPriors(unittest.TestCase):
         self.assertEquals(priorProb["altGreaterClosestRefFlag"], 1)
         self.assertEquals(priorProb["altGreaterClosestAltFlag"], "N/A")
         self.assertEquals(priorProb["frameshiftFlag"], 0)
+
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.varInSpliceRegion', side_effect = [True, False])
+    @mock.patch('calcVarPriors.varInExon', return_value = True)
+    @mock.patch('calcVarPriors.varInIneligibleDeNovoExon', return_value = False)
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'altSeq': 'AAGGTACCG',
+                                                                                       'varWindowPosition': 4,
+                                                                                       'inExonicPortion': False,
+                                                                                       'refMaxEntScanScore': 1.49,
+                                                                                       'altMaxEntScanScore': 9.67,
+                                                                                       'refSeq': 'AAGATACCG',
+                                                                                       'varStart': 3,
+                                                                                       'altZScore': 0.743629153995907,
+                                                                                       'varLength': 1,
+                                                                                       'refZScore': -2.7686143647984682})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43097272)
+    @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': 1.1729987773204027,
+                                                                            'sequence': 'CAGGTGAGT',
+                                                                            'exonStart': 0,
+                                                                            'genomicSplicePos': 43097243,
+                                                                            'intronStart': 3,
+                                                                            'exonName': 'exon9',
+                                                                            'maxEntScanScore': 10.67})
+    @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
+    @mock.patch('calcVarPriors.getDeNovoFrameshiftAndCIStatus', return_value = False)
+    @mock.patch('calcVarPriors.convertGenomicPosToTranscriptPos', side_effect = ['566', '593+1'])
+    @mock.patch('calcVarPriors.formatSplicePosition', side_effect = ['g.43097271', 'c.566', 'g.43097243', 'c.593+1'])
+    def test_getPriorProbDeNovoDonorSNSExonCappedProbBRCA1(self, getVarType, varInSpliceRegion, varInExon,
+                                                           varInIneligibleDeNovoExon, getMaxMaxEntScanScoreSlidingWindowSNS,
+                                                           getNewSplicePosition, getClosestSpliceSiteScores,
+                                                           getDeNovoSpliceFrameshiftStatus,
+                                                           getDeNovoFrameshiftAndCIStatus, convertGenomicPosToTranscriptPos,
+                                                           formatSplicePosition):
+        '''Tests that de novo prior prob is assigned correctly for BRCA1 exonic variant in special case of skipped exon'''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        self.variant["HGVS_cDNA"] = "c.566A>G"
+        self.variant["Pos"] = "43097271"
+        self.variant["Ref"] = "T"
+        self.variant["Alt"] = "C"
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, boundaries, STD_EXONIC_PORTION, GENOME,
+                                                             BRCA2_RefSeq, deNovoDonorInRefAcc=False)
+        self.assertEquals(priorProb["priorProb"], priorProbs["capped"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
+        self.assertEquals(priorProb["altGreaterRefFlag"], 1)
+        self.assertEquals(priorProb["altGreaterClosestRefFlag"], 0)
+        self.assertEquals(priorProb["altGreaterClosestAltFlag"], "N/A")
+        self.assertEquals(priorProb["frameshiftFlag"], 1)
+        
+    @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
+    @mock.patch('calcVarPriors.varInSpliceRegion', side_effect = [True, True])
+    @mock.patch('calcVarPriors.varInExon', return_value = False)
+    @mock.patch('calcVarPriors.getMaxMaxEntScanScoreSlidingWindowSNS', return_value = {'altSeq': 'AAGGTTAAT',
+                                                                                       'varWindowPosition': 5,
+                                                                                       'inExonicPortion': False,
+                                                                                       'refMaxEntScanScore': -2.45,
+                                                                                       'altMaxEntScanScore': 5.2,
+                                                                                       'refSeq': 'AAGGGTAAT',
+                                                                                       'varStart': 4,
+                                                                                       'altZScore': -1.175653062264589,
+                                                                                       'varLength': 1,
+                                                                                       'refZScore': -4.460330680696982})
+    @mock.patch('calcVarPriors.getNewSplicePosition', return_value = 43095847)
+    @mock.patch('calcVarPriors.getClosestSpliceSiteScores', return_value = {'zScore': -0.8407447560714822,
+                                                                            'sequence': 'AGGGTAATG',
+                                                                            'exonStart': 0,
+                                                                            'genomicSplicePos': 43095845,
+                                                                            'intronStart': 3,
+                                                                            'exonName': 'exon10',
+                                                                            'maxEntScanScore': 5.98})
+    @mock.patch('calcVarPriors.getPriorProbRefSpliceDonorSNS', return_value = {'refMaxEntScanScore': 5.98,
+                                                                               'altZScore': -4.490386554329697,
+                                                                               'varLength': 1,
+                                                                               'exonStart': 0,
+                                                                               'intronStart': 3,
+                                                                               'varStart': 3,
+                                                                               'refZScore': -0.8407447560714822,
+                                                                               'altMaxEntScanScore': -2.52,
+                                                                               'enigmaClass': 'class_3',
+                                                                               'priorProb': 0.5,
+                                                                               'altSeq': 'AGGTTAATG',
+                                                                               'spliceSite': 1,
+                                                                               'refSeq': 'AGGGTAATG'})
+    @mock.patch('calcVarPriors.getDeNovoSpliceFrameshiftStatus', return_value = True)
+    @mock.patch('calcVarPriors.getDeNovoFrameshiftAndCIStatus', return_value = False)
+    @mock.patch('calcVarPriors.convertGenomicPosToTranscriptPos', side_effect = ['670', '670+1'])
+    @mock.patch('calcVarPriors.formatSplicePosition', side_effect = ['g.43095846', 'c.670', 'g.43095845', 'c.670+1'])
+    def test_getPriorProbDeNovoDonorSNSSpliceSiteCappedProbBRCA1(self, getVarType, varInSpliceRegion, varInExon,
+                                                                 getMaxMaxEntScanScoreSlidingWindowSNS,
+                                                                 getNewSplicePosition, getClosestSpliceSiteScores,
+                                                                 getPriorProbRefSpliceDonorSNS, getDeNovoSpliceFrameshiftStatus,
+                                                                 getDeNovoFrameshiftAndCIStatus, convertGenomicPosToTranscriptPos,
+                                                                 formatSplicePosition):
+        '''Tests that de novo prior prob is assigned correctly for BRCA1 splice site variant in special case of skipped exon'''
+        boundaries = "enigma"
+        self.variant["Gene_Symbol"] = "BRCA1"
+        self.variant["Reference_Sequence"] = "NM_007294.3"
+        self.variant["HGVS_cDNA"] = "c.670+1g>T"
+        self.variant["Pos"] = "43095845"
+        self.variant["Ref"] = "C"
+        self.variant["Alt"] = "A"
+        priorProb = calcVarPriors.getPriorProbDeNovoDonorSNS(self.variant, boundaries, STD_EXONIC_PORTION, GENOME,
+                                                             BRCA2_RefSeq, deNovoDonorInRefAcc=False)
+        self.assertEquals(priorProb["priorProb"], priorProbs["capped"])
+        self.assertEquals(priorProb["enigmaClass"], enigmaClasses["class3"])
+        self.assertEquals(priorProb["altGreaterRefFlag"], 1)
+        self.assertEquals(priorProb["altGreaterClosestRefFlag"], 0)
+        self.assertEquals(priorProb["altGreaterClosestAltFlag"], 1)
+        self.assertEquals(priorProb["frameshiftFlag"], 1)
             
     @mock.patch('calcVarPriors.getVarType', return_value = varTypes["sub"])
     @mock.patch('calcVarPriors.varInSpliceRegion', side_effect = [True, True])
