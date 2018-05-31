@@ -1514,7 +1514,7 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                 exonName = getVarExonNumberSNS(variant)
                 if varGene == "BRCA1" and (exonName == "exon9" or exonName == "exon10"):
                     priorProb = CAPPED_PROBABILITY
-                if varGene == "BRCA2":
+                if varGene == "BRCA2" and exonName == "exon12":
                     inSpliceDonor = varInSpliceRegion(variant, donor=True, deNovo=False)
                     inSpliceAcceptor = varInSpliceRegion(variant, donor=False, deNovo=False)
                     if inSpliceDonor == True or inSpliceAcceptor == True:
