@@ -40,7 +40,7 @@ function add_release_tar_to_db {
     python ${MANAGE_SCRIPT} addrelease ${DATA} ${METADATA} ${REMOVED} ${DIFFJSON} ${REPORTS} ${REMOVEDREPORTS} ${REPORTSDIFF}
 }
 
-export HOST=${HOST:-brcaexchange.cloudapp.net}
+export HOST=${HOST:-brcaexchange.org}
 USER=brca
 
 # Expects environment (local,beta or production) as first argument.

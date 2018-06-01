@@ -15,10 +15,15 @@ There are two data views used by BRCA Exchange to aid researchers and clinicians
 	* Transcript Visualization
 	* Multifactorial Likelihood Analysis
 	* Allele Frequency Reference Sets
+		* ExAC
+		* 1000 Genomes
+		* Exome Sequencing Project
+	* Cravat/MuPIT Interactive Protein Structure Viewer
 * Lollipop Plots
 * Downloading Variant Data
 * How do I use Filters?
 * How do I use Column Selectors?
+
 
 ## How do I search for a variant?
 
@@ -176,28 +181,103 @@ Component likelihoods and final classification are from multifactorial likelihoo
 * #### Summary Family History Likelihood Ratio \(ExUV\)
 	This value is the likelihood ratio based on an analysis of the severity of summary family histories of breast and/ or ovarian cancer.
 
-## Allele Frequency Reference Sets
-The Allele Frequency fields describe how often the variant was observed overall, or in specific populations.
-* #### Allele Frequency \(ExAC minus TCGA\)
-	Minor allele frequency from ExAC data that does not include TCGA data
-* #### Allele Frequency \(1000 Genomes\)
-	Overall allele frequency, from 1000 Genomes
-* #### AFR Allele Frequency \(1000 Genomes\)
-	African-American minor allele frequency, from 1000 Genomes
-* #### AMR Allele Frequency \(1000 Genomes\)
-	Allele frequency in the Admixed American population, from 1000 Genomes
-* #### EAS Allele Frequency \(1000 Genomes\)
-	Allele frequency in the East Asian population, from 1000 Genomes
-* #### EUR Allele Frequency \(1000 Genomes\)
-	Allele frequency in the European population, from 1000 Genomes
-* #### SAS Allele Frequency \(1000 Genomes\)
-	Allele frequency in the Southeast Asian population, from 1000 Genomes
-* #### Allele Frequencies: EA|AA|All \(ESP\)
-	Allele frequencies from ESP, expressed as EA (European)|AA (African American)|All
-* #### Bar Charts
-	* ##### _Coming Soon_:
-		Supplementary information about bar chart details and functionality
+# Allele Frequency Reference Sets
+The allele frequency reference sets show the frequency of a BRCA1 or BRCA2 variant in a reference population. To view or collapse all nested tiles, click the INSERT ICON icons available at the top right of this tile. Though the two sets of populations in ExAC and 1000 Genomes closely resemble each other, they are not identical. ESP also uses different population categories.
 
+### ExAC
+
+ExAC is a data source that provides BRCA1 and BRCA2 allele frequencies for the BRCA Exchange. The goal of ExAC is to “aggregate and harmonize exome sequencing data from a variety of large-scale sequencing projects, and to make summary data available for the wider scientific community” \([About ExAC](http://exac.broadinstitute.org/about)\). The ExAC data set used by BRCA exchange excludes data from [TCGA](https://tcga-data.nci.nih.gov/docs/publications/tcga/about.html), to ensure that frequencies used to assess pathogenicity are not skewed by sampling errors. ExAC data will soon be updated to the GnomAD data set.
+
+For more information about ExAC, please refer to the [ExAC browser](http://exac.broadinstitute.org/) or their [flagship publication](https://www.nature.com/articles/nature19057).
+
+#### Graphical ExAC Data
+Graphical ExAC data can be viewed by expanding the ExAC \(Graphical\) nested tile.  Two Graphs are available; one of the graphs is custom scaled to the allele frequencies by default \(right side\). Hovering over each bar will give you the numerical value represented in the population subset. You can click anywhere on the ExAC \(scaled\) graph to change the scale between 1.0% \(.01\), 0.1% \(.001\), and the custom, default scale. Because some Allele Frequencies can be very small, a variety of scales will allow you to view all possible Allele Frequencies graphically.
+
+Each group found on the x-axis of the bar chart can be found in the list of fields described in the ExAC \(Numerical\) section.
+
+#### Numerical ExAC Data
+Numerical ExAC data fields show numerical minor allele frequency data associated with each population, as well as the overall allele frequency. All of the minor allele frequencies are consistent with the graphs shown in the ExAC \(Graphical\) nested tile.
+* #### Allele Frequency \(ExAC minus TCGA\)
+	Minor allele frequency, per ExAC \(excluding TCGA data\)
+* #### African/African American \(AFR\)
+	Allele frequency in African/African American populations, per ExAC
+* #### Admixed American/Latino \(AMR\)
+	Allele frequency in Admixed American/Latino populations, per ExAC
+* #### East Asian \(EAS\)
+	Allele frequency in East Asian populations, per ExAC
+* #### Finnish \(FIN\)
+	Allele frequency in Finnish populations, per ExAC and separated from European because of an enriched data set
+* #### Non-Finnish European \(NFE\)
+	Allele frequency in Non-Finnish European populations, per ExAC
+* #### South Asian \(SAS\)
+	Allele frequency in South Asian populations, per ExAC
+* #### Other \(OTH\)
+	Allele frequency in populations other than those listed above, per ExAC
+
+### 1000 Genomes
+
+The 1000 Genomes Project also contributes allele frequency data to BRCA Exchange. The goal of the 1000 Genomes Project is “to provide a comprehensive description of common human genetic variation by applying whole-genome sequencing to a diverse set of individuals from multiple populations” \([The 1000 Genomes Project Consortium](https://www.nature.com/articles/nature15393)\).  Whereas ExAC aggregates sequence data, 1000 Genomes works on adding new, more diverse genomes to existing data sets.
+
+For more information about 1000 Genomes, please visit the [International Genome Sample Resource](http://www.internationalgenome.org/) website or their [publications](http://www.internationalgenome.org/1000-genomes-project-publications).
+
+#### Graphical 1000 Genomes Data
+Graphical 1000 Genomes data can be viewed by expanding the 1000 Genomes \(Numerical\) nested tile. Two Graphs are available; one of the graphs is custom scaled to the allele frequencies by default \(right side\). Hovering over each bar will give you the numerical value represented in the population subset. You can click anywhere on the 1000 Genomes \(scaled\) graph to change the scale between 1.0% (.01), 0.1% (.001), and the custom, default scale. Because some Allele Frequencies can be very small, a variety of scales will allow you to view all possible Allele Frequencies graphically.
+
+Each group found on the x-axis of the bar chart can be found in the list of fields described in the 1000 Genomes \(Numerical\) section.
+
+#### Numerical 1000 Genomes Data
+Numerical 1000 Genomes data fields show numerical minor allele frequency data associated with each population, as well as the overall allele frequency. All of the minor allele frequencies are consistent with the graphs shown in the 1000 Genomes \(Graphical\) nested tile.
+* #### Allele Frequency
+	Overall allele frequency, per 1000 Genomes
+* #### AFR Allele Frequency
+	Allele frequency in African-American populations, per 1000 Genomes
+* #### AMR Allele Frequency
+	Allele frequency in Admixed American populations, per 1000 Genomes
+* #### EAS Allele Frequency
+	Allele frequency in East Asian populations, per 1000 Genomes
+* #### EUR Allele Frequency
+	Allele frequency in European populations, per 1000 Genomes
+* #### SAS Allele Frequency
+	Allele frequency in Southeast Asian Populations, per 1000 Genomes
+
+### Exome Sequencing Project
+
+#### Numerical ESP Data
+The NHLBI GO Exome Sequencing Project is yet another contributor of allele frequency data to the BRCA Exchange. The Exome Sequencing Project \(ESP\) aims to “to discover novel genes and mechanisms contributing to heart, lung and blood disorders by pioneering the application of next-generation sequencing of the protein coding regions of the human genome across diverse, richly-phenotyped populations and to share these datasets and findings with the scientific community to extend and enrich the diagnosis, management and treatment of heart, lung and blood disorders” \([NHLBI Exome Sequencing Project](http://evs.gs.washington.edu/EVS/)\).
+
+* #### Allele Frequency
+	Allele frequency in entire data set, per ESP
+* #### EA Allele Frequency
+	Allele frequency in European-American populations, per ESP
+* #### AA Allele Frequency
+	Allele frequency in African-American populations, per ESP
+
+### CRAVAT/MuPIT Interactive Protein Structure Viewer
+
+For missense variants that occur within a region of the protein with a well-defined three-dimensional structure, bioinformatics and protein structure analysis can help suggest the impact of the variation (1-3). Certain regions in protein structures tend to be more sensitive to variation, such as positions buried within the core of the protein (where variation could destabilize the protein’s structure) and positions near binding sites (where variation could impact the protein’s function). The MuPIT interactive viewer from the CRAVAT project (4) facilitates such analysis by showing the position of the variant in the context of its three-dimensional protein structure.
+
+By clicking on the CRAVAT/MuPIT thumbnail image, the user opens a new browser tab running the interactive MuPIT viewer.  The display is divided into three panels.
+
+The center panel displays the three-dimensional protein structure, and indicates the variant’s location with spacefill spheres. The positions in the structure are also color-coded, per predictions about the impact of variation in those regions. By default, colors at a position are assigned according to the most severe in silico prediction of pathogenicity (6). For example, if the reference base was a ‘C’, and the possible missense variants had respective in silico pathogenicity predictions of 0.67 for ‘A’, 0.33 for ‘G’, and 0.88 for ‘T’, then the position would be color-coded according to the highest prediction score, which is 0.88 for ‘T’. The user can rotate the protein structure by holding down and dragging the mouse.
+
+The rightmost panel provides controls to allow the user to select a different color map, and to change the color of the variant. The available color maps describe:
+* In silico prediction of the most sever variant at each position (6)
+* Multifactorial analysis, incorporating in silico prediction with probabilities estimated from case-level patient data (7)
+
+Coming soon: color maps currently under development will describe known pathogenic and benign variants, augmented with in silico prediction of whether the pathogenic variants are pathogenic due to impact on splicing or impact on protein function (6).
+
+The leftmost panel displays additional controls, including a link for further help.
+
+CRAVAT and MuPIT are available for missense variants that map to positions within curated three-dimensional protein structures.  It is not available for insertions, deletions, duplications, or positions in regions of the protein where no three-dimensional protein structure has been determined.
+
+##### References
+
+	1. [Carvalho et al. 2009. PMID 18992264](https://www.ncbi.nlm.nih.gov/pubmed/18992264).
+	2. [Karchin et al. 2008. PMID 19043619](https://www.ncbi.nlm.nih.gov/pubmed/?term=19043619).
+	3. [Karchin et al. 2007. PMID 17305420.](https://www.ncbi.nlm.nih.gov/pubmed/?term=17305420)
+	4. [Masica et al. 2017. PMID 29092935.](https://www.ncbi.nlm.nih.gov/pubmed/29092935)
+	5. [VallEe et al. 2016. PMID 26913838.](https://www.ncbi.nlm.nih.gov/pubmed/26913838)
+	6. [VallEe et al. 2012. PMID 21990165.](https://www.ncbi.nlm.nih.gov/pubmed/21990165)
 
 ## Lollipop Plots
 Lollipop plots are a tool to visualize the chromosomal position and pathogenicity classification for each variant in a gene. Here, each circle-capped ‘lollipop’ indicates whether a BRCA1 and BRCA2 variant is pathogenic (labeled in red), benign (labeled in light-blue), or the variants clinical significance is uncertain (labeled in dark-blue). The y-axis represents the pathogenicity classification of a variant. The x-axis represents the genomic coordinates of those variants in GRCh38 human reference space. The bottom box that runs along the x-axis of the diagram displays the position of each exon in the selected gene.

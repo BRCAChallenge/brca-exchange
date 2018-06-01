@@ -9,7 +9,7 @@
 
 set -o errexit
 
-HOST=${HOST:-brcaexchange.cloudapp.net}
+HOST=${HOST:-brcaexchange.org}
 
 RELEASE_ARCHIVE=$1
 TMP_DIR="/tmp/export_genome_browser"

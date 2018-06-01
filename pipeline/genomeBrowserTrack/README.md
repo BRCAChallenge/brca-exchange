@@ -33,5 +33,5 @@ cp -R hub.txt genomes.txt hg19 hg38 ./trackhubs/
 
 Move the folder to the correct location on the brcaexchange server:
 ```
-scp -prq trackhubs/. brca@brcaexchange.cloudapp.net:/var/www/html/production/trackhubs/
+scp -prq trackhubs/. brca@brcaexchange.org:/var/www/html/production/trackhubs/
 ```

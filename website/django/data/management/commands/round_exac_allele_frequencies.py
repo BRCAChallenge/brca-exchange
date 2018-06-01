@@ -3,6 +3,8 @@ from django.db import connection
 from data.models import Variant, Report, VariantDiff
 from django.db import transaction
 from math import floor, log10
+from data.utilities import update_materialized_view
+
 
 
 EMPTY = '-'
@@ -12,20 +14,6 @@ FIELDS_TO_ROUND = ["Allele_frequency_ExAC", "Allele_frequency_AFR_ExAC", "Allele
 
 class Command(BaseCommand):
     help = 'Rounds existing allele frequencies for ExAC fields to correct number of significant figures.'
-
-    def update_autocomplete_words(self):
-        # Drop words table and recreate with latest data
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                DROP MATERIALIZED VIEW IF EXISTS currentvariant;
-                    CREATE MATERIALIZED VIEW currentvariant AS (
-                        SELECT * FROM "variant" WHERE (
-                            "id" IN ( SELECT DISTINCT ON ("Genomic_Coordinate_hg38") "id" FROM "variant" ORDER BY "Genomic_Coordinate_hg38" ASC, "Data_Release_id" DESC )
-                        )
-                    );
-                """
-            )
 
     def round_sigfigs(self, num, sig_figs):
         if num != 0:
@@ -59,6 +47,6 @@ class Command(BaseCommand):
                             setattr(obj, field, EMPTY)
                 obj.save()
 
-        self.update_autocomplete_words()
+        update_materialized_view()
 
         print "Done!"

@@ -17,7 +17,7 @@ set -o errexit
 # would replace the `storage.pg` db for user `postgres` with the db from beta.
 # It will also overwrite the website/django/uploads/ directory.
 
-HOST=${HOST:-brcaexchange.cloudapp.net}
+HOST=${HOST:-brcaexchange.org}
 USER=brca
 
 # Expects environment (beta or production) as first argument.

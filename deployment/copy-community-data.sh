@@ -9,7 +9,7 @@ set -o errexit
 #   `and django_content_type` tables will be dropped and all data will be replaced.  #
 ######################################################################################
 
-HOST=${HOST:-brcaexchange.cloudapp.net}
+HOST=${HOST:-brcaexchange.org}
 USER=brca
 
 # Copy community relevant DB data from production to beta

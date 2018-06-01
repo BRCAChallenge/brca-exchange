@@ -222,6 +222,22 @@ offending file, for future reference: website/node_modules/react-data-components
     }
 }
 
+.mupit-structure img {
+    width: 100%;
+}
+
+.mupit-structure h5 {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.mupit-structure p {
+    font-weight: normal;
+    font-size: 14px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
 @media only screen and (max-width : 767px) {
     .deleted-variant-message {
         text-align: left;
@@ -1058,7 +1074,7 @@ div.variant-details-body {
 /* special section for differences in color perception, taken from R's colorblind-friendly palette */
 
 /* variant fill styles */
-.transcript-viz * { transition: fill ease-out 300ms; }
+.transcript-viz .site-indicator, .transcript-viz rect { transition: fill ease-out 300ms; }
 .transcript-viz.altpalette .changed { fill: #009E73; }
 .transcript-viz.altpalette .inserted { fill: #0072B2; }
 .transcript-viz.altpalette .deleted-fill-rect { fill: #D55E00; }

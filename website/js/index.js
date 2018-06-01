@@ -489,8 +489,13 @@ const IsoGrid = React.createClass({
     // When the DOM is rendered, let Masonry know what's changed
     componentDidUpdate: function() {
         if (this.masonry) {
-            this.masonry.reloadItems();
-            this.masonry.arrange();
+            var that = this;
+            setTimeout(() => {
+                // prevents improper layout of mupit tile, and potentially others
+                // 300ms is the time it takes for the tile to expand
+                that.masonry.reloadItems();
+                that.masonry.arrange();
+            }, 300);
         }
     },
 
@@ -810,13 +815,34 @@ var VariantDetail = React.createClass({
                     title = "Abbreviated AA Change";
                 }
 
-                // get allele frequency chart components if they're available
-                if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] !== null) {
+                // get mupit structures if they're available
+                if (prop === "Mupit_Structure") {
+                    rowItem = rowDescriptor.replace(variant, prop);
+
+                    /*
+                    Don't display mupit structures if they don't have an associated Amino Acid change.
+                    Note that there shouldn't be mupit structures for these variants in the first place,
+                    but there may be as getAminoAcidCode may change after the database is populated
+                    */
+                    if (util.getAminoAcidCode(variant["HGVS_Protein"]) === false) {
+                        rowsEmpty += 1;
+                        rowItem = false;
+                    }
+
+                    // mupit structures are not displayed if they're empty
+                    if (rowItem === false) {
+                        return false;
+                    }
+
+                    if (!variant[prop]) {
+                        rowsEmpty += 1;
+                        return false;
+                    }
+                } else if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] !== null) {
                     let val = variant["HGVS_Protein"].split(":")[0];
                     variant[prop] = val;
                     rowItem = val;
-                }
-                else if (variant[prop] !== null) {
+                } else if (variant[prop] !== null) {
                     rowItem = util.getFormattedFieldByProp(prop, variant);
                 }
 
@@ -831,7 +857,6 @@ var VariantDetail = React.createClass({
                         isEmptyValue = false;
                     }
                 }
-
                 if (isEmptyValue) {
                     rowsEmpty += 1;
                     rowItem = '-';
@@ -863,7 +888,7 @@ var VariantDetail = React.createClass({
             );
 
             return (
-                <div key={`group_collection-${groupTitle}`} className={ allEmpty && this.state.hideEmptyItems ? "group-empty" : "" }>
+                <div key={`group_collection-${groupTitle}`} className={ (allEmpty && this.state.hideEmptyItems) || (allEmpty && groupTitle === 'CRAVAT - MuPIT 3D Protein View') ? "group-empty" : "" }>
                     <Panel
                         header={header}
                         collapsable={true}
@@ -922,6 +947,7 @@ var VariantDetail = React.createClass({
 
             var clinvarDiffRows = _.map(sortedSubmissions.ClinVar, function(submissions) {
                 let newestSubmission = submissions ? submissions[0] : '';
+                let oldestSubmission = submissions ? submissions[submissions.length - 1] : '';
                 const significance = util.sentenceCase(util.getFormattedFieldByProp("Clinical_Significance_ClinVar", newestSubmission)
                 .replace(/(variant of unknown significance|uncertain significance)/i, 'VUS'));
                 const submitter = util.abbreviatedSubmitter(util.getFormattedFieldByProp("Submitter_ClinVar", newestSubmission));
@@ -957,7 +983,7 @@ var VariantDetail = React.createClass({
                     <Row>
                         <Col md={12} className="variant-history-col">
                             <h3>LOVD Submission: {newestSubmission["DBID_LOVD"]} ({submitter}; {significance})</h3>
-                            <h4>Previous Versions of this Submission (since {util.reformatDate(newestSubmission.Data_Release.date)}):</h4>
+                            <h4>Previous Versions of this Submission (since {util.normalizeDateFieldDisplay(oldestSubmission.Data_Release.date)}):</h4>
                             <Table className='variant-history nopointer' responsive bordered>
                                 <thead>
                                     <tr className='active'>
@@ -1037,7 +1063,15 @@ var VariantDetail = React.createClass({
                                 <div className="isogrid-sizer col-xs-12 col-md-6 col-lg-6 col-xl-4"/>
                                     <Col key={"splicing_vis"} xs={12} md={12} lg={12} className="variant-detail-group isogrid-item col-xl-8">
                                         <Panel header={splicingHeader} collapsable={true} defaultExpanded={localStorage.getItem("collapse-group_transcript-visualization") !== "true"}>
-                                            <Splicing variant={variant} />
+                                            <Splicing variant={variant}
+                                                onContentsChanged={() => {
+                                                    setTimeout(() => {
+                                                        // this forces a re-render after a group has expanded/collapsed, fixing the layout
+                                                        // the 0 timeout will run this once the queue is empty, i.e. after the animation has completed
+                                                        this.forceUpdate();
+                                                    }, 0);
+                                                }}
+                                            />
                                         </Panel>
                                     </Col>
                                 {

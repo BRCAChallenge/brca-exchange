@@ -3,6 +3,8 @@
 var React = require('react');
 var _ = require('lodash');
 
+import {CollapsableMixin} from 'react-bootstrap';
+import classNames from "classnames";
 import * as d3s from 'd3-scale';
 import update from 'immutability-helper';
 
@@ -13,8 +15,19 @@ const exonBorderRadius = 4;
 
 const intronWidth = 40;
 const leaderSize = 75, tailSize = 50; // made up values, how do I get UTR sizes for BRCA1 and BRCA2?
-const zoomMargin = 20;
+const zoomMargin = 200;
 const intronMag = 2; // factor by which the intron for a fully-intronic variant is scaled
+
+const segmentDims = {
+    transcript: {
+        intron: { height: 13, yOffset: 8 },
+        exon: { height: 30, }
+    },
+    zoom: {
+        intron: { height: 25, yOffset: 7 },
+        exon: { height: 40 }
+    },
+};
 
 
 // --------------------------------------------------------------------------------------------------------------
@@ -345,7 +358,7 @@ class Intron extends React.Component {
         } = this.props;
 
         return (
-            <g transform="translate(0, 10)">
+            <g transform={`translate(0, ${zoomed ? segmentDims.zoom.intron.yOffset : segmentDims.transcript.intron.yOffset})`}>
                 <g transform={isFlipped ? `translate(${x + width}) scale(-1,1)` : `translate(${x})`}>
                     <rect x={0} className={`segment intron ${highlight && 'highlighted'}`} width={width} height={height} />
 
@@ -416,7 +429,7 @@ class Transcript extends React.Component {
                         variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors} CIDomains={CIDomains}
                         selectedDomain={this.props.selectedDomain}
                         txStart={segment.span.start} txEnd={segment.span.end}
-                        x={offsets[i].x} width={offsets[i].width} height={40}
+                        x={offsets[i].x} width={offsets[i].width} height={segmentDims.transcript.exon.height}
                         highlight={segment.highlighted} zoomed={false} isFlipped={isFlipped}
                     />
                 );
@@ -427,7 +440,7 @@ class Transcript extends React.Component {
                         variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors} CIDomains={CIDomains}
                         selectedDomain={this.props.selectedDomain}
                         txStart={segment.span.start} txEnd={segment.span.end}
-                        x={offsets[i].x} width={offsets[i].width} height={20}
+                        x={offsets[i].x} width={offsets[i].width} height={segmentDims.transcript.intron.height}
                         highlight={segment.highlighted} zoomed={false} isFlipped={isFlipped}
                     />
                 );
@@ -443,15 +456,19 @@ class Transcript extends React.Component {
 
         return (
             <g>
-                <line x1={zoomLineStartLeft} y1={50} x2={zoomMargin} y2={95} className="zoomline" />
-                <line x1={zoomLineStartRight} y1={50} x2={width - zoomMargin - 2.5} y2={95} className="zoomline" />
+                <line x1={zoomLineStartLeft} y1={50} x2={zoomMargin} y2={65} className="zoomline" />
+                <line x1={zoomLineStartRight} y1={50} x2={width - zoomMargin - 2.5} y2={65} className="zoomline" />
 
                 <rect x={0} y={53} width={820} height={14} fill="rgba(255,255,255,0.6)" />
 
                 <g transform="translate(0, 10)">
-                    <rect x={1} y={8} width={scale * leaderSize} height={24} className="segment intron cap" />
+                    <rect x={1} y={segmentDims.transcript.intron.yOffset}
+                        width={scale * leaderSize} height={segmentDims.transcript.intron.height}
+                        className="segment intron cap" />
                     { blocks }
-                    <rect x={tailPos} y={8} width={scale * tailSize} height={24} className="segment intron cap" />
+                    <rect x={tailPos} y={segmentDims.transcript.intron.yOffset}
+                        width={scale * tailSize} height={segmentDims.transcript.intron.height}
+                        className="segment intron cap" />
                 </g>
             </g>
         );
@@ -508,7 +525,7 @@ class Zoom extends React.Component {
                         variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors} CIDomains={CIDomains}
                         txStart={segment.span.start} txEnd={segment.span.end}
                         selectedDomain={this.props.selectedDomain}
-                        x={offsets[i].x} width={offsets[i].width} height={80}
+                        x={offsets[i].x} width={offsets[i].width} height={segmentDims.zoom.exon.height}
                         highlight={true} zoomed={true} isFlipped={isFlipped}
                     />
                 );
@@ -519,7 +536,7 @@ class Zoom extends React.Component {
                         variant={passedVariant} donors={relevantDonors} acceptors={relevantAcceptors} CIDomains={CIDomains}
                         txStart={segment.span.start} txEnd={segment.span.end}
                         selectedDomain={this.props.selectedDomain}
-                        x={offsets[i].x} width={offsets[i].width} height={60}
+                        x={offsets[i].x} width={offsets[i].width} height={segmentDims.zoom.intron.height}
                         highlight={true} zoomed={true} isFlipped={isFlipped}
                     />
                 );
@@ -527,12 +544,98 @@ class Zoom extends React.Component {
         });
 
         return (
-            <g transform="translate(0, 100)">
+            <g transform="translate(0, 70)">
             { blocks }
             </g>
         );
     }
 }
+
+const SettingsPanel = React.createClass({
+    mixins: [CollapsableMixin],
+
+    getCollapsableDOMNode: function() {
+        return this.refs.panel.getDOMNode();
+    },
+
+    getCollapsableDimensionValue: function() {
+        return this.refs.panel.getDOMNode().scrollHeight;
+    },
+
+    onHandleToggle: function (e) {
+        e.preventDefault();
+
+        // ask our parent to toggle us
+        this.props.onToggled();
+    },
+
+    render: function() {
+        const styles = this.getCollapsableClassSet();
+
+        const settings = (
+            <div className="container-fluid">
+                <div className="row">
+                    <div className="col-md-6">
+                        { this.props.generateCIDomainSelectors(this.props.meta) }
+                    </div>
+
+                    <div className="col-md-6">
+                        <div>
+                            <label>
+                                <input style={{marginRight: '0.5em'}} type="checkbox" name="drawDonors" checked={this.props.drawDonors} onChange={this.props.toggleDrawing} />
+                                <svg className="site-indicator" width={18} height={18}><rect className="donor" /></svg>
+                                Donor Sites
+                            </label>
+                        </div>
+
+                        <div>
+                            <label style={{display: 'inline-block', marginRight: '1em', verticalAlign: 'baseline'}}>
+                                <input style={{marginRight: '0.5em'}} type="checkbox" name="drawAcceptors" checked={this.props.drawAcceptors} onChange={this.props.toggleDrawing} />
+                                <svg className="site-indicator" width={18} height={18}><rect className="acceptor" /></svg>
+                                Acceptor Sites
+                            </label>
+                        </div>
+
+                        <div>
+                            <label>
+                                <input style={{marginRight: '0.5em'}} type="checkbox" name="alternatePalette" checked={this.props.alternatePalette} onChange={this.props.toggleDrawing} />
+                                Alternate Palette
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        if (this.props.nonCollapsable) {
+            return (
+                <div style={{marginBottom: 0, borderTop: 'solid 1px #ccc', paddingTop: '10px'}}>{settings}</div>
+            );
+        }
+
+        return (
+            <div>
+                <div style={{marginBottom: 0, borderTop: 'solid 1px #ccc', padding: '10px'}}>
+                    <div className={`submitter-header ${this.props.expanded ? 'expanded' : ''}`}>
+                        <span onClick={this.onHandleToggle} style={{fontWeight: 'bold', cursor: 'pointer'}}>
+                            {
+                                this.props.expanded
+                                    ? <i className="fa fa-caret-down" aria-hidden="true" />
+                                    : <i className="fa fa-caret-right" aria-hidden="true" />
+                            }
+                            <span>&nbsp;Options</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div ref='panel' className={classNames(styles)}>
+                {settings}
+                </div>
+            </div>
+        );
+    }
+});
+
 
 class Splicing extends React.Component {
     constructor(props) {
@@ -543,17 +646,33 @@ class Splicing extends React.Component {
             drawDonors: true,
             drawCIDomains: new Set(),
             selectedDomain: null,
-            alternatePalette: false
+            alternatePalette: false,
+            optionsExpanded: localStorage.getItem("transcriptviz-options-expanded") === 'true'
         };
+
+        this.onOptionsToggled = this.onOptionsToggled.bind(this);
 
         this.toggleDrawing = this.toggleDrawing.bind(this);
         this.toggleCIDomain = this.toggleCIDomain.bind(this);
         this.selectCIDomain = this.selectCIDomain.bind(this);
+        this.generateCIDomainSelectors = this.generateCIDomainSelectors.bind(this);
     }
 
     toggleDrawing(event) {
         this.setState({
             [event.target.name]: event.target.checked
+        });
+    }
+
+    onOptionsToggled() {
+        this.setState((pstate) => ({
+            optionsExpanded: !pstate.optionsExpanded
+        }), () => {
+            // persist expansion state to localstorage
+            localStorage.setItem("transcriptviz-options-expanded", this.state.optionsExpanded ? "true" : "false");
+
+            // reflows the parent after our dimensions change
+            this.props.onContentsChanged();
         });
     }
 
@@ -618,7 +737,7 @@ class Splicing extends React.Component {
 
         return (
             <div className={`transcript-viz ${this.state.alternatePalette ? 'altpalette' : ''}`}>
-                <svg viewBox="-4 0 808 240" preserveAspectRatio="xMidYMid">
+                <svg viewBox="-4 0 808 160" preserveAspectRatio="xMidYMid">
                     {/* variant fill definitions, declared here instead of in CSS b/c one of them is a <pattern> */}
                     <defs>
                         <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">
@@ -646,7 +765,7 @@ class Splicing extends React.Component {
                     />
 
                     {/* legend */}
-                    <g transform="translate(274,220)">
+                    <g transform="translate(274,140)">
                         <rect x="0" className="changed" stroke="black" width="20" height="10" />
                         <text x="22" y="10">{ `Substitution (${info.changed} base${plural(info.changed)})` }</text>
                         <rect x="192" className="deleted" stroke="black" width="20" height="10" />
@@ -656,35 +775,18 @@ class Splicing extends React.Component {
                     </g>
                 </svg>
 
-                {/* settings panel */}
-                <div style={{padding: '10px'}}>
-                    <div>
-                        <label>
-                            <input style={{marginRight: '0.5em'}} type="checkbox" name="drawDonors" checked={this.state.drawDonors} onChange={this.toggleDrawing} />
-                            <svg className="site-indicator" width={18} height={18}><rect className="donor" /></svg>
-                            Donor Sites
-                        </label>
-                    </div>
-
-                    <div>
-                        <label style={{display: 'inline-block', marginRight: '1em', verticalAlign: 'baseline'}}>
-                            <input style={{marginRight: '0.5em'}} type="checkbox" name="drawAcceptors" checked={this.state.drawAcceptors} onChange={this.toggleDrawing} />
-                            <svg className="site-indicator" width={18} height={18}><rect className="acceptor" /></svg>
-                            Acceptor Sites
-                        </label>
-                    </div>
-
-                    {
-                        this.generateCIDomainSelectors(meta)
-                    }
-
-                    <div>
-                        <label>
-                            <input style={{marginRight: '0.5em'}} type="checkbox" name="alternatePalette" checked={this.state.alternatePalette} onChange={this.toggleDrawing} />
-                            Alternate Palette
-                        </label>
-                    </div>
-                </div>
+                <SettingsPanel
+                    key="settings-panel"
+                    meta={meta}
+                    expanded={this.state.optionsExpanded}
+                    drawDonors={this.state.drawDonors}
+                    drawAcceptors={this.state.drawAcceptors}
+                    alternatePalette={this.state.alternatePalette}
+                    generateCIDomainSelectors={this.generateCIDomainSelectors}
+                    toggleDrawing={this.toggleDrawing}
+                    onToggled={this.onOptionsToggled}
+                    nonCollapsable={false}
+                />
             </div>
         );
     }
@@ -705,7 +807,8 @@ class Splicing extends React.Component {
             exons.map(exon => ({
                 id: exon.id,
                 span: {
-                    start: Math.min(exon.span.start, exon.span.end),
+                    // the +1 makes the starting bound exclusive
+                    start: Math.min(exon.span.start, exon.span.end) + 1,
                     end: Math.max(exon.span.start, exon.span.end),
                 }
             })),
@@ -744,9 +847,10 @@ class Splicing extends React.Component {
         // --- step 2: identify the region of interest
 
         // identify the highlighted boundary
+        // (variants are defined inclusively in the starting coordinate and exclusively in the ending one)
         const overlappingSegments = segments
             .map((segment, idx) => ({idx: idx, segment: segment}))
-            .filter(({segment}) => overlaps(variantSpan, [segment.span.start, segment.span.end]));
+            .filter(({segment}) => overlaps([variantSpan[0], variantSpan[1] - 1], [segment.span.start, segment.span.end]));
 
         const firstSeg = _.first(overlappingSegments), lastSeg = _.last(overlappingSegments);
 
