@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('data', '0027_reportdiff'),
+        ('data', '0028_add_mupit_fields'),
     ]
 
     operations = [
