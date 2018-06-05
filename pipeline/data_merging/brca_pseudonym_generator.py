@@ -13,6 +13,7 @@ import pyhgvs
 import pyhgvs.utils as pyhgvs_utils
 import logging
 import csv
+import psycopg2
 from ometa.runtime import ParseError
 from pygr.seqdb import SequenceFileDB
 
@@ -215,6 +216,46 @@ def main(args):
                 print(e)
 
         if calcProtein == True:
+
+            for i in range(0,10):
+                while True:
+                    try:
+                        var_c1 = hgvsparser.parse_hgvs_variant(cdna_coord)
+                        protein_coord = variantmapper.c_to_p(var_c1)
+
+                    except hgvs.exceptions.HGVSParseError as e:
+                        template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                        message = template.format(type(e).__name__, e.args)
+                        genomicChange = '{0}:g.{1}:{2}>{3}'.format(chrom38, offset38, ref38, alt38)
+                        print('hgvs.exceptions.HGVSParseError: ', e)
+                        print('Original GRCh38 Genomic Coordinate: ', oldHgvsGenomic38)
+                        print('GRCh38 Genomic change: ', genomicChange)
+                        logging.error(message)
+                        logging.error(line)
+                        logging.error('Proposed GRCh38 Genomic change for error: %s', genomicChange)
+
+                    # Catch parse errors thrown by ometa.runtime.ParseError.
+                    except ParseError as ex:
+                        template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                        message = template.format(type(ex).__name__, ex.args)
+                        genomicChange = '{0}:g.{1}:{2}>{3}'.format(chrom38, offset38, ref38, alt38)
+                        print(message)
+                        print('ometa.runtime.ParseError', ex)
+                        print('Original GRCh38 Genomic Coordinate: ', oldHgvsGenomic38)
+                        print('GRCh38 Genomic change: ', genomicChange)
+                        logging.error(message)
+                        logging.error(line)
+                        logging.error('Proposed GRCh38 Genomic change for error: %s', genomicChange)
+
+                    # retry psycopg2 timeouts
+                    except psycopg2.DatabaseError as e:
+                        template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                        message = template.format(type(e).__name__, e.args)
+                        print('psycopg2.DatabaseError: ', e)
+                        logging.error('psycopg2.DatabaseError: %s', e)
+                        continue
+
+                    break
 
             try:
                 var_c1 = hgvsparser.parse_hgvs_variant(cdna_coord)
