@@ -30,11 +30,15 @@ MINUS VS PLUS STRAND NUMBERING
 Genes are transcribed from 5' to 3'
 For plus strand genes (e.g. BRCA2) this correlates to reading from left to right
     so genomic position increases from left to right
+(As you move from left to right along the genomic sequence, the genomic position increases
+AND the position in the cDNA trasncript increases)
 This means that for plus strand genes the exon start position is ALWAYS less than
     the exon end position and that native splice acceptors have a lower genomic position
     than native splice donors in the same exon
 For minus strand genes (e.g. BRCA1) this correlates to reading from right to left
     so genomic position increases from right to left AND decreases from left to right
+(As you move from the start of the cDNA nucleotide sequence, the cDNA position increases
+AND the genomic position decreases)
 This means that for minus strand genes the exon start position is ALWAYS greater than
     the exon end position and that native splice acceptors have a higher genomic position
     than native splice donors in the same exon
@@ -69,16 +73,16 @@ For splice donors:
         (the function to get FASTA sequences is inclusive of the endpoints so this is the last base included)
     this also means that the first base in the intron is considered the wild-type splice donor position
         (per HCI PRIORS website) 
+    For example in a plus strand gene (BRCA2):
+        c.7617 (g.32356609) is the last base in the exon and is the wild-type cut position
+        and c.7617+1 (g.32356610) is the first base in the intron and is the wild-type donor position
+        So the donor position is to the right of the cut position
+            (when looking at a layout where numbering increases from left to right)
     For example in a minus strand gene (BRCA1):
         c.441 (g.43104122) is the last base in the exon and is the wild-type cut position 
         and c.441+1 (g.43104121) is the first base in the intron and is the wild-type donor position
         So the donor position is to the right of the cut position 
             (when looking at a layout where numbering decreases from left to right)
-    For example in a plus strand gene (BRCA2):
-        c.7617 (g.32356609) is the last base in the exon and is the wild-type cut posiiton
-        and c.7617+1 (g.32356610) is the first base in the intron and is the wild-type donor position
-        So the donor position is to the right of the cut position
-            (when looking at a layout where numbering increases from left to right)
 For splice acceptors:
     splicing occurs between the last base of the intron and the first base of the exon
     this means that the first base in the exon is considered the wild-type splice cut position
