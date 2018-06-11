@@ -1215,6 +1215,85 @@ div.variant-submitter-group .submitter-header td {
 }
 
 
+/* --- in-silico prediction viz. -------------- */
+
+.subtile-container {
+    padding: 10px; border-top: solid 1px #ccc;
+}
+
+.protein-level-estimation {
+    width: 100%;
+}
+
+.protein-level-estimation th, .protein-level-estimation td {
+    padding: 5px;
+}
+.protein-level-estimation .missense-header {
+    background-color: #e1e2e6;
+}
+
+.protein-level-estimation .field-container {
+    display: flex;
+}
+
+.protein-level-estimation .label-field {
+    flex: 1 1 auto;
+    border: solid 1px #eee;
+    padding: 3px;
+}
+
+.protein-level-estimation .value-field {
+    flex: 0 1 150px;
+    text-align: center;
+    border: solid 1px #eee;
+    padding: 3px;
+}
+
+.protein-level-estimation .nested .label-field {
+    margin-left: 30px;
+    padding: 3px;
+}
+
+.protein-level-estimation .borderless { border: none; }
+.protein-level-estimation .bracket_lt25 { background-color: #abf4ac; }
+.protein-level-estimation .bracket_lt50 { background-color: #f2f4ad; }
+.protein-level-estimation .bracket_lt75 { background-color: #f5be85; }
+.protein-level-estimation .bracket_lte100 { background-color: #e85659; }
+
+.protein-level-estimation .highlighted {
+    border: solid 2px red;
+    font-weight: bold;
+}
+
+.splicing-subtile .nav-tabs {
+    display: flex;
+}
+.splicing-subtile .nav-tabs li {
+    flex: 1 1 auto;
+    text-align: center;
+}
+.splicing-subtile .nav-tabs > li > a {
+    text-transform: none;
+    font-size: 12px;
+}
+
+.splicing-level-table { width: 100%; }
+.splicing-level-table td { padding: 5px; border: solid 1px #aaa; text-align: center; }
+.splicing-level-table .sequence {
+    font-family: monospace;
+}
+.splicing-level-table .note-row {
+    text-align: left;
+    font-size: small;
+    padding: 8px;
+}
+.pathos-prob-label-outside { background-color: #cccccc; }
+.pathos-prob-label-improved { background-color: #a5c3f2; }
+.pathos-prob-label-low { background-color: #7ac39e; }
+.pathos-prob-label-moderate { background-color: #f5b170; }
+.pathos-prob-label-high { background-color: #c66178; }
+
+
 /* faisal: hack for packery to minimize the impact of the graphical glitch of opening/closing a section */
 .variant-history-col {
     background-color: white;
