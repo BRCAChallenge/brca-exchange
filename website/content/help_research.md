@@ -103,10 +103,9 @@ The Variant Nomenclature fields contain forms of identification by which the var
 	Variants are classified as either germline or somatic, depending on how they are acquired. Germline variants are genetic changes that we inherit from our parents. Somatic variants are DNA changes that we acquire over our lifetime, often through exposure to pollutants, toxins, radiation and other carcinogens.
 
 ### ClinVar
-##### _Updates Coming Soon_
 
 * #### Clinical Significance
-	These fields are extracted from the [ClinVar website](https://www.ncbi.nlm.nih.gov/clinvar/) relating to variant clinical classification, for individual submitters to ClinVar \(includes repeated information from ENIGMA and BIC tiles\).
+	These fields, extracted from [ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/), relate to variant clinical classification from individual submitters to ClinVar \(includes repeated information from ENIGMA and BIC tiles\).
 
 	##### What do these classifications mean?
 	The below classifications will be found in ClinVar's "clinical significance" field. They are implemented per [recommendations by ACMG/AMP](https://www.ncbi.nlm.nih.gov/pubmed/25741868) for variants interpreted by Mendelian disorders.
@@ -182,7 +181,7 @@ Component likelihoods and final classification are from multifactorial likelihoo
 	This value is the likelihood ratio based on an analysis of the severity of summary family histories of breast and/ or ovarian cancer.
 
 # Allele Frequency Reference Sets
-The allele frequency reference sets show the frequency of a BRCA1 or BRCA2 variant in a reference population. To view or collapse all nested tiles, click the INSERT ICON icons available at the top right of this tile. Though the two sets of populations in ExAC and 1000 Genomes closely resemble each other, they are not identical. ESP also uses different population categories.
+The allele frequency reference sets show the frequency of a BRCA1 or BRCA2 variant in a reference population. To view or collapse all nested tiles, click the arrows available at the top right of this tile. Though the two sets of populations in ExAC and 1000 Genomes closely resemble each other, they are not identical. ESP also uses different population categories.
 
 ### ExAC
 
@@ -272,12 +271,12 @@ CRAVAT and MuPIT are available for missense variants that map to positions withi
 
 ##### References
 
-	1. [Carvalho et al. 2009. PMID 18992264](https://www.ncbi.nlm.nih.gov/pubmed/18992264).
-	2. [Karchin et al. 2008. PMID 19043619](https://www.ncbi.nlm.nih.gov/pubmed/?term=19043619).
-	3. [Karchin et al. 2007. PMID 17305420.](https://www.ncbi.nlm.nih.gov/pubmed/?term=17305420)
-	4. [Masica et al. 2017. PMID 29092935.](https://www.ncbi.nlm.nih.gov/pubmed/29092935)
-	5. [VallEe et al. 2016. PMID 26913838.](https://www.ncbi.nlm.nih.gov/pubmed/26913838)
-	6. [VallEe et al. 2012. PMID 21990165.](https://www.ncbi.nlm.nih.gov/pubmed/21990165)
+1. [Carvalho et al. 2009. PMID 18992264](https://www.ncbi.nlm.nih.gov/pubmed/18992264)
+2. [Karchin et al. 2008. PMID 19043619](https://www.ncbi.nlm.nih.gov/pubmed/?term=19043619)
+3. [Karchin et al. 2007. PMID 17305420.](https://www.ncbi.nlm.nih.gov/pubmed/?term=17305420)
+4. [Masica et al. 2017. PMID 29092935.](https://www.ncbi.nlm.nih.gov/pubmed/29092935)
+5. [Vall&#x00e9;e et al. 2016. PMID 26913838.](https://www.ncbi.nlm.nih.gov/pubmed/26913838)
+6. [Vall&#x00e9;e et al. 2012. PMID 21990165.](https://www.ncbi.nlm.nih.gov/pubmed/21990165)
 
 ## Lollipop Plots
 Lollipop plots are a tool to visualize the chromosomal position and pathogenicity classification for each variant in a gene. Here, each circle-capped ‘lollipop’ indicates whether a BRCA1 and BRCA2 variant is pathogenic (labeled in red), benign (labeled in light-blue), or the variants clinical significance is uncertain (labeled in dark-blue). The y-axis represents the pathogenicity classification of a variant. The x-axis represents the genomic coordinates of those variants in GRCh38 human reference space. The bottom box that runs along the x-axis of the diagram displays the position of each exon in the selected gene.
