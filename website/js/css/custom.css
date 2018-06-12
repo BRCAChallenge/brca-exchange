@@ -696,6 +696,14 @@ th[role='columnheader'] .help, .help-target .help {
 	visibility: hidden;
 }
 
+.popover.bottom > .arrow::after {
+    border-bottom-color: #f7f7f7;
+}
+.popover.bottom.in {
+    padding-top: 0;
+    margin-top: 12px;
+}
+
 @media (max-width: 1024px) { /* Ensures help icon is always visible on most touchscreen devices */
     th[role='columnheader'] .help, .help-target .help {
         visibility: visible;

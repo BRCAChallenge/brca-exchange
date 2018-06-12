@@ -7,18 +7,19 @@ import {OverlayTrigger, Popover} from "react-bootstrap";
 
 const KeyInline = React.createClass({
     render() {
-        const {onClick, tableKey, tooltip} = this.props;
+        const {/*onClick, */tableKey, tooltip} = this.props;
+        const onClick = () => {};
 
         if (tooltip) {
             const popper = (
-                <Popover title='Quick Definition'>
+                <Popover title={tableKey}>
                     <span dangerouslySetInnerHTML={{__html: tooltip}} />
                 </Popover>
             );
 
             return (
                 <td className='help-target'>
-                    <OverlayTrigger placement='right' overlay={popper}>
+                    <OverlayTrigger placement='bottom' overlay={popper}>
                         <span className="help-target-inline" onClick={onClick}>{tableKey}</span>
                     </OverlayTrigger>
                 </td>
