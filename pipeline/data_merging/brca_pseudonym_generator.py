@@ -216,23 +216,29 @@ def main(args):
                 print('parse error: {}'.format(cdna_coord_LOVD))
                 print(e)
 
+        protein_coord = None
         if calcProtein:
             try:
+                genomic_change = '{0}:g.{1}:{2}>{3}'.format(chrom38, offset38, ref38, alt38)
+                
                 var_c1 = hgvs_parser.parse_hgvs_variant(cdna_coord)
                 var_c1_norm = hgvs_norm.normalize(var_c1) # doing normalization explicitly to get a useful error message
                 protein_coord = hgvs_am.c_to_p(var_c1_norm)
-            except (hgvs.exceptions.HGVSParseError, ParseError) as e:
-                template = "A parsing error of type {0} occured. Arguments:\n{1!r}"
-                message = template.format(type(e).__name__, e.args)
-                genomicChange = '{0}:g.{1}:{2}>{3}'.format(chrom38, offset38, ref38, alt38)
-                logging.error(message)
-                logging.error(line)
-                logging.error('Proposed GRCh38 Genomic change for error: %s', genomicChange)
             except Exception as e:
-                template = "An error of type {0} occurred. Arguments:\n{1!r}"
-                message = template.format(type(e).__name__, e.args)
-                logging.exception(message)
-                logging.error("Line was {}".format(line))
+                template = "An error of type {0} occured. Arguments:{1!r}"
+                error_name = type(e).__name__
+                message = template.format(error_name, e.args)
+                logging.error(message)
+                logging.error('Proposed GRCh38 Genomic change for error: %s', genomic_change)
+                logging.error(line)
+
+                # Exceptions related to invalid data
+                data_errors = set(['HGVSParseError', 'HGVSError', 'HGVSInvalidVariantError', 'HGVSUnsupportedOperationError'])
+                if error_name not in data_errors:
+                    # output some more if exception doesn't seem to be related to invalid data
+                    logging.error("Non data error raised")
+                    logging.exception(message)
+            
 
         # Add empty data for each new column to prepare for data insertion by index
         for i in range(len(new_columns_to_append)):

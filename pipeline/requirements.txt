@@ -1,7 +1,8 @@
 backports-abc==0.4
 beautifulsoup4==4.5.1
-biopython==1.67
-bioutils==0.1.4
+biocommons.seqrepo==0.3.5 
+biopython==1.69
+bioutils==0.3.3
 bx-python==0.7.3
 certifi==2016.8.2
 configparser==3.5.0
