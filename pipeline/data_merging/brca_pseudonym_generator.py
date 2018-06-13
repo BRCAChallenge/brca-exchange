@@ -4,11 +4,10 @@ from __future__ import print_function, division
 import argparse
 import sys
 import os
-import hgvs
-import hgvs.parser as hgvs_parser
-import hgvs.dataproviders.uta as hgvs_dataproviders_uta
-import hgvs.variantmapper as hgvs_variantmapper
-import hgvs.exceptions
+import hgvs.parser
+import hgvs.dataproviders.uta
+import hgvs.assemblymapper
+import hgvs.normalizer
 import pyhgvs
 import pyhgvs.utils as pyhgvs_utils
 import logging
@@ -79,9 +78,10 @@ def main(args):
     log_file_path = artifacts_dir + "brca-pseudonym-generator.log"
     logging.basicConfig(filename=log_file_path, filemode="w", level=logging.DEBUG)
 
-    hdp = hgvs_dataproviders_uta.connect()
-    variantmapper = hgvs_variantmapper.EasyVariantMapper(hdp)
-    hgvsparser = hgvs_parser.Parser()
+    hgvs_parser = hgvs.parser.Parser()
+    hgvs_dp = hgvs.dataproviders.uta.connect()
+    hgvs_norm = hgvs.normalizer.Normalizer(hgvs_dp)
+    hgvs_am = hgvs.assemblymapper.AssemblyMapper(hgvs_dp, assembly_name='GRCh38')
 
     genome36 = SequenceFileDB(hg18_fa.name)
     genome37 = SequenceFileDB(hg19_fa.name)
@@ -218,8 +218,9 @@ def main(args):
 
         if calcProtein:
             try:
-                var_c1 = hgvsparser.parse_hgvs_variant(cdna_coord)
-                protein_coord = variantmapper.c_to_p(var_c1)
+                var_c1 = hgvs_parser.parse_hgvs_variant(cdna_coord)
+                var_c1_norm = hgvs_norm.normalize(var_c1) # doing normalization explicitly to get a useful error message
+                protein_coord = hgvs_am.c_to_p(var_c1_norm)
             except (hgvs.exceptions.HGVSParseError, ParseError) as e:
                 template = "A parsing error of type {0} occured. Arguments:\n{1!r}"
                 message = template.format(type(e).__name__, e.args)
