@@ -15,6 +15,8 @@ import logging
 import csv
 from ometa.runtime import ParseError
 from pygr.seqdb import SequenceFileDB
+import traceback
+
 
 '''
     Example run:
@@ -214,34 +216,22 @@ def main(args):
                 print('parse error: {}'.format(cdna_coord_LOVD))
                 print(e)
 
-        if calcProtein == True:
-
+        if calcProtein:
             try:
                 var_c1 = hgvsparser.parse_hgvs_variant(cdna_coord)
                 protein_coord = variantmapper.c_to_p(var_c1)
-            except hgvs.exceptions.HGVSParseError as e:
-                template = "An exception of type {0} occured. Arguments:\n{1!r}"
+            except (hgvs.exceptions.HGVSParseError, ParseError) as e:
+                template = "A parsing error of type {0} occured. Arguments:\n{1!r}"
                 message = template.format(type(e).__name__, e.args)
                 genomicChange = '{0}:g.{1}:{2}>{3}'.format(chrom38, offset38, ref38, alt38)
-                print('hgvs.exceptions.HGVSParseError: ', e)
-                print('Original GRCh38 Genomic Coordinate: ', oldHgvsGenomic38)
-                print('GRCh38 Genomic change: ', genomicChange)
                 logging.error(message)
                 logging.error(line)
                 logging.error('Proposed GRCh38 Genomic change for error: %s', genomicChange)
-
-            # Catch parse errors thrown by ometa.runtime.ParseError.
-            except ParseError as ex:
-                template = "An exception of type {0} occured. Arguments:\n{1!r}"
-                message = template.format(type(ex).__name__, ex.args)
-                genomicChange = '{0}:g.{1}:{2}>{3}'.format(chrom38, offset38, ref38, alt38)
-                print(message)
-                print('ometa.runtime.ParseError', ex)
-                print('Original GRCh38 Genomic Coordinate: ', oldHgvsGenomic38)
-                print('GRCh38 Genomic change: ', genomicChange)
-                logging.error(message)
-                logging.error(line)
-                logging.error('Proposed GRCh38 Genomic change for error: %s', genomicChange)
+            except Exception as e:
+                template = "An error of type {0} occurred. Arguments:\n{1!r}"
+                message = template.format(type(e).__name__, e.args)
+                logging.exception(message)
+                logging.error("Line was {}".format(line))
 
         # Add empty data for each new column to prepare for data insertion by index
         for i in range(len(new_columns_to_append)):
@@ -267,6 +257,7 @@ def main(args):
     refSeq18.close()
     refSeq19.close()
     refSeq38.close()
+
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
