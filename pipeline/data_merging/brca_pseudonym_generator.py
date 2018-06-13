@@ -217,45 +217,53 @@ def main(args):
 
         if calcProtein == True:
 
-            for i in range(0,10):
-                while True:
-                    try:
-                        var_c1 = hgvsparser.parse_hgvs_variant(cdna_coord)
-                        protein_coord = variantmapper.c_to_p(var_c1)
+            try:
+                var_c1 = hgvsparser.parse_hgvs_variant(cdna_coord)
+                protein_coord = variantmapper.c_to_p(var_c1)
 
-                    except hgvs.exceptions.HGVSParseError as e:
-                        template = "An exception of type {0} occured. Arguments:\n{1!r}"
-                        message = template.format(type(e).__name__, e.args)
-                        genomicChange = '{0}:g.{1}:{2}>{3}'.format(chrom38, offset38, ref38, alt38)
-                        print('hgvs.exceptions.HGVSParseError: ', e)
-                        print('Original GRCh38 Genomic Coordinate: ', oldHgvsGenomic38)
-                        print('GRCh38 Genomic change: ', genomicChange)
-                        logging.error(message)
-                        logging.error(line)
-                        logging.error('Proposed GRCh38 Genomic change for error: %s', genomicChange)
+            except hgvs.exceptions.HGVSParseError as e:
+                template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                message = template.format(type(e).__name__, e.args)
+                genomicChange = '{0}:g.{1}:{2}>{3}'.format(chrom38, offset38, ref38, alt38)
+                print('hgvs.exceptions.HGVSParseError: ', e)
+                print('Original GRCh38 Genomic Coordinate: ', oldHgvsGenomic38)
+                print('GRCh38 Genomic change: ', genomicChange)
+                logging.error(message)
+                logging.error(line)
+                logging.error('Proposed GRCh38 Genomic change for error: %s', genomicChange)
+                protein_coord = '-'
 
-                    # Catch parse errors thrown by ometa.runtime.ParseError.
-                    except ParseError as ex:
-                        template = "An exception of type {0} occured. Arguments:\n{1!r}"
-                        message = template.format(type(ex).__name__, ex.args)
-                        genomicChange = '{0}:g.{1}:{2}>{3}'.format(chrom38, offset38, ref38, alt38)
-                        print(message)
-                        print('ometa.runtime.ParseError', ex)
-                        print('Original GRCh38 Genomic Coordinate: ', oldHgvsGenomic38)
-                        print('GRCh38 Genomic change: ', genomicChange)
-                        logging.error(message)
-                        logging.error(line)
-                        logging.error('Proposed GRCh38 Genomic change for error: %s', genomicChange)
+            # Catch parse errors thrown by ometa.runtime.ParseError.
+            except ParseError as ex:
+                template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                message = template.format(type(ex).__name__, ex.args)
+                genomicChange = '{0}:g.{1}:{2}>{3}'.format(chrom38, offset38, ref38, alt38)
+                print(message)
+                print('ometa.runtime.ParseError', ex)
+                print('Original GRCh38 Genomic Coordinate: ', oldHgvsGenomic38)
+                print('GRCh38 Genomic change: ', genomicChange)
+                logging.error(message)
+                logging.error(line)
+                logging.error('Proposed GRCh38 Genomic change for error: %s', genomicChange)
+                protein_coord = '-'
 
-                    # retry psycopg2 timeouts
-                    except psycopg2.DatabaseError as e:
-                        template = "An exception of type {0} occured. Arguments:\n{1!r}"
-                        message = template.format(type(e).__name__, e.args)
-                        print('psycopg2.DatabaseError: ', e)
-                        logging.error('psycopg2.DatabaseError: %s', e)
-                        continue
+            # catch psycopg2 timeouts
+            except psycopg2.DatabaseError as e:
+                template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                message = template.format(type(e).__name__, e.args)
+                print('psycopg2.DatabaseError: ', e)
+                logging.error('psycopg2.DatabaseError: %s', e)
+                logging.error(line)
+                protein_coord = '-'
 
-                    break
+            # catch unknown exceptions to prevent pipeline crash
+            except:
+                template = "An exception of unknown type occured. Arguments:\n{1!r}"
+                print('unkown error')
+                logging.error('unknown error')
+                logging.error(line)
+                protein_coord = '-'
+
 
         # Add empty data for each new column to prepare for data insertion by index
         for i in range(len(new_columns_to_append)):
