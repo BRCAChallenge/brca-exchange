@@ -234,11 +234,15 @@ def main(args):
 
                 # Exceptions related to invalid data
                 data_errors = set(['HGVSParseError', 'HGVSError', 'HGVSInvalidVariantError', 'HGVSUnsupportedOperationError'])
+
                 if error_name not in data_errors:
                     # output some more if exception doesn't seem to be related to invalid data
                     logging.error("Non data error raised")
-                    logging.exception(message)
-            
+                    logging.exception(e)
+
+                if error_name == "DatabaseError":
+                    # Aborting, as it is a transient error in principle, i.e. in one run we might be able to obtain a protein change, in another not, messing up the data diffs
+                    raise EnvironmentError("Issue with UTA database. Aborting")
 
         # Add empty data for each new column to prepare for data insertion by index
         for i in range(len(new_columns_to_append)):
