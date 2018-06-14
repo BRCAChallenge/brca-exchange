@@ -51,7 +51,7 @@ RUN rm -r /opt/leiden /opt/hgvs /root/.cache
 ARG FORCE_REBUILD=0
 ARG BRCA_GIT_REPO=https://github.com/BRCAChallenge/brca-exchange.git
 ARG BRCA_EXCHANGE_COMMIT=master
-#RUN git clone ${BRCA_GIT_REPO} && cd brca-exchange && git checkout ${BRCA_EXCHANGE_COMMIT}
+RUN git clone ${BRCA_GIT_REPO} && cd brca-exchange && git checkout ${BRCA_EXCHANGE_COMMIT}
 
 COPY run_luigi.sh .
 
