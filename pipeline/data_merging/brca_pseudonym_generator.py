@@ -220,7 +220,6 @@ def main(args):
         if calcProtein:
             try:
                 genomic_change = '{0}:g.{1}:{2}>{3}'.format(chrom38, offset38, ref38, alt38)
-
                 var_c1 = hgvs_parser.parse_hgvs_variant(cdna_coord)
                 var_c1_norm = hgvs_norm.normalize(var_c1) # doing normalization explicitly to get a useful error message
                 protein_coord = hgvs_am.c_to_p(var_c1_norm)
@@ -239,6 +238,9 @@ def main(args):
                     logging.error("Non data error raised")
                     logging.exception(message)
 
+                if error_name == "DatabaseError":
+                    # Aborting, as it is a transient error in principle, i.e. in one run we might be able to obtain a protein change, in another not, messing up the data diffs
+                    raise EnvironmentError("Issue with UTA database. Aborting")
 
         # Add empty data for each new column to prepare for data insertion by index
         for i in range(len(new_columns_to_append)):
