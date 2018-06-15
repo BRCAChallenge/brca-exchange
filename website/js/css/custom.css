@@ -804,7 +804,7 @@ th[role='columnheader'] .help, .help-target .help {
     margin: 20px auto 20px auto;
 }
 
-#communityMap .map-info-window div { 
+#communityMap .map-info-window div {
     float: right;
 }
 
@@ -1180,7 +1180,7 @@ div.variant-submitter-group .submitter-header td {
    background: #f2f7ff;
    cursor: pointer;
    display: flex; flex-direction: row; width: 100%;
-   align-items: center; 
+   align-items: center;
    overflow: hidden;
 }
 
@@ -1288,6 +1288,14 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
     text-transform: none;
     font-size: 12px;
 }
+.splicing-subtile .tab-body {
+    padding: 15px;
+}
+.splicing-subtile .novalue-note {
+    padding: 15px;
+    font-style: italic;
+    text-align: center;
+}
 
 .splicing-subtile .splicing-tab-header.highest-prob { font-weight: bolder; }
 .splicing-subtile .splicing-tab-header.is-na { color: gray; }
@@ -1345,5 +1353,3 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
 .help-page .list-group-item-heading {
     margin-bottom: 0;
 }
-
-
