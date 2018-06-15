@@ -56,11 +56,12 @@ class PathosProbScale extends React.Component {
 
 export default class InSilicoPredSubtile extends React.Component {
     render() {
-        const {data} = this.props;
-
-        const cols = data.context;
-        // FIXME: the below will eventually come from an endpoint
-        const summarizedData = data.context.reduce((c, a) => { c[a.prop] = a.value; return c; }, {});
+        const {probability, reason, varLoc, varType} = this.props;
+        const summarizedData = {varLoc, varType};
+        const cols = [
+            { title: 'Variant Location', prop: 'varLoc', value: 'Exon' },
+            { title: 'Variant Type', prop: 'varType', value: 'Missense' }
+        ];
 
         // for each panel, construct key-value pairs as a row of the table
         const submitterRows = cols.map(({prop, title, value, helpKey}) => {
@@ -82,11 +83,11 @@ export default class InSilicoPredSubtile extends React.Component {
         return (
             <div>
                 <div className="subtile-container" style={{padding: 0}}>
-                    <PathosProbScale value={data.value} brackets={4} />
+                    <PathosProbScale value={probability} brackets={4} />
                 </div>
 
                 <div className="subtile-container">
-                    Applicable Probability is from Splicing-level Estimation (De Novo Donor Splice Site Creation)
+                    Applicable Probability is from {reason}
                 </div>
 
                 <Table style={{paddingBottom: 0}}>

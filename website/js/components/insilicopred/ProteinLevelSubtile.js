@@ -38,8 +38,9 @@ function labelClasses(v) {
     return classNames('label-field borderless ', mapValToColor(v));
 }
 
-function valueClasses(v, probability) {
-    return classNames('value-field', probability === v ? 'highlighted' : null);
+function rowClasses(v, probability) {
+    // FIXME: needs logic to disambiguate cases where the probability matches multiple rows
+    return classNames('field-container', probability === v ? 'highlighted' : null);
 }
 
 export default class ProteinLevelSubtile extends React.Component {
@@ -62,20 +63,24 @@ export default class ProteinLevelSubtile extends React.Component {
                     </div>
 
                     <div className="nested">
-                        <div className="label-field" style={{border: 'none'}}>Inside key domains</div>
+                        <div className="field-container">
+                            <div className="label-field" style={{border: 'none'}}>Inside key domains</div>
+                        </div>
 
                         {
                             context.missense.keyDomainScores.map(x => (
-                                <div className="field-container">
+                                <div className={rowClasses(x.value, probability)}>
                                     <div className={labelClasses(x.value)}>Align GV-GD score: {x.name}</div>
-                                    <div className={valueClasses(x.value, probability)}>{x.value}</div>
+                                    <div className="value-field">{x.value}</div>
                                 </div>
                             ))
                         }
 
-                        <div className="label-field" style={{border: 'none', marginTop: '0.5em'}}>Outside key domains</div>
-
                         <div className="field-container">
+                            <div className="label-field" style={{border: 'none', marginTop: '0.5em'}}>Outside key domains</div>
+                        </div>
+
+                        <div className={rowClasses(context.missense.irrelevant, probability)}>
                             <div className={labelClasses(context.missense.irrelevant)}>
                                 <i>Missense severity irrelevant</i>
                             </div>
@@ -83,18 +88,18 @@ export default class ProteinLevelSubtile extends React.Component {
                         </div>
                     </div>
 
-                    <div className="field-container" style={{paddingTop: '1em'}}>
+                    <div className={rowClasses(context.silentVal, probability)} style={{marginTop: '1em'}}>
                         <div className={labelClasses(context.silentVal)}>
                             Silent (synonymous)
                         </div>
-                        <div className={valueClasses(context.silentVal, probability)}>{context.silentVal}</div>
+                        <div className="value-field">{context.silentVal}</div>
                     </div>
 
-                    <div className="field-container" style={{paddingTop: '1em'}}>
+                    <div className={rowClasses(context.nonsenseVal, probability)} style={{marginTop: '1em'}}>
                         <div className={labelClasses(context.nonsenseVal)}>
                             Nonsense
                         </div>
-                        <div className={valueClasses(context.nonsenseVal, probability)}>{context.nonsenseVal}</div>
+                        <div className="value-field">{context.nonsenseVal}</div>
                     </div>
                 </div>
             </div>

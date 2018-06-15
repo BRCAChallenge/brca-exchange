@@ -1249,9 +1249,8 @@ div.variant-submitter-group .submitter-header td {
     padding: 3px;
 }
 
-.protein-level-estimation .nested .label-field {
+.protein-level-estimation .nested .field-container {
     margin-left: 30px;
-    padding: 3px;
 }
 
 .protein-level-estimation .borderless { border: none; }
@@ -1260,11 +1259,17 @@ div.variant-submitter-group .submitter-header td {
 .protein-level-estimation .bracket_lt75 { background-color: #f5be85; }
 .protein-level-estimation .bracket_lte100 { background-color: #e85659; }
 
-.protein-level-estimation .highlighted {
-    border: solid 2px red;
-    font-weight: bold;
-}
+.protein-level-estimation .highlighted { border: solid 2px red; }
+tr.highlighted td { border-top: solid 2px red; border-bottom: solid 2px red; }
+tr.highlighted td:first-child { border-left: solid 2px red; }
+tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
 
+.splicing-subtile {
+    padding: 0; /* allows the tab controller to touch the edges of the screen */
+}
+.splicing-subtile .preamble {
+    margin: 10px 20px 20px 20px;
+}
 .splicing-subtile .nav-tabs {
     display: flex;
 }
@@ -1272,15 +1277,26 @@ div.variant-submitter-group .submitter-header td {
     flex: 1 1 auto;
     text-align: center;
 }
+.splicing-subtile .nav-tabs li:first-child { margin-left: 6px; }
+.splicing-subtile .nav-tabs li:last-child { margin-right: 5px; }
 .splicing-subtile .nav-tabs > li > a {
     text-transform: none;
     font-size: 12px;
+}
+.splicing-subtile .tab-body {
+    padding: 15px;
+}
+.splicing-subtile .novalue-note {
+    padding: 15px;
+    font-style: italic;
+    text-align: center;
 }
 
 .splicing-level-table { width: 100%; }
 .splicing-level-table td { padding: 5px; border: solid 1px #aaa; text-align: center; }
 .splicing-level-table .sequence {
     font-family: monospace;
+    overflow-x: auto;
 }
 .splicing-level-table .note-row {
     text-align: left;
