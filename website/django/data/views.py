@@ -140,7 +140,11 @@ def report_to_dict(report_object):
     report_dict["Change_Type"] = ChangeType.objects.get(id=report_dict["Change_Type"]).name
 
     # don't display report diffs prior to April 2018
-    cutoff_date = datetime.strptime('Apr 1 2018  12:00AM', '%b %d %Y %I:%M%p')
+    if report_object.Source == "ClinVar":
+        cutoff_date = datetime.strptime('Apr 1 2018  12:00AM', '%b %d %Y %I:%M%p')
+    elif report_object.Source == "LOVD":
+        # TODO: update this cutoff date once we're ready to share lovd report diffs
+        cutoff_date = datetime.today()
     if report_dict["Data_Release"]["date"] < cutoff_date:
         report_dict["Diff"] = None
         return report_dict
