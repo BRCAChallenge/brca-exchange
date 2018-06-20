@@ -170,7 +170,7 @@ class SpliceSiteImpactTable extends React.Component {
                 {
                     // FIXME: highlight row that matches the prior prob value
                     splicingImpactFields.fields.map(x =>
-                        <tr className={prior === x.prob ? 'highlighted' : ''}>
+                        <tr key={x.key} className={prior === x.prob ? 'highlighted' : ''}>
                             <td className={`pathos-prob-label-${x.key}`}>{x.label}</td>
                             <td>{splicingImpactFields.zScoreLabels[type][x.key]}</td>
                             <td>{x.prob}</td>
@@ -201,17 +201,17 @@ class DeNovoDonorPathogenicityTable extends React.Component {
 
                 {
                     // FIXME: highlight row that matches the prior prob value
-                    deNovoImpactFields.map(x =>
+                    deNovoImpactFields.map((x, i) =>
                         x.type === 'value'
                             ? (
-                                <tr className={prior === x.prob ? 'highlighted' : ''}>
+                                <tr key={i} className={prior === x.prob ? 'highlighted' : ''}>
                                     <td className={`pathos-prob-label-${x.impact}`}>{x.label}</td>
                                     <td>{x.zScoreLabel}</td>
                                     <td>{x.prob.toFixed(2)}</td>
                                 </tr>
                             )
                             : (
-                                <tr>
+                                <tr key={i}>
                                     <td colSpan={3} className="note-row">{x.text}</td>
                                 </tr>
                             )

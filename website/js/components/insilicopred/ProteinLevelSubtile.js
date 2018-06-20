@@ -69,7 +69,7 @@ export default class ProteinLevelSubtile extends React.Component {
 
                         {
                             context.missense.keyDomainScores.map(x => (
-                                <div className={rowClasses(x.value, probability)}>
+                                <div key={x.name} className={rowClasses(x.value, probability)}>
                                     <div className={labelClasses(x.value)}>Align GV-GD score: {x.name}</div>
                                     <div className="value-field">{x.value}</div>
                                 </div>

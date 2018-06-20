@@ -29,7 +29,7 @@ class PathosProbScale extends React.Component {
                         Array.from({ length: brackets + 1 }).map((x, idx) => {
                             const val = (idx / brackets).toFixed(2);
                             return (
-                                <text y={70} x={(450 * val)} alignmentBaseline="hanging"
+                                <text key={idx} y={70} x={(450 * val)} alignmentBaseline="hanging"
                                     textAnchor={idx === 0 ? "start" : idx === brackets ? "end" : "middle"}>
                                     {val}
                                 </text>
