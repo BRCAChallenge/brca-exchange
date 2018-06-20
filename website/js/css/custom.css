@@ -1288,6 +1288,11 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
     text-transform: none;
     font-size: 12px;
 }
+
+.splicing-subtile .splicing-tab-header.highest-prob { font-weight: bolder; }
+.splicing-subtile .splicing-tab-header.is-na { color: gray; }
+
+
 .splicing-subtile .tab-body {
     padding: 15px;
 }
