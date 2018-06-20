@@ -19,9 +19,10 @@ class PathosProbScale extends React.Component {
                     </linearGradient>
                 </defs>
 
-
                 <g transform="translate(25 0)">
-                    <rect x={0} y={0} width={450} height={40} strokeWidth={2} stroke="#ccc" fill="url(#grad1)" />
+                    <rect x={0} y={0} width={450} height={40} strokeWidth={2} stroke="#ccc" fill="url(#grad1)">
+                        <title>Value: {value}</title>
+                    </rect>
 
                     {
                         /* tickmarks */
@@ -90,7 +91,7 @@ export default class InSilicoPredSubtile extends React.Component {
                     Applicable Probability is from {reason}
                 </div>
 
-                <Table style={{paddingBottom: 0}}>
+                <Table style={{paddingBottom: 0, marginBottom: 0}}>
                     <tbody>
                         {submitterRows}
                     </tbody>
