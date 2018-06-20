@@ -178,7 +178,7 @@ export default class SilicoPredTile extends React.Component {
         return (
             <CollapsibleTile {...this.props}>
                 <CollapsibleSection
-                    fieldName="In Silico Probability of Pathogenicity"
+                    fieldName={<span><i>In Silico</i> Probability of Pathogenicity</span>}
                     extraHeaderItems={decidingProb}
                     defaultVisible={true}
                 >

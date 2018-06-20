@@ -94,6 +94,37 @@ function getPathosLevel(prob, isDeNovo) {
     }
 }
 
+/**
+ * Receives two strings, variant and ref, and compares each letter, bolding letters where they differ.
+ * @param variant the sequence for the variant
+ * @param ref the sequence for the reference
+ * @returns {*} an array of React elements, either bolded if variant differs from ref or plain text if not.
+ */
+function boldedDiff(variant, ref) {
+    // return variant;
+
+    const matched = variant
+        .split("")
+        .slice(0, ref.length)
+        .map((v, i) => ({match: v.toLowerCase() === ref[i].toLowerCase(), val: v }))
+        .reduce((c, x) => {
+            const last = c[c.length - 1];
+            // collapse runs of matches or non-matches
+            if (last && last.match === x.match) {
+                last.val += x.val;
+            }
+            else {
+                c.push(x);
+            }
+
+            return c;
+        }, [])
+        .map((x, i) => (x.match ? x.val : <span key={i} className="diff">{x.val}</span>));
+
+    // return the array of elements with bolded differences, appending the remainder of variant if we didn't process it
+    return (ref.length < variant.length) ? [matched, variant.slice(matched.length)] : matched;
+}
+
 class SplicingOverviewTable extends React.Component {
     render() {
         const {data, isDeNovo} = this.props;
@@ -120,16 +151,18 @@ class SplicingOverviewTable extends React.Component {
                     <tr>
                         <td>Wild Type</td>
                         <td className="sequence">{data.wild.sequence}</td>
-                        <td>{data.wild.MES}</td>
-                        <td>{data.wild.zScore}</td>
+                        <td>{data.wild.MES.toFixed(2)}</td>
+                        <td>{data.wild.zScore.toFixed(2)}</td>
                         { isDeNovo &&  <td>{data.wild.donorPosition || 'n/a'}</td> }
                     </tr>
 
                     <tr>
                         <td>Variant</td>
-                        <td className="sequence">{data.variant.sequence}</td>
-                        <td>{data.variant.MES}</td>
-                        <td className={`pathos-prob-label-${variantRating}`} style={{fontWeight: 'bold'}}>{data.variant.zScore}</td>
+                        <td className="sequence">{boldedDiff(data.variant.sequence, data.wild.sequence)}</td>
+                        <td>{data.variant.MES.toFixed(2)}</td>
+                        <td className={`pathos-prob-label-${variantRating}`} style={{fontWeight: 'bold'}}>
+                        {data.variant.zScore.toFixed(2)}
+                        </td>
                         { isDeNovo &&  <td>{data.variant.donorPosition || 'n/a'}</td> }
                     </tr>
 
@@ -138,8 +171,8 @@ class SplicingOverviewTable extends React.Component {
                             <tr>
                                 <td>Reference Donor</td>
                                 <td className="sequence">{data.closest.sequence}</td>
-                                <td>{data.closest.MES}</td>
-                                <td>{data.closest.zScore}</td>
+                                <td>{data.closest.MES.toFixed(2)}</td>
+                                <td>{data.closest.zScore.toFixed(2)}</td>
                                 <td>{data.closest.donorPosition}</td>
                             </tr>
                         )
@@ -222,17 +255,14 @@ class DeNovoDonorPathogenicityTable extends React.Component {
     }
 }
 
-function isNumeric(n) {
-    return !isNaN(parseFloat(n)) && isFinite(n);
-}
-
 export default class SplicingLevelSubtile extends React.Component {
     constructor(props) {
         super(props);
 
         const maxProbPanel = this.getMaxProb();
         this.state = {
-            activePane: maxProbPanel.idx
+            activePane: maxProbPanel.idx,
+            initiallyActivePane: maxProbPanel.idx
         };
 
         this.changePane = this.changePane.bind(this);
@@ -257,6 +287,18 @@ export default class SplicingLevelSubtile extends React.Component {
         this.props.onDimsChanged();
     }
 
+    tabTitle(label, field, key) {
+        return (
+            <span className={classNames(
+                "splicing-tab-header",
+                key === this.state.initiallyActivePane && "highest-prob",
+                !isNumeric(field) && "is-na",
+            )}>
+            {`${label} (${field})`}
+            </span>
+        );
+    }
+
     render() {
         const {data} = this.props;
 
@@ -271,12 +313,11 @@ export default class SplicingLevelSubtile extends React.Component {
         return (
             <div className="subtile-container splicing-subtile" style={{padding: '0px'}}>
                 <div className="preamble">
-                The highest-probability explanation is <b>{maxProbPanel.reason}</b> with a probability of <b>{maxProbPanel.prior}</b>.
-                The other tabs are included for more information.
+                The splicing-level estimation is due to <b>{maxProbPanel.reason}</b> which introduces a probability of pathogenicity of <b>{maxProbPanel.prior}</b>.
                 </div>
 
                 <TabbedArea activeKey={this.state.activePane} onSelect={this.changePane}>
-                    <TabPane eventKey={0} tab={`Donor Impact (${priorHeaders.donor})`}>
+                    <TabPane eventKey={0} tab={this.tabTitle("Donor Impact", priorHeaders.donor, 0)}>
                     {
                         isNumeric(data.donor.prior)
                             ? (
@@ -289,7 +330,7 @@ export default class SplicingLevelSubtile extends React.Component {
                     }
                     </TabPane>
 
-                    <TabPane eventKey={1} tab={`De Novo Creation (${priorHeaders.denovo})`}>
+                    <TabPane eventKey={1} tab={this.tabTitle("De Novo Donor", priorHeaders.denovo, 1)}>
                     {
                         isNumeric(data.denovo.prior)
                             ? (
@@ -302,7 +343,7 @@ export default class SplicingLevelSubtile extends React.Component {
                     }
                     </TabPane>
 
-                    <TabPane eventKey={2} tab={`Acceptor Impact (${priorHeaders.acceptor})`}>
+                    <TabPane eventKey={2} tab={this.tabTitle("Acceptor Impact", priorHeaders.acceptor, 2)}>
                     {
                         isNumeric(data.acceptor.prior)
                             ? (

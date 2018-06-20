@@ -1283,6 +1283,11 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
     text-transform: none;
     font-size: 12px;
 }
+
+.splicing-subtile .splicing-tab-header.highest-prob { font-weight: bolder; }
+.splicing-subtile .splicing-tab-header.is-na { color: gray; }
+
+
 .splicing-subtile .tab-body {
     padding: 15px;
 }
@@ -1292,11 +1297,17 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
     text-align: center;
 }
 
-.splicing-level-table { width: 100%; }
+.splicing-level-table { width: 100%; table-layout: auto !important; }
 .splicing-level-table td { padding: 5px; border: solid 1px #aaa; text-align: center; }
 .splicing-level-table .sequence {
     font-family: monospace;
-    overflow-x: auto;
+    /*overflow-x: auto;*/
+    text-align: left;
+}
+.splicing-level-table .sequence .diff {
+    font-family: "Courier", sans-serif;
+    font-weight: bold;
+    font-size: larger;
 }
 .splicing-level-table .note-row {
     text-align: left;
