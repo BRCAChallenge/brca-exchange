@@ -10,14 +10,16 @@ import CollapsibleSection from "../collapsible/CollapsibleSection";
 import SplicingLevelSubtile from "./SplicingLevelSubtile";
 import ProteinLevelSubtile from "./ProteinLevelSubtile";
 import InSilicoPredSubtile from "./InSilicoPredSubtile";
+import {isNumeric} from "../../util";
 
+/*
 const mockData = {
     varLoc: 'Exon',
     applicablePrior: 0.03, // derived from max(proteinPrior, max(refDonorPrior, deNovoDonorPrior, refAccPrior))
     proteinPrior: 0.02,
 
     refDonorPrior: 0.04,
-    deNovoDonorPrior: 0.3,
+    deNovoDonorPrior: 0.02,
     refAccPrior: 'n/a',
 
     // due to donor damage
@@ -55,6 +57,10 @@ const mockData = {
     altRefAccMES: 8.91,
     altRefAccZ: 0.38,
 };
+*/
+
+import examples from './insilico_tests.js';
+import {Panel} from "react-bootstrap";
 
 function extractSplicePayload(data, useTranscriptSplicePos) {
     return {
@@ -114,23 +120,49 @@ function extractSplicePayload(data, useTranscriptSplicePos) {
     };
 }
 
+function numberify(x) {
+    return isNumeric(x) ? x : -Infinity;
+}
+
 export default class SilicoPredTile extends React.Component {
     constructor(props) {
         super(props);
     }
 
     render() {
+        // extract the corresponding entry from the mock data, if it exists
+        const mockData = examples[this.props.Genomic_Coordinate_hg38];
+
+        if (!mockData) {
+            const groupVisID = `group-panel-${this.props.groupTitle}`;
+            const allEmpty = false;
+            return (
+                <div key={`group_collection-${groupVisID}`} className={ allEmpty && this.props.hideEmptyItems ? "group-empty variant-detail-group" : "variant-detail-group" }>
+                    <Panel header={<h3><i>In Silico</i> Prediction</h3>}>
+                        <div style={{padding: '10px'}}>
+                        no mock data found for variant
+                        </div>
+                    </Panel>
+                </div>
+            );
+        }
+
         // determine whether the probability of pathogenicity is the protein-level or splicing-level
         // estimation (de novo, acceptor, or donor).
         // whichever is highest is considered the deciding factor.
-        const splicingPrior = Math.max(mockData.refDonorPrior, mockData.deNovoDonorPrior);
-        const decidingProb = Math.max(mockData.proteinPrior, splicingPrior);
-        const reason = mockData.proteinPrior > splicingPrior
+
+        // ensure any NAs have been replaced with numeric values (i.e. -Infinity) before we do any comparisons
+        const [proteinPrior, refDonorPrior, refAccPrior, deNovoDonorPrior] =
+            [mockData.proteinPrior, mockData.refDonorPrior, mockData.refAccPrior, mockData.deNovoDonorPrior].map(numberify);
+
+        const splicingPrior = Math.max(refDonorPrior, refAccPrior, deNovoDonorPrior);
+        const decidingProb = Math.max(proteinPrior, splicingPrior);
+        const reason = proteinPrior > splicingPrior
             ? 'Protein-level Estimation'
             : 'Splicing-level Estimation ' + (
-                mockData.deNovoDonorPrior > mockData.refDonorPrior
+                deNovoDonorPrior > refDonorPrior
                     ? '(De Novo Donor Splice Site Creation)'
-                    : `(${mockData.refDonorPrior > mockData.refAccPrior ? 'Donor' : 'Acceptor'} Splice Site Impact)`
+                    : `(${refDonorPrior > refAccPrior ? 'Donor' : 'Acceptor'} Splice Site Impact)`
             );
 
         /*

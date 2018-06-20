@@ -3,11 +3,11 @@
 'use strict';
 
 import React from "react";
+import classNames from 'classnames';
 import {TabbedArea, TabPane} from "react-bootstrap";
 
-function capitalize(w) {
-    return w.charAt(0).toUpperCase() + w.substr(1);
-}
+import {capitalize, isNumeric} from "../../util";
+
 
 // these impact tables are used by all the components (SplicingOverviewTable, SpliceSiteImpactTable, and
 // DeNovoDonorPathogenicityTable) to color-code the pathogenicity probability
