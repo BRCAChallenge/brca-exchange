@@ -44,7 +44,7 @@ const FAQContent = [
         "content": require('../content/faqs/how-is-the-data-on-this-site-updated.md')
     },
     {
-        "question": "What makes brca exchange different from other public databases?",
+        "question": "What makes BRCA Exchange different from other public databases?",
         "content": require('../content/faqs/what-makes-brca-exchange-different-from-other-public-databases.md')
     }
 ];
