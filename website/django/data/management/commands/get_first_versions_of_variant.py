@@ -1,13 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connection
-<<<<<<< Updated upstream
-from data.models import Variant
-=======
 from data.models import Variant, CurrentVariant
->>>>>>> Stashed changes
 from django.db import transaction
 import csv
-import pdb
 
 
 class Command(BaseCommand):
