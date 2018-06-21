@@ -12,7 +12,7 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *args, **options):
         seen = {}
-        with open('/tmp/test.csv', 'wb') as csvfile:
+        with open('/tmp/firstVersions.csv', 'wb') as csvfile:
             fieldnames = ['Genomic_Coordinate_hg38', 'Data_Release_id', 'Only_submitted_by_ENIGMA']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
