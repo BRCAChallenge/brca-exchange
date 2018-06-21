@@ -261,30 +261,58 @@ def getVarConsequences(variant):
         for base in varAlt:
             # API only works for alt alleles that are composed of the 4 canonical bases
             if base not in ["A", "C", "G", "T"]:
-                return "unable_to_determine"
+                return "unable_to_determine"     
+           
+        query = "%s:%s-%s:%s/%s?" % (variant["Chr"], variant["Hg38_Start"],
+                                     variant["Hg38_End"], varStrand, varAlt)
+    
+        remote_result = ""
+        req_url = SERVER+ext+query
+        jsonOutput = _make_request(req_url)
+    
+        assert(len(jsonOutput) == 1)
+        assert(jsonOutput[0].has_key("transcript_consequences"))
+        # below is to extract variant consequence from json file
+        for gene in jsonOutput[0]["transcript_consequences"]:
+            if gene.has_key("transcript_id"):
+                # need to filter for canonical BRCA1 transcript
+                if re.search(BRCA1_CANONICAL, gene["transcript_id"]):
+                    remote_result = gene["consequence_terms"][0]
+                # need to filter for canonical BRCA2 transcript
+                elif re.search(BRCA2_CANONICAL, gene["transcript_id"]):
+                    remote_result = gene["consequence_terms"][0]
+            else:
+                print("ERROR: Unable to lookup remote vep consequence")
+                remote_result = ""
 
-        query = "%s:%s-%s:%s/%s" % (variant["Chr"], variant["Hg38_Start"],
-                                    variant["Hg38_End"], varStrand, varAlt)
         # Query local vep using query minus '?' character
         cmd = ["vep", "--cache", "--dir_cache", "/references/vep/",
                "--no_stats", "--offline", "--fasta", "/references/hg38.fa",
-               "--output_file", "STDOUT", "--json", "--input_data", query]
+               "--output_file", "STDOUT", "--json", "--input_data", query[:-1]]
         vep = json.loads(subprocess.check_output(cmd))
 
         for gene in vep["transcript_consequences"]:
-            if "transcript_id" in gene:
+            if gene.has_key("transcript_id"):
                 # need to filter for canonical BRCA1 transcript
                 if re.search(BRCA1_CANONICAL, gene["transcript_id"]):
                     # return gene["consequence_terms"][0]
-                    return gene["consequence_terms"][0]
+                    local_result = gene["consequence_terms"][0]
+                    break
                 # need to filter for canonical BRCA2 transcript
                 elif re.search(BRCA2_CANONICAL, gene["transcript_id"]):
                     # return gene["consequence_terms"][0]
-                    return gene["consequence_terms"][0]
+                    local_result = gene["consequence_terms"][0]
+                    break
+            else:
+                print("ERROR: Unable to lookup local vep consequence")
+                local_result = ""
 
-        return "unable_to_determine"
+        # Verify remote and local match
+        if remote_result != local_result:
+            print("VEP Error Remote={} vs. Local={}".format(remote_result, local_result))
 
-
+        return local_result
+    
 def getVarType(variant):
     '''
     Returns a string describing type of variant 
