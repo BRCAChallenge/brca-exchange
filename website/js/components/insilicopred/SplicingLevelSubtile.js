@@ -9,6 +9,10 @@ import {TabbedArea, TabPane} from "react-bootstrap";
 import {capitalize, isNumeric} from "../../util";
 
 
+// ================================================================
+// === helper tables, functions
+// ================================================================
+
 // these impact tables are used by all the components (SplicingOverviewTable, SpliceSiteImpactTable, and
 // DeNovoDonorPathogenicityTable) to color-code the pathogenicity probability
 
@@ -76,9 +80,19 @@ const deNovoImpactFields = [
         prob: 0.64
     },
     {
-        type: 'note',
-        text: (<span>If this variant creates a de novo donor, the de novo donor is not predicted to correct disruptions to the translation frame.</span>)
-    }
+        type: 'cond',
+        options: [
+            {
+                /* special case #1: de novo donor */
+                check: (data) => data.denovo.variant.zScore > data.denovo.closest.zScore,
+                text: (<span>This variant was promoted one category because the Z score for the mutant is higher than the z score of the alternative donor sequence of this exon.</span>)
+            },
+            {
+                check: () => true, // the default option, if reached
+                text: (<span>If this variant creates a de novo donor, the de novo donor is not predicted to correct disruptions to the translation frame.</span>)
+            }
+        ]
+    },
 ];
 
 function getPathosLevel(prob, isDeNovo) {
@@ -124,6 +138,11 @@ function boldedDiff(variant, ref) {
     // return the array of elements with bolded differences, appending the remainder of variant if we didn't process it
     return (ref.length < variant.length) ? [matched, variant.slice(matched.length)] : matched;
 }
+
+
+// ================================================================
+// === tab views
+// ================================================================
 
 class SplicingOverviewTable extends React.Component {
     render() {
@@ -185,7 +204,7 @@ class SplicingOverviewTable extends React.Component {
 
 class SpliceSiteImpactTable extends React.Component {
     render() {
-        const {prior, type} = this.props;
+        const {prior, type, variantZScore} = this.props;
 
         return (<div>
             <div style={{textAlign: 'center', fontWeight: 'bold', margin: '20px'}}>
@@ -211,13 +230,24 @@ class SpliceSiteImpactTable extends React.Component {
                     )
                 }
             </table>
+
+            {
+                /* special case #2: native donor (when type == 'donor') */
+                /* special case #3: native acceptor (when type == 'acceptor') */
+                /* NOTE: they're combined because they use the same text, but might refactor later if they diverge */
+                (prior === 0.34 && ((type === 'donor' && variantZScore < -2.0) || (type === 'acceptor' && variantZScore < -1.5)) && (
+                    <div>
+                    This variant was classified as Moderate because the Z score for the wildtype is already low and the change due to mutation is not considered large enough to warrant Severe.
+                    </div>
+                ))
+            }
         </div>);
     }
 }
 
 class DeNovoDonorPathogenicityTable extends React.Component {
     render() {
-        const {prior} = this.props;
+        const {prior, data} = this.props;
 
         return (<div>
             <div style={{textAlign: 'center', fontWeight: 'bold', margin: '20px'}}>
@@ -234,26 +264,43 @@ class DeNovoDonorPathogenicityTable extends React.Component {
 
                 {
                     // FIXME: highlight row that matches the prior prob value
-                    deNovoImpactFields.map((x, i) =>
-                        x.type === 'value'
-                            ? (
-                                <tr key={i} className={prior === x.prob ? 'highlighted' : ''}>
-                                    <td className={`pathos-prob-label-${x.impact}`}>{x.label}</td>
-                                    <td>{x.zScoreLabel}</td>
-                                    <td>{x.prob.toFixed(2)}</td>
-                                </tr>
-                            )
-                            : (
-                                <tr key={i}>
-                                    <td colSpan={3} className="note-row">{x.text}</td>
-                                </tr>
-                            )
-                    )
+                    deNovoImpactFields.map((x, i) => {
+                        switch(x.type) {
+                            case 'value':
+                                return (
+                                    <tr key={i} className={prior === x.prob ? 'highlighted' : ''}>
+                                        <td className={`pathos-prob-label-${x.impact}`}>{x.label}</td>
+                                        <td>{x.zScoreLabel}</td>
+                                        <td>{x.prob.toFixed(2)}</td>
+                                    </tr>
+                                );
+                            case 'note':
+                                return (
+                                    <tr key={i}>
+                                        <td colSpan={3} className="note-row">{x.text}</td>
+                                    </tr>
+                                );
+                            case 'cond':
+                                const found = x.options.find(x => x.check(data));
+                                return (<tr key={i}>
+                                    <td colSpan={3} className="note-row">
+                                    { found ? found.text : 'n/a'}
+                                    </td>
+                                </tr>);
+                            default:
+                                return (<tr><td colSpan={3}>Unknown type: {x.type}</td></tr>);
+                        }
+                    })
                 }
             </table>
         </div>);
     }
 }
+
+
+// ================================================================
+// === splicing subtile implementation
+// ================================================================
 
 export default class SplicingLevelSubtile extends React.Component {
     constructor(props) {
@@ -323,7 +370,7 @@ export default class SplicingLevelSubtile extends React.Component {
                             ? (
                                 <div className="tab-body">
                                     <SplicingOverviewTable data={data.donor} />
-                                    <SpliceSiteImpactTable prior={data.donor.prior} type='donor' />
+                                    <SpliceSiteImpactTable prior={data.donor.prior} variantZScore={data.donor.variant.zScore} type='donor' />
                                 </div>
                             )
                             : <div className="novalue-note">(replace with reasons why this might be N/A)</div>
@@ -336,7 +383,7 @@ export default class SplicingLevelSubtile extends React.Component {
                             ? (
                                 <div className="tab-body">
                                     <SplicingOverviewTable data={data.denovo} isDeNovo={true} />
-                                    <DeNovoDonorPathogenicityTable prior={data.denovo.prior} />
+                                    <DeNovoDonorPathogenicityTable prior={data.denovo.prior} data={data} />
                                 </div>
                             )
                             : <div className="novalue-note">(replace with reasons why this might be N/A)</div>
@@ -349,7 +396,7 @@ export default class SplicingLevelSubtile extends React.Component {
                             ? (
                                 <div className="tab-body">
                                     <SplicingOverviewTable data={data.acceptor} />
-                                    <SpliceSiteImpactTable prior={data.acceptor.prior} type='acceptor' />
+                                    <SpliceSiteImpactTable prior={data.acceptor.prior} variantZScore={data.acceptor.variant.zScore} type='acceptor' />
                                 </div>
                             )
                             : <div className="novalue-note">(replace with reasons why this might be N/A)</div>
