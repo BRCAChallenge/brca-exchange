@@ -71,7 +71,7 @@ var NavBarNew = React.createClass({
                         <Button onClick={() => {this.setState({ showModal: false }, function() {
                             this.props.toggleMode();
                             this.forceUpdate();
-                        })}}>Yes</Button>
+                        });}}>Yes</Button>
                         <Button onClick={() => this.setState({ showModal: false }, function() {this.forceUpdate();})}>No</Button>
                     </Modal>
                 </Col>
