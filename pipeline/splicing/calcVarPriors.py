@@ -266,24 +266,25 @@ def getVarConsequences(variant):
         query = "%s:%s-%s:%s/%s?" % (variant["Chr"], variant["Hg38_Start"],
                                      variant["Hg38_End"], varStrand, varAlt)
     
-        remote_result = ""
-        req_url = SERVER+ext+query
-        jsonOutput = _make_request(req_url)
+        # # Query remove vep server
+        # remote_result = ""
+        # req_url = SERVER+ext+query
+        # jsonOutput = _make_request(req_url)
     
-        assert(len(jsonOutput) == 1)
-        assert(jsonOutput[0].has_key("transcript_consequences"))
-        # below is to extract variant consequence from json file
-        for gene in jsonOutput[0]["transcript_consequences"]:
-            if gene.has_key("transcript_id"):
-                # need to filter for canonical BRCA1 transcript
-                if re.search(BRCA1_CANONICAL, gene["transcript_id"]):
-                    remote_result = gene["consequence_terms"][0]
-                # need to filter for canonical BRCA2 transcript
-                elif re.search(BRCA2_CANONICAL, gene["transcript_id"]):
-                    remote_result = gene["consequence_terms"][0]
-            else:
-                print("ERROR: Unable to lookup remote vep consequence")
-                remote_result = ""
+        # assert(len(jsonOutput) == 1)
+        # assert(jsonOutput[0].has_key("transcript_consequences"))
+        # # below is to extract variant consequence from json file
+        # for gene in jsonOutput[0]["transcript_consequences"]:
+        #     if gene.has_key("transcript_id"):
+        #         # need to filter for canonical BRCA1 transcript
+        #         if re.search(BRCA1_CANONICAL, gene["transcript_id"]):
+        #             remote_result = gene["consequence_terms"][0]
+        #         # need to filter for canonical BRCA2 transcript
+        #         elif re.search(BRCA2_CANONICAL, gene["transcript_id"]):
+        #             remote_result = gene["consequence_terms"][0]
+        #     else:
+        #         print("ERROR: Unable to lookup remote vep consequence")
+        #         remote_result = ""
 
         # Query local vep using query minus '?' character
         cmd = ["vep", "--cache", "--dir_cache", "/references/vep/",
@@ -308,8 +309,8 @@ def getVarConsequences(variant):
                 local_result = ""
 
         # Verify remote and local match
-        if remote_result != local_result:
-            print("VEP Error Remote={} vs. Local={}".format(remote_result, local_result))
+        # if remote_result != local_result:
+        #     print("VEP Error Remote={} vs. Local={}".format(remote_result, local_result))
 
         return local_result
     
