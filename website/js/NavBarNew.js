@@ -49,18 +49,18 @@ var NavBarNew = React.createClass({
         var navPath = (path === "") ? "home" : path.split("/")[0];
         return ((navPath === tab) ? "active" : "");
     },
-    showModal: function () {
-        this.setState({showModal: true}, function() {this.forceUpdate();});
-    },
-    toggleMode: function () {
-        this.setState({ showModal: false }, function() {
-            this.props.toggleMode();
-            this.forceUpdate();
-        });
-    },
-    handleModeChange: function (e) {
+    toggleMode: function (e) {
         e.preventDefault();
-        this.props.mode === 'research_mode' ? this.toggleMode() : this.showModal();
+        if (this.props.mode === "research_mode") {
+            this.setState({ showModal: false }, function() {
+                this.props.toggleMode();
+                this.forceUpdate();
+            });
+        } else {
+            this.setState({showModal: true}, function() {
+                this.forceUpdate();
+            });
+        }
     },
     getModal: function () {
         return (
@@ -68,7 +68,10 @@ var NavBarNew = React.createClass({
                 <Col className="jumbotron colorized-jumbo">
                     <Modal onRequestHide={() => this.setState({ showModal: false }, function() {this.forceUpdate();})}>
                         <RawHTML html={content.pages.researchWarning}/>
-                        <Button onClick={() => {this.toggleMode();}}>Yes</Button>
+                        <Button onClick={() => {this.setState({ showModal: false }, function() {
+                            this.props.toggleMode();
+                            this.forceUpdate();
+                        })}}>Yes</Button>
                         <Button onClick={() => this.setState({ showModal: false }, function() {this.forceUpdate();})}>No</Button>
                     </Modal>
                 </Col>
@@ -89,8 +92,8 @@ var NavBarNew = React.createClass({
 
                     {
                         this.props.mode === 'research_mode'
-                            ? <span id="research-label" className="label label-info" onClick={this.handleModeChange}>All Public Data</span>
-                            : <span id="research-label" className="label label-info" onClick={this.handleModeChange}>Expert Reviewed</span>
+                            ? <span id="research-label" className="label label-info" onClick={this.toggleMode}>All Public Data</span>
+                            : <span id="research-label" className="label label-info" onClick={this.toggleMode}>Expert Reviewed</span>
                     }
                 </div>
             </a>
