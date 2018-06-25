@@ -17,15 +17,21 @@ debug:
 		$(USER)-splicing-pipeline
 
 references:
+	# Download and install references
 	docker run --rm -it \
 		--user=`id -u`:`id -g` \
 		-v `readlink -f ~/references/splicing`:/references \
 		$(USER)-splicing-pipeline references
 
 short:
+	# Run a short test using the docker container
 	docker run --rm -it \
 		-v `readlink -f ~/references/splicing`:/references:ro \
 		$(USER)-splicing-pipeline test short
+
+test:
+	# Run a short test from within the docker container
+	python calcVarPriors.py test short
 
 vep:
 	# Run a single request through local vep
@@ -47,4 +53,4 @@ profile:
 
 upstream:
 	# Merge upstream into this fork
-	git pull https://github.com/ccdlott/brca-exchange.git splicingUpdates
+	git pull https://github.com/BRCAChallenge/brca-exchange master
