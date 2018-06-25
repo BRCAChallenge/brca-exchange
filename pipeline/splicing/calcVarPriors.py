@@ -15,8 +15,8 @@ import requests
 import time
 import json
 import subprocess
-import click
-import multiprocessing
+import tempfile
+import os
 import pytest
 import pyhgvs
 import pyhgvs.utils as pyhgvs_utils
@@ -3473,31 +3473,8 @@ def getVarDict(variant, boundaries):
 
     return varDict
 
-
-# Globals accessed in multi-processing function calc_one
-# REMIND: Use functools.partial to pass direction into the map function
-genome38 = None
-brca1Transcript = None
-brca2Transcript = None
-
-
-def calc_one(variant):
-    global genome38, brca1Transcript, brca2Transcript
-    try:
-        variantData = csv.DictReader(open("mod_res_dn_brca20160525.txt", "r"), delimiter="\t")
-        if variant["Gene_Symbol"] == "BRCA1":
-            varData = getVarData(variant, "enigma", variantData, genome38, brca1Transcript)
-        elif variant["Gene_Symbol"] == "BRCA2":
-            varData = getVarData(variant, "enigma", variantData, genome38, brca2Transcript)
-            click.echo("{}:{}".format(variant["HGVS_cDNA"], varData["varLoc"]), err=True)
-        return addVarDataToRow(varData, variant)
-    except KeyboardInterrupt:
-        pass
-
-
-def calc_all(variants, priors, genome, transcripts, processes):
-    global genome38, brca1Transcript, brca2Transcript
-    inputData = csv.DictReader(variants, delimiter="\t")
+def calc(args):
+    inputData = csv.DictReader(open(args.inputFile, "r"), delimiter="\t")
     fieldnames = inputData.fieldnames
     newHeaders = open("headers.tsv", "r").read().split()
     for header in newHeaders:
@@ -3584,5 +3561,62 @@ def calc(ctx, variants, priors):
              ctx.obj["genome"], ctx.obj["transcripts"], ctx.obj["processes"])
 
 
+    totalVariants = 0
+    for variant in inputData:
+        variantData = csv.DictReader(open(args.variantFile, "r"), delimiter="\t")
+        if variant["Gene_Symbol"] == "BRCA1":
+            varData = getVarData(variant, args.boundaries, variantData, genome38, brca1Transcript)
+        elif variant["Gene_Symbol"] == "BRCA2":
+            varData = getVarData(variant, args.boundaries, variantData, genome38, brca2Transcript)
+        variant = addVarDataToRow(varData, variant)
+        outputData.writerow(variant)
+        totalVariants += 1
+        print "variant", totalVariants, "complete"
+
+def run(command):
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+    while True:
+        line = process.stdout.readline().rstrip()
+        if line:
+            print(line)
+        else:
+            break
+    
 if __name__ == "__main__":
-    cli()
+    parser = argparse.ArgumentParser(
+        description="Calculates splice site priors from a list of variants")
+    parser.add_argument("command", 
+                        help="references, test short, test long or calc")
+
+    parser.add_argument("inputFile", nargs="?", help="Input variant file")
+    parser.add_argument("outputFile", nargs="?", help="Output priors file")
+
+    parser.add_argument('-v', "--variantFile", default="mod_res_dn_brca20160525.txt",
+                        help="File containing protein priors for variants")
+    parser.add_argument('-b', "--boundaries", default="enigma",
+                        help="Boundaries ('enigma' or 'priors') to use for clinically important domains")
+    parser.add_argument('-g', "--genomeFile", default="/references/hg38.fa",
+                        help="Fasta file containing hg38 reference genome")
+    parser.add_argument('-t', "--transcriptFile", default="refseq_annotation.hg38.gp", 
+                        help="RefSeq annotation hg38-based genepred file")
+    args = parser.parse_args() 
+
+    # REMIND: Hack way to parts commands, should use sub-argument parser
+    if args.command == "references":
+        run("./references.sh")
+    elif args.command == "test" and args.inputFile == "short":
+        pytest.main(["-x", "."])
+        args.inputFile = "tests/variants_short.tsv"
+        args.outputFile = "/tmp/priors_short.tsv"
+        calc(args)
+        run("md5sum -c ./tests/md5/priors_short.md5")
+    elif args.command == "test" and args.inputFile == "long":
+        pytest.main(["-x", "."])
+        args.inputFile = "tests/variants_long.tsv"
+        args.outputFile = "/tmp/priors_long.tsv"
+        calc(args)
+        run("md5sum -c ./tests/md5/priors_long.md5")
+    elif args.command == "calc" and (args.inputFile and args.outputFile):
+        calc(args)
+    else:
+        parser.print_help()
