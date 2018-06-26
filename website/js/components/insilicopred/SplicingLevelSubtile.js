@@ -307,10 +307,13 @@ export default class SplicingLevelSubtile extends React.Component {
         super(props);
 
         const maxProbPanel = this.getMaxProb();
-        this.state = {
-            activePane: maxProbPanel.idx,
-            initiallyActivePane: maxProbPanel.idx
-        };
+
+        if (maxProbPanel) {
+            this.state = {
+                activePane: maxProbPanel.idx,
+                initiallyActivePane: maxProbPanel.idx
+            };
+        }
 
         this.changePane = this.changePane.bind(this);
     }
@@ -326,7 +329,13 @@ export default class SplicingLevelSubtile extends React.Component {
                 reason: 'splice acceptor damage' }
         ];
         const maxProb = Math.max(...panes.map(x => x.prior));
-        return panes.find(x => x.prior === maxProb);
+
+        if (isNumeric(maxProb) && maxProb !== -9999) {
+            return panes.find(x => x.prior === maxProb);
+        }
+        else {
+            return null;
+        }
     }
 
     changePane(key) {
@@ -356,6 +365,15 @@ export default class SplicingLevelSubtile extends React.Component {
         };
 
         const maxProbPanel = this.getMaxProb();
+
+        if (!maxProbPanel) {
+            // everything is N/A, so display a message corresponding to that
+            return (
+                <div className="subtile-container splicing-subtile" style={{padding: '0px'}}>
+                    <div className="novalue-note">(No valid splicing-level estimation data was found.)</div>
+                </div>
+            )
+        }
 
         return (
             <div className="subtile-container splicing-subtile" style={{padding: '0px'}}>

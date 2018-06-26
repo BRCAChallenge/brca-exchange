@@ -196,7 +196,7 @@ export default class SilicoPredTile extends React.Component {
 
                 <CollapsibleSection
                     fieldName="Splicing-level Estimation"
-                    extraHeaderItems={splicingPrior}
+                    extraHeaderItems={splicingPrior !== -Infinity ? splicingPrior : 'N/A'}
                     defaultVisible={false}
                 >
                     <SplicingLevelSubtile
