@@ -1243,7 +1243,7 @@ div.variant-submitter-group .submitter-header td {
 }
 
 .protein-level-estimation .value-field {
-    flex: 0 1 150px;
+    flex: 0 0 150px;
     text-align: center;
     border: solid 1px #eee;
     padding: 3px;
