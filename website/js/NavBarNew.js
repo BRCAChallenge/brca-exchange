@@ -6,7 +6,7 @@ var classNames = require('classnames');
 var content = require('./content');
 
 var RawHTML = require('./RawHTML');
-var {Navbar, Nav, DropdownButton, Row, Col, Modal, Button} = require('react-bootstrap');
+var {Navbar, Nav, DropdownButton, Modal, Button} = require('react-bootstrap');
 var {Link} = require('react-router');
 
 var brcaHeaderLogo = require('./img/brca-logo-transp.png');
@@ -64,18 +64,14 @@ var NavBarNew = React.createClass({
     },
     getModal: function () {
         return (
-            <Row>
-                <Col className="jumbotron colorized-jumbo">
-                    <Modal onRequestHide={() => this.setState({ showModal: false }, function() {this.forceUpdate();})}>
-                        <RawHTML html={content.pages.researchWarning}/>
-                        <Button onClick={() => {this.setState({ showModal: false }, function() {
-                            this.props.toggleMode();
-                            this.forceUpdate();
-                        });}}>Yes</Button>
-                        <Button onClick={() => this.setState({ showModal: false }, function() {this.forceUpdate();})}>No</Button>
-                    </Modal>
-                </Col>
-            </Row>
+            <Modal onRequestHide={() => this.setState({ showModal: false }, function() {this.forceUpdate();})}>
+                <RawHTML html={content.pages.researchWarning}/>
+                <Button onClick={() => {this.setState({ showModal: false }, function() {
+                    this.props.toggleMode();
+                    this.forceUpdate();
+                });}}>Yes</Button>
+                <Button onClick={() => this.setState({ showModal: false }, function() {this.forceUpdate();})}>No</Button>
+            </Modal>
         );
     },
     render: function () {
