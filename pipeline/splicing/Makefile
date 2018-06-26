@@ -26,6 +26,7 @@ references:
 short:
 	# Run a short test using the docker container
 	docker run --rm -it \
+		--user=`id -u`:`id -g` \
 		-v `readlink -f ~/references/splicing`:/references:ro \
 		$(USER)-splicing-pipeline test short
 
