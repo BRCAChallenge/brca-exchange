@@ -372,7 +372,7 @@ export default class SplicingLevelSubtile extends React.Component {
                 <div className="subtile-container splicing-subtile" style={{padding: '0px'}}>
                     <div className="novalue-note">(No valid splicing-level estimation data was found.)</div>
                 </div>
-            )
+            );
         }
 
         return (
