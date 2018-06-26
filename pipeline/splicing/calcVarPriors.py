@@ -3606,13 +3606,13 @@ if __name__ == "__main__":
     if args.command == "references":
         run("./references.sh")
     elif args.command == "test" and args.inputFile == "short":
-        pytest.main(["-x", "."])
+        pytest.main(["-p", "no:cacheprovider", "-x", "."])
         args.inputFile = "tests/variants_short.tsv"
         args.outputFile = "/tmp/priors_short.tsv"
         calc(args)
         run("md5sum -c ./tests/md5/priors_short.md5")
     elif args.command == "test" and args.inputFile == "long":
-        pytest.main(["-x", "."])
+        pytest.main(["-p", "no:cacheprovider", "-x", "."])
         args.inputFile = "tests/variants_long.tsv"
         args.outputFile = "/tmp/priors_long.tsv"
         calc(args)
