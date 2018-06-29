@@ -143,7 +143,7 @@ For more information, please visit the [ClinVar website](https://www.ncbi.nlm.ni
 
 ### Leiden Open Variation Database (LOVD)
 
-According to LOVD’s homepage, the Leiden Open Variation Database seeks to “provide a flexible, freely available tool for Gene-centered collection and display of DNA variations.” This data is to the data in ClinVar, but uses different standards and nomenclatures. Below, you can find a list of the LOVD data fields displayed on BRCA Exchange.
+According to LOVD’s homepage, the Leiden Open Variation Database seeks to “provide a flexible, freely available tool for Gene-centered collection and display of DNA variations.” This data is similar to the data in ClinVar, but uses different standards and nomenclatures. Below, you can find a list of the LOVD data fields displayed on BRCA Exchange.
 
 * #### Submitter ((report-Submitters_LOVD))
 	The name of the researcher, research group, or individual who submitted the variant data to LOVD.
@@ -156,22 +156,30 @@ According to LOVD’s homepage, the Leiden Open Variation Database seeks to “p
 		* There are two assessments made in LOVD data, which are combined using the R/C format.
 		* R is a value reported by the data source/submitter.
 		* C is a value concluded by the curator (a LOVD administrator) who reviews data submissions to LOVD.
-	* \+
-	    - The variant affects function.
-	* \+?
-	    - The variant probably affects function.
-	* \+*
-	    - The variant affects function, but is not associated with individual’s disease phenotype.
-	* \#
-	    - The variant affects function, but is not associated with any known disease phenotype.
-	* \-
-	    - The variant does not affect function.
-	* \-?
-	    - The variant probably does not affect function.
-	* ?
-	    - The variant effect is unknown.
-	* \.
-	    - The variant effect is not classified.
+	* **\+**
+
+	    The variant affects function.
+	* **\+?**
+
+	    The variant probably affects function.
+	* **\+∗**
+
+	    The variant affects function, but is not associated with individual’s disease phenotype.
+	* **\#**
+
+	    The variant affects function, but is not associated with any known disease phenotype.
+	* **\-**
+
+	    The variant does not affect function.
+	* **\-?**
+
+	    The variant probably does not affect function.
+	* **?**
+
+	    The variant effect is unknown.
+	* **\.**
+
+	    The variant effect is not classified.
 
     A symbol is assigned for both the reported classification (from source, “R”) and the concluded classification (from curator, “C”).
 
@@ -191,7 +199,7 @@ According to LOVD’s homepage, the Leiden Open Variation Database seeks to “p
 	* ##### Somatic
 		Somatic variants are those that an individual acquires during their lifetime
 	* ##### SUMMARY
-		Summary records do not describe the variant type, but summarize the data that was provided by the submitter.
+		Summary records do not describe a variant found in an individual, but summarize multiple records that were provided by the submitter.
 
 	The data reported by LOVD is partially  public and partially private. Because some private data is used, data entries in these fields may look identical from a public view, while perhaps differing in the private information provided to LOVD. Data privacy is often required to secure patient’s personal information.
 
