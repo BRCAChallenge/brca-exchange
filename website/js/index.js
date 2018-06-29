@@ -20,6 +20,7 @@ require('font-awesome-webpack');
 require('css/bootstrap-xlgrid.css'); // adds xl, xxl, xxxl grid sizes to bootstrap 3
 require('css/custom.css');
 var _ = require('underscore');
+var jQuery = require('jquery');
 var backend = require('./backend');
 var {NavBarNew} = require('./NavBarNew');
 var FAQ = require('./Faq');
@@ -200,15 +201,19 @@ var About = React.createClass({
 
 var Help = React.createClass({
     mixins: [State],
+    scrollToFragment: function(fragment) {
+        setTimeout(function () {
+            var el = document.getElementById(fragment);
+            if (el) {
+                const yOffset = jQuery(el).offset().top - navbarHeight - 10;
+                window.scrollTo(0, yOffset);
+            }
+        }, 10);
+    },
     componentDidMount: function () {
         var fragment = slugify(window.location.hash.slice(1));
         if (fragment !== '') {
-            setTimeout(function () {
-                var el = document.getElementById(fragment);
-                if (el) {
-                    window.scrollTo(0, el.getBoundingClientRect().top - navbarHeight);
-                }
-            }, 0);
+            this.scrollToFragment(fragment);
         }
     },
     render: function () {
@@ -225,7 +230,7 @@ var Help = React.createClass({
                     <style>{`#${fragment} { animation-name: emphasis; animation-duration: 10s; } `}</style>}
                 <Row>
                     <Col smOffset={1} sm={10}>
-                        <RawHTML ref='content' html={helpContent}/>
+                        <RawHTML ref='content' html={helpContent} scrollToFragment={this.scrollToFragment} />
                     </Col>
                 </Row>
             </Grid>
