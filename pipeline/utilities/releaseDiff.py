@@ -584,8 +584,10 @@ def getIdentifier(obj, isReport):
             source = obj["Source"]
         if source == "ClinVar":
             return "SCV_ClinVar"
+        elif source == "LOVD":
+            return "Submission_ID_LOVD"
         else:
-            # ignore non clinvar reports
+            # ignore non clinvar/lovd reports
             return None
     else:
         # variants are always identified by same genomic coordinate field
@@ -656,12 +658,15 @@ def main():
         # handle reports
         for oldRow in v1In:
             identifier = getIdentifier(oldRow, reports)
-            if identifier is not None:
+            # if a new identifier is assigned, this will skip over old data that don't have the property
+            if identifier is not None and identifier in oldRow.keys():
                 oldData[oldRow[identifier]] = oldRow
+
         for newRow in v2In:
             identifier = getIdentifier(newRow, reports)
             if identifier is not None:
                 newData[newRow[identifier]] = newRow
+
     else:
         # handle variants
         for oldRow in v1In:
@@ -670,7 +675,6 @@ def main():
         for newRow in v2In:
             newRow = addGsIfNecessary(newRow)
             newData[newRow[getIdentifier(newRow, reports)]] = newRow
-
     for oldVariant in oldData.keys():
         if not newData.has_key(oldVariant):
             removed.writerow(oldData[oldVariant])

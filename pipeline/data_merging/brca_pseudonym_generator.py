@@ -4,17 +4,18 @@ from __future__ import print_function, division
 import argparse
 import sys
 import os
-import hgvs
-import hgvs.parser as hgvs_parser
-import hgvs.dataproviders.uta as hgvs_dataproviders_uta
-import hgvs.variantmapper as hgvs_variantmapper
-import hgvs.exceptions
+import hgvs.parser
+import hgvs.dataproviders.uta
+import hgvs.assemblymapper
+import hgvs.normalizer
 import pyhgvs
 import pyhgvs.utils as pyhgvs_utils
 import logging
 import csv
 from ometa.runtime import ParseError
 from pygr.seqdb import SequenceFileDB
+import traceback
+
 
 '''
     Example run:
@@ -77,9 +78,10 @@ def main(args):
     log_file_path = artifacts_dir + "brca-pseudonym-generator.log"
     logging.basicConfig(filename=log_file_path, filemode="w", level=logging.DEBUG)
 
-    hdp = hgvs_dataproviders_uta.connect()
-    variantmapper = hgvs_variantmapper.EasyVariantMapper(hdp)
-    hgvsparser = hgvs_parser.Parser()
+    hgvs_parser = hgvs.parser.Parser()
+    hgvs_dp = hgvs.dataproviders.uta.connect()
+    hgvs_norm = hgvs.normalizer.Normalizer(hgvs_dp)
+    hgvs_am = hgvs.assemblymapper.AssemblyMapper(hgvs_dp, assembly_name='GRCh38')
 
     genome36 = SequenceFileDB(hg18_fa.name)
     genome37 = SequenceFileDB(hg19_fa.name)
@@ -214,34 +216,31 @@ def main(args):
                 print('parse error: {}'.format(cdna_coord_LOVD))
                 print(e)
 
-        if calcProtein == True:
-
+        protein_coord = None
+        if calcProtein:
             try:
-                var_c1 = hgvsparser.parse_hgvs_variant(cdna_coord)
-                protein_coord = variantmapper.c_to_p(var_c1)
-            except hgvs.exceptions.HGVSParseError as e:
-                template = "An exception of type {0} occured. Arguments:\n{1!r}"
-                message = template.format(type(e).__name__, e.args)
-                genomicChange = '{0}:g.{1}:{2}>{3}'.format(chrom38, offset38, ref38, alt38)
-                print('hgvs.exceptions.HGVSParseError: ', e)
-                print('Original GRCh38 Genomic Coordinate: ', oldHgvsGenomic38)
-                print('GRCh38 Genomic change: ', genomicChange)
+                genomic_change = '{0}:g.{1}:{2}>{3}'.format(chrom38, offset38, ref38, alt38)
+                var_c1 = hgvs_parser.parse_hgvs_variant(cdna_coord)
+                var_c1_norm = hgvs_norm.normalize(var_c1) # doing normalization explicitly to get a useful error message
+                protein_coord = hgvs_am.c_to_p(var_c1_norm)
+            except Exception as e:
+                template = "An error of type {0} occured. Arguments:{1!r}"
+                error_name = type(e).__name__
+                message = template.format(error_name, e.args)
                 logging.error(message)
+                logging.error('Proposed GRCh38 Genomic change for error: %s', genomic_change)
                 logging.error(line)
-                logging.error('Proposed GRCh38 Genomic change for error: %s', genomicChange)
 
-            # Catch parse errors thrown by ometa.runtime.ParseError.
-            except ParseError as ex:
-                template = "An exception of type {0} occured. Arguments:\n{1!r}"
-                message = template.format(type(ex).__name__, ex.args)
-                genomicChange = '{0}:g.{1}:{2}>{3}'.format(chrom38, offset38, ref38, alt38)
-                print(message)
-                print('ometa.runtime.ParseError', ex)
-                print('Original GRCh38 Genomic Coordinate: ', oldHgvsGenomic38)
-                print('GRCh38 Genomic change: ', genomicChange)
-                logging.error(message)
-                logging.error(line)
-                logging.error('Proposed GRCh38 Genomic change for error: %s', genomicChange)
+                # Exceptions related to invalid data
+                data_errors = set(['HGVSParseError', 'HGVSError', 'HGVSInvalidVariantError', 'HGVSUnsupportedOperationError'])
+                if error_name not in data_errors:
+                    # output some more if exception doesn't seem to be related to invalid data
+                    logging.error("Non data error raised")
+                    logging.exception(message)
+
+                if error_name == "DatabaseError":
+                    # Aborting, as it is a transient error in principle, i.e. in one run we might be able to obtain a protein change, in another not, messing up the data diffs
+                    raise EnvironmentError("Issue with UTA database. Aborting")
 
         # Add empty data for each new column to prepare for data insertion by index
         for i in range(len(new_columns_to_append)):
@@ -267,6 +266,7 @@ def main(args):
     refSeq18.close()
     refSeq19.close()
     refSeq38.close()
+
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))

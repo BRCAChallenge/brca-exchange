@@ -81,7 +81,10 @@ LOVD_FIELDS = {"Variant_frequency": "frequency",
                "Individuals": "individuals",
                "Submitters": "submitters",
                "DBID": "DBID",
-               "BX_ID": "BX_ID"
+               "BX_ID": "BX_ID",
+               "Created_date": "created_date",
+               "Edited_date": "edited_date",
+               "Submission_ID": "submission_id"
                }
 
 EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
@@ -702,7 +705,15 @@ def repeat_merging(f_in, f_out):
                     if new_value == old_value:
                         continue
                     else:
-                        merged_value = list(set(new_value + old_value))
+                        if key == "individuals":
+                            '''
+                            LOVD individuals field values are all meaningful even if repeated
+                            e.g. if two LOVD submissions for the same variant each have one individual associated with them,
+                            "1,1" is a more sensible value for the variant than "1" since 2 individuals are associated.
+                            '''
+                            merged_value = list(new_value + old_value)
+                        else:
+                            merged_value = list(set(new_value + old_value))
                         variant_dict[genome_coor].INFO[key] = deepcopy(merged_value)
     print "number of repeat records: ", num_repeats, "\n"
     vcf_writer = vcf.Writer(f_out, vcf_reader)
