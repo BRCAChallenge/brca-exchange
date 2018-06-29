@@ -160,7 +160,7 @@ According to LOVD’s homepage, the Leiden Open Variation Database seeks to “p
 	    - The variant affects function.
 	* \+?
 	    - The variant probably affects function.
-	* \+\\*
+	* \+*
 	    - The variant affects function, but is not associated with individual’s disease phenotype.
 	* \#
 	    - The variant affects function, but is not associated with any known disease phenotype.
