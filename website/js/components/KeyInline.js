@@ -7,8 +7,7 @@ import {OverlayTrigger, Popover} from "react-bootstrap";
 
 const KeyInline = React.createClass({
     render() {
-        const {/*onClick, */tableKey, tooltip} = this.props;
-        const onClick = () => {};
+        const { onClick, tableKey, tooltip} = this.props;
 
         if (tooltip) {
             const popper = (

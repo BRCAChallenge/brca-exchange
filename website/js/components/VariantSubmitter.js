@@ -8,6 +8,7 @@ import classNames from 'classnames';
 import util from '../util';
 import KeyInline from './KeyInline';
 
+import slugify from '../slugify';
 
 // from https://www.ncbi.nlm.nih.gov/clinvar/docs/review_status/#revstat_def
 const marksToReviewStatuses = {
@@ -135,15 +136,19 @@ const VariantSubmitter = React.createClass({
         const {submitter, cols, data} = this.props;
 
         // for each panel, construct key-value pairs as a row of the table
-        const submitterRows = cols.map(({prop, title, value, helpKey}) => {
+        const submitterRows = cols.map(({prop, title, value, noHelpLink}) => {
             const isEmptyValue = util.isEmptyField(value);
             const rowItem = util.getFormattedFieldByProp(prop, data);
 
             return (
                 <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
                     {
-                        helpKey
-                            ? <KeyInline tableKey={title} onClick={(event) => this.props.showHelp(event, helpKey)}/>
+                        !noHelpLink
+                            ? (
+                                <KeyInline tableKey={title}
+                                    tooltip={this.props.tooltips && this.props.tooltips["report-" + slugify(prop)]}
+                                    onClick={(event) => this.props.showHelp(event, "report-" + prop)}/>
+                            )
                             : <td className='help-target'><span style={{fontWeight: 'bold'}}>{title}</span></td>
                     }
                     <td><span className="row-value">{rowItem}</span></td>

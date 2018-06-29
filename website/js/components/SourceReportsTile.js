@@ -126,6 +126,7 @@ export default class SourceReportsTile extends React.Component {
                     onReportToggled={this.reportToggled}
                     showHelp={this.props.showHelp}
                     expanded={this.state.reportExpanded[idx]}
+                    tooltips={this.props.tooltips}
                 />
             );
         });

@@ -797,6 +797,7 @@ var VariantDetail = React.createClass({
                             }, 300);
                         }}
                         showHelp={this.showHelp}
+                        tooltips={this.state.tooltips}
                     />
                 );
             }
@@ -817,6 +818,7 @@ var VariantDetail = React.createClass({
                             }, 300);
                         }}
                         showHelp={this.showHelp}
+                        tooltips={this.state.tooltips}
                         variant={variant}
                     />
                 );
@@ -894,8 +896,9 @@ var VariantDetail = React.createClass({
                     <tr key={prop} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
                         { rowDescriptor.tableKey !== false &&
                             (<KeyInline
-                                tableKey={title} tooltip={this.state.tooltips && this.state.tooltips[slugify(title)]}
-                                onClick={(event) => this.showHelp(event, title)}
+                                tableKey={title} tooltip={this.state.tooltips && prop && this.state.tooltips[slugify(prop)]}
+                                prop={prop}
+                                onClick={(event) => this.showHelp(event, prop)}
                             />)
                         }
                         <td colSpan={rowDescriptor.tableKey === false ? 2 : null} ><span className={ this.truncateData(prop) ? "row-value-truncated" : "row-value" }>{rowItem}</span></td>

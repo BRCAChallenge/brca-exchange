@@ -7,6 +7,7 @@ import {CollapsableMixin, Table} from "react-bootstrap";
 import classNames from 'classnames';
 import util from '../util';
 import KeyInline from './KeyInline';
+import slugify from "../slugify";
 const _ = require('underscore');
 
 
@@ -65,7 +66,12 @@ const AlleleFrequencyField = React.createClass({
             return (
                 <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
                     { rowDescriptor.tableKey !== false &&
-                        <KeyInline tableKey={title} onClick={(event) => this.props.showHelp(event, title)}/>
+                        (
+                            <KeyInline tableKey={title}
+                                tooltip={this.props.tooltips && this.props.tooltips[slugify(prop)]}
+                                onClick={(event) => this.props.showHelp(event, prop)}
+                            />
+                        )
                     }
                     <td colSpan={rowDescriptor.tableKey === false ? 2 : null} ><span className={"row-value" }>{rowItem}</span></td>
                 </tr>

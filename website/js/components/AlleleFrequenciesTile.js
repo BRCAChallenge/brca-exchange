@@ -92,6 +92,7 @@ export default class AlleleFrequenciesTile extends React.Component {
                     onFieldToggled={this.fieldToggled}
                     hideEmptyItems={this.props.hideEmptyItems}
                     showHelp={this.props.showHelp}
+                    tooltips={this.props.tooltips}
                 />
             );
         });
