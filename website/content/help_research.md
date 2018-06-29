@@ -153,7 +153,7 @@ According to LOVD’s homepage, the Leiden Open Variation Database seeks to “p
 	Variant effect shows the effect of the variant on the function of the protein. It is comparable, but not identical, to clinical significance.
 
 	It uses a symbolic nomenclature:
-	* R/C format
+	* **R/C format**
 		* There are two assessments made in LOVD data, which are combined using the R/C format.
 		* R is a value reported by the data source/submitter.
 		* C is a value concluded by the curator (a LOVD administrator) who reviews data submissions to LOVD.
