@@ -3,9 +3,10 @@
 var React = require('react');
 var config = require('./config');
 var classNames = require('classnames');
+var content = require('./content');
 
-
-var {Navbar, Nav, DropdownButton} = require('react-bootstrap');
+var RawHTML = require('./RawHTML');
+var {Navbar, Nav, DropdownButton, Modal, Button} = require('react-bootstrap');
 var {Link} = require('react-router');
 
 var brcaHeaderLogo = require('./img/brca-logo-transp.png');
@@ -48,10 +49,35 @@ var NavBarNew = React.createClass({
         var navPath = (path === "") ? "home" : path.split("/")[0];
         return ((navPath === tab) ? "active" : "");
     },
+    toggleMode: function (e) {
+        e.preventDefault();
+        if (this.props.mode === "research_mode") {
+            this.setState({ showModal: false }, function() {
+                this.props.toggleMode();
+                this.forceUpdate();
+            });
+        } else {
+            this.setState({showModal: true}, function() {
+                this.forceUpdate();
+            });
+        }
+    },
+    getModal: function () {
+        return (
+            <Modal onRequestHide={() => this.setState({ showModal: false }, function() {this.forceUpdate();})}>
+                <RawHTML html={content.pages.researchWarning}/>
+                <Button onClick={() => {this.setState({ showModal: false }, function() {
+                    this.props.toggleMode();
+                    this.forceUpdate();
+                });}}>Yes</Button>
+                <Button onClick={() => this.setState({ showModal: false }, function() {this.forceUpdate();})}>No</Button>
+            </Modal>
+        );
+    },
     render: function () {
         var {path} = this.props;
         var brand = (
-            <a className="branding-clickable" href="/">
+            <a href="/" className="branding-clickable">
                 <img className="logo-img" src={brcaHeaderLogo} height="40" />
 
                 <div className="brand-collapser">
@@ -62,8 +88,8 @@ var NavBarNew = React.createClass({
 
                     {
                         this.props.mode === 'research_mode'
-                            ? <span id="research-label" className="label label-info">All Public Data</span>
-                            : <span id="research-label" className="label label-info">Expert Reviewed</span>
+                            ? <span id="research-label" className="label label-info" onClick={this.toggleMode}>All Public Data</span>
+                            : <span id="research-label" className="label label-info" onClick={this.toggleMode}>Expert Reviewed</span>
                     }
                 </div>
             </a>
@@ -98,6 +124,7 @@ var NavBarNew = React.createClass({
                     </Nav>
                     {this.state.isBeta && <div className='beta-header'>This is a beta version of the BRCA Exchange. Please note that some variant information and website features displayed here are under review - for the most up-to-date finalized information, and to join our community, please refer to <a href="http://brcaexchange.org">www.brcaexchange.org</a>. If you encounter any issues while using the beta website, please report them to <a href="mailto:brcaexchange@gmail.com">brcaexchange@gmail.com</a>.</div>}
                 </Navbar>
+                {this.state.showModal && this.getModal()}
             </div>
         );
     }

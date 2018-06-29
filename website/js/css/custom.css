@@ -142,6 +142,13 @@ offending file, for future reference: website/node_modules/react-data-components
 
 #research-label {
 	padding: .3em .6em .3em;
+    cursor: pointer;
+}
+
+.logo-img,
+.BRCA,
+.exchange {
+    cursor: pointer;
 }
 
 /* at lower viewport widths, swaps the branding to a layout in which the research indicator is under a reduced title */

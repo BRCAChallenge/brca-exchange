@@ -118,6 +118,7 @@ Clinical Significance Tiles
 ### ClinVar
 
 * #### Clinical Significance ((report-Clinical_Significance_ClinVar))
+
 	These fields, extracted from [ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/), relate to variant clinical classification from individual submitters to ClinVar \(includes repeated information from ENIGMA and BIC tiles\).
 
 	##### What do these classifications mean?
@@ -269,7 +270,6 @@ Allele Frequency Reference Sets
 ----------------------------
 
 The allele frequency reference sets show the frequency of a BRCA1 or BRCA2 variant in a reference population. To view or collapse all nested tiles, click the arrows available at the top right of this tile. Though the two sets of populations in ExAC and 1000 Genomes closely resemble each other, they are not identical. ESP also uses different population categories.
-
 
 ### ExAC
 
