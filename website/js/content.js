@@ -3,7 +3,6 @@
 'use strict';
 
 var jQuery = require('jquery');
-var slugify = require('slugify');
 
 const content = {
     home: require('../content/home.md'),
@@ -79,6 +78,18 @@ const mupitStructures = [
     }
 ];
 
+function extractNonHeaders(x) {
+    const result = x.parent().clone();
+    // remove the field name
+    result.children('h4').remove();
+    // get only the first element (typically a paragraph)
+    result.children().slice(1).remove();
+    // unwrap paragraphs to remove weird bootstrap styling
+    result.find('p').replaceWith(function() { return jQuery(this).html(); });
+
+    return result.html().trim();
+}
+
 /**
  * Scrapes the help documentation to extract tooltips for fields displayed on the Variant Details page.
  * @param isResearchMode specifies whether to scrape the research mode or expert-reviewed help docs
@@ -93,27 +104,13 @@ function parseTooltips(isResearchMode) {
 
     let extracted = {};
 
-    if (isResearchMode) {
-        // the glossary's kind of implemented as h4 tags with ids followed by some text within the same parent
-        extracted = jQuery("h4", helpElem).map((idx, x) => {
-            const $x = jQuery(x);
-            const helpText = $x.siblings().html();
+    // the glossary's kind of implemented as lis with nested h4s with ids followed by some text within the same parent
+    extracted = jQuery("li", helpElem).find("h4").map((idx, x) => {
+        const $x = jQuery(x);
+        const helpText = extractNonHeaders($x);
 
-            return helpText ? {name: $x.attr("id"), text: helpText} : null;
-        }).toArray();
-    }
-    else {
-        // for the non-research help text, "tooltippable" entries need to be manually annotated with that class, e.g.
-        // <span class="tooltippable"><em>field name</em>: (any html)</span>, with the resulting key being "field-name"
-        extracted = jQuery(".tooltippable", helpElem).map((idx, x) => {
-            // extract the initial <em> indicating the term name, then everything after the : as the text
-            const $term = jQuery("em:first-child", x);
-            const fullText = jQuery(x).html();
-            const helpText = fullText.substring(fullText.indexOf(":") + 1);
-
-            return helpText ? {name: slugify($term.text()), text: helpText} : null;
-        }).toArray();
-    }
+        return helpText ? {name: $x.attr("id"), text: helpText} : null;
+    }).toArray();
 
     // creates an object {name1: val1, ...} from our [{name1,val1}, ...] array for faster access
     return extracted.reduce((c, x) => { c[x.name] = x.text; return c; }, {});
