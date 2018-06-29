@@ -53,7 +53,7 @@ const expertModeGroups = [
         {title: 'HGVS Protein', prop: 'HGVS_Protein', render: protein => protein.split(':')[1]},
         // Protein Identfifier is pulled from HGVS_Protein, this is handled in VariantDetail (index.js)
         {title: 'Protein Identifier', prop: 'HGVS_Protein_ID'},
-        {title: 'Protein Abbrev', prop: 'Protein_Change'},
+        {title: 'Protein Abbrev', prop: 'Protein_Change'}, // this is manually renamed to 'Abbreviated AA Change' in the front-end
         {title: 'BIC Designation', prop: 'BIC_Nomenclature'},
         {title: 'Genomic Nomenclature (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
         {title: 'Genomic Nomenclature (GRCh37)', prop: 'Genomic_Coordinate_hg37'}
@@ -152,6 +152,8 @@ const researchModeGroups = [
                 {title: 'Individuals', prop: 'Individuals_LOVD'},
                 {title: 'Submission ID', prop: 'DBID_LOVD'},
                 {title: 'Variant Haplotype', prop: 'Variant_haplotype_LOVD'},
+                {title: 'Created Date', prop: 'Created_date_LOVD'},
+                {title: 'Edited Date', prop: 'Edited_date_LOVD'},
             ]
         }
     },
@@ -178,8 +180,8 @@ const researchModeGroups = [
                     {title: 'EAS Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_EAS_ExAC', core: true},
                     {title: 'FIN Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_FIN_ExAC', core: true},
                     {title: 'NFE Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_NFE_ExAC', core: true},
-                    {title: 'OTH Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_OTH_ExAC', core: true},
-                    {title: 'SAS Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_SAS_ExAC', core: true}
+                    {title: 'SAS Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_SAS_ExAC', core: true},
+                    {title: 'OTH Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_OTH_ExAC', core: true}
                 ]
             },
             {
