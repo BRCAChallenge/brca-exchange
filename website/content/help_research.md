@@ -1,4 +1,6 @@
-# Help
+Help
+============================
+
 The BRCA Exchange is a curated data platform that provides information on variants of specific genes: _BRCA1_ and _BRCA2_. Rather than contributing new information about a variant, the BRCA Exchange becomes a single source that collects and organizes existing information. The BRCA Exchange retrieves data from a variety of databases, such as ClinVar and LOVD. Using these sources, BRCA Exchange answers three basic questions about a variant:
 
 * What is the most definitive clinical interpretation available for this variant?
@@ -7,25 +9,28 @@ The BRCA Exchange is a curated data platform that provides information on varian
 
 There are two data views used by BRCA Exchange to aid researchers and clinicians who work with _BRCA1_ and _BRCA2._ The default, or Expert Reviewed, view of BRCA Exchange will only display variant aliases, ENIGMA variant interpretations, and a brief interpretation history. The ENIGMA Consortium assesses variant pathogenicity using an expertly developed set of _BRCA1_ and _BRCA2_ classification criteria. The _All Public_ view contains all publicly available data on a variant. Thus, this view of the data provides a more complete, but also more complicated, characterization of a variant. Using multiple large-scale sources and two different portals, BRCA Exchange serves as a contextualized resource for curation of BRCA variant data.
 
-## Table of Contents
-* How do I search for a variant?
-* Variant Details Page
-	* Variant Nomenclature
-	* Clinical Significance Tiles
-	* Transcript Visualization
-	* Multifactorial Likelihood Analysis
-	* Allele Frequency Reference Sets
-		* ExAC
-		* 1000 Genomes
-		* Exome Sequencing Project
-	* Cravat/MuPIT Interactive Protein Structure Viewer
-* Lollipop Plots
-* Downloading Variant Data
-* How do I use Filters?
-* How do I use Column Selectors?
 
+Table of Contents
+----------------------------
 
-## How do I search for a variant?
+* [How do I search for a variant?](#how-do-i-search-for-a-variant)
+* [Variant Details Page](#variant-details-page)
+	* [Variant Nomenclature](#variant-nomenclature)
+	* [Clinical Significance Tiles](#clinical-significance-tiles)
+	* [Transcript Visualization](#transcript-visualization)
+	* [Multifactorial Likelihood Analysis](#multifactorial-likelihood-analysis)
+	* [Allele Frequency Reference Sets](#allele-frequency-reference-sets)
+		* [ExAC](#exac)
+		* [1000 Genomes](#1000-genomes)
+		* [Exome Sequencing Project](#exome-sequencing-project)
+	* [Cravat/MuPIT Interactive Protein Structure Viewer](#cravatmupit-interactive-protein-structure-viewer)
+* [Lollipop Plots](#lollipop-plots)
+* [Downloading Variant Data](#downloading-variant-data)
+* [How do I use Filters?](#how-do-i-use-filters)
+* [How do I use Column Selectors?](#how-do-i-use-column-selectors)
+
+How do I search for a variant?
+----------------------------
 
 In the BRCA Exchange, you can search _BRCA1_ and _BRCA2_ variants in our expertly curated and maintained data portal. This site allows you to access important, up-to-date information about a BRCA variant, such as its clinical significance. To begin, notice the search bar on the home page. This search bar accesses our databases directly, and can handle any identifying names for the variant or variants you are searching for. Here are some examples of what can be typed in this search box:
 * _BRCA1_ or _BRCA2_ \(Gene Symbol\)
@@ -41,40 +46,47 @@ Clicking the magnifying glass will execute a search for the variants that fit yo
 
 Please note that searching for a variant using a genomic coordinate will return all variants that match according to any of the hg38, hg19, or hg18 genome builds. For example, if you search for a variant using its hg38 coordinate, and it happens to match the coordinate of some variant in the hg19 build, both variants will be returned in the search. In this case, make sure to verify that the coordinate(s) and genome build are correct once you navigate to the Variant Details Page.
 
-# Variant Details Page
+
+
+Variant Details Page
+============================
 
 ## Variant Nomenclature
 The Variant Nomenclature fields contain forms of identification by which the variant can be labeled.
 
-* #### Gene Symbol
+* #### Gene Symbol ((Gene_Symbol))
 	The Gene Symbol field displays the name of the gene on which the variant was found, as named by HGNC. This will be either _BRCA1_ or _BRCA2_.
 
-* #### Reference cDNA Sequence
+* #### Reference cDNA Sequence ((Reference_Sequence))
 	This field provides the reference sequence on which the variant was observed, corresponding to the HGVS coordinates indicated in the Nucleotide field e.g. NM\_000492.3, NG\_016465.3, or NC\_000007.13.
 
-* #### HGVS Nucleotide
+* #### HGVS Nucleotide ((HGVS_cDNA))
 	This is the HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA.
 
-* #### HGVS Protein
+* #### HGVS Protein ((HGVS_Protein))
 	This alias utilizes predicted protein-level change \(if any\) that would be introduced by the genomic variant.
 
-* #### BIC Variant Identifier
+* #### BIC Variant Identifier ((BIC_Nomenclature))
 	This variant alias is presented in BIC Nomenclature, which predates HGVS nomenclature and thus follows a different format.
 
-* #### Genome \(GRCh38\)
+* #### Genome \(GRCh38\) ((Genomic_Coordinate_hg38))
 	This alias utilizes the coordinate of the variant on the GRCh38 reference genome. Click alias to access the UCSC Genome Browser.
 
-* #### Genome \(GRCh37\)
+* #### Genome \(GRCh37\) ((Genomic_Coordinate_hg37))
 	This alias utilizes the coordinate of the variant on the GRCh37 reference genome. Click alias to access the UCSC Genome Browser.
 
-* #### Genome \(GRCh36\)
+* #### Genome \(GRCh36\) ((Genomic_Coordinate_hg36))
 	This alias utilizes the coordinate of the variant on the GRCh36 reference genome. Click alias to access the UCSC Genome Browser.
 
-## Clinical Significance Tiles
 
-### ENIGMA
-* #### Clinical Significance
-	* This field displays the variant’s clinical classification and supporting information as provided by ENIGMA expert panel review.
+Clinical Significance Tiles
+----------------------------
+
+### ENIGMA ((clinical-significance-enigma))
+* #### Clinical Significance ((Clinical_significance_ENIGMA))
+
+    This field displays the variant’s clinical classification and supporting information as provided by ENIGMA expert panel review.
+
 	##### What do these classifications mean?
 	* Pathogenic variants confer a markedly increased risk of disease.
 	* Likely pathogenic variants have good evidence to support an association with markedly increased disease risk.
@@ -84,29 +96,29 @@ The Variant Nomenclature fields contain forms of identification by which the var
 
 	Markedly increased disease risk for a variant in _BRCA1_ and _BRCA2_ is currently defined as risk that is sufficient to alter patient management based on detection of that single genetic variant, after considering other non-genetic risk factors for the individual.
 
-* #### Comment on Clinical Significance
+* #### Comment on Clinical Significance ((Comment_on_clinical_significance_ENIGMA))
 	This field comments on the derivation of the IARC class, provided by ENIGMA.
 
-* #### Assertion Method
+* #### Assertion Method ((Assertion_method_ENIGMA))
 	This field provides the citation or URL describing the method and criteria used to make assertions of clinical significance.
 
-* #### Date last evaluated
+* #### Date last evaluated ((Date_last_evaluated_ENIGMA))
 	This is a display of the date on which the clinical significance of the variant was last evaluated by ENIGMA.
 
-* #### Collection Method
+* #### Collection Method ((Collection_method_ENIGMA))
 	This is the method used to collect the data that supports the assertion of clinical significance. The following values may be listed: case-control, clinical testing, literature only, reference population, research.
 
-* #### Clinical Significance Citation
+* #### Clinical Significance Citation ((Clinical_significance_citations_ENIGMA))
 	This field provides citations that document the clinical significance. They may be from PubMed, PubMedCentral, DOI, or NCBI Bookshelf.
 
-* #### Allele Origin
+* #### Allele Origin ((Allele_origin_ENIGMA))
 	Variants are classified as either germline or somatic, depending on how they are acquired. Germline variants are genetic changes that we inherit from our parents. Somatic variants are DNA changes that we acquire over our lifetime, often through exposure to pollutants, toxins, radiation and other carcinogens.
 
-### ClinVar
-##### _Updates Coming Soon_
 
-* #### Clinical Significance
-	These fields are extracted from the [ClinVar website](https://www.ncbi.nlm.nih.gov/clinvar/) relating to variant clinical classification, for individual submitters to ClinVar \(includes repeated information from ENIGMA and BIC tiles\).
+### ClinVar
+
+* #### Clinical Significance ((report-Clinical_Significance_ClinVar))
+	These fields, extracted from [ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/), relate to variant clinical classification from individual submitters to ClinVar \(includes repeated information from ENIGMA and BIC tiles\).
 
 	##### What do these classifications mean?
 	The below classifications will be found in ClinVar's "clinical significance" field. They are implemented per [recommendations by ACMG/AMP](https://www.ncbi.nlm.nih.gov/pubmed/25741868) for variants interpreted by Mendelian disorders.
@@ -117,41 +129,103 @@ The Variant Nomenclature fields contain forms of identification by which the var
 	* Benign
 	* Uncertain Significance
 
-* #### Submitter
+* #### Submitter ((report-Submitter_ClinVar))
 	This field provides the name of the submitting organization. From ClinVar.
-* #### SCV Accession
+* #### SCV Accession ((report-SCV_ClinVar))
 	This is the SCV accession from the ClinVar repository.
-* #### Date last updated \(ClinVar\)
+* #### Date last updated \(ClinVar\) ((report-Date_Last_Updated_ClinVar))
 	The field that shows the date the variant was last submitted to ClinVar. Note that this date is not equivalent to the date last evaluated.
 * ##### _Coming Soon:_
 	Updated Classification descriptions, Information about tile functionality, resources for star review, definition of summary evidence.
 
 For more information, please visit the [ClinVar website](https://www.ncbi.nlm.nih.gov/clinvar/) or the [ClinVar Data Dictionary](https://www.ncbi.nlm.nih.gov/projects/clinvar/ClinVarDataDictionary.pdf).
 
-### LOVD
 
-##### _Updates Coming Soon_
+### Leiden Open Variation Database (LOVD)
 
-* #### Clinical Significance
-	These fields are extracted from [LOVD](http://www.lovd.nl/3.0/home) and are relevant to variant clinical classification.
-* ##### _Coming Soon:_
-	Submitters, Variant Effect, Genetic Origin, Submission ID, Variant Haplotype
+According to LOVD’s homepage, the Leiden Open Variation Database seeks to “provide a flexible, freely available tool for Gene-centered collection and display of DNA variations.” This data is to the data in ClinVar, but uses different standards and nomenclatures. Below, you can find a list of the LOVD data fields displayed on BRCA Exchange.
 
-	For more information, please visit the [LOVD website](http://www.lovd.nl/3.0/home).
+* #### Submitter ((report-Submitters_LOVD))
+	The name of the researcher, research group, or individual who submitted the variant data to LOVD.
 
-### BIC
-* #### Patient Nationality
+* #### Variant Effect ((report-Variant_effect_LOVD))
+	Variant effect shows the effect of the variant on the function of the protein. It is comparable, but not identical, to clinical significance.
+
+	It uses a symbolic nomenclature:
+	* R/C format
+		* There are two assessments made in LOVD data, which are combined using the R/C format.
+		* R is a value reported by the data source/submitter.
+		* C is a value concluded by the curator (a LOVD administrator) who reviews data submissions to LOVD.
+	* \+
+	    - The variant affects function.
+	* \+?
+	    - The variant probably affects function.
+	* \+\\*
+	    - The variant affects function, but is not associated with individual’s disease phenotype.
+	* \#
+	    - The variant affects function, but is not associated with any known disease phenotype.
+	* \-
+	    - The variant does not affect function.
+	* \-?
+	    - The variant probably does not affect function.
+	* ?
+	    - The variant effect is unknown.
+	* \.
+	    - The variant effect is not classified.
+
+    A symbol is assigned for both the reported classification (from source, “R”) and the concluded classification (from curator, “C”).
+
+    * ##### Examples:
+        * \-/\-: denotes a variant that has been determined to not affect function both by a curator and a submitter
+        * \+/\+?: denotes a variant that has been determined to affect function by a submitter, but determined as probably affecting function by a curator
+
+* #### Variant Data Type (Origin) ((report-Genetic_origin_LOVD))
+	The Data Type field indicates what kind of data was submitted to LOVD.  This field often indicates the source of the variant.
+
+	For the BRCA genes, the following types of data are most common.
+
+	* ##### Germline
+		Germline variants are those that the individual is typically born with due to inheritance from one or more parent(s).
+	* ##### De novo
+		De novo variants are those that an individual is born with, but are not inherited through either parent. These variants might occur via processes such as random mutation.
+	* ##### Somatic
+		Somatic variants are those that an individual acquires during their lifetime
+	* ##### SUMMARY
+		Summary records do not describe the variant type, but summarize the data that was provided by the submitter.
+
+	The data reported by LOVD is partially  public and partially private. Because some private data is used, data entries in these fields may look identical from a public view, while perhaps differing in the private information provided to LOVD. Data privacy is often required to secure patient’s personal information.
+
+* #### Individuals ((report-Individuals_LOVD))
+	The number of individuals the variant has been observed in, per submission. The individuals field does not account for all LOVD data on a variant, but accounts for the number of individuals observed by the submitter.
+
+* #### Variant ID (Database ID) ((report-DBID_LOVD))
+	The ID given to the variant by LOVD. This ID is variant-specific, but not submitter-specific. Please note that this is an important difference from ClinVar’s data specifications.
+
+* #### Created Date ((report-Created_date_LOVD))
+	The date that variant data was first submitted to LOVD.
+
+* #### Edited Date ((report-Edited_date_LOVD))
+	The date that the variant data was last updated or changed in LOVD to reflect new evidence.
+
+
+### BIC ((clinical-significance-bic))
+* #### Patient Nationality ((Patient_nationality_BIC))
 	The field that indicates nationality of the patient associated with the variant.
-* #### Ethnicity
+* #### Ethnicity ((Ethnicity_BIC))
 	The field that provides the ethnicities of the observed patients.
-* #### Family members carrying this variant
+* #### Family members carrying this variant ((Number_of_family_member_carrying_mutation_BIC))
 	Number of family members carrying this variant.
-* #### Literature Reference
+* #### Literature Reference ((Literature_citation_BIC))
 	Literature Reference\(s\). From BIC.
-* #### Allele Origin
-	Origin of the allele, Germline \(G\) or Somatic \(S\). Variants are classified as either germline or somatic, depending on how they are acquired. Germline variants are genetic changes that we inherit from our parents. Somatic variants are DNA changes that we acquire over our lifetime, often through exposure to pollutants, toxins, radiation and other carcinogens. From BIC
+* #### Allele Origin ((Germline_or_Somatic_BIC))
+	Origin of the allele, Germline \(G\) or Somatic \(S\).
 
-## Transcript Visualization
+	<p>Variants are classified as either germline or somatic, depending on how they are acquired. Germline variants are genetic changes that we inherit from our parents. Somatic variants are DNA changes that we acquire over our lifetime, often through exposure to pollutants, toxins, radiation and other carcinogens.</p>
+
+
+
+Transcript Visualization
+----------------------------
 
 The transcript visualization depicts the reference transcript of the gene \(either _BRCA1_ or _BRCA2_\) on which the selected variant is found. The gene is drawn as a series of exons with intervening introns. Note that exons are drawn scaled \(nonlinearly\) to their actual size, to make the smaller exons easier to see, while introns are drawn at a fixed width.
 
@@ -166,23 +240,28 @@ The visualization also displays other regions of interest for the gene, such as 
 
 Clinically important functional domains are regions of the gene that ENIGMA has assessed to be relevant to risk. More specifically, these domains are regions of the gene that ENIGMA has determined to be relevant to risk when modified by missense alterations or in-frame deletions that could encode a stable \(non-truncated\) protein. This determination is made using existing knowledge of pathogenicity for individual variants in these domains. Clicking the label for a given clinically important domain will display the corresponding domain in an animated outline. Clicking again on the label will disable the outline, as will clicking another domain designated as clinically important.
 
-## [Multifactorial Likelihood Analysis Classification](https://www.ncbi.nlm.nih.gov/pubmed/21990134)
+
+## [Multifactorial Likelihood Analysis Classification](https://www.ncbi.nlm.nih.gov/pubmed/21990134) ((multifactorial-likelihood-analysis))
 Component likelihoods and final classification are from multifactorial likelihood analysis, which is a quantitative integrated evaluation of variant pathogenicity.
-* #### Posterior Probability of pathogenicity \(ExUV\)
+* #### Posterior Probability of pathogenicity \(ExUV\) ((Posterior_probability_exLOVD))
 	This value is the posterior probability of pathogenicity from ExUV.
-* #### Prior probability of pathogenicity \(ExUV\)
+* #### Prior probability of pathogenicity \(ExUV\) ((Combined_prior_probablility_exLOVD))
 	This value is the combined prior probability in favor of pathogenicity. It is a combination of the missense analysis prior probability and the splicing analysis prior probability. Generally, it is the higher of these two prior probabilities. From ExUV.
-* #### Missense analysis probability of pathogenicity \(ExUV\)
+* #### Missense analysis probability of pathogenicity \(ExUV\) ((Missense_analysis_prior_probability_exLOVD))
 	This prior probability estimate combines position in the protein with an evaluation of missense substitutions that fall in the proteins key functional domains. From ExUV.
-* #### Co-occurrence likelihood \(ExUV\)
+* #### Co-occurrence likelihood \(ExUV\) ((Co_occurrence_LR_exLOVD))
 	This value is the likelihood ratio based on the frequency of co-occurrence between the variant of interest and clearly pathogenic variants in the same gene. From ExUV.
-* #### Segregation Likelihood Ratio \(ExUV\)
+* #### Segregation Likelihood Ratio \(ExUV\) ((Segregation_LR_exLOVD))
 	This value is the likelihood ratio based on segregation analysis
-* #### Summary Family History Likelihood Ratio \(ExUV\)
+* #### Summary Family History Likelihood Ratio \(ExUV\) ((Sum_family_LR_exLOVD))
 	This value is the likelihood ratio based on an analysis of the severity of summary family histories of breast and/ or ovarian cancer.
 
-# Allele Frequency Reference Sets
-The allele frequency reference sets show the frequency of a BRCA1 or BRCA2 variant in a reference population. To view or collapse all nested tiles, click the INSERT ICON icons available at the top right of this tile. Though the two sets of populations in ExAC and 1000 Genomes closely resemble each other, they are not identical. ESP also uses different population categories.
+
+Allele Frequency Reference Sets
+----------------------------
+
+The allele frequency reference sets show the frequency of a BRCA1 or BRCA2 variant in a reference population. To view or collapse all nested tiles, click the arrows available at the top right of this tile. Though the two sets of populations in ExAC and 1000 Genomes closely resemble each other, they are not identical. ESP also uses different population categories.
+
 
 ### ExAC
 
@@ -190,29 +269,32 @@ ExAC is a data source that provides BRCA1 and BRCA2 allele frequencies for the B
 
 For more information about ExAC, please refer to the [ExAC browser](http://exac.broadinstitute.org/) or their [flagship publication](https://www.nature.com/articles/nature19057).
 
+
 #### Graphical ExAC Data
 Graphical ExAC data can be viewed by expanding the ExAC \(Graphical\) nested tile.  Two Graphs are available; one of the graphs is custom scaled to the allele frequencies by default \(right side\). Hovering over each bar will give you the numerical value represented in the population subset. You can click anywhere on the ExAC \(scaled\) graph to change the scale between 1.0% \(.01\), 0.1% \(.001\), and the custom, default scale. Because some Allele Frequencies can be very small, a variety of scales will allow you to view all possible Allele Frequencies graphically.
 
 Each group found on the x-axis of the bar chart can be found in the list of fields described in the ExAC \(Numerical\) section.
 
+
 #### Numerical ExAC Data
 Numerical ExAC data fields show numerical minor allele frequency data associated with each population, as well as the overall allele frequency. All of the minor allele frequencies are consistent with the graphs shown in the ExAC \(Graphical\) nested tile.
-* #### Allele Frequency \(ExAC minus TCGA\)
+* #### Allele Frequency \(ExAC minus TCGA\) ((Allele_frequency_ExAC))
 	Minor allele frequency, per ExAC \(excluding TCGA data\)
-* #### African/African American \(AFR\)
+* #### African/African American \(AFR\) ((Allele_frequency_AFR_ExAC))
 	Allele frequency in African/African American populations, per ExAC
-* #### Admixed American/Latino \(AMR\)
+* #### Admixed American/Latino \(AMR\) ((Allele_frequency_AMR_ExAC))
 	Allele frequency in Admixed American/Latino populations, per ExAC
-* #### East Asian \(EAS\)
+* #### East Asian \(EAS\) ((Allele_frequency_EAS_ExAC))
 	Allele frequency in East Asian populations, per ExAC
-* #### Finnish \(FIN\)
+* #### Finnish \(FIN\) ((Allele_frequency_FIN_ExAC))
 	Allele frequency in Finnish populations, per ExAC and separated from European because of an enriched data set
-* #### Non-Finnish European \(NFE\)
+* #### Non-Finnish European \(NFE\) ((Allele_frequency_NFE_ExAC))
 	Allele frequency in Non-Finnish European populations, per ExAC
-* #### South Asian \(SAS\)
+* #### South Asian \(SAS\) ((Allele_frequency_SAS_ExAC))
 	Allele frequency in South Asian populations, per ExAC
-* #### Other \(OTH\)
+* #### Other \(OTH\) ((Allele_frequency_OTH_ExAC))
 	Allele frequency in populations other than those listed above, per ExAC
+
 
 ### 1000 Genomes
 
@@ -227,32 +309,35 @@ Each group found on the x-axis of the bar chart can be found in the list of fiel
 
 #### Numerical 1000 Genomes Data
 Numerical 1000 Genomes data fields show numerical minor allele frequency data associated with each population, as well as the overall allele frequency. All of the minor allele frequencies are consistent with the graphs shown in the 1000 Genomes \(Graphical\) nested tile.
-* #### Allele Frequency
+* #### Allele Frequency ((Allele_frequency_1000_Genomes))
 	Overall allele frequency, per 1000 Genomes
-* #### AFR Allele Frequency
+* #### AFR Allele Frequency ((AFR_Allele_frequency_1000_Genomes))
 	Allele frequency in African-American populations, per 1000 Genomes
-* #### AMR Allele Frequency
+* #### AMR Allele Frequency ((AMR_Allele_frequency_1000_Genomes))
 	Allele frequency in Admixed American populations, per 1000 Genomes
-* #### EAS Allele Frequency
+* #### EAS Allele Frequency ((EAS_Allele_frequency_1000_Genomes))
 	Allele frequency in East Asian populations, per 1000 Genomes
-* #### EUR Allele Frequency
+* #### EUR Allele Frequency ((EUR_Allele_frequency_1000_Genomes))
 	Allele frequency in European populations, per 1000 Genomes
-* #### SAS Allele Frequency
+* #### SAS Allele Frequency ((SAS_Allele_frequency_1000_Genomes))
 	Allele frequency in Southeast Asian Populations, per 1000 Genomes
+
 
 ### Exome Sequencing Project
 
 #### Numerical ESP Data
 The NHLBI GO Exome Sequencing Project is yet another contributor of allele frequency data to the BRCA Exchange. The Exome Sequencing Project \(ESP\) aims to “to discover novel genes and mechanisms contributing to heart, lung and blood disorders by pioneering the application of next-generation sequencing of the protein coding regions of the human genome across diverse, richly-phenotyped populations and to share these datasets and findings with the scientific community to extend and enrich the diagnosis, management and treatment of heart, lung and blood disorders” \([NHLBI Exome Sequencing Project](http://evs.gs.washington.edu/EVS/)\).
 
-* #### Allele Frequency
+* #### Allele Frequency (ESP) ((Allele_Frequency_ESP))
 	Allele frequency in entire data set, per ESP
-* #### EA Allele Frequency
+* #### EA Allele Frequency (ESP) ((EA_Allele_Frequency_ESP))
 	Allele frequency in European-American populations, per ESP
-* #### AA Allele Frequency
+* #### AA Allele Frequency (ESP) ((AA_Allele_Frequency_ESP))
 	Allele frequency in African-American populations, per ESP
 
-### CRAVAT/MuPIT Interactive Protein Structure Viewer
+
+CRAVAT/MuPIT Interactive Protein Structure Viewer
+----------------------------
 
 For missense variants that occur within a region of the protein with a well-defined three-dimensional structure, bioinformatics and protein structure analysis can help suggest the impact of the variation (1-3). Certain regions in protein structures tend to be more sensitive to variation, such as positions buried within the core of the protein (where variation could destabilize the protein’s structure) and positions near binding sites (where variation could impact the protein’s function). The MuPIT interactive viewer from the CRAVAT project (4) facilitates such analysis by showing the position of the variant in the context of its three-dimensional protein structure.
 
@@ -272,30 +357,39 @@ CRAVAT and MuPIT are available for missense variants that map to positions withi
 
 ##### References
 
-	1. [Carvalho et al. 2009. PMID 18992264](https://www.ncbi.nlm.nih.gov/pubmed/18992264).
-	2. [Karchin et al. 2008. PMID 19043619](https://www.ncbi.nlm.nih.gov/pubmed/?term=19043619).
-	3. [Karchin et al. 2007. PMID 17305420.](https://www.ncbi.nlm.nih.gov/pubmed/?term=17305420)
-	4. [Masica et al. 2017. PMID 29092935.](https://www.ncbi.nlm.nih.gov/pubmed/29092935)
-	5. [VallEe et al. 2016. PMID 26913838.](https://www.ncbi.nlm.nih.gov/pubmed/26913838)
-	6. [VallEe et al. 2012. PMID 21990165.](https://www.ncbi.nlm.nih.gov/pubmed/21990165)
+1. [Carvalho et al. 2009. PMID 18992264](https://www.ncbi.nlm.nih.gov/pubmed/18992264)
+2. [Karchin et al. 2008. PMID 19043619](https://www.ncbi.nlm.nih.gov/pubmed/?term=19043619)
+3. [Karchin et al. 2007. PMID 17305420.](https://www.ncbi.nlm.nih.gov/pubmed/?term=17305420)
+4. [Masica et al. 2017. PMID 29092935.](https://www.ncbi.nlm.nih.gov/pubmed/29092935)
+5. [Vall&#x00e9;e et al. 2016. PMID 26913838.](https://www.ncbi.nlm.nih.gov/pubmed/26913838)
+6. [Vall&#x00e9;e et al. 2012. PMID 21990165.](https://www.ncbi.nlm.nih.gov/pubmed/21990165)
 
-## Lollipop Plots
+
+Lollipop Plots
+============================
+
 Lollipop plots are a tool to visualize the chromosomal position and pathogenicity classification for each variant in a gene. Here, each circle-capped ‘lollipop’ indicates whether a BRCA1 and BRCA2 variant is pathogenic (labeled in red), benign (labeled in light-blue), or the variants clinical significance is uncertain (labeled in dark-blue). The y-axis represents the pathogenicity classification of a variant. The x-axis represents the genomic coordinates of those variants in GRCh38 human reference space. The bottom box that runs along the x-axis of the diagram displays the position of each exon in the selected gene.
 
 To open the lollipop chart click on the ‘Show Lollipop Chart’ button located at the top of the Variants page. To alternate between the BRCA1 and BRCA2 lollipop charts, click on the tab that contains the relevant gene name located in the upper-left hand corner next to the lollipop chart. To select a specific area of the gene to zoom in on a region, simply click and drag on the lower box to create a shaded box which displays which region you have selected. You can also select for specific exon ranges by clicking on the relevant colored exon box on the lower box-chart. Mouse scrolling on the main chart itself will also zoom in and out of a region. To de-select or zoom all the way back out, you can either click on an unshaded space in the lower box or click the ‘Hide Lollipop Chart’ button at the top twice to refresh and reset the chart. On the legend located within the chart you can see the relative percentages of pathogenicity classifications of variants that match the search and filter criteria for a particular gene. To hide/dim a class of variants set of lollipops, click on the colored box on the legend. You can reset this by clicking on the colored box again.
 
 <div style="max-width: 1000px; margin-left: auto; margin-right: auto; height: 0px; position: relative; padding-bottom: 59.552%;"><iframe src="https://streamable.com/e/zx9c?muted=1&amp;autoplay=1&amp;hd=1" frameborder="0" allowfullscreen webkitallowfullscreen mozallowfullscreen scrolling="no" style="width: 100%; height: 100%; position: absolute;"></iframe></div>
 
-* * * * * * * * * * *
 
+Downloading Variant Data
+============================
 
-## Downloading Variant Data
 To download the variant data click on the ‘Download’ button located above the search bar within the Variants Table page. When you click on it the data that is downloaded is a comma delimited .csv file containing the set of variant details for the variants that matched the search and/or filtering criteria. The first row in the file represent the column labels.
 
-## How do I use Column Selectors?
+
+How do I use Column Selectors?
+============================
+
 Columns allow you to filter the variant table (in search results) according to fields found in the tiles on the Variant Details Page. Column selectors correspond to each tile’s fields, whose descriptions are found above. These selectors allow you to include any tile’s field as its own column in your search results. You can then sort results using added columns.
 
 ##### _Updates Coming Soon_
 
-## How do I use Filters?
+
+How do I use Filters?
+============================
+
 ##### _Updates Coming Soon_
