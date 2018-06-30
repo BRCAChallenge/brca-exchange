@@ -142,15 +142,10 @@ const VariantSubmitter = React.createClass({
 
             return (
                 <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
-                    {
-                        noHelpLink
-                            ? <td className='help-target'><span style={{fontWeight: 'bold'}}>{title}</span></td>
-                            : (
-                                <KeyInline tableKey={title}
-                                    tooltip={this.props.tooltips && this.props.tooltips["report-" + slugify(prop)]}
-                                    onClick={(event) => this.props.showHelp(event, "report-" + prop)}/>
-                            )
-                    }
+                    <KeyInline tableKey={title} noHelpLink={noHelpLink}
+                        tooltip={this.props.tooltips && this.props.tooltips["report-" + slugify(prop)]}
+                        onClick={(event) => this.props.showHelp(event, "report-" + prop)}
+                    />
                     <td><span className="row-value">{rowItem}</span></td>
                 </tr>
             );

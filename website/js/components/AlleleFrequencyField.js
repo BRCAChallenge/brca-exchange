@@ -49,7 +49,7 @@ const AlleleFrequencyField = React.createClass({
         let rowsEmpty = 0;
 
         const rows = _.map(data, (rowDescriptor) => {
-            let {prop, title} = rowDescriptor;
+            let {prop, title, noHelpLink} = rowDescriptor;
             let rowItem;
 
             if (variant[prop] !== null) {
@@ -67,7 +67,7 @@ const AlleleFrequencyField = React.createClass({
                 <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
                     { rowDescriptor.tableKey !== false &&
                         (
-                            <KeyInline tableKey={title}
+                            <KeyInline tableKey={title} noHelpLink={noHelpLink}
                                 tooltip={this.props.tooltips && this.props.tooltips[slugify(prop)]}
                                 onClick={(event) => this.props.showHelp(event, prop)}
                             />

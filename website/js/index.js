@@ -820,7 +820,7 @@ var VariantDetail = React.createClass({
 
             // now map the group's columns to a list of row objects
             const rows = _.map(innerCols, (rowDescriptor) => {
-                let {prop, title} = rowDescriptor;
+                let {prop, title, noHelpLink} = rowDescriptor;
                 let rowItem;
 
                 if (prop === "Protein_Change") {
@@ -879,8 +879,8 @@ var VariantDetail = React.createClass({
                     <tr key={prop} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
                         { rowDescriptor.tableKey !== false &&
                             (<KeyInline
-                                tableKey={title} tooltip={this.state.tooltips && prop && this.state.tooltips[slugify(prop)]}
-                                prop={prop}
+                                tableKey={title} noHelpLink={noHelpLink}
+                                tooltip={this.state.tooltips && prop && this.state.tooltips[slugify(prop)]}
                                 onClick={(event) => this.showHelp(event, prop)}
                             />)
                         }
