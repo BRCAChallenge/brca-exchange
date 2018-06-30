@@ -5,7 +5,8 @@ var slugify = require('../js/slugify');
 
 module.exports = function(md) {
     var originalHeadingOpen = md.renderer.rules.heading_open;
-    var explicitIDRegex = /[ ]?\(\(([^)]+)\)\)/;
+    // looks for a pattern like this: ((more than one of any char that's not a paren))
+    var explicitIDRegex = /\(\(([^)]+)\)\)/;
 
     md.renderer.rules.heading_open = function (tokens, idx, options, env, self) {
         tokens[idx].attrs = tokens[idx].attrs || [];
