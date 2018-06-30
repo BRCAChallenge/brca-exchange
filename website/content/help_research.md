@@ -344,7 +344,7 @@ The NHLBI GO Exome Sequencing Project is yet another contributor of allele frequ
 	Allele frequency in African-American populations, per ESP
 
 
-CRAVAT/MuPIT Interactive Protein Structure Viewer
+CRAVAT/MuPIT Interactive Protein Structure Viewer ((cravat-mupit-3d-protein-view))
 ----------------------------
 
 For missense variants that occur within a region of the protein with a well-defined three-dimensional structure, bioinformatics and protein structure analysis can help suggest the impact of the variation (1-3). Certain regions in protein structures tend to be more sensitive to variation, such as positions buried within the core of the protein (where variation could destabilize the protein’s structure) and positions near binding sites (where variation could impact the protein’s function). The MuPIT interactive viewer from the CRAVAT project (4) facilitates such analysis by showing the position of the variant in the context of its three-dimensional protein structure.
