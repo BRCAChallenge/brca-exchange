@@ -20,6 +20,7 @@ require('font-awesome-webpack');
 require('css/bootstrap-xlgrid.css'); // adds xl, xxl, xxxl grid sizes to bootstrap 3
 require('css/custom.css');
 var _ = require('underscore');
+var jQuery = require('jquery');
 var backend = require('./backend');
 var {NavBarNew} = require('./NavBarNew');
 var FAQ = require('./Faq');
@@ -36,7 +37,7 @@ var brcaLogo = require('./img/BRCA-Exchange-tall-tranparent.png');
 var logos = require('./logos');
 var slugify = require('./slugify');
 
-var content = require('./content');
+import content, {parseTooltips} from './content';
 var Community = require('./Community');
 var FactSheet = require('./FactSheet');
 var {MailingList} = require('./MailingList');
@@ -200,15 +201,19 @@ var About = React.createClass({
 
 var Help = React.createClass({
     mixins: [State],
+    scrollToFragment: function(fragment) {
+        setTimeout(function () {
+            var el = document.getElementById(fragment);
+            if (el) {
+                const yOffset = jQuery(el).offset().top - navbarHeight - 10;
+                window.scrollTo(0, yOffset);
+            }
+        }, 10);
+    },
     componentDidMount: function () {
         var fragment = slugify(window.location.hash.slice(1));
         if (fragment !== '') {
-            setTimeout(function () {
-                var el = document.getElementById(fragment);
-                if (el) {
-                    window.scrollTo(0, el.getBoundingClientRect().top - navbarHeight);
-                }
-            }, 0);
+            this.scrollToFragment(fragment);
         }
     },
     render: function () {
@@ -225,7 +230,7 @@ var Help = React.createClass({
                     <style>{`#${fragment} { animation-name: emphasis; animation-duration: 10s; } `}</style>}
                 <Row>
                     <Col smOffset={1} sm={10}>
-                        <RawHTML ref='content' html={helpContent}/>
+                        <RawHTML ref='content' html={helpContent} scrollToFragment={this.scrollToFragment} />
                     </Col>
                 </Row>
             </Grid>
@@ -527,7 +532,8 @@ var VariantDetail = React.createClass({
         this.transitionTo(`/help#${slugify(title)}`);
     },
     getInitialState: () => ({
-        hideEmptyItems: (localStorage.getItem("hide-empties") === 'true')
+        hideEmptyItems: (localStorage.getItem("hide-empties") === 'true'),
+        tooltips: parseTooltips(localStorage.getItem("research-mode") === 'true')
     }),
     componentWillMount: function () {
         backend.variant(this.props.params.id).subscribe(
@@ -551,6 +557,10 @@ var VariantDetail = React.createClass({
     },
     onChildToggleMode: function() {
         this.props.toggleMode();
+        // we need to reparse the tooltips if the mode changed
+        this.setState({
+            tooltips: parseTooltips(localStorage.getItem("research-mode") === 'true')
+        });
         this.forceUpdate();
     },
     pathogenicityChanged: function(pathogenicityDiff) {
@@ -770,6 +780,7 @@ var VariantDetail = React.createClass({
                             }, 300);
                         }}
                         showHelp={this.showHelp}
+                        tooltips={this.state.tooltips}
                     />
                 );
             }
@@ -790,6 +801,7 @@ var VariantDetail = React.createClass({
                             }, 300);
                         }}
                         showHelp={this.showHelp}
+                        tooltips={this.state.tooltips}
                         variant={variant}
                     />
                 );
@@ -808,7 +820,7 @@ var VariantDetail = React.createClass({
 
             // now map the group's columns to a list of row objects
             const rows = _.map(innerCols, (rowDescriptor) => {
-                let {prop, title} = rowDescriptor;
+                let {prop, title, noHelpLink} = rowDescriptor;
                 let rowItem;
 
                 if (prop === "Protein_Change") {
@@ -866,7 +878,11 @@ var VariantDetail = React.createClass({
                 return (
                     <tr key={prop} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
                         { rowDescriptor.tableKey !== false &&
-                            <KeyInline tableKey={title} onClick={(event) => this.showHelp(event, title)}/>
+                            (<KeyInline
+                                tableKey={title} noHelpLink={noHelpLink}
+                                tooltip={this.state.tooltips && prop && this.state.tooltips[slugify(prop)]}
+                                onClick={(event) => this.showHelp(event, prop)}
+                            />)
                         }
                         <td colSpan={rowDescriptor.tableKey === false ? 2 : null} ><span className={ this.truncateData(prop) ? "row-value-truncated" : "row-value" }>{rowItem}</span></td>
                     </tr>

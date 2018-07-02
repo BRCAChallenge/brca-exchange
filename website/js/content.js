@@ -2,6 +2,8 @@
 /*global require: false, module: false */
 'use strict';
 
+var jQuery = require('jquery');
+
 const content = {
     home: require('../content/home.md'),
     history: require('../content/history.md'),
@@ -76,8 +78,47 @@ const mupitStructures = [
     }
 ];
 
+function extractNonHeaders(x) {
+    const result = x.parent().clone();
+    // remove the field name
+    result.children('h4').remove();
+    // get only the first element (typically a paragraph)
+    result.children().slice(1).remove();
+    // unwrap paragraphs to remove weird bootstrap styling
+    result.find('p').replaceWith(function() { return jQuery(this).html(); });
+
+    return result.html().trim();
+}
+
+/**
+ * Scrapes the help documentation to extract tooltips for fields displayed on the Variant Details page.
+ * @param isResearchMode specifies whether to scrape the research mode or expert-reviewed help docs
+ * @returns {*} a mapping from slugified field names to HTML help text
+ */
+function parseTooltips(isResearchMode) {
+    // extract help text depending on the research mode
+    const helpContent = isResearchMode ? content.helpResearch : content.help;
+
+    const helpElem = document.createElement('html');
+    helpElem.innerHTML = helpContent;
+
+    let extracted = {};
+
+    // the glossary's kind of implemented as lis with nested h4s with ids followed by some text within the same parent
+    extracted = jQuery("li", helpElem).find("h4").map((idx, x) => {
+        const $x = jQuery(x);
+        const helpText = extractNonHeaders($x);
+
+        return helpText ? {name: $x.attr("id"), text: helpText} : null;
+    }).toArray();
+
+    // creates an object {name1: val1, ...} from our [{name1,val1}, ...] array for faster access
+    return extracted.reduce((c, x) => { c[x.name] = x.text; return c; }, {});
+}
+
 module.exports = {
     pages: content,
     faqs: FAQContent,
-    mupitStructures: mupitStructures
+    mupitStructures: mupitStructures,
+    parseTooltips: parseTooltips
 };

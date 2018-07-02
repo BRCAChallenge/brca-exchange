@@ -3,13 +3,27 @@
 'use strict';
 
 import React from "react";
+import {OverlayTrigger, Popover} from "react-bootstrap";
 
 const KeyInline = React.createClass({
     render() {
-        const {onClick, tableKey} = this.props;
+        const { onClick, tableKey, tooltip, noHelpLink} = this.props;
+
+        if (noHelpLink || !tooltip) {
+            return <td className='help-target'><b>{tableKey}</b></td>;
+        }
+
+        const popper = (
+            <Popover title={tableKey}>
+                <span dangerouslySetInnerHTML={{__html: tooltip}} />
+            </Popover>
+        );
+
         return (
             <td className='help-target'>
-                <span className="help-target-inline" onClick={onClick}>{tableKey}</span>
+                <OverlayTrigger placement='bottom' overlay={popper}>
+                    <span className="help-target-inline" onClick={onClick}>{tableKey}</span>
+                </OverlayTrigger>
             </td>
         );
     }
