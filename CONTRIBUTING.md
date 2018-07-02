@@ -1,5 +1,13 @@
 # Contributing Guide
 
+## Best Practices
+
+ * [The Hitchhiker's Guide to Python](http://docs.python-guide.org/en/latest/)
+ * [The Best of the Best Practices (BOBP) Guide for Python](https://gist.github.com/sloria/7001839)
+ * [Software Entropy](https://pragprog.com/the-pragmatic-programmer/extracts/software-entropy)
+
+Please aim to keep files under 500 lines long. If additional code is required, modularize! While this isn't always possible, and there are existing exceptions in the codebase, let's tidy things up moving forward :)
+
 ## Pull Request Guidelines
 
 Before submitting a pull request, please make sure to meet the following criteria:
