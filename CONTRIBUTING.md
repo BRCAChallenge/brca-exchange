@@ -3,10 +3,16 @@
 ## Best Practices
 
  * [The Hitchhiker's Guide to Python](http://docs.python-guide.org/en/latest/)
+ * [PEP 8 -- the Style Guide for Python Code](http://pep8.org/)
  * [The Best of the Best Practices (BOBP) Guide for Python](https://gist.github.com/sloria/7001839)
  * [Software Entropy](https://pragprog.com/the-pragmatic-programmer/extracts/software-entropy)
 
-Please aim to keep files under 500 lines long. If additional code is required, modularize! While this isn't always possible, and there are existing exceptions in the codebase, let's tidy things up moving forward :)
+Some simple rules of thumb:
+
+ * Refer to the PEP 8 style guide for specifics on Python.
+ * Please aim to keep files under 500 lines long. If additional code is required, modularize!
+
+Following guidelines isn't always possible (or practical), and there are existing exceptions in the codebase, but let's tidy things up moving forward :)
 
 ## Pull Request Guidelines
 
@@ -106,7 +112,7 @@ If you do not have write permissions, but would like to make a contribution, ple
 >
 >```shell
 ># Rebase all commits on your development branch
->git checkout 
+>git checkout
 >git rebase -i master
 >```
 >
