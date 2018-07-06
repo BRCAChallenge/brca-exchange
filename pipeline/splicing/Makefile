@@ -16,6 +16,10 @@ debug:
 		-v `pwd`:/app \
 		$(USER)-splicing-pipeline
 
+test:
+	# Run a short test from within the docker container
+	python calcVarPriors.py test short
+
 references:
 	# Download and install references
 	docker run --rm -it \
@@ -30,9 +34,13 @@ short:
 		-v `readlink -f ~/references/splicing`:/references:ro \
 		$(USER)-splicing-pipeline test short
 
-test:
-	# Run a short test from within the docker container
-	python calcVarPriors.py test short
+long:
+	# Run a long test using the docker container with 22 cores
+	docker pull brcachallenge/splicing-pipeline:latest
+	docker run --rm -it \
+		--user=`id -u`:`id -g` \
+		-v `readlink -f ~/references/splicing`:/references:ro \
+		brcachallenge/splicing-pipeline:latest test long -p 22 
 
 vep:
 	# Run a single request through local vep

@@ -3500,12 +3500,15 @@ def calc(args):
     try:
         calculatedVariants = pool.map(calc_one, list(inputData))
         pool.close()
-
-        # Sort output as the order of p.map is not deterministic
-        outputData.writerows(sorted(calculatedVariants, key=lambda d: d["HGVS_cDNA"]))
     except KeyboardInterrupt:
         pool.terminate()
         pool.join()
+
+    # Sort output as the order of p.map is not deterministic
+    # outputData.writerows(sorted(calculatedVariants, key=lambda d: d["HGVS_cDNA"]))
+    outputData.writerows(sorted(
+        calculatedVariants,
+        key=lambda d: "{0}:g.{1}:{2}>{3}".format(d["Chr"], d["Pos"], d["Ref"], d["Alt"])))
 
 
 def run(command):
