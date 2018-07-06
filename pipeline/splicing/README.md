@@ -43,9 +43,11 @@ Output:
 	================ test session starts ================
 	...
 	=========== 267 passed in 1.14 seconds =============
-	variant 1 complete
-	...
-	variant 8 complete
+	Processing using 8 processes
+	c.7007+3a>C:splice_donor_variant
+	c.7007+6a>T:splice_donor_variant
+	c.7006C>G:splice_donor_variant
+	c.7976G>T:CI_splice_donor_variant
 	/tmp/priors_short.tsv: OK
 
 Calculate:
@@ -74,6 +76,8 @@ You will end up with a shell inside the container but running the code mapped fr
 
 # Notes
 The file brcaPase.py contains the class for parsing through the .tsv file from the BRCA Exchange website. The class takes the mutations in the Ref column and creates a new variant sequence for MaxEntScan to parse through and generate MaxEntScores for variants.
+
+By default the pipeline spins up 8 processes for computation. To increase this use the --processes option.
 
 Run the docker with -h to see the various other options:
 

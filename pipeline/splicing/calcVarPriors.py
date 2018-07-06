@@ -17,6 +17,7 @@ import re
 import subprocess
 import tempfile
 import os
+import multiprocessing
 import pytest
 import pyhgvs
 import pyhgvs.utils as pyhgvs_utils
@@ -245,6 +246,7 @@ def _make_request(url):
 
     return req.json()
 
+
 def getVarConsequences(variant):
     '''
     Given a variant, uses Ensembl VEP API to get variant consequences
@@ -252,71 +254,41 @@ def getVarConsequences(variant):
     using variant chromosome, Hg38 start, Hg38 end, and alternate allele as input for API
     returns a string detailing consequences of variant
     '''
-    ext = "/vep/human/region/"
 
     # varStrand always 1 because all alternate alleles and positions refer to the plus strand
     varStrand = 1
     varAlt = variant["Alt"]
-    
+
     if variant["Chr"] not in ["13", "17"]:
         return "unable_to_determine"
     else:
         for base in varAlt:
             # API only works for alt alleles that are composed of the 4 canonical bases
             if base not in ["A", "C", "G", "T"]:
-                return "unable_to_determine"     
-           
-        query = "%s:%s-%s:%s/%s?" % (variant["Chr"], variant["Hg38_Start"],
-                                     variant["Hg38_End"], varStrand, varAlt)
-    
-        # # Query remove vep server
-        # remote_result = ""
-        # req_url = SERVER+ext+query
-        # jsonOutput = _make_request(req_url)
-    
-        # assert(len(jsonOutput) == 1)
-        # assert(jsonOutput[0].has_key("transcript_consequences"))
-        # # below is to extract variant consequence from json file
-        # for gene in jsonOutput[0]["transcript_consequences"]:
-        #     if gene.has_key("transcript_id"):
-        #         # need to filter for canonical BRCA1 transcript
-        #         if re.search(BRCA1_CANONICAL, gene["transcript_id"]):
-        #             remote_result = gene["consequence_terms"][0]
-        #         # need to filter for canonical BRCA2 transcript
-        #         elif re.search(BRCA2_CANONICAL, gene["transcript_id"]):
-        #             remote_result = gene["consequence_terms"][0]
-        #     else:
-        #         print("ERROR: Unable to lookup remote vep consequence")
-        #         remote_result = ""
+                return "unable_to_determine"
 
+        query = "%s:%s-%s:%s/%s" % (variant["Chr"], variant["Hg38_Start"],
+                                    variant["Hg38_End"], varStrand, varAlt)
         # Query local vep using query minus '?' character
         cmd = ["vep", "--cache", "--dir_cache", "/references/vep/",
                "--no_stats", "--offline", "--fasta", "/references/hg38.fa",
-               "--output_file", "STDOUT", "--json", "--input_data", query[:-1]]
+               "--output_file", "STDOUT", "--json", "--input_data", query]
         vep = json.loads(subprocess.check_output(cmd))
 
         for gene in vep["transcript_consequences"]:
-            if gene.has_key("transcript_id"):
+            if "transcript_id" in gene:
                 # need to filter for canonical BRCA1 transcript
                 if re.search(BRCA1_CANONICAL, gene["transcript_id"]):
                     # return gene["consequence_terms"][0]
-                    local_result = gene["consequence_terms"][0]
-                    break
+                    return gene["consequence_terms"][0]
                 # need to filter for canonical BRCA2 transcript
                 elif re.search(BRCA2_CANONICAL, gene["transcript_id"]):
                     # return gene["consequence_terms"][0]
-                    local_result = gene["consequence_terms"][0]
-                    break
-            else:
-                print("ERROR: Unable to lookup local vep consequence")
-                local_result = ""
+                    return gene["consequence_terms"][0]
 
-        # Verify remote and local match
-        # if remote_result != local_result:
-        #     print("VEP Error Remote={} vs. Local={}".format(remote_result, local_result))
+        return "unable_to_determine"
 
-        return local_result
-    
+
 def getVarType(variant):
     '''
     Returns a string describing type of variant 
@@ -865,7 +837,7 @@ def getZScore(maxEntScanScore, donor=False):
     If donor is True, uses splice donor mean and std
     If donor is False, uses splice acceptor mean and std
     '''
-    stdMeanData = json.load(open(os.path.join(os.path.dirname(__file__), 'brca.zscore.json')))
+    stdMeanData = json.load(open(os.path.join(os.path.dirname(__file__), 'brca.zscore.json'), "r"))
     if donor == False:
         std = stdMeanData["acceptors"]["std"]
         mean = stdMeanData["acceptors"]["mean"]
@@ -3478,20 +3450,42 @@ def getVarDict(variant, boundaries):
 
     return varDict
 
+
+genome38 = None
+brca1Transcript = None
+brca2Transcript = None
+
+
+def calc_one(variant):
+    global genome38, brca1Transcript, brca2Transcript
+    try:
+        variantData = csv.DictReader(open("mod_res_dn_brca20160525.txt", "r"), delimiter="\t")
+        if variant["Gene_Symbol"] == "BRCA1":
+            varData = getVarData(variant, "enigma", variantData, genome38, brca1Transcript)
+        elif variant["Gene_Symbol"] == "BRCA2":
+            varData = getVarData(variant, "enigma", variantData, genome38, brca2Transcript)
+            print("{}:{}".format(variant["HGVS_cDNA"], varData["varLoc"]))
+        return addVarDataToRow(varData, variant)
+    except KeyboardInterrupt:
+        pass
+
+
 def calc(args):
+    global genome38, brca1Transcript, brca2Transcript
     inputData = csv.DictReader(open(args.inputFile, "r"), delimiter="\t")
     fieldnames = inputData.fieldnames
     newHeaders = open("headers.tsv", "r").read().split()
     for header in newHeaders:
         fieldnames.append(header)
-    outputData = csv.DictWriter(open(args.outputFile, "w"), delimiter="\t", fieldnames=fieldnames)
-    outputData.writerow(dict((fn,fn) for fn in inputData.fieldnames))
+    outputData = csv.DictWriter(open(args.outputFile, "w"), delimiter="\t",
+                                lineterminator="\n", fieldnames=fieldnames)
+    outputData.writerow(dict((fn, fn) for fn in inputData.fieldnames))
 
     # read genome sequence
     genome38 = SequenceFileDB(args.genomeFile)
 
     # read RefSeq transcripts
-    with open(args.transcriptFile) as infile:
+    with open(args.transcriptFile, "r") as infile:
         transcripts = pyhgvs_utils.read_transcripts(infile)
 
     def get_transcript(name):
@@ -3500,17 +3494,19 @@ def calc(args):
     brca1Transcript = get_transcript(BRCA1_RefSeq)
     brca2Transcript = get_transcript(BRCA2_RefSeq)
 
-    totalVariants = 0
-    for variant in inputData:
-        variantData = csv.DictReader(open(args.variantFile, "r"), delimiter="\t")
-        if variant["Gene_Symbol"] == "BRCA1":
-            varData = getVarData(variant, args.boundaries, variantData, genome38, brca1Transcript)
-        elif variant["Gene_Symbol"] == "BRCA2":
-            varData = getVarData(variant, args.boundaries, variantData, genome38, brca2Transcript)
-        variant = addVarDataToRow(varData, variant)
-        outputData.writerow(variant)
-        totalVariants += 1
-        print "variant", totalVariants, "complete"
+    # Create a pool of processes and calculate in parallel
+    print("Processing using {} processes".format(args.processes))
+    pool = multiprocessing.Pool(args.processes)
+    try:
+        calculatedVariants = pool.map(calc_one, list(inputData))
+        pool.close()
+
+        # Sort output as the order of p.map is not deterministic
+        outputData.writerows(sorted(calculatedVariants, key=lambda d: d["HGVS_cDNA"]))
+    except KeyboardInterrupt:
+        pool.terminate()
+        pool.join()
+
 
 def run(command):
     process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
@@ -3520,11 +3516,12 @@ def run(command):
             print(line)
         else:
             break
-    
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Calculates splice site priors from a list of variants")
-    parser.add_argument("command", 
+    parser.add_argument("command",
                         help="references, test short, test long or calc")
 
     parser.add_argument("inputFile", nargs="?", help="Input variant file")
@@ -3532,13 +3529,15 @@ if __name__ == "__main__":
 
     parser.add_argument('-v', "--variantFile", default="mod_res_dn_brca20160525.txt",
                         help="File containing protein priors for variants")
+    parser.add_argument('-p', "--processes", type=int, default=8,
+                        help="Number of processes to use")
     parser.add_argument('-b', "--boundaries", default="enigma",
-                        help="Boundaries ('enigma' or 'priors') to use for clinically important domains")
+                        help="Boundaries ('enigma' or 'priors') for clinically important domains")
     parser.add_argument('-g', "--genomeFile", default="/references/hg38.fa",
                         help="Fasta file containing hg38 reference genome")
-    parser.add_argument('-t', "--transcriptFile", default="refseq_annotation.hg38.gp", 
+    parser.add_argument('-t', "--transcriptFile", default="refseq_annotation.hg38.gp",
                         help="RefSeq annotation hg38-based genepred file")
-    args = parser.parse_args() 
+    args = parser.parse_args()
 
     # REMIND: Hack way to parts commands, should use sub-argument parser
     if args.command == "references":
