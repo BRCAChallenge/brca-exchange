@@ -85,7 +85,7 @@ const deNovoImpactFields = [
             {
                 /* special case #1: de novo donor */
                 check: (data) => data.denovo.variant.zScore > data.denovo.closest.zScore,
-                text: (<span>This variant was promoted one category because the Z score for the mutant is higher than the z score of the alternative donor sequence of this exon.</span>)
+                text: (<span>This variant was promoted one category because the Z score for the de novo splice site introduced by the variant is higher than the z score of the altered wild type donor sequence of this exon.</span>)
             },
             {
                 check: () => true, // the default option, if reached
