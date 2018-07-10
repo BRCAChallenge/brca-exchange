@@ -31,6 +31,7 @@ const context = {
         irrelevant: 0.02
     },
     silentVal: 0.02,
+    nonsenseGrayZonVal: 0.5,
     nonsenseVal: 0.99
 };
 
@@ -95,7 +96,14 @@ export default class ProteinLevelSubtile extends React.Component {
                         <div className="value-field">{context.silentVal}</div>
                     </div>
 
-                    <div className={rowClasses(context.nonsenseVal, probability)} style={{marginTop: '1em'}}>
+                    <div className={rowClasses(context.nonsenseGrayZonVal, probability)} style={{marginTop: '1em'}}>
+                        <div className="label-field missense-header borderless">
+                            Nonsense in Grey Zone
+                        </div>
+                        <div className="value-field">{context.nonsenseGrayZonVal}</div>
+                    </div>
+
+                    <div className={rowClasses(context.nonsenseVal, probability)} style={{marginTop: '0em'}}>
                         <div className={labelClasses(context.nonsenseVal)}>
                             Nonsense
                         </div>
