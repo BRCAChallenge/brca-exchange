@@ -166,14 +166,13 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "BIC": BIC_FIELDS}
 
 
-LIST_TYPE_FIELDS = { "SCV_Version", # Clinvar
-                     "DateLastUpdated", # ClinVar
-                     "Number_Reported" # BIC
-                     }
+LIST_TYPE_FIELDS = {
+    "individuals", # LOVD
+    "SCV", # Clinvar, treating it as list, to have the same order as with SCV_Version
+    "SCV_Version"
+}
 
-SUM_TYPE_FIELDS = {
-    "individuals" # LOVD
-    }
+SUM_TYPE_FIELDS = {}
 
 # Enigma filename is different depending on which version of output data is used.
 ENIGMA_FILE = "ENIGMA_combined_with_bx_ids.tsv"
