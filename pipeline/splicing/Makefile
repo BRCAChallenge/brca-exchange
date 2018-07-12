@@ -1,3 +1,8 @@
+# Host path where references should be stored - symlink tolerant
+REFERENCES = $(shell readlink -f ~/references/splicing)
+
+default: build references short
+
 build:
 	# Build and tag the image prefixed by user to avoid conflicts on shared machines
 	docker build -t $(USER)-splicing-pipeline .
@@ -12,7 +17,7 @@ debug:
 	docker run --rm -it \
 		--entrypoint /bin/bash \
 		--user=`id -u`:`id -g` \
-		-v `readlink -f ~/references/splicing`:/references \
+		-v `readlink -f $(REFERENCES)`:/references \
 		-v `pwd`:/app \
 		$(USER)-splicing-pipeline
 
@@ -22,16 +27,17 @@ test:
 
 references:
 	# Download and install references
+	mkdir -p $(REFERENCES)
 	docker run --rm -it \
 		--user=`id -u`:`id -g` \
-		-v `readlink -f ~/references/splicing`:/references \
+		-v `readlink -f $(REFERENCES)`:/references \
 		$(USER)-splicing-pipeline references
 
 short:
 	# Run a short test using the docker container
 	docker run --rm -it \
 		--user=`id -u`:`id -g` \
-		-v `readlink -f ~/references/splicing`:/references:ro \
+		-v `readlink -f $(REFERENCES)`:/references:ro \
 		$(USER)-splicing-pipeline test short
 
 long:
@@ -39,7 +45,7 @@ long:
 	docker pull brcachallenge/splicing-pipeline:latest
 	docker run --rm -it \
 		--user=`id -u`:`id -g` \
-		-v `readlink -f ~/references/splicing`:/references:ro \
+		-v `readlink -f $(REFERENCES)`:/references:ro \
 		brcachallenge/splicing-pipeline:latest test long -p 22 
 
 vep:
