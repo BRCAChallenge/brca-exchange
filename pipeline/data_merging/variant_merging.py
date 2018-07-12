@@ -165,14 +165,11 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "ESP": ESP_FIELDS,
               "BIC": BIC_FIELDS}
 
-
 LIST_TYPE_FIELDS = {
     "individuals", # LOVD
     "SCV", # Clinvar, treating it as list, to have the same order as with SCV_Version
     "SCV_Version"
 }
-
-SUM_TYPE_FIELDS = {}
 
 # Enigma filename is different depending on which version of output data is used.
 ENIGMA_FILE = "ENIGMA_combined_with_bx_ids.tsv"
@@ -420,12 +417,6 @@ def get_bx_id_column_indexes(columns):
         if "BX_ID" in column:
             bx_id_column_indexes[column] = i
     return bx_id_column_indexes
-
-# TODO: should be used in normalize_values
-def normalize_none(value, default=DEFAULT_CONTENTS):
-    if value is None or value == '' or value == '-':
-        return default
-    return value
 
 
 def normalize_values(value):
@@ -712,34 +703,31 @@ def repeat_merging(f_in, f_out):
         else:
             num_repeats += 1
             for key in record.INFO:
-                # record.INFO : str -> singleton lists
-
                 if key not in variant_dict[genome_coor].INFO.keys():
                     variant_dict[genome_coor].INFO[key] = deepcopy(record.INFO[key])
                 else:
                     new_value = deepcopy(record.INFO[key])
                     old_value = deepcopy(variant_dict[genome_coor].INFO[key])
 
-                    if type(old_value) != list:
-                        old_value = list(old_value)
                     if type(new_value) != list:
-                        new_value = list(new_value)
-
-                    if key in LIST_TYPE_FIELDS:
-                        old_value.extend(new_value)
-                        merged_value = old_value
-                    elif key in SUM_TYPE_FIELDS:
-                        total = int(normalize_none(old_value[0], 0)) + \
-                                int(normalize_none(new_value[0], 0))
-                        merged_value = [total]
+                        new_value = [new_value]
+                    if type(old_value) != list:
+                        old_value = [old_value]
+                    if new_value == old_value:
+                        continue
                     else:
-                        merged_value = list(set(new_value + old_value))
+                        if key in LIST_TYPE_FIELDS:
+                            '''
+                            For instance, LOVD individuals field values are all
+                            meaningful even if repeated e.g. if two LOVD
+                            submissions for the same variant each have one individual associated with them,
+                            "1,1" is a more sensible value for the variant than "1" since 2 individuals are associated.
+                            '''
+                            merged_value = list(new_value + old_value)
+                        else:
+                            merged_value = list(set(new_value + old_value))
                         variant_dict[genome_coor].INFO[key] = deepcopy(merged_value)
-
-                    variant_dict[genome_coor].INFO[key] = deepcopy(merged_value)
-
     print "number of repeat records: ", num_repeats, "\n"
-
     vcf_writer = vcf.Writer(f_out, vcf_reader)
     for record in variant_dict.values():
         vcf_writer.write_record(record)
