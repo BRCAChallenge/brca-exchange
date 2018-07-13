@@ -4,6 +4,7 @@ biopython==1.67
 bioutils==0.1.4
 bx-python==0.7.3
 certifi==2016.8.2
+click==6.7
 configparser==3.5.0
 CrossMap==0.2.6
 Cython==0.24.1
