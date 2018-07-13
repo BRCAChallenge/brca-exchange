@@ -17,6 +17,7 @@ import json
 import subprocess
 import tempfile
 import os
+import click
 import multiprocessing
 import pytest
 import pyhgvs
@@ -3447,6 +3448,8 @@ def getVarDict(variant, boundaries):
     return varDict
 
 
+# Globals accessed in multi-processing function calc_one
+# REMIND: Use functools.partial to pass direction into the map function
 genome38 = None
 brca1Transcript = None
 brca2Transcript = None
@@ -3466,36 +3469,28 @@ def calc_one(variant):
         pass
 
 
-def calc(args):
+def calc_all(variants, priors, genome, transcripts, processes):
     global genome38, brca1Transcript, brca2Transcript
-    inputData = csv.DictReader(open(args.inputFile, "r"), delimiter="\t")
+    inputData = csv.DictReader(variants, delimiter="\t")
     fieldnames = inputData.fieldnames
     newHeaders = open("headers.tsv", "r").read().split()
     for header in newHeaders:
         fieldnames.append(header)
-    outputData = csv.DictWriter(open(args.outputFile, "w"), delimiter="\t",
-                                lineterminator="\n", fieldnames=fieldnames)
+    outputData = csv.DictWriter(priors, delimiter="\t", lineterminator="\n", fieldnames=fieldnames)
     outputData.writerow(dict((fn, fn) for fn in inputData.fieldnames))
 
     # read genome sequence
     genome38 = SequenceFileDB(genome)
 
     # read RefSeq transcripts
-    with open(args.transcriptFile, "r") as infile:
-        transcripts = pyhgvs_utils.read_transcripts(infile)
+    transcripts = pyhgvs_utils.read_transcripts(transcripts)
 
-@cli.command()
-@click.argument("variants", type=click.File("r"))
-@click.argument("priors", type=click.File("w"))
-@click.pass_context
-def calc(ctx, variants, priors):
-    calc_all(variants, priors,
-             ctx.obj["genome"], ctx.obj["transcripts"], ctx.obj["processes"])
-
+    brca1Transcript = transcripts.get(BRCA1_RefSeq)
+    brca2Transcript = transcripts.get(BRCA2_RefSeq)
 
     # Create a pool of processes and calculate in parallel
-    print("Processing using {} processes".format(args.processes))
-    pool = multiprocessing.Pool(args.processes)
+    print("Processing using {} processes".format(processes))
+    pool = multiprocessing.Pool(processes)
     try:
         calculatedVariants = pool.map(calc_one, list(inputData))
         pool.close()
@@ -3520,43 +3515,48 @@ def run(command):
             break
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Calculates splice site priors from a list of variants")
-    parser.add_argument("command",
-                        help="references, test short, test long or calc")
+@click.group()
+@click.option("--genome", type=click.Path(exists=True), default="/references/hg38.fa",
+              help="Fasta file containing hg38 reference genome")
+@click.option("--transcripts", type=click.File("r"), default="refseq_annotation.hg38.gp",
+              help="RefSeq annotation hg38-based genepred file")
+@click.option("--processes", type=int, default=8,
+              help="Number of processes to use")
+@click.pass_context
+def cli(ctx, genome, transcripts, processes):
+    ctx.obj = {"genome": genome, "transcripts": transcripts, "processes": processes}
 
-    parser.add_argument("inputFile", nargs="?", help="Input variant file")
-    parser.add_argument("outputFile", nargs="?", help="Output priors file")
 
-    parser.add_argument('-v', "--variantFile", default="mod_res_dn_brca20160525.txt",
-                        help="File containing protein priors for variants")
-    parser.add_argument('-p', "--processes", type=int, default=8,
-                        help="Number of processes to use")
-    parser.add_argument('-b', "--boundaries", default="enigma",
-                        help="Boundaries ('enigma' or 'priors') for clinically important domains")
-    parser.add_argument('-g', "--genomeFile", default="/references/hg38.fa",
-                        help="Fasta file containing hg38 reference genome")
-    parser.add_argument('-t', "--transcriptFile", default="refseq_annotation.hg38.gp",
-                        help="RefSeq annotation hg38-based genepred file")
-    args = parser.parse_args()
+@cli.command()
+def references():
+    run("./references.sh")
 
-    # REMIND: Hack way to parts commands, should use sub-argument parser
-    if args.command == "references":
-        run("./references.sh")
-    elif args.command == "test" and args.inputFile == "short":
-        pytest.main(["-p", "no:cacheprovider", "-x", "."])
-        args.inputFile = "tests/variants_short.tsv"
-        args.outputFile = "/tmp/priors_short.tsv"
-        calc(args)
+
+@cli.command(help="Run self test")
+@click.argument("length", type=click.Choice(["short", "long"]))
+@click.pass_context
+def test(ctx, length):
+    pytest.main(["-p", "no:cacheprovider", "-x", "."])
+    if length == "short":
+        calc_all(click.open_file("tests/variants_short.tsv", mode="r"),
+                 click.open_file("/tmp/priors_short.tsv", mode="w"),
+                 ctx.obj["genome"], ctx.obj["transcripts"], ctx.obj["processes"])
         run("md5sum -c ./tests/md5/priors_short.md5")
-    elif args.command == "test" and args.inputFile == "long":
-        pytest.main(["-p", "no:cacheprovider", "-x", "."])
-        args.inputFile = "tests/variants_long.tsv"
-        args.outputFile = "/tmp/priors_long.tsv"
-        calc(args)
-        run("md5sum -c ./tests/md5/priors_long.md5")
-    elif args.command == "calc" and (args.inputFile and args.outputFile):
-        calc(args)
     else:
-        parser.print_help()
+        calc_all(click.open_file("tests/variants_long.tsv", mode="r"),
+                 click.open_file("/tmp/priors_long.tsv", mode="w"),
+                 ctx.obj["genome"], ctx.obj["transcripts"], ctx.obj["processes"])
+        run("md5sum -c ./tests/md5/priors_long.md5")
+
+
+@cli.command()
+@click.argument("variants", type=click.File("r"))
+@click.argument("priors", type=click.File("w"))
+@click.pass_context
+def calc(ctx, variants, priors):
+    calc_all(variants, priors,
+             ctx.obj["genome"], ctx.obj["transcripts"], ctx.obj["processes"])
+
+
+if __name__ == "__main__":
+    cli()
