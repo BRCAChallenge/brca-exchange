@@ -3517,7 +3517,7 @@ def run(command):
 
 
 @click.group()
-@click.option("--genome", type=click.Path(exists=True), default="/references/hg38.fa",
+@click.option("--genome", type=click.Path(exists=False), default="/references/hg38.fa",
               help="Fasta file containing hg38 reference genome")
 @click.option("--transcripts", type=click.File("r"), default="refseq_annotation.hg38.gp",
               help="RefSeq annotation hg38-based genepred file")
