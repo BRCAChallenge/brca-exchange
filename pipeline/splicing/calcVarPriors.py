@@ -15,8 +15,6 @@ import requests
 import time
 import json
 import subprocess
-import tempfile
-import os
 import click
 import multiprocessing
 import pytest
@@ -3463,7 +3461,7 @@ def calc_one(variant):
             varData = getVarData(variant, "enigma", variantData, genome38, brca1Transcript)
         elif variant["Gene_Symbol"] == "BRCA2":
             varData = getVarData(variant, "enigma", variantData, genome38, brca2Transcript)
-            print("{}:{}".format(variant["HGVS_cDNA"], varData["varLoc"]))
+            click.echo("{}:{}".format(variant["HGVS_cDNA"], varData["varLoc"]), err=True)
         return addVarDataToRow(varData, variant)
     except KeyboardInterrupt:
         pass
@@ -3489,7 +3487,7 @@ def calc_all(variants, priors, genome, transcripts, processes):
     brca2Transcript = transcripts.get(BRCA2_RefSeq)
 
     # Create a pool of processes and calculate in parallel
-    print("Processing using {} processes".format(processes))
+    click.echo("Processing using {} processes".format(processes), err=True)
     pool = multiprocessing.Pool(processes)
     try:
         calculatedVariants = pool.map(calc_one, list(inputData))
@@ -3510,7 +3508,7 @@ def run(command):
     while True:
         line = process.stdout.readline().rstrip()
         if line:
-            print(line)
+            click.echo(line, err=True)
         else:
             break
 
