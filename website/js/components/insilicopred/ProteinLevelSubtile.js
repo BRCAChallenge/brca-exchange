@@ -48,6 +48,14 @@ export default class ProteinLevelSubtile extends React.Component {
     render() {
         const {probability} = this.props;
 
+        if (probability === 'N/A') {
+            return (
+                <div className="subtile-container">
+                The Protein-level estimation is not applicable because the variant is not inside an exon, and thus is not associated with estimated protein-level impact.
+                </div>
+            )
+        }
+
         return (
             <div className="subtile-container">
                 <div className="protein-level-estimation" style={{border: 'solid 1px #eee', borderRight: 'none'}}>
