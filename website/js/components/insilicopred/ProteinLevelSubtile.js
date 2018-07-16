@@ -53,7 +53,7 @@ export default class ProteinLevelSubtile extends React.Component {
                 <div className="subtile-container">
                 The Protein-level estimation is not applicable because the variant is not inside an exon, and thus is not associated with estimated protein-level impact.
                 </div>
-            )
+            );
         }
 
         return (
