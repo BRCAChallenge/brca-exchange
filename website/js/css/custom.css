@@ -950,6 +950,11 @@ div.variant-detail-group .variantfield-empty {
     display: none;
 }
 
+/* overrides bootstrap's min-height so empty groups can be completely hidden */
+div.variant-detail-group {
+    min-height: 0;
+}
+
 div.variant-detail-group .group-empty {
     display: none;
 }
