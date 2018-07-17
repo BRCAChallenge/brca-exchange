@@ -63,14 +63,15 @@ export default class CollapsibleTile extends React.Component {
         const {fieldExpansions} = this.state;
 
         // TODO: figure out how to determine if everything is empty even though variant is in 10KG or ExAC
-        const allEmpty = false;
+        const allEmpty = this.props.allEmpty;
 
         // create the source panel itself now
         const groupVisID = `group-panel-${this.props.groupTitle}`;
+        console.log(groupVisID);
         const header = (
             <h3 style={{display: 'flex', flexDirection: 'row'}}>
                 <a style={{flexGrow: 1}} href="#" onClick={(event) => this.props.onChangeGroupVisibility(groupVisID, event)}>
-                    {this.props.groupTitle}
+                    {this.props.displayTitle || this.props.groupTitle}
                 </a>
 
                 <a title='collapse all fields'
