@@ -67,6 +67,7 @@ export default class CollapsibleTile extends React.Component {
 
         // create the source panel itself now
         const groupVisID = `group-panel-${this.props.groupTitle}`;
+        console.log(groupVisID);
         const header = (
             <h3 style={{display: 'flex', flexDirection: 'row'}}>
                 <a style={{flexGrow: 1}} href="#" onClick={(event) => this.props.onChangeGroupVisibility(groupVisID, event)}>
