@@ -12,54 +12,7 @@ import ProteinLevelSubtile from "./ProteinLevelSubtile";
 import InSilicoPredSubtile from "./InSilicoPredSubtile";
 import {isNumeric} from "../../util";
 
-/*
-const mockData = {
-    varLoc: 'Exon',
-    applicablePrior: 0.03, // derived from max(proteinPrior, max(refDonorPrior, deNovoDonorPrior, refAccPrior))
-    proteinPrior: 0.02,
-
-    refDonorPrior: 0.04,
-    deNovoDonorPrior: 0.02,
-    refAccPrior: 'n/a',
-
-    // due to donor damage
-    refRefDonorSeq: 'TTGgtaaaa',
-    refRefDonorMES: 3.23,
-    refRefDonorZ: -3.293,
-    altRefDonorSeq: 'TTGgaaaaa',
-    altRefDonorMES: -4.95,
-    altRefDonorZ: -5.6,
-
-    // due to de novo donor
-    refDeNovoDonorSeq: 'ACTGTGAGA',
-    refDeNovoDonorMES: -0.91,
-    refDeNovoDonorZ: -3.80,
-    altDeNovoDonorSeq: 'ACGgtgaga',
-    altDeNovoDonorMES: 5.64,
-    altDeNovoDonorZ: 0.4,
-    deNovoDonorTranscriptSplicePos: '64',
-    deNovoDonorGenomicSplicePos: '64',
-
-    closestDonorRefSeq: 'TGGgtaagg',
-    closestDonorRefMES: 9.08,
-    closestDonorRefZ: 0.46,
-    closestDonorAltSeq: 'TAGgtattg',
-    closestDonorAltMES: 5.46,
-    closestDonorAltZ: -0.99,
-    closestDonorTranscriptSplicePos: '67 + 1',
-    closestDonorGenomicSplicePos: '67 + 1',
-
-    // due to acceptor damage
-    refRefAccSeq: 'ttttcccttgtattttacagATG',
-    refRefAccMES: 11.68,
-    refRefAccZ: 1.51,
-    altRefAccSeq: 'ttttcccttgtattgtacagATG',
-    altRefAccMES: 8.91,
-    altRefAccZ: 0.38,
-};
-*/
-
-import examples from './insilico_tests.js';
+const examples = JSON.parse(require('raw-loader!./insilico_mock.min.json'));
 import {Panel} from "react-bootstrap";
 
 function extractSplicePayload(data, useTranscriptSplicePos) {
