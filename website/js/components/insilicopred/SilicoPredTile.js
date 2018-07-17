@@ -124,6 +124,10 @@ function numberify(x) {
     return isNumeric(x) ? x : -Infinity;
 }
 
+function normalizedProb(x) {
+    return x !== -Infinity ? x : 'N/A';
+}
+
 export default class SilicoPredTile extends React.Component {
     constructor(props) {
         super(props);
@@ -175,11 +179,14 @@ export default class SilicoPredTile extends React.Component {
         // restructure splicing-level props into a heirarchy so we don't have to pass them separately
         const splicingData = extractSplicePayload(mockData, true);
 
+        // flag this entire tile as empty if none of the subtiles will contain valid data
+        const allEmpty = [decidingProb, proteinPrior, splicingPrior].every(x => x === -Infinity);
+
         return (
-            <CollapsibleTile {...this.props}>
+            <CollapsibleTile allEmpty={allEmpty} {...this.props}>
                 <CollapsibleSection
                     fieldName={<span><i>In Silico</i> Probability of Pathogenicity</span>}
-                    extraHeaderItems={decidingProb}
+                    extraHeaderItems={normalizedProb(decidingProb)}
                     defaultVisible={true}
                 >
                     <InSilicoPredSubtile probability={decidingProb} reason={reason}
@@ -188,15 +195,15 @@ export default class SilicoPredTile extends React.Component {
 
                 <CollapsibleSection
                     fieldName="Protein-level Estimation"
-                    extraHeaderItems={mockData.proteinPrior}
+                    extraHeaderItems={normalizedProb(proteinPrior)}
                     defaultVisible={false}
                 >
-                    <ProteinLevelSubtile probability={mockData.proteinPrior} />
+                    <ProteinLevelSubtile probability={proteinPrior} />
                 </CollapsibleSection>
 
                 <CollapsibleSection
                     fieldName="Splicing-level Estimation"
-                    extraHeaderItems={splicingPrior !== -Infinity ? splicingPrior : 'N/A'}
+                    extraHeaderItems={normalizedProb(splicingPrior)}
                     defaultVisible={false}
                 >
                     <SplicingLevelSubtile

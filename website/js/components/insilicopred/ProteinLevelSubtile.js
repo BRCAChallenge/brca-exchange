@@ -4,6 +4,7 @@
 
 import React from "react";
 import classNames from "classnames";
+import {isNumeric} from "../../util";
 
 const mapValToColor = (v) => {
     if (v < 0.25) {
@@ -48,7 +49,7 @@ export default class ProteinLevelSubtile extends React.Component {
     render() {
         const {probability} = this.props;
 
-        if (probability === 'N/A') {
+        if (!isNumeric(probability) || probability === -Infinity) {
             return (
                 <div className="subtile-container">
                 The Protein-level estimation is not applicable because the variant is not inside an exon, and thus is not associated with estimated protein-level impact.

@@ -374,8 +374,8 @@ export default class SplicingLevelSubtile extends React.Component {
         if (!maxProbPanel) {
             // everything is N/A, so display a message corresponding to that
             return (
-                <div className="subtile-container splicing-subtile" style={{padding: '0px'}}>
-                    <div className="novalue-note">(No valid splicing-level estimation data was found.)</div>
+                <div className="subtile-container">
+                No valid splicing-level estimation data was found.
                 </div>
             );
         }
@@ -396,7 +396,11 @@ export default class SplicingLevelSubtile extends React.Component {
                                     <SpliceSiteImpactTable prior={data.donor.prior} variantZScore={data.donor.variant.zScore} type='donor' />
                                 </div>
                             )
-                            : <div className="novalue-note">(replace with reasons why this might be N/A)</div>
+                            : (
+                                <div className="novalue-note">
+                                Probability due to wild type donor impact is not applicable because this variant is not near, and thus does not affect, the wild type donor.
+                                </div>
+                            )
                     }
                     </TabPane>
 
@@ -409,7 +413,11 @@ export default class SplicingLevelSubtile extends React.Component {
                                     <DeNovoDonorPathogenicityTable prior={data.denovo.prior} data={data} />
                                 </div>
                             )
-                            : <div className="novalue-note">(replace with reasons why this might be N/A)</div>
+                            : (
+                                <div className="novalue-note">
+                                Probability due to de novo splice site creation is not applicable because the variant is too far from the wild type donor to be considered a possible de novo splice site.
+                                </div>
+                            )
                     }
                     </TabPane>
 
@@ -422,7 +430,11 @@ export default class SplicingLevelSubtile extends React.Component {
                                     <SpliceSiteImpactTable prior={data.acceptor.prior} variantZScore={data.acceptor.variant.zScore} type='acceptor' />
                                 </div>
                             )
-                            : <div className="novalue-note">(replace with reasons why this might be N/A)</div>
+                            : (
+                                <div className="novalue-note">
+                                Probability due to wild type acceptor impact is not applicable because this variant is not in, and thus does not affect, the wild type acceptor.
+                                </div>
+                            )
                     }
                     </TabPane>
                 </TabbedArea>

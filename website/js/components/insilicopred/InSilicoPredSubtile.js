@@ -64,6 +64,14 @@ export default class InSilicoPredSubtile extends React.Component {
             { title: 'Variant Type', prop: 'varType', value: 'Missense' }
         ];
 
+        if (probability === -Infinity) {
+            return (
+                <div className="subtile-container">
+                The overall probability is not able to be calculated because the variant is in a region of the gene that cannot be accounted for by this in silico model.
+                </div>
+            );
+        }
+
         // for each panel, construct key-value pairs as a row of the table
         const submitterRows = cols.map(({prop, title, value, helpKey}) => {
             const isEmptyValue = util.isEmptyField(value);
