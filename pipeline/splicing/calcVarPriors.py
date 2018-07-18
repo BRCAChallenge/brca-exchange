@@ -115,9 +115,6 @@ All values in these dictionaries are assigned either numerical values, "N/A", or
 BRCA1_CANONICAL = "ENST00000357654"
 BRCA2_CANONICAL = "ENST00000380152"
 
-# Rest Ensembl server
-SERVER = "http://rest.ensembl.org"
-
 # clinically important domain boundaries
 brca1CIDomains = {"enigma": {"ring": {"domStart": 43124096,
                                       "domEnd": 43104260},
