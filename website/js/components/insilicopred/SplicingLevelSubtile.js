@@ -326,16 +326,16 @@ export default class SplicingLevelSubtile extends React.Component {
     getMaxProb() {
         const data = this.props.data;
         const panes = [
-            {idx: 0, prior: isNumeric(data.donor.prior) ? data.donor.prior : -9999,
+            {idx: 0, prior: isNumeric(data.donor.prior) ? data.donor.prior : -Infinity,
                 reason: 'splice donor damage' },
-            {idx: 1, prior: isNumeric(data.denovo.prior) ? data.denovo.prior : -9999,
+            {idx: 1, prior: isNumeric(data.denovo.prior) ? data.denovo.prior : -Infinity,
                 reason: 'de novo donor splice site creation' },
-            {idx: 2, prior: isNumeric(data.acceptor.prior) ? data.acceptor.prior : -9999,
+            {idx: 2, prior: isNumeric(data.acceptor.prior) ? data.acceptor.prior : -Infinity,
                 reason: 'splice acceptor damage' }
         ];
         const maxProb = Math.max(...panes.map(x => x.prior));
 
-        if (isNumeric(maxProb) && maxProb !== -9999) {
+        if (isNumeric(maxProb) && maxProb !== -Infinity) {
             return panes.find(x => x.prior === maxProb);
         }
         else {
