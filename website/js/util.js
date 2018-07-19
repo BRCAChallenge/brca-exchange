@@ -143,7 +143,8 @@ function getFormattedFieldByProp(prop, variant) {
         for (let i = 0; i < accessions.length; i++) {
             let displayText = accessions[i];
 
-            if (i < versions.length) {
+            if (i < versions.length && versions[i] != '-') {
+                // appending accession version if available
                 displayText = accessions[i].concat('.').concat(versions[i]);
             }
 
