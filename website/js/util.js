@@ -7,6 +7,7 @@ var _ = require('underscore');
 // keys that contain date values that need reformatting for the ui
 const dateKeys = [
     "Date_Last_Updated_ClinVar",
+    "DateSignificanceLastEvaluated_ClinVar",
     "Date_last_evaluated_ENIGMA",
     "Edited_date_LOVD",
     "Created_date_LOVD"
@@ -137,13 +138,20 @@ function getFormattedFieldByProp(prop, variant) {
     } else if (prop === "SCV_ClinVar" && variant[prop].toLowerCase().indexOf("scv") !== -1) {
         // Link all clinvar submissions back to clinvar
         let accessions = variant[prop].split(',');
+        let versions = variant["SCV_Version_ClinVar"].split(',');
         rowItem = [];
         for (let i = 0; i < accessions.length; i++) {
+            let displayText = accessions[i];
+
+            if (i < versions.length) {
+                displayText = accessions[i].concat('.').concat(versions[i]);
+            }
+
             if (i < (accessions.length - 1)) {
-                rowItem.push(<span><a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{accessions[i]}</a>, </span>);
+                rowItem.push(<span><a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{displayText}</a>,</span>);
             } else {
                 // exclude trailing comma
-                rowItem.push(<a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{accessions[i]}</a>);
+                rowItem.push(<a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{displayText}</a>);
             }
         }
     } else if (prop === "DBID_LOVD" && variant[prop].toLowerCase().indexOf("brca") !== -1) { // Link all dbid's back to LOVD

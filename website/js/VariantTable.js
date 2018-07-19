@@ -128,7 +128,10 @@ const researchModeGroups = [
 
                 // added these fields (redundantly?) b/c they're not noticeable in the header
                 {title: 'Clinical Significance', prop: 'Clinical_Significance_ClinVar'},
-                {title: 'Date Last Updated', prop: 'Date_Last_Updated_ClinVar'},
+                {title: 'Date Significance Last Evaluated', prop:
+                'DateSignificanceLastEvaluated_ClinVar'},
+                {title: 'Date Submission Last Updated', prop:
+                'Date_Last_Updated_ClinVar'},
 
                 {title: 'Submission Type', prop: 'Method_ClinVar'},
                 {title: 'SCV Accession', prop: 'SCV_ClinVar'},
@@ -358,6 +361,7 @@ const researchModeColumns = [
     {title: 'Comment on Clinical Significance (ENIGMA)', prop: 'Comment_on_clinical_significance_ENIGMA'},
     {title: 'Date last evaluated (ENIGMA)', prop: 'Date_last_evaluated_ENIGMA'},
     {title: 'Date last updated (ClinVar)', prop: 'Date_Last_Updated_ClinVar'},
+    {title: 'Date Significance Last Evaluated (ClinVar)', prop: 'DateSignificanceLastEvaluated_ClinVar'},
     {title: 'Has Discordant Evidence', prop: 'Discordant'},
     {title: 'Functional Analysis Result (LOVD)', prop: 'Functional_analysis_result_LOVD'},
     {title: 'Functional Analysis Method (LOVD)', prop: 'Functional_analysis_technique_LOVD'},
