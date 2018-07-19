@@ -19,8 +19,8 @@ import {capitalize, isNumeric} from "../../util";
 const splicingImpactFields = {
     fields: [
         { key: 'outside', label: 'Outside splice consensus region', prob: 0.02 },
-        { key: 'improved', label: 'Improved', prob: 0.04 },
-        { key: 'low', label: 'Weak/Null & Low', prob: 0.04 },
+        { key: 'improved', label: 'Improved', prob: 0.04, check: (data) => data.variant.zScore > data.wild.zScore },
+        { key: 'low', label: 'Weak/Null & Low', prob: 0.04, check: (data) => data.variant.zScore <= data.wild.zScore },
         { key: 'moderate', label: 'Moderate', prob: 0.34 },
         { key: 'high', label: 'High', prob: 0.97 }
     ],
@@ -52,7 +52,8 @@ const deNovoImpactFields = [
         impact: 'low',
         label: 'Innocuous IFD',
         zScoreLabel: 'n/a',
-        prob: 0.02
+        prob: 0.02,
+        check: (data) => data.variant.zScore > data.wild.zScore
     },
     {
         type: 'note',
@@ -63,7 +64,8 @@ const deNovoImpactFields = [
         impact: 'low',
         label: 'Weak/Null & Low',
         zScoreLabel: 'Z < -2',
-        prob: 0.02
+        prob: 0.02,
+        check: (data) => data.variant.zScore > data.wild.zScore
     },
     {
         type: 'value',
@@ -204,7 +206,7 @@ class SplicingOverviewTable extends React.Component {
 
 class SpliceSiteImpactTable extends React.Component {
     render() {
-        const {prior, type, variantZScore} = this.props;
+        const {prior, type, variantZScore, data} = this.props;
 
         let extraMessage = null;
 
@@ -236,7 +238,7 @@ class SpliceSiteImpactTable extends React.Component {
                 {
                     // FIXME: highlight row that matches the prior prob value
                     splicingImpactFields.fields.map(x =>
-                        <tr key={x.key} className={prior === x.prob ? 'highlighted' : ''}>
+                        <tr key={x.key} className={prior === x.prob && (!x.check || x.check(data)) ? 'highlighted' : ''}>
                             <td className={`pathos-prob-label-${x.key}`}>{x.label}</td>
                             <td>{splicingImpactFields.zScoreLabels[type][x.key]}</td>
                             <td>{x.prob}</td>
@@ -273,7 +275,7 @@ class DeNovoDonorPathogenicityTable extends React.Component {
                         switch(x.type) {
                             case 'value':
                                 return (
-                                    <tr key={i} className={prior === x.prob ? 'highlighted' : ''}>
+                                    <tr key={i} className={prior === x.prob && (!x.check || x.check(data)) ? 'highlighted' : ''}>
                                         <td className={`pathos-prob-label-${x.impact}`}>{x.label}</td>
                                         <td>{x.zScoreLabel}</td>
                                         <td>{x.prob.toFixed(2)}</td>
@@ -393,7 +395,9 @@ export default class SplicingLevelSubtile extends React.Component {
                             ? (
                                 <div className="tab-body">
                                     <SplicingOverviewTable data={data.donor} />
-                                    <SpliceSiteImpactTable prior={data.donor.prior} variantZScore={data.donor.variant.zScore} type='donor' />
+                                    <SpliceSiteImpactTable prior={data.donor.prior} variantZScore={data.donor.variant.zScore}
+                                        data={data.donor} type='donor'
+                                    />
                                 </div>
                             )
                             : (
@@ -427,7 +431,9 @@ export default class SplicingLevelSubtile extends React.Component {
                             ? (
                                 <div className="tab-body">
                                     <SplicingOverviewTable data={data.acceptor} />
-                                    <SpliceSiteImpactTable prior={data.acceptor.prior} variantZScore={data.acceptor.variant.zScore} type='acceptor' />
+                                    <SpliceSiteImpactTable prior={data.acceptor.prior} variantZScore={data.acceptor.variant.zScore}
+                                        data={data.acceptor} type='acceptor'
+                                    />
                                 </div>
                             )
                             : (
