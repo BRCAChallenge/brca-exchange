@@ -80,9 +80,7 @@ class TestStringMethods(unittest.TestCase):
                         "Allele_frequency_OTH_ExAC",
                         "Allele_frequency_SAS_ExAC",
                         "DateSignificanceLastEvaluated_ClinVar",
-                        "SCV_Version_ClinVar",
-                        "VariantAliasesHGVS_ClinVar",
-                        "VariantAliasesNucleotideChange_ClinVar"]
+                        "SCV_Version_ClinVar"]
 
         self.sources = aggregate_reports.FIELD_DICT.keys() + ["ENIGMA"]
         self.vcf_test_file = VCF_TESTDATA_FILENAME

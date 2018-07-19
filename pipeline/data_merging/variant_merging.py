@@ -64,9 +64,7 @@ CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "Description": "Description",
                   "Review_Status": "ReviewStatus",
                   "Summary_Evidence": "SummaryEvidence",
-                  "BX_ID": "BX_ID",
-                  "VariantAliasesHGVS": "VariantAliasesHGVS",
-                  "VariantAliasesNucleotideChange": "VariantAliasesNucleotideChange"}
+                  "BX_ID": "BX_ID"}
 
 '''
 NOTE: the following fields are no longer present in LOVD data following

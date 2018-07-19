@@ -77,19 +77,10 @@ class variant:
             print("Parsing variant", self.id)
         self.name = name
 
-        self.variantAliasesHGVS = []
-        self.variantAliasesNucleotideChange = []
-
         self.attribute = dict()
         for attrs in element.findall("AttributeSet"):
             for attrib in attrs.findall("Attribute"):
                 self.attribute[attrib.get("Type")] = attrib.text
-
-                attr_type = attrib.get('Type')
-                if 'HGVS' in attr_type:
-                    self.variantAliasesHGVS.append(attrib.text)
-                elif attr_type == 'nucleotide change':
-                    self.variantAliasesNucleotideChange.append(attrib.text)
 
         self.coordinates = dict()
         for item in element.findall("SequenceLocation"):

@@ -16,10 +16,8 @@ def printHeader():
                      "SCV_Version", "ID", "Origin",
                      "Method",
                      "Genomic_Coordinate", "Symbol", "Protein", "Description",
-                     "SummaryEvidence", "ReviewStatus", "VariantAliasesHGVS",
-                     "VariantAliasesNucleotideChange")))
+                     "SummaryEvidence", "ReviewStatus")))
 
-ALIASES_SEPARATOR = '|'
 
 def processSubmission(submissionSet, assembly):
     ra = submissionSet.referenceAssertion
@@ -47,8 +45,6 @@ def processSubmission(submissionSet, assembly):
 
                 # Omit the variants that don't have any genomic start coordinate indicated.
                 if start != None and start != "None" and start != "NA":
-                    variantHgvsStr = ALIASES_SEPARATOR.join(variant.variantAliasesHGVS) if variant.variantAliasesHGVS else str(None)
-                    variantHgvsNucleotideChangeStr = ALIASES_SEPARATOR.join(variant.variantAliasesNucleotideChange) if variant.variantAliasesNucleotideChange else str(None)
 
                     print("\t".join((str(hgvs),
                                      oa.submitter.encode('utf-8'),
@@ -65,10 +61,7 @@ def processSubmission(submissionSet, assembly):
                                      str(proteinChange),
                                      str(oa.description),
                                      str(oa.summaryEvidence),
-                                     str(oa.reviewStatus),
-                                     variantHgvsStr,
-                                     variantHgvsNucleotideChangeStr
-                                     )))
+                                     str(oa.reviewStatus))))
 
 
 def main():
