@@ -711,6 +711,11 @@ def repeat_merging(f_in, f_out):
                         new_value = [new_value]
                     if type(old_value) != list:
                         old_value = [old_value]
+
+                    # This if statement is crucial to not mess up text fields
+                    # containing ',' and hence being treated as separate fields.
+                    # The list(set(new_value + old_value)) statement below would
+                    # garble it otherwise.
                     if new_value == old_value:
                         continue
                     else:
