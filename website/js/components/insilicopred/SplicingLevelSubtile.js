@@ -52,7 +52,8 @@ const deNovoImpactFields = [
         impact: 'low',
         label: 'Innocuous IFD',
         zScoreLabel: 'n/a',
-        prob: 0.02
+        prob: 0.02,
+        check: (data) => data.variant.zScore > data.wild.zScore
     },
     {
         type: 'note',
@@ -63,7 +64,8 @@ const deNovoImpactFields = [
         impact: 'low',
         label: 'Weak/Null & Low',
         zScoreLabel: 'Z < -2',
-        prob: 0.02
+        prob: 0.02,
+        check: (data) => data.variant.zScore > data.wild.zScore
     },
     {
         type: 'value',
@@ -218,20 +220,6 @@ class SpliceSiteImpactTable extends React.Component {
                 extraMessage = "This variant was classified as Moderate because the Z-score for the wild type is already low (less than -1.5) and the change due to variation is not considered large enough to warrant Severe.";
             }
         }
-
-        let extraMessage = null;
-
-        if (prior === 0.34) {
-            if (type === 'donor' && variantZScore < -2.0) {
-                /* special case #2: native donor (when type == 'donor') */
-                extraMessage = "This variant was classified as Moderate because the Z-score for the wild type is already low (less than -2) and the change due to variation is not considered large enough to warrant Severe.";
-            }
-            else if (type === 'acceptor' && variantZScore < -1.5) {
-                /* special case #3: native acceptor (when type == 'acceptor') */
-                extraMessage = "This variant was classified as Moderate because the Z-score for the wild type is already low (less than -1.5) and the change due to variation is not considered large enough to warrant Severe.";
-            }
-        }
-
 
         return (<div>
             <div style={{textAlign: 'center', fontWeight: 'bold', margin: '20px'}}>
