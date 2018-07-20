@@ -1,156 +1,53 @@
 version: 2
 jobs:
-   buildweb:
-     docker:
-       - image: circleci/node:6.13
-       - image: circleci/postgres:9.6.2
-         environment:
-          POSTGRES_USER: postgres
-          POSTGRES_DB: storage.pg
-     steps:
-       - checkout
-       - run:
-           name: Setup npm
-           working_directory: ~/project/website
-           command: npm install
-       - run:
-           name: run linter
-           working_directory: ~/project/website
-           command: |
-             mkdir ~/test_reports
-             npm run lint -- -f junit -o ~/test_reports/lint-results.xml
-       - run:
-           name: run JavaScript tests
-           working_directory: ~/project/website
-           command: npm run test -- -R xunit --reporter-options output=~/test_reports/test-results.xml
-       - run:
-           name: Set up and run website backend tests
-           command: |
-             sudo apt-get install python-pip python-dev
-             sudo pip install virtualenv
-             mkdir ~/project/website_virtualenv
-             virtualenv ~/project/website_virtualenv
-             source ~/project/website_virtualenv/bin/activate
-             pip install -r ~/project/website/requirements.txt
-             pip install -r ~/project/website/test-requirements.txt
-             cd ~/project/website/django && python manage.py migrate
-             python manage.py test
-       - store_test_results:
-           path: ~/test_reports
-   deploy-dev:
-     docker:
-       - image: circleci/node:6.13
-     steps:
-       - checkout
-       - run:
-           name: Setup npm
-           working_directory: ~/project/website
-           command: npm install
-       - run:
-           name: Set up environment for deployment
-           command: |
-             sudo apt-get install rsync
-             [[ ! -d ~/.ssh ]] && mkdir ~/.ssh
-             cat >> ~/.ssh/config << EOF
-                 VerifyHostKeyDNS yes
-                 StrictHostKeyChecking no
-             EOF
-       - run:
-           name: deploying to dev machine
-           command: ~/project/deployment/deploy-dev
-   deploy-beta:
-     docker:
-       - image: circleci/node:6.13
-     steps:
-       - checkout
-       - run:
-           name: Setup npm
-           working_directory: ~/project/website
-           command: npm install
-       - run:
-           name: Set up environment for deployment
-           command: |
-             sudo apt-get install rsync
-             [[ ! -d ~/.ssh ]] && mkdir ~/.ssh
-             cat >> ~/.ssh/config << EOF
-                 VerifyHostKeyDNS yes
-                 StrictHostKeyChecking no
-             EOF
-       - run:
-           name: deploying to beta machine
-           command: HOST=brcaexchange.org ~/project/deployment/deploy-dev
-   test-pipeline:
-     working_directory: /pipeline
-     docker:
-       - image: docker:17.05.0-ce-git
-       # heavily inspired from https://circleci.com/blog/how-to-build-a-docker-image-on-circleci-2-0/
-     steps:
-       - checkout
-       - setup_remote_docker
-       - run:
-           name: Install dependencies
-           command: |
-             apk add --no-cache \
-               py-pip=9.0.0-r1
-             pip install \
-              docker-compose==1.12.0
-       - restore_cache:
-           keys:
-             - v1-{{ .Branch }}
-           paths:
-             - /caches/pipeline.tar
-       - run:
-           name: Load Docker image layer cache
-           command: |
-             set +o pipefail
-             docker load -i /caches/pipeline.tar | true
-       - run:
-           name: Build application Docker image
-           working_directory: /pipeline/pipeline/docker
-           command: |
-             pwd
-             echo $(pwd)
-             cp ../requirements.txt requirements_docker.txt
-             cp ../../test-requirements.txt test-requirements_docker.txt
-             docker build --cache-from=pipeline -t pipeline .
-       - run:
-           name: Save Docker image layer cache
-           command: |
-             mkdir -p /caches
-             docker save -o /caches/pipeline.tar pipeline
-       - save_cache:
-           key: v1-{{ .Branch }}-{{ epoch }}
-           paths:
-             - /caches/pipeline.tar
-       - run:
-           name: Run tests
-           command: |
-             docker run pipeline bash -c 'cd /opt/brca-exchange/pipeline/data && bash getdata && cd /opt/brca-exchange/pipeline && pytest'
-       - store_test_results:
-             path: ~/test_reports_pipeline
+   build:
+    working_directory: /splicing-pipeline
+    docker:
+      - image: docker:17.05.0-ce-git
+    # heavily inspired from https://circleci.com/blog/how-to-build-a-docker-image-on-circleci-2-0/
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --no-cache \
+              py-pip=9.0.0-r1 make
+      - restore_cache:
+          keys:
+            - v1-{{ .Branch }}
+          paths:
+            - /caches/splicing-pipeline.tar
+      - run:
+          name: Load Docker image layer cache
+          command: |
+            set +o pipefail
+            docker load -i /caches/splicing-pipeline.tar | true
+      - run:
+          name: Build application Docker image
+          working_directory: /splicing-pipeline/pipeline/splicing
+          command: |
+            docker build --cache-from=splicing-pipeline -t splicing-pipeline .
+      - run:
+          name: Save Docker image layer cache
+          command: |
+            mkdir -p /caches
+            docker save -o /caches/splicing-pipeline.tar splicing-pipeline
+      - save_cache:
+          key: v1-{{ .Branch }}-{{ epoch }}
+          paths:
+            - /caches/splicing-pipeline.tar
+      - run:
+          name: Run tests
+          working_directory: /splicing-pipeline/pipeline/splicing
+          command: |
+            make references -e IMAGE_NAME=splicing-pipeline -e REFERENCES=/splicing-pipeline/references
+            make short -e IMAGE_NAME=splicing-pipeline -e REFERENCES=/splicing-pipeline/references
 workflows:
    version: 2
-   build_and_test:
+   build-n-deploy:
      jobs:
-       - buildweb:
+       - build:
            filters:
              tags:
                only: /.*/
-       - test-pipeline:
-           filters:
-             tags:
-               only: /.*/
-       - deploy-dev:
-           requires:
-             - buildweb
-           filters:
-             branches:
-               only: master
-       - deploy-beta:
-           requires:
-             - buildweb
-           filters:
-             tags:
-               only: /v[0-9]+(\.[0-9]+)*/
-             branches:
-               ignore: /.*/
