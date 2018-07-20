@@ -1,7 +1,9 @@
 FROM ubuntu:16.04
 
 RUN apt-get update && apt-get install -y \
+    curl \
     git \
+    libmysqlclient-dev \
     liblzo2-dev \
     pkg-config \
     python-pip \
@@ -14,11 +16,13 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /opt
 
 COPY requirements_docker.txt .
+COPY test-requirements_docker.txt .
 
 # install numpy first to avoid issues with bio python and bx-python (see also https://github.com/LUMC/vep2lovd/issues/1)
 RUN pip install $(grep numpy requirements_docker.txt)
 
-RUN pip install -r requirements_docker.txt
+RUN pip install -r requirements_docker.txt -r test-requirements_docker.txt
+
 
 # install vcf tools
 RUN wget https://github.com/vcftools/vcftools/releases/download/v0.1.15/vcftools-0.1.15.tar.gz
