@@ -20,7 +20,6 @@ require('font-awesome-webpack');
 require('css/bootstrap-xlgrid.css'); // adds xl, xxl, xxxl grid sizes to bootstrap 3
 require('css/custom.css');
 var _ = require('underscore');
-var jQuery = require('jquery');
 var backend = require('./backend');
 var {NavBarNew} = require('./NavBarNew');
 var FAQ = require('./Faq');
@@ -59,10 +58,9 @@ var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Route, RouteHandler,
     HistoryLocation, run, DefaultRoute, Link} = require('react-router');
 var {Releases, Release} = require('./Releases.js');
+var Help = require('./Help.js');
 
 var KeyInline = require('./components/KeyInline');
-
-var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 
 var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
 
@@ -198,7 +196,7 @@ var About = React.createClass({
         );
     }
 });
-
+/*
 var Help = React.createClass({
     mixins: [State],
     scrollToFragment: function(fragment) {
@@ -237,7 +235,7 @@ var Help = React.createClass({
         );
     }
 });
-
+*/
 
 function toNumber(v) {
     return _.isString(v) ? parseInt(v) : v;

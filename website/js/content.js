@@ -78,6 +78,96 @@ const mupitStructures = [
     }
 ];
 
+const helpContent = [
+/*
+    {
+        section: "Section name goes here",
+        tiles: [
+            {
+                name: "This is the heading of a tile",
+                contents: require("../content/help/name-of-markdown-file.md")
+            },
+            {
+                name: "This tile has a reference link in the heading",
+                // you can specify a custom ID for the header here.
+                // to get the ID you need, you can just click a hover link on the site, and then look at the fragment (after the #) in the URL
+                id: "custom-id-to-match-hover-links",
+                contents: require("../content/help/another-tile-content.md"),
+                reference: "http://example.com/this-is-a-reference-link-for-the-tile"
+            },
+            {
+                name: "This tile contains an expandable list",
+                list: [
+                    {
+                        name: "List item 1",
+                        contents: require("../content/help/a-list-item-contents.md")
+                    },
+                    {
+                        name: "List item two",
+                        id: "custom-id-to-match-hover-links",
+                        contents: require("../content/help/and-another-list-item.md")
+                    },
+                ]
+            }
+        ]
+    },
+*/
+    {
+        section: "General Information",
+        tiles: [
+            {
+                name: "What is the BRCA Exchange?",
+                contents: require("../content/help/what-is-the-brca-exchange.md")
+            },
+            {
+                name: "How do I search for a variant?",
+                contents: require("../content/help/how-do-i-search-for-a-variant.md")
+            },
+        ]
+    },
+    {
+        section: "Variant Details Page",
+        tiles: [
+            {
+                name: "Variant Nomenclature",
+                contents: require("../content/help/variant-nomenclature.md")
+            },
+            {
+                name: "Clinical Significance Tiles",
+                list: [
+                    {
+                        name: "ENIGMA",
+                        id: "clinical-significance-enigma",
+                        contents: require("../content/help/clinical-significance-enigma.md")
+                    },
+                    {
+                        name: "ClinVar",
+                        contents: require("../content/help/clinical-significance-clinvar.md")
+                    },
+                    {
+                        name: "Leiden Open Variation Database (LOVD)",
+                        contents: require("../content/help/clinical-significance-lovd.md")
+                    },
+                    {
+                        name: "BIC",
+                        id: "clinical-significance-bic",
+                        contents: require("../content/help/clinical-significance-bic.md")
+                    },
+                ]
+            },
+            {
+                name: "Transcript Visualization",
+                contents: require("../content/help/transcript-visualization.md")
+            },
+            {
+                name: "Multifactorial Likelihood Analysis",
+                contents: require("../content/help/multifactorial-likelihood-analysis.md"),
+                reference: "https://www.ncbi.nlm.nih.gov/pubmed/21990134"
+            },
+        ]
+    }
+];
+
 function extractNonHeaders(x) {
     const result = x.parent().clone();
     // remove the field name
@@ -120,5 +210,6 @@ module.exports = {
     pages: content,
     faqs: FAQContent,
     mupitStructures: mupitStructures,
-    parseTooltips: parseTooltips
+    parseTooltips: parseTooltips,
+    helpContent: helpContent
 };
