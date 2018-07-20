@@ -41,8 +41,7 @@ jobs:
           name: Run tests
           working_directory: /splicing-pipeline/pipeline/splicing
           command: |
-            make references -e IMAGE_NAME=splicing-pipeline -e REFERENCES=/splicing-pipeline/references
-            make short -e IMAGE_NAME=splicing-pipeline -e REFERENCES=/splicing-pipeline/references
+            make unit_tests_docker -e IMAGE_NAME=splicing-pipeline
 workflows:
    version: 2
    build-n-deploy:
