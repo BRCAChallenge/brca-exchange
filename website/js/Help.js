@@ -1,9 +1,10 @@
 /*eslint-env browser */
 'use strict';
 
+import classNames from "classnames";
 const React = require('react');
 const RawHTML = require('./RawHTML');
-const {Grid, Col, Row, Panel, ListGroup, ListGroupItem, Glyphicon} = require('react-bootstrap');
+const {Grid, Col, Row, Panel, ListGroup, ListGroupItem, Glyphicon, CollapsableMixin, BootstrapMixin} = require('react-bootstrap');
 const {State} = require('react-router');
 
 const slugify = require('./slugify');
@@ -11,31 +12,47 @@ const content = require('./content');
 
 const navbarHeight = 70;
 
-const CollapsibleListItem = React.createClass({
-    mixins: [State],
+const CollapsableListItem = React.createClass({
+    mixins: [State, BootstrapMixin, CollapsableMixin],
 
-    getInitialState() {
+    /*getInitialState() {
         return {
             expanded: !!this.props.defaultExpanded
         };
-    },
+    },*/
 
     onClick(e) {
         this.setState({ expanded: !this.state.expanded });
         e.preventDefault();
     },
 
+    getCollapsableDimensionValue() {
+        return React.findDOMNode(this.refs.content).scrollHeight;
+    },
+
+    getCollapsableDOMNode() {
+        if (!this.isMounted() || !this.refs || !this.refs.content) {
+            return null;
+        }
+
+        return React.findDOMNode(this.refs.content);
+    },
+
     render: function() {
         let {header, id, ...rest} = this.props;
         header = (
-            <h4>
+            <h4> 
                 <a href="#" onClick={this.onClick}
                    style={{color: "inherit", textDecoration: "none"}}
-                   id={id}>{header}</a>
+                   id={id} >
+                    <small><Glyphicon  glyph={this.state.expanded ? "chevron-down" : "chevron-right"} /> </small>
+                    <span style={{verticalAlign: "text-bottom"}}>{header}</span>
+                </a>
             </h4>);
         return (
             <ListGroupItem header={header} {...rest}>
-                <div className={this.state.expanded ? "" : "hidden"} >
+                <div className={classNames(this.getCollapsableClassSet("collapse"))}
+                     ref="content">
                     { this.props.children }
                 </div>
             </ListGroupItem>
@@ -93,11 +110,11 @@ const Help = React.createClass({
                     body.push(
                         <ListGroup fill>
                             { list.map(({name, id, contents}) =>
-                                <CollapsibleListItem defaultExpanded={this.shouldBeExpanded(fragment, {name, id, contents})}
+                                <CollapsableListItem defaultExpanded={this.shouldBeExpanded(fragment, {name, id, contents})}
                                                      id={id ? id : slugify(name)}
                                                      header={name}>
                                     <RawHTML html={contents} />
-                                </CollapsibleListItem>) }
+                                </CollapsableListItem>) }
                         </ListGroup>
                     );
                 }
@@ -119,7 +136,7 @@ const Help = React.createClass({
                 </Panel>);
             })]);
         return (
-            <Grid id="main-grid" className="help">
+            <Grid id="main-grid" className="help-page">
                 {fragment === '' ? null :
                     <style>{`#${fragment} { animation-name: emphasis; animation-duration: 10s; } `}</style>}
                 <Row>
