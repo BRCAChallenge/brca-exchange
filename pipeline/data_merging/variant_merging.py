@@ -54,7 +54,10 @@ CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "Submitter": "Submitter",
                   "Clinical_Significance": "ClinicalSignificance",
                   "Date_Last_Updated": "DateLastUpdated",
+                  "DateSignificanceLastEvaluated":
+                      "DateSignificanceLastEvaluated",
                   "SCV": "SCV",
+                  "SCV_Version": "SCV_Version",
                   "Allele_Origin": "Origin",
                   "Protein": "Protein",
                   "Method": "Method",
@@ -159,6 +162,12 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "ExAC": EXAC_FIELDS,
               "ESP": ESP_FIELDS,
               "BIC": BIC_FIELDS}
+
+LIST_TYPE_FIELDS = {
+    "individuals", # LOVD
+    "SCV", # Clinvar, treating it as list, to have the same order as with SCV_Version
+    "SCV_Version"
+}
 
 # Enigma filename is different depending on which version of output data is used.
 ENIGMA_FILE = "ENIGMA_combined_with_bx_ids.tsv"
@@ -682,7 +691,7 @@ def repeat_merging(f_in, f_out):
     """takes a vcf file, collapses repetitive variant rows and write out
         to a new vcf file (without header)"""
     vcf_reader = vcf.Reader(f_in, strict_whitespace=True)
-    variant_dict = {}
+    variant_dict = {}  # str -> Record
     num_repeats = 0
     for record in vcf_reader:
         genome_coor = "chr{0}:{1}:{2}>{3}".format(
@@ -702,13 +711,19 @@ def repeat_merging(f_in, f_out):
                         new_value = [new_value]
                     if type(old_value) != list:
                         old_value = [old_value]
+
+                    # This if statement is crucial to not mess up text fields
+                    # containing ',' and hence being treated as separate fields.
+                    # The list(set(new_value + old_value)) statement below would
+                    # garble it otherwise.
                     if new_value == old_value:
                         continue
                     else:
-                        if key == "individuals":
+                        if key in LIST_TYPE_FIELDS:
                             '''
-                            LOVD individuals field values are all meaningful even if repeated
-                            e.g. if two LOVD submissions for the same variant each have one individual associated with them,
+                            For instance, LOVD individuals field values are all
+                            meaningful even if repeated e.g. if two LOVD
+                            submissions for the same variant each have one individual associated with them,
                             "1,1" is a more sensible value for the variant than "1" since 2 individuals are associated.
                             '''
                             merged_value = list(new_value + old_value)

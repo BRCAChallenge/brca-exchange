@@ -21,6 +21,20 @@ def textIfPresent(element, field):
     else:
         return(ff.text.encode('utf-8'))
 
+
+def processClinicalSignificanceElement(el, obj):
+    if el != None:
+        obj.reviewStatus = textIfPresent(el, "ReviewStatus")
+        obj.clinicalSignificance = textIfPresent(el, "Description")
+        obj.summaryEvidence = textIfPresent(el, "Comment")
+        obj.dateSignificanceLastEvaluated = el.get('DateLastEvaluated', None)
+    else:
+        obj.reviewStatus = None
+        obj.clinicalSignificance = None
+        obj.summaryEvidence = None
+        obj.dateSignificanceLastEvaluated = None
+
+
 class genomicCoordinates:
     """Contains the genomic information on the variant"""
 
@@ -62,11 +76,12 @@ class variant:
         if debug:
             print("Parsing variant", self.id)
         self.name = name
-        
+
         self.attribute = dict()
         for attrs in element.findall("AttributeSet"):
             for attrib in attrs.findall("Attribute"):
                 self.attribute[attrib.get("Type")] = attrib.text
+
         self.coordinates = dict()
         for item in element.findall("SequenceLocation"):
             assembly = item.get("Assembly")
@@ -78,7 +93,8 @@ class variant:
             symbol = measureRelationship.find("Symbol")
             if symbol != None:
                 self.geneSymbol = textIfPresent(symbol, "ElementValue")
-            
+
+
 
 class referenceAssertion:
     """For gathering the reference assertion"""
@@ -88,12 +104,10 @@ class referenceAssertion:
         self.id = element.get("ID")
         if debug:
             print("Parsing ReferenceClinVarAssertion", self.id)
-        self.reviewStatus = None
-        self.clinicalSignificance = None
-        cs = element.find("ClinicalSignificance")
-        if cs != None:
-            self.reviewStatus = textIfPresent(cs, "ReviewStatus")
-            self.clinicalSignificance = textIfPresent(cs, "Description")
+
+        processClinicalSignificanceElement(element.find(
+            "ClinicalSignificance"), self)
+
         obs = element.find("ObservedIn")
         if obs == None:
             self.origin = None
@@ -130,7 +144,7 @@ class referenceAssertion:
             self.variant = variant(measureSet.find("Measure"), variantName, 
                                    measureSet.get("ID"), 
                                    debug=debug)
-                
+
 
 class clinVarAssertion:
     """Class for representing one submission (i.e. one annotation of a 
@@ -153,6 +167,8 @@ class clinVarAssertion:
             self.accession = None
         else:
             self.accession = cva.get("Acc", default=None)
+            self.accession_version = cva.get("Version", default=None)
+
         self.origin = None
         self.method = None
         self.description = None
@@ -169,15 +185,11 @@ class clinVarAssertion:
                 for attr in description.findall("Attribute"):
                     if attr.attrib["Type"] == 'Description':
                         self.description = textIfPresent(description, "Attribute")
-        self.clinicalSignificance = None
-        self.reviewStatus = None
-        self.dateLastUpdated = None
-        cs = element.find("ClinicalSignificance")
-        if cs != None:
-            self.dateLastUpdated = cva.get("DateUpdated")
-            self.clinicalSignificance = textIfPresent(cs, "Description")
-            self.reviewStatus = textIfPresent(cs, "ReviewStatus")
-            self.summaryEvidence = textIfPresent(cs, "Comment")
+
+        processClinicalSignificanceElement(element.find(
+            "ClinicalSignificance"), self)
+
+        self.dateLastUpdated = cva.get("DateUpdated")
                  
 
 class clinVarSet:

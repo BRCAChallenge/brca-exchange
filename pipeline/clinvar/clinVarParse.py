@@ -12,7 +12,9 @@ import xml.etree.ElementTree as ET
 
 def printHeader():
     print("\t".join(("HGVS", "Submitter", "ClinicalSignificance",
-                     "DateLastUpdated", "SCV", "ID", "Origin", "Method",
+                     "DateLastUpdated", "DateSignificanceLastEvaluated", "SCV",
+                     "SCV_Version", "ID", "Origin",
+                     "Method",
                      "Genomic_Coordinate", "Symbol", "Protein", "Description",
                      "SummaryEvidence", "ReviewStatus")))
 
@@ -43,11 +45,14 @@ def processSubmission(submissionSet, assembly):
 
                 # Omit the variants that don't have any genomic start coordinate indicated.
                 if start != None and start != "None" and start != "NA":
+
                     print("\t".join((str(hgvs),
                                      oa.submitter.encode('utf-8'),
                                      str(oa.clinicalSignificance),
                                      str(oa.dateLastUpdated),
+                                     str(oa.dateSignificanceLastEvaluated),
                                      str(oa.accession),
+                                     str(oa.accession_version),
                                      str(oa.id),
                                      str(oa.origin),
                                      str(oa.method),
@@ -56,8 +61,7 @@ def processSubmission(submissionSet, assembly):
                                      str(proteinChange),
                                      str(oa.description),
                                      str(oa.summaryEvidence),
-                                     str(oa.reviewStatus),
-                                     )))
+                                     str(oa.reviewStatus))))
 
 
 def main():
