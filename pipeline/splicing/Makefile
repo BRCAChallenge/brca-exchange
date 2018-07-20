@@ -26,6 +26,13 @@ test:
 	# Run a short test from within the docker container
 	python calcVarPriors.py test short
 
+unit_tests_docker:
+	docker run --rm -it \
+		--user=`id -u`:`id -g` \
+    --entrypoint pytest \
+		$(IMAGE_NAME)
+
+
 references:
 	# Download and install references
 	mkdir -p $(REFERENCES)
