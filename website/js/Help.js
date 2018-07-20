@@ -15,12 +15,6 @@ const navbarHeight = 70;
 const CollapsableListItem = React.createClass({
     mixins: [State, BootstrapMixin, CollapsableMixin],
 
-    /*getInitialState() {
-        return {
-            expanded: !!this.props.defaultExpanded
-        };
-    },*/
-
     onClick(e) {
         this.setState({ expanded: !this.state.expanded });
         e.preventDefault();
@@ -41,7 +35,7 @@ const CollapsableListItem = React.createClass({
     render: function() {
         let {header, id, ...rest} = this.props;
         header = (
-            <h4> 
+            <h4>
                 <a href="#" onClick={this.onClick}
                    style={{color: "inherit", textDecoration: "none"}}
                    id={id} >
@@ -62,6 +56,7 @@ const CollapsableListItem = React.createClass({
 
 const Help = React.createClass({
     mixins: [State],
+
     componentDidMount() {
         var fragment = slugify(window.location.hash.slice(1));
         if (fragment !== '') {
@@ -89,9 +84,11 @@ const Help = React.createClass({
     },
 
     render() {
+        let help = localStorage.getItem("research-mode") === 'true' ? content.helpContentResearch : content.helpContentDefault;
+
         var fragment = slugify(window.location.hash.slice(1));
 
-        var helpTiles = content.helpContent.map(({section, tiles}) =>
+        var helpTiles = help.map(({section, tiles}) =>
             [<h1>{section}</h1>, tiles.map(({name, id, contents, list, reference}) => {
                 let header = [name];
                 // if the user clicks a reference link in a tile header, don't toggle the tile, and open the link.
@@ -146,25 +143,6 @@ const Help = React.createClass({
                 </Row>
             </Grid>
         );
-    /*
-        var helpContent;
-        if (localStorage.getItem("research-mode") === 'true') {
-            helpContent = content.pages.helpResearch;
-        } else {
-            helpContent = content.pages.help;
-        }
-        return (
-            <Grid id="main-grid" className="help">
-                {fragment === '' ? null :
-                    <style>{`#${fragment} { animation-name: emphasis; animation-duration: 10s; } `}</style>}
-                <Row>
-                    <Col smOffset={1} sm={10}>
-                        <RawHTML ref='content' html={helpContent}/>
-                    </Col>
-                </Row>
-            </Grid>
-        );
-    */
     }
 });
 

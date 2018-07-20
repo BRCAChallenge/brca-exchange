@@ -1,0 +1,1 @@
+The allele frequency reference sets show the frequency of a BRCA1 or BRCA2 variant in a reference population. To view or collapse all nested tiles, click the arrows available at the top right of this tile. Though the two sets of populations in ExAC and 1000 Genomes closely resemble each other, they are not identical. ESP also uses different population categories.

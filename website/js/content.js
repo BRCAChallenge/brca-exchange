@@ -8,8 +8,6 @@ const content = {
     home: require('../content/home.md'),
     history: require('../content/history.md'),
     variation: require('../content/variationAndCancer.md'),
-    help: require('../content/help.md'),
-    helpResearch: require('../content/help_research.md'),
     disclaimer: require('../content/disclaimer.md'),
     thisSite: require('../content/thisSite.md'),
     dataSubmissionPolicy: require('../content/dataSubmissionPolicy.md'),
@@ -78,50 +76,96 @@ const mupitStructures = [
     }
 ];
 
-const helpContent = [
-/*
+const helpContentDefault = [
+    {
+        section: "General Information",
+        tiles: [
+            {
+                name: "What is the BRCA Exchange?",
+                contents: require("../content/help/default/what-is-the-brca-exchange.md")
+            },
+            {
+                name: "How do I search for a variant?",
+                contents: require("../content/help/default/how-do-i-search-for-a-variant.md")
+            },
+        ]
+    },
+    {
+        section: "Variant Details Page",
+        tiles: [
+            {
+                name: "What do the fields in the Variant Details Page mean?",
+                contents: require("../content/help/default/variant-details-fields.md")
+            },
+        ]
+    },
+];
+
+const helpContentResearch = [
+/* Examples:
+
     {
         section: "Section name goes here",
         tiles: [
             {
                 name: "This is the heading of a tile",
-                contents: require("../content/help/name-of-markdown-file.md")
+                contents: require("../content/help/research/name-of-markdown-file.md")
             },
             {
                 name: "This tile has a reference link in the heading",
                 // you can specify a custom ID for the header here.
                 // to get the ID you need, you can just click a hover link on the site, and then look at the fragment (after the #) in the URL
                 id: "custom-id-to-match-hover-links",
-                contents: require("../content/help/another-tile-content.md"),
+                contents: require("../content/help/research/another-tile-content.md"),
                 reference: "http://example.com/this-is-a-reference-link-for-the-tile"
             },
             {
                 name: "This tile contains an expandable list",
+                content: require("../content/help/research/this-content-appears-before-the-list.md"),
                 list: [
                     {
                         name: "List item 1",
-                        contents: require("../content/help/a-list-item-contents.md")
+                        contents: require("../content/help/research/a-list-item-contents.md")
                     },
                     {
                         name: "List item two",
                         id: "custom-id-to-match-hover-links",
-                        contents: require("../content/help/and-another-list-item.md")
+                        contents: require("../content/help/research/and-another-list-item.md")
                     },
                 ]
-            }
+            },
         ]
     },
+
 */
     {
         section: "General Information",
         tiles: [
             {
                 name: "What is the BRCA Exchange?",
-                contents: require("../content/help/what-is-the-brca-exchange.md")
+                contents: require("../content/help/research/what-is-the-brca-exchange.md")
             },
             {
                 name: "How do I search for a variant?",
-                contents: require("../content/help/how-do-i-search-for-a-variant.md")
+                contents: require("../content/help/research/how-do-i-search-for-a-variant.md")
+            },
+            /* No content yet
+            {
+                name: "How do I use Filters?",
+                contents: require("../content/help/research/using-filters.md")
+            },
+            */
+            {
+                name: "How do I use Column Selectors?",
+                contents: require("../content/help/research/using-column-selectors.md")
+            },
+            {
+                name: "Downloading Variant Data",
+                contents: require("../content/help/research/downloading-variant-data.md")
+            },
+            {
+                name: "Lollipop Plots",
+                contents: require("../content/help/research/lollipop-plots.md")
             },
         ]
     },
@@ -130,7 +174,7 @@ const helpContent = [
         tiles: [
             {
                 name: "Variant Nomenclature",
-                contents: require("../content/help/variant-nomenclature.md")
+                contents: require("../content/help/research/variant-nomenclature.md")
             },
             {
                 name: "Clinical Significance Tiles",
@@ -138,31 +182,54 @@ const helpContent = [
                     {
                         name: "ENIGMA",
                         id: "clinical-significance-enigma",
-                        contents: require("../content/help/clinical-significance-enigma.md")
+                        contents: require("../content/help/research/clinical-significance-enigma.md")
                     },
                     {
                         name: "ClinVar",
-                        contents: require("../content/help/clinical-significance-clinvar.md")
+                        contents: require("../content/help/research/clinical-significance-clinvar.md")
                     },
                     {
                         name: "Leiden Open Variation Database (LOVD)",
-                        contents: require("../content/help/clinical-significance-lovd.md")
+                        contents: require("../content/help/research/clinical-significance-lovd.md")
                     },
                     {
                         name: "BIC",
                         id: "clinical-significance-bic",
-                        contents: require("../content/help/clinical-significance-bic.md")
+                        contents: require("../content/help/research/clinical-significance-bic.md")
                     },
                 ]
             },
             {
                 name: "Transcript Visualization",
-                contents: require("../content/help/transcript-visualization.md")
+                contents: require("../content/help/research/transcript-visualization.md")
             },
             {
                 name: "Multifactorial Likelihood Analysis",
-                contents: require("../content/help/multifactorial-likelihood-analysis.md"),
+                contents: require("../content/help/research/multifactorial-likelihood-analysis.md"),
                 reference: "https://www.ncbi.nlm.nih.gov/pubmed/21990134"
+            },
+            {
+                name: "Allele Frequency Reference Sets",
+                contents: require("../content/help/research/allele-frequency-reference-sets.md"),
+                list: [
+                    {
+                        name: "ExAC (minus TCGA)",
+                        contents: require("../content/help/research/allele-frequency-exac.md")
+                    },
+                    {
+                        name: "1000 Genomes",
+                        contents: require("../content/help/research/allele-frequency-1000-genomes.md")
+                    },
+                    {
+                        name: "Exome Sequencing Project",
+                        contents: require("../content/help/research/allele-frequency-exome.md")
+                    },
+                ]
+            },
+            {
+                name: "CRAVAT/MuPIT Interactive Protein Structure Viewer",
+                id: "cravat-mupit-3d-protein-view",
+                contents: require("../content/help/research/cravat-mupit.md")
             },
         ]
     }
@@ -209,7 +276,8 @@ function parseTooltips(isResearchMode) {
 module.exports = {
     pages: content,
     faqs: FAQContent,
-    mupitStructures: mupitStructures,
-    parseTooltips: parseTooltips,
-    helpContent: helpContent
+    mupitStructures,
+    parseTooltips,
+    helpContentDefault,
+    helpContentResearch,
 };
