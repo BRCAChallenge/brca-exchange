@@ -1230,3 +1230,9 @@ div.variant-submitter-group .submitter-header td {
     vertical-align: middle;
     float: none;
 }
+
+.help-page .list-group-item-heading {
+    margin-bottom: 0;
+}
+
+

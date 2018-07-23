@@ -20,7 +20,6 @@ require('font-awesome-webpack');
 require('css/bootstrap-xlgrid.css'); // adds xl, xxl, xxxl grid sizes to bootstrap 3
 require('css/custom.css');
 var _ = require('underscore');
-var jQuery = require('jquery');
 var backend = require('./backend');
 var {NavBarNew} = require('./NavBarNew');
 var FAQ = require('./Faq');
@@ -59,10 +58,9 @@ var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Route, RouteHandler,
     HistoryLocation, run, DefaultRoute, Link} = require('react-router');
 var {Releases, Release} = require('./Releases.js');
+var Help = require('./Help.js');
 
 var KeyInline = require('./components/KeyInline');
-
-var navbarHeight = 70; // XXX This value MUST match the setting in custom.css
 
 var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
 
@@ -198,46 +196,6 @@ var About = React.createClass({
         );
     }
 });
-
-var Help = React.createClass({
-    mixins: [State],
-    scrollToFragment: function(fragment) {
-        setTimeout(function () {
-            var el = document.getElementById(fragment);
-            if (el) {
-                const yOffset = jQuery(el).offset().top - navbarHeight - 10;
-                window.scrollTo(0, yOffset);
-            }
-        }, 10);
-    },
-    componentDidMount: function () {
-        var fragment = slugify(window.location.hash.slice(1));
-        if (fragment !== '') {
-            this.scrollToFragment(fragment);
-        }
-    },
-    render: function () {
-        var fragment = slugify(window.location.hash.slice(1));
-        var helpContent;
-        if (localStorage.getItem("research-mode") === 'true') {
-            helpContent = content.pages.helpResearch;
-        } else {
-            helpContent = content.pages.help;
-        }
-        return (
-            <Grid id="main-grid" className="help">
-                {fragment === '' ? null :
-                    <style>{`#${fragment} { animation-name: emphasis; animation-duration: 10s; } `}</style>}
-                <Row>
-                    <Col smOffset={1} sm={10}>
-                        <RawHTML ref='content' html={helpContent} scrollToFragment={this.scrollToFragment} />
-                    </Col>
-                </Row>
-            </Grid>
-        );
-    }
-});
-
 
 function toNumber(v) {
     return _.isString(v) ? parseInt(v) : v;
