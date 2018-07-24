@@ -54,7 +54,7 @@ long:
 	docker run --rm -it \
 		--user=`id -u`:`id -g` \
 		-v `readlink -f $(REFERENCES)`:/references:ro \
-		brcachallenge/splicing-pipeline:latest test long -p 22 
+		brcachallenge/splicing-pipeline:latest --processes 22 test long
 
 vep:
 	# Run a single request through local vep
