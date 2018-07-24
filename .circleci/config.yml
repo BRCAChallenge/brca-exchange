@@ -125,7 +125,7 @@ jobs:
        - run:
            name: Run tests
            command: |
-             docker run pipeline bash -c 'cd /opt/brca-exchange/pipeline/data && bash getdata && cd /opt/brca-exchange/pipeline && pytest'
+             docker run pipeline bash -c 'cd /opt/brca-exchange/pipeline/data && bash getdata && cd /opt/brca-exchange/pipeline && pytest --ignore=splicing/ --junitxml=~/test_reports/pytest-results.xml'
        - store_test_results:
              path: ~/test_reports_pipeline
    test-splicing-pipeline:
