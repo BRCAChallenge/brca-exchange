@@ -255,7 +255,7 @@ function findContentNodes(head) {
             return head.list.map(x => findContentNodes(x));
         }
         else if (head.contents !== undefined) {
-            return { name: head.name, contents: head.contents };
+            return head.contents;
         }
     }
 }
@@ -273,15 +273,12 @@ function extractNonHeaders(x) {
     return result.html().trim();
 }
 
-function parseContentForTips(name, helpContent) {
-    /*
-    const helpElem = document.createElement('html');
-    helpElem.innerHTML = helpContent;
-    */
+function parseContentForTips(helpContent) {
     // we enclose the payload in a div because otherwise jQuery can't find top-level elements in the blob
     const helpElem = jQuery.parseHTML("<div>" + helpContent + "</div>");
 
-    // the glossary's kind of implemented as lis with nested h4s with ids followed by some text within the same parent
+    // the glossary's formatted as lis with nested h4s or h5s with ids followed by some text within the same parent
+    // in rare cases where the terms aren't in a list, we also look for an explicit <span class="term_entry"> tag
     const extracted = jQuery("li,span.term_entry", helpElem).find("h4,h5").map((idx, x) => {
         const $x = jQuery(x);
         const helpText = extractNonHeaders($x);
@@ -305,7 +302,7 @@ function parseTooltips(isResearchMode) {
     const nodes = flattenDeep(findContentNodes(isResearchMode ? helpContentResearch : helpContentDefault));
 
     // merge all the nodes' respective dictionaries into one master dictionary
-    return _.reduce(nodes.map(node => parseContentForTips(node.name, node.contents)), _.extend);
+    return _.reduce(nodes.map(node => parseContentForTips(node), _.extend));
 }
 
 module.exports = {
