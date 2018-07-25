@@ -4,6 +4,9 @@
 
 var jQuery = require('jquery');
 
+import flattenDeep from 'lodash/flattenDeep';
+import _ from 'lodash';
+
 const content = {
     home: require('../content/home.md'),
     history: require('../content/history.md'),
@@ -235,10 +238,33 @@ const helpContentResearch = [
     }
 ];
 
+/**
+ * Recursively descends into the object 'head', looking for fields named 'content'. Returns an array of the values of these fields.
+ * @param head the object in which to look for content nodes
+ * @returns {*} an array of content blobs, unless called on a single object
+ */
+function findContentNodes(head) {
+    if (Array.isArray(head)) {
+        return head.map(x => findContentNodes(x));
+    }
+    else {
+        if (Array.isArray(head.tiles)) {
+            return head.tiles.map(x => findContentNodes(x));
+        }
+        else if (Array.isArray(head.list)) {
+            return head.list.map(x => findContentNodes(x));
+        }
+        else if (head.contents !== undefined) {
+            return { name: head.name, contents: head.contents };
+        }
+    }
+}
+
+// helper for parseContentForTips()
 function extractNonHeaders(x) {
     const result = x.parent().clone();
     // remove the field name
-    result.children('h4').remove();
+    result.children('h4,h5').remove();
     // get only the first element (typically a paragraph)
     result.children().slice(1).remove();
     // unwrap paragraphs to remove weird bootstrap styling
@@ -247,22 +273,16 @@ function extractNonHeaders(x) {
     return result.html().trim();
 }
 
-/**
- * Scrapes the help documentation to extract tooltips for fields displayed on the Variant Details page.
- * @param isResearchMode specifies whether to scrape the research mode or expert-reviewed help docs
- * @returns {*} a mapping from slugified field names to HTML help text
- */
-function parseTooltips(isResearchMode) {
-    // extract help text depending on the research mode
-    const helpContent = isResearchMode ? content.helpResearch : content.help;
-
+function parseContentForTips(name, helpContent) {
+    /*
     const helpElem = document.createElement('html');
     helpElem.innerHTML = helpContent;
-
-    let extracted = {};
+    */
+    // we enclose the payload in a div because otherwise jQuery can't find top-level elements in the blob
+    const helpElem = jQuery.parseHTML("<div>" + helpContent + "</div>");
 
     // the glossary's kind of implemented as lis with nested h4s with ids followed by some text within the same parent
-    extracted = jQuery("li", helpElem).find("h4").map((idx, x) => {
+    const extracted = jQuery("li,span.term_entry", helpElem).find("h4,h5").map((idx, x) => {
         const $x = jQuery(x);
         const helpText = extractNonHeaders($x);
 
@@ -271,6 +291,21 @@ function parseTooltips(isResearchMode) {
 
     // creates an object {name1: val1, ...} from our [{name1,val1}, ...] array for faster access
     return extracted.reduce((c, x) => { c[x.name] = x.text; return c; }, {});
+}
+
+
+/**
+ * Scrapes the help documentation to extract tooltips for fields displayed on the Variant Details page.
+ * @param isResearchMode specifies whether to scrape the research mode or expert-reviewed help docs
+ * @returns {*} a mapping from slugified field names to HTML help text
+ */
+function parseTooltips(isResearchMode) {
+    // extract help text depending on the research mode
+    // this recursively searches the nested help structure for 'contents' markdown nodes to scrape
+    const nodes = flattenDeep(findContentNodes(isResearchMode ? helpContentResearch : helpContentDefault));
+
+    // merge all the nodes' respective dictionaries into one master dictionary
+    return _.reduce(nodes.map(node => parseContentForTips(node.name, node.contents)), _.extend);
 }
 
 module.exports = {
