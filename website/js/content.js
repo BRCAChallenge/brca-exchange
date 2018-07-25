@@ -302,7 +302,7 @@ function parseTooltips(isResearchMode) {
     const nodes = flattenDeep(findContentNodes(isResearchMode ? helpContentResearch : helpContentDefault));
 
     // merge all the nodes' respective dictionaries into one master dictionary
-    return _.reduce(nodes.map(node => parseContentForTips(node), _.extend));
+    return _.reduce(nodes.map(node => parseContentForTips(node)), _.extend);
 }
 
 module.exports = {
