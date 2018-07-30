@@ -52,8 +52,7 @@ const deNovoImpactFields = [
         impact: 'low',
         label: 'Innocuous IFD',
         zScoreLabel: 'n/a',
-        prob: 0.02,
-        check: (data) => data.variant.zScore > data.wild.zScore
+        prob: 0.02
     },
     {
         type: 'note',
@@ -64,8 +63,7 @@ const deNovoImpactFields = [
         impact: 'low',
         label: 'Weak/Null & Low',
         zScoreLabel: 'Z < -2',
-        prob: 0.02,
-        check: (data) => data.variant.zScore > data.wild.zScore
+        prob: 0.02
     },
     {
         type: 'value',
