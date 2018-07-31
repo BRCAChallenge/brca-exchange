@@ -56,6 +56,14 @@ long:
 		-v `readlink -f $(REFERENCES)`:/references:ro \
 		brcachallenge/splicing-pipeline:latest --processes 22 test long
 
+all_old:
+	# Run a short test using the docker container
+	docker run --rm -it \
+		--user=`id -u`:`id -g` \
+		-v `pwd`/tests:/data \
+		-v `readlink -f $(REFERENCES)`:/references:ro \
+		brcachallenge/splicing-pipeline:0.0.3 --processes 8 calc /data/variants_all.tsv /data/priors_all_old.tsv
+
 vep:
 	# Run a single request through local vep
 	vep \

@@ -3459,8 +3459,8 @@ def calc_one(variant):
             varData = getVarData(variant, "enigma", variantData, genome38, brca2Transcript)
         click.echo("{}:{}".format(variant["HGVS_cDNA"], varData["varLoc"]), err=True)
         return addVarDataToRow(varData, variant)
-    except KeyboardInterrupt:
-        pass
+    except KeyboardInterrupt as e:
+        return
     except Exception as e:
         # Required to print source stack trace when running in multiprocessing
         print(traceback.format_exc())
