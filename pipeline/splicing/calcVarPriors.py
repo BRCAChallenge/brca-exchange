@@ -1796,6 +1796,8 @@ def getPriorProbAfterGreyZoneSNS(variant, boundaries):
                 "isDivisibleFlag": "N/A",
                 "lowMESFlag": "N/A"}
 
+    assert False, "Should never reach this"
+
 def varInIneligibleDeNovoExon(variant, donor=True):
     '''
     Given a variant and donor argument:
@@ -3455,10 +3457,10 @@ def calc_one(variant):
             varData = getVarData(variant, "enigma", variantData, genome38, brca1Transcript)
         elif variant["Gene_Symbol"] == "BRCA2":
             varData = getVarData(variant, "enigma", variantData, genome38, brca2Transcript)
-            click.echo("{}:{}".format(variant["HGVS_cDNA"], varData["varLoc"]), err=True)
+        click.echo("{}:{}".format(variant["HGVS_cDNA"], varData["varLoc"]), err=True)
         return addVarDataToRow(varData, variant)
-    except KeyboardInterrupt:
-        pass
+    except KeyboardInterrupt as e:
+        return
     except Exception as e:
         # Required to print source stack trace when running in multiprocessing
         print(traceback.format_exc())
