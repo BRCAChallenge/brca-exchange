@@ -7,16 +7,17 @@ Parses a tsv file (default built.tsv) containing variant information and for eac
 calculates either the prior probability of pathogenicity or a prior ENGIMA classification based on variant type and variant location
 '''
 
-import argparse
+import os
+import sys
+import re
 import csv
 import requests
-import sys
 import time
 import json
-import re
 import subprocess
-import tempfile
-import os
+import click
+import multiprocessing
+import pytest
 import pyhgvs
 import pyhgvs.utils as pyhgvs_utils
 from pygr.seqdb import SequenceFileDB
@@ -113,9 +114,6 @@ All values in these dictionaries are assigned either numerical values, "N/A", or
 # Here are the canonical BRCA transcripts in ENSEMBL nomenclature
 BRCA1_CANONICAL = "ENST00000357654"
 BRCA2_CANONICAL = "ENST00000380152"
-
-# Rest Ensembl server
-SERVER = "http://rest.ensembl.org"
 
 # clinically important domain boundaries
 brca1CIDomains = {"enigma": {"ring": {"domStart": 43124096,
@@ -244,6 +242,7 @@ def _make_request(url):
 
     return req.json()
 
+
 def getVarConsequences(variant):
     '''
     Given a variant, uses Ensembl VEP API to get variant consequences
@@ -251,38 +250,41 @@ def getVarConsequences(variant):
     using variant chromosome, Hg38 start, Hg38 end, and alternate allele as input for API
     returns a string detailing consequences of variant
     '''
-    ext = "/vep/human/region/"
 
     # varStrand always 1 because all alternate alleles and positions refer to the plus strand
     varStrand = 1
     varAlt = variant["Alt"]
-    
+
     if variant["Chr"] not in ["13", "17"]:
         return "unable_to_determine"
     else:
         for base in varAlt:
             # API only works for alt alleles that are composed of the 4 canonical bases
             if base not in ["A", "C", "G", "T"]:
-                return "unable_to_determine"     
-           
-        query = "%s:%s-%s:%s/%s?" % (variant["Chr"], variant["Hg38_Start"],
-                                     variant["Hg38_End"], varStrand, varAlt)
-    
-        req_url = SERVER+ext+query
-        jsonOutput = _make_request(req_url)
-    
-        assert(len(jsonOutput) == 1)
-        assert(jsonOutput[0].has_key("transcript_consequences"))
-        # below is to extract variant consequence from json file
-        for gene in jsonOutput[0]["transcript_consequences"]:
-            if gene.has_key("transcript_id"):
+                return "unable_to_determine"
+
+        query = "%s:%s-%s:%s/%s" % (variant["Chr"], variant["Hg38_Start"],
+                                    variant["Hg38_End"], varStrand, varAlt)
+        # Query local vep using query minus '?' character
+        cmd = ["vep", "--cache", "--dir_cache", "/references/vep/",
+               "--no_stats", "--offline", "--fasta", "/references/hg38.fa",
+               "--output_file", "STDOUT", "--json", "--input_data", query]
+        vep = json.loads(subprocess.check_output(cmd))
+
+        for gene in vep["transcript_consequences"]:
+            if "transcript_id" in gene:
                 # need to filter for canonical BRCA1 transcript
                 if re.search(BRCA1_CANONICAL, gene["transcript_id"]):
+                    # return gene["consequence_terms"][0]
                     return gene["consequence_terms"][0]
                 # need to filter for canonical BRCA2 transcript
                 elif re.search(BRCA2_CANONICAL, gene["transcript_id"]):
+                    # return gene["consequence_terms"][0]
                     return gene["consequence_terms"][0]
-    
+
+        return "unable_to_determine"
+
+
 def getVarType(variant):
     '''
     Returns a string describing type of variant 
@@ -831,7 +833,7 @@ def getZScore(maxEntScanScore, donor=False):
     If donor is True, uses splice donor mean and std
     If donor is False, uses splice acceptor mean and std
     '''
-    stdMeanData = json.load(open(os.path.join(os.path.dirname(__file__), 'brca.zscore.json')))
+    stdMeanData = json.load(open(os.path.join(os.path.dirname(__file__), 'brca.zscore.json'), "r"))
     if donor == False:
         std = stdMeanData["acceptors"]["std"]
         mean = stdMeanData["acceptors"]["mean"]
@@ -3425,7 +3427,6 @@ def addVarDataToRow(varData, inputRow):
 
 def getVarDict(variant, boundaries):
     '''
-
     Given input data, returns a dictionary containing information for each variant in input
     Dictionary key is variant HGVS_cDNA and value is a dictionary containing variant gene, variant chromosome, 
     variant strand, variant genomic coordinate, variant type, and variant location
@@ -3444,65 +3445,116 @@ def getVarDict(variant, boundaries):
 
     return varDict
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-i', "--inputFile", default="built.tsv", help="File with variant information")
-    parser.add_argument('-o', "--outputFile", help="File where results will be output")
-    parser.add_argument('-v', "--variantFile", help="File containing protein priors for variants")
-    parser.add_argument('-b', "--boundaries", default="enigma",
-                        help="Specifies which boundaries ('enigma' or 'priors') to use for clinically important domains")
-    parser.add_argument('-g', "--genomeFile", help="Fasta file containing hg38 reference genome")
-    parser.add_argument('-t', "--transcriptFile", help="RefSeq annotation hg38-based genepred file")
-    args = parser.parse_args()    
 
-    inputData = csv.DictReader(open(args.inputFile, "r"), delimiter="\t")
+# Globals accessed in multi-processing function calc_one
+# REMIND: Use functools.partial to pass direction into the map function
+genome38 = None
+brca1Transcript = None
+brca2Transcript = None
+
+
+def calc_one(variant):
+    global genome38, brca1Transcript, brca2Transcript
+    try:
+        variantData = csv.DictReader(open("mod_res_dn_brca20160525.txt", "r"), delimiter="\t")
+        if variant["Gene_Symbol"] == "BRCA1":
+            varData = getVarData(variant, "enigma", variantData, genome38, brca1Transcript)
+        elif variant["Gene_Symbol"] == "BRCA2":
+            varData = getVarData(variant, "enigma", variantData, genome38, brca2Transcript)
+            click.echo("{}:{}".format(variant["HGVS_cDNA"], varData["varLoc"]), err=True)
+        return addVarDataToRow(varData, variant)
+    except KeyboardInterrupt:
+        pass
+
+
+def calc_all(variants, priors, genome, transcripts, processes):
+    global genome38, brca1Transcript, brca2Transcript
+    inputData = csv.DictReader(variants, delimiter="\t")
     fieldnames = inputData.fieldnames
-    newHeaders = ["varType", "varLoc", "applicablePrior", "applicableEnigmaClass", "proteinPrior", "refDonorPrior", "deNovoDonorPrior",
-                  "refRefDonorMES", "refRefDonorZ", "altRefDonorMES", "altRefDonorZ", "refRefDonorSeq", "altRefDonorSeq", "refDonorVarStart",
-                  "refDonorVarLength", "refDonorExonStart", "refDonorIntronStart", "refDeNovoDonorMES", "refDeNovoDonorZ", "altDeNovoDonorMES",
-                  "altDeNovoDonorZ", "refDeNovoDonorSeq", "altDeNovoDonorSeq", "deNovoDonorVarStart", "deNovoDonorVarLength",
-                  "deNovoDonorExonStart", "deNovoDonorIntronStart", "deNovoDonorGenomicSplicePos", "deNovoDonorTranscriptSplicePos",
-                  "closestDonorGenomicSplicePos", "closestDonorTranscriptSplicePos", "closestDonorRefMES", "closestDonorRefZ",
-                  "closestDonorRefSeq", "closestDonorAltMES", "closestDonorAltZ", "closestDonorAltSeq", "closestDonorExonStart",
-                  "closestDonorIntronStart", "deNovoDonorAltGreaterRefFlag", "deNovoDonorAltGreaterClosestRefFlag",
-                  "deNovoDonorAltGreaterClosestAltFlag", "deNovoDonorFrameshiftFlag", "refAccPrior", "deNovoAccPrior", "refRefAccMES",
-                  "refRefAccZ", "altRefAccMES", "altRefAccZ", "refRefAccSeq", "altRefAccSeq", "refAccVarStart", "refAccVarLength", "refAccExonStart",
-                  "refAccIntronStart", "refDeNovoAccMES", "refDeNovoAccZ", "altDeNovoAccMES", "altDeNovoAccZ", "refDeNovoAccSeq", "altDeNovoAccSeq",
-                  "deNovoAccVarStart", "deNovoAccVarLength", "deNovoAccExonStart", "deNovoAccIntronStart", "deNovoAccGenomicSplicePos",
-                  "deNovoAccTranscriptSplicePos", "closestAccGenomicSplicePos", "closestAccTranscriptSplicePos", "closestAccRefMES",
-                  "closestAccRefZ", "closestAccRefSeq", "closestAccAltMES", "closestAccAltZ", "closestAccAltSeq",
-                  "closestAccExonStart", "closestAccIntronStart", "deNovoAccAltGreaterRefFlag", "deNovoAccAltGreaterClosestRefFlag",
-                  "deNovoAccAltGreaterClosestAltFlag", "deNovoAccFrameshiftFlag", "spliceSite", "spliceRescue", "spliceFlag", "frameshiftFlag",
-                  "inExonicPortionFlag", "CIDomainInRegionFlag", "isDivisibleFlag", "lowMESFlag"]
+    newHeaders = open("headers.tsv", "r").read().split()
     for header in newHeaders:
         fieldnames.append(header)
-    outputData = csv.DictWriter(open(args.outputFile, "w"), delimiter="\t", fieldnames=fieldnames)
-    outputData.writerow(dict((fn,fn) for fn in inputData.fieldnames))
+    outputData = csv.DictWriter(priors, delimiter="\t", lineterminator="\n", fieldnames=fieldnames)
+    outputData.writerow(dict((fn, fn) for fn in inputData.fieldnames))
 
     # read genome sequence
-    genome38 = SequenceFileDB(args.genomeFile)
+    genome38 = SequenceFileDB(genome)
 
     # read RefSeq transcripts
-    with open(args.transcriptFile) as infile:
-        transcripts = pyhgvs_utils.read_transcripts(infile)
+    transcripts = pyhgvs_utils.read_transcripts(transcripts)
 
-    def get_transcript(name):
-        return transcripts.get(name)
+    brca1Transcript = transcripts.get(BRCA1_RefSeq)
+    brca2Transcript = transcripts.get(BRCA2_RefSeq)
 
-    brca1Transcript = get_transcript(BRCA1_RefSeq)
-    brca2Transcript = get_transcript(BRCA2_RefSeq)
+    # Create a pool of processes and calculate in parallel
+    click.echo("Processing using {} processes".format(processes), err=True)
+    pool = multiprocessing.Pool(processes)
+    try:
+        calculatedVariants = pool.map(calc_one, list(inputData))
+        pool.close()
+    except KeyboardInterrupt:
+        pool.terminate()
+        pool.join()
 
-    totalVariants = 0
-    for variant in inputData:
-        variantData = csv.DictReader(open(args.variantFile, "r"), delimiter="\t")
-        if variant["Gene_Symbol"] == "BRCA1":
-            varData = getVarData(variant, args.boundaries, variantData, genome38, brca1Transcript)
-        elif variant["Gene_Symbol"] == "BRCA2":
-            varData = getVarData(variant, args.boundaries, variantData, genome38, brca2Transcript)
-        variant = addVarDataToRow(varData, variant)
-        outputData.writerow(variant)
-        totalVariants += 1
-        print "variant", totalVariants, "complete"
-    
+    # Sort output as the order of p.map is not deterministic
+    # outputData.writerows(sorted(calculatedVariants, key=lambda d: d["HGVS_cDNA"]))
+    outputData.writerows(sorted(
+        calculatedVariants,
+        key=lambda d: "{0}:g.{1}:{2}>{3}".format(d["Chr"], d["Pos"], d["Ref"], d["Alt"])))
+
+
+def run(command):
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+    while True:
+        line = process.stdout.readline().rstrip()
+        if line:
+            click.echo(line, err=True)
+        else:
+            break
+
+
+@click.group()
+@click.option("--genome", type=click.Path(exists=False), default="/references/hg38.fa",
+              help="Fasta file containing hg38 reference genome")
+@click.option("--transcripts", type=click.File("r"), default="refseq_annotation.hg38.gp",
+              help="RefSeq annotation hg38-based genepred file")
+@click.option("--processes", type=int, default=8,
+              help="Number of processes to use")
+@click.pass_context
+def cli(ctx, genome, transcripts, processes):
+    ctx.obj = {"genome": genome, "transcripts": transcripts, "processes": processes}
+
+
+@cli.command()
+def references():
+    run("./references.sh")
+
+
+@cli.command(help="Run self test")
+@click.argument("length", type=click.Choice(["short", "long"]))
+@click.pass_context
+def test(ctx, length):
+    pytest.main(["-p", "no:cacheprovider", "-x", "."])
+    if length == "short":
+        calc_all(click.open_file("tests/variants_short.tsv", mode="r"),
+                 click.open_file("/tmp/priors_short.tsv", mode="w"),
+                 ctx.obj["genome"], ctx.obj["transcripts"], ctx.obj["processes"])
+        run("md5sum -c ./tests/md5/priors_short.md5")
+    else:
+        calc_all(click.open_file("tests/variants_long.tsv", mode="r"),
+                 click.open_file("/tmp/priors_long.tsv", mode="w"),
+                 ctx.obj["genome"], ctx.obj["transcripts"], ctx.obj["processes"])
+        run("md5sum -c ./tests/md5/priors_long.md5")
+
+
+@cli.command()
+@click.argument("variants", type=click.File("r"))
+@click.argument("priors", type=click.File("w"))
+@click.pass_context
+def calc(ctx, variants, priors):
+    calc_all(variants, priors,
+             ctx.obj["genome"], ctx.obj["transcripts"], ctx.obj["processes"])
+
+
 if __name__ == "__main__":
-    main()
+    cli()

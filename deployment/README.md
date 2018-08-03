@@ -102,8 +102,10 @@ You may log in to circle-ci with your github credentials.
 Version 2.0 of CCI can easily be run locally as well using
 
 ```
-circleci build
+circleci build --job [job-name]
 ```
+
+where `job-name` for example is `buildweb`, `test-pipeline` or `test-splicing-pipeline` (see also `brca-exchange/.circleci/config.yml`)
 
 See the [local client documentation](https://circleci.com/docs/2.0/local-cli/) for more details, also regarding installation.
 
