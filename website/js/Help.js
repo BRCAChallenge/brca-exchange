@@ -89,7 +89,7 @@ const Help = React.createClass({
         var fragment = slugify(window.location.hash.slice(1));
         // looks for the fragment within id attributes wrapped in quotes (in dev) or without quotes (minified)
         // we compile it once here and pass the same regex to each call to shouldBeExpanded() to save a little time
-        const fragRegex = new RegExp(`(id=${fragment}|id="${fragment})"`);
+        const fragRegex = new RegExp(`(id=${fragment}|id="${fragment}")`);
 
         var helpTiles = help.map(({section, tiles}) =>
             [<h1>{section}</h1>, tiles.map(({name, id, contents, list, reference}) => {
