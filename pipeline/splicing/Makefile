@@ -1,5 +1,5 @@
 # Host path where references should be stored - symlink tolerant
-REFERENCES = $(shell readlink -f ~/references/splicing)
+REFERENCES = $(shell readlink -f ~/data/splicing)
 IMAGE_NAME = $(USER)-splicing-pipeline
 
 default: build references short
