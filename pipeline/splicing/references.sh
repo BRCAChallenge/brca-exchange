@@ -10,5 +10,5 @@ mkdir -p /references/vep
 echo "Unpacking VEP references..."
 tar -xzf /references/homo_sapiens_vep_92_GRCh38.tar.gz -C /references/vep
 echo "Calculating one variant to force installation of references..."
-python calcVarPriors.py calc ./tests/variants_one.tsv /tmp/priors_one.tsv
+python calcVarPriors.py --processes 1 calc ./tests/variants_one.tsv /tmp/priors_one.tsv
 echo "Reference download and installation complete."
