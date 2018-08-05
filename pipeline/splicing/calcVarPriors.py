@@ -228,22 +228,6 @@ def getVarChrom(variant):
     else:
         return ""
 
-def _make_request(url):
-    '''Makes request to API and returns json file'''
-    req = requests.get(url, headers = {"Content-Type": "application/json"})
-    
-    if req.status_code == 429 and 'Retry-After' in req.headers:
-        retry = float(req.headers['Retry-After'])
-        time.sleep(retry)
-        return _make_request(url, varData)
-
-    if not req.ok:
-        req.raise_for_status()
-        sys.exit()
-
-    return req.json()
-
-
 def getVarConsequences(variant):
     '''
     Given a variant, uses Ensembl VEP API to get variant consequences
@@ -727,6 +711,10 @@ def getFastaSeq(chrom, rangeStart, rangeStop, plusStrandSeq=True):
         req = requests.get(url)
     
     lines = req.content.split('\n')
+
+    # UCSC will return a message as the single item if we're hitting the server too hard...
+    assert len(lines) > 1
+
     # because sequence is located at index 5 in dictionary
     sequence = lines[5]
     for base in sequence:
@@ -3461,13 +3449,18 @@ brca2Transcript = None
 
 def calc_one(variant):
     global genome38, brca1Transcript, brca2Transcript
-    variantData = csv.DictReader(open("mod_res_dn_brca20160525.txt", "r"), delimiter="\t")
-    if variant["Gene_Symbol"] == "BRCA1":
-        varData = getVarData(variant, "enigma", variantData, genome38, brca1Transcript)
-    elif variant["Gene_Symbol"] == "BRCA2":
-        varData = getVarData(variant, "enigma", variantData, genome38, brca2Transcript)
-    click.echo("{}:{}".format(variant["HGVS_cDNA"], varData["varLoc"]), err=True)
-    return addVarDataToRow(varData, variant)
+    try:
+        variantData = csv.DictReader(open("mod_res_dn_brca20160525.txt", "r"), delimiter="\t")
+        if variant["Gene_Symbol"] == "BRCA1":
+            varData = getVarData(variant, "enigma", variantData, genome38, brca1Transcript)
+        elif variant["Gene_Symbol"] == "BRCA2":
+            varData = getVarData(variant, "enigma", variantData, genome38, brca2Transcript)
+        click.echo("{}:{}".format(variant["HGVS_cDNA"], varData["varLoc"]), err=True)
+        return addVarDataToRow(varData, variant)
+    except Exception as e:
+        traceback.print_exc()
+        print('')
+        raise e
 
 def calc_all(variants, priors, genome, transcripts, processes):
     global genome38, brca1Transcript, brca2Transcript
