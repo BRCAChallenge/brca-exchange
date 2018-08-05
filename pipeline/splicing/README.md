@@ -74,6 +74,11 @@ Clone this repo, change into the pipelines/splicing directory and then:
 
 You will end up with a shell inside the container but running the code mapped from your local directory. You can then edit the source outside of the docker and run/test the code using the shell inside the docker.
 
+# Production Input
+
+To run the full set of variants download the [current release](http://brcaexchange.westus2.cloudapp.azure.com/backend/downloads/releases/current_release.tar.gz) and process output/release/artifacts/built_with_mupit.tsv.
+
+
 # Notes
 The file brcaPase.py contains the class for parsing through the .tsv file from the BRCA Exchange website. The class takes the mutations in the Ref column and creates a new variant sequence for MaxEntScan to parse through and generate MaxEntScores for variants.
 
@@ -82,3 +87,5 @@ By default the pipeline spins up 8 processes for computation. To increase this u
 Run the docker with -h to see the various other options:
 
 	docker run --rm -it brcachallenge/splicing-pipeline -h
+
+The full list of consequences predicted by Ensembl VEP can be found [here](https://uswest.ensembl.org/info/genome/variation/prediction/predicted_data.html#consequence_type_table)
