@@ -3451,21 +3451,13 @@ brca2Transcript = None
 
 def calc_one(variant):
     global genome38, brca1Transcript, brca2Transcript
-    try:
-        variantData = csv.DictReader(open("mod_res_dn_brca20160525.txt", "r"), delimiter="\t")
-        if variant["Gene_Symbol"] == "BRCA1":
-            varData = getVarData(variant, "enigma", variantData, genome38, brca1Transcript)
-        elif variant["Gene_Symbol"] == "BRCA2":
-            varData = getVarData(variant, "enigma", variantData, genome38, brca2Transcript)
-        click.echo("{}:{}".format(variant["HGVS_cDNA"], varData["varLoc"]), err=True)
-        return addVarDataToRow(varData, variant)
-    except KeyboardInterrupt as e:
-        return
-    except Exception as e:
-        # Required to print source stack trace when running in multiprocessing
-        print(traceback.format_exc())
-        raise e
-
+    variantData = csv.DictReader(open("mod_res_dn_brca20160525.txt", "r"), delimiter="\t")
+    if variant["Gene_Symbol"] == "BRCA1":
+        varData = getVarData(variant, "enigma", variantData, genome38, brca1Transcript)
+    elif variant["Gene_Symbol"] == "BRCA2":
+        varData = getVarData(variant, "enigma", variantData, genome38, brca2Transcript)
+    click.echo("{}:{}".format(variant["HGVS_cDNA"], varData["varLoc"]), err=True)
+    return addVarDataToRow(varData, variant)
 
 def calc_all(variants, priors, genome, transcripts, processes):
     global genome38, brca1Transcript, brca2Transcript
@@ -3490,16 +3482,16 @@ def calc_all(variants, priors, genome, transcripts, processes):
     click.echo("Processing using {} processes".format(processes), err=True)
     pool = multiprocessing.Pool(processes)
     try:
-        calculatedVariants = pool.map(calc_one, list(inputData))
-        pool.close()
+        # Normal map has a bug if there is no timout that prevents Keyboard interrupts:
+        # https://stackoverflow.com/questions/1408356/keyboard-interrupts-with-pythons-multiprocessing-pool/1408476#1408476
+        calculatedVariants = pool.map_async(calc_one, list(inputData)).get(99999999)
+
+        # Sort output as the order of p.map is not deterministic
+        outputData.writerows(sorted(
+            calculatedVariants,
+            key=lambda d: "{0}:g.{1}:{2}>{3}".format(d["Chr"], d["Pos"], d["Ref"], d["Alt"])))
     except KeyboardInterrupt:
         pool.terminate()
-        pool.join()
-
-    # Sort output as the order of p.map is not deterministic
-    outputData.writerows(sorted(
-        calculatedVariants,
-        key=lambda d: "{0}:g.{1}:{2}>{3}".format(d["Chr"], d["Pos"], d["Ref"], d["Alt"])))
 
 
 def run(command):
