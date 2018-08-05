@@ -1392,9 +1392,11 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                 "inExonicPortionFlag": "N/A",
                 "CIDomainInRegionFlag": "N/A",
                 "isDivisibleFlag": "N/A",
-                "lowMESFlag": "N/A"}
+                "lowMESFlag": "N/A",
+                "varConsequences": "N/A"}
     # checks that variant causes a premature stop codon in an exon
-    if "stop_gained" in getVarConsequences(variant) and varInExon(variant):
+    varCons = getVarConsequences(variant)
+    if "stop_gained" in varCons and varInExon(variant):
         spliceFlag = 0
         spliceRescue = 0
         frameshiftFlag = "-"
@@ -1533,7 +1535,8 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                 "inExonicPortionFlag": inExonicPortionFlag,
                 "CIDomainInRegionFlag": CIDomainInRegionFlag,
                 "isDivisibleFlag": isDivisibleFlag,
-                "lowMESFlag": lowMESFlag}
+                "lowMESFlag": lowMESFlag,
+                "varConsequences": ",".join(varCons)}
 
 def getDeNovoSpliceFrameshiftStatus(variant, donor=True, deNovoDonorInRefAcc=False):
     '''
@@ -1794,7 +1797,8 @@ def getPriorProbAfterGreyZoneSNS(variant, boundaries):
                 "inExonicPortionFlag": "N/A",
                 "CIDomainInRegionFlag": "N/A",
                 "isDivisibleFlag": "N/A",
-                "lowMESFlag": "N/A"}
+                "lowMESFlag": "N/A",
+                "varConsequences": ",".join(varCons)}
 
     assert False, "Should never reach this"
 
@@ -2211,7 +2215,8 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData, genome, transcr
         isDivisibleFlag = "N/A"
         lowMESFlag = "N/A"
         # to check for nonsense variants in exonic portion of splice donor site
-        if varInExon(variant) and "stop_gained" in getVarConsequences(variant):
+        varCons = getVarConsequences(variant)
+        if varInExon(variant) and "stop_gained" in varCons:
             nonsenseData = getPriorProbSpliceRescueNonsenseSNS(variant, boundaries)
             applicablePrior = nonsenseData["priorProb"]
             spliceRescue = nonsenseData["spliceRescue"]
@@ -2308,7 +2313,8 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData, genome, transcr
                 "inExonicPortionFlag": inExonicPortionFlag,
                 "CIDomainInRegionFlag": CIDomainInRegionFlag,
                 "isDivisibleFlag": isDivisibleFlag,
-                "lowMESFlag": lowMESFlag}
+                "lowMESFlag": lowMESFlag,
+                "varConsequences": ",".join(varCons)}
 
 def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData, genome, transcript):
     '''
@@ -2399,7 +2405,8 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData, genome, tran
         isDivisibleFlag = "N/A"
         lowMESFlag = "N/A"
         # to check for nonsense variants in exonic portion of splice acceptor site
-        if varInExon(variant) and "stop_gained" in getVarConsequences(variant):
+        varCons = getVarConsequences(variant)
+        if varInExon(variant) and "stop_gained" in varCons:
             nonsenseData = getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc=True)
             applicablePrior = nonsenseData["priorProb"]
             spliceRescue = nonsenseData["spliceRescue"]
@@ -2496,7 +2503,8 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData, genome, tran
                 "inExonicPortionFlag": inExonicPortionFlag,
                 "CIDomainInRegionFlag": CIDomainInRegionFlag,
                 "isDivisibleFlag": isDivisibleFlag,
-                "lowMESFlag": lowMESFlag}
+                "lowMESFlag": lowMESFlag,
+                "varConsequences": ",".join(varCons)}
     
 def getPriorProbProteinSNS(variant, variantData):
     '''
@@ -2799,7 +2807,8 @@ def getPriorProbInExonSNS(variant, boundaries, variantData, genome, transcript):
                 "inExonicPortionFlag": inExonicPortionFlag,
                 "CIDomainInRegionFlag": CIDomainInRegionFlag,
                 "isDivisibleFlag": isDivisibleFlag,
-                "lowMESFlag": lowMESFlag}
+                "lowMESFlag": lowMESFlag,
+                "varConsequences": ",".join(varCons)}
 
 def getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries):
     '''
@@ -3281,7 +3290,8 @@ def getPriorProbInUTRSNS(variant, boundaries, genome, transcript):
                 "inExonicPortionFlag": "N/A",
                 "CIDomainInRegionFlag": "N/A",
                 "isDivisibleFlag": "N/A",
-                "lowMESFlag": "N/A"}
+                "lowMESFlag": "N/A",
+                "varConsequences": ",".join(varCons)}
 
 def getVarData(variant, boundaries, variantData, genome, transcript):
     '''
