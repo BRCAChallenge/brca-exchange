@@ -5,6 +5,7 @@
 // shims for older browsers
 import SourceReportsTile from "./components/SourceReportsTile";
 import AlleleFrequenciesTile from "./components/AlleleFrequenciesTile";
+import LiteratureTable from "./components/LiteratureTable";
 
 require('babel/polyfill');
 require('es5-shim');
@@ -1064,7 +1065,11 @@ var VariantDetail = React.createClass({
                         }
                     </div>
                 </Row>
-
+                <Row>
+                    <Col md={12} className="variant-literature-col">
+                        <LiteratureTable />
+                    </Col>
+                </Row>
                 <Row>
                     <Col md={12} className="variant-history-col">
                         <h3>{variant["HGVS_cDNA"]}</h3>
