@@ -1,7 +1,7 @@
 'use strict';
 
 const React = require('react'),
-    { Table, OverlayTrigger, Popover } = require('react-bootstrap');
+    { Table, OverlayTrigger, Popover, ButtonToolbar, Button, DropdownButton, MenuItem } = require('react-bootstrap');
     //util = require('./util'),
     //_ = require('lodash');class
 
@@ -56,6 +56,29 @@ class LiteratureTable extends React.Component {
         super(props);
     }
 
+    toTSV() {
+        return fakeLit.map(({title, authors, journal, year, keywords, pmid}) =>
+            [title, authors, journal, year, keywords, pmid].join("\t")).join("\n");
+    }
+    
+    toJSON() {
+        return JSON.stringify(fakeLit);
+    }
+
+    downloadTSV() {
+        let file = new File(this.toTSV(), "variant-literature.tsv", {type: "text/csv"});
+    }
+
+    downloadJSON() {
+    }
+
+    copyTable() {
+        let textarea = this.refs.clipboardContent.getDOMNode();
+        textarea.value = this.toTSV();
+        textarea.select();
+        document.execCommand('copy');
+    }
+
     render() {
         let litRows = fakeLit.map(({title, authors, journal, year, keywords, pmid}) => (
             <tr key={`lit_${pmid}`}>
@@ -67,6 +90,8 @@ class LiteratureTable extends React.Component {
                 <td><div><a href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank'>{pmid}</a></div></td>
             </tr>
         ));
+        let toTSVURL = `data:text/tab-separated-values;charset=utf-8,${encodeURIComponent(this.toTSV())}`;
+        let toJSONURL = `data:text/json;charset=utf-8,${encodeURIComponent(this.toJSON())}`;
         return (
             <div>
                 <h3>BRCA Exchange Literature Search Results</h3>
@@ -85,6 +110,14 @@ class LiteratureTable extends React.Component {
                         {litRows}
                     </tbody>
                 </Table>
+                <ButtonToolbar className='pull-right'>
+                    <Button onClick={this.copyTable.bind(this)}>Copy To Clipboard</Button>
+                    <DropdownButton title="Export">
+                        <li><a href={toTSVURL} download='variant-literature.tsv'>tsv</a></li>
+                        <li><a href={toJSONURL} download='variant-literature.json'>json</a></li>
+                    </DropdownButton>
+                </ButtonToolbar>
+                <textarea ref='clipboardContent' style={{padding: '0', width: '0', height: '0', marginLeft: '-99999999px' }}/>
             </div>
         );
     }
