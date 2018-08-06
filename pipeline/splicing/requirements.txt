@@ -2,6 +2,7 @@ biopython==1.72
 click==6.7
 mock==2.0.0
 mysqlclient==1.3.13
+pyfaidx==0.5.4.2
 pygr==0.8.2
 pytest==3.6.3
 requests==2.19.1

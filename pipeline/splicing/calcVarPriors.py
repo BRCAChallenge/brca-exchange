@@ -22,6 +22,7 @@ import pytest
 import pyhgvs
 import pyhgvs.utils as pyhgvs_utils
 from pygr.seqdb import SequenceFileDB
+from pyfaidx import Fasta
 from Bio.Seq import Seq
 from calcMaxEntScanMeanStd import fetch_gene_coordinates, runMaxEntScan
 
@@ -702,27 +703,15 @@ def getFastaSeq(chrom, rangeStart, rangeStop, plusStrandSeq=True):
         regionStart = rangeStop
         regionEnd = rangeStart
     
-    url = "http://genome.ucsc.edu/cgi-bin/das/hg38/dna?segment=%s:%d,%d" % (chrom, regionStart, regionEnd)
-    req = requests.get(url)
-    
-    if req.status_code == 429 and 'Retry-After' in req.headers:
-        retry = float(req.headers['Retry-After'])
-        time.sleep(retry)
-        req = requests.get(url)
-    
-    lines = req.content.split('\n')
+    # NOTE: pyfaidx is NOT thread safe. Would be better to have one
+    # REMIND: Switch to one per thread/process
+    hg38 = Fasta("/references/hg38.fa", sequence_always_upper=True)
+    sequence = hg38[chrom][regionStart-1:regionEnd]
 
-    # UCSC will return a message as the single item if we're hitting the server too hard...
-    assert len(lines) > 1
-
-    # because sequence is located at index 5 in dictionary
-    sequence = lines[5]
-    for base in sequence:
-        assert base in ["A", "C", "G", "T", "a", "c", "g", "t"]
-    if plusStrandSeq == True:
-        return sequence.upper()
+    if plusStrandSeq:
+        return sequence.seq
     else:
-        return str(Seq(sequence.upper()).reverse_complement())
+        return sequence.reverse.complement.seq
 
 def getSeqLocDict(chrom, varStrand, rangeStart, rangeStop):
     '''
@@ -2301,7 +2290,7 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData, genome, transcr
                 "inExonicPortionFlag": inExonicPortionFlag,
                 "CIDomainInRegionFlag": CIDomainInRegionFlag,
                 "isDivisibleFlag": isDivisibleFlag,
-                "lowMESFlag": lowMESFlag,
+                "lowMESFlag": lowMESFlag, 
                 "varConsequences": ",".join(varCons)}
 
 def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData, genome, transcript):
@@ -3442,10 +3431,9 @@ def getVarDict(variant, boundaries):
 
 # Globals accessed in multi-processing function calc_one
 # REMIND: Use functools.partial to pass direction into the map function
-genome38 = None
+genome38 = None  # This is actually never used...
 brca1Transcript = None
 brca2Transcript = None
-
 
 def calc_one(variant):
     global genome38, brca1Transcript, brca2Transcript
@@ -3471,9 +3459,6 @@ def calc_all(variants, priors, genome, transcripts, processes):
         fieldnames.append(header)
     outputData = csv.DictWriter(priors, delimiter="\t", lineterminator="\n", fieldnames=fieldnames)
     outputData.writerow(dict((fn, fn) for fn in inputData.fieldnames))
-
-    # read genome sequence
-    genome38 = SequenceFileDB(genome)
 
     # read RefSeq transcripts
     transcripts = pyhgvs_utils.read_transcripts(transcripts)
