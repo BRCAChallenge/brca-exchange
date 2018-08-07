@@ -94,7 +94,7 @@ class LiteratureTable extends React.Component {
         let toJSONURL = `data:text/json;charset=utf-8,${encodeURIComponent(this.toJSON())}`;
         return (
             <div>
-                <h3>BRCA Exchange Literature Search Results</h3>
+                <h4>Literature Search Results:</h4>
                 <Table className='variant-literature nopointer' responsive bordered>
                     <thead>
                         <tr className='active'>
