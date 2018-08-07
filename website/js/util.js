@@ -142,12 +142,12 @@ function getFormattedFieldByProp(prop, variant) {
     } else if (prop === "SCV_ClinVar" && variant[prop].toLowerCase().indexOf("scv") !== -1) {
         // Link all clinvar submissions back to clinvar
         let accessions = variant[prop].split(',');
-        let versions = variant["SCV_Version_ClinVar"].split(',');
+        let versions = variant["SCV_Version_ClinVar"] ? variant["SCV_Version_ClinVar"].split(',') : null;
         rowItem = [];
         for (let i = 0; i < accessions.length; i++) {
             let displayText = accessions[i];
 
-            if (i < versions.length && versions[i] !== '-') {
+            if (versions && i < versions.length && versions[i] !== '-') {
                 // appending accession version if available
                 displayText = accessions[i].concat('.').concat(versions[i]);
             }
