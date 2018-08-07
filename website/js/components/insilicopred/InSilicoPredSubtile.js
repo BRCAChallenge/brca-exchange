@@ -60,8 +60,8 @@ export default class InSilicoPredSubtile extends React.Component {
         const {probability, reason, varLoc, varType} = this.props;
         const summarizedData = {varLoc, varType};
         const cols = [
-            { title: 'Variant Location', prop: 'varLoc', value: 'Exon' },
-            { title: 'Variant Type', prop: 'varType', value: 'Missense' }
+            { title: 'VEP Consequences', prop: 'varLoc' },
+            // { title: 'Variant Type', prop: 'varType' }
         ];
 
         if (probability === -Infinity) {
@@ -73,9 +73,9 @@ export default class InSilicoPredSubtile extends React.Component {
         }
 
         // for each panel, construct key-value pairs as a row of the table
-        const submitterRows = cols.map(({prop, title, value, helpKey}) => {
-            const isEmptyValue = util.isEmptyField(value);
+        const submitterRows = cols.map(({prop, title, helpKey}) => {
             const rowItem = util.getFormattedFieldByProp(prop, summarizedData);
+            const isEmptyValue = util.isEmptyField(rowItem);
 
             return (
                 <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
