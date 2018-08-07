@@ -75,7 +75,7 @@ export default class InSilicoPredSubtile extends React.Component {
         // for each panel, construct key-value pairs as a row of the table
         const submitterRows = cols.map(({prop, title, helpKey}) => {
             const rowItem = util.getFormattedFieldByProp(prop, summarizedData);
-            const isEmptyValue = util.isEmptyField(rowItem);
+            const isEmptyValue = false;
 
             return (
                 <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
