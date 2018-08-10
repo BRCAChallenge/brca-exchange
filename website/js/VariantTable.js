@@ -233,56 +233,56 @@ const researchModeGroups = [
         {title: 'Literature Reference', prop: 'Literature_source_exLOVD', core: true}
     ]},
 
-    {groupTitle: 'CRAVAT - MuPIT 3D Protein View', internalGroupName: 'Mupit Structure', innerCols: [
-        {title: 'Mupit Structure', prop: 'Mupit_Structure', replace: mupitStructure, tableKey: false, dummy: true}
+    {groupTitle: 'CRAVAT - MuPIT 3D Protein View', internalGroupName: 'Mupit Structure', hideFromColumnSelection: true, innerCols: [
+        {title: 'Mupit Structure', prop: 'Mupit_Structure', replace: mupitStructure, tableKey: false}
     ]},
 ];
 
 // subColumns populate the column selection checkboxes.
-// They should match the variant detail groupings.
-const subColumns = _.map(researchModeGroups, function (group) {
-    if (group.hasOwnProperty('innerCols')) {
-        return {
-            subColTitle: group.groupTitle,
-            // hide dummy columns from column selection
-            subColList: _.map(_.filter(group.innerCols, ({dummy}) => !dummy), function (innerCol) {
-                return {
-                    title: innerCol.title,
-                    prop: innerCol.prop,
-                    render: renderCell
-                };
-            })
-        };
-    } else if (group.hasOwnProperty('reportBinding') && group.reportBinding.hasOwnProperty('cols')) {
-        return {
-            subColTitle: group.groupTitle,
-            // hide dummy columns from column selection
-            subColList: _.map(_.filter(group.reportBinding.cols, ({dummy}) => !dummy), function (col) {
-                return {
-                    title: col.title,
-                    prop: col.prop,
-                    render: renderCell
-                };
-            })
-        };
-    } else if (group.hasOwnProperty('innerGroups')) {
-        let subCols = group.innerGroups.map(function(innerGroup) {
-            // hide dummy columns from column selection
-            return _.map(_.filter(innerGroup.data, ({dummy}) => !dummy), function (col) {
-                            return {
-                                title: col.title,
-                                prop: col.prop,
-                                render: renderCell
-                            };
-                        });
-        });
-        // flatten array of arrays
-        let flattenedSubColList = [].concat.apply([], subCols);
-        return {
-            subColTitle: group.groupTitle,
-            subColList: flattenedSubColList
-        };
-    }
+// They should match the variant detail groupings unless hideFromColumnSelection is true.
+const subColumns = _.map(_.filter(researchModeGroups, function(group) { return !group.hideFromColumnSelection; }), function (group) {
+        if (group.hasOwnProperty('innerCols')) {
+            return {
+                subColTitle: group.groupTitle,
+                // hide dummy columns from column selection
+                subColList: _.map(_.filter(group.innerCols, ({dummy}) => !dummy), function (innerCol) {
+                    return {
+                        title: innerCol.title,
+                        prop: innerCol.prop,
+                        render: renderCell
+                    };
+                })
+            };
+        } else if (group.hasOwnProperty('reportBinding') && group.reportBinding.hasOwnProperty('cols')) {
+            return {
+                subColTitle: group.groupTitle,
+                // hide dummy columns from column selection
+                subColList: _.map(_.filter(group.reportBinding.cols, ({dummy}) => !dummy), function (col) {
+                    return {
+                        title: col.title,
+                        prop: col.prop,
+                        render: renderCell
+                    };
+                })
+            };
+        } else if (group.hasOwnProperty('innerGroups')) {
+            let subCols = group.innerGroups.map(function(innerGroup) {
+                // hide dummy columns from column selection
+                return _.map(_.filter(innerGroup.data, ({dummy}) => !dummy), function (col) {
+                                return {
+                                    title: col.title,
+                                    prop: col.prop,
+                                    render: renderCell
+                                };
+                            });
+            });
+            // flatten array of arrays
+            let flattenedSubColList = [].concat.apply([], subCols);
+            return {
+                subColTitle: group.groupTitle,
+                subColList: flattenedSubColList
+            };
+        }
 });
 
 const columns = [
