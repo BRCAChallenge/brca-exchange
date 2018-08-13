@@ -266,21 +266,16 @@ def setSourceUrls(row):
 
 
 def setSynonym(row):
-    delimiter = ""
-    synonym = ""
-    if row["BIC_Nomenclature"] != EMPTY:
-        for thisBic in row["BIC_Nomenclature"].split(','):
-            synonym = "%s%s%s" % (synonym, delimiter, thisBic)
-            delimiter = ","
-    if row["BIC_Nomenclature_exLOVD"] != EMPTY:
-        for thisBic in row["BIC_Nomenclature_exLOVD"].split(','):
-            synonym = "%s%s%s" % (synonym, delimiter, thisBic)
-            delimiter = ","
-    if row["BIC_Designation_BIC"] != EMPTY:
-        for thisBic in row["BIC_Designation_BIC"].split(','):
-            synonym = "%s%s%s" % (synonym, delimiter, thisBic)
-            delimiter = ","
-    return (synonym)
+
+    synonyms = {}
+
+    synonyms.update(s for s in row["BIC_Nomenclature"].split(','))
+    synonyms.update(s for s in row["BIC_Nomenclature_exLOVD"].split(','))
+    synonyms.update(s for s in row["BIC_Designation_BIC"].split(','))
+
+    synonyms.update(s for s in row["Synonyms_ClinVar"].split('|'))
+
+    return ','.join(synonyms)
 
 
 if __name__ == "__main__":

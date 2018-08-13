@@ -2,8 +2,6 @@
 ClinVarUtils: basic
 """
 
-import xml.etree.ElementTree as ET
-
 def isCurrent(element):
     """Determine if the indicated clinvar set is current"""
     rr = element.find("RecordStatus")
@@ -34,6 +32,27 @@ def processClinicalSignificanceElement(el, obj):
         obj.summaryEvidence = None
         obj.dateSignificanceLastEvaluated = None
 
+
+def extractSynonyms(el):
+    include_types = {'ProteinChange3LetterCode', 'ProteinChange1LetterCode',
+                     'nucleotide change', 'protein change, historical'}
+    include_types_norm = {s.lower() for s in include_types}
+
+    exclude_hgvs = {'HGVS, protein, RefSeq', 'HGVS, coding, RefSeq'}
+    exclude_hgvs_norm = {s.lower() for s in exclude_hgvs}
+
+    sy_alt = [a.text for a in el.findall(
+        'MeasureSet/Measure/Name/ElementValue') if a.get('Type').lower() ==
+              'alternate']
+
+    sy = []
+    for a in el.findall('MeasureSet/Measure/AttributeSet/Attribute'):
+        type = a.get('Type').lower()
+        if type in include_types_norm or ('hgvs' in type and type
+                                               not in exclude_hgvs_norm):
+            sy.append(a.text)
+
+    return sy + sy_alt
 
 class genomicCoordinates:
     """Contains the genomic information on the variant"""
@@ -108,6 +127,7 @@ class referenceAssertion:
         processClinicalSignificanceElement(element.find(
             "ClinicalSignificance"), self)
 
+
         obs = element.find("ObservedIn")
         if obs == None:
             self.origin = None
@@ -130,6 +150,8 @@ class referenceAssertion:
             if method != None:
                 self.method = textIfPresent(method, "MethodType")
         self.variant = None
+        self.synonyms = []
+
         measureSet = element.find("MeasureSet")
         #if measureSet.get("Type") == "Variant":
         if debug:
@@ -144,6 +166,8 @@ class referenceAssertion:
             self.variant = variant(measureSet.find("Measure"), variantName, 
                                    measureSet.get("ID"), 
                                    debug=debug)
+
+        self.synonyms = extractSynonyms(element)
 
 
 class clinVarAssertion:
@@ -190,6 +214,8 @@ class clinVarAssertion:
             "ClinicalSignificance"), self)
 
         self.dateLastUpdated = cva.get("DateUpdated")
+
+        self.synonyms = extractSynonyms(element)
                  
 
 class clinVarSet:

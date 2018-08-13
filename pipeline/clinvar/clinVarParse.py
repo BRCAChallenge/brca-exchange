@@ -16,11 +16,13 @@ def printHeader():
                      "SCV_Version", "ID", "Origin",
                      "Method",
                      "Genomic_Coordinate", "Symbol", "Protein", "Description",
-                     "SummaryEvidence", "ReviewStatus")))
+                     "SummaryEvidence", "ReviewStatus", "Synonyms")))
 
+MULTI_VALUE_SEP = '|'
 
 def processSubmission(submissionSet, assembly):
     ra = submissionSet.referenceAssertion
+
     for oa in submissionSet.otherAssertions.values():
         submitter = oa.submitter
         variant = ra.variant
@@ -43,6 +45,8 @@ def processSubmission(submissionSet, assembly):
                 genomicCoordinate = "chr%s:%s:%s>%s" % (chrom, start, referenceAllele,
                                                         alternateAllele)
 
+                synonyms = MULTI_VALUE_SEP.join(ra.synonyms + oa.synonyms)
+
                 # Omit the variants that don't have any genomic start coordinate indicated.
                 if start != None and start != "None" and start != "NA":
 
@@ -61,7 +65,8 @@ def processSubmission(submissionSet, assembly):
                                      str(proteinChange),
                                      str(oa.description),
                                      str(oa.summaryEvidence),
-                                     str(oa.reviewStatus))))
+                                     str(oa.reviewStatus),
+                                     str(synonyms))))
 
 
 def main():
