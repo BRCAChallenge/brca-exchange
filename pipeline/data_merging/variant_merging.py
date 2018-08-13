@@ -76,6 +76,7 @@ Functional_analysis_technique": "functionalanalysis_technique",
 dna_change_genomic": "dna_change_genomic",
 '''
 LOVD_FIELDS = {"Variant_frequency": "frequency",
+               "Functional_analysis": "functional_analysis",
                "HGVS_cDNA": "cDNA",
                "HGVS_protein": "Protein",
                "Genetic_origin": "genetic_origin",

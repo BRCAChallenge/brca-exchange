@@ -38,22 +38,23 @@ def main(args):
     # add submission_id field
     ammendedHeaderline = headerline.split('\r\n')[0] + '\t' + '"submission_id"' + '\r\n'
     f_out.write(ammendedHeaderline)
-    
+
     # get indexes of fields
     parsedHeaderline = headerline.strip().replace(' ', '_').replace('"', '').split('\t')
     fieldIdxDict = defaultdict()
     for index, field in enumerate(parsedHeaderline):
         fieldIdxDict[field] = index
 
-    # add submission id to each submission (cDNA + submitter)
+    # add submission id to each submission (cDNA + submitter + functional analysis)
     for line in f_in:
         line = line.replace('"', '')
         parsedLine = line.strip().split('\t')
 
         cDNA = parsedLine[fieldIdxDict['cDNA']]
         submitter = parsedLine[fieldIdxDict['submitters']]
+        functional_analysis = parsedLine[fieldIdxDict['functional_analysis']]
 
-        submissionId = cDNA + submitter
+        submissionId = cDNA + submitter + functional_analysis
 
         ammendedLine = line.split('\r\n')[0] + '\t' + submissionId + '\r\n'
         f_out.write(ammendedLine)
