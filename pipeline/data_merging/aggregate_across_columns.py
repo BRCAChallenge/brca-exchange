@@ -17,7 +17,8 @@ FIELDS_TO_REMOVE = ["Protein_ClinVar",
                     "HGVS_protein_exLOVD",
                     "polyPhen2_result_ESP",
                     "BIC_Designation_BIC",
-                    "BIC_Nomenclature_exLOVD"]
+                    "BIC_Nomenclature_exLOVD",
+                    "Synonyms_ClinVar"]
 FIELDS_TO_ADD = ["Hg38_Start", "Hg38_End", "Hg37_Start", "Hg37_End",
                  "Hg36_Start", "Hg36_End",
                  "HGVS_RNA",
