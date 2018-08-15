@@ -85,6 +85,7 @@ const researchModeGroups = [
         {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36'},
         {title: 'RNA (LOVD)', prop: 'RNA_LOVD'},
         {title: 'Beacons', core: true},
+        {title: 'Synonyms', prop: 'Synonyms'}
     ]},
 
     {groupTitle: 'Clinical Significance (ENIGMA)', internalGroupName: 'Significance (ENIGMA)', innerCols: [
