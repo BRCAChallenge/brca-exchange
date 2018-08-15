@@ -1,6 +1,6 @@
 #!/bin/bash
 
-URL=http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources
+URL=http://brcaexchange.org/backend/downloads/resources
 HASH=sha1sum
 
 declare -A files
