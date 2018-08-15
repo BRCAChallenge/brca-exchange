@@ -40,10 +40,18 @@ Below an example invocation of `docker run`. In the first line we make sure, tha
 Make sure the directories on the host system already exist (in particular the corresponding directory of `/files/data`), as otherwise issues may arise with access rights.
 
 In the following lines, paths on the host are mapped to paths in the container. You would need to adapt the path before the `:` accordingly.
-Note, that line concerning the code base can be omitted. In this case, the version of the pipeline already contained within the image is run.
+
+Notes:
+
+* The line concerning the code base can be omitted. In this case, the version of the pipeline already contained within the image is run.
+* The line concerning the DATA_DATE can be omitted. If provided, it explicitly sets the date of the pipeline run rather than using the current date (e.g. this is useful when rerunning a pipeline that aborted half way through).
+* The line concerning UTA_DB_URL can be used to run a local instance of a uta database. This is helpful if a remote instance is having issues.
 
 ```
 docker run --rm -u $(id -u ${USER}):$(id -g ${USER}) \
+       -e "DATA_DATE=${DATA_DATE}" \
+       --network host \
+       -e "UTA_DB_URL=postgresql://anonymous@0.0.0.0:50827/uta/uta_20170629" \
        -v  path_to_resource_files:/files/resources \
        -v  path_to_output_directory:/files/data \
        -v  optional_path_to_code_base:/opt/brca-exchange \
