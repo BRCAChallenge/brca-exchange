@@ -2,10 +2,12 @@
 /*global require: false */
 'use strict';
 
-// shims for older browsers
+
 import SourceReportsTile from "./components/SourceReportsTile";
 import AlleleFrequenciesTile from "./components/AlleleFrequenciesTile";
+import MupitStructure from './MupitStructure';
 
+// shims for older browsers
 require('babel/polyfill');
 require('es5-shim');
 require('es5-shim/es5-sham');
@@ -787,7 +789,7 @@ var VariantDetail = React.createClass({
 
                 // get mupit structures if they're available
                 if (prop === "Mupit_Structure") {
-                    rowItem = rowDescriptor.replace(variant, prop);
+                    rowItem = <MupitStructure variant={variant} prop={prop} onLoad={() => this.relayoutGrid()} />;
 
                     /*
                     Don't display mupit structures if they don't have an associated Amino Acid change.
@@ -816,7 +818,9 @@ var VariantDetail = React.createClass({
                     rowItem = util.getFormattedFieldByProp(prop, variant);
                 }
 
-                let isEmptyValue = rowDescriptor.replace ? rowItem === false : util.isEmptyField(variant[prop]);
+                let isEmptyValue = (rowDescriptor.replace || rowDescriptor.dummy)
+                    ? rowItem === false
+                    : util.isEmptyField(variant[prop]);
 
                 if (title === "Beacons") {
                     if (variant.Ref.length > 1 || variant.Alt.length > 1) {
