@@ -32,7 +32,8 @@ var moment = require('moment');
 // faisal: includes for masonry/isotope
 var Isotope = require('isotope-layout');
 require('isotope-packery');
-
+import TransitionEvents from 'react/lib/ReactTransitionEvents';
+import debounce from 'lodash/debounce';
 
 var brcaLogo = require('./img/BRCA-Exchange-tall-tranparent.png');
 var logos = require('./logos');
@@ -441,7 +442,7 @@ function isEmptyDiff(value) {
 const IsoGrid = React.createClass({
     displayName: 'IsoGrid',
 
-    // Wrapper to layout child elements passed in
+    // wraps contents in a masonry-managed container
     render: function () {
         const children = this.props.children;
         return (
@@ -451,23 +452,9 @@ const IsoGrid = React.createClass({
         );
     },
 
-    // When the DOM is rendered, let Masonry know what's changed
-    componentDidUpdate: function() {
-        if (this.masonry) {
-            var that = this;
-            setTimeout(() => {
-                // prevents improper layout of mupit tile, and potentially others
-                // 300ms is the time it takes for the tile to expand
-                that.masonry.reloadItems();
-                that.masonry.arrange();
-            }, 300);
-        }
-    },
-
-    // Set up Masonry
+    // create masonry object to manage children's positions
     componentDidMount: function() {
-        if(!this.masonry) {
-            // i suppose we're doing this so the children exist when we create it?
+        if (!this.masonry) {
             this.masonry = new Isotope('.isogrid', {
                 layoutMode: 'packery',
                 itemSelector: '.isogrid-item',
@@ -477,10 +464,14 @@ const IsoGrid = React.createClass({
                 }
             });
         }
-        else {
+    },
+
+    relayout: function(fullRefresh) {
+        if (fullRefresh) {
             this.masonry.reloadItems();
-            this.masonry.arrange();
         }
+
+        this.masonry.arrange();
     }
 });
 
@@ -498,7 +489,7 @@ var VariantDetail = React.createClass({
     componentWillMount: function () {
         backend.variant(this.props.params.id).subscribe(
             resp => {
-                return this.setState({data: resp.data, error: null});
+                this.setState({data: resp.data, error: null});
             },
             () => { this.setState({error: 'Problem connecting to server'}); }
         );
@@ -508,20 +499,31 @@ var VariantDetail = React.createClass({
                 // we always want reports grouped by source, so we'll do so centrally here
                 const groupedReports = _.groupBy(resp.data, 'Source');
 
-                return this.setState({reports: groupedReports, error: null});
+                this.setState({reports: groupedReports, error: null}, () => {
+                    this.relayoutGrid();
+                });
             }, () => {
                 this.setState({reportError: 'Problem retrieving reports'});
                 console.warn("Couldn't retrieve reports!");
             }
         );
+
     },
-    onChildToggleMode: function() {
-        this.props.toggleMode();
-        // we need to reparse the tooltips if the mode changed
-        this.setState({
-            tooltips: parseTooltips(localStorage.getItem("research-mode") === 'true')
-        });
-        this.forceUpdate();
+    componentWillUpdate: function(nextProps) {
+        // reparse the tooltips since they're mode-specific
+        if (nextProps.mode !== this.props.mode) {
+            this.setState({
+                tooltips: parseTooltips(nextProps.mode === 'research_mode')
+            });
+        }
+    },
+    componentDidUpdate: function(prevProps) {
+        if (prevProps.mode !== this.props.mode) {
+            // if the mode changed, we have to relayout the page on the next available frame
+            setTimeout(() => {
+                this.relayoutGrid(true);
+            }, 0);
+        }
     },
     pathogenicityChanged: function(pathogenicityDiff) {
         return (pathogenicityDiff.added || pathogenicityDiff.removed) ? true : false;
@@ -531,6 +533,8 @@ var VariantDetail = React.createClass({
 
         this.setState({
             hideEmptyItems: hideEmptyItems
+        }, () => {
+            this.relayoutGrid();
         });
     },
     truncateData: function(field) {
@@ -541,6 +545,19 @@ var VariantDetail = React.createClass({
             return false;
         }
     },
+    relayoutGrid: debounce(function(fullRefresh) {
+        if (this.isogrid) {
+            this.isogrid.relayout(fullRefresh);
+        }
+    }),
+    relayoutOnCollapsed: function(collapser) {
+        // this will relayout the page when the animation is finished
+        const endHandler = () => {
+            TransitionEvents.removeEndEventListener(collapser, endHandler);
+            this.relayoutGrid();
+        };
+        TransitionEvents.addEndEventListener(collapser, endHandler);
+    },
     onChangeGroupVisibility(groupTitle, event) {
         // stop the page from scrolling to the top (due to navigating to the fragment '#')
         event.preventDefault();
@@ -548,7 +565,6 @@ var VariantDetail = React.createClass({
         // the event target is actually the span *inside* the 'a' tag, but we need to check the 'a' tag for the
         // collapsed state
         const collapsingElemParent = event.target.parentElement;
-
         let willBeCollapsed = true;
 
         collapsingElemParent.childNodes.forEach(function(child) {
@@ -561,15 +577,9 @@ var VariantDetail = React.createClass({
         });
         localStorage.setItem("collapse-group_" + groupTitle, willBeCollapsed);
 
-        // defer re-layout until the state change has completed
-        const me = this;
-
-        setTimeout(() => {
-            // this forces a re-render after a group has expanded/collapsed, fixing the layout
-            // note that 300ms just happens to be the duration of the expand/collapse animation
-            // it'd be better to run the re-layout whenever the animation ends
-            me.forceUpdate();
-        }, 300);
+        // find the actual collapsing DOM element so we can attach a handler to its transition-end event
+        const collapser = collapsingElemParent.parentElement.parentElement.getElementsByClassName("panel-collapse")[0];
+        this.relayoutOnCollapsed(collapser);
     },
     determineDiffRowColor: function(highlightRow) {
         return highlightRow ? 'danger' : '';
@@ -692,7 +702,7 @@ var VariantDetail = React.createClass({
             cols,
             groups;
 
-        if (localStorage.getItem("research-mode") === 'true') {
+        if (this.props.mode === 'research_mode') {
             cols = researchModeColumns;
             groups = researchModeGroups;
         } else {
@@ -731,13 +741,8 @@ var VariantDetail = React.createClass({
                         submissions={this.state.reports[reportSource]}
                         onChangeGroupVisibility={this.onChangeGroupVisibility}
                         hideEmptyItems={this.state.hideEmptyItems}
-                        onReportToggled={() => {
-                            setTimeout(() => {
-                                // this forces a re-render after a group has expanded/collapsed, fixing the layout
-                                // note that 300ms just happens to be the duration of the expand/collapse animation
-                                // it'd be better to run the re-layout whenever the animation ends
-                                this.forceUpdate();
-                            }, 300);
+                        onReportToggled={(collapser) => {
+                            this.relayoutOnCollapsed(collapser);
                         }}
                         showHelp={this.showHelp}
                         tooltips={this.state.tooltips}
@@ -752,13 +757,8 @@ var VariantDetail = React.createClass({
                         groupTitle={groupTitle}
                         onChangeGroupVisibility={this.onChangeGroupVisibility}
                         hideEmptyItems={this.state.hideEmptyItems}
-                        onFrequencyFieldToggled={() => {
-                            setTimeout(() => {
-                                // this forces a re-render after a group has expanded/collapsed, fixing the layout
-                                // note that 300ms just happens to be the duration of the expand/collapse animation
-                                // it'd be better to run the re-layout whenever the animation ends
-                                this.forceUpdate();
-                            }, 300);
+                        onFrequencyFieldToggled={(collapser) => {
+                            this.relayoutOnCollapsed(collapser);
                         }}
                         showHelp={this.showHelp}
                         tooltips={this.state.tooltips}
@@ -870,7 +870,8 @@ var VariantDetail = React.createClass({
                     <Panel
                         header={header}
                         collapsable={true}
-                        defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
+                        defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}
+                    >
                         <Table>
                             <tbody>
                                 {rows}
@@ -992,6 +993,11 @@ var VariantDetail = React.createClass({
             </h3>
         );
 
+        const tileSizeClasses = groupTables.length < 3
+            ? `col-xs-12 col-md-${12 / groupTables.length}`
+            : `col-xs-12 col-md-6 col-lg-6 col-xl-4`;
+        const splicingTileSizeClassse = 'col-xs-12 col-md-12 col-lg-12 col-xl-8';
+
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
@@ -1023,49 +1029,41 @@ var VariantDetail = React.createClass({
 
                 <Row>
                     <div className="container-fluid variant-details-body">
-                        { (groupTables.length < 3) ?
-                            <IsoGrid>
-                                <div className={`isogrid-sizer col-xs-12 col-md-${12 / groupTables.length}`}/>
-                                {
-                                    groupTables.map((x, i) => {
-                                        return (
-                                            <Col key={"group_col-" + i} xs={12} md={12 / groupTables.length}
-                                                className="variant-detail-group isogrid-item">
-                                                {x}
-                                            </Col>
-                                        );
-                                    })
-                                }
-                            </IsoGrid>
-                            :
-                            <IsoGrid>
-                                <div className="isogrid-sizer col-xs-12 col-md-6 col-lg-6 col-xl-4"/>
-                                    <Col key={"splicing_vis"} xs={12} md={12} lg={12} className="variant-detail-group isogrid-item col-xl-8">
-                                        <Panel header={splicingHeader} collapsable={true} defaultExpanded={localStorage.getItem("collapse-group_transcript-visualization") !== "true"}>
+                        <IsoGrid ref={ (me) => { this.isogrid = me; } }>
+                            <div className={`isogrid-sizer ${tileSizeClasses}`} />
+
+                            {
+                                // show the splicing vis if we're in research mode
+                                this.props.mode === "research_mode" && (
+                                    <Col key="splicing_vis"
+                                        className={`variant-detail-group isogrid-item ${splicingTileSizeClassse}`}>
+                                        <Panel
+                                            header={splicingHeader}
+                                            collapsable={true}
+                                            defaultExpanded={localStorage.getItem("collapse-group_transcript-visualization") !== "true"}
+                                        >
                                             <Splicing variant={variant}
-                                                onContentsChanged={() => {
-                                                    setTimeout(() => {
-                                                        // this forces a re-render after a group has expanded/collapsed, fixing the layout
-                                                        // the 0 timeout will run this once the queue is empty, i.e. after the animation has completed
-                                                        this.forceUpdate();
-                                                    }, 0);
+                                                onContentsChanged={(collapser) => {
+                                                    this.relayoutOnCollapsed(collapser);
                                                 }}
                                             />
                                         </Panel>
                                     </Col>
-                                {
-                                    // we're mapping each group into a column so we can horizontally stack them
-                                    groupTables.map((x, i) => {
-                                        return (
-                                            <Col key={"group_col-" + i} xs={12} md={6} lg={6}
-                                                className="variant-detail-group isogrid-item col-xl-4">
-                                                {x}
-                                            </Col>
-                                        );
-                                    })
-                                }
-                            </IsoGrid>
-                        }
+                                )
+                            }
+
+                            {
+                                // we're mapping each group into a column so we can horizontally stack them
+                                groupTables.map((x, i) => {
+                                    return (
+                                        <Col key={"group_col-" + i}
+                                            className={`variant-detail-group isogrid-item ${tileSizeClasses}`}>
+                                            {x}
+                                        </Col>
+                                    );
+                                })
+                            }
+                        </IsoGrid>
                     </div>
                 </Row>
 
@@ -1094,7 +1092,7 @@ var VariantDetail = React.createClass({
 
                 <Row>
                     <Col md={12} mdOffset={0}>
-                        <DisclaimerModal buttonModal onToggleMode={this.onChildToggleMode} text="Show All Public Data on this Variant"/>
+                        <DisclaimerModal buttonModal onToggleMode={this.props.toggleMode} text="Show All Public Data on this Variant"/>
                     </Col>
                 </Row>
             </Grid>
