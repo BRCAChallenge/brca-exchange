@@ -558,7 +558,7 @@ var VariantDetail = React.createClass({
         };
         TransitionEvents.addEndEventListener(collapser, endHandler);
     },
-    onChangeGroupVisibility(groupTitle, event) {
+    onChangeGroupVisibility(groupTitle, event, collapser) {
         // stop the page from scrolling to the top (due to navigating to the fragment '#')
         event.preventDefault();
 
@@ -577,8 +577,6 @@ var VariantDetail = React.createClass({
         });
         localStorage.setItem("collapse-group_" + groupTitle, willBeCollapsed);
 
-        // find the actual collapsing DOM element so we can attach a handler to its transition-end event
-        const collapser = collapsingElemParent.parentElement.parentElement.getElementsByClassName("panel-collapse")[0];
         this.relayoutOnCollapsed(collapser);
     },
     determineDiffRowColor: function(highlightRow) {
@@ -858,9 +856,12 @@ var VariantDetail = React.createClass({
                 groupsEmpty += 1;
             }
 
+            // holds a reference to the collapsible DOM element that we'll pass to the relayout monitor later
+            let panelElem;
+
             const header = (
                 <h3>
-                    <a href="#" onClick={(event) => this.onChangeGroupVisibility(groupTitle, event)}>{groupTitle}</a>
+                    <a href="#" onClick={(event) => this.onChangeGroupVisibility(groupTitle, event, panelElem)}>{groupTitle}</a>
                     <GroupHelpButton group={groupTitle} onClick={(event) => { this.showHelp(event, groupTitle); return true; }} />
                 </h3>
             );
@@ -868,6 +869,7 @@ var VariantDetail = React.createClass({
             return (
                 <div key={`group_collection-${groupTitle}`} className={ (allEmpty && this.state.hideEmptyItems) || (allEmpty && groupTitle === 'CRAVAT - MuPIT 3D Protein View') ? "group-empty" : "" }>
                     <Panel
+                        ref={(me) => { panelElem = me.getCollapsableDOMNode(); }}
                         header={header}
                         collapsable={true}
                         defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}
@@ -984,9 +986,11 @@ var VariantDetail = React.createClass({
 
         }
 
+        // holds a reference to the collapsible DOM element that we'll pass to the relayout monitor later
+        let panelElem;
         const splicingHeader = (
             <h3>
-                <a href="#" onClick={(event) => this.onChangeGroupVisibility("transcript-visualization", event)}>
+                <a href="#" onClick={(event) => this.onChangeGroupVisibility("transcript-visualization", event, panelElem)}>
                 {`${variant['Gene_Symbol']} ${variant['HGVS_cDNA']} Transcript Visualization`}
                 </a>
                 <GroupHelpButton group={"transcript-visualization"} onClick={(event) => { this.showHelp(event, "transcript-visualization"); return true; }} />
@@ -1038,6 +1042,7 @@ var VariantDetail = React.createClass({
                                     <Col key="splicing_vis"
                                         className={`variant-detail-group isogrid-item ${splicingTileSizeClassse}`}>
                                         <Panel
+                                            ref={(me) => { panelElem = me.getCollapsableDOMNode(); }}
                                             header={splicingHeader}
                                             collapsable={true}
                                             defaultExpanded={localStorage.getItem("collapse-group_transcript-visualization") !== "true"}
