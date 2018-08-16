@@ -232,14 +232,14 @@ const researchModeGroups = [
         {title: 'Literature Reference', prop: 'Literature_source_exLOVD', core: true}
     ]},
 
-    {groupTitle: 'CRAVAT - MuPIT 3D Protein View', internalGroupName: 'Mupit Structure', innerCols: [
+    {groupTitle: 'CRAVAT - MuPIT 3D Protein View', internalGroupName: 'Mupit Structure', hideFromColumnSelection: true, innerCols: [
         {title: 'Mupit Structure', prop: 'Mupit_Structure', tableKey: false, dummy: true}
     ]},
 ];
 
 // subColumns populate the column selection checkboxes.
-// They should match the variant detail groupings.
-const subColumns = _.map(researchModeGroups, function (group) {
+// They should match the variant detail groupings unless hideFromColumnSelection is true.
+const subColumns = _.map(_.filter(researchModeGroups, function(group) { return !group.hideFromColumnSelection; }), function (group) {
     if (group.hasOwnProperty('innerCols')) {
         return {
             subColTitle: group.groupTitle,
