@@ -869,7 +869,7 @@ var VariantDetail = React.createClass({
             return (
                 <div key={`group_collection-${groupTitle}`} className={ (allEmpty && this.state.hideEmptyItems) || (allEmpty && groupTitle === 'CRAVAT - MuPIT 3D Protein View') ? "group-empty" : "" }>
                     <Panel
-                        ref={(me) => { panelElem = me.getCollapsableDOMNode(); }}
+                        ref={(me) => { panelElem = me ? me.getCollapsableDOMNode() : null; }}
                         header={header}
                         collapsable={true}
                         defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}
@@ -1042,7 +1042,7 @@ var VariantDetail = React.createClass({
                                     <Col key="splicing_vis"
                                         className={`variant-detail-group isogrid-item ${splicingTileSizeClassse}`}>
                                         <Panel
-                                            ref={(me) => { panelElem = me.getCollapsableDOMNode(); }}
+                                            ref={(me) => { panelElem = me ? me.getCollapsableDOMNode() : null; }}
                                             header={splicingHeader}
                                             collapsable={true}
                                             defaultExpanded={localStorage.getItem("collapse-group_transcript-visualization") !== "true"}
