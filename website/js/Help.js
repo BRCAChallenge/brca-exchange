@@ -70,6 +70,10 @@ const Help = React.createClass({
     },
 
     shouldBeExpanded(fragment, fragRegex, {name, id, contents, list}) {
+        if (!fragment) {
+            return false;
+        }
+
         let slug = id || slugify(name);
         if (slug === fragment) {
             return true;
