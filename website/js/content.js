@@ -19,7 +19,8 @@ const content = {
     variantsResearch: require('../content/variantsResearch.md'),
     researchWarning: require('../content/researchWarning.md'),
     signupMessage: require('../content/signupMessage.md'),
-    insilicoScoring: require('../content/help/research/insilico/insilico-scoring.md')
+    insilicoScoring: require('../content/help/research/insilico/insilico-scoring.md'),
+    app: require('../content/about/app.md')
 };
 
 const FAQContent = [
