@@ -764,8 +764,8 @@ var VariantDetail = React.createClass({
                         Genomic_Coordinate_hg38={variant.Genomic_Coordinate_hg38}
                         onChangeGroupVisibility={this.onChangeGroupVisibility}
                         hideEmptyItems={this.state.hideEmptyItems}
-                        onDimsChanged={() => {
-                            setTimeout(() => { this.forceUpdate(); }, 0);
+                        onDimsChanged={(collapser) => {
+                            this.relayoutOnCollapsed(collapser);
                         }}
                         showHelp={this.showHelp}
                     />

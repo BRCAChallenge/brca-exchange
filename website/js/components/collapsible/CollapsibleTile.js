@@ -44,7 +44,7 @@ export default class CollapsibleTile extends React.Component {
                 .reduce((o, k) => { o[k] = newExpansion; return o; }, {})
         }), () => {
             // causes the parent to perform a (delayed) reflow
-            this.props.onDimsChanged();
+            this.props.onDimsChanged(this.collapser.getCollapsableDOMNode());
         });
     }
 
@@ -55,7 +55,7 @@ export default class CollapsibleTile extends React.Component {
             })
         }), () => {
             // causes the parent to perform a (delayed) reflow
-            this.props.onDimsChanged();
+            this.props.onDimsChanged(this.collapser.getCollapsableDOMNode());
         });
     }
 
@@ -69,7 +69,7 @@ export default class CollapsibleTile extends React.Component {
         const groupVisID = `group-panel-${this.props.groupTitle}`;
         const header = (
             <h3 style={{display: 'flex', flexDirection: 'row'}}>
-                <a style={{flexGrow: 1}} href="#" onClick={(event) => this.props.onChangeGroupVisibility(groupVisID, event)}>
+                <a style={{flexGrow: 1}} href="#" onClick={(event) => this.props.onChangeGroupVisibility(groupVisID, event, this.collapser.getCollapsableDOMNode())}>
                     {this.props.displayTitle || this.props.groupTitle}
                 </a>
 
@@ -97,6 +97,7 @@ export default class CollapsibleTile extends React.Component {
         return (
             <div key={`group_collection-${groupVisID}`} className={ allEmpty && this.props.hideEmptyItems ? "group-empty variant-detail-group" : "variant-detail-group" }>
                 <Panel
+                    ref={(me) => { this.collapser = me; }}
                     header={header}
                     collapsable={true}
                     defaultExpanded={localStorage.getItem("collapse-group_" + groupVisID) !== "true"}
