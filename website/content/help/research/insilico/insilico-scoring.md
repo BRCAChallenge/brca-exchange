@@ -1,5 +1,6 @@
 <style>
 .markdown img { width: auto; max-height: 400px; max-width: 90%; display: block; margin: 20px auto; }
+p { text-indent: 2em; }
 </style>
 
 # Scoring Systems for Splicing-level and Protein-level Estimations
@@ -11,7 +12,7 @@ The *In Silico* Probability of Pathogenicity is the greater of two predicted val
 For all exonic variants, the "Protein-level Estimation" is calculated using Align GV-GD scores, which assess the protein-level importance of a region per sequence conservation measures and assessments of physiochemical properties. The following figure demonstrates the probabilities of pathogenicity that are used to assign Protein-level Estimation based on variant type (nonsense, missense, silent) and variant location. The estimation accounts for variant location by assessing whether the variant is inside or outside Clinically Important Functional Domains (henceforth CI Domains). CI Domains are modeled according to ENIGMA's criteria.
 
 
-![alt_text](scoring-img/img1.png "image_tooltip")
+![image 1](scoring-img/img1.png)
 
 A generalized schema for estimating Protein-level impact is:
 
@@ -30,11 +31,9 @@ The Splicing-level Estimation is determined by assessing the variant on two leve
 
 A Z-score greater than 0 (or 0.5) indicates a better than average likelihood of splicing. If a Z-score is greater than 0 for a *wild-type donor* that contains a variant, function is being retained despite the mutation. However, a Z-score greater than 0 for a *de novo dono*r indicates possible interference of wild-type splice function. In this case, likelihood of splicing outside the wild-type splice site is increasing. The Z-score ranges associated with probabilities of pathogenicity in the case of wild-type donor damage, wild-type acceptor damage, and de novo donor creation are provided below.
 
-![alt_text](scoring-img/img2.png "image_tooltip")
-
-![alt_text](scoring-img/img3.png "image_tooltip")
-
-![alt_text](scoring-img/img4.png "image_tooltip")
+<img src="scoring-img/img2.png" style="width: 600px;" />
+<img src="scoring-img/img3.png" style="width: 500px;" />
+<img src="scoring-img/img4.png" style="width: 500px;" />
 
 Examples and schemas for how these calculations are made for BRCA Exchange are available in following sections.
 
@@ -53,11 +52,11 @@ Because the variant is located in an exon and in a wild-type donor splice site r
 *   Protein-level Estimation
 
 
-![alt_text](scoring-img/img5.png "image_tooltip")
+![image 5](scoring-img/img5.png)
 
 [Caption]
 
-![alt_text](scoring-img/img6.png "image_tooltip")
+![image 6](scoring-img/img6.png)
 
 The *In Silico* Probability of Pathogenicity is assigned per the Splicing-level estimation, because the estimated splicing-level impact (0.30)  is greater than estimated protein-level impact (0.02).
 
@@ -75,11 +74,11 @@ Because the variant is located in an exon and in a wild-type acceptor splice sit
 *   Wild-type acceptor probability (splicing-level Estimation)
 *   Protein-level Estimation
 
-![alt_text](scoring-img/img7.png "image_tooltip")
+![image 7](scoring-img/img7.png)
 
 [Caption]
 
-![alt_text](scoring-img/img8.png "image_tooltip")
+![image 8](scoring-img/img8.png)
 
 This variant is a nonsense variant, so the *In Silico* Probability of Pathogenicity** **is ultimately assigned per the protein-level estimation (0.99), which is a higher predicted probability of pathogenicity than the splicing-level estimation (0.34).
 
@@ -96,11 +95,11 @@ Because the variant is located in an exon, but not a splicing region, the follow
 
 A de novo donor prior is calculated because the variant could theoretically introduce a de novo donor to the exon, even though it is not in a wild-type splice site.
 
-![alt_text](scoring-img/img9.png "image_tooltip")
+![image 9](scoring-img/img9.png)
 
 [Caption]
 
-![alt_text](scoring-img/img10.png "image_tooltip")
+![image 10](scoring-img/img10.png)
 
 This variant is a nonsense variant, so the *In Silico* Probability of Pathogenicity** **is ultimately assigned per the protein-level estimation (0.99), which is a higher predicted probability of pathogenicity than the splicing-level estimation (0.02).
 
@@ -117,11 +116,11 @@ Because the variant is located in an intron and a wild-type donor splice site re
 
 ###
 
-![alt_text](scoring-img/img11.png "image_tooltip")
+![image 11](scoring-img/img11.png)
 
 [Caption]
 
-![alt_text](scoring-img/img12.png "image_tooltip")
+![image 12](scoring-img/img12.png)
 
 The *In Silico* Probability of Pathogenicity is assigned per the Splicing-level Estimation (0.97), because intronic variants do not have Protein-level Estimations.
 
@@ -138,11 +137,11 @@ Because the variant is located in an intron and a wild-type splice site's accept
 
 *   Wild-type acceptor probability (Splicing-level Estimation)
 
-![alt_text](scoring-img/img13.png "image_tooltip")
+![image 13](scoring-img/img13.png)
 
 [Caption]
 
-![alt_text](scoring-img/img14.png "image_tooltip")
+![image 14](scoring-img/img14.png)
 
 The *In Silico* Probability of Pathogenicity (0.34, moderate risk) is assigned per the Splicing-level Estimation.
 
