@@ -344,7 +344,7 @@ export default class SplicingLevelSubtile extends React.Component {
 
     changePane(key) {
         this.setState({ activePane: key });
-        this.props.onDimsChanged();
+        this.props.onDimsChanged(React.findDOMNode(this.collapser));
     }
 
     tabTitle(label, field, key) {
@@ -385,7 +385,7 @@ export default class SplicingLevelSubtile extends React.Component {
                 The splicing-level estimation is due to <b>{maxProbPanel.reason}</b> which introduces a probability of pathogenicity of <b>{maxProbPanel.prior}</b>.
                 </div>
 
-                <TabbedArea activeKey={this.state.activePane} onSelect={this.changePane}>
+                <TabbedArea ref={(me) => { this.collapser = me; }} activeKey={this.state.activePane} onSelect={this.changePane}>
                     <TabPane eventKey={0} tab={this.tabTitle("Donor Impact", priorHeaders.donor, 0)}>
                     {
                         isNumeric(data.donor.prior)
