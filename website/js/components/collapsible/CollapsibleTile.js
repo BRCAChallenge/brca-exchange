@@ -6,6 +6,8 @@ import React from "react";
 import {Panel} from 'react-bootstrap';
 import update from 'immutability-helper';
 
+import GroupHelpButton from '../GroupHelpButton';
+
 export default class CollapsibleTile extends React.Component {
     constructor(props) {
         super(props);
@@ -84,6 +86,16 @@ export default class CollapsibleTile extends React.Component {
                     style={{cursor: 'pointer'}}>
                     <i className="fa fa-angle-double-down" aria-hidden="true" />
                 </a>
+
+                {
+                    this.props.helpSection &&
+                    <GroupHelpButton group={this.props.helpSection}
+                        onClick={(event) => {
+                            this.props.showHelp(event, this.props.helpSection);
+                            return true;
+                        }}
+                    />
+                }
             </h3>
         );
 
