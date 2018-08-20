@@ -136,7 +136,7 @@ export default class SilicoPredTile extends React.Component {
         const allEmpty = [decidingProb, proteinPrior, splicingPrior].every(x => x === -Infinity);
 
         return (
-            <CollapsibleTile allEmpty={allEmpty} {...this.props} helpSection="in-silico-probabilities-of-pathogenicity">
+            <CollapsibleTile allEmpty={allEmpty} {...this.props}>
                 <CollapsibleSection
                     fieldName={<span><i>In Silico</i> Probability of Pathogenicity</span>}
                     extraHeaderItems={normalizedProb(decidingProb)}

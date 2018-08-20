@@ -739,6 +739,7 @@ var VariantDetail = React.createClass({
                         onFrequencyFieldToggled={(collapser) => {
                             this.relayoutOnCollapsed(collapser);
                         }}
+                        helpSection="allele-frequency-reference-sets"
                         showHelp={this.showHelp}
                         tooltips={this.state.tooltips}
                         variant={variant}
@@ -757,6 +758,7 @@ var VariantDetail = React.createClass({
                         onDimsChanged={(collapser) => {
                             this.relayoutOnCollapsed(collapser);
                         }}
+                        helpSection="in-silico-probabilities-of-pathogenicity"
                         showHelp={this.showHelp}
                     />
                 );
