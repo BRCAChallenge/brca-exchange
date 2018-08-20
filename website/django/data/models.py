@@ -328,6 +328,22 @@ class Report(models.Model):
     class Meta:
         db_table = 'report'
 
+class Paper(models.Model):
+    title = models.TextField()
+    authors = models.TextField()
+    journal = models.TextField()
+    url = models.TextField()
+    keywords = models.TextField()
+    abstract = models.TextField()
+    year = models.IntegerField()
+    pmid = models.IntegerField()
+    variants = models.ManyToManyField(Variant, through="VariantPaper")
+
+class VariantPaper(models.Model):
+    variant = models.ForeignKey(Variant)
+    paper = models.ForeignKey(Paper)
+    mentions = models.TextField()
+
 
 # materialized view containing only the most current version of each variant
 class CurrentVariant(models.Model):
