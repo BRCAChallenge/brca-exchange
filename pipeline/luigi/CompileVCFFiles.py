@@ -777,7 +777,7 @@ class DownloadLOVDInputFile(luigi.Task):
 class AddVariantSubmissionIds(luigi.Task):
 
     def output(self):
-        return luigi.LocalTarget(self.file_parent_dir + "/LOVD/LOVD_with_submission_ids.txt")
+        return luigi.LocalTarget(self.file_parent_dir + "/LOVD/LOVD_with_submission_ids.tsv")
 
     def run(self):
 
@@ -798,6 +798,30 @@ class AddVariantSubmissionIds(luigi.Task):
 
 
 @requires(AddVariantSubmissionIds)
+class CombineEquivalentVariantSubmissions(luigi.Task):
+
+    def output(self):
+        return luigi.LocalTarget(self.file_parent_dir + "/LOVD/LOVD_with_submission_ids_combined.tsv")
+
+    def run(self):
+
+        brca_resources_dir = self.resources_dir
+        artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts")
+
+        os.chdir(lovd_method_dir)
+
+        args = ["python", "combineEquivalentVariantSubmissions.py", "-i", self.input().path, "-o",
+                self.output().path]
+
+        print "Running combineEquivalentVariants with the following args: %s" % (args)
+
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(self.output().path)
+
+
+@requires(CombineEquivalentVariantSubmissions)
 class ConvertSharedLOVDToVCF(luigi.Task):
 
     def output(self):
@@ -1477,7 +1501,7 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
         version_json_path = extract_file(self.previous_release_tar, tmp_dir, 'output/release/metadata/version.json')
         previous_release_date = self._extract_release_date(version_json_path)
         previous_release_date_str = datetime.datetime.strftime(previous_release_date, '%m-%d-%Y')
-        
+
         args = ["python", "releaseDiff.py", "--v2", artifacts_dir + "built_with_mupit.tsv", "--v1", previous_data_path,
                 "--removed", diff_dir + "removed.tsv", "--added", diff_dir + "added.tsv", "--added_data",
                 diff_dir + "added_data.tsv", "--diff", diff_dir + "diff.txt", "--diff_json", diff_dir + "diff.json",
@@ -1569,11 +1593,11 @@ class TopLevelReadme(luigi.Task):
     def run(self):
         top_level_readme_src = os.path.abspath(
             os.path.join(os.path.realpath(__file__), os.pardir, os.pardir, "top_level_readme.txt"))
-        
+
         shutil.copyfile(top_level_readme_src, self.output().path)
 
 @requires(TopLevelReadme)
-class GenerateMD5Sums(luigi.Task):        
+class GenerateMD5Sums(luigi.Task):
     def output(self):
         return luigi.LocalTarget(self.output_dir + "/md5sums.txt")
 
