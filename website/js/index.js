@@ -858,8 +858,8 @@ var VariantDetail = React.createClass({
 
             const header = (
                 <h3>
-                    <a href="#" onClick={(event) => this.onChangeGroupVisibility(groupTitle, event, panelElem)}>{groupTitle}</a>
-                    <GroupHelpButton group={groupTitle} onClick={(event) => { this.showHelp(event, groupTitle); return true; }} />
+                    <a className="title" href="#" onClick={(event) => this.onChangeGroupVisibility(groupTitle, event, panelElem)}>{groupTitle}</a>
+                    <GroupHelpButton onClick={(event) => { this.showHelp(event, groupTitle); return true; }} />
                 </h3>
             );
 
@@ -987,7 +987,7 @@ var VariantDetail = React.createClass({
         let panelElem;
         const splicingHeader = (
             <h3>
-                <a href="#" onClick={(event) => this.onChangeGroupVisibility("transcript-visualization", event, panelElem)}>
+                <a className="title" href="#" onClick={(event) => this.onChangeGroupVisibility("transcript-visualization", event, panelElem)}>
                 {`${variant['Gene_Symbol']} ${variant['HGVS_cDNA']} Transcript Visualization`}
                 </a>
                 <GroupHelpButton group={"transcript-visualization"} onClick={(event) => { this.showHelp(event, "transcript-visualization"); return true; }} />

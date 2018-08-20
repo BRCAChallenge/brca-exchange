@@ -975,19 +975,26 @@ div.variant-detail-group .panel {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
+div.variant-detail-group .panel-heading {
+    padding-right: 10px;
+}
+div.variant-detail-group .panel-title {
+    display: flex;
+    flex-direction: row;
+}
+div.variant-detail-group .panel-title .title {
+    flex: 1 0 auto;
+}
+
 div.variant-detail-group .panel-help-btn {
     color: #e2e2e2;
-    position: absolute;
-    right: 26px;
-    display: block;
-    top: 10px;
+    margin-left: 10px;
     font-size: 20px;
     z-index: 100;
 }
 
 div.variant-detail-group:hover .panel-help-btn {
     color: #c3c3c3;
-    display: block;
 }
 
 div.variant-detail-group .panel-body {
