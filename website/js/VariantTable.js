@@ -21,7 +21,6 @@ var ColumnCheckbox = require('./ColumnCheckbox');
 var {getDefaultExpertColumns, getDefaultResearchColumns, getAllSources} = require('./VariantTableDefaults');
 var {State} = require('react-router');
 var alleleFrequencyCharts = require('./AlleleFrequencyCharts');
-var mupitStructure = require('./MupitStructure');
 
 require('react-data-components-bd2k/css/table-twbs.css');
 
@@ -234,7 +233,7 @@ const researchModeGroups = [
     ]},
 
     {groupTitle: 'CRAVAT - MuPIT 3D Protein View', internalGroupName: 'Mupit Structure', hideFromColumnSelection: true, innerCols: [
-        {title: 'Mupit Structure', prop: 'Mupit_Structure', replace: mupitStructure, tableKey: false}
+        {title: 'Mupit Structure', prop: 'Mupit_Structure', tableKey: false, dummy: true}
     ]},
 ];
 

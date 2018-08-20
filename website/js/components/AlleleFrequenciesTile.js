@@ -38,7 +38,7 @@ export default class AlleleFrequenciesTile extends React.Component {
             return updatedFieldsOfInterest;
         }, () => {
             // causes the parent to perform a (delayed) reflow
-            this.props.onFrequencyFieldToggled();
+            this.props.onFrequencyFieldToggled(this.collapser.getCollapsableDOMNode());
         });
     }
 
@@ -47,7 +47,7 @@ export default class AlleleFrequenciesTile extends React.Component {
             [fieldName]: !this.state[fieldName]
         }, () => {
             // causes the parent to perform a (delayed) reflow
-            this.props.onFrequencyFieldToggled();
+            this.props.onFrequencyFieldToggled(this.collapser.getCollapsableDOMNode());
         });
     }
 
@@ -104,7 +104,7 @@ export default class AlleleFrequenciesTile extends React.Component {
         const groupTitle = `source-panel-${this.props.sourceName}`;
         const header = (
             <h3 style={{display: 'flex', flexDirection: 'row'}}>
-                <a style={{flexGrow: 1}} href="#" onClick={(event) => this.props.onChangeGroupVisibility(groupTitle, event)}>
+                <a style={{flexGrow: 1}} href="#" onClick={(event) => this.props.onChangeGroupVisibility(groupTitle, event, this.collapser.getCollapsableDOMNode())}>
                     {this.props.groupTitle}
                 </a>
 
@@ -125,6 +125,7 @@ export default class AlleleFrequenciesTile extends React.Component {
         return (
             <div key={`group_collection-${groupTitle}`} className={ allEmpty && this.props.hideEmptyItems ? "group-empty variant-detail-group" : "variant-detail-group" }>
                 <Panel
+                    ref={(me) => { this.collapser = me; }}
                     header={header}
                     collapsable={true}
                     defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}

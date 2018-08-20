@@ -672,7 +672,7 @@ class Splicing extends React.Component {
             localStorage.setItem("transcriptviz-options-expanded", this.state.optionsExpanded ? "true" : "false");
 
             // reflows the parent after our dimensions change
-            this.props.onContentsChanged();
+            this.props.onContentsChanged(this.collapser.getCollapsableDOMNode());
         });
     }
 
@@ -776,6 +776,7 @@ class Splicing extends React.Component {
                 </svg>
 
                 <SettingsPanel
+                    ref={(me) => { this.collapser = me; }}
                     key="settings-panel"
                     meta={meta}
                     expanded={this.state.optionsExpanded}
