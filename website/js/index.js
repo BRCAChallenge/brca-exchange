@@ -66,6 +66,7 @@ var {Releases, Release} = require('./Releases.js');
 var Help = require('./Help.js');
 
 var KeyInline = require('./components/KeyInline');
+var GroupHelpButton = require('./components/GroupHelpButton');
 
 var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
 
@@ -400,17 +401,6 @@ var Database = React.createClass({
 					</Modal>}
 				</Col>
 			</Row>);
-    }
-});
-
-const GroupHelpButton = React.createClass({
-    render() {
-        const {onClick} = this.props;
-        return (
-            <span role='button' onClick={onClick} aria-label="Help"
-                className='panel-help-btn glyphicon glyphicon-question-sign'
-            />
-        );
     }
 });
 
