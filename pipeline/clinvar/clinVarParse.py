@@ -18,7 +18,7 @@ def printHeader():
                      "Genomic_Coordinate", "Symbol", "Protein", "Description",
                      "SummaryEvidence", "ReviewStatus", "Synonyms")))
 
-MULTI_VALUE_SEP = '|'
+MULTI_VALUE_SEP = ','
 
 def processSubmission(submissionSet, assembly):
     ra = submissionSet.referenceAssertion

@@ -269,11 +269,10 @@ def setSourceUrls(row):
 def setSynonym(row):
     synonyms = set()
 
-    fields = [("BIC_Nomenclature", ","), ("BIC_Nomenclature_exLOVD", ","),
-              ("BIC_Designation_BIC", ","), ("Synonyms_ClinVar", "|")]
+    fields = ["BIC_Nomenclature", "BIC_Nomenclature_exLOVD", "BIC_Designation_BIC", "Synonyms_ClinVar"]
 
-    for c, sep in fields:
-        synonyms.update(s for s in row[c].split(sep) if s is not EMPTY)
+    for c in fields:
+        synonyms.update(s for s in row[c].split(',') if s is not EMPTY)
 
     return ','.join(synonyms)
 
