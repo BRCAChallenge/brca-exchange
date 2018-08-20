@@ -70,6 +70,12 @@ const Help = React.createClass({
     },
 
     shouldBeExpanded(fragment, fragRegex, {name, id, contents, list}) {
+        // if fragment is empty, fragRegex will be (id=|id=""), which will match anything containing 'id='
+        // if there isn't a fragment, then we should never expand anything by default anyway, so just bail w/false
+        if (!fragment) {
+            return false;
+        }
+
         let slug = id || slugify(name);
         if (slug === fragment) {
             return true;
