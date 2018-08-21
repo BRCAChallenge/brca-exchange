@@ -9,7 +9,8 @@
 			// Default config. Overridden below by config.js.
 			window.config = {
 				captcha_key: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
-				backend_url: 'http://brcaexchange.org/backend',
+				// backend_url: 'http://brcaexchange.org/backend',
+				backend_url: 'http://localhost:8000',
 				baseurl: '/'
 			}
 		</script>
