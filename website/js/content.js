@@ -231,6 +231,10 @@ const helpContentResearch = [
                 id: "cravat-mupit-3d-protein-view",
                 contents: require("../content/help/research/cravat-mupit.md")
             },
+            {
+                name: "Literature Search Results",
+                contents: require("../content/help/research/literature-search.md")
+            },
         ]
     }
 ];
