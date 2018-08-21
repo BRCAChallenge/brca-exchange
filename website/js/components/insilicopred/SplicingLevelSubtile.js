@@ -351,13 +351,15 @@ export default class SplicingLevelSubtile extends React.Component {
     }
 
     tabTitle(label, field, key) {
+        const isHighestProb = (key === this.state.initiallyActivePane);
         return (
             <span className={classNames(
                 "splicing-tab-header",
-                key === this.state.initiallyActivePane && "highest-prob",
-                !isNumeric(field) && "is-na",
+                isHighestProb && "highest-prob",
+                !isNumeric(field) && "is-na"
             )}>
-            {`${label} (${field})`}
+                {isHighestProb && <i className="glyphicon glyphicon-star" style={{marginRight: '2px'}} /> }
+                {`${label} (${field})`}
             </span>
         );
     }
