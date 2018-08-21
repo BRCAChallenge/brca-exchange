@@ -3,6 +3,7 @@
 'use strict';
 
 import React from "react";
+import mapValues from 'lodash/mapValues';
 
 import CollapsibleTile from "../collapsible/CollapsibleTile";
 import CollapsibleSection from "../collapsible/CollapsibleSection";
@@ -12,7 +13,6 @@ import ProteinLevelSubtile from "./ProteinLevelSubtile";
 import InSilicoPredSubtile from "./InSilicoPredSubtile";
 import {isNumeric} from "../../util";
 
-const examples = JSON.parse(require('raw-loader!./insilico_mock.min.json'));
 import {Panel} from "react-bootstrap";
 
 function extractSplicePayload(data, useTranscriptSplicePos) {
@@ -87,10 +87,12 @@ export default class SilicoPredTile extends React.Component {
     }
 
     render() {
-        // extract the corresponding entry from the mock data, if it exists
-        const mockData = examples[this.props.Genomic_Coordinate_hg38];
+        // if we've received mock data, ensure any number-like fields are actually numbers
+        // (they're unfortunately stored as strings in the db to handle '-', which is sometimes used to represent a
+        // missing value)
+        const priorsData = mapValues(this.props.priors, (x) => isNumeric(x) ? parseFloat(x) : x);
 
-        if (!mockData) {
+        if (!priorsData) {
             const groupVisID = `group-panel-${this.props.groupTitle}`;
             const allEmpty = false;
             return (
@@ -110,7 +112,7 @@ export default class SilicoPredTile extends React.Component {
 
         // ensure any NAs have been replaced with numeric values (i.e. -Infinity) before we do any comparisons
         const [proteinPrior, refDonorPrior, refAccPrior, deNovoDonorPrior] =
-            [mockData.proteinPrior, mockData.refDonorPrior, mockData.refAccPrior, mockData.deNovoDonorPrior].map(numberify);
+            [priorsData.proteinPrior, priorsData.refDonorPrior, priorsData.refAccPrior, priorsData.deNovoDonorPrior].map(numberify);
 
         const splicingPrior = Math.max(refDonorPrior, refAccPrior, deNovoDonorPrior);
         const decidingProb = Math.max(proteinPrior, splicingPrior);
@@ -130,7 +132,7 @@ export default class SilicoPredTile extends React.Component {
         const varType = '???'; // FIXME: how do we determine the variant type?
 
         // restructure splicing-level props into a heirarchy so we don't have to pass them separately
-        const splicingData = extractSplicePayload(mockData, true);
+        const splicingData = extractSplicePayload(priorsData, true);
 
         // flag this entire tile as empty if none of the subtiles will contain valid data
         const allEmpty = [decidingProb, proteinPrior, splicingPrior].every(x => x === -Infinity);
@@ -143,7 +145,7 @@ export default class SilicoPredTile extends React.Component {
                     defaultVisible={true}
                 >
                     <InSilicoPredSubtile probability={decidingProb} reason={reason}
-                        varLoc={mockData.varLoc} varType={varType} />
+                        varLoc={priorsData.varLoc} varType={varType} />
                 </CollapsibleSection>
 
                 <CollapsibleSection
