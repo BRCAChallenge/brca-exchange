@@ -97,7 +97,7 @@ const deNovoImpactFields = [
 
 function getPathosLevel(prob, isDeNovo, data) {
     // we may match more than one entry, in which case we need to disambiguate on the check case
-    const elems = (isDeNovo ? deNovoImpactFields : splicingImpactFields).fields.filter(x => x.prob === prob);
+    const elems = (isDeNovo ? deNovoImpactFields : splicingImpactFields.fields).filter(x => x.prob === prob);
     let elem;
 
     if (elems.length > 1) {
