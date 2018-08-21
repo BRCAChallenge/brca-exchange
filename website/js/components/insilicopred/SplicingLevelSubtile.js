@@ -95,17 +95,20 @@ const deNovoImpactFields = [
     },
 ];
 
-function getPathosLevel(prob, isDeNovo) {
-    // FIXME: needs logic to disambiguate cases where the probability matches multiple rows
+function getPathosLevel(prob, isDeNovo, data) {
+    // we may match more than one entry, in which case we need to disambiguate on the check case
+    const elems = (isDeNovo ? deNovoImpactFields : splicingImpactFields).fields.filter(x => x.prob === prob);
+    let elem;
 
-    if (!isDeNovo) {
-        const elem = splicingImpactFields.fields.find(x => x.prob === prob);
-        return elem ? elem.key : 'none';
+    if (elems.length > 1) {
+        // evaluate cond fields, if present, to disambiguate
+        elem = elems.find(x => x.check && x.check(data));
     }
-    else {
-        const elem = deNovoImpactFields.find(x => x.prob === prob);
-        return elem ? elem.impact : 'none';
+    else if (elems.length > 0) {
+        elem = elems[0];
     }
+
+    return elem ? (isDeNovo ? elem.impact : elem.key) : 'none';
 }
 
 /**
@@ -147,7 +150,7 @@ function boldedDiff(variant, ref) {
 class SplicingOverviewTable extends React.Component {
     render() {
         const {data, isDeNovo} = this.props;
-        const variantRating = getPathosLevel(data.prior, isDeNovo);
+        const variantRating = getPathosLevel(data.prior, isDeNovo, data);
 
         return (
             <table className="splicing-level-table" style={{marginTop: '1em'}}>
