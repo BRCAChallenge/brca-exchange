@@ -154,6 +154,7 @@ const researchModeGroups = [
                 {title: 'Individuals', prop: 'Individuals_LOVD'},
                 {title: 'Variant ID', prop: 'DBID_LOVD'},
                 {title: 'Variant Haplotype', prop: 'Variant_haplotype_LOVD'},
+                {title: 'Functional Analysis', prop: 'Functional_analysis_LOVD'},
                 {title: 'Created Date', prop: 'Created_date_LOVD'},
                 {title: 'Edited Date', prop: 'Edited_date_LOVD'},
             ]
@@ -364,6 +365,7 @@ const researchModeColumns = [
     {title: 'Has Discordant Evidence', prop: 'Discordant'},
     {title: 'Functional Analysis Result (LOVD)', prop: 'Functional_analysis_result_LOVD'},
     {title: 'Functional Analysis Method (LOVD)', prop: 'Functional_analysis_technique_LOVD'},
+    {title: 'Functional Analysis (LOVD)', prop: 'Functional_analysis_LOVD'},
     {title: 'Analysis Method (ClinVar)', prop: 'Method_ClinVar'},
     {title: 'Summary Evidence (ClinVar)', prop: 'Summary_Evidence_ClinVar'},
     {title: 'Supporting Observations (ClinVar)', prop: 'Description_ClinVar'},
