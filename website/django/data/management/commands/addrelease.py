@@ -103,7 +103,7 @@ class Command(BaseCommand):
             cursor.execute("REFRESH MATERIALIZED VIEW currentvariant")
 
         # calls django/data/management/commands/add_diff_json to add diff to db
-        # call_command('add_diff_json', str(release_id), diff_json, reports_diff_json)
+        call_command('add_diff_json', str(release_id), diff_json, reports_diff_json)
 
     def update_variant_values_for_insertion(self, row_dict, release_id, change_types, mupit_structures, set_ct_and_ms_to_none=False):
         for source in row_dict['Source'].split(','):
