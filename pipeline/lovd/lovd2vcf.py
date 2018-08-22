@@ -24,7 +24,9 @@ from pygr.seqdb import SequenceFileDB
 import urllib
 
 
-# LOVD_LIST_FIELDS = ["genetic_origin", "RNA", "variant_effect", "individuals", "Protein", "submission_id", "cDNA", "submitters"]
+LOVD_LIST_FIELDS = ["genetic_origin", "RNA", "variant_effect", "individuals",
+                    "Protein", "submission_id", "frequency", "geneid", "gDNA",
+                    "DBID", "Protein", "created_date", "edited_date"]
 
 
 def parse_args():
@@ -135,9 +137,10 @@ def normalize(field, field_value):
             # Semicolons are sometimes used as a list delimiter,
             # this changes them to commas for consistency with other fields.
             field_value = field_value.replace(';', ', ')
-        # Use url encoding to prevent issues in VCF file format.
-        # Decoded during merging and reports aggregation.
-        field_value = urllib.quote_plus(field_value)
+        if field in LOVD_LIST_FIELDS:
+            # Use url encoding to prevent issues in VCF file format.
+            # Decoded during merging and reports aggregation.
+            field_value = urllib.quote_plus(field_value)
     return field_value
 
 
