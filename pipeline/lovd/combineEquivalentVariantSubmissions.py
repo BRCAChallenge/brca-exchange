@@ -60,6 +60,10 @@ def main():
         else:
             combinedSubmissions[key] = mergeRows(combinedSubmissions[key], row)
     for submission_id, submission in combinedSubmissions.iteritems():
+        # combined values are handled in the pipeline as strings rather than lists
+        for key, val in submission.iteritems():
+            if not isinstance(val, basestring):
+                submission[key] = ', '.join(val)
         csvOut.writerow(submission)
 
 
