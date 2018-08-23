@@ -983,7 +983,7 @@ div.variant-detail-group .panel-title {
     flex-direction: row;
 }
 div.variant-detail-group .panel-title .title {
-    flex: 1 0 auto;
+    flex: 1 1 auto;
 }
 
 div.variant-detail-group .panel-help-btn {
