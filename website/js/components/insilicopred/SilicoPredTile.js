@@ -4,6 +4,7 @@
 
 import React from "react";
 import mapValues from 'lodash/mapValues';
+import maxBy from 'lodash/maxBy';
 
 import CollapsibleTile from "../collapsible/CollapsibleTile";
 import CollapsibleSection from "../collapsible/CollapsibleSection";
@@ -12,8 +13,6 @@ import SplicingLevelSubtile from "./SplicingLevelSubtile";
 import ProteinLevelSubtile from "./ProteinLevelSubtile";
 import InSilicoPredSubtile from "./InSilicoPredSubtile";
 import {isNumeric} from "../../util";
-
-import {Panel} from "react-bootstrap";
 
 function extractSplicePayload(data, useTranscriptSplicePos) {
     return {
@@ -87,51 +86,39 @@ export default class SilicoPredTile extends React.Component {
     }
 
     render() {
-        // if we've received mock data, ensure any number-like fields are actually numbers
-        // (they're unfortunately stored as strings in the db to handle '-', which is sometimes used to represent a
-        // missing value)
-        const priorsData = mapValues(this.props.priors, (x) => isNumeric(x) ? parseFloat(x) : x);
-
-        if (!priorsData) {
-            const groupVisID = `group-panel-${this.props.groupTitle}`;
-            const allEmpty = false;
+        if (!this.props.priors) {
             return (
-                <div key={`group_collection-${groupVisID}`} className={ allEmpty && this.props.hideEmptyItems ? "group-empty variant-detail-group" : "variant-detail-group" }>
-                    <Panel header={<h3><i>In Silico</i> Prediction</h3>}>
-                        <div style={{padding: '10px'}}>
-                        no mock data found for variant
-                        </div>
-                    </Panel>
-                </div>
+                <CollapsibleTile allEmpty={true} {...this.props}>
+                    <div style={{padding: '10px'}}>
+                    No probability information exists for this variant.
+                    </div>
+                </CollapsibleTile>
             );
         }
 
-        // determine whether the probability of pathogenicity is the protein-level or splicing-level
-        // estimation (de novo, acceptor, or donor).
-        // whichever is highest is considered the deciding factor.
+        // ensure any number-like fields are actually numbers (they're unfortunately stored as strings in the db to
+        // handle '-', which is sometimes used to represent a missing value)
+        const priorsData = mapValues(this.props.priors, (x) => isNumeric(x) ? parseFloat(x) : x);
 
         // ensure any NAs have been replaced with numeric values (i.e. -Infinity) before we do any comparisons
         const [proteinPrior, refDonorPrior, refAccPrior, deNovoDonorPrior] =
             [priorsData.proteinPrior, priorsData.refDonorPrior, priorsData.refAccPrior, priorsData.deNovoDonorPrior].map(numberify);
 
+        // determine whether the probability of pathogenicity is the protein-level or splicing-level estimation
+        // (de novo, acceptor, or donor).
+        // whichever is highest is considered the deciding factor.
+        const probAndReasons = [
+            { prob: refDonorPrior, reason: 'Splicing-level Estimation (Donor Splice Site Impact)' },
+            { prob: refAccPrior, reason: 'Splicing-level Estimation (Acceptor Splice Site Impact)' },
+            { prob: deNovoDonorPrior, reason: 'Splicing-level Estimation (De Novo Donor Splice Site Creation)' },
+            { prob: proteinPrior, reason: 'Protein-level Estimation' }
+        ];
+        const {prob: decidingProb, reason} = maxBy(probAndReasons, (x) => x.prob);
+
+        // used by the splicing subtile to show the highest probability for that category
         const splicingPrior = Math.max(refDonorPrior, refAccPrior, deNovoDonorPrior);
-        const decidingProb = Math.max(proteinPrior, splicingPrior);
-        const reason = proteinPrior > splicingPrior
-            ? 'Protein-level Estimation'
-            : 'Splicing-level Estimation ' + (
-                deNovoDonorPrior > refDonorPrior
-                    ? '(De Novo Donor Splice Site Creation)'
-                    : `(${refDonorPrior > refAccPrior ? 'Donor' : 'Acceptor'} Splice Site Impact)`
-            );
 
-        /*
-        notes from slide: "Variant Type: varType is NOT correct; only indicates insertion, deletion, delins, substitution.
-        Can be assigned with proteinPrior as long as location relative to CI domain is accounted for (i.e. check that 0.02
-        is not assigned bc of outside CI domain to assign a variant as silent)."
-         */
-        const varType = '???'; // FIXME: how do we determine the variant type?
-
-        // restructure splicing-level props into a heirarchy so we don't have to pass them separately
+        // restructure splicing-level props into a heirarchy so we don't have to pass each field separately
         const splicingData = extractSplicePayload(priorsData, true);
 
         // flag this entire tile as empty if none of the subtiles will contain valid data
@@ -145,7 +132,7 @@ export default class SilicoPredTile extends React.Component {
                     defaultVisible={true}
                 >
                     <InSilicoPredSubtile probability={decidingProb} reason={reason}
-                        varLoc={priorsData.varLoc} varType={varType} />
+                        varLoc={priorsData.varLoc} />
                 </CollapsibleSection>
 
                 <CollapsibleSection
