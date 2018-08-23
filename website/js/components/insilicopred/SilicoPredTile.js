@@ -86,14 +86,16 @@ export default class SilicoPredTile extends React.Component {
     }
 
     render() {
+        const noDataNode = (
+            <CollapsibleTile allEmpty={true} {...this.props}>
+                <div style={{padding: '10px'}}>
+                No probability information exists for this variant.
+                </div>
+            </CollapsibleTile>
+        );
+
         if (!this.props.priors) {
-            return (
-                <CollapsibleTile allEmpty={true} {...this.props}>
-                    <div style={{padding: '10px'}}>
-                    No probability information exists for this variant.
-                    </div>
-                </CollapsibleTile>
-            );
+            return noDataNode;
         }
 
         // ensure any number-like fields are actually numbers (they're unfortunately stored as strings in the db to
@@ -123,6 +125,12 @@ export default class SilicoPredTile extends React.Component {
 
         // flag this entire tile as empty if none of the subtiles will contain valid data
         const allEmpty = [decidingProb, proteinPrior, splicingPrior].every(x => x === -Infinity);
+
+        if (allEmpty) {
+            // if we have no probabilities, the individual missing texts aren't accurate (e.g. protein probs
+            // are just generally missing, not because the variant is intronic)
+            return noDataNode;
+        }
 
         return (
             <CollapsibleTile allEmpty={allEmpty} {...this.props}>
