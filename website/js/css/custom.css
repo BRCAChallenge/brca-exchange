@@ -692,7 +692,7 @@ html {
 
 @keyframes emphasis {
 	from {background-color: bisque;}
-	to {background-color: white;}
+	to {background-color: transparent;}
 }
 
 th[role='columnheader']:hover .help, .help-target:hover .help {
