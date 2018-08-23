@@ -22,7 +22,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'HOST': 'localhost',
-        'NAME': 'storage_priors',
+        'NAME': 'storage.pg',
         'USER': 'postgres',
         'PASSWORD': 'postgres'
     }
