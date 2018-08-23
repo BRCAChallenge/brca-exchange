@@ -17,24 +17,17 @@ from django.conf import settings
 from django.conf.urls import include
 from django.conf.urls import url, patterns
 from django.contrib import admin
+from django.views.static import serve as static_serve
 
 urlpatterns = [
     url(r'^data/', include('data.urls')),
     url(r'^accounts/', include('users.urls')),
     url(r'^admin/', admin.site.urls),
+
+    url(r'^site_media/media/(?P<path>.*)$', static_serve,
+        {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
+    url(r'^downloads/(?P<path>.*)$', static_serve,
+        {'document_root': settings.DOWNLOADS_ROOT, 'show_indexes': True}),
+    url(r'^static/(?P<path>.*)$', static_serve,
+        {'document_root': settings.STATIC_ROOT, 'show_indexes': True})
 ]
-
-urlpatterns += patterns('',
-                        url(r'^site_media/media/(?P<path>.*)$', 'django.views.static.serve',
-                            {'document_root': settings.MEDIA_ROOT, 'show_indexes': True})
-                        )
-
-urlpatterns += patterns('',
-                        url(r'^downloads/(?P<path>.*)$', 'django.views.static.serve',
-                            {'document_root': settings.DOWNLOADS_ROOT, 'show_indexes': True})
-                        )
-
-urlpatterns += patterns('',
-                        url(r'^static/(?P<path>.*)$', 'django.views.static.serve',
-                            {'document_root': settings.STATIC_ROOT, 'show_indexes': True})
-                        )
