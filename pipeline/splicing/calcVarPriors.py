@@ -18,6 +18,7 @@ import subprocess
 import click
 import traceback
 import multiprocessing
+import functools
 import pytest
 import pyhgvs
 import pyhgvs.utils as pyhgvs_utils
@@ -3428,20 +3429,13 @@ def getVarDict(variant, boundaries):
 
     return varDict
 
-
-# Globals accessed in multi-processing function calc_one
-# REMIND: Use functools.partial to pass direction into the map function
-brca1Transcript = None
-brca2Transcript = None
-
-def calc_one(variant):
-    global brca1Transcript, brca2Transcript
+def calc_one(variant, brca1, brca2):
     try:
         variantData = csv.DictReader(open("mod_res_dn_brca20160525.txt", "r"), delimiter="\t")
         if variant["Gene_Symbol"] == "BRCA1":
-            varData = getVarData(variant, "enigma", variantData, None, brca1Transcript)
+            varData = getVarData(variant, "enigma", variantData, None, brca1)
         elif variant["Gene_Symbol"] == "BRCA2":
-            varData = getVarData(variant, "enigma", variantData, None, brca2Transcript)
+            varData = getVarData(variant, "enigma", variantData, None, brca2)
         click.echo("{}:{}".format(variant["HGVS_cDNA"], varData["varLoc"]), err=True)
         return addVarDataToRow(varData, variant)
     except Exception as e:
@@ -3450,7 +3444,6 @@ def calc_one(variant):
         raise e
 
 def calc_all(variants, priors, genome, transcripts, processes):
-    global brca1Transcript, brca2Transcript
     inputData = csv.DictReader(variants, delimiter="\t")
     fieldnames = inputData.fieldnames
     newHeaders = open("headers.tsv", "r").read().split()
@@ -3471,7 +3464,9 @@ def calc_all(variants, priors, genome, transcripts, processes):
     try:
         # Normal map has a bug if there is no timout that prevents Keyboard interrupts:
         # https://stackoverflow.com/questions/1408356/keyboard-interrupts-with-pythons-multiprocessing-pool/1408476#1408476
-        calculatedVariants = pool.map_async(calc_one, list(inputData)).get(99999999)
+
+        calc_one_partial = functools.partial(calc_one, brca1=brca1Transcript, brca2=brca2Transcript)
+        calculatedVariants = pool.map_async(calc_one_partial, list(inputData)).get(99999999)
 
         # Sort output as the order of p.map is not deterministic
         outputData.writerows(sorted(
