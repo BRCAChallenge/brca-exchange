@@ -3431,18 +3431,17 @@ def getVarDict(variant, boundaries):
 
 # Globals accessed in multi-processing function calc_one
 # REMIND: Use functools.partial to pass direction into the map function
-genome38 = None  # This is actually never used...
 brca1Transcript = None
 brca2Transcript = None
 
 def calc_one(variant):
-    global genome38, brca1Transcript, brca2Transcript
+    global brca1Transcript, brca2Transcript
     try:
         variantData = csv.DictReader(open("mod_res_dn_brca20160525.txt", "r"), delimiter="\t")
         if variant["Gene_Symbol"] == "BRCA1":
-            varData = getVarData(variant, "enigma", variantData, genome38, brca1Transcript)
+            varData = getVarData(variant, "enigma", variantData, None, brca1Transcript)
         elif variant["Gene_Symbol"] == "BRCA2":
-            varData = getVarData(variant, "enigma", variantData, genome38, brca2Transcript)
+            varData = getVarData(variant, "enigma", variantData, None, brca2Transcript)
         click.echo("{}:{}".format(variant["HGVS_cDNA"], varData["varLoc"]), err=True)
         return addVarDataToRow(varData, variant)
     except Exception as e:
@@ -3451,7 +3450,7 @@ def calc_one(variant):
         raise e
 
 def calc_all(variants, priors, genome, transcripts, processes):
-    global genome38, brca1Transcript, brca2Transcript
+    global brca1Transcript, brca2Transcript
     inputData = csv.DictReader(variants, delimiter="\t")
     fieldnames = inputData.fieldnames
     newHeaders = open("headers.tsv", "r").read().split()
