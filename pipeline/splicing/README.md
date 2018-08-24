@@ -80,7 +80,7 @@ To run the full set of variants download the [current release](http://brcaexchan
 
 
 # Notes
-The file brcaPase.py contains the class for parsing through the .tsv file from the BRCA Exchange website. The class takes the mutations in the Ref column and creates a new variant sequence for MaxEntScan to parse through and generate MaxEntScores for variants.
+The file brcaParse.py contains the class for parsing through the .tsv file from the BRCA Exchange website. The class takes the mutations in the Ref column and creates a new variant sequence for MaxEntScan to parse through and generate MaxEntScores for variants.
 
 By default the pipeline spins up 8 processes for computation. To increase this use the --processes option.
 
