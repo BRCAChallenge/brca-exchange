@@ -26,13 +26,6 @@ test:
 	# Run a short test from within the docker container
 	python calcVarPriors.py test short
 
-unit_tests_docker:
-	docker run --rm -it \
-		--user=`id -u`:`id -g` \
-    --entrypoint pytest \
-		$(IMAGE_NAME)
-
-
 references:
 	# Download and install references
 	mkdir -p $(REFERENCES)
@@ -56,14 +49,6 @@ long:
 		-v `readlink -f $(REFERENCES)`:/references:ro \
 		brcachallenge/splicing-pipeline:latest --processes 22 test long
 
-all_old:
-	# Run a short test using the docker container
-	docker run --rm -it \
-		--user=`id -u`:`id -g` \
-		-v `pwd`/tests:/data \
-		-v `readlink -f $(REFERENCES)`:/references:ro \
-		brcachallenge/splicing-pipeline:0.0.3 --processes 8 calc /data/variants_all.tsv /data/priors_all_old.tsv
-
 vep:
 	# Run a single request through local vep
 	vep \
@@ -81,7 +66,3 @@ profile:
 		-t /references/refseq_annotation.hg38.gp \
 		-i tests/variants_short.tsv \
 		-o tests/priors_short.tsv
-
-upstream:
-	# Merge upstream into this fork
-	git pull https://github.com/BRCAChallenge/brca-exchange master
