@@ -45,7 +45,8 @@ Notes:
 
 * The line concerning the code base can be omitted. In this case, the version of the pipeline already contained within the image is run.
 * The line concerning the DATA_DATE can be omitted. If provided, it explicitly sets the date of the pipeline run rather than using the current date (e.g. this is useful when rerunning a pipeline that aborted half way through).
-* The line concerning UTA_DB_URL can be used to run a local instance of a uta database. This is helpful if a remote instance is having issues.
+* The line concerning UTA_DB_URL can be used to run a local instance of a uta database. This is helpful if a remote instance is having issues. See https://github.com/biocommons/uta/#installing-uta-locally for information on getting a local instance of a uta database running.
+* The line concerning network is used to connect to the uta container, which exposes a port on 50827 from within the pipeline container.
 
 ```
 docker run --rm -u $(id -u ${USER}):$(id -g ${USER}) \
