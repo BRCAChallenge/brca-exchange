@@ -730,6 +730,9 @@ def repeat_merging(f_in, f_out):
                             merged_value = list(new_value + old_value)
                         else:
                             merged_value = list(set(new_value + old_value))
+
+                        # Remove empty strings from list
+                        merged_value = filter(None, merged_value)
                         variant_dict[genome_coor].INFO[key] = deepcopy(merged_value)
     print "number of repeat records: ", num_repeats, "\n"
     vcf_writer = vcf.Writer(f_out, vcf_reader)

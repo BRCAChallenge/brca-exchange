@@ -63,7 +63,7 @@ def main():
         # combined values are handled in the pipeline as strings rather than lists
         for key, val in submission.iteritems():
             if not isinstance(val, basestring):
-                submission[key] = ', '.join(val)
+                submission[key] = ','.join(val)
         csvOut.writerow(submission)
 
 
