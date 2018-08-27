@@ -17,7 +17,8 @@ FIELDS_TO_REMOVE = ["Protein_ClinVar",
                     "HGVS_protein_exLOVD",
                     "polyPhen2_result_ESP",
                     "BIC_Designation_BIC",
-                    "BIC_Nomenclature_exLOVD"]
+                    "BIC_Nomenclature_exLOVD",
+                    "Synonyms_ClinVar"]
 FIELDS_TO_ADD = ["Hg38_Start", "Hg38_End", "Hg37_Start", "Hg37_End",
                  "Hg36_Start", "Hg36_End",
                  "HGVS_RNA",
@@ -266,21 +267,14 @@ def setSourceUrls(row):
 
 
 def setSynonym(row):
-    delimiter = ""
-    synonym = ""
-    if row["BIC_Nomenclature"] != EMPTY:
-        for thisBic in row["BIC_Nomenclature"].split(','):
-            synonym = "%s%s%s" % (synonym, delimiter, thisBic)
-            delimiter = ","
-    if row["BIC_Nomenclature_exLOVD"] != EMPTY:
-        for thisBic in row["BIC_Nomenclature_exLOVD"].split(','):
-            synonym = "%s%s%s" % (synonym, delimiter, thisBic)
-            delimiter = ","
-    if row["BIC_Designation_BIC"] != EMPTY:
-        for thisBic in row["BIC_Designation_BIC"].split(','):
-            synonym = "%s%s%s" % (synonym, delimiter, thisBic)
-            delimiter = ","
-    return (synonym)
+    synonyms = set()
+
+    fields = ["BIC_Nomenclature", "BIC_Nomenclature_exLOVD", "BIC_Designation_BIC", "Synonyms_ClinVar"]
+
+    for c in fields:
+        synonyms.update(s for s in row[c].split(',') if s is not EMPTY)
+
+    return ','.join(synonyms)
 
 
 if __name__ == "__main__":

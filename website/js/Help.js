@@ -99,7 +99,7 @@ const Help = React.createClass({
 
         var helpTiles = help.map(({section, tiles}) =>
             [<h1>{section}</h1>, tiles.map(({name, id, contents, list, reference}) => {
-                let header = [name];
+                let header = [<span id={id || slugify(name)}>{name}</span>];
                 // if the user clicks a reference link in a tile header, don't toggle the tile, and open the link.
                 let onSelect = function (e) {
                     if (e.target.classList.contains("help-reference-link")) {

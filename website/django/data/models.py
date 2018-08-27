@@ -242,6 +242,7 @@ class Report(models.Model):
     Description_ClinVar = models.TextField(default="-")
     Summary_Evidence_ClinVar = models.TextField(default="-")
     Review_Status_ClinVar = models.TextField(default="-")
+    Synonyms_ClinVar = models.TextField(default="-")
     BX_ID_LOVD = models.TextField()
     Variant_frequency_LOVD = models.TextField()
     HGVS_cDNA_LOVD = models.TextField()

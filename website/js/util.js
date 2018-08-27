@@ -186,6 +186,10 @@ function getFormattedFieldByProp(prop, variant) {
         rowItem = [variant[prop], <small style={{float: 'right'}}>({count} of {number})</small>];
     } else if (prop === "Genomic_Coordinate_hg38" || prop === "Genomic_Coordinate_hg37") {
         rowItem = generateLinkToGenomeBrowser(prop, variant[prop]);
+    } else if (prop === "Synonyms") {
+        let syns = variant[prop].split(',');
+        let synsNoWhitespace = _.map(syns, s => s.replace(' ', '_'));
+        rowItem = synsNoWhitespace.join(", ");
     } else {
         rowItem = normalizedFieldDisplay(variant[prop]);
     }
