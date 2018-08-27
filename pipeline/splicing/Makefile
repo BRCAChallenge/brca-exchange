@@ -22,10 +22,6 @@ debug:
 		-v `pwd`:/app \
 	  $(IMAGE_NAME)
 
-test:
-	# Run a short test from within the docker container
-	python calcVarPriors.py test short
-
 references:
 	# Download and install references
 	mkdir -p $(REFERENCES)
@@ -33,6 +29,17 @@ references:
 		--user=`id -u`:`id -g` \
 		-v `readlink -f $(REFERENCES)`:/references \
 		$(IMAGE_NAME) references
+
+test:
+	# Run a short test from within the docker container
+	python calcVarPriors.py test short
+
+unit_tests_docker:	
+	# Used by CircleCI
+	docker run --rm -it \
+		--user=`id -u`:`id -g` \
+		--entrypoint pytest \
+		$(IMAGE_NAME)	-p no:cacheprovider -x .
 
 short:
 	# Run a short test using the docker container
