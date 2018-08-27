@@ -21,8 +21,7 @@ function add_release_tar_to_db {
 
     RELEASE_DIR="${STAGING}/output/release"
 
-    # DATA=${RELEASE_DIR}/built_with_change_types.tsv
-    DATA=${RELEASE_DIR}/built_with_priors.tsv
+    DATA=${RELEASE_DIR}/built_with_change_types.tsv
     REMOVED=${RELEASE_DIR}/diff/removed.tsv
     METADATA=${RELEASE_DIR}/metadata/version.json
     DIFFJSON=${RELEASE_DIR}/diff/diff.json
