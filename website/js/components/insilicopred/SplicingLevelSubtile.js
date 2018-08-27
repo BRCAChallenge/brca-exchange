@@ -52,7 +52,7 @@ const deNovoImpactFields = [
         impact: 'low',
         label: 'Innocuous IFD',
         zScoreLabel: 'n/a',
-        prob: 0.02
+        prob: 0.02 // FIXME: we need a check condition here to differentiate between this and 'Weak/Null & Low'
     },
     {
         type: 'note',
@@ -63,7 +63,7 @@ const deNovoImpactFields = [
         impact: 'low',
         label: 'Weak/Null & Low',
         zScoreLabel: 'Z < -2',
-        prob: 0.02
+        prob: 0.02 // FIXME: we need a check condition here to differentiate between this and 'Innocuous IFD'
     },
     {
         type: 'value',
@@ -239,7 +239,6 @@ class SpliceSiteImpactTable extends React.Component {
                 </tr>
 
                 {
-                    // FIXME: highlight row that matches the prior prob value
                     splicingImpactFields.fields.map(x =>
                         <tr key={x.key} className={prior === x.prob && (!x.check || x.check(data)) ? 'highlighted' : ''}>
                             <td className={`pathos-prob-label-${x.key}`}>{x.label}</td>
@@ -273,7 +272,6 @@ class DeNovoDonorPathogenicityTable extends React.Component {
                 </tr>
 
                 {
-                    // FIXME: highlight row that matches the prior prob value
                     deNovoImpactFields.map((x, i) => {
                         switch(x.type) {
                             case 'value':
