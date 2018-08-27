@@ -108,8 +108,6 @@ jobs:
            name: Build application Docker image
            working_directory: /pipeline/pipeline/docker
            command: |
-             pwd
-             echo $(pwd)
              cp ../requirements.txt requirements_docker.txt
              cp ../../test-requirements.txt test-requirements_docker.txt
              docker build --cache-from=pipeline -t pipeline .
