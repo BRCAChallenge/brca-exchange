@@ -5,10 +5,6 @@
 import React from "react";
 import {CollapsableMixin} from "react-bootstrap";
 import classNames from 'classnames';
-// import util from '../../util';
-// import KeyInline from '../KeyInline';
-// const _ = require('underscore');
-
 
 const CollapsibleSection = React.createClass({
     mixins: [CollapsableMixin],

@@ -51,8 +51,8 @@ function extractSplicePayload(data, useTranscriptSplicePos) {
             },
             closestAlt: {
                 sequence: data.closestDonorAltSeq,
-                MES: data.closestDonorAltMES, // where is this?
-                zScore: data.closestDonorAltZ, // where is this?
+                MES: data.closestDonorAltMES,
+                zScore: data.closestDonorAltZ,
                 donorPosition: useTranscriptSplicePos ? data.closestDonorTranscriptSplicePos : data.closestDonorGenomicSplicePos
             }
         },

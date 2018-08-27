@@ -60,8 +60,7 @@ export default class InSilicoPredSubtile extends React.Component {
         const {probability, reason, varLoc, varType} = this.props;
         const summarizedData = {varLoc, varType};
         const cols = [
-            { title: 'VEP Consequences', prop: 'varLoc' },
-            // { title: 'Variant Type', prop: 'varType' }
+            { title: 'VEP Consequences', prop: 'varLoc' }
         ];
 
         if (probability === -Infinity) {
