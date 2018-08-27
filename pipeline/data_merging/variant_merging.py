@@ -717,17 +717,18 @@ def repeat_merging(f_in, f_out):
                     # containing ',' and hence being treated as separate fields.
                     # The list(set(new_value + old_value)) statement below would
                     # garble it otherwise.
-                    if new_value == old_value:
+                    if new_value == old_value and key is not "individuals":
                         continue
                     else:
+                        # FIXME: is there a better name for this? it seems it now only
+                        # applies to scv to ensure the order is the same,
+                        # but we don't hold this concern for other list fields...
                         if key in LIST_TYPE_FIELDS:
-                            '''
-                            For instance, LOVD individuals field values are all
-                            meaningful even if repeated e.g. if two LOVD
-                            submissions for the same variant each have one individual associated with them,
-                            "1,1" is a more sensible value for the variant than "1" since 2 individuals are associated.
-                            '''
                             merged_value = list(new_value + old_value)
+                        # The "individuals" values from LOVD submissions is
+                        # added together when merging variants.
+                        elif key == "individuals":
+                            merged_value = list(new_value[0] + old_value[0])
                         else:
                             merged_value = list(set(new_value + old_value))
 
