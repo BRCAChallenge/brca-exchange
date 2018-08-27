@@ -7,19 +7,23 @@ Parses a tsv file (default built.tsv) containing variant information and for eac
 calculates either the prior probability of pathogenicity or a prior ENGIMA classification based on variant type and variant location
 '''
 
-import argparse
+import os
+import sys
+import re
 import csv
 import requests
-import sys
 import time
 import json
-import re
 import subprocess
-import tempfile
-import os
+import click
+import traceback
+import multiprocessing
+import functools
+import pytest
 import pyhgvs
 import pyhgvs.utils as pyhgvs_utils
 from pygr.seqdb import SequenceFileDB
+from pyfaidx import Fasta
 from Bio.Seq import Seq
 from calcMaxEntScanMeanStd import fetch_gene_coordinates, runMaxEntScan
 
@@ -113,9 +117,6 @@ All values in these dictionaries are assigned either numerical values, "N/A", or
 # Here are the canonical BRCA transcripts in ENSEMBL nomenclature
 BRCA1_CANONICAL = "ENST00000357654"
 BRCA2_CANONICAL = "ENST00000380152"
-
-# Rest Ensembl server
-SERVER = "http://rest.ensembl.org"
 
 # clinically important domain boundaries
 brca1CIDomains = {"enigma": {"ring": {"domStart": 43124096,
@@ -229,60 +230,41 @@ def getVarChrom(variant):
     else:
         return ""
 
-def _make_request(url):
-    '''Makes request to API and returns json file'''
-    req = requests.get(url, headers = {"Content-Type": "application/json"})
-    
-    if req.status_code == 429 and 'Retry-After' in req.headers:
-        retry = float(req.headers['Retry-After'])
-        time.sleep(retry)
-        return _make_request(url, varData)
-
-    if not req.ok:
-        req.raise_for_status()
-        sys.exit()
-
-    return req.json()
-
 def getVarConsequences(variant):
     '''
     Given a variant, uses Ensembl VEP API to get variant consequences
     (e.g. intron variant, frameshift variant, missense variant)
     using variant chromosome, Hg38 start, Hg38 end, and alternate allele as input for API
-    returns a string detailing consequences of variant
+    returns a list of strings detailing consequences of variant
     '''
-    ext = "/vep/human/region/"
 
     # varStrand always 1 because all alternate alleles and positions refer to the plus strand
     varStrand = 1
     varAlt = variant["Alt"]
-    
-    if variant["Chr"] not in ["13", "17"]:
-        return "unable_to_determine"
-    else:
-        for base in varAlt:
-            # API only works for alt alleles that are composed of the 4 canonical bases
-            if base not in ["A", "C", "G", "T"]:
-                return "unable_to_determine"     
-           
-        query = "%s:%s-%s:%s/%s?" % (variant["Chr"], variant["Hg38_Start"],
-                                     variant["Hg38_End"], varStrand, varAlt)
-    
-        req_url = SERVER+ext+query
-        jsonOutput = _make_request(req_url)
-    
-        assert(len(jsonOutput) == 1)
-        assert(jsonOutput[0].has_key("transcript_consequences"))
-        # below is to extract variant consequence from json file
-        for gene in jsonOutput[0]["transcript_consequences"]:
-            if gene.has_key("transcript_id"):
-                # need to filter for canonical BRCA1 transcript
-                if re.search(BRCA1_CANONICAL, gene["transcript_id"]):
-                    return gene["consequence_terms"][0]
-                # need to filter for canonical BRCA2 transcript
-                elif re.search(BRCA2_CANONICAL, gene["transcript_id"]):
-                    return gene["consequence_terms"][0]
-    
+
+    assert variant["Chr"] in ["13", "17"]
+    for base in varAlt:
+        # API only works for alt alleles that are composed of the 4 canonical bases
+        assert base in ["A", "C", "G", "T"]
+
+    query = "%s:%s-%s:%s/%s" % (variant["Chr"], variant["Hg38_Start"],
+                                variant["Hg38_End"], varStrand, varAlt)
+    # Query local vep using query minus '?' character
+    cmd = ["vep", "--cache", "--dir_cache", "/references/vep/",
+           "--no_stats", "--offline", "--fasta", "/references/hg38.fa",
+           "--output_file", "STDOUT", "--json", "--input_data", query]
+    vep = json.loads(subprocess.check_output(cmd))
+
+    # Should only be one BRCA1 canonical transcript in the list
+    assert len([gene["consequence_terms"] for gene in vep["transcript_consequences"]
+                if gene["transcript_id"] == BRCA1_CANONICAL
+                or gene["transcript_id"] == BRCA2_CANONICAL]) == 1
+
+    for gene in vep["transcript_consequences"]:
+        if gene["transcript_id"] == BRCA1_CANONICAL or gene["transcript_id"] == BRCA2_CANONICAL:
+            return gene["consequence_terms"]
+
+
 def getVarType(variant):
     '''
     Returns a string describing type of variant 
@@ -722,23 +704,15 @@ def getFastaSeq(chrom, rangeStart, rangeStop, plusStrandSeq=True):
         regionStart = rangeStop
         regionEnd = rangeStart
     
-    url = "http://genome.ucsc.edu/cgi-bin/das/hg38/dna?segment=%s:%d,%d" % (chrom, regionStart, regionEnd)
-    req = requests.get(url)
-    
-    if req.status_code == 429 and 'Retry-After' in req.headers:
-        retry = float(req.headers['Retry-After'])
-        time.sleep(retry)
-        req = requests.get(url)
-    
-    lines = req.content.split('\n')
-    # because sequence is located at index 5 in dictionary
-    sequence = lines[5]
-    for base in sequence:
-        assert base in ["A", "C", "G", "T", "a", "c", "g", "t"]
-    if plusStrandSeq == True:
-        return sequence.upper()
+    # NOTE: pyfaidx is NOT thread safe. Would be better to have one
+    # REMIND: Switch to one per thread/process
+    hg38 = Fasta("/references/hg38.fa", sequence_always_upper=True)
+    sequence = hg38[chrom][regionStart-1:regionEnd]
+
+    if plusStrandSeq:
+        return sequence.seq
     else:
-        return str(Seq(sequence.upper()).reverse_complement())
+        return sequence.reverse.complement.seq
 
 def getSeqLocDict(chrom, varStrand, rangeStart, rangeStop):
     '''
@@ -831,7 +805,7 @@ def getZScore(maxEntScanScore, donor=False):
     If donor is True, uses splice donor mean and std
     If donor is False, uses splice acceptor mean and std
     '''
-    stdMeanData = json.load(open(os.path.join(os.path.dirname(__file__), 'brca.zscore.json')))
+    stdMeanData = json.load(open(os.path.join(os.path.dirname(__file__), 'brca.zscore.json'), "r"))
     if donor == False:
         std = stdMeanData["acceptors"]["std"]
         mean = stdMeanData["acceptors"]["mean"]
@@ -1396,9 +1370,11 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                 "inExonicPortionFlag": "N/A",
                 "CIDomainInRegionFlag": "N/A",
                 "isDivisibleFlag": "N/A",
-                "lowMESFlag": "N/A"}
+                "lowMESFlag": "N/A",
+                "varConsequences": "N/A"}
     # checks that variant causes a premature stop codon in an exon
-    if getVarConsequences(variant) == "stop_gained" and varInExon(variant) == True:
+    varCons = getVarConsequences(variant)
+    if "stop_gained" in varCons and varInExon(variant):
         spliceFlag = 0
         spliceRescue = 0
         frameshiftFlag = "-"
@@ -1537,7 +1513,8 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                 "inExonicPortionFlag": inExonicPortionFlag,
                 "CIDomainInRegionFlag": CIDomainInRegionFlag,
                 "isDivisibleFlag": isDivisibleFlag,
-                "lowMESFlag": lowMESFlag}
+                "lowMESFlag": lowMESFlag,
+                "varConsequences": ",".join(varCons)}
 
 def getDeNovoSpliceFrameshiftStatus(variant, donor=True, deNovoDonorInRefAcc=False):
     '''
@@ -1717,7 +1694,7 @@ def getPriorProbAfterGreyZoneSNS(variant, boundaries):
     varLoc = getVarLocation(variant, boundaries)
     if varType == "substitution" and varLoc == "after_grey_zone_variant":
         varCons = getVarConsequences(variant)
-        if varCons == "stop_gained" or varCons == "missense_variant" or varCons == "synonymous_variant":
+        if "stop_gained" in varCons or "missense_variant" in varCons or "synonymous_variant" in varCons:
             priorProb = "N/A"
             enigmaClass = "class_2"
         return {"applicablePrior": priorProb,
@@ -1798,7 +1775,10 @@ def getPriorProbAfterGreyZoneSNS(variant, boundaries):
                 "inExonicPortionFlag": "N/A",
                 "CIDomainInRegionFlag": "N/A",
                 "isDivisibleFlag": "N/A",
-                "lowMESFlag": "N/A"}
+                "lowMESFlag": "N/A",
+                "varConsequences": ",".join(varCons)}
+
+    assert False, "Should never reach this"
 
 def varInIneligibleDeNovoExon(variant, donor=True):
     '''
@@ -2213,7 +2193,8 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData, genome, transcr
         isDivisibleFlag = "N/A"
         lowMESFlag = "N/A"
         # to check for nonsense variants in exonic portion of splice donor site
-        if varInExon(variant) == True and getVarConsequences(variant) == "stop_gained":
+        varCons = getVarConsequences(variant)
+        if varInExon(variant) and "stop_gained" in varCons:
             nonsenseData = getPriorProbSpliceRescueNonsenseSNS(variant, boundaries)
             applicablePrior = nonsenseData["priorProb"]
             spliceRescue = nonsenseData["spliceRescue"]
@@ -2310,7 +2291,8 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData, genome, transcr
                 "inExonicPortionFlag": inExonicPortionFlag,
                 "CIDomainInRegionFlag": CIDomainInRegionFlag,
                 "isDivisibleFlag": isDivisibleFlag,
-                "lowMESFlag": lowMESFlag}
+                "lowMESFlag": lowMESFlag, 
+                "varConsequences": ",".join(varCons)}
 
 def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData, genome, transcript):
     '''
@@ -2401,7 +2383,8 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData, genome, tran
         isDivisibleFlag = "N/A"
         lowMESFlag = "N/A"
         # to check for nonsense variants in exonic portion of splice acceptor site
-        if varInExon(variant) == True and getVarConsequences(variant) == "stop_gained":
+        varCons = getVarConsequences(variant)
+        if varInExon(variant) and "stop_gained" in varCons:
             nonsenseData = getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc=True)
             applicablePrior = nonsenseData["priorProb"]
             spliceRescue = nonsenseData["spliceRescue"]
@@ -2498,7 +2481,8 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData, genome, tran
                 "inExonicPortionFlag": inExonicPortionFlag,
                 "CIDomainInRegionFlag": CIDomainInRegionFlag,
                 "isDivisibleFlag": isDivisibleFlag,
-                "lowMESFlag": lowMESFlag}
+                "lowMESFlag": lowMESFlag,
+                "varConsequences": ",".join(varCons)}
     
 def getPriorProbProteinSNS(variant, variantData):
     '''
@@ -2697,7 +2681,7 @@ def getPriorProbInExonSNS(variant, boundaries, variantData, genome, transcript):
                              "altGreaterClosestAltFlag": "N/A",
                              "frameshiftFlag": "N/A"}
         varCons = getVarConsequences(variant)
-        if varCons == "stop_gained":
+        if "stop_gained" in varCons:
             nonsenseData = getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc=False)
             applicablePrior = nonsenseData["priorProb"]
             applicableClass = nonsenseData["enigmaClass"]
@@ -2801,7 +2785,8 @@ def getPriorProbInExonSNS(variant, boundaries, variantData, genome, transcript):
                 "inExonicPortionFlag": inExonicPortionFlag,
                 "CIDomainInRegionFlag": CIDomainInRegionFlag,
                 "isDivisibleFlag": isDivisibleFlag,
-                "lowMESFlag": lowMESFlag}
+                "lowMESFlag": lowMESFlag,
+                "varConsequences": ",".join(varCons)}
 
 def getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries):
     '''
@@ -3172,11 +3157,11 @@ def getPriorProbInUTRSNS(variant, boundaries, genome, transcript):
                            "altGreaterClosestAltFlag": "N/A",
                            "frameshiftFlag": "N/A"}
         varCons = getVarConsequences(variant)
-        if varCons == "3_prime_UTR_variant":
+        if "3_prime_UTR_variant" in varCons:
             applicablePrior = LOW_PROBABILITY
             applicableClass = getEnigmaClass(applicablePrior)
             spliceFlag = 0
-        elif varCons == "5_prime_UTR_variant":
+        elif "5_prime_UTR_variant" in varCons:
             if varInExon(variant) == True:
                 deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, boundaries, STD_EXONIC_PORTION, genome, transcript,
                                                              deNovoDonorInRefAcc=False)
@@ -3283,7 +3268,8 @@ def getPriorProbInUTRSNS(variant, boundaries, genome, transcript):
                 "inExonicPortionFlag": "N/A",
                 "CIDomainInRegionFlag": "N/A",
                 "isDivisibleFlag": "N/A",
-                "lowMESFlag": "N/A"}
+                "lowMESFlag": "N/A",
+                "varConsequences": ",".join(varCons)}
 
 def getVarData(variant, boundaries, variantData, genome, transcript):
     '''
@@ -3425,7 +3411,6 @@ def addVarDataToRow(varData, inputRow):
 
 def getVarDict(variant, boundaries):
     '''
-
     Given input data, returns a dictionary containing information for each variant in input
     Dictionary key is variant HGVS_cDNA and value is a dictionary containing variant gene, variant chromosome, 
     variant strand, variant genomic coordinate, variant type, and variant location
@@ -3444,65 +3429,105 @@ def getVarDict(variant, boundaries):
 
     return varDict
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-i', "--inputFile", default="built.tsv", help="File with variant information")
-    parser.add_argument('-o', "--outputFile", help="File where results will be output")
-    parser.add_argument('-v', "--variantFile", help="File containing protein priors for variants")
-    parser.add_argument('-b', "--boundaries", default="enigma",
-                        help="Specifies which boundaries ('enigma' or 'priors') to use for clinically important domains")
-    parser.add_argument('-g', "--genomeFile", help="Fasta file containing hg38 reference genome")
-    parser.add_argument('-t', "--transcriptFile", help="RefSeq annotation hg38-based genepred file")
-    args = parser.parse_args()    
+def calc_one(variant, brca1, brca2):
+    try:
+        variantData = csv.DictReader(open("mod_res_dn_brca20160525.txt", "r"), delimiter="\t")
+        if variant["Gene_Symbol"] == "BRCA1":
+            varData = getVarData(variant, "enigma", variantData, None, brca1)
+        elif variant["Gene_Symbol"] == "BRCA2":
+            varData = getVarData(variant, "enigma", variantData, None, brca2)
+        click.echo("{}:{}".format(variant["HGVS_cDNA"], varData["varLoc"]), err=True)
+        return addVarDataToRow(varData, variant)
+    except Exception as e:
+        traceback.print_exc()
+        print('')
+        raise e
 
-    inputData = csv.DictReader(open(args.inputFile, "r"), delimiter="\t")
+def calc_all(variants, priors, genome, transcripts, processes):
+    inputData = csv.DictReader(variants, delimiter="\t")
     fieldnames = inputData.fieldnames
-    newHeaders = ["varType", "varLoc", "applicablePrior", "applicableEnigmaClass", "proteinPrior", "refDonorPrior", "deNovoDonorPrior",
-                  "refRefDonorMES", "refRefDonorZ", "altRefDonorMES", "altRefDonorZ", "refRefDonorSeq", "altRefDonorSeq", "refDonorVarStart",
-                  "refDonorVarLength", "refDonorExonStart", "refDonorIntronStart", "refDeNovoDonorMES", "refDeNovoDonorZ", "altDeNovoDonorMES",
-                  "altDeNovoDonorZ", "refDeNovoDonorSeq", "altDeNovoDonorSeq", "deNovoDonorVarStart", "deNovoDonorVarLength",
-                  "deNovoDonorExonStart", "deNovoDonorIntronStart", "deNovoDonorGenomicSplicePos", "deNovoDonorTranscriptSplicePos",
-                  "closestDonorGenomicSplicePos", "closestDonorTranscriptSplicePos", "closestDonorRefMES", "closestDonorRefZ",
-                  "closestDonorRefSeq", "closestDonorAltMES", "closestDonorAltZ", "closestDonorAltSeq", "closestDonorExonStart",
-                  "closestDonorIntronStart", "deNovoDonorAltGreaterRefFlag", "deNovoDonorAltGreaterClosestRefFlag",
-                  "deNovoDonorAltGreaterClosestAltFlag", "deNovoDonorFrameshiftFlag", "refAccPrior", "deNovoAccPrior", "refRefAccMES",
-                  "refRefAccZ", "altRefAccMES", "altRefAccZ", "refRefAccSeq", "altRefAccSeq", "refAccVarStart", "refAccVarLength", "refAccExonStart",
-                  "refAccIntronStart", "refDeNovoAccMES", "refDeNovoAccZ", "altDeNovoAccMES", "altDeNovoAccZ", "refDeNovoAccSeq", "altDeNovoAccSeq",
-                  "deNovoAccVarStart", "deNovoAccVarLength", "deNovoAccExonStart", "deNovoAccIntronStart", "deNovoAccGenomicSplicePos",
-                  "deNovoAccTranscriptSplicePos", "closestAccGenomicSplicePos", "closestAccTranscriptSplicePos", "closestAccRefMES",
-                  "closestAccRefZ", "closestAccRefSeq", "closestAccAltMES", "closestAccAltZ", "closestAccAltSeq",
-                  "closestAccExonStart", "closestAccIntronStart", "deNovoAccAltGreaterRefFlag", "deNovoAccAltGreaterClosestRefFlag",
-                  "deNovoAccAltGreaterClosestAltFlag", "deNovoAccFrameshiftFlag", "spliceSite", "spliceRescue", "spliceFlag", "frameshiftFlag",
-                  "inExonicPortionFlag", "CIDomainInRegionFlag", "isDivisibleFlag", "lowMESFlag"]
+    newHeaders = open("headers.tsv", "r").read().split()
     for header in newHeaders:
         fieldnames.append(header)
-    outputData = csv.DictWriter(open(args.outputFile, "w"), delimiter="\t", fieldnames=fieldnames)
-    outputData.writerow(dict((fn,fn) for fn in inputData.fieldnames))
-
-    # read genome sequence
-    genome38 = SequenceFileDB(args.genomeFile)
+    outputData = csv.DictWriter(priors, delimiter="\t", lineterminator="\n", fieldnames=fieldnames)
+    outputData.writerow(dict((fn, fn) for fn in inputData.fieldnames))
 
     # read RefSeq transcripts
-    with open(args.transcriptFile) as infile:
-        transcripts = pyhgvs_utils.read_transcripts(infile)
+    transcripts = pyhgvs_utils.read_transcripts(transcripts)
 
-    def get_transcript(name):
-        return transcripts.get(name)
+    brca1Transcript = transcripts.get(BRCA1_RefSeq)
+    brca2Transcript = transcripts.get(BRCA2_RefSeq)
 
-    brca1Transcript = get_transcript(BRCA1_RefSeq)
-    brca2Transcript = get_transcript(BRCA2_RefSeq)
+    # Create a pool of processes and calculate in parallel
+    click.echo("Processing using {} processes".format(processes), err=True)
+    pool = multiprocessing.Pool(processes)
+    try:
+        # Normal map has a bug if there is no timout that prevents Keyboard interrupts:
+        # https://stackoverflow.com/questions/1408356/keyboard-interrupts-with-pythons-multiprocessing-pool/1408476#1408476
 
-    totalVariants = 0
-    for variant in inputData:
-        variantData = csv.DictReader(open(args.variantFile, "r"), delimiter="\t")
-        if variant["Gene_Symbol"] == "BRCA1":
-            varData = getVarData(variant, args.boundaries, variantData, genome38, brca1Transcript)
-        elif variant["Gene_Symbol"] == "BRCA2":
-            varData = getVarData(variant, args.boundaries, variantData, genome38, brca2Transcript)
-        variant = addVarDataToRow(varData, variant)
-        outputData.writerow(variant)
-        totalVariants += 1
-        print "variant", totalVariants, "complete"
-    
+        calc_one_partial = functools.partial(calc_one, brca1=brca1Transcript, brca2=brca2Transcript)
+        calculatedVariants = pool.map_async(calc_one_partial, list(inputData)).get(99999999)
+
+        # Sort output as the order of p.map is not deterministic
+        outputData.writerows(sorted(
+            calculatedVariants,
+            key=lambda d: "{0}:g.{1}:{2}>{3}".format(d["Chr"], d["Pos"], d["Ref"], d["Alt"])))
+    except KeyboardInterrupt:
+        pool.terminate()
+
+
+def run(command):
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+    while True:
+        line = process.stdout.readline().rstrip()
+        if line:
+            click.echo(line, err=True)
+        else:
+            break
+
+
+@click.group()
+@click.option("--genome", type=click.Path(exists=False), default="/references/hg38.fa",
+              help="Fasta file containing hg38 reference genome")
+@click.option("--transcripts", type=click.File("r"), default="refseq_annotation.hg38.gp",
+              help="RefSeq annotation hg38-based genepred file")
+@click.option("--processes", type=int, default=8,
+              help="Number of processes to use")
+@click.pass_context
+def cli(ctx, genome, transcripts, processes):
+    ctx.obj = {"genome": genome, "transcripts": transcripts, "processes": processes}
+
+
+@cli.command()
+def references():
+    run("./references.sh")
+
+
+@cli.command(help="Run self test")
+@click.argument("length", type=click.Choice(["short", "long"]))
+@click.pass_context
+def test(ctx, length):
+    pytest.main(["-p", "no:cacheprovider", "-x", "."])
+    if length == "short":
+        calc_all(click.open_file("tests/variants_short.tsv", mode="r"),
+                 click.open_file("/tmp/priors_short.tsv", mode="w"),
+                 ctx.obj["genome"], ctx.obj["transcripts"], ctx.obj["processes"])
+        run("md5sum -c ./tests/md5/priors_short.md5")
+    else:
+        calc_all(click.open_file("tests/variants_long.tsv", mode="r"),
+                 click.open_file("/tmp/priors_long.tsv", mode="w"),
+                 ctx.obj["genome"], ctx.obj["transcripts"], ctx.obj["processes"])
+        run("md5sum -c ./tests/md5/priors_long.md5")
+
+
+@cli.command()
+@click.argument("variants", type=click.File("r"))
+@click.argument("priors", type=click.File("w"))
+@click.pass_context
+def calc(ctx, variants, priors):
+    calc_all(variants, priors,
+             ctx.obj["genome"], ctx.obj["transcripts"], ctx.obj["processes"])
+
+
 if __name__ == "__main__":
-    main()
+    cli()
