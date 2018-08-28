@@ -1068,7 +1068,7 @@ var VariantDetail = React.createClass({
                 <Row>
                     <Col md={12} className="variant-literature-col">
                         <h3>{variant["HGVS_cDNA"]}</h3>
-                        <LiteratureTable />
+                        <LiteratureTable maxRows={10} variant={variant} />
                     </Col>
                 </Row>
                 <Row>
@@ -1165,6 +1165,7 @@ var routes = (
         <Route path='reset/:resetToken' handler={ChangePassword}/>
         <Route path='variants' />
         <Route path='variant/:id' handler={VariantDetail}/>
+        <Route path='variant_literature/:id' handler={LiteratureTable}/>
         <Route path='releases' handler={Releases}/>
         <Route path='release/:id' handler={Release}/>
     </Route>

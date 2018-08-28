@@ -1235,8 +1235,39 @@ div.variant-submitter-group .submitter-header td {
     margin-bottom: 0;
 }
 
-.variant-literature td>div {
-    max-height: 4em;
-    overflow-y: scroll;
+/**************************************************************/
+/**********     Literature Search         *********************/
+/**************************************************************/
+
+.variant-literature-col ul {
+    list-style: none;
 }
 
+.variant-literature-col .literature-right-pane {
+    max-width: 200px;
+    float: right;
+    padding-left: 1em;
+    padding-bottom: 1em;
+    text-align: right;
+}
+
+.variant-literature-col hr {
+    clear: both;
+}
+
+.variant-literature-col .keywords {
+    list-style: none;
+    padding-left: 0;
+}
+
+.variant-literature-col .keywords .badge {
+    white-space: normal;
+    background-color: #337ab7;
+    font-weight: normal;
+}
+
+.variant-literature-col .keywords li {
+    float: left;
+    padding: 2px 4px;
+    max-width: 60%;
+}
