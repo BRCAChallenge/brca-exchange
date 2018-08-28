@@ -30,6 +30,6 @@ docker run --rm -it \
     --user=`id -u`:`id -g` \
     -v ${REFERENCES_DIR}:/references:ro \
     -v ${INPUT_OUTPUT_DIR}:/data \
-    brcachallenge/splicing-pipeline calc ${INPUT_FILE} ${OUTPUT_FILE}
+    brcachallenge/splicing-pipeline calc /data/${INPUT_FILE} /data/${OUTPUT_FILE}
 echo "Prior calculation complete!"
 

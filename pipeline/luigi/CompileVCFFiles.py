@@ -1441,7 +1441,7 @@ class CalculatePriors(luigi.Task):
         os.chdir(priors_method_dir)
 
         args = ['./calcpriors.sh', self.priors_references_dir, self.artifacts_dir,
-            self.input().path, self.output().path]
+            'built_with_mupit.tsv', 'built_with_priors.tsv']
         print "Running calcpriors.sh with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
