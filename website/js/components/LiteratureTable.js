@@ -2,7 +2,7 @@
 
 const React = require('react'),
     { Link } = require('react-router'),
-    { Grid, Row, Col, Table, OverlayTrigger, Popover, ButtonToolbar, Button, DropdownButton, Badge} = require('react-bootstrap'),
+    { Grid, Row, Col, OverlayTrigger, Popover, ButtonToolbar, Button, DropdownButton, Badge} = require('react-bootstrap'),
     backend = require('../backend');
 
 // Sort first by year, then by PMID (as a proxy for a more specific date of publication?)
@@ -24,23 +24,9 @@ const pubsOrdering = function(pub1, pub2) {
 
 const fakeLit = require('./fakepubs.js').sort(pubsOrdering);
 
-function limitFieldLength(string, maxLength) {
-    if (string.length <= maxLength) {
-        return string;
-    }
-
-    let popper = (<Popover>{string}</Popover>);
-    return (
-        <span>
-            {string.substring(0, maxLength)}
-            <OverlayTrigger placement='bottom' overlay={popper}><span>...</span></OverlayTrigger>
-        </span>
-    );
-}
-
 function limitAuthorCount(authors, maxCount) {
     let popper = (<Popover>{authors.split(";").map(e => [e, <br />])}</Popover>);
-    let auth = authors.split(";")
+    let auth = authors.split(";");
     return (
         <span>
             { auth.slice(0, maxCount).join(";") }
