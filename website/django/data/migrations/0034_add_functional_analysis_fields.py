@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('data', '0032_additional_clinvar_fields'),
+        ('data', '0033_report_synonyms_clinvar'),
     ]
 
     operations = [
