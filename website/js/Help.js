@@ -69,15 +69,21 @@ const Help = React.createClass({
         }
     },
 
-    shouldBeExpanded(fragment, {name, id, contents, list}) {
+    shouldBeExpanded(fragment, fragRegex, {name, id, contents, list}) {
+        // if fragment is empty, fragRegex will be (id=|id=""), which will match anything containing 'id='
+        // if there isn't a fragment, then we should never expand anything by default anyway, so just bail w/false
+        if (!fragment) {
+            return false;
+        }
+
         let slug = id || slugify(name);
         if (slug === fragment) {
             return true;
         }
-        if (contents && contents.includes(`id="${fragment}"`)) {
+        if (contents && fragRegex.test(contents)) {
             return true;
         }
-        if (list && list.some(elem => this.shouldBeExpanded(fragment, elem))) {
+        if (list && list.some(elem => this.shouldBeExpanded(fragment, fragRegex, elem))) {
             return true;
         }
         return false;
@@ -87,10 +93,13 @@ const Help = React.createClass({
         let help = localStorage.getItem("research-mode") === 'true' ? content.helpContentResearch : content.helpContentDefault;
 
         var fragment = slugify(window.location.hash.slice(1));
+        // looks for the fragment within id attributes wrapped in quotes (in dev) or without quotes (minified)
+        // we compile it once here and pass the same regex to each call to shouldBeExpanded() to save a little time
+        const fragRegex = new RegExp(`(id=${fragment}|id="${fragment}")`);
 
         var helpTiles = help.map(({section, tiles}) =>
             [<h1>{section}</h1>, tiles.map(({name, id, contents, list, reference}) => {
-                let header = [name];
+                let header = [<span id={id || slugify(name)}>{name}</span>];
                 // if the user clicks a reference link in a tile header, don't toggle the tile, and open the link.
                 let onSelect = function (e) {
                     if (e.target.classList.contains("help-reference-link")) {
@@ -107,7 +116,7 @@ const Help = React.createClass({
                     body.push(
                         <ListGroup fill>
                             { list.map(({name, id, contents}) =>
-                                <CollapsableListItem defaultExpanded={this.shouldBeExpanded(fragment, {name, id, contents})}
+                                <CollapsableListItem defaultExpanded={this.shouldBeExpanded(fragment, fragRegex, {name, id, contents})}
                                                      id={id ? id : slugify(name)}
                                                      header={name}>
                                     <RawHTML html={contents} />
@@ -126,7 +135,7 @@ const Help = React.createClass({
                     );
                 }
                 return (<Panel header={header} collapsable={true}
-                               defaultExpanded={this.shouldBeExpanded(fragment, {name, id, contents, list})}
+                               defaultExpanded={this.shouldBeExpanded(fragment, fragRegex, {name, id, contents, list})}
                                onSelect={onSelect}
                         >
                     { body }

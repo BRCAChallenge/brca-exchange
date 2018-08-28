@@ -197,7 +197,8 @@ var CommunityMap = React.createClass({
                 center: {lat: 17, lng: 9.4},
                 zoom: 2,
                 scrollwheel: false,
-                mapTypeControl: false,
+                mapTypeControl: true,
+                mapTypeId: 'satellite',
                 streetViewControl: false,
                 styles: [{
                     "featureType": "administrative",

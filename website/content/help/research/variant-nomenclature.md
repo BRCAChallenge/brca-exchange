@@ -1,5 +1,9 @@
+<span class="term_entry">
+
 #### Gene ((Gene_Symbol))
 The name of the gene on which the variant was found, as named by the HGNC. This will be either _BRCA1_ or _BRCA2_.
+
+</span>
 
 ----
 #### HGVS Nomenclature
@@ -18,15 +22,29 @@ A nomenclature system standardized by the Human Genome Variation Society \(HGVS\
 
 ----
 
+<span class="term_entry">
+
 #### Transcript Identifier ((Reference_Sequence))
-These identifiers, which typically start in ‘NM’, are gene-specific, not variant-specific. They are generally used to keep track of different transcripts submitted to databases such as RefSeq, and are carried over to ClinVar. BRCA Exchange mainly uses two transcript identifiers. There is one main transcript used for _BRCA1_ \(NM 007294.3\) and another identifier used for _BRCA2_ \(NM 000059.3\). Other, less common transcripts are also present in the database.
+These identifiers, which typically start in ‘NM’, are gene-specific, not variant-specific. They are generally used to keep track of different transcripts submitted to databases such as RefSeq, and are carried over to ClinVar.
+
+BRCA Exchange mainly uses two transcript identifiers. There is one main transcript used for _BRCA1_ \(NM 007294.3\) and another identifier used for _BRCA2_ \(NM 000059.3\). Other, less common transcripts are also present in the database.
+
+</span>
 
 ----
+
+<span class="term_entry">
 
 #### Abbreviated AA Change ((Protein_Change))
 A shortened abbreviation of the HGVS Protein alias using one-letter abbreviation for amino acids.
 
+</span>
+
 ----
+
+<span class="term_entry">
 
 #### BIC designation ((BIC_Nomenclature))
 A variant alias presented in BIC Nomenclature, which predates HGVS nomenclature and thus follows a different format.
+
+</span>

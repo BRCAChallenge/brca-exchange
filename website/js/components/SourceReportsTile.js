@@ -65,7 +65,7 @@ export default class SourceReportsTile extends React.Component {
             reportExpanded: Array.from({ length: this.props.submissions.length }, () => newExpansion)
         }, () => {
             // causes the parent to perform a (delayed) reflow
-            this.props.onReportToggled();
+            this.props.onReportToggled(this.collapser.getCollapsableDOMNode());
         });
     }
 
@@ -75,7 +75,7 @@ export default class SourceReportsTile extends React.Component {
             reportExpanded: pstate.reportExpanded.map((x, j) => (idx === j) ? !x : x)
         }), () => {
             // causes the parent to perform a (delayed) reflow
-            this.props.onReportToggled();
+            this.props.onReportToggled(this.collapser.getCollapsableDOMNode());
         });
     };
 
@@ -129,7 +129,7 @@ export default class SourceReportsTile extends React.Component {
         const groupTitle = `source-panel-${this.props.sourceName}`;
         const header = (
             <h3 style={{display: 'flex', flexDirection: 'row'}}>
-                <a style={{flexGrow: 1}} href="#" onClick={(event) => this.props.onChangeGroupVisibility(groupTitle, event)}>
+                <a style={{flexGrow: 1}} href="#" onClick={(event) => this.props.onChangeGroupVisibility(groupTitle, event, this.collapser.getCollapsableDOMNode())}>
                     {this.props.groupTitle}
                 </a>
 
@@ -150,6 +150,7 @@ export default class SourceReportsTile extends React.Component {
         return (
             <div key={`group_collection-${groupTitle}`} className="variant-detail-group variant-submitter-group">
                 <Panel
+                    ref={(me) => { this.collapser = me; }}
                     header={header}
                     collapsable={true}
                     defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
