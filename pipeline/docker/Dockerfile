@@ -13,6 +13,10 @@ RUN apt-get update && apt-get install -y \
     wget \
     zlib1g-dev
 
+# Get the Docker binary
+RUN curl -fsSL get.docker.com -o get-docker.sh \
+    && sh get-docker.sh
+
 WORKDIR /opt
 
 COPY requirements_docker.txt .
@@ -40,7 +44,7 @@ ENV BRCA_RESOURCES=$res
 
 RUN mkdir -p $res /files/data && chmod -R o+rwx /files
 
-RUN mkdir -p /.synapseCache && chmod o+rwx /.synapseCache  
+RUN mkdir -p /.synapseCache && chmod o+rwx /.synapseCache
 
 RUN git clone https://github.com/counsyl/hgvs.git
 # taking pyhgvs 0.9.4

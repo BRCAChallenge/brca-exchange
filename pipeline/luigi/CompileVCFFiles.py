@@ -124,6 +124,7 @@ def extract_file(archive_path, tmp_dir, file_path):
 
 
 DEFAULT_BRCA_RESOURCES_DIR = (os.path.abspath('../brca/brca-resources'))
+DEFAULT_PRIORS_REFERENCES_DIR = (os.path.abspath('../brca/priors-references'))
 DEFAULT_OUTPUT_DIR = (os.path.abspath('../brca/pipeline-data/data/pipeline_input'))
 DEFAULT_FILE_PARENT_DIR = (os.path.abspath('../brca/pipeline-data/data'))
 
@@ -136,6 +137,7 @@ lovd_method_dir = os.path.abspath('../lovd')
 g1k_method_dir = os.path.abspath('../1000_Genomes')
 enigma_method_dir = os.path.abspath('../enigma')
 data_merging_method_dir = os.path.abspath('../data_merging')
+priors_method_dir = os.path.abspath('../splicing')
 utilities_method_dir = os.path.abspath('../utilities')
 
 
@@ -1428,6 +1430,26 @@ class AppendMupitStructure(luigi.Task):
 
 
 @requires(AppendMupitStructure)
+class CalculatePriors(luigi.Task):
+    def output(self):
+        artifacts_dir = self.output_dir + "/release/artifacts/"
+        return luigi.LocalTarget(artifacts_dir + "built_with_priors.tsv")
+
+    def run(self):
+        release_dir = self.output_dir + "/release/"
+        artifacts_dir = self.output_dir + "/release/artifacts/"
+        os.chdir(priors_method_dir)
+
+        args = ['./calcpriors.sh', self.priors_references_dir, self.artifacts_dir,
+            self.input().path, self.output().path]
+        print "Running calcpriors.sh with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_input_and_output_tsvs_for_same_number_variants(self.input().path,
+                                                             self.output().path)
+
+@requires(AppendMupitStructure)
 class FindMissingReports(luigi.Task):
     def output(self):
         artifacts_dir = self.output_dir + "/release/artifacts/"
@@ -1477,7 +1499,7 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
         version_json_path = extract_file(self.previous_release_tar, tmp_dir, 'output/release/metadata/version.json')
         previous_release_date = self._extract_release_date(version_json_path)
         previous_release_date_str = datetime.datetime.strftime(previous_release_date, '%m-%d-%Y')
-        
+
         args = ["python", "releaseDiff.py", "--v2", artifacts_dir + "built_with_mupit.tsv", "--v1", previous_data_path,
                 "--removed", diff_dir + "removed.tsv", "--added", diff_dir + "added.tsv", "--added_data",
                 diff_dir + "added_data.tsv", "--diff", diff_dir + "diff.txt", "--diff_json", diff_dir + "diff.json",
@@ -1569,11 +1591,11 @@ class TopLevelReadme(luigi.Task):
     def run(self):
         top_level_readme_src = os.path.abspath(
             os.path.join(os.path.realpath(__file__), os.pardir, os.pardir, "top_level_readme.txt"))
-        
+
         shutil.copyfile(top_level_readme_src, self.output().path)
 
 @requires(TopLevelReadme)
-class GenerateMD5Sums(luigi.Task):        
+class GenerateMD5Sums(luigi.Task):
     def output(self):
         return luigi.LocalTarget(self.output_dir + "/md5sums.txt")
 
@@ -1627,6 +1649,9 @@ class RunAll(luigi.WrapperTask):
     resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
                                     description='directory to store brca-resources data')
 
+    priors_references_dir = luigi.Parameter(default=DEFAULT_PRIORS_REFERENCES_DIR,
+                                    description='directory to store priors references data')
+
     output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
                                  description='directory to store output files')
 
@@ -1646,10 +1671,10 @@ class RunAll(luigi.WrapperTask):
         if self.release_notes and self.previous_release_tar:
             yield GenerateReleaseArchive(self.date, self.resources_dir, self.output_dir,
                                          self.file_parent_dir, self.previous_release_tar,
-                                         self.release_notes)
+                                         self.release_notes, self.priors_references_dir)
         elif self.previous_release_tar:
             yield RunDiffAndAppendChangeTypesToOutputReports(self.date, self.resources_dir, self.output_dir,
-                                                      self.file_parent_dir, self.previous_release_tar)
+                                                      self.file_parent_dir, self.priors_references_dir, self.previous_release_tar)
         else:
             yield BuildAggregatedOutput(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
 

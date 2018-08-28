@@ -10,6 +10,7 @@ fi
 OUTPUT_DIR=/files/data/output
 PARENT_DIR=/files/data
 BRCA_RESOURCES=/files/resources
+PRIORS_REFERENCES=/files/references
 
 PREVIOUS_RELEASE_TAR=/files/previous_release.tar.gz
 
@@ -25,4 +26,4 @@ echo "Git hash: $(git log | head -n 1)"
 
 cd /opt/brca-exchange/pipeline/luigi
 
-python -m luigi --logging-conf-file luigi_log_configuration.conf --module CompileVCFFiles RunAll --resources-dir ${BRCA_RESOURCES} --file-parent-dir ${PARENT_DIR} --output-dir ${OUTPUT_DIR} --previous-release-tar ${PREVIOUS_RELEASE_TAR} --release-notes ${RELEASE_NOTES} ${DATE_PARAM_OPT} --local-scheduler
+python -m luigi --logging-conf-file luigi_log_configuration.conf --module CompileVCFFiles RunAll --resources-dir ${BRCA_RESOURCES} --file-parent-dir ${PARENT_DIR} --output-dir ${OUTPUT_DIR} --previous-release-tar ${PREVIOUS_RELEASE_TAR} --priors-references-dir ${PRIORS_REFERENCES} --release-notes ${RELEASE_NOTES} ${DATE_PARAM_OPT} --local-scheduler
