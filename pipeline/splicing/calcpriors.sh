@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
+set -o nounset
+set -o errexit
 
-INPUT_OUTPUT_DIR=$1
-REFERENCES_DIR=$2
+REFERENCES_DIR=$1
+INPUT_OUTPUT_DIR=$2
 INPUT_FILE=$3
 OUTPUT_FILE=$4
 
