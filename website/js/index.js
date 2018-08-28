@@ -752,7 +752,7 @@ var VariantDetail = React.createClass({
                     <SilicoPredTile
                         groupTitle='silico-pred-tile'
                         priors={variant.priors}
-                        displayTitle={<span><i>In Silico</i> Prediction (prior to considering other evidence)</span>}
+                        displayTitle={<span><i>In Silico</i> Prior Prediction (prior to considering other evidence)</span>}
                         Genomic_Coordinate_hg38={variant.Genomic_Coordinate_hg38}
                         onChangeGroupVisibility={this.onChangeGroupVisibility}
                         hideEmptyItems={this.state.hideEmptyItems}

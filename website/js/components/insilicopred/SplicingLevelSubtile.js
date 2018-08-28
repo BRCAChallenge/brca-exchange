@@ -227,7 +227,7 @@ class SpliceSiteImpactTable extends React.Component {
 
         return (<div>
             <div style={{textAlign: 'center', fontWeight: 'bold', margin: '20px'}}>
-                Probability of Pathogenicity<br />
+                Prior Probability of Pathogenicity<br />
                 [Due to Splice {capitalize(type)} Damage]
             </div>
 
@@ -235,7 +235,7 @@ class SpliceSiteImpactTable extends React.Component {
                 <tr>
                     <td width="60%">Qualitative Category</td>
                     <td width="30%">Z-score Range</td>
-                    <td width="20%">Probability</td>
+                    <td width="20%">Prior Probability</td>
                 </tr>
 
                 {
@@ -260,7 +260,7 @@ class DeNovoDonorPathogenicityTable extends React.Component {
 
         return (<div>
             <div style={{textAlign: 'center', fontWeight: 'bold', margin: '20px'}}>
-                Probability of Pathogenicity<br />
+                Prior Probability of Pathogenicity<br />
                 [Due to De Novo Donor]
             </div>
 
@@ -268,7 +268,7 @@ class DeNovoDonorPathogenicityTable extends React.Component {
                 <tr>
                     <td width="60%">Qualitative Category</td>
                     <td width="30%">Z-score Range</td>
-                    <td width="20%">Probability</td>
+                    <td width="20%">Prior Probability</td>
                 </tr>
 
                 {
@@ -388,7 +388,7 @@ export default class SplicingLevelSubtile extends React.Component {
         return (
             <div className="subtile-container splicing-subtile" style={{padding: '0px'}}>
                 <div className="preamble">
-                The splicing-level estimation is due to <b>{maxProbPanel.reason}</b> which introduces a probability of pathogenicity of <b>{maxProbPanel.prior}</b>.
+                The splicing-level estimation is due to <b>{maxProbPanel.reason}</b> which introduces a prior probability of pathogenicity of <b>{maxProbPanel.prior}</b>.
                 </div>
 
                 <TabbedArea ref={(me) => { this.collapser = me; }} activeKey={this.state.activePane} onSelect={this.changePane}>

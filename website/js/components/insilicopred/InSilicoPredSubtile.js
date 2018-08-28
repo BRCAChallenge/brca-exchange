@@ -66,7 +66,7 @@ export default class InSilicoPredSubtile extends React.Component {
         if (probability === -Infinity) {
             return (
                 <div className="subtile-container">
-                The overall probability is not able to be calculated because the variant is in a region of the gene that cannot be accounted for by this in silico model.
+                The overall prior probability is not able to be calculated because the variant is in a region of the gene that cannot be accounted for by this in silico model.
                 </div>
             );
         }
@@ -95,7 +95,7 @@ export default class InSilicoPredSubtile extends React.Component {
                 </div>
 
                 <div className="subtile-container">
-                    Applicable Probability is from {reason}
+                    Applicable Prior Probability is from {reason}
                 </div>
 
                 <Table style={{paddingBottom: 0, marginBottom: 0}}>

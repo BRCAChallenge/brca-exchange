@@ -89,7 +89,7 @@ export default class SilicoPredTile extends React.Component {
         const noDataNode = (
             <CollapsibleTile allEmpty={true} {...this.props}>
                 <div style={{padding: '10px'}}>
-                No probability information exists for this variant.
+                No prior probability information exists for this variant.
                 </div>
             </CollapsibleTile>
         );
@@ -135,7 +135,7 @@ export default class SilicoPredTile extends React.Component {
         return (
             <CollapsibleTile allEmpty={allEmpty} {...this.props}>
                 <CollapsibleSection
-                    fieldName={<span><i>In Silico</i> Probability of Pathogenicity</span>}
+                    fieldName={<span><i>In Silico</i> Prior Probability of Pathogenicity</span>}
                     extraHeaderItems={normalizedProb(decidingProb)}
                     defaultVisible={true}
                 >
