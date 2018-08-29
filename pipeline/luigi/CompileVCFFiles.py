@@ -1303,8 +1303,11 @@ class MergeVCFsIntoTSVFile(luigi.Task):
     previous_release_tar = luigi.Parameter(default=None, description='path to previous release tar for diffing versions \
                                        and producing change types for variants')
 
+    priors_references_dir = luigi.Parameter(default=None, description='directory to store priors references data')
+    
     release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
 
+    
     def output(self):
         artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts/")
         return luigi.LocalTarget(artifacts_dir + "merged.tsv")
@@ -1439,8 +1442,9 @@ class CalculatePriors(luigi.Task):
         artifacts_dir = self.output_dir + "/release/artifacts/"
         os.chdir(priors_method_dir)
 
-        args = ['./calcpriors.sh', self.priors_references_dir, self.artifacts_dir,
+        args = ['bash', 'calcpriors.sh', self.priors_references_dir, artifacts_dir,
             'built_with_mupit.tsv', 'built_with_priors.tsv']
+        
         print "Running calcpriors.sh with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
@@ -1448,7 +1452,7 @@ class CalculatePriors(luigi.Task):
         check_input_and_output_tsvs_for_same_number_variants(self.input().path,
                                                              self.output().path)
 
-@requires(AppendMupitStructure)
+@requires(CalculatePriors)
 class FindMissingReports(luigi.Task):
     def output(self):
         artifacts_dir = self.output_dir + "/release/artifacts/"
@@ -1667,6 +1671,7 @@ class RunAll(luigi.WrapperTask):
         If release notes and a previous release are provided, generate a version.json file and
         run the releaseDiff.py script to generate change_types between releases of variants.
         '''
+
         if self.release_notes and self.previous_release_tar and self.priors_references_dir:
             yield GenerateReleaseArchive(self.date, self.resources_dir, self.output_dir,
                                          self.file_parent_dir, self.previous_release_tar,

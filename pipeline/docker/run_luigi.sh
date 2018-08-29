@@ -10,7 +10,7 @@ fi
 OUTPUT_DIR=/files/data/output
 PARENT_DIR=/files/data
 BRCA_RESOURCES=/files/resources
-PRIORS_REFERENCES=/files/references
+PRIORS_REFERENCES=/home/pipeline/priors/references # path valid w.r.t to host (needed inside splicing prior pipeline) TODO make a parameter out of it
 
 PREVIOUS_RELEASE_TAR=/files/previous_release.tar.gz
 
