@@ -124,7 +124,6 @@ def extract_file(archive_path, tmp_dir, file_path):
 
 
 DEFAULT_BRCA_RESOURCES_DIR = (os.path.abspath('../brca/brca-resources'))
-DEFAULT_PRIORS_REFERENCES_DIR = (os.path.abspath('../brca/priors-references'))
 DEFAULT_OUTPUT_DIR = (os.path.abspath('../brca/pipeline-data/data/pipeline_input'))
 DEFAULT_FILE_PARENT_DIR = (os.path.abspath('../brca/pipeline-data/data'))
 
@@ -1659,8 +1658,7 @@ class RunAll(luigi.WrapperTask):
     previous_release_tar = luigi.Parameter(default=None, description='path to previous release tar for diffing versions \
                                        and producing change types for variants')
 
-    priors_references_dir = luigi.Parameter(default=DEFAULT_PRIORS_REFERENCES_DIR,
-                                    description='directory to store priors references data')
+    priors_references_dir = luigi.Parameter(default=None, description='directory to store priors references data')
 
     release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
 
@@ -1669,11 +1667,11 @@ class RunAll(luigi.WrapperTask):
         If release notes and a previous release are provided, generate a version.json file and
         run the releaseDiff.py script to generate change_types between releases of variants.
         '''
-        if self.release_notes and self.previous_release_tar:
+        if self.release_notes and self.previous_release_tar and self.priors_references_dir:
             yield GenerateReleaseArchive(self.date, self.resources_dir, self.output_dir,
                                          self.file_parent_dir, self.previous_release_tar,
                                          self.priors_references_dir, self.release_notes)
-        elif self.previous_release_tar:
+        elif self.previous_release_tar and self.priors_references_dir:
             yield RunDiffAndAppendChangeTypesToOutputReports(self.date, self.resources_dir,
                                                              self.output_dir, self.file_parent_dir,
                                                              self.previous_release_tar, self.priors_references_dir)
