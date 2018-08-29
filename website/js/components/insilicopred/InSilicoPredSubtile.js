@@ -107,6 +107,10 @@ export default class InSilicoPredSubtile extends React.Component {
                 <div className="subtile-container">
                     <b>Credits:</b> Computational algorithm and display derived from the <a href="http://priors.hci.utah.edu/PRIORS/BRCA/">HCI Breast Cancer Genes Prior Probabilities</a> website.
                 </div>
+
+                <div className="subtile-container">
+                    <b>Warning:</b> the prior probabilities shown here were calibrated against cancer case series with much stronger family cancer histories than typical in genetic testing today, and will eventually be refined using contemporary data. These probabilities form a starting point for variant interpretation.  They cannot be used for stand - alone classification, and should not be used in place of expert interpretations.
+                </div>
             </div>
         );
     }
