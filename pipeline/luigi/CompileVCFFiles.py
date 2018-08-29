@@ -1649,8 +1649,6 @@ class RunAll(luigi.WrapperTask):
     resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
                                     description='directory to store brca-resources data')
 
-    priors_references_dir = luigi.Parameter(default=DEFAULT_PRIORS_REFERENCES_DIR,
-                                    description='directory to store priors references data')
 
     output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
                                  description='directory to store output files')
@@ -1660,6 +1658,9 @@ class RunAll(luigi.WrapperTask):
 
     previous_release_tar = luigi.Parameter(default=None, description='path to previous release tar for diffing versions \
                                        and producing change types for variants')
+
+    priors_references_dir = luigi.Parameter(default=DEFAULT_PRIORS_REFERENCES_DIR,
+                                    description='directory to store priors references data')
 
     release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
 
@@ -1671,10 +1672,11 @@ class RunAll(luigi.WrapperTask):
         if self.release_notes and self.previous_release_tar:
             yield GenerateReleaseArchive(self.date, self.resources_dir, self.output_dir,
                                          self.file_parent_dir, self.previous_release_tar,
-                                         self.release_notes, self.priors_references_dir)
+                                         self.priors_references_dir, self.release_notes)
         elif self.previous_release_tar:
-            yield RunDiffAndAppendChangeTypesToOutputReports(self.date, self.resources_dir, self.output_dir,
-                                                      self.file_parent_dir, self.priors_references_dir, self.previous_release_tar)
+            yield RunDiffAndAppendChangeTypesToOutputReports(self.date, self.resources_dir,
+                                                             self.output_dir, self.file_parent_dir,
+                                                             self.previous_release_tar, self.priors_references_dir)
         else:
             yield BuildAggregatedOutput(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
 

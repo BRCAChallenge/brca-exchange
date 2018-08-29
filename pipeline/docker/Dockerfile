@@ -20,7 +20,6 @@ RUN curl -fsSL get.docker.com -o get-docker.sh \
 WORKDIR /opt
 
 COPY requirements_docker.txt .
-COPY test-requirements_docker.txt .
 
 # install numpy first to avoid issues with bio python and bx-python (see also https://github.com/LUMC/vep2lovd/issues/1)
 RUN pip install $(grep numpy requirements_docker.txt)
