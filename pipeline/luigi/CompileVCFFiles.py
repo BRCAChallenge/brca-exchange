@@ -1448,7 +1448,7 @@ class CalculatePriors(luigi.Task):
         check_input_and_output_tsvs_for_same_number_variants(self.input().path,
                                                              self.output().path)
 
-@requires(AppendMupitStructure)
+@requires(CalculatePriors)
 class FindMissingReports(luigi.Task):
     def output(self):
         artifacts_dir = self.output_dir + "/release/artifacts/"
