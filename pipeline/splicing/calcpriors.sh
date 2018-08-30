@@ -8,21 +8,20 @@ INPUT_FILE_NAME=$3
 OUTPUT_FILE_NAME=$4
 
 # Download and verify references - to be called from within the docker
-# echo "Downloading references. If not already present, this may take 1-2 hours..."
-# docker run -it --rm \
-#     --user=`id -u`:`id -g` \
-#     -v ${REFERENCES_DIR}:/references \
-#     brcachallenge/splicing-pipeline references
-# echo "Reference download and installation complete."
+echo "Downloading references. If not already present, this may take 1-2 hours..."
+docker run -it --rm \
+    --user=`id -u`:`id -g` \
+    -v ${REFERENCES_DIR}:/references \
+    brcachallenge/splicing-pipeline references
+echo "Reference download and installation complete."
 
 # Run short test to ensure proper setup
 echo "Running short test to ensure proper set up."
-# TODO: exit if tests error
-# docker run -it --rm \
-#     --user=`id -u`:`id -g` \
-#     -v ${REFERENCES_DIR}:/references:ro \
-#     brcachallenge/splicing-pipeline test short
-# echo "Tests passed!"
+docker run -it --rm \
+    --user=`id -u`:`id -g` \
+    -v ${REFERENCES_DIR}:/references:ro \
+    brcachallenge/splicing-pipeline test short
+echo "Tests passed!"
 
 # Calculate priors
 echo "Calculating priors, this may take a few hours..."
