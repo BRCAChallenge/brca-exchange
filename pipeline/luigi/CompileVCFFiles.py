@@ -1309,10 +1309,10 @@ class MergeVCFsIntoTSVFile(luigi.Task):
     priors_references_dir = luigi.Parameter(default=None, description='directory to store priors references data.')
 
     priors_docker_image_name = luigi.Parameter(default=None, description='docker image name for priors calculation')
-    
+
     release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
 
-    
+
     def output(self):
         artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts/")
         return luigi.LocalTarget(artifacts_dir + "merged.tsv")
@@ -1448,7 +1448,7 @@ class CalculatePriors(luigi.Task):
 
         args = ['bash', 'calcpriors.sh', self.priors_references_dir,
                 artifacts_dir_host, 'built_with_mupit.tsv', 'built_with_priors.tsv', self.priors_docker_image_name]
-        
+
         print "Running calcpriors.sh with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
@@ -1467,7 +1467,7 @@ class FindMissingReports(luigi.Task):
         artifacts_dir = self.output_dir + "/release/artifacts/"
         os.chdir(data_merging_method_dir)
 
-        args = ["python", "check_for_missing_reports.py", "-b", artifacts_dir + "built_with_mupit.tsv", "-r", artifacts_dir,
+        args = ["python", "check_for_missing_reports.py", "-b", artifacts_dir + "built_with_priors.tsv", "-r", artifacts_dir,
                 "-a", artifacts_dir, "-v"]
         print "Running check_for_missing_reports.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -1507,7 +1507,7 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
         previous_release_date = self._extract_release_date(version_json_path)
         previous_release_date_str = datetime.datetime.strftime(previous_release_date, '%m-%d-%Y')
 
-        args = ["python", "releaseDiff.py", "--v2", artifacts_dir + "built_with_mupit.tsv", "--v1", previous_data_path,
+        args = ["python", "releaseDiff.py", "--v2", artifacts_dir + "built_with_priors.tsv", "--v1", previous_data_path,
                 "--removed", diff_dir + "removed.tsv", "--added", diff_dir + "added.tsv", "--added_data",
                 diff_dir + "added_data.tsv", "--diff", diff_dir + "diff.txt", "--diff_json", diff_dir + "diff.json",
                 "--output", release_dir + "built_with_change_types.tsv", "--artifacts_dir", artifacts_dir,
@@ -1519,7 +1519,7 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
 
         shutil.rmtree(tmp_dir) # cleaning up
 
-        check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "built_with_mupit.tsv",
+        check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "built_with_priors.tsv",
                                                              release_dir + "built_with_change_types.tsv")
 
 
@@ -1659,7 +1659,7 @@ class RunAll(luigi.WrapperTask):
 
     output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
                                  description='directory to store output files')
-    
+
     output_dir_host = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
                                  description='directory to store output files wrt to host file system (needed for setting up volume mapping for running docker inside docker)')
 
@@ -1672,7 +1672,7 @@ class RunAll(luigi.WrapperTask):
     priors_references_dir = luigi.Parameter(default=None, description='directory to store priors references data')
 
     priors_docker_image_name = luigi.Parameter(default=None, description='docker image name for priors calculation')
-    
+
     release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
 
     def requires(self):
