@@ -3271,7 +3271,7 @@ def getPriorProbInUTRSNS(variant, boundaries, genome, transcript):
                 "lowMESFlag": "N/A",
                 "varConsequences": ",".join(varCons)}
 
-def getVarData(variant, boundaries, variantData, genome, transcript):
+def getVarData(variant, boundaries, variantData, genome, transcript, blacklist=None):
     '''
     Given variant, boundaries (either "priors" or "enigma') and list of dictionaries with variant data
     Genome is a SequenceFileDB for genome and transcript is a pyhgvs transcript object)
@@ -3369,7 +3369,12 @@ def getVarData(variant, boundaries, variantData, genome, transcript):
                  "CIDomainInRegionFlag": "-",
                  "isDivisibleFlag": "-",
                  "lowMESFlag": "-"}
-    if varType == "substitution":
+
+    if blacklist and variant['HGVS_cDNA'] in blacklist:
+        # clear out priors data for blacklisted variants
+        # TODO: should we perhaps log the values for these excluded variants?
+        varData = blankDict.copy()
+    elif varType == "substitution":
         # functions only work for variants with cannonical nucleotides (ACTG)
         if variant["Ref"] in ["A", "C","G", "T"] and variant["Alt"] in ["A", "C", "G", "T"]:
             if varLoc == "outside_transcript_boundaries_variant":
@@ -3429,13 +3434,13 @@ def getVarDict(variant, boundaries):
 
     return varDict
 
-def calc_one(variant, brca1, brca2):
+def calc_one(variant, brca1, brca2, blacklist=None):
     try:
         variantData = csv.DictReader(open("mod_res_dn_brca20160525.txt", "r"), delimiter="\t")
         if variant["Gene_Symbol"] == "BRCA1":
-            varData = getVarData(variant, "enigma", variantData, None, brca1)
+            varData = getVarData(variant, "enigma", variantData, None, brca1, blacklist)
         elif variant["Gene_Symbol"] == "BRCA2":
-            varData = getVarData(variant, "enigma", variantData, None, brca2)
+            varData = getVarData(variant, "enigma", variantData, None, brca2, blacklist)
         click.echo("{}:{}".format(variant["HGVS_cDNA"], varData["varLoc"]), err=True)
         return addVarDataToRow(varData, variant)
     except Exception as e:
@@ -3443,7 +3448,7 @@ def calc_one(variant, brca1, brca2):
         print('')
         raise e
 
-def calc_all(variants, priors, genome, transcripts, processes):
+def calc_all(variants, priors, genome, transcripts, processes, blacklisted_vars):
     inputData = csv.DictReader(variants, delimiter="\t")
     fieldnames = inputData.fieldnames
     newHeaders = open("headers.tsv", "r").read().split()
@@ -3458,6 +3463,9 @@ def calc_all(variants, priors, genome, transcripts, processes):
     brca1Transcript = transcripts.get(BRCA1_RefSeq)
     brca2Transcript = transcripts.get(BRCA2_RefSeq)
 
+    # create a set of blacklisted variants by HGVS_cDNA which we'll use to return blank data for those variants
+    blacklist = set(x.strip() for x in blacklisted_vars.readlines()) if blacklisted_vars else None
+
     # Create a pool of processes and calculate in parallel
     click.echo("Processing using {} processes".format(processes), err=True)
     pool = multiprocessing.Pool(processes)
@@ -3465,7 +3473,7 @@ def calc_all(variants, priors, genome, transcripts, processes):
         # Normal map has a bug if there is no timout that prevents Keyboard interrupts:
         # https://stackoverflow.com/questions/1408356/keyboard-interrupts-with-pythons-multiprocessing-pool/1408476#1408476
 
-        calc_one_partial = functools.partial(calc_one, brca1=brca1Transcript, brca2=brca2Transcript)
+        calc_one_partial = functools.partial(calc_one, brca1=brca1Transcript, brca2=brca2Transcript, blacklist=blacklist)
         calculatedVariants = pool.map_async(calc_one_partial, list(inputData)).get(99999999)
 
         # Sort output as the order of p.map is not deterministic
@@ -3493,9 +3501,13 @@ def run(command):
               help="RefSeq annotation hg38-based genepred file")
 @click.option("--processes", type=int, default=8,
               help="Number of processes to use")
+@click.option("--blacklisted_vars", type=click.File("r"), default="blacklisted_vars.txt",
+              help="File of HGVS cDNA coordinates of variants which should return blank priors data")
 @click.pass_context
-def cli(ctx, genome, transcripts, processes):
-    ctx.obj = {"genome": genome, "transcripts": transcripts, "processes": processes}
+def cli(ctx, genome, transcripts, processes, blacklisted_vars):
+    ctx.obj = {
+        "genome": genome, "transcripts": transcripts, "processes": processes, "blacklisted_vars": blacklisted_vars
+    }
 
 
 @cli.command()
@@ -3526,7 +3538,7 @@ def test(ctx, length):
 @click.pass_context
 def calc(ctx, variants, priors):
     calc_all(variants, priors,
-             ctx.obj["genome"], ctx.obj["transcripts"], ctx.obj["processes"])
+             ctx.obj["genome"], ctx.obj["transcripts"], ctx.obj["processes"], ctx.obj["blacklisted_vars"])
 
 
 if __name__ == "__main__":
