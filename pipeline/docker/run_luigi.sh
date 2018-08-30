@@ -14,13 +14,14 @@ BRCA_RESOURCES=/files/resources
 
 # TODO doc why different mechanism
 
-if [ "$#" -ne "2" ]; then
+if [ "$#" -ne "3" ]; then
     echo "Require host (!) paths for references directory and data directory"
-    echo "Usage: run_luigi.sh [PRIORS_REFERENCES] [OUTPUT_DIR_HOST]" 
+    echo "Usage: run_luigi.sh [PRIORS_REFERENCES] [OUTPUT_DIR_HOST] [PRIORS_DOCKER_IMAGE_NAME]" 
 fi
 
 PRIORS_REFERENCES=$1
 OUTPUT_DIR_HOST="$2/output"
+PRIORS_DOCKER_IMAGE=$3
 
 PREVIOUS_RELEASE_TAR=/files/previous_release.tar.gz
 
@@ -36,4 +37,4 @@ echo "Git hash: $(git log | head -n 1)"
 
 cd /opt/brca-exchange/pipeline/luigi
 
-python -m luigi --logging-conf-file luigi_log_configuration.conf --module CompileVCFFiles RunAll --resources-dir ${BRCA_RESOURCES} --file-parent-dir ${PARENT_DIR} --output-dir ${OUTPUT_DIR} --previous-release-tar ${PREVIOUS_RELEASE_TAR} --priors-references-dir ${PRIORS_REFERENCES} --output-dir-host ${OUTPUT_DIR_HOST} --release-notes ${RELEASE_NOTES} ${DATE_PARAM_OPT} --local-scheduler
+python -m luigi --logging-conf-file luigi_log_configuration.conf --module CompileVCFFiles RunAll --resources-dir ${BRCA_RESOURCES} --file-parent-dir ${PARENT_DIR} --output-dir ${OUTPUT_DIR} --previous-release-tar ${PREVIOUS_RELEASE_TAR} --priors-references-dir ${PRIORS_REFERENCES} --priors-docker-image-name ${PRIORS_DOCKER_IMAGE} --output-dir-host ${OUTPUT_DIR_HOST} --release-notes ${RELEASE_NOTES} ${DATE_PARAM_OPT} --local-scheduler

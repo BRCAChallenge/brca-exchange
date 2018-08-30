@@ -1307,6 +1307,8 @@ class MergeVCFsIntoTSVFile(luigi.Task):
                                        and producing change types for variants')
 
     priors_references_dir = luigi.Parameter(default=None, description='directory to store priors references data.')
+
+    priors_docker_image_name = luigi.Parameter(default=None, description='docker image name for priors calculation')
     
     release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
 
@@ -1445,7 +1447,7 @@ class CalculatePriors(luigi.Task):
         os.chdir(priors_method_dir)
 
         args = ['bash', 'calcpriors.sh', self.priors_references_dir,
-                artifacts_dir_host, 'built_with_mupit.tsv', 'built_with_priors.tsv']
+                artifacts_dir_host, 'built_with_mupit.tsv', 'built_with_priors.tsv', self.priors_docker_image_name]
         
         print "Running calcpriors.sh with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -1669,6 +1671,8 @@ class RunAll(luigi.WrapperTask):
 
     priors_references_dir = luigi.Parameter(default=None, description='directory to store priors references data')
 
+    priors_docker_image_name = luigi.Parameter(default=None, description='docker image name for priors calculation')
+    
     release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
 
     def requires(self):
@@ -1680,11 +1684,11 @@ class RunAll(luigi.WrapperTask):
         if self.release_notes and self.previous_release_tar and self.priors_references_dir:
             yield GenerateReleaseArchive(self.date, self.resources_dir, self.output_dir, self.output_dir_host,
                                          self.file_parent_dir, self.previous_release_tar,
-                                         self.priors_references_dir, self.release_notes)
+                                         self.priors_references_dir, self.priors_docker_image_name, self.release_notes)
         elif self.previous_release_tar and self.priors_references_dir:
             yield RunDiffAndAppendChangeTypesToOutputReports(self.date, self.resources_dir,
                                                              self.output_dir, self.output_dir_host, self.file_parent_dir,
-                                                             self.previous_release_tar, self.priors_references_dir)
+                                                             self.previous_release_tar, self.priors_references_dir, self.priors_docker_image_name)
         else:
             yield BuildAggregatedOutput(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
 
