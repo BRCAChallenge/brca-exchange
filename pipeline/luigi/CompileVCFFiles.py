@@ -136,6 +136,7 @@ lovd_method_dir = os.path.abspath('../lovd')
 g1k_method_dir = os.path.abspath('../1000_Genomes')
 enigma_method_dir = os.path.abspath('../enigma')
 data_merging_method_dir = os.path.abspath('../data_merging')
+priors_method_dir = os.path.abspath('../splicing')
 utilities_method_dir = os.path.abspath('../utilities')
 
 
@@ -1320,13 +1321,21 @@ class MergeVCFsIntoTSVFile(luigi.Task):
     output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
                                  description='directory to store output files')
 
+    output_dir_host = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                                 description='directory to store output files wrt to host file system (needed for setting up volume mapping for running docker inside docker)')
+
     file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
                                       description='directory to store all individual task related files')
 
     previous_release_tar = luigi.Parameter(default=None, description='path to previous release tar for diffing versions \
                                        and producing change types for variants')
 
+    priors_references_dir = luigi.Parameter(default=None, description='directory to store priors references data.')
+
+    priors_docker_image_name = luigi.Parameter(default=None, description='docker image name for priors calculation')
+
     release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
+
 
     def output(self):
         artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts/")
@@ -1452,6 +1461,26 @@ class AppendMupitStructure(luigi.Task):
 
 
 @requires(AppendMupitStructure)
+class CalculatePriors(luigi.Task):
+    def output(self):
+        artifacts_dir = self.output_dir + "/release/artifacts/"
+        return luigi.LocalTarget(artifacts_dir + "built_with_priors.tsv")
+
+    def run(self):
+        artifacts_dir_host = self.output_dir_host + "/release/artifacts/"
+        os.chdir(priors_method_dir)
+
+        args = ['bash', 'calcpriors.sh', self.priors_references_dir,
+                artifacts_dir_host, 'built_with_mupit.tsv', 'built_with_priors.tsv', self.priors_docker_image_name]
+
+        print "Running calcpriors.sh with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_input_and_output_tsvs_for_same_number_variants(self.input().path,
+                                                             self.output().path)
+
+@requires(CalculatePriors)
 class FindMissingReports(luigi.Task):
     def output(self):
         artifacts_dir = self.output_dir + "/release/artifacts/"
@@ -1462,7 +1491,7 @@ class FindMissingReports(luigi.Task):
         artifacts_dir = self.output_dir + "/release/artifacts/"
         os.chdir(data_merging_method_dir)
 
-        args = ["python", "check_for_missing_reports.py", "-b", artifacts_dir + "built_with_mupit.tsv", "-r", artifacts_dir,
+        args = ["python", "check_for_missing_reports.py", "-b", artifacts_dir + "built_with_priors.tsv", "-r", artifacts_dir,
                 "-a", artifacts_dir, "-v"]
         print "Running check_for_missing_reports.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -1502,7 +1531,7 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
         previous_release_date = self._extract_release_date(version_json_path)
         previous_release_date_str = datetime.datetime.strftime(previous_release_date, '%m-%d-%Y')
 
-        args = ["python", "releaseDiff.py", "--v2", artifacts_dir + "built_with_mupit.tsv", "--v1", previous_data_path,
+        args = ["python", "releaseDiff.py", "--v2", artifacts_dir + "built_with_priors.tsv", "--v1", previous_data_path,
                 "--removed", diff_dir + "removed.tsv", "--added", diff_dir + "added.tsv", "--added_data",
                 diff_dir + "added_data.tsv", "--diff", diff_dir + "diff.txt", "--diff_json", diff_dir + "diff.json",
                 "--output", release_dir + "built_with_change_types.tsv", "--artifacts_dir", artifacts_dir,
@@ -1514,7 +1543,7 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
 
         shutil.rmtree(tmp_dir) # cleaning up
 
-        check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "built_with_mupit.tsv",
+        check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "built_with_priors.tsv",
                                                              release_dir + "built_with_change_types.tsv")
 
 
@@ -1651,14 +1680,22 @@ class RunAll(luigi.WrapperTask):
     resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
                                     description='directory to store brca-resources data')
 
+
     output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
                                  description='directory to store output files')
+
+    output_dir_host = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                                 description='directory to store output files wrt to host file system (needed for setting up volume mapping for running docker inside docker)')
 
     file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
                                       description='directory to store all individual task related files')
 
     previous_release_tar = luigi.Parameter(default=None, description='path to previous release tar for diffing versions \
                                        and producing change types for variants')
+
+    priors_references_dir = luigi.Parameter(default=None, description='directory to store priors references data')
+
+    priors_docker_image_name = luigi.Parameter(default=None, description='docker image name for priors calculation')
 
     release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
 
@@ -1667,13 +1704,15 @@ class RunAll(luigi.WrapperTask):
         If release notes and a previous release are provided, generate a version.json file and
         run the releaseDiff.py script to generate change_types between releases of variants.
         '''
-        if self.release_notes and self.previous_release_tar:
-            yield GenerateReleaseArchive(self.date, self.resources_dir, self.output_dir,
+
+        if self.release_notes and self.previous_release_tar and self.priors_references_dir:
+            yield GenerateReleaseArchive(self.date, self.resources_dir, self.output_dir, self.output_dir_host,
                                          self.file_parent_dir, self.previous_release_tar,
-                                         self.release_notes)
-        elif self.previous_release_tar:
-            yield RunDiffAndAppendChangeTypesToOutputReports(self.date, self.resources_dir, self.output_dir,
-                                                      self.file_parent_dir, self.previous_release_tar)
+                                         self.priors_references_dir, self.priors_docker_image_name, self.release_notes)
+        elif self.previous_release_tar and self.priors_references_dir:
+            yield RunDiffAndAppendChangeTypesToOutputReports(self.date, self.resources_dir,
+                                                             self.output_dir, self.output_dir_host, self.file_parent_dir,
+                                                             self.previous_release_tar, self.priors_references_dir, self.priors_docker_image_name)
         else:
             yield BuildAggregatedOutput(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
 

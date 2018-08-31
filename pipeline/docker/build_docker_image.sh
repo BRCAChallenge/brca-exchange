@@ -32,6 +32,7 @@ fi
 
 # since we need this file during image building, we need to stage it into the docker context
 cp ../requirements.txt requirements_docker.txt
+cp ../../test-requirements.txt test-requirements_docker.txt
 
 DOCKER_IMAGE_NAME="brcachallenge/brca-exchange-pipeline:${DOCKER_TAG}"
 echo "Building ${DOCKER_IMAGE_NAME} with code from ${BRCA_GIT_REPO} ${COMMIT}"
