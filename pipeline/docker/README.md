@@ -47,13 +47,16 @@ Notes:
 * The line concerning the DATA_DATE can be omitted. If provided, it explicitly sets the date of the pipeline run rather than using the current date (e.g. this is useful when rerunning a pipeline that aborted half way through).
 * The line concerning UTA_DB_URL can be used to run a local instance of a uta database. This is helpful if a remote instance is having issues. See https://github.com/biocommons/uta/#installing-uta-locally for information on getting a local instance of a uta database running.
 * The line concerning network is used to connect to the uta container, which exposes a port on 50827 from within the pipeline container.
+* The line concerning docker.sock maps the host operating system's docker socket into the container so that the client in the luigi container talks to the single os's daemon.
 
 ```
 docker run --rm -u $(id -u ${USER}):$(id -g ${USER}) \
        -e "DATA_DATE=${DATA_DATE}" \
        --network host \
        -e "UTA_DB_URL=postgresql://anonymous@0.0.0.0:50827/uta/uta_20170629" \
+       -v /var/run/docker.sock:/var/run/docker.sock \
        -v  path_to_resource_files:/files/resources \
+       -v  path_to_priors_reference_files:/files/references \
        -v  path_to_output_directory:/files/data \
        -v  optional_path_to_code_base:/opt/brca-exchange \
        -v  path_to_pipeline_credentials.cfg:/opt/luigi_pipeline_credentials.cfg \
