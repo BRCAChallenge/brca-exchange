@@ -126,7 +126,6 @@ def filter_vars_csv(variants, blacklisted_vars, output):
     :param variants: a file-like object containing variant information in TSV format
     :param blacklisted_vars: a file-like object containing a list of variant identifiers, like 'NM_000059.3:c.1909+1G>A'
     :param output: file-like object to which to write the resulting output
-    :return: if output is None, the filtered output; otherwise, None
     """
     blacklist = set(x.strip() for x in blacklisted_vars.readlines())
 

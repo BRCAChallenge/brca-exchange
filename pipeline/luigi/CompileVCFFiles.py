@@ -137,6 +137,7 @@ g1k_method_dir = os.path.abspath('../1000_Genomes')
 enigma_method_dir = os.path.abspath('../enigma')
 data_merging_method_dir = os.path.abspath('../data_merging')
 priors_method_dir = os.path.abspath('../splicing')
+priors_filter_method_dir = os.path.abspath('../splicingfilter')
 utilities_method_dir = os.path.abspath('../utilities')
 
 
@@ -1465,7 +1466,7 @@ class FilterBlacklistedPriors(luigi.Task):
 
     def run(self):
         artifacts_dir = self.output_dir + "/release/artifacts/"
-        os.chdir(priors_method_dir)
+        os.chdir(priors_filter_method_dir)
 
         args = ["python", "filterBlacklistedVars.py",
                 "--output", artifacts_dir + "built_with_priors_clean.tsv",
