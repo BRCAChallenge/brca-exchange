@@ -10,10 +10,9 @@ DATA_DATE="$(date +%Y-%m-%d)"
 WDIR="${ROOT_DIR}/data_release_${DATA_DATE}"
 mkdir -p ${WDIR}
 
-# TODO: change code base
-CODE_BASE="/Users/marc/git/brca-exchange"
-#CODE_BASE="${WDIR}/code"
-#[ -d ${CODE_BASE} ] || git clone https://github.com/BRCAChallenge/brca-exchange.git ${CODE_BASE}
+
+CODE_BASE="${WDIR}/code"
+[ -d ${CODE_BASE} ] || git clone https://github.com/BRCAChallenge/brca-exchange.git ${CODE_BASE}
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
