@@ -9,9 +9,7 @@ variant's reference cDNA sequence followed by a ':' and then its hg38 genomic co
 The filtering script, `filterBlacklistedVars.py`, takes the following arguments:
 - `--blacklisted_vars FILENAME`: File of HGVS cDNA coordinates of variants which should return blank priors data.
 - `--output FILENAME`: File to write filtered variants, defaults to stdout.
-- `--use-csv BOOLEAN`: Use csv module (instead of pandas) to transform input, which is slower but more accurate.
 
-When pandas reads in a DataFrame from a CSV via `pd.read_csv()` it parse the float fields, introducing some imprecision
-due to rounding errors. The errors are small, but they're sufficient to change the checksum and equality checks in the
-tests, which is why the csv-module implementation is used as the default (despite being slightly slower), and why the
-pandas test is marked as expected to fail.
+When pandas reads in a DataFrame from a CSV via `pd.read_csv()` it parses the float fields, introducing some imprecision
+due to rounding errors. The test accommodates this imprecision by checking if float-coercible values are almost equal to
+each other, using absolute equality for the other values.
