@@ -24,6 +24,11 @@ setup-files:
 	[ -d $(SYNAPSE_CACHE) ] || mkdir -p $(SYNAPSE_CACHE)
 	[ -d $(RESOURCES_DIR) ] || mkdir -p $(RESOURCES_DIR)
 	[ -d $(PRIORS_REFERENCES) ] || mkdir -p $(PRIORS_REFERENCES)
+	[ -d $(OUT_DIR) ] || mkdir -p $(OUT_DIR)
+
+#setup-lovd:
+#	check HOSTNAME?
+
 
 
 DOCKER_RUN_CMD = docker run -it --rm -u `id -u ${USER}`:`id -g ${USER}` \
@@ -44,4 +49,4 @@ run-pipeline:
 run-interactive:
 	$(DOCKER_RUN_CMD) bash
 
-build-release: start-local-uta checkout build-docker download-resources setup-files run-pipeline
+build-release: start-local-uta checkout build-docker setup-files download-resources run-pipeline
