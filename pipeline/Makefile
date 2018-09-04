@@ -25,6 +25,7 @@ setup-files:
 	[ -d $(RESOURCES_DIR) ] || mkdir -p $(RESOURCES_DIR)
 	[ -d $(PRIORS_REFERENCES) ] || mkdir -p $(PRIORS_REFERENCES)
 	[ -d $(OUT_DIR) ] || mkdir -p $(OUT_DIR)
+	[ -f $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz ] || wget http://brcaexchange.org/backend/downloads/releases/current_release.tar.gz -O $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz
 
 .ONESHELL:
 setup-lovd:
@@ -52,4 +53,24 @@ run-pipeline:
 run-interactive:
 	$(DOCKER_RUN_CMD) bash
 
-build-release: start-local-uta checkout build-docker setup-files setup-lovd download-resources run-pipeline
+variants-by-source:
+	$(DOCKER_RUN_CMD) 'python /opt/brca-exchange/pipeline/utilities/variantsBySource.py  -i /files/data/output/release/built_with_change_types.tsv -c true'
+
+build-release: start-local-uta checkout build-docker setup-files setup-lovd download-resources run-pipeline variants-by-source
+
+.ONESHELL:
+tag-release:
+	cd $(CODE_BASE)
+	git tag -m $(RELEASE_TAG) -a $(RELEASE_TAG) `git rev-parse HEAD`
+	git push origin $(RELEASE_TAG)
+
+push-docker:
+	docker push brcachallenge/brca-exchange-pipeline:$(RELEASE_TAG)
+
+.ONEHSELL:
+copy-to-previous:
+	cp `ls -t /home/pipeline/monthly_releases/$(RELEASE_TAG)/brca_out/release-*.tar.gz | head -n 1` $(PREVIOUS_RELEASE_DIR)
+	rm $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz
+	ln -s `ls -t $(PREVIOUS_RELEASE_DIR)/release-*.tar.gz | head -n 1` $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz
+
+post-release-cmds: push-docker tag-release copy-to-previous

@@ -5,7 +5,7 @@
 
 ROOT_DIR=$(realpath $1)
 CREDENTIALS_PATH=$(realpath $2)
-PREVIOUS_RELEASE_PATH=$(realpath $3)
+PREVIOUS_RELEASE_DIR=$(realpath $3)
 
 GIT_COMMIT=${4-:"master"}
 
@@ -25,7 +25,7 @@ CFG_PATH=${CODE_BASE}/pipeline/brca_pipeline_cfg.mk
 jinja2 -D DATA_DATE="${DATA_DATE}" -D WORK_DIR="${WDIR}" \
        -D CODE_BASE="${CODE_BASE}" \
        -D CREDENTIALS_PATH="${CREDENTIALS_PATH}" \
-       -D PREVIOUS_RELEASE_PATH="${PREVIOUS_RELEASE_PATH}" \
+       -D PREVIOUS_RELEASE_DIR="${PREVIOUS_RELEASE_DIR}" \
        -D GIT_COMMIT="${GIT_COMMIT}" \
        "${CODE_BASE}/pipeline/pipeline_running/brca_pipeline_cfg.mk.j2" > ${CFG_PATH}
 
