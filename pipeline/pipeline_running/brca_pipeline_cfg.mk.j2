@@ -31,6 +31,7 @@ PRIORS_REFERENCES := {{ PRIORS_REFERENCES|default(WORK_DIR + "/references") }}
 ## UTA configurations
 
 {% set UTA_RELEASE_DATE = UTA_RELEASE_DATE|default("20170629") %}
+UTA_RELEASE_DATE := {{ UTA_RELEASE_DATE }}
 UTA_DOCKER_IMAGE := {{ UTA_DOCKER_IMAGE | default("biocommons/uta:uta_" + UTA_RELEASE_DATE) }}
 UTA_CONTAINER := {{ UTA_CONTAINER | default("uta_" + UTA_RELEASE_DATE) }}
 UTA_PORT := {{ UTA_PORT | default("50827") }}
