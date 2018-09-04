@@ -26,10 +26,13 @@ setup-files:
 	[ -d $(PRIORS_REFERENCES) ] || mkdir -p $(PRIORS_REFERENCES)
 	[ -d $(OUT_DIR) ] || mkdir -p $(OUT_DIR)
 
-#setup-lovd:
-#	check HOSTNAME?
-
-
+.ONESHELL:
+setup-lovd:
+#	setting up LOVD data via pipeline machine, if not running on pipeline machine, as the access is IP restricted
+	if [ `hostname -s` != "brca-pipeline" ]; then
+		mkdir -p $(OUT_DIR)/brca_out/LOVD
+		ssh pipeline@52.151.62.136 curl https://databases.lovd.nl/shared/export/BRCA > $(OUT_DIR)/brca_out/LOVD/BRCA.txt
+	fi
 
 DOCKER_RUN_CMD = docker run -it --rm -u `id -u ${USER}`:`id -g ${USER}` \
 	-e "DATA_DATE=$(DATA_DATE)" \
@@ -49,4 +52,4 @@ run-pipeline:
 run-interactive:
 	$(DOCKER_RUN_CMD) bash
 
-build-release: start-local-uta checkout build-docker setup-files download-resources run-pipeline
+build-release: start-local-uta checkout build-docker setup-files setup-lovd download-resources run-pipeline
