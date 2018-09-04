@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # TODO: add command line wrapper
 # TODO: crontab: git pull master
