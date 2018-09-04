@@ -11,7 +11,7 @@ build-docker:
 	cd $(CODE_BASE)/pipeline/docker && ./build_docker_image.sh $(GIT_COMMIT) $(RELEASE_TAG) || { echo "$(date) Something wrong with docker image creation"; exit 1; }
 
 download-resources:
-	$(CODE_BASE)/pipeline/download_resources_files.sh $(RESOURCES_DIR) >> "$(LOG_DIR)/download_resources_$(RELEASE_TAG).log" 2>&1 || { msg "Downloading resource files failed"; exit 1; }
+	$(CODE_BASE)/pipeline/download_resources_files.sh $(RESOURCES_DIR) >> "$(LOG_DIR)/download_resources_$(RELEASE_TAG).log" 2>&1 || { echo "Downloading resource files failed"; exit 1; }
 
 
 start-local-uta:
@@ -35,7 +35,8 @@ setup-lovd:
 		ssh pipeline@52.151.62.136 curl https://databases.lovd.nl/shared/export/BRCA > $(OUT_DIR)/brca_out/LOVD/BRCA.txt
 	fi
 
-DOCKER_RUN_CMD = docker run -it --rm -u `id -u ${USER}`:`id -g ${USER}` \
+# TODO: docker access within docker doesn't work yet on Mac OS X
+DOCKER_RUN_CMD = docker run -it --rm -u `id -u ${USER}`:`stat -c '%g' /var/run/docker.sock` \
 	-e "DATA_DATE=$(DATA_DATE)" \
         -e"UTA_DB_URL=postgresql://anonymous@0.0.0.0:$(UTA_PORT)/uta/uta_$(UTA_RELEASE_DATE)" \
        --network host \
@@ -45,6 +46,7 @@ DOCKER_RUN_CMD = docker run -it --rm -u `id -u ${USER}`:`id -g ${USER}` \
        -v $(PREVIOUS_RELEASE_PATH):/files/previous_release.tar.gz \
        -v $(RELEASE_NOTES_PATH):/files/release_notes.txt \
        -v ${SYNAPSE_CACHE}:/.synapseCache \
+       -v /var/run/docker.sock:/var/run/docker.sock \
        $(PIPELINE_IMAGE) 
 
 run-pipeline:
@@ -74,3 +76,4 @@ copy-to-previous:
 	ln -s `ls -t $(PREVIOUS_RELEASE_DIR)/release-*.tar.gz | head -n 1` $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz
 
 post-release-cmds: push-docker tag-release copy-to-previous
+
