@@ -52,10 +52,6 @@ function isEmptyField(value) {
     return v === '' || v === '-' || v === 'None';
 }
 
-function isNumeric(n) {
-    return !isNaN(parseFloat(n)) && isFinite(n);
-}
-
 
 // attempts to parse the given date string using a variety of formats,
 // returning the formatted result as something like '08 September 2016'.
@@ -142,12 +138,12 @@ function getFormattedFieldByProp(prop, variant) {
     } else if (prop === "SCV_ClinVar" && variant[prop].toLowerCase().indexOf("scv") !== -1) {
         // Link all clinvar submissions back to clinvar
         let accessions = variant[prop].split(',');
-        let versions = variant["SCV_Version_ClinVar"] ? variant["SCV_Version_ClinVar"].split(',') : null;
+        let versions = variant["SCV_Version_ClinVar"].split(',');
         rowItem = [];
         for (let i = 0; i < accessions.length; i++) {
             let displayText = accessions[i];
 
-            if (versions && i < versions.length && versions[i] !== '-') {
+            if (i < versions.length && versions[i] !== '-') {
                 // appending accession version if available
                 displayText = accessions[i].concat('.').concat(versions[i]);
             }
@@ -217,11 +213,6 @@ function sentenceCase(str) {
     return str.replace(/\b\S/g, (t) => t.toUpperCase() );
 }
 
-function capitalize(w) {
-    return w.charAt(0).toUpperCase() + w.substr(1);
-}
-
-
 function getAminoAcidCode(hgvsProtein) {
     let trimmedHgvs = hgvsProtein.replace(/[0-9()]/g, '');
     if (trimmedHgvs.length < 3) {
@@ -240,7 +231,6 @@ function getAminoAcidCode(hgvsProtein) {
 module.exports = {
     getAminoAcidCode,
     isEmptyField,
-    isNumeric,
     normalizeDateFieldDisplay,
     normalizedFieldDisplay,
     generateLinkToGenomeBrowser,
@@ -248,6 +238,5 @@ module.exports = {
     abbreviatedSubmitter,
     sentenceCase,
     reformatDate,
-    dateKeys,
-    capitalize
+    dateKeys
 };

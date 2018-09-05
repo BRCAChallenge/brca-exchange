@@ -11,7 +11,7 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.gzip import gzip_page
 
-from .models import Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType, Report, ReportDiff, InSilicoPriors
+from .models import Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType, Report, ReportDiff
 from django.views.decorators.http import require_http_methods
 
 # GA4GH related imports
@@ -87,11 +87,7 @@ def variant(request):
 
     variant = Variant.objects.get(id=variant_id)
     key = variant.Genomic_Coordinate_hg38
-    query = Variant.objects.filter(Genomic_Coordinate_hg38=key)\
-        .order_by('-Data_Release_id')\
-        .select_related('Data_Release')\
-        .select_related('Mupit_Structure')\
-        .select_related('insilicopriors')
+    query = Variant.objects.filter(Genomic_Coordinate_hg38=key).order_by('-Data_Release_id').select_related('Data_Release').select_related('Mupit_Structure')
 
     variant_versions = map(variant_to_dict, query)
     response = JsonResponse({"data": variant_versions})
@@ -127,13 +123,6 @@ def variant_to_dict(variant_object):
         variant_dict["Mupit_Structure"] = model_to_dict(variant_object.Mupit_Structure)
     variant_dict["Data_Release"]["date"] = variant_object.Data_Release.date
     variant_dict["Change_Type"] = ChangeType.objects.get(id=variant_dict["Change_Type"]).name
-
-    try:
-        variant_dict["priors"] = model_to_dict(variant_object.insilicopriors)
-    except InSilicoPriors.DoesNotExist:
-        print "In Silico Prior Prob. data does not exist for Variant", variant_object.Genomic_Coordinate_hg38, "from release", variant_object.Data_Release.id
-        variant_dict["priors"] = None
-
     try:
         variant_diff = VariantDiff.objects.get(variant_id=variant_object.id)
         variant_dict["Diff"] = variant_diff.diff

@@ -18,8 +18,7 @@ const content = {
     variantsDefault: require('../content/variantsDefault.md'),
     variantsResearch: require('../content/variantsResearch.md'),
     researchWarning: require('../content/researchWarning.md'),
-    signupMessage: require('../content/signupMessage.md'),
-    insilicoScoring: require('../content/help/research/insilico/insilico-scoring.md')
+    signupMessage: require('../content/signupMessage.md')
 };
 
 const FAQContent = [
@@ -229,10 +228,6 @@ const helpContentResearch = [
                         contents: require("../content/help/research/allele-frequency-exome.md")
                     },
                 ]
-            },
-            {
-                name: "In Silico Probabilities of Pathogenicity",
-                contents: require("../content/help/research/insilico/insilico-pred.md")
             },
             {
                 name: "CRAVAT/MuPIT Interactive Protein Structure Viewer",
