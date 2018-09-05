@@ -7,6 +7,8 @@ import {Panel} from 'react-bootstrap';
 import util from '../util';
 import {VariantSubmitter} from "./VariantSubmitter";
 
+import GroupHelpButton from './GroupHelpButton';
+
 export default class SourceReportsTile extends React.Component {
     constructor(props) {
         super(props);
@@ -128,8 +130,8 @@ export default class SourceReportsTile extends React.Component {
         // create the source panel itself now
         const groupTitle = `source-panel-${this.props.sourceName}`;
         const header = (
-            <h3 style={{display: 'flex', flexDirection: 'row'}}>
-                <a style={{flexGrow: 1}} href="#" onClick={(event) => this.props.onChangeGroupVisibility(groupTitle, event, this.collapser.getCollapsableDOMNode())}>
+            <h3>
+                <a className="title" href="#" onClick={(event) => this.props.onChangeGroupVisibility(groupTitle, event, this.collapser.getCollapsableDOMNode())}>
                     {this.props.groupTitle}
                 </a>
 
@@ -144,6 +146,16 @@ export default class SourceReportsTile extends React.Component {
                     style={{cursor: 'pointer'}}>
                     <i className="fa fa-angle-double-down" aria-hidden="true" />
                 </a>
+
+                {
+                    this.props.helpSection &&
+                    <GroupHelpButton group={this.props.helpSection}
+                        onClick={(event) => {
+                            this.props.showHelp(event, this.props.helpSection);
+                            return true;
+                        }}
+                    />
+                }
             </h3>
         );
 
