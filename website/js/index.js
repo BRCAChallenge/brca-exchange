@@ -5,8 +5,6 @@
 
 import SourceReportsTile from "./components/SourceReportsTile";
 import AlleleFrequenciesTile from "./components/AlleleFrequenciesTile";
-import SilicoPredTile from "./components/insilicopred/SilicoPredTile";
-
 import MupitStructure from './MupitStructure';
 
 // shims for older browsers
@@ -66,7 +64,6 @@ var {Releases, Release} = require('./Releases.js');
 var Help = require('./Help.js');
 
 var KeyInline = require('./components/KeyInline');
-var GroupHelpButton = require('./components/GroupHelpButton');
 
 var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
 
@@ -404,6 +401,17 @@ var Database = React.createClass({
     }
 });
 
+const GroupHelpButton = React.createClass({
+    render() {
+        const {onClick} = this.props;
+        return (
+            <span role='button' onClick={onClick} aria-label="Help"
+                className='panel-help-btn glyphicon glyphicon-question-sign'
+            />
+        );
+    }
+});
+
 // get display name for a given key from VariantTable.js column specification,
 // if we are in expert reviewed mode, search expert reviewed names then fall back to
 // all data, otherwise go straight to all data. Finally, if key is not found, replace
@@ -694,7 +702,7 @@ var VariantDetail = React.createClass({
         let groupsEmpty = 0;
         let totalRowsEmpty = 0;
 
-        const groupTables = _.map(groups, ({ groupTitle, innerCols, reportSource, reportBinding, alleleFrequencies, inSilicoPred, innerGroups }) => {
+        const groupTables = _.map(groups, ({ groupTitle, innerCols, reportSource, reportBinding, alleleFrequencies, innerGroups }) => {
             let rowsEmpty = 0;
 
             // if it's a report source (i.e. the key reportSource is defined), then we defer
@@ -739,28 +747,9 @@ var VariantDetail = React.createClass({
                         onFrequencyFieldToggled={(collapser) => {
                             this.relayoutOnCollapsed(collapser);
                         }}
-                        helpSection="allele-frequency-reference-sets"
                         showHelp={this.showHelp}
                         tooltips={this.state.tooltips}
                         variant={variant}
-                    />
-                );
-            }
-
-            if (inSilicoPred) {
-                return (
-                    <SilicoPredTile
-                        groupTitle='silico-pred-tile'
-                        priors={variant.priors}
-                        displayTitle={<span><i>In Silico</i> Prior Prediction (prior to considering other evidence)</span>}
-                        Genomic_Coordinate_hg38={variant.Genomic_Coordinate_hg38}
-                        onChangeGroupVisibility={this.onChangeGroupVisibility}
-                        hideEmptyItems={this.state.hideEmptyItems}
-                        onDimsChanged={(collapser) => {
-                            this.relayoutOnCollapsed(collapser);
-                        }}
-                        helpSection="in-silico-probabilities-of-pathogenicity"
-                        showHelp={this.showHelp}
                     />
                 );
             }
@@ -861,8 +850,8 @@ var VariantDetail = React.createClass({
 
             const header = (
                 <h3>
-                    <a className="title" href="#" onClick={(event) => this.onChangeGroupVisibility(groupTitle, event, panelElem)}>{groupTitle}</a>
-                    <GroupHelpButton onClick={(event) => { this.showHelp(event, groupTitle); return true; }} />
+                    <a href="#" onClick={(event) => this.onChangeGroupVisibility(groupTitle, event, panelElem)}>{groupTitle}</a>
+                    <GroupHelpButton group={groupTitle} onClick={(event) => { this.showHelp(event, groupTitle); return true; }} />
                 </h3>
             );
 
@@ -990,7 +979,7 @@ var VariantDetail = React.createClass({
         let panelElem;
         const splicingHeader = (
             <h3>
-                <a className="title" href="#" onClick={(event) => this.onChangeGroupVisibility("transcript-visualization", event, panelElem)}>
+                <a href="#" onClick={(event) => this.onChangeGroupVisibility("transcript-visualization", event, panelElem)}>
                 {`${variant['Gene_Symbol']} ${variant['HGVS_cDNA']} Transcript Visualization`}
                 </a>
                 <GroupHelpButton group={"transcript-visualization"} onClick={(event) => { this.showHelp(event, "transcript-visualization"); return true; }} />

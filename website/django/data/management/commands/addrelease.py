@@ -1,25 +1,13 @@
 from django.core.management.base import BaseCommand, CommandError
 # from django.conf import settings
 from django.db import connection, transaction
-from data.models import Variant, DataRelease, ChangeType, Report, MupitStructure, InSilicoPriors
+from data.models import Variant, DataRelease, ChangeType, Report, MupitStructure
 from argparse import FileType
 import json
 import csv
 import psycopg2
 from django.core.management import call_command
 from data.utilities import update_autocomplete_words
-
-from tqdm import tqdm
-
-
-def get_num_lines(file_path):
-    import mmap
-    fp = open(file_path, "r+")
-    buf = mmap.mmap(fp.fileno(), 0)
-    lines = 0
-    while buf.readline():
-        lines += 1
-    return lines
 
 
 OLD_MAF_ESP_FIELD_NAMES = ['Minor_allele_frequency_ESP', 'Minor_allele_frequency_ESP_percent']
@@ -68,24 +56,13 @@ class Command(BaseCommand):
         change_types = {ct['name']: ct['id'] for ct in ChangeType.objects.values()}
         mupit_structures = {ms['name']: ms['id'] for ms in MupitStructure.objects.values()}
 
-        # collect list of insilico prior column names so we can split those into a separate table, insilicopriors
-        insilicopriors_cols = [x.name for x in InSilicoPriors._meta.get_fields() if x.name not in ['id', 'Variant']]
-
-        # tqdm() displays a progress bar as we read elements from the csvreader, making this all slightly more pleasant
-        for row in tqdm(variants_reader, total=get_num_lines(variants_tsv.name)-1):
+        for row in variants_reader:
             # split Source column into booleans
             row_dict = dict(zip(variants_header, row))
-
-            # transfer insilico prior columns from row_dict to insilico_dict
-            insilico_dict = dict((col, row_dict.pop(col)) for col in insilicopriors_cols)
-
             if 'change_type' in row_dict and row_dict['change_type']:
                 row_dict = self.update_variant_values_for_insertion(row_dict, release_id, change_types, mupit_structures)
                 variant = Variant.objects.create_variant(row_dict)
                 self.create_and_associate_reports_to_variant(variant, reports_dict, sources, release_id, change_types)
-
-                # also create an instance in insilicopriors linked to this variant
-                InSilicoPriors.objects.create(Variant=variant, **insilico_dict)
 
         # deleted variants
         if (deletions_tsv):
