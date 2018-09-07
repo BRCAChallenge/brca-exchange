@@ -1,6 +1,9 @@
 <style>
 .markdown img { width: auto; max-height: 400px; max-width: 90%; display: block; margin: 20px auto; }
 p { text-indent: 2em; }
+div.schema {
+    text-align: center; font-weight: bold; font-size: 18px; margin: 1em;
+}
 </style>
 
 # Scoring Systems for Splicing-level and Protein-level Estimations
@@ -16,14 +19,14 @@ For all exonic variants, the “Protein-level Estimation” is calculated using 
 
 A generalized schema for estimating Protein-level impact is:
 
-**Variant Type → Variant Location (Exonic, CI Domain) → Protein-level Estimation**
+<div class="schema">Variant Type → Variant Location (Exonic, CI Domain) → Protein-level Estimation</div>
 
 
 ## Splicing-level Estimations: Z-scores and Associated Probabilities
 
 The Splicing-level Estimation is a value that demonstrates the highest possible impact the variant could have on mRNA splicing. Splicing is important since it can have significant impacts on the resulting protein such as a completely different amino acid sequence or early truncation. A generalized schema for Splicing-level Estimations is:
 
-**Z-scores → Wild-type and De Novo Probabilities →  Splicing-level Estimation**
+<div class="schema">Z-scores → Wild-type and De Novo Probabilities →  Splicing-level Estimation</div>
 
 Z-scores measure probability of splicing impact. Alternate Z-scores, or Z-scores for the alternate sequence introduced by the variant, measure the probability that the variant affects  splicing. The alternate Z-scores are compared to reference sequence Z-scores to account for the inherent splicing likelihood in the region, which is often low. Predictions are made about splicing impact using these Z-scores; probabilities of pathogenicity associated with minimal (or weak/null), moderate, and high impact are assigned as the predicted probabilities listed in the tables below. There are also probabilities assigned to variants that either improve splicing likelihood or occur outside splice regions.
 
@@ -101,7 +104,7 @@ The Splicing-level Estimation is due to the de novo donor probability. The de no
 
 ### Intronic Variant Located in Wild-Type Splice Site's Donor Region
 
-### Example: [c.441+2t>G](http://brcaexchange.org/variant/104996)
+Example: [c.441+2t>G](http://brcaexchange.org/variant/104996)
 
 Because the variant is located in an intron and a wild-type donor splice site region, the following values are used in predicting the *In Silico* Prior Probability of Pathogenicity:
 

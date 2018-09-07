@@ -231,7 +231,7 @@ const helpContentResearch = [
                 ]
             },
             {
-                name: "In Silico Probabilities of Pathogenicity",
+                name: "In Silico Prior Probabilities of Pathogenicity",
                 contents: require("../content/help/research/insilico/insilico-pred.md")
             },
             {
