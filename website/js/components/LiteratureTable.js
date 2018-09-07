@@ -2,8 +2,9 @@
 
 const React = require('react'),
     { Link } = require('react-router'),
-    { Grid, Row, Col, OverlayTrigger, Popover, ButtonToolbar, Button, DropdownButton, Badge} = require('react-bootstrap'),
-    backend = require('../backend');
+    { Grid, Row, Col, OverlayTrigger, Popover, ButtonToolbar, Button, DropdownButton} = require('react-bootstrap'),
+    backend = require('../backend'),
+    _ = require('underscore');
 
 // Sort first by year, then by PMID (as a proxy for a more specific date of publication?)
 const pubsOrdering = function(pub1, pub2) {
@@ -22,8 +23,6 @@ const pubsOrdering = function(pub1, pub2) {
     return 1;
 };
 
-const fakeLit = require('./fakepubs.js').sort(pubsOrdering);
-
 function limitAuthorCount(authors, maxCount) {
     let popper = (<Popover>{authors.split(";").map(e => [e, <br />])}</Popover>);
     let auth = authors.split(";");
@@ -38,11 +37,10 @@ function limitAuthorCount(authors, maxCount) {
     );
 }
 
-function formatKeywords(keywords) {
-    let kw = keywords.split(",").map(e => e.split("/").join("\n/\n"));
-    return (
-        <ul className="keywords">{kw.map(e => <li><Badge className="info">{e}</Badge></li>)}</ul>
-    );
+function formatMatches(matches, count) {
+    let ms = matches.split("|");
+    ms = ms.slice(0, count);
+    return ms.map(match => <div><small>... {_.unescape(match)} ...</small></div>);
 }
 
 class LiteratureTable extends React.Component {
@@ -60,15 +58,23 @@ class LiteratureTable extends React.Component {
                 () => { this.setState({error: 'Problem connecting to server'}); }
             );
         }
+
+        backend.variantPapers(this.props.variant ? this.props.variant.id : this.props.params.id).subscribe(
+            resp => {
+                this.setState({papers: resp.data, paperError: null});
+            },
+            () => { this.setState({paperError: 'Problem retrieving papers'}); }
+        );
+
     }
 
     toTSV() {
-        return fakeLit.map(({title, authors, journal, year, keywords, pmid}) =>
-            [title, authors, journal, year, keywords, pmid].join("\t")).join("\n");
+        return this.state.papers ? this.state.papers.map(({title, authors, journal, year, keywords, pmid}) =>
+            [title, authors, journal, year, keywords, pmid].join("\t")).join("\n") : "";
     }
 
     toJSON() {
-        return JSON.stringify(fakeLit);
+        return JSON.stringify(this.state.papers ? this.state.papers : []);
     }
 
     copyTable() {
@@ -79,14 +85,17 @@ class LiteratureTable extends React.Component {
     }
 
     render() {
+        if (!this.state.papers) {
+            return (<div />);
+        }
         if (!this.props.variant && !this.state.data) {
             return (<div />);
         }
-        let litRows = fakeLit;
+        let litRows = this.state.papers.sort(pubsOrdering);
         if (this.props.maxRows) {
             litRows = litRows.slice(0, this.props.maxRows);
         }
-        litRows = litRows.map(({title, authors, journal, year, keywords, pmid}) => (
+        litRows = litRows.map(({title, authors, journal, year, mentions, pmid}) => (
             <li>
                 <div className="literature-right-pane">
                     <small className="pmid">PMID<a href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank'>{pmid}</a></small>
@@ -95,12 +104,14 @@ class LiteratureTable extends React.Component {
                 </div>
                 <b>{title}</b>
                 <div>{limitAuthorCount(authors, 3)}</div>
-                { keywords.length ? (
-                    <div>
-                        Keywords:
-                        {formatKeywords(keywords, 5)}
-                    </div>
-                ) : null }
+                {
+                    mentions.length ? (
+                        <div>
+                            Matches:
+                            {formatMatches(mentions, 3)}
+                        </div>
+                    ) : null
+                }
                 <hr />
             </li>
         ));
@@ -112,10 +123,10 @@ class LiteratureTable extends React.Component {
                     <ul>
                     {litRows}
                     </ul>
-                    { fakeLit.length > this.props.maxRows
+                    { this.state.papers.length > this.props.maxRows
                         ? ( <div style={{textAlign: "center"}}>
                                 <Link to={`/variant_literature/${this.props.variant.id}`}>
-                                    View {`${fakeLit.length - this.props.maxRows}`} more publications...
+                                    View {`${this.state.papers.length - this.props.maxRows}`} more publications...
                                 </Link>
                             </div>
                         ) : null

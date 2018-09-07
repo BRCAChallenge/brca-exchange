@@ -338,10 +338,9 @@ class Paper(models.Model):
     abstract = models.TextField()
     year = models.IntegerField()
     pmid = models.IntegerField()
-    variants = models.ManyToManyField(Variant, through="VariantPaper")
 
 class VariantPaper(models.Model):
-    variant = models.ForeignKey(Variant)
+    variant_hg38 = models.TextField()
     paper = models.ForeignKey(Paper)
     mentions = models.TextField()
 
