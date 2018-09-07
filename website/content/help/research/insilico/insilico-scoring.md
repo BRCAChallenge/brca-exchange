@@ -1,6 +1,9 @@
 <style>
 .markdown img { width: auto; max-height: 400px; max-width: 90%; display: block; margin: 20px auto; }
 p { text-indent: 2em; }
+div.schema {
+    text-align: center; font-weight: bold; font-size: 18px; margin: 1em;
+}
 </style>
 
 # Scoring Systems for Splicing-level and Protein-level Estimations
@@ -16,14 +19,14 @@ For all exonic variants, the “Protein-level Estimation” is calculated using 
 
 A generalized schema for estimating Protein-level impact is:
 
-**Variant Type → Variant Location (Exonic, CI Domain) → Protein-level Estimation**
+<div class="schema">Variant Type → Variant Location (Exonic, CI Domain) → Protein-level Estimation</div>
 
 
 ## Splicing-level Estimations: Z-scores and Associated Probabilities
 
 The Splicing-level Estimation is a value that demonstrates the highest possible impact the variant could have on mRNA splicing. Splicing is important since it can have significant impacts on the resulting protein such as a completely different amino acid sequence or early truncation. A generalized schema for Splicing-level Estimations is:
 
-**Z-scores → Wild-type and De Novo Probabilities →  Splicing-level Estimation**
+<div class="schema">Z-scores → Wild-type and De Novo Probabilities →  Splicing-level Estimation</div>
 
 Z-scores measure probability of splicing impact. Alternate Z-scores, or Z-scores for the alternate sequence introduced by the variant, measure the probability that the variant affects  splicing. The alternate Z-scores are compared to reference sequence Z-scores to account for the inherent splicing likelihood in the region, which is often low. Predictions are made about splicing impact using these Z-scores; probabilities of pathogenicity associated with minimal (or weak/null), moderate, and high impact are assigned as the predicted probabilities listed in the tables below. There are also probabilities assigned to variants that either improve splicing likelihood or occur outside splice regions.
 
@@ -101,7 +104,7 @@ The Splicing-level Estimation is due to the de novo donor probability. The de no
 
 ### Intronic Variant Located in Wild-Type Splice Site's Donor Region
 
-### Example: [c.441+2t>G](http://brcaexchange.org/variant/104996)
+Example: [c.441+2t>G](http://brcaexchange.org/variant/104996)
 
 Because the variant is located in an intron and a wild-type donor splice site region, the following values are used in predicting the *In Silico* Prior Probability of Pathogenicity:
 
@@ -149,14 +152,14 @@ Variants located outside transcript boundaries, in untranslated regions, in non-
 *   [Pseudocode for In Silico Probability of Pathogenicity Software](https://docs.google.com/document/d/132uEmKKMYlzcBKoB4LQQw3rCv5llgxQxiiSCOGUftFk/edit)
 
 
-# *In Silico* Probabilities of Pathogenicity are an Updated Version of Previous Work
+# *In Silico* Prior Probabilities of Pathogenicity are an Updated Version of Previous Work
 
 The BRCA Exchange used the resources below to calculate the In Silico probabilities with a few minor modifications, which are detailed here. This was done in collaboration with Huntsman Cancer Institute and ENIGMA.
 
 *   Vall&#233;e et al 2016 ([https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4907813/](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4907813/))
 *   HCI PRIORS Website ([http://priors.hci.utah.edu/PRIORS/index.php](http://priors.hci.utah.edu/PRIORS/index.php))
 
-**Updates to *In Silico* Probabilities Calculations**
+**Updates to *In Silico* Prior Probabilities Calculations**
 
 *   BRCA Exchange uses the term *In Silico* Prior Probability of Pathogenicity for a value called "Prior Probability" by HCI. "Prior Probability" is used by HCI because a variant's probability is calculated prior_ _to consideration of clinical evidence.
 *   Nonsense variants are evaluated for the possibility of splice rescue. Splice rescue is a rare situation in which a variant that introduces a frame shift also introduces a de novo splice site, and the de novo splice site restores the original translation frame.
@@ -168,7 +171,7 @@ The BRCA Exchange used the resources below to calculate the In Silico probabilit
 *   De novo donor calculations are made for all intronic single nucleotide substitution variants (excluding those in reference splice acceptor regions).
 *   De novo acceptor calculations are made for single nucleotide substitution variants in de novo acceptor window as specified by SVT (reference splice acceptor region and additional 7 bp in exon - first 10 bp in exon total).
 
-**Notes on *In Silico* Probabilities Code & Pseudocode**
+**Notes on *In Silico* Prior Probabilities Code & Pseudocode**
 
 If you would like to take a closer look at how these probabilities are calculated, please visit the BRCA Exchange github to view the software’s code and code comments. You can also access the *In Silico* Prior Probabilities of Pathogenicity pseudocode [here](https://docs.google.com/document/d/132uEmKKMYlzcBKoB4LQQw3rCv5llgxQxiiSCOGUftFk/edit), which is an abridged, nonfunctional version of the code that helps the user better understand the logic implemented by the software. Please note that “wild-type” is used interchangeably with “reference” in both of these documents, and that “reference” or “ref” may refer to any reference sequence or the reference (wild-type) splice donor/acceptor. 
 Currently, there is not enough clinical evidence to provide a reliable, calibrated calculation of impact due to the creation of a de novo splice-site acceptor, which could theoretically factor into Splicing-level Estimation. Accordingly, these types of possible acceptors are still under investigation, and are not yet accounted for in the variant’s In Silico Prior Probability of Pathogenicity.
