@@ -137,6 +137,7 @@ g1k_method_dir = os.path.abspath('../1000_Genomes')
 enigma_method_dir = os.path.abspath('../enigma')
 data_merging_method_dir = os.path.abspath('../data_merging')
 priors_method_dir = os.path.abspath('../splicing')
+priors_filter_method_dir = os.path.abspath('../splicingfilter')
 utilities_method_dir = os.path.abspath('../utilities')
 
 
@@ -1480,7 +1481,33 @@ class CalculatePriors(luigi.Task):
         check_input_and_output_tsvs_for_same_number_variants(self.input().path,
                                                              self.output().path)
 
+
 @requires(CalculatePriors)
+class FilterBlacklistedPriors(luigi.Task):
+    def output(self):
+        artifacts_dir = self.output_dir + "/release/artifacts/"
+        return luigi.LocalTarget(artifacts_dir + "built_with_priors_clean.tsv")
+
+    def run(self):
+        artifacts_dir = self.output_dir + "/release/artifacts/"
+        os.chdir(priors_filter_method_dir)
+
+        args = ["python", "filterBlacklistedVars.py",
+                "--output", artifacts_dir + "built_with_priors_clean.tsv",
+                "--blacklisted_vars", "blacklisted_vars.txt",
+                "filter",
+                artifacts_dir + "built_with_priors.tsv"]
+
+        print "Running filterBlacklistedVars.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        # we only clear a few columns; we shouldn't be gaining or losing any variants
+        check_input_and_output_tsvs_for_same_number_variants(self.input().path,
+                                                             self.output().path)
+
+
+@requires(FilterBlacklistedPriors)
 class FindMissingReports(luigi.Task):
     def output(self):
         artifacts_dir = self.output_dir + "/release/artifacts/"
@@ -1491,7 +1518,7 @@ class FindMissingReports(luigi.Task):
         artifacts_dir = self.output_dir + "/release/artifacts/"
         os.chdir(data_merging_method_dir)
 
-        args = ["python", "check_for_missing_reports.py", "-b", artifacts_dir + "built_with_priors.tsv", "-r", artifacts_dir,
+        args = ["python", "check_for_missing_reports.py", "-b", artifacts_dir + "built_with_priors_clean.tsv", "-r", artifacts_dir,
                 "-a", artifacts_dir, "-v"]
         print "Running check_for_missing_reports.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -1531,7 +1558,7 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
         previous_release_date = self._extract_release_date(version_json_path)
         previous_release_date_str = datetime.datetime.strftime(previous_release_date, '%m-%d-%Y')
 
-        args = ["python", "releaseDiff.py", "--v2", artifacts_dir + "built_with_priors.tsv", "--v1", previous_data_path,
+        args = ["python", "releaseDiff.py", "--v2", artifacts_dir + "built_with_priors_clean.tsv", "--v1", previous_data_path,
                 "--removed", diff_dir + "removed.tsv", "--added", diff_dir + "added.tsv", "--added_data",
                 diff_dir + "added_data.tsv", "--diff", diff_dir + "diff.txt", "--diff_json", diff_dir + "diff.json",
                 "--output", release_dir + "built_with_change_types.tsv", "--artifacts_dir", artifacts_dir,
@@ -1543,7 +1570,7 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
 
         shutil.rmtree(tmp_dir) # cleaning up
 
-        check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "built_with_priors.tsv",
+        check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "built_with_priors_clean.tsv",
                                                              release_dir + "built_with_change_types.tsv")
 
 

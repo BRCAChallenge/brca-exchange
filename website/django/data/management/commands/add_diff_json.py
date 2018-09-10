@@ -4,7 +4,7 @@ from data.models import Variant, VariantDiff, Report, ReportDiff
 from argparse import FileType
 import json
 import psycopg2
-
+from tqdm import tqdm
 
 class Command(BaseCommand):
     help = 'Add diff information to variants'
@@ -18,13 +18,17 @@ class Command(BaseCommand):
         diff = json.load(options['diffJSON'])
         reports_diff = json.load(options['reportsDiffJSON'])
         release_id = options['release']
-        for key in diff:
+
+        print "Creating variant diffs..."
+        for key in tqdm(diff, total=len(diff)):
             try:
                 variant_instance = Variant.objects.filter(Data_Release_id=release_id).filter(Genomic_Coordinate_hg38=key).get()
                 VariantDiff.objects.create(variant=variant_instance, diff=diff[key])
             except Variant.DoesNotExist:
-                print "Error adding Variant Diff: Variant", key, "in release", release_id, "not found."
-        for key in reports_diff:
+                tqdm.write("Error adding Variant Diff: Variant %s in release %s not found" % (key, release_id))
+
+        print "Creating report diffs..."
+        for key in tqdm(reports_diff, total=len(reports_diff)):
             # Only handles ClinVar and LOVD reports for now
             if "SCV" in key:
                 # handle clinvar reports
@@ -32,11 +36,11 @@ class Command(BaseCommand):
                     report_instance = Report.objects.filter(Data_Release_id=release_id).filter(SCV_ClinVar=key).get()
                     ReportDiff.objects.create(report=report_instance, report_diff=reports_diff[key])
                 except Report.DoesNotExist:
-                    print "Error adding Report Diff: Report", key, "in release", release_id, "not found."
+                    tqdm.write("Error adding Report Diff: Report %s in release %s not found" % (key, release_id))
             else:
                 # handle lovd reports
                 try:
                     report_instance = Report.objects.filter(Data_Release_id=release_id).filter(DBID_LOVD=key).get()
                     ReportDiff.objects.create(report=report_instance, report_diff=reports_diff[key])
                 except Report.DoesNotExist:
-                    print "Error adding Report Diff: Report", key, "in release", release_id, "not found."
+                    tqdm.write("Error adding Report Diff: Report %s in release %s not found" % (key, release_id))

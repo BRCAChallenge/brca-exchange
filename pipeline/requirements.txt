@@ -30,3 +30,4 @@ six==1.10.0
 synapseclient[pandas,pysftp]==1.7.2
 tornado==4.4.1
 wheel==0.29.0
+click==6.7
