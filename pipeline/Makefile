@@ -31,11 +31,10 @@ setup-files:
 setup-lovd:
 #	setting up LOVD data via pipeline machine, if not running on pipeline machine, as the access is IP restricted
 	if [ `hostname -s` != "brca-pipeline" ]; then
-		mkdir -p $(OUT_DIR)/brca_out/LOVD
-		ssh pipeline@52.151.62.136 curl https://databases.lovd.nl/shared/export/BRCA > $(OUT_DIR)/brca_out/LOVD/BRCA.txt
+		mkdir -p $(OUT_DIR)/LOVD
+		ssh pipeline@52.151.62.136 curl https://databases.lovd.nl/shared/export/BRCA > $(OUT_DIR)/LOVD/BRCA.txt
 	fi
 
-# TODO: docker access within docker doesn't work yet on Mac OS X
 DOCKER_RUN_CMD = docker run -it --rm -u `id -u ${USER}`:`stat -c '%g' /var/run/docker.sock` \
 	-e "DATA_DATE=$(DATA_DATE)" \
         -e"UTA_DB_URL=postgresql://anonymous@0.0.0.0:$(UTA_PORT)/uta/uta_$(UTA_RELEASE_DATE)" \
@@ -46,7 +45,7 @@ DOCKER_RUN_CMD = docker run -it --rm -u `id -u ${USER}`:`stat -c '%g' /var/run/d
        -v $(PREVIOUS_RELEASE_PATH):/files/previous_release.tar.gz \
        -v $(RELEASE_NOTES_PATH):/files/release_notes.txt \
        -v ${SYNAPSE_CACHE}:/.synapseCache \
-       -v /var/run/docker.sock:/var/run/docker.sock \
+	-v /var/run/docker.sock:/var/run/docker.sock \
        $(PIPELINE_IMAGE) 
 
 run-pipeline:
