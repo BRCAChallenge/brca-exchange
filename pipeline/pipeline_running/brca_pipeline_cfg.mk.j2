@@ -40,5 +40,5 @@ UTA_PORT := {{ UTA_PORT | default("50827") }}
 
 ## varia
 
-SYNAPSE_CACHE := {{ SYNAPSE_CACHE | default(WORK_DIR + "/synapse_cache" }}
+SYNAPSE_CACHE := {{ SYNAPSE_CACHE | default(WORK_DIR + "/synapse_cache") }}
 LOG_DIR := {{ LOG_DIR | default(WORK_DIR) }}
