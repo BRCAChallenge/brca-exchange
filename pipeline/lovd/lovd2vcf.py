@@ -138,9 +138,10 @@ def normalize(field, field_value):
             # Semicolons are sometimes used as a list delimiter,
             # this changes them to commas for consistency with other fields.
             field_value = field_value.replace(';', ', ')
-        # Use url encoding to prevent issues in VCF file format.
-        # Decoded during merging and reports aggregation.
-        field_value = urllib.quote_plus(field_value)
+        if field in LOVD_LIST_FIELDS:
+            # Use url encoding to prevent issues in VCF file format.
+            # Decoded during merging and reports aggregation.
+            field_value = urllib.quote_plus(field_value)
     return field_value
 
 
