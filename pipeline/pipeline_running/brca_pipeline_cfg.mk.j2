@@ -9,8 +9,10 @@ RELEASE_TAG := {{ RELEASE_TAG }}
 # path to credential files for luigi (only used for earlier parts of pipeline)
 CREDENTIALS_PATH := {{ CREDENTIALS_PATH | default(WORK_DIR + "/luigi_pipeline_credentials.cfg") }}
 
+{% set PREVIOUS_RELEASE_DIR = PREVIOUS_RELEASE_DIR|default(WORK_DIR) %}
 # path a previous data release archive. used to determine differences
-PREVIOUS_RELEASE_PATH := {{ PREVIOUS_RELEASE_PATH | default(WORK_DIR + "/previous_release_dummy.tar.gz") }}
+PREVIOUS_RELEASE_PATH := {{ PREVIOUS_RELEASE_PATH | default(PREVIOUS_RELEASE_DIR + "/latest.tar.gz") }}
+PREVIOUS_RELEASE_DIR := {{ PREVIOUS_RELEASE_DIR }}
 
 # path to release notes
 RELEASE_NOTES_PATH := {{ RELEASE_NOTES_PATH | default(WORK_DIR + "/release_notes_" + RELEASE_TAG + ".txt") }}

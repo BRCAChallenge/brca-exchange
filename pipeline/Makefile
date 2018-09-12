@@ -11,7 +11,7 @@ build-docker:
 	cd $(CODE_BASE)/pipeline/docker && ./build_docker_image.sh $(GIT_COMMIT) $(RELEASE_TAG) || { echo "$(date) Something wrong with docker image creation"; exit 1; }
 
 download-resources:
-	$(CODE_BASE)/pipeline/download_resources_files.sh $(RESOURCES_DIR) >> "$(LOG_DIR)/download_resources_$(RELEASE_TAG).log" 2>&1 || { msg "Downloading resource files failed"; exit 1; }
+	$(CODE_BASE)/pipeline/download_resources_files.sh $(RESOURCES_DIR) >> "$(LOG_DIR)/download_resources_$(RELEASE_TAG).log" 2>&1 || { echo "Downloading resource files failed"; exit 1; }
 
 
 start-local-uta:
@@ -25,6 +25,7 @@ setup-files:
 	[ -d $(RESOURCES_DIR) ] || mkdir -p $(RESOURCES_DIR)
 	[ -d $(PRIORS_REFERENCES) ] || mkdir -p $(PRIORS_REFERENCES)
 	[ -d $(OUT_DIR) ] || mkdir -p $(OUT_DIR)
+	[ -f $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz ] || wget http://brcaexchange.org/backend/downloads/releases/current_release.tar.gz -O $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz
 
 .ONESHELL:
 setup-lovd:
@@ -34,6 +35,7 @@ setup-lovd:
 		ssh pipeline@52.151.62.136 curl https://databases.lovd.nl/shared/export/BRCA > $(OUT_DIR)/LOVD/BRCA.txt
 	fi
 
+# TODO: docker access within docker doesn't work yet on Mac OS X
 DOCKER_RUN_CMD = docker run -it --rm -u `id -u ${USER}`:`stat -c '%g' /var/run/docker.sock` \
 	-e "DATA_DATE=$(DATA_DATE)" \
         -e"UTA_DB_URL=postgresql://anonymous@0.0.0.0:$(UTA_PORT)/uta/uta_$(UTA_RELEASE_DATE)" \
@@ -53,4 +55,25 @@ run-pipeline:
 run-interactive:
 	$(DOCKER_RUN_CMD) bash
 
-build-release: start-local-uta checkout build-docker setup-files setup-lovd download-resources run-pipeline
+variants-by-source:
+	$(DOCKER_RUN_CMD) 'python /opt/brca-exchange/pipeline/utilities/variantsBySource.py  -i /files/data/output/release/built_with_change_types.tsv -c true'
+
+build-release: start-local-uta checkout build-docker setup-files setup-lovd download-resources run-pipeline variants-by-source
+
+.ONESHELL:
+tag-release:
+	cd $(CODE_BASE)
+	git tag -m $(RELEASE_TAG) -a $(RELEASE_TAG) `git rev-parse HEAD`
+	git push origin $(RELEASE_TAG)
+
+push-docker:
+	docker push brcachallenge/brca-exchange-pipeline:$(RELEASE_TAG)
+
+.ONEHSELL:
+copy-to-previous:
+	cp `ls -t /home/pipeline/monthly_releases/$(RELEASE_TAG)/brca_out/release-*.tar.gz | head -n 1` $(PREVIOUS_RELEASE_DIR)
+	rm $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz
+	ln -s `ls -t $(PREVIOUS_RELEASE_DIR)/release-*.tar.gz | head -n 1` $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz
+
+post-release-cmds: push-docker tag-release copy-to-previous
+
