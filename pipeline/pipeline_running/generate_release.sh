@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# TODO: add command line wrapper
-# TODO: crontab: git pull master
-
 ROOT_DIR=$(realpath $1)
 CREDENTIALS_PATH=$(realpath $2)
 PREVIOUS_RELEASE_DIR=$(realpath $3)
