@@ -78,5 +78,12 @@ copy-to-previous:
 	rm $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz
 	ln -s `ls -t $(PREVIOUS_RELEASE_DIR)/release-*.tar.gz | head -n 1` $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz
 
-post-release-cmds: push-docker tag-release copy-to-previous
+prune-release-notes-output:
+        rm $(OUT_DIR)/release-*.tar.gz
+        rm $(OUT_DIR)/output/md5sums.txt
+        rm $(OUT_DIR)/output/README.txt
+        rm $(OUT_DIR)/output/release/metadata/version.json
 
+include-release-notes: prune-release-notes-output run-pipeline
+
+post-release-cmds: include-release-notes push-docker tag-release copy-to-previous
