@@ -50,6 +50,7 @@ LIST_KEYS = [
             "Date_Last_Updated_ClinVar",
             "Source_URL",
             "SCV_ClinVar",
+            "SCV_Version_ClinVar",
             "Clinical_Significance_ClinVar",
             "Allele_Origin_ClinVar",
             "Synonyms",
