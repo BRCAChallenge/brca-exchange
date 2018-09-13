@@ -4,7 +4,7 @@ DATA_DATE := {{ DATA_DATE }}
 WORK_DIR := {{ WORK_DIR }}
 
 {% set RELEASE_TAG = RELEASE_TAG|default("data_release_" + DATA_DATE) %}
-RELEASE_TAG := {{ RELEASE_TAG }} 
+RELEASE_TAG := {{ RELEASE_TAG }}
 
 # path to credential files for luigi (only used for earlier parts of pipeline)
 CREDENTIALS_PATH := {{ CREDENTIALS_PATH | default(WORK_DIR + "/luigi_pipeline_credentials.cfg") }}
@@ -27,7 +27,10 @@ BRCA_GIT_REPO := {{ BRCA_GIT_REPO|default("https://github.com/BRCAChallenge/brca
 PIPELINE_IMAGE := {{ PIPELINE_IMAGE | default("brcachallenge/brca-exchange-pipeline:" + RELEASE_TAG) }}
 RESOURCES_DIR := {{ RESOURCES_DIR|default(WORK_DIR + "/resources") }}
 
-PRIORS_IMAGE := {{ PRIORS_IMAGE | default("brcachallenge/splicing-pipeline:latest") }}
+{% set PRIORS_IMAGE_DEFAULT_TAG = "0.0.4" %}
+
+{% set PRIORS_IMAGE_TAG = PRIORS_IMAGE_TAG|default(PRIORS_IMAGE_DEFAULT_TAG) %}
+PRIORS_IMAGE := {{ PRIORS_IMAGE | default("brcachallenge/splicing-pipeline:" + PRIORS_IMAGE_TAG) }}
 PRIORS_REFERENCES := {{ PRIORS_REFERENCES|default(WORK_DIR + "/references") }}
 
 ## UTA configurations

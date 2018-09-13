@@ -39,15 +39,15 @@ setup-lovd:
 DOCKER_RUN_CMD = docker run -it --rm -u `id -u ${USER}`:`stat -c '%g' /var/run/docker.sock` \
 	-e "DATA_DATE=$(DATA_DATE)" \
         -e"UTA_DB_URL=postgresql://anonymous@0.0.0.0:$(UTA_PORT)/uta/uta_$(UTA_RELEASE_DATE)" \
-       --network host \
-       -v $(RESOURCES_DIR):/files/resources \
-       -v $(OUT_DIR):/files/data \
-       -v $(CREDENTIALS_PATH):/opt/luigi_pipeline_credentials.cfg \
-       -v $(PREVIOUS_RELEASE_PATH):/files/previous_release.tar.gz \
-       -v $(RELEASE_NOTES_PATH):/files/release_notes.txt \
-       -v ${SYNAPSE_CACHE}:/.synapseCache \
+	--network host \
+	-v $(RESOURCES_DIR):/files/resources \
+	-v $(OUT_DIR):/files/data \
+	-v $(CREDENTIALS_PATH):/opt/luigi_pipeline_credentials.cfg \
+	-v $(PREVIOUS_RELEASE_PATH):/files/previous_release.tar.gz \
+	-v $(RELEASE_NOTES_PATH):/files/release_notes.txt \
+	-v ${SYNAPSE_CACHE}:/.synapseCache \
 	-v /var/run/docker.sock:/var/run/docker.sock \
-       $(PIPELINE_IMAGE) 
+	$(PIPELINE_IMAGE) 
 
 run-pipeline:
 	$(DOCKER_RUN_CMD) /opt/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE)
@@ -56,7 +56,7 @@ run-interactive:
 	$(DOCKER_RUN_CMD) bash
 
 variants-by-source:
-	$(DOCKER_RUN_CMD) 'python /opt/brca-exchange/pipeline/utilities/variantsBySource.py  -i /files/data/output/release/built_with_change_types.tsv -c true'
+	$(DOCKER_RUN_CMD) python /opt/brca-exchange/pipeline/utilities/variantsBySource.py  -i /files/data/output/release/built_with_change_types.tsv -c true
 
 build-release: start-local-uta checkout build-docker setup-files setup-lovd download-resources run-pipeline variants-by-source
 
@@ -66,12 +66,16 @@ tag-release:
 	git tag -m $(RELEASE_TAG) -a $(RELEASE_TAG) `git rev-parse HEAD`
 	git push origin $(RELEASE_TAG)
 
+.ONESHELL:
 push-docker:
+	docker login hub.docker.com
 	docker push brcachallenge/brca-exchange-pipeline:$(RELEASE_TAG)
+	docker logout hub.docker.com
 
 .ONEHSELL:
 copy-to-previous:
-	cp `ls -t /home/pipeline/monthly_releases/$(RELEASE_TAG)/brca_out/release-*.tar.gz | head -n 1` $(PREVIOUS_RELEASE_DIR)
+# 	take latest, in case there should be several tar.gz from some reason
+	cp `ls -t $(OUT_DIR)/release-*.tar.gz | head -n 1` $(PREVIOUS_RELEASE_DIR)
 	rm $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz
 	ln -s `ls -t $(PREVIOUS_RELEASE_DIR)/release-*.tar.gz | head -n 1` $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz
 
