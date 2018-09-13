@@ -53,6 +53,7 @@ LIST_KEYS = [
             "SCV_Version_ClinVar",
             "Clinical_Significance_ClinVar",
             "Allele_Origin_ClinVar",
+            "DateSignificanceLastEvaluated_ClinVar",
             "Synonyms",
             "Submitters_LOVD",
             "RNA_LOVD",
