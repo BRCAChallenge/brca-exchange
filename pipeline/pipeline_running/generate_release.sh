@@ -29,11 +29,12 @@ jinja2 -D DATA_DATE="${DATA_DATE}" -D WORK_DIR="${WDIR}" \
        -D GIT_COMMIT="${GIT_COMMIT}" \
        "${CODE_BASE}/pipeline/pipeline_running/brca_pipeline_cfg.mk.j2" > ${CFG_PATH}
 
-cd "${CODE_BASE}/pipeline"
-
-make build-release
-
 echo "You can issue pipeline commands using"
 echo "make CONFIG_PATH=${CFG_PATH} [cmd]"
 echo " -- or"
 echo "cd ${CODE_BASE}/pipeline && make [cmd]"
+
+echo "Kicking off pipeline!"
+cd "${CODE_BASE}/pipeline"
+make build-release
+
