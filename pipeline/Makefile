@@ -86,4 +86,7 @@ prune-release-notes-output:
 
 include-release-notes: prune-release-notes-output run-pipeline
 
-post-release-cmds: include-release-notes push-docker tag-release copy-to-previous
+cleanup-failed:
+        find $(OUT_DIR) -name 'FAILED*.tsv' -exec rm -i {} \;
+
+post-release-cmds: cleanup-failed include-release-notes push-docker tag-release copy-to-previous
