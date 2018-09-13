@@ -22,7 +22,13 @@ import csv
 import aggregate_reports
 import urllib
 import utilities
+import sys
 
+# Provides access to lovd directory files
+pardir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+sys.path.append(pardir + '/lovd')
+
+from lovd2vcf import LOVD_LIST_FIELDS
 
 # GENOMIC VERSION:
 VERSION = "hg38" # equivalent to GRCh38
@@ -844,7 +850,7 @@ def add_new_source(columns, variants, source, source_file, source_dict):
             variants[genome_coor] = associate_chr_pos_ref_alt_with_item(record, old_column_num, source, genome_coor)
         for value in source_dict.values():
             try:
-                if source == "LOVD":
+                if source == "LOVD" and value in LOVD_LIST_FIELDS:
                     field_value = map(urllib.unquote_plus, record.INFO[value])
                     variants[genome_coor].append(field_value)
                 else:
