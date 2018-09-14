@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-'''
+"""
 calcVarPriors
 
-Parses a tsv file (default built.tsv) containing variant information and for each variant in file 
+Parses a tsv file (default built.tsv) containing variant information and for each variant in file
 calculates either the prior probability of pathogenicity or a prior ENGIMA classification based on variant type and variant location
-'''
+"""
 
 import os
 import sys
@@ -198,7 +198,7 @@ DE_NOVO_DONOR_HIGH_CUTOFF = 0.0
 DE_NOVO_DONOR_LOW_CUTOFF = -2.0
 
 def checkSequence(sequence):
-    '''Checks if a given sequence contains acceptable nucleotides returns True if sequence is comprised entirely of acceptable bases'''
+    """Checks if a given sequence contains acceptable nucleotides returns True if sequence is comprised entirely of acceptable bases"""
     acceptableBases = ["A", "C", "T", "G", "N", "R", "Y"]
     if len(sequence) > 0:
         for base in sequence:
@@ -209,7 +209,7 @@ def checkSequence(sequence):
         return False
     
 def getVarStrand(variant):
-    '''Given a variant, returns the coding strand based on the variant's gene_symbol'''
+    """Given a variant, returns the coding strand based on the variant's gene_symbol"""
     varGene = variant["Gene_Symbol"]
 
     if varGene == "BRCA1": 
@@ -220,7 +220,7 @@ def getVarStrand(variant):
         return ""
 
 def getVarChrom(variant):
-    '''Given a variant, returns the chromosome based on the variant's gene_symbol'''
+    """Given a variant, returns the chromosome based on the variant's gene_symbol"""
     varGene = variant["Gene_Symbol"]
 
     if varGene == "BRCA1":
@@ -231,12 +231,12 @@ def getVarChrom(variant):
         return ""
 
 def getVarConsequences(variant):
-    '''
+    """
     Given a variant, uses Ensembl VEP API to get variant consequences
     (e.g. intron variant, frameshift variant, missense variant)
     using variant chromosome, Hg38 start, Hg38 end, and alternate allele as input for API
     returns a list of strings detailing consequences of variant
-    '''
+    """
 
     # varStrand always 1 because all alternate alleles and positions refer to the plus strand
     varStrand = 1
@@ -266,11 +266,11 @@ def getVarConsequences(variant):
 
 
 def getVarType(variant):
-    '''
-    Returns a string describing type of variant 
+    """
+    Returns a string describing type of variant
     -substitution, deletion, insertion, delins, other
     depending on variant reference and alternate alleles
-    '''
+    """
     varRef = variant["Ref"]
     varAlt = variant["Alt"]
     acceptableRefSeq = checkSequence(varRef)
@@ -302,11 +302,11 @@ def getVarType(variant):
         return "other"
 
 def checkWithinBoundaries(varStrand, varGenPos, boundaryStart, boundaryEnd):
-    '''
+    """
     Checks whether a position (varGenPos) is within certain boundaries (boundaryStart and boundaryEnd)
     Dependent on the variant's transcript strand (varStrand)
     Function is inclusive of boundaryStart and boundaryEnd
-    '''
+    """
     if varStrand == "+":
         if varGenPos >= boundaryStart and varGenPos <= boundaryEnd:
             return True
@@ -317,17 +317,17 @@ def checkWithinBoundaries(varStrand, varGenPos, boundaryStart, boundaryEnd):
         return False
 
 def getTranscriptData(referenceSequence):
-    '''
+    """
     Given a reference sequence (e.g. "NM_007294.3"),
     Returns transcript data for that reference sequencee
-    '''
+    """
     if referenceSequence == BRCA1_RefSeq:
         return brca1TranscriptData
     elif referenceSequence == BRCA2_RefSeq:
         return brca2TranscriptData
     
 def varOutsideBoundaries(variant):
-    '''Given a variant, determines if variant is outside transcript boundaries'''
+    """Given a variant, determines if variant is outside transcript boundaries"""
     varGenPos = int(variant["Pos"])
     varTranscript = variant["Reference_Sequence"]
     transcriptData = getTranscriptData(varTranscript)
@@ -345,12 +345,12 @@ def varOutsideBoundaries(variant):
     return False
 
 def varInUTR(variant):
-    '''
-    Given a variant, if variant is inside transcript boundaries, 
+    """
+    Given a variant, if variant is inside transcript boundaries,
     determines if variant is in 3' or 5' UTR of transcript
-    '''
+    """
     varOutBounds = varOutsideBoundaries(variant)
-    if varOutBounds == False:
+    if not varOutBounds:
         varGenPos = int(variant["Pos"])
         varTranscript = variant["Reference_Sequence"]
         transcriptData = getTranscriptData(varTranscript)
@@ -372,11 +372,11 @@ def varInUTR(variant):
     return False
                 
 def getExonBoundaries(variant):
-    '''
+    """
     Given a variant, returns the exon boundaries for the variant's transcript in a dictionary with format:
     key = exon number, value = dictionary with exon start and exon end for specific exon
     Uses function implemented in calcMaxEntScanMeanStd to get data for variant's transcript
-    '''
+    """
     varTranscript = variant["Reference_Sequence"]
     transcriptData = getTranscriptData(varTranscript)
     # parse exon starts and exon ends
@@ -414,14 +414,14 @@ def getExonBoundaries(variant):
     return varExons
 
 def getRefSpliceDonorBoundaries(variant, intronicLength, exonicLength):
-    '''
+    """
     Given a variant, intronicLength and exonicLength returns the splice donor boundaries
     intronicLength = number of bp in intron that will be considered as part of splice donor region
     exonicLength = number of bp in exon that will be considered as part of splice donor region
     splice region is the last exonicLength bp in the exon and first intronicLength bp in the intron
     for the variant's transcript in a dictionary with the format:
     key = exon number, value = dictionary with donor start and donor end for exon
-    '''
+    """
     varExons = getExonBoundaries(variant)
     donorExons = varExons.copy()
     if variant["Gene_Symbol"] == "BRCA1":
@@ -448,14 +448,14 @@ def getRefSpliceDonorBoundaries(variant, intronicLength, exonicLength):
     return donorBoundaries
 
 def getSpliceAcceptorBoundaries(variant, intronicLength, exonicLength):
-    '''
+    """
     Given a variant, intronicLength and exonicLength returns the splice acceptor boundaries
     intronicLength = number of bp in intron that will be considered as part of splice acceptor region
     exonicLength = number of bp in exon that will be considered as part of splice acceptor region
     splice rgion is the last intronicLength bp in the exon and first exonicLength bp in the exon
     for the variant's transcript in a dictionary with the format:
     key = exon number, value = a dictionary with acceptor start and acceptor end for exon
-    '''
+    """
     varExons = getExonBoundaries(variant)
     acceptorExons = varExons.copy()
     if variant["Gene_Symbol"] == "BRCA1" or variant["Gene_Symbol"] == "BRCA2":
@@ -480,13 +480,13 @@ def getSpliceAcceptorBoundaries(variant, intronicLength, exonicLength):
     return acceptorBoundaries
 
 def varInExon(variant):
-    '''
+    """
     Given a variant, determines if variant genomic position is inside transcript boundaries
     AND if variant is in an exon
     Returns true if variant is in an exon
-    '''
+    """
     varOutBounds = varOutsideBoundaries(variant)
-    if varOutBounds == False:
+    if not varOutBounds:
         varGenPos = int(variant["Pos"])
         varExons = getExonBoundaries(variant)
         varStrand = getVarStrand(variant)
@@ -502,11 +502,11 @@ def varInExon(variant):
     return False
 
 def getVarExonNumberSNS(variant):
-    '''
+    """
     Given a SNS variant, checks that variant is in an exon
     If variant in an exon, returns the number of the exon variant is located within in format "exonN"
-    '''
-    if varInExon(variant) == True:
+    """
+    if varInExon(variant):
         varGenPos = int(variant["Pos"])
         varExons = getExonBoundaries(variant)
         varStrand = getVarStrand(variant)
@@ -521,23 +521,23 @@ def getVarExonNumberSNS(variant):
                     return exon
 
 def varInSpliceRegion(variant, donor=False, deNovo=False):
-    '''
+    """
     Given a variant, determines if a variant is in reference transcript's splice donor/acceptor region
     If donor=True and deNovo=False, checks if variant is in a reference splice donor region
     If donor=True and deNovo=True, checks if variant is in a de novo splice donor region
     If donor=False and deNovo=False, checks if variant is in a reference splice acceptor region
     If donor=False and deNovo=True, checks if variant is in a de novo splice acceptor region
     Returns True if variant is in a splice region, false otherwise
-    '''
+    """
     if donor == False and deNovo == False:
         regionBounds = getSpliceAcceptorBoundaries(variant, STD_ACC_INTRONIC_LENGTH, STD_ACC_EXONIC_LENGTH)
     elif donor == False and deNovo == True:
         regionBounds = getSpliceAcceptorBoundaries(variant, STD_ACC_INTRONIC_LENGTH, STD_DE_NOVO_LENGTH)
-    elif donor == True:
+    elif donor:
         # gets reference donor splice boundaries, if deNovo = True then entireity of exon will be included below
         regionBounds = getRefSpliceDonorBoundaries(variant, STD_DONOR_INTRONIC_LENGTH, STD_DONOR_EXONIC_LENGTH)
     for exon in regionBounds.keys():
-        if donor == False:
+        if not donor:
             regionStart = regionBounds[exon]["acceptorStart"]
             regionEnd = regionBounds[exon]["acceptorEnd"]
         else:
@@ -554,17 +554,17 @@ def varInSpliceRegion(variant, donor=False, deNovo=False):
     return False
 
 def getVarSpliceRegionBounds(variant, donor=False, deNovo=False):
-    '''
+    """
     Given a variant, checks if variant is in a splice donor/acceptor region
     If donor=True, checks if variant is in a splice donor region and returns boundaries for splice donor region
       *function CANNOT be used to return de novo donor splice region bounds*
     If donor=False and deNovo=False, checks if variant is in a ref splice acceptor region and returns boundaries for splice acceptor region
     If donor=False and deNovo=True, checks if variant is in a de novo splice acceptor region and returns boundaries for that region
     If variant is in a splice region, returns a dictionary with region boundaries where variant is located
-    '''
+    """
     if varInSpliceRegion(variant, donor=donor, deNovo=deNovo):
-        if donor == False:
-            if deNovo == False:
+        if not donor:
+            if not deNovo:
                 regionBounds = getSpliceAcceptorBoundaries(variant, STD_ACC_INTRONIC_LENGTH, STD_ACC_EXONIC_LENGTH)
             else:
                 regionBounds = getSpliceAcceptorBoundaries(variant, STD_ACC_INTRONIC_LENGTH, STD_DE_NOVO_LENGTH)
@@ -578,44 +578,44 @@ def getVarSpliceRegionBounds(variant, donor=False, deNovo=False):
             regionStart = regionBounds[exon][regionStartKey]
             regionEnd = regionBounds[exon][regionEndKey]
             withinBoundaries = checkWithinBoundaries(getVarStrand(variant), int(variant["Pos"]), regionStart, regionEnd)
-            if withinBoundaries == True:
+            if withinBoundaries:
                 return {"exonName": exon,
                         regionStartKey: regionStart,
                         regionEndKey: regionEnd}    
                 
 def varInCIDomain(variant, boundaries):
-    '''
+    """
     Given a variant, determines if variant is in a clinically important domain
     Second argument determiens which boundaries (ENIGMA or PRIORS) are used for CI domains
     Returns True if variant in CI domain
-    '''
+    """
     varGenPos = int(variant["Pos"])
     varGene = variant["Gene_Symbol"]
     varStrand = getVarStrand(variant)
     inExon = varInExon(variant)
-    if inExon == True:
+    if inExon:
         if varGene == "BRCA1":
             for domain in brca1CIDomains[boundaries].keys():
                 domainStart = brca1CIDomains[boundaries][domain]["domStart"]
                 domainEnd = brca1CIDomains[boundaries][domain]["domEnd"]
                 withinBoundaries = checkWithinBoundaries(varStrand, varGenPos, domainStart, domainEnd)
-                if withinBoundaries == True:
+                if withinBoundaries:
                     return True
         elif varGene == "BRCA2":
             for domain in brca2CIDomains[boundaries].keys():
                 domainStart = brca2CIDomains[boundaries][domain]["domStart"]
                 domainEnd = brca2CIDomains[boundaries][domain]["domEnd"]
                 withinBoundaries = checkWithinBoundaries(varStrand, varGenPos, domainStart, domainEnd)
-                if withinBoundaries == True:
+                if withinBoundaries:
                     return True
     return False
                 
 def varInGreyZone(variant):
-    '''
+    """
     Given a variant, determines if variant is in the grey zone
     Returns True if variant is in the grey zone
     Returns False if variant is NOT in the grey zone
-    '''
+    """
     varGenPos = int(variant["Pos"])
     varGene = variant["Gene_Symbol"]
     varStrand = getVarStrand(variant)
@@ -623,15 +623,15 @@ def varInGreyZone(variant):
         greyZoneStart = greyZones[varGene]["greyZoneStart"]
         greyZoneEnd = greyZones[varGene]["greyZoneEnd"]
         withinBoundaries = checkWithinBoundaries(varStrand, varGenPos, greyZoneStart, greyZoneEnd)
-        if withinBoundaries == True:
+        if withinBoundaries:
             return True
     return False
 
 def varAfterGreyZone(variant):
-    '''
+    """
     Given a variant, determines if variant is after the gene grey zone
     Returns True if variant is after the grey zone
-    '''
+    """
     varGenPos = int(variant["Pos"])
     varGene = variant["Gene_Symbol"]
     # checks that varGene == BRCA2 because only BRCA2 has a grey zone
@@ -647,56 +647,56 @@ def varAfterGreyZone(variant):
     return False
                 
 def getVarLocation(variant, boundaries):
-    '''
+    """
     Given a variant, returns the variant location as below
     Second argument is for CI domain boundaries (PRIORS or ENIGMA)
-    '''
+    """
     varOutBounds = varOutsideBoundaries(variant)
-    if varOutBounds == True:
+    if varOutBounds:
         return "outside_transcript_boundaries_variant"
     inExon = varInExon(variant)
     inSpliceDonor = varInSpliceRegion(variant, donor=True, deNovo=False)
     inSpliceAcceptor = varInSpliceRegion(variant, donor=False, deNovo=False)
-    if inExon == True:
+    if inExon:
         inCIDomain = varInCIDomain(variant, boundaries)
         if inCIDomain == True and inSpliceDonor == True:
             return "CI_splice_donor_variant"
         if inCIDomain == True and inSpliceAcceptor == True:
             return "CI_splice_acceptor_variant"
-        if inCIDomain == True:
+        if inCIDomain:
             return "CI_domain_variant"
-        if inSpliceDonor == True:
+        if inSpliceDonor:
             return "splice_donor_variant"
-        if inSpliceAcceptor == True:
+        if inSpliceAcceptor:
             return "splice_acceptor_variant"
         inGreyZone = varInGreyZone(variant)
-        if inGreyZone == True:
+        if inGreyZone:
             return "grey_zone_variant"
         afterGreyZone = varAfterGreyZone(variant)
-        if afterGreyZone == True:
+        if afterGreyZone:
             return "after_grey_zone_variant"
         inUTR = varInUTR(variant)
-        if inUTR == True:
+        if inUTR:
             return "UTR_variant"
         return "exon_variant"
     else:    
-        if inSpliceDonor == True:
+        if inSpliceDonor:
             return "splice_donor_variant"
-        if inSpliceAcceptor == True:
+        if inSpliceAcceptor:
             return "splice_acceptor_variant"
         inUTR = varInUTR(variant)
-        if inUTR == True:
+        if inUTR:
             return "UTR_variant"
         return "intron_variant"
 
 def getFastaSeq(chrom, rangeStart, rangeStop, plusStrandSeq=True):
-    '''
+    """
     Given chromosome (in format 'chr13'), region genomic start position, and
     region genomic end position:
     Returns a string containing the sequence inclusive of rangeStart and rangeStop
     If plusStrandSeq=True, returns plus strand sequence
     If plusStrandSeq=False, returns minus strand sequence
-    '''
+    """
     if rangeStart < rangeStop:
         regionStart = rangeStart
         regionEnd = rangeStop
@@ -715,12 +715,12 @@ def getFastaSeq(chrom, rangeStart, rangeStop, plusStrandSeq=True):
         return sequence.reverse.complement.seq
 
 def getSeqLocDict(chrom, varStrand, rangeStart, rangeStop):
-    '''
+    """
     Given chromosome, strand, region genomic start position, and region genomic end position
     returns a dictionary containing the genomic position as the key and reference allele as the value
     For minus strand gene (rangeStart > rangeStop), for plus strand gene (rangeStart < rangeStop)
-    Always returns plus strand sequence 
-    '''
+    Always returns plus strand sequence
+    """
     seqLocDict = {}
     if varStrand == "-":
         regionStart = int(rangeStop)
@@ -737,11 +737,11 @@ def getSeqLocDict(chrom, varStrand, rangeStart, rangeStop):
     return seqLocDict
 
 def getAltSeqDict(variant, seqLocDict):
-    '''
+    """
     Given a variant and a dictionary containing a sequence with bases and their locations,
     returns the dictionary with the alternate allele in place of the reference allele
     at the variant's genomic position
-    '''
+    """
     varRef = variant["Ref"]
     varAlt = variant["Alt"]
     varGenPos = int(variant["Pos"])
@@ -752,11 +752,11 @@ def getAltSeqDict(variant, seqLocDict):
     return altSeqDict
 
 def getAltSeq(altSeqDict, varStrand):
-    '''
+    """
     Given a dictionary containing an alternate sequence with bases and their locations
     and the strand that the alternate allele is on
     Returns a string of the sequence containing the alternate allele
-    '''
+    """
     sequence = ""
     # to ensure that items in dictionary are sorted numerically
     for key, value in sorted(altSeqDict.items()):
@@ -766,10 +766,10 @@ def getAltSeq(altSeqDict, varStrand):
     return sequence
 
 def getRefAltSeqs(variant, rangeStart, rangeStop):
-    '''
+    """
     Given a variant, rangeStart, and rangeStop:
     Returns a dicitonary with ref and alt seq for the specified variant and range
-    '''
+    """
     varChrom = getVarChrom(variant)
     varStrand = getVarStrand(variant)
     if varStrand == "-":
@@ -783,13 +783,13 @@ def getRefAltSeqs(variant, rangeStart, rangeStop):
             "altSeq": altSeq}
 
 def getVarSeqIndexSNS(refSeq, altSeq):
-    '''
+    """
     Given a reference sequence and alternate sequence for a substitution variant
     Determines the index at which the alt seq differs from the ref seq
       - using zero indexing
     Returns the index at which altSeq differs from refSeq
-    For example if the refSeq is ACTG and altSeq is AGTG, returns 1 
-    '''
+    For example if the refSeq is ACTG and altSeq is AGTG, returns 1
+    """
     if len(refSeq) == len(altSeq):
         for index in xrange(len(refSeq)):
             if refSeq.lower()[index] != altSeq.lower()[index]:
@@ -800,13 +800,13 @@ def getVarSeqIndexSNS(refSeq, altSeq):
         return "N/A"
             
 def getZScore(maxEntScanScore, donor=False):
-    '''
+    """
     Given a MaxEntScanScore, returns the zscore
     If donor is True, uses splice donor mean and std
     If donor is False, uses splice acceptor mean and std
-    '''
+    """
     stdMeanData = json.load(open(os.path.join(os.path.dirname(__file__), 'brca.zscore.json'), "r"))
-    if donor == False:
+    if not donor:
         std = stdMeanData["acceptors"]["std"]
         mean = stdMeanData["acceptors"]["mean"]
     else:
@@ -817,11 +817,11 @@ def getZScore(maxEntScanScore, donor=False):
     return zscore
 
 def getRefAltScores(refSeq, altSeq, donor=False):
-    '''
+    """
     Given ref and alt sequences and if sequence is in a splice donor region or not (True/False)
     Returns a dictionary containing raw MaxEntScan scores and zscores for ref and alt sequences
-    '''
-    if donor == False:
+    """
+    if not donor:
         refMaxEntScanScore = runMaxEntScan(refSeq, donor=False)
         refZScore = getZScore(refMaxEntScanScore, donor=False)
         altMaxEntScanScore = runMaxEntScan(altSeq, donor=False)
@@ -839,7 +839,7 @@ def getRefAltScores(refSeq, altSeq, donor=False):
     return scoreDict
 
 def getMaxEntScanScoresSlidingWindowSNS(variant, windowSize, donor=False):
-    '''
+    """
     Given a variant and window size determines window sequences and scores for a sliding window
       that is the size of windowSize
     If donor=True, calculates MaxEntScan scores for splice donors
@@ -848,7 +848,7 @@ def getMaxEntScanScoresSlidingWindowSNS(variant, windowSize, donor=False):
         1. window sequences - ref and alt seq for each window (variant in positions 1-windowSize)
         2. window scores - ref and alt MaxEntScan scores and zscores for each window
         3. window alt MaxEntScan scores - only contains alt MaxEntScan scores for each window
-    '''
+    """
     varGenPos = int(variant["Pos"])
     varStrand = getVarStrand(variant)
     # use +- (windowSize - 1) to get (windowSize*2 - 1) bp region so that have sequence for:
@@ -891,8 +891,8 @@ def getMaxEntScanScoresSlidingWindowSNS(variant, windowSize, donor=False):
             "windowAltMaxEntScanScores": windowAltMaxEntScanScores}
 
 def getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLength, donor=True, deNovo=False, deNovoDonorInRefAcc=False):
-    '''
-    Given a variant, determines the maximum alt MaxEntScan score in 
+    """
+    Given a variant, determines the maximum alt MaxEntScan score in
        a sliding window of size STD_DONOR_SIZE with the variant in each position (1-STD_DONOR_SIZE) if donor = True
        a sliding window of size STD_ACC_SIZE with the variant in each position (1-STD_ACC_SIZE) if donor = False
     This function should be used to determine window in which de novo splicing is most likely to occur
@@ -904,12 +904,12 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLeng
        and varLength (equal to 1 for this function, becuase this function only works for single nucleotide substitution variants
     Dictionary also containing value "inExonicPortion" that has value either True or False
        If inExonicPortion = True, then variant is in length of bp specified by exonicPortionSize of highest scoring sliding window
-       If inExonicPortion = False, then variant is NOT in length of bp specified by exonicPortionSize highest scoring sliding window 
+       If inExonicPortion = False, then variant is NOT in length of bp specified by exonicPortionSize highest scoring sliding window
     deNovoLength refers to the length of the exonic portion of a de novo splice acceptor
     deNovoDonorInRefAcc = False if NOT checking for de novo splice donors in reference splice acceptor sites
-    deNovoDonorInRefAcc = True if checking for de novo splice donors in reference splice acceptor sites        
-    '''
-    if donor == True:
+    deNovoDonorInRefAcc = True if checking for de novo splice donors in reference splice acceptor sites
+    """
+    if donor:
         # uses default window size for a splice donor region
         slidingWindowInfo = getMaxEntScanScoresSlidingWindowSNS(variant, STD_DONOR_SIZE, donor=donor)
     else:
@@ -923,7 +923,7 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLeng
     # if variant in ref splice donor region (for de novo donor) or in ref splice acceptor region (for de novo acceptor),
     # then need to remove native splicing window from consideration for highest scoring window
     if (inRefSpliceDonorRegion == True or inRefSpliceAccRegion == True) and deNovoDonorInRefAcc == False:
-        if donor == True:
+        if donor:
             refSpliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=False)
             if getVarStrand(variant) == "+":
                 refSpliceSeq = getFastaSeq(getVarChrom(variant), refSpliceBounds["donorStart"], refSpliceBounds["donorEnd"], plusStrandSeq=True)
@@ -954,7 +954,7 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLeng
     
     # determines if variant is in the exonic portion specified by exonicPortionLength
     inExonicPortion = False
-    if donor == True:
+    if donor:
     # determines if variant is in first exonicPortionSize bp of the donor region
         if maxVarPosition <= exonicPortionSize:
             inExonicPortion = True
@@ -975,7 +975,7 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLeng
             "inExonicPortion": inExonicPortion}
 
 def varInExonicPortion(variant, exonicPortionSize, deNovoLength, donor=True, deNovoDonorInRefAcc=False):
-    '''
+    """
     Given a variant, determines if variant in in the exonic portion as specified
     exonicPortionLength refers to the number of bases that are considered to be in the exon
     deNovoLength refers to the number of bases in the exon that are considered part of deNovo acceptor region
@@ -984,35 +984,35 @@ def varInExonicPortion(variant, exonicPortionSize, deNovoLength, donor=True, deN
     If deNovoDonorInRefAcc=True, function is used in context of looking for de novo donor scores in ref splice acceptor sites
     if deNovoDonorInRefAcc=False, function is not used for de novo donors in ref splice acceptor sites
     Returns true if variant is in exonic portion, False otherwise
-    '''
+    """
     slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize=exonicPortionSize,
                                                               deNovoLength=deNovoLength, donor=donor,
                                                               deNovoDonorInRefAcc=deNovoDonorInRefAcc)
-    if slidingWindowInfo["inExonicPortion"] == True:
+    if slidingWindowInfo["inExonicPortion"]:
         return True
     return False
 
 def getVarWindowPosition(variant, donor=True, deNovoDonorInRefAcc=False):
-    '''
+    """
     Given a variant, determines window position for highest scoring sliding window
     donor=True if function being used for splice donor, donor=False if function being used for splice acceptor
     Returns integer 1-STD_DONOR_SIZE based on variant position in highest scoring window if donor=True
     Returns integer 1-STD_ACC_SIZE based on variant position in highest scoring window if donor=False
     deNovoDonorInRefAcc=True if looking for deNovoDonor in ref acceptor site, False otherwise
-    '''
+    """
     slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH,
                                                               donor=donor, deNovoDonorInRefAcc=deNovoDonorInRefAcc)
     varWindowPos = slidingWindowInfo["varWindowPosition"]
     return varWindowPos
 
 def getClosestExonNumberIntronicSNS(variant, boundaries, donor=True):
-    '''
+    """
     Given a variant and boundaries (either priors or enigma),
     1. Checks that variant is in an intron or UTR and is a SNS variant
     2. Determines the exon end that is closest to that variant
     Returns the closest exon end in the format "exonN"
     If variant is not in an intron or UTR, returns "exon0"
-    '''
+    """
     varLoc = getVarLocation(variant, boundaries)
     if (varLoc == "intron_variant" or varLoc == "UTR_variant") and getVarType(variant) == "substitution" and varInExon(variant) == False:
         exonBounds = getExonBoundaries(variant)
@@ -1020,14 +1020,14 @@ def getClosestExonNumberIntronicSNS(variant, boundaries, donor=True):
         exonIntronDiffs = {}
         for exon in exonBounds.keys():
             if getVarStrand(variant) == "+":
-                if donor == True:
+                if donor:
                     exonIntronDiff = int(varGenPos) - int(exonBounds[exon]["exonEnd"])
                 else:
                     exonIntronDiff = int(exonBounds[exon]["exonStart"]) - int(varGenPos)
                 if exonIntronDiff > 0:
                     exonIntronDiffs[exon] = exonIntronDiff
             else:
-                if donor == True:
+                if donor:
                     exonIntronDiff = int(exonBounds[exon]["exonEnd"]) - int(varGenPos)
                 else:
                     exonIntronDiff = int(varGenPos) - int(exonBounds[exon]["exonStart"])
@@ -1038,7 +1038,7 @@ def getClosestExonNumberIntronicSNS(variant, boundaries, donor=True):
     return "exon0"
                 
 def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, deNovoDonorInRefAcc=False, testMode=False):
-    '''
+    """
     Given a variant, determines scores for closest reference splice sequence
     Also returns sequence of closest reference splice site and genomic position of splice site
     deNovoOffset refers to difference between de novo acceptor length and exonic portion size
@@ -1056,19 +1056,19 @@ def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, 
        *Note if looking for closest ref acceptor for a variant in an intron, use deNovoOffset=0
     Return dictionary also contains necessary formatting variables for splice site sequence (exonStart, intronStart)
     deNovoDonorInRefAcc = False if NOT checking for de novo splice donor sites in reference splice acceptor sites
-    deNovoDonorInRefAcc = True if checking for de novo splice donor sites in reference splice acceptor sites 
-    '''
+    deNovoDonorInRefAcc = True if checking for de novo splice donor sites in reference splice acceptor sites
+    """
     varGenPos = int(variant["Pos"])
     varChrom = getVarChrom(variant)
     varLoc = getVarLocation(variant, "enigma")
     if (varInExon(variant) == True and deNovo == False) or (varLoc == "intron_variant" or varLoc == "UTR_variant"):
-        if varInExon(variant) == True:
+        if varInExon(variant):
             exonNumber = getVarExonNumberSNS(variant)
             exonName = exonNumber
         if (varLoc == "intron_variant" or varLoc == "UTR_variant") and varInExon(variant) == False:
             exonNumber = getClosestExonNumberIntronicSNS(variant, "enigma", donor=donor)
             exonName = exonNumber
-        if donor == True:
+        if donor:
             refSpliceDonorBounds = getRefSpliceDonorBoundaries(variant, STD_DONOR_INTRONIC_LENGTH, STD_DONOR_EXONIC_LENGTH)
             closestSpliceBounds = refSpliceDonorBounds[exonNumber]
         else:
@@ -1077,7 +1077,7 @@ def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, 
     if varInSpliceRegion(variant, donor=donor, deNovo=deNovo) == True and deNovoDonorInRefAcc == False:
         closestSpliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=deNovo)
         exonName = closestSpliceBounds["exonName"]
-    if donor == True:
+    if donor:
         if getVarStrand(variant) == "+":
             refSeq = getFastaSeq(varChrom, closestSpliceBounds["donorStart"], closestSpliceBounds["donorEnd"], plusStrandSeq=True)
             # splice site is 3 bp to the right of donor Start (+3 because plus strand numbering increases from left to right)
@@ -1108,7 +1108,7 @@ def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, 
             genomicSplicePos = closestSpliceBounds["acceptorEnd"] + 3 + deNovoOffset
         exonStart = len(refSeq) - STD_EXONIC_PORTION
         intronStart = 0
-    if testMode == False:
+    if not testMode:
         # to prevent issue with running max ent scan score on unittests
         if exonName == "exon0":
             return {"exonName": "N/A",
@@ -1133,13 +1133,13 @@ def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, 
                 "genomicSplicePos": genomicSplicePos}
 
 def isCIDomainInRegion(regionStart, regionEnd, boundaries, gene):
-    '''
+    """
     Given a region of interest, boundaries (either enigma or priors) and gene of interest
     Determines if there is an overlap between the region of interest and a CI domain
     For minus strand gene (BRCA1) regionStart > regionEnd
     For plus strand gene (BRCA2) regionStart < regionEnd
     Returns True if there is an overlap, False otherwise
-    '''
+    """
     if gene == "BRCA1":
         if regionStart < regionEnd:
             start = regionEnd
@@ -1169,18 +1169,18 @@ def isCIDomainInRegion(regionStart, regionEnd, boundaries, gene):
     return False
 
 def getRefExonLength(variant, donor=True):
-    '''
+    """
     Given a variant, returns the length of the reference exon
     If variant is in an exon, returns length of that exon
     If variant is in a reference splice region, returns length of exon in which exonic portion is included
     If variant is in intron, returns exon in which either closest splice donor or acceptor is included depending on donor argument
       If donor=True, returns exon length for previous exon
       If donor=False, returns exon length for subsequent exon
-    '''
-    if varInExon(variant) == True:
+    """
+    if varInExon(variant):
         varExonNum = getVarExonNumberSNS(variant)
     else:
-        if varInSpliceRegion(variant, donor=donor, deNovo=False) == True:
+        if varInSpliceRegion(variant, donor=donor, deNovo=False):
             spliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=False)
             varExonNum = spliceBounds["exonName"]
         else:
@@ -1205,47 +1205,47 @@ def getRefExonLength(variant, donor=True):
     return exonLength
 
 def getNewSplicePosition(varGenPos, varStrand, varWindowPos, inExonicPortion, exonicPortionSize, intronicPortionSize, donor=True):
-    '''
+    """
     Given a variant's:
     genetic postion, strand, sliding window position with max MES score AND
       whether that position is within exonic portion of highest scoring window, exonic portion size, and intronic portion size
     Returns the position where splicing occurs for a de novo splice donor or acceptor (depending on donor=True argument)
-    '''
+    """
     if varStrand == "+":
-        if inExonicPortion == False:
-            if donor == True:
+        if not inExonicPortion:
+            if donor:
                 newSplicePos = int(varGenPos) - (varWindowPos - exonicPortionSize)
             else:
                 newSplicePos = int(varGenPos) + abs(varWindowPos - intronicPortionSize)
         else:
-            if donor == True:
+            if donor:
                 newSplicePos = int(varGenPos) + abs(varWindowPos - exonicPortionSize)
             else:
                 newSplicePos = int(varGenPos) - (varWindowPos - intronicPortionSize)
     else:
-        if inExonicPortion == False:
-            if donor == True:
+        if not inExonicPortion:
+            if donor:
                 newSplicePos = int(varGenPos) + (varWindowPos - exonicPortionSize)
             else:
                 newSplicePos = int(varGenPos) - abs(varWindowPos - intronicPortionSize)
         else:
-            if donor == True:
+            if donor:
                 newSplicePos = int(varGenPos) - abs(varWindowPos - exonicPortionSize)
             else:
                 newSplicePos = int(varGenPos) + (varWindowPos - intronicPortionSize)
     return newSplicePos
     
 def getAltExonLength(variant, exonicPortionSize, intronicPortionSize, deNovoDonorInRefAcc=False, donor=True):
-    '''
+    """
     Given a variant and the exonic portion size,
     returns the length of the alternate exon after splicing occurs in max MES window
     Donor argument determines if function is used for de novo donor (donor=True) or de novo acceptor (donor=False)
     deNovoDonorInRefAcc=True if looking for deNovoDonor in ref acceptor site, False otherwise
-    '''
-    if varInExon(variant) == True:
+    """
+    if varInExon(variant):
         varExonNum = getVarExonNumberSNS(variant)
     else:
-        if varInSpliceRegion(variant, donor=donor, deNovo=False) == True:
+        if varInSpliceRegion(variant, donor=donor, deNovo=False):
             spliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=False)
             varExonNum = spliceBounds["exonName"]
         else:
@@ -1256,7 +1256,7 @@ def getAltExonLength(variant, exonicPortionSize, intronicPortionSize, deNovoDono
     newSplicePos = getNewSplicePosition(variant["Pos"], getVarStrand(variant), slidingWindowInfo["varWindowPosition"],
                                         slidingWindowInfo["inExonicPortion"], exonicPortionSize, intronicPortionSize, donor=donor)
     if getVarStrand(variant) == "-":
-        if donor == True:
+        if donor:
             varExonStart = int(exonBounds[varExonNum]["exonStart"])
             # +1 to account for all positions including newSplicePos
             # adding one to exonStart increases length by 1 bp because numbering decreases from left to right
@@ -1268,7 +1268,7 @@ def getAltExonLength(variant, exonicPortionSize, intronicPortionSize, deNovoDono
             exonLength = newSplicePos - varExonEnd - 1
     else:
         varExonEnd = int(exonBounds[varExonNum]["exonEnd"])
-        if donor == True:
+        if donor:
             refExonLength = getRefExonLength(variant, donor=donor)
             # need to compare to refExonLength because of + strand gene
             exonLength = refExonLength - (varExonEnd - newSplicePos)
@@ -1277,32 +1277,32 @@ def getAltExonLength(variant, exonicPortionSize, intronicPortionSize, deNovoDono
     return exonLength
 
 def compareRefAltExonLengths(refLength, altLength):
-    '''
+    """
     Compares ref and alt exon lengths
     If both exon lengths % 3 are equal, then both ref and alt have the same reading frame
     Returns true if both ref and alt exon have the same reading frame, false otherwise
-    '''
+    """
     if refLength % 3 == altLength % 3:
         return True
     else:
         return False
 
 def isSplicingWindowInFrame(variant, exonicPortionSize, intronicPortionSize, deNovoDonorInRefAcc=False, donor=True):
-    '''
+    """
     Given a variant, determines ref and alt exon length and compares them
     exonicPortionSize refers to length in bp that is considered to be in exonic portion of splice site
     intronicPortionSize referes to length in bp that is considered to be in intronic portion of splice site
     deNovoDonorInRefAcc=True if looking for deNovoDonor in ref acceptor site, False otherwise
     Donor argument determines if function is used for de novo donor (donor=True) or de novo acceptor (donor=False)
     If ref and alt exon are in the same reading frame, returns True
-    '''
+    """
     refLength = getRefExonLength(variant, donor=donor)
     altLength = getAltExonLength(variant, exonicPortionSize, intronicPortionSize, deNovoDonorInRefAcc=deNovoDonorInRefAcc, donor=donor)
     return compareRefAltExonLengths(refLength, altLength)
 
 def isDeNovoWildTypeSplicePosDistanceDivisibleByThree(variant, exonicPortionSize, intronicPortionSize,
                                                       deNovoDonorInRefAcc=False, donor=True):
-    '''
+    """
     Given a variant, compares de novo splicing position with wild-type splicing position
     exonicPortionSize refers to length in bp that is considered to be in exonic portion of splice site
     intronicPortionSize referes to length in bp that is considered to be in intronic portion of splice site
@@ -1313,11 +1313,11 @@ def isDeNovoWildTypeSplicePosDistanceDivisibleByThree(variant, exonicPortionSize
     This function is another way to check if a de novo splice site would cause a frameshift mutation
        If it returns True, then de novo splicing would not cause a frameshift
        If it returns False, then de novo splicing would cause a frameshift
-    '''
-    if varInExon(variant) == True:
+    """
+    if varInExon(variant):
         varExonNum = getVarExonNumberSNS(variant)
     else:
-        if varInSpliceRegion(variant, donor=donor, deNovo=False) == True:
+        if varInSpliceRegion(variant, donor=donor, deNovo=False):
             spliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=False)
             varExonNum = spliceBounds["exonName"]
         else:
@@ -1328,7 +1328,7 @@ def isDeNovoWildTypeSplicePosDistanceDivisibleByThree(variant, exonicPortionSize
                                                               deNovoDonorInRefAcc=deNovoDonorInRefAcc)
     deNovoSplicePos = getNewSplicePosition(variant["Pos"], varStrand, slidingWindowInfo["varWindowPosition"],
                                            slidingWindowInfo["inExonicPortion"], exonicPortionSize, intronicPortionSize, donor=donor)
-    if donor == True:
+    if donor:
         wildTypeSplicePos = refExonBounds[varExonNum]["exonEnd"]
         if varStrand == "+":
             distanceBetween = wildTypeSplicePos - deNovoSplicePos
@@ -1348,7 +1348,7 @@ def isDeNovoWildTypeSplicePosDistanceDivisibleByThree(variant, exonicPortionSize
     return False
         
 def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc=False):
-    '''
+    """
     Given a variant, determines if there is a possibility of splice rescue
     deNovoDonorInRefAcc argument = True  if looking for deNovoDonor in ref acceptor site, False otherwise
     If there is a possibility of splice rescue, flags variant for further analysis
@@ -1356,12 +1356,12 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
     Extra flags are included to provide more information about why splicing rescue does or does not occur
       frameshiftFlag: equals 1 if variant causes a frameshift, 0 if not
       inExonicPortionFlag: equals 1 if variant IS in exonic portion of highest scoring window, 0 if not
-      CIDomainRegionFlag: equals 1 if truncating region (between new donor and next reference splice acceptor) 
+      CIDomainRegionFlag: equals 1 if truncating region (between new donor and next reference splice acceptor)
          includes a clinicall import domain, 0 if not
-      isDivisibleFlag: equals 1 if distance between de novo donor and wild-type donor splice site is NOT divisible by 3, 
+      isDivisibleFlag: equals 1 if distance between de novo donor and wild-type donor splice site is NOT divisible by 3,
          0 if not
-    '''
-    if varInIneligibleDeNovoExon(variant, donor=True) == True:
+    """
+    if varInIneligibleDeNovoExon(variant, donor=True):
         return {"priorProb": PATHOGENIC_PROBABILITY,
                 "enigmaClass": "class_5",
                 "spliceRescue": 0,
@@ -1384,7 +1384,7 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
         lowMESFlag = "-"
         # if variant is in specified exonic portion of highest scoring sliding window, no splice rescue
         if varInExonicPortion(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH, donor=True,
-                              deNovoDonorInRefAcc=deNovoDonorInRefAcc) == True:
+                              deNovoDonorInRefAcc=deNovoDonorInRefAcc):
             priorProb = PATHOGENIC_PROBABILITY
             inExonicPortionFlag = 1
             spliceRescue = 0
@@ -1392,7 +1392,7 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
             inFrame = isSplicingWindowInFrame(variant, STD_EXONIC_PORTION, STD_ACC_INTRONIC_LENGTH,
                                               deNovoDonorInRefAcc=deNovoDonorInRefAcc, donor=True)
             # if variant causes a frameshift, no splice rescue
-            if inFrame == False:
+            if not inFrame:
                 priorProb = PATHOGENIC_PROBABILITY
                 frameshiftFlag = 1
                 inExonicPortionFlag = 0
@@ -1420,13 +1420,13 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                 isDivisible = isDeNovoWildTypeSplicePosDistanceDivisibleByThree(variant, STD_EXONIC_PORTION, STD_ACC_INTRONIC_LENGTH,
                                                                                 deNovoDonorInRefAcc=deNovoDonorInRefAcc, donor=True)
                 # if truncated region includes a clinically important domain or causes a frameshift
-                if CIDomainInRegion == True:
+                if CIDomainInRegion:
                     priorProb = PATHOGENIC_PROBABILITY
                     spliceRescue = 0
                     CIDomainInRegionFlag = 1
                     inExonicPortionFlag = 0
                     frameshiftFlag = 0
-                elif isDivisible == False:
+                elif not isDivisible:
                     priorProb = PATHOGENIC_PROBABILITY
                     spliceRescue = 0
                     isDivisibleFlag = 1
@@ -1462,7 +1462,7 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                             closestRefData = getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False,
                                                                         deNovoDonorInRefAcc=deNovoDonorInRefAcc)
                             closestZScore = closestRefData["zScore"]
-                            if varInSpliceRegion(variant, donor=True, deNovo=False) == True:
+                            if varInSpliceRegion(variant, donor=True, deNovo=False):
                                 closestAltData = getPriorProbRefSpliceDonorSNS(variant, boundaries)
                                 closestZScore = closestAltData["altZScore"]
                             if altZScore > closestZScore:
@@ -1490,7 +1490,7 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
         if spliceFlag == 0:
             # splice rescue does not occur
             varGene = variant["Gene_Symbol"]
-            if varInExon(variant) == True:
+            if varInExon(variant):
                 exonName = getVarExonNumberSNS(variant)
                 if varGene == "BRCA1" and (exonName == "exon9" or exonName == "exon10"):
                     priorProb = CAPPED_PROBABILITY
@@ -1517,14 +1517,14 @@ def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc
                 "varConsequences": ",".join(varCons)}
 
 def getDeNovoSpliceFrameshiftStatus(variant, donor=True, deNovoDonorInRefAcc=False):
-    '''
+    """
     Given a variant, determiens if de novo splice site (either donor or acceptor based on donor argument)
       causes a frameshift
     Returns true if variant's de novo splice site causes a frameshift, false otherwise
 
     deNovoDonorInRefAcc is True if looking for de novo donor in reference splice acceptor site, False otherwise
     Frameshift is determined in 2 ways: inFrame and isDivisible
-    '''
+    """
     # if inFrame == False then alt and ref exons are not in the same reading frame
     inFrame = isSplicingWindowInFrame(variant, STD_EXONIC_PORTION, STD_ACC_INTRONIC_LENGTH,
                                       deNovoDonorInRefAcc=deNovoDonorInRefAcc, donor=donor)
@@ -1536,9 +1536,9 @@ def getDeNovoSpliceFrameshiftStatus(variant, donor=True, deNovoDonorInRefAcc=Fal
     return False
 
 def getEnigmaClass(priorProb):
-    '''
+    """
     Given a prior probability of pathogenecity, returns a predicted qualitative ENIGMA class
-    '''
+    """
     # if variant has prior prob = N/A then a predicted qualitative ENIGMA class will have already been determined
     if priorProb == "N/A":
         pass 
@@ -1555,7 +1555,7 @@ def getEnigmaClass(priorProb):
             return "class_3"
 
 def getPriorProbRefSpliceDonorSNS(variant, boundaries):
-    '''
+    """
     Given a variant and location boundaries (either PRIORS or enigma)
     Checks that variant is in a splice donor site and is a single nucleotide substitution
     Returns a dictionary containing:
@@ -1566,7 +1566,7 @@ def getPriorProbRefSpliceDonorSNS(variant, boundaries):
        - exonStart: denotes index (0-indexed) where exonic portion of sequence starts, always equal to 0 because splice donor is at end of exon
        - intronStart: denotes index (0-indexed) where intronic portion of sequence starts, equal to exonic portion size
      also has spliceSite variable = 1, so variant is marked as in a reference splice site
-    '''
+    """
     varType = getVarType(variant)
     varLoc = getVarLocation(variant, boundaries)
     if varType == "substitution" and (varLoc == "splice_donor_variant" or varLoc == "CI_splice_donor_variant"):
@@ -1619,7 +1619,7 @@ def getPriorProbRefSpliceDonorSNS(variant, boundaries):
                 "spliceSite": 1}
     
 def getPriorProbRefSpliceAcceptorSNS(variant, boundaries):
-    '''
+    """
     Given a variant and location boundaries (either PRIORS or enigma)
     Checks that variant is in a splice acceptor site and is a single nucleotide substitution
     Returns a dictionary containing:
@@ -1630,7 +1630,7 @@ def getPriorProbRefSpliceAcceptorSNS(variant, boundaries):
        - exonStart: denotes index (0-indexed) where exonic portion of sequence starts, always equal to 0 because splice donor is at end of exon
        - intronStart: denotes index (0-indexed) where intronic portion of sequence starts, equal to exonic portion size
      also has spliceSite variable = 1, so variant is marked as in a reference splice site
-    '''
+    """
     varType = getVarType(variant)
     varLoc = getVarLocation(variant, boundaries)
     if varType == "substitution" and (varLoc == "splice_acceptor_variant" or varLoc == "CI_splice_acceptor_variant"):
@@ -1683,13 +1683,13 @@ def getPriorProbRefSpliceAcceptorSNS(variant, boundaries):
                 "spliceSite": 1}
 
 def getPriorProbAfterGreyZoneSNS(variant, boundaries):
-    '''
+    """
     Given a variant and location boundaries (either PRIORS or enigma)
     Checks that variant is after the grey zone and is a single nucleotide substitution
     Checks that variant is either a missense or nonsense mutation
     Returns a dictionary containing prior probability of pathogenecity and predicted qualitative enigma class
     Dictionary contains other values that are set to either N/A, "-", or 0 because they are not relevant
-    '''
+    """
     varType = getVarType(variant)
     varLoc = getVarLocation(variant, boundaries)
     if varType == "substitution" and varLoc == "after_grey_zone_variant":
@@ -1781,16 +1781,16 @@ def getPriorProbAfterGreyZoneSNS(variant, boundaries):
     assert False, "Should never reach this"
 
 def varInIneligibleDeNovoExon(variant, donor=True):
-    '''
+    """
     Given a variant and donor argument:
         (donor=True, if for a de novo donor, donor=False, if for a de novo acceptor)
     Determines whether that variant is in an eligible exon to be evaluated for de novo splicing
     If in ineligible exon, returns True, returns False otherwise
-    '''
-    if varInExon(variant) == True:
+    """
+    if varInExon(variant):
         varGene = variant["Gene_Symbol"]
         varExon = getVarExonNumberSNS(variant)
-        if donor == True:
+        if donor:
             # last exon not eligible for de novo splice donor
             if varGene == "BRCA1" and varExon == "exon24":
                 return True
@@ -1803,7 +1803,7 @@ def varInIneligibleDeNovoExon(variant, donor=True):
         return False
 
 def getDeNovoFrameshiftAndCIStatus(variant, boundaries, donor=True, deNovoDonorInRefAcc=False):
-    '''
+    """
     Given a variant, boundaries (enigma or priors), donor argument, and deNovoDonorInRefAcc argument:
       donor argument = True for de novo donors, False for de novo acceptors
       deNovoDonorInRefAcc argument = True if lookign for de novo donor in ref acceptor site, False otherwise
@@ -1812,21 +1812,21 @@ def getDeNovoFrameshiftAndCIStatus(variant, boundaries, donor=True, deNovoDonorI
     Else, checks to see if new splice position would splice out (skip) a CI domain
     If variant de novo splice position does not cause a frameshift and does not disrupt a CI domain, reutrns True
       Returns False otherwise
-    '''
+    """
     frameshiftStatus = getDeNovoSpliceFrameshiftStatus(variant, donor=donor, deNovoDonorInRefAcc=deNovoDonorInRefAcc)
     # checks to make sure that variant does not cause a frameshift
-    if frameshiftStatus == True:
+    if frameshiftStatus:
         return False
     else:
         # determine if CI domain is in region that would be skipped by new splicing
-        if varInExon(variant) == True:
+        if varInExon(variant):
             varExonNum = getVarExonNumberSNS(variant)
         else:
-            if varInSpliceRegion(variant, donor=donor, deNovo=False) == True:
+            if varInSpliceRegion(variant, donor=donor, deNovo=False):
                 spliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=False)
                 varExonNum = spliceBounds["exonName"]
             else:
-                if donor == True:
+                if donor:
                     # if a variant is in an intron de novo donor cannot splice out any of the exon
                     # so no part of a CI domain will be spliced out
                     return True
@@ -1836,7 +1836,7 @@ def getDeNovoFrameshiftAndCIStatus(variant, boundaries, donor=True, deNovoDonorI
                                              deNovoDonorInRefAcc=deNovoDonorInRefAcc)
         regionStart = getNewSplicePosition(variant["Pos"], getVarStrand(variant), varWindowPos, inExonicPortion,
                                            STD_EXONIC_PORTION, STD_ACC_INTRONIC_LENGTH, donor=donor)
-        if donor == True:
+        if donor:
             # nextExonNum parses out N from varExonNum and adds 1 to get next exon number "exonN+1"
             # uses [4:] to remove "exon" from "exonN" so can add 1 to N to get N+1
             nextExonNum = "exon" + str(int(varExonNum[4:]) + 1)
@@ -1854,16 +1854,16 @@ def getDeNovoFrameshiftAndCIStatus(variant, boundaries, donor=True, deNovoDonorI
             refSpliceDonorBounds = getRefSpliceDonorBoundaries(variant, STD_DONOR_INTRONIC_LENGTH, STD_DONOR_EXONIC_LENGTH)
             regionEnd = refSpliceDonorBounds[prevExonNum]["donorEnd"]
         CIDomainInRegion = isCIDomainInRegion(regionStart, regionEnd, boundaries, variant["Gene_Symbol"])
-        if CIDomainInRegion == False:
+        if not CIDomainInRegion:
             return True
         return False
     
 def convertGenomicPosToTranscriptPos(genomicPos, chrom, genome, transcript):
-    '''
+    """
     Given a genomic position, chrom (in format "chrN"), genome (SequenceFileDB for genome),
       and transcript (pyhgvs transcript object):
     Returns a string of the transcript position at the given genomic position
-    '''
+    """
     # use "T" and "A" for ref and alt because transcript position is not dependent on these values
     # converts genomic position to transcript position
     hgvs_name = str(pyhgvs.format_hgvs_name(chrom, genomicPos, "T", "A", genome, transcript))
@@ -1872,25 +1872,25 @@ def convertGenomicPosToTranscriptPos(genomicPos, chrom, genome, transcript):
     return transcriptPos
 
 def formatSplicePosition(position, transcript=False):
-    '''
+    """
     Given a position and transcript argument, returns a formatted splice position
     If transcript = True, returns transcript formatted position "c.N"
     If transcript = False, returns genomic formatted position "g.N"
-    '''
-    if transcript == True:
+    """
+    if transcript:
         return "c." + str(position)
     else:
         return "g." + str(position)
 
 def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, genome, transcript, deNovoDonorInRefAcc=False):
-    '''
+    """
     Given a variant, boundaries (either priors or enigma), and exonicPortionSize
       1. checks that variant is a single nucleotide substitution
       2. checks that variant is in an exon or is in a reference splice donor region
     Genome is a SequenceFileDB for genome and transcript is a pyhgvs transcript object)
        both genome and transcript are necessary to convert from genomic to transcript coordinates
-    Returns a dictionary containing: 
-      prior probability of pathogenecity and predicted qualitative engima class 
+    Returns a dictionary containing:
+      prior probability of pathogenecity and predicted qualitative engima class
       deNovo donor MaxEntScan scores, zscores, and sequences for ref and alt
       deNovo donor genomic and transcript splice positions in format "g.N" and "c.N" respectively
       closest donor MaxEntScan score, zscore, and sequence
@@ -1903,9 +1903,9 @@ def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, genome, t
       variables necessary for formatting any sequences that are returned by this function
     deNovoDonorInRefAcc = False if NOT checking for de novo donor in reference splice acceptor site
     deNovoDonorInRefAcc = True if checking for de novo donors in reference splice acceptor site
-    '''
+    """
     if getVarType(variant) == "substitution":
-        if varInSpliceRegion(variant, donor=True, deNovo=True) == True:
+        if varInSpliceRegion(variant, donor=True, deNovo=True):
             if varInExon(variant) == True and varInIneligibleDeNovoExon(variant, donor=True) == True:
                 return {"priorProb": "N/A",
                         "enigmaClass": "N/A",
@@ -1955,7 +1955,7 @@ def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, genome, t
             refAltSeq = "N/A"
             altGreaterClosestRefFlag = 0
             altGreaterClosestAltFlag = "N/A"
-            if varInSpliceRegion(variant, donor=True, deNovo=False) == True:
+            if varInSpliceRegion(variant, donor=True, deNovo=False):
                 refDonorInfo = getPriorProbRefSpliceDonorSNS(variant, "enigma")
                 refAltZScore = refDonorInfo["altZScore"]
                 refAltMES = refDonorInfo["altMaxEntScanScore"]
@@ -1963,7 +1963,7 @@ def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, genome, t
                 altGreaterClosestAltFlag = 0
             frameshiftFlag = 0
             frameshiftStatus = getDeNovoSpliceFrameshiftStatus(variant, donor=True, deNovoDonorInRefAcc=deNovoDonorInRefAcc)
-            if frameshiftStatus == True:
+            if frameshiftStatus:
                 frameshiftFlag = 1
             altZScore = slidingWindowInfo["altZScore"]
             refZScore = slidingWindowInfo["refZScore"]
@@ -2002,7 +2002,7 @@ def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, genome, t
             if frameshiftFlag == 0 and priorProb != 0:
                 frameshiftAndCIStatus = getDeNovoFrameshiftAndCIStatus(variant, boundaries, donor=True,
                                                                        deNovoDonorInRefAcc=deNovoDonorInRefAcc)
-                if frameshiftAndCIStatus == True:
+                if frameshiftAndCIStatus:
                     priorProb = LOW_PROBABILITY
 
             # converts genomic splice position to transcript splice position
@@ -2041,14 +2041,14 @@ def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, genome, t
                     "frameshiftFlag": frameshiftFlag}
 
 def getPriorProbDeNovoAcceptorSNS(variant, exonicPortionSize, deNovoLength, genome, transcript):
-    '''
+    """
     Given a variant, exonic portion size, and de novo length:
       1. checks that variant is a single nucleotide substitution
-      2. checks that variant is in de novo splice acceptor region 
+      2. checks that variant is in de novo splice acceptor region
          de novo splice acceptor region defined by deNovoLength
     Genome is a SequenceFileDB for genome and transcript is a pyhgvs transcript object)
        both genome and transcript are necessary to convert from genomic to transcript coordinates
-    Returns a dictionary containing: 
+    Returns a dictionary containing:
       prior probability of pathogenecity and predicted qualitative engima class (both N/A)
       deNovo acceptor MaxEntScan scores, zscores, and sequence for ref and alt
       de novo acceptor genomic and transcript splice positions in format "g.N" and "c.N" respectively
@@ -2060,9 +2060,9 @@ def getPriorProbDeNovoAcceptorSNS(variant, exonicPortionSize, deNovoLength, geno
       altGreaterClosestAltFlag: which equals 1 if variant in native acceptor and altZScore > closestAltZScore, if not,
                                 N/A if not in a native acceptor
       variables necessary for formatting the returned sequences
-    '''
+    """
     if getVarType(variant) == "substitution":
-        if varInSpliceRegion(variant, donor=False, deNovo=True) == True:
+        if varInSpliceRegion(variant, donor=False, deNovo=True):
             slidingWindowInfo = getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLength,
                                                                         donor=False)
             newGenomicSplicePos = getNewSplicePosition(variant["Pos"], getVarStrand(variant), slidingWindowInfo["varWindowPosition"],
@@ -2076,7 +2076,7 @@ def getPriorProbDeNovoAcceptorSNS(variant, exonicPortionSize, deNovoLength, geno
             refAltSeq = "N/A"
             altGreaterClosestRefFlag = 0
             altGreaterClosestAltFlag = "N/A"
-            if varInSpliceRegion(variant, donor=False, deNovo=False) == True:
+            if varInSpliceRegion(variant, donor=False, deNovo=False):
                 refAccInfo = getPriorProbRefSpliceAcceptorSNS(variant, "enigma")
                 refAltZScore = refAccInfo["altZScore"]
                 refAltMES = refAccInfo["altMaxEntScanScore"]
@@ -2084,7 +2084,7 @@ def getPriorProbDeNovoAcceptorSNS(variant, exonicPortionSize, deNovoLength, geno
                 altGreaterClosestAltFlag = 0
             frameshiftFlag = 0
             frameshiftStatus = getDeNovoSpliceFrameshiftStatus(variant, donor=False, deNovoDonorInRefAcc=False)
-            if frameshiftStatus == True:
+            if frameshiftStatus:
                 frameshiftFlag = 1
             altZScore = slidingWindowInfo["altZScore"]
             refZScore = slidingWindowInfo["refZScore"]
@@ -2133,7 +2133,7 @@ def getPriorProbDeNovoAcceptorSNS(variant, exonicPortionSize, deNovoLength, geno
                     "frameshiftFlag": frameshiftFlag}
 
 def getPriorProbSpliceDonorSNS(variant, boundaries, variantData, genome, transcript):
-    '''
+    """
     Given a variant, boundaries (either PRIORS or ENIGMA), and a list of dictionaries with variant data
     Genome is a SequenceFileDB for genome and transcript is a pyhgvs transcript object)
        both genome and transcript are necessary to convert from genomic to transcript coordinates
@@ -2158,14 +2158,14 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData, genome, transcr
         spliceRescue = 1 if splice rescue possible for nonsense variant, 0 otherwise, N/A if not nonsense variant
         spliceFlag = 1 if splice rescue is possible so variant can be flagged for further analysis, 0 otherwise
         frameshiftFlag = 1 if nonsense variant causes a frameshift mutation also, 0 if not, N/A if not nonsense variant
-        inExonicPortionFlag = 1 if variant IS in exonic portion of highest scoring window and variant is a nonsense variant, 
+        inExonicPortionFlag = 1 if variant IS in exonic portion of highest scoring window and variant is a nonsense variant,
            0 if NOT in exonic portion, N/A if not nonsense variant
-        CIDomainRegionFlag = 1 if truncating region (between new donor and next reference splice acceptor) 
+        CIDomainRegionFlag = 1 if truncating region (between new donor and next reference splice acceptor)
            includes a clinically import domain for nonsense variant, 0 if not, N/A if not nonsense variant
-        isDivisibleFlag = 1 if distance between de novo donor and wild-type donor splice site is NOT divisible by 3 for nonsense variant, 
+        isDivisibleFlag = 1 if distance between de novo donor and wild-type donor splice site is NOT divisible by 3 for nonsense variant,
            0 if it IS divisible, N/A if not a nonsense variant
     Dictionary also contains formatting variables for each listed sequence
-    ''' 
+    """
     if varInSpliceRegion(variant, donor=True, deNovo=False) and getVarType(variant) == "substitution":
         refSpliceInfo = getPriorProbRefSpliceDonorSNS(variant, boundaries)
         deNovoSpliceInfo = getPriorProbDeNovoDonorSNS(variant, boundaries, STD_EXONIC_PORTION, genome, transcript,
@@ -2173,7 +2173,7 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData, genome, transcr
         deNovoPrior = deNovoSpliceInfo["priorProb"]
         refPrior = refSpliceInfo["priorProb"]
         proteinPrior = "N/A"
-        if varInExon(variant) == True:
+        if varInExon(variant):
             proteinInfo = getPriorProbProteinSNS(variant, variantData)
             proteinPrior = proteinInfo["priorProb"]
         if deNovoPrior != "N/A" and proteinPrior != "N/A":
@@ -2295,7 +2295,7 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData, genome, transcr
                 "varConsequences": ",".join(varCons)}
 
 def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData, genome, transcript):
-    '''
+    """
     Given a variant, boundaries (either PRIORS or ENIGMA), and list of dictionaries with variant data
     Determines reference and de novo acceptor scores for variant
       If variant in exon, also determines de novo donor scores and protein prior
@@ -2320,21 +2320,21 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData, genome, tran
         spliceRescue = 1 if splice rescue possible for nonsense variant, 0 otherwise, N/A if not nonsense variant
         spliceFlag = 1 if splice rescue is possible so variant can be flagged for further analysis, 0 otherwise
         frameshiftFlag = 1 if nonsense variant causes a frameshift mutation also, 0 if not, N/A if not nonsense variant
-        inExonicPortionFlag = 1 if variant IS in exonic portion of highest scoring window and variant is a nonsense variant, 
+        inExonicPortionFlag = 1 if variant IS in exonic portion of highest scoring window and variant is a nonsense variant,
            0 if NOT in exonic portion, N/A if not nonsense variant
-        CIDomainRegionFlag = 1 if truncating region (between new donor and next reference splice acceptor) 
+        CIDomainRegionFlag = 1 if truncating region (between new donor and next reference splice acceptor)
            includes a clinically import domain for nonsense variant, 0 if not, N/A if not nonsense variant
-        isDivisibleFlag = 1 if distance between de novo donor and wild-type donor splice site is NOT divisible by 3 for nonsense variant, 
+        isDivisibleFlag = 1 if distance between de novo donor and wild-type donor splice site is NOT divisible by 3 for nonsense variant,
            0 if it IS divisible, N/A if not a nonsense variant
     Dictionary also contains formatting variables for each listed sequence
-    '''
+    """
     if varInSpliceRegion(variant, donor=False, deNovo=False) and getVarType(variant) == "substitution":
         refSpliceInfo = getPriorProbRefSpliceAcceptorSNS(variant, boundaries)
         deNovoAccInfo = getPriorProbDeNovoAcceptorSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH, genome, transcript)
         refPrior = refSpliceInfo["priorProb"]
         proteinPrior = "N/A"
         applicablePrior = refSpliceInfo["priorProb"]
-        if varInExon(variant) == True:
+        if varInExon(variant):
             deNovoDonorInfo = getPriorProbDeNovoDonorSNS(variant, boundaries, STD_EXONIC_PORTION, genome, transcript,
                                                          deNovoDonorInRefAcc=True)
             deNovoDonorPrior = deNovoDonorInfo["priorProb"]
@@ -2485,11 +2485,11 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData, genome, tran
                 "varConsequences": ",".join(varCons)}
     
 def getPriorProbProteinSNS(variant, variantData):
-    '''
+    """
     Given a variant and a list of dictionaries containing variant data,
     Returns a dictionary containing:
       the variant's protein prior probability and enigma class for that prior
-    '''
+    """
     proteinPrior = "-"
     enigmaClass = "-"
     if getVarType(variant) == "substitution":
@@ -2509,11 +2509,11 @@ def getPriorProbProteinSNS(variant, variantData):
                 "enigmaClass": enigmaClass}
 
 def getPriorProbInGreyZoneSNS(variant, boundaries, variantData):
-    '''
+    """
     Given a variant and a list of dicitionaries with variant data,
     Returns applicable prior and enigma class based on protein priors for that variant
     Dictionary also contains other values that are either "N/A", "-", or 0 because they are not relevant
-    '''
+    """
     if getVarType(variant) == "substitution" and getVarLocation(variant, boundaries) == "grey_zone_variant":
         proteinData = getPriorProbProteinSNS(variant, variantData)
         proteinPrior = proteinData["priorProb"]
@@ -2609,7 +2609,7 @@ def getPriorProbInGreyZoneSNS(variant, boundaries, variantData):
                 "lowMESFlag": "N/A"}
     
 def getPriorProbInExonSNS(variant, boundaries, variantData, genome, transcript):
-    '''
+    """
     Given a variant, boundaries (either "enigma" or "priors") and a list of dictionaries containing variant data:
       1. Checks that variant is in an exon or clinically important domains and NOT in a splice site
       2. Checks that variant is a SNS variant
@@ -2631,13 +2631,13 @@ def getPriorProbInExonSNS(variant, boundaries, variantData, genome, transcript):
         spliceRescue = 1 if splice rescue possible for nonsense variant, 0 otherwise
         spliceFlag = 1 if splice rescue is possible so variant can be flagged for further analysis, 0 otherwise
         frameshiftFlag = 1 if nonsense variant causes a frameshift mutation also, 0 if not, N/A if not nonsense variant
-        inExonicPortionFlag = 1 if variant IS in exonic portion of highest scoring window and variant is a nonsense variant, 
+        inExonicPortionFlag = 1 if variant IS in exonic portion of highest scoring window and variant is a nonsense variant,
            0 if NOT in exonic portion, N/A if not nonsense variant
-        CIDomainRegionFlag = 1 if truncating region (between new donor and next reference splice acceptor) 
+        CIDomainRegionFlag = 1 if truncating region (between new donor and next reference splice acceptor)
            includes a clinically import domain for nonsense variant, 0 if not, N/A if not nonsense variant
-        isDivisibleFlag = 1 if distance between de novo donor and wild-type donor splice site is NOT divisible by 3 for nonsense variant, 
+        isDivisibleFlag = 1 if distance between de novo donor and wild-type donor splice site is NOT divisible by 3 for nonsense variant,
            0 if it IS divisible, N/A if not a nonsense variant
-    '''
+    """
     varLoc = getVarLocation(variant, boundaries)
     if (varLoc == "exon_variant" or "CI_domain_variant") and getVarType(variant) == "substitution":
         proteinData = getPriorProbProteinSNS(variant, variantData)
@@ -2789,12 +2789,12 @@ def getPriorProbInExonSNS(variant, boundaries, variantData, genome, transcript):
                 "varConsequences": ",".join(varCons)}
 
 def getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries):
-    '''
+    """
     Given a variant and boundaries (either "enigma" or "priors"),
     Checks that variant is outside transcript boundaries
     Returns prior prob and predicted qualitative enigma class
     Dictionary also contains other values that are either "N/A", "-", or 0 because they are not relevant
-    '''
+    """
     varLoc = getVarLocation(variant, boundaries)
     varType = getVarType(variant)
     if varLoc == "outside_transcript_boundaries_variant" and varType == "substitution":
@@ -2888,7 +2888,7 @@ def getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries):
                 "lowMESFlag": "N/A"}
 
 def getPriorProbIntronicDeNovoDonorSNS(variant, genome, transcript):
-    '''
+    """
     Given a variant,
       1. Checks that variant is NOT in exon or reference donor/acceptor site
       2. Checks that variant is a substitution variant
@@ -2902,7 +2902,7 @@ def getPriorProbIntronicDeNovoDonorSNS(variant, genome, transcript):
     altGreaterClosestAltFlag is always equals N/A because this function is not used for any variants in ref splice sites
     Returns dictionary containing prior prob, enigma class, de novo donor scores, and splice flag
     Also contains closest ref donor scores and de novo and closest donor genomic and transcript splice positions
-    '''
+    """
     inExon = varInExon(variant)
     inRefDonor = varInSpliceRegion(variant, donor=True, deNovo=False)
     inRefAcc = varInSpliceRegion(variant, donor=False, deNovo=False)
@@ -2936,7 +2936,7 @@ def getPriorProbIntronicDeNovoDonorSNS(variant, genome, transcript):
 
             frameshiftStatus = getDeNovoSpliceFrameshiftStatus(variant, donor=True, deNovoDonorInRefAcc=False)
             frameshiftFlag = 0
-            if frameshiftStatus == True:
+            if frameshiftStatus:
                 frameshiftFlag = 1
 
             # converts genomic splice position to transcript splice position
@@ -2976,7 +2976,7 @@ def getPriorProbIntronicDeNovoDonorSNS(variant, genome, transcript):
                     "spliceFlag": spliceFlag}
     
 def getPriorProbInIntronSNS(variant, boundaries, genome, transcript):
-    '''
+    """
     Given a variant and boundaries (either "priors or "enigma"),
     Checks that variant is located in an intron and is a substitution variant
     Determines if variant creates a de novo donor site in the intron
@@ -2986,7 +2986,7 @@ def getPriorProbInIntronSNS(variant, boundaries, genome, transcript):
     Dictionary also contains de novo donor ref and alt scores
     AND a spliceFlag which is equal to 1 if variant creates a better de novo splice site than ref sequence
     Rest of values in dictionary are equal to 0, "-", or N/A because they are not relevant to variant
-    '''
+    """
     varLoc = getVarLocation(variant, boundaries)
     varType = getVarType(variant)
     if varLoc == "intron_variant" and varType == "substitution":
@@ -3087,7 +3087,7 @@ def getPriorProbInIntronSNS(variant, boundaries, genome, transcript):
                 "lowMESFlag": "N/A"}
 
 def getPriorProbInUTRSNS(variant, boundaries, genome, transcript):
-    '''
+    """
     Given a variant and boundaries (either "priors" or "enigma"),
     Checks that variant is a SNS variant in a UTR
     Determines prior prob based on location (5'/3' UTR and intron/exon)
@@ -3097,7 +3097,7 @@ def getPriorProbInUTRSNS(variant, boundaries, genome, transcript):
     Dictionary also contains de novo donor/acceptor ref and alt scores if applicable
     AND a spliceFlag which is equal to 1 if variant creates a better de novo splice site than ref sequence
     Rest of values in dictionary are equal to 0, "-", or N/A because they are not relevant to variant
-    '''
+    """
     # TO DO still need to account for creation of alternate ATG codons in 5' UTRs
     varLoc = getVarLocation(variant, boundaries)
     varType = getVarType(variant)
@@ -3162,13 +3162,13 @@ def getPriorProbInUTRSNS(variant, boundaries, genome, transcript):
             applicableClass = getEnigmaClass(applicablePrior)
             spliceFlag = 0
         elif "5_prime_UTR_variant" in varCons:
-            if varInExon(variant) == True:
+            if varInExon(variant):
                 deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, boundaries, STD_EXONIC_PORTION, genome, transcript,
                                                              deNovoDonorInRefAcc=False)
                 applicablePrior = deNovoDonorData["priorProb"]
                 applicableClass = deNovoDonorData["enigmaClass"]
                 spliceFlag = 0
-                if varInSpliceRegion(variant, donor=False, deNovo=True) == True:
+                if varInSpliceRegion(variant, donor=False, deNovo=True):
                     deNovoAccData = getPriorProbDeNovoAcceptorSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH,
                                                                   genome, transcript)
         else:
@@ -3272,14 +3272,14 @@ def getPriorProbInUTRSNS(variant, boundaries, genome, transcript):
                 "varConsequences": ",".join(varCons)}
 
 def getVarData(variant, boundaries, variantData, genome, transcript):
-    '''
+    """
     Given variant, boundaries (either "priors" or "enigma') and list of dictionaries with variant data
     Genome is a SequenceFileDB for genome and transcript is a pyhgvs transcript object)
        both genome and transcript are necessary to convert from genomic to transcript coordinates
     Checks that variant is a single nucleotide substitution
     Determines prior prob dictionary based on variant location
     Return dictionary containing all values for all new prior prob fields
-    '''
+    """
     varLoc = getVarLocation(variant, boundaries)
     varType = getVarType(variant)
     blankDict = {"applicablePrior": "-",
@@ -3401,20 +3401,20 @@ def getVarData(variant, boundaries, variantData, genome, transcript):
     return varData
             
 def addVarDataToRow(varData, inputRow):
-    '''
+    """
     Given data about a particular variant and a row from input file,
     Returns row with appended data
-    '''
+    """
     for key in varData.keys():
         inputRow[key] = varData[key]
     return inputRow
 
 def getVarDict(variant, boundaries):
-    '''
+    """
     Given input data, returns a dictionary containing information for each variant in input
-    Dictionary key is variant HGVS_cDNA and value is a dictionary containing variant gene, variant chromosome, 
+    Dictionary key is variant HGVS_cDNA and value is a dictionary containing variant gene, variant chromosome,
     variant strand, variant genomic coordinate, variant type, and variant location
-    '''
+    """
     varStrand = getVarStrand(variant)
     varType = getVarType(variant)
     varLoc = getVarLocation(variant, boundaries)
