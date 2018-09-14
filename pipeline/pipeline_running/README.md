@@ -8,9 +8,11 @@ In order to faciliate working with the pipeline a makefile is included in the co
 
 New data releases should ideally be generated on a dedicated pipeline machine. Although it could be run on any other machine in principle, some sources (e.g. LOVD) are only available from the pipeline machine.
 
-### Credentials:
+### Credentials
 
-Credentials can be passed into the container by mounting an appropriate file. Currently, the file should contain the following:
+Some early stages of the pipeline new some credentials to download data. These can be passed into the container by mounting an appropriate file. Also note, that some data sets are only available via the pipeline machine. However, later stages of the pipeline don't need any and some dummy file could be created.
+
+Currently, that a credential files should contain the following:
 
 ```
 [RunAll]
@@ -36,7 +38,7 @@ To create a new data release entry point is the `pipeline/pipeline_running/gener
 For the pipeline machine, we get:
 
 ```
-./generate_release.sh /home/pipeline/monthly_releases /home/pipeline/luigi_pipeline_credentials.cfg /home/pipeline/previous_releases
+/home/pipeline/brca_upstream/pipeline/pipeline_running/generate_release.sh /home/pipeline/monthly_releases /home/pipeline/luigi_pipeline_credentials.cfg /home/pipeline/previous_releases
 ```
 
 This script clones the BRCA Exchange repo into an appropriate directory and checks out the latest commit on master. It then generates a confguration file `brca_pipeline_cfg.mk` where paths and other settings are set up.
