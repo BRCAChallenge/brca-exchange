@@ -11,7 +11,7 @@ CREDENTIALS_PATH := {{ CREDENTIALS_PATH | default(WORK_DIR + "/luigi_pipeline_cr
 
 {% set PREVIOUS_RELEASE_DIR = PREVIOUS_RELEASE_DIR|default(WORK_DIR) %}
 # path a previous data release archive. used to determine differences
-PREVIOUS_RELEASE_PATH := {{ PREVIOUS_RELEASE_PATH | default(PREVIOUS_RELEASE_DIR + "/latest.tar.gz") }}
+PREVIOUS_RELEASE_PATH := {{ PREVIOUS_RELEASE_PATH | default(PREVIOUS_RELEASE_DIR + "/latest_release.tar.gz") }}
 PREVIOUS_RELEASE_DIR := {{ PREVIOUS_RELEASE_DIR }}
 
 # path to release notes
