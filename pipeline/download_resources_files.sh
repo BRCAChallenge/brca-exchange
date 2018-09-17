@@ -43,5 +43,5 @@ done
 
 for f in hg18.fa.gz hg19.fa.gz hg38.fa.gz; do
     echo "Unzipping ${f} ..."
-    gunzip -f "$f"
+    gunzip -k -f "$f"
 done
