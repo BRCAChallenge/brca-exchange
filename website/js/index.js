@@ -759,7 +759,7 @@ var VariantDetail = React.createClass({
                         onDimsChanged={(collapser) => {
                             this.relayoutOnCollapsed(collapser);
                         }}
-                        helpSection="in-silico-probabilities-of-pathogenicity"
+                        helpSection="in-silico-prior-probabilities-of-pathogenicity"
                         showHelp={this.showHelp}
                     />
                 );
