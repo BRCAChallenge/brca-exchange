@@ -19,13 +19,13 @@ RUN curl -fsSL get.docker.com -o get-docker.sh \
 
 WORKDIR /opt
 
-COPY requirements_docker.txt .
-COPY test-requirements_docker.txt .
+COPY pipeline/requirements.txt .
+COPY test-requirements.txt .
 
 # install numpy first to avoid issues with bio python and bx-python (see also https://github.com/LUMC/vep2lovd/issues/1)
-RUN pip install $(grep numpy requirements_docker.txt)
+RUN pip install $(grep numpy requirements.txt)
 
-RUN pip install -r requirements_docker.txt -r test-requirements_docker.txt
+RUN pip install -r requirements.txt -r test-requirements.txt
 
 
 # install vcf tools
@@ -50,20 +50,20 @@ RUN git clone https://github.com/counsyl/hgvs.git
 # taking pyhgvs 0.9.4
 RUN cd hgvs && git checkout aebe5bd9683f4b5937fd653ce4b13fcd4f3ebb10 && python setup.py install
 
-
 #leiden brca
 RUN git clone https://github.com/BRCAChallenge/leiden.git && cd leiden && python setup.py install
 
 RUN rm -r /opt/leiden /opt/hgvs /root/.cache
 
 ARG FORCE_REBUILD=0
-ARG BRCA_GIT_REPO=https://github.com/BRCAChallenge/brca-exchange.git
-ARG BRCA_EXCHANGE_COMMIT=master
-RUN git clone ${BRCA_GIT_REPO} && cd brca-exchange && git checkout ${BRCA_EXCHANGE_COMMIT}
+COPY . /opt/brca-exchange
 
-COPY run_luigi.sh .
+COPY pipeline/docker/run_luigi.sh .
 
 ENV LUIGI_CONFIG_PATH="/opt/luigi_pipeline_credentials.cfg"
 
-CMD ["/opt/run_luigi.sh"]
+ARG IS_GIT_DIRTY="False"
+ARG GIT_COMMIT=""
+LABEL GitCommit=$GIT_COMMIT IsGitDirty=$IS_GIT_DIRTY
 
+CMD ["/opt/run_luigi.sh"]
