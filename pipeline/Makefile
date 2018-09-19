@@ -1,7 +1,22 @@
 .DEFAULT_GOAL := help
 
 CONFIG_PATH := brca_pipeline_cfg.mk
-include $(CONFIG_PATH)
+
+ifneq ("$(wildcard $(CONFIG_PATH))","")
+	include $(CONFIG_PATH)
+endif
+
+OS := $(shell uname -s)
+
+MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+
+init: ## setup config file
+	echo "creating file in $(CONFIG_PATH). Please edit to your needs in particular the WORK_DIR!"
+	jinja2 -D DATA_DATE=2099-12-31 \
+		-D CODE_BASE=$(shell realpath "$(shell dirname $(MKFILE_PATH))/..") \
+	  -D WORK_DIR='/tmp/brca_workdir' \
+    -D RELEASE_TAG='dev' \
+		pipeline_running/brca_pipeline_cfg.mk.j2 > $(CONFIG_PATH)
 
 checkout: ## checking out code base
 	[ -d $(CODE_BASE) ] || git clone $(BRCA_GIT_REPO) $(CODE_BASE)
@@ -34,7 +49,14 @@ setup-lovd: ## setting up LOVD data via pipeline machine, if not running on pipe
 		ssh pipeline@52.151.62.136 curl https://databases.lovd.nl/shared/export/BRCA > $(OUT_DIR)/LOVD/BRCA.txt
 	fi
 
-DOCKER_RUN_CMD = docker run -it --rm -u `id -u ${USER}`:`stat -c '%g' /var/run/docker.sock` \
+
+ifeq ($(OS), Darwin)
+DOCKER_GRP = 0
+else
+DOCKER_GRP = `stat -c '%g' /var/run/docker.sock`
+endif
+
+DOCKER_RUN_CMD = docker run -it --rm -u `id -u ${USER}`:$(DOCKER_GRP) \
 	-e "DATA_DATE=$(DATA_DATE)" \
         -e"UTA_DB_URL=postgresql://anonymous@0.0.0.0:$(UTA_PORT)/uta/uta_$(UTA_RELEASE_DATE)" \
 	--network host \
@@ -92,6 +114,7 @@ copy-to-previous: ## postprocessing: copy new release tar to previous release fo
 	ln -s `ls -t $(PREVIOUS_RELEASE_DIR)/release-*.tar.gz | head -n 1` $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz
 
 post-release-cmds: cleanup-failed include-release-notes push-docker tag-release copy-to-previous ## postprocessing: do all the necessary postprocessing to wrap up a data release
+
 
 define PRINT_HELP_PYSCRIPT
 import re, sys
