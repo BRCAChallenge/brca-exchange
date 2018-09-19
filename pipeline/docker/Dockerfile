@@ -58,12 +58,10 @@ RUN rm -r /opt/leiden /opt/hgvs /root/.cache
 ARG FORCE_REBUILD=0
 COPY . /opt/brca-exchange
 
-COPY pipeline/docker/run_luigi.sh .
-
 ENV LUIGI_CONFIG_PATH="/opt/luigi_pipeline_credentials.cfg"
 
 ARG IS_GIT_DIRTY="False"
 ARG GIT_COMMIT=""
 LABEL GitCommit=$GIT_COMMIT IsGitDirty=$IS_GIT_DIRTY
 
-CMD ["/opt/run_luigi.sh"]
+CMD ["/opt/brca-exchange/pipeline/docker/run_luigi.sh"]
