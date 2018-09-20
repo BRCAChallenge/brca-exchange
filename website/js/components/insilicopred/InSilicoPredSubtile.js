@@ -105,7 +105,7 @@ export default class InSilicoPredSubtile extends React.Component {
                 </Table>
 
                 <div className="subtile-container">
-                    <b>Credits:</b> Computational algorithm and display derived from the <a href="http://priors.hci.utah.edu/PRIORS/BRCA/">HCI Breast Cancer Genes Prior Probabilities</a> website.
+                    <b>Credits:</b> Computational algorithm and display derived from the <a href="http://priors.hci.utah.edu">HCI Breast Cancer Genes Prior Probabilities</a> website.
                 </div>
 
                 <div className="subtile-container">

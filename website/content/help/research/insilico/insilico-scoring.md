@@ -30,7 +30,7 @@ The Splicing-level Estimation is a value that demonstrates the highest possible 
 
 Z-scores measure probability of splicing impact. Alternate Z-scores, or Z-scores for the alternate sequence introduced by the variant, measure the probability that the variant affects  splicing. The alternate Z-scores are compared to reference sequence Z-scores to account for the inherent splicing likelihood in the region, which is often low. Predictions are made about splicing impact using these Z-scores; probabilities of pathogenicity associated with minimal (or weak/null), moderate, and high impact are assigned as the predicted probabilities listed in the tables below. There are also probabilities assigned to variants that either improve splicing likelihood or occur outside splice regions.
 
-The Splicing-level Estimation is determined by assessing the variant on two levels, using two sets of Z-scores. A variant is not only assessed for how the altered sequence affects the wild-type splice site (*probability of wild-type acceptor damage, probability of wild-type donor damage*), but also assessed for how it may introduce new, or de novo, donor splice sites (*probability of de novo donor creation*). 
+The Splicing-level Estimation is determined by assessing the variant on two levels, using two sets of Z-scores. A variant is not only assessed for how the altered sequence affects the wild-type splice site (*probability of wild-type acceptor damage, probability of wild-type donor damage*), but also assessed for how it may introduce new, or de novo, donor splice sites (*probability of de novo donor creation*).
 
 A Z-score greater than 0 (or 0.5) indicates a better than average likelihood of splicing. If a Z-score is greater than 0 for a *wild-type donor*, splicing function is predicted to be retained despite the mutation. However, a Z-score greater than 0 for a *de novo donor* indicates possible interference of wild-type splice function. In this case, likelihood of splicing outside the wild-type splice site is increasing. The Z-score ranges associated with probabilities of pathogenicity in the case of wild-type donor damage, wild-type acceptor damage, and de novo donor creation are provided below.
 
@@ -69,7 +69,7 @@ The Splicing-level estimation is considered moderate, or 0.30, and is due to the
 
 Example: [BRCA1 c.442c>t](http://brcaexchange.org/variant/104977)
 
-Because the variant is located in an exon and in a wild-type acceptor splice site region, the following values are used in predicting the *In Silico* Prior Probability of Pathogenicity: 
+Because the variant is located in an exon and in a wild-type acceptor splice site region, the following values are used in predicting the *In Silico* Prior Probability of Pathogenicity:
 
 *   De Novo donor probability (Splicing-level Estimation)
 *   Wild-type acceptor probability (Splicing-level Estimation)
@@ -100,7 +100,7 @@ A de novo donor prior is calculated because the variant could theoretically intr
 
 This variant is a nonsense variant, so the *In Silico* Prior Probability of Pathogenicity is ultimately assigned per the Protein-level Estimation (0.99), which is a higher predicted probability of pathogenicity than the Splicing-level Estimation (0.02).
 
-The Splicing-level Estimation is due to the de novo donor probability. The de novo alt Z-score is less than -2, indicating low probability of de novo splicing in that region. Furthermore, the ref Z-score for the nearest wild-type donor is much greater, indicating that splicing is more likely to occur in the wild-type donor region. The wild-type donor probability is not applicable because the variant is not in a donor (or acceptor) region. 
+The Splicing-level Estimation is due to the de novo donor probability. The de novo alt Z-score is less than -2, indicating low probability of de novo splicing in that region. Furthermore, the ref Z-score for the nearest wild-type donor is much greater, indicating that splicing is more likely to occur in the wild-type donor region. The wild-type donor probability is not applicable because the variant is not in a donor (or acceptor) region.
 
 ### Intronic Variant Located in Wild-Type Splice Site's Donor Region
 
@@ -116,7 +116,7 @@ Because the variant is located in an intron and a wild-type donor splice site re
 
 ![image 12](scoring-img/img12.png)
 
-The *In Silico* Prior Probability of Pathogenicity is assigned per the Splicing-level Estimation (0.97), because intronic variants do not have Protein-level Estimations. 
+The *In Silico* Prior Probability of Pathogenicity is assigned per the Splicing-level Estimation (0.97), because intronic variants do not have Protein-level Estimations.
 
 This estimation is derived from the wild-type donor probability, which is 0.97 because the wild-type donor alternate Z-score is significantly lower than the wild-type donor reference Z-score, and much lower than -2.0. Thus, splicing probability in the wild-type donor has significantly decreased.
 
@@ -135,13 +135,13 @@ Because the variant is located in an intron and a wild-type splice site's accept
 
 ![image 14](scoring-img/img14.png)
 
-The *In Silico* Prior Probability of Pathogenicity (0.34, moderate prediction) is assigned per the Splicing-level Estimation. 
+The *In Silico* Prior Probability of Pathogenicity (0.34, moderate prediction) is assigned per the Splicing-level Estimation.
 
 The Splicing-level Estimation is considered moderate, 0.34, and is due to the wild-type acceptor probability. The Splicing-level Estimation only uses the wild-type acceptor prior due to the variant’s location, and is assigned as moderate because the wild-type acceptor alt Z-score is less than -2. However, the wild-type acceptor ref Z-score was already relatively low, -1.93, and the difference to the alt Z-score is <0.5, so the variant’s likelihood of pathogenicity is predicted to be moderate rather than high.
 
 ### A note on special cases:
 
-Variants located outside transcript boundaries, in untranslated regions, in non-splice regions of introns, and in the region near the end of a transcript do not follow the same logic as the above examples. (It is unknown if a truncating variant near the end of a transcript, dubbed the ‘grey-zone’ by ENIGMA, will confer a high probability of pathogenicity) . These cases are also not available for display on BRCA Exchange, though they can be found in our [downloadable data set](http://brcaexchange.org/releases). 
+Variants located outside transcript boundaries, in untranslated regions, in non-splice regions of introns, and in the region near the end of a transcript do not follow the same logic as the above examples. (It is unknown if a truncating variant near the end of a transcript, dubbed the ‘grey-zone’ by ENIGMA, will confer a high probability of pathogenicity) . These cases are also not available for display on BRCA Exchange, though they can be found in our [downloadable data set](http://brcaexchange.org/releases).
 
 ## For More Information:
 
@@ -157,7 +157,7 @@ Variants located outside transcript boundaries, in untranslated regions, in non-
 The BRCA Exchange used the resources below to calculate the In Silico probabilities with a few minor modifications, which are detailed here. This was done in collaboration with Huntsman Cancer Institute and ENIGMA.
 
 *   Vall&#233;e et al 2016 ([https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4907813/](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4907813/))
-*   HCI PRIORS Website ([http://priors.hci.utah.edu/PRIORS/index.php](http://priors.hci.utah.edu/PRIORS/index.php))
+*   HCI PRIORS Website ([http://priors.hci.utah.edu](http://priors.hci.utah.edu/PRIORS/index.php))
 
 **Updates to *In Silico* Prior Probabilities Calculations**
 
@@ -173,5 +173,5 @@ The BRCA Exchange used the resources below to calculate the In Silico probabilit
 
 **Notes on *In Silico* Prior Probabilities Code & Pseudocode**
 
-If you would like to take a closer look at how these probabilities are calculated, please visit the BRCA Exchange github to view the software’s code and code comments. You can also access the *In Silico* Prior Probabilities of Pathogenicity pseudocode [here](https://docs.google.com/document/d/132uEmKKMYlzcBKoB4LQQw3rCv5llgxQxiiSCOGUftFk/edit), which is an abridged, nonfunctional version of the code that helps the user better understand the logic implemented by the software. Please note that “wild-type” is used interchangeably with “reference” in both of these documents, and that “reference” or “ref” may refer to any reference sequence or the reference (wild-type) splice donor/acceptor. 
+If you would like to take a closer look at how these probabilities are calculated, please visit the BRCA Exchange github to view the software’s code and code comments. You can also access the *In Silico* Prior Probabilities of Pathogenicity pseudocode [here](https://docs.google.com/document/d/132uEmKKMYlzcBKoB4LQQw3rCv5llgxQxiiSCOGUftFk/edit), which is an abridged, nonfunctional version of the code that helps the user better understand the logic implemented by the software. Please note that “wild-type” is used interchangeably with “reference” in both of these documents, and that “reference” or “ref” may refer to any reference sequence or the reference (wild-type) splice donor/acceptor.
 Currently, there is not enough clinical evidence to provide a reliable, calibrated calculation of impact due to the creation of a de novo splice-site acceptor, which could theoretically factor into Splicing-level Estimation. Accordingly, these types of possible acceptors are still under investigation, and are not yet accounted for in the variant’s In Silico Prior Probability of Pathogenicity.
