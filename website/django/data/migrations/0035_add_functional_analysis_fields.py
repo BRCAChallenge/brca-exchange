@@ -18,17 +18,7 @@ class Migration(migrations.Migration):
             field=models.TextField(default=b'-'),
         ),
         migrations.AddField(
-            model_name='variant',
-            name='Functional_analysis_technique_LOVD',
-            field=models.TextField(default=b'-'),
-        ),
-        migrations.AddField(
             model_name='report',
-            name='Functional_analysis_result_LOVD',
-            field=models.TextField(default=b'-'),
-        ),
-        migrations.AddField(
-            model_name='variant',
             name='Functional_analysis_result_LOVD',
             field=models.TextField(default=b'-'),
         ),
