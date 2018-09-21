@@ -2,18 +2,18 @@
 
 """
 Zack Fischmann
-5/8/2018
+9/21/2018
 
 Description:
-    LOVD submissions are differentiated by a combination of the variant (cDNA), submitter, and
-    functional analysis technique. Combine the fields to create an id to identify the same submission
-    between releases (used for versioning).
+    LOVD functional analysis technique and result are reported in a colon delimited fashion
+    e.g. technique:result. This file splits them into two separate fields.
 """
 
 import argparse
 import sys
 import os
 import urllib
+import pdb
 from collections import defaultdict
 
 
@@ -35,8 +35,8 @@ def main(args):
 
     headerline = f_in.readline()
 
-    # add submission_id field
-    ammendedHeaderline = headerline.split('\r\n')[0] + '\t' + '"submission_id"' + '\r\n'
+    # add functional analysis fields
+    ammendedHeaderline = headerline.split('\r\n')[0] + '\t' + '"functional_analysis_technique"' + '\t' + '"functional_analysis_result"' + '\r\n'
     f_out.write(ammendedHeaderline)
 
     # get indexes of fields
@@ -45,18 +45,24 @@ def main(args):
     for index, field in enumerate(parsedHeaderline):
         fieldIdxDict[field] = index
 
-    # add submission id to each submission (cDNA + submitter + functional analysis technique)
+    # fill out data for fields
     for line in f_in:
         line = line.replace('"', '')
         parsedLine = line.strip().split('\t')
 
-        cDNA = parsedLine[fieldIdxDict['cDNA']]
-        submitter = parsedLine[fieldIdxDict['submitters']]
-        functional_analysis_technique = parsedLine[fieldIdxDict['functional_analysis_technique']]
 
-        submissionId = cDNA + submitter + functional_analysis_technique
+        functional_analysis = parsedLine[fieldIdxDict['functional_analysis']]
+        functional_analysis_technique = ''
+        functional_analysis_result = ''
 
-        ammendedLine = line.split('\r\n')[0] + '\t' + submissionId + '\r\n'
+        split_functional_analysis = functional_analysis.split(':', 1)
+        if len(split_functional_analysis) == 1:
+            functional_analysis_technique = split_functional_analysis[0]
+        else:
+            functional_analysis_technique, functional_analysis_result = split_functional_analysis
+
+
+        ammendedLine = line.split('\r\n')[0] + '\t' + functional_analysis_technique + '\t' + functional_analysis_result + '\r\n'
         f_out.write(ammendedLine)
 
 

@@ -776,13 +776,35 @@ class DownloadLOVDInputFile(luigi.Task):
 
 
 @requires(DownloadLOVDInputFile)
+class SplitFunctionalAnalysisFields(luigi.Task):
+
+    def output(self):
+        return luigi.LocalTarget(self.file_parent_dir + "/LOVD/LOVD_with_split_functional_analysis.txt")
+
+    def run(self):
+        brca_resources_dir = self.resources_dir
+        artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts")
+
+        os.chdir(lovd_method_dir)
+
+        args = ["python", "separateFunctionalAnalysisTechniqueAndResult.py", "-i", self.input().path, "-o",
+                self.output().path]
+
+        print "Running separateFunctionalAnalysisTechniqueAndResult with the following args: %s" % (args)
+
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(self.output().path)
+
+
+@requires(SplitFunctionalAnalysisFields)
 class AddVariantSubmissionIds(luigi.Task):
 
     def output(self):
-        return luigi.LocalTarget(self.file_parent_dir + "/LOVD/LOVD_with_submission_ids.tsv")
+        return luigi.LocalTarget(self.file_parent_dir + "/LOVD/LOVD_with_submission_ids.txt")
 
     def run(self):
-
         brca_resources_dir = self.resources_dir
         artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts")
 
@@ -800,37 +822,12 @@ class AddVariantSubmissionIds(luigi.Task):
 
 
 @requires(AddVariantSubmissionIds)
-class CombineEquivalentVariantSubmissions(luigi.Task):
-
-    def output(self):
-        return luigi.LocalTarget(self.file_parent_dir + "/LOVD/LOVD_with_submission_ids_combined.tsv")
-
-    def run(self):
-
-        brca_resources_dir = self.resources_dir
-        artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts")
-
-        os.chdir(lovd_method_dir)
-
-        args = ["python", "combineEquivalentVariantSubmissions.py", "-i", self.input().path, "-o",
-                self.output().path]
-
-        print "Running combineEquivalentVariants with the following args: %s" % (args)
-
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print_subprocess_output_and_error(sp)
-
-        check_file_for_contents(self.output().path)
-
-
-@requires(CombineEquivalentVariantSubmissions)
 class ConvertSharedLOVDToVCF(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget(self.file_parent_dir + "/LOVD/sharedLOVD_brca12.hg19.vcf")
 
     def run(self):
-
         brca_resources_dir = self.resources_dir
         artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts")
 

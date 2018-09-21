@@ -73,17 +73,9 @@ CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "Summary_Evidence": "SummaryEvidence",
                   "BX_ID": "BX_ID"}
 
-'''
-NOTE: the following fields are no longer present in LOVD data following
-the 11/5/2016 release.
-
-Variant_haplotype": "haplotype",
-Functional_analysis_result": "functionalanalysis_result",
-Functional_analysis_technique": "functionalanalysis_technique",
-dna_change_genomic": "dna_change_genomic",
-'''
 LOVD_FIELDS = {"Variant_frequency": "frequency",
-               "Functional_analysis": "functional_analysis",
+               "Functional_analysis_technique": "functional_analysis_technique",
+               "Functional_analysis_result": "functional_analysis_result",
                "HGVS_cDNA": "cDNA",
                "HGVS_protein": "Protein",
                "Genetic_origin": "genetic_origin",

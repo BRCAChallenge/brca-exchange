@@ -27,7 +27,7 @@ import urllib
 LOVD_LIST_FIELDS = ["genetic_origin", "RNA", "variant_effect", "individuals",
                     "Protein", "submission_id", "frequency", "geneid", "gDNA",
                     "DBID", "Protein", "created_date", "edited_date", "submitters",
-                    "functional_analysis"]
+                    "functional_analysis_technique, functional_analysis_result"]
 
 
 def parse_args():
