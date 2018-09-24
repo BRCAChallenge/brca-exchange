@@ -132,6 +132,7 @@ post-release-cmds: cleanup-failed include-release-notes push-docker tag-release 
 setup-data-from-latest-release-tar: setup-files ## sets up brca output dir with data contained in release archive from last release (only data from variant merging onwards)
 	tar -C $(OUT_DIR) -zxf $(PREVIOUS_RELEASE_PATH)
 
+setup-dev-env: start-local-uta build-docker setup-files download-resources ## setup development environment
 
 define PRINT_HELP_PYSCRIPT
 import re, sys

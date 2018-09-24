@@ -93,4 +93,12 @@ previous_releases               <-- released archives of previous releases
 
 ## Developing New Features
 
-TODO: coming soon
+A very rough guide on how to use the Makefile target for easier development:
+
+Change to the `pipeline` directory and type the following:
+
+* `make` or `make help` to see what targets are available along with minimal help
+* `make init` to set up a configuration file `pipeline/brca_pipeline_cfg.mk` with paths and other settings. It is advisable to edit it according your needs:
+* `make setup-dev-env`: runs various targets to set up a dev environment.
+* `make run-interactive`: starts bash in brca docker container.
+* `make run-task [TASK]`: runs a specific luigi task
