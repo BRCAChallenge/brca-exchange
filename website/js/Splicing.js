@@ -583,7 +583,9 @@ const SettingsPanel = React.createClass({
                         <div>
                             <label>
                                 <input style={{marginRight: '0.5em'}} type="checkbox" name="drawDonors" checked={this.props.drawDonors} onChange={this.props.toggleDrawing} />
-                                <svg className="site-indicator" width={18} height={18}><rect className="donor" /></svg>
+                                <svg className="site-indicator" width={18} height={18}>
+                                    <rect className="donor" width={18} height={18} />
+                                </svg>
                                 Donor Sites
                             </label>
                         </div>
@@ -591,7 +593,9 @@ const SettingsPanel = React.createClass({
                         <div>
                             <label style={{display: 'inline-block', marginRight: '1em', verticalAlign: 'baseline'}}>
                                 <input style={{marginRight: '0.5em'}} type="checkbox" name="drawAcceptors" checked={this.props.drawAcceptors} onChange={this.props.toggleDrawing} />
-                                <svg className="site-indicator" width={18} height={18}><rect className="acceptor" /></svg>
+                                <svg className="site-indicator" width={18} height={18}>
+                                    <rect className="acceptor" width={18} height={18} />
+                                </svg>
                                 Acceptor Sites
                             </label>
                         </div>
@@ -891,7 +895,9 @@ class Splicing extends React.Component {
                     <input style={{marginRight: '0.5em'}} type="checkbox"
                         name={org} checked={this.state.drawCIDomains.has(org)} onChange={this.toggleCIDomain}
                     />
-                    <svg className="site-indicator" width={18} height={18}><rect className={`domain-${orgMeta.code}`} /></svg>
+                    <svg className="site-indicator" width={18} height={18}>
+                        <rect width={18} height={18} className={`domain-${orgMeta.code}`} />
+                    </svg>
                     {orgMeta.label}
                 </label>
 
