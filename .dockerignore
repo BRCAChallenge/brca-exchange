@@ -1,0 +1,5 @@
+*.img
+*.tar.gz
+.git
+website/node_modules
+website/build
