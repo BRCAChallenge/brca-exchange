@@ -15,8 +15,8 @@ init: ## setup config file
 	echo "creating file in $(CONFIG_PATH). Please edit to your needs in particular the WORK_DIR!"
 	jinja2 -D DATA_DATE=2099-12-31 \
 		-D CODE_BASE=$(shell realpath "$(shell dirname $(MKFILE_PATH))/..") \
-	  -D WORK_DIR='/tmp/brca_workdir' \
-    -D RELEASE_TAG='dev' \
+		-D WORK_DIR='/tmp/brca_workdir' \
+		-D RELEASE_TAG='dev' \
 		pipeline_running/brca_pipeline_cfg.mk.j2 > $(CONFIG_PATH)
 
 checkout: ## checking out code base
@@ -67,7 +67,7 @@ DOCKER_RUN_CMD = docker run -it --rm -u `id -u ${USER}`:$(DOCKER_GRP) \
 	-v $(PREVIOUS_RELEASE_PATH):/files/previous_release.tar.gz \
 	-v $(RELEASE_NOTES_PATH):/files/release_notes.txt \
 	-v ${SYNAPSE_CACHE}:/.synapseCache \
-  -v $(CODE_BASE):/opt/brca-exchange \
+	-v $(CODE_BASE):/opt/brca-exchange \
 	-v /var/run/docker.sock:/var/run/docker.sock \
 	$(PIPELINE_IMAGE)
 
