@@ -4,7 +4,7 @@ ROOT_DIR=$(realpath $1)
 CREDENTIALS_PATH=$(realpath $2)
 PREVIOUS_RELEASE_DIR=$(realpath $3)
 
-GIT_COMMIT=${4-:"master"}
+GIT_COMMIT=${4:-"master"}
 
 DATA_DATE="$(date +%Y-%m-%d)"
 WDIR="${ROOT_DIR}/data_release_${DATA_DATE}"
