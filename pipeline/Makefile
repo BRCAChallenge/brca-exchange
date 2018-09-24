@@ -10,6 +10,7 @@ OS := $(shell uname -s)
 
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 
+
 init: ## setup config file
 	echo "creating file in $(CONFIG_PATH). Please edit to your needs in particular the WORK_DIR!"
 	jinja2 -D DATA_DATE=2099-12-31 \
@@ -23,7 +24,7 @@ checkout: ## checking out code base
 	cd $(CODE_BASE) && git checkout $(GIT_COMMIT)
 
 build-docker: ## build main pipeline docker image
-	cd $(CODE_BASE)/pipeline/docker && ./build_docker_image.sh $(GIT_COMMIT) $(RELEASE_TAG) || { echo "$(date) Something wrong with docker image creation"; exit 1; }
+	cd $(CODE_BASE)/pipeline/docker && ./build_docker_image.sh $(RELEASE_TAG) || { echo "$(date) Something wrong with docker image creation"; exit 1; } 
 
 download-resources: ## download resources files
 	$(CODE_BASE)/pipeline/download_resources_files.sh $(RESOURCES_DIR) >> "$(LOG_DIR)/download_resources_$(RELEASE_TAG).log" 2>&1 || { echo "Downloading resource files failed"; exit 1; }
@@ -66,17 +67,30 @@ DOCKER_RUN_CMD = docker run -it --rm -u `id -u ${USER}`:$(DOCKER_GRP) \
 	-v $(PREVIOUS_RELEASE_PATH):/files/previous_release.tar.gz \
 	-v $(RELEASE_NOTES_PATH):/files/release_notes.txt \
 	-v ${SYNAPSE_CACHE}:/.synapseCache \
+  -v $(CODE_BASE):/opt/brca-exchange \
 	-v /var/run/docker.sock:/var/run/docker.sock \
-	$(PIPELINE_IMAGE) 
+	$(PIPELINE_IMAGE)
 
 run-pipeline: ## running entire pipeline
 	TS=`date +%Y%m%d_%H%M%S`
 	LOG_FILE=$(LOG_DIR)/pipeline_run_$${TS}.log
 	echo "Log files are in $${LOG_FILE}"
-	$(DOCKER_RUN_CMD) /opt/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE) > $${LOG_FILE} 2>&1
+	$(DOCKER_RUN_CMD) /opt/brca-exchange/pipeline/docker/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE) > $${LOG_FILE} 2>&1
 
 run-interactive: ## starting docker container in interactive mode
 	$(DOCKER_RUN_CMD) bash
+
+# If the first argument is "run-task"...
+# https://stackoverflow.com/questions/2214575/passing-arguments-to-make-run
+ifeq (run-task,$(firstword $(MAKECMDGOALS)))
+  # use the rest as arguments for "run"
+  RUN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+  # ...and turn them into do-nothing targets
+  $(eval $(RUN_ARGS):;@:)
+endif
+
+run-task: ## Running a specific task
+	$(DOCKER_RUN_CMD) /opt/brca-exchange/pipeline/docker/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE) $(RUN_ARGS)
 
 build-release: start-local-uta checkout build-docker setup-files setup-lovd download-resources run-pipeline variants-by-source ## create new data release
 
