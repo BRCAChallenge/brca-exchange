@@ -12,7 +12,12 @@ In order to successfully run the pipeline using this setup your environment need
 * GNU make >=v3.82
 * python with jinja2-cli installed (`pip install jinja2-cli`)
 
-TODO: comming soon, additional instructions from Mac OS X
+#### Mac OS X
+
+Additional steps have to be taken on Mac OS X:
+
+* brew install make --with-default-names
+* brew install coreutils
 
 ## Creating a New Data Release
 
