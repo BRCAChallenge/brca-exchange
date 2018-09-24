@@ -13,7 +13,6 @@ import argparse
 import sys
 import os
 import urllib
-import pdb
 from collections import defaultdict
 
 

@@ -48,7 +48,7 @@ def main(args):
     # add submission id to each submission (cDNA + submitter + functional analysis technique)
     for line in f_in:
         line = line.replace('"', '')
-        parsedLine = line.strip().split('\t')
+        parsedLine = line.split('\t')
 
         cDNA = parsedLine[fieldIdxDict['cDNA']]
         submitter = parsedLine[fieldIdxDict['submitters']]
