@@ -12,7 +12,12 @@ In order to successfully run the pipeline using this setup your environment need
 * GNU make >=v3.82
 * python with jinja2-cli installed (`pip install jinja2-cli`)
 
-TODO: comming soon, additional instructions from Mac OS X
+#### Mac OS X
+
+Additional steps have to be taken on Mac OS X:
+
+* brew install make --with-default-names
+* brew install coreutils
 
 ## Creating a New Data Release
 
@@ -88,4 +93,12 @@ previous_releases               <-- released archives of previous releases
 
 ## Developing New Features
 
-TODO: coming soon
+A very rough guide on how to use the Makefile target for easier development:
+
+Change to the `pipeline` directory and type the following:
+
+* `make` or `make help` to see what targets are available along with minimal help
+* `make init` to set up a configuration file `pipeline/brca_pipeline_cfg.mk` with paths and other settings. It is advisable to edit it according your needs:
+* `make setup-dev-env`: runs various targets to set up a dev environment.
+* `make run-interactive`: starts bash in brca docker container.
+* `make run-task [TASK]`: runs a specific luigi task

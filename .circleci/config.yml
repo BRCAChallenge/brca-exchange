@@ -106,11 +106,13 @@ jobs:
              docker load -i /caches/pipeline.tar | true
        - run:
            name: Build application Docker image
-           working_directory: /pipeline/pipeline/docker
+           working_directory: /pipeline
            command: |
-             cp ../requirements.txt requirements_docker.txt
-             cp ../../test-requirements.txt test-requirements_docker.txt
-             docker build --cache-from=pipeline -t pipeline .
+             docker build --cache-from=pipeline -t pipeline -f /pipeline/pipeline/docker/Dockerfile .
+       - run:
+           name: Run tests
+           command: |
+             docker run pipeline bash -c 'cd /opt/brca-exchange/pipeline/data && bash getdata && cd /opt/brca-exchange/pipeline && pytest --ignore=splicing/ --junitxml=~/test_reports/pytest-results.xml'
        - run:
            name: Save Docker image layer cache
            command: |
@@ -120,12 +122,8 @@ jobs:
            key: v1-{{ .Branch }}-{{ epoch }}
            paths:
              - /caches/pipeline.tar
-       - run:
-           name: Run tests
-           command: |
-             docker run pipeline bash -c 'cd /opt/brca-exchange/pipeline/data && bash getdata && cd /opt/brca-exchange/pipeline && pytest --ignore=splicing/ --junitxml=~/test_reports/pytest-results.xml'
        - store_test_results:
-             path: ~/test_reports_pipeline
+           path: ~/test_reports_pipeline
    test-splicing-pipeline:
      working_directory: /splicing-pipeline
      docker:
@@ -155,6 +153,11 @@ jobs:
            command: |
              docker build --cache-from=splicing-pipeline -t splicing-pipeline .
        - run:
+           name: Run tests
+           working_directory: /splicing-pipeline/pipeline/splicing
+           command: |
+             make unit_tests_docker -e IMAGE_NAME=splicing-pipeline
+       - run:
            name: Save Docker image layer cache
            command: |
              mkdir -p /caches
@@ -163,11 +166,6 @@ jobs:
            key: v1-{{ .Branch }}-{{ epoch }}
            paths:
              - /caches/splicing-pipeline.tar
-       - run:
-           name: Run tests
-           working_directory: /splicing-pipeline/pipeline/splicing
-           command: |
-             make unit_tests_docker -e IMAGE_NAME=splicing-pipeline
 workflows:
    version: 2
    build-n-deploy:

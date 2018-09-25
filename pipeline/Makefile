@@ -1,14 +1,30 @@
 .DEFAULT_GOAL := help
 
 CONFIG_PATH := brca_pipeline_cfg.mk
-include $(CONFIG_PATH)
+
+ifneq ("$(wildcard $(CONFIG_PATH))","")
+	include $(CONFIG_PATH)
+endif
+
+OS := $(shell uname -s)
+
+MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+
+
+init: ## setup config file
+	echo "creating file in $(CONFIG_PATH). Please edit to your needs in particular the WORK_DIR!"
+	jinja2 -D DATA_DATE=2099-12-31 \
+		-D CODE_BASE=$(shell realpath "$(shell dirname $(MKFILE_PATH))/..") \
+		-D WORK_DIR='/tmp/brca_workdir' \
+		-D RELEASE_TAG='dev' \
+		pipeline_running/brca_pipeline_cfg.mk.j2 > $(CONFIG_PATH)
 
 checkout: ## checking out code base
 	[ -d $(CODE_BASE) ] || git clone $(BRCA_GIT_REPO) $(CODE_BASE)
 	cd $(CODE_BASE) && git checkout $(GIT_COMMIT)
 
 build-docker: ## build main pipeline docker image
-	cd $(CODE_BASE)/pipeline/docker && ./build_docker_image.sh $(GIT_COMMIT) $(RELEASE_TAG) || { echo "$(date) Something wrong with docker image creation"; exit 1; }
+	cd $(CODE_BASE)/pipeline/docker && ./build_docker_image.sh $(RELEASE_TAG) || { echo "$(date) Something wrong with docker image creation"; exit 1; } 
 
 download-resources: ## download resources files
 	$(CODE_BASE)/pipeline/download_resources_files.sh $(RESOURCES_DIR) >> "$(LOG_DIR)/download_resources_$(RELEASE_TAG).log" 2>&1 || { echo "Downloading resource files failed"; exit 1; }
@@ -34,8 +50,14 @@ setup-lovd: ## setting up LOVD data via pipeline machine, if not running on pipe
 		ssh pipeline@52.151.62.136 curl https://databases.lovd.nl/shared/export/BRCA > $(OUT_DIR)/LOVD/BRCA.txt
 	fi
 
-# TODO: docker access within docker doesn't work yet on Mac OS X
-DOCKER_RUN_CMD = docker run -it --rm -u `id -u ${USER}`:`stat -c '%g' /var/run/docker.sock` \
+
+ifeq ($(OS), Darwin)
+DOCKER_GRP = 0
+else
+DOCKER_GRP = `stat -c '%g' /var/run/docker.sock`
+endif
+
+COMMON_DOCKER_ARGS = --rm -u `id -u ${USER}`:$(DOCKER_GRP) \
 	-e "DATA_DATE=$(DATA_DATE)" \
         -e"UTA_DB_URL=postgresql://anonymous@0.0.0.0:$(UTA_PORT)/uta/uta_$(UTA_RELEASE_DATE)" \
 	--network host \
@@ -45,17 +67,29 @@ DOCKER_RUN_CMD = docker run -it --rm -u `id -u ${USER}`:`stat -c '%g' /var/run/d
 	-v $(PREVIOUS_RELEASE_PATH):/files/previous_release.tar.gz \
 	-v $(RELEASE_NOTES_PATH):/files/release_notes.txt \
 	-v ${SYNAPSE_CACHE}:/.synapseCache \
-	-v /var/run/docker.sock:/var/run/docker.sock \
-	$(PIPELINE_IMAGE) 
+	-v $(CODE_BASE):/opt/brca-exchange \
+	-v /var/run/docker.sock:/var/run/docker.sock
 
 run-pipeline: ## running entire pipeline
 	TS=`date +%Y%m%d_%H%M%S`
 	LOG_FILE=$(LOG_DIR)/pipeline_run_$${TS}.log
 	echo "Log files are in $${LOG_FILE}"
-	$(DOCKER_RUN_CMD) /opt/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE) > $${LOG_FILE} 2>&1
+	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) /opt/brca-exchange/pipeline/docker/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE) > $${LOG_FILE} 2>&1
 
 run-interactive: ## starting docker container in interactive mode
-	$(DOCKER_RUN_CMD) bash
+	docker run -it $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) bash
+
+# If the first argument is "run-task"...
+# https://stackoverflow.com/questions/2214575/passing-arguments-to-make-run
+ifeq (run-task,$(firstword $(MAKECMDGOALS)))
+  # use the rest as arguments for "run"
+  RUN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+  # ...and turn them into do-nothing targets
+  $(eval $(RUN_ARGS):;@:)
+endif
+
+run-task: ## Running a specific task
+	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) /opt/brca-exchange/pipeline/docker/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE) $(RUN_ARGS)
 
 build-release: start-local-uta checkout build-docker setup-files setup-lovd download-resources run-pipeline variants-by-source ## create new data release
 
@@ -93,6 +127,11 @@ copy-to-previous: ## postprocessing: copy new release tar to previous release fo
 	ln -s `ls -t $(PREVIOUS_RELEASE_DIR)/release-*.tar.gz | head -n 1` $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz
 
 post-release-cmds: cleanup-failed include-release-notes push-docker tag-release copy-to-previous ## postprocessing: do all the necessary postprocessing to wrap up a data release
+
+setup-data-from-latest-release-tar: setup-files ## sets up brca output dir with data contained in release archive from last release (only data from variant merging onwards)
+	tar -C $(OUT_DIR) -zxf $(PREVIOUS_RELEASE_PATH)
+
+setup-dev-env: start-local-uta build-docker setup-files download-resources ## setup development environment
 
 define PRINT_HELP_PYSCRIPT
 import re, sys
