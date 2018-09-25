@@ -17,3 +17,5 @@
 /utilities/*.txt
 /utilities/*.tsv
 /data_merging/version.json
+
+brca_pipeline_cfg.mk
