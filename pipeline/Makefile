@@ -57,7 +57,7 @@ else
 DOCKER_GRP = `stat -c '%g' /var/run/docker.sock`
 endif
 
-DOCKER_RUN_CMD = docker run -it --rm -u `id -u ${USER}`:$(DOCKER_GRP) \
+COMMON_DOCKER_ARGS = --rm -u `id -u ${USER}`:$(DOCKER_GRP) \
 	-e "DATA_DATE=$(DATA_DATE)" \
         -e"UTA_DB_URL=postgresql://anonymous@0.0.0.0:$(UTA_PORT)/uta/uta_$(UTA_RELEASE_DATE)" \
 	--network host \
@@ -68,17 +68,16 @@ DOCKER_RUN_CMD = docker run -it --rm -u `id -u ${USER}`:$(DOCKER_GRP) \
 	-v $(RELEASE_NOTES_PATH):/files/release_notes.txt \
 	-v ${SYNAPSE_CACHE}:/.synapseCache \
 	-v $(CODE_BASE):/opt/brca-exchange \
-	-v /var/run/docker.sock:/var/run/docker.sock \
-	$(PIPELINE_IMAGE)
+	-v /var/run/docker.sock:/var/run/docker.sock
 
 run-pipeline: ## running entire pipeline
 	TS=`date +%Y%m%d_%H%M%S`
 	LOG_FILE=$(LOG_DIR)/pipeline_run_$${TS}.log
 	echo "Log files are in $${LOG_FILE}"
-	$(DOCKER_RUN_CMD) /opt/brca-exchange/pipeline/docker/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE) > $${LOG_FILE} 2>&1
+	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) /opt/brca-exchange/pipeline/docker/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE) > $${LOG_FILE} 2>&1
 
 run-interactive: ## starting docker container in interactive mode
-	$(DOCKER_RUN_CMD) bash
+	docker run -it $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) bash
 
 # If the first argument is "run-task"...
 # https://stackoverflow.com/questions/2214575/passing-arguments-to-make-run
@@ -90,7 +89,7 @@ ifeq (run-task,$(firstword $(MAKECMDGOALS)))
 endif
 
 run-task: ## Running a specific task
-	$(DOCKER_RUN_CMD) /opt/brca-exchange/pipeline/docker/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE) $(RUN_ARGS)
+	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) /opt/brca-exchange/pipeline/docker/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE) $(RUN_ARGS)
 
 build-release: start-local-uta checkout build-docker setup-files setup-lovd download-resources run-pipeline variants-by-source ## create new data release
 
