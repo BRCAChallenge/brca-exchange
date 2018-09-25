@@ -1611,7 +1611,7 @@ class GenerateReleaseArchive(BRCATask):
 ###############################################
 
 
-class RunAll(luigi.WrapperTask):
+class RunAll(BRCATask, luigi.WrapperTask):
     def requires(self):
         '''
         If release notes and a previous release are provided, generate a version.json file and
