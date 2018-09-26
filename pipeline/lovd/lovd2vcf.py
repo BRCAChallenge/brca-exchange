@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 
 """
-Charles Markello
-6/23/2015
-
 Description:
-    Python script 'exLOVD2vcf' takes in a ex-LOVD table flat file and converts it to
+    Python script 'lovd2VCF' takes in a LOVD/exLOVD table flat file and converts it to
     vcf format. Used primarily for the purposes of data extraction for integration
     into the ga4gh reference server.
 
@@ -21,13 +18,13 @@ from collections import defaultdict
 import pyhgvs as hgvs
 import pyhgvs.utils as hgvs_utils
 from pygr.seqdb import SequenceFileDB
-import urllib
+# import urllib
 
 
-LOVD_LIST_FIELDS = ["genetic_origin", "RNA", "variant_effect", "individuals",
-                    "Protein", "submission_id", "frequency", "geneid", "gDNA",
-                    "DBID", "Protein", "created_date", "edited_date", "submitters",
-                    "functional_analysis_technique", "functional_analysis_result"]
+# LOVD_LIST_FIELDS = ["genetic_origin", "RNA", "variant_effect", "individuals",
+                    # "Protein", "submission_id", "frequency", "geneid", "gDNA",
+                    # "DBID", "Protein", "created_date", "edited_date", "submitters",
+                    # "functional_analysis_technique", "functional_analysis_result"]
 
 
 def parse_args():
@@ -37,11 +34,11 @@ def parse_args():
         object containing the arguments and their values. Default values are 'False' if option
         is not listed in the command, else the option value is set to True.
     """
-    parser = argparse.ArgumentParser(description='Convert exLOVD database table to VCF format.')
-    parser.add_argument('-i', '--inEXLOVD', type=argparse.FileType('r'),
-                        help='Input exLOVD file for conversion.')
+    parser = argparse.ArgumentParser(description='Convert database table to VCF format.')
+    parser.add_argument('-i', '--input', type=argparse.FileType('r'),
+                        help='Input file for conversion.')
     parser.add_argument('-a', '--inAnnot', default='/hive/groups/cgl/brca/phase1/data/resources/exLOVDAnnotation',
-                        help='Input exLOVD annotation file for conversion. Tab-delimited with 1st column representing field name and 2nd column representing the field description. Default(/hive/groups/cgl/brca/phase1/data/resources/exLOVDAnnotation)')
+                        help='Input annotation file for conversion. Tab-delimited with 1st column representing field name and 2nd column representing the field description. Default(/hive/groups/cgl/brca/phase1/data/resources/exLOVDAnnotation)')
     parser.add_argument('-o', '--out', type=argparse.FileType('w'),
                         help='Ouput VCF file result.')
     parser.add_argument('-e', '--errors', type=argparse.FileType('w'),
@@ -50,6 +47,7 @@ def parse_args():
                         help='Whole path to genome file. Default: (/hive/groups/cgl/brca/phase1/data/resources/hg19.fa)')
     parser.add_argument('-r', '--rpath', default='/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.gp',
                         help='Whole path to refSeq file. Default: (/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.gp)')
+    parser.add_argument('-s', '--source', help='Source from which data is extracted.')
 
     options = parser.parse_args()
     return options
@@ -57,12 +55,13 @@ def parse_args():
 
 def main(args):
     options = parse_args()
-    exLOVDFile = options.inEXLOVD
+    inputFile = options.input
     annotFile_path = options.inAnnot
     vcfFile = options.out
     genome_path = options.gpath
     refseq_path = options.rpath
     errorsFile = options.errors
+    source = options.source
 
     with open(refseq_path) as infile:
         transcripts = hgvs_utils.read_transcripts(infile)
@@ -81,21 +80,26 @@ def main(args):
 
     # print header lines to vcf file
     print('##fileformat=VCFv4.0', file=vcfFile)
-    print('##source=exLOVD', file=vcfFile)
+    if source == "exLOVD":
+        print('##source=exLOVD', file=vcfFile)
+    elif source == "LOVD":
+        print('##source=LOVD', file=vcfFile)
+    else:
+        raise ValueError('Source is %s, must be either LOVD or exLOVD' % (source))
     print('##reference=GRCh37', file=vcfFile)
     for annotation, description in annotDict.items():
         print('##INFO=<ID={0},Number=.,Type=String,Description="{1}">'.format(annotation.replace(' ', '_'), description), file=vcfFile)
     print('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO', file=vcfFile)
 
     # extract INFO field column indicies for annotation terms
-    headerline = exLOVDFile.readline().strip().replace(' ', '_').replace('"', '').split('\t')
+    headerline = inputFile.readline().strip().replace(' ', '_').replace('"', '').split('\t')
 
     fieldIdxDict = defaultdict()
     for index, field in enumerate(headerline):
         fieldIdxDict[field] = index
 
     # extract info from each line of the bic flat file
-    for line in exLOVDFile:
+    for line in inputFile:
         line = line.replace('"', '')
         INFO_field = list()
         parsedLine = line.strip().split('\t')
@@ -132,16 +136,18 @@ def normalize(field, field_value):
             field_value = field_value[1:]
         if field_value[-1] == ';':
             field_value = field_value[:-1]
-        if field not in LOVD_LIST_FIELDS and ';' in field_value:
+        if ';' in field_value:
             field_value = field_value.replace(';', '')
-        if field in LOVD_LIST_FIELDS and ';' in field_value:
-            # Semicolons are sometimes used as a list delimiter,
-            # this changes them to commas for consistency with other fields.
-            field_value = field_value.replace(';', ', ')
-        if field in LOVD_LIST_FIELDS:
-            # Use url encoding to prevent issues in VCF file format.
-            # Decoded during merging and reports aggregation.
-            field_value = urllib.quote_plus(field_value)
+        # if field not in LOVD_LIST_FIELDS and ';' in field_value:
+        #     field_value = field_value.replace(';', '')
+        # if field in LOVD_LIST_FIELDS and ';' in field_value:
+        #     # Semicolons are sometimes used as a list delimiter,
+        #     # this changes them to commas for consistency with other fields.
+        #     field_value = field_value.replace(';', ', ')
+        # if field in LOVD_LIST_FIELDS:
+        #     # Use url encoding to prevent issues in VCF file format.
+        #     # Decoded during merging and reports aggregation.
+        #     field_value = urllib.quote_plus(field_value)
     return field_value
 
 

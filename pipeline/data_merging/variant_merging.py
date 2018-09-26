@@ -20,15 +20,17 @@ from shutil import copy
 from numbers import Number
 import csv
 import aggregate_reports
-import urllib
+# import urllib
 import utilities
 import sys
+# import pdb
 
-# Provides access to lovd directory files
-pardir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-sys.path.append(pardir + '/lovd')
+# # Provides access to lovd directory files
+# pardir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+# pdb.set_trace()
+# sys.path.append(pardir + '/lovd')
 
-from lovd2vcf import LOVD_LIST_FIELDS
+# from lovd2vcf import LOVD_LIST_FIELDS
 
 # GENOMIC VERSION:
 VERSION = "hg38" # equivalent to GRCh38
@@ -719,6 +721,7 @@ def repeat_merging(f_in, f_out):
                     if new_value == old_value and key is not "individuals":
                         continue
                     else:
+                        # pdb.set_trace()
                         # FIXME: is there a better name for this? it seems it now only
                         # applies to scv to ensure the order is the same,
                         # but we don't hold this concern for other list fields...
@@ -842,11 +845,11 @@ def add_new_source(columns, variants, source, source_file, source_dict):
             variants[genome_coor] = associate_chr_pos_ref_alt_with_item(record, old_column_num, source, genome_coor)
         for value in source_dict.values():
             try:
-                if source == "LOVD" and value in LOVD_LIST_FIELDS:
-                    field_value = map(urllib.unquote_plus, record.INFO[value])
-                    variants[genome_coor].append(field_value)
-                else:
-                    variants[genome_coor].append(record.INFO[value])
+                # if source == "LOVD" and value in LOVD_LIST_FIELDS:
+                #     field_value = map(urllib.unquote_plus, record.INFO[value])
+                #     variants[genome_coor].append(field_value)
+                # else:
+                variants[genome_coor].append(record.INFO[value])
             except KeyError:
                 logging.warning("KeyError appending VCF record.INFO[value] to variant. Variant: %s \n Record.INFO: %s \n value: %s", variants[genome_coor], record.INFO, value)
                 if source == "BIC":
