@@ -11,7 +11,7 @@ OUTPUT_DIR="${PARENT_DIR}/output"
 BRCA_RESOURCES=/files/resources
 
 # TODO doc why different mechanism
-if [ "$#" -ne "3" ]; then
+if [ "$#" -lt "3" ]; then
     echo "Require host (!) paths for references directory and data directory"
     echo "Usage: run_luigi.sh [PRIORS_REFERENCES] [OUTPUT_DIR_HOST] [PRIORS_DOCKER_IMAGE_NAME] [TASK]" 
 fi
