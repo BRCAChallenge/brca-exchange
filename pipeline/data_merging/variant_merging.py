@@ -23,11 +23,9 @@ import aggregate_reports
 # import urllib
 import utilities
 import sys
-# import pdb
 
 # # Provides access to lovd directory files
 # pardir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-# pdb.set_trace()
 # sys.path.append(pardir + '/lovd')
 
 # from lovd2vcf import LOVD_LIST_FIELDS
@@ -166,7 +164,6 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "BIC": BIC_FIELDS}
 
 LIST_TYPE_FIELDS = {
-    "individuals", # LOVD
     "SCV", # Clinvar, treating it as list, to have the same order as with SCV_Version
     "SCV_Version"
 }
@@ -718,19 +715,19 @@ def repeat_merging(f_in, f_out):
                     # containing ',' and hence being treated as separate fields.
                     # The list(set(new_value + old_value)) statement below would
                     # garble it otherwise.
-                    if new_value == old_value and key is not "individuals":
+                    print key
+                    if new_value == old_value and key != "individuals":
                         continue
                     else:
-                        # pdb.set_trace()
                         # FIXME: is there a better name for this? it seems it now only
                         # applies to scv to ensure the order is the same,
                         # but we don't hold this concern for other list fields...
                         if key in LIST_TYPE_FIELDS:
                             merged_value = list(new_value + old_value)
-                        # The "individuals" values from LOVD submissions is
+                        # The "individuals" values from LOVD submissions are
                         # added together when merging variants.
                         elif key == "individuals":
-                            merged_value = list(new_value[0] + old_value[0])
+                            merged_value = [str(int(new_value[0]) + int(old_value[0]))]
                         else:
                             merged_value = list(set(new_value + old_value))
 
