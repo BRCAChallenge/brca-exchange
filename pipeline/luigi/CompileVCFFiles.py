@@ -141,46 +141,23 @@ priors_filter_method_dir = os.path.abspath('../splicingfilter')
 utilities_method_dir = os.path.abspath('../utilities')
 
 
-class BRCATask(luigi.Task):
-    date = luigi.DateParameter(default=datetime.date.today())
-    u = luigi.Parameter(default="UNKNOWN_USER")
-    p = luigi.Parameter(default="UNKNOWN_PASSWORD", significant=False)
-
-    synapse_username = luigi.Parameter(default="UNKNOWN_SYNAPSE_USER", description='used to access preprocessed enigma files')
-    synapse_password = luigi.Parameter(default="UNKNOWN_SYNAPSE_PASSWORD", description='used to access preprocessed enigma files', significant=False)
-    synapse_enigma_file_id = luigi.Parameter(default="UNKNOWN_SYNAPSE_FILEID", description='file id for combined enigma tsv file')
-
-    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
-                                    description='directory to store brca-resources data')
-
-
-    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                                 description='directory to store output files')
-
-    output_dir_host = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                                 description='directory to store output files wrt to host file system (needed for setting up volume mapping for running docker inside docker)')
-
-    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
-                                      description='directory to store all individual task related files')
-
-    previous_release_tar = luigi.Parameter(default=None, description='path to previous release tar for diffing versions \
-                                       and producing change types for variants')
-
-    priors_references_dir = luigi.Parameter(default=None, description='directory to store priors references data')
-
-    priors_docker_image_name = luigi.Parameter(default=None, description='docker image name for priors calculation')
-
-    release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
-
-    def run(self):
-        pass
-
 ###############################################
 #                   CLINVAR                   #
 ###############################################
 
 
-class DownloadLatestClinvarData(BRCATask):
+class DownloadLatestClinvarData(luigi.Task):
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                                    description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                                 description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                                      description='directory to store all individual task related files')
+
     def output(self):
         return luigi.LocalTarget(self.file_parent_dir + "/ClinVar/ClinVarFullRelease_00-latest.xml.gz")
 
@@ -193,7 +170,7 @@ class DownloadLatestClinvarData(BRCATask):
 
 
 @requires(DownloadLatestClinvarData)
-class ConvertLatestClinvarDataToXML(BRCATask):
+class ConvertLatestClinvarDataToXML(luigi.Task):
 
     def output(self):
         artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts/")
@@ -215,7 +192,7 @@ class ConvertLatestClinvarDataToXML(BRCATask):
 
 
 @requires(ConvertLatestClinvarDataToXML)
-class ConvertClinvarXMLToTXT(BRCATask):
+class ConvertClinvarXMLToTXT(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget(self.file_parent_dir + "/ClinVar/ClinVarBrca.txt")
@@ -235,7 +212,7 @@ class ConvertClinvarXMLToTXT(BRCATask):
 
 
 @requires(ConvertClinvarXMLToTXT)
-class ConvertClinvarTXTToVCF(BRCATask):
+class ConvertClinvarTXTToVCF(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget(self.file_parent_dir + "/ClinVar/ClinVarBrca.vcf")
@@ -255,7 +232,7 @@ class ConvertClinvarTXTToVCF(BRCATask):
 
 
 @requires(ConvertClinvarTXTToVCF)
-class CopyClinvarVCFToOutputDir(BRCATask):
+class CopyClinvarVCFToOutputDir(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget(self.output_dir + "/ClinVarBrca.vcf")
@@ -273,7 +250,7 @@ class CopyClinvarVCFToOutputDir(BRCATask):
 ###############################################
 
 
-class DownloadLatestESPData(BRCATask):
+class DownloadLatestESPData(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
 
     resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
@@ -297,7 +274,7 @@ class DownloadLatestESPData(BRCATask):
 
 
 @requires(DownloadLatestESPData)
-class DecompressESPTarfile(BRCATask):
+class DecompressESPTarfile(luigi.Task):
 
     def output(self):
         esp_file_dir = self.file_parent_dir + '/ESP'
@@ -318,7 +295,7 @@ class DecompressESPTarfile(BRCATask):
 
 
 @requires(DecompressESPTarfile)
-class ExtractESPDataForBRCA1Region(BRCATask):
+class ExtractESPDataForBRCA1Region(luigi.Task):
 
     def output(self):
         esp_file_dir = self.file_parent_dir + "/ESP"
@@ -340,7 +317,7 @@ class ExtractESPDataForBRCA1Region(BRCATask):
 
 
 @requires(ExtractESPDataForBRCA1Region)
-class ExtractESPDataForBRCA2Region(BRCATask):
+class ExtractESPDataForBRCA2Region(luigi.Task):
 
     def output(self):
         esp_file_dir = self.file_parent_dir + "/ESP"
@@ -360,7 +337,7 @@ class ExtractESPDataForBRCA2Region(BRCATask):
 
 
 @requires(ExtractESPDataForBRCA2Region)
-class ConcatenateESPBRCA12Data(BRCATask):
+class ConcatenateESPBRCA12Data(luigi.Task):
 
     def output(self):
         esp_file_dir = self.file_parent_dir + "/ESP"
@@ -384,7 +361,7 @@ class ConcatenateESPBRCA12Data(BRCATask):
 
 
 @requires(ConcatenateESPBRCA12Data)
-class SortConcatenatedESPBRCA12Data(BRCATask):
+class SortConcatenatedESPBRCA12Data(luigi.Task):
 
     def output(self):
         esp_file_dir = self.file_parent_dir + "/ESP"
@@ -406,7 +383,7 @@ class SortConcatenatedESPBRCA12Data(BRCATask):
 
 
 @requires(SortConcatenatedESPBRCA12Data)
-class CopyESPOutputToOutputDir(BRCATask):
+class CopyESPOutputToOutputDir(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget(self.output_dir + "/esp.brca12.sorted.hg38.vcf")
@@ -424,7 +401,7 @@ class CopyESPOutputToOutputDir(BRCATask):
 ###############################################
 
 
-class DownloadBRCA1BICData(BRCATask):
+class DownloadBRCA1BICData(luigi.Task):
     # NOTE: U/P can be found in /hive/groups/cgl/brca/phase1/data/bic/account.txt at UCSC
     date = luigi.DateParameter(default=datetime.date.today())
     u = luigi.Parameter()
@@ -454,7 +431,7 @@ class DownloadBRCA1BICData(BRCATask):
 
 
 @requires(DownloadBRCA1BICData)
-class DownloadBRCA2BICData(BRCATask):
+class DownloadBRCA2BICData(luigi.Task):
 
     def output(self):
         bic_file_dir = self.file_parent_dir + '/BIC'
@@ -470,7 +447,7 @@ class DownloadBRCA2BICData(BRCATask):
 
 
 @requires(DownloadBRCA2BICData)
-class ConvertBRCA1BICDataToVCF(BRCATask):
+class ConvertBRCA1BICDataToVCF(luigi.Task):
 
     def output(self):
         bic_file_dir = self.file_parent_dir + '/BIC'
@@ -494,7 +471,7 @@ class ConvertBRCA1BICDataToVCF(BRCATask):
 
 
 @requires(ConvertBRCA1BICDataToVCF)
-class ConvertBRCA2BICDataToVCF(BRCATask):
+class ConvertBRCA2BICDataToVCF(luigi.Task):
 
     def output(self):
         bic_file_dir = self.file_parent_dir + '/BIC'
@@ -518,7 +495,7 @@ class ConvertBRCA2BICDataToVCF(BRCATask):
 
 
 @requires(ConvertBRCA2BICDataToVCF)
-class ConcatenateBRCA12BICData(BRCATask):
+class ConcatenateBRCA12BICData(luigi.Task):
 
     def output(self):
         bic_file_dir = self.file_parent_dir + '/BIC'
@@ -538,7 +515,7 @@ class ConcatenateBRCA12BICData(BRCATask):
 
 
 @requires(ConcatenateBRCA12BICData)
-class CrossmapConcatenatedBICData(BRCATask):
+class CrossmapConcatenatedBICData(luigi.Task):
 
     def output(self):
         bic_file_dir = self.file_parent_dir + '/BIC'
@@ -561,7 +538,7 @@ class CrossmapConcatenatedBICData(BRCATask):
 
 
 @requires(CrossmapConcatenatedBICData)
-class SortBICData(BRCATask):
+class SortBICData(luigi.Task):
 
     def output(self):
         bic_file_dir = self.file_parent_dir + '/BIC'
@@ -581,7 +558,7 @@ class SortBICData(BRCATask):
 
 
 @requires(SortBICData)
-class CopyBICOutputToOutputDir(BRCATask):
+class CopyBICOutputToOutputDir(luigi.Task):
 
     def output(self):
         bic_file_dir = self.file_parent_dir + '/BIC'
@@ -600,7 +577,18 @@ class CopyBICOutputToOutputDir(BRCATask):
 ###############################################
 
 
-class ExtractDataFromLatestEXLOVD(BRCATask):
+class ExtractDataFromLatestEXLOVD(luigi.Task):
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                                    description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                                 description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                                      description='directory to store all individual task related files')
+
     def output(self):
         ex_lovd_file_dir = self.file_parent_dir + '/exLOVD'
 
@@ -621,7 +609,7 @@ class ExtractDataFromLatestEXLOVD(BRCATask):
 
 
 @requires(ExtractDataFromLatestEXLOVD)
-class ConvertEXLOVDBRCA1ExtractToVCF(BRCATask):
+class ConvertEXLOVDBRCA1ExtractToVCF(luigi.Task):
 
     def output(self):
         ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
@@ -637,7 +625,7 @@ class ConvertEXLOVDBRCA1ExtractToVCF(BRCATask):
         args = ["./lovd2vcf.py", "-i", ex_lovd_file_dir + "/BRCA1.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", "-a", "exLOVDAnnotation",
                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa", "-e", artifacts_dir + "/exLOVD_BRCA1_error_variants.txt",
+                brca_resources_dir + "/hg19.fa", '-e', artifacts_dir + '/exLOVD_BRCA1_error_variants.txt',
                 "-s", "exLOVD"]
         print "Running lovd2vcf with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -647,7 +635,7 @@ class ConvertEXLOVDBRCA1ExtractToVCF(BRCATask):
 
 
 @requires(ConvertEXLOVDBRCA1ExtractToVCF)
-class ConvertEXLOVDBRCA2ExtractToVCF(BRCATask):
+class ConvertEXLOVDBRCA2ExtractToVCF(luigi.Task):
 
     def output(self):
         ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
@@ -661,7 +649,7 @@ class ConvertEXLOVDBRCA2ExtractToVCF(BRCATask):
         args = ["./lovd2vcf.py", "-i", ex_lovd_file_dir + "/BRCA2.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf", "-a", "exLOVDAnnotation",
                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa", "-e", artifacts_dir + "/exLOVD_BRCA2_error_variants.txt",
+                brca_resources_dir + "/hg19.fa", '-e', artifacts_dir + '/exLOVD_BRCA2_error_variants.txt',
                 "-s", "exLOVD"]
         print "Running lovd2vcf with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -671,7 +659,7 @@ class ConvertEXLOVDBRCA2ExtractToVCF(BRCATask):
 
 
 @requires(ConvertEXLOVDBRCA2ExtractToVCF)
-class ConcatenateEXLOVDVCFFiles(BRCATask):
+class ConcatenateEXLOVDVCFFiles(luigi.Task):
 
     def output(self):
         ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
@@ -691,7 +679,7 @@ class ConcatenateEXLOVDVCFFiles(BRCATask):
 
 
 @requires(ConcatenateEXLOVDVCFFiles)
-class CrossmapConcatenatedEXLOVDData(BRCATask):
+class CrossmapConcatenatedEXLOVDData(luigi.Task):
 
     def output(self):
         ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
@@ -712,7 +700,7 @@ class CrossmapConcatenatedEXLOVDData(BRCATask):
 
 
 @requires(CrossmapConcatenatedEXLOVDData)
-class SortEXLOVDOutput(BRCATask):
+class SortEXLOVDOutput(luigi.Task):
 
     def output(self):
         ex_lovd_file_dir = self.file_parent_dir + "/exLOVD"
@@ -733,7 +721,7 @@ class SortEXLOVDOutput(BRCATask):
 
 
 @requires(SortEXLOVDOutput)
-class CopyEXLOVDOutputToOutputDir(BRCATask):
+class CopyEXLOVDOutputToOutputDir(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget(self.output_dir + "/exLOVD_brca12.sorted.hg38.vcf")
@@ -752,12 +740,22 @@ class CopyEXLOVDOutputToOutputDir(BRCATask):
 ###############################################
 
 
-class DownloadLOVDInputFile(BRCATask):
+class DownloadLOVDInputFile(luigi.Task):
     """ Downloads the shared LOVD data
 
     If the pipeline is run on a machine from which it is not possible to download the data (currently IP based authentication)
     the file can be manually staged in the path of `lovd_data_file`. In this case, the task will not be run.
     """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                                    description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                                 description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                                      description='directory to store all individual task related files')
 
     lovd_data_file = luigi.Parameter(default='', description='path, where the shared LOVD data will be stored')
 
@@ -780,35 +778,13 @@ class DownloadLOVDInputFile(BRCATask):
 
 
 @requires(DownloadLOVDInputFile)
-class SplitFunctionalAnalysisFields(BRCATask):
-
-    def output(self):
-        return luigi.LocalTarget(self.file_parent_dir + "/LOVD/LOVD_with_split_functional_analysis.txt")
-
-    def run(self):
-        brca_resources_dir = self.resources_dir
-        artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts")
-
-        os.chdir(lovd_method_dir)
-
-        args = ["python", "separateFunctionalAnalysisTechniqueAndResult.py", "-i", self.input().path, "-o",
-                self.output().path]
-
-        print "Running separateFunctionalAnalysisTechniqueAndResult with the following args: %s" % (args)
-
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print_subprocess_output_and_error(sp)
-
-        check_file_for_contents(self.output().path)
-
-
-@requires(SplitFunctionalAnalysisFields)
-class AddVariantSubmissionIds(BRCATask):
+class AddVariantSubmissionIds(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget(self.file_parent_dir + "/LOVD/LOVD_with_submission_ids.txt")
 
     def run(self):
+
         brca_resources_dir = self.resources_dir
         artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts")
 
@@ -826,12 +802,13 @@ class AddVariantSubmissionIds(BRCATask):
 
 
 @requires(AddVariantSubmissionIds)
-class ConvertSharedLOVDToVCF(BRCATask):
+class ConvertSharedLOVDToVCF(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget(self.file_parent_dir + "/LOVD/sharedLOVD_brca12.hg19.vcf")
 
     def run(self):
+
         brca_resources_dir = self.resources_dir
         artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts")
 
@@ -840,7 +817,7 @@ class ConvertSharedLOVDToVCF(BRCATask):
         args = ["python", "lovd2vcf.py", "-i", self.input().path, "-o",
                 self.output().path, "-a", "sharedLOVDAnnotation",
                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa", "-e", artifacts_dir + "/LOVD_error_variants.txt",
+                brca_resources_dir + "/hg19.fa", '-e', artifacts_dir + '/LOVD_error_variants.txt',
                 "-s", "LOVD"]
 
         print "Running lovd2vcf with the following args: %s" % (args)
@@ -852,7 +829,7 @@ class ConvertSharedLOVDToVCF(BRCATask):
 
 
 @requires(ConvertSharedLOVDToVCF)
-class CrossmapConcatenatedSharedLOVDData(BRCATask):
+class CrossmapConcatenatedSharedLOVDData(luigi.Task):
 
     def output(self):
         lovd_file_dir = self.file_parent_dir + "/LOVD"
@@ -873,7 +850,7 @@ class CrossmapConcatenatedSharedLOVDData(BRCATask):
 
 
 @requires(CrossmapConcatenatedSharedLOVDData)
-class SortSharedLOVDOutput(BRCATask):
+class SortSharedLOVDOutput(luigi.Task):
 
     def output(self):
         lovd_file_dir = self.file_parent_dir + "/LOVD"
@@ -894,7 +871,7 @@ class SortSharedLOVDOutput(BRCATask):
 
 
 @requires(SortSharedLOVDOutput)
-class CopySharedLOVDOutputToOutputDir(BRCATask):
+class CopySharedLOVDOutputToOutputDir(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget(self.output_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
@@ -913,7 +890,19 @@ class CopySharedLOVDOutputToOutputDir(BRCATask):
 ###############################################
 
 
-class DownloadG1KCHR13GZ(BRCATask):
+class DownloadG1KCHR13GZ(luigi.Task):
+
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                                    description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                                 description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                                      description='directory to store all individual task related files')
+
     def output(self):
         g1k_file_dir = self.file_parent_dir + '/G1K'
         return luigi.LocalTarget(g1k_file_dir + "/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz")
@@ -928,7 +917,7 @@ class DownloadG1KCHR13GZ(BRCATask):
 
 
 @requires(DownloadG1KCHR13GZ)
-class DownloadG1KCHR17GZ(BRCATask):
+class DownloadG1KCHR17GZ(luigi.Task):
 
     def output(self):
         g1k_file_dir = self.file_parent_dir + '/G1K'
@@ -943,7 +932,7 @@ class DownloadG1KCHR17GZ(BRCATask):
 
 
 @requires(DownloadG1KCHR17GZ)
-class DownloadG1KCHR13GZTBI(BRCATask):
+class DownloadG1KCHR13GZTBI(luigi.Task):
 
     def output(self):
         g1k_file_dir = self.file_parent_dir + '/G1K'
@@ -958,7 +947,7 @@ class DownloadG1KCHR13GZTBI(BRCATask):
 
 
 @requires(DownloadG1KCHR13GZTBI)
-class DownloadG1KCHR17GZTBI(BRCATask):
+class DownloadG1KCHR17GZTBI(luigi.Task):
 
     def output(self):
         g1k_file_dir = self.file_parent_dir + '/G1K'
@@ -973,7 +962,7 @@ class DownloadG1KCHR17GZTBI(BRCATask):
 
 
 @requires(DownloadG1KCHR17GZTBI)
-class ExtractCHR13BRCAData(BRCATask):
+class ExtractCHR13BRCAData(luigi.Task):
 
     def output(self):
         g1k_file_dir = self.file_parent_dir + '/G1K'
@@ -995,7 +984,7 @@ class ExtractCHR13BRCAData(BRCATask):
 
 
 @requires(ExtractCHR13BRCAData)
-class ExtractCHR17BRCAData(BRCATask):
+class ExtractCHR17BRCAData(luigi.Task):
 
     def output(self):
         g1k_file_dir = self.file_parent_dir + '/G1K'
@@ -1017,7 +1006,7 @@ class ExtractCHR17BRCAData(BRCATask):
 
 
 @requires(ExtractCHR17BRCAData)
-class ConcatenateG1KData(BRCATask):
+class ConcatenateG1KData(luigi.Task):
 
     def output(self):
         g1k_file_dir = self.file_parent_dir + '/G1K'
@@ -1037,7 +1026,7 @@ class ConcatenateG1KData(BRCATask):
 
 
 @requires(ConcatenateG1KData)
-class CrossmapConcatenatedG1KData(BRCATask):
+class CrossmapConcatenatedG1KData(luigi.Task):
 
     def output(self):
         g1k_file_dir = self.file_parent_dir + '/G1K'
@@ -1058,7 +1047,7 @@ class CrossmapConcatenatedG1KData(BRCATask):
 
 
 @requires(CrossmapConcatenatedG1KData)
-class SortG1KData(BRCATask):
+class SortG1KData(luigi.Task):
 
     def output(self):
         g1k_file_dir = self.file_parent_dir + '/G1K'
@@ -1078,7 +1067,7 @@ class SortG1KData(BRCATask):
 
 
 @requires(SortG1KData)
-class CopyG1KOutputToOutputDir(BRCATask):
+class CopyG1KOutputToOutputDir(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget(self.output_dir + "/1000G_brca.sorted.hg38.vcf")
@@ -1097,7 +1086,18 @@ class CopyG1KOutputToOutputDir(BRCATask):
 ###############################################
 
 
-class DownloadEXACVCFGZFile(BRCATask):
+class DownloadEXACVCFGZFile(luigi.Task):
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                                    description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                                 description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                                      description='directory to store all individual task related files')
+
     def output(self):
         exac_file_dir = self.file_parent_dir + '/exac'
         return luigi.LocalTarget(exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz")
@@ -1113,7 +1113,7 @@ class DownloadEXACVCFGZFile(BRCATask):
 
 
 @requires(DownloadEXACVCFGZFile)
-class DownloadEXACVCFGZTBIFile(BRCATask):
+class DownloadEXACVCFGZTBIFile(luigi.Task):
     def output(self):
         exac_file_dir = self.file_parent_dir + '/exac'
         return luigi.LocalTarget(exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz.tbi")
@@ -1128,7 +1128,7 @@ class DownloadEXACVCFGZTBIFile(BRCATask):
 
 
 @requires(DownloadEXACVCFGZTBIFile)
-class ExtractBRCA1DataFromExac(BRCATask):
+class ExtractBRCA1DataFromExac(luigi.Task):
     def output(self):
         exac_file_dir = self.file_parent_dir + '/exac'
         return luigi.LocalTarget(exac_file_dir + "/exac.brca1.hg19.vcf")
@@ -1148,7 +1148,7 @@ class ExtractBRCA1DataFromExac(BRCATask):
 
 
 @requires(ExtractBRCA1DataFromExac)
-class ExtractBRCA2DataFromExac(BRCATask):
+class ExtractBRCA2DataFromExac(luigi.Task):
     def output(self):
         exac_file_dir = self.file_parent_dir + '/exac'
         return luigi.LocalTarget(exac_file_dir + "/exac.brca2.hg19.vcf")
@@ -1168,7 +1168,7 @@ class ExtractBRCA2DataFromExac(BRCATask):
 
 
 @requires(ExtractBRCA2DataFromExac)
-class ConcatenateEXACData(BRCATask):
+class ConcatenateEXACData(luigi.Task):
     def output(self):
         exac_file_dir = self.file_parent_dir + '/exac'
         return luigi.LocalTarget(exac_file_dir + "/exac.brca12.hg19.vcf")
@@ -1187,7 +1187,7 @@ class ConcatenateEXACData(BRCATask):
 
 
 @requires(ConcatenateEXACData)
-class CrossmapEXACData(BRCATask):
+class CrossmapEXACData(luigi.Task):
     def output(self):
         exac_file_dir = self.file_parent_dir + '/exac'
         return luigi.LocalTarget(exac_file_dir + "/exac.brca12.hg38.vcf")
@@ -1207,7 +1207,7 @@ class CrossmapEXACData(BRCATask):
 
 
 @requires(CrossmapEXACData)
-class SortEXACData(BRCATask):
+class SortEXACData(luigi.Task):
     def output(self):
         exac_file_dir = self.file_parent_dir + '/exac'
         return luigi.LocalTarget(exac_file_dir + "/exac.brca12.sorted.hg38.vcf")
@@ -1225,7 +1225,7 @@ class SortEXACData(BRCATask):
 
 
 @requires(SortEXACData)
-class CopyEXACOutputToOutputDir(BRCATask):
+class CopyEXACOutputToOutputDir(luigi.Task):
     def output(self):
         return luigi.LocalTarget(self.output_dir + "/exac.brca12.sorted.hg38.vcf")
 
@@ -1243,7 +1243,22 @@ class CopyEXACOutputToOutputDir(BRCATask):
 ###############################################
 
 
-class DownloadLatestEnigmaData(BRCATask):
+class DownloadLatestEnigmaData(luigi.Task):
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    synapse_username = luigi.Parameter(description='used to access preprocessed enigma files')
+    synapse_password = luigi.Parameter(description='used to access preprocessed enigma files', significant=False)
+    synapse_enigma_file_id = luigi.Parameter(description='file id for combined enigma tsv file')
+
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                                    description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                                 description='directory to store output files')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                                      description='directory to store all individual task related files')
+
     def output(self):
         """
         Connects to synapse.org to gather latest Enigma preprocessed filenames. Requires a Synapse.org
@@ -1277,7 +1292,31 @@ class DownloadLatestEnigmaData(BRCATask):
 ###############################################
 
 
-class MergeVCFsIntoTSVFile(BRCATask):
+class MergeVCFsIntoTSVFile(luigi.Task):
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                                    description='directory to store brca-resources data')
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                                 description='directory to store output files')
+
+    output_dir_host = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                                 description='directory to store output files wrt to host file system (needed for setting up volume mapping for running docker inside docker)')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                                      description='directory to store all individual task related files')
+
+    previous_release_tar = luigi.Parameter(default=None, description='path to previous release tar for diffing versions \
+                                       and producing change types for variants')
+
+    priors_references_dir = luigi.Parameter(default=None, description='directory to store priors references data.')
+
+    priors_docker_image_name = luigi.Parameter(default=None, description='docker image name for priors calculation')
+
+    release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
+
+
     def output(self):
         artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts/")
         return luigi.LocalTarget(artifacts_dir + "merged.tsv")
@@ -1298,7 +1337,7 @@ class MergeVCFsIntoTSVFile(BRCATask):
 
 
 @requires(MergeVCFsIntoTSVFile)
-class AnnotateMergedOutput(BRCATask):
+class AnnotateMergedOutput(luigi.Task):
 
     def output(self):
         artifacts_dir = self.output_dir + "/release/artifacts/"
@@ -1328,7 +1367,7 @@ class AnnotateMergedOutput(BRCATask):
 
 
 @requires(AnnotateMergedOutput)
-class AggregateMergedOutput(BRCATask):
+class AggregateMergedOutput(luigi.Task):
 
     def output(self):
         artifacts_dir = self.output_dir + "/release/artifacts/"
@@ -1349,7 +1388,7 @@ class AggregateMergedOutput(BRCATask):
 
 
 @requires(AggregateMergedOutput)
-class BuildAggregatedOutput(BRCATask):
+class BuildAggregatedOutput(luigi.Task):
 
     def output(self):
         artifacts_dir = self.output_dir + "/release/artifacts/"
@@ -1379,7 +1418,7 @@ class BuildAggregatedOutput(BRCATask):
 
 
 @requires(BuildAggregatedOutput)
-class AppendMupitStructure(BRCATask):
+class AppendMupitStructure(luigi.Task):
 
     def output(self):
         artifacts_dir = self.output_dir + "/release/artifacts/"
@@ -1402,7 +1441,7 @@ class AppendMupitStructure(BRCATask):
 
 
 @requires(AppendMupitStructure)
-class CalculatePriors(BRCATask):
+class CalculatePriors(luigi.Task):
     def output(self):
         artifacts_dir = self.output_dir + "/release/artifacts/"
         return luigi.LocalTarget(artifacts_dir + "built_with_priors.tsv")
@@ -1423,7 +1462,7 @@ class CalculatePriors(BRCATask):
 
 
 @requires(CalculatePriors)
-class FilterBlacklistedPriors(BRCATask):
+class FilterBlacklistedPriors(luigi.Task):
     def output(self):
         artifacts_dir = self.output_dir + "/release/artifacts/"
         return luigi.LocalTarget(artifacts_dir + "built_with_priors_clean.tsv")
@@ -1448,7 +1487,7 @@ class FilterBlacklistedPriors(BRCATask):
 
 
 @requires(FilterBlacklistedPriors)
-class FindMissingReports(BRCATask):
+class FindMissingReports(luigi.Task):
     def output(self):
         artifacts_dir = self.output_dir + "/release/artifacts/"
         return luigi.LocalTarget(artifacts_dir + "missing_reports.log")
@@ -1468,7 +1507,7 @@ class FindMissingReports(BRCATask):
 
 
 @requires(FindMissingReports)
-class RunDiffAndAppendChangeTypesToOutput(BRCATask):
+class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
     def _extract_release_date(self, version_json):
         with open(version_json, 'r') as f:
             j = json.load(f)
@@ -1515,7 +1554,7 @@ class RunDiffAndAppendChangeTypesToOutput(BRCATask):
 
 
 @requires(RunDiffAndAppendChangeTypesToOutput)
-class RunDiffAndAppendChangeTypesToOutputReports(BRCATask):
+class RunDiffAndAppendChangeTypesToOutputReports(luigi.Task):
     def _extract_release_date(self, version_json):
         with open(version_json, 'r') as f:
             j = json.load(f)
@@ -1562,7 +1601,7 @@ class RunDiffAndAppendChangeTypesToOutputReports(BRCATask):
 
 
 @requires(RunDiffAndAppendChangeTypesToOutputReports)
-class GenerateReleaseNotes(BRCATask):
+class GenerateReleaseNotes(luigi.Task):
 
     def output(self):
         metadata_dir = create_path_if_nonexistent(self.output_dir + "/release/metadata/")
@@ -1581,7 +1620,7 @@ class GenerateReleaseNotes(BRCATask):
         check_file_for_contents(metadata_dir + "version.json")
 
 @requires(GenerateReleaseNotes)
-class TopLevelReadme(BRCATask):
+class TopLevelReadme(luigi.Task):
     def output(self):
         top_level_readme_dest = os.path.join(self.output_dir, "README.txt")
         return luigi.LocalTarget(top_level_readme_dest)
@@ -1593,7 +1632,7 @@ class TopLevelReadme(BRCATask):
         shutil.copyfile(top_level_readme_src, self.output().path)
 
 @requires(TopLevelReadme)
-class GenerateMD5Sums(BRCATask):
+class GenerateMD5Sums(luigi.Task):
     def output(self):
         return luigi.LocalTarget(self.output_dir + "/md5sums.txt")
 
@@ -1612,7 +1651,7 @@ class GenerateMD5Sums(BRCATask):
 
 
 @requires(GenerateMD5Sums)
-class GenerateReleaseArchive(BRCATask):
+class GenerateReleaseArchive(luigi.Task):
 
     def getArchiveName(self):
         # Format archive filename as release-mm-dd-yy.tar.gz
@@ -1635,7 +1674,37 @@ class GenerateReleaseArchive(BRCATask):
 ###############################################
 
 
-class RunAll(BRCATask, luigi.WrapperTask):
+class RunAll(luigi.WrapperTask):
+    date = luigi.DateParameter(default=datetime.date.today())
+    u = luigi.Parameter(default="UNKNOWN_USER")
+    p = luigi.Parameter(default="UNKNOWN_PASSWORD", significant=False)
+
+    synapse_username = luigi.Parameter(default="UNKNOWN_SYNAPSE_USER", description='used to access preprocessed enigma files')
+    synapse_password = luigi.Parameter(default="UNKNOWN_SYNAPSE_PASSWORD", description='used to access preprocessed enigma files', significant=False)
+    synapse_enigma_file_id = luigi.Parameter(default="UNKNOWN_SYNAPSE_FILEID", description='file id for combined enigma tsv file')
+
+    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
+                                    description='directory to store brca-resources data')
+
+
+    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                                 description='directory to store output files')
+
+    output_dir_host = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
+                                 description='directory to store output files wrt to host file system (needed for setting up volume mapping for running docker inside docker)')
+
+    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
+                                      description='directory to store all individual task related files')
+
+    previous_release_tar = luigi.Parameter(default=None, description='path to previous release tar for diffing versions \
+                                       and producing change types for variants')
+
+    priors_references_dir = luigi.Parameter(default=None, description='directory to store priors references data')
+
+    priors_docker_image_name = luigi.Parameter(default=None, description='docker image name for priors calculation')
+
+    release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
+
     def requires(self):
         '''
         If release notes and a previous release are provided, generate a version.json file and
