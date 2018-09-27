@@ -274,17 +274,6 @@ class CopyClinvarVCFToOutputDir(BRCATask):
 
 
 class DownloadLatestESPData(BRCATask):
-    date = luigi.DateParameter(default=datetime.date.today())
-
-    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
-                                    description='directory to store brca-resources data')
-
-    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                                 description='directory to store output files')
-
-    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
-                                      description='directory to store all individual task related files')
-
     def output(self):
         return luigi.LocalTarget(self.file_parent_dir + "/ESP/ESP6500SI-V2-SSA137.GRCh38-liftover.snps_indels.vcf.tar.gz")
 
@@ -425,20 +414,6 @@ class CopyESPOutputToOutputDir(BRCATask):
 
 
 class DownloadBRCA1BICData(BRCATask):
-    # NOTE: U/P can be found in /hive/groups/cgl/brca/phase1/data/bic/account.txt at UCSC
-    date = luigi.DateParameter(default=datetime.date.today())
-    u = luigi.Parameter()
-    p = luigi.Parameter(significant=False)
-
-    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
-                                    description='directory to store brca-resources data')
-
-    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                                 description='directory to store output files')
-
-    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
-                                      description='directory to store all individual task related files')
-
     def output(self):
         bic_file_dir = self.file_parent_dir + '/BIC'
         return luigi.LocalTarget(bic_file_dir + "/brca1_data.txt")
@@ -1296,7 +1271,6 @@ class MergeVCFsIntoTSVFile(BRCATask):
 
         check_file_for_contents(artifacts_dir + "merged.tsv")
 
-
 @requires(MergeVCFsIntoTSVFile)
 class AnnotateMergedOutput(BRCATask):
 
@@ -1637,30 +1611,30 @@ class GenerateReleaseArchive(BRCATask):
 
 class RunAll(BRCATask, luigi.WrapperTask):
     def requires(self):
-        '''
-        If release notes and a previous release are provided, generate a version.json file and
-        run the releaseDiff.py script to generate change_types between releases of variants.
-        '''
+        param_map = {
+            'date': self.date,
+            'u': self.u,
+            'p': self.p,
+            'synapse_username': self.synapse_username,
+            'synapse_password': self.synapse_password,
+            'synapse_enigma_file_id': self.synapse_enigma_file_id,
+            'resources_dir': self.resources_dir,
+            'output_dir': self.output_dir,
+            'output_dir_host': self.output_dir_host,
+            'file_parent_dir': self.file_parent_dir,
+            'previous_release_tar': self.previous_release_tar,
+            'priors_references_dir': self.priors_references_dir,
+            'priors_docker_image_name': self.priors_docker_image_name,
+            'release_notes': self.release_notes
+        }
 
-        if self.release_notes and self.previous_release_tar and self.priors_references_dir:
-            yield GenerateReleaseArchive(self.date, self.resources_dir, self.output_dir, self.output_dir_host,
-                                         self.file_parent_dir, self.previous_release_tar,
-                                         self.priors_references_dir, self.priors_docker_image_name, self.release_notes)
-        elif self.previous_release_tar and self.priors_references_dir:
-            yield RunDiffAndAppendChangeTypesToOutputReports(self.date, self.resources_dir,
-                                                             self.output_dir, self.output_dir_host, self.file_parent_dir,
-                                                             self.previous_release_tar, self.priors_references_dir, self.priors_docker_image_name)
-        else:
-            yield BuildAggregatedOutput(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
+        yield GenerateReleaseArchive(**param_map)
 
-        yield CopyClinvarVCFToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield CopyESPOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield CopyBICOutputToOutputDir(self.date, self.u, self.p, self.resources_dir, self.output_dir,
-                                       self.file_parent_dir)
-        yield CopyG1KOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield CopyEXACOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield CopyEXLOVDOutputToOutputDir(self.date, self.resources_dir, self.output_dir, self.file_parent_dir)
-        yield CopySharedLOVDOutputToOutputDir(date=self.date, resources_dir=self.resources_dir, output_dir=self.output_dir, file_parent_dir=self.file_parent_dir)
-
-        yield DownloadLatestEnigmaData(self.date, self.synapse_username, self.synapse_password, self.synapse_enigma_file_id, self.resources_dir,
-                                       self.output_dir, self.file_parent_dir)
+        yield CopyClinvarVCFToOutputDir(**param_map)
+        yield CopyESPOutputToOutputDir(**param_map)
+        yield CopyBICOutputToOutputDir(**param_map)
+        yield CopyG1KOutputToOutputDir(**param_map)
+        yield CopyEXACOutputToOutputDir(**param_map)
+        yield CopyEXLOVDOutputToOutputDir(**param_map)
+        yield CopySharedLOVDOutputToOutputDir(**param_map)
+        yield DownloadLatestEnigmaData(**param_map)

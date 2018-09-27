@@ -94,7 +94,7 @@ run-task: ## Running a specific task
 build-release: start-local-uta checkout build-docker setup-files setup-lovd download-resources run-pipeline variants-by-source ## create new data release
 
 variants-by-source: ## postprocessing: compute statistics for changes with respect to the last release
-	$(DOCKER_RUN_CMD) python /opt/brca-exchange/pipeline/utilities/variantsBySource.py  -i /files/data/output/release/built_with_change_types.tsv -c true
+	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) python /opt/brca-exchange/pipeline/utilities/variantsBySource.py  -i /files/data/output/release/built_with_change_types.tsv -c true
 
 prune-release-notes-output: ## postprocessing: removes some files, s.t. luigi tasks can be triggered to include updated release notes into release archive
 	rm $(OUT_DIR)/release-*.tar.gz
