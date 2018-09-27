@@ -40,7 +40,7 @@ class Command(BaseCommand):
             else:
                 # handle lovd reports
                 try:
-                    report_instance = Report.objects.filter(Data_Release_id=release_id).filter(DBID_LOVD=key).get()
+                    report_instance = Report.objects.filter(Data_Release_id=release_id).filter(Submission_ID_LOVD=key).get()
                     ReportDiff.objects.create(report=report_instance, report_diff=reports_diff[key])
                 except Report.DoesNotExist:
                     tqdm.write("Error adding Report Diff: Report %s in release %s not found" % (key, release_id))
