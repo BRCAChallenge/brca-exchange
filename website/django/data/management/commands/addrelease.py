@@ -214,4 +214,4 @@ class Command(BaseCommand):
         Report.objects.create_report(report)
 
     def is_empty(self, value):
-        return value is None or value is '' or value is '-'
+        return value is None or value == '' or value == '-'
