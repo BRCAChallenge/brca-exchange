@@ -3628,20 +3628,14 @@ def references():
 
 
 @cli.command(help="Run self test")
-@click.argument("length", type=click.Choice(["short", "long"]))
+@click.argument("length", type=click.Choice(["short", "long", "concerning"]))
 @click.pass_context
 def test(ctx, length):
     pytest.main(["-p", "no:cacheprovider", "-x", "."])
-    if length == "short":
-        calc_all(click.open_file("tests/variants_short.tsv", mode="r"),
-                 click.open_file("/tmp/priors_short.tsv", mode="w"),
-                 ctx.obj["genome"], ctx.obj["transcripts"], ctx.obj["processes"])
-        run("md5sum -c ./tests/md5/priors_short.md5")
-    else:
-        calc_all(click.open_file("tests/variants_long.tsv", mode="r"),
-                 click.open_file("/tmp/priors_long.tsv", mode="w"),
-                 ctx.obj["genome"], ctx.obj["transcripts"], ctx.obj["processes"])
-        run("md5sum -c ./tests/md5/priors_long.md5")
+    calc_all(click.open_file("tests/variants_%s.tsv" % length, mode="r"),
+             click.open_file("/tmp/priors_%s.tsv" % length, mode="w"),
+             ctx.obj["genome"], ctx.obj["transcripts"], ctx.obj["processes"])
+    run("md5sum -c ./tests/md5/priors_%s.md5" % length)
 
 
 @cli.command()
