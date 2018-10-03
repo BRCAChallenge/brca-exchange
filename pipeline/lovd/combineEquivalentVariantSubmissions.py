@@ -10,10 +10,6 @@ Description:
 
 import argparse
 import csv
-import logging
-from dateutil.parser import parse
-import pdb
-
 
 def mergeRows(oldRow, newRow):
     if oldRow == newRow:

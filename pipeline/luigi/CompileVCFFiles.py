@@ -801,6 +801,29 @@ class AddVariantSubmissionIds(BRCATask):
 
 
 @requires(AddVariantSubmissionIds)
+class CombineEquivalentLOVDSubmissions(BRCATask):
+
+    def output(self):
+        return luigi.LocalTarget(self.file_parent_dir + "/LOVD/LOVD_with_submission_ids_combined.txt")
+
+    def run(self):
+        brca_resources_dir = self.resources_dir
+        artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts")
+
+        os.chdir(lovd_method_dir)
+
+        args = ["python", "combineEquivalentVariantSubmissions.py", "-i", self.input().path, "-o",
+                self.output().path]
+
+        print "Running combineEquivalentVariantSubmissions.py with the following args: %s" % (args)
+
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(self.output().path)
+
+
+@requires(CombineEquivalentLOVDSubmissions)
 class ConvertSharedLOVDToVCF(BRCATask):
 
     def output(self):
