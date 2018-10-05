@@ -64,6 +64,15 @@ According to LOVD’s homepage, the Leiden Open Variation Database seeks to “p
 * #### Variant ID (Database ID) ((report-DBID_LOVD))
 	The ID given to the variant by LOVD. This ID is variant-specific, but not submitter-specific. Please note that this is an important difference from ClinVar’s data specifications.
 
+* #### Functional Analysis/Technique  & Functional Result
+	Free-text input provided by the LOVD submitter to give more detail about variant interpretations in the submission
+
+	* #### Analysis/Technique ((report-Functional_analysis_technique_LOVD)): Methods used to gather information about a variant’s impact.
+		* Example: “Homology directed recombination”
+
+	* #### Analysis/Result ((report-Functional_analysis_result_LOVD)): Information gathered about the variant’s impact.
+		* Example: “predicted no impact on protein function”
+
 * #### Created Date ((report-Created_date_LOVD))
 	The date that variant data was first submitted to LOVD.
 
