@@ -44,17 +44,17 @@ PYHGVS_GENOMIC_COORDINATE_FIELDS = ["pyhgvs_Genomic_Coordinate_38",
 
 LIST_KEYS = [
             "Pathogenicity_all",
+            "Source",
+            "Source_URL",
+            "Synonyms",
             "Submitter_ClinVar",
             "Method_ClinVar",
-            "Source",
             "Date_Last_Updated_ClinVar",
-            "Source_URL",
             "SCV_ClinVar",
             "Clinical_Significance_ClinVar",
             "Allele_Origin_ClinVar",
             "DateSignificanceLastEvaluated_ClinVar",
             "SCV_Verson_ClinVar",
-            "Synonyms",
             "Submitters_LOVD",
             "RNA_LOVD",
             "Variant_effect_LOVD",
@@ -70,7 +70,6 @@ LIST_KEYS = [
             "BX_ID_1000_Genomes",
             "BX_ID_ESP"
            ]
-
 
 EXAC_AF_FIELDS = [
     "Allele_frequency_ExAC",
