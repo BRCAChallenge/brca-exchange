@@ -59,6 +59,8 @@ LIST_KEYS = [
             "RNA_LOVD",
             "Variant_effect_LOVD",
             "Genetic_origin_LOVD",
+            "Created_date_LOVD",
+            "Edited_date_LOVD",
             "DBID_LOVD",
             "HGVS_cDNA_LOVD",
             "BX_ID_ENIGMA",
