@@ -5,8 +5,6 @@ Description:
     Python script 'lovd2VCF' takes in a LOVD/exLOVD table flat file and converts it to
     vcf format. Used primarily for the purposes of data extraction for integration
     into the ga4gh reference server.
-
-    Version 1, the basic flat representation of sample data
 """
 
 
@@ -18,13 +16,6 @@ from collections import defaultdict
 import pyhgvs as hgvs
 import pyhgvs.utils as hgvs_utils
 from pygr.seqdb import SequenceFileDB
-# import urllib
-
-
-# LOVD_LIST_FIELDS = ["genetic_origin", "RNA", "variant_effect", "individuals",
-                    # "Protein", "submission_id", "frequency", "geneid", "gDNA",
-                    # "DBID", "Protein", "created_date", "edited_date", "submitters",
-                    # "functional_analysis_technique", "functional_analysis_result"]
 
 
 def parse_args():
@@ -138,16 +129,6 @@ def normalize(field, field_value):
             field_value = field_value[:-1]
         if ';' in field_value:
             field_value = field_value.replace(';', '')
-        # if field not in LOVD_LIST_FIELDS and ';' in field_value:
-        #     field_value = field_value.replace(';', '')
-        # if field in LOVD_LIST_FIELDS and ';' in field_value:
-        #     # Semicolons are sometimes used as a list delimiter,
-        #     # this changes them to commas for consistency with other fields.
-        #     field_value = field_value.replace(';', ', ')
-        # if field in LOVD_LIST_FIELDS:
-        #     # Use url encoding to prevent issues in VCF file format.
-        #     # Decoded during merging and reports aggregation.
-        #     field_value = urllib.quote_plus(field_value)
     return field_value
 
 

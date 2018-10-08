@@ -20,15 +20,8 @@ from shutil import copy
 from numbers import Number
 import csv
 import aggregate_reports
-# import urllib
 import utilities
 import sys
-
-# # Provides access to lovd directory files
-# pardir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-# sys.path.append(pardir + '/lovd')
-
-# from lovd2vcf import LOVD_LIST_FIELDS
 
 # GENOMIC VERSION:
 VERSION = "hg38" # equivalent to GRCh38
@@ -715,7 +708,6 @@ def repeat_merging(f_in, f_out):
                     # containing ',' and hence being treated as separate fields.
                     # The list(set(new_value + old_value)) statement below would
                     # garble it otherwise.
-                    print key
                     if new_value == old_value and key != "individuals":
                         continue
                     else:
@@ -842,10 +834,6 @@ def add_new_source(columns, variants, source, source_file, source_dict):
             variants[genome_coor] = associate_chr_pos_ref_alt_with_item(record, old_column_num, source, genome_coor)
         for value in source_dict.values():
             try:
-                # if source == "LOVD" and value in LOVD_LIST_FIELDS:
-                #     field_value = map(urllib.unquote_plus, record.INFO[value])
-                #     variants[genome_coor].append(field_value)
-                # else:
                 variants[genome_coor].append(record.INFO[value])
             except KeyError:
                 logging.warning("KeyError appending VCF record.INFO[value] to variant. Variant: %s \n Record.INFO: %s \n value: %s", variants[genome_coor], record.INFO, value)
