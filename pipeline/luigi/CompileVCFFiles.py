@@ -213,7 +213,6 @@ class ConvertLatestClinvarDataToXML(BRCATask):
 
         check_file_for_contents(clinvar_xml_file)
 
-
 @requires(ConvertLatestClinvarDataToXML)
 class ConvertClinvarXMLToTXT(BRCATask):
 
@@ -1217,34 +1216,36 @@ class CopyEXACOutputToOutputDir(BRCATask):
 #                  ENIGMA                     #
 ###############################################
 
-
-class DownloadLatestEnigmaData(BRCATask):
+@requires(ConvertLatestClinvarDataToXML)
+class FilterEnigmaAssertions(BRCATask):
     def output(self):
-        """
-        Connects to synapse.org to gather latest Enigma preprocessed filenames. Requires a Synapse.org
-        account and access to the Enigma file directory with id syn7188267 owned by user MelissaCline.
-        """
-        create_path_if_nonexistent(self.output_dir)
-        output_file_path = self.output_dir + "/ENIGMA_combined_with_bx_ids.tsv"
-        return luigi.LocalTarget(output_file_path)
+        out_path = os.path.join(self.file_parent_dir, 'enigma', 'enigma_clinvar.xml')
+        return luigi.LocalTarget(out_path)
 
     def run(self):
-        """
-        Downloads enigma file, adds BX_ID's and moves to correct output location.
-        """
-        syn = synapseclient.Synapse()
-        syn.login(self.synapse_username, self.synapse_password)
-        enigma_file_dir = create_path_if_nonexistent(self.file_parent_dir + '/enigma')
-        enigma_file = syn.get(str(self.synapse_enigma_file_id), downloadLocation=enigma_file_dir)
-        os.chdir(enigma_method_dir)
+        os.chdir(clinvar_method_dir)
 
-        args = ["python", "enigma_add_bx_id.py", "--input", enigma_file_dir + "/" + enigma_file.name,
-                "--output", enigma_file_dir + "/ENIGMA_combined_with_bx_ids.tsv"]
-        print "Running enigma_add_bx_id.py with the following args: %s" % (args)
+        clinvar_xml = self.file_parent_dir + "/ClinVar/ClinVarBrca.xml"
+        args = ["python", "filter_enigma_data.py", clinvar_xml, self.output().path]
+
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        copy(enigma_file_dir + "/ENIGMA_combined_with_bx_ids.tsv", self.output_dir)
+
+@requires(FilterEnigmaAssertions)
+class ExtractEnigmaFromClinvar(BRCATask):
+    def output(self):
+        out_path = os.path.join(self.file_parent_dir, 'enigma', 'enigma_from_clinvar.tsv')
+        return luigi.LocalTarget(out_path)
+
+    def run(self):
+        os.chdir(clinvar_method_dir)
+
+        clinvar_xml = os.path.join(self.file_parent_dir, 'enigma', 'enigma_clinvar.xml')
+        args = ["python", "enigma_from_clinvar.py", clinvar_xml, self.output().path]
+
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
 
 
 ###############################################
@@ -1637,4 +1638,4 @@ class RunAll(BRCATask, luigi.WrapperTask):
         yield CopyEXACOutputToOutputDir(**param_map)
         yield CopyEXLOVDOutputToOutputDir(**param_map)
         yield CopySharedLOVDOutputToOutputDir(**param_map)
-        yield DownloadLatestEnigmaData(**param_map)
+        yield ExtractEnigmaFromClinvar(**param_map)
