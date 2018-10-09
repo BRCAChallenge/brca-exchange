@@ -18,6 +18,13 @@ import requests
 import subprocess
 import tempfile
 
+# basically a faster version of score3/score5
+from maxentpy import maxent
+from maxentpy import maxent_fast  # fast version could further speed up
+from maxentpy.maxent_fast import load_matrix  # support preloading matrix
+matrix3 = load_matrix(3)
+matrix5 = load_matrix(5)
+
 db = None
 
 def fetch_gene_coordinates(transcript_name):
@@ -34,21 +41,29 @@ def fetch_gene_coordinates(transcript_name):
     else:
         return r[0]
 
-def runMaxEntScan(sequence, donor=False):
+
+def runMaxEntScan(sequence, donor=False, usePerl=False):
     """Run maxEntScan on the indicated sequence.  Run score5.pl on candidate donor sequences, 
        score3.pl on candidate acceptor sequences.  Return the score"""
-    (fd, tmpfile) = tempfile.mkstemp()
-    fp = os.fdopen(fd, "w")
-    fp.write(sequence)
-    fp.close()
-    if donor:
-        pipe = subprocess.Popen(["perl", os.path.join(os.path.dirname(__file__), 'score5.pl'), tmpfile], stdout=subprocess.PIPE)
+    if usePerl:
+        (fd, tmpfile) = tempfile.mkstemp()
+        fp = os.fdopen(fd, "w")
+        fp.write(sequence)
+        fp.close()
+        if donor:
+            pipe = subprocess.Popen(["perl", os.path.join(os.path.dirname(__file__), 'score5.pl'), tmpfile], stdout=subprocess.PIPE)
+        else:
+            pipe = subprocess.Popen(["perl", os.path.join(os.path.dirname(__file__), 'score3.pl'), tmpfile], stdout=subprocess.PIPE)
+        result = pipe.stdout.read()
+        entScore = re.findall("[+-]?\d+(?:\.\d+)?", str(result))
+        os.remove(tmpfile)
+        return(float(entScore[0]))
     else:
-        pipe = subprocess.Popen(["perl", os.path.join(os.path.dirname(__file__), 'score3.pl'), tmpfile], stdout=subprocess.PIPE)
-    result = pipe.stdout.read()
-    entScore = re.findall("[+-]?\d+(?:\.\d+)?", str(result))
-    os.remove(tmpfile)
-    return(float(entScore[0]))
+        # use the fastest available maxentpy implementation that doesn't require us to launch an external process
+        if donor:
+            return maxent_fast.score5(str(sequence), matrix=matrix5)
+        else:
+            return maxent_fast.score3(str(sequence), matrix=matrix3)
 
 
 def scoreSeq(chrom, strand, coordinate, donor=False, verbose=False):
