@@ -67,10 +67,12 @@ According to LOVD’s homepage, the Leiden Open Variation Database seeks to “p
 * #### Functional Analysis/Technique  & Functional Result
 	Free-text input provided by the LOVD submitter to give more detail about variant interpretations in the submission
 
-	* #### Analysis/Technique ((report-Functional_analysis_technique_LOVD)): Methods used to gather information about a variant’s impact.
+	* #### Analysis/Technique ((report-Functional_analysis_technique_LOVD))
+		Methods used to gather information about a variant’s impact.
 		* Example: “Homology directed recombination”
 
-	* #### Analysis/Result ((report-Functional_analysis_result_LOVD)): Information gathered about the variant’s impact.
+	* #### Analysis/Result ((report-Functional_analysis_result_LOVD))
+		Information gathered about the variant’s impact.
 		* Example: “predicted no impact on protein function”
 
 * #### Created Date ((report-Created_date_LOVD))
