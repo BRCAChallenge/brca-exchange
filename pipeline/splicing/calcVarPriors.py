@@ -3540,13 +3540,14 @@ def getVarDict(variant, boundaries):
 
 brca1Transcript = None
 brca2Transcript = None
+variantData = list(csv.DictReader(open("mod_res_dn_brca20160525.txt", "r"), delimiter="\t"))
 
 
 def calc_one(variant):
-    global brca1Transcript, brca2Transcript
+    global brca1Transcript, brca2Transcript, variantData
 
     try:
-        variantData = csv.DictReader(open("mod_res_dn_brca20160525.txt", "r"), delimiter="\t")
+        # variantData = csv.DictReader(open("mod_res_dn_brca20160525.txt", "r"), delimiter="\t")
         if variant["Gene_Symbol"] == "BRCA1":
             varData = getVarData(variant, "enigma", variantData, None, brca1Transcript)
         elif variant["Gene_Symbol"] == "BRCA2":
