@@ -24,7 +24,7 @@ checkout: ## checking out code base
 	cd $(CODE_BASE) && git checkout $(GIT_COMMIT)
 
 build-docker: ## build main pipeline docker image
-	cd $(CODE_BASE)/pipeline/docker && ./build_docker_image.sh $(RELEASE_TAG) || { echo "$(date) Something wrong with docker image creation"; exit 1; } 
+	cd $(CODE_BASE)/pipeline/docker && ./build_docker_image.sh $(RELEASE_TAG) || { echo "$(date) Something wrong with docker image creation"; exit 1; }
 
 download-resources: ## download resources files
 	$(CODE_BASE)/pipeline/download_resources_files.sh $(RESOURCES_DIR) >> "$(LOG_DIR)/download_resources_$(RELEASE_TAG).log" 2>&1 || { echo "Downloading resource files failed"; exit 1; }
@@ -41,10 +41,10 @@ setup-files: ## setup various directories to run pipeline
 	[ -d $(RESOURCES_DIR) ] || mkdir -p $(RESOURCES_DIR)
 	[ -d $(PRIORS_REFERENCES) ] || mkdir -p $(PRIORS_REFERENCES)
 	[ -d $(OUT_DIR) ] || mkdir -p $(OUT_DIR)
-	[ -f $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz ] || wget http://brcaexchange.org/backend/downloads/releases/current_release.tar.gz -O $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz
+	[ -f $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz ] || wget https://brcaexchange.org/backend/downloads/releases/current_release.tar.gz -O $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz
 
 .ONESHELL:
-setup-lovd: ## setting up LOVD data via pipeline machine, if not running on pipeline machine, as the access is IP restricted. Requires access to main pipeline machine	
+setup-lovd: ## setting up LOVD data via pipeline machine, if not running on pipeline machine, as the access is IP restricted. Requires access to main pipeline machine
 	if [ `hostname -s` != "brca-pipeline" ]; then
 		mkdir -p $(OUT_DIR)/LOVD
 		ssh pipeline@52.151.62.136 curl https://databases.lovd.nl/shared/export/BRCA > $(OUT_DIR)/LOVD/BRCA.txt
@@ -120,7 +120,7 @@ push-docker: ## postprocessing: pushes docker image to docker hub
 	docker logout hub.docker.com
 
 .ONEHSELL:
-copy-to-previous: ## postprocessing: copy new release tar to previous release folder 
+copy-to-previous: ## postprocessing: copy new release tar to previous release folder
 # 	take latest, in case there should be several tar.gz from some reason
 	cp `ls -t $(OUT_DIR)/release-*.tar.gz | head -n 1` $(PREVIOUS_RELEASE_DIR)
 	rm $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz

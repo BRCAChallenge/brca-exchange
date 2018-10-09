@@ -112,7 +112,7 @@ function generateLinkToGenomeBrowser(prop, value) {
     let positionRangeStart = position - 1;
     let positionRangeEnd = position + ref.length + 1;
     let positionParameter = (genomicCoordinate.length > 1500) ? positionRangeStart + '-' + positionRangeEnd : genomicCoordinate;
-    let genomeBrowserUrl = 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg' + hgVal + '&position=' + positionParameter + '&hubUrl=http://brcaexchange.org/trackhubs/hub.txt';
+    let genomeBrowserUrl = 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg' + hgVal + '&position=' + positionParameter + '&hubUrl=https://brcaexchange.org/trackhubs/hub.txt';
     return <a target="_blank" href={genomeBrowserUrl}>{value}</a>;
 }
 

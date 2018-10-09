@@ -10,7 +10,7 @@ module.exports = [
     {
         id: 'BRCA-Exchange',
         logo: require('./img/BRCA-Exchange-fat.jpg'),
-        url: 'http://brcaexchange.org'
+        url: 'https://brcaexchange.org'
     },
     {
         id: 'ClinGen',

@@ -1,5 +1,5 @@
 track brcaexchange
-bigDataUrl http://brcaexchange.org/trackhubs/hg38/brcaExchange.bb
+bigDataUrl https://brcaexchange.org/trackhubs/hg38/brcaExchange.bb
 shortLabel BRCAExchange
 longLabel BRCAExchange BRCA1/2 variants
 type bigBed
