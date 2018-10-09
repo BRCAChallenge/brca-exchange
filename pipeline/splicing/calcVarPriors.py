@@ -3610,6 +3610,16 @@ def run(command):
         else:
             break
 
+import time
+class benchmark(object):
+    def __init__(self,name):
+        self.name = name
+    def __enter__(self):
+        self.start = time.time()
+    def __exit__(self,ty,val,tb):
+        end = time.time()
+        print("%s : %0.3f seconds" % (self.name, end-self.start))
+        return False
 
 @click.group()
 @click.option("--genome", type=click.Path(exists=False), default="/references/hg38.fa",
@@ -3632,11 +3642,12 @@ def references():
 @click.argument("length", type=click.Choice(["short", "long", "concerning"]))
 @click.pass_context
 def test(ctx, length):
-    pytest.main(["-p", "no:cacheprovider", "-x", "."])
-    calc_all(click.open_file("tests/variants_%s.tsv" % length, mode="r"),
-             click.open_file("/tmp/priors_%s.tsv" % length, mode="w"),
-             ctx.obj["genome"], ctx.obj["transcripts"], ctx.obj["processes"])
-    run("md5sum -c ./tests/md5/priors_%s.md5" % length)
+    with benchmark("running %s, time" % length):
+        pytest.main(["-p", "no:cacheprovider", "-x", "."])
+        calc_all(click.open_file("tests/variants_%s.tsv" % length, mode="r"),
+                 click.open_file("/tmp/priors_%s.tsv" % length, mode="w"),
+                 ctx.obj["genome"], ctx.obj["transcripts"], ctx.obj["processes"])
+        run("md5sum -c ./tests/md5/priors_%s.md5" % length)
 
 
 @cli.command()
