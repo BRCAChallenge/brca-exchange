@@ -46,7 +46,7 @@ Below you will find examples of numerous variants across different locations in 
 
 ### Exonic Variant Located in a Wild-Type Splice Site's Donor Region
 
-Example: [BRCA1 c.132C>T](http://brcaexchange.org/variant/105248)
+Example: [BRCA1 c.132C>T](https://brcaexchange.org/variant/105248)
 
 Because the variant is located in an exon and in a wild-type donor splice site region, the following priors are used in predicting the *In Silico* Prior Probability of Pathogenicity:
 
@@ -67,7 +67,7 @@ The Splicing-level estimation is considered moderate, or 0.30, and is due to the
 
 ### Exonic Variant Located in Wild-Type Splice Site's Acceptor Region
 
-Example: [BRCA1 c.442c>t](http://brcaexchange.org/variant/104977)
+Example: [BRCA1 c.442c>t](https://brcaexchange.org/variant/104977)
 
 Because the variant is located in an exon and in a wild-type acceptor splice site region, the following values are used in predicting the *In Silico* Prior Probability of Pathogenicity:
 
@@ -85,7 +85,7 @@ The Splicing-level Estimation is considered moderate, 0.34, and is due to the wi
 
 ### Exonic Variant Located in Non-splicing Region
 
-Example: [BRCA1 c.55c>t](http://brcaexchange.org/variant/105343)
+Example: [BRCA1 c.55c>t](https://brcaexchange.org/variant/105343)
 
 Because the variant is located in an exon, but not a splicing region, the following values are used in predicting the *In Silico* Prior Probability of Pathogenicity:
 
@@ -104,7 +104,7 @@ The Splicing-level Estimation is due to the de novo donor probability. The de no
 
 ### Intronic Variant Located in Wild-Type Splice Site's Donor Region
 
-Example: [c.441+2t>G](http://brcaexchange.org/variant/104996)
+Example: [c.441+2t>G](https://brcaexchange.org/variant/104996)
 
 Because the variant is located in an intron and a wild-type donor splice site region, the following values are used in predicting the *In Silico* Prior Probability of Pathogenicity:
 
@@ -120,12 +120,12 @@ The *In Silico* Prior Probability of Pathogenicity is assigned per the Splicing-
 
 This estimation is derived from the wild-type donor probability, which is 0.97 because the wild-type donor alternate Z-score is significantly lower than the wild-type donor reference Z-score, and much lower than -2.0. Thus, splicing probability in the wild-type donor has significantly decreased.
 
-Please again note that this value was computed *without *using clinical data for this specific variant. However, in this instance, the variant has been classified as Pathogenic per the clinical data available. Please visit this variant's [details page](http://brcaexchange.org/variant/104996) for more information on classifications.
+Please again note that this value was computed *without *using clinical data for this specific variant. However, in this instance, the variant has been classified as Pathogenic per the clinical data available. Please visit this variant's [details page](https://brcaexchange.org/variant/104996) for more information on classifications.
 
 
 ### Intronic Variant Located in Wild-Type Splice Site's Acceptor Region
 
-Example: [c.8488-12A>G](http://brcaexchange.org/variant/65584)
+Example: [c.8488-12A>G](https://brcaexchange.org/variant/65584)
 
 Because the variant is located in an intron and a wild-type splice site's acceptor region, the following values are used in predicting the *In Silico* Prior Probability of Pathogenicity:
 
@@ -141,7 +141,7 @@ The Splicing-level Estimation is considered moderate, 0.34, and is due to the wi
 
 ### A note on special cases:
 
-Variants located outside transcript boundaries, in untranslated regions, in non-splice regions of introns, and in the region near the end of a transcript do not follow the same logic as the above examples. (It is unknown if a truncating variant near the end of a transcript, dubbed the ‘grey-zone’ by ENIGMA, will confer a high probability of pathogenicity) . These cases are also not available for display on BRCA Exchange, though they can be found in our [downloadable data set](http://brcaexchange.org/releases).
+Variants located outside transcript boundaries, in untranslated regions, in non-splice regions of introns, and in the region near the end of a transcript do not follow the same logic as the above examples. (It is unknown if a truncating variant near the end of a transcript, dubbed the ‘grey-zone’ by ENIGMA, will confer a high probability of pathogenicity) . These cases are also not available for display on BRCA Exchange, though they can be found in our [downloadable data set](https://brcaexchange.org/releases).
 
 ## For More Information:
 
