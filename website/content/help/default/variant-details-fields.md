@@ -44,5 +44,5 @@ This tile organizes ENIGMA classifications and contextual information for the va
 
 #### Previous Versions Tile
 
-Here you will find a list of release dates and the interpretation as of that date. Clicking on the date takes you to the [release notes](http://brcaexchange.org/release/12), which provide you with summaries of changes, as well as a link to download the entire BRCA Exchange output as of that release date. This feature can be used to look at original variant interpretations alongside the data that informed them. These sets can be thought of as ‘variant time capsules,’ containing the data that was available when that release took place.
+Here you will find a list of release dates and the interpretation as of that date. Clicking on the date takes you to the [release notes](https://brcaexchange.org/release/12), which provide you with summaries of changes, as well as a link to download the entire BRCA Exchange output as of that release date. This feature can be used to look at original variant interpretations alongside the data that informed them. These sets can be thought of as ‘variant time capsules,’ containing the data that was available when that release took place.
 

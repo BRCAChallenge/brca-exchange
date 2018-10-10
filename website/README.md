@@ -72,7 +72,7 @@ This process will add an additional release to the database and rebuild the word
  * From the project root directory, run `./deployment/deploy-data local PATH/TO/release-MM-DD-YY.tar.gz`.
 
 ## How to add/approve new users on the community page
-* Go to http://brcaexchange.org/backend/admin/ and follow necessary steps.
+* Go to https://brcaexchange.org/backend/admin/ and follow necessary steps.
 
 ### References
  * http://blog.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/

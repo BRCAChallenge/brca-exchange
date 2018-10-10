@@ -3,4 +3,4 @@ shortLabel BRCAExchange
 longLabel BRCAExchange annotated BRCA1/2 variants
 genomesFile genomes.txt
 email brcaexchange@gmail.com
-descriptionUrl http://www.brcaexchange.org
+descriptionUrl https://www.brcaexchange.org

@@ -10,7 +10,7 @@ echo "Downloading into $1 ...."
 
 cd $1
 
-URL_PREFIX="http://brcaexchange.org/backend/downloads/resources"
+URL_PREFIX="https://brcaexchange.org/backend/downloads/resources"
 
 HASH=shasum
 
