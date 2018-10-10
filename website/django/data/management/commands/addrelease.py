@@ -91,11 +91,19 @@ class Command(BaseCommand):
         if (deletions_tsv):
             deletions_reader = csv.reader(deletions_tsv, dialect="excel-tab")
             deletions_header = deletions_reader.next()
-            for row in deletions_reader:
+            for row in tqdm(deletions_reader, total=get_num_lines(deletions_tsv.name)-1):
                 # split Source column into booleans
                 row_dict = dict(zip(deletions_header, row))
+
+                # transfer insilico prior columns from row_dict to insilico_dict
+                insilico_dict = dict((col, row_dict.pop(col)) for col in insilicopriors_cols)
+
                 row_dict = self.update_variant_values_for_insertion(row_dict, release_id, change_types, mupit_structures, True)
                 variant = Variant.objects.create_variant(row_dict)
+
+                # also create an instance in insilicopriors linked to this variant
+                InSilicoPriors.objects.create(Variant=variant, **insilico_dict)
+
         update_autocomplete_words()
 
         # update materialized view of current variants
