@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
 """
-Zack Fischmann
-9/21/2018
-
 Description:
     LOVD functional analysis technique and result are reported in a colon delimited fashion
     e.g. technique:result. This file splits them into two separate fields.
@@ -27,7 +24,7 @@ def parse_args():
     return options
 
 
-def main(args):
+def main():
     options = parse_args()
     f_in = options.input
     f_out = options.output
@@ -66,4 +63,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv))
+    main()

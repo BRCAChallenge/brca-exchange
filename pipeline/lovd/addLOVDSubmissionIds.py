@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
 """
-Zack Fischmann
-5/8/2018
-
 Description:
     LOVD submissions are differentiated by a combination of the variant (cDNA), submitter, and
     functional analysis technique. Combine the fields to create an id to identify the same submission
@@ -28,7 +25,7 @@ def parse_args():
     return options
 
 
-def main(args):
+def main():
     options = parse_args()
     f_in = options.input
     f_out = options.output
@@ -61,4 +58,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv))
+    main()

@@ -44,7 +44,7 @@ def parse_args():
     return options
 
 
-def main(args):
+def main():
     options = parse_args()
     inputFile = options.input
     annotFile_path = options.inAnnot
@@ -137,4 +137,4 @@ def is_empty(field_value):
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv))
+    main()
