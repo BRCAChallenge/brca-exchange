@@ -1223,10 +1223,11 @@ class FilterEnigmaAssertions(BRCATask):
         return luigi.LocalTarget(out_path)
 
     def run(self):
+        create_path_if_nonexistent(os.path.join(self.file_parent_dir, 'enigma'))
         os.chdir(clinvar_method_dir)
 
-        clinvar_xml = self.file_parent_dir + "/ClinVar/ClinVarBrca.xml"
-        args = ["python", "filter_enigma_data.py", clinvar_xml, self.output().path]
+        #clinvar_xml = self.file_parent_dir + "/ClinVar/ClinVarBrca.xml"
+        args = ["python", "filter_enigma_data.py", self.input().path, self.output().path]
 
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
@@ -1241,12 +1242,14 @@ class ExtractEnigmaFromClinvar(BRCATask):
     def run(self):
         os.chdir(clinvar_method_dir)
 
-        clinvar_xml = os.path.join(self.file_parent_dir, 'enigma', 'enigma_clinvar.xml')
-        args = ["python", "enigma_from_clinvar.py", clinvar_xml, self.output().path]
+        #clinvar_xml = os.path.join(self.file_parent_dir, 'enigma', 'enigma_clinvar.xml')
+
+        args = ["python", "enigma_from_clinvar.py", self.input().path, self.output().path]
 
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
+        copy(self.output().path, self.output_dir)
 
 ###############################################
 #            VARIANT COMPILATION              #

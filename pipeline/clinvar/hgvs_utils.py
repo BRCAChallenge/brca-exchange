@@ -9,7 +9,7 @@ import logging
 # TODO: does not belong here. move to utilties or similar. but then need to change how luigi stuff is ran.
 class HGVSWrapper:
     def __init__(self):
-        self.hgvs_dp = hgvs.dataproviders.uta.connect()
+        self.hgvs_dp = hgvs.dataproviders.uta.connect(pooling=True)
         logging.info("Connecting to %s", self.hgvs_dp.url)
         self.hgvs_hp = hgvs.parser.Parser()
         self.hgvs_am = hgvs.assemblymapper.AssemblyMapper(self.hgvs_dp)

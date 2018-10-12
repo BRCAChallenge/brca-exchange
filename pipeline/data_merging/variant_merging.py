@@ -162,7 +162,7 @@ LIST_TYPE_FIELDS = {
 }
 
 # Enigma filename is different depending on which version of output data is used.
-ENIGMA_FILE = "ENIGMA_combined_with_bx_ids.tsv"
+ENIGMA_FILE = "enigma_from_clinvar.tsv"
 # ENIGMA_FILE = "ENIGMA_combined.tsv"
 # ENIGMA_FILE = "enigma_variants_GRCh38_2-27-2016.tsv"
 # ENIGMA_FILE = "ENIGMA_last_updated.tsv"

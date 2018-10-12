@@ -1,4 +1,5 @@
 import re
+import multiprocessing
 from multiprocessing.pool import ThreadPool
 
 import click
@@ -208,29 +209,43 @@ def parse_record(cvs_el, hgvs_util, assembly="GRCh38"):
 def main(filtered_clinvar_xml, output):
     enigma_sets = _get_clinvar_sets(filtered_clinvar_xml)
 
-    # TODO: tweak, necessary?
-    logging.basicConfig(level=logging.INFO)
-
-    # TODO: reshuffle to use multiprocessing?
-    # TODO: make sure stack trace gets up in case of errors
-    # from multiprocessing import Pool
-    # sets_str = [etree.tostring(el, encoding='unicode', pretty_print=False) for el in sets]
-    # pool = Pool(6)
-    # variant_records = pool.map(parse_record_str, sets_str)
-
-    pool = ThreadPool(6)
-    # variant_records = [parse_record_str(s) for s in sets_str[0:100]]
-
-    # TODO: fix naming?
     hgvs_util = hgvs_utils.HGVSWrapper()
+
+    pool = ThreadPool(multiprocessing.cpu_count())
 
     variant_records = pool.map(lambda s: parse_record(s, hgvs_util),
                                enigma_sets)
 
     df = pd.DataFrame.from_dict(variant_records)
 
+    df['BX_ID'] = pd.Series(range(1, len(df)+1))
     print(df.info())
 
+    target_header = ['Gene_symbol',
+                      'Genomic_Coordinate',
+                      'Reference_sequence',
+                      'HGVS_cDNA',
+                      'BIC_Nomenclature',
+                      'Abbrev_AA_change',
+                      'URL',
+                      'Condition_ID_type',
+                      'Condition_ID_value',
+                      'Condition_category',
+                      'Clinical_significance',
+                      'Date_last_evaluated',
+                      'Assertion_method',
+                      'Assertion_method_citation',
+                      'Clinical_significance_citations',
+                      'Comment_on_clinical_significance',
+                      'Collection_method',
+                      'Allele_origin',
+                      'ClinVarAccession',
+                      'HGVS_protein',
+                      'BX_ID']
+
+    df = df.loc[:, target_header]
+
+    df.info()
     df.to_csv(output, sep='\t', index=False)
 
     # TODO: set proper return code!
