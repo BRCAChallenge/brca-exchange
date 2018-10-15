@@ -42,7 +42,8 @@ def separate_functional_analysis_technique_and_result_and_add_submission_ids(f_i
                 # no functional_analysis_result value is present
                 f_in_data_frame.loc[index, 'functional_analysis_technique'] = functional_analysis_technique
             else:
-                f_in_data_frame.loc[index, 'functional_analysis_technique'], f_in_data_frame.loc[index, 'functional_analysis_result'] = split_functional_analysis
+                f_in_data_frame.loc[index, 'functional_analysis_technique'], \
+                f_in_data_frame.loc[index, 'functional_analysis_result'] = split_functional_analysis
 
         # submission id's are used to identify equivalent submissions
         cdna = row['cDNA']

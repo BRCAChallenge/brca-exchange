@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
 """
-Zack Fischmann
-8/14/2018
-
 Description:
     Combine LOVD variants considered to be equivalent submissions.
 """
@@ -11,7 +8,9 @@ Description:
 import argparse
 import csv
 
+
 def mergeRows(oldRow, newRow):
+    assert newRow['submission_id'] == oldRow['submission_id']
     if oldRow == newRow:
         oldRow['individuals'] = str(int(oldRow['individuals']) + int(newRow['individuals']))
         return oldRow
