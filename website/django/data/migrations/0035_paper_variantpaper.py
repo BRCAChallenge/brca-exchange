@@ -9,7 +9,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('data', '0033_report_synonyms_clinvar'),
+        ('data', '0034_insilicopriors'),
     ]
 
     operations = [
