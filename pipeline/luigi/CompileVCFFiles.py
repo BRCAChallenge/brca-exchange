@@ -736,7 +736,7 @@ class DownloadLOVDInputFile(BRCATask):
 
     lovd_data_file = luigi.Parameter(default='', description='path, where the shared LOVD data will be stored')
 
-    shared_lovd_data_url = luigi.Parameter(default='https://databases.lovd.nl/shared/export_ungrouped.php/BRCA',
+    shared_lovd_data_url = luigi.Parameter(default='https://databases.lovd.nl/shared/export/BRCA',
                                             description='URL to download shared LOVD data from')
 
     def output(self):
@@ -1630,12 +1630,11 @@ class RunAll(BRCATask, luigi.WrapperTask):
 
         yield GenerateReleaseArchive(**param_map)
 
-        #yield CopyClinvarVCFToOutputDir(**param_map)
-        #yield CopyESPOutputToOutputDir(**param_map)
-        #yield CopyBICOutputToOutputDir(**param_map)
-        #yield CopyG1KOutputToOutputDir(**param_map)
-        #yield CopyEXACOutputToOutputDir(**param_map)
-        #yield CopyEXLOVDOutputToOutputDir(**param_map)
+        yield CopyClinvarVCFToOutputDir(**param_map)
+        yield CopyESPOutputToOutputDir(**param_map)
+        yield CopyBICOutputToOutputDir(**param_map)
+        yield CopyG1KOutputToOutputDir(**param_map)
+        yield CopyEXACOutputToOutputDir(**param_map)
+        yield CopyEXLOVDOutputToOutputDir(**param_map)
         yield CopySharedLOVDOutputToOutputDir(**param_map)
         yield DownloadLatestEnigmaData(**param_map)
-
