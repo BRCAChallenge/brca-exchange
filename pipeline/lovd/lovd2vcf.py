@@ -89,7 +89,7 @@ def main():
     for index, field in enumerate(headerline):
         fieldIdxDict[field] = index
 
-    # extract info from each line of the bic flat file
+    # extract info from each line of the flat file
     for line in inputFile:
         line = line.replace('"', '')
         INFO_field = list()
