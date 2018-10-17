@@ -804,7 +804,7 @@ th[role='columnheader'] .help, .help-target .help {
     margin: 20px auto 20px auto;
 }
 
-#communityMap .map-info-window div { 
+#communityMap .map-info-window div {
     float: right;
 }
 
@@ -950,6 +950,11 @@ div.variant-detail-group .variantfield-empty {
     display: none;
 }
 
+/* overrides bootstrap's min-height so empty groups can be completely hidden */
+div.variant-detail-group {
+    min-height: 0;
+}
+
 div.variant-detail-group .group-empty {
     display: none;
 }
@@ -970,19 +975,26 @@ div.variant-detail-group .panel {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
+div.variant-detail-group .panel-heading {
+    padding-right: 10px;
+}
+div.variant-detail-group .panel-title {
+    display: flex;
+    flex-direction: row;
+}
+div.variant-detail-group .panel-title .title {
+    flex: 1 1 auto;
+}
+
 div.variant-detail-group .panel-help-btn {
     color: #e2e2e2;
-    position: absolute;
-    right: 26px;
-    display: block;
-    top: 10px;
+    margin-left: 10px;
     font-size: 20px;
     z-index: 100;
 }
 
 div.variant-detail-group:hover .panel-help-btn {
     color: #c3c3c3;
-    display: block;
 }
 
 div.variant-detail-group .panel-body {
@@ -1175,7 +1187,7 @@ div.variant-submitter-group .submitter-header td {
    background: #f2f7ff;
    cursor: pointer;
    display: flex; flex-direction: row; width: 100%;
-   align-items: center; 
+   align-items: center;
    overflow: hidden;
 }
 
@@ -1213,6 +1225,125 @@ div.variant-submitter-group .submitter-header td {
 .clinvar-extras .date-updated {
     font-size: smaller;
 }
+
+
+/* --- in-silico prediction viz. -------------- */
+
+.subtile-container {
+    padding: 10px; border-top: solid 1px #ccc;
+}
+
+.protein-level-estimation {
+    width: 100%;
+}
+
+.protein-level-estimation th, .protein-level-estimation td {
+    padding: 5px;
+}
+.protein-level-estimation .missense-header {
+    background-color: #e1e2e6;
+}
+
+.protein-level-estimation .field-container {
+    display: flex;
+}
+
+.protein-level-estimation .label-field {
+    flex: 1 1 auto;
+    border: solid 1px #eee;
+    padding: 3px;
+}
+
+.protein-level-estimation .value-field {
+    flex: 0 0 150px;
+    text-align: center;
+    border: solid 1px #eee;
+    padding: 3px;
+}
+
+.protein-level-estimation .nested .field-container {
+    margin-left: 30px;
+}
+
+.protein-level-estimation .borderless { border: none; }
+.protein-level-estimation .bracket_lt25 { background-color: #abf4ac; }
+.protein-level-estimation .bracket_lt50 { background-color: #f2f4ad; }
+.protein-level-estimation .bracket_lt75 { background-color: #f5be85; }
+.protein-level-estimation .bracket_lte100 { background-color: #e85659; }
+
+.protein-level-estimation .highlighted { border: solid 2px red; }
+tr.highlighted td { border-top: solid 2px red; border-bottom: solid 2px red; }
+tr.highlighted td:first-child { border-left: solid 2px red; }
+tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
+
+.splicing-subtile {
+    padding: 0; /* allows the tab controller to touch the edges of the screen */
+}
+.splicing-subtile .preamble {
+    margin: 10px 20px 20px 20px;
+}
+.splicing-subtile .nav-tabs {
+    display: flex;
+}
+.splicing-subtile .nav-tabs li {
+    flex: 1 1 auto;
+    text-align: center;
+}
+.splicing-subtile .nav-tabs li:first-child { margin-left: 6px; }
+.splicing-subtile .nav-tabs li:last-child { margin-right: 5px; }
+.splicing-subtile .nav-tabs > li > a {
+    text-transform: none;
+    font-size: 12px;
+}
+
+.splicing-subtile .splicing-tab-header.highest-prob { font-weight: bolder; }
+.splicing-subtile .splicing-tab-header.is-na { color: gray; }
+
+
+.splicing-subtile .tab-body {
+    padding: 15px;
+}
+.splicing-subtile .novalue-note {
+    padding: 15px;
+    font-style: italic;
+    text-align: center;
+}
+
+.splicing-subtile .splicing-tab-header.highest-prob { font-weight: bolder; }
+.splicing-subtile .splicing-tab-header.is-na { color: gray; }
+
+
+.splicing-subtile .tab-body {
+    padding: 15px;
+}
+.splicing-subtile .novalue-note {
+    padding: 15px;
+    font-style: italic;
+    text-align: center;
+}
+
+.splicing-level-table { width: 100%; table-layout: auto !important; }
+.splicing-level-table td { padding: 5px; border: solid 1px #aaa; text-align: center; }
+.splicing-level-table .sequence {
+    font-family: monospace;
+    /*overflow-x: auto;*/
+    text-align: left;
+}
+.splicing-level-table .sequence .diff {
+    font-family: "Courier", sans-serif;
+    font-weight: bold;
+    font-size: larger;
+}
+.splicing-level-table .note-row {
+    text-align: left;
+    font-size: small;
+    padding: 8px;
+}
+.pathos-prob-label-outside { background-color: #cccccc; }
+.pathos-prob-label-improved { background-color: #a5c3f2; }
+.pathos-prob-label-low { background-color: #7ac39e; }
+.pathos-prob-label-moderate { background-color: #f5b170; }
+.pathos-prob-label-high { background-color: #c66178; }
 
 
 /* faisal: hack for packery to minimize the impact of the graphical glitch of opening/closing a section */

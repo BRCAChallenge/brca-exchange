@@ -17,7 +17,7 @@ if [[ $# -ne 3 ]]; then
     echo ""
     echo "./reproduce_merging.sh /tmp/reproductions/ 2018-02-17 2018-01-16"
     echo ""
-    echo "Note: you can lookup release dates here: http://brcaexchange.org/releases"
+    echo "Note: you can lookup release dates here: https://brcaexchange.org/releases"
     exit 2
 fi
 
@@ -42,11 +42,11 @@ function download_release_archive()
     DATE_US=$1
     TARGET=$2
 
-    URL="http://brcaexchange.org/backend/downloads/releases/release-${DATE_US}/release-${DATE_US}.tar.gz" 
+    URL="https://brcaexchange.org/backend/downloads/releases/release-${DATE_US}/release-${DATE_US}.tar.gz"
     wget "${URL}" -O ${TARGET}
 
     if [ "$?" -ne "0" ]; then
-        echo "Failed to download archive $URL. Please check http://brcaexchange.org/releases for the available release dates"
+        echo "Failed to download archive $URL. Please check https://brcaexchange.org/releases for the available release dates"
         exit 1
     fi
 }

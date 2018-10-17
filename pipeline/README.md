@@ -1,78 +1,104 @@
-# brca-pipeine
+# How to Run "The Pipeline"
 
-Contains source code used to wrangle the BRCA variation data that is presented in the brca-exchange site.
-##### Overall Dependencies
- * create a Synapse account, contact Melissa for access to the ENIGMA data under Synapse, and do a 'pip install synapseclient'
- * create a directory for genomic resources.  Point to it with the environment variable $BCRA_RESOURCES
- * download http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/refseq_annotation.hg38.gp to $BRCA_RESOURCES
- * download http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/refseq_annotation.hg19.gp to $BRCA_RESOURCES
- * download http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/refseq_annotation.hg18.gp to $BRCA_RESOURCES
- * download http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/hg19.fa.gz to $BRCA_RESOURCES and uncompress
- * download http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/hg18.fa.gz to $BRCA_RESOURCES and uncompress
- * download http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz to $BRCA_RESOURCES and uncompress
- * download http://hgdownload.cse.ucsc.edu/gbdb/hg19/liftOver/hg19ToHg38.over.chain.gz to $BRCA_RESOURCES.  There is no need to uncompress it.
- * Download brca1_hg38.txt, brca2_hg38.txt, brca1_hg19.txt and brca2_hg19.txt from http://hgwdev.soe.ucsc.edu/~cline/BRCA/resources/ to $BRCA_RESOURCES
- * download the latest available version of BRCA2.txt from the lovd subdirectory and move it into $BRCA_RESOURCES (can be found on the production VM)
- * install postgresql
- * install the leiden cleanup package at http://leiden-open-variation-database-lovd-cleanup.readthedocs.io/en/latest/index.html (NOTE: this can be problematic, please submit an issue if you encounter errors with the leiden package)
- * pip install git+https://github.com/counsyl/hgvs.git
- * pip install psycopg2
- * pip install parsley
- * pip install configparser (Enigma requires version 3.5.0, will fail with latest version)
- * pip install bioutils
- * pip install biopython
- * install lzo
- * install bx-python from https://pypi.python.org/packages/55/db/fa76af59a03c88ad80494fc0df2948740bbd58cd3b3ed5c31319624687cc/bx-python-0.7.3.tar.gz#md5=d8c50c01c9e421bae0bbdbfa00fef6e4 (note: pip install bx-python left an outstanding dependency to lzo1x.h, which proved to be hard to resolve) NOTE: This may lead to errors in the bx.bbi directory, please submit an issue if you encounter this problem. Sometimes `pip install bx-python` is also necessary.
- * pip install pysam
- * install lzo (sudo apt-get install liblzo2-dev)
- * pip install git+https://github.com/bxlab/bx-python
- * install Cython
- * pip install "crossmap>=0.2.4"
- * install vcftools from https://vcftools.github.io/index.html
- * pip install pyvcf
- * install tabix (see http://genometoolbox.blogspot.com/2013/11/installing-tabix-on-unix.html)
- * pip install luigi
- * pip install retrying
- * pip install synapseclient[pandas,pysftp]
- * cd into enigma and `pip install -r requirements.txt`
+## Introduction
 
-## Misc Instructions
-### Convert refseq .psl file to .gp (genepred) format (required format for hgvs conversion)
-  This is the gene feature coordinate file that coincides with the '-r' option of umd2vcf and bic2vcf scripts.
+In order to faciliate working with the pipeline a makefile is included in the code base under `pipeline/Makefile`. It is parametrized using a configuration file which by default is assumed to be in `pipeline/brca_pipeline_cfg.mk`.
 
-  1. Add '/cluster/bin/x86_64/mrnaToGene' to your PATH environment variable
-  2. mrnaToGene [options] psl genePredFile
-  3. Insert an extra column on the left-hand most side for each row in the genepred file and put any number there designating the id of the refseq annotation. The exact number doesn't matter as long as it is unique. This is needed for proper formatting so that the hgvs python package can properly interpret the genepred file.
-  4. Add the open reading frame coordinates in the genepred file (column 7 is start-codon position and column 8 is the position at the end of the stop-codon)
+### Requirements
 
-  e.g. mrnaToGene -insertMergeSize=-1 -noCds refseq_annotation.hg19.psl refseq_annotation.hg19.gp
+In order to successfully run the pipeline using this setup your environment needs to be equipped with the following:
 
-#### Generate ClinVar VCF files (`ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/`)
-See `https://github.com/BD2KGenomics/brca/blob/master/clinvar/README.txt`
+* docker
+* GNU make >=v3.82
+* python with jinja2-cli installed (`pip install jinja2-cli`)
 
-#### Generate umd vcf files from webscrapped data and upload to server
-See `https://raw.githubusercontent.com/BD2KGenomics/brca/master/umd/README.txt`
+#### Mac OS X
 
-#### Generate bic vcf files from webscrapped data and upload to server
-See `https://raw.githubusercontent.com/BD2KGenomics/brca/master/bic/README.txt`
+Additional steps have to be taken on Mac OS X:
 
-#### Get data from LOVD
-  1. Log into brcaexchange-dev.cloudapp.net.
-  2. Run `wget http://databases.lovd.nl/shared/export/BRCA`.
-  3. Create a subdirectory called "LOVD" in the target directory used during the pipeline run.
-  4. Move the BRCA file downloaded from LOVD into the LOVD directory and rename the file `BRCA.txt`.
+* brew install make --with-default-names
+* brew install coreutils
 
-##### Webscrap exLOVD (`http://hci-exlovd.hci.utah.edu/`)
-See `https://raw.githubusercontent.com/BD2KGenomics/brca/master/lovd/README.md`
+## Creating a New Data Release
 
-##### Webscrap sharedLOVD (`http://databases.lovd.nl/shared/`)
-See `https://raw.githubusercontent.com/BD2KGenomics/brca/master/lovd/README.md`
+New data releases should ideally be generated on a dedicated pipeline machine. Although it could be run on any other machine in principle, some sources (e.g. LOVD) are only available from there.
 
-#### ExAC
+### Create a Data Release
+To create a new data release the entry point is the `pipeline/pipeline_running/generate_release.sh` script. It needs to be invoked with appropriate arguments, i.e.
 
-#### ESP (`http://evs.gs.washington.edu/EVS/`)
-See `https://github.com/BD2KGenomics/brca/edit/master/esp/README.txt`
+ * root working directory
+ * path to luigi credentials file (see section below)
+ * directory where previous release archives are stored
 
-## Luigi
+For the pipeline machine, we for example get:
 
-Luigi is intended to automate many of the tasks in the pipeline directory. To get started, `pip install luigi`.
+```
+/home/pipeline/brca_upstream/pipeline/pipeline_running/generate_release.sh /home/pipeline/monthly_releases /home/pipeline/luigi_pipeline_credentials.cfg /home/pipeline/previous_releases
+```
+
+This script clones the BRCA Exchange repo into a directory in `WORKING_DIR/data_release_yyyy-MM-dd` referring to the current date and checks out the latest commit on master. It then generates a configuration file `brca_pipeline_cfg.mk` where paths and other settings are set up.
+
+Finally, the following steps are done via the Makefile: 
+ * downloads resources files
+ * builds a docker image
+ * kicks off the pipeline in the docker image just created
+
+Should anything go wrong, the pipeline can be easily restarted by issuing `make run-pipeline` in the `pipeline` directory of the code base of the corresponding release (that's where both the `Makefile` and the configuration in `brca_pipeline_cfg.mk` is stored).
+
+### Postprocessing
+
+After the data in the tar release file has been sanity checked (and the release notes updated), some post processing steps need to be done.
+
+Steps include:
+ * updating the release notes and regenerating the release archive with the release notes
+ * tagging the commit in the main git repository
+ * pushing the docker image to dockerhub
+ * copying the release tar to `previous_releases` folder.
+
+This can be done in one breeze by running `make post-release-cmds`.
+
+### Credentials
+
+Early stages of the pipeline need credentials to download data. These can be passed into the container by mounting an appropriate file. Also note, that some data sets are only available via the pipeline machine. However, later stages of the pipeline don't need any and a dummy file could be created.
+
+Currently, such a credential files should contain the following:
+
+```
+[RunAll]
+# BIC credentials
+u=bicusername
+p=bicpassword
+
+# synapse credentials
+synapse_username=your_username
+synapse_password=some_password
+synapse_enigma_file_id=syn8465585
+
+```
+
+### Setup on Pipeline Machine
+
+In directory `/home/pipeline`
+
+```
+brca_upstream                   <-- BRCA exchange code base
+monthly_releases
+├── data_release_TAG            <-- release working dir
+│   ├── code                    <-- clone of git repository 
+│   ├── brca_out                <-- pipeline working directory
+│   └── resources               <-- e.g. reference sequences
+│   └── references              <-- e.g. reference sequences for the splicing pipeline (may be merged in the future)
+previous_releases               <-- released archives of previous releases
+```
+
+## Developing New Features
+
+A very rough guide on how to use the Makefile target for easier development:
+
+Change to the `pipeline` directory and type the following:
+
+* `make` or `make help` to see what targets are available along with minimal help
+* `make init` to set up a configuration file `pipeline/brca_pipeline_cfg.mk` with paths and other settings. It is advisable to edit it according your needs:
+* `make setup-dev-env`: runs various targets to set up a dev environment.
+* `make run-interactive`: starts bash in brca docker container.
+* `make run-task [TASK]`: runs a specific luigi task

@@ -3,7 +3,7 @@ track hub from the brcaexchange tarball.
 
 First, get the release archive you would like to use. For example, if you're working with the latest production release:
 ```
-wget http://brcaexchange.org/backend/downloads/releases/current_release.tar.gz
+wget https://brcaexchange.org/backend/downloads/releases/current_release.tar.gz
 tar -zxvf current_release.tar.gz
 ```
 

@@ -117,12 +117,15 @@ var NavBarNew = React.createClass({
                             <NavLink onClick={this.close} to='/about/api'>
                                 Webservices for API Data Access
                             </NavLink>
+                            <NavLink onClick={this.close} to='/about/app'>
+                                The Mobile App
+                            </NavLink>
                             <NavLink onClick={this.close} to='/about/dataSubmissionPolicy'>
                                 Data Submission Policy
                             </NavLink>
                         </DropdownButton>
                     </Nav>
-                    {this.state.isBeta && <div className='beta-header'>This is a beta version of the BRCA Exchange. Please note that some variant information and website features displayed here are under review - for the most up-to-date finalized information, and to join our community, please refer to <a href="http://brcaexchange.org">www.brcaexchange.org</a>. If you encounter any issues while using the beta website, please report them to <a href="mailto:brcaexchange@gmail.com">brcaexchange@gmail.com</a>.</div>}
+                    {this.state.isBeta && <div className='beta-header'>This is a beta version of the BRCA Exchange. Please note that some variant information and website features displayed here are under review - for the most up-to-date finalized information, and to join our community, please refer to <a href="https://brcaexchange.org">www.brcaexchange.org</a>. If you encounter any issues while using the beta website, please report them to <a href="mailto:brcaexchange@gmail.com">brcaexchange@gmail.com</a>.</div>}
                 </Navbar>
                 {this.state.showModal && this.getModal()}
             </div>

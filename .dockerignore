@@ -1,0 +1,4 @@
+.git
+website/node_modules
+website/build
+website/django/downloads

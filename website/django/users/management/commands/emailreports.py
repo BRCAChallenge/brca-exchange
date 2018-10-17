@@ -31,7 +31,7 @@ class Command(BaseCommand):
             plaintext_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'users_awaiting_approval_email.txt'))
             html_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'users_awaiting_approval_email.html'))
             # get backend url somehow?
-            url = "http://brcaexchange.org/backend/admin/users/unapproveduser/"
+            url = "https://brcaexchange.org/backend/admin/users/unapproveduser/"
             d = Context({'user_count': user_count, 'url': url})
 
             subject, from_email = 'admin notification test', 'noreply@brcaexchange.org'

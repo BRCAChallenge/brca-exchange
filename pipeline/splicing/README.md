@@ -76,7 +76,7 @@ You will end up with a shell inside the container but running the code mapped fr
 
 # Production Input
 
-To run the full set of variants download the [current release](http://brcaexchange.westus2.cloudapp.azure.com/backend/downloads/releases/current_release.tar.gz) and process output/release/artifacts/built_with_mupit.tsv.
+To run the full set of variants download the [current release](https://brcaexchange.westus2.cloudapp.azure.com/backend/downloads/releases/current_release.tar.gz) and process output/release/artifacts/built_with_mupit.tsv.
 
 
 # Notes

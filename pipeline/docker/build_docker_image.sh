@@ -3,42 +3,38 @@
 # Creates a docker image to run the BRCA Exchange data pipeline
 #
 # Optional arguments:
-#  1. git commit: either a branch name or a hash
-#  2. tag for the docker image
+#  1. tag for the docker image
 #
-# If no arguments are provided, the code of the current master branch is used and the docker imaged tagged with "latest"
+# The codebase is included as-is into the docker image. Note, that in this process all files not excluded in the '.dockerignore' file get copied into the image, which may significantly slow down the building process.
+# If you want to build a docker image with a specific branch or commit, check it out before calling this script.
 
-DEFAULT_GIT_REPO="https://github.com/BRCAChallenge/brca-exchange.git"
-DEFAULT_COMMIT="master"
 DEFAULT_DOCKER_TAG="latest"
+DOCKER_TAG=$1
 
-SHA1_HASH_HEX_LENGTH=40
-
-COMMIT=$1
-DOCKER_TAG=$2
-
-BRCA_GIT_REPO=${BRCA_GIT_REPO:-${DEFAULT_GIT_REPO}}
-COMMIT=${COMMIT:-${DEFAULT_COMMIT}}
 DOCKER_TAG=${DOCKER_TAG:-${DEFAULT_DOCKER_TAG}}
 
 COMMIT_LENGTH=${#COMMIT}
 
-if [ "${COMMIT_LENGTH}" -eq "${SHA1_HASH_HEX_LENGTH}" ]; then
-    FORCE_REBUILD=0
-else
-    echo "No commit hash given. Will force to clone brca-exchange repository and checkout branch ${COMMIT}"
-    FORCE_REBUILD=$(date +%s)
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd ${SCRIPT_DIR}
+
+# checking whether we are in dirty git state (ignoring untracked files though)
+IS_GIT_DIRTY="False"
+if [  "$(git status --short | grep -cv '^??')" -gt 0 ]; then
+    echo "WARNING: files have been modified! Please consider committing your changes."
+    IS_GIT_DIRTY="True"
 fi
 
-# since we need this file during image building, we need to stage it into the docker context
-cp ../requirements.txt requirements_docker.txt
+BUILD_DIR="$(realpath ${SCRIPT_DIR}/../..)"
+
+echo "Build context is ${BUILD_DIR}"
 
 DOCKER_IMAGE_NAME="brcachallenge/brca-exchange-pipeline:${DOCKER_TAG}"
-echo "Building ${DOCKER_IMAGE_NAME} with code from ${BRCA_GIT_REPO} ${COMMIT}"
-docker build -t ${DOCKER_IMAGE_NAME} --build-arg FORCE_REBUILD=${FORCE_REBUILD} --build-arg BRCA_GIT_REPO=${BRCA_GIT_REPO} --build-arg BRCA_EXCHANGE_COMMIT=${COMMIT} .
+COMMIT=$(git rev-parse HEAD)
+
+echo "Building ${DOCKER_IMAGE_NAME} with ${COMMIT}"
+docker build -f "${BUILD_DIR}/pipeline/docker/Dockerfile" -t ${DOCKER_IMAGE_NAME} --build-arg FORCE_REBUILD=1 --build-arg IS_GIT_DIRTY=${IS_GIT_DIRTY} --build-arg GIT_COMMIT=${COMMIT} ${BUILD_DIR}
 
 DOCKER_EXIT="$?"
-
-rm requirements_docker.txt
 
 exit ${DOCKER_EXIT}

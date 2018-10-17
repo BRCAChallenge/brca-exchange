@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ "$#" -ne "1" ]; then
     echo "Downloads required resources files such as reference sequences"
@@ -10,7 +10,7 @@ echo "Downloading into $1 ...."
 
 cd $1
 
-URL_PREFIX="http://brcaexchange.org/backend/downloads/resources"
+URL_PREFIX="https://brcaexchange.org/backend/downloads/resources"
 
 HASH=shasum
 
@@ -43,5 +43,5 @@ done
 
 for f in hg18.fa.gz hg19.fa.gz hg38.fa.gz; do
     echo "Unzipping ${f} ..."
-    gunzip -f "$f"
+    gunzip < "$f" > "$(basename $f '.gz')"
 done

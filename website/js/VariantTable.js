@@ -233,7 +233,14 @@ const researchModeGroups = [
         {title: 'Literature Reference', prop: 'Literature_source_exLOVD', core: true}
     ]},
 
-    {groupTitle: 'CRAVAT - MuPIT 3D Protein View', internalGroupName: 'Mupit Structure', hideFromColumnSelection: true, innerCols: [
+    {groupTitle: 'In Silico Prediction (prior to considering other evidence)', internalGroupName: 'InSilicoPrediction', inSilicoPred: true,
+        hideFromColumnSelection: true,
+        innerCols: []
+    },
+
+    {groupTitle: 'CRAVAT - MuPIT 3D Protein View', internalGroupName: 'Mupit Structure',
+      hideFromColumnSelection: true,
+      innerCols: [
         {title: 'Mupit Structure', prop: 'Mupit_Structure', tableKey: false, dummy: true}
     ]},
 ];
@@ -415,7 +422,12 @@ const researchModeColumns = [
     {title: 'SAS Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_SAS_ExAC'},
     {title: 'SAS Homozygous count (ExAC minus TCGA)', prop: 'Homozygous_count_SAS_ExAC'},
     {title: 'SAS Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes'},
-    {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'}
+    {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'},
+    {title: 'In Silico Prior Probability', prop: 'applicablePrior'},
+    {title: 'Protein-level Estimation', prop: 'proteinPrior'},
+    {title: 'Donor Impact', prop: 'refDonorPrior'},
+    {title: 'De Novo Donor', prop: 'deNovoDonorPrior'},
+    {title: 'Acceptor Impact', prop: 'refAccPrior'}
 ];
 
 
