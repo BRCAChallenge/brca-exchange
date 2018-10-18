@@ -20,7 +20,7 @@ def open_maybe_gzip(fname):
 def filter_engima_xml(fin, fout):
     fout = open(fout, 'w')
 
-    xpath_filter = 'ClinVarSet/ReferenceClinVarAssertion/MeasureSet/Measure/' \
+    xpath_filter = 'ReferenceClinVarAssertion/MeasureSet/Measure/' \
                    'MeasureRelationship/Symbol[starts-with(ElementValue, "BRCA") and ElementValue/@Type="Preferred"]'
 
     # writing header
@@ -29,9 +29,16 @@ def filter_engima_xml(fin, fout):
         fout.writelines(header_lines)
 
     # filtering ClinVarSet's we are interested in
-    for ev_name, el in etree.iterparse(fin, tag='ClinVarSet'):
-        if not el.xpath(xpath_filter):
-            fout.write(etree.tostring(el))
+    for _, el in etree.iterparse(gzip.GzipFile(fin), tag='ClinVarSet'):
+        if len(el.xpath(xpath_filter)) >= 1:
+            fout.write(etree.tostring(el, pretty_print=True))
+
+        # some cleanup to save a significant amount of memory (inspired by https://www.ibm.com/developerworks/xml/library/x-hiperfparse/)
+        el.clear()
+        # Also eliminate now-empty references from the root node to elem
+        for ancestor in el.xpath('ancestor-or-self::*'):
+            while ancestor.getprevious() is not None:
+                del ancestor.getparent()[0]
 
     # writing "footer"
     fout.write("</ReleaseSet>")
