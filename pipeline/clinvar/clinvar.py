@@ -107,12 +107,11 @@ class variant:
             genomic = genomicCoordinates(item, debug=debug)
             self.coordinates[assembly] = genomic
         self.geneSymbol = None
-        measureRelationship = element.find("MeasureRelationship")
-        if measureRelationship != None:
-            symbol = measureRelationship.find("Symbol")
-            if symbol != None:
-                self.geneSymbol = textIfPresent(symbol, "ElementValue")
-
+        symbols = element.findall("MeasureRelationship/Symbol")
+        for symbol in symbols:
+            symbol_val = textIfPresent(symbol, "ElementValue")
+            if symbol_val.startswith('BRCA'):
+                self.geneSymbol = symbol_val
 
 
 class referenceAssertion:

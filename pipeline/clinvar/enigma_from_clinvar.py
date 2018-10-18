@@ -127,6 +127,12 @@ def _xpath(el, xpath):
         return e[0]
     return default_val
 
+def _xpath_text(el, xpath):
+    e = _xpath(el, xpath)
+    if e is not None:
+        return e.text
+    return default_val
+
 # clinvar set element
 def parse_record(cvs_el, hgvs_util, assembly="GRCh38"):
     rec = {}
@@ -134,8 +140,7 @@ def parse_record(cvs_el, hgvs_util, assembly="GRCh38"):
     # TODO: careful different logic. processing happens on variant set instead per assertion as in main clinvar parsing. make it more explicits?
     enigma_assertion = cvs_el.xpath('ClinVarAssertion[contains(ClinVarSubmissionID/@submitter, "ENIGMA")]')[0]
 
-    rec["Gene_symbol"] = clinvar.textIfPresent(cvs_el,
-                                               'ReferenceClinVarAssertion/MeasureSet/Measure/MeasureRelationship/Symbol/ElementValue[@Type="Preferred"]')
+    rec["Gene_symbol"] = _xpath_text(cvs_el, 'ReferenceClinVarAssertion/MeasureSet/Measure/MeasureRelationship/Symbol/ElementValue[starts-with(., "BRCA") and @Type="Preferred"]')
 
     rec["Genomic_Coordinate"] = _extract_genomic_coordinates(cvs_el, assembly)
 

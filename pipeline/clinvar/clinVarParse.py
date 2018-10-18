@@ -23,6 +23,10 @@ MULTI_VALUE_SEP = ','
 def processSubmission(submissionSet, assembly):
     ra = submissionSet.referenceAssertion
 
+    if ra.variant is None:
+        # TODO: print failing variants to stderr (or log?)
+        return None
+
     for oa in submissionSet.otherAssertions.values():
         submitter = oa.submitter
         variant = ra.variant
@@ -88,9 +92,10 @@ def main():
             elif "</ClinVarSet>" in line:
                 inputBuffer += line
                 inClinVarSet = False
+
                 cvs = ET.fromstring(inputBuffer)
                 if clinvar.isCurrent(cvs):
-                    submissionSet = clinvar.clinVarSet(cvs)
+                    submissionSet = clinvar.clinVarSet(cvs, debug=False)
                     processSubmission(submissionSet, args.assembly)
                 inputBuffer = None
             elif inClinVarSet:

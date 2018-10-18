@@ -206,7 +206,7 @@ class ConvertLatestClinvarDataToXML(BRCATask):
 
         clinvar_xml_file = clinvar_file_dir + "/ClinVarBrca.xml"
         writable_clinvar_xml_file = open(clinvar_xml_file, "w")
-        args = ["python", "clinVarBrca.py", clinvar_file_dir + "/ClinVarFullRelease_00-latest.xml.gz", "-a", artifacts_dir]
+        args = ["python", "filter_clinvar_brca.py", self.input().path, self.output().path]
         print "Running clinVarBrca.py with the following args: %s. This takes a while..." % (args)
         sp = subprocess.Popen(args, stdout=writable_clinvar_xml_file, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
