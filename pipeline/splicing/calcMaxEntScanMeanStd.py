@@ -42,7 +42,7 @@ def fetch_gene_coordinates(transcript_name):
         return r[0]
 
 
-def runMaxEntScan(sequence, donor=False, usePerl=False):
+def runMaxEntScan(sequence, donor=False, usePerl=True):
     """Run maxEntScan on the indicated sequence.  Run score5.pl on candidate donor sequences, 
        score3.pl on candidate acceptor sequences.  Return the score"""
     if usePerl:

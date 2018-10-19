@@ -3540,7 +3540,22 @@ def getVarDict(variant, boundaries):
 
 brca1Transcript = None
 brca2Transcript = None
-variantData = list(csv.DictReader(open("mod_res_dn_brca20160525.txt", "r"), delimiter="\t"))
+useOldFile = True
+
+if useOldFile:
+    with open("mod_res_dn_brca20160525.txt", "r") as combinedfile:
+        variantData = dict(
+            ((x['gene'], x['nthgvs']), x) for x in csv.DictReader(combinedfile, delimiter="\t")
+        )
+else:
+    with open("references/HCI_AllPriorsReport_BRCA1_V20.txt", "r") as brca1file, \
+         open("references/HCI_AllPriorsReport_BRCA2_V20.txt", "r") as brca2file:
+        variantData = dict(
+            ((x['gene'], x['nthgvs']), x) for x in chain(
+                csv.DictReader(brca1file, delimiter="\t"),
+                csv.DictReader(brca2file, delimiter="\t")
+            )
+        )
 
 
 def calc_one(variant):
