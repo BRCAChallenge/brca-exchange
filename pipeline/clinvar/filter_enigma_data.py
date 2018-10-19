@@ -32,7 +32,6 @@ def filter_engima_xml(fin, fout):
 @click.argument('output', type=click.Path())
 def main(clinvar_xml, output):
     filter_engima_xml(clinvar_xml, output)
-    # TODO: return code.
 
 
 if __name__ == "__main__":
