@@ -26,9 +26,9 @@ def _is_bic_designation(s):
            s.startswith('p.')
 
 
-def _fetch_bic(enigma_el):
-    elems = enigma_el.xpath(
-        "MeasureSet/Measure/Name/ElementValue[@Type='Alternate']")
+def _fetch_bic(cvs_el):
+    elems = cvs_el.xpath(
+        "*/MeasureSet/Measure/Name/ElementValue[@Type='Alternate']")
     elems_text = [e.text.replace(' ', '') for e in elems]
 
     bic = [e for e in elems_text if _is_bic_designation(e)]
@@ -189,7 +189,7 @@ def parse_record(cvs_el, hgvs_util, assembly="GRCh38"):
         rec["Reference_sequence"] = default_val
         rec["HGVS_cDNA"] = default_val
 
-    rec["BIC_Nomenclature"] = _fetch_bic(enigma_assertion)
+    rec["BIC_Nomenclature"] = _fetch_bic(cvs_el)
 
     rec["Abbrev_AA_change"], rec["HGVS_protein"] = _compute_protein_changes(
         hgvs_cdna_complete, hgvs_util)
