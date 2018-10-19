@@ -54,6 +54,16 @@ def extractSynonyms(el):
 
     return sy + sy_alt
 
+
+def extractGeneSymbolIfBRCAGene(el):
+    for measureRelationship in el.findall("MeasureRelationship"):
+        for symbol in measureRelationship.findall("Symbol"):
+            geneSymbol = textIfPresent(symbol, "ElementValue")
+            if geneSymbol.lower() in ["brca1", "brca2"]:
+                return geneSymbol
+    return None
+
+
 class genomicCoordinates:
     """Contains the genomic information on the variant"""
 
@@ -86,9 +96,9 @@ class genomicCoordinates:
 
 
 class variant:
-    """The Measure set.  We are interested in the variants specifically, 
+    """The Measure set.  We are interested in the variants specifically,
     but measure sets can be other things as well, such as haplotypes"""
-    
+
     def __init__(self, element, name, id, debug=False):
         self.element = element
         self.id = id
@@ -106,18 +116,12 @@ class variant:
             assembly = item.get("Assembly")
             genomic = genomicCoordinates(item, debug=debug)
             self.coordinates[assembly] = genomic
-        self.geneSymbol = None
-        measureRelationship = element.find("MeasureRelationship")
-        if measureRelationship != None:
-            symbol = measureRelationship.find("Symbol")
-            if symbol != None:
-                self.geneSymbol = textIfPresent(symbol, "ElementValue")
-
+        self.geneSymbol = extractGeneSymbolIfBRCAGene(element)
 
 
 class referenceAssertion:
     """For gathering the reference assertion"""
-    
+
     def __init__(self, element, debug=False):
         self.element = element
         self.id = element.get("ID")
@@ -163,17 +167,17 @@ class referenceAssertion:
                 variantName = none
             else:
                 variantName = name.find("ElementValue").text
-            self.variant = variant(measureSet.find("Measure"), variantName, 
-                                   measureSet.get("ID"), 
+            self.variant = variant(measureSet.find("Measure"), variantName,
+                                   measureSet.get("ID"),
                                    debug=debug)
 
         self.synonyms = extractSynonyms(element)
 
 
 class clinVarAssertion:
-    """Class for representing one submission (i.e. one annotation of a 
+    """Class for representing one submission (i.e. one annotation of a
     submitted variant"""
-    
+
     def __init__(self, element, debug=False):
         self.element = element
         self.id = element.get("ID")
@@ -216,11 +220,11 @@ class clinVarAssertion:
         self.dateLastUpdated = cva.get("DateUpdated")
 
         self.synonyms = extractSynonyms(element)
-                 
+
 
 class clinVarSet:
     """Container class for a ClinVarSet record, which is a set of submissions
-    that were submitted to ClinVar together.  In the ClinVar terminology, 
+    that were submitted to ClinVar together.  In the ClinVar terminology,
     each ClinVarSet is one aggregate record ("RCV Accession"), which contains
     one or more submissions ("SCV Accessions").
     """

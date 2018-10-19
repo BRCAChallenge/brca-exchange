@@ -30,9 +30,10 @@ def main():
     parser.add_argument('-a', "--artifacts_dir", help='Artifacts directory with pipeline artifact files.')
     args = parser.parse_args()
 
-    logging_level = logging.DEBUG
-    log_file_path = args.artifacts_dir + "clinvarbrcapy.log"
-    logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level)
+    if args.artifacts_dir:
+        logging_level = logging.DEBUG
+        log_file_path = args.artifacts_dir + "clinvarbrcapy.log"
+        logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level)
 
     inputBuffer = ""
 
@@ -56,7 +57,7 @@ def main():
                         continue
                     variant = submissionSet.referenceAssertion.variant
                     if variant != None:
-                        if variant.geneSymbol == "BRCA1" or variant.geneSymbol == "BRCA2":
+                        if variant.geneSymbol and variant.geneSymbol.lower() in ["brca1", "brca2"]:
                             print inputBuffer
                 inputBuffer = None
             elif inClinVarSet:
@@ -66,5 +67,4 @@ def main():
                     print line.rstrip()
 
 if __name__ == "__main__":
-    # execute only if run as a script
     main()
