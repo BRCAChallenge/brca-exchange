@@ -6,7 +6,6 @@ import datetime
 import socket
 from shutil import copy
 import luigi
-import synapseclient
 import csv
 from luigi.util import inherits, requires
 import re
@@ -145,10 +144,6 @@ class BRCATask(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
     u = luigi.Parameter(default="UNKNOWN_USER")
     p = luigi.Parameter(default="UNKNOWN_PASSWORD", significant=False)
-
-    synapse_username = luigi.Parameter(default="UNKNOWN_SYNAPSE_USER", description='used to access preprocessed enigma files')
-    synapse_password = luigi.Parameter(default="UNKNOWN_SYNAPSE_PASSWORD", description='used to access preprocessed enigma files', significant=False)
-    synapse_enigma_file_id = luigi.Parameter(default="UNKNOWN_SYNAPSE_FILEID", description='file id for combined enigma tsv file')
 
     resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
                                     description='directory to store brca-resources data')
@@ -1616,9 +1611,6 @@ class RunAll(BRCATask, luigi.WrapperTask):
             'date': self.date,
             'u': self.u,
             'p': self.p,
-            'synapse_username': self.synapse_username,
-            'synapse_password': self.synapse_password,
-            'synapse_enigma_file_id': self.synapse_enigma_file_id,
             'resources_dir': self.resources_dir,
             'output_dir': self.output_dir,
             'output_dir_host': self.output_dir_host,

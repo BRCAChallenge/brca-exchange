@@ -44,8 +44,6 @@ ENV BRCA_RESOURCES=$res
 
 RUN mkdir -p $res /files/data && chmod -R o+rwx /files
 
-RUN mkdir -p /.synapseCache && chmod o+rwx /.synapseCache
-
 RUN git clone https://github.com/counsyl/hgvs.git
 # taking pyhgvs 0.9.4
 RUN cd hgvs && git checkout aebe5bd9683f4b5937fd653ce4b13fcd4f3ebb10 && python setup.py install

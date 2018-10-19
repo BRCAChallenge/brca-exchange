@@ -37,7 +37,6 @@ start-local-uta: ## starting local uta docker container
 setup-files: ## setup various directories to run pipeline
 	[ -f $(CREDENTIALS_PATH) ] || { touch $(CREDENTIALS_PATH); echo "WARNING: files $(CREDENTIALS_PATH) doesn't exist.Creating it"; }
 	[ -f $(RELEASE_NOTES_PATH) ] || { touch $(RELEASE_NOTES_PATH) ; echo "WARNING: files $(RELEASE_NOTES_PATH) doesn't exist. Creating it"; }
-	[ -d $(SYNAPSE_CACHE) ] || mkdir -p $(SYNAPSE_CACHE)
 	[ -d $(RESOURCES_DIR) ] || mkdir -p $(RESOURCES_DIR)
 	[ -d $(PRIORS_REFERENCES) ] || mkdir -p $(PRIORS_REFERENCES)
 	[ -d $(OUT_DIR) ] || mkdir -p $(OUT_DIR)
@@ -66,7 +65,6 @@ COMMON_DOCKER_ARGS = --rm -u `id -u ${USER}`:$(DOCKER_GRP) \
 	-v $(CREDENTIALS_PATH):/opt/luigi_pipeline_credentials.cfg \
 	-v $(PREVIOUS_RELEASE_PATH):/files/previous_release.tar.gz \
 	-v $(RELEASE_NOTES_PATH):/files/release_notes.txt \
-	-v ${SYNAPSE_CACHE}:/.synapseCache \
 	-v $(CODE_BASE):/opt/brca-exchange \
 	-v /var/run/docker.sock:/var/run/docker.sock
 
