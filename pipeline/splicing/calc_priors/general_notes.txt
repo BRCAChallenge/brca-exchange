@@ -1,0 +1,75 @@
+GENERAL NOTES ON REFSEQ NUMBERING AND SPLICING
+
+MINUS VS PLUS STRAND NUMBERING
+Genes are transcribed from 5' to 3'
+For plus strand genes (e.g. BRCA2) this correlates to reading from left to right
+    so genomic position increases from left to right
+(As you move from left to right along the genomic sequence, the genomic position increases
+AND the position in the cDNA trasncript increases)
+This means that for plus strand genes the exon start position is ALWAYS less than
+    the exon end position and that native splice acceptors have a lower genomic position
+    than native splice donors in the same exon
+For minus strand genes (e.g. BRCA1) this correlates to reading from right to left
+    so genomic position increases from right to left AND decreases from left to right
+(As you move from the start of the cDNA nucleotide sequence, the cDNA position increases
+AND the genomic position decreases)
+This means that for minus strand genes the exon start position is ALWAYS greater than
+    the exon end position and that native splice acceptors have a higher genomic position
+    than native splice donors in the same exon
+
+REFSEQ NUMBERING
+RefSeq numbering starts to the right of the first base
+This effects the numbering for the lefthand side of genes when reading from left to right
+    in a layout where genomic position increases when you read from left to right
+For plus strand genes (e.g. BRCA2) this means that the RefSeq exon start genomic position
+    (which is the leftmost position in a layout where genomic position increases from left to right)
+    refers to the base immediately to the left of the first base of the exon
+    this base is the last base of the intron and is referred to as the -1 position in transcript coordinates
+        (e.g. c.476-1)
+    so the exon actually starts at varExonStart + 1 which is the genomic position of the first base in the exon
+        because numbering increases from left to right so this is the base to the left of varExonStart
+For minus strand genes (e.g. BRCA1) this means that the RefSeq exon end genomic position position
+    (which is the leftmost position in a layout where genomic position increases from left to right
+        AND is the rightmost position in a layout where genomic position decreases form left to right)
+    refers to the base immediately to the right of the last base of the exon (when looking at a layout
+        where numbering decreases from left to right)
+    this base in the first base of the intorn and is referred to as the +1 position in transcript coordinates
+    (e.g. 4185+1)
+    so the exon actually ends at varExonEnd + 1 which is the genomic position of the last base in the exon
+        because numbering decreases from left to right this is the base that is to the left of varExonEnd
+
+SPLICING AND SPLICE POSITIONS
+Native splice acceptors are located at the 5' ends of exons (near exonStart)
+Native splice donors are located at the 3' ends of exons (near exonEnd)
+For splice donors:
+    splicing occurs between the last base of the exon and the first base of the intron
+    this means that the last base in the exon is considered the wild-type splice cut position
+        (the function to get FASTA sequences is inclusive of the endpoints so this is the last base included)
+    this also means that the first base in the intron is considered the wild-type splice donor position
+        (per HCI PRIORS website)
+    For example in a plus strand gene (BRCA2):
+        c.7617 (g.32356609) is the last base in the exon and is the wild-type cut position
+        and c.7617+1 (g.32356610) is the first base in the intron and is the wild-type donor position
+        So the donor position is to the right of the cut position
+            (when looking at a layout where numbering increases from left to right)
+    For example in a minus strand gene (BRCA1):
+        c.441 (g.43104122) is the last base in the exon and is the wild-type cut position
+        and c.441+1 (g.43104121) is the first base in the intron and is the wild-type donor position
+        So the donor position is to the right of the cut position
+            (when looking at a layout where numbering decreases from left to right)
+For splice acceptors:
+    splicing occurs between the last base of the intron and the first base of the exon
+    this means that the first base in the exon is considered the wild-type splice cut position
+        (the function to get FASTA sequences is inclusive of the endpoints to this is the first base included)
+    this also means that the last base in the intron is considered the wild-type splice acceptor position
+        (which matches the guidelines used for splice donors on the HCI PRIORS website)
+    For example in a minus strand gene (BRCA1):
+        c.5194 (g.43057135) is the first base in the exon and is the wild-type cut posiiton
+        and c.5194-1 (g.43057136) is the last base in the intron and is the wild-type acceptor position
+        So the acceptor position is to the left of the cut position
+            (when looking at a layout where numbering decreases from left to right)
+    For example in a plus strand gene (BRCA2):
+        c.317 (g.32325076) is the first base in the exon and is the wild-type cut position
+        and c.317-1 (g.32325075) is the last base in the intron and is the wild-type acceptor position
+        So the acceptor position is to the left of the cut position
+            (when looking at a layout where numbering increases from left to right)
