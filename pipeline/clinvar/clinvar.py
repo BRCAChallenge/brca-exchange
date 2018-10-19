@@ -59,7 +59,7 @@ def extractGeneSymbolIfBRCAGene(el):
     for measureRelationship in el.findall("MeasureRelationship"):
         for symbol in measureRelationship.findall("Symbol"):
             geneSymbol = textIfPresent(symbol, "ElementValue")
-            if geneSymbol.lower() in ["brca1", "brca2"]:
+            if geneSymbol != None and geneSymbol.lower() in ["brca1", "brca2"]:
                 return geneSymbol
     return None
 
