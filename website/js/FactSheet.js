@@ -208,7 +208,6 @@ var FactSheet = React.createClass({
                             <p>For more information about the BRCA Challenge and GA4GH, please visit:</p>
                             <ul>
                                 <li><a href="http://www.genomicsandhealth.org/">Global Alliance for Genomics and Health</a> (GA4GH)</li>
-                                <li><a href="https://genomicsandhealth.org/work-products-demonstration-projects/brca-challenge-0">BRCA Challenge</a></li>
                             </ul>
                         </Alert>
                     </Col>
