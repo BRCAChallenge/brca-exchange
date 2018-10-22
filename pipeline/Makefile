@@ -89,6 +89,9 @@ endif
 run-task: ## Running a specific task
 	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) /opt/brca-exchange/pipeline/docker/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE) $(RUN_ARGS)
 
+test: ## Running pipeline unit tests
+	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) bash -c 'cd /opt/brca-exchange/pipeline/data && bash getdata && cd /opt/brca-exchange/pipeline && pytest --ignore=splicing/'
+
 build-release: start-local-uta checkout build-docker setup-files setup-lovd download-resources run-pipeline variants-by-source ## create new data release
 
 variants-by-source: ## postprocessing: compute statistics for changes with respect to the last release
