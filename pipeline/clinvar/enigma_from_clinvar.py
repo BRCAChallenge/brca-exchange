@@ -20,10 +20,11 @@ def _get_clinvar_sets(fin):
     return root.xpath('//ClinVarSet')
 
 
+three_letters_aa = re.compile('p.\(?[A-Z][a-z]{2}[0-9]+[A-Z][a-z]{2}') # e.g. p.(Tyr831SerfsTer9)
 def _is_bic_designation(s):
     return any(k in s.lower() for k in {'ins', 'del', 'dup'}) or \
-           ('>' in s and not s.startswith('p.')) or \
-           s.startswith('p.')
+        (not s.startswith('p.') and '>' in s) or \
+        (s.startswith('p.') and ':' not in s and three_letters_aa.match(s) is None) # shouldn't match for a BIC designator
 
 
 def _fetch_bic(cvs_el):
@@ -31,7 +32,7 @@ def _fetch_bic(cvs_el):
         "*/MeasureSet/Measure/Name/ElementValue[@Type='Alternate']")
     elems_text = [e.text.replace(' ', '') for e in elems]
 
-    bic = [e for e in elems_text if _is_bic_designation(e)]
+    bic = sorted({e for e in elems_text if _is_bic_designation(e)})
 
     if bic:
         return '|'.join(bic)
