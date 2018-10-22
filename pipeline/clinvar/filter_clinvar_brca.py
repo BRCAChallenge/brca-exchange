@@ -12,9 +12,9 @@ from lxml import etree
 
 def open_maybe_gzip(fname):
     if fname.endswith('gz'):
-        return gzip.open(fname, 'rb')
-    else:
         return gzip.GzipFile(fname)
+    else:
+        return open(fname, 'r')
 
 
 def filter_xml(fin, fout):
