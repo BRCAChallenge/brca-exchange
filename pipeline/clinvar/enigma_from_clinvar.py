@@ -1,3 +1,5 @@
+import copy
+import itertools
 import multiprocessing
 import re
 from multiprocessing.pool import ThreadPool
@@ -153,27 +155,8 @@ def _xpath_text(el, xpath):
     return default_val
 
 
-# clinvar set element
-def parse_record(cvs_el, hgvs_util, assembly="GRCh38"):
-    '''
-    Extracts information out of a ClinVarSet XML element
-
-    :param cvs_el: ClinVarSet XML element
-    :param hgvs_util: instance of HGVS util to calculate protein changes
-    :param assembly: str assembly to use
-    :return: dictionary containing the extracted data. keys correspond to column names
-    '''
+def _parse_engima_assertion(enigma_assertion, hgvs_util):
     rec = {}
-
-    # find enigma assertion
-    enigma_assertion = cvs_el.xpath(
-        'ClinVarAssertion[contains(ClinVarSubmissionID/@submitter, "ENIGMA")]')[
-        0]
-
-    rec["Gene_symbol"] = _xpath_text(cvs_el,
-                                     'ReferenceClinVarAssertion/MeasureSet/Measure/MeasureRelationship/Symbol/ElementValue[starts-with(., "BRCA") and @Type="Preferred"]')
-
-    rec["Genomic_Coordinate"] = _extract_genomic_coordinates(cvs_el, assembly)
 
     # getting hgvs cdna
     hgvs_list = [e.text for e in enigma_assertion.findall(
@@ -190,22 +173,11 @@ def parse_record(cvs_el, hgvs_util, assembly="GRCh38"):
         rec["Reference_sequence"] = default_val
         rec["HGVS_cDNA"] = default_val
 
-    rec["BIC_Nomenclature"] = _fetch_bic(cvs_el)
-
     rec["Abbrev_AA_change"], rec["HGVS_protein"] = _compute_protein_changes(
         hgvs_cdna_complete, hgvs_util)
 
     rec["URL"] = clinvar.textIfPresent(enigma_assertion,
                                        'ClinicalSignificance/Citation/URL')
-
-    rec["Condition_ID_type"], rec[
-        "Condition_ID_value"] = _extract_condition_info(cvs_el)
-
-    trait_set_el = cvs_el.find('ReferenceClinVarAssertion/TraitSet')
-    if trait_set_el is not None:
-        rec["Condition_category"] = trait_set_el.get('Type')
-    else:
-        rec["Condition_category"] = default_val
 
     rec["Clinical_significance"] = clinvar.textIfPresent(enigma_assertion,
                                                          "ClinicalSignificance/Description")
@@ -238,6 +210,45 @@ def parse_record(cvs_el, hgvs_util, assembly="GRCh38"):
     rec["ClinVarAccession"] = _extract_clinvar_accession(enigma_assertion)
 
     return rec
+
+# clinvar set element
+def parse_record(cvs_el, hgvs_util, assembly="GRCh38"):
+    '''
+    Extracts information out of a ClinVarSet XML element
+
+    :param cvs_el: ClinVarSet XML element
+    :param hgvs_util: instance of HGVS util to calculate protein changes
+    :param assembly: str assembly to use
+    :return: list of dictionary containing the extracted data. keys correspond to column names.
+    Each element of the list corresponds to a ENIGMA submission
+    '''
+    rec = {}
+
+    rec["Gene_symbol"] = _xpath_text(cvs_el,
+                                     'ReferenceClinVarAssertion/MeasureSet/Measure/MeasureRelationship/Symbol/ElementValue[starts-with(., "BRCA") and @Type="Preferred"]')
+
+    rec["Genomic_Coordinate"] = _extract_genomic_coordinates(cvs_el, assembly)
+
+    rec["BIC_Nomenclature"] = _fetch_bic(cvs_el)
+
+    rec["Condition_ID_type"], rec[
+        "Condition_ID_value"] = _extract_condition_info(cvs_el)
+
+    trait_set_el = cvs_el.find('ReferenceClinVarAssertion/TraitSet')
+    if trait_set_el is not None:
+        rec["Condition_category"] = trait_set_el.get('Type')
+    else:
+        rec["Condition_category"] = default_val
+
+    lst = []
+    for enigma_assertion in cvs_el.xpath(
+        'ClinVarAssertion[contains(ClinVarSubmissionID/@submitter, "ENIGMA")]'):
+
+        rec_tmp = copy.deepcopy(rec)
+        rec_tmp.update(_parse_engima_assertion(enigma_assertion, hgvs_util))
+        lst.append(rec_tmp)
+
+    return lst
 
 
 def _create_df(variant_records):
@@ -281,9 +292,11 @@ def main(filtered_clinvar_xml, output):
     pool = ThreadPool(multiprocessing.cpu_count())
 
     # parallelizing, as computing protein changes takes a while due to external API calls
-    variant_records = pool.map(lambda s: parse_record(s, hgvs_util),
+    variant_records_lsts = pool.map(lambda s: parse_record(s, hgvs_util),
                                enigma_sets)
 
+    # flattening list of lists
+    variant_records = list(itertools.chain.from_iterable(variant_records_lsts))
     df = _create_df(variant_records)
     df.to_csv(output, sep='\t', index=False, na_rep='-')
 

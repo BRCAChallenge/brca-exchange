@@ -28,7 +28,7 @@ def test_parse_record():
 
     res = enigma_from_clinvar.parse_record(cvs_el, hgvs_util)
 
-    expected = {
+    expected = [{
         'Abbrev_AA_change': u'I562Mfs*12',
         'Allele_origin': 'Germline',
         'Assertion_method': 'ENIGMA BRCA1/2 Classification Criteria (2017-06-29)',
@@ -49,6 +49,6 @@ def test_parse_record():
         'HGVS_protein': u'p.(Ile562MetfsTer12)',
         'Reference_sequence': 'NM_007294.3',
         'URL': None,
-    }
+    }]
 
     assert res == expected
