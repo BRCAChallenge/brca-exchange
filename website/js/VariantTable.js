@@ -155,6 +155,8 @@ const researchModeGroups = [
                 {title: 'Individuals', prop: 'Individuals_LOVD'},
                 {title: 'Variant ID', prop: 'DBID_LOVD'},
                 {title: 'Variant Haplotype', prop: 'Variant_haplotype_LOVD'},
+                {title: 'Functional Analysis Method', prop: 'Functional_analysis_technique_LOVD'},
+                {title: 'Functional Analysis Result', prop: 'Functional_analysis_result_LOVD'},
                 {title: 'Created Date', prop: 'Created_date_LOVD'},
                 {title: 'Edited Date', prop: 'Edited_date_LOVD'},
             ]
