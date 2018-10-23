@@ -32,7 +32,7 @@ def _is_bic_designation(s):
 def _fetch_bic(cvs_el):
     elems = cvs_el.xpath(
         "*/MeasureSet/Measure/Name/ElementValue[@Type='Alternate']")
-    elems_text = [e.text.replace(' ', '') for e in elems]
+    elems_text = [e.text for e in elems]
 
     bic = sorted({e for e in elems_text if _is_bic_designation(e)})
 
