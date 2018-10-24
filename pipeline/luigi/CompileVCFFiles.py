@@ -612,7 +612,8 @@ class ConvertEXLOVDBRCA1ExtractToVCF(BRCATask):
         args = ["./lovd2vcf.py", "-i", ex_lovd_file_dir + "/BRCA1.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", "-a", "exLOVDAnnotation",
                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa", '-e', artifacts_dir + '/exLOVD_BRCA1_error_variants.txt']
+                brca_resources_dir + "/hg19.fa", "-e", artifacts_dir + "/exLOVD_BRCA1_error_variants.txt",
+                "-s", "exLOVD"]
         print "Running lovd2vcf with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
@@ -635,7 +636,8 @@ class ConvertEXLOVDBRCA2ExtractToVCF(BRCATask):
         args = ["./lovd2vcf.py", "-i", ex_lovd_file_dir + "/BRCA2.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf", "-a", "exLOVDAnnotation",
                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa", '-e', artifacts_dir + '/exLOVD_BRCA2_error_variants.txt']
+                brca_resources_dir + "/hg19.fa", "-e", artifacts_dir + "/exLOVD_BRCA2_error_variants.txt",
+                "-s", "exLOVD"]
         print "Running lovd2vcf with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
@@ -753,22 +755,21 @@ class DownloadLOVDInputFile(BRCATask):
 
 
 @requires(DownloadLOVDInputFile)
-class AddVariantSubmissionIds(BRCATask):
+class NormalizeLOVDSubmissions(BRCATask):
 
     def output(self):
-        return luigi.LocalTarget(self.file_parent_dir + "/LOVD/LOVD_with_submission_ids.txt")
+        return luigi.LocalTarget(self.file_parent_dir + "/LOVD/LOVD_normalized.tsv")
 
     def run(self):
-
         brca_resources_dir = self.resources_dir
         artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts")
 
         os.chdir(lovd_method_dir)
 
-        args = ["python", "addLOVDSubmissionIds.py", "-i", self.input().path, "-o",
+        args = ["python", "normalizeLOVDSubmissions.py", "-i", self.input().path, "-o",
                 self.output().path]
 
-        print "Running addLOVDSubmissionIds with the following args: %s" % (args)
+        print "Running separateFunctionalAnalysisTechniqueAndResult with the following args: %s" % (args)
 
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
@@ -776,14 +777,36 @@ class AddVariantSubmissionIds(BRCATask):
         check_file_for_contents(self.output().path)
 
 
-@requires(AddVariantSubmissionIds)
+@requires(NormalizeLOVDSubmissions)
+class CombineEquivalentLOVDSubmissions(BRCATask):
+
+    def output(self):
+        return luigi.LocalTarget(self.file_parent_dir + "/LOVD/LOVD_normalized_combined.tsv")
+
+    def run(self):
+        brca_resources_dir = self.resources_dir
+        artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts")
+
+        os.chdir(lovd_method_dir)
+
+        args = ["python", "combineEquivalentVariantSubmissions.py", "-i", self.input().path, "-o",
+                self.output().path]
+
+        print "Running combineEquivalentVariantSubmissions.py with the following args: %s" % (args)
+
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(self.output().path)
+
+
+@requires(CombineEquivalentLOVDSubmissions)
 class ConvertSharedLOVDToVCF(BRCATask):
 
     def output(self):
         return luigi.LocalTarget(self.file_parent_dir + "/LOVD/sharedLOVD_brca12.hg19.vcf")
 
     def run(self):
-
         brca_resources_dir = self.resources_dir
         artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts")
 
@@ -792,7 +815,8 @@ class ConvertSharedLOVDToVCF(BRCATask):
         args = ["python", "lovd2vcf.py", "-i", self.input().path, "-o",
                 self.output().path, "-a", "sharedLOVDAnnotation",
                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa", '-e', artifacts_dir + '/LOVD_error_variants.txt']
+                brca_resources_dir + "/hg19.fa", "-e", artifacts_dir + "/LOVD_error_variants.txt",
+                "-s", "LOVD"]
 
         print "Running lovd2vcf with the following args: %s" % (args)
 

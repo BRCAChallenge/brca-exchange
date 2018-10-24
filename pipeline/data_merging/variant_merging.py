@@ -20,9 +20,8 @@ from shutil import copy
 from numbers import Number
 import csv
 import aggregate_reports
-import urllib
 import utilities
-
+import sys
 
 # GENOMIC VERSION:
 VERSION = "hg38" # equivalent to GRCh38
@@ -67,16 +66,9 @@ CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "Summary_Evidence": "SummaryEvidence",
                   "BX_ID": "BX_ID"}
 
-'''
-NOTE: the following fields are no longer present in LOVD data following
-the 11/5/2016 release.
-
-Variant_haplotype": "haplotype",
-Functional_analysis_result": "functionalanalysis_result",
-Functional_analysis_technique": "functionalanalysis_technique",
-dna_change_genomic": "dna_change_genomic",
-'''
 LOVD_FIELDS = {"Variant_frequency": "frequency",
+               "Functional_analysis_technique": "functional_analysis_technique",
+               "Functional_analysis_result": "functional_analysis_result",
                "HGVS_cDNA": "cDNA",
                "HGVS_protein": "Protein",
                "Genetic_origin": "genetic_origin",
@@ -165,7 +157,6 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "BIC": BIC_FIELDS}
 
 LIST_TYPE_FIELDS = {
-    "individuals", # LOVD
     "SCV", # Clinvar, treating it as list, to have the same order as with SCV_Version
     "SCV_Version"
 }
@@ -717,19 +708,23 @@ def repeat_merging(f_in, f_out):
                     # containing ',' and hence being treated as separate fields.
                     # The list(set(new_value + old_value)) statement below would
                     # garble it otherwise.
-                    if new_value == old_value:
+                    if new_value == old_value and key != "individuals":
                         continue
                     else:
+                        # FIXME: is there a better name for this? it seems it now only
+                        # applies to scv to ensure the order is the same,
+                        # but we don't hold this concern for other list fields...
                         if key in LIST_TYPE_FIELDS:
-                            '''
-                            For instance, LOVD individuals field values are all
-                            meaningful even if repeated e.g. if two LOVD
-                            submissions for the same variant each have one individual associated with them,
-                            "1,1" is a more sensible value for the variant than "1" since 2 individuals are associated.
-                            '''
                             merged_value = list(new_value + old_value)
+                        # The "individuals" values from LOVD submissions are
+                        # added together when merging variants.
+                        elif key == "individuals":
+                            merged_value = [str(int(new_value[0]) + int(old_value[0]))]
                         else:
                             merged_value = list(set(new_value + old_value))
+
+                        # Remove empty strings from list
+                        merged_value = filter(None, merged_value)
                         variant_dict[genome_coor].INFO[key] = deepcopy(merged_value)
     print "number of repeat records: ", num_repeats, "\n"
     vcf_writer = vcf.Writer(f_out, vcf_reader)
@@ -839,11 +834,7 @@ def add_new_source(columns, variants, source, source_file, source_dict):
             variants[genome_coor] = associate_chr_pos_ref_alt_with_item(record, old_column_num, source, genome_coor)
         for value in source_dict.values():
             try:
-                if source == "LOVD":
-                    field_value = map(urllib.unquote_plus, record.INFO[value])
-                    variants[genome_coor].append(field_value)
-                else:
-                    variants[genome_coor].append(record.INFO[value])
+                variants[genome_coor].append(record.INFO[value])
             except KeyError:
                 logging.warning("KeyError appending VCF record.INFO[value] to variant. Variant: %s \n Record.INFO: %s \n value: %s", variants[genome_coor], record.INFO, value)
                 if source == "BIC":
