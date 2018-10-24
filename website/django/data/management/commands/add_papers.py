@@ -17,7 +17,7 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *args, **options):
         literature_results = json.load(options['literature'])
-        variant_papers = literature_results['variants']
+        variants_found_in_papers = literature_results['variants']
         papers = literature_results['papers']
         paper_objects = {}
         for pmid, paper in papers.iteritems():
@@ -31,13 +31,12 @@ class Command(BaseCommand):
                         pmid=paper['pmid'])
                 p.save()
                 paper_objects[pmid] = p
-        for variant_name, variant_papers in variant_papers.iteritems():
-            for variant_paper in variant_papers:
-                pmid = variant_paper['varId']
-                if pmid in paper_objects:
-                    paper = paper_objects[pmid]
-                    mentions = variant_paper['geneSnippets']
-                    if mentions == None:
-                        mentions = ''
-                    vp = VariantPaper(variant_hg38=variant_name, paper=paper, mentions=mentions)
-                    vp.save()
+        for variant_genomic_coordinate, variant in variants_found_in_papers.iteritems():
+            pmid = variant['pmid']
+            if pmid in paper_objects:
+                paper = paper_objects[pmid]
+                mentions = variant['snippet']
+                if mentions == None:
+                    mentions = ''
+                vp = VariantPaper(variant_hg38=variant_genomic_coordinate, paper=paper, mentions=mentions)
+                vp.save()
