@@ -225,7 +225,7 @@ class VariantTestCase(TestCase):
         self.assertEqual(response_variant["Data_Release_id"], new_variant_2.Data_Release_id)
 
     def test_request_without_release_number(self):
-        '''Tests that the latest release of a variant is returned when release number is NOT specified'''     
+        '''Tests that the latest release of a variant is returned when release number is NOT specified'''
         count = 4
 
         while count < 20:
@@ -384,7 +384,7 @@ class VariantTestCase(TestCase):
 
         source_list = ['ENIGMA','ClinVar','1000_Genomes','ExAC','LOVD','BIC','ESP','exLOVD']
 
-        '''Loops through list of new variants, assigns a new Genomic Coordinate and Source to each and 
+        '''Loops through list of new variants, assigns a new Genomic Coordinate and Source to each and
         sets their appropriate 'Variant_in_' values to True, then puts them in database'''
         for new_variant, source in zip(variant_list, source_list):
             new_variant['Genomic_Coordinate_hg38'] = 'chr13:' + source + ':A>G'
@@ -694,6 +694,34 @@ class VariantTestCase(TestCase):
         response_variant = response_data['data'][0]
         self.assertEqual(response_variant['HGVS_Protein'], self.existing_variant.HGVS_Protein)
 
+    def test_search_by_clinvar_accession(self):
+        clinvar_accession = self.existing_variant_materialized_view.SCV_ClinVar
+        request = self.factory.get(
+            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=%s&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD' % clinvar_accession)
+        response = index(request)
+
+        self.assertIsInstance(response, JsonResponse)
+        self.assertEqual(response.status_code, 200)
+
+        response_data = json.loads(response.content)
+
+        self.assertEqual(response_data['count'], 1)
+
+        response_variant = response_data['data'][0]
+        self.assertEqual(response_variant['SCV_ClinVar'], self.existing_variant.SCV_ClinVar)
+
+    def test_search_by_incomplete_clinvar_accession(self):
+        incomplete_clinvar_accession = self.existing_variant_materialized_view.SCV_ClinVar[:-1]
+        request = self.factory.get(
+            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=%s&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD' % incomplete_clinvar_accession)
+        response = index(request)
+
+        self.assertIsInstance(response, JsonResponse)
+        self.assertEqual(response.status_code, 200)
+
+        response_data = json.loads(response.content)
+
+        self.assertEqual(response_data['count'], 0)
 
     def test_search_by_gene_symbol_and_hgvs_protein_with_colon(self):
         '''Tests searching for 'BRCA1 p.(Ala280Gly) --> Gene_Symbol HGVS_Protein.split(':')[1]' with colon separator
