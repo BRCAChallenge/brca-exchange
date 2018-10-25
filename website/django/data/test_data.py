@@ -1,7 +1,7 @@
 def existing_variant():
     return {
         'Variant_frequency_LOVD': '-',
-        'ClinVarAccession_ENIGMA': 'SCV000244373',
+        'ClinVarAccession_ENIGMA': 'SCV000244373.2',
         'Variant_in_LOVD': True,
         'Chr': '17',
         'Co_occurrence_LR_exLOVD': '1.23',

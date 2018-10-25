@@ -710,6 +710,22 @@ class VariantTestCase(TestCase):
         response_variant = response_data['data'][0]
         self.assertEqual(response_variant['SCV_ClinVar'], self.existing_variant.SCV_ClinVar)
 
+    def test_search_by_clinvar_accession_from_enigma(self):
+        clinvar_accession = self.existing_variant_materialized_view.ClinVarAccession_ENIGMA
+        request = self.factory.get(
+            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=%s&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD' % clinvar_accession)
+        response = index(request)
+
+        self.assertIsInstance(response, JsonResponse)
+        self.assertEqual(response.status_code, 200)
+
+        response_data = json.loads(response.content)
+
+        self.assertEqual(response_data['count'], 1)
+
+        response_variant = response_data['data'][0]
+        self.assertEqual(response_variant['ClinVarAccession_ENIGMA'], self.existing_variant.ClinVarAccession_ENIGMA)
+
     def test_search_by_incomplete_clinvar_accession(self):
         incomplete_clinvar_accession = self.existing_variant_materialized_view.SCV_ClinVar[:-1]
         request = self.factory.get(

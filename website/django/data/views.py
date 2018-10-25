@@ -417,12 +417,14 @@ def apply_search(query, search_term, quotes='', release=None):
     # Handle clinvar accession numbers
     elif clinvar_accession is True:
         results = query.filter(
-            Q(SCV_ClinVar__icontains=search_term)
+            Q(SCV_ClinVar__icontains=search_term) |
+            Q(ClinVarAccession_ENIGMA__icontains=search_term)
         )
 
         # filter against synonym fields
         non_synonyms = query.filter(
-            Q(SCV_ClinVar__icontains=search_term)
+            Q(SCV_ClinVar__icontains=search_term) |
+            Q(ClinVarAccession_ENIGMA__icontains=search_term)
         )
 
         # Generic searches (no prefixes)
