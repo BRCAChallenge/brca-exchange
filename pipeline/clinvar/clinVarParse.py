@@ -9,6 +9,7 @@ import re
 import sys
 import xml.etree.ElementTree as ET
 
+import logging
 
 def printHeader():
     print("\t".join(("HGVS", "Submitter", "ClinicalSignificance",
@@ -22,6 +23,11 @@ MULTI_VALUE_SEP = ','
 
 def processSubmission(submissionSet, assembly):
     ra = submissionSet.referenceAssertion
+
+    if ra.variant is None:
+        logging.warn("No variant information could be extracted for ReferenceClinVarAssertion ID %s %s",
+                     submissionSet.referenceAssertion.id, [c.accession for c in submissionSet.otherAssertions.itervalues()])
+        return None
 
     for oa in submissionSet.otherAssertions.values():
         submitter = oa.submitter
@@ -88,6 +94,7 @@ def main():
             elif "</ClinVarSet>" in line:
                 inputBuffer += line
                 inClinVarSet = False
+
                 cvs = ET.fromstring(inputBuffer)
                 if clinvar.isCurrent(cvs):
                     submissionSet = clinvar.clinVarSet(cvs)

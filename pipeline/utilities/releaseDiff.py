@@ -5,6 +5,7 @@ import re
 import json
 import logging
 from math import floor, log10
+import dateutil.parser
 
 added_data = None
 diff = None
@@ -196,11 +197,16 @@ class transformer(object):
             # In some data, empty fields are indicated by a single hyphen
             value = re.sub("", "-", value)
         elif field == "Date_last_evaluated_ENIGMA":
-            # Some dates had two-digit years. Some have four digits.
-            value = re.sub("/15$", "/2015", value)
+            try:
+                date_obj = dateutil.parser.parse(value)
+                value = date_obj.strftime('%Y-%m-%d')
+            except ValueError:
+                logging.debug("Was not able to parse %s", value)
         elif field == "Pathogenicity_expert":
             # Updated wording for non-expert-reviewed...
             value = value.replace("Not Yet Classified", "Not Yet Reviewed")
+        elif field == "BIC_Nomenclature":
+            value = value.replace(' ', '')
 
         if field in EXAC_AF_FIELDS and value != "-":
             value = str(round_sigfigs(float(value), 3))
