@@ -6,7 +6,7 @@ import subprocess
 from Bio.Seq import Seq
 from pyfaidx import Fasta
 
-from calc_priors.constants import BRCA1_CANONICAL, BRCA2_CANONICAL
+from calc_priors.constants import BRCA1_CANONICAL, BRCA2_CANONICAL, BRCA_ZSCORES
 from calc_priors import verify
 
 import calcMaxEntScanMeanStd
@@ -329,7 +329,9 @@ def getZScore(maxEntScanScore, donor=False):
     If donor is True, uses splice donor mean and std
     If donor is False, uses splice acceptor mean and std
     """
-    stdMeanData = json.load(open(os.path.join(os.path.dirname(__file__), 'brca.zscore.json'), "r"))
+    # stdMeanData = json.load(open(os.path.join(os.path.dirname(__file__), 'brca.zscore.json'), "r"))
+    stdMeanData = BRCA_ZSCORES
+
     if not donor:
         std = stdMeanData["acceptors"]["std"]
         mean = stdMeanData["acceptors"]["mean"]

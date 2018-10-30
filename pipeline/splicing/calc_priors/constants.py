@@ -76,3 +76,9 @@ REF_ACC_HIGH_CUTOFF = 0.5
 REF_ACC_LOW_CUTOFF = -1.5
 DE_NOVO_DONOR_HIGH_CUTOFF = 0.0
 DE_NOVO_DONOR_LOW_CUTOFF = -2.0
+
+# summary statistics for z-score computation
+BRCA_ZSCORES = {
+    "donors": { "std": 2.3289956850167082, "mean": 7.9380909090909073 },
+    "acceptors": { "std": 2.4336623152078452, "mean": 7.984909090909091 }
+}
