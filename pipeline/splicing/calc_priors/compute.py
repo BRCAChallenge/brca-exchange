@@ -38,9 +38,9 @@ def varInSpliceRegion(variant, donor=False, deNovo=False):
     If donor=False and deNovo=True, checks if variant is in a de novo splice acceptor region
     Returns True if variant is in a splice region, false otherwise
     """
-    if donor == False and deNovo == False:
+    if not donor and not deNovo:
         regionBounds = extract.getSpliceAcceptorBoundaries(variant, STD_ACC_INTRONIC_LENGTH, STD_ACC_EXONIC_LENGTH)
-    elif donor == False and deNovo == True:
+    elif not donor and deNovo:
         regionBounds = extract.getSpliceAcceptorBoundaries(variant, STD_ACC_INTRONIC_LENGTH, STD_DE_NOVO_LENGTH)
     elif donor:
         # gets reference donor splice boundaries, if deNovo = True then entireity of exon will be included below
@@ -53,12 +53,12 @@ def varInSpliceRegion(variant, donor=False, deNovo=False):
             regionStart = regionBounds[exon]["donorStart"]
             regionEnd = regionBounds[exon]["donorEnd"]
         withinBoundaries = verify.checkWithinBoundaries(verify.getVarStrand(variant), int(variant["Pos"]), regionStart, regionEnd)
-        if withinBoundaries == True and donor == False:
+        if withinBoundaries and not donor:
             return True
-        elif donor == True and deNovo == False and withinBoundaries == True:
+        elif donor and not deNovo and withinBoundaries:
             return True
         # because de novo donor region includes reference splice donor region and entirity of exon
-        elif donor == True and deNovo == True and (withinBoundaries == True or varInExon(variant) == True):
+        elif donor and deNovo and (withinBoundaries or varInExon(variant)):
             return True
     return False
 
@@ -231,9 +231,9 @@ def getVarLocation(variant, boundaries):
     inSpliceAcceptor = varInSpliceRegion(variant, donor=False, deNovo=False)
     if inExon:
         inCIDomain = varInCIDomain(variant, boundaries)
-        if inCIDomain == True and inSpliceDonor == True:
+        if inCIDomain and inSpliceDonor:
             return "CI_splice_donor_variant"
-        if inCIDomain == True and inSpliceAcceptor == True:
+        if inCIDomain and inSpliceAcceptor:
             return "CI_splice_acceptor_variant"
         if inCIDomain:
             return "CI_domain_variant"
@@ -386,7 +386,7 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLeng
     inRefSpliceAccRegion = varInSpliceRegion(variant, donor=False, deNovo=False)
     # if variant in ref splice donor region (for de novo donor) or in ref splice acceptor region (for de novo acceptor),
     # then need to remove native splicing window from consideration for highest scoring window
-    if (inRefSpliceDonorRegion == True or inRefSpliceAccRegion == True) and deNovoDonorInRefAcc == False:
+    if (inRefSpliceDonorRegion or inRefSpliceAccRegion) and not deNovoDonorInRefAcc:
         if donor:
             refSpliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=False)
             if verify.getVarStrand(variant) == "+":
@@ -450,8 +450,7 @@ def getClosestExonNumberIntronicSNS(variant, boundaries, donor=True):
     If variant is not in an intron or UTR, returns "exon0"
     """
     varLoc = getVarLocation(variant, boundaries)
-    if (varLoc == "intron_variant" or varLoc == "UTR_variant") and extract.getVarType(variant) == "substitution" and varInExon(
-            variant) == False:
+    if (varLoc == "intron_variant" or varLoc == "UTR_variant") and extract.getVarType(variant) == "substitution" and not varInExon(variant):
         exonBounds = extract.getExonBoundaries(variant)
         varGenPos = variant["Pos"]
         exonIntronDiffs = {}
@@ -501,11 +500,11 @@ def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, 
     varChrom = extract.getVarChrom(variant)
     varLoc = getVarLocation(variant, "enigma")
 
-    if (varInExon(variant) == True and deNovo == False) or (varLoc == "intron_variant" or varLoc == "UTR_variant"):
+    if (varInExon(variant) and not deNovo) or (varLoc == "intron_variant" or varLoc == "UTR_variant"):
         if varInExon(variant):
             exonNumber = getVarExonNumberSNS(variant)
             exonName = exonNumber
-        if (varLoc == "intron_variant" or varLoc == "UTR_variant") and varInExon(variant) == False:
+        if (varLoc == "intron_variant" or varLoc == "UTR_variant") and not varInExon(variant):
             exonNumber = getClosestExonNumberIntronicSNS(variant, "enigma", donor=donor)
             exonName = exonNumber
         if donor:
@@ -515,7 +514,7 @@ def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, 
         else:
             refSpliceAccBounds = extract.getSpliceAcceptorBoundaries(variant, STD_ACC_INTRONIC_LENGTH, STD_ACC_EXONIC_LENGTH)
             closestSpliceBounds = refSpliceAccBounds[exonNumber]
-    if varInSpliceRegion(variant, donor=donor, deNovo=deNovo) == True and deNovoDonorInRefAcc == False:
+    if varInSpliceRegion(variant, donor=donor, deNovo=deNovo) and not deNovoDonorInRefAcc:
         closestSpliceBounds = getVarSpliceRegionBounds(variant, donor=donor, deNovo=deNovo)
         exonName = closestSpliceBounds["exonName"]
     if donor:
@@ -668,7 +667,7 @@ def getDeNovoSpliceFrameshiftStatus(variant, donor=True, deNovoDonorInRefAcc=Fal
     deNovoDonorInRefAcc is True if looking for de novo donor in reference splice acceptor site, False otherwise
     Frameshift is determined in 2 ways: inFrame and isDivisible
     """
-    # if inFrame == False then alt and ref exons are not in the same reading frame
+    # if not inFrame then alt and ref exons are not in the same reading frame
     inFrame = isSplicingWindowInFrame(variant, STD_EXONIC_PORTION, STD_ACC_INTRONIC_LENGTH,
                                       deNovoDonorInRefAcc=deNovoDonorInRefAcc, donor=donor)
     # if isDivisble == Flase then distance between old and new splice position is not divislbe by 3
@@ -676,7 +675,7 @@ def getDeNovoSpliceFrameshiftStatus(variant, donor=True, deNovoDonorInRefAcc=Fal
                                                                     STD_ACC_INTRONIC_LENGTH,
                                                                     deNovoDonorInRefAcc=deNovoDonorInRefAcc,
                                                                     donor=donor)
-    if inFrame == False or isDivisible == False:
+    if not inFrame or not isDivisible:
         return True
     return False
 
