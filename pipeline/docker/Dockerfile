@@ -44,14 +44,12 @@ ENV BRCA_RESOURCES=$res
 
 RUN mkdir -p $res /files/data && chmod -R o+rwx /files
 
-RUN mkdir -p /.synapseCache && chmod o+rwx /.synapseCache
-
 RUN git clone https://github.com/counsyl/hgvs.git
 # taking pyhgvs 0.9.4
 RUN cd hgvs && git checkout aebe5bd9683f4b5937fd653ce4b13fcd4f3ebb10 && python setup.py install
 
 #leiden brca
-RUN git clone https://github.com/BRCAChallenge/leiden.git && cd leiden && python setup.py install
+RUN git clone https://github.com/BRCAChallenge/leiden.git && cd leiden && git checkout d5352801da0858840d87280f36dbce14159a6dd4 && python setup.py install
 
 RUN rm -r /opt/leiden /opt/hgvs /root/.cache
 

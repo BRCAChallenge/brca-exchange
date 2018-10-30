@@ -31,7 +31,10 @@ class TestStringMethods(unittest.TestCase):
                       'Allele_count_AFR',
                       'Allele_Frequency',
                       'Allele_frequency_FIN_ExAC',
-                      'Max_Allele_Frequency'
+                      'Max_Allele_Frequency',
+                      'Date_last_evaluated_ENIGMA',
+                      'BIC_Nomenclature',
+                      'Synonyms'
                      ]
         self.oldRow = {
                   'Pathogenicity_all': '',
@@ -51,7 +54,10 @@ class TestStringMethods(unittest.TestCase):
                   'Allele_count_AFR': '-',
                   'Allele_Frequency': '-',
                   'Allele_frequency_FIN_ExAC': '-',
-                  'Max_Allele_Frequency': '0.000132 (EAS from ExAC minus TCGA)'
+                  'Max_Allele_Frequency': '0.000132 (EAS from ExAC minus TCGA)',
+                  'Date_last_evaluated_ENIGMA': '2018-01-12',
+                  'BIC_Nomenclature': 'IVS10+332A>G',
+                  'Synonyms': '-2498del2'
                  }
 
         self.newRow = copy.deepcopy(self.oldRow)
@@ -795,6 +801,48 @@ class TestStringMethods(unittest.TestCase):
 
         identifier = releaseDiff.getIdentifier(self.newRow, False)
         self.assertEqual(identifier, "pyhgvs_Genomic_Coordinate_38")
+
+    def test_ignore_white_spaces(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+
+        self.oldRow['BIC_Nomenclature'] = 'IVS7-680del2'
+        self.newRow['BIC_Nomenclature'] = 'IVS 7-680del2'
+
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
+    def test_ignore_date_format_changes(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+
+        self.oldRow['Date_last_evaluated_ENIGMA'] = '1 / 12 / 2015'
+        self.newRow['Date_last_evaluated_ENIGMA'] = '2015 - 01 - 12'
+
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
+
+    def test_ignore_added_or_removed_white_space(self):
+        releaseDiff.added_data = self.added_data
+        releaseDiff.diff = self.diff
+        releaseDiff.diff_json = self.diff_json
+
+        self.oldRow['Synonyms'] = '-2498del2'
+        self.newRow['Synonyms'] = '-2498 del2'
+
+        v1v2 = releaseDiff.v1ToV2(self.fieldnames, self.fieldnames)
+        change_type = v1v2.compareRow(self.oldRow, self.newRow, False)
+        diff = releaseDiff.diff_json
+        self.assertEqual(diff, {})
+        self.assertIsNone(change_type)
 
 
 if __name__ == '__main__':

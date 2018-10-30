@@ -7,7 +7,7 @@ import aggregate_reports
 
 
 VCF_TESTDATA_FILENAME = path.join(path.dirname(__file__), 'test_files/1000_Genomes.vcf')
-TSV_TESTDATA_FILENAME = path.join(path.dirname(__file__), 'test_files/ENIGMA_combined_with_bx_ids.tsv')
+TSV_TESTDATA_FILENAME = path.join(path.dirname(__file__), 'test_files/enigma_from_clinvar.tsv')
 INPUT_DIRECTORY = path.join(path.dirname(__file__), 'test_files/')
 
 
