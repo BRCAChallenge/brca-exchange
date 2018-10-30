@@ -44,7 +44,7 @@ const filterColumns = [
 ];
 
 const expertModeGroups = [
-    {groupTitle: 'Variant Nomenclature', internalGroupName: 'Variant Nomenclature', innerCols: [
+    {groupTitle: 'Variant Names', internalGroupName: 'Variant Nomenclature', innerCols: [
         {title: 'Gene', prop: 'Gene_Symbol', render: gene => <i>{gene}</i>},
         {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: nucleotide => nucleotide.split(':')[1]},
         {title: 'Transcript Identifier', prop: 'Reference_Sequence'},
