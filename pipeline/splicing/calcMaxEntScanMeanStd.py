@@ -42,7 +42,7 @@ def fetch_gene_coordinates(transcript_name):
         return r[0]
 
 
-def runMaxEntScan(sequence, donor=False, usePerl=True):
+def runMaxEntScan(sequence, donor=False, usePerl=False):
     """Run maxEntScan on the indicated sequence.  Run score5.pl on candidate donor sequences, 
        score3.pl on candidate acceptor sequences.  Return the score"""
     if usePerl:
@@ -59,11 +59,12 @@ def runMaxEntScan(sequence, donor=False, usePerl=True):
         os.remove(tmpfile)
         return(float(entScore[0]))
     else:
-        # use the fastest available maxentpy implementation that doesn't require us to launch an external process
+        # use the fastest available maxentpy implementation
+        # we round to two decimal places to match the perl script's output
         if donor:
-            return maxent_fast.score5(str(sequence), matrix=matrix5)
+            return round(maxent_fast.score5(str(sequence), matrix=matrix5), 2)
         else:
-            return maxent_fast.score3(str(sequence), matrix=matrix3)
+            return round(maxent_fast.score3(str(sequence), matrix=matrix3), 2)
 
 
 def scoreSeq(chrom, strand, coordinate, donor=False, verbose=False):
