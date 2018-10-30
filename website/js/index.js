@@ -1002,15 +1002,26 @@ var VariantDetail = React.createClass({
             : `col-xs-12 col-md-6 col-lg-6 col-xl-4`;
         const splicingTileSizeClassse = 'col-xs-12 col-md-12 col-lg-12 col-xl-8';
 
+        // extra variant info that appears under the hg38 coordinate header
+        const varExtraLabel =
+            `${variant['Reference_Sequence']}(${variant['Gene_Symbol']}):${variant['HGVS_cDNA'].split(":")[1]}`;
+        const varProtein =
+            (variant['HGVS_Protein'] && variant['HGVS_Protein'] !== "None") && variant['HGVS_Protein'].split(":")[1];
+
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
-                    <Col xs={4} sm={4} smOffset={4} md={4} mdOffset={4} className="vcenterblock">
-                        <div className='text-center Variant-detail-title'>
-                            <h3>Variant Detail</h3>
+                    <Col md={2}>
+                        <h3>Variant Details</h3>
+                    </Col>
+                    <Col md={8} className="vcenterblock">
+                        <div className='text-center Variant-detail-title' style={{textAlign: 'center'}}>
+                            <h1 style={{marginTop: 30}}>{variant.Genomic_Coordinate_hg38}</h1>
+                            <div><i>or</i></div>
+                            <h3 style={{marginTop: 10}}>{varExtraLabel} {varProtein}</h3>
                         </div>
                     </Col>
-                    <Col xs={8} sm={4} md={4} className="vcenterblock">
+                    <Col md={2} className="vlowerblock">
                         <div className="Variant-detail-headerbar">
                             <Button
                                 onClick={this.setEmptyRowVisibility.bind(this, !this.state.hideEmptyItems)}

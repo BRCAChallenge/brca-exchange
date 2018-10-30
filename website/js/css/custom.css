@@ -1362,6 +1362,12 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
     float: none;
 }
 
+.vlowerblock {
+    display: inline-block;
+    vertical-align: bottom;
+    float: none;
+}
+
 .help-page .list-group-item-heading {
     margin-bottom: 0;
 }
