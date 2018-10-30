@@ -1002,12 +1002,6 @@ var VariantDetail = React.createClass({
             : `col-xs-12 col-md-6 col-lg-6 col-xl-4`;
         const splicingTileSizeClassse = 'col-xs-12 col-md-12 col-lg-12 col-xl-8';
 
-        // extra variant info that appears under the hg38 coordinate header
-        const varExtraLabel =
-            `${variant['Reference_Sequence']}(${variant['Gene_Symbol']}):${variant['HGVS_cDNA'].split(":")[1]}`;
-        const varProtein =
-            (variant['HGVS_Protein'] && variant['HGVS_Protein'] !== "None") && variant['HGVS_Protein'].split(":")[1];
-
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
@@ -1018,7 +1012,14 @@ var VariantDetail = React.createClass({
                         <div className='text-center Variant-detail-title' style={{textAlign: 'center'}}>
                             <h1 style={{marginTop: 30}}>{variant.Genomic_Coordinate_hg38}</h1>
                             <div><i>or</i></div>
-                            <h3 style={{marginTop: 10}}>{varExtraLabel} {varProtein}</h3>
+                            <h3 style={{marginTop: 10}}>
+                                {variant['Reference_Sequence']}(<i>{variant['Gene_Symbol']}</i>){`:${variant['HGVS_cDNA'].split(":")[1]}`}
+
+                                {
+                                    (variant['HGVS_Protein'] && variant['HGVS_Protein'] !== "None") &&
+                                        " " + variant['HGVS_Protein'].split(":")[1]
+                                }
+                            </h3>
                         </div>
                     </Col>
                     <Col md={2} className="vlowerblock">
