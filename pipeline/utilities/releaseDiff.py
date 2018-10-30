@@ -207,6 +207,8 @@ class transformer(object):
             value = value.replace("Not Yet Classified", "Not Yet Reviewed")
         elif field == "BIC_Nomenclature":
             value = value.replace(' ', '')
+        elif field == "Synonyms":
+            value = value.replace(" ", "")
 
         if field in EXAC_AF_FIELDS and value != "-":
             value = str(round_sigfigs(float(value), 3))
