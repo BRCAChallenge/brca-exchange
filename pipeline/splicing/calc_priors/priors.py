@@ -1042,6 +1042,7 @@ def getPriorProbProteinSNS(variant, variantData):
     """
     proteinPrior = "-"
     enigmaClass = "-"
+
     if extract.getVarType(variant) == "substitution":
         varHGVS = variant["HGVS_cDNA"]
         if varHGVS == "-":
@@ -1051,7 +1052,11 @@ def getPriorProbProteinSNS(variant, variantData):
         varGene = variant["Gene_Symbol"]
 
         foundVar = variantData[(varGene, varHGVS)]
-        proteinPrior = float(foundVar["protein_prior"])
+        try:
+            proteinPrior = float(foundVar["protein_prior"])
+        except ValueError:
+            # it couldn't be parsed as a float
+            proteinPrior = "-"
         enigmaClass = extract.getEnigmaClass(proteinPrior)
 
         return {"priorProb": proteinPrior,

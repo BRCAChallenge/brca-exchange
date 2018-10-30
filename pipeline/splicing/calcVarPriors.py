@@ -101,6 +101,9 @@ def calc_one(variant):
             varData = getVarData(variant, "enigma", variantData, None, brca1Transcript)
         elif variant["Gene_Symbol"] == "BRCA2":
             varData = getVarData(variant, "enigma", variantData, None, brca2Transcript)
+        else:
+            raise Exception("Unknown gene symbol %s encountered for variant %s" % (variant["Gene_Symbol"], variant["HGVS_cDNA"]))
+
         click.echo("{}:{}".format(variant["HGVS_cDNA"], varData["varLoc"]), err=True)
         return addVarDataToRow(varData, variant)
     except Exception as e:
@@ -185,10 +188,10 @@ def unittest(ctx):
 
 
 @cli.command(help="Run self test")
-@click.argument("length", type=click.Choice(["short", "long", "concerning"]))
+@click.argument("length", type=click.Choice(["short", "long", "concerning", "fullblacklist"]))
 @click.pass_context
 def test(ctx, length):
-    with Benchmark("running %s, time" % length):
+    with Benchmark("finished processing '%s', duration" % length):
         pytest.main(["-p", "no:cacheprovider", "-x", "."])
         calc_all(click.open_file("tests/variants_%s.tsv" % length, mode="r"),
                  click.open_file("/tmp/priors_%s.tsv" % length, mode="w"),
@@ -200,12 +203,12 @@ def test(ctx, length):
     # for now, we defer to a slower approximate matching technique
     run("md5sum -c ./tests/md5/priors_%s.md5" % length)
 
-    # now, run the test
-    with Benchmark("test running %s, time" % length):
+    # now, run an integration test against an assumedly correct reference
+    with Benchmark("finished running integration test '%s', duration" % length):
         infile = "tests/priors_%s.tsv" % length
         outfile = "/tmp/priors_%s.tsv" % length
         try:
-            approximate_compare_tsv(infile, outfile)
+            approximate_compare_tsv(infile, outfile, warnOnMismatch=True)
         except MismatchException as ex:
             print("Mismatch between %s and %s; reason: %s" % (infile, outfile, str(ex)))
 

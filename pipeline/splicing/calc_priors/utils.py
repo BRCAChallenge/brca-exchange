@@ -46,7 +46,14 @@ class MismatchException(Exception):
     pass
 
 
-def approximate_compare_tsv(aPath, bPath):
+def handle_mismatch(x, warn):
+    if warn:
+        print x
+    else:
+        raise MismatchException(x)
+
+
+def approximate_compare_tsv(aPath, bPath, warnOnMismatch=False):
     """
     For two TSV files with the same columns and rows, ensures that the values of each cell
     betweeen the two files are at least approximately equal if the cell contains a float-parseable value,
@@ -63,13 +70,23 @@ def approximate_compare_tsv(aPath, bPath):
             for col in old:
                 try:
                     if not isclose(float(new[col]), float(old[col])):
-                        raise MismatchException(
-                            "Numeric mismatch on line %d, cell %s: '%s' vs. '%s'" % (line_no, col, old[col], new[col])
+                        handle_mismatch(
+                            "Numeric mismatch on line %d (%s, %s), cell %s: %s vs. %s" % (
+                                line_no+1,
+                                old["Gene_Symbol"], old["HGVS_cDNA"],
+                                col, old[col], new[col]
+                            ),
+                            warn=warnOnMismatch
                         )
                 except ValueError:
                     if new[col] != old[col]:
-                        raise MismatchException(
-                            "Non-numeric mismatch on line %d, cell %s: '%s' vs. '%s'" % (line_no, col, old[col], new[col])
+                        handle_mismatch(
+                            "Non-numeric mismatch on line %d (%s, %s), cell %s: '%s' vs. '%s'" % (
+                                line_no+1,
+                                old["Gene_Symbol"], old["HGVS_cDNA"],
+                                col, old[col], new[col]
+                            ),
+                            warn=warnOnMismatch
                         )
 
         return True
