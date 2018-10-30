@@ -2,6 +2,7 @@ import unittest
 import mock
 import calcVarPriors
 import calc_priors.compute
+import calc_priors.dataproc
 import calc_priors.extract
 import calc_priors.priors
 import calc_priors.verify
@@ -2398,8 +2399,6 @@ class test_calcVarPriors(unittest.TestCase):
                                             getMaxMaxEntScanScoreSlidingWindowSNS, getNewSplicePosition):
         '''Tests that new exon length is correctly calculated for a de novo acceptor for a minus strand (BRCA1) variant in exon'''
         self.variant["Gene_Symbol"] = "BRCA1"
-        self.variant["Reference_Sequence"] = BRCA1_RefSeq # FIXME: why wasn't this the brca1 refseq before?
-        self.variant["Pos"] = '43051110' # FIXME: why wasn't this set, too? how did this work before?
         self.variant["HGVS_cDNA"] = "c.5285G>A"
         expectedCutSeq = "GGGCTAGAAATCTGTTGCTATGGGCCCTTCACCAACATGCCCACAG"
         altExonLength = calc_priors.compute.getAltExonLength(self.variant, STD_EXONIC_PORTION, STD_ACC_INTRONIC_LENGTH,
@@ -8762,7 +8761,7 @@ class test_calcVarPriors(unittest.TestCase):
         1. Variant information is being parsed correctly
         '''
         boundaries = "enigma"
-        varDict = calcVarPriors.getVarDict(self.variant, boundaries)
+        varDict = calc_priors.dataproc.getVarDict(self.variant, boundaries)
         self.assertEquals(varDict["varHGVScDNA"], self.variant["HGVS_cDNA"])
         self.assertEquals(varDict["varChrom"], self.variant["Chr"])
         self.assertEquals(varDict["varGene"], self.variant["Gene_Symbol"])

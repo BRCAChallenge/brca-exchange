@@ -18,9 +18,9 @@ import pytest
 import pyhgvs.utils as pyhgvs_utils
 
 from calc_priors.constants import BRCA1_RefSeq, BRCA2_RefSeq
+from calc_priors.dataproc import BLANK_DICT, addVarDataToRow
 from calc_priors.extract import getVarType
 from calc_priors.compute import getVarLocation
-from calc_priors.verify import getVarStrand
 from calc_priors.priors import getPriorProbAfterGreyZoneSNS, getPriorProbSpliceDonorSNS, getPriorProbSpliceAcceptorSNS, \
     getPriorProbInGreyZoneSNS, getPriorProbInExonSNS, getPriorProbOutsideTranscriptBoundsSNS, getPriorProbInIntronSNS, \
     getPriorProbInUTRSNS
@@ -28,7 +28,7 @@ from calc_priors.priors import getPriorProbAfterGreyZoneSNS, getPriorProbSpliceD
 from calc_priors.utils import Benchmark, approximate_compare_tsv, MismatchException
 
 
-def getVarData(variant, boundaries, variantData, genome, transcript):
+def getVarData(variant, boundaries, inputVariantData, genome, transcript):
     """
     Given variant, boundaries (either "priors" or "enigma') and list of dictionaries with variant data
     Genome is a SequenceFileDB for genome and transcript is a pyhgvs transcript object)
@@ -39,106 +39,20 @@ def getVarData(variant, boundaries, variantData, genome, transcript):
     """
     varLoc = getVarLocation(variant, boundaries)
     varType = getVarType(variant)
-    blankDict = {"applicablePrior": "-",
-                 "applicableEnigmaClass": "-",
-                 "proteinPrior": "-",
-                 "refDonorPrior": "-",
-                 "deNovoDonorPrior": "-",
-                 "refRefDonorMES": "-",
-                 "refRefDonorZ": "-",
-                 "altRefDonorMES": "-",
-                 "altRefDonorZ": "-",
-                 "refRefDonorSeq": "-",
-                 "altRefDonorSeq": "-",
-                 "refDonorVarStart": "-",
-                 "refDonorVarLength": "-",
-                 "refDonorExonStart": "-",
-                 "refDonorIntronStart": "-",
-                 "refDeNovoDonorMES": "-",
-                 "refDeNovoDonorZ": "-",
-                 "altDeNovoDonorMES": "-",
-                 "altDeNovoDonorZ": "-",
-                 "refDeNovoDonorSeq": "-",
-                 "altDeNovoDonorSeq": "-",
-                 "deNovoDonorVarStart": "-",
-                 "deNovoDonorVarLength": "-",
-                 "deNovoDonorExonStart": "-",
-                 "deNovoDonorIntronStart": "-",
-                 "deNovoDonorGenomicSplicePos": "-",
-                 "deNovoDonorTranscriptSplicePos": "-",
-                 "closestDonorGenomicSplicePos": "-",
-                 "closestDonorTranscriptSplicePos": "-",
-                 "closestDonorRefMES": "-",
-                 "closestDonorRefZ": "-",
-                 "closestDonorRefSeq": "-",
-                 "closestDonorAltMES": "-",
-                 "closestDonorAltZ": "-",
-                 "closestDonorAltSeq": "-",
-                 "closestDonorExonStart": "-",
-                 "closestDonorIntronStart": "-",
-                 "deNovoDonorAltGreaterRefFlag": "-",
-                 "deNovoDonorAltGreaterClosestRefFlag": "-",
-                 "deNovoDonorAltGreaterClosestAltFlag": "-",
-                 "deNovoDonorFrameshiftFlag": "-",
-                 "refAccPrior": "-",
-                 "deNovoAccPrior": "-",
-                 "refRefAccMES": "-",
-                 "refRefAccZ": "-",
-                 "altRefAccMES": "-",
-                 "altRefAccZ": "-",
-                 "refRefAccSeq": "-",
-                 "altRefAccSeq": "-",
-                 "refAccVarStart": "-",
-                 "refAccVarLength": "-",
-                 "refAccExonStart": "-",
-                 "refAccIntronStart": "-",
-                 "refDeNovoAccMES": "-",
-                 "refDeNovoAccZ": "-",
-                 "altDeNovoAccMES": "-",
-                 "altDeNovoAccZ": "-",
-                 "refDeNovoAccSeq": "-",
-                 "altDeNovoAccSeq": "-",
-                 "deNovoAccVarStart": "-",
-                 "deNovoAccVarLength": "-",
-                 "deNovoAccExonStart": "-",
-                 "deNovoAccIntronStart": "-",
-                 "deNovoAccGenomicSplicePos": "-",
-                 "deNovoAccTranscriptSplicePos": "-",
-                 "closestAccGenomicSplicePos": "-",
-                 "closestAccTranscriptSplicePos": "-",
-                 "closestAccRefMES": "-",
-                 "closestAccRefZ": "-",
-                 "closestAccRefSeq": "-",
-                 "closestAccAltMES": "-",
-                 "closestAccAltZ": "-",
-                 "closestAccAltSeq": "-",
-                 "closestAccExonStart": "-",
-                 "closestAccIntronStart": "-",
-                 "deNovoAccAltGreaterRefFlag": "-",
-                 "deNovoAccAltGreaterClosestRefFlag": "-",
-                 "deNovoAccAltGreaterClosestAltFlag": "-",
-                 "deNovoAccFrameshiftFlag": "-",
-                 "spliceSite": "-",
-                 "spliceRescue": "-",
-                 "spliceFlag": "-",
-                 "frameshiftFlag": "-",
-                 "inExonicPortionFlag": "-",
-                 "CIDomainInRegionFlag": "-",
-                 "isDivisibleFlag": "-",
-                 "lowMESFlag": "-"}
+
     if varType == "substitution":
         # functions only work for variants with cannonical nucleotides (ACTG)
         if variant["Ref"] in ["A", "C", "G", "T"] and variant["Alt"] in ["A", "C", "G", "T"]:
             if varLoc == "outside_transcript_boundaries_variant":
                 varData = getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries)
             elif varLoc == "CI_splice_donor_variant" or varLoc == "splice_donor_variant":
-                varData = getPriorProbSpliceDonorSNS(variant, boundaries, variantData, genome, transcript)
+                varData = getPriorProbSpliceDonorSNS(variant, boundaries, inputVariantData, genome, transcript)
             elif varLoc == "CI_splice_acceptor_variant" or varLoc == "splice_acceptor_variant":
-                varData = getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData, genome, transcript)
+                varData = getPriorProbSpliceAcceptorSNS(variant, boundaries, inputVariantData, genome, transcript)
             elif varLoc == "CI_domain_variant" or varLoc == "exon_variant":
-                varData = getPriorProbInExonSNS(variant, boundaries, variantData, genome, transcript)
+                varData = getPriorProbInExonSNS(variant, boundaries, inputVariantData, genome, transcript)
             elif varLoc == "grey_zone_variant":
-                varData = getPriorProbInGreyZoneSNS(variant, boundaries, variantData)
+                varData = getPriorProbInGreyZoneSNS(variant, boundaries, inputVariantData)
             elif varLoc == "after_grey_zone_variant":
                 varData = getPriorProbAfterGreyZoneSNS(variant, boundaries)
             elif varLoc == "UTR_variant":
@@ -146,52 +60,21 @@ def getVarData(variant, boundaries, variantData, genome, transcript):
             elif varLoc == "intron_variant":
                 varData = getPriorProbInIntronSNS(variant, boundaries, genome, transcript)
             else:
-                varData = blankDict.copy()
+                varData = BLANK_DICT.copy()
         else:
-            varData = blankDict.copy()
+            varData = BLANK_DICT.copy()
     else:
         # to account for any non SNS variants
-        varData = blankDict.copy()
+        varData = BLANK_DICT.copy()
 
     varData["varType"] = varType
     varData["varLoc"] = varLoc
     return varData
 
 
-def addVarDataToRow(varData, inputRow):
-    """
-    Given data about a particular variant and a row from input file,
-    Returns row with appended data
-    """
-    for key in varData.keys():
-        inputRow[key] = varData[key]
-    return inputRow
-
-
-def getVarDict(variant, boundaries):
-    """
-    Given input data, returns a dictionary containing information for each variant in input
-    Dictionary key is variant HGVS_cDNA and value is a dictionary containing variant gene, variant chromosome,
-    variant strand, variant genomic coordinate, variant type, and variant location
-    """
-    varStrand = getVarStrand(variant)
-    varType = getVarType(variant)
-    varLoc = getVarLocation(variant, boundaries)
-
-    varDict = {"varGene": variant["Gene_Symbol"],
-               "varChrom": variant["Chr"],
-               "varStrand": varStrand,
-               "varGenCoordinate": variant["Pos"],
-               "varType": varType,
-               "varLoc": varLoc,
-               "varHGVScDNA": variant["HGVS_cDNA"]}
-
-    return varDict
-
-
 brca1Transcript = None
 brca2Transcript = None
-useOldFile = True
+useOldFile = False
 
 if useOldFile:
     with open("mod_res_dn_brca20160525.txt", "r") as combinedfile:
