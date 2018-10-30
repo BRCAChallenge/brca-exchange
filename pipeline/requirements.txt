@@ -1,6 +1,6 @@
 backports-abc==0.4
 beautifulsoup4==4.5.1
-biocommons.seqrepo==0.3.5 
+biocommons.seqrepo==0.3.5
 biopython==1.69
 bioutils==0.3.3
 bx-python==0.7.3
@@ -24,7 +24,7 @@ pysam==0.9.1.4
 python-daemon==2.1.1
 PyVCF==0.6.8
 recordtype==1.1
-requests==2.11.0
+requests==2.20.0
 retrying==1.3.3
 setuptools==25.1.4
 singledispatch==3.4.0.3
