@@ -25,10 +25,11 @@ class Command(BaseCommand):
                 variant_instance = Variant.objects.filter(Data_Release_id=release_id).filter(Genomic_Coordinate_hg38=key).get()
                 VariantDiff.objects.create(variant=variant_instance, diff=diff[key])
             except Variant.DoesNotExist:
-                tqdm.write("Error adding Variant Diff: Variant %s in release %s not found" % (key, release_id))
+                tqdm.write("Error adding Variant Diff: Variant %s in release %s not found" % (self._encode(key), release_id))
 
         print "Creating report diffs..."
         for key in tqdm(reports_diff, total=len(reports_diff)):
+
             # Only handles ClinVar and LOVD reports for now
             if "SCV" in key:
                 # handle clinvar reports
@@ -36,11 +37,14 @@ class Command(BaseCommand):
                     report_instance = Report.objects.filter(Data_Release_id=release_id).filter(SCV_ClinVar=key).get()
                     ReportDiff.objects.create(report=report_instance, report_diff=reports_diff[key])
                 except Report.DoesNotExist:
-                    tqdm.write("Error adding Report Diff: Report %s in release %s not found" % (key, release_id))
+                    tqdm.write("Error adding Report Diff: Report %s in release %s not found" % (self._encode(key), release_id))
             else:
                 # handle lovd reports
                 try:
                     report_instance = Report.objects.filter(Data_Release_id=release_id).filter(Submission_ID_LOVD=key).get()
                     ReportDiff.objects.create(report=report_instance, report_diff=reports_diff[key])
                 except Report.DoesNotExist:
-                    tqdm.write("Error adding Report Diff: Report %s in release %s not found" % (key, release_id))
+                    tqdm.write("Error adding Report Diff: Report %s in release %s not found" % (self._encode(key), release_id))
+
+    def _encode(self, s):
+        return unicode(s).encode('utf-8')
