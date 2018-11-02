@@ -69,8 +69,9 @@ class LiteratureTable extends React.Component {
     }
 
     toTSV() {
+        const headerRow = ["title", "authors", "journal", "year", "keywords", "pmid"].join("\t");
         return this.state.papers ? this.state.papers.map(({title, authors, journal, year, keywords, pmid}) =>
-            [title, authors, journal, year, keywords, pmid].join("\t")).join("\n") : "";
+            headerRow + "\n" + [title, authors, journal, year, keywords, pmid].join("\t")).join("\n") : "";
     }
 
     toJSON() {
@@ -98,12 +99,12 @@ class LiteratureTable extends React.Component {
         litRows = litRows.map(({title, authors, journal, year, mentions, pmid}) => (
             <li>
                 <div className="literature-right-pane">
-                    <small className="pmid">PMID<a href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank'>{pmid}</a></small>
+                    <div className="pmid">PMID: <a href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank'>{pmid}</a></div>
                     <div>{year}</div>
                     <div>{journal}</div>
                 </div>
-                <b>{title}</b>
-                <div>{limitAuthorCount(authors, 3)}</div>
+                <b>Title: {title}</b>
+                <div>Author(s): {limitAuthorCount(authors, 3)}</div>
                 {
                     mentions.length ? (
                         <div>
@@ -112,16 +113,15 @@ class LiteratureTable extends React.Component {
                         </div>
                     ) : null
                 }
-                <hr />
             </li>
         ));
         let toTSVURL = `data:text/tab-separated-values;charset=utf-8,${encodeURIComponent(this.toTSV())}`;
         let toJSONURL = `data:text/json;charset=utf-8,${encodeURIComponent(this.toJSON())}`;
         let component = (
             <div>
-                <h4>Literature Search Results (alternate style):</h4>
-                    <ul>
-                    {litRows}
+                <h4>Literature Search Results:</h4>
+                    <ul className="literature-rows">
+                        {litRows}
                     </ul>
                     { this.state.papers.length > this.props.maxRows
                         ? ( <div style={{textAlign: "center"}}>

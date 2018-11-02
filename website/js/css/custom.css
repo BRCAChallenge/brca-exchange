@@ -1372,6 +1372,7 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
 
 .variant-literature-col ul {
     list-style: none;
+    padding-left: 0;
 }
 
 .variant-literature-col .literature-right-pane {
