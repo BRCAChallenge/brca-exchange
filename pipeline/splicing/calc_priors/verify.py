@@ -171,6 +171,10 @@ def compareRefAltExonLengths(refLength, altLength):
         return False
 
 
+# FIXME: getVarStrand(),  convertGenomicPosToTranscriptPos(), and formatSplicePosition() aren't predicates
+# they should be moved to another module, but currently the most logical place (extract) creates a circular dependency
+# between extract and verify, since those methods are used in this module and verify is used in extract
+
 def getVarStrand(variant):
     """Given a variant, returns the coding strand based on the variant's gene_symbol"""
     varGene = variant["Gene_Symbol"]
