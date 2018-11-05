@@ -320,6 +320,11 @@ def apply_search(query, search_term, quotes='', release=None):
         NP_009225.1:A280G --> HGVS_Protein.split(':')[0]:Protein_Change
     '''
     search_term = search_term.lower().strip()
+    clinvar_accession = False
+
+    # Accept only full clinvar accession numbers
+    if search_term.startswith('scv') and len(search_term) >= 12:
+        clinvar_accession = True
 
     # Accept genomic coordinates with or without a 'g.' before the position
     if 'chr17:' in search_term and 'g.' not in search_term:
@@ -408,6 +413,18 @@ def apply_search(query, search_term, quotes='', release=None):
             Q(HGVS_cDNA__icontains=suffix) |
             Q(Genomic_Coordinate_hg38__istartswith=suffix) |
             Q(BIC_Nomenclature__istartswith=suffix)
+        )
+    # Handle clinvar accession numbers
+    elif clinvar_accession is True:
+        results = query.filter(
+            Q(SCV_ClinVar__icontains=search_term) |
+            Q(ClinVarAccession_ENIGMA__icontains=search_term)
+        )
+
+        # filter against synonym fields
+        non_synonyms = query.filter(
+            Q(SCV_ClinVar__icontains=search_term) |
+            Q(ClinVarAccession_ENIGMA__icontains=search_term)
         )
 
         # Generic searches (no prefixes)

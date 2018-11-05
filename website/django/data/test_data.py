@@ -1,7 +1,7 @@
 def existing_variant():
     return {
         'Variant_frequency_LOVD': '-',
-        'ClinVarAccession_ENIGMA': 'SCV000244373',
+        'ClinVarAccession_ENIGMA': 'SCV000244373.2',
         'Variant_in_LOVD': True,
         'Chr': '17',
         'Co_occurrence_LR_exLOVD': '1.23',
@@ -48,7 +48,7 @@ def existing_variant():
         'Date_Last_Updated_ClinVar': '2015-08-10,2014-11-18,2010-06-01,2014-10-01,2002-05-29,2015-04-16,2014-07-23',
         'Hg38_Start': 43070959L,
         'Source_URL': 'http://hci-exlovd.hci.utah.edu/variants.php?select_db=BRCA1&action=search_all&search_Variant%2FDNA=c.4955T>C, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000053796, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000209981, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000220544, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000076721, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000213478, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000145221, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000244373',
-        'SCV_ClinVar': 'SCV000053796,SCV000209981,SCV000220544,SCV000076721,SCV000213478,SCV000145221,SCV000244373',
+        'SCV_ClinVar': 'SCV000053796',
         'Pathogenicity_expert': 'Benign / Little Clinical Significance',
         'Allele_frequency_1000_Genomes': '-',
         'Functional_analysis_result_LOVD': 'predicted neutral,predicted deleterious,no functional effect,-',
