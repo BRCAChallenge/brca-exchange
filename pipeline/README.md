@@ -69,11 +69,6 @@ Currently, such a credential files should contain the following:
 u=bicusername
 p=bicpassword
 
-# synapse credentials
-synapse_username=your_username
-synapse_password=some_password
-synapse_enigma_file_id=syn8465585
-
 ```
 
 ### Setup on Pipeline Machine

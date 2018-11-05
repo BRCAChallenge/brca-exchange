@@ -73,16 +73,9 @@ class genomicCoordinates:
             self.chrom = element.get("Chr")
             self.stop = element.get("stop")
             self.length = element.get("variantLength")
-            self.start = element.get("start")
-            self.referenceAllele = element.get("referenceAllele")
-            self.alternateAllele = element.get("alternateAllele")
-
-            """If standard ref/alt values are not provided, use the VCF values and the
-            associated VCF position."""
-            if self.referenceAllele == None and self.alternateAllele == None:
-                self.start = element.get("positionVCF")
-                self.referenceAllele = element.get("referenceAlleleVCF")
-                self.alternateAllele = element.get("alternateAlleleVCF")
+            self.start = element.get("positionVCF")
+            self.referenceAllele = element.get("referenceAlleleVCF")
+            self.alternateAllele = element.get("alternateAlleleVCF")
 
 
 class variant:
@@ -107,12 +100,11 @@ class variant:
             genomic = genomicCoordinates(item, debug=debug)
             self.coordinates[assembly] = genomic
         self.geneSymbol = None
-        measureRelationship = element.find("MeasureRelationship")
-        if measureRelationship != None:
-            symbol = measureRelationship.find("Symbol")
-            if symbol != None:
-                self.geneSymbol = textIfPresent(symbol, "ElementValue")
-
+        symbols = element.findall("MeasureRelationship/Symbol")
+        for symbol in symbols:
+            symbol_val = textIfPresent(symbol, "ElementValue")
+            if symbol_val.startswith('BRCA'):
+                self.geneSymbol = symbol_val
 
 
 class referenceAssertion:

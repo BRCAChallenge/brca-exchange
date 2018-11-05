@@ -27,11 +27,6 @@ Credentials can be passed into the container by mounting an appropriate file. Cu
 u=bicusername
 p=bicpassword
 
-# synapse credentials
-synapse_username=your_username
-synapse_password=some_password
-synapse_enigma_file_id=syn8465585
-
 ```
 
 ### Running the Pipeline
@@ -62,7 +57,6 @@ docker run --rm -u $(id -u ${USER}):$(id -g ${USER}) \
        -v  path_to_pipeline_credentials.cfg:/opt/luigi_pipeline_credentials.cfg \
        -v  path_to_previous_release_tar:/files/previous_release.tar.gz \
        -v  path_to_release_notes.txt:/files/release_notes.txt \
-       -v /tmp:/.synapseCache \
        -it \
        brcachallenge/brca-exchange-pipeline
 ```
