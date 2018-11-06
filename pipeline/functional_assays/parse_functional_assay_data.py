@@ -4,10 +4,11 @@
 Description:
     Parses a .tsv source file of functional assays into a list of variants
 """
-
 import argparse
 import pandas as pd
 import numpy as np
+import tempfile
+import os
 
 
 def parse_args():
@@ -20,6 +21,10 @@ def parse_args():
 def extract_relevant_data_for_processing(f_in_data_frame):
 
     new_columns = [
+        'chr',
+        'pos_hg19',
+        'ref',
+        'alt',
         'gene_symbol',
         'reference_sequence',
         'hgvs_nucleotide',
@@ -31,6 +36,10 @@ def extract_relevant_data_for_processing(f_in_data_frame):
     new_data_frame = new_data_frame.reset_index(drop=True)
     f_in_data_frame = f_in_data_frame.reset_index(drop=True)
 
+    new_data_frame.chr = f_in_data_frame['chromosome']
+    new_data_frame.pos_hg19 = f_in_data_frame['position (hg19)']
+    new_data_frame.ref = f_in_data_frame['reference']
+    new_data_frame.alt = f_in_data_frame['alt']
     new_data_frame.gene_symbol = f_in_data_frame['gene']
     new_data_frame.reference_sequence = f_in_data_frame['transcript_ID']
     new_data_frame.hgvs_nucleotide = f_in_data_frame['transcript_variant']
@@ -45,19 +54,21 @@ def main():
     f_in = options.input
     f_out = options.output
 
+    f_tmp = tempfile.NamedTemporaryFile(delete=False)
+
     # TODO: fixme! quick hack to rem first two lines of extra header categories
-    with open(f_in,'r') as f_in:
-        with open("/tmp/clean_tmp_functional_assay_data.tsv",'w') as f1:
+    with open(f_in, 'r') as f_in:
+        with open(f_tmp.name, 'w') as f_tmp_opened:
             # skip header lines
             f_in.next()
             f_in.next()
             for line in f_in:
-                f1.write(line)
-    f_in = "/tmp/clean_tmp_functional_assay_data.tsv"
+                f_tmp_opened.write(line)
 
-
-    f_in_data_frame = pd.read_csv(f_in, sep="\t")
+    f_in_data_frame = pd.read_csv(f_tmp.name, sep="\t")
     f_out_data_frame = extract_relevant_data_for_processing(f_in_data_frame)
+
+    os.remove(f_tmp.name)
 
     f_out_data_frame.to_csv(f_out, sep='\t', index=False)
 
