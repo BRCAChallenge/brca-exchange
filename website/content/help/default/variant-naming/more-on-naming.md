@@ -6,7 +6,7 @@ When a gene contains a substitution variant, there might be a ‘misspelling’ 
 
 This instructional aid will focus on the BRCA2 gene, and the variant 'chr13:g.32338271:G>A'. Chromosome 13, where the BRCA2 gene is found, is made up of about 115 million base pairs [Genetics Home Reference](https://ghr.nlm.nih.gov/chromosome/13)). 
 
-So, the first question to ask when looking at a variant is “_Which_ coordinate system is being used?” The answer lies in the first few letters. In this case, the variant is referencing chromosomal DNA (the **g.**enome): 
+So, the first question to ask when looking at a variant is “_Which_ coordinate system is being used?” The answer lies in the first few letters. In this case, the variant is referencing chromosomal DNA (the g.enome): 
 
 
 <figure style="width: 50%; margin: 0 auto 1em auto;">
