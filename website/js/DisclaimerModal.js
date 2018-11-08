@@ -29,7 +29,7 @@ var DisclaimerModal = React.createClass({
         if(localStorage.getItem('research-mode') === 'true') {
             return (
                 <div className="form-group">
-                <Button className="btn-default" onClick={this.disableResearchMode}>Show Expert Reviewed Data on this Variant</Button>
+                <Button className="btn-default" onClick={this.disableResearchMode}>Show Summary View of this Variant</Button>
                 </div>
             );
         } else {
