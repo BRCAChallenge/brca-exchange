@@ -314,28 +314,38 @@ class VariantTestCase(TestCase):
 
     def test_filter_by_pathogenicity(self):
         '''Tests filtering by 'Pathogenicity' option'''
-        #variant with pathogenic classification
         new_variant_pathogenic = test_data.existing_variant()
         new_variant_pathogenic['Genomic_Coordinate_hg38'] = 'chr13:PATHOGENIC:A>G'
         new_variant_pathogenic['Pathogenicity_expert'] = 'Pathogenic'
         (new_variant_pathogenic, new_current_variant_pathogenic) = create_variant_and_materialized_view(new_variant_pathogenic)
 
-        #variant with benign/little clinical significance classification
         new_variant_benign = test_data.existing_variant()
         new_variant_benign['Genomic_Coordinate_hg38'] = 'chr13:BENIGN:A>G'
         new_variant_benign['Pathogenicity_expert'] = 'Benign / Little Clinical Significance'
         (new_variant_benign, new_current_variant_benign) = create_variant_and_materialized_view(new_variant_benign)
 
-        #variant with not_yet_reviewed status
         new_variant_not_reviewed = test_data.existing_variant()
         new_variant_not_reviewed['Genomic_Coordinate_hg38'] = 'chr13:NOT_REVIEWED:A>G'
         new_variant_not_reviewed['Pathogenicity_expert'] = 'Not Yet Reviewed'
         (new_variant_not_reviewed, new_current_variant_not_reviewed) = create_variant_and_materialized_view(new_variant_not_reviewed)
 
+        new_variant_likely_pathogenic = test_data.existing_variant()
+        new_variant_likely_pathogenic['Genomic_Coordinate_hg38'] = 'chr13:LIKELY_PATHOGENIC:A>G'
+        new_variant_likely_pathogenic['Pathogenicity_expert'] = 'Likely pathogenic'
+        (new_variant_likely_pathogenic, new_current_variant_likely_pathogenic) = create_variant_and_materialized_view(new_variant_likely_pathogenic)
+
+        new_variant_likely_benign = test_data.existing_variant()
+        new_variant_likely_benign['Genomic_Coordinate_hg38'] = 'chr13:LIKELY_BENIGN:A>G'
+        new_variant_likely_benign['Pathogenicity_expert'] = 'Likely benign'
+        (new_variant_likely_benign, new_current_variant_likely_benign) = create_variant_and_materialized_view(new_variant_likely_benign)
+
         filter_list = [
             'Pathogenic',
             'Benign / Little Clinical Significance',
-            'Not Yet Reviewed'
+            'Not Yet Reviewed',
+            'Likely Pathogenic',
+            'Likely Benign',
+            'Some non-existing Pathogenecity Designation'
             ]
 
         for filter_name in filter_list:
@@ -352,13 +362,19 @@ class VariantTestCase(TestCase):
             response_variants = response_data['data']
 
             expected_number_of_variants_in_response = 1
+
             for variant in response_variants:
                 #Because existing_variant and new_variant_* have same pathogenicity_expert values, we would expect two values to be returned
                 if self.existing_variant_materialized_view.Pathogenicity_expert == variant['Pathogenicity_expert']:
                     expected_number_of_variants_in_response = 2
 
-                self.assertEqual(expected_number_of_variants_in_response, response_data['count'])
-                self.assertTrue(filter_name in variant['Pathogenicity_expert'], message)
+            if filter_name == 'Some non-existing Pathogenecity Designation':
+                expected_number_of_variants_in_response = 0
+                self.assertFalse(filter_name.lower() in variant['Pathogenicity_expert'].lower(), message)
+            else:
+                self.assertTrue(filter_name.lower() in variant['Pathogenicity_expert'].lower(), message)
+
+            self.assertEqual(expected_number_of_variants_in_response, response_data['count'])
 
     def test_filter_by_sources(self):
         '''Tests filtering by 'Source' options'''
