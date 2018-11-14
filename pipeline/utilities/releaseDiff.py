@@ -68,6 +68,7 @@ LIST_KEYS = [
             "HGVS_protein_LOVD",
             "Functional_analysis_technique_LOVD",
             "Functional_analysis_result_LOVD",
+            "BIC_Nomenclature_BIC",
             "BX_ID_ENIGMA",
             "BX_ID_ClinVar",
             "BX_ID_BIC",
