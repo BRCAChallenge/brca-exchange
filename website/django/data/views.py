@@ -54,28 +54,34 @@ def variant_counts(request):
     enigma_pathogenic_count = query.filter(Pathogenicity_expert='Pathogenic').count()
     enigma_benign_count = query.filter(Pathogenicity_expert__contains='Benign').count()
     enigma_likely_benign_count = query.filter(Pathogenicity_expert__contains='Likely benign').count()
+    enigma_likely_pathogenic_count = query.filter(Pathogenicity_expert__contains='Likely pathogenic').count()
     query_brca1 = query.filter(Gene_Symbol='BRCA1')
     brca1_enigma_pathogenic_count = query_brca1.filter(Pathogenicity_expert='Pathogenic').count()
     brca1_enigma_benign_count = query_brca1.filter(Pathogenicity_expert__contains='Benign').count()
     brca1_enigma_likely_benign_count = query_brca1.filter(Pathogenicity_expert__contains='Likely benign').count()
+    brca1_enigma_likely_pathogenic_count = query_brca1.filter(Pathogenicity_expert__contains='Likely pathogenic').count()
     query_brca2 = query.filter(Gene_Symbol='BRCA2')
     brca2_enigma_pathogenic_count = query_brca2.filter(Pathogenicity_expert='Pathogenic').count()
     brca2_enigma_benign_count = query_brca2.filter(Pathogenicity_expert__contains='Benign').count()
     brca2_enigma_likely_benign_count = query_brca2.filter(Pathogenicity_expert__contains='Likely benign').count()
+    brca2_enigma_likely_pathogenic_count = query_brca2.filter(Pathogenicity_expert__contains='Likely pathogenic').count()
     response = JsonResponse({
         "total": total_count,
         "brca1": {
             "total": brca1_count,
             "pathogenic": brca1_enigma_pathogenic_count,
             "benign": brca1_enigma_benign_count,
-            "likelyBenign": brca1_enigma_likely_benign_count },
+            "likelyBenign": brca1_enigma_likely_benign_count,
+            "likelyPathogenic": brca1_enigma_likely_pathogenic_count },
         "brca2": {
             "total": brca2_count,
             "pathogenic": brca2_enigma_pathogenic_count,
             "benign": brca2_enigma_benign_count,
-            "likelyBenign": brca2_enigma_likely_benign_count },
+            "likelyBenign": brca2_enigma_likely_benign_count,
+            "likelyPathogenic": brca2_enigma_likely_pathogenic_count },
         "enigma": enigma_count,
         "enigmaPathogenic": enigma_pathogenic_count,
+        "enigmaLikelyPathogenic": enigma_likely_pathogenic_count,
         "enigmaBenign": enigma_benign_count,
         "enigmaLikelyBenign": enigma_likely_benign_count })
     response['Access-Control-Allow-Origin'] = '*'
@@ -271,9 +277,14 @@ def apply_sources(query, include, exclude):
     return query
 
 
+def normalize_filter_values(filterValues):
+    return [fV.replace('Likely Benign', 'Likely benign').replace('Likely Pathogenic', 'Likely pathogenic') for fV in filterValues]
+
+
 def apply_filters(query, filterValues, filters, quotes=''):
     # if there are multiple filters the row must match all the filters
-    for column, value in zip(filters, filterValues):
+    normalizedFilterValues = normalize_filter_values(filterValues)
+    for column, value in zip(filters, normalizedFilterValues):
         if column == 'id':
             query = query.filter(**{column: value})
         else:
