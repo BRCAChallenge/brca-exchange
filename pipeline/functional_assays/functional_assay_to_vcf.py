@@ -36,7 +36,6 @@ def parse_args():
                         help='Whole path to genome file. Default: (/hive/groups/cgl/brca/phase1/data/resources/hg19.fa)')
     parser.add_argument('-r', '--rpath', default='/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.gp',
                         help='Whole path to refSeq file. Default: (/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.gp)')
-    parser.add_argument('-s', '--source', help='Source from which data is extracted.')
 
     options = parser.parse_args()
     return options
@@ -95,11 +94,18 @@ def main():
 
         # extract hgvs cDNA term for variant and cleanup formatting
         hgvsName = parsedLine[fieldIdxDict['hgvs_nucleotide']]
-        sys.exit("ERROR: could not parse hgvs name.")
         if hgvsName == '-':
             print(parsedLine)
             continue
-        queryHgvsName = hgvsName.rstrip().split(';')[0]
+        gene_symbol = parsedLine[fieldIdxDict['gene_symbol']].lower()
+        if gene_symbol == 'brca1':
+            transcript = 'NM_007294.3'
+        elif gene_symbol == 'brca2':
+            transcript = 'NM_000059.3'
+        else:
+            print('improper gene symbol: '+ gene_symbol, file=errorsFile)
+            continue
+        queryHgvsName = transcript + ':' + hgvsName.rstrip().split(';')[0]
         INFO_field_string = ';'.join(INFO_field)
         try:
             chrom, offset, ref, alt = hgvs.parse_hgvs_name(queryHgvsName, genome, get_transcript=get_transcript)
