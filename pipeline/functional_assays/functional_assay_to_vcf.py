@@ -49,7 +49,6 @@ def main():
     genome_path = options.gpath
     refseq_path = options.rpath
     errorsFile = options.errors
-    source = options.source
 
     with open(refseq_path) as infile:
         transcripts = hgvs_utils.read_transcripts(infile)
