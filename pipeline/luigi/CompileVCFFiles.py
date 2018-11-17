@@ -1255,7 +1255,7 @@ class DownloadFunctionalAssayInputFile(BRCATask):
 
     functional_assays_file = luigi.Parameter(default='', description='path, where the functional assays data will be stored')
 
-    functional_assays_data_url = luigi.Parameter(default='https://brcaexchange.org/backend/downlaods/functional_assays.tsv',
+    functional_assays_data_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/functional_assays.tsv',
                                             description='URL to download functional assays data from')
 
     def output(self):
@@ -1766,4 +1766,5 @@ class RunAll(BRCATask, luigi.WrapperTask):
         yield CopyEXACOutputToOutputDir(**param_map)
         yield CopyEXLOVDOutputToOutputDir(**param_map)
         yield CopySharedLOVDOutputToOutputDir(**param_map)
+        yield CopyFunctionalAssaysOutputToOutputDir(**param_map)
         yield ExtractEnigmaFromClinvar(**param_map)

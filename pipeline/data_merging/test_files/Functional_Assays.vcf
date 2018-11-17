@@ -1,0 +1,19 @@
+##fileformat=VCFv4.0
+##source=functionalAssay
+##reference=GRCh37
+##INFO=<ID=hgvs_nucleotide,Number=.,Type=String,Description="">
+##INFO=<ID=functional_enrichment_score,Number=.,Type=String,Descriptionpipeline@brca-pipeline:~/zfisch/functional_assay/brca_out$ head -c 2000 functional_assay.hg38.sorted.vcf
+##fileformat=VCFv4.0
+##source=functionalAssay
+##reference=GRCh37
+##INFO=<ID=hgvs_nucleotide,Number=.,Type=String,Description="">
+##INFO=<ID=functional_enrichment_score,Number=.,Type=String,Description="FILLER">
+##INFO=<ID=log_rna_depletion,Number=.,Type=String,Description="FILLER">
+##INFO=<ID=reference_sequence,Number=.,Type=String,Description="Reference sequence.">
+##liftOverProgram=CrossMap(https://sourceforge.net/projects/crossmap/)
+##liftOverFile=/files/resources/hg19ToHg38.over.chain.gz
+##new_reference_genome=/files/resources/hg38.fa
+##liftOverTime=November16,2018
+#CHROM  POS ID  REF ALT QUAL    FILTER  INFO
+17  43045705    NM_007294.3:c.5565A>C   T   G   .   .   chr=17;pos_hg19=41197722;ref=T;alt=G;gene_symbol=BRCA1;reference_sequence=NM_007294.3;hgvs_nucleotide=c.5565A>C;log_rna_depletion=0.2076599121;functional_enrichment_score=0.2311826862;BX_ID=1
+17  43045705    NM_007294.3:c.5565A>G   T   C   .   .   chr=17;pos_hg19=41197722;ref=T;alt=C;gene_symbol=BRCA1;reference_sequence=NM_007294.3;hgvs_nucleotide=c.5565A>G;log_rna_depletion=-0.2895259711;functional_enrichment_score=0.0219408619;BX_ID=2
