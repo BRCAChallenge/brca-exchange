@@ -1243,6 +1243,142 @@ class ExtractEnigmaFromClinvar(BRCATask):
 
         copy(self.output().path, self.output_dir)
 
+
+###############################################
+#             FUNCTIONAL ASSAYS               #
+###############################################
+
+
+
+class DownloadFunctionalAssayInputFile(BRCATask):
+    # Downloads functional assays
+
+    functional_assays_file = luigi.Parameter(default='', description='path, where the functional assays data will be stored')
+
+    functional_assays_data_url = luigi.Parameter(default='https://brcaexchange.org/backend/downlaods/functional_assays.tsv',
+                                            description='URL to download functional assays data from')
+
+    def output(self):
+        if len(str(self.functional_assays_file)) == 0:
+            path = self.file_parent_dir + "/functional_assays/functional_assays.tsv"
+        else:
+            path = str(self.functional_assays_file)
+
+        return luigi.LocalTarget(path)
+
+    def run(self):
+        create_path_if_nonexistent(os.path.dirname(self.output().path))
+        data = urlopen_with_retry(self.functional_assays_data_url).read()
+        with open(self.output().path, "wb") as f:
+            f.write(data)
+
+
+@requires(DownloadFunctionalAssayInputFile)
+class ParseFunctionalAssays(BRCATask):
+
+    def output(self):
+        return luigi.LocalTarget(self.file_parent_dir + "/functional_assays/functional_assays_clean.tsv")
+
+    def run(self):
+        brca_resources_dir = self.resources_dir
+        artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts")
+
+        os.chdir(functional_assays_method_dir)
+
+        args = ["python", "parse_functional_assays.py", "-i", self.input().path, "-o",
+                self.output().path]
+
+        print "Running ParseFunctionalAssays with the following args: %s" % (args)
+
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(self.output().path)
+
+
+@requires(ParseFunctionalAssays)
+class ConvertFunctionalAssaysToVCF(BRCATask):
+
+    def output(self):
+        return luigi.LocalTarget(self.file_parent_dir + "/functional_assays/functional_assays.hg19.vcf")
+
+    def run(self):
+        brca_resources_dir = self.resources_dir
+        artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts")
+
+        os.chdir(lovd_method_dir)
+
+        args = ["python", "functional_assays_to_vcf.py", "-i", self.input().path, "-o",
+                self.output().path, "-a", "functionalAssayAnnotation",
+                "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
+                brca_resources_dir + "/hg19.fa", "-e", artifacts_dir + "/functional_assays_error_variants.txt"]
+
+        print "Running functional_assays_to_vcf with the following args: %s" % (args)
+
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(self.output().path)
+
+
+@requires(ConvertFunctionalAssaysToVCF)
+class CrossmapFunctionalAssays(BRCATask):
+
+    def output(self):
+        functional_assays_file_dir = self.file_parent_dir + "/functional_assays"
+        return luigi.LocalTarget(functional_assays_file_dir + "/functional_assays.hg38.vcf")
+
+    def run(self):
+        functional_assays_file_dir = self.file_parent_dir + "/functional_assays"
+        brca_resources_dir = self.resources_dir
+
+        args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz",
+                functional_assays_file_dir + "/functional_assays.hg19.vcf", brca_resources_dir + "/hg38.fa",
+                functional_assays_file_dir + "/functional_assays.hg38.vcf"]
+        print "Running CrossMap.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        check_file_for_contents(functional_assays_file_dir + "/functional_assays.hg38.vcf")
+
+
+@requires(CrossmapFunctionalAssays)
+class SortFunctionalAssays(BRCATask):
+
+    def output(self):
+        functional_assays_file_dir = self.file_parent_dir + "/functional_assays"
+        return luigi.LocalTarget(functional_assays_file_dir + "/functional_assays.sorted.hg38.vcf")
+
+    def run(self):
+        functional_assays_file_dir = self.file_parent_dir + "/functional_assays"
+
+        sorted_functional_assays = functional_assays_file_dir + "/functional_assays.sorted.hg38.vcf"
+        writable_sorted_functional_assays = open(sorted_functional_assays, 'w')
+        args = ["vcf-sort", functional_assays_file_dir + "/functional_assays.hg38.vcf"]
+        print "Running vcf-sort with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=writable_sorted_functional_assays, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+        print "Sorted hg38 vcf file into %s" % (writable_sorted_functional_assays)
+
+        check_file_for_contents(functional_assays_file_dir + "/functional_assays.sorted.hg38.vcf")
+
+
+@requires(SortFunctionalAssays)
+class CopyFunctionalAssaysOutputToOutputDir(BRCATask):
+
+    def output(self):
+        return luigi.LocalTarget(self.output_dir + "/functional_assays.sorted.hg38.vcf")
+
+    def run(self):
+        functional_assays_file_dir = self.file_parent_dir + "/functional_assays"
+        create_path_if_nonexistent(self.output_dir)
+
+        copy(functional_assays_file_dir + "/functional_assays.sorted.hg38.vcf", self.output_dir)
+
+        check_file_for_contents(self.output_dir + "/functional_assays.sorted.hg38.vcf")
+
+
+
 ###############################################
 #            VARIANT COMPILATION              #
 ###############################################
