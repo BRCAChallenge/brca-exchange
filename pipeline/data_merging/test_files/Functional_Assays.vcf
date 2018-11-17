@@ -2,7 +2,7 @@
 ##source=functionalAssay
 ##reference=GRCh37
 ##INFO=<ID=hgvs_nucleotide,Number=.,Type=String,Description="">
-##INFO=<ID=functional_enrichment_score,Number=.,Type=String,Descriptionpipeline@brca-pipeline:~/zfisch/functional_assay/brca_out$ head -c 2000 functional_assay.hg38.sorted.vcf
+##INFO=<ID=functional_enrichment_score,Number=.,Type=String,Description="">
 ##fileformat=VCFv4.0
 ##source=functionalAssay
 ##reference=GRCh37
