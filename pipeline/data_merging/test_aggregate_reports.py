@@ -5,7 +5,6 @@ import csv
 from os import path, getcwd
 import aggregate_reports
 
-
 VCF_TESTDATA_FILENAME = path.join(path.dirname(__file__), 'test_files/1000_Genomes.vcf')
 TSV_TESTDATA_FILENAME = path.join(path.dirname(__file__), 'test_files/enigma_from_clinvar.tsv')
 INPUT_DIRECTORY = path.join(path.dirname(__file__), 'test_files/')
@@ -123,6 +122,17 @@ class TestStringMethods(unittest.TestCase):
                 source_reports[source] += 1
         for source in self.sources:
             self.assertEqual(source_reports[source], 2)
+
+    def test_aggregate_reports_maintains_proper_variant_effect_lovd_formatting(self):
+        LOVD_reports_file = [INPUT_DIRECTORY + r for r in aggregate_reports.get_reports_files(INPUT_DIRECTORY) if r == 'LOVD.vcf']
+        reports = aggregate_reports.aggregate_reports(LOVD_reports_file, self.columns)
+
+        # Check that two of each source are present
+        variant_effect_lovd_index = self.columns.index("Variant_effect_LOVD")
+
+        for variant in reports:
+            self.assertIn(variant[variant_effect_lovd_index][0], ['?/.', '+/+'])
+
 
 
 if __name__ == '__main__':
