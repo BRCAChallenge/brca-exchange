@@ -124,13 +124,26 @@ class LiteratureTable extends React.Component {
             headerRow + "\n" + [title, authors, journal, year, keywords, pmid].join("\t")).join("\n") : "";
     }
 
+    toCitation() {
+        return this.state.papers
+            ? this.state.papers.map(({title, authors, journal, year, keywords, pmid}) => {
+                const authList = authors.split(";");
+                const authorText = (authList.length > 5)
+                    ? authList.slice(0, 3).join(";") + "; et al"
+                    : authList.join(";");
+
+                return `${authorText}. "${title}" ${journal} (${year})\nPMID: ${pmid}\nKeywords: ${keywords}\n\n`;
+            })
+            : "";
+    }
+
     toJSON() {
         return JSON.stringify(this.state.papers ? this.state.papers : []);
     }
 
     copyTable() {
         let textarea = this.refs.clipboardContent.getDOMNode();
-        textarea.value = this.toTSV();
+        textarea.value = this.toCitation();
         textarea.select();
         document.execCommand('copy');
     }
