@@ -167,7 +167,7 @@ class LiteratureTable extends React.Component {
 
                     <AuthorList authors={authors} maxCount={3} />
 
-                    <div style={{margin: '10px'}}>
+                    <div style={{marginTop: '10px'}}>
                         <b>Text Matches:</b>
                     {
                         mentions.length ? (
@@ -193,8 +193,8 @@ class LiteratureTable extends React.Component {
                     <Table className='nopointer literature-rows' bordered>
                         <thead>
                             <tr className="active">
-                                <th>Title</th>
-                                <th>Publication</th>
+                                <th>&nbsp;</th>
+                                <th>Citation Info</th>
                             </tr>
                         </thead>
                         <tbody>
