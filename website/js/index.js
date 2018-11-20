@@ -1073,7 +1073,6 @@ var VariantDetail = React.createClass({
                 </Row>
                 <Row>
                     <Col md={12} className="variant-literature-col">
-                        <h3>{variant["HGVS_cDNA"]}</h3>
                         <LiteratureTable maxRows={10} variant={variant} />
                     </Col>
                 </Row>
