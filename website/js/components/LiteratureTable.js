@@ -2,7 +2,7 @@
 
 const React = require('react'),
     { Link } = require('react-router'),
-    { Grid, Row, Col, OverlayTrigger, Popover, ButtonToolbar, Button, DropdownButton} = require('react-bootstrap'),
+    { Grid, Row, Col, ButtonToolbar, Button, DropdownButton, Table } = require('react-bootstrap'),
     backend = require('../backend'),
     _ = require('underscore');
 
@@ -23,6 +23,7 @@ const pubsOrdering = function(pub1, pub2) {
     return 1;
 };
 
+/*
 function limitAuthorCount(authors, maxCount) {
     let popper = (<Popover>{authors.split(";").map(e => [e, <br />])}</Popover>);
     let auth = authors.split(";");
@@ -36,12 +37,46 @@ function limitAuthorCount(authors, maxCount) {
         </span>
     );
 }
+*/
 
 function formatMatches(matches, count) {
     let ms = matches.split("|");
     ms = ms.slice(0, count);
     return ms.map(match => <div><small>... {_.unescape(match)} ...</small></div>);
 }
+
+class AuthorList extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            expanded: false
+        };
+    }
+
+    render() {
+        const {authors, maxCount} = this.props;
+        const authList = authors.split(";");
+
+        return (<div style={{marginTop: '5px'}}>
+            {
+                this.state.expanded
+                    ? `${authList.join(";")}.`
+                    : (
+                        <span>
+                            {authList.slice(0, maxCount).join(";")}
+                            ...&nbsp;
+                            <a style={{cursor: 'pointer'}} onClick={() => this.setState({ expanded: true})}>(more)</a>
+                        </span>
+                    )
+            }
+        </div>);
+    }
+}
+
+AuthorList.propTypes = {
+    authors: React.PropTypes.string,
+    maxCount: React.PropTypes.number
+};
 
 class LiteratureTable extends React.Component {
     constructor(props) {
@@ -97,32 +132,48 @@ class LiteratureTable extends React.Component {
             litRows = litRows.slice(0, this.props.maxRows);
         }
         litRows = litRows.map(({title, authors, journal, year, mentions, pmid}) => (
-            <li>
-                <div className="literature-right-pane">
+            <tr>
+                <td>
+                    <b style={{fontSize: '16px'}}>{title}</b>
+                    {/*<div>{limitAuthorCount(authors, 3)}</div>*/}
+
+                    <AuthorList authors={authors} maxCount={3} />
+
+                    <div style={{margin: '10px'}}>
+                        <b>Text Matches:</b>
+                    {
+                        mentions.length ? (
+                            <ol>
+                                {formatMatches(mentions, 3)}
+                            </ol>
+                        ) : null
+                    }
+                    </div>
+                </td>
+                <td style={{width: '12%'}}>
                     <div className="pmid">PMID: <a href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank'>{pmid}</a></div>
                     <div>{year}</div>
                     <div>{journal}</div>
-                </div>
-                <b>Title: {title}</b>
-                <div>Author(s): {limitAuthorCount(authors, 3)}</div>
-                {
-                    mentions.length ? (
-                        <div>
-                            Matches:
-                            {formatMatches(mentions, 3)}
-                        </div>
-                    ) : null
-                }
-            </li>
+                </td>
+            </tr>
         ));
         let toTSVURL = `data:text/tab-separated-values;charset=utf-8,${encodeURIComponent(this.toTSV())}`;
         let toJSONURL = `data:text/json;charset=utf-8,${encodeURIComponent(this.toJSON())}`;
         let component = (
             <div>
-                <h4>Literature Search Results:</h4>
-                    <ul className="literature-rows">
+                <h3>Literature Search Results:</h3>
+                    <Table className='nopointer literature-rows' bordered>
+                        <thead>
+                            <tr className="active">
+                                <th>Title</th>
+                                <th>Publication</th>
+                            </tr>
+                        </thead>
+                        <tbody>
                         {litRows}
-                    </ul>
+                        </tbody>
+                    </Table>
+
                     { this.state.papers.length > this.props.maxRows
                         ? ( <div style={{textAlign: "center"}}>
                                 <Link to={`/variant_literature/${this.props.variant.id}`}>
@@ -131,6 +182,7 @@ class LiteratureTable extends React.Component {
                             </div>
                         ) : null
                     }
+
                 <ButtonToolbar className='pull-right'>
                     <Button onClick={this.copyTable.bind(this)}>Copy To Clipboard</Button>
                     <DropdownButton title="Export">
@@ -138,6 +190,7 @@ class LiteratureTable extends React.Component {
                         <li><a href={toJSONURL} download='variant-literature.json'>json</a></li>
                     </DropdownButton>
                 </ButtonToolbar>
+
                 <textarea ref='clipboardContent' style={{padding: '0', width: '0', height: '0', marginLeft: '-99999999px' }}/>
             </div>
         );
