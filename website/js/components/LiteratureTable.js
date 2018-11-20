@@ -42,7 +42,22 @@ function limitAuthorCount(authors, maxCount) {
 function formatMatches(matches, count) {
     let ms = matches.split("|");
     ms = ms.slice(0, count);
-    return ms.map(match => <div><small>... {_.unescape(match)} ...</small></div>);
+
+    return ms.map(match =>
+        // we extract entries like <<<some text here>>>, keeping the first < as an indicator that the text is highlighted
+        <li>
+            <small>...
+            {
+                _.unescape(match).split(/<<(<.*)>>>/g).map(
+                    x => x.startsWith('<')
+                        ? <span style={{backgroundColor: 'yellow', borderRadius: 2, border: 'solid 1px #bca723'}}>{x.slice(1)}</span>
+                        : x)
+            }
+            ...</small>
+        </li>
+    );
+
+    // return ms.map(match => <div><small>... {_.unescape(match)} ...</small></div>);
 }
 
 class AuthorList extends React.Component {
