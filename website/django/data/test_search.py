@@ -44,6 +44,13 @@ def create_variant_and_materialized_view(variant_data):
     update_autocomplete_words()
     return (variant, materialized_view)
 
+def create_report_and_associate_to_variant(report_data, variant):
+    report_data['Variant'] = variant
+    report = Report.objects.create_report(report_data)
+    with connection.cursor() as cursor:
+        cursor.execute("REFRESH MATERIALIZED VIEW currentvariant")
+    return report
+
 
 class VariantTestCase(TestCase):
     def setUp(self):
@@ -1006,3 +1013,25 @@ class VariantTestCase(TestCase):
             response_data = json.loads(response.content)
 
             self.assertEqual(response_data['count'], 0, message)
+
+    def test_finds_other_versions_of_reports_even_if_associated_with_different_variant(self):
+        # This test creates two new reports  and a new variant. The new reports
+        # have the same identifiers as the existing reports (SCV_ClinVar / Submission_ID_Lovd)
+        # so the existing reports should come up as other versions of these new reports
+        # when querying the new variant.
+
+        (new_variant, new_current_variant) = create_variant_and_materialized_view(test_data.new_variant())
+        second_version_lovd_report = create_report_and_associate_to_variant(test_data.second_version_lovd_report(), new_variant)
+        second_version_clinvar_report = create_report_and_associate_to_variant(test_data.second_version_clinvar_report(), new_variant)
+
+        request = self.factory.get(
+            '/data/variant/%s/reports' % new_variant.id)
+        response = variant_reports(request, new_variant.id)
+
+
+        self.assertIsInstance(response, JsonResponse)
+        self.assertEqual(response.status_code, 200)
+
+        response_data = json.loads(response.content)
+        # pdb.set_trace()
+
