@@ -95,12 +95,14 @@ else:
 def calc_one(variant):
     global brca1Transcript, brca2Transcript, variantData
 
+    priors_set = "priors"  # either "priors" or "enigma"
+
     try:
         # variantData = csv.DictReader(open("mod_res_dn_brca20160525.txt", "r"), delimiter="\t")
         if variant["Gene_Symbol"] == "BRCA1":
-            varData = getVarData(variant, "enigma", variantData, None, brca1Transcript)
+            varData = getVarData(variant, priors_set, variantData, None, brca1Transcript)
         elif variant["Gene_Symbol"] == "BRCA2":
-            varData = getVarData(variant, "enigma", variantData, None, brca2Transcript)
+            varData = getVarData(variant, priors_set, variantData, None, brca2Transcript)
         else:
             raise Exception("Unknown gene symbol %s encountered for variant %s" % (variant["Gene_Symbol"], variant["HGVS_cDNA"]))
 
