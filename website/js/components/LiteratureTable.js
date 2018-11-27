@@ -149,7 +149,8 @@ class LiteratureTable extends React.Component {
     }
 
     render() {
-        if (!this.state.papers) {
+        if (!this.state.papers || this.state.papers.length == 0) {
+            //empty or does not exist
             return (<div />);
         }
         if (!this.props.variant && !this.state.data) {
