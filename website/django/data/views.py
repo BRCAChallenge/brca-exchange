@@ -116,8 +116,8 @@ def variant_reports(request, variant_id):
             report_query = Report.objects.filter(SCV_ClinVar=key).order_by('-Data_Release_id').select_related('Data_Release')
             report_versions.extend(map(report_to_dict, report_query))
         elif report.Source == "LOVD":
-            key = report.DBID_LOVD
-            report_query = Report.objects.filter(DBID_LOVD=key).order_by('-Data_Release_id').select_related('Data_Release')
+            key = report.Submission_ID_LOVD
+            report_query = Report.objects.filter(Submission_ID_LOVD=key).order_by('-Data_Release_id').select_related('Data_Release')
             report_versions.extend(map(report_to_dict, report_query))
 
     response = JsonResponse({"data": report_versions})
@@ -156,12 +156,14 @@ def report_to_dict(report_object):
     report_dict["Data_Release"]["date"] = report_object.Data_Release.date
     report_dict["Change_Type"] = ChangeType.objects.get(id=report_dict["Change_Type"]).name
 
-    # don't display report diffs prior to April 2018
     if report_object.Source == "ClinVar":
+        # don't display ClinVar report diffs prior to April 2018
         cutoff_date = datetime.strptime('Apr 1 2018  12:00AM', '%b %d %Y %I:%M%p')
     elif report_object.Source == "LOVD":
-        # TODO: update this cutoff date once we're ready to share lovd report diffs
-        cutoff_date = datetime.today()
+        # don't display LOVD report diffs prior to November 4 2018 (we
+        # updated the definition of LOVD submissions in the early November
+        # release, so it only makes sense to show diffs from following releases)
+        cutoff_date = datetime.strptime('Nov 4 2018  12:00AM', '%b %d %Y %I:%M%p')
     if report_dict["Data_Release"]["date"] < cutoff_date:
         report_dict["Diff"] = None
         return report_dict
@@ -171,6 +173,7 @@ def report_to_dict(report_object):
         report_dict["Diff"] = report_diff.report_diff
     except ReportDiff.DoesNotExist:
         report_dict["Diff"] = None
+
 
     return report_dict
 
