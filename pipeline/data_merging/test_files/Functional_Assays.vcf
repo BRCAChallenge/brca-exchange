@@ -7,8 +7,8 @@
 ##source=functionalAssay
 ##reference=GRCh37
 ##INFO=<ID=hgvs_nucleotide,Number=.,Type=String,Description="">
-##INFO=<ID=functional_enrichment_score,Number=.,Type=String,Description="FILLER">
-##INFO=<ID=log_rna_depletion,Number=.,Type=String,Description="FILLER">
+##INFO=<ID=functional_enrichment_score,Number=.,Type=String,Description="FILLER.">
+##INFO=<ID=log_rna_depletion,Number=.,Type=String,Description="FILLER.">
 ##INFO=<ID=reference_sequence,Number=.,Type=String,Description="Reference sequence.">
 ##liftOverProgram=CrossMap(https://sourceforge.net/projects/crossmap/)
 ##liftOverFile=/files/resources/hg19ToHg38.over.chain.gz

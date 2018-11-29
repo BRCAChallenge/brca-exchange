@@ -101,7 +101,7 @@ class TestStringMethods(unittest.TestCase):
 
     def test_get_reports_files(self):
         reports_files = aggregate_reports.get_reports_files(INPUT_DIRECTORY)
-        self.assertEqual(len(reports_files), 8)
+        self.assertEqual(len(reports_files), 9)
         self.assertNotIn("1000_Genomesready.vcf", reports_files)
 
     def test_aggregate_reports(self):

@@ -1260,12 +1260,7 @@ class DownloadFunctionalAssayInputFile(BRCATask):
                                             description='URL to download functional assays data from')
 
     def output(self):
-        if len(str(self.functional_assays_file)) == 0:
-            path = self.file_parent_dir + "/functional_assays/functional_assays.tsv"
-        else:
-            path = str(self.functional_assays_file)
-
-        return luigi.LocalTarget(path)
+        return luigi.LocalTarget(self.file_parent_dir + "/functional_assays/functional_assays.tsv")
 
     def run(self):
         create_path_if_nonexistent(os.path.dirname(self.output().path))
