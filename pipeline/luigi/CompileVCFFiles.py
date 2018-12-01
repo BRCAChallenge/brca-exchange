@@ -1302,7 +1302,7 @@ class ConvertFunctionalAssaysToVCF(BRCATask):
         brca_resources_dir = self.resources_dir
         artifacts_dir = create_path_if_nonexistent(self.output_dir + "/release/artifacts")
 
-        os.chdir(lovd_method_dir)
+        os.chdir(functional_assays_method_dir)
 
         args = ["python", "functional_assays_to_vcf.py", "-i", self.input().path, "-o",
                 self.output().path, "-a", "functionalAssayAnnotation",
