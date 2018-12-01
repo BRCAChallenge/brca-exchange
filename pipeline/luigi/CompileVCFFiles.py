@@ -1281,10 +1281,10 @@ class ParseFunctionalAssays(BRCATask):
 
         os.chdir(functional_assays_method_dir)
 
-        args = ["python", "parse_functional_assays.py", "-i", self.input().path, "-o",
+        args = ["python", "parse_functional_assay_data.py", "-i", self.input().path, "-o",
                 self.output().path]
 
-        print "Running ParseFunctionalAssays with the following args: %s" % (args)
+        print "Running parse_functional_assay_data.py with the following args: %s" % (args)
 
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
