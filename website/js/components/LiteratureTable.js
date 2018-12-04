@@ -175,53 +175,65 @@ class LiteratureTable extends React.Component {
     }
 
     render() {
-        if (!this.state.papers || this.state.papers.length === 0) {
-            //empty or does not exist
-            return (<div />);
-        }
         if (!this.props.variant && !this.state.data) {
             return (<div />);
         }
-        let litRows = this.state.papers.sort(pubsOrdering);
-        if (this.props.maxRows) {
-            litRows = litRows.slice(0, this.props.maxRows);
-        }
-        litRows = litRows.map(({title, authors, journal, year, mentions, pmid}) => (
+
+        // if no lit results exist, return a 'no lit results' placeholder
+        let litResultsExist = false;
+        let litRows = (
             <tr>
-                <td>
-                    <b style={{fontSize: '16px'}}>{title}</b>
-                    {/*<div>{limitAuthorCount(authors, 3)}</div>*/}
-
-                    <AuthorList authors={authors} maxCount={3} />
-
-                    <div style={{marginTop: '10px'}}>
-                        <b>Text Matches:</b>
-                    {
-                        mentions.length ? (
-                            <ol>
-                                {formatMatches(mentions, 3)}
-                            </ol>
-                        ) : null
-                    }
-                    </div>
-                </td>
-                <td style={{width: '12%'}}>
-                    <div className="pmid">PMID: <a href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank'>{pmid}</a></div>
-                    <div>{year}</div>
-                    <div>{journal}</div>
-                </td>
+                <td colSpan={2} style={{textAlign: 'center'}}><i>No literature results for this variant.</i></td>
             </tr>
-        ));
+        );
+
+        if (this.state.papers && this.state.papers.length > 0) {
+            litResultsExist = true;
+            litRows = this.state.papers.sort(pubsOrdering);
+
+            if (this.props.maxRows) {
+                litRows = litRows.slice(0, this.props.maxRows);
+            }
+
+            litRows = litRows.map(({title, authors, journal, year, mentions, pmid}) => (
+                <tr>
+                    <td>
+                        <b style={{fontSize: '16px'}}>{title}</b>
+
+                        <AuthorList authors={authors} maxCount={3} />
+
+                        <div style={{marginTop: '10px'}}>
+                            <b>Text Matches:</b>
+                            {
+                                mentions.length ? (
+                                    <ol>
+                                        {formatMatches(mentions, 3)}
+                                    </ol>
+                                ) : null
+                            }
+                        </div>
+                    </td>
+                    <td style={{width: '12%'}}>
+                        <div className="pmid">PMID: <a href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank'>{pmid}</a></div>
+                        <div>{year}</div>
+                        <div>{journal}</div>
+                    </td>
+                </tr>
+            ));
+        }
+
         let toTSVURL = `data:text/tab-separated-values;charset=utf-8,${encodeURIComponent(this.toTSV())}`;
         let toJSONURL = `data:text/json;charset=utf-8,${encodeURIComponent(this.toJSON())}`;
+
         let component = (
+            (litResultsExist || !this.props.hideEmptyItems) &&
             <div>
-                <h3>Literature Search Results:</h3>
+                <h4>Literature Search Results:</h4>
                     <Table className='nopointer literature-rows' bordered>
                         <thead>
                             <tr className="active">
                                 <th>&nbsp;</th>
-                                <th>Citation Info</th>
+                                <th style={{width: '12%'}}>Citation Info</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -229,7 +241,7 @@ class LiteratureTable extends React.Component {
                         </tbody>
                     </Table>
 
-                    { this.state.papers.length > this.props.maxRows
+                    { this.state.papers && this.state.papers.length > this.props.maxRows
                         ? ( <div style={{textAlign: "center"}}>
                                 <Link to={`/variant_literature/${this.props.variant.id}`}>
                                     View {`${this.state.papers.length - this.props.maxRows}`} more publications...
