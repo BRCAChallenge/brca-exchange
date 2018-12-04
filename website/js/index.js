@@ -1071,6 +1071,19 @@ var VariantDetail = React.createClass({
                         </IsoGrid>
                     </div>
                 </Row>
+
+                <Row>
+                    <Col md={12} className="variant-history-col">
+                        <h3>
+                            {variant['Reference_Sequence']}(<i>{variant['Gene_Symbol']}</i>){`:${variant['HGVS_cDNA'].split(":")[1]}`}
+                            {
+                                (variant['HGVS_Protein'] && variant['HGVS_Protein'] !== "None") &&
+                                " " + variant['HGVS_Protein'].split(":")[1]
+                            }
+                        </h3>
+                    </Col>
+                </Row>
+
                 <Row>
                     <Col md={12} className="variant-literature-col">
                         <LiteratureTable maxRows={10} variant={variant} />
@@ -1078,7 +1091,6 @@ var VariantDetail = React.createClass({
                 </Row>
                 <Row>
                     <Col md={12} className="variant-history-col">
-                        <h3>{variant["HGVS_cDNA"]}</h3>
                         <h4>Previous Versions of this Variant:</h4>
                         <Table className='variant-history nopointer' responsive bordered>
                             <thead>
