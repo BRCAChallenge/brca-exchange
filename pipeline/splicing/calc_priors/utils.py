@@ -43,6 +43,11 @@ def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
 
 
 class MismatchException(Exception):
+    """
+    This exception is raised if approximate_compare_tsv() is called with warnOnMismatch=False and the files don't match.
+    """
+    # the class is emtpy because we're not changing Exception at all. we're just using the new type, MismatchException,
+    # to match a catch block elsewhere in the code.
     pass
 
 
@@ -58,6 +63,7 @@ def approximate_compare_tsv(aPath, bPath, warnOnMismatch=False):
     For two TSV files with the same columns and rows, ensures that the values of each cell
     betweeen the two files are at least approximately equal if the cell contains a float-parseable value,
     and exactly equal if not.
+    :param warnOnMismatch: if True, a warning is printed if the files don't match; if False, an exception is raised
     :param aPath: path to TSV file 'a'
     :param bPath: path to TSV file 'b'
     :return: True if they are approximately identical, False otherwise
