@@ -1247,6 +1247,10 @@ div.variant-submitter-group .submitter-header td {
     font-size: 10px;
 }
 
+.func-assay .axis text.axis-label {
+    font-size: 12px;
+}
+
 .func-assay .y.axis path {
     fill: none; stroke: none;
 }

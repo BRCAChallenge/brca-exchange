@@ -24,7 +24,7 @@ export default class FuncClassSubtile extends React.Component {
         const {score} = this.props;
         var values = this.data;
 
-        const margin = { top: 0, bottom: 60, left: 40, right: 20 };
+        const margin = { top: 0, bottom: 80, left: 65, right: 20 };
         const width = 500 - margin.left - margin.right;
         const height = 200 - margin.top - margin.bottom;
 
@@ -94,18 +94,31 @@ export default class FuncClassSubtile extends React.Component {
         svg.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
+            .call(xAxis)
+            .append("text") // add x-axis "Function Score" label
+            .attr("class", "axis-label")
+            .attr("y", 35)
+            .attr("x", 170)
+            .style("text-anchor", "center")
+            .text("Function Score");
 
         // ...and the y-axis
         svg.append("g")
             .attr("class", "y axis")
-            .call(yAxis);
+            .call(yAxis)
+            .append("text") // add y-axis "SNVs" label
+            .attr("class", "axis-label")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -30)
+            .attr("x", -70)
+            .style("text-anchor", "center")
+            .text("SNVs");
 
         // draw classification regions below chart
         const regions = svg.selectAll(".region")
             .data(impacts)
             .enter().append("g")
-            .attr("transform", d => `translate(${x(d.range[0])},${height + 25})`);
+            .attr("transform", d => `translate(${x(d.range[0])},${height + 45})`);
 
         regions.append("rect")
             .attr("width", d => x(Math.min(d.range[1], max)) - x(Math.max(d.range[0], min)))
@@ -123,7 +136,7 @@ export default class FuncClassSubtile extends React.Component {
         // draw caret on classification chart
         svg
             .append("g")
-            .attr("transform", `translate(${x(score)}, ${height + 30})`)
+            .attr("transform", `translate(${x(score)}, ${height + 50})`)
             .append("polygon")
             .attr("stroke", "none")
             .attr("fill", "black")
