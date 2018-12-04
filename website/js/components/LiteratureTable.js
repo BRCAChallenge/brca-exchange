@@ -23,22 +23,6 @@ const pubsOrdering = function(pub1, pub2) {
     return 1;
 };
 
-/*
-function limitAuthorCount(authors, maxCount) {
-    let popper = (<Popover>{authors.split(";").map(e => [e, <br />])}</Popover>);
-    let auth = authors.split(";");
-    return (
-        <span>
-            { auth.slice(0, maxCount).join(";") }
-            { auth.length > maxCount ?
-                (<OverlayTrigger placement='bottom' overlay={popper}><span>... (more)</span></OverlayTrigger>)
-                : null
-            }
-        </span>
-    );
-}
-*/
-
 function formatMatches(matches, count) {
     let ms = matches.split("|");
     ms = ms.slice(0, count);
@@ -60,6 +44,45 @@ function formatMatches(matches, count) {
     // return ms.map(match => <div><small>... {_.unescape(match)} ...</small></div>);
 }
 
+/**
+ * Given a string of authors, returns an object with two lists: a full list of parsed-out authors and an abbreviated
+ * list of authors. If the number of authors is less than maxBeforeCut, the abbreviated list will be the same as the
+ * full list. If it's more, the abbreviated list will contain a maximum of maxAfterCut authors.
+ * @param authors the list of semicolon-delimited authors, with each author having a comma-delimited given and first name(s).
+ * @param maxBeforeCut the number of authors which triggers the abbreviated list to be shortened
+ * @param maxAfterCut the maximum number of authors in the resulting abbreviated list
+ * @param abbrevFirstNames whether first name(s) should be shortened to just their first characters, e.g. "Emily Leigh" -> EL
+ * @return {{full: *, abbreviated: *, diff: number}}
+ */
+export function authorsList(authors, maxBeforeCut, maxAfterCut, abbrevFirstNames = false) {
+    if (!maxAfterCut) {
+        maxAfterCut = maxBeforeCut;
+    }
+
+    const authList = authors.split(";").map(x => {
+        // for an author like "Rauscher, Emily A" return "Rauscher EA"
+        const [given, rest] = x.trim().split(",", 2);
+
+        if (abbrevFirstNames) {
+            return `${given.trim()} ${rest.trim().split(" ").map(x => x.slice(0, 1)).join("")}`;
+        }
+        else {
+            return `${given.trim()}, ${rest.trim()}`;
+        }
+    });
+
+    const abbrevList = authList.length > maxBeforeCut && authList.length > maxAfterCut
+        ? authList.slice(0, maxAfterCut)
+        : authList;
+
+    return {
+        full: authList,
+        abbreviated: abbrevList,
+        diff: authList.length - abbrevList.length // if nonzero, indicates caller should add 'et al'
+    };
+}
+
+
 class AuthorList extends React.Component {
     constructor(props) {
         super(props);
@@ -70,17 +93,19 @@ class AuthorList extends React.Component {
 
     render() {
         const {authors, maxCount} = this.props;
-        const authList = authors.split(";");
+        const authList = authorsList(authors, maxCount); // authors.split(";");
 
         return (<div style={{marginTop: '5px'}}>
             {
                 this.state.expanded
-                    ? `${authList.join(";")}.`
+                    ? `${authList.full.join("; ")}.`
                     : (
                         <span>
-                            {authList.slice(0, maxCount).join(";")}
+                            {authList.abbreviated.join("; ")}
                             ...&nbsp;
-                            <a style={{cursor: 'pointer'}} onClick={() => this.setState({ expanded: true})}>(more)</a>
+                            <a style={{cursor: 'pointer'}} onClick={() => this.setState({ expanded: true})}>
+                                {`(${authList.diff} more)`}
+                            </a>
                         </span>
                     )
             }
@@ -127,12 +152,13 @@ class LiteratureTable extends React.Component {
     toCitation() {
         return this.state.papers
             ? this.state.papers.map(({title, authors, journal, year, keywords, pmid}) => {
-                const authList = authors.split(";");
-                const authorText = (authList.length > 5)
-                    ? authList.slice(0, 3).join(";") + "; et al"
-                    : authList.join(";");
+                const authList = authorsList(authors, 5, 3, true);
+                let abbrevList = authList.abbreviated;
+                if (authList.diff > 0) {
+                    abbrevList.push("et al");
+                }
 
-                return `${authorText}. "${title}" ${journal} (${year})\nPMID: ${pmid}\nKeywords: ${keywords}\n\n`;
+                return `${abbrevList.join(", ")}. (${year}) ${title} ${journal}\nPMID: ${pmid}\nKeywords: ${keywords}\n\n`;
             })
             : "";
     }
@@ -214,9 +240,9 @@ class LiteratureTable extends React.Component {
 
                 <ButtonToolbar className='pull-right'>
                     <Button onClick={this.copyTable.bind(this)}>Copy To Clipboard</Button>
-                    <DropdownButton title="Export">
-                        <li><a href={toTSVURL} download='variant-literature.tsv'>tsv</a></li>
-                        <li><a href={toJSONURL} download='variant-literature.json'>json</a></li>
+                    <DropdownButton title="Export" className='pull-right'>
+                        <li><a href={toTSVURL} download='variant-literature.tsv'>Excel (.tsv format)</a></li>
+                        <li><a href={toJSONURL} download='variant-literature.json'>JSON</a></li>
                     </DropdownButton>
                 </ButtonToolbar>
 
