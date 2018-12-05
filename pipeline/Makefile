@@ -11,7 +11,7 @@ OS := $(shell uname -s)
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 
 LUIGI_ROOT_TASK = RunAll
-LUIGI_WORKERS = 4
+LUIGI_WORKERS = 8
 
 init: ## setup config file
 	echo "creating file in $(CONFIG_PATH). Please edit to your needs in particular the WORK_DIR!"
