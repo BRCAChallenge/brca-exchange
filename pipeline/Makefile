@@ -10,7 +10,7 @@ OS := $(shell uname -s)
 
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 
-LUIGI_ROOT_TASK = RunAll
+LUIGI_ROOT_TASK = GenerateReleaseArchive
 LUIGI_WORKERS = 8
 
 init: ## setup config file

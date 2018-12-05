@@ -1609,13 +1609,3 @@ class GenerateReleaseArchive(luigi.Task):
         os.chdir(self.getArchiveParentDirectory())
         with tarfile.open(self.getArchiveParentDirectory() + self.getArchiveName(), "w:gz") as tar:
             tar.add(PipelineParams().output_dir, arcname=os.path.basename(PipelineParams().output_dir))
-
-
-###############################################
-#              MASTER RUN TASK                #
-###############################################
-
-
-class RunAll(luigi.WrapperTask):
-    def requires(self):
-        yield GenerateReleaseArchive()
