@@ -17,12 +17,16 @@ def walk_tree(task, target_task):
 
     children = flatten(task.requires())
 
+    ret = []
     for c in children:
         files = walk_tree(c, target_task)
+        # only propagate up output targets if the target task was encountered
         if files:
-            return files + outputs
+            ret.extend(files)
 
-    return []
+    if ret:
+        ret.extend(outputs)
+    return ret
 
 
 @click.command(context_settings={"ignore_unknown_options": True})
@@ -60,7 +64,7 @@ def main(luigi_module_file, last_task, first_task, dry_run, luigi_args):
         print("Determining output files on path {} to {}".format(first_task, last_task))
         files = walk_tree(task, first_task)
 
-        files_to_delete = [f for f in files if os.path.exists(f)]
+        files_to_delete = {f for f in files if os.path.exists(f)}
 
         if not files_to_delete:
             print("Nothing to delete.")
