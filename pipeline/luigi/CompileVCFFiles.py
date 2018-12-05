@@ -140,7 +140,7 @@ priors_filter_method_dir = os.path.abspath('../splicingfilter')
 utilities_method_dir = os.path.abspath('../utilities')
 
 
-class BRCAParams(luigi.Config):
+class PipelineParams(luigi.Config):
     date = luigi.DateParameter(default=datetime.date.today())
     u = luigi.Parameter(default="UNKNOWN_USER")
     p = luigi.Parameter(default="UNKNOWN_PASSWORD", significant=False)
@@ -177,10 +177,10 @@ class BRCAParams(luigi.Config):
 
 class DownloadLatestClinvarData(luigi.Task):
     def output(self):
-        return luigi.LocalTarget(BRCAParams().file_parent_dir + "/ClinVar/ClinVarFullRelease_00-latest.xml.gz")
+        return luigi.LocalTarget(PipelineParams().file_parent_dir + "/ClinVar/ClinVarFullRelease_00-latest.xml.gz")
 
     def run(self):
-        clinvar_file_dir = create_path_if_nonexistent(BRCAParams().file_parent_dir + "/ClinVar")
+        clinvar_file_dir = create_path_if_nonexistent(PipelineParams().file_parent_dir + "/ClinVar")
         os.chdir(clinvar_file_dir)
 
         clinvar_data_url = "ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/ClinVarFullRelease_00-latest.xml.gz"
@@ -191,12 +191,12 @@ class DownloadLatestClinvarData(luigi.Task):
 class ConvertLatestClinvarDataToXML(luigi.Task):
 
     def output(self):
-        artifacts_dir = create_path_if_nonexistent(BRCAParams().output_dir + "/release/artifacts/")
-        return luigi.LocalTarget(BRCAParams().file_parent_dir + "/ClinVar/ClinVarBrca.xml")
+        artifacts_dir = create_path_if_nonexistent(PipelineParams().output_dir + "/release/artifacts/")
+        return luigi.LocalTarget(PipelineParams().file_parent_dir + "/ClinVar/ClinVarBrca.xml")
 
     def run(self):
-        artifacts_dir = create_path_if_nonexistent(BRCAParams().output_dir + "/release/artifacts/")
-        clinvar_file_dir = BRCAParams().file_parent_dir + "/ClinVar"
+        artifacts_dir = create_path_if_nonexistent(PipelineParams().output_dir + "/release/artifacts/")
+        clinvar_file_dir = PipelineParams().file_parent_dir + "/ClinVar"
         os.chdir(clinvar_method_dir)
 
         clinvar_xml_file = clinvar_file_dir + "/ClinVarBrca.xml"
@@ -212,10 +212,10 @@ class ConvertLatestClinvarDataToXML(luigi.Task):
 class ConvertClinvarXMLToTXT(luigi.Task):
 
     def output(self):
-        return luigi.LocalTarget(BRCAParams().file_parent_dir + "/ClinVar/ClinVarBrca.txt")
+        return luigi.LocalTarget(PipelineParams().file_parent_dir + "/ClinVar/ClinVarBrca.txt")
 
     def run(self):
-        clinvar_file_dir = BRCAParams().file_parent_dir + "/ClinVar"
+        clinvar_file_dir = PipelineParams().file_parent_dir + "/ClinVar"
         os.chdir(clinvar_method_dir)
 
         clinvar_txt_file = clinvar_file_dir + "/ClinVarBrca.txt"
@@ -232,10 +232,10 @@ class ConvertClinvarXMLToTXT(luigi.Task):
 class ConvertClinvarTXTToVCF(luigi.Task):
 
     def output(self):
-        return luigi.LocalTarget(BRCAParams().file_parent_dir + "/ClinVar/ClinVarBrca.vcf")
+        return luigi.LocalTarget(PipelineParams().file_parent_dir + "/ClinVar/ClinVarBrca.vcf")
 
     def run(self):
-        clinvar_file_dir = BRCAParams().file_parent_dir + "/ClinVar"
+        clinvar_file_dir = PipelineParams().file_parent_dir + "/ClinVar"
         clinvar_vcf_file = clinvar_file_dir + "/ClinVarBrca.vcf"
 
         os.chdir(data_merging_method_dir)
@@ -252,14 +252,14 @@ class ConvertClinvarTXTToVCF(luigi.Task):
 class CopyClinvarVCFToOutputDir(luigi.Task):
 
     def output(self):
-        return luigi.LocalTarget(BRCAParams().output_dir + "/ClinVarBrca.vcf")
+        return luigi.LocalTarget(PipelineParams().output_dir + "/ClinVarBrca.vcf")
 
     def run(self):
-        clinvar_file_dir = BRCAParams().file_parent_dir + "/ClinVar"
-        create_path_if_nonexistent(BRCAParams().output_dir)
+        clinvar_file_dir = PipelineParams().file_parent_dir + "/ClinVar"
+        create_path_if_nonexistent(PipelineParams().output_dir)
 
-        copy(BRCAParams().file_parent_dir + "/ClinVar/ClinVarBrca.vcf", BRCAParams().output_dir)
-        check_file_for_contents(BRCAParams().output_dir + "/ClinVarBrca.vcf")
+        copy(PipelineParams().file_parent_dir + "/ClinVar/ClinVarBrca.vcf", PipelineParams().output_dir)
+        check_file_for_contents(PipelineParams().output_dir + "/ClinVarBrca.vcf")
 
 
 ###############################################
@@ -269,10 +269,10 @@ class CopyClinvarVCFToOutputDir(luigi.Task):
 
 class DownloadLatestESPData(luigi.Task):
     def output(self):
-        return luigi.LocalTarget(BRCAParams().file_parent_dir + "/ESP/ESP6500SI-V2-SSA137.GRCh38-liftover.snps_indels.vcf.tar.gz")
+        return luigi.LocalTarget(PipelineParams().file_parent_dir + "/ESP/ESP6500SI-V2-SSA137.GRCh38-liftover.snps_indels.vcf.tar.gz")
 
     def run(self):
-        esp_file_dir = create_path_if_nonexistent(BRCAParams().file_parent_dir + '/ESP')
+        esp_file_dir = create_path_if_nonexistent(PipelineParams().file_parent_dir + '/ESP')
         os.chdir(esp_file_dir)
 
         esp_data_url = "http://evs.gs.washington.edu/evs_bulk_data/ESP6500SI-V2-SSA137.GRCh38-liftover.snps_indels.vcf.tar.gz"
@@ -283,13 +283,13 @@ class DownloadLatestESPData(luigi.Task):
 class DecompressESPTarfile(luigi.Task):
 
     def output(self):
-        esp_file_dir = BRCAParams().file_parent_dir + '/ESP'
+        esp_file_dir = PipelineParams().file_parent_dir + '/ESP'
 
         return {'chr17': luigi.LocalTarget(esp_file_dir + "/ESP6500SI-V2-SSA137.GRCh38-liftover.chr17.snps_indels.vcf"),
                 'chr13': luigi.LocalTarget(esp_file_dir + "/ESP6500SI-V2-SSA137.GRCh38-liftover.chr13.snps_indels.vcf")}
 
     def run(self):
-        esp_file_dir = BRCAParams().file_parent_dir + '/ESP'
+        esp_file_dir = PipelineParams().file_parent_dir + '/ESP'
         esp_data_url = "http://evs.gs.washington.edu/evs_bulk_data/ESP6500SI-V2-SSA137.GRCh38-liftover.snps_indels.vcf.tar.gz"
         file_name = esp_data_url.split('/')[-1]
         os.chdir(esp_file_dir)
@@ -304,11 +304,11 @@ class DecompressESPTarfile(luigi.Task):
 class ExtractESPDataForBRCA1Region(luigi.Task):
 
     def output(self):
-        esp_file_dir = BRCAParams().file_parent_dir + "/ESP"
+        esp_file_dir = PipelineParams().file_parent_dir + "/ESP"
         return luigi.LocalTarget(esp_file_dir + "/esp.brca1.vcf")
 
     def run(self):
-        esp_file_dir = BRCAParams().file_parent_dir + "/ESP"
+        esp_file_dir = PipelineParams().file_parent_dir + "/ESP"
         os.chdir(esp_method_dir)
 
         brca1_region_file = esp_file_dir + "/ESP6500SI-V2-SSA137.GRCh38-liftover.chr17.snps_indels.vcf"
@@ -326,11 +326,11 @@ class ExtractESPDataForBRCA1Region(luigi.Task):
 class ExtractESPDataForBRCA2Region(luigi.Task):
 
     def output(self):
-        esp_file_dir = BRCAParams().file_parent_dir + "/ESP"
+        esp_file_dir = PipelineParams().file_parent_dir + "/ESP"
         return luigi.LocalTarget(esp_file_dir + "/esp.brca2.vcf")
 
     def run(self):
-        esp_file_dir = BRCAParams().file_parent_dir + "/ESP"
+        esp_file_dir = PipelineParams().file_parent_dir + "/ESP"
         os.chdir(esp_method_dir)
         brca2_region_file = esp_file_dir + '/ESP6500SI-V2-SSA137.GRCh38-liftover.chr13.snps_indels.vcf'
         brca2_region_output = esp_file_dir + "/esp.brca2.vcf"
@@ -346,12 +346,12 @@ class ExtractESPDataForBRCA2Region(luigi.Task):
 class ConcatenateESPBRCA12Data(luigi.Task):
 
     def output(self):
-        esp_file_dir = BRCAParams().file_parent_dir + "/ESP"
+        esp_file_dir = PipelineParams().file_parent_dir + "/ESP"
         return luigi.LocalTarget(esp_file_dir + "/esp.brca12.hg38.vcf")
 
     def run(self):
         # Note: requires correct installation of VCF tools and export PERL5LIB=/path/to/your/vcftools-directory/src/perl/ in path
-        esp_file_dir = BRCAParams().file_parent_dir + "/ESP"
+        esp_file_dir = PipelineParams().file_parent_dir + "/ESP"
         brca1_region_output = esp_file_dir + "/esp.brca1.vcf"
         brca2_region_output = esp_file_dir + "/esp.brca2.vcf"
         concatenated_brca_output_file = esp_file_dir + "/esp.brca12.hg38.vcf"
@@ -370,11 +370,11 @@ class ConcatenateESPBRCA12Data(luigi.Task):
 class SortConcatenatedESPBRCA12Data(luigi.Task):
 
     def output(self):
-        esp_file_dir = BRCAParams().file_parent_dir + "/ESP"
+        esp_file_dir = PipelineParams().file_parent_dir + "/ESP"
         return luigi.LocalTarget(esp_file_dir + "/esp.brca12.sorted.hg38.vcf")
 
     def run(self):
-        esp_file_dir = BRCAParams().file_parent_dir + "/ESP"
+        esp_file_dir = PipelineParams().file_parent_dir + "/ESP"
         sorted_concatenated_brca_output_file = esp_file_dir + "/esp.brca12.sorted.hg38.vcf"
         concatenated_brca_output_file = esp_file_dir + "/esp.brca12.hg38.vcf"
         writable_sorted_concatenated_brca_output_file = open(sorted_concatenated_brca_output_file, 'w')
@@ -392,14 +392,14 @@ class SortConcatenatedESPBRCA12Data(luigi.Task):
 class CopyESPOutputToOutputDir(luigi.Task):
 
     def output(self):
-        return luigi.LocalTarget(BRCAParams().output_dir + "/esp.brca12.sorted.hg38.vcf")
+        return luigi.LocalTarget(PipelineParams().output_dir + "/esp.brca12.sorted.hg38.vcf")
 
     def run(self):
-        esp_file_dir = BRCAParams().file_parent_dir + "/ESP"
-        create_path_if_nonexistent(BRCAParams().output_dir)
+        esp_file_dir = PipelineParams().file_parent_dir + "/ESP"
+        create_path_if_nonexistent(PipelineParams().output_dir)
 
-        copy(esp_file_dir + "/esp.brca12.sorted.hg38.vcf", BRCAParams().output_dir)
-        check_file_for_contents(BRCAParams().output_dir + "/esp.brca12.sorted.hg38.vcf")
+        copy(esp_file_dir + "/esp.brca12.sorted.hg38.vcf", PipelineParams().output_dir)
+        check_file_for_contents(PipelineParams().output_dir + "/esp.brca12.sorted.hg38.vcf")
 
 
 ###############################################
@@ -409,51 +409,51 @@ class CopyESPOutputToOutputDir(luigi.Task):
 
 class DownloadBRCA1BICData(luigi.Task):
     def output(self):
-        bic_file_dir = BRCAParams().file_parent_dir + '/BIC'
+        bic_file_dir = PipelineParams().file_parent_dir + '/BIC'
         return luigi.LocalTarget(bic_file_dir + "/brca1_data.txt")
 
     def run(self):
-        bic_file_dir = create_path_if_nonexistent(BRCAParams().file_parent_dir + '/BIC')
+        bic_file_dir = create_path_if_nonexistent(PipelineParams().file_parent_dir + '/BIC')
 
         os.chdir(bic_file_dir)
 
         brca1_data_url = "https://research.nhgri.nih.gov/projects/bic/Member/cgi-bin/bic_query_result.cgi/brca1_data.txt?table=brca1_exons&download=1&submit=Download"
         brca1_file_name = "brca1_data.txt"
-        download_file_with_basic_auth(brca1_data_url, brca1_file_name, BRCAParams().u, BRCAParams().p)
+        download_file_with_basic_auth(brca1_data_url, brca1_file_name, PipelineParams().u, PipelineParams().p)
 
 
 @requires(DownloadBRCA1BICData)
 class DownloadBRCA2BICData(luigi.Task):
 
     def output(self):
-        bic_file_dir = BRCAParams().file_parent_dir + '/BIC'
+        bic_file_dir = PipelineParams().file_parent_dir + '/BIC'
         return luigi.LocalTarget(bic_file_dir + "/brca2_data.txt")
 
     def run(self):
-        bic_file_dir = BRCAParams().file_parent_dir + '/BIC'
+        bic_file_dir = PipelineParams().file_parent_dir + '/BIC'
         os.chdir(bic_file_dir)
 
         brca2_data_url = "https://research.nhgri.nih.gov/projects/bic/Member/cgi-bin/bic_query_result.cgi/brca2_data.txt?table=brca2_exons&download=1&submit=Download"
         brca2_file_name = "brca2_data.txt"
-        download_file_with_basic_auth(brca2_data_url, brca2_file_name, BRCAParams().u, BRCAParams().p)
+        download_file_with_basic_auth(brca2_data_url, brca2_file_name, PipelineParams().u, PipelineParams().p)
 
 
 @requires(DownloadBRCA2BICData)
 class ConvertBRCA1BICDataToVCF(luigi.Task):
 
     def output(self):
-        bic_file_dir = BRCAParams().file_parent_dir + '/BIC'
+        bic_file_dir = PipelineParams().file_parent_dir + '/BIC'
         return luigi.LocalTarget(bic_file_dir + "/bic_brca1.hg19.vcf")
 
     def run(self):
-        bic_file_dir = BRCAParams().file_parent_dir + '/BIC'
+        bic_file_dir = PipelineParams().file_parent_dir + '/BIC'
         os.chdir(bic_method_dir)
 
         # Note: output file doesn't need to be opened because it's opened inside ./bic2vcf
         bic_brca1_vcf_file = bic_file_dir + "/bic_brca1.hg19.vcf"
 
         args = ["./bic2vcf", "-i", bic_file_dir + "/brca1_data.txt", "-o", bic_brca1_vcf_file, "-b", "1", "-g",
-                BRCAParams().resources_dir + "/hg19.fa", "-r", BRCAParams().resources_dir + "/refseq_annotation.hg19.gp", "-a",
+                PipelineParams().resources_dir + "/hg19.fa", "-r", PipelineParams().resources_dir + "/refseq_annotation.hg19.gp", "-a",
                 bic_method_dir + "/bicAnnotation"]
         print "Converting BRCA1 BIC data to vcf with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -466,18 +466,18 @@ class ConvertBRCA1BICDataToVCF(luigi.Task):
 class ConvertBRCA2BICDataToVCF(luigi.Task):
 
     def output(self):
-        bic_file_dir = BRCAParams().file_parent_dir + '/BIC'
+        bic_file_dir = PipelineParams().file_parent_dir + '/BIC'
         return luigi.LocalTarget(bic_file_dir + "/bic_brca2.hg19.vcf")
 
     def run(self):
-        bic_file_dir = BRCAParams().file_parent_dir + '/BIC'
+        bic_file_dir = PipelineParams().file_parent_dir + '/BIC'
         os.chdir(bic_method_dir)
 
         # Note: output file doesn't need to be opened because it's opened inside ./bic2vcf
         bic_brca2_vcf_file = bic_file_dir + "/bic_brca2.hg19.vcf"
 
         args = ["./bic2vcf", "-i", bic_file_dir + "/brca2_data.txt", "-o", bic_brca2_vcf_file, "-b", "2", "-g",
-                BRCAParams().resources_dir + "/hg19.fa", "-r", BRCAParams().resources_dir + "/refseq_annotation.hg19.gp", "-a",
+                PipelineParams().resources_dir + "/hg19.fa", "-r", PipelineParams().resources_dir + "/refseq_annotation.hg19.gp", "-a",
                 bic_method_dir + "/bicAnnotation"]
         print "Converting BRCA2 BIC data to vcf with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -490,11 +490,11 @@ class ConvertBRCA2BICDataToVCF(luigi.Task):
 class ConcatenateBRCA12BICData(luigi.Task):
 
     def output(self):
-        bic_file_dir = BRCAParams().file_parent_dir + '/BIC'
+        bic_file_dir = PipelineParams().file_parent_dir + '/BIC'
         return luigi.LocalTarget(bic_file_dir + "/bic_brca12.hg19.vcf")
 
     def run(self):
-        bic_file_dir = BRCAParams().file_parent_dir + '/BIC'
+        bic_file_dir = PipelineParams().file_parent_dir + '/BIC'
 
         bic_brca12_vcf_file = bic_file_dir + "/bic_brca12.hg19.vcf"
         writable_bic_brca12_vcf_file = open(bic_brca12_vcf_file, 'w')
@@ -510,12 +510,12 @@ class ConcatenateBRCA12BICData(luigi.Task):
 class CrossmapConcatenatedBICData(luigi.Task):
 
     def output(self):
-        bic_file_dir = BRCAParams().file_parent_dir + '/BIC'
+        bic_file_dir = PipelineParams().file_parent_dir + '/BIC'
         return luigi.LocalTarget(bic_file_dir + "/bic_brca12.hg38.vcf")
 
     def run(self):
-        bic_file_dir = BRCAParams().file_parent_dir + '/BIC'
-        brca_resources_dir = BRCAParams().resources_dir
+        bic_file_dir = PipelineParams().file_parent_dir + '/BIC'
+        brca_resources_dir = PipelineParams().resources_dir
 
         bic_brca12_hg38_vcf_file = bic_file_dir + "/bic_brca12.hg38.vcf"
         writable_bic_brca12_hg38_vcf_file = open(bic_brca12_hg38_vcf_file, 'w')
@@ -533,11 +533,11 @@ class CrossmapConcatenatedBICData(luigi.Task):
 class SortBICData(luigi.Task):
 
     def output(self):
-        bic_file_dir = BRCAParams().file_parent_dir + '/BIC'
+        bic_file_dir = PipelineParams().file_parent_dir + '/BIC'
         return luigi.LocalTarget(bic_file_dir + "/bic_brca12.sorted.hg38.vcf")
 
     def run(self):
-        bic_file_dir = BRCAParams().file_parent_dir + '/BIC'
+        bic_file_dir = PipelineParams().file_parent_dir + '/BIC'
 
         sorted_bic_output_file = bic_file_dir + "/bic_brca12.sorted.hg38.vcf"
         writable_sorted_bic_output_file = open(sorted_bic_output_file, 'w')
@@ -553,15 +553,15 @@ class SortBICData(luigi.Task):
 class CopyBICOutputToOutputDir(luigi.Task):
 
     def output(self):
-        bic_file_dir = BRCAParams().file_parent_dir + '/BIC'
-        return luigi.LocalTarget(BRCAParams().output_dir + "/bic_brca12.sorted.hg38.vcf")
+        bic_file_dir = PipelineParams().file_parent_dir + '/BIC'
+        return luigi.LocalTarget(PipelineParams().output_dir + "/bic_brca12.sorted.hg38.vcf")
 
     def run(self):
-        bic_file_dir = BRCAParams().file_parent_dir + '/BIC'
-        create_path_if_nonexistent(BRCAParams().output_dir)
+        bic_file_dir = PipelineParams().file_parent_dir + '/BIC'
+        create_path_if_nonexistent(PipelineParams().output_dir)
 
-        copy(bic_file_dir + "/bic_brca12.sorted.hg38.vcf", BRCAParams().output_dir)
-        check_file_for_contents(BRCAParams().output_dir + "/bic_brca12.sorted.hg38.vcf")
+        copy(bic_file_dir + "/bic_brca12.sorted.hg38.vcf", PipelineParams().output_dir)
+        check_file_for_contents(PipelineParams().output_dir + "/bic_brca12.sorted.hg38.vcf")
 
 
 ###############################################
@@ -571,13 +571,13 @@ class CopyBICOutputToOutputDir(luigi.Task):
 
 class ExtractDataFromLatestEXLOVD(luigi.Task):
     def output(self):
-        ex_lovd_file_dir = BRCAParams().file_parent_dir + '/exLOVD'
+        ex_lovd_file_dir = PipelineParams().file_parent_dir + '/exLOVD'
 
         return {'brca1': luigi.LocalTarget(ex_lovd_file_dir + "/BRCA1.txt"),
                 'brca2': luigi.LocalTarget(ex_lovd_file_dir + "/BRCA2.txt")}
 
     def run(self):
-        ex_lovd_file_dir = create_path_if_nonexistent(BRCAParams().file_parent_dir + '/exLOVD')
+        ex_lovd_file_dir = create_path_if_nonexistent(PipelineParams().file_parent_dir + '/exLOVD')
 
         os.chdir(lovd_method_dir)
 
@@ -593,13 +593,13 @@ class ExtractDataFromLatestEXLOVD(luigi.Task):
 class ConvertEXLOVDBRCA1ExtractToVCF(luigi.Task):
 
     def output(self):
-        ex_lovd_file_dir = BRCAParams().file_parent_dir + "/exLOVD"
+        ex_lovd_file_dir = PipelineParams().file_parent_dir + "/exLOVD"
         return luigi.LocalTarget(ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf")
 
     def run(self):
-        ex_lovd_file_dir = BRCAParams().file_parent_dir + "/exLOVD"
-        brca_resources_dir = BRCAParams().resources_dir
-        artifacts_dir = create_path_if_nonexistent(BRCAParams().output_dir + "/release/artifacts/")
+        ex_lovd_file_dir = PipelineParams().file_parent_dir + "/exLOVD"
+        brca_resources_dir = PipelineParams().resources_dir
+        artifacts_dir = create_path_if_nonexistent(PipelineParams().output_dir + "/release/artifacts/")
 
         os.chdir(lovd_method_dir)
 
@@ -619,13 +619,13 @@ class ConvertEXLOVDBRCA1ExtractToVCF(luigi.Task):
 class ConvertEXLOVDBRCA2ExtractToVCF(luigi.Task):
 
     def output(self):
-        ex_lovd_file_dir = BRCAParams().file_parent_dir + "/exLOVD"
+        ex_lovd_file_dir = PipelineParams().file_parent_dir + "/exLOVD"
         return luigi.LocalTarget(ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf")
 
     def run(self):
-        ex_lovd_file_dir = BRCAParams().file_parent_dir + "/exLOVD"
-        brca_resources_dir = BRCAParams().resources_dir
-        artifacts_dir = create_path_if_nonexistent(BRCAParams().output_dir + "/release/artifacts/")
+        ex_lovd_file_dir = PipelineParams().file_parent_dir + "/exLOVD"
+        brca_resources_dir = PipelineParams().resources_dir
+        artifacts_dir = create_path_if_nonexistent(PipelineParams().output_dir + "/release/artifacts/")
 
         args = ["./lovd2vcf.py", "-i", ex_lovd_file_dir + "/BRCA2.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf", "-a", "exLOVDAnnotation",
@@ -643,11 +643,11 @@ class ConvertEXLOVDBRCA2ExtractToVCF(luigi.Task):
 class ConcatenateEXLOVDVCFFiles(luigi.Task):
 
     def output(self):
-        ex_lovd_file_dir = BRCAParams().file_parent_dir + "/exLOVD"
+        ex_lovd_file_dir = PipelineParams().file_parent_dir + "/exLOVD"
         return luigi.LocalTarget(ex_lovd_file_dir + "/exLOVD_brca12.hg19.vcf")
 
     def run(self):
-        ex_lovd_file_dir = BRCAParams().file_parent_dir + "/exLOVD"
+        ex_lovd_file_dir = PipelineParams().file_parent_dir + "/exLOVD"
 
         ex_lovd_brca12_hg19_vcf_file = ex_lovd_file_dir + "/exLOVD_brca12.hg19.vcf"
         writable_ex_lovd_brca12_hg19_vcf_file = open(ex_lovd_brca12_hg19_vcf_file, 'w')
@@ -663,12 +663,12 @@ class ConcatenateEXLOVDVCFFiles(luigi.Task):
 class CrossmapConcatenatedEXLOVDData(luigi.Task):
 
     def output(self):
-        ex_lovd_file_dir = BRCAParams().file_parent_dir + "/exLOVD"
+        ex_lovd_file_dir = PipelineParams().file_parent_dir + "/exLOVD"
         return luigi.LocalTarget(ex_lovd_file_dir + "/exLOVD_brca12.hg38.vcf")
 
     def run(self):
-        ex_lovd_file_dir = BRCAParams().file_parent_dir + "/exLOVD"
-        brca_resources_dir = BRCAParams().resources_dir
+        ex_lovd_file_dir = PipelineParams().file_parent_dir + "/exLOVD"
+        brca_resources_dir = PipelineParams().resources_dir
 
         args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz",
                 ex_lovd_file_dir + "/exLOVD_brca12.hg19.vcf", brca_resources_dir + "/hg38.fa",
@@ -684,11 +684,11 @@ class CrossmapConcatenatedEXLOVDData(luigi.Task):
 class SortEXLOVDOutput(luigi.Task):
 
     def output(self):
-        ex_lovd_file_dir = BRCAParams().file_parent_dir + "/exLOVD"
+        ex_lovd_file_dir = PipelineParams().file_parent_dir + "/exLOVD"
         return luigi.LocalTarget(ex_lovd_file_dir + "/exLOVD_brca12.sorted.hg38.vcf")
 
     def run(self):
-        ex_lovd_file_dir = BRCAParams().file_parent_dir + "/exLOVD"
+        ex_lovd_file_dir = PipelineParams().file_parent_dir + "/exLOVD"
 
         sorted_ex_lovd_output_file = ex_lovd_file_dir + "/exLOVD_brca12.sorted.hg38.vcf"
         writable_sorted_ex_lovd_output_file = open(sorted_ex_lovd_output_file, 'w')
@@ -705,15 +705,15 @@ class SortEXLOVDOutput(luigi.Task):
 class CopyEXLOVDOutputToOutputDir(luigi.Task):
 
     def output(self):
-        return luigi.LocalTarget(BRCAParams().output_dir + "/exLOVD_brca12.sorted.hg38.vcf")
+        return luigi.LocalTarget(PipelineParams().output_dir + "/exLOVD_brca12.sorted.hg38.vcf")
 
     def run(self):
-        ex_lovd_file_dir = BRCAParams().file_parent_dir + "/exLOVD"
-        create_path_if_nonexistent(BRCAParams().output_dir)
+        ex_lovd_file_dir = PipelineParams().file_parent_dir + "/exLOVD"
+        create_path_if_nonexistent(PipelineParams().output_dir)
 
-        copy(ex_lovd_file_dir + "/exLOVD_brca12.sorted.hg38.vcf", BRCAParams().output_dir)
+        copy(ex_lovd_file_dir + "/exLOVD_brca12.sorted.hg38.vcf", PipelineParams().output_dir)
 
-        check_file_for_contents(BRCAParams().output_dir + "/exLOVD_brca12.sorted.hg38.vcf")
+        check_file_for_contents(PipelineParams().output_dir + "/exLOVD_brca12.sorted.hg38.vcf")
 
 
 ###############################################
@@ -735,7 +735,7 @@ class DownloadLOVDInputFile(luigi.Task):
 
     def output(self):
         if len(str(self.lovd_data_file)) == 0:
-            path = BRCAParams().file_parent_dir + "/LOVD/BRCA.txt"
+            path = PipelineParams().file_parent_dir + "/LOVD/BRCA.txt"
         else:
             path = str(self.lovd_data_file)
 
@@ -752,11 +752,11 @@ class DownloadLOVDInputFile(luigi.Task):
 class NormalizeLOVDSubmissions(luigi.Task):
 
     def output(self):
-        return luigi.LocalTarget(BRCAParams().file_parent_dir + "/LOVD/LOVD_normalized.tsv")
+        return luigi.LocalTarget(PipelineParams().file_parent_dir + "/LOVD/LOVD_normalized.tsv")
 
     def run(self):
-        brca_resources_dir = BRCAParams().resources_dir
-        artifacts_dir = create_path_if_nonexistent(BRCAParams().output_dir + "/release/artifacts")
+        brca_resources_dir = PipelineParams().resources_dir
+        artifacts_dir = create_path_if_nonexistent(PipelineParams().output_dir + "/release/artifacts")
 
         os.chdir(lovd_method_dir)
 
@@ -775,11 +775,11 @@ class NormalizeLOVDSubmissions(luigi.Task):
 class CombineEquivalentLOVDSubmissions(luigi.Task):
 
     def output(self):
-        return luigi.LocalTarget(BRCAParams().file_parent_dir + "/LOVD/LOVD_normalized_combined.tsv")
+        return luigi.LocalTarget(PipelineParams().file_parent_dir + "/LOVD/LOVD_normalized_combined.tsv")
 
     def run(self):
-        brca_resources_dir = BRCAParams().resources_dir
-        artifacts_dir = create_path_if_nonexistent(BRCAParams().output_dir + "/release/artifacts")
+        brca_resources_dir = PipelineParams().resources_dir
+        artifacts_dir = create_path_if_nonexistent(PipelineParams().output_dir + "/release/artifacts")
 
         os.chdir(lovd_method_dir)
 
@@ -798,11 +798,11 @@ class CombineEquivalentLOVDSubmissions(luigi.Task):
 class ConvertSharedLOVDToVCF(luigi.Task):
 
     def output(self):
-        return luigi.LocalTarget(BRCAParams().file_parent_dir + "/LOVD/sharedLOVD_brca12.hg19.vcf")
+        return luigi.LocalTarget(PipelineParams().file_parent_dir + "/LOVD/sharedLOVD_brca12.hg19.vcf")
 
     def run(self):
-        brca_resources_dir = BRCAParams().resources_dir
-        artifacts_dir = create_path_if_nonexistent(BRCAParams().output_dir + "/release/artifacts")
+        brca_resources_dir = PipelineParams().resources_dir
+        artifacts_dir = create_path_if_nonexistent(PipelineParams().output_dir + "/release/artifacts")
 
         os.chdir(lovd_method_dir)
 
@@ -824,12 +824,12 @@ class ConvertSharedLOVDToVCF(luigi.Task):
 class CrossmapConcatenatedSharedLOVDData(luigi.Task):
 
     def output(self):
-        lovd_file_dir = BRCAParams().file_parent_dir + "/LOVD"
+        lovd_file_dir = PipelineParams().file_parent_dir + "/LOVD"
         return luigi.LocalTarget(lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf")
 
     def run(self):
-        lovd_file_dir = BRCAParams().file_parent_dir + "/LOVD"
-        brca_resources_dir = BRCAParams().resources_dir
+        lovd_file_dir = PipelineParams().file_parent_dir + "/LOVD"
+        brca_resources_dir = PipelineParams().resources_dir
 
         args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz",
                 lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf", brca_resources_dir + "/hg38.fa",
@@ -845,11 +845,11 @@ class CrossmapConcatenatedSharedLOVDData(luigi.Task):
 class SortSharedLOVDOutput(luigi.Task):
 
     def output(self):
-        lovd_file_dir = BRCAParams().file_parent_dir + "/LOVD"
+        lovd_file_dir = PipelineParams().file_parent_dir + "/LOVD"
         return luigi.LocalTarget(lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
 
     def run(self):
-        lovd_file_dir = BRCAParams().file_parent_dir + "/LOVD"
+        lovd_file_dir = PipelineParams().file_parent_dir + "/LOVD"
 
         sorted_lovd_output_file = lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf"
         writable_sorted_lovd_output_file = open(sorted_lovd_output_file, 'w')
@@ -866,15 +866,15 @@ class SortSharedLOVDOutput(luigi.Task):
 class CopySharedLOVDOutputToOutputDir(luigi.Task):
 
     def output(self):
-        return luigi.LocalTarget(BRCAParams().output_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
+        return luigi.LocalTarget(PipelineParams().output_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
 
     def run(self):
-        lovd_file_dir = BRCAParams().file_parent_dir + "/LOVD"
-        create_path_if_nonexistent(BRCAParams().output_dir)
+        lovd_file_dir = PipelineParams().file_parent_dir + "/LOVD"
+        create_path_if_nonexistent(PipelineParams().output_dir)
 
-        copy(lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf", BRCAParams().output_dir)
+        copy(lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf", PipelineParams().output_dir)
 
-        check_file_for_contents(BRCAParams().output_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
+        check_file_for_contents(PipelineParams().output_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
 
 
 ###############################################
@@ -884,11 +884,11 @@ class CopySharedLOVDOutputToOutputDir(luigi.Task):
 
 class DownloadG1KCHR13GZ(luigi.Task):
     def output(self):
-        g1k_file_dir = BRCAParams().file_parent_dir + '/G1K'
+        g1k_file_dir = PipelineParams().file_parent_dir + '/G1K'
         return luigi.LocalTarget(g1k_file_dir + "/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz")
 
     def run(self):
-        g1k_file_dir = create_path_if_nonexistent(BRCAParams().file_parent_dir + '/G1K')
+        g1k_file_dir = create_path_if_nonexistent(PipelineParams().file_parent_dir + '/G1K')
 
         os.chdir(g1k_file_dir)
 
@@ -900,11 +900,11 @@ class DownloadG1KCHR13GZ(luigi.Task):
 class DownloadG1KCHR17GZ(luigi.Task):
 
     def output(self):
-        g1k_file_dir = BRCAParams().file_parent_dir + '/G1K'
+        g1k_file_dir = PipelineParams().file_parent_dir + '/G1K'
         return luigi.LocalTarget(g1k_file_dir + "/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz")
 
     def run(self):
-        g1k_file_dir = BRCAParams().file_parent_dir + '/G1K'
+        g1k_file_dir = PipelineParams().file_parent_dir + '/G1K'
         os.chdir(g1k_file_dir)
 
         chr17_vcf_gz_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz"
@@ -915,11 +915,11 @@ class DownloadG1KCHR17GZ(luigi.Task):
 class DownloadG1KCHR13GZTBI(luigi.Task):
 
     def output(self):
-        g1k_file_dir = BRCAParams().file_parent_dir + '/G1K'
+        g1k_file_dir = PipelineParams().file_parent_dir + '/G1K'
         return luigi.LocalTarget(g1k_file_dir + "/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi")
 
     def run(self):
-        g1k_file_dir = BRCAParams().file_parent_dir + '/G1K'
+        g1k_file_dir = PipelineParams().file_parent_dir + '/G1K'
         os.chdir(g1k_file_dir)
 
         chr13_vcf_gz_tbi_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi"
@@ -930,11 +930,11 @@ class DownloadG1KCHR13GZTBI(luigi.Task):
 class DownloadG1KCHR17GZTBI(luigi.Task):
 
     def output(self):
-        g1k_file_dir = BRCAParams().file_parent_dir + '/G1K'
+        g1k_file_dir = PipelineParams().file_parent_dir + '/G1K'
         return luigi.LocalTarget(g1k_file_dir + "/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi")
 
     def run(self):
-        g1k_file_dir = BRCAParams().file_parent_dir + '/G1K'
+        g1k_file_dir = PipelineParams().file_parent_dir + '/G1K'
         os.chdir(g1k_file_dir)
 
         chr17_vcf_gz_tbi_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi"
@@ -945,11 +945,11 @@ class DownloadG1KCHR17GZTBI(luigi.Task):
 class ExtractCHR13BRCAData(luigi.Task):
 
     def output(self):
-        g1k_file_dir = BRCAParams().file_parent_dir + '/G1K'
+        g1k_file_dir = PipelineParams().file_parent_dir + '/G1K'
         return luigi.LocalTarget(g1k_file_dir + "/chr13_brca2_1000g_GRCh37.vcf")
 
     def run(self):
-        g1k_file_dir = BRCAParams().file_parent_dir + '/G1K'
+        g1k_file_dir = PipelineParams().file_parent_dir + '/G1K'
 
         chr13_brca2_vcf_file = g1k_file_dir + "/chr13_brca2_1000g_GRCh37.vcf"
         writable_chr13_brca2_vcf_file = open(chr13_brca2_vcf_file, "w")
@@ -967,11 +967,11 @@ class ExtractCHR13BRCAData(luigi.Task):
 class ExtractCHR17BRCAData(luigi.Task):
 
     def output(self):
-        g1k_file_dir = BRCAParams().file_parent_dir + '/G1K'
+        g1k_file_dir = PipelineParams().file_parent_dir + '/G1K'
         return luigi.LocalTarget(g1k_file_dir + "/chr17_brca1_1000g_GRCh37.vcf")
 
     def run(self):
-        g1k_file_dir = BRCAParams().file_parent_dir + '/G1K'
+        g1k_file_dir = PipelineParams().file_parent_dir + '/G1K'
 
         chr17_brca1_vcf_file = g1k_file_dir + "/chr17_brca1_1000g_GRCh37.vcf"
         writable_chr17_brca1_vcf_file = open(chr17_brca1_vcf_file, "w")
@@ -989,11 +989,11 @@ class ExtractCHR17BRCAData(luigi.Task):
 class ConcatenateG1KData(luigi.Task):
 
     def output(self):
-        g1k_file_dir = BRCAParams().file_parent_dir + '/G1K'
+        g1k_file_dir = PipelineParams().file_parent_dir + '/G1K'
         return luigi.LocalTarget(g1k_file_dir + "/brca12_1000g_GRCh37.vcf")
 
     def run(self):
-        g1k_file_dir = BRCAParams().file_parent_dir + '/G1K'
+        g1k_file_dir = PipelineParams().file_parent_dir + '/G1K'
         concatenated_g1k_vcf = g1k_file_dir + "/brca12_1000g_GRCh37.vcf"
         writable_concatenated_g1k_vcf = open(concatenated_g1k_vcf, "w")
         args = ["vcf-concat", g1k_file_dir + "/chr13_brca2_1000g_GRCh37.vcf",
@@ -1009,12 +1009,12 @@ class ConcatenateG1KData(luigi.Task):
 class CrossmapConcatenatedG1KData(luigi.Task):
 
     def output(self):
-        g1k_file_dir = BRCAParams().file_parent_dir + '/G1K'
+        g1k_file_dir = PipelineParams().file_parent_dir + '/G1K'
         return luigi.LocalTarget(g1k_file_dir + "/1000G_brca.hg38.vcf")
 
     def run(self):
-        g1k_file_dir = BRCAParams().file_parent_dir + '/G1K'
-        brca_resources_dir = BRCAParams().resources_dir
+        g1k_file_dir = PipelineParams().file_parent_dir + '/G1K'
+        brca_resources_dir = PipelineParams().resources_dir
 
         args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz",
                 g1k_file_dir + "/brca12_1000g_GRCh37.vcf", brca_resources_dir + "/hg38.fa",
@@ -1030,11 +1030,11 @@ class CrossmapConcatenatedG1KData(luigi.Task):
 class SortG1KData(luigi.Task):
 
     def output(self):
-        g1k_file_dir = BRCAParams().file_parent_dir + '/G1K'
+        g1k_file_dir = PipelineParams().file_parent_dir + '/G1K'
         return luigi.LocalTarget(g1k_file_dir + "/1000G_brca.sorted.hg38.vcf")
 
     def run(self):
-        g1k_file_dir = BRCAParams().file_parent_dir + '/G1K'
+        g1k_file_dir = PipelineParams().file_parent_dir + '/G1K'
 
         sorted_g1k_output_file = g1k_file_dir + "/1000G_brca.sorted.hg38.vcf"
         writable_sorted_g1k_output_file = open(sorted_g1k_output_file, 'w')
@@ -1050,15 +1050,15 @@ class SortG1KData(luigi.Task):
 class CopyG1KOutputToOutputDir(luigi.Task):
 
     def output(self):
-        return luigi.LocalTarget(BRCAParams().output_dir + "/1000G_brca.sorted.hg38.vcf")
+        return luigi.LocalTarget(PipelineParams().output_dir + "/1000G_brca.sorted.hg38.vcf")
 
     def run(self):
-        g1k_file_dir = BRCAParams().file_parent_dir + '/G1K'
-        create_path_if_nonexistent(BRCAParams().output_dir)
+        g1k_file_dir = PipelineParams().file_parent_dir + '/G1K'
+        create_path_if_nonexistent(PipelineParams().output_dir)
 
-        copy(g1k_file_dir + "/1000G_brca.sorted.hg38.vcf", BRCAParams().output_dir)
+        copy(g1k_file_dir + "/1000G_brca.sorted.hg38.vcf", PipelineParams().output_dir)
 
-        check_file_for_contents(BRCAParams().output_dir + "/1000G_brca.sorted.hg38.vcf")
+        check_file_for_contents(PipelineParams().output_dir + "/1000G_brca.sorted.hg38.vcf")
 
 
 ###############################################
@@ -1068,11 +1068,11 @@ class CopyG1KOutputToOutputDir(luigi.Task):
 
 class DownloadEXACVCFGZFile(luigi.Task):
     def output(self):
-        exac_file_dir = BRCAParams().file_parent_dir + '/exac'
+        exac_file_dir = PipelineParams().file_parent_dir + '/exac'
         return luigi.LocalTarget(exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz")
 
     def run(self):
-        exac_file_dir = create_path_if_nonexistent(BRCAParams().file_parent_dir + '/exac')
+        exac_file_dir = create_path_if_nonexistent(PipelineParams().file_parent_dir + '/exac')
 
         os.chdir(exac_file_dir)
 
@@ -1084,11 +1084,11 @@ class DownloadEXACVCFGZFile(luigi.Task):
 @requires(DownloadEXACVCFGZFile)
 class DownloadEXACVCFGZTBIFile(luigi.Task):
     def output(self):
-        exac_file_dir = BRCAParams().file_parent_dir + '/exac'
+        exac_file_dir = PipelineParams().file_parent_dir + '/exac'
         return luigi.LocalTarget(exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz.tbi")
 
     def run(self):
-        exac_file_dir = BRCAParams().file_parent_dir + '/exac'
+        exac_file_dir = PipelineParams().file_parent_dir + '/exac'
         os.chdir(exac_file_dir)
 
         exac_vcf_gz_tbi_url = "ftp://ftp.broadinstitute.org/pub/ExAC_release/current/subsets/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz.tbi"
@@ -1099,11 +1099,11 @@ class DownloadEXACVCFGZTBIFile(luigi.Task):
 @requires(DownloadEXACVCFGZTBIFile)
 class ExtractBRCA1DataFromExac(luigi.Task):
     def output(self):
-        exac_file_dir = BRCAParams().file_parent_dir + '/exac'
+        exac_file_dir = PipelineParams().file_parent_dir + '/exac'
         return luigi.LocalTarget(exac_file_dir + "/exac.brca1.hg19.vcf")
 
     def run(self):
-        exac_file_dir = BRCAParams().file_parent_dir + '/exac'
+        exac_file_dir = PipelineParams().file_parent_dir + '/exac'
 
         exac_brca1_hg19_vcf_file = exac_file_dir + "/exac.brca1.hg19.vcf"
         writable_exac_brca1_hg19_vcf_file = open(exac_brca1_hg19_vcf_file, 'w')
@@ -1119,11 +1119,11 @@ class ExtractBRCA1DataFromExac(luigi.Task):
 @requires(ExtractBRCA1DataFromExac)
 class ExtractBRCA2DataFromExac(luigi.Task):
     def output(self):
-        exac_file_dir = BRCAParams().file_parent_dir + '/exac'
+        exac_file_dir = PipelineParams().file_parent_dir + '/exac'
         return luigi.LocalTarget(exac_file_dir + "/exac.brca2.hg19.vcf")
 
     def run(self):
-        exac_file_dir = BRCAParams().file_parent_dir + '/exac'
+        exac_file_dir = PipelineParams().file_parent_dir + '/exac'
 
         exac_brca2_hg19_vcf_file = exac_file_dir + "/exac.brca2.hg19.vcf"
         writable_exac_brca2_hg19_vcf_file = open(exac_brca2_hg19_vcf_file, 'w')
@@ -1139,11 +1139,11 @@ class ExtractBRCA2DataFromExac(luigi.Task):
 @requires(ExtractBRCA2DataFromExac)
 class ConcatenateEXACData(luigi.Task):
     def output(self):
-        exac_file_dir = BRCAParams().file_parent_dir + '/exac'
+        exac_file_dir = PipelineParams().file_parent_dir + '/exac'
         return luigi.LocalTarget(exac_file_dir + "/exac.brca12.hg19.vcf")
 
     def run(self):
-        exac_file_dir = BRCAParams().file_parent_dir + '/exac'
+        exac_file_dir = PipelineParams().file_parent_dir + '/exac'
 
         exac_brca12_hg19_vcf_file = exac_file_dir + "/exac.brca12.hg19.vcf"
         writable_exac_brca12_hg19_vcf_file = open(exac_brca12_hg19_vcf_file, 'w')
@@ -1158,12 +1158,12 @@ class ConcatenateEXACData(luigi.Task):
 @requires(ConcatenateEXACData)
 class CrossmapEXACData(luigi.Task):
     def output(self):
-        exac_file_dir = BRCAParams().file_parent_dir + '/exac'
+        exac_file_dir = PipelineParams().file_parent_dir + '/exac'
         return luigi.LocalTarget(exac_file_dir + "/exac.brca12.hg38.vcf")
 
     def run(self):
-        exac_file_dir = BRCAParams().file_parent_dir + '/exac'
-        brca_resources_dir = BRCAParams().resources_dir
+        exac_file_dir = PipelineParams().file_parent_dir + '/exac'
+        brca_resources_dir = PipelineParams().resources_dir
 
         args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz",
                 exac_file_dir + "/exac.brca12.hg19.vcf", brca_resources_dir + "/hg38.fa",
@@ -1178,11 +1178,11 @@ class CrossmapEXACData(luigi.Task):
 @requires(CrossmapEXACData)
 class SortEXACData(luigi.Task):
     def output(self):
-        exac_file_dir = BRCAParams().file_parent_dir + '/exac'
+        exac_file_dir = PipelineParams().file_parent_dir + '/exac'
         return luigi.LocalTarget(exac_file_dir + "/exac.brca12.sorted.hg38.vcf")
 
     def run(self):
-        exac_file_dir = BRCAParams().file_parent_dir + '/exac'
+        exac_file_dir = PipelineParams().file_parent_dir + '/exac'
 
         with self.output().open("w") as vcf_file:
             args = ["vcf-sort", exac_file_dir + "/exac.brca12.hg38.vcf"]
@@ -1196,15 +1196,15 @@ class SortEXACData(luigi.Task):
 @requires(SortEXACData)
 class CopyEXACOutputToOutputDir(luigi.Task):
     def output(self):
-        return luigi.LocalTarget(BRCAParams().output_dir + "/exac.brca12.sorted.hg38.vcf")
+        return luigi.LocalTarget(PipelineParams().output_dir + "/exac.brca12.sorted.hg38.vcf")
 
     def run(self):
-        exac_file_dir = BRCAParams().file_parent_dir + '/exac'
-        create_path_if_nonexistent(BRCAParams().output_dir)
+        exac_file_dir = PipelineParams().file_parent_dir + '/exac'
+        create_path_if_nonexistent(PipelineParams().output_dir)
 
-        copy(exac_file_dir + "/exac.brca12.sorted.hg38.vcf", BRCAParams().output_dir)
+        copy(exac_file_dir + "/exac.brca12.sorted.hg38.vcf", PipelineParams().output_dir)
 
-        check_file_for_contents(BRCAParams().output_dir + "/exac.brca12.sorted.hg38.vcf")
+        check_file_for_contents(PipelineParams().output_dir + "/exac.brca12.sorted.hg38.vcf")
 
 
 ###############################################
@@ -1214,11 +1214,11 @@ class CopyEXACOutputToOutputDir(luigi.Task):
 @requires(ConvertLatestClinvarDataToXML)
 class FilterEnigmaAssertions(luigi.Task):
     def output(self):
-        out_path = os.path.join(BRCAParams().file_parent_dir, 'enigma', 'enigma_clinvar.xml')
+        out_path = os.path.join(PipelineParams().file_parent_dir, 'enigma', 'enigma_clinvar.xml')
         return luigi.LocalTarget(out_path)
 
     def run(self):
-        create_path_if_nonexistent(os.path.join(BRCAParams().file_parent_dir, 'enigma'))
+        create_path_if_nonexistent(os.path.join(PipelineParams().file_parent_dir, 'enigma'))
         os.chdir(clinvar_method_dir)
 
         args = ["python", "filter_enigma_data.py", self.input().path, self.output().path]
@@ -1230,7 +1230,7 @@ class FilterEnigmaAssertions(luigi.Task):
 @requires(FilterEnigmaAssertions)
 class ExtractEnigmaFromClinvar(luigi.Task):
     def output(self):
-        out_path = os.path.join(BRCAParams().file_parent_dir, 'enigma', 'enigma_from_clinvar.tsv')
+        out_path = os.path.join(PipelineParams().file_parent_dir, 'enigma', 'enigma_from_clinvar.tsv')
         return luigi.LocalTarget(out_path)
 
     def run(self):
@@ -1241,7 +1241,7 @@ class ExtractEnigmaFromClinvar(luigi.Task):
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        copy(self.output().path, BRCAParams().output_dir)
+        copy(self.output().path, PipelineParams().output_dir)
 
 ###############################################
 #            VARIANT COMPILATION              #
@@ -1261,16 +1261,16 @@ class MergeVCFsIntoTSVFile(luigi.Task):
         yield ExtractEnigmaFromClinvar()
 
     def output(self):
-        artifacts_dir = create_path_if_nonexistent(BRCAParams().output_dir + "/release/artifacts/")
+        artifacts_dir = create_path_if_nonexistent(PipelineParams().output_dir + "/release/artifacts/")
         return luigi.LocalTarget(artifacts_dir + "merged.tsv")
 
     def run(self):
-        artifacts_dir = create_path_if_nonexistent(BRCAParams().output_dir + "/release/artifacts/")
-        brca_resources_dir = BRCAParams().resources_dir
+        artifacts_dir = create_path_if_nonexistent(PipelineParams().output_dir + "/release/artifacts/")
+        brca_resources_dir = PipelineParams().resources_dir
 
         os.chdir(data_merging_method_dir)
 
-        args = ["python", "variant_merging.py", "-i", BRCAParams().output_dir + "/", "-o",
+        args = ["python", "variant_merging.py", "-i", PipelineParams().output_dir + "/", "-o",
                 artifacts_dir, "-p", "-r", brca_resources_dir + "/", "-a", artifacts_dir, "-v"]
         print "Running variant_merging.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -1282,11 +1282,11 @@ class MergeVCFsIntoTSVFile(luigi.Task):
 class AnnotateMergedOutput(luigi.Task):
 
     def output(self):
-        artifacts_dir = BRCAParams().output_dir + "/release/artifacts/"
+        artifacts_dir = PipelineParams().output_dir + "/release/artifacts/"
         return luigi.LocalTarget(artifacts_dir + "annotated.tsv")
 
     def run(self):
-        artifacts_dir = BRCAParams().output_dir + "/release/artifacts/"
+        artifacts_dir = PipelineParams().output_dir + "/release/artifacts/"
         os.chdir(data_merging_method_dir)
 
         args = ["python", "add_annotation.py", "-i", artifacts_dir + "merged.tsv",
@@ -1312,11 +1312,11 @@ class AnnotateMergedOutput(luigi.Task):
 class AggregateMergedOutput(luigi.Task):
 
     def output(self):
-        artifacts_dir = BRCAParams().output_dir + "/release/artifacts/"
+        artifacts_dir = PipelineParams().output_dir + "/release/artifacts/"
         return luigi.LocalTarget(artifacts_dir + "aggregated.tsv")
 
     def run(self):
-        artifacts_dir = BRCAParams().output_dir + "/release/artifacts/"
+        artifacts_dir = PipelineParams().output_dir + "/release/artifacts/"
         os.chdir(data_merging_method_dir)
 
         args = ["python", "aggregate_across_columns.py", "-i", artifacts_dir + "annotated.tsv",
@@ -1333,13 +1333,13 @@ class AggregateMergedOutput(luigi.Task):
 class BuildAggregatedOutput(luigi.Task):
 
     def output(self):
-        artifacts_dir = BRCAParams().output_dir + "/release/artifacts/"
+        artifacts_dir = PipelineParams().output_dir + "/release/artifacts/"
         return luigi.LocalTarget(artifacts_dir + "built.tsv")
 
     def run(self):
-        release_dir = BRCAParams().output_dir + "/release/"
+        release_dir = PipelineParams().output_dir + "/release/"
         artifacts_dir = release_dir + "artifacts/"
-        brca_resources_dir = BRCAParams().resources_dir
+        brca_resources_dir = PipelineParams().resources_dir
         os.chdir(data_merging_method_dir)
 
         args = ["python", "brca_pseudonym_generator.py", "-i", artifacts_dir + "/aggregated.tsv", "-p",
@@ -1363,13 +1363,13 @@ class BuildAggregatedOutput(luigi.Task):
 class AppendMupitStructure(luigi.Task):
 
     def output(self):
-        artifacts_dir = BRCAParams().output_dir + "/release/artifacts/"
+        artifacts_dir = PipelineParams().output_dir + "/release/artifacts/"
         return luigi.LocalTarget(artifacts_dir + "built_with_mupit.tsv")
 
     def run(self):
-        release_dir = BRCAParams().output_dir + "/release/"
+        release_dir = PipelineParams().output_dir + "/release/"
         artifacts_dir = release_dir + "artifacts/"
-        brca_resources_dir = BRCAParams().resources_dir
+        brca_resources_dir = PipelineParams().resources_dir
         os.chdir(data_merging_method_dir)
 
         args = ["python", "getMupitStructure.py", "-i", artifacts_dir + "built.tsv", "-o",
@@ -1385,15 +1385,15 @@ class AppendMupitStructure(luigi.Task):
 @requires(AppendMupitStructure)
 class CalculatePriors(luigi.Task):
     def output(self):
-        artifacts_dir = BRCAParams().output_dir + "/release/artifacts/"
+        artifacts_dir = PipelineParams().output_dir + "/release/artifacts/"
         return luigi.LocalTarget(artifacts_dir + "built_with_priors.tsv")
 
     def run(self):
-        artifacts_dir_host = BRCAParams().output_dir_host + "/release/artifacts/"
+        artifacts_dir_host = PipelineParams().output_dir_host + "/release/artifacts/"
         os.chdir(priors_method_dir)
 
-        args = ['bash', 'calcpriors.sh', BRCAParams().priors_references_dir,
-                artifacts_dir_host, 'built_with_mupit.tsv', 'built_with_priors.tsv', BRCAParams().priors_docker_image_name]
+        args = ['bash', 'calcpriors.sh', PipelineParams().priors_references_dir,
+                artifacts_dir_host, 'built_with_mupit.tsv', 'built_with_priors.tsv', PipelineParams().priors_docker_image_name]
 
         print "Running calcpriors.sh with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -1406,11 +1406,11 @@ class CalculatePriors(luigi.Task):
 @requires(CalculatePriors)
 class FilterBlacklistedPriors(luigi.Task):
     def output(self):
-        artifacts_dir = BRCAParams().output_dir + "/release/artifacts/"
+        artifacts_dir = PipelineParams().output_dir + "/release/artifacts/"
         return luigi.LocalTarget(artifacts_dir + "built_with_priors_clean.tsv")
 
     def run(self):
-        artifacts_dir = BRCAParams().output_dir + "/release/artifacts/"
+        artifacts_dir = PipelineParams().output_dir + "/release/artifacts/"
         os.chdir(priors_filter_method_dir)
 
         args = ["python", "filterBlacklistedVars.py",
@@ -1431,12 +1431,12 @@ class FilterBlacklistedPriors(luigi.Task):
 @requires(FilterBlacklistedPriors)
 class FindMissingReports(luigi.Task):
     def output(self):
-        artifacts_dir = BRCAParams().output_dir + "/release/artifacts/"
+        artifacts_dir = PipelineParams().output_dir + "/release/artifacts/"
         return luigi.LocalTarget(artifacts_dir + "missing_reports.log")
 
     def run(self):
-        release_dir = BRCAParams().output_dir + "/release/"
-        artifacts_dir = BRCAParams().output_dir + "/release/artifacts/"
+        release_dir = PipelineParams().output_dir + "/release/"
+        artifacts_dir = PipelineParams().output_dir + "/release/artifacts/"
         os.chdir(data_merging_method_dir)
 
         args = ["python", "check_for_missing_reports.py", "-b", artifacts_dir + "built_with_priors_clean.tsv", "-r", artifacts_dir,
@@ -1457,7 +1457,7 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
 
 
     def output(self):
-        release_dir = BRCAParams().output_dir + "/release/"
+        release_dir = PipelineParams().output_dir + "/release/"
         diff_dir = create_path_if_nonexistent(release_dir + "diff/")
         return {'built_with_change_types': luigi.LocalTarget(release_dir + "built_with_change_types.tsv"),
                 'removed': luigi.LocalTarget(diff_dir + "removed.tsv"),
@@ -1468,14 +1468,14 @@ class RunDiffAndAppendChangeTypesToOutput(luigi.Task):
                 'README': luigi.LocalTarget(diff_dir + "README.txt")}
 
     def run(self):
-        release_dir = BRCAParams().output_dir + "/release/"
+        release_dir = PipelineParams().output_dir + "/release/"
         artifacts_dir = release_dir + "artifacts/"
         diff_dir = create_path_if_nonexistent(release_dir + "diff/")
         os.chdir(utilities_method_dir)
 
         tmp_dir = tempfile.mkdtemp()
-        previous_data_path = extract_file(BRCAParams().previous_release_tar, tmp_dir, 'output/release/built_with_change_types.tsv')
-        version_json_path = extract_file(BRCAParams().previous_release_tar, tmp_dir, 'output/release/metadata/version.json')
+        previous_data_path = extract_file(PipelineParams().previous_release_tar, tmp_dir, 'output/release/built_with_change_types.tsv')
+        version_json_path = extract_file(PipelineParams().previous_release_tar, tmp_dir, 'output/release/metadata/version.json')
         previous_release_date = self._extract_release_date(version_json_path)
         previous_release_date_str = datetime.datetime.strftime(previous_release_date, '%m-%d-%Y')
 
@@ -1504,7 +1504,7 @@ class RunDiffAndAppendChangeTypesToOutputReports(luigi.Task):
 
 
     def output(self):
-        release_dir = BRCAParams().output_dir + "/release/"
+        release_dir = PipelineParams().output_dir + "/release/"
         diff_dir = create_path_if_nonexistent(release_dir + "diff/")
         return {'reports_with_change_types': luigi.LocalTarget(release_dir + "reports_with_change_types.tsv"),
                 'removed_reports': luigi.LocalTarget(diff_dir + "removed_reports.tsv"),
@@ -1515,14 +1515,14 @@ class RunDiffAndAppendChangeTypesToOutputReports(luigi.Task):
                 'README': luigi.LocalTarget(diff_dir + "README.txt")}
 
     def run(self):
-        release_dir = BRCAParams().output_dir + "/release/"
+        release_dir = PipelineParams().output_dir + "/release/"
         artifacts_dir = release_dir + "artifacts/"
         diff_dir = create_path_if_nonexistent(release_dir + "diff/")
         os.chdir(utilities_method_dir)
 
         tmp_dir = tempfile.mkdtemp()
-        previous_data_path = extract_file(BRCAParams().previous_release_tar, tmp_dir, 'output/release/artifacts/reports.tsv')
-        version_json_path = extract_file(BRCAParams().previous_release_tar, tmp_dir, 'output/release/metadata/version.json')
+        previous_data_path = extract_file(PipelineParams().previous_release_tar, tmp_dir, 'output/release/artifacts/reports.tsv')
+        version_json_path = extract_file(PipelineParams().previous_release_tar, tmp_dir, 'output/release/metadata/version.json')
         previous_release_date = self._extract_release_date(version_json_path)
         previous_release_date_str = datetime.datetime.strftime(previous_release_date, '%m-%d-%Y')
 
@@ -1546,14 +1546,14 @@ class RunDiffAndAppendChangeTypesToOutputReports(luigi.Task):
 class GenerateReleaseNotes(luigi.Task):
 
     def output(self):
-        metadata_dir = create_path_if_nonexistent(BRCAParams().output_dir + "/release/metadata/")
+        metadata_dir = create_path_if_nonexistent(PipelineParams().output_dir + "/release/metadata/")
         return luigi.LocalTarget(metadata_dir + "version.json")
 
     def run(self):
-        metadata_dir = BRCAParams().output_dir + "/release/metadata/"
+        metadata_dir = PipelineParams().output_dir + "/release/metadata/"
         os.chdir(data_merging_method_dir)
 
-        args = ["python", "buildVersionMetadata.py", "--date", str(BRCAParams().date), "--notes", self.release_notes,
+        args = ["python", "buildVersionMetadata.py", "--date", str(PipelineParams().date), "--notes", self.release_notes,
                 "--output", metadata_dir + "version.json"]
         print "Running buildVersionMetadata.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -1564,7 +1564,7 @@ class GenerateReleaseNotes(luigi.Task):
 @requires(GenerateReleaseNotes)
 class TopLevelReadme(luigi.Task):
     def output(self):
-        top_level_readme_dest = os.path.join(BRCAParams().output_dir, "README.txt")
+        top_level_readme_dest = os.path.join(PipelineParams().output_dir, "README.txt")
         return luigi.LocalTarget(top_level_readme_dest)
 
     def run(self):
@@ -1576,10 +1576,10 @@ class TopLevelReadme(luigi.Task):
 @requires(TopLevelReadme)
 class GenerateMD5Sums(luigi.Task):
     def output(self):
-        return luigi.LocalTarget(BRCAParams().output_dir + "/md5sums.txt")
+        return luigi.LocalTarget(PipelineParams().output_dir + "/md5sums.txt")
 
     def run(self):
-        output_dir = BRCAParams().output_dir
+        output_dir = PipelineParams().output_dir
         md5sumsFile = output_dir + "/md5sums.txt"
 
         os.chdir(utilities_method_dir)
@@ -1597,10 +1597,10 @@ class GenerateReleaseArchive(luigi.Task):
 
     def getArchiveName(self):
         # Format archive filename as release-mm-dd-yy.tar.gz
-        return "release-" + BRCAParams().date.strftime("%x").replace('/', '-') + ".tar.gz"
+        return "release-" + PipelineParams().date.strftime("%x").replace('/', '-') + ".tar.gz"
 
     def getArchiveParentDirectory(self):
-        return os.path.dirname(BRCAParams().output_dir) + "/"
+        return os.path.dirname(PipelineParams().output_dir) + "/"
 
     def output(self):
         return luigi.LocalTarget(self.getArchiveParentDirectory() + self.getArchiveName())
@@ -1608,7 +1608,7 @@ class GenerateReleaseArchive(luigi.Task):
     def run(self):
         os.chdir(self.getArchiveParentDirectory())
         with tarfile.open(self.getArchiveParentDirectory() + self.getArchiveName(), "w:gz") as tar:
-            tar.add(BRCAParams().output_dir, arcname=os.path.basename(BRCAParams().output_dir))
+            tar.add(PipelineParams().output_dir, arcname=os.path.basename(PipelineParams().output_dir))
 
 
 ###############################################
