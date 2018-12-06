@@ -64,7 +64,7 @@ Early stages of the pipeline need credentials to download data. These can be pas
 Currently, such a credential files should contain the following:
 
 ```
-[RunAll]
+[PipelineParams]
 # BIC credentials
 u=bicusername
 p=bicpassword
@@ -95,5 +95,12 @@ Change to the `pipeline` directory and type the following:
 * `make` or `make help` to see what targets are available along with minimal help
 * `make init` to set up a configuration file `pipeline/brca_pipeline_cfg.mk` with paths and other settings. It is advisable to edit it according your needs:
 * `make setup-dev-env`: runs various targets to set up a dev environment.
-* `make run-interactive`: starts bash in brca docker container.
+* `make show-luigi-graph`: shows the graph of tasks on the console (use e.g.
+`less -R` if you experience issues with colors)
+* `make run-interactive`: starts a bash in brca exchange docker container.
 * `make run-task [TASK]`: runs a specific luigi task
+* `make force-run-task [TASK]`: runs a specific luigi task, deleting its outputs
+ first (otherwise luigi doesn't run the task)
+* `make clean-files-from [TASK]`: deletes all outputs of the given task along
+with all the tasks directly or indirectly depending on it. This is useful to
+force regeneration of 'downstream' data if something in TASK has changed.
