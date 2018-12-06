@@ -5,7 +5,6 @@ Description:
     Takes in a functional assay table and converts it to vcf format.
 """
 
-
 from __future__ import print_function, division
 import argparse
 import sys
