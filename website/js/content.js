@@ -20,6 +20,7 @@ const content = {
     researchWarning: require('../content/researchWarning.md'),
     signupMessage: require('../content/signupMessage.md'),
     insilicoScoring: require('../content/help/research/insilico/insilico-scoring.md'),
+    moreOnNaming: require('../content/help/default/variant-naming/more-on-naming.md'),
     app: require('../content/about/app.md')
 };
 
@@ -98,11 +99,40 @@ const helpContentDefault = [
     {
         section: "Variant Details Page",
         tiles: [
-            {
+           {
                 name: "What do the fields in the Variant Details Page mean?",
                 contents: require("../content/help/default/variant-details-fields.md")
-            },
-        ]
+           },
+           {
+                name: "Variant Classifications",
+		list: [
+                    {
+                        name: "Pathogenic",
+                        contents: require("../content/help/default/variant-classifications-pathogenic.md")
+                    },
+                    {
+                        name: "Benign/Little Clinical Significance",
+                        contents: require("../content/help/default/variant-classifications-benign.md")
+                    },
+                    {
+                        name: "Variant of Uncertain Significance",
+                        contents: require("../content/help/default/variant-classifications-VUS.md")
+                    },
+                    {
+                        name: "Not Yet Reviewed",
+                        contents: require("../content/help/default/variant-classifications-not-yet-reviewed.md")
+                    },
+                  ]
+	   },
+           {
+                name: "Variant Naming Demystified",
+                contents: require("../content/help/default/variant-naming/demystifying-variant-naming.md")
+	   },
+           {
+                name: "Outside Resources on BRCA Genes, Genetic Testing, and Cancer Risk",
+                contents: require("../content/help/default/outside-resources-on-brca-genes.md")
+           },
+	]
     },
 ];
 

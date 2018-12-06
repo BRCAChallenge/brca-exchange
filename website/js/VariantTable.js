@@ -40,7 +40,7 @@ function renderCell(val) {
 
 const filterColumns = [
     {name: 'Gene', prop: 'Gene_Symbol', values: ['BRCA1', 'BRCA2']},
-    {name: 'Pathogenicity', prop: 'Pathogenicity_expert', values: ['Pathogenic', 'Benign / Little Clinical Significance', 'Not Yet Reviewed']}
+    {name: 'Pathogenicity', prop: 'Pathogenicity_expert', values: ['Pathogenic', 'Likely Pathogenic', 'Benign / Little Clinical Significance', 'Likely Benign', 'Not Yet Reviewed']}
 ];
 
 const expertModeGroups = [

@@ -387,11 +387,11 @@ var Database = React.createClass({
 					{this.props.mode === 'default' && <img id='enigma-logo' src={require('./img/enigma_logo.jpeg')} />}
 					<RawHTML ref='content' html={message}/>
 					{this.props.mode === 'research_mode' && <Button className="btn-default" onClick={this.toggleMode}>
-						Show Expert Reviewed Data Only
+						Show Summary Data Only
 					</Button>}
 					{this.props.mode === 'default' &&
 					<Button className="btn-default" onClick={() =>this.setState({showModal: true})}>
-						Show All Public Data
+						Show Detail View
 					</Button>}
 					{this.props.mode === 'default' && this.state.showModal &&
 					<Modal onRequestHide={() => this.setState({ showModal: false })}>
@@ -405,7 +405,7 @@ var Database = React.createClass({
 });
 
 // get display name for a given key from VariantTable.js column specification,
-// if we are in expert reviewed mode, search expert reviewed names then fall back to
+// if we are in summary view mode, search summary view names then fall back to
 // all data, otherwise go straight to all data. Finally, if key is not found, replace
 // _ with space in the key and return that.
 function getDisplayName(key) {
@@ -415,7 +415,7 @@ function getDisplayName(key) {
         displayName = columns.find(e => e.prop === key);
         displayName = displayName && displayName.title;
     }
-    // we are not in expert reviewed more, or key wasn't found in expert reviewed columns
+    // we are not in summary view anymore, or key wasn't found in summary view columns
     if (displayName === undefined) {
         displayName = researchModeColumns.find(e => e.prop === key);
         displayName = displayName && displayName.title;
@@ -949,7 +949,7 @@ var VariantDetail = React.createClass({
                                     {this.generateDiffRows(cols, submissions, true)}
                                 </tbody>
                             </Table>
-                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show All Public Data on this Variant" to see these changes.</p>
+                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show Detail View for this Variant" to see these changes.</p>
                         </Col>
                     </Row>
                 );
@@ -978,7 +978,7 @@ var VariantDetail = React.createClass({
                                     {this.generateDiffRows(cols, submissions, true)}
                                 </tbody>
                             </Table>
-                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show All Public Data on this Variant" to see these changes.</p>
+                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show Detail View for this Variant" to see these changes.</p>
                         </Col>
                     </Row>
                 );
@@ -1105,7 +1105,7 @@ var VariantDetail = React.createClass({
                                 {diffRows}
                             </tbody>
                         </Table>
-                        <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show All Public Data on this Variant" to see these changes.</p>
+                        <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show Detail View for this Variant" to see these changes.</p>
                     </Col>
                 </Row>
 
@@ -1114,7 +1114,7 @@ var VariantDetail = React.createClass({
 
                 <Row>
                     <Col md={12} mdOffset={0}>
-                        <DisclaimerModal buttonModal onToggleMode={this.props.toggleMode} text="Show All Public Data on this Variant"/>
+                        <DisclaimerModal buttonModal onToggleMode={this.props.toggleMode} text="Show Detail View for this Variant"/>
                     </Col>
                 </Row>
             </Grid>

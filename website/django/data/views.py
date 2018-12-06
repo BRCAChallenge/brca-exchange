@@ -56,28 +56,34 @@ def variant_counts(request):
     enigma_pathogenic_count = query.filter(Pathogenicity_expert='Pathogenic').count()
     enigma_benign_count = query.filter(Pathogenicity_expert__contains='Benign').count()
     enigma_likely_benign_count = query.filter(Pathogenicity_expert__contains='Likely benign').count()
+    enigma_likely_pathogenic_count = query.filter(Pathogenicity_expert__contains='Likely pathogenic').count()
     query_brca1 = query.filter(Gene_Symbol='BRCA1')
     brca1_enigma_pathogenic_count = query_brca1.filter(Pathogenicity_expert='Pathogenic').count()
     brca1_enigma_benign_count = query_brca1.filter(Pathogenicity_expert__contains='Benign').count()
     brca1_enigma_likely_benign_count = query_brca1.filter(Pathogenicity_expert__contains='Likely benign').count()
+    brca1_enigma_likely_pathogenic_count = query_brca1.filter(Pathogenicity_expert__contains='Likely pathogenic').count()
     query_brca2 = query.filter(Gene_Symbol='BRCA2')
     brca2_enigma_pathogenic_count = query_brca2.filter(Pathogenicity_expert='Pathogenic').count()
     brca2_enigma_benign_count = query_brca2.filter(Pathogenicity_expert__contains='Benign').count()
     brca2_enigma_likely_benign_count = query_brca2.filter(Pathogenicity_expert__contains='Likely benign').count()
+    brca2_enigma_likely_pathogenic_count = query_brca2.filter(Pathogenicity_expert__contains='Likely pathogenic').count()
     response = JsonResponse({
         "total": total_count,
         "brca1": {
             "total": brca1_count,
             "pathogenic": brca1_enigma_pathogenic_count,
             "benign": brca1_enigma_benign_count,
-            "likelyBenign": brca1_enigma_likely_benign_count },
+            "likelyBenign": brca1_enigma_likely_benign_count,
+            "likelyPathogenic": brca1_enigma_likely_pathogenic_count },
         "brca2": {
             "total": brca2_count,
             "pathogenic": brca2_enigma_pathogenic_count,
             "benign": brca2_enigma_benign_count,
-            "likelyBenign": brca2_enigma_likely_benign_count },
+            "likelyBenign": brca2_enigma_likely_benign_count,
+            "likelyPathogenic": brca2_enigma_likely_pathogenic_count },
         "enigma": enigma_count,
         "enigmaPathogenic": enigma_pathogenic_count,
+        "enigmaLikelyPathogenic": enigma_likely_pathogenic_count,
         "enigmaBenign": enigma_benign_count,
         "enigmaLikelyBenign": enigma_likely_benign_count })
     response['Access-Control-Allow-Origin'] = '*'
@@ -112,8 +118,8 @@ def variant_reports(request, variant_id):
             report_query = Report.objects.filter(SCV_ClinVar=key).order_by('-Data_Release_id').select_related('Data_Release')
             report_versions.extend(map(report_to_dict, report_query))
         elif report.Source == "LOVD":
-            key = report.DBID_LOVD
-            report_query = Report.objects.filter(DBID_LOVD=key).order_by('-Data_Release_id').select_related('Data_Release')
+            key = report.Submission_ID_LOVD
+            report_query = Report.objects.filter(Submission_ID_LOVD=key).order_by('-Data_Release_id').select_related('Data_Release')
             report_versions.extend(map(report_to_dict, report_query))
 
     response = JsonResponse({"data": report_versions})
@@ -161,12 +167,14 @@ def report_to_dict(report_object):
     report_dict["Data_Release"]["date"] = report_object.Data_Release.date
     report_dict["Change_Type"] = ChangeType.objects.get(id=report_dict["Change_Type"]).name
 
-    # don't display report diffs prior to April 2018
     if report_object.Source == "ClinVar":
+        # don't display ClinVar report diffs prior to April 2018
         cutoff_date = datetime.strptime('Apr 1 2018  12:00AM', '%b %d %Y %I:%M%p')
     elif report_object.Source == "LOVD":
-        # TODO: update this cutoff date once we're ready to share lovd report diffs
-        cutoff_date = datetime.today()
+        # don't display LOVD report diffs prior to November 4 2018 (we
+        # updated the definition of LOVD submissions in the early November
+        # release, so it only makes sense to show diffs from following releases)
+        cutoff_date = datetime.strptime('Nov 4 2018  12:00AM', '%b %d %Y %I:%M%p')
     if report_dict["Data_Release"]["date"] < cutoff_date:
         report_dict["Diff"] = None
         return report_dict
@@ -176,6 +184,7 @@ def report_to_dict(report_object):
         report_dict["Diff"] = report_diff.report_diff
     except ReportDiff.DoesNotExist:
         report_dict["Diff"] = None
+
 
     return report_dict
 
@@ -282,9 +291,14 @@ def apply_sources(query, include, exclude):
     return query
 
 
+def normalize_filter_values(filterValues):
+    return [fV.replace('Likely Benign', 'Likely benign').replace('Likely Pathogenic', 'Likely pathogenic') for fV in filterValues]
+
+
 def apply_filters(query, filterValues, filters, quotes=''):
     # if there are multiple filters the row must match all the filters
-    for column, value in zip(filters, filterValues):
+    normalizedFilterValues = normalize_filter_values(filterValues)
+    for column, value in zip(filters, normalizedFilterValues):
         if column == 'id':
             query = query.filter(**{column: value})
         else:
@@ -331,6 +345,11 @@ def apply_search(query, search_term, quotes='', release=None):
         NP_009225.1:A280G --> HGVS_Protein.split(':')[0]:Protein_Change
     '''
     search_term = search_term.lower().strip()
+    clinvar_accession = False
+
+    # Accept only full clinvar accession numbers
+    if search_term.startswith('scv') and len(search_term) >= 12:
+        clinvar_accession = True
 
     # Accept genomic coordinates with or without a 'g.' before the position
     if 'chr17:' in search_term and 'g.' not in search_term:
@@ -419,6 +438,18 @@ def apply_search(query, search_term, quotes='', release=None):
             Q(HGVS_cDNA__icontains=suffix) |
             Q(Genomic_Coordinate_hg38__istartswith=suffix) |
             Q(BIC_Nomenclature__istartswith=suffix)
+        )
+    # Handle clinvar accession numbers
+    elif clinvar_accession is True:
+        results = query.filter(
+            Q(SCV_ClinVar__icontains=search_term) |
+            Q(ClinVarAccession_ENIGMA__icontains=search_term)
+        )
+
+        # filter against synonym fields
+        non_synonyms = query.filter(
+            Q(SCV_ClinVar__icontains=search_term) |
+            Q(ClinVarAccession_ENIGMA__icontains=search_term)
         )
 
         # Generic searches (no prefixes)

@@ -88,8 +88,8 @@ var NavBarNew = React.createClass({
 
                     {
                         this.props.mode === 'research_mode'
-                            ? <span id="research-label" className="label label-info" onClick={this.toggleMode}>All Public Data</span>
-                            : <span id="research-label" className="label label-info" onClick={this.toggleMode}>Expert Reviewed</span>
+                            ? <span id="research-label" className="label label-info" onClick={this.toggleMode}>Detail View</span>
+                            : <span id="research-label" className="label label-info" onClick={this.toggleMode}>Summary View</span>
                     }
                 </div>
             </a>
