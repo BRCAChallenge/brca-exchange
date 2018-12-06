@@ -4,12 +4,13 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import django.db.models.deletion
+from django.contrib.postgres.fields import ArrayField
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('data', '0035_add_functional_analysis_fields'),
+        ('data', '0036_add_submission_id_lovd_index'),
     ]
 
     operations = [
@@ -25,6 +26,7 @@ class Migration(migrations.Migration):
                 ('abstract', models.TextField()),
                 ('year', models.IntegerField()),
                 ('pmid', models.IntegerField()),
+                ('deleted', models.BooleanField())
             ],
         ),
         migrations.CreateModel(
@@ -32,7 +34,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('variant_hg38', models.TextField()),
-                ('mentions', models.TextField()),
+                ('mentions', ArrayField(models.TextField())),
+                ('deleted', models.BooleanField()),
                 ('paper', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='data.Paper')),
             ],
         ),
