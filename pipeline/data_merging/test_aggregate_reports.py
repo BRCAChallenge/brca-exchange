@@ -5,10 +5,10 @@ import csv
 from os import path, getcwd
 import aggregate_reports
 
+
 VCF_TESTDATA_FILENAME = path.join(path.dirname(__file__), 'test_files/1000_Genomes.vcf')
 TSV_TESTDATA_FILENAME = path.join(path.dirname(__file__), 'test_files/enigma_from_clinvar.tsv')
 INPUT_DIRECTORY = path.join(path.dirname(__file__), 'test_files/')
-
 
 class TestStringMethods(unittest.TestCase):
 
@@ -81,7 +81,11 @@ class TestStringMethods(unittest.TestCase):
                         "Allele_frequency_SAS_ExAC",
                         "DateSignificanceLastEvaluated_ClinVar",
                         "SCV_Version_ClinVar",
-                        "Synonyms_ClinVar"]
+                        "Synonyms_ClinVar",
+                        "HGVS_Nucleotide_Functional_Assays",
+                        "Log_RNA_Depletion_Functional_Assays",
+                        "Functional_Enrichment_Score_Functional_Assays",
+                        "BX_ID_Functional_Assays"]
 
         self.sources = aggregate_reports.FIELD_DICT.keys() + ["ENIGMA"]
         self.vcf_test_file = VCF_TESTDATA_FILENAME
