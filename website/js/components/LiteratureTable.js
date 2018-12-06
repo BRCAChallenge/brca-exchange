@@ -24,8 +24,7 @@ const pubsOrdering = function(pub1, pub2) {
 };
 
 function formatMatches(matches, count) {
-    let ms = matches.split("|");
-    ms = ms.slice(0, count);
+    let ms = matches.slice(0, count);
 
     return ms.map(match =>
         // we extract entries like <<<some text here>>>, keeping the first < as an indicator that the text is highlighted
