@@ -1,1 +1,1 @@
-This is the BRCA Exchange Clinical Space. Clinical significance for variants, where denoted, is from expert review by the ENIGMA consortium. Additional variant review is ongoing.
+This is the BRCA Exchange Summary View. Clinical significance for variants, where denoted, is from expert review by the ENIGMA consortium. Additional variant review is ongoing.
