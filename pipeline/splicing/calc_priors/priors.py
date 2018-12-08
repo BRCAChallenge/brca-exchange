@@ -1051,11 +1051,11 @@ def getPriorProbProteinSNS(variant, variantData):
             varHGVS = variant["pyhgvs_cDNA"][12:]
         varGene = variant["Gene_Symbol"]
 
-        foundVar = variantData[(varGene, varHGVS)]
         try:
+            foundVar = variantData[(varGene, varHGVS)]
             proteinPrior = float(foundVar["protein_prior"])
-        except ValueError:
-            # it couldn't be parsed as a float
+        except (ValueError, KeyError):
+            # it couldn't be found, or it couldn't be parsed as a float
             proteinPrior = "-"
         enigmaClass = extract.getEnigmaClass(proteinPrior)
 
