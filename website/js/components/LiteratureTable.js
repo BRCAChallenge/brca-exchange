@@ -234,7 +234,7 @@ class LiteratureTable extends React.Component {
         let component = (
             (litResultsExist || !this.props.hideEmptyItems) &&
             <div>
-                <h4>Literature Search Results:</h4>
+                <h4>Literature Search Results: <span className="badge" style={{backgroundColor: '#3f6fff'}}>Beta Feature</span></h4>
                     <Table className='nopointer literature-rows' bordered>
                         <thead>
                             <tr className="active">
@@ -256,13 +256,19 @@ class LiteratureTable extends React.Component {
                         ) : null
                     }
 
-                <ButtonToolbar className='pull-right'>
-                    <Button onClick={this.copyTable.bind(this)}>Copy To Clipboard</Button>
-                    <DropdownButton title="Export" className='pull-right'>
-                        <li><a href={toTSVURL} download='variant-literature.tsv'>Excel (.tsv format)</a></li>
-                        <li><a href={toJSONURL} download='variant-literature.json'>JSON</a></li>
-                    </DropdownButton>
-                </ButtonToolbar>
+                    <div>
+                        <em className="pull-left" style={{marginBottom: '1em'}}>
+                            To report a false positive, or to include a paper that should be in the list, please <a href="mailto:brca-exchange-contact@genomicsandhealth.org">contact us</a>.
+                        </em>
+
+                        <ButtonToolbar className='pull-right'>
+                            <Button onClick={this.copyTable.bind(this)}>Copy To Clipboard</Button>
+                            <DropdownButton title="Export" className='pull-right'>
+                                <li><a href={toTSVURL} download='variant-literature.tsv'>Excel (.tsv format)</a></li>
+                                <li><a href={toJSONURL} download='variant-literature.json'>JSON</a></li>
+                            </DropdownButton>
+                        </ButtonToolbar>
+                    </div>
 
                 <textarea ref='clipboardContent' style={{padding: '0', width: '0', height: '0', marginLeft: '-99999999px' }}/>
             </div>
