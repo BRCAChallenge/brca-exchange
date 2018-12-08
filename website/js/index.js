@@ -1005,12 +1005,40 @@ var VariantDetail = React.createClass({
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
-                    <Col xs={4} sm={4} smOffset={4} md={4} mdOffset={4} className="vcenterblock">
-                        <div className='text-center Variant-detail-title'>
-                            <h3>Variant Detail</h3>
-                        </div>
-                    </Col>
-                    <Col xs={8} sm={4} md={4} className="vcenterblock">
+                    {
+                        (this.props.mode !== "research_mode")
+                            ? (
+                                /* display new header w/genomic coordinates in expert-reviewed mode */
+                                <span>
+                                    <Col md={2}>
+                                        <h3>Variant Details</h3>
+                                    </Col>
+                                    <Col md={8} className="vcenterblock">
+                                        <div className='text-center Variant-detail-title' style={{textAlign: 'center'}}>
+                                            <h1 style={{marginTop: 30}}>{variant.Genomic_Coordinate_hg38}</h1>
+                                            <div><i>or</i></div>
+                                            <h3 style={{marginTop: 10}}>
+                                                {variant['Reference_Sequence']}(<i>{variant['Gene_Symbol']}</i>){`:${variant['HGVS_cDNA'].split(":")[1]}`}
+
+                                                {
+                                                    (variant['HGVS_Protein'] && variant['HGVS_Protein'] !== "None") &&
+                                                        " " + variant['HGVS_Protein'].split(":")[1]
+                                                }
+                                            </h3>
+                                        </div>
+                                    </Col>
+                                </span>
+                            )
+                            : (
+                                /* display old header if we're in research mode */
+                                <Col xs={4} sm={4} smOffset={4} md={4} mdOffset={4} className="vcenterblock">
+                                    <div className='text-center Variant-detail-title'>
+                                        <h3>Variant Details</h3>
+                                    </div>
+                                </Col>
+                            )
+                    }
+                    <Col md={2} className={(this.props.mode !== "research_mode") ? "vlowerblock" : "vcenterblock"}>
                         <div className="Variant-detail-headerbar">
                             <Button
                                 onClick={this.setEmptyRowVisibility.bind(this, !this.state.hideEmptyItems)}
