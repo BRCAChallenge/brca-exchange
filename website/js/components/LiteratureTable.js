@@ -62,12 +62,19 @@ export function authorsList(authors, maxBeforeCut, maxAfterCut, abbrevFirstNames
         // for an author like "Rauscher, Emily A" return "Rauscher EA"
         const [given, rest] = x.trim().split(",", 2);
 
+        if (!rest) {
+            // sometimes we encounter names of orgs or consortiums, e.g., "ENIGMA"
+            // there's no second part there, so we just return the first (aka 'given name') part
+            return given.trim();
+        }
+
         if (abbrevFirstNames) {
             return `${given.trim()} ${rest.trim().split(" ").map(x => x.slice(0, 1)).join("")}`;
         }
         else {
             return `${given.trim()}, ${rest.trim()}`;
         }
+
     });
 
     const abbrevList = authList.length > maxBeforeCut && authList.length > maxAfterCut
