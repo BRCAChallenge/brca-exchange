@@ -1,6 +1,6 @@
 The Literature Search feature provides a list of publications in which a specific variant (and its aliases) are found. This feature uses text mining methods to search the abstract and the body of papers from major journals. If a variant of interest is found within the paper, the publication is listed on its Variant Details Page. Tables and supplementary data files are also searched (1). 
 
-The Literature Search results are displayed near the bottom of the Variant Details page in a table format. This table includes the title, authors, journal, publication date, publisher-provided keywords, the variant alias which matched in the search, and the PubMed ID (PMID). The PubMed ID may be clicked to access the article in PubMed. You may use the “Copy” or “Export” button to copy the table to your clipboard or export it to the file format of your choice. 
+The Literature Search results are displayed near the bottom of the Variant Details page in a table format. This table includes the title, authors, journal, publication date, the variant alias or aliases which matched in the search, the text snippet(s) around the match, and the PubMed ID (PMID). The PubMed ID may be clicked to access the article in PubMed. You may use the “Copy” or “Export” button to copy the table to your clipboard or export it to the file format of your choice.
 
 ##### Methods
 
