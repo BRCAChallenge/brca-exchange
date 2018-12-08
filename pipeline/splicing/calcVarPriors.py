@@ -220,8 +220,9 @@ def test(ctx, length):
 @click.argument("priors", type=click.File("w"))
 @click.pass_context
 def calc(ctx, variants, priors):
-    calc_all(variants, priors,
-             ctx.obj["genome"], ctx.obj["transcripts"], ctx.obj["processes"])
+    with Benchmark("finished processing, duration"):
+        calc_all(variants, priors,
+                 ctx.obj["genome"], ctx.obj["transcripts"], ctx.obj["processes"])
 
 
 if __name__ == "__main__":
