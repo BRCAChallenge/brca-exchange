@@ -99,7 +99,9 @@ const Help = React.createClass({
 
         var helpTiles = help.map(({section, tiles}) =>
             [<h1>{section}</h1>, tiles.map(({name, id, contents, list, reference}) => {
-                let header = [<span id={id || slugify(name)}>{name}</span>];
+                const elemKey = id || slugify(name);
+
+                let header = [<span id={elemKey} key={elemKey}>{name}</span>];
                 // if the user clicks a reference link in a tile header, don't toggle the tile, and open the link.
                 let onSelect = function (e) {
                     if (e.target.classList.contains("help-reference-link")) {
@@ -112,6 +114,7 @@ const Help = React.createClass({
                 if (contents) {
                     body.push(<RawHTML html={contents} />);
                 }
+
                 if (list) {
                     body.push(
                         <ListGroup fill>
@@ -134,7 +137,8 @@ const Help = React.createClass({
                         </small>
                     );
                 }
-                return (<Panel header={header} collapsable={true}
+
+                return (<Panel key={`panel_${elemKey}`} header={header} collapsable={true}
                                defaultExpanded={this.shouldBeExpanded(fragment, fragRegex, {name, id, contents, list})}
                                onSelect={onSelect}
                         >
