@@ -250,7 +250,7 @@ class LiteratureTable extends React.Component {
                     </Table>
 
                     { this.state.papers && this.state.papers.length > this.props.maxRows
-                        ? ( <div style={{textAlign: "center"}}>
+                        ? ( <div style={{textAlign: "center", marginBottom: '1em'}}>
                                 <Link to={`/variant_literature/${this.props.variant.id}`}>
                                     View {`${this.state.papers.length - this.props.maxRows}`} more publications...
                                 </Link>
