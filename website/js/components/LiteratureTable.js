@@ -6,6 +6,8 @@ const React = require('react'),
     backend = require('../backend'),
     _ = require('underscore');
 
+import BetaTag from "./BetaTag";
+
 // Sort first by year, then by PMID (as a proxy for a more specific date of publication?)
 const pubsOrdering = function(pub1, pub2) {
     if (isNaN(pub1.year)) {
@@ -234,11 +236,11 @@ class LiteratureTable extends React.Component {
         let component = (
             (litResultsExist || !this.props.hideEmptyItems) &&
             <div>
-                <h4>Literature Search Results: <span className="badge" style={{backgroundColor: '#3f6fff'}}>Beta Feature</span></h4>
+                <h4>Literature Search Results: <BetaTag margin="0.25em" verticalALign="top" hoverText="Literature Search is a beta feature, so please beware of erroneous or missing results." /></h4>
                     <Table className='nopointer literature-rows' bordered>
                         <thead>
                             <tr className="active">
-                                <th>&nbsp;</th>
+                                <th>Publications Mentioning this Variant</th>
                                 <th style={{width: '12%'}}>Citation Info</th>
                             </tr>
                         </thead>
