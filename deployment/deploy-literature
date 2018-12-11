@@ -47,7 +47,7 @@ fi
 
 if [ "${ENVIRONMENT}" == "beta" ] || [ "${ENVIRONMENT}" == "production" ] ;then
 
-    REMOTELITERATURERELEASES=/var/www/backend/${ENVIRONMENT}/django/downloads/releases/literature
+    REMOTE_LITERATURE_RELEASES=/var/www/backend/${ENVIRONMENT}/django/downloads/releases/literature
 
     LITERATURE_RESULTS_DIRECTORY_NAME=$(basename ${LITERATURE_RESULTS} .json)
 
@@ -61,13 +61,13 @@ if [ "${ENVIRONMENT}" == "beta" ] || [ "${ENVIRONMENT}" == "production" ] ;then
         $(declare -f add_literature_to_db)
 
         source /var/www/backend/${ENVIRONMENT}/virtualenv/bin/activate
-        add_literature_to_db ${REMOTE_LITERATURE_RESULTS} /var/www/backend/${ENVIRONMENT}/django/manage.py
+        add_literature_to_db ${REMOTE_LITERATURE_RESULTS_TMP} /var/www/backend/${ENVIRONMENT}/django/manage.py
 
         echo "Installing literature in downloads section"
-        mkdir -p ${REMOTELITERATURERELEASES}/${LITERATURE_RESULTS_DIRECTORY_NAME}
-        sudo cp ${REMOTE_LITERATURE_RESULTS_TMP} ${REMOTELITERATURERELEASES}/${LITERATURE_RESULTS_DIRECTORY_NAME}/${LITERATURE_RESULTS_DIRECTORY_NAME}.json
+        mkdir -p ${REMOTE_LITERATURE_RELEASES}/${LITERATURE_RESULTS_DIRECTORY_NAME}
+        sudo cp ${REMOTE_LITERATURE_RESULTS_TMP} ${REMOTE_LITERATURE_RELEASES}/${LITERATURE_RESULTS_DIRECTORY_NAME}/${LITERATURE_RESULTS_DIRECTORY_NAME}.json
         # swap out current_literature_results with new literature results
-        sudo cp ${REMOTELITERATURERELEASES}/${LITERATURE_RESULTS_DIRECTORY_NAME}/${LITERATURE_RESULTS_DIRECTORY_NAME}.json /var/www/backend/${ENVIRONMENT}/django/downloads/releases/current_literature_results.json
+        sudo cp ${REMOTE_LITERATURE_RELEASES}/${LITERATURE_RESULTS_DIRECTORY_NAME}/${LITERATURE_RESULTS_DIRECTORY_NAME}.json /var/www/backend/${ENVIRONMENT}/django/downloads/releases/current_literature_results.json
 
 ENDSSH
 
