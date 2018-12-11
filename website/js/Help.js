@@ -113,6 +113,7 @@ const Help = React.createClass({
                 if (contents) {
                     body.push(<RawHTML html={contents} />);
                 }
+
                 if (list) {
                     body.push(
                         <ListGroup fill>
