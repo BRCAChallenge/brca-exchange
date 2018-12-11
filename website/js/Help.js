@@ -2,6 +2,7 @@
 'use strict';
 
 import classNames from "classnames";
+import BetaTag from "./components/BetaTag";
 const React = require('react');
 const RawHTML = require('./RawHTML');
 const {Grid, Col, Row, Panel, ListGroup, ListGroupItem, Glyphicon, CollapsableMixin, BootstrapMixin} = require('react-bootstrap');
@@ -98,7 +99,7 @@ const Help = React.createClass({
         const fragRegex = new RegExp(`(id=${fragment}|id="${fragment}")`);
 
         var helpTiles = help.map(({section, tiles}) =>
-            [<h1>{section}</h1>, tiles.map(({name, id, contents, list, reference}) => {
+            [<h1>{section}</h1>, tiles.map(({name, id, contents, list, reference, isBeta}) => {
                 let header = [<span id={id || slugify(name)}>{name}</span>];
                 // if the user clicks a reference link in a tile header, don't toggle the tile, and open the link.
                 let onSelect = function (e) {
@@ -134,6 +135,13 @@ const Help = React.createClass({
                         </small>
                     );
                 }
+
+                if (isBeta) {
+                    header.push(
+                        <BetaTag />
+                    );
+                }
+
                 return (<Panel header={header} collapsable={true}
                                defaultExpanded={this.shouldBeExpanded(fragment, fragRegex, {name, id, contents, list})}
                                onSelect={onSelect}

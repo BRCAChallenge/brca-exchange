@@ -272,7 +272,8 @@ const helpContentResearch = [
             },
             {
                 name: "Literature Search Results",
-                contents: require("../content/help/research/literature-search.md")
+                contents: require("../content/help/research/literature-search.md"),
+                isBeta: true
             },
         ]
     }
