@@ -5,8 +5,8 @@
 
 import SourceReportsTile from "./components/SourceReportsTile";
 import AlleleFrequenciesTile from "./components/AlleleFrequenciesTile";
+import LiteratureTable from "./components/LiteratureTable";
 import SilicoPredTile from "./components/insilicopred/SilicoPredTile";
-
 import MupitStructure from './MupitStructure';
 
 // shims for older browsers
@@ -1102,7 +1102,24 @@ var VariantDetail = React.createClass({
 
                 <Row>
                     <Col md={12} className="variant-history-col">
-                        <h3>{variant["HGVS_cDNA"]}</h3>
+                        <h3>
+                            {variant['Reference_Sequence']}(<i>{variant['Gene_Symbol']}</i>){`:${variant['HGVS_cDNA'].split(":")[1]}`}
+                            {
+                                (variant['HGVS_Protein'] && variant['HGVS_Protein'] !== "None") &&
+                                " " + variant['HGVS_Protein'].split(":")[1]
+                            }
+                        </h3>
+                    </Col>
+                </Row>
+
+                <Row>
+                    <Col md={12} className="variant-literature-col">
+                        <LiteratureTable maxRows={10} variant={variant} hideEmptyItems={this.state.hideEmptyItems} />
+                    </Col>
+                </Row>
+
+                <Row>
+                    <Col md={12} className="variant-history-col">
                         <h4>Previous Versions of this Variant:</h4>
                         <Table className='variant-history nopointer' responsive bordered>
                             <thead>
@@ -1194,6 +1211,7 @@ var routes = (
         <Route path='reset/:resetToken' handler={ChangePassword}/>
         <Route path='variants' />
         <Route path='variant/:id' handler={VariantDetail}/>
+        <Route path='variant_literature/:id' handler={LiteratureTable}/>
         <Route path='releases' handler={Releases}/>
         <Route path='release/:id' handler={Release}/>
     </Route>

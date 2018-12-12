@@ -3,6 +3,7 @@ import re
 import tempfile
 import json
 from operator import __or__
+from django.core import serializers
 from django.db import connection
 from django.db.models import Q
 from django.db.models import Value
@@ -11,7 +12,8 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.gzip import gzip_page
 
-from .models import Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType, Report, ReportDiff, InSilicoPriors
+from .models import Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType, Report, ReportDiff, \
+        InSilicoPriors, VariantPaper, Paper
 from django.views.decorators.http import require_http_methods
 
 # GA4GH related imports
@@ -124,6 +126,15 @@ def variant_reports(request, variant_id):
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
+def variant_papers(request):
+    variant_id = int(request.GET.get('variant_id'))
+    variant = Variant.objects.get(id=variant_id)
+    variant_name = variant.Genomic_Coordinate_hg38
+    variantpapers = VariantPaper.objects.select_related('paper').filter(variant_hg38=variant_name).all()
+    variantpapers = map(lambda vp: dict(model_to_dict(vp.paper), **{"mentions": vp.mentions}), variantpapers)
+    response = JsonResponse({"data": list(variantpapers)}, safe=False)
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
 
 def variant_to_dict(variant_object):
     change_types_map = {x['name']:x['id'] for x in ChangeType.objects.values().all()}

@@ -1,0 +1,74 @@
+#!/bin/bash
+set -o nounset
+set -o errexit
+
+# This script expects two arguments:
+
+# 1. Environment (beta, production, or local)
+
+# 2. A path to literature search results in json format.
+
+# Example:
+
+# Running `./deployment/deploy-literature beta PATH/TO/literature.json`
+# would add the literature results to the beta database and put files in the correct
+# locations for access, storage and download.
+
+function add_literature_to_db {
+    LITERATURE=$1
+    MANAGE_SCRIPT=$2
+
+    echo "Adding literature to database"
+
+    # add data to DB
+    python ${MANAGE_SCRIPT} add_papers ${LITERATURE}
+}
+
+export HOST=${HOST:-brcaexchange.org}
+USER=brca
+
+# Expects environment (local,beta or production) as first argument.
+ENVIRONMENT=$1
+if [ "${ENVIRONMENT}" != "beta" ] && [ "${ENVIRONMENT}" != "production" ] && [ "${ENVIRONMENT}" != "local" ]  ;then
+    echo "ERROR: Please only enter 'local', 'beta' or 'production' as environment."
+    exit 1
+fi
+
+LITERATURE_RESULTS=$2
+
+if [ "${ENVIRONMENT}" == "local" ] ;then
+    # Get deployment directory to have relative path to add_papers script
+    DEPLOYMENTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+    cd "$DEPLOYMENTDIR"
+
+    add_literature_to_db ${LITERATURE_RESULTS} "../website/django/manage.py"
+fi
+
+if [ "${ENVIRONMENT}" == "beta" ] || [ "${ENVIRONMENT}" == "production" ] ;then
+
+    REMOTE_LITERATURE_RELEASES=/var/www/backend/${ENVIRONMENT}/django/downloads/releases/literature
+
+    LITERATURE_RESULTS_DIRECTORY_NAME=$(basename ${LITERATURE_RESULTS} .json)
+
+    rsync -a ${LITERATURE_RESULTS} ${USER}@${HOST}:/tmp
+
+    REMOTE_LITERATURE_RESULTS_TMP=/tmp/${LITERATURE_RESULTS_DIRECTORY_NAME}.json
+
+    ssh -l${USER} ${HOST} <<-ENDSSH
+        set -o errexit
+
+        $(declare -f add_literature_to_db)
+
+        source /var/www/backend/${ENVIRONMENT}/virtualenv/bin/activate
+        add_literature_to_db ${REMOTE_LITERATURE_RESULTS_TMP} /var/www/backend/${ENVIRONMENT}/django/manage.py
+
+        echo "Installing literature in downloads section"
+        mkdir -p ${REMOTE_LITERATURE_RELEASES}/${LITERATURE_RESULTS_DIRECTORY_NAME}
+        sudo cp ${REMOTE_LITERATURE_RESULTS_TMP} ${REMOTE_LITERATURE_RELEASES}/${LITERATURE_RESULTS_DIRECTORY_NAME}/${LITERATURE_RESULTS_DIRECTORY_NAME}.json
+        # swap out current_literature_results with new literature results
+        sudo cp ${REMOTE_LITERATURE_RELEASES}/${LITERATURE_RESULTS_DIRECTORY_NAME}/${LITERATURE_RESULTS_DIRECTORY_NAME}.json /var/www/backend/${ENVIRONMENT}/django/downloads/releases/current_literature_results.json
+
+ENDSSH
+
+fi
