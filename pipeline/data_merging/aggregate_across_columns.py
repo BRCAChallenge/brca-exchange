@@ -144,7 +144,7 @@ def hgvsCdnaUpdate(row):
 def hgvsProteinUpdate(row):
     protein = row["HGVS_Protein"]
     if protein == EMPTY:
-        if row["Protein_ClinVar"] == EMPTY:
+        if row["Protein_ClinVar"] != EMPTY:
             protein = row["Protein_ClinVar"]
         elif row["HGVS_protein_LOVD"] != EMPTY:
             protein = row["HGVS_protein_LOVD"]
