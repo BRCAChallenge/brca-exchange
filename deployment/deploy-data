@@ -4,7 +4,7 @@ set -o errexit
 
 # This script expects two arguments:
 
-# 1. Environment (beta, production, or local)
+# 1. Environment (beta, production, dev, or local)
 
 # 2. A path to a release archive of the format release-{mm-dd-yy}.tar.gz
 
@@ -40,13 +40,19 @@ function add_release_tar_to_db {
     python ${MANAGE_SCRIPT} addrelease ${DATA} ${METADATA} ${REMOVED} ${DIFFJSON} ${REPORTS} ${REMOVEDREPORTS} ${REPORTSDIFF}
 }
 
-export HOST=${HOST:-brcaexchange.org}
+
+if [ "${ENVIRONMENT}" == "dev" ] ;then
+    export HOST=${HOST:-brcaexchange-dev.cloudapp.net}
+else
+    export HOST=${HOST:-brcaexchange.org}
+fi
+
 USER=brca
 
-# Expects environment (local,beta or production) as first argument.
+# Expects environment (local, beta, dev or production) as first argument.
 ENVIRONMENT=$1
-if [ "${ENVIRONMENT}" != "beta" ] && [ "${ENVIRONMENT}" != "production" ] && [ "${ENVIRONMENT}" != "local" ]  ;then
-    echo "ERROR: Please only enter 'local', 'beta' or 'production' as environment."
+if [ "${ENVIRONMENT}" != "beta" ] && [ "${ENVIRONMENT}" != "production" ] && [ "${ENVIRONMENT}" != "local" ] && [ "${ENVIRONMENT}" != "dev" ]  ;then
+    echo "ERROR: Please only enter 'local', 'beta', 'dev', or 'production' as environment."
     exit 1
 fi
 
@@ -61,7 +67,7 @@ if [ "${ENVIRONMENT}" == "local" ] ;then
     add_release_tar_to_db /tmp/brca_tar_staging ${RELEASE_ARCHIVE_PATH} "../website/django/manage.py"
 fi
 
-if [ "${ENVIRONMENT}" == "beta" ] || [ "${ENVIRONMENT}" == "production" ] ;then
+if [ "${ENVIRONMENT}" == "beta" ] || [ "${ENVIRONMENT}" == "production" ] || [ "${ENVIRONMENT}" == "dev" ] ;then
 
     REMOTERELEASES=/var/www/backend/${ENVIRONMENT}/django/downloads/releases
 
