@@ -50,7 +50,6 @@ else
     export HOST=${HOST:-brcaexchange.org}
 fi
 
-
 if [ "${ENVIRONMENT}" != "beta" ] && [ "${ENVIRONMENT}" != "production" ] && [ "${ENVIRONMENT}" != "local" ] && [ "${ENVIRONMENT}" != "dev" ]  ;then
     echo "ERROR: Please only enter 'local', 'beta', 'dev', or 'production' as environment."
     exit 1
