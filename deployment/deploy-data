@@ -40,6 +40,9 @@ function add_release_tar_to_db {
     python ${MANAGE_SCRIPT} addrelease ${DATA} ${METADATA} ${REMOVED} ${DIFFJSON} ${REPORTS} ${REMOVEDREPORTS} ${REPORTSDIFF}
 }
 
+# Expects environment (local, beta, dev or production) as first argument.
+ENVIRONMENT=$1
+USER=brca
 
 if [ "${ENVIRONMENT}" == "dev" ] ;then
     export HOST=${HOST:-brcaexchange-dev.cloudapp.net}
@@ -47,10 +50,7 @@ else
     export HOST=${HOST:-brcaexchange.org}
 fi
 
-USER=brca
 
-# Expects environment (local, beta, dev or production) as first argument.
-ENVIRONMENT=$1
 if [ "${ENVIRONMENT}" != "beta" ] && [ "${ENVIRONMENT}" != "production" ] && [ "${ENVIRONMENT}" != "local" ] && [ "${ENVIRONMENT}" != "dev" ]  ;then
     echo "ERROR: Please only enter 'local', 'beta', 'dev', or 'production' as environment."
     exit 1
@@ -68,6 +68,11 @@ if [ "${ENVIRONMENT}" == "local" ] ;then
 fi
 
 if [ "${ENVIRONMENT}" == "beta" ] || [ "${ENVIRONMENT}" == "production" ] || [ "${ENVIRONMENT}" == "dev" ] ;then
+
+    if [ "${ENVIRONMENT}" == "dev" ] ;then
+        # the website is run from the beta directory on dev
+        ENVIRONMENT="beta"
+    fi
 
     REMOTERELEASES=/var/www/backend/${ENVIRONMENT}/django/downloads/releases
 
