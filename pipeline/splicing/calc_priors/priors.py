@@ -1040,8 +1040,6 @@ def getPriorProbProteinSNS(variant, variantData):
     Returns a dictionary containing:
       the variant's protein prior probability and enigma class for that prior
     """
-    proteinPrior = "-"
-    enigmaClass = "-"
 
     if extract.getVarType(variant) == "substitution":
         varHGVS = variant["HGVS_cDNA"]
@@ -1054,10 +1052,11 @@ def getPriorProbProteinSNS(variant, variantData):
         try:
             foundVar = variantData[(varGene, varHGVS)]
             proteinPrior = float(foundVar["protein_prior"])
+            enigmaClass = extract.getEnigmaClass(proteinPrior)
         except (ValueError, KeyError):
             # it couldn't be found, or it couldn't be parsed as a float
             proteinPrior = "-"
-        enigmaClass = extract.getEnigmaClass(proteinPrior)
+            enigmaClass = "-"
 
         return {"priorProb": proteinPrior,
                 "enigmaClass": enigmaClass}
