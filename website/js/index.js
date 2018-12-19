@@ -5,8 +5,8 @@
 
 import SourceReportsTile from "./components/SourceReportsTile";
 import AlleleFrequenciesTile from "./components/AlleleFrequenciesTile";
+import LiteratureTable from "./components/LiteratureTable";
 import SilicoPredTile from "./components/insilicopred/SilicoPredTile";
-
 import MupitStructure from './MupitStructure';
 
 // shims for older browsers
@@ -109,6 +109,7 @@ var Footer = React.createClass({
                         <li><a href="/about/history">About</a></li>
                         <li><a href="/variants">Variants</a></li>
                         <li><a href="/help">Help</a></li>
+                        <li><a href="/about/app">Mobile App</a></li>
                         <li><a href="/about/api">API</a></li>
                     </ul>
                 </div>
@@ -1005,12 +1006,40 @@ var VariantDetail = React.createClass({
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
-                    <Col xs={4} sm={4} smOffset={4} md={4} mdOffset={4} className="vcenterblock">
-                        <div className='text-center Variant-detail-title'>
-                            <h3>Variant Detail</h3>
-                        </div>
-                    </Col>
-                    <Col xs={8} sm={4} md={4} className="vcenterblock">
+                    {
+                        (this.props.mode !== "research_mode")
+                            ? (
+                                /* display new header w/genomic coordinates in expert-reviewed mode */
+                                <span>
+                                    <Col md={2}>
+                                        <h3>Variant Details</h3>
+                                    </Col>
+                                    <Col md={8} className="vcenterblock">
+                                        <div className='text-center Variant-detail-title' style={{textAlign: 'center'}}>
+                                            <h1 style={{marginTop: 30}}>{variant.Genomic_Coordinate_hg38}</h1>
+                                            <div><i>or</i></div>
+                                            <h3 style={{marginTop: 10}}>
+                                                {variant['Reference_Sequence']}(<i>{variant['Gene_Symbol']}</i>){`:${variant['HGVS_cDNA'].split(":")[1]}`}
+
+                                                {
+                                                    (variant['HGVS_Protein'] && variant['HGVS_Protein'] !== "None") &&
+                                                        " " + variant['HGVS_Protein'].split(":")[1]
+                                                }
+                                            </h3>
+                                        </div>
+                                    </Col>
+                                </span>
+                            )
+                            : (
+                                /* display old header if we're in research mode */
+                                <Col xs={4} sm={4} smOffset={4} md={4} mdOffset={4} className="vcenterblock">
+                                    <div className='text-center Variant-detail-title'>
+                                        <h3>Variant Details</h3>
+                                    </div>
+                                </Col>
+                            )
+                    }
+                    <Col md={2} className={(this.props.mode !== "research_mode") ? "vlowerblock" : "vcenterblock"}>
                         <div className="Variant-detail-headerbar">
                             <Button
                                 onClick={this.setEmptyRowVisibility.bind(this, !this.state.hideEmptyItems)}
@@ -1074,7 +1103,24 @@ var VariantDetail = React.createClass({
 
                 <Row>
                     <Col md={12} className="variant-history-col">
-                        <h3>{variant["HGVS_cDNA"]}</h3>
+                        <h3>
+                            {variant['Reference_Sequence']}(<i>{variant['Gene_Symbol']}</i>){`:${variant['HGVS_cDNA'].split(":")[1]}`}
+                            {
+                                (variant['HGVS_Protein'] && variant['HGVS_Protein'] !== "None") &&
+                                " " + variant['HGVS_Protein'].split(":")[1]
+                            }
+                        </h3>
+                    </Col>
+                </Row>
+
+                <Row>
+                    <Col md={12} className="variant-literature-col">
+                        <LiteratureTable maxRows={10} variant={variant} hideEmptyItems={this.state.hideEmptyItems} />
+                    </Col>
+                </Row>
+
+                <Row>
+                    <Col md={12} className="variant-history-col">
                         <h4>Previous Versions of this Variant:</h4>
                         <Table className='variant-history nopointer' responsive bordered>
                             <thead>
@@ -1166,6 +1212,7 @@ var routes = (
         <Route path='reset/:resetToken' handler={ChangePassword}/>
         <Route path='variants' />
         <Route path='variant/:id' handler={VariantDetail}/>
+        <Route path='variant_literature/:id' handler={LiteratureTable}/>
         <Route path='releases' handler={Releases}/>
         <Route path='release/:id' handler={Release}/>
     </Route>
