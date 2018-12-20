@@ -1386,6 +1386,7 @@ class MergeVCFsIntoTSVFile(luigi.Task):
         yield CopyEXLOVDOutputToOutputDir()
         yield CopySharedLOVDOutputToOutputDir()
         yield ExtractEnigmaFromClinvar()
+        yield CopyFindlayBRCA1RingFunctionScoresOutputToOutputDir()
 
     def output(self):
         artifacts_dir = create_path_if_nonexistent(PipelineParams().output_dir + "/release/artifacts/")
