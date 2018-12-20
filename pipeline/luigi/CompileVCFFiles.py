@@ -1249,7 +1249,6 @@ class ExtractEnigmaFromClinvar(luigi.Task):
 #             FUNCTIONAL ASSAYS               #
 ###############################################
 
-Findlay_BRCA1_Ring_function_scores
 
 class DownloadFindlayBRCA1RingFunctionScoresInputFile(luigi.Task):
     findlay_BRCA1_ring_function_scores_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/findlay_BRCA1_ring_function_scores.tsv',
