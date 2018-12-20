@@ -21,7 +21,7 @@ def main():
                               "ExAC": 0,
                               "BIC": 0,
                               "ESP": 0,
-                              "Functional_Assays": 0
+                              "Findlay_BRCA1_Ring_Function_Scores": 0
                              }
 
     num_variants_by_change_type = {

@@ -1249,31 +1249,27 @@ class ExtractEnigmaFromClinvar(luigi.Task):
 #             FUNCTIONAL ASSAYS               #
 ###############################################
 
+Findlay_BRCA1_Ring_function_scores
 
-
-class DownloadFunctionalAssayInputFile(luigi.Task):
-    # Downloads functional assays
-
-    functional_assays_file = luigi.Parameter(default='', description='path, where the functional assays data will be stored')
-
-    functional_assays_data_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/functional_assays.tsv',
-                                            description='URL to download functional assays data from')
+class DownloadFindlayBRCA1RingFunctionScoresInputFile(luigi.Task):
+    findlay_BRCA1_ring_function_scores_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/findlay_BRCA1_ring_function_scores.tsv',
+                                            description='URL to download findlay_BRCA1_ring_function_scores data from')
 
     def output(self):
-        return luigi.LocalTarget(PipelineParams().file_parent_dir + "/functional_assays/functional_assays.tsv")
+        return luigi.LocalTarget(PipelineParams().file_parent_dir + "/functional_assays/findlay_BRCA1_ring_function_scores.tsv")
 
     def run(self):
         create_path_if_nonexistent(os.path.dirname(self.output().path))
-        data = urlopen_with_retry(self.functional_assays_data_url).read()
+        data = urlopen_with_retry(self.findlay_BRCA1_ring_function_scores_url).read()
         with open(self.output().path, "wb") as f:
             f.write(data)
 
 
-@requires(DownloadFunctionalAssayInputFile)
-class ParseFunctionalAssays(luigi.Task):
+@requires(DownloadFindlayBRCA1RingFunctionScoresInputFile)
+class ParseFindlayBRCA1RingFunctionScores(luigi.Task):
 
     def output(self):
-        return luigi.LocalTarget(PipelineParams().file_parent_dir + "/functional_assays/functional_assays_clean.tsv")
+        return luigi.LocalTarget(PipelineParams().file_parent_dir + "/functional_assays/findlay_BRCA1_ring_function_scores.tsv")
 
     def run(self):
         brca_resources_dir = PipelineParams().resources_dir
@@ -1292,11 +1288,11 @@ class ParseFunctionalAssays(luigi.Task):
         check_file_for_contents(self.output().path)
 
 
-@requires(ParseFunctionalAssays)
-class ConvertFunctionalAssaysToVCF(luigi.Task):
+@requires(ParseFindlayBRCA1RingFunctionScores)
+class ConvertFindlayBRCA1RingFunctionScoresToVCF(luigi.Task):
 
     def output(self):
-        return luigi.LocalTarget(PipelineParams().file_parent_dir + "/functional_assays/functional_assays.hg19.vcf")
+        return luigi.LocalTarget(PipelineParams().file_parent_dir + "/functional_assays/findlay_BRCA1_ring_function_scores.hg19.vcf")
 
     def run(self):
         brca_resources_dir = PipelineParams().resources_dir
@@ -1307,7 +1303,7 @@ class ConvertFunctionalAssaysToVCF(luigi.Task):
         args = ["python", "functional_assays_to_vcf.py", "-i", self.input().path, "-o",
                 self.output().path, "-a", "functionalAssayAnnotation",
                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa", "-e", artifacts_dir + "/functional_assays_error_variants.txt"]
+                brca_resources_dir + "/hg19.fa", "-e", artifacts_dir + "/findlay_BRCA1_ring_function_scores_error_variants.txt"]
 
         print "Running functional_assays_to_vcf with the following args: %s" % (args)
 
@@ -1317,61 +1313,61 @@ class ConvertFunctionalAssaysToVCF(luigi.Task):
         check_file_for_contents(self.output().path)
 
 
-@requires(ConvertFunctionalAssaysToVCF)
-class CrossmapFunctionalAssays(luigi.Task):
+@requires(ConvertFindlayBRCA1RingFunctionScoresToVCF)
+class CrossmapFindlayBRCA1RingFunctionScores(luigi.Task):
 
     def output(self):
         functional_assays_file_dir = PipelineParams().file_parent_dir + "/functional_assays"
-        return luigi.LocalTarget(functional_assays_file_dir + "/functional_assays.hg38.vcf")
+        return luigi.LocalTarget(functional_assays_file_dir + "/findlay_BRCA1_ring_function_scores.hg38.vcf")
 
     def run(self):
         functional_assays_file_dir = PipelineParams().file_parent_dir + "/functional_assays"
         brca_resources_dir = PipelineParams().resources_dir
 
         args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz",
-                functional_assays_file_dir + "/functional_assays.hg19.vcf", brca_resources_dir + "/hg38.fa",
-                functional_assays_file_dir + "/functional_assays.hg38.vcf"]
+                functional_assays_file_dir + "/findlay_BRCA1_ring_function_scores.hg19.vcf", brca_resources_dir + "/hg38.fa",
+                functional_assays_file_dir + "/findlay_BRCA1_ring_function_scores.hg38.vcf"]
         print "Running CrossMap.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        check_file_for_contents(functional_assays_file_dir + "/functional_assays.hg38.vcf")
+        check_file_for_contents(functional_assays_file_dir + "/findlay_BRCA1_ring_function_scores.hg38.vcf")
 
 
-@requires(CrossmapFunctionalAssays)
-class SortFunctionalAssays(luigi.Task):
+@requires(CrossmapFindlayBRCA1RingFunctionScores)
+class SortFindlayBRCA1RingFunctionScores(luigi.Task):
 
     def output(self):
         functional_assays_file_dir = PipelineParams().file_parent_dir + "/functional_assays"
-        return luigi.LocalTarget(functional_assays_file_dir + "/functional_assays.sorted.hg38.vcf")
+        return luigi.LocalTarget(functional_assays_file_dir + "/findlay_BRCA1_ring_function_scores.sorted.hg38.vcf")
 
     def run(self):
         functional_assays_file_dir = PipelineParams().file_parent_dir + "/functional_assays"
 
-        sorted_functional_assays = functional_assays_file_dir + "/functional_assays.sorted.hg38.vcf"
-        writable_sorted_functional_assays = open(sorted_functional_assays, 'w')
-        args = ["vcf-sort", functional_assays_file_dir + "/functional_assays.hg38.vcf"]
+        sorted_findlay_BRCA1_ring_function_scores = functional_assays_file_dir + "/findlay_BRCA1_ring_function_scores.sorted.hg38.vcf"
+        writable_sorted_findlay_BRCA1_ring_function_scores = open(sorted_findlay_BRCA1_ring_function_scores, 'w')
+        args = ["vcf-sort", functional_assays_file_dir + "/findlay_BRCA1_ring_function_scores.hg38.vcf"]
         print "Running vcf-sort with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=writable_sorted_functional_assays, stderr=subprocess.PIPE)
+        sp = subprocess.Popen(args, stdout=writable_sorted_findlay_BRCA1_ring_function_scores, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
-        print "Sorted hg38 vcf file into %s" % (writable_sorted_functional_assays)
+        print "Sorted hg38 vcf file into %s" % (writable_sorted_findlay_BRCA1_ring_function_scores)
 
-        check_file_for_contents(functional_assays_file_dir + "/functional_assays.sorted.hg38.vcf")
+        check_file_for_contents(functional_assays_file_dir + "/findlay_BRCA1_ring_function_scores.sorted.hg38.vcf")
 
 
-@requires(SortFunctionalAssays)
-class CopyFunctionalAssaysOutputToOutputDir(luigi.Task):
+@requires(SortFindlayBRCA1RingFunctionScores)
+class CopyFindlayBRCA1RingFunctionScoresOutputToOutputDir(luigi.Task):
 
     def output(self):
-        return luigi.LocalTarget(PipelineParams().output_dir + "/functional_assays.sorted.hg38.vcf")
+        return luigi.LocalTarget(PipelineParams().output_dir + "/findlay_BRCA1_ring_function_scores.sorted.hg38.vcf")
 
     def run(self):
         functional_assays_file_dir = PipelineParams().file_parent_dir + "/functional_assays"
         create_path_if_nonexistent(PipelineParams().output_dir)
 
-        copy(functional_assays_file_dir + "/functional_assays.sorted.hg38.vcf", PipelineParams().output_dir)
+        copy(functional_assays_file_dir + "/findlay_BRCA1_ring_function_scores.sorted.hg38.vcf", PipelineParams().output_dir)
 
-        check_file_for_contents(PipelineParams().output_dir + "/functional_assays.sorted.hg38.vcf")
+        check_file_for_contents(PipelineParams().output_dir + "/findlay_BRCA1_ring_function_scores.sorted.hg38.vcf")
 
 
 

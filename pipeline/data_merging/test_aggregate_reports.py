@@ -82,10 +82,10 @@ class TestStringMethods(unittest.TestCase):
                         "DateSignificanceLastEvaluated_ClinVar",
                         "SCV_Version_ClinVar",
                         "Synonyms_ClinVar",
-                        "HGVS_Nucleotide_Functional_Assays",
-                        "Log_RNA_Depletion_Functional_Assays",
-                        "Functional_Enrichment_Score_Functional_Assays",
-                        "BX_ID_Functional_Assays"]
+                        "HGVS_Nucleotide_Findlay_BRCA1_Ring_Function_Scores",
+                        "Log_RNA_Depletion_Findlay_BRCA1_Ring_Function_Scores",
+                        "Functional_Enrichment_Score_Findlay_BRCA1_Ring_Function_Scores",
+                        "BX_ID_Findlay_BRCA1_Ring_Function_Scores"]
 
         self.sources = aggregate_reports.FIELD_DICT.keys() + ["ENIGMA"]
         self.vcf_test_file = VCF_TESTDATA_FILENAME

@@ -35,6 +35,7 @@ def parse_args():
                         help='Whole path to genome file. Default: (/hive/groups/cgl/brca/phase1/data/resources/hg19.fa)')
     parser.add_argument('-r', '--rpath', default='/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.gp',
                         help='Whole path to refSeq file. Default: (/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.gp)')
+    parser.add_argument('-s', '--source', default='FunctionalAssay')
 
     options = parser.parse_args()
     return options
@@ -48,6 +49,7 @@ def main():
     genome_path = options.gpath
     refseq_path = options.rpath
     errorsFile = options.errors
+    source = options.source
 
     with open(refseq_path) as infile:
         transcripts = hgvs_utils.read_transcripts(infile)
@@ -66,7 +68,7 @@ def main():
 
     # print header lines to vcf file
     print('##fileformat=VCFv4.0', file=vcfFile)
-    print('##source=functionalAssay', file=vcfFile)
+    print('##source={0}', source, file=vcfFile)
     print('##reference=GRCh37', file=vcfFile)
     for annotation, description in annotDict.items():
         print('##INFO=<ID={0},Number=.,Type=String,Description="{1}">'.format(annotation.replace(' ', '_'), description), file=vcfFile)
