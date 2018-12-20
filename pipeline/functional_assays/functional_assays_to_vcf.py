@@ -68,7 +68,7 @@ def main():
 
     # print header lines to vcf file
     print('##fileformat=VCFv4.0', file=vcfFile)
-    print('##source={0}', source, file=vcfFile)
+    print('##source={0}'.format(source), file=vcfFile)
     print('##reference=GRCh37', file=vcfFile)
     for annotation, description in annotDict.items():
         print('##INFO=<ID={0},Number=.,Type=String,Description="{1}">'.format(annotation.replace(' ', '_'), description), file=vcfFile)
