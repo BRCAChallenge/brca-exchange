@@ -1245,6 +1245,21 @@ class ExtractEnigmaFromClinvar(luigi.Task):
         copy(self.output().path, PipelineParams().output_dir)
 
 
+@requires(ExtractEnigmaFromClinvar)
+class CopyEnigmaOutputToOutputDir(luigi.Task):
+    def output(self):
+        return luigi.LocalTarget(PipelineParams().output_dir + "/enigma_from_clinvar.tsv")
+
+    def run(self):
+        enigma_file_dir = PipelineParams().file_parent_dir + '/enigma'
+        create_path_if_nonexistent(PipelineParams().output_dir)
+
+        copy(enigma_file_dir + "/enigma_from_clinvar.tsv", PipelineParams().output_dir)
+
+        check_file_for_contents(PipelineParams().output_dir + "/enigma_from_clinvar.tsv")
+
+
+
 ###############################################
 #             FUNCTIONAL ASSAYS               #
 ###############################################
@@ -1386,7 +1401,7 @@ class MergeVCFsIntoTSVFile(luigi.Task):
         yield CopyEXACOutputToOutputDir()
         yield CopyEXLOVDOutputToOutputDir()
         yield CopySharedLOVDOutputToOutputDir()
-        yield ExtractEnigmaFromClinvar()
+        yield CopyEnigmaOutputToOutputDir()
         yield CopyFindlayBRCA1RingFunctionScoresOutputToOutputDir()
 
     def output(self):
