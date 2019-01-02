@@ -606,7 +606,7 @@ class ConvertEXLOVDBRCA1ExtractToVCF(luigi.Task):
         args = ["./lovd2vcf.py", "-i", ex_lovd_file_dir + "/BRCA1.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", "-a", "exLOVDAnnotation",
                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa", "-e", artifacts_dir + "/exLOVD_BRCA1_error_variants.txt",
+                brca_resources_dir + "/hg19.fa", "-e", artifacts_dir + "exLOVD_BRCA1_error_variants.txt",
                 "-s", "exLOVD"]
         print "Running lovd2vcf with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -630,7 +630,7 @@ class ConvertEXLOVDBRCA2ExtractToVCF(luigi.Task):
         args = ["./lovd2vcf.py", "-i", ex_lovd_file_dir + "/BRCA2.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf", "-a", "exLOVDAnnotation",
                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa", "-e", artifacts_dir + "/exLOVD_BRCA2_error_variants.txt",
+                brca_resources_dir + "/hg19.fa", "-e", artifacts_dir + "exLOVD_BRCA2_error_variants.txt",
                 "-s", "exLOVD"]
         print "Running lovd2vcf with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
