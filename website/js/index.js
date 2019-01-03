@@ -1113,11 +1113,14 @@ var VariantDetail = React.createClass({
                     </Col>
                 </Row>
 
-                <Row>
-                    <Col md={12} className="variant-literature-col">
-                        <LiteratureTable maxRows={10} variant={variant} hideEmptyItems={this.state.hideEmptyItems} />
-                    </Col>
-                </Row>
+                { this.props.mode === "research_mode" && (
+                    <Row>
+                        <Col md={12} className="variant-literature-col">
+                            <LiteratureTable maxRows={10} variant={variant} hideEmptyItems={this.state.hideEmptyItems} />
+                        </Col>
+                    </Row>
+                    )
+                }
 
                 <Row>
                     <Col md={12} className="variant-history-col">

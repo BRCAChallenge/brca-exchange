@@ -289,7 +289,7 @@ def main(filtered_clinvar_xml, output):
 
     hgvs_util = hgvs_utils.HGVSWrapper()
 
-    pool = ThreadPool(multiprocessing.cpu_count())
+    pool = ThreadPool(1) #multiprocessing.cpu_count()) # just using one thread as we are running issues with hgvs_utils in a parallel setting
 
     # parallelizing, as computing protein changes takes a while due to external API calls
     variant_records_lsts = pool.map(lambda s: parse_record(s, hgvs_util),
