@@ -627,6 +627,8 @@ class ConvertEXLOVDBRCA2ExtractToVCF(luigi.Task):
         brca_resources_dir = PipelineParams().resources_dir
         artifacts_dir = create_path_if_nonexistent(PipelineParams().output_dir + "/release/artifacts/")
 
+        os.chdir(lovd_method_dir)
+        
         args = ["./lovd2vcf.py", "-i", ex_lovd_file_dir + "/BRCA2.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf", "-a", "exLOVDAnnotation",
                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
@@ -1553,7 +1555,7 @@ class GenerateReleaseNotes(luigi.Task):
         metadata_dir = PipelineParams().output_dir + "/release/metadata/"
         os.chdir(data_merging_method_dir)
 
-        args = ["python", "buildVersionMetadata.py", "--date", str(PipelineParams().date), "--notes", self.release_notes,
+        args = ["python", "buildVersionMetadata.py", "--date", str(PipelineParams().date), "--notes", PipelineParams().release_notes,
                 "--output", metadata_dir + "version.json"]
         print "Running buildVersionMetadata.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
