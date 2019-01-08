@@ -376,7 +376,7 @@ def mailinglist(request):
     mailchimp_data = {'email_address': email,
                       'merge_fields': {'FNAME': first_name, 'LNAME': last_name},
                       'status': 'pending'}
-    mailchimp_response = requests.post(settings.MAILCHIMP_URL + '/lists/' + settings.MAILCHIMP_LIST + '/members', auth=('user', settings.MAILCHIMP_KEY), json=mailchimp_data)
+    mailchimp_response = requests.post(settings.MAILCHIMP_URL + '/lists/' + settings.MAILCHIMP_LIST + '/members', auth=('user', settings.MAILCHIMP_KEY), data=json.dumps(mailchimp_data))
     try:
         mailchimp_response.raise_for_status()
     except requests.exceptions.HTTPError as e:

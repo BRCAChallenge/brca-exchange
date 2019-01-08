@@ -26,6 +26,9 @@ import google.protobuf.json_format as json_format
 from datetime import datetime
 
 
+DISALLOWED_SEARCH_CHARS = ['\x00']
+
+
 def releases(request):
     release_id = request.GET.get('release_id')
     if release_id:
@@ -316,6 +319,12 @@ def add_paren_to_hgvs_protein_if_absent(value):
         return value
 
 
+def remove_disallowed_chars(search_term):
+    for disallowed in DISALLOWED_SEARCH_CHARS:
+        search_term = search_term.replace(disallowed, '')
+    return search_term
+
+
 def apply_search(query, search_term, quotes='', release=None):
     '''
     NOTE: there is some additional handling of search terms on the front-end in
@@ -345,6 +354,7 @@ def apply_search(query, search_term, quotes='', release=None):
         NP_009225.1:A280G --> HGVS_Protein.split(':')[0]:Protein_Change
     '''
     search_term = search_term.lower().strip()
+    search_term = remove_disallowed_chars(search_term)
     clinvar_accession = False
 
     # Accept only full clinvar accession numbers

@@ -14,7 +14,7 @@ from django.db import connection
 from unittest import skip
 from django.test.client import RequestFactory
 from data import test_data
-from data.views import index, autocomplete, variant_reports
+from data.views import index, autocomplete, variant_reports, remove_disallowed_chars
 from utilities import update_autocomplete_words
 
 '''
@@ -922,7 +922,7 @@ class VariantTestCase(TestCase):
         gibberish,<.>/?'';:[{]}\|=+-_)(*&%^$#@!~`'''
         ascii_list = [chr(i) for i in xrange(256)]
         ascii_string = 'hey I\'m gibberish look at meeee' + ''.join(ascii_list)
-
+        ascii_string = remove_disallowed_chars(ascii_string)
         request = self.factory.get(
             '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=%s' % ascii_string)
         response = index(request)
