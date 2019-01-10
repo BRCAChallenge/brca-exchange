@@ -299,7 +299,7 @@ brca2RefSpliceAcceptorBounds = {'exon2': {'acceptorStart': 32316402,
                                            'acceptorEnd': 32398164}}
 
 # sample variant data
-variantData = [{'de_novo_prior': '0.02',
+variantDataList = [{'de_novo_prior': '0.02',
                 'refsplice_prior': '0.04',
                 'promote': 'no',
                 'applicable_prior': '0.29',
@@ -384,3 +384,5 @@ variantData = [{'de_novo_prior': '0.02',
                 'gene': 'BRCA1',
                 'removesKeyDomain': 'Y',
                 'protein_prior': '0.02'}]
+
+variantData = dict(((x['gene'], x['nthgvs']), x) for x in variantDataList)
