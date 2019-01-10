@@ -628,6 +628,8 @@ class ConvertEXLOVDBRCA2ExtractToVCF(luigi.Task):
         brca_resources_dir = PipelineParams().resources_dir
         artifacts_dir = create_path_if_nonexistent(PipelineParams().output_dir + "/release/artifacts/")
 
+        os.chdir(lovd_method_dir)
+        
         args = ["./lovd2vcf.py", "-i", ex_lovd_file_dir + "/BRCA2.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf", "-a", "exLOVDAnnotation",
                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
@@ -1422,37 +1424,8 @@ class MergeVCFsIntoTSVFile(luigi.Task):
 
         check_file_for_contents(artifacts_dir + "merged.tsv")
 
+
 @requires(MergeVCFsIntoTSVFile)
-class AnnotateMergedOutput(luigi.Task):
-
-    def output(self):
-        artifacts_dir = PipelineParams().output_dir + "/release/artifacts/"
-        return luigi.LocalTarget(artifacts_dir + "annotated.tsv")
-
-    def run(self):
-        artifacts_dir = PipelineParams().output_dir + "/release/artifacts/"
-        os.chdir(data_merging_method_dir)
-
-        args = ["python", "add_annotation.py", "-i", artifacts_dir + "merged.tsv",
-                "-o", artifacts_dir + "annotated.tsv", "-l", artifacts_dir + "add-annotation.log", "-v"]
-        print "Running add_annotation.py with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print_subprocess_output_and_error(sp)
-
-        # get number of variants thrown out
-        numVariantsRemoved = 0
-        with open(artifacts_dir + "add-annotation.log") as fp:
-            lines = fp.readlines()
-            for line in lines:
-                if "ERROR COUNT" in line:
-                    # pull integer from error count line
-                    numVariantsRemoved = int(filter(str.isdigit, line))
-
-        check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "merged.tsv",
-                                                             artifacts_dir + "annotated.tsv", numVariantsRemoved)
-
-
-@requires(AnnotateMergedOutput)
 class AggregateMergedOutput(luigi.Task):
 
     def output(self):
@@ -1463,13 +1436,13 @@ class AggregateMergedOutput(luigi.Task):
         artifacts_dir = PipelineParams().output_dir + "/release/artifacts/"
         os.chdir(data_merging_method_dir)
 
-        args = ["python", "aggregate_across_columns.py", "-i", artifacts_dir + "annotated.tsv",
+        args = ["python", "aggregate_across_columns.py", "-i", artifacts_dir + "merged.tsv",
                 "-o", artifacts_dir + "aggregated.tsv"]
         print "Running aggregate_across_columns.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
-        check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "annotated.tsv",
+        check_input_and_output_tsvs_for_same_number_variants(artifacts_dir + "merged.tsv",
                                                              artifacts_dir + "aggregated.tsv")
 
 
