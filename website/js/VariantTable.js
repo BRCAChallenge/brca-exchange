@@ -542,15 +542,21 @@ var ResearchVariantTableSupplier = function (Component) {
 
             return {
                 sourceSelection: selectedSources,
-                columnSelection: selectedColumns
+                columnSelection: selectedColumns,
+                changeInProgress: false
             };
+        },
+        componentWillReceiveProps: function() {
+            // Change is now complete (has propagated all the way
+            // down and back up through the parent component)
+            this.setState({changeInProgress: false});
         },
         toggleColumns: function (prop) {
             let {columnSelection} = this.state,
                 val = columnSelection[prop],
                 cs = {...columnSelection, [prop]: !val};
             localStorage.setItem('columnSelection', JSON.stringify(cs));
-            this.setState({columnSelection: cs});
+            this.setState({columnSelection: cs, changeInProgress: true});
         },
         setSource: function (prop, event) {
             // this function uses 1, 0 and -1 to accommodate excluding sources as well as not-including them
@@ -559,7 +565,7 @@ var ResearchVariantTableSupplier = function (Component) {
             let value = event.target.checked ? 1 : 0;
             let ss = {...sourceSelection, [prop]: value};
             localStorage.setItem('sourceSelection', JSON.stringify(ss));
-            this.setState({sourceSelection: ss});
+            this.setState({sourceSelection: ss, changeInProgress: true});
         },
         filterFormCols: function (subColList, columnSelection) {
             return _.map(subColList, ({title, prop}) =>
@@ -657,7 +663,8 @@ var ResearchVariantTableSupplier = function (Component) {
                     sourceSelection={this.state.sourceSelection}
                     columnSelection={this.state.columnSelection}
                     downloadButton={this.getDownloadButton}
-                    lollipopButton={this.getLollipopButton}/>
+                    lollipopButton={this.getLollipopButton}
+                    changeInProgress={this.state.changeInProgress}/>
             );
         }
     });
