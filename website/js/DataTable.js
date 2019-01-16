@@ -127,7 +127,15 @@ var DataTable = React.createClass({
         var newState = mergeState(this.state, newProps.initialState);
         newState.sourceSelection = newProps.sourceSelection;
         newState.columnSelection = newProps.columnSelection;
-        this.setStateFetch(newState);
+        this.setState(newState);
+        if (newProps.changeInProgress === true) {
+            // if a change is made midway through the component
+            // tree, changes must propagate back up to the top before
+            // a new request is made
+            this.propagateChanges(newState);
+        } else {
+            this.fetch(newState);
+        }
     },
     handleResize: function() {
         this.setState({windowWidth: window.innerWidth});
@@ -138,7 +146,7 @@ var DataTable = React.createClass({
 
         localStorage.setItem('filterValues', JSON.stringify(newFilterValues));
 
-        this.setStateFetch({
+        this.propagateChanges({
           filterValues: newFilterValues,
           page: 0
         });
@@ -185,12 +193,12 @@ var DataTable = React.createClass({
             exclude: _.keys(_.pick(sourceSelection, v => v === -1)),
             filterValues}, hgvs.filters(search, filterValues)));
     },
-    // helper function that sets state, fetches new data,
-    // and updates url.
-    setStateFetch: function (opts) {
+    propagateChanges: function (opts) {
+        // sends changes up to the top of the tree so the URL
+        // can be updated. the update also triggers a new request
+        // to the server in this.componentWillReceiveProps
         var newState = mergeState(this.state, opts);
         this.setState(newState);
-        this.fetch(newState);
         this.props.onChange(newState);
     },
     toggleLollipop: function () {
@@ -203,20 +211,20 @@ var DataTable = React.createClass({
         this.setState({columnSelectorsOpen: !this.state.columnSelectorsOpen});
     },
     showDeleted: function () {
-        this.setStateFetch({showDeleted: true});
+        this.propagateChanges({showDeleted: true});
     },
     onChangePage: function (pageNumber) {
-        this.setStateFetch({page: pageNumber});
+        this.propagateChanges({page: pageNumber});
     },
     onSort: function(sortBy) {
-        this.setStateFetch({sortBy});
+        this.propagateChanges({sortBy});
     },
     onPageLengthChange: function(txt) {
         var length = parseInt(txt),
             {page, pageLength} = this.state,
             newPage = Math.floor((page * pageLength) / length);
 
-        this.setStateFetch({page: newPage, pageLength: length});
+        this.propagateChanges({page: newPage, pageLength: length});
     },
     restoreDefaults: function() {
         // Clears local storage, resets filters/columns/sources/releases/changetypes,
@@ -225,21 +233,18 @@ var DataTable = React.createClass({
         delete localStorage.filterValues;
         delete localStorage.sourceSelection;
         let that = this;
+        let defaults = {filterValues: {},
+                        release: undefined,
+                        changeTypes: undefined,
+                        showDeleted: undefined
+                       };
         if (this.state.mode === 'default') {
             this.props.expertVariantTableRestoreDefaults(function() {
-                that.setState({filterValues: {},
-                               release: undefined,
-                               changeTypes: undefined,
-                               showDeleted: undefined
-                             });
+                that.setState(defaults, function() {that.propagateChanges(defaults);});
             });
         } else {
             this.props.researchVariantTableRestoreDefaults(function() {
-                that.setState({filterValues: {},
-                               release: undefined,
-                               changeTypes: undefined,
-                               showDeleted: undefined
-                             });
+                that.setState(defaults, function() {that.propagateChanges(defaults);});
             });
         }
     },
@@ -346,7 +351,7 @@ var DataTable = React.createClass({
                             release={release}
                             onChange={v => {
                                 // reset the page number to zero on new searches
-                                this.setStateFetch({search: v, page: 0});
+                                this.propagateChanges({search: v, page: 0});
                             }}
                         />
                     </Col>
