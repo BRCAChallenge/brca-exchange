@@ -324,7 +324,6 @@ const researchModeColumns = [
     {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
     {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
     {title: 'Mutation category (BIC)', prop: 'Mutation_type_BIC'},
-    {title: 'SIFT score', prop: 'Sift_Score'},
     {title: 'BIC Variant Identifier', prop: 'BIC_Nomenclature'},
     {title: 'Nucleotide', prop: 'HGVS_cDNA'},
     {title: 'Protein', prop: 'HGVS_Protein'},
