@@ -1175,6 +1175,11 @@ div.variant-submitter-group .submitter-header td {
     flex: 0 0 203px; /* the +3 gets it to line up with the columns below it */
 }
 
+.lovd-submitter .submitter-header .submitter-cell.submitter-label {
+    text-align: left;
+    flex: none;
+}
+
 .allele-frequency-header td {
     border-bottom-width: 3px;
 }
