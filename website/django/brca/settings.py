@@ -61,7 +61,8 @@ CORS_ORIGIN_WHITELIST = (
     'brcaexchange.cloudapp.net',
     'brcaexchange.org',
     'brca-website.cloudapp.net',
-    'brcaexchange-prod.gi.ucsc.edu'
+    'brcaexchange-prod.gi.ucsc.edu',
+    'beta.brcaexchange.org'
 )
 
 ROOT_URLCONF = 'brca.urls'
