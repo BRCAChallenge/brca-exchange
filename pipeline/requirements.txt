@@ -1,6 +1,6 @@
 backports-abc==0.4
 beautifulsoup4==4.5.1
-biocommons.seqrepo==0.3.5
+biocommons.seqrepo==0.4.4
 biopython==1.69
 bioutils==0.3.3
 bx-python==0.7.3
@@ -9,7 +9,7 @@ configparser==3.5.0
 CrossMap==0.2.6
 Cython==0.24.1
 docutils==0.12
-hgvs==1.1.2
+hgvs==1.2.4
 itertoolz==0.5
 lxml==4.2.5
 lockfile==0.12.2
