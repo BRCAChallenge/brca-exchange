@@ -7,7 +7,7 @@ CAPTCHA_SECRET = '' # enter captcha secret here
 DEBUG = False
 
 
-URL_FRONTEND = 'http://brcaexchange.cloudapp.net/'
+URL_FRONTEND = 'http://brcaexchange-prod.gi.ucsc.edu/'
 
 EMAIL_HOST = 'gmail.com'
 EMAIL_HOST_USER = 'brcaexchange'
