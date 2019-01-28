@@ -2,7 +2,7 @@
 set -o nounset
 set -o errexit
 
-HOST=${HOST:-brcaexchange-dev.cloudapp.net}
+HOST=${HOST:-brcaexchange-dev.gi.ucsc.edu}
 USER=brca
 
 # directory of this file
