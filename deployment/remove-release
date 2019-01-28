@@ -29,7 +29,7 @@ fi
 USER=${2:-brca}
 
 if [ "${ENVIRONMENT}" == "dev" ] ;then
-	HOST=${HOST:-brcaexchange-dev.cloudapp.net}
+	HOST=${HOST:-brcaexchange-dev.gi.ucsc.edu}
 	ssh -l${USER} ${HOST} <<-ENDSSH
 	    set -o errexit
     	. /var/www/backend/beta/virtualenv/bin/activate
