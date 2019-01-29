@@ -13,6 +13,8 @@ MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 LUIGI_ROOT_TASK = GenerateReleaseArchive
 LUIGI_WORKERS = 8
 
+SEQ_REPO_DIR_DOCKER := /files/resources/seq_repo
+
 init: ## setup config file
 	echo "creating file in $(CONFIG_PATH). Please edit to your needs in particular the WORK_DIR!"
 	jinja2 -D DATA_DATE=2099-12-31 \
@@ -30,7 +32,6 @@ build-docker: ## build main pipeline docker image
 
 download-resources: ## download resources files
 	$(CODE_BASE)/pipeline/download_resources_files.sh $(RESOURCES_DIR) >> "$(LOG_DIR)/download_resources_$(RELEASE_TAG).log" 2>&1 || { echo "Downloading resource files failed"; exit 1; }
-
 
 start-local-uta: ## starting local uta docker container
 	[ `docker ps -f name=$(UTA_CONTAINER) | wc -l` -gt 1 ] || docker run -dit --name $(UTA_CONTAINER) -p $(UTA_PORT):5432 $(UTA_DOCKER_IMAGE)
@@ -60,7 +61,8 @@ endif
 
 COMMON_DOCKER_ARGS = --rm -u `id -u ${USER}`:$(DOCKER_GRP) \
 	-e "DATA_DATE=$(DATA_DATE)" \
-        -e"UTA_DB_URL=postgresql://anonymous@0.0.0.0:$(UTA_PORT)/uta/uta_$(UTA_RELEASE_DATE)" \
+        -e "UTA_DB_URL=postgresql://anonymous@0.0.0.0:$(UTA_PORT)/uta/uta_$(UTA_RELEASE_DATE)" \
+	-e "HGVS_SEQREPO_DIR=$(SEQ_REPO_DIR_DOCKER)/latest" \
 	--network host \
 	-v $(RESOURCES_DIR):/files/resources \
 	-v $(OUT_DIR):/files/data \
@@ -69,6 +71,9 @@ COMMON_DOCKER_ARGS = --rm -u `id -u ${USER}`:$(DOCKER_GRP) \
 	-v $(RELEASE_NOTES_PATH):/files/release_notes.txt \
 	-v $(CODE_BASE):/opt/brca-exchange \
 	-v /var/run/docker.sock:/var/run/docker.sock
+
+download-seqrepo: ## Download seq repo data
+	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) bash -c "mkdir -p $(SEQ_REPO_DIR_DOCKER) && seqrepo --root-directory $(SEQ_REPO_DIR_DOCKER) pull && seqrepo --root-directory $(SEQ_REPO_DIR_DOCKER) update-latest"
 
 run-pipeline: ## running entire pipeline
 	TS=`date +%Y%m%d_%H%M%S`
@@ -107,7 +112,7 @@ show-luigi-graph: ## print some representation of the luigi compute graph on the
 test: ## Running pipeline unit tests
 	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) bash -c 'cd /opt/brca-exchange/pipeline/data && bash getdata && cd /opt/brca-exchange/pipeline && pytest --ignore=splicing/'
 
-build-release: start-local-uta checkout build-docker setup-files setup-lovd download-resources run-pipeline variants-by-source ## create new data release
+build-release: start-local-uta checkout build-docker setup-files setup-lovd download-resources download-seqrepo run-pipeline variants-by-source ## create new data release
 
 variants-by-source: ## postprocessing: compute statistics for changes with respect to the last release
 	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) python /opt/brca-exchange/pipeline/utilities/variantsBySource.py  -i /files/data/output/release/built_with_change_types.tsv -c true
