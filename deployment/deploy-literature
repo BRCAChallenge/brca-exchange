@@ -28,7 +28,7 @@ ENVIRONMENT=$1
 LITERATURE_RESULTS=$2
 
 if [ "${ENVIRONMENT}" == "dev" ] ;then
-    export HOST=${HOST:-brcaexchange-dev.cloudapp.net}
+    export HOST=${HOST:-brcaexchange-dev.gi.ucsc.edu}
 else
     export HOST=${HOST:-brcaexchange.org}
 fi

@@ -5,7 +5,7 @@ See [this page](RELEASES.md).
 # azure instances
 
 Two VMs are provisioned: brcaexchange-prod.gi.ucsc.edu for production, and
-brcaexchange-dev.cloudapp.net for development.
+brcaexchange-dev.gi.ucsc.edu for development.
 
 # virtual hosts
 
@@ -17,13 +17,13 @@ on the public domain (e.g. brcaexchange.org).
 | --- | --- | --- |
 | brcaexchange |  beta | brcaexchange-prod.gi.ucsc.edu |
 | brcaexchange |  production | brcaexchange.org |
-| brcaexchange-dev |  beta | brcaexchange-dev.cloudapp.net |
+| brcaexchange-dev |  beta | brcaexchange-dev.gi.ucsc.edu |
 | brcaexchange-dev |  production | |
 
 
-No public domain has been published for brcaexchange-dev.cloudapp.net, but you
+No public domain has been published for brcaexchange-dev.gi.ucsc.edu, but you
 may add the following line to your /etc/hosts file if you need access to the
-'production' virtual host on brcaexchange-dev.cloudapp.net:
+'production' virtual host on brcaexchange-dev.gi.ucsc.edu:
 
 ```
 40.78.99.255 brcaexchange-dev.org

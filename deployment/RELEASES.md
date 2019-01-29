@@ -5,7 +5,7 @@ github for CI testing. After they are merged to ```master```, they can be delete
 'branches' page at github.
 
 When a feature is complete, the feature branch can be merged to ```master```. Commits
-on ```master``` will be tested and deployed to brcaexchange-dev.cloudapp.net.
+on ```master``` will be tested and deployed to brcaexchange-dev.gi.ucsc.edu.
 
 When ```master``` is feature complete and ready for release, the ```release```
 script is run to create a new release branch. The new release will be tagged,
