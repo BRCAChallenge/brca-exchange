@@ -5,6 +5,7 @@
 import React from "react";
 import {Panel} from 'react-bootstrap';
 import util from '../util';
+import slugify from '../slugify';
 import {VariantSubmitter} from "./VariantSubmitter";
 
 import GroupHelpButton from './GroupHelpButton';
@@ -160,7 +161,7 @@ export default class SourceReportsTile extends React.Component {
         );
 
         return (
-            <div key={`group_collection-${groupTitle}`} className="variant-detail-group variant-submitter-group">
+            <div key={`group_collection-${groupTitle}`} className={`variant-detail-group variant-submitter-group ${slugify(this.props.sourceName)}-submitter`}>
                 <Panel
                     ref={(me) => { this.collapser = me; }}
                     header={header}
