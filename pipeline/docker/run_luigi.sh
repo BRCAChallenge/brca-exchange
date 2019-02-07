@@ -20,6 +20,8 @@ PRIORS_DOCKER_IMAGE=$3
 LUIGI_TASK=${4}
 N_WORKERS=${5}
 
+GENE_CONFIG="/opt/brca-exchange/pipeline/luigi/gene_config_brca_only.txt"
+
 PREVIOUS_RELEASE_TAR=/files/previous_release.tar.gz
 
 RELEASE_NOTES=/files/release_notes.txt
@@ -35,4 +37,4 @@ echo "Git hash: $(git log | head -n 1)"
 cd /opt/brca-exchange/pipeline/luigi
 
 echo "Attempting to run task ${LUIGI_TASK}"
-python -m luigi --logging-conf-file luigi_log_configuration.conf --module CompileVCFFiles ${LUIGI_TASK} --PipelineParams-resources-dir ${BRCA_RESOURCES} --PipelineParams-file-parent-dir ${PARENT_DIR} --PipelineParams-output-dir ${OUTPUT_DIR} --PipelineParams-previous-release-tar ${PREVIOUS_RELEASE_TAR} --PipelineParams-priors-references-dir ${PRIORS_REFERENCES} --PipelineParams-priors-docker-image-name ${PRIORS_DOCKER_IMAGE} --PipelineParams-output-dir-host ${OUTPUT_DIR_HOST} --PipelineParams-release-notes ${RELEASE_NOTES} ${DATE_PARAM_OPT} --workers ${N_WORKERS} --local-scheduler
+python -m luigi --logging-conf-file luigi_log_configuration.conf --module CompileVCFFiles ${LUIGI_TASK} --PipelineParams-resources-dir ${BRCA_RESOURCES} --PipelineParams-file-parent-dir ${PARENT_DIR} --PipelineParams-output-dir ${OUTPUT_DIR} --PipelineParams-previous-release-tar ${PREVIOUS_RELEASE_TAR} --PipelineParams-priors-references-dir ${PRIORS_REFERENCES} --PipelineParams-priors-docker-image-name ${PRIORS_DOCKER_IMAGE} --PipelineParams-output-dir-host ${OUTPUT_DIR_HOST} --PipelineParams-release-notes ${RELEASE_NOTES} --PipelineParams-gene-config-path ${GENE_CONFIG} ${DATE_PARAM_OPT} --workers ${N_WORKERS} --local-scheduler

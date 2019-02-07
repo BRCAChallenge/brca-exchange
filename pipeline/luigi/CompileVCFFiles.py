@@ -1,136 +1,25 @@
-import subprocess
-import os
-import urllib2
-import tarfile
-import datetime
-import socket
-from shutil import copy
-import luigi
-import csv
-from luigi.util import inherits, requires
-import re
-import tempfile
-import shutil
 import json
+import shutil
+import subprocess
+import tempfile
+from shutil import copy
 
-from retrying import retry
+import luigi
+from luigi.util import requires
 
-
-#######################
-# Convenience methods #
-#######################
-
-
-def create_path_if_nonexistent(path):
-    if not os.path.exists(path):
-        os.makedirs(path)
-    return path
-
-
-def print_subprocess_output_and_error(sp):
-    out, err = sp.communicate()
-    if out:
-        print "standard output of subprocess:"
-        print out
-    if err:
-        print "standard error of subprocess:"
-        print err
-
-
-@retry(stop_max_attempt_number=3, wait_fixed=3000)
-def urlopen_with_retry(url):
-    return urllib2.urlopen(url)
-
-
-def download_file_and_display_progress(url, file_name=None):
-    if file_name is None:
-        file_name = url.split('/')[-1]
-
-    u = urlopen_with_retry(url)
-    f = open(file_name, 'wb')
-    meta = u.info()
-    file_size = int(meta.getheaders("Content-Length")[0])
-    print "Downloading: %s Bytes: %s" % (file_name, file_size)
-
-    file_size_dl = 0
-    block_sz = 8192
-    while True:
-        buffer = u.read(block_sz)
-        if not buffer:
-            break
-
-        file_size_dl += len(buffer)
-        f.write(buffer)
-        status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
-        status = status + chr(8)*(len(status)+1)
-        print status,
-
-    f.close()
-    print "Finished downloading %s" % (file_name)
-
-
-def download_file_with_basic_auth(url, file_name, username, password):
-    p = urllib2.HTTPPasswordMgrWithDefaultRealm()
-
-    p.add_password(None, url, username, password)
-
-    handler = urllib2.HTTPBasicAuthHandler(p)
-    opener = urllib2.build_opener(handler)
-    urllib2.install_opener(opener)
-
-    data = urlopen_with_retry(url).read()
-    f = open(file_name, "wb")
-    f.write(data)
-    f.close()
-    print "Finished downloading %s" % (file_name)
-
-
-def check_file_for_contents(file_path):
-    handle_process_success_or_failure(os.stat(file_path).st_size != 0, file_path)
-
-
-def check_input_and_output_tsvs_for_same_number_variants(tsvIn, tsvOut, numVariantsRemoved=0):
-    tsvInput = csv.DictReader(open(tsvIn, 'r'), delimiter='\t')
-    numVariantsIn = len(list(tsvInput))
-    tsvOutput = csv.DictReader(open(tsvOut, 'r'), delimiter='\t')
-    numVariantsOut = len(list(tsvOutput))
-    print("Number of variants in input: %s \nNumber of variants in output: %s \n Number of variants removed: %s\n" % (numVariantsIn, numVariantsOut, numVariantsRemoved))
-    handle_process_success_or_failure(numVariantsIn - numVariantsRemoved == numVariantsOut, tsvOut)
-
-
-def handle_process_success_or_failure(process_succeeded, file_path):
-    file_name = file_path.split('/')[-1]
-    if process_succeeded is True:
-        print("Completed writing %s. \n" % (file_name))
-    else:
-        now = str(datetime.datetime.utcnow())
-        file_directory = os.path.dirname(file_path)
-        failed_file_name = "FAILED_" + now + "_" + file_name
-        os.rename(file_path, file_directory + "/" + failed_file_name)
-        print("**** Failure creating %s ****\n" % (file_name))
-
-
-def extract_file(archive_path, tmp_dir, file_path):
-        with tarfile.open(archive_path, "r:gz") as tar:
-            tar.extract(file_path, tmp_dir)
-
-        return tmp_dir + '/' + file_path
-
+import esp_processing
+import pipeline_common
+from pipeline_common import PipelineParams
+from pipeline_utils import *  # TODO fix
 
 #######################################
 # Default Globals / Env / Directories #
 #######################################
 
-
-DEFAULT_BRCA_RESOURCES_DIR = (os.path.abspath('../brca/brca-resources'))
-DEFAULT_OUTPUT_DIR = (os.path.abspath('../brca/pipeline-data/data/pipeline_input'))
-DEFAULT_FILE_PARENT_DIR = (os.path.abspath('../brca/pipeline-data/data'))
-
 luigi_dir = os.getcwd()
 
 bic_method_dir = os.path.abspath('../bic')
 clinvar_method_dir = os.path.abspath('../clinvar')
-esp_method_dir = os.path.abspath('../esp')
 lovd_method_dir = os.path.abspath('../lovd')
 g1k_method_dir = os.path.abspath('../1000_Genomes')
 enigma_method_dir = os.path.abspath('../enigma')
@@ -140,36 +29,6 @@ priors_method_dir = os.path.abspath('../splicing')
 priors_filter_method_dir = os.path.abspath('../splicingfilter')
 utilities_method_dir = os.path.abspath('../utilities')
 
-
-class PipelineParams(luigi.Config):
-    date = luigi.DateParameter(default=datetime.date.today())
-    u = luigi.Parameter(default="UNKNOWN_USER")
-    p = luigi.Parameter(default="UNKNOWN_PASSWORD", significant=False)
-
-    resources_dir = luigi.Parameter(default=DEFAULT_BRCA_RESOURCES_DIR,
-                                    description='directory to store brca-resources data')
-
-
-    output_dir = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                                 description='directory to store output files')
-
-    output_dir_host = luigi.Parameter(default=DEFAULT_OUTPUT_DIR,
-                                 description='directory to store output files wrt to host file system (needed for setting up volume mapping for running docker inside docker)')
-
-    file_parent_dir = luigi.Parameter(default=DEFAULT_FILE_PARENT_DIR,
-                                      description='directory to store all individual task related files')
-
-    previous_release_tar = luigi.Parameter(default=None, description='path to previous release tar for diffing versions \
-                                       and producing change types for variants')
-
-    priors_references_dir = luigi.Parameter(default=None, description='directory to store priors references data')
-
-    priors_docker_image_name = luigi.Parameter(default=None, description='docker image name for priors calculation')
-
-    release_notes = luigi.Parameter(default=None, description='notes for release, must be a .txt file')
-
-    def run(self):
-        pass
 
 ###############################################
 #                   CLINVAR                   #
@@ -262,145 +121,6 @@ class CopyClinvarVCFToOutputDir(luigi.Task):
         copy(PipelineParams().file_parent_dir + "/ClinVar/ClinVarBrca.vcf", PipelineParams().output_dir)
         check_file_for_contents(PipelineParams().output_dir + "/ClinVarBrca.vcf")
 
-
-###############################################
-#                     ESP                     #
-###############################################
-
-
-class DownloadLatestESPData(luigi.Task):
-    def output(self):
-        return luigi.LocalTarget(PipelineParams().file_parent_dir + "/ESP/ESP6500SI-V2-SSA137.GRCh38-liftover.snps_indels.vcf.tar.gz")
-
-    def run(self):
-        esp_file_dir = create_path_if_nonexistent(PipelineParams().file_parent_dir + '/ESP')
-        os.chdir(esp_file_dir)
-
-        esp_data_url = "http://evs.gs.washington.edu/evs_bulk_data/ESP6500SI-V2-SSA137.GRCh38-liftover.snps_indels.vcf.tar.gz"
-        download_file_and_display_progress(esp_data_url)
-
-
-@requires(DownloadLatestESPData)
-class DecompressESPTarfile(luigi.Task):
-
-    def output(self):
-        esp_file_dir = PipelineParams().file_parent_dir + '/ESP'
-
-        return {'chr17': luigi.LocalTarget(esp_file_dir + "/ESP6500SI-V2-SSA137.GRCh38-liftover.chr17.snps_indels.vcf"),
-                'chr13': luigi.LocalTarget(esp_file_dir + "/ESP6500SI-V2-SSA137.GRCh38-liftover.chr13.snps_indels.vcf")}
-
-    def run(self):
-        esp_file_dir = PipelineParams().file_parent_dir + '/ESP'
-        esp_data_url = "http://evs.gs.washington.edu/evs_bulk_data/ESP6500SI-V2-SSA137.GRCh38-liftover.snps_indels.vcf.tar.gz"
-        file_name = esp_data_url.split('/')[-1]
-        os.chdir(esp_file_dir)
-
-        tar = tarfile.open(file_name, "r:gz")
-        tar.extractall()
-        tar.close()
-        print "Finished extracting files from %s" % (file_name)
-
-
-@requires(DecompressESPTarfile)
-class ExtractESPDataForBRCA1Region(luigi.Task):
-
-    def output(self):
-        esp_file_dir = PipelineParams().file_parent_dir + "/ESP"
-        return luigi.LocalTarget(esp_file_dir + "/esp.brca1.vcf")
-
-    def run(self):
-        esp_file_dir = PipelineParams().file_parent_dir + "/ESP"
-        os.chdir(esp_method_dir)
-
-        brca1_region_file = esp_file_dir + "/ESP6500SI-V2-SSA137.GRCh38-liftover.chr17.snps_indels.vcf"
-        brca1_region_output = esp_file_dir + "/esp.brca1.vcf"
-        args = ["python", "espExtract.py", brca1_region_file, "--start",
-                "43044295", "--end", "43125483", "--full", "1", "-o", brca1_region_output]
-        print "Calling espExtract.py for BRCA1 region with the following arguments: %s" % (args)
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print_subprocess_output_and_error(sp)
-
-        check_file_for_contents(brca1_region_output)
-
-
-@requires(ExtractESPDataForBRCA1Region)
-class ExtractESPDataForBRCA2Region(luigi.Task):
-
-    def output(self):
-        esp_file_dir = PipelineParams().file_parent_dir + "/ESP"
-        return luigi.LocalTarget(esp_file_dir + "/esp.brca2.vcf")
-
-    def run(self):
-        esp_file_dir = PipelineParams().file_parent_dir + "/ESP"
-        os.chdir(esp_method_dir)
-        brca2_region_file = esp_file_dir + '/ESP6500SI-V2-SSA137.GRCh38-liftover.chr13.snps_indels.vcf'
-        brca2_region_output = esp_file_dir + "/esp.brca2.vcf"
-
-        args = ["python", "espExtract.py", brca2_region_file, "--start", "32315473",
-                "--end", "32400266", "--full", "1", "-o", brca2_region_output]
-        print "Calling espExtract.py for BRCA 2 region with the following arguments: %s" % (args)
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print_subprocess_output_and_error(sp)
-
-
-@requires(ExtractESPDataForBRCA2Region)
-class ConcatenateESPBRCA12Data(luigi.Task):
-
-    def output(self):
-        esp_file_dir = PipelineParams().file_parent_dir + "/ESP"
-        return luigi.LocalTarget(esp_file_dir + "/esp.brca12.hg38.vcf")
-
-    def run(self):
-        # Note: requires correct installation of VCF tools and export PERL5LIB=/path/to/your/vcftools-directory/src/perl/ in path
-        esp_file_dir = PipelineParams().file_parent_dir + "/ESP"
-        brca1_region_output = esp_file_dir + "/esp.brca1.vcf"
-        brca2_region_output = esp_file_dir + "/esp.brca2.vcf"
-        concatenated_brca_output_file = esp_file_dir + "/esp.brca12.hg38.vcf"
-        writable_concatenated_brca_output_file = open(concatenated_brca_output_file, 'w')
-        args = ["vcf-concat", brca1_region_output, brca2_region_output]
-        print "Calling vcf-concat with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=writable_concatenated_brca_output_file, stderr=subprocess.PIPE)
-        print_subprocess_output_and_error(sp)
-
-        writable_concatenated_brca_output_file.close()
-        check_file_for_contents(concatenated_brca_output_file)
-        print "Concatenation complete."
-
-
-@requires(ConcatenateESPBRCA12Data)
-class SortConcatenatedESPBRCA12Data(luigi.Task):
-
-    def output(self):
-        esp_file_dir = PipelineParams().file_parent_dir + "/ESP"
-        return luigi.LocalTarget(esp_file_dir + "/esp.brca12.sorted.hg38.vcf")
-
-    def run(self):
-        esp_file_dir = PipelineParams().file_parent_dir + "/ESP"
-        sorted_concatenated_brca_output_file = esp_file_dir + "/esp.brca12.sorted.hg38.vcf"
-        concatenated_brca_output_file = esp_file_dir + "/esp.brca12.hg38.vcf"
-        writable_sorted_concatenated_brca_output_file = open(sorted_concatenated_brca_output_file, 'w')
-        args = ["vcf-sort", concatenated_brca_output_file]
-        print "Calling vcf-sort with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=writable_sorted_concatenated_brca_output_file, stderr=subprocess.PIPE)
-        print_subprocess_output_and_error(sp)
-
-        writable_sorted_concatenated_brca_output_file.close()
-        check_file_for_contents(sorted_concatenated_brca_output_file)
-        print "Sorting of concatenated files complete."
-
-
-@requires(SortConcatenatedESPBRCA12Data)
-class CopyESPOutputToOutputDir(luigi.Task):
-
-    def output(self):
-        return luigi.LocalTarget(PipelineParams().output_dir + "/esp.brca12.sorted.hg38.vcf")
-
-    def run(self):
-        esp_file_dir = PipelineParams().file_parent_dir + "/ESP"
-        create_path_if_nonexistent(PipelineParams().output_dir)
-
-        copy(esp_file_dir + "/esp.brca12.sorted.hg38.vcf", PipelineParams().output_dir)
-        check_file_for_contents(PipelineParams().output_dir + "/esp.brca12.sorted.hg38.vcf")
 
 
 ###############################################
@@ -1394,10 +1114,10 @@ class CopyFindlayBRCA1RingFunctionScoresOutputToOutputDir(luigi.Task):
 
 
 class MergeVCFsIntoTSVFile(luigi.Task):
-
     def requires(self):
+        yield pipeline_common.CopyOutputToOutputDir(PipelineParams().output_dir,
+                                                    esp_processing.SortConcatenatedESPData())
         yield CopyClinvarVCFToOutputDir()
-        yield CopyESPOutputToOutputDir()
         yield CopyBICOutputToOutputDir()
         yield CopyG1KOutputToOutputDir()
         yield CopyEXACOutputToOutputDir()
@@ -1411,6 +1131,8 @@ class MergeVCFsIntoTSVFile(luigi.Task):
         return luigi.LocalTarget(artifacts_dir + "merged.tsv")
 
     def run(self):
+        print("running merged")
+        print(self.input())
         artifacts_dir = create_path_if_nonexistent(PipelineParams().output_dir + "/release/artifacts/")
         brca_resources_dir = PipelineParams().resources_dir
 
