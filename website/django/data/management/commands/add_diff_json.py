@@ -1,10 +1,18 @@
 from django.core.management.base import BaseCommand, CommandError
-from django.db import connection
-from data.models import Variant, VariantDiff, Report, ReportDiff
+from django.db import connection, transaction
+from data.models import Variant, VariantDiff, Report, ReportDiff, ReportDiffExploded, VariantDiffExploded
 from argparse import FileType
 import json
 import psycopg2
 from tqdm import tqdm
+
+from data.profiling import profile
+
+from django.db import connection
+from StringIO import StringIO
+
+from data.utilities import Benchmark
+
 
 class Command(BaseCommand):
     help = 'Add diff information to variants'
@@ -14,37 +22,57 @@ class Command(BaseCommand):
         parser.add_argument('diffJSON', type=FileType('r'), help='JSON diff file')
         parser.add_argument('reportsDiffJSON', type=FileType('r'), help='Reports JSON diff file')
 
+    @transaction.atomic
     def handle(self, *args, **options):
-        diff = json.load(options['diffJSON'])
-        reports_diff = json.load(options['reportsDiffJSON'])
+        diff = options['diffJSON']
+        reports_diff = options['reportsDiffJSON']
         release_id = options['release']
 
-        print "Creating variant diffs..."
-        for key in tqdm(diff, total=len(diff)):
-            try:
-                variant_instance = Variant.objects.filter(Data_Release_id=release_id).filter(Genomic_Coordinate_hg38=key).get()
-                VariantDiff.objects.create(variant=variant_instance, diff=diff[key])
-            except Variant.DoesNotExist:
-                tqdm.write("Error adding Variant Diff: Variant %s in release %s not found" % (self._encode(key), release_id))
+        add_diffs(diff, release_id, reports_diff)
 
-        print "Creating report diffs..."
-        for key in tqdm(reports_diff, total=len(reports_diff)):
 
-            # Only handles ClinVar and LOVD reports for now
-            if "SCV" in key:
-                # handle clinvar reports
-                try:
-                    report_instance = Report.objects.filter(Data_Release_id=release_id).filter(SCV_ClinVar=key).get()
-                    ReportDiff.objects.create(report=report_instance, report_diff=reports_diff[key])
-                except Report.DoesNotExist:
-                    tqdm.write("Error adding Report Diff: Report %s in release %s not found" % (self._encode(key), release_id))
-            else:
-                # handle lovd reports
-                try:
-                    report_instance = Report.objects.filter(Data_Release_id=release_id).filter(Submission_ID_LOVD=key).get()
-                    ReportDiff.objects.create(report=report_instance, report_diff=reports_diff[key])
-                except Report.DoesNotExist:
-                    tqdm.write("Error adding Report Diff: Report %s in release %s not found" % (self._encode(key), release_id))
+def add_diffs(diff_fp, release_id, reports_diff_fp):
+    diff = json.load(diff_fp)
+    reports_diff = json.load(reports_diff_fp)
 
-    def _encode(self, s):
-        return unicode(s).encode('utf-8')
+    print "Creating variant diffs..."
+    with Benchmark("variant diffs"):
+        with connection.cursor() as cursor:
+            cursor.execute("""create temporary table _var_diffs (key text, diff json)""")
+
+            with cursor.connection.cursor() as psycon:
+                # psycon = cursor.connection  # get the underlying psycopg2 handle so we can use copy_from()
+                buf = StringIO("".join("%s\t%s\n" % (k, json.dumps(diff[k]).replace('\\', '\\\\')) for k in diff))
+                psycon.copy_from(file=buf, table="_var_diffs")
+
+            cursor.execute("""
+            insert into data_variantdiff (variant_id, diff)
+            select variant.id, _var_diffs.diff from _var_diffs
+            inner join variant on _var_diffs.key = variant."Genomic_Coordinate_hg38"
+            and variant."Data_Release_id"=%s
+            -- on conflict DO NOTHING;
+            """, [release_id])
+
+    print "Creating report diffs..."
+    with Benchmark("creating report diffs"):
+        with connection.cursor() as cursor:
+            cursor.execute("""create temporary table _report_diffs (key text, diff json)""")
+
+            with cursor.connection.cursor() as psycon:
+                # psycon = cursor.connection  # get the underlying psycopg2 handle so we can use copy_from()
+                buf = StringIO("".join("%s\t%s\n" % (k, json.dumps(reports_diff[k]).replace('\\', '\\\\')) for k in reports_diff))
+                psycon.copy_from(buf, table="_report_diffs")
+
+            cursor.execute("""
+            insert into data_reportdiff (report_id, report_diff)
+            select report.id, _report_diffs.diff from _report_diffs
+            inner join report on _report_diffs.key = (
+              case when _report_diffs.key like 'SCV%%' then report."SCV_ClinVar" else report."Submission_ID_LOVD" end
+            )
+            and report."Data_Release_id"=%s
+            -- on conflict DO NOTHING;
+            """, [release_id])
+
+
+def _encode(s):
+    return unicode(s).encode('utf-8')

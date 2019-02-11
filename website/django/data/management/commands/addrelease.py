@@ -1,15 +1,19 @@
+from collections import defaultdict
+
 from django.core.management.base import BaseCommand, CommandError
 # from django.conf import settings
 from django.db import connection, transaction
+
+from brca.site_settings import DATABASES
 from data.models import Variant, DataRelease, ChangeType, Report, MupitStructure, InSilicoPriors
 from argparse import FileType
 import json
 import csv
 import psycopg2
-from django.core.management import call_command
 from data.utilities import update_autocomplete_words
-
 from tqdm import tqdm
+
+from data.management.commands.add_diff_json import add_diffs
 
 
 def get_num_lines(file_path):
@@ -24,18 +28,25 @@ def get_num_lines(file_path):
 
 OLD_MAF_ESP_FIELD_NAMES = ['Minor_allele_frequency_ESP', 'Minor_allele_frequency_ESP_percent']
 
+SKIP_VAR_INSERTION = True
+
+
 class Command(BaseCommand):
     help = 'Add a new variant release to the database'
+
+    def __init__(self):
+        super(Command, self).__init__()
+        self.previous_release_id = DataRelease.objects.order_by('-id')[1].id
 
     def add_arguments(self, parser):
         parser.add_argument('variants', type=FileType('r'), help='Variants to be added, in TSV format')
         parser.add_argument('notes', type=FileType('r'), help='Release notes and metadata, in JSON format')
         parser.add_argument('deletions', nargs='?', default=None, type=FileType('r'),
                             help='Deleted variants, in TSV format, same schema sans change_type')
-        parser.add_argument('diffJSON', help='JSON diff file')
+        parser.add_argument('diffJSON', type=FileType('r'), help='JSON diff file')
         parser.add_argument('reports', type=FileType('r'), help='Reports to be added, in TSV format')
         parser.add_argument('removedReports', type=FileType('r'), help='Removed reports to be added, in TSV format')
-        parser.add_argument('reportsDiffJSON', help='Reports JSON diff file')
+        parser.add_argument('reportsDiffJSON', type=FileType('r'), help='Reports JSON diff file')
 
     @transaction.atomic
     def handle(self, *args, **options):
@@ -56,53 +67,33 @@ class Command(BaseCommand):
         release_name = int(DataRelease.objects.all().order_by('-name')[0].name) + 1
         release_id = DataRelease.objects.create(name=release_name, **notes).id
 
-        reports_reader = csv.reader(reports_tsv, dialect="excel-tab")
-        reports_header = reports_reader.next()
-        removed_reports_reader = csv.reader(removed_reports_tsv, dialect="excel-tab")
-        removed_reports_header = removed_reports_reader.next()
-        reports_dict = self.build_report_dictionary_by_source(reports_reader, reports_header, removed_reports_reader, removed_reports_header, sources)
+        print "Creating new release with ID %d and name %s in db %s" % (release_id, release_name, DATABASES['default']['NAME'])
 
-        variants_reader = csv.reader(variants_tsv, dialect="excel-tab")
-        variants_header = variants_reader.next()
-
+        reports_dict = self.build_report_dictionary_by_source(reports_tsv, removed_reports_tsv)
         change_types = {ct['name']: ct['id'] for ct in ChangeType.objects.values()}
         mupit_structures = {ms['name']: ms['id'] for ms in MupitStructure.objects.values()}
 
-        # collect list of insilico prior column names so we can split those into a separate table, insilicopriors
-        insilicopriors_cols = [x.name for x in InSilicoPriors._meta.get_fields() if x.name not in ['id', 'Variant']]
+        # TODO: split variants_tsv ahead of time into separate variant and insilicopriors lists
+        # TODO: use django-postgres-copy to load these files, although we'll have to run update_variant_values_for_insertion on it beforehand
 
-        # tqdm() displays a progress bar as we read elements from the csvreader, making this all slightly more pleasant
-        for row in tqdm(variants_reader, total=get_num_lines(variants_tsv.name)-1):
-            # split Source column into booleans
-            row_dict = dict(zip(variants_header, row))
-
-            # transfer insilico prior columns from row_dict to insilico_dict
-            insilico_dict = dict((col, row_dict.pop(col)) for col in insilicopriors_cols)
-
-            if 'change_type' in row_dict and row_dict['change_type']:
-                row_dict = self.update_variant_values_for_insertion(row_dict, release_id, change_types, mupit_structures)
-                variant = Variant.objects.create_variant(row_dict)
-                self.create_and_associate_reports_to_variant(variant, reports_dict, sources, release_id, change_types)
-
-                # also create an instance in insilicopriors linked to this variant
-                InSilicoPriors.objects.create(Variant=variant, **insilico_dict)
+        self.insert_variants(
+            variants_tsv, label="inserting variants", is_deletion=False, release_id=release_id,
+            change_types=change_types, mupit_structures=mupit_structures, reports_dict=reports_dict, sources=sources
+        )
 
         # deleted variants
-        if (deletions_tsv):
-            deletions_reader = csv.reader(deletions_tsv, dialect="excel-tab")
-            deletions_header = deletions_reader.next()
-            for row in tqdm(deletions_reader, total=get_num_lines(deletions_tsv.name)-1):
-                # split Source column into booleans
-                row_dict = dict(zip(deletions_header, row))
+        if deletions_tsv:
+            self.insert_variants(
+                deletions_tsv, label="applying deletions", is_deletion=True, release_id=release_id,
+                change_types=change_types, mupit_structures=mupit_structures, reports_dict=reports_dict, sources=sources
+            )
 
-                # transfer insilico prior columns from row_dict to insilico_dict
-                insilico_dict = dict((col, row_dict.pop(col)) for col in insilicopriors_cols)
+        # calls django/data/management/commands/add_diff_json to add diff to db
+        # converted to a method call so that we don't launch a separate process that's not in the current transaction
+        # call_command('add_diff_json', str(release_id), diff_json, reports_diff_json)
+        add_diffs(diff_json, str(release_id), reports_diff_json)
 
-                row_dict = self.update_variant_values_for_insertion(row_dict, release_id, change_types, mupit_structures, True)
-                variant = Variant.objects.create_variant(row_dict)
-
-                # also create an instance in insilicopriors linked to this variant
-                InSilicoPriors.objects.create(Variant=variant, **insilico_dict)
+        # raise Exception("terminating b/c i don't want to commit")
 
         update_autocomplete_words()
 
@@ -110,8 +101,54 @@ class Command(BaseCommand):
         with connection.cursor() as cursor:
             cursor.execute("REFRESH MATERIALIZED VIEW currentvariant")
 
-        # calls django/data/management/commands/add_diff_json to add diff to db
-        call_command('add_diff_json', str(release_id), diff_json, reports_diff_json)
+        # raise Exception("terminating b/c i don't want to commit")
+
+    def insert_variants(self, tsv_fp, label, is_deletion, release_id, change_types, mupit_structures, reports_dict, sources):
+        """
+        Given a file pointer to a TSV file containing variants, insert each variant + in-silico priors information
+        into the database. If is_deletion is true, mark the variants we're inserting as deletions instead of
+        new or changed variant information.
+        :param tsv_fp: a handle to a tab-delimited file containing variant data
+        :param label: the message to display to the user in the progress bar
+        :param is_deletion: whether these variants should be treated as new/changed variants, or deletions
+        :param release_id: the number of this release
+        :param change_types: a mapping from change_type strings (e.g., "added_information") to ChangeType model IDs
+        :param mupit_structures: a mapping from mupit strings (e.g., "4igk") to MupitStructure model IDs
+        :param reports_dict: an aggregation of reports, returned by build_report_dictionary_by_source()
+        :param sources: a list of sources included in this release, e.g. ["Bic", "ClinVar", "ESP", "ExAC"...]
+        :return:
+        """
+        reader = csv.reader(tsv_fp, dialect="excel-tab")
+        header = reader.next()
+
+        # collect list of insilico prior column names so we can split those into a separate table, insilicopriors
+        insilicopriors_cols = [x.name for x in InSilicoPriors._meta.get_fields() if x.name not in ['id', 'Variant']]
+
+        # tqdm() displays a progress bar as we read elements from the csvreader, making this all slightly more pleasant
+        for row in tqdm(reader, desc=label, total=get_num_lines(tsv_fp.name) - 1):
+            # split Source column into booleans
+            row_dict = dict(zip(header, row))
+
+            # transfer insilico prior columns from row_dict to insilico_dict
+            insilico_dict = dict((col, row_dict.pop(col)) for col in insilicopriors_cols)
+
+            # basically, we process every variant if we're loading deletions,
+            # or if it's a non-deletion only variants that have a valid change type field
+            if is_deletion or ('change_type' in row_dict and row_dict['change_type']):
+                # remap certain variant columns to account for historical differences in the variant description
+                row_dict = self.update_variant_values_for_insertion(
+                    row_dict, release_id, change_types, mupit_structures,
+                    set_ct_and_ms_to_none=is_deletion
+                )
+
+                # create the actual variant
+                variant = Variant.objects.create_variant(row_dict)
+
+                if not is_deletion:
+                    self.create_and_associate_reports_to_variant(variant, reports_dict, sources, release_id, change_types)
+
+                # also create an instance in insilicopriors linked to this variant
+                InSilicoPriors.objects.create(Variant=variant, **insilico_dict)
 
     def update_variant_values_for_insertion(self, row_dict, release_id, change_types, mupit_structures, set_ct_and_ms_to_none=False):
         for source in row_dict['Source'].split(','):
@@ -129,7 +166,6 @@ class Command(BaseCommand):
                 row_dict['Mupit_Structure_id'] = None
             else:
                 row_dict['Mupit_Structure_id'] = mupit_structures[mupit_structure]
-
 
         # use cleaned up genomic coordinates and other values
         row_dict['Genomic_Coordinate_hg38'] = row_dict.pop('pyhgvs_Genomic_Coordinate_38')
@@ -149,33 +185,40 @@ class Command(BaseCommand):
 
         return row_dict
 
-    def build_report_dictionary_by_source(self, reports_reader, reports_header, removed_reports_reader, removed_reports_header, sources):
-        reports_dict = {'reports': {}, 'removed_reports': {}}
+    def build_report_dictionary_by_source(self, reports_tsv, removed_reports_tsv):
+        reports_reader = csv.reader(reports_tsv, dialect="excel-tab")
+        reports_header = reports_reader.next()
+        removed_reports_reader = csv.reader(removed_reports_tsv, dialect="excel-tab")
+        removed_reports_header = removed_reports_reader.next()
+
+        reports_dict = {
+            'reports': defaultdict(dict), 'removed_reports': defaultdict(dict)
+        }
+
         for row in reports_reader:
             report = dict(zip(reports_header, row))
             if self.is_empty(report['change_type']):
                 report['change_type'] = 'none'
             source = report['Source']
             bx_id = report['BX_ID_' + source]
-            if source not in reports_dict['reports']:
-                reports_dict['reports'][source] = {}
             reports_dict['reports'][source][bx_id] = report
+
         # add removed reports to dict
         for row in removed_reports_reader:
             report = dict(zip(reports_header, row))
             report['change_type'] = 'deleted'
             source = report['Source']
             bx_id = report['BX_ID_' + source]
-            if source not in reports_dict['removed_reports']:
-                reports_dict['removed_reports'][source] = {}
             reports_dict['removed_reports'][source][bx_id] = report
+
         return reports_dict
 
     def create_and_associate_reports_to_variant(self, variant, reports_dict, sources, release_id, change_types):
         # Used to associate removed reports with variants because removed report bx_ids refer
-        # to bx_ids from the previous release.
-        previous_release_id = DataRelease.objects.order_by('-id')[1].id
-        previous_version_of_variant_query = Variant.objects.filter(Data_Release_id=previous_release_id).filter(Genomic_Coordinate_hg38=variant.Genomic_Coordinate_hg38)
+        # to bx_ids from the previous release.\
+        previous_version_of_variant_query = Variant.objects.filter(
+            Data_Release_id=self.previous_release_id, Genomic_Coordinate_hg38=variant.Genomic_Coordinate_hg38
+        )
 
         for source in sources:
             if source == "Bic":
@@ -191,7 +234,7 @@ class Command(BaseCommand):
             if not self.is_empty(getattr(variant, bx_id_field)):
                 bx_ids = getattr(variant, bx_id_field).split(',')
                 for bx_id in bx_ids:
-                    self.create_and_associate_report_to_variant(bx_id, source, reports_dict, variant, release_id, change_types)
+                    self.create_and_associate_report_to_variant(bx_id, source, reports_dict, variant, release_id, change_types, removed=False)
 
             '''
             Associate removed reports with variant -- note that bx_ids are release specific,
@@ -204,11 +247,10 @@ class Command(BaseCommand):
                     bx_ids = getattr(previous_version_of_variant, bx_id_field).split(',')
                     for bx_id in bx_ids:
                         if source in reports_dict['removed_reports'] and bx_id in reports_dict['removed_reports'][source]:
-                            self.create_and_associate_report_to_variant(bx_id, source, reports_dict, variant, release_id, change_types, True)
-
+                            self.create_and_associate_report_to_variant(bx_id, source, reports_dict, variant, release_id, change_types, removed=True)
 
     def create_and_associate_report_to_variant(self, bx_id, source, reports_dict, variant, release_id, change_types, removed=False):
-        if removed == True:
+        if removed:
             report = reports_dict['removed_reports'][source][bx_id]
         else:
             report = reports_dict['reports'][source][bx_id]

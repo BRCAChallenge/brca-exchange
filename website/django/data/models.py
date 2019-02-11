@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.postgres.fields import JSONField, ArrayField
 
+from postgres_copy import CopyManager
+
+
 class DataRelease(models.Model):
     schema = models.TextField()
     archive = models.TextField()
@@ -15,15 +18,23 @@ class DataRelease(models.Model):
         db_table = "data_release"
         ordering = ['date']
 
+
 class ChangeType(models.Model):
     name = models.TextField()
+
 
 class MupitStructure(models.Model):
     name = models.TextField()
 
+
 class LegacyJSONField(JSONField):
     def db_type(self, connection):
         return 'json'
+
+
+# ------------------------------------------------------------------------
+# --- diff models
+# ------------------------------------------------------------------------
 
 class VariantDiff(models.Model):
     variant = models.OneToOneField('Variant', primary_key=True)
@@ -31,15 +42,22 @@ class VariantDiff(models.Model):
     # provides JSON validation
     diff = LegacyJSONField()
 
+
 class ReportDiff(models.Model):
     report = models.OneToOneField('Report', primary_key=True)
     # Postgres-specific JSON field. If migrating away from postgres, use TextField instead
     # provides JSON validation
     report_diff = LegacyJSONField()
 
-class VariantManager(models.Manager):
+
+# ------------------------------------------------------------------------
+# --- variants
+# ------------------------------------------------------------------------
+
+class VariantManager(CopyManager):
     def create_variant(self, row):
         return self.create(**row)
+
 
 class Variant(models.Model):
     # These are some extra derived columns that help with filtering
@@ -239,7 +257,7 @@ class Report(models.Model):
     HGVS_ClinVar = models.TextField()
     Submitter_ClinVar = models.TextField()
     Protein_ClinVar = models.TextField()
-    SCV_ClinVar = models.TextField()
+    SCV_ClinVar = models.TextField(db_index=True)
     SCV_Version_ClinVar = models.TextField(default='-')
     Allele_Origin_ClinVar = models.TextField()
     Method_ClinVar = models.TextField()
@@ -261,7 +279,7 @@ class Report(models.Model):
     Created_date_LOVD = models.TextField(default="-")
     Edited_date_LOVD = models.TextField(default="-")
     DBID_LOVD = models.TextField(default="-")
-    Submission_ID_LOVD = models.TextField(default='-')
+    Submission_ID_LOVD = models.TextField(default='-', db_index=True)
     BX_ID_ESP = models.TextField()
     Minor_allele_frequency_percent_ESP = models.TextField()
     EA_Allele_Frequency_ESP = models.TextField(default="-")
@@ -340,6 +358,12 @@ class Report(models.Model):
     class Meta:
         db_table = 'report'
 
+        index_together = [
+            ["Data_Release", "SCV_ClinVar"],
+            ["Data_Release", "Submission_ID_LOVD"]
+        ]
+
+
 class Paper(models.Model):
     title = models.TextField()
     authors = models.TextField()
@@ -350,6 +374,7 @@ class Paper(models.Model):
     year = models.IntegerField()
     pmid = models.IntegerField()
     deleted = models.BooleanField()
+
 
 class VariantPaper(models.Model):
     variant_hg38 = models.TextField()
