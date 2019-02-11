@@ -1,12 +1,10 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connection, transaction
-from data.models import Variant, VariantDiff, Report, ReportDiff, ReportDiffExploded, VariantDiffExploded
+from data.models import Variant, VariantDiff, Report, ReportDiff
 from argparse import FileType
 import json
 import psycopg2
 from tqdm import tqdm
-
-from data.profiling import profile
 
 from django.db import connection
 from StringIO import StringIO
