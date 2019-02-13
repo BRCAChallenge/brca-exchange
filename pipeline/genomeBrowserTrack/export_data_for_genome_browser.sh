@@ -29,8 +29,8 @@ python ${SRC_DIR}/brcaToBed.py -i ${TMP_DIR}/output/release/built_with_change_ty
 sort -k1,1 -k2,2 ${HG19_BED} -o ${HG19_BED}
 sort -k1,1 -k2,2 ${HG38_BED} -o ${HG38_BED}
 
-bedToBigBed -type=bed9+ -as=${AS} -tab ${HG19_BED} ${SRC_DIR}/hg19.chrom.sizes ${SRC_DIR}/hg19/brcaExchange.bb
-bedToBigBed -type=bed9+ -as=${AS} -tab ${HG38_BED} ${SRC_DIR}/hg38.chrom.sizes ${SRC_DIR}/hg38/brcaExchange.bb
+./bedToBigBed -type=bed9+ -as=${AS} -tab ${HG19_BED} ${SRC_DIR}/hg19.chrom.sizes ${SRC_DIR}/hg19/brcaExchange.bb
+./bedToBigBed -type=bed9+ -as=${AS} -tab ${HG38_BED} ${SRC_DIR}/hg38.chrom.sizes ${SRC_DIR}/hg38/brcaExchange.bb
 
 # preparing trackhubs directory, which then gets pushed to the remote machine
 TRACKHUBS=${TMP_DIR}/trackhubs
@@ -38,6 +38,6 @@ TRACKHUBS=${TMP_DIR}/trackhubs
 
 cp -R ${SRC_DIR}/hub.txt ${SRC_DIR}/genomes.txt ${SRC_DIR}/hg19 ${SRC_DIR}/hg38 ${TRACKHUBS}
 
-scp -rq ${TRACKHUBS}/. brca@${HOST}:/var/www/html/production/trackhubs/
+rsync -rtz --del --progress ${TRACKHUBS}/ brca@${HOST}:/var/www/html/production/trackhubs/
 
 rm -r ${TMP_DIR}
