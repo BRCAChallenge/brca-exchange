@@ -11,7 +11,7 @@ OUTPUT_DIR="${PARENT_DIR}/output"
 BRCA_RESOURCES=/files/resources
 
 if [ "$#" -lt "4" ]; then
-    echo "Usage: run_luigi.sh [PRIORS_REFERENCES] [OUTPUT_DIR_HOST] [PRIORS_DOCKER_IMAGE_NAME] [TASK] [WORKERS]" 
+    echo "Usage: run_luigi.sh [PRIORS_REFERENCES] [OUTPUT_DIR_HOST] [PRIORS_DOCKER_IMAGE_NAME] [TASK] [WORKERS] [GENE_CONFIG_FILE]"
 fi
 
 PRIORS_REFERENCES=$1
@@ -19,8 +19,7 @@ OUTPUT_DIR_HOST="$2/output"
 PRIORS_DOCKER_IMAGE=$3
 LUIGI_TASK=${4}
 N_WORKERS=${5}
-
-GENE_CONFIG="/opt/brca-exchange/pipeline/luigi/gene_config_brca_only.txt"
+GENE_CONFIG=${6}
 
 PREVIOUS_RELEASE_TAR=/files/previous_release.tar.gz
 

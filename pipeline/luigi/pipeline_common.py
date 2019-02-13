@@ -57,7 +57,6 @@ class PipelineParams(luigi.Config):
     @staticmethod
     def get_instance():
         if not PipelineParams.__instance:
-            print("init params")
             PipelineParams.__instance = PipelineParams()
         return PipelineParams.__instance
 
