@@ -2,6 +2,7 @@ import os
 import re
 import tempfile
 import json
+import StringIO
 from operator import __or__
 from django.core import serializers
 from django.db import connection
@@ -242,33 +243,21 @@ def index(request):
     if order_by:
         query = apply_order(query, order_by, direction)
 
-    if format == 'csv':
-
+    if format == 'csv' or format == 'tsv':
         cursor = connection.cursor()
-        with tempfile.NamedTemporaryFile() as f:
-            os.chmod(f.name, 0606)
-            query = "COPY ({}) TO '{}' WITH DELIMITER ',' CSV HEADER".format(query.query, f.name)
-            # HACK to add quotes around search terms
-            query = re.sub(r'LIKE UPPER\((.+?)\)', r"LIKE UPPER('\1')", query)
-            cursor.execute(query)
 
-            response = HttpResponse(f.read(), content_type='text/csv')
-            response['Content-Disposition'] = 'attachment;filename="variants.csv"'
-            return response
+        # create an in-memory StringIO object that we can use to buffer the results from the server
+        # (it'll get released when it goes out of scope, so unlike a real file we don't need to close it)
+        f = StringIO.StringIO()
+        query = "COPY ({}) TO STDOUT WITH DELIMITER '{}' CSV HEADER".format(query.query, '\t' if format == 'tsv' else ',')
+        # HACK to add quotes around search terms
+        query = re.sub(r'LIKE UPPER\((.+?)\)', r"LIKE UPPER('\1')", query)
+        cursor.copy_expert(query, f)
+        f.seek(0)
 
-    elif format == 'tsv':
-
-        cursor = connection.cursor()
-        with tempfile.NamedTemporaryFile() as f:
-            os.chmod(f.name, 0606)
-            query = "COPY ({}) TO '{}' WITH DELIMITER '\t' CSV HEADER".format(query.query, f.name)
-            # HACK to add quotes around search terms
-            query = re.sub(r'LIKE UPPER\((.+?)\)', r"LIKE UPPER('\1')", query)
-            cursor.execute(query)
-
-            response = HttpResponse(f.read(), content_type='text/csv')
-            response['Content-Disposition'] = 'attachment;filename="variants.tsv"'
-            return response
+        response = HttpResponse(f.read(), content_type='text/csv')
+        response['Content-Disposition'] = 'attachment;filename="variants.%s"' % format
+        return response
 
     elif format == 'json':
         count = query.count()

@@ -34,7 +34,7 @@ To create a new data release the entry point is the `pipeline/pipeline_running/g
 For the pipeline machine, we for example get:
 
 ```
-/home/pipeline/brca_upstream/pipeline/pipeline_running/generate_release.sh /home/pipeline/monthly_releases /home/pipeline/luigi_pipeline_credentials.cfg /home/pipeline/previous_releases
+/home/brca/brca_upstream/pipeline/pipeline_running/generate_release.sh /data/monthly_releases /data/luigi_pipeline_credentials.cfg /data/previous_releases
 ```
 
 This script clones the BRCA Exchange repo into a directory in `WORKING_DIR/data_release_yyyy-MM-dd` referring to the current date and checks out the latest commit on master. It then generates a configuration file `brca_pipeline_cfg.mk` where paths and other settings are set up.

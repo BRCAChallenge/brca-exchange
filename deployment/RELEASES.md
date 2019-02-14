@@ -5,18 +5,18 @@ github for CI testing. After they are merged to ```master```, they can be delete
 'branches' page at github.
 
 When a feature is complete, the feature branch can be merged to ```master```. Commits
-on ```master``` will be tested and deployed to brcaexchange-dev.cloudapp.net.
+on ```master``` will be tested and deployed to brcaexchange-dev.gi.ucsc.edu.
 
 When ```master``` is feature complete and ready for release, the ```release```
 script is run to create a new release branch. The new release will be tagged,
-tested, and deployed to brcaexchange.cloudapp.net for final QA testing.
+tested, and deployed to brcaexchange-prod.gi.ucsc.edu for final QA testing.
 
 If no bugs are found in QA, the ```deploy-production``` script is run
-to copy brcaexchange.cloudapp.net to brcaexchange.org. 
+to copy brcaexchange-prod.gi.ucsc.edu to brcaexchange.org.
 
 If bugs are found in QA, a fix is committed to the release branch, and
 the ```release``` script is run to create a patch release. The new release
-will be tagged, tested, and deployed to brcaexchange.cloudapp.net. The fix
+will be tagged, tested, and deployed to brcaexchange-prod.gi.ucsc.edu. The fix
 is also cherry-picked or ported to ```master```.
 
 ![Image of branching](brca-branching.png)
