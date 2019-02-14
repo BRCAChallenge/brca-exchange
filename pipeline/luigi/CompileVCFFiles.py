@@ -629,7 +629,7 @@ class ConvertEXLOVDBRCA2ExtractToVCF(luigi.Task):
         artifacts_dir = create_path_if_nonexistent(PipelineParams().output_dir + "/release/artifacts/")
 
         os.chdir(lovd_method_dir)
-        
+
         args = ["./lovd2vcf.py", "-i", ex_lovd_file_dir + "/BRCA2.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf", "-a", "exLOVDAnnotation",
                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
@@ -766,7 +766,7 @@ class NormalizeLOVDSubmissions(luigi.Task):
         args = ["python", "normalizeLOVDSubmissions.py", "-i", self.input().path, "-o",
                 self.output().path]
 
-        print "Running separateFunctionalAnalysisTechniqueAndResult with the following args: %s" % (args)
+        print "Running NormalizeLOVDSubmissions with the following args: %s" % (args)
 
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
