@@ -30,7 +30,8 @@ class ESPTask(DefaultPipelineTask):
 
 class DownloadLatestESPData(ESPTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.esp_file_dir, self.esp_tar_file_name))
+        return luigi.LocalTarget(
+            os.path.join(self.esp_file_dir, self.esp_tar_file_name))
 
     def run(self):
         os.chdir(self.esp_file_dir)
@@ -87,8 +88,8 @@ class ExtractESPData(ESPTask):
 
         logger.info(
             "Calling espExtract.py for %s region with the following arguments: %s",
-                self.gene,
-                args)
+            self.gene,
+            args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
