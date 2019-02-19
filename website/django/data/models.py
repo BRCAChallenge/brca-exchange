@@ -143,6 +143,9 @@ class Variant(models.Model):
     Posterior_probability_exLOVD = models.TextField()
     Missense_analysis_prior_probability_exLOVD = models.TextField()
     Segregation_LR_exLOVD = models.TextField()
+    HGVS_Nucleotide_Findlay_BRCA1_Ring_Function_Scores = models.TextField(default="-")
+    Functional_Enrichment_Score_Findlay_BRCA1_Ring_Function_Scores= models.TextField(default="-")
+    Log_RNA_Depletion_Findlay_BRCA1_Ring_Function_Scores = models.TextField(default="-")
     Gene_Symbol = models.TextField()
     Reference_Sequence = models.TextField()
     HGVS_cDNA = models.TextField()
@@ -182,6 +185,7 @@ class Variant(models.Model):
     BX_ID_1000_Genomes = models.TextField(default='')
     BX_ID_ExAC = models.TextField(default='')
     BX_ID_exLOVD = models.TextField(default='')
+    BX_ID_Findlay_BRCA1_Ring_Function_Scores = models.TextField(default='')
     Mupit_Structure = models.ForeignKey(MupitStructure, null=True)
 
     # Data Versioning
@@ -322,6 +326,10 @@ class Report(models.Model):
     Missense_analysis_prior_probability_exLOVD = models.TextField()
     Segregation_LR_exLOVD = models.TextField()
     HGVS_protein_exLOVD = models.TextField()
+    HGVS_Nucleotide_Findlay_BRCA1_Ring_Function_Scores = models.TextField(default="-")
+    Functional_Enrichment_Score_Findlay_BRCA1_Ring_Function_Scores= models.TextField(default="-")
+    Log_RNA_Depletion_Findlay_BRCA1_Ring_Function_Scores = models.TextField(default="-")
+    BX_ID_Findlay_BRCA1_Ring_Function_Scores = models.TextField(default='')
 
     Data_Release = models.ForeignKey(DataRelease)
     Change_Type = models.ForeignKey(ChangeType)
@@ -450,6 +458,9 @@ class CurrentVariant(models.Model):
     Posterior_probability_exLOVD = models.TextField()
     Missense_analysis_prior_probability_exLOVD = models.TextField()
     Segregation_LR_exLOVD = models.TextField()
+    HGVS_Nucleotide_Findlay_BRCA1_Ring_Function_Scores = models.TextField(default="-")
+    Functional_Enrichment_Score_Findlay_BRCA1_Ring_Function_Scores= models.TextField(default="-")
+    Log_RNA_Depletion_Findlay_BRCA1_Ring_Function_Scores = models.TextField(default="-")
     Gene_Symbol = models.TextField()
     Reference_Sequence = models.TextField()
     HGVS_cDNA = models.TextField()
@@ -489,6 +500,7 @@ class CurrentVariant(models.Model):
     BX_ID_1000_Genomes = models.TextField(default='')
     BX_ID_ExAC = models.TextField(default='')
     BX_ID_exLOVD = models.TextField(default='')
+    BX_ID_Findlay_BRCA1_Ring_Function_Scores = models.TextField(default='')
     Mupit_Structure = models.ForeignKey(MupitStructure, null=True)
 
     # Data Versioning
