@@ -33,12 +33,12 @@ To create a new data release the entry point is the `pipeline/pipeline_running/g
 For the pipeline machine, we for example get:
 
 ```
-/home/pipeline/brca_upstream/pipeline/pipeline_running/generate_release.sh /home/pipeline/monthly_releases /home/pipeline/luigi_pipeline_credentials.cfg /home/pipeline/previous_releases
+/home/brca/brca_upstream/pipeline/pipeline_running/generate_release.sh /data/monthly_releases /data/luigi_pipeline_credentials.cfg /data/previous_releases
 ```
 
 This script clones the BRCA Exchange repo into a directory in `WORKING_DIR/data_release_yyyy-MM-dd` referring to the current date and checks out the latest commit on master. It then generates a configuration file `brca_pipeline_cfg.mk` where paths and other settings are set up.
 
-Finally, the following steps are done via the Makefile: 
+Finally, the following steps are done via the Makefile:
  * downloads resources files
  * builds a docker image
  * kicks off the pipeline in the docker image just created
@@ -64,7 +64,7 @@ Early stages of the pipeline need credentials to download data. These can be pas
 Currently, such a credential files should contain the following:
 
 ```
-[RunAll]
+[PipelineParams]
 # BIC credentials
 u=bicusername
 p=bicpassword
@@ -79,7 +79,7 @@ In directory `/home/pipeline`
 brca_upstream                   <-- BRCA exchange code base
 monthly_releases
 ├── data_release_TAG            <-- release working dir
-│   ├── code                    <-- clone of git repository 
+│   ├── code                    <-- clone of git repository
 │   ├── brca_out                <-- pipeline working directory
 │   └── resources               <-- e.g. reference sequences
 │   └── references              <-- e.g. reference sequences for the splicing pipeline (may be merged in the future)
@@ -95,5 +95,12 @@ Change to the `pipeline` directory and type the following:
 * `make` or `make help` to see what targets are available along with minimal help
 * `make init` to set up a configuration file `pipeline/brca_pipeline_cfg.mk` with paths and other settings. It is advisable to edit it according your needs:
 * `make setup-dev-env`: runs various targets to set up a dev environment.
-* `make run-interactive`: starts bash in brca docker container.
+* `make show-luigi-graph`: shows the graph of tasks on the console (use e.g.
+`less -R` if you experience issues with colors)
+* `make run-interactive`: starts a bash in brca exchange docker container.
 * `make run-task [TASK]`: runs a specific luigi task
+* `make force-run-task [TASK]`: runs a specific luigi task, deleting its outputs
+ first (otherwise luigi doesn't run the task)
+* `make clean-files-from [TASK]`: deletes all outputs of the given task along
+with all the tasks directly or indirectly depending on it. This is useful to
+force regeneration of 'downstream' data if something in TASK has changed.

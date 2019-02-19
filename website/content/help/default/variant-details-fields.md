@@ -1,10 +1,10 @@
 The Variant Details page is displayed once you have chosen a single variant from a set of search results. This page is a “bird’s eye view” of the variant in question, based on publicly available data. This page will tell you all the standard aliases of the variant, its most definitive classification, and a brief history of variant interpretations. These details originate from large databases, rather than individual submissions from people who have undergone BRCA testing.
 
-### Variant Details in the Expert Reviewed Data Portal
+### Variant Details in the Summary View
 
-The Expert Reviewed Data Portal contains an abridged view of the variant data in BRCA Exchange, including a definitive, expertly reviewed ENIGMA interpretation. For all publicly available data on a variant, click the "Show All Public Data on this Variant" button at the bottom of the Variant Details Page.
+The Summary View contains an abridged view of the variant data in BRCA Exchange, including a definitive, expertly reviewed ENIGMA interpretation. For all publicly available data on a variant, click the "Show Detail View for this Variant" button at the bottom of the Variant Details Page.
 
-#### Variant Nomenclature Tile
+#### Variant Names Tile ((variant-names))
 
 * #### Gene ((Gene_Symbol))
   The name of the gene on which the variant was found, as named by the HGNC. This will be either _BRCA1_ or _BRCA2_.
@@ -31,7 +31,7 @@ The Expert Reviewed Data Portal contains an abridged view of the variant data in
 * #### BIC designation ((BIC_Nomenclature))
     A variant alias presented in BIC Nomenclature, which predates HGVS nomenclature and thus follows a different format.
 
-#### Clinical Significance Tile
+#### Clinical Significance Tile ((clinical-significance-enigma))
 
 This tile organizes ENIGMA classifications and contextual information for the variant.
 

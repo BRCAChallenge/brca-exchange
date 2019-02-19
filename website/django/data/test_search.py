@@ -7,14 +7,14 @@ from os import path
 from urllib import quote
 from django.http import JsonResponse, HttpResponse
 from brca import settings
-from data.models import Variant, CurrentVariant, ChangeType, DataRelease
+from data.models import Variant, CurrentVariant, ChangeType, DataRelease, Report
 from django.test import TestCase, RequestFactory
 import data.views as views
 from django.db import connection
 from unittest import skip
 from django.test.client import RequestFactory
 from data import test_data
-from data.views import index, autocomplete
+from data.views import index, autocomplete, variant_reports, remove_disallowed_chars
 from utilities import update_autocomplete_words
 
 '''
@@ -44,6 +44,13 @@ def create_variant_and_materialized_view(variant_data):
     update_autocomplete_words()
     return (variant, materialized_view)
 
+def create_report_and_associate_to_variant(report_data, variant):
+    report_data['Variant'] = variant
+    report = Report.objects.create_report(report_data)
+    with connection.cursor() as cursor:
+        cursor.execute("REFRESH MATERIALIZED VIEW currentvariant")
+    return report
+
 
 class VariantTestCase(TestCase):
     def setUp(self):
@@ -54,6 +61,8 @@ class VariantTestCase(TestCase):
         """
         self.factory = RequestFactory()
         (self.existing_variant, self.existing_variant_materialized_view) = create_variant_and_materialized_view(test_data.existing_variant())
+        self.existing_clinvar_report = create_report_and_associate_to_variant(test_data.existing_clinvar_report(), self.existing_variant)
+        self.existing_lovd_report = create_report_and_associate_to_variant(test_data.existing_lovd_report(), self.existing_variant)
 
     def test_variant_model(self):
         """This tests creation and retreival of a new variant by the Genomic_Coordinate_hg38 column"""
@@ -314,28 +323,38 @@ class VariantTestCase(TestCase):
 
     def test_filter_by_pathogenicity(self):
         '''Tests filtering by 'Pathogenicity' option'''
-        #variant with pathogenic classification
         new_variant_pathogenic = test_data.existing_variant()
         new_variant_pathogenic['Genomic_Coordinate_hg38'] = 'chr13:PATHOGENIC:A>G'
         new_variant_pathogenic['Pathogenicity_expert'] = 'Pathogenic'
         (new_variant_pathogenic, new_current_variant_pathogenic) = create_variant_and_materialized_view(new_variant_pathogenic)
 
-        #variant with benign/little clinical significance classification
         new_variant_benign = test_data.existing_variant()
         new_variant_benign['Genomic_Coordinate_hg38'] = 'chr13:BENIGN:A>G'
         new_variant_benign['Pathogenicity_expert'] = 'Benign / Little Clinical Significance'
         (new_variant_benign, new_current_variant_benign) = create_variant_and_materialized_view(new_variant_benign)
 
-        #variant with not_yet_reviewed status
         new_variant_not_reviewed = test_data.existing_variant()
         new_variant_not_reviewed['Genomic_Coordinate_hg38'] = 'chr13:NOT_REVIEWED:A>G'
         new_variant_not_reviewed['Pathogenicity_expert'] = 'Not Yet Reviewed'
         (new_variant_not_reviewed, new_current_variant_not_reviewed) = create_variant_and_materialized_view(new_variant_not_reviewed)
 
+        new_variant_likely_pathogenic = test_data.existing_variant()
+        new_variant_likely_pathogenic['Genomic_Coordinate_hg38'] = 'chr13:LIKELY_PATHOGENIC:A>G'
+        new_variant_likely_pathogenic['Pathogenicity_expert'] = 'Likely pathogenic'
+        (new_variant_likely_pathogenic, new_current_variant_likely_pathogenic) = create_variant_and_materialized_view(new_variant_likely_pathogenic)
+
+        new_variant_likely_benign = test_data.existing_variant()
+        new_variant_likely_benign['Genomic_Coordinate_hg38'] = 'chr13:LIKELY_BENIGN:A>G'
+        new_variant_likely_benign['Pathogenicity_expert'] = 'Likely benign'
+        (new_variant_likely_benign, new_current_variant_likely_benign) = create_variant_and_materialized_view(new_variant_likely_benign)
+
         filter_list = [
             'Pathogenic',
             'Benign / Little Clinical Significance',
-            'Not Yet Reviewed'
+            'Not Yet Reviewed',
+            'Likely Pathogenic',
+            'Likely Benign',
+            'Some non-existing Pathogenecity Designation'
             ]
 
         for filter_name in filter_list:
@@ -352,13 +371,19 @@ class VariantTestCase(TestCase):
             response_variants = response_data['data']
 
             expected_number_of_variants_in_response = 1
+
             for variant in response_variants:
                 #Because existing_variant and new_variant_* have same pathogenicity_expert values, we would expect two values to be returned
                 if self.existing_variant_materialized_view.Pathogenicity_expert == variant['Pathogenicity_expert']:
                     expected_number_of_variants_in_response = 2
 
-                self.assertEqual(expected_number_of_variants_in_response, response_data['count'])
-                self.assertTrue(filter_name in variant['Pathogenicity_expert'], message)
+            if filter_name == 'Some non-existing Pathogenecity Designation':
+                expected_number_of_variants_in_response = 0
+                self.assertFalse(filter_name.lower() in variant['Pathogenicity_expert'].lower(), message)
+            else:
+                self.assertTrue(filter_name.lower() in variant['Pathogenicity_expert'].lower(), message)
+
+            self.assertEqual(expected_number_of_variants_in_response, response_data['count'])
 
     def test_filter_by_sources(self):
         '''Tests filtering by 'Source' options'''
@@ -897,7 +922,7 @@ class VariantTestCase(TestCase):
         gibberish,<.>/?'';:[{]}\|=+-_)(*&%^$#@!~`'''
         ascii_list = [chr(i) for i in xrange(256)]
         ascii_string = 'hey I\'m gibberish look at meeee' + ''.join(ascii_list)
-
+        ascii_string = remove_disallowed_chars(ascii_string)
         request = self.factory.get(
             '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=%s' % ascii_string)
         response = index(request)
@@ -990,3 +1015,39 @@ class VariantTestCase(TestCase):
             response_data = json.loads(response.content)
 
             self.assertEqual(response_data['count'], 0, message)
+
+    def test_finds_other_versions_of_reports_even_if_associated_with_different_variant(self):
+        # This test creates two new reports and a new variant. The new reports
+        # have the same identifiers as the existing reports (SCV_ClinVar / Submission_ID_Lovd)
+        # so the existing reports should come up as other versions of these new reports
+        # when querying the new variant.
+
+        (new_variant, new_current_variant) = create_variant_and_materialized_view(test_data.new_variant())
+        second_version_lovd_report = create_report_and_associate_to_variant(test_data.second_version_lovd_report(), new_variant)
+        second_version_clinvar_report = create_report_and_associate_to_variant(test_data.second_version_clinvar_report(), new_variant)
+
+        # second versions need a second data release to associate with
+        second_data_release = DataRelease.objects.create(date='2018-12-26', id=2, name=2)
+
+        request = self.factory.get(
+            '/data/variant/%s/reports' % new_variant.id)
+        response = variant_reports(request, new_variant.id)
+
+        self.assertIsInstance(response, JsonResponse)
+        self.assertEqual(response.status_code, 200)
+
+        response_data = json.loads(response.content)
+
+        clinvar_reports = []
+        lovd_reports = []
+
+        # expects 2 clinvar and 2 lovd reports, 4 in total
+        for report in response_data['data']:
+            if report['Source'] == 'LOVD':
+                lovd_reports.append(report)
+            elif report['Source'] == 'ClinVar':
+                clinvar_reports.append(report)
+
+        self.assertEqual(len(response_data['data']), 4)
+        self.assertEqual(len(clinvar_reports), 2)
+        self.assertEqual(len(lovd_reports), 2)

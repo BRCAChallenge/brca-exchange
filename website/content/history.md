@@ -2,13 +2,13 @@
 Content linked to by History of the BRCA Exchange under About
 -->
 
-# History of the BRCA Exchange  
+# History of the BRCA Exchange
 
-Genetic sequencing labs, academic centers, and companies all work independently to classify _BRCA1_ and _BRCA2_ variants as pathogenic or benign using clinical data and other evidence. Unfortunately, each of these individual laboratories are limited in their efforts because they do not have access to data that has been aggregated across all these groups.  While some groups have begun adding their data into shared databases, there has not been full exchange of all BRCA1/2 data among laboratories.  
+Genetic sequencing labs, academic centers, and companies all work independently to classify _BRCA1_ and _BRCA2_ variants as pathogenic or benign using clinical data and other evidence. Unfortunately, each of these individual laboratories are limited in their efforts because they do not have access to data that has been aggregated across all these groups.  While some groups have begun adding their data into shared databases, there has not been full exchange of all BRCA1/2 data among laboratories.
 
 In March 2014, Professor Sir John Burn of Newcastle University, UK proposed a data sharing experiment now called the BRCA Challenge at the first plenary meeting of the [Global Alliance for Genomics and Health](http://genomicsandhealth.org/) (GA4GH), to address these issues. Over the subsequent months, John Burn and co-chair Stephen Chanock of the National Cancer Institute, USA, formed a Steering Committee including leaders from the breast cancer field and from genomic data sharing efforts. The Steering Committee defined initial goals for the Challenge including:
 
-1. Share _BRCA1_ and _BRCA2_ variants publically
+1. Share _BRCA1_ and _BRCA2_ variants publicly
 
 2. Create an environment for collaborative variant curation with access to evidence (e.g. phenotypes, family history, genetic data, and functional studies)
 
@@ -49,7 +49,7 @@ The BRCA Exchange represents the combined vision of clinicians, researchers and 
 * Kazuto Kato, Osaka University, Osaka, Japan
 
 * Delyth Jane Morgan, Baroness Morgan of Drefelin, Breast Cancer Now, Cancer Research UK
- 
+
 * Robert Nussbaum, University of California San Francisco, San Francisco, USA
 
 * Kenneth Offit, Memorial Sloan Kettering Cancer Center, New York, USA

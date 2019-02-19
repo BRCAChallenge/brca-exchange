@@ -4,26 +4,26 @@ See [this page](RELEASES.md).
 
 # azure instances
 
-Two VMs are provisioned: brcaexchange.cloudapp.net for production, and
-brcaexchange-dev.cloudapp.net for development.
+Two VMs are provisioned: brcaexchange-prod.gi.ucsc.edu for production, and
+brcaexchange-dev.gi.ucsc.edu for development.
 
 # virtual hosts
 
 On each VM, two apache virtual hosts are configured: one for beta, and one for production.
-The beta vhost is on the azure domain, (e.g. brcaexchange.cloudapp.net). The production vhost is
+The beta vhost is on the azure domain, (e.g. brcaexchange-prod.gi.ucsc.edu). The production vhost is
 on the public domain (e.g. brcaexchange.org).
 
 | VM | vhost | domain |
 | --- | --- | --- |
-| brcaexchange |  beta | brcaexchange.cloudapp.net |
+| brcaexchange |  beta | brcaexchange-prod.gi.ucsc.edu |
 | brcaexchange |  production | brcaexchange.org |
-| brcaexchange-dev |  beta | brcaexchange-dev.cloudapp.net |
+| brcaexchange-dev |  beta | brcaexchange-dev.gi.ucsc.edu |
 | brcaexchange-dev |  production | |
 
 
-No public domain has been published for brcaexchange-dev.cloudapp.net, but you
+No public domain has been published for brcaexchange-dev.gi.ucsc.edu, but you
 may add the following line to your /etc/hosts file if you need access to the
-'production' virtual host on brcaexchange-dev.cloudapp.net:
+'production' virtual host on brcaexchange-dev.gi.ucsc.edu:
 
 ```
 40.78.99.255 brcaexchange-dev.org
@@ -89,7 +89,7 @@ and deploy them on the beta vhost of brcaexchange-dev. The deploy script, deploy
 will rsync the build, and copy site settings into place.
 
 Any commits that are tagged with a version number, e.g. v1.2.3, will be built and
-deployed to brcaexchange.cloudapp.net (beta). The ```release``` script will
+deployed to brcaexchange-prod.gi.ucsc.edu (beta). The ```release``` script will
 generate and increment tags of this form automatically.
 
 To allow CCI to push code to azure, an authorized ssh key is added to the ssh config

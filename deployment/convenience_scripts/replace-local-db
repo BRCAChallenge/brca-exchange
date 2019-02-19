@@ -59,6 +59,7 @@ rsync -a --rsync-path='sudo rsync' ${USER}@${HOST}:/tmp/full_db.dump /tmp/
 echo "Moved db dump to local /tmp."
 
 # Overwrite local db with db dump.
-pg_restore /tmp/full_db.dump -c -v -1 -d ${LOCALDBNAME}
+#pg_restore /tmp/full_db.dump -c -v -1 -d ${LOCALDBNAME}
+sudo -u postgres pg_restore /tmp/full_db.dump -c -v -1 -d ${LOCALDBNAME}
 
 echo "Complete!"

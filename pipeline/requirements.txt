@@ -1,6 +1,6 @@
 backports-abc==0.4
 beautifulsoup4==4.5.1
-biocommons.seqrepo==0.3.5
+git+https://github.com/biocommons/biocommons.seqrepo.git@129d285727228920dd2d7746a47c48eb7b88b191 # fixing issue with seqrepo update-latest command. TODO change to release > 0.4.4 as soon as it is available
 biopython==1.69
 bioutils==0.3.3
 bx-python==0.7.3
@@ -9,11 +9,11 @@ configparser==3.5.0
 CrossMap==0.2.6
 Cython==0.24.1
 docutils==0.12
-hgvs==1.1.2
+hgvs==1.2.4
 itertoolz==0.5
 lxml==4.2.5
 lockfile==0.12.2
-luigi==2.2.0
+luigi==2.8.2
 nose==1.3.7
 numpy==1.14.*
 Parsley==1.3

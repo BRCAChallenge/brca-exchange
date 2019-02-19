@@ -2,7 +2,9 @@ import os
 import re
 import tempfile
 import json
+import StringIO
 from operator import __or__
+from django.core import serializers
 from django.db import connection
 from django.db.models import Q
 from django.db.models import Value
@@ -11,7 +13,8 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.gzip import gzip_page
 
-from .models import Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType, Report, ReportDiff, InSilicoPriors
+from .models import Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType, Report, ReportDiff, \
+        InSilicoPriors, VariantPaper, Paper
 from django.views.decorators.http import require_http_methods
 
 # GA4GH related imports
@@ -22,6 +25,9 @@ from ga4gh.schemas.ga4gh import metadata_pb2 as metadata
 
 import google.protobuf.json_format as json_format
 from datetime import datetime
+
+
+DISALLOWED_SEARCH_CHARS = ['\x00']
 
 
 def releases(request):
@@ -54,28 +60,34 @@ def variant_counts(request):
     enigma_pathogenic_count = query.filter(Pathogenicity_expert='Pathogenic').count()
     enigma_benign_count = query.filter(Pathogenicity_expert__contains='Benign').count()
     enigma_likely_benign_count = query.filter(Pathogenicity_expert__contains='Likely benign').count()
+    enigma_likely_pathogenic_count = query.filter(Pathogenicity_expert__contains='Likely pathogenic').count()
     query_brca1 = query.filter(Gene_Symbol='BRCA1')
     brca1_enigma_pathogenic_count = query_brca1.filter(Pathogenicity_expert='Pathogenic').count()
     brca1_enigma_benign_count = query_brca1.filter(Pathogenicity_expert__contains='Benign').count()
     brca1_enigma_likely_benign_count = query_brca1.filter(Pathogenicity_expert__contains='Likely benign').count()
+    brca1_enigma_likely_pathogenic_count = query_brca1.filter(Pathogenicity_expert__contains='Likely pathogenic').count()
     query_brca2 = query.filter(Gene_Symbol='BRCA2')
     brca2_enigma_pathogenic_count = query_brca2.filter(Pathogenicity_expert='Pathogenic').count()
     brca2_enigma_benign_count = query_brca2.filter(Pathogenicity_expert__contains='Benign').count()
     brca2_enigma_likely_benign_count = query_brca2.filter(Pathogenicity_expert__contains='Likely benign').count()
+    brca2_enigma_likely_pathogenic_count = query_brca2.filter(Pathogenicity_expert__contains='Likely pathogenic').count()
     response = JsonResponse({
         "total": total_count,
         "brca1": {
             "total": brca1_count,
             "pathogenic": brca1_enigma_pathogenic_count,
             "benign": brca1_enigma_benign_count,
-            "likelyBenign": brca1_enigma_likely_benign_count },
+            "likelyBenign": brca1_enigma_likely_benign_count,
+            "likelyPathogenic": brca1_enigma_likely_pathogenic_count },
         "brca2": {
             "total": brca2_count,
             "pathogenic": brca2_enigma_pathogenic_count,
             "benign": brca2_enigma_benign_count,
-            "likelyBenign": brca2_enigma_likely_benign_count },
+            "likelyBenign": brca2_enigma_likely_benign_count,
+            "likelyPathogenic": brca2_enigma_likely_pathogenic_count },
         "enigma": enigma_count,
         "enigmaPathogenic": enigma_pathogenic_count,
+        "enigmaLikelyPathogenic": enigma_likely_pathogenic_count,
         "enigmaBenign": enigma_benign_count,
         "enigmaLikelyBenign": enigma_likely_benign_count })
     response['Access-Control-Allow-Origin'] = '*'
@@ -110,14 +122,23 @@ def variant_reports(request, variant_id):
             report_query = Report.objects.filter(SCV_ClinVar=key).order_by('-Data_Release_id').select_related('Data_Release')
             report_versions.extend(map(report_to_dict, report_query))
         elif report.Source == "LOVD":
-            key = report.DBID_LOVD
-            report_query = Report.objects.filter(DBID_LOVD=key).order_by('-Data_Release_id').select_related('Data_Release')
+            key = report.Submission_ID_LOVD
+            report_query = Report.objects.filter(Submission_ID_LOVD=key).order_by('-Data_Release_id').select_related('Data_Release')
             report_versions.extend(map(report_to_dict, report_query))
 
     response = JsonResponse({"data": report_versions})
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
+def variant_papers(request):
+    variant_id = int(request.GET.get('variant_id'))
+    variant = Variant.objects.get(id=variant_id)
+    variant_name = variant.Genomic_Coordinate_hg38
+    variantpapers = VariantPaper.objects.select_related('paper').filter(variant_hg38=variant_name).all()
+    variantpapers = map(lambda vp: dict(model_to_dict(vp.paper), **{"mentions": vp.mentions}), variantpapers)
+    response = JsonResponse({"data": list(variantpapers)}, safe=False)
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
 
 def variant_to_dict(variant_object):
     change_types_map = {x['name']:x['id'] for x in ChangeType.objects.values().all()}
@@ -150,12 +171,14 @@ def report_to_dict(report_object):
     report_dict["Data_Release"]["date"] = report_object.Data_Release.date
     report_dict["Change_Type"] = ChangeType.objects.get(id=report_dict["Change_Type"]).name
 
-    # don't display report diffs prior to April 2018
     if report_object.Source == "ClinVar":
+        # don't display ClinVar report diffs prior to April 2018
         cutoff_date = datetime.strptime('Apr 1 2018  12:00AM', '%b %d %Y %I:%M%p')
     elif report_object.Source == "LOVD":
-        # TODO: update this cutoff date once we're ready to share lovd report diffs
-        cutoff_date = datetime.today()
+        # don't display LOVD report diffs prior to November 4 2018 (we
+        # updated the definition of LOVD submissions in the early November
+        # release, so it only makes sense to show diffs from following releases)
+        cutoff_date = datetime.strptime('Nov 4 2018  12:00AM', '%b %d %Y %I:%M%p')
     if report_dict["Data_Release"]["date"] < cutoff_date:
         report_dict["Diff"] = None
         return report_dict
@@ -165,6 +188,7 @@ def report_to_dict(report_object):
         report_dict["Diff"] = report_diff.report_diff
     except ReportDiff.DoesNotExist:
         report_dict["Diff"] = None
+
 
     return report_dict
 
@@ -219,33 +243,21 @@ def index(request):
     if order_by:
         query = apply_order(query, order_by, direction)
 
-    if format == 'csv':
-
+    if format == 'csv' or format == 'tsv':
         cursor = connection.cursor()
-        with tempfile.NamedTemporaryFile() as f:
-            os.chmod(f.name, 0606)
-            query = "COPY ({}) TO '{}' WITH DELIMITER ',' CSV HEADER".format(query.query, f.name)
-            # HACK to add quotes around search terms
-            query = re.sub(r'LIKE UPPER\((.+?)\)', r"LIKE UPPER('\1')", query)
-            cursor.execute(query)
 
-            response = HttpResponse(f.read(), content_type='text/csv')
-            response['Content-Disposition'] = 'attachment;filename="variants.csv"'
-            return response
+        # create an in-memory StringIO object that we can use to buffer the results from the server
+        # (it'll get released when it goes out of scope, so unlike a real file we don't need to close it)
+        f = StringIO.StringIO()
+        query = "COPY ({}) TO STDOUT WITH DELIMITER '{}' CSV HEADER".format(query.query, '\t' if format == 'tsv' else ',')
+        # HACK to add quotes around search terms
+        query = re.sub(r'LIKE UPPER\((.+?)\)', r"LIKE UPPER('\1')", query)
+        cursor.copy_expert(query, f)
+        f.seek(0)
 
-    elif format == 'tsv':
-
-        cursor = connection.cursor()
-        with tempfile.NamedTemporaryFile() as f:
-            os.chmod(f.name, 0606)
-            query = "COPY ({}) TO '{}' WITH DELIMITER '\t' CSV HEADER".format(query.query, f.name)
-            # HACK to add quotes around search terms
-            query = re.sub(r'LIKE UPPER\((.+?)\)', r"LIKE UPPER('\1')", query)
-            cursor.execute(query)
-
-            response = HttpResponse(f.read(), content_type='text/csv')
-            response['Content-Disposition'] = 'attachment;filename="variants.tsv"'
-            return response
+        response = HttpResponse(f.read(), content_type='text/csv')
+        response['Content-Disposition'] = 'attachment;filename="variants.%s"' % format
+        return response
 
     elif format == 'json':
         count = query.count()
@@ -271,9 +283,14 @@ def apply_sources(query, include, exclude):
     return query
 
 
+def normalize_filter_values(filterValues):
+    return [fV.replace('Likely Benign', 'Likely benign').replace('Likely Pathogenic', 'Likely pathogenic') for fV in filterValues]
+
+
 def apply_filters(query, filterValues, filters, quotes=''):
     # if there are multiple filters the row must match all the filters
-    for column, value in zip(filters, filterValues):
+    normalizedFilterValues = normalize_filter_values(filterValues)
+    for column, value in zip(filters, normalizedFilterValues):
         if column == 'id':
             query = query.filter(**{column: value})
         else:
@@ -289,6 +306,12 @@ def add_paren_to_hgvs_protein_if_absent(value):
         return value[:2] + '(' + value[2:]
     else:
         return value
+
+
+def remove_disallowed_chars(search_term):
+    for disallowed in DISALLOWED_SEARCH_CHARS:
+        search_term = search_term.replace(disallowed, '')
+    return search_term
 
 
 def apply_search(query, search_term, quotes='', release=None):
@@ -320,6 +343,7 @@ def apply_search(query, search_term, quotes='', release=None):
         NP_009225.1:A280G --> HGVS_Protein.split(':')[0]:Protein_Change
     '''
     search_term = search_term.lower().strip()
+    search_term = remove_disallowed_chars(search_term)
     clinvar_accession = False
 
     # Accept only full clinvar accession numbers

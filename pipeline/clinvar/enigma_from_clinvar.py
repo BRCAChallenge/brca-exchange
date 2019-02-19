@@ -1,8 +1,6 @@
 import copy
 import itertools
-import multiprocessing
 import re
-from multiprocessing.pool import ThreadPool
 
 import click
 import pandas as pd
@@ -289,11 +287,7 @@ def main(filtered_clinvar_xml, output):
 
     hgvs_util = hgvs_utils.HGVSWrapper()
 
-    pool = ThreadPool(multiprocessing.cpu_count())
-
-    # parallelizing, as computing protein changes takes a while due to external API calls
-    variant_records_lsts = pool.map(lambda s: parse_record(s, hgvs_util),
-                               enigma_sets)
+    variant_records_lsts = [ parse_record(s, hgvs_util) for s in enigma_sets ]   
 
     # flattening list of lists
     variant_records = list(itertools.chain.from_iterable(variant_records_lsts))

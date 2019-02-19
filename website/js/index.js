@@ -5,9 +5,9 @@
 
 import SourceReportsTile from "./components/SourceReportsTile";
 import AlleleFrequenciesTile from "./components/AlleleFrequenciesTile";
+import LiteratureTable from "./components/LiteratureTable";
 import SilicoPredTile from "./components/insilicopred/SilicoPredTile";
 import FunctionalAssayTile from "./components/functionalassay/FunctionalAssayTile";
-
 import MupitStructure from './MupitStructure';
 
 // shims for older browsers
@@ -110,6 +110,7 @@ var Footer = React.createClass({
                         <li><a href="/about/history">About</a></li>
                         <li><a href="/variants">Variants</a></li>
                         <li><a href="/help">Help</a></li>
+                        <li><a href="/about/app">Mobile App</a></li>
                         <li><a href="/about/api">API</a></li>
                     </ul>
                 </div>
@@ -388,11 +389,11 @@ var Database = React.createClass({
 					{this.props.mode === 'default' && <img id='enigma-logo' src={require('./img/enigma_logo.jpeg')} />}
 					<RawHTML ref='content' html={message}/>
 					{this.props.mode === 'research_mode' && <Button className="btn-default" onClick={this.toggleMode}>
-						Show Expert Reviewed Data Only
+						Show Summary Data Only
 					</Button>}
 					{this.props.mode === 'default' &&
 					<Button className="btn-default" onClick={() =>this.setState({showModal: true})}>
-						Show All Public Data
+						Show Detail View
 					</Button>}
 					{this.props.mode === 'default' && this.state.showModal &&
 					<Modal onRequestHide={() => this.setState({ showModal: false })}>
@@ -406,7 +407,7 @@ var Database = React.createClass({
 });
 
 // get display name for a given key from VariantTable.js column specification,
-// if we are in expert reviewed mode, search expert reviewed names then fall back to
+// if we are in summary view mode, search summary view names then fall back to
 // all data, otherwise go straight to all data. Finally, if key is not found, replace
 // _ with space in the key and return that.
 function getDisplayName(key) {
@@ -416,7 +417,7 @@ function getDisplayName(key) {
         displayName = columns.find(e => e.prop === key);
         displayName = displayName && displayName.title;
     }
-    // we are not in expert reviewed more, or key wasn't found in expert reviewed columns
+    // we are not in summary view anymore, or key wasn't found in summary view columns
     if (displayName === undefined) {
         displayName = researchModeColumns.find(e => e.prop === key);
         displayName = displayName && displayName.title;
@@ -967,7 +968,7 @@ var VariantDetail = React.createClass({
                                     {this.generateDiffRows(cols, submissions, true)}
                                 </tbody>
                             </Table>
-                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show All Public Data on this Variant" to see these changes.</p>
+                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show Detail View for this Variant" to see these changes.</p>
                         </Col>
                     </Row>
                 );
@@ -996,7 +997,7 @@ var VariantDetail = React.createClass({
                                     {this.generateDiffRows(cols, submissions, true)}
                                 </tbody>
                             </Table>
-                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show All Public Data on this Variant" to see these changes.</p>
+                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show Detail View for this Variant" to see these changes.</p>
                         </Col>
                     </Row>
                 );
@@ -1023,12 +1024,40 @@ var VariantDetail = React.createClass({
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
-                    <Col xs={4} sm={4} smOffset={4} md={4} mdOffset={4} className="vcenterblock">
-                        <div className='text-center Variant-detail-title'>
-                            <h3>Variant Detail</h3>
-                        </div>
-                    </Col>
-                    <Col xs={8} sm={4} md={4} className="vcenterblock">
+                    {
+                        (this.props.mode !== "research_mode")
+                            ? (
+                                /* display new header w/genomic coordinates in expert-reviewed mode */
+                                <span>
+                                    <Col md={2}>
+                                        <h3>Variant Details</h3>
+                                    </Col>
+                                    <Col md={8} className="vcenterblock">
+                                        <div className='text-center Variant-detail-title' style={{textAlign: 'center'}}>
+                                            <h1 style={{marginTop: 30}}>{variant.Genomic_Coordinate_hg38}</h1>
+                                            <div><i>or</i></div>
+                                            <h3 style={{marginTop: 10}}>
+                                                {variant['Reference_Sequence']}(<i>{variant['Gene_Symbol']}</i>){`:${variant['HGVS_cDNA'].split(":")[1]}`}
+
+                                                {
+                                                    (variant['HGVS_Protein'] && variant['HGVS_Protein'] !== "None") &&
+                                                        " " + variant['HGVS_Protein'].split(":")[1]
+                                                }
+                                            </h3>
+                                        </div>
+                                    </Col>
+                                </span>
+                            )
+                            : (
+                                /* display old header if we're in research mode */
+                                <Col xs={4} sm={4} smOffset={4} md={4} mdOffset={4} className="vcenterblock">
+                                    <div className='text-center Variant-detail-title'>
+                                        <h3>Variant Details</h3>
+                                    </div>
+                                </Col>
+                            )
+                    }
+                    <Col md={2} className={(this.props.mode !== "research_mode") ? "vlowerblock" : "vcenterblock"}>
                         <div className="Variant-detail-headerbar">
                             <Button
                                 onClick={this.setEmptyRowVisibility.bind(this, !this.state.hideEmptyItems)}
@@ -1092,7 +1121,27 @@ var VariantDetail = React.createClass({
 
                 <Row>
                     <Col md={12} className="variant-history-col">
-                        <h3>{variant["HGVS_cDNA"]}</h3>
+                        <h3>
+                            {variant['Reference_Sequence']}(<i>{variant['Gene_Symbol']}</i>){`:${variant['HGVS_cDNA'].split(":")[1]}`}
+                            {
+                                (variant['HGVS_Protein'] && variant['HGVS_Protein'] !== "None") &&
+                                " " + variant['HGVS_Protein'].split(":")[1]
+                            }
+                        </h3>
+                    </Col>
+                </Row>
+
+                { this.props.mode === "research_mode" && (
+                    <Row>
+                        <Col md={12} className="variant-literature-col">
+                            <LiteratureTable maxRows={10} variant={variant} hideEmptyItems={this.state.hideEmptyItems} />
+                        </Col>
+                    </Row>
+                    )
+                }
+
+                <Row>
+                    <Col md={12} className="variant-history-col">
                         <h4>Previous Versions of this Variant:</h4>
                         <Table className='variant-history nopointer' responsive bordered>
                             <thead>
@@ -1106,7 +1155,7 @@ var VariantDetail = React.createClass({
                                 {diffRows}
                             </tbody>
                         </Table>
-                        <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show All Public Data on this Variant" to see these changes.</p>
+                        <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show Detail View for this Variant" to see these changes.</p>
                     </Col>
                 </Row>
 
@@ -1115,7 +1164,7 @@ var VariantDetail = React.createClass({
 
                 <Row>
                     <Col md={12} mdOffset={0}>
-                        <DisclaimerModal buttonModal onToggleMode={this.props.toggleMode} text="Show All Public Data on this Variant"/>
+                        <DisclaimerModal buttonModal onToggleMode={this.props.toggleMode} text="Show Detail View for this Variant"/>
                     </Col>
                 </Row>
             </Grid>
@@ -1184,6 +1233,7 @@ var routes = (
         <Route path='reset/:resetToken' handler={ChangePassword}/>
         <Route path='variants' />
         <Route path='variant/:id' handler={VariantDetail}/>
+        <Route path='variant_literature/:id' handler={LiteratureTable}/>
         <Route path='releases' handler={Releases}/>
         <Route path='release/:id' handler={Release}/>
     </Route>

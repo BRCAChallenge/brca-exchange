@@ -6,7 +6,7 @@ var classNames = require('classnames');
 var content = require('./content');
 
 var RawHTML = require('./RawHTML');
-var {Navbar, Nav, DropdownButton, Modal, Button} = require('react-bootstrap');
+var {Navbar, Nav, DropdownButton, Modal, Button, OverlayTrigger, Popover} = require('react-bootstrap');
 var {Link} = require('react-router');
 
 var brcaHeaderLogo = require('./img/brca-logo-transp.png');
@@ -20,6 +20,32 @@ var NavLink = React.createClass({
                     {children}
                 </Link>
             </li>
+        );
+    }
+});
+
+const ModeButton = React.createClass({
+    render: function() {
+        const {mode, toggleMode} = this.props;
+
+        const popper = (mode === 'research_mode')
+        ? (
+            <Popover title="Change View">
+            The BRCA Exchange Detail View shows information drawn from multiple databases and is intended to provide professional users a set of annotations which is as comprehensive as possible. For summary information with expert interpretations, click this button to switch to the Summary View.
+            </Popover>
+        )
+        : (
+            <Popover title="Change View">
+            The BRCA Exchange Summary View shows the clinical significance as reviewed by the expert ENIGMA consortium. For additional variant information, click this button to switch to the Detail View.
+            </Popover>
+        );
+
+        return (
+            <OverlayTrigger placement='bottom' delayShow={300} overlay={popper}>
+                <span id="research-label" className="label label-info" style={{cursor: 'help'}} onClick={toggleMode}>
+                    {`${mode === 'research_mode' ? "Detail" : "Summary"} View`}
+                </span>
+            </OverlayTrigger>
         );
     }
 });
@@ -75,10 +101,10 @@ var NavBarNew = React.createClass({
         );
     },
     render: function () {
-        var {path} = this.props;
-        var brand = (
+        const {path} = this.props;
+        const brand = (
             <a href="/" className="branding-clickable">
-                <img className="logo-img" src={brcaHeaderLogo} height="40" />
+                <img alt="BRCA Exchange Logo" className="logo-img" src={brcaHeaderLogo} height="40" />
 
                 <div className="brand-collapser">
                     <h1>
@@ -86,11 +112,7 @@ var NavBarNew = React.createClass({
                         <span className="exchange"> Exchange</span>
                     </h1>
 
-                    {
-                        this.props.mode === 'research_mode'
-                            ? <span id="research-label" className="label label-info" onClick={this.toggleMode}>All Public Data</span>
-                            : <span id="research-label" className="label label-info" onClick={this.toggleMode}>Expert Reviewed</span>
-                    }
+                    <ModeButton mode={this.props.mode} toggleMode={this.toggleMode} />
                 </div>
             </a>
         );

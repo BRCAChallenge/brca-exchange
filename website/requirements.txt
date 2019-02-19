@@ -1,4 +1,4 @@
-Django==1.9.4
+Django==1.9.13
 PyJWT==1.4.2
 argparse==1.2.1
 django-cors-headers==1.1.0
@@ -6,7 +6,7 @@ django-jwt-auth==0.0.2
 django-utils==0.0.2
 djangorestframework==3.4.3
 djangorestframework-jwt==1.8.0
-psycopg2==2.6.2
+psycopg2==2.7.3.2
 requests==2.20.0
 wsgiref==0.1.2
 ga4gh-schemas==0.0.8
