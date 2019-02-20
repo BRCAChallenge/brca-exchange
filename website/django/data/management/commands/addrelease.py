@@ -184,6 +184,8 @@ class Command(BaseCommand):
                 source = "1000_Genomes"
             elif source == "ExUV":
                 source = "exLOVD"
+            elif source == "Findlay BRCA1 Ring Function Scores":
+                source = "Findlay_BRCA1_Ring_Function_Scores"
             bx_id_field = "BX_ID_" + source
 
             if not self.is_empty(getattr(variant, bx_id_field)):
