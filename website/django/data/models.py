@@ -51,6 +51,7 @@ class Variant(models.Model):
     Variant_in_BIC = models.BooleanField(default=False)
     Variant_in_ESP = models.BooleanField(default=False)
     Variant_in_exLOVD = models.BooleanField(default=False)
+    Variant_in_Findlay_BRCA1_Ring_Function_Scores = models.BooleanField(default=False)
 
     Source = models.TextField()
     URL_ENIGMA = models.TextField()
@@ -368,6 +369,7 @@ class CurrentVariant(models.Model):
     Variant_in_BIC = models.BooleanField(default=False)
     Variant_in_ESP = models.BooleanField(default=False)
     Variant_in_exLOVD = models.BooleanField(default=False)
+    Variant_in_Findlay_BRCA1_Ring_Function_Scores = models.BooleanField(default=False)
 
     Source = models.TextField()
     URL_ENIGMA = models.TextField()

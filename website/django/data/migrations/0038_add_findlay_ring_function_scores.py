@@ -52,6 +52,11 @@ class Migration(migrations.Migration):
             name='Log_RNA_Depletion_Findlay_BRCA1_Ring_Function_Scores',
             field=models.TextField(default=b'-'),
         ),
+        migrations.AddField(
+            model_name='variant',
+            name='Variant_in_Findlay_BRCA1_Ring_Function_Scores',
+            field=models.BooleanField(default=False),
+        ),
         migrations.RunSQL(
             """
             DROP MATERIALIZED VIEW IF EXISTS currentvariant;
