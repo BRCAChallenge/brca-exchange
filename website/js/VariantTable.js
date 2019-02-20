@@ -240,6 +240,11 @@ const researchModeGroups = [
         innerCols: []
     },
 
+    {groupTitle: 'Functional Assay Results', internalGroupName: 'FunctionalAssayResults',
+        hideFromColumnSelection: true,
+        innerCols: []
+    },
+
     {groupTitle: 'CRAVAT - MuPIT 3D Protein View', internalGroupName: 'Mupit Structure',
       hideFromColumnSelection: true,
       innerCols: [

@@ -7,6 +7,7 @@ import SourceReportsTile from "./components/SourceReportsTile";
 import AlleleFrequenciesTile from "./components/AlleleFrequenciesTile";
 import LiteratureTable from "./components/LiteratureTable";
 import SilicoPredTile from "./components/insilicopred/SilicoPredTile";
+import FunctionalAssayTile from "./components/functionalassay/FunctionalAssayTile";
 import MupitStructure from './MupitStructure';
 
 // shims for older browsers
@@ -761,6 +762,23 @@ var VariantDetail = React.createClass({
                             this.relayoutOnCollapsed(collapser);
                         }}
                         helpSection="in-silico-prior-probabilities-of-pathogenicity"
+                        showHelp={this.showHelp}
+                    />
+                );
+            }
+
+            if (groupTitle === "Functional Assay Results") {
+                return (
+                    <FunctionalAssayTile
+                        groupTitle='functional-assay-tile'
+                        HGVS_cDNA={variant['HGVS_cDNA']}
+                        displayTitle="Functional Assay Results"
+                        onChangeGroupVisibility={this.onChangeGroupVisibility}
+                        hideEmptyItems={this.state.hideEmptyItems}
+                        onDimsChanged={(collapser) => {
+                            this.relayoutOnCollapsed(collapser);
+                        }}
+                        helpSection="functional-assay"
                         showHelp={this.showHelp}
                     />
                 );
