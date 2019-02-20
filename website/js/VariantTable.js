@@ -611,7 +611,9 @@ var ResearchVariantTableSupplier = function (Component) {
             let source = name.substring(11).replace(/_/g, " ");
             if (source.toLowerCase() === "exlovd") {
                 source = "ExUV";
-            }
+            } else if (source.toLowerCase() === "findlay brca1 ring function scores") {
+	         source = "Findlay";
+	    }
             return source;
         },
         getFilters: function() {

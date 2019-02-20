@@ -14,7 +14,8 @@ const allSources = {
     "Variant_in_LOVD": 1,
     "Variant_in_BIC": 1,
     "Variant_in_ESP": 1,
-    "Variant_in_exLOVD": 1
+    "Variant_in_exLOVD": 1,
+    "Variant_in_Findlay_BRCA1_Ring_Function_Scores": 1
 };
 
 const getDefaultExpertColumns = function() {
