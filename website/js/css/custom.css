@@ -1457,3 +1457,12 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
     padding: 2px 4px;
     max-width: 60%;
 }
+
+.variant-literature-col .lit-text-matches {
+    margin-top: 1em;
+}
+
+.variant-literature-col .lit-text-matches ol li {
+    word-break: break-word;
+    overflow-wrap: break-word
+}
