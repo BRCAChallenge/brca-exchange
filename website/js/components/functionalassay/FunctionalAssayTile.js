@@ -57,7 +57,7 @@ export default class FunctionalAssayTile extends React.Component {
                         <FuncClassSubtile score={funcScore} impactScale={impactScale} />
                     </div>
 
-                    <div style={{padding: 20, paddingTop: 10, fontSize: 'smaller', fontStyle: 'italic', textAlign: 'center'}}>
+                    <div style={{padding: 20, paddingTop: 10, paddingBottom: 10, fontSize: 'smaller', fontStyle: 'italic', textAlign: 'center'}}>
                         The median synonymous SNV scored 0.0 and the median nonsense SNV scored -2.12.
                     </div>
 

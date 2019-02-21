@@ -26,7 +26,7 @@ export default class FuncClassSubtile extends React.Component {
 
         const margin = { top: 0, bottom: 80, left: 65, right: 20 };
         const width = 500 - margin.left - margin.right;
-        const height = 200 - margin.top - margin.bottom;
+        const height = 150 - margin.top - margin.bottom;
 
         var max = d3.max(values);
         var min = d3.min(values);
@@ -144,6 +144,6 @@ export default class FuncClassSubtile extends React.Component {
     }
 
     render() {
-        return (<svg id="func-assay-obj" width="100%" height="auto" viewBox="0 0 500 200" />);
+        return (<svg id="func-assay-obj" width="100%" height="auto" viewBox="0 0 500 150" />);
     }
 }
