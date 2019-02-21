@@ -111,12 +111,14 @@ export default class AlleleFrequenciesTile extends React.Component {
                 </a>
 
                 <a title='collapse all fields'
+                   className="toggle-subfields"
                     onClick={(event) => this.setAllFieldsExpansion(event, false)}
                     style={{cursor: 'pointer', marginRight: '10px'}}>
                     <i className="fa fa-angle-double-up" aria-hidden="true" />
                 </a>
 
                 <a title='expand all fields'
+                   className="toggle-subfields"
                     onClick={(event) => this.setAllFieldsExpansion(event, true)}
                     style={{cursor: 'pointer'}}>
                     <i className="fa fa-angle-double-down" aria-hidden="true" />
