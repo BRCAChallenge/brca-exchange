@@ -7,6 +7,7 @@ import varScores from './mockdata/variants_to_funcscores';
 import CollapsibleTile from "../collapsible/CollapsibleTile";
 import CollapsibleSection from "../collapsible/CollapsibleSection";
 import FuncClassSubtile from "./FuncClassSubtile";
+import {Table} from "react-bootstrap";
 
 
 export const impacts = [
@@ -35,6 +36,14 @@ export default class FunctionalAssayTile extends React.Component {
 
         return (
             <CollapsibleTile allEmpty={false} {...this.props}>
+                <Table style={{paddingBottom: 0, marginBottom: 0}}>
+                    <tbody>
+                        <tr>
+                            <td style={{verticalAlign: 'middle', width: '25%', fontWeight: 'bold', textAlign: 'center'}}>Disclaimer</td>
+                            <td style={{verticalAlign: 'middle'}}>Please note that functional assay results reflect laboratory models of disease, and should not be used as a proxy for clinical variant interpretations.</td>
+                        </tr>
+                    </tbody>
+                </Table>
                 <CollapsibleSection
                     fieldName="Findlay Function Score"
                     extraHeaderItems={<span>Score: {funcScore} ({impactScale(funcScore).label})</span>}
