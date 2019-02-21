@@ -36,7 +36,7 @@ export default class FunctionalAssayTile extends React.Component {
         return (
             <CollapsibleTile allEmpty={false} {...this.props}>
                 <CollapsibleSection
-                    fieldName="Functional Classification"
+                    fieldName="Findlay Function Score"
                     extraHeaderItems={<span>Score: {funcScore} ({impactScale(funcScore).label})</span>}
                     defaultVisible={true}
                 >
