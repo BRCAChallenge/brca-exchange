@@ -46,7 +46,7 @@ export default class FunctionalAssayTile extends React.Component {
                 </Table>
                 <CollapsibleSection
                     fieldName="Findlay Function Score"
-                    extraHeaderItems={<span>Score: {funcScore} ({impactScale(funcScore).label})</span>}
+                    extraHeaderItems={<span>Score: {funcScore.toFixed(3)} ({impactScale(funcScore).label})</span>}
                     defaultVisible={true}
                 >
                     <div className="subtile-container" style={{padding: 20, paddingTop: 10, paddingBottom: 10}}>
@@ -60,6 +60,11 @@ export default class FunctionalAssayTile extends React.Component {
                     <div style={{padding: 20, paddingTop: 10, fontSize: 'smaller', fontStyle: 'italic', textAlign: 'center'}}>
                         The median synonymous SNV scored 0.0 and the median nonsense SNV scored -2.12.
                     </div>
+
+                    <ol style={{padding: 20, paddingTop: 10}}>
+                        Publications the report on the accuracy of this assay.
+                        <li style={{marginLeft: 30}}><a href="https://www.ncbi.nlm.nih.gov/pubmed/30209399">Findlay et al. 2018</a></li>
+                    </ol>
                 </CollapsibleSection>
             </CollapsibleTile>
         );
