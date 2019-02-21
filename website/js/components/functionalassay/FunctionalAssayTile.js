@@ -50,7 +50,7 @@ export default class FunctionalAssayTile extends React.Component {
                     defaultVisible={true}
                 >
                     <div className="subtile-container" style={{padding: 20, paddingTop: 10, paddingBottom: 10}}>
-                    This histogram summarizes functional classification results from saturation genome editing, provided by the Starita lab at the University of Washington (<a href="https://www.ncbi.nlm.nih.gov/pubmed/30209399">Findlay et al, Nature, 2018</a>). Please see <a href="https://sge.gs.washington.edu/BRCA1/">their site</a> for further information.
+                        This histogram summarizes functional classification results from saturation genome editing, provided by the Starita lab at the University of Washington (<a href="https://www.ncbi.nlm.nih.gov/pubmed/30209399">Findlay et al, Nature, 2018</a>). Please see <a href="https://sge.gs.washington.edu/BRCA1/">their site</a> for further information.
                     </div>
 
                     <div id="func-assay-container" style={{textAlign: 'center'}}>

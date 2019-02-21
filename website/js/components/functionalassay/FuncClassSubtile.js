@@ -134,13 +134,23 @@ export default class FuncClassSubtile extends React.Component {
             .text(d => d.label);
 
         // draw caret on classification chart
-        svg
-            .append("g")
+        svg.append("g")
             .attr("transform", `translate(${x(score)}, ${height + 50})`)
             .append("polygon")
             .attr("stroke", "none")
             .attr("fill", "black")
             .attr("points", "0,0 5,10 -5,10");
+
+        svg.append("g")
+            .attr("transform", `translate(${x(score)}, ${height + 50})`)
+            .append("line")
+            .attr("stroke", "black")
+            .attr("stroke-dasharray", 4)
+            .attr("fill", "black")
+            .attr("y", 0)
+            .attr("y2", -yMax)
+            .attr("points", "0,0 5,10 -5,10");
+
     }
 
     render() {
