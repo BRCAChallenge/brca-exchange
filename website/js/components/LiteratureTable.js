@@ -210,7 +210,7 @@ class LiteratureTable extends React.Component {
 
                         <AuthorList authors={authors} maxCount={3} />
 
-                        <div style={{marginTop: '10px'}}>
+                        <div className="lit-text-matches">
                             <b>Text Matches:</b>
                             {
                                 mentions.length ? (
