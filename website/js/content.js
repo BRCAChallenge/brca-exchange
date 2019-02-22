@@ -262,6 +262,16 @@ const helpContentResearch = [
                 ]
             },
             {
+                name: "Functional Assay Results",
+                contents: require("../content/help/research/functional-assay-disclaimer.md"),
+                list: [
+                    {
+                        name: "Findlay Function Scores",
+                        contents: require("../content/help/research/findlay-function-scores.md")
+                    },
+                ]
+            },
+            {
                 name: "In Silico Prior Probabilities of Pathogenicity",
                 contents: require("../content/help/research/insilico/insilico-pred.md")
             },
