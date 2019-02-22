@@ -56,12 +56,14 @@ def main():
 
     f_tmp = tempfile.NamedTemporaryFile(delete=False)
 
-    # TODO: fixme! quick hack to rem first two lines of extra header categories
+    # Remove extra header categories from input file
+    # NOTE: adjust NUM_HEADER_LINES as needed
+    NUM_HEADER_LINES = 2
     with open(f_in, 'r') as f_in:
         with open(f_tmp.name, 'w') as f_tmp_opened:
-            # skip header lines
-            f_in.next()
-            f_in.next()
+            while NUM_HEADER_LINES > 0:
+                f_in.next()
+                NUM_HEADER_LINES -= 1
             for line in f_in:
                 f_tmp_opened.write(line)
 

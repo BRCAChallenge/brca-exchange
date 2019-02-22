@@ -16,12 +16,6 @@ from pygr.seqdb import SequenceFileDB
 
 
 def parse_args():
-    """
-    Description:
-        function 'parse_args' parses arguments from command-line and returns an argparse
-        object containing the arguments and their values. Default values are 'False' if option
-        is not listed in the command, else the option value is set to True.
-    """
     parser = argparse.ArgumentParser(description='Convert database table to VCF format.')
     parser.add_argument('-i', '--input', type=argparse.FileType('r'),
                         help='Input file for conversion.')
