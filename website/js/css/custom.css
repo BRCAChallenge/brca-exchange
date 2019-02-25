@@ -1444,4 +1444,9 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
     .toggle-subfields {
         display: none !important;
     }
+
+    /* disables bootstrap's "helpful" displaying of link URLs when printing */
+    a[href]:after {
+        content: none
+    }
 }
