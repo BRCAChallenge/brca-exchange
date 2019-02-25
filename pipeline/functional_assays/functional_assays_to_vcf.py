@@ -13,6 +13,7 @@ from collections import defaultdict
 import pyhgvs as hgvs
 import pyhgvs.utils as hgvs_utils
 from pygr.seqdb import SequenceFileDB
+import logging
 
 
 def parse_args():
@@ -23,13 +24,13 @@ def parse_args():
                         help='Input annotation file for conversion. Tab-delimited with 1st column representing field name and 2nd column representing the field description. Default(/hive/groups/cgl/brca/phase1/data/resources/exLOVDAnnotation)')
     parser.add_argument('-o', '--out', type=argparse.FileType('w'),
                         help='Ouput VCF file result.')
-    parser.add_argument('-e', '--errors', type=argparse.FileType('w'),
-                        help='File containing all variants that could not be parsed.')
+    parser.add_argument('-l', '--logfile', default='/tmp/functional_assays_to_vcf.log')
     parser.add_argument('-g', '--gpath', default='/hive/groups/cgl/brca/phase1/data/resources/hg19.fa',
                         help='Whole path to genome file. Default: (/hive/groups/cgl/brca/phase1/data/resources/hg19.fa)')
     parser.add_argument('-r', '--rpath', default='/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.gp',
                         help='Whole path to refSeq file. Default: (/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.gp)')
     parser.add_argument('-s', '--source', default='FunctionalAssay')
+    parser.add_argument('-v', '--verbose', action='count', default=False, help='determines logging')
 
     options = parser.parse_args()
     return options
@@ -42,8 +43,15 @@ def main():
     vcfFile = options.out
     genome_path = options.gpath
     refseq_path = options.rpath
-    errorsFile = options.errors
     source = options.source
+    logfile = options.logfile
+
+    if options.verbose:
+        logging_level = logging.DEBUG
+    else:
+        logging_level = logging.CRITICAL
+
+    logging.basicConfig(filename=logfile, filemode="w", level=logging_level)
 
     with open(refseq_path) as infile:
         transcripts = hgvs_utils.read_transcripts(infile)
@@ -89,7 +97,7 @@ def main():
         # extract hgvs cDNA term for variant and cleanup formatting
         hgvsName = parsedLine[fieldIdxDict['hgvs_nucleotide']]
         if hgvsName == '-':
-            print(parsedLine)
+            logging.debug("hgvs name == '-' for line: %s", parsedLine)
             continue
         gene_symbol = parsedLine[fieldIdxDict['gene_symbol']].lower()
         if gene_symbol == 'brca1':
@@ -97,7 +105,7 @@ def main():
         elif gene_symbol == 'brca2':
             transcript = 'NM_000059.3'
         else:
-            print('improper gene symbol: '+ gene_symbol, file=errorsFile)
+            logging.debug("improper gene symbol: %s", gene_symbol)
             continue
         queryHgvsName = transcript + ':' + hgvsName.rstrip().split(';')[0]
         INFO_field_string = ';'.join(INFO_field)
@@ -106,7 +114,7 @@ def main():
             chrom = chrom.replace('chr', '')
             print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(chrom, offset, queryHgvsName, ref, alt, INFO_field_string), file=vcfFile)
         except Exception as e:
-            print(str(e)+': could not parse hgvs field '+queryHgvsName, file=errorsFile)
+            logging.debug("could not parse hgvs field: %s", queryHgvsName)
 
 
 def normalize(field, field_value):
