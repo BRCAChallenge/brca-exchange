@@ -54,24 +54,9 @@ def main():
     f_in = options.input
     f_out = options.output
 
-    f_tmp = tempfile.NamedTemporaryFile(delete=False)
-
-    # Remove extra header categories from input file
-    # NOTE: adjust NUM_HEADER_LINES as needed
-    NUM_HEADER_LINES = 2
-    with open(f_in, 'r') as f_in:
-        with open(f_tmp.name, 'w') as f_tmp_opened:
-            while NUM_HEADER_LINES > 0:
-                f_in.next()
-                NUM_HEADER_LINES -= 1
-            for line in f_in:
-                f_tmp_opened.write(line)
-
-    f_in_data_frame = pd.read_csv(f_tmp.name, sep="\t")
+    # NOTE: adjust skiprows as needed to remove extra header lines
+    f_in_data_frame = pd.read_csv(f_in, skiprows=2, sep="\t")
     f_out_data_frame = extract_relevant_data_for_processing(f_in_data_frame)
-
-    os.remove(f_tmp.name)
-
     f_out_data_frame.to_csv(f_out, sep='\t', index=False)
 
 
