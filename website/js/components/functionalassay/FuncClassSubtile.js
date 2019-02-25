@@ -2,13 +2,12 @@
 import React from 'react';
 import d3 from 'd3';
 
-import varScores from './mockdata/variants_to_funcscores';
+import varScoresArray from './mockdata/funcscores_array';
 import {impacts} from "./FunctionalAssayTile";
 
 export default class FuncClassSubtile extends React.Component {
     constructor(props) {
         super(props);
-        this.data = Object.values(varScores);
         this.createBarChart = this.createBarChart.bind(this);
     }
 
@@ -22,50 +21,52 @@ export default class FuncClassSubtile extends React.Component {
 
     createBarChart() {
         const {score} = this.props;
-        var values = this.data;
+        // FIXME: 'varScoresArray' was generated from a copy of the findlay functional scores.
+        //  ideally this should be generated/exported by the pipeline to the front-end, so it stays in sync with the source.
+        const values = varScoresArray;
 
         const margin = { top: 0, bottom: 80, left: 65, right: 20 };
         const width = 500 - margin.left - margin.right;
         const height = 150 - margin.top - margin.bottom;
 
-        var max = d3.max(values);
-        var min = d3.min(values);
-        var x = d3.scale.linear()
+        const max = d3.max(values);
+        const min = d3.min(values);
+        const x = d3.scale.linear()
             .domain([min, max])
             .range([0, width])
             .clamp(true);
 
         // Generate a histogram using twenty uniformly-spaced bins.
-        var data = d3.layout.histogram()
+        const data = d3.layout.histogram()
             .bins(x.ticks(40))
             (values);
 
-        var yMax = d3.max(data, d => d.length);
-        // var yMin = d3.min(data, d => d.length);
+        const yMax = d3.max(data, d => d.length);
+        // const yMin = d3.min(data, d => d.length);
 
-        var y = d3.scale.linear()
+        const y = d3.scale.linear()
             .domain([0, yMax])
             .range([height, 0]);
 
-        var xAxis = d3.svg.axis()
+        const xAxis = d3.svg.axis()
             .scale(x)
             .ticks(20)
             .orient("bottom");
 
-        var yAxis = d3.svg.axis()
+        const yAxis = d3.svg.axis()
             .scale(y)
             .ticks(4)
             .tickSize(0)
             .orient("left");
 
         // FIXME: instead of duplicating the axis object, figure out how to clone yAxis
-        var yAxis2 = d3.svg.axis()
+        const yAxis2 = d3.svg.axis()
             .scale(y)
             .ticks(4)
             .orient("left");
 
-        // var svgElem = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        var svg = d3.select("#func-assay-obj")
+        // const svgElem = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        const svg = d3.select("#func-assay-obj")
             .attr("class", "func-assay")
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -79,7 +80,7 @@ export default class FuncClassSubtile extends React.Component {
             );
 
         // draw histogram bars
-        var bar = svg.selectAll(".bar")
+        const bar = svg.selectAll(".bar")
             .data(data)
             .enter().append("g")
             .attr("class", "bar")

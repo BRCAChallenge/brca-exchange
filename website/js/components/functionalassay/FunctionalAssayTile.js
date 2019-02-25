@@ -2,8 +2,6 @@
 import React from 'react';
 import d3 from "d3";
 
-import varScores from './mockdata/variants_to_funcscores';
-
 import CollapsibleTile from "../collapsible/CollapsibleTile";
 import CollapsibleSection from "../collapsible/CollapsibleSection";
 import FuncClassSubtile from "./FuncClassSubtile";
@@ -18,13 +16,13 @@ export const impacts = [
 
 export default class FunctionalAssayTile extends React.Component {
     render() {
-        const funcScore = varScores[this.props['HGVS_cDNA']];
+        const funcScore = parseFloat(this.props.score);
 
         const impactScale = d3.scale.threshold()
             .domain(impacts[1].range)
             .range(impacts);
 
-        if (funcScore === undefined) {
+        if (funcScore === undefined || isNaN(funcScore)) {
             return (
                 <CollapsibleTile allEmpty={true} {...this.props}>
                     <div style={{padding: '10px'}}>

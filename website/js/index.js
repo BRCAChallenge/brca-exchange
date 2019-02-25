@@ -771,7 +771,7 @@ var VariantDetail = React.createClass({
                 return (
                     <FunctionalAssayTile
                         groupTitle='functional-assay-tile'
-                        HGVS_cDNA={variant['HGVS_cDNA']}
+                        score={variant.Functional_Enrichment_Score_Findlay_BRCA1_Ring_Function_Scores}
                         displayTitle="Functional Assay Results"
                         onChangeGroupVisibility={this.onChangeGroupVisibility}
                         hideEmptyItems={this.state.hideEmptyItems}
