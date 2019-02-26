@@ -182,6 +182,18 @@ class LiteratureTable extends React.Component {
         document.execCommand('copy');
     }
 
+    trackLitAccess(elem) {
+        const targetURL = elem.target.getAttribute('href');
+
+        if (window.ga) {
+            window.ga('send', 'event', {
+                eventCategory: 'Literature Outbound Link',
+                eventAction: 'click',
+                eventLabel: targetURL
+            });
+        }
+    }
+
     render() {
         if (!this.props.variant && !this.state.data) {
             return (<div />);
@@ -222,7 +234,7 @@ class LiteratureTable extends React.Component {
                         </div>
                     </td>
                     <td style={{width: '12%'}}>
-                        <div className="pmid">PMID: <a href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank'>{pmid}</a></div>
+                        <div className="pmid">PMID: <a onClick={this.trackLitAccess} href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank'>{pmid}</a></div>
                         <div>{year}</div>
                         <div>{journal}</div>
                     </td>
