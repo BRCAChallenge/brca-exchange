@@ -36,7 +36,7 @@ class Command(BaseCommand):
 
     def __init__(self):
         super(Command, self).__init__()
-        self.previous_release_id = DataRelease.objects.order_by('-id')[1].id
+        self.previous_release_id = None  # filled in within handle()
 
     def add_arguments(self, parser):
         parser.add_argument('variants', type=FileType('r'), help='Variants to be added, in TSV format')
@@ -66,6 +66,8 @@ class Command(BaseCommand):
         # To name the release we're adding, find the most recently added release and add 1 to its name.
         release_name = int(DataRelease.objects.all().order_by('-name')[0].name) + 1
         release_id = DataRelease.objects.create(name=release_name, **notes).id
+
+        self.previous_release_id = DataRelease.objects.order_by('-id')[1].id
 
         print "Creating new release with ID %d and name %s in db %s" % (release_id, release_name, DATABASES['default']['NAME'])
 
