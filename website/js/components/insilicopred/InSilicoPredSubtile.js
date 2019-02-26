@@ -11,7 +11,7 @@ class PathosProbScale extends React.Component {
         const {value, brackets} = this.props;
 
         return (
-            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100" viewBox="0 0 500 60">
+            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="auto" viewBox="0 0 500 70" preserveAspectRatio="xMidYMid meet">
                 <defs>
                     <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
                         <stop offset="0%"   style={{stopColor: '#0000FE', stopOpacity: 1}} />
@@ -90,7 +90,7 @@ export default class InSilicoPredSubtile extends React.Component {
 
         return (
             <div>
-                <div className="subtile-container" style={{padding: 0}}>
+                <div className="subtile-container" style={{padding: '20px 0'}}>
                     <PathosProbScale value={probability} brackets={4} />
                 </div>
 
