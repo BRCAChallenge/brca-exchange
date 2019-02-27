@@ -137,12 +137,14 @@ export default class SourceReportsTile extends React.Component {
                 </a>
 
                 <a title='collapse all reports'
+                   className="toggle-subfields"
                     onClick={(event) => this.setAllReportExpansion(event, false)}
                     style={{cursor: 'pointer', marginRight: '10px'}}>
                     <i className="fa fa-angle-double-up" aria-hidden="true" />
                 </a>
 
                 <a title='expand all reports'
+                   className="toggle-subfields"
                     onClick={(event) => this.setAllReportExpansion(event, true)}
                     style={{cursor: 'pointer'}}>
                     <i className="fa fa-angle-double-down" aria-hidden="true" />
