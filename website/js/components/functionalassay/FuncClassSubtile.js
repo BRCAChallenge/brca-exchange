@@ -147,7 +147,7 @@ export default class FuncClassSubtile extends React.Component {
             .append("line")
             .attr("stroke", "black")
             .attr("stroke-dasharray", 9)
-            .attr("stroke-width", 3)
+            .attr("stroke-width", 1)
             .attr("fill", "black")
             .attr("y", 0)
             .attr("y2", -yMax)
