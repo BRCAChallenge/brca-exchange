@@ -24,7 +24,7 @@ const CollapsibleSection = React.createClass({
         this.props.onFieldToggled(fieldName);
     },
 
-    generateHeader: function(fieldName, extraHeaderItems, twoColumnExtraHeader=false) {
+    generateHeader: function(fieldName, extraHeaderItems, twoColumnExtraHeader) {
         return (
             <div className={`allele-frequency-header ${this.props.expanded ? 'expanded' : ''}`} onClick={(e) => this.handleToggle(e, fieldName)}>
                 <div className="allele-frequency-cell allele-frequency-label">
