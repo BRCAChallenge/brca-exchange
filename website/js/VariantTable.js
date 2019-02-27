@@ -240,6 +240,11 @@ const researchModeGroups = [
         innerCols: []
     },
 
+    {groupTitle: 'Functional Assay Results', internalGroupName: 'FunctionalAssayResults',
+        hideFromColumnSelection: true,
+        innerCols: []
+    },
+
     {groupTitle: 'CRAVAT - MuPIT 3D Protein View', internalGroupName: 'Mupit Structure',
       hideFromColumnSelection: true,
       innerCols: [
@@ -606,6 +611,8 @@ var ResearchVariantTableSupplier = function (Component) {
             let source = name.substring(11).replace(/_/g, " ");
             if (source.toLowerCase() === "exlovd") {
                 source = "ExUV";
+            } else if (source.toLowerCase() === "findlay_brca1_ring_function_scores") {
+                source = "Findlay";
             }
             return source;
         },

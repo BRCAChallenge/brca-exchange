@@ -1233,6 +1233,48 @@ div.variant-submitter-group .submitter-header td {
 }
 
 
+/* --- functional assay viz. -------------- */
+
+.func-assay .bar rect {
+    shape-rendering: crispEdges;
+}
+
+.func-assay .bar text {
+    fill: #999999;
+}
+
+.func-assay .axis path, .func-assay .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.func-assay .axis text {
+    font-size: 10px;
+}
+
+.func-assay .axis text.axis-label {
+    font-size: 12px;
+}
+
+.func-assay .y.axis path {
+    fill: none; stroke: none;
+}
+.func-assay .y.axis line {
+    fill: none; stroke: #555;
+    shape-rendering: crispEdges;
+}
+
+.func-assay .grid {
+    fill: none;
+}
+.func-assay .grid line {
+    stroke: #eee;
+    stroke-width: 1;
+    fill: none;
+    shape-rendering: crispEdges;
+}
+
 /* --- in-silico prediction viz. -------------- */
 
 .subtile-container {

@@ -18,6 +18,7 @@ Additional steps have to be taken on Mac OS X:
 
 * brew install make --with-default-names
 * brew install coreutils
+* setup bash version >= 4.0 (https://coderwall.com/p/dmuxma/upgrade-bash-on-your-mac-os)
 
 ## Creating a New Data Release
 

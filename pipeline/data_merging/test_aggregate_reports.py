@@ -5,10 +5,10 @@ import csv
 from os import path, getcwd
 import aggregate_reports
 
+
 VCF_TESTDATA_FILENAME = path.join(path.dirname(__file__), 'test_files/1000_Genomes.vcf')
 TSV_TESTDATA_FILENAME = path.join(path.dirname(__file__), 'test_files/enigma_from_clinvar.tsv')
 INPUT_DIRECTORY = path.join(path.dirname(__file__), 'test_files/')
-
 
 class TestStringMethods(unittest.TestCase):
 
@@ -81,7 +81,11 @@ class TestStringMethods(unittest.TestCase):
                         "Allele_frequency_SAS_ExAC",
                         "DateSignificanceLastEvaluated_ClinVar",
                         "SCV_Version_ClinVar",
-                        "Synonyms_ClinVar"]
+                        "Synonyms_ClinVar",
+                        "HGVS_Nucleotide_Findlay_BRCA1_Ring_Function_Scores",
+                        "Log_RNA_Depletion_Findlay_BRCA1_Ring_Function_Scores",
+                        "Functional_Enrichment_Score_Findlay_BRCA1_Ring_Function_Scores",
+                        "BX_ID_Findlay_BRCA1_Ring_Function_Scores"]
 
         self.sources = aggregate_reports.FIELD_DICT.keys() + ["ENIGMA"]
         self.vcf_test_file = VCF_TESTDATA_FILENAME
@@ -101,7 +105,7 @@ class TestStringMethods(unittest.TestCase):
 
     def test_get_reports_files(self):
         reports_files = aggregate_reports.get_reports_files(INPUT_DIRECTORY)
-        self.assertEqual(len(reports_files), 8)
+        self.assertEqual(len(reports_files), 9)
         self.assertNotIn("1000_Genomesready.vcf", reports_files)
 
     def test_aggregate_reports(self):

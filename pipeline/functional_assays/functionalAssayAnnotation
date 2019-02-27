@@ -1,0 +1,4 @@
+reference_sequence	Reference sequence.
+hgvs_nucleotide	HGVS nucleotide.
+log_rna_depletion	log ratio comparing RNA abundance from the alternative allele compared to the reference allele.  From Findlay et al (PMID: 30209399), Supplemental Table 1, Column AV (mean RNA score).
+functional_enrichment_score	function score of the alternative allele, from Findlay et al (PMID: 30209399), Supplemental Table 1, Column P (function score mean).

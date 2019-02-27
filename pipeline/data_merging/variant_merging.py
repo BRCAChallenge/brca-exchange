@@ -148,13 +148,21 @@ EXAC_FIELDS = {"Allele_frequency": "AF",
 
 EXAC_SUBPOPULATIONS = ["AFR", "AMR", "EAS", "FIN", "NFE", "OTH", "SAS"]
 
+FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS = {
+               "HGVS_Nucleotide": "hgvs_nucleotide",
+               "Log_RNA_Depletion": "log_rna_depletion",
+               "Functional_Enrichment_Score": "functional_enrichment_score",
+               "BX_ID": "BX_ID"
+               }
+
 FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "ClinVar": CLINVAR_FIELDS,
               "LOVD": LOVD_FIELDS,
               "exLOVD": EX_LOVD_FIELDS,
               "ExAC": EXAC_FIELDS,
               "ESP": ESP_FIELDS,
-              "BIC": BIC_FIELDS}
+              "BIC": BIC_FIELDS,
+              "Findlay_BRCA1_Ring_Function_Scores": FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS}
 
 LIST_TYPE_FIELDS = {
     "SCV", # Clinvar, treating it as list, to have the same order as with SCV_Version
@@ -174,6 +182,9 @@ EX_LOVD_FILE = "exLOVD_brca12.sorted.hg38.vcf"
 BIC_FILE = "bic_brca12.sorted.hg38.vcf"
 EXAC_FILE = "exac.brca12.sorted.hg38.vcf"
 ESP_FILE = "esp.brca12.sorted.hg38.vcf"
+
+# Functional Assays
+FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS_FILE = "findlay_BRCA1_ring_function_scores.sorted.hg38.vcf"
 
 DISCARDED_REPORTS_WRITER = None
 
@@ -619,6 +630,7 @@ def preprocessing():
                    "ExAC": EXAC_FILE,
                    "ESP": ESP_FILE,
                    "BIC": BIC_FILE,
+                   "Findlay_BRCA1_Ring_Function_Scores": FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS_FILE
                    }
     print "\n" + ARGS.input + ":"
     print "---------------------------------------------------------"
