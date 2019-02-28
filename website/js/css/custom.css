@@ -1275,9 +1275,6 @@ div.variant-submitter-group .submitter-header td {
     shape-rendering: crispEdges;
 }
 
-.func-assay-extras > * {
-    white-space: nowrap;
-}
 .func-assay-extras .func-assay-impact {
     padding-right: 10px;
 }
