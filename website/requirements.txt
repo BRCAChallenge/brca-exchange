@@ -15,8 +15,9 @@ idna==2.7
 protobuf==3.1.0
 psycopg2==2.7.3.2
 PyJWT==1.4.2
-PyYAML==3.13
+pyyaml==4.2b1
 requests==2.20.0
 six==1.12.0
 tqdm==4.25.0
 urllib3==1.24.1
+django-postgres-copy==2.3.7
