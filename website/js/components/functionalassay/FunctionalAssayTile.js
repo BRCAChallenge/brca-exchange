@@ -15,6 +15,16 @@ export const impacts = [
 ];
 
 export default class FunctionalAssayTile extends React.Component {
+    generateHeader(funcScore, label) {
+        return (
+            <div className="func-assay-extras">
+                <span className="func-assay-score" style={{paddingLeft: '10px'}}>Score: {funcScore}</span>
+                <span className="func-assay-impact" style={{float: 'right', paddingRight: '10px'}}>{label}</span>
+                <div style={{clear: 'both'}}></div>
+            </div>
+        );
+    }
+
     render() {
         const funcScore = parseFloat(this.props.score);
 
@@ -44,7 +54,8 @@ export default class FunctionalAssayTile extends React.Component {
                 </Table>
                 <CollapsibleSection
                     fieldName="Findlay Function Score"
-                    extraHeaderItems={<span>Score: {funcScore.toFixed(3)} ({impactScale(funcScore).label})</span>}
+                    extraHeaderItems={this.generateHeader(funcScore.toFixed(3), impactScale(funcScore).label)}
+                    twoColumnExtraHeader={true}
                     defaultVisible={true}
                 >
                     <div className="subtile-container" style={{padding: 20, paddingTop: 10, paddingBottom: 10}}>
@@ -60,7 +71,7 @@ export default class FunctionalAssayTile extends React.Component {
                     </div>
 
                     <ol style={{padding: 20, paddingTop: 10}}>
-                        Publications the report on the accuracy of this assay.
+                        Publications that report on the accuracy of this assay:
                         <li style={{marginLeft: 30}}><a href="https://www.ncbi.nlm.nih.gov/pubmed/30209399">Findlay et al. 2018</a></li>
                     </ol>
                 </CollapsibleSection>
