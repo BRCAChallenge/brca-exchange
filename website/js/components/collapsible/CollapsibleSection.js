@@ -24,7 +24,7 @@ const CollapsibleSection = React.createClass({
         this.props.onFieldToggled(fieldName);
     },
 
-    generateHeader: function(field, fieldName, extraHeaderItems) {
+    generateHeader: function(fieldName, extraHeaderItems, twoColumnExtraHeader) {
         return (
             <div className={`allele-frequency-header ${this.props.expanded ? 'expanded' : ''}`} onClick={(e) => this.handleToggle(e, fieldName)}>
                 <div className="allele-frequency-cell allele-frequency-label">
@@ -36,10 +36,18 @@ const CollapsibleSection = React.createClass({
                     &nbsp;
                     <span>{fieldName}</span>
                 </div>
-
                 {
-                    extraHeaderItems &&
+                    extraHeaderItems && !twoColumnExtraHeader &&
                     <div className="submitter-cell optional" style={{textAlign: 'left', flex: '0 1 auto'}}>
+                        {
+                            // remaining header elements depend on the source
+                            extraHeaderItems
+                        }
+                    </div>
+                }
+                {
+                    extraHeaderItems && twoColumnExtraHeader &&
+                    <div className="submitter-cell optional" style={{textAlign: 'left', width: '100%'}}>
                         {
                             // remaining header elements depend on the source
                             extraHeaderItems
@@ -51,14 +59,14 @@ const CollapsibleSection = React.createClass({
     },
 
     render: function() {
-        const {field, fieldName, hideEmptyItems, extraHeaderItems} = this.props;
+        const {fieldName, hideEmptyItems, extraHeaderItems, twoColumnExtraHeader} = this.props;
         let allEmpty = false;
         let styles = this.getCollapsableClassSet();
 
         return (
             <div className={ allEmpty && hideEmptyItems ? "group-empty" : "" }>
                 <div style={{marginBottom: 0, borderTop: 'solid 2px #ccc'}}>
-                { this.generateHeader(field, fieldName, extraHeaderItems) }
+                { this.generateHeader(fieldName, extraHeaderItems, twoColumnExtraHeader) }
                 </div>
 
                 <div ref='panel' className={allEmpty ? "group-empty" : classNames(styles)}>
