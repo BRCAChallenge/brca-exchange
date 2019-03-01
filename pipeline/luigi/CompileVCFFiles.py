@@ -1701,7 +1701,7 @@ class DataDictionary(luigi.Task):
         data_dictionary_src = os.path.abspath(
             os.path.join(os.path.realpath(__file__), os.pardir, os.pardir, "built_with_change_types.dictionary.tsv"))
 
-        shutil.copyfile(top_level_readme_src, self.output().path)
+        shutil.copyfile(data_dictionary_src, self.output().path)
 
 
 @requires(DataDictionary)
