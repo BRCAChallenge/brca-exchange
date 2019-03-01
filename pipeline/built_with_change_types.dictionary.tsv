@@ -1,0 +1,230 @@
+Field Name	Description	Example Value	Useful Resources
+Source	One or more labs, repositories, consortiums, or other entities who reported data for the variant (does not include Submitters to ClinVar)	ENIGMA,ClinVar,LOVD,ESP,1000_Genomes,ExAC,BIC,exLOVD	
+Chr	The chromosome on which the variant is found	17	
+Pos	The position of the variant, per _____ nomenclature	43063368	
+Ref	The nucleotide(s) that is in the reference sequence at this position	T	
+Alt	The nucleotide(s) that has changed in this variant	C	
+URL_ENIGMA	Evidence URL that helped informed ENIGMA interpretation	http://hci-exlovd.hci.utah.edu/variants.php?select_db=BRCA1&action=search_all&search_Variant%2FDNA=c.5158A%3EG	
+Condition_ID_type_ENIGMA	Ontology used by ENIGMA for describing phenotypic conditions	OMIM	https://www.omim.org/about
+Condition_ID_value_ENIGMA	Phenotypic condition that ENIGMA classifies variants against	BREAST-OVARIAN CANCER, FAMILIAL, SUSCEPTIBILITY TO, 1; BROVCA1 (604370)	
+Condition_category_ENIGMA	Category of phenotypic condition relating to ENIGMA classificaiton	Disease	
+Clinical_significance_ENIGMA	variant’s clinical classification and supporting information as provided by ENIGMA expert panel review	Benign	
+Date_last_evaluated_ENIGMA	If applicable, date on which the clinical significance of the variant was last evaluated by ENIGMA	8/10/15	
+Assertion_method_ENIGMA	citation or URL describing the method and criteria used to make assertions of clinical significance	ENIGMA BRCA1/2 Classification Criteria (2015)	
+Assertion_method_citation_ENIGMA	Publication that describes the assertion method in more detail	https://submit.ncbi.nlm.nih.gov/ft/byid/hxnfuuxx/enigma_rules_2015-03-26.pdf	
+Clinical_significance_citations_ENIGMA	Publication in which the clinical significance was determined	PMID:21990134	
+Comment_on_clinical_significance_ENIGMA	Comments on the derivation of the IARC class, provided by ENIGMA	IARC class based on posterior probability from multifactorial likelihood analysis, thresholds for class as per Plon et al. 2008 (PMID: 18951446). Class 1 based on posterior probability = 0.000000000000344	
+Collection_method_ENIGMA	The method used to collect the data that supports the assertion of clinical significance	Curation	
+Allele_origin_ENIGMA	Classification of variant origin, either germline or somatic	Germline	
+ClinVarAccession_ENIGMA	Accession corresponding to ENIGMA's submission to ClinVar	SCV000244390.1	
+BX_ID_ENIGMA	Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation	6981	
+BX_ID_ClinVar	List of arbitrary, unique identifiers for ClinVar submissions used by BRCA Exchange for the purpose of variant aggregation	28,107,281,152,811,400,000,000,000,000,000,000,000,000,000,000,000	
+Submitter_ClinVar	This field provides the name of the submitting organization	Genome_Diagnostics_Laboratory,Erasmus_Medical_Center,DNA_and_Cytogenetics_Diagnostics_Unit,Breast_Cancer_Information_Core_(BIC)_(BRCA1),Ambry_Genetics,Eurofins_Clinical_Diagnostics,GeneDx,Invitae,Sinai_Health_System,University_Medical_Center_Utrecht,Evidence-based_Network_for_the_Interpretation_of_Germline_Mutant_Alleles_(ENIGMA),EGL_Genetic_Diagnostics,Department_of_Pathology_and_Laboratory_Medicine,Sharing_Clinical_Reports_Project_(SCRP)	
+Method_ClinVar	Method via which the ClinVar submitter collected data on the variant	curation,clinical_testing	
+Date_Last_Updated_ClinVar	List of the dates the record was last updated in ClinVar.	2018-04-19,2018-04-09,2018-11-13,2018-11-03,2018-06-30,2016-10-05,2018-08-29	
+Allele_Origin_ClinVar	The genetic origin of the variant for each observation	germline	https://www.ncbi.nlm.nih.gov/projects/clinvar/ClinVarDataDictionary.pdf
+DateSignificanceLastEvaluated_ClinVar	List of the dates the clinical significance of the variant was last evaluated (not the date that a patient was evaluated).	1999-12-30,2015-08-10,2018-01-03,2015-03-10,2014-11-18,2008-11-14,2017-07-28,2015-09-25,2014-02-21,2015-09-21	
+SCV_Version_ClinVar	Version numbers of ClinVar accessions.  See SCV_ClinVar.	1,1,1,1,2,7,11,4,1,3	
+Clinical_Significance_ClinVar	Clinical Significance(s) provided by ClinVar; relate to variant clinical classification from individual submitters to ClinVar	Benign,Uncertain_significance,Likely_benign	
+SCV_ClinVar	List of ClinVar accessions for each submitted assertion	SCV000244390,SCV000743378,SCV000145365,SCV000744593,SCV000109408,SCV000076849,SCV000167319,SCV000226798,SCV000591588,SCV000213306	
+HGVS_Nucleotide_Findlay_BRCA1_Ring_Function_Scores	HGVS nucleotide nomenclature for the variant in the Findlay functional assay	c.-10A>T	
+Functional_Enrichment_Score_Findlay_BRCA1_Ring_Function_Scores	Functional assay results for variants in critical domains of BRCA1, obtained using saturation genome editing; provided by Starita lab (see Findlay et al. 2018)	-0.107071247	
+BX_ID_Findlay_BRCA1_Ring_Function_Scores	Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation	152	
+Log_RNA_Depletion_Findlay_BRCA1_Ring_Function_Scores	Log ratio comparing RNA expression with and without the variant	-0.006252529515	
+BX_ID_LOVD	Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation	12,547,125,461,254,500,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000	
+Functional_analysis_result_LOVD	Information gathered about variant, provided by LOVD	no functional effect,predicted neutral,inconclusive,as wildtype control,?	
+Edited_date_LOVD	Information gathered about variant's impact, provided by LOVD	2018-08-26 12:56:23,2018-08-26 14:11:38,2018-08-26 13:17:52,2016-08-05 14:13:49,2018-08-26 14:00:50,2018-08-24 10:30:22	
+Submitters_LOVD	The name(s) of the researcher, research group, or individual who submitted the variant data to LOVD.	Angela Solano & F Cardoso (Buenos Aires,Quest Diagnostics (Madison,Pascale Hilbert (Charleroi,AR),ENIGMA consortium (Brisbane,Ans M.W. van den Ouweland (Rotterdam,Marjolijn JL Ligtenberg (Nijmegen,AU),Juul Wijnen (Leiden,Erik Teugels (Brussel,Peter Devilee (Leiden,NL),Thomas Hansen (Copenhagen,Rien Blok (Maastricht,VKGL-NL_Utrecht (Utrecht,BE),Frans BL Hogervorst (Amsterdam,US),Marco Koudijs (Utrecht,VKGL-NL_Rotterdam (VKGL-NL_Rotterdam,VKGL-NL_Nijmegen (Nijmegen,DK)	
+Individuals_LOVD	The number of individuals the variant has been observed in, per submission. The individuals field does not account for all LOVD data on a variant, but accounts for the number of individuals observed by the submitter.	27	
+HGVS_cDNA_LOVD	LOVD variant identifer in HGVS cDNA nomenclature	NM_007294.3:c.5158A>G	
+Created_date_LOVD	The date that variant data was first submitted to LOVD.	2014-12-17 19:07:22,2014-12-21 10:06:24,2017-01-11 11:18:41,2015-10-08 12:00:00,2018-01-15 20:58:59,2009-10-03 16:25:01,2011-09-14 12:26:59,2014-02-03 22:13:57	
+Genetic_origin_LOVD	LOVD record type	In vitro (cloned),Unknown,CLASSIFICATION record,Germline,SUMMARY record	
+DBID_LOVD	 ID given to the variant by LOVD. This ID is variant-specific, but not submitter-specific. 	BRCA1_000409	
+RNA_LOVD	LOVD variant identifier in HGVS RNA nomenclature	r.(?),-,?	
+Functional_analysis_technique_LOVD	Methods used to gather information about a variant's impact	Transcription activation in yeast (GAL4-fusions),Peptide binding ability,Bayesian statistics,Structure-based prediction (crystallography etc),transcription activation/PS/BA/BS,Multifactorial likelihood-ratio model,Proteolytic degradation,?	
+Variant_effect_LOVD	Symbolic nomenclature to represent the effect of the variant on the function of the protein, in Submitter/Curator (R/C) format	?/?,?/.,-/.,-/-	
+Variant_frequency_LOVD	Observed frequency of the variant as reported to LOVD by the submitter.  Expressed as allele counts (observations of variant/total observations)	1/1900 cases	
+EA_Allele_Frequency_ESP	Allele frequency in European-American populations, per ESP	0.000233	
+Minor_allele_frequency_percent_ESP	Percent minor allele frequency for EA, AA, and overall, from ESP	0.0233,0.0,0.0154	
+AA_Allele_Frequency_ESP	Allele frequency in African-American populations, per ESP	0	
+BX_ID_ESP	Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation	461	
+Allele_Frequency_ESP	Allele frequency in entire data set, per ESP	0.000154	
+EUR_Allele_frequency_1000_Genomes	Allele frequency in European populations, per 1000 Genomes	0	http://www.internationalgenome.org/faq/which-populations-are-part-your-study/
+AFR_Allele_frequency_1000_Genomes	Allele frequency in African populations, per 1000 Genomes	0	http://www.internationalgenome.org/faq/which-populations-are-part-your-study/
+AMR_Allele_frequency_1000_Genomes	Allele frequency in Admixed American populations, per 1000 Genomes	0.0014	http://www.internationalgenome.org/faq/which-populations-are-part-your-study/
+EAS_Allele_frequency_1000_Genomes	Allele frequency in East Asian populations, per 1000 Genomes	0	http://www.internationalgenome.org/faq/which-populations-are-part-your-study/
+BX_ID_1000_Genomes	Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation	2783	
+Allele_frequency_1000_Genomes	Overall allele frequency according to all studied populations, provided by 1000 Genomes	0.000199681	http://www.internationalgenome.org/faq/which-populations-are-part-your-study/
+SAS_Allele_frequency_1000_Genomes	Allele frequency in Southeast Asian Populations, per 1000 Genomes	0	http://www.internationalgenome.org/faq/which-populations-are-part-your-study/
+Homozygous_count_OTH_ExAC	Number of homozygotes with the allele in Other Populations	0	
+Allele_count_SAS_ExAC	Count of observed alternate alleles (variant) in South Asian Populations	0	
+Allele_count_AMR_ExAC	Count of observed alternate alleles (variant) in Admixed American/Latino Populations	7	
+Allele_count_EAS_ExAC	Count of observed alternate alleles (variant) in East Asian Populations	0	
+Allele_frequency_NFE_ExAC	Allele frequency in Non-Finnish European populations, per ExAC (Allele Count/Alle Number)	3.74E-05	
+Allele_count_NFE_ExAC	Count of observed alternate alleles (variant) in Non-Finish  Populations	2	
+Allele_number_AFR_ExAC	Number of total chromosomes studied (for this variant) in African/African American populations 	8978	
+Homozygous_count_SAS_ExAC	Number of homozygotes with the allele in South Asian Populations	0	
+Homozygous_count_AMR_ExAC	Number of homozygotes with the allele in Admixed American/Latino Populations	0	
+Allele_frequency_FIN_ExAC	Allele frequency in Finnish populations, per ExAC and separated from European because of an enriched data set	0	
+Allele_number_NFE_ExAC	Number of total chromosomes studied (for this variant) in Non-Finnish European populations 	53530	
+Allele_count_OTH_ExAC	Number of chromosomes with this variant in Other populations	0	
+BX_ID_ExAC	Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation	2281	
+Allele_number_EAS_ExAC	Number of total chromosomes studied (for this variant) in East Asian populations 	7818	
+Allele_number_AMR_ExAC	Number of total chromosomes studied (for this variant) in Admixed American/Latino populations 	11154	
+Allele_number_OTH_ExAC	Number of total chromosomes studied (for this variant) in populations other than those provided, per ExAC	694	
+Allele_frequency_ExAC	Minor allele frequency, per ExAC (excluding TCGA data)	9.42E-05	
+Homozygous_count_NFE_ExAC	Number of homozygotes with the allele in Non-Finnish European populations	0	
+Homozygous_count_FIN_ExAC	Number of homozgotes with the allele in Finnish populations	0	
+Allele_number_FIN_ExAC	Number of total chromosomes studied (for this variant) in Finnish populations	6584	
+Allele_frequency_SAS_ExAC	Allele frequency in South Asian populations, per ExAC	0	
+Allele_frequency_OTH_ExAC	Allele frequency in populations other than those provided, per ExAC	0	
+Allele_frequency_AFR_ExAC	Allele frequency in African/African American populations, per ExAC	0.000111	
+Allele_count_AFR_ExAC	Number of chromosomes with this variant in African populations	1	
+Allele_number_SAS_ExAC	Number of total chromosomes studied (for this variant) in South Asian populations	16260	
+Homozygous_count_EAS_ExAC	Number of homozygotes with hte variant in East Asian populations	0	
+Allele_frequency_EAS_ExAC	Allele frequency in East Asian populations, per ExAC	0	
+Allele_count_FIN_ExAC	Number of chromosomes with the variant in Finnish populations	0	
+Homozygous_count_AFR_ExAC	Number of homozygotes with the variant in African populations	0	
+Allele_frequency_AMR_ExAC	Allele frequency in Admixed American/Latino populations, per ExAC	0.000628	
+IARC_class_exLOVD	IARC class corresponding the the posterior probability	1 - Not pathogenic or of no clinical significance	
+Sum_family_LR_exLOVD	Log ratio describing the likelihood of variant pathogenicity given family history data	5.89E-07	
+Combined_prior_probablility_exLOVD	Prior probability of variant pathogenicity from sequence data, considering protein and splicing impact	0.03	
+BX_ID_exLOVD	Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation	162	
+Literature_source_exLOVD	Literature reference for the BRCA ExUV /exLOVD data analyses 	Easton et al. 2007	
+Co_occurrence_LR_exLOVD	Log ratio describing the likelihood of variant pathogenicity given variant co-occurrence data	3.09	
+Posterior_probability_exLOVD	Posterior probability of variant pathogenicity, from multifactorial analysis	0	
+Missense_analysis_prior_probability_exLOVD	Prior probability of variant pathogenicity from sequence data, considering protein impact only	0.03	
+Segregation_LR_exLOVD	Log ratio describing the likelihood of variant pathogenicity, given co-segregation data	0.00001	
+BX_ID_BIC	Arbitrary, unique identifiers for BIC submissions used by BRCA Exchange for the purpose of variant aggregation	159,151,590,615,917,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000	
+Patient_nationality_BIC	Nationality of observed patients as reported to BIC	Western Europe,-,Dutch?	
+Clinical_importance_BIC	Clinical significance as reported to BIC	unknown	
+Clinical_classification_BIC	Status of the clinical classification, as reported to BIC	Pending	
+Literature_citation_BIC	Literature citation pertaining to the variant, from BIC	1995.,Plummer et al,-, Hum Mol Genet 4:1989-1991	
+Number_of_family_member_carrying_mutation_BIC	Observations of the number of family members with the variant, as reported to BIC	4	
+Germline_or_Somatic_BIC	Whether the variant was in the germline or arose somatically	G	
+Ethnicity_BIC	Ethnicity of probands with the variant, as reported to BIC	Latin American/Caribbean, Mexican",Western European,-Native-American,-, Central/Eastern European",American,"Latin American/Caribbean,Western-European,Western Europe,"Western European	
+Mutation_type_BIC	Type of mutation, as reported to BIC	M	
+Reference_Sequence	transcript identifier used to keep track of different transcripts submitted to databases such as RefSeq; carried over to ClinVar	NM_007294.3	
+BIC_Nomenclature	Variant name according to BIC Nomenclature, which predates HGVS nomenclature and thus follows a different format	5277A>G	
+HGVS_cDNA	HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA	c.5158A>G	
+Gene_Symbol	HUGO symbol for the gene containing the variant	BRCA1	
+HGVS_Protein	The predicted protein-level change (if any) that would be introduced by the genomic variant.	p.(Thr1720Ala)	
+Protein_Change	A shortened abbreviation of the HGVS Protein alias using one-letter abbreviation for amino acids.	T1720A	
+Genomic_Coordinate_hg38	Genomic coordinate of the variant in the hg38 genome build	chr17:43063368:T>C	
+Hg38_Start	Start coordinate in the Hg38 build	43063368	
+Hg38_End	End coordinate in the Hg38 build	43063368	
+Hg37_Start	Start coordinate in the Hg37 build	-	
+Hg37_End	End coordinate in the Hg37 build	-	
+Hg36_Start	(Deprecated) Start coordinate in hte Hg36 build	-	
+Hg36_End	(Deprecated) End coordinate in the Hg36 build	-	
+HGVS_RNA	HGVS RNA variant nomenclature	-	
+Allele_Frequency	Summary of the allele frequencies from ExAC, 1000 Genomes and ESP	9.415e-05 (ExAC minus TCGA)	
+Max_Allele_Frequency	(Deprecated) Largest single allele frequency from each of ExAC, 1000 Genomes and ESP 	-	
+Genomic_Coordinate_hg37	(Deprecated) Genomic coordinate of the variant in the hg37 genome build	-	
+Genomic_Coordinate_hg36	(Deprecated) Genomic coordinate of the variant in the hg36 genome build	-	
+Source_URL	URL for the original source of the data	http://hci-exlovd.hci.utah.edu/variants.php?select_db=BRCA1&action=search_all&search_Variant%2FDNA=c.5158A%3EG, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000244390, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000743378, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000145365, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000744593, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000109408, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000076849, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000167319, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000226798, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000591588, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000213306	
+Discordant	(Deprecated) Indicates if there are discordant clinical significance interpretations for this variant	Concordant	
+Synonyms	Alternate names for this variant	NM_007294.3.c.5158A>G,T1720A,5277A>G,NC_000017.11.g.43063368T>C,LRG_292.g.154616A>G,NG_005905.2.g.154616A>G,P38398.p.Thr1720Ala,LRG_292p1.p.Thr1720Ala,p.Thr1720Ala,p.T1720A.ACC>GCC,NC_000017.10.g.41215385T>C,NR_027676.1.n.5294A>G,p.T1720A,U14680.1.n.5277A>G,LRG_292t1.c.5158A>G,NM_007294.2:c.5158A>G,NM_007300.3:c.5221A>G,NM_007299.3:c.1846A>G,NM_007298.3:c.1846A>G,NM_007297.3:c.5017A>G,U14680.1:c.5270A>G	
+Pathogenicity_expert	Variant pathogenicity as displayed in the Summary view	Benign / Little Clinical Significance	
+Pathogenicity_all	Variant pathogenicity as displayed in the Detail view	Benign(ENIGMA); Benign,Uncertain_significance,Likely_benign (ClinVar); Pending (BIC)	
+pyhgvs_Genomic_Coordinate_36	HGVS variant alias which references the nucleotide in genomic DNA, per the GRCh36 genome build	chr17:g.38468911:T>C	https://brcaexchange.org/help#variant-naming-demystified
+pyhgvs_Genomic_Coordinate_37	HGVS variant alias which references the nucleotide in genomic DNA, per the GRCh37 genome build	chr17:g.41215385:T>C	https://brcaexchange.org/help#variant-naming-demystified
+pyhgvs_Genomic_Coordinate_38	HGVS variant alias which references the nucleotide in genomic DNA, per the GRCh38 genome build	chr17:g.43063368:T>C	https://brcaexchange.org/help#variant-naming-demystified
+pyhgvs_Hg37_Start	Starting position in Hg37 build according to HGVS nomenclature	41215385	https://brcaexchange.org/help#variant-naming-demystified
+pyhgvs_Hg37_End	Ending position in Hg37 build according to HGVS nomenclature	41215385	https://brcaexchange.org/help#variant-naming-demystified
+pyhgvs_Hg36_Start	Starting position in Hg36 build according to HGVS nomenclature	38468911	https://brcaexchange.org/help#variant-naming-demystified
+pyhgvs_Hg36_End	Ending position in Hg36 build according to HGVS nomenclature	38468911	https://brcaexchange.org/help#variant-naming-demystified
+pyhgvs_cDNA	HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA	NM_007294.3:c.5158A>G	https://brcaexchange.org/help#variant-naming-demystified
+pyhgvs_Protein	HGVS protein nomenclature	NP_009225.1:p.(Thr1720Ala)	https://brcaexchange.org/help#variant-naming-demystified
+mupit_structure	Indicates the three-dimensional protein structure that the variant can be visualized within, with MuPIT	1t15	
+varType	Indicates the type of variant in terms of substitution, deletion, missense, etc. 	substitution	
+varLoc	Indicates whether a variant is in a clinically important domain, exon, intron, or splice-relevant position	CI_domain_variant	
+applicablePrior	Final value for the In Silico Probability of Pathogenicity	0.03	https://brcaexchange.org/help#in-silico-prior-probabilities-of-pathogenicity
+applicableEnigmaClass	IARC class that corresponds to the applicable prior	class_2	
+proteinPrior	Protein-level estimation for the In Silico Probability of Pathogenicity	0.03	https://brcaexchange.org/about/insilicoScoring
+refDonorPrior	Intermediate value to determine splice-level estimation fro the In Silico Probability of Pathogenicity	N/A	https://brcaexchange.org/about/insilicoScoring
+deNovoDonorPrior	Intermediate value to determine splice-level estimation fro the In Silico Probability of Pathogenicity	0.02	https://brcaexchange.org/about/insilicoScoring
+refRefDonorMES	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+refRefDonorZ	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+altRefDonorMES	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+altRefDonorZ	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+refRefDonorSeq	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+altRefDonorSeq	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+refDonorVarStart	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+refDonorVarLength	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+refDonorExonStart	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+refDonorIntronStart	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+refDeNovoDonorMES	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	-5.48	
+refDeNovoDonorZ	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	-5.761320639	
+altDeNovoDonorMES	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	-4.57	
+altDeNovoDonorZ	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	-5.370594282	
+refDeNovoDonorSeq	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	TAGGGGTGA	
+altDeNovoDonorSeq	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	TAGGGGTGG	
+deNovoDonorVarStart	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	8	
+deNovoDonorVarLength	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	1	
+deNovoDonorExonStart	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	0	
+deNovoDonorIntronStart	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	3	
+deNovoDonorGenomicSplicePos	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	g.43063373	
+deNovoDonorTranscriptSplicePos	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	c.5153	
+closestDonorGenomicSplicePos	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	g.43063332	
+closestDonorTranscriptSplicePos	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	c.5193+1	
+closestDonorRefMES	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	11.08	
+closestDonorRefZ	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	1.349040323	
+closestDonorRefSeq	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	GAGGTAAGT	
+closestDonorAltMES	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+closestDonorAltZ	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+closestDonorAltSeq	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+closestDonorExonStart	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	0	
+closestDonorIntronStart	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	3	
+deNovoDonorAltGreaterRefFlag	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	1	
+deNovoDonorAltGreaterClosestRefFlag	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	0	
+deNovoDonorAltGreaterClosestAltFlag	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+deNovoDonorFrameshiftFlag	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	1	
+refAccPrior	Intermediate value to determine splice-level estimation fro the In Silico Probability of Pathogenicity	N/A	https://brcaexchange.org/about/insilicoScoring
+deNovoAccPrior	Intermediate value to determine splice-level estimation fro the In Silico Probability of Pathogenicity	N/A	https://brcaexchange.org/about/insilicoScoring
+refRefAccMES	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+refRefAccZ	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+altRefAccMES	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+altRefAccZ	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+refRefAccSeq	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+altRefAccSeq	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+refAccVarStart	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+refAccVarLength	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+refAccExonStart	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+refAccIntronStart	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+refDeNovoAccMES	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	-2.8	
+refDeNovoAccZ	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	-4.431555283	
+altDeNovoAccMES	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	-1.93	
+altDeNovoAccZ	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	-4.074069368	
+refDeNovoAccSeq	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	GGTGACCCAGTCTATTAAAGAAA	
+altDeNovoAccSeq	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	GGTGGCCCAGTCTATTAAAGAAA	
+deNovoAccVarStart	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	4	
+deNovoAccVarLength	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	1	
+deNovoAccExonStart	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	20	
+deNovoAccIntronStart	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	0	
+deNovoAccGenomicSplicePos	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	g.43063353	
+deNovoAccTranscriptSplicePos	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	c.5173	
+closestAccGenomicSplicePos	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	g.43063374	
+closestAccTranscriptSplicePos	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	c.5153-1	
+closestAccRefMES	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	8.78	
+closestAccRefZ	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	0.3267055187	
+closestAccRefSeq	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	CTTTTCTATGATCTCTTTAGGGG	
+closestAccAltMES	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+closestAccAltZ	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+closestAccAltSeq	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+closestAccExonStart	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	20	
+closestAccIntronStart	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	0	
+deNovoAccAltGreaterRefFlag	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	1	
+deNovoAccAltGreaterClosestRefFlag	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	0	
+deNovoAccAltGreaterClosestAltFlag	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+deNovoAccFrameshiftFlag	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	0	
+spliceSite	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	0	
+spliceRescue	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+spliceFlag	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	0	
+frameshiftFlag	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+inExonicPortionFlag	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+CIDomainInRegionFlag	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+isDivisibleFlag	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+lowMESFlag	Intermediate position, sequence, or value used in In Silico Prior Probability calculations	N/A	
+varConsequences	Variant consequences, pulled from Ensembl's Variant Effect Predictor	missense_variant	https://useast.ensembl.org/info/genome/variation/prediction/predicted_data.html#consequence_type_table
+change_type	Update status of the variant since the last release	changed_information	

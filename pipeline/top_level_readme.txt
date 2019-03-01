@@ -47,8 +47,8 @@ output/release/built_with_change_types.tsv	Tab-delimited file of the
 						Exchange, their attributes, and
 						their update status since the
 						last release.
-output/release/built_with_change_types.dictionary.xlsx
-					Spreadsheet documenting the columns
+output/release/build_with_change_types.dictionary.tsv
+					File documenting the columns
 					of built_with_change_types.tsv
 output/release/diff/	Subdirectory containing files that detail how the
 			set of variants has changed since the previous release

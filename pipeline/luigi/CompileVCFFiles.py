@@ -1694,12 +1694,12 @@ class TopLevelReadme(luigi.Task):
 class DataDictionary(luigi.Task):
     def output(self):
         release_dir = PipelineParams().output_dir + "/release/"
-        data_dictionary_dest = os.path.join(PipelineParams().release_dir, "built_with_change_types.dictionary.xlsx")
+        data_dictionary_dest = os.path.join(PipelineParams().release_dir, "built_with_change_types.dictionary.tsv")
         return luigi.LocalTarget(data_dictionary_dest)
 
     def run(self):
         data_dictionary_src = os.path.abspath(
-            os.path.join(os.path.realpath(__file__), os.pardir, os.pardir, "built_with_change_types.dictionary.xlsx"))
+            os.path.join(os.path.realpath(__file__), os.pardir, os.pardir, "built_with_change_types.dictionary.tsv"))
 
         shutil.copyfile(top_level_readme_src, self.output().path)
 
