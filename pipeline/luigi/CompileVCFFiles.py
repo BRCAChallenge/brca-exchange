@@ -1691,6 +1691,20 @@ class TopLevelReadme(luigi.Task):
         shutil.copyfile(top_level_readme_src, self.output().path)
 
 @requires(TopLevelReadme)
+class DataDictionary(luigi.Task):
+    def output(self):
+        release_dir = PipelineParams().output_dir + "/release/"
+        data_dictionary_dest = os.path.join(release_dir, "built_with_change_types.dictionary.tsv")
+        return luigi.LocalTarget(data_dictionary_dest)
+
+    def run(self):
+        data_dictionary_src = os.path.abspath(
+            os.path.join(os.path.realpath(__file__), os.pardir, os.pardir, "built_with_change_types.dictionary.tsv"))
+
+        shutil.copyfile(data_dictionary_src, self.output().path)
+
+
+@requires(DataDictionary)
 class GenerateMD5Sums(luigi.Task):
     def output(self):
         return luigi.LocalTarget(PipelineParams().output_dir + "/md5sums.txt")

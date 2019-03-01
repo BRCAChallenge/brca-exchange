@@ -47,10 +47,10 @@ setup-files: ## setup various directories to run pipeline
 
 .ONESHELL:
 setup-lovd: ## setting up LOVD data via pipeline machine, if not running on pipeline machine, as the access is IP restricted. Requires access to main pipeline machine
-    if [ `hostname -s` != "brcaexchange-dev" ]; then
-        mkdir -p $(OUT_DIR)/LOVD
-        ssh brca@brcaexchange-dev.gi.ucsc.edu curl https://databases.lovd.nl/shared/export/BRCA > $(OUT_DIR)/LOVD/BRCA.txt
-    fi
+	if [ `hostname -s` != "brcaexchange-dev" ]; then
+		mkdir -p $(OUT_DIR)/LOVD
+		ssh brca@brcaexchange-dev.gi.ucsc.edu curl https://databases.lovd.nl/shared/export/BRCA > $(OUT_DIR)/LOVD/BRCA.txt
+	fi
 
 
 ifeq ($(OS), Darwin)
