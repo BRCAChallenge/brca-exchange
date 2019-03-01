@@ -48,7 +48,7 @@ export default class FunctionalAssayTile extends React.Component {
                     <tbody>
                         <tr>
                             <td style={{verticalAlign: 'middle', width: '25%', fontWeight: 'bold', textAlign: 'center'}}>Disclaimer</td>
-                            <td style={{verticalAlign: 'middle'}}>Please note that functional assay results reflect laboratory models of disease, and should not be used as a proxy for clinical variant interpretations.</td>
+                            <td style={{verticalAlign: 'middle'}}>Please note that these experiments may include variants that have not been observed in clinical contexts. Furthermore, functional assay results reflect laboratory models of genetic variation and disease. Thus, these results should not be used as a proxy for clinical variant interpretations.</td>
                         </tr>
                     </tbody>
                 </Table>
