@@ -152,14 +152,12 @@ def variant_to_dict(variant_object):
     try:
         variant_dict["priors"] = model_to_dict(variant_object.insilicopriors)
     except InSilicoPriors.DoesNotExist:
-        print "In Silico Prior Prob. data does not exist for Variant", variant_object.Genomic_Coordinate_hg38, "from release", variant_object.Data_Release.id
         variant_dict["priors"] = None
 
     try:
         variant_diff = VariantDiff.objects.get(variant_id=variant_object.id)
         variant_dict["Diff"] = variant_diff.diff
     except VariantDiff.DoesNotExist:
-        print "Variant Diff does not exist for Variant", variant_object.Genomic_Coordinate_hg38, "from release", variant_object.Data_Release.id
         variant_dict["Diff"] = None
     return variant_dict
 
