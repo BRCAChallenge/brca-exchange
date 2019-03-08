@@ -380,6 +380,7 @@ class VariantPaper(models.Model):
     variant_hg38 = models.TextField()
     paper = models.ForeignKey(Paper)
     mentions = ArrayField(models.TextField())
+    points = models.IntegerField(default=0)
     deleted = models.BooleanField()
 
 

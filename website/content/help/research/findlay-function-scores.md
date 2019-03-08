@@ -1,5 +1,5 @@
 
-The Findlay Function Scores tile displays functional assay results for variants in functionally  critical domains of BRCA1, obtained using saturation genome editing. The data is provided freely for nonprofit use. Commercial entities should contact the University of Washington for licensing agreements.
+The Findlay Function Scores tile displays functional assay results for variants in functionally critical domains of BRCA1, obtained using saturation genome editing. The data is provided freely for nonprofit use. Commercial entities should contact the University of Washington for licensing agreements.
 
 Nearly all possible single nucleotide variants (SNVs) within specific regions of BRCA1 were introduced using saturation genome editing (SGE). SGE utilizes CRISPR-Cas9 technology to introduce SNVs in near-haploid human cells (HAP1). Variant impact on cell survival and mRNA expression levels was then assessed. The function score measures the degree of cell death observed when the variant was introduced.
 
