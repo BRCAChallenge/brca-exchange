@@ -122,7 +122,7 @@ def variant_reports(request, variant_id):
         if report.Source == "ClinVar":
             key = report.SCV_ClinVar
             if not key or key == '-':
-                # need list for map
+                # if no key is available, skip report history
                 report_query = [report]
             else:
                 report_query = Report.objects.filter(SCV_ClinVar=key).order_by('-Data_Release_id').select_related('Data_Release')
@@ -130,7 +130,7 @@ def variant_reports(request, variant_id):
         elif report.Source == "LOVD":
             key = report.Submission_ID_LOVD
             if not key or key == '-':
-                # need list for map
+                # if no key is available, skip report history
                 report_query = [report]
             else:
                 report_query = Report.objects.filter(Submission_ID_LOVD=key).order_by('-Data_Release_id').select_related('Data_Release')
