@@ -27,6 +27,7 @@ import google.protobuf.json_format as json_format
 from datetime import datetime
 from operator import itemgetter
 
+import logging
 
 DISALLOWED_SEARCH_CHARS = ['\x00']
 
@@ -120,11 +121,19 @@ def variant_reports(request, variant_id):
         key = None
         if report.Source == "ClinVar":
             key = report.SCV_ClinVar
-            report_query = Report.objects.filter(SCV_ClinVar=key).order_by('-Data_Release_id').select_related('Data_Release')
+            if not key or key == '-':
+                # need list for map
+                report_query = [report]
+            else:
+                report_query = Report.objects.filter(SCV_ClinVar=key).order_by('-Data_Release_id').select_related('Data_Release')
             report_versions.extend(map(report_to_dict, report_query))
         elif report.Source == "LOVD":
             key = report.Submission_ID_LOVD
-            report_query = Report.objects.filter(Submission_ID_LOVD=key).order_by('-Data_Release_id').select_related('Data_Release')
+            if not key or key == '-':
+                # need list for map
+                report_query = [report]
+            else:
+                report_query = Report.objects.filter(Submission_ID_LOVD=key).order_by('-Data_Release_id').select_related('Data_Release')
             report_versions.extend(map(report_to_dict, report_query))
 
     response = JsonResponse({"data": report_versions})
@@ -184,9 +193,12 @@ def report_to_dict(report_object):
         # updated the definition of LOVD submissions in the early November
         # release, so it only makes sense to show diffs from following releases)
         cutoff_date = datetime.strptime('Nov 4 2018  12:00AM', '%b %d %Y %I:%M%p')
-    if report_dict["Data_Release"]["date"] < cutoff_date:
-        report_dict["Diff"] = None
-        return report_dict
+    try:
+        if report_dict["Data_Release"]["date"] < cutoff_date:
+            report_dict["Diff"] = None
+            return report_dict
+    except UnboundLocalError as e:
+        logging.error(repr(e))
 
     try:
         report_diff = ReportDiff.objects.get(report_id=report_object.id)
