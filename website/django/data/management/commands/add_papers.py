@@ -46,7 +46,7 @@ class Command(BaseCommand):
             for variant in variant_instances:
                 pmid = variant['pmid']
                 points = variant['points']
-                mentions = variant['snippets']
+                mentions = variant['mentions']
                 if pmid in paper_objects:
                     paper = paper_objects[pmid]
                     if mentions == None:
