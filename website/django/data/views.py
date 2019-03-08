@@ -25,6 +25,7 @@ from ga4gh.schemas.ga4gh import metadata_pb2 as metadata
 
 import google.protobuf.json_format as json_format
 from datetime import datetime
+from operator import itemgetter
 
 
 DISALLOWED_SEARCH_CHARS = ['\x00']
@@ -135,8 +136,14 @@ def variant_papers(request):
     variant = Variant.objects.get(id=variant_id)
     variant_name = variant.Genomic_Coordinate_hg38
     variantpapers = VariantPaper.objects.select_related('paper').filter(variant_hg38=variant_name).all()
-    variantpapers = map(lambda vp: dict(model_to_dict(vp.paper), **{"mentions": vp.mentions}), variantpapers)
-    response = JsonResponse({"data": list(variantpapers)}, safe=False)
+    for variantpaper in variantpapers:
+        # year of 0000 means year could not be found during a crawl
+        if variantpaper.paper.year == 0000:
+            variantpaper.paper.year = "Unknown"
+    variantpapers = map(lambda vp: dict(model_to_dict(vp.paper), **{"mentions": vp.mentions, "points": vp.points}), variantpapers)
+    # Points indicate strength of a hit, so papers with most points are shown first
+    variantpapers = sorted(variantpapers, key=itemgetter('points'), reverse=True)
+    response = JsonResponse({"data": variantpapers}, safe=False)
     response['Access-Control-Allow-Origin'] = '*'
     return response
 

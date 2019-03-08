@@ -6,7 +6,6 @@ import json
 from django.core.management import call_command
 
 
-
 class Command(BaseCommand):
     help = 'Add literature search results to database'
 
@@ -18,6 +17,7 @@ class Command(BaseCommand):
         literature_results = json.load(options['literature'])
         variants_found_in_papers = literature_results['variants']
         papers = literature_results['papers']
+
 
         # Soft delete all existing records (they will be undeleted if they're
         # in the new data)
@@ -34,14 +34,19 @@ class Command(BaseCommand):
                 paper_objects[pmid] = query[0]
                 query.update(deleted=False)
             else:
+                if not paper['year']:
+                    paper['year'] = '0000'
                 p = Paper(title=paper['title'], authors=paper['authors'], journal=paper['journal'], \
                         keywords=paper['keywords'], abstract=paper['abstract'], year=paper['year'], \
                         deleted=False, pmid=paper['pmid'])
                 p.save()
                 paper_objects[pmid] = p
 
-        for variant_genomic_coordinate, variant in variants_found_in_papers.iteritems():
-            for pmid, mentions in variant.iteritems():
+        for variant_genomic_coordinate, variant_instances in variants_found_in_papers.iteritems():
+            for variant in variant_instances:
+                pmid = variant['pmid']
+                points = variant['points']
+                mentions = variant['snippets']
                 if pmid in paper_objects:
                     paper = paper_objects[pmid]
                     if mentions == None:
@@ -49,7 +54,7 @@ class Command(BaseCommand):
                     query = VariantPaper.objects.filter(variant_hg38=variant_genomic_coordinate, paper=paper)
                     if query.count() > 0:
                         # we already have this variantpaper
-                        query.update(mentions=mentions, deleted=False)
+                        query.update(mentions=mentions, points=points, deleted=False)
                     else:
-                        vp = VariantPaper(variant_hg38=variant_genomic_coordinate, paper=paper, mentions=mentions, deleted=False)
+                        vp = VariantPaper(variant_hg38=variant_genomic_coordinate, paper=paper, points=points, mentions=mentions, deleted=False)
                         vp.save()
