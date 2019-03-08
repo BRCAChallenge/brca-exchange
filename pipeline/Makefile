@@ -133,9 +133,9 @@ tag-release: ## postprocessing: tags and pushes git commit used for the data rel
 
 .ONESHELL:
 push-docker: ## postprocessing: pushes docker image to docker hub
-	docker login hub.docker.com
+	docker login
 	docker push brcachallenge/brca-exchange-pipeline:$(RELEASE_TAG)
-	docker logout hub.docker.com
+	docker logout
 
 .ONEHSELL:
 copy-to-previous: ## postprocessing: copy new release tar to previous release folder
