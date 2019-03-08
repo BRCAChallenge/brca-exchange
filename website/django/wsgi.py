@@ -10,6 +10,8 @@ https://docs.djangoproject.com/en/1.9/howto/deployment/wsgi/
 import os
 import sys
 import site
+from django.db.backends.signals import connection_created
+from django.dispatch import receiver
 
 appdir = os.path.dirname(__file__)
 
@@ -19,5 +21,16 @@ from django.core.wsgi import get_wsgi_application
 sys.path.append(appdir)
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "brca.settings")
+
+@receiver(connection_created)
+def setup_postgres(connection, **kwargs):
+    if connection.vendor != 'postgresql':
+        return
+    # Timeout statements after 45 seconds.
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SET statement_timeout TO 45000;
+        """)
+
 
 application = get_wsgi_application()
