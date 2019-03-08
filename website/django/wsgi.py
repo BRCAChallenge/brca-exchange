@@ -10,13 +10,13 @@ https://docs.djangoproject.com/en/1.9/howto/deployment/wsgi/
 import os
 import sys
 import site
-from django.db.backends.signals import connection_created
-from django.dispatch import receiver
 
 appdir = os.path.dirname(__file__)
 
 site.addsitedir(os.path.join(appdir, '../virtualenv/lib/python2.7/site-packages'))
 from django.core.wsgi import get_wsgi_application
+from django.db.backends.signals import connection_created
+from django.dispatch import receiver
 
 sys.path.append(appdir)
 
