@@ -1,6 +1,7 @@
 from hypothesis import given, assume, settings
 from hypothesis.strategies import integers, tuples, text, sampled_from, lists
-from variant_merging import variant_equal, init, normalize_values, add_variant_to_dict, COLUMN_SOURCE, COLUMN_GENE, COLUMN_GENOMIC_HGVS, COLUMN_VCF_CHR, COLUMN_VCF_POS, COLUMN_VCF_REF, COLUMN_VCF_ALT, append_exac_allele_frequencies, EXAC_SUBPOPULATIONS
+from variant_merging import init, normalize_values, add_variant_to_dict, COLUMN_SOURCE, COLUMN_GENE, COLUMN_GENOMIC_HGVS, COLUMN_VCF_CHR, COLUMN_VCF_POS, COLUMN_VCF_REF, COLUMN_VCF_ALT, append_exac_allele_frequencies, EXAC_SUBPOPULATIONS
+from variant_equivalence import variant_equal
 import unittest
 import itertools
 import os
