@@ -9,6 +9,24 @@ const React = require('react'),
 import BetaTag from "./BetaTag";
 
 
+// Sort first by year, then by PMID (as a proxy for a more specific date of publication?)
+const pubsOrdering = function(pub1, pub2) {
+    if (isNaN(pub1.year)) {
+        return 1;
+    }
+    if (isNaN(pub2.year)) {
+        return -1;
+    }
+    if (pub2.year - pub1.year !== 0) {
+        return pub2.year - pub1.year;
+    }
+    if (pub2.pmid - pub1.pmid !== 0) {
+        return pub2.pmid - pub1.pmid;
+    }
+    return 1;
+};
+
+
 function formatMatches(matches, count) {
     let ms = matches.slice(0, count);
 
@@ -194,8 +212,7 @@ class LiteratureTable extends React.Component {
         if (this.state.papers && this.state.papers.length > 0) {
             litResultsExist = true;
 
-            // Results are sorted by the server
-            litRows = this.state.papers;
+            litRows = this.state.papers.sort(pubsOrdering);
 
             if (this.props.maxRows) {
                 litRows = litRows.slice(0, this.props.maxRows);
