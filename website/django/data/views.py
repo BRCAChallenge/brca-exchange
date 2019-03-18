@@ -150,8 +150,6 @@ def variant_papers(request):
         if variantpaper.paper.year == 0000:
             variantpaper.paper.year = "Unknown"
     variantpapers = map(lambda vp: dict(model_to_dict(vp.paper), **{"mentions": vp.mentions, "points": vp.points}), variantpapers)
-    # Points indicate strength of a hit, so papers with most points are shown first
-    variantpapers = sorted(variantpapers, key=itemgetter('points'), reverse=True)
     response = JsonResponse({"data": variantpapers}, safe=False)
     response['Access-Control-Allow-Origin'] = '*'
     return response
