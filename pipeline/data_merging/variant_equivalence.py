@@ -1,6 +1,6 @@
 import os
 import logging
-
+import hashlib
 
 def brca_normalize_chunks(chr1, pos, ref1, alt1, seq_lookup):
     # chr1, pos1, ref1, alt1 = v1
@@ -16,6 +16,7 @@ def brca_normalize_chunks(chr1, pos, ref1, alt1, seq_lookup):
     assert pos1 + len(ref1) <= reflen, "v1 position is above the reference"
 
     # assert seq[pos1:].startswith(ref1)
+    edited = seq[0:pos1] + alt1 + seq[pos1 + len(ref1):]
 
     def compute_delta_joint(ref, alt):
         dref_left = 0
@@ -25,7 +26,7 @@ def brca_normalize_chunks(chr1, pos, ref1, alt1, seq_lookup):
         dalt_right = len(alt) - 1
         delta_right = 0
 
-        while dref_right > dref_left and dalt_right > dalt_left:
+        while dref_right >= dref_left and dalt_right >= dalt_left:
             # remove on the right first to obtain left aligned changes
             if ref[dref_right] == alt[dalt_right]:
                 dref_right -= 1
@@ -69,9 +70,7 @@ def brca_normalize_chunks(chr1, pos, ref1, alt1, seq_lookup):
 
     pos_repeat_adj = pos1 - repeat_delta
 
-    edited = seq[0:pos1] + alt1 + seq[pos1 + len(ref1):]
-
-    return hash(edited), (
+    return hashlib.sha1(edited).digest(), (
     pos_repeat_adj, alt_adj, pos_repeat_adj + len(ref_adj))
 
 
