@@ -63,7 +63,7 @@
     "isotope-layout": "^3.0.3",
     "isotope-packery": "^2.0.0",
     "jquery": "^3.0.0",
-    "less": "^1.5.0",
+    "less": "^1.7.5",
     "lodash": "^4.17.4",
     "markdown-it": "^4.4.0",
     "moment": "^2.17.1",
