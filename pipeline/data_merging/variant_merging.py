@@ -181,7 +181,7 @@ LOVD_FILE = "sharedLOVD_brca12.sorted.hg38.vcf"
 EX_LOVD_FILE = "exLOVD_brca12.sorted.hg38.vcf"
 BIC_FILE = "bic_brca12.sorted.hg38.vcf"
 EXAC_FILE = "exac.brca12.sorted.hg38.vcf"
-ESP_FILE = "esp.brca12.sorted.hg38.vcf"
+ESP_FILE = "esp.sorted.hg38.vcf"
 
 # Functional Assays
 FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS_FILE = "findlay_BRCA1_ring_function_scores.sorted.hg38.vcf"
