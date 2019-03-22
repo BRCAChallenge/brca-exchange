@@ -1212,7 +1212,7 @@ class CrossmapFindlayBRCA1RingFunctionScores(DefaultPipelineTask):
 
 
 @requires(CrossmapFindlayBRCA1RingFunctionScores)
-class SortFindlayBRCA1RingFunctionScores(luigi.Task):
+class SortFindlayBRCA1RingFunctionScores(DefaultPipelineTask):
 
     def output(self):
         functional_assays_file_dir = self.cfg.file_parent_dir + "/functional_assays"
