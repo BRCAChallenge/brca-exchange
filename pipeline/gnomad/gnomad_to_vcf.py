@@ -6,6 +6,7 @@ Description:
 """
 
 from __future__ import print_function, division
+import pdb
 import argparse
 import sys
 import os
@@ -95,22 +96,28 @@ def main():
             INFO_field.append('{0}={1}'.format(field, field_value))
 
         # extract hgvs cDNA term for variant and cleanup formatting
-        hgvsName = parsedLine[fieldIdxDict['hgvs_nucleotide']]
-        if hgvsName == '-':
-            logging.debug("hgvs name == '-' for line: %s", parsedLine)
-            continue
-        gene_symbol = parsedLine[fieldIdxDict['gene_symbol']].lower()
-        if gene_symbol == 'brca1':
+        # hgvsName = parsedLine[fieldIdxDict['hgvs_nucleotide']]
+        # if hgvsName == '-':
+            # logging.debug("hgvs name == '-' for line: %s", parsedLine)
+            # continue
+        chr = parsedLine[fieldIdxDict['chr']].lower()
+        if chr == '17':
             transcript = 'NM_007294.3'
-        elif gene_symbol == 'brca2':
+        elif chr == '13':
             transcript = 'NM_000059.3'
         else:
-            logging.debug("improper gene symbol: %s", gene_symbol)
+            logging.debug("improper chromosome: %s", chr)
             continue
         queryHgvsName = transcript + ':' + hgvsName.rstrip().split(';')[0]
         INFO_field_string = ';'.join(INFO_field)
         try:
-            chrom, offset, ref, alt = hgvs.parse_hgvs_name(queryHgvsName, genome, get_transcript=get_transcript)
+            # Format an HGVS name.
+            # chrom, offset, ref, alt = ('chr11', 17496508, 'T', 'C')
+            # transcript = get_transcript('NM_000352.3')
+            pdb.set_trace()
+            hgvs_name = hgvs.format_hgvs_name(
+                chr, pos, ref, alt, genome, transcript)
+            # chrom, offset, ref, alt = hgvs.parse_hgvs_name(queryHgvsName, genome, get_transcript=get_transcript)
             chrom = chrom.replace('chr', '')
             print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(chrom, offset, queryHgvsName, ref, alt, INFO_field_string), file=vcfFile)
         except Exception as e:
