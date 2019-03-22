@@ -19,9 +19,9 @@ gnomAD_brca2_data_url = "https://brcaexchange.org/backend/downloads/BRCA2_gnomAD
 logger = logging.getLogger('gnomAD')
 
 
-class gnomADTask(DefaultPipelineTask):
+class GnomADTask(DefaultPipelineTask):
     def __init__(self, *args, **kwargs):
-        super(gnomADTask, self).__init__(*args, **kwargs)
+        super(GnomADTask, self).__init__(*args, **kwargs)
         self.gnomAD_file_dir = self.cfg.file_parent_dir + "/gnomAD"
         self.gnomAD_brca1_file_name = gnomAD_brca1_data_url.split('/')[-1]
         self.gnomAD_brca2_file_name = gnomAD_brca2_data_url.split('/')[-1]
@@ -29,7 +29,7 @@ class gnomADTask(DefaultPipelineTask):
         pipeline_utils.create_path_if_nonexistent(self.gnomAD_file_dir)
 
 
-class DownloadBRCA1GnomADData(gnomADTask):
+class DownloadBRCA1GnomADData(GnomADTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, self.gnomad_brca1_file_name))
 
@@ -40,9 +40,9 @@ class DownloadBRCA1GnomADData(gnomADTask):
 
 
 @requires(DownloadBRCA1GnomADData)
-class DownloadBRCA2GnomADData(gnomADTask):
+class DownloadBRCA2GnomADData(GnomADTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, self.gnomad_brca2_file_name))
+        return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, self.gnomAD_brca2_file_name))
 
     def run(self):
         os.chdir(self.gnomAD_file_dir)
@@ -51,7 +51,7 @@ class DownloadBRCA2GnomADData(gnomADTask):
 
 
 @requires(DownloadBRCA2GnomADData)
-class ParseGnomADBRCA1Data(gnomADTask):
+class ParseGnomADBRCA1Data(GnomADTask):
 
     def output(self):
         return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, "gnomAD_BRCA1.clean.tsv"))
@@ -71,7 +71,7 @@ class ParseGnomADBRCA1Data(gnomADTask):
 
 
 @requires(ParseGnomADBRCA1Data)
-class ParseGnomADBRCA2Data(gnomADTask):
+class ParseGnomADBRCA2Data(GnomADTask):
 
     def output(self):
         return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, "gnomAD_BRCA2.clean.tsv"))
@@ -92,7 +92,7 @@ class ParseGnomADBRCA2Data(gnomADTask):
 
 
 @requires(ParseGnomADBRCA2Data)
-class ConvertGnomADBRCA1ToVCF(gnomADTask):
+class ConvertGnomADBRCA1ToVCF(GnomADTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, 'gnomAD_BRCA1.clean.hg19.vcf'))
 
@@ -117,7 +117,7 @@ class ConvertGnomADBRCA1ToVCF(gnomADTask):
 
 
 @requires(ConvertGnomADBRCA1ToVCF)
-class ConvertGnomADBRCA2ToVCF(gnomADTask):
+class ConvertGnomADBRCA2ToVCF(GnomADTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, 'gnomAD_BRCA2.clean.hg19.vcf'))
 
@@ -142,7 +142,7 @@ class ConvertGnomADBRCA2ToVCF(gnomADTask):
 
 
 @requires(ConvertGnomADBRCA2ToVCF)
-class ConcatenateBRCA12GnomADData(gnomADTask):
+class ConcatenateBRCA12GnomADData(GnomADTask):
 
     def output(self):
         return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, "gnomAD_BRCA12.clean.hg19.vcf"))
@@ -166,7 +166,7 @@ class ConcatenateBRCA12GnomADData(gnomADTask):
 
 
 @requires(ConcatenateBRCA12GnomADData)
-class CrossmapGnomADBRCA12Data(gnomADTask):
+class CrossmapGnomADBRCA12Data(GnomADTask):
 
     def output(self):
         return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, "gnomAD_BRCA12.clean.hg38.vcf"))
@@ -187,7 +187,7 @@ class CrossmapGnomADBRCA12Data(gnomADTask):
 
 
 @requires(CrossmapGnomADBRCA12Data)
-class SortConcatenatedGnomADData(gnomADTask):
+class SortConcatenatedGnomADData(GnomADTask):
 
     def output(self):
         return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, "gnomad_BRCA12.clean.sorted.hg38.vcf"))
