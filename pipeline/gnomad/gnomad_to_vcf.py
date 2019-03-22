@@ -2,7 +2,7 @@
 
 """
 Description:
-    Takes in a functional assay table and converts it to vcf format.
+    Takes in a gnomad table and converts it to vcf format.
 """
 
 from __future__ import print_function, division
@@ -20,16 +20,16 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Convert database table to VCF format.')
     parser.add_argument('-i', '--input', type=argparse.FileType('r'),
                         help='Input file for conversion.')
-    parser.add_argument('-a', '--inAnnot', default='/hive/groups/cgl/brca/phase1/data/resources/functionalAssayAnnotation',
+    parser.add_argument('-a', '--inAnnot', default='/hive/groups/cgl/brca/phase1/data/resources/gnomadAnnotation',
                         help='Input annotation file for conversion. Tab-delimited with 1st column representing field name and 2nd column representing the field description. Default(/hive/groups/cgl/brca/phase1/data/resources/exLOVDAnnotation)')
     parser.add_argument('-o', '--out', type=argparse.FileType('w'),
                         help='Ouput VCF file result.')
-    parser.add_argument('-l', '--logfile', default='/tmp/functional_assays_to_vcf.log')
+    parser.add_argument('-l', '--logfile', default='/tmp/gnomad_to_vcf.log')
     parser.add_argument('-g', '--gpath', default='/hive/groups/cgl/brca/phase1/data/resources/hg19.fa',
                         help='Whole path to genome file. Default: (/hive/groups/cgl/brca/phase1/data/resources/hg19.fa)')
     parser.add_argument('-r', '--rpath', default='/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.gp',
                         help='Whole path to refSeq file. Default: (/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.gp)')
-    parser.add_argument('-s', '--source', default='FunctionalAssay')
+    parser.add_argument('-s', '--source', default='gnomAD')
     parser.add_argument('-v', '--verbose', action='count', default=False, help='determines logging')
 
     options = parser.parse_args()

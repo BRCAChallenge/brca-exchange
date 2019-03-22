@@ -11,6 +11,7 @@ import luigi
 from luigi.util import requires
 
 import esp_processing
+import gnomad_processing
 import pipeline_common
 import pipeline_utils
 from pipeline_common import DefaultPipelineTask
@@ -1256,6 +1257,8 @@ class MergeVCFsIntoTSVFile(DefaultPipelineTask):
     def requires(self):
         yield pipeline_common.CopyOutputToOutputDir(self.cfg.output_dir,
                                                     esp_processing.SortConcatenatedESPData())
+        yield pipeline_common.CopyOutputToOutputDir(self.cfg.output_dir,
+                                                    gnomad_processing.SortConcatenatedGnomADData())
         yield CopyClinvarVCFToOutputDir()
         yield CopyBICOutputToOutputDir()
         yield CopyG1KOutputToOutputDir()
