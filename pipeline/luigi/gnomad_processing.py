@@ -29,7 +29,7 @@ class gnomADTask(DefaultPipelineTask):
         pipeline_utils.create_path_if_nonexistent(self.gnomAD_file_dir)
 
 
-class DownloadBRCA1gnomADData(gnomADTask):
+class DownloadBRCA1GnomADData(gnomADTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, self.gnomad_brca1_file_name))
 
