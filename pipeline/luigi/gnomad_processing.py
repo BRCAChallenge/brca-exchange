@@ -12,7 +12,7 @@ from pipeline_common import DefaultPipelineTask
 #                  gnomAD                     #
 ###############################################
 
-gnomAD_method_dir = os.path.abspath('../gnomAD')
+gnomAD_method_dir = os.path.abspath('../gnomad')
 gnomAD_brca1_data_url = "https://brcaexchange.org/backend/downloads/BRCA1_gnomAD_v2.1.1_(non-cancer)_ENSG00000012048_2019_03_21_12_39_22.csv"
 gnomAD_brca2_data_url = "https://brcaexchange.org/backend/downloads/BRCA2_gnomAD_v2.1.1_(non-cancer)_ENSG00000139618_2019_03_21_12_40_20.csv"
 
@@ -31,7 +31,7 @@ class GnomADTask(DefaultPipelineTask):
 
 class DownloadBRCA1GnomADData(GnomADTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, self.gnomad_brca1_file_name))
+        return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, self.gnomAD_brca1_file_name))
 
     def run(self):
         os.chdir(self.gnomAD_file_dir)
