@@ -72,7 +72,8 @@ def main():
         logging_level = logging.CRITICAL
 
     log_file_path = ARGS.artifacts_dir + "variant_merging.log"
-    logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level)
+    logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level,
+                        format=' %(asctime)s %(filename)-15s %(message)s')
 
     discarded_reports_file = open(ARGS.artifacts_dir + "discarded_reports.tsv", "w")
 
@@ -760,56 +761,6 @@ def save_enigma_to_dict(path):
     f_wrong.close()
     print "in ENIGMA, wrong: {0}, total: {1}".format(n_wrong, n_total)
     return (columns, variants)
-
-
-def variant_equal(v1, v2, version="hg38"):
-    "return edited1 == edited2"
-    if v1 == v2:
-        logging.debug("v1 == v2 %s %s", str(v1), str(v2))
-        return True
-    chr1, pos1, ref1, alt1 = v1
-    chr2, pos2, ref2, alt2 = v2
-    pos1 = int(pos1)
-    pos2 = int(pos2)
-    if chr1 != chr2:
-        return False
-
-    #  must be same number of bases after variation
-    if (len(ref1) - len(alt1)) != (len(ref2) - len(alt2)):
-        return False
-
-    # make sure that v1 is upstream of v2
-    if pos1 > pos2:
-        return variant_equal(v2, v1, version)
-
-    # lift coordinates and make everything 0-based
-    if chr1 == "13":
-        seq = BRCA2[version]["sequence"]
-        pos1 = pos1 - 1 - BRCA2[version]["start"]
-        pos2 = pos2 - 1 - BRCA2[version]["start"]
-    elif chr1 == "17":
-        seq = BRCA1[version]["sequence"]
-        pos1 = pos1 - 1 - BRCA1[version]["start"]
-        pos2 = pos2 - 1 - BRCA1[version]["start"]
-    else:
-        assert False, "Bad chrom in variant"
-
-    assert pos1 >= 0, "v1 positions is below the reference"
-    assert pos2 >= 0, "v2 position is below the reference"
-    reflen = len(BRCA1[version]["sequence"])
-    assert pos1 + len(ref1) <= reflen, "v1 position is above the reference"
-    assert pos2 + len(ref2) <= reflen, "v2 position is above the reference"
-
-    # replace vcf ref string with alt string
-    edited_v1 = seq[0:pos1]+alt1+seq[pos1+len(ref1):]
-    edited_v2 = seq[0:pos2]+alt2+seq[pos2+len(ref2):]
-
-    if edited_v1 == edited_v2:
-        logging.debug("VARIANTS EQUAL:")
-        logging.debug("Converted %s into %s due to variant v1 %s", seq[pos1-5:pos1+5], edited_v1[pos1-5:pos1+5], v1)
-        logging.debug("Converted %s into %s due to variant v2 %s", seq[pos2-5:pos2+5], edited_v2[pos2-5:pos2+5], v2)
-
-    return edited_v1 == edited_v2
 
 
 def ref_correct(chr, pos, ref, alt, version="hg38"):
