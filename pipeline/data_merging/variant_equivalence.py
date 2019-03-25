@@ -63,7 +63,7 @@ def find_equivalent_variant(variants_dict):
     '''
     logging.info("Running find_equivalent_variants.")
 
-    variant_eq = [(v_name, hash(calculate_edited_seq(v_rec, seq_lookup))) for
+    variant_eq = [(v_name, hash(calculate_edited_seq_from_rec(v_rec, seq_lookup))) for
                   v_name, v_rec in variants_dict.items()]
 
     # dictionary from hashed edited references to a list of variant names

@@ -146,7 +146,7 @@ def variant_standardize(columns, variants="pickle"):
             (chr, pos, ref, alt) = add_leading_base(chr, pos, ref, alt)
         if len(ref) < 1 or len(alt) < 1:
             (chr, pos, ref, alt) = add_leading_base(chr, pos, ref, alt)
-        #(chr, pos, ref, alt) = trim_bases(chr, pos, ref, alt)
+        (chr, pos, ref, alt) = trim_bases(chr, pos, ref, alt)
 
         hgvs = "chr%s:g.%s:%s>%s" % (str(chr), str(pos), ref, alt)
 
