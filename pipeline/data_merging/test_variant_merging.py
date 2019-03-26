@@ -1,44 +1,33 @@
-from hypothesis import given, assume, settings
-from hypothesis.strategies import integers, tuples, text, sampled_from, lists
-from variant_merging import init, normalize_values, add_variant_to_dict, COLUMN_SOURCE, COLUMN_GENE, COLUMN_GENOMIC_HGVS, COLUMN_VCF_CHR, COLUMN_VCF_POS, COLUMN_VCF_REF, COLUMN_VCF_ALT, append_exac_allele_frequencies, EXAC_SUBPOPULATIONS
-from variant_equivalence import variant_equal
-import unittest
 import itertools
 import os
+import unittest
+
 import pytest
 import vcf
-from utilities import round_sigfigs
+from hypothesis import given, assume, settings
+from hypothesis.strategies import integers, tuples, sampled_from, lists
 
+import seq_utils
+from utilities import round_sigfigs
+from variant_equivalence import variant_equal
+from variant_merging import normalize_values, add_variant_to_dict, \
+    COLUMN_SOURCE, append_exac_allele_frequencies, EXAC_SUBPOPULATIONS
 
 runtimes = 500000
 settings.register_profile('ci', settings(max_examples=runtimes, max_iterations=runtimes, timeout=-1))
 
 # Uncomment this for longer test runs.
-# settings.load_profile('ci')
+#settings.load_profile('ci')
 
 #
 # initialize module
 #
 
 pwd=os.path.dirname(os.path.realpath(__file__))
+seq_provider = seq_utils.SeqProvider(os.path.join(pwd, '..', 'data') + '/')
 
-# XXX instead of adding '/' we should fix variant_merging to use
-# os.join.
-class Args:
-    reference = os.path.join(pwd, '..', 'data') + '/'
-
-init(Args())
-# This is really hacky, but we have to re-import from variant_merging to
-# get the BRCA1 and BRCA2 after init. I'm sure there's a better way.
-from variant_merging import BRCA1, BRCA2
-
-# If this isn't true, things are bad.
-assert(set(BRCA1.keys()) == set(BRCA2.keys()))
-lengths = [len(ref["sequence"]) for ref in BRCA1.values()] + [len(ref["sequence"]) for ref in BRCA1.values()]
-assert(len(lengths) > 0)
-assert(len(set(lengths)) == 1)
-
-reference_length = lengths[0]
+BRCA1_CHR = 17
+reference_length = len(seq_provider.get_seq_with_start(BRCA1_CHR).sequence)
 
 # variants are specfied in genome coords. BRCA1 and BRCA2 hold slices of the
 # reference genomes, starting before the gene. Currently, all the reference
@@ -52,7 +41,8 @@ reference_length = lengths[0]
 #
 # generators
 #
-reference_id = sampled_from(BRCA1.keys())
+default_reference_version = "hg38"
+reference_id = sampled_from([default_reference_version])
 chrom = sampled_from(('13', '17'))
 pos = integers(min_value=0, max_value=reference_length - 1) # pos relative to the reference start.
 base = sampled_from(('A', 'C', 'T', 'G'))
@@ -80,8 +70,8 @@ def not_on_ref_noop(v):
 variant_on_ref = tuples(chrom, pos, integers(min_value=0), subseq).filter(not_on_ref_noop)
 
 chrom_ref = {
-    '13': BRCA2,
-    '17': BRCA1
+    '13': { default_reference_version : seq_provider.get_seq_with_start(13)._asdict() },
+    '17': { default_reference_version :  seq_provider.get_seq_with_start(17)._asdict() }
 }
 
 # Add the start position of the slice of reference that we're holding, to create
@@ -102,9 +92,9 @@ def test_variant_equal_throws_below_reference():
     v1 = ('13', chrom_ref['13'][ref_id]['start'], 'A', 'C')
     v2 = ('13', chrom_ref['13'][ref_id]['start'] + 10, 'A', 'C')
     with pytest.raises(AssertionError):
-        variant_equal(v1, v2, ref_id)
+        variant_equal(v1, v2, ref_id, seq_provider)
     with pytest.raises(AssertionError):
-        variant_equal(v2, v1, ref_id)
+        variant_equal(v2, v1, ref_id, seq_provider)
 
 def test_variant_equal_throws_above_reference():
     ref_id = chrom_ref['13'].keys()[0]
@@ -112,9 +102,9 @@ def test_variant_equal_throws_above_reference():
     v1 = ('13', start + reference_length + 2, 'A', 'C')
     v2 = ('13', start + 10, 'A', 'C')
     with pytest.raises(AssertionError):
-        variant_equal(v1, v2, ref_id)
+        variant_equal(v1, v2, ref_id, seq_provider)
     with pytest.raises(AssertionError):
-        variant_equal(v2, v1, ref_id)
+        variant_equal(v2, v1, ref_id, seq_provider)
 
 #@settings(max_examples=50000)
 @given(variant, reference_id)
@@ -123,7 +113,7 @@ def test_variant_equal_identity(v, ref_id):
     (_, pos, ref, _) = v
     assume(pos + len(ref) <= reference_length)
     v = add_start(v, ref_id)
-    assert variant_equal(v, v, ref_id)
+    assert variant_equal(v, v, ref_id, seq_provider)
 
 #@settings(max_examples=50000)
 @given(variant, variant, reference_id)
@@ -136,7 +126,7 @@ def test_variant_equal_commutative(v1, v2, ref_id):
 
     v1 = add_start(v1, ref_id)
     v2 = add_start(v2, ref_id)
-    assert variant_equal(v1, v2, ref_id) == variant_equal(v2, v1, ref_id)
+    assert variant_equal(v1, v2, ref_id, seq_provider) == variant_equal(v2, v1, ref_id, seq_provider)
 
 
 # The rules here describe how to generate equivalent variants.  I believe these
@@ -270,7 +260,7 @@ def test_variant_equal_equiv(v, ref_id):
 
     for veq in equivs:
         if is_in_bounds(veq):
-            assert variant_equal(add_start(v, ref_id), add_start(veq, ref_id), ref_id)
+            assert variant_equal(add_start(v, ref_id), add_start(veq, ref_id), ref_id, seq_provider)
 
 def equiv_set(refsequence, v):
     return set(all_norm_equiv(refsequence, v) + [normalize_variant(v)])
@@ -295,9 +285,9 @@ def test_variant_equal_not_equiv(v1, v2, ref_id):
     eq2 = equiv_set(refsequence2, v2)
 
     if len(eq1.intersection(eq2)) == 0: # should test not-equal
-        assert not variant_equal(add_start(v1, ref_id), add_start(v2, ref_id), ref_id)
+        assert not variant_equal(add_start(v1, ref_id), add_start(v2, ref_id), ref_id, seq_provider)
     else:
-        assert variant_equal(add_start(v1, ref_id), add_start(v2, ref_id), ref_id)
+        assert variant_equal(add_start(v1, ref_id), add_start(v2, ref_id), ref_id, seq_provider)
 
 # Do we need to explicitly test variations in surrounding reference length?
 # The tests above only test random variants against normalized (minimum reference)
