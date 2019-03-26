@@ -251,7 +251,7 @@ class LiteratureTable extends React.Component {
         let component = (
             (litResultsExist || !this.props.hideEmptyItems) &&
             <div>
-                <h4>Literature Search Results{this.state.papers && ` (as of ${util.normalizeDateFieldDisplay(this.state.papers[0].crawl_date)}`}): <BetaTag margin="0.25em" verticalALign="top" hoverText="Literature Search is a beta feature, so please beware of erroneous or missing results. You are welcome to contact us about observed errors." /></h4>
+                <h4>Literature Search Results{this.state.papers && ` (as of ${util.normalizeDateFieldDisplay(this.state.papers[0].crawl_date)})`}: <BetaTag margin="0.25em" verticalALign="top" hoverText="Literature Search is a beta feature, so please beware of erroneous or missing results. You are welcome to contact us about observed errors." /></h4>
                     <Table className='nopointer literature-rows' bordered>
                         <thead>
                             <tr className="active">
