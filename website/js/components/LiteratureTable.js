@@ -4,6 +4,7 @@ const React = require('react'),
     { Link } = require('react-router'),
     { Grid, Row, Col, ButtonToolbar, Button, DropdownButton, Table } = require('react-bootstrap'),
     backend = require('../backend'),
+    util = require('../util'),
     _ = require('underscore');
 
 import BetaTag from "./BetaTag";
@@ -247,11 +248,10 @@ class LiteratureTable extends React.Component {
 
         let toTSVURL = `data:text/tab-separated-values;charset=utf-8,${encodeURIComponent(this.toTSV())}`;
         let toJSONURL = `data:text/json;charset=utf-8,${encodeURIComponent(this.toJSON())}`;
-
         let component = (
             (litResultsExist || !this.props.hideEmptyItems) &&
             <div>
-                <h4>Literature Search Results: <BetaTag margin="0.25em" verticalALign="top" hoverText="Literature Search is a beta feature, so please beware of erroneous or missing results. You are welcome to contact us about observed errors." /></h4>
+                <h4>Literature Search Results{this.state.papers && ` (as of ${util.normalizeDateFieldDisplay(this.state.papers[0].crawl_date)}`}): <BetaTag margin="0.25em" verticalALign="top" hoverText="Literature Search is a beta feature, so please beware of erroneous or missing results. You are welcome to contact us about observed errors." /></h4>
                     <Table className='nopointer literature-rows' bordered>
                         <thead>
                             <tr className="active">

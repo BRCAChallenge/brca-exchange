@@ -17,7 +17,7 @@ class Command(BaseCommand):
         literature_results = json.load(options['literature'])
         variants_found_in_papers = literature_results['variants']
         papers = literature_results['papers']
-
+        crawl_date = literature_results['date']
 
         # Soft delete all existing records (they will be undeleted if they're
         # in the new data)
@@ -32,13 +32,13 @@ class Command(BaseCommand):
             if query.count() > 0:
                 # we already have this paper in the database
                 paper_objects[pmid] = query[0]
-                query.update(deleted=False)
+                query.update(deleted=False, crawl_date=crawl_date)
             else:
                 if not paper['year']:
                     paper['year'] = '0000'
                 p = Paper(title=paper['title'], authors=paper['authors'], journal=paper['journal'], \
                         keywords=paper['keywords'], abstract=paper['abstract'], year=paper['year'], \
-                        deleted=False, pmid=paper['pmid'])
+                        deleted=False, pmid=paper['pmid'], crawl_date=crawl_date)
                 p.save()
                 paper_objects[pmid] = p
 
