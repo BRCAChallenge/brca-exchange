@@ -43,7 +43,7 @@ def main():
 
     args = parser.parse_args()
 
-    seq_provider = seq_utils.SeqProvider(args["reference"])
+    seq_provider = seq_utils.SeqProvider(args.reference)
 
     if args.verbose:
         logging_level = logging.DEBUG
@@ -76,7 +76,7 @@ def main():
 
     # compare dna sequence results of variants and merge if equivalent
     print "------------dna sequence comparison merge-------------------------------"
-    variants = string_comparison_merge(variants)
+    variants = string_comparison_merge(variants, seq_provider)
 
     # write final output to file
     write_new_tsv(args.output + "merged.tsv", columns, variants)
@@ -334,12 +334,12 @@ def variant_is_false(ref, alt):
     return ref == alt
 
 
-def string_comparison_merge(variants):
+def string_comparison_merge(variants, seq_provider):
     # makes sure the input genomic coordinate strings are unique (no dupes)
     assert (len(variants.keys()) == len(set(variants.keys())))
 
     logging.info('Calculating all equivalent variants without pickle dump.')
-    equivalence = variant_equivalence.find_equivalent_variant(variants)
+    equivalence = variant_equivalence.find_equivalent_variant(variants, seq_provider)
 
     n_before_merge = 0
     for each in equivalence:
@@ -438,7 +438,7 @@ def preprocessing(input_dir, output_dir, seq_provider):
         source_dict[source_name] = f_out.name
 
     print "-------check if genomic coordinates are correct----------"
-    (columns, variants) = save_enigma_to_dict(input_dir + ENIGMA_FILE)
+    (columns, variants) = save_enigma_to_dict(input_dir + ENIGMA_FILE, output_dir, seq_provider)
     for source_name, file_name in source_dict.iteritems():
         f = open(file_name, "r")
         d_wrong = output_dir + "wrong_genome_coors/"
@@ -693,7 +693,7 @@ def add_columns_to_enigma_data(line):
     return columns
 
 
-def save_enigma_to_dict(path, output_dir):
+def save_enigma_to_dict(path, output_dir, seq_provider):
     global DISCARDED_REPORTS_WRITER
 
     enigma_file = open(path, "r")
@@ -715,7 +715,7 @@ def save_enigma_to_dict(path, output_dir):
             bx_id = items[bx_id_column_index]
             hgvs = "chr%s:g.%s:%s>%s" % (str(chrom), str(pos), ref, alt)
 
-            if ref_correct(chrom, pos, ref, alt):
+            if ref_correct(chrom, pos, ref, alt, seq_provider):
                 variants = add_variant_to_dict(variants, hgvs, items)
             else:
                 logging.warning("Ref incorrect for Enigma report, throwing away: %s", line)

@@ -24,7 +24,7 @@ settings.register_profile('ci', settings(max_examples=runtimes, max_iterations=r
 #
 
 pwd=os.path.dirname(os.path.realpath(__file__))
-seq_provider = seq_utils.SeqProvider(os.path.join(pwd, '..', 'data') + '/')
+seq_provider = seq_utils.SeqProvider(os.path.join(pwd, '..', 'data'))
 
 BRCA1_CHR = 17
 reference_length = len(seq_provider.get_seq_with_start(BRCA1_CHR).sequence)

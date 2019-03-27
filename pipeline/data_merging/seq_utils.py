@@ -18,7 +18,7 @@ class SeqProvider:
                                                 "r").read().upper()},
                           13: {"start": 32300000,
                                "sequence": open(os.path.join(
-                                   reference_path + "brca2_hg38.txt"),
+                                   reference_path, "brca2_hg38.txt"),
                                    "r").read().upper()}
                           }
 
