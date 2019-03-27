@@ -84,28 +84,15 @@ const mupitStructures = [
 
 const helpContentDefault = [
     {
-        section: "General Information",
+	section: "Getting Started: Variants and How to Find Them",
         tiles: [
-            {
-                name: "What is the BRCA Exchange?",
-                contents: require("../content/help/default/what-is-the-brca-exchange.md")
-            },
-            {
+           {
                 name: "How do I search for a variant?",
                 contents: require("../content/help/default/how-do-i-search-for-a-variant.md")
-            },
-        ]
-    },
-    {
-        section: "Variant Details Page",
-        tiles: [
-           {
-                name: "What do the fields in the Variant Details Page mean?",
-                contents: require("../content/help/default/variant-details-fields.md")
            },
            {
-                name: "Variant Classifications",
-		list: [
+                name: "What does a variant's classification mean?",
+                list: [
                     {
                         name: "Pathogenic",
                         contents: require("../content/help/default/variant-classifications-pathogenic.md")
@@ -123,16 +110,59 @@ const helpContentDefault = [
                         contents: require("../content/help/default/variant-classifications-not-yet-reviewed.md")
                     },
                   ]
-	   },
-           {
-                name: "Variant Naming Demystified",
-                contents: require("../content/help/default/variant-naming/demystifying-variant-naming.md")
-	   },
-           {
-                name: "Outside Resources on BRCA Genes, Genetic Testing, and Cancer Risk",
-                contents: require("../content/help/default/outside-resources-on-brca-genes.md")
            },
+           {
+		   name: "What does it mean if a variant is \"Not Yet Reviewed\"?",
+		   contents: require("../content/help/default/what-does-it-mean-if-a-variant-is-not-yet-reviewed.md")
+           },
+           {
+                   name: "How do variants get their names?",
+                   contents: require("../content/help/default/variant-naming/demystifying-variant-naming.md")
+           },
+           {
+                   name: "Why can't I find the variant I searched?",
+                   contents: require("../content/help/default/why-cant-i-find-the-variant-i-searched.md")
+           },
+        ]
+    },
+    {
+	section: "Variant Details: Understanding the Data",
+        tiles: [
+           {
+                name: "What do the fields in the Variant Details Page mean?",
+                contents: require("../content/help/default/variant-details-fields.md")
+           },
+           {
+		   name: "How is the data on this site updated?",
+                contents: require("../content/help/default/how-is-the-data-on-this-site-updated.md")
+	   },
 	]
+    },
+    {
+	section: "Who We Are: Understanding the BRCA Exchange",
+        tiles: [
+            {
+                name: "What is the BRCA Exchange?",
+                contents: require("../content/help/default/what-is-the-brca-exchange.md")
+            },
+            {
+                name: "What makes BRCA Exchange different from other public databases?",
+                contents: require("../content/help/default/what-makes-brca-exchange-different-from-other-public-databases.md")
+            },
+            {
+                name: "What is ENIGMA and how does it determine variant classifications?",
+                contents: require("../content/help/default/what-is-enigma-and-how-does-it-determine-variant-classifications.md")
+            },
+        ]
+    },
+    {
+            section: "More Resources",
+        tiles: [
+            {
+                name: "Where can I find additional information on BRCA Genes, Genetic Testing, and Cancer Risk?",
+                contents: require("../content/help/default/outside-resources-on-brca-genes.md")
+            },
+        ]
     },
 ];
 
@@ -174,15 +204,19 @@ const helpContentResearch = [
 
 */
     {
-        section: "General Information",
+	section: "Getting Started\: Variants and How to Find Them",
         tiles: [
-            {
-                name: "What is the BRCA Exchange?",
-                contents: require("../content/help/research/what-is-the-brca-exchange.md")
-            },
             {
                 name: "How do I search for a variant?",
                 contents: require("../content/help/research/how-do-i-search-for-a-variant.md")
+            },
+            {
+                name: "Why can't I find the variant I searched?",
+                contents: require("../content/help/research/why-cant-i-find-the-variant-i-searched.md")
+            },
+            {
+                name: "How do I use column selectors?",
+                contents: require("../content/help/research/using-column-selectors.md")
             },
             /* No content yet
             {
@@ -190,29 +224,17 @@ const helpContentResearch = [
                 contents: require("../content/help/research/using-filters.md")
             },
             */
-            {
-                name: "How do I use Column Selectors?",
-                contents: require("../content/help/research/using-column-selectors.md")
-            },
-            {
-                name: "Downloading Variant Data",
-                contents: require("../content/help/research/downloading-variant-data.md")
-            },
-            {
-                name: "Lollipop Plots",
-                contents: require("../content/help/research/lollipop-plots.md")
-            },
         ]
     },
     {
-        section: "Variant Details Page",
+	section: "Variant Details: Understanding the Data",
         tiles: [
             {
-                name: "Variant Nomenclature",
+                name: "What are the fields in the Variant Nomenclature Tile?",
                 contents: require("../content/help/research/variant-nomenclature.md")
             },
             {
-                name: "Clinical Significance Tiles",
+                name: "What data sources and fields are provided in Clinical Significance Tiles?",
                 list: [
                     {
                         name: "ENIGMA",
@@ -235,16 +257,16 @@ const helpContentResearch = [
                 ]
             },
             {
-                name: "Transcript Visualization",
+                name: "What information is displayed in the Transcript Visualization?",
                 contents: require("../content/help/research/transcript-visualization.md")
             },
             {
-                name: "Multifactorial Likelihood Analysis",
+                name: "What data is used in Multifactorial Likelihood Analysis?",
                 contents: require("../content/help/research/multifactorial-likelihood-analysis.md"),
                 reference: "https://www.ncbi.nlm.nih.gov/pubmed/21990134"
             },
             {
-                name: "Allele Frequency Reference Sets",
+                name: "What information is provided in the Allele Frequency Reference Sets Tile?",
                 contents: require("../content/help/research/allele-frequency-reference-sets.md"),
                 list: [
                     {
@@ -262,7 +284,7 @@ const helpContentResearch = [
                 ]
             },
             {
-                name: "Functional Assay Results",
+                name: "What sources are available in the Functional Assay Results tile?",
                 contents: require("../content/help/research/functional-assay-disclaimer.md"),
                 list: [
                     {
@@ -272,21 +294,56 @@ const helpContentResearch = [
                 ]
             },
             {
-                name: "In Silico Prior Probabilities of Pathogenicity",
+                name: "What are In Silico Prior Probabilities of Pathogenicity?",
                 contents: require("../content/help/research/insilico/insilico-pred.md")
             },
             {
-                name: "CRAVAT/MuPIT Interactive Protein Structure Viewer",
+                name: "How do I interpret the CRAVAT/MuPIT Interactive Protein Structure Viewer?",
                 id: "cravat-mupit-3d-protein-view",
                 contents: require("../content/help/research/cravat-mupit.md")
             },
             {
-                name: "Literature Search Results",
+                name: "How does the BRCA Exchange provide Literature Search Results for variants?",
                 contents: require("../content/help/research/literature-search.md"),
                 isBeta: true
             },
+            {
+                name: "What genome build is this site using?",
+                id: "cravat-mupit-3d-protein-view",
+                contents: require("../content/help/research/what-genome-build-is-this-site-using.md")
+            },
+            {
+                name: "How is the data on this site updated?",
+                contents: require("../content/help/research/how-is-the-data-on-this-site-updated.md"),
+                isBeta: true
+            },
+            {
+                name: "How do I Download Variant Data?",
+                contents: require("../content/help/research/downloading-variant-data.md")
+            },
+            {
+                name: "What are Lollipop Plots?",
+                contents: require("../content/help/research/lollipop-plots.md")
+            },
         ]
-    }
+    },
+    {
+        section: "Who We Are: Understanding the BRCA Exchange",
+        tiles: [
+            {
+                name: "What is the BRCA Exchange?",
+                contents: require("../content/help/default/what-is-the-brca-exchange.md")
+            },
+            {
+                name: "What makes BRCA Exchange different from other public databases?",
+                contents: require("../content/help/default/what-makes-brca-exchange-different-from-other-public-databases.md")
+            },
+            {
+                name: "What is ENIGMA and how does it determine variant classifications?",
+                contents: require("../content/help/default/what-is-enigma-and-how-does-it-determine-variant-classifications.md")
+            },
+        ]
+    },
 ];
 
 /**
