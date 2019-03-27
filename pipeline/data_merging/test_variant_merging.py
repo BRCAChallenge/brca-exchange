@@ -9,7 +9,7 @@ from hypothesis.strategies import integers, tuples, sampled_from, lists
 
 import seq_utils
 from utilities import round_sigfigs
-from variant_equivalence import variant_equal
+from variant_equivalence import variant_equal, find_equivalent_variant
 from variant_merging import normalize_values, add_variant_to_dict, \
     COLUMN_SOURCE, append_exac_allele_frequencies, EXAC_SUBPOPULATIONS
 
@@ -376,6 +376,31 @@ class TestVariantMerging(unittest.TestCase):
                     self.assertEqual(float_val, round_sigfigs(float(val), 3))
                 except ValueError:
                     self.assertEqual(val, '-')
+
+
+def test_find_equivalent_variant():
+    # empty case
+    assert [] == find_equivalent_variant({}, seq_provider)
+
+    # a bunch of variants. If they appear in the same set, they are considered equivalent
+    example_variants = [
+        frozenset({'chr13:g.32355030:A>AA'}),
+        frozenset({'chr13:g.32339774:GAT>G', 'chr13:g.32339776:TAT>T'}),
+        frozenset({'chr17:g.43090921:G>GCA', 'chr17:g.43090921:GCA>GCACA'})
+    ]
+
+    # construct variant dict (flattening example_variants!)
+    variant_dict = {v: [None, None, None,
+                        v.split(':')[0].lstrip('chr'),
+                        v.split(':')[1].lstrip('g.'),
+                        v.split(':')[2].split('>')[0],
+                        v.split(':')[2].split('>')[1],
+                        ] for eq_variants in example_variants for v in
+                    eq_variants
+                    }
+
+    assert frozenset(example_variants) == frozenset(find_equivalent_variant(variant_dict,
+                                                            seq_provider))
 
 
 if __name__ == "__main__":

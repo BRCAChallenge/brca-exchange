@@ -71,7 +71,7 @@ def find_equivalent_variant(variants_dict, seq_provider):
                 "Hash Collisions. Involved variants were {}".format(var_lst))
 
         for var_lst2 in vd.values():
-            equivalent_variants.append({vn for vn in var_lst2})
+            equivalent_variants.append(frozenset({vn for vn in var_lst2}))
 
     return equivalent_variants
 
