@@ -94,28 +94,27 @@ def main():
             field_value = normalize(field, field_value)
             INFO_field.append('{0}={1}'.format(field, field_value))
 
-        chr = parsedLine[fieldIdxDict['chr']].lower()
-        pos_hg19 = parsedLine[fieldIdxDict['pos_hg19']].lower()
-        ref = parsedLine[fieldIdxDict['ref']].lower()
-        alt = parsedLine[fieldIdxDict['alt']].lower()
-        if chr == '17':
+        # extract hgvs cDNA term for variant and cleanup formatting
+        hgvsName = parsedLine[fieldIdxDict['hgvsc']]
+        if hgvsName == '-':
+            logging.debug("hgvs name == '-' for line: %s", parsedLine)
+            continue
+        chrom = parsedLine[fieldIdxDict['chrom']].lower()
+        if chrom == '17':
             transcript = 'NM_007294.3'
-        elif chr == '13':
+        elif chrom == '13':
             transcript = 'NM_000059.3'
         else:
-            logging.debug("improper chromosome: %s", chr)
+            logging.debug("improper gene symbol: %s", chrom)
             continue
+        queryHgvsName = transcript + ':' + hgvsName.rstrip().split(';')[0]
         INFO_field_string = ';'.join(INFO_field)
         try:
-            # transcript = get_transcript(transcript)
-            hgvs_name = hgvs.format_hgvs_name(
-                chr, int(pos_hg19), ref, alt, genome, get_transcript(transcript))
-            queryHgvsName = transcript + ':' + hgvs_name.rstrip().split(';')[0]
             chrom, offset, ref, alt = hgvs.parse_hgvs_name(queryHgvsName, genome, get_transcript=get_transcript)
             chrom = chrom.replace('chr', '')
             print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(chrom, offset, queryHgvsName, ref, alt, INFO_field_string), file=vcfFile)
         except Exception as e:
-            logging.debug("could not parse hgvs field: %s, %s, %s, %s, %s", chr, int(pos_hg19), ref, alt, transcript)
+            logging.debug("could not parse hgvs field: %s", queryHgvsName)
 
 
 def normalize(field, field_value):

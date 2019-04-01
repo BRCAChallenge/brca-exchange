@@ -2,7 +2,7 @@
 
 """
 Description:
-    Parses a .tsv source file of functional assays into a list of variants
+    Parses a .tsv source file of gnomAD data
 """
 import argparse
 import pandas as pd
@@ -19,55 +19,56 @@ def parse_args():
 
 def extract_relevant_data_for_processing(f_in_data_frame):
     relevant_existing_columns = [
-        'Chromosome',
-        'Position',
-        'Reference',
-        'Alternate',
-        'Source',
-        'Allele Count',
-        'Allele Number',
-        'Allele Frequency',
-        'Homozygote Count',
-        'Hemizygote Count',
-        'Allele Count African',
-        'Allele Number African',
-        'Homozygote Count African',
-        'Hemizygote Count African',
-        'Allele Count Latino',
-        'Allele Number Latino',
-        'Homozygote Count Latino',
-        'Hemizygote Count Latino',
-        'Allele Count Ashkenazi Jewish',
-        'Allele Number Ashkenazi Jewish',
-        'Homozygote Count Ashkenazi Jewish',
-        'Hemizygote Count Ashkenazi Jewish',
-        'Allele Count East Asian',
-        'Allele Number East Asian',
-        'Homozygote Count East Asian',
-        'Hemizygote Count East Asian',
-        'Allele Count European (Finnish)',
-        'Allele Number European (Finnish)',
-        'Homozygote Count European (Finnish)',
-        'Hemizygote Count European (Finnish)',
-        'Allele Count European (non-Finnish)',
-        'Allele Number European (non-Finnish)',
-        'Homozygote Count European (non-Finnish)',
-        'Hemizygote Count European (non-Finnish)',
-        'Allele Count Other',
-        'Allele Number Other',
-        'Homozygote Count Other',
-        'Hemizygote Count Other',
-        'Allele Count South Asian',
-        'Allele Number South Asian',
-        'Homozygote Count South Asian',
-        'Hemizygote Count South Asian'
+        'AFR_ac',
+        'AFR_ac_hemi',
+        'AFR_ac_hom',
+        'AFR_an',
+        'AMR_ac',
+        'AMR_ac_hemi',
+        'AMR_ac_hom',
+        'AMR_an',
+        'ASJ_ac',
+        'ASJ_ac_hemi',
+        'ASJ_ac_hom',
+        'ASJ_an',
+        'EAS_ac',
+        'EAS_ac_hemi',
+        'EAS_ac_hom',
+        'EAS_an',
+        'FIN_ac',
+        'FIN_ac_hemi',
+        'FIN_ac_hom',
+        'FIN_an',
+        'NFE_ac',
+        'NFE_ac_hemi',
+        'NFE_ac_hom',
+        'NFE_an',
+        'OTH_ac',
+        'OTH_ac_hemi',
+        'OTH_ac_hom',
+        'OTH_an',
+        'SAS_ac',
+        'SAS_ac_hemi',
+        'SAS_ac_hom',
+        'SAS_an',
+        'ac',
+        'ac_hemi',
+        'ac_hom',
+        'af',
+        'alt',
+        'an',
+        'chrom',
+        'datasets',
+        'hgvsc',
+        'hgvsp',
+        'pos',
+        'ref',
+        'variantId',
     ]
 
     column_name_mapping = {
-        'Chromosome': 'chr',
-        'Position': 'pos_hg19',
-        'Reference': 'ref',
-        'Alternate': 'alt',
+        'chrom': 'chr',
+        'pos': 'pos_hg19',
     }
 
     parsed_data_frame = f_in_data_frame[relevant_existing_columns]
@@ -79,8 +80,7 @@ def main():
     f_in = options.input
     f_out = options.output
 
-    # NOTE: adjust skiprows as needed to remove extra header lines
-    f_in_data_frame = pd.read_csv(f_in)
+    f_in_data_frame = pd.read_csv(f_in, sep='\t')
     f_out_data_frame = extract_relevant_data_for_processing(f_in_data_frame)
     f_out_data_frame.to_csv(f_out, sep='\t', index=False)
 

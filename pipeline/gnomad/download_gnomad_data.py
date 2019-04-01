@@ -1,6 +1,42 @@
 import requests
 import pandas
 import json
+import argparse
+import logging
+import pdb
+
+def parse_args():
+        parser = argparse.ArgumentParser(description='Download gnomad data and convert to .tsv format.')
+        parser.add_argument('-o', '--output', type=argparse.FileType('w'),
+                            help='Ouput TSV file result.')
+        parser.add_argument('-l', '--logfile', default='/tmp/download_gnomad_data.log')
+        parser.add_argument('-v', '--verbose', action='count', default=False, help='determines logging')
+        options = parser.parse_args()
+        return options
+
+
+def main():
+    options = parse_args()
+    output = options.output
+    logfile = options.logfile
+
+    if options.verbose:
+        logging_level = logging.DEBUG
+    else:
+        logging_level = logging.CRITICAL
+
+    logging.basicConfig(filename=logfile, filemode="w", level=logging_level)
+
+    variants_brca1 = generate_data("BRCA1")
+    variants_brca2 = generate_data("BRCA2")
+
+    variants = variants_brca1 + variants_brca2
+
+    variants_with_flattened_populations = flatten_populations(variants)
+
+    df = pandas.DataFrame.from_dict(variants_with_flattened_populations)
+
+    df.to_csv(output, sep='\t', index=False, na_rep='-')
 
 
 def flatten_populations(variants):
@@ -75,14 +111,6 @@ def generate_data(gene):
     return parsed_json['data']['gene']['variants']
 
 
-variants_brca1 = generate_data("BRCA1")
-variants_brca2 = generate_data("BRCA2")
-
-variants = variants_brca1 + variants_brca2
-
-variants_with_flattened_populations = flatten_populations(variants)
-
-df = pandas.DataFrame.from_dict(variants_with_flattened_populations)
-
-df.to_csv('gnomad.tsv', sep='\t', index=False, na_rep='-')
+if __name__ == "__main__":
+    main()
 
