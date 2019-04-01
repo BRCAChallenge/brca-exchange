@@ -374,6 +374,7 @@ class Paper(models.Model):
     year = models.IntegerField()
     pmid = models.IntegerField()
     deleted = models.BooleanField()
+    crawl_date = models.DateTimeField(null=True)
 
 
 class VariantPaper(models.Model):
