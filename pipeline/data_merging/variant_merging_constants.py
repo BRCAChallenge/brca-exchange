@@ -13,8 +13,6 @@ COLUMN_VCF_ALT = 6
 # This is the string to be stored when a field is empty
 DEFAULT_CONTENTS = "-"
 
-# files needed for string comparison
-
 # key value pair dictionaries of all extra fields in various databases to add
 GENOME1K_FIELDS = {"Allele_frequency": "AF",
                    "EAS_Allele_frequency": "EAS_AF",
@@ -152,7 +150,7 @@ LOVD_FILE = "sharedLOVD_brca12.sorted.hg38.vcf"
 EX_LOVD_FILE = "exLOVD_brca12.sorted.hg38.vcf"
 BIC_FILE = "bic_brca12.sorted.hg38.vcf"
 EXAC_FILE = "exac.brca12.sorted.hg38.vcf"
-ESP_FILE = "esp.brca12.sorted.hg38.vcf"
+ESP_FILE = "esp.sorted.hg38.vcf"
 
 # Functional Assays
 FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS_FILE = "findlay_BRCA1_ring_function_scores.clean.sorted.hg38.vcf"
