@@ -28,11 +28,11 @@ class GnomADTask(DefaultPipelineTask):
 
 class DownloadGnomADData(GnomADTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, self.gnomAD_file_name))
+        return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, self.gnomAD_download_file_name))
 
     def run(self):
         artifacts_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.output_dir + "/release/artifacts")
-        os.chdir(self.gnomAD_method_dir)
+        os.chdir(gnomAD_method_dir)
 
         args = ["python", "download_gnomad_data.py", "-o", self.output().path,
                 "-l", artifacts_dir + "/download_gnomAD_data.log"]

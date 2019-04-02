@@ -32,12 +32,17 @@ def main():
 
     variants = variants_brca1 + variants_brca2
 
-    variants_with_flattened_populations = flatten_populations(variants)
+    normalized_variants = normalize_variants(variants)
 
-    df = pandas.DataFrame.from_dict(variants_with_flattened_populations)
+    df = pandas.DataFrame.from_dict(normalized_variants)
 
     df.to_csv(output, sep='\t', index=False, na_rep='-')
 
+
+def normalize_variants(variants):
+    variants_with_flattened_populations = flatten_populations(variants)
+    normalized_variants = stringify_arrays(variants_with_flattened_populations)
+    return normalized_variants
 
 def flatten_populations(variants):
     for variant in variants:
@@ -51,6 +56,9 @@ def flatten_populations(variants):
         del variant['populations']
     return variants
 
+def stringify_arrays(variants):
+    variants['datasets'].apply(', '.join)
+    return variants
 
 def build_query(gene):
     return """{
