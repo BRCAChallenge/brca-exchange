@@ -4,221 +4,35 @@ this scripts takes the enigma variant list and merge vcf files in a folder into
 the exisitng enigma variants:
 """
 import argparse
-import datetime
+import csv
+import logging
 import os
 import pickle
 import re
-import shutil
 import subprocess
-import tempfile
-import vcf
-import logging
-from StringIO import StringIO
 from copy import deepcopy
-from pprint import pprint
-from shutil import copy
 from numbers import Number
-import csv
+from shutil import copy
+
+import vcf
+
 import aggregate_reports
+import seq_utils
 import utilities
-import sys
-
-# GENOMIC VERSION:
-VERSION = "hg38" # equivalent to GRCh38
-
-# Specific columns in the output matrix
-COLUMN_SOURCE = 0
-COLUMN_GENE = 1
-COLUMN_GENOMIC_HGVS = 2
-COLUMN_VCF_CHR = 3
-COLUMN_VCF_POS = 4
-COLUMN_VCF_REF = 5
-COLUMN_VCF_ALT = 6
-
-# This is the string to be stored when a field is empty
-DEFAULT_CONTENTS = "-"
-
-# files needed for string comparison
-
-# key value pair dictionaries of all extra fields in various databases to add
-GENOME1K_FIELDS = {"Allele_frequency": "AF",
-                   "EAS_Allele_frequency": "EAS_AF",
-                   "EUR_Allele_frequency": "EUR_AF",
-                   "AFR_Allele_frequency": "AFR_AF",
-                   "AMR_Allele_frequency": "AMR_AF",
-                   "SAS_Allele_frequency": "SAS_AF",
-                   "BX_ID": "BX_ID"}
-
-CLINVAR_FIELDS = {"HGVS": "HGVS",
-                  "Submitter": "Submitter",
-                  "Clinical_Significance": "ClinicalSignificance",
-                  "Date_Last_Updated": "DateLastUpdated",
-                  "DateSignificanceLastEvaluated":
-                      "DateSignificanceLastEvaluated",
-                  "SCV": "SCV",
-                  "SCV_Version": "SCV_Version",
-                  "Allele_Origin": "Origin",
-                  "Protein": "Protein",
-                  "Method": "Method",
-                  "Description": "Description",
-                  "Review_Status": "ReviewStatus",
-                  "Synonyms": "Synonyms",
-                  "Summary_Evidence": "SummaryEvidence",
-                  "BX_ID": "BX_ID"}
-
-LOVD_FIELDS = {"Variant_frequency": "frequency",
-               "Functional_analysis_technique": "functional_analysis_technique",
-               "Functional_analysis_result": "functional_analysis_result",
-               "HGVS_cDNA": "cDNA",
-               "HGVS_protein": "Protein",
-               "Genetic_origin": "genetic_origin",
-               "RNA": "RNA",
-               "Variant_effect": "variant_effect",
-               "Individuals": "individuals",
-               "Submitters": "submitters",
-               "DBID": "DBID",
-               "BX_ID": "BX_ID",
-               "Created_date": "created_date",
-               "Edited_date": "edited_date",
-               "Submission_ID": "submission_id"
-               }
-
-EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
-                  "Segregation_LR": "segregation_lr",
-                  "Sum_family_LR": "sum_family_lr",
-                  "Co_occurrence_LR": "co_occurrence_lr",
-                  "Missense_analysis_prior_probability": "missense_analysis_prior_p",
-                  "Posterior_probability": "posterior_p",
-                  "IARC_class": "iarc_class",
-                  "BIC_Nomenclature": "bic_dna_change",
-                  "Literature_source": "observational_reference",
-                  "HGVS_cDNA": "dna_change",
-                  "HGVS_protein": "protein_change",
-                  "BX_ID": "BX_ID"}
-
-BIC_FIELDS = {"Clinical_classification": "Category",
-              "Number_of_family_member_carrying_mutation": "Number_Reported",
-              "Patient_nationality": "Nationality",
-              "Germline_or_Somatic": "G_or_S",
-              "Mutation_type": "Mutation_Type",
-              "BIC_Designation": "Designation",
-              "Clinical_importance": "Clinically_Importance",
-              "Ethnicity": "Ethnicity",
-              "Literature_citation": "Reference",
-              "BX_ID": "BX_ID"}
-
-ESP_FIELDS = {"polyPhen2_result": "PH",
-              "Minor_allele_frequency_percent": "MAF",
-              "EA_Allele_Frequency": "BX_EAAF",
-              "AA_Allele_Frequency": "BX_AAAF",
-              "Allele_Frequency": "BX_AF",
-              "BX_ID": "BX_ID"}
-
-
-EXAC_FIELDS = {"Allele_frequency": "AF",
-               "Allele_count_AFR": "AC_AFR",
-               "Allele_number_AFR": "AN_AFR",
-               "Allele_frequency_AFR": "AF_AFR",
-               "Homozygous_count_AFR": "Hom_AFR",
-               "Allele_count_AMR": "AC_AMR",
-               "Allele_number_AMR": "AN_AMR",
-               "Allele_frequency_AMR": "AF_AMR",
-               "Homozygous_count_AMR": "Hom_AMR",
-               "Allele_count_EAS": "AC_EAS",
-               "Allele_number_EAS": "AN_EAS",
-               "Allele_frequency_EAS": "AF_EAS",
-               "Homozygous_count_EAS": "Hom_EAS",
-               "Allele_count_FIN": "AC_FIN",
-               "Allele_number_FIN": "AN_FIN",
-               "Allele_frequency_FIN": "AF_FIN",
-               "Homozygous_count_FIN": "Hom_FIN",
-               "Allele_count_NFE": "AC_NFE",
-               "Allele_number_NFE": "AN_NFE",
-               "Allele_frequency_NFE": "AF_NFE",
-               "Homozygous_count_NFE": "Hom_NFE",
-               "Allele_count_OTH": "AC_OTH",
-               "Allele_number_OTH": "AN_OTH",
-               "Allele_frequency_OTH": "AF_OTH",
-               "Homozygous_count_OTH": "Hom_OTH",
-               "Allele_count_SAS": "AC_SAS",
-               "Allele_number_SAS": "AN_SAS",
-               "Allele_frequency_SAS": "AF_SAS",
-               "Homozygous_count_SAS": "Hom_SAS",
-               "BX_ID": "BX_ID"}
-
-EXAC_SUBPOPULATIONS = ["AFR", "AMR", "EAS", "FIN", "NFE", "OTH", "SAS"]
-
-FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS = {
-               "HGVS_Nucleotide": "hgvs_nucleotide",
-               "Log_RNA_Depletion": "log_rna_depletion",
-               "Functional_Enrichment_Score": "functional_enrichment_score",
-               "BX_ID": "BX_ID"
-               }
-
-FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
-              "ClinVar": CLINVAR_FIELDS,
-              "LOVD": LOVD_FIELDS,
-              "exLOVD": EX_LOVD_FIELDS,
-              "ExAC": EXAC_FIELDS,
-              "ESP": ESP_FIELDS,
-              "BIC": BIC_FIELDS,
-              "Findlay_BRCA1_Ring_Function_Scores": FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS}
-
-LIST_TYPE_FIELDS = {
-    "SCV", # Clinvar, treating it as list, to have the same order as with SCV_Version
-    "SCV_Version"
-}
-
-# Enigma filename is different depending on which version of output data is used.
-ENIGMA_FILE = "enigma_from_clinvar.tsv"
-# ENIGMA_FILE = "ENIGMA_combined.tsv"
-# ENIGMA_FILE = "enigma_variants_GRCh38_2-27-2016.tsv"
-# ENIGMA_FILE = "ENIGMA_last_updated.tsv"
-
-GENOME1K_FILE = "1000G_brca.sorted.hg38.vcf"
-CLINVAR_FILE = "ClinVarBrca.vcf"
-LOVD_FILE = "sharedLOVD_brca12.sorted.hg38.vcf"
-EX_LOVD_FILE = "exLOVD_brca12.sorted.hg38.vcf"
-BIC_FILE = "bic_brca12.sorted.hg38.vcf"
-EXAC_FILE = "exac.brca12.sorted.hg38.vcf"
-ESP_FILE = "esp.sorted.hg38.vcf"
-
-# Functional Assays
-FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS_FILE = "findlay_BRCA1_ring_function_scores.clean.sorted.hg38.vcf"
+import variant_equivalence
+from variant_merging_constants import *
 
 DISCARDED_REPORTS_WRITER = None
-
 
 def options(parser):
     parser.add_argument("-i", "--input", help="Input VCF directory",
                         default="/home/brca/pipeline-data/pipeline-input/")
     parser.add_argument("-o", "--output",
                         default="/home/brca/pipeline-data/pipeline-output/")
-    parser.add_argument("-p", "--de_novo", default=False,
-                        help="string comparison all over, instead of loading from pickle dump",
-                        action="store_true")
     parser.add_argument('-r', "--reference", help="reference data directory",
                         default="/home/brca/pipeline-data/pipeline-resources/")
     parser.add_argument('-a', "--artifacts_dir", help='Artifacts directory with pipeline artifact files.')
     parser.add_argument("-v", "--verbose", action="count", default=False, help="determines logging")
-
-ARGS = None
-BRCA1 = None
-BRCA2 = None
-
-
-def init(args):
-    global BRCA1, BRCA2, ARGS
-
-    ARGS = args
-    BRCA1 = {"hg38": {"start": 43000000,
-                      "sequence": open(ARGS.reference + "brca1_hg38.txt", "r").read().upper()},
-             "hg19": {"start": 41100000,
-                      "sequence": open(ARGS.reference + "brca1_hg19.txt", "r").read().upper()}}
-    BRCA2 = {"hg38": {"start": 32300000,
-                      "sequence": open(ARGS.reference + "brca2_hg38.txt", "r").read().upper()},
-             "hg19": {"start": 32800000,
-                      "sequence": open(ARGS.reference + "brca2_hg19.txt", "r").read().upper()}}
 
 
 def main():
@@ -227,17 +41,20 @@ def main():
     parser = argparse.ArgumentParser()
     options(parser)
 
-    init(parser.parse_args())
+    args = parser.parse_args()
 
-    if ARGS.verbose:
+    seq_provider = seq_utils.SeqProvider(args.reference)
+
+    if args.verbose:
         logging_level = logging.DEBUG
     else:
         logging_level = logging.CRITICAL
 
-    log_file_path = ARGS.artifacts_dir + "variant_merging.log"
-    logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level)
+    log_file_path = args.artifacts_dir + "variant_merging.log"
+    logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level,
+                        format=' %(asctime)s %(filename)-15s %(message)s')
 
-    discarded_reports_file = open(ARGS.artifacts_dir + "discarded_reports.tsv", "w")
+    discarded_reports_file = open(args.artifacts_dir + "discarded_reports.tsv", "w")
 
     fieldnames = ['Report_id', 'Source', 'Reason', 'Variant']
 
@@ -245,7 +62,7 @@ def main():
     DISCARDED_REPORTS_WRITER.writeheader()
 
     # merge repeats within data sources before merging between data sources
-    source_dict, columns, variants = preprocessing()
+    source_dict, columns, variants = preprocessing(args.input, args.output, seq_provider)
 
     # merges repeats from different data sources, adds necessary columns and data
     print "\n------------merging different datasets------------------------------"
@@ -255,20 +72,20 @@ def main():
 
     # standardizes genomic coordinates for variants
     print "\n------------standardizing genomic coordinates-------------"
-    variants = variant_standardize(columns, variants=variants)
+    variants = variant_standardize(columns, seq_provider, variants=variants)
 
     # compare dna sequence results of variants and merge if equivalent
     print "------------dna sequence comparison merge-------------------------------"
-    variants = string_comparison_merge(variants)
+    variants = string_comparison_merge(variants, seq_provider)
 
     # write final output to file
-    write_new_tsv(ARGS.output + "merged.tsv", columns, variants)
+    write_new_tsv(args.output + "merged.tsv", columns, variants)
 
     # copy enigma file to artifacts directory along with other ready files
-    copy(ARGS.input + ENIGMA_FILE, ARGS.output)
+    copy(args.input + ENIGMA_FILE, args.output)
 
     # write reports to reports file
-    aggregate_reports.write_reports_tsv(ARGS.output + "reports.tsv", columns, ARGS.output)
+    aggregate_reports.write_reports_tsv(args.output + "reports.tsv", columns, args.output)
 
     discarded_reports_file.close()
 
@@ -276,7 +93,7 @@ def main():
     print "Done"
 
 
-def variant_standardize(columns, variants="pickle"):
+def variant_standardize(columns, seq_provider, variants="pickle"):
     """standardize variants such
     1. "-" in ref or alt is removed, and a leading base is added, e.g. ->T is changed to N > NT
     2. remove trailing same bases: e.g. AGGGG > TGGGG is changed to A>T
@@ -305,15 +122,15 @@ def variant_standardize(columns, variants="pickle"):
         if alt == "None":
             alt = ""
         if re.search("^-", ref) or re.search("^-", alt):
-            (chr, pos, ref, alt) = add_leading_base(chr, pos, ref, alt)
+            (chr, pos, ref, alt) = add_leading_base(chr, pos, ref, alt, seq_provider)
         if len(ref) < 1 or len(alt) < 1:
-            (chr, pos, ref, alt) = add_leading_base(chr, pos, ref, alt)
+            (chr, pos, ref, alt) = add_leading_base(chr, pos, ref, alt, seq_provider)
         (chr, pos, ref, alt) = trim_bases(chr, pos, ref, alt)
 
         hgvs = "chr%s:g.%s:%s>%s" % (str(chr), str(pos), ref, alt)
 
         # If the reference is wrong, remove the variant
-        if not ref_correct(chr, pos, ref, alt):
+        if not ref_correct(chr, pos, ref, alt, seq_provider):
             reason_for_discard = "Incorrect Reference"
             variants_to_remove = prepare_variant_for_removal_and_log(ev, hgvs, items, bx_ids_for_variant, reason_for_discard, variants_to_remove)
             continue
@@ -483,7 +300,7 @@ def trim_leading(chr, pos, ref, alt):
         return trim_leading(chr, str(pos+1), ref, alt)
 
 
-def add_leading_base(chr, pos, ref, alt, version="hg38"):
+def add_leading_base(chr, pos, ref, alt, seq_provider):
     pos = int(pos)
     empty_ref = False
     empty_alt = False
@@ -493,24 +310,20 @@ def add_leading_base(chr, pos, ref, alt, version="hg38"):
     if isEmpty(alt):
         alt = ""
         empty_alt = True
-    if chr == "13":
-        seq = BRCA2[version]["sequence"]
-        brca_pos = pos - 1 - BRCA2[version]["start"]
-    elif chr == "17":
-        seq = BRCA1[version]["sequence"]
-        brca_pos = pos - 1 - BRCA1[version]["start"]
-    else:
-        raise Exception("wrong chromosome number")
+
+    seq, seq_start = seq_provider.get_seq_with_start(int(chr))
+    seq_pos = pos - 1 - seq_start
+
     if empty_ref is True and empty_alt is True:
         raise Exception("both ref and alt are empty")
     elif empty_ref is True:
         # If the ref is empty, get the base at the position and append it to ref and alt
-        leading_base = seq[brca_pos]
+        leading_base = seq[seq_pos]
         return (chr, str(pos), leading_base + ref, leading_base + alt)
     elif empty_alt is True:
         # If the alt is empty, get the base at the position just before where the deletion happens
         # and append it to the ref and alt
-        leading_base = seq[brca_pos - 1]
+        leading_base = seq[seq_pos - 1]
         return (chr, str(pos - 1), leading_base + ref, leading_base + alt)
     else:
         raise Exception("add leading base called but both ref and alt were provided!")
@@ -521,21 +334,13 @@ def variant_is_false(ref, alt):
     return ref == alt
 
 
-def string_comparison_merge(variants):
+def string_comparison_merge(variants, seq_provider):
     # makes sure the input genomic coordinate strings are unique (no dupes)
     assert (len(variants.keys()) == len(set(variants.keys())))
 
-    # optimization for comparison -- saves previously identified equivalent genomic strings in a file for faster reference
-    if ARGS.de_novo:
-        logging.info('Calculating all equivalent variants without pickle dump.')
-        equivalence = find_equivalent_variant(variants)
-        with open(ARGS.output + "equivalent_variants.pkl", "w") as f:
-            f.write(pickle.dumps(equivalence))
-        f.close()
-    else:
-        logging.warning('Using equivalent_variants.pkl')
-        print "********* WARNING: Using equivalent_variants.pkl to determine equivalents instead of testing individually *******"
-        equivalence = pickle.loads(open(ARGS.output + "equivalent_variants.pkl", "r").read())
+    logging.info('Calculating all equivalent variants without pickle dump.')
+    equivalence = variant_equivalence.find_equivalent_variant(variants, seq_provider)
+
     n_before_merge = 0
     for each in equivalence:
         n_before_merge += len(each)
@@ -593,34 +398,7 @@ def string_comparison_merge(variants):
     return variants
 
 
-def find_equivalent_variant(variants):
-    genome_coors = variants.keys()
-    uniq_variants = {}
-    logging.info("Running find_equivalent_variants.")
-    for i, v in enumerate(genome_coors):
-        variant_exist = False
-        for existing_v in uniq_variants:
-            if v == existing_v:
-                logging.debug('v == existing_v \n "v: " %s \n "existing_v: " %s', str(v), str(existing_v))
-                continue
-            else:
-                v1 = [variants[v][COLUMN_VCF_CHR], variants[v][COLUMN_VCF_POS], variants[v][COLUMN_VCF_REF], variants[v][COLUMN_VCF_ALT]]
-                v2 = [variants[existing_v][COLUMN_VCF_CHR], variants[existing_v][COLUMN_VCF_POS], variants[existing_v][COLUMN_VCF_REF], variants[existing_v][COLUMN_VCF_ALT]]
-                if variant_equal(v1, v2):
-                    logging.info("Equal variants: \n %s \n %s", str(v1), str(v2))
-                    variant_exist = True
-                    uniq_variants[existing_v].add(v)
-        if not variant_exist:
-            uniq_variants[v] = set([v])
-    equivalent_variants = []
-    for value in uniq_variants.values():
-        if len(value) > 1:
-            equivalent_variants.append(value)
-    print equivalent_variants
-    return equivalent_variants
-
-
-def preprocessing():
+def preprocessing(input_dir, output_dir, seq_provider):
     # Preprocessing variants:
     source_dict = {
                    "1000_Genomes": GENOME1K_FILE + "for_pipeline",
@@ -632,43 +410,43 @@ def preprocessing():
                    "BIC": BIC_FILE,
                    "Findlay_BRCA1_Ring_Function_Scores": FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS_FILE
                    }
-    print "\n" + ARGS.input + ":"
+    print "\n" + input_dir + ":"
     print "---------------------------------------------------------"
     print "ENIGMA: {0}".format(ENIGMA_FILE)
     for source_name, file_name in source_dict.iteritems():
         print source_name, ":", file_name
     print "\n------------preprocessing--------------------------------"
     print "remove sample columns and two erroneous rows from 1000 Genome file"
-    f_1000G = open(ARGS.input + GENOME1K_FILE + "for_pipeline", "w")
+    f_1000G = open(input_dir+ GENOME1K_FILE + "for_pipeline", "w")
     subprocess.call(
-       ["bash", "1000g_preprocess.sh", ARGS.input + GENOME1K_FILE], stdout=f_1000G)
+       ["bash", "1000g_preprocess.sh", input_dir + GENOME1K_FILE], stdout=f_1000G)
 
     # merge multiple variant per vcf into multiple lines
     for source_name, file_name in source_dict.iteritems():
         print "convert to one variant per line in ", source_name
-        f_in = open(ARGS.input + file_name, "r")
-        f_out = open(ARGS.output + source_name + ".vcf", "w")
+        f_in = open(input_dir + file_name, "r")
+        f_out = open(output_dir+ source_name + ".vcf", "w")
         # Individual reports (lines in VCF/TSV) are given ids as part of the one_variant_transform method.
         one_variant_transform(f_in, f_out, source_name)
         f_in.close()
         f_out.close()
 
         print "merge repetitive variants within ", source_name
-        f_in = open(ARGS.output + source_name + ".vcf", "r")
-        f_out = open(ARGS.output + source_name + "ready.vcf", "w")
+        f_in = open(output_dir + source_name + ".vcf", "r")
+        f_out = open(output_dir + source_name + "ready.vcf", "w")
         repeat_merging(f_in, f_out)
         source_dict[source_name] = f_out.name
 
     print "-------check if genomic coordinates are correct----------"
-    (columns, variants) = save_enigma_to_dict(ARGS.input + ENIGMA_FILE)
+    (columns, variants) = save_enigma_to_dict(input_dir + ENIGMA_FILE, output_dir, seq_provider)
     for source_name, file_name in source_dict.iteritems():
         f = open(file_name, "r")
-        d_wrong = ARGS.output + "wrong_genome_coors/"
+        d_wrong = output_dir + "wrong_genome_coors/"
         if not os.path.exists(d_wrong):
             os.makedirs(d_wrong)
-        f_wrong = open(ARGS.output + "wrong_genome_coors/" +
+        f_wrong = open(output_dir + "wrong_genome_coors/" +
                        source_name + "_wrong_genome_coor.vcf", "w")
-        f_right = open(ARGS.output + "right" + source_name, "w")
+        f_right = open(output_dir+ "right" + source_name, "w")
         vcf_reader = vcf.Reader(f, strict_whitespace=True)
         vcf_wrong_writer = vcf.Writer(f_wrong, vcf_reader)
         vcf_right_writer = vcf.Writer(f_right, vcf_reader)
@@ -676,7 +454,7 @@ def preprocessing():
         for record in vcf_reader:
             ref = record.REF.replace("-", "")
             v = [record.CHROM, record.POS, ref, "dummy"]
-            if not ref_correct(record.CHROM, record.POS, record.REF, record.ALT):
+            if not ref_correct(record.CHROM, record.POS, record.REF, record.ALT, seq_provider):
                 logging.warning("Reference incorrect for Chrom: %s, Pos: %s, Ref: %s, and Alt: %s",
                                 record.CHROM, record.POS, record.REF, record.ALT)
                 vcf_wrong_writer.write_record(record)
@@ -915,13 +693,13 @@ def add_columns_to_enigma_data(line):
     return columns
 
 
-def save_enigma_to_dict(path):
+def save_enigma_to_dict(path, output_dir, seq_provider):
     global DISCARDED_REPORTS_WRITER
 
     enigma_file = open(path, "r")
     variants = dict()
     line_num = 0
-    f_wrong = open(ARGS.output + "ENIGMA_wrong_genome.txt", "w")
+    f_wrong = open(output_dir + "ENIGMA_wrong_genome.txt", "w")
     n_wrong, n_total = 0, 0
     bx_id_column_index = None
     for line in enigma_file:
@@ -937,7 +715,7 @@ def save_enigma_to_dict(path):
             bx_id = items[bx_id_column_index]
             hgvs = "chr%s:g.%s:%s>%s" % (str(chrom), str(pos), ref, alt)
 
-            if ref_correct(chrom, pos, ref, alt):
+            if ref_correct(chrom, pos, ref, alt, seq_provider):
                 variants = add_variant_to_dict(variants, hgvs, items)
             else:
                 logging.warning("Ref incorrect for Enigma report, throwing away: %s", line)
@@ -952,74 +730,20 @@ def save_enigma_to_dict(path):
     return (columns, variants)
 
 
-def variant_equal(v1, v2, version="hg38"):
-    "return edited1 == edited2"
-    if v1 == v2:
-        logging.debug("v1 == v2 %s %s", str(v1), str(v2))
-        return True
-    chr1, pos1, ref1, alt1 = v1
-    chr2, pos2, ref2, alt2 = v2
-    pos1 = int(pos1)
-    pos2 = int(pos2)
-    if chr1 != chr2:
-        return False
-
-    #  must be same number of bases after variation
-    if (len(ref1) - len(alt1)) != (len(ref2) - len(alt2)):
-        return False
-
-    # make sure that v1 is upstream of v2
-    if pos1 > pos2:
-        return variant_equal(v2, v1, version)
-
-    # lift coordinates and make everything 0-based
-    if chr1 == "13":
-        seq = BRCA2[version]["sequence"]
-        pos1 = pos1 - 1 - BRCA2[version]["start"]
-        pos2 = pos2 - 1 - BRCA2[version]["start"]
-    elif chr1 == "17":
-        seq = BRCA1[version]["sequence"]
-        pos1 = pos1 - 1 - BRCA1[version]["start"]
-        pos2 = pos2 - 1 - BRCA1[version]["start"]
-    else:
-        assert False, "Bad chrom in variant"
-
-    assert pos1 >= 0, "v1 positions is below the reference"
-    assert pos2 >= 0, "v2 position is below the reference"
-    reflen = len(BRCA1[version]["sequence"])
-    assert pos1 + len(ref1) <= reflen, "v1 position is above the reference"
-    assert pos2 + len(ref2) <= reflen, "v2 position is above the reference"
-
-    # replace vcf ref string with alt string
-    edited_v1 = seq[0:pos1]+alt1+seq[pos1+len(ref1):]
-    edited_v2 = seq[0:pos2]+alt2+seq[pos2+len(ref2):]
-
-    if edited_v1 == edited_v2:
-        logging.debug("VARIANTS EQUAL:")
-        logging.debug("Converted %s into %s due to variant v1 %s", seq[pos1-5:pos1+5], edited_v1[pos1-5:pos1+5], v1)
-        logging.debug("Converted %s into %s due to variant v2 %s", seq[pos2-5:pos2+5], edited_v2[pos2-5:pos2+5], v2)
-
-    return edited_v1 == edited_v2
-
-
-def ref_correct(chr, pos, ref, alt, version="hg38"):
+def ref_correct(chr, pos, ref, alt, seq_provider):
     if pos == "None":
         return False
     pos = int(pos)
-    if chr == "13":
-        seq = BRCA2[version]["sequence"]
-        brca_pos = pos - 1 - BRCA2[version]["start"]
-    elif chr == "17":
-        seq = BRCA1[version]["sequence"]
-        brca_pos = pos - 1 - BRCA1[version]["start"]
-    else:
-        assert(False)
-    genomeRef = seq[brca_pos:brca_pos + len(ref)].upper()
+
+    seq, seq_start = seq_provider.get_seq_with_start(int(chr))
+    seq_pos = pos - 1 - seq_start
+
+    genomeRef = seq[seq_pos:seq_pos + len(ref)].upper()
     if len(ref) != 0 and len(genomeRef) == 0:
         print "%s:%s:%s>%s" % (chr, pos, ref, alt)
         raise Exception("ref not inside BRCA1 or BRCA2")
     if (genomeRef != ref):
-        logging.warning("genomeref not equal ref for: chr, pos, brca_pos, ref, genomeref, alt: %s, %s, %s, %s, %s, %s", chr, pos, brca_pos, ref, genomeRef, alt)
+        logging.warning("genomeref not equal ref for: chr, pos, brca_pos, ref, genomeref, alt: %s, %s, %s, %s, %s, %s", chr, pos, seq_pos, ref, genomeRef, alt)
         return False
     else:
         return True
