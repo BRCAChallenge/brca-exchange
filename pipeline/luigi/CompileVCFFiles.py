@@ -1284,7 +1284,7 @@ class MergeVCFsIntoTSVFile(DefaultPipelineTask):
 
         args = ["python", "variant_merging.py", "-i", self.cfg.output_dir + "/",
                 "-o",
-                artifacts_dir, "-p", "-r", brca_resources_dir + "/", "-a",
+                artifacts_dir, "-r", brca_resources_dir + "/", "-a",
                 artifacts_dir, "-v"]
         print "Running variant_merging.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
