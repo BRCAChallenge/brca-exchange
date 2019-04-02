@@ -58,6 +58,7 @@ def not_noop(v):
 # (chrom, position, ref, alt)
 variant = tuples(chrom, pos, subseq, subseq).filter(not_noop)
 
+
 # Note this doesn't catch all degenerate variants. A -> A would pass, for example.
 def not_on_ref_noop(v):
     "False if ref and alt are empty"
@@ -80,7 +81,10 @@ chrom_ref = {
 def add_start(v, ref_id):
     "Add reference start position to a variant"
     (chrom, pos, ref, alt) = v
-    return (chrom, pos + chrom_ref[chrom][ref_id]['start'] + 1, ref, alt)
+
+    return chrom, \
+           pos + chrom_ref[chrom][ref_id]['start'] + 1, \
+           chrom_ref[chrom][ref_id]['sequence'][pos: (pos + len(ref))], alt
 
 
 #

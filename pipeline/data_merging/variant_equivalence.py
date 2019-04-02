@@ -10,8 +10,7 @@ def calculate_edited_seq(chr, pos_chr, ref, alt, seq_provider):
     assert pos_seq >= 0, "v1 positions is below the reference"
     assert pos_seq + len(ref) <= len(seq), "v1 position is above the reference"
 
-    # TODO: fix. tests fail, as it seems illegal variants are constructed
-    # assert seq[pos_seq:].startswith(ref)
+    assert seq[pos_seq:].startswith(ref)
 
     edited = ''.join([seq[0:pos_seq], alt, seq[pos_seq + len(ref):]])
 
