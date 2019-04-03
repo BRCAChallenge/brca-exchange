@@ -3,7 +3,7 @@ import pandas
 import json
 import argparse
 import logging
-import pdb
+
 
 def parse_args():
         parser = argparse.ArgumentParser(description='Download gnomad data and convert to .tsv format.')
@@ -32,17 +32,10 @@ def main():
 
     variants = variants_brca1 + variants_brca2
 
-    normalized_variants = normalize_variants(variants)
+    normalized_variants_df = normalize_variants(variants)
 
-    df = pandas.DataFrame.from_dict(normalized_variants)
+    normalized_variants_df.to_csv(output, sep='\t', index=False, na_rep='-')
 
-    df.to_csv(output, sep='\t', index=False, na_rep='-')
-
-
-def normalize_variants(variants):
-    variants_with_flattened_populations = flatten_populations(variants)
-    normalized_variants = stringify_arrays(variants_with_flattened_populations)
-    return normalized_variants
 
 def flatten_populations(variants):
     for variant in variants:
@@ -56,9 +49,17 @@ def flatten_populations(variants):
         del variant['populations']
     return variants
 
-def stringify_arrays(variants):
-    variants['datasets'].apply(', '.join)
-    return variants
+
+def normalize_variants(variants):
+    variants_with_flattened_populations = flatten_populations(variants)
+
+    variants_df = pandas.DataFrame.from_dict(variants_with_flattened_populations)
+
+    # stringify array values
+    variants_df['datasets'] = variants_df['datasets'].apply(', '.join)
+
+    return variants_df
+
 
 def build_query(gene):
     return """{
