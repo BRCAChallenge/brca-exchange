@@ -19,51 +19,84 @@ def parse_args():
 
 def extract_relevant_data_for_processing(f_in_data_frame):
     relevant_existing_columns = [
-        'AFR_ac',
-        'AFR_ac_hemi',
-        'AFR_ac_hom',
-        'AFR_an',
-        'AMR_ac',
-        'AMR_ac_hemi',
-        'AMR_ac_hom',
-        'AMR_an',
-        'ASJ_ac',
-        'ASJ_ac_hemi',
-        'ASJ_ac_hom',
-        'ASJ_an',
-        'EAS_ac',
-        'EAS_ac_hemi',
-        'EAS_ac_hom',
-        'EAS_an',
-        'FIN_ac',
-        'FIN_ac_hemi',
-        'FIN_ac_hom',
-        'FIN_an',
-        'NFE_ac',
-        'NFE_ac_hemi',
-        'NFE_ac_hom',
-        'NFE_an',
-        'OTH_ac',
-        'OTH_ac_hemi',
-        'OTH_ac_hom',
-        'OTH_an',
-        'SAS_ac',
-        'SAS_ac_hemi',
-        'SAS_ac_hom',
-        'SAS_an',
-        'ac',
-        'ac_hemi',
-        'ac_hom',
-        'af',
+        'genome_AFR_ac',
+        'genome_AFR_ac_hemi',
+        'genome_AFR_ac_hom',
+        'genome_AFR_an',
+        'genome_AMR_ac',
+        'genome_AMR_ac_hemi',
+        'genome_AMR_ac_hom',
+        'genome_AMR_an',
+        'genome_ASJ_ac',
+        'genome_ASJ_ac_hemi',
+        'genome_ASJ_ac_hom',
+        'genome_ASJ_an',
+        'genome_EAS_ac',
+        'genome_EAS_ac_hemi',
+        'genome_EAS_ac_hom',
+        'genome_EAS_an',
+        'genome_FIN_ac',
+        'genome_FIN_ac_hemi',
+        'genome_FIN_ac_hom',
+        'genome_FIN_an',
+        'genome_NFE_ac',
+        'genome_NFE_ac_hemi',
+        'genome_NFE_ac_hom',
+        'genome_NFE_an',
+        'genome_OTH_ac',
+        'genome_OTH_ac_hemi',
+        'genome_OTH_ac_hom',
+        'genome_OTH_an',
+        'genome_SAS_ac',
+        'genome_SAS_ac_hemi',
+        'genome_SAS_ac_hom',
+        'genome_SAS_an',
+        'genome_ac',
+        'genome_an',
+        'genome_af',
+        'exome_AFR_ac',
+        'exome_AFR_ac_hemi',
+        'exome_AFR_ac_hom',
+        'exome_AFR_an',
+        'exome_AMR_ac',
+        'exome_AMR_ac_hemi',
+        'exome_AMR_ac_hom',
+        'exome_AMR_an',
+        'exome_ASJ_ac',
+        'exome_ASJ_ac_hemi',
+        'exome_ASJ_ac_hom',
+        'exome_ASJ_an',
+        'exome_EAS_ac',
+        'exome_EAS_ac_hemi',
+        'exome_EAS_ac_hom',
+        'exome_EAS_an',
+        'exome_FIN_ac',
+        'exome_FIN_ac_hemi',
+        'exome_FIN_ac_hom',
+        'exome_FIN_an',
+        'exome_NFE_ac',
+        'exome_NFE_ac_hemi',
+        'exome_NFE_ac_hom',
+        'exome_NFE_an',
+        'exome_OTH_ac',
+        'exome_OTH_ac_hemi',
+        'exome_OTH_ac_hom',
+        'exome_OTH_an',
+        'exome_SAS_ac',
+        'exome_SAS_ac_hemi',
+        'exome_SAS_ac_hom',
+        'exome_SAS_an',
+        'exome_an',
+        'exome_ac',
+        'exome_af',
         'alt',
-        'an',
         'chrom',
-        'datasets',
         'hgvsc',
         'hgvsp',
         'pos',
         'ref',
         'variantId',
+        'consequence'
     ]
 
     column_name_mapping = {
@@ -75,13 +108,49 @@ def extract_relevant_data_for_processing(f_in_data_frame):
     return parsed_data_frame.rename(columns=column_name_mapping)
 
 
+def compile_allele_values(df):
+    populations = ['AFR', 'AMR', 'ASJ', 'EAS', 'FIN', 'EAS', 'NFE', 'OTH', 'SAS']
+    # try:
+    df['ac'] = add_values(df['genome_ac'], df['exome_ac'])
+    df['an'] = add_values(df['genome_an'], df['exome_an'])
+    df['af'] = calculate_frequency(df['ac'], df['an'])
+    for population in populations:
+        df[population + '_ac'] = add_values(df['genome_' + population + '_ac'], df['exome_' + population + '_ac'])
+        df[population + '_ac_hom'] = add_values(df['genome_' + population + '_ac_hom'], df['exome_' + population + '_ac_hom'])
+        df[population + '_ac_hemi'] = add_values(df['genome_' + population + '_ac_hemi'], df['exome_' + population + '_ac_hemi'])
+        df[population + '_an'] = add_values(df['genome_' + population + '_an'], df['exome_' + population + '_an'])
+    df[population + '_af'] = calculate_frequency(df[population + '_ac'], df[population + '_an'])
+    return df
+
+
+def add_values(field_one, field_two):
+    if isinstance(field_one, (int, long, float, complex)):
+        if isinstance(field_two, (int, long, float, complex)):
+            return field_one + field_two
+        else:
+            return field_one
+    else:
+        return field_two
+
+
+def calculate_frequency(ac, an):
+    if not isinstance(an, (int, long, float, complex)):
+        return '-'
+    else:
+        if isinstance(ac, (int, long, float, complex)):
+            return ac / an
+        else:
+            return '-'
+
+
 def main():
     options = parse_args()
     f_in = options.input
     f_out = options.output
 
     f_in_data_frame = pd.read_csv(f_in, sep='\t')
-    f_out_data_frame = extract_relevant_data_for_processing(f_in_data_frame)
+    relevant_fields_data_frame = extract_relevant_data_for_processing(f_in_data_frame)
+    f_out_data_frame = compile_allele_values(relevant_fields_data_frame)
     f_out_data_frame.to_csv(f_out, sep='\t', index=False)
 
 

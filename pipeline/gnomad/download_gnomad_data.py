@@ -39,77 +39,106 @@ def main():
 
 def flatten_populations(variants):
     for variant in variants:
-        populations = variant['populations']
-        for pop in populations:
-            name = pop['id']
-            keys = pop.keys()
-            for key in keys:
-                if name != key:
-                    variant[name + '_' + key] = pop[key]
-        del variant['populations']
+        genome = variant['genome']
+        exome = variant['exome']
+        if genome:
+            for field in genome:
+                if field not in ['populations', 'filters']:
+                    variant['genome_' + field] = genome[field]
+            genome_populations = genome['populations']
+            for pop in genome_populations:
+                name = pop['id']
+                keys = pop.keys()
+                for key in keys:
+                    if name != key:
+                        variant['genome_' + name + '_' + key] = pop[key]
+        if exome:
+            for field in exome:
+                if field not in ['populations', 'filters']:
+                    variant['exome_' + field] = exome[field]
+            exome_populations = exome['populations']
+            for pop in exome_populations:
+                name = pop['id']
+                keys = pop.keys()
+                for key in keys:
+                    if name != key:
+                        variant['exome_' + name + '_' + key] = pop[key]
+        del variant['genome']
+        del variant['exome']
     return variants
 
 
 def normalize_variants(variants):
     variants_with_flattened_populations = flatten_populations(variants)
-
     variants_df = pandas.DataFrame.from_dict(variants_with_flattened_populations)
-
-    # stringify array values
-    variants_df['datasets'] = variants_df['datasets'].apply(', '.join)
-
     return variants_df
 
 
 def build_query(gene):
     return """{
-    gene(gene_name: "%s") {
-        _id
-        omim_description
-        gene_id
-        omim_accession
-        chrom
-        strand
-        full_gene_name
-        gene_name_upper
-        other_names
-        canonical_transcript
-        start
-        stop
-        xstop
-        xstart
-        gene_name
-        variants(dataset:gnomad_r2_1_non_cancer) {
-            alt
+        gene(gene_name: "%s") {
+            _id
+            omim_description
+            gene_id
+            omim_accession
             chrom
-            pos
-            ref
-            variantId
-            xpos
-            ac
-            ac_hemi
-            ac_hom
-            an
-            af
-            consequence
-            consequence_in_canonical_transcript
-            datasets
-            filters
-            flags
-            hgvs
-            hgvsc
-            hgvsp
-            rsid
-            populations {
-                id
-                ac
-                an
-                ac_hemi
-                ac_hom
+            strand
+            full_gene_name
+            gene_name_upper
+            other_names
+            canonical_transcript
+            start
+            stop
+            xstop
+            xstart
+            gene_name
+            variants(dataset: gnomad_r2_1_non_cancer) {
+                alt
+                chrom
+                pos
+                ref
+                variantId
+                xpos
+                genome {
+                    ac
+                    ac_hemi
+                    ac_hom
+                    an
+                    af
+                    filters
+                    populations {
+                      id
+                      ac
+                      an
+                      ac_hemi
+                      ac_hom
+                    }
+                }
+                exome {
+                    ac
+                    ac_hemi
+                    ac_hom
+                    an
+                    af
+                    filters
+                    populations {
+                        id
+                        ac
+                        an
+                        ac_hemi
+                        ac_hom
+                    }
+                }
+                consequence
+                consequence_in_canonical_transcript
+                flags
+                hgvs
+                hgvsc
+                hgvsp
+                rsid
             }
         }
-    }
-}""" % (gene)
+    }""" % (gene)
 
 
 def generate_data(gene):
