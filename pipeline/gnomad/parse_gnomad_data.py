@@ -124,23 +124,11 @@ def compile_allele_values(df):
 
 
 def add_values(field_one, field_two):
-    if isinstance(field_one, (int, long, float, complex)):
-        if isinstance(field_two, (int, long, float, complex)):
-            return field_one + field_two
-        else:
-            return field_one
-    else:
-        return field_two
+    return pd.to_numeric(field_one, errors='coerce').add(pd.to_numeric(field_two, errors='coerce'))
 
 
 def calculate_frequency(ac, an):
-    if not isinstance(an, (int, long, float, complex)):
-        return '-'
-    else:
-        if isinstance(ac, (int, long, float, complex)):
-            return ac / an
-        else:
-            return '-'
+    return pd.to_numeric(ac, errors='coerce').divide(pd.to_numeric(an, errors='coerce'))
 
 
 def main():
