@@ -26,7 +26,7 @@ output/exLOVD_brca12.sorted.hg38.vcf	Variants from the BRCA ExUV project
 					at the Huntsman Institute
 output/exac.brca12.sorted.hg38.vcf	Variants from the ExAC project at the
 					Broad Institute
-findlay_BRCA1_ring_function_scores.sorted.hg38.vcf
+findlay_BRCA1_ring_function_scores.clean.sorted.hg38.vcf
 					Functional assay scores from Findlay
 					et al, 2018.
 output/md5sums.txt			md5sums for all data files in this

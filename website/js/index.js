@@ -77,6 +77,12 @@ if (typeof console === "undefined") {
     };
 }
 
+// add react-ga tracking code to track each pageview
+import ReactGA from 'react-ga';
+if (window.config.analytics) {
+    ReactGA.initialize(window.config.analytics, { standardImplementation: true });
+}
+
 function isEmptyVal(val) {
     if ((typeof val === 'string' || val instanceof String) && val.trim() === '') {
             return true;
@@ -1201,7 +1207,14 @@ var Application = React.createClass({
         }
     },
     render: function () {
-        var path = this.getPath().slice(1);
+        const path = this.getPath().slice(1);
+
+        // logs the full path, including the hash, to google analytics
+        const fullHref = window.location.href;
+        const origin = window.location.origin;
+        const fullPathWithHash = fullHref.startsWith(origin) ? fullHref.slice(origin.length) : fullHref;
+        ReactGA.ga('send', 'pageview', fullPathWithHash);
+
         return (
             <div>
                 <NavBarNew path={path} mode={this.state.mode} toggleMode={this.toggleMode}/>
