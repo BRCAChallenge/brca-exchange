@@ -315,7 +315,6 @@ const helpContentResearch = [
             {
                 name: "How is the data on this site updated?",
                 contents: require("../content/help/research/how-is-the-data-on-this-site-updated.md"),
-                isBeta: true
             },
             {
                 name: "How do I Download Variant Data?",
