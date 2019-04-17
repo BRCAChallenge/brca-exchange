@@ -117,14 +117,11 @@ class SortGnomADData(GnomADTask):
         return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, "gnomAD.clean.sorted.hg38.vcf"))
 
     def run(self):
-        concatenated_brca_output_file = self.input().path
-        sorted_concatenated_brca_output_file = self.output().path
-
-        with open(concatenated_brca_output_file, 'w') as f:
-            args = ["vcf-sort", self.gnomAD_file_dir + "/gnomAD.clean.hg38.vcf"]
+        with open(self.output().path, 'w') as f:
+            args = ["vcf-sort", self.input().path]
             logger.info("Running vcf-sort with the following args: %s", args)
             sp = subprocess.Popen(args, stdout=f, stderr=subprocess.PIPE)
             pipeline_utils.print_subprocess_output_and_error(sp)
 
-        pipeline_utils.check_file_for_contents(sorted_concatenated_brca_output_file)
+        pipeline_utils.check_file_for_contents(self.output().path)
         logger.info("Sorting of concatenated files complete.")
