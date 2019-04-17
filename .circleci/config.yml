@@ -26,6 +26,7 @@ jobs:
        - run:
            name: Set up and run website backend tests
            command: |
+             sudo apt-get update
              sudo apt-get install python-pip python-dev
              sudo pip install virtualenv
              mkdir ~/project/website_virtualenv
@@ -49,6 +50,7 @@ jobs:
        - run:
            name: Set up environment for deployment
            command: |
+             sudo apt-get update
              sudo apt-get install rsync
              [[ ! -d ~/.ssh ]] && mkdir ~/.ssh
              cat >> ~/.ssh/config << EOF
@@ -70,6 +72,7 @@ jobs:
        - run:
            name: Set up environment for deployment
            command: |
+             sudo apt-get update
              sudo apt-get install rsync
              [[ ! -d ~/.ssh ]] && mkdir ~/.ssh
              cat >> ~/.ssh/config << EOF
