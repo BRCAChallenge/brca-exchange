@@ -2,7 +2,7 @@ version: 2
 jobs:
    buildweb:
      docker:
-       - image: circleci/node:6.13
+       - image: circleci/node:6.13-stretch
        - image: circleci/postgres:9.6.2
          environment:
           POSTGRES_USER: postgres
@@ -26,6 +26,7 @@ jobs:
        - run:
            name: Set up and run website backend tests
            command: |
+             sudo apt-get update
              sudo apt-get install python-pip python-dev
              sudo pip install virtualenv
              mkdir ~/project/website_virtualenv
@@ -39,7 +40,7 @@ jobs:
            path: ~/test_reports
    deploy-dev:
      docker:
-       - image: circleci/node:6.13
+       - image: circleci/node:6.13-stretch
      steps:
        - checkout
        - run:
@@ -49,6 +50,7 @@ jobs:
        - run:
            name: Set up environment for deployment
            command: |
+             sudo apt-get update
              sudo apt-get install rsync
              [[ ! -d ~/.ssh ]] && mkdir ~/.ssh
              cat >> ~/.ssh/config << EOF
@@ -60,7 +62,7 @@ jobs:
            command: ~/project/deployment/deploy-dev
    deploy-beta:
      docker:
-       - image: circleci/node:6.13
+       - image: circleci/node:6.13-stretch
      steps:
        - checkout
        - run:
@@ -70,6 +72,7 @@ jobs:
        - run:
            name: Set up environment for deployment
            command: |
+             sudo apt-get update
              sudo apt-get install rsync
              [[ ! -d ~/.ssh ]] && mkdir ~/.ssh
              cat >> ~/.ssh/config << EOF
