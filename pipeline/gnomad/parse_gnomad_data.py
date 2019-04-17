@@ -100,7 +100,6 @@ def extract_relevant_data_for_processing(f_in_data_frame):
     ]
 
     column_name_mapping = {
-        'chrom': 'chr',
         'pos': 'pos_hg19',
     }
 
@@ -110,7 +109,6 @@ def extract_relevant_data_for_processing(f_in_data_frame):
 
 def compile_allele_values(df):
     populations = ['AFR', 'AMR', 'ASJ', 'EAS', 'FIN', 'EAS', 'NFE', 'OTH', 'SAS']
-    # try:
     df['ac'] = add_values(df['genome_ac'], df['exome_ac'])
     df['an'] = add_values(df['genome_an'], df['exome_an'])
     df['af'] = calculate_frequency(df['ac'], df['an'])
@@ -139,6 +137,8 @@ def main():
     f_in_data_frame = pd.read_csv(f_in, sep='\t')
     relevant_fields_data_frame = extract_relevant_data_for_processing(f_in_data_frame)
     f_out_data_frame = compile_allele_values(relevant_fields_data_frame)
+    stringified_df = f_out_data_frame.replace(np.nan, '-', regex=True)
+    stringified_df = f_out_data_frame.replace('', '-', regex=True)
     f_out_data_frame.to_csv(f_out, sep='\t', index=False)
 
 
