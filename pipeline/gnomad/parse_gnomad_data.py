@@ -117,7 +117,7 @@ def compile_allele_values(df):
         df[population + '_ac_hom'] = add_values(df['genome_' + population + '_ac_hom'], df['exome_' + population + '_ac_hom'])
         df[population + '_ac_hemi'] = add_values(df['genome_' + population + '_ac_hemi'], df['exome_' + population + '_ac_hemi'])
         df[population + '_an'] = add_values(df['genome_' + population + '_an'], df['exome_' + population + '_an'])
-    df[population + '_af'] = calculate_frequency(df[population + '_ac'], df[population + '_an'])
+        df[population + '_af'] = calculate_frequency(df[population + '_ac'], df[population + '_an'])
     return df
 
 
