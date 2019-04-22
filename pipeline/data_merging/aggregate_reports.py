@@ -23,7 +23,8 @@ from variant_merging import (
      FIELD_DICT,
      ENIGMA_FILE,
      GENOME1K_FIELDS,
-     LOVD_FIELDS
+     LOVD_FIELDS,
+     GNOMAD_FIELDS
      )
 
 

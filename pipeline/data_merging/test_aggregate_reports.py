@@ -85,7 +85,53 @@ class TestStringMethods(unittest.TestCase):
                         "HGVS_Nucleotide_Findlay_BRCA1_Ring_Function_Scores",
                         "Log_RNA_Depletion_Findlay_BRCA1_Ring_Function_Scores",
                         "Functional_Enrichment_Score_Findlay_BRCA1_Ring_Function_Scores",
-                        "BX_ID_Findlay_BRCA1_Ring_Function_Scores"]
+                        "BX_ID_Findlay_BRCA1_Ring_Function_Scores",
+                        "HGVS_cDNA_GnomAD",
+                        "HGVS_protein_GnomAD",
+                        "Allele_count_GnomAD",
+                        "Allele_number_GnomAD",
+                        "Allele_frequency_GnomAD",
+                        "Allele_frequency_AFR_GnomAD",
+                        "Allele_count_hom_AFR_GnomAD",
+                        "Allele_count_hemi_AFR_GnomAD",
+                        "Allele_frequency_AFR_GnomAD",
+                        "Allele_number_AFR_GnomAD",
+                        "Allele_frequency_AMR_GnomAD",
+                        "Allele_count_hom_AMR_GnomAD",
+                        "Allele_count_hemi_AMR_GnomAD",
+                        "Allele_number_AMR_GnomAD",
+                        "Allele_frequency_AMR_GnomAD",
+                        "Allele_frequency_ASJ_GnomAD",
+                        "Allele_count_hom_ASJ_GnomAD",
+                        "Allele_count_hemi_ASJ_GnomAD",
+                        "Allele_number_ASJ_GnomAD",
+                        "Allele_frequency_ASJ_GnomAD",
+                        "Allele_frequency_EAS_GnomAD",
+                        "Allele_count_hom_EAS_GnomAD",
+                        "Allele_count_hemi_EAS_GnomAD",
+                        "Allele_number_EAS_GnomAD",
+                        "Allele_frequency_EAS_GnomAD",
+                        "Allele_frequency_FIN_GnomAD",
+                        "Allele_count_hom_FIN_GnomAD",
+                        "Allele_count_hemi_FIN_GnomAD",
+                        "Allele_number_FIN_GnomAD",
+                        "Allele_frequency_FIN_GnomAD",
+                        "Allele_frequency_NFE_GnomAD",
+                        "Allele_count_hom_NFE_GnomAD",
+                        "Allele_count_hemi_NFE_GnomAD",
+                        "Allele_number_NFE_GnomAD",
+                        "Allele_frequency_NFE_GnomAD",
+                        "Allele_frequency_OTH_GnomAD",
+                        "Allele_count_hom_OTH_GnomAD",
+                        "Allele_count_hemi_OTH_GnomAD",
+                        "Allele_number_OTH_GnomAD",
+                        "Allele_frequency_OTH_GnomAD",
+                        "Allele_frequency_SAS_GnomAD",
+                        "Allele_count_hom_SAS_GnomAD",
+                        "Allele_count_hemi_SAS_GnomAD",
+                        "Allele_number_SAS_GnomAD",
+                        "Allele_frequency_SAS_GnomAD",
+                        "BX_ID_GnomAD"]
 
         self.sources = aggregate_reports.FIELD_DICT.keys() + ["ENIGMA"]
         self.vcf_test_file = VCF_TESTDATA_FILENAME
@@ -105,7 +151,7 @@ class TestStringMethods(unittest.TestCase):
 
     def test_get_reports_files(self):
         reports_files = aggregate_reports.get_reports_files(INPUT_DIRECTORY)
-        self.assertEqual(len(reports_files), 9)
+        self.assertEqual(len(reports_files), 10)
         self.assertNotIn("1000_Genomesready.vcf", reports_files)
 
     def test_aggregate_reports(self):
