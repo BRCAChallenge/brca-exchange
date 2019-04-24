@@ -24,37 +24,6 @@ const content = {
     app: require('../content/about/app.md')
 };
 
-const FAQContent = [
-    {
-        "question": "What is the BRCA Exchange?",
-        "content": require('../content/faqs/what-is-the-brca-exchange.md')
-    },
-    {
-        "question": "What is ENIGMA and how does it determine variant classifications?",
-        "content": require('../content/faqs/what-is-enigma-and-how-does-it-determine-variant-classifications.md')
-    },
-    {
-        "question": "What does it mean if a variant is \"Not Yet Reviewed\"?",
-        "content": require('../content/faqs/what-does-it-mean-if-a-variant-is-not-yet-reviewed.md')
-    },
-    {
-        "question": "Why can't I find the variant I searched?",
-        "content": require('../content/faqs/why-cant-i-find-the-variant-i-searched.md')
-    },
-    {
-        "question": "What genome build is this site using?",
-        "content": require('../content/faqs/what-genome-build-is-this-site-using.md')
-    },
-    {
-        "question": "How is the data on this site updated?",
-        "content": require('../content/faqs/how-is-the-data-on-this-site-updated.md')
-    },
-    {
-        "question": "What makes BRCA Exchange different from other public databases?",
-        "content": require('../content/faqs/what-makes-brca-exchange-different-from-other-public-databases.md')
-    }
-];
-
 const mupitStructures = [
     {
         "name": "1t15",
@@ -414,7 +383,6 @@ function parseTooltips(isResearchMode) {
 
 module.exports = {
     pages: content,
-    faqs: FAQContent,
     mupitStructures,
     parseTooltips,
     helpContentDefault,

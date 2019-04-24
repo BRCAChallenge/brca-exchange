@@ -125,7 +125,6 @@ var NavBarNew = React.createClass({
                         <NavLink to='/variants'>Variants</NavLink>
                         <NavLink to='/community'>Community</NavLink>
                         <NavLink to='/help'>Help</NavLink>
-                        <NavLink to='/faq'>FAQ</NavLink>
                         <DropdownButton className={this.activePath(path, "about")} ref='about' title='More'>
                             <NavLink onClick={this.close} to='/about/thisSite'>
                                 This Site

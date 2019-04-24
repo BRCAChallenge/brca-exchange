@@ -248,7 +248,7 @@ class LiteratureTable extends React.Component {
 
         let toTSVURL = `data:text/tab-separated-values;charset=utf-8,${encodeURIComponent(this.toTSV())}`;
         let toJSONURL = `data:text/json;charset=utf-8,${encodeURIComponent(this.toJSON())}`;
-        let crawlDate = this.state.papers && util.normalizeDateFieldDisplay(this.state.papers[0].crawl_date);
+        let crawlDate = this.state.papers && this.state.papers.length > 0 && util.normalizeDateFieldDisplay(this.state.papers[0].crawl_date);
         let component = (
             (litResultsExist || !this.props.hideEmptyItems) &&
             <div>
