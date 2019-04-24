@@ -13,6 +13,8 @@ from variant_equivalence import variant_equal, find_equivalent_variant
 from variant_merging import normalize_values, add_variant_to_dict, \
     COLUMN_SOURCE, append_exac_allele_frequencies, EXAC_SUBPOPULATIONS
 
+from variant_merging_constants import VCFVariant
+
 runtimes = 500000
 settings.register_profile('ci', settings(max_examples=runtimes, max_iterations=runtimes, timeout=-1))
 
@@ -24,7 +26,7 @@ settings.register_profile('ci', settings(max_examples=runtimes, max_iterations=r
 #
 
 pwd=os.path.dirname(os.path.realpath(__file__))
-seq_provider = seq_utils.SeqProvider(os.path.join(pwd, '..', 'data'))
+seq_provider = seq_utils.LegacyFileBasedSeqProvider(os.path.join(pwd, '..', 'data'))
 
 BRCA1_CHR = 17
 reference_length = len(seq_provider.get_seq_with_start(BRCA1_CHR).sequence)
@@ -383,8 +385,10 @@ class TestVariantMerging(unittest.TestCase):
 
 
 def test_find_equivalent_variant():
+    seq_wrapper = seq_utils.SeqRepoWrapper()
+
     # empty case
-    assert [] == find_equivalent_variant({}, seq_provider)
+    assert [] == find_equivalent_variant({}, seq_wrapper)
 
     # a bunch of variants. If they appear in the same set, they are considered equivalent
     example_variants = [
@@ -394,17 +398,36 @@ def test_find_equivalent_variant():
     ]
 
     # construct variant dict (flattening example_variants!)
-    variant_dict = {v: [None, None, None,
-                        v.split(':')[0].lstrip('chr'),
-                        v.split(':')[1].lstrip('g.'),
-                        v.split(':')[2].split('>')[0],
-                        v.split(':')[2].split('>')[1],
-                        ] for eq_variants in example_variants for v in
-                    eq_variants
-                    }
+    variant_dict = {v: VCFVariant(
+        int(v.split(':')[0].lstrip('chr')),
+        int(v.split(':')[1].lstrip('g.')),
+        v.split(':')[2].split('>')[0],
+        v.split(':')[2].split('>')[1]) for eq_variants in example_variants for v
+    in
+        eq_variants
+    }
 
-    assert frozenset(example_variants) == frozenset(find_equivalent_variant(variant_dict,
-                                                            seq_provider))
+    margin = 20
+    chunk_provider = seq_utils.ChunkBasedSeqProvider(variant_dict.values(), margin, seq_wrapper)
+
+    assert frozenset(example_variants) == frozenset(
+        find_equivalent_variant(variant_dict, chunk_provider))
+
+
+def test_chunking():
+    def chunker(vars, margin):
+        return seq_utils.ChunkBasedSeqProvider.generate_chunks(vars, margin)
+
+    margin = 2
+    assert chunker([], margin) == []
+
+    some_chr = 7
+    v1 = VCFVariant(some_chr, 10, 'AGAGT', 'G')
+    assert chunker([v1], margin) == [(some_chr, 10 - margin, 10 + 5 + margin)]
+
+    # merging intervals of v1 and v2 together
+    v2 = VCFVariant(some_chr, 11, 'GAGT', 'G')
+    assert chunker([v1, v2], margin) == [(some_chr, min(10 - margin, 11 - margin), max(10 + 5 + margin, 11 + 4 + margin))]
 
 
 if __name__ == "__main__":

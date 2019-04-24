@@ -13,6 +13,7 @@ import subprocess
 from copy import deepcopy
 from numbers import Number
 from shutil import copy
+import pandas as pd
 
 import vcf
 
@@ -29,10 +30,16 @@ def options(parser):
                         default="/home/brca/pipeline-data/pipeline-input/")
     parser.add_argument("-o", "--output",
                         default="/home/brca/pipeline-data/pipeline-output/")
-    parser.add_argument('-r', "--reference", help="reference data directory",
-                        default="/home/brca/pipeline-data/pipeline-resources/")
+    #parser.add_argument('-r', "--reference", help="reference data directory",
+    #                    default="/home/brca/pipeline-data/pipeline-resources/")
+    parser.add_argument("-c", "--config")
     parser.add_argument('-a', "--artifacts_dir", help='Artifacts directory with pipeline artifact files.')
     parser.add_argument("-v", "--verbose", action="count", default=False, help="determines logging")
+
+# TODO: copied from pipeline_common.py, properly integrate!
+def load_config(path):
+    df = pd.read_csv(path, sep=',', header=0)
+    return df.set_index('symbol', drop=False)
 
 
 def main():
@@ -43,7 +50,12 @@ def main():
 
     args = parser.parse_args()
 
-    seq_provider = seq_utils.SeqProvider(args.reference)
+    gene_config_df = load_config(args.config)
+
+    gene_regions = [seq_utils.ChrInterval(a[0], a[1], a[2]) for a in
+     gene_config_df.loc[:, ['chr', 'start_hg38', 'end_hg38']].values]
+    # '/Users/marc/brca/nobackup/enigma_wdir/resources/seq_repo/latest')
+    seq_provider = seq_utils.SeqRepoWrapper(regions_preload=gene_regions)
 
     if args.verbose:
         logging_level = logging.DEBUG
@@ -68,7 +80,7 @@ def main():
     print "\n------------merging different datasets------------------------------"
     for source_name, file in source_dict.iteritems():
         (columns, variants) = add_new_source(columns, variants, source_name,
-                                             file, FIELD_DICT[source_name])
+                                             file, FIELD_DICT[source_name], gene_config_df)
 
     # standardizes genomic coordinates for variants
     print "\n------------standardizing genomic coordinates-------------"
@@ -76,7 +88,7 @@ def main():
 
     # compare dna sequence results of variants and merge if equivalent
     print "------------dna sequence comparison merge-------------------------------"
-    variants = string_comparison_merge(variants, seq_provider)
+    variants = string_comparison_merge(variants, seq_provider, 100) # TODO set margin as parameter
 
     # write final output to file
     write_new_tsv(args.output + "merged.tsv", columns, variants)
@@ -85,7 +97,7 @@ def main():
     copy(args.input + ENIGMA_FILE, args.output)
 
     # write reports to reports file
-    aggregate_reports.write_reports_tsv(args.output + "reports.tsv", columns, args.output)
+    aggregate_reports.write_reports_tsv(args.output + "reports.tsv", columns, args.output, gene_config_df)
 
     discarded_reports_file.close()
 
@@ -311,8 +323,8 @@ def add_leading_base(chr, pos, ref, alt, seq_provider):
         alt = ""
         empty_alt = True
 
-    seq, seq_start = seq_provider.get_seq_with_start(int(chr))
-    seq_pos = pos - 1 - seq_start
+    seq = seq_provider.get_seq(int(chr), pos - 1, 2)
+    seq_pos = 1
 
     if empty_ref is True and empty_alt is True:
         raise Exception("both ref and alt are empty")
@@ -334,12 +346,19 @@ def variant_is_false(ref, alt):
     return ref == alt
 
 
-def string_comparison_merge(variants, seq_provider):
+def string_comparison_merge(variants, seq_wrapper, margin=50):
     # makes sure the input genomic coordinate strings are unique (no dupes)
     assert (len(variants.keys()) == len(set(variants.keys())))
 
     logging.info('Calculating all equivalent variants without pickle dump.')
-    equivalence = variant_equivalence.find_equivalent_variant(variants, seq_provider)
+    vcf_variant_dict = { k : VCFVariant(int(v[COLUMN_VCF_CHR]),
+                                        int(v[COLUMN_VCF_POS]),
+                                        v[COLUMN_VCF_REF],
+                                        v[COLUMN_VCF_ALT]) for k, v in variants.iteritems() }
+
+    chunk_seq_provider = seq_utils.ChunkBasedSeqProvider(vcf_variant_dict.values(), margin, seq_wrapper)
+
+    equivalence = variant_equivalence.find_equivalent_variant(vcf_variant_dict, chunk_seq_provider)
 
     n_before_merge = 0
     for each in equivalence:
@@ -603,7 +622,7 @@ def write_new_tsv(filename, columns, variants):
     merged_file.close()
 
 
-def add_new_source(columns, variants, source, source_file, source_dict):
+def add_new_source(columns, variants, source, source_file, source_dict, gene_config_df):
     print "adding {0} into merged file.....".format(source)
     old_column_num = len(columns)
     for column_title in source_dict.keys():
@@ -621,7 +640,7 @@ def add_new_source(columns, variants, source, source_file, source_dict):
                 variants[genome_coor][COLUMN_SOURCE] = [variants[genome_coor][COLUMN_SOURCE]]
             variants[genome_coor][COLUMN_SOURCE].append(source)
         else:
-            variants[genome_coor] = associate_chr_pos_ref_alt_with_item(record, old_column_num, source, genome_coor)
+            variants[genome_coor] = associate_chr_pos_ref_alt_with_item(record, old_column_num, source, genome_coor, gene_config_df)
         for value in source_dict.values():
             try:
                 variants[genome_coor].append(record.INFO[value])
@@ -646,21 +665,39 @@ def add_new_source(columns, variants, source, source_file, source_dict):
     return (columns, variants)
 
 
-def associate_chr_pos_ref_alt_with_item(line, column_num, source, genome_coor):
+def associate_chr_pos_ref_alt_with_item(line, column_num, source, genome_coor, gene_config_df):
     # places genomic coordinate data in correct positions to align with relevant columns in output tsv file.
     item = ['-'] * column_num
     item[COLUMN_SOURCE] = source
-    if line.CHROM == "13":
-        item[COLUMN_GENE] = "BRCA2"
-    elif line.CHROM == "17":
-        item[COLUMN_GENE] = "BRCA1"
-    else:
-        raise Exception("Wrong chromosome")
+
+    # if line.CHROM == "13":
+    #     item[COLUMN_GENE] = "BRCA2"
+    # elif line.CHROM == "17":
+    #     item[COLUMN_GENE] = "BRCA1"
+    # else:
+    #     raise Exception("Wrong chromosome")
+
     item[COLUMN_GENOMIC_HGVS] = genome_coor
     item[COLUMN_VCF_CHR] = line.CHROM
     item[COLUMN_VCF_POS] = line.POS
     item[COLUMN_VCF_REF] = line.REF
     item[COLUMN_VCF_ALT] = str(line.ALT[0])
+
+    # TODO: should also verify positions on chromosome, however how to deal with variants outside transcript?
+    df_query = 'chr == {}'.format(item[COLUMN_VCF_CHR])
+    gene_symbol_lst = gene_config_df.query(df_query)['symbol']
+
+    if len(gene_symbol_lst) == 1:
+        item[COLUMN_GENE] = gene_symbol_lst[0]
+    elif gene_symbol_lst.empty:
+        print(gene_config_df.head())
+        raise Exception(
+            "Did find record satisfiying {} in gene configuration".format(
+                df_query))
+    else:
+        raise Exception("More than one record satisfying {} configuration in gene config. "
+                        "Note, that genes appearing on the same chromosome is not supported ")
+
     return item
 
 
@@ -733,17 +770,18 @@ def save_enigma_to_dict(path, output_dir, seq_provider):
 def ref_correct(chr, pos, ref, alt, seq_provider):
     if pos == "None":
         return False
+
     pos = int(pos)
 
-    seq, seq_start = seq_provider.get_seq_with_start(int(chr))
-    seq_pos = pos - 1 - seq_start
+    seq = seq_provider.get_seq_at(int(chr), pos - 1, len(ref))
 
-    genomeRef = seq[seq_pos:seq_pos + len(ref)].upper()
+    # TODO: change condition for sequence not inside
+    genomeRef = seq[0:len(ref)].upper()
     if len(ref) != 0 and len(genomeRef) == 0:
         print "%s:%s:%s>%s" % (chr, pos, ref, alt)
         raise Exception("ref not inside BRCA1 or BRCA2")
     if (genomeRef != ref):
-        logging.warning("genomeref not equal ref for: chr, pos, brca_pos, ref, genomeref, alt: %s, %s, %s, %s, %s, %s", chr, pos, seq_pos, ref, genomeRef, alt)
+        logging.warning("genomeref not equal ref for: chr, pos, ref, genomeref, alt: %s, %s, %s, %s, %s", chr, pos, ref, genomeRef, alt)
         return False
     else:
         return True

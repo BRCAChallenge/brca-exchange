@@ -1126,14 +1126,14 @@ class MergeVCFsIntoTSVFile(DefaultPipelineTask):
         print(self.input())
         artifacts_dir = pipeline_utils.create_path_if_nonexistent(
             self.cfg.output_dir + "/release/artifacts/")
-        brca_resources_dir = self.cfg.resources_dir
 
         os.chdir(data_merging_method_dir)
 
         args = ["python", "variant_merging.py", "-i", self.cfg.output_dir + "/",
                 "-o",
-                artifacts_dir, "-r", brca_resources_dir + "/", "-a",
-                artifacts_dir, "-v"]
+                artifacts_dir, "-a",
+                artifacts_dir, "-v",
+                "-c", self.cfg.gene_config_path]
         print "Running variant_merging.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)

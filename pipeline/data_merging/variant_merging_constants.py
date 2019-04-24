@@ -1,3 +1,5 @@
+from collections import namedtuple
+
 # GENOMIC VERSION:
 VERSION = "hg38" # equivalent to GRCh38
 
@@ -155,3 +157,4 @@ ESP_FILE = "esp.sorted.hg38.vcf"
 # Functional Assays
 FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS_FILE = "findlay_BRCA1_ring_function_scores.clean.sorted.hg38.vcf"
 
+VCFVariant = namedtuple("VCFVariant", "chr,pos,ref,alt")

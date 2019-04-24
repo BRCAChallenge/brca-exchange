@@ -2,13 +2,19 @@ import pytest
 import unittest
 import tempfile
 import csv
+import os
 from os import path, getcwd
 import aggregate_reports
-
+import pandas as pd
 
 VCF_TESTDATA_FILENAME = path.join(path.dirname(__file__), 'test_files/1000_Genomes.vcf')
 TSV_TESTDATA_FILENAME = path.join(path.dirname(__file__), 'test_files/enigma_from_clinvar.tsv')
 INPUT_DIRECTORY = path.join(path.dirname(__file__), 'test_files/')
+
+# TODO: copied from pipeline_common.py, properly integrate!
+def load_config(path):
+    df = pd.read_csv(path, sep=',', header=0)
+    return df.set_index('symbol', drop=False)
 
 class TestStringMethods(unittest.TestCase):
 
@@ -91,14 +97,17 @@ class TestStringMethods(unittest.TestCase):
         self.vcf_test_file = VCF_TESTDATA_FILENAME
         self.tsv_test_file = TSV_TESTDATA_FILENAME
 
+        pwd = os.path.dirname(os.path.realpath(__file__))
+        self.gene_config_df = load_config(os.path.join(pwd, '..', 'luigi', 'gene_config_brca_only.txt'))
+
     def test_normalize_reports_vcf(self):
-        file_reports = aggregate_reports.normalize_reports(self.vcf_test_file, self.columns)
+        file_reports = aggregate_reports.normalize_reports(self.vcf_test_file, self.columns, self.gene_config_df)
         first_report = file_reports[0]
         self.assertEqual(len(file_reports), 2)
         self.assertEqual(first_report[aggregate_reports.COLUMN_SOURCE], '1000_Genomes')
 
     def test_normalize_reports_tsv(self):
-        file_reports = aggregate_reports.normalize_reports(self.tsv_test_file, self.columns)
+        file_reports = aggregate_reports.normalize_reports(self.tsv_test_file, self.columns, self.gene_config_df)
         first_report = file_reports[0]
         self.assertEqual(len(file_reports), 2)
         self.assertEqual(first_report[aggregate_reports.COLUMN_SOURCE], 'ENIGMA')
@@ -110,7 +119,7 @@ class TestStringMethods(unittest.TestCase):
 
     def test_aggregate_reports(self):
         reports_files = [INPUT_DIRECTORY + r for r in aggregate_reports.get_reports_files(INPUT_DIRECTORY)]
-        reports = aggregate_reports.aggregate_reports(reports_files, self.columns)
+        reports = aggregate_reports.aggregate_reports(reports_files, self.columns, self.gene_config_df)
 
         # Each test file contains two reports, check that all reports are present
         self.assertEqual(len(reports), (len(self.sources) * 2))
@@ -129,7 +138,7 @@ class TestStringMethods(unittest.TestCase):
 
     def test_aggregate_reports_maintains_proper_variant_effect_lovd_formatting(self):
         LOVD_reports_file = [INPUT_DIRECTORY + r for r in aggregate_reports.get_reports_files(INPUT_DIRECTORY) if r == 'LOVD.vcf']
-        reports = aggregate_reports.aggregate_reports(LOVD_reports_file, self.columns)
+        reports = aggregate_reports.aggregate_reports(LOVD_reports_file, self.columns, self.gene_config_df)
 
         # Check that two of each source are present
         variant_effect_lovd_index = self.columns.index("Variant_effect_LOVD")
