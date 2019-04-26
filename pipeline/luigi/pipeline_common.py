@@ -92,5 +92,5 @@ class CopyOutputToOutputDir(DefaultPipelineTask):
         pipeline_utils.create_path_if_nonexistent(
             os.path.dirname(self.output().path))
 
-        copy(self.req_task.input().path, self.output().path)
+        copy(self.req_task.output().path, self.output().path)
         pipeline_utils.check_file_for_contents(self.output().path)
