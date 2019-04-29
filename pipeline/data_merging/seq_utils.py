@@ -1,46 +1,84 @@
+import logging
 import os
 from collections import namedtuple
-from toolz import groupby, memoize
-from intervaltree import IntervalTree
-from bioutils import assemblies
+
 from biocommons.seqrepo import SeqRepo
+from bioutils import assemblies
+from intervaltree import IntervalTree
+from toolz import groupby
 
 SeqWithStart = namedtuple("SeqWithStart", "sequence, start")
 
 ChrInterval = namedtuple("ChrInterval", "chr, start, end")
 
 
+def build_interval_trees_by_chr(chr_intervals, interval_tuple_builder):
+    d = {}
+
+    for c, regs in groupby(lambda r: r.chr,
+                           chr_intervals).iteritems():
+        interval_tuples = [
+            (r.start, r.end, interval_tuple_builder(c, r.start, r.end)) for
+            r in regs]
+
+        d[c] = IntervalTree.from_tuples(
+            interval_tuples)
+
+    return d
+
 class SeqRepoWrapper:
     DEFAULT_ASSY_NAME = 'GRCh38.p11'  # TODO: move somewhere else?
 
-    def __init__(self, seq_repo_path=None, regions_preload=None):
+    def __init__(self, seq_repo_path=None, regions_preload=None, preload_pos_margin=100):
         if not seq_repo_path:
             seq_repo_path = os.environ.get("HGVS_SEQREPO_DIR")
 
         self.seq_repo = SeqRepo(seq_repo_path)
         self.assy_map = assemblies.make_name_ac_map(self.DEFAULT_ASSY_NAME)
 
-        interval_tuples = []
+        self.preloaded_regions = {}
         if regions_preload:
-            interval_tuples = [(r.start, r.end, self._fetch_seq(r.chr, r.start, r.end)) for r in regions_preload]
-
-        self.preloaded_regions = IntervalTree.from_tuples(interval_tuples)
-
+            self.preloaded_regions = build_interval_trees_by_chr(regions_preload, lambda c, s, e: self._fetch_seq(c, s, e + preload_pos_margin))
 
     def get_seq_at(self, chr, pos, length):
         return self.get_seq(chr, pos, pos + length)
 
     def get_seq(self, chr, start_pos, end_pos):
-        preloaded = list(self.preloaded_regions.at(start_pos + 1))
+        preloaded = self.get_preloaded_seq_at(chr, start_pos)
+
         if preloaded:
             first_pos, _, seq = preloaded[0]
-            return seq[start_pos - 1 - first_pos : end_pos - 1 - first_pos]
+            return seq[start_pos - first_pos: end_pos - first_pos]
         else:
             return self._fetch_seq(chr, start_pos, end_pos)
+
+    def get_preloaded_seq_at(self, chr, pos):
+        preloaded = []
+        if chr in self.preloaded_regions:
+            preloaded = list(self.preloaded_regions[chr].at(pos))
+
+        return preloaded
 
     def _fetch_seq(self, chr, start_pos, end_pos):
         ac = self.assy_map[str(chr)]
         return self.seq_repo.fetch(ac, start_pos, end_pos)
+
+
+class WholeSeqSeqProvider:
+    def __init__(self, seq_wrapper):
+        if not seq_wrapper.preloaded_regions:
+            raise ValueError("need to have preloaded regions in seq wrapper")
+
+        self.seq_wrapper = seq_wrapper
+
+    def get_seq_with_start(self, chr, pos):
+        preloaded = self.seq_wrapper.get_preloaded_seq_at(chr, pos)
+
+        if not preloaded:
+            raise ValueError("Expected to have a sequence preloaded at chr {} pos {}".format(chr, pos))
+
+        first_pos, _, seq = preloaded[0]
+        return SeqWithStart(seq, first_pos)
 
 
 # TODO rename?
@@ -50,38 +88,24 @@ class ChunkBasedSeqProvider:
 
         chunks = self.generate_chunks(variant_records, margin)
 
-        self.itree_dict = {}
+        self.itree_dict = build_interval_trees_by_chr([ChrInterval._make(c) for c in chunks], lambda c, s, e: self.sr_wrapper.get_seq(c, s, e))
 
-        for c, tuples in groupby(lambda x: x[0], chunks).iteritems():
-            interval_tuples = [self._get_interval_tree_el(c, t[1], t[2]) for t in tuples]
-            self.itree_dict[c] = IntervalTree.from_tuples(interval_tuples)
+        logging.debug("Number of chunks: %d", len(chunks))
+        logging.debug("Total bytes in memory from chunks: %d", sum(
+            [len(inter[2]) for tree in self.itree_dict.values() for inter in
+             tree]))
 
-        # TODO: check how many chars kept in memory?
-        print("number of chunks", len(chunks))
-        print(sum([len(inter[2]) for tree in self.itree_dict.values() for inter in tree]))
-
-
-    def _get_interval_tree_el(self, chr, start, end):
-        seq = self.sr_wrapper.get_seq(chr, start - 1, end)
-        return start, end, seq
 
     def get_seq_with_start(self, chr, pos):
         itree = self.itree_dict[chr]
 
         intervals = list(itree.at(pos))
+        assert len(
+            intervals) == 1, "expect exactly one chunk per chr, got {}".format(
+            len(intervals))
+        start, _, seq = intervals[0]
 
-        assert len(intervals) == 1, "expect only one chunk per chr"
-        chunk = intervals[
-            0]  # TODO make more robust, should only have one element!
-
-        ret = (chunk[2], chunk[0] - 1)
-
-        # print(ret, pos, chunk[0])
-        return ret
-
-    def _repeat_seq(self, chr, start, delta):
-        # go over in chunks of 10, find repeat seq
-        pass
+        return (seq, start)
 
     @staticmethod
     def generate_chunks(variant_records, margin):

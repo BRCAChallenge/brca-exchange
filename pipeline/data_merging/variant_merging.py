@@ -42,6 +42,8 @@ def load_config(path):
     return df.set_index('symbol', drop=False)
 
 
+#def gene
+
 def main():
     global DISCARDED_REPORTS_WRITER
 
@@ -52,8 +54,11 @@ def main():
 
     gene_config_df = load_config(args.config)
 
-    gene_regions = [seq_utils.ChrInterval(a[0], a[1], a[2]) for a in
-     gene_config_df.loc[:, ['chr', 'start_hg38', 'end_hg38']].values]
+    gene_regions = [seq_utils.ChrInterval(a[0], a[1], a[2]+1) for a in
+     gene_config_df.loc[:, ['chr', 'start_hg38', 'end_hg38']].values] # end_hg38 position is inclusive, but in seq_utils end position is treated exclusive
+
+    gene_regions_trees = seq_utils.build_interval_trees_by_chr(gene_regions, lambda c,s,e: None)
+
     # '/Users/marc/brca/nobackup/enigma_wdir/resources/seq_repo/latest')
     seq_provider = seq_utils.SeqRepoWrapper(regions_preload=gene_regions)
 
@@ -74,7 +79,7 @@ def main():
     DISCARDED_REPORTS_WRITER.writeheader()
 
     # merge repeats within data sources before merging between data sources
-    source_dict, columns, variants = preprocessing(args.input, args.output, seq_provider)
+    source_dict, columns, variants = preprocessing(args.input, args.output, seq_provider, gene_regions_trees)
 
     # merges repeats from different data sources, adds necessary columns and data
     print "\n------------merging different datasets------------------------------"
@@ -84,7 +89,7 @@ def main():
 
     # standardizes genomic coordinates for variants
     print "\n------------standardizing genomic coordinates-------------"
-    variants = variant_standardize(columns, seq_provider, variants=variants)
+    variants = variant_standardize(columns, seq_provider, gene_regions_trees, variants=variants)
 
     # compare dna sequence results of variants and merge if equivalent
     print "------------dna sequence comparison merge-------------------------------"
@@ -105,7 +110,7 @@ def main():
     print "Done"
 
 
-def variant_standardize(columns, seq_provider, variants="pickle"):
+def variant_standardize(columns, seq_provider, gene_regions_tree, variants="pickle"):
     """standardize variants such
     1. "-" in ref or alt is removed, and a leading base is added, e.g. ->T is changed to N > NT
     2. remove trailing same bases: e.g. AGGGG > TGGGG is changed to A>T
@@ -142,13 +147,16 @@ def variant_standardize(columns, seq_provider, variants="pickle"):
         hgvs = "chr%s:g.%s:%s>%s" % (str(chr), str(pos), ref, alt)
 
         # If the reference is wrong, remove the variant
-        if not ref_correct(chr, pos, ref, alt, seq_provider):
-            reason_for_discard = "Incorrect Reference"
-            variants_to_remove = prepare_variant_for_removal_and_log(ev, hgvs, items, bx_ids_for_variant, reason_for_discard, variants_to_remove)
-            continue
+        reason_for_discard = ""
 
-        if variant_is_false(ref, alt):
+        if is_outside_boundaries(chr, pos, gene_regions_tree):
+            reason_for_discard = "Reference outside boundaries"
+        elif not ref_correct(chr, pos, ref, alt, seq_provider):
+            reason_for_discard = "Incorrect Reference"
+        elif variant_is_false(ref, alt):
             reason_for_discard = "Variant ref and alt are the same"
+
+        if reason_for_discard:
             variants_to_remove = prepare_variant_for_removal_and_log(ev, hgvs, items, bx_ids_for_variant, reason_for_discard, variants_to_remove)
             continue
 
@@ -417,7 +425,7 @@ def string_comparison_merge(variants, seq_wrapper, margin=50):
     return variants
 
 
-def preprocessing(input_dir, output_dir, seq_provider):
+def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
     # Preprocessing variants:
     source_dict = {
                    "1000_Genomes": GENOME1K_FILE + "for_pipeline",
@@ -457,7 +465,7 @@ def preprocessing(input_dir, output_dir, seq_provider):
         source_dict[source_name] = f_out.name
 
     print "-------check if genomic coordinates are correct----------"
-    (columns, variants) = save_enigma_to_dict(input_dir + ENIGMA_FILE, output_dir, seq_provider)
+    (columns, variants) = save_enigma_to_dict(input_dir + ENIGMA_FILE, output_dir, seq_provider, gene_regions_trees)
     for source_name, file_name in source_dict.iteritems():
         f = open(file_name, "r")
         d_wrong = output_dir + "wrong_genome_coors/"
@@ -473,7 +481,7 @@ def preprocessing(input_dir, output_dir, seq_provider):
         for record in vcf_reader:
             ref = record.REF.replace("-", "")
             v = [record.CHROM, record.POS, ref, "dummy"]
-            if not ref_correct(record.CHROM, record.POS, record.REF, record.ALT, seq_provider):
+            if not ref_correct(record.CHROM, record.POS, record.REF, record.ALT, seq_provider) or is_outside_boundaries(record.CHROM, record.POS, gene_regions_trees):
                 logging.warning("Reference incorrect for Chrom: %s, Pos: %s, Ref: %s, and Alt: %s",
                                 record.CHROM, record.POS, record.REF, record.ALT)
                 vcf_wrong_writer.write_record(record)
@@ -690,7 +698,6 @@ def associate_chr_pos_ref_alt_with_item(line, column_num, source, genome_coor, g
     if len(gene_symbol_lst) == 1:
         item[COLUMN_GENE] = gene_symbol_lst[0]
     elif gene_symbol_lst.empty:
-        print(gene_config_df.head())
         raise Exception(
             "Did find record satisfiying {} in gene configuration".format(
                 df_query))
@@ -730,7 +737,7 @@ def add_columns_to_enigma_data(line):
     return columns
 
 
-def save_enigma_to_dict(path, output_dir, seq_provider):
+def save_enigma_to_dict(path, output_dir, seq_provider, gene_regions_trees):
     global DISCARDED_REPORTS_WRITER
 
     enigma_file = open(path, "r")
@@ -752,11 +759,11 @@ def save_enigma_to_dict(path, output_dir, seq_provider):
             bx_id = items[bx_id_column_index]
             hgvs = "chr%s:g.%s:%s>%s" % (str(chrom), str(pos), ref, alt)
 
-            if ref_correct(chrom, pos, ref, alt, seq_provider):
+            if ref_correct(chrom, pos, ref, alt, seq_provider) and not is_outside_boundaries(chrom, pos, gene_regions_trees):
                 variants = add_variant_to_dict(variants, hgvs, items)
             else:
                 logging.warning("Ref incorrect for Enigma report, throwing away: %s", line)
-                log_discarded_reports("ENIGMA", bx_id, hgvs, "Incorrect Reference")
+                log_discarded_reports("ENIGMA", bx_id, hgvs, "Incorrect Reference. Is outside Boundaries {}".format(is_outside_boundaries(chrom, pos, gene_regions_trees)))
                 n_wrong += 1
                 f_wrong.write(line)
 
@@ -767,21 +774,27 @@ def save_enigma_to_dict(path, output_dir, seq_provider):
     return (columns, variants)
 
 
+def is_outside_boundaries(c, pos, gene_regions_trees):
+    c = int(c)
+    pos = int(pos)
+
+    if c not in gene_regions_trees.keys():
+        raise ValueError("No relevant genes on chromosome {}".format(c))
+
+    chr_regions = gene_regions_trees[c]
+    return len(chr_regions.at(pos)) == 0
+
 def ref_correct(chr, pos, ref, alt, seq_provider):
     if pos == "None":
         return False
 
     pos = int(pos)
 
-    seq = seq_provider.get_seq_at(int(chr), pos - 1, len(ref))
+    genomeRef = seq_provider.get_seq_at(int(chr), pos - 1, len(ref))
 
-    # TODO: change condition for sequence not inside
-    genomeRef = seq[0:len(ref)].upper()
-    if len(ref) != 0 and len(genomeRef) == 0:
-        print "%s:%s:%s>%s" % (chr, pos, ref, alt)
-        raise Exception("ref not inside BRCA1 or BRCA2")
-    if (genomeRef != ref):
-        logging.warning("genomeref not equal ref for: chr, pos, ref, genomeref, alt: %s, %s, %s, %s, %s", chr, pos, ref, genomeRef, alt)
+    #genomeRef = seq[0:len(ref)].upper()
+    if (genomeRef.upper() != ref.upper()):
+        logging.warning("genomeref not equal ref for: chr, pos, ref, genomeref, alt: %s, %s, %s, %s, %s", chr, pos, ref.upper(), genomeRef.upper(), alt)
         return False
     else:
         return True
