@@ -122,6 +122,7 @@ const researchModeGroups = [
                 return starDiff || datetimeDiff;
             },
             submitter: {title: 'Submitter', prop: 'Submitter_ClinVar'},
+            helpKey: 'clinical-significance-clinvar',
             cols: [
                 // displayed here in full since the display in the header is potentially truncated
                 {title: 'Submitter', prop: 'Submitter_ClinVar'},
@@ -144,6 +145,7 @@ const researchModeGroups = [
     {groupTitle: 'Clinical Significance (LOVD)', internalGroupName: 'Significance (LOVD)', reportSource: 'LOVD',
         reportBinding: {
             submitter: {title: 'Submitter(s)', prop: 'Submitters_LOVD'},
+            helpKey: 'clinical-significance-lovd',
             cols: [
                 // displayed here in full since the display in the header is potentially truncated
                 {title: 'Submitter(s)', prop: 'Submitters_LOVD'},

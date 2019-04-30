@@ -730,6 +730,7 @@ var VariantDetail = React.createClass({
                         onReportToggled={(collapser) => {
                             this.relayoutOnCollapsed(collapser);
                         }}
+                        helpSection={reportBinding.helpKey}
                         showHelp={this.showHelp}
                         tooltips={this.state.tooltips}
                     />
