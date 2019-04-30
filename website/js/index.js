@@ -783,7 +783,7 @@ var VariantDetail = React.createClass({
                         onDimsChanged={(collapser) => {
                             this.relayoutOnCollapsed(collapser);
                         }}
-                        helpSection="functional-assay"
+                        helpSection="functional-assay-results"
                         showHelp={this.showHelp}
                     />
                 );

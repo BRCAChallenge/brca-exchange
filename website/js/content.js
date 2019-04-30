@@ -200,6 +200,7 @@ const helpContentResearch = [
         tiles: [
             {
                 name: "What are the fields in the Variant Nomenclature Tile?",
+                id: "variant-nomenclature",
                 contents: require("../content/help/research/variant-nomenclature.md")
             },
             {
@@ -212,10 +213,12 @@ const helpContentResearch = [
                     },
                     {
                         name: "ClinVar",
+                        id: "clinical-significance-clinvar",
                         contents: require("../content/help/research/clinical-significance-clinvar.md")
                     },
                     {
                         name: "Leiden Open Variation Database (LOVD)",
+                        id: "clinical-significance-lovd",
                         contents: require("../content/help/research/clinical-significance-lovd.md")
                     },
                     {
@@ -227,15 +230,18 @@ const helpContentResearch = [
             },
             {
                 name: "What information is displayed in the Transcript Visualization?",
+                id: "transcript-visualization",
                 contents: require("../content/help/research/transcript-visualization.md")
             },
             {
                 name: "What data is used in Multifactorial Likelihood Analysis?",
+                id: "multifactorial-likelihood-analysis",
                 contents: require("../content/help/research/multifactorial-likelihood-analysis.md"),
                 reference: "https://www.ncbi.nlm.nih.gov/pubmed/21990134"
             },
             {
                 name: "What information is provided in the Allele Frequency Reference Sets Tile?",
+                id: "allele-frequency-reference-sets",
                 contents: require("../content/help/research/allele-frequency-reference-sets.md"),
                 list: [
                     {
@@ -254,6 +260,7 @@ const helpContentResearch = [
             },
             {
                 name: "What sources are available in the Functional Assay Results tile?",
+                id: "functional-assay-results",
                 contents: require("../content/help/research/functional-assay-disclaimer.md"),
                 list: [
                     {
@@ -264,6 +271,7 @@ const helpContentResearch = [
             },
             {
                 name: "What are In Silico Prior Probabilities of Pathogenicity?",
+                id: "in-silico-prior-probabilities-of-pathogenicity",
                 contents: require("../content/help/research/insilico/insilico-pred.md")
             },
             {
@@ -278,7 +286,6 @@ const helpContentResearch = [
             },
             {
                 name: "What genome build is this site using?",
-                id: "cravat-mupit-3d-protein-view",
                 contents: require("../content/help/research/what-genome-build-is-this-site-using.md")
             },
             {
