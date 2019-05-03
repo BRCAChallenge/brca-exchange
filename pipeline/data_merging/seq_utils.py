@@ -3,42 +3,47 @@ import os
 from collections import namedtuple
 
 from biocommons.seqrepo import SeqRepo
-from bioutils import assemblies
-from intervaltree import IntervalTree
-from toolz import groupby
+from bioutils import assemblies, seqfetcher
+
+from utilities import build_interval_trees_by_chr, ChrInterval
 
 SeqWithStart = namedtuple("SeqWithStart", "sequence, start")
 
-ChrInterval = namedtuple("ChrInterval", "chr, start, end")
-
-
-def build_interval_trees_by_chr(chr_intervals, interval_tuple_builder):
-    d = {}
-
-    for c, regs in groupby(lambda r: r.chr,
-                           chr_intervals).iteritems():
-        interval_tuples = [
-            (r.start, r.end, interval_tuple_builder(c, r.start, r.end)) for
-            r in regs]
-
-        d[c] = IntervalTree.from_tuples(
-            interval_tuples)
-
-    return d
 
 class SeqRepoWrapper:
-    DEFAULT_ASSY_NAME = 'GRCh38.p11'  # TODO: move somewhere else?
+    '''
+    Wrap access to biocommons seqrepo.
 
-    def __init__(self, seq_repo_path=None, regions_preload=None, preload_pos_margin=100):
+    Has a mechanism to preload certain genomic regions. Queries falling into these
+    regions are then
+
+    '''
+    DEFAULT_ASSY_NAME = 'GRCh38.p11'
+
+    def __init__(self, seq_repo_path=None, regions_preload=None, preload_pos_margin=500):
+        '''
+        :param seq_repo_path: Path to local seqrepo directory. If None, read HGVS_SEQREPO_DIR environment variable
+        :param regions_preload: Iterable[ChrInterval], optionally preload these genomic regions
+        :param preload_pos_margin: adding margin at the end of a preloaded genome
+          in order to have data to verify structural variants across the end of a gene
+        '''
+
         if not seq_repo_path:
             seq_repo_path = os.environ.get("HGVS_SEQREPO_DIR")
 
-        self.seq_repo = SeqRepo(seq_repo_path)
+        if seq_repo_path:
+            seq_repo = SeqRepo(seq_repo_path)
+            self.seq_repo_fetcher = seq_repo.fetch
+        else:
+            logging.warn("Using remote sequence provider.")
+            self.seq_repo_fetcher = seqfetcher.fetch_seq
+
         self.assy_map = assemblies.make_name_ac_map(self.DEFAULT_ASSY_NAME)
 
         self.preloaded_regions = {}
         if regions_preload:
-            self.preloaded_regions = build_interval_trees_by_chr(regions_preload, lambda c, s, e: self._fetch_seq(c, s, e + preload_pos_margin))
+            self.preloaded_regions = build_interval_trees_by_chr(regions_preload,
+                                                                 lambda c, s, e: self._fetch_seq(c, s, e + preload_pos_margin))
 
     def get_seq_at(self, chr, pos, length):
         return self.get_seq(chr, pos, pos + length)
@@ -61,11 +66,19 @@ class SeqRepoWrapper:
 
     def _fetch_seq(self, chr, start_pos, end_pos):
         ac = self.assy_map[str(chr)]
-        return self.seq_repo.fetch(ac, start_pos, end_pos)
+        return self.seq_repo_fetcher(ac, start_pos, end_pos)
 
 
 class WholeSeqSeqProvider:
+    '''
+    Sequence provider returning sequence of an entire gene to apply edits to verify
+    if variants are equivalent
+    '''
     def __init__(self, seq_wrapper):
+        '''
+
+        :param seq_wrapper: SeqRepoWrapper instance with preloaded regions
+        '''
         if not seq_wrapper.preloaded_regions:
             raise ValueError("need to have preloaded regions in seq wrapper")
 
@@ -81,9 +94,32 @@ class WholeSeqSeqProvider:
         return SeqWithStart(seq, first_pos)
 
 
-# TODO rename?
 class ChunkBasedSeqProvider:
+    '''
+    Sequence provider not returning sequence of an entire gene, but only of the 'chunk'
+    a variant belongs in.
+
+    Needs to have all variants which are going to be processed up front.
+    For every variant the 'interval of influence' is determined.
+    This is a range of positions on the genome where differences to the reference may possibly occur.
+    It is basically the position on the chromosome plus the length of the ref
+    or alt string whatever is longer. Then, to deal with repeat regions and
+    differing alignment some constant margin (say 100 nucleotides) is added at each side.
+
+    Then the 'interval of influence' are together into chunks, s.t. all overlapping
+    intervals end up in the same chunk. One chunk would then have a start and end
+    position associated. After this preprocessing, we determine for every variant
+    the chunk it belongs and calculate the edited sequence wrt to the sequence
+    corresponding to the chunk.
+    '''
     def __init__(self, variant_records, margin, seq_wrapper):
+        '''
+
+        :param variant_records: Iterable[VCFVariant] complete list of variants to be processed
+        :param margin: margin to add to the left and right of the initial interval of influence of
+          a variant to account for repeat regions in the genome
+        :param seq_wrapper: instance of SeqRepoWrapper
+        '''
         self.sr_wrapper = seq_wrapper
 
         chunks = self.generate_chunks(variant_records, margin)
@@ -138,8 +174,11 @@ class ChunkBasedSeqProvider:
         return chunks
 
 
-# TODO mark as deprecated
 class LegacyFileBasedSeqProvider:
+    '''
+    Sequence provider returning sequence of an entire gene read from a file
+    Deprecated, only for maintaining compatibility with testing code.
+    '''
     def __init__(self, reference_path):
         self._ref_dict = {17: {"start": 43000000,
                                "sequence": open(os.path.join(reference_path,
