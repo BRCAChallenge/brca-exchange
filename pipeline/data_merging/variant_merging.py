@@ -29,8 +29,6 @@ def options(parser):
                         default="/home/brca/pipeline-data/pipeline-input/")
     parser.add_argument("-o", "--output",
                         default="/home/brca/pipeline-data/pipeline-output/")
-    #parser.add_argument('-r', "--reference", help="reference data directory",
-    #                    default="/home/brca/pipeline-data/pipeline-resources/")
     parser.add_argument("-c", "--config")
     parser.add_argument('-a', "--artifacts_dir", help='Artifacts directory with pipeline artifact files.')
     parser.add_argument("-v", "--verbose", action="count", default=False, help="determines logging")
@@ -52,7 +50,6 @@ def main():
 
     genome_regions_symbol_dict = utilities.get_genome_regions_symbol_dict(gene_config_df)
 
-    # '/Users/marc/brca/nobackup/enigma_wdir/resources/seq_repo/latest')
     seq_provider = seq_utils.SeqRepoWrapper(regions_preload=gene_regions_dict.keys())
 
     if args.verbose:
@@ -86,7 +83,7 @@ def main():
 
     # compare dna sequence results of variants and merge if equivalent
     print "------------dna sequence comparison merge-------------------------------"
-    variants = string_comparison_merge(variants, seq_provider, 100) # TODO set margin as parameter
+    variants = string_comparison_merge(variants, seq_provider)
 
     # write final output to file
     write_new_tsv(args.output + "merged.tsv", columns, variants)
@@ -347,7 +344,7 @@ def variant_is_false(ref, alt):
     return ref == alt
 
 
-def string_comparison_merge(variants, seq_wrapper, margin=50):
+def string_comparison_merge(variants, seq_wrapper):
     # makes sure the input genomic coordinate strings are unique (no dupes)
     assert (len(variants.keys()) == len(set(variants.keys())))
 
@@ -767,6 +764,7 @@ def is_outside_boundaries(c, pos, gene_regions_trees):
     chr_regions = gene_regions_trees[c]
     return len(chr_regions.at(pos)) == 0
 
+
 def ref_correct(chr, pos, ref, alt, seq_provider):
     if pos == "None":
         return False
@@ -775,7 +773,6 @@ def ref_correct(chr, pos, ref, alt, seq_provider):
 
     genomeRef = seq_provider.get_seq_at(int(chr), pos - 1, len(ref))
 
-    #genomeRef = seq[0:len(ref)].upper()
     if (genomeRef.upper() != ref.upper()):
         logging.warning("genomeref not equal ref for: chr, pos, ref, genomeref, alt: %s, %s, %s, %s, %s", chr, pos, ref.upper(), genomeRef.upper(), alt)
         return False
