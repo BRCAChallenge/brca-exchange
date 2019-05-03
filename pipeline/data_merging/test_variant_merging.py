@@ -8,10 +8,11 @@ from hypothesis import given, assume, settings
 from hypothesis.strategies import integers, tuples, sampled_from, lists
 
 import seq_utils
-from utilities import round_sigfigs
-from variant_equivalence import variant_equal, find_equivalent_variant
+from utilities import round_sigfigs, load_config, extract_gene_regions_dict
+from variant_equivalence import variant_equal, find_equivalent_variant, find_equivalent_variants_whole_seq
 from variant_merging import normalize_values, add_variant_to_dict, \
     COLUMN_SOURCE, append_exac_allele_frequencies, EXAC_SUBPOPULATIONS
+
 
 from variant_merging_constants import VCFVariant
 
@@ -412,6 +413,35 @@ def test_find_equivalent_variant():
 
     assert frozenset(example_variants) == frozenset(
         find_equivalent_variant(variant_dict, chunk_provider))
+
+def test_find_equivalent_variant_whole_seq():
+    gene_config_path = os.path.join(pwd, '..', 'luigi', 'gene_config_brca_only.txt')
+    seq_wrapper = seq_utils.SeqRepoWrapper(regions_preload=extract_gene_regions_dict(load_config(gene_config_path)).keys())
+
+    # empty case
+    assert [] == find_equivalent_variants_whole_seq({}, seq_wrapper)
+
+    # a bunch of variants. If they appear in the same set, they are considered equivalent
+    example_variants = [
+        frozenset({'chr13:g.32355030:A>AA'}),
+        frozenset({'chr13:g.32339774:GAT>G', 'chr13:g.32339776:TAT>T'}),
+        frozenset({'chr17:g.43090921:G>GCA', 'chr17:g.43090921:GCA>GCACA'})
+    ]
+
+    # construct variant dict (flattening example_variants!)
+    variant_dict = {v: VCFVariant(
+        int(v.split(':')[0].lstrip('chr')),
+        int(v.split(':')[1].lstrip('g.')),
+        v.split(':')[2].split('>')[0],
+        v.split(':')[2].split('>')[1]) for eq_variants in example_variants for v
+    in
+        eq_variants
+    }
+
+    whole_seq_provider = seq_utils.WholeSeqSeqProvider(seq_wrapper)
+
+    assert frozenset(example_variants) == frozenset(
+        find_equivalent_variants_whole_seq(variant_dict, whole_seq_provider))
 
 
 def test_chunking():

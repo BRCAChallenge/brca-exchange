@@ -13,7 +13,6 @@ import subprocess
 from copy import deepcopy
 from numbers import Number
 from shutil import copy
-import pandas as pd
 
 import vcf
 
@@ -36,13 +35,6 @@ def options(parser):
     parser.add_argument('-a', "--artifacts_dir", help='Artifacts directory with pipeline artifact files.')
     parser.add_argument("-v", "--verbose", action="count", default=False, help="determines logging")
 
-# TODO: copied from pipeline_common.py, properly integrate!
-def load_config(path):
-    df = pd.read_csv(path, sep=',', header=0)
-    return df.set_index('symbol', drop=False)
-
-
-#def gene
 
 def main():
     global DISCARDED_REPORTS_WRITER
@@ -52,15 +44,16 @@ def main():
 
     args = parser.parse_args()
 
-    gene_config_df = load_config(args.config)
+    gene_config_df = utilities.load_config(args.config)
 
-    gene_regions = [seq_utils.ChrInterval(a[0], a[1], a[2]+1) for a in
-     gene_config_df.loc[:, ['chr', 'start_hg38', 'end_hg38']].values] # end_hg38 position is inclusive, but in seq_utils end position is treated exclusive
+    gene_regions_dict = utilities.extract_gene_regions_dict(gene_config_df)
 
-    gene_regions_trees = seq_utils.build_interval_trees_by_chr(gene_regions, lambda c,s,e: None)
+    gene_regions_trees = seq_utils.build_interval_trees_by_chr(gene_regions_dict.keys(), lambda c,s,e: None)
+
+    genome_regions_symbol_dict = utilities.get_genome_regions_symbol_dict(gene_config_df)
 
     # '/Users/marc/brca/nobackup/enigma_wdir/resources/seq_repo/latest')
-    seq_provider = seq_utils.SeqRepoWrapper(regions_preload=gene_regions)
+    seq_provider = seq_utils.SeqRepoWrapper(regions_preload=gene_regions_dict.keys())
 
     if args.verbose:
         logging_level = logging.DEBUG
@@ -85,7 +78,7 @@ def main():
     print "\n------------merging different datasets------------------------------"
     for source_name, file in source_dict.iteritems():
         (columns, variants) = add_new_source(columns, variants, source_name,
-                                             file, FIELD_DICT[source_name], gene_config_df)
+                                             file, FIELD_DICT[source_name], genome_regions_symbol_dict)
 
     # standardizes genomic coordinates for variants
     print "\n------------standardizing genomic coordinates-------------"
@@ -102,7 +95,7 @@ def main():
     copy(args.input + ENIGMA_FILE, args.output)
 
     # write reports to reports file
-    aggregate_reports.write_reports_tsv(args.output + "reports.tsv", columns, args.output, gene_config_df)
+    aggregate_reports.write_reports_tsv(args.output + "reports.tsv", columns, args.output, genome_regions_symbol_dict)
 
     discarded_reports_file.close()
 
@@ -364,9 +357,9 @@ def string_comparison_merge(variants, seq_wrapper, margin=50):
                                         v[COLUMN_VCF_REF],
                                         v[COLUMN_VCF_ALT]) for k, v in variants.iteritems() }
 
-    chunk_seq_provider = seq_utils.ChunkBasedSeqProvider(vcf_variant_dict.values(), margin, seq_wrapper)
+    whole_seq_provider = seq_utils.WholeSeqSeqProvider(seq_wrapper)
 
-    equivalence = variant_equivalence.find_equivalent_variant(vcf_variant_dict, chunk_seq_provider)
+    equivalence = variant_equivalence.find_equivalent_variants_whole_seq(vcf_variant_dict, whole_seq_provider)
 
     n_before_merge = 0
     for each in equivalence:
@@ -630,7 +623,7 @@ def write_new_tsv(filename, columns, variants):
     merged_file.close()
 
 
-def add_new_source(columns, variants, source, source_file, source_dict, gene_config_df):
+def add_new_source(columns, variants, source, source_file, source_dict, genome_regions_symbol_dict):
     print "adding {0} into merged file.....".format(source)
     old_column_num = len(columns)
     for column_title in source_dict.keys():
@@ -648,7 +641,7 @@ def add_new_source(columns, variants, source, source_file, source_dict, gene_con
                 variants[genome_coor][COLUMN_SOURCE] = [variants[genome_coor][COLUMN_SOURCE]]
             variants[genome_coor][COLUMN_SOURCE].append(source)
         else:
-            variants[genome_coor] = associate_chr_pos_ref_alt_with_item(record, old_column_num, source, genome_coor, gene_config_df)
+            variants[genome_coor] = associate_chr_pos_ref_alt_with_item(record, old_column_num, source, genome_coor, genome_regions_symbol_dict)
         for value in source_dict.values():
             try:
                 variants[genome_coor].append(record.INFO[value])
@@ -673,17 +666,10 @@ def add_new_source(columns, variants, source, source_file, source_dict, gene_con
     return (columns, variants)
 
 
-def associate_chr_pos_ref_alt_with_item(line, column_num, source, genome_coor, gene_config_df):
+def associate_chr_pos_ref_alt_with_item(line, column_num, source, genome_coor, genome_regions_symbol_dict):
     # places genomic coordinate data in correct positions to align with relevant columns in output tsv file.
     item = ['-'] * column_num
     item[COLUMN_SOURCE] = source
-
-    # if line.CHROM == "13":
-    #     item[COLUMN_GENE] = "BRCA2"
-    # elif line.CHROM == "17":
-    #     item[COLUMN_GENE] = "BRCA1"
-    # else:
-    #     raise Exception("Wrong chromosome")
 
     item[COLUMN_GENOMIC_HGVS] = genome_coor
     item[COLUMN_VCF_CHR] = line.CHROM
@@ -691,19 +677,16 @@ def associate_chr_pos_ref_alt_with_item(line, column_num, source, genome_coor, g
     item[COLUMN_VCF_REF] = line.REF
     item[COLUMN_VCF_ALT] = str(line.ALT[0])
 
-    # TODO: should also verify positions on chromosome, however how to deal with variants outside transcript?
-    df_query = 'chr == {}'.format(item[COLUMN_VCF_CHR])
-    gene_symbol_lst = gene_config_df.query(df_query)['symbol']
+    chr_tree = genome_regions_symbol_dict.get(int(item[COLUMN_VCF_CHR]))
 
-    if len(gene_symbol_lst) == 1:
-        item[COLUMN_GENE] = gene_symbol_lst[0]
-    elif gene_symbol_lst.empty:
+    if not chr_tree:
         raise Exception(
-            "Did find record satisfiying {} in gene configuration".format(
-                df_query))
-    else:
-        raise Exception("More than one record satisfying {} configuration in gene config. "
-                        "Note, that genes appearing on the same chromosome is not supported ")
+            "Did find data for chromosome {}".format(int(item[COLUMN_VCF_CHR])))
+
+    symbols = list(chr_tree.at(int(item[COLUMN_VCF_POS])))
+    assert len(symbols) == 1, "Expect exactly one symbol at a given position, but got {} for chr {} pos {}".format(len(symbols), item[COLUMN_VCF_CHR], item[COLUMN_VCF_POS])
+
+    _, _, item[COLUMN_GENE] = symbols[0] # don't care about start and end of genomic position
 
     return item
 
