@@ -1,7 +1,10 @@
 import itertools
+import glob
 import os
 import unittest
 
+import bioutils.seqfetcher
+from mock import patch
 import pytest
 import vcf
 from hypothesis import given, assume, settings
@@ -26,8 +29,9 @@ settings.register_profile('ci', settings(max_examples=runtimes, max_iterations=r
 # initialize module
 #
 
-pwd=os.path.dirname(os.path.realpath(__file__))
-seq_provider = seq_utils.LegacyFileBasedSeqProvider(os.path.join(pwd, '..', 'data'))
+pwd = os.path.dirname(os.path.realpath(__file__))
+data_dir = os.path.join(pwd, '..', 'data')
+seq_provider = seq_utils.LegacyFileBasedSeqProvider(data_dir)
 
 BRCA1_CHR = 17
 reference_length = len(seq_provider.get_seq_with_start(BRCA1_CHR).sequence)
@@ -384,64 +388,79 @@ class TestVariantMerging(unittest.TestCase):
                 except ValueError:
                     self.assertEqual(val, '-')
 
+@pytest.fixture()
+def fetch_seq_mock_data():
+    mock_data = {}
+    for path in glob.glob(os.path.join(data_dir, 'mock_fetch_seq*')):
+        with open(path, 'r') as f:
+            fn = os.path.basename(path).rstrip('.txt')
+            key = tuple(fn.split('-')[-3:]) # ac, start, end
+            mock_data[key] = f.readline().strip()
 
-def test_find_equivalent_variant():
-    seq_wrapper = seq_utils.SeqRepoWrapper()
+    return mock_data
 
-    # empty case
-    assert [] == find_equivalent_variant({}, seq_wrapper)
 
-    # a bunch of variants. If they appear in the same set, they are considered equivalent
-    example_variants = [
-        frozenset({'chr13:g.32355030:A>AA'}),
-        frozenset({'chr13:g.32339774:GAT>G', 'chr13:g.32339776:TAT>T'}),
-        frozenset({'chr17:g.43090921:G>GCA', 'chr17:g.43090921:GCA>GCACA'})
-    ]
+def test_find_equivalent_variant(fetch_seq_mock_data):
+    # mocking _fetch_seq method
+    with patch.object(bioutils.seqfetcher, 'fetch_seq', side_effect=lambda ac, s, e: fetch_seq_mock_data[(str(ac), str(s), str(e))]):
+        seq_wrapper = seq_utils.SeqRepoWrapper()
+        # empty case
+        assert [] == find_equivalent_variant({}, seq_wrapper)
 
-    # construct variant dict (flattening example_variants!)
-    variant_dict = {v: VCFVariant(
-        int(v.split(':')[0].lstrip('chr')),
-        int(v.split(':')[1].lstrip('g.')),
-        v.split(':')[2].split('>')[0],
-        v.split(':')[2].split('>')[1]) for eq_variants in example_variants for v
-    in
-        eq_variants
-    }
+        # a bunch of variants. If they appear in the same set, they are considered equivalent
+        example_variants = [
+            frozenset({'chr13:g.32355030:A>AA'}),
+            frozenset({'chr13:g.32339774:GAT>G', 'chr13:g.32339776:TAT>T'}),
+            frozenset({'chr17:g.43090921:G>GCA', 'chr17:g.43090921:GCA>GCACA'})
+        ]
 
-    margin = 20
-    chunk_provider = seq_utils.ChunkBasedSeqProvider(variant_dict.values(), margin, seq_wrapper)
+        # construct variant dict (flattening example_variants!)
+        variant_dict = {v: VCFVariant(
+            int(v.split(':')[0].lstrip('chr')),
+            int(v.split(':')[1].lstrip('g.')),
+            v.split(':')[2].split('>')[0],
+            v.split(':')[2].split('>')[1]) for eq_variants in example_variants for v
+        in
+            eq_variants
+        }
 
-    assert frozenset(example_variants) == frozenset(
-        find_equivalent_variant(variant_dict, chunk_provider))
+        margin = 20
+        chunk_provider = seq_utils.ChunkBasedSeqProvider(variant_dict.values(), margin, seq_wrapper)
 
-def test_find_equivalent_variant_whole_seq():
-    gene_config_path = os.path.join(pwd, '..', 'luigi', 'gene_config_brca_only.txt')
-    seq_wrapper = seq_utils.SeqRepoWrapper(regions_preload=extract_gene_regions_dict(load_config(gene_config_path)).keys())
+        assert frozenset(example_variants) == frozenset(
+            find_equivalent_variant(variant_dict, chunk_provider))
 
-    # empty case
-    assert [] == find_equivalent_variants_whole_seq({}, seq_wrapper)
 
-    # a bunch of variants. If they appear in the same set, they are considered equivalent
-    example_variants = [
-        frozenset({'chr13:g.32355030:A>AA'}),
-        frozenset({'chr13:g.32339774:GAT>G', 'chr13:g.32339776:TAT>T'}),
-        frozenset({'chr17:g.43090921:G>GCA', 'chr17:g.43090921:GCA>GCACA'})
-    ]
+def test_find_equivalent_variant_whole_seq(fetch_seq_mock_data):
+    with patch.object(bioutils.seqfetcher, 'fetch_seq', side_effect=lambda ac, s, e: fetch_seq_mock_data[(str(ac), str(s), str(e))]):
+        gene_config_path = os.path.join(pwd, '..', 'luigi', 'gene_config_brca_only.txt')
 
-    # construct variant dict (flattening example_variants!)
-    variant_dict = {v: VCFVariant(
-        int(v.split(':')[0].lstrip('chr')),
-        int(v.split(':')[1].lstrip('g.')),
-        v.split(':')[2].split('>')[0],
-        v.split(':')[2].split('>')[1]) for eq_variants in example_variants for v
-    in
-        eq_variants
-    }
+        seq_wrapper = seq_utils.SeqRepoWrapper(regions_preload=extract_gene_regions_dict(load_config(gene_config_path)).keys())
 
-    whole_seq_provider = seq_utils.WholeSeqSeqProvider(seq_wrapper)
+        # empty case
+        assert [] == find_equivalent_variants_whole_seq({}, seq_wrapper)
 
-    assert frozenset(example_variants) == frozenset(
-        find_equivalent_variants_whole_seq(variant_dict, whole_seq_provider))
+        # a bunch of variants. If they appear in the same set, they are considered equivalent
+        example_variants = [
+            frozenset({'chr13:g.32355030:A>AA'}),
+            frozenset({'chr13:g.32339774:GAT>G', 'chr13:g.32339776:TAT>T'}),
+            frozenset({'chr17:g.43090921:G>GCA', 'chr17:g.43090921:GCA>GCACA'})
+        ]
+
+        # construct variant dict (flattening example_variants!)
+        variant_dict = {v: VCFVariant(
+            int(v.split(':')[0].lstrip('chr')),
+            int(v.split(':')[1].lstrip('g.')),
+            v.split(':')[2].split('>')[0],
+            v.split(':')[2].split('>')[1]) for eq_variants in example_variants for v
+        in
+            eq_variants
+        }
+
+        whole_seq_provider = seq_utils.WholeSeqSeqProvider(seq_wrapper)
+
+        assert frozenset(example_variants) == frozenset(
+            find_equivalent_variants_whole_seq(variant_dict, whole_seq_provider))
 
 
 def test_chunking():
