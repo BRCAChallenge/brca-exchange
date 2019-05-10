@@ -96,7 +96,8 @@ def extract_relevant_data_for_processing(f_in_data_frame):
         'pos',
         'ref',
         'variantId',
-        'consequence'
+        'consequence',
+        'flags'
     ]
 
     column_name_mapping = {
@@ -109,20 +110,10 @@ def extract_relevant_data_for_processing(f_in_data_frame):
 
 def compile_allele_values(df):
     populations = ['AFR', 'AMR', 'ASJ', 'EAS', 'FIN', 'EAS', 'NFE', 'OTH', 'SAS']
-    df['ac'] = add_values(df['genome_ac'], df['exome_ac'])
-    df['an'] = add_values(df['genome_an'], df['exome_an'])
-    df['af'] = calculate_frequency(df['ac'], df['an'])
     for population in populations:
-        df[population + '_ac'] = add_values(df['genome_' + population + '_ac'], df['exome_' + population + '_ac'])
-        df[population + '_ac_hom'] = add_values(df['genome_' + population + '_ac_hom'], df['exome_' + population + '_ac_hom'])
-        df[population + '_ac_hemi'] = add_values(df['genome_' + population + '_ac_hemi'], df['exome_' + population + '_ac_hemi'])
-        df[population + '_an'] = add_values(df['genome_' + population + '_an'], df['exome_' + population + '_an'])
-        df[population + '_af'] = calculate_frequency(df[population + '_ac'], df[population + '_an'])
+        df['genome_' + population + '_af'] = calculate_frequency(df['genome_' + population + '_ac'], df['genome_' + population + '_an'])
+        df['exome_' + population + '_af'] = calculate_frequency(df['exome_' + population + '_ac'], df['exome_' + population + '_an'])
     return df
-
-
-def add_values(field_one, field_two):
-    return pd.to_numeric(field_one, errors='coerce').add(pd.to_numeric(field_two, errors='coerce'))
 
 
 def calculate_frequency(ac, an):

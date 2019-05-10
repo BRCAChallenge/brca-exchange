@@ -71,6 +71,7 @@ def flatten_populations(variants):
 def normalize_variants(variants):
     variants_with_flattened_populations = flatten_populations(variants)
     variants_df = pandas.DataFrame.from_dict(variants_with_flattened_populations)
+    variants_df['flags'] = variants_df['flags'].apply(', '.join)
     return variants_df
 
 
