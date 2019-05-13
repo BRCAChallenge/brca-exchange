@@ -46,7 +46,6 @@ class DownloadGnomADData(GnomADTask):
 
 @requires(DownloadGnomADData)
 class ParseGnomADData(GnomADTask):
-
     def output(self):
         return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, "gnomAD.clean.tsv"))
 
@@ -91,7 +90,6 @@ class ConvertGnomADToVCF(GnomADTask):
 
 @requires(ConvertGnomADToVCF)
 class CrossmapGnomADData(GnomADTask):
-
     def output(self):
         return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, "gnomAD.clean.hg38.vcf"))
 
@@ -112,7 +110,6 @@ class CrossmapGnomADData(GnomADTask):
 
 @requires(CrossmapGnomADData)
 class SortGnomADData(GnomADTask):
-
     def output(self):
         return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, "gnomAD.clean.sorted.hg38.vcf"))
 

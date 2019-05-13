@@ -125,15 +125,11 @@ class SortConcatenatedESPData(ESPTask):
         return luigi.LocalTarget(self.esp_file_dir + "/esp.sorted.hg38.vcf")
 
     def run(self):
-        sorted_concatenated_brca_output_file = self.output().path
-        concatenated_brca_output_file = self.input().path
-
-        with open(sorted_concatenated_brca_output_file, 'w') as f:
-            args = ["vcf-sort", concatenated_brca_output_file]
+        with open(self.output().path, 'w') as f:
+            args = ["vcf-sort", self.input().path]
             logger.info("Calling vcf-sort with the following args: %s", args)
             sp = subprocess.Popen(args, stdout=f, stderr=subprocess.PIPE)
             pipeline_utils.print_subprocess_output_and_error(sp)
 
-        pipeline_utils.check_file_for_contents(
-            sorted_concatenated_brca_output_file)
+        pipeline_utils.check_file_for_contents(self.output().path)
         logger.info("Sorting of concatenated files complete.")
