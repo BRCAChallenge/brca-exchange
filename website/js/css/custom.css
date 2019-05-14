@@ -250,6 +250,14 @@ offending file, for future reference: website/node_modules/react-data-components
         text-align: left;
     }
 }
+
+.bic-disclaimer {
+    margin: 10px;
+}
+
+.bic-disclaimer div {
+    padding: 5px;
+}
 /**************************************************************/
 /**********     Variant Search box       *********************/
 /**************************************************************/

@@ -891,6 +891,20 @@ var VariantDetail = React.createClass({
                 </h3>
             );
 
+            const bicDisclaimer = (
+                <div className="bic-disclaimer">
+                    <div>
+                        Please note that the BIC database is no longer actively curated. A copy of all BIC data has
+                        been shared with several other variation databases.
+                    </div>
+                    <div>
+                        Though the National Human Genome Research Institute recommends using ClinVar or BRCA Exchange for
+                        updated information on BRCA1 and BRCA2 variants, the BIC database will be maintained to allow
+                        historical studies and other uses."
+                    </div>
+                </div>
+            );
+
             return (
                 <div key={`group_collection-${groupTitle}`} className={ (allEmpty && this.state.hideEmptyItems) || (allEmpty && groupTitle === 'CRAVAT - MuPIT 3D Protein View') ? "group-empty" : "" }>
                     <Panel
@@ -901,6 +915,7 @@ var VariantDetail = React.createClass({
                     >
                         <Table>
                             <tbody>
+                                {groupTitle === "Clinical Significance (BIC)" ? bicDisclaimer : ''}
                                 {rows}
                             </tbody>
                         </Table>
