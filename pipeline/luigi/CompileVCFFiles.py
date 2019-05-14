@@ -21,7 +21,6 @@ from pipeline_common import DefaultPipelineTask
 
 luigi_dir = os.getcwd()
 
-bic_method_dir = os.path.abspath('../bic')
 clinvar_method_dir = os.path.abspath('../clinvar')
 lovd_method_dir = os.path.abspath('../lovd')
 g1k_method_dir = os.path.abspath('../1000_Genomes')
@@ -148,10 +147,10 @@ class CopyClinvarVCFToOutputDir(DefaultPipelineTask):
 ###############################################
 
 
-class DownloadBRCA1BICData(DefaultPipelineTask):
+class DownloadBICData(DefaultPipelineTask):
     def output(self):
         bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        return luigi.LocalTarget(bic_file_dir + "/brca1_data.txt")
+        return luigi.LocalTarget(bic_file_dir + "/bic_brca12.sorted.hg38.vcf")
 
     def run(self):
         bic_file_dir = pipeline_utils.create_path_if_nonexistent(
@@ -159,159 +158,11 @@ class DownloadBRCA1BICData(DefaultPipelineTask):
 
         os.chdir(bic_file_dir)
 
-        brca1_data_url = "https://research.nhgri.nih.gov/projects/bic/Member/cgi-bin/bic_query_result.cgi/brca1_data.txt?table=brca1_exons&download=1&submit=Download"
-        brca1_file_name = "brca1_data.txt"
-        pipeline_utils.download_file_with_basic_auth(brca1_data_url,
-                                                     brca1_file_name,
-                                                     self.cfg.u, self.cfg.p)
+        brca1_data_url = "https://brcaexchange.org/backend/downloads/bic_brca12.sorted.hg38.vcf"
+        pipeline_utils.download_file_and_display_progress(brca1_data_url)
 
 
-@requires(DownloadBRCA1BICData)
-class DownloadBRCA2BICData(DefaultPipelineTask):
-
-    def output(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        return luigi.LocalTarget(bic_file_dir + "/brca2_data.txt")
-
-    def run(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        os.chdir(bic_file_dir)
-
-        brca2_data_url = "https://research.nhgri.nih.gov/projects/bic/Member/cgi-bin/bic_query_result.cgi/brca2_data.txt?table=brca2_exons&download=1&submit=Download"
-        brca2_file_name = "brca2_data.txt"
-        pipeline_utils.download_file_with_basic_auth(brca2_data_url,
-                                                     brca2_file_name,
-                                                     self.cfg.u, self.cfg.p)
-
-
-@requires(DownloadBRCA2BICData)
-class ConvertBRCA1BICDataToVCF(DefaultPipelineTask):
-
-    def output(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        return luigi.LocalTarget(bic_file_dir + "/bic_brca1.hg19.vcf")
-
-    def run(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        os.chdir(bic_method_dir)
-
-        # Note: output file doesn't need to be opened because it's opened inside ./bic2vcf
-        bic_brca1_vcf_file = bic_file_dir + "/bic_brca1.hg19.vcf"
-
-        args = ["./bic2vcf", "-i", bic_file_dir + "/brca1_data.txt", "-o",
-                bic_brca1_vcf_file, "-b", "1", "-g",
-                self.cfg.resources_dir + "/hg19.fa", "-r",
-                self.cfg.resources_dir + "/refseq_annotation.hg19.gp", "-a",
-                bic_method_dir + "/bicAnnotation"]
-        print "Converting BRCA1 BIC data to vcf with the following args: %s" % (
-            args)
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(bic_brca1_vcf_file)
-
-
-@requires(ConvertBRCA1BICDataToVCF)
-class ConvertBRCA2BICDataToVCF(DefaultPipelineTask):
-
-    def output(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        return luigi.LocalTarget(bic_file_dir + "/bic_brca2.hg19.vcf")
-
-    def run(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        os.chdir(bic_method_dir)
-
-        # Note: output file doesn't need to be opened because it's opened inside ./bic2vcf
-        bic_brca2_vcf_file = bic_file_dir + "/bic_brca2.hg19.vcf"
-
-        args = ["./bic2vcf", "-i", bic_file_dir + "/brca2_data.txt", "-o",
-                bic_brca2_vcf_file, "-b", "2", "-g",
-                self.cfg.resources_dir + "/hg19.fa", "-r",
-                self.cfg.resources_dir + "/refseq_annotation.hg19.gp", "-a",
-                bic_method_dir + "/bicAnnotation"]
-        print "Converting BRCA2 BIC data to vcf with the following args: %s" % (
-            args)
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(bic_brca2_vcf_file)
-
-
-@requires(ConvertBRCA2BICDataToVCF)
-class ConcatenateBRCA12BICData(DefaultPipelineTask):
-
-    def output(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        return luigi.LocalTarget(bic_file_dir + "/bic_brca12.hg19.vcf")
-
-    def run(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-
-        bic_brca12_vcf_file = bic_file_dir + "/bic_brca12.hg19.vcf"
-        writable_bic_brca12_vcf_file = open(bic_brca12_vcf_file, 'w')
-        args = ["vcf-concat", bic_file_dir + "/bic_brca1.hg19.vcf",
-                bic_file_dir + "/bic_brca2.hg19.vcf"]
-        print "Concatenating BRCA1/2 BIC data with the following args: %s" % (
-            args)
-        sp = subprocess.Popen(args, stdout=writable_bic_brca12_vcf_file,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(bic_brca12_vcf_file)
-
-
-@requires(ConcatenateBRCA12BICData)
-class CrossmapConcatenatedBICData(DefaultPipelineTask):
-
-    def output(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        return luigi.LocalTarget(bic_file_dir + "/bic_brca12.hg38.vcf")
-
-    def run(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        brca_resources_dir = self.cfg.resources_dir
-
-        bic_brca12_hg38_vcf_file = bic_file_dir + "/bic_brca12.hg38.vcf"
-        writable_bic_brca12_hg38_vcf_file = open(bic_brca12_hg38_vcf_file, 'w')
-        args = ["CrossMap.py", "vcf",
-                brca_resources_dir + "/hg19ToHg38.over.chain.gz",
-                bic_file_dir + "/bic_brca12.hg19.vcf",
-                brca_resources_dir + "/hg38.fa",
-                bic_file_dir + "/bic_brca12.hg38.vcf"]
-        print "Crossmapping concatenated BIC data with the following args: %s" % (
-            args)
-        sp = subprocess.Popen(args, stdout=writable_bic_brca12_hg38_vcf_file,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(bic_brca12_hg38_vcf_file)
-
-
-@requires(CrossmapConcatenatedBICData)
-class SortBICData(DefaultPipelineTask):
-
-    def output(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        return luigi.LocalTarget(bic_file_dir + "/bic_brca12.sorted.hg38.vcf")
-
-    def run(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-
-        sorted_bic_output_file = bic_file_dir + "/bic_brca12.sorted.hg38.vcf"
-        writable_sorted_bic_output_file = open(sorted_bic_output_file, 'w')
-        args = ["vcf-sort", bic_file_dir + "/bic_brca12.hg38.vcf"]
-        print "Sorting BIC data with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=writable_sorted_bic_output_file,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(sorted_bic_output_file)
-
-
-@requires(SortBICData)
+@requires(DownloadBICData)
 class CopyBICOutputToOutputDir(DefaultPipelineTask):
 
     def output(self):
