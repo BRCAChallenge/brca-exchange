@@ -187,9 +187,6 @@ def pathogenicityUpdate(row):
         pathoAll = "%s%s%s (ClinVar)" % (pathoAll, delimiter,
                                                row["Clinical_Significance_ClinVar"])
         delimiter = "; "
-    if row["Clinical_classification_BIC"] != EMPTY:
-        pathoAll = "%s%s%s (BIC)" % (pathoAll, delimiter,
-                                           row["Clinical_classification_BIC"])
     if pathoAll == "":
         pathAll = EMPTY
     return(pathoExpert, pathoAll)
@@ -237,11 +234,6 @@ def checkDiscordantStatus(row):
                 hasBenignClassification = True
             if re.search("^uncertain_significance$", item.lower()):
                 hasBenignClassification = True
-    for item in row["Clinical_classification_BIC"].split(","):
-        if re.search("class 5", item.lower()):
-            hasPathogenicClassification = True
-        if re.search("class 1", item.lower()):
-            hasBenignClassification = True
     if hasPathogenicClassification and hasBenignClassification:
         return "Discordant"
     else:
