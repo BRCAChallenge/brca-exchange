@@ -209,9 +209,18 @@ offending file, for future reference: website/node_modules/react-data-components
 /**************************************************************/
 /**********     Variant Detail            *********************/
 /**************************************************************/
+.variant-message {
+    text-align: center;
+}
 .deleted-variant-message {
     color: red;
-    text-align: center;
+}
+.outdated-variant-message {
+    color: red;
+    font-size: 18px;
+}
+.redirected-variant-msg {
+    color: #333;
 }
 
 .alleleFrequencyChart {
