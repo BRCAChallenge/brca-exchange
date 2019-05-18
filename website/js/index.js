@@ -1213,7 +1213,7 @@ var VariantDetail = React.createClass({
 
                 <Row>
                     <Col md={12} className="variant-history-col">
-                        <h4>Previous Versions of this Variant:</h4>
+                        <h4>Previous Versions of this Variant (up to {util.reformatDate(data[0].Data_Release.date)}):</h4>
                         <Table className='variant-history nopointer' responsive bordered>
                             <thead>
                                 <tr className='active'>
