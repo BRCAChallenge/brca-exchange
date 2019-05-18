@@ -683,10 +683,11 @@ var VariantDetail = React.createClass({
             return <div />;
         }
 
-        let variant = data[0],
-            release = variant["Data_Release"],
-            cols,
-            groups;
+        const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.props.params.id));
+        const variant = data[variantVersionIdx];
+        const release = variant["Data_Release"];
+        let cols, groups;
+
 
         if (this.props.mode === 'research_mode') {
             cols = researchModeColumns;
