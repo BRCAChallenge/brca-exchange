@@ -900,7 +900,7 @@ var VariantDetail = React.createClass({
                     <div>
                         Though the National Human Genome Research Institute recommends using ClinVar or BRCA Exchange for
                         updated information on BRCA1 and BRCA2 variants, the BIC database will be maintained to allow
-                        historical studies and other uses."
+                        historical studies and other uses.
                     </div>
                 </div>
             );
