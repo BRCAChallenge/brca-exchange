@@ -1121,7 +1121,7 @@ var VariantDetail = React.createClass({
                           <Col xs={12} classname="vcenterblock">
                               <div className="variant-message outdated-variant-message panel panel-danger">
                                   <div className="panel-body panel-danger">
-                                      <h3 style={{marginTop: 0}}>There is new data on this variant available.</h3>
+                                      <h3 style={{marginTop: 0}}>There is new data available on this variant.</h3>
 
                                       The data below is from release {variant.Data_Release.name} ({util.reformatDate(variant.Data_Release.date)}). <a href={`/variant/${data[0].id}`}>Click here for updated data on this variant.</a>
                                   </div>
