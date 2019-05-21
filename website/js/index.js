@@ -1123,7 +1123,7 @@ var VariantDetail = React.createClass({
                                   <div className="panel-body panel-danger">
                                       <h3 style={{marginTop: 0}}>There is new data available on this variant.</h3>
 
-                                      The data below is from release {variant.Data_Release.name} ({util.reformatDate(variant.Data_Release.date)}). <a href={`/variant/${data[0].id}`}>Click here for updated data on this variant.</a>
+                                      The data below is from {util.reformatDate(variant.Data_Release.date)} (Release {variant.Data_Release.name}). <a href={`/variant/${data[0].id}`}>Click here for updated data on this variant.</a>
                                   </div>
                               </div>
                           </Col>
@@ -1137,9 +1137,9 @@ var VariantDetail = React.createClass({
                                   <div className="panel-body panel-primary">
                                       <h3 style={{marginTop: 0}}>You are viewing the most recent data on this variant.</h3>
 
-                                      The variant url you requested is from an old release. You have been automatically redirected to updated data. <br />
+                                      The variant url you requested only has data up to {util.reformatDate(redirectedFromVariant.Data_Release.date)}. You have been automatically redirected to the newest data.<br />
                                       <a href={`/variant/${redirectedFrom}?noRedirect=true`}>
-                                          Click here to view variant data from Release {redirectedFromVariant.Data_Release.name} ({util.reformatDate(redirectedFromVariant.Data_Release.date)}).
+                                          Click here to view variant data from {util.reformatDate(redirectedFromVariant.Data_Release.date)} (Release {redirectedFromVariant.Data_Release.name}).
                                       </a>
                                   </div>
                               </div>
