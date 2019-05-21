@@ -1121,9 +1121,9 @@ var VariantDetail = React.createClass({
                           <Col xs={12} classname="vcenterblock">
                               <div className="variant-message outdated-variant-message panel panel-danger">
                                   <div className="panel-body panel-danger">
-                                      <h3 style={{marginTop: 0}}>There is a newer version of this variant available</h3>
+                                      <h3 style={{marginTop: 0}}>There is new data on this variant available.</h3>
 
-                                      The data below is from release {variant.Data_Release.name}, dated {util.reformatDate(variant.Data_Release.date)}. <a href={`/variant/${data[0].id}`}>Go to the latest version of this variant.</a>
+                                      The data below is from release {variant.Data_Release.name} ({util.reformatDate(variant.Data_Release.date)}). <a href={`/variant/${data[0].id}`}>Click here for updated data on this variant.</a>
                                   </div>
                               </div>
                           </Col>
@@ -1135,12 +1135,11 @@ var VariantDetail = React.createClass({
                           <Col xs={12} classname="vcenterblock">
                               <div className="variant-message redirected-variant-msg panel panel-primary">
                                   <div className="panel-body panel-primary">
-                                      <h3 style={{marginTop: 0}}>You are now viewing the newest version of this variant</h3>
+                                      <h3 style={{marginTop: 0}}>You are viewing the most recent data on this variant.</h3>
 
-                                      The variant you originally requested was from an older release.
-                                      You have been automatically redirected to the newest version.<br />
+                                      The variant url you requested is from an old release. You have been automatically redirected to updated data. <br />
                                       <a href={`/variant/${redirectedFrom}?noRedirect=true`}>
-                                          Return to the version from release {redirectedFromVariant.Data_Release.name}, {util.reformatDate(redirectedFromVariant.Data_Release.date)}.
+                                          Click here to view variant data from Release {redirectedFromVariant.Data_Release.name} ({util.reformatDate(redirectedFromVariant.Data_Release.date)}).
                                       </a>
                                   </div>
                               </div>
