@@ -136,9 +136,9 @@ const researchModeGroups = [
 
                 {title: 'Submission Type', prop: 'Method_ClinVar'},
                 {title: 'SCV Accession', prop: 'SCV_ClinVar'},
-                {title: 'Summary Evidence', prop: 'Summary_Evidence_ClinVar'},
-                {title: 'Supporting Observations', prop: 'Description_ClinVar'},
-                {title: 'Review Status', prop: 'Review_Status_ClinVar'},
+                {title: 'Summary Evidence', prop: 'Summary_Evidence_ClinVar', dummy: true},
+                {title: 'Supporting Observations', prop: 'Description_ClinVar', dummy: true},
+                {title: 'Review Status', prop: 'Review_Status_ClinVar', dummy: true},
             ]
         }
     },
