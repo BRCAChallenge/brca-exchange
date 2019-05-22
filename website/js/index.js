@@ -475,7 +475,7 @@ const IsoGrid = React.createClass({
 });
 
 var VariantDetail = React.createClass({
-    mixins: [Navigation],
+    mixins: [Navigation, State],
     showHelp: function (event, title) {
         event.preventDefault();
 
@@ -508,12 +508,26 @@ var VariantDetail = React.createClass({
         );
 
     },
-    componentWillUpdate: function(nextProps) {
+    componentWillUpdate: function(nextProps, nextState) {
         // reparse the tooltips since they're mode-specific
         if (nextProps.mode !== this.props.mode) {
             this.setState({
                 tooltips: parseTooltips(nextProps.mode === 'research_mode')
             });
+        }
+
+        // ensure that we're viewing the latest version of the variant, and redirect if we're not,
+        // unless the querystring param 'noRedirect=true' is specified, in which case we stay here.
+        // (if someone *really* wants to link to the old variant, they may also specify 'noRedirectMsg=true'
+        // to silence the warning at the top of the page, too.)
+        const { data } = nextState;
+
+        if (data && parseInt(this.props.params.id) !== data[0].id) {
+            // if the variant we're requesting isn't the newest version, we need to redirect to it
+            const { noRedirect } = this.getQuery();
+            if (noRedirect !== "true") {
+                this.replaceWith(`/variant/:id`, { id: data[0].id }, { redirectedFrom: this.props.params.id });
+            }
         }
     },
     componentDidUpdate: function(prevProps) {
@@ -683,10 +697,13 @@ var VariantDetail = React.createClass({
             return <div />;
         }
 
-        let variant = data[0],
-            release = variant["Data_Release"],
-            cols,
-            groups;
+        const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.props.params.id));
+        const variant = data[variantVersionIdx];
+        const release = variant["Data_Release"];
+        let cols, groups;
+
+        const { redirectedFrom, noRedirectMsg } = this.getQuery();
+        const redirectedFromVariant = redirectedFrom ? data.find(x => x.id === parseInt(redirectedFrom)) : null;
 
         if (this.props.mode === 'research_mode') {
             cols = researchModeColumns;
@@ -1090,12 +1107,44 @@ var VariantDetail = React.createClass({
                             </Button>
                         </div>
                     </Col>
+
                     {variant['Change_Type'] === 'deleted' &&
                         (<Col xs={12} className="vcenterblock">
-                            <p className='deleted-variant-message'>
+                            <p className='variant-message deleted-variant-message'>
                             Note: This variant has been removed from the BRCA Exchange. For reasons on why this variant was removed please see the <Link to={`/release/${release.id}`}>release notes</Link>.
                             </p>
                         </Col>)
+                    }
+
+                    {
+                        (variantVersionIdx !== 0 && noRedirectMsg !== "true") && (
+                          <Col xs={12} classname="vcenterblock">
+                              <div className="variant-message outdated-variant-message panel panel-danger">
+                                  <div className="panel-body panel-danger">
+                                      <h3 style={{marginTop: 0}}>There is new data available on this variant.</h3>
+
+                                      The data below is from {util.reformatDate(variant.Data_Release.date)} (Release {variant.Data_Release.name}). <a href={`/variant/${data[0].id}`}>Click here for updated data on this variant.</a>
+                                  </div>
+                              </div>
+                          </Col>
+                        )
+                    }
+
+                    {
+                        redirectedFromVariant && (
+                          <Col xs={12} classname="vcenterblock">
+                              <div className="variant-message redirected-variant-msg panel panel-primary">
+                                  <div className="panel-body panel-primary">
+                                      <h3 style={{marginTop: 0}}>You are viewing the most recent data on this variant.</h3>
+
+                                      The variant url you requested only has data up to {util.reformatDate(redirectedFromVariant.Data_Release.date)}. You have been automatically redirected to the newest data.<br />
+                                      <a href={`/variant/${redirectedFrom}?noRedirect=true`}>
+                                          Click here to view variant data from {util.reformatDate(redirectedFromVariant.Data_Release.date)} (Release {redirectedFromVariant.Data_Release.name}).
+                                      </a>
+                                  </div>
+                              </div>
+                          </Col>
+                        )
                     }
                 </Row>
 
@@ -1163,7 +1212,7 @@ var VariantDetail = React.createClass({
 
                 <Row>
                     <Col md={12} className="variant-history-col">
-                        <h4>Previous Versions of this Variant:</h4>
+                        <h4>Variant History:</h4>
                         <Table className='variant-history nopointer' responsive bordered>
                             <thead>
                                 <tr className='active'>
