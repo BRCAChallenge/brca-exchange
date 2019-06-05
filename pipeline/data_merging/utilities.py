@@ -43,9 +43,11 @@ def get_genome_regions_symbol_dict(gene_config_df):
     :param gene_config_df:
     :return: dict[int, IntervalTree]
     '''
-    gene_regions_dict = extract_gene_regions_dict(gene_config_df)
 
-    interval_tree_mapper = lambda c, s, e: gene_regions_dict[ChrInterval(c, s,e)]['symbol']
+    def interval_tree_mapper(c, s, e):
+        return gene_regions_dict[ChrInterval(c, s, e)]['symbol']
+
+    gene_regions_dict = extract_gene_regions_dict(gene_config_df)
 
     return build_interval_trees_by_chr(gene_regions_dict.keys(),
                                     interval_tree_mapper)

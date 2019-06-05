@@ -15,7 +15,7 @@ class SeqRepoWrapper:
     Wrap access to biocommons seqrepo.
 
     Has a mechanism to preload certain genomic regions. Queries falling into these
-    regions are then
+    regions are then served from memory.
 
     '''
     DEFAULT_ASSY_NAME = 'GRCh38.p11'
@@ -65,8 +65,8 @@ class SeqRepoWrapper:
         return preloaded
 
     def _fetch_seq(self, chr, start_pos, end_pos):
-        ac = self.assy_map[str(chr)]
-        return self.seq_repo_fetcher(ac, start_pos, end_pos)
+        accession = self.assy_map[str(chr)]
+        return self.seq_repo_fetcher(accession, start_pos, end_pos)
 
 
 class WholeSeqSeqProvider:
