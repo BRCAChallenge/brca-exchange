@@ -14,15 +14,19 @@ def calculate_edited_seq(vcf_var, seq_provider):
     '''
     seq, seq_start = seq_provider.get_seq_with_start(vcf_var.chr, vcf_var.pos)
 
-    pos_seq = int(vcf_var.pos) - 1 - seq_start
+    pos_seq = int(vcf_var.pos) - seq_start
 
-    assert pos_seq >= 0, "position is below the reference for {}".format(vcf_var)
-    assert pos_seq + len(vcf_var.ref) <= len(seq), "position is above the reference for {}".format(vcf_var)
+    len_ref = len(vcf_var.ref)
 
-    assert seq[pos_seq:].startswith(vcf_var.ref)
+    assert pos_seq >= 0,  "position is below the reference for {}. Truncating for comparison".format(vcf_var)
 
-    edited = ''.join([seq[0:pos_seq], vcf_var.alt, seq[pos_seq + len(vcf_var.ref):]])
+    if pos_seq + len_ref < len(seq):
+        assert seq[pos_seq:].startswith(vcf_var.ref), "Sequences don't match"
+    else:
+        logging.warn("Sequence goes on above the reference for {}. ref len {}. seq len {}".format(vcf_var, len_ref, len(seq)))
+        assert vcf_var.ref.startswith(seq[pos_seq:]), "Sequences don't match for variant going over reference"
 
+    edited = ''.join([seq[0:pos_seq], vcf_var.alt, seq[pos_seq + len_ref:]])
     return vcf_var.chr, seq_start, edited
 
 
@@ -112,7 +116,7 @@ def find_equivalent_variant(variants_dict, chunk_seq_provider):
 # for testing purposes
 def variant_equal(v1, v2, ref_id, seq_provider):
     assert ref_id == 'hg38'
-    v1_norm = calculate_edited_seq(VCFVariant(int(v1[0]), v1[1], v1[2], v1[3]), seq_provider)
-    v2_norm = calculate_edited_seq(VCFVariant(int(v2[0]), v2[1], v2[2], v2[3]), seq_provider)
+    v1_norm = calculate_edited_seq(VCFVariant(int(v1[0]), v1[1] - 1, v1[2], v1[3]), seq_provider)
+    v2_norm = calculate_edited_seq(VCFVariant(int(v2[0]), v2[1] - 1, v2[2], v2[3]), seq_provider)
 
     return v1_norm == v2_norm

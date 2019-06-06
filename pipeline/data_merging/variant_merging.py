@@ -771,10 +771,11 @@ def ref_correct(chr, pos, ref, alt, seq_provider):
 
     pos = int(pos)
 
-    genomeRef = seq_provider.get_seq_at(int(chr), pos - 1, len(ref))
+    genomeRef = seq_provider.get_seq_at(int(chr), pos, len(ref))
 
-    if (genomeRef.upper() != ref.upper()):
-        logging.warning("genomeref not equal ref for: chr, pos, ref, genomeref, alt: %s, %s, %s, %s, %s", chr, pos, ref.upper(), genomeRef.upper(), alt)
+    if (not ref.upper().startswith(genomeRef.upper())):
+        logging.warning("genomeref not equal ref for: chr, pos, ref, len(ref), genomeref, len(genomeref), alt: %s, %s, %s, %s, %s, %s, %s",
+                        chr, pos, ref.upper(), len(ref), genomeRef.upper(), len(genomeRef), alt)
         return False
     else:
         return True

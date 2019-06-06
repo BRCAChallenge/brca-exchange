@@ -66,7 +66,9 @@ class SeqRepoWrapper:
 
     def _fetch_seq(self, chr, start_pos, end_pos):
         accession = self.assy_map[str(chr)]
-        return self.seq_repo_fetcher(accession, start_pos, end_pos)
+
+        # SeqRepo used 0-based coordinates
+        return self.seq_repo_fetcher(accession, start_pos - 1, end_pos - 1)
 
 
 class WholeSeqSeqProvider:

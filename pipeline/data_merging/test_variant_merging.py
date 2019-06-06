@@ -51,7 +51,7 @@ reference_length = len(seq_provider.get_seq_with_start(BRCA1_CHR).sequence)
 default_reference_version = "hg38"
 reference_id = sampled_from([default_reference_version])
 chrom = sampled_from(('13', '17'))
-pos = integers(min_value=0, max_value=reference_length - 1) # pos relative to the reference start.
+pos = integers(min_value=1, max_value=reference_length) # pos relative to the reference start.
 base = sampled_from(('A', 'C', 'T', 'G'))
 subseq = lists(base).map(lambda x: ''.join(x))
 
