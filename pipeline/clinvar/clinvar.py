@@ -163,10 +163,9 @@ class referenceAssertion:
         self.synonyms = extractSynonyms(element)
 
         # extract condition
-        self.condition_id = None
         self.condition_type = None
-        self.condition_db = None
         self.condition_value = None
+        self.condition_db_id = None
         traitSet = element.find("TraitSet")
         if traitSet != None:
             self.condition_type = traitSet.attrib["Type"]
@@ -184,8 +183,7 @@ class referenceAssertion:
                     self.condition_db = []
                     self.condition_id = []
                     for xref in xrefs:
-                        self.condition_db.append(xref.attrib["DB"])
-                        self.condition_id.append(xref.attrib["ID"])
+                        self.condition_db.append(xref.attrib["DB"] + "_" + xref.attrib["ID"])
 
 
 class clinVarAssertion:

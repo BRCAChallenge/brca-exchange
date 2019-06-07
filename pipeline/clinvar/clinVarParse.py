@@ -15,8 +15,8 @@ def printHeader():
                      "DateLastUpdated", "DateSignificanceLastEvaluated", "SCV",
                      "SCV_Version", "ID", "Origin", "Method", "Genomic_Coordinate",
                      "Symbol", "Protein", "Description", "SummaryEvidence",
-                     "ReviewStatus", "ConditionID", "ConditionType", "ConditionDB",
-                     "ConditionValue", "Synonyms")))
+                     "ReviewStatus", "ConditionType", "ConditionValue",
+                     "ConditionDB_ID", "Synonyms")))
 
 MULTI_VALUE_SEP = ','
 
@@ -70,10 +70,9 @@ def processSubmission(submissionSet, assembly):
                                      str(oa.description),
                                      str(oa.summaryEvidence),
                                      str(oa.reviewStatus),
-                                     ",".join(ra.condition_id),
                                      str(ra.condition_type),
-                                     ",".join(ra.condition_db),
                                      str(ra.condition_value),
+                                     ",".join(ra.condition_db_id),
                                      str(synonyms))))
 
 
