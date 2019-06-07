@@ -72,7 +72,7 @@ def processSubmission(submissionSet, assembly):
                                      str(oa.reviewStatus),
                                      str(ra.condition_type),
                                      str(ra.condition_value),
-                                     ",".join(ra.condition_db_id),
+                                     ",".join(ra.condition_db_id) if isinstance(ra.condition_db_id, list) else str(ra.condition_db_id),
                                      str(synonyms))))
 
 

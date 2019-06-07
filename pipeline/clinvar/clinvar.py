@@ -180,10 +180,9 @@ class referenceAssertion:
                         break
                 xrefs = trait.findall("XRef")
                 if xrefs != None and len(xrefs) > 0:
-                    self.condition_db = []
-                    self.condition_id = []
+                    self.condition_db_id = []
                     for xref in xrefs:
-                        self.condition_db.append(xref.attrib["DB"] + "_" + xref.attrib["ID"])
+                        self.condition_db_id.append(xref.attrib["DB"] + "_" + xref.attrib["ID"])
 
 
 class clinVarAssertion:
