@@ -39,6 +39,9 @@ CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "Review_Status": "ReviewStatus",
                   "Synonyms": "Synonyms",
                   "Summary_Evidence": "SummaryEvidence",
+                  "Condition_Type": "ConditionType",
+                  "Condition_Value": "ConditionValue",
+                  "Condition_DB_ID": "ConditionDB_ID",
                   "BX_ID": "BX_ID"}
 
 LOVD_FIELDS = {"Variant_frequency": "frequency",
