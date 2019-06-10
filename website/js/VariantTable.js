@@ -139,6 +139,7 @@ const researchModeGroups = [
                 {title: 'Summary Evidence', prop: 'Summary_Evidence_ClinVar', dummy: true},
                 {title: 'Supporting Observations', prop: 'Description_ClinVar', dummy: true},
                 {title: 'Review Status', prop: 'Review_Status_ClinVar', dummy: true},
+                {title: 'Condition(s) (Mode of Inheritance)', prop: 'Condition_Value_ClinVar_Condition_DB_ID_ClinVar', dummy: true},
             ]
         }
     },

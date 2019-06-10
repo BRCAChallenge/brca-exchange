@@ -129,6 +129,23 @@ function reformatDate(date) { //handles single dates or an array of dates
     }).join();
 }
 
+function formatClinVarConditionLink(dbId) {
+    let splitDbId = dbId.split('_');
+    let db = splitDbId[0];
+    let id = splitDbId[1];
+    let formattedDbId;
+    if (db === "MedGen") {
+        formattedDbId = "https://www.ncbi.nlm.nih.gov/medgen/" + id;
+    } else if (db === "OMIM") {
+        formattedDbId = "http://www.omim.org/entry/" + id;
+    } else if (db === "Orphanet") {
+        formattedDbId = "http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=EN&Expert=" + id;
+    } else {
+        return db;
+    }
+    return <a target="_blank" href={formattedDbId}>{db}</a>;
+}
+
 
 function getFormattedFieldByProp(prop, variant) {
     let rowItem;
@@ -159,6 +176,21 @@ function getFormattedFieldByProp(prop, variant) {
                 rowItem.push(<a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{displayText}</a>);
             }
         }
+    } else if (prop === "Condition_Value_ClinVar_Condition_DB_ID_ClinVar" && !isEmptyField(variant['Condition_DB_ID_ClinVar'])) {
+        let dbIds = variant['Condition_DB_ID_ClinVar'].split(',');
+        rowItem = [normalizedFieldDisplay(variant['Condition_Value_ClinVar'])];
+        rowItem.push(' [');
+        for (let i = 0; i < dbIds.length; i++) {
+            if (i === (dbIds.length - 1)) {
+                let formattedDbId = formatClinVarConditionLink(dbIds[i]);
+                rowItem.push(formattedDbId);
+            } else {
+                let formattedDbId = formatClinVarConditionLink(dbIds[i]);
+                rowItem.push(formattedDbId);
+                rowItem.push(" | ");
+            }
+        }
+        rowItem.push(']');
     } else if (prop === "DBID_LOVD" && variant[prop].toLowerCase().indexOf("brca") !== -1) { // Link all dbid's back to LOVD
         let ids = variant[prop].split(',');
         rowItem = [];
