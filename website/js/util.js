@@ -56,6 +56,18 @@ function isNumeric(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
+function sentenceCase(str) {
+    return str.replace(/\b\S/g, (t) => t.toUpperCase() );
+}
+
+function capitalize(w) {
+    return w.charAt(0).toUpperCase() + w.substr(1);
+}
+
+function extractValInsideParens(str) {
+    const regExp = /\(([^)]+)\)/;
+    return regExp.exec(str)[1];
+}
 
 // attempts to parse the given date string using a variety of formats,
 // returning the formatted result as something like '08 September 2016'.
@@ -129,10 +141,7 @@ function reformatDate(date) { //handles single dates or an array of dates
     }).join();
 }
 
-function formatClinVarConditionLink(dbId) {
-    let splitDbId = dbId.split('_');
-    let db = splitDbId[0];
-    let id = splitDbId[1];
+function formatConditionLink(db, id) {
     let formattedDbId;
     if (db === "MedGen") {
         formattedDbId = "https://www.ncbi.nlm.nih.gov/medgen/" + id;
@@ -182,15 +191,27 @@ function getFormattedFieldByProp(prop, variant) {
         rowItem = [normalizedFieldDisplay(variant['Condition_Value_ClinVar'])];
         rowItem.push(' [');
         for (let i = 0; i < dbIds.length; i++) {
+            let dbId = dbIds[i];
+            let splitDbId = dbId.split('_');
+            let db = splitDbId[0];
+            let id = splitDbId[1];
             if (i === (dbIds.length - 1)) {
-                let formattedDbId = formatClinVarConditionLink(dbIds[i]);
+                let formattedDbId = formatConditionLink(db, id);
                 rowItem.push(formattedDbId);
             } else {
-                let formattedDbId = formatClinVarConditionLink(dbIds[i]);
+                let formattedDbId = formatConditionLink(db, id);
                 rowItem.push(formattedDbId);
                 rowItem.push(" | ");
             }
         }
+        rowItem.push(']');
+    }  else if (prop === "Condition_ID_value_ENIGMA" && !isEmptyField(variant['Condition_ID_type_ENIGMA'])) {
+        let db = variant['Condition_ID_type_ENIGMA'];
+        let id = extractValInsideParens(variant['Condition_ID_value_ENIGMA']);
+        let conditionValue = sentenceCase(normalizedFieldDisplay(variant['Condition_ID_value_ENIGMA'].split(';')[0]).toLowerCase());
+        rowItem = [conditionValue];
+        rowItem.push(' [');
+        rowItem.push(formatConditionLink(db, id));
         rowItem.push(']');
     } else if (prop === "DBID_LOVD" && variant[prop].toLowerCase().indexOf("brca") !== -1) { // Link all dbid's back to LOVD
         let ids = variant[prop].split(',');
@@ -243,15 +264,6 @@ function abbreviatedSubmitter(originalSubmitter) {
     return originalSubmitter
         .replace('Evidence-based Network for the Interpretation of Germline Mutant Alleles (ENIGMA)', 'ENIGMA')
         .replace('Breast Cancer Information Core (BIC)', 'BIC');
-}
-
-
-function sentenceCase(str) {
-    return str.replace(/\b\S/g, (t) => t.toUpperCase() );
-}
-
-function capitalize(w) {
-    return w.charAt(0).toUpperCase() + w.substr(1);
 }
 
 

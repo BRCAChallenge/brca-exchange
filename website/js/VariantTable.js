@@ -96,6 +96,9 @@ const researchModeGroups = [
         {title: 'Collection Method', prop: 'Collection_method_ENIGMA', core: true},
         {title: 'Clinical Significance Citation', prop: 'Clinical_significance_citations_ENIGMA', core: true},
         {title: 'Allele Origin', prop: 'Allele_origin_ENIGMA', core: true},
+        // Note: Displayed condition value is actually a combo of Condition_ID_type_ENIGMA and
+        // Condition_ID_value_ENIGMA, but only one is used as the prop to ensure proper handling downstream
+        {title: 'Condition(s) (Mode of Inheritance)', prop: 'Condition_ID_value_ENIGMA', dummy: true},
     ]},
 
     // if a group contains reportSource, it'll be replaced with a SourceReportsTile component.
