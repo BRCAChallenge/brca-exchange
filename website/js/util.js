@@ -141,6 +141,7 @@ function formatClinVarConditionLink(dbId) {
     } else if (db === "Orphanet") {
         formattedDbId = "http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=EN&Expert=" + id;
     } else {
+        // No url for other sources
         return db;
     }
     return <a target="_blank" href={formattedDbId}>{db}</a>;
@@ -176,7 +177,7 @@ function getFormattedFieldByProp(prop, variant) {
                 rowItem.push(<a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{displayText}</a>);
             }
         }
-    } else if (prop === "Condition_Value_ClinVar_Condition_DB_ID_ClinVar" && !isEmptyField(variant['Condition_DB_ID_ClinVar'])) {
+    } else if (prop === "Condition_Value_ClinVar" && !isEmptyField(variant['Condition_DB_ID_ClinVar'])) {
         let dbIds = variant['Condition_DB_ID_ClinVar'].split(',');
         rowItem = [normalizedFieldDisplay(variant['Condition_Value_ClinVar'])];
         rowItem.push(' [');
