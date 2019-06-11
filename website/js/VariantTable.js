@@ -139,6 +139,8 @@ const researchModeGroups = [
                 {title: 'Summary Evidence', prop: 'Summary_Evidence_ClinVar', dummy: true},
                 {title: 'Supporting Observations', prop: 'Description_ClinVar', dummy: true},
                 {title: 'Review Status', prop: 'Review_Status_ClinVar', dummy: true},
+                // Note: Displayed condition value is actually a combo of Condition_Value and Condition_DB_ID,
+                // but only one is used as the prop to ensure proper handling downstream
                 {title: 'Condition(s) (Mode of Inheritance)', prop: 'Condition_Value_ClinVar', dummy: true},
             ]
         }
