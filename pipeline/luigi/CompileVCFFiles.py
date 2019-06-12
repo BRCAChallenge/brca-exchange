@@ -759,7 +759,7 @@ class DownloadEXACVCFGZFile(DefaultPipelineTask):
     def output(self):
         exac_file_dir = self.cfg.file_parent_dir + '/exac'
         return luigi.LocalTarget(
-            exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz")
+            exac_file_dir + "/ExAC_nonTCGA.r1.sites.vep.vcf.gz")
 
     def run(self):
         exac_file_dir = pipeline_utils.create_path_if_nonexistent(
@@ -767,30 +767,13 @@ class DownloadEXACVCFGZFile(DefaultPipelineTask):
 
         os.chdir(exac_file_dir)
 
-        exac_vcf_gz_url = "ftp://ftp.broadinstitute.org/pub/ExAC_release/current/subsets/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz"
+        exac_vcf_gz_url = "https://brcaexchange.org/backend/downloads/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz"
         exac_vcf_gz_file_name = exac_vcf_gz_url.split('/')[-1]
         pipeline_utils.download_file_and_display_progress(exac_vcf_gz_url,
                                                           exac_vcf_gz_file_name)
 
 
 @requires(DownloadEXACVCFGZFile)
-class DownloadEXACVCFGZTBIFile(DefaultPipelineTask):
-    def output(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-        return luigi.LocalTarget(
-            exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz.tbi")
-
-    def run(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-        os.chdir(exac_file_dir)
-
-        exac_vcf_gz_tbi_url = "ftp://ftp.broadinstitute.org/pub/ExAC_release/current/subsets/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz.tbi"
-        exac_vcf_gz_tbi_file_name = exac_vcf_gz_tbi_url.split('/')[-1]
-        pipeline_utils.download_file_and_display_progress(exac_vcf_gz_tbi_url,
-                                                          exac_vcf_gz_tbi_file_name)
-
-
-@requires(DownloadEXACVCFGZTBIFile)
 class ExtractBRCA1DataFromExac(DefaultPipelineTask):
     def output(self):
         exac_file_dir = self.cfg.file_parent_dir + '/exac'
