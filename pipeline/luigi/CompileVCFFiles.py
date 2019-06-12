@@ -767,10 +767,8 @@ class DownloadEXACVCFGZFile(DefaultPipelineTask):
 
         os.chdir(exac_file_dir)
 
-        exac_vcf_gz_url = "https://brcaexchange.org/backend/downloads/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz"
-        exac_vcf_gz_file_name = exac_vcf_gz_url.split('/')[-1]
-        pipeline_utils.download_file_and_display_progress(exac_vcf_gz_url,
-                                                          exac_vcf_gz_file_name)
+        exac_vcf_gz_url = "https://brcaexchange.org/backend/downloads/ExAC_nonTCGA.r1.sites.vep.vcf.gz"
+        pipeline_utils.download_file_and_display_progress(exac_vcf_gz_url)
 
 
 @requires(DownloadEXACVCFGZFile)
@@ -786,7 +784,7 @@ class ExtractBRCA1DataFromExac(DefaultPipelineTask):
         writable_exac_brca1_hg19_vcf_file = open(exac_brca1_hg19_vcf_file, 'w')
 
         args = ["tabix", "-h",
-                exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz",
+                exac_file_dir + "/ExAC_nonTCGA.r1.sites.vep.vcf.gz",
                 "17:41196312-41277500"]
         print "Running tabix with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=writable_exac_brca1_hg19_vcf_file,
@@ -809,7 +807,7 @@ class ExtractBRCA2DataFromExac(DefaultPipelineTask):
         writable_exac_brca2_hg19_vcf_file = open(exac_brca2_hg19_vcf_file, 'w')
 
         args = ["tabix", "-h",
-                exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz",
+                exac_file_dir + "/ExAC_nonTCGA.r1.sites.vep.vcf.gz",
                 "13:32889617-32973809"]
         print "Running tabix with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=writable_exac_brca2_hg19_vcf_file,
