@@ -772,6 +772,21 @@ class DownloadEXACVCFGZFile(DefaultPipelineTask):
 
 
 @requires(DownloadEXACVCFGZFile)
+class DownloadEXACVCFGZTBIFile(DefaultPipelineTask):
+    def output(self):
+        exac_file_dir = self.cfg.file_parent_dir + '/exac'
+        return luigi.LocalTarget(
+            exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz.tbi")
+
+    def run(self):
+        exac_file_dir = self.cfg.file_parent_dir + '/exac'
+        os.chdir(exac_file_dir)
+
+        exac_vcf_gz_tbi_url = "https://brcaexchange.org/backend/downloads/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz.tbi"
+        pipeline_utils.download_file_and_display_progress(exac_vcf_gz_tbi_url)
+
+
+@requires(DownloadEXACVCFGZTBIFile)
 class ExtractBRCA1DataFromExac(DefaultPipelineTask):
     def output(self):
         exac_file_dir = self.cfg.file_parent_dir + '/exac'
