@@ -755,11 +755,11 @@ class CopyG1KOutputToOutputDir(DefaultPipelineTask):
 ###############################################
 
 
-class DownloadEXACVCFGZFile(DefaultPipelineTask):
+class DownloadStaticExACData(DefaultPipelineTask):
     def output(self):
         exac_file_dir = self.cfg.file_parent_dir + '/exac'
         return luigi.LocalTarget(
-            exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz")
+            exac_file_dir + "/exac.brca12.sorted.hg38.vcf")
 
     def run(self):
         exac_file_dir = pipeline_utils.create_path_if_nonexistent(
@@ -767,141 +767,11 @@ class DownloadEXACVCFGZFile(DefaultPipelineTask):
 
         os.chdir(exac_file_dir)
 
-        exac_vcf_gz_url = "ftp://ftp.broadinstitute.org/pub/ExAC_release/current/subsets/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz"
-        exac_vcf_gz_file_name = exac_vcf_gz_url.split('/')[-1]
-        pipeline_utils.download_file_and_display_progress(exac_vcf_gz_url,
-                                                          exac_vcf_gz_file_name)
+        exac_vcf_gz_url = "https://brcaexchange.org/backend/downloads/exac.brca12.sorted.hg38.vcf"
+        pipeline_utils.download_file_and_display_progress(exac_vcf_gz_url)
 
 
-@requires(DownloadEXACVCFGZFile)
-class DownloadEXACVCFGZTBIFile(DefaultPipelineTask):
-    def output(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-        return luigi.LocalTarget(
-            exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz.tbi")
-
-    def run(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-        os.chdir(exac_file_dir)
-
-        exac_vcf_gz_tbi_url = "ftp://ftp.broadinstitute.org/pub/ExAC_release/current/subsets/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz.tbi"
-        exac_vcf_gz_tbi_file_name = exac_vcf_gz_tbi_url.split('/')[-1]
-        pipeline_utils.download_file_and_display_progress(exac_vcf_gz_tbi_url,
-                                                          exac_vcf_gz_tbi_file_name)
-
-
-@requires(DownloadEXACVCFGZTBIFile)
-class ExtractBRCA1DataFromExac(DefaultPipelineTask):
-    def output(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-        return luigi.LocalTarget(exac_file_dir + "/exac.brca1.hg19.vcf")
-
-    def run(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-
-        exac_brca1_hg19_vcf_file = exac_file_dir + "/exac.brca1.hg19.vcf"
-        writable_exac_brca1_hg19_vcf_file = open(exac_brca1_hg19_vcf_file, 'w')
-
-        args = ["tabix", "-h",
-                exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz",
-                "17:41196312-41277500"]
-        print "Running tabix with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=writable_exac_brca1_hg19_vcf_file,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(exac_brca1_hg19_vcf_file)
-
-
-@requires(ExtractBRCA1DataFromExac)
-class ExtractBRCA2DataFromExac(DefaultPipelineTask):
-    def output(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-        return luigi.LocalTarget(exac_file_dir + "/exac.brca2.hg19.vcf")
-
-    def run(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-
-        exac_brca2_hg19_vcf_file = exac_file_dir + "/exac.brca2.hg19.vcf"
-        writable_exac_brca2_hg19_vcf_file = open(exac_brca2_hg19_vcf_file, 'w')
-
-        args = ["tabix", "-h",
-                exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz",
-                "13:32889617-32973809"]
-        print "Running tabix with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=writable_exac_brca2_hg19_vcf_file,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(exac_brca2_hg19_vcf_file)
-
-
-@requires(ExtractBRCA2DataFromExac)
-class ConcatenateEXACData(DefaultPipelineTask):
-    def output(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-        return luigi.LocalTarget(exac_file_dir + "/exac.brca12.hg19.vcf")
-
-    def run(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-
-        exac_brca12_hg19_vcf_file = exac_file_dir + "/exac.brca12.hg19.vcf"
-        writable_exac_brca12_hg19_vcf_file = open(exac_brca12_hg19_vcf_file,
-                                                  'w')
-        args = ["vcf-concat", exac_file_dir + "/exac.brca1.hg19.vcf",
-                exac_file_dir + "/exac.brca2.hg19.vcf"]
-        print "Running tabix with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=writable_exac_brca12_hg19_vcf_file,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(exac_brca12_hg19_vcf_file)
-
-
-@requires(ConcatenateEXACData)
-class CrossmapEXACData(DefaultPipelineTask):
-    def output(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-        return luigi.LocalTarget(exac_file_dir + "/exac.brca12.hg38.vcf")
-
-    def run(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-        brca_resources_dir = self.cfg.resources_dir
-
-        args = ["CrossMap.py", "vcf",
-                brca_resources_dir + "/hg19ToHg38.over.chain.gz",
-                exac_file_dir + "/exac.brca12.hg19.vcf",
-                brca_resources_dir + "/hg38.fa",
-                exac_file_dir + "/exac.brca12.hg38.vcf"]
-        print "Running CrossMap.py with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(
-            exac_file_dir + "/exac.brca12.hg38.vcf")
-
-
-@requires(CrossmapEXACData)
-class SortEXACData(DefaultPipelineTask):
-    def output(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-        return luigi.LocalTarget(exac_file_dir + "/exac.brca12.sorted.hg38.vcf")
-
-    def run(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-
-        with self.output().open("w") as vcf_file:
-            args = ["vcf-sort", exac_file_dir + "/exac.brca12.hg38.vcf"]
-            print "Running tabix with the following args: %s" % (args)
-            sp = subprocess.Popen(args, stdout=vcf_file, stderr=subprocess.PIPE)
-            pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(
-            exac_file_dir + "/exac.brca12.sorted.hg38.vcf")
-
-
-@requires(SortEXACData)
+@requires(DownloadStaticExACData)
 class CopyEXACOutputToOutputDir(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(
