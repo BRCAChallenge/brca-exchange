@@ -530,12 +530,22 @@ var VariantDetail = React.createClass({
             }
         }
     },
-    componentDidUpdate: function(prevProps) {
+
+    componentDidUpdate: function(prevProps, prevState) {
         if (prevProps.mode !== this.props.mode) {
             // if the mode changed, we have to relayout the page on the next available frame
             setTimeout(() => {
                 this.relayoutGrid(true);
             }, 0);
+        }
+
+        // update the title if the variant info changed
+        if (!prevState.data && this.state.data) {
+            const data = this.state.data;
+            const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.props.params.id));
+            const variant = data[variantVersionIdx];
+
+            document.title = `${variant['Reference_Sequence']}:${variant['HGVS_cDNA'].split(":")[1]} (${variant['Gene_Symbol']}) - BRCA Exchange`;
         }
     },
     pathogenicityChanged: function(pathogenicityDiff) {
