@@ -637,3 +637,8 @@ class InSilicoPriors(models.Model):
 
     class Meta:
         db_table = 'insilicopriors'
+
+
+class VariantRepresentation(models.Model):
+    Variant = models.OneToOneField('Variant', primary_key=True)
+    Description = JSONField(null=False, default={})
