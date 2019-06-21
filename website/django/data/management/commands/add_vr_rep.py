@@ -19,7 +19,7 @@ class Command(BaseCommand):
 
         for row in vr_rep_fp:
             candidate = VariantRepresentation(
-                Variant=Variant.objects.get(Genomic_Coordinate_hg38=row['Variant_id']),
+                Genomic_Coordinate_hg38=row['Variant_id'],
                 Description=json.loads(row['VR'])
             )
             candidate.save()

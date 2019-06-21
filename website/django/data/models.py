@@ -640,5 +640,5 @@ class InSilicoPriors(models.Model):
 
 
 class VariantRepresentation(models.Model):
-    Variant = models.OneToOneField('Variant', primary_key=True)
+    Genomic_Coordinate_hg38 = models.TextField(null=False)
     Description = JSONField(null=False, default={})

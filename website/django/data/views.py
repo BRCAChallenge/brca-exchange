@@ -116,17 +116,17 @@ def variant(request):
 
 
 def variantreps(request):
-    # get only VR representations for current variants
-    vr_reps = (
-        VariantRepresentation.objects
-            .filter(Variant_id__in=CurrentVariant.objects.values('id'))
-            .values_list('Variant_id', 'Variant__Genomic_Coordinate_hg38', 'Description')
+    vr_reps = list(
+        VariantRepresentation.objects.raw("""
+        select VR.id, VR."Genomic_Coordinate_hg38", CV.id as Variant_id, VR."Description" from data_variantrepresentation VR
+        inner join currentvariant CV on CV."Genomic_Coordinate_hg38" = VR."Genomic_Coordinate_hg38"
+        """)
     )
-    # variants = CurrentVariant.objects.values_list('id', 'Genomic_Coordinate_hg38')
+
     response = JsonResponse({
-        "count": vr_reps.count(),
+        "count": len(vr_reps),
         "data": list(
-            {'id': x[0], 'Genomic_Coordinate_hg38': x[1], 'vr_rep': x[2]}
+            {'id': x.variant_id, 'Genomic_Coordinate_hg38': x.Genomic_Coordinate_hg38, 'vr_rep': x.Description}
             for x in vr_reps
         )
     })
