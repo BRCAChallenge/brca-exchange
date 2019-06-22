@@ -78,6 +78,10 @@ function variantPapers(variant) {
     return Rx.DOM.get(`${config.backend_url}/data/variantpapers/?variant_id=${variant}`).map(xhr => JSON.parse(xhr.responseText));
 }
 
+function variantReps() {
+    return Rx.DOM.get(`${config.backend_url}/data/variantreps`).map(xhr => JSON.parse(xhr.responseText));
+}
+
 function variantCounts() {
     return Rx.DOM.get(`${config.backend_url}/data/variantcounts`).map(xhr => JSON.parse(xhr.responseText));
 }
@@ -118,6 +122,7 @@ module.exports = {
     variantReports,
     variantCounts,
     variantPapers,
+    variantReps,
     releases,
     release,
     users,

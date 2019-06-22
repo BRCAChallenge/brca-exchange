@@ -63,6 +63,7 @@ var VariantSearch = require('./VariantSearch');
 var {Navigation, State, Route, RouteHandler,
     HistoryLocation, run, DefaultRoute, Link} = require('react-router');
 var {Releases, Release} = require('./Releases.js');
+var {VariantRepresentations} = require('./VariantRepresentations.js');
 var Help = require('./Help.js');
 
 var KeyInline = require('./components/KeyInline');
@@ -1320,6 +1321,7 @@ var routes = (
         <Route path='variant_literature/:id' handler={LiteratureTable}/>
         <Route path='releases' handler={Releases}/>
         <Route path='release/:id' handler={Release}/>
+        <Route path='variantreps' handler={VariantRepresentations}/>
     </Route>
 );
 
