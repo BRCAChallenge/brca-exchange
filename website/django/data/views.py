@@ -146,7 +146,11 @@ def variant_reports(request, variant_id):
                 # if no key is available, skip report history
                 report_query = [report]
             else:
-                report_query = Report.objects.filter(SCV_ClinVar=key).order_by('-Data_Release_id').select_related('Data_Release')
+                # extend the selection w/reports that have matching keys,
+                # but only up until the requested variants' release
+                report_query = Report.objects\
+                    .filter(Data_Release_id__lte=report.Data_Release.id, SCV_ClinVar=key)\
+                    .order_by('-Data_Release_id').select_related('Data_Release')
             report_versions.extend(map(report_to_dict, report_query))
         elif report.Source == "LOVD":
             key = report.Submission_ID_LOVD
@@ -154,7 +158,11 @@ def variant_reports(request, variant_id):
                 # if no key is available, skip report history
                 report_query = [report]
             else:
-                report_query = Report.objects.filter(Submission_ID_LOVD=key).order_by('-Data_Release_id').select_related('Data_Release')
+                # extend the selection w/reports that have matching keys,
+                # but only up until the requested variants' release (i.e., same as for ClinVar)
+                report_query = Report.objects\
+                    .filter(Data_Release_id__lte=report.Data_Release.id, Submission_ID_LOVD=key)\
+                    .order_by('-Data_Release_id').select_related('Data_Release')
             report_versions.extend(map(report_to_dict, report_query))
 
     response = JsonResponse({"data": report_versions})
