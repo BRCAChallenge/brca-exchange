@@ -640,3 +640,8 @@ class InSilicoPriors(models.Model):
 
     class Meta:
         db_table = 'insilicopriors'
+
+
+class VariantRepresentation(models.Model):
+    Genomic_Coordinate_hg38 = models.TextField(null=False)
+    Description = JSONField(null=False, default={})

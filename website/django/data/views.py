@@ -13,8 +13,10 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.gzip import gzip_page
 
-from .models import Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType, Report, ReportDiff, \
-        InSilicoPriors, VariantPaper, Paper
+from .models import (
+    Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType, Report, ReportDiff,
+    InSilicoPriors, VariantPaper, Paper, VariantRepresentation
+)
 from django.views.decorators.http import require_http_methods
 
 # GA4GH related imports
@@ -109,6 +111,25 @@ def variant(request):
 
     variant_versions = map(variant_to_dict, query)
     response = JsonResponse({"data": variant_versions})
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
+
+
+def variantreps(request):
+    vr_reps = list(
+        VariantRepresentation.objects.raw("""
+        select VR.id, VR."Genomic_Coordinate_hg38", CV.id as Variant_id, VR."Description" from data_variantrepresentation VR
+        inner join currentvariant CV on CV."Genomic_Coordinate_hg38" = VR."Genomic_Coordinate_hg38"
+        """)
+    )
+
+    response = JsonResponse({
+        "count": len(vr_reps),
+        "data": list(
+            {'id': x.variant_id, 'Genomic_Coordinate_hg38': x.Genomic_Coordinate_hg38, 'vr_rep': x.Description}
+            for x in vr_reps
+        )
+    })
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
