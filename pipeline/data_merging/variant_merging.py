@@ -456,6 +456,8 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
 
     print "-------check if genomic coordinates are correct----------"
     (columns, variants) = save_enigma_to_dict(input_dir + ENIGMA_FILE, output_dir, seq_provider, gene_regions_trees)
+    
+    new_source_dict = {}
     for source_name, file_name in source_dict.iteritems():
         f = open(file_name, "r")
         d_wrong = output_dir + "wrong_genome_coors/"
@@ -464,6 +466,9 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
         f_wrong = open(output_dir + "wrong_genome_coors/" +
                        source_name + "_wrong_genome_coor.vcf", "w")
         f_right = open(output_dir+ "right" + source_name, "w")
+
+        new_source_dict[source_name] = f_right.name
+
         vcf_reader = vcf.Reader(f, strict_whitespace=True)
         vcf_wrong_writer = vcf.Writer(f_wrong, vcf_reader)
         vcf_right_writer = vcf.Writer(f_right, vcf_reader)
@@ -483,7 +488,7 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
         f_wrong.close()
         print "in {0}, wrong: {1}, total: {2}".format(source_name, n_wrong, n_total)
 
-    return source_dict, columns, variants
+    return new_source_dict, columns, variants
 
 
 def repeat_merging(f_in, f_out):
