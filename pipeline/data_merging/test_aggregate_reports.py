@@ -94,7 +94,7 @@ class TestStringMethods(unittest.TestCase):
 
         pwd = os.path.dirname(os.path.realpath(__file__))
 
-        gene_config_df = utilities.load_config(os.path.join(pwd, '..', 'luigi', 'gene_config_brca_only.txt'))
+        gene_config_df = utilities.load_config(os.path.join(pwd, 'test_files', 'gene_config_test.txt'))
         self.genome_regions_symbol_dict = utilities.get_genome_regions_symbol_dict(gene_config_df)
 
     def test_normalize_reports_vcf(self):
