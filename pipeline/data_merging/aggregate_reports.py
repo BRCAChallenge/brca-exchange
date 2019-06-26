@@ -1,30 +1,18 @@
 #!/usr/bin/env python
-import argparse
 import os
-import vcf
 import logging
-import csv
+
+import vcf
+
 from variant_merging import (
-     add_columns_to_enigma_data,
-     associate_chr_pos_ref_alt_with_enigma_item,
-     associate_chr_pos_ref_alt_with_item,
-     BIC_FIELDS,
-     COLUMN_SOURCE,
-     COLUMN_GENE,
-     COLUMN_GENOMIC_HGVS,
-     COLUMN_VCF_CHR,
-     COLUMN_VCF_POS,
-     COLUMN_VCF_REF,
-     COLUMN_VCF_ALT,
-     CLINVAR_FIELDS,
-     EX_LOVD_FIELDS,
-     ESP_FIELDS,
-     EXAC_FIELDS,
-     FIELD_DICT,
-     ENIGMA_FILE,
-     GENOME1K_FIELDS,
-     LOVD_FIELDS
-     )
+    add_columns_to_enigma_data,
+    associate_chr_pos_ref_alt_with_enigma_item,
+    associate_chr_pos_ref_alt_with_item,
+    is_outside_boundaries,
+    FIELD_DICT,
+    ENIGMA_FILE,
+    COLUMN_SOURCE
+)
 
 
 def write_reports_tsv(filename, columns, ready_files_dir, genome_regions_symbol_dict):
@@ -106,6 +94,10 @@ def normalize_vcf_reports(file, columns, filename, file_extension, genome_region
         count += 1
         genome_coor = ("chr" + str(record.CHROM) + ":g." + str(record.POS) + ":" +
                        record.REF + ">" + str(record.ALT[0]))
+
+        if is_outside_boundaries(record.CHROM, record.POS, genome_regions_symbol_dict):
+            logging.warning("Skipping report since the positions is outside the genome boundaries: " + str(record))
+            continue
 
         report = associate_chr_pos_ref_alt_with_item(record, len(columns), source, genome_coor, genome_regions_symbol_dict)
         for key, value in FIELD_DICT[source].iteritems():
