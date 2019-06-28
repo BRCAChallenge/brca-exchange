@@ -48,7 +48,7 @@ def main():
 
     gene_regions_trees = seq_utils.build_interval_trees_by_chr(gene_regions_dict.keys(), lambda c,s,e: None)
 
-    genome_regions_symbol_dict = utilities.get_genome_regions_symbol_dict(gene_config_df)
+    genome_regions_symbol_dict = utilities.get_genome_regions_symbol_dict(gene_config_df, 'start_hg38_legacy_variants', 'end_hg38_legacy_variants')
 
     seq_provider = seq_utils.SeqRepoWrapper(regions_preload=gene_regions_dict.keys())
 

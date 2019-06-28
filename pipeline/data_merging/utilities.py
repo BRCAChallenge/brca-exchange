@@ -33,7 +33,7 @@ def build_interval_trees_by_chr(chr_intervals, interval_tuple_builder):
     return d
 
 
-def get_genome_regions_symbol_dict(gene_config_df):
+def get_genome_regions_symbol_dict(gene_config_df, start_col='start_hg38', end_col='end_hg38'):
     '''
     Build a dictionary from chromosome to a interval tree with the gene symbol
     as payload.
@@ -47,7 +47,7 @@ def get_genome_regions_symbol_dict(gene_config_df):
     def interval_tree_mapper(c, s, e):
         return gene_regions_dict[ChrInterval(c, s, e)]['symbol']
 
-    gene_regions_dict = extract_gene_regions_dict(gene_config_df)
+    gene_regions_dict = extract_gene_regions_dict(gene_config_df, start_col, end_col)
 
     return build_interval_trees_by_chr(gene_regions_dict.keys(),
                                     interval_tree_mapper)
