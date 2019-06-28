@@ -53,7 +53,7 @@ def get_genome_regions_symbol_dict(gene_config_df):
                                     interval_tree_mapper)
 
 
-def extract_gene_regions_dict(gene_config_df):
+def extract_gene_regions_dict(gene_config_df, start_col='start_hg38', end_col='end_hg38'):
     '''
     Prepares dict used in get_genome_regions_symbol_dict
 
@@ -65,7 +65,7 @@ def extract_gene_regions_dict(gene_config_df):
     return {ChrInterval(a[0], a[1], a[2] + 1): {'symbol': a[3]} for a
             in
             gene_config_df.loc[:,
-            ['chr', 'start_hg38', 'end_hg38', 'symbol']].values}
+            ['chr', start_col, end_col, 'symbol']].values}
 
 def load_config(path):
     '''
@@ -74,7 +74,13 @@ def load_config(path):
     :param path: config file path
     :return: dataframe
     '''
-    df = pd.read_csv(path, sep=',', header=0)
+    df = pd.read_csv(path, sep=',', header=0, na_values='-')
+
+    # allow for '-' in legacy variants to avoid duplicated information in the file,
+    # in case the boundaries coincide
+    df['start_hg38_legacy_variants'] = df['start_hg38_legacy_variants'].fillna(df['start_hg38']).astype(int)
+    df['end_hg38_legacy_variants'] = df['end_hg38_legacy_variants'].fillna(df['end_hg38']).astype(int)
+
     return df.set_index('symbol', drop=False)
 
 

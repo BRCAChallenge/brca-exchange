@@ -44,7 +44,7 @@ def main():
 
     gene_config_df = utilities.load_config(args.config)
 
-    gene_regions_dict = utilities.extract_gene_regions_dict(gene_config_df)
+    gene_regions_dict = utilities.extract_gene_regions_dict(gene_config_df, 'start_hg38_legacy_variants', 'end_hg38_legacy_variants')
 
     gene_regions_trees = seq_utils.build_interval_trees_by_chr(gene_regions_dict.keys(), lambda c,s,e: None)
 
