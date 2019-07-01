@@ -28,12 +28,12 @@ from variant_merging import (
      )
 
 
-def write_reports_tsv(filename, columns, ready_files_dir):
+def write_reports_tsv(filename, columns, ready_files_dir, genome_regions_symbol_dict):
     reports_output = open(filename, "w")
 
     reports_files = [ready_files_dir + r for r in get_reports_files(ready_files_dir)]
 
-    reports = aggregate_reports(reports_files, columns)
+    reports = aggregate_reports(reports_files, columns, genome_regions_symbol_dict)
 
     reports_output.write("\t".join(columns)+"\n")
 
@@ -54,12 +54,12 @@ def write_reports_tsv(filename, columns, ready_files_dir):
     print "Done"
 
 
-def aggregate_reports(reports_files, columns):
+def aggregate_reports(reports_files, columns, genome_regions_symbol_dict):
     # Gathers all reports from an input directory, normalizes them, and combines them into a single list.
     reports = []
 
     for file in reports_files:
-        file_reports = normalize_reports(file, columns)
+        file_reports = normalize_reports(file, columns, genome_regions_symbol_dict)
         print "finished normalizing %s" % (file)
         reports = reports + file_reports
 
@@ -75,10 +75,10 @@ def get_reports_files(input_directory):
     return reports_files
 
 
-def normalize_reports(file, columns):
+def normalize_reports(file, columns, genome_regions_symbol_dict):
     filename, file_extension = os.path.splitext(file)
     if file_extension == ".vcf":
-        reports = normalize_vcf_reports(file, columns, filename, file_extension)
+        reports = normalize_vcf_reports(file, columns, filename, file_extension, genome_regions_symbol_dict)
     elif file_extension == ".tsv":
         if os.path.basename(file) != ENIGMA_FILE:
             raise Exception("ERROR: received tsv file that is not for ENIGMA: %s" % (file))
@@ -92,7 +92,7 @@ def normalize_reports(file, columns):
     return reports
 
 
-def normalize_vcf_reports(file, columns, filename, file_extension):
+def normalize_vcf_reports(file, columns, filename, file_extension, genome_regions_symbol_dict):
     reports = []
     if "clinvar" in filename.lower() or 'findlay' in filename.lower() or 'gnomad' in filename.lower():
         # If fields contain spaces they cause strict whitespace failure
@@ -108,7 +108,7 @@ def normalize_vcf_reports(file, columns, filename, file_extension):
         genome_coor = ("chr" + str(record.CHROM) + ":g." + str(record.POS) + ":" +
                        record.REF + ">" + str(record.ALT[0]))
 
-        report = associate_chr_pos_ref_alt_with_item(record, len(columns), source, genome_coor)
+        report = associate_chr_pos_ref_alt_with_item(record, len(columns), source, genome_coor, genome_regions_symbol_dict)
         for key, value in FIELD_DICT[source].iteritems():
             try:
                 column_name = key + "_" + source

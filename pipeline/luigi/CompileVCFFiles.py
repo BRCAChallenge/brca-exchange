@@ -22,7 +22,6 @@ from pipeline_common import DefaultPipelineTask
 
 luigi_dir = os.getcwd()
 
-bic_method_dir = os.path.abspath('../bic')
 clinvar_method_dir = os.path.abspath('../clinvar')
 lovd_method_dir = os.path.abspath('../lovd')
 g1k_method_dir = os.path.abspath('../1000_Genomes')
@@ -149,10 +148,10 @@ class CopyClinvarVCFToOutputDir(DefaultPipelineTask):
 ###############################################
 
 
-class DownloadBRCA1BICData(DefaultPipelineTask):
+class DownloadBICData(DefaultPipelineTask):
     def output(self):
         bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        return luigi.LocalTarget(bic_file_dir + "/brca1_data.txt")
+        return luigi.LocalTarget(bic_file_dir + "/bic_brca12.sorted.hg38.vcf")
 
     def run(self):
         bic_file_dir = pipeline_utils.create_path_if_nonexistent(
@@ -160,159 +159,11 @@ class DownloadBRCA1BICData(DefaultPipelineTask):
 
         os.chdir(bic_file_dir)
 
-        brca1_data_url = "https://research.nhgri.nih.gov/projects/bic/Member/cgi-bin/bic_query_result.cgi/brca1_data.txt?table=brca1_exons&download=1&submit=Download"
-        brca1_file_name = "brca1_data.txt"
-        pipeline_utils.download_file_with_basic_auth(brca1_data_url,
-                                                     brca1_file_name,
-                                                     self.cfg.u, self.cfg.p)
+        brca1_data_url = "https://brcaexchange.org/backend/downloads/bic_brca12.sorted.hg38.vcf"
+        pipeline_utils.download_file_and_display_progress(brca1_data_url)
 
 
-@requires(DownloadBRCA1BICData)
-class DownloadBRCA2BICData(DefaultPipelineTask):
-
-    def output(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        return luigi.LocalTarget(bic_file_dir + "/brca2_data.txt")
-
-    def run(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        os.chdir(bic_file_dir)
-
-        brca2_data_url = "https://research.nhgri.nih.gov/projects/bic/Member/cgi-bin/bic_query_result.cgi/brca2_data.txt?table=brca2_exons&download=1&submit=Download"
-        brca2_file_name = "brca2_data.txt"
-        pipeline_utils.download_file_with_basic_auth(brca2_data_url,
-                                                     brca2_file_name,
-                                                     self.cfg.u, self.cfg.p)
-
-
-@requires(DownloadBRCA2BICData)
-class ConvertBRCA1BICDataToVCF(DefaultPipelineTask):
-
-    def output(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        return luigi.LocalTarget(bic_file_dir + "/bic_brca1.hg19.vcf")
-
-    def run(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        os.chdir(bic_method_dir)
-
-        # Note: output file doesn't need to be opened because it's opened inside ./bic2vcf
-        bic_brca1_vcf_file = bic_file_dir + "/bic_brca1.hg19.vcf"
-
-        args = ["./bic2vcf", "-i", bic_file_dir + "/brca1_data.txt", "-o",
-                bic_brca1_vcf_file, "-b", "1", "-g",
-                self.cfg.resources_dir + "/hg19.fa", "-r",
-                self.cfg.resources_dir + "/refseq_annotation.hg19.gp", "-a",
-                bic_method_dir + "/bicAnnotation"]
-        print "Converting BRCA1 BIC data to vcf with the following args: %s" % (
-            args)
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(bic_brca1_vcf_file)
-
-
-@requires(ConvertBRCA1BICDataToVCF)
-class ConvertBRCA2BICDataToVCF(DefaultPipelineTask):
-
-    def output(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        return luigi.LocalTarget(bic_file_dir + "/bic_brca2.hg19.vcf")
-
-    def run(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        os.chdir(bic_method_dir)
-
-        # Note: output file doesn't need to be opened because it's opened inside ./bic2vcf
-        bic_brca2_vcf_file = bic_file_dir + "/bic_brca2.hg19.vcf"
-
-        args = ["./bic2vcf", "-i", bic_file_dir + "/brca2_data.txt", "-o",
-                bic_brca2_vcf_file, "-b", "2", "-g",
-                self.cfg.resources_dir + "/hg19.fa", "-r",
-                self.cfg.resources_dir + "/refseq_annotation.hg19.gp", "-a",
-                bic_method_dir + "/bicAnnotation"]
-        print "Converting BRCA2 BIC data to vcf with the following args: %s" % (
-            args)
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(bic_brca2_vcf_file)
-
-
-@requires(ConvertBRCA2BICDataToVCF)
-class ConcatenateBRCA12BICData(DefaultPipelineTask):
-
-    def output(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        return luigi.LocalTarget(bic_file_dir + "/bic_brca12.hg19.vcf")
-
-    def run(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-
-        bic_brca12_vcf_file = bic_file_dir + "/bic_brca12.hg19.vcf"
-        writable_bic_brca12_vcf_file = open(bic_brca12_vcf_file, 'w')
-        args = ["vcf-concat", bic_file_dir + "/bic_brca1.hg19.vcf",
-                bic_file_dir + "/bic_brca2.hg19.vcf"]
-        print "Concatenating BRCA1/2 BIC data with the following args: %s" % (
-            args)
-        sp = subprocess.Popen(args, stdout=writable_bic_brca12_vcf_file,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(bic_brca12_vcf_file)
-
-
-@requires(ConcatenateBRCA12BICData)
-class CrossmapConcatenatedBICData(DefaultPipelineTask):
-
-    def output(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        return luigi.LocalTarget(bic_file_dir + "/bic_brca12.hg38.vcf")
-
-    def run(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        brca_resources_dir = self.cfg.resources_dir
-
-        bic_brca12_hg38_vcf_file = bic_file_dir + "/bic_brca12.hg38.vcf"
-        writable_bic_brca12_hg38_vcf_file = open(bic_brca12_hg38_vcf_file, 'w')
-        args = ["CrossMap.py", "vcf",
-                brca_resources_dir + "/hg19ToHg38.over.chain.gz",
-                bic_file_dir + "/bic_brca12.hg19.vcf",
-                brca_resources_dir + "/hg38.fa",
-                bic_file_dir + "/bic_brca12.hg38.vcf"]
-        print "Crossmapping concatenated BIC data with the following args: %s" % (
-            args)
-        sp = subprocess.Popen(args, stdout=writable_bic_brca12_hg38_vcf_file,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(bic_brca12_hg38_vcf_file)
-
-
-@requires(CrossmapConcatenatedBICData)
-class SortBICData(DefaultPipelineTask):
-
-    def output(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-        return luigi.LocalTarget(bic_file_dir + "/bic_brca12.sorted.hg38.vcf")
-
-    def run(self):
-        bic_file_dir = self.cfg.file_parent_dir + '/BIC'
-
-        sorted_bic_output_file = bic_file_dir + "/bic_brca12.sorted.hg38.vcf"
-        writable_sorted_bic_output_file = open(sorted_bic_output_file, 'w')
-        args = ["vcf-sort", bic_file_dir + "/bic_brca12.hg38.vcf"]
-        print "Sorting BIC data with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=writable_sorted_bic_output_file,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(sorted_bic_output_file)
-
-
-@requires(SortBICData)
+@requires(DownloadBICData)
 class CopyBICOutputToOutputDir(DefaultPipelineTask):
 
     def output(self):
@@ -517,172 +368,192 @@ class CopyEXLOVDOutputToOutputDir(DefaultPipelineTask):
 #                sharedLOVD                   #
 ###############################################
 
+# NOTE: LOVD data underwent some changes that broke our definition of individual
+# submissions. Until the issue is resolved, skip processing and simply use static
+# data from the February 2019 release (most recent release before breaking data format).
 
-class DownloadLOVDInputFile(DefaultPipelineTask):
-    """ Downloads the shared LOVD data
 
-    If the pipeline is run on a machine from which it is not possible to download the data (currently IP based authentication)
-    the file can be manually staged in the path of `lovd_data_file`. In this case, the task will not be run.
-    """
+# class DownloadLOVDInputFile(DefaultPipelineTask):
+#     """ Downloads the shared LOVD data
 
-    lovd_data_file = luigi.Parameter(default='',
-                                     description='path, where the shared LOVD data will be stored')
+#     If the pipeline is run on a machine from which it is not possible to download the data (currently IP based authentication)
+#     the file can be manually staged in the path of `lovd_data_file`. In this case, the task will not be run.
+#     """
 
-    shared_lovd_data_url = luigi.Parameter(
-        default='https://databases.lovd.nl/shared/export/BRCA',
-        description='URL to download shared LOVD data from')
+#     lovd_data_file = luigi.Parameter(default='',
+#                                      description='path, where the shared LOVD data will be stored')
 
+#     shared_lovd_data_url = luigi.Parameter(
+#         default='https://databases.lovd.nl/shared/export/BRCA',
+#         description='URL to download shared LOVD data from')
+
+#     def output(self):
+#         if len(str(self.lovd_data_file)) == 0:
+#             path = self.cfg.file_parent_dir + "/LOVD/BRCA.txt"
+#         else:
+#             path = str(self.lovd_data_file)
+
+#         return luigi.LocalTarget(path)
+
+#     def run(self):
+#         pipeline_utils.create_path_if_nonexistent(
+#             os.path.dirname(self.output().path))
+#         data = pipeline_utils.urlopen_with_retry(
+#             self.shared_lovd_data_url).read()
+#         with open(self.output().path, "wb") as f:
+#             f.write(data)
+
+
+# @requires(DownloadLOVDInputFile)
+# class NormalizeLOVDSubmissions(DefaultPipelineTask):
+
+#     def output(self):
+#         return luigi.LocalTarget(
+#             self.cfg.file_parent_dir + "/LOVD/LOVD_normalized.tsv")
+
+#     def run(self):
+#         artifacts_dir = pipeline_utils.create_path_if_nonexistent(
+#             self.cfg.output_dir + "/release/artifacts")
+
+#         os.chdir(lovd_method_dir)
+
+#         args = ["python", "normalizeLOVDSubmissions.py", "-i",
+#                 self.input().path, "-o",
+#                 self.output().path]
+
+#         print "Running NormalizeLOVDSubmissions with the following args: %s" % (args)
+
+#         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
+#                               stderr=subprocess.PIPE)
+#         pipeline_utils.print_subprocess_output_and_error(sp)
+
+#         pipeline_utils.check_file_for_contents(self.output().path)
+
+
+# @requires(NormalizeLOVDSubmissions)
+# class CombineEquivalentLOVDSubmissions(DefaultPipelineTask):
+
+#     def output(self):
+#         return luigi.LocalTarget(
+#             self.cfg.file_parent_dir + "/LOVD/LOVD_normalized_combined.tsv")
+
+#     def run(self):
+#         artifacts_dir = pipeline_utils.create_path_if_nonexistent(
+#             self.cfg.output_dir + "/release/artifacts")
+
+#         os.chdir(lovd_method_dir)
+
+#         args = ["python", "combineEquivalentVariantSubmissions.py", "-i",
+#                 self.input().path, "-o",
+#                 self.output().path]
+
+#         print "Running combineEquivalentVariantSubmissions.py with the following args: %s" % (
+#             args)
+
+#         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
+#                               stderr=subprocess.PIPE)
+#         pipeline_utils.print_subprocess_output_and_error(sp)
+
+#         pipeline_utils.check_file_for_contents(self.output().path)
+
+
+# @requires(CombineEquivalentLOVDSubmissions)
+# class ConvertSharedLOVDToVCF(DefaultPipelineTask):
+
+#     def output(self):
+#         return luigi.LocalTarget(
+#             self.cfg.file_parent_dir + "/LOVD/sharedLOVD_brca12.hg19.vcf")
+
+#     def run(self):
+#         brca_resources_dir = self.cfg.resources_dir
+#         artifacts_dir = pipeline_utils.create_path_if_nonexistent(
+#             self.cfg.output_dir + "/release/artifacts")
+
+#         os.chdir(lovd_method_dir)
+
+#         args = ["python", "lovd2vcf.py", "-i", self.input().path, "-o",
+#                 self.output().path, "-a", "sharedLOVDAnnotation",
+#                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
+#                 brca_resources_dir + "/hg19.fa", "-e",
+#                 artifacts_dir + "/LOVD_error_variants.txt",
+#                 "-s", "LOVD"]
+
+#         print "Running lovd2vcf with the following args: %s" % (args)
+
+#         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
+#                               stderr=subprocess.PIPE)
+#         pipeline_utils.print_subprocess_output_and_error(sp)
+
+#         pipeline_utils.check_file_for_contents(self.output().path)
+
+
+# @requires(ConvertSharedLOVDToVCF)
+# class CrossmapConcatenatedSharedLOVDData(DefaultPipelineTask):
+
+#     def output(self):
+#         lovd_file_dir = self.cfg.file_parent_dir + "/LOVD"
+#         return luigi.LocalTarget(lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf")
+
+#     def run(self):
+#         lovd_file_dir = self.cfg.file_parent_dir + "/LOVD"
+#         brca_resources_dir = self.cfg.resources_dir
+
+#         args = ["CrossMap.py", "vcf",
+#                 brca_resources_dir + "/hg19ToHg38.over.chain.gz",
+#                 lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf",
+#                 brca_resources_dir + "/hg38.fa",
+#                 lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
+#         print "Running CrossMap.py with the following args: %s" % (args)
+#         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
+#                               stderr=subprocess.PIPE)
+#         pipeline_utils.print_subprocess_output_and_error(sp)
+
+#         pipeline_utils.check_file_for_contents(
+#             lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf")
+
+
+# @requires(CrossmapConcatenatedSharedLOVDData)
+# class SortSharedLOVDOutput(DefaultPipelineTask):
+
+#     def output(self):
+#         lovd_file_dir = self.cfg.file_parent_dir + "/LOVD"
+#         return luigi.LocalTarget(
+#             lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
+
+#     def run(self):
+#         lovd_file_dir = self.cfg.file_parent_dir + "/LOVD"
+
+#         sorted_lovd_output_file = lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf"
+#         writable_sorted_lovd_output_file = open(sorted_lovd_output_file, 'w')
+#         args = ["vcf-sort", lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
+#         print "Running vcf-sort with the following args: %s" % (args)
+#         sp = subprocess.Popen(args, stdout=writable_sorted_lovd_output_file,
+#                               stderr=subprocess.PIPE)
+#         pipeline_utils.print_subprocess_output_and_error(sp)
+#         print "Sorted BRCA1/2 hg38 vcf file into %s" % (
+#             writable_sorted_lovd_output_file)
+
+#         pipeline_utils.check_file_for_contents(
+#             lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
+
+# Until issues are resolved with LOVD, use static data generated on 14 February, 2019.
+class DownloadStaticLOVDData(DefaultPipelineTask):
     def output(self):
-        if len(str(self.lovd_data_file)) == 0:
-            path = self.cfg.file_parent_dir + "/LOVD/BRCA.txt"
-        else:
-            path = str(self.lovd_data_file)
-
-        return luigi.LocalTarget(path)
-
-    def run(self):
-        pipeline_utils.create_path_if_nonexistent(
-            os.path.dirname(self.output().path))
-        data = pipeline_utils.urlopen_with_retry(
-            self.shared_lovd_data_url).read()
-        with open(self.output().path, "wb") as f:
-            f.write(data)
-
-
-@requires(DownloadLOVDInputFile)
-class NormalizeLOVDSubmissions(DefaultPipelineTask):
-
-    def output(self):
-        return luigi.LocalTarget(
-            self.cfg.file_parent_dir + "/LOVD/LOVD_normalized.tsv")
-
-    def run(self):
-        artifacts_dir = pipeline_utils.create_path_if_nonexistent(
-            self.cfg.output_dir + "/release/artifacts")
-
-        os.chdir(lovd_method_dir)
-
-        args = ["python", "normalizeLOVDSubmissions.py", "-i",
-                self.input().path, "-o",
-                self.output().path]
-
-        print "Running NormalizeLOVDSubmissions with the following args: %s" % (args)
-
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(self.output().path)
-
-
-@requires(NormalizeLOVDSubmissions)
-class CombineEquivalentLOVDSubmissions(DefaultPipelineTask):
-
-    def output(self):
-        return luigi.LocalTarget(
-            self.cfg.file_parent_dir + "/LOVD/LOVD_normalized_combined.tsv")
-
-    def run(self):
-        artifacts_dir = pipeline_utils.create_path_if_nonexistent(
-            self.cfg.output_dir + "/release/artifacts")
-
-        os.chdir(lovd_method_dir)
-
-        args = ["python", "combineEquivalentVariantSubmissions.py", "-i",
-                self.input().path, "-o",
-                self.output().path]
-
-        print "Running combineEquivalentVariantSubmissions.py with the following args: %s" % (
-            args)
-
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(self.output().path)
-
-
-@requires(CombineEquivalentLOVDSubmissions)
-class ConvertSharedLOVDToVCF(DefaultPipelineTask):
-
-    def output(self):
-        return luigi.LocalTarget(
-            self.cfg.file_parent_dir + "/LOVD/sharedLOVD_brca12.hg19.vcf")
-
-    def run(self):
-        brca_resources_dir = self.cfg.resources_dir
-        artifacts_dir = pipeline_utils.create_path_if_nonexistent(
-            self.cfg.output_dir + "/release/artifacts")
-
-        os.chdir(lovd_method_dir)
-
-        args = ["python", "lovd2vcf.py", "-i", self.input().path, "-o",
-                self.output().path, "-a", "sharedLOVDAnnotation",
-                "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa", "-e",
-                artifacts_dir + "/LOVD_error_variants.txt",
-                "-s", "LOVD"]
-
-        print "Running lovd2vcf with the following args: %s" % (args)
-
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(self.output().path)
-
-
-@requires(ConvertSharedLOVDToVCF)
-class CrossmapConcatenatedSharedLOVDData(DefaultPipelineTask):
-
-    def output(self):
-        lovd_file_dir = self.cfg.file_parent_dir + "/LOVD"
-        return luigi.LocalTarget(lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf")
-
-    def run(self):
-        lovd_file_dir = self.cfg.file_parent_dir + "/LOVD"
-        brca_resources_dir = self.cfg.resources_dir
-
-        args = ["CrossMap.py", "vcf",
-                brca_resources_dir + "/hg19ToHg38.over.chain.gz",
-                lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf",
-                brca_resources_dir + "/hg38.fa",
-                lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
-        print "Running CrossMap.py with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(
-            lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf")
-
-
-@requires(CrossmapConcatenatedSharedLOVDData)
-class SortSharedLOVDOutput(DefaultPipelineTask):
-
-    def output(self):
-        lovd_file_dir = self.cfg.file_parent_dir + "/LOVD"
+        lovd_file_dir = self.cfg.file_parent_dir + '/LOVD'
         return luigi.LocalTarget(
             lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
 
     def run(self):
-        lovd_file_dir = self.cfg.file_parent_dir + "/LOVD"
+        lovd_file_dir = pipeline_utils.create_path_if_nonexistent(
+            self.cfg.file_parent_dir + '/LOVD')
 
-        sorted_lovd_output_file = lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf"
-        writable_sorted_lovd_output_file = open(sorted_lovd_output_file, 'w')
-        args = ["vcf-sort", lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
-        print "Running vcf-sort with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=writable_sorted_lovd_output_file,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-        print "Sorted BRCA1/2 hg38 vcf file into %s" % (
-            writable_sorted_lovd_output_file)
+        os.chdir(lovd_file_dir)
 
-        pipeline_utils.check_file_for_contents(
-            lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
+        static_sharedLOVD_data_url = "https://brcaexchange.org/backend/downloads/sharedLOVD_brca12.sorted.hg38.vcf"
+        pipeline_utils.download_file_and_display_progress(static_sharedLOVD_data_url)
 
 
-@requires(SortSharedLOVDOutput)
+@requires(DownloadStaticLOVDData)
 class CopySharedLOVDOutputToOutputDir(DefaultPipelineTask):
 
     def output(self):
@@ -905,11 +776,11 @@ class CopyG1KOutputToOutputDir(DefaultPipelineTask):
 ###############################################
 
 
-class DownloadEXACVCFGZFile(DefaultPipelineTask):
+class DownloadStaticExACData(DefaultPipelineTask):
     def output(self):
         exac_file_dir = self.cfg.file_parent_dir + '/exac'
         return luigi.LocalTarget(
-            exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz")
+            exac_file_dir + "/exac.brca12.sorted.hg38.vcf")
 
     def run(self):
         exac_file_dir = pipeline_utils.create_path_if_nonexistent(
@@ -917,141 +788,11 @@ class DownloadEXACVCFGZFile(DefaultPipelineTask):
 
         os.chdir(exac_file_dir)
 
-        exac_vcf_gz_url = "ftp://ftp.broadinstitute.org/pub/ExAC_release/current/subsets/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz"
-        exac_vcf_gz_file_name = exac_vcf_gz_url.split('/')[-1]
-        pipeline_utils.download_file_and_display_progress(exac_vcf_gz_url,
-                                                          exac_vcf_gz_file_name)
+        exac_vcf_gz_url = "https://brcaexchange.org/backend/downloads/exac.brca12.sorted.hg38.vcf"
+        pipeline_utils.download_file_and_display_progress(exac_vcf_gz_url)
 
 
-@requires(DownloadEXACVCFGZFile)
-class DownloadEXACVCFGZTBIFile(DefaultPipelineTask):
-    def output(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-        return luigi.LocalTarget(
-            exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz.tbi")
-
-    def run(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-        os.chdir(exac_file_dir)
-
-        exac_vcf_gz_tbi_url = "ftp://ftp.broadinstitute.org/pub/ExAC_release/current/subsets/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz.tbi"
-        exac_vcf_gz_tbi_file_name = exac_vcf_gz_tbi_url.split('/')[-1]
-        pipeline_utils.download_file_and_display_progress(exac_vcf_gz_tbi_url,
-                                                          exac_vcf_gz_tbi_file_name)
-
-
-@requires(DownloadEXACVCFGZTBIFile)
-class ExtractBRCA1DataFromExac(DefaultPipelineTask):
-    def output(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-        return luigi.LocalTarget(exac_file_dir + "/exac.brca1.hg19.vcf")
-
-    def run(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-
-        exac_brca1_hg19_vcf_file = exac_file_dir + "/exac.brca1.hg19.vcf"
-        writable_exac_brca1_hg19_vcf_file = open(exac_brca1_hg19_vcf_file, 'w')
-
-        args = ["tabix", "-h",
-                exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz",
-                "17:41196312-41277500"]
-        print "Running tabix with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=writable_exac_brca1_hg19_vcf_file,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(exac_brca1_hg19_vcf_file)
-
-
-@requires(ExtractBRCA1DataFromExac)
-class ExtractBRCA2DataFromExac(DefaultPipelineTask):
-    def output(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-        return luigi.LocalTarget(exac_file_dir + "/exac.brca2.hg19.vcf")
-
-    def run(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-
-        exac_brca2_hg19_vcf_file = exac_file_dir + "/exac.brca2.hg19.vcf"
-        writable_exac_brca2_hg19_vcf_file = open(exac_brca2_hg19_vcf_file, 'w')
-
-        args = ["tabix", "-h",
-                exac_file_dir + "/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz",
-                "13:32889617-32973809"]
-        print "Running tabix with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=writable_exac_brca2_hg19_vcf_file,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(exac_brca2_hg19_vcf_file)
-
-
-@requires(ExtractBRCA2DataFromExac)
-class ConcatenateEXACData(DefaultPipelineTask):
-    def output(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-        return luigi.LocalTarget(exac_file_dir + "/exac.brca12.hg19.vcf")
-
-    def run(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-
-        exac_brca12_hg19_vcf_file = exac_file_dir + "/exac.brca12.hg19.vcf"
-        writable_exac_brca12_hg19_vcf_file = open(exac_brca12_hg19_vcf_file,
-                                                  'w')
-        args = ["vcf-concat", exac_file_dir + "/exac.brca1.hg19.vcf",
-                exac_file_dir + "/exac.brca2.hg19.vcf"]
-        print "Running tabix with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=writable_exac_brca12_hg19_vcf_file,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(exac_brca12_hg19_vcf_file)
-
-
-@requires(ConcatenateEXACData)
-class CrossmapEXACData(DefaultPipelineTask):
-    def output(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-        return luigi.LocalTarget(exac_file_dir + "/exac.brca12.hg38.vcf")
-
-    def run(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-        brca_resources_dir = self.cfg.resources_dir
-
-        args = ["CrossMap.py", "vcf",
-                brca_resources_dir + "/hg19ToHg38.over.chain.gz",
-                exac_file_dir + "/exac.brca12.hg19.vcf",
-                brca_resources_dir + "/hg38.fa",
-                exac_file_dir + "/exac.brca12.hg38.vcf"]
-        print "Running CrossMap.py with the following args: %s" % (args)
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(
-            exac_file_dir + "/exac.brca12.hg38.vcf")
-
-
-@requires(CrossmapEXACData)
-class SortEXACData(DefaultPipelineTask):
-    def output(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-        return luigi.LocalTarget(exac_file_dir + "/exac.brca12.sorted.hg38.vcf")
-
-    def run(self):
-        exac_file_dir = self.cfg.file_parent_dir + '/exac'
-
-        with self.output().open("w") as vcf_file:
-            args = ["vcf-sort", exac_file_dir + "/exac.brca12.hg38.vcf"]
-            print "Running tabix with the following args: %s" % (args)
-            sp = subprocess.Popen(args, stdout=vcf_file, stderr=subprocess.PIPE)
-            pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(
-            exac_file_dir + "/exac.brca12.sorted.hg38.vcf")
-
-
-@requires(SortEXACData)
+@requires(DownloadStaticExACData)
 class CopyEXACOutputToOutputDir(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(
@@ -1278,14 +1019,14 @@ class MergeVCFsIntoTSVFile(DefaultPipelineTask):
         print(self.input())
         artifacts_dir = pipeline_utils.create_path_if_nonexistent(
             self.cfg.output_dir + "/release/artifacts/")
-        brca_resources_dir = self.cfg.resources_dir
 
         os.chdir(data_merging_method_dir)
 
         args = ["python", "variant_merging.py", "-i", self.cfg.output_dir + "/",
                 "-o",
-                artifacts_dir, "-r", brca_resources_dir + "/", "-a",
-                artifacts_dir, "-v"]
+                artifacts_dir, "-a",
+                artifacts_dir, "-v",
+                "-c", self.cfg.gene_config_path]
         print "Running variant_merging.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)

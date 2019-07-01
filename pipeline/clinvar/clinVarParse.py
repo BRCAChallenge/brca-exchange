@@ -8,16 +8,15 @@ import codecs
 import re
 import sys
 import xml.etree.ElementTree as ET
-
 import logging
 
 def printHeader():
     print("\t".join(("HGVS", "Submitter", "ClinicalSignificance",
                      "DateLastUpdated", "DateSignificanceLastEvaluated", "SCV",
-                     "SCV_Version", "ID", "Origin",
-                     "Method",
-                     "Genomic_Coordinate", "Symbol", "Protein", "Description",
-                     "SummaryEvidence", "ReviewStatus", "Synonyms")))
+                     "SCV_Version", "ID", "Origin", "Method", "Genomic_Coordinate",
+                     "Symbol", "Protein", "Description", "SummaryEvidence",
+                     "ReviewStatus", "ConditionType", "ConditionValue",
+                     "ConditionDB_ID", "Synonyms")))
 
 MULTI_VALUE_SEP = ','
 
@@ -55,7 +54,6 @@ def processSubmission(submissionSet, assembly):
 
                 # Omit the variants that don't have any genomic start coordinate indicated.
                 if start != None and start != "None" and start != "NA":
-
                     print("\t".join((str(hgvs),
                                      oa.submitter.encode('utf-8'),
                                      str(oa.clinicalSignificance),
@@ -72,6 +70,9 @@ def processSubmission(submissionSet, assembly):
                                      str(oa.description),
                                      str(oa.summaryEvidence),
                                      str(oa.reviewStatus),
+                                     str(ra.condition_type),
+                                     str(ra.condition_value),
+                                     ",".join(ra.condition_db_id) if isinstance(ra.condition_db_id, list) else str(ra.condition_db_id),
                                      str(synonyms))))
 
 

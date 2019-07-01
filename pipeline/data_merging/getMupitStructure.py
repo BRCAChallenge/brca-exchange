@@ -103,7 +103,7 @@ def get_brca_struct(chrom, pos):
     Mupit supports querying with multiple positions at once, though brca exchange does not do this.
     3) no_res. Select the structure with the most residues (amino acids)
     '''
-    main_url = 'http://mupit.icm.jhu.edu/MuPIT_Interactive'
+    main_url = 'https://mupit.icm.jhu.edu/MuPIT_Interactive'
     brca_structures = ['1t15','1jm7','4igk','fENSP00000380152_7']
     query_url = main_url+'/rest/showstructure/query'
     params = {

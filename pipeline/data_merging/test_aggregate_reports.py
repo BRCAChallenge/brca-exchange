@@ -1,14 +1,13 @@
-import pytest
 import unittest
-import tempfile
-import csv
-from os import path, getcwd
+import os
+from os import path
 import aggregate_reports
-
+import utilities
 
 VCF_TESTDATA_FILENAME = path.join(path.dirname(__file__), 'test_files/1000_Genomes.vcf')
 TSV_TESTDATA_FILENAME = path.join(path.dirname(__file__), 'test_files/enigma_from_clinvar.tsv')
 INPUT_DIRECTORY = path.join(path.dirname(__file__), 'test_files/')
+
 
 class TestStringMethods(unittest.TestCase):
 
@@ -32,10 +31,12 @@ class TestStringMethods(unittest.TestCase):
                         'SCV_ClinVar', 'Allele_Origin_ClinVar',
                         'Method_ClinVar', 'Description_ClinVar',
                         'Summary_Evidence_ClinVar', 'Review_Status_ClinVar',
-                        'Individuals_LOVD', 'BX_ID_LOVD', 'Variant_effect_LOVD',
-                        'Variant_frequency_LOVD', 'HGVS_cDNA_LOVD',
-                        'HGVS_protein_LOVD', 'Genetic_origin_LOVD', 'RNA_LOVD',
-                        'Submitters_LOVD', 'DBID_LOVD', 'Functional_analysis_technique_LOVD',
+                        'Condition_Type_ClinVar', 'Condition_Value_ClinVar',
+                        'Condition_DB_ID_ClinVar', 'Individuals_LOVD',
+                        'BX_ID_LOVD', 'Variant_effect_LOVD', 'Variant_frequency_LOVD',
+                        'HGVS_cDNA_LOVD', 'HGVS_protein_LOVD', 'Genetic_origin_LOVD',
+                        'RNA_LOVD', 'Submitters_LOVD', 'DBID_LOVD',
+                        'Functional_analysis_technique_LOVD',
                         'Functional_analysis_result_LOVD', 'Created_date_LOVD',
                         'Edited_date_LOVD', 'Submission_ID_LOVD',
                         'BX_ID_ESP', 'Minor_allele_frequency_percent_ESP',
@@ -183,14 +184,19 @@ class TestStringMethods(unittest.TestCase):
         self.vcf_test_file = VCF_TESTDATA_FILENAME
         self.tsv_test_file = TSV_TESTDATA_FILENAME
 
+        pwd = os.path.dirname(os.path.realpath(__file__))
+
+        gene_config_df = utilities.load_config(os.path.join(pwd, '..', 'luigi', 'gene_config_brca_only.txt'))
+        self.genome_regions_symbol_dict = utilities.get_genome_regions_symbol_dict(gene_config_df)
+
     def test_normalize_reports_vcf(self):
-        file_reports = aggregate_reports.normalize_reports(self.vcf_test_file, self.columns)
+        file_reports = aggregate_reports.normalize_reports(self.vcf_test_file, self.columns, self.genome_regions_symbol_dict)
         first_report = file_reports[0]
         self.assertEqual(len(file_reports), 2)
         self.assertEqual(first_report[aggregate_reports.COLUMN_SOURCE], '1000_Genomes')
 
     def test_normalize_reports_tsv(self):
-        file_reports = aggregate_reports.normalize_reports(self.tsv_test_file, self.columns)
+        file_reports = aggregate_reports.normalize_reports(self.tsv_test_file, self.columns, self.genome_regions_symbol_dict)
         first_report = file_reports[0]
         self.assertEqual(len(file_reports), 2)
         self.assertEqual(first_report[aggregate_reports.COLUMN_SOURCE], 'ENIGMA')
@@ -202,7 +208,7 @@ class TestStringMethods(unittest.TestCase):
 
     def test_aggregate_reports(self):
         reports_files = [INPUT_DIRECTORY + r for r in aggregate_reports.get_reports_files(INPUT_DIRECTORY)]
-        reports = aggregate_reports.aggregate_reports(reports_files, self.columns)
+        reports = aggregate_reports.aggregate_reports(reports_files, self.columns, self.genome_regions_symbol_dict)
 
         # Each test file contains two reports, check that all reports are present
         self.assertEqual(len(reports), (len(self.sources) * 2))
@@ -221,7 +227,7 @@ class TestStringMethods(unittest.TestCase):
 
     def test_aggregate_reports_maintains_proper_variant_effect_lovd_formatting(self):
         LOVD_reports_file = [INPUT_DIRECTORY + r for r in aggregate_reports.get_reports_files(INPUT_DIRECTORY) if r == 'LOVD.vcf']
-        reports = aggregate_reports.aggregate_reports(LOVD_reports_file, self.columns)
+        reports = aggregate_reports.aggregate_reports(LOVD_reports_file, self.columns, self.genome_regions_symbol_dict)
 
         # Check that two of each source are present
         variant_effect_lovd_index = self.columns.index("Variant_effect_LOVD")

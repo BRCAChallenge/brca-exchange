@@ -1,3 +1,5 @@
+from collections import namedtuple
+
 # GENOMIC VERSION:
 VERSION = "hg38" # equivalent to GRCh38
 
@@ -37,6 +39,9 @@ CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "Review_Status": "ReviewStatus",
                   "Synonyms": "Synonyms",
                   "Summary_Evidence": "SummaryEvidence",
+                  "Condition_Type": "ConditionType",
+                  "Condition_Value": "ConditionValue",
+                  "Condition_DB_ID": "ConditionDB_ID",
                   "BX_ID": "BX_ID"}
 
 LOVD_FIELDS = {"Variant_frequency": "frequency",
@@ -253,3 +258,4 @@ GNOMAD_FILE = "gnomAD.clean.sorted.hg38.vcf"
 # Functional Assays
 FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS_FILE = "findlay_BRCA1_ring_function_scores.clean.sorted.hg38.vcf"
 
+VCFVariant = namedtuple("VCFVariant", "chr,pos,ref,alt")

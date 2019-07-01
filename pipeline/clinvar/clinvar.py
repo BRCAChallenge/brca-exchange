@@ -2,6 +2,7 @@
 ClinVarUtils: basic
 """
 
+
 def isCurrent(element):
     """Determine if the indicated clinvar set is current"""
     rr = element.find("RecordStatus")
@@ -79,9 +80,9 @@ class genomicCoordinates:
 
 
 class variant:
-    """The Measure set.  We are interested in the variants specifically, 
+    """The Measure set.  We are interested in the variants specifically,
     but measure sets can be other things as well, such as haplotypes"""
-    
+
     def __init__(self, element, name, id, debug=False):
         self.element = element
         self.id = id
@@ -109,7 +110,7 @@ class variant:
 
 class referenceAssertion:
     """For gathering the reference assertion"""
-    
+
     def __init__(self, element, debug=False):
         self.element = element
         self.id = element.get("ID")
@@ -155,17 +156,39 @@ class referenceAssertion:
                 variantName = none
             else:
                 variantName = name.find("ElementValue").text
-            self.variant = variant(measureSet.find("Measure"), variantName, 
-                                   measureSet.get("ID"), 
+            self.variant = variant(measureSet.find("Measure"), variantName,
+                                   measureSet.get("ID"),
                                    debug=debug)
 
         self.synonyms = extractSynonyms(element)
 
+        # extract condition
+        self.condition_type = None
+        self.condition_value = None
+        self.condition_db_id = None
+        traitSet = element.find("TraitSet")
+        if traitSet != None:
+            self.condition_type = traitSet.attrib["Type"]
+            trait = traitSet.find("Trait")
+            if trait != None:
+                names = trait.findall("Name")
+                if names != None and len(names) > 0:
+                    for name in names:
+                        ev = name.find("ElementValue")
+                        if ev != None and ev.attrib["Type"] == "Preferred":
+                            self.condition_value = textIfPresent(name, "ElementValue")
+                        break
+                xrefs = trait.findall("XRef")
+                if xrefs != None and len(xrefs) > 0:
+                    self.condition_db_id = []
+                    for xref in xrefs:
+                        self.condition_db_id.append(xref.attrib["DB"] + "_" + xref.attrib["ID"])
+
 
 class clinVarAssertion:
-    """Class for representing one submission (i.e. one annotation of a 
+    """Class for representing one submission (i.e. one annotation of a
     submitted variant"""
-    
+
     def __init__(self, element, debug=False):
         self.element = element
         self.id = element.get("ID")
@@ -208,11 +231,11 @@ class clinVarAssertion:
         self.dateLastUpdated = cva.get("DateUpdated")
 
         self.synonyms = extractSynonyms(element)
-                 
+
 
 class clinVarSet:
     """Container class for a ClinVarSet record, which is a set of submissions
-    that were submitted to ClinVar together.  In the ClinVar terminology, 
+    that were submitted to ClinVar together.  In the ClinVar terminology,
     each ClinVarSet is one aggregate record ("RCV Accession"), which contains
     one or more submissions ("SCV Accessions").
     """

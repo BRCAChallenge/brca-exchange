@@ -386,6 +386,9 @@ class Report(models.Model):
     Description_ClinVar = models.TextField(default="-")
     Summary_Evidence_ClinVar = models.TextField(default="-")
     Review_Status_ClinVar = models.TextField(default="-")
+    Condition_Type_ClinVar = models.TextField(default="-")
+    Condition_Value_ClinVar = models.TextField(default="-")
+    Condition_DB_ID_ClinVar = models.TextField(default="-")
     Synonyms_ClinVar = models.TextField(default="-")
     BX_ID_LOVD = models.TextField()
     Variant_frequency_LOVD = models.TextField()
@@ -1003,3 +1006,8 @@ class InSilicoPriors(models.Model):
 
     class Meta:
         db_table = 'insilicopriors'
+
+
+class VariantRepresentation(models.Model):
+    Genomic_Coordinate_hg38 = models.TextField(null=False)
+    Description = JSONField(null=False, default={})

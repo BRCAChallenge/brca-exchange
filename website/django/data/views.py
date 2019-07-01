@@ -13,8 +13,10 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.gzip import gzip_page
 
-from .models import Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType, Report, ReportDiff, \
-        InSilicoPriors, VariantPaper, Paper
+from .models import (
+    Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType, Report, ReportDiff,
+    InSilicoPriors, VariantPaper, Paper, VariantRepresentation
+)
 from django.views.decorators.http import require_http_methods
 
 # GA4GH related imports
@@ -113,6 +115,25 @@ def variant(request):
     return response
 
 
+def variantreps(request):
+    vr_reps = list(
+        VariantRepresentation.objects.raw("""
+        select VR.id, VR."Genomic_Coordinate_hg38", CV.id as Variant_id, VR."Description" from data_variantrepresentation VR
+        inner join currentvariant CV on CV."Genomic_Coordinate_hg38" = VR."Genomic_Coordinate_hg38"
+        """)
+    )
+
+    response = JsonResponse({
+        "count": len(vr_reps),
+        "data": list(
+            {'id': x.variant_id, 'Genomic_Coordinate_hg38': x.Genomic_Coordinate_hg38, 'vr_rep': x.Description}
+            for x in vr_reps
+        )
+    })
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
+
+
 def variant_reports(request, variant_id):
     variant_id = int(variant_id)
     query = Report.objects.filter(Variant_id=variant_id)
@@ -125,7 +146,11 @@ def variant_reports(request, variant_id):
                 # if no key is available, skip report history
                 report_query = [report]
             else:
-                report_query = Report.objects.filter(SCV_ClinVar=key).order_by('-Data_Release_id').select_related('Data_Release')
+                # extend the selection w/reports that have matching keys,
+                # but only up until the requested variants' release
+                report_query = Report.objects\
+                    .filter(Data_Release_id__lte=report.Data_Release.id, SCV_ClinVar=key)\
+                    .order_by('-Data_Release_id').select_related('Data_Release')
             report_versions.extend(map(report_to_dict, report_query))
         elif report.Source == "LOVD":
             key = report.Submission_ID_LOVD
@@ -133,7 +158,11 @@ def variant_reports(request, variant_id):
                 # if no key is available, skip report history
                 report_query = [report]
             else:
-                report_query = Report.objects.filter(Submission_ID_LOVD=key).order_by('-Data_Release_id').select_related('Data_Release')
+                # extend the selection w/reports that have matching keys,
+                # but only up until the requested variants' release (i.e., same as for ClinVar)
+                report_query = Report.objects\
+                    .filter(Data_Release_id__lte=report.Data_Release.id, Submission_ID_LOVD=key)\
+                    .order_by('-Data_Release_id').select_related('Data_Release')
             report_versions.extend(map(report_to_dict, report_query))
 
     response = JsonResponse({"data": report_versions})
