@@ -17,7 +17,5 @@
 	This is the SCV accession from the ClinVar repository.
 * #### Date last updated \(ClinVar\) ((report-Date_Last_Updated_ClinVar))
 	The field that shows the date the variant was last submitted to ClinVar. Note that this date is not equivalent to the date last evaluated.
-* ##### _Coming Soon:_
-	Updated Classification descriptions, Information about tile functionality, resources for star review, definition of summary evidence.
 
-For more information, please visit the [ClinVar website](https://www.ncbi.nlm.nih.gov/clinvar/) or the [ClinVar Data Dictionary](https://www.ncbi.nlm.nih.gov/projects/clinvar/ClinVarDataDictionary.pdf).
+For more information about classifications, star reviews, condition(s), summary evidence, the submission process, or other ClinVar data, please visit the [ClinVar website](https://www.ncbi.nlm.nih.gov/clinvar/) or the [ClinVar Data Dictionary](https://www.ncbi.nlm.nih.gov/projects/clinvar/ClinVarDataDictionary.pdf).
