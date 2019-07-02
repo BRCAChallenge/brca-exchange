@@ -436,9 +436,11 @@ def test_find_equivalent_variant(fetch_seq_mock_data):
 
 def test_find_equivalent_variant_whole_seq(fetch_seq_mock_data):
     with patch.object(bioutils.seqfetcher, 'fetch_seq', side_effect=lambda ac, s, e: fetch_seq_mock_data[(str(ac), str(s), str(e))]):
-        gene_config_path = os.path.join(pwd, '..', 'luigi', 'gene_config_brca_only.txt')
+        gene_config_path = os.path.join(pwd, 'test_files', 'gene_config_test.txt')
 
-        seq_wrapper = seq_utils.SeqRepoWrapper(regions_preload=extract_gene_regions_dict(load_config(gene_config_path)).keys())
+        cfg = load_config(gene_config_path)
+        regions = extract_gene_regions_dict(cfg, 'start_hg38_legacy_variants', 'end_hg38_legacy_variants').keys()
+        seq_wrapper = seq_utils.SeqRepoWrapper(regions_preload=regions)
 
         # empty case
         assert [] == find_equivalent_variants_whole_seq({}, seq_wrapper)

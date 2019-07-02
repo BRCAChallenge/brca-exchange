@@ -94,8 +94,8 @@ class TestStringMethods(unittest.TestCase):
 
         pwd = os.path.dirname(os.path.realpath(__file__))
 
-        gene_config_df = utilities.load_config(os.path.join(pwd, '..', 'luigi', 'gene_config_brca_only.txt'))
-        self.genome_regions_symbol_dict = utilities.get_genome_regions_symbol_dict(gene_config_df)
+        gene_config_df = utilities.load_config(os.path.join(pwd, 'test_files', 'gene_config_test.txt'))
+        self.genome_regions_symbol_dict = utilities.get_genome_regions_symbol_dict(gene_config_df, 'start_hg38_legacy_variants', 'end_hg38_legacy_variants')
 
     def test_normalize_reports_vcf(self):
         file_reports = aggregate_reports.normalize_reports(self.vcf_test_file, self.columns, self.genome_regions_symbol_dict)
