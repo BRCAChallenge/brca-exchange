@@ -1012,7 +1012,8 @@ class MergeVCFsIntoTSVFile(DefaultPipelineTask):
     def output(self):
         artifacts_dir = pipeline_utils.create_path_if_nonexistent(
             self.cfg.output_dir + "/release/artifacts/")
-        return luigi.LocalTarget(artifacts_dir + "merged.tsv")
+        return [luigi.LocalTarget(artifacts_dir + "merged.tsv"),
+                luigi.LocalTarget(artifacts_dir + "reports.tsv")]
 
     def run(self):
         print("running merged")
@@ -1033,6 +1034,7 @@ class MergeVCFsIntoTSVFile(DefaultPipelineTask):
         pipeline_utils.print_subprocess_output_and_error(sp)
 
         pipeline_utils.check_file_for_contents(artifacts_dir + "merged.tsv")
+        pipeline_utils.check_file_for_contents(artifacts_dir + "reports.tsv")
 
 
 @requires(MergeVCFsIntoTSVFile)
