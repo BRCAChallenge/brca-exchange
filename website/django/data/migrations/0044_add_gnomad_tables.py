@@ -292,4 +292,14 @@ class Migration(migrations.Migration):
             name='Gnomad_Data',
             field=models.ForeignKey(default=data.models.get_default_gnomad_variant_data, on_delete=django.db.models.deletion.CASCADE, to='data.VariantGnomadData'),
         ),
+        migrations.RunSQL(
+            """
+            DROP MATERIALIZED VIEW IF EXISTS currentvariant;
+            CREATE MATERIALIZED VIEW currentvariant AS (
+                SELECT * FROM "variant" WHERE (
+                    "id" IN ( SELECT DISTINCT ON ("Genomic_Coordinate_hg38") "id" FROM "variant" ORDER BY "Genomic_Coordinate_hg38" ASC, "Data_Release_id" DESC )
+                )
+            );
+            """
+        ),
     ]
