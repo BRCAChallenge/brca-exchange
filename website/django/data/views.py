@@ -15,7 +15,8 @@ from django.views.decorators.gzip import gzip_page
 
 from .models import (
     Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType, Report, ReportDiff,
-    InSilicoPriors, VariantPaper, Paper, VariantRepresentation
+    InSilicoPriors, VariantGnomadData, ReportGnomadData, VariantPaper, Paper,
+    VariantRepresentation
 )
 from django.views.decorators.http import require_http_methods
 
@@ -107,7 +108,8 @@ def variant(request):
         .order_by('-Data_Release_id')\
         .select_related('Data_Release')\
         .select_related('Mupit_Structure')\
-        .select_related('insilicopriors')
+        .select_related('insilicopriors')\
+        .select_related('variantgnomaddata')
 
     variant_versions = map(variant_to_dict, query)
     response = JsonResponse({"data": variant_versions})
@@ -198,6 +200,11 @@ def variant_to_dict(variant_object):
         variant_dict["priors"] = None
 
     try:
+        variant_dict["gnomad_data"] = model_to_dict(variant_object.variantgnomaddata)
+    except VariantGnomadData.DoesNotExist:
+        variant_dict["gnomad_data"] = None
+
+    try:
         variant_diff = VariantDiff.objects.get(variant_id=variant_object.id)
         variant_dict["Diff"] = variant_diff.diff
     except VariantDiff.DoesNotExist:
@@ -226,6 +233,11 @@ def report_to_dict(report_object):
             return report_dict
     except UnboundLocalError as e:
         logging.error(repr(e))
+
+    try:
+        report_dict["gnomad_data"] = model_to_dict(report_object.reportgnomaddata)
+    except ReportGnomadData.DoesNotExist:
+        report_dict["gnomad_data"] = None
 
     try:
         report_diff = ReportDiff.objects.get(report_id=report_object.id)
