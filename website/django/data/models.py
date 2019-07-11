@@ -343,7 +343,6 @@ class Variant(models.Model):
     # Data Versioning
     Data_Release = models.ForeignKey(DataRelease)
     Change_Type = models.ForeignKey(ChangeType)
-    Gnomad_Data = models.ForeignKey(VariantGnomadData, default=get_default_gnomad_variant_data)
 
     objects = VariantManager()
 
@@ -624,8 +623,6 @@ class Report(models.Model):
 
     Data_Release = models.ForeignKey(DataRelease)
     Change_Type = models.ForeignKey(ChangeType)
-    Gnomad_Data = models.ForeignKey(ReportGnomadData, default=get_default_gnomad_report_data)
-
 
     objects = ReportManager()
 
@@ -810,8 +807,6 @@ class CurrentVariant(models.Model):
     # Data Versioning
     Data_Release = models.ForeignKey(DataRelease)
     Change_Type = models.ForeignKey(ChangeType)
-    Gnomad_Data = models.ForeignKey(VariantGnomadData, default=get_default_gnomad_variant_data)
-
 
     class Meta:
         db_table = 'currentvariant'
