@@ -1242,6 +1242,11 @@ class Migration(migrations.Migration):
             name='Variant_id_GnomAD',
             field=models.TextField(null=True),
         ),
+        migrations.AddField(
+            model_name='variant',
+            name='Variant_in_GnomAD',
+            field=models.BooleanField(default=False),
+        ),
         migrations.RunSQL(
             """
             DROP MATERIALIZED VIEW IF EXISTS currentvariant;
