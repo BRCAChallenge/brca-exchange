@@ -8,6 +8,7 @@ import argparse
 import pandas as pd
 import numpy as np
 import os
+from math import floor, log10, isnan
 
 
 def parse_args():
@@ -16,6 +17,7 @@ def parse_args():
     parser.add_argument('-o', '--output', help='Ouput tsv file result.')
     options = parser.parse_args()
     return options
+
 
 def extract_relevant_data_for_processing(f_in_data_frame):
     relevant_existing_columns = [
@@ -117,7 +119,16 @@ def compile_allele_values(df):
 
 
 def calculate_frequency(ac, an):
-    return pd.to_numeric(ac, errors='coerce').divide(pd.to_numeric(an, errors='coerce'))
+    freq = pd.to_numeric(ac, errors='coerce').divide(pd.to_numeric(an, errors='coerce'))
+
+
+def round_three_sigfigs(num):
+    if isnan(num):
+        return num
+    elif num == 0 or num == 0.0:
+        return 0
+    else:
+        return round(num, -int(floor(log10(abs(num))) - (2)))
 
 
 def main():
