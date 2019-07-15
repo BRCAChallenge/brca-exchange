@@ -79,7 +79,7 @@ class AlleleFrequencyCharts extends React.Component {
                 {label: 'SAS', prop: 'Allele_frequency_exome_SAS_GnomAD'},
             ];
 
-            title = 'GnomAD';
+            title = 'gnomAD Exomes';
             pointFormat =  "{point.y}<br /><em>({point.count} of {point.number})</em>";
         }
         else if (prop === 'Allele_Frequency_Charts_Genome_GnomAD') {
@@ -97,7 +97,7 @@ class AlleleFrequencyCharts extends React.Component {
                 {label: 'SAS', prop: 'Allele_frequency_genome_SAS_GnomAD'},
             ];
 
-            title = 'GnomAD';
+            title = 'gnomAD Genomes';
             pointFormat =  "{point.y}<br /><em>({point.count} of {point.number})</em>";
         } else {
             return false;

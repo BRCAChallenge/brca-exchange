@@ -78,7 +78,6 @@ const AlleleFrequencyField = React.createClass({
             );
         });
         const allEmpty = rowsEmpty >= data.length;
-
         return [rows, allEmpty];
     },
 
@@ -89,23 +88,21 @@ const AlleleFrequencyField = React.createClass({
         let styles = this.getCollapsableClassSet();
         let isChart = false;
 
-        // debugger;
-
-        if (fieldName === "GnomAD Genome (Graphical)") {
+        if (fieldName === "gnomAD Genomes (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
             if (!variant.Variant_in_GnomAD) {
                 allEmpty = true;
             }
             isChart = true;
-        } else if (fieldName === "GnomAD Genome (Numerical)") {
+        } else if (fieldName === "gnomAD Genomes (Numerical)") {
             renderedRows = this.getRowsAndDetermineIfEmpty("GnomAD", field, variant);
-        } else if (fieldName === "GnomAD Exome (Graphical)") {
+        } else if (fieldName === "gnomAD Exomes (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
             if (!variant.Variant_in_GnomAD) {
                 allEmpty = true;
             }
             isChart = true;
-        } else if (fieldName === "GnomAD Exome (Numerical)") {
+        } else if (fieldName === "gnomAD Exomes (Numerical)") {
             renderedRows = this.getRowsAndDetermineIfEmpty("GnomAD", field, variant);
         } else if (fieldName === "ExAC (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
