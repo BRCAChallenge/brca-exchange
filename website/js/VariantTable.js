@@ -74,7 +74,7 @@ const expertModeGroups = [
 
 const researchModeGroups = [
     {groupTitle: 'Variant Nomenclature', internalGroupName: 'Variant Nomenclature', innerCols: [
-        {title: 'Gene Symbol', prop: 'Gene_Symbol', render: gene => <i>{gene}</i>, core: true},
+        {title: 'Gene Symbol', prop: 'Gene_Symbol', render: gene => <i>{gene}</i>},
         {title: 'Reference cDNA Sequence', prop: 'Reference_Sequence', core: true},
         {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: nucleotide => nucleotide.split(':')[1], core: true},
         {title: 'HGVS Protein', prop: 'HGVS_Protein', render: protein => protein.split(':')[1], core: true},
@@ -181,6 +181,41 @@ const researchModeGroups = [
 
     {groupTitle: 'Allele Frequency Reference Sets', internalGroupName: 'Allele Frequency Reference Sets', alleleFrequencies: true,
         innerGroups: [
+            {
+                source: "GnomAD",
+                chart: [
+                    {title: 'Allele Frequency Charts (GnomAD Genome)', prop: 'Allele_Frequency_Charts_Genome_GnomAD', replace: alleleFrequencyCharts, tableKey: false, dummy: true},
+                ],
+                data: [
+                    {title: 'Allele frequency (GnomAD Genome)', prop: 'Allele_frequency_genome_GnomAD', core: true},
+                    {title: 'AFR Allele frequency (GnomAD Genome)', prop: 'Allele_frequency_genome_AFR_GnomAD', core: true},
+                    {title: 'AMR Allele frequency (GnomAD Genome)', prop: 'Allele_frequency_genome_AMR_GnomAD', core: true},
+                    {title: 'ASJ Allele frequency (GnomAD Genome)', prop: 'Allele_frequency_genome_ASJ_GnomAD', core: true},
+                    {title: 'EAS Allele frequency (GnomAD Genome)', prop: 'Allele_frequency_genome_EAS_GnomAD', core: true},
+                    {title: 'FIN Allele frequency (GnomAD Genome)', prop: 'Allele_frequency_genome_FIN_GnomAD', core: true},
+                    {title: 'NFE Allele frequency (GnomAD Genome)', prop: 'Allele_frequency_genome_NFE_GnomAD', core: true},
+                    {title: 'OTH Allele frequency (GnomAD Genome)', prop: 'Allele_frequency_genome_OTH_GnomAD', core: true},
+                    {title: 'SAS Allele frequency (GnomAD Genome)', prop: 'Allele_frequency_genome_SAS_GnomAD', core: true}
+                ]
+            },
+            {
+                source: "GnomAD",
+                chart: [
+                    {title: 'Allele Frequency Charts (GnomAD Exome)', prop: 'Allele_Frequency_Charts_Exome_GnomAD', replace: alleleFrequencyCharts, tableKey: false, dummy: true},
+                ],
+                data: [
+                    {title: 'Allele frequency (GnomAD Exome)', prop: 'Allele_frequency_exome_GnomAD', core: true},
+                    {title: 'AFR Allele frequency (GnomAD Exome)', prop: 'Allele_frequency_exome_AFR_GnomAD', core: true},
+                    {title: 'AMR Allele frequency (GnomAD Exome)', prop: 'Allele_frequency_exome_AMR_GnomAD', core: true},
+                    {title: 'ASJ Allele frequency (GnomAD Exome)', prop: 'Allele_frequency_exome_ASJ_GnomAD', core: true},
+                    {title: 'EAS Allele frequency (GnomAD Exome)', prop: 'Allele_frequency_exome_EAS_GnomAD', core: true},
+                    {title: 'FIN Allele frequency (GnomAD Exome)', prop: 'Allele_frequency_exome_FIN_GnomAD', core: true},
+                    {title: 'NFE Allele frequency (GnomAD Exome)', prop: 'Allele_frequency_exome_NFE_GnomAD', core: true},
+                    {title: 'OTH Allele frequency (GnomAD Exome)', prop: 'Allele_frequency_exome_OTH_GnomAD', core: true},
+                    {title: 'SAS Allele frequency (GnomAD Exome)', prop: 'Allele_frequency_exome_SAS_GnomAD', core: true}
+                ]
+
+            },
             {
                 source: "ExAC",
                 chart: [
@@ -406,6 +441,24 @@ const researchModeColumns = [
     {title: 'EA Allele Frequency (ESP)', prop: 'EA_Allele_Frequency_ESP'},
     {title: 'AA Allele Frequency (ESP)', prop: 'AA_Allele_Frequency_ESP'},
     {title: 'Allele Frequency (ESP)', prop: 'Allele_Frequency_ESP'},
+    {title: 'Allele frequency (GnomAD Genome)', prop: 'Allele_frequency_genome_GnomAD'},
+    {title: 'AFR Allele frequency (GnomAD Genome)', prop: 'Allele_frequency_genome_AFR_GnomAD'},
+    {title: 'AMR Allele frequency (GnomAD Genome)', prop: 'Allele_frequency_genome_AMR_GnomAD'},
+    {title: 'ASJ Allele frequency (GnomAD Genome)', prop: 'Allele_frequency_genome_ASJ_GnomAD'},
+    {title: 'EAS Allele frequency (GnomAD Genome)', prop: 'Allele_frequency_genome_EAS_GnomAD'},
+    {title: 'FIN Allele frequency (GnomAD Genome)', prop: 'Allele_frequency_genome_FIN_GnomAD'},
+    {title: 'NFE Allele frequency (GnomAD Genome)', prop: 'Allele_frequency_genome_NFE_GnomAD'},
+    {title: 'OTH Allele frequency (GnomAD Genome)', prop: 'Allele_frequency_genome_OTH_GnomAD'},
+    {title: 'SAS Allele frequency (GnomAD Genome)', prop: 'Allele_frequency_genome_SAS_GnomAD'},
+    {title: 'Allele frequency (GnomAD Exome)', prop: 'Allele_frequency_exome_GnomAD'},
+    {title: 'AFR Allele frequency (GnomAD Exome)', prop: 'Allele_frequency_exome_AFR_GnomAD'},
+    {title: 'AMR Allele frequency (GnomAD Exome)', prop: 'Allele_frequency_exome_AMR_GnomAD'},
+    {title: 'ASJ Allele frequency (GnomAD Exome)', prop: 'Allele_frequency_exome_ASJ_GnomAD'},
+    {title: 'EAS Allele frequency (GnomAD Exome)', prop: 'Allele_frequency_exome_EAS_GnomAD'},
+    {title: 'FIN Allele frequency (GnomAD Exome)', prop: 'Allele_frequency_exome_FIN_GnomAD'},
+    {title: 'NFE Allele frequency (GnomAD Exome)', prop: 'Allele_frequency_exome_NFE_GnomAD'},
+    {title: 'OTH Allele frequency (GnomAD Exome)', prop: 'Allele_frequency_exome_OTH_GnomAD'},
+    {title: 'SAS Allele frequency (GnomAD Exome)', prop: 'Allele_frequency_exome_SAS_GnomAD'},
     {title: 'Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_ExAC'},
     {title: 'AFR Allele count (ExAC minus TCGA)', prop: 'Allele_count_AFR_ExAC'},
     {title: 'AFR Allele number (ExAC minus TCGA)', prop: 'Allele_number_AFR_ExAC'},

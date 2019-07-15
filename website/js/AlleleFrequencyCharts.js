@@ -63,6 +63,42 @@ class AlleleFrequencyCharts extends React.Component {
 
             title = 'ExAC';
             pointFormat =  "{point.y}<br /><em>({point.count} of {point.number})</em>";
+        }
+        else if (prop === 'Allele_Frequency_Charts_Exome_GnomAD') {
+            if (!variant['Variant_in_GnomAD']) {
+                return false;
+            }
+            frequencyProps = [
+                {label: 'AFR', prop: 'Allele_frequency_exome_AFR_GnomAD'},
+                {label: 'AMR', prop: 'Allele_frequency_exome_AMR_GnomAD'},
+                {label: 'ASJ', prop: 'Allele_frequency_exome_ASJ_GnomAD'},
+                {label: 'EAS', prop: 'Allele_frequency_exome_EAS_GnomAD'},
+                {label: 'FIN', prop: 'Allele_frequency_exome_FIN_GnomAD'},
+                {label: 'NFE', prop: 'Allele_frequency_exome_NFE_GnomAD'},
+                {label: 'OTH', prop: 'Allele_frequency_exome_OTH_GnomAD'},
+                {label: 'SAS', prop: 'Allele_frequency_exome_SAS_GnomAD'},
+            ];
+
+            title = 'GnomAD';
+            pointFormat =  "{point.y}<br /><em>({point.count} of {point.number})</em>";
+        }
+        else if (prop === 'Allele_Frequency_Charts_Genome_GnomAD') {
+            if (!variant['Variant_in_GnomAD']) {
+                return false;
+            }
+            frequencyProps = [
+                {label: 'AFR', prop: 'Allele_frequency_genome_AFR_GnomAD'},
+                {label: 'AMR', prop: 'Allele_frequency_genome_AMR_GnomAD'},
+                {label: 'ASJ', prop: 'Allele_frequency_genome_ASJ_GnomAD'},
+                {label: 'EAS', prop: 'Allele_frequency_genome_EAS_GnomAD'},
+                {label: 'FIN', prop: 'Allele_frequency_genome_FIN_GnomAD'},
+                {label: 'NFE', prop: 'Allele_frequency_genome_NFE_GnomAD'},
+                {label: 'OTH', prop: 'Allele_frequency_genome_OTH_GnomAD'},
+                {label: 'SAS', prop: 'Allele_frequency_genome_SAS_GnomAD'},
+            ];
+
+            title = 'GnomAD';
+            pointFormat =  "{point.y}<br /><em>({point.count} of {point.number})</em>";
         } else {
             return false;
         }
