@@ -165,7 +165,7 @@ const AlleleFrequencyField = React.createClass({
 
                 <div ref='panel' className={allEmpty && isChart ? "group-empty" : classNames(styles)}>
                     <div className="tile-disclaimer">
-                        <div style={{display: isGnomad && !isChart ? '' : 'none'}}>
+                        <div style={{display: isGnomad && !util.isEmptyField(flag) && !isChart ? '' : 'none'}}>
                             You are viewing flags for ENSEMBL transcript ENST00000357654. This is not the canonical
                             transcript shown by default on gnomAD, but corresponds to RefSeq transcript NM_007294.3
                             (per <a href="http://ftp.ebi.ac.uk/pub/databases/lrgex/LRG_292.xml">LRG</a>).  Additional
@@ -179,7 +179,7 @@ const AlleleFrequencyField = React.createClass({
                         </tbody>
                     </Table>
                     <div className="tile-disclaimer">
-                        <div style={{display: isGnomad && isChart ? '' : 'none'}}>
+                        <div style={{display: isGnomad && isChart && !util.isEmptyField(flag) ? '' : 'none'}}>
                             You are viewing flags for ENSEMBL transcript ENST00000357654. This is not the canonical
                             transcript shown by default on gnomAD, but corresponds to RefSeq transcript NM_007294.3
                             (per <a href="http://ftp.ebi.ac.uk/pub/databases/lrgex/LRG_292.xml">LRG</a>).  Additional
