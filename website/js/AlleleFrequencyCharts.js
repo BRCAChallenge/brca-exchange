@@ -199,11 +199,6 @@ class AlleleFrequencyCharts extends React.Component {
             series: [{ data: data, allowPointSelect: false }]
         };
 
-        let flag;
-        if (prop.toLowerCase().includes('gnomad')) {
-            flag = variant['Flags_GnomAD'];
-        }
-
         return (
             <div className="alleleFrequencyChartContainer">
                 <div className='alleleFrequencyChart'>
