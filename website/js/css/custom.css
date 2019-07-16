@@ -253,6 +253,11 @@ offending file, for future reference: website/node_modules/react-data-components
     margin: 10px;
 }
 
+small .gnomad-flag span {
+    padding-left: 10px;
+    color: black;
+}
+
 .genome-header {
     color: white;
     border: 1px solid black;

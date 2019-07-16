@@ -46,8 +46,8 @@ const AlleleFrequencyField = React.createClass({
                     {
                         isGnomad
                             ? isGenome
-                                ? <span className="allele-frequency-gnomad-header"><span className="genome-header">G</span><span className="glyphicon glyphicon-flag" style={{display: flag && flag !== '-' ? '' : 'none'}}></span></span>
-                                : <span className="allele-frequency-gnomad-header"><span className="exome-header">E</span><span className="glyphicon glyphicon-flag" style={{display: flag && flag !== '-' ? '' : 'none'}}></span></span>
+                                ? <span className="allele-frequency-gnomad-header"><span className="genome-header">G</span><span className="glyphicon glyphicon-flag" style={{display: flag && !util.isEmptyField(flag) ? '' : 'none'}}></span></span>
+                                : <span className="allele-frequency-gnomad-header"><span className="exome-header">E</span><span className="glyphicon glyphicon-flag" style={{display: flag && !util.isEmptyField(flag) ? '' : 'none'}}></span></span>
                             : ''
                     }
                     {
@@ -100,10 +100,15 @@ const AlleleFrequencyField = React.createClass({
 
     render: function() {
         const {field, fieldName, variant, hideEmptyItems} = this.props;
-        let renderedRows;
+        let renderedRows, flag;
         let allEmpty = false;
         let styles = this.getCollapsableClassSet();
         let isChart = false;
+        let isGnomad = false;
+
+        if (fieldName.toLowerCase().includes('gnomad')) {
+            flag = variant['Flags_GnomAD'];
+        }
 
         if (fieldName === "gnomAD Genomes (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
@@ -111,16 +116,20 @@ const AlleleFrequencyField = React.createClass({
                 allEmpty = true;
             }
             isChart = true;
+            isGnomad = true;
         } else if (fieldName === "gnomAD Genomes (Numerical)") {
-            renderedRows = this.getRowsAndDetermineIfEmpty("GnomAD", field, variant);
+            renderedRows = this.getRowsAndDetermineIfEmpty("GnomAD", field, variant, flag);
+            isGnomad = true;
         } else if (fieldName === "gnomAD Exomes (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
             if (!variant.Variant_in_GnomAD) {
                 allEmpty = true;
             }
             isChart = true;
+            isGnomad = true;
         } else if (fieldName === "gnomAD Exomes (Numerical)") {
-            renderedRows = this.getRowsAndDetermineIfEmpty("GnomAD", field, variant);
+            renderedRows = this.getRowsAndDetermineIfEmpty("GnomAD", field, variant, flag);
+            isGnomad = true;
         } else if (fieldName === "ExAC (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
             if (!variant.Variant_in_ExAC) {
@@ -146,8 +155,6 @@ const AlleleFrequencyField = React.createClass({
             renderedRows = renderedRows[0];
         }
 
-        let flag = fieldName.toLowerCase().includes('gnomad') && variant['Flags_GnomAD'];
-
         return (
             <div className={ allEmpty && (isChart || hideEmptyItems) ? "group-empty" : "" }>
                 <div style={{marginBottom: 0, borderTop: 'solid 2px #ccc'}}>
@@ -157,15 +164,29 @@ const AlleleFrequencyField = React.createClass({
                 </div>
 
                 <div ref='panel' className={allEmpty && isChart ? "group-empty" : classNames(styles)}>
-                    {flag && flag !== '-'
-                        ? <div className="glyphicon glyphicon-flag gnomad-flag"><span style={{color: 'black', marginLeft: '6px'}}>{flag}</span></div>
-                        : ''
-                    }
+                    <div className="tile-disclaimer">
+                        <div style={{display: isGnomad && !isChart ? '' : 'none'}}>
+                            You are viewing flags for ENSEMBL transcript ENST00000357654. This is not the canonical
+                            transcript shown by default on gnomAD, but corresponds to RefSeq transcript NM_007294.3
+                            (per <a href="http://ftp.ebi.ac.uk/pub/databases/lrgex/LRG_292.xml">LRG</a>).  Additional
+                            data for this variant, including detailed populations, quality scores, and flags relative
+                            to other transcripts, are available at gnomAD.
+                        </div>
+                    </div>
                     <Table key={`allele-frequency-name-${fieldName}`}>
                         <tbody>
                         { renderedRows }
                         </tbody>
                     </Table>
+                    <div className="tile-disclaimer">
+                        <div style={{display: isGnomad && isChart ? '' : 'none'}}>
+                            You are viewing flags for ENSEMBL transcript ENST00000357654. This is not the canonical
+                            transcript shown by default on gnomAD, but corresponds to RefSeq transcript NM_007294.3
+                            (per <a href="http://ftp.ebi.ac.uk/pub/databases/lrgex/LRG_292.xml">LRG</a>).  Additional
+                            data for this variant, including detailed populations, quality scores, and flags relative
+                            to other transcripts, are available at gnomAD.
+                        </div>
+                    </div>
                 </div>
             </div>
         );
