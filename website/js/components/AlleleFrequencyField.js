@@ -29,10 +29,27 @@ const AlleleFrequencyField = React.createClass({
         this.props.onFieldToggled(fieldName);
     },
 
-    generateHeader: function(field, fieldName) {
+    generateHeader: function(field, fieldName, flag) {
+        let fnLower = fieldName.toLowerCase();
+        let isGenome = false;
+        let isGnomad = false;
+        if (fnLower.includes('gnomad')) {
+            isGnomad = true;
+            if (fnLower.includes('genome')) {
+                isGenome = true;
+            }
+        }
+
         return (
             <div className={`allele-frequency-header ${this.props.expanded ? 'expanded' : ''}`} onClick={(e) => this.handleToggle(e, fieldName)}>
                 <div className="allele-frequency-cell allele-frequency-label">
+                    {
+                        isGnomad
+                            ? isGenome
+                                ? <span className="allele-frequency-gnomad-header"><span className="genome-header">G</span><span className="glyphicon glyphicon-flag" style={{display: flag && flag !== '-' ? '' : 'none'}}></span></span>
+                                : <span className="allele-frequency-gnomad-header"><span className="exome-header">E</span><span className="glyphicon glyphicon-flag" style={{display: flag && flag !== '-' ? '' : 'none'}}></span></span>
+                            : ''
+                    }
                     {
                         this.props.expanded
                             ? <i className="fa fa-caret-down" aria-hidden="true" />
@@ -129,15 +146,21 @@ const AlleleFrequencyField = React.createClass({
             renderedRows = renderedRows[0];
         }
 
+        let flag = fieldName.toLowerCase().includes('gnomad') && variant['Flags_GnomAD'];
+
         return (
             <div className={ allEmpty && (isChart || hideEmptyItems) ? "group-empty" : "" }>
                 <div style={{marginBottom: 0, borderTop: 'solid 2px #ccc'}}>
                 {
-                    this.generateHeader(field, fieldName)
+                    this.generateHeader(field, fieldName, flag)
                 }
                 </div>
 
                 <div ref='panel' className={allEmpty && isChart ? "group-empty" : classNames(styles)}>
+                    {flag && flag !== '-'
+                        ? <div className="glyphicon glyphicon-flag gnomad-flag"><span style={{color: 'black', marginLeft: '6px'}}>{flag}</span></div>
+                        : ''
+                    }
                     <Table key={`allele-frequency-name-${fieldName}`}>
                         <tbody>
                         { renderedRows }

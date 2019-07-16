@@ -919,7 +919,7 @@ var VariantDetail = React.createClass({
             const bicTileTable = (
                 <Table>
                     <tbody>
-                        <div className="bic-disclaimer">
+                        <div className="tile-disclaimer">
                             <div>
                                 Please note that the BIC database is no longer actively curated. A copy of all BIC data has
                                 been shared with several other variation databases.

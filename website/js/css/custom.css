@@ -232,10 +232,43 @@ offending file, for future reference: website/node_modules/react-data-components
     border-top: 1px solid #ddd;
 }
 
+
 @media(max-width:400px) {
     .alleleFrequencyChart {
         width: 100%;
     }
+}
+
+.allele-frequency-gnomad-header {
+    margin-right: 6px;
+}
+
+.allele-frequency-gnomad-header .glyphicon-flag {
+    color: #C03657;
+}
+
+.gnomad-flag.glyphicon-flag {
+    text-align: left;
+    color: #C03657;
+    margin: 10px;
+}
+
+.genome-header {
+    color: white;
+    border: 1px solid black;
+    border-radius: 4px;
+    background: #337ab7;
+    padding: 4px 5px;
+    margin-right: 6px;
+}
+
+.exome-header {
+    color: white;
+    border: 1px solid black;
+    border-radius: 4px;
+    background: #5cb85c;
+    padding: 4px 6px;
+    margin-right: 6px;
 }
 
 .mupit-structure img {
@@ -260,11 +293,11 @@ offending file, for future reference: website/node_modules/react-data-components
     }
 }
 
-.bic-disclaimer {
+.tile-disclaimer {
     margin: 10px;
 }
 
-.bic-disclaimer div {
+.tile-disclaimer div {
     padding: 5px;
 }
 /**************************************************************/

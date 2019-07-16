@@ -166,6 +166,13 @@ export default class AlleleFrequenciesTile extends React.Component {
                     collapsable={true}
                     defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}
                     hideEmptyItems={this.props.hideEmptyItems}>
+                    <div className="tile-disclaimer">
+                        <div>
+                            The gnomAD and ExAC data sets used by BRCA Exchange are “non-cancer” versions of
+                            these sources. Data from TCGA and other noncancer cohorts is excluded to ensure
+                            that frequencies used to assess pathogenicity are not skewed by sampling errors.
+                        </div>
+                    </div>
                     {renderedAlleleFrequencyFields}
                 </Panel>
             </div>
