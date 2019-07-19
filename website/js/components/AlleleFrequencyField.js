@@ -69,6 +69,8 @@ const AlleleFrequencyField = React.createClass({
             let {prop, title, noHelpLink} = rowDescriptor;
             let rowItem;
 
+            console.log(prop);
+
             if (variant[prop] !== null) {
                 rowItem = util.getFormattedFieldByProp(prop, variant);
             }
@@ -100,7 +102,7 @@ const AlleleFrequencyField = React.createClass({
 
     render: function() {
         const {field, fieldName, variant, hideEmptyItems} = this.props;
-        let renderedRows, flag;
+        let renderedRows, flag, gnomadLink;
         let allEmpty = false;
         let styles = this.getCollapsableClassSet();
         let isChart = false;
@@ -108,6 +110,8 @@ const AlleleFrequencyField = React.createClass({
 
         if (fieldName.toLowerCase().includes('gnomad')) {
             flag = variant['Flags_GnomAD'];
+            isGnomad = true;
+            gnomadLink = "https://gnomad.broadinstitute.org/variant/" + variant['Variant_id_GnomAD'];
         }
 
         if (fieldName === "gnomAD Genomes (Graphical)") {
@@ -116,20 +120,16 @@ const AlleleFrequencyField = React.createClass({
                 allEmpty = true;
             }
             isChart = true;
-            isGnomad = true;
         } else if (fieldName === "gnomAD Genomes (Numerical)") {
             renderedRows = this.getRowsAndDetermineIfEmpty("GnomAD", field, variant, flag);
-            isGnomad = true;
         } else if (fieldName === "gnomAD Exomes (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
             if (!variant.Variant_in_GnomAD) {
                 allEmpty = true;
             }
             isChart = true;
-            isGnomad = true;
         } else if (fieldName === "gnomAD Exomes (Numerical)") {
             renderedRows = this.getRowsAndDetermineIfEmpty("GnomAD", field, variant, flag);
-            isGnomad = true;
         } else if (fieldName === "ExAC (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
             if (!variant.Variant_in_ExAC) {
@@ -164,13 +164,13 @@ const AlleleFrequencyField = React.createClass({
                 </div>
 
                 <div ref='panel' className={allEmpty && isChart ? "group-empty" : classNames(styles)}>
-                    <div className="tile-disclaimer">
-                        <div style={{display: isGnomad && !util.isEmptyField(flag) && !isChart ? '' : 'none'}}>
+                    <div className="tile-disclaimer" style={{display: isGnomad && !util.isEmptyField(flag) && !isChart ? '' : 'none'}}>
+                        <div>
                             You are viewing flags for ENSEMBL transcript ENST00000357654. This is not the canonical
                             transcript shown by default on gnomAD, but corresponds to RefSeq transcript NM_007294.3
                             (per <a href="http://ftp.ebi.ac.uk/pub/databases/lrgex/LRG_292.xml">LRG</a>).  Additional
                             data for this variant, including detailed populations, quality scores, and flags relative
-                            to other transcripts, are available at gnomAD.
+                            to other transcripts, <a href={gnomadLink} target="_blank">are available at gnomAD</a>.
                         </div>
                     </div>
                     <Table key={`allele-frequency-name-${fieldName}`}>
@@ -184,7 +184,7 @@ const AlleleFrequencyField = React.createClass({
                             transcript shown by default on gnomAD, but corresponds to RefSeq transcript NM_007294.3
                             (per <a href="http://ftp.ebi.ac.uk/pub/databases/lrgex/LRG_292.xml">LRG</a>).  Additional
                             data for this variant, including detailed populations, quality scores, and flags relative
-                            to other transcripts, are available at gnomAD.
+                            to other transcripts, <a href={gnomadLink} target="_blank">are available at gnomAD</a>.
                         </div>
                     </div>
                 </div>
