@@ -78,12 +78,6 @@ function precise(x) {
     }
 }
 
-function toIntegerIfNum(n) {
-    if (isNumeric(n)) {
-        return
-    }
-}
-
 // attempts to parse the given date string using a variety of formats,
 // returning the formatted result as something like '08 September 2016'.
 // just returns the input if every pattern fails to match
