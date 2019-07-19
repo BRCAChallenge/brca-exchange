@@ -245,7 +245,11 @@ const helpContentResearch = [
                 contents: require("../content/help/research/allele-frequency-reference-sets.md"),
                 list: [
                     {
-                        name: "ExAC (minus TCGA)",
+			name: "gnomAD: Genome Aggregation Database (non-cancer cohort)",
+                        contents: require("../content/help/research/allele-frequency-gnomad.md")
+                    },
+                    {
+			name: "ExAC: Exome Aggregation Consortium (minus TCGA)",
                         contents: require("../content/help/research/allele-frequency-exac.md")
                     },
                     {
