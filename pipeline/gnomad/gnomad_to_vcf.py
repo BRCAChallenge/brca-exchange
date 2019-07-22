@@ -125,6 +125,8 @@ def normalize(field, field_value):
             field_value = field_value[:-1]
         if ';' in field_value:
             field_value = field_value.replace(';', '')
+        if any(s in field for s in ['_ac', '_an']):
+            field_value = field_value.replace('.0', '')
     return field_value
 
 

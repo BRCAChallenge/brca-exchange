@@ -69,14 +69,6 @@ function extractValInsideParens(str) {
     return regExp.exec(str)[1];
 }
 
-function precise(x) {
-    let n = Number.parseFloat(x);
-    if (n === 0) {
-        return 0;
-    } else {
-        return n.toPrecision(4);
-    }
-}
 
 // attempts to parse the given date string using a variety of formats,
 // returning the formatted result as something like '08 September 2016'.
@@ -254,15 +246,15 @@ function getFormattedFieldByProp(prop, variant) {
     } else if (prop === "Allele_frequency_genome_GnomAD" || prop === "Allele_frequency_exome_GnomAD") {
         let flag = variant["Flags_GnomAD"];
         if (!isEmptyField(flag)) {
-            rowItem = [precise(variant[prop]), <small style={{float: 'right'}}><span className="glyphicon glyphicon-flag gnomad-flag"><span>{flag}</span></span></small>];
+            rowItem = [variant[prop], <small style={{float: 'right'}}><span className="glyphicon glyphicon-flag gnomad-flag"><span>{flag}</span></span></small>];
         } else {
             rowItem = normalizedFieldDisplay(variant[prop]);
         }
     } else if (/Allele_frequency_.*_GnomAD/.test(prop)) {
-        let count = precise(variant[prop.replace("frequency", "count")]),
-            number = precise(variant[prop.replace("frequency", "number")]),
-            hom = precise(variant[prop.replace("frequency", "count_hom")]);
-        rowItem = [precise(variant[prop]), <small style={{float: 'right'}}>({count} of {number}, Hom={hom})</small>];
+        let count = variant[prop.replace("frequency", "count")],
+            number = variant[prop.replace("frequency", "number")],
+            hom = variant[prop.replace("frequency", "count_hom")];
+        rowItem = [variant[prop], <small style={{float: 'right'}}>({count} of {number}, Hom={hom})</small>];
     } else if (/count.*_GnomAD/.test(prop) || /number.*_GnomAD/.test(prop)) {
         debugger;
         rowItem = variant[prop];
