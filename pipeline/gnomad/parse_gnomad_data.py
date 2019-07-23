@@ -115,6 +115,8 @@ def compile_allele_values(df):
     for population in populations:
         df['genome_' + population + '_af'] = calculate_frequency(df['genome_' + population + '_ac'], df['genome_' + population + '_an'])
         df['exome_' + population + '_af'] = calculate_frequency(df['exome_' + population + '_ac'], df['exome_' + population + '_an'])
+    for field in ['exome_af', 'genome_af']:
+        df[field] = pd.to_numeric(df[field], errors='coerce').apply(round_four_sigfigs)
     return df
 
 

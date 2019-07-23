@@ -37,32 +37,28 @@ def main():
     normalized_variants_df.to_csv(output, sep='\t', index=False, na_rep='-')
 
 
+def flatten(variant, field, genome_or_exome):
+    for f in field:
+        if f not in ['populations', 'filters']:
+            variant[genome_or_exome + '_' + f] = field[f]
+    populations = field['populations']
+    for population in populations:
+        name = population['id']
+        keys = population.keys()
+        for key in keys:
+            if name != key:
+                variant[genome_or_exome + '_' + name + '_' + key] = population[key]
+    return variant
+
+
 def flatten_populations(variants):
     for variant in variants:
         genome = variant['genome']
         exome = variant['exome']
         if genome:
-            for field in genome:
-                if field not in ['populations', 'filters']:
-                    variant['genome_' + field] = genome[field]
-            genome_populations = genome['populations']
-            for pop in genome_populations:
-                name = pop['id']
-                keys = pop.keys()
-                for key in keys:
-                    if name != key:
-                        variant['genome_' + name + '_' + key] = pop[key]
+            variant = flatten(variant, genome, 'genome')
         if exome:
-            for field in exome:
-                if field not in ['populations', 'filters']:
-                    variant['exome_' + field] = exome[field]
-            exome_populations = exome['populations']
-            for pop in exome_populations:
-                name = pop['id']
-                keys = pop.keys()
-                for key in keys:
-                    if name != key:
-                        variant['exome_' + name + '_' + key] = pop[key]
+            variant = flatten(variant, exome, 'exome')
         del variant['genome']
         del variant['exome']
     return variants
