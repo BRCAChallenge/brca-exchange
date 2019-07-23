@@ -107,7 +107,7 @@ const AlleleFrequencyField = React.createClass({
         if (fieldName.toLowerCase().includes('gnomad')) {
             flag = variant['Flags_GnomAD'];
             isGnomad = true;
-            gnomadLink = "https://gnomad.broadinstitute.org/variant/" + variant['Variant_id_GnomAD'];
+            gnomadLink = "https://gnomad.broadinstitute.org/variant/" + variant['Variant_id_GnomAD'] + "?dataset=gnomad_r2_1_non_cancer";
         }
 
         if (fieldName === "gnomAD Genomes (Graphical)") {

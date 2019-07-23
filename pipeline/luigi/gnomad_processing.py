@@ -43,7 +43,6 @@ class DownloadGnomADData(GnomADTask):
         pipeline_utils.check_file_for_contents(self.output().path)
 
 
-
 @requires(DownloadGnomADData)
 class ParseGnomADData(GnomADTask):
     def output(self):
