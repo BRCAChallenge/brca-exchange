@@ -64,11 +64,9 @@ const AlleleFrequencyField = React.createClass({
 
     getRowsAndDetermineIfEmpty(source, data, variant) {
         let rowsEmpty = 0;
-
         const rows = _.map(data, (rowDescriptor) => {
             let {prop, title, noHelpLink} = rowDescriptor;
             let rowItem;
-
             if (variant[prop] !== null) {
                 rowItem = util.getFormattedFieldByProp(prop, variant);
             }
@@ -114,7 +112,7 @@ const AlleleFrequencyField = React.createClass({
 
         if (fieldName === "gnomAD Genomes (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
-            if (!variant.Variant_in_GnomAD) {
+            if (!variant.Variant_in_GnomAD || util.isEmptyField(variant['Allele_frequency_genome_GnomAD'])) {
                 allEmpty = true;
             }
             isChart = true;
@@ -122,7 +120,7 @@ const AlleleFrequencyField = React.createClass({
             renderedRows = this.getRowsAndDetermineIfEmpty("GnomAD", field, variant, flag);
         } else if (fieldName === "gnomAD Exomes (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
-            if (!variant.Variant_in_GnomAD) {
+            if (!variant.Variant_in_GnomAD || util.isEmptyField(variant['Allele_frequency_exome_GnomAD'])) {
                 allEmpty = true;
             }
             isChart = true;

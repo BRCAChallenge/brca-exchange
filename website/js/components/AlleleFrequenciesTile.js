@@ -97,6 +97,7 @@ export default class AlleleFrequenciesTile extends React.Component {
                                 return dd.source === "ESP";
                             }).data, "ESP (Numerical)"];
 
+
         const alleleFrequencyFields = [gnomadGenomeGraph, gnomadGenomeData, gnomadExomeGraph,
                                        gnomadExomeData, exacGraph, exacData, thousandGenomesGraph,
                                        thousandGenomesData, espData];
@@ -121,7 +122,7 @@ export default class AlleleFrequenciesTile extends React.Component {
             );
         });
 
-        // TODO: figure out how to determine if everything is empty even though variant is in 10KG or ExAC
+        // TODO: figure out how to determine if everything is empty even though variant is in 10KG / ExAC / GnomAD
         const allEmpty = !variant.Variant_in_1000_Genomes && !variant.Variant_in_ExAC && !variant.Variant_in_GnomAD;
 
         // create the source panel itself now
