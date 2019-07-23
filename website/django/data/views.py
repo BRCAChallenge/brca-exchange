@@ -131,6 +131,25 @@ def variantreps(request):
         )
     })
     response['Access-Control-Allow-Origin'] = '*'
+
+
+def sitemap(request):
+    variants = CurrentVariant.objects.values_list('id')
+    root_links = [
+        'https://brcaexchange.org/',
+        'https://brcaexchange.org/factsheet',
+        'https://brcaexchange.org/help',
+        'https://brcaexchange.org/community',
+        'https://brcaexchange.org/variants',
+        'https://brcaexchange.org/about/thisSite',
+        'https://brcaexchange.org/releases',
+    ]
+    response = HttpResponse(
+        ("\n".join(root_links) + "\n") +
+        "\n".join("https://brcaexchange.org/variant/%s" % x[0] for x in variants)
+    )
+    response['Access-Control-Allow-Origin'] = '*'
+    response['Content-Type'] = 'text/plain'
     return response
 
 

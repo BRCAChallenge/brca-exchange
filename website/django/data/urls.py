@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^variantcounts', views.variant_counts, name="variant_counts"),
     url(r'^variantpapers/$',views.variant_papers, name="variant_papers"),
     url(r'^variantreps/$', views.variantreps, name="variant_reps"),
+    url(r'^sitemap.txt$', views.sitemap, name="sitemap"),
     url(r'^suggestions/$', views.autocomplete),
     url(r'^ga4gh/v0.6.0a7/variants/search$', views.search_variants, name='search_variants'),
     url(r'^ga4gh/v0.6.0a7/variants/(?P<variant_id>.+)$', views.get_variant, name = 'get_variant'),
