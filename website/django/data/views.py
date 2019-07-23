@@ -136,6 +136,7 @@ def variantreps(request):
 def sitemap(request):
     variants = CurrentVariant.objects.values_list('id')
     root_links = [
+        'https://brcaexchange.org/',
         'https://brcaexchange.org/factsheet',
         'https://brcaexchange.org/help',
         'https://brcaexchange.org/community',
