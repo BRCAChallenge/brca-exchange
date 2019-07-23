@@ -69,8 +69,6 @@ const AlleleFrequencyField = React.createClass({
             let {prop, title, noHelpLink} = rowDescriptor;
             let rowItem;
 
-            console.log(prop);
-
             if (variant[prop] !== null) {
                 rowItem = util.getFormattedFieldByProp(prop, variant);
             }
