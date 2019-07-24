@@ -314,10 +314,10 @@ def add_leading_base(chr, pos, ref, alt, seq_provider):
     pos = int(pos)
     empty_ref = False
     empty_alt = False
-    if isEmpty(ref):
+    if utilities.isEmpty(ref):
         ref = ""
         empty_ref = True
-    if isEmpty(alt):
+    if utilities.isEmpty(alt):
         alt = ""
         empty_alt = True
 
@@ -457,7 +457,7 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
 
     print "-------check if genomic coordinates are correct----------"
     (columns, variants) = save_enigma_to_dict(input_dir + ENIGMA_FILE, output_dir, seq_provider, gene_regions_trees)
-    
+
     new_source_dict = {}
     for source_name, file_name in source_dict.iteritems():
         f = open(file_name, "r")
@@ -787,10 +787,6 @@ def ref_correct(chr, pos, ref, alt, seq_provider):
         return True
 
 
-def isEmpty(value):
-    return value == '-' or value is None or value == [] or value == ['-'] or value == ''
-
-
 def prepare_variant_for_removal_and_log(original_hgvs, normalized_hgvs, items, bx_ids_for_variant, reason_for_discard, variants_to_remove):
     if reason_for_discard == "Incorrect Reference":
         logging.warning("Ref incorrect using %s", normalized_hgvs)
@@ -804,7 +800,7 @@ def prepare_variant_for_removal_and_log(original_hgvs, normalized_hgvs, items, b
 
     for key in bx_ids_for_variant.keys():
         reports = bx_ids_for_variant[key]
-        if isEmpty(reports):
+        if utilities.isEmpty(reports):
             continue
         else:
             prefix = "BX_ID_"
