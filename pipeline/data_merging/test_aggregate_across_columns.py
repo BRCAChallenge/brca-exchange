@@ -352,15 +352,15 @@ class TestStringMethods(unittest.TestCase):
         self.assertEquals(AF, '0.20345 (ESP)')
 
         self.newRowAlleleFrequencies['Allele_frequency_genome_GnomAD'] = '0.345'
-        self.newRowAlleleFrequencies['Allele_count_genome_GnomAD'] = '0'
+        self.newRowAlleleFrequencies['Allele_count_genome_GnomAD'] = '345'
         self.newRowAlleleFrequencies['Allele_count_exome_GnomAD'] = '0'
-        self.newRowAlleleFrequencies['Allele_number_genome_GnomAD'] = '0'
+        self.newRowAlleleFrequencies['Allele_number_genome_GnomAD'] = '1000'
         self.newRowAlleleFrequencies['Allele_number_exome_GnomAD'] = '0'
 
         AF = selectAlleleFrequency(self.newRowAlleleFrequencies)
-        self.assertEquals(AF, '0.0 (GnomAD)')
+        self.assertEquals(AF, '0.345 (GnomAD)')
 
-        self.newRowAlleleFrequencies['Allele_frequency_exome_GnomAD'] = '0.345'
+        self.newRowAlleleFrequencies['Allele_frequency_exome_GnomAD'] = '0.5'
         self.newRowAlleleFrequencies['Allele_count_genome_GnomAD'] = '1'
         self.newRowAlleleFrequencies['Allele_count_exome_GnomAD'] = '1'
         self.newRowAlleleFrequencies['Allele_number_genome_GnomAD'] = '2'
@@ -368,8 +368,6 @@ class TestStringMethods(unittest.TestCase):
 
         AF = selectAlleleFrequency(self.newRowAlleleFrequencies)
         self.assertEquals(AF, '0.5 (GnomAD)')
-
-
 
 
 if __name__ == '__main__':

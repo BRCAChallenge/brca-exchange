@@ -199,7 +199,7 @@ def getNumericAFValue(value):
     if isEmpty(value):
         return 0
     else:
-        return int(value)
+        return float(value)
 
 
 def determineGnomADAlleleFrequency(row):
@@ -210,7 +210,9 @@ def determineGnomADAlleleFrequency(row):
         an_genome = getNumericAFValue(row['Allele_number_genome_GnomAD'])
         ac_exome = getNumericAFValue(row['Allele_count_exome_GnomAD'])
         an_exome = getNumericAFValue(row['Allele_number_exome_GnomAD'])
-        return round_sigfigs((row['Allele_count_genome_GnomAD'] + row['Allele_count_exome_GnomAD']) / (row['Allele_number_genome_GnomAD'] + row['Allele_number_exome_GnomAD']), 4)
+        if (an_genome + an_exome) == 0:
+            return EMPTY
+        return round_sigfigs(((ac_genome + ac_exome) / (an_genome + an_exome)), 4)
 
 
 def selectAlleleFrequency(row):
