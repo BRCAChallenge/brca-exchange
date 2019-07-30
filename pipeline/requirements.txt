@@ -9,7 +9,7 @@ configparser==3.5.0
 CrossMap==0.2.6
 Cython==0.24.1
 docutils==0.12
-hgvs==1.2.4
+hgvs==1.3.0
 intervaltree==3.0.2
 itertoolz==0.5
 lxml==4.2.5
