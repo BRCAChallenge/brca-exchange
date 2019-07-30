@@ -4,7 +4,7 @@ For more information about ExAC, please refer to the [ExAC browser](http://exac.
 
 
 #### Graphical ExAC Data
-Graphical ExAC data can be viewed by expanding the ExAC \(Graphical\) subtile.  Two Graphs are available; one of the graphs is custom scaled to the allele frequencies by default \(right side\). Hovering over each bar will give you the numerical value represented in the population subset. You can click anywhere on the ExAC \(scaled\) graph to change the scale between 1.0% \(.01\), 0.1% \(.001\), and the custom, default scale. Because some Allele Frequencies can be very small, a variety of scales will allow you to view all possible Allele Frequencies graphically.
+Graphical ExAC data can be viewed by expanding the ExAC \(Graphical\) subtile.  Two Graphs are available; one of the graphs is custom scaled to the allele frequencies by default \(right side\). Hovering over each bar will give you the numerical value represented in the population subset. You can click anywhere on the ExAC \(scaled\) graph to change the scale between 1.0% \(.01\), 0.1% \(.001\), and the custom, default scale. This variety of scales will allow you to view all possible Allele Frequencies graphically.
 
 Each group found on the x-axis of the bar chart can be found in the list of fields described in the ExAC \(Numerical\) section.
 
