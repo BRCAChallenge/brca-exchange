@@ -1,3 +1,3 @@
-The BRCA Exchange aims to advance our understanding of the genetic basis of breast cancer, ovarian cancer and other diseases by pooling data on BRCA1/2 genetic variants and corresponding clinical data from around the world. Search for _BRCA1_ or _BRCA2_ variants above.
+#### Help us keep this resource free!
 
-This website is supported by the BRCA Challenge project, a driver project of the Global Alliance for Genomics and Health.
+For more than five years, we have worked to ensure reliable testing worldwide by making quality data available free of cost, to anyone, anywhere. Help us maintain this resource by donating today!
