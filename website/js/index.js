@@ -30,6 +30,8 @@ var {NavBarNew} = require('./NavBarNew');
 var Rx = require('rx');
 require('rx-dom');
 var moment = require('moment');
+var DonationBar = require('./components/DonationBar');
+
 
 // faisal: includes for masonry/isotope
 var Isotope = require('isotope-layout');
@@ -1309,10 +1311,10 @@ var Application = React.createClass({
         const origin = window.location.origin;
         const fullPathWithHash = fullHref.startsWith(origin) ? fullHref.slice(origin.length) : fullHref;
         ReactGA.ga('send', 'pageview', fullPathWithHash);
-
         return (
             <div>
                 <NavBarNew path={path} mode={this.state.mode} toggleMode={this.toggleMode}/>
+                {path !== "" ? <DonationBar /> : ""}
                 <RouteHandler toggleMode={this.onChildToggleMode} mode={this.state.mode} />
                 <Database
                     mode={this.state.mode}

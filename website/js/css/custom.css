@@ -597,6 +597,17 @@ div#main {
     font-size: 30px;
 }
 
+.donation-bar {
+    background: #FDE7FC;
+    text-align: center;
+    margin: -10px auto 0 auto;
+    padding: 10px;
+}
+
+.donation-bar p {
+    margin: 0;
+}
+
 /**************************************************************/
 /**********     Table                     *********************/
 /**************************************************************/
