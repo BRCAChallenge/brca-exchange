@@ -138,7 +138,6 @@ def sitemap(request):
     root_links = [
         'https://brcaexchange.org/',
         'https://brcaexchange.org/factsheet',
-        'https://brcaexchange.org/whydonate',
         'https://brcaexchange.org/help',
         'https://brcaexchange.org/community',
         'https://brcaexchange.org/variants',

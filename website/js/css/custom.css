@@ -36,6 +36,18 @@ p {
     font-weight: 200;
 }
 
+center {
+    font-weight: 200;
+}
+
+.centered {
+    text-align: center;
+}
+
+.margin-top-forty {
+    margin-top: 40px;
+}
+
 .bold {
     font-weight: bold;
 }
@@ -441,6 +453,9 @@ div.colorized-jumbo {
         margin-top: 51px;
         height: 258px;
     }
+    .homepage-image-container {
+        margin-bottom: -180px;
+    }
 }
 
 @media only screen and (max-width : 991px) and (min-width: 768px)  {
@@ -570,6 +585,16 @@ div#main {
 .modal-content button {
     margin: 0px 0px 40px 40px;
     text-align: left;
+}
+
+
+/**************************************************************/
+/**********     Donation Drive             ********************/
+/**************************************************************/
+
+.donate-button {
+    margin: 50px auto;
+    font-size: 30px;
 }
 
 /**************************************************************/

@@ -45,6 +45,7 @@ import content, {parseTooltips} from './content';
 var Community = require('./Community');
 var FactSheet = require('./FactSheet');
 var WhyDonate = require('./WhyDonate');
+var FundraisingDetails = require('./FundraisingDetails');
 var {MailingList} = require('./MailingList');
 var Splicing = require('./Splicing');
 
@@ -1329,6 +1330,7 @@ var routes = (
         <Route path='about/:page' handler={About}/>
         <Route path='factsheet' handler={FactSheet}/>
         <Route path='whydonate' handler={WhyDonate}/>
+        <Route path='fundraisingdetails' handler={FundraisingDetails}/>
         <Route path='help' handler={Help}/>
         <Route path='community' handler={Community}/>
         <Route path='signup' handler={Signup}/>
