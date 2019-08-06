@@ -1,5 +1,5 @@
 # Why Donate to the BRCA Exchange?
-#### Every $1 helps TWO patients access better data.
+### Every $1 helps TWO patients access better data.
 
 Genetic tests for _BRCA1_ and _BRCA2_ have more than doubled in the past TEN years.<sup>1</sup> With more tests being administered every year, accessible, high quality data is of the utmost importance.
 
