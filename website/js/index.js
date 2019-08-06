@@ -282,15 +282,7 @@ var Database = React.createClass({
 
           if (event.metaKey || event.altKey || event.ctrlKey || event.button === 1) {
               // the user is attempting to open the link in a new window/tab
-
-              // chrome sets metaKey=true when command is held on OS X (presumably on windows this would be the 'windows' key).
-              // safari functions the same as chrome does.
-              // firefox, on the other hand, hijacks command for selecting cells in tables, so we have to use altKey
-              // (option on OS X) to allow firefox users to open tabs.
-              // finally, middle-clicks on all browsers set event.button to 1
-
-              // note that we don't focus the window since 1) most users want to open multiple tabs without interruption,
-              // and 2) in most cases, most browsers won't let you change the focus programmatically
+              // (browsers vary in what they consider the 'special' tab-opening key, so we're trapping for them all)
               window.open(`/variant/${variantPathJoin(row)}`, '_blank');
           }
           else {
