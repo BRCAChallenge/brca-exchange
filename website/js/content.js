@@ -21,7 +21,10 @@ const content = {
     signupMessage: require('../content/signupMessage.md'),
     insilicoScoring: require('../content/help/research/insilico/insilico-scoring.md'),
     moreOnNaming: require('../content/help/default/variant-naming/more-on-naming.md'),
-    app: require('../content/about/app.md')
+    app: require('../content/about/app.md'),
+    whyDonate: require('../content/whyDonate.md'),
+    whyDonateSubtext: require('../content/whyDonateSubtext.md'),
+    fundraisingDetails: require('../content/fundraisingDetails.md')
 };
 
 const mupitStructures = [
