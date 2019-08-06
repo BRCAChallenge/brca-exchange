@@ -277,9 +277,6 @@ var Database = React.createClass({
               d3TipDiv[0].style.pointerEvents = 'none';
           }
 
-          event.persist();
-          console.log("Event: ", event);
-
           if (event.metaKey || event.altKey || event.ctrlKey || event.button === 1) {
               // the user is attempting to open the link in a new window/tab
               // (browsers vary in what they consider the 'special' tab-opening key, so we're trapping for them all)
