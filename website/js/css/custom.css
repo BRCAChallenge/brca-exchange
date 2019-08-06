@@ -408,81 +408,27 @@ div.colorized-jumbo {
 /**********     Homepage images             *******************/
 /**************************************************************/
 
-.vimeo-video {
-    width: 100%;
-    height: 486px;
-}
-
-.homepage-image {
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-}
-
-.homepage-image-container {
-    width: 100%;
-    height: 486px;
-}
-
 .homepage-jumbotron {
     background-color: #FDE7FC;
     text-align: center;
-    margin-bottom: 0;
+    margin-bottom: 8em;
 }
 
-@media only screen and (min-width: 1200px) {
-    .homepage-image {
-        margin-top: 142px;
-        height: 202px;
-    }
-
-    .homepage-image-container {
-        width: 100%;
-        height: 486px;
-        margin-bottom: -160px;
-    }
+.homepage-under-image-text-container {
+    width: 80%;
+    margin-bottom: 2em;
 }
 
-@media only screen and (max-width : 1199px) and (min-width: 992px) {
-    .vimeo-video {
-        height: 360px;
-    }
-    .homepage-image {
-        width: auto;
-        margin-top: 51px;
-        height: 258px;
-    }
-    .homepage-image-container {
-        margin-bottom: -180px;
-    }
-}
-
-@media only screen and (max-width : 991px) and (min-width: 768px)  {
-    .homepage-image {
-        width: auto;
-        height: 480px;
-    }
-}
-
-@media only screen and (max-width : 767px) {
-    .vimeo-video {
-        height: 180px;
-    }
-    .homepage-image {
-        width: auto;
-        height: 210px;
-    }
-    .homepage-image-container {
-        margin-bottom: -180px;
-    }
-    .homepage-jumbotron {
-        margin-bottom: 70px;
-    }
-}
-
-.homepage-under-image-text {
+.homepage-caption {
+    padding-top: 10px;
     text-align: center;
+    line-height: 120%;
+    font-size: 2em; font-weight: bold;
+}
+.homepage-caption.subtext {
+    padding-top: 5px;
+    font-size: smaller;
+    font-weight: normal;
 }
 
 /**************************************************************/

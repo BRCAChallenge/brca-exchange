@@ -187,27 +187,46 @@ var Home = React.createClass({
                         </Button>
                     </div>
                 </Row>
+
                 <Row>
-                    <Col lg={4} md={6} xs={12}>
-                        <div className="homepage-image-container">
-                            <iframe className="vimeo-video" src="https://player.vimeo.com/video/199396428" frameBorder="0" webkitallowfullscreen mozallowfullscreen allowFullScreen></iframe>
+                    <Col lg={4} lgOffset={0} md={8} mdOffset={2} xs={12}>
+                        <div className="homepage-image-container embed-responsive embed-responsive-16by9">
+                            <iframe className="vimeo-video embed-responsive-item" src="https://player.vimeo.com/video/199396428" webkitallowfullscreen mozallowfullscreen allowFullScreen />
+                        </div>
+                        <div className="homepage-under-image-text-container center-block">
+                            <div className="homepage-caption">
+                            What is the BRCA Exchange?
+                            </div>
+                            <div className="homepage-caption subtext">
+                            Video produced by <a href="http://www.kindealabs.com/">Kindea Labs</a>
+                            </div>
                         </div>
                     </Col>
-                    <Col lg={4} md={6} xs={12}>
-                        <div className="homepage-image-container">
-                            <Link to={`/whydonate`}>
-                                <img className="homepage-image" src={require('../content/BRCA_scaled.JPG')}></img>
-                                <div className="homepage-under-image-text-container">
-                                <div className="homepage-under-image-text bold">
-                                    Why Donate to the BRCA Exchange?
-                                </div>
-                                </div>
+
+                    <Col lg={4} lgOffset={0} md={8} mdOffset={2} xs={12}>
+                        <div className="homepage-image-container embed-responsive embed-responsive-16by9">
+                            <Link to={`/whydonate`} >
+                                <img className="embed-responsive-item" src={require('../content/BRCA_scaled.JPG')} alt="BRCA Exchange Team Photo" />
                             </Link>
                         </div>
+                        <div className="homepage-under-image-text-container center-block">
+                            <div className="homepage-caption caption">
+                                <Link to={`/whydonate`}>Why Donate to the BRCA Exchange?</Link>
+                            </div>
+                        </div>
                     </Col>
-                    <Col lg={4} md={6} xs={12}>
-                        <div className="homepage-image-container">
-                            <iframe className="vimeo-video" src="https://player.vimeo.com/video/351028818" frameBorder="0" webkitallowfullscreen mozallowfullscreen allowFullScreen></iframe>
+
+                    <Col lg={4} lgOffset={0} md={8} mdOffset={2} xs={12}>
+                        <div className="homepage-image-container embed-responsive embed-responsive-16by9">
+                            <iframe className="vimeo-video embed-responsive-item" src="https://player.vimeo.com/video/351028818" webkitallowfullscreen mozallowfullscreen allowFullScreen />
+                        </div>
+                        <div className="homepage-under-image-text-container center-block">
+                            <div className="homepage-caption">
+                                How does the BRCA Exchange Benefit Patients?
+                            </div>
+                            <div className="homepage-caption subtext">
+                                Video produced by the Global Alliance for Genomics and Health and the Broad Institute
+                            </div>
                         </div>
                     </Col>
                 </Row>
