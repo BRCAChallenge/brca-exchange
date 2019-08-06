@@ -190,7 +190,7 @@ var Home = React.createClass({
 
                 <Row>
                     <Col lg={4} lgOffset={0} md={8} mdOffset={2} xs={12}>
-                        <div className="homepage-image-container embed-responsive embed-responsive-16by9">
+                        <div className="embed-responsive embed-responsive-16by9">
                             <iframe className="vimeo-video embed-responsive-item" src="https://player.vimeo.com/video/199396428" webkitallowfullscreen mozallowfullscreen allowFullScreen />
                         </div>
                         <div className="homepage-under-image-text-container center-block">
@@ -204,7 +204,7 @@ var Home = React.createClass({
                     </Col>
 
                     <Col lg={4} lgOffset={0} md={8} mdOffset={2} xs={12}>
-                        <div className="homepage-image-container embed-responsive embed-responsive-16by9">
+                        <div className="embed-responsive embed-responsive-16by9">
                             <Link to={`/whydonate`} >
                                 <img className="embed-responsive-item" src={require('../content/BRCA_scaled.JPG')} alt="BRCA Exchange Team Photo" />
                             </Link>
@@ -217,7 +217,7 @@ var Home = React.createClass({
                     </Col>
 
                     <Col lg={4} lgOffset={0} md={8} mdOffset={2} xs={12}>
-                        <div className="homepage-image-container embed-responsive embed-responsive-16by9">
+                        <div className="embed-responsive embed-responsive-16by9">
                             <iframe className="vimeo-video embed-responsive-item" src="https://player.vimeo.com/video/351028818" webkitallowfullscreen mozallowfullscreen allowFullScreen />
                         </div>
                         <div className="homepage-under-image-text-container center-block">
