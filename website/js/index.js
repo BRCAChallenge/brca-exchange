@@ -270,13 +270,33 @@ var Database = React.createClass({
             restoringDefaults: false
         };
     },
-    showVariant: function (row) {
+    showVariant: function (row, event) {
           var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
           if (d3TipDiv.length !== 0 && d3TipDiv[0].style.opacity !== '0') {
               d3TipDiv[0].style.opacity = '0';
               d3TipDiv[0].style.pointerEvents = 'none';
           }
-          this.transitionTo(`/variant/${variantPathJoin(row)}`);
+
+          event.persist();
+          console.log("Event: ", event);
+
+          if (event.metaKey || event.altKey || event.ctrlKey || event.button === 1) {
+              // the user is attempting to open the link in a new window/tab
+
+              // chrome sets metaKey=true when command is held on OS X (presumably on windows this would be the 'windows' key).
+              // safari functions the same as chrome does.
+              // firefox, on the other hand, hijacks command for selecting cells in tables, so we have to use altKey
+              // (option on OS X) to allow firefox users to open tabs.
+              // finally, middle-clicks on all browsers set event.button to 1
+
+              // note that we don't focus the window since 1) most users want to open multiple tabs without interruption,
+              // and 2) in most cases, most browsers won't let you change the focus programmatically
+              window.open(`/variant/${variantPathJoin(row)}`, '_blank');
+          }
+          else {
+              // open it in the current window
+              this.transitionTo(`/variant/${variantPathJoin(row)}`);
+          }
     },
     showHelp: function (title) {
         var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
@@ -539,13 +559,13 @@ var VariantDetail = React.createClass({
             }, 0);
         }
 
-        // update the title if the variant info changed
+        // update the title only when the variant info is first populated
         if (!prevState.data && this.state.data) {
             const data = this.state.data;
             const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.props.params.id));
             const variant = data[variantVersionIdx];
 
-            document.title = `${variant['Reference_Sequence']}:${variant['HGVS_cDNA'].split(":")[1]} (${variant['Gene_Symbol']}) - BRCA Exchange`;
+            document.title = `${variant['HGVS_cDNA'].split(":")[1]} (${variant['Gene_Symbol']}) - BRCA Exchange`;
         }
     },
     pathogenicityChanged: function(pathogenicityDiff) {
