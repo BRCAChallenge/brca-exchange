@@ -30,6 +30,8 @@ var {NavBarNew} = require('./NavBarNew');
 var Rx = require('rx');
 require('rx-dom');
 var moment = require('moment');
+var DonationBar = require('./components/DonationBar');
+
 
 // faisal: includes for masonry/isotope
 var Isotope = require('isotope-layout');
@@ -44,13 +46,15 @@ var slugify = require('./slugify');
 import content, {parseTooltips} from './content';
 var Community = require('./Community');
 var FactSheet = require('./FactSheet');
+var WhyDonate = require('./WhyDonate');
+var FundraisingDetails = require('./FundraisingDetails');
 var {MailingList} = require('./MailingList');
 var Splicing = require('./Splicing');
 
 var databaseKey = require('../databaseKey');
 var util = require('./util');
 
-var {Grid, Col, Row, Table, Button, Modal, Panel, Glyphicon} = require('react-bootstrap');
+var {Grid, Col, Row, Table, Button, Modal, Panel} = require('react-bootstrap');
 
 /* FAISAL: added 'groups' collection that specifies how to map columns to higher-level groups */
 var {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups} = require('./VariantTable');
@@ -176,19 +180,59 @@ var Home = React.createClass({
                     </Col>
                 </Row>
                 <Row>
-                    <div className="jumbotron">
+                    <div className="jumbotron homepage-jumbotron">
                         <RawHTML html={content.pages.home} />
-                        <Button bsStyle="primary" className="center-block video-button" onClick={() => this.setState({ showModal: true })}>
-                            <Glyphicon glyph="play-circle" />&nbsp;&nbsp;Video Overview
+                        <Button bsStyle="primary" className="center-block video-button" onClick={()=> window.open("https://secure.ucsc.edu/s/1069/bp18/interior.aspx?sid=1069&gid=1001&pgid=780&cid=1749&dids=1004", "_blank")}>
+                            Donate Now
                         </Button>
                     </div>
+                </Row>
+
+                <Row>
+                    <Col lg={4} lgOffset={0} md={8} mdOffset={2} xs={12}>
+                        <div className="embed-responsive embed-responsive-16by9">
+                            <iframe className="vimeo-video embed-responsive-item" src="https://player.vimeo.com/video/199396428" webkitallowfullscreen mozallowfullscreen allowFullScreen />
+                        </div>
+                        <div className="homepage-under-image-text-container center-block">
+                            <div className="homepage-caption">
+                            What is the BRCA Exchange?
+                            </div>
+                            <div className="homepage-caption subtext">
+                            Video produced by <a href="http://www.kindealabs.com/">Kindea Labs</a>
+                            </div>
+                        </div>
+                    </Col>
+
+                    <Col lg={4} lgOffset={0} md={8} mdOffset={2} xs={12}>
+                        <div className="embed-responsive embed-responsive-16by9">
+                            <Link to={`/whydonate`} >
+                                <img className="embed-responsive-item" src={require('../content/BRCA_scaled.JPG')} alt="BRCA Exchange Team Photo" />
+                            </Link>
+                        </div>
+                        <div className="homepage-under-image-text-container center-block">
+                            <div className="homepage-caption caption">
+                                <Link to={`/whydonate`}>Why Donate to the BRCA Exchange?</Link>
+                            </div>
+                        </div>
+                    </Col>
+
+                    <Col lg={4} lgOffset={0} md={8} mdOffset={2} xs={12}>
+                        <div className="embed-responsive embed-responsive-16by9">
+                            <iframe className="vimeo-video embed-responsive-item" src="https://player.vimeo.com/video/351028818" webkitallowfullscreen mozallowfullscreen allowFullScreen />
+                        </div>
+                        <div className="homepage-under-image-text-container center-block">
+                            <div className="homepage-caption">
+                                How does the BRCA Exchange Benefit Patients?
+                            </div>
+                            <div className="homepage-caption subtext">
+                                Video produced by the Global Alliance for Genomics and Health and the Broad Institute
+                            </div>
+                        </div>
+                    </Col>
                 </Row>
                 <Row className="logo-block">
                     {logoItems}
                 </Row>
-                {this.state.showModal && <Modal bsSize="large" onRequestHide={() => this.setState({ showModal: false })}>
-                    <iframe className="vimeo-video" src="https://player.vimeo.com/video/199396428" frameBorder="0" webkitallowfullscreen mozallowfullscreen allowFullScreen></iframe>
-                </Modal>}
             </Grid>
         );
     }
@@ -1286,10 +1330,10 @@ var Application = React.createClass({
         const origin = window.location.origin;
         const fullPathWithHash = fullHref.startsWith(origin) ? fullHref.slice(origin.length) : fullHref;
         ReactGA.ga('send', 'pageview', fullPathWithHash);
-
         return (
             <div>
                 <NavBarNew path={path} mode={this.state.mode} toggleMode={this.toggleMode}/>
+                {path !== "" ? <DonationBar /> : ""}
                 <RouteHandler toggleMode={this.onChildToggleMode} mode={this.state.mode} />
                 <Database
                     mode={this.state.mode}
@@ -1306,6 +1350,8 @@ var routes = (
         <DefaultRoute handler={Home}/>
         <Route path='about/:page' handler={About}/>
         <Route path='factsheet' handler={FactSheet}/>
+        <Route path='whydonate' handler={WhyDonate}/>
+        <Route path='fundraisingdetails' handler={FundraisingDetails}/>
         <Route path='help' handler={Help}/>
         <Route path='community' handler={Community}/>
         <Route path='signup' handler={Signup}/>

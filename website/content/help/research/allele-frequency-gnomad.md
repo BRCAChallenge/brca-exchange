@@ -4,7 +4,7 @@ gnomAD provides _BRCA1_ and _BRCA2_ allele frequencies for the BRCA Exchange. Th
 As an aggregation database, gnomAD data subsumes much of ExAC and 1000 Genomes data. 
 
 #### Exomes and Genomes 
-gnomAD provides frequency from both exome and genome sequencing projects. On the BRCA Exchange, these frequencies are presented  in different subtiles. A small "E" indicates Exomes data, while a small "G" icon indicates Genomes data. If data is available on both Exomes and Genomes, a total of four subtiles will be available:
+gnomAD provides frequencies from both exome and genome sequencing projects. On the BRCA Exchange, these frequencies are presented in different subtiles. A small "E" indicates Exomes data, while a small "G" icon indicates Genomes data. If data is available on both Exomes and Genomes, a total of four subtiles will be available:
 
 * gnomAD Exomes (Graphical) 
 * gnomAD Exomes (Numerical) 
@@ -15,7 +15,7 @@ This data is updated during the monthly release cycle, and will contain any new 
 
 #### gnomAD Populations
 
-The BRCA Exchange displays the primary subsets used by ExAC (i.e. “East  Asian”, but does not display detailed population data (i.e. “Japanese,” “Korean”). Detailed populations, as well as female and male distributions, can be found in gnomAD. 
+The BRCA Exchange displays the primary subsets used by ExAC (i.e. “East  Asian”), but does not display detailed population data (i.e. “Japanese,” “Korean”). Detailed populations, as well as female and male distributions, can be found in gnomAD. 
 
 * ##### Allele Frequency (gnomAD non-cancer cohort)
 	* Minor allele frequency, per ExAC (excluding cancer sequencing data)
@@ -23,6 +23,8 @@ The BRCA Exchange displays the primary subsets used by ExAC (i.e. “East  Asian
 	* Allele frequency in African/African American populations, per gnomAD
 * ##### Latino (AMR)
 	* Allele frequency in Admixed American/Latino populations, per gnomAD
+* ##### Ashkenazi Jewish (ASJ)
+	* Allele frequency in Ahskenazi Jewish populations, per gnomAD
 * ##### East Asian (EAS)
 	* Allele frequency in East Asian populations, per gnomAD
 	* Subsets available on gnomAD:
@@ -47,7 +49,7 @@ The BRCA Exchange displays the primary subsets used by ExAC (i.e. “East  Asian
 	* South Asian genomes only contain 31 samples; thus for genome data, the SAS population is grouped with Other.
 
 #### Graphical gnomAD Data
-Graphical gnomAD data can be viewed by expanding the gnomAD (Graphical) subtile. Two Graphs are available; one of the graphs is custom scaled to the allele frequencies by default (right side). Hovering over each bar will give you the numerical value represented in the population subset. You can click anywhere on the gnomAD (scaled) graph to change the scale between 1.0% (.01), 0.1% (.001), and the custom, default scale. Because some Allele Frequencies can be very small, a variety of scales will allow you to view all possible Allele Frequencies graphically.
+Graphical gnomAD data can be viewed by expanding the gnomAD (Graphical) subtile. Two Graphs are available; one of the graphs is custom scaled to the allele frequencies by default (right side). Hovering over each bar will give you the numerical value represented in the population subset. You can click anywhere on the gnomAD (scaled) graph to change the scale between 1.0% (.01), 0.1% (.001), and the custom, default scale. This variety of scales will allow you to view all possible Allele Frequencies graphically.
 Each group found on the x-axis of the bar chart can be found in the list of fields described in the gnomAD Populations section.
 
 #### Numerical gnomAD Data
