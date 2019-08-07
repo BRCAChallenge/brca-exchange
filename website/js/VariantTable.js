@@ -535,7 +535,11 @@ var Table = React.createClass({
                 {...opts}
                 columnSelection={columnSelection}
                 sourceSelection={sourceSelection}
-                buildRowOptions={r => ({className: r['Change_Type_id'] === 2 ? 'warning data-table-row' : 'data-table-row', title: 'click for details', onClick: () => hasSelection() ? null : onRowClick(r)})}
+                buildRowOptions={r => ({
+                    className: r['Change_Type_id'] === 2 ? 'warning data-table-row' : 'data-table-row',
+                    title: 'click for details',
+                    onMouseUp: (e) => hasSelection() ? null : onRowClick(r, e)
+                })}
                 buildHeader={title => buildHeader(onHeaderClick, title)}
                 onRowClick={onRowClick}
                 onHeaderClick={onHeaderClick}
