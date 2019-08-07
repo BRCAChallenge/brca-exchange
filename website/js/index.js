@@ -314,13 +314,22 @@ var Database = React.createClass({
             restoringDefaults: false
         };
     },
-    showVariant: function (row) {
+    showVariant: function (row, event) {
           var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
           if (d3TipDiv.length !== 0 && d3TipDiv[0].style.opacity !== '0') {
               d3TipDiv[0].style.opacity = '0';
               d3TipDiv[0].style.pointerEvents = 'none';
           }
-          this.transitionTo(`/variant/${variantPathJoin(row)}`);
+
+          if (event.metaKey || event.altKey || event.ctrlKey || event.button === 1) {
+              // the user is attempting to open the link in a new window/tab
+              // (browsers vary in what they consider the 'special' tab-opening key, so we're trapping for them all)
+              window.open(`/variant/${variantPathJoin(row)}`, '_blank');
+          }
+          else {
+              // open it in the current window
+              this.transitionTo(`/variant/${variantPathJoin(row)}`);
+          }
     },
     showHelp: function (title) {
         var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
@@ -574,12 +583,22 @@ var VariantDetail = React.createClass({
             }
         }
     },
-    componentDidUpdate: function(prevProps) {
+
+    componentDidUpdate: function(prevProps, prevState) {
         if (prevProps.mode !== this.props.mode) {
             // if the mode changed, we have to relayout the page on the next available frame
             setTimeout(() => {
                 this.relayoutGrid(true);
             }, 0);
+        }
+
+        // update the title only when the variant info is first populated
+        if (!prevState.data && this.state.data) {
+            const data = this.state.data;
+            const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.props.params.id));
+            const variant = data[variantVersionIdx];
+
+            document.title = `${variant['HGVS_cDNA'].split(":")[1]} (${variant['Gene_Symbol']}) - BRCA Exchange`;
         }
     },
     pathogenicityChanged: function(pathogenicityDiff) {
