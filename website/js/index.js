@@ -222,10 +222,10 @@ var Home = React.createClass({
                         </div>
                         <div className="homepage-under-image-text-container center-block">
                             <div className="homepage-caption">
-                                How does the BRCA Exchange Benefit Patients?
+                                How Does the BRCA Exchange Benefit Patients?
                             </div>
                             <div className="homepage-caption subtext">
-                                Video produced by the Global Alliance for Genomics and Health and the Broad Institute
+                                Video produced by the <a href="https://www.ga4gh.org/">Global Alliance for Genomics and Health</a> and the <a href="https://www.broadinstitute.org/">Broad Institute</a>
                             </div>
                         </div>
                     </Col>
@@ -240,17 +240,38 @@ var Home = React.createClass({
 
 var About = React.createClass({
     render: function() {
-        var {page} = this.props.params;
-
-        return (
-            <Grid id="main-grid" className="main-grid">
-                <Row>
-                    <Col smOffset={1} sm={10}>
-                        <RawHTML html={content.pages[page]} />
-                    </Col>
-                </Row>
-            </Grid>
-        );
+        let {page} = this.props.params;
+        if (page === "thisSite") {
+            let logoItems = _.map(logos, ({id, logo, url}) => (
+                <Col key={id} lg={4} md={6} xs={12} className="logo-item">
+                    <a href={url}>
+                        <img id={id} src={logo} alt={id + ' logo'} />
+                    </a>
+                </Col>
+            ));
+            return (
+                <Grid id="main-grid" className="main-grid">
+                    <Row>
+                        <Col smOffset={1} sm={10}>
+                            <RawHTML html={content.pages[page]} />
+                        </Col>
+                    </Row>
+                    <Row className="logo-block">
+                        {logoItems}
+                    </Row>
+                </Grid>
+            );
+        } else {
+            return (
+                <Grid id="main-grid" className="main-grid">
+                    <Row>
+                        <Col smOffset={1} sm={10}>
+                            <RawHTML html={content.pages[page]} />
+                        </Col>
+                    </Row>
+                </Grid>
+            );
+        }
     }
 });
 

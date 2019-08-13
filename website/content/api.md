@@ -1,6 +1,5 @@
 # BRCA Exchange GA4GH API
 
----
 
 The GA4GH has defined a standard interface for exchanging genomic data over HTTP called an API, or Application Programming Interface.
 
