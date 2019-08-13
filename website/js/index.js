@@ -240,15 +240,15 @@ var Home = React.createClass({
 
 var About = React.createClass({
     render: function() {
-        var {page} = this.props.params;
-        var logoItems = _.map(logos, ({id, logo, url}) => (
-            <Col key={id} lg={4} md={6} xs={12} className="logo-item">
-                <a href={url}>
-                    <img id={id} src={logo} alt={id + ' logo'} />
-                </a>
-            </Col>
-        ));
+        let {page} = this.props.params;
         if (page === "thisSite") {
+            let logoItems = _.map(logos, ({id, logo, url}) => (
+                <Col key={id} lg={4} md={6} xs={12} className="logo-item">
+                    <a href={url}>
+                        <img id={id} src={logo} alt={id + ' logo'} />
+                    </a>
+                </Col>
+            ));
             return (
                 <Grid id="main-grid" className="main-grid">
                     <Row>
