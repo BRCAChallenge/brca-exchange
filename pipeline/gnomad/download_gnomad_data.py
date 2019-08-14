@@ -3,7 +3,7 @@ import pandas
 import json
 import argparse
 import logging
-
+import pdb
 
 def parse_args():
         parser = argparse.ArgumentParser(description='Download gnomad data and convert to .tsv format.')
@@ -27,7 +27,7 @@ def main():
 
     logging.basicConfig(filename=logfile, filemode="w", level=logging_level)
 
-    variants_brca1 = generate_data("BRCA1", "ENST00000357654.8")
+    variants_brca1 = generate_data("BRCA1", "ENST00000357654")
     variants_brca2 = generate_data("BRCA2", "ENST00000544455")
 
     variants = variants_brca1 + variants_brca2
