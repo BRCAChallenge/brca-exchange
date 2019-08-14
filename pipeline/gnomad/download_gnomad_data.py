@@ -27,8 +27,8 @@ def main():
 
     logging.basicConfig(filename=logfile, filemode="w", level=logging_level)
 
-    variants_brca1 = generate_data("BRCA1")
-    variants_brca2 = generate_data("BRCA2")
+    variants_brca1 = generate_data("BRCA1", "ENST00000357654.8")
+    variants_brca2 = generate_data("BRCA2", "ENST00000544455")
 
     variants = variants_brca1 + variants_brca2
 
@@ -71,7 +71,7 @@ def normalize_variants(variants):
     return variants_df
 
 
-def build_query(gene):
+def build_query(gene, transcript):
     return """{
         gene(gene_name: "%s") {
             _id
@@ -89,7 +89,7 @@ def build_query(gene):
             xstop
             xstart
             gene_name
-            variants(dataset: gnomad_r2_1_non_cancer) {
+            variants(dataset: gnomad_r2_1_non_cancer, transcriptId: "%s") {
                 alt
                 chrom
                 pos
@@ -135,11 +135,11 @@ def build_query(gene):
                 rsid
             }
         }
-    }""" % (gene)
+    }""" % (gene, transcript)
 
 
-def generate_data(gene):
-    query = build_query(gene)
+def generate_data(gene, transcript):
+    query = build_query(gene, transcript)
     headers = { "content-type": "application/graphql" }
     response = requests.post('https://gnomad.broadinstitute.org/api', data=query, headers=headers)
     parsed_json = json.loads(response.text)
