@@ -15,7 +15,7 @@ module.exports = [
     {
         id: 'ClinGen',
         logo: require('./img/clingen_logo.jpg'),
-        url: 'http://www.humanvariomeproject.org'
+        url: 'https://clinicalgenome.org/'
     },
     {
         id: 'GA4GH',
