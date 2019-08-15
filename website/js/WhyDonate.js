@@ -17,7 +17,7 @@ const WhyDonate = React.createClass({
                 <Row>
                     <Col smOffset={1} sm={10}>
                         <RawHTML html={content.pages.whyDonate} />
-                        <h3 className="centered margin-top-forty">Will you help us improve genetic test results worldwide by donating today?</h3>
+                        <h3 className="centered margin-top-forty">Will you help us improve genetic data and variant interpretations worldwide by donating today?</h3>
                         <Button bsStyle="primary" className="center-block donate-button" onClick={()=> window.open("https://secure.ucsc.edu/s/1069/bp18/interior.aspx?sid=1069&gid=1001&pgid=780&cid=1749&dids=1004", "_blank")}>
                             Donate Now
                         </Button>
