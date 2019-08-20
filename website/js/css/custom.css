@@ -277,7 +277,7 @@ small .gnomad-flag span {
     color: white;
     border: 1px solid black;
     border-radius: 4px;
-    background: #337ab7;
+    background: #5cb85c;
     padding: 4px 5px;
     margin-right: 6px;
 }
@@ -286,7 +286,7 @@ small .gnomad-flag span {
     color: white;
     border: 1px solid black;
     border-radius: 4px;
-    background: #5cb85c;
+    background: #337ab7;
     padding: 4px 6px;
     margin-right: 6px;
 }

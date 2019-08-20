@@ -98,16 +98,27 @@ const AlleleFrequencyField = React.createClass({
 
     render: function() {
         const {field, fieldName, variant, hideEmptyItems} = this.props;
-        let renderedRows, flag, gnomadLink;
+        let renderedRows, flag, gnomadLink, chr, transcript, refSeqTranscript, lrgLink;
         let allEmpty = false;
         let styles = this.getCollapsableClassSet();
         let isChart = false;
         let isGnomad = false;
+        debugger;
 
         if (fieldName.toLowerCase().includes('gnomad')) {
-            flag = variant['Flags_GnomAD'];
+            flag = variant.Flags_GnomAD;
+            chr = variant.Chr;
             isGnomad = true;
             gnomadLink = "https://gnomad.broadinstitute.org/variant/" + variant['Variant_id_GnomAD'] + "?dataset=gnomad_r2_1_non_cancer";
+            if (chr === "17") {
+                transcript = "ENST00000357654";
+                refSeqTranscript = "NM_007294.3";
+                lrgLink = "http://ftp.ebi.ac.uk/pub/databases/lrgex/LRG_292.xml";
+            } else {
+                transcript = "ENST00000544455";
+                refSeqTranscript = "NM_000059.3";
+                lrgLink = "http://ftp.ebi.ac.uk/pub/databases/lrgex/LRG_293.xml";
+            }
         }
 
         if (fieldName === "gnomAD Genomes (Graphical)") {
@@ -162,11 +173,11 @@ const AlleleFrequencyField = React.createClass({
                 <div ref='panel' className={allEmpty && isChart ? "group-empty" : classNames(styles)}>
                     <div className="tile-disclaimer" style={{display: isGnomad && !util.isEmptyField(flag) && !isChart ? '' : 'none'}}>
                         <div>
-                            You are viewing flags for ENSEMBL transcript ENST00000357654. This is not the canonical
-                            transcript shown by default on gnomAD, but corresponds to RefSeq transcript NM_007294.3
-                            (per <a href="http://ftp.ebi.ac.uk/pub/databases/lrgex/LRG_292.xml">LRG</a>).  Additional
-                            data for this variant, including detailed populations, quality scores, and flags relative
-                            to other transcripts, <a href={gnomadLink} target="_blank">are available at gnomAD</a>.
+                            You are viewing flags for ENSEMBL transcript {{transcript}}. This is not the canonical
+                            transcript shown by default on gnomAD, but corresponds to RefSeq transcript {{refSeqTranscript}}
+                            &nbsp;(per <a href={{lrgLink}}>LRG</a>).  Additional data for this variant, including detailed
+                            populations, quality scores, and flags relative to other transcripts,
+                            <a href={gnomadLink} target="_blank">&nbsp;are available at gnomAD</a>.
                         </div>
                     </div>
                     <Table key={`allele-frequency-name-${fieldName}`}>
@@ -176,9 +187,9 @@ const AlleleFrequencyField = React.createClass({
                     </Table>
                     <div className="tile-disclaimer">
                         <div style={{display: isGnomad && isChart && !util.isEmptyField(flag) ? '' : 'none'}}>
-                            You are viewing flags for ENSEMBL transcript ENST00000357654. This is not the canonical
-                            transcript shown by default on gnomAD, but corresponds to RefSeq transcript NM_007294.3
-                            (per <a href="http://ftp.ebi.ac.uk/pub/databases/lrgex/LRG_292.xml">LRG</a>).  Additional
+                            You are viewing flags for ENSEMBL transcript {{transcript}}. This is not the canonical
+                            transcript shown by default on gnomAD, but corresponds to RefSeq transcript {{refSeqTranscript}}
+                            &nbsp;(per <a href="http://ftp.ebi.ac.uk/pub/databases/lrgex/LRG_292.xml">LRG</a>).  Additional
                             data for this variant, including detailed populations, quality scores, and flags relative
                             to other transcripts, <a href={gnomadLink} target="_blank">are available at gnomAD</a>.
                         </div>
