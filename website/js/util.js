@@ -69,6 +69,7 @@ function extractValInsideParens(str) {
     return regExp.exec(str)[1];
 }
 
+
 // attempts to parse the given date string using a variety of formats,
 // returning the formatted result as something like '08 September 2016'.
 // just returns the input if every pattern fails to match
@@ -242,6 +243,21 @@ function getFormattedFieldByProp(prop, variant) {
         let count = variant[prop.replace("frequency", "count")],
             number = variant[prop.replace("frequency", "number")];
         rowItem = [variant[prop], <small style={{float: 'right'}}>({count} of {number})</small>];
+    } else if (prop === "Allele_frequency_genome_GnomAD" || prop === "Allele_frequency_exome_GnomAD") {
+        let flag = variant["Flags_GnomAD"];
+        if (!isEmptyField(flag)) {
+            rowItem = [variant[prop], <small style={{float: 'right'}}><span className="glyphicon glyphicon-flag gnomad-flag"><span>{flag}</span></span></small>];
+        } else {
+            rowItem = normalizedFieldDisplay(variant[prop]);
+        }
+    } else if (/Allele_frequency_.*_GnomAD/.test(prop)) {
+        let count = variant[prop.replace("frequency", "count")],
+            number = variant[prop.replace("frequency", "number")],
+            hom = variant[prop.replace("frequency", "count_hom")];
+        rowItem = [variant[prop], <small style={{float: 'right'}}>({count} of {number}, Hom={hom})</small>];
+    } else if (/count.*_GnomAD/.test(prop) || /number.*_GnomAD/.test(prop)) {
+        debugger;
+        rowItem = variant[prop];
     } else if (prop === "Genomic_Coordinate_hg38" || prop === "Genomic_Coordinate_hg37") {
         rowItem = generateLinkToGenomeBrowser(prop, variant[prop]);
     } else if (prop === "Synonyms") {

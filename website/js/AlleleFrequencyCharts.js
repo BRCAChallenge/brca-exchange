@@ -32,7 +32,7 @@ class AlleleFrequencyCharts extends React.Component {
     }
     render() {
         let {variant, prop} = this.props;
-        let frequencyProps, title, pointFormat;
+        let frequencyProps, title, pointFormat, flag;
         if (prop === 'Allele_Frequency_Charts_1000_Genomes') {
             if (!variant['Variant_in_1000_Genomes']) { // eslint-disable-line dot-notation
                 return false;
@@ -62,6 +62,42 @@ class AlleleFrequencyCharts extends React.Component {
             ];
 
             title = 'ExAC';
+            pointFormat =  "{point.y}<br /><em>({point.count} of {point.number})</em>";
+        }
+        else if (prop === 'Allele_Frequency_Charts_Exome_GnomAD') {
+            if (!variant['Variant_in_GnomAD']) {
+                return false;
+            }
+            frequencyProps = [
+                {label: 'AFR', prop: 'Allele_frequency_exome_AFR_GnomAD'},
+                {label: 'AMR', prop: 'Allele_frequency_exome_AMR_GnomAD'},
+                {label: 'ASJ', prop: 'Allele_frequency_exome_ASJ_GnomAD'},
+                {label: 'EAS', prop: 'Allele_frequency_exome_EAS_GnomAD'},
+                {label: 'FIN', prop: 'Allele_frequency_exome_FIN_GnomAD'},
+                {label: 'NFE', prop: 'Allele_frequency_exome_NFE_GnomAD'},
+                {label: 'OTH', prop: 'Allele_frequency_exome_OTH_GnomAD'},
+                {label: 'SAS', prop: 'Allele_frequency_exome_SAS_GnomAD'},
+            ];
+            flag = variant['Flags_GnomAD'];
+            title = 'gnomAD Exomes';
+            pointFormat =  "{point.y}<br /><em>({point.count} of {point.number})</em>";
+        }
+        else if (prop === 'Allele_Frequency_Charts_Genome_GnomAD') {
+            if (!variant['Variant_in_GnomAD']) {
+                return false;
+            }
+            frequencyProps = [
+                {label: 'AFR', prop: 'Allele_frequency_genome_AFR_GnomAD'},
+                {label: 'AMR', prop: 'Allele_frequency_genome_AMR_GnomAD'},
+                {label: 'ASJ', prop: 'Allele_frequency_genome_ASJ_GnomAD'},
+                {label: 'EAS', prop: 'Allele_frequency_genome_EAS_GnomAD'},
+                {label: 'FIN', prop: 'Allele_frequency_genome_FIN_GnomAD'},
+                {label: 'NFE', prop: 'Allele_frequency_genome_NFE_GnomAD'},
+                {label: 'OTH', prop: 'Allele_frequency_genome_OTH_GnomAD'},
+                {label: 'SAS', prop: 'Allele_frequency_genome_SAS_GnomAD'},
+            ];
+            flag = variant['Flags_GnomAD'];
+            title = 'gnomAD Genomes';
             pointFormat =  "{point.y}<br /><em>({point.count} of {point.number})</em>";
         } else {
             return false;
@@ -164,13 +200,19 @@ class AlleleFrequencyCharts extends React.Component {
         };
 
         return (
-            <div className="alleleFrequencyChartContainer">
-                <div className='alleleFrequencyChart'>
-                    <BarChart ref={`${prop}_alleleFreq2`} container={`${prop}_alleleFreq1`} options={fullscaleChartOptions}/>
-                </div>
-                <div className='alleleFrequencyChart' onClick={this.toggleScale.bind(this, `${prop}_alleleFreq2`)}>
-                    <BarChart ref={`${prop}_alleleFreq2`} container={`${prop}_alleleFreq2`} options={scaledChartOptions} />
-                    <div style={{textAlign: 'center', color: 'grey', fontSize: '12px'}}>(click chart to change scale)</div>
+            <div className="alleleFrequencyChartOuterContainer">
+                {flag && flag !== '-'
+                    ? <div className="glyphicon glyphicon-flag gnomad-flag"><span style={{color: 'black', marginLeft: '6px'}}>{flag}</span></div>
+                    : ''
+                }
+                <div className="alleleFrequencyChartContainer">
+                    <div className='alleleFrequencyChart'>
+                        <BarChart ref={`${prop}_alleleFreq2`} container={`${prop}_alleleFreq1`} options={fullscaleChartOptions}/>
+                    </div>
+                    <div className='alleleFrequencyChart' onClick={this.toggleScale.bind(this, `${prop}_alleleFreq2`)}>
+                        <BarChart ref={`${prop}_alleleFreq2`} container={`${prop}_alleleFreq2`} options={scaledChartOptions} />
+                        <div style={{textAlign: 'center', color: 'grey', fontSize: '12px'}}>(click chart to change scale)</div>
+                    </div>
                 </div>
             </div>
         );

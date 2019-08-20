@@ -11,6 +11,10 @@ const _ = require('underscore');
 
 
 const fieldsOfInterest = {
+    'gnomAD Exomes (Graphical)': true,
+    'gnomAD Exomes (Numerical)': false,
+    'gnomAD Genomes (Graphical)': true,
+    'gnomAD Genomes (Numerical)': false,
     'ExAC (Graphical)': true,
     'ExAC (Numerical)': false,
     '1000 Genomes (Graphical)': false,
@@ -57,6 +61,22 @@ export default class AlleleFrequenciesTile extends React.Component {
         const variant = this.props.variant;
         const data = this.props.alleleFrequencyData;
 
+        const gnomadExomeGraph = [_.find(data, function(dd) {
+                                return dd.source === "GnomAD Exomes";
+                            }).chart[0], "gnomAD Exomes (Graphical)"];
+
+        const gnomadExomeData = [_.find(data, function(dd) {
+                                return dd.source === "GnomAD Exomes";
+                            }).data, "gnomAD Exomes (Numerical)"];
+
+        const gnomadGenomeGraph = [_.find(data, function(dd) {
+                                return dd.source === "GnomAD Genomes";
+                            }).chart[0], "gnomAD Genomes (Graphical)"];
+
+        const gnomadGenomeData = [_.find(data, function(dd) {
+                                return dd.source === "GnomAD Genomes";
+                            }).data, "gnomAD Genomes (Numerical)"];
+
         const exacGraph = [_.find(data, function(dd) {
                                 return dd.source === "ExAC";
                             }).chart[0], "ExAC (Graphical)"];
@@ -77,7 +97,10 @@ export default class AlleleFrequenciesTile extends React.Component {
                                 return dd.source === "ESP";
                             }).data, "ESP (Numerical)"];
 
-        const alleleFrequencyFields = [exacGraph, exacData, thousandGenomesGraph, thousandGenomesData, espData];
+
+        const alleleFrequencyFields = [gnomadExomeGraph, gnomadExomeData, gnomadGenomeGraph,
+                                       gnomadGenomeData, exacGraph, exacData, thousandGenomesGraph,
+                                       thousandGenomesData, espData];
 
         const renderedAlleleFrequencyFields = alleleFrequencyFields.map((field, idx) => {
             let fieldValue = field[0];
@@ -99,8 +122,8 @@ export default class AlleleFrequenciesTile extends React.Component {
             );
         });
 
-        // TODO: figure out how to determine if everything is empty even though variant is in 10KG or ExAC
-        const allEmpty = !variant.Variant_in_1000_Genomes && !variant.Variant_in_ExAC;
+        // TODO: figure out how to determine if everything is empty even though variant is in 10KG / ExAC / GnomAD
+        const allEmpty = !variant.Variant_in_1000_Genomes && !variant.Variant_in_ExAC && !variant.Variant_in_GnomAD;
 
         // create the source panel itself now
         const groupTitle = `source-panel-${this.props.sourceName}`;
@@ -144,6 +167,14 @@ export default class AlleleFrequenciesTile extends React.Component {
                     collapsable={true}
                     defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}
                     hideEmptyItems={this.props.hideEmptyItems}>
+                    <div className="tile-disclaimer">
+                        <div>
+                            The gnomAD and ExAC data sets used by BRCA Exchange are the “non-cancer” subsets
+                            of these sources. Data from <a href="https://tcga-data.nci.nih.gov/docs/publications/tcga/about.html">TCGA</a>
+                            &nbsp;and other cancer cohorts are excluded to ensure that the frequencies used
+                            to assess pathogenicity represent individuals not affected by cancer.
+                        </div>
+                    </div>
                     {renderedAlleleFrequencyFields}
                 </Panel>
             </div>

@@ -1,0 +1,95 @@
+genome_ac	Total count of observed alternate alleles (variant) in genomes
+genome_an	Total number of total chromosomes studied (for this variant) in genomes
+genome_af	Overall allele frequency (for genomes) according to all studied populations, per gnomAD
+exome_an	Total number of total chromosomes studied (for this variant) in exomes
+exome_ac	Total count of observed alternate alleles (variant) in exomes
+exome_af	Overall allele frequency (for exomes) according to all studied populations, per gnomAD
+alt	Alternate base(s)
+chrom	Chromosome
+hgvsc	HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA
+hgvsp	The predicted protein-level change (if any) that would be introduced by the genomic variant
+pos_hg19	Position according to hg19
+ref	Reference base(s)
+variantId	Identifier provided by gnomAD
+consequence	Variant consequence from Ensembl's Variant Effect Predictor, provided by gnomAD
+flags	Flags provided by gnomAD to indicate an annotation or something unusual about the data
+genome_FIN_ac	Count of observed alternate alleles (variant) in genomes of Finnish Populations, per gnomAD
+exome_NFE_af	Allele Frequency in exomes of Non-Finnish European Populations
+exome_ASJ_ac_hemi	Count of observed alternate alleles (variant) in exomes of hemizygous Ashkenazi Jewish Populations, per gnomAD
+genome_FIN_af	Allele Frequency in genomes of Finnish Populations
+genome_ASJ_ac	Count of observed alternate alleles (variant) in genomes of Ashkenazi Jewish Populations, per gnomAD
+genome_ASJ_ac_hom	Count of observed alternate alleles (variant) in genomes of homozygous Ashkenazi Jewish Populations, per gnomAD
+genome_AMR_ac_hemi	Count of observed alternate alleles (variant) in genomes of hemizygous Latino Populations, per gnomAD
+exome_NFE_an	Number of total chromosomes studied (for this variant) in exomes of Non-Finnish European Populations
+genome_FIN_an	Number of total chromosomes studied (for this variant) in genomes of Finnish Populations
+exome_AMR_ac_hom	Count of observed alternate alleles (variant) in exomes of homozygous Latino Populations, per gnomAD
+genome_FIN_ac_hemi	Count of observed alternate alleles (variant) in genomes of hemizygous Finnish Populations, per gnomAD
+genome_FIN_ac_hom	Count of observed alternate alleles (variant) in genomes of homozygous Finnish Populations, per gnomAD
+exome_AMR_ac_hemi	Count of observed alternate alleles (variant) in exomes of hemizygous Latino Populations, per gnomAD
+genome_ASJ_af	Allele Frequency in genomes of Ashkenazi Jewish Populations
+genome_AMR_ac	Count of observed alternate alleles (variant) in genomes of Latino Populations, per gnomAD
+genome_AFR_af	Allele Frequency in genomes of African/African American Populations
+genome_EAS_an	Number of total chromosomes studied (for this variant) in genomes of East Asian Populations
+genome_AMR_an	Number of total chromosomes studied (for this variant) in genomes of Latino Populations
+genome_EAS_ac	Count of observed alternate alleles (variant) in genomes of East Asian Populations, per gnomAD
+genome_OTH_ac_hemi	Count of observed alternate alleles (variant) in genomes of hemizygous Other Populations, per gnomAD
+exome_AFR_ac_hemi	Count of observed alternate alleles (variant) in exomes of hemizygous African/African American Populations, per gnomAD
+exome_OTH_ac	Count of observed alternate alleles (variant) in exomes of Other Populations, per gnomAD
+exome_SAS_ac_hemi	Count of observed alternate alleles (variant) in exomes of hemizygous South Asian Populations, per gnomAD
+genome_ASJ_an	Number of total chromosomes studied (for this variant) in genomes of Ashkenazi Jewish Populations
+exome_OTH_af	Allele Frequency in exomes of Other Populations
+genome_NFE_ac_hom	Count of observed alternate alleles (variant) in genomes of homozygous Non-Finnish European Populations, per gnomAD
+genome_EAS_af	Allele Frequency in genomes of East Asian Populations
+exome_SAS_ac_hom	Count of observed alternate alleles (variant) in exomes of homozygous South Asian Populations, per gnomAD
+exome_NFE_ac	Count of observed alternate alleles (variant) in exomes of Non-Finnish European Populations, per gnomAD
+exome_OTH_an	Number of total chromosomes studied (for this variant) in exomes of Other Populations
+genome_SAS_ac	Count of observed alternate alleles (variant) in genomes of South Asian Populations, per gnomAD
+genome_OTH_ac	Count of observed alternate alleles (variant) in genomes of Other Populations, per gnomAD
+exome_EAS_af	Allele Frequency in exomes of East Asian Populations
+exome_SAS_af	Allele Frequency in exomes of South Asian Populations
+genome_OTH_af	Allele Frequency in genomes of Other Populations
+exome_OTH_ac_hemi	Count of observed alternate alleles (variant) in exomes of hemizygous Other Populations, per gnomAD
+exome_EAS_ac	Count of observed alternate alleles (variant) in exomes of East Asian Populations, per gnomAD
+exome_EAS_an	Number of total chromosomes studied (for this variant) in exomes of East Asian Populations
+genome_OTH_ac_hom	Count of observed alternate alleles (variant) in genomes of homozygous Other Populations, per gnomAD
+genome_EAS_ac_hom	Count of observed alternate alleles (variant) in genomes of homozygous East Asian Populations, per gnomAD
+exome_SAS_an	Number of total chromosomes studied (for this variant) in exomes of South Asian Populations
+genome_SAS_an	Number of total chromosomes studied (for this variant) in genomes of South Asian Populations
+genome_AFR_ac_hemi	Count of observed alternate alleles (variant) in genomes of hemizygous African/African American Populations, per gnomAD
+genome_AMR_ac_hom	Count of observed alternate alleles (variant) in genomes of homozygous Latino Populations, per gnomAD
+exome_ASJ_ac_hom	Count of observed alternate alleles (variant) in exomes of homozygous Ashkenazi Jewish Populations, per gnomAD
+genome_NFE_ac_hemi	Count of observed alternate alleles (variant) in genomes of hemizygous Non-Finnish European Populations, per gnomAD
+exome_AFR_ac_hom	Count of observed alternate alleles (variant) in exomes of homozygous African/African American Populations, per gnomAD
+genome_ASJ_ac_hemi	Count of observed alternate alleles (variant) in genomes of hemizygous Ashkenazi Jewish Populations, per gnomAD
+genome_SAS_ac_hom	Count of observed alternate alleles (variant) in genomes of homozygous South Asian Populations, per gnomAD
+exome_SAS_ac	Count of observed alternate alleles (variant) in exomes of South Asian Populations, per gnomAD
+genome_SAS_ac_hemi	Count of observed alternate alleles (variant) in genomes of hemizygous South Asian Populations, per gnomAD
+exome_ASJ_af	Allele Frequency in exomes of Ashkenazi Jewish Populations
+exome_EAS_ac_hemi	Count of observed alternate alleles (variant) in exomes of hemizygous East Asian Populations, per gnomAD
+exome_ASJ_ac	Count of observed alternate alleles (variant) in exomes of Ashkenazi Jewish Populations, per gnomAD
+exome_FIN_ac	Count of observed alternate alleles (variant) in exomes of Finnish Populations, per gnomAD
+genome_AFR_ac_hom	Count of observed alternate alleles (variant) in genomes of homozygous African/African American Populations, per gnomAD
+exome_ASJ_an	Number of total chromosomes studied (for this variant) in exomes of Ashkenazi Jewish Populations
+exome_NFE_ac_hemi	Count of observed alternate alleles (variant) in exomes of hemizygous Non-Finnish European Populations, per gnomAD
+exome_AMR_an	Number of total chromosomes studied (for this variant) in exomes of Latino Populations
+exome_EAS_ac_hom	Count of observed alternate alleles (variant) in exomes of homozygous East Asian Populations, per gnomAD
+genome_AFR_an	Number of total chromosomes studied (for this variant) in genomes of African/African American Populations
+genome_AMR_af	Allele Frequency in genomes of Latino Populations
+genome_OTH_an	Number of total chromosomes studied (for this variant) in genomes of Other Populations
+genome_AFR_ac	Count of observed alternate alleles (variant) in genomes of African/African American Populations, per gnomAD
+exome_AMR_ac	Count of observed alternate alleles (variant) in exomes of Latino Populations, per gnomAD
+exome_FIN_ac_hemi	Count of observed alternate alleles (variant) in exomes of hemizygous Finnish Populations, per gnomAD
+exome_OTH_ac_hom	Count of observed alternate alleles (variant) in exomes of homozygous Other Populations, per gnomAD
+exome_NFE_ac_hom	Count of observed alternate alleles (variant) in exomes of homozygous Non-Finnish European Populations, per gnomAD
+genome_NFE_af	Allele Frequency in genomes of Non-Finnish European Populations
+exome_AMR_af	Allele Frequency in exomes of Latino Populations
+exome_FIN_an	Number of total chromosomes studied (for this variant) in exomes of Finnish Populations
+exome_AFR_an	Number of total chromosomes studied (for this variant) in exomes of African/African American Populations
+genome_NFE_ac	Count of observed alternate alleles (variant) in genomes of Non-Finnish European Populations, per gnomAD
+exome_FIN_ac_hom	Count of observed alternate alleles (variant) in exomes of homozygous Finnish Populations, per gnomAD
+genome_EAS_ac_hemi	Count of observed alternate alleles (variant) in genomes of hemizygous East Asian Populations, per gnomAD
+genome_NFE_an	Number of total chromosomes studied (for this variant) in genomes of Non-Finnish European Populations
+exome_AFR_ac	Count of observed alternate alleles (variant) in exomes of African/African American Populations, per gnomAD
+exome_FIN_af	Allele Frequency in exomes of Finnish Populations
+exome_AFR_af	Allele Frequency in exomes of African/African American Populations
+genome_SAS_af	Allele Frequency in genomes of South Asian Populations

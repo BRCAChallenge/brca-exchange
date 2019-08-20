@@ -3,7 +3,7 @@ import argparse
 import copy
 import csv
 import re
-import utilities
+from utilities import isEmpty, round_sigfigs
 
 EMPTY = "-"
 FIELDS_TO_REMOVE = ["Protein_ClinVar",
@@ -195,8 +195,31 @@ def pathogenicityUpdate(row):
     return(pathoExpert, pathoAll)
 
 
+def getNumericAFValue(value):
+    if isEmpty(value):
+        return 0
+    else:
+        return float(value)
+
+
+def determineGnomADAlleleFrequency(row):
+    if isEmpty(row['Allele_frequency_genome_GnomAD']) and isEmpty(row['Allele_frequency_exome_GnomAD']):
+        return EMPTY
+    else:
+        ac_genome = getNumericAFValue(row['Allele_count_genome_GnomAD'])
+        an_genome = getNumericAFValue(row['Allele_number_genome_GnomAD'])
+        ac_exome = getNumericAFValue(row['Allele_count_exome_GnomAD'])
+        an_exome = getNumericAFValue(row['Allele_number_exome_GnomAD'])
+        if (an_genome + an_exome) == 0:
+            return EMPTY
+        return round_sigfigs(((ac_genome + ac_exome) / (an_genome + an_exome)), 4)
+
+
 def selectAlleleFrequency(row):
-    if row["Allele_frequency_ExAC"] != EMPTY:
+    gnomAD_AF = determineGnomADAlleleFrequency(row)
+    if gnomAD_AF != EMPTY:
+        return "%s (GnomAD)" % gnomAD_AF
+    elif row["Allele_frequency_ExAC"] != EMPTY:
         return "%s (ExAC minus TCGA)" % row["Allele_frequency_ExAC"]
     elif row["Minor_allele_frequency_percent_ESP"] != EMPTY:
         # Percent must be converted to a fraction

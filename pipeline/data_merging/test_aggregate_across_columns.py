@@ -270,37 +270,30 @@ class TestStringMethods(unittest.TestCase):
             'AA_Allele_Frequency_ESP': EMPTY,
             'EA_Allele_Frequency_ESP': EMPTY,
             'Allele_frequency_NFE_ExAC': EMPTY,
+            'Allele_frequency_genome_GnomAD': EMPTY,
+            'Allele_frequency_exome_GnomAD': EMPTY,
+            'Allele_count_genome_GnomAD': EMPTY,
+            'Allele_count_exome_GnomAD': EMPTY,
+            'Allele_number_genome_GnomAD': EMPTY,
+            'Allele_number_exome_GnomAD': EMPTY,
         }
 
-    def test_select_max_allele_frequency(self):
-        maxFreqString = selectMaxAlleleFrequency(self.newRowAlleleFrequencies)
-        self.assertEquals(maxFreqString, EMPTY)
-
-        self.newRowAlleleFrequencies["Allele_frequency_SAS_ExAC"] = '0.305'
-        maxFreqString = selectMaxAlleleFrequency(self.newRowAlleleFrequencies)
-        self.assertEquals(maxFreqString, EMPTY)
-
-        for attr, value in self.newRowAlleleFrequencies.iteritems():
-            self.newRowAlleleFrequencies[attr] = EMPTY
-
-        maxFreqString = selectMaxAlleleFrequency(self.newRowAlleleFrequencies)
-        self.assertEquals(maxFreqString, EMPTY)
 
     def test_set_output_columns(self):
         '''
-        Tests that: 
-        none of the fields in FIELDS_TO_REMOVE are present, 
-        all of the fields from FIELDS_TO_ADD are present, 
+        Tests that:
+        none of the fields in FIELDS_TO_REMOVE are present,
+        all of the fields from FIELDS_TO_ADD are present,
         and that all of the fields in FIEDLS_TO_RENAME have been properly renamed.
         '''
         outputFields = setOutputColumns(self.initialFields, FIELDS_TO_REMOVE, FIELDS_TO_ADD, FIELDS_TO_RENAME)
 
         for field in FIELDS_TO_REMOVE:
             self.assertNotIn(field, outputFields)
-            
+
         for field in FIELDS_TO_ADD:
             self.assertIn(field, outputFields)
-            
+
         for oldName, newName in FIELDS_TO_RENAME.iteritems():
             self.assertNotIn(oldName, outputFields)
             self.assertIn(newName, outputFields)
@@ -316,7 +309,7 @@ class TestStringMethods(unittest.TestCase):
         oldRow_copy1 = self.oldRow.copy()
         oldRow_copy2 = self.oldRow.copy()
         updatedRow = update_basic_fields(self.oldRow, FIELDS_TO_RENAME)
-        
+
         for oldName, newName in FIELDS_TO_RENAME.iteritems():
             self.assertNotIn(oldName, updatedRow.keys())
             self.assertIn(newName, updatedRow.keys())
@@ -341,7 +334,6 @@ class TestStringMethods(unittest.TestCase):
         for attr, value in self.newRowAlleleFrequencies.iteritems():
             self.newRowAlleleFrequencies[attr] = '-'
 
-
         self.newRowAlleleFrequencies['Minor_allele_frequency_percent_ESP'] = '20.345'
         AF = selectAlleleFrequency(self.newRowAlleleFrequencies)
         self.assertEquals(AF, '0.20345 (ESP)')
@@ -353,6 +345,29 @@ class TestStringMethods(unittest.TestCase):
         self.newRowAlleleFrequencies['Minor_allele_frequency_percent_ESP'] = '2'
         AF = selectAlleleFrequency(self.newRowAlleleFrequencies)
         self.assertEquals(AF, '0.02 (ESP)')
+
+    def test_determine_gnomAD_allele_frequency(self):
+        self.newRowAlleleFrequencies['Minor_allele_frequency_percent_ESP'] = '20.345'
+        AF = selectAlleleFrequency(self.newRowAlleleFrequencies)
+        self.assertEquals(AF, '0.20345 (ESP)')
+
+        self.newRowAlleleFrequencies['Allele_frequency_genome_GnomAD'] = '0.345'
+        self.newRowAlleleFrequencies['Allele_count_genome_GnomAD'] = '345'
+        self.newRowAlleleFrequencies['Allele_count_exome_GnomAD'] = '0'
+        self.newRowAlleleFrequencies['Allele_number_genome_GnomAD'] = '1000'
+        self.newRowAlleleFrequencies['Allele_number_exome_GnomAD'] = '0'
+
+        AF = selectAlleleFrequency(self.newRowAlleleFrequencies)
+        self.assertEquals(AF, '0.345 (GnomAD)')
+
+        self.newRowAlleleFrequencies['Allele_frequency_exome_GnomAD'] = '0.5'
+        self.newRowAlleleFrequencies['Allele_count_genome_GnomAD'] = '1'
+        self.newRowAlleleFrequencies['Allele_count_exome_GnomAD'] = '1'
+        self.newRowAlleleFrequencies['Allele_number_genome_GnomAD'] = '2'
+        self.newRowAlleleFrequencies['Allele_number_exome_GnomAD'] = '2'
+
+        AF = selectAlleleFrequency(self.newRowAlleleFrequencies)
+        self.assertEquals(AF, '0.5 (GnomAD)')
 
 
 if __name__ == '__main__':
