@@ -81,7 +81,7 @@ jobs:
              EOF
        - run:
            name: deploying to beta machine
-           command: HOST=brcaexchange.org ~/project/deployment/deploy-dev
+           command: HOST=brcaexchange-prod.gi.ucsc.edu ~/project/deployment/deploy-dev
    test-pipeline:
      working_directory: /pipeline
      docker:
