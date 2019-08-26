@@ -13,7 +13,7 @@ httmock==1.2.6
 humanize==0.5.1
 idna==2.7
 protobuf==3.1.0
-psycopg2==2.7.3.2
+psycopg2==2.8.3
 PyJWT==1.4.2
 pyyaml==4.2b1
 requests==2.20.0
