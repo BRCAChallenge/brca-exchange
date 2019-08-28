@@ -6,7 +6,7 @@ Adds a name field which starts at 1 and is set in ascending
 order based on the date field (when the release was generated).
 '''
 
-from __future__ import unicode_literals
+
 
 from django.db import migrations, models
 from data.utilities import set_release_name_defaults

@@ -3,9 +3,8 @@ import hashlib
 import json
 import os
 import random
-import md5
 import requests
-from urllib2 import HTTPError
+from urllib.error import HTTPError
 from django.core.mail import EmailMultiAlternatives
 from django.db import IntegrityError
 from django.db.models import Q
@@ -90,7 +89,7 @@ def update(request):
             image = request.FILES["image"]
             if image is not None:
                 save_picture(user[0].id, image)
-    except Exception, e:
+    except Exception as e:
         logging.error(repr(e))
         return JsonResponse({'success': False, 'error': str(e)})
 

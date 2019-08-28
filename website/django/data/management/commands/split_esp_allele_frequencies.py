@@ -38,4 +38,4 @@ class Command(BaseCommand):
 
         update_materialized_view()
 
-        print "Done!"
+        print("Done!")

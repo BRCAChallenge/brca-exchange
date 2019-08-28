@@ -37,7 +37,7 @@ function add_release_tar_to_db {
     echo "Adding release to database"
 
     # add data to DB
-    python ${MANAGE_SCRIPT} addrelease ${DATA} ${METADATA} ${REMOVED} ${DIFFJSON} ${REPORTS} ${REMOVEDREPORTS} ${REPORTSDIFF}
+    python3 ${MANAGE_SCRIPT} addrelease ${DATA} ${METADATA} ${REMOVED} ${DIFFJSON} ${REPORTS} ${REMOVEDREPORTS} ${REPORTSDIFF}
 }
 
 # Expects environment (local, beta, dev or production) as first argument.

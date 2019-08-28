@@ -9,4 +9,4 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         update_mupit_structure_for_existing_variants()
         update_materialized_view()
-        print "Done!"
+        print("Done!")

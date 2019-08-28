@@ -1,7 +1,7 @@
 import json
 import os
 import unittest
-from urllib import quote
+from urllib.parse import quote
 from django.http import JsonResponse, HttpResponse
 from django.test import TestCase
 from django.test.client import RequestFactory
@@ -10,7 +10,7 @@ from data import test_data
 from data.models import Variant, CurrentVariant
 from data.views import index, autocomplete
 import data.views as views
-from test_search import create_variant_and_materialized_view
+from .test_search import create_variant_and_materialized_view
 
 # GA4GH related modules
 import google.protobuf.json_format as json_format
@@ -120,7 +120,7 @@ class GA4GHTestCase(TestCase):
         # Field 'callSets' is an empty list in bad request set id
         self.assertEqual(json_response["callSets"], list([]))
         # Next page token is empty, no other result available for display
-        self.assertEqual(json_response["nextPageToken"], unicode(''))
+        self.assertEqual(json_response["nextPageToken"], str(''))
 
     def test_variant_set_metadata(self):
         """Tests that a variant set found via search has well formed metadata."""
@@ -141,13 +141,13 @@ class GA4GHTestCase(TestCase):
         response = views.search_variant_sets(request)
         variant_sets = json.loads(response.content)["variantSets"]
         # There are currently three variant sets
-        self.assertEquals(len(variant_sets), 3)
+        self.assertEqual(len(variant_sets), 3)
         for variant_set in variant_sets:
             self.assertIsNotNone(variant_set["referenceSetId"])
             self.assertIsNotNone(variant_set["datasetId"])
             self.assertIsNotNone(variant_set["name"])
         # Next Page Token Field should be empty response.
-        self.assertEquals(json.loads(response.content)["nextPageToken"], "")
+        self.assertEqual(json.loads(response.content)["nextPageToken"], "")
 
     def test_get_variant_set_by_id(self):
         """Ensures that expected variant sets are present."""
@@ -251,7 +251,7 @@ class GA4GHTestCase(TestCase):
                                 json.dumps(json_format.MessageToDict(request, False)),
                                 content_type="application/json")
         response = views.search_variants(req)
-        self.assertEquals(response.status_code, 400)
+        self.assertEqual(response.status_code, 400)
         self.assertJSONEqual(response.content,
                              views.ErrorMessages['referenceName'],
                              "A useful error is thrown when the reference name is not present")
@@ -275,7 +275,7 @@ class GA4GHTestCase(TestCase):
                                 json.dumps(json_format.MessageToDict(request, False)),
                                 content_type="application/json")
         response = views.search_variants(req)
-        self.assertEquals(response.status_code, 404, "A bad variant set ID should 404")
+        self.assertEqual(response.status_code, 404, "A bad variant set ID should 404")
         # Test for an end value less than the end value
 
         test_request = self.factory.post("/data/ga4gh/variants/search",
@@ -322,12 +322,12 @@ class GA4GHTestCase(TestCase):
                  "pageToken": "3"}), content_type="application/json", )
         response = json.loads(views.search_variants(request).content)
         for variant in response["variants"]:
-            self.assertGreater(long(variant["end"]), start)
-            self.assertLess(long(variant["start"]), end,
+            self.assertGreater(int(variant["end"]), start)
+            self.assertLess(int(variant["start"]), end,
                             "Should be in range"
                             " v.start {} r.end {}".format(variant['start'], end))
         self.assertEqual(response["nextPageToken"], "4")
-        self.assertEquals(len(response["variants"]), 5)
+        self.assertEqual(len(response["variants"]), 5)
 
     def test_search_variants_empty_page_request(self):
         """This would be the same response when a requested
@@ -361,8 +361,8 @@ class GA4GHTestCase(TestCase):
         jresp = json.loads(response.content)
         self.assertGreater(len(jresp["variants"]), 0)
         for variant in jresp["variants"]:
-            self.assertTrue(long(variant["end"]) > start)
-            self.assertTrue(long(variant["start"]) < end,
+            self.assertTrue(int(variant["end"]) > start)
+            self.assertTrue(int(variant["start"]) < end,
                             "Should be in range"
                             " v.start {} r.end {}".format(variant['start'], end))
             self.assertTrue(
@@ -415,7 +415,7 @@ class GA4GHTestCase(TestCase):
         json_response = json.loads(response.content)
         """Note that it is an empty response, no variants exist within
         the provided search range"""
-        self.assertEqual(json_response['nextPageToken'], unicode(''))
+        self.assertEqual(json_response['nextPageToken'], str(''))
         self.assertEqual(json_response['variants'], list([]))
         request = self.factory.post("/data/ga4gh/variants/search",
                                            json.dumps({"referenceName": "5",
@@ -427,7 +427,7 @@ class GA4GHTestCase(TestCase):
         """Note that it is an empty response, no variants exist within
         the provided search range"""
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(json_response['nextPageToken'], unicode(''))
+        self.assertEqual(json_response['nextPageToken'], str(''))
         self.assertEqual(json_response['variants'], list([]))
 
     def test_get_variant_by_id(self):

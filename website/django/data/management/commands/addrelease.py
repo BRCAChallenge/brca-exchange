@@ -69,11 +69,11 @@ class Command(BaseCommand):
 
         self.previous_release_id = DataRelease.objects.order_by('-id')[1].id
 
-        print "Creating new release with ID %d and name %s in db %s" % (release_id, release_name, DATABASES['default']['NAME'])
+        print(("Creating new release with ID %d and name %s in db %s" % (release_id, release_name, DATABASES['default']['NAME'])))
 
         reports_dict = self.build_report_dictionary_by_source(reports_tsv, removed_reports_tsv)
-        change_types = {ct['name']: ct['id'] for ct in ChangeType.objects.values()}
-        mupit_structures = {ms['name']: ms['id'] for ms in MupitStructure.objects.values()}
+        change_types = {ct['name']: ct['id'] for ct in list(ChangeType.objects.values())}
+        mupit_structures = {ms['name']: ms['id'] for ms in list(MupitStructure.objects.values())}
 
         # TODO: split variants_tsv ahead of time into separate variant and insilicopriors lists
         # TODO: use django-postgres-copy to load these files, although we'll have to run update_variant_values_for_insertion on it beforehand
@@ -121,7 +121,7 @@ class Command(BaseCommand):
         :return:
         """
         reader = csv.reader(tsv_fp, dialect="excel-tab")
-        header = reader.next()
+        header = next(reader)
 
         # collect list of insilico prior column names so we can split those into a separate table, insilicopriors
         insilicopriors_cols = [x.name for x in InSilicoPriors._meta.get_fields() if x.name not in ['id', 'Variant']]
@@ -129,7 +129,7 @@ class Command(BaseCommand):
         # tqdm() displays a progress bar as we read elements from the csvreader, making this all slightly more pleasant
         for row in tqdm(reader, desc=label, total=get_num_lines(tsv_fp.name) - 1):
             # split Source column into booleans
-            row_dict = dict(zip(header, row))
+            row_dict = dict(list(zip(header, row)))
 
             # transfer insilico prior columns from row_dict to insilico_dict
             insilico_dict = dict((col, row_dict.pop(col)) for col in insilicopriors_cols)
@@ -189,16 +189,16 @@ class Command(BaseCommand):
 
     def build_report_dictionary_by_source(self, reports_tsv, removed_reports_tsv):
         reports_reader = csv.reader(reports_tsv, dialect="excel-tab")
-        reports_header = reports_reader.next()
+        reports_header = next(reports_reader)
         removed_reports_reader = csv.reader(removed_reports_tsv, dialect="excel-tab")
-        removed_reports_header = removed_reports_reader.next()
+        removed_reports_header = next(removed_reports_reader)
 
         reports_dict = {
             'reports': defaultdict(dict), 'removed_reports': defaultdict(dict)
         }
 
         for row in reports_reader:
-            report = dict(zip(reports_header, row))
+            report = dict(list(zip(reports_header, row)))
             if self.is_empty(report['change_type']):
                 report['change_type'] = 'none'
             source = report['Source']
@@ -207,7 +207,7 @@ class Command(BaseCommand):
 
         # add removed reports to dict
         for row in removed_reports_reader:
-            report = dict(zip(reports_header, row))
+            report = dict(list(zip(reports_header, row)))
             report['change_type'] = 'deleted'
             source = report['Source']
             bx_id = report['BX_ID_' + source]

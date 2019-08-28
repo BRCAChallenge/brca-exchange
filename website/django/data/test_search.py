@@ -4,7 +4,7 @@ import string
 import shutil
 import tempfile
 from os import path
-from urllib import quote
+from urllib.parse import quote
 from django.http import JsonResponse, HttpResponse
 from brca import settings
 from data.models import Variant, CurrentVariant, ChangeType, DataRelease, Report
@@ -15,7 +15,7 @@ from unittest import skip
 from django.test.client import RequestFactory
 from data import test_data
 from data.views import index, autocomplete, variant_reports, remove_disallowed_chars
-from utilities import update_autocomplete_words
+from .utilities import update_autocomplete_words
 
 '''
 NOTE:
@@ -443,7 +443,7 @@ class VariantTestCase(TestCase):
 
     def test_change_types(self):
         '''Tests change_types parameter'''
-        change_types_list = ChangeType.objects.values()
+        change_types_list = list(ChangeType.objects.values())
 
         #creates new variants that have differing change_type_ids: one of each type
         for change_type in change_types_list:
@@ -683,7 +683,7 @@ class VariantTestCase(TestCase):
         }
 
         #This loops through test_list dictionary, providing matching pairs of correctly-ordered search terms as field_1 and field_2
-        for field_1, field_2 in test_list.items():
+        for field_1, field_2 in list(test_list.items()):
             test_case = getattr(self.existing_variant_materialized_view, field_1) + ':' + getattr(self.existing_variant_materialized_view, field_2)
 
             request = self.factory.get(
@@ -816,7 +816,7 @@ class VariantTestCase(TestCase):
             'Gene_Symbol': 'Protein_Change'
         }
         #This loops through the test_list dictionary, providing matching pairs of correctly-ordered search terms
-        for field_1, field_2 in test_list.items():
+        for field_1, field_2 in list(test_list.items()):
 
             field_1_val = getattr(self.existing_variant_materialized_view, field_1)
 
@@ -920,7 +920,7 @@ class VariantTestCase(TestCase):
     def test_search_by_gibberish(self):
         '''Tests gibberish searches
         gibberish,<.>/?'';:[{]}\|=+-_)(*&%^$#@!~`'''
-        ascii_list = [chr(i) for i in xrange(256)]
+        ascii_list = [chr(i) for i in range(256)]
         ascii_string = 'hey I\'m gibberish look at meeee' + ''.join(ascii_list)
         ascii_string = remove_disallowed_chars(ascii_string)
         request = self.factory.get(
@@ -999,7 +999,7 @@ class VariantTestCase(TestCase):
             'Gene_Symbol': 'Protein_Change'
         }
 
-        for field_1, field_2 in test_list.items():
+        for field_1, field_2 in list(test_list.items()):
             test_case = getattr(self.existing_variant_materialized_view,field_2) + ':' + getattr(self.existing_variant_materialized_view,field_1)
 
             request = self.factory.get(
