@@ -28,12 +28,12 @@ jobs:
            command: |
              sudo apt-get update
              sudo apt-get install python3-pip python3-dev
-             sudo pip install virtualenv
+             sudo pip3 install virtualenv
              mkdir ~/project/website_virtualenv
              virtualenv ~/project/website_virtualenv
              source ~/project/website_virtualenv/bin/activate
-             pip install -r ~/project/website/requirements.txt
-             pip install -r ~/project/website/test-requirements.txt
+             pip3 install -r ~/project/website/requirements.txt
+             pip3 install -r ~/project/website/test-requirements.txt
              cd ~/project/website/django && python3 manage.py migrate
              python3 manage.py test
        - store_test_results:
