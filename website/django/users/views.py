@@ -124,10 +124,9 @@ def register(request):
         created_user.save()
 
         # Create and save activation key
-        salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
-        activation_key = hashlib.sha1(salt + created_user.email).hexdigest()
-
-        created_user.activation_key = activation_key
+        salt = hashlib.sha1(str(random.random()).encode('utf-8')).hexdigest()[:5]
+        activation_key = hashlib.sha1((salt + created_user.email).encode('utf-8')).hexdigest()
+        created_user['activation_key'] = activation_key
         created_user.save()
 
         # Send activation email
@@ -199,8 +198,8 @@ def password_reset(request):
     user = user[0]
 
     # Create and save password reset token
-    salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
-    password_reset_token = hashlib.sha1(salt + user.email).hexdigest()
+    salt = hashlib.sha1(str(random.random()).encode('utf-8')).hexdigest()[:5]
+    password_reset_token = hashlib.sha1((salt + user.email).encode('utf-8')).hexdigest()
 
     user.password_reset_token = password_reset_token
     email_duration_days = settings.PASSWORD_RESET_LINK_DURATION

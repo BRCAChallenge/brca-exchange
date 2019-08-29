@@ -92,12 +92,12 @@ class VariantTestCase(TestCase):
 
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(json.loads(response.content)['count'], 1)
+        self.assertEqual(json.loads(response.content.decode('utf-8'))['count'], 1)
 
     @skip("Not complete")
     def test_format_tsv(self):
         '''Tests format parameter with format tsv'''
-        #make sure there are 2 variants in database, search for 1 variant by coordinate, status code = 200, format = tsv, check response.content and test if it contains genomic coordinate and doesn't contain any other genomic coordinate
+        #make sure there are 2 variants in database, search for 1 variant by coordinate, status code = 200, format = tsv, check response.content.decode('utf-8') and test if it contains genomic coordinate and doesn't contain any other genomic coordinate
         variant_1 = test_data.existing_variant()
         variant_1['Genomic_Coordinate_hg38'] = 'non-tsv'
         (variant_1, current_variant_1) = create_variant_and_materialized_view(variant_1)
@@ -112,10 +112,10 @@ class VariantTestCase(TestCase):
 
         self.assertIsInstance(response, HttpResponse)
         self.assertEqual(response.status_code, 200)
-        #self.assertEqual(tsv.loads(response.content)['count'], 1)
-        #self.assertTrue(tsv.loads(response.content)['data'][0]['Genomic_Coordinate_hg38'] != variant_2['Genomic_Coordinate_hg38'])
-        self.assertEqual(response.content['count'], 1)
-        self.assertTrue(response.content['data'][0]['Genomic_Coordinate_hg38'] != variant_2['Genomic_Coordinate_hg38'])
+        #self.assertEqual(tsv.loads(response.content.decode('utf-8'))['count'], 1)
+        #self.assertTrue(tsv.loads(response.content.decode('utf-8'))['data'][0]['Genomic_Coordinate_hg38'] != variant_2['Genomic_Coordinate_hg38'])
+        self.assertEqual(response.content.decode('utf-8')['count'], 1)
+        self.assertTrue(response.content.decode('utf-8')['data'][0]['Genomic_Coordinate_hg38'] != variant_2['Genomic_Coordinate_hg38'])
 
     @skip("Not complete")
     def test_format_csv(self):
@@ -134,10 +134,10 @@ class VariantTestCase(TestCase):
 
         self.assertIsInstance(response, HttpResponse)
         self.assertEqual(response.status_code, 200)
-        #self.assertEqual(csv.loads(response.content)['count'], 1)
-        #self.assertTrue(csv.loads(response.content)['data'][0]['Genomic_Coordinate_hg38'] != variant_2['Genomic_Coordinate_hg38'])
-        self.assertEqual(response.content['count'], 1)
-        self.assertTrue(response.content['data'][0]['Genomic_Coordinate_hg38'] != variant_2['Genomic_Coordinate_hg38'])
+        #self.assertEqual(csv.loads(response.content.decode('utf-8'))['count'], 1)
+        #self.assertTrue(csv.loads(response.content.decode('utf-8'))['data'][0]['Genomic_Coordinate_hg38'] != variant_2['Genomic_Coordinate_hg38'])
+        self.assertEqual(response.content.decode('utf-8')['count'], 1)
+        self.assertTrue(response.content.decode('utf-8')['data'][0]['Genomic_Coordinate_hg38'] != variant_2['Genomic_Coordinate_hg38'])
 
     def test_search_by_id(self):
         """Tests searching for a variant by id using a filter"""
@@ -149,7 +149,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
         self.assertEqual(response_data["count"], 1)
 
         response_variant = response_data["data"][0]
@@ -171,7 +171,7 @@ class VariantTestCase(TestCase):
 
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(response.content, {"suggestions": expected_autocomplete_results})
+        self.assertJSONEqual(response.content.decode('utf-8'), {"suggestions": expected_autocomplete_results})
 
     def test_autocomplete_bic(self):
         """Getting autocomplete suggestions for words starting with 5074 should return 1 result"""
@@ -189,7 +189,7 @@ class VariantTestCase(TestCase):
 
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(response.content, {"suggestions": expected_autocomplete_results})
+        self.assertJSONEqual(response.content.decode('utf-8'), {"suggestions": expected_autocomplete_results})
 
     def test_source_filters_all_off(self):
         """Tests all source filters on returns no variants"""
@@ -200,7 +200,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
         self.assertEqual(response_data["count"], 0)
 
     def test_request_with_release_number(self):
@@ -225,7 +225,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
         self.assertEqual(response_data["count"], 1)
         self.assertEqual(response_data["releaseName"], 1)
 
@@ -250,7 +250,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
         self.assertEqual(response_data["count"], 1)
         self.assertIsNone(response_data["releaseName"])
 
@@ -274,7 +274,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
 
         self.assertEqual(response_data["count"], 2)
 
@@ -297,7 +297,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
         self.assertEqual(response_data["count"], 1)
 
         response_variant = response_data["data"][0]
@@ -318,7 +318,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
         self.assertEqual(response_data["count"], 2)
 
     def test_filter_by_pathogenicity(self):
@@ -367,7 +367,7 @@ class VariantTestCase(TestCase):
             self.assertIsInstance(response, JsonResponse, message)
             self.assertEqual(response.status_code, 200, message)
 
-            response_data = json.loads(response.content)
+            response_data = json.loads(response.content.decode('utf-8'))
             response_variants = response_data['data']
 
             expected_number_of_variants_in_response = 1
@@ -427,7 +427,7 @@ class VariantTestCase(TestCase):
             self.assertIsInstance(response, JsonResponse, message)
             self.assertEqual(response.status_code, 200, message)
 
-            response_data = json.loads(response.content)
+            response_data = json.loads(response.content.decode('utf-8'))
             #Checks if existing_variant source field is truthy
             if getattr(self.existing_variant_materialized_view, 'Variant_in_' + source_name)  == True:
                 variant_num = 2
@@ -462,7 +462,7 @@ class VariantTestCase(TestCase):
             self.assertIsInstance(response, JsonResponse)
             self.assertEqual(response.status_code, 200)
 
-            response_data = json.loads(response.content)
+            response_data = json.loads(response.content.decode('utf-8'))
 
             self.assertEqual(response_data['count'], 1)
 
@@ -486,7 +486,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
 
         #0 variants should be in response_data['count']
         self.assertEqual(response_data['count'], 1)
@@ -508,7 +508,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
 
         #the formerly deleted variant should now be shown in response_data['count']
         self.assertEqual(response_data['count'], 2)
@@ -527,7 +527,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
         self.assertEqual(response_data['count'], 1)
 
         response_variant = response_data['data'][0]
@@ -545,7 +545,7 @@ class VariantTestCase(TestCase):
             self.assertIsInstance(response, JsonResponse)
             self.assertEqual(response.status_code, 200)
 
-            response_data = json.loads(response.content)
+            response_data = json.loads(response.content.decode('utf-8'))
 
             self.assertEqual(response_data['count'], 1)
 
@@ -640,7 +640,7 @@ class VariantTestCase(TestCase):
             self.assertIsInstance(response, JsonResponse, message)
             self.assertEqual(response.status_code, 200, message)
 
-            response_data = json.loads(response.content)
+            response_data = json.loads(response.content.decode('utf-8'))
 
             self.assertEqual(response_data['count'], 1, message)
 
@@ -658,7 +658,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
         self.assertEqual(response_data['count'], 1)
 
         response_variant = response_data['data'][0]
@@ -695,7 +695,7 @@ class VariantTestCase(TestCase):
             self.assertIsInstance(response, JsonResponse, message)
             self.assertEqual(response.status_code, 200, message)
 
-            response_data = json.loads(response.content)
+            response_data = json.loads(response.content.decode('utf-8'))
 
             self.assertEqual(response_data['count'], 1, message)
 
@@ -712,7 +712,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
 
         self.assertEqual(response_data['count'], 1)
 
@@ -728,7 +728,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
 
         self.assertEqual(response_data['count'], 1)
 
@@ -744,7 +744,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
 
         self.assertEqual(response_data['count'], 1)
 
@@ -760,7 +760,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
 
         self.assertEqual(response_data['count'], 0)
 
@@ -775,7 +775,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
 
         self.assertEqual(response_data['count'], 1)
 
@@ -793,7 +793,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
 
         self.assertEqual(response_data['count'], 1)
 
@@ -836,7 +836,7 @@ class VariantTestCase(TestCase):
             self.assertIsInstance(response, JsonResponse, message)
             self.assertEqual(response.status_code, 200, message)
 
-            response_data = json.loads(response.content)
+            response_data = json.loads(response.content.decode('utf-8'))
 
             self.assertEqual(response_data['count'], 1, message)
 
@@ -854,7 +854,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
 
         self.assertEqual(response_data['count'], 1)
 
@@ -872,7 +872,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
 
         self.assertEqual(response_data['count'], 1)
 
@@ -890,7 +890,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
         self.assertEqual(response_data['count'], 1)
 
         response_variant = response_data['data'][0]
@@ -913,7 +913,7 @@ class VariantTestCase(TestCase):
             self.assertIsInstance(response, JsonResponse, message)
             self.assertEqual(response.status_code, 200, message)
 
-            response_data = json.loads(response.content)
+            response_data = json.loads(response.content.decode('utf-8'))
 
             self.assertEqual(response_data['count'], 0, message)
 
@@ -930,7 +930,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
         self.assertEqual(response_data['count'], 0)
 
     def test_search_by_too_many_fields(self):
@@ -944,7 +944,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
 
         self.assertEqual(response_data['count'], 0)
 
@@ -959,7 +959,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
 
         self.assertEqual(response_data['count'], 0)
 
@@ -974,7 +974,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
 
         self.assertEqual(response_data['count'], 0)
 
@@ -1012,7 +1012,7 @@ class VariantTestCase(TestCase):
             self.assertIsInstance(response, JsonResponse, message)
             self.assertEqual(response.status_code, 200, message)
 
-            response_data = json.loads(response.content)
+            response_data = json.loads(response.content.decode('utf-8'))
 
             self.assertEqual(response_data['count'], 0, message)
 
@@ -1036,7 +1036,7 @@ class VariantTestCase(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = json.loads(response.content.decode('utf-8'))
 
         clinvar_reports = []
         lovd_reports = []
