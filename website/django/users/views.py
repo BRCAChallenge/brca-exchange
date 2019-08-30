@@ -107,7 +107,7 @@ def register(request):
         post_data = {'secret': settings.CAPTCHA_SECRET,
                      'response': captcha}
         response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=post_data)
-        content = json.loads(response.content)
+        content = json.loads(response.content.decode('utf-8'))
         response = {'success': content['success']}
     except HTTPError:
         logging.error(repr(HTTPError))
@@ -363,7 +363,7 @@ def mailinglist(request):
         post_data = {'secret': settings.CAPTCHA_SECRET,
                      'response': captcha}
         resp = requests.post('https://www.google.com/recaptcha/api/siteverify', data=post_data)
-        content = json.loads(resp.content)
+        content = json.loads(resp.content.decode('utf-8'))
         response = JsonResponse({'success': content['success']})
     except HTTPError:
         logging.error(repr(HTTPError))
