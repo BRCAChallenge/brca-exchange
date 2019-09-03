@@ -22,11 +22,11 @@ ssh -l${USER} ${HOST} <<-'ENDSSH'
     cp ~/site_settings/site_settings.${DST}.py /var/www/backend/${DST}/django/brca/site_settings.py
 
     . /var/www/backend/${SRC}/virtualenv/bin/activate
-    requirements=$(pip freeze)
+    requirements=$(pip3 freeze)
     deactivate
     requirements=$(echo ${requirements}) # drop carriage returns
     . /var/www/backend/${DST}/virtualenv/bin/activate
-    pip install ${requirements}
-    python /var/www/backend/production/django/manage.py migrate --noinput --verbosity 2
+    pip3 install ${requirements}
+    python3 /var/www/backend/production/django/manage.py migrate --noinput --verbosity 2
     sudo apache2ctl restart
 ENDSSH
