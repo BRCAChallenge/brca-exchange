@@ -48,8 +48,8 @@ const RawHTMLHighlight = React.createClass({
             });
         }
 
-        if (this.state.matched && !prevState.matched) {
-            this.props.setExpansion(this.props.collapserId, true);
+        if (this.state.matched !== prevState.matched) {
+            this.props.setExpansion(this.props.collapserId, this.state.matched);
         }
     },
 
