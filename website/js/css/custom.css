@@ -1503,7 +1503,23 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
     margin-bottom: 0;
 }
 
-/**************************************************************/
+.help-page .help-search-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.help-page .help-search-header h1 {
+    margin: 0;
+    font-size: 48px;
+}
+.help-page .help-search-header .form-group {
+    margin: 10px 0 0 0;
+}
+.help-page .highlighted {
+    background-color: yellow;
+}
+
+    /**************************************************************/
 /**********     Literature Search         *********************/
 /**************************************************************/
 
