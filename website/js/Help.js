@@ -5,69 +5,158 @@ import classNames from "classnames";
 import update from 'immutability-helper';
 import BetaTag from "./components/BetaTag";
 import {debounce} from "lodash";
+import Mark from 'mark.js';
 // import debounce from 'lodash/debounce';
 const React = require('react');
 const RawHTML = require('./RawHTML');
 const {Grid, Col, Row, Panel, ListGroup, ListGroupItem, Glyphicon, CollapsableMixin, BootstrapMixin} = require('react-bootstrap');
 const {State} = require('react-router');
 
+var $ = require('jquery');
 const slugify = require('./slugify');
 const content = require('./content');
 
 const navbarHeight = 70;
+// extra padding when scrolling to a search result
+const EXTRA_SEARCH_PADDING = 8;
 
-const RawHTMLHighlight = React.createClass({
+const SearchController = React.createClass({
     getInitialState() {
         return {
-            matched: false,
-            text: null
+            searchTerm: '',
+            searching: false,
+            matched: 0,
+            currentMark: null
         };
     },
 
-    simpleHighlight(query, orig) {
-        if (!query) {
-            return { text: orig, matches: 0 };
-        }
-
-        const r = new RegExp(query, "giu");
-        let matches = 0;
-        const text = orig.replace(r, match => {
-            matches += 1;
-            return `<span class="highlighted">${match}</span>`;
+    searchChanged(e) {
+        this.setState({
+            searchTerm: e.target.value,
+            searching: true
+        }, () => {
+            this.debouncedSearchResponse();
         });
-        return { text, matches };
     },
 
-    componentDidUpdate(prevProps, prevState) {
-        if (this.props.searchTerm !== prevProps.searchTerm || this.props.html !== prevProps.html) {
-            // recompute highlight, potentially expanding our parent if there's a match
-            const result = this.simpleHighlight(this.props.searchTerm, this.props.html);
+    searchResponse() {
+        if (!this.state.searchTerm || this.state.searchTerm === '') {
+            // remove any marks if they cleared the search
             this.setState({
-                matched: result.matches > 0,
-                text: result.text
+                matched: 0,
+                currentMark: null,
+                searching: false
+            }, () => {
+                this.searcher.unmark();
+
+                $(this.props.target).find('*[data-expander-id]').each((idx, elem) => {
+                    this.props.setExpansion($(elem).data('expander-id'), false);
+                });
             });
+            return;
         }
 
-        if (this.state.matched !== prevState.matched) {
-            this.props.setExpansion(this.props.collapserId, this.state.matched);
-        }
+        // perform full matching against 'target'
+        // (first we unmark, then mark, then deal with the match results)
+        this.searcher.unmark({
+            done: () => {
+                this.pendingUpdate = new Set();
+
+                // then iteratively expand while searching for marks
+                this.searcher.mark(this.state.searchTerm, {
+                    element: 'span',
+                    className: 'highlighted',
+                    done: (totalMarks) => {
+                        this.setState({
+                            searching: false,
+                            currentMark: null,
+                            matched: totalMarks
+                        });
+
+                        // set all the elements that can be toggled to their match status
+                        $('*[data-expander-id]').each((idx, elem) => {
+                            const targetID = $(elem).data('expander-id');
+                            this.props.setExpansion(targetID, this.pendingUpdate.has(targetID));
+                        });
+                    },
+                    each: (elem) => {
+                        // check if it has ancestors that need to be expanded and add them to the expanded list
+                        $(elem).parents('*[data-expander-id]').each((idx, elem) => {
+                            this.pendingUpdate.add($(elem).data('expander-id'));
+                        });
+                    }
+                });
+            }
+        });
     },
 
-    /*
-    // also look up the collapser and trigger its click method
-    this.props.setExpansion(this.props.collapserId, true);
-     */
+    componentWillMount() {
+        this.searcher = new Mark(this.props.target);
+        this.debouncedSearchResponse = debounce(this.searchResponse, 300);
 
-    render: function() {
-        let content = this.state.matched ? this.state.text : this.props.html;
+        this.navForward = this.navMarks.bind(this, true);
+        this.navBackward = this.navMarks.bind(this, false);
+    },
 
-        return <RawHTML html={content} />;
+    navMarks(forward) {
+        const $highlightSet = $('.highlighted').removeClass("focused");
+        let nextMark = this.state.currentMark;
+
+        if (nextMark === null) {
+            // initialize currentMark if we haven't navigated anything previously
+            nextMark = forward ? 0 : $highlightSet.length - 1;
+        } else {
+            // apply navigation
+            nextMark = (nextMark + (forward ? 1 : -1)) % $highlightSet.length;
+            if (nextMark < 0) {
+                nextMark = $highlightSet.length + nextMark;
+            }
+        }
+
+        this.setState({
+            currentMark: nextMark
+        }, () => {
+            const $targetElem = $($highlightSet.get(this.state.currentMark)).addClass("focused");
+            // move to whatever we navigated to
+            window.scrollTo({
+                // we want the element to not be covered by the navbar or the sticky search header, with some
+                // extra cosmetic padding, EXTRA_PADDING, past the header as well
+                top: $targetElem.offset().top - navbarHeight - (this.props.headerElem.outerHeight() + EXTRA_SEARCH_PADDING),
+                behavior: 'smooth'
+            });
+        });
+    },
+
+    render() {
+        return (
+            <div className="input-group has-feedback has-search">
+                <div className="input-group-addon">
+                    <span className={`glyphicon ${this.state.searching ? "glyphicon-refresh glyphicon-spin" : "glyphicon-search"}`} />
+                </div>
+                <input type="text" className="form-control" placeholder="Search" value={this.state.searchTerm} onChange={this.searchChanged} />
+                {
+                    (this.state.matched > 0) && (
+                        <span className="input-group-addon">
+                         { this.state.currentMark !== null && `${this.state.currentMark + 1} / ` }
+                            { this.state.matched}
+                        </span>
+                    )
+                }
+                <div className="input-group-btn">
+                    <button type="button" disabled={this.state.matched <= 0} onClick={this.navForward} className="btn btn-default">
+                        <span className="glyphicon glyphicon-triangle-bottom" />
+                    </button>
+                    <button type="button" disabled={this.state.matched <= 0} onClick={this.navBackward} className="btn btn-default">
+                        <span className="glyphicon glyphicon-triangle-top" />
+                    </button>
+                </div>
+            </div>
+        );
     }
 });
-RawHTMLHighlight.propTypes = {
-    html: React.PropTypes.string.isRequired,
-    collapserId: React.PropTypes.string.isRequired,
-    searchTerm: React.PropTypes.string
+SearchController.propTypes = {
+    target: React.PropTypes.string.isRequired,
+    setExpansion: React.PropTypes.func.isRequired
 };
 
 const CollapsableListItem = React.createClass({
@@ -96,8 +185,8 @@ const CollapsableListItem = React.createClass({
         header = (
             <h4>
                 <a href="#" onClick={this.onClick}
-                   style={{color: "inherit", textDecoration: "none"}}
-                   id={id} >
+                    style={{color: "inherit", textDecoration: "none"}}
+                    id={id} >
                     <small><Glyphicon  glyph={this.state.expanded ? "chevron-down" : "chevron-right"} /> </small>
                     <span style={{verticalAlign: "text-bottom"}}>{header}</span>
                 </a>
@@ -105,7 +194,7 @@ const CollapsableListItem = React.createClass({
         return (
             <ListGroupItem header={header} {...rest}>
                 <div className={classNames(this.getCollapsableClassSet("collapse"))}
-                     ref="content">
+                    ref="content">
                     { this.props.children }
                 </div>
             </ListGroupItem>
@@ -150,8 +239,9 @@ const Help = React.createClass({
     },
 
     componentWillMount() {
+        // debouncing committedSearch prevents the collapsing panels from reacting too quickly to user input
+        // (e.g., opening a panel immediately on 'b', then closing it on 'br', etc.)
         this.debouncedCommitSearch = debounce(() => {
-            console.log("Triggered");
             this.setState((pstate) => ({
                 committedSearch: pstate.searchTerm
             }));
@@ -191,11 +281,11 @@ const Help = React.createClass({
     },
 
     searchChanged(event) {
-      this.setState({
-        searchTerm: event.target.value
-      }, () => {
-          this.debouncedCommitSearch();
-      });
+        this.setState({
+            searchTerm: event.target.value
+        }, () => {
+            this.debouncedCommitSearch();
+        });
     },
 
     setExpansion(id, forced = null) {
@@ -217,8 +307,6 @@ const Help = React.createClass({
                 // if the user clicks a reference link in a tile header, don't toggle the tile, and open the link.
                 const _this = this;
                 let onSelect = function (e) {
-                    console.log(e.target.getAttribute('id'), "clicked");
-
                     _this.setExpansion(e.target.getAttribute('id'));
 
                     if (e.target.classList.contains("help-reference-link")) {
@@ -231,7 +319,7 @@ const Help = React.createClass({
                 const actualId = id ? id : slugify(name);
                 let body = [];
                 if (contents) {
-                    body.push(<RawHTMLHighlight html={contents} collapserId={actualId} setExpansion={this.setExpansion} searchTerm={this.state.committedSearch} />);
+                    body.push(<RawHTML html={contents} />);
                 }
 
                 if (list) {
@@ -239,13 +327,14 @@ const Help = React.createClass({
                         <ListGroup fill>
                             {
                                 list.map(({name, id, contents}) => {
-                                    const actualId = id ? id : slugify(name);
+                                    const localId = id ? id : slugify(name);
                                     return (
                                         <CollapsableListItem
-                                            id={actualId} setExpansion={this.setExpansion}
-                                            expanded={this.state.collapsedItems[actualId]}
+                                            id={localId} setExpansion={this.setExpansion}
+                                            expanded={this.state.collapsedItems[localId]}
+                                            data-expander-id={localId}
                                             header={name}>
-                                            <RawHTMLHighlight html={contents} collapserId={actualId}  setExpansion={this.setExpansion} searchTerm={this.state.committedSearch} />
+                                            <RawHTML html={contents} />
                                         </CollapsableListItem>
                                     );
                                 })
@@ -270,32 +359,31 @@ const Help = React.createClass({
                     );
                 }
 
-                return (<Panel header={header} collapsable={true}
-                               expanded={this.state.collapsedItems[actualId]}
-                               onSelect={onSelect}
-                        >
-                    { body }
-                </Panel>);
+                return (
+                    <Panel
+                        header={header} collapsable={true}
+                        expanded={this.state.collapsedItems[actualId]}
+                        data-expander-id={actualId}
+                        onSelect={onSelect}
+                    >
+                        { body }
+                    </Panel>
+                );
             })]);
         return (
             <Grid id="main-grid" className="help-page">
                 {fragment === '' ? null :
                     <style>{`#${fragment} { animation-name: emphasis; animation-duration: 10s; } `}</style>}
 
-                <Row>
-                  <Col smOffset={1} sm={10} className="help-search-header">
-                    <h1>BRCA Exchange: Help</h1>
-                    <div className="form-group has-feedback has-search">
-                      <span className="glyphicon glyphicon-search form-control-feedback" />
-                      <input type="text" className="form-control" placeholder="Search" value={this.state.searchTerm} onChange={this.searchChanged} />
-                    </div>
-                  </Col>
+                <Row ref={(me) => { if (me) { this.headerElem = $(me.getDOMNode()); } }} className="header-sticky">
+                    <Col smOffset={1} sm={10} className="help-search-header">
+                        {/*<h1>BRCA Exchange: Help</h1>*/}
+                        <SearchController setExpansion={this.setExpansion} headerElem={this.headerElem} target="#help-body" />
+                    </Col>
                 </Row>
 
-                <hr />
-
                 <Row>
-                    <Col smOffset={1} sm={10}>
+                    <Col smOffset={1} sm={10} id="help-body">
                         {helpTiles}
                     </Col>
                 </Row>

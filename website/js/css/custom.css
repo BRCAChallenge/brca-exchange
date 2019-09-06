@@ -1499,13 +1499,27 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
     float: none;
 }
 
+#main-grid.help-page {
+    margin-top: 0;
+}
+
 .help-page .list-group-item-heading {
     margin-bottom: 0;
 }
 
+.help-page .header-sticky {
+    position: sticky;
+    top: 70px;
+    background-color: white;
+    z-index: 1000;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-bottom: solid 1px #ddd;
+}
+
 .help-page .help-search-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
 }
 .help-page .help-search-header h1 {
@@ -1515,11 +1529,33 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
 .help-page .help-search-header .form-group {
     margin: 10px 0 0 0;
 }
+.help-page .search-set {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
 .help-page .highlighted {
     background-color: yellow;
 }
+.help-page .highlighted.focused {
+    border: solid 1px #ff7547;
+    border-radius: 2px;
+    animation: blinkin 500ms forwards ease-in;
+}
 
-    /**************************************************************/
+.glyphicon-spin {
+    animation: spin 1000ms infinite linear;
+}
+@keyframes spin {
+    0%   { -webkit-transform: rotate(0deg);   transform: rotate(0deg);   }
+    100% { -webkit-transform: rotate(359deg); transform: rotate(359deg); }
+}
+@keyframes blinkin {
+    0%   { opacity: 0.2;   }
+    100% { opacity: 1; }
+}
+
+/**************************************************************/
 /**********     Literature Search         *********************/
 /**************************************************************/
 
