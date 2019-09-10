@@ -232,7 +232,7 @@ const CollapsableListItem = React.createClass({
                     <small><Glyphicon  glyph={this.props.expanded ? "chevron-down" : "chevron-right"} /> </small>
                     <span style={{verticalAlign: "text-bottom"}}>{header}</span>
                 </a>
-                <a className="id-helper-tip" onClick={(e) => { idHelpClicked(e) }} href={`#${id}`}>&para;</a>
+                <a className="id-helper-tip" onClick={(e) => { idHelpClicked(e); }} href={`#${id}`}>&para;</a>
             </h4>
         );
 
