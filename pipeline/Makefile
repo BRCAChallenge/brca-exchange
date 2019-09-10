@@ -65,6 +65,7 @@ COMMON_DOCKER_ARGS = --rm -u `id -u ${USER}`:$(DOCKER_GRP) \
 	-e "DATA_DATE=$(DATA_DATE)" \
         -e "UTA_DB_URL=postgresql://anonymous@0.0.0.0:$(UTA_PORT)/uta/uta_$(UTA_RELEASE_DATE)" \
 	-e "HGVS_SEQREPO_DIR=$(SEQ_REPO_DIR_DOCKER)/latest" \
+  -e "PYTHONPATH=/opt/brca-exchange/pipeline" \
 	--network host \
 	-v $(RESOURCES_DIR):/files/resources \
 	-v $(OUT_DIR):/files/data \

@@ -1,109 +1,85 @@
-
-import os
-import sys
-import pandas as pd
-import hgvs.parser
-import hgvs.dataproviders.uta
-import hgvs.assemblymapper
-import hgvs.normalizer
-import hgvs.projector
-import hgvs.validator
-from hgvs.exceptions import HGVSError
-import bioutils.assemblies
 import logging
+import os
 import pickle
 import subprocess
-import numpy as np
+import tempfile
+from multiprocessing import Pool
+
 import click
-# TODO: fix
-sys.path.append(os.path.realpath(os.path.join(__file__, '../..')))
+import hgvs.assemblymapper
+import hgvs.dataproviders.uta
+import hgvs.normalizer
+import hgvs.parser
+import hgvs.projector
+import hgvs.validator
+import numpy as np
+import pandas as pd
+from hgvs.exceptions import HGVSError
 
-print(sys.path)
-
-import types
+from common import config
+from common.hgvs_utils import HgvsWrapper
 from common.types import VCFVariant
 
-# TODO: find better name
-class HgvsProcessor:
-    GRCh38_Assem = 'GRCh38'
-    GRCh37_Assem = 'GRCh37'
+SYNONYMS_FIELD = 'Synonyms'
 
-    # TODO: refactor, put into proper utils
-    def __init__(self):
-        # TODO: should be parameter
-        self.hgvs_dp = hgvs.dataproviders.uta.connect(
-        'postgresql://anonymous@localhost:50827/uta/uta_20170629')
-        self.hgvs_parser = hgvs.parser.Parser()
-        self.hgvs_norm = hgvs.normalizer.Normalizer(self.hgvs_dp)
+# TODO: use! (check pathos)
+def parallelize_dataframe(df, func, n_cores=4):
+    df_split = np.array_split(df, n_cores)
 
-        assemblies = [self.GRCh37_Assem, self.GRCh38_Assem]
+    with Pool(n_cores) as pool:
+        df = pd.concat(pool.map(func, df_split))
+    #pool.close()
+    #pool.join()
+    return df
 
-        self.hgvs_ams = { a : (hgvs.assemblymapper.AssemblyMapper(self.hgvs_dp, assembly_name=a, normalize=False, prevalidation_level=None)) for a in assemblies }
 
-        self.hgvs_ams_normalizing = {a: (
-            hgvs.assemblymapper.AssemblyMapper(self.hgvs_dp, assembly_name=a,
-                                               normalize=True)) for a in
-                         assemblies}
+def _get_cdna(df, pkl, hgvs_proc):
+    def cdna_from_cdna_field(x):
+        if x['HGVS_cDNA'] and x['HGVS_cDNA'] != '-':
+            c = x['HGVS_cDNA']
+            if ',' in c:
+                c = c.split(',')[0]
 
-        all_assemblies = bioutils.assemblies.get_assemblies()
-        # TODO: separate object?
-        self.contig_maps = {a: ({
-            s['name']: s['refseq_ac']
-            for s in all_assemblies[a]['sequences'] if
-            s['refseq_ac'] is not None
-        }) for a in assemblies
-        }
-
-    def to_cdna(self, hgvs_obj, assembly = GRCh38_Assem):
-        am = self.hgvs_ams[assembly]
-
-        try:
-            tr = am.relevant_transcripts(hgvs_obj)
-
-            if tr:
-                return am.g_to_c(hgvs_obj, tr[0])
-
-        except HGVSError as e:
-            logging.info("CDNA conversion issues " + str(e))
-
+            return hgvs_proc.hgvs_parser.parse(x["Reference_Sequence"] + ":" + c)
         return None
 
+    def compute_hgvs(x):
+        v = VCFVariant(x['Chr'], x['Pos'], x['Ref'], x['Alt'])
+        return hgvs_proc.to_cdna(v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh38_Assem]))
 
-def _to_protein(hgvs_cdna, hgvs_proc):
-    if not hgvs_cdna:
-        return None
+    def from_field_or_compute(row):
+        r = cdna_from_cdna_field(row)
+        if not r:
+            r = compute_hgvs(row)
+        return r
 
-    try:
-        #var_c1_norm = hgvs_proc.hgvs_norm.normalize(
-        #    hgvs_cdna)  # TODO: for better error msgs?
-        return str(hgvs_proc.hgvs_ams[HgvsProcessor.GRCh38_Assem].c_to_p(hgvs_cdna))
-    except hgvs.exceptions.HGVSError as e:
-        logging.info("Protein conversion issues with " + str(hgvs_cdna) + ": " + str(e))
+    var_objs = df['var_objs']
 
-    return str(None)
+    if pkl and os.path.exists(pkl):
+        pickle_dict = pickle.load(open(pkl, 'rb'))
+        s_cdna = pd.Series([ pickle_dict[str(v)]  for v in var_objs  ])
+    else:
+        s_cdna = df.apply(from_field_or_compute, axis=1)
 
+        if pkl:
+            pickle_dict = {str(v): c for (c, v) in zip(s_cdna, var_objs)}
+            pickle.dump(pickle_dict, open(pkl, 'wb'))
 
-def determine_cdna():
-    # attempt to convert, if not present try to substitue with data from other field
-
-    #
-    pass
+    return s_cdna
 
 
-
-def convert_to_hg37(vars):
+def convert_to_hg37(vars, brca_resources_dir):
     def pseudo_vcf_entry(v):
         entries = [v.chr, v.pos, '.', v.ref, v.alt, '', '', '']
         return '\t'.join([str(s) for s in entries])
 
     lst = [pseudo_vcf_entry(v) for v in vars]
 
-    vcf_tmp = '/tmp/myvcf_all.vcf' # TODO better bat
+    vcf_tmp = tempfile.mktemp('.vcf')
     with open(vcf_tmp, 'w') as f:
         f.write('\n'.join(lst))
 
-    vcf_tmp_out = '/tmp/myvcf_all_out.vcf'
-    brca_resources_dir = '/Users/marc/brca/nobackup/enigma_wdir/resources'
+    vcf_tmp_out = tempfile.mktemp('.vcf')
     args = ["CrossMap.py", "vcf",
             brca_resources_dir + "/hg38ToHg19.over.chain.gz",
             vcf_tmp,
@@ -121,161 +97,106 @@ def convert_to_hg37(vars):
 
     vcf_out_lines = open(vcf_tmp_out, 'r').readlines()
 
-    return [VCFVariant(v[0], v[1], v[3], v[4]) for v in
+    return [VCFVariant(v[0], int(v[1]), v[3], v[4]) for v in
      [l.strip().split('\t') for l in vcf_out_lines]]
 
 
+def get_synonyms(x, hgvs_proc, syn_ac_dict):
+    synonyms = []
 
-@click.command()
-@click.argument('input', click.Path(readable=True))
-@click.argument('output', click.Path(writable=True))
-@click.option("--pkl") # TODO: keep?
-def main(input, output, pkl):
-    log_file_path = "/Users/marc/brca/nobackup/pseudonym_generator.log"
-    logging.basicConfig(filename=log_file_path, filemode="w", level=logging.INFO,
-                        format=' %(asctime)s %(filename)-15s %(message)s')
+    for _, _, _, dst, alt_ac, method in hgvs_proc.hgvs_dp.get_tx_for_gene(x['Gene_Symbol']):
+        if x['Gene_Symbol'] not in syn_ac_dict:
+            continue
 
-    # TODO: parametrize?
-    os.environ[
-        'HGVS_SEQREPO_DIR'] = '/Users/marc/brca/nobackup/enigma_wdir/resources/seq_repo/latest'
+        accessions = syn_ac_dict[x['Gene_Symbol']]
 
-    df = pd.read_csv(input,
-                     sep='\t')
+        if(dst in accessions):
+            for vc in [x['tmp_hgvs_cdna_unorm']]:
+                if not vc:
+                    continue
+                # TODO: need to optimize?
 
-    #df.loc[df['Synonyms'].isna(), 'Synonyms'] = '-'
-
-    hgvs_proc = HgvsProcessor()
-
-    def proc(x):
-        v = VCFVariant(x['Chr'], x['Pos'], x['Ref'], x['Alt'])
-        return str(v), hgvs_proc.to_cdna(v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsProcessor.GRCh38_Assem]))
-
-
-    d = pickle.load(open(pkl))
-    #print(len(d))
-
-    # calcualte CDNA only for missing variants?
-
-    # TODO: how to log stuff?
-
-    # do column wise, one function per attribute
-
-
-    # conversion to protein
-
-    df_sub = df #df.iloc[0:200]
-
-    #d = {k: v for (k, v) in df_sub.apply(proc, axis=1)}
-    #pickle.dump(d, open(pkl, 'w'))
-
-    def get_cdna(x):
-        v = VCFVariant(x['Chr'], x['Pos'], x['Ref'], x['Alt'])
-        return d[str(v)]
-
-    df_sub['tmp_hgvs_cdna_unorm'] = df_sub.apply(get_cdna, axis=1)
-
-    def cdna_from_cdna_field(x):
-        if x['HGVS_cDNA'] and x['HGVS_cDNA'] != '-':
-            c = x['HGVS_cDNA']
-            if ',' in c:
-                c = c.split(',')[0]
-
-            return hgvs_proc.hgvs_parser.parse(x["Reference_Sequence"] + ":" + c)
-        return None
-
-    df_sub['tmp_hgvs_cdna_unorm'] = df_sub.apply(lambda x: x['tmp_hgvs_cdna_unorm'] if x[
-        'tmp_hgvs_cdna_unorm'] else None, axis=1)
-
-    # TODO: paralellize?
-    #df_sub['tmp_hgvs_cdna'] = df_sub.apply(lambda x: proc(x)[1], axis=1)
-
-    def normalizing(v):
-        if v:
-            try:
-                return hgvs_proc.hgvs_norm.normalize(v)
-            except Exception as e:
-                logging.info("Issues with normalizing " + str(v) + ": " + str(e))
-        else:
-            None
-
-    df_sub['tmp_hgvs_cdna_norm'] = df_sub['tmp_hgvs_cdna_unorm'].apply(normalizing)
-
-    df_sub['tmp_hgvs_g37'] = df_sub['tmp_hgvs_cdna_unorm'].apply(lambda hgvs_cdna: hgvs_proc.hgvs_ams[HgvsProcessor.GRCh37_Assem].c_to_g(hgvs_cdna) if hgvs_cdna else None)
-
-
-    df_sub['tmp_hgvs_cdna_completed'] = df_sub.apply(lambda x:  x['tmp_hgvs_cdna_unorm'] if x['tmp_hgvs_cdna_unorm'] else cdna_from_cdna_field(x), axis=1)
-
-    df_sub['pyhgvs_cDNA'] = df_sub['tmp_hgvs_cdna_completed'].apply(str)
-
-    df_sub.loc[:, 'pyhgvs_Genomic_Coordinate_38'] = df_sub.apply(
-        lambda x: str(VCFVariant(x['Chr'], x['Pos'], x['Ref'], x['Alt'])),
-        axis=1)
-
-    # conversion to 37
-    #df_sub.loc[:, 'pyhgvs_Genomic_Coordinate_37'] = df_sub['tmp_hgvs_g37'].apply(lambda h: str(VCFVariant.from_hgvs_obj(h)) if h else None)
-
-    cc = convert_to_hg37(df_sub.apply(lambda x: VCFVariant(x['Chr'], x['Pos'], x['Ref'], x['Alt']), axis=1))
-
-    print(cc[1:10])
-    print(len(cc))
-    df_sub.loc[:, 'pyhgvs_Genomic_Coordinate_37'] = [str(v) for v in cc]
-
-    #df_sub.loc[:, 'pyhgvs_Hg37_Start'] = df_sub['tmp_hgvs_g37'].apply(
-    #    lambda h: h.posedit.pos.start.base if h else None)
-
-    #df_sub.loc[:, 'pyhgvs_Hg37_End'] = df_sub['tmp_hgvs_g37'].apply(
-    #    lambda h: h.posedit.pos.end.base if h else None)
-
-    df_sub.loc[:, 'pyhgvs_Protein'] = (df_sub['tmp_hgvs_cdna_unorm'].
-                                       #fillna(df_sub['tmp_hgvs_cdna']). # TODO: does this help?
-                                       apply(lambda hgvs_cdna: _to_protein(hgvs_cdna, hgvs_proc)))
-
-
-    # filter on U and NM
-
-    # TODO: generalize
-    brca1_trans = {'NM_007294.2', 'NM_007300.3', 'NM_007299.3',
-                              'NM_007298.3', 'NM_007297.3', 'U14680.1'}
-    brca2_trans = {'U43746.1'}
-
-    def get_synonyms(x):
-        synonyms = []
-
-        for _, _, _, dst, alt_ac, method in hgvs_proc.hgvs_dp.get_tx_for_gene(x['Gene_Symbol']):
-            #print(alt_ac +  " " + x['hgvs_cdna'].ac)
-
-            if(dst in brca1_trans or dst in brca2_trans):
-
-                for vc in [x['tmp_hgvs_cdna_completed']]:
-                    if not vc:
-                        continue
-                    # TODO: need to optimize?
+                try:
                     pj = hgvs.projector.Projector(hdp=hgvs_proc.hgvs_dp,
                                                   alt_ac=alt_ac,
                                                   src_ac=vc.ac,
                                                   dst_ac=dst, dst_alt_aln_method=method)
 
-                    try:
-                        vp = pj.project_variant_forward(vc)
-                        synonyms.append(vp)
-                        vp_norm = normalizing(vp)
-                        if vp_norm:
-                            if vp_norm not in synonyms:
-                                logging.info("Found new synonym! " + str(vp_norm) + " " + str(vp) + " " + str(x['pyhgvs_Genomic_Coordinate_38']))
-                            synonyms.append(vp_norm)
-                    except Exception as e:
-                        logging.info("Exception in synonym handling " + str(vc) + " with " + str(dst) + "using " + str(method) + " via " + str(dst) + " : " + str(e))
 
-        return list({str(s) for s in synonyms})
+                    vp = pj.project_variant_forward(vc)
+                    synonyms.append(vp)
+                    vp_norm = hgvs_proc.normalizing(vp)
+                    if vp_norm:
+                        if vp_norm not in synonyms:
+                            logging.info("Found new synonym! " + str(vp_norm) + " " + str(vp) + " " + str(x['pyhgvs_Genomic_Coordinate_38']))
+                        synonyms.append(vp_norm)
+                except HGVSError as e:
+                    logging.info("Exception in synonym handling " + str(vc) + " from " + str(vc.ac) + " to " + str(dst) + " using " + str(method) + " via " + str(alt_ac) + " : " + str(e) + " " + str(e.__class__))
 
-    df_sub.loc[:, "new_syns"] = df_sub.apply(get_synonyms, axis=1)
-
-    # TODO: sort within?
-
-    df_sub['Synonyms'] = df_sub.apply(lambda x: ','.join(sorted(list(set( (x["Synonyms"].split(',') if (str(x["Synonyms"]) != 'nan' and x["Synonyms"] != '-') else list() )+ x["new_syns"])))), axis=1)
+    return list({str(s) for s in synonyms})
 
 
-    df_sub.to_csv(output, sep='\t', index=False)
+def _merge_synonyms(x):
+    orig_list = [s for s in x[SYNONYMS_FIELD].split(',') if s] # filter away ''
+
+    combined = set(orig_list + x['new_syns'])
+    list_sorted = sorted(list(combined))
+    return ','.join(list_sorted)
+
+
+@click.command()
+@click.argument('input', click.Path(readable=True))
+@click.argument('output', click.Path(writable=True))
+@click.option('--log-path', default='pseudonym_generator.log')
+@click.option("--pkl") # TODO: keep?
+@click.option("--config-file", required=True)
+@click.option('--resources')
+def main(input, output, pkl, log_path, config_file, resources):
+    logging.basicConfig(filename=log_path, filemode="w", level=logging.INFO,
+                        format=' %(asctime)s %(filename)-15s %(message)s')
+
+    cfg_df = config.load_config(config_file)
+
+    syn_ac_dict = { x[config.SYMBOL_COL] : x[config.SYNONYM_AC_COL].split(';') for _, x in cfg_df.iterrows()}
+
+    hgvs_proc = HgvsWrapper()
+
+    df = pd.read_csv(input, sep='\t')
+
+    df = df.iloc[0:100] # TODO: remove
+
+    df['var_objs'] = df.apply(lambda x: VCFVariant(x['Chr'], x['Pos'], x['Ref'], x['Alt']), axis=1)
+
+    # CDNA conversions
+    df['tmp_hgvs_cdna_unorm'] = _get_cdna(df, pkl, hgvs_proc)
+    df['tmp_hgvs_cdna_norm'] = df['tmp_hgvs_cdna_unorm'].apply(hgvs_proc.normalizing)
+    df['pyhgvs_cDNA'] = df['tmp_hgvs_cdna_unorm'].apply(str)
+
+    # Genomic Coordinates
+    df['pyhgvs_Genomic_Coordinate_38'] = df['var_objs'].apply(lambda v: str(v))
+
+    var_objs_hg37 = convert_to_hg37(df['var_objs'], resources)
+    df['pyhgvs_Genomic_Coordinate_37'] = pd.Series([str(v) for v in var_objs_hg37])
+
+    df['pyhgvs_Hg37_Start'] = pd.Series([v.pos for v in var_objs_hg37])
+    df['pyhgvs_Hg37_End'] = df['pyhgvs_Hg37_Start'] + (df['Hg38_End'] - df['Hg38_Start'])
+
+    # ## Protein
+    df['pyhgvs_Protein'] = (df['tmp_hgvs_cdna_norm'].
+                            apply(lambda hgvs_cdna: hgvs_proc._to_protein(hgvs_cdna)))
+
+    df["new_syns"] = df.apply(lambda s: get_synonyms(s, hgvs_proc, syn_ac_dict), axis=1)
+
+    df[SYNONYMS_FIELD] = df[SYNONYMS_FIELD].fillna('').str.strip()
+
+    # TODO: rename to generated_syonynms?
+    # merge existing synonyms with generated ones and sort them
+    df[SYNONYMS_FIELD] = df.apply(_merge_synonyms, axis=1)
+
+    # TODO: check types, remove unused fields
+    print(df.dtypes)
+
+    df.to_csv(output, sep='\t', index=False)
 
 
 if __name__ == "__main__":

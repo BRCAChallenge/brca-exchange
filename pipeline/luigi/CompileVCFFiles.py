@@ -1075,18 +1075,16 @@ class BuildAggregatedOutput(DefaultPipelineTask):
         brca_resources_dir = self.cfg.resources_dir
         os.chdir(data_merging_method_dir)
 
-        args = ["python", "brca_pseudonym_generator.py", "-i",
-                artifacts_dir + "/aggregated.tsv", "-p",
-                "-j", brca_resources_dir + "/hg18.fa",
-                "-k", brca_resources_dir + "/hg19.fa",
-                "-l", brca_resources_dir + "/hg38.fa",
-                "-r", brca_resources_dir + "/refseq_annotation.hg18.gp",
-                "-s", brca_resources_dir + "/refseq_annotation.hg19.gp",
-                "-t", brca_resources_dir + "/refseq_annotation.hg38.gp",
-                "-o", artifacts_dir + "built.tsv",
-                "--artifacts_dir", artifacts_dir]
+        args = ["python", "brca_pseudonym_generator_new.py",
+                artifacts_dir + "aggregated.tsv",
+                artifacts_dir + "built.tsv",
+                "--log-path", artifacts_dir + "brca-pseudonym-generator.log",
+                "--config-file", self.cfg.gene_config_path,
+                "--resources", brca_resources_dir]
+
         print "Running brca_pseudonym_generator.py with the following args: %s" % (
             args)
+
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
