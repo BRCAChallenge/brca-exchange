@@ -18,17 +18,19 @@ const RawHTML = React.createClass({
             });
         }
 
-        // add tooltips to anything that has an id
-        const $idElems = $("*[id]", this.refs.me.getDOMNode());
-        $idElems.each((idx, elem) => {
-            $(elem).addClass("id-associated");
-            $("<a>")
-                .addClass("id-helper-tip")
-                .html("&para;")
-                .click((e) => { idHelpClicked(e); })
-                .attr("href", `#${$(elem).attr("id")}`)
-                .appendTo(elem);
-        });
+        if (this.props.hardlinks) {
+            // add tooltips to anything that has an id
+            const $idElems = $("*[id]", this.refs.me.getDOMNode());
+            $idElems.each((idx, elem) => {
+                $(elem).addClass("id-associated");
+                $("<a>")
+                    .addClass("id-helper-tip")
+                    .html("&para;")
+                    .click((e) => { idHelpClicked(e); })
+                    .attr("href", `#${$(elem).attr("id")}`)
+                    .appendTo(elem);
+            });
+        }
     },
     render: function() {
         var {html, ...otherProps} = this.props;
@@ -37,5 +39,9 @@ const RawHTML = React.createClass({
         );
     }
 });
+RawHTML.propTypes = {
+    html: React.PropTypes.string.isRequired,
+    hardlinks: React.PropTypes.bool
+};
 
 module.exports = RawHTML;

@@ -372,7 +372,7 @@ const Help = React.createClass({
 
                 let body = [];
                 if (contents) {
-                    body.push(<RawHTML key="contents" html={contents} />);
+                    body.push(<RawHTML key="contents" hardlinks={true} html={contents} />);
                 }
 
                 if (list) {
@@ -387,7 +387,7 @@ const Help = React.createClass({
                                             expanded={this.state.collapsedItems[localId]}
                                             data-expander-id={localId}
                                             header={name}>
-                                            <RawHTML html={contents} />
+                                            <RawHTML hardlinks={true} html={contents} />
                                         </CollapsableListItem>
                                     );
                                 })
