@@ -21,7 +21,7 @@ function add_literature_to_db {
     echo "Adding literature to database"
 
     # add data to DB
-    python ${MANAGE_SCRIPT} add_papers ${LITERATURE}
+    python3 ${MANAGE_SCRIPT} add_papers ${LITERATURE}
 }
 
 ENVIRONMENT=$1

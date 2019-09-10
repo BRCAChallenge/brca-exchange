@@ -1,5 +1,5 @@
 from django.db import connection
-from models import DataRelease, CurrentVariant, Variant, MupitStructure
+from .models import DataRelease, CurrentVariant, Variant, MupitStructure
 import requests
 import json
 import sys
@@ -60,12 +60,12 @@ def send_mupit_request(query_url, params):
             resp = requests.post(query_url, data=params)
             return resp
         except requests.exceptions.RequestException as e:
-            print e
+            print(e)
             time.sleep(10)
             tries += 1
             continue
         break
-    print "Request failed 5 times, exiting."
+    print("Request failed 5 times, exiting.")
     sys.exit(1)
 
 
@@ -101,7 +101,7 @@ def has_relevant_protein_change(hgvs_protein):
 
 
 def update_mupit_structure_for_existing_variants():
-    mupit_structures = {ms['name']: ms['id'] for ms in MupitStructure.objects.values()}
+    mupit_structures = {ms['name']: ms['id'] for ms in list(MupitStructure.objects.values())}
     cvs = CurrentVariant.objects.all()
     for cv in cvs:
         variant = Variant.objects.get(id=getattr(cv, 'id'))
@@ -175,5 +175,5 @@ class Benchmark(object):
 
     def __exit__(self,ty,val,tb):
         end = time.time()
-        print("%s : %0.3f seconds" % (self.name, end-self.start))
+        print(("%s : %0.3f seconds" % (self.name, end-self.start)))
         return False

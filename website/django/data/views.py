@@ -2,7 +2,7 @@ import os
 import re
 import tempfile
 import json
-import StringIO
+import io
 from operator import __or__
 from django.core import serializers
 from django.db import connection
@@ -24,6 +24,7 @@ from datetime import datetime
 from operator import itemgetter
 
 import logging
+from functools import reduce
 
 DISALLOWED_SEARCH_CHARS = ['\x00']
 
@@ -31,11 +32,11 @@ DISALLOWED_SEARCH_CHARS = ['\x00']
 def releases(request):
     release_id = request.GET.get('release_id')
     if release_id:
-        releases = DataRelease.objects.filter(id=release_id).values().all()
+        releases = list(DataRelease.objects.filter(id=release_id).values())
     else:
-        releases = DataRelease.objects.values().all()
+        releases = list(DataRelease.objects.values())
     latest = DataRelease.objects.order_by('-id')[0].id
-    change_types = {x['name']: x['id'] for x in ChangeType.objects.values().all()}
+    change_types = {x['name']: x['id'] for x in list(ChangeType.objects.values())}
     for release in releases:
         variants = Variant.objects.filter(Data_Release_id=release['id'])
         release['variants_added'] = variants.filter(Change_Type_id=change_types['new']).count()
@@ -103,7 +104,7 @@ def variant(request):
         .select_related('Mupit_Structure')\
         .select_related('insilicopriors')
 
-    variant_versions = map(variant_to_dict, query)
+    variant_versions = list(map(variant_to_dict, query))
     response = JsonResponse({"data": variant_versions})
     response['Access-Control-Allow-Origin'] = '*'
     return response
@@ -164,7 +165,7 @@ def variant_reports(request, variant_id):
                 report_query = Report.objects\
                     .filter(Data_Release_id__lte=report.Data_Release.id, SCV_ClinVar=key)\
                     .order_by('-Data_Release_id').select_related('Data_Release')
-            report_versions.extend(map(report_to_dict, report_query))
+            report_versions.extend(list(map(report_to_dict, report_query)))
         elif report.Source == "LOVD":
             key = report.Submission_ID_LOVD
             if not key or key == '-':
@@ -176,7 +177,7 @@ def variant_reports(request, variant_id):
                 report_query = Report.objects\
                     .filter(Data_Release_id__lte=report.Data_Release.id, Submission_ID_LOVD=key)\
                     .order_by('-Data_Release_id').select_related('Data_Release')
-            report_versions.extend(map(report_to_dict, report_query))
+            report_versions.extend(list(map(report_to_dict, report_query)))
 
     response = JsonResponse({"data": report_versions})
     response['Access-Control-Allow-Origin'] = '*'
@@ -191,13 +192,13 @@ def variant_papers(request):
         # year of 0000 means year could not be found during a crawl
         if variantpaper.paper.year == 0000:
             variantpaper.paper.year = "Unknown"
-    variantpapers = map(lambda vp: dict(model_to_dict(vp.paper), **{"mentions": vp.mentions, "points": vp.points}), variantpapers)
+    variantpapers = [dict(model_to_dict(vp.paper), **{"mentions": vp.mentions, "points": vp.points}) for vp in variantpapers]
     response = JsonResponse({"data": variantpapers}, safe=False)
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
 def variant_to_dict(variant_object):
-    change_types_map = {x['name']:x['id'] for x in ChangeType.objects.values().all()}
+    change_types_map = {x['name']:x['id'] for x in list(ChangeType.objects.values())}
     variant_dict = model_to_dict(variant_object)
     variant_dict["Data_Release"] = model_to_dict(variant_object.Data_Release)
     if variant_object.Mupit_Structure is not None:
@@ -219,7 +220,7 @@ def variant_to_dict(variant_object):
 
 
 def report_to_dict(report_object):
-    change_types_map = {x['name']:x['id'] for x in ChangeType.objects.values().all()}
+    change_types_map = {x['name']:x['id'] for x in list(ChangeType.objects.values())}
     report_dict = model_to_dict(report_object)
     report_dict["Data_Release"] = model_to_dict(report_object.Data_Release)
     report_dict["Data_Release"]["date"] = report_object.Data_Release.date
@@ -265,7 +266,7 @@ def index(request):
     column = request.GET.getlist('column')
     release = request.GET.get('release')
     change_types = request.GET.getlist('change_types')
-    change_types_map = {x['name']:x['id'] for x in ChangeType.objects.values().all()}
+    change_types_map = {x['name']:x['id'] for x in list(ChangeType.objects.values())}
     show_deleted = (request.GET.get('show_deleted', False) != False)
     deleted_count = 0
     synonyms_count = 0
@@ -274,7 +275,7 @@ def index(request):
     if release:
         query = Variant.objects.filter(Data_Release_id=int(release))
         if(change_types):
-            change_types = map(lambda c: change_types_map[c], filter(lambda c: c in change_types_map, change_types))
+            change_types = [change_types_map[c] for c in [c for c in change_types if c in change_types_map]]
             query = query.filter(Change_Type_id__in=change_types)
         release_name = DataRelease.objects.get(id=int(release)).name
     else:
@@ -305,7 +306,7 @@ def index(request):
 
         # create an in-memory StringIO object that we can use to buffer the results from the server
         # (it'll get released when it goes out of scope, so unlike a real file we don't need to close it)
-        f = StringIO.StringIO()
+        f = io.StringIO()
         query = "COPY ({}) TO STDOUT WITH DELIMITER '{}' CSV HEADER".format(query.query, '\t' if format == 'tsv' else ',')
         # HACK to add quotes around search terms
         query = re.sub(r'LIKE UPPER\((.+?)\)', r"LIKE UPPER('\1')", query)
@@ -593,4 +594,3 @@ def sanitise_term(term):
     # Enable prefix search
     term += ":*"
     return term
-

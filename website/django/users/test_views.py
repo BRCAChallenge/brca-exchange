@@ -62,20 +62,20 @@ class TestViewsAPI(TestCase):
                                         'lastName': 'example'
                                         })
             response = views.mailinglist(request)
-            response_json = json.loads(response.content)
+            response_json = json.loads(response.content.decode('utf-8'))
             self.assertEqual(response.status_code, 500)
             self.assertFalse(response_json['success'])
 
     def test_password_reset_with_invalid_email(self):
         response = self.client.post('/accounts/password_reset/', {'email': 'nonexistant-email@example.com'})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(json.loads(response.content)['success'], False)
-        self.assertEqual(json.loads(response.content)['error'], 'Email not found')
+        self.assertEqual(json.loads(response.content.decode('utf-8'))['success'], False)
+        self.assertEqual(json.loads(response.content.decode('utf-8'))['error'], 'Email not found')
 
     def test_password_reset_valid_email(self):
         response = self.client.post('/accounts/password_reset/', {'email': self.test_user.email})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(json.loads(response.content)['success'], True)
+        self.assertEqual(json.loads(response.content.decode('utf-8'))['success'], True)
 
     def test_update_password_invalid_token(self):
         self.test_user.password_reset_token = '12345'
@@ -87,8 +87,8 @@ class TestViewsAPI(TestCase):
         response = self.client.post('/accounts/update_password/' + invalid_token + '/',
                                     {'password': 'new_password'})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(json.loads(response.content)['success'], False)
-        self.assertEqual(json.loads(response.content)['error'], 'Invalid link')
+        self.assertEqual(json.loads(response.content.decode('utf-8'))['success'], False)
+        self.assertEqual(json.loads(response.content.decode('utf-8'))['error'], 'Invalid link')
 
     def test_update_password_expired_token(self):
         self.test_user.password_reset_token = '12345'
@@ -100,8 +100,8 @@ class TestViewsAPI(TestCase):
                                     {'password': 'new_password'})
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(json.loads(response.content)['success'], False)
-        self.assertEqual(json.loads(response.content)['error'], 'Invalid link')
+        self.assertEqual(json.loads(response.content.decode('utf-8'))['success'], False)
+        self.assertEqual(json.loads(response.content.decode('utf-8'))['error'], 'Invalid link')
 
     def test_update_password(self):
         self.test_user.password_reset_token = '12345'
@@ -113,7 +113,7 @@ class TestViewsAPI(TestCase):
                                     {'password': 'new_password'})
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(json.loads(response.content)['success'], True)
+        self.assertEqual(json.loads(response.content.decode('utf-8'))['success'], True)
 
     def create_test_user(self):
         test_user_fields = {'role': 0, 'role_other': 'role_other', 'city': 'city', 'country': 'country',

@@ -3,7 +3,7 @@ import os
 import random
 import md5
 import requests
-from urllib2 import HTTPError
+from urllib.error import HTTPError
 from django.core.mail import EmailMultiAlternatives
 from django.template import Context
 from django.template.loader import get_template
