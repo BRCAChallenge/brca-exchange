@@ -119,7 +119,7 @@ var NavBarNew = React.createClass({
         );
 
         return (
-            <div className={classNames("navbar-container", {"beta": this.state.isBeta && false})}>
+            <div className={classNames("navbar-container", {"beta": this.state.isBeta})}>
                 <Navbar fixedTop brand={brand} toggleNavKey={0}>
                     <Nav eventKey={0} navbar right>
                         <NavLink to='/'>Home</NavLink>
