@@ -297,6 +297,20 @@ function getAminoAcidCode(hgvsProtein) {
     }
 }
 
+/**
+ * Handles clicking link helpers, which should change the address bar without performing an actual navigation.
+ * @param e the click event object
+ * @returns {boolean} true if handled here, false otherwise
+ */
+function idHelpClicked(e) {
+    if (e.target.classList.contains("id-helper-tip")) {
+        history.pushState(null, null, e.target.getAttribute('href'));
+        e.preventDefault();
+        return true;
+    }
+
+    return false;
+}
 
 module.exports = {
     getAminoAcidCode,
@@ -310,5 +324,6 @@ module.exports = {
     sentenceCase,
     reformatDate,
     dateKeys,
-    capitalize
+    capitalize,
+    idHelpClicked
 };

@@ -1,26 +1,39 @@
 /*global module: false, require: false */
 'use strict';
 
-var React = require('react');
-var jQuery = require('jquery');
+const React = require('react');
+const $ = require('jquery');
+import {idHelpClicked} from "./util";
 
-var RawHTML = React.createClass({
+const RawHTML = React.createClass({
     componentDidMount() {
         const {scrollToFragment} = this.props;
 
         // make all the anchor tags use scrollToFragment, if it was specified
         if (scrollToFragment) {
-            jQuery(".markdown a").click(function() {
+            $(".markdown a").click(function() {
                 const fragment = this.getAttribute("href").slice(1);
                 scrollToFragment(fragment);
                 history.replaceState(undefined, undefined, '#' + fragment);
             });
         }
+
+        // add tooltips to anything that has an id
+        const $idElems = $("*[id]", this.refs.me.getDOMNode());
+        $idElems.each((idx, elem) => {
+            $(elem).addClass("id-associated");
+            $("<a>")
+                .addClass("id-helper-tip")
+                .html("&para;")
+                .click((e) => { idHelpClicked(e); })
+                .attr("href", `#${$(elem).attr("id")}`)
+                .appendTo(elem);
+        });
     },
     render: function() {
         var {html, ...otherProps} = this.props;
         return (
-            <div className='markdown' {...otherProps} dangerouslySetInnerHTML={{__html: html}} />
+            <div ref="me" className='markdown' {...otherProps} dangerouslySetInnerHTML={{__html: html}} />
         );
     }
 });

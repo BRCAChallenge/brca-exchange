@@ -1499,6 +1499,10 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
     float: none;
 }
 
+/**************************************************************/
+/**********     Help                      *********************/
+/**************************************************************/
+
 #main-grid.help-page {
     margin-top: 0;
 }
@@ -1507,6 +1511,9 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
     margin-bottom: 0;
 }
 
+.help-page h1 { margin: 1em 0 0.5em 0; }
+
+/* search box styles, for the search box itself and for matches */
 .help-page .header-sticky {
     position: sticky;
     top: 70px;
@@ -1516,7 +1523,6 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
     padding-bottom: 10px;
     border-bottom: solid 1px #ddd;
 }
-
 .help-page .help-search-header {
     display: flex;
     justify-content: flex-end;
@@ -1535,14 +1541,16 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
     align-items: center;
 }
 .help-page .highlighted {
+    cursor: pointer;
     background-color: yellow;
 }
 .help-page .highlighted.focused {
     border: solid 1px #ff7547;
-    border-radius: 2px;
+    border-radius: 3px;
     animation: blinkin 500ms forwards ease-in;
 }
 
+/* generic styles for spinning glyphs, used in the help search bars' progress indicator */
 .glyphicon-spin {
     animation: spin 1000ms infinite linear;
 }
@@ -1553,6 +1561,26 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
 @keyframes blinkin {
     0%   { opacity: 0.2;   }
     100% { opacity: 1; }
+}
+
+.help-page .panel-heading, .list-group-item-heading, .id-associated {
+    position: relative;
+}
+.help-page .id-helper-tip {
+    display: none;
+    color: #aaa;
+    position: absolute;
+    width: 1em;
+    right: 10px;
+    top: 50%;
+    margin-top: -0.75em;
+    z-index: 1000;
+}
+.help-page .panel-heading:hover .id-helper-tip,
+.list-group-item-heading:hover .id-helper-tip,
+.id-associated:hover .id-helper-tip
+{
+    display: inherit;
 }
 
 /**************************************************************/

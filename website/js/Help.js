@@ -6,6 +6,7 @@ import update from 'immutability-helper';
 import BetaTag from "./components/BetaTag";
 import {debounce} from "lodash";
 import Mark from 'mark.js';
+import {idHelpClicked} from "./util";
 // import debounce from 'lodash/debounce';
 const React = require('react');
 const RawHTML = require('./RawHTML');
@@ -20,6 +21,15 @@ const navbarHeight = 70;
 // extra padding when scrolling to a search result
 const EXTRA_SEARCH_PADDING = 8;
 
+/**
+ * The SearchController renders as a sticky search box with extra controls for navigating the search results.
+ *
+ * When beginning a search, all collapsible elements in the targeted element's tree will be collapsed. Strings that
+ * match the query will be wrapped in <span class="highlighted"> tags, and all ancestors of the string that are
+ * collapsible will be expanded.
+ *
+ * When the site's mode is toggled, search results will be cleared since they won't be valid for the new text anyway.
+ */
 const SearchController = React.createClass({
     getInitialState() {
         return {
@@ -80,14 +90,42 @@ const SearchController = React.createClass({
                         });
                     },
                     each: (elem) => {
+                        const me = this;
+
                         // check if it has ancestors that need to be expanded and add them to the expanded list
-                        $(elem).parents('*[data-expander-id]').each((idx, elem) => {
+                        $(elem).click(function() {
+                            const $highlightSet = $('.highlighted').removeClass("focused");
+
+                            // set this element to the currently-selected index
+                            $(this).addClass("focused");
+                            me.setState({ currentMark: $highlightSet.index(this) });
+                        })
+                        .parents('*[data-expander-id]').each((idx, elem) => {
                             this.pendingUpdate.add($(elem).data('expander-id'));
                         });
                     }
                 });
             }
         });
+    },
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.researchMode !== this.props.researchMode) {
+            // reinitialize if they've switched help page modes
+            this.setState({
+                searchTerm: '',
+                searching: false,
+                matched: 0,
+                currentMark: null
+            });
+
+            // clear any marks and recreate the marker
+            this.searcher.unmark({
+                done: () => {
+                    this.searcher = new Mark(this.props.target);
+                }
+            });
+        }
     },
 
     componentWillMount() {
@@ -163,8 +201,11 @@ const CollapsableListItem = React.createClass({
     mixins: [State, BootstrapMixin, CollapsableMixin],
 
     onClick(e) {
+        // handle the inline id helper if that's what the user clicked
+        if (idHelpClicked(e)) { return; }
+
+        // toggle our expansion status via this callback declared in our parent
         this.props.setExpansion(this.props.id);
-        // this.setState({ expanded: !this.state.expanded });
         e.preventDefault();
     },
 
@@ -182,20 +223,23 @@ const CollapsableListItem = React.createClass({
 
     render: function() {
         let {header, id, ...rest} = this.props;
-        header = (
+
+        const headerElem = (
             <h4>
                 <a href="#" onClick={this.onClick}
                     style={{color: "inherit", textDecoration: "none"}}
                     id={id} >
-                    <small><Glyphicon  glyph={this.state.expanded ? "chevron-down" : "chevron-right"} /> </small>
+                    <small><Glyphicon  glyph={this.props.expanded ? "chevron-down" : "chevron-right"} /> </small>
                     <span style={{verticalAlign: "text-bottom"}}>{header}</span>
                 </a>
-            </h4>);
+                <a className="id-helper-tip" onClick={(e) => { idHelpClicked(e) }} href={`#${id}`}>&para;</a>
+            </h4>
+        );
+
         return (
-            <ListGroupItem header={header} {...rest}>
-                <div className={classNames(this.getCollapsableClassSet("collapse"))}
-                    ref="content">
-                    { this.props.children }
+            <ListGroupItem header={headerElem} {...rest}>
+                <div className={classNames(this.getCollapsableClassSet("collapse"))} ref="content">
+                { this.props.children }
                 </div>
             </ListGroupItem>
         );
@@ -296,6 +340,24 @@ const Help = React.createClass({
         }));
     },
 
+    onSelect(e) {
+        // handle the inline id helper if that's what the user clicked
+        if (idHelpClicked(e)) { return; }
+
+        // find the parent that has an identifier associated with it
+        const targetID = e.target.classList.contains("identifier")
+            ? e.target.getAttribute('id')
+            : $(e.target).parent('.identifier').attr('id');
+        this.setExpansion(targetID);
+
+        if (e.target.classList.contains("help-reference-link")) {
+            // if the user clicks a reference link in a tile header, don't toggle the tile, and open the link.
+            e.selected = false;
+        } else {
+            e.preventDefault();
+        }
+    },
+
     render() {
         let help = localStorage.getItem("research-mode") === 'true' ? content.helpContentResearch : content.helpContentDefault;
 
@@ -303,34 +365,25 @@ const Help = React.createClass({
 
         var helpTiles = help.map(({section, tiles}) =>
             [<h1>{section}</h1>, tiles.map(({name, id, contents, list, reference, isBeta}) => {
-                let header = [<span id={id || slugify(name)}>{name}</span>];
-                // if the user clicks a reference link in a tile header, don't toggle the tile, and open the link.
-                const _this = this;
-                let onSelect = function (e) {
-                    _this.setExpansion(e.target.getAttribute('id'));
-
-                    if (e.target.classList.contains("help-reference-link")) {
-                        e.selected = false;
-                    } else {
-                        e.preventDefault();
-                    }
-                };
-
                 const actualId = id ? id : slugify(name);
+
+                let header = [<span key="header_name" className="identifier" id={actualId}>{name}</span>];
+                header.push(<a  key="header_id_helper" className="id-helper-tip" href={`#${actualId}`}>&para;</a>);
+
                 let body = [];
                 if (contents) {
-                    body.push(<RawHTML html={contents} />);
+                    body.push(<RawHTML key="contents" html={contents} />);
                 }
 
                 if (list) {
                     body.push(
-                        <ListGroup fill>
+                        <ListGroup key="listgroup" fill>
                             {
                                 list.map(({name, id, contents}) => {
                                     const localId = id ? id : slugify(name);
                                     return (
                                         <CollapsableListItem
-                                            id={localId} setExpansion={this.setExpansion}
+                                            key={localId} id={localId} setExpansion={this.setExpansion}
                                             expanded={this.state.collapsedItems[localId]}
                                             data-expander-id={localId}
                                             header={name}>
@@ -345,7 +398,7 @@ const Help = React.createClass({
 
                 if (reference) {
                     header.push(
-                        <small>&nbsp;
+                        <small key="help_reference">&nbsp;
                             <a href={reference} target="_blank">
                                 <Glyphicon glyph="link" className="help-reference-link" />
                             </a>
@@ -355,16 +408,17 @@ const Help = React.createClass({
 
                 if (isBeta) {
                     header.push(
-                        <BetaTag />
+                        <BetaTag key="beta_tag" />
                     );
                 }
 
                 return (
                     <Panel
                         header={header} collapsable={true}
+                        key={actualId}
                         expanded={this.state.collapsedItems[actualId]}
                         data-expander-id={actualId}
-                        onSelect={onSelect}
+                        onSelect={this.onSelect}
                     >
                         { body }
                     </Panel>
@@ -378,7 +432,7 @@ const Help = React.createClass({
                 <Row ref={(me) => { if (me) { this.headerElem = $(me.getDOMNode()); } }} className="header-sticky">
                     <Col smOffset={1} sm={10} className="help-search-header">
                         {/*<h1>BRCA Exchange: Help</h1>*/}
-                        <SearchController setExpansion={this.setExpansion} headerElem={this.headerElem} target="#help-body" />
+                        <SearchController researchMode={localStorage.getItem('research-mode')} setExpansion={this.setExpansion} headerElem={this.headerElem} target="#help-body" />
                     </Col>
                 </Row>
 
