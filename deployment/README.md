@@ -35,7 +35,7 @@ may add the following line to your /etc/hosts file if you need access to the
 | file | description |
 | --- | --- |
 | /var/www/html/beta | static assets |
-| /var/www/backend/beta/virtualenv | the python virtualenv |
+| /var/www/backend/beta/virtualenv3 | the python virtualenv |
 | /var/www/backend/beta/django | application django source |
 
 ## production vhost
@@ -43,7 +43,7 @@ may add the following line to your /etc/hosts file if you need access to the
 | file | description |
 | --- | --- |
 | /var/www/html/production | static assets |
-| /var/www/backend/production/virtualenv | the python virtualenv |
+| /var/www/backend/production/virtualenv3 | the python virtualenv |
 | /var/www/backend/production/django | application django source |
 
 # apache configuration

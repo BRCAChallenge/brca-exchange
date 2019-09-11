@@ -24,7 +24,7 @@ ssh -l${USER} ${HOST} <<-ENDSSH
     cp ~/site_settings/config.beta.js /var/www/html/beta/config.js
     cp ~/site_settings/site_settings.beta.py /var/www/backend/beta/django/brca/site_settings.py
     sudo chown -R www-data:www-data /var/www/backend/beta/django/uploads
-    . /var/www/backend/beta/virtualenv/bin/activate
+    . /var/www/backend/beta/virtualenv3/bin/activate
     pip3 install ${requirements}
     python3 /var/www/backend/beta/django/manage.py migrate --noinput --verbosity 2
     sudo apache2ctl restart
