@@ -32,14 +32,14 @@ if [ "${ENVIRONMENT}" == "dev" ] ;then
 	HOST=${HOST:-brcaexchange-dev.gi.ucsc.edu}
 	ssh -l${USER} ${HOST} <<-ENDSSH
 	    set -o errexit
-    	. /var/www/backend/beta/virtualenv/bin/activate
+    	. /var/www/backend/beta/virtualenv3/bin/activate
 	    python /home/${USER}/brca-exchange/website/django/manage.py remove_last_release
 	ENDSSH
 elif [ "${ENVIRONMENT}" == "beta" ] ;then
 	HOST=${HOST:-brcaexchange.org}
 	ssh -l${USER} ${HOST} <<-ENDSSH
 	    set -o errexit
-	    . /var/www/backend/${ENVIRONMENT}/virtualenv/bin/activate
+	    . /var/www/backend/${ENVIRONMENT}/virtualenv3/bin/activate
 		python /var/www/backend/${ENVIRONMENT}/django/manage.py remove_last_release
 	ENDSSH
 else
