@@ -13,7 +13,7 @@ import site
 
 appdir = os.path.dirname(__file__)
 
-site.addsitedir(os.path.join(appdir, '../virtualenv/lib/python2.7/site-packages'))
+site.addsitedir(os.path.join(appdir, '../virtualenv/lib/python3.6/site-packages'))
 from django.core.wsgi import get_wsgi_application
 from django.db.backends.signals import connection_created
 from django.dispatch import receiver
