@@ -30,7 +30,7 @@ CLASSIFICATION_FIELD = "Pathogenicity_all"
 ADJUSTED_COLUMN_NAMES = {
     'pyhgvs_Genomic_Coordinate_38': 'Genomic_Coordinate_hg38',
     'pyhgvs_Genomic_Coordinate_37': 'Genomic_Coordinate_hg37',
-    'pyhgvs_Genomic_Coordinate_36': 'Genomic_Coordinate_hg36',
+#    'pyhgvs_Genomic_Coordinate_36': 'Genomic_Coordinate_hg36',
     'pyhgvs_Hg37_Start': 'Hg37_Start',
     'pyhgvs_Hg37_End': 'Hg37_End',
     'pyhgvs_Hg36_Start': 'Hg36_Start',
@@ -40,8 +40,8 @@ ADJUSTED_COLUMN_NAMES = {
 }
 
 PYHGVS_GENOMIC_COORDINATE_FIELDS = ["pyhgvs_Genomic_Coordinate_38",
-                                    "pyhgvs_Genomic_Coordinate_37",
-                                    "pyhgvs_Genomic_Coordinate_36"]
+                                    "pyhgvs_Genomic_Coordinate_37"]
+#                                    "pyhgvs_Genomic_Coordinate_36"]
 
 LIST_KEYS = [
             "Pathogenicity_all",
