@@ -1568,19 +1568,28 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
 }
 .help-page .id-helper-tip {
     display: none;
-    color: #aaa;
+    color: #bbb;
     position: absolute;
-    width: 1em;
-    right: 10px;
+    right: 8px;
     top: 50%;
-    margin-top: -0.75em;
+    margin-top: -1em;
     z-index: 1000;
+
+    font-size: small;
+    border-radius: 5px;
+    background: #efefef;
+    padding: 4px 6px;
+    text-decoration: none;
 }
 .help-page .panel-heading:hover .id-helper-tip,
 .list-group-item-heading:hover .id-helper-tip,
 .id-associated:hover .id-helper-tip
 {
     display: inherit;
+}
+.id-helper-tip:hover {
+    color: #aaa;
+    background: #ddd;
 }
 
 /**************************************************************/
