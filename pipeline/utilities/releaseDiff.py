@@ -30,18 +30,14 @@ CLASSIFICATION_FIELD = "Pathogenicity_all"
 ADJUSTED_COLUMN_NAMES = {
     'pyhgvs_Genomic_Coordinate_38': 'Genomic_Coordinate_hg38',
     'pyhgvs_Genomic_Coordinate_37': 'Genomic_Coordinate_hg37',
-#    'pyhgvs_Genomic_Coordinate_36': 'Genomic_Coordinate_hg36',
     'pyhgvs_Hg37_Start': 'Hg37_Start',
     'pyhgvs_Hg37_End': 'Hg37_End',
-    'pyhgvs_Hg36_Start': 'Hg36_Start',
-    'pyhgvs_Hg36_End': 'Hg36_End',
     'pyhgvs_cDNA': 'HGVS_cDNA',
     'pyhgvs_Protein': 'HGVS_Protein'
 }
 
 PYHGVS_GENOMIC_COORDINATE_FIELDS = ["pyhgvs_Genomic_Coordinate_38",
                                     "pyhgvs_Genomic_Coordinate_37"]
-#                                    "pyhgvs_Genomic_Coordinate_36"]
 
 LIST_KEYS = [
             "Pathogenicity_all",
@@ -272,9 +268,9 @@ class transformer(object):
         global total_variants_with_changes
 
         # Uncomment if using old data schema (e.g. pre pyhgvs_Genomic_Coordinate_38)
-        columns_to_ignore = ["change_type", "Assertion_method_citation_ENIGMA", "Genomic_Coordinate_hg36",
+        columns_to_ignore = ["change_type", "Assertion_method_citation_ENIGMA",
                              "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg38", "HGVS_cDNA", "HGVS_Protein",
-                             "Hg37_Start", "Hg37_End", "Hg36_Start", "Hg36_End", "BX_ID_ENIGMA", "BX_ID_ClinVar",
+                             "Hg37_Start", "Hg37_End", "BX_ID_ENIGMA", "BX_ID_ClinVar",
                              "BX_ID_BIC", "BX_ID_ExAC", "BX_ID_LOVD", "BX_ID_exLOVD", "BX_ID_1000_Genomes", "BX_ID_ESP",
                              "Polyphen_Prediction", "Polyphen_Score", "Sift_Prediction", "Sift_Score",
                              "Minor_allele_frequency_ESP", "Max_Allele_Frequency", "mupit_structure"]
