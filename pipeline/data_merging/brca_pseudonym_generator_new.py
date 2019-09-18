@@ -165,6 +165,7 @@ def main(input, output, pkl, log_path, config_file, resources):
     cfg_df = config.load_config(config_file)
 
     syn_ac_dict = { x[config.SYMBOL_COL] : x[config.SYNONYM_AC_COL].split(';') for _, x in cfg_df.iterrows()}
+    cdna_default_ac_dict = { x[config.SYMBOL_COL] : x[config.HGVS_CDNA_DEFAULT_AC] for _, x in cfg_df.iterrows()}
 
     hgvs_proc = HgvsWrapper()
 
@@ -178,6 +179,14 @@ def main(input, output, pkl, log_path, config_file, resources):
     df[TMP_CDNA_UNORM_FIELD] = _get_cdna(df, pkl, hgvs_proc)
     df[TMP_CDNA_NORM_FIELD] = df[TMP_CDNA_UNORM_FIELD].apply(hgvs_proc.normalizing)
     df['pyhgvs_cDNA'] = df[TMP_CDNA_UNORM_FIELD].apply(str)
+
+    available_cdna = df['pyhgvs_cDNA'].str.startswith("NM_")
+    df.loc[available_cdna, 'Reference_Sequence'] = df.loc[available_cdna, 'pyhgvs_cDNA'].str.split(':').apply(lambda l: l[0])
+    df.loc[available_cdna, 'HGVS_cDNA'] = df.loc[available_cdna, 'pyhgvs_cDNA'].str.split(':').apply(lambda l: l[1])
+
+    # still setting a reference sequence for downstream steps, even though no cDNA could be determined
+    df.loc[~available_cdna, 'Reference_Sequence'] = df.loc[~available_cdna, 'Gene_Symbol'].apply(lambda g: cdna_default_ac_dict[g])
+    df.loc[~available_cdna, 'HGVS_cDNA'] = '-'
 
     # Genomic Coordinates
     df['pyhgvs_Genomic_Coordinate_38'] = df[VAR_OBJ_FIELD].apply(lambda v: str(v))

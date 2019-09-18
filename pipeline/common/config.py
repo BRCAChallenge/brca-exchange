@@ -1,5 +1,6 @@
 import pandas as pd
 
+HGVS_CDNA_DEFAULT_AC = 'hgvs_cdna_default_ac'
 SYMBOL_COL = 'symbol'
 SYNONYM_AC_COL = 'synonyms_ac_col'
 
