@@ -3,7 +3,7 @@ import os
 import pickle
 import subprocess
 import tempfile
-from multiprocessing import Pool
+from multiprocessing.pool import ThreadPool
 
 import click
 import hgvs.assemblymapper
@@ -22,25 +22,32 @@ from common.types import VCFVariant
 
 SYNONYMS_FIELD = 'Synonyms'
 
+# temporary fields
+VAR_OBJ_FIELD = 'var_objs'
+NEW_SYNONYMS_FIELD = 'new_syns'
+TMP_CDNA_UNORM_FIELD = 'tmp_hgvs_cdna_unorm'
+TMP_CDNA_NORM_FIELD = 'tmp_hgvs_cdna_norm'
+
 # TODO: use! (check pathos)
 def parallelize_dataframe(df, func, n_cores=4):
     df_split = np.array_split(df, n_cores)
 
-    with Pool(n_cores) as pool:
-        df = pd.concat(pool.map(func, df_split))
-    #pool.close()
-    #pool.join()
+    pool = ThreadPool(n_cores)
+    df = pd.concat(pool.map(func, df_split))
+    pool.close()
+    pool.join()
     return df
 
 
 def _get_cdna(df, pkl, hgvs_proc):
     def cdna_from_cdna_field(x):
-        if x['HGVS_cDNA'] and x['HGVS_cDNA'] != '-':
+        if x['HGVS_cDNA'] and x['HGVS_cDNA'].startswith('c.'):
             c = x['HGVS_cDNA']
             if ',' in c:
                 c = c.split(',')[0]
 
             return hgvs_proc.hgvs_parser.parse(x["Reference_Sequence"] + ":" + c)
+
         return None
 
     def compute_hgvs(x):
@@ -53,13 +60,13 @@ def _get_cdna(df, pkl, hgvs_proc):
             r = compute_hgvs(row)
         return r
 
-    var_objs = df['var_objs']
+    var_objs = df[VAR_OBJ_FIELD]
 
     if pkl and os.path.exists(pkl):
         pickle_dict = pickle.load(open(pkl, 'rb'))
         s_cdna = pd.Series([ pickle_dict[str(v)]  for v in var_objs  ])
     else:
-        s_cdna = df.apply(from_field_or_compute, axis=1)
+        s_cdna = parallelize_dataframe(df, lambda dfx: dfx.apply(from_field_or_compute, axis=1), 4)
 
         if pkl:
             pickle_dict = {str(v): c for (c, v) in zip(s_cdna, var_objs)}
@@ -111,7 +118,7 @@ def get_synonyms(x, hgvs_proc, syn_ac_dict):
         accessions = syn_ac_dict[x['Gene_Symbol']]
 
         if(dst in accessions):
-            for vc in [x['tmp_hgvs_cdna_unorm']]:
+            for vc in [x[TMP_CDNA_UNORM_FIELD]]:
                 if not vc:
                     continue
                 # TODO: need to optimize?
@@ -139,7 +146,7 @@ def get_synonyms(x, hgvs_proc, syn_ac_dict):
 def _merge_synonyms(x):
     orig_list = [s for s in x[SYNONYMS_FIELD].split(',') if s] # filter away ''
 
-    combined = set(orig_list + x['new_syns'])
+    combined = set(orig_list + x[NEW_SYNONYMS_FIELD])
     list_sorted = sorted(list(combined))
     return ','.join(list_sorted)
 
@@ -163,29 +170,29 @@ def main(input, output, pkl, log_path, config_file, resources):
 
     df = pd.read_csv(input, sep='\t')
 
-    df = df.iloc[0:100] # TODO: remove
+    df = df.iloc[0:1000] # TODO: remove
 
-    df['var_objs'] = df.apply(lambda x: VCFVariant(x['Chr'], x['Pos'], x['Ref'], x['Alt']), axis=1)
+    df[VAR_OBJ_FIELD] = df.apply(lambda x: VCFVariant(x['Chr'], x['Pos'], x['Ref'], x['Alt']), axis=1)
 
     # CDNA conversions
-    df['tmp_hgvs_cdna_unorm'] = _get_cdna(df, pkl, hgvs_proc)
-    df['tmp_hgvs_cdna_norm'] = df['tmp_hgvs_cdna_unorm'].apply(hgvs_proc.normalizing)
-    df['pyhgvs_cDNA'] = df['tmp_hgvs_cdna_unorm'].apply(str)
+    df[TMP_CDNA_UNORM_FIELD] = _get_cdna(df, pkl, hgvs_proc)
+    df[TMP_CDNA_NORM_FIELD] = df[TMP_CDNA_UNORM_FIELD].apply(hgvs_proc.normalizing)
+    df['pyhgvs_cDNA'] = df[TMP_CDNA_UNORM_FIELD].apply(str)
 
     # Genomic Coordinates
-    df['pyhgvs_Genomic_Coordinate_38'] = df['var_objs'].apply(lambda v: str(v))
+    df['pyhgvs_Genomic_Coordinate_38'] = df[VAR_OBJ_FIELD].apply(lambda v: str(v))
 
-    var_objs_hg37 = convert_to_hg37(df['var_objs'], resources)
+    var_objs_hg37 = convert_to_hg37(df[VAR_OBJ_FIELD], resources)
     df['pyhgvs_Genomic_Coordinate_37'] = pd.Series([str(v) for v in var_objs_hg37])
 
     df['pyhgvs_Hg37_Start'] = pd.Series([v.pos for v in var_objs_hg37])
     df['pyhgvs_Hg37_End'] = df['pyhgvs_Hg37_Start'] + (df['Hg38_End'] - df['Hg38_Start'])
 
     # ## Protein
-    df['pyhgvs_Protein'] = (df['tmp_hgvs_cdna_norm'].
+    df['pyhgvs_Protein'] = (df[TMP_CDNA_NORM_FIELD].
                             apply(lambda hgvs_cdna: hgvs_proc._to_protein(hgvs_cdna)))
 
-    df["new_syns"] = df.apply(lambda s: get_synonyms(s, hgvs_proc, syn_ac_dict), axis=1)
+    df[NEW_SYNONYMS_FIELD] = df.apply(lambda s: get_synonyms(s, hgvs_proc, syn_ac_dict), axis=1)
 
     df[SYNONYMS_FIELD] = df[SYNONYMS_FIELD].fillna('').str.strip()
 
@@ -193,8 +200,8 @@ def main(input, output, pkl, log_path, config_file, resources):
     # merge existing synonyms with generated ones and sort them
     df[SYNONYMS_FIELD] = df.apply(_merge_synonyms, axis=1)
 
-    # TODO: check types, remove unused fields
-    print(df.dtypes)
+    # cleaning up temporary fields
+    df = df.drop(columns=[VAR_OBJ_FIELD, NEW_SYNONYMS_FIELD, TMP_CDNA_UNORM_FIELD, TMP_CDNA_NORM_FIELD])
 
     df.to_csv(output, sep='\t', index=False)
 
