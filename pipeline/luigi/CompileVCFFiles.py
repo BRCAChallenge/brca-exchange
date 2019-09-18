@@ -1075,7 +1075,7 @@ class BuildAggregatedOutput(DefaultPipelineTask):
         brca_resources_dir = self.cfg.resources_dir
         os.chdir(data_merging_method_dir)
 
-        args = ["python", "brca_pseudonym_generator_new.py",
+        args = ["python", "brca_pseudonym_generator.py",
                 artifacts_dir + "aggregated.tsv",
                 artifacts_dir + "built.tsv",
                 "--log-path", artifacts_dir + "brca-pseudonym-generator.log",
