@@ -18,7 +18,7 @@ from hgvs.exceptions import HGVSError
 
 from common import config
 from common.hgvs_utils import HgvsWrapper
-from common.types import VCFVariant
+from common.variant_utils import VCFVariant
 
 SYNONYMS_FIELD = 'Synonyms'
 
