@@ -19,28 +19,43 @@ from common import config
 from common.hgvs_utils import HgvsWrapper
 from common.variant_utils import VCFVariant
 
-SYNONYMS_FIELD = 'Synonyms'
+ALT_COL = 'Alt'
+CHR_COL = 'Chr'
+GENE_SYMBOL_COL = 'Gene_Symbol'
+HG38_END_COL = 'Hg38_End'
+HG38_START_COL = 'Hg38_Start'
+HGVS_CDNA_COL = 'HGVS_cDNA'
+POS_COL = 'Pos'
+PYHGVS_CDNA_COL = 'pyhgvs_cDNA'
+PYHGVS_GENOMIC_COORDINATE_37_COL = 'pyhgvs_Genomic_Coordinate_37'
+PYHGVS_GENOMIC_COORDINATE_38_COL = 'pyhgvs_Genomic_Coordinate_38'
+PYHGVS_HG37_END_COL = 'pyhgvs_Hg37_End'
+PYHGVS_HG37_START_COL = 'pyhgvs_Hg37_Start'
+PYHGVS_PROTEIN_COL = 'pyhgvs_Protein'
+REFERENCE_SEQUENCE_COL = 'Reference_Sequence'
+REF_COL = 'Ref'
+SYNONYMS_COL = 'Synonyms'
 
 # temporary fields
 VAR_OBJ_FIELD = 'var_objs'
 NEW_SYNONYMS_FIELD = 'new_syns'
-TMP_CDNA_UNORM_FIELD = 'tmp_hgvs_cdna_unorm'
-TMP_CDNA_NORM_FIELD = 'tmp_hgvs_cdna_norm'
+TMP_CDNA_UNORM_FIELD = 'tmp_HGVS_CDNA_FIELD_unorm'
+TMP_CDNA_NORM_FIELD = 'tmp_HGVS_CDNA_FIELD_norm'
 
 
 def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict):
     def cdna_from_cdna_field(x):
-        if x['HGVS_cDNA'] and x['HGVS_cDNA'].startswith('c.') and x['Reference_Sequence'] == cdna_ac_dict[x['Gene_Symbol']]:
-            c = x['HGVS_cDNA']
+        if x[HGVS_CDNA_COL] and x[HGVS_CDNA_COL].startswith('c.') and x[REFERENCE_SEQUENCE_COL] == cdna_ac_dict[x[GENE_SYMBOL_COL]]:
+            c = x[HGVS_CDNA_COL]
             if ',' in c:
                 c = c.split(',')[0]
 
-            return hgvs_proc.hgvs_parser.parse(x["Reference_Sequence"] + ":" + c)
+            return hgvs_proc.hgvs_parser.parse(x[REFERENCE_SEQUENCE_COL] + ":" + c)
 
         return None
 
     def compute_hgvs(x):
-        v = VCFVariant(x['Chr'], x['Pos'], x['Ref'], x['Alt'])
+        v = VCFVariant(x[CHR_COL], x[POS_COL], x[REF_COL], x[ALT_COL])
         return hgvs_proc.to_cdna(v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh38_Assem]))
 
     def from_field_or_compute(row):
@@ -82,14 +97,13 @@ def convert_to_hg37(vars, brca_resources_dir):
             brca_resources_dir + "/hg19.fa",
             vcf_tmp_out]
 
-    sp = subprocess.Popen(args) # TODO: make cleaner
+    logging.info("Running CrossMap.py to convert to hg19")
+    sp = subprocess.Popen(args)
     out, err = sp.communicate()
     if out:
-        print("standard output of subprocess:")
-        print out
+        logging.info("standard output of subprocess: {}".format(out))
     if err:
-        print("standard error of subprocess:")
-        print err
+        logging.info("standard output of subprocess: {}".format(err))
 
     vcf_out_lines = open(vcf_tmp_out, 'r').readlines()
 
@@ -100,17 +114,16 @@ def convert_to_hg37(vars, brca_resources_dir):
 def get_synonyms(x, hgvs_proc, syn_ac_dict):
     synonyms = []
 
-    for _, _, _, dst, alt_ac, method in hgvs_proc.hgvs_dp.get_tx_for_gene(x['Gene_Symbol']):
-        if x['Gene_Symbol'] not in syn_ac_dict:
+    for _, _, _, dst, alt_ac, method in hgvs_proc.hgvs_dp.get_tx_for_gene(x[GENE_SYMBOL_COL]):
+        if x[GENE_SYMBOL_COL] not in syn_ac_dict:
             continue
 
-        accessions = syn_ac_dict[x['Gene_Symbol']]
+        accessions = syn_ac_dict[x[GENE_SYMBOL_COL]]
 
-        if(dst in accessions):
+        if dst in accessions:
             for vc in [x[TMP_CDNA_UNORM_FIELD]]:
                 if not vc:
                     continue
-                # TODO: need to optimize?
 
                 try:
                     pj = hgvs.projector.Projector(hdp=hgvs_proc.hgvs_dp,
@@ -124,7 +137,7 @@ def get_synonyms(x, hgvs_proc, syn_ac_dict):
                     vp_norm = hgvs_proc.normalizing(vp)
                     if vp_norm:
                         if vp_norm not in synonyms:
-                            logging.info("Found new synonym! " + str(vp_norm) + " " + str(vp) + " " + str(x['pyhgvs_Genomic_Coordinate_38']))
+                            logging.info("Found new synonym! " + str(vp_norm) + " " + str(vp) + " " + str(x[PYHGVS_GENOMIC_COORDINATE_38_COL]))
                         synonyms.append(vp_norm)
                 except HGVSError as e:
                     logging.info("Exception in synonym handling " + str(vc) + " from " + str(vc.ac) + " to " + str(dst) + " using " + str(method) + " via " + str(alt_ac) + " : " + str(e) + " " + str(e.__class__))
@@ -133,7 +146,7 @@ def get_synonyms(x, hgvs_proc, syn_ac_dict):
 
 
 def _merge_synonyms(x):
-    orig_list = [s for s in x[SYNONYMS_FIELD].split(',') if s] # filter away ''
+    orig_list = [s for s in x[SYNONYMS_COL].split(',') if s] # filter away ''
 
     combined = set(orig_list + x[NEW_SYNONYMS_FIELD])
     list_sorted = sorted(list(combined))
@@ -143,10 +156,10 @@ def _merge_synonyms(x):
 @click.command()
 @click.argument('input', click.Path(readable=True))
 @click.argument('output', click.Path(writable=True))
-@click.option('--log-path', default='pseudonym_generator.log')
-@click.option("--pkl") # TODO: keep?
-@click.option("--config-file", required=True)
-@click.option('--resources')
+@click.option('--log-path', default='pseudonym_generator.log', help="Log file pth")
+@click.option("--pkl", help="Saving HGVS cDNA objects to save time during development")
+@click.option("--config-file", required=True, help="path to gene configuration file")
+@click.option('--resources', help="path to directory containing reference sequences")
 def main(input, output, pkl, log_path, config_file, resources):
     logging.basicConfig(filename=log_path, filemode="w", level=logging.INFO,
                         format=' %(asctime)s %(filename)-15s %(message)s')
@@ -160,41 +173,43 @@ def main(input, output, pkl, log_path, config_file, resources):
 
     df = pd.read_csv(input, sep='\t')
 
-    df[VAR_OBJ_FIELD] = df.apply(lambda x: VCFVariant(x['Chr'], x['Pos'], x['Ref'], x['Alt']), axis=1)
+    df[VAR_OBJ_FIELD] = df.apply(lambda x: VCFVariant(x[CHR_COL], x[POS_COL], x[REF_COL], x[ALT_COL]), axis=1)
 
-    # CDNA conversions
+    #### CDNA conversions
     df[TMP_CDNA_UNORM_FIELD] = _get_cdna(df, pkl, hgvs_proc, cdna_default_ac_dict)
     df[TMP_CDNA_NORM_FIELD] = df[TMP_CDNA_UNORM_FIELD].apply(hgvs_proc.normalizing)
-    df['pyhgvs_cDNA'] = df[TMP_CDNA_UNORM_FIELD].apply(str)
+    df[PYHGVS_CDNA_COL] = df[TMP_CDNA_UNORM_FIELD].apply(str)
 
-    available_cdna = df['pyhgvs_cDNA'].str.startswith("NM_")
-    df.loc[available_cdna, 'Reference_Sequence'] = df.loc[available_cdna, 'pyhgvs_cDNA'].str.split(':').apply(lambda l: l[0])
-    df.loc[available_cdna, 'HGVS_cDNA'] = df.loc[available_cdna, 'pyhgvs_cDNA'].str.split(':').apply(lambda l: l[1])
+    available_cdna = df[PYHGVS_CDNA_COL].str.startswith("NM_")
+    df.loc[available_cdna, REFERENCE_SEQUENCE_COL] = df.loc[available_cdna, PYHGVS_CDNA_COL].str.split(':').apply(lambda l: l[0])
+    df.loc[available_cdna, HGVS_CDNA_COL] = df.loc[available_cdna, PYHGVS_CDNA_COL].str.split(':').apply(lambda l: l[1])
 
     # still setting a reference sequence for downstream steps, even though no cDNA could be determined
-    df.loc[~available_cdna, 'Reference_Sequence'] = df.loc[~available_cdna, 'Gene_Symbol'].apply(lambda g: cdna_default_ac_dict[g])
-    df.loc[~available_cdna, 'HGVS_cDNA'] = '-'
+    df.loc[~available_cdna, REFERENCE_SEQUENCE_COL] = df.loc[~available_cdna, GENE_SYMBOL_COL].apply(lambda g: cdna_default_ac_dict[g])
+    df.loc[~available_cdna, HGVS_CDNA_COL] = '-'
 
-    # Genomic Coordinates
-    df['pyhgvs_Genomic_Coordinate_38'] = df[VAR_OBJ_FIELD].apply(lambda v: str(v))
+    #### Genomic Coordinates
+    df[PYHGVS_GENOMIC_COORDINATE_38_COL] = df[VAR_OBJ_FIELD].apply(lambda v: str(v))
 
     var_objs_hg37 = convert_to_hg37(df[VAR_OBJ_FIELD], resources)
-    df['pyhgvs_Genomic_Coordinate_37'] = pd.Series([str(v) for v in var_objs_hg37])
+    df[PYHGVS_GENOMIC_COORDINATE_37_COL] = pd.Series([str(v) for v in var_objs_hg37])
 
-    df['pyhgvs_Hg37_Start'] = pd.Series([v.pos for v in var_objs_hg37])
-    df['pyhgvs_Hg37_End'] = df['pyhgvs_Hg37_Start'] + (df['Hg38_End'] - df['Hg38_Start'])
+    df[PYHGVS_HG37_START_COL] = pd.Series([v.pos for v in var_objs_hg37])
+    df[PYHGVS_HG37_END_COL] = df[PYHGVS_HG37_START_COL] + (df[HG38_END_COL] - df[HG38_START_COL])
 
-    # ## Protein
-    df['pyhgvs_Protein'] = (df[TMP_CDNA_NORM_FIELD].
-                            apply(lambda hgvs_cdna: hgvs_proc._to_protein(hgvs_cdna)))
+    #### Protein
+    df[PYHGVS_PROTEIN_COL] = (df[TMP_CDNA_NORM_FIELD].
+                              apply(lambda HGVS_CDNA_FIELD: str(hgvs_proc.to_protein(HGVS_CDNA_FIELD))))
 
+    #### Synonyms
     df[NEW_SYNONYMS_FIELD] = df.apply(lambda s: get_synonyms(s, hgvs_proc, syn_ac_dict), axis=1)
 
-    df[SYNONYMS_FIELD] = df[SYNONYMS_FIELD].fillna('').str.strip()
+    df[SYNONYMS_COL] = df[SYNONYMS_COL].fillna('').str.strip()
 
     # merge existing synonyms with generated ones and sort them
-    df[SYNONYMS_FIELD] = df.apply(_merge_synonyms, axis=1)
+    df[SYNONYMS_COL] = df.apply(_merge_synonyms, axis=1)
 
+    #### Writing out
     # cleaning up temporary fields
     df = df.drop(columns=[VAR_OBJ_FIELD, NEW_SYNONYMS_FIELD, TMP_CDNA_UNORM_FIELD, TMP_CDNA_NORM_FIELD])
 

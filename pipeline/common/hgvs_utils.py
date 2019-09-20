@@ -1,26 +1,27 @@
-
-import hgvs
-import hgvs.parser
 import logging
-import hgvs.dataproviders.uta
+import os
+
+import bioutils
+import hgvs
 import hgvs.assemblymapper
+import hgvs.dataproviders.uta
 import hgvs.normalizer
+import hgvs.parser
 import hgvs.projector
 import hgvs.validator
 from hgvs.exceptions import HGVSError
-import bioutils
-import os
+
 
 class HgvsWrapper:
     GRCh38_Assem = 'GRCh38'
     GRCh37_Assem = 'GRCh37'
 
-    # TODO: refactor, put into proper utils
     def __init__(self):
         logging.info("HGVS_SEQREPO_DIR: {}".format(os.environ.get('HGVS_SEQREPO_DIR', "Not set. Using public instance")))
-        # TODO: should be parameter
-        self.hgvs_dp = hgvs.dataproviders.uta.connect(
-        'postgresql://anonymous@localhost:50827/uta/uta_20170629')
+
+        self.hgvs_dp = hgvs.dataproviders.uta.connect()
+        logging.info("Using UTA instance at {}".format(self.hgvs_dp.url))
+
         self.hgvs_parser = hgvs.parser.Parser()
         self.hgvs_norm = hgvs.normalizer.Normalizer(self.hgvs_dp)
 
@@ -34,13 +35,14 @@ class HgvsWrapper:
                          assemblies}
 
         all_assemblies = bioutils.assemblies.get_assemblies()
-        # TODO: separate object?
-        self.contig_maps = {a: ({
-            s['name']: s['refseq_ac']
-            for s in all_assemblies[a]['sequences'] if
-            s['refseq_ac'] is not None
-        }) for a in assemblies
-        }
+
+        self.contig_maps = {}
+        for a in assemblies:
+            m = {}
+            for s in all_assemblies[a]['sequences']:
+                if s['refseq_ac'] is not None:
+                    m[s['name']] = s['refseq_ac']
+            self.contig_maps[a] = m
 
     def to_cdna(self, hgvs_obj, assembly = GRCh38_Assem):
         am = self.hgvs_ams[assembly]
@@ -56,15 +58,11 @@ class HgvsWrapper:
 
         return None
 
-
-    ## TODO: use hgvs clinvar
-    def _to_protein(self, hgvs_cdna):
+    def to_protein(self, hgvs_cdna):
         if not hgvs_cdna:
             return None
 
         try:
-            # var_c1_norm = hgvs_proc.hgvs_norm.normalize(
-            #    hgvs_cdna)  # TODO: for better error msgs?
             return str(self.hgvs_ams[HgvsWrapper.GRCh38_Assem].c_to_p(
                 hgvs_cdna))
         except (hgvs.exceptions.HGVSError, IndexError) as e:
@@ -72,7 +70,7 @@ class HgvsWrapper:
                 "Protein conversion issues with " + str(hgvs_cdna) + ": " + str(
                     e))
 
-        return str(None)
+        return None
 
     def normalizing(self, v):
         if v:
