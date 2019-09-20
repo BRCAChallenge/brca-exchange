@@ -18,7 +18,6 @@ from hgvs.exceptions import HGVSError
 from common import config
 from common.hgvs_utils import HgvsWrapper
 from common.variant_utils import VCFVariant
-from common import utils
 
 SYNONYMS_FIELD = 'Synonyms'
 
@@ -29,9 +28,9 @@ TMP_CDNA_UNORM_FIELD = 'tmp_hgvs_cdna_unorm'
 TMP_CDNA_NORM_FIELD = 'tmp_hgvs_cdna_norm'
 
 
-def _get_cdna(df, pkl, hgvs_proc):
+def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict):
     def cdna_from_cdna_field(x):
-        if x['HGVS_cDNA'] and x['HGVS_cDNA'].startswith('c.'):
+        if x['HGVS_cDNA'] and x['HGVS_cDNA'].startswith('c.') and x['Reference_Sequence'] == cdna_ac_dict[x['Gene_Symbol']]:
             c = x['HGVS_cDNA']
             if ',' in c:
                 c = c.split(',')[0]
@@ -56,7 +55,7 @@ def _get_cdna(df, pkl, hgvs_proc):
         pickle_dict = pickle.load(open(pkl, 'rb'))
         s_cdna = pd.Series([ pickle_dict[str(v)]  for v in var_objs  ])
     else:
-        s_cdna = utils.parallelize_dataframe(df, lambda dfx: dfx.apply(from_field_or_compute, axis=1), 4)
+        s_cdna = df.apply(from_field_or_compute, axis=1)
 
         if pkl:
             pickle_dict = {str(v): c for (c, v) in zip(s_cdna, var_objs)}
@@ -164,7 +163,7 @@ def main(input, output, pkl, log_path, config_file, resources):
     df[VAR_OBJ_FIELD] = df.apply(lambda x: VCFVariant(x['Chr'], x['Pos'], x['Ref'], x['Alt']), axis=1)
 
     # CDNA conversions
-    df[TMP_CDNA_UNORM_FIELD] = _get_cdna(df, pkl, hgvs_proc)
+    df[TMP_CDNA_UNORM_FIELD] = _get_cdna(df, pkl, hgvs_proc, cdna_default_ac_dict)
     df[TMP_CDNA_NORM_FIELD] = df[TMP_CDNA_UNORM_FIELD].apply(hgvs_proc.normalizing)
     df['pyhgvs_cDNA'] = df[TMP_CDNA_UNORM_FIELD].apply(str)
 
@@ -189,7 +188,7 @@ def main(input, output, pkl, log_path, config_file, resources):
     df['pyhgvs_Protein'] = (df[TMP_CDNA_NORM_FIELD].
                             apply(lambda hgvs_cdna: hgvs_proc._to_protein(hgvs_cdna)))
 
-    df[NEW_SYNONYMS_FIELD] = utils.parallelize_dataframe(df, lambda d: d.apply(lambda s: get_synonyms(s, hgvs_proc, syn_ac_dict), axis=1), 4)
+    df[NEW_SYNONYMS_FIELD] = df.apply(lambda s: get_synonyms(s, hgvs_proc, syn_ac_dict), axis=1)
 
     df[SYNONYMS_FIELD] = df[SYNONYMS_FIELD].fillna('').str.strip()
 
