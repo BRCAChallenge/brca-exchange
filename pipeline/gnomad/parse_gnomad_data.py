@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import os
 from math import floor, log10, isnan
+import pdb
 
 
 def parse_args():
@@ -20,84 +21,68 @@ def parse_args():
 
 RELEVANT_EXISTING_COLUMNS = [
     'genome_AFR_ac',
-    'genome_AFR_ac_hemi',
     'genome_AFR_ac_hom',
     'genome_AFR_an',
     'genome_AMR_ac',
-    'genome_AMR_ac_hemi',
     'genome_AMR_ac_hom',
     'genome_AMR_an',
     'genome_ASJ_ac',
-    'genome_ASJ_ac_hemi',
     'genome_ASJ_ac_hom',
     'genome_ASJ_an',
     'genome_EAS_ac',
-    'genome_EAS_ac_hemi',
     'genome_EAS_ac_hom',
     'genome_EAS_an',
     'genome_FIN_ac',
-    'genome_FIN_ac_hemi',
     'genome_FIN_ac_hom',
     'genome_FIN_an',
     'genome_NFE_ac',
-    'genome_NFE_ac_hemi',
     'genome_NFE_ac_hom',
     'genome_NFE_an',
     'genome_OTH_ac',
-    'genome_OTH_ac_hemi',
     'genome_OTH_ac_hom',
     'genome_OTH_an',
     'genome_SAS_ac',
-    'genome_SAS_ac_hemi',
     'genome_SAS_ac_hom',
     'genome_SAS_an',
     'genome_ac',
+    'genome_ac_hom',
     'genome_an',
-    'genome_af',
     'exome_AFR_ac',
-    'exome_AFR_ac_hemi',
     'exome_AFR_ac_hom',
     'exome_AFR_an',
     'exome_AMR_ac',
-    'exome_AMR_ac_hemi',
     'exome_AMR_ac_hom',
     'exome_AMR_an',
     'exome_ASJ_ac',
-    'exome_ASJ_ac_hemi',
     'exome_ASJ_ac_hom',
     'exome_ASJ_an',
     'exome_EAS_ac',
-    'exome_EAS_ac_hemi',
     'exome_EAS_ac_hom',
     'exome_EAS_an',
     'exome_FIN_ac',
-    'exome_FIN_ac_hemi',
     'exome_FIN_ac_hom',
     'exome_FIN_an',
     'exome_NFE_ac',
-    'exome_NFE_ac_hemi',
     'exome_NFE_ac_hom',
     'exome_NFE_an',
     'exome_OTH_ac',
-    'exome_OTH_ac_hemi',
     'exome_OTH_ac_hom',
     'exome_OTH_an',
     'exome_SAS_ac',
-    'exome_SAS_ac_hemi',
     'exome_SAS_ac_hom',
     'exome_SAS_an',
-    'exome_an',
     'exome_ac',
-    'exome_af',
+    'exome_ac_hom',
+    'exome_an',
     'alt',
     'chrom',
     'hgvsc',
     'hgvsp',
+    'hgvs',
     'pos',
     'ref',
-    'variantId',
-    'consequence',
-    'flags'
+    'flags',
+    'variant_id'
 ]
 
 
@@ -115,8 +100,8 @@ def compile_allele_values(df):
     for population in populations:
         df['genome_' + population + '_af'] = calculate_frequency(df['genome_' + population + '_ac'], df['genome_' + population + '_an'])
         df['exome_' + population + '_af'] = calculate_frequency(df['exome_' + population + '_ac'], df['exome_' + population + '_an'])
-    for field in ['exome_af', 'genome_af']:
-        df[field] = pd.to_numeric(df[field], errors='coerce').apply(round_four_sigfigs)
+    df['exome_af'] = calculate_frequency(df['exome_ac'], df['exome_an'])
+    df['genome_af'] = calculate_frequency(df['genome_ac'], df['genome_an'])
     return df
 
 
