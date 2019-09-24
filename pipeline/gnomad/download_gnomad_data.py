@@ -161,7 +161,7 @@ def query_one_variant(one_variant_id, transcript, subset):
                 },
                 headers=headers)
             one_variant_data = json.loads(response.text)
-        except json.decoder.JSONDecodeError:
+        except ValueError:
             retry_count += 1
             one_variant_data = None
         else:

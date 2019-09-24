@@ -21,7 +21,7 @@ class GnomADTask(DefaultPipelineTask):
     def __init__(self, *args, **kwargs):
         super(GnomADTask, self).__init__(*args, **kwargs)
         self.gnomAD_file_dir = self.cfg.file_parent_dir + "/gnomAD"
-        self.gnomAD_download_file_name = "gnomAD.tsv"
+        self.gnomAD_download_file_name = "gnomAD.json"
 
         pipeline_utils.create_path_if_nonexistent(self.gnomAD_file_dir)
 
@@ -38,6 +38,25 @@ class DownloadGnomADData(GnomADTask):
                 "-l", artifacts_dir + "/download_gnomAD_data.log"]
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+        pipeline_utils.print_subprocess_output_and_error(sp)
+
+        pipeline_utils.check_file_for_contents(self.output().path)
+
+
+@requires(DownloadGnomADData)
+class NormalizeGnomADData(GnomADTask):
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, "gnomAD.normalized.tsv"))
+
+    def run(self):
+        os.chdir(gnomAD_method_dir)
+
+        args = ["python", "normalize.py", "-i", self.input().path,
+                "-o", self.output().path]
+
+        logger.info("Running parse_gnomad_data.py with the following args: %s", args)
+
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
 
         pipeline_utils.check_file_for_contents(self.output().path)
