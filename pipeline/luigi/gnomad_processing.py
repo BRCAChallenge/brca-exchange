@@ -54,7 +54,7 @@ class NormalizeGnomADData(GnomADTask):
         args = ["python", "normalize.py", "-i", self.input().path,
                 "-o", self.output().path]
 
-        logger.info("Running parse_gnomad_data.py with the following args: %s", args)
+        logger.info("Running normalize.py with the following args: %s", args)
 
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -62,7 +62,7 @@ class NormalizeGnomADData(GnomADTask):
         pipeline_utils.check_file_for_contents(self.output().path)
 
 
-@requires(DownloadGnomADData)
+@requires(NormalizeGnomADData)
 class ParseGnomADData(GnomADTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, "gnomAD.clean.tsv"))
