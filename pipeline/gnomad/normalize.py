@@ -2,7 +2,7 @@ import pandas
 import json
 import argparse
 import logging
-import pdb
+
 
 def parse_args():
         parser = argparse.ArgumentParser(description='Download gnomad data and convert to .tsv format.')
@@ -69,7 +69,6 @@ def flatten_consequences_for_selected_transcript(variants):
                 variant[f] = variant['consequencesForSelectedTranscript'][f]
             del variant['consequencesForSelectedTranscript']
         except:
-            pdb.set_trace()
             pass
         del variant['sortedTranscriptConsequences']
     return variants      
