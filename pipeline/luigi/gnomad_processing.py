@@ -82,7 +82,7 @@ class GnomADTask(DefaultPipelineTask):
 
 
 # Until issues are resolved with gnomAD API, use static concattenated gnomAD data.
-class DownloadStaticGnomADData(DefaultPipelineTask):
+class DownloadStaticGnomADData(GnomADTask):
     def output(self):
         gnomAD_file_dir = self.cfg.file_parent_dir + '/gnomAD'
         return luigi.LocalTarget(
