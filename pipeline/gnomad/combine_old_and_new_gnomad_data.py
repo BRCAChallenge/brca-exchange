@@ -2,7 +2,7 @@ import pandas as pd
 import json
 import argparse
 import logging
-import pdb
+
 
 def parse_args():
         parser = argparse.ArgumentParser(description='Download gnomad data and convert to .tsv format.')
