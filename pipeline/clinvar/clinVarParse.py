@@ -3,12 +3,11 @@
 clinVarParse: parse the ClinVar XML file and output the data of interest
 """
 import argparse
-import clinvar
-import codecs
-import re
-import sys
-import xml.etree.ElementTree as ET
 import logging
+import xml.etree.ElementTree as ET
+
+import clinvar
+
 
 def printHeader():
     print("\t".join(("HGVS", "Submitter", "ClinicalSignificance",
@@ -29,7 +28,6 @@ def processSubmission(submissionSet, assembly):
         return None
 
     for oa in submissionSet.otherAssertions.values():
-        submitter = oa.submitter
         variant = ra.variant
         if oa.origin == "germline":
             hgvs = ra.hgvs_cdna
@@ -37,10 +35,7 @@ def processSubmission(submissionSet, assembly):
             proteinChange = None
             if variant.attribute.has_key("HGVS, protein, RefSeq"):
                 proteinChange = variant.attribute["HGVS, protein, RefSeq"]
-            chrom = None
-            start = None
-            referenceAllele = None
-            alternateAllele = None
+
             if assembly in variant.coordinates:
                 genomicData = variant.coordinates[assembly]
                 chrom = genomicData.chrom
@@ -53,7 +48,8 @@ def processSubmission(submissionSet, assembly):
                 synonyms = MULTI_VALUE_SEP.join(ra.synonyms + oa.synonyms)
 
                 # Omit the variants that don't have any genomic start coordinate indicated.
-                if start != None and start != "None" and start != "NA":
+                if start != None and start != "None" and start != "NA" and \
+                    _bases_only(referenceAllele) and _bases_only(alternateAllele):
                     print("\t".join((str(hgvs),
                                      oa.submitter.encode('utf-8'),
                                      str(oa.clinicalSignificance),
@@ -74,6 +70,11 @@ def processSubmission(submissionSet, assembly):
                                      str(ra.condition_value),
                                      ",".join(ra.condition_db_id) if isinstance(ra.condition_db_id, list) else str(ra.condition_db_id),
                                      str(synonyms))))
+
+
+def _bases_only(seq):
+    # only allow bases, a not other IUPAC codes such as N, B, S etc
+    return all(s in set(['-', 'A', 'C', 'T', 'G']) for s in seq)
 
 
 def main():
