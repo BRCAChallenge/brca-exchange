@@ -32,8 +32,8 @@ def processSubmission(submissionSet, assembly):
         submitter = oa.submitter
         variant = ra.variant
         if oa.origin == "germline":
-            hgvs = re.sub("\(" + "(BRCA[1|2])" + "\)",
-                          "", variant.name.split()[0])
+            hgvs = ra.hgvs_cdna
+
             proteinChange = None
             if variant.attribute.has_key("HGVS, protein, RefSeq"):
                 proteinChange = variant.attribute["HGVS, protein, RefSeq"]
