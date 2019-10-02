@@ -37,7 +37,7 @@ fi
 # Create DB dump from remote.
 ssh -l${USER} ${HOST} <<-ENDSSH
 	set -o errexit
-	. /var/www/backend/${ENVIRONMENT}/virtualenv/bin/activate
+	. /var/www/backend/${ENVIRONMENT}/virtualenv3/bin/activate
 	sudo -u postgres pg_dump -d ${REMOTEDBNAME} -F c -c -f /tmp/full_db.dump
 ENDSSH
 

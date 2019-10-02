@@ -3,9 +3,8 @@ import hashlib
 import json
 import os
 import random
-import md5
 import requests
-from urllib2 import HTTPError
+from urllib.error import HTTPError
 from django.core.mail import EmailMultiAlternatives
 from django.db import IntegrityError
 from django.db.models import Q
@@ -90,7 +89,7 @@ def update(request):
             image = request.FILES["image"]
             if image is not None:
                 save_picture(user[0].id, image)
-    except Exception, e:
+    except Exception as e:
         logging.error(repr(e))
         return JsonResponse({'success': False, 'error': str(e)})
 
@@ -108,7 +107,7 @@ def register(request):
         post_data = {'secret': settings.CAPTCHA_SECRET,
                      'response': captcha}
         response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=post_data)
-        content = json.loads(response.content)
+        content = json.loads(response.content.decode('utf-8'))
         response = {'success': content['success']}
     except HTTPError:
         logging.error(repr(HTTPError))
@@ -125,10 +124,9 @@ def register(request):
         created_user.save()
 
         # Create and save activation key
-        salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
-        activation_key = hashlib.sha1(salt + created_user.email).hexdigest()
-
-        created_user.activation_key = activation_key
+        salt = hashlib.sha1(str(random.random()).encode('utf-8')).hexdigest()[:5]
+        activation_key = hashlib.sha1((salt + created_user.email).encode('utf-8')).hexdigest()
+        created_user['activation_key'] = activation_key
         created_user.save()
 
         # Send activation email
@@ -200,8 +198,8 @@ def password_reset(request):
     user = user[0]
 
     # Create and save password reset token
-    salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
-    password_reset_token = hashlib.sha1(salt + user.email).hexdigest()
+    salt = hashlib.sha1(str(random.random()).encode('utf-8')).hexdigest()[:5]
+    password_reset_token = hashlib.sha1((salt + user.email).encode('utf-8')).hexdigest()
 
     user.password_reset_token = password_reset_token
     email_duration_days = settings.PASSWORD_RESET_LINK_DURATION
@@ -365,7 +363,7 @@ def mailinglist(request):
         post_data = {'secret': settings.CAPTCHA_SECRET,
                      'response': captcha}
         resp = requests.post('https://www.google.com/recaptcha/api/siteverify', data=post_data)
-        content = json.loads(resp.content)
+        content = json.loads(resp.content.decode('utf-8'))
         response = JsonResponse({'success': content['success']})
     except HTTPError:
         logging.error(repr(HTTPError))

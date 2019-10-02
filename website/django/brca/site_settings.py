@@ -1,5 +1,6 @@
 ALLOWED_HOSTS = (
     'localhost:8080',
+    'localhost'
 )
 
 # SECURITY WARNING: keep the secret key used in production secret!

@@ -33,7 +33,7 @@ class Command(BaseCommand):
                         try:
                             df['added'] = str(self.round_sigfigs(float(val), 3))
                         except ValueError:
-                            print val
+                            print(val)
             diffs.save()
         for Obj in [Variant, Report]:
             objs = Obj.objects.all()
@@ -49,4 +49,4 @@ class Command(BaseCommand):
 
         update_materialized_view()
 
-        print "Done!"
+        print("Done!")

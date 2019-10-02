@@ -7,7 +7,7 @@ import psycopg2
 from tqdm import tqdm
 
 from django.db import connection
-from StringIO import StringIO
+from io import StringIO
 
 from data.utilities import Benchmark
 
@@ -33,7 +33,7 @@ def add_diffs(diff_fp, release_id, reports_diff_fp):
     diff = json.load(diff_fp)
     reports_diff = json.load(reports_diff_fp)
 
-    print "Creating variant diffs..."
+    print("Creating variant diffs...")
     with Benchmark("variant diffs"):
         with connection.cursor() as cursor:
             cursor.execute("""create temporary table _var_diffs (key text, diff json)""")
@@ -51,7 +51,7 @@ def add_diffs(diff_fp, release_id, reports_diff_fp):
             -- on conflict DO NOTHING;
             """, [release_id])
 
-    print "Creating report diffs..."
+    print("Creating report diffs...")
     with Benchmark("creating report diffs"):
         with connection.cursor() as cursor:
             cursor.execute("""create temporary table _report_diffs (key text, diff json)""")
@@ -73,4 +73,4 @@ def add_diffs(diff_fp, release_id, reports_diff_fp):
 
 
 def _encode(s):
-    return unicode(s).encode('utf-8')
+    return str(s).encode('utf-8')

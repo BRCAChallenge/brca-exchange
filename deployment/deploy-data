@@ -37,7 +37,7 @@ function add_release_tar_to_db {
     echo "Adding release to database"
 
     # add data to DB
-    python ${MANAGE_SCRIPT} addrelease ${DATA} ${METADATA} ${REMOVED} ${DIFFJSON} ${REPORTS} ${REMOVEDREPORTS} ${REPORTSDIFF}
+    python3 ${MANAGE_SCRIPT} addrelease ${DATA} ${METADATA} ${REMOVED} ${DIFFJSON} ${REPORTS} ${REMOVEDREPORTS} ${REPORTSDIFF}
 }
 
 # Expects environment (local, beta, dev or production) as first argument.
@@ -89,7 +89,7 @@ if [ "${ENVIRONMENT}" == "beta" ] || [ "${ENVIRONMENT}" == "production" ] || [ "
 
         $(declare -f add_release_tar_to_db)
 
-        source /var/www/backend/${ENVIRONMENT}/virtualenv/bin/activate
+        source /var/www/backend/${ENVIRONMENT}/virtualenv3/bin/activate
         add_release_tar_to_db ${REMOTE_STAGING} ${REMOTE_TAR_TMP} /var/www/backend/${ENVIRONMENT}/django/manage.py
 
         echo "Installing tar in downloads section"

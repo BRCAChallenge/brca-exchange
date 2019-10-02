@@ -27,7 +27,7 @@ class Command(BaseCommand):
         existing_variant_papers.update(deleted=True)
 
         paper_objects = {}
-        for pmid, paper in papers.iteritems():
+        for pmid, paper in list(papers.items()):
             query = Paper.objects.filter(pmid=pmid)
             if query.count() > 0:
                 # we already have this paper in the database
@@ -42,7 +42,7 @@ class Command(BaseCommand):
                 p.save()
                 paper_objects[pmid] = p
 
-        for variant_genomic_coordinate, variant_instances in variants_found_in_papers.iteritems():
+        for variant_genomic_coordinate, variant_instances in list(variants_found_in_papers.items()):
             for variant in variant_instances:
                 pmid = variant['pmid']
                 points = variant['points']

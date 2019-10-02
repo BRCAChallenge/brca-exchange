@@ -94,13 +94,13 @@ def main():
     chr17 = open(args.config + "/brca1.txt", "r")
     brca1_genomic_seq = chr17.read()
     databases = get_databases(args.vcf, brca1_genomic_seq, brca2_genomic_seq)
-    for key in databases.keys():
+    for key in list(databases.keys()):
         print_variant_size(databases[key], key)
-        for key2 in databases.keys():
+        for key2 in list(databases.keys()):
             if key != key2:
                 get_overlap(key, key2, databases, brca1_genomic_seq, 
                             brca2_genomic_seq)
-        print ""
+        print("")
 
 def get_databases(path, brca1_genomic_seq, brca2_genomic_seq):
     db = {}
@@ -112,7 +112,7 @@ def get_databases(path, brca1_genomic_seq, brca2_genomic_seq):
     return db
 
 def print_variant_size(database, database_name):
-    print "unique variants in %s:%d" %(database_name, len(database))
+    print(("unique variants in %s:%d" %(database_name, len(database))))
 
 def get_overlap(name_db1, name_db2, database, brca1_genomic_seq, 
                 brca2_genomic_seq):
@@ -123,7 +123,7 @@ def get_overlap(name_db1, name_db2, database, brca1_genomic_seq,
         if check_variant_exist(variant, database[name_db2], brca1_genomic_seq,
                                brca2_genomic_seq) == True:
             num_overlap += 1
-    print "overlap between the %s and %s: %d" %(name_db1, name_db2, num_overlap)
+    print(("overlap between the %s and %s: %d" %(name_db1, name_db2, num_overlap)))
 
 
 def get_unique_variants(filename, brca1_genomic_seq, brca2_genomic_seq):
@@ -132,7 +132,7 @@ def get_unique_variants(filename, brca1_genomic_seq, brca2_genomic_seq):
     line_num = 0
     for line in varFile:
         line_num += 1
-        print line_num, filename
+        print((line_num, filename))
         this_variant = line.strip().split("\t")[:4]
         alt = this_variant[-1]
         if "," in alt:

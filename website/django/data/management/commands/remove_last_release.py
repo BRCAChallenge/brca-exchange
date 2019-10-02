@@ -47,25 +47,25 @@ class Command(BaseCommand):
         # Delete variants from latest release
         Variant.objects.filter(Data_Release_id=latest_release_id).delete()
 
-        print "Deleted variants from most recent release."
+        print("Deleted variants from most recent release.")
 
         Report.objects.filter(Data_Release_id=latest_release_id).delete()
 
-        print "Deleted reports from most recent release."
+        print("Deleted reports from most recent release.")
 
         # Delete latest data_release and update materialized view of variants
         with connection.cursor() as cursor:
             cursor.execute("DELETE FROM data_release WHERE id = %s", [latest_release_id])
             cursor.execute("REFRESH MATERIALIZED VIEW currentvariant")
 
-        print "Deleted most recent data_release and updated materialized view."
+        print("Deleted most recent data_release and updated materialized view.")
 
         self.update_autocomplete_words()
 
-        print "Updated autocomplete words."
+        print("Updated autocomplete words.")
 
         self.reset_sequence_ids()
 
-        print "Reset sequence ids in DB."
+        print("Reset sequence ids in DB.")
 
-        print "Done!"
+        print("Done!")
