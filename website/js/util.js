@@ -297,7 +297,6 @@ function getAminoAcidCode(hgvsProtein) {
     }
 }
 
-
 module.exports = {
     getAminoAcidCode,
     isEmptyField,
