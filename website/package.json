@@ -34,6 +34,7 @@
     "imports-loader": "^0.6.3",
     "jsverify": "^0.6.0-alpha.3",
     "loader-utils": "^0.2.11",
+    "mark.js": "^8.11.1",
     "markdown-it-loader": "^0.1.0",
     "mocha": "^6.0.2",
     "mocha-loader": "^2.0.1",
