@@ -127,6 +127,8 @@ def variantreps(request):
     })
     response['Access-Control-Allow-Origin'] = '*'
 
+    return response
+
 
 def sitemap(request):
     variants = CurrentVariant.objects.values_list('id')
