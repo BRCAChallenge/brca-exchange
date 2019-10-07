@@ -2,6 +2,7 @@
 ClinVarUtils: basic
 """
 
+import re
 
 def isCurrent(element):
     """Determine if the indicated clinvar set is current"""
@@ -185,6 +186,7 @@ class referenceAssertion:
                         self.condition_db_id.append(xref.attrib["DB"] + "_" + xref.attrib["ID"])
 
 
+
 class clinVarAssertion:
     """Class for representing one submission (i.e. one annotation of a
     submitted variant"""
@@ -249,8 +251,40 @@ class clinVarSet:
         if isCurrent(rcva):
             self.referenceAssertion = referenceAssertion(rcva, debug=debug)
         self.otherAssertions = dict()
+
         for item in element.findall("ClinVarAssertion"):
             if isCurrent(item):
                 cva = clinVarAssertion(item)
                 accession = cva.accession
                 self.otherAssertions[accession] = cva
+
+        if self.referenceAssertion.variant:
+            self.referenceAssertion.hgvs_cdna = self.extract_hgvs_cdna(self.referenceAssertion.variant.name, element)
+
+    def extract_hgvs_cdna(self, variant_name, clinvar_set_el):
+        """
+        Finds a HGVS CDNA representation of a variant within a ClinVarSet.
+        If possible, avoid repeat representations using the "[]" synatax, since
+        we are currently not able to handle it further downstream (https://github.com/biocommons/hgvs/issues/113)
+
+        :param variant_name: variant name from title
+        :param clinvar_set_el: clinvar set element
+        :return: HGVS CDNA representation as string
+        """
+        hgvs_cand = re.sub("\(" + "(BRCA[1|2])" + "\)",
+                      "", variant_name.split()[0])
+
+        # only take variants starting with NM_ and not containing []
+        hgvs_cdna_re = 'NM_.*:[^\[]*$'
+
+        if not re.match(hgvs_cdna_re, hgvs_cand):
+            # taking Attribute of 'HGVS', 'HGVS, coding' or 'HGVS, coding, RefSeq' in
+            # both ReferenceClinVarAssertion and ClinVarAssertion's
+            hgvs_candidates = [ev.text for ev in clinvar_set_el.findall('.//Measure/AttributeSet/Attribute')
+                               if ev.attrib['Type'].startswith('HGVS, coding') or ev.attrib['Type'] == 'HGVS']
+
+            filtered = [s for s in hgvs_candidates if re.match(hgvs_cdna_re, s)]
+            if filtered:
+                return filtered[0]
+
+        return hgvs_cand

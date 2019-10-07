@@ -69,7 +69,7 @@ EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "Posterior_probability": "posterior_p",
                   "IARC_class": "iarc_class",
                   "BIC_Nomenclature": "bic_dna_change",
-                  "Literature_source": "observational_reference",
+                  "Literature_source": "key_observational_reference",
                   "HGVS_cDNA": "dna_change",
                   "HGVS_protein": "protein_change",
                   "BX_ID": "BX_ID"}

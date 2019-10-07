@@ -1499,8 +1499,97 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
     float: none;
 }
 
+/**************************************************************/
+/**********     Help                      *********************/
+/**************************************************************/
+
+#main-grid.help-page {
+    margin-top: 0;
+}
+
 .help-page .list-group-item-heading {
     margin-bottom: 0;
+}
+
+.help-page h1 { margin: 1em 0 0.5em 0; }
+
+/* search box styles, for the search box itself and for matches */
+.help-page .header-sticky {
+    position: sticky;
+    top: 70px;
+    background-color: white;
+    z-index: 1000;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-bottom: solid 1px #ddd;
+}
+.help-page .help-search-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+.help-page .help-search-header h1 {
+    margin: 0;
+    font-size: 48px;
+}
+.help-page .help-search-header .form-group {
+    margin: 10px 0 0 0;
+}
+.help-page .search-set {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+.help-page .highlighted {
+    cursor: pointer;
+    background-color: yellow;
+}
+.help-page .highlighted.focused {
+    border: solid 1px #ff7547;
+    border-radius: 3px;
+    animation: blinkin 500ms forwards ease-in;
+}
+
+/* generic styles for spinning glyphs, used in the help search bars' progress indicator */
+.glyphicon-spin {
+    animation: spin 1000ms infinite linear;
+}
+@keyframes spin {
+    0%   { -webkit-transform: rotate(0deg);   transform: rotate(0deg);   }
+    100% { -webkit-transform: rotate(359deg); transform: rotate(359deg); }
+}
+@keyframes blinkin {
+    0%   { opacity: 0.2;   }
+    100% { opacity: 1; }
+}
+
+.help-page .panel-heading, .list-group-item-heading, .id-associated {
+    position: relative;
+}
+.help-page .id-helper-tip {
+    display: none;
+    color: #bbb;
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    margin-top: -1em;
+    z-index: 1000;
+
+    font-size: small;
+    border-radius: 5px;
+    background: #efefef;
+    padding: 4px 6px;
+    text-decoration: none;
+}
+.help-page .panel-heading:hover .id-helper-tip,
+.list-group-item-heading:hover .id-helper-tip,
+.id-associated:hover .id-helper-tip
+{
+    display: inherit;
+}
+.id-helper-tip:hover {
+    color: #aaa;
+    background: #ddd;
 }
 
 /**************************************************************/
