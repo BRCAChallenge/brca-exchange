@@ -747,6 +747,11 @@ def save_enigma_to_dict(path, output_dir, seq_provider, gene_regions_trees):
 
             if ref_correct(chrom, pos, ref, alt, seq_provider) and not is_outside_boundaries(chrom, pos, gene_regions_trees):
                 variants = add_variant_to_dict(variants, hgvs, items)
+            elif pos == 'None':
+                logging.warning("Position is none for Enigma report, throwing away: %s", line)
+                log_discarded_reports("ENIGMA", bx_id, hgvs, "None position")
+                n_wrong += 1
+                f_wrong.write(line)
             else:
                 logging.warning("Ref incorrect for Enigma report, throwing away: %s", line)
                 log_discarded_reports("ENIGMA", bx_id, hgvs, "Incorrect Reference. Is outside Boundaries {}".format(is_outside_boundaries(chrom, pos, gene_regions_trees)))
