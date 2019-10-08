@@ -6,7 +6,7 @@ import io
 from operator import __or__
 from django.core import serializers
 from django.db import connection
-from django.db.models import Q
+from django.db.models import Q, F
 from django.db.models import Value
 from django.db.models.functions import Concat
 from django.forms.models import model_to_dict
@@ -150,38 +150,31 @@ def sitemap(request):
 
 def variant_reports(request, variant_id):
     variant_id = int(variant_id)
-    query = Report.objects.filter(Variant_id=variant_id)
-    report_versions = []
-    for report in query:
-        key = None
-        if report.Source == "ClinVar":
-            key = report.SCV_ClinVar
-            if not key or key == '-':
-                # if no key is available, skip report history
-                report_query = [report]
-            else:
-                # extend the selection w/reports that have matching keys,
-                # but only up until the requested variants' release
-                report_query = Report.objects\
-                    .filter(Data_Release_id__lte=report.Data_Release.id, SCV_ClinVar=key)\
-                    .order_by('-Data_Release_id').select_related('Data_Release')
-            report_versions.extend(list(map(report_to_dict, report_query)))
-        elif report.Source == "LOVD":
-            key = report.Submission_ID_LOVD
-            if not key or key == '-':
-                # if no key is available, skip report history
-                report_query = [report]
-            else:
-                # extend the selection w/reports that have matching keys,
-                # but only up until the requested variants' release (i.e., same as for ClinVar)
-                report_query = Report.objects\
-                    .filter(Data_Release_id__lte=report.Data_Release.id, Submission_ID_LOVD=key)\
-                    .order_by('-Data_Release_id').select_related('Data_Release')
-            report_versions.extend(list(map(report_to_dict, report_query)))
 
-    response = JsonResponse({"data": report_versions})
+    # in the code below, rr stands for "root reports" and dr stands for "derived reports"
+    results = Report.objects.raw("""
+    with rr as (
+      select *
+      from report where "Variant_id"=%(var_id)s
+    ), dr as (
+      select dr.*
+      from report dr, rr
+      where dr.id != rr.id and (
+        (dr."Source" = 'ClinVar' and dr."SCV_ClinVar" is not null and dr."SCV_ClinVar" != '-' and dr."SCV_ClinVar"=rr."SCV_ClinVar") or
+        (dr."Source" = 'LOVD'  and dr."Submission_ID_LOVD" is not null and dr."Submission_ID_LOVD" != '-' and dr."Submission_ID_LOVD"=rr."Submission_ID_LOVD")
+      )
+    )
+    select * from rr
+    union all
+    select * from dr
+    order by "Data_Release_id" desc;
+    """, {'var_id': variant_id})
+
+    response = JsonResponse({"data": list(map(report_to_dict, results))})
     response['Access-Control-Allow-Origin'] = '*'
+
     return response
+
 
 def variant_papers(request):
     variant_id = int(request.GET.get('variant_id'))
