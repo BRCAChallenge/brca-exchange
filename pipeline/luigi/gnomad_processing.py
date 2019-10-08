@@ -84,18 +84,13 @@ class GnomADTask(DefaultPipelineTask):
 # Until issues are resolved with gnomAD API, use static concattenated gnomAD data.
 class DownloadStaticGnomADData(GnomADTask):
     def output(self):
-        gnomAD_file_dir = self.cfg.file_parent_dir + '/gnomAD'
         return luigi.LocalTarget(
-            gnomAD_file_dir + self.gnomAD_static_file)
+            os.path.join(self.gnomAD_file_dir, self.gnomAD_static_file))
 
     def run(self):
-        gnomAD_file_dir = pipeline_utils.create_path_if_nonexistent(
-            self.cfg.file_parent_dir + '/gnomAD')
-
-        os.chdir(gnomAD_file_dir)
-
+        os.chdir(self.gnomAD_file_dir)
         static_gnomAD_data_url = "https://brcaexchange.org/backend/downloads/gnomAD.concatted.clean.tsv"
-        pipeline_utils.download_file_and_display_progress(static_gnomAD_data_url)
+        pipeline_utils.download_file_and_display_progress(static_gnomAD_data_url, self.output().path)
 
 
 @requires(DownloadStaticGnomADData)
