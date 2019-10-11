@@ -120,6 +120,9 @@ def convert_to_hg37(vars, brca_resources_dir):
 def get_synonyms(x, hgvs_proc, syn_ac_dict):
     synonyms = []
 
+    if not x[GENE_SYMBOL_COL]:
+        return []
+
     for _, _, _, dst, alt_ac, method in hgvs_proc.hgvs_dp.get_tx_for_gene(x[GENE_SYMBOL_COL]):
         if x[GENE_SYMBOL_COL] not in syn_ac_dict:
             continue

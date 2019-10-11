@@ -104,7 +104,10 @@ def calc_one(variant):
         elif variant["Gene_Symbol"] == "BRCA2":
             varData = getVarData(variant, priors_set, variantData, None, brca2Transcript)
         else:
-            raise Exception("Unknown gene symbol %s encountered for variant %s" % (variant["Gene_Symbol"], variant["HGVS_cDNA"]))
+            varData = BLANK_DICT
+            varData['varLoc'] = '-'
+            varData['varType'] = '-'
+            print("Warning: Unknown gene symbol %s encountered for variant %s" % (variant["Gene_Symbol"], variant["HGVS_cDNA"]))
 
         click.echo("{}:{}".format(variant["HGVS_cDNA"], varData["varLoc"]), err=True)
         return addVarDataToRow(varData, variant)

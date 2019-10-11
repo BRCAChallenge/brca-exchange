@@ -197,6 +197,9 @@ def getTranscriptData(referenceSequence):
     elif referenceSequence == BRCA2_RefSeq:
         return brca2TranscriptData
 
+    print("Warning: No reference sequence available for " + str(referenceSequence))
+    return None
+
 
 def convertGenomicPosToTranscriptPos(genomicPos, chrom, genome, transcript):
     """
