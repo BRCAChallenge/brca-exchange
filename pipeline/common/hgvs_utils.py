@@ -44,7 +44,7 @@ class HgvsWrapper:
                     m[s['name']] = s['refseq_ac']
             self.contig_maps[a] = m
 
-    def to_cdna(self, hgvs_obj, assembly = GRCh38_Assem):
+    def to_cdna(self, hgvs_obj, assembly=GRCh38_Assem):
         am = self.hgvs_ams[assembly]
 
         try:
@@ -79,5 +79,4 @@ class HgvsWrapper:
             except (hgvs.exceptions.HGVSError, IndexError) as e:
                 logging.info(
                     "Issues with normalizing " + str(v) + ": " + str(e))
-        else:
-            None
+        return None

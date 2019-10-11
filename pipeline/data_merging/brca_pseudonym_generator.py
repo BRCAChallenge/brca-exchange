@@ -11,7 +11,6 @@ import hgvs.normalizer
 import hgvs.parser
 import hgvs.projector
 import hgvs.validator
-
 import pandas as pd
 from hgvs.exceptions import HGVSError
 
@@ -138,7 +137,6 @@ def get_synonyms(x, hgvs_proc, syn_ac_dict):
                                                   src_ac=vc.ac,
                                                   dst_ac=dst, dst_alt_aln_method=method)
 
-
                     vp = pj.project_variant_forward(vc)
                     synonyms.append(vp)
                     vp_norm = hgvs_proc.normalizing(vp)
@@ -147,7 +145,8 @@ def get_synonyms(x, hgvs_proc, syn_ac_dict):
                             logging.info("Found new synonym! " + str(vp_norm) + " " + str(vp) + " " + str(x[PYHGVS_GENOMIC_COORDINATE_38_COL]))
                         synonyms.append(vp_norm)
                 except HGVSError as e:
-                    logging.info("Exception in synonym handling " + str(vc) + " from " + str(vc.ac) + " to " + str(dst) + " using " + str(method) + " via " + str(alt_ac) + " : " + str(e) + " " + str(e.__class__))
+                    logging.info("Exception in synonym handling " + str(vc) + " from " + str(vc.ac) + " to " +
+                                 str(dst) + " using " + str(method) + " via " + str(alt_ac) + " : " + str(e) + " " + str(e.__class__.__name__))
 
     return list({str(s) for s in synonyms})
 
@@ -204,8 +203,7 @@ def main(input, output, pkl, log_path, config_file, resources):
     df[PYHGVS_HG37_END_COL] = df[PYHGVS_HG37_START_COL] + (df[HG38_END_COL] - df[HG38_START_COL])
 
     #### Protein
-    df[PYHGVS_PROTEIN_COL] = (df[TMP_CDNA_NORM_FIELD].
-                              apply(lambda HGVS_CDNA_FIELD: str(hgvs_proc.to_protein(HGVS_CDNA_FIELD))))
+    df[PYHGVS_PROTEIN_COL] = df[TMP_CDNA_NORM_FIELD].apply(lambda x: str(hgvs_proc.to_protein(x)))
 
     #### Synonyms
     df[NEW_SYNONYMS_FIELD] = df.apply(lambda s: get_synonyms(s, hgvs_proc, syn_ac_dict), axis=1)
