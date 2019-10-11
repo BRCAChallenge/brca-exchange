@@ -43,7 +43,7 @@ TMP_CDNA_UNORM_FIELD = 'tmp_HGVS_CDNA_FIELD_unorm'
 TMP_CDNA_NORM_FIELD = 'tmp_HGVS_CDNA_FIELD_norm'
 
 
-def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict):
+def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
     def cdna_from_cdna_field(x):
         if x[HGVS_CDNA_COL] and x[HGVS_CDNA_COL].startswith('c.') and x[REFERENCE_SEQUENCE_COL] == cdna_ac_dict[x[GENE_SYMBOL_COL]]:
             c = x[HGVS_CDNA_COL]
@@ -56,13 +56,20 @@ def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict):
 
     def compute_hgvs(x):
         v = VCFVariant(x[CHR_COL], x[POS_COL], x[REF_COL], x[ALT_COL])
-        return hgvs_proc.to_cdna(v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh38_Assem]))
+        v = v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh38_Assem])
+
+        if normalize:
+            vn = hgvs_proc.normalizing(v)
+            v = vn if vn else v
+
+        return hgvs_proc.to_cdna(v)
 
     def from_field_or_compute(row):
-        r = cdna_from_cdna_field(row)
-        if not r:
-            r = compute_hgvs(row)
-        return r
+        computed = compute_hgvs(row)
+
+        if not computed:
+            return cdna_from_cdna_field(row)
+        return computed
 
     var_objs = df[VAR_OBJ_FIELD]
 
@@ -121,7 +128,7 @@ def get_synonyms(x, hgvs_proc, syn_ac_dict):
         accessions = syn_ac_dict[x[GENE_SYMBOL_COL]]
 
         if dst in accessions:
-            for vc in [x[TMP_CDNA_UNORM_FIELD]]:
+            for vc in [x[TMP_CDNA_NORM_FIELD]]:
                 if not vc:
                     continue
 
@@ -176,9 +183,8 @@ def main(input, output, pkl, log_path, config_file, resources):
     df[VAR_OBJ_FIELD] = df.apply(lambda x: VCFVariant(x[CHR_COL], x[POS_COL], x[REF_COL], x[ALT_COL]), axis=1)
 
     #### CDNA conversions
-    df[TMP_CDNA_UNORM_FIELD] = _get_cdna(df, pkl, hgvs_proc, cdna_default_ac_dict)
-    df[TMP_CDNA_NORM_FIELD] = df[TMP_CDNA_UNORM_FIELD].apply(hgvs_proc.normalizing)
-    df[PYHGVS_CDNA_COL] = df[TMP_CDNA_UNORM_FIELD].apply(str)
+    df[TMP_CDNA_NORM_FIELD] = _get_cdna(df, pkl, hgvs_proc, cdna_default_ac_dict, normalize=True)
+    df[PYHGVS_CDNA_COL] = df[TMP_CDNA_NORM_FIELD].apply(str)
 
     available_cdna = df[PYHGVS_CDNA_COL].str.startswith("NM_")
     df.loc[available_cdna, REFERENCE_SEQUENCE_COL] = df.loc[available_cdna, PYHGVS_CDNA_COL].str.split(':').apply(lambda l: l[0])
@@ -211,7 +217,7 @@ def main(input, output, pkl, log_path, config_file, resources):
 
     #### Writing out
     # cleaning up temporary fields
-    df = df.drop(columns=[VAR_OBJ_FIELD, NEW_SYNONYMS_FIELD, TMP_CDNA_UNORM_FIELD, TMP_CDNA_NORM_FIELD])
+    df = df.drop(columns=[VAR_OBJ_FIELD, NEW_SYNONYMS_FIELD, TMP_CDNA_NORM_FIELD])
 
     df.to_csv(output, sep='\t', index=False)
 
