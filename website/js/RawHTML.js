@@ -21,7 +21,7 @@ const RawHTML = React.createClass({
 
         if (this.props.hardlinks) {
             // add tooltips to anything that has an id
-            const $idElems = $("*[id]", this.refs.me.getDOMNode());
+            const $idElems = $("*[id]", React.findDOMNode(this.refs.me));
             $idElems.each((idx, elem) => {
                 // TODO: ideally we'd replace this ad-hoc html element with the actual HardlinkHelper, although that
                 //  would be tricky/hacky since the contents of RawHTML aren't part of the react component tree...

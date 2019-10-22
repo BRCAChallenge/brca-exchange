@@ -15,11 +15,11 @@ const AlleleFrequencyField = React.createClass({
     mixins: [CollapsableMixin],
 
     getCollapsableDOMNode: function() {
-        return this.refs.panel.getDOMNode();
+        return React.findDOMNode(this.refs.panel);
     },
 
     getCollapsableDimensionValue: function() {
-        return this.refs.panel.getDOMNode().scrollHeight;
+        return React.findDOMNode(this.refs.panel).scrollHeight;
     },
 
     handleToggle: function(e, fieldName) {

@@ -103,11 +103,11 @@ var ChangePasswordForm = React.createClass({
     isValid: function () {
         var compulsoryFields = ['password', 'passwordConfirm'];
         var errors = {};
-        if (this.refs.password.getDOMNode().value !== this.refs.passwordConfirm.getDOMNode().value) {
+        if (React.findDOMNode(this.refs.password).value !== React.findDOMNode(this.refs.passwordConfirm).value) {
             errors.passwordConfirm = "The passwords don't match";
         }
         compulsoryFields.forEach(function (field) {
-            var value = this.refs[field].getDOMNode().value.trim();
+            var value = React.findDOMNode(this.refs[field]).value.trim();
             if (!value) {
                 errors[field] = 'This field is required';
             }
@@ -117,8 +117,8 @@ var ChangePasswordForm = React.createClass({
     },
     getFormData: function () {
         var data = {
-            password: this.refs.password.getDOMNode().value,
-			passwordConfirm: this.refs.passwordConfirm.getDOMNode().value
+            password: React.findDOMNode(this.refs.password).value,
+			passwordConfirm: React.findDOMNode(this.refs.passwordConfirm).value
         };
         return data;
     },

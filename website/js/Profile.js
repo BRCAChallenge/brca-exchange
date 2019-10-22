@@ -184,14 +184,14 @@ var EditProfileForm = React.createClass({
     },
     getFormErrors: function () {
         var errors = {};
-        if (this.refs.role.getDOMNode().value === "NONE") {
+        if (React.findDOMNode(this.refs.role).value === "NONE") {
             errors.role = <span>Please select a <strong>Roll</strong></span>;
         }
         if (this.state.captcha === "") {
             errors.captcha = <span>No <strong>CAPTCHA</strong> entered</span>;
         }
         this.getCompulsoryFields().forEach(function (field) {
-            var value = this.refs[field].getDOMNode().value.trim();
+            var value = React.findDOMNode(this.refs[field]).value.trim();
             if (!value) {
                 errors[field] = <span><strong>{ field.replace(/([A-Z])/g, ' $1').replace(/^./, function(str) { return str.toUpperCase(); }) }</strong> is required</span>;
             }
@@ -206,7 +206,7 @@ var EditProfileForm = React.createClass({
     },
     getCompulsoryFields: function () {
         var fields = [];
-        if (!this.refs || !this.refs.role || parseInt(this.refs.role.getDOMNode().value) !== Role.ROLE_DATA_PROVIDER) {
+        if (!this.refs || !this.refs.role || parseInt(React.findDOMNode(this.refs.role).value) !== Role.ROLE_DATA_PROVIDER) {
             fields.push('firstName', 'lastName');
         }
         if (this.state.otherRole) {
@@ -215,25 +215,25 @@ var EditProfileForm = React.createClass({
         return fields;
     },
     getFormData: function () {
-        var title = this.refs.titlemd.getDOMNode().checked && this.refs.titlemd.getDOMNode().value ||
-            this.refs.titlephd.getDOMNode().checked && this.refs.titlephd.getDOMNode().value ||
-            this.refs.titleother.getDOMNode().checked && this.refs.titlecustom.getDOMNode().value;
+        var title = React.findDOMNode(this.refs.titlemd).checked && React.findDOMNode(this.refs.titlemd).value ||
+            React.findDOMNode(this.refs.titlephd).checked && React.findDOMNode(this.refs.titlephd).value ||
+            React.findDOMNode(this.refs.titleother).checked && React.findDOMNode(this.refs.titlecustom).value;
 
         var data = {
             "image": this.state.file,
             "deleteImage": this.state.imageDelete,
-            "firstName": this.refs.firstName.getDOMNode().value,
-            "lastName": this.refs.lastName.getDOMNode().value,
+            "firstName": React.findDOMNode(this.refs.firstName).value,
+            "lastName": React.findDOMNode(this.refs.lastName).value,
             "title": title,
-            "role": this.refs.role.getDOMNode().value,
-            "role_other": this.state.otherRole ? this.refs.role_other.getDOMNode().value : Role.get(this.refs.role.getDOMNode().value)[2],
-            "institution": this.refs.institution.getDOMNode().value,
-            "city": this.refs.city.getDOMNode().value,
-            "state": this.refs.state.getDOMNode().value,
-            "country": this.refs.country.getDOMNode().value,
-            "phone_number": this.refs.phone_number.getDOMNode().value,
-            "hide_number": this.refs.hide_number.getDOMNode().checked,
-            "hide_email": this.refs.hide_email.getDOMNode().checked
+            "role": React.findDOMNode(this.refs.role).value,
+            "role_other": this.state.otherRole ? React.findDOMNode(this.refs.role_other).value : Role.get(React.findDOMNode(this.refs.role).value)[2],
+            "institution": React.findDOMNode(this.refs.institution).value,
+            "city": React.findDOMNode(this.refs.city).value,
+            "state": React.findDOMNode(this.refs.state).value,
+            "country": React.findDOMNode(this.refs.country).value,
+            "phone_number": React.findDOMNode(this.refs.phone_number).value,
+            "hide_number": React.findDOMNode(this.refs.hide_number).checked,
+            "hide_email": React.findDOMNode(this.refs.hide_email).checked
         };
         return data;
     },
@@ -262,7 +262,7 @@ var EditProfileForm = React.createClass({
     },
     render: function () {
         var onChange = function() {
-            var value = this.refs.role.getDOMNode().value;
+            var value = React.findDOMNode(this.refs.role).value;
             this.setState({otherRole: Role.other(value)});
         };
         return (
@@ -322,7 +322,7 @@ var EditProfileForm = React.createClass({
             </div>);
     },
     renderTextInput: function (id, label, defaultValue) {
-        var handleChange = () => {var oldData = this.state.data; oldData[id] = this.refs[id].getDOMNode().value; this.setState({data: oldData});};
+        var handleChange = () => {var oldData = this.state.data; oldData[id] = React.findDOMNode(this.refs[id]).value; this.setState({data: oldData});};
         return this.renderField(id, label,
             <input type="text" className="form-control" id={id} ref={id} value={defaultValue} onChange={handleChange}/>
         );
@@ -365,7 +365,7 @@ var EditProfileForm = React.createClass({
         );
     },
     renderRadioInlines: function (id, label, kwargs) {
-        var handleTextChange = () => {var oldData = this.state.data; oldData[id] = this.refs.titlecustom.getDOMNode().value; this.setState({data: oldData});};
+        var handleTextChange = () => {var oldData = this.state.data; oldData[id] = React.findDOMNode(this.refs.titlecustom).value; this.setState({data: oldData});};
         var otherValue = kwargs.defaultCheckedValue;
 		// XXX Not sure why eslint flags this bind, because 'this' is used in the handlers within the
 		// body of the function.
@@ -400,7 +400,7 @@ var EditProfileForm = React.createClass({
         return this.renderField(id, "", checkbox);
     },
     renderMailingList: function (id, label, defaultValue) {
-        var handleChange = () => {this.setState({mailingList: !!this.refs[id].getDOMNode().checked});};
+        var handleChange = () => {this.setState({mailingList: !!React.findDOMNode(this.refs[id]).checked});};
         var checkbox = (<label className="radio-inline">
             <input type='checkbox' ref={id} checked={defaultValue} onChange={handleChange} />
             &nbsp;{label}

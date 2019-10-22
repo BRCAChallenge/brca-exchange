@@ -89,7 +89,7 @@ var ResetPasswordForm = React.createClass({
         var compulsoryFields = ['email'];
         var errors = {};
         compulsoryFields.forEach(function (field) {
-            var value = this.refs[field].getDOMNode().value.trim();
+            var value = React.findDOMNode(this.refs[field]).value.trim();
             if (!value) {
                 errors[field] = 'This field is required';
             }
@@ -99,7 +99,7 @@ var ResetPasswordForm = React.createClass({
     },
     getFormData: function () {
         var data = {
-            email: this.refs.email.getDOMNode().value
+            email: React.findDOMNode(this.refs.email).value
         };
         return data;
     },
@@ -233,7 +233,7 @@ var SigninForm = React.createClass({
         var compulsoryFields = ['email', 'password'];
         var errors = {};
         compulsoryFields.forEach(function (field) {
-            var value = this.refs[field].getDOMNode().value.trim();
+            var value = React.findDOMNode(this.refs[field]).value.trim();
             if (!value) {
                 errors[field] = 'This field is required';
             }
@@ -243,8 +243,8 @@ var SigninForm = React.createClass({
     },
     getFormData: function () {
         var data = {
-            email: this.refs.email.getDOMNode().value
-            , password: this.refs.password.getDOMNode().value
+            email: React.findDOMNode(this.refs.email).value
+            , password: React.findDOMNode(this.refs.password).value
         };
         return data;
     },

@@ -207,20 +207,20 @@ var SignupForm = React.createClass({
     },
     getFormErrors: function () {
         var errors = {};
-        if (this.refs.role.getDOMNode().value === "NONE") {
+        if (React.findDOMNode(this.refs.role).value === "NONE") {
             errors.role = <span>Please select a <strong>Roll</strong></span>;
         }
-        if (this.refs.email.getDOMNode().value !== this.refs.email_confirm.getDOMNode().value) {
+        if (React.findDOMNode(this.refs.email).value !== React.findDOMNode(this.refs.email_confirm).value) {
             errors["email_confirm"] = <span>The <strong>emails</strong> don't match</span>;
         }
-        if (this.refs.password.getDOMNode().value !== this.refs.password_confirm.getDOMNode().value) {
+        if (React.findDOMNode(this.refs.password).value !== React.findDOMNode(this.refs.password_confirm).value) {
             errors["password_confirm"] = <span>The <strong>passwords</strong> don't match</span>;
         }
         if (this.state.captcha === "") {
             errors.captcha = <span>No <strong>CAPTCHA</strong> entered</span>;
         }
         this.getCompulsoryFields().forEach(function (field) {
-            var value = this.refs[field].getDOMNode().value.trim();
+            var value = React.findDOMNode(this.refs[field]).value.trim();
             if (!value) {
                 errors[field] = <span><strong>{ field.replace(/([A-Z])/g, ' $1').replace(/^./, function(str) { return str.toUpperCase(); }) }</strong> is required</span>;
             }
@@ -235,7 +235,7 @@ var SignupForm = React.createClass({
     },
     getCompulsoryFields: function () {
         var fields = ['email', 'password', 'role'];
-        if (!this.refs || !this.refs.role || parseInt(this.refs.role.getDOMNode().value) !== Role.ROLE_DATA_PROVIDER) {
+        if (!this.refs || !this.refs.role || parseInt(React.findDOMNode(this.refs.role).value) !== Role.ROLE_DATA_PROVIDER) {
             fields.push('firstName', 'lastName');
         }
         if (this.state.otherRole) {
@@ -244,28 +244,28 @@ var SignupForm = React.createClass({
         return fields;
     },
     getFormData: function () {
-        var title = this.refs.titlemd.getDOMNode().checked && this.refs.titlemd.getDOMNode().value ||
-            this.refs.titlephd.getDOMNode().checked && this.refs.titlephd.getDOMNode().value ||
-            this.refs.titleother.getDOMNode().checked && this.refs.titlecustom.getDOMNode().value;
+        var title = React.findDOMNode(this.refs.titlemd).checked && React.findDOMNode(this.refs.titlemd).value ||
+            React.findDOMNode(this.refs.titlephd).checked && React.findDOMNode(this.refs.titlephd).value ||
+            React.findDOMNode(this.refs.titleother).checked && React.findDOMNode(this.refs.titlecustom).value;
 
         var data = {
             "image": this.state.file,
-            "email": this.refs.email.getDOMNode().value,
-            "email_confirm": this.refs.email_confirm.getDOMNode().value,
-            "password": this.refs.password.getDOMNode().value,
-            "password_confirm": this.refs.password_confirm.getDOMNode().value,
-            "firstName": this.refs.firstName.getDOMNode().value,
-            "lastName": this.refs.lastName.getDOMNode().value,
+            "email": React.findDOMNode(this.refs.email).value,
+            "email_confirm": React.findDOMNode(this.refs.email_confirm).value,
+            "password": React.findDOMNode(this.refs.password).value,
+            "password_confirm": React.findDOMNode(this.refs.password_confirm).value,
+            "firstName": React.findDOMNode(this.refs.firstName).value,
+            "lastName": React.findDOMNode(this.refs.lastName).value,
             "title": title,
-            "role": this.refs.role.getDOMNode().value,
-            "role_other": this.state.otherRole ? this.refs.role_other.getDOMNode().value : Role.get(this.refs.role.getDOMNode().value)[2],
-            "institution": this.refs.institution.getDOMNode().value,
-            "city": this.refs.city.getDOMNode().value,
-            "state": this.refs.state.getDOMNode().value,
-            "country": this.refs.country.getDOMNode().value,
-            "phone_number": this.refs.phone_number.getDOMNode().value,
-            "hide_number": this.refs.hide_number.getDOMNode().checked,
-            "hide_email": this.refs.hide_email.getDOMNode().checked,
+            "role": React.findDOMNode(this.refs.role).value,
+            "role_other": this.state.otherRole ? React.findDOMNode(this.refs.role_other).value : Role.get(React.findDOMNode(this.refs.role).value)[2],
+            "institution": React.findDOMNode(this.refs.institution).value,
+            "city": React.findDOMNode(this.refs.city).value,
+            "state": React.findDOMNode(this.refs.state).value,
+            "country": React.findDOMNode(this.refs.country).value,
+            "phone_number": React.findDOMNode(this.refs.phone_number).value,
+            "hide_number": React.findDOMNode(this.refs.hide_number).checked,
+            "hide_email": React.findDOMNode(this.refs.hide_email).checked,
             "captcha": this.state.captcha
         };
         return data;
@@ -294,7 +294,7 @@ var SignupForm = React.createClass({
     },
     render: function () {
         var onChange = function() {
-            var value = this.refs.role.getDOMNode().value;
+            var value = React.findDOMNode(this.refs.role).value;
             this.setState({otherRole: Role.other(value)});
         };
         return (
