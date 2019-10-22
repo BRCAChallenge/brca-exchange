@@ -29,11 +29,6 @@ class HgvsWrapper:
 
         self.hgvs_ams = { a : (hgvs.assemblymapper.AssemblyMapper(self.hgvs_dp, assembly_name=a, normalize=False, prevalidation_level=None)) for a in assemblies }
 
-        self.hgvs_ams_normalizing = {a: (
-            hgvs.assemblymapper.AssemblyMapper(self.hgvs_dp, assembly_name=a,
-                                               normalize=True)) for a in
-                         assemblies}
-
         all_assemblies = bioutils.assemblies.get_assemblies()
 
         self.contig_maps = {}

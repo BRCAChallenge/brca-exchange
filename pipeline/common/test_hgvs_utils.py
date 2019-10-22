@@ -20,10 +20,10 @@ def hgvs_variant(wrapper):
 
 def test_to_cdna(wrapper, hgvs_variant):
     cdna = wrapper.to_cdna(hgvs_variant)
-    assert str(cdna) == 'NM 00005.3:c.22_23delAG'
+    assert str(cdna) == 'NM_000059.3:c.17_19delinsA' # normalized 'NM_000059.3:c.22_23del'
 
 
-def test_to_cdna(wrapper, hgvs_variant):
+def test_to_protein(wrapper, hgvs_variant):
     protein = wrapper.to_protein(wrapper.to_cdna(hgvs_variant))
     assert str(protein) == 'NP_000050.2:p.(Arg8AlafsTer5)'
 
