@@ -1,7 +1,7 @@
 # FROM ensemblorg/ensembl-vep:release_93
 FROM ensemblorg/ensembl-vep@sha256:abc7a41b218c4e051bf97ed5e42add0b3c9fcf84929da28f1f80a215f259a69e
 
-USER root
+RUN chmod -R o+rwx /tmp
 
 RUN apt-get update && apt-get install -y \
     git \
