@@ -3,6 +3,7 @@
 'use strict';
 
 var React = require('react');
+var ReactDOM = require('react-dom');
 var slugify = require('./slugify');
 var {Navigation} = require('react-router');
 var AutoSuggest = require('react-autosuggest');
@@ -48,7 +49,7 @@ var VariantSearch = React.createClass({
     mixins: [Navigation],
     onClick: function (ev) {
         ev.stopPropagation();
-        var value = React.findDOMNode(this.refs.input).value;
+        var value = ReactDOM.findDOMNode(this.refs.input).value;
         this.props.onSearch(value);
     },
     onClickSearchButton: function () {

@@ -3,6 +3,7 @@
 'use strict';
 
 import React from "react";
+import ReactDOM from 'react-dom';
 import classNames from 'classnames';
 import {TabbedArea, TabPane} from "react-bootstrap";
 
@@ -348,7 +349,7 @@ export default class SplicingLevelSubtile extends React.Component {
 
     changePane(key) {
         this.setState({ activePane: key });
-        this.props.onDimsChanged(React.findDOMNode(this.collapser));
+        this.props.onDimsChanged(ReactDOM.findDOMNode(this.collapser));
     }
 
     tabTitle(label, field, key) {

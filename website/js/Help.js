@@ -9,6 +9,7 @@ import SearchController, {EXTRA_SEARCH_PADDING} from "./components/help/SearchCo
 import HardlinkHelper, {idHelpClicked} from "./components/help/HardlinkHelper";
 // import debounce from 'lodash/debounce';
 const React = require('react');
+const ReactDOM = require('react-dom');
 const RawHTML = require('./RawHTML');
 const {Grid, Col, Row, Panel, ListGroup, ListGroupItem, Glyphicon, CollapsableMixin, BootstrapMixin} = require('react-bootstrap');
 const {State} = require('react-router');
@@ -32,7 +33,7 @@ const CollapsableListItem = React.createClass({
     },
 
     getCollapsableDimensionValue() {
-        return React.findDOMNode(this.refs.content).scrollHeight;
+        return ReactDOM.findDOMNode(this.refs.content).scrollHeight;
     },
 
     getCollapsableDOMNode() {
@@ -40,7 +41,7 @@ const CollapsableListItem = React.createClass({
             return null;
         }
 
-        return React.findDOMNode(this.refs.content);
+        return ReactDOM.findDOMNode(this.refs.content);
     },
 
     render: function() {

@@ -3,6 +3,7 @@
 'use strict';
 
 import React from "react";
+import ReactDOM from 'react-dom';
 import {CollapsableMixin} from "react-bootstrap";
 import classNames from 'classnames';
 
@@ -10,11 +11,11 @@ const CollapsibleSection = React.createClass({
     mixins: [CollapsableMixin],
 
     getCollapsableDOMNode: function() {
-        return React.findDOMNode(this.refs.panel);
+        return ReactDOM.findDOMNode(this.refs.panel);
     },
 
     getCollapsableDimensionValue: function() {
-        return React.findDOMNode(this.refs.panel).scrollHeight;
+        return ReactDOM.findDOMNode(this.refs.panel).scrollHeight;
     },
 
     handleToggle: function(e, fieldName) {

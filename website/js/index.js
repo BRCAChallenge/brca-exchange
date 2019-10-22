@@ -17,6 +17,7 @@ require('es5-shim/es5-sham');
 
 require('./favicons');
 var React = require('react');
+var ReactDOM = require('react-dom');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 var DisclaimerModal = require('./DisclaimerModal');
 var RawHTML = require('./RawHTML');
@@ -1435,5 +1436,5 @@ var routes = (
 var main = document.getElementById('main');
 
 run(routes, HistoryLocation, (Root) => {
-  React.render(<Root/>, main);
+  ReactDOM.render(<Root/>, main);
 });

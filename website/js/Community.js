@@ -1,6 +1,7 @@
 'use strict';
 
 var React = require('react');
+var ReactDOMServer = require('react-dom/server');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 var {Grid, Col, Row, Button, Table} = require('react-bootstrap');
 var backend = require('backend');
@@ -224,7 +225,7 @@ var CommunityMap = React.createClass({
                 </div>
             );
             roleMarkers = _.values(_.groupBy(roleMarkers, (item, index) => index % 4)).map(group => <div className="map-legend-row">{group}</div>);
-            legendControl.innerHTML = React.renderToStaticMarkup(
+            legendControl.innerHTML = ReactDOMServer.renderToStaticMarkup(
                 <div>
                     <img src={require("./img/map/1.png")} className="map-legend-icon" />
                     <div className="map-legend-slide">
@@ -289,7 +290,7 @@ var CommunityMap = React.createClass({
                             });
                             marker.userID = id;
                             markers.push(marker);
-                            var info = new google.maps.InfoWindow({content: React.renderToStaticMarkup(userInfo) });
+                            var info = new google.maps.InfoWindow({content: ReactDOMServer.renderToStaticMarkup(userInfo) });
                             marker.addListener('click', () => {
                                 if (infowindow) {
                                     infowindow.close();

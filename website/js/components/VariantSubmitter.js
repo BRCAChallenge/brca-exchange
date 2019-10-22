@@ -3,6 +3,7 @@
 'use strict';
 
 import React from "react";
+import ReactDOM from 'react-dom';
 import {CollapsableMixin, Table} from "react-bootstrap";
 import classNames from 'classnames';
 import util from '../util';
@@ -55,11 +56,11 @@ const VariantSubmitter = React.createClass({
     mixins: [CollapsableMixin],
 
     getCollapsableDOMNode: function() {
-        return React.findDOMNode(this.refs.panel);
+        return ReactDOM.findDOMNode(this.refs.panel);
     },
 
     getCollapsableDimensionValue: function() {
-        return React.findDOMNode(this.refs.panel).scrollHeight;
+        return ReactDOM.findDOMNode(this.refs.panel).scrollHeight;
     },
 
     onHandleToggle: function(e) {

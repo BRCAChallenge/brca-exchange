@@ -1,6 +1,7 @@
 'use strict';
 
 var React = require('react');
+var ReactDOM = require('react-dom');
 var _ = require('lodash');
 
 import {CollapsableMixin} from 'react-bootstrap';
@@ -555,11 +556,11 @@ const SettingsPanel = React.createClass({
     mixins: [CollapsableMixin],
 
     getCollapsableDOMNode: function() {
-        return React.findDOMNode(this.refs.panel);
+        return ReactDOM.findDOMNode(this.refs.panel);
     },
 
     getCollapsableDimensionValue: function() {
-        return React.findDOMNode(this.refs.panel).scrollHeight;
+        return ReactDOM.findDOMNode(this.refs.panel).scrollHeight;
     },
 
     onHandleToggle: function (e) {
