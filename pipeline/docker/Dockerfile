@@ -1,6 +1,6 @@
 FROM ubuntu:16.04
 
-RUN chmod -R o+rwx /tmp
+RUN chmod 1777 /tmp
 
 RUN apt-get update && apt-get install -y \
     curl \
