@@ -23,6 +23,7 @@ files[brca2_hg38.txt]=e3d40430167100bb3252a5f0e3655f56e244e413
 files[hg18.fa.gz]=177dcd8262eed25f565cd2cd10f87fe63a7e54cb
 files[hg19.fa.gz]=c1a06a3122bb9b3747ceeefb902aecd3ea9b9008
 files[hg19ToHg38.over.chain.gz]=4769aaa7a5a7837c3947604207da346b1dd19a8f
+files[hg38ToHg19.over.chain.gz]=48d40f5aa131f22ff41fad441a085d6c464ef56d
 files[hg38.fa.gz]=d329507d63d32405664053785b2bfdc02b3e6b28
 files[refseq_annotation.hg18.gp]=21911f9cd02f00b82eeb6068b7ab737c4d89f896
 files[refseq_annotation.hg19.gp]=e12092220926fe112da26ffdc8188b76aef83231
