@@ -27,7 +27,7 @@ BRCA_GIT_REPO := {{ BRCA_GIT_REPO|default("https://github.com/BRCAChallenge/brca
 PIPELINE_IMAGE := {{ PIPELINE_IMAGE | default("brcachallenge/brca-exchange-pipeline:" + RELEASE_TAG) }}
 RESOURCES_DIR := {{ RESOURCES_DIR|default(WORK_DIR + "/resources") }}
 
-{% set PRIORS_IMAGE_DEFAULT_TAG = "0.0.7" %}
+{% set PRIORS_IMAGE_DEFAULT_TAG = "0.0.6" %}
 
 {% set PRIORS_IMAGE_TAG = PRIORS_IMAGE_TAG|default(PRIORS_IMAGE_DEFAULT_TAG) %}
 PRIORS_IMAGE := {{ PRIORS_IMAGE | default("brcachallenge/splicing-pipeline:" + PRIORS_IMAGE_TAG) }}
@@ -35,11 +35,11 @@ PRIORS_REFERENCES := {{ PRIORS_REFERENCES|default(WORK_DIR + "/references") }}
 
 ## UTA configurations
 
-{% set UTA_RELEASE_DATE = UTA_RELEASE_DATE|default("20170629") %}
+{% set UTA_RELEASE_DATE = UTA_RELEASE_DATE|default("20171026") %}
 UTA_RELEASE_DATE := {{ UTA_RELEASE_DATE }}
 UTA_DOCKER_IMAGE := {{ UTA_DOCKER_IMAGE | default("biocommons/uta:uta_" + UTA_RELEASE_DATE) }}
 UTA_CONTAINER := {{ UTA_CONTAINER | default("uta_" + UTA_RELEASE_DATE) }}
-UTA_PORT := {{ UTA_PORT | default("50827") }}
+UTA_PORT := {{ UTA_PORT | default("50828") }}
 
 ## varia
 

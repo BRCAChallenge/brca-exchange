@@ -3,19 +3,14 @@ import os
 from shutil import copy
 
 import luigi
-import pandas as pd
 
 import pipeline_utils
+from common import config
 
 DEFAULT_BRCA_RESOURCES_DIR = (os.path.abspath('../brca/brca-resources'))
 DEFAULT_OUTPUT_DIR = (
     os.path.abspath('../brca/pipeline-data/data/pipeline_input'))
 DEFAULT_FILE_PARENT_DIR = (os.path.abspath('../brca/pipeline-data/data'))
-
-
-def load_config(path):
-    df = pd.read_csv(path, sep=',', header=0)
-    return df.set_index('symbol', drop=False)
 
 
 class PipelineParams(luigi.Config):
@@ -55,7 +50,7 @@ class PipelineParams(luigi.Config):
 
     @property
     def gene_metadata(self):
-        return load_config(str(self.gene_config_path))
+        return config.load_config(str(self.gene_config_path))
 
     __instance = None
 
