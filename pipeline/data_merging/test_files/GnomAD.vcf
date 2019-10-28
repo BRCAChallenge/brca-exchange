@@ -4,8 +4,85 @@
 ##liftOverProgram=CrossMap(https://sourceforge.net/projects/crossmap/)
 ##liftOverFile=/files/resources/hg19ToHg38.over.chain.gz
 ##new_reference_genome=/files/resources/hg38.fa
-##liftOverTime=July05,2019
-##INFO=<ID=source,Number=.,Type=String,Description="source">
+##liftOverTime=October25,2019
+##INFO=<ID=genome_FIN_ac,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in genomes of Finnish Populations, per gnomAD">
+##INFO=<ID=exome_NFE_af,Number=.,Type=String,Description="Allele Frequency in exomes of Non-Finnish European Populations">
+##INFO=<ID=genome_FIN_af,Number=.,Type=String,Description="Allele Frequency in genomes of Finnish Populations">
+##INFO=<ID=genome_EAS_an,Number=.,Type=String,Description="Number of total chromosomes studied (for this variant) in genomes of East Asian Populations">
+##INFO=<ID=genome_ASJ_ac_hom,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in genomes of homozygous Ashkenazi Jewish Populations, per gnomAD">
+##INFO=<ID=exome_AMR_ac,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in exomes of Latino Populations, per gnomAD">
+##INFO=<ID=exome_NFE_an,Number=.,Type=String,Description="Number of total chromosomes studied (for this variant) in exomes of Non-Finnish European Populations">
+##INFO=<ID=genome_FIN_an,Number=.,Type=String,Description="Number of total chromosomes studied (for this variant) in genomes of Finnish Populations">
+##INFO=<ID=exome_AMR_ac_hom,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in exomes of homozygous Latino Populations, per gnomAD">
+##INFO=<ID=genome_FIN_ac_hom,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in genomes of homozygous Finnish Populations, per gnomAD">
+##INFO=<ID=genome_AMR_af,Number=.,Type=String,Description="Allele Frequency in genomes of Latino Populations">
+##INFO=<ID=genome_ASJ_af,Number=.,Type=String,Description="Allele Frequency in genomes of Ashkenazi Jewish Populations">
+##INFO=<ID=pos_hg19,Number=.,Type=String,Description="Position according to hg19">
+##INFO=<ID=genome_ASJ_ac,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in genomes of Ashkenazi Jewish Populations, per gnomAD">
+##INFO=<ID=genome_AMR_an,Number=.,Type=String,Description="Number of total chromosomes studied (for this variant) in genomes of Latino Populations">
+##INFO=<ID=alt,Number=.,Type=String,Description="Alternate base(s)">
+##INFO=<ID=genome_EAS_ac,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in genomes of East Asian Populations, per gnomAD">
+##INFO=<ID=genome_EAS_af,Number=.,Type=String,Description="Allele Frequency in genomes of East Asian Populations">
+##INFO=<ID=genome_SAS_an,Number=.,Type=String,Description="Number of total chromosomes studied (for this variant) in genomes of South Asian Populations">
+##INFO=<ID=exome_OTH_ac,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in exomes of Other Populations, per gnomAD">
+##INFO=<ID=genome_ASJ_an,Number=.,Type=String,Description="Number of total chromosomes studied (for this variant) in genomes of Ashkenazi Jewish Populations">
+##INFO=<ID=exome_OTH_af,Number=.,Type=String,Description="Allele Frequency in exomes of Other Populations">
+##INFO=<ID=exome_an,Number=.,Type=String,Description="Total number of total chromosomes studied (for this variant) in exomes">
+##INFO=<ID=genome_SAS_af,Number=.,Type=String,Description="Allele Frequency in genomes of South Asian Populations">
+##INFO=<ID=exome_ac,Number=.,Type=String,Description="Total count of observed alternate alleles (variant) in exomes">
+##INFO=<ID=exome_OTH_an,Number=.,Type=String,Description="Number of total chromosomes studied (for this variant) in exomes of Other Populations">
+##INFO=<ID=genome_SAS_ac,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in genomes of South Asian Populations, per gnomAD">
+##INFO=<ID=exome_af,Number=.,Type=String,Description="Overall allele frequency (for exomes) according to all studied populations, per gnomAD">
+##INFO=<ID=genome_OTH_ac,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in genomes of Other Populations, per gnomAD">
+##INFO=<ID=exome_EAS_af,Number=.,Type=String,Description="Allele Frequency in exomes of East Asian Populations">
+##INFO=<ID=genome_OTH_af,Number=.,Type=String,Description="Allele Frequency in genomes of Other Populations">
+##INFO=<ID=exome_NFE_ac,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in exomes of Non-Finnish European Populations, per gnomAD">
+##INFO=<ID=exome_EAS_ac,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in exomes of East Asian Populations, per gnomAD">
+##INFO=<ID=exome_FIN_an,Number=.,Type=String,Description="Number of total chromosomes studied (for this variant) in exomes of Finnish Populations">
+##INFO=<ID=exome_EAS_an,Number=.,Type=String,Description="Number of total chromosomes studied (for this variant) in exomes of East Asian Populations">
+##INFO=<ID=ref,Number=.,Type=String,Description="Reference base(s)">
+##INFO=<ID=genome_EAS_ac_hom,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in genomes of homozygous East Asian Populations, per gnomAD">
+##INFO=<ID=genome_OTH_ac_hom,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in genomes of homozygous Other Populations, per gnomAD">
+##INFO=<ID=genome_AFR_an,Number=.,Type=String,Description="Number of total chromosomes studied (for this variant) in genomes of African/African American Populations">
+##INFO=<ID=genome_AMR_ac_hom,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in genomes of homozygous Latino Populations, per gnomAD">
+##INFO=<ID=exome_ASJ_ac_hom,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in exomes of homozygous Ashkenazi Jewish Populations, per gnomAD">
+##INFO=<ID=exome_SAS_af,Number=.,Type=String,Description="Allele Frequency in exomes of South Asian Populations">
+##INFO=<ID=exome_AFR_ac_hom,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in exomes of homozygous African/African American Populations, per gnomAD">
+##INFO=<ID=genome_NFE_ac,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in genomes of Non-Finnish European Populations, per gnomAD">
+##INFO=<ID=genome_SAS_ac_hom,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in genomes of homozygous South Asian Populations, per gnomAD">
+##INFO=<ID=exome_SAS_ac,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in exomes of South Asian Populations, per gnomAD">
+##INFO=<ID=exome_SAS_an,Number=.,Type=String,Description="Number of total chromosomes studied (for this variant) in exomes of South Asian Populations">
+##INFO=<ID=exome_ASJ_af,Number=.,Type=String,Description="Allele Frequency in exomes of Ashkenazi Jewish Populations">
+##INFO=<ID=variantId,Number=.,Type=String,Description="Identifier provided by gnomAD">
+##INFO=<ID=exome_ASJ_ac,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in exomes of Ashkenazi Jewish Populations, per gnomAD">
+##INFO=<ID=exome_FIN_ac,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in exomes of Finnish Populations, per gnomAD">
+##INFO=<ID=genome_AFR_ac_hom,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in genomes of homozygous African/African American Populations, per gnomAD">
+##INFO=<ID=exome_ASJ_an,Number=.,Type=String,Description="Number of total chromosomes studied (for this variant) in exomes of Ashkenazi Jewish Populations">
+##INFO=<ID=chrom,Number=.,Type=String,Description="Chromosome">
+##INFO=<ID=genome_NFE_an,Number=.,Type=String,Description="Number of total chromosomes studied (for this variant) in genomes of Non-Finnish European Populations">
+##INFO=<ID=exome_AMR_an,Number=.,Type=String,Description="Number of total chromosomes studied (for this variant) in exomes of Latino Populations">
+##INFO=<ID=hgvsp,Number=.,Type=String,Description="The predicted protein-level change (if any) that would be introduced by the genomic variant">
+##INFO=<ID=genome_NFE_ac_hom,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in genomes of homozygous Non-Finnish European Populations, per gnomAD">
+##INFO=<ID=exome_EAS_ac_hom,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in exomes of homozygous East Asian Populations, per gnomAD">
+##INFO=<ID=genome_OTH_an,Number=.,Type=String,Description="Number of total chromosomes studied (for this variant) in genomes of Other Populations">
+##INFO=<ID=genome_AFR_ac,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in genomes of African/African American Populations, per gnomAD">
+##INFO=<ID=exome_SAS_ac_hom,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in exomes of homozygous South Asian Populations, per gnomAD">
+##INFO=<ID=genome_AFR_af,Number=.,Type=String,Description="Allele Frequency in genomes of African/African American Populations">
+##INFO=<ID=exome_OTH_ac_hom,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in exomes of homozygous Other Populations, per gnomAD">
+##INFO=<ID=hgvsc,Number=.,Type=String,Description="HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA">
+##INFO=<ID=exome_NFE_ac_hom,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in exomes of homozygous Non-Finnish European Populations, per gnomAD">
+##INFO=<ID=genome_NFE_af,Number=.,Type=String,Description="Allele Frequency in genomes of Non-Finnish European Populations">
+##INFO=<ID=genome_ac,Number=.,Type=String,Description="Total count of observed alternate alleles (variant) in genomes">
+##INFO=<ID=flags,Number=.,Type=String,Description="Flags provided by gnomAD to indicate an annotation or something unusual about the data">
+##INFO=<ID=exome_AFR_af,Number=.,Type=String,Description="Allele Frequency in exomes of African/African American Populations">
+##INFO=<ID=genome_af,Number=.,Type=String,Description="Overall allele frequency (for genomes) according to all studied populations, per gnomAD">
+##INFO=<ID=exome_AMR_af,Number=.,Type=String,Description="Allele Frequency in exomes of Latino Populations">
+##INFO=<ID=exome_FIN_ac_hom,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in exomes of homozygous Finnish Populations, per gnomAD">
+##INFO=<ID=genome_AMR_ac,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in genomes of Latino Populations, per gnomAD">
+##INFO=<ID=exome_AFR_an,Number=.,Type=String,Description="Number of total chromosomes studied (for this variant) in exomes of African/African American Populations">
+##INFO=<ID=exome_AFR_ac,Number=.,Type=String,Description="Count of observed alternate alleles (variant) in exomes of African/African American Populations, per gnomAD">
+##INFO=<ID=exome_FIN_af,Number=.,Type=String,Description="Allele Frequency in exomes of Finnish Populations">
+##INFO=<ID=genome_an,Number=.,Type=String,Description="Total number of total chromosomes studied (for this variant) in genomes">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
-13	32316388	NM_000059.3:c.-39-34C>T	C	T	.	.	BX_ID=1;alt=T;chrom=13;consequence=intron_variant;exome_AFR_ac=-;exome_AFR_ac_hemi=-;exome_AFR_ac_hom=-;exome_AFR_af=-;exome_AFR_an=-;exome_AMR_ac=-;exome_AMR_ac_hemi=-;exome_AMR_ac_hom=-;exome_AMR_af=-;exome_AMR_an=-;exome_ASJ_ac=-;exome_ASJ_ac_hemi=-;exome_ASJ_ac_hom=-;exome_ASJ_af=-;exome_ASJ_an=-;exome_EAS_ac=-;exome_EAS_ac_hemi=-;exome_EAS_ac_hom=-;exome_EAS_af=-;exome_EAS_an=-;exome_FIN_ac=-;exome_FIN_ac_hemi=-;exome_FIN_ac_hom=-;exome_FIN_af=-;exome_FIN_an=-;exome_NFE_ac=-;exome_NFE_ac_hemi=-;exome_NFE_ac_hom=-;exome_NFE_af=-;exome_NFE_an=-;exome_OTH_ac=-;exome_OTH_ac_hemi=-;exome_OTH_ac_hom=-;exome_OTH_af=-;exome_OTH_an=-;exome_SAS_ac=-;exome_SAS_ac_hemi=-;exome_SAS_ac_hom=-;exome_SAS_af=-;exome_SAS_an=-;exome_ac=-;exome_af=-;exome_an=-;flags=-;genome_AFR_ac=0.0;genome_AFR_ac_hemi=0.0;genome_AFR_ac_hom=0.0;genome_AFR_af=0.0;genome_AFR_an=8708.0;genome_AMR_ac=0.0;genome_AMR_ac_hemi=0.0;genome_AMR_ac_hom=0.0;genome_AMR_af=0.0;genome_AMR_an=848.0;genome_ASJ_ac=0.0;genome_ASJ_ac_hemi=0.0;genome_ASJ_ac_hom=0.0;genome_ASJ_af=0.0;genome_ASJ_an=290.0;genome_EAS_ac=1.0;genome_EAS_ac_hemi=0.0;genome_EAS_ac_hom=0.0;genome_EAS_af=0.000641025641025641;genome_EAS_an=1560.0;genome_FIN_ac=0.0;genome_FIN_ac_hemi=0.0;genome_FIN_ac_hom=0.0;genome_FIN_af=0.0;genome_FIN_an=3476.0;genome_NFE_ac=0.0;genome_NFE_ac_hemi=0.0;genome_NFE_ac_hom=0.0;genome_NFE_af=0.0;genome_NFE_an=15430.0;genome_OTH_ac=0.0;genome_OTH_ac_hemi=0.0;genome_OTH_ac_hom=0.0;genome_OTH_af=0.0;genome_OTH_an=1086.0;genome_SAS_ac=0.0;genome_SAS_ac_hemi=0.0;genome_SAS_ac_hom=0.0;genome_SAS_af=-;genome_SAS_an=0.0;genome_ac=1.0;genome_af=3.1849162367029746e-05;genome_an=31398.0;hgvsc=c.-39-34C>T;hgvsp=-;pos_hg19=32890525;ref=C;variantId=13-32890525-C-T
-13	32316411	NM_000059.3:c.-39-11C>T	C	T	.	.	BX_ID=2;alt=T;chrom=13;consequence=intron_variant;exome_AFR_ac=0.0;exome_AFR_ac_hemi=0.0;exome_AFR_ac_hom=0.0;exome_AFR_af=0.0;exome_AFR_an=14600.0;exome_AMR_ac=2.0;exome_AMR_ac_hemi=0.0;exome_AMR_ac_hom=0.0;exome_AMR_af=5.864758665180928e-05;exome_AMR_an=34102.0;exome_ASJ_ac=0.0;exome_ASJ_ac_hemi=0.0;exome_ASJ_ac_hom=0.0;exome_ASJ_af=0.0;exome_ASJ_an=9514.0;exome_EAS_ac=0.0;exome_EAS_ac_hemi=0.0;exome_EAS_ac_hom=0.0;exome_EAS_af=0.0;exome_EAS_an=17492.0;exome_FIN_ac=0.0;exome_FIN_ac_hemi=0.0;exome_FIN_ac_hom=0.0;exome_FIN_af=0.0;exome_FIN_an=21538.0;exome_NFE_ac=0.0;exome_NFE_ac_hemi=0.0;exome_NFE_ac_hom=0.0;exome_NFE_af=0.0;exome_NFE_an=100392.0;exome_OTH_ac=0.0;exome_OTH_ac_hemi=0.0;exome_OTH_ac_hom=0.0;exome_OTH_af=0.0;exome_OTH_an=5572.0;exome_SAS_ac=0.0;exome_SAS_ac_hemi=0.0;exome_SAS_ac_hom=0.0;exome_SAS_af=0.0;exome_SAS_an=29904.0;exome_ac=2.0;exome_af=8.57949329512599e-06;exome_an=233114.0;flags=-;genome_AFR_ac=-;genome_AFR_ac_hemi=-;genome_AFR_ac_hom=-;genome_AFR_af=-;genome_AFR_an=-;genome_AMR_ac=-;genome_AMR_ac_hemi=-;genome_AMR_ac_hom=-;genome_AMR_af=-;genome_AMR_an=-;genome_ASJ_ac=-;genome_ASJ_ac_hemi=-;genome_ASJ_ac_hom=-;genome_ASJ_af=-;genome_ASJ_an=-;genome_EAS_ac=-;genome_EAS_ac_hemi=-;genome_EAS_ac_hom=-;genome_EAS_af=-;genome_EAS_an=-;genome_FIN_ac=-;genome_FIN_ac_hemi=-;genome_FIN_ac_hom=-;genome_FIN_af=-;genome_FIN_an=-;genome_NFE_ac=-;genome_NFE_ac_hemi=-;genome_NFE_ac_hom=-;genome_NFE_af=-;genome_NFE_an=-;genome_OTH_ac=-;genome_OTH_ac_hemi=-;genome_OTH_ac_hom=-;genome_OTH_af=-;genome_OTH_an=-;genome_SAS_ac=-;genome_SAS_ac_hemi=-;genome_SAS_ac_hom=-;genome_SAS_af=-;genome_SAS_an=-;genome_ac=-;genome_af=-;genome_an=-;hgvsc=c.-39-11C>T;hgvsp=-;pos_hg19=32890548;ref=C;variantId=13-32890548-C-T
+13	32315486	NM_000059.3:c.-221C>A	C	A	.	.	genome_FIN_ac=0;exome_NFE_af=-;genome_FIN_af=0.0;genome_EAS_an=1560;genome_ASJ_ac_hom=0;exome_AMR_ac=-;exome_NFE_an=-;genome_FIN_an=3470;exome_AMR_ac_hom=-;genome_FIN_ac_hom=0;genome_AMR_af=0.0;genome_ASJ_af=0.0;pos_hg19=32889623;genome_ASJ_ac=0;genome_AMR_an=848;alt=A;genome_EAS_ac=0;genome_EAS_af=0.0;genome_SAS_an=0;exome_OTH_ac=-;genome_ASJ_an=288;exome_OTH_af=-;exome_an=-;genome_SAS_af=-;exome_ac=-;exome_OTH_an=-;genome_SAS_ac=0;exome_af=-;genome_OTH_ac=0;exome_EAS_af=-;genome_OTH_af=0.0;exome_NFE_ac=-;exome_EAS_ac=-;exome_FIN_an=-;exome_EAS_an=-;ref=C;genome_EAS_ac_hom=0;genome_OTH_ac_hom=0;genome_AFR_an=8714;genome_AMR_ac_hom=0;exome_ASJ_ac_hom=-;exome_SAS_af=-;exome_AFR_ac_hom=-;genome_NFE_ac=1;genome_SAS_ac_hom=0;exome_SAS_ac=-;exome_SAS_an=-;exome_ASJ_af=-;exome_ASJ_ac=-;exome_FIN_ac=-;genome_AFR_ac_hom=0;exome_ASJ_an=-;chrom=13;genome_NFE_an=15424;exome_AMR_an=-;hgvsp=-;genome_NFE_ac_hom=0;exome_EAS_ac_hom=-;genome_OTH_an=1088;genome_AFR_ac=0;exome_SAS_ac_hom=-;genome_AFR_af=0.0;exome_OTH_ac_hom=-;hgvsc=c.-221C>A;exome_NFE_ac_hom=-;genome_NFE_af=6.483e-05;genome_ac=1;flags=-;exome_AFR_af=-;genome_af=3.186e-05;exome_AMR_af=-;exome_FIN_ac_hom=-;genome_AMR_ac=0;exome_AFR_an=-;exome_AFR_ac=-;exome_FIN_af=-;genome_an=31392;BX_ID=1;exome_ac_hom=-;genome_ac_hom=0;hgvs=c.-221C>A;variant_id=13-32889623-C-A
+13	32315487	NM_000059.3:c.-220G>T	G	T	.	.	genome_FIN_ac=0;exome_NFE_af=-;genome_FIN_af=0.0;genome_EAS_an=1560;genome_ASJ_ac_hom=0;exome_AMR_ac=-;exome_NFE_an=-;genome_FIN_an=3472;exome_AMR_ac_hom=-;genome_FIN_ac_hom=0;genome_AMR_af=0.0;genome_ASJ_af=0.0;pos_hg19=32889624;genome_ASJ_ac=0;genome_AMR_an=848;alt=T;genome_EAS_ac=0;genome_EAS_af=0.0;genome_SAS_an=0;exome_OTH_ac=-;genome_ASJ_an=290;exome_OTH_af=-;exome_an=-;genome_SAS_af=-;exome_ac=-;exome_OTH_an=-;genome_SAS_ac=0;exome_af=-;genome_OTH_ac=0;exome_EAS_af=-;genome_OTH_af=0.0;exome_NFE_ac=-;exome_EAS_ac=-;exome_FIN_an=-;exome_EAS_an=-;ref=G;genome_EAS_ac_hom=0;genome_OTH_ac_hom=0;genome_AFR_an=8710;genome_AMR_ac_hom=0;exome_ASJ_ac_hom=-;exome_SAS_af=-;exome_AFR_ac_hom=-;genome_NFE_ac=2;genome_SAS_ac_hom=0;exome_SAS_ac=-;exome_SAS_an=-;exome_ASJ_af=-;exome_ASJ_ac=-;exome_FIN_ac=-;genome_AFR_ac_hom=0;exome_ASJ_an=-;chrom=13;genome_NFE_an=15424;exome_AMR_an=-;hgvsp=-;genome_NFE_ac_hom=0;exome_EAS_ac_hom=-;genome_OTH_an=1088;genome_AFR_ac=0;exome_SAS_ac_hom=-;genome_AFR_af=0.0;exome_OTH_ac_hom=-;hgvsc=c.-220G>T;exome_NFE_ac_hom=-;genome_NFE_af=0.0001297;genome_ac=2;flags=-;exome_AFR_af=-;genome_af=6.371e-05;exome_AMR_af=-;exome_FIN_ac_hom=-;genome_AMR_ac=0;exome_AFR_an=-;exome_AFR_ac=-;exome_FIN_af=-;genome_an=31392;BX_ID=2;exome_ac_hom=-;genome_ac_hom=0;hgvs=c.-220G>T;variant_id=13-32889624-G-T
