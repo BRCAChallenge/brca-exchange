@@ -9,7 +9,6 @@ import pandas as pd
 import numpy as np
 import os
 from math import floor, log10, isnan
-import pdb
 
 
 def parse_args():

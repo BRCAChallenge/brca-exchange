@@ -26,62 +26,64 @@ class GnomADTask(DefaultPipelineTask):
         pipeline_utils.create_path_if_nonexistent(self.gnomAD_file_dir)
 
 
-# class DownloadGnomADData(GnomADTask):
-#     def output(self):
-#         return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, self.gnomAD_download_file_name))
+"""
+Until issues are resolved with the GnomAD API, use static concattenated data
 
-#     def run(self):
-#         artifacts_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.output_dir + "/release/artifacts")
-#         os.chdir(gnomAD_method_dir)
+class DownloadGnomADData(GnomADTask):
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, self.gnomAD_download_file_name))
 
-#         args = ["python", "download_gnomad_data.py", "-o", self.output().path,
-#                 "-l", artifacts_dir + "/download_gnomAD_data.log"]
-#         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    def run(self):
+        artifacts_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.output_dir + "/release/artifacts")
+        os.chdir(gnomAD_method_dir)
 
-#         pipeline_utils.print_subprocess_output_and_error(sp)
+        args = ["python", "download_gnomad_data.py", "-o", self.output().path,
+                "-l", artifacts_dir + "/download_gnomAD_data.log"]
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-#         pipeline_utils.check_file_for_contents(self.output().path)
+        pipeline_utils.print_subprocess_output_and_error(sp)
 
-
-# @requires(DownloadGnomADData)
-# class NormalizeGnomADData(GnomADTask):
-#     def output(self):
-#         return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, "gnomAD.normalized.tsv"))
-
-#     def run(self):
-#         os.chdir(gnomAD_method_dir)
-
-#         args = ["python", "normalize.py", "-i", self.input().path,
-#                 "-o", self.output().path]
-
-#         logger.info("Running normalize.py with the following args: %s", args)
-
-#         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-#         pipeline_utils.print_subprocess_output_and_error(sp)
-
-#         pipeline_utils.check_file_for_contents(self.output().path)
+        pipeline_utils.check_file_for_contents(self.output().path)
 
 
-# @requires(NormalizeGnomADData)
-# class ParseGnomADData(GnomADTask):
-#     def output(self):
-#         return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, "gnomAD.clean.tsv"))
+@requires(DownloadGnomADData)
+class NormalizeGnomADData(GnomADTask):
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, "gnomAD.normalized.tsv"))
 
-#     def run(self):
-#         os.chdir(gnomAD_method_dir)
+    def run(self):
+        os.chdir(gnomAD_method_dir)
 
-#         args = ["python", "parse_gnomad_data.py", "-i", self.input().path,
-#                 "-o", self.output().path]
+        args = ["python", "normalize.py", "-i", self.input().path,
+                "-o", self.output().path]
 
-#         logger.info("Running parse_gnomad_data.py with the following args: %s", args)
+        logger.info("Running normalize.py with the following args: %s", args)
 
-#         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-#         pipeline_utils.print_subprocess_output_and_error(sp)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        pipeline_utils.print_subprocess_output_and_error(sp)
 
-#         pipeline_utils.check_file_for_contents(self.output().path)
+        pipeline_utils.check_file_for_contents(self.output().path)
 
 
-# Until issues are resolved with gnomAD API, use static concattenated gnomAD data.
+@requires(NormalizeGnomADData)
+class ParseGnomADData(GnomADTask):
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, "gnomAD.clean.tsv"))
+
+    def run(self):
+        os.chdir(gnomAD_method_dir)
+
+        args = ["python", "parse_gnomad_data.py", "-i", self.input().path,
+                "-o", self.output().path]
+
+        logger.info("Running parse_gnomad_data.py with the following args: %s", args)
+
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        pipeline_utils.print_subprocess_output_and_error(sp)
+
+        pipeline_utils.check_file_for_contents(self.output().path)
+"""
+
 class DownloadStaticGnomADData(GnomADTask):
     def output(self):
         return luigi.LocalTarget(
