@@ -38,7 +38,7 @@ function setPages({data, count, deletedCount, synonyms, releaseName}, pageLength
 var FastTable = React.createClass({
     mixins: [PureRenderMixin],
     truncateGenomicCoordinates: function(variantData) {
-        const genomicCoordinateFields = ["Genomic_Coordinate_hg36", "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg38"];
+        const genomicCoordinateFields = ["Genomic_Coordinate_hg37", "Genomic_Coordinate_hg38"];
         genomicCoordinateFields.forEach(function(field) {
             if (variantData[field].length > 35) {
                 variantData[field] = variantData[field].substring(0, 35) + "...";

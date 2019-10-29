@@ -172,11 +172,8 @@ class Command(BaseCommand):
         # use cleaned up genomic coordinates and other values
         row_dict['Genomic_Coordinate_hg38'] = row_dict.pop('pyhgvs_Genomic_Coordinate_38')
         row_dict['Genomic_Coordinate_hg37'] = row_dict.pop('pyhgvs_Genomic_Coordinate_37')
-        row_dict['Genomic_Coordinate_hg36'] = row_dict.pop('pyhgvs_Genomic_Coordinate_36')
         row_dict['Hg37_Start'] = row_dict.pop('pyhgvs_Hg37_Start')
         row_dict['Hg37_End'] = row_dict.pop('pyhgvs_Hg37_End')
-        row_dict['Hg36_Start'] = row_dict.pop('pyhgvs_Hg36_Start')
-        row_dict['Hg36_End'] = row_dict.pop('pyhgvs_Hg36_End')
         row_dict['HGVS_cDNA'] = row_dict.pop('pyhgvs_cDNA')
         row_dict['HGVS_Protein'] = row_dict.pop('pyhgvs_Protein')
 

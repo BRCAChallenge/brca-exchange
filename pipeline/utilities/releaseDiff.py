@@ -273,8 +273,7 @@ class transformer(object):
                              "Hg37_Start", "Hg37_End", "BX_ID_ENIGMA", "BX_ID_ClinVar",
                              "BX_ID_BIC", "BX_ID_ExAC", "BX_ID_LOVD", "BX_ID_exLOVD", "BX_ID_1000_Genomes", "BX_ID_ESP",
                              "Polyphen_Prediction", "Polyphen_Score", "Sift_Prediction", "Sift_Score",
-                             "Minor_allele_frequency_ESP", "Max_Allele_Frequency", "mupit_structure", "pyhgvs_Genomic_Coordinate_36",
-                             "pyhgvs_Hg36_Start", "pyhgvs_Hg36_End"]
+                             "Minor_allele_frequency_ESP", "Max_Allele_Frequency", "mupit_structure"]
 
         # Header to group all logs the same variant
         variant_intro = "\n\n %s \n Old Source: %s \n New Source: %s \n\n" % (newRow[getIdentifier(newRow, isReport)],
