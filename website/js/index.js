@@ -635,7 +635,7 @@ var VariantDetail = React.createClass({
         });
     },
     truncateData: function(field) {
-        const fieldsToTruncate = ["Genomic_Coordinate_hg38", "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg36"];
+        const fieldsToTruncate = ["Genomic_Coordinate_hg38", "Genomic_Coordinate_hg37"];
         if (fieldsToTruncate.indexOf(field) > -1) {
             return true;
         } else {
