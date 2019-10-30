@@ -82,7 +82,6 @@ const researchModeGroups = [
         {title: 'BIC Designation', prop: 'BIC_Nomenclature', core: true},
         {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38', core: true},
         {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
-        {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36'},
         {title: 'RNA (LOVD)', prop: 'RNA_LOVD'},
         {title: 'Beacons', core: true},
         {title: 'Synonyms', prop: 'Synonyms'}
@@ -368,7 +367,6 @@ const columns = [
 
 const researchModeColumns = [
     {title: 'Gene Symbol', prop: 'Gene_Symbol', render: gene => <i>{gene}</i>},
-    {title: 'Genome (GRCh36)', prop: 'Genomic_Coordinate_hg36'},
     {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
     {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
     {title: 'Mutation category (BIC)', prop: 'Mutation_type_BIC'},

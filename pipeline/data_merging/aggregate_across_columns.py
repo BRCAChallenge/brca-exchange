@@ -23,12 +23,11 @@ FIELDS_TO_REMOVE = ["Protein_ClinVar",
                     "BIC_Nomenclature_exLOVD",
                     "Synonyms_ClinVar"]
 FIELDS_TO_ADD = ["Hg38_Start", "Hg38_End", "Hg37_Start", "Hg37_End",
-                 "Hg36_Start", "Hg36_End",
                  "HGVS_RNA",
                  "Allele_Frequency",
                  "Max_Allele_Frequency",
-                 "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg36",
-                 "Source_URL", "Discordant", "Synonyms",
+                 "Genomic_Coordinate_hg37", "Source_URL",
+                 "Discordant", "Synonyms",
                  "Pathogenicity_expert", "Pathogenicity_all"]
 FIELDS_TO_RENAME = {"Gene_symbol_ENIGMA": "Gene_Symbol",
                     "Genomic_Coordinate": "Genomic_Coordinate_hg38",
@@ -88,11 +87,8 @@ def updateRow(row, toRename, toRemove):
     newRow["Source_URL"] = setSourceUrls(newRow)
     newRow["Synonyms"] = setSynonym(row)
     newRow["Genomic_Coordinate_hg37"] = EMPTY
-    newRow["Genomic_Coordinate_hg36"] = EMPTY
     newRow["Hg37_Start"] = EMPTY
     newRow["Hg37_End"] = EMPTY
-    newRow["Hg36_Start"] = EMPTY
-    newRow["Hg36_End"] = EMPTY
     for item in toRemove:
         del newRow[item]
     for item in newRow:

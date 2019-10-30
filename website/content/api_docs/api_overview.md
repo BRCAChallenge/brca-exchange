@@ -357,7 +357,6 @@ Suggestions are returned in this form:
 Suggestions are extracted as lowercase versions of distinct values that occur in the following columns in Variant:
 - Genomic_Coordinate_hg38
 - Genomic_Coordinate_hg37
-- Genomic_Coordinate_hg36
 - Clinical_significance_ENIGMA
 - Gene_Symbol
 - Reference_Sequence

@@ -565,12 +565,10 @@ class VariantTestCase(TestCase):
 
     BRCA1:chr17:g.43094692:G>C --> Gene_Symbol:Genomic_Coordinate_hg38
     BRCA1:chr17:g.41246709:G>C --> Gene_Symbol:Genomic_Coordinate_hg37
-    BRCA1:chr17:g.38500235:G>C --> Gene_Symbol:Genomic_Coordinate_hg36
     BRCA1:958C>G --> Gene_Symbol:BIC_Nomenclature
     BRCA1:c.839C>G --> Gene_Symbol:HGVS_cDNA
     NM_007294.3:chr17:g.43094692:G>C --> Reference_Sequence:Genomic_Coordinate_hg38
     NM_007294.3:chr17:g.41246709:G>C --> Reference_Sequence:Genomic_Coordinate_hg37
-    NM_007294.3:chr17:g.38500235:G>C --> Reference_Sequence:Genomic_Coordinate_hg36
     NM_007294.3:958C>G --> Reference_Sequence:BIC_Nomenclature
     NM_007294.3:c.839C>G --> Reference_Sequence:HGVS_cDNA
     BRCA1:p.(Ala280Gly) --> Gene_Symbol:HGVS_Protein.split(':')[1] (HGVS_Protein is actually stored as NP_009225.1:p.(Ala280Gly), so this has to be split on the ':')
@@ -593,10 +591,6 @@ class VariantTestCase(TestCase):
             evmv.Gene_Symbol + ' ' + evmv.Genomic_Coordinate_hg37,
             evmv.Gene_Symbol + ':' + evmv.Genomic_Coordinate_hg37.replace('g.', ''),
             evmv.Gene_Symbol + ' ' + evmv.Genomic_Coordinate_hg37.replace('g.', ''),
-            evmv.Gene_Symbol + ':' + evmv.Genomic_Coordinate_hg36,
-            evmv.Gene_Symbol + ' ' + evmv.Genomic_Coordinate_hg36,
-            evmv.Gene_Symbol + ':' + evmv.Genomic_Coordinate_hg36.replace('g.', ''),
-            evmv.Gene_Symbol + ' ' + evmv.Genomic_Coordinate_hg36.replace('g.', ''),
             evmv.Gene_Symbol + ':' + evmv.BIC_Nomenclature,
             evmv.Gene_Symbol + ' ' + evmv.BIC_Nomenclature,
             evmv.Gene_Symbol + ':' + evmv.HGVS_cDNA.split(':')[1],
@@ -617,10 +611,6 @@ class VariantTestCase(TestCase):
             evmv.Reference_Sequence + ' ' + evmv.Genomic_Coordinate_hg37,
             evmv.Reference_Sequence + ':' + evmv.Genomic_Coordinate_hg37.replace('g.', ''),
             evmv.Reference_Sequence + ' ' + evmv.Genomic_Coordinate_hg37.replace('g.', ''),
-            evmv.Reference_Sequence + ':' + evmv.Genomic_Coordinate_hg36,
-            evmv.Reference_Sequence + ' ' + evmv.Genomic_Coordinate_hg36,
-            evmv.Reference_Sequence + ':' + evmv.Genomic_Coordinate_hg36.replace('g.', ''),
-            evmv.Reference_Sequence + ' ' + evmv.Genomic_Coordinate_hg36.replace('g.', ''),
             evmv.Reference_Sequence + ':' + evmv.BIC_Nomenclature,
             evmv.Reference_Sequence + ' ' + evmv.BIC_Nomenclature,
             evmv.Reference_Sequence + ':' + evmv.HGVS_cDNA.split(':')[1],
@@ -671,12 +661,10 @@ class VariantTestCase(TestCase):
         test_list = {
             'Gene_Symbol': 'Genomic_Coordinate_hg38',
             'Gene_Symbol': 'Genomic_Coordinate_hg37',
-            'Gene_Symbol': 'Genomic_Coordinate_hg36',
             'Gene_Symbol': 'BIC_Nomenclature',
             'Gene_Symbol': 'HGVS_cDNA',
             'Reference_Sequence': 'Genomic_Coordinate_hg38',
             'Reference_Sequence': 'Genomic_Coordinate_hg37',
-            'Reference_Sequence': 'Genomic_Coordinate_hg36',
             'Reference_Sequence': 'BIC_Nomenclature',
             'Reference_Sequence': 'HGVS_cDNA',
             'Gene_Symbol': 'Protein_Change'
@@ -805,12 +793,10 @@ class VariantTestCase(TestCase):
         test_list = {
             'Gene_Symbol': 'Genomic_Coordinate_hg38',
             'Gene_Symbol': 'Genomic_Coordinate_hg37',
-            'Gene_Symbol': 'Genomic_Coordinate_hg36',
             'Gene_Symbol': 'BIC_Nomenclature',
             'Gene_Symbol': 'HGVS_cDNA',
             'Reference_Sequence': 'Genomic_Coordinate_hg38',
             'Reference_Sequence': 'Genomic_Coordinate_hg37',
-            'Reference_Sequence': 'Genomic_Coordinate_hg36',
             'Reference_Sequence': 'BIC_Nomenclature',
             'Reference_Sequence': 'HGVS_cDNA',
             'Gene_Symbol': 'Protein_Change'
@@ -988,12 +974,10 @@ class VariantTestCase(TestCase):
         test_list = {
             'Gene_Symbol': 'Genomic_Coordinate_hg38',
             'Gene_Symbol': 'Genomic_Coordinate_hg37',
-            'Gene_Symbol': 'Genomic_Coordinate_hg36',
             'Gene_Symbol': 'BIC_Nomenclature',
             'Gene_Symbol': 'HGVS_cDNA',
             'Reference_Sequence': 'Genomic_Coordinate_hg38',
             'Reference_Sequence': 'Genomic_Coordinate_hg37',
-            'Reference_Sequence': 'Genomic_Coordinate_hg36',
             'Reference_Sequence': 'BIC_Nomenclature',
             'Reference_Sequence': 'HGVS_cDNA',
             'Gene_Symbol': 'Protein_Change'

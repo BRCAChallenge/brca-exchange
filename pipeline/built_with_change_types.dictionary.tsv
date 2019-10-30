@@ -115,25 +115,19 @@ Hg38_Start	Start coordinate in the Hg38 build	43063368
 Hg38_End	End coordinate in the Hg38 build	43063368
 Hg37_Start	Start coordinate in the Hg37 build	-
 Hg37_End	End coordinate in the Hg37 build	-
-Hg36_Start	(Deprecated) Start coordinate in hte Hg36 build	-
-Hg36_End	(Deprecated) End coordinate in the Hg36 build	-
 HGVS_RNA	HGVS RNA variant nomenclature	-
 Allele_Frequency	Summary of the allele frequencies from ExAC, 1000 Genomes and ESP	9.415e-05 (ExAC minus TCGA)
 Max_Allele_Frequency	(Deprecated) Largest single allele frequency from each of ExAC, 1000 Genomes and ESP 	-
 Genomic_Coordinate_hg37	(Deprecated) Genomic coordinate of the variant in the hg37 genome build	-
-Genomic_Coordinate_hg36	(Deprecated) Genomic coordinate of the variant in the hg36 genome build	-
 Source_URL	URL for the original source of the data	http://hci-exlovd.hci.utah.edu/variants.php?select_db=BRCA1&action=search_all&search_Variant%2FDNA=c.5158A%3EG, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000244390, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000743378, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000145365, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000744593, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000109408, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000076849, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000167319, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000226798, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000591588, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000213306
 Discordant	(Deprecated) Indicates if there are discordant clinical significance interpretations for this variant	Concordant
 Synonyms	Alternate names for this variant	NM_007294.3.c.5158A>G,T1720A,5277A>G,NC_000017.11.g.43063368T>C,LRG_292.g.154616A>G,NG_005905.2.g.154616A>G,P38398.p.Thr1720Ala,LRG_292p1.p.Thr1720Ala,p.Thr1720Ala,p.T1720A.ACC>GCC,NC_000017.10.g.41215385T>C,NR_027676.1.n.5294A>G,p.T1720A,U14680.1.n.5277A>G,LRG_292t1.c.5158A>G,NM_007294.2:c.5158A>G,NM_007300.3:c.5221A>G,NM_007299.3:c.1846A>G,NM_007298.3:c.1846A>G,NM_007297.3:c.5017A>G,U14680.1:c.5270A>G
 Pathogenicity_expert	Variant pathogenicity as displayed in the Summary view	Benign / Little Clinical Significance
 Pathogenicity_all	Variant pathogenicity as displayed in the Detail view	Benign(ENIGMA); Benign,Uncertain_significance,Likely_benign (ClinVar); Pending (BIC)
-pyhgvs_Genomic_Coordinate_36	HGVS variant alias which references the nucleotide in genomic DNA, per the GRCh36 genome build	chr17:g.38468911:T>C	https://brcaexchange.org/help#variant-naming-demystified
 pyhgvs_Genomic_Coordinate_37	HGVS variant alias which references the nucleotide in genomic DNA, per the GRCh37 genome build	chr17:g.41215385:T>C	https://brcaexchange.org/help#variant-naming-demystified
 pyhgvs_Genomic_Coordinate_38	HGVS variant alias which references the nucleotide in genomic DNA, per the GRCh38 genome build	chr17:g.43063368:T>C	https://brcaexchange.org/help#variant-naming-demystified
 pyhgvs_Hg37_Start	Starting position in Hg37 build according to HGVS nomenclature	41215385	https://brcaexchange.org/help#variant-naming-demystified
 pyhgvs_Hg37_End	Ending position in Hg37 build according to HGVS nomenclature	41215385	https://brcaexchange.org/help#variant-naming-demystified
-pyhgvs_Hg36_Start	Starting position in Hg36 build according to HGVS nomenclature	38468911	https://brcaexchange.org/help#variant-naming-demystified
-pyhgvs_Hg36_End	Ending position in Hg36 build according to HGVS nomenclature	38468911	https://brcaexchange.org/help#variant-naming-demystified
 pyhgvs_cDNA	HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA	NM_007294.3:c.5158A>G	https://brcaexchange.org/help#variant-naming-demystified
 pyhgvs_Protein	HGVS protein nomenclature	NP_009225.1:p.(Thr1720Ala)	https://brcaexchange.org/help#variant-naming-demystified
 mupit_structure	Indicates the three-dimensional protein structure that the variant can be visualized within, with MuPIT	1t15

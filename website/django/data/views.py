@@ -389,12 +389,10 @@ def apply_search(query, search_term, quotes='', release=None):
 
         BRCA1:chr17:g.43094692:G>C --> Gene_Symbol:Genomic_Coordinate_hg38
         BRCA1:chr17:g.41246709:G>C --> Gene_Symbol:Genomic_Coordinate_hg37
-        BRCA1:chr17:g.38500235:G>C --> Gene_Symbol:Genomic_Coordinate_hg36
         BRCA1:958C>G --> Gene_Symbol:BIC_Nomenclature
         BRCA1:c.839C>G --> Gene_Symbol:HGVS_cDNA
         NM_007294.3:chr17:g.43094692:G>C --> Reference_Sequence:Genomic_Coordinate_hg38
         NM_007294.3:chr17:g.41246709:G>C --> Reference_Sequence:Genomic_Coordinate_hg37
-        NM_007294.3:chr17:g.38500235:G>C --> Reference_Sequence:Genomic_Coordinate_hg36
         NM_007294.3:958C>G --> Reference_Sequence:BIC_Nomenclature
         NM_007294.3:c.839C>G --> Reference_Sequence:HGVS_cDNA
         BRCA1:p.(Ala280Gly) --> Gene_Symbol:HGVS_Protein.split(':')[1] (HGVS_Protein is actually stored as NP_009225.1:p.(Ala280Gly), so this has to be split on the ":")
@@ -464,7 +462,6 @@ def apply_search(query, search_term, quotes='', release=None):
             Q(HGVS_Protein__icontains=suffix) |
             Q(Genomic_Coordinate_hg38__istartswith=suffix) |
             Q(Genomic_Coordinate_hg37__istartswith=suffix) |
-            Q(Genomic_Coordinate_hg36__istartswith=suffix) |
             Q(BIC_Nomenclature__istartswith=suffix) |
             Q(Protein_Change__istartswith=suffix) |
             Q(Synonyms__icontains=comma_prefixed_suffix) |
@@ -488,7 +485,6 @@ def apply_search(query, search_term, quotes='', release=None):
             Q(HGVS_cDNA__icontains=suffix) |
             Q(Genomic_Coordinate_hg38__istartswith=suffix) |
             Q(Genomic_Coordinate_hg37__istartswith=suffix) |
-            Q(Genomic_Coordinate_hg36__istartswith=suffix) |
             Q(BIC_Nomenclature__istartswith=suffix) |
             Q(Synonyms__icontains=comma_prefixed_suffix) |
             Q(Synonyms__istartswith=suffix)
@@ -518,7 +514,6 @@ def apply_search(query, search_term, quotes='', release=None):
             Q(Pathogenicity_expert__icontains=search_term) |
             Q(Genomic_Coordinate_hg38__icontains=search_term) |
             Q(Genomic_Coordinate_hg37__icontains=search_term) |
-            Q(Genomic_Coordinate_hg36__icontains=search_term) |
             Q(Synonyms__icontains=search_term) |
             Q(Gene_Symbol__icontains=search_term) |
             Q(HGVS_cDNA__icontains=search_term) |
