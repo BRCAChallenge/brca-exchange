@@ -256,7 +256,6 @@ function getFormattedFieldByProp(prop, variant) {
             hom = variant[prop.replace("frequency", "count_hom")];
         rowItem = [variant[prop], <small style={{float: 'right'}}>({count} of {number}, Hom={hom})</small>];
     } else if (/count.*_GnomAD/.test(prop) || /number.*_GnomAD/.test(prop)) {
-        debugger;
         rowItem = variant[prop];
     } else if (prop === "Genomic_Coordinate_hg38" || prop === "Genomic_Coordinate_hg37") {
         rowItem = generateLinkToGenomeBrowser(prop, variant[prop]);

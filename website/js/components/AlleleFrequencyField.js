@@ -103,7 +103,6 @@ const AlleleFrequencyField = React.createClass({
         let styles = this.getCollapsableClassSet();
         let isChart = false;
         let isGnomad = false;
-        debugger;
 
         if (fieldName.toLowerCase().includes('gnomad')) {
             flag = variant.Flags_GnomAD;
