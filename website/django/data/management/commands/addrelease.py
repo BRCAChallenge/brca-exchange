@@ -177,6 +177,14 @@ class Command(BaseCommand):
         row_dict['HGVS_cDNA'] = row_dict.pop('pyhgvs_cDNA')
         row_dict['HGVS_Protein'] = row_dict.pop('pyhgvs_Protein')
 
+        # remove deprecated fields if they're present
+        row_dict.pop('Hg36_Start', None)
+        row_dict.pop('Hg36_End', None)
+        row_dict.pop('Genomic_Coordinate_hg36', None)
+        row_dict.pop('pyhgvs_Genomic_Coordinate_36', None)
+        row_dict.pop('pyhgvs_Hg36_Start', None)
+        row_dict.pop('pyhgvs_Hg36_End', None)
+
         # Denote percentage in field name, two different fieldnames were used previously so both are handled below
         for oldName in OLD_MAF_ESP_FIELD_NAMES:
             if oldName in row_dict:
