@@ -88,6 +88,7 @@ class TestStringMethods(unittest.TestCase):
                         "Functional_Enrichment_Score_Findlay_BRCA1_Ring_Function_Scores",
                         "BX_ID_Findlay_BRCA1_Ring_Function_Scores",
                         "HGVS_cDNA_GnomAD",
+                        "HGVS_GnomAD",
                         "HGVS_protein_GnomAD",
                         "Flags_GnomAD",
                         "Consequence_GnomAD",

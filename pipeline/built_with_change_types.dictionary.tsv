@@ -226,6 +226,7 @@ Allele_number_exome_GnomAD	Total number of total chromosomes studied (for this v
 BX_ID_GnomAD	Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation
 Allele_count_exome_GnomAD	Total count of observed alternate alleles (variant) in exomes
 HGVS_cDNA_GnomAD	HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA
+HGVS_GnomAD	HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA
 Allele_count_genome_GnomAD	Total count of observed alternate alleles (variant) in genomes
 Allele_number_genome_GnomAD	Total number of total chromosomes studied (for this variant) in genomes
 Allele_frequency_exome_GnomAD	Overall allele frequency (for exomes) according to all studied populations, per gnomAD
@@ -233,7 +234,6 @@ Allele_frequency_genome_GnomAD	Overall allele frequency (for genomes) according 
 Variant_id_GnomAD	Identifier provided by gnomAD
 HGVS_protein_GnomAD	The predicted protein-level change (if any) that would be introduced by the genomic variant
 Flags_GnomAD	Flags provided by gnomAD to indicate an annotation or something unusual about the data
-Consequence_GnomAD	Variant consequence from Ensembl's Variant Effect Predictor, provided by gnomAD
 Allele_number_genome_ASJ_GnomAD	Number of total chromosomes studied (for this variant) in genomes of Ashkenazi Jewish Populations
 Allele_frequency_genome_SAS_GnomAD	Allele Frequency in genomes of South Asian Populations
 Allele_count_exome_AFR_GnomAD	Count of observed alternate alleles (variant) in exomes of African African American Populations, per gnomAD
