@@ -9,6 +9,7 @@ Description:
 
 
 from __future__ import print_function, division
+import re
 import argparse
 import sys
 import os
@@ -111,7 +112,7 @@ def main():
         if hgvsName == '-':
             print(parsedLine)
             continue
-        queryHgvsName = hgvsName.rstrip().split(';')[0]
+        queryHgvsName = re.sub(r'[^\x00-\x7F]+', '', hgvsName).rstrip().split(';')[0]
         INFO_field_string = ';'.join(INFO_field)
         try:
             chrom, offset, ref, alt = hgvs.parse_hgvs_name(queryHgvsName, genome, get_transcript=get_transcript)
