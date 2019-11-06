@@ -1305,6 +1305,7 @@ var VariantDetail = React.createClass({
                 <Row>
                     <Col md={12} className="variant-history-col">
                         <h4>Variant History:</h4>
+                        <p>Variant nomenclature may change between releases, please review submission history below for further details.<p>
                         <Table className='variant-history nopointer' responsive bordered>
                             <thead>
                                 <tr className='active'>
@@ -1317,7 +1318,7 @@ var VariantDetail = React.createClass({
                                 {diffRows}
                             </tbody>
                         </Table>
-                        <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show Detail View for this Variant" to see these changes.</p>
+                        <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, as well as changes to corresponding submissions. Click "Show Detail View for this Variant" to see these changes.</p>
                     </Col>
                 </Row>
 
