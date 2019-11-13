@@ -31,6 +31,7 @@ PYHGVS_GENOMIC_COORDINATE_38_COL = 'pyhgvs_Genomic_Coordinate_38'
 PYHGVS_HG37_END_COL = 'pyhgvs_Hg37_End'
 PYHGVS_HG37_START_COL = 'pyhgvs_Hg37_Start'
 PYHGVS_PROTEIN_COL = 'pyhgvs_Protein'
+PYHGVS_GENOMIC_COL = 'pyhgvs_Genomic'
 REFERENCE_SEQUENCE_COL = 'Reference_Sequence'
 REF_COL = 'Ref'
 SYNONYMS_COL = 'Synonyms'
@@ -40,6 +41,8 @@ VAR_OBJ_FIELD = 'var_objs'
 NEW_SYNONYMS_FIELD = 'new_syns'
 TMP_CDNA_UNORM_FIELD = 'tmp_HGVS_CDNA_FIELD_unorm'
 TMP_CDNA_NORM_FIELD = 'tmp_HGVS_CDNA_FIELD_norm'
+TMP_GENOMIC_NORM_FIELD = 'tmp_HGVS_GENOMIC_FIELD_norm'
+TMP_GENOMIC_UNORM_FIELD = 'tmp_HGVS_GENOMIC_FIELD_norm'
 
 
 def _get_cdna_and_genomic(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
@@ -78,8 +81,8 @@ def _get_cdna_and_genomic(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
         pickle_dict = pickle.load(open(pkl, 'rb'))
         s_cdna = pd.Series([ pickle_dict[str(v)]  for v in var_objs  ])
     else:
-        s_cdna = df.apply(from_field_or_compute, axis=1, args=("cDNA"))
-        s_genomic = df.apply(from_field_or_compute, axis=1, args=("genomic"))
+        s_cdna = df.apply(from_field_or_compute, axis=1, args=["cDNA"])
+        s_genomic = df.apply(from_field_or_compute, axis=1, args=["genomic"])
 
         if pkl:
             pickle_dict = {str(v): c for (c, v) in zip(s_cdna, var_objs)}
