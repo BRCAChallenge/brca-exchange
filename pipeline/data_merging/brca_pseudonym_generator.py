@@ -78,14 +78,11 @@ def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
     if pkl and os.path.exists(pkl):
         pickle_dict = pickle.load(open(pkl, 'rb'))
         s_cdna = pd.Series([ pickle_dict[str(v)] for v in var_objs_hg37  ])
-        # s_genomic = pd.Series([ pickle_dict[str(v)] for v in var_objs_hg37  ])
     else:
         s_cdna = df.apply(from_field_or_compute, axis=1)
-        s_genomic = df.apply(compute_genomic_hgvs, axis=1)
 
         if pkl:
             pickle_dict = {str(v): c for (c, v) in zip(s_cdna, var_objs)}
-            # pickle_dict = {str(v): c for (c, v) in zip(s_genomic, var_objs)}
             pickle.dump(pickle_dict, open(pkl, 'wb'))
 
     return s_cdna
