@@ -89,28 +89,31 @@ def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
 
 
 def _get_genomic_hgvs(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
-    def compute_genomic_hgvs():
-        v = VCFVariant(x[CHR_COL], x[POS_COL], x[REF_COL], x[ALT_COL])
-        v = v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh38_Assem])
+    def compute_genomic_hgvs(row):
+        v = VCFVariant(row[CHR_COL], row[POS_COL], row[REF_COL], row[ALT_COL])
+        v38 = v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh38_Assem])
+        v37 = v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh37_Assem])
 
         if normalize:
-            vn = hgvs_proc.normalizing(v)
-            v = vn if vn else v
-        return v
+            v38n = hgvs_proc.normalizing(v38)
+            v37n = hgvs_proc.normalizing(v37)
+            v38 = v38n if v38n else v38
+            v37 = v37n if v37n else v37
+        return v38, v37
 
     var_objs = df[VAR_OBJ_FIELD]
 
     if pkl and os.path.exists(pkl):
         pickle_dict = pickle.load(open(pkl, 'rb'))
-        s_genomic = pd.Series([ pickle_dict[str(v)] for v in var_objs_hg37  ])
+        s_genomic = pd.Series([ pickle_dict[str(v)] for v in var_objs_hg37 ])
     else:
-        s_genomic = df.apply(compute_genomic_hgvs, axis=1)
+        s_genomic38, s_genomic37 = df.apply(compute_genomic_hgvs, axis=1)
 
         if pkl:
             pickle_dict = {str(v): c for (c, v) in zip(s_genomic, var_objs)}
             pickle.dump(pickle_dict, open(pkl, 'wb'))
 
-    return s_genomic
+    return s_genomic38, s_genomic37
 
 
 def convert_to_hg37(vars, brca_resources_dir):
@@ -216,9 +219,9 @@ def main(input, output, pkl, log_path, config_file, resources):
     df[TMP_CDNA_NORM_FIELD] = _get_cdna(df, pkl, hgvs_proc, cdna_default_ac_dict, normalize=True)
     df[PYHGVS_CDNA_COL] = df[TMP_CDNA_NORM_FIELD].apply(str)
 
-    df[TMP_GENOMIC_HG37_NORM_FIELD], df[TMP_GENOMIC_HG38_NORM_FIELD_HG38] = _get_genomic_hgvs(df, pkl, hgvs_proc, cdna_default_ac_dict, normalize=True)
-    df[GENOMIC_HGVS_HG37_COL] = df[TMP_GENOMIC_HG37_NORM_FIELD].apply(str)
+    df[TMP_GENOMIC_HG38_NORM_FIELD_HG38], df[TMP_GENOMIC_HG37_NORM_FIELD]  = _get_genomic_hgvs(df, pkl, hgvs_proc, cdna_default_ac_dict, normalize=True)
     df[GENOMIC_HGVS_HG38_COL] = df[TMP_GENOMIC_HG38_NORM_FIELD].apply(str)
+    df[GENOMIC_HGVS_HG37_COL] = df[TMP_GENOMIC_HG37_NORM_FIELD].apply(str)
 
     available_cdna = df[PYHGVS_CDNA_COL].str.startswith("NM_")
     df.loc[available_cdna, REFERENCE_SEQUENCE_COL] = df.loc[available_cdna, PYHGVS_CDNA_COL].str.split(':').apply(lambda l: l[0])
