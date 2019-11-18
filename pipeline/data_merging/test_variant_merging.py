@@ -10,8 +10,9 @@ import vcf
 from hypothesis import given, assume, settings
 from hypothesis.strategies import integers, tuples, sampled_from, lists
 
-import seq_utils
-from utilities import round_sigfigs, load_config, extract_gene_regions_dict
+from common import seq_utils
+from common.config import load_config, extract_gene_regions_dict
+from utilities import round_sigfigs
 from variant_equivalence import variant_equal, find_equivalent_variant, find_equivalent_variants_whole_seq
 from variant_merging import normalize_values, add_variant_to_dict, \
     COLUMN_SOURCE, append_exac_allele_frequencies, EXAC_SUBPOPULATIONS

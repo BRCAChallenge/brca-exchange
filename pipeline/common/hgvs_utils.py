@@ -74,3 +74,31 @@ class HgvsWrapper:
                 logging.info(
                     "Issues with normalizing " + str(v) + ": " + str(e))
         return None
+
+    __instance = None
+
+
+    def hg19_to_hg38(self, v):
+        """
+        Conversion from hg19 (GRCh37) to hg38 via NM_ transcripts (doesn't work for intronic variants)
+        :param v:
+        :return:
+        """
+        am37 = self.hgvs_ams[self.GRCh37_Assem]
+
+        transcripts = [t for t in am37.relevant_transcripts(v) if t.startswith('NM_')]
+
+        if not transcripts:
+            raise ValueError("Didn't find transcripts for " + v)
+
+        v_c = am37.g_to_c(v, transcripts[0])
+
+        # TODO: write test, also with intronic variant
+        return self.hgvs_ams[self.GRCh38_Assem].c_to_g(v_c)
+
+
+    @staticmethod
+    def get_instance():
+        if not HgvsWrapper.__instance:
+            HgvsWrapper.__instance = HgvsWrapper()
+        return HgvsWrapper.__instance
