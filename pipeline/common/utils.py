@@ -1,3 +1,4 @@
+import logging
 from collections import namedtuple
 from multiprocessing.pool import ThreadPool
 
@@ -41,3 +42,12 @@ def parallelize_dataframe(df, func, n_cores=4):
     pool.close()
     pool.join()
     return df
+
+
+def setup_logfile(log_path, log_level=logging.INFO):
+    # https://stackoverflow.com/questions/20240464/python-logging-file-is-not-working-when-using-logging-basicconfig
+    from imp import reload
+    reload(logging)
+
+    logging.basicConfig(filename=log_path, filemode="w", level=log_level,
+                        format=' %(asctime)s %(filename)-15s %(message)s')

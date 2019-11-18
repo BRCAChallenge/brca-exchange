@@ -12,6 +12,7 @@ import pandas as pd
 from hgvs.exceptions import HGVSError
 
 from common import config
+from common import utils
 from common.hgvs_utils import HgvsWrapper
 from common.variant_utils import VCFVariant
 
@@ -177,8 +178,7 @@ def _merge_synonyms(x):
 @click.option("--config-file", required=True, help="path to gene configuration file")
 @click.option('--resources', help="path to directory containing reference sequences")
 def main(input, output, pkl, log_path, config_file, resources):
-    logging.basicConfig(filename=log_path, filemode="w", level=logging.INFO,
-                        format=' %(asctime)s %(filename)-15s %(message)s')
+    utils.setup_logfile(log_path)
 
     cfg_df = config.load_config(config_file)
 

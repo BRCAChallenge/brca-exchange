@@ -7,6 +7,7 @@ import logging
 import xml.etree.ElementTree as ET
 
 import clinvar
+from common import utils
 
 
 def printHeader():
@@ -37,19 +38,12 @@ def processSubmission(submissionSet, assembly):
                 proteinChange = variant.attribute["HGVS, protein, RefSeq"]
 
             if assembly in variant.coordinates:
-                genomicData = variant.coordinates[assembly]
-                chrom = genomicData.chrom
-                start = genomicData.start
-                referenceAllele = genomicData.referenceAllele
-                alternateAllele = genomicData.alternateAllele
-                genomicCoordinate = "chr%s:%s:%s>%s" % (chrom, start, referenceAllele,
-                                                        alternateAllele)
-
                 synonyms = MULTI_VALUE_SEP.join(ra.synonyms + oa.synonyms)
 
+                vcf_var = variant.coordinates[assembly]
+
                 # Omit the variants that don't have any genomic start coordinate indicated.
-                if start != None and start != "None" and start != "NA" and \
-                    _bases_only(referenceAllele) and _bases_only(alternateAllele):
+                if vcf_var and _bases_only(vcf_var.ref) and _bases_only(vcf_var.alt):
                     print("\t".join((str(hgvs),
                                      oa.submitter.encode('utf-8'),
                                      str(oa.clinicalSignificance),
@@ -60,7 +54,7 @@ def processSubmission(submissionSet, assembly):
                                      str(oa.id),
                                      str(oa.origin),
                                      str(oa.method),
-                                     genomicCoordinate,
+                                     str(vcf_var),
                                      str(variant.geneSymbol),
                                      str(proteinChange),
                                      str(oa.description),
@@ -81,7 +75,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("clinVarXmlFilename")
     parser.add_argument('-a', "--assembly", default="GRCh38")
+    parser.add_argument('-l', "--logs")
     args = parser.parse_args()
+
+    utils.setup_logfile(args.logs)
 
     printHeader()
 

@@ -3,6 +3,10 @@ ClinVarUtils: basic
 """
 
 import re
+from common import hgvs_utils, variant_utils
+from hgvs.exceptions import HGVSError
+import hgvs
+import logging
 
 def isCurrent(element):
     """Determine if the indicated clinvar set is current"""
@@ -56,6 +60,90 @@ def extractSynonyms(el):
 
     return sy + sy_alt
 
+
+# TODO tune interface (which element)
+# TODO: add assembly
+def extract_genomic_coordinates_from_measure(meas_el):
+    sequence_locations = meas_el.findall('SequenceLocation')
+
+    coords = {}
+    for el in sequence_locations:
+        assembly = el.attrib['Assembly'] # GRCh38
+
+        if el.get('referenceAlleleVCF'):
+            coords[assembly] = variant_utils.VCFVariant(
+                el.get('Chr'),
+                el.get('positionVCF'),
+                el.get('referenceAlleleVCF'),
+                el.get('alternateAlleleVCF')
+            )
+
+    # if no reference/alternate allele found, compute (assuming the missingness
+    # is consistent across the different assemblies)
+    if not coords:
+        coords = _extract_genomic_coordinates_from_non_genomic_fields(meas_el)
+
+    return coords
+
+
+def _preprocess_variant(var_str):
+    var_str = re.sub(r'\s*\(p[^)]+\)', '', var_str)
+    #var_str = re.sub(r'(del[TCGA]+)ins[0-9]+$', r'\1', var_str)
+    # test re.sub('ins[0-9]+$', '', 'NM_007294.3(BRCA1):c.1387_1390delAAAAins4')
+    return var_str
+
+
+def _extract_genomic_coordinates_from_non_genomic_fields(meas_el, assemblies = [hgvs_utils.HgvsWrapper.GRCh38_Assem], hgvs_wrapper = hgvs_utils.HgvsWrapper.get_instance()):
+    pref_el_lst = meas_el.findall('Name/ElementValue[@Type="Preferred"]')
+
+    coords = {}
+    if not pref_el_lst:
+        return coords
+
+    pref = pref_el_lst[0].text
+
+    try:
+        preprocessed_var = _preprocess_variant(pref)
+        v = hgvs_wrapper.hgvs_parser.parse(preprocessed_var)
+
+        for assembly in assemblies:
+            if v.ac.startswith('U'):
+                v37 = hgvs.assemblymapper.AssemblyMapper(hgvs_wrapper.hgvs_dp,
+                                                         assembly_name=hgvs_utils.HgvsWrapper.GRCh37_Assem,
+                                                         alt_aln_method='BLAST').n_to_g(v)
+
+                if assembly == hgvs_utils.HgvsWrapper.GRCh38_Assem:
+                    v_g = hgvs_wrapper.hg19_to_hg38(v37)
+                else:
+                    v_g = v37
+
+            elif v.ac.startswith('NG_'):
+                am38 = hgvs_wrapper.hgvs_ams[hgvs_utils.HgvsWrapper.GRCh38_Assem]
+
+                rel = [t for t in am38.relevant_transcripts(v) if t.startswith('NM_')]
+
+                if not rel:
+                    logging.warn("No transcripts could be found for " + preprocessed_var + " in " + str(am38.relevant_transcripts(v)))
+                    continue
+
+                v_c = am38.g_to_c(v, rel[0])
+
+                v_g = hgvs_wrapper.hgvs_ams[
+                    hgvs_utils.HgvsWrapper.GRCh38_Assem].c_to_g(v_c)
+            elif v.ac.startswith('NM_'):
+                v_g = hgvs_wrapper.hgvs_ams[assembly].c_to_g(v)
+            else:
+                logging.warn("Skipping genomic coordinate extraction for " + preprocessed_var)
+                continue
+
+            vcf = variant_utils.VCFVariant.from_hgvs_obj(v_g)
+            coords[assembly] = vcf
+    except HGVSError as e:
+        logging.warn("HGVS Error while attempting to process " + preprocessed_var + " : " + str(e))
+
+    return coords
+
+
 class genomicCoordinates:
     """Contains the genomic information on the variant"""
 
@@ -96,17 +184,15 @@ class variant:
             for attrib in attrs.findall("Attribute"):
                 self.attribute[attrib.get("Type")] = attrib.text
 
-        self.coordinates = dict()
-        for item in element.findall("SequenceLocation"):
-            assembly = item.get("Assembly")
-            genomic = genomicCoordinates(item, debug=debug)
-            self.coordinates[assembly] = genomic
+        self.coordinates = extract_genomic_coordinates_from_measure(element)
+
         self.geneSymbol = None
         symbols = element.findall("MeasureRelationship/Symbol")
         for symbol in symbols:
             symbol_val = textIfPresent(symbol, "ElementValue")
             if symbol_val.startswith('BRCA'):
                 self.geneSymbol = symbol_val
+
 
 
 class referenceAssertion:
