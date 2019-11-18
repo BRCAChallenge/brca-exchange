@@ -7,10 +7,7 @@ import tempfile
 import click
 import hgvs.assemblymapper
 import hgvs.dataproviders.uta
-import hgvs.normalizer
-import hgvs.parser
 import hgvs.projector
-import hgvs.validator
 import pandas as pd
 from hgvs.exceptions import HGVSError
 
@@ -42,8 +39,6 @@ VAR_OBJ_FIELD = 'var_objs'
 NEW_SYNONYMS_FIELD = 'new_syns'
 TMP_CDNA_UNORM_FIELD = 'tmp_HGVS_CDNA_FIELD_unorm'
 TMP_CDNA_NORM_FIELD = 'tmp_HGVS_CDNA_FIELD_norm'
-TMP_GENOMIC_HG37_NORM_FIELD = 'tmp_GENOMIC_HGVS_FIELD_norm'
-TMP_GENOMIC_HG38_NORM_FIELD = 'tmp_GENOMIC_HGVS_FIELD_norm'
 
 
 def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
@@ -88,32 +83,14 @@ def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
     return s_cdna
 
 
-def _get_genomic_hgvs(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
-    def compute_genomic_hgvs(row):
-        v = VCFVariant(row[CHR_COL], row[POS_COL], row[REF_COL], row[ALT_COL])
-        v38 = v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh38_Assem])
-        v37 = v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh37_Assem])
-
-        if normalize:
-            v38n = hgvs_proc.normalizing(v38)
-            v37n = hgvs_proc.normalizing(v37)
-            v38 = v38n if v38n else v38
-            v37 = v37n if v37n else v37
-        return v38, v37
-
-    var_objs = df[VAR_OBJ_FIELD]
-
-    if pkl and os.path.exists(pkl):
-        pickle_dict = pickle.load(open(pkl, 'rb'))
-        s_genomic = pd.Series([ pickle_dict[str(v)] for v in var_objs_hg37 ])
-    else:
-        s_genomic38, s_genomic37 = df.apply(compute_genomic_hgvs, axis=1)
-
-        if pkl:
-            pickle_dict = {str(v): c for (c, v) in zip(s_genomic, var_objs)}
-            pickle.dump(pickle_dict, open(pkl, 'wb'))
-
-    return s_genomic38, s_genomic37
+def compute_genomic_hgvs(cDNA, assemblyMapper):
+    try:
+        genomic_hgvs = assemblyMapper.c_to_g(cDNA)
+        return str(genomic_hgvs)
+    except hgvs.exceptions.HGVSInvalidIntervalError as e:
+        logging.info("HGVSInvalidIntervalError: The given coordinate is outside the bounds of the reference sequence: " +
+                     str(cDNA))
+        return None
 
 
 def convert_to_hg37(vars, brca_resources_dir):
@@ -218,10 +195,12 @@ def main(input, output, pkl, log_path, config_file, resources):
     #### CDNA and Genomic HGVS conversions
     df[TMP_CDNA_NORM_FIELD] = _get_cdna(df, pkl, hgvs_proc, cdna_default_ac_dict, normalize=True)
     df[PYHGVS_CDNA_COL] = df[TMP_CDNA_NORM_FIELD].apply(str)
-
-    df[TMP_GENOMIC_HG38_NORM_FIELD_HG38], df[TMP_GENOMIC_HG37_NORM_FIELD]  = _get_genomic_hgvs(df, pkl, hgvs_proc, cdna_default_ac_dict, normalize=True)
-    df[GENOMIC_HGVS_HG38_COL] = df[TMP_GENOMIC_HG38_NORM_FIELD].apply(str)
-    df[GENOMIC_HGVS_HG37_COL] = df[TMP_GENOMIC_HG37_NORM_FIELD].apply(str)
+    
+    dataProviders = hgvs.dataproviders.uta.connect()
+    df[GENOMIC_HGVS_HG38_COL] = df[TMP_CDNA_NORM_FIELD].apply(compute_genomic_hgvs, args=[hgvs.assemblymapper.AssemblyMapper(dataProviders,
+                                                              assembly_name=HgvsWrapper.GRCh38_Assem, alt_aln_method='splign')])
+    df[GENOMIC_HGVS_HG37_COL] = df[TMP_CDNA_NORM_FIELD].apply(compute_genomic_hgvs, args=[hgvs.assemblymapper.AssemblyMapper(dataProviders,
+                                                              assembly_name=HgvsWrapper.GRCh37_Assem, alt_aln_method='splign')])
 
     available_cdna = df[PYHGVS_CDNA_COL].str.startswith("NM_")
     df.loc[available_cdna, REFERENCE_SEQUENCE_COL] = df.loc[available_cdna, PYHGVS_CDNA_COL].str.split(':').apply(lambda l: l[0])
@@ -253,7 +232,7 @@ def main(input, output, pkl, log_path, config_file, resources):
 
     #### Writing out
     # cleaning up temporary fields
-    df = df.drop(columns=[VAR_OBJ_FIELD, NEW_SYNONYMS_FIELD, TMP_CDNA_NORM_FIELD, TMP_GENOMIC_HG37_NORM_FIELD, TMP_GENOMIC_HG38_NORM_FIELD])
+    df = df.drop(columns=[VAR_OBJ_FIELD, NEW_SYNONYMS_FIELD, TMP_CDNA_NORM_FIELD])
 
     df.to_csv(output, sep='\t', index=False)
 

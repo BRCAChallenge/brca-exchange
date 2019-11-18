@@ -7,7 +7,6 @@ import hgvs.assemblymapper
 import hgvs.dataproviders.uta
 import hgvs.normalizer
 import hgvs.parser
-import hgvs.projector
 import hgvs.validator
 from hgvs.exceptions import HGVSError
 
