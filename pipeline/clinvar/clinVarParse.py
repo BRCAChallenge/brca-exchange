@@ -54,7 +54,7 @@ def processSubmission(submissionSet, assembly):
                                      str(oa.id),
                                      str(oa.origin),
                                      str(oa.method),
-                                     str(vcf_var),
+                                     str(vcf_var).replace('g.', ''),
                                      str(variant.geneSymbol),
                                      str(proteinChange),
                                      str(oa.description),
