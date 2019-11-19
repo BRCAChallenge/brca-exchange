@@ -234,13 +234,13 @@ class referenceAssertion:
 
         measureSet = element.find("MeasureSet")
         #if measureSet.get("Type") == "Variant":
-        if debug:
-            if len(measureSet.findall("Measure")) > 1:
-                print(self.id, "has multiple measures")
-        if len(measureSet.findall("Measure")) == 1:
+
+        if len(measureSet.findall("Measure")) > 1:
+            logging.warn("Assertion with ID " + str(self.id) + " has multiple measures. Taking first one.")
+        if len(measureSet.findall("Measure")) >= 1:
             name = measureSet.find("Name")
             if name == None:
-                variantName = none
+                variantName = None
             else:
                 variantName = name.find("ElementValue").text
             self.variant = variant(measureSet.find("Measure"), variantName,
