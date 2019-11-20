@@ -1164,7 +1164,7 @@ var VariantDetail = React.createClass({
                                     </Col>
                                     <Col md={8} className="vcenterblock">
                                         <div className='text-center Variant-detail-title' style={{textAlign: 'center'}}>
-                                            <h1 style={{marginTop: 30}}>{variant.Genomic_Coordinate_hg38}</h1>
+                                            <h1 style={{marginTop: 30}}>{variant.Genomic_HGVS_38 ? variant.Genomic_HGVS_38 : variant.Genomic_Coordinate_hg38}</h1>
                                             <div><i>or</i></div>
                                             <h3 style={{marginTop: 10}}>
                                                 {variant['Reference_Sequence']}(<i>{variant['Gene_Symbol']}</i>){`:${variant['HGVS_cDNA'].split(":")[1]}`}
