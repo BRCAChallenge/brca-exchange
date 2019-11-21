@@ -910,6 +910,16 @@ var VariantDetail = React.createClass({
                 if (prop === "Protein_Change") {
                     title = "Abbreviated AA Change";
                 }
+                else if (prop === "Genomic_Coordinate_hg38") {
+                    if (!util.isEmptyField(variant["Genomic_HGVS_38"])) {
+                        prop = "Genomic_HGVS_38";
+                    }
+                }
+                else if (prop === "Genomic_Coordinate_hg37") {
+                    if (!util.isEmptyField(variant["Genomic_HGVS_37"])) {
+                        prop = "Genomic_HGVS_37";
+                    }
+                }
 
                 // get mupit structures if they're available
                 if (prop === "Mupit_Structure") {
