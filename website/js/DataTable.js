@@ -38,31 +38,24 @@ function setPages({data, count, deletedCount, synonyms, releaseName}, pageLength
 // Wrap Table with a version having PureRenderMixin
 var FastTable = React.createClass({
     mixins: [PureRenderMixin],
-    determineGenomicCoordinates: function(variantData) {
-        let field;
-        let hgvs;
-        field = "Genomic_Coordinate_hg37";
-        hgvs = variantData.Genomic_HGVS_37;
+    normalizeGenomicCoordinate: function(field, hgvs, variantData) {
         if (!util.isEmptyField(hgvs)) {
             variantData[field] = hgvs;
         } else {
             if (variantData[field].length > 35) {
                 variantData[field] = variantData[field].substring(0, 35) + "...";
-            } else {
-                return variantData[field];
             }
         }
+        return variantData;
+    },
+    determineGenomicCoordinates: function(variantData) {
+        let field = "Genomic_Coordinate_hg37";
+        let hgvs = variantData.Genomic_HGVS_37;
+        variantData = this.normalizeGenomicCoordinate(field, hgvs, variantData);
+
         field = "Genomic_Coordinate_hg38";
         hgvs = variantData.Genomic_HGVS_38;
-        if (!util.isEmptyField(hgvs)) {
-            variantData[field] = hgvs;
-        } else {
-            if (variantData[field].length > 35) {
-                variantData[field] = variantData[field].substring(0, 35) + "...";
-            } else {
-                return variantData[field];
-            }
-        }
+        variantData = this.normalizeGenomicCoordinate(field, hgvs, variantData);
         return variantData;
     },
     render: function () {
