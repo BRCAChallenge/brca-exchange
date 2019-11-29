@@ -117,6 +117,10 @@ show-luigi-graph: ## print some representation of the luigi compute graph on the
 test: ## Running pipeline unit tests
 	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) bash -c 'cd /opt/brca-exchange/pipeline/data && bash getdata && cd /opt/brca-exchange/pipeline && pytest --ignore=splicing/'
 
+test-coverage: ## Running pipeline unit tests with coverage information
+	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) bash -c 'cd /opt/brca-exchange/pipeline/data && bash getdata && cd /opt/brca-exchange/pipeline && pytest --cov --ignore=splicing/ && coverage html --include="/opt/brca-exchange/pipeline/*" --omit="*/test_*"'
+
+
 build-release: start-local-uta checkout build-docker setup-files setup-lovd download-resources download-seqrepo run-pipeline variants-by-source ## create new data release
 
 variants-by-source: ## postprocessing: compute statistics for changes with respect to the last release
@@ -155,6 +159,13 @@ setup-data-from-latest-release-tar: setup-files ## sets up brca output dir with 
 	tar -C $(OUT_DIR) -zxf $(PREVIOUS_RELEASE_PATH)
 
 setup-dev-env: start-local-uta build-docker setup-files download-resources ## setup development environment
+
+clean-pyc: ## remove Python file artifacts
+	find . -name '*.pyc' -exec rm -f {} +
+	find . -name '*.pyo' -exec rm -f {} +
+	find . -name '*~' -exec rm -f {} +
+	find . -name '__pycache__' -exec rm -fr {} +
+
 
 define PRINT_HELP_PYSCRIPT
 import re, sys
