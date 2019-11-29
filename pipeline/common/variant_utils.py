@@ -68,8 +68,6 @@ class VCFVariant(namedtuple("VCFVariant", "chr,pos,ref,alt")):
             # transforming 'del' to a delins
             padding = str(seq_fetcher.get_seq_at(str(chr), pos-1, 1))
 
-            # TODO: set ref if not already set
-
             if not edit_type.startswith('ins'):
                 pos -= 1
 

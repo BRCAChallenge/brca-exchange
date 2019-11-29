@@ -29,7 +29,6 @@ def test_variant_simple_roundtripping(v):
 def test_variant_hgvs_roundtripping(v):
     hgvs_wrap = HgvsWrapper()
     hgvs = variant_utils.VCFVariant.from_str(v).to_hgvs_obj(hgvs_wrap.contig_maps[hgvs_wrap.GRCh38_Assem])
-    #hgvs_wrap.normalizing(hgvs)
     assert str(variant_utils.VCFVariant.from_hgvs_obj(hgvs)) == v
 
 

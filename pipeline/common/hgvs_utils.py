@@ -80,7 +80,7 @@ class HgvsWrapper:
 
     def hg19_to_hg38(self, v):
         """
-        Conversion from hg19 (GRCh37) to hg38 via NM_ transcripts (doesn't work for intronic variants)
+        Conversion from hg19 (GRCh37) to hg38 via NM_ transcripts (doesn't work for variants outside transcripts)
         :param v:
         :return:
         """
@@ -89,11 +89,9 @@ class HgvsWrapper:
         transcripts = [t for t in am37.relevant_transcripts(v) if t.startswith('NM_')]
 
         if not transcripts:
-            raise ValueError("Didn't find transcripts for " + v)
+            raise ValueError("Didn't find transcripts for " + str(v))
 
         v_c = am37.g_to_c(v, transcripts[0])
-
-        # TODO: write test, also with intronic variant
         return self.hgvs_ams[self.GRCh38_Assem].c_to_g(v_c)
 
 
