@@ -92,8 +92,6 @@ def compute_genomic_hgvs(cDNA, assemblyMapper):
         return None
 
 
-
-
 def convert_to_hg37(vars, brca_resources_dir):
     def pseudo_vcf_entry(v):
         entries = [v.chr, v.pos, '.', v.ref, v.alt, '', '', '']
