@@ -12,6 +12,7 @@ var _ = require('underscore');
 var cx = require('classnames');
 var hgvs = require('./hgvs');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
+var util = require('./util');
 
 var filterDisplay = v => v == null ? 'Any' : v;
 var filterAny = v => v === 'Any' ? null : v;
@@ -37,22 +38,31 @@ function setPages({data, count, deletedCount, synonyms, releaseName}, pageLength
 // Wrap Table with a version having PureRenderMixin
 var FastTable = React.createClass({
     mixins: [PureRenderMixin],
-    truncateGenomicCoordinates: function(variantData) {
-        const genomicCoordinateFields = ["Genomic_Coordinate_hg37", "Genomic_Coordinate_hg38"];
-        genomicCoordinateFields.forEach(function(field) {
+    normalizeGenomicCoordinate: function(field, hgvs, variantData) {
+        if (!util.isEmptyField(hgvs)) {
+            variantData[field] = hgvs;
+        } else {
             if (variantData[field].length > 35) {
                 variantData[field] = variantData[field].substring(0, 35) + "...";
-            } else {
-                return variantData[field];
             }
-        });
+        }
+        return variantData;
+    },
+    determineGenomicCoordinates: function(variantData) {
+        let field = "Genomic_Coordinate_hg37";
+        let hgvs = variantData.Genomic_HGVS_37;
+        variantData = this.normalizeGenomicCoordinate(field, hgvs, variantData);
+
+        field = "Genomic_Coordinate_hg38";
+        hgvs = variantData.Genomic_HGVS_38;
+        variantData = this.normalizeGenomicCoordinate(field, hgvs, variantData);
         return variantData;
     },
     render: function () {
         var {dataArray, ...props} = this.props;
         if (dataArray.length > 0) {
             dataArray = _.map(dataArray, function(variantData) {
-                return this.truncateGenomicCoordinates(variantData);
+                return this.determineGenomicCoordinates(variantData);
             }, this);
         }
         return <Table {...props} dataArray={dataArray}/>;

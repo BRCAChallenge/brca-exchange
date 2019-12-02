@@ -116,7 +116,7 @@ function normalizedFieldDisplay(value) {
 }
 
 
-function generateLinkToGenomeBrowser(prop, value) {
+function generateLinkToGenomeBrowser(prop, value, hgvs) {
     let hgVal = (prop === "Genomic_Coordinate_hg38") ? '38' : '19';
     let genomicCoordinate = value;
     let genomicCoordinateElements = genomicCoordinate.split(':');
@@ -126,6 +126,9 @@ function generateLinkToGenomeBrowser(prop, value) {
     let positionRangeEnd = position + ref.length + 1;
     let positionParameter = (genomicCoordinate.length > 1500) ? positionRangeStart + '-' + positionRangeEnd : genomicCoordinate;
     let genomeBrowserUrl = 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg' + hgVal + '&position=' + positionParameter + '&hubUrl=https://brcaexchange.org/trackhubs/hub.txt';
+    if (!isEmptyField(hgvs)) {
+        value = hgvs;
+    }
     return <a target="_blank" href={genomeBrowserUrl}>{value}</a>;
 }
 
@@ -258,7 +261,13 @@ function getFormattedFieldByProp(prop, variant) {
     } else if (/count.*_GnomAD/.test(prop) || /number.*_GnomAD/.test(prop)) {
         rowItem = variant[prop];
     } else if (prop === "Genomic_Coordinate_hg38" || prop === "Genomic_Coordinate_hg37") {
-        rowItem = generateLinkToGenomeBrowser(prop, variant[prop]);
+        let hgvs;
+        if (prop === "Genomic_Coordinate_hg38") {
+            hgvs = variant.Genomic_HGVS_38;
+        } else if (prop === "Genomic_Coordinate_hg37") {
+            hgvs = variant.Genomic_HGVS_37;
+        }
+        rowItem = generateLinkToGenomeBrowser(prop, variant[prop], hgvs);
     } else if (prop === "Synonyms") {
         let syns = variant[prop].split(',');
         let synsNoWhitespace = _.map(syns, s => s.replace(' ', '_'));

@@ -7,10 +7,7 @@ import tempfile
 import click
 import hgvs.assemblymapper
 import hgvs.dataproviders.uta
-import hgvs.normalizer
-import hgvs.parser
 import hgvs.projector
-import hgvs.validator
 import pandas as pd
 from hgvs.exceptions import HGVSError
 
@@ -31,6 +28,8 @@ PYHGVS_GENOMIC_COORDINATE_38_COL = 'pyhgvs_Genomic_Coordinate_38'
 PYHGVS_HG37_END_COL = 'pyhgvs_Hg37_End'
 PYHGVS_HG37_START_COL = 'pyhgvs_Hg37_Start'
 PYHGVS_PROTEIN_COL = 'pyhgvs_Protein'
+GENOMIC_HGVS_HG37_COL = 'Genomic_HGVS_37'
+GENOMIC_HGVS_HG38_COL = 'Genomic_HGVS_38'
 REFERENCE_SEQUENCE_COL = 'Reference_Sequence'
 REF_COL = 'Ref'
 SYNONYMS_COL = 'Synonyms'
@@ -60,7 +59,6 @@ def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
         if normalize:
             vn = hgvs_proc.normalizing(v)
             v = vn if vn else v
-
         return hgvs_proc.to_cdna(v)
 
     def from_field_or_compute(row):
@@ -74,7 +72,7 @@ def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
 
     if pkl and os.path.exists(pkl):
         pickle_dict = pickle.load(open(pkl, 'rb'))
-        s_cdna = pd.Series([ pickle_dict[str(v)]  for v in var_objs  ])
+        s_cdna = pd.Series([ pickle_dict[str(v)] for v in var_objs ])
     else:
         s_cdna = df.apply(from_field_or_compute, axis=1)
 
@@ -83,6 +81,15 @@ def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
             pickle.dump(pickle_dict, open(pkl, 'wb'))
 
     return s_cdna
+
+
+def compute_genomic_hgvs(cDNA, assemblyMapper):
+    try:
+        genomic_hgvs = assemblyMapper.c_to_g(cDNA)
+        return str(genomic_hgvs)
+    except HGVSError as e:
+        logging.info("Exception during conversion of " + str(cDNA) + " to genomic coordinates: " + str(e))
+        return None
 
 
 def convert_to_hg37(vars, brca_resources_dir):
@@ -184,9 +191,15 @@ def main(input, output, pkl, log_path, config_file, resources):
 
     df[VAR_OBJ_FIELD] = df.apply(lambda x: VCFVariant(x[CHR_COL], x[POS_COL], x[REF_COL], x[ALT_COL]), axis=1)
 
-    #### CDNA conversions
+    #### CDNA and Genomic HGVS conversions
     df[TMP_CDNA_NORM_FIELD] = _get_cdna(df, pkl, hgvs_proc, cdna_default_ac_dict, normalize=True)
     df[PYHGVS_CDNA_COL] = df[TMP_CDNA_NORM_FIELD].apply(str)
+    
+    dataProviders = hgvs.dataproviders.uta.connect()
+    df[GENOMIC_HGVS_HG38_COL] = df[TMP_CDNA_NORM_FIELD].apply(compute_genomic_hgvs, args=[hgvs.assemblymapper.AssemblyMapper(dataProviders,
+                                                              assembly_name=HgvsWrapper.GRCh38_Assem, alt_aln_method='splign')])
+    df[GENOMIC_HGVS_HG37_COL] = df[TMP_CDNA_NORM_FIELD].apply(compute_genomic_hgvs, args=[hgvs.assemblymapper.AssemblyMapper(dataProviders,
+                                                              assembly_name=HgvsWrapper.GRCh37_Assem, alt_aln_method='splign')])
 
     available_cdna = df[PYHGVS_CDNA_COL].str.startswith("NM_")
     df.loc[available_cdna, REFERENCE_SEQUENCE_COL] = df.loc[available_cdna, PYHGVS_CDNA_COL].str.split(':').apply(lambda l: l[0])
