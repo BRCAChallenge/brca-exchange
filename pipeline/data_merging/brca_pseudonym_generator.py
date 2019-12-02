@@ -87,10 +87,11 @@ def compute_genomic_hgvs(cDNA, assemblyMapper):
     try:
         genomic_hgvs = assemblyMapper.c_to_g(cDNA)
         return str(genomic_hgvs)
-    except hgvs.exceptions.HGVSInvalidIntervalError as e:
-        logging.info("HGVSInvalidIntervalError: The given coordinate is outside the bounds of the reference sequence: " +
-                     str(cDNA))
+    except HGVSError as e:
+        logging.info("Exception during conversion of " + str(cDNA) + " to genomic coordinates: " + str(e))
         return None
+
+
 
 
 def convert_to_hg37(vars, brca_resources_dir):
