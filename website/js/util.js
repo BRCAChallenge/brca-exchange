@@ -91,12 +91,15 @@ function normalizeDateFieldDisplay(value) {
 
 // replaces commas with comma-spaces to wrap long lines better, removes blank entries from comma-delimited lists,
 // and normalizes blank/null values to a single hyphen
-function normalizedFieldDisplay(value) {
+function normalizedFieldDisplay(value, prop) {
     if (value) {
+        // leave underscores in Refence Sequence field
+        if (prop !== "Reference_Sequence") {
+            value = value.split(/_+/).join(" ");
+        }
         // replace any number of underscores with spaces
         // make sure commas, if present, wrap
         value = value
-            .split(/_+/).join(" ")
             .split(",")
             .map(x => x.trim())
             .filter(x => x && x !== '-')
@@ -106,8 +109,7 @@ function normalizedFieldDisplay(value) {
         if (value.trim() === "") {
             value = "-";
         }
-    }
-    else {
+    } else {
         // similar to above, normalize blank entries to a hyphen
         value = "-";
     }
@@ -273,7 +275,7 @@ function getFormattedFieldByProp(prop, variant) {
         let synsNoWhitespace = _.map(syns, s => s.replace(' ', '_'));
         rowItem = synsNoWhitespace.join(", ");
     } else {
-        rowItem = normalizedFieldDisplay(variant[prop]);
+        rowItem = normalizedFieldDisplay(variant[prop], prop);
     }
 
     if (_.contains(dateKeys, prop)) {
