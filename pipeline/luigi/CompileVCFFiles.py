@@ -533,7 +533,7 @@ class SortSharedLOVDOutput(DefaultPipelineTask):
             lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
 
 
-@requires(DownloadStaticLOVDData)
+@requires(SortSharedLOVDOutput)
 class CopySharedLOVDOutputToOutputDir(DefaultPipelineTask):
 
     def output(self):
