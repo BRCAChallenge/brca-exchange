@@ -24,6 +24,10 @@ def add_submission_ids(f_in_data_frame):
         cdna = row['cDNA']
         submitters = row['submitters']
         remarks = row['remarks']
+        if isinstance(row['remarks'], basestring):
+            remarks = row['remarks']
+        else:
+            remarks = ''
         f_in_data_frame.loc[index, 'submission_id'] = cdna + submitters + remarks
     return f_in_data_frame
 
