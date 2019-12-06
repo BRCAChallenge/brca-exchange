@@ -86,11 +86,11 @@ const VariantSubmitter = React.createClass({
             );
         }
         else if (source === 'LOVD') {
-            const variantEffect = util.getFormattedFieldByProp("Variant_effect_LOVD", data);
+            const clinicalClassification = util.getFormattedFieldByProp("Clinical_classification_LOVD", data);
 
             extraHeaderItems = (
                 <div style={{whiteSpace: 'nowrap', overflow: 'hidden'}}>
-                {`Variant Effect: ${variantEffect}`}
+                {`Clinical Classification: ${clinicalClassification}`}
                 </div>
             );
         }
