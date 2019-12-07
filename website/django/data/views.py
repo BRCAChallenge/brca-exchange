@@ -12,7 +12,6 @@ from django.db.models.functions import Concat
 from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.gzip import gzip_page
-
 from .models import (
     Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType, Report, ReportDiff,
     InSilicoPriors, VariantPaper, Paper, VariantRepresentation
@@ -232,10 +231,10 @@ def report_to_dict(report_object):
         # don't display ClinVar report diffs prior to April 2018
         cutoff_date = datetime.strptime('Apr 1 2018  12:00AM', '%b %d %Y %I:%M%p')
     elif report_object.Source == "LOVD":
-        # don't display LOVD report diffs prior to November 4 2018 (we
-        # updated the definition of LOVD submissions in the early November
+        # don't display LOVD report diffs prior to December 2 2019 (we
+        # updated the definition of LOVD submissions in the early December
         # release, so it only makes sense to show diffs from following releases)
-        cutoff_date = datetime.strptime('Nov 4 2018  12:00AM', '%b %d %Y %I:%M%p')
+        cutoff_date = datetime.strptime('Dec 2 2018  12:00AM', '%b %d %Y %I:%M%p')
     try:
         if report_dict["Data_Release"]["date"] < cutoff_date:
             report_dict["Diff"] = None
