@@ -12,7 +12,6 @@ import csv
 import psycopg2
 from data.utilities import update_autocomplete_words
 from tqdm import tqdm
-
 from data.management.commands.add_diff_json import add_diffs
 
 
@@ -212,7 +211,7 @@ class Command(BaseCommand):
 
         # add removed reports to dict
         for row in removed_reports_reader:
-            report = dict(list(zip(reports_header, row)))
+            report = dict(list(zip(removed_reports_header, row)))
             report['change_type'] = 'deleted'
             source = report['Source']
             bx_id = report['BX_ID_' + source]
