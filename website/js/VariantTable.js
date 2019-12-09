@@ -155,7 +155,6 @@ const researchModeGroups = [
                 // displayed here in full since the display in the header is potentially truncated
                 {title: 'Submitter(s)', prop: 'Submitters_LOVD'},
                 {title: 'Clinical Classification', prop: 'Classification_LOVD'},
-                {title: 'Variant Effect', prop: 'Variant_effect_LOVD'},
 
                 {title: 'Variant Data Type', prop: 'Genetic_origin_LOVD'},
                 {title: 'Variant Frequency', prop: 'Variant_frequency_LOVD'},
@@ -383,7 +382,6 @@ const researchModeColumns = [
     {title: 'Variant Data Type (LOVD)', prop: 'Genetic_origin_LOVD'},
     {title: 'Clinical Classification (LOVD)', prop: 'Classification_LOVD'},
     {title: 'Individuals (LOVD)', prop: 'Individuals_LOVD'},
-    {title: 'Variant Effect (LOVD)', prop: 'Variant_effect_LOVD'},
     {title: 'Created Date (LOVD)', prop: 'Created_date_LOVD'},
     {title: 'Edited Date (LOVD)', prop: 'Edited_date_LOVD'},
     {title: 'Variant Remarks (LOVD)', prop: 'Remarks_LOVD'},
