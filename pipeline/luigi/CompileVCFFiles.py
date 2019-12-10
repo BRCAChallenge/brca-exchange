@@ -186,21 +186,30 @@ class CopyBICOutputToOutputDir(DefaultPipelineTask):
 
 
 class ExtractDataFromLatestEXLOVD(DefaultPipelineTask):
-    def output(self):
-        ex_lovd_file_dir = self.cfg.file_parent_dir + '/exLOVD'
+    dir_name = 'exLOVD'
 
-        return {'brca1': luigi.LocalTarget(ex_lovd_file_dir + "/BRCA1.txt"),
-                'brca2': luigi.LocalTarget(ex_lovd_file_dir + "/BRCA2.txt")}
+    def __init__(self):
+        super(ExtractDataFromLatestEXLOVD, self).__init__()
+        self.ex_lovd_file_dir = os.path.join(self.cfg.file_parent_dir,
+                                        ExtractDataFromLatestEXLOVD.dir_name)
+
+    def output(self):
+        return {'brca1': luigi.LocalTarget(os.path.join(self.ex_lovd_file_dir, "BRCA1.txt")),
+                'brca2': luigi.LocalTarget(os.path.join(self.ex_lovd_file_dir, "BRCA2.txt"))}
 
     def run(self):
-        ex_lovd_file_dir = pipeline_utils.create_path_if_nonexistent(
-            self.cfg.file_parent_dir + '/exLOVD')
+        pipeline_utils.create_path_if_nonexistent(self.ex_lovd_file_dir)
+
+        # calculating host path because we are running a docker within a docker
+        ex_lovd_file_dir_host = os.path.join(os.path.dirname(self.cfg.output_dir_host), ExtractDataFromLatestEXLOVD.dir_name)
 
         os.chdir(lovd_method_dir)
 
         ex_lovd_data_host_url = "http://hci-exlovd.hci.utah.edu/"
-        args = ["extract_data.py", "-u", ex_lovd_data_host_url, "-l", "BRCA1",
-                "BRCA2", "-o", ex_lovd_file_dir]
+
+        args = ['bash', 'extract_latest_exlovd.sh', ex_lovd_file_dir_host, "-u", ex_lovd_data_host_url, "-l", "BRCA1",
+                "BRCA2", "-o", "/data"]
+
         print "Running extract_data.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
