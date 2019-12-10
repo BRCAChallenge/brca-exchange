@@ -14,12 +14,12 @@ var config = require('./config');
 require('./css/Autosuggest.css');
 
 
-function getSuggestions(value, callback) {
+function getSuggestions(value, callback, release) {
     var matchStr = encodeURIComponent(value.toLowerCase());
     var suggestionsEndpoint = `${config.backend_url}/data/suggestions/?term=${matchStr}`;
     // If a release is specified, include it in the request
-    if (this.props.release) {
-        suggestionsEndpoint += `&release=${this.props.release}`;
+    if (release) {
+        suggestionsEndpoint += `&release=${release}`;
     }
     $.ajax({
         url: suggestionsEndpoint,
@@ -34,12 +34,12 @@ function getSuggestions(value, callback) {
     });
 }
 
-function renderSuggestion(suggestion, input) {
-    var maxLengthToDisplay = 50;
+function renderSuggestion(suggestion, { query }) {
+    const maxLengthToDisplay = 50;
     return (
         <span>
-            <strong>{suggestion.slice(0, input.length)}</strong>
-            {suggestion.slice(input.length, maxLengthToDisplay)}
+            <strong>{suggestion.slice(0, query.length)}</strong>
+            {suggestion.slice(query.length, maxLengthToDisplay)}
             {(suggestion.length > maxLengthToDisplay) ? "..." : ""}
         </span>
     );
@@ -58,7 +58,7 @@ var VariantSearch = React.createClass({
     showHelp: function (title) {
         this.transitionTo(`/help#${slugify(title)}`);
     },
-    onChange: function (value) {
+    onChange: function (event, { newValue: value }) {
         var {onChange} = this.props;
         // XXX We're getting an onChange event when props are updated, which
         // leads to a loop of sorts. Check if value has actually changed before
@@ -82,9 +82,10 @@ var VariantSearch = React.createClass({
     },
     getInitialState: function () {
         return {
-            value: this.props.value,
+            value: this.props.value || '',
             release: this.props.release,
-            placeholder: "search for \"c.1105G>A\", \"brca1\" or \"IVS7+1037T>C\""
+            placeholder: "search for \"c.1105G>A\", \"brca1\" or \"IVS7+1037T>C\"",
+            suggestions: []
         };
     },
     onFocus: function () {
@@ -93,38 +94,51 @@ var VariantSearch = React.createClass({
     onBlur: function() {
         this.setState({placeholder: "search for \"c.1105G>A\", \"brca1\" or \"IVS7+1037T>C\""});
     },
+    onFetchSuggestions({ value }) {
+        getSuggestions(value, (error, results) => {
+            this.setState({ suggestions: results });
+        }, this.state.release);
+    },
+    onClearSuggestions() {
+        this.setState({ suggestions: [] });
+    },
     componentWillReceiveProps: function (newProps) {
         this.setState({value: newProps.value});
     },
     render: function () {
-        var {id, onSearch} = this.props,
-            {release, value} = this.state;
+        const {id, onSearch} = this.props;
+        const {value, suggestions} = this.state;
+
         return (
             <div className='search-box'>
                 <form onSubmit={this.onSubmit} style={{display: 'inline'}}>
-                    <input type='submit' className='input-sm'style={{display: 'none'}} />
+                    <input type='submit' className='input-sm' style={{display: 'none'}} />
                     <div className='text-nowrap help-target'>
                         <AutoSuggest
                             id={id}
                             className='dropdown open'
-                            cache={false}
-                            value={value}
-                            release={release}
-                            inputAttributes={{
+                            inputProps={{
                                 className: 'variant-search-input',
                                 placeholder: this.state.placeholder,
                                 onChange: this.onChange,
                                 onFocus: this.onFocus,
-                                onBlur: this.onBlur
+                                onBlur: this.onBlur,
+                                value: value
                             }}
-                            showWhen={input => input.trim().length > 0}
-                            suggestions={_.debounce(getSuggestions, 200)}
-                            onSuggestionSelected={v => onSearch(v)}
-                            suggestionRenderer={renderSuggestion}
-                            ref='input' />
+                            shouldRenderSuggestions={input => input.trim().length > 0}
+                            onSuggestionsFetchRequested={_.debounce(this.onFetchSuggestions, 200)}
+                            onSuggestionsClearRequested={this.onClearSuggestions}
+                            getSuggestionValue={(x) => x}
+                            suggestions={suggestions}
+                            onSuggestionSelected={(event, { suggestionValue }) => onSearch(suggestionValue)}
+                            renderSuggestion={renderSuggestion}
+                            ref='input'
+                        />
+
                         <span
                             className="glyphicon glyphicon-search search-box-icon"
-                            onClick={this.onClickSearchButton}/>
+                            onClick={this.onClickSearchButton}
+                        />
                     </div>
                 </form>
             </div>

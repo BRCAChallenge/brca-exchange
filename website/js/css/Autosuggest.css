@@ -1,5 +1,5 @@
 /* Try to match bootstrap .dropdown */
-.react-autosuggest {
+.react-autosuggest__container {
 	position: relative;
 	display: inline-block;
 	width: 100%;
@@ -8,13 +8,13 @@
 /* Remove radius from input when dropdown is open, so
  * the dropdown looks connected.
  */
-.react-autosuggest input[aria-expanded="true"] {
+.react-autosuggest__container input[aria-expanded="true"] {
 	border-bottom-left-radius: 0;
 	border-bottom-right-radius: 0;
 }
-  
+
 /* Try to match bootstrap .dropdown-menu */
-.react-autosuggest__suggestions {
+.react-autosuggest__suggestions-list {
 	position: absolute;
 	top: 100%;
 	left: 0;
@@ -30,7 +30,6 @@
 	-webkit-background-clip: padding-box;
 	background-clip: padding-box;
 	border: 1px solid #ccc;
-	border: 1px solid rgba(0, 0, 0, .15);
 	border-radius: 4px;
 	-webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
 	box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
@@ -47,9 +46,9 @@
 	white-space: nowrap;
 	cursor: pointer;
 }
-  
+
 /* Try to match bootstrap .dropdown-menu > li > a:focus */
-.react-autosuggest__suggestion--focused {
+.react-autosuggest__suggestion--highlighted {
 	color: #262626;
 	text-decoration: none;
 	background-color: #f5f5f5;
