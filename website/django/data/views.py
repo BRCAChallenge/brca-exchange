@@ -21,7 +21,6 @@ from django.views.decorators.http import require_http_methods
 import google.protobuf.json_format as json_format
 from datetime import datetime
 from operator import itemgetter
-
 import logging
 from functools import reduce
 
@@ -151,7 +150,7 @@ def sitemap(request):
 
 def variant_reports(request, variant_id):
     variant_id = int(variant_id)
-    query = Report.objects.filter(Variant_id=variant_id)
+    query = Report.objects.filter(Variant_id=variant_id).exclude(Change_Type_id='2')
     report_versions = []
     for report in query:
         key = None
@@ -168,6 +167,8 @@ def variant_reports(request, variant_id):
                     .order_by('-Data_Release_id').select_related('Data_Release')
             report_versions.extend(list(map(report_to_dict, report_query)))
         elif report.Source == "LOVD":
+            # only return submissions on or after 12/2/2019 since we redefined submission ids in this release
+            cutoff_date = datetime.strptime('Dec 2 2018  12:00AM', '%b %d %Y %I:%M%p')
             key = report.Submission_ID_LOVD
             if not key or key == '-':
                 # if no key is available, skip report history
@@ -176,7 +177,7 @@ def variant_reports(request, variant_id):
                 # extend the selection w/reports that have matching keys,
                 # but only up until the requested variants' release (i.e., same as for ClinVar)
                 report_query = Report.objects\
-                    .filter(Data_Release_id__lte=report.Data_Release.id, Submission_ID_LOVD=key)\
+                    .filter(Data_Release_id__lte=report.Data_Release.id, Submission_ID_LOVD=key, Data_Release__date__gte='2019-12-02')\
                     .order_by('-Data_Release_id').select_related('Data_Release')
             report_versions.extend(list(map(report_to_dict, report_query)))
 
