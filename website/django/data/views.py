@@ -150,7 +150,8 @@ def sitemap(request):
 
 def variant_reports(request, variant_id):
     variant_id = int(variant_id)
-    query = Report.objects.filter(Variant_id=variant_id).exclude(Change_Type_id='2')
+    change_types_map = {x['name']:x['id'] for x in list(ChangeType.objects.values())}
+    query = Report.objects.filter(Variant_id=variant_id).exclude(Change_Type_id=change_types_map['deleted'])
     report_versions = []
     for report in query:
         key = None
