@@ -390,10 +390,14 @@ def apply_search(query, search_term, quotes='', release=None):
 
         BRCA1:chr17:g.43094692:G>C --> Gene_Symbol:Genomic_Coordinate_hg38
         BRCA1:chr17:g.41246709:G>C --> Gene_Symbol:Genomic_Coordinate_hg37
+        BRCA1:NC_000013.11:g.32398880A>C --> Gene_Symbol:Genomic_HGVS_38
+        BRCA1:NC_000013.10:g.32973017A>C --> Gene_Symbol:Genomic_HGVS_37
         BRCA1:958C>G --> Gene_Symbol:BIC_Nomenclature
         BRCA1:c.839C>G --> Gene_Symbol:HGVS_cDNA
         NM_007294.3:chr17:g.43094692:G>C --> Reference_Sequence:Genomic_Coordinate_hg38
         NM_007294.3:chr17:g.41246709:G>C --> Reference_Sequence:Genomic_Coordinate_hg37
+        NM_007294.3:NC_000013.11:g.32398880A>C --> Gene_Symbol:Genomic_HGVS_38
+        NM_007294.3:NC_000013.10:g.32973017A>C --> Gene_Symbol:Genomic_HGVS_37
         NM_007294.3:958C>G --> Reference_Sequence:BIC_Nomenclature
         NM_007294.3:c.839C>G --> Reference_Sequence:HGVS_cDNA
         BRCA1:p.(Ala280Gly) --> Gene_Symbol:HGVS_Protein.split(':')[1] (HGVS_Protein is actually stored as NP_009225.1:p.(Ala280Gly), so this has to be split on the ":")
@@ -414,6 +418,16 @@ def apply_search(query, search_term, quotes='', release=None):
         search_term = search_term.replace('chr17:', 'chr17:g.')
     if 'chr13:' in search_term and 'g.' not in search_term:
         search_term = search_term.replace('chr13:', 'chr13:g.')
+
+    # Accept genomic hgvs nomenclature with or without a 'g.' before the position
+    if 'nc_000013.11:' in search_term and 'g.' not in search_term:
+        search_term = search_term.replace('nc_000013.11:', 'nc_000013.11:g.')
+    if 'nc_000017.11:' in search_term and 'g.' not in search_term:
+        search_term = search_term.replace('nc_000017.11:', 'nc_000017.11:g.')
+    if 'nc_000013.10:' in search_term and 'g.' not in search_term:
+        search_term = search_term.replace('nc_000013.10:', 'nc_000013.10:g.')
+    if 'nc_000017.10:' in search_term and 'g.' not in search_term:
+        search_term = search_term.replace('nc_000017.10:', 'nc_000017.10:g.')
 
     p_hgvs_protein_colon = re.compile("^np_[0-9]{6}.[0-9]:")
     m_hgvs_protein_colon = p_hgvs_protein_colon.match(search_term)
@@ -463,6 +477,8 @@ def apply_search(query, search_term, quotes='', release=None):
             Q(HGVS_Protein__icontains=suffix) |
             Q(Genomic_Coordinate_hg38__istartswith=suffix) |
             Q(Genomic_Coordinate_hg37__istartswith=suffix) |
+            Q(Genomic_HGVS_38__istartswith=suffix) |
+            Q(Genomic_HGVS_37__istartswith=suffix) |
             Q(BIC_Nomenclature__istartswith=suffix) |
             Q(Protein_Change__istartswith=suffix) |
             Q(Synonyms__icontains=comma_prefixed_suffix) |
@@ -473,6 +489,7 @@ def apply_search(query, search_term, quotes='', release=None):
             Q(HGVS_cDNA__icontains=suffix) |
             Q(HGVS_Protein__icontains=suffix) |
             Q(Genomic_Coordinate_hg38__istartswith=suffix) |
+            Q(Genomic_HGVS_38__istartswith=suffix) |
             Q(BIC_Nomenclature__istartswith=suffix) |
             Q(Protein_Change__istartswith=suffix)
         )
@@ -486,6 +503,8 @@ def apply_search(query, search_term, quotes='', release=None):
             Q(HGVS_cDNA__icontains=suffix) |
             Q(Genomic_Coordinate_hg38__istartswith=suffix) |
             Q(Genomic_Coordinate_hg37__istartswith=suffix) |
+            Q(Genomic_HGVS_38__istartswith=suffix) |
+            Q(Genomic_HGVS_37__istartswith=suffix) |
             Q(BIC_Nomenclature__istartswith=suffix) |
             Q(Synonyms__icontains=comma_prefixed_suffix) |
             Q(Synonyms__istartswith=suffix)
@@ -493,6 +512,7 @@ def apply_search(query, search_term, quotes='', release=None):
         non_synonyms = results.filter(
             Q(HGVS_cDNA__icontains=suffix) |
             Q(Genomic_Coordinate_hg38__istartswith=suffix) |
+            Q(Genomic_HGVS_38__istartswith=suffix) |
             Q(BIC_Nomenclature__istartswith=suffix)
         )
     # Handle clinvar accession numbers
@@ -515,6 +535,8 @@ def apply_search(query, search_term, quotes='', release=None):
             Q(Pathogenicity_expert__icontains=search_term) |
             Q(Genomic_Coordinate_hg38__icontains=search_term) |
             Q(Genomic_Coordinate_hg37__icontains=search_term) |
+            Q(Genomic_HGVS_38__istartswith=search_term) |
+            Q(Genomic_HGVS_37__istartswith=search_term) |
             Q(Synonyms__icontains=search_term) |
             Q(Gene_Symbol__icontains=search_term) |
             Q(HGVS_cDNA__icontains=search_term) |
@@ -527,6 +549,7 @@ def apply_search(query, search_term, quotes='', release=None):
         non_synonyms = query.filter(
             Q(Pathogenicity_expert__icontains=search_term) |
             Q(Genomic_Coordinate_hg38__icontains=search_term) |
+            Q(Genomic_HGVS_38__istartswith=search_term) |
             Q(Gene_Symbol__icontains=search_term) |
             Q(HGVS_cDNA__icontains=search_term) |
             Q(BIC_Nomenclature__icontains=search_term) |
