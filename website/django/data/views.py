@@ -169,7 +169,7 @@ def variant_reports(request, variant_id):
             report_versions.extend(list(map(report_to_dict, report_query)))
         elif report.Source == "LOVD":
             # only return submissions on or after 12/2/2019 since we redefined submission ids in this release
-            cutoff_date = datetime.strptime('Dec 2 2018  12:00AM', '%b %d %Y %I:%M%p')
+            cutoff_date = '2019-12-02'
             key = report.Submission_ID_LOVD
             if not key or key == '-':
                 # if no key is available, skip report history
@@ -178,7 +178,7 @@ def variant_reports(request, variant_id):
                 # extend the selection w/reports that have matching keys,
                 # but only up until the requested variants' release (i.e., same as for ClinVar)
                 report_query = Report.objects\
-                    .filter(Data_Release_id__lte=report.Data_Release.id, Submission_ID_LOVD=key, Data_Release__date__gte='2019-12-02')\
+                    .filter(Data_Release_id__lte=report.Data_Release.id, Submission_ID_LOVD=key, Data_Release__date__gte=cutoff_date)\
                     .order_by('-Data_Release_id').select_related('Data_Release')
             report_versions.extend(list(map(report_to_dict, report_query)))
 
