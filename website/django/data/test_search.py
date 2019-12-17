@@ -37,7 +37,7 @@ def create_variant_and_materialized_view(variant_data):
     try:
         data_release = DataRelease.objects.get(id=release_id)
     except DataRelease.DoesNotExist:
-        data_release = DataRelease.objects.create(date='2017-12-26', id=release_id, name=1)
+        data_release = DataRelease.objects.create(date='2019-12-26', id=release_id, name=1)
     with connection.cursor() as cursor:
         cursor.execute("REFRESH MATERIALIZED VIEW currentvariant")
     materialized_view = CurrentVariant.objects.get(Genomic_Coordinate_hg38=variant.Genomic_Coordinate_hg38)
@@ -1011,7 +1011,7 @@ class VariantTestCase(TestCase):
         second_version_clinvar_report = create_report_and_associate_to_variant(test_data.second_version_clinvar_report(), new_variant)
 
         # second versions need a second data release to associate with
-        second_data_release = DataRelease.objects.create(date='2018-12-26', id=2, name=2)
+        second_data_release = DataRelease.objects.create(date='2019-12-26', id=2, name=2)
 
         request = self.factory.get(
             '/data/variant/%s/reports' % new_variant.id)

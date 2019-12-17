@@ -673,7 +673,7 @@ var VariantDetail = React.createClass({
             if (version.Source === "ClinVar") {
                 return util.getFormattedFieldByProp("Clinical_Significance_ClinVar", version);
             } else {
-                return util.getFormattedFieldByProp("Variant_effect_LOVD", version);
+                return util.getFormattedFieldByProp("Classification_LOVD", version);
             }
         } else {
             // Only concerned about expert pathogenicity for diff
@@ -1107,7 +1107,7 @@ var VariantDetail = React.createClass({
             var lovdDiffRows = _.map(sortedSubmissions.LOVD, function(submissions) {
                 let newestSubmission = submissions ? submissions[0] : '';
                 let oldestSubmission = submissions ? submissions[submissions.length - 1] : '';
-                const significance = util.sentenceCase(util.getFormattedFieldByProp("Variant_Effect_LOVD", newestSubmission)
+                const significance = util.sentenceCase(util.getFormattedFieldByProp("Classification_LOVD", newestSubmission)
                 .replace(/(variant of unknown significance|uncertain significance)/i, 'VUS'));
                 const submitter = util.abbreviatedSubmitter(util.getFormattedFieldByProp("Submitters_LOVD", newestSubmission));
                 return (

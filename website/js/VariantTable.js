@@ -154,18 +154,16 @@ const researchModeGroups = [
             cols: [
                 // displayed here in full since the display in the header is potentially truncated
                 {title: 'Submitter(s)', prop: 'Submitters_LOVD'},
-
-                // added this field (redundantly?) b/c it's not noticeable in the header
-                {title: 'Variant Effect', prop: 'Variant_effect_LOVD'},
+                {title: 'Clinical Classification', prop: 'Classification_LOVD'},
 
                 {title: 'Variant Data Type', prop: 'Genetic_origin_LOVD'},
+                {title: 'Variant Frequency', prop: 'Variant_frequency_LOVD'},
                 {title: 'Individuals', prop: 'Individuals_LOVD'},
                 {title: 'Variant ID', prop: 'DBID_LOVD'},
                 {title: 'Variant Haplotype', prop: 'Variant_haplotype_LOVD'},
-                {title: 'Functional Analysis Method', prop: 'Functional_analysis_technique_LOVD'},
-                {title: 'Functional Analysis Result', prop: 'Functional_analysis_result_LOVD'},
                 {title: 'Created Date', prop: 'Created_date_LOVD'},
                 {title: 'Edited Date', prop: 'Edited_date_LOVD'},
+                {title: 'Variant Remarks', prop: 'Remarks_LOVD'},
             ]
         }
     },
@@ -382,10 +380,11 @@ const researchModeColumns = [
     {title: 'RNA (LOVD)', prop: 'RNA_LOVD'},
     {title: 'Submitters (LOVD)', prop: 'Submitters_LOVD'},
     {title: 'Variant Data Type (LOVD)', prop: 'Genetic_origin_LOVD'},
+    {title: 'Clinical Classification (LOVD)', prop: 'Classification_LOVD'},
     {title: 'Individuals (LOVD)', prop: 'Individuals_LOVD'},
-    {title: 'Variant Effect (LOVD)', prop: 'Variant_effect_LOVD'},
     {title: 'Created Date (LOVD)', prop: 'Created_date_LOVD'},
     {title: 'Edited Date (LOVD)', prop: 'Edited_date_LOVD'},
+    {title: 'Variant Remarks (LOVD)', prop: 'Remarks_LOVD'},
     {title: 'Variant ID (LOVD)', prop: 'DBID_LOVD'},
     {title: 'Allele Origin (ClinVar)', prop: 'Allele_Origin_ClinVar'},
     {title: 'Allele Origin (ENIGMA)', prop: 'Allele_origin_ENIGMA'},
