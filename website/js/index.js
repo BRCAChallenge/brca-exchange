@@ -128,6 +128,9 @@ var Footer = React.createClass({
                 <div className="col-sm-5 right-footer">
                     <ul>
                         <li>
+                            <li><a href="/whydonate">Donate</a></li>
+                        </li>
+                        <li>
                             <DisclaimerModal text="Disclaimer"/>
                         </li>
                         <li>
