@@ -30,7 +30,6 @@ var {NavBarNew} = require('./NavBarNew');
 var Rx = require('rx');
 require('rx-dom');
 var moment = require('moment');
-var DonationBar = require('./components/DonationBar');
 
 
 // faisal: includes for masonry/isotope
@@ -129,6 +128,9 @@ var Footer = React.createClass({
                 <div className="col-sm-5 right-footer">
                     <ul>
                         <li>
+                            <li><a href="/whydonate">Donate</a></li>
+                        </li>
+                        <li>
                             <DisclaimerModal text="Disclaimer"/>
                         </li>
                         <li>
@@ -182,14 +184,11 @@ var Home = React.createClass({
                 <Row>
                     <div className="jumbotron homepage-jumbotron">
                         <RawHTML html={content.pages.home} />
-                        <Button bsStyle="primary" className="center-block video-button" onClick={()=> window.open("https://secure.ucsc.edu/s/1069/bp18/interior.aspx?sid=1069&gid=1001&pgid=780&cid=1749&dids=1004", "_blank")}>
-                            Donate Now
-                        </Button>
                     </div>
                 </Row>
 
                 <Row>
-                    <Col lg={4} lgOffset={0} md={8} mdOffset={2} xs={12}>
+                    <Col lg={4} lgOffset={1} md={8} mdOffset={2} xs={12}>
                         <div className="embed-responsive embed-responsive-16by9">
                             <iframe className="vimeo-video embed-responsive-item" src="https://player.vimeo.com/video/199396428" webkitallowfullscreen mozallowfullscreen allowFullScreen />
                         </div>
@@ -203,20 +202,7 @@ var Home = React.createClass({
                         </div>
                     </Col>
 
-                    <Col lg={4} lgOffset={0} md={8} mdOffset={2} xs={12}>
-                        <div className="embed-responsive embed-responsive-16by9">
-                            <Link to={`/whydonate`} >
-                                <img className="embed-responsive-item" src={require('../content/BRCA_scaled.JPG')} alt="BRCA Exchange Team Photo" />
-                            </Link>
-                        </div>
-                        <div className="homepage-under-image-text-container center-block">
-                            <div className="homepage-caption caption">
-                                <Link to={`/whydonate`}>Why Donate to the BRCA Exchange?</Link>
-                            </div>
-                        </div>
-                    </Col>
-
-                    <Col lg={4} lgOffset={0} md={8} mdOffset={2} xs={12}>
+                    <Col lg={4} lgOffset={2} md={8} mdOffset={2} xs={12}>
                         <div className="embed-responsive embed-responsive-16by9">
                             <iframe className="vimeo-video embed-responsive-item" src="https://player.vimeo.com/video/351028818" webkitallowfullscreen mozallowfullscreen allowFullScreen />
                         </div>
@@ -1374,7 +1360,6 @@ var Application = React.createClass({
         return (
             <div>
                 <NavBarNew path={path} mode={this.state.mode} toggleMode={this.toggleMode}/>
-                {path !== "" ? <DonationBar /> : ""}
                 <RouteHandler toggleMode={this.onChildToggleMode} mode={this.state.mode} />
                 <Database
                     mode={this.state.mode}
