@@ -8,13 +8,10 @@ class TestStringMethods(unittest.TestCase):
     def setUp(self):
         self.oldRow = {
             'submission_id': 'NM_007294.3:c.(5467+1_5468-1)_(*1_?)delJohan den Dunnen (Rotterdam,NL)',
-            'functional_analysis_result': '',
             'individuals': '1',
-            'functional_analysis': '',
             'genetic_origin': 'Germline',
             'DBID': 'BRCA1_001694',
             'RNA': 'r.?',
-            'functional_analysis_technique': '',
             'edited_date': '2018-04-02 11:41:21',
             'gDNA': 'g.(?_41197694)_(41197820_41199659)del',
             'frequency': '',
@@ -24,17 +21,15 @@ class TestStringMethods(unittest.TestCase):
             'Protein': 'p.?',
             'submitters': 'Johan den Dunnen (Rotterdam,NL)',
             'geneid': 'BRCA1',
-            'variant_effect': '+/.'
+            'variant_effect': '+/.',
+            'remarks': ''
         }
         self.newRow = {
             'submission_id': 'NM_007294.3:c.(5467+1_5468-1)_(*1_?)delJohan den Dunnen (Rotterdam,NL)',
-            'functional_analysis_result': '',
             'individuals': '1',
-            'functional_analysis': '',
             'genetic_origin': 'Germline',
             'DBID': 'BRCA1_001694',
             'RNA': 'r.?',
-            'functional_analysis_technique': '',
             'edited_date': '2018-04-02 11:41:21',
             'gDNA': 'g.(?_41197694)_(41197820_41199659)del',
             'frequency': '',
@@ -44,7 +39,8 @@ class TestStringMethods(unittest.TestCase):
             'Protein': 'p.?',
             'submitters': 'Johan den Dunnen (Rotterdam,NL)',
             'geneid': 'BRCA1',
-            'variant_effect': '+/.'
+            'variant_effect': '+/.',
+            'remarks': ''
         }
 
     def test_dont_merge_submissions_with_different_submission_ids(self):

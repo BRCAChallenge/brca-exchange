@@ -31,19 +31,6 @@ HGVS_Nucleotide_Findlay_BRCA1_Ring_Function_Scores	HGVS nucleotide nomenclature 
 Functional_Enrichment_Score_Findlay_BRCA1_Ring_Function_Scores	Functional assay results for variants in critical domains of BRCA1, obtained using saturation genome editing; provided by Starita lab (see Findlay et al. 2018)	-0.107071247
 BX_ID_Findlay_BRCA1_Ring_Function_Scores	Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation	152
 Log_RNA_Depletion_Findlay_BRCA1_Ring_Function_Scores	Log ratio comparing RNA expression with and without the variant	-0.006252529515
-BX_ID_LOVD	Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation	12,547,125,461,254,500,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
-Functional_analysis_result_LOVD	Information gathered about variant, provided by LOVD	no functional effect,predicted neutral,inconclusive,as wildtype control,?
-Edited_date_LOVD	Information gathered about variant's impact, provided by LOVD	2018-08-26 12:56:23,2018-08-26 14:11:38,2018-08-26 13:17:52,2016-08-05 14:13:49,2018-08-26 14:00:50,2018-08-24 10:30:22
-Submitters_LOVD	The name(s) of the researcher, research group, or individual who submitted the variant data to LOVD.	Angela Solano & F Cardoso (Buenos Aires,Quest Diagnostics (Madison,Pascale Hilbert (Charleroi,AR),ENIGMA consortium (Brisbane,Ans M.W. van den Ouweland (Rotterdam,Marjolijn JL Ligtenberg (Nijmegen,AU),Juul Wijnen (Leiden,Erik Teugels (Brussel,Peter Devilee (Leiden,NL),Thomas Hansen (Copenhagen,Rien Blok (Maastricht,VKGL-NL_Utrecht (Utrecht,BE),Frans BL Hogervorst (Amsterdam,US),Marco Koudijs (Utrecht,VKGL-NL_Rotterdam (VKGL-NL_Rotterdam,VKGL-NL_Nijmegen (Nijmegen,DK)
-Individuals_LOVD	The number of individuals the variant has been observed in, per submission. The individuals field does not account for all LOVD data on a variant, but accounts for the number of individuals observed by the submitter.	27
-HGVS_cDNA_LOVD	LOVD variant identifer in HGVS cDNA nomenclature	NM_007294.3:c.5158A>G
-Created_date_LOVD	The date that variant data was first submitted to LOVD.	2014-12-17 19:07:22,2014-12-21 10:06:24,2017-01-11 11:18:41,2015-10-08 12:00:00,2018-01-15 20:58:59,2009-10-03 16:25:01,2011-09-14 12:26:59,2014-02-03 22:13:57
-Genetic_origin_LOVD	LOVD record type	In vitro (cloned),Unknown,CLASSIFICATION record,Germline,SUMMARY record
-DBID_LOVD	 ID given to the variant by LOVD. This ID is variant-specific, but not submitter-specific. 	BRCA1_000409
-RNA_LOVD	LOVD variant identifier in HGVS RNA nomenclature	r.(?),-,?
-Functional_analysis_technique_LOVD	Methods used to gather information about a variant's impact	Transcription activation in yeast (GAL4-fusions),Peptide binding ability,Bayesian statistics,Structure-based prediction (crystallography etc),transcription activation/PS/BA/BS,Multifactorial likelihood-ratio model,Proteolytic degradation,?
-Variant_effect_LOVD	Symbolic nomenclature to represent the effect of the variant on the function of the protein, in Submitter/Curator (R/C) format	?/?,?/.,-/.,-/-
-Variant_frequency_LOVD	Observed frequency of the variant as reported to LOVD by the submitter.  Expressed as allele counts (observations of variant/total observations)	1/1900 cases
 EA_Allele_Frequency_ESP	Allele frequency in European-American populations, per ESP	0.000233
 Minor_allele_frequency_percent_ESP	Percent minor allele frequency for EA, AA, and overall, from ESP	0.0233,0.0,0.0154
 AA_Allele_Frequency_ESP	Allele frequency in African-American populations, per ESP	0
@@ -298,3 +285,16 @@ Allele_count_hom_exome_AMR_GnomAD	Count of observed alternate alleles (variant) 
 Allele_number_exome_AFR_GnomAD	Number of total chromosomes studied (for this variant) in exomes of African/African American Populations
 Allele_count_exome_SAS_GnomAD	Count of observed alternate alleles (variant) in exomes of South Asian Populations, per gnomAD
 Allele_count_genome_AMR_GnomAD	Count of observed alternate alleles (variant) in genomes of Latino Populations, per gnomAD
+BX_ID_LOVD	Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation	22209,22208,22210,22211
+Edited_date_LOVD	Information gathered about variant's impact, provided by LOVD	2016-08-05 14:13:49,2018-04-02 11:41:21,2019-03-11 21:42:51,2019-12-04 15:24:38,2017-08-18 17:34:03
+Submitters_LOVD	The name(s) of the researcher, research group, or individual who submitted the variant data to LOVD.	Johan den Dunnen (Rotterdam,BE),AU),VKGL-NL (Nijmegen,NL),ENIGMA consortium (Brisbane,Erik Teugels (Brussel
+Variant_effect_LOVD	Symbolic nomenclature to represent the effect of the variant on the function of the protein, in Submitter/Curator (R/C) format	+/+,+/.
+HGVS_cDNA_LOVD	LOVD variant identifer in HGVS cDNA nomenclature	NM_007294.3:c.131G>A
+Created_date_LOVD	The date that variant data was first submitted to LOVD.	2018-04-02 11:41:21,2019-03-11 21:42:51,2018-01-15 20:58:59,2014-02-03 22:13:57,2015-10-08 12:00:00
+Classification_LOVD	classification of variant based on clinical consequences, preferably using standardised criteria	pathogenic
+Genetic_origin_LOVD	LOVD record type	Unknown,CLASSIFICATION record,Germline,SUMMARY record
+DBID_LOVD	 ID given to the variant by LOVD. This ID is variant-specific, but not submitter-specific. BRCA1_001192 
+RNA_LOVD	LOVD variant identifier in HGVS RNA nomenclature	r.(?)
+Individuals_LOVD	The number of individuals the variant has been observed in, per submission. The individuals field does not account for all LOVD data on a variant, but accounts for the number of individuals observed by the submitter.	7
+Variant_frequency_LOVD	Observed frequency of the variant as reported to LOVD by the submitter.  Expressed as allele counts (observations of variant/total observations)	1/8085 cases
+Remarks_LOVD	remarks regarding variant described	thresholds for class as per Plon 2008 (PMID:18951446). Class 5 based on posterior probability = 1,IARC class based on posterior probability from multifactorial likelihood analysis,VKGL data sharing initiative Nederland

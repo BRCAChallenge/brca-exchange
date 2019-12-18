@@ -45,8 +45,8 @@ CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "BX_ID": "BX_ID"}
 
 LOVD_FIELDS = {"Variant_frequency": "frequency",
-               "Functional_analysis_technique": "functional_analysis_technique",
-               "Functional_analysis_result": "functional_analysis_result",
+               "Remarks": "remarks",
+               "Classification": "classification",
                "HGVS_cDNA": "cDNA",
                "HGVS_protein": "Protein",
                "Genetic_origin": "genetic_origin",
