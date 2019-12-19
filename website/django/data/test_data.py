@@ -61,6 +61,8 @@ def existing_variant():
         'Genomic_Coordinate_hg37': 'chr17:g.41222976:A>G',
         'Number_of_family_member_carrying_mutation_BIC': '-',
         'Genomic_Coordinate_hg38': 'chr17:g.43070959:A>G',
+        'Genomic_HGVS_38': 'NC_000017.11:g.43070959A>G',
+        'Genomic_HGVS_37': 'NC_000017.10:g.41222976A>G',
         'Allele_frequency_ExAC': '1.647e-05',
         'Mutation_type_BIC': 'M',
         'Assertion_method_citation_ENIGMA': 'http://enigmaconsortium.org/documents/ENIGMA_Rules_2015-03-26.pdf',
