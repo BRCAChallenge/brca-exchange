@@ -60,9 +60,10 @@ class VCFVariant(namedtuple("VCFVariant", "chr,pos,ref,alt")):
             ref = str(seq_fetcher.get_seq(str(chr), hgvs_var.posedit.pos.start.base, hgvs_var.posedit.pos.end.base + 1))
 
         if len(ref) >= 1 and len(alt) >= 1 and not edit_type.startswith('ins'):
-            return VCFVariant(chr, pos, ref, alt)
+            return VCFVariant(int(chr), int(pos), ref, alt)
 
-        # require padding
+        # require padding, i.e. inserting previous base to avoid empty alt
+        # e.g. instead of 'C'>'' do 'AC'>'A'
 
         if edit_type.startswith('del') or edit_type.startswith('ins') or edit_type.startswith('dup'):
             # transforming 'del' to a delins
@@ -80,4 +81,4 @@ class VCFVariant(namedtuple("VCFVariant", "chr,pos,ref,alt")):
             else:
                 alt = padding + ref
                 ref = padding
-        return VCFVariant(chr, pos, ref, alt)
+        return VCFVariant(int(chr), int(pos), ref, alt)

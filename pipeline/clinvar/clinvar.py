@@ -61,9 +61,13 @@ def extractSynonyms(el):
     return sy + sy_alt
 
 
-# TODO tune interface (which element)
-# TODO: add assembly
 def extract_genomic_coordinates_from_measure(meas_el):
+    """
+    meas_el: `xml` module object of a ClinVar `Measure` element
+
+    returns: dictionary of assembly (str) to genomic coordinates (VCFVariant object)
+    """
+
     sequence_locations = meas_el.findall('SequenceLocation')
 
     coords = {}
@@ -72,25 +76,22 @@ def extract_genomic_coordinates_from_measure(meas_el):
 
         if el.get('referenceAlleleVCF'):
             coords[assembly] = variant_utils.VCFVariant(
-                el.get('Chr'),
-                el.get('positionVCF'),
+                int(el.get('Chr')),
+                int(el.get('positionVCF')),
                 el.get('referenceAlleleVCF'),
                 el.get('alternateAlleleVCF')
             )
 
-    # if no reference/alternate allele found, compute (assuming the missingness
-    # is consistent across the different assemblies)
+    # if no reference/alternate allele found, compute (assuming genomic coordinates
+    # are either present for all assemblies or for none)
     if not coords:
         coords = _extract_genomic_coordinates_from_non_genomic_fields(meas_el)
 
     return coords
 
 
-def _preprocess_variant(var_str):
-    var_str = re.sub(r'\s*\(p[^)]+\)', '', var_str)
-    #var_str = re.sub(r'(del[TCGA]+)ins[0-9]+$', r'\1', var_str)
-    # test re.sub('ins[0-9]+$', '', 'NM_007294.3(BRCA1):c.1387_1390delAAAAins4')
-    return var_str
+def _preprocess_element_value(var_str):
+    return re.sub(r'\s*\(p[^)]+\)', '', var_str)
 
 
 def _extract_genomic_coordinates_from_non_genomic_fields(meas_el, assemblies = [hgvs_utils.HgvsWrapper.GRCh38_Assem], hgvs_wrapper = hgvs_utils.HgvsWrapper.get_instance()):
@@ -101,43 +102,27 @@ def _extract_genomic_coordinates_from_non_genomic_fields(meas_el, assemblies = [
         return coords
 
     pref = pref_el_lst[0].text
+    preprocessed_var = _preprocess_element_value(pref)
+
+    hutils = hgvs_wrapper.get_instance()
 
     try:
-        preprocessed_var = _preprocess_variant(pref)
         v = hgvs_wrapper.hgvs_parser.parse(preprocessed_var)
 
         for assembly in assemblies:
             if v.ac.startswith('U'):
-                v37 = hgvs.assemblymapper.AssemblyMapper(hgvs_wrapper.hgvs_dp,
-                                                         assembly_name=hgvs_utils.HgvsWrapper.GRCh37_Assem,
-                                                         alt_aln_method='BLAST').n_to_g(v)
-
-                if assembly == hgvs_utils.HgvsWrapper.GRCh38_Assem:
-                    v_g = hgvs_wrapper.hg19_to_hg38(v37)
-                else:
-                    v_g = v37
-
+                v_g = hutils.u_to_genomic(v, assembly)
             elif v.ac.startswith('NG_'):
-                am38 = hgvs_wrapper.hgvs_ams[hgvs_utils.HgvsWrapper.GRCh38_Assem]
-
-                rel = [t for t in am38.relevant_transcripts(v) if t.startswith('NM_')]
-
-                if not rel:
-                    logging.warn("No transcripts could be found for " + preprocessed_var + " in " + str(am38.relevant_transcripts(v)))
-                    continue
-
-                v_c = am38.g_to_c(v, rel[0])
-
-                v_g = hgvs_wrapper.hgvs_ams[
-                    hgvs_utils.HgvsWrapper.GRCh38_Assem].c_to_g(v_c)
+                v_g = hutils.ng_to_genomic(v, assembly)
             elif v.ac.startswith('NM_'):
-                v_g = hgvs_wrapper.hgvs_ams[assembly].c_to_g(v)
+                v_g = hutils.nm_to_genomic(v, assembly)
             else:
                 logging.warn("Skipping genomic coordinate extraction for " + preprocessed_var)
                 continue
 
-            vcf = variant_utils.VCFVariant.from_hgvs_obj(v_g)
-            coords[assembly] = vcf
+            if v_g:
+                vcf = variant_utils.VCFVariant.from_hgvs_obj(v_g)
+                coords[assembly] = vcf
     except HGVSError as e:
         logging.warn("HGVS Error while attempting to process " + preprocessed_var + " : " + str(e))
 

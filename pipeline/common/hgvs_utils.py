@@ -38,7 +38,7 @@ class HgvsWrapper:
                     m[s['name']] = s['refseq_ac']
             self.contig_maps[a] = m
 
-    def to_cdna(self, hgvs_obj, assembly=GRCh38_Assem):
+    def genomic_to_cdna(self, hgvs_obj, assembly=GRCh38_Assem):
         am = self.hgvs_ams[assembly]
 
         try:
@@ -52,7 +52,7 @@ class HgvsWrapper:
 
         return None
 
-    def to_protein(self, hgvs_cdna):
+    def cdna_to_protein(self, hgvs_cdna):
         if not hgvs_cdna:
             return None
 
@@ -77,7 +77,6 @@ class HgvsWrapper:
 
     __instance = None
 
-
     def hg19_to_hg38(self, v):
         """
         Conversion from hg19 (GRCh37) to hg38 via NM_ transcripts (doesn't work for variants outside transcripts)
@@ -94,6 +93,34 @@ class HgvsWrapper:
         v_c = am37.g_to_c(v, transcripts[0])
         return self.hgvs_ams[self.GRCh38_Assem].c_to_g(v_c)
 
+    def u_to_genomic(self, v, target_assembly=GRCh38_Assem):
+        v37 = hgvs.assemblymapper.AssemblyMapper(self.hgvs_dp,
+                                                 assembly_name=self.GRCh37_Assem,
+                                                 alt_aln_method='BLAST').n_to_g(v)
+
+        if target_assembly == self.GRCh38_Assem:
+            return self.hg19_to_hg38(v37)
+        elif target_assembly == self.GRCh37_Assem:
+            return v37
+        else:
+            raise ValueError("Unknown assembly " + target_assembly)
+
+    def ng_to_genomic(self, v, target_assembly=GRCh38_Assem):
+        am = self.hgvs_ams[target_assembly]
+
+        rel = [t for t in am.relevant_transcripts(v) if t.startswith('NM_')]
+
+        if not rel:
+            logging.warn("No transcripts could be found for " + str(v) + " in " + str(am.relevant_transcripts(v)) +
+                         " and target assembly " + str(target_assembly))
+            return None
+
+        v_c = am.g_to_c(v, rel[0])
+
+        return self.hgvs_ams[target_assembly].c_to_g(v_c)
+
+    def nm_to_genomic(self, v, target_assembly=GRCh38_Assem):
+        return self.hgvs_ams[target_assembly].c_to_g(v)
 
     @staticmethod
     def get_instance():

@@ -19,12 +19,12 @@ def hgvs_variant(wrapper):
 
 
 def test_to_cdna(wrapper, hgvs_variant):
-    cdna = wrapper.to_cdna(hgvs_variant)
+    cdna = wrapper.genomic_to_cdna(hgvs_variant)
     assert str(cdna) == 'NM_000059.3:c.17_19delinsA' # normalized 'NM_000059.3:c.22_23del'
 
 
 def test_to_protein(wrapper, hgvs_variant):
-    protein = wrapper.to_protein(wrapper.to_cdna(hgvs_variant))
+    protein = wrapper.cdna_to_protein(wrapper.genomic_to_cdna(hgvs_variant))
     assert str(protein) == 'NP_000050.2:p.(Arg8AlafsTer5)'
 
 
@@ -48,3 +48,25 @@ def test_hg19_to_hg38(wrapper):
         else:
             with pytest.raises(ValueError):
                 wrapper.hg19_to_hg38(v37_obj)
+
+
+@pytest.mark.parametrize("u,expected", [
+    ("U43746.1:n.8034-16T>C", "NC_000013.11:g.32362507A>C")
+])
+def test_u_to_genomic(u, expected, wrapper):
+    u_obj = wrapper.hgvs_parser.parse(u)
+    expected_obj = wrapper.hgvs_parser.parse(expected)
+
+    assert wrapper.u_to_genomic(u_obj) == expected_obj
+
+
+@pytest.mark.parametrize("ng,expected", [
+    ("NG_005905.2:g.110966_142550del", "NC_000017.11:g.43075434_43107018del")
+])
+def test_ng_to_genomic(ng, expected, wrapper):
+    ng_obj = wrapper.hgvs_parser.parse(ng)
+    expected_obj = wrapper.hgvs_parser.parse(expected)
+    wrapper.normalizing(expected_obj) # populating some fields in expected_obj...
+
+    s = wrapper.ng_to_genomic(ng_obj)
+    assert s == expected_obj
