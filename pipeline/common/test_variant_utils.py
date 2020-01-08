@@ -36,6 +36,7 @@ def test_variant_hgvs_roundtripping(v):
                          [('NC_000017.11:g.43091923C>T', 'chr17:g.43091923:C>T'),
                           ('NC_000017.11:g.43086110_43086115dupACACAC', 'chr17:g.43086109:T>TACACAC'),
                           ('NC_000017.11:g.43098661_43098662insT',  'chr17:g.43098661:C>CT'),
+                          ('NC_000017.11:g.43045730_43045731insCAGTGCCAGGACAGCAGG', 'chr17:g.43045730:C>CCAGTGCCAGGACAGCAGG'),
                           ('NC_000017.11:g.43091784_43091817del', 'chr17:g.43091783:CGGTAGCAACGGTGCTATGCCTAGTAGACTGAGAA>C')
                         ])
 def test_hgvs_to_vcf(wrapper, v, expected, seq_fetcher):
