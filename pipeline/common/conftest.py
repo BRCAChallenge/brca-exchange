@@ -36,7 +36,6 @@ def fetch_seq_mock_data():
 def seq_fetcher(fetch_seq_mock_data):
     with patch.object(bioutils.seqfetcher, 'fetch_seq',
                           side_effect=lambda ac, s, e: fetch_seq_mock_data[(str(ac), str(s), str(e))]):
-        return seq_utils.SeqRepoWrapper.get_instance()
-
+        return seq_utils.SeqRepoWrapper()
 
 
