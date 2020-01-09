@@ -12,7 +12,6 @@ from mock import patch
 
 from common import seq_utils
 from common.config import load_config, extract_gene_regions_dict
-from common.conftest import seq_fetcher, fetch_seq_mock_data
 from utilities import round_sigfigs
 from variant_equivalence import variant_equal, find_equivalent_variant, find_equivalent_variants_whole_seq
 from variant_merging import normalize_values, add_variant_to_dict, \
