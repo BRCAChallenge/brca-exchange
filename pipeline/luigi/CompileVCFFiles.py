@@ -911,10 +911,9 @@ class ConvertFindlayBRCA1RingFunctionScoresToVCF(DefaultPipelineTask):
 
         os.chdir(functional_assays_method_dir)
 
-        args = ["python", "functional_assays_to_vcf.py", "-i", self.input().path, "-o",
+        args = ["python", "functional_assays_to_vcf.py", "-v", "-i", self.input().path, "-o",
                 self.output().path, "-a", "functionalAssayAnnotation",
-                "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa", "-l", artifacts_dir + "/findlay_BRCA1_ring_function_scores_error_variants.log",
+                "-l", artifacts_dir + "/findlay_BRCA1_ring_function_scores_error_variants.log",
                 "-s", "FindlayBRCA1RingFunctionScores"]
 
         print "Running functional_assays_to_vcf with the following args: %s" % (args)
