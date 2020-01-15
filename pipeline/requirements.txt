@@ -1,7 +1,7 @@
 backports-abc==0.4
 beautifulsoup4==4.5.1
 biocommons.seqrepo>=0.4.4
--e git+https://github.com/ga4gh/vr-python.git@f694dbb0ca2a7c46ceed1eefd516aa7dba192253#egg=ga4gh.vr
+ga4gh.vr
 biopython==1.69
 bioutils==0.3.3
 bx-python==0.7.3
