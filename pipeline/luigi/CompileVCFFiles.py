@@ -94,7 +94,9 @@ class ConvertClinvarXMLToTXT(DefaultPipelineTask):
         clinvar_txt_file = clinvar_file_dir + "/ClinVarBrca.txt"
         writable_clinvar_txt_file = open(clinvar_txt_file, "w")
         args = ["python", "clinVarParse.py",
-                clinvar_file_dir + "/ClinVarBrca.xml", "--assembly", "GRCh38"]
+                clinvar_file_dir + "/ClinVarBrca.xml",
+                "--logs", clinvar_file_dir + "/clinvar_xml_to_txt.log",
+                "--assembly", "GRCh38"]
         print "Running clinVarParse.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=writable_clinvar_txt_file,
                               stderr=subprocess.PIPE)
@@ -833,7 +835,9 @@ class ExtractEnigmaFromClinvar(DefaultPipelineTask):
         os.chdir(clinvar_method_dir)
 
         args = ["python", "enigma_from_clinvar.py", self.input().path,
-                self.output().path]
+                self.output().path,
+                '--logs', os.path.join(self.cfg.file_parent_dir, 'enigma', 'enigma_from_clinvar.log')
+               ]
 
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)

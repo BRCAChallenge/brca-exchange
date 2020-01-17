@@ -3,6 +3,10 @@ ClinVarUtils: basic
 """
 
 import re
+from common import hgvs_utils, variant_utils
+from hgvs.exceptions import HGVSError
+import hgvs
+import logging
 
 def isCurrent(element):
     """Determine if the indicated clinvar set is current"""
@@ -56,6 +60,76 @@ def extractSynonyms(el):
 
     return sy + sy_alt
 
+
+def extract_genomic_coordinates_from_measure(meas_el):
+    """
+    meas_el: `xml` module object of a ClinVar `Measure` element
+
+    returns: dictionary of assembly (str) to genomic coordinates (VCFVariant object)
+    """
+
+    sequence_locations = meas_el.findall('SequenceLocation')
+
+    coords = {}
+    for el in sequence_locations:
+        assembly = el.attrib['Assembly'] # GRCh38
+
+        if el.get('referenceAlleleVCF'):
+            coords[assembly] = variant_utils.VCFVariant(
+                int(el.get('Chr')),
+                int(el.get('positionVCF')),
+                el.get('referenceAlleleVCF'),
+                el.get('alternateAlleleVCF')
+            )
+
+    # if no reference/alternate allele found, compute (assuming genomic coordinates
+    # are either present for all assemblies or for none)
+    if not coords:
+        coords = _extract_genomic_coordinates_from_non_genomic_fields(meas_el)
+
+    return coords
+
+
+def _preprocess_element_value(var_str):
+    # removing dangling protein level changes like '(p.Glu2198fs)'
+    return re.sub(r'\s*\(p[^)]+\)', '', var_str)
+
+
+def _extract_genomic_coordinates_from_non_genomic_fields(meas_el, assemblies = [hgvs_utils.HgvsWrapper.GRCh38_Assem], hgvs_wrapper = hgvs_utils.HgvsWrapper.get_instance()):
+    pref_el_lst = meas_el.findall('Name/ElementValue[@Type="Preferred"]')
+
+    coords = {}
+    if not pref_el_lst:
+        return coords
+
+    pref = pref_el_lst[0].text
+    preprocessed_var = _preprocess_element_value(pref)
+
+    hutils = hgvs_wrapper.get_instance()
+
+    try:
+        v = hgvs_wrapper.hgvs_parser.parse(preprocessed_var)
+
+        for assembly in assemblies:
+            if v.ac.startswith('U'):
+                v_g = hutils.u_to_genomic(v, assembly)
+            elif v.ac.startswith('NG_'):
+                v_g = hutils.ng_to_genomic(v, assembly)
+            elif v.ac.startswith('NM_'):
+                v_g = hutils.nm_to_genomic(v, assembly)
+            else:
+                logging.warn("Skipping genomic coordinate extraction for " + preprocessed_var)
+                continue
+
+            if v_g:
+                vcf = variant_utils.VCFVariant.from_hgvs_obj(v_g)
+                coords[assembly] = vcf
+    except HGVSError as e:
+        logging.warn("HGVS Error while attempting to process " + preprocessed_var + " : " + str(e))
+
+    return coords
+
+
 class genomicCoordinates:
     """Contains the genomic information on the variant"""
 
@@ -96,17 +170,15 @@ class variant:
             for attrib in attrs.findall("Attribute"):
                 self.attribute[attrib.get("Type")] = attrib.text
 
-        self.coordinates = dict()
-        for item in element.findall("SequenceLocation"):
-            assembly = item.get("Assembly")
-            genomic = genomicCoordinates(item, debug=debug)
-            self.coordinates[assembly] = genomic
+        self.coordinates = extract_genomic_coordinates_from_measure(element)
+
         self.geneSymbol = None
         symbols = element.findall("MeasureRelationship/Symbol")
         for symbol in symbols:
             symbol_val = textIfPresent(symbol, "ElementValue")
             if symbol_val.startswith('BRCA'):
                 self.geneSymbol = symbol_val
+
 
 
 class referenceAssertion:
@@ -148,13 +220,13 @@ class referenceAssertion:
 
         measureSet = element.find("MeasureSet")
         #if measureSet.get("Type") == "Variant":
-        if debug:
-            if len(measureSet.findall("Measure")) > 1:
-                print(self.id, "has multiple measures")
-        if len(measureSet.findall("Measure")) == 1:
+
+        if len(measureSet.findall("Measure")) > 1:
+            logging.warn("Assertion with ID " + str(self.id) + " has multiple measures. Taking first one.")
+        if len(measureSet.findall("Measure")) >= 1:
             name = measureSet.find("Name")
             if name == None:
-                variantName = none
+                variantName = None
             else:
                 variantName = name.find("ElementValue").text
             self.variant = variant(measureSet.find("Measure"), variantName,
