@@ -37,7 +37,7 @@ def create_variant_and_materialized_view(variant_data):
     try:
         data_release = DataRelease.objects.get(id=release_id)
     except DataRelease.DoesNotExist:
-        data_release = DataRelease.objects.create(date='2017-12-26', id=release_id, name=1)
+        data_release = DataRelease.objects.create(date='2019-12-26', id=release_id, name=1)
     with connection.cursor() as cursor:
         cursor.execute("REFRESH MATERIALIZED VIEW currentvariant")
     materialized_view = CurrentVariant.objects.get(Genomic_Coordinate_hg38=variant.Genomic_Coordinate_hg38)
@@ -533,6 +533,22 @@ class VariantTestCase(TestCase):
         response_variant = response_data['data'][0]
         self.assertEqual(response_variant['Genomic_Coordinate_hg38'], self.existing_variant.Genomic_Coordinate_hg38)
 
+    def test_search_by_genomic_hgvs(self):
+        '''Tests that searching for a variant with a genomic_coordinate_hg38 search term is successful'''
+        existing_genomic_hgvs = self.existing_variant_materialized_view.Genomic_HGVS_38
+        request = self.factory.get(
+            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&include=Variant_in_ENIGMA&search_term=%s' % existing_genomic_hgvs)
+        response = index(request)
+
+        self.assertIsInstance(response, JsonResponse)
+        self.assertEqual(response.status_code, 200)
+
+        response_data = json.loads(response.content.decode('utf-8'))
+        self.assertEqual(response_data['count'], 1)
+
+        response_variant = response_data['data'][0]
+        self.assertEqual(response_variant['Genomic_HGVS_38'], self.existing_variant.Genomic_HGVS_38)
+
     def test_search_by_combined_gene_symbol_and_genomic_coordinate(self):
         '''Tests that searching for a variant with a 'gene_symbol:genomic_coordinate_hg38' search term is successful'''
         gene_symbol_genomic_coordinate_hg38 = self.existing_variant_materialized_view.Gene_Symbol + ':' + self.existing_variant_materialized_view.Genomic_Coordinate_hg38
@@ -565,19 +581,19 @@ class VariantTestCase(TestCase):
 
     BRCA1:chr17:g.43094692:G>C --> Gene_Symbol:Genomic_Coordinate_hg38
     BRCA1:chr17:g.41246709:G>C --> Gene_Symbol:Genomic_Coordinate_hg37
-    BRCA1:chr17:g.38500235:G>C --> Gene_Symbol:Genomic_Coordinate_hg36
+    BRCA1:NC_000013.11:g.32398880A>C --> Gene_Symbol:Genomic_HGVS_38
+    BRCA1:NC_000013.10:g.32973017A>C --> Gene_Symbol:Genomic_HGVS_37
     BRCA1:958C>G --> Gene_Symbol:BIC_Nomenclature
     BRCA1:c.839C>G --> Gene_Symbol:HGVS_cDNA
     NM_007294.3:chr17:g.43094692:G>C --> Reference_Sequence:Genomic_Coordinate_hg38
     NM_007294.3:chr17:g.41246709:G>C --> Reference_Sequence:Genomic_Coordinate_hg37
-    NM_007294.3:chr17:g.38500235:G>C --> Reference_Sequence:Genomic_Coordinate_hg36
+    NM_007294.3:NC_000013.11:g.32398880A>C --> Reference_Sequence:Genomic_HGVS_38
+    NM_007294.3:NC_000013.10:g.32973017A>C --> Reference_Sequence:Genomic_HGVS_37
     NM_007294.3:958C>G --> Reference_Sequence:BIC_Nomenclature
     NM_007294.3:c.839C>G --> Reference_Sequence:HGVS_cDNA
-    BRCA1:p.(Ala280Gly) --> Gene_Symbol:HGVS_Protein.split(':')[1] (HGVS_Protein is actually stored as NP_009225.1:p.(Ala280Gly), so this has to be split on the ':')
+    BRCA1:p.(Ala280Gly) --> Gene_Symbol:HGVS_Protein.split(':')[1] (HGVS_Protein is actually stored as NP_009225.1:p.(Ala280Gly), so this has to be split on the ":")
     BRCA1:A280G --> Gene_Symbol:Protein_Change
-    NP_009225.1:p.(Ala280Gly) --> HGVS_Protein !!! NOT included in test_list
     NP_009225.1:A280G --> HGVS_Protein.split(':')[0]:Protein_Change
-    Add test case for space separator
     '''
 
     def test_search_examples(self):
@@ -593,10 +609,14 @@ class VariantTestCase(TestCase):
             evmv.Gene_Symbol + ' ' + evmv.Genomic_Coordinate_hg37,
             evmv.Gene_Symbol + ':' + evmv.Genomic_Coordinate_hg37.replace('g.', ''),
             evmv.Gene_Symbol + ' ' + evmv.Genomic_Coordinate_hg37.replace('g.', ''),
-            evmv.Gene_Symbol + ':' + evmv.Genomic_Coordinate_hg36,
-            evmv.Gene_Symbol + ' ' + evmv.Genomic_Coordinate_hg36,
-            evmv.Gene_Symbol + ':' + evmv.Genomic_Coordinate_hg36.replace('g.', ''),
-            evmv.Gene_Symbol + ' ' + evmv.Genomic_Coordinate_hg36.replace('g.', ''),
+            evmv.Gene_Symbol + ':' + evmv.Genomic_HGVS_38,
+            evmv.Gene_Symbol + ' ' + evmv.Genomic_HGVS_38,
+            evmv.Gene_Symbol + ':' + evmv.Genomic_HGVS_38.replace('g.', ''),
+            evmv.Gene_Symbol + ' ' + evmv.Genomic_HGVS_38.replace('g.', ''),
+            evmv.Gene_Symbol + ':' + evmv.Genomic_HGVS_37,
+            evmv.Gene_Symbol + ' ' + evmv.Genomic_HGVS_37,
+            evmv.Gene_Symbol + ':' + evmv.Genomic_HGVS_37.replace('g.', ''),
+            evmv.Gene_Symbol + ' ' + evmv.Genomic_HGVS_37.replace('g.', ''),
             evmv.Gene_Symbol + ':' + evmv.BIC_Nomenclature,
             evmv.Gene_Symbol + ' ' + evmv.BIC_Nomenclature,
             evmv.Gene_Symbol + ':' + evmv.HGVS_cDNA.split(':')[1],
@@ -617,10 +637,15 @@ class VariantTestCase(TestCase):
             evmv.Reference_Sequence + ' ' + evmv.Genomic_Coordinate_hg37,
             evmv.Reference_Sequence + ':' + evmv.Genomic_Coordinate_hg37.replace('g.', ''),
             evmv.Reference_Sequence + ' ' + evmv.Genomic_Coordinate_hg37.replace('g.', ''),
-            evmv.Reference_Sequence + ':' + evmv.Genomic_Coordinate_hg36,
-            evmv.Reference_Sequence + ' ' + evmv.Genomic_Coordinate_hg36,
-            evmv.Reference_Sequence + ':' + evmv.Genomic_Coordinate_hg36.replace('g.', ''),
-            evmv.Reference_Sequence + ' ' + evmv.Genomic_Coordinate_hg36.replace('g.', ''),
+            evmv.Reference_Sequence + ':' + evmv.Genomic_HGVS_38,
+            evmv.Reference_Sequence + ' ' + evmv.Genomic_HGVS_38,
+            evmv.Reference_Sequence + ':' + evmv.Genomic_HGVS_38.replace('g.', ''),
+            evmv.Reference_Sequence + ' ' + evmv.Genomic_HGVS_38.replace('g.', ''),
+            evmv.Reference_Sequence + ':' + evmv.Genomic_HGVS_37,
+            evmv.Reference_Sequence + ' ' + evmv.Genomic_HGVS_37,
+            evmv.Reference_Sequence + ':' + evmv.Genomic_HGVS_37.replace('g.', ''),
+            evmv.Reference_Sequence + ' ' + evmv.Genomic_HGVS_37.replace('g.', ''),
+            evmv.Reference_Sequence + ':' + evmv.BIC_Nomenclature,
             evmv.Reference_Sequence + ':' + evmv.BIC_Nomenclature,
             evmv.Reference_Sequence + ' ' + evmv.BIC_Nomenclature,
             evmv.Reference_Sequence + ':' + evmv.HGVS_cDNA.split(':')[1],
@@ -644,9 +669,6 @@ class VariantTestCase(TestCase):
 
             self.assertEqual(response_data['count'], 1, message)
 
-            response_variant = response_data['data'][0]
-            #self.assertEqual(response_variant[test_term], getattr(self.existing_variant, test_term), message)
-
     def test_genomic_coordinate_without_g(self):
         '''Tests that searching for a variant with a genomic_coordinate_hg38 search term is successful'''
         existing_genomic_coordinate = self.existing_variant_materialized_view.Genomic_Coordinate_hg38
@@ -664,19 +686,36 @@ class VariantTestCase(TestCase):
         response_variant = response_data['data'][0]
         self.assertEqual(response_variant['Genomic_Coordinate_hg38'], self.existing_variant.Genomic_Coordinate_hg38)
 
+    def test_genomic_hgvs_without_g(self):
+        '''Tests that searching for a variant with a genomic_coordinate_hg38 search term is successful'''
+        existing_genomic_hgvs = self.existing_variant_materialized_view.Genomic_HGVS_38
+        existing_genomic_hgvs_without_g = existing_genomic_hgvs.replace('g.', '')
+        request = self.factory.get(
+            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&include=Variant_in_ENIGMA&search_term=%s' % existing_genomic_hgvs_without_g)
+        response = index(request)
 
+        self.assertIsInstance(response, JsonResponse)
+        self.assertEqual(response.status_code, 200)
+
+        response_data = json.loads(response.content.decode('utf-8'))
+        self.assertEqual(response_data['count'], 1)
+
+        response_variant = response_data['data'][0]
+        self.assertEqual(response_variant['Genomic_HGVS_38'], self.existing_variant.Genomic_HGVS_38)
 
     def test_search_by_colon_delimiters(self):
         #Tests searching for variants with colon delimiters
         test_list = {
             'Gene_Symbol': 'Genomic_Coordinate_hg38',
             'Gene_Symbol': 'Genomic_Coordinate_hg37',
-            'Gene_Symbol': 'Genomic_Coordinate_hg36',
+            'Gene_Symbol': 'Genomic_HGVS_38',
+            'Gene_Symbol': 'Genomic_HGVS_37',
             'Gene_Symbol': 'BIC_Nomenclature',
             'Gene_Symbol': 'HGVS_cDNA',
             'Reference_Sequence': 'Genomic_Coordinate_hg38',
             'Reference_Sequence': 'Genomic_Coordinate_hg37',
-            'Reference_Sequence': 'Genomic_Coordinate_hg36',
+            'Reference_Sequence': 'Genomic_HGVS_38',
+            'Reference_Sequence': 'Genomic_HGVS_37',
             'Reference_Sequence': 'BIC_Nomenclature',
             'Reference_Sequence': 'HGVS_cDNA',
             'Gene_Symbol': 'Protein_Change'
@@ -805,12 +844,14 @@ class VariantTestCase(TestCase):
         test_list = {
             'Gene_Symbol': 'Genomic_Coordinate_hg38',
             'Gene_Symbol': 'Genomic_Coordinate_hg37',
-            'Gene_Symbol': 'Genomic_Coordinate_hg36',
+            'Gene_Symbol': 'Genomic_HGVS_37',
+            'Gene_Symbol': 'Genomic_HGVS_38',
             'Gene_Symbol': 'BIC_Nomenclature',
             'Gene_Symbol': 'HGVS_cDNA',
             'Reference_Sequence': 'Genomic_Coordinate_hg38',
             'Reference_Sequence': 'Genomic_Coordinate_hg37',
-            'Reference_Sequence': 'Genomic_Coordinate_hg36',
+            'Reference_Sequence': 'Genomic_HGVS_37',
+            'Reference_Sequence': 'Genomic_HGVS_38',
             'Reference_Sequence': 'BIC_Nomenclature',
             'Reference_Sequence': 'HGVS_cDNA',
             'Gene_Symbol': 'Protein_Change'
@@ -988,12 +1029,14 @@ class VariantTestCase(TestCase):
         test_list = {
             'Gene_Symbol': 'Genomic_Coordinate_hg38',
             'Gene_Symbol': 'Genomic_Coordinate_hg37',
-            'Gene_Symbol': 'Genomic_Coordinate_hg36',
+            'Gene_Symbol': 'Genomic_HGVS_38',
+            'Gene_Symbol': 'Genomic_HGVS_37',
             'Gene_Symbol': 'BIC_Nomenclature',
             'Gene_Symbol': 'HGVS_cDNA',
             'Reference_Sequence': 'Genomic_Coordinate_hg38',
             'Reference_Sequence': 'Genomic_Coordinate_hg37',
-            'Reference_Sequence': 'Genomic_Coordinate_hg36',
+            'Reference_Sequence': 'Genomic_HGVS_38',
+            'Reference_Sequence': 'Genomic_HGVS_37',
             'Reference_Sequence': 'BIC_Nomenclature',
             'Reference_Sequence': 'HGVS_cDNA',
             'Gene_Symbol': 'Protein_Change'
@@ -1027,7 +1070,7 @@ class VariantTestCase(TestCase):
         second_version_clinvar_report = create_report_and_associate_to_variant(test_data.second_version_clinvar_report(), new_variant)
 
         # second versions need a second data release to associate with
-        second_data_release = DataRelease.objects.create(date='2018-12-26', id=2, name=2)
+        second_data_release = DataRelease.objects.create(date='2019-12-26', id=2, name=2)
 
         request = self.factory.get(
             '/data/variant/%s/reports' % new_variant.id)

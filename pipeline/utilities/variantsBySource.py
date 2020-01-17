@@ -3,7 +3,7 @@
 import argparse
 import csv
 import collections
-
+import re
 
 def main():
     parser = argparse.ArgumentParser()
@@ -39,9 +39,9 @@ def main():
 
     for variant in inputData:
         total_number_of_variants += 1
-        for source in num_variants_by_source.keys():
-            if source in variant["Source"]:
-                num_variants_by_source[source] += 1
+        sources_this_variant = re.split(",", variant["Source"])
+        for source in sources_this_variant:
+            num_variants_by_source[source] += 1
         if args.change_type:
             for change_type in num_variants_by_change_type.keys():
                 if change_type in variant["change_type"]:

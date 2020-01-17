@@ -31,19 +31,6 @@ HGVS_Nucleotide_Findlay_BRCA1_Ring_Function_Scores	HGVS nucleotide nomenclature 
 Functional_Enrichment_Score_Findlay_BRCA1_Ring_Function_Scores	Functional assay results for variants in critical domains of BRCA1, obtained using saturation genome editing; provided by Starita lab (see Findlay et al. 2018)	-0.107071247
 BX_ID_Findlay_BRCA1_Ring_Function_Scores	Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation	152
 Log_RNA_Depletion_Findlay_BRCA1_Ring_Function_Scores	Log ratio comparing RNA expression with and without the variant	-0.006252529515
-BX_ID_LOVD	Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation	12,547,125,461,254,500,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
-Functional_analysis_result_LOVD	Information gathered about variant, provided by LOVD	no functional effect,predicted neutral,inconclusive,as wildtype control,?
-Edited_date_LOVD	Information gathered about variant's impact, provided by LOVD	2018-08-26 12:56:23,2018-08-26 14:11:38,2018-08-26 13:17:52,2016-08-05 14:13:49,2018-08-26 14:00:50,2018-08-24 10:30:22
-Submitters_LOVD	The name(s) of the researcher, research group, or individual who submitted the variant data to LOVD.	Angela Solano & F Cardoso (Buenos Aires,Quest Diagnostics (Madison,Pascale Hilbert (Charleroi,AR),ENIGMA consortium (Brisbane,Ans M.W. van den Ouweland (Rotterdam,Marjolijn JL Ligtenberg (Nijmegen,AU),Juul Wijnen (Leiden,Erik Teugels (Brussel,Peter Devilee (Leiden,NL),Thomas Hansen (Copenhagen,Rien Blok (Maastricht,VKGL-NL_Utrecht (Utrecht,BE),Frans BL Hogervorst (Amsterdam,US),Marco Koudijs (Utrecht,VKGL-NL_Rotterdam (VKGL-NL_Rotterdam,VKGL-NL_Nijmegen (Nijmegen,DK)
-Individuals_LOVD	The number of individuals the variant has been observed in, per submission. The individuals field does not account for all LOVD data on a variant, but accounts for the number of individuals observed by the submitter.	27
-HGVS_cDNA_LOVD	LOVD variant identifer in HGVS cDNA nomenclature	NM_007294.3:c.5158A>G
-Created_date_LOVD	The date that variant data was first submitted to LOVD.	2014-12-17 19:07:22,2014-12-21 10:06:24,2017-01-11 11:18:41,2015-10-08 12:00:00,2018-01-15 20:58:59,2009-10-03 16:25:01,2011-09-14 12:26:59,2014-02-03 22:13:57
-Genetic_origin_LOVD	LOVD record type	In vitro (cloned),Unknown,CLASSIFICATION record,Germline,SUMMARY record
-DBID_LOVD	 ID given to the variant by LOVD. This ID is variant-specific, but not submitter-specific. 	BRCA1_000409
-RNA_LOVD	LOVD variant identifier in HGVS RNA nomenclature	r.(?),-,?
-Functional_analysis_technique_LOVD	Methods used to gather information about a variant's impact	Transcription activation in yeast (GAL4-fusions),Peptide binding ability,Bayesian statistics,Structure-based prediction (crystallography etc),transcription activation/PS/BA/BS,Multifactorial likelihood-ratio model,Proteolytic degradation,?
-Variant_effect_LOVD	Symbolic nomenclature to represent the effect of the variant on the function of the protein, in Submitter/Curator (R/C) format	?/?,?/.,-/.,-/-
-Variant_frequency_LOVD	Observed frequency of the variant as reported to LOVD by the submitter.  Expressed as allele counts (observations of variant/total observations)	1/1900 cases
 EA_Allele_Frequency_ESP	Allele frequency in European-American populations, per ESP	0.000233
 Minor_allele_frequency_percent_ESP	Percent minor allele frequency for EA, AA, and overall, from ESP	0.0233,0.0,0.0154
 AA_Allele_Frequency_ESP	Allele frequency in African-American populations, per ESP	0
@@ -115,25 +102,19 @@ Hg38_Start	Start coordinate in the Hg38 build	43063368
 Hg38_End	End coordinate in the Hg38 build	43063368
 Hg37_Start	Start coordinate in the Hg37 build	-
 Hg37_End	End coordinate in the Hg37 build	-
-Hg36_Start	(Deprecated) Start coordinate in hte Hg36 build	-
-Hg36_End	(Deprecated) End coordinate in the Hg36 build	-
 HGVS_RNA	HGVS RNA variant nomenclature	-
 Allele_Frequency	Summary of the allele frequencies from ExAC, 1000 Genomes and ESP	9.415e-05 (ExAC minus TCGA)
 Max_Allele_Frequency	(Deprecated) Largest single allele frequency from each of ExAC, 1000 Genomes and ESP 	-
 Genomic_Coordinate_hg37	(Deprecated) Genomic coordinate of the variant in the hg37 genome build	-
-Genomic_Coordinate_hg36	(Deprecated) Genomic coordinate of the variant in the hg36 genome build	-
 Source_URL	URL for the original source of the data	http://hci-exlovd.hci.utah.edu/variants.php?select_db=BRCA1&action=search_all&search_Variant%2FDNA=c.5158A%3EG, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000244390, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000743378, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000145365, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000744593, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000109408, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000076849, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000167319, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000226798, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000591588, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000213306
 Discordant	(Deprecated) Indicates if there are discordant clinical significance interpretations for this variant	Concordant
 Synonyms	Alternate names for this variant	NM_007294.3.c.5158A>G,T1720A,5277A>G,NC_000017.11.g.43063368T>C,LRG_292.g.154616A>G,NG_005905.2.g.154616A>G,P38398.p.Thr1720Ala,LRG_292p1.p.Thr1720Ala,p.Thr1720Ala,p.T1720A.ACC>GCC,NC_000017.10.g.41215385T>C,NR_027676.1.n.5294A>G,p.T1720A,U14680.1.n.5277A>G,LRG_292t1.c.5158A>G,NM_007294.2:c.5158A>G,NM_007300.3:c.5221A>G,NM_007299.3:c.1846A>G,NM_007298.3:c.1846A>G,NM_007297.3:c.5017A>G,U14680.1:c.5270A>G
 Pathogenicity_expert	Variant pathogenicity as displayed in the Summary view	Benign / Little Clinical Significance
 Pathogenicity_all	Variant pathogenicity as displayed in the Detail view	Benign(ENIGMA); Benign,Uncertain_significance,Likely_benign (ClinVar); Pending (BIC)
-pyhgvs_Genomic_Coordinate_36	HGVS variant alias which references the nucleotide in genomic DNA, per the GRCh36 genome build	chr17:g.38468911:T>C	https://brcaexchange.org/help#variant-naming-demystified
 pyhgvs_Genomic_Coordinate_37	HGVS variant alias which references the nucleotide in genomic DNA, per the GRCh37 genome build	chr17:g.41215385:T>C	https://brcaexchange.org/help#variant-naming-demystified
 pyhgvs_Genomic_Coordinate_38	HGVS variant alias which references the nucleotide in genomic DNA, per the GRCh38 genome build	chr17:g.43063368:T>C	https://brcaexchange.org/help#variant-naming-demystified
 pyhgvs_Hg37_Start	Starting position in Hg37 build according to HGVS nomenclature	41215385	https://brcaexchange.org/help#variant-naming-demystified
 pyhgvs_Hg37_End	Ending position in Hg37 build according to HGVS nomenclature	41215385	https://brcaexchange.org/help#variant-naming-demystified
-pyhgvs_Hg36_Start	Starting position in Hg36 build according to HGVS nomenclature	38468911	https://brcaexchange.org/help#variant-naming-demystified
-pyhgvs_Hg36_End	Ending position in Hg36 build according to HGVS nomenclature	38468911	https://brcaexchange.org/help#variant-naming-demystified
 pyhgvs_cDNA	HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA	NM_007294.3:c.5158A>G	https://brcaexchange.org/help#variant-naming-demystified
 pyhgvs_Protein	HGVS protein nomenclature	NP_009225.1:p.(Thr1720Ala)	https://brcaexchange.org/help#variant-naming-demystified
 mupit_structure	Indicates the three-dimensional protein structure that the variant can be visualized within, with MuPIT	1t15
@@ -232,6 +213,7 @@ Allele_number_exome_GnomAD	Total number of total chromosomes studied (for this v
 BX_ID_GnomAD	Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation
 Allele_count_exome_GnomAD	Total count of observed alternate alleles (variant) in exomes
 HGVS_cDNA_GnomAD	HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA
+HGVS_GnomAD	HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA
 Allele_count_genome_GnomAD	Total count of observed alternate alleles (variant) in genomes
 Allele_number_genome_GnomAD	Total number of total chromosomes studied (for this variant) in genomes
 Allele_frequency_exome_GnomAD	Overall allele frequency (for exomes) according to all studied populations, per gnomAD
@@ -239,7 +221,6 @@ Allele_frequency_genome_GnomAD	Overall allele frequency (for genomes) according 
 Variant_id_GnomAD	Identifier provided by gnomAD
 HGVS_protein_GnomAD	The predicted protein-level change (if any) that would be introduced by the genomic variant
 Flags_GnomAD	Flags provided by gnomAD to indicate an annotation or something unusual about the data
-Consequence_GnomAD	Variant consequence from Ensembl's Variant Effect Predictor, provided by gnomAD
 Allele_number_genome_ASJ_GnomAD	Number of total chromosomes studied (for this variant) in genomes of Ashkenazi Jewish Populations
 Allele_frequency_genome_SAS_GnomAD	Allele Frequency in genomes of South Asian Populations
 Allele_count_exome_AFR_GnomAD	Count of observed alternate alleles (variant) in exomes of African African American Populations, per gnomAD
@@ -247,7 +228,6 @@ Allele_frequency_genome_OTH_GnomAD	Allele Frequency in genomes of Other Populati
 Allele_count_exome_NFE_GnomAD	Count of observed alternate alleles (variant) in exomes of Non-Finnish European Populations, per gnomAD
 Allele_frequency_exome_AFR_GnomAD	Allele Frequency in exomes of African/African American Populations
 Allele_count_hom_genome_NFE_GnomAD	Count of observed alternate alleles (variant) in genomes of homozygous Non-Finnish European Populations, per gnomAD
-Allele_count_hemi_exome_ASJ_GnomAD	Count of observed alternate alleles (variant) in exomes of hemizygous Ashkenazi Jewish Populations, per gnomAD
 Allele_count_hom_genome_SAS_GnomAD	Count of observed alternate alleles (variant) in genomes of homozygous South Asian Populations, per gnomAD
 Allele_count_hom_genome_AFR_GnomAD	Count of observed alternate alleles (variant) in genomes of homozygous African/African American Populations, per gnomAD
 Allele_number_genome_NFE_GnomAD	Number of total chromosomes studied (for this variant) in genomes of Non-Finnish European Populations
@@ -256,26 +236,18 @@ Allele_frequency_exome_ASJ_GnomAD	Allele Frequency in exomes of Ashkenazi Jewish
 Allele_count_hom_genome_OTH_GnomAD	Count of observed alternate alleles (variant) in genomes of homozygous Other Populations, per gnomAD
 Allele_number_exome_FIN_GnomAD	Number of total chromosomes studied (for this variant) in exomes of Finnish Populations
 Allele_frequency_genome_NFE_GnomAD	Allele Frequency in genomes of Non-Finnish European Populations
-Allele_count_hemi_genome_FIN_GnomAD	Count of observed alternate alleles (variant) in genomes of hemizygous Finnish Populations, per gnomAD
 Allele_frequency_exome_EAS_GnomAD	Allele Frequency in exomes of East Asian Populations
 Allele_frequency_genome_FIN_GnomAD	Allele Frequency in genomes of Finnish Populations
 Allele_count_genome_OTH_GnomAD	Count of observed alternate alleles (variant) in genomes of Other Populations, per gnomAD
 Allele_number_exome_NFE_GnomAD	Number of total chromosomes studied (for this variant) in exomes of Non-Finnish European Populations
 Allele_count_hom_exome_SAS_GnomAD	Count of observed alternate alleles (variant) in exomes of homozygous South Asian Populations, per gnomAD
-Allele_count_hemi_exome_AMR_GnomAD	Count of observed alternate alleles (variant) in exomes of hemizygous Latino Populations, per gnomAD
-Allele_count_hemi_genome_EAS_GnomAD	Count of observed alternate alleles (variant) in genomes of hemizygous East Asian Populations, per gnomAD
-Allele_count_hemi_genome_ASJ_GnomAD	Count of observed alternate alleles (variant) in genomes of hemizygous Ashkenazi Jewish Populations, per gnomAD
 Allele_number_genome_SAS_GnomAD	Number of total chromosomes studied (for this variant) in genomes of South Asian Populations
-Allele_count_hemi_exome_EAS_GnomAD	Count of observed alternate alleles (variant) in exomes of hemizygous East Asian Populations, per gnomAD
 Allele_count_hom_exome_ASJ_GnomAD	Count of observed alternate alleles (variant) in exomes of homozygous Ashkenazi Jewish Populations, per gnomAD
 Allele_count_hom_genome_AMR_GnomAD	Count of observed alternate alleles (variant) in genomes of homozygous Latino Populations, per gnomAD
 Allele_count_genome_SAS_GnomAD	Count of observed alternate alleles (variant) in genomes of South Asian Populations, per gnomAD
 Allele_number_genome_AMR_GnomAD	Number of total chromosomes studied (for this variant) in genomes of Latino Populations
-Allele_count_hemi_genome_OTH_GnomAD	Count of observed alternate alleles (variant) in genomes of hemizygous Other Populations, per gnomAD
-Allele_count_hemi_genome_SAS_GnomAD	Count of observed alternate alleles (variant) in genomes of hemizygous South Asian Populations, per gnomAD
 Allele_number_exome_AMR_GnomAD	Number of total chromosomes studied (for this variant) in exomes of Latino Populations
 Allele_count_exome_EAS_GnomAD	Count of observed alternate alleles (variant) in exomes of East Asian Populations, per gnomAD
-Allele_count_hemi_exome_NFE_GnomAD	Count of observed alternate alleles (variant) in exomes of hemizygous Non-Finnish European Populations, per gnomAD
 Allele_count_hom_exome_NFE_GnomAD	Count of observed alternate alleles (variant) in exomes of homozygous Non-Finnish European Populations, per gnomAD
 Allele_frequency_genome_EAS_GnomAD	Allele Frequency in genomes of East Asian Populations
 Allele_count_genome_AFR_GnomAD	Count of observed alternate alleles (variant) in genomes of African African American Populations, per gnomAD
@@ -284,12 +256,9 @@ Allele_frequency_exome_AMR_GnomAD	Allele Frequency in exomes of Latino Populatio
 Allele_number_genome_FIN_GnomAD	Number of total chromosomes studied (for this variant) in genomes of Finnish Populations
 Allele_count_hom_exome_FIN_GnomAD	Count of observed alternate alleles (variant) in exomes of homozygous Finnish Populations, per gnomAD
 Allele_frequency_genome_AMR_GnomAD	Allele Frequency in genomes of Latino Populations
-Allele_count_hemi_exome_SAS_GnomAD	Count of observed alternate alleles (variant) in exomes of hemizygous South Asian Populations, per gnomAD
-Allele_count_hemi_genome_NFE_GnomAD	Count of observed alternate alleles (variant) in genomes of hemizygous Non-Finnish European Populations, per gnomAD
 Allele_number_genome_AFR_GnomAD	Number of total chromosomes studied (for this variant) in genomes of African/African American Populations
 Allele_number_exome_ASJ_GnomAD	Number of total chromosomes studied (for this variant) in exomes of Ashkenazi Jewish Populations
-Allele_count_hemi_genome_AFR_GnomAD	Count of observed alternate alleles (variant) in genomes of hemizygous African/African American Populations, per gnomAD
-Allele_count_hemi_exome_FIN_GnomADAllele_frequency_exome_NFE_GnomAD	Allele Frequency in exomes of Finnish Populations
+Allele_frequency_exome_NFE_GnomAD	Allele Frequency in exomes of Finnish Populations
 Allele_frequency_genome_AFR_GnomAD	Allele Frequency in genomes of African/African American Populations
 Allele_count_hom_genome_EAS_GnomAD	Count of observed alternate alleles (variant) in genomes of homozygous East Asian Populations, per gnomAD
 Allele_frequency_genome_ASJ_GnomAD	Allele Frequency in genomes of Ashkenazi Jewish Populations
@@ -298,7 +267,6 @@ Allele_frequency_exome_SAS_GnomAD	Allele Frequency in exomes of South Asian Popu
 Allele_count_genome_FIN_GnomAD	Count of observed alternate alleles (variant) in genomes of Finnish Populations, per gnomAD
 Allele_count_genome_EAS_GnomAD	Count of observed alternate alleles (variant) in genomes of East Asian Populations, per gnomAD
 Allele_count_genome_ASJ_GnomAD	Count of observed alternate alleles (variant) in genomes of Ashkenazi Jewish Populations, per gnomAD
-Allele_count_hemi_genome_AMR_GnomAD	Count of observed alternate alleles (variant) in genomes of hemizygous Latino Populations, per gnomAD
 Allele_count_hom_genome_FIN_GnomAD	Count of observed alternate alleles (variant) in genomes of homozygous Finnish Populations, per gnomAD
 Allele_count_hom_genome_ASJ_GnomAD	Count of observed alternate alleles (variant) in genomes of homozygous Ashkenazi Jewish Populations, per gnomAD
 Allele_count_hom_exome_AFR_GnomAD	Count of observed alternate alleles (variant) in exomes of homozygous African/African American Populations, per gnomAD
@@ -313,8 +281,20 @@ Allele_frequency_exome_OTH_GnomAD	Allele Frequency in exomes of Other Population
 Allele_count_exome_ASJ_GnomAD	Count of observed alternate alleles (variant) in exomes of Ashkenazi Jewish Populations, per gnomAD
 Allele_frequency_exome_FIN_GnomAD	Allele Frequency in exomes of Finnish Populations
 Allele_count_exome_FIN_GnomAD	Count of observed alternate alleles (variant) in exomes of Finnish Populations, per gnomAD
-Allele_count_hemi_exome_OTH_GnomAD	Count of observed alternate alleles (variant) in exomes of hemizygous Other Populations, per gnomAD
 Allele_count_hom_exome_AMR_GnomAD	Count of observed alternate alleles (variant) in exomes of homozygous Latino Populations, per gnomAD
 Allele_number_exome_AFR_GnomAD	Number of total chromosomes studied (for this variant) in exomes of African/African American Populations
 Allele_count_exome_SAS_GnomAD	Count of observed alternate alleles (variant) in exomes of South Asian Populations, per gnomAD
 Allele_count_genome_AMR_GnomAD	Count of observed alternate alleles (variant) in genomes of Latino Populations, per gnomAD
+BX_ID_LOVD	Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation	22209,22208,22210,22211
+Edited_date_LOVD	Information gathered about variant's impact, provided by LOVD	2016-08-05 14:13:49,2018-04-02 11:41:21,2019-03-11 21:42:51,2019-12-04 15:24:38,2017-08-18 17:34:03
+Submitters_LOVD	The name(s) of the researcher, research group, or individual who submitted the variant data to LOVD.	Johan den Dunnen (Rotterdam,BE),AU),VKGL-NL (Nijmegen,NL),ENIGMA consortium (Brisbane,Erik Teugels (Brussel
+Variant_effect_LOVD	Symbolic nomenclature to represent the effect of the variant on the function of the protein, in Submitter/Curator (R/C) format	+/+,+/.
+HGVS_cDNA_LOVD	LOVD variant identifer in HGVS cDNA nomenclature	NM_007294.3:c.131G>A
+Created_date_LOVD	The date that variant data was first submitted to LOVD.	2018-04-02 11:41:21,2019-03-11 21:42:51,2018-01-15 20:58:59,2014-02-03 22:13:57,2015-10-08 12:00:00
+Classification_LOVD	classification of variant based on clinical consequences, preferably using standardised criteria	pathogenic
+Genetic_origin_LOVD	LOVD record type	Unknown,CLASSIFICATION record,Germline,SUMMARY record
+DBID_LOVD	 ID given to the variant by LOVD. This ID is variant-specific, but not submitter-specific. BRCA1_001192 
+RNA_LOVD	LOVD variant identifier in HGVS RNA nomenclature	r.(?)
+Individuals_LOVD	The number of individuals the variant has been observed in, per submission. The individuals field does not account for all LOVD data on a variant, but accounts for the number of individuals observed by the submitter.	7
+Variant_frequency_LOVD	Observed frequency of the variant as reported to LOVD by the submitter.  Expressed as allele counts (observations of variant/total observations)	1/8085 cases
+Remarks_LOVD	remarks regarding variant described	thresholds for class as per Plon 2008 (PMID:18951446). Class 5 based on posterior probability = 1,IARC class based on posterior probability from multifactorial likelihood analysis,VKGL data sharing initiative Nederland

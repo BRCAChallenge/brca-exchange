@@ -1,272 +1,240 @@
-#!/usr/bin/env python
-
-from __future__ import print_function, division
-import argparse
-import sys
-import os
-import hgvs.parser
-import hgvs.dataproviders.uta
-import hgvs.assemblymapper
-import hgvs.normalizer
-import pyhgvs
-import pyhgvs.utils as pyhgvs_utils
 import logging
-import csv
-from ometa.runtime import ParseError
-from pygr.seqdb import SequenceFileDB
-import traceback
+import os
+import pickle
+import subprocess
+import tempfile
+
+import click
+import hgvs.assemblymapper
+import hgvs.dataproviders.uta
+import hgvs.projector
+import pandas as pd
+from hgvs.exceptions import HGVSError
+
+from common import config
+from common.hgvs_utils import HgvsWrapper
+from common.variant_utils import VCFVariant
+
+ALT_COL = 'Alt'
+CHR_COL = 'Chr'
+GENE_SYMBOL_COL = 'Gene_Symbol'
+HG38_END_COL = 'Hg38_End'
+HG38_START_COL = 'Hg38_Start'
+HGVS_CDNA_COL = 'HGVS_cDNA'
+POS_COL = 'Pos'
+PYHGVS_CDNA_COL = 'pyhgvs_cDNA'
+PYHGVS_GENOMIC_COORDINATE_37_COL = 'pyhgvs_Genomic_Coordinate_37'
+PYHGVS_GENOMIC_COORDINATE_38_COL = 'pyhgvs_Genomic_Coordinate_38'
+PYHGVS_HG37_END_COL = 'pyhgvs_Hg37_End'
+PYHGVS_HG37_START_COL = 'pyhgvs_Hg37_Start'
+PYHGVS_PROTEIN_COL = 'pyhgvs_Protein'
+GENOMIC_HGVS_HG37_COL = 'Genomic_HGVS_37'
+GENOMIC_HGVS_HG38_COL = 'Genomic_HGVS_38'
+REFERENCE_SEQUENCE_COL = 'Reference_Sequence'
+REF_COL = 'Ref'
+SYNONYMS_COL = 'Synonyms'
+
+# temporary fields
+VAR_OBJ_FIELD = 'var_objs'
+NEW_SYNONYMS_FIELD = 'new_syns'
+TMP_CDNA_UNORM_FIELD = 'tmp_HGVS_CDNA_FIELD_unorm'
+TMP_CDNA_NORM_FIELD = 'tmp_HGVS_CDNA_FIELD_norm'
 
 
-'''
-    Example run:
-        ./brca_pseudonym_generator.py -j hg18.fa -k hg19.fa -l hg38.fa -r refseq_annotation.hg18.gp -s refseq_annotation.hg19.gp -t refseq_annotation.hg38.gp -i aggregated.tsv -o test.out -p > stdoutErrorLog.txt
+def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
+    def cdna_from_cdna_field(x):
+        if x[HGVS_CDNA_COL] and x[HGVS_CDNA_COL].startswith('c.') and x[REFERENCE_SEQUENCE_COL] == cdna_ac_dict[x[GENE_SYMBOL_COL]]:
+            c = x[HGVS_CDNA_COL]
+            if ',' in c:
+                c = c.split(',')[0]
 
-    WARNING:
-        Currently only works for insertion and deletion strings less than or equal to 100 bases long. Can be modified to be larger.
-'''
+            return hgvs_proc.hgvs_parser.parse(x[REFERENCE_SEQUENCE_COL] + ":" + c)
+
+        return None
+
+    def compute_hgvs(x):
+        v = VCFVariant(x[CHR_COL], x[POS_COL], x[REF_COL], x[ALT_COL])
+        v = v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh38_Assem])
+
+        if normalize:
+            vn = hgvs_proc.normalizing(v)
+            v = vn if vn else v
+        return hgvs_proc.to_cdna(v)
+
+    def from_field_or_compute(row):
+        computed = compute_hgvs(row)
+
+        if not computed:
+            return cdna_from_cdna_field(row)
+        return computed
+
+    var_objs = df[VAR_OBJ_FIELD]
+
+    if pkl and os.path.exists(pkl):
+        pickle_dict = pickle.load(open(pkl, 'rb'))
+        s_cdna = pd.Series([ pickle_dict[str(v)] for v in var_objs ])
+    else:
+        s_cdna = df.apply(from_field_or_compute, axis=1)
+
+        if pkl:
+            pickle_dict = {str(v): c for (c, v) in zip(s_cdna, var_objs)}
+            pickle.dump(pickle_dict, open(pkl, 'wb'))
+
+    return s_cdna
 
 
-def parse_args():
-    """
-    Description:
-        function 'parse_args' parses arguments from command-line and returns an argparse
-        object containing the arguments and their values. Default values are 'False' if option
-        is not listed in the command, else the option value is set to True.
-    """
-    parser = argparse.ArgumentParser(description='Fill in hg18, hg19 genomic coordinates and cDNA hgvs strings in merged BRCA variant dataset.')
-    parser.add_argument('-i', '--inBRCA', type=argparse.FileType('r'),
-                        help='Input ENIGMA BRCA datatable file for conversion.')
-    parser.add_argument('-j', '--inHg18', type=argparse.FileType('r'),
-                        help='Input hg18 reference genome fasta file.')
-    parser.add_argument('-k', '--inHg19', type=argparse.FileType('r'),
-                        help='Input hg19 reference genome fasta file.')
-    parser.add_argument('-l', '--inHg38', type=argparse.FileType('r'),
-                        help='Input hg38 reference genome fasta file.')
-    parser.add_argument('-r', '--inRefSeq18', type=argparse.FileType('r'),
-                        help='Input refseq annotation hg18-based genepred file.')
-    parser.add_argument('-s', '--inRefSeq19', type=argparse.FileType('r'),
-                        help='Input refseq annotation hg19-based genepred file.')
-    parser.add_argument('-t', '--inRefSeq38', type=argparse.FileType('r'),
-                        help='Input refseq annotation hg38-based genepred file.')
-    parser.add_argument('-p', '--calcProtein', dest='calcProtein', action='store_true',
-                        help='Set flag for hgvs protein fill-in. May not result in complete fill-in.')
-    parser.add_argument('-o', '--outBRCA', type=argparse.FileType('w'),
-                        help='Output filled in ENIGMA BRCA datatable file.')
-    parser.add_argument('--artifacts_dir', help='Artifacts directory with pipeline artifact files.')
-
-    parser.set_defaults(calcProtein=False)
-    options = parser.parse_args()
-    return options
+def compute_genomic_hgvs(cDNA, assemblyMapper):
+    try:
+        genomic_hgvs = assemblyMapper.c_to_g(cDNA)
+        return str(genomic_hgvs)
+    except HGVSError as e:
+        logging.info("Exception during conversion of " + str(cDNA) + " to genomic coordinates: " + str(e))
+        return None
 
 
-def main(args):
+def convert_to_hg37(vars, brca_resources_dir):
+    def pseudo_vcf_entry(v):
+        entries = [v.chr, v.pos, '.', v.ref, v.alt, '', '', '']
+        return '\t'.join([str(s) for s in entries])
 
-    options = parse_args()
-    brcaFile = options.inBRCA
-    hg18_fa = options.inHg18
-    hg19_fa = options.inHg19
-    hg38_fa = options.inHg38
-    refSeq18 = options.inRefSeq18
-    refSeq19 = options.inRefSeq19
-    refSeq38 = options.inRefSeq38
-    outputFile = options.outBRCA
-    calcProtein = options.calcProtein
-    artifacts_dir = options.artifacts_dir
+    lst = [pseudo_vcf_entry(v) for v in vars]
 
-    if not os.path.exists(artifacts_dir):
-        os.makedirs(artifacts_dir)
-    log_file_path = artifacts_dir + "brca-pseudonym-generator.log"
-    logging.basicConfig(filename=log_file_path, filemode="w", level=logging.DEBUG)
+    vcf_tmp = tempfile.mktemp('.vcf')
+    with open(vcf_tmp, 'w') as f:
+        f.write('\n'.join(lst))
 
-    hgvs_parser = hgvs.parser.Parser()
-    hgvs_dp = hgvs.dataproviders.uta.connect()
-    hgvs_norm = hgvs.normalizer.Normalizer(hgvs_dp)
-    hgvs_am = hgvs.assemblymapper.AssemblyMapper(hgvs_dp, assembly_name='GRCh38')
+    vcf_tmp_out = tempfile.mktemp('.vcf')
+    args = ["CrossMap.py", "vcf",
+            brca_resources_dir + "/hg38ToHg19.over.chain.gz",
+            vcf_tmp,
+            brca_resources_dir + "/hg19.fa",
+            vcf_tmp_out]
 
-    genome36 = SequenceFileDB(hg18_fa.name)
-    genome37 = SequenceFileDB(hg19_fa.name)
-    genome38 = SequenceFileDB(hg38_fa.name)
+    logging.info("Running CrossMap.py to convert to hg19")
+    sp = subprocess.Popen(args)
+    out, err = sp.communicate()
+    if out:
+        logging.info("standard output of subprocess: {}".format(out))
+    if err:
+        logging.info("standard output of subprocess: {}".format(err))
 
-    transcripts36 = pyhgvs_utils.read_transcripts(refSeq18)
-    transcripts37 = pyhgvs_utils.read_transcripts(refSeq19)
-    transcripts38 = pyhgvs_utils.read_transcripts(refSeq38)
+    vcf_out_lines = open(vcf_tmp_out, 'r').readlines()
 
-    def get_transcript36(name):
-        return transcripts36.get(name)
+    return [VCFVariant(v[0], int(v[1]), v[3], v[4]) for v in
+     [l.strip().split('\t') for l in vcf_out_lines]]
 
-    def get_transcript37(name):
-        return transcripts37.get(name)
 
-    def get_transcript38(name):
-        return transcripts38.get(name)
+def get_synonyms(x, hgvs_proc, syn_ac_dict):
+    synonyms = []
 
-    hgvsG36ColumnName = 'Genomic_Coordinate_hg36'
-    hgvsG37ColumnName = 'Genomic_Coordinate_hg37'
-    hgvsG38ColumnName = 'Genomic_Coordinate_hg38'
-    refSeqColumnName = 'Reference_Sequence'
-    hgvsCDNAColumnName = 'HGVS_cDNA'
-    hgvsCDNALOVDColumnName = 'HGVS_cDNA_LOVD'
-    hgvsPColumnName = 'HGVS_Protein'
+    if not x[GENE_SYMBOL_COL]:
+        return []
 
-    # Set up header for output file
-    input_file = csv.reader(brcaFile, delimiter='\t')
-    output_file = csv.writer(outputFile, delimiter='\t')
-    input_header_row = input_file.next()
-
-    # The following new columns will contain data generated by this file
-    new_columns_to_append = ["pyhgvs_Genomic_Coordinate_36", "pyhgvs_Genomic_Coordinate_37",
-                          "pyhgvs_Genomic_Coordinate_38", "pyhgvs_Hg37_Start", "pyhgvs_Hg37_End",
-                          "pyhgvs_Hg36_Start", "pyhgvs_Hg36_End", "pyhgvs_cDNA", "pyhgvs_Protein"]
-
-    output_header_row = input_header_row + new_columns_to_append
-
-    output_file.writerow(output_header_row)
-
-    # Store indexes of the relevant columns
-    hgvsG36Index = input_header_row.index(hgvsG36ColumnName)
-    hgvsG37Index = input_header_row.index(hgvsG37ColumnName)
-    hgvsG38Index = input_header_row.index(hgvsG38ColumnName)
-    refSeqIndex = input_header_row.index(refSeqColumnName)
-    hgvsCDNAIndex = input_header_row.index(hgvsCDNAColumnName)
-    hgvsPIndex = input_header_row.index(hgvsPColumnName)
-    hgvsCDNALOVDIndex = input_header_row.index(hgvsCDNALOVDColumnName)
-    geneSymbolIndex = input_header_row.index("Gene_Symbol")
-    synonymIndex = input_header_row.index("Synonyms")
-
-    refSeqBRCA1Transcripts = ['NM_007294.2', 'NM_007300.3', 'NM_007299.3', 'NM_007298.3', 'NM_007297.3', 'U14680.1']
-    refSeqBRCA2Transcripts = ['U43746.1']
-
-    for line in input_file:
-        if line[geneSymbolIndex] == 'BRCA1':
-            line[refSeqIndex] = 'NM_007294.3'
-        elif line[geneSymbolIndex] == 'BRCA2':
-            line[refSeqIndex] = 'NM_000059.3'
-
-        # Store for reference and debugging
-        oldHgvsGenomic38 = line[refSeqIndex] + ':' + line[hgvsG38Index].split(',')[0]
-
-        chrom38 = line[input_header_row.index("Chr")]
-        offset38 = line[input_header_row.index("Pos")]
-        ref38 = line[input_header_row.index("Ref")]
-        alt38 = line[input_header_row.index("Alt")]
-
-        # Edge cases to correct variant string formats for indels in order to be accepted by the counsyl parser
-        if ref38 == '-': ref38 = ''
-        if alt38 == '-': alt38 = ''
-        if alt38 == 'None': alt38 = ''
-        transcript38 = get_transcript38(line[refSeqIndex])
-        transcript37 = get_transcript37(line[refSeqIndex])
-        transcript36 = get_transcript36(line[refSeqIndex])
-
-        # Normalize hgvs cdna string to fit what the counsyl hgvs parser determines to be the correct format
-        if transcript38 is None:
-            print("ERROR: could not parse transcript38 for variant: %s \n" % (line))
+    for _, _, _, dst, alt_ac, method in hgvs_proc.hgvs_dp.get_tx_for_gene(x[GENE_SYMBOL_COL]):
+        if x[GENE_SYMBOL_COL] not in syn_ac_dict:
             continue
-        cdna_coord = str(pyhgvs.format_hgvs_name("chr" + chrom38, int(offset38), ref38, alt38, genome38, transcript38, use_gene=False, max_allele_length=100))
-        chrom38, offset38, ref38, alt38 = pyhgvs.parse_hgvs_name(cdna_coord, genome38, get_transcript=get_transcript38)
-        chrom37, offset37, ref37, alt37 = pyhgvs.parse_hgvs_name(cdna_coord, genome37, get_transcript=get_transcript37)
-        chrom36, offset36, ref36, alt36 = pyhgvs.parse_hgvs_name(cdna_coord, genome36, get_transcript=get_transcript36)
 
-        # Generate transcript hgvs cdna synonym string
-        if line[synonymIndex] == "-":
-            synonymString = []
-        elif line[synonymIndex] == "":
-            synonymString = []
-        else:
-            synonymString = line[synonymIndex].split(",")
-        if line[geneSymbolIndex] == 'BRCA1':
-            for transcriptName in refSeqBRCA1Transcripts:
-                transcript38 = get_transcript38(transcriptName)
-                cdna_synonym = str(pyhgvs.format_hgvs_name(chrom38, int(offset38), ref38, alt38, genome38, transcript38, use_gene=False, max_allele_length=100))
-                synonymString.append(cdna_synonym)
-        elif line[geneSymbolIndex] == 'BRCA2':
-            for transcriptName in refSeqBRCA2Transcripts:
-                transcript38 = get_transcript38(transcriptName)
-                cdna_synonym = str(pyhgvs.format_hgvs_name(chrom38, int(offset38), ref38, alt38, genome38, transcript38, use_gene=False, max_allele_length=100))
-                synonymString.append(cdna_synonym)
+        accessions = syn_ac_dict[x[GENE_SYMBOL_COL]]
 
-        # Add hgvs_cDNA values from LOVD to synonyms if not already present
-        for cdna_coord_LOVD in line[hgvsCDNALOVDIndex].split(','):
-            # Skip if blank
-            if cdna_coord_LOVD == "-" or cdna_coord_LOVD is None or cdna_coord_LOVD == "":
-                continue
+        if dst in accessions:
+            for vc in [x[TMP_CDNA_NORM_FIELD]]:
+                if not vc:
+                    continue
 
-            cdna_coord_LOVD = cdna_coord_LOVD.strip()
+                try:
+                    pj = hgvs.projector.Projector(hdp=hgvs_proc.hgvs_dp,
+                                                  alt_ac=alt_ac,
+                                                  src_ac=vc.ac,
+                                                  dst_ac=dst, dst_alt_aln_method=method)
 
-            # Don't add to synonyms if main hgvs_cDNA field is already equivalent to hgvs_cDNA value from LOVD
-            cdna_coord_LOVD_for_comparison = cdna_coord_LOVD.split(':')[1]
-            if cdna_coord_LOVD_for_comparison in line[hgvsCDNAIndex]:
-                continue
+                    vp = pj.project_variant_forward(vc)
+                    synonyms.append(vp)
+                    vp_norm = hgvs_proc.normalizing(vp)
+                    if vp_norm:
+                        if vp_norm not in synonyms:
+                            logging.info("Found new synonym! " + str(vp_norm) + " " + str(vp) + " " + str(x[PYHGVS_GENOMIC_COORDINATE_38_COL]))
+                        synonyms.append(vp_norm)
+                except HGVSError as e:
+                    logging.info("Exception in synonym handling " + str(vc) + " from " + str(vc.ac) + " to " +
+                                 str(dst) + " using " + str(method) + " via " + str(alt_ac) + " : " + str(e) + " " + str(e.__class__.__name__))
 
-            try:
-                chrom38LOVD, offset38LOVD, ref38LOVD, alt38LOVD = pyhgvs.parse_hgvs_name(cdna_coord_LOVD, genome38, get_transcript=get_transcript38)
-                if line[geneSymbolIndex] == 'BRCA1':
-                    for transcriptName in refSeqBRCA1Transcripts:
-                        transcript38 = get_transcript38(transcriptName)
-                        cdna_synonym = str(pyhgvs.format_hgvs_name(chrom38LOVD, int(offset38LOVD), ref38LOVD, alt38LOVD, genome38, transcript38, use_gene=False, max_allele_length=100))
-                        if cdna_synonym not in synonymString:
-                            synonymString.append(cdna_synonym)
-                elif line[geneSymbolIndex] == 'BRCA2':
-                    for transcriptName in refSeqBRCA2Transcripts:
-                        transcript38 = get_transcript38(transcriptName)
-                        cdna_synonym = str(pyhgvs.format_hgvs_name(chrom38LOVD, int(offset38LOVD), ref38LOVD, alt38LOVD, genome38, transcript38, use_gene=False, max_allele_length=100))
-                        if cdna_synonym not in synonymString:
-                            synonymString.append(cdna_synonym)
-            except Exception as e:
-                print('parse error: {}'.format(cdna_coord_LOVD))
-                print(e)
+    return list({str(s) for s in synonyms})
 
-        protein_coord = None
-        if calcProtein:
-            try:
-                genomic_change = '{0}:g.{1}:{2}>{3}'.format(chrom38, offset38, ref38, alt38)
-                var_c1 = hgvs_parser.parse_hgvs_variant(cdna_coord)
-                var_c1_norm = hgvs_norm.normalize(var_c1) # doing normalization explicitly to get a useful error message
-                protein_coord = hgvs_am.c_to_p(var_c1_norm)
-            except Exception as e:
-                template = "An error of type {0} occured. Arguments:{1!r}"
-                error_name = type(e).__name__
-                message = template.format(error_name, e.args)
-                logging.error(message)
-                logging.error('Proposed GRCh38 Genomic change for error: %s', genomic_change)
-                logging.error(line)
 
-                # Exceptions related to invalid data
-                data_errors = set(['HGVSParseError', 'HGVSError', 'HGVSInvalidVariantError', 'HGVSUnsupportedOperationError'])
-                if error_name not in data_errors:
-                    # output some more if exception doesn't seem to be related to invalid data
-                    logging.error("Non data error raised")
-                    logging.exception(message)
+def _merge_synonyms(x):
+    orig_list = [s for s in x[SYNONYMS_COL].split(',') if s] # filter away ''
 
-                if error_name == "DatabaseError":
-                    # Aborting, as it is a transient error in principle, i.e. in one run we might be able to obtain a protein change, in another not, messing up the data diffs
-                    raise EnvironmentError("Issue with UTA database. Aborting")
+    combined = set(orig_list + x[NEW_SYNONYMS_FIELD])
+    list_sorted = sorted(list(combined))
+    return ','.join(list_sorted)
 
-        # Add empty data for each new column to prepare for data insertion by index
-        for i in range(len(new_columns_to_append)):
-            line.append('-')
 
-        line[output_header_row.index("pyhgvs_Genomic_Coordinate_36")] = '{0}:g.{1}:{2}>{3}'.format(chrom36,offset36,ref36,alt36)
-        line[output_header_row.index("pyhgvs_Genomic_Coordinate_37")] = '{0}:g.{1}:{2}>{3}'.format(chrom37,offset37,ref37,alt37)
-        line[output_header_row.index("pyhgvs_Genomic_Coordinate_38")] = '{0}:g.{1}:{2}>{3}'.format(chrom38,offset38,ref38,alt38)
-        line[output_header_row.index("pyhgvs_Hg37_Start")] = str(offset37)
-        line[output_header_row.index("pyhgvs_Hg37_End")] = str(int(offset37) + len(ref38) - 1)
-        line[output_header_row.index("pyhgvs_Hg36_Start")] = str(offset36)
-        line[output_header_row.index("pyhgvs_Hg36_End")] = str(int(offset36) + len(ref38) - 1)
-        line[output_header_row.index("pyhgvs_cDNA")] = '{0}'.format(cdna_coord)
-        if calcProtein == True:
-            line[output_header_row.index("pyhgvs_Protein")] = '{0}'.format(str(protein_coord))
-        line[synonymIndex] = ','.join(synonymString)
+@click.command()
+@click.argument('input', click.Path(readable=True))
+@click.argument('output', click.Path(writable=True))
+@click.option('--log-path', default='pseudonym_generator.log', help="Log file pth")
+@click.option("--pkl", help="Saving HGVS cDNA objects to save time during development")
+@click.option("--config-file", required=True, help="path to gene configuration file")
+@click.option('--resources', help="path to directory containing reference sequences")
+def main(input, output, pkl, log_path, config_file, resources):
+    logging.basicConfig(filename=log_path, filemode="w", level=logging.INFO,
+                        format=' %(asctime)s %(filename)-15s %(message)s')
 
-        output_file.writerow(line)
+    cfg_df = config.load_config(config_file)
 
-    hg18_fa.close()
-    hg19_fa.close()
-    hg38_fa.close()
-    refSeq18.close()
-    refSeq19.close()
-    refSeq38.close()
+    syn_ac_dict = { x[config.SYMBOL_COL] : x[config.SYNONYM_AC_COL].split(';') for _, x in cfg_df.iterrows()}
+    cdna_default_ac_dict = { x[config.SYMBOL_COL] : x[config.HGVS_CDNA_DEFAULT_AC] for _, x in cfg_df.iterrows()}
+
+    hgvs_proc = HgvsWrapper()
+
+    df = pd.read_csv(input, sep='\t')
+
+    df[VAR_OBJ_FIELD] = df.apply(lambda x: VCFVariant(x[CHR_COL], x[POS_COL], x[REF_COL], x[ALT_COL]), axis=1)
+
+    #### CDNA and Genomic HGVS conversions
+    df[TMP_CDNA_NORM_FIELD] = _get_cdna(df, pkl, hgvs_proc, cdna_default_ac_dict, normalize=True)
+    df[PYHGVS_CDNA_COL] = df[TMP_CDNA_NORM_FIELD].apply(str)
+    
+    dataProviders = hgvs.dataproviders.uta.connect()
+    df[GENOMIC_HGVS_HG38_COL] = df[TMP_CDNA_NORM_FIELD].apply(compute_genomic_hgvs, args=[hgvs.assemblymapper.AssemblyMapper(dataProviders,
+                                                              assembly_name=HgvsWrapper.GRCh38_Assem, alt_aln_method='splign')])
+    df[GENOMIC_HGVS_HG37_COL] = df[TMP_CDNA_NORM_FIELD].apply(compute_genomic_hgvs, args=[hgvs.assemblymapper.AssemblyMapper(dataProviders,
+                                                              assembly_name=HgvsWrapper.GRCh37_Assem, alt_aln_method='splign')])
+
+    available_cdna = df[PYHGVS_CDNA_COL].str.startswith("NM_")
+    df.loc[available_cdna, REFERENCE_SEQUENCE_COL] = df.loc[available_cdna, PYHGVS_CDNA_COL].str.split(':').apply(lambda l: l[0])
+    df.loc[available_cdna, HGVS_CDNA_COL] = df.loc[available_cdna, PYHGVS_CDNA_COL].str.split(':').apply(lambda l: l[1])
+
+    # still setting a reference sequence for downstream steps, even though no cDNA could be determined
+    df.loc[~available_cdna, REFERENCE_SEQUENCE_COL] = df.loc[~available_cdna, GENE_SYMBOL_COL].apply(lambda g: cdna_default_ac_dict[g])
+    df.loc[~available_cdna, HGVS_CDNA_COL] = '-'
+
+    #### Genomic Coordinates
+    df[PYHGVS_GENOMIC_COORDINATE_38_COL] = df[VAR_OBJ_FIELD].apply(lambda v: str(v))
+
+    var_objs_hg37 = convert_to_hg37(df[VAR_OBJ_FIELD], resources)
+    df[PYHGVS_GENOMIC_COORDINATE_37_COL] = pd.Series([str(v) for v in var_objs_hg37])
+
+    df[PYHGVS_HG37_START_COL] = pd.Series([v.pos for v in var_objs_hg37])
+    df[PYHGVS_HG37_END_COL] = df[PYHGVS_HG37_START_COL] + (df[HG38_END_COL] - df[HG38_START_COL])
+
+    #### Protein
+    df[PYHGVS_PROTEIN_COL] = df[TMP_CDNA_NORM_FIELD].apply(lambda x: str(hgvs_proc.to_protein(x)))
+
+    #### Synonyms
+    df[NEW_SYNONYMS_FIELD] = df.apply(lambda s: get_synonyms(s, hgvs_proc, syn_ac_dict), axis=1)
+
+    df[SYNONYMS_COL] = df[SYNONYMS_COL].fillna('').str.strip()
+
+    # merge existing synonyms with generated ones and sort them
+    df[SYNONYMS_COL] = df.apply(_merge_synonyms, axis=1)
+
+    #### Writing out
+    # cleaning up temporary fields
+    df = df.drop(columns=[VAR_OBJ_FIELD, NEW_SYNONYMS_FIELD, TMP_CDNA_NORM_FIELD])
+
+    df.to_csv(output, sep='\t', index=False)
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv))
+    main()

@@ -12,7 +12,6 @@ import csv
 import psycopg2
 from data.utilities import update_autocomplete_words
 from tqdm import tqdm
-
 from data.management.commands.add_diff_json import add_diffs
 
 
@@ -172,13 +171,18 @@ class Command(BaseCommand):
         # use cleaned up genomic coordinates and other values
         row_dict['Genomic_Coordinate_hg38'] = row_dict.pop('pyhgvs_Genomic_Coordinate_38')
         row_dict['Genomic_Coordinate_hg37'] = row_dict.pop('pyhgvs_Genomic_Coordinate_37')
-        row_dict['Genomic_Coordinate_hg36'] = row_dict.pop('pyhgvs_Genomic_Coordinate_36')
         row_dict['Hg37_Start'] = row_dict.pop('pyhgvs_Hg37_Start')
         row_dict['Hg37_End'] = row_dict.pop('pyhgvs_Hg37_End')
-        row_dict['Hg36_Start'] = row_dict.pop('pyhgvs_Hg36_Start')
-        row_dict['Hg36_End'] = row_dict.pop('pyhgvs_Hg36_End')
         row_dict['HGVS_cDNA'] = row_dict.pop('pyhgvs_cDNA')
         row_dict['HGVS_Protein'] = row_dict.pop('pyhgvs_Protein')
+
+        # remove deprecated fields if they're present
+        row_dict.pop('Hg36_Start', None)
+        row_dict.pop('Hg36_End', None)
+        row_dict.pop('Genomic_Coordinate_hg36', None)
+        row_dict.pop('pyhgvs_Genomic_Coordinate_36', None)
+        row_dict.pop('pyhgvs_Hg36_Start', None)
+        row_dict.pop('pyhgvs_Hg36_End', None)
 
         # Denote percentage in field name, two different fieldnames were used previously so both are handled below
         for oldName in OLD_MAF_ESP_FIELD_NAMES:
@@ -207,7 +211,7 @@ class Command(BaseCommand):
 
         # add removed reports to dict
         for row in removed_reports_reader:
-            report = dict(list(zip(reports_header, row)))
+            report = dict(list(zip(removed_reports_header, row)))
             report['change_type'] = 'deleted'
             source = report['Source']
             bx_id = report['BX_ID_' + source]

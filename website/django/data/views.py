@@ -12,7 +12,6 @@ from django.db.models.functions import Concat
 from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.gzip import gzip_page
-
 from .models import (
     Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType, Report, ReportDiff,
     InSilicoPriors, VariantPaper, Paper, VariantRepresentation
@@ -22,7 +21,6 @@ from django.views.decorators.http import require_http_methods
 import google.protobuf.json_format as json_format
 from datetime import datetime
 from operator import itemgetter
-
 import logging
 from functools import reduce
 
@@ -152,7 +150,8 @@ def sitemap(request):
 
 def variant_reports(request, variant_id):
     variant_id = int(variant_id)
-    query = Report.objects.filter(Variant_id=variant_id)
+    change_types_map = {x['name']:x['id'] for x in list(ChangeType.objects.values())}
+    query = Report.objects.filter(Variant_id=variant_id).exclude(Change_Type_id=change_types_map['deleted'])
     report_versions = []
     for report in query:
         key = None
@@ -169,6 +168,8 @@ def variant_reports(request, variant_id):
                     .order_by('-Data_Release_id').select_related('Data_Release')
             report_versions.extend(list(map(report_to_dict, report_query)))
         elif report.Source == "LOVD":
+            # only return submissions on or after 12/2/2019 since we redefined submission ids in this release
+            cutoff_date = '2019-12-02'
             key = report.Submission_ID_LOVD
             if not key or key == '-':
                 # if no key is available, skip report history
@@ -177,7 +178,7 @@ def variant_reports(request, variant_id):
                 # extend the selection w/reports that have matching keys,
                 # but only up until the requested variants' release (i.e., same as for ClinVar)
                 report_query = Report.objects\
-                    .filter(Data_Release_id__lte=report.Data_Release.id, Submission_ID_LOVD=key)\
+                    .filter(Data_Release_id__lte=report.Data_Release.id, Submission_ID_LOVD=key, Data_Release__date__gte=cutoff_date)\
                     .order_by('-Data_Release_id').select_related('Data_Release')
             report_versions.extend(list(map(report_to_dict, report_query)))
 
@@ -232,10 +233,10 @@ def report_to_dict(report_object):
         # don't display ClinVar report diffs prior to April 2018
         cutoff_date = datetime.strptime('Apr 1 2018  12:00AM', '%b %d %Y %I:%M%p')
     elif report_object.Source == "LOVD":
-        # don't display LOVD report diffs prior to November 4 2018 (we
-        # updated the definition of LOVD submissions in the early November
+        # don't display LOVD report diffs prior to December 2 2019 (we
+        # updated the definition of LOVD submissions in the early December
         # release, so it only makes sense to show diffs from following releases)
-        cutoff_date = datetime.strptime('Nov 4 2018  12:00AM', '%b %d %Y %I:%M%p')
+        cutoff_date = datetime.strptime('Dec 2 2018  12:00AM', '%b %d %Y %I:%M%p')
     try:
         if report_dict["Data_Release"]["date"] < cutoff_date:
             report_dict["Diff"] = None
@@ -389,12 +390,14 @@ def apply_search(query, search_term, quotes='', release=None):
 
         BRCA1:chr17:g.43094692:G>C --> Gene_Symbol:Genomic_Coordinate_hg38
         BRCA1:chr17:g.41246709:G>C --> Gene_Symbol:Genomic_Coordinate_hg37
-        BRCA1:chr17:g.38500235:G>C --> Gene_Symbol:Genomic_Coordinate_hg36
+        BRCA1:NC_000013.11:g.32398880A>C --> Gene_Symbol:Genomic_HGVS_38
+        BRCA1:NC_000013.10:g.32973017A>C --> Gene_Symbol:Genomic_HGVS_37
         BRCA1:958C>G --> Gene_Symbol:BIC_Nomenclature
         BRCA1:c.839C>G --> Gene_Symbol:HGVS_cDNA
         NM_007294.3:chr17:g.43094692:G>C --> Reference_Sequence:Genomic_Coordinate_hg38
         NM_007294.3:chr17:g.41246709:G>C --> Reference_Sequence:Genomic_Coordinate_hg37
-        NM_007294.3:chr17:g.38500235:G>C --> Reference_Sequence:Genomic_Coordinate_hg36
+        NM_007294.3:NC_000013.11:g.32398880A>C --> Gene_Symbol:Genomic_HGVS_38
+        NM_007294.3:NC_000013.10:g.32973017A>C --> Gene_Symbol:Genomic_HGVS_37
         NM_007294.3:958C>G --> Reference_Sequence:BIC_Nomenclature
         NM_007294.3:c.839C>G --> Reference_Sequence:HGVS_cDNA
         BRCA1:p.(Ala280Gly) --> Gene_Symbol:HGVS_Protein.split(':')[1] (HGVS_Protein is actually stored as NP_009225.1:p.(Ala280Gly), so this has to be split on the ":")
@@ -415,6 +418,16 @@ def apply_search(query, search_term, quotes='', release=None):
         search_term = search_term.replace('chr17:', 'chr17:g.')
     if 'chr13:' in search_term and 'g.' not in search_term:
         search_term = search_term.replace('chr13:', 'chr13:g.')
+
+    # Accept genomic hgvs nomenclature with or without a 'g.' before the position
+    if 'nc_000013.11:' in search_term and 'g.' not in search_term:
+        search_term = search_term.replace('nc_000013.11:', 'nc_000013.11:g.')
+    if 'nc_000017.11:' in search_term and 'g.' not in search_term:
+        search_term = search_term.replace('nc_000017.11:', 'nc_000017.11:g.')
+    if 'nc_000013.10:' in search_term and 'g.' not in search_term:
+        search_term = search_term.replace('nc_000013.10:', 'nc_000013.10:g.')
+    if 'nc_000017.10:' in search_term and 'g.' not in search_term:
+        search_term = search_term.replace('nc_000017.10:', 'nc_000017.10:g.')
 
     p_hgvs_protein_colon = re.compile("^np_[0-9]{6}.[0-9]:")
     m_hgvs_protein_colon = p_hgvs_protein_colon.match(search_term)
@@ -464,7 +477,8 @@ def apply_search(query, search_term, quotes='', release=None):
             Q(HGVS_Protein__icontains=suffix) |
             Q(Genomic_Coordinate_hg38__istartswith=suffix) |
             Q(Genomic_Coordinate_hg37__istartswith=suffix) |
-            Q(Genomic_Coordinate_hg36__istartswith=suffix) |
+            Q(Genomic_HGVS_38__istartswith=suffix) |
+            Q(Genomic_HGVS_37__istartswith=suffix) |
             Q(BIC_Nomenclature__istartswith=suffix) |
             Q(Protein_Change__istartswith=suffix) |
             Q(Synonyms__icontains=comma_prefixed_suffix) |
@@ -475,6 +489,7 @@ def apply_search(query, search_term, quotes='', release=None):
             Q(HGVS_cDNA__icontains=suffix) |
             Q(HGVS_Protein__icontains=suffix) |
             Q(Genomic_Coordinate_hg38__istartswith=suffix) |
+            Q(Genomic_HGVS_38__istartswith=suffix) |
             Q(BIC_Nomenclature__istartswith=suffix) |
             Q(Protein_Change__istartswith=suffix)
         )
@@ -488,7 +503,8 @@ def apply_search(query, search_term, quotes='', release=None):
             Q(HGVS_cDNA__icontains=suffix) |
             Q(Genomic_Coordinate_hg38__istartswith=suffix) |
             Q(Genomic_Coordinate_hg37__istartswith=suffix) |
-            Q(Genomic_Coordinate_hg36__istartswith=suffix) |
+            Q(Genomic_HGVS_38__istartswith=suffix) |
+            Q(Genomic_HGVS_37__istartswith=suffix) |
             Q(BIC_Nomenclature__istartswith=suffix) |
             Q(Synonyms__icontains=comma_prefixed_suffix) |
             Q(Synonyms__istartswith=suffix)
@@ -496,6 +512,7 @@ def apply_search(query, search_term, quotes='', release=None):
         non_synonyms = results.filter(
             Q(HGVS_cDNA__icontains=suffix) |
             Q(Genomic_Coordinate_hg38__istartswith=suffix) |
+            Q(Genomic_HGVS_38__istartswith=suffix) |
             Q(BIC_Nomenclature__istartswith=suffix)
         )
     # Handle clinvar accession numbers
@@ -518,7 +535,8 @@ def apply_search(query, search_term, quotes='', release=None):
             Q(Pathogenicity_expert__icontains=search_term) |
             Q(Genomic_Coordinate_hg38__icontains=search_term) |
             Q(Genomic_Coordinate_hg37__icontains=search_term) |
-            Q(Genomic_Coordinate_hg36__icontains=search_term) |
+            Q(Genomic_HGVS_38__istartswith=search_term) |
+            Q(Genomic_HGVS_37__istartswith=search_term) |
             Q(Synonyms__icontains=search_term) |
             Q(Gene_Symbol__icontains=search_term) |
             Q(HGVS_cDNA__icontains=search_term) |
@@ -531,6 +549,7 @@ def apply_search(query, search_term, quotes='', release=None):
         non_synonyms = query.filter(
             Q(Pathogenicity_expert__icontains=search_term) |
             Q(Genomic_Coordinate_hg38__icontains=search_term) |
+            Q(Genomic_HGVS_38__istartswith=search_term) |
             Q(Gene_Symbol__icontains=search_term) |
             Q(HGVS_cDNA__icontains=search_term) |
             Q(BIC_Nomenclature__icontains=search_term) |

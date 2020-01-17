@@ -1,13 +1,11 @@
-# BRCA Exchange GA4GH API
+# BRCA Exchange API
 
+The BRCA Exchange API allows third parties to access BRCA Exchange's live database. The API described in the documentation
+below is used to populate the website. While it is the most up-to-date source of data, it is also subject to change
+without notice.
 
-The GA4GH has defined a standard interface for exchanging genomic data over HTTP called an API, or Application Programming Interface.
-
-Using the <a href="http://github.com/ga4gh/schemas">GA4GH schemas</a>, students at UCSC have developed an implementation of this interface that provides programmatic access to the BRCA Exchange variation data and annotations.
-
-This allows the well curated and expert reviewed variation data in the BRCA exchange to be made available to application developers in most common languages.
-
-The BRCA exchange exposes the interfaces necessary for accessing variant data, which are a subset of the interfaces the GA4GH defines. An example of accessing variants using python and the GA4GH client can be seen in this <a href="https://github.com/BD2KGenomics/brca-exchange/blob/master/website/django/data/static/python_notebook/brca-exchange.ipynb"><b>python notebook</b></a>.
+- [This API document](https://github.com/BRCAChallenge/brca-exchange/blob/master/website/content/api_docs/api_overview.md) describes the endpoints for the internal API.
+- [This Jupyter notebook](https://github.com/BRCAChallenge/brca-exchange/blob/master/website/content/api_docs/internal-api.ipynb) provides a tutorial on how to use the API.
 
 ---
 

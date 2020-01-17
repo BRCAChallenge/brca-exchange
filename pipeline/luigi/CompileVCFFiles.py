@@ -186,21 +186,30 @@ class CopyBICOutputToOutputDir(DefaultPipelineTask):
 
 
 class ExtractDataFromLatestEXLOVD(DefaultPipelineTask):
-    def output(self):
-        ex_lovd_file_dir = self.cfg.file_parent_dir + '/exLOVD'
+    dir_name = 'exLOVD'
 
-        return {'brca1': luigi.LocalTarget(ex_lovd_file_dir + "/BRCA1.txt"),
-                'brca2': luigi.LocalTarget(ex_lovd_file_dir + "/BRCA2.txt")}
+    def __init__(self):
+        super(ExtractDataFromLatestEXLOVD, self).__init__()
+        self.ex_lovd_file_dir = os.path.join(self.cfg.file_parent_dir,
+                                        ExtractDataFromLatestEXLOVD.dir_name)
+
+    def output(self):
+        return {'brca1': luigi.LocalTarget(os.path.join(self.ex_lovd_file_dir, "BRCA1.txt")),
+                'brca2': luigi.LocalTarget(os.path.join(self.ex_lovd_file_dir, "BRCA2.txt"))}
 
     def run(self):
-        ex_lovd_file_dir = pipeline_utils.create_path_if_nonexistent(
-            self.cfg.file_parent_dir + '/exLOVD')
+        pipeline_utils.create_path_if_nonexistent(self.ex_lovd_file_dir)
+
+        # calculating host path because we are running a docker within a docker
+        ex_lovd_file_dir_host = os.path.join(os.path.dirname(self.cfg.output_dir_host), ExtractDataFromLatestEXLOVD.dir_name)
 
         os.chdir(lovd_method_dir)
 
         ex_lovd_data_host_url = "http://hci-exlovd.hci.utah.edu/"
-        args = ["extract_data.py", "-u", ex_lovd_data_host_url, "-l", "BRCA1",
-                "BRCA2", "-o", ex_lovd_file_dir]
+
+        args = ['bash', 'extract_latest_exlovd.sh', ex_lovd_file_dir_host, "-u", ex_lovd_data_host_url, "-l", "BRCA1",
+                "BRCA2", "-o", "/data"]
+
         print "Running extract_data.py with the following args: %s" % (args)
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
@@ -364,196 +373,176 @@ class CopyEXLOVDOutputToOutputDir(DefaultPipelineTask):
             self.cfg.output_dir + "/exLOVD_brca12.sorted.hg38.vcf")
 
 
-###############################################
-#                sharedLOVD                   #
-###############################################
-
-# NOTE: LOVD data underwent some changes that broke our definition of individual
-# submissions. Until the issue is resolved, skip processing and simply use static
-# data from the February 2019 release (most recent release before breaking data format).
+##############################################
+#               sharedLOVD                   #
+##############################################
 
 
-# class DownloadLOVDInputFile(DefaultPipelineTask):
-#     """ Downloads the shared LOVD data
+class DownloadLOVDInputFile(DefaultPipelineTask):
+    """ Downloads the shared LOVD data
 
-#     If the pipeline is run on a machine from which it is not possible to download the data (currently IP based authentication)
-#     the file can be manually staged in the path of `lovd_data_file`. In this case, the task will not be run.
-#     """
+    If the pipeline is run on a machine from which it is not possible to download the data (currently IP based authentication)
+    the file can be manually staged in the path of `lovd_data_file`. In this case, the task will not be run.
+    """
 
-#     lovd_data_file = luigi.Parameter(default='',
-#                                      description='path, where the shared LOVD data will be stored')
+    lovd_data_file = luigi.Parameter(default='',
+                                     description='path, where the shared LOVD data will be stored')
 
-#     shared_lovd_data_url = luigi.Parameter(
-#         default='https://databases.lovd.nl/shared/export/BRCA',
-#         description='URL to download shared LOVD data from')
+    shared_lovd_data_url = luigi.Parameter(
+        default='https://databases.lovd.nl/shared/export/BRCA',
+        description='URL to download shared LOVD data from')
 
-#     def output(self):
-#         if len(str(self.lovd_data_file)) == 0:
-#             path = self.cfg.file_parent_dir + "/LOVD/BRCA.txt"
-#         else:
-#             path = str(self.lovd_data_file)
-
-#         return luigi.LocalTarget(path)
-
-#     def run(self):
-#         pipeline_utils.create_path_if_nonexistent(
-#             os.path.dirname(self.output().path))
-#         data = pipeline_utils.urlopen_with_retry(
-#             self.shared_lovd_data_url).read()
-#         with open(self.output().path, "wb") as f:
-#             f.write(data)
-
-
-# @requires(DownloadLOVDInputFile)
-# class NormalizeLOVDSubmissions(DefaultPipelineTask):
-
-#     def output(self):
-#         return luigi.LocalTarget(
-#             self.cfg.file_parent_dir + "/LOVD/LOVD_normalized.tsv")
-
-#     def run(self):
-#         artifacts_dir = pipeline_utils.create_path_if_nonexistent(
-#             self.cfg.output_dir + "/release/artifacts")
-
-#         os.chdir(lovd_method_dir)
-
-#         args = ["python", "normalizeLOVDSubmissions.py", "-i",
-#                 self.input().path, "-o",
-#                 self.output().path]
-
-#         print "Running NormalizeLOVDSubmissions with the following args: %s" % (args)
-
-#         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
-#                               stderr=subprocess.PIPE)
-#         pipeline_utils.print_subprocess_output_and_error(sp)
-
-#         pipeline_utils.check_file_for_contents(self.output().path)
-
-
-# @requires(NormalizeLOVDSubmissions)
-# class CombineEquivalentLOVDSubmissions(DefaultPipelineTask):
-
-#     def output(self):
-#         return luigi.LocalTarget(
-#             self.cfg.file_parent_dir + "/LOVD/LOVD_normalized_combined.tsv")
-
-#     def run(self):
-#         artifacts_dir = pipeline_utils.create_path_if_nonexistent(
-#             self.cfg.output_dir + "/release/artifacts")
-
-#         os.chdir(lovd_method_dir)
-
-#         args = ["python", "combineEquivalentVariantSubmissions.py", "-i",
-#                 self.input().path, "-o",
-#                 self.output().path]
-
-#         print "Running combineEquivalentVariantSubmissions.py with the following args: %s" % (
-#             args)
-
-#         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
-#                               stderr=subprocess.PIPE)
-#         pipeline_utils.print_subprocess_output_and_error(sp)
-
-#         pipeline_utils.check_file_for_contents(self.output().path)
-
-
-# @requires(CombineEquivalentLOVDSubmissions)
-# class ConvertSharedLOVDToVCF(DefaultPipelineTask):
-
-#     def output(self):
-#         return luigi.LocalTarget(
-#             self.cfg.file_parent_dir + "/LOVD/sharedLOVD_brca12.hg19.vcf")
-
-#     def run(self):
-#         brca_resources_dir = self.cfg.resources_dir
-#         artifacts_dir = pipeline_utils.create_path_if_nonexistent(
-#             self.cfg.output_dir + "/release/artifacts")
-
-#         os.chdir(lovd_method_dir)
-
-#         args = ["python", "lovd2vcf.py", "-i", self.input().path, "-o",
-#                 self.output().path, "-a", "sharedLOVDAnnotation",
-#                 "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-#                 brca_resources_dir + "/hg19.fa", "-e",
-#                 artifacts_dir + "/LOVD_error_variants.txt",
-#                 "-s", "LOVD"]
-
-#         print "Running lovd2vcf with the following args: %s" % (args)
-
-#         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
-#                               stderr=subprocess.PIPE)
-#         pipeline_utils.print_subprocess_output_and_error(sp)
-
-#         pipeline_utils.check_file_for_contents(self.output().path)
-
-
-# @requires(ConvertSharedLOVDToVCF)
-# class CrossmapConcatenatedSharedLOVDData(DefaultPipelineTask):
-
-#     def output(self):
-#         lovd_file_dir = self.cfg.file_parent_dir + "/LOVD"
-#         return luigi.LocalTarget(lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf")
-
-#     def run(self):
-#         lovd_file_dir = self.cfg.file_parent_dir + "/LOVD"
-#         brca_resources_dir = self.cfg.resources_dir
-
-#         args = ["CrossMap.py", "vcf",
-#                 brca_resources_dir + "/hg19ToHg38.over.chain.gz",
-#                 lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf",
-#                 brca_resources_dir + "/hg38.fa",
-#                 lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
-#         print "Running CrossMap.py with the following args: %s" % (args)
-#         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
-#                               stderr=subprocess.PIPE)
-#         pipeline_utils.print_subprocess_output_and_error(sp)
-
-#         pipeline_utils.check_file_for_contents(
-#             lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf")
-
-
-# @requires(CrossmapConcatenatedSharedLOVDData)
-# class SortSharedLOVDOutput(DefaultPipelineTask):
-
-#     def output(self):
-#         lovd_file_dir = self.cfg.file_parent_dir + "/LOVD"
-#         return luigi.LocalTarget(
-#             lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
-
-#     def run(self):
-#         lovd_file_dir = self.cfg.file_parent_dir + "/LOVD"
-
-#         sorted_lovd_output_file = lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf"
-#         writable_sorted_lovd_output_file = open(sorted_lovd_output_file, 'w')
-#         args = ["vcf-sort", lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
-#         print "Running vcf-sort with the following args: %s" % (args)
-#         sp = subprocess.Popen(args, stdout=writable_sorted_lovd_output_file,
-#                               stderr=subprocess.PIPE)
-#         pipeline_utils.print_subprocess_output_and_error(sp)
-#         print "Sorted BRCA1/2 hg38 vcf file into %s" % (
-#             writable_sorted_lovd_output_file)
-
-#         pipeline_utils.check_file_for_contents(
-#             lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
-
-# Until issues are resolved with LOVD, use static data generated on 14 February, 2019.
-class DownloadStaticLOVDData(DefaultPipelineTask):
     def output(self):
-        lovd_file_dir = self.cfg.file_parent_dir + '/LOVD'
+        if len(str(self.lovd_data_file)) == 0:
+            path = self.cfg.file_parent_dir + "/LOVD/BRCA.txt"
+        else:
+            path = str(self.lovd_data_file)
+
+        return luigi.LocalTarget(path)
+
+    def run(self):
+        pipeline_utils.create_path_if_nonexistent(
+            os.path.dirname(self.output().path))
+        data = pipeline_utils.urlopen_with_retry(
+            self.shared_lovd_data_url).read()
+        with open(self.output().path, "wb") as f:
+            f.write(data)
+
+
+@requires(DownloadLOVDInputFile)
+class NormalizeLOVDSubmissions(DefaultPipelineTask):
+
+    def output(self):
+        return luigi.LocalTarget(
+            self.cfg.file_parent_dir + "/LOVD/LOVD_normalized.tsv")
+
+    def run(self):
+        artifacts_dir = pipeline_utils.create_path_if_nonexistent(
+            self.cfg.output_dir + "/release/artifacts")
+
+        os.chdir(lovd_method_dir)
+
+        args = ["python", "normalizeLOVDSubmissions.py", "-i",
+                self.input().path, "-o",
+                self.output().path]
+
+        print "Running NormalizeLOVDSubmissions with the following args: %s" % (args)
+
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
+        pipeline_utils.print_subprocess_output_and_error(sp)
+
+        pipeline_utils.check_file_for_contents(self.output().path)
+
+
+@requires(NormalizeLOVDSubmissions)
+class CombineEquivalentLOVDSubmissions(DefaultPipelineTask):
+
+    def output(self):
+        return luigi.LocalTarget(
+            self.cfg.file_parent_dir + "/LOVD/LOVD_normalized_combined.tsv")
+
+    def run(self):
+        artifacts_dir = pipeline_utils.create_path_if_nonexistent(
+            self.cfg.output_dir + "/release/artifacts")
+
+        os.chdir(lovd_method_dir)
+
+        args = ["python", "combineEquivalentVariantSubmissions.py", "-i",
+                self.input().path, "-o",
+                self.output().path]
+
+        print "Running combineEquivalentVariantSubmissions.py with the following args: %s" % (
+            args)
+
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
+        pipeline_utils.print_subprocess_output_and_error(sp)
+
+        pipeline_utils.check_file_for_contents(self.output().path)
+
+
+@requires(CombineEquivalentLOVDSubmissions)
+class ConvertSharedLOVDToVCF(DefaultPipelineTask):
+
+    def output(self):
+        return luigi.LocalTarget(
+            self.cfg.file_parent_dir + "/LOVD/sharedLOVD_brca12.hg19.vcf")
+
+    def run(self):
+        brca_resources_dir = self.cfg.resources_dir
+        artifacts_dir = pipeline_utils.create_path_if_nonexistent(
+            self.cfg.output_dir + "/release/artifacts")
+
+        os.chdir(lovd_method_dir)
+
+        args = ["python", "lovd2vcf.py", "-i", self.input().path, "-o",
+                self.output().path, "-a", "sharedLOVDAnnotation",
+                "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
+                brca_resources_dir + "/hg19.fa", "-e",
+                artifacts_dir + "/LOVD_error_variants.txt",
+                "-s", "LOVD"]
+
+        print "Running lovd2vcf with the following args: %s" % (args)
+
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
+        pipeline_utils.print_subprocess_output_and_error(sp)
+
+        pipeline_utils.check_file_for_contents(self.output().path)
+
+
+@requires(ConvertSharedLOVDToVCF)
+class CrossmapConcatenatedSharedLOVDData(DefaultPipelineTask):
+
+    def output(self):
+        lovd_file_dir = self.cfg.file_parent_dir + "/LOVD"
+        return luigi.LocalTarget(lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf")
+
+    def run(self):
+        lovd_file_dir = self.cfg.file_parent_dir + "/LOVD"
+        brca_resources_dir = self.cfg.resources_dir
+
+        args = ["CrossMap.py", "vcf",
+                brca_resources_dir + "/hg19ToHg38.over.chain.gz",
+                lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf",
+                brca_resources_dir + "/hg38.fa",
+                lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
+        print "Running CrossMap.py with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
+        pipeline_utils.print_subprocess_output_and_error(sp)
+
+        pipeline_utils.check_file_for_contents(
+            lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf")
+
+
+@requires(CrossmapConcatenatedSharedLOVDData)
+class SortSharedLOVDOutput(DefaultPipelineTask):
+
+    def output(self):
+        lovd_file_dir = self.cfg.file_parent_dir + "/LOVD"
         return luigi.LocalTarget(
             lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
 
     def run(self):
-        lovd_file_dir = pipeline_utils.create_path_if_nonexistent(
-            self.cfg.file_parent_dir + '/LOVD')
+        lovd_file_dir = self.cfg.file_parent_dir + "/LOVD"
 
-        os.chdir(lovd_file_dir)
+        sorted_lovd_output_file = lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf"
+        writable_sorted_lovd_output_file = open(sorted_lovd_output_file, 'w')
+        args = ["vcf-sort", lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
+        print "Running vcf-sort with the following args: %s" % (args)
+        sp = subprocess.Popen(args, stdout=writable_sorted_lovd_output_file,
+                              stderr=subprocess.PIPE)
+        pipeline_utils.print_subprocess_output_and_error(sp)
+        print "Sorted BRCA1/2 hg38 vcf file into %s" % (
+            writable_sorted_lovd_output_file)
 
-        static_sharedLOVD_data_url = "https://brcaexchange.org/backend/downloads/sharedLOVD_brca12.sorted.hg38.vcf"
-        pipeline_utils.download_file_and_display_progress(static_sharedLOVD_data_url)
+        pipeline_utils.check_file_for_contents(
+            lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
 
 
-@requires(DownloadStaticLOVDData)
+@requires(SortSharedLOVDOutput)
 class CopySharedLOVDOutputToOutputDir(DefaultPipelineTask):
 
     def output(self):
@@ -1075,18 +1064,16 @@ class BuildAggregatedOutput(DefaultPipelineTask):
         brca_resources_dir = self.cfg.resources_dir
         os.chdir(data_merging_method_dir)
 
-        args = ["python", "brca_pseudonym_generator.py", "-i",
-                artifacts_dir + "/aggregated.tsv", "-p",
-                "-j", brca_resources_dir + "/hg18.fa",
-                "-k", brca_resources_dir + "/hg19.fa",
-                "-l", brca_resources_dir + "/hg38.fa",
-                "-r", brca_resources_dir + "/refseq_annotation.hg18.gp",
-                "-s", brca_resources_dir + "/refseq_annotation.hg19.gp",
-                "-t", brca_resources_dir + "/refseq_annotation.hg38.gp",
-                "-o", artifacts_dir + "built.tsv",
-                "--artifacts_dir", artifacts_dir]
+        args = ["python", "brca_pseudonym_generator.py",
+                artifacts_dir + "aggregated.tsv",
+                artifacts_dir + "built.tsv",
+                "--log-path", artifacts_dir + "brca-pseudonym-generator.log",
+                "--config-file", self.cfg.gene_config_path,
+                "--resources", brca_resources_dir]
+
         print "Running brca_pseudonym_generator.py with the following args: %s" % (
             args)
+
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
