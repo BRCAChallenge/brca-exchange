@@ -4,7 +4,7 @@ git+https://github.com/biocommons/biocommons.seqrepo.git@129d285727228920dd2d774
 biopython==1.69
 bioutils==0.3.3
 bx-python==0.7.3
-certifi==2016.8.2
+certifi>=2017.4.17
 configparser==3.5.0
 CrossMap==0.2.6
 Cython==0.24.1

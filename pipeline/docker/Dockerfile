@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     python-pip \
     python-gdbm \
     python-lzo \
+    rsync \
     vim \
     wget \
     zlib1g-dev
@@ -63,3 +64,4 @@ ARG GIT_COMMIT=""
 LABEL GitCommit=$GIT_COMMIT IsGitDirty=$IS_GIT_DIRTY
 
 CMD ["/opt/brca-exchange/pipeline/docker/run_luigi.sh"]
+
