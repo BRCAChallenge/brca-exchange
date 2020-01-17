@@ -91,6 +91,7 @@ def extract_genomic_coordinates_from_measure(meas_el):
 
 
 def _preprocess_element_value(var_str):
+    # removing dangling protein level changes like '(p.Glu2198fs)'
     return re.sub(r'\s*\(p[^)]+\)', '', var_str)
 
 
