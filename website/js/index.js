@@ -163,8 +163,21 @@ var Home = React.createClass({
         this.transitionTo('/variants', null, {search: value});
     },
     render: function() {
-        var {suggestions} = this.props;
-        var logoItems = _.map(logos, ({id, logo, url}) => (
+        let {suggestions} = this.props;
+        let currentSupporters = _.filter(logos, function(logo) {
+                                    return logo.currentSupporter;
+                                });
+        let notCurrentSupporterLogos = _.filter(logos, function(logo) {
+                             return !logo.currentSupporter;
+                         });
+        var notCurrentSupporterLogoItems = _.map(notCurrentSupporterLogos, ({id, logo, url}) => (
+            <Col key={id} lg={4} md={6} xs={12} className="logo-item">
+                <a href={url}>
+                    <img id={id} src={logo} alt={id + ' logo'} />
+                </a>
+            </Col>
+        ));
+        var currentSupporterLogoItems = _.map(currentSupporters, ({id, logo, url}) => (
             <Col key={id} lg={4} md={6} xs={12} className="logo-item">
                 <a href={url}>
                     <img id={id} src={logo} alt={id + ' logo'} />
@@ -217,7 +230,14 @@ var Home = React.createClass({
                     </Col>
                 </Row>
                 <Row className="logo-block">
-                    {logoItems}
+                    {notCurrentSupporterLogoItems}
+                </Row>
+                <Row className="logo-block">
+                    <h3 className="logo-header">Currently Supported By:</h3>
+                    {currentSupporterLogoItems}
+                </Row>
+                <Row className="logo-block">
+                    <h3 className="logo-header no-margin-bottom">Consider supporting this open-source project by <Link to={'/whydonate'}>donating</Link> today.</h3>
                 </Row>
             </Grid>
         );
@@ -228,7 +248,20 @@ var About = React.createClass({
     render: function() {
         let {page} = this.props.params;
         if (page === "thisSite") {
-            let logoItems = _.map(logos, ({id, logo, url}) => (
+            let currentSupporters = _.filter(logos, function(logo) {
+                                        return logo.currentSupporter;
+                                    });
+            let notCurrentSupporterLogos = _.filter(logos, function(logo) {
+                                 return !logo.currentSupporter;
+                             });
+            var notCurrentSupporterLogoItems = _.map(notCurrentSupporterLogos, ({id, logo, url}) => (
+                <Col key={id} lg={4} md={6} xs={12} className="logo-item">
+                    <a href={url}>
+                        <img id={id} src={logo} alt={id + ' logo'} />
+                    </a>
+                </Col>
+            ));
+            var currentSupporterLogoItems = _.map(currentSupporters, ({id, logo, url}) => (
                 <Col key={id} lg={4} md={6} xs={12} className="logo-item">
                     <a href={url}>
                         <img id={id} src={logo} alt={id + ' logo'} />
@@ -243,7 +276,11 @@ var About = React.createClass({
                         </Col>
                     </Row>
                     <Row className="logo-block">
-                        {logoItems}
+                        {notCurrentSupporterLogoItems}
+                    </Row>
+                    <Row className="logo-block">
+                        <h3 className="logo-header">Currently Supported By:</h3>
+                        {currentSupporterLogoItems}
                     </Row>
                 </Grid>
             );
