@@ -12,6 +12,7 @@ import pandas as pd
 from hgvs.exceptions import HGVSError
 
 from common import config
+from common import utils
 from common.hgvs_utils import HgvsWrapper
 from common.variant_utils import VCFVariant
 
@@ -59,7 +60,7 @@ def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
         if normalize:
             vn = hgvs_proc.normalizing(v)
             v = vn if vn else v
-        return hgvs_proc.to_cdna(v)
+        return hgvs_proc.genomic_to_cdna(v)
 
     def from_field_or_compute(row):
         computed = compute_hgvs(row)
@@ -177,8 +178,7 @@ def _merge_synonyms(x):
 @click.option("--config-file", required=True, help="path to gene configuration file")
 @click.option('--resources', help="path to directory containing reference sequences")
 def main(input, output, pkl, log_path, config_file, resources):
-    logging.basicConfig(filename=log_path, filemode="w", level=logging.INFO,
-                        format=' %(asctime)s %(filename)-15s %(message)s')
+    utils.setup_logfile(log_path)
 
     cfg_df = config.load_config(config_file)
 
@@ -194,7 +194,7 @@ def main(input, output, pkl, log_path, config_file, resources):
     #### CDNA and Genomic HGVS conversions
     df[TMP_CDNA_NORM_FIELD] = _get_cdna(df, pkl, hgvs_proc, cdna_default_ac_dict, normalize=True)
     df[PYHGVS_CDNA_COL] = df[TMP_CDNA_NORM_FIELD].apply(str)
-    
+
     dataProviders = hgvs.dataproviders.uta.connect()
     df[GENOMIC_HGVS_HG38_COL] = df[TMP_CDNA_NORM_FIELD].apply(compute_genomic_hgvs, args=[hgvs.assemblymapper.AssemblyMapper(dataProviders,
                                                               assembly_name=HgvsWrapper.GRCh38_Assem, alt_aln_method='splign')])
@@ -219,7 +219,7 @@ def main(input, output, pkl, log_path, config_file, resources):
     df[PYHGVS_HG37_END_COL] = df[PYHGVS_HG37_START_COL] + (df[HG38_END_COL] - df[HG38_START_COL])
 
     #### Protein
-    df[PYHGVS_PROTEIN_COL] = df[TMP_CDNA_NORM_FIELD].apply(lambda x: str(hgvs_proc.to_protein(x)))
+    df[PYHGVS_PROTEIN_COL] = df[TMP_CDNA_NORM_FIELD].apply(lambda x: str(hgvs_proc.cdna_to_protein(x)))
 
     #### Synonyms
     df[NEW_SYNONYMS_FIELD] = df.apply(lambda s: get_synonyms(s, hgvs_proc, syn_ac_dict), axis=1)

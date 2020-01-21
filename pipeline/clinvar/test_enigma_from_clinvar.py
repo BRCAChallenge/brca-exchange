@@ -19,8 +19,8 @@ def test_is_bic_designation(s, expected):
     assert enigma_from_clinvar._is_bic_designation(s) == expected
 
 
-def test_parse_record():
-    hgvs_util = hgvs_utils.HGVSWrapper()
+def test_parse_record(hgvs_wrapper):
+    hgvs_util = hgvs_utils.HGVSWrapper(hgvs_wrapper.hgvs_dp)
 
     xml_path = os.path.join(os.path.dirname(__file__), 'test_files',
                             'enigma_clinvar_set.xml')

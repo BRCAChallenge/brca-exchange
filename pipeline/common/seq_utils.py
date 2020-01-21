@@ -5,7 +5,7 @@ from collections import namedtuple
 from biocommons.seqrepo import SeqRepo
 from bioutils import assemblies, seqfetcher
 
-from utilities import build_interval_trees_by_chr, ChrInterval
+from .utils import build_interval_trees_by_chr, ChrInterval
 
 SeqWithStart = namedtuple("SeqWithStart", "sequence, start")
 
@@ -70,6 +70,14 @@ class SeqRepoWrapper:
         # SeqRepo used 0-based coordinates
         return self.seq_repo_fetcher(accession, start_pos - 1, end_pos - 1)
 
+    __instance = None
+
+    @staticmethod
+    def get_instance():
+        """ Static access method. """
+        if not SeqRepoWrapper.__instance:
+            SeqRepoWrapper.__instance = SeqRepoWrapper()
+        return SeqRepoWrapper.__instance
 
 class WholeSeqSeqProvider:
     '''

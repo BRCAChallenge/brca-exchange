@@ -17,7 +17,7 @@ from shutil import copy
 import vcf
 
 import aggregate_reports
-import seq_utils
+from common import seq_utils, config
 import utilities
 import variant_equivalence
 from variant_merging_constants import *
@@ -42,13 +42,13 @@ def main():
 
     args = parser.parse_args()
 
-    gene_config_df = utilities.load_config(args.config)
+    gene_config_df = config.load_config(args.config)
 
-    gene_regions_dict = utilities.extract_gene_regions_dict(gene_config_df, 'start_hg38_legacy_variants', 'end_hg38_legacy_variants')
+    gene_regions_dict = config.extract_gene_regions_dict(gene_config_df, 'start_hg38_legacy_variants', 'end_hg38_legacy_variants')
 
     gene_regions_trees = seq_utils.build_interval_trees_by_chr(gene_regions_dict.keys(), lambda c,s,e: None)
 
-    genome_regions_symbol_dict = utilities.get_genome_regions_symbol_dict(gene_config_df, 'start_hg38_legacy_variants', 'end_hg38_legacy_variants')
+    genome_regions_symbol_dict = config.get_genome_regions_symbol_dict(gene_config_df, 'start_hg38_legacy_variants', 'end_hg38_legacy_variants')
 
     seq_provider = seq_utils.SeqRepoWrapper(regions_preload=gene_regions_dict.keys())
 

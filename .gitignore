@@ -3,6 +3,8 @@ pipeline/brca/*
 *.cache/
 .idea/*
 *.hypothesis/
+.coverage
+htmlcov
 /pipeline/data/brca1_hg19.txt
 /pipeline/data/brca1_hg38.txt
 /pipeline/data/brca2_hg19.txt

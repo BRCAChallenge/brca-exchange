@@ -1,8 +1,8 @@
+from common import config
 import unittest
 import os
 from os import path
 import aggregate_reports
-import utilities
 
 VCF_TESTDATA_FILENAME = path.join(path.dirname(__file__), 'test_files/1000_Genomes.vcf')
 TSV_TESTDATA_FILENAME = path.join(path.dirname(__file__), 'test_files/enigma_from_clinvar.tsv')
@@ -187,8 +187,8 @@ class TestStringMethods(unittest.TestCase):
 
         pwd = os.path.dirname(os.path.realpath(__file__))
 
-        gene_config_df = utilities.load_config(os.path.join(pwd, 'test_files', 'gene_config_test.txt'))
-        self.genome_regions_symbol_dict = utilities.get_genome_regions_symbol_dict(gene_config_df, 'start_hg38_legacy_variants', 'end_hg38_legacy_variants')
+        gene_config_df = config.load_config(os.path.join(pwd, 'test_files', 'gene_config_test.txt'))
+        self.genome_regions_symbol_dict = config.get_genome_regions_symbol_dict(gene_config_df, 'start_hg38_legacy_variants', 'end_hg38_legacy_variants')
 
     def test_normalize_reports_vcf(self):
         file_reports = aggregate_reports.normalize_reports(self.vcf_test_file, self.columns, self.genome_regions_symbol_dict)

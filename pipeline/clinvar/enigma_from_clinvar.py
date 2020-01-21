@@ -7,6 +7,7 @@ import pandas as pd
 from lxml import etree
 
 import clinvar
+import common
 import hgvs_utils
 
 default_val = None
@@ -75,21 +76,6 @@ def _extract_assertion_method(enigma_assertion):
                                                      "Citation/URL")
     else:
         return default_val, default_val
-
-
-def _extract_genomic_coordinates(cvs_el, assembly):
-    sequence_location_el = cvs_el.find(
-        'ReferenceClinVarAssertion/MeasureSet/Measure/SequenceLocation[@Assembly="{}"]'.format(
-            assembly))
-
-    if sequence_location_el is not None:
-        return "chr{}:{}:{}>{}".format(
-            sequence_location_el.get('Chr'),
-            sequence_location_el.get('positionVCF'),
-            sequence_location_el.get('referenceAlleleVCF'),
-            sequence_location_el.get('alternateAlleleVCF'))
-
-    return default_val
 
 
 def _extract_condition_info(cvs_el):
@@ -225,7 +211,8 @@ def parse_record(cvs_el, hgvs_util, assembly="GRCh38"):
     rec["Gene_symbol"] = _xpath_text(cvs_el,
                                      'ReferenceClinVarAssertion/MeasureSet/Measure/MeasureRelationship/Symbol/ElementValue[starts-with(., "BRCA") and @Type="Preferred"]')
 
-    rec["Genomic_Coordinate"] = _extract_genomic_coordinates(cvs_el, assembly)
+    measure_el = cvs_el.find('ReferenceClinVarAssertion/MeasureSet/Measure')
+    rec["Genomic_Coordinate"] = str(clinvar.extract_genomic_coordinates_from_measure(measure_el)[assembly]).replace('g.', '')
 
     rec["BIC_Nomenclature"] = _fetch_bic(cvs_el)
 
@@ -281,13 +268,16 @@ def _create_df(variant_records):
 
 @click.command()
 @click.argument('filtered_clinvar_xml', type=click.Path(exists=True))
-@click.argument('output', type=click.Path())
-def main(filtered_clinvar_xml, output):
+@click.argument('output', type=click.Path(writable=True))
+@click.option('--logs', type=click.Path(writable=True))
+def main(filtered_clinvar_xml, output, logs):
+    common.utils.setup_logfile(logs)
+
     enigma_sets = _get_clinvar_sets(filtered_clinvar_xml)
 
     hgvs_util = hgvs_utils.HGVSWrapper()
 
-    variant_records_lsts = [ parse_record(s, hgvs_util) for s in enigma_sets ]   
+    variant_records_lsts = [ parse_record(s, hgvs_util) for s in enigma_sets ]
 
     # flattening list of lists
     variant_records = list(itertools.chain.from_iterable(variant_records_lsts))

@@ -96,6 +96,8 @@ Change to the `pipeline` directory and type the following:
 * `make` or `make help` to see what targets are available along with minimal help
 * `make init` to set up a configuration file `pipeline/brca_pipeline_cfg.mk` with paths and other settings. It is advisable to edit it according your needs:
 * `make setup-dev-env`: runs various targets to set up a dev environment.
+
+Running tasks:
 * `make show-luigi-graph`: shows the graph of tasks on the console (use e.g.
 `less -R` if you experience issues with colors)
 * `make run-interactive`: starts a bash in brca exchange docker container.
@@ -105,3 +107,8 @@ Change to the `pipeline` directory and type the following:
 * `make clean-files-from [TASK]`: deletes all outputs of the given task along
 with all the tasks directly or indirectly depending on it. This is useful to
 force regeneration of 'downstream' data if something in TASK has changed.
+
+Running tests:
+* `make test`: runs pipeline unit tests in docker container
+* `make test-coverage`: runs pipeline unit tests with coverage analysis. The
+ HTML reports can be found in the directory `pipline/htmlcov`
