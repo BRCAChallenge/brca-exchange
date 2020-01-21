@@ -1,0 +1,2 @@
+ga4gh.vr
+requests==2.20.0

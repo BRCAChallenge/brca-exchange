@@ -1,7 +1,6 @@
 backports-abc==0.4
 beautifulsoup4==4.5.1
 biocommons.seqrepo>=0.4.4
-ga4gh.vr
 biopython==1.69
 bioutils==0.3.3
 bx-python==0.7.3
