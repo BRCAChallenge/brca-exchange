@@ -4,8 +4,7 @@
 
 import React from "react";
 import ReactDOM from 'react-dom';
-import {CollapsableMixin, Table} from "react-bootstrap";
-import classNames from 'classnames';
+import {Collapse, Table} from "react-bootstrap";
 import util from '../util';
 import KeyInline from './KeyInline';
 import slugify from "../slugify";
@@ -13,8 +12,6 @@ const _ = require('underscore');
 
 
 const AlleleFrequencyField = React.createClass({
-    mixins: [CollapsableMixin],
-
     getCollapsableDOMNode: function() {
         return ReactDOM.findDOMNode(this.refs.panel);
     },
@@ -101,7 +98,6 @@ const AlleleFrequencyField = React.createClass({
         const {field, fieldName, variant, hideEmptyItems} = this.props;
         let renderedRows, flag, gnomadLink, chr, transcript, refSeqTranscript, lrgLink;
         let allEmpty = false;
-        let styles = this.getCollapsableClassSet();
         let isChart = false;
         let isGnomad = false;
 
@@ -170,31 +166,37 @@ const AlleleFrequencyField = React.createClass({
                 }
                 </div>
 
-                <div ref='panel' className={allEmpty && isChart ? "group-empty" : classNames(styles)}>
-                    <div className="tile-disclaimer" style={{display: isGnomad && !util.isEmptyField(flag) && !isChart ? '' : 'none'}}>
-                        <div>
-                            You are viewing flags for ENSEMBL transcript {{transcript}}. This is not the canonical
-                            transcript shown by default on gnomAD, but corresponds to RefSeq transcript {{refSeqTranscript}}
-                            &nbsp;(per <a href={{lrgLink}}>LRG</a>).  Additional data for this variant, including detailed
-                            populations, quality scores, and flags relative to other transcripts,
-                            <a href={gnomadLink} target="_blank">&nbsp;are available at gnomAD</a>.
+                <Collapse className={allEmpty && isChart ? "group-empty" : ""}
+                    in={this.props.expanded}
+                    onEntered={this.props.relayoutGrid}
+                    onExited={this.props.relayoutGrid}
+                >
+                    <div>
+                        <div className="tile-disclaimer" style={{display: isGnomad && !util.isEmptyField(flag) && !isChart ? '' : 'none'}}>
+                            <div>
+                                You are viewing flags for ENSEMBL transcript {transcript}. This is not the canonical
+                                transcript shown by default on gnomAD, but corresponds to RefSeq transcript {refSeqTranscript}
+                                &nbsp;(per <a href={lrgLink}>LRG</a>).  Additional data for this variant, including detailed
+                                populations, quality scores, and flags relative to other transcripts,
+                                <a href={gnomadLink} target="_blank">&nbsp;are available at gnomAD</a>.
+                            </div>
+                        </div>
+                        <Table key={`allele-frequency-name-${fieldName}`}>
+                            <tbody>
+                            { renderedRows }
+                            </tbody>
+                        </Table>
+                        <div className="tile-disclaimer">
+                            <div style={{display: isGnomad && isChart && !util.isEmptyField(flag) ? '' : 'none'}}>
+                                You are viewing flags for ENSEMBL transcript {transcript}. This is not the canonical
+                                transcript shown by default on gnomAD, but corresponds to RefSeq transcript {refSeqTranscript}
+                                &nbsp;(per <a href="http://ftp.ebi.ac.uk/pub/databases/lrgex/LRG_292.xml">LRG</a>).  Additional
+                                data for this variant, including detailed populations, quality scores, and flags relative
+                                to other transcripts, <a href={gnomadLink} target="_blank">are available at gnomAD</a>.
+                            </div>
                         </div>
                     </div>
-                    <Table key={`allele-frequency-name-${fieldName}`}>
-                        <tbody>
-                        { renderedRows }
-                        </tbody>
-                    </Table>
-                    <div className="tile-disclaimer">
-                        <div style={{display: isGnomad && isChart && !util.isEmptyField(flag) ? '' : 'none'}}>
-                            You are viewing flags for ENSEMBL transcript {{transcript}}. This is not the canonical
-                            transcript shown by default on gnomAD, but corresponds to RefSeq transcript {{refSeqTranscript}}
-                            &nbsp;(per <a href="http://ftp.ebi.ac.uk/pub/databases/lrgex/LRG_292.xml">LRG</a>).  Additional
-                            data for this variant, including detailed populations, quality scores, and flags relative
-                            to other transcripts, <a href={gnomadLink} target="_blank">are available at gnomAD</a>.
-                        </div>
-                    </div>
-                </div>
+                </Collapse>
             </div>
         );
     }

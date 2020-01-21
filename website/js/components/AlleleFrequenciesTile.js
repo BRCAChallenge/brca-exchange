@@ -42,18 +42,12 @@ export default class AlleleFrequenciesTile extends React.Component {
                 updatedFieldsOfInterest[key] = newExpansion;
             });
             return updatedFieldsOfInterest;
-        }, () => {
-            // causes the parent to perform a (delayed) reflow
-            this.props.onFrequencyFieldToggled(this.collapser.getCollapsableDOMNode());
         });
     }
 
     fieldToggled(fieldName) {
         this.setState({
             [fieldName]: !this.state[fieldName]
-        }, () => {
-            // causes the parent to perform a (delayed) reflow
-            this.props.onFrequencyFieldToggled(this.collapser.getCollapsableDOMNode());
         });
     }
 
@@ -116,6 +110,7 @@ export default class AlleleFrequenciesTile extends React.Component {
                     expanded={expanded}
                     onFieldToggled={this.fieldToggled}
                     hideEmptyItems={this.props.hideEmptyItems}
+                    relayoutGrid={this.props.relayoutGrid}
                     showHelp={this.props.showHelp}
                     tooltips={this.props.tooltips}
                 />
@@ -127,55 +122,65 @@ export default class AlleleFrequenciesTile extends React.Component {
 
         // create the source panel itself now
         const groupTitle = `source-panel-${this.props.sourceName}`;
-        const header = (
-            <h3>
-                <a className="title" href="#" onClick={(event) => this.props.onChangeGroupVisibility(groupTitle, event, this.collapser.getCollapsableDOMNode())}>
-                    {this.props.groupTitle}
-                </a>
 
-                <a title='collapse all fields'
-                   className="toggle-subfields"
-                    onClick={(event) => this.setAllFieldsExpansion(event, false)}
-                    style={{cursor: 'pointer', marginRight: '10px'}}>
-                    <i className="fa fa-angle-double-up" aria-hidden="true" />
-                </a>
-
-                <a title='expand all fields'
-                   className="toggle-subfields"
-                    onClick={(event) => this.setAllFieldsExpansion(event, true)}
-                    style={{cursor: 'pointer'}}>
-                    <i className="fa fa-angle-double-down" aria-hidden="true" />
-                </a>
-
-                {
-                    this.props.helpSection &&
-                    <GroupHelpButton group={this.props.helpSection}
-                        onClick={(event) => {
-                            this.props.showHelp(event, this.props.helpSection);
-                            return true;
-                        }}
-                    />
-                }
-            </h3>
-        );
+        // return <div />;
 
         return (
             <div key={`group_collection-${groupTitle}`} className={ allEmpty && this.props.hideEmptyItems ? "group-empty variant-detail-group" : "variant-detail-group" }>
                 <Panel
-                    ref={(me) => { this.collapser = me; }}
-                    header={header}
-                    collapsable={true}
+                    collapsible={true}
                     defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}
-                    hideEmptyItems={this.props.hideEmptyItems}>
-                    <div className="tile-disclaimer">
-                        <div>
-                            The gnomAD and ExAC data sets used by BRCA Exchange are the “non-cancer” subsets
-                            of these sources. Data from <a href="https://tcga-data.nci.nih.gov/docs/publications/tcga/about.html">TCGA</a>
-                            &nbsp;and other cancer cohorts are excluded to ensure that the frequencies used
-                            to assess pathogenicity represent individuals not affected by cancer.
-                        </div>
-                    </div>
-                    {renderedAlleleFrequencyFields}
+                    hideEmptyItems={this.props.hideEmptyItems}
+                >
+                    <Panel.Heading>
+                        <Panel.Title componentClass="h3">
+                            <Panel.Toggle componentClass="a" className="title"
+                                onClick={(event) => this.props.onChangeGroupVisibility(groupTitle, event)}
+                            >
+                                {this.props.groupTitle}
+                            </Panel.Toggle>
+
+                            <a title='collapse all fields'
+                                className="toggle-subfields"
+                                onClick={(event) => this.setAllFieldsExpansion(event, false)}
+                                style={{cursor: 'pointer', marginRight: '10px'}}>
+                                <i className="fa fa-angle-double-up" aria-hidden="true" />
+                            </a>
+
+                            <a title='expand all fields'
+                                className="toggle-subfields"
+                                onClick={(event) => this.setAllFieldsExpansion(event, true)}
+                                style={{cursor: 'pointer'}}>
+                                <i className="fa fa-angle-double-down" aria-hidden="true" />
+                            </a>
+
+                            {
+                                this.props.helpSection &&
+                                <GroupHelpButton group={this.props.helpSection}
+                                    onClick={(event) => {
+                                        this.props.showHelp(event, this.props.helpSection);
+                                        return true;
+                                    }}
+                                />
+                            }
+                        </Panel.Title>
+                    </Panel.Heading>
+                    <Panel.Collapse
+                        onEntered={this.props.relayoutGrid}
+                        onExited={this.props.relayoutGrid}
+                    >
+                        <Panel.Body>
+                            <div className="tile-disclaimer">
+                                <div>
+                                    The gnomAD and ExAC data sets used by BRCA Exchange are the “non-cancer” subsets
+                                    of these sources. Data from <a href="https://tcga-data.nci.nih.gov/docs/publications/tcga/about.html">TCGA</a>
+                                    &nbsp;and other cancer cohorts are excluded to ensure that the frequencies used
+                                    to assess pathogenicity represent individuals not affected by cancer.
+                                </div>
+                            </div>
+                            {renderedAlleleFrequencyFields}
+                        </Panel.Body>
+                    </Panel.Collapse>
                 </Panel>
             </div>
         );

@@ -3,9 +3,7 @@
 'use strict';
 
 import React from "react";
-import ReactDOM from 'react-dom';
-import {CollapsableMixin, Table} from "react-bootstrap";
-import classNames from 'classnames';
+import {Collapse, Table} from "react-bootstrap";
 import util from '../util';
 import KeyInline from './KeyInline';
 
@@ -53,16 +51,6 @@ function getMarksForReviewStatus(status) {
 }
 
 const VariantSubmitter = React.createClass({
-    mixins: [CollapsableMixin],
-
-    getCollapsableDOMNode: function() {
-        return ReactDOM.findDOMNode(this.refs.panel);
-    },
-
-    getCollapsableDimensionValue: function() {
-        return ReactDOM.findDOMNode(this.refs.panel).scrollHeight;
-    },
-
     onHandleToggle: function(e) {
         e.preventDefault();
 
@@ -133,7 +121,6 @@ const VariantSubmitter = React.createClass({
     },
 
     render: function() {
-        let styles = this.getCollapsableClassSet();
         const {submitter, cols, data} = this.props;
 
         // for each panel, construct key-value pairs as a row of the table
@@ -161,13 +148,18 @@ const VariantSubmitter = React.createClass({
                 }
                 </div>
 
-                <div ref='panel' className={classNames(styles)}>
-                    <Table key={`submitter-name-${submitter}`}>
-                        <tbody>
-                        { submitterRows }
-                        </tbody>
-                    </Table>
-                </div>
+                <Collapse in={this.props.expanded}
+                    onEntered={this.props.relayoutGrid}
+                    onExited={this.props.relayoutGrid}
+                >
+                    <div>
+                        <Table key={`submitter-name-${submitter}`}>
+                            <tbody>
+                                { submitterRows }
+                            </tbody>
+                        </Table>
+                    </div>
+                </Collapse>
             </div>
         );
     }

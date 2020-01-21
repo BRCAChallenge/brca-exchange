@@ -50,11 +50,10 @@ var DisclaimerModal = React.createClass({
         return (
             <span>
                 <a style={{cursor: "pointer"}} onClick={this.open}>{this.props.text}</a>
-                {this.state.showModal ?
-                    <Modal onRequestHide={this.close}>
-                        <RawHTML html={content.pages.disclaimer} />
-                        <Button onClick={this.close}>OK</Button>
-                    </Modal> : null }
+                <Modal show={this.state.showModal} onHide={this.close}>
+                    <RawHTML html={content.pages.disclaimer} />
+                    <Button onClick={this.close}>OK</Button>
+                </Modal>
             </span>
         );
     },

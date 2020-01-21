@@ -135,30 +135,36 @@ export default class SilicoPredTile extends React.Component {
         return (
             <CollapsibleTile allEmpty={allEmpty} {...this.props}>
                 <CollapsibleSection
+                    id="ispp"
                     fieldName={<span><i>In Silico</i> Prior Probability of Pathogenicity</span>}
                     extraHeaderItems={normalizedProb(decidingProb)}
                     defaultVisible={true}
+                    relayoutGrid={this.props.relayoutGrid}
                 >
                     <InSilicoPredSubtile probability={decidingProb} reason={reason}
                         varLoc={priorsData.varLoc} />
                 </CollapsibleSection>
 
                 <CollapsibleSection
+                    id="protein-estimation"
                     fieldName="Protein-level Estimation"
                     extraHeaderItems={normalizedProb(proteinPrior)}
                     defaultVisible={false}
+                    relayoutGrid={this.props.relayoutGrid}
                 >
                     <ProteinLevelSubtile probability={proteinPrior} />
                 </CollapsibleSection>
 
                 <CollapsibleSection
+                    id="splicing-estimation"
                     fieldName="Splicing-level Estimation"
                     extraHeaderItems={normalizedProb(splicingPrior)}
                     defaultVisible={false}
+                    relayoutGrid={this.props.relayoutGrid}
                 >
                     <SplicingLevelSubtile
                         data={splicingData}
-                        onDimsChanged={this.props.onDimsChanged}
+                        onDimsChanged={this.props.relayoutGrid}
                     />
                 </CollapsibleSection>
             </CollapsibleTile>

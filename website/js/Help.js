@@ -1,7 +1,6 @@
 /*eslint-env browser */
 'use strict';
 
-import classNames from "classnames";
 import update from 'immutability-helper';
 import BetaTag from "./components/BetaTag";
 import {debounce} from "lodash";
@@ -11,7 +10,7 @@ import HardlinkHelper, {idHelpClicked} from "./components/help/HardlinkHelper";
 const React = require('react');
 const ReactDOM = require('react-dom');
 const RawHTML = require('./RawHTML');
-const {Grid, Col, Row, Panel, ListGroup, ListGroupItem, Glyphicon, CollapsableMixin, BootstrapMixin} = require('react-bootstrap');
+const {Grid, Col, Row, Panel, ListGroup, ListGroupItem, Glyphicon, Collapse} = require('react-bootstrap');
 const {State} = require('react-router');
 
 var $ = require('jquery');
@@ -21,7 +20,7 @@ const content = require('./content');
 export const navbarHeight = 70;
 
 const CollapsableListItem = React.createClass({
-    mixins: [State, BootstrapMixin, CollapsableMixin],
+    mixins: [State],
 
     onClick(e) {
         // handle the inline id helper if that's what the user clicked
@@ -30,18 +29,6 @@ const CollapsableListItem = React.createClass({
         // toggle our expansion status via this callback declared in our parent
         this.props.setExpansion(this.props.id);
         e.preventDefault();
-    },
-
-    getCollapsableDimensionValue() {
-        return ReactDOM.findDOMNode(this.refs.content).scrollHeight;
-    },
-
-    getCollapsableDOMNode() {
-        if (!this.isMounted() || !this.refs || !this.refs.content) {
-            return null;
-        }
-
-        return ReactDOM.findDOMNode(this.refs.content);
     },
 
     render: function() {
@@ -61,9 +48,11 @@ const CollapsableListItem = React.createClass({
 
         return (
             <ListGroupItem header={headerElem} {...rest}>
-                <div className={classNames(this.getCollapsableClassSet("collapse"))} ref="content">
-                { this.props.children }
-                </div>
+                <Collapse in={this.props.expanded}>
+                    <div>
+                    { this.props.children }
+                    </div>
+                </Collapse>
             </ListGroupItem>
         );
     }
@@ -123,7 +112,7 @@ const Help = React.createClass({
                 if (el) {
                     const elemTop = $(el).offset().top;
                     const headerOffset = navbarHeight + $('.header-sticky').outerHeight() + EXTRA_SEARCH_PADDING;
-                    console.log("Element top: ", elemTop, "; header offset: ", headerOffset, "; total: ", elemTop - headerOffset);
+
                     window.scrollTo({
                         top: elemTop - headerOffset,
                         behavior: 'smooth'
@@ -153,14 +142,6 @@ const Help = React.createClass({
         return false;
     },
 
-    searchChanged(event) {
-        this.setState({
-            searchTerm: event.target.value
-        }, () => {
-            this.debouncedCommitSearch();
-        });
-    },
-
     setExpansion(id, forced = null) {
         this.setState((pstate) => ({
             collapsedItems: update(pstate.collapsedItems, {
@@ -169,96 +150,89 @@ const Help = React.createClass({
         }));
     },
 
-    onSelect(e) {
-        // handle the inline id helper if that's what the user clicked
-        if (idHelpClicked(e)) { return; }
-
-        // find the parent that has an identifier associated with it
+    /*
+    onClick(e) {
+        e.persist();
+        console.log("Toggling ", e);
         const targetID = e.target.classList.contains("identifier")
             ? e.target.getAttribute('id')
             : $(e.target).parent('.identifier').attr('id');
         this.setExpansion(targetID);
-
-        if (e.target.classList.contains("help-reference-link")) {
-            // if the user clicks a reference link in a tile header, don't toggle the tile, and open the link.
-            e.selected = false;
-        } else {
-            e.preventDefault();
-        }
     },
+     */
 
     render() {
         let help = localStorage.getItem("research-mode") === 'true' ? content.helpContentResearch : content.helpContentDefault;
 
         const {fragment} = this.fragmentMatchers();
 
-        var helpTiles = help.map(({section, tiles}) =>
+        const helpTiles = help.map(({section, tiles}) =>
             [<h1>{section}</h1>, tiles.map(({name, id, contents, list, reference, isBeta}) => {
                 const actualId = id ? id : slugify(name);
 
-                let header = [<span key="header_name" className="identifier" id={actualId}>{name}</span>];
-                header.push(<HardlinkHelper id={actualId} />);
-
-                let body = [];
-                if (contents) {
-                    body.push(<RawHTML key="contents" hardlinks={true} html={contents} />);
-                }
-
-                if (list) {
-                    body.push(
-                        <ListGroup key="listgroup" fill>
-                            {
-                                list.map(({name, id, contents}) => {
-                                    const localId = id ? id : slugify(name);
-                                    return (
-                                        <CollapsableListItem
-                                            key={localId} id={localId} setExpansion={this.setExpansion}
-                                            expanded={this.state.collapsedItems[localId]}
-                                            data-expander-id={localId}
-                                            header={name}>
-                                            <RawHTML hardlinks={true} html={contents} />
-                                        </CollapsableListItem>
-                                    );
-                                })
-                            }
-                        </ListGroup>
-                    );
-                }
-
-                if (reference) {
-                    header.push(
-                        <small key="help_reference">&nbsp;
-                            <a href={reference} target="_blank">
-                                <Glyphicon glyph="link" className="help-reference-link" />
-                            </a>
-                        </small>
-                    );
-                }
-
-                if (isBeta) {
-                    header.push(
-                        <BetaTag key="beta_tag" />
-                    );
-                }
-
                 return (
                     <Panel
-                        header={header} collapsable={true}
                         key={actualId}
                         expanded={this.state.collapsedItems[actualId]}
+                        onToggle={() => { this.setExpansion(actualId); }}
                         data-expander-id={actualId}
-                        onSelect={this.onSelect}
                     >
-                        { body }
+                        <Panel.Heading>
+                            <Panel.Title componentClass="h4">
+                                <Panel.Toggle className="identifier" id={actualId}>{name}</Panel.Toggle>
+
+                                <HardlinkHelper id={actualId} />
+
+                                {
+                                    reference && (
+                                        <small key="help_reference">&nbsp;
+                                            <a href={reference} target="_blank">
+                                                <Glyphicon glyph="link" className="help-reference-link" />
+                                            </a>
+                                        </small>
+                                    )
+                                }
+
+                                { isBeta && <BetaTag key="beta_tag" /> }
+                            </Panel.Title>
+                        </Panel.Heading>
+
+                        <Panel.Collapse>
+                            { contents && (
+                                <div className="panel-body">
+                                    <RawHTML key="contents" hardlinks={true} html={contents} />
+                                </div>
+                            ) }
+
+                            { list && (
+                                <ListGroup key="listgroup" fill>
+                                    {
+                                        list.map(({name, id, contents}) => {
+                                            const localId = id ? id : slugify(name);
+                                            return (
+                                                <CollapsableListItem
+                                                    key={localId} id={localId} setExpansion={this.setExpansion}
+                                                    expanded={this.state.collapsedItems[localId]}
+                                                    data-expander-id={localId}
+                                                    header={name}>
+                                                    <RawHTML hardlinks={true} html={contents} />
+                                                </CollapsableListItem>
+                                            );
+                                        })
+                                    }
+                                </ListGroup>
+                            ) }
+                        </Panel.Collapse>
                     </Panel>
                 );
             })]);
+
         return (
             <Grid id="main-grid" className="help-page">
                 {fragment === '' ? null :
                     <style>{`#${fragment} { animation-name: emphasis; animation-duration: 10s; } `}</style>}
 
-                <Row ref={(me) => { if (me) { this.headerElem = $(me.getDOMNode()); } }} className="header-sticky">
+                <Row ref={(me) => { if (me) { this.headerElem = $(ReactDOM.findDOMNode(me)); } }} className="header-sticky">
                     <Col smOffset={1} sm={10} className="help-search-header">
                         <SearchController
                             researchMode={localStorage.getItem('research-mode')}

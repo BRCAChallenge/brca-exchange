@@ -3,9 +3,8 @@
 'use strict';
 
 import React from "react";
-import ReactDOM from 'react-dom';
 import classNames from 'classnames';
-import {TabbedArea, TabPane} from "react-bootstrap";
+import {Tabs, Tab} from "react-bootstrap";
 
 import {capitalize, isNumeric} from "../../util";
 
@@ -349,7 +348,7 @@ export default class SplicingLevelSubtile extends React.Component {
 
     changePane(key) {
         this.setState({ activePane: key });
-        this.props.onDimsChanged(ReactDOM.findDOMNode(this.collapser));
+        this.props.onDimsChanged();
     }
 
     tabTitle(label, field, key) {
@@ -392,8 +391,8 @@ export default class SplicingLevelSubtile extends React.Component {
                 The splicing-level estimation is due to <b>{maxProbPanel.reason}</b> which introduces a prior probability of pathogenicity of <b>{maxProbPanel.prior}</b>.
                 </div>
 
-                <TabbedArea ref={(me) => { this.collapser = me; }} activeKey={this.state.activePane} onSelect={this.changePane}>
-                    <TabPane eventKey={0} tab={this.tabTitle("Donor Impact", priorHeaders.donor, 0)}>
+                <Tabs id="splicing_level_tabs" activeKey={this.state.activePane} onSelect={this.changePane}>
+                    <Tab eventKey={0} tab={this.tabTitle("Donor Impact", priorHeaders.donor, 0)}>
                     {
                         isNumeric(data.donor.prior)
                             ? (
@@ -410,9 +409,9 @@ export default class SplicingLevelSubtile extends React.Component {
                                 </div>
                             )
                     }
-                    </TabPane>
+                    </Tab>
 
-                    <TabPane eventKey={1} tab={this.tabTitle("De Novo Donor", priorHeaders.denovo, 1)}>
+                    <Tab eventKey={1} tab={this.tabTitle("De Novo Donor", priorHeaders.denovo, 1)}>
                     {
                         isNumeric(data.denovo.prior)
                             ? (
@@ -427,9 +426,9 @@ export default class SplicingLevelSubtile extends React.Component {
                                 </div>
                             )
                     }
-                    </TabPane>
+                    </Tab>
 
-                    <TabPane eventKey={2} tab={this.tabTitle("Acceptor Impact", priorHeaders.acceptor, 2)}>
+                    <Tab eventKey={2} tab={this.tabTitle("Acceptor Impact", priorHeaders.acceptor, 2)}>
                     {
                         isNumeric(data.acceptor.prior)
                             ? (
@@ -446,8 +445,8 @@ export default class SplicingLevelSubtile extends React.Component {
                                 </div>
                             )
                     }
-                    </TabPane>
-                </TabbedArea>
+                    </Tab>
+                </Tabs>
             </div>
         );
     }

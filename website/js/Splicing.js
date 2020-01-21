@@ -1,11 +1,9 @@
 'use strict';
 
-var React = require('react');
-var ReactDOM = require('react-dom');
-var _ = require('lodash');
+import React from 'react';
+import * as _ from 'lodash';
 
-import {CollapsableMixin} from 'react-bootstrap';
-import classNames from "classnames";
+import {Collapse} from 'react-bootstrap';
 import * as d3s from 'd3-scale';
 import update from 'immutability-helper';
 
@@ -553,16 +551,6 @@ class Zoom extends React.Component {
 }
 
 const SettingsPanel = React.createClass({
-    mixins: [CollapsableMixin],
-
-    getCollapsableDOMNode: function() {
-        return ReactDOM.findDOMNode(this.refs.panel);
-    },
-
-    getCollapsableDimensionValue: function() {
-        return ReactDOM.findDOMNode(this.refs.panel).scrollHeight;
-    },
-
     onHandleToggle: function (e) {
         e.preventDefault();
 
@@ -571,8 +559,6 @@ const SettingsPanel = React.createClass({
     },
 
     render: function() {
-        const styles = this.getCollapsableClassSet();
-
         const settings = (
             <div className="container-fluid">
                 <div className="row">
@@ -633,9 +619,12 @@ const SettingsPanel = React.createClass({
                     </div>
                 </div>
 
-                <div ref='panel' className={classNames(styles)}>
+                <Collapse in={this.props.expanded}
+                    onEntered={this.props.relayoutGrid}
+                    onExited={this.props.relayoutGrid}
+                >
                 {settings}
-                </div>
+                </Collapse>
             </div>
         );
     }
@@ -675,9 +664,6 @@ class Splicing extends React.Component {
         }), () => {
             // persist expansion state to localstorage
             localStorage.setItem("transcriptviz-options-expanded", this.state.optionsExpanded ? "true" : "false");
-
-            // reflows the parent after our dimensions change
-            this.props.onContentsChanged(this.collapser.getCollapsableDOMNode());
         });
     }
 
@@ -781,7 +767,6 @@ class Splicing extends React.Component {
                 </svg>
 
                 <SettingsPanel
-                    ref={(me) => { this.collapser = me; }}
                     key="settings-panel"
                     meta={meta}
                     expanded={this.state.optionsExpanded}
@@ -791,6 +776,7 @@ class Splicing extends React.Component {
                     generateCIDomainSelectors={this.generateCIDomainSelectors}
                     toggleDrawing={this.toggleDrawing}
                     onToggled={this.onOptionsToggled}
+                    relayoutGrid={this.props.relayoutGrid}
                     nonCollapsable={false}
                 />
             </div>
@@ -890,10 +876,17 @@ class Splicing extends React.Component {
      * @param meta gene metadata, including the CI domains and their locations
      */
     generateCIDomainSelectors(meta) {
+        // FIXME: resolve the following error:
+        //  Uncaught Invariant Violation: findComponentRoot(..., .0.2.1.0.0.$splicing_vis.0.1:$0.$=10.$settings-panel
+        //  .1.0.0.$ENIGMA Consortium.0.$ENIGMA Consortium_checkbox): Unable to find element. This probably means the
+        //  DOM was unexpectedly mutated (e.g., by the browser), usually due to forgetting a <tbody> when using tables,
+        //  nesting tags like <form>, <p>, or <a>, or using non-SVG elements in an <svg> parent. Try inspecting the
+        //  child nodes of the element with React ID ``.
+
         return _.toPairs(meta.CIDomains).map(([org, orgMeta]) =>
             <div key={org}>
                 <label style={{display: 'inline-block', marginRight: '1em'}}>
-                    <input style={{marginRight: '0.5em'}} type="checkbox"
+                    <input key={`${org}_checkbox`} style={{marginRight: '0.5em'}} type="checkbox"
                         name={org} checked={this.state.drawCIDomains.has(org)} onChange={this.toggleCIDomain}
                     />
                     <svg className="site-indicator" width={18} height={18}>

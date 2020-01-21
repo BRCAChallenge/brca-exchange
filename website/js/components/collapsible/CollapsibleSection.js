@@ -3,31 +3,21 @@
 'use strict';
 
 import React from "react";
-import ReactDOM from 'react-dom';
-import {CollapsableMixin} from "react-bootstrap";
-import classNames from 'classnames';
+import {Collapse} from "react-bootstrap";
 
 const CollapsibleSection = React.createClass({
-    mixins: [CollapsableMixin],
-
-    getCollapsableDOMNode: function() {
-        return ReactDOM.findDOMNode(this.refs.panel);
-    },
-
-    getCollapsableDimensionValue: function() {
-        return ReactDOM.findDOMNode(this.refs.panel).scrollHeight;
-    },
-
-    handleToggle: function(e, fieldName) {
+    handleToggle: function(e, id) {
         e.preventDefault();
 
+        console.log("Toggling ", id);
+
         // ask our parent to toggle us
-        this.props.onFieldToggled(fieldName);
+        this.props.onFieldToggled(id);
     },
 
-    generateHeader: function(fieldName, extraHeaderItems, twoColumnExtraHeader) {
+    generateHeader: function(id, fieldName, extraHeaderItems, twoColumnExtraHeader) {
         return (
-            <div className={`allele-frequency-header ${this.props.expanded ? 'expanded' : ''}`} onClick={(e) => this.handleToggle(e, fieldName)}>
+            <div className={`allele-frequency-header ${this.props.expanded ? 'expanded' : ''}`} onClick={(e) => this.handleToggle(e, id)}>
                 <div className="allele-frequency-cell allele-frequency-label">
                     {
                         this.props.expanded
@@ -60,19 +50,24 @@ const CollapsibleSection = React.createClass({
     },
 
     render: function() {
-        const {fieldName, hideEmptyItems, extraHeaderItems, twoColumnExtraHeader} = this.props;
+        const {id, fieldName, hideEmptyItems, extraHeaderItems, twoColumnExtraHeader} = this.props;
         let allEmpty = false;
-        let styles = this.getCollapsableClassSet();
 
         return (
             <div className={ allEmpty && hideEmptyItems ? "group-empty" : "" }>
                 <div style={{marginBottom: 0, borderTop: 'solid 2px #ccc'}}>
-                { this.generateHeader(fieldName, extraHeaderItems, twoColumnExtraHeader) }
+                { this.generateHeader(id, fieldName, extraHeaderItems, twoColumnExtraHeader) }
                 </div>
 
-                <div ref='panel' className={allEmpty ? "group-empty" : classNames(styles)}>
-                {this.props.children}
-                </div>
+                <Collapse className={allEmpty ? "group-empty" : ""}
+                    in={this.props.expanded}
+                    onEntered={this.props.relayoutGrid}
+                    onExited={this.props.relayoutGrid}
+                >
+                    <div>
+                    {this.props.children}
+                    </div>
+                </Collapse>
             </div>
         );
     }

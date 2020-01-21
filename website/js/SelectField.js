@@ -3,7 +3,6 @@
 
 var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
-var {Input} = require('react-bootstrap');
 var _ = require('underscore');
 
 var SelectField = React.createClass({
@@ -16,9 +15,12 @@ var SelectField = React.createClass({
             opels = _.map(options, v => <option key={v} value={v}>{v}</option>);
 
         return (
-            <Input type="select" value={value} label={label} onChange={this.onChange}>
-                {opels}
-            </Input>
+            <label>
+                {label}
+                <select value={value} onChange={this.onChange}>
+                    {opels}
+                </select>
+            </label>
         );
     }
 });
