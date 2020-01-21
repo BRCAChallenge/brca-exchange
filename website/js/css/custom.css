@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Lato:200,600');
+/*@import url('https://fonts.googleapis.com/css?family=Lato:200,400');*/
 
 /* Note that bootstrap 3 media sizes are as follows:
   @media(max-width:767px){}  // xs
@@ -145,7 +145,8 @@ offending file, for future reference: website/node_modules/react-data-components
     font-stretch: condensed;
     margin: 0 10px 10px 0;
 
-    font-family: 'Lato', sans-serif;
+    /*font-family: 'Lato', sans-serif;*/
+    font-family: sans-serif;
     color: black;
 }
 
