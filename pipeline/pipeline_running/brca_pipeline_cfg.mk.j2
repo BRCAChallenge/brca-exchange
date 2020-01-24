@@ -33,6 +33,11 @@ RESOURCES_DIR := {{ RESOURCES_DIR|default(WORK_DIR + "/resources") }}
 PRIORS_IMAGE := {{ PRIORS_IMAGE | default("brcachallenge/splicing-pipeline:" + PRIORS_IMAGE_TAG) }}
 PRIORS_REFERENCES := {{ PRIORS_REFERENCES|default(WORK_DIR + "/references") }}
 
+# VR configurations
+
+{% set VR_IMAGE_DEFAULT_TAG = "0.1" %}
+VR_IMAGE := {{ VR_IMAGE | default("brcachallenge/append-vr-ids:" + VR_IMAGE_TAG) }}
+
 ## UTA configurations
 
 {% set UTA_RELEASE_DATE = UTA_RELEASE_DATE|default("20171026") %}

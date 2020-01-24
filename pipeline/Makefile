@@ -38,6 +38,9 @@ download-resources: ## download resources files
 start-local-uta: ## starting local uta docker container
 	[ `docker ps -f name=$(UTA_CONTAINER) | wc -l` -gt 1 ] || docker run -dit --name $(UTA_CONTAINER) -p $(UTA_PORT):5432 $(UTA_DOCKER_IMAGE)
 
+start-seqrepo-rest-service:
+	docker run --name seqrepo-rest-service --detach --rm -p 5000:5000 -v /usr/local/share/seqrepo/:/usr/local/share/seqrepo/ biocommons/seqrepo-rest-service
+
 .ONESHELL:
 setup-files: ## setup various directories to run pipeline
 	[ -f $(CREDENTIALS_PATH) ] || { touch $(CREDENTIALS_PATH); echo "WARNING: files $(CREDENTIALS_PATH) doesn't exist.Creating it"; }
@@ -82,7 +85,7 @@ run-pipeline: ## running entire pipeline
 	TS=`date +%Y%m%d_%H%M%S`
 	LOG_FILE=$(LOG_DIR)/pipeline_run_$${TS}.log
 	echo "Log files are in $${LOG_FILE}"
-	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) /opt/brca-exchange/pipeline/docker/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE) $(LUIGI_ROOT_TASK) $(LUIGI_WORKERS) $(GENE_CONFIG_FILE) > $${LOG_FILE} 2>&1
+	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) /opt/brca-exchange/pipeline/docker/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE) $(VR_IMAGE) $(LUIGI_ROOT_TASK) $(LUIGI_WORKERS) $(GENE_CONFIG_FILE) > $${LOG_FILE} 2>&1
 
 run-interactive: ## starting docker container in interactive mode
 	docker run -it $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) bash
@@ -96,7 +99,7 @@ ifeq ($(firstword),$(filter $(firstword), run-task, force-run-task, clean-files-
   $(eval $(RUN_ARGS):;@:)
 endif
 
-RUN_TASK_CMD := docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) /opt/brca-exchange/pipeline/docker/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE)
+RUN_TASK_CMD := docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) /opt/brca-exchange/pipeline/docker/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE) $(VR_IMAGE)
 
 run-task: ## Running a specific task
 	$(RUN_TASK_CMD) $(RUN_ARGS) $(LUIGI_WORKERS) $(GENE_CONFIG_FILE)

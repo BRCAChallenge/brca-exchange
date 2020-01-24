@@ -39,6 +39,9 @@ class PipelineParams(luigi.Config):
     priors_docker_image_name = luigi.Parameter(default=str(None),
                                                description='docker image name for priors calculation')
 
+    vr_docker_image_name = luigi.Parameter(default=str(None),
+                                               description='docker image name for VR id gathering')
+
     release_notes = luigi.Parameter(default=str(None),
                                     description='notes for release, must be a .txt file')
 

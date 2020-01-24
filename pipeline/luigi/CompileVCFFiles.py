@@ -1178,10 +1178,9 @@ class AppendVRId(DefaultPipelineTask):
         artifacts_dir = self.cfg.output_dir + "/release/artifacts/"
         os.chdir(vr_method_dir)
 
-        args = ["python", "appendVRIds.py",
-                "--log-path", artifacts_dir + "append_vr_ids.log",
-                "--input", artifacts_dir + "built_with_priors.tsv",
-                "--output", artifacts_dir + "built_with_VR_ids.tsv"]
+        args = ['bash', 'appendvrids.sh', artifacts_dir, 'built_with_priors.tsv',
+                'built_with_vr_ids.tsv', self.cfg.vr_docker_image_name]
+
 
         print "Running appendVRIds.py with the following args: %s" % (
             args)
