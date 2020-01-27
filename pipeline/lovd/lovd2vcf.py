@@ -9,15 +9,16 @@ Description:
 
 
 from __future__ import print_function, division
-import re
-import argparse
-import sys
-import os
-from collections import defaultdict
-import pyhgvs as hgvs
-import pyhgvs.utils as hgvs_utils
-from pygr.seqdb import SequenceFileDB
 
+import argparse
+import re
+import sys
+from collections import defaultdict
+
+from common import vcf_files_helper
+from common.hgvs_utils import HgvsWrapper
+from common.variant_utils import VCFVariant
+from hgvs.exceptions import HGVSError
 
 def parse_args():
     """
@@ -35,10 +36,6 @@ def parse_args():
                         help='Ouput VCF file result.')
     parser.add_argument('-e', '--errors', type=argparse.FileType('w'),
                         help='File containing all LOVD variants that could not be parsed.')
-    parser.add_argument('-g', '--gpath', default='/hive/groups/cgl/brca/phase1/data/resources/hg19.fa',
-                        help='Whole path to genome file. Default: (/hive/groups/cgl/brca/phase1/data/resources/hg19.fa)')
-    parser.add_argument('-r', '--rpath', default='/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.gp',
-                        help='Whole path to refSeq file. Default: (/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.gp)')
     parser.add_argument('-s', '--source', help='Source from which data is extracted.')
 
     options = parser.parse_args()
@@ -50,18 +47,8 @@ def main():
     inputFile = options.input
     annotFile_path = options.inAnnot
     vcfFile = options.out
-    genome_path = options.gpath
-    refseq_path = options.rpath
     errorsFile = options.errors
     source = options.source
-
-    with open(refseq_path) as infile:
-        transcripts = hgvs_utils.read_transcripts(infile)
-
-    genome = SequenceFileDB(genome_path)
-
-    def get_transcript(name):
-        return transcripts.get(name)
 
     # open and store annotation fields in a dictionary
     annotDict = defaultdict()
@@ -98,7 +85,7 @@ def main():
         for field in headerline:
             field_index = fieldIdxDict[field]
             field_value = parsedLine[field_index]
-            field_value = normalize(field, field_value)
+            field_value = vcf_files_helper.normalize_field_value(field_value)
             INFO_field.append('{0}={1}'.format(field, field_value))
 
         # extract hgvs cDNA term for variant and cleanup formatting
@@ -106,7 +93,7 @@ def main():
         if 'cDNA' in fieldIdxDict:
             hgvsName = parsedLine[fieldIdxDict['cDNA']]
         elif 'dna_change' in fieldIdxDict:
-            hgvsName = parsedLine[fieldIdxDict['dna_change']]
+            hgvsName = parsedLine[fieldIdxDict['dna_change']].replace(':', '.3:') # TODO fix hack!!
         else:
             sys.exit("ERROR: could not parse hgvs name.")
         if hgvsName == '-':
@@ -114,27 +101,47 @@ def main():
             continue
         queryHgvsName = re.sub(r'[^\x00-\x7F]+', '', hgvsName).rstrip().split(';')[0]
         INFO_field_string = ';'.join(INFO_field)
-        try:
-            chrom, offset, ref, alt = hgvs.parse_hgvs_name(queryHgvsName, genome, get_transcript=get_transcript)
-            chrom = chrom.replace('chr', '')
-            print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(chrom, offset, queryHgvsName, ref, alt, INFO_field_string), file=vcfFile)
-        except Exception as e:
-            print(str(e)+': could not parse hgvs field '+queryHgvsName, file=errorsFile)
+
+        hgvs_wrapper = HgvsWrapper.get_instance()
+
+        v = None
+
+        if source == "LOVD":
+            v = from_genomic(parsedLine, fieldIdxDict, hgvs_wrapper, errorsFile)
+
+        if not v:
+            try:
+                v = vcf_files_helper.cdna_str_to_genomic_var(queryHgvsName,
+                                                    HgvsWrapper.GRCh37_Assem,
+                                                    hgvs_wrapper)
+            except HGVSError as e:
+                print('Could not parse cdna field ' + str(
+                    queryHgvsName) + '. Error was ' + str(e), file=errorsFile)
+
+        if v:
+            print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(v.chr,
+                                                                  v.pos,
+                                                                  queryHgvsName,
+                                                                  v.ref, v.alt,
+                                                                  INFO_field_string),
+                  file=vcfFile)
+        else:
+            print('Could not process line. Skipping variant: ' + str(
+                queryHgvsName), file=errorsFile)
 
 
-def normalize(field, field_value):
-    if not is_empty(field_value):
-        if field_value[0] == ';':
-            field_value = field_value[1:]
-        if field_value[-1] == ';':
-            field_value = field_value[:-1]
-        if ';' in field_value:
-            field_value = field_value.replace(';', '')
-    return field_value
+def from_genomic(parsedLine, fieldIdxDict, hgvs_wrapper, errorsFile):
+    acc = 'NC_0000' + str(parsedLine[fieldIdxDict['chromosome']].replace('chr', '')) # TODO fx
 
+    var_str = acc + ":" + parsedLine[fieldIdxDict['gDNA']]
 
-def is_empty(field_value):
-    return field_value == '' or field_value is None
+    try:
+        var_hgvs = hgvs_wrapper.hgvs_parser.parse(var_str)
+        return VCFVariant.from_hgvs_obj(var_hgvs)
+    except HGVSError as e:
+        print('Could not parse genomic field ' + str(var_str) + '. Error was ' + str(e), file=errorsFile)
+
+    return None
 
 
 if __name__ == "__main__":

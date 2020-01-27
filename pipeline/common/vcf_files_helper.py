@@ -4,9 +4,7 @@ from .variant_utils import VCFVariant
 import hgvs
 
 # TODO: remove assembly parameter
-def cdna_str_to_genomic_var(cdna_hgvs_str, assembly=HgvsWrapper.GRCh38_Assem):
-    hgvs_wrapper = HgvsWrapper.get_instance()
-
+def cdna_str_to_genomic_var(cdna_hgvs_str, assembly=HgvsWrapper.GRCh38_Assem, hgvs_wrapper = HgvsWrapper.get_instance()):
     hgvs_cdna = hgvs_wrapper.hgvs_parser.parse(cdna_hgvs_str)
 
     hgvs_g = hgvs_wrapper.nm_to_genomic(hgvs_cdna, assembly)

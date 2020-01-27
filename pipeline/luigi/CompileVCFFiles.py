@@ -236,9 +236,7 @@ class ConvertEXLOVDBRCA1ExtractToVCF(DefaultPipelineTask):
 
         args = ["./lovd2vcf.py", "-i", ex_lovd_file_dir + "/BRCA1.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", "-a",
-                "exLOVDAnnotation",
-                "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa", "-e",
+                "exLOVDAnnotation", "-e",
                 artifacts_dir + "exLOVD_BRCA1_error_variants.txt",
                 "-s", "exLOVD"]
         print "Running lovd2vcf with the following args: %s" % (args)
@@ -267,9 +265,7 @@ class ConvertEXLOVDBRCA2ExtractToVCF(DefaultPipelineTask):
 
         args = ["./lovd2vcf.py", "-i", ex_lovd_file_dir + "/BRCA2.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf", "-a",
-                "exLOVDAnnotation",
-                "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa", "-e",
+                "exLOVDAnnotation", "-e",
                 artifacts_dir + "exLOVD_BRCA2_error_variants.txt",
                 "-s", "exLOVD"]
         print "Running lovd2vcf with the following args: %s" % (args)
@@ -479,9 +475,7 @@ class ConvertSharedLOVDToVCF(DefaultPipelineTask):
         os.chdir(lovd_method_dir)
 
         args = ["python", "lovd2vcf.py", "-i", self.input().path, "-o",
-                self.output().path, "-a", "sharedLOVDAnnotation",
-                "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa", "-e",
+                self.output().path, "-a", "sharedLOVDAnnotation", "-e",
                 artifacts_dir + "/LOVD_error_variants.txt",
                 "-s", "LOVD"]
 

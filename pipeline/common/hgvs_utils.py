@@ -122,6 +122,7 @@ class HgvsWrapper:
     def nm_to_genomic(self, v, target_assembly=GRCh38_Assem):
         return self.hgvs_ams[target_assembly].c_to_g(v)
 
+
     @staticmethod
     def get_instance():
         if not HgvsWrapper.__instance:
