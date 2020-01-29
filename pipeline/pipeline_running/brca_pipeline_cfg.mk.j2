@@ -27,7 +27,7 @@ BRCA_GIT_REPO := {{ BRCA_GIT_REPO|default("https://github.com/BRCAChallenge/brca
 PIPELINE_IMAGE := {{ PIPELINE_IMAGE | default("brcachallenge/brca-exchange-pipeline:" + RELEASE_TAG) }}
 RESOURCES_DIR := {{ RESOURCES_DIR|default(WORK_DIR + "/resources") }}
 
-{% set PRIORS_IMAGE_DEFAULT_TAG = "0.0.6" %}
+{% set PRIORS_IMAGE_DEFAULT_TAG = "0.0.8" %}
 
 {% set PRIORS_IMAGE_TAG = PRIORS_IMAGE_TAG|default(PRIORS_IMAGE_DEFAULT_TAG) %}
 PRIORS_IMAGE := {{ PRIORS_IMAGE | default("brcachallenge/splicing-pipeline:" + PRIORS_IMAGE_TAG) }}
