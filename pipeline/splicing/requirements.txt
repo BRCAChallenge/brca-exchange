@@ -7,3 +7,4 @@ pyfaidx==0.5.4.2
 pygr==0.8.2
 pytest==4.6.5
 requests==2.20.0
+zipp==1.0.0 # https://github.com/jaraco/zipp/issues/28
