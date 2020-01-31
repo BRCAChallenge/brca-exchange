@@ -19,6 +19,7 @@ from common import vcf_files_helper
 from common.hgvs_utils import HgvsWrapper
 from common.variant_utils import VCFVariant
 from hgvs.exceptions import HGVSError
+from common.seq_utils import SeqRepoWrapper
 
 def parse_args():
     """
@@ -77,6 +78,9 @@ def main():
     for index, field in enumerate(headerline):
         fieldIdxDict[field] = index
 
+    seq_fetcher37 = SeqRepoWrapper(assembly_name=SeqRepoWrapper.ASSEMBLY_NAME_hg37)
+    hgvs_wrapper = HgvsWrapper.get_instance()
+
     # extract info from each line of the flat file
     for line in inputFile:
         line = line.replace('"', '')
@@ -102,8 +106,6 @@ def main():
         queryHgvsName = re.sub(r'[^\x00-\x7F]+', '', hgvsName).rstrip().split(';')[0]
         INFO_field_string = ';'.join(INFO_field)
 
-        hgvs_wrapper = HgvsWrapper.get_instance()
-
         v = None
 
         if source == "LOVD":
@@ -113,7 +115,7 @@ def main():
             try:
                 v = vcf_files_helper.cdna_str_to_genomic_var(queryHgvsName,
                                                     HgvsWrapper.GRCh37_Assem,
-                                                    hgvs_wrapper)
+                                                    hgvs_wrapper, seq_fetcher37)
             except HGVSError as e:
                 print('Could not parse cdna field ' + str(
                     queryHgvsName) + '. Error was ' + str(e), file=errorsFile)
