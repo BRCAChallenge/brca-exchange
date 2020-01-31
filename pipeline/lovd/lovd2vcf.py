@@ -20,6 +20,7 @@ from common.hgvs_utils import HgvsWrapper
 from common.variant_utils import VCFVariant
 from hgvs.exceptions import HGVSError
 from common.seq_utils import SeqRepoWrapper
+import hgvs
 
 def parse_args():
     """
@@ -109,17 +110,16 @@ def main():
 
         v = None
 
-        if source == "LOVD":
-            v = from_genomic(parsedLine, fieldIdxDict, hgvs_wrapper, errorsFile)
-
-        if not v:
-            try:
-                v = vcf_files_helper.cdna_str_to_genomic_var(queryHgvsName,
+        try:
+            v = vcf_files_helper.cdna_str_to_genomic_var(queryHgvsName,
                                                     HgvsWrapper.GRCh37_Assem,
                                                     hgvs_wrapper, seq_fetcher37)
-            except HGVSError as e:
-                print('Could not parse cdna field ' + str(
-                    queryHgvsName) + '. Error was ' + str(e), file=errorsFile)
+        except HGVSError as e:
+            print('Could not parse cdna field ' + str(
+                queryHgvsName) + '. Error was ' + str(e), file=errorsFile)
+
+        if not v and source == "LOVD":
+            v = from_genomic(parsedLine, fieldIdxDict, hgvs_wrapper, seq_fetcher37, errorsFile)
 
         if v:
             print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(v.chr,
@@ -133,14 +133,15 @@ def main():
                 queryHgvsName), file=errorsFile)
 
 
-def from_genomic(parsedLine, fieldIdxDict, hgvs_wrapper, errorsFile):
-    acc = 'NC_0000' + str(parsedLine[fieldIdxDict['chromosome']].replace('chr', '')) # TODO fx
+def from_genomic(parsedLine, fieldIdxDict, hgvs_wrapper, seq_fetcher37, errorsFile):
+    acc = 'NC_0000' + str(parsedLine[fieldIdxDict['chromosome']].replace('chr', '')) + '.10'
 
     var_str = acc + ":" + parsedLine[fieldIdxDict['gDNA']]
 
     try:
         var_hgvs = hgvs_wrapper.hgvs_parser.parse(var_str)
-        return VCFVariant.from_hgvs_obj(var_hgvs)
+        var_hgvs_norm = hgvs.normalizer.Normalizer(hgvs_wrapper.hgvs_dp, shuffle_direction=5).normalize(var_hgvs)
+        return VCFVariant.from_hgvs_obj(var_hgvs_norm, seq_fetcher37)
     except HGVSError as e:
         print('Could not parse genomic field ' + str(var_str) + '. Error was ' + str(e), file=errorsFile)
 
