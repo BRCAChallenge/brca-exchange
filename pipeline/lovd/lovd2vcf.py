@@ -104,6 +104,7 @@ def main():
             print(parsedLine)
             continue
         queryHgvsName = re.sub(r'[^\x00-\x7F]+', '', hgvsName).rstrip().split(';')[0]
+        queryHgvsName = re.sub(r'\s', '', queryHgvsName) # remove whitespaces within name
         INFO_field_string = ';'.join(INFO_field)
 
         v = None
