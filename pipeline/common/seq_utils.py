@@ -42,9 +42,10 @@ class SeqRepoWrapper:
             logging.warn("Using remote sequence provider.")
             self.seq_repo_fetcher = seqfetcher.fetch_seq
 
-        if not assembly_name:
+        self.assembly_name = assembly_name
+        if not self.assembly_name:
             self.assembly_name = self.DEFAULT_ASSY_NAME
-        self.assy_map = assemblies.make_name_ac_map(assembly_name)
+        self.assy_map = assemblies.make_name_ac_map(self.assembly_name)
 
         self.preloaded_regions = {}
         if regions_preload:
