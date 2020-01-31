@@ -62,10 +62,16 @@ def hgvs_wrapper(fetch_seq_mock_data):
                               side_effect=lambda ac, s, e: generate_mock_data(ac, s, e)):
             return HgvsWrapper()
 
+
 @pytest.fixture(scope="module")
 def seq_fetcher(fetch_seq_mock_data):
-    with patch.object(bioutils.seqfetcher, 'fetch_seq',
-                          side_effect=lambda ac, s, e: fetch_seq_mock_data[(str(ac), str(s), str(e))]):
-        return seq_utils.SeqRepoWrapper()
+    if not GENERATE_MOCK_DATA:
+        with patch.object(bioutils.seqfetcher, 'fetch_seq',
+                              side_effect=lambda ac, s, e: fetch_seq_mock_data[(str(ac), str(s), str(e))]):
+            return seq_utils.SeqRepoWrapper()
+    else:
+        with patch.object(bioutils.seqfetcher, 'fetch_seq',
+                              side_effect=lambda ac, s, e: generate_mock_data(ac, s, e)):
+            return seq_utils.SeqRepoWrapper()
 
 
