@@ -1005,6 +1005,8 @@ th[role='columnheader'] .help, .help-target .help {
 /**********     Variant Details: Tile Groups ******************/
 /**************************************************************/
 
+.panel-title a.title { cursor: pointer; }
+
 div.variant-detail-group table.table-bordered {
     border: solid 1px #9a9a9a;
 }
