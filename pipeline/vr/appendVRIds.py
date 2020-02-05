@@ -4,18 +4,18 @@ import logging
 import sys
 import argparse
 import csv
-# from ga4gh.core import sha512t24u, ga4gh_digest, ga4gh_identify, ga4gh_serialize
-# from ga4gh.vr import __version__, models, normalize
-# from ga4gh.vr.extras.dataproxy import SeqRepoRESTDataProxy
-# from ga4gh.vr.extras.translator import Translator
+from ga4gh.core import sha512t24u, ga4gh_digest, ga4gh_identify, ga4gh_serialize
+from ga4gh.vr import __version__, models, normalize
+from ga4gh.vr.extras.dataproxy import SeqRepoRESTDataProxy
+from ga4gh.vr.extras.translator import Translator
 
 
-# SEQREPO_REST_SERVICE_URL = "http://localhost:5000/seqrepo"
-# DP = SeqRepoRESTDataProxy(base_url=SEQREPO_REST_SERVICE_URL)
-# TLR = Translator(data_proxy=DP,
-#                  translate_sequence_identifiers=True,
-#                  normalize=True,
-#                  identify=True)
+SEQREPO_REST_SERVICE_URL = "http://localhost:5000/seqrepo"
+DP = SeqRepoRESTDataProxy(base_url=SEQREPO_REST_SERVICE_URL)
+TLR = Translator(data_proxy=DP,
+                 translate_sequence_identifiers=True,
+                 normalize=True,
+                 identify=True)
 
 
 def parse_args():
@@ -70,10 +70,9 @@ def is_empty(field_value):
 
 def get_vr_id(hgvs):
     try:
-        # allele = TLR.from_hgvs(hgvs)
-        # allele_dict = allele.as_dict()
-        # return allele_dict['_id']
-        return "placeholder"
+        allele = TLR.from_hgvs(hgvs)
+        allele_dict = allele.as_dict()
+        return allele_dict['_id']
     except ValueError as e:
         logging.warning("Exception during processing of " + str(hgvs) + ": " + str(e))
         return '-'

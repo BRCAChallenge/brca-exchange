@@ -1,3 +1,2 @@
-numpy
-PyYAML
 ga4gh.vr[extras]
+
