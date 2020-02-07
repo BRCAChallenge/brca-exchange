@@ -1194,7 +1194,7 @@ class AppendVRId(DefaultPipelineTask):
             self.output().path)
 
 
-@requires(FilterBlacklistedPriors)
+@requires(AppendVRId)
 class FindMissingReports(DefaultPipelineTask):
     def output(self):
         artifacts_dir = self.cfg.output_dir + "/release/artifacts/"

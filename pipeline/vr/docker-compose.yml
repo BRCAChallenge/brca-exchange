@@ -1,0 +1,33 @@
+version: "3"
+
+# docker-compose up successfully starts seqrepo-rest-service and uta
+
+services:
+  seqrepo-rest-service:    
+    image: biocommons/seqrepo-rest-service:latest
+    volumes:
+      - seqrepo_vol:/usr/local/share/seqrepo
+    ports:
+      - "5000:5000"
+    
+  uta:
+    image: biocommons/uta:uta_20180821
+    volumes:
+      - uta_vol:/var/lib/postgresql/data
+    ports:
+      - "50829:5432"
+
+
+  # Not sure how to set up this next container to run properly...
+  # needs to take an input and output file as specified in
+  # CompileVCFFiles.py and run appendVRIds.py inside docker
+
+  # append-vr-ids:
+  #   image: brcachallenge/append-vr-ids:0.1
+
+
+volumes:
+  seqrepo_vol:
+    external: true
+  uta_vol:
+    external: true
