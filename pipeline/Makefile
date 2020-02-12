@@ -13,6 +13,8 @@ MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 LUIGI_ROOT_TASK = GenerateReleaseArchive
 LUIGI_WORKERS = 8
 
+# the path to seqrepo in the container; this is mounted separately from the rest of /files/resources
+# since seqrepo is huge and thus won't be locate in the same place as the rest of the resources
 SEQ_REPO_DIR_DOCKER := /files/resources/seq_repo
 
 GENE_CONFIG_FILE := /opt/brca-exchange/pipeline/luigi/gene_config_brca_only.txt
@@ -71,6 +73,7 @@ COMMON_DOCKER_ARGS = --rm -u `id -u ${USER}`:$(DOCKER_GRP) \
   -e "PYTHONPATH=/opt/brca-exchange/pipeline" \
 	--network host \
 	-v $(RESOURCES_DIR):/files/resources \
+	-v $(SEQ_REPO_DIR):$(SEQ_REPO_DIR_DOCKER) \
 	-v $(OUT_DIR):/files/data \
 	-v $(CREDENTIALS_PATH):/opt/luigi_pipeline_credentials.cfg \
 	-v $(PREVIOUS_RELEASE_PATH):/files/previous_release.tar.gz \
@@ -78,8 +81,11 @@ COMMON_DOCKER_ARGS = --rm -u `id -u ${USER}`:$(DOCKER_GRP) \
 	-v $(CODE_BASE):/opt/brca-exchange \
 	-v /var/run/docker.sock:/var/run/docker.sock
 
-download-seqrepo: ## Download seq repo data
-	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) bash -c "mkdir -p $(SEQ_REPO_DIR_DOCKER) && seqrepo --root-directory $(SEQ_REPO_DIR_DOCKER) pull && seqrepo --root-directory $(SEQ_REPO_DIR_DOCKER) update-latest"
+download-seqrepo: ## Download seq repo data (fyi, seqrepo pull will skip downloading the latest release if we already have it)
+	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) \
+	bash -c "mkdir -p $(SEQ_REPO_DIR_DOCKER) && seqrepo -v --root-directory $(SEQ_REPO_DIR_DOCKER) pull --update-latest" \
+	2>&1 | tee /dev/tty | \
+	grep 'most recent seqrepo instance is' | rev | cut -d ' ' -f 1 | rev > $(OUT_DIR)/seqrepo_instance.txt
 
 run-pipeline: ## running entire pipeline
 	TS=`date +%Y%m%d_%H%M%S`
