@@ -1167,7 +1167,6 @@ class FilterBlacklistedPriors(DefaultPipelineTask):
             self.output().path)
 
 
-
 @requires(CalculatePriors)
 class AppendVRId(DefaultPipelineTask):
     def output(self):
@@ -1178,8 +1177,14 @@ class AppendVRId(DefaultPipelineTask):
         artifacts_dir = self.cfg.output_dir + "/release/artifacts/"
         os.chdir(vr_method_dir)
 
-        args = ['bash', 'appendvrids.sh', artifacts_dir, 'built_with_priors.tsv',
-                'built_with_vr_ids.tsv', self.cfg.vr_docker_image_name]
+        args = [
+            'bash', 'appendvrids.sh',
+            artifacts_dir,
+            'built_with_priors.tsv',
+            'built_with_vr_ids.tsv',
+            self.cfg.vr_docker_image_name,
+            self.cfg.seq_repo_dir
+        ]
 
 
         print "Running appendVRIds.py with the following args: %s" % (

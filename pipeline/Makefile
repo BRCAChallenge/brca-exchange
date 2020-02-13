@@ -83,15 +83,15 @@ COMMON_DOCKER_ARGS = --rm -u `id -u ${USER}`:$(DOCKER_GRP) \
 
 download-seqrepo: ## Download seq repo data (fyi, seqrepo pull will skip downloading the latest release if we already have it)
 	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) \
-	bash -c "mkdir -p $(SEQ_REPO_DIR_DOCKER) && seqrepo -v --root-directory $(SEQ_REPO_DIR_DOCKER) pull --update-latest" \
-	2>&1 | tee /dev/tty | \
-	grep 'most recent seqrepo instance is' | rev | cut -d ' ' -f 1 | rev > $(OUT_DIR)/seqrepo_instance.txt
+	  bash -c "mkdir -p $(SEQ_REPO_DIR_DOCKER) && seqrepo -v --root-directory $(SEQ_REPO_DIR_DOCKER) pull --update-latest" \
+	  2>&1 | tee /dev/tty | \
+	  grep 'most recent seqrepo instance is' | rev | cut -d ' ' -f 1 | rev > $(OUT_DIR)/seqrepo_instance.txt
 
 run-pipeline: ## running entire pipeline
 	TS=`date +%Y%m%d_%H%M%S`
 	LOG_FILE=$(LOG_DIR)/pipeline_run_$${TS}.log
 	echo "Log files are in $${LOG_FILE}"
-	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) /opt/brca-exchange/pipeline/docker/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE) $(VR_IMAGE) $(LUIGI_ROOT_TASK) $(LUIGI_WORKERS) $(GENE_CONFIG_FILE) > $${LOG_FILE} 2>&1
+	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) /opt/brca-exchange/pipeline/docker/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE) $(VR_IMAGE) $(LUIGI_ROOT_TASK) $(LUIGI_WORKERS) $(GENE_CONFIG_FILE) $(SEQ_REPO_DIR) > $${LOG_FILE} 2>&1
 
 run-interactive: ## starting docker container in interactive mode
 	docker run -it $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) bash
