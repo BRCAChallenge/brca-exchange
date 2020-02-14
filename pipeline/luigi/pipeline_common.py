@@ -48,6 +48,9 @@ class PipelineParams(luigi.Config):
     gene_config_path = luigi.Parameter(default=str(None),
                                        description='gene metadata config file')
 
+    seq_repo_dir = luigi.Parameter(default=str(None),
+                                   description='directory of seq_repo')
+
     def run(self):
         pass
 

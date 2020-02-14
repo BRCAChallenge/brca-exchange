@@ -14,7 +14,7 @@ LUIGI_ROOT_TASK = GenerateReleaseArchive
 LUIGI_WORKERS = 8
 
 # the path to seqrepo in the container; this is mounted separately from the rest of /files/resources
-# since seqrepo is huge and thus won't be locate in the same place as the rest of the resources
+# since seqrepo is huge and thus won't be located in the same place as the rest of the resources
 SEQ_REPO_DIR_DOCKER := /files/resources/seq_repo
 
 GENE_CONFIG_FILE := /opt/brca-exchange/pipeline/luigi/gene_config_brca_only.txt
