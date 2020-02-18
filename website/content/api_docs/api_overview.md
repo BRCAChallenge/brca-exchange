@@ -8,17 +8,18 @@ All paths are prefixed with `https://brcaexchange.org/backend/data`.
 
 Endpoints are listed in the following table.
 
-| Path                                       | Name                                            | Code Reference |
-| ------------------------------------------ | ----------------------------------------------- | -------------- |
-| /                                          | [index](#user-content---search-index)                                   |  [views.index](https://github.com/BRCAChallenge/brca-exchange/blob/master/website/django/data/views.py#L255) |
-| /releases                                  | [releases](#user-content-releases--release--list)                       | [views.releases](https://github.com/BRCAChallenge/brca-exchange/blob/master/website/django/data/views.py#L32) |
-| /variant/                                  | [variant](#user-content-variant-variant-details)                        | [views.variant](https://github.com/BRCAChallenge/brca-exchange/blob/master/website/django/data/views.py#L96) |
-| /variant/(&lt;variant_id&gt;)/reports      | [variant reports](#user-content-variantvariant_idreports-reports)       | [views.variant_reports](https://github.com/BRCAChallenge/brca-exchange/blob/master/website/django/data/views.py#L151) |
-| /variantcounts                             | [variant counts](#user-content-variantcounts-variant-counts)            | [views.variant_counts](https://github.com/BRCAChallenge/brca-exchange/blob/master/website/django/data/views.py#L52) |
-| /variantpapers                             | [variant papers](#user-content-variantpapers--literature-results)       | [views.variant_papers](https://github.com/BRCAChallenge/brca-exchange/blob/master/website/django/data/views.py#L186) |
-| /variantreps/                              | [variant reps](#user-content-variantreps--variant-representation-table) | [views.variantreps](https://github.com/BRCAChallenge/brca-exchange/blob/master/website/django/data/views.py#L113) |
-| /sitemap.txt                               | [sitemap](#user-content-sitemaptxt-sitemap-metadata)                    | [views.sitemap](https://github.com/BRCAChallenge/brca-exchange/blob/master/website/django/data/views.py#L131) |
-| /suggestions/                              | [suggestions](#user-content-suggestions-suggestions)                    | [views.autocomplete](https://github.com/BRCAChallenge/brca-exchange/blob/master/website/django/data/views.py#L561) |
+| Path                                       | Name                                                                    | Code Reference |
+| ------------------------------------------ | ----------------------------------------------------------------------- | -------------- |
+| /                                          | [index](#user-content---search-index)                                   | [views.index](https://github.com/BRCAChallenge/brca-exchange/blob/444110d/website/django/data/views.py#L258) |
+| /releases                                  | [releases](#user-content-releases--release--list)                       | [views.releases](https://github.com/BRCAChallenge/brca-exchange/blob/444110d/website/django/data/views.py#L30) |
+| /variant/                                  | [variant](#user-content-variant-variant-details)                        | [views.variant](https://github.com/BRCAChallenge/brca-exchange/blob/444110d/website/django/data/views.py#L94) |
+| /vrid/                                     | [vrid](#user-content-vrid-variant-representation-vr-id)                 | [views.vrid](https://github.com/BRCAChallenge/brca-exchange/blob/444110d/website/django/data/views.py#L111) |
+| /variant/(&lt;variant_id&gt;)/reports      | [variant reports](#user-content-variantvariant_idreports-reports)       | [views.variant_reports](https://github.com/BRCAChallenge/brca-exchange/blob/444110d/website/django/data/views.py#L151) |
+| /variantcounts                             | [variant counts](#user-content-variantcounts-variant-counts)            | [views.variant_counts](https://github.com/BRCAChallenge/brca-exchange/blob/444110d/website/django/data/views.py#L50) |
+| /variantpapers                             | [variant papers](#user-content-variantpapers--literature-results)       | [views.variant_papers](https://github.com/BRCAChallenge/brca-exchange/blob/444110d/website/django/data/views.py#L189) |
+| /variantreps/                              | [variant reps](#user-content-variantreps--variant-representation-table) | [views.variantreps](https://github.com/BRCAChallenge/brca-exchange/blob/444110d/website/django/data/views.py#L111) |
+| /sitemap.txt                               | [sitemap](#user-content-sitemaptxt-sitemap-metadata)                    | [views.sitemap](https://github.com/BRCAChallenge/brca-exchange/blob/444110d/website/django/data/views.py#L131) |
+| /suggestions/                              | [suggestions](#user-content-suggestions-suggestions)                    | [views.autocomplete](https://github.com/BRCAChallenge/brca-exchange/blob/444110d/website/django/data/views.py#L582) |
 
 *(Pay special attention to each path's trailing slash (or lack thereof). If the slash is included, it must be supplied, and omitted otherwise.)*
 
@@ -148,7 +149,7 @@ Returns detailed information about a single variant.
 
 | Parameter      | Description                                                      | Default |
 |----------------|------------------------------------------------------------------|---------|
-| variant_id     | ID of the variant to retrieve; server error if None              | None*    |
+| variant_id     | ID of the variant to retrieve; server error if None              | None*   |
 
 
 #### Response
@@ -176,6 +177,31 @@ Diff entries have the following form:
 ```
 
 If `field_type` is `individual`, `removed` and `added` contain scalar types. If `field_type` is `list`, then those fields will contain lists (or null). Throughout the system, '' (the empty string), '-', 'None', and null are used (somewhat) interchangeably as indicators of an empty field. You'll often see one of these values for `removed` if a value for that field was introduced in the current version.
+
+
+<!-- -------------------------------------------------------------------- -->
+### /vrid: Variant Representation (VR) ID
+<!-- -------------------------------------------------------------------- -->
+
+Given a VR ID, returns data about the associated variant. If the VR ID doesn't match any variant, the server
+returns an HTTP 500 error.
+
+#### Request
+
+| Parameter      | Description                                                      | Default |
+|----------------|------------------------------------------------------------------|---------|
+| vr_id          | The VR hash for the desired variant                              | None*   |
+
+
+#### Response
+
+```
+{
+  data: [<:Variant>, ...]
+}
+```
+
+The data returned in the Variant array is the same as returned from the `/variant` endpoint.
 
 
 <!-- -------------------------------------------------------------------- -->
