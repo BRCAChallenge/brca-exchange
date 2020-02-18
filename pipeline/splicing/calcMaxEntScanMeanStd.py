@@ -79,8 +79,6 @@ def fetch_gene_coordinates(transcript_name):
         else:
             return r[0]
     except IndexError as e:
-        if args.verbose:
-            print "Error while attempting to fetch gene coordinates for " + transcript_name + " : " + str(e)
         if transcript_name == 'NM_007294.3':
             return TranscriptDataBRCA1
         elif transcript_name == 'NM_000059.3':
