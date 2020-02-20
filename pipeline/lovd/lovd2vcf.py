@@ -110,16 +110,19 @@ def main():
 
         v = None
 
-        try:
-            v = vcf_files_helper.cdna_str_to_genomic_var(queryHgvsName,
-                                                    HgvsWrapper.GRCh37_Assem,
-                                                    hgvs_wrapper, seq_fetcher37)
-        except HGVSError as e:
-            print('Could not parse cdna field ' + str(
-                queryHgvsName) + '. Error was ' + str(e), file=errorsFile)
+        # attempt to compute variant from genomic coordinates in LOVD, unless we know from
+        # the cdna string that we are dealing with a variant having ambiguous boundaries.
+        if source == "LOVD" and '?' not in queryHgvsName:
+            v = from_genomic(parsedLine, fieldIdxDict, hgvs_wrapper, errorsFile)
 
-        if not v and source == "LOVD":
-            v = from_genomic(parsedLine, fieldIdxDict, hgvs_wrapper, seq_fetcher37, errorsFile)
+        if not v:
+            try:
+                v = vcf_files_helper.cdna_str_to_genomic_var(queryHgvsName,
+                                                        HgvsWrapper.GRCh37_Assem,
+                                                        hgvs_wrapper, seq_fetcher37)
+            except HGVSError as e:
+                print('Could not parse cdna field ' + str(
+                    queryHgvsName) + '. Error was ' + str(e), file=errorsFile)
 
         if v:
             print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(v.chr,
