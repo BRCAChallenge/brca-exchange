@@ -94,11 +94,13 @@ def main():
             INFO_field.append('{0}={1}'.format(field, field_value))
 
         # extract hgvs cDNA term for variant and cleanup formatting
-        # Sometimes dna_change is in the field cDNA, sometimes it's labeled dna_change.
         if 'cDNA' in fieldIdxDict:
+            # LOVD
             hgvsName = parsedLine[fieldIdxDict['cDNA']]
         elif 'dna_change' in fieldIdxDict:
-            hgvsName = parsedLine[fieldIdxDict['dna_change']].replace(':', '.3:') # TODO fix hack!!
+            # exLOVD
+            # clean up, when https://github.com/BRCAChallenge/brca-exchange/issues/1181 is resolved
+            hgvsName = parsedLine[fieldIdxDict['dna_change']].replace(':', '.3:')
         else:
             sys.exit("ERROR: could not parse hgvs name.")
         if hgvsName == '-':
