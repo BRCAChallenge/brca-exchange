@@ -118,8 +118,8 @@ def main():
         if source == "LOVD" and '?' not in queryHgvsName:
             v = from_genomic(parsedLine, fieldIdxDict, hgvs_wrapper, seq_fetcher37, errorsFile)
 
-            if v:
-                print("Was able to process genomic coordinates of " + str(queryHgvsName) + " using " + parsedLine[fieldIdxDict['gDNA']] +  " as " + str(v), file=errorsFile)
+            if not v:
+                print("Was not able to process genomic coordinates of " + str(queryHgvsName) + " using " + parsedLine[fieldIdxDict['gDNA']], file=errorsFile)
 
         if not v:
             try:
