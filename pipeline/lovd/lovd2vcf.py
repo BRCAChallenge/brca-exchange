@@ -99,7 +99,8 @@ def main():
             hgvsName = parsedLine[fieldIdxDict['cDNA']]
         elif 'dna_change' in fieldIdxDict:
             # exLOVD
-            # clean up, when https://github.com/BRCAChallenge/brca-exchange/issues/1181 is resolved
+            # append accession version number, i.e. NM_007294 -> NM_007294.3
+            # see also https://github.com/BRCAChallenge/brca-exchange/issues/1181
             hgvsName = parsedLine[fieldIdxDict['dna_change']].replace(':', '.3:')
         else:
             sys.exit("ERROR: could not parse hgvs name.")
@@ -115,7 +116,10 @@ def main():
         # attempt to compute variant from genomic coordinates in LOVD, unless we know from
         # the cdna string that we are dealing with a variant having ambiguous boundaries.
         if source == "LOVD" and '?' not in queryHgvsName:
-            v = from_genomic(parsedLine, fieldIdxDict, hgvs_wrapper, errorsFile)
+            v = from_genomic(parsedLine, fieldIdxDict, hgvs_wrapper, seq_fetcher37, errorsFile)
+
+            if v:
+                print("Was able to process genomic coordinates of " + str(queryHgvsName) + " using " + parsedLine[fieldIdxDict['gDNA']] +  " as " + str(v), file=errorsFile)
 
         if not v:
             try:
