@@ -129,9 +129,9 @@ var Community = React.createClass({
                 </Row>
                 <Row>
                     <Col className="text-center" md={10} mdOffset={1} sm={12}>
-                        <Link to="/mailinglist"><Button disabled={config.environment === 'beta' && 'disabled'}>Join the mailing list only</Button></Link>&nbsp;
-                        <Link to="/signup"><Button disabled={config.environment === 'beta' && 'disabled'}>Join the mailing list and add me to the supporters</Button></Link>&nbsp;
-                        <Link to="/signin"><Button disabled={config.environment === 'beta' && 'disabled'}>Edit your profile</Button></Link>
+                        <Link to="/mailinglist"><Button disabled={config.environment === 'beta'}>Join the mailing list only</Button></Link>&nbsp;
+                        <Link to="/signup"><Button disabled={config.environment === 'beta'}>Join the mailing list and add me to the supporters</Button></Link>&nbsp;
+                        <Link to="/signin"><Button disabled={config.environment === 'beta'}>Edit your profile</Button></Link>
                     </Col>
                 </Row>
                 <Row>
