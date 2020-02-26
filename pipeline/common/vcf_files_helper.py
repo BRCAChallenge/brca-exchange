@@ -17,6 +17,11 @@ def cdna_str_to_genomic_var(cdna_hgvs_str, assembly=HgvsWrapper.GRCh38_Assem, hg
     :param seq_fetcher: SeqRepoWrapper instance
     :return: VCF variant object
     """
+    # assembly_name of seq_fetcher may contain the patch version, like GRCh38.p11
+    assert seq_fetcher.assembly_name.startswith(assembly), \
+        "seq_fetcher assembly does not correspond to assembly. " \
+        "Got " +  seq_fetcher.assembly_name + " and " + assembly
+
     hgvs_cdna = hgvs_wrapper.hgvs_parser.parse(cdna_hgvs_str)
 
     hgvs_g = hgvs_wrapper.nm_to_genomic(hgvs_cdna, assembly)
