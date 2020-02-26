@@ -6,14 +6,12 @@ Description:
 """
 
 from __future__ import print_function, division
+
 import argparse
-import sys
-import os
-from collections import defaultdict
-import pyhgvs as hgvs
-import pyhgvs.utils as hgvs_utils
-from pygr.seqdb import SequenceFileDB
 import logging
+from collections import defaultdict
+
+from common import vcf_files_helper
 
 
 def parse_args():
@@ -25,10 +23,6 @@ def parse_args():
     parser.add_argument('-o', '--out', type=argparse.FileType('w'),
                         help='Ouput VCF file result.')
     parser.add_argument('-l', '--logfile', default='/tmp/functional_assays_to_vcf.log')
-    parser.add_argument('-g', '--gpath', default='/hive/groups/cgl/brca/phase1/data/resources/hg19.fa',
-                        help='Whole path to genome file. Default: (/hive/groups/cgl/brca/phase1/data/resources/hg19.fa)')
-    parser.add_argument('-r', '--rpath', default='/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.gp',
-                        help='Whole path to refSeq file. Default: (/hive/groups/cgl/brca/phase1/data/resources/refseq_annotation.hg19.gp)')
     parser.add_argument('-s', '--source', default='FunctionalAssay')
     parser.add_argument('-v', '--verbose', action='count', default=False, help='determines logging')
 
@@ -41,8 +35,7 @@ def main():
     inputFile = options.input
     annotFile_path = options.inAnnot
     vcfFile = options.out
-    genome_path = options.gpath
-    refseq_path = options.rpath
+
     source = options.source
     logfile = options.logfile
 
@@ -52,14 +45,6 @@ def main():
         logging_level = logging.CRITICAL
 
     logging.basicConfig(filename=logfile, filemode="w", level=logging_level)
-
-    with open(refseq_path) as infile:
-        transcripts = hgvs_utils.read_transcripts(infile)
-
-    genome = SequenceFileDB(genome_path)
-
-    def get_transcript(name):
-        return transcripts.get(name)
 
     # open and store annotation fields in a dictionary
     annotDict = defaultdict()
@@ -91,45 +76,22 @@ def main():
         for field in headerline:
             field_index = fieldIdxDict[field]
             field_value = parsedLine[field_index]
-            field_value = normalize(field, field_value)
+            field_value = vcf_files_helper.normalize_field_value(field_value)
             INFO_field.append('{0}={1}'.format(field, field_value))
 
-        # extract hgvs cDNA term for variant and cleanup formatting
-        hgvsName = parsedLine[fieldIdxDict['hgvs_nucleotide']]
-        if hgvsName == '-':
-            logging.debug("hgvs name == '-' for line: %s", parsedLine)
-            continue
-        gene_symbol = parsedLine[fieldIdxDict['gene_symbol']].lower()
-        if gene_symbol == 'brca1':
-            transcript = 'NM_007294.3'
-        elif gene_symbol == 'brca2':
-            transcript = 'NM_000059.3'
-        else:
-            logging.debug("improper gene symbol: %s", gene_symbol)
-            continue
-        queryHgvsName = transcript + ':' + hgvsName.rstrip().split(';')[0]
         INFO_field_string = ';'.join(INFO_field)
-        try:
-            chrom, offset, ref, alt = hgvs.parse_hgvs_name(queryHgvsName, genome, get_transcript=get_transcript)
-            chrom = chrom.replace('chr', '')
-            print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(chrom, offset, queryHgvsName, ref, alt, INFO_field_string), file=vcfFile)
-        except Exception as e:
-            logging.debug("could not parse hgvs field: %s", queryHgvsName)
 
+        ref_seq = parsedLine[fieldIdxDict['reference_sequence']]
+        nuleotide = parsedLine[fieldIdxDict['hgvs_nucleotide']]
+        cdna_hgvs_str = ref_seq + ":" + nuleotide
 
-def normalize(field, field_value):
-    if not is_empty(field_value):
-        if field_value[0] == ';':
-            field_value = field_value[1:]
-        if field_value[-1] == ';':
-            field_value = field_value[:-1]
-        if ';' in field_value:
-            field_value = field_value.replace(';', '')
-    return field_value
+        print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(parsedLine[fieldIdxDict['chr']],
+                                                          parsedLine[fieldIdxDict['pos_hg19']],
+                                                          cdna_hgvs_str,
+                                                          parsedLine[fieldIdxDict['ref']],
+                                                          parsedLine[fieldIdxDict['alt']],
+                                                          INFO_field_string), file=vcfFile)
 
-
-def is_empty(field_value):
-    return field_value == '' or field_value is None
 
 
 if __name__ == "__main__":

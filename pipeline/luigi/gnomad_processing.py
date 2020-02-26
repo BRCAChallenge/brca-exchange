@@ -44,15 +44,13 @@ class ConvertGnomADToVCF(GnomADTask):
         return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, 'gnomAD.clean.hg19.vcf'))
 
     def run(self):
-        brca_resources_dir = self.cfg.resources_dir
         artifacts_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.output_dir + "/release/artifacts")
 
         os.chdir(gnomAD_method_dir)
 
         args = ["python", "gnomad_to_vcf.py", "-i", self.input().path, "-o",
                 self.output().path, "-a", "gnomADAnnotation",
-                "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa", "-l", artifacts_dir + "/gnomAD_error_variants.log",
+                "-l", artifacts_dir + "/gnomAD_error_variants.log",
                 "-s", "gnomAD"]
 
         logger.info("Running gnomad_to_vcf.py with the following args: %s", args)

@@ -18,9 +18,13 @@ class SeqRepoWrapper:
     regions are then served from memory.
 
     '''
-    DEFAULT_ASSY_NAME = 'GRCh38.p11'
 
-    def __init__(self, seq_repo_path=None, regions_preload=None, preload_pos_margin=500):
+    ASSEMBLY_NAME_hg37 = 'GRCh37.p13'
+    ASSEMBLY_NAME_hg38 = 'GRCh38.p11'
+
+    DEFAULT_ASSY_NAME = ASSEMBLY_NAME_hg38
+
+    def __init__(self, seq_repo_path=None, regions_preload=None, preload_pos_margin=500, assembly_name=None):
         '''
         :param seq_repo_path: Path to local seqrepo directory. If None, read HGVS_SEQREPO_DIR environment variable
         :param regions_preload: Iterable[ChrInterval], optionally preload these genomic regions
@@ -38,7 +42,10 @@ class SeqRepoWrapper:
             logging.warn("Using remote sequence provider.")
             self.seq_repo_fetcher = seqfetcher.fetch_seq
 
-        self.assy_map = assemblies.make_name_ac_map(self.DEFAULT_ASSY_NAME)
+        self.assembly_name = assembly_name
+        if not self.assembly_name:
+            self.assembly_name = self.DEFAULT_ASSY_NAME
+        self.assy_map = assemblies.make_name_ac_map(self.assembly_name)
 
         self.preloaded_regions = {}
         if regions_preload:

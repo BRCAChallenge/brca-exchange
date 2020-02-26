@@ -271,7 +271,7 @@ class transformer(object):
         columns_to_ignore = ["change_type", "Assertion_method_citation_ENIGMA",
                              "Genomic_Coordinate_hg37", "Genomic_Coordinate_hg38", "HGVS_cDNA", "HGVS_Protein",
                              "Hg37_Start", "Hg37_End", "BX_ID_ENIGMA", "BX_ID_ClinVar",
-                             "BX_ID_BIC", "BX_ID_ExAC", "BX_ID_LOVD", "BX_ID_exLOVD", "BX_ID_1000_Genomes", "BX_ID_ESP",
+                             "BX_ID_BIC", "BX_ID_ExAC", "BX_ID_LOVD", "BX_ID_exLOVD", "BX_ID_1000_Genomes", "BX_ID_ESP", "BX_ID_GnomAD",
                              "Polyphen_Prediction", "Polyphen_Score", "Sift_Prediction", "Sift_Score",
                              "Minor_allele_frequency_ESP", "Max_Allele_Frequency", "mupit_structure", "Genomic_HGVS_37",
                              "Genomic_HGVS_38"]
