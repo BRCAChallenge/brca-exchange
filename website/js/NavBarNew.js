@@ -111,37 +111,40 @@ var NavBarNew = React.createClass({
                 <Navbar fixedTop>
                     <Navbar.Header>
                         <Navbar.Brand>{brand}</Navbar.Brand>
+                        <Navbar.Toggle />
                     </Navbar.Header>
 
-                    <Nav eventKey={0} navbar pullRight>
-                        <NavLink to='/'>Home</NavLink>
-                        <NavLink to='/variants'>Variants</NavLink>
-                        <NavLink to='/community'>Community</NavLink>
-                        <NavLink to='/help'>Help</NavLink>
-                        <NavDropdown id="about-dropdown" className={this.activePath(path, "about")} ref='about' title='More'>
-                            <NavLink onClick={this.close} to='/about/thisSite'>
-                                This Site
-                            </NavLink>
-                            <NavLink onClick={this.close} to='/factsheet'>
-                                Facts & Stats
-                            </NavLink>
-                            <NavLink onClick={this.close} to='/releases'>
-                                Previous Data Releases
-                            </NavLink>
-                            <NavLink onClick={this.close} to='/about/api'>
-                                Webservices for API Data Access
-                            </NavLink>
-                            <NavLink onClick={this.close} to='/about/app'>
-                                The Mobile App
-                            </NavLink>
-                            <NavLink onClick={this.close} to='/about/dataSubmissionPolicy'>
-                                Data Submission Policy
-                            </NavLink>
-                            <NavLink onClick={this.close} to='/whydonate'>
-                                Donate
-                            </NavLink>
-                        </NavDropdown>
-                    </Nav>
+                    <Navbar.Collapse>
+                        <Nav eventKey={0} navbar pullRight>
+                            <NavLink to='/'>Home</NavLink>
+                            <NavLink to='/variants'>Variants</NavLink>
+                            <NavLink to='/community'>Community</NavLink>
+                            <NavLink to='/help'>Help</NavLink>
+                            <NavDropdown id="about-dropdown" className={this.activePath(path, "about")} ref='about' title='More'>
+                                <NavLink onClick={this.close} to='/about/thisSite'>
+                                    This Site
+                                </NavLink>
+                                <NavLink onClick={this.close} to='/factsheet'>
+                                    Facts & Stats
+                                </NavLink>
+                                <NavLink onClick={this.close} to='/releases'>
+                                    Previous Data Releases
+                                </NavLink>
+                                <NavLink onClick={this.close} to='/about/api'>
+                                    Webservices for API Data Access
+                                </NavLink>
+                                <NavLink onClick={this.close} to='/about/app'>
+                                    The Mobile App
+                                </NavLink>
+                                <NavLink onClick={this.close} to='/about/dataSubmissionPolicy'>
+                                    Data Submission Policy
+                                </NavLink>
+                                <NavLink onClick={this.close} to='/whydonate'>
+                                    Donate
+                                </NavLink>
+                            </NavDropdown>
+                        </Nav>
+                    </Navbar.Collapse>
                     {this.state.isBeta && false && <div className='beta-header'>This is a beta version of the BRCA Exchange. Please note that some variant information and website features displayed here are under review - for the most up-to-date finalized information, and to join our community, please refer to <a href="https://brcaexchange.org">www.brcaexchange.org</a>. If you encounter any issues while using the beta website, please report them to <a href="mailto:brcaexchange@gmail.com">brcaexchange@gmail.com</a>.</div>}
                 </Navbar>
 
