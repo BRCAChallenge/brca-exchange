@@ -56,11 +56,13 @@ def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
     def compute_hgvs(x):
         v = VCFVariant(x[CHR_COL], x[POS_COL], x[REF_COL], x[ALT_COL])
         v = v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh38_Assem])
+        v = hgvs_proc.genomic_to_cdna(v)
 
         if normalize:
             vn = hgvs_proc.normalizing(v)
             v = vn if vn else v
-        return hgvs_proc.genomic_to_cdna(v)
+
+        return v
 
     def from_field_or_compute(row):
         computed = compute_hgvs(row)
