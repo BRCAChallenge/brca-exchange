@@ -48,7 +48,8 @@
 }
 
 /* Try to match bootstrap .dropdown-menu > li > a:focus */
-.react-autosuggest__suggestion--highlighted {
+.react-autosuggest__suggestion--highlighted,
+.react-autosuggest__suggestion--focused {
 	color: #262626;
 	text-decoration: none;
 	background-color: #f5f5f5;
