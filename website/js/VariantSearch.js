@@ -2,16 +2,16 @@
 /*eslint-env browser */
 'use strict';
 
-var React = require('react');
-var ReactDOM = require('react-dom');
-var slugify = require('./slugify');
-var {Navigation} = require('react-router');
-var AutoSuggest = require('react-autosuggest');
-var _ = require('underscore');
-var $ = require('jquery');
-var config = require('./config');
+import React from 'react';
+import ReactDOM from 'react-dom';
+import slugify from './slugify';
+import {Navigation} from 'react-router';
+import AutoSuggest from 'react-autosuggest';
+import * as _ from 'underscore';
+import * as $ from 'jquery';
+import config from './config';
 
-require('./css/Autosuggest.css');
+import './css/Autosuggest.css';
 
 
 function getSuggestions(value, callback, release) {
@@ -25,8 +25,7 @@ function getSuggestions(value, callback, release) {
         url: suggestionsEndpoint,
         dataType: 'json',
         success: function (data) {
-            var suggestions = _.flatten(_.values(data.suggestions));
-            setTimeout(() => callback(null, suggestions), 300);
+            callback(null, _.flatten(_.values(data.suggestions)));
         },
         error: function () {
             callback(new Error("Couldn't get suggestions"));
@@ -52,12 +51,15 @@ var VariantSearch = React.createClass({
         var value = ReactDOM.findDOMNode(this.refs.input).value;
         this.props.onSearch(value);
     },
+
     onClickSearchButton: function () {
         this.props.onSearch(this.state.value);
     },
+
     showHelp: function (title) {
         this.transitionTo(`/help#${slugify(title)}`);
     },
+
     onChange: function (event, { newValue: value }) {
         var {onChange} = this.props;
         // XXX We're getting an onChange event when props are updated, which
@@ -68,43 +70,53 @@ var VariantSearch = React.createClass({
         }
         this.setState({value: value, release: this.props.release});
     },
+
     componentWillUnmount: function () {
         clearTimeout(this.cb);
     },
+
     onSubmit: function (ev) {
         ev.preventDefault();
         this.props.onSearch(this.state.value);
     },
+
     getDefaultProps: function () {
         return {
             onSearch: () => {}
         };
     },
+
     getInitialState: function () {
         return {
             value: this.props.value || '',
             release: this.props.release,
             placeholder: "search for \"c.1105G>A\", \"brca1\" or \"IVS7+1037T>C\"",
-            suggestions: []
+            suggestions: this.props.suggestions || []
         };
     },
+
     onFocus: function () {
         this.setState({placeholder: ""});
     },
+
     onBlur: function() {
         this.setState({placeholder: "search for \"c.1105G>A\", \"brca1\" or \"IVS7+1037T>C\""});
     },
+
     onFetchSuggestions({ value }) {
         getSuggestions(value, (error, results) => {
             this.setState({ suggestions: results });
         }, this.state.release);
     },
+
     onClearSuggestions() {
         this.setState({ suggestions: [] });
     },
+
     componentWillReceiveProps: function (newProps) {
         this.setState({value: newProps.value});
     },
+
     render: function () {
         const {id, onSearch} = this.props;
         const {value, suggestions} = this.state;
@@ -112,7 +124,6 @@ var VariantSearch = React.createClass({
         return (
             <div className='search-box'>
                 <form onSubmit={this.onSubmit} style={{display: 'inline'}}>
-                    <input type='submit' className='input-sm' style={{display: 'none'}} />
                     <div className='text-nowrap help-target'>
                         <AutoSuggest
                             id={id}
@@ -143,7 +154,7 @@ var VariantSearch = React.createClass({
                 </form>
             </div>
         );
-    }
+    },
 });
 
 module.exports = VariantSearch;
