@@ -56,8 +56,15 @@ def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
     def compute_hgvs(x):
         v = VCFVariant(x[CHR_COL], x[POS_COL], x[REF_COL], x[ALT_COL])
         v = v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh38_Assem])
+
+        # normalize prior to translation to cdna
+        if normalize:
+            vn = hgvs_proc.normalizing(v)
+            v = vn if vn else v
+
         v = hgvs_proc.genomic_to_cdna(v)
 
+        # normalize again -- this affects BRCA1 delins variants in repeat regions
         if normalize:
             vn = hgvs_proc.normalizing(v)
             v = vn if vn else v
