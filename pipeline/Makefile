@@ -41,7 +41,7 @@ start-local-uta: ## starting local uta docker container
 	[ `docker ps -f name=$(UTA_CONTAINER) | wc -l` -gt 1 ] || docker run -dit --name $(UTA_CONTAINER) -p $(UTA_PORT):5432 $(UTA_DOCKER_IMAGE)
 
 start-seqrepo-rest-service:
-	docker run --name seqrepo-rest-service --detach --rm -p 5000:5000 -v /usr/local/share/seqrepo/:/usr/local/share/seqrepo/ biocommons/seqrepo-rest-service
+	docker run --name seqrepo-rest-service --detach --rm -p 5000:5000 -v $(SEQ_REPO_DIR):/usr/local/share/seqrepo/ biocommons/seqrepo-rest-service
 
 .ONESHELL:
 setup-files: ## setup various directories to run pipeline
@@ -130,7 +130,7 @@ test-coverage: ## Running pipeline unit tests with coverage information
 	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) bash -c 'cd /opt/brca-exchange/pipeline/data && bash getdata && cd /opt/brca-exchange/pipeline && pytest --cov --ignore=splicing/ && coverage html --include="/opt/brca-exchange/pipeline/*" --omit="*/test_*"'
 
 
-build-release: start-local-uta checkout build-docker setup-files setup-lovd download-resources download-seqrepo run-pipeline variants-by-source ## create new data release
+build-release: start-local-uta checkout build-docker setup-files setup-lovd download-resources download-seqrepo start-seqrepo-rest-service run-pipeline variants-by-source ## create new data release
 
 variants-by-source: ## postprocessing: compute statistics for changes with respect to the last release
 	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) python /opt/brca-exchange/pipeline/utilities/variantsBySource.py  -i /files/data/output/release/built_with_change_types.tsv -c true

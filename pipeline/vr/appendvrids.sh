@@ -33,6 +33,3 @@ docker run --rm \
   "${IMAGE_NAME}" \
   -i "/artifacts/${INPUT_FILE}" \
   -o "/artifacts/${OUTPUT_FILE}"
-
-# --- post-step: when vr's done, bring down its dependent services
-docker stop seqrepo-service
