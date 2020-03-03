@@ -41,7 +41,7 @@ start-local-uta: ## starting local uta docker container
 	[ `docker ps -f name=$(UTA_CONTAINER) | wc -l` -gt 1 ] || docker run -dit --name $(UTA_CONTAINER) -p $(UTA_PORT):5432 $(UTA_DOCKER_IMAGE)
 
 start-seqrepo-rest-service:
-	docker run --name seqrepo-rest-service --detach --rm -p 5000:5000 -v $(SEQ_REPO_DIR):/usr/local/share/seqrepo/ biocommons/seqrepo-rest-service
+	[ `docker ps -f name="seqrepo-rest-service" | wc -l` -gt 1 ] || docker run --name seqrepo-rest-service --detach --rm -p 5000:5000 -v $(SEQ_REPO_DIR):/usr/local/share/seqrepo/ biocommons/seqrepo-rest-service
 
 .ONESHELL:
 setup-files: ## setup various directories to run pipeline
