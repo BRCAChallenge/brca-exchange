@@ -13,6 +13,8 @@ MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 LUIGI_ROOT_TASK = GenerateReleaseArchive
 LUIGI_WORKERS = 8
 
+# the path to seqrepo in the container; this is mounted separately from the rest of /files/resources
+# since seqrepo is huge and thus won't be located in the same place as the rest of the resources
 SEQ_REPO_DIR_DOCKER := /files/resources/seq_repo
 
 GENE_CONFIG_FILE := /opt/brca-exchange/pipeline/luigi/gene_config_brca_only.txt
@@ -37,6 +39,9 @@ download-resources: ## download resources files
 
 start-local-uta: ## starting local uta docker container
 	[ `docker ps -f name=$(UTA_CONTAINER) | wc -l` -gt 1 ] || docker run -dit --name $(UTA_CONTAINER) -p $(UTA_PORT):5432 $(UTA_DOCKER_IMAGE)
+
+start-seqrepo-rest-service:
+	[ `docker ps -f name="seqrepo-rest-service" | wc -l` -gt 1 ] || docker run --name seqrepo-rest-service --detach --rm -p 5000:5000 -v $(SEQ_REPO_DIR):/usr/local/share/seqrepo/ biocommons/seqrepo-rest-service
 
 .ONESHELL:
 setup-files: ## setup various directories to run pipeline
@@ -68,6 +73,7 @@ COMMON_DOCKER_ARGS = --rm -u `id -u ${USER}`:$(DOCKER_GRP) \
   -e "PYTHONPATH=/opt/brca-exchange/pipeline" \
 	--network host \
 	-v $(RESOURCES_DIR):/files/resources \
+	-v $(SEQ_REPO_DIR):$(SEQ_REPO_DIR_DOCKER) \
 	-v $(OUT_DIR):/files/data \
 	-v $(CREDENTIALS_PATH):/opt/luigi_pipeline_credentials.cfg \
 	-v $(PREVIOUS_RELEASE_PATH):/files/previous_release.tar.gz \
@@ -75,14 +81,17 @@ COMMON_DOCKER_ARGS = --rm -u `id -u ${USER}`:$(DOCKER_GRP) \
 	-v $(CODE_BASE):/opt/brca-exchange \
 	-v /var/run/docker.sock:/var/run/docker.sock
 
-download-seqrepo: ## Download seq repo data
-	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) bash -c "mkdir -p $(SEQ_REPO_DIR_DOCKER) && seqrepo --root-directory $(SEQ_REPO_DIR_DOCKER) pull && seqrepo --root-directory $(SEQ_REPO_DIR_DOCKER) update-latest"
+download-seqrepo: ## Download seq repo data (fyi, seqrepo pull will skip downloading the latest release if we already have it)
+	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) \
+	  bash -c "mkdir -p $(SEQ_REPO_DIR_DOCKER) && seqrepo -v --root-directory $(SEQ_REPO_DIR_DOCKER) pull --update-latest" \
+	  2>&1 | tee /dev/tty | \
+	  grep 'most recent seqrepo instance is' | rev | cut -d ' ' -f 1 | rev > $(OUT_DIR)/seqrepo_instance.txt
 
 run-pipeline: ## running entire pipeline
 	TS=`date +%Y%m%d_%H%M%S`
 	LOG_FILE=$(LOG_DIR)/pipeline_run_$${TS}.log
 	echo "Log files are in $${LOG_FILE}"
-	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) /opt/brca-exchange/pipeline/docker/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE) $(LUIGI_ROOT_TASK) $(LUIGI_WORKERS) $(GENE_CONFIG_FILE) > $${LOG_FILE} 2>&1
+	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) /opt/brca-exchange/pipeline/docker/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE) $(VR_IMAGE) $(LUIGI_ROOT_TASK) $(LUIGI_WORKERS) $(GENE_CONFIG_FILE) $(SEQ_REPO_DIR) > $${LOG_FILE} 2>&1
 
 run-interactive: ## starting docker container in interactive mode
 	docker run -it $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) bash
@@ -96,7 +105,7 @@ ifeq ($(firstword),$(filter $(firstword), run-task, force-run-task, clean-files-
   $(eval $(RUN_ARGS):;@:)
 endif
 
-RUN_TASK_CMD := docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) /opt/brca-exchange/pipeline/docker/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE)
+RUN_TASK_CMD := docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) /opt/brca-exchange/pipeline/docker/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE) $(VR_IMAGE)
 
 run-task: ## Running a specific task
 	$(RUN_TASK_CMD) $(RUN_ARGS) $(LUIGI_WORKERS) $(GENE_CONFIG_FILE)
@@ -121,7 +130,7 @@ test-coverage: ## Running pipeline unit tests with coverage information
 	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) bash -c 'cd /opt/brca-exchange/pipeline/data && bash getdata && cd /opt/brca-exchange/pipeline && pytest --cov --ignore=splicing/ && coverage html --include="/opt/brca-exchange/pipeline/*" --omit="*/test_*"'
 
 
-build-release: start-local-uta checkout build-docker setup-files setup-lovd download-resources download-seqrepo run-pipeline variants-by-source ## create new data release
+build-release: start-local-uta checkout build-docker setup-files setup-lovd download-resources download-seqrepo start-seqrepo-rest-service run-pipeline variants-by-source ## create new data release
 
 variants-by-source: ## postprocessing: compute statistics for changes with respect to the last release
 	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) python /opt/brca-exchange/pipeline/utilities/variantsBySource.py  -i /files/data/output/release/built_with_change_types.tsv -c true
