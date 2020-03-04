@@ -31,6 +31,7 @@ data_merging_method_dir = os.path.abspath('../data_merging')
 priors_method_dir = os.path.abspath('../splicing')
 priors_filter_method_dir = os.path.abspath('../splicingfilter')
 utilities_method_dir = os.path.abspath('../utilities')
+vr_method_dir = os.path.abspath('../vr')
 
 
 ###############################################
@@ -1160,6 +1161,38 @@ class FilterBlacklistedPriors(DefaultPipelineTask):
 
 
 @requires(FilterBlacklistedPriors)
+class AppendVRId(DefaultPipelineTask):
+    def output(self):
+        artifacts_dir = self.cfg.output_dir + "/release/artifacts/"
+        return luigi.LocalTarget(artifacts_dir + "built_with_vr_ids.tsv")
+
+    def run(self):
+        artifacts_dir_host = self.cfg.output_dir_host + "/release/artifacts/"
+        os.chdir(vr_method_dir)
+
+        args = [
+            'bash', 'appendvrids.sh',
+            artifacts_dir_host,
+            'built_with_priors_clean.tsv',
+            'built_with_vr_ids.tsv',
+            self.cfg.vr_docker_image_name,
+            self.cfg.seq_repo_dir
+        ]
+
+
+        print "Running appendVRIds.py with the following args: %s" % (
+            args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
+        pipeline_utils.print_subprocess_output_and_error(sp)
+
+        # we shouldn't be gaining or losing any variants
+        pipeline_utils.check_input_and_output_tsvs_for_same_number_variants(
+            self.input().path,
+            self.output().path)
+
+
+@requires(AppendVRId)
 class FindMissingReports(DefaultPipelineTask):
     def output(self):
         artifacts_dir = self.cfg.output_dir + "/release/artifacts/"
@@ -1171,7 +1204,7 @@ class FindMissingReports(DefaultPipelineTask):
         os.chdir(data_merging_method_dir)
 
         args = ["python", "check_for_missing_reports.py", "-b",
-                artifacts_dir + "built_with_priors_clean.tsv", "-r",
+                artifacts_dir + "built_with_vr_ids.tsv", "-r",
                 artifacts_dir,
                 "-a", artifacts_dir, "-v"]
         print "Running check_for_missing_reports.py with the following args: %s" % (
@@ -1223,7 +1256,7 @@ class RunDiffAndAppendChangeTypesToOutput(DefaultPipelineTask):
             previous_release_date, '%m-%d-%Y')
 
         args = ["python", "releaseDiff.py", "--v2",
-                artifacts_dir + "built_with_priors_clean.tsv", "--v1",
+                artifacts_dir + "built_with_vr_ids.tsv", "--v1",
                 previous_data_path,
                 "--removed", diff_dir + "removed.tsv", "--added",
                 diff_dir + "added.tsv", "--added_data",
@@ -1242,7 +1275,7 @@ class RunDiffAndAppendChangeTypesToOutput(DefaultPipelineTask):
         shutil.rmtree(tmp_dir)  # cleaning up
 
         pipeline_utils.check_input_and_output_tsvs_for_same_number_variants(
-            artifacts_dir + "built_with_priors_clean.tsv",
+            artifacts_dir + "built_with_vr_ids.tsv",
             release_dir + "built_with_change_types.tsv")
 
 

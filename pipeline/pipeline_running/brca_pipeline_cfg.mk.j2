@@ -14,6 +14,10 @@ CREDENTIALS_PATH := {{ CREDENTIALS_PATH | default(WORK_DIR + "/luigi_pipeline_cr
 PREVIOUS_RELEASE_PATH := {{ PREVIOUS_RELEASE_PATH | default(PREVIOUS_RELEASE_DIR + "/latest_release.tar.gz") }}
 PREVIOUS_RELEASE_DIR := {{ PREVIOUS_RELEASE_DIR }}
 
+# path to seqrepo instance downloads
+{% set SEQ_REPO_DIR = SEQ_REPO_DIR|default("/data/seqrepo") %}
+SEQ_REPO_DIR := {{ SEQ_REPO_DIR }}
+
 # path to release notes
 RELEASE_NOTES_PATH := {{ RELEASE_NOTES_PATH | default(WORK_DIR + "/release_notes_" + RELEASE_TAG + ".txt") }}
 
@@ -32,6 +36,11 @@ RESOURCES_DIR := {{ RESOURCES_DIR|default(WORK_DIR + "/resources") }}
 {% set PRIORS_IMAGE_TAG = PRIORS_IMAGE_TAG|default(PRIORS_IMAGE_DEFAULT_TAG) %}
 PRIORS_IMAGE := {{ PRIORS_IMAGE | default("brcachallenge/splicing-pipeline:" + PRIORS_IMAGE_TAG) }}
 PRIORS_REFERENCES := {{ PRIORS_REFERENCES|default(WORK_DIR + "/references") }}
+
+# VR configurations
+
+{% set VR_IMAGE_DEFAULT_TAG = "0.1" %}
+VR_IMAGE := {{ VR_IMAGE | default("brcachallenge/append-vr-ids:" + VR_IMAGE_DEFAULT_TAG) }}
 
 ## UTA configurations
 

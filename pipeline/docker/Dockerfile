@@ -14,7 +14,8 @@ RUN apt-get update && apt-get install -y \
     rsync \
     vim \
     wget \
-    zlib1g-dev
+    zlib1g-dev \
+    netcat
 
 # Get the Docker binary
 RUN curl -fsSL get.docker.com -o get-docker.sh \
