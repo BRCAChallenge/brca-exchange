@@ -16,11 +16,11 @@ from shutil import copy
 
 import vcf
 
-import aggregate_reports
+from . import aggregate_reports
 from common import seq_utils, config
-import utilities
-import variant_equivalence
-from variant_merging_constants import *
+from . import utilities
+from . import variant_equivalence
+from .variant_merging_constants import *
 
 DISCARDED_REPORTS_WRITER = None
 
@@ -72,17 +72,17 @@ def main():
     source_dict, columns, variants = preprocessing(args.input, args.output, seq_provider, gene_regions_trees)
 
     # merges repeats from different data sources, adds necessary columns and data
-    print "\n------------merging different datasets------------------------------"
-    for source_name, file in source_dict.iteritems():
+    print("\n------------merging different datasets------------------------------")
+    for source_name, file in source_dict.items():
         (columns, variants) = add_new_source(columns, variants, source_name,
                                              file, FIELD_DICT[source_name], genome_regions_symbol_dict)
 
     # standardizes genomic coordinates for variants
-    print "\n------------standardizing genomic coordinates-------------"
+    print("\n------------standardizing genomic coordinates-------------")
     variants = variant_standardize(columns, seq_provider, gene_regions_trees, variants=variants)
 
     # compare dna sequence results of variants and merge if equivalent
-    print "------------dna sequence comparison merge-------------------------------"
+    print("------------dna sequence comparison merge-------------------------------")
     variants = string_comparison_merge(variants, seq_provider)
 
     # write final output to file
@@ -96,8 +96,8 @@ def main():
 
     discarded_reports_file.close()
 
-    print "final number of variants: %d" % len(variants)
-    print "Done"
+    print("final number of variants: %d" % len(variants))
+    print("Done")
 
 
 def variant_standardize(columns, seq_provider, gene_regions_tree, variants="pickle"):
@@ -118,7 +118,7 @@ def variant_standardize(columns, seq_provider, gene_regions_tree, variants="pick
         fv.close()
     variants_to_remove = list()
     variants_to_add = {}
-    for ev, items in variants.iteritems():
+    for ev, items in variants.items():
         bx_ids_for_variant = get_bx_ids_for_variant(bx_id_column_indexes, items)
         chr = items[COLUMN_VCF_CHR]
         pos = items[COLUMN_VCF_POS]
@@ -173,7 +173,7 @@ def remove_bad_variants(variants_to_remove, variants):
 
 
 def add_and_merge_new_variant_representations(variants_to_add, variants):
-    for genomic_coordinate, values in variants_to_add.iteritems():
+    for genomic_coordinate, values in variants_to_add.items():
         variants = add_variant_to_dict(variants, genomic_coordinate, values)
     return variants
 
@@ -259,7 +259,7 @@ def normalize_values(value):
     if isinstance(value, int) or isinstance(value, float):
         value = str(value)
 
-    if isinstance(value, basestring):
+    if isinstance(value, str):
         value = value.strip()
     else:
         # handle lists
@@ -268,7 +268,7 @@ def normalize_values(value):
             if v is None or v == "-" or v == "":
                 continue
             else:
-                if isinstance(v, basestring):
+                if isinstance(v, str):
                     v = v.strip()
                 if isinstance(v, int) or isinstance(v, float):
                     v = str(v)
@@ -352,7 +352,7 @@ def string_comparison_merge(variants, seq_wrapper):
     vcf_variant_dict = { k : VCFVariant(int(v[COLUMN_VCF_CHR]),
                                         int(v[COLUMN_VCF_POS]),
                                         v[COLUMN_VCF_REF],
-                                        v[COLUMN_VCF_ALT]) for k, v in variants.iteritems() }
+                                        v[COLUMN_VCF_ALT]) for k, v in variants.items() }
 
     whole_seq_provider = seq_utils.WholeSeqSeqProvider(seq_wrapper)
 
@@ -364,8 +364,8 @@ def string_comparison_merge(variants, seq_wrapper):
     n_after_merge = len(equivalence)
     logging.info('Before merge: %s', str(n_before_merge))
     logging.info('After merge: %s', str(n_after_merge))
-    print "%d equivalent variants are merged into %d unique variants" %(
-          n_before_merge, n_after_merge)
+    print("%d equivalent variants are merged into %d unique variants" %(
+          n_before_merge, n_after_merge))
     for equivalent_v in equivalence:
         #
         # equivalent_v contains a set of variants found to be equivalent.
@@ -428,20 +428,20 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
                    "GnomAD": GNOMAD_FILE,
                    "Findlay_BRCA1_Ring_Function_Scores": FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS_FILE
                    }
-    print "\n" + input_dir + ":"
-    print "---------------------------------------------------------"
-    print "ENIGMA: {0}".format(ENIGMA_FILE)
-    for source_name, file_name in source_dict.iteritems():
-        print source_name, ":", file_name
-    print "\n------------preprocessing--------------------------------"
-    print "remove sample columns and two erroneous rows from 1000 Genome file"
+    print("\n" + input_dir + ":")
+    print("---------------------------------------------------------")
+    print("ENIGMA: {0}".format(ENIGMA_FILE))
+    for source_name, file_name in source_dict.items():
+        print(source_name, ":", file_name)
+    print("\n------------preprocessing--------------------------------")
+    print("remove sample columns and two erroneous rows from 1000 Genome file")
     f_1000G = open(input_dir+ GENOME1K_FILE + "for_pipeline", "w")
     subprocess.call(
        ["bash", "1000g_preprocess.sh", input_dir + GENOME1K_FILE], stdout=f_1000G)
 
     # merge multiple variant per vcf into multiple lines
-    for source_name, file_name in source_dict.iteritems():
-        print "convert to one variant per line in ", source_name
+    for source_name, file_name in source_dict.items():
+        print("convert to one variant per line in ", source_name)
         f_in = open(input_dir + file_name, "r")
         f_out = open(output_dir+ source_name + ".vcf", "w")
         # Individual reports (lines in VCF/TSV) are given ids as part of the one_variant_transform method.
@@ -449,17 +449,17 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
         f_in.close()
         f_out.close()
 
-        print "merge repetitive variants within ", source_name
+        print("merge repetitive variants within ", source_name)
         f_in = open(output_dir + source_name + ".vcf", "r")
         f_out = open(output_dir + source_name + "ready.vcf", "w")
         repeat_merging(f_in, f_out)
         source_dict[source_name] = f_out.name
 
-    print "-------check if genomic coordinates are correct----------"
+    print("-------check if genomic coordinates are correct----------")
     (columns, variants) = save_enigma_to_dict(input_dir + ENIGMA_FILE, output_dir, seq_provider, gene_regions_trees)
 
     new_source_dict = {}
-    for source_name, file_name in source_dict.iteritems():
+    for source_name, file_name in source_dict.items():
         f = open(file_name, "r")
         d_wrong = output_dir + "wrong_genome_coors/"
         if not os.path.exists(d_wrong):
@@ -487,7 +487,7 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
             n_total += 1
         f_right.close()
         f_wrong.close()
-        print "in {0}, wrong: {1}, total: {2}".format(source_name, n_wrong, n_total)
+        print("in {0}, wrong: {1}, total: {2}".format(source_name, n_wrong, n_total))
 
     return new_source_dict, columns, variants
 
@@ -537,9 +537,9 @@ def repeat_merging(f_in, f_out):
                             merged_value = list(set(new_value + old_value))
 
                         # Remove empty strings from list
-                        merged_value = filter(None, merged_value)
+                        merged_value = [_f for _f in merged_value if _f]
                         variant_dict[genome_coor].INFO[key] = deepcopy(merged_value)
-    print "number of repeat records: ", num_repeats, "\n"
+    print("number of repeat records: ", num_repeats, "\n")
     vcf_writer = vcf.Writer(f_out, vcf_reader)
     for record in variant_dict.values():
         vcf_writer.write_record(record)
@@ -613,7 +613,7 @@ def append_exac_allele_frequencies(record, new_record=None, i=None):
 def write_new_tsv(filename, columns, variants):
     merged_file = open(filename, "w")
     merged_file.write("\t".join(columns)+"\n")
-    for key, variant in sorted(variants.iteritems()):
+    for key, variant in sorted(variants.items()):
         if len(variant) != len(columns):
             raise Exception("mismatching number of columns in head and row")
         for ii in range(len(variant)):
@@ -627,7 +627,7 @@ def write_new_tsv(filename, columns, variants):
 
 
 def add_new_source(columns, variants, source, source_file, source_dict, genome_regions_symbol_dict):
-    print "adding {0} into merged file.....".format(source)
+    print("adding {0} into merged file.....".format(source))
     old_column_num = len(columns)
     for column_title in source_dict.keys():
         columns.append(column_title+"_{0}".format(source))
@@ -660,10 +660,10 @@ def add_new_source(columns, variants, source, source_file, source_dict, genome_r
     for value in variants.values():
         if len(value) != len(columns):
             value += [DEFAULT_CONTENTS] * len(source_dict)
-    print "number of variants in " + source + " is ", variants_num
-    print "overlap with previous dataset: ", overlap
-    print "number of total variants with the addition of " + source + " is: ", len(variants), "\n"
-    for index, value in variants.iteritems():
+    print("number of variants in " + source + " is ", variants_num)
+    print("overlap with previous dataset: ", overlap)
+    print("number of total variants with the addition of " + source + " is: ", len(variants), "\n")
+    for index, value in variants.items():
         if len(value) != len(columns):
             raise Exception("mismatching number of columns in head and row")
     return (columns, variants)
@@ -761,7 +761,7 @@ def save_enigma_to_dict(path, output_dir, seq_provider, gene_regions_trees):
             n_total += 1
 
     f_wrong.close()
-    print "in ENIGMA, wrong: {0}, total: {1}".format(n_wrong, n_total)
+    print("in ENIGMA, wrong: {0}, total: {1}".format(n_wrong, n_total))
     return (columns, variants)
 
 
@@ -817,7 +817,7 @@ def prepare_variant_for_removal_and_log(original_hgvs, normalized_hgvs, items, b
 
 def log_discarded_reports(source, reports, hgvs, reason):
     # if reports is a list, log each report individually
-    if not isinstance(reports, basestring) and not isinstance(reports, Number):
+    if not isinstance(reports, str) and not isinstance(reports, Number):
         for report in reports:
             log_discarded_report(source, report, hgvs, reason)
     else:

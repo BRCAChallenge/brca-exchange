@@ -19,11 +19,11 @@ import csv
 def load_variants(variant_file):
     variants_tsv = open(variant_file)
     reader = csv.reader(variants_tsv, dialect="excel-tab")
-    header = reader.next()
+    header = next(reader)
     variant_row = []
     
     for row in reader:
-        row_dict = dict(zip(header, row))
+        row_dict = dict(list(zip(header, row)))
         variant_row.append(row_dict)
 
     return variant_row
@@ -40,7 +40,7 @@ class VariantTSVTest(unittest.TestCase):
 	
 	def test_data_not_empty(self):
 		for i in self.data:
-			for v in i.itervalues():
+			for v in i.values():
 				self.assertIsNot(v, "") 
 
 

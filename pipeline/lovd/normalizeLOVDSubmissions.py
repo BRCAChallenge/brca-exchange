@@ -24,7 +24,7 @@ def add_submission_ids(f_in_data_frame):
         cdna = row['cDNA']
         submitters = row['submitters']
         remarks = row['remarks']
-        if isinstance(row['remarks'], basestring):
+        if isinstance(row['remarks'], str):
             remarks = row['remarks']
         else:
             remarks = ''

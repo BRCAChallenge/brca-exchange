@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 
-from variant_merging_constants import VCFVariant
+from .variant_merging_constants import VCFVariant
 
 
 def calculate_edited_seq(vcf_var, seq_provider):

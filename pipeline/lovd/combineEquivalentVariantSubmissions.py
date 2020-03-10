@@ -16,15 +16,15 @@ def mergeRows(oldRow, newRow):
         return oldRow
     else:
         combinedRow = {}
-        for key, val in oldRow.iteritems():
+        for key, val in oldRow.items():
             if key == "individuals":
                 combinedRow[key] = str(int(val) + int(newRow[key]))
             elif val != newRow[key]:
-                if isinstance(val, basestring):
+                if isinstance(val, str):
                     oldVal = [val]
                 else:
                     oldVal = val
-                if isinstance(newRow[key], basestring):
+                if isinstance(newRow[key], str):
                     newVal = [newRow[key]]
                 else:
                     newVal = newRow[key]
@@ -54,10 +54,10 @@ def main():
             combinedSubmissions[key] = row
         else:
             combinedSubmissions[key] = mergeRows(combinedSubmissions[key], row)
-    for submission_id, submission in combinedSubmissions.iteritems():
+    for submission_id, submission in combinedSubmissions.items():
         # combined values are handled in the pipeline as strings rather than lists
-        for key, val in submission.iteritems():
-            if not isinstance(val, basestring):
+        for key, val in submission.items():
+            if not isinstance(val, str):
                 submission[key] = ','.join(val)
         csvOut.writerow(submission)
 

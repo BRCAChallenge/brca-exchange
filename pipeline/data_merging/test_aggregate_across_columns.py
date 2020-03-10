@@ -1,6 +1,6 @@
 import pytest
 import unittest
-from aggregate_across_columns import selectMaxAlleleFrequency, selectAlleleFrequency, FIELDS_TO_REMOVE, FIELDS_TO_ADD, FIELDS_TO_RENAME, setOutputColumns, update_basic_fields, EMPTY
+from .aggregate_across_columns import selectMaxAlleleFrequency, selectAlleleFrequency, FIELDS_TO_REMOVE, FIELDS_TO_ADD, FIELDS_TO_RENAME, setOutputColumns, update_basic_fields, EMPTY
 
 class TestStringMethods(unittest.TestCase):
 
@@ -248,7 +248,7 @@ class TestStringMethods(unittest.TestCase):
             'Allele_number_AMR_ExAC': EMPTY
         }
 
-        self.initialFields = FIELDS_TO_RENAME.keys() + FIELDS_TO_REMOVE
+        self.initialFields = list(FIELDS_TO_RENAME.keys()) + FIELDS_TO_REMOVE
 
         self.newRowAlleleFrequencies = {
             'Allele_frequency_FIN_ExAC': EMPTY,
@@ -294,7 +294,7 @@ class TestStringMethods(unittest.TestCase):
         for field in FIELDS_TO_ADD:
             self.assertIn(field, outputFields)
 
-        for oldName, newName in FIELDS_TO_RENAME.iteritems():
+        for oldName, newName in FIELDS_TO_RENAME.items():
             self.assertNotIn(oldName, outputFields)
             self.assertIn(newName, outputFields)
 
@@ -310,9 +310,9 @@ class TestStringMethods(unittest.TestCase):
         oldRow_copy2 = self.oldRow.copy()
         updatedRow = update_basic_fields(self.oldRow, FIELDS_TO_RENAME)
 
-        for oldName, newName in FIELDS_TO_RENAME.iteritems():
-            self.assertNotIn(oldName, updatedRow.keys())
-            self.assertIn(newName, updatedRow.keys())
+        for oldName, newName in FIELDS_TO_RENAME.items():
+            self.assertNotIn(oldName, list(updatedRow.keys()))
+            self.assertIn(newName, list(updatedRow.keys()))
 
         expected_start = self.oldRow["Pos"]
         self.assertEqual(expected_start, updatedRow["Hg38_Start"])
@@ -331,25 +331,25 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(updatedRow["HGVS_RNA"], EMPTY)
 
     def test_select_allele_frequency(self):
-        for attr, value in self.newRowAlleleFrequencies.iteritems():
+        for attr, value in self.newRowAlleleFrequencies.items():
             self.newRowAlleleFrequencies[attr] = '-'
 
         self.newRowAlleleFrequencies['Minor_allele_frequency_percent_ESP'] = '20.345'
         AF = selectAlleleFrequency(self.newRowAlleleFrequencies)
-        self.assertEquals(AF, '0.20345 (ESP)')
+        self.assertEqual(AF, '0.20345 (ESP)')
 
         self.newRowAlleleFrequencies['Minor_allele_frequency_percent_ESP'] = '0.0'
         AF = selectAlleleFrequency(self.newRowAlleleFrequencies)
-        self.assertEquals(AF, '0.0 (ESP)')
+        self.assertEqual(AF, '0.0 (ESP)')
 
         self.newRowAlleleFrequencies['Minor_allele_frequency_percent_ESP'] = '2'
         AF = selectAlleleFrequency(self.newRowAlleleFrequencies)
-        self.assertEquals(AF, '0.02 (ESP)')
+        self.assertEqual(AF, '0.02 (ESP)')
 
     def test_determine_gnomAD_allele_frequency(self):
         self.newRowAlleleFrequencies['Minor_allele_frequency_percent_ESP'] = '20.345'
         AF = selectAlleleFrequency(self.newRowAlleleFrequencies)
-        self.assertEquals(AF, '0.20345 (ESP)')
+        self.assertEqual(AF, '0.20345 (ESP)')
 
         self.newRowAlleleFrequencies['Allele_frequency_genome_GnomAD'] = '0.345'
         self.newRowAlleleFrequencies['Allele_count_genome_GnomAD'] = '345'
@@ -358,7 +358,7 @@ class TestStringMethods(unittest.TestCase):
         self.newRowAlleleFrequencies['Allele_number_exome_GnomAD'] = '0'
 
         AF = selectAlleleFrequency(self.newRowAlleleFrequencies)
-        self.assertEquals(AF, '0.345 (GnomAD)')
+        self.assertEqual(AF, '0.345 (GnomAD)')
 
         self.newRowAlleleFrequencies['Allele_frequency_exome_GnomAD'] = '0.5'
         self.newRowAlleleFrequencies['Allele_count_genome_GnomAD'] = '1'
@@ -367,7 +367,7 @@ class TestStringMethods(unittest.TestCase):
         self.newRowAlleleFrequencies['Allele_number_exome_GnomAD'] = '2'
 
         AF = selectAlleleFrequency(self.newRowAlleleFrequencies)
-        self.assertEquals(AF, '0.5 (GnomAD)')
+        self.assertEqual(AF, '0.5 (GnomAD)')
 
 
 if __name__ == '__main__':

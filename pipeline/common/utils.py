@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from intervaltree import IntervalTree
 from toolz import groupby
+import importlib
 
 ChrInterval = namedtuple("ChrInterval", "chr, start, end")
 
@@ -23,7 +24,7 @@ def build_interval_trees_by_chr(chr_intervals, interval_tuple_builder):
     d = {}
 
     for c, regs in groupby(lambda r: r.chr,
-                           chr_intervals).iteritems():
+                           chr_intervals).items():
         interval_tuples = [
             (r.start, r.end + 1, interval_tuple_builder(c, r.start, r.end)) for
             r in regs]
@@ -47,7 +48,7 @@ def parallelize_dataframe(df, func, n_cores=4):
 def setup_logfile(log_path, log_level=logging.INFO):
     # https://stackoverflow.com/questions/20240464/python-logging-file-is-not-working-when-using-logging-basicconfig
     from imp import reload
-    reload(logging)
+    importlib.reload(logging)
 
     logging.basicConfig(filename=log_path, filemode="w", level=log_level,
                         format=' %(asctime)s %(filename)-15s %(message)s')

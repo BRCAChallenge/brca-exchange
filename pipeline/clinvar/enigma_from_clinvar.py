@@ -6,9 +6,9 @@ import click
 import pandas as pd
 from lxml import etree
 
-import clinvar
+from . import clinvar
 import common
-import hgvs_utils
+from . import hgvs_utils
 
 default_val = None
 

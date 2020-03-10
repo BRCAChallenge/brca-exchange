@@ -4,7 +4,7 @@ import logging
 
 import vcf
 
-from variant_merging import (
+from .variant_merging import (
     add_columns_to_enigma_data,
     associate_chr_pos_ref_alt_with_enigma_item,
     associate_chr_pos_ref_alt_with_item,
@@ -37,8 +37,8 @@ def write_reports_tsv(filename, columns, ready_files_dir, genome_regions_symbol_
 
     reports_output.close()
 
-    print "final number of reports: %d" % len(reports)
-    print "Done"
+    print("final number of reports: %d" % len(reports))
+    print("Done")
 
 
 def aggregate_reports(reports_files, columns, genome_regions_symbol_dict):
@@ -47,7 +47,7 @@ def aggregate_reports(reports_files, columns, genome_regions_symbol_dict):
 
     for file in reports_files:
         file_reports = normalize_reports(file, columns, genome_regions_symbol_dict)
-        print "finished normalizing %s" % (file)
+        print("finished normalizing %s" % (file))
         reports = reports + file_reports
 
     return reports
@@ -100,7 +100,7 @@ def normalize_vcf_reports(file, columns, filename, file_extension, genome_region
             continue
 
         report = associate_chr_pos_ref_alt_with_item(record, len(columns), source, genome_coor, genome_regions_symbol_dict)
-        for key, value in FIELD_DICT[source].iteritems():
+        for key, value in FIELD_DICT[source].items():
             try:
                 column_name = key + "_" + source
                 column_index = columns.index(column_name)
@@ -125,7 +125,7 @@ def normalize_enigma_tsv_reports(file, columns, filename, file_extension):
         else:
             (items, chrom, pos, ref, alt) = associate_chr_pos_ref_alt_with_enigma_item(line)
             report = ['-'] * len(columns)
-            for key, value in enigma_column_indexes.iteritems():
+            for key, value in enigma_column_indexes.items():
                 report[columns.index(value)] = items[key]
             reports.append(report)
     enigma_file.close()

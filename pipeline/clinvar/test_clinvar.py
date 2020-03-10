@@ -1,4 +1,4 @@
-import clinvar
+from . import clinvar
 
 from common import hgvs_utils, variant_utils
 import xml.etree.ElementTree as ET

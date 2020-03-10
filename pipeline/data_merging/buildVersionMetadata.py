@@ -42,7 +42,7 @@ def handler(obj):
     if hasattr(obj, 'isoformat'):
         return obj.isoformat()
     else:
-        raise TypeError, 'Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj))
+        raise TypeError('Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj)))
 
 if __name__ == "__main__":
     main()

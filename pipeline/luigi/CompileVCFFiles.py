@@ -72,8 +72,8 @@ class ConvertLatestClinvarDataToXML(DefaultPipelineTask):
         writable_clinvar_xml_file = open(clinvar_xml_file, "w")
         args = ["python", "filter_clinvar_brca.py", self.input().path,
                 self.output().path]
-        print "Running clinVarBrca.py with the following args: %s. This takes a while..." % (
-            args)
+        print("Running clinVarBrca.py with the following args: %s. This takes a while..." % (
+            args))
         sp = subprocess.Popen(args, stdout=writable_clinvar_xml_file,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -98,7 +98,7 @@ class ConvertClinvarXMLToTXT(DefaultPipelineTask):
                 clinvar_file_dir + "/ClinVarBrca.xml",
                 "--logs", clinvar_file_dir + "/clinvar_xml_to_txt.log",
                 "--assembly", "GRCh38"]
-        print "Running clinVarParse.py with the following args: %s" % (args)
+        print("Running clinVarParse.py with the following args: %s" % (args))
         sp = subprocess.Popen(args, stdout=writable_clinvar_txt_file,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -121,8 +121,8 @@ class ConvertClinvarTXTToVCF(DefaultPipelineTask):
         args = ["python", "convert_tsv_to_vcf.py", "-i",
                 clinvar_file_dir + "/ClinVarBrca.txt", "-o",
                 clinvar_file_dir + "/ClinVarBrca.vcf", "-s", "ClinVar"]
-        print "Running convert_tsv_to_vcf.py with the following args: %s" % (
-            args)
+        print("Running convert_tsv_to_vcf.py with the following args: %s" % (
+            args))
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -213,11 +213,11 @@ class ExtractDataFromLatestEXLOVD(DefaultPipelineTask):
         args = ['bash', 'extract_latest_exlovd.sh', ex_lovd_file_dir_host, "-u", ex_lovd_data_host_url, "-l", "BRCA1",
                 "BRCA2", "-o", "/data"]
 
-        print "Running extract_data.py with the following args: %s" % (args)
+        print("Running extract_data.py with the following args: %s" % (args))
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
-        print "Extracted data from %s." % (ex_lovd_data_host_url)
+        print("Extracted data from %s." % (ex_lovd_data_host_url))
 
 
 @requires(ExtractDataFromLatestEXLOVD)
@@ -240,7 +240,7 @@ class ConvertEXLOVDBRCA1ExtractToVCF(DefaultPipelineTask):
                 "exLOVDAnnotation", "-e",
                 artifacts_dir + "exLOVD_BRCA1_error_variants.txt",
                 "-s", "exLOVD"]
-        print "Running lovd2vcf with the following args: %s" % (args)
+        print("Running lovd2vcf with the following args: %s" % (args))
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -269,7 +269,7 @@ class ConvertEXLOVDBRCA2ExtractToVCF(DefaultPipelineTask):
                 "exLOVDAnnotation", "-e",
                 artifacts_dir + "exLOVD_BRCA2_error_variants.txt",
                 "-s", "exLOVD"]
-        print "Running lovd2vcf with the following args: %s" % (args)
+        print("Running lovd2vcf with the following args: %s" % (args))
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -293,7 +293,7 @@ class ConcatenateEXLOVDVCFFiles(DefaultPipelineTask):
             ex_lovd_brca12_hg19_vcf_file, 'w')
         args = ["vcf-concat", ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf",
                 ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf"]
-        print "Running vcf-concat with the following args: %s" % (args)
+        print("Running vcf-concat with the following args: %s" % (args))
         sp = subprocess.Popen(args,
                               stdout=writable_ex_lovd_brca12_hg19_vcf_file,
                               stderr=subprocess.PIPE)
@@ -319,7 +319,7 @@ class CrossmapConcatenatedEXLOVDData(DefaultPipelineTask):
                 ex_lovd_file_dir + "/exLOVD_brca12.hg19.vcf",
                 brca_resources_dir + "/hg38.fa",
                 ex_lovd_file_dir + "/exLOVD_brca12.hg38.vcf"]
-        print "Running CrossMap.py with the following args: %s" % (args)
+        print("Running CrossMap.py with the following args: %s" % (args))
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -343,12 +343,12 @@ class SortEXLOVDOutput(DefaultPipelineTask):
         writable_sorted_ex_lovd_output_file = open(sorted_ex_lovd_output_file,
                                                    'w')
         args = ["vcf-sort", ex_lovd_file_dir + "/exLOVD_brca12.hg38.vcf"]
-        print "Running vcf-sort with the following args: %s" % (args)
+        print("Running vcf-sort with the following args: %s" % (args))
         sp = subprocess.Popen(args, stdout=writable_sorted_ex_lovd_output_file,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
-        print "Sorted BRCA1/2 hg38 vcf file into %s" % (
-            writable_sorted_ex_lovd_output_file)
+        print("Sorted BRCA1/2 hg38 vcf file into %s" % (
+            writable_sorted_ex_lovd_output_file))
 
         pipeline_utils.check_file_for_contents(
             ex_lovd_file_dir + "/exLOVD_brca12.sorted.hg38.vcf")
@@ -425,7 +425,7 @@ class NormalizeLOVDSubmissions(DefaultPipelineTask):
                 self.input().path, "-o",
                 self.output().path]
 
-        print "Running NormalizeLOVDSubmissions with the following args: %s" % (args)
+        print("Running NormalizeLOVDSubmissions with the following args: %s" % (args))
 
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
@@ -451,8 +451,8 @@ class CombineEquivalentLOVDSubmissions(DefaultPipelineTask):
                 self.input().path, "-o",
                 self.output().path]
 
-        print "Running combineEquivalentVariantSubmissions.py with the following args: %s" % (
-            args)
+        print("Running combineEquivalentVariantSubmissions.py with the following args: %s" % (
+            args))
 
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
@@ -480,7 +480,7 @@ class ConvertSharedLOVDToVCF(DefaultPipelineTask):
                 artifacts_dir + "/LOVD_error_variants.txt",
                 "-s", "LOVD"]
 
-        print "Running lovd2vcf with the following args: %s" % (args)
+        print("Running lovd2vcf with the following args: %s" % (args))
 
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
@@ -505,7 +505,7 @@ class CrossmapConcatenatedSharedLOVDData(DefaultPipelineTask):
                 lovd_file_dir + "/sharedLOVD_brca12.hg19.vcf",
                 brca_resources_dir + "/hg38.fa",
                 lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
-        print "Running CrossMap.py with the following args: %s" % (args)
+        print("Running CrossMap.py with the following args: %s" % (args))
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -528,12 +528,12 @@ class SortSharedLOVDOutput(DefaultPipelineTask):
         sorted_lovd_output_file = lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf"
         writable_sorted_lovd_output_file = open(sorted_lovd_output_file, 'w')
         args = ["vcf-sort", lovd_file_dir + "/sharedLOVD_brca12.hg38.vcf"]
-        print "Running vcf-sort with the following args: %s" % (args)
+        print("Running vcf-sort with the following args: %s" % (args))
         sp = subprocess.Popen(args, stdout=writable_sorted_lovd_output_file,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
-        print "Sorted BRCA1/2 hg38 vcf file into %s" % (
-            writable_sorted_lovd_output_file)
+        print("Sorted BRCA1/2 hg38 vcf file into %s" % (
+            writable_sorted_lovd_output_file))
 
         pipeline_utils.check_file_for_contents(
             lovd_file_dir + "/sharedLOVD_brca12.sorted.hg38.vcf")
@@ -641,7 +641,7 @@ class ExtractCHR13BRCAData(DefaultPipelineTask):
         args = ["tabix", "-h",
                 g1k_file_dir + "/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz",
                 "13:32889617-32973809"]
-        print "Running tabix with the following args: %s" % (args)
+        print("Running tabix with the following args: %s" % (args))
         sp = subprocess.Popen(args, stdout=writable_chr13_brca2_vcf_file,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -664,7 +664,7 @@ class ExtractCHR17BRCAData(DefaultPipelineTask):
         args = ["tabix", "-h",
                 g1k_file_dir + "/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz",
                 "17:41196312-41277500"]
-        print "Running tabix with the following args: %s" % (args)
+        print("Running tabix with the following args: %s" % (args))
         sp = subprocess.Popen(args, stdout=writable_chr17_brca1_vcf_file,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -685,7 +685,7 @@ class ConcatenateG1KData(DefaultPipelineTask):
         writable_concatenated_g1k_vcf = open(concatenated_g1k_vcf, "w")
         args = ["vcf-concat", g1k_file_dir + "/chr13_brca2_1000g_GRCh37.vcf",
                 g1k_file_dir + "/chr17_brca1_1000g_GRCh37.vcf"]
-        print "Running vcf-concat with the following args: %s" % (args)
+        print("Running vcf-concat with the following args: %s" % (args))
         sp = subprocess.Popen(args, stdout=writable_concatenated_g1k_vcf,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -709,7 +709,7 @@ class CrossmapConcatenatedG1KData(DefaultPipelineTask):
                 g1k_file_dir + "/brca12_1000g_GRCh37.vcf",
                 brca_resources_dir + "/hg38.fa",
                 g1k_file_dir + "/1000G_brca.hg38.vcf"]
-        print "Running CrossMap.py with the following args: %s" % (args)
+        print("Running CrossMap.py with the following args: %s" % (args))
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -731,7 +731,7 @@ class SortG1KData(DefaultPipelineTask):
         sorted_g1k_output_file = g1k_file_dir + "/1000G_brca.sorted.hg38.vcf"
         writable_sorted_g1k_output_file = open(sorted_g1k_output_file, 'w')
         args = ["vcf-sort", g1k_file_dir + "/1000G_brca.hg38.vcf"]
-        print "Running vcf-sort with the following args: %s" % (args)
+        print("Running vcf-sort with the following args: %s" % (args))
         sp = subprocess.Popen(args, stdout=writable_sorted_g1k_output_file,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -887,7 +887,7 @@ class ParseFindlayBRCA1RingFunctionScores(DefaultPipelineTask):
         args = ["python", "parse_functional_assay_data.py", "-i", self.input().path, "-o",
                 self.output().path]
 
-        print "Running parse_functional_assay_data.py with the following args: %s" % (args)
+        print("Running parse_functional_assay_data.py with the following args: %s" % (args))
 
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -911,7 +911,7 @@ class ConvertFindlayBRCA1RingFunctionScoresToVCF(DefaultPipelineTask):
                 "-l", artifacts_dir + "/findlay_BRCA1_ring_function_scores_error_variants.log",
                 "-s", "FindlayBRCA1RingFunctionScores"]
 
-        print "Running functional_assays_to_vcf with the following args: %s" % (args)
+        print("Running functional_assays_to_vcf with the following args: %s" % (args))
 
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -933,7 +933,7 @@ class CrossmapFindlayBRCA1RingFunctionScores(DefaultPipelineTask):
         args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz",
                 functional_assays_file_dir + "/findlay_BRCA1_ring_function_scores.clean.hg19.vcf", brca_resources_dir + "/hg38.fa",
                 functional_assays_file_dir + "/findlay_BRCA1_ring_function_scores.clean.hg38.vcf"]
-        print "Running CrossMap.py with the following args: %s" % (args)
+        print("Running CrossMap.py with the following args: %s" % (args))
         sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
 
@@ -953,10 +953,10 @@ class SortFindlayBRCA1RingFunctionScores(DefaultPipelineTask):
         sorted_findlay_BRCA1_ring_function_scores = functional_assays_file_dir + "/findlay_BRCA1_ring_function_scores.clean.sorted.hg38.vcf"
         writable_sorted_findlay_BRCA1_ring_function_scores = open(sorted_findlay_BRCA1_ring_function_scores, 'w')
         args = ["vcf-sort", functional_assays_file_dir + "/findlay_BRCA1_ring_function_scores.clean.hg38.vcf"]
-        print "Running vcf-sort with the following args: %s" % (args)
+        print("Running vcf-sort with the following args: %s" % (args))
         sp = subprocess.Popen(args, stdout=writable_sorted_findlay_BRCA1_ring_function_scores, stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
-        print "Sorted hg38 vcf file into %s" % (writable_sorted_findlay_BRCA1_ring_function_scores)
+        print("Sorted hg38 vcf file into %s" % (writable_sorted_findlay_BRCA1_ring_function_scores))
 
         pipeline_utils.check_file_for_contents(functional_assays_file_dir + "/findlay_BRCA1_ring_function_scores.clean.sorted.hg38.vcf")
 
@@ -1015,7 +1015,7 @@ class MergeVCFsIntoTSVFile(DefaultPipelineTask):
                 artifacts_dir, "-a",
                 artifacts_dir, "-v",
                 "-c", self.cfg.gene_config_path]
-        print "Running variant_merging.py with the following args: %s" % (args)
+        print("Running variant_merging.py with the following args: %s" % (args))
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -1038,8 +1038,8 @@ class AggregateMergedOutput(DefaultPipelineTask):
         args = ["python", "aggregate_across_columns.py", "-i",
                 artifacts_dir + "merged.tsv",
                 "-o", artifacts_dir + "aggregated.tsv"]
-        print "Running aggregate_across_columns.py with the following args: %s" % (
-            args)
+        print("Running aggregate_across_columns.py with the following args: %s" % (
+            args))
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -1069,8 +1069,8 @@ class BuildAggregatedOutput(DefaultPipelineTask):
                 "--config-file", self.cfg.gene_config_path,
                 "--resources", brca_resources_dir]
 
-        print "Running brca_pseudonym_generator.py with the following args: %s" % (
-            args)
+        print("Running brca_pseudonym_generator.py with the following args: %s" % (
+            args))
 
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
@@ -1097,8 +1097,8 @@ class AppendMupitStructure(DefaultPipelineTask):
         args = ["python", "getMupitStructure.py", "-i",
                 artifacts_dir + "built.tsv", "-o",
                 artifacts_dir + "/built_with_mupit.tsv"]
-        print "Running getMupitStructure.py with the following args: %s" % (
-            args)
+        print("Running getMupitStructure.py with the following args: %s" % (
+            args))
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -1122,7 +1122,7 @@ class CalculatePriors(DefaultPipelineTask):
                 artifacts_dir_host, 'built_with_mupit.tsv',
                 'built_with_priors.tsv', self.cfg.priors_docker_image_name]
 
-        print "Running calcpriors.sh with the following args: %s" % (args)
+        print("Running calcpriors.sh with the following args: %s" % (args))
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -1148,8 +1148,8 @@ class FilterBlacklistedPriors(DefaultPipelineTask):
                 "filter",
                 artifacts_dir + "built_with_priors.tsv"]
 
-        print "Running filterBlacklistedVars.py with the following args: %s" % (
-            args)
+        print("Running filterBlacklistedVars.py with the following args: %s" % (
+            args))
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -1180,8 +1180,8 @@ class AppendVRId(DefaultPipelineTask):
         ]
 
 
-        print "Running appendVRIds.py with the following args: %s" % (
-            args)
+        print("Running appendVRIds.py with the following args: %s" % (
+            args))
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -1207,8 +1207,8 @@ class FindMissingReports(DefaultPipelineTask):
                 artifacts_dir + "built_with_vr_ids.tsv", "-r",
                 artifacts_dir,
                 "-a", artifacts_dir, "-v"]
-        print "Running check_for_missing_reports.py with the following args: %s" % (
-            args)
+        print("Running check_for_missing_reports.py with the following args: %s" % (
+            args))
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -1267,7 +1267,7 @@ class RunDiffAndAppendChangeTypesToOutput(DefaultPipelineTask):
                 "--diff_dir", diff_dir, "--v1_release_date",
                 previous_release_date_str, "--reports", "False"]
 
-        print "Running releaseDiff.py with the following args: %s" % (args)
+        print("Running releaseDiff.py with the following args: %s" % (args))
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -1334,7 +1334,7 @@ class RunDiffAndAppendChangeTypesToOutputReports(DefaultPipelineTask):
                 "--diff_dir", diff_dir, "--v1_release_date",
                 previous_release_date_str, "--reports", "True"]
 
-        print "Running releaseDiff.py with the following args: %s" % (args)
+        print("Running releaseDiff.py with the following args: %s" % (args))
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -1361,8 +1361,8 @@ class GenerateReleaseNotes(DefaultPipelineTask):
         args = ["python", "buildVersionMetadata.py", "--date",
                 str(self.cfg.date), "--notes", self.cfg.release_notes,
                 "--output", metadata_dir + "version.json"]
-        print "Running buildVersionMetadata.py with the following args: %s" % (
-            args)
+        print("Running buildVersionMetadata.py with the following args: %s" % (
+            args))
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)
@@ -1411,7 +1411,7 @@ class GenerateMD5Sums(DefaultPipelineTask):
 
         args = ["python", "generateMD5Sums.py", "-i", output_dir, "-o",
                 md5sumsFile]
-        print "Generating md5sums with the following args: %s" % (args)
+        print("Generating md5sums with the following args: %s" % (args))
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         pipeline_utils.print_subprocess_output_and_error(sp)

@@ -12,13 +12,13 @@ from mock import patch
 
 from common import seq_utils
 from common.config import load_config, extract_gene_regions_dict
-from utilities import round_sigfigs
-from variant_equivalence import variant_equal, find_equivalent_variant, find_equivalent_variants_whole_seq
-from variant_merging import normalize_values, add_variant_to_dict, \
+from .utilities import round_sigfigs
+from .variant_equivalence import variant_equal, find_equivalent_variant, find_equivalent_variants_whole_seq
+from .variant_merging import normalize_values, add_variant_to_dict, \
     COLUMN_SOURCE, append_exac_allele_frequencies, EXAC_SUBPOPULATIONS
 
 
-from variant_merging_constants import VCFVariant
+from .variant_merging_constants import VCFVariant
 
 runtimes = 500000
 settings.register_profile('ci', settings(max_examples=runtimes, max_iterations=runtimes, timeout=-1))
@@ -100,7 +100,7 @@ def add_start(v, ref_id):
 #
 
 def test_variant_equal_throws_below_reference():
-    ref_id = chrom_ref['13'].keys()[0]
+    ref_id = list(chrom_ref['13'].keys())[0]
     v1 = ('13', chrom_ref['13'][ref_id]['start'], 'A', 'C')
     v2 = ('13', chrom_ref['13'][ref_id]['start'] + 10, 'A', 'C')
     with pytest.raises(AssertionError):
@@ -109,7 +109,7 @@ def test_variant_equal_throws_below_reference():
         variant_equal(v2, v1, ref_id, seq_provider)
 
 def test_variant_equal_throws_above_reference():
-    ref_id = chrom_ref['13'].keys()[0]
+    ref_id = list(chrom_ref['13'].keys())[0]
     start = chrom_ref['13'][ref_id]['start']
     v1 = ('13', start + reference_length + 2, 'A', 'C')
     v2 = ('13', start + 10, 'A', 'C')
@@ -414,7 +414,7 @@ def test_find_equivalent_variant(seq_fetcher):
     }
 
     margin = 20
-    chunk_provider = seq_utils.ChunkBasedSeqProvider(variant_dict.values(), margin, seq_wrapper)
+    chunk_provider = seq_utils.ChunkBasedSeqProvider(list(variant_dict.values()), margin, seq_wrapper)
 
     assert frozenset(example_variants) == frozenset(
         find_equivalent_variant(variant_dict, chunk_provider))
@@ -425,7 +425,7 @@ def test_find_equivalent_variant_whole_seq(fetch_seq_mock_data):
         gene_config_path = os.path.join(pwd, 'test_files', 'gene_config_test.txt')
 
         cfg = load_config(gene_config_path)
-        regions = extract_gene_regions_dict(cfg, 'start_hg38_legacy_variants', 'end_hg38_legacy_variants').keys()
+        regions = list(extract_gene_regions_dict(cfg, 'start_hg38_legacy_variants', 'end_hg38_legacy_variants').keys())
         seq_wrapper = seq_utils.SeqRepoWrapper(regions_preload=regions)
 
         # empty case
@@ -474,5 +474,5 @@ if __name__ == "__main__":
     # To reproduce failure conditions, paste them in here and run as
     # python ./test_variant_merging.py
     # print variant_equal(v1 = ('17', 41100001, 'gcttccca', ''), v2 = ('17', 41100002, 'cttcccag', ''), version = 'hg38')
-    print variant_equal(('13', 32800003, '', 'A'), ('13', 32800005, '', 'A'), 'hg19')
+    print(variant_equal(('13', 32800003, '', 'A'), ('13', 32800005, '', 'A'), 'hg19'))
     pass

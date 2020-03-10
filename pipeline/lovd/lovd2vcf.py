@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Description:
@@ -8,7 +8,7 @@ Description:
 """
 
 
-from __future__ import print_function, division
+
 
 import argparse
 import re
@@ -68,7 +68,7 @@ def main():
     else:
         raise ValueError('Source is %s, must be either LOVD or exLOVD' % (source))
     print('##reference=GRCh37', file=vcfFile)
-    for annotation, description in annotDict.items():
+    for annotation, description in list(annotDict.items()):
         print('##INFO=<ID={0},Number=.,Type=String,Description="{1}">'.format(annotation.replace(' ', '_'), description), file=vcfFile)
     print('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO', file=vcfFile)
 

@@ -7,7 +7,7 @@ import csv
 import logging
 from os import listdir
 from os.path import isfile, join, abspath
-from aggregate_reports import get_reports_files
+from .aggregate_reports import get_reports_files
 import vcf
 
 
@@ -62,7 +62,7 @@ def get_bx_ids():
                     ids = map(int, record.INFO['BX_ID'])
                     bx_ids[source] = bx_ids[source] + ids
             except ValueError as e:
-                print e
+                print(e)
 
     return bx_ids
 

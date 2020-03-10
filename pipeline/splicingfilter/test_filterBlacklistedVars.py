@@ -37,7 +37,7 @@ class TestBlacklistedVars(unittest.TestCase):
                     expected = '-' if var_id in blacklist and col in priorsCols else old[col]
 
                     try:
-                        self.assertAlmostEquals(float(new[col]), float(expected))
+                        self.assertAlmostEqual(float(new[col]), float(expected))
                     except ValueError:
                         # it's not a float, use the regular exact equality
-                        self.assertEquals(new[col], expected)
+                        self.assertEqual(new[col], expected)

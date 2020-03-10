@@ -33,7 +33,7 @@ def main():
     if args.full:
         writer = vcf.Writer(open(args.output, "w"), reader)
     for record in reader:
-        if record.INFO.has_key("GRCh38_POSITION"):
+        if "GRCh38_POSITION" in record.INFO:
             tokens = record.INFO["GRCh38_POSITION"][0].split(":")
             if len(tokens) > 1:
                 chrom = tokens[0]
@@ -53,10 +53,10 @@ def main():
                         elif args.ancestry == "AA":
                             maf = record.INFO["MAF"][1]
                         for alt in record.ALT:
-                            print "%s_%s_%s_%s %s" % (record.CHROM,
+                            print("%s_%s_%s_%s %s" % (record.CHROM,
                                                       record.POS,
                                                       record.REF,
-                                                      alt, maf)
+                                                      alt, maf))
 
 
 def breakUpESPAlleleFrequencies(mafArray):
