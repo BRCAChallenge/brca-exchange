@@ -1403,11 +1403,14 @@ var Application = React.createClass({
     render: function () {
         const path = this.getPath().slice(1);
 
-        // logs the full path, including the hash, to google analytics
-        const fullHref = window.location.href;
-        const origin = window.location.origin;
-        const fullPathWithHash = fullHref.startsWith(origin) ? fullHref.slice(origin.length) : fullHref;
-        ReactGA.ga('send', 'pageview', fullPathWithHash);
+        // logs the full path, including the hash, to google analytics (if analytics is enabled)
+        if (window.config.analytics) {
+            const fullHref = window.location.href;
+            const origin = window.location.origin;
+            const fullPathWithHash = fullHref.startsWith(origin) ? fullHref.slice(origin.length) : fullHref;
+            ReactGA.ga('send', 'pageview', fullPathWithHash);
+        }
+
         return (
             <div>
                 <NavBarNew path={path} mode={this.state.mode} toggleMode={this.toggleMode}/>
