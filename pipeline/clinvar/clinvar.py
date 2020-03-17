@@ -23,7 +23,7 @@ def textIfPresent(element, field):
     if ff == None or ff.text == None:
         return None
     else:
-        return(ff.text.encode('utf-8'))
+        return ff.text
 
 
 def processClinicalSignificanceElement(el, obj):

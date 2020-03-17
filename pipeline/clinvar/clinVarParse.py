@@ -45,7 +45,7 @@ def processSubmission(submissionSet, assembly):
                 # Omit the variants that don't have any genomic start coordinate indicated.
                 if vcf_var and _bases_only(vcf_var.ref) and _bases_only(vcf_var.alt):
                     print("\t".join((str(hgvs),
-                                     oa.submitter.encode('utf-8'),
+                                     oa.submitter,
                                      str(oa.clinicalSignificance),
                                      str(oa.dateLastUpdated),
                                      str(oa.dateSignificanceLastEvaluated),
