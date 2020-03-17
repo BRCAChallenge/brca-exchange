@@ -497,12 +497,14 @@ var Database = React.createClass({
 					<Button className="btn-default" onClick={() =>this.setState({showModal: true})}>
 						Show Detail View
 					</Button>}
-					{this.props.mode === 'default' && this.state.showModal &&
-					<Modal onRequestHide={() => this.setState({ showModal: false })}>
-						<RawHTML html={content.pages.researchWarning}/>
-						<Button onClick={() => {this.toggleMode();}}>Yes</Button>
-						<Button onClick={() => this.setState({ showModal: false })}>No</Button>
-					</Modal>}
+					{
+					    this.props.mode === 'default' && this.state.showModal &&
+                        <Modal show={true} onHide={() => this.setState({ showModal: false })}>
+                            <RawHTML html={content.pages.researchWarning}/>
+                            <Button onClick={() => {this.toggleMode();}}>Yes</Button>
+                            <Button onClick={() => this.setState({ showModal: false })}>No</Button>
+                        </Modal>
+					}
 				</Col>
 			</Row>);
     }

@@ -70,6 +70,7 @@ var NavBarNew = React.createClass({
         }
         return this.props.mode !== nextProps.mode ||
             this.state.loggedin !== nextState.loggedin ||
+            this.state.showModal !== nextState.showModal ||
             this.props.path.split(/\?/)[0] !== nextProps.path.split(/\?/)[0];
     },
     activePath: function (path, tab) {
@@ -148,14 +149,21 @@ var NavBarNew = React.createClass({
                     {this.state.isBeta && false && <div className='beta-header'>This is a beta version of the BRCA Exchange. Please note that some variant information and website features displayed here are under review - for the most up-to-date finalized information, and to join our community, please refer to <a href="https://brcaexchange.org">www.brcaexchange.org</a>. If you encounter any issues while using the beta website, please report them to <a href="mailto:brcaexchange@gmail.com">brcaexchange@gmail.com</a>.</div>}
                 </Navbar>
 
-                <Modal show={this.state.showModal} onHide={() => this.setState({ showModal: false }, function() {this.forceUpdate();})}>
-                    <RawHTML html={content.pages.researchWarning}/>
-                    <Button onClick={() => {this.setState({ showModal: false }, function() {
-                        this.props.toggleMode();
-                        this.forceUpdate();
-                    });}}>Yes</Button>
-                    <Button onClick={() => this.setState({ showModal: false }, function() {this.forceUpdate();})}>No</Button>
-                </Modal>
+                {
+                    this.state.showModal &&
+                    <Modal show={true} onHide={() => this.setState({showModal: false})}>
+                        <RawHTML html={content.pages.researchWarning}/>
+                        <Button onClick={() => {
+                            this.setState({showModal: false}, function () {
+                                this.props.toggleMode();
+                                this.forceUpdate();
+                            });
+                        }}>Yes</Button>
+                        <Button onClick={() => this.setState({showModal: false}, function () {
+                            console.log("Modal visible?: " + this.state.showModal);
+                        })}>No</Button>
+                    </Modal>
+                }
             </div>
         );
     }

@@ -36,12 +36,15 @@ var DisclaimerModal = React.createClass({
             return (
                 <div className="form-group">
                     <Button className="btn-default" onClick={this.open}>{this.props.text}</Button>
-                    {this.state.showModal ?
-                        <Modal onRequestHide={this.close}>
-                            <RawHTML html={content.pages.researchWarning} />
+
+                    {
+                        this.state.showModal &&
+                        <Modal show={true} onHide={this.close}>
+                            <RawHTML html={content.pages.researchWarning}/>
                             <Button onClick={this.agree}>YES</Button>
                             <Button onClick={this.close}>NO</Button>
-                        </Modal> : null }
+                        </Modal>
+                    }
                 </div>
             );
         }
@@ -50,10 +53,13 @@ var DisclaimerModal = React.createClass({
         return (
             <span>
                 <a style={{cursor: "pointer"}} onClick={this.open}>{this.props.text}</a>
-                <Modal show={this.state.showModal} onHide={this.close}>
-                    <RawHTML html={content.pages.disclaimer} />
-                    <Button onClick={this.close}>OK</Button>
-                </Modal>
+                {
+                    this.state.showModal &&
+                    <Modal show={true} onHide={this.close}>
+                        <RawHTML html={content.pages.disclaimer} />
+                        <Button onClick={this.close}>OK</Button>
+                    </Modal>
+                }
             </span>
         );
     },
