@@ -635,7 +635,7 @@ var ResearchVariantTableSupplier = function (Component) {
         },
         filterFormCols: function (subColList, columnSelection) {
             return _.map(subColList, ({title, prop}) =>
-                <ColumnCheckbox onChange={() => this.toggleColumns(prop)} key={prop} label={prop} title={title}
+                <ColumnCheckbox onChange={() => this.toggleColumns(prop)} key={prop || title} label={prop || title} title={title}
                                 initialCheck={columnSelection}/>);
         },
         onChangeSubcolVisibility(subColTitle, event) {
