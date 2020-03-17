@@ -670,7 +670,6 @@ var VariantDetail = React.createClass({
         }
     },
     relayoutGrid: debounce(function(fullRefresh) {
-        console.log("Laying out grid...");
         if (this.isogrid) {
             this.isogrid.relayout(fullRefresh);
         }

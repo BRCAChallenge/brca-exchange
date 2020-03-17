@@ -9,8 +9,6 @@ const CollapsibleSection = React.createClass({
     handleToggle: function(e, id) {
         e.preventDefault();
 
-        console.log("Toggling ", id);
-
         // ask our parent to toggle us
         this.props.onFieldToggled(id);
     },

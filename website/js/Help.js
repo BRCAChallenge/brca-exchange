@@ -150,17 +150,6 @@ const Help = React.createClass({
         }));
     },
 
-    /*
-    onClick(e) {
-        e.persist();
-        console.log("Toggling ", e);
-        const targetID = e.target.classList.contains("identifier")
-            ? e.target.getAttribute('id')
-            : $(e.target).parent('.identifier').attr('id');
-        this.setExpansion(targetID);
-    },
-     */
-
     render() {
         let help = localStorage.getItem("research-mode") === 'true' ? content.helpContentResearch : content.helpContentDefault;
 
