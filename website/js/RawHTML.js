@@ -40,7 +40,7 @@ const RawHTML = React.createClass({
     render: function() {
         var {html, ...otherProps} = this.props;
         return (
-            <div ref="me" className='markdown' {...otherProps} dangerouslySetInnerHTML={{__html: html}} />
+            <span style={{display: 'block'}} ref="me" className='markdown' {...otherProps} dangerouslySetInnerHTML={{__html: html}} />
         );
     }
 });
