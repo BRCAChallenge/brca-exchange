@@ -232,12 +232,15 @@ class SpliceSiteImpactTable extends React.Component {
             </div>
 
             <table className="splicing-level-table">
-                <tr>
-                    <td width="60%">Qualitative Category</td>
-                    <td width="30%">Z-score Range</td>
-                    <td width="20%">Prior Probability</td>
-                </tr>
+                <thead>
+                    <tr>
+                        <td width="60%">Qualitative Category</td>
+                        <td width="30%">Z-score Range</td>
+                        <td width="20%">Prior Probability</td>
+                    </tr>
+                </thead>
 
+                <tbody>
                 {
                     splicingImpactFields.fields.map(x =>
                         <tr key={x.key} className={prior === x.prob && (!x.check || x.check(data)) ? 'highlighted' : ''}>
@@ -247,6 +250,7 @@ class SpliceSiteImpactTable extends React.Component {
                         </tr>
                     )
                 }
+                </tbody>
             </table>
 
             { extraMessage && <div>{ extraMessage }</div> }
@@ -265,12 +269,15 @@ class DeNovoDonorPathogenicityTable extends React.Component {
             </div>
 
             <table className="splicing-level-table">
-                <tr>
-                    <td width="60%">Qualitative Category</td>
-                    <td width="30%">Z-score Range</td>
-                    <td width="20%">Prior Probability</td>
-                </tr>
+                <thead>
+                    <tr>
+                        <td width="60%">Qualitative Category</td>
+                        <td width="30%">Z-score Range</td>
+                        <td width="20%">Prior Probability</td>
+                    </tr>
+                </thead>
 
+                <tbody>
                 {
                     deNovoImpactFields.map((x, i) => {
                         switch(x.type) {
@@ -292,7 +299,7 @@ class DeNovoDonorPathogenicityTable extends React.Component {
                                 const found = x.options.find(x => x.check(data));
                                 return (<tr key={i}>
                                     <td colSpan={3} className="note-row">
-                                    { found ? found.text : 'n/a'}
+                                        { found ? found.text : 'n/a'}
                                     </td>
                                 </tr>);
                             default:
@@ -300,6 +307,7 @@ class DeNovoDonorPathogenicityTable extends React.Component {
                         }
                     })
                 }
+                </tbody>
             </table>
         </div>);
     }
