@@ -1,15 +1,19 @@
-FROM ubuntu:18.04
+FROM python:3.7
 
 RUN chmod 1777 /tmp
 
 RUN apt-get update && apt-get install -y \
     curl \
     git \
-    libmysqlclient-dev \
+    libmariadb-dev-compat \
+    libmariadb-dev \
     liblzo2-dev \
+    libbz2-dev \
+    liblzma-dev \
     pkg-config \
-    python-pip \
-    python-gdbm \
+    python3 \
+    python3-pip \
+    python3-gdbm \
     python-lzo \
     rsync \
     vim \
@@ -27,12 +31,13 @@ COPY pipeline/requirements.txt .
 COPY test-requirements.txt .
 
 # install numpy first to avoid issues with bio python and bx-python (see also https://github.com/LUMC/vep2lovd/issues/1)
-RUN pip install $(grep numpy requirements.txt)
+RUN pip3 install $(grep numpy requirements.txt)
 
-RUN pip install -r requirements.txt -r test-requirements.txt
+RUN pip3 install $(grep -i cython requirements.txt)
+RUN pip3 install -r requirements.txt -r test-requirements.txt
 
 # install vcf tools
-RUN wget https://github.com/vcftools/vcftools/releases/download/v0.1.15/vcftools-0.1.15.tar.gz
+RUN wget https://github.com/vcftools/vcftools/releases/download/v0.1.16/vcftools-0.1.16.tar.gz
 RUN tar zxf vcftools*.tar.gz
 RUN cd vcftools* && ./configure && make && make install && cd .. && rm -r vcftools*
 
