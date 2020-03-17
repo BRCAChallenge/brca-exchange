@@ -163,7 +163,6 @@ var Home = React.createClass({
         this.transitionTo('/variants', null, {search: value});
     },
     render: function() {
-        let {suggestions} = this.props;
         let currentSupporters = _.filter(logos, function(logo) {
                                     return logo.currentSupporter;
                                 });
@@ -190,7 +189,6 @@ var Home = React.createClass({
                     <Col smOffset={2} sm={8}>
                         <VariantSearch
                             id='home-search'
-                            suggestions={suggestions}
                             onSearch={this.onSearch}/>
                     </Col>
                 </Row>

@@ -68,7 +68,7 @@ var VariantSearch = React.createClass({
         if (value !== this.state.value && onChange) {
             onChange(value);
         }
-        this.setState({value: value, release: this.props.release});
+        this.setState({value: value || '', release: this.props.release});
     },
 
     componentWillUnmount: function () {
@@ -91,7 +91,7 @@ var VariantSearch = React.createClass({
             value: this.props.value || '',
             release: this.props.release,
             placeholder: "search for \"c.1105G>A\", \"brca1\" or \"IVS7+1037T>C\"",
-            suggestions: this.props.suggestions || []
+            suggestions: []
         };
     },
 
@@ -114,7 +114,7 @@ var VariantSearch = React.createClass({
     },
 
     componentWillReceiveProps: function (newProps) {
-        this.setState({value: newProps.value});
+        this.setState({value: newProps.value || ''});
     },
 
     render: function () {
