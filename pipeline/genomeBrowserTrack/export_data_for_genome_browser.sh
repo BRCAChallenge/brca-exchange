@@ -29,6 +29,35 @@ python ${SRC_DIR}/brcaToBed.py -i ${TMP_DIR}/output/release/built_with_change_ty
 sort -k1,1 -k2,2 ${HG19_BED} -o ${HG19_BED}
 sort -k1,1 -k2,2 ${HG38_BED} -o ${HG38_BED}
 
+set +e
+
+# bedToBigBed errors on variants > 255 characters, this removes those problem variants until bedToBigBed succeeds
+
+# captures error message if present
+ERROR=`bedToBigBed -type=bed9+ -as=${AS} -tab ${HG19_BED} ${SRC_DIR}/hg19.chrom.sizes ${SRC_DIR}/hg19/brcaExchange.bb 2>&1 `
+
+# parses line number of problem variant from error
+ERRORLINE=`echo $ERROR | sed -n -e 's/^.*line //p' | sed 's/\s.*$//'`
+
+until [ -z "$ERRORLINE" ]
+do
+	# removes error variant from both BED files if present
+	sed -i "${ERRORLINE}d" ${HG19_BED}
+	sed -i "${ERRORLINE}d" ${HG38_BED}
+	echo "removed variant due to error:"
+	echo $ERROR
+
+	# captures error message if present
+        ERROR=`bedToBigBed -type=bed9+ -as=${AS} -tab ${HG19_BED} ${SRC_DIR}/hg19.chrom.sizes ${SRC_DIR}/hg19/brcaExchange.bb 2>&1 `
+        echo $ERROR
+
+        # parses line number of problem variant from error
+        ERRORLINE=`echo $ERROR | sed -n -e 's/^.*line //p' | sed 's/\s.*$//'`
+        echo $ERRORLINE
+done
+
+set -e
+
 bedToBigBed -type=bed9+ -as=${AS} -tab ${HG19_BED} ${SRC_DIR}/hg19.chrom.sizes ${SRC_DIR}/hg19/brcaExchange.bb
 bedToBigBed -type=bed9+ -as=${AS} -tab ${HG38_BED} ${SRC_DIR}/hg38.chrom.sizes ${SRC_DIR}/hg38/brcaExchange.bb
 
