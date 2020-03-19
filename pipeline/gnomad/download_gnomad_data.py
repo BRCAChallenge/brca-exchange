@@ -2,6 +2,7 @@
 import requests
 import json
 import time
+import numpy as np
 import pandas as pd
 from math import floor, log10, isnan
 import pdb
@@ -151,7 +152,6 @@ def variant_set_to_variant_data(variants, dataset):
              }"""
     headers = { "content-type": "application/json" }
     variant_details = []
-    count = 0
     for this_variant in variants:
         variant_detail_variables = {
             "variantId": this_variant,
@@ -167,9 +167,6 @@ def variant_set_to_variant_data(variants, dataset):
         parse = json.loads(response.text)
         variant_details.append(parse['data']['variant'])
         print('fetched', this_variant)
-        count += 1
-        if (count > 1):
-            break
         time.sleep(0.01)
     return(variant_details)
 
@@ -227,46 +224,33 @@ def flatten_populations(variants):
         del variant['exome']
     return variants
 
-# def flatten_consequences_for_selected_transcript(variants):
-#     for variant in variants:
-#         try:
-#             for f in variant['consequencesForSelectedTranscript']:
-#                 variant[f] = variant['consequencesForSelectedTranscript'][f]
-#             del variant['consequencesForSelectedTranscript']
-#         except:
-#             pass
-#         del variant['sortedTranscriptConsequences']
-#     return variants
 
 def main():
     dataset = "gnomad_r2_1_non_cancer"
 
-    # gather brca1 data from gnomad
+    # organize brca1 request
     brca1_exonic_variants = transcript_to_variants("ENST00000357654", dataset)
     brca1_intronic_variants = gene_to_region_variants("BRCA1", dataset)
     brca1_variants = brca1_intronic_variants | brca1_exonic_variants
 
-    # gather brca2 data from gnomad
+    # organize brca2 request
     brca2_exonic_variants = transcript_to_variants("ENST00000351666", dataset)
     brca2_intronic_variants = gene_to_region_variants("BRCA2", dataset)
     brca2_variants = brca2_intronic_variants | brca2_exonic_variants
     
-    # combine brca1 and brca2 datasets into a pandas dataframe
+    # combine requests and get brca1 and brca2 data from gnomAD
     brca12_variants = brca1_variants | brca2_variants
     brca12_variant_data = variant_set_to_variant_data(brca12_variants, dataset)
 
-
-    # flatten data
+    # flatten, convert to dataframe, compute allele frequencies, and normalize
     variants_with_flattened_populations = flatten_populations(brca12_variant_data)
-    # variants_with_flattened_fields = flatten_consequences_for_selected_transcript(variants_with_flattened_populations)
-    
-    # convert to dataframe, compute allele frequencies, and normalize
-    variants_df = pd.DataFrame.from_dict(variants_with_flattened_populations)
+    variants_df = pd.json_normalize(variants_with_flattened_populations)
     variants_df['flags'] = variants_df['flags'].apply(', '.join)
-    brca12_dataframe = pd.json_normalize(brca12_variant_data)
-    df_with_allele_values = compile_allele_values(brca12_dataframe)
+    df_with_allele_values = compile_allele_values(variants_df)
     stringified_df_with_allele_values = df_with_allele_values.replace(np.nan, '-', regex=True).replace('', '-', regex=True)
-    pdb.set_trace()
+
+    # output to .tsv
+    stringified_df_with_allele_values.to_csv(f_out, sep='\t', index=False)
 
 
 if __name__ == "__main__":
