@@ -1,13 +1,14 @@
 'use strict';
 
 var React = require('react');
+var ReactDOMServer = require('react-dom/server');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 var {Grid, Col, Row, Button, Table} = require('react-bootstrap');
 var backend = require('backend');
 var config  = require('./config');
 var {Role} = require('./Signup');
 var {Navigation, Link} = require('react-router');
-var {Pagination} = require('react-data-components-bd2k');
+var {Pagination} = require('react-data-components-brcaex');
 var _ = require('underscore');
 var placeholder = require('./img/placeholder.png');
 var auth = require('./auth');
@@ -128,9 +129,9 @@ var Community = React.createClass({
                 </Row>
                 <Row>
                     <Col className="text-center" md={10} mdOffset={1} sm={12}>
-                        <Link to="/mailinglist"><Button disabled={config.environment === 'beta' && 'disabled'}>Join the mailing list only</Button></Link>&nbsp;
-                        <Link to="/signup"><Button disabled={config.environment === 'beta' && 'disabled'}>Join the mailing list and add me to the supporters</Button></Link>&nbsp;
-                        <Link to="/signin"><Button disabled={config.environment === 'beta' && 'disabled'}>Edit your profile</Button></Link>
+                        <Link to="/mailinglist"><Button disabled={config.environment === 'beta'}>Join the mailing list only</Button></Link>&nbsp;
+                        <Link to="/signup"><Button disabled={config.environment === 'beta'}>Join the mailing list and add me to the supporters</Button></Link>&nbsp;
+                        <Link to="/signin"><Button disabled={config.environment === 'beta'}>Edit your profile</Button></Link>
                     </Col>
                 </Row>
                 <Row>
@@ -224,7 +225,7 @@ var CommunityMap = React.createClass({
                 </div>
             );
             roleMarkers = _.values(_.groupBy(roleMarkers, (item, index) => index % 4)).map(group => <div className="map-legend-row">{group}</div>);
-            legendControl.innerHTML = React.renderToStaticMarkup(
+            legendControl.innerHTML = ReactDOMServer.renderToStaticMarkup(
                 <div>
                     <img src={require("./img/map/1.png")} className="map-legend-icon" />
                     <div className="map-legend-slide">
@@ -289,7 +290,7 @@ var CommunityMap = React.createClass({
                             });
                             marker.userID = id;
                             markers.push(marker);
-                            var info = new google.maps.InfoWindow({content: React.renderToStaticMarkup(userInfo) });
+                            var info = new google.maps.InfoWindow({content: ReactDOMServer.renderToStaticMarkup(userInfo) });
                             marker.addListener('click', () => {
                                 if (infowindow) {
                                     infowindow.close();

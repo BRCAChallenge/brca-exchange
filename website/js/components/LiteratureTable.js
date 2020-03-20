@@ -281,7 +281,7 @@ class LiteratureTable extends React.Component {
 
                         <ButtonToolbar className='pull-right'>
                             <Button onClick={this.copyTable.bind(this)}>Copy To Clipboard</Button>
-                            <DropdownButton title="Export" className='pull-right'>
+                            <DropdownButton id="download_table_dropdown" title="Export" className='pull-right'>
                                 <li><a href={toTSVURL} download='variant-literature.tsv'>Excel (.tsv format)</a></li>
                                 <li><a href={toJSONURL} download='variant-literature.json'>JSON</a></li>
                             </DropdownButton>

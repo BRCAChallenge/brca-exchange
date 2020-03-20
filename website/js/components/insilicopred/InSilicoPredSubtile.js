@@ -11,7 +11,7 @@ class PathosProbScale extends React.Component {
         const {value, brackets} = this.props;
 
         return (
-            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="auto" viewBox="0 0 500 70" preserveAspectRatio="xMidYMid meet">
+            <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 500 70" preserveAspectRatio="xMidYMid meet">
                 <defs>
                     <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
                         <stop offset="0%"   style={{stopColor: '#0000FE', stopOpacity: 1}} />

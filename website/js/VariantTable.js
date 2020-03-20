@@ -16,13 +16,13 @@ var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin');
 var DataTable = require('./DataTable');
 var _ = require('underscore');
-var {Col, Panel, Button, Input} = require('react-bootstrap');
+var {Col, Panel, Button, Checkbox} = require('react-bootstrap');
 var ColumnCheckbox = require('./ColumnCheckbox');
 var {getDefaultExpertColumns, getDefaultResearchColumns, getAllSources} = require('./VariantTableDefaults');
 var {State} = require('react-router');
 var alleleFrequencyCharts = require('./AlleleFrequencyCharts');
 
-require('react-data-components-bd2k/css/table-twbs.css');
+require('react-data-components-brcaex/css/table-twbs.css');
 
 function buildHeader(onClick, title) {
     return (
@@ -635,7 +635,7 @@ var ResearchVariantTableSupplier = function (Component) {
         },
         filterFormCols: function (subColList, columnSelection) {
             return _.map(subColList, ({title, prop}) =>
-                <ColumnCheckbox onChange={() => this.toggleColumns(prop)} key={prop} label={prop} title={title}
+                <ColumnCheckbox onChange={() => this.toggleColumns(prop)} key={prop || title} label={prop || title} title={title}
                                 initialCheck={columnSelection}/>);
         },
         onChangeSubcolVisibility(subColTitle, event) {
@@ -654,17 +654,28 @@ var ResearchVariantTableSupplier = function (Component) {
             var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
                 <Col sm={6} md={4} key={subColTitle}>
                     <Panel
-                        header={subColTitle}
-                        collapsable={true}
+                        collapsible={true}
                         defaultExpanded={localStorage.getItem("collapse-subcol_" + subColTitle) !== "true"}
                         onSelect={(event) => this.onChangeSubcolVisibility(subColTitle, event)}>
-                        {this.filterFormCols(subColList, this.state.columnSelection)}
+                        <Panel.Heading>
+                            <Panel.Title>{subColTitle}</Panel.Title>
+                        </Panel.Heading>
+                        <Panel.Collapse>
+                            <Panel.Body>
+                            {this.filterFormCols(subColList, this.state.columnSelection)}
+                            </Panel.Body>
+                        </Panel.Collapse>
                     </Panel>
                 </Col>
             );
             return (<label className='control-label'>
-                <Panel header="Column Selection">
+                <Panel>
+                    <Panel.Heading>
+                        <Panel.Title>Column Selection</Panel.Title>
+                    </Panel.Heading>
+                    <Panel.Body>
                     {filterFormSubCols}
+                    </Panel.Body>
                 </Panel>
             </label>);
         },
@@ -681,15 +692,20 @@ var ResearchVariantTableSupplier = function (Component) {
         getFilters: function() {
             var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
                 <Col sm={6} md={3} key={name}>
-                    <Input type="checkbox"
+                    <Checkbox
                         onChange={v => this.setSource(name, v)}
-                        label={this.getSourceName(name)}
-                        checked={value > 0}/>
+                        checked={value > 0}
+                    >{this.getSourceName(name)}</Checkbox>
                 </Col>
             );
             return (<label className='control-label source-filters'>
-                <Panel className="top-buffer" header="Source Selection">
+                <Panel className="top-buffer">
+                    <Panel.Heading>
+                        <Panel.Title>Source Selection</Panel.Title>
+                    </Panel.Heading>
+                    <Panel.Body>
                     {sourceCheckboxes}
+                    </Panel.Body>
                 </Panel>
             </label>);
         },
