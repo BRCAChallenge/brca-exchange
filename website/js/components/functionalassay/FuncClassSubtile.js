@@ -156,6 +156,6 @@ export default class FuncClassSubtile extends React.Component {
     }
 
     render() {
-        return (<svg id="func-assay-obj" width="100%" height="auto" viewBox="0 0 500 150" />);
+        return (<svg id="func-assay-obj" width="100%" viewBox="0 0 500 150" />);
     }
 }

@@ -4,7 +4,7 @@
 var React = require('react');
 var Rx = require('rx');
 require('rx/dist/rx.time');
-var {Table, Pagination} = require('react-data-components-bd2k');
+var {Table, Pagination} = require('react-data-components-brcaex');
 var {Button, Row, Col} = require('react-bootstrap');
 var VariantSearch = require('./VariantSearch');
 var SelectField = require('./SelectField');

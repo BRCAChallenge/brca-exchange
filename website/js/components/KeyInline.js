@@ -14,7 +14,7 @@ const KeyInline = React.createClass({
         }
 
         const popper = (
-            <Popover title={tableKey}>
+            <Popover id={`tooltip_${tableKey}`} title={tableKey}>
                 <span dangerouslySetInnerHTML={{__html: tooltip}} />
             </Popover>
         );

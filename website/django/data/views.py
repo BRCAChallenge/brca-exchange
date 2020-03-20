@@ -108,6 +108,23 @@ def variant(request):
     return response
 
 
+def vrid(request):
+    vr_id = request.GET.get('vr_id')
+
+    variant = Variant.objects.get(VR_ID__iexact=vr_id)
+    key = variant.Genomic_Coordinate_hg38
+    query = Variant.objects.filter(Genomic_Coordinate_hg38=key)\
+        .order_by('-Data_Release_id')\
+        .select_related('Data_Release')\
+        .select_related('Mupit_Structure')\
+        .select_related('insilicopriors')
+
+    variant_versions = list(map(variant_to_dict, query))
+    response = JsonResponse({"data": variant_versions})
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
+
+
 def variantreps(request):
     vr_reps = list(
         VariantRepresentation.objects.raw("""

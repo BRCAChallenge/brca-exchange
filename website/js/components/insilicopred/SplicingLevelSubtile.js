@@ -4,7 +4,7 @@
 
 import React from "react";
 import classNames from 'classnames';
-import {TabbedArea, TabPane} from "react-bootstrap";
+import {Tabs, Tab} from "react-bootstrap";
 
 import {capitalize, isNumeric} from "../../util";
 
@@ -232,12 +232,15 @@ class SpliceSiteImpactTable extends React.Component {
             </div>
 
             <table className="splicing-level-table">
-                <tr>
-                    <td width="60%">Qualitative Category</td>
-                    <td width="30%">Z-score Range</td>
-                    <td width="20%">Prior Probability</td>
-                </tr>
+                <thead>
+                    <tr>
+                        <td width="60%">Qualitative Category</td>
+                        <td width="30%">Z-score Range</td>
+                        <td width="20%">Prior Probability</td>
+                    </tr>
+                </thead>
 
+                <tbody>
                 {
                     splicingImpactFields.fields.map(x =>
                         <tr key={x.key} className={prior === x.prob && (!x.check || x.check(data)) ? 'highlighted' : ''}>
@@ -247,6 +250,7 @@ class SpliceSiteImpactTable extends React.Component {
                         </tr>
                     )
                 }
+                </tbody>
             </table>
 
             { extraMessage && <div>{ extraMessage }</div> }
@@ -265,12 +269,15 @@ class DeNovoDonorPathogenicityTable extends React.Component {
             </div>
 
             <table className="splicing-level-table">
-                <tr>
-                    <td width="60%">Qualitative Category</td>
-                    <td width="30%">Z-score Range</td>
-                    <td width="20%">Prior Probability</td>
-                </tr>
+                <thead>
+                    <tr>
+                        <td width="60%">Qualitative Category</td>
+                        <td width="30%">Z-score Range</td>
+                        <td width="20%">Prior Probability</td>
+                    </tr>
+                </thead>
 
+                <tbody>
                 {
                     deNovoImpactFields.map((x, i) => {
                         switch(x.type) {
@@ -292,7 +299,7 @@ class DeNovoDonorPathogenicityTable extends React.Component {
                                 const found = x.options.find(x => x.check(data));
                                 return (<tr key={i}>
                                     <td colSpan={3} className="note-row">
-                                    { found ? found.text : 'n/a'}
+                                        { found ? found.text : 'n/a'}
                                     </td>
                                 </tr>);
                             default:
@@ -300,6 +307,7 @@ class DeNovoDonorPathogenicityTable extends React.Component {
                         }
                     })
                 }
+                </tbody>
             </table>
         </div>);
     }
@@ -348,7 +356,7 @@ export default class SplicingLevelSubtile extends React.Component {
 
     changePane(key) {
         this.setState({ activePane: key });
-        this.props.onDimsChanged(React.findDOMNode(this.collapser));
+        this.props.onDimsChanged();
     }
 
     tabTitle(label, field, key) {
@@ -391,8 +399,8 @@ export default class SplicingLevelSubtile extends React.Component {
                 The splicing-level estimation is due to <b>{maxProbPanel.reason}</b> which introduces a prior probability of pathogenicity of <b>{maxProbPanel.prior}</b>.
                 </div>
 
-                <TabbedArea ref={(me) => { this.collapser = me; }} activeKey={this.state.activePane} onSelect={this.changePane}>
-                    <TabPane eventKey={0} tab={this.tabTitle("Donor Impact", priorHeaders.donor, 0)}>
+                <Tabs id="splicing_level_tabs" activeKey={this.state.activePane} onSelect={this.changePane}>
+                    <Tab eventKey={0} tab={this.tabTitle("Donor Impact", priorHeaders.donor, 0)}>
                     {
                         isNumeric(data.donor.prior)
                             ? (
@@ -409,9 +417,9 @@ export default class SplicingLevelSubtile extends React.Component {
                                 </div>
                             )
                     }
-                    </TabPane>
+                    </Tab>
 
-                    <TabPane eventKey={1} tab={this.tabTitle("De Novo Donor", priorHeaders.denovo, 1)}>
+                    <Tab eventKey={1} tab={this.tabTitle("De Novo Donor", priorHeaders.denovo, 1)}>
                     {
                         isNumeric(data.denovo.prior)
                             ? (
@@ -426,9 +434,9 @@ export default class SplicingLevelSubtile extends React.Component {
                                 </div>
                             )
                     }
-                    </TabPane>
+                    </Tab>
 
-                    <TabPane eventKey={2} tab={this.tabTitle("Acceptor Impact", priorHeaders.acceptor, 2)}>
+                    <Tab eventKey={2} tab={this.tabTitle("Acceptor Impact", priorHeaders.acceptor, 2)}>
                     {
                         isNumeric(data.acceptor.prior)
                             ? (
@@ -445,8 +453,8 @@ export default class SplicingLevelSubtile extends React.Component {
                                 </div>
                             )
                     }
-                    </TabPane>
-                </TabbedArea>
+                    </Tab>
+                </Tabs>
             </div>
         );
     }

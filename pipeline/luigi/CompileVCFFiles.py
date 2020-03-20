@@ -31,6 +31,7 @@ data_merging_method_dir = os.path.abspath('../data_merging')
 priors_method_dir = os.path.abspath('../splicing')
 priors_filter_method_dir = os.path.abspath('../splicingfilter')
 utilities_method_dir = os.path.abspath('../utilities')
+vr_method_dir = os.path.abspath('../vr')
 
 
 ###############################################
@@ -236,9 +237,7 @@ class ConvertEXLOVDBRCA1ExtractToVCF(DefaultPipelineTask):
 
         args = ["./lovd2vcf.py", "-i", ex_lovd_file_dir + "/BRCA1.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf", "-a",
-                "exLOVDAnnotation",
-                "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa", "-e",
+                "exLOVDAnnotation", "-e",
                 artifacts_dir + "exLOVD_BRCA1_error_variants.txt",
                 "-s", "exLOVD"]
         print "Running lovd2vcf with the following args: %s" % (args)
@@ -267,9 +266,7 @@ class ConvertEXLOVDBRCA2ExtractToVCF(DefaultPipelineTask):
 
         args = ["./lovd2vcf.py", "-i", ex_lovd_file_dir + "/BRCA2.txt", "-o",
                 ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf", "-a",
-                "exLOVDAnnotation",
-                "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa", "-e",
+                "exLOVDAnnotation", "-e",
                 artifacts_dir + "exLOVD_BRCA2_error_variants.txt",
                 "-s", "exLOVD"]
         print "Running lovd2vcf with the following args: %s" % (args)
@@ -479,9 +476,7 @@ class ConvertSharedLOVDToVCF(DefaultPipelineTask):
         os.chdir(lovd_method_dir)
 
         args = ["python", "lovd2vcf.py", "-i", self.input().path, "-o",
-                self.output().path, "-a", "sharedLOVDAnnotation",
-                "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa", "-e",
+                self.output().path, "-a", "sharedLOVDAnnotation", "-e",
                 artifacts_dir + "/LOVD_error_variants.txt",
                 "-s", "LOVD"]
 
@@ -911,10 +906,9 @@ class ConvertFindlayBRCA1RingFunctionScoresToVCF(DefaultPipelineTask):
 
         os.chdir(functional_assays_method_dir)
 
-        args = ["python", "functional_assays_to_vcf.py", "-i", self.input().path, "-o",
+        args = ["python", "functional_assays_to_vcf.py", "-v", "-i", self.input().path, "-o",
                 self.output().path, "-a", "functionalAssayAnnotation",
-                "-r", brca_resources_dir + "/refseq_annotation.hg19.gp", "-g",
-                brca_resources_dir + "/hg19.fa", "-l", artifacts_dir + "/findlay_BRCA1_ring_function_scores_error_variants.log",
+                "-l", artifacts_dir + "/findlay_BRCA1_ring_function_scores_error_variants.log",
                 "-s", "FindlayBRCA1RingFunctionScores"]
 
         print "Running functional_assays_to_vcf with the following args: %s" % (args)
@@ -1167,6 +1161,38 @@ class FilterBlacklistedPriors(DefaultPipelineTask):
 
 
 @requires(FilterBlacklistedPriors)
+class AppendVRId(DefaultPipelineTask):
+    def output(self):
+        artifacts_dir = self.cfg.output_dir + "/release/artifacts/"
+        return luigi.LocalTarget(artifacts_dir + "built_with_vr_ids.tsv")
+
+    def run(self):
+        artifacts_dir_host = self.cfg.output_dir_host + "/release/artifacts/"
+        os.chdir(vr_method_dir)
+
+        args = [
+            'bash', 'appendvrids.sh',
+            artifacts_dir_host,
+            'built_with_priors_clean.tsv',
+            'built_with_vr_ids.tsv',
+            self.cfg.vr_docker_image_name,
+            self.cfg.seq_repo_dir
+        ]
+
+
+        print "Running appendVRIds.py with the following args: %s" % (
+            args)
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
+        pipeline_utils.print_subprocess_output_and_error(sp)
+
+        # we shouldn't be gaining or losing any variants
+        pipeline_utils.check_input_and_output_tsvs_for_same_number_variants(
+            self.input().path,
+            self.output().path)
+
+
+@requires(AppendVRId)
 class FindMissingReports(DefaultPipelineTask):
     def output(self):
         artifacts_dir = self.cfg.output_dir + "/release/artifacts/"
@@ -1178,7 +1204,7 @@ class FindMissingReports(DefaultPipelineTask):
         os.chdir(data_merging_method_dir)
 
         args = ["python", "check_for_missing_reports.py", "-b",
-                artifacts_dir + "built_with_priors_clean.tsv", "-r",
+                artifacts_dir + "built_with_vr_ids.tsv", "-r",
                 artifacts_dir,
                 "-a", artifacts_dir, "-v"]
         print "Running check_for_missing_reports.py with the following args: %s" % (
@@ -1230,7 +1256,7 @@ class RunDiffAndAppendChangeTypesToOutput(DefaultPipelineTask):
             previous_release_date, '%m-%d-%Y')
 
         args = ["python", "releaseDiff.py", "--v2",
-                artifacts_dir + "built_with_priors_clean.tsv", "--v1",
+                artifacts_dir + "built_with_vr_ids.tsv", "--v1",
                 previous_data_path,
                 "--removed", diff_dir + "removed.tsv", "--added",
                 diff_dir + "added.tsv", "--added_data",
@@ -1249,7 +1275,7 @@ class RunDiffAndAppendChangeTypesToOutput(DefaultPipelineTask):
         shutil.rmtree(tmp_dir)  # cleaning up
 
         pipeline_utils.check_input_and_output_tsvs_for_same_number_variants(
-            artifacts_dir + "built_with_priors_clean.tsv",
+            artifacts_dir + "built_with_vr_ids.tsv",
             release_dir + "built_with_change_types.tsv")
 
 

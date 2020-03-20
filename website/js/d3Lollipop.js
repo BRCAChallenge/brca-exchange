@@ -2,6 +2,7 @@
 'use strict';
 
 var React = require('react');
+var ReactDOM = require('react-dom');
 var _ = require('underscore');
 require('muts-needle-plot/src/js/d3-svg-legend');
 require('./css/d3Lollipop.css');
@@ -153,7 +154,7 @@ var D3Lollipop = React.createClass({
         this.startSpinner();
         var {dataIsEmpty, data, brcakey, onRowClick, ...opts} = this.props;
         // Redraw the chart when brcakey has changed.
-        var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
+        var d3svgBrcaRef = ReactDOM.findDOMNode(this.refs.d3svgBrca);
         var subSetData = data.map(this.filterAttributes);
         var domainBRCA = JSON.parse(brca12JSON[brcakey].brcaDomainFile);
         // data.length indicates whether data had PREVIOSLY been loaded.
@@ -181,13 +182,13 @@ var D3Lollipop = React.createClass({
             if (this.props.data.length !== 0) {
                 this.cleanupBRCA();
             };
-            var d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
+            var d3svgBrcaRef = ReactDOM.findDOMNode(this.refs.d3svgBrca);
             var {data, brcakey, onRowClick, ...opts} = newProps;
             while (d3svgBrcaRef.lastChild) {
                 d3svgBrcaRef.removeChild(d3svgBrcaRef.lastChild);
             }
             var subSetData = data.map(this.filterAttributes);
-            d3svgBrcaRef = React.findDOMNode(this.refs.d3svgBrca);
+            d3svgBrcaRef = ReactDOM.findDOMNode(this.refs.d3svgBrca);
             while (d3svgBrcaRef.lastChild ) {
                 d3svgBrcaRef.removeChild(d3svgBrcaRef.lastChild);
             }

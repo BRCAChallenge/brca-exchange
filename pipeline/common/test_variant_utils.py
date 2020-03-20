@@ -26,7 +26,8 @@ def test_variant_hgvs_roundtripping(v, hgvs_wrapper):
                           ('NC_000017.11:g.43086110_43086115dupACACAC', 'chr17:g.43086109:T>TACACAC'),
                           ('NC_000017.11:g.43098661_43098662insT',  'chr17:g.43098661:C>CT'),
                           ('NC_000017.11:g.43045730_43045731insCAGTGCCAGGACAGCAGG', 'chr17:g.43045730:C>CCAGTGCCAGGACAGCAGG'),
-                          ('NC_000017.11:g.43091784_43091817del', 'chr17:g.43091783:CGGTAGCAACGGTGCTATGCCTAGTAGACTGAGAA>C')
+                          ('NC_000017.11:g.43091784_43091817del', 'chr17:g.43091783:CGGTAGCAACGGTGCTATGCCTAGTAGACTGAGAA>C'),
+                          ('NC_000017.11:g.43091691_43091692inv', 'chr17:g.43091691:AG>CT')
                         ])
 def test_hgvs_to_vcf(hgvs_wrapper, v, expected, seq_fetcher):
     hgvs_var = hgvs_wrapper.hgvs_parser.parse(v)

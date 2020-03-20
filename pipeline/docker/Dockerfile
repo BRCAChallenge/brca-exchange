@@ -14,7 +14,8 @@ RUN apt-get update && apt-get install -y \
     rsync \
     vim \
     wget \
-    zlib1g-dev
+    zlib1g-dev \
+    netcat
 
 # Get the Docker binary
 RUN curl -fsSL get.docker.com -o get-docker.sh \
@@ -29,7 +30,6 @@ COPY test-requirements.txt .
 RUN pip install $(grep numpy requirements.txt)
 
 RUN pip install -r requirements.txt -r test-requirements.txt
-
 
 # install vcf tools
 RUN wget https://github.com/vcftools/vcftools/releases/download/v0.1.15/vcftools-0.1.15.tar.gz
@@ -47,11 +47,7 @@ ENV BRCA_RESOURCES=$res
 
 RUN mkdir -p $res /files/data && chmod -R o+rwx /files
 
-RUN git clone https://github.com/counsyl/hgvs.git
-# taking pyhgvs 0.9.4
-RUN cd hgvs && git checkout aebe5bd9683f4b5937fd653ce4b13fcd4f3ebb10 && python setup.py install
-
-RUN rm -r /opt/hgvs /root/.cache
+RUN rm -r  /root/.cache
 
 ARG FORCE_REBUILD=0
 COPY . /opt/brca-exchange
