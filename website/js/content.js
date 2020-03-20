@@ -240,7 +240,7 @@ const helpContentResearch = [
                 name: "What data is used in Multifactorial Likelihood Analysis?",
                 id: "multifactorial-likelihood-analysis",
                 contents: require("../content/help/research/multifactorial-likelihood-analysis.md"),
-                reference: "https://www.ncbi.nlm.nih.gov/pubmed/21990134"
+                // reference: "https://www.ncbi.nlm.nih.gov/pubmed/21990134"
             },
             {
                 name: "What information is provided in the Allele Frequency Reference Sets Tile?",

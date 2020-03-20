@@ -56,7 +56,8 @@ def extractSynonyms(el):
         type = a.get('Type').lower()
         if type in include_types_norm or ('hgvs' in type and type
                                                not in exclude_hgvs_norm):
-            sy.append(a.text)
+            if a.text is not None:
+                sy.append(a.text)
 
     return sy + sy_alt
 

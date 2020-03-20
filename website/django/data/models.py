@@ -332,6 +332,7 @@ class Variant(models.Model):
     BX_ID_exLOVD = models.TextField(default='')
     BX_ID_GnomAD = models.TextField(null=True)
     BX_ID_Findlay_BRCA1_Ring_Function_Scores = models.TextField(default='')
+    VR_ID = models.TextField(null=True)
     Mupit_Structure = models.ForeignKey(MupitStructure, null=True)
 
     # Data Versioning
@@ -914,6 +915,7 @@ class CurrentVariant(models.Model):
     BX_ID_exLOVD = models.TextField(default='')
     BX_ID_GnomAD = models.TextField(null=True)
     BX_ID_Findlay_BRCA1_Ring_Function_Scores = models.TextField(default='')
+    VR_ID = models.TextField(null=True)
     Mupit_Structure = models.ForeignKey(MupitStructure, null=True)
 
     # Data Versioning

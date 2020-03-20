@@ -200,21 +200,25 @@ class AlleleFrequencyCharts extends React.Component {
         };
 
         return (
-            <div className="alleleFrequencyChartOuterContainer">
-                {flag && flag !== '-'
-                    ? <div className="glyphicon glyphicon-flag gnomad-flag"><span style={{color: 'black', marginLeft: '6px'}}>{flag}</span></div>
-                    : ''
-                }
-                <div className="alleleFrequencyChartContainer">
-                    <div className='alleleFrequencyChart'>
-                        <BarChart ref={`${prop}_alleleFreq2`} container={`${prop}_alleleFreq1`} options={fullscaleChartOptions}/>
+            <tr>
+                <td>
+                    <div className="alleleFrequencyChartOuterContainer">
+                        {flag && flag !== '-'
+                            ? <div className="glyphicon glyphicon-flag gnomad-flag"><span style={{color: 'black', marginLeft: '6px'}}>{flag}</span></div>
+                            : ''
+                        }
+                        <div className="alleleFrequencyChartContainer">
+                            <div className='alleleFrequencyChart'>
+                                <BarChart ref={`${prop}_alleleFreq2`} container={`${prop}_alleleFreq1`} options={fullscaleChartOptions}/>
+                            </div>
+                            <div className='alleleFrequencyChart' onClick={this.toggleScale.bind(this, `${prop}_alleleFreq2`)}>
+                                <BarChart ref={`${prop}_alleleFreq2`} container={`${prop}_alleleFreq2`} options={scaledChartOptions} />
+                                <div style={{textAlign: 'center', color: 'grey', fontSize: '12px'}}>(click chart to change scale)</div>
+                            </div>
+                        </div>
                     </div>
-                    <div className='alleleFrequencyChart' onClick={this.toggleScale.bind(this, `${prop}_alleleFreq2`)}>
-                        <BarChart ref={`${prop}_alleleFreq2`} container={`${prop}_alleleFreq2`} options={scaledChartOptions} />
-                        <div style={{textAlign: 'center', color: 'grey', fontSize: '12px'}}>(click chart to change scale)</div>
-                    </div>
-                </div>
-            </div>
+                </td>
+            </tr>
         );
     }
 

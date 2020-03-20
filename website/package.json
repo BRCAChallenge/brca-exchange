@@ -1,6 +1,6 @@
 {
   "name": "brcaexchange",
-  "version": "3.81.0-alpha.0",
+  "version": "3.82.0-alpha.0",
   "description": "brca variant browser",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "lint": "eslint --no-color js/*.js test/*.js",
     "eslint": "eslint",
     "clean": "rimraf build/*",
-    "start": "webpack-dev-server --devtool eval --progress --colors --history-api-fallback --host 0.0.0.0",
+    "start": "webpack-dev-server --devtool inline-cheap-module-source-map --progress --colors --history-api-fallback --host 0.0.0.0",
     "build": "webpack",
     "build:prod": "npm run build -- --config webpack.prod.js --devtool source-map",
     "prebuild": "npm run clean"
@@ -70,10 +70,11 @@
     "moment": "^2.17.1",
     "prop-types": "^15.7.2",
     "qs": "2.4.1",
-    "react": "^0.13.1",
-    "react-autosuggest": "git+https://github.com/moroshko/react-autosuggest.git#785ee38a752a929cceacec0e9207175592446a1a",
-    "react-bootstrap": "^0.20.0",
-    "react-data-components-bd2k": "^0.5.3",
+    "react": "^0.14.8",
+    "react-autosuggest": "^8.0.1",
+    "react-bootstrap": "^0.33.1",
+    "react-data-components-brcaex": "^0.5.6",
+    "react-dom": "^0.14.8",
     "react-ga": "^2.5.7",
     "react-remarkable": "^1.1.1",
     "react-router": "^0.13.3",

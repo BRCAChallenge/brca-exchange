@@ -4,6 +4,7 @@
 import {HARDLINK_GLYPH, idHelpClicked} from "./components/help/HardlinkHelper";
 
 const React = require('react');
+const ReactDOM = require('react-dom');
 const $ = require('jquery');
 
 const RawHTML = React.createClass({
@@ -21,7 +22,7 @@ const RawHTML = React.createClass({
 
         if (this.props.hardlinks) {
             // add tooltips to anything that has an id
-            const $idElems = $("*[id]", this.refs.me.getDOMNode());
+            const $idElems = $("*[id]", ReactDOM.findDOMNode(this.refs.me));
             $idElems.each((idx, elem) => {
                 // TODO: ideally we'd replace this ad-hoc html element with the actual HardlinkHelper, although that
                 //  would be tricky/hacky since the contents of RawHTML aren't part of the react component tree...
@@ -39,7 +40,7 @@ const RawHTML = React.createClass({
     render: function() {
         var {html, ...otherProps} = this.props;
         return (
-            <div ref="me" className='markdown' {...otherProps} dangerouslySetInnerHTML={{__html: html}} />
+            <span style={{display: 'block'}} ref="me" className='markdown' {...otherProps} dangerouslySetInnerHTML={{__html: html}} />
         );
     }
 });

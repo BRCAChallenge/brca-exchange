@@ -39,11 +39,17 @@ class PipelineParams(luigi.Config):
     priors_docker_image_name = luigi.Parameter(default=str(None),
                                                description='docker image name for priors calculation')
 
+    vr_docker_image_name = luigi.Parameter(default=str(None),
+                                               description='docker image name for VR id gathering')
+
     release_notes = luigi.Parameter(default=str(None),
                                     description='notes for release, must be a .txt file')
 
     gene_config_path = luigi.Parameter(default=str(None),
                                        description='gene metadata config file')
+
+    seq_repo_dir = luigi.Parameter(default=str(None),
+                                   description='directory of seq_repo')
 
     def run(self):
         pass

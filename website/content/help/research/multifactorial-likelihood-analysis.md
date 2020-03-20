@@ -11,3 +11,7 @@ Component likelihoods and final classification are from multifactorial likelihoo
     This value is the likelihood ratio based on segregation analysis
 * #### Summary Family History Likelihood Ratio \(ExUV\) ((Sum_family_LR_exLOVD))
     This value is the likelihood ratio based on an analysis of the severity of summary family histories of breast and/ or ovarian cancer.
+
+<div>
+  Reference: <a href="https://www.ncbi.nlm.nih.gov/pubmed/21990134" target="_blank">https://www.ncbi.nlm.nih.gov/pubmed/21990134</a>
+</div>

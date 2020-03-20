@@ -3,7 +3,7 @@ from collections import namedtuple
 import hgvs
 
 from common import seq_utils
-
+from bioutils.sequences import reverse_complement
 
 class VCFVariant(namedtuple("VCFVariant", "chr,pos,ref,alt")):
     __slots__ = ()
@@ -66,8 +66,8 @@ class VCFVariant(namedtuple("VCFVariant", "chr,pos,ref,alt")):
 
         # require padding, i.e. inserting previous base to avoid empty alt
         # e.g. instead of 'C'>'' do 'AC'>'A'
-        if edit_type.startswith('del') or edit_type.startswith('ins') or edit_type.startswith('dup'):
-            if not edit_type.startswith('ins'):
+        if edit_type.startswith('del') or edit_type.startswith('ins') or edit_type.startswith('dup') or edit_type.startswith('inv'):
+            if not edit_type.startswith('ins') and not edit_type.startswith('inv'):
                 pos -= 1
 
             # transforming 'del' to a delins
@@ -81,4 +81,7 @@ class VCFVariant(namedtuple("VCFVariant", "chr,pos,ref,alt")):
             elif edit_type.startswith('del'):
                 ref = padding + ref
                 alt = padding + alt
+            elif edit_type.startswith('inv'):
+                alt = reverse_complement(ref)
+
         return VCFVariant(int(chr), int(pos), ref, alt)

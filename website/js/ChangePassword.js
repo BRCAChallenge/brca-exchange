@@ -1,6 +1,7 @@
 'use strict';
 
 var React = require('react');
+var ReactDOM = require('react-dom');
 var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {State, Navigation} = require('react-router');
 var {$c} = require('./Signup');
@@ -103,11 +104,11 @@ var ChangePasswordForm = React.createClass({
     isValid: function () {
         var compulsoryFields = ['password', 'passwordConfirm'];
         var errors = {};
-        if (this.refs.password.getDOMNode().value !== this.refs.passwordConfirm.getDOMNode().value) {
+        if (ReactDOM.findDOMNode(this.refs.password).value !== ReactDOM.findDOMNode(this.refs.passwordConfirm).value) {
             errors.passwordConfirm = "The passwords don't match";
         }
         compulsoryFields.forEach(function (field) {
-            var value = this.refs[field].getDOMNode().value.trim();
+            var value = ReactDOM.findDOMNode(this.refs[field]).value.trim();
             if (!value) {
                 errors[field] = 'This field is required';
             }
@@ -117,8 +118,8 @@ var ChangePasswordForm = React.createClass({
     },
     getFormData: function () {
         var data = {
-            password: this.refs.password.getDOMNode().value,
-			passwordConfirm: this.refs.passwordConfirm.getDOMNode().value
+            password: ReactDOM.findDOMNode(this.refs.password).value,
+			passwordConfirm: ReactDOM.findDOMNode(this.refs.passwordConfirm).value
         };
         return data;
     },
