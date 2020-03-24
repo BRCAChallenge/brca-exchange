@@ -4,8 +4,8 @@ import json
 import time
 import numpy as np
 import pandas as pd
-from math import floor, log10, isnan
 import argparse
+from math import floor, log10, isnan
 
 def fetch(jsondata, url="https://gnomad.broadinstitute.org/api"):
     # The server gives a generic error message if the content type isn't
@@ -182,12 +182,10 @@ def fetch_data_for_one_variant(variant_id, dataset, max_retries=5):
 def variant_set_to_variant_data(variants, dataset):
     variant_details = []
     for this_variant in variants:
-            variant_data = fetch_data_for_one_variant(this_variant, dataset)
-            if variant_data is not None:
-                variant_details.append(variant_data)
+        variant_data = fetch_data_for_one_variant(this_variant, dataset)
+        if variant_data is not None:
+            variant_details.append(variant_data)
             time.sleep(0.01)
-        else:
-            break
     return(variant_details)
 
 
