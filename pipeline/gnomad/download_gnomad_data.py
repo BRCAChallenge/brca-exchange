@@ -5,7 +5,7 @@ import time
 import numpy as np
 import pandas as pd
 from math import floor, log10, isnan
-import pdb
+import argparse
 
 def fetch(jsondata, url="https://gnomad.broadinstitute.org/api"):
     # The server gives a generic error message if the content type isn't
@@ -104,7 +104,7 @@ def gene_to_region_variants(gene_name, dataset_id):
                                      coords["stop"], dataset_id)
     return(set(variantList))
 
-def variant_set_to_variant_data(variants, dataset):
+def fetch_data_for_one_variant(variant_id, dataset, max_retries=5):
     variant_detail_query = """
         query GnomadVariant($variantId: String!, $datasetId: DatasetId!) {
             variant(variantId: $variantId, dataset: $datasetId) {
@@ -115,6 +115,10 @@ def variant_set_to_variant_data(variants, dataset):
                 variantId                                              
                 ... on GnomadVariantDetails {
                         flags
+                        sortedTranscriptConsequences {
+                            transcript_id
+                            hgvsc
+                        }
                     }
                     exome {
                         ac
@@ -151,23 +155,39 @@ def variant_set_to_variant_data(variants, dataset):
                 }
              }"""
     headers = { "content-type": "application/json" }
+    print("Fetching", variant_id)
+    variant_detail_variables = {
+        "variantId": variant_id,
+        "datasetId": dataset,
+    }
+    retries = 0
+    while retries < max_retries:
+        try:
+            response = requests.post(
+                'http://gnomad.broadinstitute.org/api',
+                json={
+                    "query": variant_detail_query,
+                    "variables": variant_detail_variables
+                },
+                headers=headers)
+            parse = json.loads(response.text)
+        except json.decoder.JSONDecodeError:
+            retries += 1
+            time.sleep(0.1)
+        else:
+            return(parse['data']['variant'])
+    return None
+
+
+def variant_set_to_variant_data(variants, dataset):
     variant_details = []
     for this_variant in variants:
-        variant_detail_variables = {
-            "variantId": this_variant,
-            "datasetId": dataset,
-            }
-        response = requests.post(
-            'http://gnomad.broadinstitute.org/api',
-            json={
-                "query": variant_detail_query,
-                "variables": variant_detail_variables
-                },
-            headers=headers)
-        parse = json.loads(response.text)
-        variant_details.append(parse['data']['variant'])
-        print('fetched', this_variant)
-        time.sleep(0.01)
+            variant_data = fetch_data_for_one_variant(this_variant, dataset)
+            if variant_data is not None:
+                variant_details.append(variant_data)
+            time.sleep(0.01)
+        else:
+            break
     return(variant_details)
 
 
@@ -225,25 +245,61 @@ def flatten_populations(variants):
     return variants
 
 
+def find_correct_hgvs(variants, transcripts):
+    """
+    Given the set of transcript IDs that we queried for (one per gene), and
+    given the data for one particular variant, return the cDNA HGVS string
+    for that variant, corresponding to one of the transcripts we're intereted
+    in.  There should be one and only one.  If there is no such transcript
+    and HGVS string for this variant, then make a note and throw out the variant.
+    """
+    variants_in_expected_transcripts = []
+    for variant in variants:
+        sortedTranscriptConsequences = variant["sortedTranscriptConsequences"]
+        for transcript_hgvs in sortedTranscriptConsequences:
+            if transcript_hgvs["transcript_id"] in transcripts:
+                variant["hgvs"] = transcript_hgvs["hgvsc"]
+                variant["transcript"] = transcript_hgvs["transcript_id"]
+                del variant["sortedTranscriptConsequences"]
+                variants_in_expected_transcripts.append(variant)
+                break
+        if "hgvs" not in variant:
+            print("Warning: variant %s falls outside the expected transcripts"
+                  % variant["variantId"])
+    return variants_in_expected_transcripts
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-o', '--output', help='Ouput tsv file result.')
+    options = parser.parse_args()
+    return options
+
+
 def main():
+    f_out = parse_args().output
     dataset = "gnomad_r2_1_non_cancer"
+    brca1_transcript ="ENST00000357654"
+    brca2_transcript = "ENST00000544455"
+    transcripts = (brca1_transcript, brca2_transcript)
 
     # organize brca1 request
-    brca1_exonic_variants = transcript_to_variants("ENST00000357654", dataset)
+    brca1_exonic_variants = transcript_to_variants(brca1_transcript, dataset)
     brca1_intronic_variants = gene_to_region_variants("BRCA1", dataset)
     brca1_variants = brca1_intronic_variants | brca1_exonic_variants
 
     # organize brca2 request
-    brca2_exonic_variants = transcript_to_variants("ENST00000351666", dataset)
+    brca2_exonic_variants = transcript_to_variants(brca2_transcript, dataset)
     brca2_intronic_variants = gene_to_region_variants("BRCA2", dataset)
     brca2_variants = brca2_intronic_variants | brca2_exonic_variants
-    
+
     # combine requests and get brca1 and brca2 data from gnomAD
     brca12_variants = brca1_variants | brca2_variants
     brca12_variant_data = variant_set_to_variant_data(brca12_variants, dataset)
 
-    # flatten, convert to dataframe, compute allele frequencies, and normalize
-    variants_with_flattened_populations = flatten_populations(brca12_variant_data)
+    # find hgvs, flatten, convert to dataframe, compute allele frequencies, and normalize
+    variants_with_hgvs = find_correct_hgvs(brca12_variant_data, transcripts)
+    variants_with_flattened_populations = flatten_populations(variants_with_hgvs)
     variants_df = pd.json_normalize(variants_with_flattened_populations)
     variants_df['flags'] = variants_df['flags'].apply(', '.join)
     df_with_allele_values = compile_allele_values(variants_df)

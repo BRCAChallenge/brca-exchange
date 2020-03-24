@@ -81,7 +81,7 @@ def main():
             INFO_field.append('{0}={1}'.format(field, field_value))
 
         # extract hgvs cDNA term for variant and cleanup formatting
-        hgvsName = parsedLine[fieldIdxDict['hgvsc']]
+        hgvsName = parsedLine[fieldIdxDict['hgvs']]
         if hgvsName == '-':
             logging.debug("hgvs name == '-' for line: %s", parsedLine)
             continue
