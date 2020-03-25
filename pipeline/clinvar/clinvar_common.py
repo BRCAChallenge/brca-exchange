@@ -126,7 +126,7 @@ def _extract_genomic_coordinates_from_non_genomic_fields(meas_el, assemblies = [
                 vcf = variant_utils.VCFVariant.from_hgvs_obj(v_g)
                 coords[assembly] = vcf
     except HGVSError as e:
-        logging.warn("HGVS Error while attempting to process " + preprocessed_var + " : " + str(e))
+        logging.warning("HGVS Error while attempting to process " + preprocessed_var + " : " + str(e))
 
     return coords
 

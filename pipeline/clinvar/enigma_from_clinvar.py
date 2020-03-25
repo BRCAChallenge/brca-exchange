@@ -1,14 +1,15 @@
 import copy
 import itertools
+import logging
 import re
 import logging
 import click
 import pandas as pd
 from lxml import etree
 
-from . import clinvar
 import common
-from . import hgvs_utils
+from clinvar import clinvar_common as clinvar
+from clinvar import hgvs_utils
 
 default_val = None
 
@@ -21,7 +22,7 @@ def _get_clinvar_sets(fin):
     return root.xpath('//ClinVarSet')
 
 
-three_letters_aa = re.compile('p.\(?[A-Z][a-z]{2}[0-9]+[A-Z][a-z]{2}') # e.g. p.(Tyr831SerfsTer9)
+three_letters_aa = re.compile('p.\\(?[A-Z][a-z]{2}[0-9]+[A-Z][a-z]{2}') # e.g. p.(Tyr831SerfsTer9)
 def _is_bic_designation(s):
     return any(k in s.lower() for k in {'ins', 'del', 'dup'}) or \
         (not s.startswith('p.') and '>' in s) or \
@@ -218,7 +219,7 @@ def parse_record(cvs_el, hgvs_util, assembly="GRCh38"):
     if assembly not in genomic_coords.keys():
         var_name = clinvar.textIfPresent(measure_el,  'Name/ElementValue[@Type="Preferred"]')
 
-        logging.warn("Skipping variant %s as no genomic coordinates could be extracted", var_name)
+        logging.warning("Skipping variant %s as no genomic coordinates could be extracted", var_name)
         return []
 
     rec["Genomic_Coordinate"] = str(genomic_coords[assembly]).replace('g.', '')
@@ -281,10 +282,9 @@ def _create_df(variant_records):
 @click.option('--logs', type=click.Path(writable=True))
 def main(filtered_clinvar_xml, output, logs):
     common.utils.setup_logfile(logs)
+    hgvs_util = hgvs_utils.HGVSWrapper()
 
     enigma_sets = _get_clinvar_sets(filtered_clinvar_xml)
-
-    hgvs_util = hgvs_utils.HGVSWrapper()
 
     variant_records_lsts = [ parse_record(s, hgvs_util) for s in enigma_sets ]
 
