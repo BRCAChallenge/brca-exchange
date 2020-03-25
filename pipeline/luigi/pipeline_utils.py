@@ -40,7 +40,7 @@ def download_file_and_display_progress(url, file_name=None):
     u = urlopen_with_retry(url)
     f = open(file_name, 'wb')
     meta = u.info()
-    file_size = int(meta.getheaders("Content-Length")[0])
+    file_size = int(meta.get("Content-Length")[0])
     print("Downloading: %s Bytes: %s" % (file_name, file_size))
 
     file_size_dl = 0
