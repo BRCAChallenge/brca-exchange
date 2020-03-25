@@ -2,6 +2,7 @@ import hgvs
 import hgvs.parser
 import hgvs.dataproviders.uta
 import hgvs.assemblymapper
+from hgvs.exceptions import HGVSError
 
 import logging
 import time
@@ -29,15 +30,15 @@ class HGVSWrapper:
             time.sleep(1)
 
             if(retry_cnts > 0):
-                logging.warn("Retrying another time for %s", hgvs_cdna)
+                logging.warning("Retrying another time for %s", hgvs_cdna)
 
                 return self.compute_protein_change(hgvs_cdna, include_braces, retry_cnts - 1)
             else:
                 # fail the pipeline. We actually should get data, but don't due to some intermittent issue
                 # see also https://github.com/biocommons/hgvs/issues/519
                 raise RuntimeError("HGVS data not available for %s . Cannot continue. Error was %s", hgvs_cdna, e.message)
-        except Exception as e:
-            logging.warning('Issues converting %s. %s type %s', hgvs_cdna, e.message, type(e))
+        except HGVSError as e:
+            logging.warning('Issues converting %s. %s type %s', hgvs_cdna, e, type(e))
             return None
 
         return vp
