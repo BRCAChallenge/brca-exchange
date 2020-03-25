@@ -3,7 +3,7 @@ import argparse
 import copy
 import csv
 import re
-from .utilities import isEmpty, round_sigfigs
+from data_merging.utilities import isEmpty, round_sigfigs
 
 EMPTY = "-"
 FIELDS_TO_REMOVE = ["Protein_ClinVar",

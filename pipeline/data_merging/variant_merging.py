@@ -16,11 +16,11 @@ from shutil import copy
 
 import vcf
 
-from . import aggregate_reports
+from data_merging import aggregate_reports
 from common import seq_utils, config
-from . import utilities
-from . import variant_equivalence
-from .variant_merging_constants import *
+from data_merging import utilities
+from data_merging import variant_equivalence
+from data_merging.variant_merging_constants import *
 
 DISCARDED_REPORTS_WRITER = None
 

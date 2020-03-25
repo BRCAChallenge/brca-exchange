@@ -4,14 +4,13 @@ import logging
 
 import vcf
 
-from .variant_merging import (
+from data_merging.variant_merging import (
     add_columns_to_enigma_data,
     associate_chr_pos_ref_alt_with_enigma_item,
     associate_chr_pos_ref_alt_with_item,
     is_outside_boundaries,
     FIELD_DICT,
-    ENIGMA_FILE,
-    COLUMN_SOURCE
+    ENIGMA_FILE
 )
 
 

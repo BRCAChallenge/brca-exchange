@@ -7,7 +7,7 @@ import csv
 import logging
 from os import listdir
 from os.path import isfile, join, abspath
-from .aggregate_reports import get_reports_files
+from data_merging.aggregate_reports import get_reports_files
 import vcf
 
 
