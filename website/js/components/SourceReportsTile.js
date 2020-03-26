@@ -66,9 +66,6 @@ export default class SourceReportsTile extends React.Component {
 
         this.setState({
             reportExpanded: Array.from({ length: this.props.submissions.length }, () => newExpansion)
-        }, () => {
-            // causes the parent to perform a (delayed) reflow
-            this.props.onReportToggled(this.collapser.getCollapsableDOMNode());
         });
     }
 
@@ -76,10 +73,7 @@ export default class SourceReportsTile extends React.Component {
         // return a new array in which only the selected element is toggled
         this.setState((pstate) => ({
             reportExpanded: pstate.reportExpanded.map((x, j) => (idx === j) ? !x : x)
-        }), () => {
-            // causes the parent to perform a (delayed) reflow
-            this.props.onReportToggled(this.collapser.getCollapsableDOMNode());
-        });
+        }));
     };
 
     render() {
@@ -121,6 +115,7 @@ export default class SourceReportsTile extends React.Component {
                     reportBinding={this.props.reportBinding} cols={formattedCols} data={submissionData}
                     hideEmptyItems={this.props.hideEmptyItems}
                     onReportToggled={this.reportToggled}
+                    relayoutGrid={this.props.relayoutGrid}
                     showHelp={this.props.showHelp}
                     expanded={this.state.reportExpanded[idx]}
                     tooltips={this.props.tooltips}
@@ -130,46 +125,54 @@ export default class SourceReportsTile extends React.Component {
 
         // create the source panel itself now
         const groupTitle = `source-panel-${this.props.sourceName}`;
-        const header = (
-            <h3>
-                <a className="title" href="#" onClick={(event) => this.props.onChangeGroupVisibility(groupTitle, event, this.collapser.getCollapsableDOMNode())}>
-                    {this.props.groupTitle}
-                </a>
-
-                <a title='collapse all reports'
-                   className="toggle-subfields"
-                    onClick={(event) => this.setAllReportExpansion(event, false)}
-                    style={{cursor: 'pointer', marginRight: '10px'}}>
-                    <i className="fa fa-angle-double-up" aria-hidden="true" />
-                </a>
-
-                <a title='expand all reports'
-                   className="toggle-subfields"
-                    onClick={(event) => this.setAllReportExpansion(event, true)}
-                    style={{cursor: 'pointer'}}>
-                    <i className="fa fa-angle-double-down" aria-hidden="true" />
-                </a>
-
-                {
-                    this.props.helpSection &&
-                    <GroupHelpButton group={this.props.helpSection}
-                        onClick={(event) => {
-                            this.props.showHelp(event, this.props.helpSection);
-                            return true;
-                        }}
-                    />
-                }
-            </h3>
-        );
 
         return (
             <div key={`group_collection-${groupTitle}`} className={`variant-detail-group variant-submitter-group ${slugify(this.props.sourceName)}-submitter`}>
                 <Panel
-                    ref={(me) => { this.collapser = me; }}
-                    header={header}
-                    collapsable={true}
-                    defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}>
-                    {submitters}
+                    collapsible={true}
+                    defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}
+                >
+                    <Panel.Heading>
+                        <Panel.Title componentClass="h3">
+                            <Panel.Toggle componentClass="a" className="title"
+                                onClick={(event) => this.props.onChangeGroupVisibility(groupTitle, event)}
+                            >
+                                {this.props.groupTitle}
+                            </Panel.Toggle>
+
+                            <a title='collapse all reports'
+                                className="toggle-subfields"
+                                onClick={(event) => this.setAllReportExpansion(event, false)}
+                                style={{cursor: 'pointer', marginRight: '10px'}}>
+                                <i className="fa fa-angle-double-up" aria-hidden="true" />
+                            </a>
+
+                            <a title='expand all reports'
+                                className="toggle-subfields"
+                                onClick={(event) => this.setAllReportExpansion(event, true)}
+                                style={{cursor: 'pointer'}}>
+                                <i className="fa fa-angle-double-down" aria-hidden="true" />
+                            </a>
+
+                            {
+                                this.props.helpSection &&
+                                <GroupHelpButton group={this.props.helpSection}
+                                    onClick={(event) => {
+                                        this.props.showHelp(event, this.props.helpSection);
+                                        return true;
+                                    }}
+                                />
+                            }
+                        </Panel.Title>
+                    </Panel.Heading>
+                    <Panel.Collapse
+                        onEntered={this.props.relayoutGrid}
+                        onExited={this.props.relayoutGrid}
+                    >
+                        <Panel.Body>
+                        {submitters}
+                        </Panel.Body>
+                    </Panel.Collapse>
                 </Panel>
             </div>
         );

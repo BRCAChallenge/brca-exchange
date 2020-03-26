@@ -1,6 +1,7 @@
 'use strict';
 
 var React = require('react');
+var ReactDOM = require('react-dom');
 var $ = require('jquery');
 var config  = require('./config');
 var {Grid, Row, Col, Button} = require('react-bootstrap');
@@ -144,11 +145,11 @@ var MailingListForm = React.createClass({
     isValid: function () {
         var compulsoryFields = ['email', 'emailConfirm'];
         var errors = {};
-        if (this.refs.email.getDOMNode().value !== this.refs.emailConfirm.getDOMNode().value) {
+        if (ReactDOM.findDOMNode(this.refs.email).value !== ReactDOM.findDOMNode(this.refs.emailConfirm).value) {
             errors.emailConfirm = "The emails don't match";
         }
         compulsoryFields.forEach(function (field) {
-            var value = this.refs[field].getDOMNode().value.trim();
+            var value = ReactDOM.findDOMNode(this.refs[field]).value.trim();
             if (!value) {
                 errors[field] = 'This field is required';
             }
@@ -167,9 +168,9 @@ var MailingListForm = React.createClass({
     },
     getFormData: function () {
         var data = {
-            "email": this.refs.email.getDOMNode().value,
-            "firstName": this.refs.firstName.getDOMNode().value,
-            "lastName": this.refs.lastName.getDOMNode().value,
+            "email": ReactDOM.findDOMNode(this.refs.email).value,
+            "firstName": ReactDOM.findDOMNode(this.refs.firstName).value,
+            "lastName": ReactDOM.findDOMNode(this.refs.lastName).value,
         };
         return data;
     },

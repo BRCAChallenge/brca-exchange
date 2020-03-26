@@ -1,6 +1,7 @@
 'use strict';
 
 var React = require('react');
+var ReactDOM = require('react-dom');
 var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {State, Navigation, Link} = require('react-router');
 var auth = require('./auth');
@@ -89,7 +90,7 @@ var ResetPasswordForm = React.createClass({
         var compulsoryFields = ['email'];
         var errors = {};
         compulsoryFields.forEach(function (field) {
-            var value = this.refs[field].getDOMNode().value.trim();
+            var value = ReactDOM.findDOMNode(this.refs[field]).value.trim();
             if (!value) {
                 errors[field] = 'This field is required';
             }
@@ -99,7 +100,7 @@ var ResetPasswordForm = React.createClass({
     },
     getFormData: function () {
         var data = {
-            email: this.refs.email.getDOMNode().value
+            email: ReactDOM.findDOMNode(this.refs.email).value
         };
         return data;
     },
@@ -233,7 +234,7 @@ var SigninForm = React.createClass({
         var compulsoryFields = ['email', 'password'];
         var errors = {};
         compulsoryFields.forEach(function (field) {
-            var value = this.refs[field].getDOMNode().value.trim();
+            var value = ReactDOM.findDOMNode(this.refs[field]).value.trim();
             if (!value) {
                 errors[field] = 'This field is required';
             }
@@ -243,8 +244,8 @@ var SigninForm = React.createClass({
     },
     getFormData: function () {
         var data = {
-            email: this.refs.email.getDOMNode().value
-            , password: this.refs.password.getDOMNode().value
+            email: ReactDOM.findDOMNode(this.refs.email).value
+            , password: ReactDOM.findDOMNode(this.refs.password).value
         };
         return data;
     },

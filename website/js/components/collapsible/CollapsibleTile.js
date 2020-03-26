@@ -29,8 +29,8 @@ export default class CollapsibleTile extends React.Component {
         const visibleFields = {};
 
         React.Children.map(props.children, (c) => {
-            if (React.isValidElement(c) && c.props.fieldName) {
-                visibleFields[c.props.fieldName] = c.props.defaultVisible !== undefined ? c.props.defaultVisible : false;
+            if (React.isValidElement(c) && c.props.id) {
+                visibleFields[c.props.id] = c.props.defaultVisible !== undefined ? c.props.defaultVisible : false;
             }
         });
 
@@ -44,21 +44,15 @@ export default class CollapsibleTile extends React.Component {
             // generate a new fieldExpansions object where all existing fields' visibilities are set to newExpansion
             fieldExpansions: Object.keys(pstate.fieldExpansions)
                 .reduce((o, k) => { o[k] = newExpansion; return o; }, {})
-        }), () => {
-            // causes the parent to perform a (delayed) reflow
-            this.props.onDimsChanged(this.collapser.getCollapsableDOMNode());
-        });
+        }));
     }
 
-    fieldToggled(fieldName) {
+    fieldToggled(id) {
         this.setState((pstate) => ({
             fieldExpansions: update(pstate.fieldExpansions, {
-                [fieldName]: (visible) => visible ? !visible : true
+                [id]: (visible) => visible ? !visible : true
             })
-        }), () => {
-            // causes the parent to perform a (delayed) reflow
-            this.props.onDimsChanged(this.collapser.getCollapsableDOMNode());
-        });
+        }));
     }
 
     render() {
@@ -69,54 +63,64 @@ export default class CollapsibleTile extends React.Component {
 
         // create the source panel itself now
         const groupVisID = `group-panel-${this.props.groupTitle}`;
-        const header = (
-            <h3>
-                <a className="title" href="#" onClick={(event) => this.props.onChangeGroupVisibility(groupVisID, event, this.collapser.getCollapsableDOMNode())}>
-                    {this.props.displayTitle || this.props.groupTitle}
-                </a>
-
-                <a title='collapse all fields'
-                   className="toggle-subfields"
-                    onClick={(event) => this.setAllFieldsExpansion(event, false)}
-                    style={{cursor: 'pointer', marginRight: '10px'}}>
-                    <i className="fa fa-angle-double-up" aria-hidden="true" />
-                </a>
-
-                <a title='expand all fields'
-                   className="toggle-subfields"
-                    onClick={(event) => this.setAllFieldsExpansion(event, true)}
-                    style={{cursor: 'pointer'}}>
-                    <i className="fa fa-angle-double-down" aria-hidden="true" />
-                </a>
-
-                {
-                    this.props.helpSection &&
-                    <GroupHelpButton group={this.props.helpSection}
-                        onClick={(event) => {
-                            this.props.showHelp(event, this.props.helpSection);
-                            return true;
-                        }}
-                    />
-                }
-            </h3>
-        );
 
         // inject props for allowing us to react to child sections' request to change their visibility
         const togglableKids = React.Children.map(this.props.children, (c) => React.cloneElement(c, {
             onFieldToggled: this.fieldToggled,
-            expanded: fieldExpansions[c.props.fieldName],
+            expanded: fieldExpansions[c.props.id],
+            relayoutGrid: this.props.relayoutGrid,
             hideEmptyItems: this.props.hideEmptyItems
         }));
 
         return (
             <div key={`group_collection-${groupVisID}`} className={ allEmpty && this.props.hideEmptyItems ? "group-empty variant-detail-group" : "variant-detail-group" }>
                 <Panel
-                    ref={(me) => { this.collapser = me; }}
-                    header={header}
-                    collapsable={true}
+                    collapsible={true}
                     defaultExpanded={localStorage.getItem("collapse-group_" + groupVisID) !== "true"}
-                    hideEmptyItems={this.props.hideEmptyItems}>
-                    { togglableKids }
+                    hideEmptyItems={this.props.hideEmptyItems}
+                >
+                    <Panel.Heading>
+                        <Panel.Title componentClass="h3">
+                            <Panel.Toggle componentClass="a" className="title"
+                                onClick={(event) => this.props.onChangeGroupVisibility(groupVisID, event)}
+                            >
+                                {this.props.displayTitle || this.props.groupTitle}
+                            </Panel.Toggle>
+
+                            <a title='collapse all fields'
+                                className="toggle-subfields"
+                                onClick={(event) => this.setAllFieldsExpansion(event, false)}
+                                style={{cursor: 'pointer', marginRight: '10px'}}>
+                                <i className="fa fa-angle-double-up" aria-hidden="true" />
+                            </a>
+
+                            <a title='expand all fields'
+                                className="toggle-subfields"
+                                onClick={(event) => this.setAllFieldsExpansion(event, true)}
+                                style={{cursor: 'pointer'}}>
+                                <i className="fa fa-angle-double-down" aria-hidden="true" />
+                            </a>
+
+                            {
+                                this.props.helpSection &&
+                                <GroupHelpButton group={this.props.helpSection}
+                                    onClick={(event) => {
+                                        this.props.showHelp(event, this.props.helpSection);
+                                        return true;
+                                    }}
+                                />
+                            }
+                        </Panel.Title>
+                    </Panel.Heading>
+                    <Panel.Collapse
+                        onEntered={this.props.relayoutGrid}
+                        onExited={this.props.relayoutGrid}
+                    >
+                        <Panel.Body>
+                        { togglableKids }
+                        </Panel.Body>
+                    </Panel.Collapse>
+
                 </Panel>
             </div>
         );
@@ -124,7 +128,7 @@ export default class CollapsibleTile extends React.Component {
 };
 
 CollapsibleTile.defaultProps = {
-    onDimsChanged: () => {
-        console.warn("onDimsChanged() unspecified; it should be specified to cause the parent container to reflow");
+    relayoutGrid: () => {
+        console.warn("relayoutGrid() unspecified; it should be specified to allow the parent container to reflow");
     }
 };

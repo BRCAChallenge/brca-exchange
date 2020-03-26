@@ -17,6 +17,7 @@ require('es5-shim/es5-sham');
 
 require('./favicons');
 var React = require('react');
+var ReactDOM = require('react-dom');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 var DisclaimerModal = require('./DisclaimerModal');
 var RawHTML = require('./RawHTML');
@@ -35,7 +36,6 @@ var moment = require('moment');
 // faisal: includes for masonry/isotope
 var Isotope = require('isotope-layout');
 require('isotope-packery');
-import TransitionEvents from 'react/lib/ReactTransitionEvents';
 import debounce from 'lodash/debounce';
 
 var brcaLogo = require('./img/BRCA-Exchange-tall-tranparent.png');
@@ -128,7 +128,7 @@ var Footer = React.createClass({
                 <div className="col-sm-5 right-footer">
                     <ul>
                         <li>
-                            <li><a href="/whydonate">Donate</a></li>
+                            <a href="/whydonate">Donate</a>
                         </li>
                         <li>
                             <DisclaimerModal text="Disclaimer"/>
@@ -163,7 +163,6 @@ var Home = React.createClass({
         this.transitionTo('/variants', null, {search: value});
     },
     render: function() {
-        let {suggestions} = this.props;
         let currentSupporters = _.filter(logos, function(logo) {
                                     return logo.currentSupporter;
                                 });
@@ -190,7 +189,6 @@ var Home = React.createClass({
                     <Col smOffset={2} sm={8}>
                         <VariantSearch
                             id='home-search'
-                            suggestions={suggestions}
                             onSearch={this.onSearch}/>
                     </Col>
                 </Row>
@@ -497,12 +495,14 @@ var Database = React.createClass({
 					<Button className="btn-default" onClick={() =>this.setState({showModal: true})}>
 						Show Detail View
 					</Button>}
-					{this.props.mode === 'default' && this.state.showModal &&
-					<Modal onRequestHide={() => this.setState({ showModal: false })}>
-						<RawHTML html={content.pages.researchWarning}/>
-						<Button onClick={() => {this.toggleMode();}}>Yes</Button>
-						<Button onClick={() => this.setState({ showModal: false })}>No</Button>
-					</Modal>}
+					{
+					    this.props.mode === 'default' && this.state.showModal &&
+                        <Modal show={true} onHide={() => this.setState({ showModal: false })}>
+                            <RawHTML html={content.pages.researchWarning}/>
+                            <Button onClick={() => {this.toggleMode();}}>Yes</Button>
+                            <Button onClick={() => this.setState({ showModal: false })}>No</Button>
+                        </Modal>
+					}
 				</Col>
 			</Row>);
     }
@@ -563,6 +563,10 @@ const IsoGrid = React.createClass({
     },
 
     relayout: function(fullRefresh) {
+        if (!this.masonry) {
+            return;
+        }
+
         if (fullRefresh) {
             this.masonry.reloadItems();
         }
@@ -669,16 +673,19 @@ var VariantDetail = React.createClass({
         if (this.isogrid) {
             this.isogrid.relayout(fullRefresh);
         }
-    }),
-    relayoutOnCollapsed: function(collapser) {
-        // this will relayout the page when the animation is finished
-        const endHandler = () => {
-            TransitionEvents.removeEndEventListener(collapser, endHandler);
-            this.relayoutGrid();
-        };
-        TransitionEvents.addEndEventListener(collapser, endHandler);
+    }, 100),
+    relayoutOnCollapsed: function(/* collapser */) {
+        console.warn("Deprecated relayoutOnCollapsed; replace relayoutOnCollapsed handlers w/direct calls to relayoutGrid() in your collapsing components");
+
+        // migration path:
+        // 1. remove references to bootstrap's deprecated CollapsableMixin
+        // 2. replace collapsible elements (i.e., ones that implement getCollapsableDOMNode,
+        //    getCollapsableDimensionValue) with the Collapse element. remove those functions.
+        // 3. instead of references to relayoutOnCollapsed, pass refs to this.relayoutGrid down to
+        //    collapsible components.
+        // 4. call this.relayoutGrid() in Collapse's onEntered, onExited events.
     },
-    onChangeGroupVisibility(groupTitle, event, collapser) {
+    onChangeGroupVisibility(groupTitle, event) {
         // stop the page from scrolling to the top (due to navigating to the fragment '#')
         event.preventDefault();
 
@@ -686,7 +693,10 @@ var VariantDetail = React.createClass({
         const willBeCollapsed = localStorage.getItem("collapse-group_" + groupTitle) !== "true";
         localStorage.setItem("collapse-group_" + groupTitle, willBeCollapsed ? "true" : "false");
 
-        this.relayoutOnCollapsed(collapser);
+        // this.relayoutOnCollapsed(collapser);
+        // this.relayoutGrid();
+        // note: anything listening to the localstorage setting above should relayout the grid
+        // itself, now that collapsing is handled by Collapse elements.
     },
     determineDiffRowColor: function(highlightRow) {
         return highlightRow ? 'danger' : '';
@@ -777,7 +787,7 @@ var VariantDetail = React.createClass({
             }
 
             diffRows.push(
-                <tr className={this.determineDiffRowColor(highlightRow)}>
+                <tr key={i} className={this.determineDiffRowColor(highlightRow)}>
                     <td><Link to={`/release/${release.id}`}>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</Link></td>
                     <td>{this.getPathogenicity(version, isReports)}</td>
                     <td>{diffHTML}</td>
@@ -845,15 +855,14 @@ var VariantDetail = React.createClass({
 
                 return (
                     <SourceReportsTile
+                        key="source-reports-tile"
                         groupTitle={groupTitle}
                         sourceName={reportSource}
                         reportBinding={reportBinding}
                         submissions={this.state.reports[reportSource]}
                         onChangeGroupVisibility={this.onChangeGroupVisibility}
+                        relayoutGrid={this.relayoutGrid}
                         hideEmptyItems={this.state.hideEmptyItems}
-                        onReportToggled={(collapser) => {
-                            this.relayoutOnCollapsed(collapser);
-                        }}
                         helpSection={reportBinding.helpKey}
                         showHelp={this.showHelp}
                         tooltips={this.state.tooltips}
@@ -864,13 +873,12 @@ var VariantDetail = React.createClass({
             if (alleleFrequencies) {
                 return (
                     <AlleleFrequenciesTile
+                        key="allele-frequency-tile"
                         alleleFrequencyData={innerGroups}
                         groupTitle={groupTitle}
                         onChangeGroupVisibility={this.onChangeGroupVisibility}
+                        relayoutGrid={this.relayoutGrid}
                         hideEmptyItems={this.state.hideEmptyItems}
-                        onFrequencyFieldToggled={(collapser) => {
-                            this.relayoutOnCollapsed(collapser);
-                        }}
                         helpSection="allele-frequency-reference-sets"
                         showHelp={this.showHelp}
                         tooltips={this.state.tooltips}
@@ -882,15 +890,14 @@ var VariantDetail = React.createClass({
             if (inSilicoPred) {
                 return (
                     <SilicoPredTile
+                        key="silico-pred-tile"
                         groupTitle='silico-pred-tile'
                         priors={variant.priors}
                         displayTitle={<span><i>In Silico</i> Prior Prediction (prior to considering other evidence)</span>}
                         Genomic_Coordinate_hg38={variant.Genomic_Coordinate_hg38}
                         onChangeGroupVisibility={this.onChangeGroupVisibility}
                         hideEmptyItems={this.state.hideEmptyItems}
-                        onDimsChanged={(collapser) => {
-                            this.relayoutOnCollapsed(collapser);
-                        }}
+                        relayoutGrid={this.relayoutGrid}
                         helpSection="in-silico-prior-probabilities-of-pathogenicity"
                         showHelp={this.showHelp}
                     />
@@ -900,14 +907,13 @@ var VariantDetail = React.createClass({
             if (groupTitle === "Functional Assay Results") {
                 return (
                     <FunctionalAssayTile
+                        key="source-reports-tile"
                         groupTitle='functional-assay-tile'
                         score={variant.Functional_Enrichment_Score_Findlay_BRCA1_Ring_Function_Scores}
                         displayTitle="Functional Assay Results"
                         onChangeGroupVisibility={this.onChangeGroupVisibility}
                         hideEmptyItems={this.state.hideEmptyItems}
-                        onDimsChanged={(collapser) => {
-                            this.relayoutOnCollapsed(collapser);
-                        }}
+                        relayoutGrid={this.relayoutGrid}
                         helpSection="functional-assay-results"
                         showHelp={this.showHelp}
                     />
@@ -1005,16 +1011,6 @@ var VariantDetail = React.createClass({
                 groupsEmpty += 1;
             }
 
-            // holds a reference to the collapsible DOM element that we'll pass to the relayout monitor later
-            let panelElem;
-
-            const header = (
-                <h3>
-                    <a className="title" href="#" onClick={(event) => this.onChangeGroupVisibility(groupTitle, event, panelElem)}>{groupTitle}</a>
-                    <GroupHelpButton onClick={(event) => { this.showHelp(event, groupTitle); return true; }} />
-                </h3>
-            );
-
             const tileTable = (
                 <Table>
                     <tbody>
@@ -1024,33 +1020,50 @@ var VariantDetail = React.createClass({
             );
 
             const bicTileTable = (
-                <Table>
-                    <tbody>
-                        <div className="tile-disclaimer">
-                            <div>
-                                Please note that the BIC database is no longer actively curated. A copy of all BIC data has
-                                been shared with several other variation databases.
-                            </div>
-                            <div>
-                                Though the National Human Genome Research Institute recommends using ClinVar or BRCA Exchange for
-                                updated information on BRCA1 and BRCA2 variants, the BIC database will be maintained to allow
-                                historical studies and other uses.
-                            </div>
+                <div>
+                    <div className="tile-disclaimer">
+                        <div>
+                            Please note that the BIC database is no longer actively curated. A copy of all BIC data has
+                            been shared with several other variation databases.
                         </div>
-                        {rows}
-                    </tbody>
-                </Table>
+                        <div>
+                            Though the National Human Genome Research Institute recommends using ClinVar or BRCA Exchange for
+                            updated information on BRCA1 and BRCA2 variants, the BIC database will be maintained to allow
+                            historical studies and other uses.
+                        </div>
+                    </div>
+
+                    <Table>
+                        <tbody>
+                            {rows}
+                        </tbody>
+                    </Table>
+                </div>
             );
 
             return (
                 <div key={`group_collection-${groupTitle}`} className={ (allEmpty && this.state.hideEmptyItems) || (allEmpty && groupTitle === 'CRAVAT - MuPIT 3D Protein View') ? "group-empty" : "" }>
                     <Panel
-                        ref={(me) => { panelElem = me ? me.getCollapsableDOMNode() : null; }}
-                        header={header}
-                        collapsable={true}
                         defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}
                     >
-                        {groupTitle === "Clinical Significance (BIC)" ? bicTileTable : tileTable}
+                        <Panel.Heading>
+                            <Panel.Title componentClass="h3">
+                                <Panel.Toggle componentClass="a" className="title"
+                                    onClick={(event) => this.onChangeGroupVisibility(groupTitle, event)}
+                                >
+                                    {groupTitle}
+                                </Panel.Toggle>
+                                <GroupHelpButton onClick={(event) => { this.showHelp(event, groupTitle); return true; }} />
+                            </Panel.Title>
+                        </Panel.Heading>
+                        <Panel.Collapse
+                            onEntered={this.relayoutGrid}
+                            onExited={this.relayoutGrid}
+                        >
+                            <Panel.Body>
+                            {groupTitle === "Clinical Significance (BIC)" ? bicTileTable : tileTable}
+                            </Panel.Body>
+                        </Panel.Collapse>
                     </Panel>
                 </div>
             );
@@ -1155,19 +1168,7 @@ var VariantDetail = React.createClass({
                     </Row>
                 );
             }, this);
-
         }
-
-        // holds a reference to the collapsible DOM element that we'll pass to the relayout monitor later
-        let panelElem;
-        const splicingHeader = (
-            <h3>
-                <a className="title" href="#" onClick={(event) => this.onChangeGroupVisibility("transcript-visualization", event, panelElem)}>
-                {`${variant['Gene_Symbol']} ${variant['HGVS_cDNA']} Transcript Visualization`}
-                </a>
-                <GroupHelpButton group={"transcript-visualization"} onClick={(event) => { this.showHelp(event, "transcript-visualization"); return true; }} />
-            </h3>
-        );
 
         const tileSizeClasses = groupTables.length < 3
             ? `col-xs-12 col-md-${12 / groupTables.length}`
@@ -1274,16 +1275,29 @@ var VariantDetail = React.createClass({
                                     <Col key="splicing_vis"
                                         className={`variant-detail-group isogrid-item ${splicingTileSizeClassse}`}>
                                         <Panel
-                                            ref={(me) => { panelElem = me ? me.getCollapsableDOMNode() : null; }}
-                                            header={splicingHeader}
-                                            collapsable={true}
+                                            collapsible={true}
                                             defaultExpanded={localStorage.getItem("collapse-group_transcript-visualization") !== "true"}
                                         >
-                                            <Splicing variant={variant}
-                                                onContentsChanged={(collapser) => {
-                                                    this.relayoutOnCollapsed(collapser);
-                                                }}
-                                            />
+                                            <Panel.Heading>
+                                                <Panel.Title componentClass="h3">
+                                                    <Panel.Toggle componentClass="a" className="title"
+                                                        onClick={(event) => this.onChangeGroupVisibility("transcript-visualization", event)}
+                                                    >
+                                                        {`${variant['Gene_Symbol']} ${variant['HGVS_cDNA']} Transcript Visualization`}
+                                                    </Panel.Toggle>
+                                                    <GroupHelpButton group={"transcript-visualization"} onClick={(event) => { this.showHelp(event, "transcript-visualization"); return true; }} />
+                                                </Panel.Title>
+                                            </Panel.Heading>
+                                            <Panel.Collapse
+                                                onEntered={this.relayoutGrid}
+                                                onExited={this.relayoutGrid}
+                                            >
+                                                <Panel.Body>
+                                                    <Splicing variant={variant}
+                                                        relayoutGrid={this.relayoutGrid}
+                                                    />
+                                                </Panel.Body>
+                                            </Panel.Collapse>
                                         </Panel>
                                     </Col>
                                 )
@@ -1389,11 +1403,14 @@ var Application = React.createClass({
     render: function () {
         const path = this.getPath().slice(1);
 
-        // logs the full path, including the hash, to google analytics
-        const fullHref = window.location.href;
-        const origin = window.location.origin;
-        const fullPathWithHash = fullHref.startsWith(origin) ? fullHref.slice(origin.length) : fullHref;
-        ReactGA.ga('send', 'pageview', fullPathWithHash);
+        // logs the full path, including the hash, to google analytics (if analytics is enabled)
+        if (window.config.analytics) {
+            const fullHref = window.location.href;
+            const origin = window.location.origin;
+            const fullPathWithHash = fullHref.startsWith(origin) ? fullHref.slice(origin.length) : fullHref;
+            ReactGA.ga('send', 'pageview', fullPathWithHash);
+        }
+
         return (
             <div>
                 <NavBarNew path={path} mode={this.state.mode} toggleMode={this.toggleMode}/>
@@ -1435,5 +1452,5 @@ var routes = (
 var main = document.getElementById('main');
 
 run(routes, HistoryLocation, (Root) => {
-  React.render(<Root/>, main);
+  ReactDOM.render(<Root/>, main);
 });

@@ -32,7 +32,7 @@ var Releases = React.createClass({
             }).reverse();
         }
         var rows = _.map(releases, release => (
-            <tr>
+            <tr key={release.id}>
                 <td style={{ whiteSpace: 'nowrap' }}><Link to={`/release/${release.id}`}>Version {release.name}</Link></td>
                 <td style={{ whiteSpace: 'nowrap' }}>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</td>
                 <td>{this.getSourceRepresentations(release.sources)}</td>
@@ -51,13 +51,15 @@ var Releases = React.createClass({
                         <div className="table-responsive table-responsive-outset">
                             <table className="table table-inset-bordered table-grayheader nopointer">
                                 <thead>
-                                    <th>Notes</th>
-                                    <th>Date</th>
-                                    <th>Data Sources</th>
-                                    <th>New Variants</th>
-                                    <th>New Classifications</th>
-                                    <th>Changed/Updated Variants</th>
-                                    <th>Removed Variants</th>
+                                    <tr>
+                                        <th>Notes</th>
+                                        <th>Date</th>
+                                        <th>Data Sources</th>
+                                        <th>New Variants</th>
+                                        <th>New Classifications</th>
+                                        <th>Changed/Updated Variants</th>
+                                        <th>Removed Variants</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
                                     {rows}
