@@ -4,8 +4,10 @@ import json
 import time
 import numpy as np
 import pandas as pd
+from pandas.io.json import json_normalize
 import argparse
 from math import floor, log10, isnan
+
 
 def fetch(jsondata, url="https://gnomad.broadinstitute.org/api"):
     # The server gives a generic error message if the content type isn't
@@ -256,7 +258,7 @@ def find_correct_hgvs(variants, transcripts):
         sortedTranscriptConsequences = variant["sortedTranscriptConsequences"]
         for transcript_hgvs in sortedTranscriptConsequences:
             if transcript_hgvs["transcript_id"] in transcripts:
-                variant["hgvs"] = transcript_hgvs["hgvsc"]
+                variant["hgvs"] = transcript_hgvs["hgvsc"].split(':')[1]
                 variant["transcript"] = transcript_hgvs["transcript_id"]
                 del variant["sortedTranscriptConsequences"]
                 variants_in_expected_transcripts.append(variant)
@@ -298,7 +300,7 @@ def main():
     # find hgvs, flatten, convert to dataframe, compute allele frequencies, and normalize
     variants_with_hgvs = find_correct_hgvs(brca12_variant_data, transcripts)
     variants_with_flattened_populations = flatten_populations(variants_with_hgvs)
-    variants_df = pd.json_normalize(variants_with_flattened_populations)
+    variants_df = json_normalize(variants_with_flattened_populations)
     variants_df['flags'] = variants_df['flags'].apply(', '.join)
     df_with_allele_values = compile_allele_values(variants_df)
     stringified_df_with_allele_values = df_with_allele_values.replace(np.nan, '-', regex=True).replace('', '-', regex=True)
