@@ -173,7 +173,7 @@ def fetch_data_for_one_variant(variant_id, dataset, max_retries=5):
                 },
                 headers=headers)
             parse = json.loads(response.text)
-        except json.decoder.JSONDecodeError:
+        except ValueError:
             retries += 1
             time.sleep(0.1)
         else:
