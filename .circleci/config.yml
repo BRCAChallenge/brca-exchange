@@ -159,7 +159,7 @@ jobs:
            name: Run tests
            working_directory: /splicing-pipeline/pipeline/splicing
            command: |
-             make unit_tests_docker -e IMAGE_NAME=splicing-pipeline
+             make unit_tests_docker -e IMAGE_NAME=brcachallenge/splicing-pipeline:0.0.8
        - run:
            name: Save Docker image layer cache
            command: |
