@@ -212,7 +212,16 @@ def parse_record(cvs_el, hgvs_util, assembly="GRCh38"):
                                      'ReferenceClinVarAssertion/MeasureSet/Measure/MeasureRelationship/Symbol/ElementValue[starts-with(., "BRCA") and @Type="Preferred"]')
 
     measure_el = cvs_el.find('ReferenceClinVarAssertion/MeasureSet/Measure')
-    rec["Genomic_Coordinate"] = str(clinvar.extract_genomic_coordinates_from_measure(measure_el)[assembly]).replace('g.', '')
+
+    genomic_coords = clinvar.extract_genomic_coordinates_from_measure(measure_el)
+
+    if assembly not in genomic_coords.keys():
+        var_name = clinvar.textIfPresent(measure_el,  'Name/ElementValue[@Type="Preferred"]')
+
+        logging.warn("Skipping variant %s as no genomic coordinates could be extracted", var_name)
+        return []
+
+    rec["Genomic_Coordinate"] = str(genomic_coords[assembly]).replace('g.', '')
 
     rec["BIC_Nomenclature"] = _fetch_bic(cvs_el)
 
