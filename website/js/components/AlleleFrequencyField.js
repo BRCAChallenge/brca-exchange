@@ -176,7 +176,12 @@ const AlleleFrequencyField = React.createClass({
                             <div>
                                 You are viewing flags for ENSEMBL transcript {transcript}. This is not the canonical
                                 transcript shown by default on gnomAD, but corresponds to RefSeq transcript {refSeqTranscript}
-                                &nbsp;(per <a href={lrgLink}>LRG</a>).  Additional data for this variant, including detailed
+                                &nbsp;(per <a href={lrgLink}>LRG</a>).
+                            </div>
+                        </div>
+                        <div className="tile-disclaimer" style={{display: isGnomad && !isChart ? '' : 'none'}}>
+                            <div>
+                                Additional data for this variant, including detailed
                                 populations, quality scores, and flags relative to other transcripts,
                                 <a href={gnomadLink} target="_blank">&nbsp;are available at gnomAD</a>.
                             </div>
@@ -190,8 +195,10 @@ const AlleleFrequencyField = React.createClass({
                             <div style={{display: isGnomad && isChart && !util.isEmptyField(flag) ? '' : 'none'}}>
                                 You are viewing flags for ENSEMBL transcript {transcript}. This is not the canonical
                                 transcript shown by default on gnomAD, but corresponds to RefSeq transcript {refSeqTranscript}
-                                &nbsp;(per <a href="http://ftp.ebi.ac.uk/pub/databases/lrgex/LRG_292.xml">LRG</a>).  Additional
-                                data for this variant, including detailed populations, quality scores, and flags relative
+                                &nbsp;(per <a href="http://ftp.ebi.ac.uk/pub/databases/lrgex/LRG_292.xml">LRG</a>).
+                            </div>
+                            <div style={{display: isGnomad && isChart ? '' : 'none'}}>
+                                Additional data for this variant, including detailed populations, quality scores, and flags relative
                                 to other transcripts, <a href={gnomadLink} target="_blank">are available at gnomAD</a>.
                             </div>
                         </div>
