@@ -1,7 +1,7 @@
 import copy
 import itertools
 import re
-
+import logging
 import click
 import pandas as pd
 from lxml import etree
