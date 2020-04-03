@@ -221,7 +221,11 @@ def round_four_sigfigs(num):
 def flatten(variant, field, genome_or_exome):
     for f in field:
         if f not in ['populations', 'filters']:
-            variant[genome_or_exome + '_' + f] = field[f]
+            if f == 'faf95':
+                for p in field[f]:
+                    variant[genome_or_exome + '_' + p] = field[f][p]
+            else:
+                variant[genome_or_exome + '_' + f] = field[f]
     populations = field['populations']
     for population in populations:
         name = population['id']

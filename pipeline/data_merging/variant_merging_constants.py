@@ -126,85 +126,200 @@ EXAC_FIELDS = {"Allele_frequency": "AF",
 
 EXAC_SUBPOPULATIONS = ["AFR", "AMR", "EAS", "FIN", "NFE", "OTH", "SAS"]
 
-GNOMAD_FIELDS = {"HGVS_cDNA": "hgvsc",
-                 "HGVS": "hgvs",
-                 "HGVS_protein": "hgvsp",
+GNOMAD_FIELDS = {"HGVS_cDNA": "hgvs",
                  "Flags": "flags",
-                 "Variant_id": "variant_id",
+                 "Variant_id": "variantId",
+
+                 "faf95_popmax_genome": "genome_popmax",
+                 "faf95_popmax_population_genome": "genome_popmax_population",
+
                  "Allele_count_genome_AFR": "genome_AFR_ac",
                  "Allele_count_hom_genome_AFR": "genome_AFR_ac_hom",
                  "Allele_number_genome_AFR": "genome_AFR_an",
                  "Allele_frequency_genome_AFR": "genome_AFR_af",
+
                  "Allele_count_genome_AMR": "genome_AMR_ac",
                  "Allele_count_hom_genome_AMR": "genome_AMR_ac_hom",
                  "Allele_number_genome_AMR": "genome_AMR_an",
                  "Allele_frequency_genome_AMR": "genome_AMR_af",
+
                  "Allele_count_genome_ASJ": "genome_ASJ_ac",
                  "Allele_count_hom_genome_ASJ": "genome_ASJ_ac_hom",
                  "Allele_number_genome_ASJ": "genome_ASJ_an",
                  "Allele_frequency_genome_ASJ": "genome_ASJ_af",
+
                  "Allele_count_genome_EAS": "genome_EAS_ac",
                  "Allele_count_hom_genome_EAS": "genome_EAS_ac_hom",
                  "Allele_number_genome_EAS": "genome_EAS_an",
                  "Allele_frequency_genome_EAS": "genome_EAS_af",
+
+                 "Allele_count_genome_EAS_JPN": "genome_EAS_JPN_ac",
+                 "Allele_count_hom_genome_EAS_JPN": "genome_EAS_JPN_ac_hom",
+                 "Allele_number_genome_EAS_JPN": "genome_EAS_JPN_an",
+                 "Allele_frequency_genome_EAS_JPN": "genome_EAS_JPN_af",
+
+                 "Allele_count_genome_EAS_KOR": "genome_EAS_KOR_ac",
+                 "Allele_count_hom_genome_EAS_KOR": "genome_EAS_KOR_ac_hom",
+                 "Allele_number_genome_EAS_KOR": "genome_EAS_KOR_an",
+                 "Allele_frequency_genome_EAS_KOR": "genome_EAS_KOR_af",
+
+                 "Allele_count_genome_EAS_OEA": "genome_EAS_OEA_ac",
+                 "Allele_count_hom_genome_EAS_OEA": "genome_EAS_OEA_ac_hom",
+                 "Allele_number_genome_EAS_OEA": "genome_EAS_OEA_an",
+                 "Allele_frequency_genome_EAS_OEA": "genome_EAS_OEA_af",
+
                  "Allele_count_genome_FIN": "genome_FIN_ac",
                  "Allele_count_hom_genome_FIN": "genome_FIN_ac_hom",
                  "Allele_number_genome_FIN": "genome_FIN_an",
                  "Allele_frequency_genome_FIN": "genome_FIN_af",
+
                  "Allele_count_genome_NFE": "genome_NFE_ac",
                  "Allele_count_hom_genome_NFE": "genome_NFE_ac_hom",
                  "Allele_number_genome_NFE": "genome_NFE_an",
                  "Allele_frequency_genome_NFE": "genome_NFE_af",
+
+                 "Allele_count_genome_NFE_EST": "genome_NFE_EST_ac",
+                 "Allele_count_hom_genome_NFE_EST": "genome_NFE_EST_ac_hom",
+                 "Allele_number_genome_NFE_EST": "genome_NFE_EST_an",
+                 "Allele_frequency_genome_NFE_EST": "genome_NFE_EST_af",
+
+                 "Allele_count_genome_NFE_BGR": "genome_NFE_BGR_ac",
+                 "Allele_count_hom_genome_NFE_BGR": "genome_NFE_BGR_ac_hom",
+                 "Allele_number_genome_NFE_BGR": "genome_NFE_BGR_an",
+                 "Allele_frequency_genome_NFE_BGR": "genome_NFE_BGR_af",
+
+                 "Allele_count_genome_NFE_NWE": "genome_NFE_NWE_ac",
+                 "Allele_count_hom_genome_NFE_NWE": "genome_NFE_NWE_ac_hom",
+                 "Allele_number_genome_NFE_NWE": "genome_NFE_NWE_an",
+                 "Allele_frequency_genome_NFE_NWE": "genome_NFE_NWE_af",
+
+                 "Allele_count_genome_NFE_ONF": "genome_NFE_ONF_ac",
+                 "Allele_count_hom_genome_NFE_ONF": "genome_NFE_ONF_ac_hom",
+                 "Allele_number_genome_NFE_ONF": "genome_NFE_ONF_an",
+                 "Allele_frequency_genome_NFE_ONF": "genome_NFE_ONF_af",
+
+                 "Allele_count_genome_NFE_SEU": "genome_NFE_SEU_ac",
+                 "Allele_count_hom_genome_NFE_SEU": "genome_NFE_SEU_ac_hom",
+                 "Allele_number_genome_NFE_SEU": "genome_NFE_SEU_an",
+                 "Allele_frequency_genome_NFE_SEU": "genome_NFE_SEU_af",
+
+                 "Allele_count_genome_NFE_SWE": "genome_NFE_SWE_ac",
+                 "Allele_count_hom_genome_NFE_SWE": "genome_NFE_SWE_ac_hom",
+                 "Allele_number_genome_NFE_SWE": "genome_NFE_SWE_an",
+                 "Allele_frequency_genome_NFE_SWE": "genome_NFE_SWE_af",
+
                  "Allele_count_genome_OTH": "genome_OTH_ac",
                  "Allele_count_hom_genome_OTH": "genome_OTH_ac_hom",
                  "Allele_number_genome_OTH": "genome_OTH_an",
                  "Allele_frequency_genome_OTH": "genome_OTH_af",
+
                  "Allele_count_genome_SAS": "genome_SAS_ac",
                  "Allele_count_hom_genome_SAS": "genome_SAS_ac_hom",
                  "Allele_number_genome_SAS": "genome_SAS_an",
                  "Allele_frequency_genome_SAS": "genome_SAS_af",
+
                  "Allele_count_genome": "genome_ac",
                  "Allele_number_genome": "genome_an",
                  "Allele_frequency_genome": "genome_af",
+
+                 "faf95_popmax_exome": "exome_popmax",
+                 "faf95_popmax_population_exome": "exome_popmax_population",
+
                  "Allele_count_exome_AFR": "exome_AFR_ac",
                  "Allele_count_hom_exome_AFR": "exome_AFR_ac_hom",
                  "Allele_number_exome_AFR": "exome_AFR_an",
                  "Allele_frequency_exome_AFR": "exome_AFR_af",
+
                  "Allele_count_exome_AMR": "exome_AMR_ac",
                  "Allele_count_hom_exome_AMR": "exome_AMR_ac_hom",
                  "Allele_number_exome_AMR": "exome_AMR_an",
                  "Allele_frequency_exome_AMR": "exome_AMR_af",
+
                  "Allele_count_exome_ASJ": "exome_ASJ_ac",
                  "Allele_count_hom_exome_ASJ": "exome_ASJ_ac_hom",
                  "Allele_number_exome_ASJ": "exome_ASJ_an",
                  "Allele_frequency_exome_ASJ": "exome_ASJ_af",
+
                  "Allele_count_exome_EAS": "exome_EAS_ac",
                  "Allele_count_hom_exome_EAS": "exome_EAS_ac_hom",
                  "Allele_number_exome_EAS": "exome_EAS_an",
                  "Allele_frequency_exome_EAS": "exome_EAS_af",
+
+                 "Allele_count_exome_EAS_JPN": "exome_EAS_JPN_ac",
+                 "Allele_count_hom_exome_EAS_JPN": "exome_EAS_JPN_ac_hom",
+                 "Allele_number_exome_EAS_JPN": "exome_EAS_JPN_an",
+                 "Allele_frequency_exome_EAS_JPN": "exome_EAS_JPN_af",
+
+                 "Allele_count_exome_EAS_KOR": "exome_EAS_KOR_ac",
+                 "Allele_count_hom_exome_EAS_KOR": "exome_EAS_KOR_ac_hom",
+                 "Allele_number_exome_EAS_KOR": "exome_EAS_KOR_an",
+                 "Allele_frequency_exome_EAS_KOR": "exome_EAS_KOR_af",
+
+                 "Allele_count_exome_EAS_OEA": "exome_EAS_OEA_ac",
+                 "Allele_count_hom_exome_EAS_OEA": "exome_EAS_OEA_ac_hom",
+                 "Allele_number_exome_EAS_OEA": "exome_EAS_OEA_an",
+                 "Allele_frequency_exome_EAS_OEA": "exome_EAS_OEA_af",
+
                  "Allele_count_exome_FIN": "exome_FIN_ac",
                  "Allele_count_hom_exome_FIN": "exome_FIN_ac_hom",
                  "Allele_number_exome_FIN": "exome_FIN_an",
                  "Allele_frequency_exome_FIN": "exome_FIN_af",
+
                  "Allele_count_exome_NFE": "exome_NFE_ac",
                  "Allele_count_hom_exome_NFE": "exome_NFE_ac_hom",
                  "Allele_number_exome_NFE": "exome_NFE_an",
                  "Allele_frequency_exome_NFE": "exome_NFE_af",
+
+                 "Allele_count_exome_NFE_EST": "exome_NFE_EST_ac",
+                 "Allele_count_hom_exome_NFE_EST": "exome_NFE_EST_ac_hom",
+                 "Allele_number_exome_NFE_EST": "exome_NFE_EST_an",
+                 "Allele_frequency_exome_NFE_EST": "exome_NFE_EST_af",
+
+                 "Allele_count_exome_NFE_BGR": "exome_NFE_BGR_ac",
+                 "Allele_count_hom_exome_NFE_BGR": "exome_NFE_BGR_ac_hom",
+                 "Allele_number_exome_NFE_BGR": "exome_NFE_BGR_an",
+                 "Allele_frequency_exome_NFE_BGR": "exome_NFE_BGR_af",
+
+                 "Allele_count_exome_NFE_NWE": "exome_NFE_NWE_ac",
+                 "Allele_count_hom_exome_NFE_NWE": "exome_NFE_NWE_ac_hom",
+                 "Allele_number_exome_NFE_NWE": "exome_NFE_NWE_an",
+                 "Allele_frequency_exome_NFE_NWE": "exome_NFE_NWE_af",
+
+                 "Allele_count_exome_NFE_ONF": "exome_NFE_ONF_ac",
+                 "Allele_count_hom_exome_NFE_ONF": "exome_NFE_ONF_ac_hom",
+                 "Allele_number_exome_NFE_ONF": "exome_NFE_ONF_an",
+                 "Allele_frequency_exome_NFE_ONF": "exome_NFE_ONF_af",
+
+                 "Allele_count_exome_NFE_SEU": "exome_NFE_SEU_ac",
+                 "Allele_count_hom_exome_NFE_SEU": "exome_NFE_SEU_ac_hom",
+                 "Allele_number_exome_NFE_SEU": "exome_NFE_SEU_an",
+                 "Allele_frequency_exome_NFE_SEU": "exome_NFE_SEU_af",
+
+                 "Allele_count_exome_NFE_SWE": "exome_NFE_SWE_ac",
+                 "Allele_count_hom_exome_NFE_SWE": "exome_NFE_SWE_ac_hom",
+                 "Allele_number_exome_NFE_SWE": "exome_NFE_SWE_an",
+                 "Allele_frequency_exome_NFE_SWE": "exome_NFE_SWE_af",
+
                  "Allele_count_exome_OTH": "exome_OTH_ac",
                  "Allele_count_hom_exome_OTH": "exome_OTH_ac_hom",
                  "Allele_number_exome_OTH": "exome_OTH_an",
                  "Allele_frequency_exome_OTH": "exome_OTH_af",
+
                  "Allele_count_exome_SAS": "exome_SAS_ac",
                  "Allele_count_hom_exome_SAS": "exome_SAS_ac_hom",
                  "Allele_number_exome_SAS": "exome_SAS_an",
                  "Allele_frequency_exome_SAS": "exome_SAS_af",
+
                  "Allele_number_exome": "exome_an",
                  "Allele_count_exome": "exome_ac",
                  "Allele_frequency_exome": "exome_af",
+
                  "BX_ID": "BX_ID"}
 
 
-GNOMAD_SUBPOPULATIONS = ["AFR", "AMR", "ASJ", "EAS", "FIN", "NFE", "OTH", "SAS"]
+GNOMAD_SUBPOPULATIONS = ["AFR", "AMR", "ASJ", "EAS", "EAS_JPN", "EAS_KOR", "EAS_OEA",
+                         "FIN", "NFE", "NFE_EST", "NFE_BGR", "NFE_NWE", "NFE_ONF",
+                         "NFE_SEU", "NFE_SWE", "OTH", "SAS"]
 
 FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS = {
                "HGVS_Nucleotide": "hgvs_nucleotide",
