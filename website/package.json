@@ -48,7 +48,7 @@
     "webpack-dev-server": "^1.7.0"
   },
   "dependencies": {
-    "anchorme": "^0.7.1",
+    "anchorme": "^2.0.0",
     "babel-runtime": "^5.1.13",
     "bootstrap": "^3.4.1",
     "classnames": "^2.1.5",
