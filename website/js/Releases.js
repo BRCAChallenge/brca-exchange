@@ -9,7 +9,7 @@ var {Table, Grid, Row, Col} = require('react-bootstrap');
 
 var backend = require('./backend');
 var config = require('config');
-var anchorme = require("anchorme");
+var anchorme = require("anchorme").default;
 
 
 var Releases = React.createClass({
@@ -92,8 +92,6 @@ var Release = React.createClass({
             releaseNotes = release.notes.replace(/\n\s*\n/g, '\n\n');
             // format hyperlinks
             releaseNotes = anchorme(releaseNotes);
-            // remove mailto from text portion of emails without removing link
-            releaseNotes = releaseNotes.replace(/>mailto:/, '>');
             // rename exLOVD ExUV following the name change in October 2017
             releaseNotes = releaseNotes.replace(/exlovd/ig, 'ExUV');
         }
