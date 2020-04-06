@@ -165,14 +165,15 @@ def fetch_data_for_one_variant(variant_id, dataset, max_retries=5):
     retries = 0
     while retries < max_retries:
         try:
-            response = requests.post(
+            # https://stackoverflow.com/questions/49064398/requests-exceptions-chunkedencodingerror-connection-broken-incompleteread0
+            with requests.post(
                 'http://gnomad.broadinstitute.org/api',
                 json={
                     "query": variant_detail_query,
                     "variables": variant_detail_variables
                 },
-                headers=headers)
-            parse = json.loads(response.text)
+                headers=headers) as response:
+                parse = json.loads(response.text)
         except ValueError:
             retries += 1
             time.sleep(0.1)
