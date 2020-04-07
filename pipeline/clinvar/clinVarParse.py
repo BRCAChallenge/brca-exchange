@@ -6,7 +6,7 @@ import argparse
 import logging
 import xml.etree.ElementTree as ET
 
-import clinvar
+from clinvar import clinvar_common as clinvar
 from common import utils
 
 

@@ -29,7 +29,6 @@ def filter_xml(fin, fout):
         header_lines = itertools.takewhile(lambda s: "ClinVarSet" not in s.decode('utf-8'), f)
         fout.writelines(header_lines)
 
-
     # filtering ClinVarSet's we are interested in
     with open_maybe_gzip(fin) as f:
         for _, el in etree.iterparse(f, tag='ClinVarSet'):
@@ -45,7 +44,7 @@ def filter_xml(fin, fout):
                     del ancestor.getparent()[0]
 
     # writing "footer"
-    fout.write("</ReleaseSet>")
+    fout.write("</ReleaseSet>".encode('UTF-8'))
 
     fout.close()
 
@@ -55,7 +54,6 @@ def filter_xml(fin, fout):
 @click.argument('output', type=click.Path())
 def main(input, output):
     filter_xml(input, output)
-
 
 if __name__ == "__main__":
     main()
