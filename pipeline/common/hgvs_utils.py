@@ -59,7 +59,7 @@ class HgvsWrapper:
         try:
             return str(self.hgvs_ams[HgvsWrapper.GRCh38_Assem].c_to_p(
                 hgvs_cdna))
-        except (hgvs.exceptions.HGVSError, IndexError) as e:
+        except (hgvs.exceptions.HGVSError, IndexError, ValueError) as e:
             logging.info(
                 "Protein conversion issues with " + str(hgvs_cdna) + ": " + str(
                     e))
