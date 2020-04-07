@@ -5,6 +5,8 @@ import csv
 import re
 from data_merging.utilities import isEmpty, round_sigfigs
 
+csv.field_size_limit(10000000)
+
 EMPTY = "-"
 FIELDS_TO_REMOVE = ["Protein_ClinVar",
                     "Description_ClinVar",

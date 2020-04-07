@@ -7,6 +7,8 @@ import logging
 from math import floor, log10
 import dateutil.parser
 
+csv.field_size_limit(10000000)
+
 added_data = None
 diff = None
 total_variants_with_changes = 0

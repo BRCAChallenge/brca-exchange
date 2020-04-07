@@ -6,6 +6,7 @@ import urllib.request, urllib.error, urllib.parse
 
 from retrying import retry
 
+csv.field_size_limit(10000000)
 
 #######################
 # Convenience methods #
