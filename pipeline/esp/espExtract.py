@@ -64,11 +64,11 @@ def breakUpESPAlleleFrequencies(mafArray):
     aaAlleleFrequency = EMPTY
     alleleFrequency = EMPTY
     if len(mafArray) > 2:
-        alleleFrequency = "%s" % (float(mafArray[2]) / 100)
+        alleleFrequency = f"{float(mafArray[2])/100:.{6}}"
     if len(mafArray) > 1:
-        aaAlleleFrequency = "%s" % (float(mafArray[1]) / 100)
+        aaAlleleFrequency = f"{float(mafArray[1])/100:.{6}}"
     if len(mafArray) > 0:
-        eaAlleleFrequency = "%s" % (float(mafArray[0]) / 100)
+        eaAlleleFrequency = f"{float(mafArray[0])/100:.{6}}"
     return (eaAlleleFrequency, aaAlleleFrequency, alleleFrequency)
 
 
