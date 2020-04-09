@@ -366,13 +366,17 @@ def string_comparison_merge(variants, seq_wrapper):
     logging.info('After merge: %s', str(n_after_merge))
     print("%d equivalent variants are merged into %d unique variants" %(
           n_before_merge, n_after_merge))
+
     for equivalent_v in equivalence:
         #
         # equivalent_v contains a set of variants found to be equivalent.
         # The next step is to merge data for these variants, which will
         # end up in the array merged_row.
         merged_row = []
-        for each_v in equivalent_v:
+
+        # taking right most variant for + stranded genes
+        # needs to be generalized, see https://github.com/BRCAChallenge/brca-exchange/issues/1194
+        for each_v in sorted(list(equivalent_v), reverse=list(equivalent_v)[0].startswith('chr13')):
             if len(merged_row) == 0:
                 #
                 # If this is the first variant in the equivalence set, initialize
@@ -534,7 +538,7 @@ def repeat_merging(f_in, f_out):
                         elif key == "individuals":
                             merged_value = [str(int(new_value[0]) + int(old_value[0]))]
                         else:
-                            merged_value = list(set(new_value + old_value))
+                            merged_value = sorted(list(set(new_value + old_value)))
 
                         # Remove empty strings from list
                         merged_value = [_f for _f in merged_value if _f]
