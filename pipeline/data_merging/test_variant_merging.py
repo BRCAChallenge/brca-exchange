@@ -6,7 +6,7 @@ import pytest
 
 import bioutils
 import vcf
-from hypothesis import given, assume, settings
+from hypothesis import given, assume, settings, HealthCheck
 from hypothesis.strategies import integers, tuples, sampled_from, lists
 from mock import patch
 
@@ -21,7 +21,7 @@ from .variant_merging import normalize_values, add_variant_to_dict, \
 from .variant_merging_constants import VCFVariant
 
 runtimes = 500000
-settings.register_profile('ci', settings(max_examples=runtimes, max_iterations=runtimes, timeout=-1))
+settings.register_profile('ci', settings(max_examples=runtimes, deadline=None))
 
 # Uncomment this for longer test runs.
 #settings.load_profile('ci')
@@ -277,16 +277,15 @@ def test_variant_equal_equiv(v, ref_id):
 def equiv_set(refsequence, v):
     return set(all_norm_equiv(refsequence, v) + [normalize_variant(v)])
 
-#@settings(max_examples=runtimes, max_iterations=runtimes, timeout=-1, database_file=None)
-#@settings(max_examples=runtimes, max_iterations=runtimes, timeout=-1)
+
 @given(variant_on_ref, variant_on_ref, reference_id)
 def test_variant_equal_not_equiv(v1, v2, ref_id):
     (chrom1, pos1, reflen1, alt1) = v1
     (chrom2, pos2, reflen2, alt2) = v2
     assume(pos1 + reflen1 <= reference_length)
     assume(pos2 + reflen2 <= reference_length)
-    assume(not alt1 == '' and reflen1 == 0)
-    assume(not alt2 == '' and reflen2 == 0)
+    assume(alt1 != '' and reflen1 > 0)
+    assume(alt2 != '' and reflen2 > 0)
 
     refsequence1 = chrom_ref[chrom1][ref_id]["sequence"]
     refsequence2 = chrom_ref[chrom2][ref_id]["sequence"]
