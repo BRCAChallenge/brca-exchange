@@ -24,7 +24,7 @@ def processSubmission(submissionSet, assembly):
     ra = submissionSet.referenceAssertion
 
     if ra.variant is None:
-        logging.warn("No variant information could be extracted for ReferenceClinVarAssertion ID %s %s",
+        logging.warning("No variant information could be extracted for ReferenceClinVarAssertion ID %s %s",
                      submissionSet.referenceAssertion.id, [c.accession for c in submissionSet.otherAssertions.values()])
         return None
 

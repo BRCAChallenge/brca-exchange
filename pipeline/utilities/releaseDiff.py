@@ -187,11 +187,11 @@ class transformer(object):
             val = str(round_sigfigs(float(val), 3))
             value = val + ' ' + source_string
             # (ExAC) was changed to (ExAC minus TCGA)
-            value = re.sub("\(ExAC\)", "(ExAC minus TCGA)", value)
+            value = re.sub(r"\(ExAC\)", "(ExAC minus TCGA)", value)
         elif field == "Sift_Prediction":
             # for sift predictions, some data combines the
             # numerical and categorical scores
-            value = re.sub("\(*$", "", value)
+            value = re.sub(r"\(*$", "", value)
         elif field == "Clinical_significance_citations_ENIGMA":
             # In some data, empty fields are indicated by a single hyphen
             value = re.sub("", "-", value)

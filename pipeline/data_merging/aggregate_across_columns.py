@@ -169,7 +169,7 @@ def hgvsProteinUpdate(row):
 
 def BICUpdate(row):
     bic = row["BIC_Nomenclature"]
-    bic = re.sub("\|", ",", bic)
+    bic = re.sub(r"\|", ",", bic)
     if bic == EMPTY:
         if row["BIC_Designation_BIC"] != EMPTY:
             bic = row["BIC_Designation_BIC"]
