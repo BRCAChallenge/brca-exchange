@@ -6,11 +6,19 @@ import React from "react";
 import {OverlayTrigger, Popover} from "react-bootstrap";
 
 const KeyInline = React.createClass({
+    getCaret: function() {
+        return (
+            this.props.expanded
+                ? <i className="fa fa-caret-down gnomad-header-row" aria-hidden="true" />
+                : <i className="fa fa-caret-right gnomad-header-row" aria-hidden="true" />
+        );
+    },
+
     render() {
-        const { onClick, tableKey, tooltip, noHelpLink} = this.props;
+        const { onClick, tableKey, tooltip, noHelpLink, headerGroup } = this.props;
 
         if (noHelpLink || !tooltip) {
-            return <td className='help-target'><b>{tableKey}</b></td>;
+            return <td className='help-target'>{headerGroup ? this.getCaret() : ''}<b>{tableKey}</b></td>;
         }
 
         const popper = (
