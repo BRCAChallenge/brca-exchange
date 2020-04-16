@@ -5,6 +5,7 @@
 import React from "react";
 import ReactDOM from 'react-dom';
 import {Collapse, Table} from "react-bootstrap";
+import classNames from "classnames";
 import util from '../util';
 import KeyInline from './KeyInline';
 import slugify from "../slugify";
@@ -12,6 +13,17 @@ const _ = require('underscore');
 
 
 const AlleleFrequencyField = React.createClass({
+
+    getInitialState: function () {
+        // identifies which subpopulation groups are expanded
+        return {
+            'Allele_frequency_exome_NFE_GnomAD': false,
+            'Allele_frequency_exome_EAS_GnomAD': false,
+            'Allele_frequency_genome_NFE_GnomAD': false,
+            'Allele_frequency_genome_EAS_GnomAD': false
+        };
+    },
+
     getCollapsableDOMNode: function() {
         return ReactDOM.findDOMNode(this.refs.panel);
     },
@@ -25,6 +37,13 @@ const AlleleFrequencyField = React.createClass({
 
         // ask our parent to toggle us
         this.props.onFieldToggled(fieldName);
+    },
+
+    fieldToggled: function(field) {
+        // handles toggling of subpopulation groups in gnomad numerical tables
+        this.setState({
+            [field]: !this.state[field]
+        });
     },
 
     generateHeader: function(field, fieldName, flag) {
@@ -60,11 +79,30 @@ const AlleleFrequencyField = React.createClass({
         );
     },
 
+    getPopMax: function(fieldName, variant) {
+        /*eslint-disable camelcase*/
+        if (fieldName === "Genomes (Graphical)") {
+            return variant.faf95_popmax_genome_GnomAD + ' (' + variant.faf95_popmax_population_genome_GnomAD + ')';
+        } else {
+            return variant.faf95_popmax_exome_GnomAD + ' (' + variant.faf95_popmax_population_exome_GnomAD + ')';
+        }
+        /*eslint-enable camelcase*/
+    },
+
+    determineShowEASJPNAsterisk: function (isGnomad, isChart) {
+        return isGnomad && !isChart && (this.state['Allele_frequency_genome_EAS_GnomAD'] ||
+        this.state['Allele_frequency_exome_EAS_GnomAD']);
+    },
+
     getRowsAndDetermineIfEmpty(source, data, variant) {
         let rowsEmpty = 0;
         const rows = _.map(data, (rowDescriptor) => {
             let {prop, title, noHelpLink} = rowDescriptor;
             let rowItem;
+            let show = true;
+            let subRow = false;
+            let headerRow = false;
+
             if (variant[prop] !== null) {
                 rowItem = util.getFormattedFieldByProp(prop, variant);
             }
@@ -76,19 +114,93 @@ const AlleleFrequencyField = React.createClass({
                 rowItem = '-';
             }
 
-            return (
-                <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
-                    { rowDescriptor.tableKey !== false &&
-                        (
-                            <KeyInline tableKey={title} noHelpLink={noHelpLink}
-                                tooltip={this.props.tooltips && this.props.tooltips[slugify(prop)]}
-                                onClick={(event) => this.props.showHelp(event, prop)}
-                            />
-                        )
-                    }
-                    <td colSpan={rowDescriptor.tableKey === false ? 2 : null} ><span className={"row-value" }>{rowItem}</span></td>
-                </tr>
-            );
+            if (prop.includes('EAS_JPN')
+               || prop.includes('EAS_KOR')
+               || prop.includes('EAS_OEA')
+               || prop.includes('NFE_EST')
+               || prop.includes('NFE_BGR')
+               || prop.includes('NFE_NWE')
+               || prop.includes('NFE_ONF')
+               || prop.includes('NFE_SEU')
+               || prop.includes('NFE_SWE')) {
+                    subRow = true;
+            }
+
+            if (prop.includes('EAS_GnomAD') || prop.includes('NFE_GnomAD')) {
+                headerRow = true;
+            }
+
+            let rowClasses = classNames({
+                  'variantfield-empty': (isEmptyValue && this.props.hideEmptyItems),
+                  'header-row': headerRow,
+                  'sub-row': subRow
+            });
+
+            if (prop.includes('genome_NFE')) {
+                show = this.state['Allele_frequency_genome_NFE_GnomAD'];
+            } else if (prop.includes('exome_NFE')) {
+                show = this.state['Allele_frequency_exome_NFE_GnomAD'];
+            } else if (prop.includes('genome_EAS')) {
+                show = subRow && this.state['Allele_frequency_genome_EAS_GnomAD'];
+            } else if (prop.includes('exome_EAS')) {
+                show = subRow && this.state['Allele_frequency_exome_EAS_GnomAD'];
+            }
+
+            if (prop.includes('EAS_JPN')) {
+                title = "* " + title;
+            }
+
+            if (subRow) {
+                return (
+                    <Collapse
+                        in={show}
+                        onEntered={this.props.relayoutGrid}
+                        onExited={this.props.relayoutGrid}
+                    >
+                        <tr key={prop} className={ rowClasses }>
+                            { rowDescriptor.tableKey !== false &&
+                                (
+                                    <KeyInline tableKey={title} noHelpLink={noHelpLink}
+                                        headerGroup={false}
+                                        tooltip={this.props.tooltips && this.props.tooltips[slugify(prop)]}
+                                    />
+                                )
+                            }
+                            <td colSpan={rowDescriptor.tableKey === false ? 2 : null} ><span className={"row-value" }>{rowItem}</span></td>
+                        </tr>
+                    </Collapse>
+                );
+            } else if (headerRow) {
+                return (
+                    <tr key={prop} className={ rowClasses } onClick={() => this.fieldToggled(prop)}>
+                        { rowDescriptor.tableKey !== false &&
+                            (
+                                <KeyInline tableKey={title} noHelpLink={noHelpLink}
+                                    headerGroup={true}
+                                    expanded={this.state[prop]}
+                                    tooltip={this.props.tooltips && this.props.tooltips[slugify(prop)]}
+                                />
+                            )
+                        }
+                        <td colSpan={rowDescriptor.tableKey === false ? 2 : null} ><span className={"row-value" }>{rowItem}</span></td>
+                    </tr>
+                );
+            } else {
+                return (
+                    <tr key={prop} className={ rowClasses }>
+                        { rowDescriptor.tableKey !== false &&
+                            (
+                                <KeyInline tableKey={title} noHelpLink={noHelpLink}
+                                    headerGroup={headerRow}
+                                    tooltip={this.props.tooltips && this.props.tooltips[slugify(prop)]}
+                                    onClick={(event) => this.props.showHelp(event, prop)}
+                                />
+                            )
+                        }
+                        <td colSpan={rowDescriptor.tableKey === false ? 2 : null} ><span className={"row-value" }>{rowItem}</span></td>
+                    </tr>
+                );
+            }
         });
         const allEmpty = rowsEmpty >= data.length;
         return [rows, allEmpty];
@@ -100,6 +212,8 @@ const AlleleFrequencyField = React.createClass({
         let allEmpty = false;
         let isChart = false;
         let isGnomad = false;
+        let popmax = this.getPopMax(fieldName, variant);
+
 
         if (fieldName.toLowerCase().includes('gnomad')) {
             flag = variant.Flags_GnomAD;
@@ -172,27 +286,48 @@ const AlleleFrequencyField = React.createClass({
                     onExited={this.props.relayoutGrid}
                 >
                     <div>
-                        <div className="tile-disclaimer" style={{display: isGnomad && !util.isEmptyField(flag) && !isChart ? '' : 'none'}}>
+                        {flag && flag !== '-'
+                            ? <div className="glyphicon glyphicon-flag gnomad-flag"><span style={{color: 'black', marginLeft: '6px'}}>{flag}</span></div>
+                            : ''
+                        }
+                        {flag && flag !== '-'
+                            ? <hr style={{marginTop: "2px"}}/>
+                            : ''
+                        }
+                        <div className="tile-disclaimer" style={{display: isGnomad && !util.isEmptyField(flag) ? '' : 'none'}}>
                             <div>
                                 You are viewing flags for ENSEMBL transcript {transcript}. This is not the canonical
                                 transcript shown by default on gnomAD, but corresponds to RefSeq transcript {refSeqTranscript}
-                                &nbsp;(per <a href={lrgLink}>LRG</a>).  Additional data for this variant, including detailed
+                                &nbsp;(per <a href={lrgLink}>LRG</a>).
+                            </div>
+                        </div>
+                        <div className="tile-disclaimer" style={{display: isGnomad ? '' : 'none'}}>
+                            <div>
+                                Additional data for this variant, including detailed
                                 populations, quality scores, and flags relative to other transcripts,
                                 <a href={gnomadLink} target="_blank">&nbsp;are available at gnomAD</a>.
                             </div>
                         </div>
-                        <Table key={`allele-frequency-name-${fieldName}`}>
+                        <Table key={`allele-frequency-name-${fieldName}`} style={{borderBottom: this.determineShowEASJPNAsterisk(isGnomad, isChart) ? '1px solid #ddd' : ''}}>
                             <tbody>
                             { renderedRows }
                             </tbody>
                         </Table>
-                        <div className="tile-disclaimer">
-                            <div style={{display: isGnomad && isChart && !util.isEmptyField(flag) ? '' : 'none'}}>
-                                You are viewing flags for ENSEMBL transcript {transcript}. This is not the canonical
-                                transcript shown by default on gnomAD, but corresponds to RefSeq transcript {refSeqTranscript}
-                                &nbsp;(per <a href="http://ftp.ebi.ac.uk/pub/databases/lrgex/LRG_292.xml">LRG</a>).  Additional
-                                data for this variant, including detailed populations, quality scores, and flags relative
-                                to other transcripts, <a href={gnomadLink} target="_blank">are available at gnomAD</a>.
+                        <div className="tile-disclaimer" style={{display: this.determineShowEASJPNAsterisk(isGnomad, isChart) ? '' : 'none'}}>
+                            <div>
+                                * Due to the limited number of samples in the Japanese subpopulation, allele frequencies
+                                should be used cautiously. ACMG recommends using datasets that are comprised of at least
+                                the 2,000 observed alleles (PMID: <a target="_blank" href="https://www.ncbi.nlm.nih.gov/pubmed/30311383">30311383</a>).
+                            </div>
+                        </div>
+                        <div className="tile-disclaimer" style={{display: isGnomad && isChart && !util.isEmptyField(popmax) ? '' : 'none'}}>
+                            <div>
+                                Popmax Filtering AF (95% confidence): { popmax }
+                            </div>
+                            <div>
+                                If the filter allele frequency of a variant is above the maximum credible population AF
+                                for a condition of interest, then this variant should be filtered (ie not considered a
+                                candidate causative variant).
                             </div>
                         </div>
                     </div>

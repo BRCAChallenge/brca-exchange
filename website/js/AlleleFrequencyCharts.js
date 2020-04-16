@@ -32,7 +32,7 @@ class AlleleFrequencyCharts extends React.Component {
     }
     render() {
         let {variant, prop} = this.props;
-        let frequencyProps, title, pointFormat, flag;
+        let frequencyProps, title, pointFormat;
         if (prop === 'Allele_Frequency_Charts_1000_Genomes') {
             if (!variant['Variant_in_1000_Genomes']) { // eslint-disable-line dot-notation
                 return false;
@@ -78,7 +78,6 @@ class AlleleFrequencyCharts extends React.Component {
                 {label: 'OTH', prop: 'Allele_frequency_exome_OTH_GnomAD'},
                 {label: 'SAS', prop: 'Allele_frequency_exome_SAS_GnomAD'},
             ];
-            flag = variant['Flags_GnomAD'];
             title = 'gnomAD Exomes';
             pointFormat =  "{point.y}<br /><em>({point.count} of {point.number})</em>";
         }
@@ -96,7 +95,6 @@ class AlleleFrequencyCharts extends React.Component {
                 {label: 'OTH', prop: 'Allele_frequency_genome_OTH_GnomAD'},
                 {label: 'SAS', prop: 'Allele_frequency_genome_SAS_GnomAD'},
             ];
-            flag = variant['Flags_GnomAD'];
             title = 'gnomAD Genomes';
             pointFormat =  "{point.y}<br /><em>({point.count} of {point.number})</em>";
         } else {
@@ -203,10 +201,6 @@ class AlleleFrequencyCharts extends React.Component {
             <tr>
                 <td>
                     <div className="alleleFrequencyChartOuterContainer">
-                        {flag && flag !== '-'
-                            ? <div className="glyphicon glyphicon-flag gnomad-flag"><span style={{color: 'black', marginLeft: '6px'}}>{flag}</span></div>
-                            : ''
-                        }
                         <div className="alleleFrequencyChartContainer">
                             <div className='alleleFrequencyChart'>
                                 <BarChart ref={`${prop}_alleleFreq2`} container={`${prop}_alleleFreq1`} options={fullscaleChartOptions}/>
