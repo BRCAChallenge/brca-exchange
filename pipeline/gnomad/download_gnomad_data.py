@@ -4,7 +4,6 @@ import json
 import time
 import numpy as np
 import pandas as pd
-from pandas.io.json import json_normalize
 import argparse
 from math import floor, log10, isnan
 
@@ -174,7 +173,7 @@ def fetch_data_for_one_variant(variant_id, dataset, max_retries=5):
                 },
                 headers=headers) as response:
                 parse = json.loads(response.text)
-        except ValueError:
+        except json.decoder.JSONDecodeError:
             retries += 1
             time.sleep(0.1)
         else:
@@ -305,7 +304,7 @@ def main():
     # find hgvs, flatten, convert to dataframe, compute allele frequencies, and normalize
     variants_with_hgvs = find_correct_hgvs(brca12_variant_data, transcripts)
     variants_with_flattened_populations = flatten_populations(variants_with_hgvs)
-    variants_df = json_normalize(variants_with_flattened_populations)
+    variants_df = pd.json_normalize(variants_with_flattened_populations)
     variants_df['flags'] = variants_df['flags'].apply(', '.join)
     df_with_allele_values = compile_allele_values(variants_df)
     stringified_df_with_allele_values = df_with_allele_values.replace(np.nan, '-', regex=True).replace('', '-', regex=True)
