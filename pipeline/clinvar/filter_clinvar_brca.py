@@ -18,7 +18,7 @@ def open_maybe_gzip(fname):
 
 
 def filter_xml(fin, fout):
-    fout = open(fout, 'w')
+    fout = open(fout, 'wb')
 
     # copying ClinVarSet if it contains a Symbol with a "Preferred" ElementValue BRCA*
     xpath_filter = 'ReferenceClinVarAssertion/MeasureSet/Measure/' \
@@ -26,14 +26,14 @@ def filter_xml(fin, fout):
 
     # copying header
     with open_maybe_gzip(fin) as f:
-        header_lines = itertools.takewhile(lambda s: "ClinVarSet" not in s, f)
+        header_lines = itertools.takewhile(lambda s: "ClinVarSet" not in s.decode('utf-8'), f)
         fout.writelines(header_lines)
 
     # filtering ClinVarSet's we are interested in
     with open_maybe_gzip(fin) as f:
         for _, el in etree.iterparse(f, tag='ClinVarSet'):
             if len(el.xpath(xpath_filter)) >= 1:
-                fout.write(etree.tostring(el, pretty_print=True))
+                fout.write(etree.tostring(el, pretty_print=True, encoding='UTF-8'))
 
             # some cleanup to save a significant amount of memory
             # (inspired by https://www.ibm.com/developerworks/xml/library/x-hiperfparse/)
@@ -44,7 +44,7 @@ def filter_xml(fin, fout):
                     del ancestor.getparent()[0]
 
     # writing "footer"
-    fout.write("</ReleaseSet>")
+    fout.write("</ReleaseSet>".encode('UTF-8'))
 
     fout.close()
 
@@ -54,7 +54,6 @@ def filter_xml(fin, fout):
 @click.argument('output', type=click.Path())
 def main(input, output):
     filter_xml(input, output)
-
 
 if __name__ == "__main__":
     main()

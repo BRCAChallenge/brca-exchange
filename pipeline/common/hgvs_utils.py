@@ -59,7 +59,7 @@ class HgvsWrapper:
         try:
             return str(self.hgvs_ams[HgvsWrapper.GRCh38_Assem].c_to_p(
                 hgvs_cdna))
-        except (hgvs.exceptions.HGVSError, IndexError) as e:
+        except (hgvs.exceptions.HGVSError, IndexError, ValueError) as e:
             logging.info(
                 "Protein conversion issues with " + str(hgvs_cdna) + ": " + str(
                     e))
@@ -111,7 +111,7 @@ class HgvsWrapper:
         rel = [t for t in am.relevant_transcripts(v) if t.startswith('NM_')]
 
         if not rel:
-            logging.warn("No transcripts could be found for " + str(v) + " in " + str(am.relevant_transcripts(v)) +
+            logging.warning("No transcripts could be found for " + str(v) + " in " + str(am.relevant_transcripts(v)) +
                          " and target assembly " + str(target_assembly))
             return None
 

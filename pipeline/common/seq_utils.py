@@ -39,7 +39,7 @@ class SeqRepoWrapper:
             seq_repo = SeqRepo(seq_repo_path)
             self.seq_repo_fetcher = seq_repo.fetch
         else:
-            logging.warn("Using remote sequence provider.")
+            logging.warning("Using remote sequence provider.")
             self.seq_repo_fetcher = seqfetcher.fetch_seq
 
         self.assembly_name = assembly_name

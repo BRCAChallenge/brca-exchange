@@ -5,7 +5,7 @@ Description:
     Takes in a gnomad table and converts it to vcf format.
 """
 
-from __future__ import print_function, division
+
 import argparse
 from collections import defaultdict
 import logging
@@ -54,7 +54,7 @@ def main():
     print('##fileformat=VCFv4.0', file=vcfFile)
     print('##source={0}'.format(source), file=vcfFile)
     print('##reference=GRCh37', file=vcfFile)
-    for annotation, description in annotDict.items():
+    for annotation, description in list(annotDict.items()):
         print('##INFO=<ID={0},Number=.,Type=String,Description="{1}">'.format(annotation.replace(' ', '_'), description), file=vcfFile)
     print('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO', file=vcfFile)
 

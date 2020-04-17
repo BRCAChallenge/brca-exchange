@@ -62,13 +62,13 @@ def main():
         pg_sources = pg_variant["Source"]
         pg_variants[pg_genomic_coordinate] = (pg_pathogenicity_all, pg_pathogenicity_expert, pg_cDNA, pg_sources)
 
-    for variant in built_variants.keys():
+    for variant in list(built_variants.keys()):
         if built_variants[variant] != pg_variants[variant]:
-            print "BAD MATCH for variant %s: %s | %s" % (variant, built_variants[variant], pg_variants[variant])
+            print("BAD MATCH for variant %s: %s | %s" % (variant, built_variants[variant], pg_variants[variant]))
             bad_matches[variant] = (built_variants[variant], pg_variants[variant])
 
     if bad_matches == {}:
-        print "All variants in pgDump match!"
+        print("All variants in pgDump match!")
 
 
 if __name__ == "__main__":

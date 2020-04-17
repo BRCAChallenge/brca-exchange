@@ -2,7 +2,7 @@ import pytest
 import unittest
 import tempfile
 import csv
-import releaseDiff
+from . import releaseDiff
 import copy
 from os import path
 
