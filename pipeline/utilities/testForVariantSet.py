@@ -99,15 +99,15 @@ def main():
                 else:
                     sys.exit("unregocnized gene %s in the input data" % row["Gene_symbol"])
                 alleleFound = False
-                for outputAllele in outputVariantData.keys():
+                for outputAllele in list(outputVariantData.keys()):
                     if re.search(allele, outputAllele):
                         alleleFound = True
                         matchingVariantData = outputVariantData[outputAllele]
-                        print "Variant %s found in output variant(s) %s from source(s) %s" % \
+                        print("Variant %s found in output variant(s) %s from source(s) %s" % \
                             (variant, matchingVariantData["pyhgvs_Genomic_Coordinate_38"],
-                             matchingVariantData["Source"])
+                             matchingVariantData["Source"]))
                 if not alleleFound:       
-                    print "Error: variant %s with allele %s not found" % (variant, allele)
+                    print("Error: variant %s with allele %s not found" % (variant, allele))
 
 
 if __name__ == "__main__":

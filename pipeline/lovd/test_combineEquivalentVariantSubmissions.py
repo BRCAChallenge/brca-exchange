@@ -116,7 +116,7 @@ class TestStringMethods(unittest.TestCase):
         merged = mergeRows(oldRow, newRow)
 
         # ignores same values for variant_effect
-        self.assertIsInstance(merged['variant_effect'], basestring)
+        self.assertIsInstance(merged['variant_effect'], str)
         self.assertEqual(merged['variant_effect'], '+/.')
 
         # adds individuals

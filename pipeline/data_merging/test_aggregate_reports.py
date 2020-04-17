@@ -2,7 +2,7 @@ from common import config
 import unittest
 import os
 from os import path
-import aggregate_reports
+from . import aggregate_reports
 
 VCF_TESTDATA_FILENAME = path.join(path.dirname(__file__), 'test_files/1000_Genomes.vcf')
 TSV_TESTDATA_FILENAME = path.join(path.dirname(__file__), 'test_files/enigma_from_clinvar.tsv')
@@ -181,7 +181,7 @@ class TestStringMethods(unittest.TestCase):
                         "Allele_frequency_exome_GnomAD",
                         "BX_ID_GnomAD"]
 
-        self.sources = aggregate_reports.FIELD_DICT.keys() + ["ENIGMA"]
+        self.sources = list(aggregate_reports.FIELD_DICT.keys()) + ["ENIGMA"]
         self.vcf_test_file = VCF_TESTDATA_FILENAME
         self.tsv_test_file = TSV_TESTDATA_FILENAME
 

@@ -180,8 +180,8 @@ def _merge_synonyms(x):
 
 
 @click.command()
-@click.argument('input', click.Path(readable=True))
-@click.argument('output', click.Path(writable=True))
+@click.argument('input', type=click.Path(readable=True))
+@click.argument('output', type=click.Path(writable=True))
 @click.option('--log-path', default='pseudonym_generator.log', help="Log file pth")
 @click.option("--pkl", help="Saving HGVS cDNA objects to save time during development")
 @click.option("--config-file", required=True, help="path to gene configuration file")

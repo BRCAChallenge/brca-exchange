@@ -1,7 +1,7 @@
 from .hgvs_utils import HgvsWrapper
 from .variant_utils import VCFVariant
 import hgvs
-from seq_utils import SeqRepoWrapper
+from .seq_utils import SeqRepoWrapper
 
 
 def cdna_str_to_genomic_var(cdna_hgvs_str, assembly=HgvsWrapper.GRCh38_Assem, hgvs_wrapper = HgvsWrapper.get_instance(),

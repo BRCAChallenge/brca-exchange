@@ -18,7 +18,7 @@ def main():
             info_keys = line.strip().split(args.delimiter)
         else:
             info_values = line.strip().split(args.delimiter)
-            infos.append(dict(zip(info_keys, info_values)))  
+            infos.append(dict(list(zip(info_keys, info_values))))
     
     sorted_infos = sort_by_pos(infos)
     write_header(args.output, info_keys, args.source, args.version)
@@ -78,7 +78,7 @@ def write_body(path_output, infos):
     for info in infos:
         [chrom, pos, ref, alt] = parse_genome_coor(info["Genomic_Coordinate"])
         INFOs = []
-        for key, value in info.iteritems():
+        for key, value in info.items():
             ## ; space : not allowed
             value = value.replace(";",".").replace(":",".").replace(" ","_")
             INFOs.append(key + "=" + value)
