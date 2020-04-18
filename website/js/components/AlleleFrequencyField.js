@@ -81,7 +81,7 @@ const AlleleFrequencyField = React.createClass({
 
     getPopMax: function(fieldName, variant) {
         /*eslint-disable camelcase*/
-        if (fieldName === "Genomes (Graphical)") {
+        if (fieldName.includes("Genomes (Graphical)")) {
             return variant.faf95_popmax_genome_GnomAD + ' (' + variant.faf95_popmax_population_genome_GnomAD + ')';
         } else {
             return variant.faf95_popmax_exome_GnomAD + ' (' + variant.faf95_popmax_population_exome_GnomAD + ')';
