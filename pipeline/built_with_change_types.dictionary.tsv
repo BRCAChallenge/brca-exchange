@@ -213,7 +213,6 @@ Allele_number_exome_GnomAD	Total number of total chromosomes studied (for this v
 BX_ID_GnomAD	Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation
 Allele_count_exome_GnomAD	Total count of observed alternate alleles (variant) in exomes
 HGVS_cDNA_GnomAD	HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA
-HGVS_GnomAD	HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA
 Allele_count_genome_GnomAD	Total count of observed alternate alleles (variant) in genomes
 Allele_number_genome_GnomAD	Total number of total chromosomes studied (for this variant) in genomes
 Allele_frequency_exome_GnomAD	Overall allele frequency (for exomes) according to all studied populations, per gnomAD
