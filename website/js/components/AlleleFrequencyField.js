@@ -94,11 +94,49 @@ const AlleleFrequencyField = React.createClass({
         this.state['Allele_frequency_exome_EAS_GnomAD']);
     },
 
-    getRowsAndDetermineIfEmpty(source, data, variant) {
+    getEmptyHeaders: function(variant, data) {
+        // determines which subpopulation groups have all empty subrows -- hides expansion functionality
+        // if they do and if show empty items is set to true
+        let emptyHeaders = {};
+
+        emptyHeaders['Allele_frequency_genome_EAS_GnomAD'] =
+            util.isEmptyField(variant['Allele_frequency_genome_EAS_JPN_GnomAD'])
+            && util.isEmptyField(variant['Allele_frequency_genome_EAS_KOR_GnomAD'])
+            && util.isEmptyField(variant['Allele_frequency_genome_EAS_OEA_GnomAD']);
+
+        emptyHeaders['Allele_frequency_exome_EAS_GnomAD'] =
+            util.isEmptyField(variant['Allele_frequency_exome_EAS_JPN_GnomAD'])
+            && util.isEmptyField(variant['Allele_frequency_exome_EAS_KOR_GnomAD'])
+            && util.isEmptyField(variant['Allele_frequency_exome_EAS_OEA_GnomAD']);
+
+        emptyHeaders['Allele_frequency_genome_NFE_GnomAD'] =
+            util.isEmptyField(variant['Allele_frequency_genome_NFE_EST_GnomAD'])
+            && util.isEmptyField(variant['Allele_frequency_genome_NFE_BGR_GnomAD'])
+            && util.isEmptyField(variant['Allele_frequency_genome_NFE_NWE_GnomAD'])
+            && util.isEmptyField(variant['Allele_frequency_genome_NFE_ONF_GnomAD'])
+            && util.isEmptyField(variant['Allele_frequency_genome_NFE_SEU_GnomAD'])
+            && util.isEmptyField(variant['Allele_frequency_genome_NFE_SWE_GnomAD']);
+
+        emptyHeaders['Allele_frequency_exome_NFE_GnomAD'] =
+            util.isEmptyField(variant['Allele_frequency_exome_NFE_EST_GnomAD'])
+            && util.isEmptyField(variant['Allele_frequency_exome_NFE_BGR_GnomAD'])
+            && util.isEmptyField(variant['Allele_frequency_exome_NFE_NWE_GnomAD'])
+            && util.isEmptyField(variant['Allele_frequency_exome_NFE_ONF_GnomAD'])
+            && util.isEmptyField(variant['Allele_frequency_exome_NFE_SEU_GnomAD'])
+            && util.isEmptyField(variant['Allele_frequency_exome_NFE_SWE_GnomAD']);
+
+        return emptyHeaders;
+    },
+
+    getRowsAndDetermineIfEmpty: function(source, data, variant) {
         let rowsEmpty = 0;
+
+        let emptyHeaders = this.getEmptyHeaders(variant, data);
+
         const rows = _.map(data, (rowDescriptor) => {
             let {prop, title, noHelpLink} = rowDescriptor;
             let rowItem;
+            let hideHeaderProperties;
             let show = true;
             let subRow = false;
             let headerRow = false;
@@ -128,27 +166,36 @@ const AlleleFrequencyField = React.createClass({
 
             if (prop.includes('EAS_GnomAD') || prop.includes('NFE_GnomAD')) {
                 headerRow = true;
+                hideHeaderProperties = emptyHeaders[prop] && this.props.hideEmptyItems;
             }
 
-            let rowClasses = classNames({
-                  'variantfield-empty': (isEmptyValue && this.props.hideEmptyItems),
-                  'header-row': headerRow,
-                  'sub-row': subRow
-            });
-
             if (prop.includes('genome_NFE')) {
-                show = this.state['Allele_frequency_genome_NFE_GnomAD'];
+                show = this.state['Allele_frequency_genome_NFE_GnomAD']
+                && !(emptyHeaders['Allele_frequency_genome_NFE_GnomAD']
+                && this.props.hideEmptyItems);
             } else if (prop.includes('exome_NFE')) {
-                show = this.state['Allele_frequency_exome_NFE_GnomAD'];
+                show = this.state['Allele_frequency_exome_NFE_GnomAD']
+                && !(emptyHeaders['Allele_frequency_exome_NFE_GnomAD']
+                && this.props.hideEmptyItems);
             } else if (prop.includes('genome_EAS')) {
-                show = subRow && this.state['Allele_frequency_genome_EAS_GnomAD'];
+                show = this.state['Allele_frequency_genome_EAS_GnomAD']
+                && !(emptyHeaders['Allele_frequency_genome_EAS_GnomAD']
+                && this.props.hideEmptyItems);
             } else if (prop.includes('exome_EAS')) {
-                show = subRow && this.state['Allele_frequency_exome_EAS_GnomAD'];
+                show = this.state['Allele_frequency_exome_EAS_GnomAD']
+                && !(emptyHeaders['Allele_frequency_exome_EAS_GnomAD']
+                && this.props.hideEmptyItems);
             }
 
             if (prop.includes('EAS_JPN')) {
                 title = "* " + title;
             }
+
+            let rowClasses = classNames({
+                  'variantfield-empty': (isEmptyValue && this.props.hideEmptyItems),
+                  'header-row': headerRow && !hideHeaderProperties,
+                  'sub-row': subRow
+            });
 
             if (subRow) {
                 return (
@@ -172,12 +219,12 @@ const AlleleFrequencyField = React.createClass({
                 );
             } else if (headerRow) {
                 return (
-                    <tr key={prop} className={ rowClasses } onClick={() => this.fieldToggled(prop)}>
+                    <tr key={prop} className={ rowClasses } onClick={() => !hideHeaderProperties && this.fieldToggled(prop)}>
                         { rowDescriptor.tableKey !== false &&
                             (
                                 <KeyInline tableKey={title} noHelpLink={noHelpLink}
-                                    headerGroup={true}
-                                    expanded={this.state[prop]}
+                                    headerGroup={true && !hideHeaderProperties}
+                                    expanded={this.state[prop] && !hideHeaderProperties}
                                     tooltip={this.props.tooltips && this.props.tooltips[slugify(prop)]}
                                 />
                             )
