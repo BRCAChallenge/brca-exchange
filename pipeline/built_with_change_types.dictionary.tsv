@@ -379,3 +379,7 @@ Allele_count_hom_genome_NFE_NWE_GnomAD  Count of observed alternate alleles (var
 Allele_count_hom_genome_NFE_ONF_GnomAD  Count of observed alternate alleles (variant) in the genomes of homozygous Other Non-Finnish European populations (subset of Non-Finnish European)
 Allele_count_hom_genome_NFE_SEU_GnomAD  Count of observed alternate alleles (variant) in the genomes of homozygous Southern European populations (subset of Non-Finnish European)
 Allele_count_hom_genome_NFE_SWE_GnomAD  Count of observed alternate alleles (variant) in the genomes of homozygous Swedish populations (subset of Non-Finnish European)
+faf95_popmax_exome_GnomAD	The gnomAD exome population frequency that is most significant with a 95% confidence threshold
+faf95_popmax_population_exome_GnomAD	The gnomAD population that is most significant (most frequent) in the exome data at 95% confidence
+faf95_popmax_genome_GnomAD	The gnomAD genome population frequency that is most significant with a 95% confidence threshold
+faf95_popmax_population_genome_GnomAD	The gnomAD population that is most significant (most frequent) in the genome data at 95% confidence
