@@ -94,7 +94,7 @@ const AlleleFrequencyField = React.createClass({
         this.state['Allele_frequency_exome_EAS_GnomAD']);
     },
 
-    getEmptyHeaders: function(variant, data) {
+    getEmptyHeaders: function(variant) {
         // determines which subpopulation groups have all empty subrows -- hides expansion functionality
         // if they do and if show empty items is set to true
         let emptyHeaders = {};
