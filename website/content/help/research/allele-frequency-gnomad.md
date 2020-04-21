@@ -74,4 +74,4 @@ The PopMax Filtering Allele Frequency represents the 95% confidence threshold on
 
 ##### References
 
-1. [Whiffin et al. 2017]{https://www.ncbi.nlm.nih.gov/pubmed/?term=28518168}
+1. [Whiffin et al. 2017](https://www.ncbi.nlm.nih.gov/pubmed/?term=28518168)
