@@ -6,9 +6,8 @@ exome_ac	Total count of observed alternate alleles (variant) in exomes
 exome_af	Overall allele frequency (for exomes) according to all studied populations, per gnomAD
 alt	Alternate base(s)
 chrom	Chromosome
-hgvsc	HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA
-hgvsp	The predicted protein-level change (if any) that would be introduced by the genomic variant
-pos_hg19	Position according to hg19
+hgvs	HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA
+pos	Position according to hg19
 ref	Reference base(s)
 variantId	Identifier provided by gnomAD
 flags	Flags provided by gnomAD to indicate an annotation or something unusual about the data
@@ -76,3 +75,79 @@ exome_AFR_ac	Count of observed alternate alleles (variant) in exomes of African/
 exome_FIN_af	Allele Frequency in exomes of Finnish Populations
 exome_AFR_af	Allele Frequency in exomes of African/African American Populations
 genome_SAS_af	Allele Frequency in genomes of South Asian Populations
+exome_EAS_JPN_af        Allele Frequency in the exomes of Japanese populations (subset of East Asian)
+exome_EAS_KOR_af        Allele Frequency in the exomes of Korean populations (subset of East Asian)
+exome_EAS_OEA_af        Allele Frequency in the exomes of Other East Asian populations (subset of East Asian)
+exome_NFE_EST_af        Allele Frequency in the exomes of Estonian populations (subset of Non-Finnish European)
+exome_NFE_BGR_af        Allele Frequency in the exomes of Bulgarian populations (subset of Non-Finnish European)
+exome_NFE_NWE_af        Allele Frequency in the exomes of Northwestern European populations (subset of Non-Finnish European)
+exome_NFE_ONF_af        Allele Frequency in the exomes of Other Non-Finnish European populations (subset of Non-Finnish European)
+exome_NFE_SEU_af        Allele Frequency in the exomes of Southern European populations (subset of Non-Finnish European)
+exome_NFE_SWE_af        Allele Frequency in the exomes of Swedish populations (subset of Non-Finnish European)
+exome_EAS_JPN_an        Number of total chromosomes studied (for this variant) in the exomes of Japanese populations (subset of East Asian)
+exome_EAS_KOR_an        Number of total chromosomes studied (for this variant) in the exomes of Korean populations (subset of East Asian)
+exome_EAS_OEA_an        Number of total chromosomes studied (for this variant) in the exomes of Other East Asian populations (subset of East Asian)
+exome_NFE_EST_an        Number of total chromosomes studied (for this variant) in the exomes of Estonian populations (subset of Non-Finnish European)
+exome_NFE_BGR_an        Number of total chromosomes studied (for this variant) in the exomes of Bulgarian populations (subset of Non-Finnish European)
+exome_NFE_NWE_an        Number of total chromosomes studied (for this variant) in the exomes of Northwestern European populations (subset of Non-Finnish European)
+exome_NFE_ONF_an        Number of total chromosomes studied (for this variant) in the exomes of Other Non-Finnish European populations (subset of Non-Finnish European)
+exome_NFE_SEU_an        Number of total chromosomes studied (for this variant) in the exomes of Southern European populations (subset of Non-Finnish European)
+exome_NFE_SWE_an        Number of total chromosomes studied (for this variant) in the exomes of Swedish populations (subset of Non-Finnish European)
+exome_EAS_JPN_ac        Count of observed alternate alleles (variant) in the exomes of Japanese populations (subset of East Asian)
+exome_EAS_KOR_ac        Count of observed alternate alleles (variant) in the exomes of Korean populations (subset of East Asian)
+exome_EAS_OEA_ac        Count of observed alternate alleles (variant) in the exomes of Other East Asian populations (subset of East Asian)
+exome_NFE_EST_ac        Count of observed alternate alleles (variant) in the exomes of Estonian populations (subset of Non-Finnish European)
+exome_NFE_BGR_ac        Count of observed alternate alleles (variant) in the exomes of Bulgarian populations (subset of Non-Finnish European)
+exome_NFE_NWE_ac        Count of observed alternate alleles (variant) in the exomes of Northwestern European populations (subset of Non-Finnish European)
+exome_NFE_ONF_ac        Count of observed alternate alleles (variant) in the exomes of Other Non-Finnish European populations (subset of Non-Finnish European)
+exome_NFE_SEU_ac        Count of observed alternate alleles (variant) in the exomes of Southern European populations (subset of Non-Finnish European)
+exome_NFE_SWE_ac        Count of observed alternate alleles (variant) in the exomes of Swedish populations (subset of Non-Finnish European)
+exome_EAS_JPN_hom       Count of observed alternate alleles (variant) in the exomes of homozygous Japanese populations (subset of East Asian)
+exome_EAS_KOR_hom       Count of observed alternate alleles (variant) in the exomes of homozygous Korean populations (subset of East Asian)
+exome_EAS_OEA_hom       Count of observed alternate alleles (variant) in the exomes of homozygous Other East Asian populations (subset of East Asian)
+exome_NFE_EST_hom       Count of observed alternate alleles (variant) in the exomes of homozygous Estonian populations (subset of Non-Finnish European)
+exome_NFE_BGR_hom       Count of observed alternate alleles (variant) in the exomes of homozygous Bulgarian populations (subset of Non-Finnish European)
+exome_NFE_NWE_hom       Count of observed alternate alleles (variant) in the exomes of homozygous Northwestern European populations (subset of Non-Finnish European)
+exome_NFE_ONF_hom       Count of observed alternate alleles (variant) in the exomes of homozygous Other Non-Finnish European populations (subset of Non-Finnish European)
+exome_NFE_SEU_hom       Count of observed alternate alleles (variant) in the exomes of homozygous Southern European populations (subset of Non-Finnish European)
+exome_NFE_SWE_hom       Count of observed alternate alleles (variant) in the exomes of homozygous Swedish populations (subset of Non-Finnish European)
+genome_EAS_JPN_af       Allele Frequency in the genomes of Japanese populations (subset of East Asian)
+genome_EAS_KOR_af       Allele Frequency in the genomes of Korean populations (subset of East Asian)
+genome_EAS_OEA_af       Allele Frequency in the genomes of Other East Asian populations (subset of East Asian)
+genome_NFE_EST_af       Allele Frequency in the genomes of Estonian populations (subset of Non-Finnish European)
+genome_NFE_BGR_af       Allele Frequency in the genomes of Bulgarian populations (subset of Non-Finnish European)
+genome_NFE_NWE_af       Allele Frequency in the genomes of Northwestern European populations (subset of Non-Finnish European)
+genome_NFE_ONF_af       Allele Frequency in the genomes of Other Non-Finnish European populations (subset of Non-Finnish European)
+genome_NFE_SEU_af       Allele Frequency in the genomes of Southern European populations (subset of Non-Finnish European)
+genome_NFE_SWE_af       Allele Frequency in the genomes of Swedish populations (subset of Non-Finnish European)
+genome_EAS_JPN_an       Number of total chromosomes studied (for this variant) in the genomes of Japanese populations (subset of East Asian)
+genome_EAS_KOR_an       Number of total chromosomes studied (for this variant) in the genomes of Korean populations (subset of East Asian)
+genome_EAS_OEA_an       Number of total chromosomes studied (for this variant) in the genomes of Other East Asian populations (subset of East Asian)
+genome_NFE_EST_an       Number of total chromosomes studied (for this variant) in the genomes of Estonian populations (subset of Non-Finnish European)
+genome_NFE_BGR_an       Number of total chromosomes studied (for this variant) in the genomes of Bulgarian populations (subset of Non-Finnish European)
+genome_NFE_NWE_an       Number of total chromosomes studied (for this variant) in the genomes of Northwestern European populations (subset of Non-Finnish European)
+genome_NFE_ONF_an       Number of total chromosomes studied (for this variant) in the genomes of Other Non-Finnish European populations (subset of Non-Finnish European)
+genome_NFE_SEU_an       Number of total chromosomes studied (for this variant) in the genomes of Southern European populations (subset of Non-Finnish European)
+genome_NFE_SWE_an       Number of total chromosomes studied (for this variant) in the genomes of Swedish populations (subset of Non-Finnish European)
+genome_EAS_JPN_ac       Count of observed alternate alleles (variant) in the genomes of Japanese populations (subset of East Asian)
+genome_EAS_KOR_ac       Count of observed alternate alleles (variant) in the genomes of Korean populations (subset of East Asian)
+genome_EAS_OEA_ac       Count of observed alternate alleles (variant) in the genomes of Other East Asian populations (subset of East Asian)
+genome_NFE_EST_ac       Count of observed alternate alleles (variant) in the genomes of Estonian populations (subset of Non-Finnish European)
+genome_NFE_BGR_ac       Count of observed alternate alleles (variant) in the genomes of Bulgarian populations (subset of Non-Finnish European)
+genome_NFE_NWE_ac       Count of observed alternate alleles (variant) in the genomes of Northwestern European populations (subset of Non-Finnish European)
+genome_NFE_ONF_ac       Count of observed alternate alleles (variant) in the genomes of Other Non-Finnish European populations (subset of Non-Finnish European)
+genome_NFE_SEU_ac       Count of observed alternate alleles (variant) in the genomes of Southern European populations (subset of Non-Finnish European)
+genome_NFE_SWE_ac       Count of observed alternate alleles (variant) in the genomes of Swedish populations (subset of Non-Finnish European)
+genome_EAS_JPN_hom      Count of observed alternate alleles (variant) in the genomes of homozygous Japanese populations (subset of East Asian)
+genome_EAS_KOR_hom      Count of observed alternate alleles (variant) in the genomes of homozygous Korean populations (subset of East Asian)
+genome_EAS_OEA_hom      Count of observed alternate alleles (variant) in the genomes of homozygous Other East Asian populations (subset of East Asian)
+genome_NFE_EST_hom      Count of observed alternate alleles (variant) in the genomes of homozygous Estonian populations (subset of Non-Finnish European)
+genome_NFE_BGR_hom      Count of observed alternate alleles (variant) in the genomes of homozygous Bulgarian populations (subset of Non-Finnish European)
+genome_NFE_NWE_hom      Count of observed alternate alleles (variant) in the genomes of homozygous Northwestern European populations (subset of Non-Finnish European)
+genome_NFE_ONF_hom      Count of observed alternate alleles (variant) in the genomes of homozygous Other Non-Finnish European populations (subset of Non-Finnish European)
+genome_NFE_SEU_hom      Count of observed alternate alleles (variant) in the genomes of homozygous Southern European populations (subset of Non-Finnish European)
+genome_NFE_SWE_hom      Count of observed alternate alleles (variant) in the genomes of homozygous Swedish populations (subset of Non-Finnish European)
+popmax_exome	The gnomAD exome population frequency that is most significant with a 95% confidence threshold
+popmax_population_exome	The gnomAD population that is most significant (most frequent) in the exome data at 95% confidence
+popmax_genome	The gnomAD genome population frequency that is most significant with a 95% confidence threshold
+popmax_population_genome	The gnomAD population that is most significant (most frequent) in the genome data at 95% confidence
