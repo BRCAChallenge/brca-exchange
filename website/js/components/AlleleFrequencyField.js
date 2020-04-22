@@ -81,10 +81,11 @@ const AlleleFrequencyField = React.createClass({
 
     getPopMax: function(fieldName, variant) {
         /*eslint-disable camelcase*/
+        let popmax = parseFloat(variant.faf95_popmax_genome_GnomAD) ? parseFloat(variant.faf95_popmax_genome_GnomAD).toPrecision(4) : '-';
         if (fieldName.includes("Genomes (Graphical)")) {
-            return variant.faf95_popmax_genome_GnomAD + ' (' + variant.faf95_popmax_population_genome_GnomAD + ')';
+            return popmax + ' (' + variant.faf95_popmax_population_genome_GnomAD + ')';
         } else {
-            return variant.faf95_popmax_exome_GnomAD + ' (' + variant.faf95_popmax_population_exome_GnomAD + ')';
+            return popmax + ' (' + variant.faf95_popmax_population_exome_GnomAD + ')';
         }
         /*eslint-enable camelcase*/
     },
