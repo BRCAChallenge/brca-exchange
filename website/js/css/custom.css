@@ -274,6 +274,22 @@ small .gnomad-flag span {
     color: black;
 }
 
+i.gnomad-header-row {
+    margin-right: 20px;
+}
+
+.sub-row {
+    font-size: 11px;
+}
+
+.sub-row .help-target {
+    padding-left: 60px;
+}
+
+.header-row {
+    cursor: pointer;
+}
+
 .genome-header {
     color: white;
     border: 1px solid black;
