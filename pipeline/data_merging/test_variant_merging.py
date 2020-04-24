@@ -291,7 +291,8 @@ def test_variant_equal_not_equiv(v1, v2, ref_id):
     refsequence2 = chrom_ref[chrom2][ref_id]["sequence"]
     v1 = inject_ref(refsequence1, v1)
     v2 = inject_ref(refsequence2, v2)
-
+    assume(v1[2] != v1[3] and v2[2] != v2[3]) # excluding noop variants
+    
     eq1 = equiv_set(refsequence1, v1)
     eq2 = equiv_set(refsequence2, v2)
 
