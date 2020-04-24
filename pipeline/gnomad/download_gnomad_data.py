@@ -204,6 +204,12 @@ def compile_allele_values(df):
     return df
 
 
+def round_popmax(df):
+    df['exome_popmax'] = pd.to_numeric(df['exome_popmax'], errors='coerce').apply(round_four_sigfigs)
+    df['genome_popmax'] = pd.to_numeric(df['genome_popmax'], errors='coerce').apply(round_four_sigfigs)
+    return df
+
+
 def calculate_frequency(ac, an):
     freq = pd.to_numeric(ac, errors='coerce').divide(pd.to_numeric(an, errors='coerce'))
     return freq.apply(round_four_sigfigs)
@@ -307,7 +313,8 @@ def main():
     variants_df = pd.json_normalize(variants_with_flattened_populations)
     variants_df['flags'] = variants_df['flags'].apply(', '.join)
     df_with_allele_values = compile_allele_values(variants_df)
-    stringified_df_with_allele_values = df_with_allele_values.replace(np.nan, '-', regex=True).replace('', '-', regex=True)
+    df_with_rounded_popmax = round_popmax(df_with_allele_values)
+    stringified_df_with_allele_values = df_with_rounded_popmax.replace(np.nan, '-', regex=True).replace('', '-', regex=True)
 
     # output to .tsv
     stringified_df_with_allele_values.to_csv(f_out, sep='\t', index=False)
