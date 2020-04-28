@@ -27,7 +27,7 @@ The BRCA Exchange displays the primary subsets used by ExAC and gnomAD (i.e. “
 	* Allele frequency in Ahskenazi Jewish populations, per gnomAD
 * ##### East Asian (EAS)
 	* Allele frequency in East Asian populations, per gnomAD
-	* Subsets available on gnomAD:
+	* Subsets available:
 		* Japanese (EAS_JPN)
 		* Korean (EAS_KOR)
 		* Other East Asian (EAS_OEA)
@@ -35,7 +35,7 @@ The BRCA Exchange displays the primary subsets used by ExAC and gnomAD (i.e. “
 	* Allele frequency in Finnish populations, per gnomAD and separated from European because of an enriched data set
 * ##### Non-Finnish European (NFE)
 	* Allele frequency in Non-Finnish European populations, per gnomAD
-	* Subsets available on gnomAD:
+	* Subsets available:
 		* Bulgarian (NFE_BGR)
 		* Estonian (NFE_EST)
 		* North-western European (NFE_NWE)
@@ -69,3 +69,9 @@ The BRCA Exchange displays data associated with ENSEMBL transcript ENST000003576
 
 For more information about efforts to unify NCBI and EMBL-EBI datasets, please visit [MANE](https://ncbiinsights.ncbi.nlm.nih.gov/2019/03/12/mane-select-v0-5/) (Matched Annotation from the NCBI and EMBL-EBI). Though they have not yet covered _BRCA1_ and _BRCA2_, the MANE Select set will eventually comprise of “a matched representative transcript for every human protein-coding gene.”
 
+#### GnomAD PopMax Filtering AF (95% Confidence) and Population
+The PopMax Filtering Allele Frequency represents the 95% confidence threshold on the population frequencies, as evaluated over all of the populations.  This is usually the highest allele frequency for any population.  In cases where some population has a high observed allele frequency but low overall counts (i.e. low allele number), this observed allele frequency might not be statistically significant, and the filtering allele frequency might be the allele frequency of a different population.  The Popmax Filtering Allele Frequency population indicates the population from which the Popmax Filtering Allele Frequency was derived.  When studying a heritable disorder with a large disease cohort, if the observed allele frequency in the disease cohort exceeds the 95% filtering allele frequency, one can assume (with 95% confidence) that the variant in question is too common to be causative of the disease and can be dismissed.
+
+##### References
+
+1. [Whiffin et al. 2017](https://www.ncbi.nlm.nih.gov/pubmed/?term=28518168)
