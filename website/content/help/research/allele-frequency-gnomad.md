@@ -47,7 +47,7 @@ The BRCA Exchange displays the primary subsets used by ExAC and gnomAD (i.e. “
 * ##### Other (OTH)
 	* Allele frequency in populations that “did not unambiguously cluster with the major populations in a principal component analysis,” per gnomAD
 	* South Asian genomes only contain 31 samples; thus for genome data, the SAS population is grouped with Other.
-	
+
 #### Graphical gnomAD Data
 Graphical gnomAD data can be viewed by expanding the gnomAD (Graphical) subtile. Two Graphs are available; one of the graphs is custom scaled to the allele frequencies by default (right side). Hovering over each bar will give you the numerical value represented in the population subset. You can click anywhere on the gnomAD (scaled) graph to change the scale between 1.0% (.01), 0.1% (.001), and the custom, default scale. This variety of scales will allow you to view all possible Allele Frequencies graphically.
 Each group found on the x-axis of the bar chart can be found in the list of fields described in the gnomAD Populations section.
