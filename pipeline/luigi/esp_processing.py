@@ -86,13 +86,8 @@ class ExtractESPData(ESPTask):
                 "--full", "1", "-o",
                 self.output().path]
 
-        logger.info(
-            "Calling espExtract.py for %s region with the following arguments: %s",
-            self.gene,
-            args)
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
+        pipeline_utils.run_process(args)
+        pipeline_utils.check_file_for_contents(self.output().path)
 
 
 class ConcatenateESPData(ESPTask):
@@ -104,19 +99,12 @@ class ConcatenateESPData(ESPTask):
         return luigi.LocalTarget(self.esp_file_dir + "/esp.hg38.vcf")
 
     def run(self):
-        concatenated_brca_output_file = self.output().path
+        # Note: requires correct installation of VCF tools and export PERL5LIB=/path/to/your/vcftools-directory/src/perl/ in path
+        args = ["vcf-concat"]
+        args.extend([t.path for t in self.input()])
 
-        with open(concatenated_brca_output_file, 'w') as f:
-            # Note: requires correct installation of VCF tools and export PERL5LIB=/path/to/your/vcftools-directory/src/perl/ in path
-            args = ["vcf-concat"]
-            args.extend([t.path for t in self.input()])
-
-            logger.info("Calling vcf-concat with the following args: %s", args)
-            sp = subprocess.Popen(args, stdout=f, stderr=subprocess.PIPE)
-            pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_file_for_contents(concatenated_brca_output_file)
-        logger.info("Concatenation complete.")
+        pipeline_utils.run_process(args, redirect_stdout_path=self.output().path)
+        pipeline_utils.check_file_for_contents(self.output().path)
 
 
 @requires(ConcatenateESPData)
@@ -125,11 +113,7 @@ class SortConcatenatedESPData(ESPTask):
         return luigi.LocalTarget(self.esp_file_dir + "/esp.sorted.hg38.vcf")
 
     def run(self):
-        with open(self.output().path, 'w') as f:
-            args = ["vcf-sort", self.input().path]
-            logger.info("Calling vcf-sort with the following args: %s", args)
-            sp = subprocess.Popen(args, stdout=f, stderr=subprocess.PIPE)
-            pipeline_utils.print_subprocess_output_and_error(sp)
+        args = ["vcf-sort", self.input().path]
 
+        pipeline_utils.run_process(args, redirect_stdout_path=self.output().path)
         pipeline_utils.check_file_for_contents(self.output().path)
-        logger.info("Sorting of concatenated files complete.")
