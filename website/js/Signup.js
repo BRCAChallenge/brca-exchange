@@ -378,19 +378,23 @@ var SignupForm = React.createClass({
     renderRadioInlines: function (id, label, kwargs) {
         var options = kwargs.values.map(function (value) {
             var defaultChecked = (value.name === kwargs.defaultCheckedValue);
-            return (
-				<label className="radio-inline">
-					<input type="radio" ref={id + value.ref} name={id} value={value.name} defaultChecked={defaultChecked}/>
-					{value.name}
-				</label>);
+            if (value.name === "Other") {
+                return (
+                    <label className="radio-inline">
+                        <input type="radio" ref={id + value.ref} name={id} value={value.name} defaultChecked={defaultChecked}/>
+                        {value.name + ':'}<input className="form-control" type="text" ref="titlecustom" name="titlecustom"/>
+                    </label>
+                );
+            } else {
+                return (<label className="radio-inline">
+                    <input type="radio" ref={id + value.ref} name={id} value={value.name} defaultChecked={defaultChecked}/>
+                        {value.name}
+                    </label>
+                );
+            }
         });
-        options = <span className="col-sm-9">{options}</span>;
-        var other =
-            (<span className="col-sm-3">
-            <input className="form-control" type="text" ref="titlecustom" name="titlecustom"/>
-            </span>);
-        var optionsWithOther = {options, other};
-        return this.renderField(id, label, optionsWithOther);
+        options = (<span className="col-xs-12">{options}</span>);
+        return this.renderField(id, label, options);
     },
     renderCheckBox: function (id, label, defaultChecked = false) {
         var checkbox = (<label className="radio-inline">
@@ -408,8 +412,9 @@ var SignupForm = React.createClass({
 				<label htmlFor={id} className="col-sm-4 control-label">{label}</label>
 				<div className="col-sm-6">
 					{field}
+                </div>
             </div>
-        </div>);
+        );
     }
 });
 
