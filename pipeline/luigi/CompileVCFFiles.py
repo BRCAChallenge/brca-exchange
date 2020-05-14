@@ -176,7 +176,7 @@ class ExtractDataFromLatestEXLOVD(DefaultPipelineTask):
 @requires(ExtractDataFromLatestEXLOVD)
 class ConvertEXLOVDBRCA1ExtractToVCF(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf")
+        return luigi.LocalTarget(os.path.join(self.ex_lovd_file_dir, "exLOVD_brca1.hg19.vcf"))
 
     def run(self):
         os.chdir(lovd_method_dir)
@@ -184,7 +184,7 @@ class ConvertEXLOVDBRCA1ExtractToVCF(DefaultPipelineTask):
         args = ["./lovd2vcf.py", "-i", self.ex_lovd_file_dir + "/BRCA1.txt", "-o",
                 self.output().path, "-a",
                 "exLOVDAnnotation", "-e",
-                self.artifacts_dir + "exLOVD_BRCA1_error_variants.txt",
+                os.path.join(self.artifacts_dir, "exLOVD_BRCA1_error_variants.txt"),
                 "-s", "exLOVD"]
 
         pipeline_utils.run_process(args)
@@ -203,7 +203,7 @@ class ConvertEXLOVDBRCA2ExtractToVCF(DefaultPipelineTask):
         args = ["./lovd2vcf.py", "-i", self.ex_lovd_file_dir + "/BRCA2.txt", "-o",
                 self.output().path, "-a",
                 "exLOVDAnnotation", "-e",
-                self.artifacts_dir + "exLOVD_BRCA2_error_variants.txt",
+                os.path.join(self.artifacts_dir, "exLOVD_BRCA2_error_variants.txt"),
                 "-s", "exLOVD"]
 
         pipeline_utils.run_process(args)
@@ -581,7 +581,7 @@ class FilterEnigmaAssertions(DefaultPipelineTask):
 @requires(FilterEnigmaAssertions)
 class ExtractEnigmaFromClinvar(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.enigma_file_dir, 'enigma_clinvar.tsv'))
+        return luigi.LocalTarget(os.path.join(self.enigma_file_dir, 'enigma_from_clinvar.tsv'))
 
     def run(self):
         os.chdir(clinvar_method_dir)
@@ -640,7 +640,7 @@ class ParseFindlayBRCA1RingFunctionScores(DefaultPipelineTask):
 @requires(ParseFindlayBRCA1RingFunctionScores)
 class ConvertFindlayBRCA1RingFunctionScoresToVCF(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.assays_dir + "findlay_BRCA1_ring_function_scores.clean.hg19.vcf")
+        return luigi.LocalTarget(os.path.join(self.assays_dir, "findlay_BRCA1_ring_function_scores.clean.hg19.vcf"))
 
     def run(self):
         os.chdir(functional_assays_method_dir)
@@ -657,7 +657,7 @@ class ConvertFindlayBRCA1RingFunctionScoresToVCF(DefaultPipelineTask):
 @requires(ConvertFindlayBRCA1RingFunctionScoresToVCF)
 class CrossmapFindlayBRCA1RingFunctionScores(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.assays_dir + "/findlay_BRCA1_ring_function_scores.clean.hg38.vcf")
+        return luigi.LocalTarget(os.path.join(self.assays_dir, "findlay_BRCA1_ring_function_scores.clean.hg38.vcf"))
 
     def run(self):
         brca_resources_dir = self.cfg.resources_dir
@@ -673,7 +673,7 @@ class CrossmapFindlayBRCA1RingFunctionScores(DefaultPipelineTask):
 @requires(CrossmapFindlayBRCA1RingFunctionScores)
 class SortFindlayBRCA1RingFunctionScores(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.assays_dir + "/findlay_BRCA1_ring_function_scores.clean.sorted.hg38.vcf")
+        return luigi.LocalTarget(os.path.join(self.assays_dir, "findlay_BRCA1_ring_function_scores.clean.sorted.hg38.vcf"))
 
     def run(self):
         args = ["vcf-sort", self.input().path]
@@ -685,7 +685,7 @@ class SortFindlayBRCA1RingFunctionScores(DefaultPipelineTask):
 @requires(SortFindlayBRCA1RingFunctionScores)
 class CopyFindlayBRCA1RingFunctionScoresOutputToOutputDir(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.cfg.output_dir + "/findlay_BRCA1_ring_function_scores.clean.sorted.hg38.vcf")
+        return luigi.LocalTarget(os.path.join(self.cfg.output_dir, "findlay_BRCA1_ring_function_scores.clean.sorted.hg38.vcf"))
 
     def run(self):
         copy(self.input().path, self.cfg.output_dir)
@@ -713,16 +713,16 @@ class MergeVCFsIntoTSVFile(DefaultPipelineTask):
         yield CopyFindlayBRCA1RingFunctionScoresOutputToOutputDir()
 
     def output(self):
-        return {'merged': luigi.LocalTarget(self.artifacts_dir + "merged.tsv"),
-                'reports': luigi.LocalTarget(self.artifacts_dir + "reports.tsv")}
+        return {'merged': luigi.LocalTarget(os.path.join(self.artifacts_dir, "merged.tsv")),
+                'reports': luigi.LocalTarget(os.path.join(self.artifacts_dir, "reports.tsv"))}
 
     def run(self):
         os.chdir(data_merging_method_dir)
 
         args = ["python", "variant_merging.py", "-i", self.cfg.output_dir + "/",
                 "-o",
-                self.artifacts_dir, "-a",
-                self.artifacts_dir, "-v",
+                self.artifacts_dir + '/', "-a",
+                self.artifacts_dir + '/', "-v",
                 "-c", self.cfg.gene_config_path]
 
         pipeline_utils.run_process(args)
@@ -769,7 +769,7 @@ class BuildAggregatedOutput(DefaultPipelineTask):
         pipeline_utils.run_process(args)
 
         pipeline_utils.check_input_and_output_tsvs_for_same_number_variants(
-            self.intput().path,
+            self.input().path,
             self.output().path)
 
 
@@ -804,7 +804,7 @@ class AppendCAID(DefaultPipelineTask):
 @requires(AppendCAID)
 class AppendMupitStructure(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.artifacts_dir + "built_with_mupit.tsv")
+        return luigi.LocalTarget(os.path.join(self.artifacts_dir, "built_with_mupit.tsv"))
 
     def run(self):
         os.chdir(data_merging_method_dir)
@@ -816,7 +816,7 @@ class AppendMupitStructure(DefaultPipelineTask):
         pipeline_utils.run_process(args)
 
         pipeline_utils.check_input_and_output_tsvs_for_same_number_variants(
-            self.intput().path,
+            self.input().path,
             self.output().path)
 
 
@@ -944,7 +944,7 @@ class RunDiffAndAppendChangeTypesToOutput(DefaultPipelineTask):
                 "--removed", os.path.join(self.diff_dir, "removed.tsv"), "--added",
                 os.path.join(self.diff_dir, "added.tsv"), "--added_data",
                 os.path.join(self.diff_dir, "added_data.tsv"), "--diff", os.path.join(self.diff_dir, "diff.txt"),
-                "--diff_json", os.path.join(self.diff_dir + "diff.json"),
+                "--diff_json", os.path.join(self.diff_dir, "diff.json"),
                 "--output", os.path.join(self.release_dir, "built_with_change_types.tsv"),
                 "--artifacts_dir", self.artifacts_dir,
                 "--diff_dir", self.diff_dir, "--v1_release_date",

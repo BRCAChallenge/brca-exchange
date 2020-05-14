@@ -57,11 +57,11 @@ def main():
     else:
         logging_level = logging.CRITICAL
 
-    log_file_path = args.artifacts_dir + "variant_merging.log"
+    log_file_path = os.path.join(args.artifacts_dir, "variant_merging.log")
     logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level,
                         format=' %(asctime)s %(filename)-15s %(message)s')
 
-    discarded_reports_file = open(args.artifacts_dir + "discarded_reports.tsv", "w")
+    discarded_reports_file = open(os.path.join(args.artifacts_dir, "discarded_reports.tsv"), "w")
 
     fieldnames = ['Report_id', 'Source', 'Reason', 'Variant']
 
@@ -89,7 +89,7 @@ def main():
     write_new_tsv(args.output + "merged.tsv", columns, variants)
 
     # copy enigma file to artifacts directory along with other ready files
-    copy(args.input + ENIGMA_FILE, args.output)
+    copy(os.path.join(args.input, ENIGMA_FILE), args.output)
 
     # write reports to reports file
     aggregate_reports.write_reports_tsv(args.output + "reports.tsv", columns, args.output, genome_regions_symbol_dict)
@@ -439,28 +439,28 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
         print(source_name, ":", file_name)
     print("\n------------preprocessing--------------------------------")
     print("remove sample columns and two erroneous rows from 1000 Genome file")
-    f_1000G = open(input_dir+ GENOME1K_FILE + "for_pipeline", "w")
+    f_1000G = open(os.path.join(input_dir, GENOME1K_FILE + "for_pipeline"), "w")
     subprocess.call(
-       ["bash", "1000g_preprocess.sh", input_dir + GENOME1K_FILE], stdout=f_1000G)
+       ["bash", "1000g_preprocess.sh", os.path.join(input_dir, GENOME1K_FILE)], stdout=f_1000G)
 
     # merge multiple variant per vcf into multiple lines
     for source_name, file_name in source_dict.items():
         print("convert to one variant per line in ", source_name)
-        f_in = open(input_dir + file_name, "r")
-        f_out = open(output_dir+ source_name + ".vcf", "w")
+        f_in = open(os.path.join(input_dir, file_name), "r")
+        f_out = open(os.path.join(output_dir, source_name + ".vcf"), "w")
         # Individual reports (lines in VCF/TSV) are given ids as part of the one_variant_transform method.
         one_variant_transform(f_in, f_out, source_name)
         f_in.close()
         f_out.close()
 
         print("merge repetitive variants within ", source_name)
-        f_in = open(output_dir + source_name + ".vcf", "r")
-        f_out = open(output_dir + source_name + "ready.vcf", "w")
+        f_in = open(os.path.join(output_dir, source_name + ".vcf"), "r")
+        f_out = open(os.path.join(output_dir, source_name + "ready.vcf"), "w")
         repeat_merging(f_in, f_out)
         source_dict[source_name] = f_out.name
 
     print("-------check if genomic coordinates are correct----------")
-    (columns, variants) = save_enigma_to_dict(input_dir + ENIGMA_FILE, output_dir, seq_provider, gene_regions_trees)
+    (columns, variants) = save_enigma_to_dict(os.path.join(input_dir, ENIGMA_FILE), output_dir, seq_provider, gene_regions_trees)
 
     new_source_dict = {}
     for source_name, file_name in source_dict.items():

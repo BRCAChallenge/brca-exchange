@@ -6,6 +6,7 @@ import json
 import logging
 from math import floor, log10
 import dateutil.parser
+import os
 
 csv.field_size_limit(10000000)
 
@@ -563,7 +564,7 @@ def generateReadme(args):
     }
 
 
-    with open(args.diff_dir + "README.txt", "w") as readme:
+    with open(os.path.join(args.diff_dir, "README.txt"), "w") as readme:
         readme.write("This file contains basic information about the diff directory.\n\n\n")
         for k, v in output_file_descriptions.items():
             readme.write(k + ": " + v + '\n\n')
@@ -636,7 +637,7 @@ def main():
     args = parser.parse_args()
 
     if args.artifacts_dir:
-        logFile = args.artifacts_dir + 'releaseDiff.log'
+        logFile = os.path.join(args.artifacts_dir, 'releaseDiff.log')
     else:
         logFile = 'releaseDiff.log'
 
