@@ -83,7 +83,6 @@ def main():
     printHeader()
 
     inputBuffer = ""
-    cnt = 0
     with open(args.clinVarXmlFilename) as inputFile:
         inClinVarSet = False
         for line in inputFile:
@@ -102,12 +101,6 @@ def main():
                 inputBuffer = None
             elif inClinVarSet:
                 inputBuffer += line
-
-            cnt = cnt + 1
-
-            if cnt > 100:
-                import sys
-                sys.exit(0)
 
 if __name__ == "__main__":
     # execute only if run as a script
