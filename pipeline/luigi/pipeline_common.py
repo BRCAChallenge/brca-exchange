@@ -92,6 +92,22 @@ class DefaultPipelineTask(luigi.Task):
         self.enigma_file_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.file_parent_dir + '/enigma')
         self.assays_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.file_parent_dir + '/functional_assays')
 
+    def on_failure(self, exception):
+        # renaming files by prefixing filename with "FAILURE_". This way, on rerunning the pipeline the failed task is
+        # automatically run again, but instead of just deleting the file, it can still be inspected.
+        def _rename_file(path):
+            ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            failed_file_name = f"FAILED_{ts}_{os.path.basename(path)}"
+            os.rename(path, os.path.join(os.path.dirname(path), failed_file_name))
+
+        if isinstance(self.output(), luigi.LocalTarget):
+            _rename_file(self.output().path)
+        else:
+            for o in self.output().values():
+                _rename_file(o.path)
+
+        return super().on_failure(exception)
+
 
 class CopyOutputToOutputDir(DefaultPipelineTask):
     out_dir = luigi.Parameter()

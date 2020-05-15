@@ -25,11 +25,11 @@ def run_process(args, redirect_stdout_path=None, expected_returncode=0):
     if redirect_stdout_path:
         stdout_cm = open(redirect_stdout_path, 'w')
     else:
-        # wrapping into a dummy contsee https://docs.python.org/3/library/contextlib.html#contextlib.nullcontext
+        # wrapping into a dummy context, see https://docs.python.org/3/library/contextlib.html#contextlib.nullcontext
         stdout_cm = contextlib.nullcontext(subprocess.PIPE)
 
     with stdout_cm as stdout:
-        print(f"Running clinVarParse.py with the following args: {args}")
+        print(f"Running with the following args: {args}")
         sp = subprocess.Popen(args, stdout=stdout, stderr=subprocess.PIPE)
         print_subprocess_output_and_error(sp)
 
