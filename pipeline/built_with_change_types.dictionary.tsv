@@ -1,5 +1,5 @@
 Field Name	Description	Example Value	Useful Resources
-Source	One or more labs, repositories, consortiums, or other entities who reported data for the variant (does not include Submitters to ClinVar)	ENIGMA,ClinVar,LOVD,ESP,1000_Genomes,ExAC,gnomAD,exLOVD
+Source	One or more labs, repositories, consortiums, or other entities who reported data for the variant (does not include Submitters to ClinVar)	ENIGMA,ClinVar,LOVD,ESP, BIC,1000_Genomes,ExAC,gnomAD,exLOVD
 Chr	The chromosome on which the variant is found	17
 Pos	The position of the variant, per _____ nomenclature	43063368
 Ref	The nucleotide(s) that is in the reference sequence at this position	T
