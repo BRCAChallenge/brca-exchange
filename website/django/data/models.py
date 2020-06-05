@@ -410,6 +410,7 @@ class Variant(models.Model):
     BX_ID_Findlay_BRCA1_Ring_Function_Scores = models.TextField(default='')
     VR_ID = models.TextField(null=True)
     Mupit_Structure = models.ForeignKey(MupitStructure, null=True)
+    CA_ID = models.TextField(null=True)
 
     # Data Versioning
     Data_Release = models.ForeignKey(DataRelease)
@@ -1145,6 +1146,7 @@ class CurrentVariant(models.Model):
     BX_ID_Findlay_BRCA1_Ring_Function_Scores = models.TextField(default='')
     VR_ID = models.TextField(null=True)
     Mupit_Structure = models.ForeignKey(MupitStructure, null=True)
+    CA_ID = models.TextField(null=True)
 
     # Data Versioning
     Data_Release = models.ForeignKey(DataRelease)
