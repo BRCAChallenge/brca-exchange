@@ -4,7 +4,7 @@ import sys
 import argparse
 import csv
 import time
-import pdb
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Gathers ClinGen Allele Registry IDs.')
