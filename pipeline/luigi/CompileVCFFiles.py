@@ -1082,6 +1082,34 @@ class BuildAggregatedOutput(DefaultPipelineTask):
 
 
 @requires(BuildAggregatedOutput)
+class AppendCAID(DefaultPipelineTask):
+
+    def output(self):
+        artifacts_dir = self.cfg.output_dir + "/release/artifacts/"
+        return luigi.LocalTarget(artifacts_dir + "built_with_ca_ids.tsv")
+
+    def run(self):
+        release_dir = self.cfg.output_dir + "/release/"
+        artifacts_dir = release_dir + "artifacts/"
+        brca_resources_dir = self.cfg.resources_dir
+        os.chdir(data_merging_method_dir)
+
+        args = ["python", "get_ca_id.py", "-i",
+                artifacts_dir + "built.tsv", "-o",
+                artifacts_dir + "/built_with_ca_ids.tsv", "-e",
+                artifacts_dir + "/ca_id_error_variants.txt"]
+        print("Running get_ca_id.py with the following args: %s" % (
+            args))
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
+        pipeline_utils.print_subprocess_output_and_error(sp)
+
+        pipeline_utils.check_input_and_output_tsvs_for_same_number_variants(
+            artifacts_dir + "built.tsv",
+            artifacts_dir + "built_with_ca_ids.tsv")
+
+
+@requires(AppendCAID)
 class AppendMupitStructure(DefaultPipelineTask):
 
     def output(self):
@@ -1095,7 +1123,7 @@ class AppendMupitStructure(DefaultPipelineTask):
         os.chdir(data_merging_method_dir)
 
         args = ["python", "getMupitStructure.py", "-i",
-                artifacts_dir + "built.tsv", "-o",
+                artifacts_dir + "built_with_ca_ids.tsv", "-o",
                 artifacts_dir + "/built_with_mupit.tsv"]
         print("Running getMupitStructure.py with the following args: %s" % (
             args))
@@ -1104,7 +1132,7 @@ class AppendMupitStructure(DefaultPipelineTask):
         pipeline_utils.print_subprocess_output_and_error(sp)
 
         pipeline_utils.check_input_and_output_tsvs_for_same_number_variants(
-            artifacts_dir + "built.tsv",
+            artifacts_dir + "built_with_ca_ids.tsv",
             artifacts_dir + "built_with_mupit.tsv")
 
 
