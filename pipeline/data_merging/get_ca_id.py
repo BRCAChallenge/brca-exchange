@@ -44,7 +44,7 @@ def main(args):
         for i in range(len(new_columns_to_append)):
             variant.append('-')
 
-        ca_id = get_ca_id(hgvs, variant)
+        ca_id = get_ca_id(hgvs, variant, errorsFile)
 
         variant[output_header_row.index("CA_ID")] = ca_id
 
@@ -53,7 +53,7 @@ def main(args):
         output_file.writerow(variant)
 
 
-def get_ca_id(hgvs, variant):
+def get_ca_id(hgvs, variant, errorsFile):
     if hgvs == '-' or hgvs == '':
         print('no hgvs provided for variant: %s' % (variant), file=errorsFile)
         print('\n', file=errorsFile)
