@@ -95,7 +95,9 @@ run-pipeline: ## running entire pipeline
 	TS=`date +%Y%m%d_%H%M%S`
 	LOG_FILE=$(LOG_DIR)/pipeline_run_$${TS}.log
 	echo "Log files are in $${LOG_FILE}"
+
 	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) /opt/brca-exchange/pipeline/docker/run_luigi.sh $(PRIORS_REFERENCES) $(OUT_DIR) $(PRIORS_IMAGE) $(VR_IMAGE) $(LUIGI_ROOT_TASK) $(LUIGI_WORKERS) $(GENE_CONFIG_FILE) ${VICTOR_IMAGE} ${VICTOR_DATA_DIR}/$(DATA_DATE) $(SEQ_REPO_DIR) > $${LOG_FILE} 2>&1
+
 
 run-interactive: ## starting docker container in interactive mode
 	docker run -it $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) bash
