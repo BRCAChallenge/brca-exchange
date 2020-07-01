@@ -282,6 +282,7 @@ pyhgvs_Genomic_Coordinate_37	HGVS variant alias which references the nucleotide 
 pyhgvs_Hg37_Start	Starting position in Hg37 build according to HGVS nomenclature	41215385	https://brcaexchange.org/help#variant-naming-demystified
 pyhgvs_Hg37_End	Ending position in Hg37 build according to HGVS nomenclature	41215385	https://brcaexchange.org/help#variant-naming-demystified
 pyhgvs_Protein	HGVS protein nomenclature	NP_009225.1:p.(Thr1720Ala)	https://brcaexchange.org/help#variant-naming-demystified
+CA_ID ClinGen Allele Registry canonical ID  CA247478059
 mupit_structure	Indicates the three-dimensional protein structure that the variant can be visualized within, with MuPIT	1t15
 varType	Indicates the type of variant in terms of substitution, deletion, missense, etc. 	substitution
 varLoc	Indicates whether a variant is in a clinically important domain, exon, intron, or splice-relevant position	CI_domain_variant
