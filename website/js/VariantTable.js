@@ -54,6 +54,7 @@ const expertModeGroups = [
         {title: 'Protein Identifier', prop: 'HGVS_Protein_ID'},
         {title: 'Protein Abbrev', prop: 'Protein_Change'}, // this is manually renamed to 'Abbreviated AA Change' in the front-end
         {title: 'BIC Designation', prop: 'BIC_Nomenclature'},
+        {title: 'ClinGen Allele Registry', prop: 'CA_ID'},
         {title: 'Genomic Nomenclature (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
         {title: 'Genomic Nomenclature (GRCh37)', prop: 'Genomic_Coordinate_hg37'}
     ]},
@@ -80,6 +81,7 @@ const researchModeGroups = [
         {title: 'HGVS Protein', prop: 'HGVS_Protein', render: protein => protein.split(':')[1], core: true},
         {title: 'Protein Amino Acid Change', prop: 'Protein_Change', core: true},
         {title: 'BIC Designation', prop: 'BIC_Nomenclature', core: true},
+        {title: 'ClinGen Allele Registry', prop: 'CA_ID'},
         {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38', core: true},
         {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
         {title: 'RNA (LOVD)', prop: 'RNA_LOVD'},
@@ -367,6 +369,7 @@ const columns = [
     {title: 'Protein Identifier', prop: 'HGVS_Protein_ID'},
     {title: 'Protein Abbrev', prop: 'Protein_Change'},
     {title: 'BIC Designation', prop: 'BIC_Nomenclature'},
+    {title: 'ClinGen Allele Registry', prop: 'CA_ID'},
     {title: 'Genomic Nomenclature (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
     {title: 'Genomic Nomenclature (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
     {title: 'Clinical Significance', prop: 'Pathogenicity_expert'},
@@ -387,6 +390,7 @@ const researchModeColumns = [
     {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
     {title: 'Mutation category (BIC)', prop: 'Mutation_type_BIC'},
     {title: 'BIC Variant Identifier', prop: 'BIC_Nomenclature'},
+    {title: 'ClinGen Allele Registry', prop: 'CA_ID'},
     {title: 'Nucleotide', prop: 'HGVS_cDNA'},
     {title: 'Protein', prop: 'HGVS_Protein'},
     {title: 'SCV Accession (ClinVar)', prop: 'SCV_ClinVar'},
