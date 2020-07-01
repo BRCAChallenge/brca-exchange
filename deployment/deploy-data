@@ -106,6 +106,17 @@ ENDSSH
         SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
         GENOME_BROWSER_SCRIPT="${SCRIPT_DIR}/../pipeline/genomeBrowserTrack/export_data_for_genome_browser.sh"
         ${GENOME_BROWSER_SCRIPT} ${RELEASE_ARCHIVE_PATH}
+
+        # backup release tarball to s3
+        aws s3 cp ${RELEASE_ARCHIVE_PATH} s3://brcaexchange/previous_releases/
+
+        # backup production db to S3
+        ssh -l${USER} ${HOST} <<-ENDSSH
+            set -o errexit
+            source /var/www/backend/${ENVIRONMENT}/virtualenv3/bin/activate
+            . /home/brca/scripts/backup_db.sh
+ENDSSH
+
     fi
 
 fi
