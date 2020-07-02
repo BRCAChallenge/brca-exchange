@@ -6,7 +6,7 @@ coord_col = 'genomics_coord'
 
 VCF_INFO_COL = 7
 
-VARS_OF_INTEREST = ["vAnnGeneAll", "OriginalIndex", "BayesDel_nsfp33a_noAF"]
+VARS_OF_INTEREST = ["vAnnGeneAll", "BayesDel_nsfp33a_noAF"]
 
 
 def _read_part(path):
@@ -28,7 +28,7 @@ def victor_results_as_df(paths):
 
     # processing VCF INFO col, generate a dict variable_name -> value out of the info field for every record
     info_dict = victor_vcf_df.iloc[:, VCF_INFO_COL].str.split(';').apply(
-        lambda l: {s.split('=')[0]: s.split('=')[1] for s in l})
+        lambda l: {s.split('=')[0] : '='.join(s.split('=')[1:]) for s in l})
 
     # generating dataframe out of dict, one column per variable
     df_victor_props = pd.DataFrame.from_records(info_dict.values, index=info_dict.index)[VARS_OF_INTEREST]
