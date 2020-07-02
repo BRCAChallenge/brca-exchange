@@ -45,12 +45,11 @@ class VictorAnnotations(DefaultPipelineTask):
 
         log_file = Path(self.cfg.output_dir) / 'release' / 'artifacts' / 'victor_annotation.log'
 
-        # TODO big comment with hosting issue
-        # TODO: fix avoid repetition with previous task
-        vcf_host = Path(self.cfg.output_dir_host) / 'release'/'artifacts'/'bayesdel.vcf'
+        # Even though we are running a docker container (victor) from within a docker container (BE pipeline), we need to
+        # do the file mapping with respect to the host file system not the file system from the BE pipeline container
+        vcf_host = Path(self.cfg.output_dir_host) / 'release' / 'artifacts' / 'bayesdel.vcf'
         wdir_host = Path(self.cfg.output_dir_host) / 'release' / 'artifacts' / 'victor_wdir'
 
-        print(f"original {self.input().path}")
         args = ["bash", "bayesdel/run_annotation_docker.sh",
                 str(vcf_host),
                 str(self.cfg.victor_data_dir),
@@ -67,7 +66,7 @@ class VictorAnnotations(DefaultPipelineTask):
         with open(log_file, 'w') as f:
             f.write(proc_out.decode('utf-8'))
 
-        print(f"wrote log to {log_file}")
+        print(f"Wrote log to {log_file}")
 
 
 @requires(VictorAnnotations)

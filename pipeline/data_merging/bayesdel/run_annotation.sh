@@ -30,5 +30,4 @@ export VICTOR_GENOME=GRCh38
 export VCF=${VCF_FILE}.gz
 export OUT=output
 
-# TODO: limit threads?
 slurm.annotate
