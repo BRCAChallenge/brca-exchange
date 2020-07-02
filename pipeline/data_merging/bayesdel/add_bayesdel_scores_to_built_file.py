@@ -1,6 +1,7 @@
 import click
 import pandas as pd
 
+from common import vcf_files_helper
 
 coord_col = 'genomics_coord'
 
@@ -11,7 +12,7 @@ VARS_OF_INTEREST = ["vAnnGeneAll", "BayesDel_nsfp33a_noAF"]
 
 def _read_part(path):
     try:
-        return pd.read_csv(path, sep='\t', comment='#', header=None)
+        return vcf_files_helper.read_vcf_as_dataframe(path)
     except pd.errors.EmptyDataError:
         return pd.DataFrame()
 
@@ -57,7 +58,7 @@ def main(vcf_parts, built_tsv, output):
 
     # drop join key and write
     (df_merged.drop(columns=[coord_col]).
-     to_csv(output, sep='\t', index=False))
+     to_csv(output, sep='\t', index=False, na_rep='-'))
 
 
 if __name__ == "__main__":
