@@ -56,6 +56,7 @@ class TestStringMethods(unittest.TestCase):
                         'Germline_or_Somatic_BIC', 'Ethnicity_BIC',
                         'Mutation_type_BIC', 'IARC_class_exLOVD',
                         'BIC_Nomenclature_exLOVD', 'Sum_family_LR_exLOVD',
+                        'Pathology_LR_exLOVD', 'Case_control_LR_exLOVD',
                         'Combined_prior_probablility_exLOVD', 'BX_ID_exLOVD',
                         'HGVS_cDNA_exLOVD', 'Literature_source_exLOVD',
                         'Co_occurrence_LR_exLOVD',
