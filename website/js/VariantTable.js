@@ -290,10 +290,10 @@ const researchModeGroups = [
         {title: 'Prior probability of pathogenicity', prop: 'Combined_prior_probablility_exLOVD', core: true},
         {title: 'Missense analysis pathogenicity prior', prop: 'Missense_analysis_prior_probability_exLOVD', core: true},
         {title: 'Co-occurrence likelihood', prop: 'Co_occurrence_LR_exLOVD', core: true},
-        {title: 'Pathology likelihood', prop: 'Pathology_LR_exLOVD', core: true},
-        {title: 'Case-Control likelihood', prop: 'Case_control_LR_exLOVD', core: true},
         {title: 'Segregation Likelihood Ratio', prop: 'Segregation_LR_exLOVD', core: true},
         {title: 'Summary Family History Likelihood Ratio', prop: 'Sum_family_LR_exLOVD', core: true},
+        {title: 'Pathology likelihood', prop: 'Pathology_LR_exLOVD', core: true},
+        {title: 'Case-Control likelihood', prop: 'Case_control_LR_exLOVD', core: true},
         {title: 'Literature Reference', prop: 'Literature_source_exLOVD', core: true}
     ]},
 
