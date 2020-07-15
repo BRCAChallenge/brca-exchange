@@ -77,7 +77,7 @@ def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
         if not computed:
             cDNA = cdna_from_cdna_field(row)
             if cDNA is None:
-                logging.info("No calculable cDNA for row: {row}")
+                logging.info(f"No calculable cDNA for row: {row}")
             return cDNA
         return computed
 
@@ -104,7 +104,7 @@ def compute_genomic_hgvs(cDNA, assemblyMapper):
             genomic_hgvs = assemblyMapper.c_to_g(cDNA)
             return str(genomic_hgvs)
         except HGVSError as e:
-            logging.info("Exception during conversion of {cDNA} to genomic coordinates: {e}")
+            logging.info(f"Exception during conversion of {cDNA} to genomic coordinates: {e}")
             return None
 
 
