@@ -19,12 +19,7 @@ class ConvertBuiltToVCF(DefaultPipelineTask):
 
         args = ["python", "bayesdel/convert_merged_variants_to_vcf.py", self.input().path, self.output().path]
 
-        print("Running with the following args: %s" % (
-            args))
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE)
-
-        pipeline_utils.print_subprocess_output_and_error(sp)
+        pipeline_utils.run_process(args)
 
 
 @requires(ConvertBuiltToVCF)
@@ -81,9 +76,4 @@ class AddBayesdelScores(DefaultPipelineTask):
                 '--built-tsv', ConvertBuiltToVCF().input().path] + \
                 [ p.path for p in self.input()['paths']]
 
-        print("Running with the following args: %s" % (
-            args))
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE)
-
-        pipeline_utils.print_subprocess_output_and_error(sp)
+        pipeline_utils.run_process(args)
