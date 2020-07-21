@@ -22,8 +22,8 @@ def convert_merged_to_vcf(path, vcf_path):
     df_vcf['QUAL'] = df_vcf['FILTER'] = df_vcf['ID'] = '.'
     df_vcf['INFO'] = '.'
 
-    # filtering out variants with unambiguous bases
-    df_vcf = df_vcf[~df_vcf['ALT'].apply(lambda s: any(x not in 'ACTG' for x in s))]
+    # only taking variants with unambiguous bases
+    df_vcf = df_vcf[df_vcf['ALT'].apply(lambda s: all(x in 'ACTG' for x in s))]
 
     with open(vcf_path, 'w') as f:
         header = '##fileformat=VCFv4.0\n##source=brcaexchange\n##reference=GRCh38\n'
