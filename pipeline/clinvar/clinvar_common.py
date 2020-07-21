@@ -40,11 +40,11 @@ def processClinicalSignificanceElement(el, obj):
 
 
 def build_xpath_filter_for_cv_assertions(gene_symbols):
-    symbols_str = [ f'ElementValue="{s}"' for s in gene_symbols]
+    symbols_str = [ f'text()="{s}"' for s in gene_symbols]
     symbols_pred = ' or '.join(symbols_str)
 
     # filter assertion if it contains a Symbol we are interested in
-    return f"ReferenceClinVarAssertion/MeasureSet/Measure/MeasureRelationship/Symbol[({symbols_pred}) and ElementValue/@Type=\"Preferred\"]"
+    return f"ReferenceClinVarAssertion/MeasureSet/Measure/MeasureRelationship/Symbol/ElementValue[({symbols_pred}) and @Type=\"Preferred\"]"
 
 
 def extractSynonyms(el):
