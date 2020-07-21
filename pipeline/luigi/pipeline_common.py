@@ -51,6 +51,12 @@ class PipelineParams(luigi.Config):
     seq_repo_dir = luigi.Parameter(default=str(None),
                                    description='directory of seq_repo')
 
+    victor_docker_image_name = luigi.Parameter(default=str(None),
+                                               description='docker image name for running the victor annotation pipeline')
+
+    victor_data_dir = luigi.Parameter(default=str(None),
+                                               description='data dir with the required data for victor')
+
     def run(self):
         pass
 

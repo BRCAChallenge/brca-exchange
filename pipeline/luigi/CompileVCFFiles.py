@@ -10,6 +10,7 @@ from shutil import copy
 import luigi
 from luigi.util import requires
 
+
 import esp_processing
 import gnomad_processing
 import pipeline_common
@@ -1244,8 +1245,9 @@ class FindMissingReports(DefaultPipelineTask):
         pipeline_utils.check_file_for_contents(
             artifacts_dir + "missing_reports.log")
 
-
-@requires(FindMissingReports)
+# don't put import statement at the beginning, otherwise having issues resolving the circular dependency
+import bayesdel_processing
+@requires(bayesdel_processing.AddBayesdelScores)
 class RunDiffAndAppendChangeTypesToOutput(DefaultPipelineTask):
     def _extract_release_date(self, version_json):
         with open(version_json, 'r') as f:
