@@ -7,7 +7,7 @@ coord_col = 'genomics_coord'
 
 VCF_INFO_COL = 7
 
-VARS_OF_INTEREST = ["vAnnGeneAll", "BayesDel_nsfp33a_noAF"]
+VARS_OF_INTEREST = ["BayesDel_nsfp33a_noAF"]
 
 
 def _read_part(path):
