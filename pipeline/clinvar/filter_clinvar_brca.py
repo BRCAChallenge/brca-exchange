@@ -8,7 +8,7 @@ import itertools
 
 import click
 from lxml import etree
-
+from clinvar import clinvar_common
 
 def open_maybe_gzip(fname):
     if fname.endswith('gz'):
@@ -17,12 +17,10 @@ def open_maybe_gzip(fname):
         return open(fname, 'r')
 
 
-def filter_xml(fin, fout):
+def filter_xml(fin, fout, symbols):
     fout = open(fout, 'wb')
 
-    # copying ClinVarSet if it contains a Symbol with a "Preferred" ElementValue BRCA*
-    xpath_filter = 'ReferenceClinVarAssertion/MeasureSet/Measure/' \
-                   'MeasureRelationship/Symbol[starts-with(ElementValue, "BRCA") and ElementValue/@Type="Preferred"]'
+    xpath_filter = clinvar_common.build_xpath_filter_for_cv_assertions(symbols)
 
     # copying header
     with open_maybe_gzip(fin) as f:
@@ -52,8 +50,9 @@ def filter_xml(fin, fout):
 @click.command()
 @click.argument('input', type=click.Path(exists=True))
 @click.argument('output', type=click.Path())
-def main(input, output):
-    filter_xml(input, output)
+@click.option('--gene', type=str, required=True, multiple=True)
+def main(input, output, gene):
+    filter_xml(input, output, list(set(gene)))
 
 if __name__ == "__main__":
     main()
