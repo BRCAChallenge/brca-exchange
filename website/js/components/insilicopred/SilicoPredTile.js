@@ -152,7 +152,7 @@ export default class SilicoPredTile extends React.Component {
                     defaultVisible={false}
                     relayoutGrid={this.props.relayoutGrid}
                 >
-                    <ProteinLevelSubtile probability={proteinPrior} />
+                    <ProteinLevelSubtile probability={proteinPrior} synonymous={this.props.synonymous} />
                 </CollapsibleSection>
 
                 <CollapsibleSection
