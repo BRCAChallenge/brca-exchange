@@ -4,13 +4,25 @@ from shutil import copy
 
 import luigi
 
-import pipeline_utils
 from common import config
+from workflow import pipeline_utils
 
 DEFAULT_BRCA_RESOURCES_DIR = (os.path.abspath('../brca/brca-resources'))
 DEFAULT_OUTPUT_DIR = (
     os.path.abspath('../brca/pipeline-data/data/pipeline_input'))
 DEFAULT_FILE_PARENT_DIR = (os.path.abspath('../brca/pipeline-data/data'))
+
+
+clinvar_method_dir = os.path.abspath('../clinvar')
+lovd_method_dir = os.path.abspath('../lovd')
+g1k_method_dir = os.path.abspath('../1000_Genomes')
+enigma_method_dir = os.path.abspath('../enigma')
+functional_assays_method_dir = os.path.abspath('../functional_assays')
+data_merging_method_dir = os.path.abspath('../data_merging')
+priors_method_dir = os.path.abspath('../splicing')
+priors_filter_method_dir = os.path.abspath('../splicingfilter')
+utilities_method_dir = os.path.abspath('../utilities')
+vr_method_dir = os.path.abspath('../vr')
 
 
 class PipelineParams(luigi.Config):

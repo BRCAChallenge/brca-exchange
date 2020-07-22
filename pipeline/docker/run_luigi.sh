@@ -38,7 +38,7 @@ cd /opt/brca-exchange
 echo "Running brca exchange pipeline:"
 echo "Git hash: $(git log | head -n 1)"
 
-cd /opt/brca-exchange/pipeline/luigi
+cd /opt/brca-exchange/pipeline/workflow
 
 echo "Attempting to run task ${LUIGI_TASK}"
 python -m luigi --logging-conf-file luigi_log_configuration.conf --module CompileVCFFiles ${LUIGI_TASK} \

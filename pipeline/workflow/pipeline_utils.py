@@ -1,10 +1,12 @@
+import contextlib
 import csv
 import datetime
-import contextlib
 import os
-import tarfile
-import urllib.request, urllib.error, urllib.parse
 import subprocess
+import tarfile
+import urllib.error
+import urllib.parse
+import urllib.request
 
 from retrying import retry
 

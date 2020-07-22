@@ -10,30 +10,16 @@ from shutil import copy
 import luigi
 from luigi.util import requires
 
-
-import esp_processing
-import gnomad_processing
-import pipeline_common
-import pipeline_utils
-from pipeline_common import DefaultPipelineTask
+from workflow import bayesdel_processing, esp_processing, gnomad_processing, pipeline_common, pipeline_utils
+from workflow.pipeline_common import DefaultPipelineTask, clinvar_method_dir, lovd_method_dir, \
+    functional_assays_method_dir, data_merging_method_dir, priors_method_dir, priors_filter_method_dir, \
+    utilities_method_dir, vr_method_dir
 
 #######################################
 # Default Globals / Env / Directories #
 #######################################
 
 luigi_dir = os.getcwd()
-
-clinvar_method_dir = os.path.abspath('../clinvar')
-lovd_method_dir = os.path.abspath('../lovd')
-g1k_method_dir = os.path.abspath('../1000_Genomes')
-enigma_method_dir = os.path.abspath('../enigma')
-functional_assays_method_dir = os.path.abspath('../functional_assays')
-data_merging_method_dir = os.path.abspath('../data_merging')
-priors_method_dir = os.path.abspath('../splicing')
-priors_filter_method_dir = os.path.abspath('../splicingfilter')
-utilities_method_dir = os.path.abspath('../utilities')
-vr_method_dir = os.path.abspath('../vr')
-
 
 ###############################################
 #                   CLINVAR                   #
@@ -905,8 +891,7 @@ class FindMissingReports(DefaultPipelineTask):
         pipeline_utils.run_process(args)
         pipeline_utils.check_file_for_contents(self.output().path)
 
-# don't put import statement at the beginning, otherwise having issues resolving the circular dependency
-import bayesdel_processing
+
 @requires(bayesdel_processing.AddBayesdelScores)
 class RunDiffAndAppendChangeTypesToOutput(DefaultPipelineTask):
     def _extract_release_date(self, version_json):

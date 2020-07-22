@@ -1,16 +1,19 @@
 import os
-from pathlib import Path
-from pipeline_common import DefaultPipelineTask
-import pipeline_utils
-from CompileVCFFiles import AppendVRId, data_merging_method_dir
-
 import subprocess
+from pathlib import Path
+
 import luigi
 from luigi.util import requires
 
+import workflow.pipeline_utils as pipeline_utils
+from workflow.pipeline_common import DefaultPipelineTask, data_merging_method_dir
 
-@requires(AppendVRId)
+
 class ConvertBuiltToVCF(DefaultPipelineTask):
+    def requires(self):
+        from workflow.CompileVCFFiles import AppendVRId
+        return AppendVRId()
+
     def output(self):
         return luigi.LocalTarget(Path(self.cfg.output_dir)/'release'/'artifacts'/'bayesdel.vcf')
 
