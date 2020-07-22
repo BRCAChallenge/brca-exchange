@@ -886,7 +886,6 @@ var VariantDetail = React.createClass({
                     />
                 );
             }
-            console.log(variant.pyhgvs_protein);
             if (inSilicoPred) {
                 return (
                     <SilicoPredTile
