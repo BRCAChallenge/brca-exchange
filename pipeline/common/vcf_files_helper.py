@@ -1,7 +1,9 @@
-from .hgvs_utils import HgvsWrapper
-from .variant_utils import VCFVariant
 import hgvs
+import pandas as pd
+
+from .hgvs_utils import HgvsWrapper
 from .seq_utils import SeqRepoWrapper
+from .variant_utils import VCFVariant
 
 
 def cdna_str_to_genomic_var(cdna_hgvs_str, assembly=HgvsWrapper.GRCh38_Assem, hgvs_wrapper = HgvsWrapper.get_instance(),
@@ -39,6 +41,10 @@ def normalize_field_value(field_value):
         if ';' in field_value:
             field_value = field_value.replace(';', '')
     return field_value
+
+
+def read_vcf_as_dataframe(path):
+    return pd.read_csv(path, sep='\t', comment='#', header=None)
 
 
 def _is_empty_field(field_value):

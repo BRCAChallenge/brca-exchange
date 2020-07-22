@@ -18,6 +18,9 @@ PREVIOUS_RELEASE_DIR := {{ PREVIOUS_RELEASE_DIR }}
 {% set SEQ_REPO_DIR = SEQ_REPO_DIR|default("/data/seqrepo") %}
 SEQ_REPO_DIR := {{ SEQ_REPO_DIR }}
 
+{% set VICTOR_DATA_DIR = VICTOR_DATA_DIR|default("/data/victor") %}
+VICTOR_DATA_DIR := {{ VICTOR_DATA_DIR }}
+
 # path to release notes
 RELEASE_NOTES_PATH := {{ RELEASE_NOTES_PATH | default(WORK_DIR + "/release_notes_" + RELEASE_TAG + ".txt") }}
 
