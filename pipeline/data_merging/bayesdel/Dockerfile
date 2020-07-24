@@ -40,4 +40,3 @@ WORKDIR /opt/victor/wdir
 USER nobody
 
 ENTRYPOINT ["/opt/run_annotation.sh"]
-

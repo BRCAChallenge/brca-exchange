@@ -1,8 +1,12 @@
+import contextlib
 import csv
 import datetime
 import os
+import subprocess
 import tarfile
-import urllib.request, urllib.error, urllib.parse
+import urllib.error
+import urllib.parse
+import urllib.request
 
 from retrying import retry
 
@@ -17,6 +21,22 @@ def create_path_if_nonexistent(path):
     if not os.path.exists(path):
         os.makedirs(path)
     return path
+
+
+def run_process(args, redirect_stdout_path=None, expected_returncode=0):
+    if redirect_stdout_path:
+        stdout_cm = open(redirect_stdout_path, 'w')
+    else:
+        # wrapping into a dummy context, see https://docs.python.org/3/library/contextlib.html#contextlib.nullcontext
+        stdout_cm = contextlib.nullcontext(subprocess.PIPE)
+
+    with stdout_cm as stdout:
+        print(f"Running with the following args: {args}")
+        sp = subprocess.Popen(args, stdout=stdout, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        if sp.returncode != expected_returncode:
+            raise RuntimeError(f"Process returned with code {sp.returncode} instead of {expected_returncode}")
 
 
 def print_subprocess_output_and_error(sp):
