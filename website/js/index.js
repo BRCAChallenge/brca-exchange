@@ -886,7 +886,6 @@ var VariantDetail = React.createClass({
                     />
                 );
             }
-
             if (inSilicoPred) {
                 return (
                     <SilicoPredTile
@@ -900,6 +899,7 @@ var VariantDetail = React.createClass({
                         relayoutGrid={this.relayoutGrid}
                         helpSection="in-silico-prior-probabilities-of-pathogenicity"
                         showHelp={this.showHelp}
+                        synonymous={variant.HGVS_Protein.includes('=')}
                     />
                 );
             }

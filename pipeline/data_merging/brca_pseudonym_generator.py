@@ -75,7 +75,10 @@ def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
         computed = compute_hgvs(row)
 
         if not computed:
-            return cdna_from_cdna_field(row)
+            cDNA = cdna_from_cdna_field(row)
+            if cDNA is None:
+                logging.info(f"No calculable cDNA for row: {row}")
+            return cDNA
         return computed
 
     var_objs = df[VAR_OBJ_FIELD]
@@ -94,12 +97,15 @@ def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
 
 
 def compute_genomic_hgvs(cDNA, assemblyMapper):
-    try:
-        genomic_hgvs = assemblyMapper.c_to_g(cDNA)
-        return str(genomic_hgvs)
-    except HGVSError as e:
-        logging.info("Exception during conversion of " + str(cDNA) + " to genomic coordinates: " + str(e))
+    if cDNA is None:
         return None
+    else:
+        try:
+            genomic_hgvs = assemblyMapper.c_to_g(cDNA)
+            return str(genomic_hgvs)
+        except HGVSError as e:
+            logging.info(f"Exception during conversion of {cDNA} to genomic coordinates: {e}")
+            return None
 
 
 def convert_to_hg37(vars, brca_resources_dir):
