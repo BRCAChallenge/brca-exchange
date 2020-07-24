@@ -197,7 +197,7 @@ def _parse_engima_assertion(enigma_assertion, hgvs_util):
     return rec
 
 # clinvar set element
-def parse_record(cvs_el, hgvs_util, assembly="GRCh38"):
+def parse_record(cvs_el, hgvs_util, symbols, assembly="GRCh38"):
     '''
     Extracts information out of a ClinVarSet XML element
 
@@ -210,7 +210,7 @@ def parse_record(cvs_el, hgvs_util, assembly="GRCh38"):
     rec = {}
 
     rec["Gene_symbol"] = _xpath_text(cvs_el,
-                                     'ReferenceClinVarAssertion/MeasureSet/Measure/MeasureRelationship/Symbol/ElementValue[starts-with(., "BRCA") and @Type="Preferred"]')
+                                     clinvar.build_xpath_filter_for_cv_assertions(symbols))
 
     measure_el = cvs_el.find('ReferenceClinVarAssertion/MeasureSet/Measure')
 
@@ -273,6 +273,10 @@ def _create_df(variant_records):
                      'HGVS_protein',
                      'BX_ID']
 
+    if df.empty:
+        # can happen if none of the genes of interest are curated by ENIGMA
+        return pd.DataFrame({}, columns=target_header)
+
     return df.loc[:, target_header]
 
 
@@ -280,13 +284,15 @@ def _create_df(variant_records):
 @click.argument('filtered_clinvar_xml', type=click.Path(exists=True))
 @click.argument('output', type=click.Path(writable=True))
 @click.option('--logs', type=click.Path(writable=True))
-def main(filtered_clinvar_xml, output, logs):
+@click.option('--gene', type=str, required=True, multiple=True)
+def main(filtered_clinvar_xml, gene, output, logs):
     common.utils.setup_logfile(logs)
     hgvs_util = hgvs_utils.HGVSWrapper()
 
     enigma_sets = _get_clinvar_sets(filtered_clinvar_xml)
 
-    variant_records_lsts = [ parse_record(s, hgvs_util) for s in enigma_sets ]
+    gene_symbols = list(set(gene))
+    variant_records_lsts = [ parse_record(s, hgvs_util, gene_symbols) for s in enigma_sets ]
 
     # flattening list of lists
     variant_records = list(itertools.chain.from_iterable(variant_records_lsts))
