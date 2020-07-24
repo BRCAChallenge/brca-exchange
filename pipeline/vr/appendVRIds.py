@@ -9,6 +9,7 @@ from ga4gh.vr import __version__, models, normalize
 from ga4gh.vr.extras.dataproxy import SeqRepoRESTDataProxy
 from ga4gh.vr.extras.translator import Translator
 
+csv.field_size_limit(10000000)
 
 SEQREPO_REST_SERVICE_URL = "http://localhost:5000/seqrepo"
 DP = SeqRepoRESTDataProxy(base_url=SEQREPO_REST_SERVICE_URL)

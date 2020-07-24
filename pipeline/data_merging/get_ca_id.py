@@ -5,6 +5,7 @@ import argparse
 import csv
 import time
 
+csv.field_size_limit(10000000)
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Gathers ClinGen Allele Registry IDs.')
