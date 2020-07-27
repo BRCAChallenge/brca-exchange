@@ -21,6 +21,9 @@ SEQ_REPO_DIR := {{ SEQ_REPO_DIR }}
 {% set VICTOR_DATA_DIR = VICTOR_DATA_DIR|default("/data/victor") %}
 VICTOR_DATA_DIR := {{ VICTOR_DATA_DIR }}
 
+{% set VICTOR_IMAGE_DEFAULT_TAG = "0.1" %}
+VICTOR_IMAGE := {{ VICTOR_IMAGE | default("brcachallenge/victor:" + VICTOR_IMAGE_DEFAULT_TAG) }}
+
 # path to release notes
 RELEASE_NOTES_PATH := {{ RELEASE_NOTES_PATH | default(WORK_DIR + "/release_notes_" + RELEASE_TAG + ".txt") }}
 
