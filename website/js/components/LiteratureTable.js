@@ -197,6 +197,50 @@ class LiteratureTable extends React.Component {
         }
     }
 
+    getRelevantDataFromSynonyms(synonyms) {
+        let outputSyns = [];
+        let syns = synonyms.split(',');
+        _.each(syns, function(syn) {
+            if (syn.match(/^\d/)) {
+                outputSyns.push(syn);
+            } else if (syn.includes('c.')) {
+                outputSyns.push(syn.split('c.')[1]);
+            } else if (syn.includes('p.')) {
+                outputSyns.push(syn.split('p.')[1]);
+            }
+        });
+        return outputSyns.join('+OR+');
+    }
+
+    getProteinChange(pc) {
+        if (util.isEmptyField(pc) || pc === "p.?") {
+            return '';
+        }
+        // remove leading p.
+        pc = pc.replace('p.', '');
+        // remove parentheses
+        pc = pc.replace(/[()]/g, '');
+        return pc;
+    }
+
+    getCDNA(cDNA) {
+        if (util.isEmptyField(cDNA)) {
+            return '';
+        }
+        // remove refseq and c.
+        cDNA = cDNA.split(':')[1].replace('c.', '');
+        return cDNA;
+    }
+
+    getSearchTerm() {
+        let geneSymbol = this.props.variant.Gene_Symbol;
+        let proteinChange = this.getProteinChange(this.props.variant.Protein_Change);
+        let cDNA = this.getCDNA(this.props.variant.HGVS_cDNA);
+        let relevantSynonyms = this.getRelevantDataFromSynonyms(this.props.variant.Synonyms);
+        let searchTerm = `${geneSymbol}+AND+(${proteinChange}+OR+${cDNA}+OR+${relevantSynonyms})`;
+        return searchTerm;
+    }
+
     render() {
         if (!this.props.variant && !this.state.data) {
             return (<div />);
@@ -248,6 +292,10 @@ class LiteratureTable extends React.Component {
 
         let toTSVURL = `data:text/tab-separated-values;charset=utf-8,${encodeURIComponent(this.toTSV())}`;
         let toJSONURL = `data:text/json;charset=utf-8,${encodeURIComponent(this.toJSON())}`;
+
+        let googleSearchLink = `https://www.google.com/search?q=${this.getSearchTerm()}`;
+        let pubmedSearchLink = `https://pubmed.ncbi.nlm.nih.gov/?term=${this.getSearchTerm()}`;
+
         let crawlDate = this.state.papers && this.state.papers.length > 0 && util.normalizeDateFieldDisplay(this.state.papers[0].crawl_date);
         let component = (
             (litResultsExist || !this.props.hideEmptyItems) &&
@@ -277,6 +325,8 @@ class LiteratureTable extends React.Component {
                     <div>
                         <em className="pull-left" style={{marginBottom: '1em'}}>
                             To report a false positive, or to include a paper that should be in the list, please <a href="mailto:brca-exchange-contact@genomicsandhealth.org">contact us</a>.
+                            <br />
+                            To search for additional content, click here to search <a href={googleSearchLink}>Google</a> or <a href={pubmedSearchLink}>PubMed</a>.
                         </em>
 
                         <ButtonToolbar className='pull-right'>
