@@ -43,8 +43,10 @@ class ConvertLatestClinvarDataToXML(DefaultPipelineTask):
 
     def run(self):
         os.chdir(clinvar_method_dir)
+        genes_opts = [ s for g in self.cfg.gene_metadata['symbol'] for s in ['--gene', g]]
+
         pipeline_utils.run_process(["python", "filter_clinvar_brca.py", self.input().path,
-                                    self.output().path])
+                                    self.output().path] + genes_opts)
 
         pipeline_utils.check_file_for_contents(self.output().path)
 
@@ -572,10 +574,12 @@ class ExtractEnigmaFromClinvar(DefaultPipelineTask):
     def run(self):
         os.chdir(clinvar_method_dir)
 
+        genes_opts = [ s for g in self.cfg.gene_metadata['symbol'] for s in ['--gene', g]]
+
         args = ["python", "enigma_from_clinvar.py", self.input().path,
                 self.output().path,
                 '--logs', os.path.join(self.enigma_file_dir, 'enigma_from_clinvar.log')
-               ]
+               ] + genes_opts
 
         pipeline_utils.run_process(args)
 
