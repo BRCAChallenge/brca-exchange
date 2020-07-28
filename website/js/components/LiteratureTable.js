@@ -198,18 +198,20 @@ class LiteratureTable extends React.Component {
     }
 
     getRelevantDataFromSynonyms(synonyms) {
-        let outputSyns = [];
+        let outputSyns = new Set();
         _.each(synonyms.split(','), function(syn) {
             if (syn.match(/^\d/)) {
                 // keep synonyms that start with a number
-                outputSyns.push(syn);
+                outputSyns.add(syn);
             } else if (syn.includes('c.')) {
-                outputSyns.push(syn.split('c.')[1]);
+                syn = syn.split('c.')[1];
+                outputSyns.add(syn);
             } else if (syn.includes('p.')) {
-                outputSyns.push(syn.split('p.')[1]);
+                syn = syn.split('p.')[1];
+                outputSyns.add(syn);
             }
         });
-        return outputSyns.join('+OR+');
+        return outputSyns;
     }
 
     getProteinChange(pc) {
@@ -234,10 +236,11 @@ class LiteratureTable extends React.Component {
 
     getSearchTerm() {
         let geneSymbol = this.props.variant.Gene_Symbol;
-        let proteinChange = this.getProteinChange(this.props.variant.Protein_Change);
-        let cDNA = this.getCDNA(this.props.variant.HGVS_cDNA);
-        let relevantSynonyms = this.getRelevantDataFromSynonyms(this.props.variant.Synonyms);
-        let searchTerm = `${geneSymbol}+AND+(${proteinChange}+OR+${cDNA}+OR+${relevantSynonyms})`;
+        let terms = new Set();
+        terms.add(this.getProteinChange(this.props.variant.Protein_Change));
+        terms.add(this.getCDNA(this.props.variant.HGVS_cDNA));
+        terms = new Set([...terms, ...this.getRelevantDataFromSynonyms(this.props.variant.Synonyms)]);
+        let searchTerm = `${geneSymbol}+AND+(${[...terms].join('+OR+')})`;
         return searchTerm;
     }
 
