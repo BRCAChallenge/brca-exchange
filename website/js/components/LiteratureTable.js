@@ -204,11 +204,9 @@ class LiteratureTable extends React.Component {
                 // keep synonyms that start with a number
                 outputSyns.add(syn);
             } else if (syn.includes('c.')) {
-                syn = syn.split('c.')[1];
-                outputSyns.add(syn);
+                outputSyns.add(syn.split('c.')[1]);
             } else if (syn.includes('p.')) {
-                syn = syn.split('p.')[1];
-                outputSyns.add(syn);
+                outputSyns.add(syn.split('p.')[1]);
             }
         });
         return outputSyns;
