@@ -199,9 +199,9 @@ class LiteratureTable extends React.Component {
 
     getRelevantDataFromSynonyms(synonyms) {
         let outputSyns = [];
-        let syns = synonyms.split(',');
-        _.each(syns, function(syn) {
+        _.each(synonyms.split(','), function(syn) {
             if (syn.match(/^\d/)) {
+                // keep synonyms that start with a number
                 outputSyns.push(syn);
             } else if (syn.includes('c.')) {
                 outputSyns.push(syn.split('c.')[1]);
