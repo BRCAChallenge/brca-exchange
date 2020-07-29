@@ -328,6 +328,7 @@ class LiteratureTable extends React.Component {
                             To report a false positive, or to include a paper that should be in the list, please <a href="mailto:brca-exchange-contact@genomicsandhealth.org">contact us</a>.
                             <br />
                             To search for additional content, click here to search <a href={googleSearchLink}>Google</a> or <a href={pubmedSearchLink}>PubMed</a>.
+                             These searches can have a high false positive rate, but can also find additional content that was missed in the pre-computed searches.
                         </em>
 
                         <ButtonToolbar className='pull-right'>
