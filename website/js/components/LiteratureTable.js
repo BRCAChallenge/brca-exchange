@@ -200,8 +200,8 @@ class LiteratureTable extends React.Component {
     getRelevantDataFromSynonyms(synonyms) {
         let outputSyns = new Set();
         _.each(synonyms.split(','), function(syn) {
-            if (syn.match(/^\d/)) {
-                // keep synonyms that start with a number
+            if(!(/^\d+$/.test(syn)) && syn.match(/^\d/)) {
+                // keep synonyms that start with a number but aren't all numbers
                 outputSyns.add(syn);
             } else if (syn.includes('c.')) {
                 outputSyns.add(syn.split('c.')[1]);
@@ -238,7 +238,7 @@ class LiteratureTable extends React.Component {
         terms.add(this.getProteinChange(this.props.variant.Protein_Change));
         terms.add(this.getCDNA(this.props.variant.HGVS_cDNA));
         terms = new Set([...terms, ...this.getRelevantDataFromSynonyms(this.props.variant.Synonyms)]);
-        let searchTerm = `${geneSymbol}+AND+(${[...terms].join('+OR+')})`;
+        let searchTerm = `${geneSymbol}+AND+("${[...terms].join('"+OR+"')}")`;
         return searchTerm;
     }
 
