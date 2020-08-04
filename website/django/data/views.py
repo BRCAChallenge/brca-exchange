@@ -111,9 +111,7 @@ def variant(request):
 def vrid(request):
     vr_id = request.GET.get('vr_id')
 
-    variant = Variant.objects.get(VR_ID__iexact=vr_id)
-    key = variant.Genomic_Coordinate_hg38
-    query = Variant.objects.filter(Genomic_Coordinate_hg38=key)\
+    query = Variant.objects.filter(VR_ID=vr_id)\
         .order_by('-Data_Release_id')\
         .select_related('Data_Release')\
         .select_related('Mupit_Structure')\
@@ -425,6 +423,10 @@ def apply_search(query, search_term, quotes='', release=None):
     search_term = search_term.lower().strip()
     search_term = remove_disallowed_chars(search_term)
     clinvar_accession = False
+
+    # Accept search by ga4gh VR id
+    if search_term.startswith('ga4gh'):
+        return query.filter(Q(VR_ID__icontains=search_term)), 0
 
     # Accept only full clinvar accession numbers
     if search_term.startswith('scv') and len(search_term) >= 12:
