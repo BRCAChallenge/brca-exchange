@@ -111,14 +111,38 @@ def variant(request):
 def vrid(request):
     vr_id = request.GET.get('vr_id')
 
-    query = Variant.objects.filter(VR_ID=vr_id)\
-        .order_by('-Data_Release_id')\
-        .select_related('Data_Release')\
-        .select_related('Mupit_Structure')\
-        .select_related('insilicopriors')
+    variant = Variant.objects.filter(VR_ID=vr_id).order_by('-Data_Release_id')[0]
 
-    variant_versions = list(map(variant_to_dict, query))
-    response = JsonResponse({"data": variant_versions})
+    variant_data = variant_to_dict(variant)
+
+    relevant_keys = {
+        'id',
+        'Source',
+        'URL_ENIGMA',
+        'Condition_ID_type_ENIGMA',
+        'Condition_ID_value_ENIGMA',
+        'Condition_category_ENIGMA',
+        'Clinical_significance_ENIGMA',
+        'Date_last_evaluated_ENIGMA',
+        'Assertion_method_ENIGMA',
+        'Assertion_method_citation_ENIGMA',
+        'Clinical_significance_citations_ENIGMA',
+        'Comment_on_clinical_significance_ENIGMA',
+        'Collection_method_ENIGMA',
+        'Allele_origin_ENIGMA',
+        'ClinVarAccession_ENIGMA',
+        'Gene_Symbol',
+        'Reference_Sequence',
+        'HGVS_cDNA',
+        'BIC_Nomenclature',
+        'HGVS_Protein',
+        'Protein_Change',
+        'Genomic_HGVS_38',
+        'Genomic_HGVS_37',
+        'CA_ID'
+    }
+
+    response = JsonResponse({"data": {k: variant_data[k] for k in variant_data if k in relevant_keys}})
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
