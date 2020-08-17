@@ -1,0 +1,16 @@
+##fileformat=VCFv4.0
+##source=brcaexchange
+##reference=GRCh38
+##INFO=<ID=vAnnGeneAll,Number=.,Type=String,Description="Functional consequence annotated by vAnnGene. Format: Symbol,Type,Detail,Symbol,Type,Detail,...">
+##INFO=<ID=OriginalIndex,Number=1,Type=String,Description="Original CHR_POS_REF_ALT before modification by vAnnGene.">
+##INFO=<ID=Exon,Number=1,Type=Integer,Description="Exon number if the whole variant is inside an exone.">
+##INFO=<ID=LastExon,Number=1,Type=String,Description="yes/no whether the whole variant is inside the last exon of a multi-exon gene.">
+##INFO=<ID=Grantham,Number=1,Type=Integer,Description="Grantham socre of a missense substitution.">
+##INFO=<ID=Blosum62,Number=1,Type=Integer,Description="Blosum62 socre of a missense substitution.">
+##INFO=<ID=MaxAF,Number=1,Type=Float,Description="MaxAF annotated by vAnnDel.">
+##INFO=<ID=BayesDel_nsfp33a_noAF,Number=1,Type=Float,Description="Score annotated by vAnnBase">
+##INFO=<ID=PROVEAN,Number=1,Type=Float,Description="PROVEAN annotated by vAnnDel.">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+17	43097249	.	A	G	.	.	vAnnGeneAll=NBR2,Upstream(knClinSig=0.a),NR_003108:n.1-28308A>G,BRCA1,Synonymous(knClinSig=0.a)(ETG:FOCS_P),NM_007294:c.588T>C:p.=;MaxAF=.;BayesDel_nsfp33a_noAF=-0.87
+17	43099396	.	G	A	.	.	vAnnGeneAll=NBR2,Upstream,NR_003108:n.1-26161G>A,BRCA1,Intronic(ETG:FOCS_P),NM_007294:c.547+379C>T;MaxAF=0.00021;BayesDel_nsfp33a_noAF=-0.91
+17	43101656	.	C	A	.	.	vAnnGeneAll=NBR2,Upstream,NR_003108:n.1-23901C>A,BRCA1,Intronic(ETG:FOCS_P),NM_007294:c.442-1776G>T;MaxAF=.;BayesDel_nsfp33a_noAF=-0.95

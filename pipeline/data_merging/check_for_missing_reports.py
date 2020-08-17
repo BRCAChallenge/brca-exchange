@@ -5,6 +5,7 @@ checks that all reports are accounted for in final pipeline output
 import argparse
 import csv
 import logging
+import os
 from os import listdir
 from os.path import isfile, join, abspath
 from data_merging.aggregate_reports import get_reports_files
@@ -44,7 +45,7 @@ def get_bx_ids():
     files = get_reports_files(ARGS.ready_input_dir)
 
     for file in files:
-        file_path = abspath(ARGS.ready_input_dir + file)
+        file_path = abspath(os.path.join(ARGS.ready_input_dir, file))
         if file_path.endswith('.tsv'):
             source = "ENIGMA"
             bx_ids[source] = []
@@ -121,7 +122,7 @@ def configure_logging():
     else:
         logging_level = logging.CRITICAL
 
-    log_file_path = ARGS.artifacts_dir + "missing_reports.log"
+    log_file_path = os.path.join(ARGS.artifacts_dir, "missing_reports.log")
     logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level)
 
 

@@ -94,7 +94,7 @@ function normalizeDateFieldDisplay(value) {
 function normalizedFieldDisplay(value, prop) {
     if (value) {
         // leave underscores in Refence Sequence field
-        if (prop !== "Reference_Sequence") {
+        if (prop !== "Reference_Sequence" && prop !== "VR_ID") {
             value = value.split(/_+/).join(" ");
         }
         // replace any number of underscores with spaces

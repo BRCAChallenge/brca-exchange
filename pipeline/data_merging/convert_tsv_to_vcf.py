@@ -26,11 +26,15 @@ def main():
     merge_header_body(args.output)
 
 def sort_by_pos(infos):
-    info_dict = {13:{}, 17:{}}
+    info_dict = {}
     for info in infos:
         [chrom, pos, ref, alt] = parse_genome_coor(info["Genomic_Coordinate"])
         chrom = int(chrom)
         pos = int(pos)
+
+        if chrom not in info_dict.keys():
+            info_dict[chrom] = {}
+
         if pos not in info_dict[chrom]:
             info_dict[chrom][pos] = [info]
         else:

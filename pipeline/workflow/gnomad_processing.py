@@ -1,12 +1,11 @@
-import os
-import subprocess
 import logging
+import os
 
 import luigi
 from luigi.util import requires
 
-import pipeline_utils
-from pipeline_common import DefaultPipelineTask
+from workflow import pipeline_utils
+from workflow.pipeline_common import DefaultPipelineTask
 
 ###############################################
 #                  gnomAD                     #
@@ -32,16 +31,11 @@ class DownloadGnomADData(GnomADTask):
             os.path.join(self.gnomAD_file_dir, self.gnomAD_download_file))
 
     def run(self):
-        artifacts_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.output_dir + "/release/artifacts")
         os.chdir(gnomAD_method_dir)
 
         args = ["python", "download_gnomad_data.py", "-o", self.output().path]
 
-        logger.info("Running download_gnomad_data.py with the following args: %s", args)
-
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
+        pipeline_utils.run_process(args)
         pipeline_utils.check_file_for_contents(self.output().path)
 
 
@@ -51,20 +45,14 @@ class ConvertGnomADToVCF(GnomADTask):
         return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, 'gnomAD.hg19.vcf'))
 
     def run(self):
-        artifacts_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.output_dir + "/release/artifacts")
-
         os.chdir(gnomAD_method_dir)
 
         args = ["python", "gnomad_to_vcf.py", "-i", self.input().path, "-o",
                 self.output().path, "-a", "gnomADAnnotation",
-                "-l", artifacts_dir + "/gnomAD_error_variants.log",
+                "-l", self.artifacts_dir + "/gnomAD_error_variants.log",
                 "-s", "gnomAD"]
 
-        logger.info("Running gnomad_to_vcf.py with the following args: %s", args)
-
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
+        pipeline_utils.run_process(args)
         pipeline_utils.check_file_for_contents(self.output().path)
 
 
@@ -77,14 +65,10 @@ class CrossmapGnomADData(GnomADTask):
         brca_resources_dir = self.cfg.resources_dir
 
         args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz",
-                self.gnomAD_file_dir + "/gnomAD.hg19.vcf", brca_resources_dir + "/hg38.fa",
-                self.gnomAD_file_dir + "/gnomAD.hg38.vcf"]
+                self.input().path, brca_resources_dir + "/hg38.fa",
+                self.output().path]
 
-        logger.info("Running CrossMap.py with the following args: %s", args)
-
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
+        pipeline_utils.run_process(args)
         pipeline_utils.check_file_for_contents(self.output().path)
 
 
@@ -94,11 +78,6 @@ class SortGnomADData(GnomADTask):
         return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, "gnomAD.sorted.hg38.vcf"))
 
     def run(self):
-        with open(self.output().path, 'w') as f:
-            args = ["vcf-sort", self.input().path]
-            logger.info("Running vcf-sort with the following args: %s", args)
-            sp = subprocess.Popen(args, stdout=f, stderr=subprocess.PIPE)
-            pipeline_utils.print_subprocess_output_and_error(sp)
-
+        args = ["vcf-sort", self.input().path]
+        pipeline_utils.run_process(args, redirect_stdout_path=self.output().path)
         pipeline_utils.check_file_for_contents(self.output().path)
-        logger.info("Sorting of concatenated files complete.")
