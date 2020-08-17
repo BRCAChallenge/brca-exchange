@@ -86,6 +86,7 @@ const researchModeGroups = [
         {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
         {title: 'RNA (LOVD)', prop: 'RNA_LOVD'},
         {title: 'Beacons', core: true},
+        {title: 'VRS Indentifier', prop: 'VR_ID'},
         {title: 'Synonyms', prop: 'Synonyms'}
     ]},
 
@@ -292,6 +293,8 @@ const researchModeGroups = [
         {title: 'Co-occurrence likelihood', prop: 'Co_occurrence_LR_exLOVD', core: true},
         {title: 'Segregation Likelihood Ratio', prop: 'Segregation_LR_exLOVD', core: true},
         {title: 'Summary Family History Likelihood Ratio', prop: 'Sum_family_LR_exLOVD', core: true},
+        {title: 'Pathology likelihood', prop: 'Pathology_LR_exLOVD', core: true},
+        {title: 'Case-Control likelihood', prop: 'Case_control_LR_exLOVD', core: true},
         {title: 'Literature Reference', prop: 'Literature_source_exLOVD', core: true}
     ]},
 
@@ -416,6 +419,8 @@ const researchModeColumns = [
     {title: 'Variant Haplotype (LOVD)', prop: 'Variant_haplotype_LOVD'},
     {title: 'Family members carrying this variant (BIC)', prop: 'Number_of_family_member_carrying_mutation_BIC'},
     {title: 'Co-occurrence likelihood (ExUV)', prop: 'Co_occurrence_LR_exLOVD'},
+    {title: 'Pathology likelihood (ExUV)', prop: 'Pathology_LR_exLOVD'},
+    {title: 'Case-Control likelihood (ExUV)', prop: 'Case_control_LR_exLOVD'},
     {title: 'Prior probability of pathogenicity (ExUV)', prop: 'Combined_prior_probablility_exLOVD'},
     {
         title: 'Missense analysis probability of pathogenicity (ExUV)',

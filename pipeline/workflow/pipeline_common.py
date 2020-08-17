@@ -4,13 +4,25 @@ from shutil import copy
 
 import luigi
 
-import pipeline_utils
 from common import config
+from workflow import pipeline_utils
 
 DEFAULT_BRCA_RESOURCES_DIR = (os.path.abspath('../brca/brca-resources'))
 DEFAULT_OUTPUT_DIR = (
     os.path.abspath('../brca/pipeline-data/data/pipeline_input'))
 DEFAULT_FILE_PARENT_DIR = (os.path.abspath('../brca/pipeline-data/data'))
+
+
+clinvar_method_dir = os.path.abspath('../clinvar')
+lovd_method_dir = os.path.abspath('../lovd')
+g1k_method_dir = os.path.abspath('../1000_Genomes')
+enigma_method_dir = os.path.abspath('../enigma')
+functional_assays_method_dir = os.path.abspath('../functional_assays')
+data_merging_method_dir = os.path.abspath('../data_merging')
+priors_method_dir = os.path.abspath('../splicing')
+priors_filter_method_dir = os.path.abspath('../splicingfilter')
+utilities_method_dir = os.path.abspath('../utilities')
+vr_method_dir = os.path.abspath('../vr')
 
 
 class PipelineParams(luigi.Config):
@@ -51,6 +63,12 @@ class PipelineParams(luigi.Config):
     seq_repo_dir = luigi.Parameter(default=str(None),
                                    description='directory of seq_repo')
 
+    victor_docker_image_name = luigi.Parameter(default=str(None),
+                                               description='docker image name for running the victor annotation pipeline')
+
+    victor_data_dir = luigi.Parameter(default=str(None),
+                                               description='data dir with the required data for victor')
+
     def run(self):
         pass
 
@@ -72,6 +90,36 @@ class DefaultPipelineTask(luigi.Task):
         super(DefaultPipelineTask, self).__init__(*args, **kwargs)
 
         self.cfg = PipelineParams.get_instance()
+
+        self.artifacts_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.output_dir + "/release/artifacts")
+        self.release_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.output_dir + "/release/")
+        self.diff_dir = pipeline_utils.create_path_if_nonexistent(self.release_dir + "/diff")
+        self.metadata_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.output_dir + "/release/metadata/")
+
+        self.clinvar_file_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.file_parent_dir + "/ClinVar")
+        self.ex_lovd_file_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.file_parent_dir + "/exLOVD")
+        self.lovd_file_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.file_parent_dir + "/LOVD")
+        self.g1k_file_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.file_parent_dir + '/G1K')
+        self.exac_file_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.file_parent_dir + '/exac')
+        self.enigma_file_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.file_parent_dir + '/enigma')
+        self.assays_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.file_parent_dir + '/functional_assays')
+
+    def on_failure(self, exception):
+        # renaming files by prefixing filename with "FAILURE_". This way, on rerunning the pipeline the failed task is
+        # automatically run again, but instead of just deleting the file, it can still be inspected.
+        def _rename_file(path):
+            if os.path.exists(path):
+                ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                failed_file_name = f"FAILED_{ts}_{os.path.basename(path)}"
+                os.rename(path, os.path.join(os.path.dirname(path), failed_file_name))
+
+        if isinstance(self.output(), luigi.LocalTarget):
+            _rename_file(self.output().path)
+        else:
+            for o in self.output().values():
+                _rename_file(o.path)
+
+        return super().on_failure(exception)
 
 
 class CopyOutputToOutputDir(DefaultPipelineTask):

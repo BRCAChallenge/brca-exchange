@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import click
 import luigi
@@ -72,7 +73,12 @@ def main(luigi_module_file, last_task, first_task, dry_run, luigi_args):
         for f in files_to_delete:
             if not dry_run:
                 print("Removing {}".format(f))
-                os.unlink(f)
+
+                if os.path.exists(f):
+                    if os.path.isdir(f):
+                        shutil.rmtree(f)
+                    else:
+                        os.unlink(f)
             else:
                 print("Would remove {}".format(f))
 

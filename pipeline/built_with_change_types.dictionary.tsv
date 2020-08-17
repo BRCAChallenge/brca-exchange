@@ -53,6 +53,8 @@ Sum_family_LR_exLOVD	Log ratio describing the likelihood of variant pathogenicit
 Co_occurrence_LR_exLOVD	Log ratio describing the likelihood of variant pathogenicity given variant co-occurrence data	3.09
 Missense_analysis_prior_probability_exLOVD	Prior probability of variant pathogenicity from sequence data, considering protein impact only	0.03
 Posterior_probability_exLOVD	Posterior probability of variant pathogenicity, from multifactorial analysis	0
+Case_control_LR_exLOVD  Log ratio estimated from analysis of matched case (diagnosed with cancer) and control (unaffected by cancer) patients. From ExUV. 2.6741E
+Pathology_LR_exLOVD likelihood ratio estimated from tumor pathology data from cancer patients who carry the variant. From ExUV  3.73
 IARC_class_exLOVD	IARC class corresponding the the posterior probability	1 - Not pathogenic or of no clinical significance
 Literature_source_exLOVD	Literature reference for the BRCA ExUV /exLOVD data analyses 	Easton et al. 2007
 BX_ID_exLOVD	Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation	162
@@ -282,6 +284,7 @@ pyhgvs_Genomic_Coordinate_37	HGVS variant alias which references the nucleotide 
 pyhgvs_Hg37_Start	Starting position in Hg37 build according to HGVS nomenclature	41215385	https://brcaexchange.org/help#variant-naming-demystified
 pyhgvs_Hg37_End	Ending position in Hg37 build according to HGVS nomenclature	41215385	https://brcaexchange.org/help#variant-naming-demystified
 pyhgvs_Protein	HGVS protein nomenclature	NP_009225.1:p.(Thr1720Ala)	https://brcaexchange.org/help#variant-naming-demystified
+CA_ID ClinGen Allele Registry canonical ID  CA247478059
 mupit_structure	Indicates the three-dimensional protein structure that the variant can be visualized within, with MuPIT	1t15
 varType	Indicates the type of variant in terms of substitution, deletion, missense, etc. 	substitution
 varLoc	Indicates whether a variant is in a clinically important domain, exon, intron, or splice-relevant position	CI_domain_variant

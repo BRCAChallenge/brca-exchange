@@ -26,7 +26,7 @@ def test_parse_record(hgvs_wrapper):
                             'enigma_clinvar_set.xml')
     cvs_el = etree.parse(xml_path)
 
-    res = enigma_from_clinvar.parse_record(cvs_el, hgvs_util)
+    res = enigma_from_clinvar.parse_record(cvs_el, hgvs_util, ['BRCA1', 'BRCA2'])
 
     expected = [{
         'Abbrev_AA_change': 'I562Mfs*12',

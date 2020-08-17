@@ -8,12 +8,14 @@ from brca.site_settings import DATABASES
 from data.models import Variant, DataRelease, ChangeType, Report, MupitStructure, InSilicoPriors
 from argparse import FileType
 import json
+import sys
 import csv
 import psycopg2
 from data.utilities import update_autocomplete_words
 from tqdm import tqdm
 from data.management.commands.add_diff_json import add_diffs
 
+csv.field_size_limit(sys.maxsize)
 
 def get_num_lines(file_path):
     import mmap

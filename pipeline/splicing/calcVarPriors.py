@@ -27,6 +27,7 @@ from calc_priors.priors import getPriorProbAfterGreyZoneSNS, getPriorProbSpliceD
 
 from calc_priors.utils import Benchmark, approximate_compare_tsv, MismatchException
 
+csv.field_size_limit(10000000)
 
 def getVarData(variant, boundaries, inputVariantData, genome, transcript):
     """

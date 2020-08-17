@@ -57,3 +57,10 @@ A variant alias presented in BIC Nomenclature, which predates HGVS nomenclature 
 Link to the variant in the ClinGen Allele Registry.
 
 </span>
+
+<span class="term_entry">
+
+#### VRS Identifier ((VR_ID))
+The VRS Identifier is a globally-unique identifier that removes a number of the ambiguities in variant representation. Further details are available [here](https://vr-spec.readthedocs.io/en/1.0/).
+
+</span>
