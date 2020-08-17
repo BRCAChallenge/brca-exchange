@@ -40,14 +40,17 @@ function labelClasses(v) {
     return classNames('label-field borderless ', mapValToColor(v));
 }
 
-function rowClasses(v, probability) {
-    // FIXME: needs logic to disambiguate cases where the probability matches multiple rows
-    return classNames('field-container', probability === v ? 'highlighted' : null);
+function rowClasses(v, probability, canBeHighlighted) {
+    if (canBeHighlighted === false) {
+        return classNames('field-container');
+    } else {
+        return classNames('field-container', probability === v ? 'highlighted' : null);
+    }
 }
 
 export default class ProteinLevelSubtile extends React.Component {
     render() {
-        const {probability} = this.props;
+        const {probability, synonymous} = this.props;
 
         if (!isNumeric(probability) || probability === -Infinity) {
             return (
@@ -90,7 +93,7 @@ export default class ProteinLevelSubtile extends React.Component {
                             <div className="label-field" style={{border: 'none', marginTop: '0.5em'}}>Outside key domains</div>
                         </div>
 
-                        <div className={rowClasses(context.missense.irrelevant, probability)}>
+                        <div className={rowClasses(context.missense.irrelevant, probability, (synonymous === false))}>
                             <div className={labelClasses(context.missense.irrelevant)}>
                                 <i>Missense severity irrelevant</i>
                             </div>
@@ -98,7 +101,7 @@ export default class ProteinLevelSubtile extends React.Component {
                         </div>
                     </div>
 
-                    <div className={rowClasses(context.silentVal, probability)} style={{marginTop: '1em'}}>
+                    <div className={rowClasses(context.silentVal, probability, (synonymous === true))} style={{marginTop: '1em'}}>
                         <div className={labelClasses(context.silentVal)}>
                             Silent (synonymous)
                         </div>

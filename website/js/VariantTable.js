@@ -54,6 +54,7 @@ const expertModeGroups = [
         {title: 'Protein Identifier', prop: 'HGVS_Protein_ID'},
         {title: 'Protein Abbrev', prop: 'Protein_Change'}, // this is manually renamed to 'Abbreviated AA Change' in the front-end
         {title: 'BIC Designation', prop: 'BIC_Nomenclature'},
+        {title: 'ClinGen Allele Registry', prop: 'CA_ID'},
         {title: 'Genomic Nomenclature (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
         {title: 'Genomic Nomenclature (GRCh37)', prop: 'Genomic_Coordinate_hg37'}
     ]},
@@ -80,10 +81,12 @@ const researchModeGroups = [
         {title: 'HGVS Protein', prop: 'HGVS_Protein', render: protein => protein.split(':')[1], core: true},
         {title: 'Protein Amino Acid Change', prop: 'Protein_Change', core: true},
         {title: 'BIC Designation', prop: 'BIC_Nomenclature', core: true},
+        {title: 'ClinGen Allele Registry', prop: 'CA_ID'},
         {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38', core: true},
         {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
         {title: 'RNA (LOVD)', prop: 'RNA_LOVD'},
         {title: 'Beacons', core: true},
+        {title: 'VRS Indentifier', prop: 'VR_ID'},
         {title: 'Synonyms', prop: 'Synonyms'}
     ]},
 
@@ -189,8 +192,17 @@ const researchModeGroups = [
                     {title: 'AMR Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_AMR_GnomAD', core: true},
                     {title: 'ASJ Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_ASJ_GnomAD', core: true},
                     {title: 'EAS Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_EAS_GnomAD', core: true},
+                    {title: 'EAS JPN Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_EAS_JPN_GnomAD', core: true},
+                    {title: 'EAS KOR Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_EAS_KOR_GnomAD', core: true},
+                    {title: 'EAS OEA Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_EAS_OEA_GnomAD', core: true},
                     {title: 'FIN Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_FIN_GnomAD', core: true},
                     {title: 'NFE Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_NFE_GnomAD', core: true},
+                    {title: 'NFE EST Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_NFE_EST_GnomAD', core: true},
+                    {title: 'NFE BGR Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_NFE_BGR_GnomAD', core: true},
+                    {title: 'NFE NWE Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_NFE_NWE_GnomAD', core: true},
+                    {title: 'NFE ONF Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_NFE_ONF_GnomAD', core: true},
+                    {title: 'NFE SEU Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_NFE_SEU_GnomAD', core: true},
+                    {title: 'NFE SWE Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_NFE_SWE_GnomAD', core: true},
                     {title: 'OTH Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_OTH_GnomAD', core: true},
                     {title: 'SAS Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_SAS_GnomAD', core: true}
                 ]
@@ -206,8 +218,17 @@ const researchModeGroups = [
                     {title: 'AMR Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_AMR_GnomAD', core: true},
                     {title: 'ASJ Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_ASJ_GnomAD', core: true},
                     {title: 'EAS Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_EAS_GnomAD', core: true},
+                    {title: 'EAS JPN Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_EAS_JPN_GnomAD', core: true},
+                    {title: 'EAS KOR Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_EAS_KOR_GnomAD', core: true},
+                    {title: 'EAS OEA Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_EAS_OEA_GnomAD', core: true},
                     {title: 'FIN Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_FIN_GnomAD', core: true},
                     {title: 'NFE Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_NFE_GnomAD', core: true},
+                    {title: 'NFE EST Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_NFE_EST_GnomAD', core: true},
+                    {title: 'NFE BGR Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_NFE_BGR_GnomAD', core: true},
+                    {title: 'NFE NWE Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_NFE_NWE_GnomAD', core: true},
+                    {title: 'NFE ONF Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_NFE_ONF_GnomAD', core: true},
+                    {title: 'NFE SEU Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_NFE_SEU_GnomAD', core: true},
+                    {title: 'NFE SWE Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_NFE_SWE_GnomAD', core: true},
                     {title: 'OTH Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_OTH_GnomAD', core: true},
                     {title: 'SAS Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_SAS_GnomAD', core: true}
                 ]
@@ -272,6 +293,8 @@ const researchModeGroups = [
         {title: 'Co-occurrence likelihood', prop: 'Co_occurrence_LR_exLOVD', core: true},
         {title: 'Segregation Likelihood Ratio', prop: 'Segregation_LR_exLOVD', core: true},
         {title: 'Summary Family History Likelihood Ratio', prop: 'Sum_family_LR_exLOVD', core: true},
+        {title: 'Pathology likelihood', prop: 'Pathology_LR_exLOVD', core: true},
+        {title: 'Case-Control likelihood', prop: 'Case_control_LR_exLOVD', core: true},
         {title: 'Literature Reference', prop: 'Literature_source_exLOVD', core: true}
     ]},
 
@@ -349,6 +372,7 @@ const columns = [
     {title: 'Protein Identifier', prop: 'HGVS_Protein_ID'},
     {title: 'Protein Abbrev', prop: 'Protein_Change'},
     {title: 'BIC Designation', prop: 'BIC_Nomenclature'},
+    {title: 'ClinGen Allele Registry', prop: 'CA_ID'},
     {title: 'Genomic Nomenclature (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
     {title: 'Genomic Nomenclature (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
     {title: 'Clinical Significance', prop: 'Pathogenicity_expert'},
@@ -369,6 +393,7 @@ const researchModeColumns = [
     {title: 'Genome (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
     {title: 'Mutation category (BIC)', prop: 'Mutation_type_BIC'},
     {title: 'BIC Variant Identifier', prop: 'BIC_Nomenclature'},
+    {title: 'ClinGen Allele Registry', prop: 'CA_ID'},
     {title: 'Nucleotide', prop: 'HGVS_cDNA'},
     {title: 'Protein', prop: 'HGVS_Protein'},
     {title: 'SCV Accession (ClinVar)', prop: 'SCV_ClinVar'},
@@ -394,6 +419,8 @@ const researchModeColumns = [
     {title: 'Variant Haplotype (LOVD)', prop: 'Variant_haplotype_LOVD'},
     {title: 'Family members carrying this variant (BIC)', prop: 'Number_of_family_member_carrying_mutation_BIC'},
     {title: 'Co-occurrence likelihood (ExUV)', prop: 'Co_occurrence_LR_exLOVD'},
+    {title: 'Pathology likelihood (ExUV)', prop: 'Pathology_LR_exLOVD'},
+    {title: 'Case-Control likelihood (ExUV)', prop: 'Case_control_LR_exLOVD'},
     {title: 'Prior probability of pathogenicity (ExUV)', prop: 'Combined_prior_probablility_exLOVD'},
     {
         title: 'Missense analysis probability of pathogenicity (ExUV)',

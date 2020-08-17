@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Description:
@@ -8,7 +8,7 @@ Description:
 """
 
 
-from __future__ import print_function, division
+
 
 import argparse
 import re
@@ -68,7 +68,7 @@ def main():
     else:
         raise ValueError('Source is %s, must be either LOVD or exLOVD' % (source))
     print('##reference=GRCh37', file=vcfFile)
-    for annotation, description in annotDict.items():
+    for annotation, description in list(annotDict.items()):
         print('##INFO=<ID={0},Number=.,Type=String,Description="{1}">'.format(annotation.replace(' ', '_'), description), file=vcfFile)
     print('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO', file=vcfFile)
 
@@ -145,16 +145,31 @@ def main():
 def from_genomic(parsedLine, fieldIdxDict, hgvs_wrapper, seq_fetcher37, errorsFile):
     acc = 'NC_0000' + str(parsedLine[fieldIdxDict['chromosome']].replace('chr', '')) + '.10'
 
-    var_str = acc + ":" + parsedLine[fieldIdxDict['gDNA']]
+    # sometimes different gDNA's are provided by LOVD and combined by us
+    # checks to make sure they're all valid, otherwise throws an error
+    gDNAs = parsedLine[fieldIdxDict['gDNA']].split(',')
 
-    try:
-        var_hgvs = hgvs_wrapper.hgvs_parser.parse(var_str)
-        var_hgvs_norm = hgvs.normalizer.Normalizer(hgvs_wrapper.hgvs_dp, shuffle_direction=5).normalize(var_hgvs)
-        return VCFVariant.from_hgvs_obj(var_hgvs_norm, seq_fetcher37)
-    except HGVSError as e:
-        print('Could not parse genomic field ' + str(var_str) + '. Error was ' + str(e), file=errorsFile)
+    # to hold variant in memory and make sure they're all equivalent
+    v = None
 
-    return None
+    for gDNA in gDNAs:
+
+        var_str = acc + ":" + gDNA
+
+        try:
+            var_hgvs = hgvs_wrapper.hgvs_parser.parse(var_str)
+            var_hgvs_norm = hgvs.normalizer.Normalizer(hgvs_wrapper.hgvs_dp, shuffle_direction=5).normalize(var_hgvs)
+            variant = VCFVariant.from_hgvs_obj(var_hgvs_norm, seq_fetcher37)
+            # ensures all variants parsed from different gDNAs are the same
+            if v is not None:
+                if variant != v:
+                    print('parsed gDNAs not equivalent: ' + str(v) + ', and: ' + str(variant), file=errorsFile)
+                    return None
+            v = variant
+        except HGVSError as e:
+            print('Could not parse genomic field ' + str(var_str) + '. Error was ' + str(e), file=errorsFile)
+
+    return v
 
 
 if __name__ == "__main__":

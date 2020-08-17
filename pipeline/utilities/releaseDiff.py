@@ -6,6 +6,9 @@ import json
 import logging
 from math import floor, log10
 import dateutil.parser
+import os
+
+csv.field_size_limit(10000000)
 
 added_data = None
 diff = None
@@ -115,7 +118,7 @@ class transformer(object):
                 newToOldNameMapping[ocol] = ocol
             else:
                 oldColumnsRemoved.append(ocol)
-            if self._renamedColumns.has_key(ocol):
+            if ocol in self._renamedColumns:
                 newToOldNameMapping[self._renamedColumns[ocol]] = ocol
         for ncol in newColumns:
             if ncol not in oldColumns:
@@ -185,11 +188,11 @@ class transformer(object):
             val = str(round_sigfigs(float(val), 3))
             value = val + ' ' + source_string
             # (ExAC) was changed to (ExAC minus TCGA)
-            value = re.sub("\(ExAC\)", "(ExAC minus TCGA)", value)
+            value = re.sub(r"\(ExAC\)", "(ExAC minus TCGA)", value)
         elif field == "Sift_Prediction":
             # for sift predictions, some data combines the
             # numerical and categorical scores
-            value = re.sub("\(*$", "", value)
+            value = re.sub(r"\(*$", "", value)
         elif field == "Clinical_significance_citations_ENIGMA":
             # In some data, empty fields are indicated by a single hyphen
             value = re.sub("", "-", value)
@@ -227,7 +230,7 @@ class transformer(object):
             pass
         variant = newRow[identifier]
         newValue = self._normalize(newRow[field], field)
-        if field in self._newColumnsAdded and field not in self._renamedColumns.values():
+        if field in self._newColumnsAdded and field not in list(self._renamedColumns.values()):
             if newValue == "-":
                 # Ignore new columns with no data in diff
                 return "unchanged"
@@ -284,7 +287,7 @@ class transformer(object):
         added_data_str = ""
         changed_classification = False
 
-        for field in newRow.keys():
+        for field in list(newRow.keys()):
             if field not in columns_to_ignore:
                 result = self.compareField(oldRow, newRow, field)
                 if re.search("major change", result):
@@ -299,8 +302,8 @@ class transformer(object):
                         changed_classification = True
 
         # If a field is no longer present in the new data, make sure to include it in the diff
-        for field in oldRow.keys():
-            if field not in columns_to_ignore and field not in newRow.keys():
+        for field in list(oldRow.keys()):
+            if field not in columns_to_ignore and field not in list(newRow.keys()):
                 identifier = getIdentifier(newRow, reports)
                 if identifier is None:
                     pass
@@ -446,8 +449,8 @@ def breakUpValueIntoList(value):
 def determineDiffForList(oldValues, newValues):
     added = []
     removed = []
-    oldValues = map(str.strip, oldValues)
-    newValues = map(str.strip, newValues)
+    oldValues = list(map(str.strip, oldValues))
+    newValues = list(map(str.strip, newValues))
     for value in oldValues:
         if value not in newValues:
             removed.append(value)
@@ -469,8 +472,8 @@ def determineDiffForPathogenicityAll(oldValue, newValue):
     removed = []
     oldValuesBySource = oldValue.split(';')
     newValuesBySource = newValue.split(';')
-    oldValuesBySource = map(str.strip, oldValuesBySource)
-    newValuesBySource = map(str.strip, newValuesBySource)
+    oldValuesBySource = list(map(str.strip, oldValuesBySource))
+    newValuesBySource = list(map(str.strip, newValuesBySource))
     for source in sources:
         (classificationAdded, classificationRemoved) = checkPathogenicityAllDiffBySource(source, oldValuesBySource, newValuesBySource)
         if not isEmpty(classificationAdded):
@@ -561,9 +564,9 @@ def generateReadme(args):
     }
 
 
-    with open(args.diff_dir + "README.txt", "w") as readme:
+    with open(os.path.join(args.diff_dir, "README.txt"), "w") as readme:
         readme.write("This file contains basic information about the diff directory.\n\n\n")
-        for k, v in output_file_descriptions.iteritems():
+        for k, v in output_file_descriptions.items():
             readme.write(k + ": " + v + '\n\n')
 
 
@@ -634,7 +637,7 @@ def main():
     args = parser.parse_args()
 
     if args.artifacts_dir:
-        logFile = args.artifacts_dir + 'releaseDiff.log'
+        logFile = os.path.join(args.artifacts_dir, 'releaseDiff.log')
     else:
         logFile = 'releaseDiff.log'
 
@@ -672,7 +675,7 @@ def main():
         for oldRow in v1In:
             identifier = getIdentifier(oldRow, reports)
             # if a new identifier is assigned, this will skip over old data that don't have the property
-            if identifier is not None and identifier in oldRow.keys():
+            if identifier is not None and identifier in list(oldRow.keys()):
                 oldData[oldRow[identifier]] = oldRow
 
         for newRow in v2In:
@@ -688,12 +691,12 @@ def main():
         for newRow in v2In:
             newRow = addGsIfNecessary(newRow)
             newData[newRow[getIdentifier(newRow, reports)]] = newRow
-    for oldVariant in oldData.keys():
-        if not newData.has_key(oldVariant):
+    for oldVariant in list(oldData.keys()):
+        if oldVariant not in newData:
             removed.writerow(oldData[oldVariant])
 
-    for newVariant in newData.keys():
-        if not oldData.has_key(newVariant):
+    for newVariant in list(newData.keys()):
+        if newVariant not in oldData:
             variantChangeTypes[newVariant] = CHANGE_TYPES['ADDED']
             added.writerow(newData[newVariant])
         else:
@@ -710,8 +713,8 @@ def main():
 
     generateReadme(args)
 
-    print "Number of variants with additions: " + str(total_variants_with_additions)
-    print "Number of variants with changes: " + str(total_variants_with_changes)
+    print("Number of variants with additions: " + str(total_variants_with_additions))
+    print("Number of variants with changes: " + str(total_variants_with_changes))
 
 
 if __name__ == "__main__":

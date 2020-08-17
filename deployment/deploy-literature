@@ -82,3 +82,9 @@ if [ "${ENVIRONMENT}" == "beta" ] || [ "${ENVIRONMENT}" == "production" ] || [ "
 ENDSSH
 
 fi
+
+if [ "${ENVIRONMENT}" == "production" ] ;then
+    # backup literature
+    tar -czvf /tmp/literature.tar.gz ${LITERATURE_RESULTS}
+    aws s3 cp /tmp/literature.tar.gz s3://brcaexchange/literature/
+fi

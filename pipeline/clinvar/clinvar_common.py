@@ -23,7 +23,7 @@ def textIfPresent(element, field):
     if ff == None or ff.text == None:
         return None
     else:
-        return(ff.text.encode('utf-8'))
+        return ff.text
 
 
 def processClinicalSignificanceElement(el, obj):
@@ -37,6 +37,14 @@ def processClinicalSignificanceElement(el, obj):
         obj.clinicalSignificance = None
         obj.summaryEvidence = None
         obj.dateSignificanceLastEvaluated = None
+
+
+def build_xpath_filter_for_cv_assertions(gene_symbols):
+    symbols_str = [ f'text()="{s}"' for s in gene_symbols]
+    symbols_pred = ' or '.join(symbols_str)
+
+    # filter assertion if it contains a Symbol we are interested in
+    return f"ReferenceClinVarAssertion/MeasureSet/Measure/MeasureRelationship/Symbol/ElementValue[({symbols_pred}) and @Type=\"Preferred\"]"
 
 
 def extractSynonyms(el):
@@ -119,14 +127,14 @@ def _extract_genomic_coordinates_from_non_genomic_fields(meas_el, assemblies = [
             elif v.ac.startswith('NM_'):
                 v_g = hutils.nm_to_genomic(v, assembly)
             else:
-                logging.warn("Skipping genomic coordinate extraction for " + preprocessed_var)
+                logging.warning("Skipping genomic coordinate extraction for " + preprocessed_var)
                 continue
 
             if v_g:
                 vcf = variant_utils.VCFVariant.from_hgvs_obj(v_g)
                 coords[assembly] = vcf
     except HGVSError as e:
-        logging.warn("HGVS Error while attempting to process " + preprocessed_var + " : " + str(e))
+        logging.warning("HGVS Error while attempting to process " + preprocessed_var + " : " + str(e))
 
     return coords
 
@@ -223,7 +231,7 @@ class referenceAssertion:
         #if measureSet.get("Type") == "Variant":
 
         if len(measureSet.findall("Measure")) > 1:
-            logging.warn("Assertion with ID " + str(self.id) + " has multiple measures. Taking first one.")
+            logging.warning("Assertion with ID " + str(self.id) + " has multiple measures. Taking first one.")
         if len(measureSet.findall("Measure")) >= 1:
             name = measureSet.find("Name")
             if name == None:
@@ -344,11 +352,11 @@ class clinVarSet:
         :param clinvar_set_el: clinvar set element
         :return: HGVS CDNA representation as string
         """
-        hgvs_cand = re.sub("\(" + "(BRCA[1|2])" + "\)",
+        hgvs_cand = re.sub(r"\(" + "(BRCA[1|2])" + r"\)",
                       "", variant_name.split()[0])
 
         # only take variants starting with NM_ and not containing []
-        hgvs_cdna_re = 'NM_.*:[^\[]*$'
+        hgvs_cdna_re = r'NM_.*:[^\[]*$'
 
         if not re.match(hgvs_cdna_re, hgvs_cand):
             # taking Attribute of 'HGVS', 'HGVS, coding' or 'HGVS, coding, RefSeq' in

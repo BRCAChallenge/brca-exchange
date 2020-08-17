@@ -6,7 +6,7 @@ import argparse
 import logging
 import xml.etree.ElementTree as ET
 
-import clinvar
+from clinvar import clinvar_common as clinvar
 from common import utils
 
 
@@ -24,17 +24,17 @@ def processSubmission(submissionSet, assembly):
     ra = submissionSet.referenceAssertion
 
     if ra.variant is None:
-        logging.warn("No variant information could be extracted for ReferenceClinVarAssertion ID %s %s",
-                     submissionSet.referenceAssertion.id, [c.accession for c in submissionSet.otherAssertions.itervalues()])
+        logging.warning("No variant information could be extracted for ReferenceClinVarAssertion ID %s %s",
+                     submissionSet.referenceAssertion.id, [c.accession for c in submissionSet.otherAssertions.values()])
         return None
 
-    for oa in submissionSet.otherAssertions.values():
+    for oa in list(submissionSet.otherAssertions.values()):
         variant = ra.variant
         if oa.origin == "germline":
             hgvs = ra.hgvs_cdna
 
             proteinChange = None
-            if variant.attribute.has_key("HGVS, protein, RefSeq"):
+            if "HGVS, protein, RefSeq" in variant.attribute:
                 proteinChange = variant.attribute["HGVS, protein, RefSeq"]
 
             if assembly in variant.coordinates:
@@ -45,7 +45,7 @@ def processSubmission(submissionSet, assembly):
                 # Omit the variants that don't have any genomic start coordinate indicated.
                 if vcf_var and _bases_only(vcf_var.ref) and _bases_only(vcf_var.alt):
                     print("\t".join((str(hgvs),
-                                     oa.submitter.encode('utf-8'),
+                                     oa.submitter,
                                      str(oa.clinicalSignificance),
                                      str(oa.dateLastUpdated),
                                      str(oa.dateSignificanceLastEvaluated),

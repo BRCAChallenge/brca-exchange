@@ -1,11 +1,16 @@
+import contextlib
 import csv
 import datetime
 import os
+import subprocess
 import tarfile
-import urllib2
+import urllib.error
+import urllib.parse
+import urllib.request
 
 from retrying import retry
 
+csv.field_size_limit(10000000)
 
 #######################
 # Convenience methods #
@@ -18,19 +23,35 @@ def create_path_if_nonexistent(path):
     return path
 
 
+def run_process(args, redirect_stdout_path=None, expected_returncode=0):
+    if redirect_stdout_path:
+        stdout_cm = open(redirect_stdout_path, 'w')
+    else:
+        # wrapping into a dummy context, see https://docs.python.org/3/library/contextlib.html#contextlib.nullcontext
+        stdout_cm = contextlib.nullcontext(subprocess.PIPE)
+
+    with stdout_cm as stdout:
+        print(f"Running with the following args: {args}")
+        sp = subprocess.Popen(args, stdout=stdout, stderr=subprocess.PIPE)
+        print_subprocess_output_and_error(sp)
+
+        if sp.returncode != expected_returncode:
+            raise RuntimeError(f"Process returned with code {sp.returncode} instead of {expected_returncode}")
+
+
 def print_subprocess_output_and_error(sp):
     out, err = sp.communicate()
     if out:
-        print "standard output of subprocess:"
-        print out
+        print("standard output of subprocess:")
+        print(out)
     if err:
-        print "standard error of subprocess:"
-        print err
+        print("standard error of subprocess:")
+        print(err)
 
 
 @retry(stop_max_attempt_number=3, wait_fixed=3000)
 def urlopen_with_retry(url):
-    return urllib2.urlopen(url)
+    return urllib.request.urlopen(url)
 
 
 def download_file_and_display_progress(url, file_name=None):
@@ -40,8 +61,8 @@ def download_file_and_display_progress(url, file_name=None):
     u = urlopen_with_retry(url)
     f = open(file_name, 'wb')
     meta = u.info()
-    file_size = int(meta.getheaders("Content-Length")[0])
-    print "Downloading: %s Bytes: %s" % (file_name, file_size)
+    file_size = int(meta.get("Content-Length")[0])
+    print("Downloading: %s Bytes: %s" % (file_name, file_size))
 
     file_size_dl = 0
     block_sz = 8192
@@ -55,26 +76,26 @@ def download_file_and_display_progress(url, file_name=None):
         status = r"%10d  [%3.2f%%]" % (
         file_size_dl, file_size_dl * 100. / file_size)
         status = status + chr(8) * (len(status) + 1)
-        print status,
+        print(status, end=' ')
 
     f.close()
-    print "Finished downloading %s" % (file_name)
+    print("Finished downloading %s" % (file_name))
 
 
 def download_file_with_basic_auth(url, file_name, username, password):
-    p = urllib2.HTTPPasswordMgrWithDefaultRealm()
+    p = urllib.request.HTTPPasswordMgrWithDefaultRealm()
 
     p.add_password(None, url, username, password)
 
-    handler = urllib2.HTTPBasicAuthHandler(p)
-    opener = urllib2.build_opener(handler)
-    urllib2.install_opener(opener)
+    handler = urllib.request.HTTPBasicAuthHandler(p)
+    opener = urllib.request.build_opener(handler)
+    urllib.request.install_opener(opener)
 
     data = urlopen_with_retry(url).read()
     f = open(file_name, "wb")
     f.write(data)
     f.close()
-    print "Finished downloading %s" % (file_name)
+    print("Finished downloading %s" % (file_name))
 
 
 def check_file_for_contents(file_path):

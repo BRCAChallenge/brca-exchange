@@ -48,3 +48,19 @@ A shortened abbreviation of the HGVS Protein alias using one-letter abbreviation
 A variant alias presented in BIC Nomenclature, which predates HGVS nomenclature and thus follows a different format.
 
 </span>
+
+----
+
+<span class="term_entry">
+
+#### ClinGen Allele Registry Link ((CA_ID))
+Link to the variant in the ClinGen Allele Registry.
+
+</span>
+
+<span class="term_entry">
+
+#### VRS Identifier ((VR_ID))
+The VRS Identifier is a globally-unique identifier that removes a number of the ambiguities in variant representation. Further details are available [here](https://vr-spec.readthedocs.io/en/1.0/).
+
+</span>

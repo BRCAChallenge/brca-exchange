@@ -3,7 +3,9 @@ import argparse
 import copy
 import csv
 import re
-from utilities import isEmpty, round_sigfigs
+from data_merging.utilities import isEmpty, round_sigfigs
+
+csv.field_size_limit(10000000)
 
 EMPTY = "-"
 FIELDS_TO_REMOVE = ["Protein_ClinVar",
@@ -56,14 +58,14 @@ def main():
     for row in csvIn:
         rowCount += 1
         csvOut.writerow(updateRow(row, FIELDS_TO_RENAME, FIELDS_TO_REMOVE))
-    print "Process complete, aggregated %s variants." % (rowCount)
+    print("Process complete, aggregated %s variants." % (rowCount))
 
 
 def setOutputColumns(fields, toRemove, toAdd, toRename):
     newFields = []
     for item in fields:
         newFields.append(item)
-    for oldName, newName in toRename.iteritems():
+    for oldName, newName in toRename.items():
         newFields.remove(oldName)
         newFields.append(newName)
     for item in toRemove:
@@ -98,7 +100,7 @@ def updateRow(row, toRename, toRemove):
 
 
 def update_basic_fields(row, columnsToReplace):
-    for key, value in columnsToReplace.iteritems():
+    for key, value in columnsToReplace.items():
         row[value] = row[key]
         del row[key]
     row["Hg38_Start"] = row['Pos']
@@ -167,7 +169,7 @@ def hgvsProteinUpdate(row):
 
 def BICUpdate(row):
     bic = row["BIC_Nomenclature"]
-    bic = re.sub("\|", ",", bic)
+    bic = re.sub(r"\|", ",", bic)
     if bic == EMPTY:
         if row["BIC_Designation_BIC"] != EMPTY:
             bic = row["BIC_Designation_BIC"]

@@ -886,7 +886,6 @@ var VariantDetail = React.createClass({
                     />
                 );
             }
-
             if (inSilicoPred) {
                 return (
                     <SilicoPredTile
@@ -900,6 +899,7 @@ var VariantDetail = React.createClass({
                         relayoutGrid={this.relayoutGrid}
                         helpSection="in-silico-prior-probabilities-of-pathogenicity"
                         showHelp={this.showHelp}
+                        synonymous={variant.HGVS_Protein.includes('=')}
                     />
                 );
             }
@@ -984,6 +984,13 @@ var VariantDetail = React.createClass({
                         isEmptyValue = false;
                     }
                 }
+
+                if (!isEmptyValue && prop === "CA_ID") {
+                    let websiteUrl = `http://reg.clinicalgenome.org/redmine/projects/registry/genboree_registry/by_canonicalid?canonicalid=${variant.CA_ID}`;
+                    rowItem = <a target="_blank" href={websiteUrl}>{variant[prop]}</a>;
+                    isEmptyValue = false;
+                }
+
                 if (isEmptyValue) {
                     rowsEmpty += 1;
                     rowItem = '-';

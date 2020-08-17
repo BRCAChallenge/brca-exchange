@@ -5,7 +5,7 @@ Description:
     Takes in a gnomad table and converts it to vcf format.
 """
 
-from __future__ import print_function, division
+
 import argparse
 from collections import defaultdict
 import logging
@@ -54,7 +54,7 @@ def main():
     print('##fileformat=VCFv4.0', file=vcfFile)
     print('##source={0}'.format(source), file=vcfFile)
     print('##reference=GRCh37', file=vcfFile)
-    for annotation, description in annotDict.items():
+    for annotation, description in list(annotDict.items()):
         print('##INFO=<ID={0},Number=.,Type=String,Description="{1}">'.format(annotation.replace(' ', '_'), description), file=vcfFile)
     print('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO', file=vcfFile)
 
@@ -81,7 +81,7 @@ def main():
             INFO_field.append('{0}={1}'.format(field, field_value))
 
         # extract hgvs cDNA term for variant and cleanup formatting
-        hgvsName = parsedLine[fieldIdxDict['hgvsc']]
+        hgvsName = parsedLine[fieldIdxDict['hgvs']]
         if hgvsName == '-':
             logging.debug("hgvs name == '-' for line: %s", parsedLine)
             continue
@@ -99,7 +99,7 @@ def main():
         INFO_field_string = ';'.join(INFO_field)
 
         print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(parsedLine[fieldIdxDict['chrom']],
-                                                          parsedLine[fieldIdxDict['pos_hg19']],
+                                                          parsedLine[fieldIdxDict['pos']],
                                                           queryHgvsName,
                                                           parsedLine[fieldIdxDict['ref']],
                                                           parsedLine[fieldIdxDict['alt']],

@@ -1,14 +1,15 @@
 import copy
 import itertools
+import logging
 import re
-
+import logging
 import click
 import pandas as pd
 from lxml import etree
 
-import clinvar
 import common
-import hgvs_utils
+from clinvar import clinvar_common as clinvar
+from clinvar import hgvs_utils
 
 default_val = None
 
@@ -21,7 +22,7 @@ def _get_clinvar_sets(fin):
     return root.xpath('//ClinVarSet')
 
 
-three_letters_aa = re.compile('p.\(?[A-Z][a-z]{2}[0-9]+[A-Z][a-z]{2}') # e.g. p.(Tyr831SerfsTer9)
+three_letters_aa = re.compile('p.\\(?[A-Z][a-z]{2}[0-9]+[A-Z][a-z]{2}') # e.g. p.(Tyr831SerfsTer9)
 def _is_bic_designation(s):
     return any(k in s.lower() for k in {'ins', 'del', 'dup'}) or \
         (not s.startswith('p.') and '>' in s) or \
@@ -196,7 +197,7 @@ def _parse_engima_assertion(enigma_assertion, hgvs_util):
     return rec
 
 # clinvar set element
-def parse_record(cvs_el, hgvs_util, assembly="GRCh38"):
+def parse_record(cvs_el, hgvs_util, symbols, assembly="GRCh38"):
     '''
     Extracts information out of a ClinVarSet XML element
 
@@ -209,10 +210,19 @@ def parse_record(cvs_el, hgvs_util, assembly="GRCh38"):
     rec = {}
 
     rec["Gene_symbol"] = _xpath_text(cvs_el,
-                                     'ReferenceClinVarAssertion/MeasureSet/Measure/MeasureRelationship/Symbol/ElementValue[starts-with(., "BRCA") and @Type="Preferred"]')
+                                     clinvar.build_xpath_filter_for_cv_assertions(symbols))
 
     measure_el = cvs_el.find('ReferenceClinVarAssertion/MeasureSet/Measure')
-    rec["Genomic_Coordinate"] = str(clinvar.extract_genomic_coordinates_from_measure(measure_el)[assembly]).replace('g.', '')
+
+    genomic_coords = clinvar.extract_genomic_coordinates_from_measure(measure_el)
+
+    if assembly not in genomic_coords.keys():
+        var_name = clinvar.textIfPresent(measure_el,  'Name/ElementValue[@Type="Preferred"]')
+
+        logging.warning("Skipping variant %s as no genomic coordinates could be extracted", var_name)
+        return []
+
+    rec["Genomic_Coordinate"] = str(genomic_coords[assembly]).replace('g.', '')
 
     rec["BIC_Nomenclature"] = _fetch_bic(cvs_el)
 
@@ -263,6 +273,10 @@ def _create_df(variant_records):
                      'HGVS_protein',
                      'BX_ID']
 
+    if df.empty:
+        # can happen if none of the genes of interest are curated by ENIGMA
+        return pd.DataFrame({}, columns=target_header)
+
     return df.loc[:, target_header]
 
 
@@ -270,14 +284,15 @@ def _create_df(variant_records):
 @click.argument('filtered_clinvar_xml', type=click.Path(exists=True))
 @click.argument('output', type=click.Path(writable=True))
 @click.option('--logs', type=click.Path(writable=True))
-def main(filtered_clinvar_xml, output, logs):
+@click.option('--gene', type=str, required=True, multiple=True)
+def main(filtered_clinvar_xml, gene, output, logs):
     common.utils.setup_logfile(logs)
+    hgvs_util = hgvs_utils.HGVSWrapper()
 
     enigma_sets = _get_clinvar_sets(filtered_clinvar_xml)
 
-    hgvs_util = hgvs_utils.HGVSWrapper()
-
-    variant_records_lsts = [ parse_record(s, hgvs_util) for s in enigma_sets ]
+    gene_symbols = list(set(gene))
+    variant_records_lsts = [ parse_record(s, hgvs_util, gene_symbols) for s in enigma_sets ]
 
     # flattening list of lists
     variant_records = list(itertools.chain.from_iterable(variant_records_lsts))

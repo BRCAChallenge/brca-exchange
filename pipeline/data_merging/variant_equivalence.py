@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 
-from variant_merging_constants import VCFVariant
+from data_merging.variant_merging_constants import VCFVariant
 
 
 def calculate_edited_seq(vcf_var, seq_provider):
@@ -23,7 +23,7 @@ def calculate_edited_seq(vcf_var, seq_provider):
     if pos_seq + len_ref < len(seq):
         assert seq[pos_seq:].startswith(vcf_var.ref), "Sequences don't match"
     else:
-        logging.warn("Sequence goes on above the reference for {}. ref len {}. seq len {}".format(vcf_var, len_ref, len(seq)))
+        logging.warning("Sequence goes on above the reference for {}. ref len {}. seq len {}".format(vcf_var, len_ref, len(seq)))
         assert vcf_var.ref.startswith(seq[pos_seq:]), "Sequences don't match for variant going over reference"
 
     edited = ''.join([seq[0:pos_seq], vcf_var.alt, seq[pos_seq + len_ref:]])

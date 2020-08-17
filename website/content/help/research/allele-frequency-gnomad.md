@@ -15,7 +15,7 @@ This data is updated during the monthly release cycle, and will contain any new 
 
 #### gnomAD Populations
 
-The BRCA Exchange displays the primary subsets used by ExAC (i.e. “East  Asian”), but does not display detailed population data (i.e. “Japanese,” “Korean”). Detailed populations, as well as female and male distributions, can be found in gnomAD. 
+The BRCA Exchange displays the primary subsets used by ExAC and gnomAD (i.e. “East  Asian”), For gnomAD, detailed population data (i.e. “Japanese,” “Korean”) is shown numerically but not graphically. Additional detailed population data, such as female and male distributions, can be found in gnomAD. 
 
 * ##### Allele Frequency (gnomAD non-cancer cohort)
 	* Minor allele frequency, per ExAC (excluding cancer sequencing data)
@@ -27,21 +27,21 @@ The BRCA Exchange displays the primary subsets used by ExAC (i.e. “East  Asian
 	* Allele frequency in Ahskenazi Jewish populations, per gnomAD
 * ##### East Asian (EAS)
 	* Allele frequency in East Asian populations, per gnomAD
-	* Subsets available on gnomAD:
-		* Japanese 
-		* Korean 
-		* Other East Asian
+	* Subsets available:
+		* Japanese (EAS_JPN)
+		* Korean (EAS_KOR)
+		* Other East Asian (EAS_OEA)
 * ##### Finnish (FIN)
 	* Allele frequency in Finnish populations, per gnomAD and separated from European because of an enriched data set
 * ##### Non-Finnish European (NFE)
 	* Allele frequency in Non-Finnish European populations, per gnomAD
-	* Subsets available on gnomAD:
-		* Bulgarian
-		* Estonian 
-		* North-western European
-		* Other non-Finnish European
-		* Southern European
-		* Swedish
+	* Subsets available:
+		* Bulgarian (NFE_BGR)
+		* Estonian (NFE_EST)
+		* North-western European (NFE_NWE)
+		* Other non-Finnish European (NFE_ONF)
+		* Southern European (NFE_SEU)
+		* Swedish (NFE_SWE)
 * ##### South Asian (SAS)
 	* Allele frequency in South Asian populations, per gnomAD
 * ##### Other (OTH)
@@ -69,3 +69,9 @@ The BRCA Exchange displays data associated with ENSEMBL transcript ENST000003576
 
 For more information about efforts to unify NCBI and EMBL-EBI datasets, please visit [MANE](https://ncbiinsights.ncbi.nlm.nih.gov/2019/03/12/mane-select-v0-5/) (Matched Annotation from the NCBI and EMBL-EBI). Though they have not yet covered _BRCA1_ and _BRCA2_, the MANE Select set will eventually comprise of “a matched representative transcript for every human protein-coding gene.”
 
+#### GnomAD PopMax Filtering AF (95% Confidence) and Population
+The PopMax Filtering Allele Frequency represents the 95% confidence threshold on the population frequencies, as evaluated over all of the populations.  This is usually the highest allele frequency for any population.  In cases where some population has a high observed allele frequency but low overall counts (i.e. low allele number), this observed allele frequency might not be statistically significant, and the filtering allele frequency might be the allele frequency of a different population.  The Popmax Filtering Allele Frequency population indicates the population from which the Popmax Filtering Allele Frequency was derived.  When studying a heritable disorder with a large disease cohort, if the observed allele frequency in the disease cohort exceeds the 95% filtering allele frequency, one can assume (with 95% confidence) that the variant in question is too common to be causative of the disease and can be dismissed.
+
+##### References
+
+1. [Whiffin et al. 2017](https://www.ncbi.nlm.nih.gov/pubmed/?term=28518168)

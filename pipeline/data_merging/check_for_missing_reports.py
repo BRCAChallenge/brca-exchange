@@ -5,9 +5,10 @@ checks that all reports are accounted for in final pipeline output
 import argparse
 import csv
 import logging
+import os
 from os import listdir
 from os.path import isfile, join, abspath
-from aggregate_reports import get_reports_files
+from data_merging.aggregate_reports import get_reports_files
 import vcf
 
 
@@ -44,13 +45,13 @@ def get_bx_ids():
     files = get_reports_files(ARGS.ready_input_dir)
 
     for file in files:
-        file_path = abspath(ARGS.ready_input_dir + file)
+        file_path = abspath(os.path.join(ARGS.ready_input_dir, file))
         if file_path.endswith('.tsv'):
             source = "ENIGMA"
             bx_ids[source] = []
             tsv_file = csv.DictReader(open(file_path, "r"), delimiter='\t')
             for report in tsv_file:
-                ids = map(int, report['BX_ID'].split(','))
+                ids = list(map(int, report['BX_ID'].split(',')))
                 bx_ids[source] = bx_ids[source] + ids
         else:
             suffix = '.vcf'
@@ -59,10 +60,10 @@ def get_bx_ids():
             vcf_reader = vcf.Reader(open(file_path, 'r'), strict_whitespace=True)
             try:
                 for record in vcf_reader:
-                    ids = map(int, record.INFO['BX_ID'])
+                    ids = list(map(int, record.INFO['BX_ID']))
                     bx_ids[source] = bx_ids[source] + ids
             except ValueError as e:
-                print e
+                print(e)
 
     return bx_ids
 
@@ -91,7 +92,7 @@ def find_matches_per_source(bx_ids):
                 if not match:
                     logging.warning("Variant %s has report(s) %s from source %s, but source is not associated with variant", variant, source_bx_ids, source)
                 else:
-                    source_bx_ids = map(int, source_bx_ids.split(','))
+                    source_bx_ids = list(map(int, source_bx_ids.split(',')))
                     for source_bx_id in source_bx_ids:
                         if source_bx_id in bx_ids[source]:
                             matches_per_source[source].append(source_bx_id)
@@ -121,7 +122,7 @@ def configure_logging():
     else:
         logging_level = logging.CRITICAL
 
-    log_file_path = ARGS.artifacts_dir + "missing_reports.log"
+    log_file_path = os.path.join(ARGS.artifacts_dir, "missing_reports.log")
     logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level)
 
 

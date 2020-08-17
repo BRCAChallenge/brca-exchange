@@ -1,6 +1,6 @@
 {
   "name": "brcaexchange",
-  "version": "3.82.0-alpha.0",
+  "version": "3.88.0-alpha.0",
   "description": "brca variant browser",
   "main": "index.js",
   "scripts": {
@@ -63,9 +63,9 @@
     "isotope-fit-columns": "^1.1.3",
     "isotope-layout": "^3.0.3",
     "isotope-packery": "^2.0.0",
-    "jquery": "^3.0.0",
+    "jquery": "^3.5.0",
     "less": "^1.7.5",
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.19",
     "markdown-it": "^4.4.0",
     "moment": "^2.17.1",
     "prop-types": "^15.7.2",
