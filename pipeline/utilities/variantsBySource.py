@@ -4,6 +4,9 @@ import argparse
 import csv
 import collections
 import re
+import sys
+
+csv.field_size_limit(sys.maxsize)
 
 def main():
     parser = argparse.ArgumentParser()
