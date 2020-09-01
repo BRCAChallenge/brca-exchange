@@ -40,7 +40,7 @@ The Summary View contains an abridged view of the variant data in BRCA Exchange,
 * _Transcript Identifier_: These identifiers, which typically start in ‘NM’, are gene-specific, not variant-specific. They are generally used to keep track of different transcripts submitted to databases such as RefSeq, and are carried over to ClinVar. BRCA Exchange mainly uses contains two transcript identifiers. There is one main transcript used for _BRCA1_ \(NM 007294.3\) and another identifier used for _BRCA2_ \(NM 000059.3\). Other, less common transcripts are also present in the database.
 * _Abbreviated AA Change_: A shortened abbreviation of the HGVS Protein alias using one-letter abbreviation for amino acids.
 * _BIC designation_: A variant alias presented in BIC Nomenclature, which predates HGVS nomenclature and thus follows a different format.
-* _VRS Indentifier_: The VRS Identifier is a globally-unique identifier that removes a number of the ambiguities in variant representation. Further details are available [here](https://vr-spec.readthedocs.io/en/1.0/).
+* _GA4GH VRS Indentifier_: The Variant Reference Specification (VRS) is a standard developed by the Global Alliance for Genomic Health (GA4GH) to facilitate and improve sharing of genetic information. The VRS Identifier is a computed string that identifies the variant uniquely and globally, with fewer ambiguities than other nomenclature systems. Further details are available [here](https://vr-spec.readthedocs.io/en/1.0/).
 
 #### Clinical Significance Tile
 
