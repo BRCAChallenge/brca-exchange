@@ -60,7 +60,7 @@ Link to the variant in the ClinGen Allele Registry.
 
 <span class="term_entry">
 
-#### VRS Identifier ((VR_ID))
-The VRS Identifier is a globally-unique identifier that removes a number of the ambiguities in variant representation. Further details are available [here](https://vr-spec.readthedocs.io/en/1.0/).
+#### GA4GH VRS Identifier ((VR_ID))
+The Variant Reference Specification (VRS) is a standard developed by the Global Alliance for Genomic Health (GA4GH) to facilitate and improve sharing of genetic information. The VRS Identifier is a computed string that identifies the variant uniquely and globally, with fewer ambiguities than other nomenclature systems. Further details are available [here](https://vr-spec.readthedocs.io/en/1.0/).
 
 </span>
