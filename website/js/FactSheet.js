@@ -148,6 +148,7 @@ var FactSheet = React.createClass({
                                     <li>Up to a 17% chance of developing ovarian cancer in their lifetime</li>
                                 </ul>
                             </ul>
+                            <li>Additionally, variation in both BRCA1 and BRCA2 are significant risk factors for pancreatic and male breast cancers, while variation in BRCA2 presents significant risk for prostate cancer. BRCA variation is suspected to contribute to other cancers as well, and this is an active area of research.</li>
                             <li>With advances in DNA sequencing, individuals can have genetic testing performed to screen their DNA for specific known BRCA variants. Testing involves taking a blood or saliva sample from the individual. The results are interpreted by a clinical geneticist or licenced genetic counselor.</li>
                             <li>Genetic testing centres each hold a portion of the world’s knowledge about BRCA variants. By aggregating this knowledge together into one shared resource, scientists around the world can have access to greater amounts of information to assist them in classifying variants as ‘pathogenic’ or ‘benign’. This means more accurate and consistent information for doctors, patients, and families.</li>
                         </ul>
