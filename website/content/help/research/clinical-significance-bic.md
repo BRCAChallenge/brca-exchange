@@ -11,4 +11,4 @@
 
 	<p>Variants are classified as either germline or somatic, depending on how they are acquired. Germline variants are genetic changes that we inherit from our parents. Somatic variants are DNA changes that we acquire over our lifetime, often through exposure to pollutants, toxins, radiation and other carcinogens.</p>
 
-    <p>Please note that the BIC database is no longer actively curated. A copy of all BIC data has been shared with several other variation databases. Though the National Human Genome Research Institute recommends using ClinVar or BRCA Exchange for updated information on BRCA1 and BRCA2 variants, the BIC database will be maintained to allow historical studies and other uses.</p>
+<p>Please note that the BIC database is no longer actively curated. A copy of all BIC data has been shared with several other variation databases. Though the National Human Genome Research Institute recommends using ClinVar or BRCA Exchange for updated information on BRCA1 and BRCA2 variants, the BIC database will be maintained to allow historical studies and other uses.</p>
