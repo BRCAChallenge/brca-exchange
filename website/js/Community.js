@@ -119,7 +119,7 @@ var Community = React.createClass({
                 <Row id="message"> {message} </Row>
                 <Row>
                     <Col md={10} mdOffset={1} sm={12}>
-                        <p className="community-message">The BRCA Exchange supports the exchange of information about BRCA1 and BRCA2 variants. Show your support by joining our mailing list and/or listing your name below as one of our supporters.</p>
+                        <p className="community-message">The BRCA Exchange supports the exchange of information about BRCA1 and BRCA2 variants. Show your support by joining our global community!  By showing your support, you will help us demonstrate the value of this resource, which will help keep it freely available to all.</p>
                     </Col>
                 </Row>
                 <Row>
@@ -129,9 +129,9 @@ var Community = React.createClass({
                 </Row>
                 <Row>
                     <Col className="text-center" md={10} mdOffset={1} sm={12}>
-                        <Link to="/mailinglist"><Button disabled={config.environment === 'beta'}>Join the mailing list only</Button></Link>&nbsp;
-                        <Link to="/signup"><Button disabled={config.environment === 'beta'}>Join the mailing list and add me to the supporters</Button></Link>&nbsp;
-                        <Link to="/signin"><Button disabled={config.environment === 'beta'}>Edit your profile</Button></Link>
+                        <Link to="/signup"><Button disabled={config.environment === 'beta'}>Join the community</Button></Link>&nbsp;
+                        <p className="community-disclaimer">We will add you to the BRCA Exchange News mailing list. You can unsubscribe at any time.</p>
+                        <p>To update or remove your profile, please <a href="mailto:brca-exchange-contact@genomicsandhealth.org?subject=Update Personal Information">contact us</a>.</p>
                     </Col>
                 </Row>
                 <Row>

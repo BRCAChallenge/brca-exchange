@@ -16,6 +16,7 @@ from django.views.decorators.cache import never_cache
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from mailchimp3 import MailChimp, mailchimpclient
 
 from brca import settings, site_settings
 from .models import MyUser, MailingListEmail
@@ -32,23 +33,21 @@ def retrieve(request):
     data = list(query.values())[0]
     data["password"] = ''
 
-    # get mailing list status
-    subscriber_hash = md5.new(data["email"]).hexdigest()
-    mailchimp_url = settings.MAILCHIMP_URL + '/lists/' + settings.MAILCHIMP_LIST + '/members/' + subscriber_hash
-    mailchimp_response = requests.get(mailchimp_url, auth=('user', settings.MAILCHIMP_KEY))
+    # get mailing list status (mailchimp uses md5 hashes of emails to identify subscribers)
+    email = data["email"].lower().encode(encoding='utf-8')
+    subscriber_hash = hashlib.md5(email).hexdigest()
+    mc_client = MailChimp(mc_api=settings.MAILCHIMP_KEY, timeout=10.0)
+
     try:
-        mailchimp_response.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        return mailingListErrorHandling(mailchimp_response, e)
+        mc_user = client.lists.members.get(list_id=settings.MAILCHIMP_LIST, subscriber_hash=subscriber_hash)
+        is_subscribed = (mc_user['status'] == 'pending' or mc_user['status'] == 'subscribed')
+        response = JsonResponse({'user': data, 'mailinglist': is_subscribed})
+        return response
 
-    is_subscribed = False
-    if mailchimp_response.status_code == requests.codes.ok:
-        status = mailchimp_response.json()['status']
-        if status == "subscribed" or status == "pending":
-            is_subscribed = True
-
-    response = JsonResponse({'user': data, 'mailinglist': is_subscribed})
-    return response
+    except mailchimpclient.MailChimpError as e:
+        logging.error(repr(e))
+        response = JsonResponse({'user': data, 'mailinglist': False})
+        return response
 
 
 @never_cache
@@ -68,20 +67,6 @@ def update(request):
         u.set_password(fields['password'])
         u.save()
     del fields['password']
-
-    # mailing list toggle
-    if 'subscribe' in request.POST:
-        subscribe = request.POST.get('subscribe')
-        subscriber_hash = md5.new(user[0].email).hexdigest()
-        mailchimp_data = {'email_address': user[0].email,
-                          'merge_fields': {'FNAME': fields['firstName'], 'LNAME': fields['lastName']},
-                          'status': 'subscribed' if subscribe == 'true' else 'unsubscribed'}
-        mailchimp_url = settings.MAILCHIMP_URL + '/lists/' + settings.MAILCHIMP_LIST + '/members/' + subscriber_hash
-        mailchimp_response = requests.put(mailchimp_url, auth=('user', settings.MAILCHIMP_KEY), json=mailchimp_data)
-        try:
-            mailchimp_response.raise_for_status()
-        except requests.exceptions.HTTPError as e:
-            return mailingListErrorHandling(mailchimp_response, e)
 
     try:
         user.update(**fields)
@@ -126,8 +111,19 @@ def register(request):
         # Create and save activation key
         salt = hashlib.sha1(str(random.random()).encode('utf-8')).hexdigest()[:5]
         activation_key = hashlib.sha1((salt + created_user.email).encode('utf-8')).hexdigest()
-        created_user['activation_key'] = activation_key
+        created_user.activation_key = activation_key
         created_user.save()
+
+        # Sign up for mailchimp
+        mc_client = MailChimp(mc_api=settings.MAILCHIMP_KEY, timeout=10.0)
+        mc_client.lists.members.create(settings.MAILCHIMP_LIST, {
+            'email_address': created_user.email,
+            'status': 'subscribed',
+            'merge_fields': {
+                'FNAME': created_user.firstName,
+                'LNAME': created_user.lastName,
+            },
+        })
 
         # Send activation email
         url = "{0}confirm/{1}".format(site_settings.URL_FRONTEND, activation_key)
@@ -146,6 +142,9 @@ def register(request):
     except IntegrityError:
         logging.error(repr(IntegrityError))
         return JsonResponse({'success': False, 'error': 'This email address already exists'})
+
+    except mailchimpclient.MailChimpError as e:
+        logging.error(repr(e))
 
     return JsonResponse({'success': True})
 
@@ -349,48 +348,5 @@ def user_locations(request):
 
     fields = ['id', 'firstName', 'lastName', 'title', 'role', 'role_other', 'institution', 'city', 'state', 'country', 'latitude', 'longitude', 'has_image']
     response = JsonResponse({'data': list(query.values(*fields))})
-    response['Access-Control-Allow-Origin'] = '*'
-    return response
-
-def mailinglist(request):
-    email = request.POST.get('email')
-    first_name = request.POST.get('firstName')
-    last_name = request.POST.get('lastName')
-
-    # Check the CAPTCHA
-    try:
-        captcha = request.POST.get('captcha')
-        post_data = {'secret': settings.CAPTCHA_SECRET,
-                     'response': captcha}
-        resp = requests.post('https://www.google.com/recaptcha/api/siteverify', data=post_data)
-        content = json.loads(resp.content.decode('utf-8'))
-        response = JsonResponse({'success': content['success']})
-    except HTTPError:
-        logging.error(repr(HTTPError))
-        response = JsonResponse({'success': False, 'error': 'Wrong CAPTCHA'})
-        response['Access-Control-Allow-Origin'] = '*'
-        return response
-
-    mailchimp_data = {'email_address': email,
-                      'merge_fields': {'FNAME': first_name, 'LNAME': last_name},
-                      'status': 'pending'}
-    mailchimp_response = requests.post(settings.MAILCHIMP_URL + '/lists/' + settings.MAILCHIMP_LIST + '/members', auth=('user', settings.MAILCHIMP_KEY), data=json.dumps(mailchimp_data))
-    try:
-        mailchimp_response.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        return mailingListErrorHandling(mailchimp_response, e)
-
-    response = JsonResponse({'success': True})
-    response['Access-Control-Allow-Origin'] = '*'
-    return response
-
-
-def mailingListErrorHandling(mailchimp_response, e):
-    try:
-        error = mailchimp_response.json()['title']
-    except (AttributeError, ValueError):
-        error = 'There was an error connecting to our mailing list. Please contact brcaexchange@gmail.com for support.'
-    logging.error(repr(e))
-    response = JsonResponse({'success': False, 'error': error, 'debug_info': repr(e)}, status=500)
     response['Access-Control-Allow-Origin'] = '*'
     return response
