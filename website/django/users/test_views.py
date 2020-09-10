@@ -44,28 +44,6 @@ class TestViewsAPI(TestCase):
         self.factory = RequestFactory()
         self.test_user = self.create_test_user()
 
-    def test_mailinglist_signup_success(self):
-        with HTTMock(response_content):
-            request = self.factory.post('/mailinglist/', {
-                                        'email': 'test@example.com',
-                                        'firstName': 'test',
-                                        'lastName': 'example'
-                                        })
-            response = views.mailinglist(request)
-            self.assertEqual(response.status_code, 200)
-
-    def test_mailinglist_signup_failure(self):
-        with HTTMock(google_mock):
-            request = self.factory.post('/mailinglist/', {
-                                        'email': 'test@example.com',
-                                        'firstName': 'test',
-                                        'lastName': 'example'
-                                        })
-            response = views.mailinglist(request)
-            response_json = json.loads(response.content.decode('utf-8'))
-            self.assertEqual(response.status_code, 500)
-            self.assertFalse(response_json['success'])
-
     def test_password_reset_with_invalid_email(self):
         response = self.client.post('/accounts/password_reset/', {'email': 'nonexistant-email@example.com'})
         self.assertEqual(response.status_code, 200)

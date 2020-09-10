@@ -904,6 +904,11 @@ th[role='columnheader'] .help, .help-target .help {
     font-weight: 200;
 }
 
+.community-disclaimer {
+    font-weight: 200;
+    margin-top: 15px;
+}
+
 #communityMap {
     width: 100%;
     height: 450px;
