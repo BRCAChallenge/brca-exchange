@@ -105,7 +105,7 @@ def check_file_for_contents(file_path):
 
 def concatenate_symbols(symbols):
     concat_symbols = []
-    for symbol in self.cfg.gene_metadata['symbol']:
+    for symbol in symbols:
         concat_symbols.append(symbol)
 
     # brca genes are concattenated
