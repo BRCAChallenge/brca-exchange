@@ -433,15 +433,7 @@ class ExtractData(DefaultPipelineTask):
 @requires(ExtractData)
 class CrossmapConcatenatedG1KData(DefaultPipelineTask):
     def output(self):
-        symbols = []
-        for symbol in self.cfg.gene_metadata['symbol']:
-            symbols.append(symbol)
-
-        # brca genes are concattenated
-        if 'BRCA1' in symbols and 'BRCA2' in symbols:
-            symbols.remove('BRCA1')
-            symbols.remove('BRCA2')
-            symbols.append('BRCA12')
+        symbols = pipeline_utils.concatenate_symbols(self.cfg.gene_metadata['symbol'])
 
         return { f"1000G_{symbol}.hg38.vcf" : luigi.LocalTarget(
                 self.g1k_file_dir + f"/1000G_{symbol}.hg38.vcf") for symbol in symbols }
@@ -453,8 +445,8 @@ class CrossmapConcatenatedG1KData(DefaultPipelineTask):
 
         # concatenate brca1/brca2 data
         if 'BRCA1' in files_to_crossmap.keys() and 'BRCA2' in files_to_crossmap.keys():
-            args = ["vcf-concat", self.g1k_file_dir + files_to_crossmap['BRCA1'],
-                    self.g1k_file_dir + files_to_crossmap['BRCA2']]
+            args = ["vcf-concat", self.g1k_file_dir + f"{files_to_crossmap['BRCA1']}",
+                    self.g1k_file_dir + f"{files_to_crossmap['BRCA2']}"]
 
             pipeline_utils.run_process(args, redirect_stdout_path=self.g1k_file_dir + f"/1000G_BRCA12.hg37.vcf")
             pipeline_utils.check_file_for_contents(self.g1k_file_dir + f"/1000G_BRCA12.hg37.vcf")
@@ -468,7 +460,7 @@ class CrossmapConcatenatedG1KData(DefaultPipelineTask):
         for symbol in files_to_crossmap:
             args = ["CrossMap.py", "vcf",
                     brca_resources_dir + "/hg19ToHg38.over.chain.gz",
-                    self.g1k_file_dir + files_to_crossmap[symbol],
+                    self.g1k_file_dir + f"/{files_to_crossmap[symbol]}",
                     brca_resources_dir + "/hg38.fa",
                     self.g1k_file_dir + f"/1000G_{symbol}.hg38.vcf"]
 
@@ -479,13 +471,15 @@ class CrossmapConcatenatedG1KData(DefaultPipelineTask):
 @requires(CrossmapConcatenatedG1KData)
 class SortG1KData(DefaultPipelineTask):
     def output(self):
+        symbols = pipeline_utils.concatenate_symbols(self.cfg.gene_metadata['symbol'])
+
         return { f"1000G_{symbol}.sorted.hg38.vcf" : luigi.LocalTarget(
-                self.g1k_file_dir + f"/1000G_{symbol}.sorted.hg38.vcf") for symbol in self.cfg.gene_metadata['symbol'] }
+                self.g1k_file_dir + f"/1000G_{symbol}.sorted.hg38.vcf") for symbol in symbols }
 
     def run(self):
-        for symbol in self.cfg.gene_metadata['symbol']:
-            if symbol == 'brca1' or symbol == 'brca2':
-                symbol = 'brca12'
+        symbols = pipeline_utils.concatenate_symbols(self.cfg.gene_metadata['symbol'])
+
+        for symbol in symbols:
             args = ["vcf-sort", self.g1k_file_dir + f"/1000G_{symbol}.hg38.vcf"]
 
             pipeline_utils.run_process(args, redirect_stdout_path=self.g1k_file_dir + f"/1000G_{symbol}.sorted.hg38.vcf")
@@ -495,11 +489,15 @@ class SortG1KData(DefaultPipelineTask):
 @requires(SortG1KData)
 class CopyG1KOutputToOutputDir(DefaultPipelineTask):
     def output(self):
+        symbols = pipeline_utils.concatenate_symbols(self.cfg.gene_metadata['symbol'])
+
         return { f"1000G_{symbol}.sorted.hg38.vcf" : luigi.LocalTarget(
-                self.cfg.output_dir + f"/1000G_{symbol}.sorted.hg38.vcf") for symbol in self.cfg.gene_metadata['symbol'] }
+                self.cfg.output_dir + f"/1000G_{symbol}.sorted.hg38.vcf") for symbol in symbols }
 
     def run(self):
-        for symbol in self.cfg.gene_metadata['symbol']:
+        symbols = pipeline_utils.concatenate_symbols(self.cfg.gene_metadata['symbol'])
+
+        for symbol in symbols:
             copy(self.g1k_file_dir + f"/1000G_{symbol}.sorted.hg38.vcf", self.cfg.output_dir)
             pipeline_utils.check_file_for_contents(self.cfg.output_dir + f"/1000G_{symbol}.sorted.hg38.vcf")
 
