@@ -413,10 +413,10 @@ class DownloadG1KTBIs(DefaultPipelineTask):
 class ExtractData(DefaultPipelineTask):
     def output(self):
         return { symbol : luigi.LocalTarget(
-                self.g1k_file_dir + f'/1000G.{symbol}.hg37.vcf') for vcf in self.cfg.gene_metadata['symbol'] }
+                self.g1k_file_dir + f'/1000G_{symbol}.hg37.vcf') for symbol in self.cfg.gene_metadata['symbol'] }
 
     def run(self):
-        for index, gene in self.cfg.gene_metadata:
+        for index, gene in self.cfg.gene_metadata.iterrows():
             chrom = gene['chr']
             start_hg37 = gene['start_hg37']
             end_hg37 = gene['end_hg37']
@@ -426,8 +426,8 @@ class ExtractData(DefaultPipelineTask):
                     self.g1k_file_dir + f"/ALL.chr{chrom}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz",
                     f"{chrom}:{start_hg37}-{end_hg37}"]
 
-            pipeline_utils.run_process(args, redirect_stdout_path=(self.g1k_file_dir + f'/1000G.{symbol}.hg37.vcf'))
-            pipeline_utils.check_file_for_contents(self.g1k_file_dir + f'/1000G.{symbol}.hg37.vcf')
+            pipeline_utils.run_process(args, redirect_stdout_path=(self.g1k_file_dir + f'/1000G_{symbol}.hg37.vcf'))
+            pipeline_utils.check_file_for_contents(self.g1k_file_dir + f'/1000G_{symbol}.hg37.vcf')
 
 
 @requires(ExtractData)
@@ -435,7 +435,7 @@ class CrossmapConcatenatedG1KData(DefaultPipelineTask):
     def output(self):
         symbols = []
         for symbol in self.cfg.gene_metadata['symbol']:
-            symbols.append(symbol.lower())
+            symbols.append(symbol)
 
         # brca genes are concattenated
         if 'BRCA1' in symbols and 'BRCA2' in symbols:
@@ -444,12 +444,12 @@ class CrossmapConcatenatedG1KData(DefaultPipelineTask):
             symbols.append('BRCA12')
 
         return { f"1000G_{symbol}.hg38.vcf" : luigi.LocalTarget(
-                self.g1k_file_dir + f"/1000G.{symbol}.hg38.vcf") for symbol in symbols }
+                self.g1k_file_dir + f"/1000G_{symbol}.hg38.vcf") for symbol in symbols }
 
     def run(self):
         files_to_crossmap = {}
         for symbol in self.cfg.gene_metadata['symbol']:
-            files_to_crossmap[symbol.lower()] = f"/1000G.{symbol}.hg37.vcf"
+            files_to_crossmap[symbol] = f"/1000G_{symbol}.hg37.vcf"
 
         # concatenate brca1/brca2 data
         if 'BRCA1' in files_to_crossmap.keys() and 'BRCA2' in files_to_crossmap.keys():
