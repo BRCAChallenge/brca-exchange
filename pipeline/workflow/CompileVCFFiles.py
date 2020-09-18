@@ -384,137 +384,124 @@ class CopySharedLOVDOutputToOutputDir(DefaultPipelineTask):
 ###############################################
 
 
-class DownloadG1KCHR13GZ(DefaultPipelineTask):
+class DownloadG1KVCFs(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(
-            self.g1k_file_dir + "/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz")
+        return { chrom : luigi.LocalTarget(self.g1k_file_dir + f"/ALL.chr{chrom}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz") for chrom in self.cfg.gene_metadata['chr'] }
 
     def run(self):
         os.chdir(self.g1k_file_dir)
 
-        chr13_vcf_gz_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz"
-        pipeline_utils.download_file_and_display_progress(chr13_vcf_gz_url)
+        for chrom in self.cfg.gene_metadata['chr']:
+            url = f"ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr{chrom}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz"
+            pipeline_utils.download_file_and_display_progress(url)
 
 
-@requires(DownloadG1KCHR13GZ)
-class DownloadG1KCHR17GZ(DefaultPipelineTask):
+@requires(DownloadG1KVCFs)
+class DownloadG1KTBIs(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(
-            self.g1k_file_dir + "/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz")
+        return { chrom : luigi.LocalTarget(self.g1k_file_dir + f"/ALL.chr{chrom}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi") for chrom in self.cfg.gene_metadata['chr'] }
 
     def run(self):
         os.chdir(self.g1k_file_dir)
 
-        chr17_vcf_gz_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz"
-        pipeline_utils.download_file_and_display_progress(chr17_vcf_gz_url)
+        for chrom in self.cfg.gene_metadata['chr']:
+            url = f"ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr{chrom}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi"
+            pipeline_utils.download_file_and_display_progress(url)
 
 
-@requires(DownloadG1KCHR17GZ)
-class DownloadG1KCHR13GZTBI(DefaultPipelineTask):
+@requires(DownloadG1KTBIs)
+class ExtractData(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(
-            self.g1k_file_dir + "/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi")
+        return { symbol : luigi.LocalTarget(
+                self.g1k_file_dir + f'/1000G.{symbol}.hg37.vcf') for vcf in self.cfg.gene_metadata['symbol'] }
 
     def run(self):
-        os.chdir(self.g1k_file_dir)
+        for index, gene in self.cfg.gene_metadata:
+            chrom = gene['chr']
+            start_hg37 = gene['start_hg37']
+            end_hg37 = gene['end_hg37']
+            symbol = gene['symbol']
 
-        chr13_vcf_gz_tbi_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi"
-        pipeline_utils.download_file_and_display_progress(chr13_vcf_gz_tbi_url)
+            args = ["tabix", "-h",
+                    self.g1k_file_dir + f"/ALL.chr{chrom}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz",
+                    f"{chrom}:{start_hg37}-{end_hg37}"]
 
-
-@requires(DownloadG1KCHR13GZTBI)
-class DownloadG1KCHR17GZTBI(DefaultPipelineTask):
-    def output(self):
-        return luigi.LocalTarget(
-            self.g1k_file_dir + "/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi")
-
-    def run(self):
-        os.chdir(self.g1k_file_dir)
-
-        chr17_vcf_gz_tbi_url = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi"
-        pipeline_utils.download_file_and_display_progress(chr17_vcf_gz_tbi_url)
+            pipeline_utils.run_process(args, redirect_stdout_path=(self.g1k_file_dir + f'/1000G.{symbol}.hg37.vcf'))
+            pipeline_utils.check_file_for_contents(self.g1k_file_dir + f'/1000G.{symbol}.hg37.vcf')
 
 
-@requires(DownloadG1KCHR17GZTBI)
-class ExtractCHR13BRCAData(DefaultPipelineTask):
-    def output(self):
-        return luigi.LocalTarget(self.g1k_file_dir + "/chr13_brca2_1000g_GRCh37.vcf")
-
-    def run(self):
-        args = ["tabix", "-h",
-                self.g1k_file_dir + "/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz",
-                "13:32889617-32973809"]
-
-        pipeline_utils.run_process(args, redirect_stdout_path=self.output().path)
-        pipeline_utils.check_file_for_contents(self.output().path)
-
-
-@requires(ExtractCHR13BRCAData)
-class ExtractCHR17BRCAData(DefaultPipelineTask):
-    def output(self):
-        return luigi.LocalTarget(self.g1k_file_dir + "/chr17_brca1_1000g_GRCh37.vcf")
-
-    def run(self):
-        args = ["tabix", "-h",
-                self.g1k_file_dir + "/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz",
-                "17:41196312-41277500"]
-
-        pipeline_utils.run_process(args, redirect_stdout_path=self.output().path)
-        pipeline_utils.check_file_for_contents(self.output().path)
-
-
-@requires(ExtractCHR17BRCAData)
-class ConcatenateG1KData(DefaultPipelineTask):
-    def output(self):
-        return luigi.LocalTarget(self.g1k_file_dir + "/brca12_1000g_GRCh37.vcf")
-
-    def run(self):
-        args = ["vcf-concat", self.g1k_file_dir + "/chr13_brca2_1000g_GRCh37.vcf",
-                self.g1k_file_dir + "/chr17_brca1_1000g_GRCh37.vcf"]
-
-        pipeline_utils.run_process(args, redirect_stdout_path=self.output().path)
-        pipeline_utils.check_file_for_contents(self.output().path)
-
-
-@requires(ConcatenateG1KData)
+@requires(ExtractData)
 class CrossmapConcatenatedG1KData(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.g1k_file_dir + "/1000G_brca.hg38.vcf")
+        symbols = []
+        for symbol in self.cfg.gene_metadata['symbol']:
+            symbols.append(symbol.lower())
+
+        # brca genes are concattenated
+        if 'BRCA1' in symbols and 'BRCA2' in symbols:
+            symbols.remove('BRCA1')
+            symbols.remove('BRCA2')
+            symbols.append('BRCA12')
+
+        return { f"1000G_{symbol}.hg38.vcf" : luigi.LocalTarget(
+                self.g1k_file_dir + f"/1000G.{symbol}.hg38.vcf") for symbol in symbols }
 
     def run(self):
+        files_to_crossmap = {}
+        for symbol in self.cfg.gene_metadata['symbol']:
+            files_to_crossmap[symbol.lower()] = f"/1000G.{symbol}.hg37.vcf"
+
+        # concatenate brca1/brca2 data
+        if 'BRCA1' in files_to_crossmap.keys() and 'BRCA2' in files_to_crossmap.keys():
+            args = ["vcf-concat", self.g1k_file_dir + files_to_crossmap['BRCA1'],
+                    self.g1k_file_dir + files_to_crossmap['BRCA2']]
+
+            pipeline_utils.run_process(args, redirect_stdout_path=self.g1k_file_dir + f"/1000G_BRCA12.hg37.vcf")
+            pipeline_utils.check_file_for_contents(self.g1k_file_dir + f"/1000G_BRCA12.hg37.vcf")
+
+            files_to_crossmap['BRCA12'] = "1000G_BRCA12.hg37.vcf"
+            del files_to_crossmap['BRCA1']
+            del files_to_crossmap['BRCA2']
+
         brca_resources_dir = self.cfg.resources_dir
 
-        args = ["CrossMap.py", "vcf",
-                brca_resources_dir + "/hg19ToHg38.over.chain.gz",
-                self.g1k_file_dir + "/brca12_1000g_GRCh37.vcf",
-                brca_resources_dir + "/hg38.fa",
-                self.output().path]
+        for symbol in files_to_crossmap:
+            args = ["CrossMap.py", "vcf",
+                    brca_resources_dir + "/hg19ToHg38.over.chain.gz",
+                    self.g1k_file_dir + files_to_crossmap[symbol],
+                    brca_resources_dir + "/hg38.fa",
+                    self.g1k_file_dir + f"/1000G_{symbol}.hg38.vcf"]
 
-        pipeline_utils.run_process(args)
-        pipeline_utils.check_file_for_contents(self.output().path)
+            pipeline_utils.run_process(args)
+            pipeline_utils.check_file_for_contents(self.g1k_file_dir + f"/1000G_{symbol}.hg38.vcf")
 
 
 @requires(CrossmapConcatenatedG1KData)
 class SortG1KData(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.g1k_file_dir + "/1000G_brca.sorted.hg38.vcf")
+        return { f"1000G_{symbol}.sorted.hg38.vcf" : luigi.LocalTarget(
+                self.g1k_file_dir + f"/1000G_{symbol}.sorted.hg38.vcf") for symbol in self.cfg.gene_metadata['symbol'] }
 
     def run(self):
-        args = ["vcf-sort", self.g1k_file_dir + "/1000G_brca.hg38.vcf"]
+        for symbol in self.cfg.gene_metadata['symbol']:
+            if symbol == 'brca1' or symbol == 'brca2':
+                symbol = 'brca12'
+            args = ["vcf-sort", self.g1k_file_dir + f"/1000G_{symbol}.hg38.vcf"]
 
-        pipeline_utils.run_process(args, redirect_stdout_path=self.output().path)
-        pipeline_utils.check_file_for_contents(self.output().path)
+            pipeline_utils.run_process(args, redirect_stdout_path=self.g1k_file_dir + f"/1000G_{symbol}.sorted.hg38.vcf")
+            pipeline_utils.check_file_for_contents(self.g1k_file_dir + f"/1000G_{symbol}.sorted.hg38.vcf")
 
 
 @requires(SortG1KData)
 class CopyG1KOutputToOutputDir(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(
-            self.cfg.output_dir + "/1000G_brca.sorted.hg38.vcf")
+        return { f"1000G_{symbol}.sorted.hg38.vcf" : luigi.LocalTarget(
+                self.cfg.output_dir + f"/1000G_{symbol}.sorted.hg38.vcf") for symbol in self.cfg.gene_metadata['symbol'] }
 
     def run(self):
-        copy(self.input().path, self.cfg.output_dir)
-        pipeline_utils.check_file_for_contents(self.output().path)
+        for symbol in self.cfg.gene_metadata['symbol']:
+            copy(self.g1k_file_dir + f"/1000G_{symbol}.sorted.hg38.vcf", self.cfg.output_dir)
+            pipeline_utils.check_file_for_contents(self.cfg.output_dir + f"/1000G_{symbol}.sorted.hg38.vcf")
 
 
 ###############################################
