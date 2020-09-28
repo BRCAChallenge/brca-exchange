@@ -199,7 +199,7 @@ var CommunityMap = React.createClass({
                 zoom: 2,
                 scrollwheel: false,
                 mapTypeControl: true,
-                mapTypeId: 'satellite',
+                mapTypeId: 'roadmap',
                 streetViewControl: false,
                 styles: [{
                     "featureType": "administrative",
@@ -285,7 +285,7 @@ var CommunityMap = React.createClass({
                                 title: `${firstName} ${lastName}${title.length ? "," : ""} ${title}`,
                                 icon: {
                                     url: require(`./img/map/${role}.png`),
-                                    scaledSize: new google.maps.Size(20, 32)
+                                    scaledSize: new google.maps.Size(15, 24)
                                 }
                             });
                             marker.userID = id;
