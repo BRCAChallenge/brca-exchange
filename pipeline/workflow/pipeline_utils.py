@@ -103,6 +103,20 @@ def check_file_for_contents(file_path):
                                       file_path)
 
 
+def concatenate_symbols(symbols):
+    concat_symbols = []
+    for symbol in symbols:
+        concat_symbols.append(symbol)
+
+    # brca genes are concattenated
+    if 'BRCA1' in concat_symbols and 'BRCA2' in concat_symbols:
+        concat_symbols.remove('BRCA1')
+        concat_symbols.remove('BRCA2')
+        concat_symbols.append('BRCA12')
+
+    return concat_symbols
+
+
 def check_input_and_output_tsvs_for_same_number_variants(tsvIn, tsvOut,
                                                          numVariantsRemoved=0):
     tsvInput = csv.DictReader(open(tsvIn, 'r'), delimiter='\t')
