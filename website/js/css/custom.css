@@ -48,6 +48,10 @@ center {
     margin-top: 40px;
 }
 
+.margin-bottom-thirty {
+    margin-bottom: 30px;
+}
+
 .bold {
     font-weight: bold;
 }
@@ -616,6 +620,21 @@ div#main {
 
 .donation-bar p {
     margin: 0;
+}
+
+#ngbocw-logo {
+    width: 75%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.margin-ordered-list {
+    margin-top: 15px;
+}
+
+.margin-ordered-list li {
+    margin-top: 10px;
 }
 
 /**************************************************************/
