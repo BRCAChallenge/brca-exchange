@@ -1,13 +1,13 @@
+import importlib
 import logging
 from collections import namedtuple
-from multiprocessing.pool import ThreadPool
+from typing import Callable
 
 import numpy as np
 import pandas as pd
+import pathos
 from intervaltree import IntervalTree
 from toolz import groupby
-import importlib
-import pathos
 
 ChrInterval = namedtuple("ChrInterval", "chr, start, end")
 
@@ -36,13 +36,13 @@ def build_interval_trees_by_chr(chr_intervals, interval_tuple_builder):
     return d
 
 
-def parallelize_dataframe(df: pd.DataFrame, func, n_cores=4):
+def parallelize_dataframe(df: pd.DataFrame, func: Callable[[pd.DataFrame], pd.DataFrame], n_processes: int = 4):
     if df.empty:
         return df
 
-    df_split = np.array_split(df, n_cores)
+    df_split = np.array_split(df, n_processes)
 
-    with pathos.multiprocessing.ProcessingPool(ncpus=n_cores) as pool:
+    with pathos.multiprocessing.ProcessingPool(ncpus=n_processes) as pool:
         df = pd.concat(pool.map(func, df_split))
 
     return df
@@ -50,7 +50,6 @@ def parallelize_dataframe(df: pd.DataFrame, func, n_cores=4):
 
 def setup_logfile(log_path, log_level=logging.INFO):
     # https://stackoverflow.com/questions/20240464/python-logging-file-is-not-working-when-using-logging-basicconfig
-    from imp import reload
     importlib.reload(logging)
 
     logging.basicConfig(filename=log_path, filemode="w", level=log_level,
