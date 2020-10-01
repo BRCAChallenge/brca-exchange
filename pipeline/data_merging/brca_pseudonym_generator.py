@@ -38,75 +38,96 @@ SYNONYMS_COL = 'Synonyms'
 # temporary fields
 VAR_OBJ_FIELD = 'var_objs'
 NEW_SYNONYMS_FIELD = 'new_syns'
+TMP_HGVS_HG38 = 'tmp_Genomic_HGVS_38'
 TMP_CDNA_UNORM_FIELD = 'tmp_HGVS_CDNA_FIELD_unorm'
 TMP_CDNA_NORM_FIELD = 'tmp_HGVS_CDNA_FIELD_norm'
 
 
-def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
-    def cdna_from_cdna_field(x):
-        if x[HGVS_CDNA_COL] and x[HGVS_CDNA_COL].startswith('c.') and x[REFERENCE_SEQUENCE_COL] == cdna_ac_dict[x[GENE_SYMBOL_COL]]:
-            c = x[HGVS_CDNA_COL]
-            if ',' in c:
-                c = c.split(',')[0]
+def _normalize_genomic_coordinates(hgvs_obj, strand, hgvs_norm_3, hgvs_norm_5):
+    # TODO make this more robust
+    normalizer = hgvs_norm_3 if strand == '+' else hgvs_norm_5
 
-            return hgvs_proc.hgvs_parser.parse(x[REFERENCE_SEQUENCE_COL] + ":" + c)
-
-        return None
-
-    def compute_hgvs(x):
-        v = VCFVariant(x[CHR_COL], x[POS_COL], x[REF_COL], x[ALT_COL])
-        v = v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh38_Assem])
-
-        # normalize prior to translation to cdna
-        if normalize:
-            vn = hgvs_proc.normalizing(v)
-            v = vn if vn else v
-
-        v = hgvs_proc.genomic_to_cdna(v)
-
-        # normalize again -- this affects BRCA1 delins variants in repeat regions
-        if normalize:
-            vn = hgvs_proc.normalizing(v)
-            v = vn if vn else v
-
-        return v
-
-    def from_field_or_compute(row):
-        computed = compute_hgvs(row)
-
-        if not computed:
-            cDNA = cdna_from_cdna_field(row)
-            if cDNA is None:
-                logging.info(f"No calculable cDNA for row: {row}")
-            return cDNA
-        return computed
-
-    var_objs = df[VAR_OBJ_FIELD]
-
-    if pkl and os.path.exists(pkl):
-        pickle_dict = pickle.load(open(pkl, 'rb'))
-        s_cdna = pd.Series([ pickle_dict[str(v)] for v in var_objs ])
-    else:
-        s_cdna = df.apply(from_field_or_compute, axis=1)
-
-        if pkl:
-            pickle_dict = {str(v): c for (c, v) in zip(s_cdna, var_objs)}
-            pickle.dump(pickle_dict, open(pkl, 'wb'))
-
-    return s_cdna
+    try:
+        return normalizer.normalize(hgvs_obj)
+    except HGVSError as e:
+        logging.warning("Issue normalizing genomic coordinates {}: {}".format(hgvs_obj, e))
+    return None
 
 
-def compute_genomic_hgvs(cDNA, assemblyMapper):
-    if cDNA is None:
-        return None
-    else:
-        try:
-            genomic_hgvs = assemblyMapper.c_to_g(cDNA)
-            return str(genomic_hgvs)
-        except HGVSError as e:
-            logging.info(f"Exception during conversion of {cDNA} to genomic coordinates: {e}")
-            return None
+# def _get_cdna(df, pkl, hgvs_proc, cdna_ac_dict, normalize):
+#     def cdna_from_cdna_field(x):
+#         if x[HGVS_CDNA_COL] and x[HGVS_CDNA_COL].startswith('c.') and x[REFERENCE_SEQUENCE_COL] == cdna_ac_dict[x[GENE_SYMBOL_COL]]:
+#             c = x[HGVS_CDNA_COL]
+#             if ',' in c:
+#                 c = c.split(',')[0]
+#
+#             return hgvs_proc.hgvs_parser.parse(x[REFERENCE_SEQUENCE_COL] + ":" + c)
+#
+#         return None
+#
+#     def compute_hgvs(x):
+#         v = VCFVariant(x[CHR_COL], x[POS_COL], x[REF_COL], x[ALT_COL])
+#         v = v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh38_Assem])
+#
+#         # normalize prior to translation to cdna
+#         if normalize:
+#             vn = hgvs_proc.normalizing(v)
+#             v = vn if vn else v
+#
+#         v = hgvs_proc.genomic_to_cdna(v)
+#
+#         # normalize again -- this affects BRCA1 delins variants in repeat regions
+#         if normalize:
+#             vn = hgvs_proc.normalizing(v)
+#             v = vn if vn else v
+#
+#         return v
+#
+#     def from_field_or_compute(row):
+#         computed = compute_hgvs(row)
+#
+#         if not computed:
+#             cDNA = cdna_from_cdna_field(row)
+#             if cDNA is None:
+#                 logging.info(f"No calculable cDNA for row: {row}")
+#             return cDNA
+#         return computed
+#
+#     var_objs = df[VAR_OBJ_FIELD]
+#
+#     if pkl and os.path.exists(pkl):
+#         pickle_dict = pickle.load(open(pkl, 'rb'))
+#         s_cdna = pd.Series([ pickle_dict[str(v)] for v in var_objs ])
+#     else:
+#         s_cdna = df.apply(from_field_or_compute, axis=1)
+#
+#         if pkl:
+#             pickle_dict = {str(v): c for (c, v) in zip(s_cdna, var_objs)}
+#             pickle.dump(pickle_dict, open(pkl, 'wb'))
+#
+#     return s_cdna
 
+
+# def compute_genomic_hgvs(cDNA, assemblyMapper):
+#     if cDNA is None:
+#         return None
+#     else:
+#         try:
+#             genomic_hgvs = assemblyMapper.c_to_g(cDNA)
+#             return str(genomic_hgvs)
+#         except HGVSError as e:
+#             logging.info(f"Exception during conversion of {cDNA} to genomic coordinates: {e}")
+#             return None
+
+def cdna_from_cdna_field(x, cdna_ac_dict, hgvs_proc):
+    if x[HGVS_CDNA_COL] and x[HGVS_CDNA_COL].startswith('c.') and x[REFERENCE_SEQUENCE_COL] == cdna_ac_dict[x[GENE_SYMBOL_COL]]:
+        c = x[HGVS_CDNA_COL]
+        if ',' in c:
+            c = c.split(',')[0]
+
+        return hgvs_proc.hgvs_parser.parse(x[REFERENCE_SEQUENCE_COL] + ":" + c)
+
+    return None
 
 def convert_to_hg37(vars, brca_resources_dir):
     def pseudo_vcf_entry(v):
@@ -192,29 +213,56 @@ def _merge_synonyms(x):
 @click.option("--pkl", help="Saving HGVS cDNA objects to save time during development")
 @click.option("--config-file", required=True, help="path to gene configuration file")
 @click.option('--resources', help="path to directory containing reference sequences")
-def main(input, output, pkl, log_path, config_file, resources):
+@click.option('--processes', type=int, help='Number of processes to use for parallelization', default=8)
+def main(input, output, pkl, log_path, config_file, resources, processes):
     utils.setup_logfile(log_path)
 
     cfg_df = config.load_config(config_file)
 
     syn_ac_dict = { x[config.SYMBOL_COL] : x[config.SYNONYM_AC_COL].split(';') for _, x in cfg_df.iterrows()}
     cdna_default_ac_dict = { x[config.SYMBOL_COL] : x[config.HGVS_CDNA_DEFAULT_AC] for _, x in cfg_df.iterrows()}
+    # TODO fix hard coding strand!
+    strand_dict = { 'BRCA1': '-', 'BRCA2': '+' }
 
     hgvs_proc = HgvsWrapper()
+    hgvs_norm_3 = hgvs.normalizer.Normalizer(hgvs_proc.hgvs_dp, shuffle_direction=3)
+    hgvs_norm_5 = hgvs.normalizer.Normalizer(hgvs_proc.hgvs_dp, shuffle_direction=5)
 
-    df = pd.read_csv(input, sep='\t')
+    logging.info("Loading data from {}".format(input))
+    df = pd.read_csv(input, sep='\t').head(10)
 
     df[VAR_OBJ_FIELD] = df.apply(lambda x: VCFVariant(x[CHR_COL], x[POS_COL], x[REF_COL], x[ALT_COL]), axis=1)
 
+    logging.info("Converting variants to hgvs objects")
+    def _convert_to_hgvs_obj(df_part):
+        df_part[TMP_HGVS_HG38] = df_part[VAR_OBJ_FIELD].apply(lambda v: v.to_hgvs_obj(HgvsWrapper().contig_maps[HgvsWrapper.GRCh38_Assem]))
+        return df_part
+    df = utils.parallelize_dataframe(df, _convert_to_hgvs_obj, processes)
+
+    logging.info("Normalize genomic representation")
+    # TODO make strand lookup more robust, how to work in strand? lookup or dataframe?
+    df[TMP_HGVS_HG38] = df.apply(lambda r: _normalize_genomic_coordinates(r[TMP_HGVS_HG38],
+                                                                                  strand_dict.get(r[GENE_SYMBOL_COL]),
+                                                                                  hgvs_norm_3, hgvs_norm_5), axis=1)
+    df[GENOMIC_HGVS_HG38_COL] = df[TMP_HGVS_HG38].apply(str)
+
+    logging.info("Compute hg37 representation of normalized genomic representation")
+    #var_objs_hg37_norm = convert_to_hg37(df[TMP_HGVS_HG38].apply(lambda hgvs_obj: VCFVariant.from_hgvs_obj(hgvs_obj)), resources)
+    #df[GENOMIC_HGVS_HG37_COL] = pd.Series([str(v) for v in var_objs_hg37_norm])
+    df[GENOMIC_HGVS_HG37_COL] = '-'
+
+    logging.warning("Compute cDNA representation")
+    df[TMP_CDNA_NORM_FIELD] = df[TMP_HGVS_HG38].apply(lambda hgvs_obj: hgvs_proc.genomic_to_cdna(hgvs_obj)) # TODO: handle potential conversion issues
+    # extract cdna from source if it could not be computed
+    df[TMP_CDNA_NORM_FIELD] = df.apply(lambda r: cdna_from_cdna_field(r, cdna_default_ac_dict, hgvs_proc) if not r[TMP_CDNA_NORM_FIELD] else r[TMP_CDNA_NORM_FIELD], axis=1)
+
     #### CDNA and Genomic HGVS conversions
-    df[TMP_CDNA_NORM_FIELD] = _get_cdna(df, pkl, hgvs_proc, cdna_default_ac_dict, normalize=True)
+    #df[TMP_CDNA_NORM_FIELD] = _get_cdna(df, pkl, hgvs_proc, cdna_default_ac_dict, normalize=True)
     df[PYHGVS_CDNA_COL] = df[TMP_CDNA_NORM_FIELD].apply(str)
 
-    dataProviders = hgvs.dataproviders.uta.connect()
-    df[GENOMIC_HGVS_HG38_COL] = df[TMP_CDNA_NORM_FIELD].apply(compute_genomic_hgvs, args=[hgvs.assemblymapper.AssemblyMapper(dataProviders,
-                                                              assembly_name=HgvsWrapper.GRCh38_Assem, alt_aln_method='splign')])
-    df[GENOMIC_HGVS_HG37_COL] = df[TMP_CDNA_NORM_FIELD].apply(compute_genomic_hgvs, args=[hgvs.assemblymapper.AssemblyMapper(dataProviders,
-                                                              assembly_name=HgvsWrapper.GRCh37_Assem, alt_aln_method='splign')])
+    # dataProviders = hgvs.dataproviders.uta.connect()
+    #df[GENOMIC_HGVS_HG38_COL] = df[TMP_CDNA_NORM_FIELD].apply(compute_genomic_hgvs, args=[hgvs.assemblymapper.AssemblyMapper(dataProviders,
+    #                                                          assembly_name=HgvsWrapper.GRCh38_Assem, alt_aln_method='splign')])
 
     available_cdna = df[PYHGVS_CDNA_COL].str.startswith("NM_")
     df.loc[available_cdna, REFERENCE_SEQUENCE_COL] = df.loc[available_cdna, PYHGVS_CDNA_COL].str.split(':').apply(lambda l: l[0])
@@ -227,6 +275,7 @@ def main(input, output, pkl, log_path, config_file, resources):
     #### Genomic Coordinates
     df[PYHGVS_GENOMIC_COORDINATE_38_COL] = df[VAR_OBJ_FIELD].apply(lambda v: str(v))
 
+    logging.warning("convert hg37")
     var_objs_hg37 = convert_to_hg37(df[VAR_OBJ_FIELD], resources)
     df[PYHGVS_GENOMIC_COORDINATE_37_COL] = pd.Series([str(v) for v in var_objs_hg37])
 
@@ -234,9 +283,11 @@ def main(input, output, pkl, log_path, config_file, resources):
     df[PYHGVS_HG37_END_COL] = df[PYHGVS_HG37_START_COL] + (df[HG38_END_COL] - df[HG38_START_COL])
 
     #### Protein
+    logging.warning("protein convert")
     df[PYHGVS_PROTEIN_COL] = df[TMP_CDNA_NORM_FIELD].apply(lambda x: str(hgvs_proc.cdna_to_protein(x)))
 
     #### Synonyms
+    logging.warning("synonyms")
     df[NEW_SYNONYMS_FIELD] = df.apply(lambda s: get_synonyms(s, hgvs_proc, syn_ac_dict), axis=1)
 
     df[SYNONYMS_COL] = df[SYNONYMS_COL].fillna('').str.strip()
@@ -248,6 +299,7 @@ def main(input, output, pkl, log_path, config_file, resources):
     # cleaning up temporary fields
     df = df.drop(columns=[VAR_OBJ_FIELD, NEW_SYNONYMS_FIELD, TMP_CDNA_NORM_FIELD])
 
+    logging.warning("writing out")
     df.to_csv(output, sep='\t', index=False)
 
 
