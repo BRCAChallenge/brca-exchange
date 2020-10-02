@@ -2,7 +2,6 @@ import copy
 import itertools
 import logging
 import re
-import logging
 import click
 import pandas as pd
 from lxml import etree

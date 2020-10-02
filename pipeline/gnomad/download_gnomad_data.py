@@ -5,6 +5,7 @@ import time
 import numpy as np
 import pandas as pd
 import argparse
+import logging
 from math import floor, log10, isnan
 
 
@@ -175,6 +176,7 @@ def fetch_data_for_one_variant(variant_id, dataset, max_retries=5):
                 parse = json.loads(response.text)
         except json.decoder.JSONDecodeError:
             retries += 1
+            logging.warning(f'Request for variant {variant_id} failed, kicking off retry #{retries}')
             time.sleep(0.1)
         else:
             return(parse['data']['variant'])
@@ -282,12 +284,16 @@ def find_correct_hgvs(variants, transcripts):
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', '--output', help='Ouput tsv file result.')
+    parser.add_argument('-l', '--logfile', help='Ouput logfile.')
     options = parser.parse_args()
     return options
 
 
 def main():
     f_out = parse_args().output
+    log_file_path = parse_args().logfile
+    logging.basicConfig(filename=log_file_path, filemode="w",
+                        format=' %(asctime)s %(filename)-15s %(message)s')
     dataset = "gnomad_r2_1_non_cancer"
     brca1_transcript ="ENST00000357654"
     brca2_transcript = "ENST00000544455"

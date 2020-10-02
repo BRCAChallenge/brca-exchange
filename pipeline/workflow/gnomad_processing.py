@@ -33,7 +33,7 @@ class DownloadGnomADData(GnomADTask):
     def run(self):
         os.chdir(gnomAD_method_dir)
 
-        args = ["python", "download_gnomad_data.py", "-o", self.output().path]
+        args = ["python", "download_gnomad_data.py", "-o", self.output().path, "-l", self.artifacts_dir + "/gnomAD_download.log"]
 
         pipeline_utils.run_process(args)
         pipeline_utils.check_file_for_contents(self.output().path)
