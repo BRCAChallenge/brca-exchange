@@ -26,6 +26,28 @@ class GnomADTask(DefaultPipelineTask):
 
 
 class DownloadGnomADData(GnomADTask):
+    gnomAD_static_data_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/gnomAD_static_download_10_02_2020.tsv',
+                                            description='URL to download static gnomAD data from')
+
+    def output(self):
+        return luigi.LocalTarget(self.assays_dir + "/gnomAD.tsv")
+
+    def run(self):
+        data = pipeline_utils.urlopen_with_retry(self.gnomAD_static_data_url).read()
+        with open(self.output().path, "wb") as f:
+            f.write(data)
+
+"""
+################
+NOTE:
+gnomAD rarely updates its dataset
+due to issues with consistency downloading the same gnomad data for each release,
+a static file can be reused until new data is available
+see previous task for static data download
+################
+
+
+class DownloadGnomADData(GnomADTask):
     def output(self):
         return luigi.LocalTarget(
             os.path.join(self.gnomAD_file_dir, self.gnomAD_download_file))
@@ -37,6 +59,7 @@ class DownloadGnomADData(GnomADTask):
 
         pipeline_utils.run_process(args)
         pipeline_utils.check_file_for_contents(self.output().path)
+"""
 
 
 @requires(DownloadGnomADData)
