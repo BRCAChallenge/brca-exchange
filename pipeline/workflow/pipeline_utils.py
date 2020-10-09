@@ -117,6 +117,17 @@ def concatenate_symbols(symbols):
     return concat_symbols
 
 
+def get_lovd_symbols(symbols):
+    lovd_symbols = []
+
+    for symbol in pipeline_utils.concatenate_symbols(symbols):
+        symbol.replace('BRCA12', 'BRCA')
+        if symbol in ['BRCA', 'CDH1']:
+            lovd_symbols.append(symbol)
+
+    return lovd_symbols
+
+
 def check_input_and_output_tsvs_for_same_number_variants(tsvIn, tsvOut,
                                                          numVariantsRemoved=0):
     tsvInput = csv.DictReader(open(tsvIn, 'r'), delimiter='\t')

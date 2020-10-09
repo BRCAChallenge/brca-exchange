@@ -264,67 +264,55 @@ class DownloadLOVDInputFile(DefaultPipelineTask):
     the file can be manually staged in the path of `lovd_data_file`. In this case, the task will not be run.
     """
 
-    symbols = []
+    lovd_data_files = {'BRCA': luigi.Parameter(default='',
+                                     description='path, where the shared LOVD BRCA data will be stored'),
+                       'CDH1': luigi.Parameter(default='',
+                                     description='path, where the shared LOVD CDH1 data will be stored')}
 
-    for symbol in pipeline_utils.concatenate_symbols(self.cfg.gene_metadata['symbol']):
-        symbol.replace('BRCA12', 'BRCA')
-        symbols.append(symbol)
+    shared_lovd_data_urls = {'BRCA': luigi.Parameter(
+                                     default='https://databases.lovd.nl/shared/export/BRCA',
+                                     description='URL to download shared LOVD BRCA data from'),
+                             'CDH1': luigi.Parameter(
+                                     default='https://databases.lovd.nl/shared/export/CDH1',
+                                     description='URL to download shared LOVD CDH1 data from')}
 
-
-    lovd_available_symbols = ['BRCA', 'CDH1']
-
-    lovd_data_files = {}
-
-    shared_lovd_data_urls = {}
-
-    for symbol in symbols:
-        if symbol in lovd_available_symbols:
-            lovd_data_files[symbol] = (luigi.Parameter(default='',
-                            description=f'path for {symbol}, where the shared LOVD data will be stored'))
-            shared_lovd_data_urls[symbol] = luigi.Parameter(
-                default=f'https://databases.lovd.nl/shared/export/{symbol}',
-                description='URL to download shared LOVD data from')
 
     def output(self):
         outputs = {}
-        for symbol in self.symbols:
-            if symbol in self.lovd_available_symbols:
-                if len(str(self.lovd_data_files[symbol])) == 0:
-                    output[symbol] = self.lovd_file_dir + f"/{symbol}.txt"
-                else:
-                    output[symbol] = str(self.lovd_data_files[symbol])
+        for symbol in pipeline_utils.get_lovd_symbols(self.cfg.gene_metadata['symbol']):
+            if len(str(self.lovd_data_files[symbol])) == 0:
+                output[symbol] = self.lovd_file_dir + f"/{symbol}.txt"
+            else:
+                output[symbol] = str(self.lovd_data_files[symbol])
 
         return output
 
     def run(self):
-        for symbol in self.symbols:
-            if symbol in self.lovd_available_symbols:
-                pipeline_utils.create_path_if_nonexistent(
-                    os.path.dirname(self.output()[symbol].path))
-                data = pipeline_utils.urlopen_with_retry(
-                    self.shared_lovd_data_urls[symbol]).read()
-                with open(self.output()[symbol].path, "wb") as f:
-                    f.write(data)
+        for symbol in pipeline_utils.get_lovd_symbols(self.cfg.gene_metadata['symbol']):
+            pipeline_utils.create_path_if_nonexistent(
+                os.path.dirname(self.output()[symbol].path))
+            data = pipeline_utils.urlopen_with_retry(
+                self.shared_lovd_data_urls[symbol]).read()
+            with open(self.output()[symbol].path, "wb") as f:
+                f.write(data)
 
 
 @requires(DownloadLOVDInputFile)
 class NormalizeLOVDSubmissions(DefaultPipelineTask):
     def output(self):
         output = {}
-        for symbol in self.symbols:
-            if symbol in self.lovd_available_symbols:
-                output[symbol] = luigi.LocalTarget(self.lovd_file_dir + f"/LOVD_normalized_{symbol}.tsv")
+        for symbol in pipeline_utils.get_lovd_symbols(self.cfg.gene_metadata['symbol']):
+            output[symbol] = luigi.LocalTarget(self.lovd_file_dir + f"/LOVD_normalized_{symbol}.tsv")
         return output
 
     def run(self):
         os.chdir(lovd_method_dir)
-        for symbol in self.symbols:
-            if symbol in self.lovd_available_symbols:
-                args = ["python", "normalizeLOVDSubmissions.py", "-i",
-                        self.input()[symbol].path, "-o",
-                        self.output()[symbol].path]
-                pipeline_utils.run_process(args)
-                pipeline_utils.check_file_for_contents(self.output()[symbol].path)
+        for symbol in pipeline_utils.get_lovd_symbols(self.cfg.gene_metadata['symbol']):
+            args = ["python", "normalizeLOVDSubmissions.py", "-i",
+                    self.input()[symbol].path, "-o",
+                    self.output()[symbol].path]
+            pipeline_utils.run_process(args)
+            pipeline_utils.check_file_for_contents(self.output()[symbol].path)
 
 
 
@@ -332,103 +320,91 @@ class NormalizeLOVDSubmissions(DefaultPipelineTask):
 class CombineEquivalentLOVDSubmissions(DefaultPipelineTask):
     def output(self):
         output = {}
-        for symbol in self.symbols:
-            if symbol in self.lovd_available_symbols:
-                output[symbol] = luigi.LocalTarget(self.lovd_file_dir + f"/LOVD_normalized_combined_{symbol}.tsv")
+        for symbol in pipeline_utils.get_lovd_symbols(self.cfg.gene_metadata['symbol']):
+            output[symbol] = luigi.LocalTarget(self.lovd_file_dir + f"/LOVD_normalized_combined_{symbol}.tsv")
         return output
 
     def run(self):
         os.chdir(lovd_method_dir)
-        for symbol in self.symbols:
-            if symbol in self.lovd_available_symbols:
-                args = ["python", "combineEquivalentVariantSubmissions.py", "-i",
-                        self.input()[symbol].path, "-o",
-                        self.output()[symbol].path]
+        for symbol in pipeline_utils.get_lovd_symbols(self.cfg.gene_metadata['symbol']):
+            args = ["python", "combineEquivalentVariantSubmissions.py", "-i",
+                    self.input()[symbol].path, "-o",
+                    self.output()[symbol].path]
 
-                pipeline_utils.run_process(args)
-                pipeline_utils.check_file_for_contents(self.output()[symbol].path)
+            pipeline_utils.run_process(args)
+            pipeline_utils.check_file_for_contents(self.output()[symbol].path)
 
 
 @requires(CombineEquivalentLOVDSubmissions)
 class ConvertSharedLOVDToVCF(DefaultPipelineTask):
     def output(self):
         output = {}
-        for symbol in self.symbols:
-            if symbol in self.lovd_available_symbols:
-                output[symbol] = luigi.LocalTarget(self.lovd_file_dir + f"/sharedLOVD_{symbol}.hg19.vcf")
+        for symbol in pipeline_utils.get_lovd_symbols(self.cfg.gene_metadata['symbol']):
+            output[symbol] = luigi.LocalTarget(self.lovd_file_dir + f"/sharedLOVD_{symbol}.hg19.vcf")
         return output
 
     def run(self):
         os.chdir(lovd_method_dir)
-        for symbol in self.symbols:
-            if symbol in self.lovd_available_symbols:
+        for symbol in pipeline_utils.get_lovd_symbols(self.cfg.gene_metadata['symbol']):
+            args = ["python", "lovd2vcf.py", "-i", self.input()[symbol].path, "-o",
+                    self.output()[symbol].path, "-a", "sharedLOVDAnnotation", "-e",
+                    self.artifacts_dir + f"/LOVD_error_variants_{symbol}.txt",
+                    "-s", "LOVD"]
 
-                args = ["python", "lovd2vcf.py", "-i", self.input()[symbol].path, "-o",
-                        self.output()[symbol].path, "-a", "sharedLOVDAnnotation", "-e",
-                        self.artifacts_dir + f"/LOVD_error_variants_{symbol}.txt",
-                        "-s", "LOVD"]
-
-                pipeline_utils.run_process(args)
-                pipeline_utils.check_file_for_contents(self.output()[symbol].path)
+            pipeline_utils.run_process(args)
+            pipeline_utils.check_file_for_contents(self.output()[symbol].path)
 
 
 @requires(ConvertSharedLOVDToVCF)
 class CrossmapConcatenatedSharedLOVDData(DefaultPipelineTask):
     def output(self):
         output = {}
-        for symbol in self.symbols:
-            if symbol in self.lovd_available_symbols:
-                output[symbol] = luigi.LocalTarget(self.lovd_file_dir + f"/sharedLOVD_{symbol}.hg38.vcf")
+        for symbol in pipeline_utils.get_lovd_symbols(self.cfg.gene_metadata['symbol']):
+            output[symbol] = luigi.LocalTarget(self.lovd_file_dir + f"/sharedLOVD_{symbol}.hg38.vcf")
         return output
 
     def run(self):
         brca_resources_dir = self.cfg.resources_dir
 
-        for symbol in self.symbols:
-            if symbol in self.lovd_available_symbols:
+        for symbol in pipeline_utils.get_lovd_symbols(self.cfg.gene_metadata['symbol']):
+            args = ["CrossMap.py", "vcf",
+                    brca_resources_dir + "/hg19ToHg38.over.chain.gz",
+                    self.input()[symbol].path,
+                    brca_resources_dir + "/hg38.fa",
+                    self.output()[symbol].path]
 
-                args = ["CrossMap.py", "vcf",
-                        brca_resources_dir + "/hg19ToHg38.over.chain.gz",
-                        self.input()[symbol].path,
-                        brca_resources_dir + "/hg38.fa",
-                        self.output()[symbol].path]
-
-                pipeline_utils.run_process(args)
-                pipeline_utils.check_file_for_contents(self.output()[symbol].path)
+            pipeline_utils.run_process(args)
+            pipeline_utils.check_file_for_contents(self.output()[symbol].path)
 
 
 @requires(CrossmapConcatenatedSharedLOVDData)
 class SortSharedLOVDOutput(DefaultPipelineTask):
     def output(self):
         output = {}
-        for symbol in self.symbols:
-            if symbol in self.lovd_available_symbols:
-                output[symbol] = luigi.LocalTarget(self.lovd_file_dir + f"/sharedLOVD_{symbol}.sorted.hg38.vcf")
+        for symbol in pipeline_utils.get_lovd_symbols(self.cfg.gene_metadata['symbol']):
+            output[symbol] = luigi.LocalTarget(self.lovd_file_dir + f"/sharedLOVD_{symbol}.sorted.hg38.vcf")
         return output
 
     def run(self):
-        for symbol in self.symbols:
-            if symbol in self.lovd_available_symbols:
-                args = ["vcf-sort", self.input()[symbol].path]
+        for symbol in pipeline_utils.get_lovd_symbols(self.cfg.gene_metadata['symbol']):
+            args = ["vcf-sort", self.input()[symbol].path]
 
-                pipeline_utils.run_process(args, redirect_stdout_path=self.output()[symbol].path)
-                pipeline_utils.check_file_for_contents(self.output()[symbol].path)
+            pipeline_utils.run_process(args, redirect_stdout_path=self.output()[symbol].path)
+            pipeline_utils.check_file_for_contents(self.output()[symbol].path)
 
 
 @requires(SortSharedLOVDOutput)
 class CopySharedLOVDOutputToOutputDir(DefaultPipelineTask):
     def output(self):
         output = {}
-        for symbol in self.symbols:
-            if symbol in self.lovd_available_symbols:
-                output[symbol] = luigi.LocalTarget(self.cfg.output_dir + f"/sharedLOVD_{symbol.replace('BRCA', 'BRCA12')}.sorted.hg38.vcf")
+        for symbol in pipeline_utils.get_lovd_symbols(self.cfg.gene_metadata['symbol']):
+            output[symbol] = luigi.LocalTarget(self.cfg.output_dir + f"/sharedLOVD_{symbol.replace('BRCA', 'BRCA12')}.sorted.hg38.vcf")
         return output
 
     def run(self):
-        for symbol in self.symbols:
-            if symbol in self.lovd_available_symbols:
-                copy(self.input()[symbol].path, self.cfg.output_dir)
-                pipeline_utils.check_file_for_contents(self.output()[symbol].path)
+        for symbol in pipeline_utils.get_lovd_symbols(self.cfg.gene_metadata['symbol']):
+            copy(self.input()[symbol].path, self.cfg.output_dir)
+            pipeline_utils.check_file_for_contents(self.output()[symbol].path)
 
 
 ###############################################
