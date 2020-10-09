@@ -104,24 +104,24 @@ def check_file_for_contents(file_path):
 
 
 def concatenate_symbols(symbols):
-    concat_symbols = []
+    concatted_symbols = []
     for symbol in symbols:
-        concat_symbols.append(symbol)
+        concatted_symbols.append(symbol)
 
     # brca genes are concattenated
-    if 'BRCA1' in concat_symbols and 'BRCA2' in concat_symbols:
-        concat_symbols.remove('BRCA1')
-        concat_symbols.remove('BRCA2')
-        concat_symbols.append('BRCA12')
+    if 'BRCA1' in concatted_symbols and 'BRCA2' in concatted_symbols:
+        concatted_symbols.remove('BRCA1')
+        concatted_symbols.remove('BRCA2')
+        concatted_symbols.append('BRCA12')
 
-    return concat_symbols
+    return concatted_symbols
 
 
 def get_lovd_symbols(symbols):
     lovd_symbols = []
 
-    for symbol in pipeline_utils.concatenate_symbols(symbols):
-        symbol.replace('BRCA12', 'BRCA')
+    for symbol in concatenate_symbols(symbols):
+        symbol = symbol.replace('BRCA12', 'BRCA')
         if symbol in ['BRCA', 'CDH1']:
             lovd_symbols.append(symbol)
 

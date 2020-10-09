@@ -264,35 +264,31 @@ class DownloadLOVDInputFile(DefaultPipelineTask):
     the file can be manually staged in the path of `lovd_data_file`. In this case, the task will not be run.
     """
 
-    lovd_data_files = {'BRCA': luigi.Parameter(default='',
-                                     description='path, where the shared LOVD BRCA data will be stored'),
-                       'CDH1': luigi.Parameter(default='',
-                                     description='path, where the shared LOVD CDH1 data will be stored')}
+    lovd_data_file = luigi.Parameter(default='',
+                                     description='path, where the shared LOVD BRCA data will be stored')
 
-    shared_lovd_data_urls = {'BRCA': luigi.Parameter(
-                                     default='https://databases.lovd.nl/shared/export/BRCA',
-                                     description='URL to download shared LOVD BRCA data from'),
-                             'CDH1': luigi.Parameter(
-                                     default='https://databases.lovd.nl/shared/export/CDH1',
-                                     description='URL to download shared LOVD CDH1 data from')}
+    shared_lovd_data_url = luigi.Parameter(
+                                     default='https://databases.lovd.nl/shared/export/',
+                                     description='URL to download shared LOVD BRCA data from')
 
 
     def output(self):
-        outputs = {}
-        for symbol in pipeline_utils.get_lovd_symbols(self.cfg.gene_metadata['symbol']):
-            if len(str(self.lovd_data_files[symbol])) == 0:
-                output[symbol] = self.lovd_file_dir + f"/{symbol}.txt"
-            else:
-                output[symbol] = str(self.lovd_data_files[symbol])
+        if len(str(self.lovd_data_file)) != 0:
+            return luigi.LocalTarget(str(luigi.LocalTarget(str(self.lovd_data_file))))
+        else:
+            output = {}
 
-        return output
+            for symbol in pipeline_utils.get_lovd_symbols(self.cfg.gene_metadata['symbol']):
+                output[symbol] = luigi.LocalTarget(self.lovd_file_dir + f"/{symbol}.txt")
+
+            return output
 
     def run(self):
         for symbol in pipeline_utils.get_lovd_symbols(self.cfg.gene_metadata['symbol']):
             pipeline_utils.create_path_if_nonexistent(
                 os.path.dirname(self.output()[symbol].path))
             data = pipeline_utils.urlopen_with_retry(
-                self.shared_lovd_data_urls[symbol]).read()
+                self.shared_lovd_data_url + symbol).read()
             with open(self.output()[symbol].path, "wb") as f:
                 f.write(data)
 
