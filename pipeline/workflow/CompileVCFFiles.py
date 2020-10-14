@@ -394,7 +394,7 @@ class CopySharedLOVDOutputToOutputDir(DefaultPipelineTask):
     def output(self):
         output = {}
         for symbol in pipeline_utils.get_lovd_symbols(self.cfg.gene_metadata['symbol']):
-            output[symbol] = luigi.LocalTarget(self.cfg.output_dir + f"/sharedLOVD_{symbol.replace('BRCA', 'BRCA12')}.sorted.hg38.vcf")
+            output[symbol] = luigi.LocalTarget(self.cfg.output_dir + f"/sharedLOVD_{symbol}.sorted.hg38.vcf")
         return output
 
     def run(self):
