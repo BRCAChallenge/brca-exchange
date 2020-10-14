@@ -32,7 +32,7 @@ findlay_BRCA1_ring_function_scores.clean.sorted.hg38.vcf
 output/md5sums.txt			md5sums for all data files in this
 					archive
 output/release/				(see below)
-output/sharedLOVD_brca12.sorted.hg38.vcf     BRCA variants from the shared
+output/sharedLOVD_BRCA.sorted.hg38.vcf     BRCA variants from the shared
 					     LOVD repository at Leiden
 					     University
 
