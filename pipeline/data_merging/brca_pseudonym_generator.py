@@ -39,6 +39,7 @@ SYNONYMS_COL = 'Synonyms'
 VAR_OBJ_FIELD = 'var_objs'
 NEW_SYNONYMS_FIELD = 'new_syns'
 TMP_HGVS_HG38 = 'tmp_Genomic_HGVS_38'
+TMP_HGVS_HG37 = 'tmp_Genomic_HGVS_37'
 TMP_CDNA_UNORM_FIELD = 'tmp_HGVS_CDNA_FIELD_unorm'
 TMP_CDNA_NORM_FIELD = 'tmp_HGVS_CDNA_FIELD_norm'
 
@@ -229,30 +230,41 @@ def main(input, output, pkl, log_path, config_file, resources, processes):
     hgvs_norm_5 = hgvs.normalizer.Normalizer(hgvs_proc.hgvs_dp, shuffle_direction=5)
 
     logging.info("Loading data from {}".format(input))
-    df = pd.read_csv(input, sep='\t').head(10)
+    df = pd.read_csv(input, sep='\t')
 
     df[VAR_OBJ_FIELD] = df.apply(lambda x: VCFVariant(x[CHR_COL], x[POS_COL], x[REF_COL], x[ALT_COL]), axis=1)
 
     logging.info("Converting variants to hgvs objects")
-    def _convert_to_hgvs_obj(df_part):
-        df_part[TMP_HGVS_HG38] = df_part[VAR_OBJ_FIELD].apply(lambda v: v.to_hgvs_obj(HgvsWrapper().contig_maps[HgvsWrapper.GRCh38_Assem]))
-        return df_part
-    df = utils.parallelize_dataframe(df, _convert_to_hgvs_obj, processes)
+
+    df[TMP_HGVS_HG38] = df[VAR_OBJ_FIELD].apply(lambda v: v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh38_Assem]))
 
     logging.info("Normalize genomic representation")
     # TODO make strand lookup more robust, how to work in strand? lookup or dataframe?
+    # TODO: parallelize?
     df[TMP_HGVS_HG38] = df.apply(lambda r: _normalize_genomic_coordinates(r[TMP_HGVS_HG38],
-                                                                                  strand_dict.get(r[GENE_SYMBOL_COL]),
-                                                                                  hgvs_norm_3, hgvs_norm_5), axis=1)
+                                                                                  strand_dict.get(r[GENE_SYMBOL_COL]), hgvs_norm_3, hgvs_norm_5), axis=1)
+
     df[GENOMIC_HGVS_HG38_COL] = df[TMP_HGVS_HG38].apply(str)
 
-    logging.info("Compute hg37 representation of normalized genomic representation")
-    #var_objs_hg37_norm = convert_to_hg37(df[TMP_HGVS_HG38].apply(lambda hgvs_obj: VCFVariant.from_hgvs_obj(hgvs_obj)), resources)
-    #df[GENOMIC_HGVS_HG37_COL] = pd.Series([str(v) for v in var_objs_hg37_norm])
-    df[GENOMIC_HGVS_HG37_COL] = '-'
+    logging.warning("Compute hg37 representation of internal representation")
+    var_objs_hg37 = convert_to_hg37(df[VAR_OBJ_FIELD], resources)
+
+    logging.warning("Compute hg37 normalized representation of internal")
+    # normalizing again for the hg37 representation. An alternative would be to convert the normalized hg38 representation to hg37. If we use crossmap, we would need a way to convert the VCF like representation back to an hgvs object, which we currently are unable to do properly. That is, we can use VCFVariant.to_hgvs_obj, however, structural variants will be converted to delins, losing information if a variant was e.g. a del, ins, or dup.
+
+    df[TMP_HGVS_HG37] = pd.Series([ v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh37_Assem]) for v in var_objs_hg37 ])
+    # TODO: make strand lookup more robust!
+    df[GENOMIC_HGVS_HG37_COL] = df.apply(lambda r: str(_normalize_genomic_coordinates(r[TMP_HGVS_HG37], strand_dict.get(r[GENE_SYMBOL_COL]),
+                                                                                  hgvs_norm_3, hgvs_norm_5)), axis=1)
 
     logging.warning("Compute cDNA representation")
-    df[TMP_CDNA_NORM_FIELD] = df[TMP_HGVS_HG38].apply(lambda hgvs_obj: hgvs_proc.genomic_to_cdna(hgvs_obj)) # TODO: handle potential conversion issues
+    def _compute_cdna(df_part):
+        hgvs_proc = HgvsWrapper() # create it to avoid pickle issues when copying to subprocess
+        df_part[TMP_CDNA_NORM_FIELD] = df_part[TMP_HGVS_HG38].apply(lambda hgvs_obj: hgvs_proc.genomic_to_cdna(hgvs_obj)) # TODO: handle potential conversion issues
+        return df_part
+
+    df = utils.parallelize_dataframe(df, _compute_cdna, processes)
+
     # extract cdna from source if it could not be computed
     df[TMP_CDNA_NORM_FIELD] = df.apply(lambda r: cdna_from_cdna_field(r, cdna_default_ac_dict, hgvs_proc) if not r[TMP_CDNA_NORM_FIELD] else r[TMP_CDNA_NORM_FIELD], axis=1)
 
@@ -272,13 +284,10 @@ def main(input, output, pkl, log_path, config_file, resources, processes):
     df.loc[~available_cdna, REFERENCE_SEQUENCE_COL] = df.loc[~available_cdna, GENE_SYMBOL_COL].apply(lambda g: cdna_default_ac_dict[g])
     df.loc[~available_cdna, HGVS_CDNA_COL] = '-'
 
-    #### Genomic Coordinates
+    #### Internal Genomic Coordinates
     df[PYHGVS_GENOMIC_COORDINATE_38_COL] = df[VAR_OBJ_FIELD].apply(lambda v: str(v))
 
-    logging.warning("convert hg37")
-    var_objs_hg37 = convert_to_hg37(df[VAR_OBJ_FIELD], resources)
     df[PYHGVS_GENOMIC_COORDINATE_37_COL] = pd.Series([str(v) for v in var_objs_hg37])
-
     df[PYHGVS_HG37_START_COL] = pd.Series([v.pos for v in var_objs_hg37])
     df[PYHGVS_HG37_END_COL] = df[PYHGVS_HG37_START_COL] + (df[HG38_END_COL] - df[HG38_START_COL])
 
@@ -287,8 +296,14 @@ def main(input, output, pkl, log_path, config_file, resources, processes):
     df[PYHGVS_PROTEIN_COL] = df[TMP_CDNA_NORM_FIELD].apply(lambda x: str(hgvs_proc.cdna_to_protein(x)))
 
     #### Synonyms
-    logging.warning("synonyms")
-    df[NEW_SYNONYMS_FIELD] = df.apply(lambda s: get_synonyms(s, hgvs_proc, syn_ac_dict), axis=1)
+    logging.warning("Compute Synonyms")
+
+    def _compute_synonyms(df_part):
+        hgvs_proc = HgvsWrapper()
+        df_part[NEW_SYNONYMS_FIELD] = df_part.apply(lambda s: get_synonyms(s, hgvs_proc, syn_ac_dict), axis=1)
+        return df_part
+
+    df = utils.parallelize_dataframe(df, _compute_synonyms, processes)
 
     df[SYNONYMS_COL] = df[SYNONYMS_COL].fillna('').str.strip()
 
@@ -297,7 +312,7 @@ def main(input, output, pkl, log_path, config_file, resources, processes):
 
     #### Writing out
     # cleaning up temporary fields
-    df = df.drop(columns=[VAR_OBJ_FIELD, NEW_SYNONYMS_FIELD, TMP_CDNA_NORM_FIELD])
+    df = df.drop(columns=[VAR_OBJ_FIELD, NEW_SYNONYMS_FIELD, TMP_CDNA_NORM_FIELD, TMP_HGVS_HG37, TMP_HGVS_HG38])
 
     logging.warning("writing out")
     df.to_csv(output, sep='\t', index=False)
