@@ -292,8 +292,13 @@ def main(input, output, pkl, log_path, config_file, resources, processes):
     df[PYHGVS_HG37_END_COL] = df[PYHGVS_HG37_START_COL] + (df[HG38_END_COL] - df[HG38_START_COL])
 
     #### Protein
-    logging.warning("protein convert")
-    df[PYHGVS_PROTEIN_COL] = df[TMP_CDNA_NORM_FIELD].apply(lambda x: str(hgvs_proc.cdna_to_protein(x)))
+    logging.warning("Protein Conversion")
+    def _compute_proteins(df_part):
+        hgvs_proc = HgvsWrapper()
+        df_part[PYHGVS_PROTEIN_COL] = df_part[TMP_CDNA_NORM_FIELD].apply(lambda x: str(hgvs_proc.cdna_to_protein(x)))
+        return df_part
+
+    df = utils.parallelize_dataframe(df, _compute_proteins, processes)
 
     #### Synonyms
     logging.warning("Compute Synonyms")
