@@ -40,9 +40,13 @@ VAR_OBJ_FIELD = 'var_objs'
 NEW_SYNONYMS_FIELD = 'new_syns'
 TMP_HGVS_HG38 = 'tmp_Genomic_HGVS_38'
 TMP_HGVS_HG37 = 'tmp_Genomic_HGVS_37'
+TMP_HGVS_HG38_LEFT_ALIGNED = 'tmp_Genomic_HGVS_38_left'
+TMP_HGVS_HG37_LEFT_ALIGNED = 'tmp_Genomic_HGVS_37_left'
+TMP_CDNA_FROM_SOURCE = "tmp_hgvs_cdna_source"
 TMP_CDNA_UNORM_FIELD = 'tmp_HGVS_CDNA_FIELD_unorm'
 TMP_CDNA_NORM_FIELD = 'tmp_HGVS_CDNA_FIELD_norm'
-
+TMP_CDNA_NORM_LEFT_ALINGED_FIELD = 'tmp_HGVS_CDNA_FIELD_left'
+TMP_PROTEIN_LEFT_ALINGED_FIELD = 'tmp_Protein_Field_left'
 
 def _normalize_genomic_coordinates(hgvs_obj, strand, hgvs_norm_3, hgvs_norm_5):
     # TODO make this more robust
@@ -163,7 +167,11 @@ def convert_to_hg37(vars, brca_resources_dir):
 
 
 def get_synonyms(x, hgvs_proc, syn_ac_dict):
-    synonyms = []
+    synonyms = [str(x[TMP_CDNA_FROM_SOURCE]),
+                str(x[TMP_HGVS_HG37_LEFT_ALIGNED]),
+                str(x[TMP_HGVS_HG38_LEFT_ALIGNED]),
+                str(x[TMP_CDNA_NORM_LEFT_ALINGED_FIELD]),
+                str(x[TMP_PROTEIN_LEFT_ALINGED_FIELD])]
 
     if not x[GENE_SYMBOL_COL]:
         return []
@@ -175,7 +183,12 @@ def get_synonyms(x, hgvs_proc, syn_ac_dict):
         accessions = syn_ac_dict[x[GENE_SYMBOL_COL]]
 
         if dst in accessions:
-            for vc in [x[TMP_CDNA_NORM_FIELD]]:
+            cdna_rep_list = [x[TMP_CDNA_NORM_FIELD]]
+
+            if x[TMP_CDNA_NORM_FIELD] != x[TMP_CDNA_NORM_LEFT_ALINGED_FIELD]:
+                cdna_rep_list = [x[TMP_CDNA_NORM_FIELD], x[TMP_CDNA_NORM_LEFT_ALINGED_FIELD]]
+
+            for vc in cdna_rep_list:
                 if not vc:
                     continue
 
@@ -187,11 +200,6 @@ def get_synonyms(x, hgvs_proc, syn_ac_dict):
 
                     vp = pj.project_variant_forward(vc)
                     synonyms.append(vp)
-                    vp_norm = hgvs_proc.normalizing(vp)
-                    if vp_norm:
-                        if vp_norm not in synonyms:
-                            logging.info("Found new synonym! " + str(vp_norm) + " " + str(vp) + " " + str(x[PYHGVS_GENOMIC_COORDINATE_38_COL]))
-                        synonyms.append(vp_norm)
                 except HGVSError as e:
                     logging.info("Exception in synonym handling " + str(vc) + " from " + str(vc.ac) + " to " +
                                  str(dst) + " using " + str(method) + " via " + str(alt_ac) + " : " + str(e) + " " + str(e.__class__.__name__))
@@ -199,12 +207,15 @@ def get_synonyms(x, hgvs_proc, syn_ac_dict):
     return list({str(s) for s in synonyms})
 
 
-def _merge_synonyms(x):
+def _merge_and_clean_synonyms(x):
     orig_list = [s for s in x[SYNONYMS_COL].split(',') if s] # filter away ''
 
     combined = set(orig_list + x[NEW_SYNONYMS_FIELD])
     list_sorted = sorted(list(combined))
-    return ','.join(list_sorted)
+
+    reps_other_cols = { x[GENOMIC_HGVS_HG37_COL], x[GENOMIC_HGVS_HG38_COL], x[PYHGVS_CDNA_COL], x[PYHGVS_PROTEIN_COL], x[HGVS_CDNA_COL] }
+    list_sorted_cleaned = [ v for v in list_sorted if v not in reps_other_cols and v != str(None) and v != '-' ]
+    return ','.join(list_sorted_cleaned)
 
 
 @click.command()
@@ -244,6 +255,10 @@ def main(input, output, pkl, log_path, config_file, resources, processes):
     df[TMP_HGVS_HG38] = df.apply(lambda r: _normalize_genomic_coordinates(r[TMP_HGVS_HG38],
                                                                                   strand_dict.get(r[GENE_SYMBOL_COL]), hgvs_norm_3, hgvs_norm_5), axis=1)
 
+    df[TMP_HGVS_HG38_LEFT_ALIGNED] = df.apply(lambda r: _normalize_genomic_coordinates(r[TMP_HGVS_HG38],
+                                                                                       strand_dict.get(r[GENE_SYMBOL_COL]), hgvs_norm_5, hgvs_norm_3), axis=1)
+
+
     df[GENOMIC_HGVS_HG38_COL] = df[TMP_HGVS_HG38].apply(str)
 
     logging.warning("Compute hg37 representation of internal representation")
@@ -256,16 +271,20 @@ def main(input, output, pkl, log_path, config_file, resources, processes):
     # TODO: make strand lookup more robust!
     df[GENOMIC_HGVS_HG37_COL] = df.apply(lambda r: str(_normalize_genomic_coordinates(r[TMP_HGVS_HG37], strand_dict.get(r[GENE_SYMBOL_COL]),
                                                                                   hgvs_norm_3, hgvs_norm_5)), axis=1)
+    df[TMP_HGVS_HG37_LEFT_ALIGNED] = df.apply(lambda r: _normalize_genomic_coordinates(r[TMP_HGVS_HG37], strand_dict.get(r[GENE_SYMBOL_COL]),
+                                                                                  hgvs_norm_5, hgvs_norm_3), axis=1)
 
     logging.warning("Compute cDNA representation")
     def _compute_cdna(df_part):
         hgvs_proc = HgvsWrapper() # create it to avoid pickle issues when copying to subprocess
         df_part[TMP_CDNA_NORM_FIELD] = df_part[TMP_HGVS_HG38].apply(lambda hgvs_obj: hgvs_proc.genomic_to_cdna(hgvs_obj)) # TODO: handle potential conversion issues
+        df_part[TMP_CDNA_NORM_LEFT_ALINGED_FIELD] = df_part[TMP_HGVS_HG38_LEFT_ALIGNED].apply(lambda hgvs_obj: hgvs_proc.genomic_to_cdna(hgvs_obj)) # TODO: handle potential conversion issues
         return df_part
 
     df = utils.parallelize_dataframe(df, _compute_cdna, processes)
 
     # extract cdna from source if it could not be computed
+    df[TMP_CDNA_FROM_SOURCE] = df[HGVS_CDNA_COL] # "backup" to be used later during synonym computation
     df[TMP_CDNA_NORM_FIELD] = df.apply(lambda r: cdna_from_cdna_field(r, cdna_default_ac_dict, hgvs_proc) if not r[TMP_CDNA_NORM_FIELD] else r[TMP_CDNA_NORM_FIELD], axis=1)
 
     #### CDNA and Genomic HGVS conversions
@@ -296,6 +315,7 @@ def main(input, output, pkl, log_path, config_file, resources, processes):
     def _compute_proteins(df_part):
         hgvs_proc = HgvsWrapper()
         df_part[PYHGVS_PROTEIN_COL] = df_part[TMP_CDNA_NORM_FIELD].apply(lambda x: str(hgvs_proc.cdna_to_protein(x)))
+        df_part[TMP_PROTEIN_LEFT_ALINGED_FIELD] = df_part[TMP_CDNA_NORM_LEFT_ALINGED_FIELD].apply(lambda x: str(hgvs_proc.cdna_to_protein(x)))
         return df_part
 
     df = utils.parallelize_dataframe(df, _compute_proteins, processes)
@@ -313,11 +333,12 @@ def main(input, output, pkl, log_path, config_file, resources, processes):
     df[SYNONYMS_COL] = df[SYNONYMS_COL].fillna('').str.strip()
 
     # merge existing synonyms with generated ones and sort them
-    df[SYNONYMS_COL] = df.apply(_merge_synonyms, axis=1)
+    df[SYNONYMS_COL] = df.apply(_merge_and_clean_synonyms, axis=1)
 
     #### Writing out
     # cleaning up temporary fields
-    df = df.drop(columns=[VAR_OBJ_FIELD, NEW_SYNONYMS_FIELD, TMP_CDNA_NORM_FIELD, TMP_HGVS_HG37, TMP_HGVS_HG38])
+    tmp_fields = [ c for c in df.columns if c.startswith('tmp_') ]
+    df = df.drop(columns=[VAR_OBJ_FIELD, NEW_SYNONYMS_FIELD] + tmp_fields)
 
     logging.warning("writing out")
     df.to_csv(output, sep='\t', index=False)
