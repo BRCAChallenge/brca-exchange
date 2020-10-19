@@ -21,6 +21,9 @@ def load_config(path):
     df['start_hg38_legacy_variants'] = df['start_hg38_legacy_variants'].fillna(df['start_hg38']).astype(int)
     df['end_hg38_legacy_variants'] = df['end_hg38_legacy_variants'].fillna(df['end_hg38']).astype(int)
 
+    # allow no synonyms
+    df['synonyms_ac_col'] = df['synonyms_ac_col'].fillna('-').astype(str)
+
     return df.set_index(SYMBOL_COL, drop=False)
 
 
