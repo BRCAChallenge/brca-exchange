@@ -159,11 +159,10 @@ def _merge_and_clean_synonyms(x):
 @click.argument('input', type=click.Path(readable=True))
 @click.argument('output', type=click.Path(writable=True))
 @click.option('--log-path', default='pseudonym_generator.log', help="Log file pth")
-@click.option("--pkl", help="Saving HGVS cDNA objects to save time during development")
 @click.option("--config-file", required=True, help="path to gene configuration file")
 @click.option('--resources', help="path to directory containing reference sequences")
 @click.option('--processes', type=int, help='Number of processes to use for parallelization', default=8)
-def main(input, output, pkl, log_path, config_file, resources, processes):
+def main(input, output, log_path, config_file, resources, processes):
     utils.setup_logfile(log_path)
 
     cfg_df = config.load_config(config_file)
