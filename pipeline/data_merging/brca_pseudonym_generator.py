@@ -49,8 +49,7 @@ TMP_CDNA_NORM_LEFT_ALINGED_FIELD = 'tmp_HGVS_CDNA_FIELD_left'
 TMP_PROTEIN_LEFT_ALINGED_FIELD = 'tmp_Protein_Field_left'
 
 def _normalize_genomic_coordinates(hgvs_obj, strand, hgvs_norm_3, hgvs_norm_5):
-    # TODO make this more robust
-    normalizer = hgvs_norm_3 if strand == '+' else hgvs_norm_5
+    normalizer = hgvs_norm_3 if strand == config.POSITIVE_STRAND else hgvs_norm_5
 
     try:
         return normalizer.normalize(hgvs_obj)
@@ -234,11 +233,9 @@ def main(input, output, pkl, log_path, config_file, resources, processes):
     syn_ac_dict = { x[config.SYMBOL_COL] : x[config.SYNONYM_AC_COL].split(';') for _, x in cfg_df.iterrows()}
     cdna_default_ac_dict = { x[config.SYMBOL_COL] : x[config.HGVS_CDNA_DEFAULT_AC] for _, x in cfg_df.iterrows()}
     # TODO fix hard coding strand!
-    strand_dict = { 'BRCA1': '-', 'BRCA2': '+' }
+    strand_dict = { 'BRCA1': config.NEGATIVE_STRAND, 'BRCA2': config.POSITIVE_STRAND }
 
     hgvs_proc = HgvsWrapper()
-    hgvs_norm_3 = hgvs.normalizer.Normalizer(hgvs_proc.hgvs_dp, shuffle_direction=3)
-    hgvs_norm_5 = hgvs.normalizer.Normalizer(hgvs_proc.hgvs_dp, shuffle_direction=5)
 
     logging.info("Loading data from {}".format(input))
     df = pd.read_csv(input, sep='\t')
@@ -250,14 +247,23 @@ def main(input, output, pkl, log_path, config_file, resources, processes):
     df[TMP_HGVS_HG38] = df[VAR_OBJ_FIELD].apply(lambda v: v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh38_Assem]))
 
     logging.info("Normalize genomic representation")
-    # TODO make strand lookup more robust, how to work in strand? lookup or dataframe?
-    # TODO: parallelize?
-    df[TMP_HGVS_HG38] = df.apply(lambda r: _normalize_genomic_coordinates(r[TMP_HGVS_HG38],
-                                                                                  strand_dict.get(r[GENE_SYMBOL_COL]), hgvs_norm_3, hgvs_norm_5), axis=1)
+    def _normalize_genomic_fnc(src_col, target_col, right_shift):
+        def _ret(df_part):
+            hgvs_proc = HgvsWrapper() # create it again in subprocess to avoid pickle issues when otherwise copying it to subprocess
+            hgvs_norm_3 = hgvs.normalizer.Normalizer(hgvs_proc.hgvs_dp, shuffle_direction=3 if right_shift else 5)
+            hgvs_norm_5 = hgvs.normalizer.Normalizer(hgvs_proc.hgvs_dp, shuffle_direction=5 if right_shift else 3)
 
-    df[TMP_HGVS_HG38_LEFT_ALIGNED] = df.apply(lambda r: _normalize_genomic_coordinates(r[TMP_HGVS_HG38],
-                                                                                       strand_dict.get(r[GENE_SYMBOL_COL]), hgvs_norm_5, hgvs_norm_3), axis=1)
+            df_part[target_col] = df_part.apply(lambda r: _normalize_genomic_coordinates(r[src_col],
+                                                                                         strand_dict.get(
+                                                                                             r[GENE_SYMBOL_COL]),
+                                                                                         hgvs_norm_3,
+                                                                                         hgvs_norm_5), axis=1)
+            return df_part
 
+        return _ret
+
+    df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG38, TMP_HGVS_HG38, True), processes)
+    df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG38, TMP_HGVS_HG38_LEFT_ALIGNED, False), processes)
 
     df[GENOMIC_HGVS_HG38_COL] = df[TMP_HGVS_HG38].apply(str)
 
@@ -265,20 +271,22 @@ def main(input, output, pkl, log_path, config_file, resources, processes):
     var_objs_hg37 = convert_to_hg37(df[VAR_OBJ_FIELD], resources)
 
     logging.warning("Compute hg37 normalized representation of internal")
-    # normalizing again for the hg37 representation. An alternative would be to convert the normalized hg38 representation to hg37. If we use crossmap, we would need a way to convert the VCF like representation back to an hgvs object, which we currently are unable to do properly. That is, we can use VCFVariant.to_hgvs_obj, however, structural variants will be converted to delins, losing information if a variant was e.g. a del, ins, or dup.
+    # normalizing again for the hg37 representation. An alternative would be to convert the normalized hg38 representation to hg37.
+    # If we use crossmap, we would need a way to convert the VCF like representation back to an hgvs object, which we currently
+    # are unable to do properly. That is, we can use VCFVariant.to_hgvs_obj, however, structural variants will be converted
+    # to delins, losing information if a variant was e.g. a del, ins, or dup.
 
     df[TMP_HGVS_HG37] = pd.Series([ v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh37_Assem]) for v in var_objs_hg37 ])
-    # TODO: make strand lookup more robust!
-    df[GENOMIC_HGVS_HG37_COL] = df.apply(lambda r: str(_normalize_genomic_coordinates(r[TMP_HGVS_HG37], strand_dict.get(r[GENE_SYMBOL_COL]),
-                                                                                  hgvs_norm_3, hgvs_norm_5)), axis=1)
-    df[TMP_HGVS_HG37_LEFT_ALIGNED] = df.apply(lambda r: _normalize_genomic_coordinates(r[TMP_HGVS_HG37], strand_dict.get(r[GENE_SYMBOL_COL]),
-                                                                                  hgvs_norm_5, hgvs_norm_3), axis=1)
+
+    df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG37, GENOMIC_HGVS_HG37_COL, True), processes)
+    df[GENOMIC_HGVS_HG37_COL] = df[GENOMIC_HGVS_HG37_COL].apply(str)
+    df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG37, TMP_HGVS_HG37_LEFT_ALIGNED, False), processes)
 
     logging.warning("Compute cDNA representation")
     def _compute_cdna(df_part):
         hgvs_proc = HgvsWrapper() # create it to avoid pickle issues when copying to subprocess
-        df_part[TMP_CDNA_NORM_FIELD] = df_part[TMP_HGVS_HG38].apply(lambda hgvs_obj: hgvs_proc.genomic_to_cdna(hgvs_obj)) # TODO: handle potential conversion issues
-        df_part[TMP_CDNA_NORM_LEFT_ALINGED_FIELD] = df_part[TMP_HGVS_HG38_LEFT_ALIGNED].apply(lambda hgvs_obj: hgvs_proc.genomic_to_cdna(hgvs_obj)) # TODO: handle potential conversion issues
+        df_part[TMP_CDNA_NORM_FIELD] = df_part[TMP_HGVS_HG38].apply(lambda hgvs_obj: hgvs_proc.genomic_to_cdna(hgvs_obj))
+        df_part[TMP_CDNA_NORM_LEFT_ALINGED_FIELD] = df_part[TMP_HGVS_HG38_LEFT_ALIGNED].apply(lambda hgvs_obj: hgvs_proc.genomic_to_cdna(hgvs_obj))
         return df_part
 
     df = utils.parallelize_dataframe(df, _compute_cdna, processes)

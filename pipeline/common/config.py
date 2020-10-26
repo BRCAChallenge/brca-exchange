@@ -6,6 +6,8 @@ HGVS_CDNA_DEFAULT_AC = 'hgvs_cdna_default_ac'
 SYMBOL_COL = 'symbol'
 SYNONYM_AC_COL = 'synonyms_ac_col'
 
+POSITIVE_STRAND = 'positive'
+NEGATIVE_STRAND = 'negative'
 
 def load_config(path):
     '''
