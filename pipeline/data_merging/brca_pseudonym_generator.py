@@ -169,8 +169,7 @@ def main(input, output, log_path, config_file, resources, processes):
 
     syn_ac_dict = {x[config.SYMBOL_COL]: x[config.SYNONYM_AC_COL].split(';') for _, x in cfg_df.iterrows()}
     cdna_default_ac_dict = {x[config.SYMBOL_COL]: x[config.HGVS_CDNA_DEFAULT_AC] for _, x in cfg_df.iterrows()}
-    # TODO fix hard coding strand!
-    strand_dict = {'BRCA1': config.NEGATIVE_STRAND, 'BRCA2': config.POSITIVE_STRAND}
+    strand_dict = { x[config.SYMBOL_COL] : x[config.STRAND_COL] for _, x in cfg_df.iterrows() }
 
     hgvs_proc = HgvsWrapper()
 
