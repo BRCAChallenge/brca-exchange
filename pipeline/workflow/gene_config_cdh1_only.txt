@@ -1,2 +1,2 @@
-symbol,entrez_id,chr,end_hg38,ensembl_id,start_hg38,start_hg38_legacy_variants,end_hg38_legacy_variants,synonyms_ac_col,hgvs_cdna_default_ac,start_hg37,end_hg37
-CDH1,999,16,68837541,ENSG00000153922,68732292,-,-,-,NM_004360.3,6877112,68869445
+symbol,entrez_id,chr,end_hg38,ensembl_id,start_hg38,start_hg38_legacy_variants,end_hg38_legacy_variants,synonyms_ac_col,hgvs_cdna_default_ac,start_hg37,end_hg37,strand
+CDH1,999,16,68837541,ENSG00000153922,68732292,-,-,-,NM_004360.3,6877112,68869445,plus
