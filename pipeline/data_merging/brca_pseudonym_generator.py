@@ -206,10 +206,10 @@ def main(input, output, log_path, config_file, resources, processes):
 
     df[GENOMIC_HGVS_HG38_COL] = df[TMP_HGVS_HG38].apply(str)
 
-    logging.warning("Compute hg37 representation of internal representation")
+    logging.info("Compute hg37 representation of internal representation")
     var_objs_hg37 = convert_to_hg37(df[VAR_OBJ_FIELD], resources)
 
-    logging.warning("Compute hg37 normalized representation of internal")
+    logging.info("Compute hg37 normalized representation of internal")
     # normalizing again for the hg37 representation. An alternative would be to convert the normalized hg38 representation to hg37.
     # If we use crossmap, we would need a way to convert the VCF like representation back to an hgvs object, which we currently
     # are unable to do properly. That is, we can use VCFVariant.to_hgvs_obj, however, structural variants will be converted
@@ -223,7 +223,7 @@ def main(input, output, log_path, config_file, resources, processes):
     df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG37, TMP_HGVS_HG37_LEFT_ALIGNED, False),
                                      processes)
 
-    logging.warning("Compute cDNA representation")
+    logging.info("Compute cDNA representation")
 
     def _compute_cdna(df_part):
         hgvs_proc = HgvsWrapper()  # create it to avoid pickle issues when copying to subprocess
@@ -262,7 +262,7 @@ def main(input, output, log_path, config_file, resources, processes):
     df[PYHGVS_HG37_END_COL] = df[PYHGVS_HG37_START_COL] + (df[HG38_END_COL] - df[HG38_START_COL])
 
     #### Protein
-    logging.warning("Protein Conversion")
+    logging.info("Protein Conversion")
 
     def _compute_proteins(df_part):
         hgvs_proc = HgvsWrapper()
@@ -274,7 +274,7 @@ def main(input, output, log_path, config_file, resources, processes):
     df = utils.parallelize_dataframe(df, _compute_proteins, processes)
 
     #### Synonyms
-    logging.warning("Compute Synonyms")
+    logging.info("Compute Synonyms")
 
     def _compute_synonyms(df_part):
         hgvs_proc = HgvsWrapper()
@@ -293,7 +293,7 @@ def main(input, output, log_path, config_file, resources, processes):
     tmp_fields = [c for c in df.columns if c.startswith('tmp_')]
     df = df.drop(columns=[VAR_OBJ_FIELD, NEW_SYNONYMS_FIELD] + tmp_fields)
 
-    logging.warning("writing out")
+    logging.info(f"Writing out to {output}")
     df.to_csv(output, sep='\t', index=False)
 
 
