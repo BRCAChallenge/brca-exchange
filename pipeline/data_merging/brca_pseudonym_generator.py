@@ -169,7 +169,7 @@ def get_synonyms(row: pd.Series, hgvs_proc: HgvsWrapper, syn_ac_dict: Dict[str, 
                     vp = pj.project_variant_forward(vc)
                     synonyms.append(vp)
                 except HGVSError as e:
-                    logging.info("Erowception in synonym handling " + str(vc) + " from " + str(vc.ac) + " to " +
+                    logging.info("Exception in synonym handling " + str(vc) + " from " + str(vc.ac) + " to " +
                                  str(dst) + " using " + str(method) + " via " + str(alt_ac) + " : " + str(
                         e) + " " + str(e.__class__.__name__))
 
@@ -221,9 +221,12 @@ def main(input, output, log_path, config_file, resources, processes):
 
     logging.info("Normalize genomic representation")
 
-    df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG38, TMP_HGVS_HG38, True, strand_dict), processes)
-    df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG38, TMP_HGVS_HG38_LEFT_ALIGNED, False, strand_dict),
-                                     processes)
+    df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG38,
+                                                                TMP_HGVS_HG38, True,
+                                                                strand_dict), processes)
+    df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG38,
+                                                                TMP_HGVS_HG38_LEFT_ALIGNED, False,
+                                                                strand_dict), processes)
 
     df[GENOMIC_HGVS_HG38_COL] = df[TMP_HGVS_HG38].apply(str)
 
@@ -239,10 +242,12 @@ def main(input, output, log_path, config_file, resources, processes):
     df[TMP_HGVS_HG37] = pd.Series(
         [v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh37_Assem]) for v in var_objs_hg37])
 
-    df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG37, GENOMIC_HGVS_HG37_COL, True, strand_dict), processes)
+    df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG37,
+                                                                GENOMIC_HGVS_HG37_COL, True, strand_dict), processes)
     df[GENOMIC_HGVS_HG37_COL] = df[GENOMIC_HGVS_HG37_COL].apply(str)
-    df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG37, TMP_HGVS_HG37_LEFT_ALIGNED, False, strand_dict),
-                                     processes)
+
+    df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG37,
+                                                                TMP_HGVS_HG37_LEFT_ALIGNED, False, strand_dict), processes)
 
     logging.info("Compute cDNA representation")
 
