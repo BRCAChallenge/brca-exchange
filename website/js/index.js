@@ -31,8 +31,6 @@ var {NavBarNew} = require('./NavBarNew');
 var Rx = require('rx');
 require('rx-dom');
 var moment = require('moment');
-var DonationBar = require('./components/DonationBar');
-var DonateDrive = require('./DonateDrive');
 
 
 // faisal: includes for masonry/isotope
@@ -1422,7 +1420,6 @@ var Application = React.createClass({
         return (
             <div>
                 <NavBarNew path={path} mode={this.state.mode} toggleMode={this.toggleMode}/>
-                {path !== "donatedrive" ? <DonationBar /> : ""}
                 <RouteHandler toggleMode={this.onChildToggleMode} mode={this.state.mode} />
                 <Database
                     mode={this.state.mode}
@@ -1440,7 +1437,6 @@ var routes = (
         <Route path='about/:page' handler={About}/>
         <Route path='factsheet' handler={FactSheet}/>
         <Route path='whydonate' handler={WhyDonate}/>
-        <Route path='donatedrive' handler={DonateDrive}/>
         <Route path='fundraisingdetails' handler={FundraisingDetails}/>
         <Route path='help' handler={Help}/>
         <Route path='community' handler={Community}/>
