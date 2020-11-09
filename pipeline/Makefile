@@ -10,7 +10,7 @@ OS := $(shell uname -s)
 
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 
-LUIGI_ROOT_TASK = GenerateReleaseArchive
+LUIGI_ROOT_TASK = CompileVCFFiles.GenerateReleaseArchive
 LUIGI_WORKERS = 8
 
 # the path to seqrepo in the container; this is mounted separately from the rest of /files/resources
