@@ -20,6 +20,10 @@ ALLELES_ENDPOINT = "http://reg.clinicalgenome.org/alleles?file=hgvs"
 MAX_TRIES = 5
 CA_ID_RE = re.compile(r'CA[0-9]+')
 
+RESP_ID_KEY = '@id'
+RESP_ERROR_TYPE_KEY = 'errorType'
+RESP_DESCRIPTION_KEY = 'description'
+RESP_MESSAGE_KEY = 'message'
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Gathers ClinGen Allele Registry IDs.')
@@ -34,13 +38,13 @@ def parse_args():
 
 
 def _extract_ca_id(r, orig_hgvs):
-    if '@id' not in r.keys():
-        if 'errorType' in r.keys():
+    if RESP_ID_KEY not in r.keys():
+        if RESP_ERROR_TYPE_KEY in r.keys():
             logging.warning(
-                f"Server could not process {orig_hgvs}: {r['errorType']}. {r['description']}. {r['message']}")
+                f"Server could not process {orig_hgvs}: {r[RESP_ERROR_TYPE_KEY]}. {r[RESP_DESCRIPTION_KEY]}. {r[RESP_MESSAGE_KEY]}")
         return None
 
-    id_str = r['@id']
+    id_str = r[RESP_ID_KEY]
 
     ca_id = id_str.split('/')[-1]
 
