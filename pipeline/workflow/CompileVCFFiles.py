@@ -789,8 +789,8 @@ class AppendCAID(DefaultPipelineTask):
 
         args = ["python", "get_ca_id.py", "-i",
                 artifacts_dir + "built.tsv", "-o",
-                artifacts_dir + "/built_with_ca_ids.tsv", "-e",
-                artifacts_dir + "/ca_id_error_variants.txt"]
+                artifacts_dir + "/built_with_ca_ids.tsv", "-l",
+                artifacts_dir + "/get_ca_id.log"]
         print("Running get_ca_id.py with the following args: %s" % (
             args))
         sp = subprocess.Popen(args, stdout=subprocess.PIPE,

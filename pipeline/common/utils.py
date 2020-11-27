@@ -1,7 +1,7 @@
 import importlib
 import logging
 from collections import namedtuple
-from typing import Callable
+from typing import List, Callable, Sequence, TypeVar
 
 import numpy as np
 import pandas as pd
@@ -34,6 +34,13 @@ def build_interval_trees_by_chr(chr_intervals, interval_tuple_builder):
             interval_tuples)
 
     return d
+
+
+T = TypeVar('T')
+
+
+def split_list_in_chunks(seq: Sequence[T], chunk_size: int) -> List[List[T]]:
+    return [seq[pos:pos + chunk_size] for pos in range(0, len(seq), chunk_size)]
 
 
 def parallelize_dataframe(df: pd.DataFrame, func: Callable[[pd.DataFrame], pd.DataFrame], n_processes: int = 4):
