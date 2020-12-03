@@ -30,11 +30,14 @@ WORKDIR /opt
 COPY pipeline/requirements.txt .
 COPY test-requirements.txt .
 
-# install numpy first to avoid issues with bio python and bx-python (see also https://github.com/LUMC/vep2lovd/issues/1)
-RUN pip3 install $(grep numpy requirements.txt)
+# pip 20.3+ uses strict dependency resolver that causes biocommons/bioutils and hgvs/ipython errors
+RUN pip install pip==20.2
 
-RUN pip3 install $(grep -i cython requirements.txt)
-RUN pip3 install -r requirements.txt -r test-requirements.txt
+# install numpy first to avoid issues with bio python and bx-python (see also https://github.com/LUMC/vep2lovd/issues/1)
+RUN pip install $(grep numpy requirements.txt)
+
+RUN pip install $(grep -i cython requirements.txt)
+RUN pip install -r requirements.txt -r test-requirements.txt
 
 # install vcf tools
 RUN wget https://github.com/vcftools/vcftools/releases/download/v0.1.16/vcftools-0.1.16.tar.gz
