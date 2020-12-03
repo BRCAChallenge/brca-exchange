@@ -30,6 +30,9 @@ WORKDIR /opt
 COPY pipeline/requirements.txt .
 COPY test-requirements.txt .
 
+# use loose dependency resolver to prevent biocommons/bioutils and hgvs/ipython errors
+RUN pip3 install --upgrade pip3==20.3 --use-deprecated=legacy-resolver
+
 # install numpy first to avoid issues with bio python and bx-python (see also https://github.com/LUMC/vep2lovd/issues/1)
 RUN pip3 install $(grep numpy requirements.txt)
 
