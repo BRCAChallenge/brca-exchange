@@ -6,6 +6,8 @@ ifneq ("$(wildcard $(CONFIG_PATH))","")
 	include $(CONFIG_PATH)
 endif
 
+PREVIOUS_RELEASE_TAR = $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz
+
 OS := $(shell uname -s)
 
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
@@ -17,6 +19,11 @@ LUIGI_WORKERS = 8
 # since seqrepo is huge and thus won't be located in the same place as the rest of the resources
 SEQ_REPO_DIR_DOCKER := /files/resources/seq_repo
 
+ifndef GENE_CONFIG_FILENAME
+GENE_CONFIG_FILE = /opt/brca-exchange/pipeline/workflow/gene_config_brca_only.txt
+else
+GENE_CONFIG_FILE = /opt/brca-exchange/pipeline/workflow/$(GENE_CONFIG_FILENAME)
+endif
 
 GENE_CONFIG_FILE := /opt/brca-exchange/pipeline/workflow/gene_config_brca_only.txt
 
@@ -51,7 +58,7 @@ setup-files: ## setup various directories to run pipeline
 	[ -d $(RESOURCES_DIR) ] || mkdir -p $(RESOURCES_DIR)
 	[ -d $(PRIORS_REFERENCES) ] || mkdir -p $(PRIORS_REFERENCES)
 	[ -d $(OUT_DIR) ] || mkdir -p $(OUT_DIR)
-	[ -f $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz ] || wget https://brcaexchange.org/backend/downloads/releases/current_release.tar.gz -O $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz
+	[ -f $(PREVIOUS_RELEASE_TAR) ] || wget https://brcaexchange.org/backend/downloads/releases/current_release.tar.gz -O $(PREVIOUS_RELEASE_TAR)
 
 .ONESHELL:
 setup-lovd: ## setting up LOVD data via pipeline machine, if not running on pipeline machine, as the access is IP restricted. Requires access to main pipeline machine
@@ -117,8 +124,10 @@ run-task: ## Running a specific task
 	$(RUN_TASK_CMD) $(RUN_ARGS) $(LUIGI_WORKERS) $(GENE_CONFIG_FILE) ${VICTOR_IMAGE} ${VICTOR_DATA_DIR}/$(DATA_DATE) $(SEQ_REPO_DIR)
 
 PIPELINE_ARGS := --PipelineParams-output-dir /files/data/output --PipelineParams-file-parent-dir /files/data --PipelineParams-date $(DATA_DATE) --PipelineParams-gene-config-path $(GENE_CONFIG_FILE)
+# PIPELINE_ARGS := --PipelineParams-output-dir /files/data/output --PipelineParams-file-parent-dir /files/data --PipelineParams-date $(DATA_DATE) --PipelineParams-gene-config-path $(GENE_CONFIG_FILE) --PipelineParams-victor-docker-image-name ${VICTOR_IMAGE} --PipelineParams-victor-data-dir ${VICTOR_DATA_DIR}/${DATA_DATE}
 
 force-run-task: ## Running a specific task (deleting its dependencies first)
+	## TODO: should this command use RUN_ARGS command twice?
 	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) bash -c 'cd /opt/brca-exchange/pipeline/workflow && python prune_output_files.py CompileVCFFiles $(RUN_ARGS) $(RUN_ARGS) $(PIPELINE_ARGS)'
 	$(RUN_TASK_CMD) $(RUN_ARGS) $(LUIGI_WORKERS) $(GENE_CONFIG_FILE) ${VICTOR_IMAGE} ${VICTOR_DATA_DIR}/$(DATA_DATE) $(SEQ_REPO_DIR)
 
@@ -164,8 +173,8 @@ push-docker: ## postprocessing: pushes docker image to docker hub
 copy-to-previous: ## postprocessing: copy new release tar to previous release folder
 # 	take latest, in case there should be several tar.gz from some reason
 	cp `ls -t $(OUT_DIR)/release-*.tar.gz | head -n 1` $(PREVIOUS_RELEASE_DIR)
-	rm $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz
-	ln -s `ls -t $(PREVIOUS_RELEASE_DIR)/release-*.tar.gz | head -n 1` $(PREVIOUS_RELEASE_DIR)/latest_release.tar.gz
+	rm $(PREVIOUS_RELEASE_TAR)
+	ln -s `ls -t $(PREVIOUS_RELEASE_DIR)/release-*.tar.gz | head -n 1` $(PREVIOUS_RELEASE_TAR)
 
 post-release-cmds: cleanup-failed include-release-notes push-docker tag-release copy-to-previous ## postprocessing: do all the necessary postprocessing to wrap up a data release
 
