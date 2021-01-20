@@ -19,10 +19,7 @@ logger = logging.getLogger('gnomAD')
 class GnomADTask(DefaultPipelineTask):
     def __init__(self, *args, **kwargs):
         super(GnomADTask, self).__init__(*args, **kwargs)
-        self.gnomAD_file_dir = self.cfg.file_parent_dir + "/gnomAD"
         self.gnomAD_download_file = "gnomAD.tsv"
-
-        pipeline_utils.create_path_if_nonexistent(self.gnomAD_file_dir)
 
 
 class DownloadGnomADData(GnomADTask):
@@ -50,7 +47,7 @@ see previous task for static data download
 class DownloadGnomADData(GnomADTask):
     def output(self):
         return luigi.LocalTarget(
-            os.path.join(self.gnomAD_file_dir, self.gnomAD_download_file))
+            os.path.join(self.gnomad_file_dir, self.gnomAD_download_file))
 
     def run(self):
         os.chdir(gnomAD_method_dir)
@@ -65,7 +62,7 @@ class DownloadGnomADData(GnomADTask):
 @requires(DownloadGnomADData)
 class ConvertGnomADToVCF(GnomADTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, 'gnomAD.hg19.vcf'))
+        return luigi.LocalTarget(os.path.join(self.gnomad_file_dir, 'gnomAD.hg19.vcf'))
 
     def run(self):
         os.chdir(gnomAD_method_dir)
@@ -82,7 +79,7 @@ class ConvertGnomADToVCF(GnomADTask):
 @requires(ConvertGnomADToVCF)
 class CrossmapGnomADData(GnomADTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, "gnomAD.hg38.vcf"))
+        return luigi.LocalTarget(os.path.join(self.gnomad_file_dir, "gnomAD.hg38.vcf"))
 
     def run(self):
         brca_resources_dir = self.cfg.resources_dir
@@ -98,7 +95,7 @@ class CrossmapGnomADData(GnomADTask):
 @requires(CrossmapGnomADData)
 class SortGnomADData(GnomADTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.gnomAD_file_dir, "gnomAD.sorted.hg38.vcf"))
+        return luigi.LocalTarget(os.path.join(self.gnomad_file_dir, "gnomAD.sorted.hg38.vcf"))
 
     def run(self):
         args = ["vcf-sort", self.input().path]

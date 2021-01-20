@@ -1,6 +1,5 @@
 '''
-Parses original ClinVar XML file and filters out ClinVarSets of interest (i.e.
-currently those related to BRCA1 and BRCA2)
+Parses original ClinVar XML file and filters out ClinVarSets of interest
 '''
 
 import gzip

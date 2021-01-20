@@ -9,13 +9,13 @@ archive.  If you have any questions or concerns, please feel free to contact
 brca-exchange-contact@genomicsandhealth.org.
 
 output/  Top-level directory, containing pre-processed VCFs of variant data
-         from the contributing repositories, filtered for the BRCA variants,
+         from the contributing repositories, filtered for relevant variants,
 	 and translated into GRCh38 coordinates as needed.
-output/1000G_brca.sorted.hg38.vcf   		Variants selected from 1000
+output/1000G.sorted.hg38.vcf   		Variants selected from 1000
 				    		Genomes, with genotype data.
-output/1000G_brca.sorted.hg38.vcffor_pipeline	Variants from 1000 Genomes,
+output/1000G.sorted.hg38.vcffor_pipeline	Variants from 1000 Genomes,
 						without genotype data
-output/ClinVarBrca.vcf			BRCA variants from ClinVar at NCBI.
+output/ClinVar.vcf			Variants from ClinVar at NCBI.
 output/ENIGMA_combined_with_bx_ids.tsv	Tab-delimited file of the ENIGMA
 					clinical significance data.
 output/bic_brca12.sorted.hg38.vcf	Variants from the Breast Cancer
@@ -32,7 +32,7 @@ findlay_BRCA1_ring_function_scores.clean.sorted.hg38.vcf
 output/md5sums.txt			md5sums for all data files in this
 					archive
 output/release/				(see below)
-output/sharedLOVD_BRCA.sorted.hg38.vcf     BRCA variants from the shared
+output/sharedLOVD.sorted.hg38.vcf     Variants from the shared
 					     LOVD repository at Leiden
 					     University
 

@@ -7,6 +7,8 @@ import tarfile
 import urllib.error
 import urllib.parse
 import urllib.request
+import shutil
+import glob
 
 from retrying import retry
 
@@ -115,6 +117,17 @@ def concatenate_symbols(symbols):
         concatted_symbols.append('BRCA12')
 
     return concatted_symbols
+
+
+def concatenate_files_with_identical_headers(file_directory, output):
+    allFiles = glob.glob(file_directory + "/*.txt")
+    with open(output, 'wb') as outfile:
+        for i, fname in enumerate(allFiles):
+            with open(fname, 'rb') as infile:
+                if i != 0:
+                    infile.readline()  # Throw away header on all but first file
+                # Block copy rest of file from input to output without parsing
+                shutil.copyfileobj(infile, outfile)
 
 
 def get_lovd_symbols(symbols):
