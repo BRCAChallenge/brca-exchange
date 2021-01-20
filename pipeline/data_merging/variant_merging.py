@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
-this scripts takes the enigma variant list and merge vcf files in a folder into
-the exisitng enigma variants:
+this script merges all variants from different sources together into a single output file
+it also merges equivalent variants together
 """
 import argparse
 import csv

@@ -80,7 +80,7 @@ touch ${RELEASE_NOTES}
 CREDENTIALS_FILE=${BASE}/dummy_credentials_file.cfg
 touch ${CREDENTIALS_FILE}
 
-OUTPUT_DIR=${BASE}/brca_out
+OUTPUT_DIR=${BASE}/data_out
 mkdir -p ${OUTPUT_DIR}
 
 # extracting required files from release tar
