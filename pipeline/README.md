@@ -30,11 +30,13 @@ To create a new data release the entry point is the `pipeline/pipeline_running/g
  * root working directory
  * path to luigi credentials file (see section below)
  * directory where previous release archives are stored
+ * gene config filename (optional, defaults to gene_config_brca_only.txt)
+ * git commit (optional, defaults to master)
 
 For the pipeline machine, we for example get:
 
 ```
-/home/brca/brca_upstream/pipeline/pipeline_running/generate_release.sh /data/monthly_releases /data/luigi_pipeline_credentials.cfg /data/previous_releases
+/home/brca/brca_upstream/pipeline/pipeline_running/generate_release.sh /data/monthly_releases /data/luigi_pipeline_credentials.cfg /data/previous_releases gene_config_brca_only.txt dff32a9c
 ```
 
 This script clones the BRCA Exchange repo into a directory in `WORKING_DIR/data_release_yyyy-MM-dd` referring to the current date and checks out the latest commit on master. It then generates a configuration file `brca_pipeline_cfg.mk` where paths and other settings are set up.
@@ -81,7 +83,7 @@ brca_upstream                   <-- BRCA exchange code base
 monthly_releases
 ├── data_release_TAG            <-- release working dir
 │   ├── code                    <-- clone of git repository
-│   ├── brca_out                <-- pipeline working directory
+│   ├── data_out                <-- pipeline working directory
 │   └── resources               <-- e.g. reference sequences
 │   └── references              <-- e.g. reference sequences for the splicing pipeline (may be merged in the future)
 previous_releases               <-- released archives of previous releases
