@@ -25,8 +25,6 @@ else
 GENE_CONFIG_FILE = /opt/brca-exchange/pipeline/workflow/$(GENE_CONFIG_FILENAME)
 endif
 
-GENE_CONFIG_FILE := /opt/brca-exchange/pipeline/workflow/gene_config_brca_only.txt
-
 init: ## setup config file
 	echo "creating file in $(CONFIG_PATH). Please edit to your needs in particular the WORK_DIR!"
 	jinja2 -D DATA_DATE=2099-12-31 \
