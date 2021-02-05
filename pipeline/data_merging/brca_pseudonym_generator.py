@@ -237,7 +237,7 @@ def main(input, output, log_path, config_file, resources, processes):
     df[GENOMIC_HGVS_HG38_COL] = df[TMP_HGVS_HG38].apply(str)
 
     logging.info("Compute hg37 representation of internal representation")
-    var_objs_hg37, var_objs_hg37_failed = convert_to_hg37(df[VAR_OBJ_FIELD], resources)[0]
+    var_objs_hg37, var_objs_hg37_failed = convert_to_hg37(df[VAR_OBJ_FIELD], resources)
 
     logging.info("Compute hg37 normalized representation of internal")
     # normalizing again for the hg37 representation. An alternative would be to convert the normalized hg38 representation to hg37.
