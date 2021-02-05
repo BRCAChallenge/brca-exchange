@@ -2,6 +2,7 @@ import logging
 import subprocess
 import tempfile
 from typing import Dict, List, Iterable
+from os import path
 
 import click
 import hgvs.assemblymapper
@@ -126,8 +127,13 @@ def convert_to_hg37(vars: Iterable[VCFVariant], brca_resources_dir: str):
 
     vcf_out_lines = open(vcf_tmp_out, 'r').readlines()
 
-    return [VCFVariant(v[0], int(v[1]), v[3], v[4]) for v in
-            [l.strip().split('\t') for l in vcf_out_lines]]
+    if path.exists(vcf_tmp_out + '.unmap'):
+        vcf_out_failed_lines = open(vcf_tmp_out + '.unmap', 'r').readlines()
+        return ([VCFVariant(v[0], int(v[1]), v[3], v[4]) for v in [l.strip().split('\t') for l in vcf_out_lines]],
+                [VCFVariant(v[0], int(v[1]), v[3], v[4]) for v in [l.strip().split('\t') for l in vcf_out_failed_lines]])
+    else:
+        return ([VCFVariant(v[0], int(v[1]), v[3], v[4]) for v in [l.strip().split('\t') for l in vcf_out_lines]], [])
+
 
 
 def get_synonyms(row: pd.Series, hgvs_proc: HgvsWrapper, syn_ac_dict: Dict[str, List[str]]):
@@ -231,7 +237,7 @@ def main(input, output, log_path, config_file, resources, processes):
     df[GENOMIC_HGVS_HG38_COL] = df[TMP_HGVS_HG38].apply(str)
 
     logging.info("Compute hg37 representation of internal representation")
-    var_objs_hg37 = convert_to_hg37(df[VAR_OBJ_FIELD], resources)
+    var_objs_hg37, var_objs_hg37_failed = convert_to_hg37(df[VAR_OBJ_FIELD], resources)[0]
 
     logging.info("Compute hg37 normalized representation of internal")
     # normalizing again for the hg37 representation. An alternative would be to convert the normalized hg38 representation to hg37.
@@ -239,8 +245,15 @@ def main(input, output, log_path, config_file, resources, processes):
     # are unable to do properly. That is, we can use VCFVariant.to_hgvs_obj, however, structural variants will be converted
     # to delins, losing information if a variant was e.g. a del, ins, or dup.
 
-    df[TMP_HGVS_HG37] = pd.Series(
-        [v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh37_Assem]) for v in var_objs_hg37])
+    # Set None values for any hg37 coordinates that cannot be derived and add to the list in proper order
+    tmp_hgvs_hg37_values = [v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh37_Assem]) for v in var_objs_hg37]
+    for v in var_objs_hg37_failed:
+        hgvs_obj = v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh38_Assem])
+        row_number = df[df[GENOMIC_HGVS_HG38_COL] == str(hgvs_obj)].index[0]
+        tmp_hgvs_hg37_values.insert(row_number, None)
+        logging.info("Could not compute hg37 normalized representation of internal for {}".format(str(hgvs_obj)))
+
+    df[TMP_HGVS_HG37] = pd.Series(tmp_hgvs_hg37_values)
 
     df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG37,
                                                                 GENOMIC_HGVS_HG37_COL, True, strand_dict), processes)
