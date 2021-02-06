@@ -1,7 +1,7 @@
 import logging
 import subprocess
 import tempfile
-from typing import Dict, List, Iterable
+from typing import Dict, List, Iterable, Optional
 from os import path
 
 import click
@@ -51,12 +51,14 @@ TMP_CDNA_NORM_LEFT_ALINGED_FIELD = 'tmp_HGVS_CDNA_FIELD_left'
 TMP_PROTEIN_LEFT_ALINGED_FIELD = 'tmp_Protein_Field_left'
 
 
-def _normalize_genomic_coordinates(hgvs_obj: SequenceVariant, strand: str, hgvs_norm_3: Normalizer, hgvs_norm_5: Normalizer):
+def _normalize_genomic_coordinates(hgvs_obj: Optional[SequenceVariant], strand: str, hgvs_norm_3: Normalizer, hgvs_norm_5: Normalizer):
     normalizer = hgvs_norm_3 if strand == config.POSITIVE_STRAND else hgvs_norm_5
 
     try:
         return normalizer.normalize(hgvs_obj)
     except HGVSError as e:
+        logging.warning("Issue normalizing genomic coordinates {}: {}".format(hgvs_obj, e))
+    except AssertionError as e:
         logging.warning("Issue normalizing genomic coordinates {}: {}".format(hgvs_obj, e))
     return None
 
