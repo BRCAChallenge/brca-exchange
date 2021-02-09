@@ -53,12 +53,11 @@ TMP_PROTEIN_LEFT_ALINGED_FIELD = 'tmp_Protein_Field_left'
 
 def _normalize_genomic_coordinates(hgvs_obj: Optional[SequenceVariant], strand: str, hgvs_norm_3: Normalizer, hgvs_norm_5: Normalizer):
     normalizer = hgvs_norm_3 if strand == config.POSITIVE_STRAND else hgvs_norm_5
-
+    if hgvs_obj is None:
+        return None
     try:
         return normalizer.normalize(hgvs_obj)
     except HGVSError as e:
-        logging.warning("Issue normalizing genomic coordinates {}: {}".format(hgvs_obj, e))
-    except AssertionError as e:
         logging.warning("Issue normalizing genomic coordinates {}: {}".format(hgvs_obj, e))
     return None
 
