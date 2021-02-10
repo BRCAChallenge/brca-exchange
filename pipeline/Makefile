@@ -122,7 +122,6 @@ run-task: ## Running a specific task
 	$(RUN_TASK_CMD) $(RUN_ARGS) $(LUIGI_WORKERS) $(GENE_CONFIG_FILE) ${VICTOR_IMAGE} ${VICTOR_DATA_DIR}/$(DATA_DATE) $(SEQ_REPO_DIR)
 
 PIPELINE_ARGS := --PipelineParams-output-dir /files/data/output --PipelineParams-file-parent-dir /files/data --PipelineParams-date $(DATA_DATE) --PipelineParams-gene-config-path $(GENE_CONFIG_FILE)
-# PIPELINE_ARGS := --PipelineParams-output-dir /files/data/output --PipelineParams-file-parent-dir /files/data --PipelineParams-date $(DATA_DATE) --PipelineParams-gene-config-path $(GENE_CONFIG_FILE) --PipelineParams-victor-docker-image-name ${VICTOR_IMAGE} --PipelineParams-victor-data-dir ${VICTOR_DATA_DIR}/${DATA_DATE}
 
 force-run-task: ## Running a specific task (deleting its dependencies first)
 	## TODO: should this command use RUN_ARGS command twice?
