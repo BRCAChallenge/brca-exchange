@@ -136,6 +136,16 @@ def convert_to_hg37(vars: Iterable[VCFVariant], brca_resources_dir: str):
         return ([VCFVariant(v[0], int(v[1]), v[3], v[4]) for v in [l.strip().split('\t') for l in vcf_out_lines]], [])
 
 
+def handle_failed_hg37_translations(df, var_objs_hg37, var_objs_hg37_failed, tmp_hgvs_hg37_values):
+    # set None values for any hg37 coordinates that cannot be derived and add to lists in proper order
+    for v in var_objs_hg37_failed:
+        hgvs_obj = v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh38_Assem])
+        row_number = df[df[GENOMIC_HGVS_HG38_COL] == str(hgvs_obj)].index[0]
+        var_objs_hg37.insert(row_number, None)
+        tmp_hgvs_hg37_values.insert(row_number, None)
+        logging.info("Could not compute hg37 representation of internal for {}".format(str(hgvs_obj)))
+    return (var_objs_hg37, tmp_hgvs_hg37_values, df)
+
 
 def get_synonyms(row: pd.Series, hgvs_proc: HgvsWrapper, syn_ac_dict: Dict[str, List[str]]):
     """ Determine other representations a variant may be known as """
@@ -240,22 +250,17 @@ def main(input, output, log_path, config_file, resources, processes):
     logging.info("Compute hg37 representation of internal representation")
     var_objs_hg37, var_objs_hg37_failed = convert_to_hg37(df[VAR_OBJ_FIELD], resources)
 
+    tmp_hgvs_hg37_values = [v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh37_Assem]) for v in var_objs_hg37]
+
+    var_objs_hg37, tmp_hgvs_hg37_values, df = handle_failed_hg37_translations(df, var_objs_hg37, var_objs_hg37_failed, tmp_hgvs_hg37_values)
+
+    df[TMP_HGVS_HG37] = pd.Series(tmp_hgvs_hg37_values)
+
     logging.info("Compute hg37 normalized representation of internal")
     # normalizing again for the hg37 representation. An alternative would be to convert the normalized hg38 representation to hg37.
     # If we use crossmap, we would need a way to convert the VCF like representation back to an hgvs object, which we currently
     # are unable to do properly. That is, we can use VCFVariant.to_hgvs_obj, however, structural variants will be converted
     # to delins, losing information if a variant was e.g. a del, ins, or dup.
-
-    # set None values for any hg37 coordinates that cannot be derived and add to lists in proper order
-    tmp_hgvs_hg37_values = [v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh37_Assem]) for v in var_objs_hg37]
-    for v in var_objs_hg37_failed:
-        hgvs_obj = v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh38_Assem])
-        row_number = df[df[GENOMIC_HGVS_HG38_COL] == str(hgvs_obj)].index[0]
-        var_objs_hg37.insert(row_number, None)
-        tmp_hgvs_hg37_values.insert(row_number, None)
-        logging.info("Could not compute hg37 normalized representation of internal for {}".format(str(hgvs_obj)))
-
-    df[TMP_HGVS_HG37] = pd.Series(tmp_hgvs_hg37_values)
 
     df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG37,
                                                                 GENOMIC_HGVS_HG37_COL, True, strand_dict), processes)
@@ -301,12 +306,7 @@ def main(input, output, log_path, config_file, resources, processes):
     df[PYHGVS_GENOMIC_COORDINATE_37_COL] = pd.Series([str(v) for v in var_objs_hg37])
 
     # handles missing hg37 coordinates
-    hg37_start_col_pos = []
-    for v in var_objs_hg37:
-        if v is None:
-            hg37_start_col_pos.append(None)
-        else:
-            hg37_start_col_pos.append(v.pos)
+    hg37_start_col_pos = [ v.pos for v in var_objs_hg37 if v else None ]
 
     df[PYHGVS_HG37_START_COL] = pd.Series(hg37_start_col_pos)
 
