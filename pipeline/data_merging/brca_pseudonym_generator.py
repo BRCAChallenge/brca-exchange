@@ -136,7 +136,7 @@ def convert_to_hg37(vars: Iterable[VCFVariant], brca_resources_dir: str):
         return ([VCFVariant(v[0], int(v[1]), v[3], v[4]) for v in [l.strip().split('\t') for l in vcf_out_lines]], [])
 
 
-def handle_failed_hg37_translations(df, var_objs_hg37, var_objs_hg37_failed, tmp_hgvs_hg37_values):
+def handle_failed_hg37_translations(df, var_objs_hg37, var_objs_hg37_failed, tmp_hgvs_hg37_values, hgvs_proc):
     # set None values for any hg37 coordinates that cannot be derived and add to lists in proper order
     for v in var_objs_hg37_failed:
         hgvs_obj = v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh38_Assem])
@@ -252,7 +252,7 @@ def main(input, output, log_path, config_file, resources, processes):
 
     tmp_hgvs_hg37_values = [v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh37_Assem]) for v in var_objs_hg37]
 
-    var_objs_hg37, tmp_hgvs_hg37_values, df = handle_failed_hg37_translations(df, var_objs_hg37, var_objs_hg37_failed, tmp_hgvs_hg37_values)
+    var_objs_hg37, tmp_hgvs_hg37_values, df = handle_failed_hg37_translations(df, var_objs_hg37, var_objs_hg37_failed, tmp_hgvs_hg37_values, hgvs_proc)
 
     df[TMP_HGVS_HG37] = pd.Series(tmp_hgvs_hg37_values)
 
@@ -306,7 +306,7 @@ def main(input, output, log_path, config_file, resources, processes):
     df[PYHGVS_GENOMIC_COORDINATE_37_COL] = pd.Series([str(v) for v in var_objs_hg37])
 
     # handles missing hg37 coordinates
-    hg37_start_col_pos = [ v.pos for v in var_objs_hg37 if v else None ]
+    hg37_start_col_pos = [ v.pos if v else None for v in var_objs_hg37 ]
 
     df[PYHGVS_HG37_START_COL] = pd.Series(hg37_start_col_pos)
 
