@@ -272,7 +272,7 @@ class DownloadLOVDInputFile(DefaultPipelineTask):
             output = {}
 
             for symbol in pipeline_utils.get_lovd_symbols(self.cfg.gene_metadata['symbol']):
-                output[symbol] = luigi.LocalTarget(self.lovd_file_dir + f"/{symbol}.txt")
+                output[symbol] = luigi.LocalTarget(f"{self.lovd_file_dir}/{symbol}.txt")
 
             return output
 
@@ -289,7 +289,7 @@ class DownloadLOVDInputFile(DefaultPipelineTask):
 @requires(DownloadLOVDInputFile)
 class ConcatenateLOVDData(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.lovd_file_dir + f"/lovd_concatenated_genes.txt")
+        return luigi.LocalTarget(f"{self.lovd_file_dir}/lovd_concatenated_genes.txt")
 
     def run(self):
         pipeline_utils.concatenate_files_with_identical_headers(self.lovd_file_dir, self.output().path)
@@ -299,7 +299,7 @@ class ConcatenateLOVDData(DefaultPipelineTask):
 @requires(ConcatenateLOVDData)
 class NormalizeLOVDSubmissions(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.lovd_file_dir + f"/LOVD_normalized.tsv")
+        return luigi.LocalTarget(f"{self.lovd_file_dir}/LOVD_normalized.tsv")
 
     def run(self):
         os.chdir(lovd_method_dir)
@@ -313,7 +313,7 @@ class NormalizeLOVDSubmissions(DefaultPipelineTask):
 @requires(NormalizeLOVDSubmissions)
 class CombineEquivalentLOVDSubmissions(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.lovd_file_dir + f"/LOVD_normalized_combined.tsv")
+        return luigi.LocalTarget(f"{self.lovd_file_dir}/LOVD_normalized_combined.tsv")
 
     def run(self):
         os.chdir(lovd_method_dir)
@@ -327,13 +327,13 @@ class CombineEquivalentLOVDSubmissions(DefaultPipelineTask):
 @requires(CombineEquivalentLOVDSubmissions)
 class ConvertSharedLOVDToVCF(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.lovd_file_dir + f"/sharedLOVD.hg19.vcf")
+        return luigi.LocalTarget(f"{self.lovd_file_dir}/sharedLOVD.hg19.vcf")
 
     def run(self):
         os.chdir(lovd_method_dir)
         args = ["python", "lovd2vcf.py", "-i", self.input().path, "-o",
                 self.output().path, "-a", "sharedLOVDAnnotation", "-e",
-                self.artifacts_dir + f"/LOVD_error_variants.txt",
+                f"{self.artifacts_dir}/LOVD_error_variants.txt",
                 "-s", "LOVD"]
         pipeline_utils.run_process(args)
         pipeline_utils.check_file_for_contents(self.output().path)
@@ -342,7 +342,7 @@ class ConvertSharedLOVDToVCF(DefaultPipelineTask):
 @requires(ConvertSharedLOVDToVCF)
 class CrossmapConcatenatedSharedLOVDData(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.lovd_file_dir + f"/sharedLOVD.hg38.vcf")
+        return luigi.LocalTarget(f"{self.lovd_file_dir}/sharedLOVD.hg38.vcf")
 
     def run(self):
         brca_resources_dir = self.cfg.resources_dir
@@ -359,7 +359,7 @@ class CrossmapConcatenatedSharedLOVDData(DefaultPipelineTask):
 @requires(CrossmapConcatenatedSharedLOVDData)
 class SortSharedLOVDOutput(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.lovd_file_dir + f"/sharedLOVD.sorted.hg38.vcf")
+        return luigi.LocalTarget(f"{self.lovd_file_dir}/sharedLOVD.sorted.hg38.vcf")
 
     def run(self):
         args = ["vcf-sort", self.input().path]
@@ -370,7 +370,7 @@ class SortSharedLOVDOutput(DefaultPipelineTask):
 @requires(SortSharedLOVDOutput)
 class CopySharedLOVDOutputToOutputDir(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.cfg.output_dir + f"/sharedLOVD.sorted.hg38.vcf")
+        return luigi.LocalTarget(f"{self.cfg.output_dir}/sharedLOVD.sorted.hg38.vcf")
 
     def run(self):
         copy(self.input().path, self.cfg.output_dir)
@@ -384,7 +384,7 @@ class CopySharedLOVDOutputToOutputDir(DefaultPipelineTask):
 
 class DownloadG1KVCFs(DefaultPipelineTask):
     def output(self):
-        return { chrom : luigi.LocalTarget(self.g1k_file_dir + f"/ALL.chr{chrom}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz") for chrom in self.cfg.gene_metadata['chr'] }
+        return { chrom : luigi.LocalTarget(f"{self.g1k_file_dir}/ALL.chr{chrom}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz") for chrom in self.cfg.gene_metadata['chr'] }
 
     def run(self):
         os.chdir(self.g1k_file_dir)
@@ -397,7 +397,7 @@ class DownloadG1KVCFs(DefaultPipelineTask):
 @requires(DownloadG1KVCFs)
 class DownloadG1KTBIs(DefaultPipelineTask):
     def output(self):
-        return { chrom : luigi.LocalTarget(self.g1k_file_dir + f"/ALL.chr{chrom}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi") for chrom in self.cfg.gene_metadata['chr'] }
+        return { chrom : luigi.LocalTarget(f"{self.g1k_file_dir}/ALL.chr{chrom}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi") for chrom in self.cfg.gene_metadata['chr'] }
 
     def run(self):
         os.chdir(self.g1k_file_dir)
@@ -421,7 +421,7 @@ class ExtractData(DefaultPipelineTask):
             symbol = gene['symbol']
 
             args = ["tabix", "-h",
-                    self.g1k_file_dir + f"/ALL.chr{chrom}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz",
+                    f"{self.g1k_file_dir}/ALL.chr{chrom}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz",
                     f"{chrom}:{start_hg37}-{end_hg37}"]
 
             pipeline_utils.run_process(args, redirect_stdout_path=(self.g1k_file_dir + f'/1000G_{symbol}.hg37.vcf'))
@@ -431,12 +431,12 @@ class ExtractData(DefaultPipelineTask):
 @requires(ExtractData)
 class ConcatenateG1KData(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.g1k_file_dir + f"/1000G.hg37.vcf")
+        return luigi.LocalTarget(f"{self.g1k_file_dir}/1000G.hg37.vcf")
 
     def run(self):
         args_for_concatenate_step = ["vcf-concat"]
         for symbol in self.cfg.gene_metadata['symbol']:
-            args_for_concatenate_step.append(self.g1k_file_dir + f"/1000G_{symbol}.hg37.vcf")
+            args_for_concatenate_step.append(f"{self.g1k_file_dir}/1000G_{symbol}.hg37.vcf")
         pipeline_utils.run_process(args_for_concatenate_step, redirect_stdout_path=self.output().path)
         pipeline_utils.check_file_for_contents(self.output().path)
 
@@ -444,7 +444,7 @@ class ConcatenateG1KData(DefaultPipelineTask):
 @requires(ConcatenateG1KData)
 class CrossmapG1KData(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.g1k_file_dir + f"/1000G.hg38.vcf")
+        return luigi.LocalTarget(f"{self.g1k_file_dir}/1000G.hg38.vcf")
 
     def run(self):
         brca_resources_dir = self.cfg.resources_dir
@@ -462,7 +462,7 @@ class CrossmapG1KData(DefaultPipelineTask):
 @requires(CrossmapG1KData)
 class SortG1KData(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.g1k_file_dir + f"/1000G.sorted.hg38.vcf")
+        return luigi.LocalTarget(f"{self.g1k_file_dir}/1000G.sorted.hg38.vcf")
 
     def run(self):
         args = ["vcf-sort", self.input().path]
@@ -473,7 +473,7 @@ class SortG1KData(DefaultPipelineTask):
 @requires(SortG1KData)
 class CopyG1KOutputToOutputDir(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.cfg.output_dir + f"/1000G.sorted.hg38.vcf")
+        return luigi.LocalTarget(f"{self.cfg.output_dir}/1000G.sorted.hg38.vcf")
 
     def run(self):
         copy(self.input().path, self.cfg.output_dir)
