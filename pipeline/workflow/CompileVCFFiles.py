@@ -292,7 +292,7 @@ class ConcatenateLOVDData(DefaultPipelineTask):
         return luigi.LocalTarget(f"{self.lovd_file_dir}/lovd_concatenated_genes.txt")
 
     def run(self):
-        pipeline_utils.concatenate_files_with_identical_headers(self.lovd_file_dir, self.output().path)
+        pipeline_utils.concatenate_files_with_identical_header_rows(self.lovd_file_dir, self.output().path)
         pipeline_utils.check_file_for_contents(self.output().path)
 
 

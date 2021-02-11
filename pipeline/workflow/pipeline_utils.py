@@ -119,7 +119,7 @@ def concatenate_symbols(symbols):
     return concatted_symbols
 
 
-def concatenate_files_with_identical_headers(file_directory, output):
+def concatenate_files_with_identical_header_rows(file_directory, output):
     allFiles = glob.glob(file_directory + "/*.txt")
     with open(output, 'wb') as outfile:
         for i, fname in enumerate(allFiles):
