@@ -1,7 +1,8 @@
 import logging
 import subprocess
 import tempfile
-from typing import Dict, List, Iterable
+from typing import Dict, List, Iterable, Optional
+from os import path
 
 import click
 import hgvs.assemblymapper
@@ -50,9 +51,10 @@ TMP_CDNA_NORM_LEFT_ALINGED_FIELD = 'tmp_HGVS_CDNA_FIELD_left'
 TMP_PROTEIN_LEFT_ALINGED_FIELD = 'tmp_Protein_Field_left'
 
 
-def _normalize_genomic_coordinates(hgvs_obj: SequenceVariant, strand: str, hgvs_norm_3: Normalizer, hgvs_norm_5: Normalizer):
+def _normalize_genomic_coordinates(hgvs_obj: Optional[SequenceVariant], strand: str, hgvs_norm_3: Normalizer, hgvs_norm_5: Normalizer):
     normalizer = hgvs_norm_3 if strand == config.POSITIVE_STRAND else hgvs_norm_5
-
+    if hgvs_obj is None:
+        return None
     try:
         return normalizer.normalize(hgvs_obj)
     except HGVSError as e:
@@ -126,8 +128,23 @@ def convert_to_hg37(vars: Iterable[VCFVariant], brca_resources_dir: str):
 
     vcf_out_lines = open(vcf_tmp_out, 'r').readlines()
 
-    return [VCFVariant(v[0], int(v[1]), v[3], v[4]) for v in
-            [l.strip().split('\t') for l in vcf_out_lines]]
+    if path.exists(vcf_tmp_out + '.unmap'):
+        vcf_out_failed_lines = open(vcf_tmp_out + '.unmap', 'r').readlines()
+        return ([VCFVariant(v[0], int(v[1]), v[3], v[4]) for v in [l.strip().split('\t') for l in vcf_out_lines]],
+                [VCFVariant(v[0], int(v[1]), v[3], v[4]) for v in [l.strip().split('\t') for l in vcf_out_failed_lines]])
+    else:
+        return ([VCFVariant(v[0], int(v[1]), v[3], v[4]) for v in [l.strip().split('\t') for l in vcf_out_lines]], [])
+
+
+def handle_failed_hg37_translations(df, var_objs_hg37, var_objs_hg37_failed, tmp_hgvs_hg37_values, hgvs_proc):
+    # set None values for any hg37 coordinates that cannot be derived and add to lists in proper order
+    for v in var_objs_hg37_failed:
+        hgvs_obj = v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh38_Assem])
+        row_number = df[df[GENOMIC_HGVS_HG38_COL] == str(hgvs_obj)].index[0]
+        var_objs_hg37.insert(row_number, None)
+        tmp_hgvs_hg37_values.insert(row_number, None)
+        logging.info("Could not compute hg37 representation of internal for {}".format(str(hgvs_obj)))
+    return (var_objs_hg37, tmp_hgvs_hg37_values, df)
 
 
 def get_synonyms(row: pd.Series, hgvs_proc: HgvsWrapper, syn_ac_dict: Dict[str, List[str]]):
@@ -231,16 +248,19 @@ def main(input, output, log_path, config_file, resources, processes):
     df[GENOMIC_HGVS_HG38_COL] = df[TMP_HGVS_HG38].apply(str)
 
     logging.info("Compute hg37 representation of internal representation")
-    var_objs_hg37 = convert_to_hg37(df[VAR_OBJ_FIELD], resources)
+    var_objs_hg37, var_objs_hg37_failed = convert_to_hg37(df[VAR_OBJ_FIELD], resources)
+
+    tmp_hgvs_hg37_values = [v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh37_Assem]) for v in var_objs_hg37]
+
+    var_objs_hg37, tmp_hgvs_hg37_values, df = handle_failed_hg37_translations(df, var_objs_hg37, var_objs_hg37_failed, tmp_hgvs_hg37_values, hgvs_proc)
+
+    df[TMP_HGVS_HG37] = pd.Series(tmp_hgvs_hg37_values)
 
     logging.info("Compute hg37 normalized representation of internal")
     # normalizing again for the hg37 representation. An alternative would be to convert the normalized hg38 representation to hg37.
     # If we use crossmap, we would need a way to convert the VCF like representation back to an hgvs object, which we currently
     # are unable to do properly. That is, we can use VCFVariant.to_hgvs_obj, however, structural variants will be converted
     # to delins, losing information if a variant was e.g. a del, ins, or dup.
-
-    df[TMP_HGVS_HG37] = pd.Series(
-        [v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh37_Assem]) for v in var_objs_hg37])
 
     df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG37,
                                                                 GENOMIC_HGVS_HG37_COL, True, strand_dict), processes)
@@ -284,7 +304,12 @@ def main(input, output, log_path, config_file, resources, processes):
     df[PYHGVS_GENOMIC_COORDINATE_38_COL] = df[VAR_OBJ_FIELD].apply(lambda v: str(v))
 
     df[PYHGVS_GENOMIC_COORDINATE_37_COL] = pd.Series([str(v) for v in var_objs_hg37])
-    df[PYHGVS_HG37_START_COL] = pd.Series([v.pos for v in var_objs_hg37])
+
+    # handles missing hg37 coordinates
+    hg37_start_col_pos = [ v.pos if v else None for v in var_objs_hg37 ]
+
+    df[PYHGVS_HG37_START_COL] = pd.Series(hg37_start_col_pos)
+
     df[PYHGVS_HG37_END_COL] = df[PYHGVS_HG37_START_COL] + (df[HG38_END_COL] - df[HG38_START_COL])
 
     #### Protein

@@ -28,7 +28,7 @@ VICTOR_IMAGE := {{ VICTOR_IMAGE | default("brcachallenge/victor:" + VICTOR_IMAGE
 RELEASE_NOTES_PATH := {{ RELEASE_NOTES_PATH | default(WORK_DIR + "/release_notes_" + RELEASE_TAG + ".txt") }}
 
 # directory for results
-OUT_DIR := {{ OUT_DIR | default(WORK_DIR + "/brca_out") }}
+OUT_DIR := {{ OUT_DIR | default(WORK_DIR + "/data_out") }}
 
 CODE_BASE := {{ CODE_BASE|default("../../..") }}
 GIT_COMMIT := {{ GIT_COMMIT|default("master") }}
