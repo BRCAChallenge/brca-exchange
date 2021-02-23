@@ -24,6 +24,8 @@ priors_filter_method_dir = os.path.abspath('../splicingfilter')
 utilities_method_dir = os.path.abspath('../utilities')
 vr_method_dir = os.path.abspath('../vr')
 
+field_metadata_path = os.path.abspath(os.path.join('..', 'field_metadata.tsv'))
+field_metadata_path_additional = os.path.abspath(os.path.join('..', 'field_metadata_additional_fields_variant_output_file.tsv'))
 
 class PipelineParams(luigi.Config):
     date = luigi.DateParameter(default=datetime.date.today())
@@ -105,6 +107,8 @@ class DefaultPipelineTask(luigi.Task):
         self.exac_file_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.file_parent_dir + '/exac')
         self.enigma_file_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.file_parent_dir + '/enigma')
         self.assays_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.file_parent_dir + '/functional_assays')
+
+        self.bayesdel_output = os.path.join(self.artifacts_dir, 'built_with_bayesdel.tsv')
 
     def on_failure(self, exception):
         # renaming files by prefixing filename with "FAILURE_". This way, on rerunning the pipeline the failed task is

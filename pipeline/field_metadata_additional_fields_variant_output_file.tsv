@@ -1,0 +1,2 @@
+Field Name	Category	Variants Output Mapping	Description	Example Value	Useful Resources
+NA	Nomenclature	genomic_vcf38	normalized (right aligned w.r.t cDNA) VCF like representation	chr17:g.43063368:T>C

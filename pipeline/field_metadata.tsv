@@ -1,0 +1,380 @@
+Field Name	Category	Variants Output Mapping	Description	Example Value	Useful Resources
+Source	Provenance	#COPY	"One or more labs, repositories, consortiums, or other entities who reported data for the variant (does not include Submitters to ClinVar)"	"ENIGMA,ClinVar,LOVD,ESP, BIC,1000_Genomes,ExAC,gnomAD,exLOVD"
+Chr	Nomenclature	#COPY	The chromosome on which the variant is found	17
+Pos	Nomenclature	#TRANSFORM	"The position of the variant, per _____ nomenclature"	43063368
+Ref	Nomenclature	#TRANSFORM	The nucleotide(s) that is in the reference sequence at this position	T
+Alt	Nomenclature	#TRANSFORM	The nucleotide(s) that has changed in this variant	C
+URL_ENIGMA	Reference	#COPY	Evidence URL that helped informed ENIGMA interpretation	http://hci-exlovd.hci.utah.edu/variants.php?select_db=BRCA1&action=search_all&search_Variant%2FDNA=c.5158A%3EG
+Condition_ID_type_ENIGMA	Provenance	#COPY	Ontology used by ENIGMA for describing phenotypic conditions	OMIM	https://www.omim.org/about
+Condition_ID_value_ENIGMA	Provenance	#COPY	Phenotypic condition that ENIGMA classifies variants against	"BREAST-OVARIAN CANCER, FAMILIAL, SUSCEPTIBILITY TO, 1; BROVCA1 (604370)"
+Condition_category_ENIGMA	Provenance	#COPY	Category of phenotypic condition relating to ENIGMA classificaiton	Disease
+Clinical_significance_ENIGMA	Clinical Significance	#COPY	variant’s clinical classification and supporting information as provided by ENIGMA expert panel review	Benign
+Date_last_evaluated_ENIGMA	Clinical Significance	#COPY	"If applicable, date on which the clinical significance of the variant was last evaluated by ENIGMA"	8/10/15
+Assertion_method_ENIGMA	Provenance	#COPY	citation or URL describing the method and criteria used to make assertions of clinical significance	ENIGMA BRCA1/2 Classification Criteria (2015)
+Assertion_method_citation_ENIGMA	Provenance	#COPY	Publication that describes the assertion method in more detail	https://submit.ncbi.nlm.nih.gov/ft/byid/hxnfuuxx/enigma_rules_2015-03-26.pdf
+Clinical_significance_citations_ENIGMA	Provenance	#COPY	Publication in which the clinical significance was determined	PMID:21990134
+Comment_on_clinical_significance_ENIGMA	Clinical Significance	#COPY	"Comments on the derivation of the IARC class, provided by ENIGMA"	"IARC class based on posterior probability from multifactorial likelihood analysis, thresholds for class as per Plon et al. 2008 (PMID: 18951446). Class 1 based on posterior probability = 0.000000000000344"
+Collection_method_ENIGMA	Provenance	#COPY	The method used to collect the data that supports the assertion of clinical significance	Curation
+Allele_origin_ENIGMA	Provenance	#COPY	"Classification of variant origin, either germline or somatic"	Germline
+ClinVarAccession_ENIGMA	Nomenclature	#COPY	Accession corresponding to ENIGMA's submission to ClinVar	SCV000244390.1
+BX_ID_ENIGMA	Internal	#SKIP	"Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation"	6981
+Allele_frequency_1000_Genomes	Allele Frequency	#SKIP	"Overall allele frequency according to all studied populations, provided by 1000 Genomes"	0.000199681	http://www.internationalgenome.org/faq/which-populations-are-part-your-study/
+EAS_Allele_frequency_1000_Genomes	Allele Frequency	#SKIP	"Allele frequency in East Asian populations, per 1000 Genomes"	0	http://www.internationalgenome.org/faq/which-populations-are-part-your-study/
+EUR_Allele_frequency_1000_Genomes	Allele Frequency	#SKIP	"Allele frequency in European populations, per 1000 Genomes"	0	http://www.internationalgenome.org/faq/which-populations-are-part-your-study/
+AFR_Allele_frequency_1000_Genomes	Allele Frequency	#SKIP	"Allele frequency in African populations, per 1000 Genomes"	0	http://www.internationalgenome.org/faq/which-populations-are-part-your-study/
+AMR_Allele_frequency_1000_Genomes	Allele Frequency	#SKIP	"Allele frequency in Admixed American populations, per 1000 Genomes"	0.0014	http://www.internationalgenome.org/faq/which-populations-are-part-your-study/
+SAS_Allele_frequency_1000_Genomes	Allele Frequency	#SKIP	"Allele frequency in Southeast Asian Populations, per 1000 Genomes"	0	http://www.internationalgenome.org/faq/which-populations-are-part-your-study/
+BX_ID_1000_Genomes	Internal	#SKIP	"Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation"	2783
+Submitter_ClinVar	Provenance	#COPY	This field provides the name of the submitting organization	"Genome_Diagnostics_Laboratory,Erasmus_Medical_Center,DNA_and_Cytogenetics_Diagnostics_Unit,Breast_Cancer_Information_Core_(BIC)_(BRCA1),Ambry_Genetics,Eurofins_Clinical_Diagnostics,GeneDx,Invitae,Sinai_Health_System,University_Medical_Center_Utrecht,Evidence-based_Network_for_the_Interpretation_of_Germline_Mutant_Alleles_(ENIGMA),EGL_Genetic_Diagnostics,Department_of_Pathology_and_Laboratory_Medicine,Sharing_Clinical_Reports_Project_(SCRP)"
+Clinical_Significance_ClinVar	Clinical Significance	#COPY	Clinical Significance(s) provided by ClinVar; relate to variant clinical classification from individual submitters to ClinVar	"Benign,Uncertain_significance,Likely_benign"
+Date_Last_Updated_ClinVar	Provenance	#COPY	List of the dates the record was last updated in ClinVar.	"2018-04-19,2018-04-09,2018-11-13,2018-11-03,2018-06-30,2016-10-05,2018-08-29"
+DateSignificanceLastEvaluated_ClinVar	Provenance	#COPY	List of the dates the clinical significance of the variant was last evaluated (not the date that a patient was evaluated).	"1999-12-30,2015-08-10,2018-01-03,2015-03-10,2014-11-18,2008-11-14,2017-07-28,2015-09-25,2014-02-21,2015-09-21"
+SCV_ClinVar	Nomenclature	#COPY	List of ClinVar accessions for each submitted assertion	"SCV000244390,SCV000743378,SCV000145365,SCV000744593,SCV000109408,SCV000076849,SCV000167319,SCV000226798,SCV000591588,SCV000213306"
+SCV_Version_ClinVar	Nomenclature	#COPY	Version numbers of ClinVar accessions.  See SCV_ClinVar.	"1,1,1,1,2,7,11,4,1,3"
+Allele_Origin_ClinVar	Provenance	#COPY	The genetic origin of the variant for each observation	germline	https://www.ncbi.nlm.nih.gov/projects/clinvar/ClinVarDataDictionary.pdf
+Method_ClinVar	Provenance	#COPY	Method via which the ClinVar submitter collected data on the variant	"curation,clinical_testing"
+BX_ID_ClinVar	Internal	#SKIP	"List of arbitrary, unique identifiers for ClinVar submissions used by BRCA Exchange for the purpose of variant aggregation"	"28,107,281,152,811,400,000,000,000,000,000,000,000,000,000,000,000"
+Variant_frequency_LOVD	Provenance	#COPY	Observed frequency of the variant as reported to LOVD by the submitter.  Expressed as allele counts (observations of variant/total observations)	1/8085 cases
+Remarks_LOVD	Provenance	#COPY	remarks regarding variant described	"thresholds for class as per Plon 2008 (PMID:18951446). Class 5 based on posterior probability = 1,IARC class based on posterior probability from multifactorial likelihood analysis,VKGL data sharing initiative Nederland"
+Classification_LOVD	Clinical Significance	#COPY	"classification of variant based on clinical consequences, preferably using standardised criteria"	pathogenic
+HGVS_cDNA_LOVD	Nomenclature	#SKIP	LOVD variant identifer in HGVS cDNA nomenclature	NM_007294.3:c.131G>A
+Genetic_origin_LOVD	Provenance	#COPY	LOVD record type	"Unknown,CLASSIFICATION record,Germline,SUMMARY record"
+RNA_LOVD	Nomenclature	#COPY	LOVD variant identifier in HGVS RNA nomenclature	r.(?)
+Variant_effect_LOVD	Clinical Significance	#COPY	"Symbolic nomenclature to represent the effect of the variant on the function of the protein, in Submitter/Curator (R/C) format"	"+/+,+/."
+Individuals_LOVD	Provenance	#COPY	"The number of individuals the variant has been observed in, per submission. The individuals field does not account for all LOVD data on a variant, but accounts for the number of individuals observed by the submitter."	7
+Submitters_LOVD	Provenance	#COPY	"The name(s) of the researcher, research group, or individual who submitted the variant data to LOVD."	"Johan den Dunnen (Rotterdam,BE),AU),VKGL-NL (Nijmegen,NL),ENIGMA consortium (Brisbane,Erik Teugels (Brussel"
+DBID_LOVD	Provenance	#COPY	"ID given to the variant by LOVD. This ID is variant-specific, but not submitter-specific. BRCA1_001192"
+BX_ID_LOVD	Internal	#SKIP	"Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation"	"22209,22208,22210,22211"
+Created_date_LOVD	Provenance	#COPY	The date that variant data was first submitted to LOVD.	"2018-04-02 11:41:21,2019-03-11 21:42:51,2018-01-15 20:58:59,2014-02-03 22:13:57,2015-10-08 12:00:00"
+Edited_date_LOVD	Provenance	#COPY	"Information gathered about variant's impact, provided by LOVD"	"2016-08-05 14:13:49,2018-04-02 11:41:21,2019-03-11 21:42:51,2019-12-04 15:24:38,2017-08-18 17:34:03"
+Combined_prior_probablility_exLOVD	Evidence	#COPY	"Prior probability of variant pathogenicity from sequence data, considering protein and splicing impact"	0.03
+Segregation_LR_exLOVD	Evidence	#COPY	"Log ratio describing the likelihood of variant pathogenicity, given co-segregation data"	0.00001
+Sum_family_LR_exLOVD	Evidence	#COPY	Log ratio describing the likelihood of variant pathogenicity given family history data	5.89E-07
+Co_occurrence_LR_exLOVD	Evidence	#COPY	Log ratio describing the likelihood of variant pathogenicity given variant co-occurrence data	3.09
+Missense_analysis_prior_probability_exLOVD	Evidence	#COPY	"Prior probability of variant pathogenicity from sequence data, considering protein impact only"	0.03
+Posterior_probability_exLOVD	Evidence	#COPY	"Posterior probability of variant pathogenicity, from multifactorial analysis"	0
+Case_control_LR_exLOVD	Evidence	#COPY	Log ratio estimated from analysis of matched case (diagnosed with cancer) and control (unaffected by cancer) patients. From ExUV. 2.6741E
+Pathology_LR_exLOVD	Evidence	#COPY	likelihood ratio estimated from tumor pathology data from cancer patients who carry the variant. From ExUV  3.73
+IARC_class_exLOVD	Evidence	#COPY	IARC class corresponding the the posterior probability	1 - Not pathogenic or of no clinical significance
+Literature_source_exLOVD	Provenance	#COPY	Literature reference for the BRCA ExUV /exLOVD data analyses 	Easton et al. 2007
+BX_ID_exLOVD	Internal	#SKIP	"Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation"	162
+Allele_frequency_ExAC	Allele Frequency	#SKIP	"Minor allele frequency, per ExAC (excluding TCGA data)"	9.42E-05
+Allele_count_AFR_ExAC	Allele Frequency	#SKIP	Number of chromosomes with this variant in African populations	1
+Allele_number_AFR_ExAC	Allele Frequency	#SKIP	Number of total chromosomes studied (for this variant) in African/African American populations 	8978
+Allele_frequency_AFR_ExAC	Allele Frequency	#SKIP	"Allele frequency in African/African American populations, per ExAC"	0.000111
+Homozygous_count_AFR_ExAC	Allele Frequency	#SKIP	Number of homozygotes with the variant in African populations	0
+Allele_count_AMR_ExAC	Allele Frequency	#SKIP	Count of observed alternate alleles (variant) in Admixed American/Latino Populations	7
+Allele_number_AMR_ExAC	Allele Frequency	#SKIP	Number of total chromosomes studied (for this variant) in Admixed American/Latino populations 	11154
+Allele_frequency_AMR_ExAC	Allele Frequency	#SKIP	"Allele frequency in Admixed American/Latino populations, per ExAC"	0.000628
+Homozygous_count_AMR_ExAC	Allele Frequency	#SKIP	Number of homozygotes with the allele in Admixed American/Latino Populations	0
+Allele_count_EAS_ExAC	Allele Frequency	#SKIP	Count of observed alternate alleles (variant) in East Asian Populations	0
+Allele_number_EAS_ExAC	Allele Frequency	#SKIP	Number of total chromosomes studied (for this variant) in East Asian populations 	7818
+Allele_frequency_EAS_ExAC	Allele Frequency	#SKIP	"Allele frequency in East Asian populations, per ExAC"	0
+Homozygous_count_EAS_ExAC	Allele Frequency	#SKIP	Number of homozygotes with hte variant in East Asian populations	0
+Allele_count_FIN_ExAC	Allele Frequency	#SKIP	Number of chromosomes with the variant in Finnish populations	0
+Allele_number_FIN_ExAC	Allele Frequency	#SKIP	Number of total chromosomes studied (for this variant) in Finnish populations	6584
+Allele_frequency_FIN_ExAC	Allele Frequency	#SKIP	"Allele frequency in Finnish populations, per ExAC and separated from European because of an enriched data set"	0
+Homozygous_count_FIN_ExAC	Allele Frequency	#SKIP	Number of homozgotes with the allele in Finnish populations	0
+Allele_count_NFE_ExAC	Allele Frequency	#SKIP	Count of observed alternate alleles (variant) in Non-Finish  Populations	2
+Allele_number_NFE_ExAC	Allele Frequency	#SKIP	Number of total chromosomes studied (for this variant) in Non-Finnish European populations 	53530
+Allele_frequency_NFE_ExAC	Allele Frequency	#SKIP	"Allele frequency in Non-Finnish European populations, per ExAC (Allele Count/Alle Number)"	3.74E-05
+Homozygous_count_NFE_ExAC	Allele Frequency	#SKIP	Number of homozygotes with the allele in Non-Finnish European populations	0
+Allele_count_OTH_ExAC	Allele Frequency	#SKIP	Number of chromosomes with this variant in Other populations	0
+Allele_number_OTH_ExAC	Allele Frequency	#SKIP	"Number of total chromosomes studied (for this variant) in populations other than those provided, per ExAC"	694
+Allele_frequency_OTH_ExAC	Allele Frequency	#SKIP	"Allele frequency in populations other than those provided, per ExAC"	0
+Homozygous_count_OTH_ExAC	Allele Frequency	#SKIP	Number of homozygotes with the allele in Other Populations	0
+Allele_count_SAS_ExAC	Allele Frequency	#SKIP	Count of observed alternate alleles (variant) in South Asian Populations	0
+Allele_number_SAS_ExAC	Allele Frequency	#SKIP	Number of total chromosomes studied (for this variant) in South Asian populations	16260
+Allele_frequency_SAS_ExAC	Allele Frequency	#SKIP	"Allele frequency in South Asian populations, per ExAC"	0
+Homozygous_count_SAS_ExAC	Allele Frequency	#SKIP	Number of homozygotes with the allele in South Asian Populations	0
+BX_ID_ExAC	Internal	#SKIP	"Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation"	2281
+Minor_allele_frequency_percent_ESP	Allele Frequency	#SKIP	"Percent minor allele frequency for EA, AA, and overall, from ESP"	"0.0233,0.0,0.0154"
+EA_Allele_Frequency_ESP	Allele Frequency	#SKIP	"Allele frequency in European-American populations, per ESP"	0.000233
+AA_Allele_Frequency_ESP	Allele Frequency	#SKIP	"Allele frequency in African-American populations, per ESP"	0
+Allele_Frequency_ESP	Allele Frequency	#SKIP	"Allele frequency in entire data set, per ESP"	0.000154
+BX_ID_ESP	Internal	#SKIP	"Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation"	461
+Clinical_classification_BIC	Clinical Significance	#SKIP	"Status of the clinical classification, as reported to BIC"	Pending
+Number_of_family_member_carrying_mutation_BIC	Allele Frequency	#SKIP	"Observations of the number of family members with the variant, as reported to BIC"	4
+Patient_nationality_BIC	Population	#SKIP	Nationality of observed patients as reported to BIC	"Western Europe,-,Dutch?"
+Germline_or_Somatic_BIC	Provenance	#SKIP	Whether the variant was in the germline or arose somatically	G
+Mutation_type_BIC	Provenance	#SKIP	"Type of mutation, as reported to BIC"	M
+Clinical_importance_BIC	Clinical Significance	#SKIP	Clinical significance as reported to BIC	unknown
+Ethnicity_BIC	Population	#SKIP	"Ethnicity of probands with the variant, as reported to BIC"	Latin American/Caribbean
+Literature_citation_BIC	Provenance	#SKIP	"Literature citation pertaining to the variant, from BIC"	"1995.,Plummer et al,-, Hum Mol Genet 4:1989-1991"
+BX_ID_BIC	Internal	#SKIP	"Arbitrary, unique identifiers for BIC submissions used by BRCA Exchange for the purpose of variant aggregation"	"159,151,590,615,917,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000"
+HGVS_cDNA_GnomAD	Nomenclature	#SKIP	"HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA"
+Flags_GnomAD	Remarks	#COPY	Flags provided by gnomAD to indicate an annotation or something unusual about the data
+Variant_id_GnomAD	Internal	#SKIP	Identifier provided by gnomAD
+faf95_popmax_genome_GnomAD	Allele Frequency	#COPY	The gnomAD genome population frequency that is most significant with a 95% confidence threshold
+faf95_popmax_population_genome_GnomAD	Allele Frequency	#COPY	The gnomAD population that is most significant (most frequent) in the genome data at 95% confidence
+Allele_count_genome_AFR_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of African African American Populations, per gnomAD"
+Allele_count_hom_genome_AFR_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous African/African American Populations, per gnomAD"
+Allele_number_genome_AFR_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of African/African American Populations
+Allele_frequency_genome_AFR_GnomAD	Allele Frequency	#COPY	Allele Frequency in genomes of African/African American Populations
+Allele_count_genome_AMR_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of Latino Populations, per gnomAD"
+Allele_count_hom_genome_AMR_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous Latino Populations, per gnomAD"
+Allele_number_genome_AMR_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of Latino Populations
+Allele_frequency_genome_AMR_GnomAD	Allele Frequency	#COPY	Allele Frequency in genomes of Latino Populations
+Allele_count_genome_ASJ_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of Ashkenazi Jewish Populations, per gnomAD"
+Allele_count_hom_genome_ASJ_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous Ashkenazi Jewish Populations, per gnomAD"
+Allele_number_genome_ASJ_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of Ashkenazi Jewish Populations
+Allele_frequency_genome_ASJ_GnomAD	Allele Frequency	#COPY	Allele Frequency in genomes of Ashkenazi Jewish Populations
+Allele_count_genome_EAS_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of East Asian Populations, per gnomAD"
+Allele_count_hom_genome_EAS_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous East Asian Populations, per gnomAD"
+Allele_number_genome_EAS_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of East Asian Populations
+Allele_frequency_genome_EAS_GnomAD	Allele Frequency	#COPY	Allele Frequency in genomes of East Asian Populations
+Allele_count_genome_EAS_JPN_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of Japanese populations (subset of East Asian)
+Allele_count_hom_genome_EAS_JPN_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of homozygous Japanese populations (subset of East Asian)
+Allele_number_genome_EAS_JPN_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the genomes of Japanese populations (subset of East Asian)
+Allele_frequency_genome_EAS_JPN_GnomAD	Allele Frequency	#COPY	Allele Frequency in the genomes of Japanese populations (subset of East Asian)
+Allele_count_genome_EAS_KOR_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of Korean populations (subset of East Asian)
+Allele_count_hom_genome_EAS_KOR_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of homozygous Korean populations (subset of East Asian)
+Allele_number_genome_EAS_KOR_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the genomes of Korean populations (subset of East Asian)
+Allele_frequency_genome_EAS_KOR_GnomAD	Allele Frequency	#COPY	Allele Frequency in the genomes of Korean populations (subset of East Asian)
+Allele_count_genome_EAS_OEA_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of Other East Asian populations (subset of East Asian)
+Allele_count_hom_genome_EAS_OEA_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of homozygous Other East Asian populations (subset of East Asian)
+Allele_number_genome_EAS_OEA_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the genomes of Other East Asian populations (subset of East Asian)
+Allele_frequency_genome_EAS_OEA_GnomAD	Allele Frequency	#COPY	Allele Frequency in the genomes of Other East Asian populations (subset of East Asian)
+Allele_count_genome_FIN_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of Finnish Populations, per gnomAD"
+Allele_count_hom_genome_FIN_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous Finnish Populations, per gnomAD"
+Allele_number_genome_FIN_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of Finnish Populations
+Allele_frequency_genome_FIN_GnomAD	Allele Frequency	#COPY	Allele Frequency in genomes of Finnish Populations
+Allele_count_genome_NFE_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of Non-Finnish European Populations, per gnomAD"
+Allele_count_hom_genome_NFE_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous Non-Finnish European Populations, per gnomAD"
+Allele_number_genome_NFE_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of Non-Finnish European Populations
+Allele_frequency_genome_NFE_GnomAD	Allele Frequency	#COPY	Allele Frequency in genomes of Non-Finnish European Populations
+Allele_count_genome_NFE_EST_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of Estonian populations (subset of Non-Finnish European)
+Allele_count_hom_genome_NFE_EST_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of homozygous Estonian populations (subset of Non-Finnish European)
+Allele_number_genome_NFE_EST_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the genomes of Estonian populations (subset of Non-Finnish European)
+Allele_frequency_genome_NFE_EST_GnomAD	Allele Frequency	#COPY	Allele Frequency in the genomes of Estonian populations (subset of Non-Finnish European)
+Allele_count_genome_NFE_BGR_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of Bulgarian populations (subset of Non-Finnish European)
+Allele_count_hom_genome_NFE_BGR_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of homozygous Bulgarian populations (subset of Non-Finnish European)
+Allele_number_genome_NFE_BGR_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the genomes of Bulgarian populations (subset of Non-Finnish European)
+Allele_frequency_genome_NFE_BGR_GnomAD	Allele Frequency	#COPY	Allele Frequency in the genomes of Bulgarian populations (subset of Non-Finnish European)
+Allele_count_genome_NFE_NWE_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of Northwestern European populations (subset of Non-Finnish European)
+Allele_count_hom_genome_NFE_NWE_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of homozygous Northwestern European populations (subset of Non-Finnish European)
+Allele_number_genome_NFE_NWE_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the genomes of Northwestern European populations (subset of Non-Finnish European)
+Allele_frequency_genome_NFE_NWE_GnomAD	Allele Frequency	#COPY	Allele Frequency in the genomes of Northwestern European populations (subset of Non-Finnish European)
+Allele_count_genome_NFE_ONF_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of Other Non-Finnish European populations (subset of Non-Finnish European)
+Allele_count_hom_genome_NFE_ONF_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of homozygous Other Non-Finnish European populations (subset of Non-Finnish European)
+Allele_number_genome_NFE_ONF_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the genomes of Other Non-Finnish European populations (subset of Non-Finnish European)
+Allele_frequency_genome_NFE_ONF_GnomAD	Allele Frequency	#COPY	Allele Frequency in the genomes of Other Non-Finnish European populations (subset of Non-Finnish European)
+Allele_count_genome_NFE_SEU_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of Southern European populations (subset of Non-Finnish European)
+Allele_count_hom_genome_NFE_SEU_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of homozygous Southern European populations (subset of Non-Finnish European)
+Allele_number_genome_NFE_SEU_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the genomes of Southern European populations (subset of Non-Finnish European)
+Allele_frequency_genome_NFE_SEU_GnomAD	Allele Frequency	#COPY	Allele Frequency in the genomes of Southern European populations (subset of Non-Finnish European)
+Allele_count_genome_NFE_SWE_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of Swedish populations (subset of Non-Finnish European)
+Allele_count_hom_genome_NFE_SWE_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of homozygous Swedish populations (subset of Non-Finnish European)
+Allele_number_genome_NFE_SWE_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the genomes of Swedish populations (subset of Non-Finnish European)
+Allele_frequency_genome_NFE_SWE_GnomAD	Allele Frequency	#COPY	Allele Frequency in the genomes of Swedish populations (subset of Non-Finnish European)
+Allele_count_genome_OTH_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of Other Populations, per gnomAD"
+Allele_count_hom_genome_OTH_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous Other Populations, per gnomAD"
+Allele_number_genome_OTH_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of Other Populations
+Allele_frequency_genome_OTH_GnomAD	Allele Frequency	#COPY	Allele Frequency in genomes of Other Populations
+Allele_count_genome_SAS_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of South Asian Populations, per gnomAD"
+Allele_count_hom_genome_SAS_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous South Asian Populations, per gnomAD"
+Allele_number_genome_SAS_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of South Asian Populations
+Allele_frequency_genome_SAS_GnomAD	Allele Frequency	#COPY	Allele Frequency in genomes of South Asian Populations
+Allele_count_genome_GnomAD	Allele Frequency	#COPY	Total count of observed alternate alleles (variant) in genomes
+Allele_number_genome_GnomAD	Allele Frequency	#COPY	Total number of total chromosomes studied (for this variant) in genomes
+Allele_frequency_genome_GnomAD	Allele Frequency	#COPY	"Overall allele frequency (for genomes) according to all studied populations, per gnomAD"
+faf95_popmax_exome_GnomAD	Allele Frequency	#COPY	The gnomAD exome population frequency that is most significant with a 95% confidence threshold
+faf95_popmax_population_exome_GnomAD	Allele Frequency	#COPY	The gnomAD population that is most significant (most frequent) in the exome data at 95% confidence
+Allele_count_exome_AFR_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of African African American Populations, per gnomAD"
+Allele_count_hom_exome_AFR_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of homozygous African/African American Populations, per gnomAD"
+Allele_number_exome_AFR_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in exomes of African/African American Populations
+Allele_frequency_exome_AFR_GnomAD	Allele Frequency	#COPY	Allele Frequency in exomes of African/African American Populations
+Allele_count_exome_AMR_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of Latino Populations, per gnomAD"
+Allele_count_hom_exome_AMR_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of homozygous Latino Populations, per gnomAD"
+Allele_number_exome_AMR_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in exomes of Latino Populations
+Allele_frequency_exome_AMR_GnomAD	Allele Frequency	#COPY	Allele Frequency in exomes of Latino Populations
+Allele_count_exome_ASJ_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of Ashkenazi Jewish Populations, per gnomAD"
+Allele_count_hom_exome_ASJ_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of homozygous Ashkenazi Jewish Populations, per gnomAD"
+Allele_number_exome_ASJ_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in exomes of Ashkenazi Jewish Populations
+Allele_frequency_exome_ASJ_GnomAD	Allele Frequency	#COPY	Allele Frequency in exomes of Ashkenazi Jewish Populations
+Allele_count_exome_EAS_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of East Asian Populations, per gnomAD"
+Allele_count_hom_exome_EAS_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of homozygous East Asian Populations, per gnomAD"
+Allele_number_exome_EAS_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in exomes of East Asian Populations
+Allele_frequency_exome_EAS_GnomAD	Allele Frequency	#COPY	Allele Frequency in exomes of East Asian Populations
+Allele_count_exome_EAS_JPN_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of Japanese populations (subset of East Asian)
+Allele_count_hom_exome_EAS_JPN_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of homozygous Japanese populations (subset of East Asian)
+Allele_number_exome_EAS_JPN_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the exomes of Japanese populations (subset of East Asian)
+Allele_frequency_exome_EAS_JPN_GnomAD	Allele Frequency	#COPY	Allele Frequency in the exomes of Japanese populations (subset of East Asian)
+Allele_count_exome_EAS_KOR_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of Korean populations (subset of East Asian)
+Allele_count_hom_exome_EAS_KOR_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of homozygous Korean populations (subset of East Asian)
+Allele_number_exome_EAS_KOR_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the exomes of Korean populations (subset of East Asian)
+Allele_frequency_exome_EAS_KOR_GnomAD	Allele Frequency	#COPY	Allele Frequency in the exomes of Korean populations (subset of East Asian)
+Allele_count_exome_EAS_OEA_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of Other East Asian populations (subset of East Asian)
+Allele_count_hom_exome_EAS_OEA_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of homozygous Other East Asian populations (subset of East Asian)
+Allele_number_exome_EAS_OEA_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the exomes of Other East Asian populations (subset of East Asian)
+Allele_frequency_exome_EAS_OEA_GnomAD	Allele Frequency	#COPY	Allele Frequency in the exomes of Other East Asian populations (subset of East Asian)
+Allele_count_exome_FIN_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of Finnish Populations, per gnomAD"
+Allele_count_hom_exome_FIN_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of homozygous Finnish Populations, per gnomAD"
+Allele_number_exome_FIN_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in exomes of Finnish Populations
+Allele_frequency_exome_FIN_GnomAD	Allele Frequency	#COPY	Allele Frequency in exomes of Finnish Populations
+Allele_count_exome_NFE_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of Non-Finnish European Populations, per gnomAD"
+Allele_count_hom_exome_NFE_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of homozygous Non-Finnish European Populations, per gnomAD"
+Allele_number_exome_NFE_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in exomes of Non-Finnish European Populations
+Allele_frequency_exome_NFE_GnomAD	Allele Frequency	#COPY	Allele Frequency in exomes of Finnish Populations
+Allele_count_exome_NFE_EST_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of Estonian populations (subset of Non-Finnish European)
+Allele_count_hom_exome_NFE_EST_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of homozygous Estonian populations (subset of Non-Finnish European)
+Allele_number_exome_NFE_EST_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the exomes of Estonian populations (subset of Non-Finnish European)
+Allele_frequency_exome_NFE_EST_GnomAD	Allele Frequency	#COPY	Allele Frequency in the exomes of Estonian populations (subset of Non-Finnish European)
+Allele_count_exome_NFE_BGR_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of Bulgarian populations (subset of Non-Finnish European)
+Allele_count_hom_exome_NFE_BGR_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of homozygous Bulgarian populations (subset of Non-Finnish European)
+Allele_number_exome_NFE_BGR_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the exomes of Bulgarian populations (subset of Non-Finnish European)
+Allele_frequency_exome_NFE_BGR_GnomAD	Allele Frequency	#COPY	Allele Frequency in the exomes of Bulgarian populations (subset of Non-Finnish European)
+Allele_count_exome_NFE_NWE_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of Northwestern European populations (subset of Non-Finnish European)
+Allele_count_hom_exome_NFE_NWE_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of homozygous Northwestern European populations (subset of Non-Finnish European)
+Allele_number_exome_NFE_NWE_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the exomes of Northwestern European populations (subset of Non-Finnish European)
+Allele_frequency_exome_NFE_NWE_GnomAD	Allele Frequency	#COPY	Allele Frequency in the exomes of Northwestern European populations (subset of Non-Finnish European)
+Allele_count_exome_NFE_ONF_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of Other Non-Finnish European populations (subset of Non-Finnish European)
+Allele_count_hom_exome_NFE_ONF_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of homozygous Other Non-Finnish European populations (subset of Non-Finnish European)
+Allele_number_exome_NFE_ONF_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the exomes of Other Non-Finnish European populations (subset of Non-Finnish European)
+Allele_frequency_exome_NFE_ONF_GnomAD	Allele Frequency	#COPY	Allele Frequency in the exomes of Other Non-Finnish European populations (subset of Non-Finnish European)
+Allele_count_exome_NFE_SEU_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of Southern European populations (subset of Non-Finnish European)
+Allele_count_hom_exome_NFE_SEU_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of homozygous Southern European populations (subset of Non-Finnish European)
+Allele_number_exome_NFE_SEU_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the exomes of Southern European populations (subset of Non-Finnish European)
+Allele_frequency_exome_NFE_SEU_GnomAD	Allele Frequency	#COPY	Allele Frequency in the exomes of Southern European populations (subset of Non-Finnish European)
+Allele_count_exome_NFE_SWE_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of Swedish populations (subset of Non-Finnish European)
+Allele_count_hom_exome_NFE_SWE_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of homozygous Swedish populations (subset of Non-Finnish European)
+Allele_number_exome_NFE_SWE_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the exomes of Swedish populations (subset of Non-Finnish European)
+Allele_frequency_exome_NFE_SWE_GnomAD	Allele Frequency	#COPY	Allele Frequency in the exomes of Swedish populations (subset of Non-Finnish European)
+Allele_count_exome_OTH_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of Other Populations, per gnomAD"
+Allele_count_hom_exome_OTH_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of homozygous Other Populations, per gnomAD"
+Allele_number_exome_OTH_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in exomes of Other Populations
+Allele_frequency_exome_OTH_GnomAD	Allele Frequency	#COPY	Allele Frequency in exomes of Other Populations
+Allele_count_exome_SAS_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of South Asian Populations, per gnomAD"
+Allele_count_hom_exome_SAS_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of homozygous South Asian Populations, per gnomAD"
+Allele_number_exome_SAS_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in exomes of South Asian Populations
+Allele_frequency_exome_SAS_GnomAD	Allele Frequency	#COPY	Allele Frequency in exomes of South Asian Populations
+Allele_number_exome_GnomAD	Allele Frequency	#COPY	Total number of total chromosomes studied (for this variant) in exomes
+Allele_count_exome_GnomAD	Allele Frequency	#COPY	Total count of observed alternate alleles (variant) in exomes
+Allele_frequency_exome_GnomAD	Allele Frequency	#COPY	"Overall allele frequency (for exomes) according to all studied populations, per gnomAD"
+BX_ID_GnomAD	Internal	#SKIP	"Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation"
+HGVS_Nucleotide_Findlay_BRCA1_Ring_Function_Scores	Nomenclature	#SKIP	HGVS nucleotide nomenclature for the variant in the Findlay functional assay	c.-10A>T
+Log_RNA_Depletion_Findlay_BRCA1_Ring_Function_Scores	Evidence	#COPY	Log ratio comparing RNA expression with and without the variant	-0.006252529515
+Functional_Enrichment_Score_Findlay_BRCA1_Ring_Function_Scores	Evidence	#COPY	"Functional assay results for variants in critical domains of BRCA1, obtained using saturation genome editing; provided by Starita lab (see Findlay et al. 2018)"	-0.107071247
+BX_ID_Findlay_BRCA1_Ring_Function_Scores	Internal	#SKIP	"Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation"	152
+Gene_Symbol	Nomenclature	#COPY	HUGO symbol for the gene containing the variant	BRCA1
+Genomic_Coordinate_hg38	Nomenclature	#SKIP	Genomic coordinate of the variant in the hg38 genome build	chr17:43063368:T>C
+Reference_Sequence	Nomenclature	#COPY	transcript identifier used to keep track of different transcripts submitted to databases such as RefSeq; carried over to ClinVar	NM_007294.3
+Protein_Change	Nomenclature	#COPY	A shortened abbreviation of the HGVS Protein alias using one-letter abbreviation for amino acids.	T1720A
+HGVS_cDNA	Nomenclature	#SKIP	"HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA"	c.5158A>G
+HGVS_Protein	Nomenclature	#SKIP	The predicted protein-level change (if any) that would be introduced by the genomic variant.	p.(Thr1720Ala)
+BIC_Nomenclature	Nomenclature	#COPY	"Variant name according to BIC Nomenclature, which predates HGVS nomenclature and thus follows a different format"	5277A>G
+Hg38_Start	Nomenclature	#SKIP	Start coordinate in the Hg38 build	43063368
+Hg38_End	Nomenclature	#SKIP	End coordinate in the Hg38 build	43063368
+Hg37_Start	Nomenclature	#SKIP	Start coordinate in the Hg37 build	-
+Hg37_End	Nomenclature	#SKIP	End coordinate in the Hg37 build	-
+HGVS_RNA	Nomenclature	#SKIP	HGVS RNA variant nomenclature	-
+Allele_Frequency	Allele Frequency	#SKIP	"Summary of the allele frequencies from ExAC, 1000 Genomes and ESP"	9.415e-05 (ExAC minus TCGA)
+Max_Allele_Frequency	Allele Frequency	#SKIP	"(Deprecated) Largest single allele frequency from each of ExAC, 1000 Genomes and ESP"	-
+Genomic_Coordinate_hg37	Nomenclature	#SKIP	(Deprecated) Genomic coordinate of the variant in the hg37 genome build	-
+Source_URL	Provenance	#COPY	URL for the original source of the data	"http://hci-exlovd.hci.utah.edu/variants.php?select_db=BRCA1&action=search_all&search_Variant%2FDNA=c.5158A%3EG, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000244390, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000743378, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000145365, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000744593, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000109408, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000076849, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000167319, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000226798, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000591588, http://www.ncbi.nlm.nih.gov/clinvar/?term=SCV000213306"
+Discordant	Clinical Significance	#SKIP	(Deprecated) Indicates if there are discordant clinical significance interpretations for this variant	Concordant
+Synonyms	Nomenclature	#COPY	Alternate names for this variant	"NM_007294.3.c.5158A>G,T1720A,5277A>G,NC_000017.11.g.43063368T>C,LRG_292.g.154616A>G,NG_005905.2.g.154616A>G,P38398.p.Thr1720Ala,LRG_292p1.p.Thr1720Ala,p.Thr1720Ala,p.T1720A.ACC>GCC,NC_000017.10.g.41215385T>C,NR_027676.1.n.5294A>G,p.T1720A,U14680.1.n.5277A>G,LRG_292t1.c.5158A>G,NM_007294.2:c.5158A>G,NM_007300.3:c.5221A>G,NM_007299.3:c.1846A>G,NM_007298.3:c.1846A>G,NM_007297.3:c.5017A>G,U14680.1:c.5270A>G"
+Pathogenicity_expert	Clinical Significance	#SKIP	Variant pathogenicity as displayed in the Summary view	Benign / Little Clinical Significance
+Pathogenicity_all	Clinical Significance	#SKIP	Variant pathogenicity as displayed in the Detail view	"Benign(ENIGMA); Benign,Uncertain_significance,Likely_benign (ClinVar); Pending (BIC)"
+pyhgvs_cDNA	Nomenclature	cdna	"HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA"	NM_007294.3:c.5158A>G	https://brcaexchange.org/help#variant-naming-demystified
+Genomic_HGVS_38	Nomenclature	#COPY	HGVS representation of the variant relative to the GRCh38 genome   NC_000017.11:g.43125475T>G
+Genomic_HGVS_37	Nomenclature	#COPY	HGVS representation of the variant relative to the GRCh37 genome   NC_000017.10:g.41277492T>G
+pyhgvs_Genomic_Coordinate_38	Nomenclature	genomic_vcf38_source	"HGVS variant alias which references the nucleotide in genomic DNA, per the GRCh38 genome build"	chr17:g.43063368:T>C	https://brcaexchange.org/help#variant-naming-demystified
+pyhgvs_Genomic_Coordinate_37	Nomenclature	genomic_vcf37_source	"HGVS variant alias which references the nucleotide in genomic DNA, per the GRCh37 genome build"	chr17:g.41215385:T>C	https://brcaexchange.org/help#variant-naming-demystified
+pyhgvs_Hg37_Start	Nomenclature	#SKIP	Starting position in Hg37 build according to HGVS nomenclature	41215385	https://brcaexchange.org/help#variant-naming-demystified
+pyhgvs_Hg37_End	Nomenclature	#SKIP	Ending position in Hg37 build according to HGVS nomenclature	41215385	https://brcaexchange.org/help#variant-naming-demystified
+pyhgvs_Protein	Nomenclature	protein	HGVS protein nomenclature	NP_009225.1:p.(Thr1720Ala)	https://brcaexchange.org/help#variant-naming-demystified
+CA_ID	Nomenclature	#COPY	ClinGen Allele Registry canonical ID  CA247478059
+mupit_structure	Internal	#SKIP	"Indicates the three-dimensional protein structure that the variant can be visualized within, with MuPIT"	1t15
+varType	Evidence	variant_type	"Indicates the type of variant in terms of substitution, deletion, missense, etc. "	substitution
+varLoc	Evidence	variant_context	"Indicates whether a variant is in a clinically important domain, exon, intron, or splice-relevant position"	CI_domain_variant
+applicablePrior	Evidence	pathogenicity_prior	Final value for the In Silico Probability of Pathogenicity	0.03	https://brcaexchange.org/help#in-silico-prior-probabilities-of-pathogenicity
+applicableEnigmaClass	Clinical Significance	#SKIP	IARC class that corresponds to the applicable prior	class_2
+proteinPrior	Evidence	pathogenicity_protein_prior	Protein-level estimation for the In Silico Probability of Pathogenicity	0.03	https://brcaexchange.org/about/insilicoScoring
+refDonorPrior	Evidence	pathogenicity_splicing_prior_ref_donor	Intermediate value to determine splice-level estimation fro the In Silico Probability of Pathogenicity	N/A	https://brcaexchange.org/about/insilicoScoring
+deNovoDonorPrior	Evidence	pathogenicity_splicing_prior_de_novo	Intermediate value to determine splice-level estimation fro the In Silico Probability of Pathogenicity	0.02	https://brcaexchange.org/about/insilicoScoring
+refRefDonorMES	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+refRefDonorZ	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+altRefDonorMES	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+altRefDonorZ	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+refRefDonorSeq	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+altRefDonorSeq	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+refDonorVarStart	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+refDonorVarLength	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+refDonorExonStart	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+refDonorIntronStart	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+refDeNovoDonorMES	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	-5.48
+refDeNovoDonorZ	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	-5.761320639
+altDeNovoDonorMES	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	-4.57
+altDeNovoDonorZ	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	-5.370594282
+refDeNovoDonorSeq	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	TAGGGGTGA
+altDeNovoDonorSeq	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	TAGGGGTGG
+deNovoDonorVarStart	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	8
+deNovoDonorVarLength	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	1
+deNovoDonorExonStart	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	0
+deNovoDonorIntronStart	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	3
+deNovoDonorGenomicSplicePos	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	g.43063373
+deNovoDonorTranscriptSplicePos	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	c.5153
+closestDonorGenomicSplicePos	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	g.43063332
+closestDonorTranscriptSplicePos	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	c.5193+1
+closestDonorRefMES	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	11.08
+closestDonorRefZ	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	1.349040323
+closestDonorRefSeq	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	GAGGTAAGT
+closestDonorAltMES	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+closestDonorAltZ	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+closestDonorAltSeq	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+closestDonorExonStart	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	0
+closestDonorIntronStart	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	3
+deNovoDonorAltGreaterRefFlag	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	1
+deNovoDonorAltGreaterClosestRefFlag	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	0
+deNovoDonorAltGreaterClosestAltFlag	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+deNovoDonorFrameshiftFlag	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	1
+refAccPrior	Evidence	pathogenicity_splicing_prior_ref_acceptor	Intermediate value to determine splice-level estimation fro the In Silico Probability of Pathogenicity	N/A	https://brcaexchange.org/about/insilicoScoring
+deNovoAccPrior	Internal	#SKIP	Intermediate value to determine splice-level estimation fro the In Silico Probability of Pathogenicity	N/A	https://brcaexchange.org/about/insilicoScoring
+refRefAccMES	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+refRefAccZ	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+altRefAccMES	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+altRefAccZ	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+refRefAccSeq	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+altRefAccSeq	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+refAccVarStart	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+refAccVarLength	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+refAccExonStart	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+refAccIntronStart	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+refDeNovoAccMES	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	-2.8
+refDeNovoAccZ	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	-4.431555283
+altDeNovoAccMES	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	-1.93
+altDeNovoAccZ	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	-4.074069368
+refDeNovoAccSeq	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	GGTGACCCAGTCTATTAAAGAAA
+altDeNovoAccSeq	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	GGTGGCCCAGTCTATTAAAGAAA
+deNovoAccVarStart	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	4
+deNovoAccVarLength	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	1
+deNovoAccExonStart	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	20
+deNovoAccIntronStart	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	0
+deNovoAccGenomicSplicePos	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	g.43063353
+deNovoAccTranscriptSplicePos	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	c.5173
+closestAccGenomicSplicePos	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	g.43063374
+closestAccTranscriptSplicePos	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	c.5153-1
+closestAccRefMES	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	8.78
+closestAccRefZ	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	0.3267055187
+closestAccRefSeq	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	CTTTTCTATGATCTCTTTAGGGG
+closestAccAltMES	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+closestAccAltZ	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+closestAccAltSeq	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+closestAccExonStart	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	20
+closestAccIntronStart	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	0
+deNovoAccAltGreaterRefFlag	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	1
+deNovoAccAltGreaterClosestRefFlag	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	0
+deNovoAccAltGreaterClosestAltFlag	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+deNovoAccFrameshiftFlag	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	0
+spliceSite	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	0
+spliceRescue	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+spliceFlag	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	0
+frameshiftFlag	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+inExonicPortionFlag	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+CIDomainInRegionFlag	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+isDivisibleFlag	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+lowMESFlag	Internal	#SKIP	"Intermediate position, sequence, or value used in In Silico Prior Probability calculations"	N/A
+varConsequences	Nomenclature	#COPY	"Variant consequences, pulled from Ensembl's Variant Effect Predictor"	missense_variant	https://useast.ensembl.org/info/genome/variation/prediction/predicted_data.html#consequence_type_table
+VR_ID	Nomenclature	#COPY	The digest representing the variant (in GRCh38 genomic coordinates) by the GA4GH Variant Representation Standard	ga4gh:VA.kVvzAwHx3AlCzQ8u6b7J9bLNuxKcSnUr
+BayesDel_nsfp33a_noAF	Evidence	bayesdel_noaf	"BayesDel score"	0.55
