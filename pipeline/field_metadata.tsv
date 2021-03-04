@@ -1,4 +1,4 @@
-Field Name	Category	Variants Output Mapping	Description	Example Value	Useful Resources
+field_name	category	variants_output_mapping	description	example_value	useful_resources
 Source	Provenance	#COPY	"One or more labs, repositories, consortiums, or other entities who reported data for the variant (does not include Submitters to ClinVar)"	"ENIGMA,ClinVar,LOVD,ESP, BIC,1000_Genomes,ExAC,gnomAD,exLOVD"
 Chr	Nomenclature	#COPY	The chromosome on which the variant is found	17
 Pos	Nomenclature	#TRANSFORM	"The position of the variant, per _____ nomenclature"	43063368

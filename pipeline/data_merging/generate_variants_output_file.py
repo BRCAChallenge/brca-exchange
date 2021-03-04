@@ -9,9 +9,9 @@ from common import hgvs_utils
 from common import utils
 from common import variant_utils
 
-FIELD_NAME_FIELD = 'Field Name'
-CATEGORY_FIELD = 'Category'
-VARIANTS_OUTPUT_MAPPING_FIELD = 'Variants Output Mapping'
+FIELD_NAME_FIELD = 'field_name'
+CATEGORY_FIELD = 'category'
+VARIANTS_OUTPUT_MAPPING_FIELD = 'variants_output_mapping'
 
 NEW_COLUMN_NAME_FIELD = 'new_column_name'
 
