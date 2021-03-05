@@ -776,7 +776,6 @@ class AppendMupitStructure(DefaultPipelineTask):
             self.output().path)
 
 
-
 @requires(AppendMupitStructure)
 class CalculatePriors(DefaultPipelineTask):
     def output(self):
@@ -845,7 +844,18 @@ class AppendVRId(DefaultPipelineTask):
             self.output().path)
 
 
-@requires(AppendVRId)
+@requires(bayesdel_processing.AddBayesdelScores)
+class LinkBuiltFinal(DefaultPipelineTask):
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.release_dir, "built_final.tsv"))
+
+    def run(self):
+        # create relative symlink to have a permanent pointer to what currently the final output of the pipeline is
+        relativ_input = os.path.relpath(self.input().path, os.path.dirname(self.output().path))
+        os.symlink(relativ_input, self.output().path)
+
+
+@requires(LinkBuiltFinal)
 class FindMissingReports(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(self.artifacts_dir, "missing_reports.log"))
@@ -862,7 +872,7 @@ class FindMissingReports(DefaultPipelineTask):
         pipeline_utils.check_file_for_contents(self.output().path)
 
 
-@requires(bayesdel_processing.AddBayesdelScores)
+@requires(LinkBuiltFinal)
 class RunDiffAndAppendChangeTypesToOutput(DefaultPipelineTask):
     def _extract_release_date(self, version_json):
         with open(version_json, 'r') as f:
@@ -894,7 +904,7 @@ class RunDiffAndAppendChangeTypesToOutput(DefaultPipelineTask):
             previous_release_date, '%m-%d-%Y')
 
         args = ["python", "releaseDiff.py", "--v2",
-                self.bayesdel_output, "--v1",
+                self.input.path(), "--v1",
                 previous_data_path,
                 "--removed", os.path.join(self.diff_dir, "removed.tsv"), "--added",
                 os.path.join(self.diff_dir, "added.tsv"), "--added_data",
@@ -971,7 +981,7 @@ class RunDiffAndAppendChangeTypesToOutputReports(DefaultPipelineTask):
             os.path.join(self.release_dir, "reports_with_change_types.tsv"))
 
 
-@requires(RunDiffAndAppendChangeTypesToOutputReports)
+@requires(LinkBuiltFinal)
 class GenerateVariantsOutputFile(DefaultPipelineTask):
     VAR_OUTPUT_FILE_KEY = 'var_output_file'
     VAR_OUTPUT_METADATA_FILE_KEY = 'var_output_metadata_file'
@@ -985,7 +995,7 @@ class GenerateVariantsOutputFile(DefaultPipelineTask):
     def run(self):
         os.chdir(data_merging_method_dir)
 
-        in_file = self.bayesdel_output
+        in_file = self.input().path
         args = ["python", "generate_variants_output_file.py",
                 in_file,
                 field_metadata_path,
@@ -1046,7 +1056,7 @@ class DataDictionary(DefaultPipelineTask):
         utils.write_dataframe_as_tsv(metadata_public, self.output().path)
 
 
-@requires(DataDictionary)
+@requires(DataDictionary, FindMissingReports, RunDiffAndAppendChangeTypesToOutputReports)
 class GenerateMD5Sums(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(self.cfg.output_dir, "md5sums.txt"))

@@ -70,7 +70,7 @@ class VictorAnnotations(DefaultPipelineTask):
 @requires(VictorAnnotations)
 class AddBayesdelScores(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.bayesdel_output)
+        return luigi.LocalTarget(os.path.join(self.artifacts_dir, 'built_with_bayesdel.tsv'))
 
     def run(self):
         os.chdir(data_merging_method_dir)

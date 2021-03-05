@@ -108,8 +108,6 @@ class DefaultPipelineTask(luigi.Task):
         self.enigma_file_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.file_parent_dir + '/enigma')
         self.assays_dir = pipeline_utils.create_path_if_nonexistent(self.cfg.file_parent_dir + '/functional_assays')
 
-        self.bayesdel_output = os.path.join(self.artifacts_dir, 'built_with_bayesdel.tsv')
-
     def on_failure(self, exception):
         # renaming files by prefixing filename with "FAILURE_". This way, on rerunning the pipeline the failed task is
         # automatically run again, but instead of just deleting the file, it can still be inspected.
