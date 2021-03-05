@@ -1,4 +1,4 @@
-(Readme last updated February 28, 2019)
+(Readme last updated March 05, 2021)
 
 BRCA Exchange download data
 
@@ -7,6 +7,12 @@ This archive contains the variant data released by BRCA Exchange
 data from which it was aggregated.  This file describes the contents of that
 archive.  If you have any questions or concerns, please feel free to contact
 brca-exchange-contact@genomicsandhealth.org.
+
+A good starting point to explore the data is the `output/variants_output.tsv` file. Have a look at the Jupyter notebook in
+https://github.com/BRCAChallenge/brca-exchange/tree/master/pipeline/notebooks/variants_output_file_tour.ipynb
+to see how the data can be used. The columns in the file are described in the `output/variants_output_field_metadata.tsv` file.
+
+Description of the files in the tar ball:
 
 output/
 	Top-level directory, containing pre-processed VCFs of variant data
@@ -36,10 +42,8 @@ output/release/
 	Subdirectory containing the computed data released on the BRCA Exchange web portal
 output/release/artifacts/
 	Subdirectory with miscellaneous intermediate results from the data aggregation pipeline
-output/release/built.tsv
+output/release/built_final.tsv
 	Tab-delimited file with the variants shared on BRCA Exchange, and their attribute data
-output/release/built_with_change_types.dictionary.tsv
-	File documenting the columns of built_with_change_types.tsv
 output/release/built_with_change_types.tsv
 	Tab-delimited file of the variants shared on BRCA Exchange, their attributes, and their update status since the
 	last release.
@@ -55,13 +59,18 @@ output/release/diff/diff.txt
 	Text file detailing specific changes to the updated variants, with old and new data values
 output/release/diff/removed.tsv
 	Tab-delimited file containing any variants removed in the last release
+output/release/field_metadata.tsv
+	File documenting the columns of built_final.tsv
 output/release/metadata/
 	Subdirectory containing metadata on this release
 output/release/metadata/version.json
 	JSON file containing metadata on this release.
 output/sharedLOVD.sorted.hg38.vcf
 	Variants from the shared LOVD repository at Leiden University
-
+output/variants_output.tsv
+    Simplified version of built_final.tsv for downstream consumption
+output/variants_output_field_metadata.tsv
+    File documenting the columns of variants_output.tsv
 
 For any concerns with this data, please contact
 brca-exchange-contact@genomicsandhealth.org.
