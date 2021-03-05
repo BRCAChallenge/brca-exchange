@@ -904,7 +904,7 @@ class RunDiffAndAppendChangeTypesToOutput(DefaultPipelineTask):
             previous_release_date, '%m-%d-%Y')
 
         args = ["python", "releaseDiff.py", "--v2",
-                self.input.path(), "--v1",
+                self.input().path, "--v1",
                 previous_data_path,
                 "--removed", os.path.join(self.diff_dir, "removed.tsv"), "--added",
                 os.path.join(self.diff_dir, "added.tsv"), "--added_data",
