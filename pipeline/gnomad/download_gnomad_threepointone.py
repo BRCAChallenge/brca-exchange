@@ -91,7 +91,7 @@ def gene_to_coords(gene_id, reference, max_retries=5):
         if gene_data is not None:
             return gene_data
         retries += 1
-    logging.error(f'Request for gene coords {gene_id} failed')
+    logging.info(f'Request for gene coords {gene_id} failed')
     print(f'Request for gene coords {gene_id} failed')
     return None
 
@@ -122,12 +122,12 @@ def coords_to_variants(chrom, start, stop, dataset, reference):
             else:
                 continue
         except Exception as e:
-            logging.error(e)
+            logging.info(e)
             print(f"coords to variants error {e}")
             retries += 1
             time.sleep(3)
             continue
-    logging.error(f'Request for intronic variants non_cancer failed 5 attempts')
+    logging.info(f'Request for intronic variants non_cancer failed 5 attempts')
 
 
 def fetch_data_for_one_variant(variant_id, dataset, max_retries=5):
@@ -187,13 +187,22 @@ def fetch_data_for_one_variant(variant_id, dataset, max_retries=5):
                 time.sleep(60)
                 continue
         except json.decoder.JSONDecodeError:
+            logging.info(f'Request for variant {variant_id} failed, kicking off retry #{retries}')
             retries += 1
-            logging.warning(f'Request for variant {variant_id} failed, kicking off retry #{retries}')
             time.sleep(3)
+            continue
         except KeyError as e:
             print(f"keyerror for variant {variant_id}, error is {e}")
+            retries += 1
             time.sleep(300)
             continue
+        except Exception as e:
+            print(f"unknown error: {e}, sleeping for a couple minutes...")
+            retries += 1
+            time.sleep(300)
+            continue
+    print(f"failed to get data for {variant_id}")
+    logging.info(f"failed to get data for {variant_id}")
     return None
     
 
@@ -212,7 +221,6 @@ def getVariants(transcript, gene, dataset, reference):
     exonic_set = set()
     variant_ids = []
     exonic_variants_non_cancer = transcript_to_variants(transcript, dataset, reference)
-    exonic_variants_non_cancer = exonic_variants_non_cancer[:100]
     for variant in exonic_variants_non_cancer:
         variant_id = variant['variant_id']
         if variant_id not in variant_ids:
@@ -228,7 +236,6 @@ def getVariants(transcript, gene, dataset, reference):
         if intronic_variants_non_cancer is None:
             retries += 1
             continue
-        intronic_variants_non_cancer = intronic_variants_non_cancer[:100]
         for variant in intronic_variants_non_cancer:
             variant_id = variant['variant_id']
             if variant_id not in variant_ids:
@@ -237,7 +244,7 @@ def getVariants(transcript, gene, dataset, reference):
                 variant_ids.append(variant_id)
         combined_set = exonic_set | intronic_set
         return combined_set
-    logging.error(f'Request for intronic variants non_cancer failed 5 attempts')
+    logging.info(f'Request for intronic variants non_cancer failed 5 attempts')
     pdb.set_trace()
 
 
