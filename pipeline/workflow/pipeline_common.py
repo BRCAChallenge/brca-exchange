@@ -24,6 +24,8 @@ priors_filter_method_dir = os.path.abspath('../splicingfilter')
 utilities_method_dir = os.path.abspath('../utilities')
 vr_method_dir = os.path.abspath('../vr')
 
+field_metadata_path = os.path.abspath(os.path.join('..', 'field_metadata.tsv'))
+field_metadata_path_additional = os.path.abspath(os.path.join('..', 'field_metadata_additional_fields_variant_output_file.tsv'))
 
 class PipelineParams(luigi.Config):
     date = luigi.DateParameter(default=datetime.date.today())

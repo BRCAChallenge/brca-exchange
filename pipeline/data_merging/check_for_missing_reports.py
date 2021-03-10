@@ -11,6 +11,7 @@ from os.path import isfile, join, abspath
 from data_merging.aggregate_reports import get_reports_files
 import vcf
 
+csv.field_size_limit(10000000)
 
 ARGS = None
 
