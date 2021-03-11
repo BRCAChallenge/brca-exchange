@@ -400,8 +400,7 @@ def main():
     df.replace('', np.nan, inplace=True)
 
     # output to .tsv
-    stringified_df_with_allele_values.to_csv(outputFile, sep='\t', index=False)
-    pdb.set_trace()
+    df.to_csv(outputFile, sep='\t', index=False)
 
 if __name__ == "__main__":
     main()
