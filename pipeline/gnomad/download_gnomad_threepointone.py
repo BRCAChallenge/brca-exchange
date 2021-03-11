@@ -374,7 +374,30 @@ def main():
     variants_df['flags'] = variants_df['flags'].apply(', '.join)
     df_with_allele_values = compile_allele_values(variants_df)
     df_with_rounded_popmax = round_popmax(df_with_allele_values)
-    stringified_df_with_allele_values = df_with_rounded_popmax.replace(np.nan, '-', regex=True).replace('', '-', regex=True)
+    df = df_with_rounded_popmax.replace(np.nan, '-', regex=True).replace('', '-', regex=True)
+
+    df.rename(columns=lambda s: s.replace('XX', 'FEMALE'), inplace=True)
+    df.rename(columns=lambda s: s.replace('XY', 'MALE'), inplace=True)
+    df.rename(columns=lambda s: s.replace('_afr_', '_AFR_'), inplace=True)
+    df.rename(columns=lambda s: s.replace('_amr_', '_AMR_'), inplace=True)
+    df.rename(columns=lambda s: s.replace('_asj_', '_ASJ_'), inplace=True)
+    df.rename(columns=lambda s: s.replace('_eas_', '_EAS_'), inplace=True)
+    df.rename(columns=lambda s: s.replace('_fin_', '_FIN_'), inplace=True)
+    df.rename(columns=lambda s: s.replace('_nfe_', '_NFE_'), inplace=True)
+    df.rename(columns=lambda s: s.replace('_oth_', '_OTH_'), inplace=True)
+    df.rename(columns=lambda s: s.replace('_sas_', '_SAS_'), inplace=True)
+    df.rename(columns=lambda s: s.replace('_mid_', '_MID_'), inplace=True)
+    df.rename(columns=lambda s: s.replace('_ami_', '_AMI_'), inplace=True)
+
+    df['genome_popmax_population'] = df['genome_popmax_population'].str.upper()
+
+    for col in df.columns:
+        if col.endswith('_id'):
+            df[col] = df[col].str.upper()
+            df[col] = df[col].str.replace("XX", "FEMALE")
+            df[col] = df[col].str.replace("XY", "MALE")
+
+    df.replace('', np.nan, inplace=True)
 
     # output to .tsv
     stringified_df_with_allele_values.to_csv(outputFile, sep='\t', index=False)

@@ -27,7 +27,7 @@ class DownloadGnomADData(GnomADTask):
                                             description='URL to download static gnomAD data from')
 
     def output(self):
-        return luigi.LocalTarget(self.assays_dir + "/gnomAD.tsv")
+        return luigi.LocalTarget(self.gnomad_file_dir + "/gnomAD.tsv")
 
     def run(self):
         data = pipeline_utils.urlopen_with_retry(self.gnomAD_static_data_url).read()
