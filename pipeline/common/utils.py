@@ -1,7 +1,8 @@
 import importlib
 import logging
 from collections import namedtuple
-from typing import List, Callable, Sequence, TypeVar
+from pathlib import Path
+from typing import List, Callable, Sequence, TypeVar, Union
 
 import numpy as np
 import pandas as pd
@@ -34,6 +35,17 @@ def build_interval_trees_by_chr(chr_intervals, interval_tuple_builder):
             interval_tuples)
 
     return d
+
+
+NA_REP='-'
+
+
+def read_tsv_as_dataframe(path: Union[Path, str]) -> pd.DataFrame:
+    return pd.read_csv(path, sep='\t', na_values=['', NA_REP], low_memory=False)
+
+
+def write_dataframe_as_tsv(df: pd.DataFrame, path: Union[Path, str]) -> None:
+    df.to_csv(path, sep='\t', index=False, na_rep=NA_REP)
 
 
 T = TypeVar('T')
