@@ -1,6 +1,6 @@
 import logging
 import os
-
+import tarfile
 import luigi
 from luigi.util import requires
 
@@ -19,67 +19,54 @@ logger = logging.getLogger('gnomAD')
 class GnomADTask(DefaultPipelineTask):
     def __init__(self, *args, **kwargs):
         super(GnomADTask, self).__init__(*args, **kwargs)
-        self.gnomAD_download_file = "gnomAD.tsv"
+        self.gnomAD_download_file = "gnomAD_static_files.tar.gz"
 
 
 class DownloadGnomADData(GnomADTask):
-    gnomAD_static_data_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/gnomAD_static_download_10_02_2020.tsv',
-                                            description='URL to download static gnomAD data from')
+    gnomAD_v2_static_data_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/gnomAD_v2_hg19_10_02_2020.tsv',
+                                            description='URL to download static gnomAD v2 data from')
+    gnomAD_v3_static_data_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/gnomAD_v3_GRCh38_03_10_2021.tsv',
+                                            description='URL to download static gnomAD v3 data from')
 
     def output(self):
-        return luigi.LocalTarget(self.gnomad_file_dir + "/gnomAD.tsv")
+        return { "v2": luigi.LocalTarget(f"{self.gnomad_file_dir}/gnomAD_v2_hg19_10_02_2020.tsv"),
+                 "v3": luigi.LocalTarget(f"{self.gnomad_file_dir}/gnomAD_v3_GRCh38_03_10_2021.tsv")}
 
     def run(self):
-        data = pipeline_utils.urlopen_with_retry(self.gnomAD_static_data_url).read()
-        with open(self.output().path, "wb") as f:
+        data = pipeline_utils.urlopen_with_retry(self.gnomAD_v2_static_data_url).read()
+        with open(self.output()["v2"].path, "wb") as f:
             f.write(data)
 
-"""
-################
-NOTE:
-gnomAD rarely updates its dataset
-due to issues with consistency downloading the same gnomad data for each release,
-a static file can be reused until new data is available
-see previous task for static data download
-################
-
-
-class DownloadGnomADData(GnomADTask):
-    def output(self):
-        return luigi.LocalTarget(
-            os.path.join(self.gnomad_file_dir, self.gnomAD_download_file))
-
-    def run(self):
-        os.chdir(gnomAD_method_dir)
-
-        args = ["python", "download_gnomad_data.py", "-o", self.output().path, "-l", self.artifacts_dir + "/gnomAD_download.log"]
-
-        pipeline_utils.run_process(args)
-        pipeline_utils.check_file_for_contents(self.output().path)
-"""
+        data = pipeline_utils.urlopen_with_retry(self.gnomAD_v3_static_data_url).read()
+        with open(self.output()["v3"].path, "wb") as f:
+            f.write(data)
 
 
 @requires(DownloadGnomADData)
 class ConvertGnomADToVCF(GnomADTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.gnomad_file_dir, 'gnomAD.hg19.vcf'))
+        return { "v2": luigi.LocalTarget(f"{self.gnomad_file_dir}/gnomADv2.hg19.vcf"),
+                 "v3": luigi.LocalTarget(f"{self.gnomad_file_dir}/gnomADv3.hg38.vcf")}
 
     def run(self):
         os.chdir(gnomAD_method_dir)
 
-        args = ["python", "gnomad_to_vcf.py", "-i", self.input().path, "-o",
-                self.output().path, "-a", "gnomADAnnotation",
-                "-l", self.artifacts_dir + "/gnomAD_error_variants.log",
-                "-s", "gnomAD"]
+        for file in self.input().keys():
+            self.input()[file]
 
-        pipeline_utils.run_process(args)
-        pipeline_utils.check_file_for_contents(self.output().path)
+            args = ["python", "gnomad_to_vcf.py", "-i", self.input()[file], "-o",
+                    self.output()[file].path, "-a", "gnomADAnnotation",
+                    "-l", self.artifacts_dir + "/gnomADv2_error_variants.log",
+                    "-s", "gnomAD"]
+
+            pipeline_utils.run_process(args)
+            pipeline_utils.check_file_for_contents(self.output()[file].path)
 
 
 @requires(ConvertGnomADToVCF)
-class CrossmapGnomADData(GnomADTask):
+class CrossmapGnomADV2Data(GnomADTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.gnomad_file_dir, "gnomAD.hg38.vcf"))
+        return luigi.LocalTarget(os.path.join(self.gnomad_file_dir, "gnomADv2.hg38.vcf"))
 
     def run(self):
         brca_resources_dir = self.cfg.resources_dir
@@ -92,12 +79,14 @@ class CrossmapGnomADData(GnomADTask):
         pipeline_utils.check_file_for_contents(self.output().path)
 
 
-@requires(CrossmapGnomADData)
+@requires(CrossmapGnomADV2Data)
 class SortGnomADData(GnomADTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.gnomad_file_dir, "gnomAD.sorted.hg38.vcf"))
+        return { "v2": luigi.LocalTarget(f"{self.gnomad_file_dir}/gnomADv2.sorted.hg38.vcf"),
+                 "v3": luigi.LocalTarget(f"{self.gnomad_file_dir}/gnomADv3.sorted.hg38.vcf")}
 
     def run(self):
-        args = ["vcf-sort", self.input().path]
-        pipeline_utils.run_process(args, redirect_stdout_path=self.output().path)
-        pipeline_utils.check_file_for_contents(self.output().path)
+        for key in self.output().keys():
+            args = ["vcf-sort", f"{self.gnomad_file_dir}/gnomAD{key}.hg38.vcf"]
+            pipeline_utils.run_process(args, redirect_stdout_path=self.output()[key].path)
+            pipeline_utils.check_file_for_contents(self.output()[key].path)
