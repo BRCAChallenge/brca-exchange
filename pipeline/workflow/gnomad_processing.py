@@ -19,7 +19,6 @@ logger = logging.getLogger('gnomAD')
 class GnomADTask(DefaultPipelineTask):
     def __init__(self, *args, **kwargs):
         super(GnomADTask, self).__init__(*args, **kwargs)
-        self.gnomAD_download_file = "gnomAD_static_files.tar.gz"
 
 
 class DownloadGnomADData(GnomADTask):
@@ -52,8 +51,6 @@ class ConvertGnomADToVCF(GnomADTask):
         os.chdir(gnomAD_method_dir)
 
         for file in self.input().keys():
-            self.input()[file]
-
             args = ["python", "gnomad_to_vcf.py", "-i", self.input()[file], "-o",
                     self.output()[file].path, "-a", "gnomADAnnotation",
                     "-l", self.artifacts_dir + "/gnomADv2_error_variants.log",
