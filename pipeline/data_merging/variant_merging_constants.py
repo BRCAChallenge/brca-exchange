@@ -128,7 +128,7 @@ EXAC_FIELDS = {"Allele_frequency": "AF",
 
 EXAC_SUBPOPULATIONS = ["AFR", "AMR", "EAS", "FIN", "NFE", "OTH", "SAS"]
 
-GNOMAD_FIELDS = {"HGVS_cDNA": "hgvs",
+GNOMAD_V2_FIELDS = {"HGVS_cDNA": "hgvs",
                  "Flags": "flags",
                  "Variant_id": "variantId",
 
@@ -319,9 +319,76 @@ GNOMAD_FIELDS = {"HGVS_cDNA": "hgvs",
                  "BX_ID": "BX_ID"}
 
 
-GNOMAD_SUBPOPULATIONS = ["AFR", "AMR", "ASJ", "EAS", "EAS_JPN", "EAS_KOR", "EAS_OEA",
+GNOMAD_V2_SUBPOPULATIONS = ["AFR", "AMR", "ASJ", "EAS", "EAS_JPN", "EAS_KOR", "EAS_OEA",
                          "FIN", "NFE", "NFE_EST", "NFE_BGR", "NFE_NWE", "NFE_ONF",
                          "NFE_SEU", "NFE_SWE", "OTH", "SAS"]
+
+GNOMAD_V3_FIELDS = {"HGVS_cDNA": "hgvs",
+                 "Flags": "flags",
+                 "Variant_id": "variant_id",
+
+                 "faf95_popmax_genome": "genome_popmax",
+                 "faf95_popmax_population_genome": "genome_popmax_population",
+
+                 "Allele_count_genome_AFR": "genome_AFR_ac",
+                 "Allele_count_hom_genome_AFR": "genome_AFR_ac_hom",
+                 "Allele_number_genome_AFR": "genome_AFR_an",
+                 "Allele_frequency_genome_AFR": "genome_AFR_af",
+
+                 "Allele_count_genome_AMR": "genome_AMR_ac",
+                 "Allele_count_hom_genome_AMR": "genome_AMR_ac_hom",
+                 "Allele_number_genome_AMR": "genome_AMR_an",
+                 "Allele_frequency_genome_AMR": "genome_AMR_af",
+
+                 "Allele_count_genome_ASJ": "genome_ASJ_ac",
+                 "Allele_count_hom_genome_ASJ": "genome_ASJ_ac_hom",
+                 "Allele_number_genome_ASJ": "genome_ASJ_an",
+                 "Allele_frequency_genome_ASJ": "genome_ASJ_af",
+
+                 "Allele_count_genome_EAS": "genome_EAS_ac",
+                 "Allele_count_hom_genome_EAS": "genome_EAS_ac_hom",
+                 "Allele_number_genome_EAS": "genome_EAS_an",
+                 "Allele_frequency_genome_EAS": "genome_EAS_af",
+
+                 "Allele_count_genome_FIN": "genome_FIN_ac",
+                 "Allele_count_hom_genome_FIN": "genome_FIN_ac_hom",
+                 "Allele_number_genome_FIN": "genome_FIN_an",
+                 "Allele_frequency_genome_FIN": "genome_FIN_af",
+
+                 "Allele_count_genome_NFE": "genome_NFE_ac",
+                 "Allele_count_hom_genome_NFE": "genome_NFE_ac_hom",
+                 "Allele_number_genome_NFE": "genome_NFE_an",
+                 "Allele_frequency_genome_NFE": "genome_NFE_af",
+
+                 "Allele_count_genome_OTH": "genome_OTH_ac",
+                 "Allele_count_hom_genome_OTH": "genome_OTH_ac_hom",
+                 "Allele_number_genome_OTH": "genome_OTH_an",
+                 "Allele_frequency_genome_OTH": "genome_OTH_af",
+
+                 "Allele_count_genome_SAS": "genome_SAS_ac",
+                 "Allele_count_hom_genome_SAS": "genome_SAS_ac_hom",
+                 "Allele_number_genome_SAS": "genome_SAS_an",
+                 "Allele_frequency_genome_SAS": "genome_SAS_af",
+
+                 "Allele_count_genome_MID": "genome_MID_ac",
+                 "Allele_count_hom_genome_MID": "genome_MID_ac_hom",
+                 "Allele_number_genome_MID": "genome_MID_an",
+                 "Allele_frequency_genome_MID": "genome_MID_af",
+
+                 "Allele_count_genome_AMI": "genome_AMI_ac",
+                 "Allele_count_hom_genome_AMI": "genome_AMI_ac_hom",
+                 "Allele_number_genome_AMI": "genome_AMI_an",
+                 "Allele_frequency_genome_AMI": "genome_AMI_af",
+
+                 "Allele_count_genome": "genome_ac",
+                 "Allele_number_genome": "genome_an",
+                 "Allele_frequency_genome": "genome_af",
+
+                 "BX_ID": "BX_ID"}
+
+
+GNOMAD_V3_SUBPOPULATIONS = ["AFR", "AMR", "ASJ", "EAS", "FIN", "NFE",
+                            "OTH", "SAS", "MID", "AMI"]
 
 FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS = {
                "HGVS_Nucleotide": "hgvs_nucleotide",
@@ -337,7 +404,8 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "ExAC": EXAC_FIELDS,
               "ESP": ESP_FIELDS,
               "BIC": BIC_FIELDS,
-              "GnomAD": GNOMAD_FIELDS,
+              "GnomADv2": GNOMAD_V2_FIELDS,
+              "GnomADv3": GNOMAD_V3_FIELDS,
               "Findlay_BRCA1_Ring_Function_Scores": FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS}
 
 LIST_TYPE_FIELDS = {
@@ -354,7 +422,8 @@ EX_LOVD_FILE = "exLOVD_brca12.sorted.hg38.vcf"
 BIC_FILE = "bic_brca12.sorted.hg38.vcf"
 EXAC_FILE = "exac.brca12.sorted.hg38.vcf"
 ESP_FILE = "esp.sorted.hg38.vcf"
-GNOMAD_FILE = "gnomAD.sorted.hg38.vcf"
+GNOMAD_V2_FILE = "gnomADv2.sorted.hg38.vcf"
+GNOMAD_V3_FILE = "gnomADv3.sorted.hg38.vcf"
 
 # Functional Assays
 FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS_FILE = "findlay_BRCA1_ring_function_scores.clean.sorted.hg38.vcf"
