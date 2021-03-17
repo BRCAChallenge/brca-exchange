@@ -51,7 +51,7 @@ class ConvertGnomADToVCF(GnomADTask):
         os.chdir(gnomAD_method_dir)
 
         for file in self.input().keys():
-            args = ["python", "gnomad_to_vcf.py", "-i", self.input()[file], "-o",
+            args = ["python", "gnomad_to_vcf.py", "-i", self.input()[file].path, "-o",
                     self.output()[file].path, "-a", "gnomADAnnotation",
                     "-l", self.artifacts_dir + "/gnomADv2_error_variants.log",
                     "-s", "gnomAD"]
@@ -69,7 +69,7 @@ class CrossmapGnomADV2Data(GnomADTask):
         brca_resources_dir = self.cfg.resources_dir
 
         args = ["CrossMap.py", "vcf", brca_resources_dir + "/hg19ToHg38.over.chain.gz",
-                self.input().path, brca_resources_dir + "/hg38.fa",
+                self.input()["v2"].path, brca_resources_dir + "/hg38.fa",
                 self.output().path]
 
         pipeline_utils.run_process(args)
