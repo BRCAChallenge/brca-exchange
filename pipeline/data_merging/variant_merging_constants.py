@@ -404,7 +404,7 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "ExAC": EXAC_FIELDS,
               "ESP": ESP_FIELDS,
               "BIC": BIC_FIELDS,
-              "GnomADv2": GNOMAD_V2_FIELDS,
+              "GnomAD": GNOMAD_V2_FIELDS,
               "GnomADv3": GNOMAD_V3_FIELDS,
               "Findlay_BRCA1_Ring_Function_Scores": FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS}
 

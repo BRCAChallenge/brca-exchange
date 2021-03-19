@@ -50,14 +50,18 @@ class ConvertGnomADToVCF(GnomADTask):
     def run(self):
         os.chdir(gnomAD_method_dir)
 
-        for file in self.input().keys():
-            args = ["python", "gnomad_to_vcf.py", "-i", self.input()[file].path, "-o",
-                    self.output()[file].path, "-a", "gnomADAnnotation",
+        for k, v in self.input().items():
+            if k == "v2":
+                annotation = "gnomADAnnotation"
+            else if k == "v3":
+                annotation = "gnomADv3Annotation"
+            args = ["python", "gnomad_to_vcf.py", "-i", v.path, "-o",
+                    self.output()[k].path, "-a", annotation,
                     "-l", self.artifacts_dir + "/gnomADv2_error_variants.log",
                     "-s", "gnomAD"]
 
             pipeline_utils.run_process(args)
-            pipeline_utils.check_file_for_contents(self.output()[file].path)
+            pipeline_utils.check_file_for_contents(self.output()[k].path)
 
 
 @requires(ConvertGnomADToVCF)
