@@ -51,10 +51,10 @@ class ConvertGnomADToVCF(GnomADTask):
         os.chdir(gnomAD_method_dir)
 
         for k, v in self.input().items():
-            if k == "v2":
-                annotation = "gnomADAnnotation"
-            else if k == "v3":
+            if k == "v3":
                 annotation = "gnomADv3Annotation"
+            else:
+                annotation = "gnomADAnnotation"
             args = ["python", "gnomad_to_vcf.py", "-i", v.path, "-o",
                     self.output()[k].path, "-a", annotation,
                     "-l", self.artifacts_dir + "/gnomADv2_error_variants.log",
