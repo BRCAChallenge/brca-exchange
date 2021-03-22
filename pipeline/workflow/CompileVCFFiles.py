@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import tarfile
 import tempfile
+from pathlib import Path
 from shutil import copy
 
 import luigi
@@ -1064,8 +1065,15 @@ class GenerateMD5Sums(DefaultPipelineTask):
     def run(self):
         os.chdir(utilities_method_dir)
 
-        args = ["python", "generateMD5Sums.py", "-i", self.cfg.output_dir, "-o",
-                self.output().path]
+        workflow_dir = os.path.abspath(os.path.join(os.path.realpath(__file__), os.pardir))
+
+        keep_list_file_path = os.path.join(workflow_dir, "tarball_files_keep_list.txt")
+        discard_list_file_path = os.path.join(workflow_dir, "tarball_files_discard_list.txt")
+        args = ["python", "generateMD5Sums.py",
+                "-i", self.cfg.output_dir,
+                "-o", self.output().path,
+                "--keepListFilePath", keep_list_file_path,
+                "--discardListFilePath", discard_list_file_path]
 
         pipeline_utils.run_process(args)
         pipeline_utils.check_file_for_contents(self.output().path)
@@ -1073,22 +1081,22 @@ class GenerateMD5Sums(DefaultPipelineTask):
 
 @requires(GenerateMD5Sums)
 class GenerateReleaseArchive(DefaultPipelineTask):
-    def getArchiveName(self):
-        # Format archive filename as release-mm-dd-yy.tar.gz
-        return "release-" + self.cfg.date.strftime("%x").replace('/',
-                                                                 '-') + ".tar.gz"
-
-    def getArchiveParentDirectory(self):
-        return os.path.dirname(self.cfg.output_dir) + "/"
-
     def output(self):
-        return luigi.LocalTarget(
-            self.getArchiveParentDirectory() + self.getArchiveName())
+        # Format archive filename as release-mm-dd-yy.tar.gz
+        archive_name = f'release-{self.cfg.date.strftime("%x").replace("/", "-")}.tar.gz'
+        return luigi.LocalTarget(Path(self.cfg.output_dir).parent / archive_name)
 
     def run(self):
-        os.chdir(self.getArchiveParentDirectory())
-        with tarfile.open(
-                self.getArchiveParentDirectory() + self.getArchiveName(),
-                "w:gz") as tar:
-            tar.add(self.cfg.output_dir,
-                    arcname=os.path.basename(self.cfg.output_dir))
+        # parse md5sum list.
+        with open(self.input().path) as f:
+            file_list = [line.strip().split(' ')[-1] for line in f.readlines()]
+
+        # include md5sum in tar as well
+        file_list.append(Path(self.input().path).name)
+
+        output_dir = Path(self.cfg.output_dir)
+        with tarfile.open(self.output().path, "w:gz") as tar:
+            for file in file_list:
+                file_path = output_dir / file
+                tar.add(file_path, arcname=Path(output_dir.name) / file)
+
