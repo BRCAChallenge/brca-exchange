@@ -252,6 +252,55 @@ Allele_number_exome_GnomAD	Allele Frequency	#COPY	Total number of total chromoso
 Allele_count_exome_GnomAD	Allele Frequency	#COPY	Total count of observed alternate alleles (variant) in exomes
 Allele_frequency_exome_GnomAD	Allele Frequency	#COPY	"Overall allele frequency (for exomes) according to all studied populations, per gnomAD"
 BX_ID_GnomAD	Internal	#SKIP	"Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation"
+HGVS_cDNA_GnomADv3		Nomenclature	#SKIP	"HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA"
+Flags_GnomADv3		Remarks	#COPY	Flags provided by gnomAD to indicate an annotation or something unusual about the data
+Variant_id_GnomADv3		Internal	#SKIP	Identifier provided by gnomAD
+faf95_popmax_genome_GnomADv3	Allele Frequency	#COPY	The gnomAD genome population frequency that is most significant with a 95% confidence threshold
+faf95_popmax_population_genome_GnomADv3	Allele Frequency	#COPY	The gnomAD population that is most significant (most frequent) in the genome data at 95% confidence
+Allele_count_genome_AFR_GnomADv3	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of African Populations, per gnomAD"
+Allele_count_hom_genome_AFR_GnomADv3	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous African Populations, per gnomAD v3"
+Allele_number_genome_AFR_GnomADv3	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of African Populations
+Allele_frequency_genome_AFR_GnomADv3	Allele Frequency	#COPY	Allele Frequency in genomes of African Populations
+Allele_count_genome_AMR_GnomADv3	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of Latino Populations, per gnomAD"
+Allele_count_hom_genome_AMR_GnomADv3	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous Latino Populations, per gnomAD v3"
+Allele_number_genome_AMR_GnomADv3	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of Latino Populations
+Allele_frequency_genome_AMR_GnomADv3	Allele Frequency	#COPY	Allele Frequency in genomes of Latino Populations
+Allele_count_genome_ASJ_GnomADv3	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of Ashkenazi Jewish Populations, per gnomAD"
+Allele_count_hom_genome_ASJ_GnomADv3	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous Ashkenazi Jewish Populations, per gnomAD v3"
+Allele_number_genome_ASJ_GnomADv3	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of Ashkenazi Jewish Populations
+Allele_frequency_genome_ASJ_GnomADv3	Allele Frequency	#COPY	Allele Frequency in genomes of Ashkenazi Jewish Populations
+Allele_count_genome_EAS_GnomADv3	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of East Asian Populations, per gnomAD"
+Allele_count_hom_genome_EAS_GnomADv3	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous East Asian Populations, per gnomAD v3"
+Allele_number_genome_EAS_GnomADv3	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of East Asian Populations
+Allele_frequency_genome_EAS_GnomADv3	Allele Frequency	#COPY	Allele Frequency in genomes of East Asian Populations
+Allele_count_genome_FIN_GnomADv3	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of Finnish Populations, per gnomAD"
+Allele_count_hom_genome_FIN_GnomADv3	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous Finnish Populations, per gnomAD v3"
+Allele_number_genome_FIN_GnomADv3	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of Finnish Populations
+Allele_frequency_genome_FIN_GnomADv3	Allele Frequency	#COPY	Allele Frequency in genomes of Finnish Populations
+Allele_count_genome_NFE_GnomADv3	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of Non-Finnish European Populations, per gnomAD"
+Allele_count_hom_genome_NFE_GnomADv3	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous Non-Finnish European Populations, per gnomAD v3"
+Allele_number_genome_NFE_GnomADv3	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of Non-Finnish European Populations
+Allele_frequency_genome_NFE_GnomADv3	Allele Frequency	#COPY	Allele Frequency in genomes of Non-Finnish European Populations
+Allele_count_genome_OTH_GnomADv3	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of Other Populations, per gnomAD"
+Allele_count_hom_genome_OTH_GnomADv3	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous Other Populations, per gnomAD v3"
+Allele_number_genome_OTH_GnomADv3	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of Other Populations
+Allele_frequency_genome_OTH_GnomADv3	Allele Frequency	#COPY	Allele Frequency in genomes of Other Populations
+Allele_count_genome_SAS_GnomADv3	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of South Asian Populations, per gnomAD"
+Allele_count_hom_genome_SAS_GnomADv3	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous South Asian Populations, per gnomAD v3"
+Allele_number_genome_SAS_GnomADv3	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of South Asian Populations
+Allele_frequency_genome_SAS_GnomADv3	Allele Frequency	#COPY	Allele Frequency in genomes of South Asian Populations
+Allele_count_genome_MID_GnomADv3	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of Middle Eastern Populations, per gnomAD"
+Allele_count_hom_genome_MID_GnomADv3	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous Middle Eastern Populations, per gnomAD v3"
+Allele_number_genome_MID_GnomADv3	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of Middle Eastern Populations
+Allele_frequency_genome_MID_GnomADv3	Allele Frequency	#COPY	Allele Frequency in genomes of Middle Eastern Populations
+Allele_count_genome_AMI_GnomADv3	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of Amish Populations, per gnomAD"
+Allele_count_hom_genome_AMI_GnomADv3	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous Amish Populations, per gnomAD v3"
+Allele_number_genome_AMI_GnomADv3	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of Amish Populations
+Allele_frequency_genome_AMI_GnomADv3	Allele Frequency	#COPY	Allele Frequency in genomes of Amish Populations
+Allele_count_genome_GnomADv3	Allele Frequency	#COPY	Total count of observed alternate alleles (variant) in genomes
+Allele_number_genome_GnomADv3	Allele Frequency	#COPY	Total number of total chromosomes studied (for this variant) in genomes
+Allele_frequency_genome_GnomADv3	Allele Frequency	#COPY	"Overall allele frequency (for genomes) according to all studied populations, per gnomAD v3"
+BX_ID_GnomADv3	Internal	#SKIP	"Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation"
 HGVS_Nucleotide_Findlay_BRCA1_Ring_Function_Scores	Nomenclature	#SKIP	HGVS nucleotide nomenclature for the variant in the Findlay functional assay	c.-10A>T
 Log_RNA_Depletion_Findlay_BRCA1_Ring_Function_Scores	Evidence	#COPY	Log ratio comparing RNA expression with and without the variant	-0.006252529515
 Functional_Enrichment_Score_Findlay_BRCA1_Ring_Function_Scores	Evidence	#COPY	"Functional assay results for variants in critical domains of BRCA1, obtained using saturation genome editing; provided by Starita lab (see Findlay et al. 2018)"	-0.107071247
