@@ -103,154 +103,154 @@ Ethnicity_BIC	Population	#SKIP	"Ethnicity of probands with the variant, as repor
 Literature_citation_BIC	Provenance	#SKIP	"Literature citation pertaining to the variant, from BIC"	"1995.,Plummer et al,-, Hum Mol Genet 4:1989-1991"
 BX_ID_BIC	Internal	#SKIP	"Arbitrary, unique identifiers for BIC submissions used by BRCA Exchange for the purpose of variant aggregation"	"159,151,590,615,917,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000"
 HGVS_cDNA_GnomAD	Nomenclature	#SKIP	"HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA"
-Flags_GnomAD	Remarks	#COPY	Flags provided by gnomAD to indicate an annotation or something unusual about the data
+Flags_GnomAD	Remarks	Flags_GnomADv2	Flags provided by gnomAD to indicate an annotation or something unusual about the data
 Variant_id_GnomAD	Internal	#SKIP	Identifier provided by gnomAD
-faf95_popmax_genome_GnomAD	Allele Frequency	#COPY	The gnomAD genome population frequency that is most significant with a 95% confidence threshold
-faf95_popmax_population_genome_GnomAD	Allele Frequency	#COPY	The gnomAD population that is most significant (most frequent) in the genome data at 95% confidence
-Allele_count_genome_AFR_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of African African American Populations, per gnomAD"
-Allele_count_hom_genome_AFR_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous African/African American Populations, per gnomAD"
-Allele_number_genome_AFR_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of African/African American Populations
-Allele_frequency_genome_AFR_GnomAD	Allele Frequency	#COPY	Allele Frequency in genomes of African/African American Populations
-Allele_count_genome_AMR_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of Latino Populations, per gnomAD"
-Allele_count_hom_genome_AMR_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous Latino Populations, per gnomAD"
-Allele_number_genome_AMR_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of Latino Populations
-Allele_frequency_genome_AMR_GnomAD	Allele Frequency	#COPY	Allele Frequency in genomes of Latino Populations
-Allele_count_genome_ASJ_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of Ashkenazi Jewish Populations, per gnomAD"
-Allele_count_hom_genome_ASJ_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous Ashkenazi Jewish Populations, per gnomAD"
-Allele_number_genome_ASJ_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of Ashkenazi Jewish Populations
-Allele_frequency_genome_ASJ_GnomAD	Allele Frequency	#COPY	Allele Frequency in genomes of Ashkenazi Jewish Populations
-Allele_count_genome_EAS_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of East Asian Populations, per gnomAD"
-Allele_count_hom_genome_EAS_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous East Asian Populations, per gnomAD"
-Allele_number_genome_EAS_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of East Asian Populations
-Allele_frequency_genome_EAS_GnomAD	Allele Frequency	#COPY	Allele Frequency in genomes of East Asian Populations
-Allele_count_genome_EAS_JPN_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of Japanese populations (subset of East Asian)
-Allele_count_hom_genome_EAS_JPN_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of homozygous Japanese populations (subset of East Asian)
-Allele_number_genome_EAS_JPN_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the genomes of Japanese populations (subset of East Asian)
-Allele_frequency_genome_EAS_JPN_GnomAD	Allele Frequency	#COPY	Allele Frequency in the genomes of Japanese populations (subset of East Asian)
-Allele_count_genome_EAS_KOR_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of Korean populations (subset of East Asian)
-Allele_count_hom_genome_EAS_KOR_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of homozygous Korean populations (subset of East Asian)
-Allele_number_genome_EAS_KOR_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the genomes of Korean populations (subset of East Asian)
-Allele_frequency_genome_EAS_KOR_GnomAD	Allele Frequency	#COPY	Allele Frequency in the genomes of Korean populations (subset of East Asian)
-Allele_count_genome_EAS_OEA_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of Other East Asian populations (subset of East Asian)
-Allele_count_hom_genome_EAS_OEA_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of homozygous Other East Asian populations (subset of East Asian)
-Allele_number_genome_EAS_OEA_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the genomes of Other East Asian populations (subset of East Asian)
-Allele_frequency_genome_EAS_OEA_GnomAD	Allele Frequency	#COPY	Allele Frequency in the genomes of Other East Asian populations (subset of East Asian)
-Allele_count_genome_FIN_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of Finnish Populations, per gnomAD"
-Allele_count_hom_genome_FIN_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous Finnish Populations, per gnomAD"
-Allele_number_genome_FIN_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of Finnish Populations
-Allele_frequency_genome_FIN_GnomAD	Allele Frequency	#COPY	Allele Frequency in genomes of Finnish Populations
-Allele_count_genome_NFE_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of Non-Finnish European Populations, per gnomAD"
-Allele_count_hom_genome_NFE_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous Non-Finnish European Populations, per gnomAD"
-Allele_number_genome_NFE_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of Non-Finnish European Populations
-Allele_frequency_genome_NFE_GnomAD	Allele Frequency	#COPY	Allele Frequency in genomes of Non-Finnish European Populations
-Allele_count_genome_NFE_EST_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of Estonian populations (subset of Non-Finnish European)
-Allele_count_hom_genome_NFE_EST_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of homozygous Estonian populations (subset of Non-Finnish European)
-Allele_number_genome_NFE_EST_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the genomes of Estonian populations (subset of Non-Finnish European)
-Allele_frequency_genome_NFE_EST_GnomAD	Allele Frequency	#COPY	Allele Frequency in the genomes of Estonian populations (subset of Non-Finnish European)
-Allele_count_genome_NFE_BGR_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of Bulgarian populations (subset of Non-Finnish European)
-Allele_count_hom_genome_NFE_BGR_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of homozygous Bulgarian populations (subset of Non-Finnish European)
-Allele_number_genome_NFE_BGR_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the genomes of Bulgarian populations (subset of Non-Finnish European)
-Allele_frequency_genome_NFE_BGR_GnomAD	Allele Frequency	#COPY	Allele Frequency in the genomes of Bulgarian populations (subset of Non-Finnish European)
-Allele_count_genome_NFE_NWE_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of Northwestern European populations (subset of Non-Finnish European)
-Allele_count_hom_genome_NFE_NWE_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of homozygous Northwestern European populations (subset of Non-Finnish European)
-Allele_number_genome_NFE_NWE_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the genomes of Northwestern European populations (subset of Non-Finnish European)
-Allele_frequency_genome_NFE_NWE_GnomAD	Allele Frequency	#COPY	Allele Frequency in the genomes of Northwestern European populations (subset of Non-Finnish European)
-Allele_count_genome_NFE_ONF_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of Other Non-Finnish European populations (subset of Non-Finnish European)
-Allele_count_hom_genome_NFE_ONF_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of homozygous Other Non-Finnish European populations (subset of Non-Finnish European)
-Allele_number_genome_NFE_ONF_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the genomes of Other Non-Finnish European populations (subset of Non-Finnish European)
-Allele_frequency_genome_NFE_ONF_GnomAD	Allele Frequency	#COPY	Allele Frequency in the genomes of Other Non-Finnish European populations (subset of Non-Finnish European)
-Allele_count_genome_NFE_SEU_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of Southern European populations (subset of Non-Finnish European)
-Allele_count_hom_genome_NFE_SEU_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of homozygous Southern European populations (subset of Non-Finnish European)
-Allele_number_genome_NFE_SEU_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the genomes of Southern European populations (subset of Non-Finnish European)
-Allele_frequency_genome_NFE_SEU_GnomAD	Allele Frequency	#COPY	Allele Frequency in the genomes of Southern European populations (subset of Non-Finnish European)
-Allele_count_genome_NFE_SWE_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of Swedish populations (subset of Non-Finnish European)
-Allele_count_hom_genome_NFE_SWE_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the genomes of homozygous Swedish populations (subset of Non-Finnish European)
-Allele_number_genome_NFE_SWE_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the genomes of Swedish populations (subset of Non-Finnish European)
-Allele_frequency_genome_NFE_SWE_GnomAD	Allele Frequency	#COPY	Allele Frequency in the genomes of Swedish populations (subset of Non-Finnish European)
-Allele_count_genome_OTH_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of Other Populations, per gnomAD"
-Allele_count_hom_genome_OTH_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous Other Populations, per gnomAD"
-Allele_number_genome_OTH_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of Other Populations
-Allele_frequency_genome_OTH_GnomAD	Allele Frequency	#COPY	Allele Frequency in genomes of Other Populations
-Allele_count_genome_SAS_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of South Asian Populations, per gnomAD"
-Allele_count_hom_genome_SAS_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in genomes of homozygous South Asian Populations, per gnomAD"
-Allele_number_genome_SAS_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in genomes of South Asian Populations
-Allele_frequency_genome_SAS_GnomAD	Allele Frequency	#COPY	Allele Frequency in genomes of South Asian Populations
-Allele_count_genome_GnomAD	Allele Frequency	#COPY	Total count of observed alternate alleles (variant) in genomes
-Allele_number_genome_GnomAD	Allele Frequency	#COPY	Total number of total chromosomes studied (for this variant) in genomes
-Allele_frequency_genome_GnomAD	Allele Frequency	#COPY	"Overall allele frequency (for genomes) according to all studied populations, per gnomAD"
-faf95_popmax_exome_GnomAD	Allele Frequency	#COPY	The gnomAD exome population frequency that is most significant with a 95% confidence threshold
-faf95_popmax_population_exome_GnomAD	Allele Frequency	#COPY	The gnomAD population that is most significant (most frequent) in the exome data at 95% confidence
-Allele_count_exome_AFR_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of African African American Populations, per gnomAD"
-Allele_count_hom_exome_AFR_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of homozygous African/African American Populations, per gnomAD"
-Allele_number_exome_AFR_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in exomes of African/African American Populations
-Allele_frequency_exome_AFR_GnomAD	Allele Frequency	#COPY	Allele Frequency in exomes of African/African American Populations
-Allele_count_exome_AMR_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of Latino Populations, per gnomAD"
-Allele_count_hom_exome_AMR_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of homozygous Latino Populations, per gnomAD"
-Allele_number_exome_AMR_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in exomes of Latino Populations
-Allele_frequency_exome_AMR_GnomAD	Allele Frequency	#COPY	Allele Frequency in exomes of Latino Populations
-Allele_count_exome_ASJ_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of Ashkenazi Jewish Populations, per gnomAD"
-Allele_count_hom_exome_ASJ_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of homozygous Ashkenazi Jewish Populations, per gnomAD"
-Allele_number_exome_ASJ_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in exomes of Ashkenazi Jewish Populations
-Allele_frequency_exome_ASJ_GnomAD	Allele Frequency	#COPY	Allele Frequency in exomes of Ashkenazi Jewish Populations
-Allele_count_exome_EAS_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of East Asian Populations, per gnomAD"
-Allele_count_hom_exome_EAS_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of homozygous East Asian Populations, per gnomAD"
-Allele_number_exome_EAS_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in exomes of East Asian Populations
-Allele_frequency_exome_EAS_GnomAD	Allele Frequency	#COPY	Allele Frequency in exomes of East Asian Populations
-Allele_count_exome_EAS_JPN_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of Japanese populations (subset of East Asian)
-Allele_count_hom_exome_EAS_JPN_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of homozygous Japanese populations (subset of East Asian)
-Allele_number_exome_EAS_JPN_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the exomes of Japanese populations (subset of East Asian)
-Allele_frequency_exome_EAS_JPN_GnomAD	Allele Frequency	#COPY	Allele Frequency in the exomes of Japanese populations (subset of East Asian)
-Allele_count_exome_EAS_KOR_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of Korean populations (subset of East Asian)
-Allele_count_hom_exome_EAS_KOR_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of homozygous Korean populations (subset of East Asian)
-Allele_number_exome_EAS_KOR_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the exomes of Korean populations (subset of East Asian)
-Allele_frequency_exome_EAS_KOR_GnomAD	Allele Frequency	#COPY	Allele Frequency in the exomes of Korean populations (subset of East Asian)
-Allele_count_exome_EAS_OEA_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of Other East Asian populations (subset of East Asian)
-Allele_count_hom_exome_EAS_OEA_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of homozygous Other East Asian populations (subset of East Asian)
-Allele_number_exome_EAS_OEA_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the exomes of Other East Asian populations (subset of East Asian)
-Allele_frequency_exome_EAS_OEA_GnomAD	Allele Frequency	#COPY	Allele Frequency in the exomes of Other East Asian populations (subset of East Asian)
-Allele_count_exome_FIN_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of Finnish Populations, per gnomAD"
-Allele_count_hom_exome_FIN_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of homozygous Finnish Populations, per gnomAD"
-Allele_number_exome_FIN_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in exomes of Finnish Populations
-Allele_frequency_exome_FIN_GnomAD	Allele Frequency	#COPY	Allele Frequency in exomes of Finnish Populations
-Allele_count_exome_NFE_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of Non-Finnish European Populations, per gnomAD"
-Allele_count_hom_exome_NFE_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of homozygous Non-Finnish European Populations, per gnomAD"
-Allele_number_exome_NFE_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in exomes of Non-Finnish European Populations
-Allele_frequency_exome_NFE_GnomAD	Allele Frequency	#COPY	Allele Frequency in exomes of Finnish Populations
-Allele_count_exome_NFE_EST_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of Estonian populations (subset of Non-Finnish European)
-Allele_count_hom_exome_NFE_EST_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of homozygous Estonian populations (subset of Non-Finnish European)
-Allele_number_exome_NFE_EST_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the exomes of Estonian populations (subset of Non-Finnish European)
-Allele_frequency_exome_NFE_EST_GnomAD	Allele Frequency	#COPY	Allele Frequency in the exomes of Estonian populations (subset of Non-Finnish European)
-Allele_count_exome_NFE_BGR_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of Bulgarian populations (subset of Non-Finnish European)
-Allele_count_hom_exome_NFE_BGR_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of homozygous Bulgarian populations (subset of Non-Finnish European)
-Allele_number_exome_NFE_BGR_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the exomes of Bulgarian populations (subset of Non-Finnish European)
-Allele_frequency_exome_NFE_BGR_GnomAD	Allele Frequency	#COPY	Allele Frequency in the exomes of Bulgarian populations (subset of Non-Finnish European)
-Allele_count_exome_NFE_NWE_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of Northwestern European populations (subset of Non-Finnish European)
-Allele_count_hom_exome_NFE_NWE_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of homozygous Northwestern European populations (subset of Non-Finnish European)
-Allele_number_exome_NFE_NWE_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the exomes of Northwestern European populations (subset of Non-Finnish European)
-Allele_frequency_exome_NFE_NWE_GnomAD	Allele Frequency	#COPY	Allele Frequency in the exomes of Northwestern European populations (subset of Non-Finnish European)
-Allele_count_exome_NFE_ONF_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of Other Non-Finnish European populations (subset of Non-Finnish European)
-Allele_count_hom_exome_NFE_ONF_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of homozygous Other Non-Finnish European populations (subset of Non-Finnish European)
-Allele_number_exome_NFE_ONF_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the exomes of Other Non-Finnish European populations (subset of Non-Finnish European)
-Allele_frequency_exome_NFE_ONF_GnomAD	Allele Frequency	#COPY	Allele Frequency in the exomes of Other Non-Finnish European populations (subset of Non-Finnish European)
-Allele_count_exome_NFE_SEU_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of Southern European populations (subset of Non-Finnish European)
-Allele_count_hom_exome_NFE_SEU_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of homozygous Southern European populations (subset of Non-Finnish European)
-Allele_number_exome_NFE_SEU_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the exomes of Southern European populations (subset of Non-Finnish European)
-Allele_frequency_exome_NFE_SEU_GnomAD	Allele Frequency	#COPY	Allele Frequency in the exomes of Southern European populations (subset of Non-Finnish European)
-Allele_count_exome_NFE_SWE_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of Swedish populations (subset of Non-Finnish European)
-Allele_count_hom_exome_NFE_SWE_GnomAD	Allele Frequency	#COPY	Count of observed alternate alleles (variant) in the exomes of homozygous Swedish populations (subset of Non-Finnish European)
-Allele_number_exome_NFE_SWE_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in the exomes of Swedish populations (subset of Non-Finnish European)
-Allele_frequency_exome_NFE_SWE_GnomAD	Allele Frequency	#COPY	Allele Frequency in the exomes of Swedish populations (subset of Non-Finnish European)
-Allele_count_exome_OTH_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of Other Populations, per gnomAD"
-Allele_count_hom_exome_OTH_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of homozygous Other Populations, per gnomAD"
-Allele_number_exome_OTH_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in exomes of Other Populations
-Allele_frequency_exome_OTH_GnomAD	Allele Frequency	#COPY	Allele Frequency in exomes of Other Populations
-Allele_count_exome_SAS_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of South Asian Populations, per gnomAD"
-Allele_count_hom_exome_SAS_GnomAD	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in exomes of homozygous South Asian Populations, per gnomAD"
-Allele_number_exome_SAS_GnomAD	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in exomes of South Asian Populations
-Allele_frequency_exome_SAS_GnomAD	Allele Frequency	#COPY	Allele Frequency in exomes of South Asian Populations
-Allele_number_exome_GnomAD	Allele Frequency	#COPY	Total number of total chromosomes studied (for this variant) in exomes
-Allele_count_exome_GnomAD	Allele Frequency	#COPY	Total count of observed alternate alleles (variant) in exomes
-Allele_frequency_exome_GnomAD	Allele Frequency	#COPY	"Overall allele frequency (for exomes) according to all studied populations, per gnomAD"
+faf95_popmax_genome_GnomAD	Allele Frequency	faf95_popmax_genome_GnomADv2	The gnomAD genome population frequency that is most significant with a 95% confidence threshold
+faf95_popmax_population_genome_GnomAD	Allele Frequency	faf95_popmax_population_genome_GnomADv2	The gnomAD population that is most significant (most frequent) in the genome data at 95% confidence
+Allele_count_genome_AFR_GnomAD	Allele Frequency	Allele_count_genome_AFR_GnomADv2	"Count of observed alternate alleles (variant) in genomes of African African American Populations, per gnomAD"
+Allele_count_hom_genome_AFR_GnomAD	Allele Frequency	Allele_count_hom_genome_AFR_GnomADv2	"Count of observed alternate alleles (variant) in genomes of homozygous African/African American Populations, per gnomAD"
+Allele_number_genome_AFR_GnomAD	Allele Frequency	Allele_number_genome_AFR_GnomADv2	Number of total chromosomes studied (for this variant) in genomes of African/African American Populations
+Allele_frequency_genome_AFR_GnomAD	Allele Frequency	Allele_frequency_genome_AFR_GnomADv2	Allele Frequency in genomes of African/African American Populations
+Allele_count_genome_AMR_GnomAD	Allele Frequency	Allele_count_genome_AMR_GnomADv2	"Count of observed alternate alleles (variant) in genomes of Latino Populations, per gnomAD"
+Allele_count_hom_genome_AMR_GnomAD	Allele Frequency	Allele_count_hom_genome_AMR_GnomADv2	"Count of observed alternate alleles (variant) in genomes of homozygous Latino Populations, per gnomAD"
+Allele_number_genome_AMR_GnomAD	Allele Frequency	Allele_number_genome_AMR_GnomADv2	Number of total chromosomes studied (for this variant) in genomes of Latino Populations
+Allele_frequency_genome_AMR_GnomAD	Allele Frequency	Allele_frequency_genome_AMR_GnomADv2	Allele Frequency in genomes of Latino Populations
+Allele_count_genome_ASJ_GnomAD	Allele Frequency	Allele_count_genome_ASJ_GnomADv2	"Count of observed alternate alleles (variant) in genomes of Ashkenazi Jewish Populations, per gnomAD"
+Allele_count_hom_genome_ASJ_GnomAD	Allele Frequency	Allele_count_hom_genome_ASJ_GnomADv2	"Count of observed alternate alleles (variant) in genomes of homozygous Ashkenazi Jewish Populations, per gnomAD"
+Allele_number_genome_ASJ_GnomAD	Allele Frequency	Allele_number_genome_ASJ_GnomADv2	Number of total chromosomes studied (for this variant) in genomes of Ashkenazi Jewish Populations
+Allele_frequency_genome_ASJ_GnomAD	Allele Frequency	Allele_frequency_genome_ASJ_GnomADv2	Allele Frequency in genomes of Ashkenazi Jewish Populations
+Allele_count_genome_EAS_GnomAD	Allele Frequency	Allele_count_genome_EAS_GnomADv2	"Count of observed alternate alleles (variant) in genomes of East Asian Populations, per gnomAD"
+Allele_count_hom_genome_EAS_GnomAD	Allele Frequency	Allele_count_hom_genome_EAS_GnomADv2	"Count of observed alternate alleles (variant) in genomes of homozygous East Asian Populations, per gnomAD"
+Allele_number_genome_EAS_GnomAD	Allele Frequency	Allele_number_genome_EAS_GnomADv2	Number of total chromosomes studied (for this variant) in genomes of East Asian Populations
+Allele_frequency_genome_EAS_GnomAD	Allele Frequency	Allele_frequency_genome_EAS_GnomADv2	Allele Frequency in genomes of East Asian Populations
+Allele_count_genome_EAS_JPN_GnomAD	Allele Frequency	Allele_count_genome_EAS_JPN_GnomADv2	Count of observed alternate alleles (variant) in the genomes of Japanese populations (subset of East Asian)
+Allele_count_hom_genome_EAS_JPN_GnomAD	Allele Frequency	Allele_count_hom_genome_EAS_JPN_GnomADv2	Count of observed alternate alleles (variant) in the genomes of homozygous Japanese populations (subset of East Asian)
+Allele_number_genome_EAS_JPN_GnomAD	Allele Frequency	Allele_number_genome_EAS_JPN_GnomADv2	Number of total chromosomes studied (for this variant) in the genomes of Japanese populations (subset of East Asian)
+Allele_frequency_genome_EAS_JPN_GnomAD	Allele Frequency	Allele_frequency_genome_EAS_JPN_GnomADv2	Allele Frequency in the genomes of Japanese populations (subset of East Asian)
+Allele_count_genome_EAS_KOR_GnomAD	Allele Frequency	Allele_count_genome_EAS_KOR_GnomADv2	Count of observed alternate alleles (variant) in the genomes of Korean populations (subset of East Asian)
+Allele_count_hom_genome_EAS_KOR_GnomAD	Allele Frequency	Allele_count_hom_genome_EAS_KOR_GnomADv2	Count of observed alternate alleles (variant) in the genomes of homozygous Korean populations (subset of East Asian)
+Allele_number_genome_EAS_KOR_GnomAD	Allele Frequency	Allele_number_genome_EAS_KOR_GnomADv2	Number of total chromosomes studied (for this variant) in the genomes of Korean populations (subset of East Asian)
+Allele_frequency_genome_EAS_KOR_GnomAD	Allele Frequency	Allele_frequency_genome_EAS_KOR_GnomADv2	Allele Frequency in the genomes of Korean populations (subset of East Asian)
+Allele_count_genome_EAS_OEA_GnomAD	Allele Frequency	Allele_count_genome_EAS_OEA_GnomADv2	Count of observed alternate alleles (variant) in the genomes of Other East Asian populations (subset of East Asian)
+Allele_count_hom_genome_EAS_OEA_GnomAD	Allele Frequency	Allele_count_hom_genome_EAS_OEA_GnomADv2	Count of observed alternate alleles (variant) in the genomes of homozygous Other East Asian populations (subset of East Asian)
+Allele_number_genome_EAS_OEA_GnomAD	Allele Frequency	Allele_number_genome_EAS_OEA_GnomADv2	Number of total chromosomes studied (for this variant) in the genomes of Other East Asian populations (subset of East Asian)
+Allele_frequency_genome_EAS_OEA_GnomAD	Allele Frequency	Allele_frequency_genome_EAS_OEA_GnomADv2	Allele Frequency in the genomes of Other East Asian populations (subset of East Asian)
+Allele_count_genome_FIN_GnomAD	Allele Frequency	Allele_count_genome_FIN_GnomADv2	"Count of observed alternate alleles (variant) in genomes of Finnish Populations, per gnomAD"
+Allele_count_hom_genome_FIN_GnomAD	Allele Frequency	Allele_count_hom_genome_FIN_GnomADv2	"Count of observed alternate alleles (variant) in genomes of homozygous Finnish Populations, per gnomAD"
+Allele_number_genome_FIN_GnomAD	Allele Frequency	Allele_number_genome_FIN_GnomADv2	Number of total chromosomes studied (for this variant) in genomes of Finnish Populations
+Allele_frequency_genome_FIN_GnomAD	Allele Frequency	Allele_frequency_genome_FIN_GnomADv2	Allele Frequency in genomes of Finnish Populations
+Allele_count_genome_NFE_GnomAD	Allele Frequency	Allele_count_genome_NFE_GnomADv2	"Count of observed alternate alleles (variant) in genomes of Non-Finnish European Populations, per gnomAD"
+Allele_count_hom_genome_NFE_GnomAD	Allele Frequency	Allele_count_hom_genome_NFE_GnomADv2	"Count of observed alternate alleles (variant) in genomes of homozygous Non-Finnish European Populations, per gnomAD"
+Allele_number_genome_NFE_GnomAD	Allele Frequency	Allele_number_genome_NFE_GnomADv2	Number of total chromosomes studied (for this variant) in genomes of Non-Finnish European Populations
+Allele_frequency_genome_NFE_GnomAD	Allele Frequency	Allele_frequency_genome_NFE_GnomADv2	Allele Frequency in genomes of Non-Finnish European Populations
+Allele_count_genome_NFE_EST_GnomAD	Allele Frequency	Allele_count_genome_NFE_EST_GnomADv2	Count of observed alternate alleles (variant) in the genomes of Estonian populations (subset of Non-Finnish European)
+Allele_count_hom_genome_NFE_EST_GnomAD	Allele Frequency	Allele_count_hom_genome_NFE_EST_GnomADv2	Count of observed alternate alleles (variant) in the genomes of homozygous Estonian populations (subset of Non-Finnish European)
+Allele_number_genome_NFE_EST_GnomAD	Allele Frequency	Allele_number_genome_NFE_EST_GnomADv2	Number of total chromosomes studied (for this variant) in the genomes of Estonian populations (subset of Non-Finnish European)
+Allele_frequency_genome_NFE_EST_GnomAD	Allele Frequency	Allele_frequency_genome_NFE_EST_GnomADv2	Allele Frequency in the genomes of Estonian populations (subset of Non-Finnish European)
+Allele_count_genome_NFE_BGR_GnomAD	Allele Frequency	Allele_count_genome_NFE_BGR_GnomADv2	Count of observed alternate alleles (variant) in the genomes of Bulgarian populations (subset of Non-Finnish European)
+Allele_count_hom_genome_NFE_BGR_GnomAD	Allele Frequency	Allele_count_hom_genome_NFE_BGR_GnomADv2	Count of observed alternate alleles (variant) in the genomes of homozygous Bulgarian populations (subset of Non-Finnish European)
+Allele_number_genome_NFE_BGR_GnomAD	Allele Frequency	Allele_number_genome_NFE_BGR_GnomADv2	Number of total chromosomes studied (for this variant) in the genomes of Bulgarian populations (subset of Non-Finnish European)
+Allele_frequency_genome_NFE_BGR_GnomAD	Allele Frequency	Allele_frequency_genome_NFE_BGR_GnomADv2	Allele Frequency in the genomes of Bulgarian populations (subset of Non-Finnish European)
+Allele_count_genome_NFE_NWE_GnomAD	Allele Frequency	Allele_count_genome_NFE_NWE_GnomADv2	Count of observed alternate alleles (variant) in the genomes of Northwestern European populations (subset of Non-Finnish European)
+Allele_count_hom_genome_NFE_NWE_GnomAD	Allele Frequency	Allele_count_hom_genome_NFE_NWE_GnomADv2	Count of observed alternate alleles (variant) in the genomes of homozygous Northwestern European populations (subset of Non-Finnish European)
+Allele_number_genome_NFE_NWE_GnomAD	Allele Frequency	Allele_number_genome_NFE_NWE_GnomADv2	Number of total chromosomes studied (for this variant) in the genomes of Northwestern European populations (subset of Non-Finnish European)
+Allele_frequency_genome_NFE_NWE_GnomAD	Allele Frequency	Allele_frequency_genome_NFE_NWE_GnomADv2	Allele Frequency in the genomes of Northwestern European populations (subset of Non-Finnish European)
+Allele_count_genome_NFE_ONF_GnomAD	Allele Frequency	Allele_count_genome_NFE_ONF_GnomADv2	Count of observed alternate alleles (variant) in the genomes of Other Non-Finnish European populations (subset of Non-Finnish European)
+Allele_count_hom_genome_NFE_ONF_GnomAD	Allele Frequency	Allele_count_hom_genome_NFE_ONF_GnomADv2	Count of observed alternate alleles (variant) in the genomes of homozygous Other Non-Finnish European populations (subset of Non-Finnish European)
+Allele_number_genome_NFE_ONF_GnomAD	Allele Frequency	Allele_number_genome_NFE_ONF_GnomADv2	Number of total chromosomes studied (for this variant) in the genomes of Other Non-Finnish European populations (subset of Non-Finnish European)
+Allele_frequency_genome_NFE_ONF_GnomAD	Allele Frequency	Allele_frequency_genome_NFE_ONF_GnomADv2	Allele Frequency in the genomes of Other Non-Finnish European populations (subset of Non-Finnish European)
+Allele_count_genome_NFE_SEU_GnomAD	Allele Frequency	Allele_count_genome_NFE_SEU_GnomADv2	Count of observed alternate alleles (variant) in the genomes of Southern European populations (subset of Non-Finnish European)
+Allele_count_hom_genome_NFE_SEU_GnomAD	Allele Frequency	Allele_count_hom_genome_NFE_SEU_GnomADv2	Count of observed alternate alleles (variant) in the genomes of homozygous Southern European populations (subset of Non-Finnish European)
+Allele_number_genome_NFE_SEU_GnomAD	Allele Frequency	Allele_number_genome_NFE_SEU_GnomADv2	Number of total chromosomes studied (for this variant) in the genomes of Southern European populations (subset of Non-Finnish European)
+Allele_frequency_genome_NFE_SEU_GnomAD	Allele Frequency	Allele_frequency_genome_NFE_SEU_GnomADv2	Allele Frequency in the genomes of Southern European populations (subset of Non-Finnish European)
+Allele_count_genome_NFE_SWE_GnomAD	Allele Frequency	Allele_count_genome_NFE_SWE_GnomADv2	Count of observed alternate alleles (variant) in the genomes of Swedish populations (subset of Non-Finnish European)
+Allele_count_hom_genome_NFE_SWE_GnomAD	Allele Frequency	Allele_count_hom_genome_NFE_SWE_GnomADv2	Count of observed alternate alleles (variant) in the genomes of homozygous Swedish populations (subset of Non-Finnish European)
+Allele_number_genome_NFE_SWE_GnomAD	Allele Frequency	Allele_number_genome_NFE_SWE_GnomADv2	Number of total chromosomes studied (for this variant) in the genomes of Swedish populations (subset of Non-Finnish European)
+Allele_frequency_genome_NFE_SWE_GnomAD	Allele Frequency	Allele_frequency_genome_NFE_SWE_GnomADv2	Allele Frequency in the genomes of Swedish populations (subset of Non-Finnish European)
+Allele_count_genome_OTH_GnomAD	Allele Frequency	Allele_count_genome_OTH_GnomADv2	"Count of observed alternate alleles (variant) in genomes of Other Populations, per gnomAD"
+Allele_count_hom_genome_OTH_GnomAD	Allele Frequency	Allele_count_hom_genome_OTH_GnomADv2	"Count of observed alternate alleles (variant) in genomes of homozygous Other Populations, per gnomAD"
+Allele_number_genome_OTH_GnomAD	Allele Frequency	Allele_number_genome_OTH_GnomADv2	Number of total chromosomes studied (for this variant) in genomes of Other Populations
+Allele_frequency_genome_OTH_GnomAD	Allele Frequency	Allele_frequency_genome_OTH_GnomADv2	Allele Frequency in genomes of Other Populations
+Allele_count_genome_SAS_GnomAD	Allele Frequency	Allele_count_genome_SAS_GnomADv2	"Count of observed alternate alleles (variant) in genomes of South Asian Populations, per gnomAD"
+Allele_count_hom_genome_SAS_GnomAD	Allele Frequency	Allele_count_hom_genome_SAS_GnomADv2	"Count of observed alternate alleles (variant) in genomes of homozygous South Asian Populations, per gnomAD"
+Allele_number_genome_SAS_GnomAD	Allele Frequency	Allele_number_genome_SAS_GnomADv2	Number of total chromosomes studied (for this variant) in genomes of South Asian Populations
+Allele_frequency_genome_SAS_GnomAD	Allele Frequency	Allele_frequency_genome_SAS_GnomADv2	Allele Frequency in genomes of South Asian Populations
+Allele_count_genome_GnomAD	Allele Frequency	Allele_count_genome_GnomADv2	Total count of observed alternate alleles (variant) in genomes
+Allele_number_genome_GnomAD	Allele Frequency	Allele_number_genome_GnomADv2	Total number of total chromosomes studied (for this variant) in genomes
+Allele_frequency_genome_GnomAD	Allele Frequency	Allele_frequency_genome_GnomADv2	"Overall allele frequency (for genomes) according to all studied populations, per gnomAD"
+faf95_popmax_exome_GnomAD	Allele Frequency	faf95_popmax_exome_GnomADv2	The gnomAD exome population frequency that is most significant with a 95% confidence threshold
+faf95_popmax_population_exome_GnomAD	Allele Frequency	faf95_popmax_population_exome_GnomADv2	The gnomAD population that is most significant (most frequent) in the exome data at 95% confidence
+Allele_count_exome_AFR_GnomAD	Allele Frequency	Allele_count_exome_AFR_GnomADv2	"Count of observed alternate alleles (variant) in exomes of African African American Populations, per gnomAD"
+Allele_count_hom_exome_AFR_GnomAD	Allele Frequency	Allele_count_hom_exome_AFR_GnomADv2	"Count of observed alternate alleles (variant) in exomes of homozygous African/African American Populations, per gnomAD"
+Allele_number_exome_AFR_GnomAD	Allele Frequency	Allele_number_exome_AFR_GnomADv2	Number of total chromosomes studied (for this variant) in exomes of African/African American Populations
+Allele_frequency_exome_AFR_GnomAD	Allele Frequency	Allele_frequency_exome_AFR_GnomADv2	Allele Frequency in exomes of African/African American Populations
+Allele_count_exome_AMR_GnomAD	Allele Frequency	Allele_count_exome_AMR_GnomADv2	"Count of observed alternate alleles (variant) in exomes of Latino Populations, per gnomAD"
+Allele_count_hom_exome_AMR_GnomAD	Allele Frequency	Allele_count_hom_exome_AMR_GnomADv2	"Count of observed alternate alleles (variant) in exomes of homozygous Latino Populations, per gnomAD"
+Allele_number_exome_AMR_GnomAD	Allele Frequency	Allele_number_exome_AMR_GnomADv2	Number of total chromosomes studied (for this variant) in exomes of Latino Populations
+Allele_frequency_exome_AMR_GnomAD	Allele Frequency	Allele_frequency_exome_AMR_GnomADv2	Allele Frequency in exomes of Latino Populations
+Allele_count_exome_ASJ_GnomAD	Allele Frequency	Allele_count_exome_ASJ_GnomADv2	"Count of observed alternate alleles (variant) in exomes of Ashkenazi Jewish Populations, per gnomAD"
+Allele_count_hom_exome_ASJ_GnomAD	Allele Frequency	Allele_count_hom_exome_ASJ_GnomADv2	"Count of observed alternate alleles (variant) in exomes of homozygous Ashkenazi Jewish Populations, per gnomAD"
+Allele_number_exome_ASJ_GnomAD	Allele Frequency	Allele_number_exome_ASJ_GnomADv2	Number of total chromosomes studied (for this variant) in exomes of Ashkenazi Jewish Populations
+Allele_frequency_exome_ASJ_GnomAD	Allele Frequency	Allele_frequency_exome_ASJ_GnomADv2	Allele Frequency in exomes of Ashkenazi Jewish Populations
+Allele_count_exome_EAS_GnomAD	Allele Frequency	Allele_count_exome_EAS_GnomADv2	"Count of observed alternate alleles (variant) in exomes of East Asian Populations, per gnomAD"
+Allele_count_hom_exome_EAS_GnomAD	Allele Frequency	Allele_count_hom_exome_EAS_GnomADv2	"Count of observed alternate alleles (variant) in exomes of homozygous East Asian Populations, per gnomAD"
+Allele_number_exome_EAS_GnomAD	Allele Frequency	Allele_number_exome_EAS_GnomADv2	Number of total chromosomes studied (for this variant) in exomes of East Asian Populations
+Allele_frequency_exome_EAS_GnomAD	Allele Frequency	Allele_frequency_exome_EAS_GnomADv2	Allele Frequency in exomes of East Asian Populations
+Allele_count_exome_EAS_JPN_GnomAD	Allele Frequency	Allele_count_exome_EAS_JPN_GnomADv2	Count of observed alternate alleles (variant) in the exomes of Japanese populations (subset of East Asian)
+Allele_count_hom_exome_EAS_JPN_GnomAD	Allele Frequency	Allele_count_hom_exome_EAS_JPN_GnomADv2	Count of observed alternate alleles (variant) in the exomes of homozygous Japanese populations (subset of East Asian)
+Allele_number_exome_EAS_JPN_GnomAD	Allele Frequency	Allele_number_exome_EAS_JPN_GnomADv2	Number of total chromosomes studied (for this variant) in the exomes of Japanese populations (subset of East Asian)
+Allele_frequency_exome_EAS_JPN_GnomAD	Allele Frequency	Allele_frequency_exome_EAS_JPN_GnomADv2	Allele Frequency in the exomes of Japanese populations (subset of East Asian)
+Allele_count_exome_EAS_KOR_GnomAD	Allele Frequency	Allele_count_exome_EAS_KOR_GnomADv2	Count of observed alternate alleles (variant) in the exomes of Korean populations (subset of East Asian)
+Allele_count_hom_exome_EAS_KOR_GnomAD	Allele Frequency	Allele_count_hom_exome_EAS_KOR_GnomADv2	Count of observed alternate alleles (variant) in the exomes of homozygous Korean populations (subset of East Asian)
+Allele_number_exome_EAS_KOR_GnomAD	Allele Frequency	Allele_number_exome_EAS_KOR_GnomADv2	Number of total chromosomes studied (for this variant) in the exomes of Korean populations (subset of East Asian)
+Allele_frequency_exome_EAS_KOR_GnomAD	Allele Frequency	Allele_frequency_exome_EAS_KOR_GnomADv2	Allele Frequency in the exomes of Korean populations (subset of East Asian)
+Allele_count_exome_EAS_OEA_GnomAD	Allele Frequency	Allele_count_exome_EAS_OEA_GnomADv2	Count of observed alternate alleles (variant) in the exomes of Other East Asian populations (subset of East Asian)
+Allele_count_hom_exome_EAS_OEA_GnomAD	Allele Frequency	Allele_count_hom_exome_EAS_OEA_GnomADv2	Count of observed alternate alleles (variant) in the exomes of homozygous Other East Asian populations (subset of East Asian)
+Allele_number_exome_EAS_OEA_GnomAD	Allele Frequency	Allele_number_exome_EAS_OEA_GnomADv2	Number of total chromosomes studied (for this variant) in the exomes of Other East Asian populations (subset of East Asian)
+Allele_frequency_exome_EAS_OEA_GnomAD	Allele Frequency	Allele_frequency_exome_EAS_OEA_GnomADv2	Allele Frequency in the exomes of Other East Asian populations (subset of East Asian)
+Allele_count_exome_FIN_GnomAD	Allele Frequency	Allele_count_exome_FIN_GnomADv2	"Count of observed alternate alleles (variant) in exomes of Finnish Populations, per gnomAD"
+Allele_count_hom_exome_FIN_GnomAD	Allele Frequency	Allele_count_hom_exome_FIN_GnomADv2	"Count of observed alternate alleles (variant) in exomes of homozygous Finnish Populations, per gnomAD"
+Allele_number_exome_FIN_GnomAD	Allele Frequency	Allele_number_exome_FIN_GnomADv2	Number of total chromosomes studied (for this variant) in exomes of Finnish Populations
+Allele_frequency_exome_FIN_GnomAD	Allele Frequency	Allele_frequency_exome_FIN_GnomADv2	Allele Frequency in exomes of Finnish Populations
+Allele_count_exome_NFE_GnomAD	Allele Frequency	Allele_count_exome_NFE_GnomADv2	"Count of observed alternate alleles (variant) in exomes of Non-Finnish European Populations, per gnomAD"
+Allele_count_hom_exome_NFE_GnomAD	Allele Frequency	Allele_count_hom_exome_NFE_GnomADv2	"Count of observed alternate alleles (variant) in exomes of homozygous Non-Finnish European Populations, per gnomAD"
+Allele_number_exome_NFE_GnomAD	Allele Frequency	Allele_number_exome_NFE_GnomADv2	Number of total chromosomes studied (for this variant) in exomes of Non-Finnish European Populations
+Allele_frequency_exome_NFE_GnomAD	Allele Frequency	Allele_frequency_exome_NFE_GnomADv2	Allele Frequency in exomes of Finnish Populations
+Allele_count_exome_NFE_EST_GnomAD	Allele Frequency	Allele_count_exome_NFE_EST_GnomADv2	Count of observed alternate alleles (variant) in the exomes of Estonian populations (subset of Non-Finnish European)
+Allele_count_hom_exome_NFE_EST_GnomAD	Allele Frequency	Allele_count_hom_exome_NFE_EST_GnomADv2	Count of observed alternate alleles (variant) in the exomes of homozygous Estonian populations (subset of Non-Finnish European)
+Allele_number_exome_NFE_EST_GnomAD	Allele Frequency	Allele_number_exome_NFE_EST_GnomADv2	Number of total chromosomes studied (for this variant) in the exomes of Estonian populations (subset of Non-Finnish European)
+Allele_frequency_exome_NFE_EST_GnomAD	Allele Frequency	Allele_frequency_exome_NFE_EST_GnomADv2	Allele Frequency in the exomes of Estonian populations (subset of Non-Finnish European)
+Allele_count_exome_NFE_BGR_GnomAD	Allele Frequency	Allele_count_exome_NFE_BGR_GnomADv2	Count of observed alternate alleles (variant) in the exomes of Bulgarian populations (subset of Non-Finnish European)
+Allele_count_hom_exome_NFE_BGR_GnomAD	Allele Frequency	Allele_count_hom_exome_NFE_BGR_GnomADv2	Count of observed alternate alleles (variant) in the exomes of homozygous Bulgarian populations (subset of Non-Finnish European)
+Allele_number_exome_NFE_BGR_GnomAD	Allele Frequency	Allele_number_exome_NFE_BGR_GnomADv2	Number of total chromosomes studied (for this variant) in the exomes of Bulgarian populations (subset of Non-Finnish European)
+Allele_frequency_exome_NFE_BGR_GnomAD	Allele Frequency	Allele_frequency_exome_NFE_BGR_GnomADv2	Allele Frequency in the exomes of Bulgarian populations (subset of Non-Finnish European)
+Allele_count_exome_NFE_NWE_GnomAD	Allele Frequency	Allele_count_exome_NFE_NWE_GnomADv2	Count of observed alternate alleles (variant) in the exomes of Northwestern European populations (subset of Non-Finnish European)
+Allele_count_hom_exome_NFE_NWE_GnomAD	Allele Frequency	Allele_count_hom_exome_NFE_NWE_GnomADv2	Count of observed alternate alleles (variant) in the exomes of homozygous Northwestern European populations (subset of Non-Finnish European)
+Allele_number_exome_NFE_NWE_GnomAD	Allele Frequency	Allele_number_exome_NFE_NWE_GnomADv2	Number of total chromosomes studied (for this variant) in the exomes of Northwestern European populations (subset of Non-Finnish European)
+Allele_frequency_exome_NFE_NWE_GnomAD	Allele Frequency	Allele_frequency_exome_NFE_NWE_GnomADv2	Allele Frequency in the exomes of Northwestern European populations (subset of Non-Finnish European)
+Allele_count_exome_NFE_ONF_GnomAD	Allele Frequency	Allele_count_exome_NFE_ONF_GnomADv2	Count of observed alternate alleles (variant) in the exomes of Other Non-Finnish European populations (subset of Non-Finnish European)
+Allele_count_hom_exome_NFE_ONF_GnomAD	Allele Frequency	Allele_count_hom_exome_NFE_ONF_GnomADv2	Count of observed alternate alleles (variant) in the exomes of homozygous Other Non-Finnish European populations (subset of Non-Finnish European)
+Allele_number_exome_NFE_ONF_GnomAD	Allele Frequency	Allele_number_exome_NFE_ONF_GnomADv2	Number of total chromosomes studied (for this variant) in the exomes of Other Non-Finnish European populations (subset of Non-Finnish European)
+Allele_frequency_exome_NFE_ONF_GnomAD	Allele Frequency	Allele_frequency_exome_NFE_ONF_GnomADv2	Allele Frequency in the exomes of Other Non-Finnish European populations (subset of Non-Finnish European)
+Allele_count_exome_NFE_SEU_GnomAD	Allele Frequency	Allele_count_exome_NFE_SEU_GnomADv2	Count of observed alternate alleles (variant) in the exomes of Southern European populations (subset of Non-Finnish European)
+Allele_count_hom_exome_NFE_SEU_GnomAD	Allele Frequency	Allele_count_hom_exome_NFE_SEU_GnomADv2	Count of observed alternate alleles (variant) in the exomes of homozygous Southern European populations (subset of Non-Finnish European)
+Allele_number_exome_NFE_SEU_GnomAD	Allele Frequency	Allele_number_exome_NFE_SEU_GnomADv2	Number of total chromosomes studied (for this variant) in the exomes of Southern European populations (subset of Non-Finnish European)
+Allele_frequency_exome_NFE_SEU_GnomAD	Allele Frequency	Allele_frequency_exome_NFE_SEU_GnomADv2	Allele Frequency in the exomes of Southern European populations (subset of Non-Finnish European)
+Allele_count_exome_NFE_SWE_GnomAD	Allele Frequency	Allele_count_exome_NFE_SWE_GnomADv2	Count of observed alternate alleles (variant) in the exomes of Swedish populations (subset of Non-Finnish European)
+Allele_count_hom_exome_NFE_SWE_GnomAD	Allele Frequency	Allele_count_hom_exome_NFE_SWE_GnomADv2	Count of observed alternate alleles (variant) in the exomes of homozygous Swedish populations (subset of Non-Finnish European)
+Allele_number_exome_NFE_SWE_GnomAD	Allele Frequency	Allele_number_exome_NFE_SWE_GnomADv2	Number of total chromosomes studied (for this variant) in the exomes of Swedish populations (subset of Non-Finnish European)
+Allele_frequency_exome_NFE_SWE_GnomAD	Allele Frequency	Allele_frequency_exome_NFE_SWE_GnomADv2	Allele Frequency in the exomes of Swedish populations (subset of Non-Finnish European)
+Allele_count_exome_OTH_GnomAD	Allele Frequency	Allele_count_exome_OTH_GnomADv2	"Count of observed alternate alleles (variant) in exomes of Other Populations, per gnomAD"
+Allele_count_hom_exome_OTH_GnomAD	Allele Frequency	Allele_count_hom_exome_OTH_GnomADv2	"Count of observed alternate alleles (variant) in exomes of homozygous Other Populations, per gnomAD"
+Allele_number_exome_OTH_GnomAD	Allele Frequency	Allele_number_exome_OTH_GnomADv2	Number of total chromosomes studied (for this variant) in exomes of Other Populations
+Allele_frequency_exome_OTH_GnomAD	Allele Frequency	Allele_frequency_exome_OTH_GnomADv2	Allele Frequency in exomes of Other Populations
+Allele_count_exome_SAS_GnomAD	Allele Frequency	Allele_count_exome_SAS_GnomADv2	"Count of observed alternate alleles (variant) in exomes of South Asian Populations, per gnomAD"
+Allele_count_hom_exome_SAS_GnomAD	Allele Frequency	Allele_count_hom_exome_SAS_GnomADv2	"Count of observed alternate alleles (variant) in exomes of homozygous South Asian Populations, per gnomAD"
+Allele_number_exome_SAS_GnomAD	Allele Frequency	Allele_number_exome_SAS_GnomADv2	Number of total chromosomes studied (for this variant) in exomes of South Asian Populations
+Allele_frequency_exome_SAS_GnomAD	Allele Frequency	Allele_frequency_exome_SAS_GnomADv2	Allele Frequency in exomes of South Asian Populations
+Allele_number_exome_GnomAD	Allele Frequency	Allele_number_exome_GnomADv2	Total number of total chromosomes studied (for this variant) in exomes
+Allele_count_exome_GnomAD	Allele Frequency	Allele_count_exome_GnomADv2	Total count of observed alternate alleles (variant) in exomes
+Allele_frequency_exome_GnomAD	Allele Frequency	Allele_frequency_exome_GnomADv2	"Overall allele frequency (for exomes) according to all studied populations, per gnomAD"
 BX_ID_GnomAD	Internal	#SKIP	"Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation"
 HGVS_cDNA_GnomADv3		Nomenclature	#SKIP	"HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA"
 Flags_GnomADv3		Remarks	#COPY	Flags provided by gnomAD to indicate an annotation or something unusual about the data
