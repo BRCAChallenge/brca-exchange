@@ -75,25 +75,27 @@ class AlleleFrequencyCharts extends React.Component {
                 {label: 'EAS', prop: 'Allele_frequency_exome_EAS_GnomAD'},
                 {label: 'FIN', prop: 'Allele_frequency_exome_FIN_GnomAD'},
                 {label: 'NFE', prop: 'Allele_frequency_exome_NFE_GnomAD'},
-                {label: 'OTH', prop: 'Allele_frequency_exome_OTH_GnomAD'},
                 {label: 'SAS', prop: 'Allele_frequency_exome_SAS_GnomAD'},
+                {label: 'OTH', prop: 'Allele_frequency_exome_OTH_GnomAD'},
             ];
             title = 'gnomAD Exomes';
             pointFormat =  "{point.y}<br /><em>({point.count} of {point.number})</em>";
         }
-        else if (prop === 'Allele_Frequency_Charts_Genome_GnomAD') {
-            if (!variant['Variant_in_GnomAD']) {
+        else if (prop === 'Allele_Frequency_Charts_Genome_GnomADv3') {
+            if (!variant.Variant_in_GnomADv3) {
                 return false;
             }
             frequencyProps = [
-                {label: 'AFR', prop: 'Allele_frequency_genome_AFR_GnomAD'},
-                {label: 'AMR', prop: 'Allele_frequency_genome_AMR_GnomAD'},
-                {label: 'ASJ', prop: 'Allele_frequency_genome_ASJ_GnomAD'},
-                {label: 'EAS', prop: 'Allele_frequency_genome_EAS_GnomAD'},
-                {label: 'FIN', prop: 'Allele_frequency_genome_FIN_GnomAD'},
-                {label: 'NFE', prop: 'Allele_frequency_genome_NFE_GnomAD'},
-                {label: 'OTH', prop: 'Allele_frequency_genome_OTH_GnomAD'},
-                {label: 'SAS', prop: 'Allele_frequency_genome_SAS_GnomAD'},
+                {label: 'AFR', prop: 'Allele_frequency_genome_AFR_GnomADv3'},
+                {label: 'AMR', prop: 'Allele_frequency_genome_AMR_GnomADv3'},
+                {label: 'AMI', prop: 'Allele_frequency_genome_AMI_GnomADv3'},
+                {label: 'ASJ', prop: 'Allele_frequency_genome_ASJ_GnomADv3'},
+                {label: 'EAS', prop: 'Allele_frequency_genome_EAS_GnomADv3'},
+                {label: 'FIN', prop: 'Allele_frequency_genome_FIN_GnomADv3'},
+                {label: 'MID', prop: 'Allele_frequency_genome_MID_GnomADv3'},
+                {label: 'NFE', prop: 'Allele_frequency_genome_NFE_GnomADv3'},
+                {label: 'SAS', prop: 'Allele_frequency_genome_SAS_GnomADv3'},
+                {label: 'OTH', prop: 'Allele_frequency_genome_OTH_GnomADv3'},
             ];
             title = 'gnomAD Genomes';
             pointFormat =  "{point.y}<br /><em>({point.count} of {point.number})</em>";

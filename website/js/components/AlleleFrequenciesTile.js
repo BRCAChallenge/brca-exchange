@@ -64,11 +64,11 @@ export default class AlleleFrequenciesTile extends React.Component {
                             }).data, "gnomAD Exomes (Numerical)"];
 
         const gnomadGenomeGraph = [_.find(data, function(dd) {
-                                return dd.source === "GnomAD Genomes";
+                                return dd.source === "GnomADv3 Genomes";
                             }).chart[0], "gnomAD Genomes (Graphical)"];
 
         const gnomadGenomeData = [_.find(data, function(dd) {
-                                return dd.source === "GnomAD Genomes";
+                                return dd.source === "GnomADv3 Genomes";
                             }).data, "gnomAD Genomes (Numerical)"];
 
         const exacGraph = [_.find(data, function(dd) {

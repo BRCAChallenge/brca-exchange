@@ -248,8 +248,13 @@ function getFormattedFieldByProp(prop, variant) {
         let count = variant[prop.replace("frequency", "count")],
             number = variant[prop.replace("frequency", "number")];
         rowItem = [variant[prop], <small style={{float: 'right'}}>({count} of {number})</small>];
-    } else if (prop === "Allele_frequency_genome_GnomAD" || prop === "Allele_frequency_exome_GnomAD") {
-        let flag = variant["Flags_GnomAD"];
+    } else if (prop === "Allele_frequency_genome_GnomADv3" || prop === "Allele_frequency_exome_GnomAD") {
+        let flag;
+        if (prop === "Allele_frequency_genome_GnomADv3") {
+            flag = variant.Flags_GnomADv3;
+        } else {
+            flag = variant.Flags_GnomAD;
+        }
         if (!isEmptyField(flag)) {
             rowItem = [variant[prop], <small style={{float: 'right'}}><span className="glyphicon glyphicon-flag gnomad-flag"><span>{flag}</span></span></small>];
         } else {
@@ -262,6 +267,8 @@ function getFormattedFieldByProp(prop, variant) {
         rowItem = [variant[prop], <small style={{float: 'right'}}>({count} of {number}, Hom={hom})</small>];
     } else if (/count.*_GnomAD/.test(prop) || /number.*_GnomAD/.test(prop)) {
         rowItem = variant[prop];
+    } else if (prop === "faf95_popmax_genome_GnomADv3") {
+        rowItem = [variant[prop], <small style={{float: 'right'}}>({variant.faf95_popmax_population_genome_GnomADv3})</small>];
     } else if (prop === "Genomic_Coordinate_hg38" || prop === "Genomic_Coordinate_hg37") {
         let hgvs;
         if (prop === "Genomic_Coordinate_hg38") {
