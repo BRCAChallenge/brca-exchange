@@ -15,33 +15,26 @@ This data is updated during the monthly release cycle, and will contain any new 
 
 #### gnomAD Populations
 
-The BRCA Exchange displays the primary subsets used by ExAC and gnomAD (i.e. “East  Asian”), For gnomAD, detailed population data (i.e. “Japanese,” “Korean”) is shown numerically but not graphically. Additional detailed population data, such as female and male distributions, can be found in gnomAD. 
+The BRCA Exchange displays the primary subsets used by ExAC and gnomAD (i.e. “East  Asian”). Additional detailed population data, such as female and male distributions, can be found in gnomAD. 
 
 * ##### Allele Frequency (gnomAD non-cancer cohort)
 	* Minor allele frequency, per ExAC (excluding cancer sequencing data)
 * ##### African/African American (AFR)
 	* Allele frequency in African/African American populations, per gnomAD
+* ##### Amish (AMI)
+	* Allele frequency in Amish populations, per gnomAD
 * ##### Latino (AMR)
 	* Allele frequency in Admixed American/Latino populations, per gnomAD
 * ##### Ashkenazi Jewish (ASJ)
 	* Allele frequency in Ahskenazi Jewish populations, per gnomAD
 * ##### East Asian (EAS)
 	* Allele frequency in East Asian populations, per gnomAD
-	* Subsets available:
-		* Japanese (EAS_JPN)
-		* Korean (EAS_KOR)
-		* Other East Asian (EAS_OEA)
 * ##### Finnish (FIN)
 	* Allele frequency in Finnish populations, per gnomAD and separated from European because of an enriched data set
+* ##### Middle Eastern (MID)
+		* Allele frequency in Middle Eastern populations, per gnomAD
 * ##### Non-Finnish European (NFE)
 	* Allele frequency in Non-Finnish European populations, per gnomAD
-	* Subsets available:
-		* Bulgarian (NFE_BGR)
-		* Estonian (NFE_EST)
-		* North-western European (NFE_NWE)
-		* Other non-Finnish European (NFE_ONF)
-		* Southern European (NFE_SEU)
-		* Swedish (NFE_SWE)
 * ##### South Asian (SAS)
 	* Allele frequency in South Asian populations, per gnomAD
 * ##### Other (OTH)
