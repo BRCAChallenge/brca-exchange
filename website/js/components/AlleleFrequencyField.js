@@ -132,7 +132,7 @@ const AlleleFrequencyField = React.createClass({
 
     render: function() {
         const {field, fieldName, variant, hideEmptyItems} = this.props;
-        let renderedRows, flag, gnomadLink, chr, transcript, refSeqTranscript, lrgLink;
+        let renderedRows, flag, gnomadLink, chr, transcript, refSeqTranscript, lrgLink, variantId, dataset;
         let allEmpty = false;
         let isChart = false;
         let isGnomad = false;
@@ -143,7 +143,14 @@ const AlleleFrequencyField = React.createClass({
             flag = variant.Flags_GnomAD;
             chr = variant.Chr;
             isGnomad = true;
-            gnomadLink = "https://gnomad.broadinstitute.org/variant/" + variant.Variant_id_GnomADv3 + "?dataset=gnomad_r3_1_non_cancer";
+            if (fieldName.toLowerCase().includes('genome')) {
+                variantId = variant.Variant_id_GnomADv3;
+                dataset = "gnomad_r3_non_cancer";
+            } else {
+                variantId = variant.Variant_id_GnomAD;
+                dataset = "gnomad_r2_1_non_cancer";
+            }
+            gnomadLink = "https://gnomad.broadinstitute.org/variant/" + variantId + "?dataset=" + dataset;
             if (chr === "17") {
                 transcript = "ENST00000357654";
                 refSeqTranscript = "NM_007294.3";
