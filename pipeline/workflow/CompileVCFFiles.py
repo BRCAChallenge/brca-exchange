@@ -846,17 +846,6 @@ class AppendVRId(DefaultPipelineTask):
 
 
 @requires(bayesdel_processing.AddBayesdelScores)
-class LinkBuiltFinal(DefaultPipelineTask):
-    def output(self):
-        return luigi.LocalTarget(os.path.join(self.release_dir, "built_final.tsv"))
-
-    def run(self):
-        # create relative symlink to have a permanent pointer to what currently the final output of the pipeline is
-        relativ_input = os.path.relpath(self.input().path, os.path.dirname(self.output().path))
-        os.symlink(relativ_input, self.output().path)
-
-
-@requires(LinkBuiltFinal)
 class FindMissingReports(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(self.artifacts_dir, "missing_reports.log"))
@@ -873,7 +862,7 @@ class FindMissingReports(DefaultPipelineTask):
         pipeline_utils.check_file_for_contents(self.output().path)
 
 
-@requires(LinkBuiltFinal)
+@requires(bayesdel_processing.AddBayesdelScores)
 class RunDiffAndAppendChangeTypesToOutput(DefaultPipelineTask):
     def _extract_release_date(self, version_json):
         with open(version_json, 'r') as f:
@@ -980,6 +969,17 @@ class RunDiffAndAppendChangeTypesToOutputReports(DefaultPipelineTask):
         pipeline_utils.check_input_and_output_tsvs_for_same_number_variants(
             os.path.join(self.artifacts_dir, "reports.tsv"),
             os.path.join(self.release_dir, "reports_with_change_types.tsv"))
+
+
+@requires(RunDiffAndAppendChangeTypesToOutput)
+class LinkBuiltFinal(DefaultPipelineTask):
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.release_dir, "built_final.tsv"))
+
+    def run(self):
+        # create relative symlink to have a permanent pointer to what currently the final output of the pipeline is
+        relative_input = os.path.relpath(self.input().path, os.path.dirname(self.output().path))
+        os.symlink(relative_input, self.output().path)
 
 
 @requires(LinkBuiltFinal)
