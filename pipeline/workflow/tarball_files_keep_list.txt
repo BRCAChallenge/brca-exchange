@@ -5,6 +5,7 @@
 ./esp.sorted.hg38.vcf
 ./exac.brca12.sorted.hg38.vcf
 ./exLOVD_brca12.sorted.hg38.vcf
+./findlay_BRCA1_ring_function_scores.clean.sorted.hg38.vcf
 ./gnomAD.sorted.hg38.vcf
 ./md5sums.txt
 ./README.txt
