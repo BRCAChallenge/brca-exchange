@@ -29,6 +29,10 @@ def main():
     keep_list = read_file_list(args.keepListFilePath)
     discard_list = read_file_list(args.discardListFilePath)
 
+    lists_intersec = keep_list.intersection(discard_list)
+    if lists_intersec:
+        sys.exit(f"Keep list and discard list are not disjoint! Got {', '.join([str(p) for p in lists_intersec])}")
+
     input_dir = Path(args.inputDir)
     output_file_name = args.outputFile
 
@@ -51,9 +55,9 @@ def main():
                         # If a file is neither in the keep list nor the discard,list, fail, as it is an unexpected file.
                         # This way we are making sure we don't forget to include a newly created file into the tarball
                         sys.exit(f"Found found file {filepath} neither in keep list nor discard list. ")
-
-                md5hash = hashlib.md5(open(Path(subdir) / file, 'rb').read()).hexdigest()
-                f_out.write(f"{md5hash}  {filepath}\n")  # 2 whitespaces in order to be compatible with GNU md5sum
+                else:
+                    md5hash = hashlib.md5(open(Path(subdir) / file, 'rb').read()).hexdigest()
+                    f_out.write(f"{md5hash}  {filepath}\n")  # 2 whitespaces in order to be compatible with GNU md5sum
 
 
 if __name__ == "__main__":

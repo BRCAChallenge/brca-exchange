@@ -977,8 +977,9 @@ class LinkBuiltFinal(DefaultPipelineTask):
         return luigi.LocalTarget(os.path.join(self.release_dir, "built_final.tsv"))
 
     def run(self):
+        input_path = self.input()['built_with_change_types'].path
         # create relative symlink to have a permanent pointer to what currently the final output of the pipeline is
-        relative_input = os.path.relpath(self.input().path, os.path.dirname(self.output().path))
+        relative_input = os.path.relpath(input_path, os.path.dirname(self.output().path))
         os.symlink(relative_input, self.output().path)
 
 

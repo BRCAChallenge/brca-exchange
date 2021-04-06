@@ -11,7 +11,6 @@
 ./README.txt
 ./release/artifacts/aggregated.tsv
 ./release/artifacts/brca-pseudonym-generator.log
-./release/artifacts/built_with_bayesdel.tsv
 ./release/artifacts/discarded_reports.tsv
 ./release/artifacts/ENIGMA_wrong_genome.txt
 ./release/artifacts/exLOVD_BRCA1_error_variants.txt
@@ -32,6 +31,7 @@
 ./release/artifacts/wrong_genome_coors/Findlay_BRCA1_Ring_Function_Scores_wrong_genome_coor.vcf
 ./release/artifacts/wrong_genome_coors/GnomAD_wrong_genome_coor.vcf
 ./release/artifacts/wrong_genome_coors/LOVD_wrong_genome_coor.vcf
+./release/built_final.tsv
 ./release/built_with_change_types.tsv
 ./release/diff/added_data_reports.tsv
 ./release/diff/added_data.tsv

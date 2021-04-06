@@ -378,3 +378,4 @@ lowMESFlag	Internal	#SKIP	"Intermediate position, sequence, or value used in In 
 varConsequences	Nomenclature	#COPY	"Variant consequences, pulled from Ensembl's Variant Effect Predictor"	missense_variant	https://useast.ensembl.org/info/genome/variation/prediction/predicted_data.html#consequence_type_table
 VR_ID	Nomenclature	#COPY	The digest representing the variant (in GRCh38 genomic coordinates) by the GA4GH Variant Representation Standard	ga4gh:VA.kVvzAwHx3AlCzQ8u6b7J9bLNuxKcSnUr
 BayesDel_nsfp33a_noAF	Evidence	bayesdel_noaf	"BayesDel score"	0.55
+change_type	Internal	#SKIP	"type of change with respect to last release"	"changed_information"

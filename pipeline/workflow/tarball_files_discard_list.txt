@@ -5,6 +5,7 @@
 ./release/artifacts/BICready.vcf
 ./release/artifacts/BIC.vcf
 ./release/artifacts/built.tsv
+./release/artifacts/built_with_bayesdel.tsv
 ./release/artifacts/built_with_ca_ids.tsv
 ./release/artifacts/built_with_mupit.tsv
 ./release/artifacts/built_with_priors_clean.tsv
