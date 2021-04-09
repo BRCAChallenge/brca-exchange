@@ -9,7 +9,6 @@
 ./gnomAD.sorted.hg38.vcf
 ./md5sums.txt
 ./README.txt
-./release/artifacts/aggregated.tsv
 ./release/artifacts/brca-pseudonym-generator.log
 ./release/artifacts/discarded_reports.tsv
 ./release/artifacts/ENIGMA_wrong_genome.txt
