@@ -41,7 +41,7 @@ output/release/
 output/release/artifacts/
 	Subdirectory with miscellaneous intermediate results from the data aggregation pipeline
 output/release/built_final.tsv
-	Tab-delimited file with the variants shared on BRCA Exchange, and their attribute data
+	Final and complete output of pipeline. Currently just a symlink to output/release/built_with_change_types.tsv
 output/release/built_with_change_types.tsv
 	Tab-delimited file of the variants shared on BRCA Exchange, their attributes, and their update status since the
 	last release.
