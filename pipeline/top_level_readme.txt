@@ -1,4 +1,4 @@
-(Readme last updated March 05, 2021)
+(Readme last updated April 06, 2021)
 
 BRCA Exchange download data
 
@@ -20,8 +20,6 @@ output/
 	and translated into GRCh38 coordinates as needed.
 output/1000G.sorted.hg38.vcf
 	Variants selected from 1000 Genomes, with genotype data.
-output/1000G.sorted.hg38.vcffor_pipeline
-	Variants from 1000 Genomes, without genotype data
 output/ClinVar.vcf
 	Variants from ClinVar at NCBI.
 output/bic_brca12.sorted.hg38.vcf
@@ -43,7 +41,7 @@ output/release/
 output/release/artifacts/
 	Subdirectory with miscellaneous intermediate results from the data aggregation pipeline
 output/release/built_final.tsv
-	Tab-delimited file with the variants shared on BRCA Exchange, and their attribute data
+	Final and complete output of pipeline. Currently just a symlink to output/release/built_with_change_types.tsv
 output/release/built_with_change_types.tsv
 	Tab-delimited file of the variants shared on BRCA Exchange, their attributes, and their update status since the
 	last release.
