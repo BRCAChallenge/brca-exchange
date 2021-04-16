@@ -386,95 +386,18 @@ class CopySharedLOVDOutputToOutputDir(DefaultPipelineTask):
 ###############################################
 
 
-class DownloadG1KVCFs(DefaultPipelineTask):
-    def output(self):
-        return { chrom : luigi.LocalTarget(f"{self.g1k_file_dir}/ALL.chr{chrom}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz") for chrom in self.cfg.gene_metadata['chr'] }
-
-    def run(self):
-        os.chdir(self.g1k_file_dir)
-
-        for chrom in self.cfg.gene_metadata['chr']:
-            url = f"ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr{chrom}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz"
-            pipeline_utils.download_file_and_display_progress(url)
-
-
-@requires(DownloadG1KVCFs)
-class DownloadG1KTBIs(DefaultPipelineTask):
-    def output(self):
-        return { chrom : luigi.LocalTarget(f"{self.g1k_file_dir}/ALL.chr{chrom}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi") for chrom in self.cfg.gene_metadata['chr'] }
-
-    def run(self):
-        os.chdir(self.g1k_file_dir)
-
-        for chrom in self.cfg.gene_metadata['chr']:
-            url = f"ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr{chrom}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi"
-            pipeline_utils.download_file_and_display_progress(url)
-
-
-@requires(DownloadG1KTBIs)
-class ExtractData(DefaultPipelineTask):
-    def output(self):
-        return { symbol : luigi.LocalTarget(
-                self.g1k_file_dir + f'/1000G_{symbol}.hg37.vcf') for symbol in self.cfg.gene_metadata['symbol'] }
-
-    def run(self):
-        for index, gene in self.cfg.gene_metadata.iterrows():
-            chrom = gene['chr']
-            start_hg37 = gene['start_hg37']
-            end_hg37 = gene['end_hg37']
-            symbol = gene['symbol']
-
-            args = ["tabix", "-h",
-                    f"{self.g1k_file_dir}/ALL.chr{chrom}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz",
-                    f"{chrom}:{start_hg37}-{end_hg37}"]
-
-            pipeline_utils.run_process(args, redirect_stdout_path=(self.g1k_file_dir + f'/1000G_{symbol}.hg37.vcf'))
-            pipeline_utils.check_file_for_contents(self.g1k_file_dir + f'/1000G_{symbol}.hg37.vcf')
-
-
-@requires(ExtractData)
-class ConcatenateG1KData(DefaultPipelineTask):
-    def output(self):
-        return luigi.LocalTarget(f"{self.g1k_file_dir}/1000G.hg37.vcf")
-
-    def run(self):
-        args_for_concatenate_step = ["vcf-concat"]
-        for symbol in self.cfg.gene_metadata['symbol']:
-            args_for_concatenate_step.append(f"{self.g1k_file_dir}/1000G_{symbol}.hg37.vcf")
-        pipeline_utils.run_process(args_for_concatenate_step, redirect_stdout_path=self.output().path)
-        pipeline_utils.check_file_for_contents(self.output().path)
-
-
-@requires(ConcatenateG1KData)
-class CrossmapG1KData(DefaultPipelineTask):
-    def output(self):
-        return luigi.LocalTarget(f"{self.g1k_file_dir}/1000G.hg38.vcf")
-
-    def run(self):
-        brca_resources_dir = self.cfg.resources_dir
-
-        args = ["CrossMap.py", "vcf",
-                brca_resources_dir + "/hg19ToHg38.over.chain.gz",
-                self.input().path,
-                brca_resources_dir + "/hg38.fa",
-                self.output().path]
-
-        pipeline_utils.run_process(args)
-        pipeline_utils.check_file_for_contents(self.output().path)
-
-
-@requires(CrossmapG1KData)
-class SortG1KData(DefaultPipelineTask):
+class DownloadStaticG1KData(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(f"{self.g1k_file_dir}/1000G.sorted.hg38.vcf")
 
     def run(self):
-        args = ["vcf-sort", self.input().path]
-        pipeline_utils.run_process(args, redirect_stdout_path=self.output().path)
-        pipeline_utils.check_file_for_contents(self.output().path)
+        os.chdir(self.exac_file_dir)
+
+        g1k_vcf_url = "https://brcaexchange.org/backend/downloads/1000G.sorted.hg38.vcf"
+        pipeline_utils.download_file_and_display_progress(g1k_vcf_url)
 
 
-@requires(SortG1KData)
+@requires(DownloadStaticG1KData)
 class CopyG1KOutputToOutputDir(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(f"{self.cfg.output_dir}/1000G.sorted.hg38.vcf")
