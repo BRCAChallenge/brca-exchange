@@ -391,7 +391,7 @@ class DownloadStaticG1KData(DefaultPipelineTask):
         return luigi.LocalTarget(f"{self.g1k_file_dir}/1000G.sorted.hg38.vcf")
 
     def run(self):
-        os.chdir(self.exac_file_dir)
+        os.chdir(self.g1k_file_dir)
 
         g1k_vcf_url = "https://brcaexchange.org/backend/downloads/1000G.sorted.hg38.vcf"
         pipeline_utils.download_file_and_display_progress(g1k_vcf_url)
