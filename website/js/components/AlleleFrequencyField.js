@@ -82,12 +82,18 @@ const AlleleFrequencyField = React.createClass({
     getPopMax: function(fieldName, variant) {
         /*eslint-disable camelcase*/
         let popmax = parseFloat(variant.faf95_popmax_genome_GnomADv3) ? parseFloat(variant.faf95_popmax_genome_GnomADv3).toPrecision(4) : '-';
-        if (fieldName.includes("Genomes (Graphical)")) {
+        if (fieldName.includes("Genomes, Non-Cancer (Graphical)")) {
             return popmax + ' (' + variant.faf95_popmax_population_genome_GnomADv3 + ')';
         } else {
             return popmax + ' (' + variant.faf95_popmax_population_exome_GnomAD + ')';
         }
         /*eslint-enable camelcase*/
+    },
+
+    cleanRowTitle: function (title) {
+        title = title.replace(" (gnomAD V2.1 Exomes)", "");
+        title = title.replace(" (gnomAD V3.1 Genomes)", "");
+        return title;
     },
 
     getRowsAndDetermineIfEmpty: function(source, data, variant) {
@@ -96,6 +102,8 @@ const AlleleFrequencyField = React.createClass({
         const rows = _.map(data, (rowDescriptor) => {
             let {prop, title, noHelpLink} = rowDescriptor;
             let rowItem;
+
+            title = this.cleanRowTitle(title);
 
             if (variant[prop] !== null) {
                 rowItem = util.getFormattedFieldByProp(prop, variant);
@@ -162,21 +170,21 @@ const AlleleFrequencyField = React.createClass({
             }
         }
 
-        if (fieldName === "gnomAD Genomes (Graphical)") {
+        if (fieldName === "gnomAD V3.1 Genomes, Non-Cancer (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
             if (!variant.Variant_in_GnomAD || util.isEmptyField(variant.Allele_frequency_genome_GnomADv3)) {
                 allEmpty = true;
             }
             isChart = true;
-        } else if (fieldName === "gnomAD Genomes (Numerical)") {
+        } else if (fieldName === "gnomAD V3.1 Genomes, Non-Cancer (Numerical)") {
             renderedRows = this.getRowsAndDetermineIfEmpty("GnomAD", field, variant, flag);
-        } else if (fieldName === "gnomAD Exomes (Graphical)") {
+        } else if (fieldName === "gnomAD V2.1 Exomes, Non-Cancer (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
             if (!variant.Variant_in_GnomAD || util.isEmptyField(variant['Allele_frequency_exome_GnomAD'])) {
                 allEmpty = true;
             }
             isChart = true;
-        } else if (fieldName === "gnomAD Exomes (Numerical)") {
+        } else if (fieldName === "gnomAD V2.1 Exomes, Non-Cancer (Numerical)") {
             renderedRows = this.getRowsAndDetermineIfEmpty("GnomAD", field, variant, flag);
         } else if (fieldName === "ExAC (Graphical)") {
             renderedRows = field.replace(variant, field.prop);

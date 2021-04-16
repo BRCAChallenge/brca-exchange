@@ -11,10 +11,10 @@ const _ = require('underscore');
 
 
 const fieldsOfInterest = {
-    'gnomAD Exomes (Graphical)': true,
-    'gnomAD Exomes (Numerical)': false,
-    'gnomAD Genomes (Graphical)': true,
-    'gnomAD Genomes (Numerical)': false,
+    'gnomAD V2.1 Exomes, Non-Cancer (Graphical)': true,
+    'gnomAD V2.1 Exomes, Non-Cancer (Numerical)': false,
+    'gnomAD V3.1 Genomes, Non-Cancer (Graphical)': true,
+    'gnomAD V3.1 Genomes, Non-Cancer (Numerical)': false,
     'ExAC (Graphical)': true,
     'ExAC (Numerical)': false,
     '1000 Genomes (Graphical)': false,
@@ -57,19 +57,19 @@ export default class AlleleFrequenciesTile extends React.Component {
 
         const gnomadExomeGraph = [_.find(data, function(dd) {
                                 return dd.source === "GnomAD Exomes";
-                            }).chart[0], "gnomAD Exomes (Graphical)"];
+                            }).chart[0], "gnomAD V2.1 Exomes, Non-Cancer (Graphical)"];
 
         const gnomadExomeData = [_.find(data, function(dd) {
                                 return dd.source === "GnomAD Exomes";
-                            }).data, "gnomAD Exomes (Numerical)"];
+                            }).data, "gnomAD V2.1 Exomes, Non-Cancer (Numerical)"];
 
         const gnomadGenomeGraph = [_.find(data, function(dd) {
                                 return dd.source === "GnomADv3 Genomes";
-                            }).chart[0], "gnomAD Genomes (Graphical)"];
+                            }).chart[0], "gnomAD V3.1 Genomes, Non-Cancer (Graphical)"];
 
         const gnomadGenomeData = [_.find(data, function(dd) {
                                 return dd.source === "GnomADv3 Genomes";
-                            }).data, "gnomAD Genomes (Numerical)"];
+                            }).data, "gnomAD V3.1 Genomes, Non-Cancer (Numerical)"];
 
         const exacGraph = [_.find(data, function(dd) {
                                 return dd.source === "ExAC";
