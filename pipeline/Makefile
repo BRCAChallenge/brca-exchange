@@ -152,7 +152,7 @@ prune-release-notes-output: ## postprocessing: removes some files, s.t. luigi ta
 include-release-notes: prune-release-notes-output run-pipeline ## postprocessing: include updated release notes into archive
 
 cleanup-failed: ## postprocessing: cleaning up some dangling FAILED files, which may be confusing
-	find $(OUT_DIR) -name 'FAILED*.tsv' -exec rm -i {} \;
+	find $(OUT_DIR) -name 'FAILED*' -exec rm -i {} \;
 
 .ONESHELL:
 tag-release: ## postprocessing: tags and pushes git commit used for the data release
