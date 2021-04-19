@@ -25,6 +25,8 @@
 ./release/artifacts/Findlay_BRCA1_Ring_Function_Scores.vcf
 ./release/artifacts/GnomADready.vcf
 ./release/artifacts/GnomAD.vcf
+./release/artifacts/GnomADv3ready.vcf
+./release/artifacts/GnomADv3.vcf
 ./release/artifacts/LOVDready.vcf
 ./release/artifacts/LOVD.vcf
 ./release/artifacts/releaseDiff.log
@@ -36,6 +38,7 @@
 ./release/artifacts/rightexLOVD
 ./release/artifacts/rightFindlay_BRCA1_Ring_Function_Scores
 ./release/artifacts/rightGnomAD
+./release/artifacts/rightGnomADv3
 ./release/artifacts/rightLOVD
 ./release/artifacts/victor_wdir/input.vcf.gz
 ./release/artifacts/victor_wdir/input.vcf.gz.tbi

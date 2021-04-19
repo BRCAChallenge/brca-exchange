@@ -81,66 +81,29 @@ const AlleleFrequencyField = React.createClass({
 
     getPopMax: function(fieldName, variant) {
         /*eslint-disable camelcase*/
-        let popmax = parseFloat(variant.faf95_popmax_genome_GnomAD) ? parseFloat(variant.faf95_popmax_genome_GnomAD).toPrecision(4) : '-';
-        if (fieldName.includes("Genomes (Graphical)")) {
-            return popmax + ' (' + variant.faf95_popmax_population_genome_GnomAD + ')';
+        let popmax = parseFloat(variant.faf95_popmax_genome_GnomADv3) ? parseFloat(variant.faf95_popmax_genome_GnomADv3).toPrecision(4) : '-';
+        if (fieldName.includes("Genomes, Non-Cancer (Graphical)")) {
+            return popmax + ' (' + variant.faf95_popmax_population_genome_GnomADv3 + ')';
         } else {
             return popmax + ' (' + variant.faf95_popmax_population_exome_GnomAD + ')';
         }
         /*eslint-enable camelcase*/
     },
 
-    determineShowEASJPNAsterisk: function (isGnomad, isChart) {
-        return isGnomad && !isChart && (this.state['Allele_frequency_genome_EAS_GnomAD'] ||
-        this.state['Allele_frequency_exome_EAS_GnomAD']);
-    },
-
-    getEmptyHeaders: function(variant) {
-        // determines which subpopulation groups have all empty subrows -- hides expansion functionality
-        // if they do and if show empty items is set to true
-        let emptyHeaders = {};
-
-        emptyHeaders['Allele_frequency_genome_EAS_GnomAD'] =
-            util.isEmptyField(variant['Allele_frequency_genome_EAS_JPN_GnomAD'])
-            && util.isEmptyField(variant['Allele_frequency_genome_EAS_KOR_GnomAD'])
-            && util.isEmptyField(variant['Allele_frequency_genome_EAS_OEA_GnomAD']);
-
-        emptyHeaders['Allele_frequency_exome_EAS_GnomAD'] =
-            util.isEmptyField(variant['Allele_frequency_exome_EAS_JPN_GnomAD'])
-            && util.isEmptyField(variant['Allele_frequency_exome_EAS_KOR_GnomAD'])
-            && util.isEmptyField(variant['Allele_frequency_exome_EAS_OEA_GnomAD']);
-
-        emptyHeaders['Allele_frequency_genome_NFE_GnomAD'] =
-            util.isEmptyField(variant['Allele_frequency_genome_NFE_EST_GnomAD'])
-            && util.isEmptyField(variant['Allele_frequency_genome_NFE_BGR_GnomAD'])
-            && util.isEmptyField(variant['Allele_frequency_genome_NFE_NWE_GnomAD'])
-            && util.isEmptyField(variant['Allele_frequency_genome_NFE_ONF_GnomAD'])
-            && util.isEmptyField(variant['Allele_frequency_genome_NFE_SEU_GnomAD'])
-            && util.isEmptyField(variant['Allele_frequency_genome_NFE_SWE_GnomAD']);
-
-        emptyHeaders['Allele_frequency_exome_NFE_GnomAD'] =
-            util.isEmptyField(variant['Allele_frequency_exome_NFE_EST_GnomAD'])
-            && util.isEmptyField(variant['Allele_frequency_exome_NFE_BGR_GnomAD'])
-            && util.isEmptyField(variant['Allele_frequency_exome_NFE_NWE_GnomAD'])
-            && util.isEmptyField(variant['Allele_frequency_exome_NFE_ONF_GnomAD'])
-            && util.isEmptyField(variant['Allele_frequency_exome_NFE_SEU_GnomAD'])
-            && util.isEmptyField(variant['Allele_frequency_exome_NFE_SWE_GnomAD']);
-
-        return emptyHeaders;
+    cleanRowTitle: function (title) {
+        title = title.replace(" (gnomAD V2.1 Exomes)", "");
+        title = title.replace(" (gnomAD V3.1 Genomes)", "");
+        return title;
     },
 
     getRowsAndDetermineIfEmpty: function(source, data, variant) {
         let rowsEmpty = 0;
 
-        let emptyHeaders = this.getEmptyHeaders(variant, data);
-
         const rows = _.map(data, (rowDescriptor) => {
             let {prop, title, noHelpLink} = rowDescriptor;
             let rowItem;
-            let hideHeaderProperties;
-            let show = true;
-            let subRow = false;
-            let headerRow = false;
+
+            title = this.cleanRowTitle(title);
 
             if (variant[prop] !== null) {
                 rowItem = util.getFormattedFieldByProp(prop, variant);
@@ -153,102 +116,23 @@ const AlleleFrequencyField = React.createClass({
                 rowItem = '-';
             }
 
-            if (prop.includes('EAS_JPN')
-               || prop.includes('EAS_KOR')
-               || prop.includes('EAS_OEA')
-               || prop.includes('NFE_EST')
-               || prop.includes('NFE_BGR')
-               || prop.includes('NFE_NWE')
-               || prop.includes('NFE_ONF')
-               || prop.includes('NFE_SEU')
-               || prop.includes('NFE_SWE')) {
-                    subRow = true;
-            }
-
-            if (prop.includes('EAS_GnomAD') || prop.includes('NFE_GnomAD')) {
-                headerRow = true;
-                hideHeaderProperties = emptyHeaders[prop] && this.props.hideEmptyItems;
-            }
-
-            if (prop.includes('genome_NFE')) {
-                show = this.state['Allele_frequency_genome_NFE_GnomAD']
-                && !(emptyHeaders['Allele_frequency_genome_NFE_GnomAD']
-                && this.props.hideEmptyItems);
-            } else if (prop.includes('exome_NFE')) {
-                show = this.state['Allele_frequency_exome_NFE_GnomAD']
-                && !(emptyHeaders['Allele_frequency_exome_NFE_GnomAD']
-                && this.props.hideEmptyItems);
-            } else if (prop.includes('genome_EAS')) {
-                show = this.state['Allele_frequency_genome_EAS_GnomAD']
-                && !(emptyHeaders['Allele_frequency_genome_EAS_GnomAD']
-                && this.props.hideEmptyItems);
-            } else if (prop.includes('exome_EAS')) {
-                show = this.state['Allele_frequency_exome_EAS_GnomAD']
-                && !(emptyHeaders['Allele_frequency_exome_EAS_GnomAD']
-                && this.props.hideEmptyItems);
-            }
-
-            if (prop.includes('EAS_JPN')) {
-                title = "* " + title;
-            }
-
             let rowClasses = classNames({
-                  'variantfield-empty': (isEmptyValue && this.props.hideEmptyItems),
-                  'header-row': headerRow && !hideHeaderProperties,
-                  'sub-row': subRow
+                'variantfield-empty': (isEmptyValue && this.props.hideEmptyItems),
             });
 
-            if (subRow) {
-                return (
-                    <Collapse
-                        in={show}
-                        onEntered={this.props.relayoutGrid}
-                        onExited={this.props.relayoutGrid}
-                    >
-                        <tr key={prop} className={ rowClasses }>
-                            { rowDescriptor.tableKey !== false &&
-                                (
-                                    <KeyInline tableKey={title} noHelpLink={noHelpLink}
-                                        headerGroup={false}
-                                        tooltip={this.props.tooltips && this.props.tooltips[slugify(prop)]}
-                                    />
-                                )
-                            }
-                            <td colSpan={rowDescriptor.tableKey === false ? 2 : null} ><span className={"row-value" }>{rowItem}</span></td>
-                        </tr>
-                    </Collapse>
-                );
-            } else if (headerRow) {
-                return (
-                    <tr key={prop} className={ rowClasses } onClick={() => !hideHeaderProperties && this.fieldToggled(prop)}>
-                        { rowDescriptor.tableKey !== false &&
-                            (
-                                <KeyInline tableKey={title} noHelpLink={noHelpLink}
-                                    headerGroup={true && !hideHeaderProperties}
-                                    expanded={this.state[prop] && !hideHeaderProperties}
-                                    tooltip={this.props.tooltips && this.props.tooltips[slugify(prop)]}
-                                />
-                            )
-                        }
-                        <td colSpan={rowDescriptor.tableKey === false ? 2 : null} ><span className={"row-value" }>{rowItem}</span></td>
-                    </tr>
-                );
-            } else {
-                return (
-                    <tr key={prop} className={ rowClasses }>
-                        { rowDescriptor.tableKey !== false &&
-                            (
-                                <KeyInline tableKey={title} noHelpLink={noHelpLink}
-                                    headerGroup={headerRow}
-                                    tooltip={this.props.tooltips && this.props.tooltips[slugify(prop)]}
-                                    onClick={(event) => this.props.showHelp(event, prop)}
-                                />
-                            )
-                        }
-                        <td colSpan={rowDescriptor.tableKey === false ? 2 : null} ><span className={"row-value" }>{rowItem}</span></td>
-                    </tr>
-                );
-            }
+            return (
+                <tr key={prop} className={ rowClasses }>
+                    { rowDescriptor.tableKey !== false &&
+                        (
+                            <KeyInline tableKey={title} noHelpLink={noHelpLink}
+                                tooltip={this.props.tooltips && this.props.tooltips[slugify(prop)]}
+                                onClick={(event) => this.props.showHelp(event, prop)}
+                            />
+                        )
+                    }
+                    <td colSpan={rowDescriptor.tableKey === false ? 2 : null} ><span className={"row-value" }>{rowItem}</span></td>
+                </tr>
+            );
         });
         const allEmpty = rowsEmpty >= data.length;
         return [rows, allEmpty];
@@ -256,7 +140,7 @@ const AlleleFrequencyField = React.createClass({
 
     render: function() {
         const {field, fieldName, variant, hideEmptyItems} = this.props;
-        let renderedRows, flag, gnomadLink, chr, transcript, refSeqTranscript, lrgLink;
+        let renderedRows, flag, gnomadLink, chr, transcript, refSeqTranscript, lrgLink, variantId, dataset;
         let allEmpty = false;
         let isChart = false;
         let isGnomad = false;
@@ -267,7 +151,14 @@ const AlleleFrequencyField = React.createClass({
             flag = variant.Flags_GnomAD;
             chr = variant.Chr;
             isGnomad = true;
-            gnomadLink = "https://gnomad.broadinstitute.org/variant/" + variant['Variant_id_GnomAD'] + "?dataset=gnomad_r2_1_non_cancer";
+            if (fieldName.toLowerCase().includes('genome')) {
+                variantId = variant.Variant_id_GnomADv3;
+                dataset = "gnomad_r3_non_cancer";
+            } else {
+                variantId = variant.Variant_id_GnomAD;
+                dataset = "gnomad_r2_1_non_cancer";
+            }
+            gnomadLink = "https://gnomad.broadinstitute.org/variant/" + variantId + "?dataset=" + dataset;
             if (chr === "17") {
                 transcript = "ENST00000357654";
                 refSeqTranscript = "NM_007294.3";
@@ -279,21 +170,21 @@ const AlleleFrequencyField = React.createClass({
             }
         }
 
-        if (fieldName === "gnomAD Genomes (Graphical)") {
+        if (fieldName === "gnomAD V3.1 Genomes, Non-Cancer (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
-            if (!variant.Variant_in_GnomAD || util.isEmptyField(variant['Allele_frequency_genome_GnomAD'])) {
+            if (!variant.Variant_in_GnomAD || util.isEmptyField(variant.Allele_frequency_genome_GnomADv3)) {
                 allEmpty = true;
             }
             isChart = true;
-        } else if (fieldName === "gnomAD Genomes (Numerical)") {
+        } else if (fieldName === "gnomAD V3.1 Genomes, Non-Cancer (Numerical)") {
             renderedRows = this.getRowsAndDetermineIfEmpty("GnomAD", field, variant, flag);
-        } else if (fieldName === "gnomAD Exomes (Graphical)") {
+        } else if (fieldName === "gnomAD V2.1 Exomes, Non-Cancer (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
             if (!variant.Variant_in_GnomAD || util.isEmptyField(variant['Allele_frequency_exome_GnomAD'])) {
                 allEmpty = true;
             }
             isChart = true;
-        } else if (fieldName === "gnomAD Exomes (Numerical)") {
+        } else if (fieldName === "gnomAD V2.1 Exomes, Non-Cancer (Numerical)") {
             renderedRows = this.getRowsAndDetermineIfEmpty("GnomAD", field, variant, flag);
         } else if (fieldName === "ExAC (Graphical)") {
             renderedRows = field.replace(variant, field.prop);
@@ -356,18 +247,11 @@ const AlleleFrequencyField = React.createClass({
                                 <a href={gnomadLink} target="_blank">&nbsp;are available at gnomAD</a>.
                             </div>
                         </div>
-                        <Table key={`allele-frequency-name-${fieldName}`} style={{borderBottom: this.determineShowEASJPNAsterisk(isGnomad, isChart) ? '1px solid #ddd' : ''}}>
+                        <Table key={`allele-frequency-name-${fieldName}`} >
                             <tbody>
                             { renderedRows }
                             </tbody>
                         </Table>
-                        <div className="tile-disclaimer" style={{display: this.determineShowEASJPNAsterisk(isGnomad, isChart) ? '' : 'none'}}>
-                            <div>
-                                * Due to the limited number of samples in the Japanese subpopulation, allele frequencies
-                                should be used cautiously. ACMG recommends using datasets that are comprised of at least
-                                the 2,000 observed alleles (PMID: <a target="_blank" href="https://www.ncbi.nlm.nih.gov/pubmed/30311383">30311383</a>).
-                            </div>
-                        </div>
                         <div className="tile-disclaimer" style={{display: isGnomad && isChart && !util.isEmptyField(popmax) ? '' : 'none'}}>
                             <div>
                                 Popmax Filtering AF (95% confidence): { popmax }

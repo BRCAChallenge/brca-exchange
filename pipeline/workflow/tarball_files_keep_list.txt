@@ -6,7 +6,8 @@
 ./exac.brca12.sorted.hg38.vcf
 ./exLOVD_brca12.sorted.hg38.vcf
 ./findlay_BRCA1_ring_function_scores.clean.sorted.hg38.vcf
-./gnomAD.sorted.hg38.vcf
+./gnomADv2.sorted.hg38.vcf
+./gnomADv3.sorted.hg38.vcf
 ./md5sums.txt
 ./README.txt
 ./release/artifacts/brca-pseudonym-generator.log
@@ -29,6 +30,7 @@
 ./release/artifacts/wrong_genome_coors/exLOVD_wrong_genome_coor.vcf
 ./release/artifacts/wrong_genome_coors/Findlay_BRCA1_Ring_Function_Scores_wrong_genome_coor.vcf
 ./release/artifacts/wrong_genome_coors/GnomAD_wrong_genome_coor.vcf
+./release/artifacts/wrong_genome_coors/GnomADv3_wrong_genome_coor.vcf
 ./release/artifacts/wrong_genome_coors/LOVD_wrong_genome_coor.vcf
 ./release/built_final.tsv
 ./release/built_with_change_types.tsv
